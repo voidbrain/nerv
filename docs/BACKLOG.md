@@ -404,7 +404,7 @@ Reviewed 1 November 2026 against main `47876c9`. PR #1 merged after both head ch
 
 | Field | Value |
 |---|---|
-| PR / evidence | Follow-up plan; no runtime implementation |
+| PR / evidence | [PR #2](https://github.com/voidbrain/nodo/pull/2); plan only, no runtime implementation |
 | Opened | 2026-11-01 |
 | Verification | Pending adapter feasibility, regression and live host tests |
 | Reviewed | 2026-11-01 |
