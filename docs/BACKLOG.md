@@ -29,7 +29,7 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; current PR pending; scoped audit and local checks |
+| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -46,7 +46,7 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 |:---:|---|---|---|---|
 | 🟡 | 🔺 P1 | Implemented | 🟡 Medium | ~70% |
 
-💻 **→ Human action required: No**<br />Validate CLI/API/frontend joins; add strict calendar-date validation, bounded requests and lifecycle checks where findings require them.
+💻 **→ Human action required: No**<br />Complete browser acceptance for the core UI; calendar validation, bounded requests and process lifecycle are covered by regression tests.
 
 | | |
 |---|---|
@@ -57,13 +57,13 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Validate CLI/API/frontend joins; add strict calendar-date validation, bounded requests and lifecycle checks where findings require them. Restart recovery, no duplicate local inbox delivery, cancellation, auth, invalid input and clean shutdown; production operations separately documented.
+**Next action / closure evidence:** Complete browser acceptance for the core UI; calendar validation, bounded requests and process lifecycle are covered by regression tests. Restart recovery, no duplicate local inbox delivery, cancellation, auth, invalid input and clean shutdown; production operations separately documented.
 
 **Estimates:** Medium remaining effort; ~70% complete. Bootstrap scope estimate, not verification. Estimated 2026-11-01.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; current PR pending; scoped audit and local checks |
+| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -97,7 +97,7 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; current PR pending; scoped audit and local checks |
+| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -131,7 +131,7 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; current PR pending; scoped audit and local checks |
+| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -165,7 +165,7 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; current PR pending; scoped audit and local checks |
+| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -199,7 +199,7 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; current PR pending; scoped audit and local checks |
+| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -233,7 +233,7 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; current PR pending; scoped audit and local checks |
+| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -267,7 +267,7 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; current PR pending; scoped audit and local checks |
+| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -302,7 +302,7 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 
 | Field | Value |
 |---|---|
-| PR / evidence | Current branch, local regression and process checks; CI pending |
+| PR / evidence | [PR #1](https://github.com/voidbrain/nodo/pull/1); local checks pass; CI pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -336,7 +336,7 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 
 | Field | Value |
 |---|---|
-| PR / evidence | Current branch, local regression and process checks; CI pending |
+| PR / evidence | [PR #1](https://github.com/voidbrain/nodo/pull/1); local checks pass; CI pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -370,7 +370,7 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 
 | Field | Value |
 |---|---|
-| PR / evidence | Current branch, local regression and process checks; CI pending |
+| PR / evidence | [PR #1](https://github.com/voidbrain/nodo/pull/1); local checks pass; CI pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
