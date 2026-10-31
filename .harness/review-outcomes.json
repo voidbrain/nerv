@@ -1,13 +1,13 @@
 [
   {
     "kind": "rule",
-    "disposition": "backlog",
-    "target": "F-001",
-    "evidence": "Published v3.1.1 has no reusable Node profile. Kept Nodo-specific conventions in area notes; upstream work is not claimed complete."
+    "disposition": "implemented",
+    "target": "docs/agents/areas.md",
+    "evidence": "Nodo-specific headless lifecycle, private credentials, service-versus-companion ownership and locale limits now explicit; runtime tests cover joins. No copied tool or generic policy changed."
   },
   {
     "kind": "none",
     "disposition": "no-change",
-    "evidence": "Kept copied tools byte-identical, separated runtime policy from repository instructions, and tracked every accepted milestone. No automatic relaxation or generated skill installation."
+    "evidence": "Template v3.1.1 still current online; copied helpers retained. Reusable Node profile is an upstream gap tracked by F-001, not a dependency of this local step."
   }
 ]

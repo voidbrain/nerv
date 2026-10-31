@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "kind": "scoped",
+  "reviewed": "2026-10-31T23:56:00.282Z",
+  "baseline": "f25fae5b6821d6614704e2d69cb0af66ca4b562b",
+  "report": "docs/audits/2026-10-31-headless.md",
+  "areas": {
+    "code": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-10-31-headless.md: named inspected scope, baseline CI and local checks",
+      "limits": "Scoped local review only; browser/phone/native OS service acceptance and current remote PR CI are separate."
+    },
+    "logic": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-10-31-headless.md: named inspected scope, baseline CI and local checks",
+      "limits": "Scoped local review only; browser/phone/native OS service acceptance and current remote PR CI are separate."
+    },
+    "tests": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-10-31-headless.md: named inspected scope, baseline CI and local checks",
+      "limits": "Scoped local review only; browser/phone/native OS service acceptance and current remote PR CI are separate."
+    },
+    "documentation": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-10-31-headless.md: named inspected scope, baseline CI and local checks",
+      "limits": "Scoped local review only; browser/phone/native OS service acceptance and current remote PR CI are separate."
+    },
+    "harness": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-10-31-headless.md: named inspected scope, baseline CI and local checks",
+      "limits": "Scoped local review only; browser/phone/native OS service acceptance and current remote PR CI are separate."
+    },
+    "security": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-10-31-headless.md: named inspected scope, baseline CI and local checks",
+      "limits": "Scoped local review only; browser/phone/native OS service acceptance and current remote PR CI are separate."
+    },
+    "delivery": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-10-31-headless.md: named inspected scope, baseline CI and local checks",
+      "limits": "Scoped local review only; browser/phone/native OS service acceptance and current remote PR CI are separate."
+    },
+    "backlog": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-10-31-headless.md: named inspected scope, baseline CI and local checks",
+      "limits": "Scoped local review only; browser/phone/native OS service acceptance and current remote PR CI are separate."
+    }
+  }
+}

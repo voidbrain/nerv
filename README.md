@@ -4,43 +4,39 @@
 
 ## Current build: 0.1 foundation
 
-Working: CLI; SQLite reminders and durable local inbox; cancellation; restart catch-up; duplicate delivery prevention; authenticated loopback API; local doctor; Angular reminder and diagnostics workspace.
+Working: CLI; SQLite reminders and durable local inbox; cancellation; restart catch-up; duplicate delivery prevention; authenticated loopback API; local doctor; bilingual Angular workspace; single-process production UI serving; user-service installation commands.
 
-Not implemented yet: conversational agents, Claude/Ollama execution, Telegram/WhatsApp, phone delivery, recurring schedules, GenUI generation, device discovery/bootstrap, remote workers, PWA installation/offline behaviour, voice, coding agents or skill learning. Their contracts and acceptance criteria are in [the roadmap](docs/ROADMAP.md) and [backlog](docs/BACKLOG.md). No device is controlled by this build.
+Not implemented yet: conversational agents, Claude/Ollama execution, Telegram/WhatsApp, phone delivery, recurring schedules, GenUI generation, device discovery/bootstrap, remote workers, PWA installation/offline behaviour, voice, coding agents or skill learning. Their contracts and acceptance criteria are in [the roadmap](docs/ROADMAP.md) and [backlog](docs/BACKLOG.md). No device is controlled by this build. The native SwiftUI menu-bar companion is planned; Electron is not required.
 
 ## Run it
 
-Requires Node **24+**. Node SQLite is built in; its API may still emit an experimental warning on supported releases.
+Requires Node **24+**. Italian is the default interface language; English is selectable. CLI commands remain English. Nodo does not yet understand conversational Italian or English.
 
 ```bash
 npm ci
-npm test
-npm run typecheck
 npm run build
+npm start -- init
+npm start -- serve
+```
+
+Open **http://127.0.0.1:4317** and enter the token from `~/.nodo/token`. This one process serves the built UI, API and scheduler. To run without keeping Terminal open, stop the foreground process and run `npm start -- service install`. Supports macOS launchd and Linux systemd **user** services. See [installation, updates, data migration and service controls](docs/INSTALL.md).
+
+For frontend development only, `npm run dev` uses **4318**, with its API proxy targeting 4317. Port 4200 is not used.
+
+```bash
 npm start -- doctor
-npm start -- remind "Renew car insurance" "2030-01-15T09:00:00+01:00"
+npm start -- remind "Rinnovare assicurazione auto" "2030-01-15T09:00:00+01:00"
 npm start -- list
 npm start -- tick
 npm start -- inbox
+npm test
+npm run typecheck
+npm run test:headless
 ```
 
-Use your actual future deadline. CLI timestamps require an explicit UTC offset. `tick` catches overdue reminders and atomically writes their local inbox entries. `serve` runs the scheduler each second; reminders catch up after downtime. Nothing runs while the process is stopped. Data defaults to `.nodo/nodo.sqlite`; set `NODO_HOME` to a private durable directory. Back up with the process stopped, retaining SQLite sidecar files if present. Do not share the data directory.
+Use your actual future deadline. CLI timestamps require an explicit UTC offset. User data now defaults to `~/.nodo` (override with an absolute `NODO_HOME`). Legacy checkout-local databases trigger migration guidance rather than being silently ignored. `init` preserves existing files; token/configuration files are private. Reminders enter the local inbox while running, or catch up after restart. Sleep or logout can pause user services; use an awake always-on host for dependable scheduling.
 
-Start backend and frontend in separate terminals:
-
-```bash
-# Terminal 1: token is an example command that generates a fresh secret.
-export NODO_TOKEN="$(node -e 'console.log(require("node:crypto").randomBytes(32).toString("hex"))')"
-npm start -- serve
-# Copy the token locally into the frontend, without sharing or committing it.
-
-# Terminal 2
-npm run dev
-```
-
-Open the Angular development-server URL (normally http://localhost:4200). The dev proxy forwards `/api` to the loopback backend at port 4317. Enter the same token. Set `NODO_PORT` only if you also update the dev proxy. The token stays in tab memory; reload requires it again. `dist/web/browser` is the production frontend build; a production same-origin server, TLS and remote access configuration are not included. Do not expose this development setup publicly.
-
-API: authenticated `GET /api/doctor`, `GET/POST /api/reminders`, `DELETE /api/reminders/:id`, `GET /api/inbox`. Bearer token required for every endpoint. No CORS access is enabled.
+All `/api` routes require a bearer token. Static UI files are public on loopback and contain no credentials. No permissive CORS or public-network binding is enabled. Doctor covers local configuration/runtime/database; remote/device probes remain planned.
 
 ## Where things are
 
@@ -49,6 +45,7 @@ API: authenticated `GET /api/doctor`, `GET/POST /api/reminders`, `DELETE /api/re
 | `src/` | Local backend, CLI, persistence and proposed distributed contracts |
 | `web/` | Angular workspace and knot identity |
 | `test/` | Restart, cancellation, idempotency and API regression tests |
+| `docs/INSTALL.md` | Headless installation, service lifecycle and data migration |
 | `docs/ARCHITECTURE.md` | Boundaries, trust and future orchestration |
 | `docs/ROADMAP.md` | Sequenced delivery and acceptance |
 | `docs/BACKLOG.md` | Current work and gaps |

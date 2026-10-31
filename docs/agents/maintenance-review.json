@@ -1,41 +1,18 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-10-31T23:36:26.611Z",
+  "reviewed": "2026-10-31T23:55:02.509Z",
   "policy": "7ce9883fd1bff25038076e9e36015a833c38e1378e1df68043f48a64635abad4",
   "inputs": {
-    "AGENTS.md": "1290567a1a92ef873fc78fff7bf880ad156f06a53a85958d8e6ad5fc678d9f27",
+    "AGENTS.md": "3e2734e445751da996684c6b8fe988a8b57dcc3456b5850e5be5ba80e7505f0b",
     "docs/BACKLOG-RULES.md": "829ba1b55add1a556b311782dea534f8bd39aa555d261e59d75b3545ec3a4dd5",
-    "docs/agents/areas.md": "db8d4ece6f2872c7a786cf4976a7d23d476a25b1390018d7c29b4d71bdef06a3",
+    "docs/agents/areas.md": "d4027271ced3e008c15800d95131c1efc9815a17f79b65df9fa7eb77194e6052",
     "docs/agents/maintenance.md": "a7e93ce963ffab30b4592ee90bdd0e72d49ea1320f82df74f22c88f70899d899"
   },
   "measurements": {
     "samples": 1,
-    "latestAt": "2026-10-31T23:36:11.305Z",
+    "latestAt": "2026-10-31T23:55:02.444Z",
     "operations": {
       "adoption": {
-        "samples": 1,
-        "durationMs": {
-          "observed": 1,
-          "missing": 0,
-          "median": 287570
-        },
-        "conflicts": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
-        },
-        "unnecessaryPrompts": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
-        },
-        "repeatedContextLoads": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
-        }
-      },
-      "reconciliation": {
         "samples": 0,
         "durationMs": {
           "observed": 0,
@@ -57,20 +34,43 @@
           "missing": 0,
           "median": null
         }
+      },
+      "reconciliation": {
+        "samples": 1,
+        "durationMs": {
+          "observed": 1,
+          "missing": 0,
+          "median": 95071
+        },
+        "conflicts": {
+          "observed": 0,
+          "missing": 1,
+          "median": null
+        },
+        "unnecessaryPrompts": {
+          "observed": 0,
+          "missing": 1,
+          "median": null
+        },
+        "repeatedContextLoads": {
+          "observed": 0,
+          "missing": 1,
+          "median": null
+        }
       }
     }
   },
   "outcomes": [
     {
       "kind": "rule",
-      "disposition": "backlog",
-      "target": "F-001",
-      "evidence": "Published v3.1.1 has no reusable Node profile. Kept Nodo-specific conventions in area notes; upstream work is not claimed complete."
+      "disposition": "implemented",
+      "target": "docs/agents/areas.md",
+      "evidence": "Nodo-specific headless lifecycle, private credentials, service-versus-companion ownership and locale limits now explicit; runtime tests cover joins. No copied tool or generic policy changed."
     },
     {
       "kind": "none",
       "disposition": "no-change",
-      "evidence": "Kept copied tools byte-identical, separated runtime policy from repository instructions, and tracked every accepted milestone. No automatic relaxation or generated skill installation."
+      "evidence": "Template v3.1.1 still current online; copied helpers retained. Reusable Node profile is an upstream gap tracked by F-001, not a dependency of this local step."
     }
   ]
 }

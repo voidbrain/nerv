@@ -10,6 +10,7 @@ What must follow a change, and what must run again after it (AGENTS, "What follo
 |---|---|---|---|---|---|---|
 | frontend | `web/**`, `angular.json`, `package*.json` |  | Build and inspect the Angular workspace; reconcile README and style guide. | `npm run build` |  | Angular compiler and browser acceptance F-004 |
 | core | `src/**`, `test/**` |  | Run core regression tests and reconcile the architecture and commands. | `npm test` |  | Restart, duplicate delivery, cancellation and HTTP tests |
+| service | `src/config.ts`, `src/service.ts`, `src/cli.ts`, `test/headless.integration.ts`, `docs/INSTALL.md` |  | Verify production process lifecycle and reconcile installation/roadmap acceptance. | `npm run build && npm run test:headless` | core | Process restart regression; real target-host acceptance remains F-009 |
 
 ## Content dependencies
 

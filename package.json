@@ -19,7 +19,8 @@
     "check:maintenance": "node tools/maintenance.mjs check",
     "check:integrations": "node tools/mcp.mjs check",
     "check:conventions": "node tools/check-conventions.mjs",
-    "ci:status": "node tools/ci-status.mjs"
+    "ci:status": "node tools/ci-status.mjs",
+    "test:headless": "node --test test/headless.integration.ts"
   },
   "dependencies": {
     "@angular/core": "22.2.4",
