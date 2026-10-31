@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "projects": {
+    "nodo": {
+      "projectType": "application",
+      "root": "web",
+      "sourceRoot": "web/src",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "web/src/main.ts",
+            "tsConfig": "web/tsconfig.app.json",
+            "index": "web/src/index.html",
+            "styles": [
+              "web/src/styles.css"
+            ],
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "web/public",
+                "output": "/"
+              }
+            ],
+            "outputPath": "dist/web"
+          },
+          "configurations": {
+            "production": {
+              "outputHashing": "all"
+            }
+          }
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "options": {
+            "buildTarget": "nodo:build"
+          }
+        }
+      }
+    }
+  }
+}

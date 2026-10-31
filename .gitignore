@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.angular/
+.nodo/
+.env
+.harness/friction.jsonl
+.harness/friction-session.json
+.claude/settings.local.json
+.claude/worktrees/

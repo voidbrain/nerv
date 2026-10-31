@@ -1,0 +1,13 @@
+[
+  {
+    "kind": "rule",
+    "disposition": "backlog",
+    "target": "F-001",
+    "evidence": "Published v3.1.1 has no reusable Node profile. Kept Nodo-specific conventions in area notes; upstream work is not claimed complete."
+  },
+  {
+    "kind": "none",
+    "disposition": "no-change",
+    "evidence": "Kept copied tools byte-identical, separated runtime policy from repository instructions, and tracked every accepted milestone. No automatic relaxation or generated skill installation."
+  }
+]

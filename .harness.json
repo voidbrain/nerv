@@ -1,0 +1,123 @@
+{
+  "template": {
+    "path": "../harness-template",
+    "repo": "https://github.com/voidbrain/project-harness"
+  },
+  "version": "3.1.1",
+  "stacks": [
+    "core",
+    "angular"
+  ],
+  "copied": {
+    "tools/check-backlog.mjs": "core/tools/check-backlog.mjs",
+    "tools/check-freshness.mjs": "core/tools/check-freshness.mjs",
+    "tools/impact-map.mjs": "core/tools/impact-map.mjs",
+    "tools/coverage-table.mjs": "core/tools/coverage-table.mjs",
+    "tools/check-harness.mjs": "core/tools/check-harness.mjs",
+    "tools/ci-status.mjs": "core/tools/ci-status.mjs",
+    "tools/merge-backlog.mjs": "core/tools/merge-backlog.mjs",
+    "tools/merge-when-green.mjs": "core/tools/merge-when-green.mjs",
+    "tools/mcp.mjs": "core/tools/mcp.mjs",
+    "tools/mcp-catalog.json": "core/tools/mcp-catalog.json",
+    "docs/agents/mcp.md": "core/docs/agents/mcp.md",
+    "docs/agents/solution-profile.md": "core/docs/agents/solution-profile.md",
+    "docs/agents/skills.md": "core/docs/agents/skills.md",
+    "tools/reconcile-preview.mjs": "core/tools/reconcile-preview.mjs",
+    "tools/friction.mjs": "core/tools/friction.mjs",
+    "docs/agents/maintenance.md": "core/docs/agents/maintenance.md",
+    "tools/maintenance.mjs": "core/tools/maintenance.mjs",
+    ".github/workflows/maintenance.yml": "core/.github/workflows/maintenance.yml",
+    "tools/check-audits.mjs": "core/tools/check-audits.mjs",
+    "docs/agents/audit.md": "core/docs/agents/audit.md",
+    "tools/check-conventions.mjs": "angular/tools/check-conventions.mjs"
+  },
+  "forked": {},
+  "freshness": {
+    "auditDays": 7
+  },
+  "impact": [
+    {
+      "id": "frontend",
+      "when": [
+        "web/**",
+        "angular.json",
+        "package*.json"
+      ],
+      "then": "Build and inspect the Angular workspace; reconcile README and style guide.",
+      "run": "npm run build",
+      "checked": "Angular compiler and browser acceptance F-004",
+      "after": []
+    },
+    {
+      "id": "core",
+      "when": [
+        "src/**",
+        "test/**"
+      ],
+      "then": "Run core regression tests and reconcile the architecture and commands.",
+      "run": "npm test",
+      "checked": "Restart, duplicate delivery, cancellation and HTTP tests",
+      "after": []
+    }
+  ],
+  "couplings": [],
+  "outside": [
+    {
+      "what": "Node SQLite API and Angular dependencies",
+      "affects": "Runtime, builds and persistence compatibility",
+      "noticed": "Pinned install, regression tests and doctor"
+    },
+    {
+      "what": "Host clock and timezone",
+      "affects": "Reminder deadlines",
+      "noticed": "Explicit timezone inputs and doctor"
+    }
+  ],
+  "pages": [
+    {
+      "title": "Architecture",
+      "path": "docs/ARCHITECTURE.md",
+      "about": "Implemented and intended boundaries"
+    }
+  ],
+  "adapted": {
+    "AGENTS.md": [
+      "core/AGENTS.md",
+      "angular/AGENTS.angular.md"
+    ],
+    "CLAUDE.md": "core/CLAUDE.md",
+    "README.md": "core/README.md",
+    "docs/BACKLOG.md": "core/docs/BACKLOG.md",
+    "docs/BACKLOG-RULES.md": "core/docs/BACKLOG-RULES.md",
+    "docs/STYLE-GUIDE.md": "core/docs/STYLE-GUIDE.md",
+    "docs/agents/areas.md": "core/docs/agents/areas.md",
+    "docs/audits/README.md": "core/docs/audits/README.md",
+    "docs/archive/README.md": "core/docs/archive/README.md",
+    ".editorconfig": "core/.editorconfig",
+    ".gitignore": "core/gitignore.txt",
+    "package.json": "angular/package-scripts.json"
+  },
+  "ciStatus": {
+    "workflow": "CI",
+    "browserJobs": "e2e|browser",
+    "logNotes": []
+  },
+  "maintenance": {
+    "enabled": true,
+    "reviewDays": 7,
+    "requireMeasurement": true,
+    "inputs": [
+      "AGENTS.md",
+      "docs/BACKLOG-RULES.md",
+      "docs/agents/areas.md",
+      "docs/agents/maintenance.md"
+    ]
+  },
+  "audit": {
+    "days": 7,
+    "enforce": false
+  },
+  "conventions": {
+    "pureDirs": []
+  }
+}

@@ -1,0 +1,20 @@
+name: Maintenance freshness
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Required maintenance evidence
+        run: node tools/maintenance.mjs check
+
+      - name: Scope-aware audit evidence
+        run: node tools/check-audits.mjs --github

@@ -1,0 +1,26 @@
+name: CI
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npm run check:backlog
+      - run: npm run check:conventions
+      - run: npm run check:integrations
+      - run: npm run check:maintenance
+      - run: npm run check:audits
+      - run: git clone --branch v3.1.1 --depth 1 https://github.com/voidbrain/project-harness "$RUNNER_TEMP/project-harness"
+      - run: npm run check:freshness
+        env:
+          HARNESS_HOME: ${{ runner.temp }}/project-harness
