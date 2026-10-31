@@ -70,7 +70,7 @@ The convention checker applies default-specific rules to the installed workspace
 
 ## Project conventions (Nodo)
 
-The project is **Nodo**. The repository is this source tree; no remote repository or deployment is provisioned. Angular project: `nodo`. Backend: Node 24 native TypeScript and SQLite.
+The project is **Nodo**. The repository is `https://github.com/voidbrain/nodo`; the default branch is `main`. No hosted deployment is provisioned. Angular project: `nodo`. Backend: Node 24 native TypeScript and SQLite.
 
 ### Architecture
 

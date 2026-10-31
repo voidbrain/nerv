@@ -1,6 +1,6 @@
 # Nodo backlog
 
-Reviewed 1 November 2026. Local bootstrap against main `04ca127`; no remote main or CI evidence exists yet. [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md).
+Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; current branch acceptance is recorded below. [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md).
 
 ## Features and improvements
 
@@ -29,7 +29,7 @@ Reviewed 1 November 2026. Local bootstrap against main `04ca127`; no remote main
 
 | Field | Value |
 |---|---|
-| PR / evidence | Local source, five backend tests, build and scoped audit; no remote PR |
+| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -46,7 +46,7 @@ Reviewed 1 November 2026. Local bootstrap against main `04ca127`; no remote main
 |:---:|---|---|---|---|
 | 🟡 | 🔺 P1 | Implemented | 🟡 Medium | ~70% |
 
-💻 **→ Human action required: No**<br />Validate CLI/API/frontend joins; add strict calendar-date validation, bounded requests and lifecycle checks where findings require them.
+💻 **→ Human action required: No**<br />Complete browser acceptance for the core UI; calendar validation, bounded requests and process lifecycle are covered by regression tests.
 
 | | |
 |---|---|
@@ -57,13 +57,13 @@ Reviewed 1 November 2026. Local bootstrap against main `04ca127`; no remote main
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Validate CLI/API/frontend joins; add strict calendar-date validation, bounded requests and lifecycle checks where findings require them. Restart recovery, no duplicate local inbox delivery, cancellation, auth, invalid input and clean shutdown; production operations separately documented.
+**Next action / closure evidence:** Complete browser acceptance for the core UI; calendar validation, bounded requests and process lifecycle are covered by regression tests. Restart recovery, no duplicate local inbox delivery, cancellation, auth, invalid input and clean shutdown; production operations separately documented.
 
 **Estimates:** Medium remaining effort; ~70% complete. Bootstrap scope estimate, not verification. Estimated 2026-11-01.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Local source, five backend tests, build and scoped audit; no remote PR |
+| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -97,7 +97,7 @@ Reviewed 1 November 2026. Local bootstrap against main `04ca127`; no remote main
 
 | Field | Value |
 |---|---|
-| PR / evidence | Local source, five backend tests, build and scoped audit; no remote PR |
+| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -131,7 +131,7 @@ Reviewed 1 November 2026. Local bootstrap against main `04ca127`; no remote main
 
 | Field | Value |
 |---|---|
-| PR / evidence | Local source, five backend tests, build and scoped audit; no remote PR |
+| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -165,7 +165,7 @@ Reviewed 1 November 2026. Local bootstrap against main `04ca127`; no remote main
 
 | Field | Value |
 |---|---|
-| PR / evidence | Local source, five backend tests, build and scoped audit; no remote PR |
+| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -199,7 +199,7 @@ Reviewed 1 November 2026. Local bootstrap against main `04ca127`; no remote main
 
 | Field | Value |
 |---|---|
-| PR / evidence | Local source, five backend tests, build and scoped audit; no remote PR |
+| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -233,7 +233,7 @@ Reviewed 1 November 2026. Local bootstrap against main `04ca127`; no remote main
 
 | Field | Value |
 |---|---|
-| PR / evidence | Local source, five backend tests, build and scoped audit; no remote PR |
+| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -267,7 +267,7 @@ Reviewed 1 November 2026. Local bootstrap against main `04ca127`; no remote main
 
 | Field | Value |
 |---|---|
-| PR / evidence | Local source, five backend tests, build and scoped audit; no remote PR |
+| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -276,3 +276,105 @@ Reviewed 1 November 2026. Local bootstrap against main `04ca127`; no remote main
 
 ---
 
+
+### F-009
+
+**Run Nodo headless as one local user service**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🟡 | 🔺 P1 | Implemented | 🟡 Medium | ~80% |
+
+💻 **→ Human action required: No**<br />Validate the current PR in CI; retain actual launchd/systemd user-session installation and logout tests as unperformed host acceptance.
+
+| | |
+|---|---|
+| **Issue** | Service commands and definitions implemented. Linux tests validate rendering and process lifecycle; no service is installed on this execution host. |
+| **Reproduce** | Follow docs/INSTALL.md and the scoped headless implementation checks. |
+| **Check** | Single process serves production UI/API on 4317; config survives init; clean SIGTERM and restart catch-up; private credentials; install/status/start/stop/uninstall on real target OS. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Validate the current PR in CI; retain actual launchd/systemd user-session installation and logout tests as unperformed host acceptance. Single process serves production UI/API on 4317; config survives init; clean SIGTERM and restart catch-up; private credentials; install/status/start/stop/uninstall on real target OS.
+
+**Estimates:** Medium remaining effort; ~80% complete. Estimate dated 2026-11-01, not acceptance evidence.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #1](https://github.com/voidbrain/nodo/pull/1); local checks pass; CI pending |
+| Opened | 2026-11-01 |
+| Verification | Pending named acceptance |
+| Reviewed | 2026-11-01 |
+
+</details>
+
+---
+
+### F-010
+
+**Italian-default interface and dedicated development port**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🟡 | 🔺 P1 | Implemented | 🟢 Small | ~80% |
+
+💻 **→ Human action required: No**<br />Run the current PR checks and browser acceptance for Italian/English, dates and responsive layout.
+
+| | |
+|---|---|
+| **Issue** | Translation and configuration implemented; natural-language interpretation remains F-003. Browser visual/accessibility checks remain unverified. |
+| **Reproduce** | Follow docs/INSTALL.md and the scoped headless implementation checks. |
+| **Check** | Italian default, matching translation keys, selectable English, unchanged reminder content, labelled browser-local dates, development port 4318. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Run the current PR checks and browser acceptance for Italian/English, dates and responsive layout. Italian default, matching translation keys, selectable English, unchanged reminder content, labelled browser-local dates, development port 4318.
+
+**Estimates:** Small remaining effort; ~80% complete. Estimate dated 2026-11-01, not acceptance evidence.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #1](https://github.com/voidbrain/nodo/pull/1); local checks pass; CI pending |
+| Opened | 2026-11-01 |
+| Verification | Pending named acceptance |
+| Reviewed | 2026-11-01 |
+
+</details>
+
+---
+
+### F-011
+
+**Native macOS menu-bar companion without Electron**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔺 P1 | Open | 🔴 Large | ~0% |
+
+💻 **→ Human action required: No**<br />Create a SwiftUI MenuBarExtra companion with authenticated local API pairing and independent service controls.
+
+| | |
+|---|---|
+| **Issue** | Approved native companion is planned. No Swift application ships in this step. |
+| **Reproduce** | Follow docs/INSTALL.md and the scoped headless implementation checks. |
+| **Check** | Build and package on macOS; health/reminders, workspace launch, doctor, notifications, launch-at-login; Quit companion leaves service running; Stop Nodo is separate. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Create a SwiftUI MenuBarExtra companion with authenticated local API pairing and independent service controls. Build and package on macOS; health/reminders, workspace launch, doctor, notifications, launch-at-login; Quit companion leaves service running; Stop Nodo is separate.
+
+**Estimates:** Large remaining effort; ~0% complete. Estimate dated 2026-11-01, not acceptance evidence.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #1](https://github.com/voidbrain/nodo/pull/1); local checks pass; CI pending |
+| Opened | 2026-11-01 |
+| Verification | Pending named acceptance |
+| Reviewed | 2026-11-01 |
+
+</details>
+
+---

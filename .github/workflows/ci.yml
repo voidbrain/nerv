@@ -15,6 +15,7 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+      - run: npm run test:headless
       - run: npm run check:backlog
       - run: npm run check:conventions
       - run: npm run check:integrations

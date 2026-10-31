@@ -58,6 +58,22 @@
       "run": "npm test",
       "checked": "Restart, duplicate delivery, cancellation and HTTP tests",
       "after": []
+    },
+    {
+      "id": "service",
+      "when": [
+        "src/config.ts",
+        "src/service.ts",
+        "src/cli.ts",
+        "test/headless.integration.ts",
+        "docs/INSTALL.md"
+      ],
+      "then": "Verify production process lifecycle and reconcile installation/roadmap acceptance.",
+      "run": "npm run build && npm run test:headless",
+      "checked": "Process restart regression; real target-host acceptance remains F-009",
+      "after": [
+        "core"
+      ]
     }
   ],
   "couplings": [],

@@ -33,7 +33,8 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
-            "buildTarget": "nodo:build"
+            "buildTarget": "nodo:build",
+            "port": 4318
           }
         }
       }

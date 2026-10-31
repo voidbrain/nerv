@@ -2,7 +2,7 @@
 
 ## Implemented boundary
 
-CLI and authenticated loopback HTTP share one Store. Angular calls the same HTTP operations through a development proxy. SQLite holds reminder and delivery rows. A transaction creates inbox delivery and marks completion together. The polling scheduler runs only in `serve`; `tick` is the one-shot catch-up command. There is no language model involved in scheduling.
+CLI and authenticated loopback HTTP share one Store. In production, the same backend serves compiled Angular assets and API routes on 4317; in development Angular on 4318 proxies those operations. Configuration/token files live under the durable per-user data directory; init preserves them. User services supervise the same foreground serve command. SQLite holds reminder and delivery rows. A transaction creates inbox delivery and marks completion together. The polling scheduler runs only in `serve`; `tick` is the one-shot catch-up command. There is no language model involved in scheduling.
 
 ## Intended distributed boundary
 
@@ -29,3 +29,7 @@ Tools are versioned typed capabilities, with policy enforced outside prompts and
 ## Domain ownership
 
 The FPV app owns batteries, aircraft damage and maintenance state. Nodo invokes its typed API/MCP tools. Distinguish recording a charge from starting a physical charger. Calendar, insurance deadlines and absence dates are structured facts with provenance and correction, not guesses reconstructed from chat history.
+
+## Local lifecycle and native companion
+
+The OS supervisor owns starting/restarting the Node process; Angular is not responsible for keeping reminders alive. launchd is a per-user GUI agent; systemd uses the current user session. Sleep and logout limits must be visible. The planned native macOS companion uses SwiftUI MenuBarExtra, with independent app/service lifecycles and authenticated API access. Electron is not a dependency.

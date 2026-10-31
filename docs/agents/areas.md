@@ -2,12 +2,16 @@
 
 ## Local core
 
-Node 24 runs erasable TypeScript directly. `src/store.ts` owns SQLite state; `src/server.ts` owns authenticated loopback HTTP; `src/cli.ts` owns process lifecycle. Validate untrusted input before writes. Do not expose arbitrary SQL, shell execution or tools through chat. Keep delivery creation and reminder completion in one transaction. `npm test` covers restart, duplicates, cancellation and HTTP authentication. These are Nodo's current conventions, not a published reusable Node harness profile.
+Node 24 runs erasable TypeScript directly. `src/store.ts` owns SQLite state; `src/server.ts` owns authenticated loopback HTTP; `src/cli.ts` owns process lifecycle; `src/config.ts` owns private per-user configuration and `src/service.ts` renders/manages user services. Validate untrusted input before writes. Do not expose arbitrary SQL, shell execution or tools through chat. Keep delivery creation and reminder completion in one transaction. `npm test` covers restart, duplicates, cancellation and HTTP authentication. These are Nodo's current conventions, not a published reusable Node harness profile.
 
 ## Frontend
 
-Read the style guide. Angular renders registered components, never model-generated JavaScript. The access token remains only in component memory. Planned cards must say planned; no simulated live devices. Current UI uses typed reminder data; generated UI selection is not implemented. PWA installation/offline caching and browser acceptance remain F-004.
+Read the style guide. Angular renders registered components, never model-generated JavaScript. The frontend access token remains only in component memory; the backend token is in a mode-0600 file under NODO_HOME. Italian is the default interface language, with English switching. CLI command names and raw diagnostic messages remain English. Planned cards must say planned; no simulated live devices. Current UI uses typed reminder data; generated UI selection is not implemented. PWA installation/offline caching and browser acceptance remain F-004.
 
 ## Distributed contracts
 
 `src/contracts.ts` declares version 1 intentions only; it is not an implemented network protocol. Agent role, model endpoint and execution location remain independent. Node trust requires enrolment; discovery grants no permission. A future broker must enforce privacy, fencing, lease expiry, idempotency and exclusive resources before remote operations. A timeout does not prove that an external action failed. Inspect device state before replaying physical actions. Never silently send local-only input to cloud inference.
+
+## Headless installation
+
+Serve built Angular assets and the API from one loopback process on 4317. Development uses 4318; both values must agree with README and tests. Service definitions contain no token, use absolute paths and run as the current user. Never install system services or enable linger on the execution host as part of a code change. Test service rendering and real process lifecycle; distinguish those from launchd/systemd acceptance on a user machine. Keep Quit companion separate from Stop Nodo in the future native SwiftUI companion. Read docs/INSTALL.md before changing service lifecycle.
