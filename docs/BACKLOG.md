@@ -438,7 +438,7 @@ Current work ledger, reviewed 1 November 2026 against main `718776f`. PR #1 and 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Current implementation branch; local checks and scoped audit; remote CI pending |
+| PR / evidence | [PR #3](https://github.com/voidbrain/nodo/pull/3); local checks and scoped audit pass; CI pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -472,7 +472,7 @@ Current work ledger, reviewed 1 November 2026 against main `718776f`. PR #1 and 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Current implementation branch; local checks and scoped audit; remote CI pending |
+| PR / evidence | [PR #3](https://github.com/voidbrain/nodo/pull/3); local checks and scoped audit pass; CI pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -506,7 +506,7 @@ Current work ledger, reviewed 1 November 2026 against main `718776f`. PR #1 and 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Current implementation branch; local checks and scoped audit; remote CI pending |
+| PR / evidence | [PR #3](https://github.com/voidbrain/nodo/pull/3); local checks and scoped audit pass; CI pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -540,7 +540,7 @@ Current work ledger, reviewed 1 November 2026 against main `718776f`. PR #1 and 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Current implementation branch; local checks and scoped audit; remote CI pending |
+| PR / evidence | [PR #3](https://github.com/voidbrain/nodo/pull/3); local checks and scoped audit pass; CI pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
