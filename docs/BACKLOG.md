@@ -1,6 +1,6 @@
 # Nodo backlog
 
-Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; current branch acceptance is recorded below. [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md).
+Current work ledger, reviewed 1 November 2026 against main `47876c9`. PR #1 merged after both head checks passed; target-OS and browser acceptance remain pending. [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md).
 
 ## Features and improvements
 
@@ -29,7 +29,7 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
+| PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -63,7 +63,7 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
+| PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -97,7 +97,7 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
+| PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -131,7 +131,7 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
+| PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -165,7 +165,7 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
+| PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -199,7 +199,7 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
+| PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -233,7 +233,7 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
+| PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -267,7 +267,7 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; PR #1 pending; scoped audit and local checks |
+| PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -285,7 +285,7 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 |:---:|---|---|---|---|
 | 🟡 | 🔺 P1 | Implemented | 🟡 Medium | ~80% |
 
-💻 **→ Human action required: No**<br />Validate the current PR in CI; retain actual launchd/systemd user-session installation and logout tests as unperformed host acceptance.
+💻 **→ Human action required: No**<br />Validate launchd/systemd installation and login/logout on target hosts; PR #1 CI is green.
 
 | | |
 |---|---|
@@ -296,13 +296,13 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Validate the current PR in CI; retain actual launchd/systemd user-session installation and logout tests as unperformed host acceptance. Single process serves production UI/API on 4317; config survives init; clean SIGTERM and restart catch-up; private credentials; install/status/start/stop/uninstall on real target OS.
+**Next action / closure evidence:** Validate launchd/systemd installation and login/logout on target hosts; PR #1 CI is green. Single process serves production UI/API on 4317; config survives init; clean SIGTERM and restart catch-up; private credentials; install/status/start/stop/uninstall on real target OS.
 
 **Estimates:** Medium remaining effort; ~80% complete. Estimate dated 2026-11-01, not acceptance evidence.
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #1](https://github.com/voidbrain/nodo/pull/1); local checks pass; CI pending |
+| PR / evidence | [PR #1](https://github.com/voidbrain/nodo/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -319,7 +319,7 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 |:---:|---|---|---|---|
 | 🟡 | 🔺 P1 | Implemented | 🟢 Small | ~80% |
 
-💻 **→ Human action required: No**<br />Run the current PR checks and browser acceptance for Italian/English, dates and responsive layout.
+💻 **→ Human action required: No**<br />Complete browser acceptance for Italian/English, dates and responsive layout; PR #1 CI is green.
 
 | | |
 |---|---|
@@ -330,13 +330,13 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Run the current PR checks and browser acceptance for Italian/English, dates and responsive layout. Italian default, matching translation keys, selectable English, unchanged reminder content, labelled browser-local dates, development port 4318.
+**Next action / closure evidence:** Complete browser acceptance for Italian/English, dates and responsive layout; PR #1 CI is green. Italian default, matching translation keys, selectable English, unchanged reminder content, labelled browser-local dates, development port 4318.
 
 **Estimates:** Small remaining effort; ~80% complete. Estimate dated 2026-11-01, not acceptance evidence.
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #1](https://github.com/voidbrain/nodo/pull/1); local checks pass; CI pending |
+| PR / evidence | [PR #1](https://github.com/voidbrain/nodo/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -370,9 +370,43 @@ Reviewed 1 November 2026 against main `f25fae5`. Foundation CI run #1 passed; cu
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #1](https://github.com/voidbrain/nodo/pull/1); local checks pass; CI pending |
+| PR / evidence | [PR #1](https://github.com/voidbrain/nodo/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
+| Reviewed | 2026-11-01 |
+
+</details>
+
+---
+
+### F-012
+
+**Resume a specific paused job after its provider limit resets**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔺 P1 | Open | 🔴 Large | ~0% |
+
+💻 **→ Human action required: No**<br />Define durable waiting jobs and implement an authorized browser/editor adapter that rechecks the exact job before resuming once.
+
+| | |
+|---|---|
+| **Issue** | User wants Nodo to resume a web-chat job or Claude Code job in VS Code after a three-hour token-limit pause. This capability is not implemented. |
+| **Reproduce** | Ask to resume an identified job after its reported reset time; keep its worker awake and session available. |
+| **Check** | Persist target, permission, reset time, expiry and attempts; verify readiness and unchanged job identity; resume once; notify outcome; survive restart; handle longer limits, logout, closed tabs, sleeping workers, changed tasks and already-resumed jobs without duplicate actions. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Prefer supported application commands/APIs. Use a browser worker or narrowly scoped desktop automation only when required. Adapter capability and host permission must be observed, not inferred. At the deadline inspect actual availability: three hours passing is not proof of a reset. Persist a bounded retry/expiry policy, cancellation, execution lease and result reconciliation. Recheck account/session/window/job identity after sleep or restart; do not replay stale clicks. Permission covers resuming the named job only, not accepting unrelated tool/security prompts or bypassing provider limits. Never place a model-originated resume instruction above user policy. The coordinator can schedule on an always-on host, but execution waits for the target worker and authenticated session. CLI/headless coding adapters should expose resumable job IDs where available; VS Code integration is not assumed to provide such an API. Required evaluations include changed button/DOM, an expired session, revised target content, already-running state and an uncertain click acknowledgement. Depends on F-003 durable scheduling and F-005/F-006 execution capabilities.
+
+**Estimates:** Large remaining effort; ~0% complete. Estimated 2026-11-01; adapter feasibility and real host acceptance remain unverified.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #2](https://github.com/voidbrain/nodo/pull/2); plan only, no runtime implementation |
+| Opened | 2026-11-01 |
+| Verification | Pending adapter feasibility, regression and live host tests |
 | Reviewed | 2026-11-01 |
 
 </details>
