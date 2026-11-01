@@ -3,11 +3,11 @@
     "kind": "rule",
     "disposition": "implemented",
     "target": "docs/agents/areas.md",
-    "evidence": "Nodo-specific headless lifecycle, private credentials, service-versus-companion ownership and locale limits now explicit; runtime tests cover joins. No copied tool or generic policy changed."
+    "evidence": "Project-specific process ownership, same-user isolation limit, method authorization and text-only surface rendering documented and tested; copied harness tools unchanged."
   },
   {
     "kind": "none",
     "disposition": "no-change",
-    "evidence": "Template v3.1.1 still current online; copied helpers retained. Reusable Node profile is an upstream gap tracked by F-001, not a dependency of this local step."
+    "evidence": "Kept Node and Angular. Evaluated Agency Swarm concepts without a runtime dependency; overlay and coordinator failover are separate app decisions, not generic harness changes."
   }
 ]

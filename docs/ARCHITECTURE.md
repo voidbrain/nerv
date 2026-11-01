@@ -2,7 +2,7 @@
 
 ## Implemented boundary
 
-CLI and authenticated loopback HTTP share one Store. In production, the same backend serves compiled Angular assets and API routes on 4317; in development Angular on 4318 proxies those operations. Configuration/token files live under the durable per-user data directory; init preserves them. User services supervise the same foreground serve command. SQLite holds reminder and delivery rows. A transaction creates inbox delivery and marks completion together. The polling scheduler runs only in `serve`; `tick` is the one-shot catch-up command. There is no language model involved in scheduling.
+During serve, A owns SQLite/ticker/inbox in an isolated child, B is an execution/health child with no agent loop yet, and C serves REST/static UI and supervises children. C accesses A through schema-validated JSON-RPC IPC; static file reads are asynchronous. Standalone CLI commands still use the Store directly. REST contracts remain compatible. Native clients can read local `/rpc` over authenticated WebSockets; remote workers and mutation RPC are not implemented. See [the runtime decision](decisions/runtime-boundaries.md) for bounds, failover and security limits.
 
 ## Intended distributed boundary
 
@@ -20,7 +20,7 @@ Discover using selected LAN ranges, mDNS/DNS-SD, configured SSH targets, Tailsca
 
 ## GenUI and interfaces
 
-The stable Angular shell owns navigation and device/permission management. A future schema-validated Surface references a registered Angular component. Treat remote agent/tool data as untrusted; never evaluate generated JS or bypass backend permissions. Telegram receives text/buttons representing the same operations. Future voice is another input/output adapter. PWA install, push delivery and background constraints require device tests.
+The stable Angular shell owns navigation and device/permission management. A schema-validated Surface now references an allowlisted Web Component; Angular hosts it in the stable shell. The first deterministic status card is implemented; model surface generation is not. Treat remote agent/tool data as untrusted; never evaluate generated JS or bypass backend permissions. Telegram receives text/buttons representing the same operations. Future voice is another input/output adapter. PWA install, push delivery and background constraints require device tests.
 
 ## Skills, models and tools
 

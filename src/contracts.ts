@@ -11,4 +11,4 @@ export interface Job {
 }
 export interface Lease {jobId:string; nodeId:string; token:string; expiresAt:string; fencingToken:number}
 export interface AgentTask {id:string; parentId?:string; modelEndpoint:string; executionNode:string; allowedTools:string[]; maxSteps:number; maxCost:number}
-export type Surface = {version:1; component:'reminder-list'|'doctor-report'|'node-list'; data:unknown};
+export type {StatusSurface as Surface} from '../shared/surface.ts';

@@ -1,6 +1,6 @@
 # Nodo backlog
 
-Current work ledger, reviewed 1 November 2026 against main `47876c9`. PR #1 merged after both head checks passed; target-OS and browser acceptance remain pending. [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md).
+Current work ledger, reviewed 1 November 2026 against main `718776f`. PR #1 and planning PR #2 merged after green checks; target-OS and browser acceptance remain pending. [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md).
 
 ## Features and improvements
 
@@ -407,6 +407,142 @@ Current work ledger, reviewed 1 November 2026 against main `47876c9`. PR #1 merg
 | PR / evidence | [PR #2](https://github.com/voidbrain/nodo/pull/2); plan only, no runtime implementation |
 | Opened | 2026-11-01 |
 | Verification | Pending adapter feasibility, regression and live host tests |
+| Reviewed | 2026-11-01 |
+
+</details>
+
+---
+
+### F-013
+
+**Isolate the scheduler and execution runtime**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🟡 | 🔺 P1 | Implemented | 🟡 Medium | ~70% |
+
+💻 **→ Human action required: No**<br />Validate process failure/backpressure regressions and finish bounded history/pagination and latency measurements before claiming load resilience.
+
+| | |
+|---|---|
+| **Issue** | A/B/C process split, validated IPC and fail-closed lifecycle exist. Brain is a health boundary only; no agent/model loop or sandbox. |
+| **Reproduce** | Follow docs/decisions/runtime-boundaries.md and the protocol/isolation test fixtures. |
+| **Check** | Blocked/killed Brain leaves due delivery working; Nervous failure shuts supervisor down; no orphaned children; bounded queues/frames; large histories and concurrent CLI writes have measured limits. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Validate process failure/backpressure regressions and finish bounded history/pagination and latency measurements before claiming load resilience. Blocked/killed Brain leaves due delivery working; Nervous failure shuts supervisor down; no orphaned children; bounded queues/frames; large histories and concurrent CLI writes have measured limits.
+
+**Estimates:** Medium remaining effort; ~70% complete. Estimated 2026-11-01; not acceptance evidence.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Current implementation branch; local checks and scoped audit; remote CI pending |
+| Opened | 2026-11-01 |
+| Verification | Pending named acceptance |
+| Reviewed | 2026-11-01 |
+
+</details>
+
+---
+
+### F-014
+
+**Version and secure WebSocket JSON-RPC communication**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🟡 | 🔺 P1 | Implemented | 🔴 Large | ~30% |
+
+💻 **→ Human action required: No**<br />Extend the local read-only endpoint into an enrolled outbound worker protocol with heartbeat, reconnect cursor, durable idempotency, fencing and resource locks.
+
+| | |
+|---|---|
+| **Issue** | Authenticated loopback read-only RPC and directed method graph exist; remote transport, mutation RPC, pairing, durable delivery and stream sequencing remain unimplemented. |
+| **Reproduce** | Follow docs/decisions/runtime-boundaries.md and the protocol/isolation test fixtures. |
+| **Check** | Reject unauthenticated/Origin/browser/query-token access; validate schemas/graph; bound payloads/concurrency; reconnect and asleep-worker tests before remote execution. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Extend the local read-only endpoint into an enrolled outbound worker protocol with heartbeat, reconnect cursor, durable idempotency, fencing and resource locks. Reject unauthenticated/Origin/browser/query-token access; validate schemas/graph; bound payloads/concurrency; reconnect and asleep-worker tests before remote execution.
+
+**Estimates:** Large remaining effort; ~30% complete. Estimated 2026-11-01; not acceptance evidence.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Current implementation branch; local checks and scoped audit; remote CI pending |
+| Opened | 2026-11-01 |
+| Verification | Pending named acceptance |
+| Reviewed | 2026-11-01 |
+
+</details>
+
+---
+
+### F-015
+
+**Pair native clients without sharing the root credential**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔺 P1 | Open | 🔴 Large | ~0% |
+
+💻 **→ Human action required: No**<br />Implement short-lived single-use local pairing, per-client revocable scoped credentials and Keychain storage in the native companion.
+
+| | |
+|---|---|
+| **Issue** | Design in runtime-boundaries; no pairing endpoint, Keychain integration or scoped client credential runtime yet. |
+| **Reproduce** | Follow docs/decisions/runtime-boundaries.md and the protocol/isolation test fixtures. |
+| **Check** | Expired/replayed tickets fail; credentials are bound to runtime identity; no tokens in URLs/argv/logs or Brain; revocation/rotation tested; native permissions remain explicit. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Implement short-lived single-use local pairing, per-client revocable scoped credentials and Keychain storage in the native companion. Expired/replayed tickets fail; credentials are bound to runtime identity; no tokens in URLs/argv/logs or Brain; revocation/rotation tested; native permissions remain explicit.
+
+**Estimates:** Large remaining effort; ~0% complete. Estimated 2026-11-01; not acceptance evidence.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Current implementation branch; local checks and scoped audit; remote CI pending |
+| Opened | 2026-11-01 |
+| Verification | Pending named acceptance |
+| Reviewed | 2026-11-01 |
+
+</details>
+
+---
+
+### F-016
+
+**Relocate the logical coordinator without split brain**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔺 P1 | Open | 🔴 Large | ~0% |
+
+💻 **→ Human action required: No**<br />Keep the coordinator on an always-on host initially; design later replicated state, leader epochs/leases, fencing and restore.
+
+| | |
+|---|---|
+| **Issue** | Deferred milestone 5b. No distributed election, replication or automatic failover is implemented. |
+| **Reproduce** | Follow docs/decisions/runtime-boundaries.md and the protocol/isolation test fixtures. |
+| **Check** | Network partitions, asleep old leaders and reconnect cannot create simultaneous authorities or duplicate physical effects. Context copying alone never grants leadership. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Keep the coordinator on an always-on host initially; design later replicated state, leader epochs/leases, fencing and restore. Network partitions, asleep old leaders and reconnect cannot create simultaneous authorities or duplicate physical effects. Context copying alone never grants leadership.
+
+**Estimates:** Large remaining effort; ~0% complete. Estimated 2026-11-01; not acceptance evidence.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Current implementation branch; local checks and scoped audit; remote CI pending |
+| Opened | 2026-11-01 |
+| Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
 
 </details>
