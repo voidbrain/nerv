@@ -58,5 +58,5 @@ enum CredentialStore {
         if status == errSecItemNotFound { var request = query; request[kSecValueData as String] = data; guard SecItemAdd(request as CFDictionary, nil) == errSecSuccess else { throw NativeError.keychain } }
         else if status != errSecSuccess { throw NativeError.keychain }
     }
-    static func forget() { SecItemDelete(query as CFDictionary) }
+    static func forget() throws { let status = SecItemDelete(query as CFDictionary); guard status == errSecSuccess || status == errSecItemNotFound else { throw NativeError.keychain } }
 }

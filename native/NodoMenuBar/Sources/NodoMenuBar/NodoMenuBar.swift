@@ -38,7 +38,7 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
             reminders = Array(values.filter { $0.cancelled == nil && $0.delivered == nil }.prefix(5)); status = "Nodo connesso"
         } catch { status = error.localizedDescription; reminders = [] }
     }
-    func forget() { CredentialStore.forget(); credential = nil; paired = false; reminders = []; status = "Abbinamento locale rimosso" }
+    func forget() { do { try CredentialStore.forget(); credential = nil; paired = false; reminders = []; status = "Abbinamento locale rimosso" } catch { status = error.localizedDescription } }
     func openWorkspace() { if let credential { NSWorkspace.shared.open(URL(string: "http://127.0.0.1:\(credential.webPort)")!) } }
 }
 @main struct NodoMenuBarApp: App {
@@ -60,7 +60,7 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
                 Button(model.tr("Apri spazio web")) { model.openWorkspace() }
                 Button(model.tr("Aggiorna diagnostica")) { Task { await model.refresh() } }.disabled(model.busy)
                 ForEach(model.reminders) { item in VStack(alignment: .leading) { Text(item.title); Text(Self.date(item.due, language: model.language)).font(.caption).foregroundStyle(.secondary) } }
-                Button(model.tr("Rimuovi abbinamento locale")) { model.forget() }
+                Button(model.tr("Rimuovi abbinamento locale")) { model.forget() }.disabled(model.busy)
             }
             Divider()
             Text(model.tr("Chiudere questa app lascia Nodo in esecuzione.")).font(.caption)
