@@ -1,6 +1,6 @@
 import SwiftUI
 import AppKit
-struct Doctor: Decodable { let runtimeId: String; let language: String; let home: String? }
+struct RuntimeStatus: Decodable { let runtimeId: String; let language: String; let home: String? }
 struct Reminder: Decodable, Identifiable { let id: String; let title: String; let due: String; let delivered: String?; let cancelled: String? }
 struct Claim: Decodable { let clientId: String; let token: String; let expiresAt: Int64; let runtimeId: String; let scopes: [String] }
 @MainActor final class Companion: ObservableObject {
@@ -53,7 +53,7 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
         do {
             guard try await notifications.requestPermission() else { throw NativeEventError.denied }
             let connection = NativeConnection(port: credential.port, fingerprint: credential.fingerprint)
-            let doctor = try JSONDecoder().decode(Doctor.self, from: await connection.request("/api/doctor", token: credential.token))
+            let doctor = try JSONDecoder().decode(RuntimeStatus.self, from: await connection.request("/api/status", token: credential.token))
             guard doctor.runtimeId == credential.runtimeId else { throw NativeError.identityMismatch }
             let page = try JSONDecoder().decode(InboxPage.self, from: await connection.request("/api/inbox/page?after=0&limit=1", token: credential.token))
             try notificationEngine.baseline(credential.runtimeId, head: page.head)
@@ -62,7 +62,7 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
     }
     func tr(_ text: String) -> String {
         guard language == "en" else { return text }
-        return ["Nodo non connesso":"Nodo disconnected", "Nodo abbinato":"Nodo paired", "Nodo connesso":"Nodo connected", "Abbinamento locale rimosso":"Local pairing removed", "Genera un invito con npm start -- pair e incollalo qui.":"Generate an invitation with npm start -- pair and paste it here.", "Invito privato":"Private invitation", "Abbina Nodo":"Pair Nodo", "Apri spazio web":"Open workspace", "Aggiorna diagnostica":"Refresh diagnostics", "Rimuovi abbinamento locale":"Forget local pairing", "Chiudere questa app lascia Nodo in esecuzione.":"Quitting this app leaves Nodo running.", "Esci dal companion":"Quit companion", "Ora locale del Mac":"Mac local time", "Servizio Nodo di questo Mac":"Nodo service on this Mac", "Il servizio locale non corrisponde al Nodo abbinato.":"The local service does not match the paired Nodo.", "Notifiche disattivate":"Notifications off", "Notifiche attive: nuovi promemoria":"Notifications on: new reminders", "Disattiva notifiche":"Turn notifications off", "Attiva notifiche da ora":"Enable notifications from now", "Cronologia cambiata: controlla la casella":"History changed: check the inbox", "Servizio caricato":"Service loaded", "Servizio non caricato o non accessibile":"Service not loaded or unavailable", "Avvia Nodo":"Start Nodo", "Ferma Nodo…":"Stop Nodo…", "Ferma Nodo":"Stop Nodo", "Annulla":"Cancel", "Avvio al login attivo":"Launch at login enabled", "Avvio al login: approvazione richiesta":"Launch at login requires approval", "Avvio al login non attivo":"Launch at login not enabled", "Disattiva avvio al login":"Disable launch at login", "Avvia companion al login":"Launch companion at login", "Apri impostazioni login":"Open login settings", "Fermare il servizio Nodo? I promemoria attendono il riavvio.":"Stop the Nodo service? Reminders will wait until it restarts."][text] ?? text
+        return ["Nodo non connesso":"Nodo disconnected", "Nodo abbinato":"Nodo paired", "Nodo connesso":"Nodo connected", "Abbinamento locale rimosso":"Local pairing removed", "Genera un invito con npm start -- pair e incollalo qui.":"Generate an invitation with npm start -- pair and paste it here.", "Invito privato":"Private invitation", "Abbina Nodo":"Pair Nodo", "Apri spazio web":"Open workspace", "Aggiorna stato":"Refresh status", "Rimuovi abbinamento locale":"Forget local pairing", "Chiudere questa app lascia Nodo in esecuzione.":"Quitting this app leaves Nodo running.", "Esci dal companion":"Quit companion", "Ora locale del Mac":"Mac local time", "Servizio Nodo di questo Mac":"Nodo service on this Mac", "Il servizio locale non corrisponde al Nodo abbinato.":"The local service does not match the paired Nodo.", "Notifiche disattivate":"Notifications off", "Notifiche attive: nuovi promemoria":"Notifications on: new reminders", "Disattiva notifiche":"Turn notifications off", "Attiva notifiche da ora":"Enable notifications from now", "Cronologia cambiata: controlla la casella":"History changed: check the inbox", "Servizio caricato":"Service loaded", "Servizio non caricato o non accessibile":"Service not loaded or unavailable", "Avvia Nodo":"Start Nodo", "Ferma Nodo…":"Stop Nodo…", "Ferma Nodo":"Stop Nodo", "Annulla":"Cancel", "Avvio al login attivo":"Launch at login enabled", "Avvio al login: approvazione richiesta":"Launch at login requires approval", "Avvio al login non attivo":"Launch at login not enabled", "Disattiva avvio al login":"Disable launch at login", "Avvia companion al login":"Launch companion at login", "Apri impostazioni login":"Open login settings", "Fermare il servizio Nodo? I promemoria attendono il riavvio.":"Stop the Nodo service? Reminders will wait until it restarts."][text] ?? text
     }
     func pair() async {
         guard !busy else { return }; busy = true; defer { busy = false }
@@ -80,7 +80,7 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
         do {
             guard credential.expiresAt > Int64(Date().timeIntervalSince1970 * 1000) else { throw NativeError.expired }
             let connection = NativeConnection(port: credential.port, fingerprint: credential.fingerprint)
-            let doctor = try JSONDecoder().decode(Doctor.self, from: await connection.request("/api/doctor", token: credential.token))
+            let doctor = try JSONDecoder().decode(RuntimeStatus.self, from: await connection.request("/api/status", token: credential.token))
             guard doctor.runtimeId == credential.runtimeId else { throw NativeError.identityMismatch }
             serviceMatchesRuntime = service.matches(home: doctor.home)
             let values = try JSONDecoder().decode([Reminder].self, from: await connection.request("/api/reminders/pending", token: credential.token))
@@ -117,7 +117,7 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
                 Button(model.tr("Abbina Nodo")) { Task { await model.pair(); await model.refresh() } }.disabled(model.busy || model.invitation.isEmpty)
             } else {
                 Button(model.tr("Apri spazio web")) { model.openWorkspace() }
-                Button(model.tr("Aggiorna diagnostica")) { Task { await model.refreshOSState(); await model.refresh() } }.disabled(model.busy)
+                Button(model.tr("Aggiorna stato")) { Task { await model.refreshOSState(); await model.refresh() } }.disabled(model.busy)
                 ForEach(model.reminders) { item in VStack(alignment: .leading) { Text(item.title); Text(Self.date(item.due, language: model.language)).font(.caption).foregroundStyle(.secondary) } }
                 Button(model.tr(model.notificationsEnabled ? "Disattiva notifiche" : "Attiva notifiche da ora")) { Task { await model.toggleNotifications() } }.disabled(model.busy)
                 Text(model.tr(model.notificationStatus)).font(.caption)

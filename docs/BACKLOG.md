@@ -1,6 +1,6 @@
 # Nodo backlog
 
-Current work ledger, reviewed 1 November 2026 against main `37398b6`. PR #1–#4 merged after green checks; target-OS and browser acceptance remain pending. [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md).
+Current work ledger, reviewed 1 November 2026 against main `2a8b901`. PR #1–#5 merged after green checks; target-OS and browser acceptance remain pending. [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md).
 
 ## Features and improvements
 
@@ -370,7 +370,7 @@ Current work ledger, reviewed 1 November 2026 against main `37398b6`. PR #1–#4
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #5](https://github.com/voidbrain/nodo/pull/5); Linux checks pass; macOS CI pending |
+| PR / evidence | [PR #5](https://github.com/voidbrain/nodo/pull/5) merged; Linux and macOS checks green; real OS acceptance remains pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -425,7 +425,7 @@ Current work ledger, reviewed 1 November 2026 against main `37398b6`. PR #1–#4
 
 | | |
 |---|---|
-| **Issue** | A/B/C process split, validated IPC and fail-closed lifecycle exist. Native inbox and pending-reminder reads are now bounded; full-history web pagination/load limits remain open. Brain is a health boundary only, not an agent/model loop or sandbox. |
+| **Issue** | A/B/C process split, validated IPC and fail-closed lifecycle exist. Native inbox and pending-reminder reads are now bounded; background status now pings the scheduler rather than running SQLite quick_check every 15 seconds; full-history web pagination/load limits remain open. Brain is a health boundary only, not an agent/model loop or sandbox. |
 | **Reproduce** | Follow docs/decisions/runtime-boundaries.md and the protocol/isolation test fixtures. |
 | **Check** | Blocked/killed Brain leaves due delivery working; Nervous failure shuts supervisor down; no orphaned children; bounded queues/frames; large histories and concurrent CLI writes have measured limits. |
 
@@ -438,7 +438,7 @@ Current work ledger, reviewed 1 November 2026 against main `37398b6`. PR #1–#4
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #3](https://github.com/voidbrain/nodo/pull/3); local checks and scoped audit pass; CI pending |
+| PR / evidence | [PR #3](https://github.com/voidbrain/nodo/pull/3) runtime; [PR #5](https://github.com/voidbrain/nodo/pull/5) bounded native feeds; [PR #6](https://github.com/voidbrain/nodo/pull/6) lightweight status, CI pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -506,7 +506,7 @@ Current work ledger, reviewed 1 November 2026 against main `37398b6`. PR #1–#4
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #4](https://github.com/voidbrain/nodo/pull/4); backend checks pass; macOS CI pending |
+| PR / evidence | [PR #4](https://github.com/voidbrain/nodo/pull/4) merged; Linux and macOS checks green; live Keychain/rotation acceptance remains pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
