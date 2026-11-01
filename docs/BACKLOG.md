@@ -1,6 +1,6 @@
 # Nodo backlog
 
-Current work ledger, reviewed 1 November 2026 against main `9248f10`. PR #1–#3 merged after green checks; target-OS and browser acceptance remain pending. [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md).
+Current work ledger, reviewed 1 November 2026 against main `37398b6`. PR #1–#4 merged after green checks; target-OS and browser acceptance remain pending. [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md).
 
 ## Features and improvements
 
@@ -351,26 +351,26 @@ Current work ledger, reviewed 1 November 2026 against main `9248f10`. PR #1–#3
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🟡 | 🔺 P1 | Implemented | 🔴 Large | ~50% |
+| 🟡 | 🔺 P1 | Implemented | 🔴 Large | ~80% |
 
-💻 **→ Human action required: No**<br />Validate the native preview on macOS; add notifications, service controls, launch-at-login and signed/notarized distribution after the pairing/read path passes.
+💻 **→ Human action required: No**<br />Validate native notification permissions/banners, guarded service start/stop and login/logout on a target Mac; finish distribution signing/notarization.
 
 | | |
 |---|---|
-| **Issue** | SwiftUI menu-bar source, Keychain client storage, pinned TLS pairing, read-only reminders/status and local app packaging now exist. OS controls, notifications, login and distribution acceptance remain incomplete. |
+| **Issue** | SwiftUI pairing, private notification checkpoints, bounded catch-up, opt-in OS notifications, guarded local service controls and login selection now exist. Real permission/menu/login acceptance and distribution signing remain incomplete. |
 | **Reproduce** | Follow docs/INSTALL.md and the scoped headless implementation checks. |
 | **Check** | Build and package on macOS; health/reminders, workspace launch, doctor, notifications, launch-at-login; Quit companion leaves service running; Stop Nodo is separate. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Validate the native preview on macOS; add notifications, service controls, launch-at-login and signed/notarized distribution after the pairing/read path passes. Build and package on macOS; health/reminders, workspace launch, doctor, notifications, launch-at-login; Quit companion leaves service running; Stop Nodo is separate.
+**Next action / closure evidence:** Validate native notification permissions/banners, guarded service start/stop and login/logout on a target Mac; finish distribution signing/notarization. Build and package on macOS; health/reminders, workspace launch, doctor, notifications, launch-at-login; Quit companion leaves service running; Stop Nodo is separate.
 
-**Estimates:** Large remaining effort; ~50% complete. Estimate dated 2026-11-01, not acceptance evidence.
+**Estimates:** Large remaining effort; ~80% complete. Estimate dated 2026-11-01, not acceptance evidence.
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #4](https://github.com/voidbrain/nodo/pull/4); backend checks pass; macOS CI pending |
+| PR / evidence | Current native lifecycle branch; Linux checks pass; macOS CI pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -425,7 +425,7 @@ Current work ledger, reviewed 1 November 2026 against main `9248f10`. PR #1–#3
 
 | | |
 |---|---|
-| **Issue** | A/B/C process split, validated IPC and fail-closed lifecycle exist. Brain is a health boundary only; no agent/model loop or sandbox. |
+| **Issue** | A/B/C process split, validated IPC and fail-closed lifecycle exist. Native inbox and pending-reminder reads are now bounded; full-history web pagination/load limits remain open. Brain is a health boundary only, not an agent/model loop or sandbox. |
 | **Reproduce** | Follow docs/decisions/runtime-boundaries.md and the protocol/isolation test fixtures. |
 | **Check** | Blocked/killed Brain leaves due delivery working; Nervous failure shuts supervisor down; no orphaned children; bounded queues/frames; large histories and concurrent CLI writes have measured limits. |
 

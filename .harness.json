@@ -107,6 +107,25 @@
       "after": [
         "core"
       ]
+    },
+    {
+      "id": "notification-feed",
+      "when": [
+        "src/store.ts",
+        "src/rpc.ts",
+        "src/runtime.ts",
+        "src/nervous-process.ts",
+        "src/server.ts",
+        "native/NodoMenuBar/Sources/NodoMenuBar/Notifications.swift",
+        "native/NodoMenuBar/Sources/NodoMenuBar/OSControls.swift",
+        "test/inbox-page.test.ts"
+      ],
+      "then": "Check bounded cursor/restore semantics, notification replay/failure behavior and fixed user OS actions; reconcile guides and native tests.",
+      "run": "npm test; swift test --package-path native/NodoMenuBar",
+      "checked": "Store/page tests and Swift notification mocks/command plans; live OS acceptance remains F-011",
+      "after": [
+        "core"
+      ]
     }
   ],
   "couplings": [

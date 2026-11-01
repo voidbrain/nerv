@@ -10,4 +10,6 @@ Italian is the default UI language; English is selectable. Keep messages in web/
 
 The status card uses the existing theme tokens through a Shadow DOM. Shadow DOM encapsulates styles; it is not a security boundary. The current surface is deterministic, not LLM-generated. Preserve text escaping and bounded descriptions in every renderer.
 
-The native menu uses a monochrome template drawing of the wrapped-knot geometry, with Italian default and English selection. It displays at most five pending reminders and Mac-local dates. Quit companion leaves the daemon running. Native pairing uses a SecureField; never show or copy the administrative bearer token into the app. Local forget and server revocation are distinct. Native/system error details may retain the OS language.
+The native menu uses a monochrome template drawing of the wrapped-knot geometry, with Italian default and English selection. The scrollable menu displays at most five pending reminders and Mac-local dates. Quit companion leaves the daemon running. Native pairing uses a SecureField; never show or copy the administrative bearer token into the app. Local forget and server revocation are distinct. Native/system error details may retain the OS language.
+
+Notification enablement says “from now”; denied/failed permissions remain visible. Stop Nodo uses a destructive confirmation; Quit companion is a separate action. Service loaded, daemon connected and login enabled/approval-required must be shown as distinct states. Never present OS notification submission as proof the user saw a banner.

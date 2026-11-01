@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-01T08:35:07.527Z",
+  "reviewed": "2026-11-01T08:55:45.437Z",
   "policy": "7ce9883fd1bff25038076e9e36015a833c38e1378e1df68043f48a64635abad4",
   "inputs": {
     "AGENTS.md": "3e2734e445751da996684c6b8fe988a8b57dcc3456b5850e5be5ba80e7505f0b",
     "docs/BACKLOG-RULES.md": "829ba1b55add1a556b311782dea534f8bd39aa555d261e59d75b3545ec3a4dd5",
-    "docs/agents/areas.md": "c49d356b3f11d21bdc89632631cee2aea6d111aae95d7a85066023f5baa85709",
+    "docs/agents/areas.md": "e7ac629959f9422346ced423737cbd52c80900e15bc10eb14d2d2ee8ebbf04e3",
     "docs/agents/maintenance.md": "a7e93ce963ffab30b4592ee90bdd0e72d49ea1320f82df74f22c88f70899d899"
   },
   "measurements": {
     "samples": 1,
-    "latestAt": "2026-11-01T08:35:07.468Z",
+    "latestAt": "2026-11-01T08:55:45.366Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -40,7 +40,7 @@
         "durationMs": {
           "observed": 1,
           "missing": 0,
-          "median": 265064
+          "median": 651418
         },
         "conflicts": {
           "observed": 0,
@@ -65,12 +65,12 @@
       "kind": "rule",
       "disposition": "implemented",
       "target": "docs/agents/areas.md",
-      "evidence": "Nodo-specific pairing/TLS/verifier ownership, native CI versus live acceptance, root/client boundary and artifact limits documented with backend tests."
+      "evidence": "Nodo-specific notification cursor/restore/failure semantics and fixed, user-authorized OS actions documented; no live OS changes from tests."
     },
     {
       "kind": "none",
       "disposition": "no-change",
-      "evidence": "No copied harness tool or generic template rule changed; native credentials are a project runtime concern."
+      "evidence": "Copied harness helpers unchanged. This increment changes native application behavior, not generic harness policy."
     }
   ]
 }

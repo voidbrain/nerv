@@ -9,9 +9,11 @@ export const methodSchemas={
  'runtime.ping':empty,
  'runtime.doctor':empty,
  'reminders.list':empty,
+ 'reminders.pending':empty,
  'reminders.add':{type:'object',required:['title','due'],properties:{title:{type:'string',minLength:1,maxLength:500},due:{type:'string',maxLength:64}},additionalProperties:false},
  'reminders.cancel':{type:'object',required:['id'],properties:{id:{type:'string',minLength:1,maxLength:100}},additionalProperties:false},
  'inbox.list':empty,
+ 'inbox.page':{type:'object',properties:{after:{type:'integer',minimum:0,maximum:Number.MAX_SAFE_INTEGER},afterId:{type:'string',minLength:1,maxLength:100},limit:{type:'integer',minimum:1,maximum:20}},additionalProperties:false},
 } as const;
 export type Method=keyof typeof methodSchemas;
 const validators=new Map(Object.entries(methodSchemas).map(([name,schema])=>[name,ajv.compile(schema)]));
@@ -22,8 +24,8 @@ export function validateParams(method:string,params:unknown):asserts method is M
 export type Principal='interface'|'coordinator'|'nervous'|'brain';
 /** Directed edges describe permission, not routing or model capability. Deny by default. */
 export const communicationGraph=[
- {from:'interface',to:'coordinator',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.add','reminders.cancel','inbox.list']},
- {from:'coordinator',to:'nervous',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.add','reminders.cancel','inbox.list']},
+ {from:'interface',to:'coordinator',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.pending','reminders.add','reminders.cancel','inbox.list','inbox.page']},
+ {from:'coordinator',to:'nervous',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.pending','reminders.add','reminders.cancel','inbox.list','inbox.page']},
  {from:'coordinator',to:'brain',methods:['runtime.ping']},
 ] as const;
 export function authorize(from:Principal,to:Principal,method:string):void {

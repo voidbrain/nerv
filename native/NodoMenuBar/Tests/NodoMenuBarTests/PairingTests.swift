@@ -21,6 +21,9 @@ extension PairingTests {
         XCTAssertEqual(claim.runtimeId, invitation.runtimeId)
         let doctor = try JSONDecoder().decode(Doctor.self, from: await connection.request("/api/doctor", token: claim.token))
         XCTAssertEqual(doctor.runtimeId, invitation.runtimeId)
+        let inbox = try JSONDecoder().decode(InboxPage.self, from: await connection.request("/api/inbox/page?after=0&limit=5", token: claim.token))
+        XCTAssertEqual(inbox.head.sequence, 0)
+        XCTAssertTrue(inbox.items.isEmpty)
         do { _ = try await connection.request("/api/reminders", token: claim.token, body: ["title":"forbidden", "due":"2099-01-01T00:00:00Z"]); XCTFail("Read-only client mutated state") } catch { }
         let wrong = NativeConnection(port: invitation.port, fingerprint: String(repeating: "0", count: 64))
         do { _ = try await wrong.request("/api/doctor", token: claim.token); XCTFail("Different certificate pin accepted") } catch { }

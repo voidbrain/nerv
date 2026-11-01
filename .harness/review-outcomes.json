@@ -3,11 +3,11 @@
     "kind": "rule",
     "disposition": "implemented",
     "target": "docs/agents/areas.md",
-    "evidence": "Nodo-specific pairing/TLS/verifier ownership, native CI versus live acceptance, root/client boundary and artifact limits documented with backend tests."
+    "evidence": "Nodo-specific notification cursor/restore/failure semantics and fixed, user-authorized OS actions documented; no live OS changes from tests."
   },
   {
     "kind": "none",
     "disposition": "no-change",
-    "evidence": "No copied harness tool or generic template rule changed; native credentials are a project runtime concern."
+    "evidence": "Copied harness helpers unchanged. This increment changes native application behavior, not generic harness policy."
   }
 ]

@@ -1,14 +1,14 @@
 import {DatabaseSync} from 'node:sqlite';
 import {randomBytes,randomUUID,createHash,X509Certificate} from 'node:crypto';
 import {mkdirSync,existsSync,writeFileSync,readFileSync,chmodSync} from 'node:fs';
-import {join} from 'node:path';
+import {join,resolve} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {request} from 'node:https';
 const hash=(value:string)=>createHash('sha256').update(value).digest('hex');
 export interface Invitation {version:1;ticket:string;runtimeId:string;port:number;webPort:number;fingerprint:string;expiresAt:number}
 export class NativeAuth {
- private db:DatabaseSync;readonly runtimeId:string;
- constructor(home:string){mkdirSync(home,{recursive:true,mode:0o700});const path=join(home,'native-auth.sqlite');this.db=new DatabaseSync(path);chmodSync(path,0o600);
+ private db:DatabaseSync;readonly runtimeId:string;readonly home:string;
+ constructor(home:string){this.home=resolve(home);mkdirSync(home,{recursive:true,mode:0o700});const path=join(home,'native-auth.sqlite');this.db=new DatabaseSync(path);chmodSync(path,0o600);
  const version=this.db.prepare('PRAGMA user_version').get() as {user_version:number};if(version.user_version>1){this.db.close();throw new Error('Native credential schema is newer than this Nodo version.');}
  this.db.exec(`PRAGMA busy_timeout=2000;PRAGMA user_version=1;CREATE TABLE IF NOT EXISTS identity(id TEXT NOT NULL);CREATE TABLE IF NOT EXISTS tickets(hash TEXT PRIMARY KEY,label TEXT NOT NULL,expires INTEGER NOT NULL);CREATE TABLE IF NOT EXISTS clients(id TEXT PRIMARY KEY,hash TEXT UNIQUE NOT NULL,label TEXT NOT NULL,expires INTEGER NOT NULL,revoked INTEGER NOT NULL DEFAULT 0);`);
  this.db.prepare('INSERT INTO identity SELECT ? WHERE NOT EXISTS(SELECT 1 FROM identity)').run(randomUUID());this.runtimeId=(this.db.prepare('SELECT id FROM identity').get() as {id:string}).id;}

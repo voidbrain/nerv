@@ -1,7 +1,9 @@
 import {ProcessClient} from './process-client.ts';
-import type {Reminder} from './store.ts';
+import type {Reminder,InboxPage} from './store.ts';
 export interface StoreApi {
  list():Reminder[]|Promise<Reminder[]>;
+ pendingReminders():Reminder[]|Promise<Reminder[]>;
+ inboxPage(after?:number,limit?:number,afterId?:string):InboxPage|Promise<InboxPage>;
  add(title:string,due:string):Reminder|Promise<Reminder>;
  cancel(id:string):boolean|Promise<boolean>;
  inbox():unknown|Promise<unknown>;
@@ -15,6 +17,8 @@ export class Runtime implements StoreApi {
  }
  async ready(){await this.nervous.call('runtime.ping');}
  async list(){return await this.nervous.call('reminders.list') as Reminder[];}
+ async pendingReminders(){return await this.nervous.call('reminders.pending') as Reminder[];}
+ async inboxPage(after=0,limit=5,afterId?:string){return await this.nervous.call('inbox.page',{after,limit,...(afterId?{afterId}:{})}) as InboxPage;}
  async add(title:string,due:string){return await this.nervous.call('reminders.add',{title,due}) as Reminder;}
  async cancel(id:string){return await this.nervous.call('reminders.cancel',{id}) as boolean;}
  async inbox(){return this.nervous.call('inbox.list');}

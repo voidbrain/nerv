@@ -23,9 +23,11 @@ export function attachRpcSocket(server:Server,store:StoreApi,token:string,option
      case 'runtime.ping':return {role:'coordinator'};
      case 'runtime.doctor':return {...await store.doctor(),language:options.language ?? 'it',timeZone:options.timeZone ?? 'Europe/Rome'};
      case 'reminders.list':return store.list();
+     case 'reminders.pending':return store.pendingReminders();
      case 'reminders.add':throw new RpcFault(-32003,'Mutations require the REST API; durable RPC idempotency is not implemented yet.');
      case 'reminders.cancel':throw new RpcFault(-32003,'Mutations require the REST API; durable RPC idempotency is not implemented yet.');
      case 'inbox.list':return store.inbox();
+     case 'inbox.page':return store.inboxPage(params.after as number|undefined,params.limit as number|undefined,params.afterId as string|undefined);
     }
    }).then(reply=>{
     if(reply&&client.readyState===WebSocket.OPEN){const encoded=JSON.stringify(reply);if(Buffer.byteLength(encoded)>MAX_FRAME_BYTES||client.bufferedAmount>MAX_FRAME_BYTES)client.close(1009,'Response too large.');else client.send(encoded);}
