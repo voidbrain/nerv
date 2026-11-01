@@ -33,3 +33,9 @@ The FPV app owns batteries, aircraft damage and maintenance state. Nodo invokes 
 ## Local lifecycle and native companion
 
 The OS supervisor owns starting/restarting the Node process; Angular is not responsible for keeping reminders alive. launchd is a per-user GUI agent; systemd uses the current user session. Sleep and logout limits must be visible. The planned native macOS companion uses SwiftUI MenuBarExtra, with independent app/service lifecycles and authenticated API access. Electron is not a dependency.
+
+## Native pairing implementation
+
+Optional native HTTPS on loopback 4319 is enabled by native-init. The existing web/API remains on 4317. The gateway loads a private localhost TLS key/certificate and a separate bounded native credential database. Reminder SQLite/ticks remain in A; Brain receives neither TLS keys nor master/native credentials. The credential database contains only verifier hashes, metadata and a persistent runtime UUID. Small administrative operations occur in C and do not share A's reminder transaction queue.
+
+An authenticated CLI uses the persisted TLS certificate to request a two-minute single-use invitation. It includes the certificate fingerprint and runtime identity. The companion pins that certificate before presenting its ticket, validates hostname/expiry through Security.framework, claims a 30-day read-only client credential and stores it in Keychain. Each subsequent request is TLS-pinned, checks server-side revocation/expiry and checks the runtime UUID before accepting state. Redirects are denied. Nothing adds the local certificate to global trust. Invitations and native tokens are not URL parameters or provider credentials. Per-client socket authentication remains unimplemented; native preview uses REST.

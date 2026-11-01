@@ -16,7 +16,7 @@
 
 FPV battery/crash integration is F-008 and can proceed after typed tool/model boundaries. WhatsApp remains an optional channel after Telegram. Dedicated always-listening hardware and replicated coordinators require separate feasibility acceptance; neither is assumed necessary for the first release.
 
-Current implementation step: 1a.1 (isolation/protocol/renderer foundation), before native integration and real model execution. It does not replace model/channel milestone 2. Service render/process tests are not an actual macOS/systemd installation trial. Italian natural-language and voice acceptance remain in F-003/F-007; F-010 is interface localization only.
+Current implementation step: 1b native preview and F-015 pairing. Menu-bar pairing/read access is implemented; notifications, service controls, launch-at-login, distribution signing and live native acceptance remain open. Real model execution is still milestone 2. It does not replace model/channel milestone 2. Service render/process tests are not an actual macOS/systemd installation trial. Italian natural-language and voice acceptance remain in F-003/F-007; F-010 is interface localization only.
 
 ## Waiting and resuming external jobs (F-012)
 

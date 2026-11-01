@@ -1,4 +1,6 @@
-import { createServer, type IncomingMessage } from 'node:http';
+import { createServer, type IncomingMessage, type RequestListener } from 'node:http';
+import {createServer as createHttpsServer} from 'node:https';
+import type {NativeAuth} from './native-auth.ts';
 import { timingSafeEqual } from 'node:crypto';
 import { realpath,stat,readFile } from 'node:fs/promises';
 import { resolve, sep, extname } from 'node:path';
@@ -8,12 +10,15 @@ async function body(req: IncomingMessage): Promise<Record<string,unknown>> {
   let text=''; for await(const chunk of req) { text+=chunk; if(Buffer.byteLength(text)>8192) throw new Error('Request too large.'); }
   const value:unknown=JSON.parse(text); if(!value || typeof value!=='object' || Array.isArray(value)) throw new Error('Expected JSON object.'); return value as Record<string,unknown>;
 }
-export function makeServer(store: StoreApi, token: string, options: {webRoot?:string; language?:string; timeZone?:string} = {}) {
+export function makeServer(store: StoreApi, token: string, options: {webRoot?:string; language?:string; timeZone?:string;tls?:{key:Buffer;cert:Buffer};native?:{auth:NativeAuth;fingerprint:string;port:number;webPort:number}} = {}) {
+  if(options.native&&!options.tls)throw new Error('Native pairing requires TLS.');
   if(token.length<24) throw new Error('NODO_TOKEN must be at least 24 characters.');
-  const server = createServer(async(req,res)=>{
+  const listener:RequestListener=async(req,res)=>{
     res.setHeader('Content-Type','application/json'); res.setHeader('Cache-Control','no-store'); res.setHeader('X-Content-Type-Options','nosniff');
     const reply=(status:number,value:unknown)=>{res.writeHead(status);res.end(JSON.stringify(value));};
     const path=new URL(req.url ?? '/', 'http://localhost').pathname;
+    if(options.native&&req.headers.origin){reply(403,{error:'Native clients only.'});return;}
+    if(options.native&&req.method==='POST'&&path==='/api/pairing/claim'){try{const value=await body(req);if(Object.keys(value).length!==1||typeof value.ticket!=='string')throw new Error('Invalid invitation.');reply(201,options.native.auth.claim(value.ticket));}catch{reply(400,{error:'Invalid, expired or used invitation.'});}return;}
     if(!path.startsWith('/api/') && path!=='/api') {
       if(!options.webRoot || !['GET','HEAD'].includes(req.method ?? '')) {reply(404,{error:'Unknown operation.'});return;}
       try {
@@ -34,16 +39,23 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
       }catch{reply(404,{error:'Not found.'});return;}
     }
     const supplied=Buffer.from(req.headers.authorization ?? ''); const expected=Buffer.from(`Bearer ${token}`);
-    if(supplied.length!==expected.length || !timingSafeEqual(supplied,expected)) {reply(401,{error:'Authentication required.'});return;}
+    const admin=supplied.length===expected.length&&timingSafeEqual(supplied,expected);
+    const client=!admin&&options.native?.auth.authenticate((req.headers.authorization?.startsWith('Bearer ')?req.headers.authorization.slice(7):''));
+    if(!admin&&!client){reply(401,{error:'Authentication required.'});return;}
+    if(!admin&&!(req.method==='GET'&&['/api/doctor','/api/reminders','/api/inbox'].includes(path))){reply(403,{error:'Read-only client.'});return;}
     try {
-      if(req.method==='GET' && path==='/api/reminders') reply(200,await store.list());
+      if(options.native&&admin&&req.method==='POST'&&path==='/api/pairing/tickets'){const value=await body(req);if(Object.keys(value).length!==1||typeof value.label!=='string')throw new Error('Invalid client label.');reply(201,{version:1,...options.native.auth.issue(value.label),runtimeId:options.native.auth.runtimeId,port:options.native.port,webPort:options.native.webPort,fingerprint:options.native.fingerprint});}
+      else if(options.native&&admin&&req.method==='GET'&&path==='/api/clients')reply(200,options.native.auth.clients());
+      else if(options.native&&admin&&req.method==='DELETE'&&path.startsWith('/api/clients/'))reply(options.native.auth.revoke(path.split('/').at(-1)!)?200:404,{message:'Revocation processed.'});
+      else if(req.method==='GET' && path==='/api/reminders') reply(200,await store.list());
       else if(req.method==='POST' && path==='/api/reminders') {const b=await body(req);if(typeof b.title!=='string'||typeof b.due!=='string') throw new Error('Title and due are required.');reply(201,await store.add(b.title,b.due));}
       else if(req.method==='DELETE' && /^\/api\/reminders\/[a-f0-9-]+$/.test(path)) reply((await store.cancel(path.split('/').at(-1)!))?200:404,{message:'Cancellation processed.'});
       else if(req.method==='GET' && path==='/api/inbox') reply(200,await store.inbox());
-      else if(req.method==='GET' && path==='/api/doctor') reply(200,{name:'Nodo',mode:'local-core',...await store.doctor(),remoteWorkers:'not implemented',providers:'not configured',language:options.language ?? 'it',timeZone:options.timeZone ?? 'Europe/Rome'});
+      else if(req.method==='GET' && path==='/api/doctor') reply(200,{name:'Nodo',mode:'local-core',...await store.doctor(),remoteWorkers:'not implemented',providers:'not configured',language:options.language ?? 'it',timeZone:options.timeZone ?? 'Europe/Rome',...(options.native?{runtimeId:options.native.auth.runtimeId}:{} )});
       else reply(404,{error:'Unknown operation.'});
     } catch(e) {reply(400,{error:e instanceof Error?e.message:'Invalid request.'});}
-  });
+  };
+  const server=options.tls?createHttpsServer({...options.tls,minVersion:'TLSv1.3'},listener):createServer(listener);
   const sockets=attachRpcSocket(server,store,token,options);
   const close=server.close.bind(server);
   server.close=(callback)=>{for(const client of sockets.clients)client.terminate();sockets.close();return close(callback);};

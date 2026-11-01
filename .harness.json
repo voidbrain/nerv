@@ -90,9 +90,41 @@
       "after": [
         "core"
       ]
+    },
+    {
+      "id": "native-app",
+      "when": [
+        "native/**",
+        "src/native-auth.ts",
+        "src/server.ts",
+        "src/config.ts",
+        "test/native*",
+        ".github/workflows/ci.yml"
+      ],
+      "then": "Validate backend pairing/TLS and run macOS Swift tests/app packaging; reconcile setup and lifecycle limits.",
+      "run": "npm test; swift test --package-path native/NodoMenuBar; sh native/build-app.sh",
+      "checked": "Linux backend tests plus macOS CI; live menu/Keychain/OS tests remain F-011/F-015",
+      "after": [
+        "core"
+      ]
     }
   ],
-  "couplings": [],
+  "couplings": [
+    {
+      "value": "Vertical wrapped-knot geometry",
+      "places": [
+        {
+          "file": "web/public/knot.svg",
+          "what": "Web SVG mark"
+        },
+        {
+          "file": "native/NodoMenuBar/Sources/NodoMenuBar/NodoMenuBar.swift",
+          "what": "Native monochrome menu template drawing"
+        }
+      ],
+      "kept": "Review both geometric renditions in branding changes; no automatic pixel equivalence claimed."
+    }
+  ],
   "outside": [
     {
       "what": "Node SQLite API and Angular dependencies",

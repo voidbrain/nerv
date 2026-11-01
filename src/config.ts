@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync, chmodSync } from 'n
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { randomBytes } from 'node:crypto';
-export interface Config {port:number; language:'it'|'en'; timeZone:string}
+export interface Config {port:number; language:'it'|'en'; timeZone:string;nativePort?:number}
 export const defaults: Config = {port:4317,language:'it',timeZone:'Europe/Rome'};
 export function dataHome():string {
   const home=resolve(process.env.NODO_HOME ?? join(homedir(),'.nodo'));
@@ -16,6 +16,8 @@ export function readConfig(home:string):Config {
   if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('Invalid config.json.');
   const raw={...defaults,...value};
   const config:Config={port:Number(process.env.NODO_PORT ?? raw.port),language:raw.language,timeZone:raw.timeZone};
+  if('nativePort' in raw){const native=Number(raw.nativePort);if(!Number.isInteger(native)||native<1||native>65535||native===config.port)throw new Error('Invalid native port.');config.nativePort=native;}
+  if(config.port===(config.nativePort ?? 4319))throw new Error('Web and native ports must differ.');
   if(!Number.isInteger(config.port)||config.port<1||config.port>65535)throw new Error('Invalid Nodo port.');
   if(!['it','en'].includes(config.language))throw new Error('Invalid language: use it or en.');
   if(typeof config.timeZone!=='string')throw new Error('Invalid timezone.');

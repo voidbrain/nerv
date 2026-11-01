@@ -3,11 +3,11 @@
     "kind": "rule",
     "disposition": "implemented",
     "target": "docs/agents/areas.md",
-    "evidence": "Project-specific process ownership, same-user isolation limit, method authorization and text-only surface rendering documented and tested; copied harness tools unchanged."
+    "evidence": "Nodo-specific pairing/TLS/verifier ownership, native CI versus live acceptance, root/client boundary and artifact limits documented with backend tests."
   },
   {
     "kind": "none",
     "disposition": "no-change",
-    "evidence": "Kept Node and Angular. Evaluated Agency Swarm concepts without a runtime dependency; overlay and coordinator failover are separate app decisions, not generic harness changes."
+    "evidence": "No copied harness tool or generic template rule changed; native credentials are a project runtime concern."
   }
 ]
