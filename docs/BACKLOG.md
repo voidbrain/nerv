@@ -370,7 +370,7 @@ Current work ledger, reviewed 1 November 2026 against main `2a8b901`. PR #1–#5
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #5](https://github.com/voidbrain/nodo/pull/5); Linux checks pass; macOS CI pending |
+| PR / evidence | [PR #5](https://github.com/voidbrain/nodo/pull/5) merged; Linux and macOS checks green; real OS acceptance remains pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -438,7 +438,7 @@ Current work ledger, reviewed 1 November 2026 against main `2a8b901`. PR #1–#5
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #3](https://github.com/voidbrain/nodo/pull/3); local checks and scoped audit pass; CI pending |
+| PR / evidence | [PR #3](https://github.com/voidbrain/nodo/pull/3) runtime; [PR #5](https://github.com/voidbrain/nodo/pull/5) bounded native feeds; [PR #6](https://github.com/voidbrain/nodo/pull/6) lightweight status, CI pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -506,7 +506,7 @@ Current work ledger, reviewed 1 November 2026 against main `2a8b901`. PR #1–#5
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #4](https://github.com/voidbrain/nodo/pull/4); backend checks pass; macOS CI pending |
+| PR / evidence | [PR #4](https://github.com/voidbrain/nodo/pull/4) merged; Linux and macOS checks green; live Keychain/rotation acceptance remains pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
