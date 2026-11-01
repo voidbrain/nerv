@@ -370,7 +370,7 @@ Current work ledger, reviewed 1 November 2026 against main `37398b6`. PR #1–#4
 
 | Field | Value |
 |---|---|
-| PR / evidence | Current native lifecycle branch; Linux checks pass; macOS CI pending |
+| PR / evidence | [PR #5](https://github.com/voidbrain/nodo/pull/5); Linux checks pass; macOS CI pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
