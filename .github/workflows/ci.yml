@@ -25,3 +25,32 @@ jobs:
       - run: npm run check:freshness
         env:
           HARNESS_HOME: ${{ runner.temp }}/project-harness
+
+  native-macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: swift build --package-path native/NodoMenuBar
+      - name: Native pairing and pinned TLS tests
+        shell: bash
+        run: |
+          export NODO_NATIVE_FIXTURE="$RUNNER_TEMP/nodo-native-invitation"
+          node test/native-fixture.ts &
+          fixture_pid=$!
+          trap 'kill "$fixture_pid" 2>/dev/null || true' EXIT
+          for attempt in {1..50}; do
+            test -s "$NODO_NATIVE_FIXTURE" && break
+            sleep 0.1
+          done
+          swift test --package-path native/NodoMenuBar
+      - run: sh native/build-app.sh
+      - run: ditto -c -k --sequesterRsrc --keepParent dist/Nodo.app dist/Nodo-macOS.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Nodo-macOS
+          path: dist/Nodo-macOS.zip

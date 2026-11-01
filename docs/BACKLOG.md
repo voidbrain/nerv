@@ -1,6 +1,6 @@
 # Nodo backlog
 
-Current work ledger, reviewed 1 November 2026 against main `718776f`. PR #1 and planning PR #2 merged after green checks; target-OS and browser acceptance remain pending. [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md).
+Current work ledger, reviewed 1 November 2026 against main `9248f10`. PR #1–#3 merged after green checks; target-OS and browser acceptance remain pending. [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md).
 
 ## Features and improvements
 
@@ -351,26 +351,26 @@ Current work ledger, reviewed 1 November 2026 against main `718776f`. PR #1 and 
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔺 P1 | Open | 🔴 Large | ~0% |
+| 🟡 | 🔺 P1 | Implemented | 🔴 Large | ~50% |
 
-💻 **→ Human action required: No**<br />Create a SwiftUI MenuBarExtra companion with authenticated local API pairing and independent service controls.
+💻 **→ Human action required: No**<br />Validate the native preview on macOS; add notifications, service controls, launch-at-login and signed/notarized distribution after the pairing/read path passes.
 
 | | |
 |---|---|
-| **Issue** | Approved native companion is planned. No Swift application ships in this step. |
+| **Issue** | SwiftUI menu-bar source, Keychain client storage, pinned TLS pairing, read-only reminders/status and local app packaging now exist. OS controls, notifications, login and distribution acceptance remain incomplete. |
 | **Reproduce** | Follow docs/INSTALL.md and the scoped headless implementation checks. |
 | **Check** | Build and package on macOS; health/reminders, workspace launch, doctor, notifications, launch-at-login; Quit companion leaves service running; Stop Nodo is separate. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Create a SwiftUI MenuBarExtra companion with authenticated local API pairing and independent service controls. Build and package on macOS; health/reminders, workspace launch, doctor, notifications, launch-at-login; Quit companion leaves service running; Stop Nodo is separate.
+**Next action / closure evidence:** Validate the native preview on macOS; add notifications, service controls, launch-at-login and signed/notarized distribution after the pairing/read path passes. Build and package on macOS; health/reminders, workspace launch, doctor, notifications, launch-at-login; Quit companion leaves service running; Stop Nodo is separate.
 
-**Estimates:** Large remaining effort; ~0% complete. Estimate dated 2026-11-01, not acceptance evidence.
+**Estimates:** Large remaining effort; ~50% complete. Estimate dated 2026-11-01, not acceptance evidence.
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #1](https://github.com/voidbrain/nodo/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
+| PR / evidence | Current native implementation branch; backend checks pass; macOS CI pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -487,26 +487,26 @@ Current work ledger, reviewed 1 November 2026 against main `718776f`. PR #1 and 
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔺 P1 | Open | 🔴 Large | ~0% |
+| 🟡 | 🔺 P1 | Implemented | 🔴 Large | ~70% |
 
-💻 **→ Human action required: No**<br />Implement short-lived single-use local pairing, per-client revocable scoped credentials and Keychain storage in the native companion.
+💻 **→ Human action required: No**<br />Validate pinned TLS/Keychain pairing on macOS and complete renewal/rotation recovery before closing native credential acceptance.
 
 | | |
 |---|---|
-| **Issue** | Design in runtime-boundaries; no pairing endpoint, Keychain integration or scoped client credential runtime yet. |
+| **Issue** | Backend single-use invitations, pinned TLS transport, separate hashed verifier storage and read-only revocable credentials are implemented; Swift Keychain/pinning source exists with macOS CI checks. Renewal/rotation and live native acceptance remain open. |
 | **Reproduce** | Follow docs/decisions/runtime-boundaries.md and the protocol/isolation test fixtures. |
 | **Check** | Expired/replayed tickets fail; credentials are bound to runtime identity; no tokens in URLs/argv/logs or Brain; revocation/rotation tested; native permissions remain explicit. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Implement short-lived single-use local pairing, per-client revocable scoped credentials and Keychain storage in the native companion. Expired/replayed tickets fail; credentials are bound to runtime identity; no tokens in URLs/argv/logs or Brain; revocation/rotation tested; native permissions remain explicit.
+**Next action / closure evidence:** Validate pinned TLS/Keychain pairing on macOS and complete renewal/rotation recovery before closing native credential acceptance. Expired/replayed tickets fail; credentials are bound to runtime identity; no tokens in URLs/argv/logs or Brain; revocation/rotation tested; native permissions remain explicit.
 
-**Estimates:** Large remaining effort; ~0% complete. Estimated 2026-11-01; not acceptance evidence.
+**Estimates:** Large remaining effort; ~70% complete. Estimated 2026-11-01; not acceptance evidence.
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #3](https://github.com/voidbrain/nodo/pull/3); local checks and scoped audit pass; CI pending |
+| PR / evidence | Current native implementation branch; backend checks pass; macOS CI pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |

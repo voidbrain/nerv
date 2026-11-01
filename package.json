@@ -20,7 +20,7 @@
     "check:integrations": "node tools/mcp.mjs check",
     "check:conventions": "node tools/check-conventions.mjs",
     "ci:status": "node tools/ci-status.mjs",
-    "test:headless": "node --test test/headless.integration.ts"
+    "test:headless": "node --test test/*.integration.ts"
   },
   "dependencies": {
     "@angular/common": "22.2.4",

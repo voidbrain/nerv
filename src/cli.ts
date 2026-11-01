@@ -5,14 +5,17 @@ import { Store } from './store.ts';
 import { makeServer } from './server.ts';
 import { dataHome, initialize, readConfig, readToken } from './config.ts';
 import { service } from './service.ts';
+import {initializeNativeTLS,loadNativeTLS,nativeAdmin,NativeAuth,type Invitation} from './native-auth.ts';
 import { Runtime } from './runtime.ts';
 const [command,...args]=process.argv.slice(2);
 let store:Store|undefined;let running=false;
 try {
   const home=dataHome();
   if(command==='init'){initialize(home);console.log(`Nodo configurato / configured: ${home}\nAccess token: ${join(home,'token')}`);}
+  else if(command==='native-init'){initialize(home);initializeNativeTLS(home);console.log('Native TLS configured. Restart Nodo, then run pair.');}
+  else if(['pair','clients','revoke'].includes(command ?? '')){const config=readConfig(home);const path=command==='pair'?'/api/pairing/tickets':command==='clients'?'/api/clients':'/api/clients/'+encodeURIComponent(args[0] ?? '');const value=await nativeAdmin(home,config.nativePort ?? 4319,readToken(home),path,command==='pair'?'POST':command==='revoke'?'DELETE':'GET',command==='pair'?{label:args[0] ?? 'Nodo Menu Bar'}:undefined);if(command==='pair'){const invitation=value as Invitation;console.log('Private invitation (expires in 2 minutes; paste only into Nodo companion):\n'+Buffer.from(JSON.stringify(invitation)).toString('base64url'));}else console.log(JSON.stringify(value,null,2));}
   else if(command==='service')service(args[0] ?? '',home);
-  else if(!command||command==='help')console.log('Nodo\nCommands: init | doctor | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | serve | service install|start|stop|status|uninstall');
+  else if(!command||command==='help')console.log('Nodo\nCommands: init | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | serve | service install|start|stop|status|uninstall');
   else {
     const config=readConfig(home);
     if(command!=='serve')store=new Store(join(home,'nodo.sqlite'));
@@ -27,14 +30,17 @@ try {
       case 'serve':{
         const webRoot=resolve(fileURLToPath(new URL('../dist/web/browser',import.meta.url)));
         if(!existsSync(join(webRoot,'index.html')))throw new Error('Frontend missing: run npm run build.');
-        const token=readToken(home);
+        const token=readToken(home);const nativeTLS=loadNativeTLS(home);
+        const nativeAuth=nativeTLS?new NativeAuth(home):undefined;
         const runtime=new Runtime(join(home,'nodo.sqlite'));
-        try{await runtime.ready();}catch(e){await runtime.close();throw e;}
-        const server=makeServer(runtime,token,{webRoot,...config});
-        let stopped=false;
-        const close=()=>{if(stopped)return;stopped=true;server.close(()=>void runtime.close());server.closeIdleConnections();};
+        try{await runtime.ready();}catch(e){await runtime.close();nativeAuth?.close();throw e;}
+        let server:ReturnType<typeof makeServer>;let native:ReturnType<typeof makeServer>|undefined;
+        try{server=makeServer(runtime,token,{webRoot,...config});native=nativeTLS&&nativeAuth?makeServer(runtime,token,{...config,tls:nativeTLS,native:{auth:nativeAuth,fingerprint:nativeTLS.fingerprint,port:config.nativePort ?? 4319,webPort:config.port}}):undefined;}catch(e){await runtime.close();nativeAuth?.close();throw e;}
+        const servers=native?[server,native]:[server];let stopped=false;
+        const close=()=>{if(stopped)return;stopped=true;void Promise.all(servers.map(s=>new Promise<void>(done=>{s.close(()=>done());s.closeIdleConnections();}))).then(()=>runtime.close()).finally(()=>nativeAuth?.close());};
         runtime.nervous.child.once('exit',()=>{if(!stopped){console.error('Scheduler unavailable; shutting down for supervisor recovery.');process.exitCode=1;close();}});
-        server.on('error',(e)=>{console.error(e.message);process.exitCode=1;stopped=true;void runtime.close();});
+        for(const listener of servers)listener.on('error',e=>{console.error(e.message);process.exitCode=1;close();});
+        if(native)await new Promise<void>((done,reject)=>{native.once('error',reject);native.listen(config.nativePort ?? 4319,'127.0.0.1',done);}).catch(e=>{close();throw e;});
         server.listen(config.port,'127.0.0.1',()=>console.log(`Nodo: http://127.0.0.1:${config.port} · ${config.language} · ${config.timeZone}`));running=true;
         process.once('SIGINT',close);process.once('SIGTERM',close);break;
       }

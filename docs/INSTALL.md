@@ -50,10 +50,10 @@ The backend remains bound to loopback. Remote TLS/Tailscale deployment, service 
 
 `npm run dev` uses **4318**, proxies API calls to **4317** and is only needed for editing the frontend. The installed service serves the production build directly on 4317. Port 4200 is not used.
 
-## Native menu-bar companion — planned
+## Native menu-bar companion — development preview
 
-macOS SwiftUI `MenuBarExtra`, without Electron. It will show health and reminders, open the workspace, provide notifications and doctor/service controls, and support launch at login. Quit companion must leave the service running; Stop Nodo must be a separate explicit action. Secure pairing, signed app packaging and actual macOS notification/service tests belong to F-011. No native app is shipped in this step.
+SwiftUI MenuBarExtra without Electron now includes pairing, Keychain storage, read-only status/reminders and a workspace shortcut. Run native-init, restart the daemon, then pair. Native TLS defaults to 4319; the web workspace remains 4317. Full commands, app build steps, revocation and limits are in [the native guide](../native/README.md). Notifications, start/stop controls, launch-at-login and distribution signing remain F-011. No native app is installed on this execution host.
 
 ## Isolated child lifecycle
 
-The same launchd/systemd definition starts the supervisor, which starts its two children. A CPU stall or failure in the execution boundary does not stop the scheduler. Scheduler death stops the gateway with failure so the OS supervisor can recover it. The authenticated API doctor reports process PIDs and execution-boundary availability; it does not claim model readiness. Child environment isolation avoids inheriting root/API tokens but does not sandbox processes running under your user. Do not run untrusted tools before the later execution policy/sandbox work. Local native WebSocket reads require an Authorization header; browser use of /rpc is rejected until ticket pairing exists.
+The same launchd/systemd definition starts the supervisor, which starts its two children. A CPU stall or failure in the execution boundary does not stop the scheduler. Scheduler death stops the gateway with failure so the OS supervisor can recover it. The authenticated API doctor reports process PIDs and execution-boundary availability; it does not claim model readiness. Child environment isolation avoids inheriting root/API tokens but does not sandbox processes running under your user. Do not run untrusted tools before the later execution policy/sandbox work. Local native WebSocket reads require an Authorization header; browser use of /rpc remains rejected. Native pairing uses a separate TLS REST flow; client-scoped WebSockets are not implemented.
