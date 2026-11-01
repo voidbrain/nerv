@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-10-31T23:55:02.509Z",
+  "reviewed": "2026-11-01T08:08:28.468Z",
   "policy": "7ce9883fd1bff25038076e9e36015a833c38e1378e1df68043f48a64635abad4",
   "inputs": {
     "AGENTS.md": "3e2734e445751da996684c6b8fe988a8b57dcc3456b5850e5be5ba80e7505f0b",
     "docs/BACKLOG-RULES.md": "829ba1b55add1a556b311782dea534f8bd39aa555d261e59d75b3545ec3a4dd5",
-    "docs/agents/areas.md": "d4027271ced3e008c15800d95131c1efc9815a17f79b65df9fa7eb77194e6052",
+    "docs/agents/areas.md": "208e9807b2aa320ba9f369e7ebf94b347c84391c4ece88059298774200080a46",
     "docs/agents/maintenance.md": "a7e93ce963ffab30b4592ee90bdd0e72d49ea1320f82df74f22c88f70899d899"
   },
   "measurements": {
     "samples": 1,
-    "latestAt": "2026-10-31T23:55:02.444Z",
+    "latestAt": "2026-11-01T08:08:28.408Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -40,7 +40,7 @@
         "durationMs": {
           "observed": 1,
           "missing": 0,
-          "median": 95071
+          "median": 580595
         },
         "conflicts": {
           "observed": 0,
@@ -65,12 +65,12 @@
       "kind": "rule",
       "disposition": "implemented",
       "target": "docs/agents/areas.md",
-      "evidence": "Nodo-specific headless lifecycle, private credentials, service-versus-companion ownership and locale limits now explicit; runtime tests cover joins. No copied tool or generic policy changed."
+      "evidence": "Project-specific process ownership, same-user isolation limit, method authorization and text-only surface rendering documented and tested; copied harness tools unchanged."
     },
     {
       "kind": "none",
       "disposition": "no-change",
-      "evidence": "Template v3.1.1 still current online; copied helpers retained. Reusable Node profile is an upstream gap tracked by F-001, not a dependency of this local step."
+      "evidence": "Kept Node and Angular. Evaluated Agency Swarm concepts without a runtime dependency; overlay and coordinator failover are separate app decisions, not generic harness changes."
     }
   ]
 }

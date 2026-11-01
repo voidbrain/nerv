@@ -10,7 +10,8 @@
       "ES2022",
       "DOM"
     ],
-    "types": []
+    "types": [],
+    "rewriteRelativeImportExtensions": true
   },
   "angularCompilerOptions": {
     "strictTemplates": true

@@ -13,10 +13,13 @@ test('one headless process serves UI and reminders, exits cleanly, and recovers 
   writeFileSync(join(home,'config.json'),JSON.stringify({port,language:'it',timeZone:'Europe/Rome'}));
   const headers={Authorization:'Bearer '+readToken(home),'Content-Type':'application/json'};const base=`http://127.0.0.1:${port}`;
   const first=await launch();assert.match(await(await fetch(base)).text(),/nodo-app/);
+  const health=await(await fetch(base+'/api/doctor',{headers})).json();const pids=[health.processes.nervous,health.processes.brain] as number[];assert.equal(new Set(pids).size,2);
   const due=new Date(Date.now()+1500).toISOString();assert.equal((await fetch(base+'/api/reminders',{method:'POST',headers,body:JSON.stringify({title:'Promemoria di prova',due})})).status,201);
-  await stop(first);child=undefined;
+  await stop(first);child=undefined;for(const pid of pids)assert.throws(()=>process.kill(pid,0));
   await new Promise(done=>setTimeout(done,1600));const second=await launch();
   assert.equal((await(await fetch(base+'/api/inbox',{headers})).json()).length,1);await stop(second);child=undefined;
   const third=await launch();assert.equal((await(await fetch(base+'/api/inbox',{headers})).json()).length,1);await stop(third);child=undefined;
- }finally{if(child){const exited=once(child,'exit');child.kill('SIGKILL');await exited;}rmSync(home,{recursive:true,force:true});}
+  const failing=await launch();const failureHealth=await(await fetch(base+'/api/doctor',{headers})).json();const exited=once(failing,'exit');process.kill(failureHealth.processes.nervous,'SIGKILL');const [failureCode]=await exited;assert.equal(failureCode,1);child=undefined;assert.throws(()=>process.kill(failureHealth.processes.brain,0));
+  const recovered=await launch();assert.equal((await(await fetch(base+'/api/inbox',{headers})).json()).length,1);await stop(recovered);child=undefined;
+ }finally{if(child&&child.exitCode===null&&child.signalCode===null){const exited=once(child,'exit');child.kill('SIGKILL');await exited;}rmSync(home,{recursive:true,force:true});}
 });

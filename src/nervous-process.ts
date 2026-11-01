@@ -1,0 +1,20 @@
+import { Store } from './store.ts';
+import { dispatchRpc,MAX_FRAME_BYTES } from './rpc.ts';
+const store=new Store(process.argv[2]!);
+store.tick();
+const timer=setInterval(()=>{try{store.tick();}catch{console.error('Nervous scheduler tick failed.');}},250);
+process.on('message',(value:unknown)=>{
+ if(Buffer.byteLength(JSON.stringify(value))>MAX_FRAME_BYTES){process.exitCode=1;stop();return;}
+ void dispatchRpc(value,(method,params)=>{
+  switch(method){
+   case 'runtime.ping':return {role:'nervous',pid:process.pid};
+   case 'runtime.doctor':return store.doctor();
+   case 'reminders.list':return store.list();
+   case 'reminders.add':try{return store.add(params.title as string,params.due as string);}catch{throw new Error('Invalid reminder.');}
+   case 'reminders.cancel':return store.cancel(params.id as string);
+   case 'inbox.list':return store.inbox();
+  }
+ }).then(reply=>{if(reply&&process.connected){if(Buffer.byteLength(JSON.stringify(reply))>MAX_FRAME_BYTES)process.send?.({jsonrpc:'2.0',id:reply.id,error:{code:-32005,message:'Response exceeds IPC bound; pagination required.'}});else process.send?.(reply);}}).catch(()=>{console.error('Nervous IPC failed.');});
+});
+let stopped=false;function stop(){if(stopped)return;stopped=true;clearInterval(timer);store.close();if(process.connected)process.disconnect();}
+process.on('disconnect',stop);process.once('SIGTERM',stop);process.once('SIGINT',stop);

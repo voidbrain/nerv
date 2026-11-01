@@ -12,7 +12,7 @@ npm start -- doctor
 npm start -- serve
 ```
 
-Open **http://127.0.0.1:4317**. `serve` now runs the scheduler, authenticated API and compiled Angular UI together. There is no Angular development server to keep open in this mode. Before installing a service, stop this foreground process with Ctrl-C to free the port.
+Open **http://127.0.0.1:4317**. `serve` supervises three processes: isolated SQLite/scheduler, an execution/health boundary and the API/static gateway. No model provider runs yet. There is no Angular development server to keep open in this mode. Before installing a service, stop this foreground process with Ctrl-C to free the port.
 
 Initialization creates `~/.nodo/config.json` and `~/.nodo/token` with private file permissions. Read the token locally to connect the UI; do not paste it into chat, a URL or a repository. The token stays in tab memory. Repeat initialization preserves configuration and credentials.
 
@@ -53,3 +53,7 @@ The backend remains bound to loopback. Remote TLS/Tailscale deployment, service 
 ## Native menu-bar companion — planned
 
 macOS SwiftUI `MenuBarExtra`, without Electron. It will show health and reminders, open the workspace, provide notifications and doctor/service controls, and support launch at login. Quit companion must leave the service running; Stop Nodo must be a separate explicit action. Secure pairing, signed app packaging and actual macOS notification/service tests belong to F-011. No native app is shipped in this step.
+
+## Isolated child lifecycle
+
+The same launchd/systemd definition starts the supervisor, which starts its two children. A CPU stall or failure in the execution boundary does not stop the scheduler. Scheduler death stops the gateway with failure so the OS supervisor can recover it. The authenticated API doctor reports process PIDs and execution-boundary availability; it does not claim model readiness. Child environment isolation avoids inheriting root/API tokens but does not sandbox processes running under your user. Do not run untrusted tools before the later execution policy/sandbox work. Local native WebSocket reads require an Authorization header; browser use of /rpc is rejected until ticket pairing exists.

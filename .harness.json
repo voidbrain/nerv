@@ -74,6 +74,22 @@
       "after": [
         "core"
       ]
+    },
+    {
+      "id": "protocol-surfaces",
+      "when": [
+        "src/rpc.ts",
+        "src/socket.ts",
+        "src/process-client.ts",
+        "shared/**",
+        "web/src/status-card.ts"
+      ],
+      "then": "Validate protocol/schema/graph security and rebuild the registered Web Component host.",
+      "run": "npm test && npm run build",
+      "checked": "Protocol/isolation/DOM fixtures; browser/remote acceptance stays explicit",
+      "after": [
+        "core"
+      ]
     }
   ],
   "couplings": [],
