@@ -16,7 +16,7 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
   const listener:RequestListener=async(req,res)=>{
     res.setHeader('Content-Type','application/json'); res.setHeader('Cache-Control','no-store'); res.setHeader('X-Content-Type-Options','nosniff');
     const reply=(status:number,value:unknown)=>{res.writeHead(status);res.end(JSON.stringify(value));};
-    const path=new URL(req.url ?? '/', 'http://localhost').pathname;
+    const url=new URL(req.url ?? '/', 'http://localhost');const path=url.pathname;
     if(options.native&&req.headers.origin){reply(403,{error:'Native clients only.'});return;}
     if(options.native&&req.method==='POST'&&path==='/api/pairing/claim'){try{const value=await body(req);if(Object.keys(value).length!==1||typeof value.ticket!=='string')throw new Error('Invalid invitation.');reply(201,options.native.auth.claim(value.ticket));}catch{reply(400,{error:'Invalid, expired or used invitation.'});}return;}
     if(!path.startsWith('/api/') && path!=='/api') {
@@ -42,16 +42,18 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
     const admin=supplied.length===expected.length&&timingSafeEqual(supplied,expected);
     const client=!admin&&options.native?.auth.authenticate((req.headers.authorization?.startsWith('Bearer ')?req.headers.authorization.slice(7):''));
     if(!admin&&!client){reply(401,{error:'Authentication required.'});return;}
-    if(!admin&&!(req.method==='GET'&&['/api/doctor','/api/reminders','/api/inbox'].includes(path))){reply(403,{error:'Read-only client.'});return;}
+    if(!admin&&!(req.method==='GET'&&['/api/doctor','/api/reminders','/api/reminders/pending','/api/inbox','/api/inbox/page'].includes(path))){reply(403,{error:'Read-only client.'});return;}
     try {
       if(options.native&&admin&&req.method==='POST'&&path==='/api/pairing/tickets'){const value=await body(req);if(Object.keys(value).length!==1||typeof value.label!=='string')throw new Error('Invalid client label.');reply(201,{version:1,...options.native.auth.issue(value.label),runtimeId:options.native.auth.runtimeId,port:options.native.port,webPort:options.native.webPort,fingerprint:options.native.fingerprint});}
       else if(options.native&&admin&&req.method==='GET'&&path==='/api/clients')reply(200,options.native.auth.clients());
       else if(options.native&&admin&&req.method==='DELETE'&&path.startsWith('/api/clients/'))reply(options.native.auth.revoke(path.split('/').at(-1)!)?200:404,{message:'Revocation processed.'});
+      else if(req.method==='GET'&&path==='/api/inbox/page'){if([...url.searchParams.keys()].some(k=>!['after','afterId','limit'].includes(k)))throw new Error('Unknown inbox query.');reply(200,await store.inboxPage(Number(url.searchParams.get('after') ?? 0),Number(url.searchParams.get('limit') ?? 5),url.searchParams.get('afterId') ?? undefined));}
+      else if(req.method==='GET'&&path==='/api/reminders/pending')reply(200,await store.pendingReminders());
       else if(req.method==='GET' && path==='/api/reminders') reply(200,await store.list());
       else if(req.method==='POST' && path==='/api/reminders') {const b=await body(req);if(typeof b.title!=='string'||typeof b.due!=='string') throw new Error('Title and due are required.');reply(201,await store.add(b.title,b.due));}
       else if(req.method==='DELETE' && /^\/api\/reminders\/[a-f0-9-]+$/.test(path)) reply((await store.cancel(path.split('/').at(-1)!))?200:404,{message:'Cancellation processed.'});
       else if(req.method==='GET' && path==='/api/inbox') reply(200,await store.inbox());
-      else if(req.method==='GET' && path==='/api/doctor') reply(200,{name:'Nodo',mode:'local-core',...await store.doctor(),remoteWorkers:'not implemented',providers:'not configured',language:options.language ?? 'it',timeZone:options.timeZone ?? 'Europe/Rome',...(options.native?{runtimeId:options.native.auth.runtimeId}:{} )});
+      else if(req.method==='GET' && path==='/api/doctor') reply(200,{name:'Nodo',mode:'local-core',...await store.doctor(),remoteWorkers:'not implemented',providers:'not configured',language:options.language ?? 'it',timeZone:options.timeZone ?? 'Europe/Rome',...(options.native?{runtimeId:options.native.auth.runtimeId,home:options.native.auth.home}:{} )});
       else reply(404,{error:'Unknown operation.'});
     } catch(e) {reply(400,{error:e instanceof Error?e.message:'Invalid request.'});}
   };

@@ -52,7 +52,7 @@ The backend remains bound to loopback. Remote TLS/Tailscale deployment, service 
 
 ## Native menu-bar companion — development preview
 
-SwiftUI MenuBarExtra without Electron now includes pairing, Keychain storage, read-only status/reminders and a workspace shortcut. Run native-init, restart the daemon, then pair. Native TLS defaults to 4319; the web workspace remains 4317. Full commands, app build steps, revocation and limits are in [the native guide](../native/README.md). Notifications, start/stop controls, launch-at-login and distribution signing remain F-011. No native app is installed on this execution host.
+SwiftUI MenuBarExtra without Electron now includes pairing, Keychain storage, read-only status/reminders and a workspace shortcut. Run native-init, restart the daemon, then pair. Native TLS defaults to 4319; the web workspace remains 4317. Full commands, app build steps, revocation and limits are in [the native guide](../native/README.md). Notifications, guarded start/stop controls and companion launch-at-login selection are now implemented; distribution signing and actual OS permission/login/menu checks remain F-011. No native app is installed on this execution host.
 
 ## Isolated child lifecycle
 

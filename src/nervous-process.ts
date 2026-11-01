@@ -10,9 +10,11 @@ process.on('message',(value:unknown)=>{
    case 'runtime.ping':return {role:'nervous',pid:process.pid};
    case 'runtime.doctor':return store.doctor();
    case 'reminders.list':return store.list();
+   case 'reminders.pending':return store.pendingReminders();
    case 'reminders.add':try{return store.add(params.title as string,params.due as string);}catch{throw new Error('Invalid reminder.');}
    case 'reminders.cancel':return store.cancel(params.id as string);
    case 'inbox.list':return store.inbox();
+   case 'inbox.page':return store.inboxPage(params.after as number|undefined,params.limit as number|undefined,params.afterId as string|undefined);
   }
  }).then(reply=>{if(reply&&process.connected){if(Buffer.byteLength(JSON.stringify(reply))>MAX_FRAME_BYTES)process.send?.({jsonrpc:'2.0',id:reply.id,error:{code:-32005,message:'Response exceeds IPC bound; pagination required.'}});else process.send?.(reply);}}).catch(()=>{console.error('Nervous IPC failed.');});
 });
