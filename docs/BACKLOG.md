@@ -1,6 +1,6 @@
 # Nodo backlog
 
-Reviewed 1 November 2026 against main `47876c9`. PR #1 merged after both head checks passed; target-OS and browser acceptance remain pending. [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md).
+Current work ledger, reviewed 1 November 2026 against main `47876c9`. PR #1 merged after both head checks passed; target-OS and browser acceptance remain pending. [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md).
 
 ## Features and improvements
 
