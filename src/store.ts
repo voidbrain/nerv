@@ -57,6 +57,7 @@ export class Store {
       this.db.exec('COMMIT');return {items,head,next,reset:false};
     }catch(e){this.db.exec('ROLLBACK');throw e;}
   }
+  health() { return {integrityCheck:"not-run"}; }
   doctor() { return {database:this.db.prepare('PRAGMA quick_check').get(),schema:this.db.prepare('PRAGMA user_version').get(),pending:this.db.prepare('SELECT count(*) AS count FROM reminders WHERE delivered IS NULL AND cancelled IS NULL').get()}; }
   close() { this.db.close(); }
 }

@@ -42,7 +42,7 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
     const admin=supplied.length===expected.length&&timingSafeEqual(supplied,expected);
     const client=!admin&&options.native?.auth.authenticate((req.headers.authorization?.startsWith('Bearer ')?req.headers.authorization.slice(7):''));
     if(!admin&&!client){reply(401,{error:'Authentication required.'});return;}
-    if(!admin&&!(req.method==='GET'&&['/api/doctor','/api/reminders','/api/reminders/pending','/api/inbox','/api/inbox/page'].includes(path))){reply(403,{error:'Read-only client.'});return;}
+    if(!admin&&!(req.method==='GET'&&['/api/status','/api/doctor','/api/reminders','/api/reminders/pending','/api/inbox','/api/inbox/page'].includes(path))){reply(403,{error:'Read-only client.'});return;}
     try {
       if(options.native&&admin&&req.method==='POST'&&path==='/api/pairing/tickets'){const value=await body(req);if(Object.keys(value).length!==1||typeof value.label!=='string')throw new Error('Invalid client label.');reply(201,{version:1,...options.native.auth.issue(value.label),runtimeId:options.native.auth.runtimeId,port:options.native.port,webPort:options.native.webPort,fingerprint:options.native.fingerprint});}
       else if(options.native&&admin&&req.method==='GET'&&path==='/api/clients')reply(200,options.native.auth.clients());
@@ -53,6 +53,7 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
       else if(req.method==='POST' && path==='/api/reminders') {const b=await body(req);if(typeof b.title!=='string'||typeof b.due!=='string') throw new Error('Title and due are required.');reply(201,await store.add(b.title,b.due));}
       else if(req.method==='DELETE' && /^\/api\/reminders\/[a-f0-9-]+$/.test(path)) reply((await store.cancel(path.split('/').at(-1)!))?200:404,{message:'Cancellation processed.'});
       else if(req.method==='GET' && path==='/api/inbox') reply(200,await store.inbox());
+      else if(req.method==='GET' && path==='/api/status')reply(200,{name:'Nodo',mode:'local-core',...await store.health(),language:options.language ?? 'it',timeZone:options.timeZone ?? 'Europe/Rome',...(options.native?{runtimeId:options.native.auth.runtimeId,home:options.native.auth.home}:{})});
       else if(req.method==='GET' && path==='/api/doctor') reply(200,{name:'Nodo',mode:'local-core',...await store.doctor(),remoteWorkers:'not implemented',providers:'not configured',language:options.language ?? 'it',timeZone:options.timeZone ?? 'Europe/Rome',...(options.native?{runtimeId:options.native.auth.runtimeId,home:options.native.auth.home}:{} )});
       else reply(404,{error:'Unknown operation.'});
     } catch(e) {reply(400,{error:e instanceof Error?e.message:'Invalid request.'});}
