@@ -370,7 +370,7 @@ Current work ledger, reviewed 1 November 2026 against main `9248f10`. PR #1–#3
 
 | Field | Value |
 |---|---|
-| PR / evidence | Current native implementation branch; backend checks pass; macOS CI pending |
+| PR / evidence | [PR #4](https://github.com/voidbrain/nodo/pull/4); backend checks pass; macOS CI pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -506,7 +506,7 @@ Current work ledger, reviewed 1 November 2026 against main `9248f10`. PR #1–#3
 
 | Field | Value |
 |---|---|
-| PR / evidence | Current native implementation branch; backend checks pass; macOS CI pending |
+| PR / evidence | [PR #4](https://github.com/voidbrain/nodo/pull/4); backend checks pass; macOS CI pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
