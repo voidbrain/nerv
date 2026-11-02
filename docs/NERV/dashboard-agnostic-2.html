@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nodo — Operations Control</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap");
+    :root {
+      --bg:#0b0c10; --panel:#12141a; --border:#2a2e3a; --text:#e6e8ee; --muted:#8b93a7;
+      --accent:#3b82f6; --ok:#22c55e; --warn:#f59e0b; --danger:#ef4444;
+      --blue:#38bdf8; --orange:#f59e0b; --red:#ef4444;
+      --hdr-bg:transparent; --hdr-fg:var(--muted); --radius:6px;
+      --font:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+    }
+    body.theme-light {
+      --bg:#f4f5f7; --panel:#ffffff; --border:#d8dde8; --text:#1a1d26; --muted:#5c657a; --accent:#2563eb;
+    }
+    body.theme-terminal {
+      --bg:#0a0f0a; --panel:#0f1a0f; --border:#1f3d1f; --text:#b6f5b6; --muted:#6a9a6a; --accent:#4ade80;
+      --ok:#4ade80; --warn:#facc15; --danger:#f87171;
+    }
+    body.theme-eva-basic, body.theme-eva-full {
+      --bg:#050508; --panel:#0d0d12; --border:rgba(255,102,0,0.4);
+      --text:#ffaa66; --muted:#a67c52; --accent:#ff6600;
+      --ok:#22c55e; --warn:#ffcc00; --danger:#ff0033;
+      --blue:#0099ff; --orange:#ff6600; --red:#ff0033;
+      --hdr-bg:#ff6600; --hdr-fg:#000; --radius:0;
+      --font:"Share Tech Mono",ui-monospace,monospace;
+    }
+    body.theme-eva-basic { --bg:#08080c; --panel:#100e12; --radius:2px; }
+    body { background:var(--bg); color:var(--text); font-family:var(--font); font-size:12px; }
+    body.theme-eva-full.crt-on {
+      background-image:radial-gradient(rgba(255,102,0,0.04) 1px,transparent 0),
+        linear-gradient(to bottom,rgba(0,0,0,0) 50%,rgba(0,0,0,0.28) 51%);
+      background-size:24px 24px,100% 4px;
+    }
+    body.theme-eva-full.crt-on::after {
+      content:""; position:fixed; inset:0; pointer-events:none; z-index:50;
+      background:linear-gradient(rgba(18,16,16,0) 50%,rgba(0,0,0,0.22) 50%);
+      background-size:100% 4px;
+    }
+    .panel { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); }
+    body.theme-eva-full .panel { box-shadow:inset 0 0 14px rgba(255,102,0,0.07); }
+    .hdr {
+      font-weight:700; letter-spacing:0.1em; text-transform:uppercase; font-size:10px;
+      color:var(--hdr-fg); background:var(--hdr-bg); border-bottom:1px solid var(--border);
+      padding:5px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px;
+    }
+    body.theme-eva-basic .hdr, body.theme-eva-full .hdr { letter-spacing:0.14em; }
+    .btn {
+      border:1px solid var(--border); background:transparent; color:var(--text);
+      padding:4px 8px; border-radius:calc(var(--radius)); font-size:11px; cursor:pointer; letter-spacing:0.04em;
+    }
+    .btn:hover { border-color:var(--accent); color:var(--accent); }
+    .btn.active, .btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+    body.theme-terminal .btn.active, body.theme-terminal .btn.primary,
+    body.theme-eva-basic .btn.active, body.theme-eva-basic .btn.primary,
+    body.theme-eva-full .btn.active, body.theme-eva-full .btn.primary { color:#000; }
+    .btn.danger { border-color:var(--danger); color:var(--danger); }
+    .btn.danger:hover { background:var(--danger); color:#fff; }
+    .badge { font-size:9px; padding:1px 6px; border-radius:999px; font-weight:700; letter-spacing:0.04em; }
+    body.theme-eva-basic .badge, body.theme-eva-full .badge { border-radius:2px; }
+    .badge-blue { background:color-mix(in srgb,var(--blue) 18%,transparent); color:var(--blue); }
+    .badge-orange { background:color-mix(in srgb,var(--orange) 18%,transparent); color:var(--orange); }
+    .badge-red { background:color-mix(in srgb,var(--red) 18%,transparent); color:var(--red); }
+    .badge-ok { background:color-mix(in srgb,var(--ok) 18%,transparent); color:var(--ok); }
+    .badge-muted { background:color-mix(in srgb,var(--muted) 18%,transparent); color:var(--muted); }
+    .badge-warn { background:color-mix(in srgb,var(--warn) 18%,transparent); color:var(--warn); }
+    .stage {
+      border:1px dashed var(--border); padding:6px 8px; border-radius:var(--radius);
+      color:var(--muted); text-align:center; transition:.15s;
+    }
+    .stage.active {
+      border-style:solid; border-color:var(--accent); color:var(--text);
+      background:color-mix(in srgb,var(--accent) 12%,transparent); font-weight:700;
+    }
+    .stage.done { border-style:solid; border-color:var(--ok); color:var(--ok); }
+    .row { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .muted { color:var(--muted); }
+    .ok { color:var(--ok); }
+    .warn { color:var(--warn); }
+    .danger { color:var(--danger); }
+    .log {
+      background:color-mix(in srgb,var(--bg) 80%,#000); border:1px solid var(--border);
+      border-radius:var(--radius); padding:8px; height:160px; overflow-y:auto;
+      font-size:11px; line-height:1.45;
+    }
+    .log .ts { color:var(--muted); margin-right:6px; }
+    input, select {
+      background:var(--bg); border:1px solid var(--border); color:var(--text);
+      border-radius:var(--radius); padding:4px 8px; font-size:11px;
+    }
+    input:focus, select:focus { outline:1px solid var(--accent); }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
+    body.theme-eva-full .blink { animation:blink 1.2s infinite ease-in-out; }
+    .brand-mark { font-weight:900; letter-spacing:0.12em; font-size:13px; }
+    body.theme-eva-basic .brand-mark, body.theme-eva-full .brand-mark {
+      background:var(--accent); color:#000; padding:2px 8px; letter-spacing:0.16em;
+    }
+    .avatar {
+      width:28px; height:28px; border:1px solid var(--border);
+      display:flex; align-items:center; justify-content:center;
+      font-size:9px; font-weight:700; flex-shrink:0; background:var(--bg);
+    }
+    body.theme-eva-basic .avatar, body.theme-eva-full .avatar { border-color:var(--accent); color:var(--accent); }
+    .pipe-line { width:1px; height:8px; background:var(--border); margin:0 auto; }
+    .chip {
+      display:inline-flex; align-items:center; gap:4px;
+      border:1px solid var(--border); padding:2px 6px; font-size:9px; font-weight:700;
+      border-radius:var(--radius); background:color-mix(in srgb,var(--bg) 60%,transparent);
+    }
+    .chip .dot { width:6px; height:6px; border-radius:50%; background:var(--muted); }
+    .chip.online .dot { background:var(--ok); }
+    .chip.standby .dot { background:var(--warn); }
+    .chip.offline .dot { background:#555; }
+    .chip.jit { border-style:dashed; }
+    .chip.remote { border-color:var(--blue); }
+
+    /* banners */
+    .banner {
+      border:1px solid var(--border); padding:6px 10px; font-size:11px;
+      display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between;
+    }
+    .banner.shadow { border-color:var(--warn); background:color-mix(in srgb,var(--warn) 10%,transparent); }
+    .banner.dummy { border-color:var(--danger); background:color-mix(in srgb,var(--danger) 12%,transparent); }
+    .banner.seel { border-color:var(--muted); }
+
+    /* MAGI SVG */
+    .magi-triangle { display:none; width:100%; max-width:400px; margin:0 auto; padding:6px 4px 2px; }
+    body.theme-eva-full .magi-triangle { display:block; }
+    body.theme-eva-full .magi-plain { display:none !important; }
+    .magi-row-top { display:flex; justify-content:center; margin-bottom:8px; }
+    .magi-row-bot { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .magi-svg-panel { position:relative; width:100%; height:112px; }
+    .magi-svg-panel.top { height:122px; max-width:300px; margin:0 auto; }
+    .magi-svg-panel svg { position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
+    .magi-svg-panel .magi-body {
+      position:absolute; inset:0; display:flex; flex-direction:column;
+      align-items:center; justify-content:center; text-align:center;
+      pointer-events:none; z-index:1; padding:6px 12px 16px;
+    }
+    .magi-svg-panel .name { font-size:10px; font-weight:900; letter-spacing:0.12em; }
+    .magi-svg-panel .val { font-size:17px; font-weight:900; margin-top:2px; letter-spacing:0.1em; }
+    .magi-svg-panel .role { font-size:13px; font-weight:700; color:var(--text); margin-top:2px; letter-spacing:0.14em; }
+    .magi-svg-panel .role .en { font-size:8px; font-weight:400; color:var(--muted); letter-spacing:0.04em; display:block; margin-top:1px; }
+    .magi-svg-panel .host { font-size:8px; color:var(--muted); margin-top:2px; }
+    .magi-svg-panel .metrics {
+      display:flex; gap:6px; justify-content:center; flex-wrap:wrap;
+      margin-top:3px; font-size:9px; font-weight:700;
+    }
+    .magi-svg-panel .metrics span { color:var(--muted); }
+    .magi-svg-panel .metrics b { color:var(--text); font-weight:900; }
+    .magi-svg-panel[data-status="approve"] svg polygon { stroke:#22c55e; fill:#02120a; }
+    .magi-svg-panel[data-status="reject"] svg polygon { stroke:#ff0033; fill:#1a0008; }
+    .magi-svg-panel[data-status="pending"] svg polygon { stroke:#ffcc00; fill:#1a1400; }
+    .magi-svg-panel[data-status="skip"] svg polygon,
+    .magi-svg-panel[data-status="—"] svg polygon { stroke:#555; fill:#0a0a0e; }
+    .magi-svg-panel[data-status="approve"] .name,
+    .magi-svg-panel[data-status="approve"] .val { color:#22c55e !important; }
+    .magi-svg-panel[data-status="reject"] .name,
+    .magi-svg-panel[data-status="reject"] .val { color:#ff0033 !important; }
+    .magi-svg-panel[data-status="pending"] .name,
+    .magi-svg-panel[data-status="pending"] .val { color:#ffcc00 !important; }
+
+    /* EVA only / non-eva */
+    .eva-bay { display:none; }
+    body.theme-eva-full .eva-bay { display:block; }
+    .eva-only { display:none !important; }
+    body.theme-eva-full .eva-only { display:block !important; }
+    .non-eva-only { display:block; }
+    body.theme-eva-full .non-eva-only { display:none !important; }
+    .eva-bay-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
+    .eva-slot {
+      border:1px solid rgba(255,102,0,0.4); background:#0a0a0e; padding:5px;
+      display:flex; flex-direction:column; gap:3px; min-width:0;
+      box-shadow:inset 0 0 12px rgba(255,102,0,0.06);
+    }
+    .eva-slot-head { display:flex; align-items:center; justify-content:space-between; gap:4px; }
+    .eva-unit { font-weight:900; letter-spacing:0.08em; font-size:10px; color:var(--accent); }
+    .eva-status { font-size:8px; font-weight:700; }
+    .eva-art {
+      width:100%; height:52px; background:#050508; border:1px solid rgba(255,102,0,0.25);
+      display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative;
+    }
+    .eva-art img { width:100%; height:100%; object-fit:contain; }
+    .eva-art .fallback { display:none; font-size:9px; font-weight:900; color:var(--muted); }
+    .eva-pilot-line { font-size:9px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .eva-pilot-line .meta { color:var(--muted); font-weight:400; font-size:8px; }
+    .eva-sync-canvas { width:100%; height:26px; display:block; background:#000; border:1px solid rgba(255,102,0,0.3); }
+    .eva-sync-label { font-size:8px; font-weight:700; display:flex; justify-content:space-between; }
+
+    #syncCanvas, #globeCanvas {
+      width:100%; display:block; background:#000; border:1px solid var(--border);
+    }
+    .jp { opacity:0.85; font-size:9px; letter-spacing:0.08em; }
+    body:not(.theme-eva-basic):not(.theme-eva-full) .jp-only { display:none !important; }
+
+    .flow-step {
+      border:1px solid var(--border); padding:4px 6px; font-size:9px; text-align:center;
+      color:var(--muted); min-width:0;
+    }
+    .flow-step.on { border-color:var(--accent); color:var(--text); background:color-mix(in srgb,var(--accent) 12%,transparent); font-weight:700; }
+    .flow-step.done { border-color:var(--ok); color:var(--ok); }
+    .flow-arrow { color:var(--muted); font-size:10px; align-self:center; }
+
+    .meter {
+      height:6px; background:#111; border:1px solid var(--border); position:relative; overflow:hidden;
+    }
+    .meter > i { display:block; height:100%; background:var(--ok); }
+    .meter.warn > i { background:var(--warn); }
+    .meter.danger > i { background:var(--danger); }
+
+    .token-card {
+      border:1px dashed var(--border); padding:6px 8px; font-size:10px;
+      background:color-mix(in srgb,var(--bg) 70%,transparent);
+    }
+    .token-card.live { border-style:solid; border-color:var(--ok); }
+    .token-card.revoked { border-color:var(--danger); opacity:0.75; }
+
+    ::-webkit-scrollbar { width:5px; height:5px; }
+    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+  </style>
+</head>
+<body class="p-3">
+  <div class="max-w-[1680px] mx-auto flex flex-col gap-2 min-h-screen">
+
+    <!-- SHADOW / NOT ARMED -->
+    <div id="shadow-banner" class="banner shadow panel">
+      <div>
+        <strong id="arm-label">SHADOW UI · NOT ARMED</strong>
+        <span class="muted"> — risk buttons, MAGI votes, Spear and HITL are local simulation until bound to Nodo API</span>
+      </div>
+      <div class="flex gap-2 items-center">
+        <span class="badge badge-warn" id="arm-badge">SIM</span>
+        <button class="btn" onclick="toggleArmed()">Toggle arm (demo)</button>
+      </div>
+    </div>
+
+    <!-- DUMMY PLUG banner (hidden unless active) -->
+    <div id="dummy-banner" class="banner dummy panel hidden">
+      <div>
+        <strong>DUMMY PLUG ACTIVE</strong>
+        <span class="muted" id="dummy-reason"> — model/API path unavailable · deterministic fallback</span>
+      </div>
+      <button class="btn" onclick="clearDummy()">Clear</button>
+    </div>
+
+    <!-- HEADER -->
+    <header class="panel px-3 py-2 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="brand-mark" data-i18n="brand">NODO</div>
+        <div>
+          <div class="text-[11px] font-bold tracking-wider" data-i18n="tagline">Operations · local-first agent</div>
+          <div class="jp jp-only text-[9px] muted">特務機関NERV · 中央作戦司令部 · GEOFRONT</div>
+        </div>
+        <span id="api-status" class="badge badge-warn">API UNBOUND</span>
+      </div>
+      <div class="flex items-center gap-2 flex-wrap">
+        <label class="muted text-[10px]" data-i18n="node">NODE</label>
+        <select id="node-select" onchange="onNodeChange(this.value)">
+          <option value="local-mac">TOKYO-3 (coordinator)</option>
+          <option value="mini-pc">NERV-01 (worker)</option>
+          <option value="edge-pi">NERV-02 (worker)</option>
+        </select>
+        <select id="theme-select" onchange="setTheme(this.value)">
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+          <option value="terminal">Terminal</option>
+          <option value="eva-basic">EVA Basic</option>
+          <option value="eva-full">EVA Full</option>
+        </select>
+        <button id="crt-btn" class="btn hidden" onclick="toggleCrt()">CRT</button>
+        <div class="text-right text-[10px] leading-tight">
+          <div id="clock" class="font-bold"></div>
+          <div id="health-line" class="ok" data-i18n="health">healthy · reminders ok</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- SEELE policy strip -->
+    <div class="banner seel panel">
+      <div class="flex flex-wrap gap-3 items-center">
+        <span class="font-bold text-[10px] tracking-wider">SEELE · POLICY</span>
+        <span class="muted text-[10px]">pack <b id="seel-pack">seel-2026.11.01</b></span>
+        <span class="chip"><span class="dot" style="background:var(--ok)"></span> Blue auto ≤ read</span>
+        <span class="chip"><span class="dot" style="background:var(--warn)"></span> Orange needs 2/3</span>
+        <span class="chip"><span class="dot" style="background:var(--danger)"></span> Red never auto</span>
+        <span class="chip">experts cannot grant Red</span>
+      </div>
+      <span class="muted text-[9px]">deny: shell unrestricted · outbound unscoped secret</span>
+    </div>
+
+    <main class="grid grid-cols-12 gap-2 flex-1">
+
+      <!-- ========== LEFT ========== -->
+      <section class="col-span-12 lg:col-span-3 flex flex-col gap-2">
+
+        <div class="panel">
+          <div class="hdr">
+            <span data-i18n="risk">Task risk</span>
+            <span class="muted" data-i18n="router">router · Gendo</span>
+          </div>
+          <div class="p-2 space-y-1.5">
+            <button onclick="submitDemo('blue')" class="btn w-full row">
+              <span><strong style="color:var(--blue)">BLUE</strong>
+                <span class="muted" data-i18n="blue-desc">read-only / routine</span></span>
+              <span class="badge badge-blue">AUTO</span>
+            </button>
+            <button onclick="submitDemo('orange')" class="btn w-full row">
+              <span><strong style="color:var(--orange)">ORANGE</strong>
+                <span class="muted" data-i18n="orange-desc">bounded transform</span></span>
+              <span class="badge badge-orange" data-i18n="council-badge">MAGI±EXP</span>
+            </button>
+            <button onclick="submitDemo('red')" class="btn w-full row">
+              <span><strong style="color:var(--red)">RED</strong>
+                <span class="muted" data-i18n="red-desc">mutation / privileged</span></span>
+              <span class="badge badge-red">HITL</span>
+            </button>
+            <button onclick="triggerDummy()" class="btn w-full text-[10px]">Simulate Dummy Plug failure</button>
+            <button onclick="rollback()" class="btn danger w-full mt-1" data-i18n="rollback">Spear · revoke last grant</button>
+          </div>
+        </div>
+
+        <!-- Committee seats this job -->
+        <div class="panel">
+          <div class="hdr">
+            <span>Committee this job</span>
+            <span class="muted text-[9px]" id="committee-mode">idle</span>
+          </div>
+          <div class="p-2 flex flex-wrap gap-1.5" id="committee-chips">
+            <span class="muted text-[10px]">No active ballot</span>
+          </div>
+        </div>
+
+        <!-- A.T. Field token -->
+        <div class="panel">
+          <div class="hdr">
+            <span>A.T. Field · capability</span>
+            <span id="token-state" class="badge badge-muted">NONE</span>
+          </div>
+          <div class="p-2 space-y-1.5" id="token-box">
+            <div class="token-card muted">No live grant · issue after promote</div>
+          </div>
+        </div>
+
+        <!-- System promote confidence -->
+        <div class="panel">
+          <div class="hdr">
+            <span data-i18n="active-job">Active job</span>
+            <span id="job-id" class="muted">—</span>
+          </div>
+          <div class="p-2 text-[11px] space-y-1" id="job-box">
+            <div class="muted">No active job</div>
+          </div>
+          <div class="px-2 pb-2">
+            <div class="row mb-1">
+              <span class="text-[10px] muted">Promote confidence <span class="jp-only">(not pilot sync)</span></span>
+              <span id="confidence-label" class="ok font-bold text-[11px]">0.94 · OK</span>
+            </div>
+            <canvas id="syncCanvas" class="eva-only" height="52"></canvas>
+            <div class="non-eva-only mt-1">
+              <input id="confidence-slider" type="range" min="0" max="100" value="94" class="w-full"
+                style="accent-color:var(--accent)" oninput="setConfidence(this.value/100)" />
+              <div class="row mt-0.5 text-[9px] muted"><span>0</span><span>≥ 0.80 promote</span><span>1.0</span></div>
+            </div>
+            <div class="row mt-1 text-[9px] muted eva-only">
+              <span>promote ≥ 0.80</span><span>HITL if &lt; 0.80 / RED</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cost -->
+        <div class="panel">
+          <div class="hdr"><span>Cost</span><span class="muted" id="cost-total">$0.000</span></div>
+          <div class="p-2 text-[10px] space-y-1" id="cost-box">
+            <div class="row"><span class="muted">Blue jobs</span><span id="cost-blue">$0</span></div>
+            <div class="row"><span class="muted">Orange + MAGI</span><span id="cost-orange">$0</span></div>
+            <div class="row"><span class="muted">Red + HITL</span><span id="cost-red">$0</span></div>
+            <div class="row"><span class="muted">Melchior seat</span><span id="cost-m1">$0</span></div>
+            <div class="row"><span class="muted">Balthasar seat</span><span id="cost-m2">$0</span></div>
+            <div class="row"><span class="muted">Casper seat</span><span id="cost-m3">$0</span></div>
+          </div>
+        </div>
+
+        <div class="panel flex-1">
+          <div class="hdr">
+            <span data-i18n="doctor">Doctor</span>
+            <button class="btn" onclick="runDoctor()">Run</button>
+          </div>
+          <div class="p-2 text-[11px] space-y-1">
+            <div class="row"><span>Scheduler</span><span class="ok" id="doc-sched">ok</span></div>
+            <div class="row"><span>SQLite / Dogma</span><span class="ok" id="doc-db">ok</span></div>
+            <div class="row"><span>Gateway</span><span class="ok" id="doc-gw">ok</span></div>
+            <div class="row"><span>Mesh</span><span class="ok" id="doc-mesh">ok</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== CENTER ========== -->
+      <section class="col-span-12 lg:col-span-6 flex flex-col gap-2">
+
+        <!-- Decision timeline -->
+        <div class="panel">
+          <div class="hdr">
+            <span>Decision timeline</span>
+            <span class="muted text-[9px]">Ingress → Gendo → MAGI → Experts → Token → EVA → Dogma</span>
+          </div>
+          <div class="p-2 flex flex-wrap gap-1 items-stretch" id="flow-timeline">
+            <div class="flow-step" id="flow-ingress">1 Ingress</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step" id="flow-gendo">2 Gendo</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step" id="flow-magi">3 MAGI</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step" id="flow-experts">4 Experts</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step" id="flow-ritsuko">5 Sync/Token</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step" id="flow-hitl">HITL</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step" id="flow-eva">6 EVA</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step" id="flow-dogma">7 Dogma</div>
+          </div>
+          <div class="px-2 pb-2 text-[10px] muted" id="flow-detail">Idle · no job in flight</div>
+        </div>
+
+        <!-- MAGI + roster -->
+        <div class="grid grid-cols-12 gap-2">
+          <div class="col-span-12 md:col-span-8 panel">
+            <div class="hdr">
+              <span data-i18n="council">MAGI council</span>
+              <span id="council-summary" class="muted">idle · Blue skips full ballot</span>
+            </div>
+            <div class="magi-plain p-2 grid grid-cols-3 gap-2">
+              <div class="panel p-2 text-center">
+                <div class="muted text-[10px] mb-1">SAFETY</div>
+                <div class="font-bold text-sm" id="check-safety-val">—</div>
+              </div>
+              <div class="panel p-2 text-center">
+                <div class="muted text-[10px] mb-1">POLICY</div>
+                <div class="font-bold text-sm" id="check-policy-val">—</div>
+              </div>
+              <div class="panel p-2 text-center">
+                <div class="muted text-[10px] mb-1">INTENT</div>
+                <div class="font-bold text-sm" id="check-intent-val">—</div>
+              </div>
+            </div>
+            <div class="magi-triangle">
+              <div class="magi-row-top">
+                <div class="magi-svg-panel top" id="magi-panel-casper" data-status="—">
+                  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <polygon points="0,0 100,0 100,68 84,100 16,100 0,68"
+                      fill="#1a0008" stroke="#ff0033" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
+                  </svg>
+                  <div class="magi-body">
+                    <div class="name" style="color:var(--danger)">CASPER · 3</div>
+                    <div class="val" id="check-intent-val-m">—</div>
+                    <div class="role">意図<span class="en">intent · ethics</span></div>
+                    <div class="host" id="magi-casper-host">@ NERV-02 · Claude</div>
+                    <div class="metrics">
+                      <span>GPU <b id="magi-casper-gpu">84%</b></span>
+                      <span>CPU <b id="magi-casper-cpu">41%</b></span>
+                      <span>RAM <b id="magi-casper-ram">62%</b></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="magi-row-bot">
+                <div class="magi-svg-panel" id="magi-panel-balthasar" data-status="—">
+                  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <polygon points="0,0 82,0 100,24 100,100 0,100"
+                      fill="#02120a" stroke="#22c55e" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
+                  </svg>
+                  <div class="magi-body">
+                    <div class="name" style="color:var(--ok)">BALTHASAR · 2</div>
+                    <div class="val" id="check-safety-val-m">—</div>
+                    <div class="role">安全<span class="en">safety</span></div>
+                    <div class="host" id="magi-balthasar-host">@ TOKYO-3 · local Gemma</div>
+                    <div class="metrics">
+                      <span>GPU <b id="magi-balthasar-gpu">58%</b></span>
+                      <span>CPU <b id="magi-balthasar-cpu">33%</b></span>
+                      <span>RAM <b id="magi-balthasar-ram">71%</b></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="magi-svg-panel" id="magi-panel-melchior" data-status="—">
+                  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <polygon points="18,0 100,0 100,100 0,100 0,24"
+                      fill="#02120a" stroke="#22c55e" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
+                  </svg>
+                  <div class="magi-body">
+                    <div class="name" style="color:var(--ok)">MELCHIOR · 1</div>
+                    <div class="val" id="check-policy-val-m">—</div>
+                    <div class="role">政策<span class="en">policy</span></div>
+                    <div class="host" id="magi-melchior-host">@ TOKYO-3 · Claude</div>
+                    <div class="metrics">
+                      <span>GPU <b id="magi-melchior-gpu">22%</b></span>
+                      <span>CPU <b id="magi-melchior-cpu">19%</b></span>
+                      <span>RAM <b id="magi-melchior-ram">44%</b></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="px-2 pb-2">
+              <div class="row panel p-1.5 text-[11px]">
+                <span data-i18n="resolution">Resolution</span>
+                <span id="resolution" class="font-bold muted">—</span>
+                <span id="vote-tally" class="muted">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- MAGI + expert roster -->
+          <div class="col-span-12 md:col-span-4 panel">
+            <div class="hdr">
+              <span>Seats &amp; experts</span>
+              <span class="muted text-[9px]">resident · remote · JIT</span>
+            </div>
+            <div class="p-2 space-y-1.5 text-[10px]" id="seat-roster"></div>
+          </div>
+        </div>
+
+        <!-- Kaji progressive trust -->
+        <div class="panel">
+          <div class="hdr">
+            <span data-i18n="trust">Kaji · progressive trust</span>
+            <span class="muted">shadow → bounded → full · rollback</span>
+          </div>
+          <div class="p-2 space-y-1.5 text-[11px]" id="trust-list"></div>
+        </div>
+
+        <!-- Pipeline stages (compact) -->
+        <div class="panel">
+          <div class="hdr">
+            <span data-i18n="pipeline">Execution pipeline</span>
+            <span id="pipeline-state" class="muted">IDLE</span>
+          </div>
+          <div class="p-2 flex flex-col gap-0 text-[11px]">
+            <div id="stage-1" class="stage">1 · Ingress &amp; parse</div>
+            <div class="pipe-line"></div>
+            <div class="grid grid-cols-2 gap-1.5">
+              <div id="stage-2" class="stage">2 · Gendo risk</div>
+              <div id="stage-3" class="stage">3 · MAGI / experts</div>
+            </div>
+            <div class="pipe-line"></div>
+            <div id="stage-4" class="stage">4 · Sync · A.T. Field</div>
+            <div class="pipe-line"></div>
+            <div class="grid grid-cols-2 gap-1.5">
+              <div id="stage-5" class="stage">5 · EVA / sandbox</div>
+              <div id="stage-6" class="stage">6 · Dogma ledger</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stream / HITL -->
+        <div class="panel flex-1 flex flex-col">
+          <div class="hdr">
+            <div class="flex gap-1 flex-wrap">
+              <button class="btn active" id="tab-stream" onclick="switchTab('stream')" data-i18n="stream">Event stream</button>
+              <button class="btn" id="tab-hitl" onclick="switchTab('hitl')" data-i18n="hitl">HITL / Misato</button>
+            </div>
+            <div class="flex gap-2 items-center text-[10px]">
+              <span class="muted">on call:</span>
+              <span class="font-bold" id="hitl-oncall">Misato</span>
+              <span class="muted">| oldest Red:</span>
+              <span id="hitl-oldest" class="warn">—</span>
+              <select id="voice-select" class="text-[10px]" onchange="setVoice(this.value)">
+                <option value="ops">Ops</option>
+                <option value="misato">Misato</option>
+                <option value="gendo">Gendo</option>
+                <option value="magi">MAGI</option>
+              </select>
+            </div>
+          </div>
+          <div class="p-2 flex-1 flex flex-col gap-2">
+            <div id="view-stream" class="log"></div>
+            <div id="view-hitl" class="hidden flex flex-col gap-2 flex-1">
+              <div id="hitl-queue" class="space-y-1.5 text-[11px]"></div>
+              <div class="log flex-1" id="ops-log"></div>
+              <div class="flex gap-1 items-center">
+                <div class="avatar" id="chat-avatar">OP</div>
+                <input id="ops-input" class="flex-1" placeholder="status · why Red · approve…" onkeydown="if(event.key==='Enter')sendOps()" />
+                <button class="btn primary" onclick="sendOps()">Send</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== RIGHT ========== -->
+      <section class="col-span-12 lg:col-span-3 flex flex-col gap-2">
+
+        <!-- Mesh / bases -->
+        <div class="panel">
+          <div class="hdr">
+            <span data-i18n="nodes">NERV bases</span>
+            <span id="worker-count" class="ok">2 online</span>
+          </div>
+          <div class="p-1 eva-only">
+            <canvas id="globeCanvas" height="140"></canvas>
+            <div class="text-[9px] muted px-1 py-0.5" id="map-label">active mesh</div>
+            <div class="text-[8px] px-1 pb-1 flex flex-wrap gap-x-2 gap-y-0.5" id="mesh-links"></div>
+          </div>
+          <div class="p-2 space-y-1 text-[11px]" id="worker-list"></div>
+        </div>
+
+        <!-- EVA Bay -->
+        <div class="panel eva-bay">
+          <div class="hdr">
+            <span>EVA BAY · HANGAR 3</span>
+            <span class="ok text-[10px]">ACTIVE</span>
+          </div>
+          <div class="p-2 eva-bay-grid">
+            <div class="eva-slot" data-unit="01">
+              <div class="eva-slot-head">
+                <span class="eva-unit" style="color:var(--ok)">UNIT-01</span>
+                <span class="eva-status ok">READY</span>
+              </div>
+              <div class="eva-art">
+                <img src="assets/eva01.png" alt="EVA-01" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+                <span class="fallback">EVA-01</span>
+              </div>
+              <div class="eva-pilot-line">SHINJI <span class="meta">· pilot skill</span></div>
+              <canvas class="eva-sync-canvas" id="evaSync01" height="26"></canvas>
+              <div class="eva-sync-label"><span class="ok">SYNC</span><span class="ok" id="sync-01">94%</span></div>
+            </div>
+            <div class="eva-slot" data-unit="02">
+              <div class="eva-slot-head">
+                <span class="eva-unit" style="color:var(--danger)">UNIT-02</span>
+                <span class="eva-status warn">STANDBY</span>
+              </div>
+              <div class="eva-art">
+                <img src="assets/eva02.png" alt="EVA-02" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+                <span class="fallback">EVA-02</span>
+              </div>
+              <div class="eva-pilot-line">ASUKA <span class="meta">· pilot skill</span></div>
+              <canvas class="eva-sync-canvas" id="evaSync02" height="26"></canvas>
+              <div class="eva-sync-label"><span class="warn">SYNC</span><span class="warn" id="sync-02">71%</span></div>
+            </div>
+            <div class="eva-slot" data-unit="08">
+              <div class="eva-slot-head">
+                <span class="eva-unit" style="color:var(--blue)">UNIT-08</span>
+                <span class="eva-status muted">OFFLINE</span>
+              </div>
+              <div class="eva-art">
+                <img src="assets/eva08.png" alt="EVA-08" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+                <span class="fallback">EVA-08</span>
+              </div>
+              <div class="eva-pilot-line">MARI <span class="meta">· pilot skill</span></div>
+              <canvas class="eva-sync-canvas" id="evaSync08" height="26"></canvas>
+              <div class="eva-sync-label"><span class="muted">SYNC</span><span class="muted" id="sync-08">—</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Terminal Dogma -->
+        <div class="panel">
+          <div class="hdr">
+            <span>Terminal Dogma</span>
+            <span class="ok text-[9px]" id="dogma-health">REPLICATING</span>
+          </div>
+          <div class="p-2 text-[10px] space-y-1">
+            <div class="row"><span class="muted">Last commit</span><span id="dogma-commit">—</span></div>
+            <div class="row"><span class="muted">Litestream lag</span><span id="dogma-lag" class="ok">0.2 s</span></div>
+            <div class="row"><span class="muted">Inbox pending</span><span id="dogma-inbox">0</span></div>
+            <div class="row"><span class="muted">Last compensate</span><span id="dogma-comp" class="muted">none</span></div>
+            <div class="meter mt-1" id="dogma-meter"><i style="width:96%"></i></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="hdr">
+            <span data-i18n="inbox">Inbox</span>
+            <span id="inbox-count" class="badge badge-muted">0</span>
+          </div>
+          <div class="p-2 space-y-1.5 text-[11px]" id="inbox-list">
+            <div class="muted">No pending deliveries</div>
+          </div>
+        </div>
+
+        <div class="panel flex-1">
+          <div class="hdr">
+            <span data-i18n="approvals">Pending HITL</span>
+            <span id="hitl-count" class="badge badge-red">0</span>
+          </div>
+          <div class="p-2 space-y-1.5 text-[11px]" id="approval-list">
+            <div class="muted">None</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    /* ========== DATA ========== */
+    const NODES = [
+      { id:"local-mac", status:"online", latency:2, role:"coordinator",
+        lat:35.6, lon:139.7, callsign:"TOKYO-3", links:["mini-pc","edge-pi"] },
+      { id:"mini-pc", status:"online", latency:18, role:"worker",
+        lat:37.7, lon:-122.4, callsign:"NERV-01", links:["local-mac"] },
+      { id:"edge-pi", status:"standby", latency:null, role:"worker",
+        lat:52.5, lon:13.4, callsign:"NERV-02", links:["local-mac"] }
+    ];
+
+    const MAGI_SEATS = [
+      { id:"melchior", name:"MELCHIOR · 1", role:"policy", kind:"resident",
+        host:"TOKYO-3", model:"Claude", node:"local-mac", panel:"magi-panel-melchior", voteId:"check-policy-val-m" },
+      { id:"balthasar", name:"BALTHASAR · 2", role:"safety", kind:"resident",
+        host:"TOKYO-3", model:"Gemma local", node:"local-mac", panel:"magi-panel-balthasar", voteId:"check-safety-val-m" },
+      { id:"casper", name:"CASPER · 3", role:"intent", kind:"remote",
+        host:"NERV-02", model:"Claude", node:"edge-pi", panel:"magi-panel-casper", voteId:"check-intent-val-m" }
+    ];
+
+    const EXPERTS = [
+      { id:"calendar_expert", name:"calendar_expert", kind:"fixed", stage:"bounded",
+        days:12, score:0.91, host:"TOKYO-3", canVote:false },
+      { id:"sql_optimizer", name:"sql_optimizer", kind:"jit", stage:"shadow",
+        days:2, score:0.74, host:"NERV-01", canVote:false },
+      { id:"legal_brief", name:"legal_brief", kind:"jit", stage:"shadow",
+        days:1, score:0.68, host:"TOKYO-3", canVote:false }
+    ];
+
+    const TRUST = [
+      { id:"web_scraper_v2", name:"web_scraper_v2", stage:"shadow", days:2, score:0.81, type:"skill" },
+      { id:"sql_optimizer", name:"sql_optimizer", stage:"bounded", days:9, score:0.88, type:"skill" },
+      { id:"calendar_expert", name:"calendar_expert", stage:"bounded", days:12, score:0.91, type:"expert" },
+      { id:"shell_runner", name:"shell_runner", stage:"full", days:40, score:0.96, type:"skill" }
+    ];
+
+    const EVA_UNITS = [
+      { id:"01", sync:0.94 },
+      { id:"02", sync:0.71 },
+      { id:"08", sync:0 }
+    ];
+
+    const LABELS = {
+      neutral: {
+        brand:"NODO", tagline:"Operations · local-first agent",
+        health:"healthy · reminders ok", node:"NODE",
+        risk:"Task risk", router:"router · Gendo",
+        "blue-desc":"read-only / routine", "orange-desc":"bounded transform",
+        "red-desc":"mutation / privileged", "council-badge":"MAGI±EXP",
+        rollback:"Spear · revoke last grant",
+        trust:"Kaji · progressive trust",
+        "active-job":"Active job", council:"MAGI council",
+        resolution:"Resolution", pipeline:"Execution pipeline",
+        stream:"Event stream", hitl:"HITL / Misato",
+        inbox:"Inbox", approvals:"Pending HITL",
+        doctor:"Doctor", nodes:"NERV bases"
+      },
+      eva: {
+        brand:"NERV", tagline:"TACTICAL COMMAND // 中央作戦司令部",
+        health:"KAJI MESH SECURE · DOGMA OK", node:"GEOFRONT",
+        risk:"PATTERN INGRESS", router:"GENDO",
+        "blue-desc":"routine / auto", "orange-desc":"MAGI path",
+        "red-desc":"HITL intercept", "council-badge":"MAGI±EXP",
+        rollback:"SPEAR OF LONGINUS",
+        trust:"KAJI'S WATERMELONS",
+        "active-job":"ACTIVE SORTIE", council:"MAGI SYSTEM",
+        resolution:"決議", pipeline:"SEPHIROT PIPE",
+        stream:"LIVE STREAM", hitl:"MISATO / HITL",
+        inbox:"INBOX", approvals:"HITL QUEUE",
+        doctor:"DOCTOR", nodes:"EVA BAY / BASES"
+      }
+    };
+
+    const state = {
+      theme:"dark", crt:false, node:"local-mac", voice:"ops",
+      confidence:0.94, armed:false, dummy:false, dummyReason:"",
+      stream:[], inbox:[], approvals:[],
+      lastCouncil:{ safety:"—", policy:"—", intent:"—" },
+      job:null, token:null,
+      cost:{ blue:0, orange:0, red:0, m1:0, m2:0, m3:0 },
+      dogma:{ commit:"—", lag:"0.2 s", comp:"none" }
+    };
+
+    const stages = ["stage-1","stage-2","stage-3","stage-4","stage-5","stage-6"];
+    const flowIds = ["flow-ingress","flow-gendo","flow-magi","flow-experts","flow-ritsuko","flow-hitl","flow-eva","flow-dogma"];
+
+    function isEva() {
+      return state.theme === "eva-full" || state.theme === "eva-basic";
+    }
+    function L() {
+      return isEva() ? LABELS.eva : LABELS.neutral;
+    }
+    function ts() { return new Date().toTimeString().split(" ")[0]; }
+
+    function log(msg, cls) {
+      cls = cls || "";
+      state.stream.push({ t:ts(), msg:msg, cls:cls });
+      if (state.stream.length > 80) state.stream.shift();
+      const el = document.getElementById("view-stream");
+      el.innerHTML = state.stream.map(function(e) {
+        return "<div class=\"" + e.cls + "\"><span class=\"ts\">[" + e.t + "]</span>" + e.msg + "</div>";
+      }).join("");
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function applyLabels() {
+      const pack = L();
+      document.querySelectorAll("[data-i18n]").forEach(function(el) {
+        const k = el.getAttribute("data-i18n");
+        if (pack[k] != null) el.textContent = pack[k];
+      });
+      document.getElementById("health-line").textContent = pack.health;
+    }
+
+    /* ========== BANNERS / ARM ========== */
+    function toggleArmed() {
+      state.armed = !state.armed;
+      document.getElementById("arm-label").textContent = state.armed
+        ? "ARMED · LIVE PATH (still demo handlers)"
+        : "SHADOW UI · NOT ARMED";
+      document.getElementById("arm-badge").textContent = state.armed ? "LIVE?" : "SIM";
+      document.getElementById("arm-badge").className = "badge " + (state.armed ? "badge-ok" : "badge-warn");
+      document.getElementById("api-status").textContent = state.armed ? "API BOUND (demo)" : "API UNBOUND";
+      document.getElementById("api-status").className = "badge " + (state.armed ? "badge-ok" : "badge-warn");
+      log(state.armed ? "UI marked armed — handlers still local simulation" : "UI shadow mode", "warn");
+    }
+    function triggerDummy() {
+      state.dummy = true;
+      state.dummyReason = " — Melchior cloud timeout · Casper unreachable from NERV-02";
+      document.getElementById("dummy-banner").classList.remove("hidden");
+      document.getElementById("dummy-reason").textContent = state.dummyReason;
+      log("Dummy Plug engaged" + state.dummyReason, "danger");
+    }
+    function clearDummy() {
+      state.dummy = false;
+      document.getElementById("dummy-banner").classList.add("hidden");
+      log("Dummy Plug cleared", "ok");
+    }
+
+    /* ========== FLOW / STAGES ========== */
+    function clearFlow() {
+      flowIds.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.classList.remove("on", "done");
+      });
+      document.getElementById("flow-detail").textContent = "Idle · no job in flight";
+    }
+    function setFlow(onIds, doneIds, detail) {
+      clearFlow();
+      (doneIds || []).forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.classList.add("done");
+      });
+      (onIds || []).forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) { el.classList.remove("done"); el.classList.add("on"); }
+      });
+      if (detail) document.getElementById("flow-detail").textContent = detail;
+    }
+    function clearStages() {
+      stages.forEach(function(id) {
+        document.getElementById(id).classList.remove("active", "done");
+      });
+      document.getElementById("pipeline-state").textContent = "IDLE";
+    }
+    function activateStages(ids, doneIds) {
+      doneIds = doneIds || [];
+      clearStages();
+      ids.forEach(function(id) { document.getElementById(id).classList.add("active"); });
+      doneIds.forEach(function(id) {
+        document.getElementById(id).classList.remove("active");
+        document.getElementById(id).classList.add("done");
+      });
+      document.getElementById("pipeline-state").textContent = ids.length ? "RUNNING" : "IDLE";
+    }
+
+    /* ========== COUNCIL / METRICS ========== */
+    function tickMagiMetrics() {
+      function jitter(id, base) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = Math.max(5, Math.min(98, base + Math.round((Math.random() - 0.5) * 8))) + "%";
+      }
+      jitter("magi-casper-gpu", 84); jitter("magi-casper-cpu", 41); jitter("magi-casper-ram", 62);
+      jitter("magi-balthasar-gpu", 58); jitter("magi-balthasar-cpu", 33); jitter("magi-balthasar-ram", 71);
+      jitter("magi-melchior-gpu", 22); jitter("magi-melchior-cpu", 19); jitter("magi-melchior-ram", 44);
+    }
+    function syncCouncilDisplay() {
+      var c = state.lastCouncil;
+      var map = { approve:"ok", reject:"danger", pending:"warn", skip:"muted", "—":"muted" };
+      function apply(id, val) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = val.toUpperCase();
+        el.className = "font-bold text-sm " + (map[val] || "muted");
+        if (state.theme === "eva-full" && val !== "—") el.classList.add("blink");
+        else el.classList.remove("blink");
+      }
+      apply("check-safety-val", c.safety);
+      apply("check-policy-val", c.policy);
+      apply("check-intent-val", c.intent);
+      apply("check-safety-val-m", c.safety);
+      apply("check-policy-val-m", c.policy);
+      apply("check-intent-val-m", c.intent);
+      ["check-safety-val-m","check-policy-val-m","check-intent-val-m"].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var key = id.indexOf("safety") >= 0 ? c.safety : id.indexOf("policy") >= 0 ? c.policy : c.intent;
+        el.className = "val " + (map[key] || "muted");
+      });
+      var pc = document.getElementById("magi-panel-casper");
+      var pb = document.getElementById("magi-panel-balthasar");
+      var pm = document.getElementById("magi-panel-melchior");
+      if (pc) pc.setAttribute("data-status", c.intent || "—");
+      if (pb) pb.setAttribute("data-status", c.safety || "—");
+      if (pm) pm.setAttribute("data-status", c.policy || "—");
+    }
+    function setCouncil(safety, policy, intent, resolution, tally) {
+      state.lastCouncil = { safety:safety, policy:policy, intent:intent };
+      syncCouncilDisplay();
+      tickMagiMetrics();
+      document.getElementById("resolution").textContent = resolution;
+      var map = { approve:"ok", reject:"danger", pending:"warn", skip:"muted", auto:"ok", approved:"ok", hitl:"warn", "—":"muted" };
+      document.getElementById("resolution").className = "font-bold " + (map[String(resolution).toLowerCase()] || "muted");
+      document.getElementById("vote-tally").textContent = tally;
+    }
+
+    function setConfidence(v) {
+      state.confidence = v;
+      var suffix = isEva()
+        ? (v >= 0.8 ? " · SYNC OK" : " · REVIEW")
+        : (v >= 0.8 ? " · OK" : " · REVIEW");
+      document.getElementById("confidence-label").textContent = v.toFixed(2) + suffix;
+      document.getElementById("confidence-label").className = (v >= 0.8 ? "ok" : "warn") + " font-bold text-[11px]";
+      var sl = document.getElementById("confidence-slider");
+      if (sl && document.activeElement !== sl) sl.value = Math.round(v * 100);
+    }
+
+    function setJob(job) {
+      state.job = job;
+      var box = document.getElementById("job-box");
+      if (!job) {
+        document.getElementById("job-id").textContent = "—";
+        box.innerHTML = "<div class=\"muted\">No active job</div>";
+        return;
+      }
+      document.getElementById("job-id").textContent = job.id;
+      box.innerHTML =
+        "<div class=\"row\"><span>Pattern</span><strong style=\"color:var(--" +
+        (job.pattern === "blue" ? "blue" : job.pattern === "orange" ? "orange" : "red") +
+        ")\">" + job.pattern.toUpperCase() + "</strong></div>" +
+        "<div class=\"row\"><span>Stage</span><span>" + job.stage + "</span></div>" +
+        "<div class=\"row\"><span>Worker</span><span>" + job.worker + "</span></div>";
+    }
+
+    /* ========== TOKEN ========== */
+    function issueToken(job) {
+      var scopes = job.pattern === "blue"
+        ? ["inbox:read", "reminders:read"]
+        : job.pattern === "orange"
+          ? ["inbox:read", "tools:bounded", "fs:workspace"]
+          : ["inbox:write", "tools:privileged", "db:mutate"];
+      state.token = {
+        id: "atf-" + Math.random().toString(36).slice(2, 8),
+        job: job.id,
+        scopes: scopes,
+        ttl: job.pattern === "red" ? 120 : 300,
+        issued: Date.now(),
+        status: "live"
+      };
+      renderToken();
+      log("A.T. Field issued " + state.token.id + " · scopes " + scopes.join(", "), "ok");
+    }
+    function revokeToken(reason) {
+      if (!state.token) {
+        log("Spear: no live grant to revoke", "warn");
+        return;
+      }
+      state.token.status = "revoked";
+      state.dogma.comp = ts() + " · " + (reason || "spear");
+      document.getElementById("dogma-comp").textContent = state.dogma.comp;
+      document.getElementById("dogma-comp").className = "danger";
+      renderToken();
+      log("Spear of Longinus: " + state.token.id + " revoked · ledger compensate", "danger");
+    }
+    function renderToken() {
+      var box = document.getElementById("token-box");
+      var st = document.getElementById("token-state");
+      if (!state.token) {
+        st.textContent = "NONE"; st.className = "badge badge-muted";
+        box.innerHTML = "<div class=\"token-card muted\">No live grant · issue after promote</div>";
+        return;
+      }
+      var t = state.token;
+      var live = t.status === "live";
+      st.textContent = live ? "LIVE" : "REVOKED";
+      st.className = "badge " + (live ? "badge-ok" : "badge-red");
+      box.innerHTML =
+        "<div class=\"token-card " + (live ? "live" : "revoked") + "\">" +
+        "<div class=\"row\"><span class=\"font-bold\">" + t.id + "</span><span class=\"muted\">job " + t.job + "</span></div>" +
+        "<div class=\"muted mt-1\">scopes</div>" +
+        "<div>" + t.scopes.map(function(s){ return "<span class=\"chip\">" + s + "</span>"; }).join(" ") + "</div>" +
+        "<div class=\"row mt-1\"><span class=\"muted\">TTL</span><span>" + t.ttl + "s</span></div>" +
+        (live ? "<button class=\"btn danger w-full mt-1\" onclick=\"revokeToken('manual')\">Spear this grant</button>" : "") +
+        "</div>";
+    }
+
+    /* ========== COMMITTEE / ROSTER / TRUST ========== */
+    function setCommittee(pattern, includeExperts) {
+      var mode = document.getElementById("committee-mode");
+      var box = document.getElementById("committee-chips");
+      if (pattern === "blue") {
+        mode.textContent = "Blue · council skipped";
+        box.innerHTML = "<span class=\"chip\">deterministic path</span>";
+        return;
+      }
+      mode.textContent = pattern.toUpperCase() + " ballot";
+      var chips = MAGI_SEATS.map(function(s) {
+        var cls = s.kind === "remote" ? "chip remote online" : "chip online";
+        return "<span class=\"" + cls + "\"><span class=\"dot\"></span>" + s.name +
+          " <span class=\"muted\">@" + s.host + "</span></span>";
+      });
+      if (includeExperts) {
+        EXPERTS.filter(function(e){ return e.stage !== "full"; }).slice(0, 2).forEach(function(e) {
+          chips.push("<span class=\"chip jit\"><span class=\"dot\"></span>" + e.name +
+            " <span class=\"muted\">" + e.kind + " · " + e.stage + "</span></span>");
+        });
+      }
+      box.innerHTML = chips.join("");
+    }
+
+    function renderSeatRoster() {
+      var box = document.getElementById("seat-roster");
+      var html = MAGI_SEATS.map(function(s) {
+        var badge = s.kind === "resident" ? "badge-ok" : s.kind === "remote" ? "badge-blue" : "badge-orange";
+        return "<div class=\"row panel p-1.5\" style=\"border-style:dashed\">" +
+          "<div><div class=\"font-bold\">" + s.name + "</div>" +
+          "<div class=\"muted\">" + s.model + " · @" + s.host + "</div></div>" +
+          "<span class=\"badge " + badge + "\">" + s.kind.toUpperCase() + "</span></div>";
+      }).join("");
+      html += "<div class=\"muted text-[9px] mt-1 mb-0.5\">Experts / JIT</div>";
+      html += EXPERTS.map(function(e) {
+        return "<div class=\"row panel p-1.5\" style=\"border-style:dashed\">" +
+          "<div><div class=\"font-bold\">" + e.name + "</div>" +
+          "<div class=\"muted\">" + e.stage + " · " + e.days + "d · score " + e.score +
+          " · @" + e.host + "</div></div>" +
+          "<span class=\"badge badge-orange\">" + e.kind.toUpperCase() + "</span></div>";
+      }).join("");
+      box.innerHTML = html;
+    }
+
+    function renderTrust() {
+      var box = document.getElementById("trust-list");
+      box.innerHTML = TRUST.map(function(t) {
+        var pct = Math.round(t.score * 100);
+        var mcls = t.stage === "shadow" ? "warn" : t.stage === "bounded" ? "" : "";
+        return "<div class=\"panel p-1.5\">" +
+          "<div class=\"row\"><div><span class=\"font-bold\">" + t.name + "</span> " +
+          "<span class=\"badge badge-muted\">" + t.type + "</span></div>" +
+          "<span class=\"badge " + (t.stage === "full" ? "badge-ok" : t.stage === "bounded" ? "badge-orange" : "badge-warn") +
+          "\">" + t.stage.toUpperCase() + "</span></div>" +
+          "<div class=\"row muted text-[9px] mt-0.5\"><span>" + t.days + " days in stage</span><span>eval " + pct + "%</span></div>" +
+          "<div class=\"meter " + mcls + " mt-1\"><i style=\"width:" + pct + "%\"></i></div>" +
+          "<div class=\"flex gap-1 mt-1\">" +
+          "<button class=\"btn text-[9px]\" onclick=\"trustAction('" + t.id + "','promote')\">Promote</button>" +
+          "<button class=\"btn danger text-[9px]\" onclick=\"trustAction('" + t.id + "','rollback')\">Rollback</button>" +
+          "</div></div>";
+      }).join("");
+    }
+    function trustAction(id, act) {
+      var t = TRUST.find(function(x){ return x.id === id; });
+      if (!t) return;
+      if (act === "promote") {
+        if (t.stage === "shadow") t.stage = "bounded";
+        else if (t.stage === "bounded") t.stage = "full";
+        log("Kaji: promoted " + id + " → " + t.stage, "ok");
+      } else {
+        t.stage = "shadow";
+        t.days = 0;
+        log("Kaji: rolled back " + id + " → shadow", "danger");
+      }
+      renderTrust();
+      renderSeatRoster();
+    }
+
+    /* ========== NODES / DOGMA / COST ========== */
+    function renderNodes() {
+      var list = document.getElementById("worker-list");
+      var online = NODES.filter(function(n){ return n.status === "online"; }).length;
+      document.getElementById("worker-count").textContent = online + " online";
+      list.innerHTML = NODES.map(function(n) {
+        var badgeClass = n.status === "online" ? "badge-ok" : n.status === "standby" ? "badge-orange" : "badge-muted";
+        var badgeText = n.status === "online" ? (n.role === "coordinator" ? "COORD" : "ONLINE")
+          : (n.status === "standby" ? "STANDBY" : "OFF");
+        var lat = n.latency != null ? n.latency + " ms" : "—";
+        var linkNames = (n.links || []).map(function(id) {
+          var peer = NODES.find(function(x){ return x.id === id; });
+          return peer && peer.callsign ? peer.callsign : id;
+        }).join(", ");
+        return "<div class=\"row panel p-1.5\" style=\"border-style:dashed\">" +
+          "<div><div class=\"font-bold\">" + n.callsign + "</div>" +
+          "<div class=\"muted text-[10px]\">" + n.role + " · " + lat + "</div>" +
+          (linkNames ? "<div class=\"muted text-[9px]\">↔ " + linkNames + "</div>" : "") +
+          "</div><span class=\"badge " + badgeClass + "\">" + badgeText + "</span></div>";
+      }).join("");
+      var active = NODES.find(function(n){ return n.id === state.node; });
+      var mapLabel = document.getElementById("map-label");
+      if (mapLabel) mapLabel.textContent = "ACTIVE: " + (active ? active.callsign : state.node);
+      var mesh = document.getElementById("mesh-links");
+      if (mesh) {
+        var pairs = {}, bits = [];
+        NODES.forEach(function(n) {
+          (n.links || []).forEach(function(tid) {
+            var key = [n.id, tid].sort().join("|");
+            if (pairs[key]) return;
+            pairs[key] = true;
+            var peer = NODES.find(function(x){ return x.id === tid; });
+            var up = n.status === "online" && peer && peer.status === "online";
+            bits.push("<span class=\"" + (up ? "ok" : "muted") + "\">" +
+              n.callsign + (up ? " ↔ " : " ╌ ") + (peer ? peer.callsign : tid) + "</span>");
+          });
+        });
+        mesh.innerHTML = bits.join(" · ");
+      }
+    }
+
+    function updateDogma(commit) {
+      if (commit) {
+        state.dogma.commit = commit;
+        document.getElementById("dogma-commit").textContent = commit;
+      }
+      document.getElementById("dogma-inbox").textContent = String(state.inbox.length);
+      document.getElementById("dogma-lag").textContent = state.dogma.lag;
+    }
+
+    function updateCost() {
+      var c = state.cost;
+      var total = c.blue + c.orange + c.red;
+      document.getElementById("cost-total").textContent = "$" + total.toFixed(3);
+      document.getElementById("cost-blue").textContent = "$" + c.blue.toFixed(3);
+      document.getElementById("cost-orange").textContent = "$" + c.orange.toFixed(3);
+      document.getElementById("cost-red").textContent = "$" + c.red.toFixed(3);
+      document.getElementById("cost-m1").textContent = "$" + c.m1.toFixed(3);
+      document.getElementById("cost-m2").textContent = "$" + c.m2.toFixed(3);
+      document.getElementById("cost-m3").textContent = "$" + c.m3.toFixed(3);
+    }
+
+    function renderInbox() {
+      var list = document.getElementById("inbox-list");
+      document.getElementById("inbox-count").textContent = state.inbox.length;
+      updateDogma();
+      if (!state.inbox.length) {
+        list.innerHTML = "<div class=\"muted\">No pending deliveries</div>";
+        return;
+      }
+      list.innerHTML = state.inbox.map(function(i) {
+        return "<div class=\"row panel p-1.5\" style=\"border-style:dashed\">" +
+          "<div><div class=\"font-bold\">" + i.text + "</div>" +
+          "<div class=\"muted text-[10px]\">" + i.due + "</div></div>" +
+          "<span class=\"badge badge-orange\">" + i.status + "</span></div>";
+      }).join("");
+    }
+
+    function renderApprovals() {
+      var list = document.getElementById("approval-list");
+      var hitl = document.getElementById("hitl-queue");
+      document.getElementById("hitl-count").textContent = state.approvals.length;
+      var oldest = "—";
+      if (state.approvals.length) {
+        var ages = state.approvals.map(function(a){ return a.since || Date.now(); });
+        var min = Math.min.apply(null, ages);
+        var sec = Math.round((Date.now() - min) / 1000);
+        oldest = sec < 60 ? sec + "s" : Math.round(sec / 60) + "m";
+      }
+      document.getElementById("hitl-oldest").textContent = oldest;
+      document.getElementById("hitl-oldest").className = state.approvals.length ? "warn" : "muted";
+
+      if (!state.approvals.length) {
+        list.innerHTML = "<div class=\"muted\">None</div>";
+        hitl.innerHTML = "<div class=\"muted\">No pending HITL items · on call: Misato</div>";
+        return;
+      }
+      function card(a) {
+        return "<div class=\"panel p-1.5\">" +
+          "<div class=\"font-bold\">" + a.title + "</div>" +
+          "<div class=\"muted text-[10px]\">" + a.detail + "</div>" +
+          "<div class=\"flex gap-1 mt-1\">" +
+          "<button class=\"btn primary\" onclick=\"decideApproval('" + a.id + "',true)\">Approve</button>" +
+          "<button class=\"btn danger\" onclick=\"decideApproval('" + a.id + "',false)\">Reject</button>" +
+          "</div></div>";
+      }
+      list.innerHTML = state.approvals.map(card).join("");
+      hitl.innerHTML = state.approvals.map(card).join("");
+    }
+
+    /* ========== DEMO JOB FLOW ========== */
+    function submitDemo(pattern) {
+      if (state.dummy && pattern !== "blue") {
+        log("Dummy Plug: non-Blue paths blocked · use deterministic Blue or clear Dummy", "danger");
+        return;
+      }
+      var id = "job-" + Math.random().toString(36).slice(2, 7);
+      var job = {
+        id:id, pattern:pattern, stage:"ingress", worker:state.node,
+        confidence: pattern === "blue" ? 0.96 : pattern === "orange" ? 0.84 : 0.62
+      };
+      setJob(job);
+      setConfidence(job.confidence);
+      setCommittee(pattern, pattern !== "blue");
+      log((isEva() ? "Gendo" : "Router") + ": ingress " + id + " · " + pattern.toUpperCase(),
+        pattern === "red" ? "danger" : pattern === "orange" ? "warn" : "ok");
+
+      activateStages(["stage-1"]);
+      setFlow(["flow-ingress"], [], "Entry Plug parsing " + id);
+
+      setTimeout(function() {
+        activateStages(["stage-2"], ["stage-1"]);
+        setFlow(["flow-gendo"], ["flow-ingress"], "Gendo classified " + pattern.toUpperCase());
+        log("Risk router → " + pattern.toUpperCase());
+      }, 280);
+
+      setTimeout(function() {
+        if (pattern === "blue") {
+          setCouncil("skip","skip","skip","auto","0/0");
+          setCommittee("blue", false);
+          activateStages(["stage-4"], ["stage-1","stage-2"]);
+          setFlow(["flow-ritsuko"], ["flow-ingress","flow-gendo"], "Blue · MAGI skipped · promote check");
+          document.getElementById("council-summary").textContent = "Blue · deterministic path";
+          log("MAGI skipped (Blue / high confidence)", "ok");
+          setTimeout(function() {
+            issueToken(job);
+            activateStages(["stage-5"], ["stage-1","stage-2","stage-4"]);
+            setFlow(["flow-eva"], ["flow-ingress","flow-gendo","flow-ritsuko"], "EVA sandbox executing");
+            finishJob(job, true);
+          }, 400);
+        } else {
+          activateStages(["stage-3"], ["stage-1","stage-2"]);
+          setFlow(["flow-magi"], ["flow-ingress","flow-gendo"], "MAGI ballot open");
+          document.getElementById("council-summary").textContent = "MAGI active";
+          log("MAGI consulted · seats Melchior @TOKYO-3, Balthasar @TOKYO-3, Casper @NERV-02");
+          setCouncil("pending","pending","pending","pending","—");
+          setTimeout(function() {
+            setFlow(["flow-experts"], ["flow-ingress","flow-gendo","flow-magi"],
+              "Experts: " + EXPERTS.slice(0,2).map(function(e){ return e.name; }).join(", ") + " (suggest-only)");
+            log("Experts attached (suggest-only, no Red authority)");
+            state.cost.m1 += 0.008; state.cost.m2 += 0.003; state.cost.m3 += 0.008;
+            updateCost();
+            setTimeout(function() {
+              if (pattern === "orange") {
+                setCouncil("approve","approve","approve","approved","3/3");
+                activateStages(["stage-4"], ["stage-1","stage-2","stage-3"]);
+                setFlow(["flow-ritsuko"], ["flow-ingress","flow-gendo","flow-magi","flow-experts"], "3/3 · sync gate");
+                log("MAGI approved 3/3", "ok");
+                setTimeout(function() {
+                  issueToken(job);
+                  activateStages(["stage-5"], ["stage-1","stage-2","stage-3","stage-4"]);
+                  setFlow(["flow-eva"], ["flow-ingress","flow-gendo","flow-magi","flow-experts","flow-ritsuko"], "EVA executing");
+                  finishJob(job, true);
+                }, 400);
+              } else {
+                setCouncil("approve","reject","approve","hitl","2/3");
+                activateStages(["stage-4"], ["stage-1","stage-2","stage-3"]);
+                setFlow(["flow-hitl"], ["flow-ingress","flow-gendo","flow-magi","flow-experts"], "2/3 split · Misato HITL");
+                log("MAGI split · routing to HITL", "danger");
+                state.approvals.push({
+                  id:"ap-" + id, title:id,
+                  detail:"Privileged mutation · confidence " + job.confidence.toFixed(2) + " · policy dissent",
+                  since: Date.now()
+                });
+                renderApprovals();
+                document.getElementById("council-summary").textContent = "awaiting Misato";
+                switchTab("hitl");
+              }
+            }, 450);
+          }, 350);
+        }
+      }, 500);
+    }
+
+    function finishJob(job, ok) {
+      setTimeout(function() {
+        activateStages([], ["stage-1","stage-2","stage-3","stage-4","stage-5","stage-6"]);
+        document.getElementById("stage-6").classList.add("done");
+        setFlow(["flow-dogma"],
+          ["flow-ingress","flow-gendo","flow-magi","flow-experts","flow-ritsuko","flow-eva"],
+          ok ? "Terminal Dogma commit" : "Rejected");
+        job.stage = ok ? "done" : "rejected";
+        setJob(job);
+        if (ok) {
+          var add = job.pattern === "blue" ? 0.002 : job.pattern === "orange" ? 0.02 : 0.05;
+          state.cost[job.pattern] += add;
+          updateCost();
+          updateDogma(ts() + " · " + job.id);
+          log("Terminal Dogma committed · " + job.id, "ok");
+        } else {
+          log("Rejected · " + job.id, "danger");
+        }
+        setTimeout(function() {
+          clearStages();
+          clearFlow();
+          setJob(null);
+          setCouncil("—","—","—","—","—");
+          setCommittee("idle", false);
+          document.getElementById("committee-mode").textContent = "idle";
+          document.getElementById("committee-chips").innerHTML = "<span class=\"muted text-[10px]\">No active ballot</span>";
+          document.getElementById("council-summary").textContent = "idle · Blue skips full ballot";
+        }, 1400);
+      }, 400);
+    }
+
+    function decideApproval(id, approve) {
+      state.approvals = state.approvals.filter(function(a){ return a.id !== id; });
+      renderApprovals();
+      log(approve ? "Misato approved " + id : "Misato rejected " + id, approve ? "ok" : "danger");
+      if (approve) {
+        var job = {
+          id:id.replace("ap-",""), pattern:"red", stage:"sandbox",
+          worker:state.node, confidence:state.confidence
+        };
+        setJob(job);
+        issueToken(job);
+        activateStages(["stage-5"], ["stage-1","stage-2","stage-3","stage-4"]);
+        setFlow(["flow-eva"], ["flow-ingress","flow-gendo","flow-magi","flow-experts","flow-hitl","flow-ritsuko"], "HITL cleared · EVA");
+        finishJob(job, true);
+      } else {
+        clearStages();
+        clearFlow();
+        setJob(null);
+        if (state.token && state.token.job === id.replace("ap-","")) revokeToken("hitl-reject");
+      }
+    }
+
+    function rollback() {
+      revokeToken("spear-ui");
+    }
+
+    function runDoctor() {
+      log("Doctor: scheduler ok · dogma ok · gateway ok · mesh ok", "ok");
+      ["doc-sched","doc-db","doc-gw","doc-mesh"].forEach(function(id) {
+        document.getElementById(id).textContent = "ok";
+        document.getElementById(id).className = "ok";
+      });
+    }
+
+    function switchTab(tab) {
+      document.getElementById("view-stream").classList.toggle("hidden", tab !== "stream");
+      document.getElementById("view-hitl").classList.toggle("hidden", tab !== "hitl");
+      document.getElementById("tab-stream").classList.toggle("active", tab === "stream");
+      document.getElementById("tab-hitl").classList.toggle("active", tab === "hitl");
+    }
+    function setVoice(v) {
+      state.voice = v;
+      var map = { ops:"OP", misato:"MK", gendo:"GI", magi:"MG" };
+      document.getElementById("chat-avatar").textContent = map[v] || "OP";
+    }
+    function sendOps() {
+      var input = document.getElementById("ops-input");
+      var text = (input.value || "").trim();
+      if (!text) return;
+      var ops = document.getElementById("ops-log");
+      ops.innerHTML += "<div class=\"mb-1\"><strong>you:</strong> " + text + "</div>";
+      input.value = "";
+      setTimeout(function() {
+        var reply = "Acknowledged.";
+        var t = text.toLowerCase();
+        if (t.indexOf("status") >= 0) {
+          reply = "Node " + state.node + " · promote " + state.confidence.toFixed(2) +
+            " · HITL " + state.approvals.length + " · armed " + state.armed;
+        } else if (t.indexOf("approve") >= 0 && state.approvals.length) {
+          decideApproval(state.approvals[0].id, true);
+          reply = "Approved first pending item.";
+        } else if (state.approvals.length) {
+          reply = state.approvals.length + " approval(s) waiting.";
+        }
+        ops.innerHTML += "<div class=\"ok mb-1\"><strong>" + state.voice + ":</strong> " + reply + "</div>";
+        ops.scrollTop = ops.scrollHeight;
+      }, 200);
+    }
+    function onNodeChange(v) {
+      state.node = v;
+      log("Active node → " + v);
+      renderNodes();
+    }
+
+    /* ========== SYNC WAVES ========== */
+    let syncPhase = 0, syncAnim = null;
+    function paintWave(canvas, v, phase) {
+      if (!canvas) return;
+      var ctx = canvas.getContext("2d");
+      var dpr = window.devicePixelRatio || 1;
+      var w = canvas.clientWidth || 120;
+      var h = canvas.height || 28;
+      if (canvas.width !== Math.floor(w * dpr)) {
+        canvas.width = Math.floor(w * dpr);
+        canvas.height = Math.floor(h * dpr);
+      }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, w, h);
+      if (v <= 0) {
+        ctx.strokeStyle = "rgba(80,80,80,0.5)";
+        ctx.beginPath(); ctx.moveTo(0, h/2); ctx.lineTo(w, h/2); ctx.stroke();
+        return;
+      }
+      var amp = 4 + v * (h * 0.35);
+      var col = v >= 0.8 ? "rgba(34,197,94,0.85)" : v >= 0.6 ? "rgba(245,158,11,0.8)" : "rgba(239,68,68,0.85)";
+      var col2 = "rgba(255,102,0,0.4)";
+      for (var layer = 0; layer < 3; layer++) {
+        ctx.beginPath();
+        ctx.strokeStyle = layer % 2 === 0 ? col : col2;
+        ctx.lineWidth = 1.1;
+        for (var x = 0; x < w; x += 2) {
+          var y = h/2 + Math.sin(x * 0.05 + phase + layer * 0.8) * amp *
+            Math.cos((x / Math.max(w,1)) * Math.PI) * (1 - layer * 0.18);
+          if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+    }
+    function drawSync() {
+      if (syncAnim) cancelAnimationFrame(syncAnim);
+      function frame() {
+        if (!isEva()) { syncAnim = null; return; }
+        paintWave(document.getElementById("syncCanvas"), state.confidence, syncPhase);
+        EVA_UNITS.forEach(function(u) {
+          paintWave(document.getElementById("evaSync" + u.id), u.sync, syncPhase + parseInt(u.id, 10));
+        });
+        syncPhase += 0.045 + (1 - state.confidence) * 0.025;
+        syncAnim = requestAnimationFrame(frame);
+      }
+      frame();
+    }
+
+    /* ========== GLOBE ========== */
+    let globe = { renderer:null, scene:null, camera:null, earth:null, markers:[], mat:null, anim:null };
+    function initGlobe() {
+      var canvas = document.getElementById("globeCanvas");
+      if (!canvas || typeof THREE === "undefined") return;
+      if (globe.renderer) return;
+      var w = canvas.clientWidth || 280, h = 140;
+      canvas.width = w; canvas.height = h;
+      var renderer = new THREE.WebGLRenderer({ canvas:canvas, antialias:true, alpha:true });
+      renderer.setSize(w, h, false);
+      renderer.setClearColor(0x000000, 1);
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(35, w/h, 0.1, 100);
+      camera.position.z = 3.2;
+      var group = new THREE.Group();
+      scene.add(group);
+      var mat = new THREE.MeshBasicMaterial({
+        color: isEva() ? 0xff6600 : 0x3b82f6, wireframe:true, transparent:true, opacity:0.55
+      });
+      group.add(new THREE.Mesh(new THREE.SphereGeometry(1, 24, 18), mat));
+      group.add(new THREE.Mesh(
+        new THREE.TorusGeometry(1.02, 0.008, 8, 64),
+        new THREE.MeshBasicMaterial({ color: isEva() ? 0xff6600 : 0x3b82f6, transparent:true, opacity:0.35 })
+      ));
+      function latLonToVec(lat, lon, r) {
+        var phi = (90 - lat) * (Math.PI/180);
+        var theta = (lon + 180) * (Math.PI/180);
+        return new THREE.Vector3(
+          -r * Math.sin(phi) * Math.cos(theta),
+          r * Math.cos(phi),
+          r * Math.sin(phi) * Math.sin(theta)
+        );
+      }
+      var posMap = {}, markers = [];
+      NODES.forEach(function(n) {
+        var pos = latLonToVec(n.lat, n.lon, 1.04);
+        posMap[n.id] = pos;
+        var m = new THREE.Mesh(
+          new THREE.SphereGeometry(n.role === "coordinator" ? 0.055 : 0.042, 8, 8),
+          new THREE.MeshBasicMaterial({
+            color: n.status === "online" ? 0x22c55e : n.status === "standby" ? 0xf59e0b : 0x666666
+          })
+        );
+        m.position.copy(pos);
+        group.add(m);
+        markers.push(m);
+      });
+      var drawn = {};
+      NODES.forEach(function(n) {
+        (n.links || []).forEach(function(tid) {
+          var key = [n.id, tid].sort().join("|");
+          if (drawn[key]) return;
+          drawn[key] = true;
+          var a = posMap[n.id], b = posMap[tid];
+          if (!a || !b) return;
+          var mid = a.clone().add(b).multiplyScalar(0.5).normalize().multiplyScalar(1.25);
+          var curve = new THREE.QuadraticBezierCurve3(a, mid, b);
+          var geo = new THREE.BufferGeometry().setFromPoints(curve.getPoints(24));
+          var peer = NODES.find(function(x){ return x.id === tid; });
+          var both = n.status === "online" && peer && peer.status === "online";
+          group.add(new THREE.Line(geo, new THREE.LineBasicMaterial({
+            color: both ? 0xff6600 : 0x444444, transparent:true, opacity: both ? 0.55 : 0.25
+          })));
+        });
+      });
+      globe = { renderer:renderer, scene:scene, camera:camera, earth:group, markers:markers, mat:mat, anim:null };
+      function animate() {
+        globe.anim = requestAnimationFrame(animate);
+        group.rotation.y += 0.004;
+        group.rotation.x = Math.sin(Date.now() * 0.0003) * 0.12;
+        renderer.render(scene, camera);
+      }
+      animate();
+    }
+    function refreshGlobeColor() {
+      if (globe.mat) globe.mat.color.set(isEva() ? 0xff6600 : 0x3b82f6);
+    }
+
+    /* ========== THEME ========== */
+    function setTheme(name) {
+      state.theme = name;
+      document.body.classList.remove("theme-light","theme-terminal","theme-eva-basic","theme-eva-full");
+      if (name === "light") document.body.classList.add("theme-light");
+      if (name === "terminal") document.body.classList.add("theme-terminal");
+      if (name === "eva-basic") document.body.classList.add("theme-eva-basic");
+      if (name === "eva-full") document.body.classList.add("theme-eva-full");
+      var crtBtn = document.getElementById("crt-btn");
+      if (name === "eva-full") {
+        crtBtn.classList.remove("hidden");
+        document.body.classList.toggle("crt-on", state.crt);
+        crtBtn.classList.toggle("active", state.crt);
+      } else {
+        crtBtn.classList.add("hidden");
+        document.body.classList.remove("crt-on");
+      }
+      var vs = document.getElementById("voice-select");
+      if (isEva() && state.voice === "ops") { state.voice = "misato"; vs.value = "misato"; }
+      else if (!isEva() && ["misato","gendo","magi"].includes(state.voice)) {
+        state.voice = "ops"; vs.value = "ops";
+      }
+      [].forEach.call(vs.options, function(o) {
+        if (["misato","gendo","magi"].includes(o.value)) o.hidden = !isEva();
+      });
+      setVoice(state.voice);
+      applyLabels();
+      syncCouncilDisplay();
+      refreshGlobeColor();
+      setConfidence(state.confidence);
+      renderNodes();
+      if (isEva()) {
+        drawSync();
+        if (!globe.renderer) setTimeout(initGlobe, 80);
+      } else if (syncAnim) {
+        cancelAnimationFrame(syncAnim);
+        syncAnim = null;
+      }
+    }
+    function toggleCrt() {
+      state.crt = !state.crt;
+      document.body.classList.toggle("crt-on", state.crt);
+      document.getElementById("crt-btn").classList.toggle("active", state.crt);
+    }
+
+    /* ========== BOOT ========== */
+    setInterval(function() {
+      document.getElementById("clock").textContent =
+        new Date().toISOString().slice(0, 19).replace("T", " ");
+    }, 1000);
+
+    renderSeatRoster();
+    renderTrust();
+    renderNodes();
+    renderToken();
+    renderInbox();
+    renderApprovals();
+    updateCost();
+    setConfidence(0.94);
+    setCouncil("—","—","—","—","—");
+    setTheme("eva-full");
+    log("Nodo ops ready · SHADOW UI · MAGI seats linked to bases · Dogma/token/committee surfaces live");
+  </script>
+</body>
+</html>

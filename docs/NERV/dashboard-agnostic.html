@@ -199,58 +199,146 @@
 
     .pipe-line { width: 1px; height: 8px; background: var(--border); margin: 0 auto; }
 
-    /* MAGI triangle layout */
+    /* MAGI — shape rules (user):
+       TOP  = cuts on bottom-left AND bottom-right
+       LEFT = cut on top-right corner
+       RIGHT= cut on top-left corner  (Melchior bottom-right)
+       Drawn as SVG so stroke follows the cut edges. */
     .magi-triangle {
-      position: relative;
-      width: 100%;
-      height: 200px;
       display: none;
+      width: 100%;
+      max-width: 380px;
+      margin: 0 auto;
+      padding: 6px 4px 2px;
     }
     body.theme-eva-full .magi-triangle { display: block; }
     body.theme-eva-full .magi-plain { display: none !important; }
 
-    .magi-node {
+    .magi-row-top {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+    .magi-row-bot {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .magi-svg-panel {
+      position: relative;
+      width: 100%;
+      height: 88px;
+    }
+    .magi-svg-panel.top {
+      height: 96px;
+      max-width: 280px;
+      margin: 0 auto;
+    }
+    .magi-svg-panel svg {
       position: absolute;
-      width: 110px;
-      height: 72px;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+    .magi-svg-panel .magi-body {
+      position: absolute;
+      inset: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      font-size: 11px;
-      border: 2px solid;
-      background: #0a0a0e;
-    }
-    .magi-node .name { font-size: 9px; font-weight: 900; letter-spacing: 0.12em; }
-    .magi-node .val { font-size: 14px; font-weight: 700; margin-top: 2px; }
-    .magi-node .role { font-size: 8px; color: var(--muted); margin-top: 1px; }
-
-    /* Closed hex-like / trapezoid borders approximating classic MAGI panels */
-    .magi-melchior {
-      left: 50%; top: 4px; transform: translateX(-50%);
-      border-color: var(--ok);
-      clip-path: polygon(12% 0%, 88% 0%, 100% 18%, 100% 100%, 0% 100%, 0% 18%);
-      box-shadow: inset 0 0 16px rgba(34,197,94,0.35), 0 0 8px rgba(34,197,94,0.2);
-    }
-    .magi-balthasar {
-      left: 8%; bottom: 8px;
-      border-color: var(--ok);
-      clip-path: polygon(0% 0%, 88% 0%, 100% 22%, 100% 100%, 0% 100%);
-      box-shadow: inset 0 0 16px rgba(34,197,94,0.35), 0 0 8px rgba(34,197,94,0.2);
-    }
-    .magi-casper {
-      right: 8%; bottom: 8px;
-      border-color: var(--danger);
-      clip-path: polygon(12% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 22%);
-      box-shadow: inset 0 0 16px rgba(255,0,51,0.35), 0 0 8px rgba(255,0,51,0.2);
-      background: #1a0008;
-    }
-
-    /* Triangle connector lines */
-    .magi-tri-svg {
-      position: absolute; inset: 0; width: 100%; height: 100%;
       pointer-events: none;
+      z-index: 1;
+      padding: 8px 14px 14px;
+    }
+    .magi-svg-panel .name { font-size: 10px; font-weight: 900; letter-spacing: 0.12em; }
+    .magi-svg-panel .val { font-size: 18px; font-weight: 900; margin-top: 2px; letter-spacing: 0.1em; }
+    .magi-svg-panel .role {
+      font-size: 13px; font-weight: 700; color: var(--text);
+      margin-top: 3px; letter-spacing: 0.14em;
+    }
+    .magi-svg-panel .role .en {
+      font-size: 8px; font-weight: 400; color: var(--muted);
+      letter-spacing: 0.04em; display: block; margin-top: 1px;
+    }
+    .magi-svg-panel .metrics {
+      display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;
+      margin-top: 4px; font-size: 9px; font-weight: 700; letter-spacing: 0.04em;
+    }
+    .magi-svg-panel .metrics span { color: var(--muted); }
+    .magi-svg-panel .metrics b { color: var(--text); font-weight: 900; }
+    .magi-svg-panel.top { height: 118px; }
+    .magi-svg-panel { height: 108px; }
+    .magi-svg-panel .magi-body { padding: 6px 12px 16px; }
+
+
+    .magi-svg-panel[data-status="approve"] svg polygon { stroke: #22c55e; fill: #02120a; }
+    .magi-svg-panel[data-status="reject"] svg polygon { stroke: #ff0033; fill: #1a0008; }
+    .magi-svg-panel[data-status="pending"] svg polygon { stroke: #ffcc00; fill: #1a1400; }
+    .magi-svg-panel[data-status="skip"] svg polygon,
+    .magi-svg-panel[data-status="—"] svg polygon { stroke: #555; fill: #0a0a0e; }
+    .magi-svg-panel[data-status="approve"] .name,
+    .magi-svg-panel[data-status="approve"] .val { color: #22c55e !important; }
+    .magi-svg-panel[data-status="reject"] .name,
+    .magi-svg-panel[data-status="reject"] .val { color: #ff0033 !important; }
+    .magi-svg-panel[data-status="pending"] .name,
+    .magi-svg-panel[data-status="pending"] .val { color: #ffcc00 !important; }
+
+    /* EVA Bay — 3 in a row + sync waveforms; 3D/waves EVA-only */
+    .eva-bay { display: none; }
+    body.theme-eva-full .eva-bay { display: block; }
+
+    .eva-only { display: none !important; }
+    body.theme-eva-full .eva-only { display: block !important; }
+    .non-eva-only { display: block; }
+    body.theme-eva-full .non-eva-only { display: none !important; }
+
+    .eva-bay-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+    }
+    .eva-slot {
+      border: 1px solid rgba(255,102,0,0.4);
+      background: #0a0a0e;
+      padding: 5px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      box-shadow: inset 0 0 12px rgba(255,102,0,0.06);
+      min-width: 0;
+    }
+    .eva-slot-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 4px;
+    }
+    .eva-unit { font-weight: 900; letter-spacing: 0.08em; font-size: 10px; color: var(--accent); }
+    .eva-status { font-size: 8px; font-weight: 700; letter-spacing: 0.04em; }
+    .eva-art {
+      width: 100%; height: 56px; background: #050508;
+      border: 1px solid rgba(255,102,0,0.25);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; position: relative;
+    }
+    .eva-art img { width: 100%; height: 100%; object-fit: contain; }
+    .eva-art .fallback {
+      display: none; font-size: 9px; font-weight: 900;
+      letter-spacing: 0.1em; color: var(--muted);
+    }
+    .eva-pilot-line {
+      font-size: 9px; font-weight: 700;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .eva-pilot-line .meta { color: var(--muted); font-weight: 400; font-size: 8px; }
+    .eva-sync-canvas {
+      width: 100%; height: 28px; display: block;
+      background: #000; border: 1px solid rgba(255,102,0,0.3);
+    }
+    .eva-sync-label {
+      font-size: 8px; font-weight: 700;
+      display: flex; justify-content: space-between;
     }
 
     #syncCanvas, #globeCanvas {
@@ -372,11 +460,20 @@
               <span class="text-[10px] muted" data-i18n="confidence">Confidence</span>
               <span id="confidence-label" class="ok font-bold text-[11px]">0.94 · OK</span>
             </div>
-            <canvas id="syncCanvas" height="56"></canvas>
-            <div class="row mt-1 text-[9px] muted">
+            <canvas id="syncCanvas" class="eva-only" height="56"></canvas>
+            <div class="non-eva-only mt-1">
+              <input id="confidence-slider" type="range" min="0" max="100" value="94"
+                class="w-full" style="accent-color:var(--accent)"
+                oninput="setConfidence(this.value/100)" />
+              <div class="row mt-0.5 text-[9px] muted">
+                <span>0</span><span>promote ≥ 0.80</span><span>1.0</span>
+              </div>
+            </div>
+            <div class="row mt-1 text-[9px] muted eva-only">
               <span>promote ≥ 0.80</span>
               <span>HITL if &lt; 0.80 / RED</span>
             </div>
+            <div class="text-[8px] muted mt-0.5 jp-only eva-only">システム同期 · not pilot sync (see EVA BAY)</div>
           </div>
         </div>
 
@@ -420,25 +517,63 @@
               </div>
             </div>
             <!-- Triangle MAGI (EVA Full) -->
-            <div class="magi-triangle mx-auto" style="max-width:340px">
-              <svg class="magi-tri-svg" viewBox="0 0 340 200" preserveAspectRatio="none">
-                <polygon points="170,40 60,160 280,160" fill="none"
-                  stroke="rgba(255,102,0,0.35)" stroke-width="1" stroke-dasharray="4 3"/>
-              </svg>
-              <div class="magi-node magi-melchior">
-                <div class="name" style="color:var(--ok)">MELCHIOR</div>
-                <div class="val" id="check-policy-val-m">—</div>
-                <div class="role">政策 · policy</div>
+            <div class="magi-triangle">
+              <!-- TOP: bottom L+R cuts — CASPER -->
+              <div class="magi-row-top">
+                <div class="magi-svg-panel top" id="magi-panel-casper" data-status="—">
+                  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <polygon points="0,0 100,0 100,68 84,100 16,100 0,68"
+                      fill="#1a0008" stroke="#ff0033" stroke-width="2.5"
+                      vector-effect="non-scaling-stroke"/>
+                  </svg>
+                  <div class="magi-body">
+                    <div class="name" style="color:var(--danger)">CASPER · 3</div>
+                    <div class="val" id="check-intent-val-m">—</div>
+                    <div class="role">意図<span class="en">intent · ethics</span></div>
+                    <div class="metrics">
+                      <span>GPU <b id="magi-casper-gpu">84%</b></span>
+                      <span>CPU <b id="magi-casper-cpu">41%</b></span>
+                      <span>RAM <b id="magi-casper-ram">62%</b></span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="magi-node magi-balthasar">
-                <div class="name" style="color:var(--ok)">BALTHASAR</div>
-                <div class="val" id="check-safety-val-m">—</div>
-                <div class="role">安全 · safety</div>
-              </div>
-              <div class="magi-node magi-casper">
-                <div class="name" style="color:var(--danger)">CASPER</div>
-                <div class="val" id="check-intent-val-m">—</div>
-                <div class="role">意図 · intent</div>
+              <!-- BOTTOM: LEFT top-right cut | RIGHT top-left cut -->
+              <div class="magi-row-bot">
+                <div class="magi-svg-panel" id="magi-panel-balthasar" data-status="—">
+                  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <polygon points="0,0 82,0 100,24 100,100 0,100"
+                      fill="#02120a" stroke="#22c55e" stroke-width="2.5"
+                      vector-effect="non-scaling-stroke"/>
+                  </svg>
+                  <div class="magi-body">
+                    <div class="name" style="color:var(--ok)">BALTHASAR · 2</div>
+                    <div class="val" id="check-safety-val-m">—</div>
+                    <div class="role">安全<span class="en">safety</span></div>
+                    <div class="metrics">
+                      <span>GPU <b id="magi-balthasar-gpu">58%</b></span>
+                      <span>CPU <b id="magi-balthasar-cpu">33%</b></span>
+                      <span>RAM <b id="magi-balthasar-ram">71%</b></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="magi-svg-panel" id="magi-panel-melchior" data-status="—">
+                  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <polygon points="18,0 100,0 100,100 0,100 0,24"
+                      fill="#02120a" stroke="#22c55e" stroke-width="2.5"
+                      vector-effect="non-scaling-stroke"/>
+                  </svg>
+                  <div class="magi-body">
+                    <div class="name" style="color:var(--ok)">MELCHIOR · 1</div>
+                    <div class="val" id="check-policy-val-m">—</div>
+                    <div class="role">政策<span class="en">policy</span></div>
+                    <div class="metrics">
+                      <span>GPU <b id="magi-melchior-gpu">22%</b></span>
+                      <span>CPU <b id="magi-melchior-cpu">19%</b></span>
+                      <span>RAM <b id="magi-melchior-ram">44%</b></span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             <div class="px-2 pb-2">
@@ -543,17 +678,70 @@
       <!-- RIGHT -->
       <section class="col-span-12 lg:col-span-3 flex flex-col gap-3">
 
-        <!-- Node map (Three.js wireframe) -->
+        <!-- Node map: 3D globe only in EVA Full; list always -->
         <div class="panel">
           <div class="hdr">
             <span data-i18n="nodes">Nodes</span>
             <span id="worker-count" class="ok">3 online</span>
           </div>
-          <div class="p-1">
+          <div class="p-1 eva-only">
             <canvas id="globeCanvas" height="150"></canvas>
             <div class="text-[9px] muted px-1 py-0.5" id="map-label">active mesh</div>
+            <div class="text-[8px] px-1 pb-1 flex flex-wrap gap-x-2 gap-y-0.5" id="mesh-links"></div>
           </div>
           <div class="p-2 space-y-1 text-[11px]" id="worker-list"></div>
+        </div>
+
+        <!-- EVA Bay — 3 in a row, PNG, per-unit sync waveform -->
+        <div class="panel eva-bay">
+          <div class="hdr">
+            <span>EVA BAY · HANGAR 3</span>
+            <span class="ok text-[10px]">ACTIVE</span>
+          </div>
+          <div class="p-2 eva-bay-grid">
+            <div class="eva-slot" data-unit="01">
+              <div class="eva-slot-head">
+                <span class="eva-unit" style="color:var(--ok)">UNIT-01</span>
+                <span class="eva-status ok">READY</span>
+              </div>
+              <div class="eva-art">
+                <img src="assets/eva01.png" alt="EVA-01"
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                <span class="fallback">EVA-01</span>
+              </div>
+              <div class="eva-pilot-line">SHINJI <span class="meta">· plug</span></div>
+              <canvas class="eva-sync-canvas" id="evaSync01" height="28"></canvas>
+              <div class="eva-sync-label"><span class="ok">SYNC</span><span class="ok" id="sync-01">94%</span></div>
+            </div>
+            <div class="eva-slot" data-unit="02">
+              <div class="eva-slot-head">
+                <span class="eva-unit" style="color:var(--danger)">UNIT-02</span>
+                <span class="eva-status warn">STANDBY</span>
+              </div>
+              <div class="eva-art">
+                <img src="assets/eva02.png" alt="EVA-02"
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                <span class="fallback">EVA-02</span>
+              </div>
+              <div class="eva-pilot-line">ASUKA <span class="meta">· plug</span></div>
+              <canvas class="eva-sync-canvas" id="evaSync02" height="28"></canvas>
+              <div class="eva-sync-label"><span class="warn">SYNC</span><span class="warn" id="sync-02">71%</span></div>
+            </div>
+            <div class="eva-slot" data-unit="08">
+              <div class="eva-slot-head">
+                <span class="eva-unit" style="color:var(--blue)">UNIT-08</span>
+                <span class="eva-status muted">OFFLINE</span>
+              </div>
+              <div class="eva-art">
+                <img src="assets/eva08.png" alt="EVA-08"
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                <span class="fallback">EVA-08</span>
+              </div>
+              <div class="eva-pilot-line">MARI <span class="meta">· plug</span></div>
+              <canvas class="eva-sync-canvas" id="evaSync08" height="28"></canvas>
+              <div class="eva-sync-label"><span class="muted">SYNC</span><span class="muted" id="sync-08">—</span></div>
+            </div>
+          </div>
         </div>
 
         <div class="panel">
@@ -613,7 +801,7 @@
         "red-desc": "HITL intercept", "council-badge": "MAGI",
         rollback: "SPEAR OF LONGINUS (ROLLBACK)",
         trust: "KAJI'S WATERMELONS", skills: "技能 / 専門家",
-        confidence: "SYNC RATIO", nodes: "EVA BAY / BASES",
+        confidence: "SYSTEM SYNC", nodes: "MESH / BASES",
         council: "MAGI SYSTEM", safety: "BALTHASAR", policy: "MELCHIOR", intent: "CASPER",
         resolution: "決議 RESOLUTION", pipeline: "EXECUTION PIPELINE",
         stream: "LIVE STREAM", hitl: "MISATO / HITL",
@@ -632,9 +820,18 @@
     };
 
     const NODES = [
-      { id: "local-mac", status: "online", latency: 2, role: "coordinator", lat: 35.6, lon: 139.7 },
-      { id: "mini-pc", status: "online", latency: 18, role: "worker", lat: 37.7, lon: -122.4 },
-      { id: "edge-pi", status: "standby", latency: null, role: "worker", lat: 52.5, lon: 13.4 }
+      { id: "local-mac", status: "online", latency: 2, role: "coordinator",
+        lat: 35.6, lon: 139.7, callsign: "TOKYO-3", links: ["mini-pc", "edge-pi"] },
+      { id: "mini-pc", status: "online", latency: 18, role: "worker",
+        lat: 37.7, lon: -122.4, callsign: "NERV-01", links: ["local-mac"] },
+      { id: "edge-pi", status: "standby", latency: null, role: "worker",
+        lat: 52.5, lon: 13.4, callsign: "NERV-02", links: ["local-mac"] }
+    ];
+
+    const EVA_UNITS = [
+      { id: "01", sync: 0.94 },
+      { id: "02", sync: 0.71 },
+      { id: "08", sync: 0 }
     ];
 
     const state = {
@@ -683,58 +880,104 @@
       document.getElementById("worker-count").textContent = online + " online";
       list.innerHTML = NODES.map(n => {
         const nn = pack.nodeNames[n.id] || { name: n.id, role: n.role };
-        const badgeClass = n.status === "online" ? "badge-ok" : "badge-muted";
+        const badgeClass = n.status === "online" ? "badge-ok"
+          : (n.status === "standby" ? "badge-orange" : "badge-muted");
         const badgeText = n.status === "online"
-          ? (n.role === "coordinator" ? "COORD" : "ONLINE") : "STANDBY";
+          ? (n.role === "coordinator" ? "COORD" : "ONLINE")
+          : (n.status === "standby" ? "STANDBY" : "OFF");
         const lat = n.latency != null ? n.latency + " ms" : "—";
+        const cs = n.callsign ? n.callsign + " · " : "";
+        const linkNames = (n.links || []).map(function(id) {
+          const peer = NODES.find(function(x) { return x.id === id; });
+          return peer && peer.callsign ? peer.callsign : id;
+        }).join(", ");
+        const linkLine = linkNames
+          ? "<div class=\"muted text-[9px]\">↔ " + linkNames + "</div>" : "";
         return '<div class="row panel p-1.5" style="border-style:dashed">' +
-          "<div><div class=\"font-bold\">" + nn.name + "</div>" +
-          "<div class=\"muted text-[10px]\">" + nn.role + " · " + lat + "</div></div>" +
+          "<div><div class=\"font-bold\">" + cs + nn.name + "</div>" +
+          "<div class=\"muted text-[10px]\">" + nn.role + " · " + lat + "</div>" +
+          linkLine + "</div>" +
           "<span class=\"badge " + badgeClass + "\">" + badgeText + "</span></div>";
       }).join("");
       const active = pack.nodeNames[state.node];
-      document.getElementById("map-label").textContent =
-        "ACTIVE: " + (active ? active.name : state.node);
+      const mapLabel = document.getElementById("map-label");
+      if (mapLabel) mapLabel.textContent = "ACTIVE: " + (active ? active.name : state.node);
+      const mesh = document.getElementById("mesh-links");
+      if (mesh) {
+        const pairs = {};
+        const bits = [];
+        NODES.forEach(function(n) {
+          (n.links || []).forEach(function(tid) {
+            const key = [n.id, tid].sort().join("|");
+            if (pairs[key]) return;
+            pairs[key] = true;
+            const a = n.callsign || n.id;
+            const peer = NODES.find(function(x) { return x.id === tid; });
+            const b = peer ? (peer.callsign || peer.id) : tid;
+            const up = n.status === "online" && peer && peer.status === "online";
+            bits.push("<span class=\"" + (up ? "ok" : "muted") + "\">" +
+              a + (up ? " ↔ " : " ╌ ") + b + "</span>");
+          });
+        });
+        mesh.innerHTML = bits.join(" · ") || "<span class=\"muted\">no intercomms</span>";
+      }
     }
 
-    /* ---- Sync ratio canvas (eye-ish waveform) ---- */
+    /* ---- Sync waveforms (system + per-EVA); EVA Full only ---- */
     let syncPhase = 0;
-    function drawSync() {
-      const c = document.getElementById("syncCanvas");
-      if (!c) return;
-      const ctx = c.getContext("2d");
+    let syncAnim = null;
+
+    function paintWave(canvas, v, phase) {
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
       const dpr = window.devicePixelRatio || 1;
-      const w = c.clientWidth, h = c.height;
-      if (c.width !== w * dpr) { c.width = w * dpr; c.height = h * dpr; }
+      const w = canvas.clientWidth || 120;
+      const h = canvas.height || 28;
+      if (canvas.width !== Math.floor(w * dpr)) {
+        canvas.width = Math.floor(w * dpr);
+        canvas.height = Math.floor(h * dpr);
+      }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.fillStyle = "#000";
       ctx.fillRect(0, 0, w, h);
-
-      const v = state.confidence;
-      const amp = 8 + v * 18;
-      const col = v >= 0.8 ? "rgba(34,197,94,0.75)"
-        : v >= 0.6 ? "rgba(245,158,11,0.75)" : "rgba(239,68,68,0.8)";
-      const col2 = isEva() ? "rgba(255,102,0,0.45)" : "rgba(59,130,246,0.4)";
-
-      for (let layer = 0; layer < 4; layer++) {
+      if (v <= 0) {
+        ctx.strokeStyle = "rgba(80,80,80,0.5)";
+        ctx.beginPath(); ctx.moveTo(0, h / 2); ctx.lineTo(w, h / 2); ctx.stroke();
+        return;
+      }
+      const amp = 4 + v * (h * 0.35);
+      const col = v >= 0.8 ? "rgba(34,197,94,0.85)"
+        : v >= 0.6 ? "rgba(245,158,11,0.8)" : "rgba(239,68,68,0.85)";
+      const col2 = "rgba(255,102,0,0.4)";
+      for (let layer = 0; layer < 3; layer++) {
         ctx.beginPath();
         ctx.strokeStyle = layer % 2 === 0 ? col : col2;
-        ctx.lineWidth = 1.2;
-        for (let x = 0; x < w; x += 3) {
+        ctx.lineWidth = 1.1;
+        for (let x = 0; x < w; x += 2) {
           const y = h / 2 +
-            Math.sin(x * 0.04 + syncPhase + layer * 0.7) * amp *
-            Math.cos((x / w) * Math.PI) *
-            (1 - layer * 0.15);
+            Math.sin(x * 0.05 + phase + layer * 0.8) * amp *
+            Math.cos((x / Math.max(w, 1)) * Math.PI) *
+            (1 - layer * 0.18);
           if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         }
         ctx.stroke();
       }
-      // center line
-      ctx.strokeStyle = "rgba(255,255,255,0.08)";
-      ctx.beginPath(); ctx.moveTo(0, h/2); ctx.lineTo(w, h/2); ctx.stroke();
+    }
 
-      syncPhase += 0.04 + (1 - v) * 0.03;
-      requestAnimationFrame(drawSync);
+    function drawSync() {
+      if (syncAnim) cancelAnimationFrame(syncAnim);
+      function frame() {
+        if (typeof isEva === "function" && !isEva()) { syncAnim = null; return; }
+        paintWave(document.getElementById("syncCanvas"), state.confidence, syncPhase);
+        if (typeof EVA_UNITS !== "undefined") {
+          EVA_UNITS.forEach(function(u) {
+            paintWave(document.getElementById("evaSync" + u.id), u.sync, syncPhase + parseInt(u.id, 10));
+          });
+        }
+        syncPhase += 0.045 + (1 - state.confidence) * 0.025;
+        syncAnim = requestAnimationFrame(frame);
+      }
+      frame();
     }
 
     /* ---- Three.js wireframe globe ---- */
@@ -775,23 +1018,49 @@
       });
       group.add(new THREE.Mesh(ringGeo, ringMat));
 
-      // node markers
+      // NERV base markers + intercomm arcs
+      function latLonToVec(lat, lon, r) {
+        const phi = (90 - lat) * (Math.PI / 180);
+        const theta = (lon + 180) * (Math.PI / 180);
+        return new THREE.Vector3(
+          -r * Math.sin(phi) * Math.cos(theta),
+          r * Math.cos(phi),
+          r * Math.sin(phi) * Math.sin(theta)
+        );
+      }
       const markers = [];
+      const posMap = {};
       NODES.forEach(n => {
-        const phi = (90 - n.lat) * (Math.PI / 180);
-        const theta = (n.lon + 180) * (Math.PI / 180);
-        const r = 1.04;
-        const x = -r * Math.sin(phi) * Math.cos(theta);
-        const y = r * Math.cos(phi);
-        const z = r * Math.sin(phi) * Math.sin(theta);
-        const mGeo = new THREE.SphereGeometry(0.045, 8, 8);
-        const mMat = new THREE.MeshBasicMaterial({
-          color: n.status === "online" ? 0x22c55e : 0x666666
-        });
-        const m = new THREE.Mesh(mGeo, mMat);
-        m.position.set(x, y, z);
+        const pos = latLonToVec(n.lat, n.lon, 1.04);
+        posMap[n.id] = pos;
+        const mGeo = new THREE.SphereGeometry(n.role === "coordinator" ? 0.055 : 0.042, 8, 8);
+        const col = n.status === "online" ? 0x22c55e
+          : (n.status === "standby" ? 0xf59e0b : 0x666666);
+        const m = new THREE.Mesh(mGeo, new THREE.MeshBasicMaterial({ color: col }));
+        m.position.copy(pos);
         group.add(m);
         markers.push(m);
+      });
+      const drawn = {};
+      NODES.forEach(n => {
+        (n.links || []).forEach(function(tid) {
+          const key = [n.id, tid].sort().join("|");
+          if (drawn[key]) return;
+          drawn[key] = true;
+          const a = posMap[n.id], b = posMap[tid];
+          if (!a || !b) return;
+          const mid = a.clone().add(b).multiplyScalar(0.5).normalize().multiplyScalar(1.25);
+          const curve = new THREE.QuadraticBezierCurve3(a, mid, b);
+          const pts = curve.getPoints(24);
+          const geo = new THREE.BufferGeometry().setFromPoints(pts);
+          const peer = NODES.find(function(x) { return x.id === tid; });
+          const bothOnline = n.status === "online" && peer && peer.status === "online";
+          group.add(new THREE.Line(geo, new THREE.LineBasicMaterial({
+            color: bothOnline ? 0xff6600 : 0x444444,
+            transparent: true,
+            opacity: bothOnline ? 0.55 : 0.25
+          })));
+        });
       });
 
       globe = { renderer, scene, camera, earth: group, markers, mat, anim: null };
@@ -845,6 +1114,14 @@
       syncCouncilDisplay();
       refreshGlobeColor();
       setConfidence(state.confidence);
+      renderNodes();
+      if (isEva()) {
+        drawSync();
+        if (!globe.renderer) setTimeout(initGlobe, 80);
+      } else if (syncAnim) {
+        cancelAnimationFrame(syncAnim);
+        syncAnim = null;
+      }
     }
 
     function toggleCrt() {
@@ -923,11 +1200,32 @@
       if (elS) elS.className = "val " + (map[c.safety] || "muted");
       if (elP) elP.className = "val " + (map[c.policy] || "muted");
       if (elI) elI.className = "val " + (map[c.intent] || "muted");
+      // shape + text color from vote status
+      var pc = document.getElementById("magi-panel-casper");
+      var pb = document.getElementById("magi-panel-balthasar");
+      var pm = document.getElementById("magi-panel-melchior");
+      if (pc) pc.setAttribute("data-status", c.intent || "—");
+      if (pb) pb.setAttribute("data-status", c.safety || "—");
+      if (pm) pm.setAttribute("data-status", c.policy || "—");
+    }
+
+
+    function tickMagiMetrics() {
+      function jitter(id, base) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var v = Math.max(5, Math.min(98, base + Math.round((Math.random() - 0.5) * 8)));
+        el.textContent = v + "%";
+      }
+      jitter("magi-casper-gpu", 84); jitter("magi-casper-cpu", 41); jitter("magi-casper-ram", 62);
+      jitter("magi-balthasar-gpu", 58); jitter("magi-balthasar-cpu", 33); jitter("magi-balthasar-ram", 71);
+      jitter("magi-melchior-gpu", 22); jitter("magi-melchior-cpu", 19); jitter("magi-melchior-ram", 44);
     }
 
     function setCouncil(safety, policy, intent, resolution, tally) {
       state.lastCouncil = { safety: safety, policy: policy, intent: intent };
       syncCouncilDisplay();
+      tickMagiMetrics();
       document.getElementById("resolution").textContent = resolution;
       var map = { approve: "ok", reject: "danger", pending: "warn", skip: "muted", auto: "ok", approved: "ok", hitl: "warn", "—": "muted" };
       document.getElementById("resolution").className = "font-bold " + (map[resolution.toLowerCase()] || "muted");
@@ -941,6 +1239,8 @@
         : (v >= 0.8 ? " · OK" : " · REVIEW");
       document.getElementById("confidence-label").textContent = v.toFixed(2) + suffix;
       document.getElementById("confidence-label").className = (v >= 0.8 ? "ok" : "warn") + " font-bold text-[11px]";
+      var sl = document.getElementById("confidence-slider");
+      if (sl && document.activeElement !== sl) sl.value = Math.round(v * 100);
     }
 
     function renderInbox() {
@@ -1186,9 +1486,7 @@
     setConfidence(0.94);
     setCouncil("—","—","—","—","—");
     setTheme("dark");
-    drawSync();
-    // defer globe until layout sized
-    setTimeout(initGlobe, 100);
+    // drawSync + globe only when EVA Full (setTheme)
     window.addEventListener("resize", function() {
       if (globe.renderer) {
         var canvas = document.getElementById("globeCanvas");
