@@ -1,6 +1,6 @@
 # Nodo backlog
 
-Current work ledger, reviewed 1 November 2026 against main `2a8b901`. PR #1–#5 merged after green checks; target-OS and browser acceptance remain pending. [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md).
+Current work ledger, reviewed 2 November 2026 against main `2a8b901` (+ architecture discussion 2026-11-02). PR #1–#5 merged after green checks; target-OS and browser acceptance remain pending. [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md).
 
 ## Features and improvements
 
@@ -80,7 +80,7 @@ Current work ledger, reviewed 1 November 2026 against main `2a8b901`. PR #1–#5
 |:---:|---|---|---|---|
 | 🔴 | 🔺 P1 | Open | 🔴 Large | ~0% |
 
-💻 **→ Human action required: No**<br />Implement provider adapters and a delivery outbox with recurring timezone-aware schedules and user-editable facts.
+💻 **→ Human action required: No**<br />Implement provider adapters and a delivery outbox with recurring timezone-aware schedules and user-editable facts. Add isk-tiered routing (Pattern Blue fast-path; Orange/Red may invoke dynamic council); structured memory + context compaction before model calls; MCP/tool registration path; HITL timeout/escrow for approvals; no multi-model ballot on Blue or high-Sync work.
 
 | | |
 |---|---|
@@ -182,7 +182,7 @@ Current work ledger, reviewed 1 November 2026 against main `2a8b901`. PR #1–#5
 |:---:|---|---|---|---|
 | 🔴 | 🔺 P1 | Open | 🔴 Large | ~0% |
 
-💻 **→ Human action required: No**<br />Implement capability-aware scheduling with independent model endpoint and execution node selection.
+💻 **→ Human action required: No**<br />Implement capability-aware scheduling with independent model endpoint and execution node selection. Add: counselors/experts are hired (fixed or JIT) and default to suggest-only; only a small core council holds vote authority; capability ads + cost/privacy policy drive hiring; progressive trust can later promote a reliable expert into a stronger role.
 
 | | |
 |---|---|
@@ -531,6 +531,8 @@ Current work ledger, reviewed 1 November 2026 against main `2a8b901`. PR #1–#5
 | **Reproduce** | Follow docs/decisions/runtime-boundaries.md and the protocol/isolation test fixtures. |
 | **Check** | Network partitions, asleep old leaders and reconnect cannot create simultaneous authorities or duplicate physical effects. Context copying alone never grants leadership. |
 
+
+
 <details>
 <summary>Next action, estimates and evidence</summary>
 
@@ -544,6 +546,312 @@ Current work ledger, reviewed 1 November 2026 against main `2a8b901`. PR #1–#5
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
+
+</details>
+
+---
+
+### F-017
+
+**Risk-tiered dynamic council (Gendo router + conditional MAGI)**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔺 P1 | Open | 🔴 Large | ~0% |
+
+💻 **→ Human action required: No**<br />Implement Pattern Blue/Orange/Red classification and invoke multi-model (or multi-check) consensus only for Orange/Red or low Sync Ratio; Blue stays fast/deterministic.
+
+| | |
+|---|---|
+| **Issue** | Full multi-model ballot on every non-trivial task causes latency and cost explosion. Dynamic council by risk/task was planned but not implemented. |
+| **Reproduce** | Submit Blue, Orange and Red tasks; observe routing, whether MAGI is called, and end-to-end latency/cost. |
+| **Check** | Blue (and high-Sync) path skips or uses only deterministic/cheap checks; Orange may use small core council; Red or low Sync requires stronger consensus or HITL; decision and rationale are recorded and visible to observability. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Implement Gendo-style risk router and a small core MAGI (or equivalent multi-check) that is consulted only when policy requires it. Pattern Blue never pays for a full 2/3 multi-model vote. Persist classification, participants, votes/suggestions and final decision for the live flow view (F-019). Depends on F-003 model adapters.
+
+**Estimates:** Large remaining effort; ~0% complete. Estimated 2026-11-02.
+
+| Field | Value |
+|---|---|
+| PR / evidence | — |
+| Opened | 2026-11-02 |
+| Verification | Pending |
+| Reviewed | 2026-11-02 |
+
+</details>
+
+---
+
+### F-018
+
+**Fixed and JIT counselors/experts (outside council, suggest-only by default)**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔺 P1 | Open | 🔴 Large | ~0% |
+
+💻 **→ Human action required: No**<br />Support fixed local/always-on specialists and just-in-time (cloud, other-machine) experts that live outside the voting council and only suggest unless explicitly given a temporary seat.
+
+| | |
+|---|---|
+| **Issue** | Specialists are needed without making every task a large multi-model committee. Hiring and authority boundaries are undefined. |
+| **Reproduce** | Register a fixed specialist and a JIT expert; run tasks that should and should not hire them; inspect suggestions vs binding votes. |
+| **Check** | Expert roster with capability ads, cost, privacy and availability; hiring decision is cheap/rule-based; default mode is suggest-only; structured suggestion payload (proposal, confidence, evidence, cost/risk); temporary vote seat and progressive promotion are explicit and logged; MCP/API tools can appear as experts. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Define counselor/expert registry and hiring policy in the router (Gendo). Core MAGI remains small and authoritative. Fixed and JIT experts default to suggest-only; promotion into stronger roles follows progressive-trust rules (link F-007 / F-025). Remote experts are enrolled workers (F-005/F-006), not permanent council members. Dashboard expert-pool panel reflects real roster state.
+
+**Estimates:** Large remaining effort; ~0% complete. Estimated 2026-11-02.
+
+| Field | Value |
+|---|---|
+| PR / evidence | — |
+| Opened | 2026-11-02 |
+| Verification | Pending |
+| Reviewed | 2026-11-02 |
+
+</details>
+
+---
+
+### F-019
+
+**Live decision-flow observability (dashboard bound to real stages)**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔺 P2 | Open | 🟡 Medium | ~10% |
+
+💻 **→ Human action required: No**<br />Replace decorative dashboard animations with a stage-aware trace of Ingress → risk classification → optional council → token/HITL → execution → ledger.
+
+| | |
+|---|---|
+| **Issue** | dashboard1.html shows MAGI, Sephiroth tree and streams as test animations. Operators need a real view of where a job is and why a decision was taken. |
+| **Reproduce** | Run Blue/Orange/Red jobs; open dashboard; confirm active stage, classification reason, council participation and final outcome match backend state. |
+| **Check** | Pipeline tree and MAGI matrix driven by job state; Live Reasoning Stream is structured and filterable; Pattern and Sync Ratio are real; decorative-only paths removed or clearly marked demo; monochrome / light / dark / terminal skins planned. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Define a versioned job-stage and decision-event schema emitted by the coordinator. Bind dashboard panels (and any NERV skin) to that stream. Keep Eva framing as optional skin; functional observability must work without it. Depends on F-017 classification events and F-003 job runtime.
+
+**Estimates:** Medium remaining effort; ~10% complete (static UI exists). Estimated 2026-11-02.
+
+| Field | Value |
+|---|---|
+| PR / evidence | docs/NERV/dashboard1.html (prototype only) |
+| Opened | 2026-11-02 |
+| Verification | Pending |
+| Reviewed | 2026-11-02 |
+
+</details>
+
+---
+
+### F-020
+
+**Grounded personas for HITL and explanation (Misato primary)**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔺 P2 | Open | 🟡 Medium | ~5% |
+
+💻 **→ Human action required: No**<br />Optional conversational faces grounded in real job state: Misato as primary HITL/ops voice; Gendo optional for risk/policy explanation; pilots optional as worker identity only.
+
+| | |
+|---|---|
+| **Issue** | Personas Codec Chat exists as UI prototype. Free-form roleplay without grounding is a distraction and safety risk. |
+| **Reproduce** | Request approval, status brief, or “why was this Red?”; confirm answers cite real job/decision data and cannot bypass policy. |
+| **Check** | Misato can surface pending HITL and accept/reject with audit; Gendo (or Command) can explain classification; no persona can grant capabilities the backend policy denies; persona layer can be disabled; responses remain useful in non-Eva skins. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Implement thin, state-grounded persona adapters after F-003 messaging and F-017 decisions exist. Prefer Misato for push/HITL. Keep Shinji/pilots as optional labels for workers, not primary chat partners. Safety: persona output never overrides capability tokens or Pattern Red rules.
+
+**Estimates:** Medium remaining effort; ~5% complete. Estimated 2026-11-02.
+
+| Field | Value |
+|---|---|
+| PR / evidence | docs/NERV/dashboard1.html personas tab (prototype) |
+| Opened | 2026-11-02 |
+| Verification | Pending |
+| Reviewed | 2026-11-02 |
+
+</details>
+
+---
+
+### F-021
+
+**MCP and standardized tool/expert protocol**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔺 P1 | Open | 🔴 Large | ~0% |
+
+💻 **→ Human action required: No**<br />Adopt MCP and/or OpenAPI-style tool specs so fixed specialists, JIT experts and external tools register without bespoke wrappers.
+
+| | |
+|---|---|
+| **Issue** | Tool and expert integration is currently undefined; custom wrappers will not scale. |
+| **Reproduce** | Register a tool/expert via MCP or OpenAPI descriptor; invoke from a task; confirm schema validation, capability scope and audit. |
+| **Check** | Versioned tool/expert descriptors; deny-by-default capability binding; works for local and remote (other-machine) endpoints; appears in expert roster (F-018); no silent privilege escalation. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Choose MCP and/or OpenAPI as the registration path for Lilith/tools and counselors. Wire into risk router and suggest-only expert path. Align with F-005/F-006 worker enrolment for remote tools.
+
+**Estimates:** Large remaining effort; ~0% complete. Estimated 2026-11-02.
+
+| Field | Value |
+|---|---|
+| PR / evidence | — |
+| Opened | 2026-11-02 |
+| Verification | Pending |
+| Reviewed | 2026-11-02 |
+
+</details>
+
+---
+
+### F-022
+
+**Structured memory and context compaction**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔺 P1 | Open | 🔴 Large | ~0% |
+
+💻 **→ Human action required: No**<br />Provide editable user/facts memory plus a context-compaction step before model/council calls so history does not blow the window.
+
+| | |
+|---|---|
+| **Issue** | Durable SQLite state exists; there is no structured memory layer or summarizer for model context. |
+| **Reproduce** | Accumulate multi-day history; run a task that needs prior facts; confirm relevant memory is loaded and context stays within budget. |
+| **Check** | User-editable facts with provenance; compaction/summarization before MAGI or model calls; local-only default; correction and rollback of bad memory entries. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Design memory schema and compaction pipeline as part of M2 (F-003). Compaction runs before expensive council/model invocation. Link to progressive trust for memory-writing skills later (F-007).
+
+**Estimates:** Large remaining effort; ~0% complete. Estimated 2026-11-02.
+
+| Field | Value |
+|---|---|
+| PR / evidence | — |
+| Opened | 2026-11-02 |
+| Verification | Pending |
+| Reviewed | 2026-11-02 |
+
+</details>
+
+---
+
+### F-023
+
+**HITL timeout and escrow policies**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔺 P1 | Open | 🟡 Medium | ~0% |
+
+💻 **→ Human action required: No**<br />Pending Pattern Red / low-Sync approvals must expire or safe-cancel so the queue cannot block indefinitely when the human is offline.
+
+| | |
+|---|---|
+| **Issue** | HITL (Misato’s Apartment) has no TTL/escrow; a sleeping operator can stall the system. |
+| **Reproduce** | Create a Red approval request; do not respond; observe expiry, notification behaviour and final job state. |
+| **Check** | Configurable TTL; explicit expired/cancelled/needs-attention outcomes; no silent auto-approve of Red; push notification path (Telegram/PWA) when available; ledger records the timeout decision. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Add approval-lease / escrow fields to the inbox/job model. Default safe action on timeout is cancel or hold, never escalate privilege. Surface in dashboard and Misato persona (F-019/F-020). Depends on F-003 delivery and F-017 risk path.
+
+**Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-02.
+
+| Field | Value |
+|---|---|
+| PR / evidence | — |
+| Opened | 2026-11-02 |
+| Verification | Pending |
+| Reviewed | 2026-11-02 |
+
+</details>
+
+---
+
+### F-024
+
+**Structured telemetry and tracing**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔺 P2 | Open | 🟡 Medium | ~0% |
+
+💻 **→ Human action required: No**<br />Emit structured spans (OpenTelemetry-style or equivalent) for risk classification, council, expert suggestions, token issuance and execution so multi-step failures are debuggable.
+
+| | |
+|---|---|
+| **Issue** | Raw log streams and decorative dashboards are not enough to debug agent reasoning inside sandboxes or across nodes. |
+| **Reproduce** | Run a multi-step Orange/Red job that fails; locate the failing stage and expert/council input from traces alone. |
+| **Check** | Trace IDs across Ingress → Gendo → MAGI/experts → HITL → sandbox → ledger; exportable or queryable; no secrets in spans; feeds the live flow view (F-019). |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Define minimal span schema for decision and execution events. Prefer OpenTelemetry-compatible export later; start with structured local events that the dashboard and doctor can consume. Do not block M2 on full OTEL.
+
+**Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-02.
+
+| Field | Value |
+|---|---|
+| PR / evidence | — |
+| Opened | 2026-11-02 |
+| Verification | Pending |
+| Reviewed | 2026-11-02 |
+
+</details>
+
+---
+
+### F-025
+
+**Progressive trust for counselors/experts (as well as skills)**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔺 P2 | Open | 🟡 Medium | ~0% |
+
+💻 **→ Human action required: No**<br />Apply shadow → bounded → fuller autonomy (or temporary vote seat) to fixed/JIT experts using the same evaluation and rollback discipline as skills.
+
+| | |
+|---|---|
+| **Issue** | Progressive trust is specified for skills (Kaji’s Watermelons / F-007) but not yet for counselors and experts. |
+| **Reproduce** | Run a new expert in shadow/suggest-only; after successful evaluations, grant temporary seat or fixed specialist status; force a rollback. |
+| **Check** | Expert stages visible in roster and dashboard; promotion requires evaluation evidence; rollback revokes seat and capability without breaking the core council; never auto-grants Pattern Red authority. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Extend the progressive-trust pipeline so it applies to expert/counselor identities as well as skills. Reuse evaluation and rollback machinery from F-007. Keep core MAGI membership tightly controlled.
+
+**Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-02. Depends on F-018 and F-007.
+
+| Field | Value |
+|---|---|
+| PR / evidence | — |
+| Opened | 2026-11-02 |
+| Verification | Pending |
+| Reviewed | 2026-11-02 |
 
 </details>
 
