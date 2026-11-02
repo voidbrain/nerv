@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NODO OS // CONTROL PLANE & EXECUTION DASHBOARD v1.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap');
+
+        :root {
+            --bg-main: #f8f9fa;
+            --panel-bg: #ffffff;
+            --border-color: #d1d5db;
+            --text-primary: #111827;
+            --text-muted: #6b7280;
+            --accent-black: #000000;
+            --status-green: #16a34a;
+            --status-amber: #d97706;
+            --status-red: #dc2626;
+            --status-blue: #2563eb;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .term-box {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .term-header {
+            background-color: #f3f4f6;
+            border-bottom: 1px solid var(--border-color);
+            color: #111827;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .term-btn {
+            border: 1px solid #d1d5db;
+            background: #ffffff;
+            color: #111827;
+            transition: all 0.1s ease;
+        }
+        .term-btn:hover, .term-btn.active {
+            background: #111827;
+            color: #ffffff;
+            border-color: #111827;
+        }
+
+        .term-btn-danger {
+            border: 1px solid #fca5a5;
+            background: #fef2f2;
+            color: #dc2626;
+        }
+        .term-btn-danger:hover {
+            background: #dc2626;
+            color: #ffffff;
+        }
+
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #f3f4f6; }
+        ::-webkit-scrollbar-thumb { background: #9ca3af; }
+
+        .tree-step {
+            border: 1px solid #e5e7eb;
+            background: #ffffff;
+            transition: all 0.2s ease;
+        }
+        .tree-step.active {
+            border: 1px solid #111827;
+            background: #f3f4f6;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="p-3">
+
+    <div class="max-w-[1650px] mx-auto flex flex-col gap-2">
+
+        <!-- SYSTEM HEADER & TOP CONTROL BAR -->
+        <header class="term-box p-2 flex flex-wrap justify-between items-center bg-white">
+            <div class="flex items-center gap-3">
+                <div class="bg-black text-white font-bold px-2 py-0.5 text-xs tracking-wider">
+                    NODO CORE v1.0
+                </div>
+                <div>
+                    <h1 class="font-bold tracking-tight text-gray-900">DETERMINISTIC AGENT EXECUTION SYSTEM</h1>
+                    <p class="text-[9px] text-gray-500">M0–M6 ROADMAP TARGET // ARCHITECTURAL CONTROL PLANE</p>
+                </div>
+            </div>
+
+            <!-- NODE CLUSTER SELECTOR (M3 MULTI-NODE) -->
+            <div class="flex items-center gap-2 bg-gray-100 px-2 py-1 border border-gray-300">
+                <span class="text-[9px] text-gray-500 font-bold">PRIMARY NODE:</span>
+                <select id="cluster-node-select" onchange="switchClusterNode(this.value)" class="bg-white text-black font-bold text-[10px] border border-gray-300 px-1 py-0.5 focus:outline-none">
+                    <option value="local">LOCAL CLUSTER [MAC MINI M2 PRO / COORDINATOR]</option>
+                    <option value="cloud">CLOUD INSTANCE [AWS GRAVITON3 / WORKER]</option>
+                    <option value="edge">EDGE REPLICA [RASPBERRY PI 5 / INFERENCE]</option>
+                </select>
+            </div>
+
+            <div class="flex items-center gap-3 text-right">
+                <div class="text-[9px]">
+                    <div id="sys-clock" class="font-bold text-gray-900">2026.11.01 - 23:08:12</div>
+                    <span class="text-green-600 font-bold">● LITESTREAM LEDGER: SYNCED</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN CONTROL PLANE GRID -->
+        <main class="grid grid-cols-12 gap-2">
+
+            <!-- LEFT COLUMN: INGRESS (L3/M0), TRUST (M6), CONFIDENCE MONITOR (L4/M6), PERSISTENCE (L1/M1) -->
+            <section class="col-span-12 lg:col-span-3 flex flex-col gap-2">
+
+                <!-- INGRESS & TASK SCHEDULER (M0 HARNESS / L3 ROUTER) -->
+                <div class="term-box p-2">
+                    <div class="term-header px-2 py-1 text-[9px] mb-2 flex justify-between">
+                        <span>L3 TASK INGRESS & RISK CLASSIFIER</span>
+                        <span class="text-gray-500">M0 / M3</span>
+                    </div>
+                    <div class="space-y-1">
+                        <button onclick="triggerTask('LOW')" class="w-full text-left p-1.5 border border-gray-200 bg-gray-50 hover:bg-gray-100 rounded flex justify-between items-center text-[9px]">
+                            <div>
+                                <span class="font-bold text-blue-700">LOW RISK (READ-ONLY)</span>
+                                <div class="text-[8px] text-gray-500">Telemetry polling, log compression</div>
+                            </div>
+                            <span class="text-[8px] px-1 bg-blue-100 text-blue-800 font-bold">AUTO</span>
+                        </button>
+
+                        <button onclick="triggerTask('MED')" class="w-full text-left p-1.5 border border-gray-200 bg-gray-50 hover:bg-gray-100 rounded flex justify-between items-center text-[9px]">
+                            <div>
+                                <span class="font-bold text-amber-700">MEDIUM RISK (BOUNDED)</span>
+                                <div class="text-[8px] text-gray-500">Web scraping, multi-node sync</div>
+                            </div>
+                            <span class="text-[8px] px-1 bg-amber-100 text-amber-800 font-bold">VOTE</span>
+                        </button>
+
+                        <button onclick="triggerTask('HIGH')" class="w-full text-left p-1.5 border border-gray-200 bg-gray-50 hover:bg-gray-100 rounded flex justify-between items-center text-[9px]">
+                            <div>
+                                <span class="font-bold text-red-700">HIGH RISK (MUTATIVE)</span>
+                                <div class="text-[8px] text-gray-500">DB schema updates, shell exec</div>
+                            </div>
+                            <span class="text-[8px] px-1 bg-red-100 text-red-800 font-bold">HITL</span>
+                        </button>
+                    </div>
+
+                    <div class="mt-2 pt-1.5 border-t border-gray-200">
+                        <button onclick="triggerEmergencyRollback()" class="term-btn term-btn-danger w-full py-1.5 font-bold text-center text-[9px]">
+                            EMERGENCY TRANSACTION ROLLBACK (SPEAR)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PROGRESSIVE TRUST PIPELINE (M6 / SHADOW TO AUTONOMY) -->
+                <div class="term-box p-2">
+                    <div class="term-header px-2 py-1 text-[9px] mb-1.5 flex justify-between">
+                        <span>PROGRESSIVE TRUST PIPELINE (M6)</span>
+                        <span class="text-gray-500">SHADOW ➔ FULL</span>
+                    </div>
+                    <div class="space-y-1.5 text-[8px]">
+                        <div class="p-1.5 border border-gray-200 bg-gray-50 flex justify-between items-center">
+                            <div>
+                                <div class="font-bold text-gray-900">web_scraper_v2.py</div>
+                                <div class="text-gray-500">Stage: Shadow Mode (Evaluating AST)</div>
+                            </div>
+                            <span class="px-1 bg-amber-100 text-amber-800 font-bold text-[8px]">SHADOW</span>
+                        </div>
+                        <div class="p-1.5 border border-gray-200 bg-gray-50 flex justify-between items-center">
+                            <div>
+                                <div class="font-bold text-gray-900">sqlite_backup_tool.py</div>
+                                <div class="text-gray-500">Stage: Full Autonomy (Promoted)</div>
+                            </div>
+                            <span class="px-1 bg-green-100 text-green-800 font-bold text-[8px]">PROMOTED</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OPENJEV EVALUATION SCORE & SIGNAL MONITOR (L4 / M6) -->
+                <div class="term-box p-2">
+                    <div class="term-header px-2 py-1 text-[9px] mb-1 flex justify-between">
+                        <span>OPENJEV CODE CONFIDENCE SIGNAL</span>
+                        <span class="text-green-700 font-bold" id="confidence-score-text">SCORE: 9.4 / 10.0</span>
+                    </div>
+                    <div class="bg-black relative h-[90px] border border-gray-300">
+                        <canvas id="signalCanvas" width="280" height="90" class="w-full h-full"></canvas>
+                        <div class="absolute bottom-1 left-2 text-[7px] text-gray-400 font-mono">AST LINTER WAVEFORM // AST VALIDATION STABLE</div>
+                    </div>
+                </div>
+
+                <!-- PERSISTENCE & TOOL REGISTRIES (L1 / M1 / MCP) -->
+                <div class="term-box p-2 flex-1 flex flex-col gap-1 text-[8px]">
+                    <div class="term-header px-2 py-1 text-[8px]">L1 PERSISTENCE & ENGINE REGISTRIES</div>
+
+                    <div class="p-1.5 border border-gray-200 bg-gray-50">
+                        <div class="font-bold text-gray-900">TERMINAL DOGMA LEDGER & MCP TOOL REGISTRY</div>
+                        <div class="text-gray-600">SQLite append-only transaction log + 24 verified Model Context Protocol (MCP) tools loaded.</div>
+                    </div>
+
+                    <div class="p-1.5 border border-gray-200 bg-gray-50">
+                        <div class="font-bold text-gray-900">FOUNDATION MODEL KERNEL & LOCAL ENGINE</div>
+                        <div class="text-gray-600">Base weight configurations + local Gemma instances for zero-cost edge execution.</div>
+                    </div>
+
+                    <div class="p-1.5 border border-gray-200 bg-gray-50">
+                        <div class="font-bold text-gray-900">DETERMINISTIC COMPLIANCE LAYER (SEELE)</div>
+                        <div class="text-gray-600">Static AST parsing, capability boundary checks, and signed JWT scopes.</div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- CENTER COLUMN: MULTI-MODEL CONSENSUS (L5/M2), STREAM/CHAT TABBED VIEW, HARDWARE RUNTIMES (L2/M1a) -->
+            <section class="col-span-12 lg:col-span-6 flex flex-col gap-2">
+
+                <!-- MULTI-MODEL CONSENSUS MATRIX (L5 MAGI COUNCIL / M2) -->
+                <div class="term-box p-2.5">
+                    <div class="flex justify-between items-center border-b border-gray-300 pb-1 mb-2">
+                        <div class="text-[10px] font-bold text-gray-900">L5: MULTI-MODEL CONSENSUS COUNCIL (M2)</div>
+                        <div class="text-[8px] text-gray-500 font-mono">BALLOT SCHEME: 2/3 MAJORITY REQUIRED</div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 text-center mb-2">
+                        <!-- MODEL 1 -->
+                        <div id="model-1-box" class="p-2 border border-green-600 bg-green-50 text-left">
+                            <div class="text-[8px] text-gray-500 font-bold mb-1">NODE 01: CLOUD REASONER</div>
+                            <div class="text-[9px] font-bold text-gray-900">Claude 3.5 Sonnet</div>
+                            <div id="m1-vote" class="text-xs font-bold text-green-700 mt-1">VOTE: APPROVED</div>
+                        </div>
+
+                        <!-- MODEL 2 -->
+                        <div id="model-2-box" class="p-2 border border-green-600 bg-green-50 text-left">
+                            <div class="text-[8px] text-gray-500 font-bold mb-1">NODE 02: LOCAL EDGE LLM</div>
+                            <div class="text-[9px] font-bold text-gray-900">Gemma 2B (Ollama)</div>
+                            <div id="m2-vote" class="text-xs font-bold text-green-700 mt-1">VOTE: APPROVED</div>
+                        </div>
+
+                        <!-- MODEL 3 -->
+                        <div id="model-3-box" class="p-2 border border-red-600 bg-red-50 text-left">
+                            <div class="text-[8px] text-gray-500 font-bold mb-1">NODE 03: SAFETY & ETHICS</div>
+                            <div class="text-[9px] font-bold text-gray-900">GPT-4o / Local Policy</div>
+                            <div id="m3-vote" class="text-xs font-bold text-red-700 mt-1">VOTE: REJECTED</div>
+                        </div>
+                    </div>
+
+                    <!-- EXPERT POOL & TALLY BAR -->
+                    <div class="p-1.5 bg-gray-100 border border-gray-300 flex justify-between items-center text-[8px]">
+                        <div>
+                            <span class="font-bold text-gray-700">SPECIALIZED CONSULTANT POOL:</span>
+                            <span class="text-gray-600">Jasper (Token Auditor) [ACTIVE] | Zara (Reversibility Checker) [READY]</span>
+                        </div>
+                        <div id="consensus-result-badge" class="font-bold text-green-700">
+                            RESULT: PASS (2/3 MAJORITY)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TABBED AREA: REASONING TELEMETRY STREAM VS HUMAN-IN-THE-LOOP COMMS (M4 PWA/TELEGRAM) -->
+                <div class="term-box p-2.5 flex-1 flex flex-col h-[240px]">
+                    <div class="flex justify-between items-center border-b border-gray-200 pb-1 mb-1.5">
+                        <div class="flex gap-1">
+                            <button onclick="switchTab('stream')" id="tab-btn-stream" class="term-btn active px-2 py-0.5 text-[8px] font-bold">REASONING & EXECUTION STREAM</button>
+                            <button onclick="switchTab('comms')" id="tab-btn-comms" class="term-btn px-2 py-0.5 text-[8px] font-bold">HITL INTERLOCK COMMS (M4)</button>
+                        </div>
+                        <span class="text-[7px] text-gray-400">STRICT SINGLE-LINE TELEMETRY</span>
+                    </div>
+
+                    <!-- TAB 1: REASONING STREAM (STRICT SINGLE LINE OUTPUT) -->
+                    <div id="tab-view-stream" class="tab-pane flex-1 bg-gray-950 text-gray-200 p-2 border border-gray-800 font-mono overflow-y-auto space-y-1 text-[9px]" style="display: block;">
+                        <div class="text-gray-400">[23:08:00] [MESH] WireGuard encrypted tunnel active between local coordinator and remote workers.</div>
+                        <div class="text-gray-400">[23:08:03] [LEDGER] SQLite transaction log checkpoint synced via Litestream to backup target.</div>
+                        <div class="text-blue-400">[23:08:06] [PARSER] Entry Plug task ingested. Risk tier classified as PATTERN LOW.</div>
+                        <div class="text-green-400">[23:08:10] [EXEC] Task dispatched to Firecracker micro-VM sandbox #01. Execution nominal.</div>
+                    </div>
+
+                    <!-- TAB 2: HITL INTERLOCK COMMS (TELEGRAM / PWA INTEGRATION) -->
+                    <div id="tab-view-comms" class="tab-pane flex-1 flex flex-col gap-1.5" style="display: none;">
+                        <div class="flex gap-1">
+                            <button onclick="switchOperator('architect')" class="px-1.5 py-0.5 bg-gray-100 text-[8px] font-bold text-gray-800 border border-gray-300">SYSTEM ARCHITECT</button>
+                            <button onclick="switchOperator('router')" class="px-1.5 py-0.5 bg-gray-100 text-[8px] font-bold text-gray-800 border border-gray-300">RISK ROUTER</button>
+                            <button onclick="switchOperator('hitl')" class="px-1.5 py-0.5 bg-gray-100 text-[8px] font-bold text-blue-700 border border-blue-300">HITL INTERLOCK</button>
+                        </div>
+                        <div class="flex-1 bg-gray-50 p-2 border border-gray-200 overflow-y-auto space-y-1.5 font-mono text-[9px]" id="operator-chat-log">
+                            <div class="flex gap-2 items-start bg-white p-1.5 border border-gray-200">
+                                <div class="w-6 h-6 bg-black text-white flex items-center justify-center font-bold text-[8px] flex-shrink-0">SYS</div>
+                                <div>
+                                    <span class="font-bold text-gray-900">[ARCHITECT]:</span>
+                                    <span class="text-gray-700">System parameters loaded. Human-in-the-Loop approval required for mutative calls.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-1">
+                            <input type="text" id="operator-input" placeholder="Transmit approval token or command..." class="flex-1 bg-white border border-gray-300 p-1 text-gray-900 text-[9px] focus:outline-none focus:border-black">
+                            <button onclick="sendOperatorMessage()" class="term-btn px-3 py-1 text-[8px] font-bold">TRANSMIT</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COMPACT HARDWARE RUNTIME HANGAR (L2 FIRECRACKER MICRO-VMS / M1a.1 & M5) -->
+                <div class="term-box p-2">
+                    <div class="term-header px-2 py-0.5 text-[9px] mb-1.5 flex justify-between">
+                        <span>L2 CONTAINMENT RUNTIMES & HARDWARE WORKERS (M1a / M5)</span>
+                        <span class="text-green-700 font-bold">3 CONTAINERS READY</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <!-- WORKER 1 -->
+                        <div class="p-1.5 border border-gray-200 bg-gray-50 flex flex-col justify-between">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-gray-900">NODE-01 (COORDINATOR)</span>
+                                <span class="text-[7px] px-1 bg-green-100 text-green-800 font-bold">LOCAL</span>
+                            </div>
+                            <div class="text-[8px] text-gray-500">Hardware: Mac Mini M2 Pro</div>
+                            <div class="text-[8px] text-gray-500">Scope: Broad Capability Token</div>
+                            <div class="text-[8px] text-blue-700 font-bold mt-1">Runtime: Firecracker micro-VM #1</div>
+                        </div>
+
+                        <!-- WORKER 2 -->
+                        <div class="p-1.5 border border-gray-200 bg-gray-50 flex flex-col justify-between">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-gray-900">NODE-02 (EDGE INFERENCE)</span>
+                                <span class="text-[7px] px-1 bg-amber-100 text-amber-800 font-bold">EDGE</span>
+                            </div>
+                            <div class="text-[8px] text-gray-500">Hardware: Raspberry Pi 5</div>
+                            <div class="text-[8px] text-gray-500">Scope: High Compute Scope</div>
+                            <div class="text-[8px] text-blue-700 font-bold mt-1">Runtime: Firecracker micro-VM #2</div>
+                        </div>
+
+                        <!-- WORKER 3 -->
+                        <div class="p-1.5 border border-gray-200 bg-gray-50 flex flex-col justify-between">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-gray-900">NODE-03 (CLOUD STORAGE)</span>
+                                <span class="text-[7px] px-1 bg-blue-100 text-blue-800 font-bold">CLOUD</span>
+                            </div>
+                            <div class="text-[8px] text-gray-500">Hardware: NAS / AWS Cluster</div>
+                            <div class="text-[8px] text-gray-500">Scope: Minimal Read-Only Scope</div>
+                            <div class="text-[8px] text-blue-700 font-bold mt-1">Runtime: Docker Sandbox Isolation</div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- RIGHT COLUMN: VERTICAL TREE-OF-LIFE JOB FLUX & SPHERICAL MESH NETWORK GLOBE -->
+            <section class="col-span-12 lg:col-span-3 flex flex-col gap-2">
+
+                <!-- VERTICAL TREE-OF-LIFE JOB FLUX (DECISION STATE MACHINE FLOWCHART) -->
+                <div class="term-box p-2.5">
+                    <div class="term-header px-2 py-0.5 text-[8px] mb-2 flex justify-between">
+                        <span>EXECUTION PIPELINE FLOW (STATE MACHINE)</span>
+                        <span class="text-gray-500 font-bold">STATE: IDLE</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1.5 font-mono text-[9px]">
+                        <div id="tree-1" class="tree-step active w-full p-1.5 text-center rounded">
+                            <span class="text-black font-bold">01. INGRESS & PAYLOAD PARSE</span>
+                        </div>
+                        <div class="w-[1px] h-2 bg-gray-300"></div>
+                        <div id="tree-2" class="tree-step w-full p-1.5 text-center rounded">
+                            <span class="text-gray-600">02. L3 RISK CLASSIFIER</span>
+                        </div>
+                        <div class="w-[1px] h-2 bg-gray-300"></div>
+                        <div id="tree-3" class="tree-step w-full p-1.5 text-center rounded">
+                            <span class="text-gray-600">03. L5 CONSENSUS COUNCIL</span>
+                        </div>
+                        <div class="w-[1px] h-2 bg-gray-300"></div>
+                        <div id="tree-4" class="tree-step w-full p-1.5 text-center rounded">
+                            <span class="text-gray-600">04. L4 AST & CONFIDENCE EVAL</span>
+                        </div>
+                        <div class="w-[1px] h-2 bg-gray-300"></div>
+                        <div id="tree-5" class="tree-step w-full p-1.5 text-center rounded">
+                            <span class="text-gray-600">05. L2 CONTAINER SANDBOX</span>
+                        </div>
+                        <div class="w-[1px] h-2 bg-gray-300"></div>
+                        <div id="tree-6" class="tree-step w-full p-1.5 text-center rounded">
+                            <span class="text-gray-600">06. L1 DOGMA LEDGER SYNC</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MESH NETWORK SPHERICAL GLOBE (M3 WIREGUARD MESH) -->
+                <div class="term-box p-2 flex-1">
+                    <div class="term-header px-2 py-0.5 text-[8px] mb-1.5 flex justify-between">
+                        <span>WIREGUARD MESH NETWORK GLOBE (M3)</span>
+                        <span class="text-green-700 font-bold">ENCRYPTED</span>
+                    </div>
+                    <div class="bg-gray-950 border border-gray-800 h-[150px] relative flex items-center justify-center overflow-hidden cursor-pointer" onclick="cycleClusterMesh()">
+                        <canvas id="meshGlobeCanvas" width="280" height="150" class="w-full h-full"></canvas>
+                        <div class="absolute bottom-1 left-2 text-[7px] text-gray-400 font-bold" id="mesh-status-label">ACTIVE NODE: LOCAL COORDINATOR</div>
+                    </div>
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <!-- SCRIPT LOGIC & TELEMETRY ENGINE -->
+    <script>
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('sys-clock').innerText =
+                now.getFullYear() + '.' +
+                String(now.getMonth()+1).padStart(2,'0') + '.' +
+                String(now.getDate()).padStart(2,'0') + ' - ' +
+                now.toTimeString().split(' ')[0];
+        }, 1000);
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-pane').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('#tab-btn-stream, #tab-btn-comms').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-view-' + tab).style.display = 'flex';
+            document.getElementById('tab-btn-' + tab).classList.add('active');
+        }
+
+        // CONFIDENCE SCORE WAVEFORM CANVAS (L4 OPENJEV)
+        const signalCanvas = document.getElementById('signalCanvas');
+        const signalCtx = signalCanvas.getContext('2d');
+        let signalPhase = 0;
+
+        function drawSignalWaveform() {
+            signalCtx.fillStyle = '#000000';
+            signalCtx.fillRect(0, 0, signalCanvas.width, signalCanvas.height);
+            signalCtx.lineWidth = 1.2;
+
+            for (let i = 0; i < 5; i++) {
+                signalCtx.beginPath();
+                signalCtx.strokeStyle = i % 2 === 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(59, 130, 246, 0.7)';
+
+                for (let x = 0; x < signalCanvas.width; x += 4) {
+                    const y = (signalCanvas.height / 2) + Math.sin(x * 0.03 + signalPhase + (i * 0.2)) * 25 * Math.cos((x / signalCanvas.width) * Math.PI);
+                    if (x === 0) signalCtx.moveTo(x, y);
+                    else signalCtx.lineTo(x, y);
+                }
+                signalCtx.stroke();
+            }
+            signalPhase += 0.04;
+            requestAnimationFrame(drawSignalWaveform);
+        }
+        drawSignalWaveform();
+
+        // WIREGUARD MESH GLOBE CANVAS (M3 MULTI-NODE)
+        const globeCanvas = document.getElementById('meshGlobeCanvas');
+        const globeCtx = globeCanvas.getContext('2d');
+        let globeRotation = 0;
+        let selectedMeshIndex = 0;
+        const meshNodes = ["LOCAL COORDINATOR (MAC MINI)", "CLOUD WORKER (AWS)", "EDGE REPLICA (RASPBERRY PI)"];
+
+        function drawMeshGlobe() {
+            globeCtx.fillStyle = '#030712';
+            globeCtx.fillRect(0, 0, globeCanvas.width, globeCanvas.height);
+
+            const cx = globeCanvas.width / 2;
+            const cy = globeCanvas.height / 2;
+            const radius = 52;
+
+            globeCtx.strokeStyle = '#4b5563';
+            globeCtx.lineWidth = 1;
+            globeCtx.beginPath();
+            globeCtx.arc(cx, cy, radius, 0, 2 * Math.PI);
+            globeCtx.stroke();
+
+            // Latitude lines
+            for (let lat = -Math.PI / 3; lat <= Math.PI / 3; lat += Math.PI / 6) {
+                let ringRadius = radius * Math.cos(lat);
+                let ringY = cy + radius * Math.sin(lat);
+                globeCtx.beginPath();
+                globeCtx.ellipse(cx, ringY, ringRadius, ringRadius * 0.2, 0, 0, 2 * Math.PI);
+                globeCtx.strokeStyle = 'rgba(156, 163, 175, 0.3)';
+                globeCtx.stroke();
+            }
+
+            // Longitude lines
+            for (let i = 0; i < 4; i++) {
+                let angle = globeRotation + (i * Math.PI / 4);
+                globeCtx.beginPath();
+                globeCtx.ellipse(cx, cy, radius * Math.abs(Math.sin(angle)), radius, 0, 0, 2 * Math.PI);
+                globeCtx.strokeStyle = 'rgba(156, 163, 175, 0.3)';
+                globeCtx.stroke();
+            }
+
+            globeRotation += 0.01;
+            requestAnimationFrame(drawMeshGlobe);
+        }
+        drawMeshGlobe();
+
+        function cycleClusterMesh() {
+            selectedMeshIndex = (selectedMeshIndex + 1) % meshNodes.length;
+            document.getElementById('mesh-status-label').innerText = "ACTIVE NODE: " + meshNodes[selectedMeshIndex];
+        }
+
+        // TASK INGRESS & FLOWCHART ACTIVATION (STRICT LINE-BY-LINE OUTPUT)
+        function triggerTask(risk) {
+            const stream = document.getElementById('tab-view-stream');
+            const time = new Date().toTimeString().split(' ')[0];
+
+            for(let i=1; i<=6; i++) document.getElementById(`tree-${i}`).classList.remove('active');
+
+            if (risk === 'LOW') {
+                document.getElementById('tree-1').classList.add('active');
+                setTimeout(() => document.getElementById('tree-3').classList.add('active'), 200);
+                setTimeout(() => document.getElementById('tree-5').classList.add('active'), 400);
+                setTimeout(() => document.getElementById('tree-6').classList.add('active'), 600);
+                stream.innerHTML += `<div class="text-blue-400">[${time}] [INGRESS] Low risk task parsed. Consensus bypassed. Dispatched to Firecracker sandbox.</div>`;
+            } else if (risk === 'MED') {
+                document.getElementById('tree-1').classList.add('active');
+                setTimeout(() => document.getElementById('tree-2').classList.add('active'), 200);
+                setTimeout(() => document.getElementById('tree-3').classList.add('active'), 400);
+                setTimeout(() => document.getElementById('tree-4').classList.add('active'), 600);
+                stream.innerHTML += `<div class="text-amber-400">[${time}] [ROUTER] Bounded task detected. Polling 3-node model consensus and AST static analyzer.</div>`;
+            } else if (risk === 'HIGH') {
+                document.getElementById('tree-1').classList.add('active');
+                setTimeout(() => document.getElementById('tree-2').classList.add('active'), 200);
+                setTimeout(() => document.getElementById('tree-3').classList.add('active'), 400);
+                setTimeout(() => document.getElementById('tree-4').classList.add('active'), 600);
+                stream.innerHTML += `<div class="text-red-400">[${time}] [INTERCEPT] High-risk mutative task detected! Routed to HITL approval portal (Telegram/PWA).</div>`;
+            }
+            stream.scrollTop = stream.scrollHeight;
+        }
+
+        function triggerEmergencyRollback() {
+            const stream = document.getElementById('tab-view-stream');
+            const time = new Date().toTimeString().split(' ')[0];
+            stream.innerHTML += `<div class="text-red-500 font-bold">[${time}] [ROLLBACK] Emergency kill switch activated. Capability tokens revoked and SQLite ledger rolled back.</div>`;
+            stream.scrollTop = stream.scrollHeight;
+        }
+
+        function switchClusterNode(node) {
+            const stream = document.getElementById('tab-view-stream');
+            const time = new Date().toTimeString().split(' ')[0];
+            stream.innerHTML += `<div class="text-green-400">[${time}] [CLUSTER] Active primary node set to: ${node.toUpperCase()}</div>`;
+            stream.scrollTop = stream.scrollHeight;
+        }
+
+        let currentOperator = 'architect';
+        function switchOperator(op) {
+            currentOperator = op;
+        }
+
+        function sendOperatorMessage() {
+            const input = document.getElementById('operator-input');
+            const log = document.getElementById('operator-chat-log');
+            if(!input.value.trim()) return;
+
+            log.innerHTML += `<div class="flex gap-2 items-start bg-white p-1.5 border border-gray-200">
+                <div class="w-6 h-6 bg-blue-600 text-white flex items-center justify-center font-bold text-[8px] flex-shrink-0">USER</div>
+                <div><span class="font-bold text-blue-700">[OPERATOR]:</span> <span class="text-gray-900">${input.value}</span></div></div>`;
+
+            setTimeout(() => {
+                let reply = "Task instruction received and committed to Terminal Dogma.";
+                if(currentOperator === 'architect') reply = "Invariant parameters checked against tool schema.";
+                if(currentOperator === 'router') reply = "Risk classification confirmed. Dispatched to queue.";
+                if(currentOperator === 'hitl') reply = "Manual signature verified. Released capability token.";
+
+                log.innerHTML += `<div class="flex gap-2 items-start bg-white p-1.5 border border-gray-200">
+                    <div class="w-6 h-6 bg-black text-white flex items-center justify-center font-bold text-[8px] flex-shrink-0">SYS</div>
+                    <div><span class="font-bold text-gray-900">[${currentOperator.toUpperCase()}]:</span> <span class="text-gray-800">${reply}</span></div></div>`;
+                log.scrollTop = log.scrollHeight;
+            }, 400);
+
+            input.value = "";
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NERV MAGI / NODO OS v5.0 [TOKYO-3 COMMAND]</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+        :root {
+            --nerv-orange: #ff6600;
+            --nerv-red: #ff0033;
+            --nerv-yellow: #ffcc00;
+            --nerv-blue: #0099ff;
+            --nerv-purple: #a855f7;
+            --nerv-bg: #08080a;
+            --nerv-panel: #111116;
+            --nerv-border: rgba(255, 102, 0, 0.3);
+        }
+
+        body {
+            background-color: var(--nerv-bg);
+            color: #ffaa66;
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+        }
+
+        body.scanlines-active {
+            background-image:
+                radial-gradient(rgba(255, 102, 0, 0.05) 1px, transparent 0),
+                linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0, 0, 0, 0.4) 51%);
+            background-size: 24px 24px, 100% 4px;
+        }
+
+        .nerv-box {
+            background-color: var(--nerv-panel);
+            border: 1px solid var(--nerv-border);
+            position: relative;
+        }
+
+        .nerv-header-block {
+            background: var(--nerv-orange);
+            color: #000;
+            font-weight: 900;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .nerv-btn {
+            border: 1px solid var(--nerv-orange);
+            background: rgba(255, 102, 0, 0.1);
+            color: var(--nerv-orange);
+            transition: all 0.15s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .nerv-btn:hover, .nerv-btn.active {
+            background: var(--nerv-orange);
+            color: #000;
+            box-shadow: 0 0 10px rgba(255, 102, 0, 0.5);
+        }
+
+        .nerv-btn-danger {
+            border: 1px solid var(--nerv-red);
+            background: rgba(255, 0, 51, 0.1);
+            color: var(--nerv-red);
+        }
+
+        .nerv-btn-danger:hover {
+            background: var(--nerv-red);
+            color: #fff;
+            box-shadow: 0 0 12px rgba(255, 0, 51, 0.7);
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            z-index: 99;
+            display: none;
+        }
+
+        body.scanlines-active .scanline { display: block; }
+
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #08080a; }
+        ::-webkit-scrollbar-thumb { background: var(--nerv-orange); }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: grid; }
+    </style>
+</head>
+<body class="p-3 text-xs scanlines-active">
+
+    <div class="scanline"></div>
+
+    <div class="max-w-[1600px] mx-auto flex flex-col gap-3 min-h-screen">
+
+        <!-- HEADER & GEOFRONT NODE SELECTOR -->
+        <header class="nerv-box p-2 border-l-4 border-l-[#ff6600] flex flex-wrap justify-between items-center bg-black/80">
+            <div class="flex items-center gap-3">
+                <div class="bg-[#ff6600] text-black font-black px-3 py-1 text-sm tracking-widest flex items-center gap-2">
+                    <span>特務機関NERV</span>
+                    <span class="text-[9px] bg-black text-[#ff6600] px-1">GEOFRONT OS</span>
+                </div>
+                <div>
+                    <h1 class="text-xs font-bold tracking-wider text-[#ffaa66]">NODO DISTRIBUTED AGENT RUNNER // <span class="text-red-500">中央作戦司令部</span></h1>
+                    <p class="text-[9px] text-zinc-500">KAJI MESH (WIREGUARD) ACTIVE // KAJI'S WATERMELONS TRUST PROTOCOL</p>
+                </div>
+            </div>
+
+            <!-- GEOFRONT BASE / NODE SELECTOR -->
+            <div class="flex items-center gap-2 bg-zinc-900 px-3 py-1 border border-zinc-700">
+                <span class="text-[10px] text-zinc-400">GEOFRONT NODE:</span>
+                <select id="geofront-node-select" onchange="switchGeofrontNode(this.value)" class="bg-black text-[#ff6600] font-bold text-xs border border-[#ff6600] px-2 py-0.5 focus:outline-none">
+                    <option value="tokyo3">TOKYO-3 [MAC MINI LOCAL (BASE)]</option>
+                    <option value="usa">NERV-01 [USA BASE - CLOUD COMPUTE]</option>
+                    <option value="germany">NERV-02 [GERMANY BASE - EDGE REPLICA]</option>
+                </select>
+            </div>
+
+            <!-- TABS ROUTER -->
+            <nav class="flex gap-1 flex-wrap">
+                <button onclick="switchTab('tactical')" id="tab-tactical" class="nerv-btn active px-2.5 py-1 text-[10px] font-bold">01. TACTICAL</button>
+                <button onclick="switchTab('magi')" id="tab-magi" class="nerv-btn px-2.5 py-1 text-[10px] font-bold">02. MAGI & EXPERTS</button>
+                <button onclick="switchTab('nodes')" id="tab-nodes" class="nerv-btn px-2.5 py-1 text-[10px] font-bold">03. EVA FLEET & KAJI</button>
+                <button onclick="switchTab('terminal')" id="tab-terminal" class="nerv-btn px-2.5 py-1 text-[10px] font-bold">04. DOGMA & MCP</button>
+                <button onclick="switchTab('chat')" id="tab-chat" class="nerv-btn px-2.5 py-1 text-[10px] font-bold">05. PERSONAS & HITL</button>
+                <button onclick="switchTab('settings')" id="tab-settings" class="nerv-btn px-2.5 py-1 text-[10px] font-bold">06. CONFIG</button>
+            </nav>
+
+            <div class="flex items-center gap-3">
+                <button onclick="toggleScanlines()" class="nerv-btn px-2 py-1 text-[9px]">CRT FX</button>
+                <div class="text-right text-[9px]">
+                    <div id="sys-clock" class="text-[#ff6600] font-bold">2026.11.01 - 20:46:12</div>
+                    <span class="text-emerald-500 font-bold">KAJI MESH SECURE</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- ================================================================================================ -->
+        <!-- TAB 01: TACTICAL OVERVIEW -->
+        <!-- ================================================================================================ -->
+        <main id="view-tactical" class="tab-content active grid-cols-12 gap-3">
+
+            <section class="col-span-12 lg:col-span-3 flex flex-col gap-3">
+                <div class="nerv-box p-3 border-t-2 border-t-[#ff6600]">
+                    <div class="nerv-header-block px-2 py-0.5 text-[10px] mb-2 flex justify-between">
+                        <span>ACTIVE NODE SPECS</span>
+                        <span class="text-black bg-white px-1 font-semibold" id="active-node-tag">TOKYO-3</span>
+                    </div>
+                    <div class="space-y-2 text-[11px]">
+                        <div class="flex justify-between border-b border-zinc-800 pb-1">
+                            <span class="text-zinc-400">ARCHITECT:</span>
+                            <span class="text-white font-bold">DR. NAOKO AKAGI</span>
+                        </div>
+                        <div class="flex justify-between border-b border-zinc-800 pb-1">
+                            <span class="text-zinc-400">SYNC RATIO:</span>
+                            <span class="text-emerald-400 font-bold">94.2% [NOMINAL]</span>
+                        </div>
+                        <div class="flex justify-between border-b border-zinc-800 pb-1">
+                            <span class="text-zinc-400">POWER SUB-SYSTEM:</span>
+                            <span class="text-amber-400 font-bold" id="node-power-mode">S² ENGINE (LOCAL)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INGRESS & TASK SELECTOR -->
+                <div class="nerv-box p-3 flex-1">
+                    <div class="nerv-header-block px-2 py-0.5 text-[10px] mb-2">ENTRY PLUG TASK INGRESS</div>
+                    <p class="text-[10px] text-zinc-500 mb-2">Select task payload for active node execution:</p>
+                    <div class="space-y-2">
+                        <button onclick="triggerTask('BLUE')" class="w-full text-left p-2 border border-blue-900 bg-blue-950/20 hover:bg-blue-900/40 text-blue-300 rounded flex justify-between items-center">
+                            <div>
+                                <div class="font-bold">PATTERN BLUE (LOW RISK)</div>
+                                <div class="text-[9px] text-blue-400">Routine sync & log maintenance</div>
+                            </div>
+                            <span class="text-[9px] px-1 bg-blue-900 text-white">AUTO</span>
+                        </button>
+                        <button onclick="triggerTask('ORANGE')" class="w-full text-left p-2 border border-amber-900 bg-amber-950/20 hover:bg-amber-900/40 text-amber-300 rounded flex justify-between items-center">
+                            <div>
+                                <div class="font-bold">PATTERN ORANGE (MED RISK)</div>
+                                <div class="text-[9px] text-amber-400">Cross-node dataset migration</div>
+                            </div>
+                            <span class="text-[9px] px-1 bg-amber-900 text-white">MAGI</span>
+                        </button>
+                        <button onclick="triggerTask('RED')" class="w-full text-left p-2 border border-red-900 bg-red-950/20 hover:bg-red-900/40 text-red-300 rounded flex justify-between items-center">
+                            <div>
+                                <div class="font-bold">PATTERN RED (HIGH RISK)</div>
+                                <div class="text-[9px] text-red-400">Database schema mutation</div>
+                            </div>
+                            <span class="text-[9px] px-1 bg-red-600 text-black font-bold">HITL</span>
+                        </button>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-zinc-800">
+                        <button onclick="triggerSpear()" class="nerv-btn nerv-btn-danger w-full py-2 font-bold text-center text-[10px]">
+                            🗡️ SPEAR OF LONGINUS (EMERGENCY ROLLBACK)
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CENTER: REAL-TIME REASONING FEED -->
+            <section class="col-span-12 lg:col-span-6 flex flex-col gap-3">
+                <div class="nerv-box p-3 flex-1 flex flex-col">
+                    <div class="nerv-header-block px-2 py-0.5 text-[10px] mb-2 flex justify-between">
+                        <span>LIVE EXECUTION TELEMETRY & THINKING</span>
+                        <span id="active-task-badge" class="text-black bg-emerald-400 px-1 font-bold">IDLE</span>
+                    </div>
+                    <div class="flex-1 bg-black p-3 border border-zinc-800 font-mono overflow-y-auto max-h-[360px] space-y-1.5 text-[11px]" id="tactical-log">
+                        <div class="text-zinc-600">[20:46:00] [KAJI_MESH] WireGuard VPN tunnel active across Tokyo-3, NERV-01 (USA), NERV-02 (GER).</div>
+                        <div class="text-zinc-600">[20:46:05] [L1_DOGMA] SQLite inbox ledger mounted. Litestream streaming replication nominal.</div>
+                        <div class="text-emerald-500">[20:46:10] [SYSTEM] Ready for task ingestion.</div>
+                    </div>
+                    <div class="mt-3 grid grid-cols-3 gap-2 text-center">
+                        <div class="bg-zinc-900 p-2 border border-zinc-800">
+                            <div class="text-zinc-500 text-[9px]">UMBILICAL / S² POWER</div>
+                            <div class="text-[#ff6600] font-bold" id="power-status-display">S² ENGINE (LOCAL)</div>
+                        </div>
+                        <div class="bg-zinc-900 p-2 border border-zinc-800">
+                            <div class="text-zinc-500 text-[9px]">ACTIVE WORKER</div>
+                            <div class="text-emerald-400 font-bold" id="worker-display">EVA-01 (Mac Mini)</div>
+                        </div>
+                        <div class="bg-zinc-900 p-2 border border-zinc-800">
+                            <div class="text-zinc-500 text-[9px]">SANDBOX</div>
+                            <div class="text-amber-400 font-bold">Firecracker micro-VM</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT: MAGI & FLEET SNAPSHOT -->
+            <section class="col-span-12 lg:col-span-3 flex flex-col gap-3">
+                <div class="nerv-box p-3">
+                    <div class="nerv-header-block px-2 py-0.5 text-[10px] mb-2">MAGI CONSENSUS TRIAD</div>
+                    <div class="grid grid-cols-3 gap-1 text-center font-bold">
+                        <div class="p-2 border border-purple-900 bg-purple-950/30">
+                            <div class="text-[9px] text-purple-400">MELCHIOR</div>
+                            <div class="text-emerald-400 text-xs" id="vote-m1">AGREE</div>
+                        </div>
+                        <div class="p-2 border border-purple-900 bg-purple-950/30">
+                            <div class="text-[9px] text-purple-400">BALTHASAR</div>
+                            <div class="text-emerald-400 text-xs" id="vote-m2">AGREE</div>
+                        </div>
+                        <div class="p-2 border border-purple-900 bg-purple-950/30">
+                            <div class="text-[9px] text-purple-400">CASPER</div>
+                            <div class="text-emerald-400 text-xs" id="vote-m3">AGREE</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nerv-box p-3 flex-1">
+                    <div class="nerv-header-block px-2 py-0.5 text-[10px] mb-2">REMOTE NODES & MESH STATUS</div>
+                    <div class="space-y-2 text-[10px]">
+                        <div class="p-2 bg-black border border-zinc-800 flex justify-between items-center">
+                            <div>
+                                <span class="text-white font-bold">TOKYO-3 (Local Mac)</span>
+                                <div class="text-zinc-500">Latency: 0ms // Active</div>
+                            </div>
+                            <span class="text-emerald-400 font-bold">ONLINE</span>
+                        </div>
+                        <div class="p-2 bg-black border border-zinc-800 flex justify-between items-center">
+                            <div>
+                                <span class="text-white font-bold">NERV-01 (USA Base)</span>
+                                <div class="text-zinc-500">Latency: 114ms // Magis 2 & 3</div>
+                            </div>
+                            <span class="text-emerald-400 font-bold">ONLINE</span>
+                        </div>
+                        <div class="p-2 bg-black border border-zinc-800 flex justify-between items-center">
+                            <div>
+                                <span class="text-white font-bold">NERV-02 (Germany Base)</span>
+                                <div class="text-zinc-500">Latency: 42ms // Backup Edge</div>
+                            </div>
+                            <span class="text-emerald-400 font-bold">ONLINE</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ================================================================================================ -->
+        <!-- TAB 02: MAGI CONSENSUS & SPECIALIST CONSULTANTS -->
+        <!-- ================================================================================================ -->
+        <main id="view-magi" class="tab-content grid-cols-12 gap-3">
+            <section class="col-span-12 lg:col-span-8 nerv-box p-3">
+                <div class="nerv-header-block px-2 py-0.5 text-[10px] mb-3">MAGI SUPERCOMPUTER & BALTHASAR INSTANTIATION</div>
+
+                <div class="grid grid-cols-3 gap-3 mb-4">
+                    <div class="border border-purple-800 bg-purple-950/20 p-3">
+                        <div class="text-purple-400 font-bold text-xs">MELCHIOR-1 (Cloud)</div>
+                        <div class="text-[10px] text-zinc-400 mb-2">Claude 3.5 Sonnet Integration</div>
+                        <p class="text-[10px] text-zinc-300 bg-black/60 p-2 border border-purple-900/50">"Code logic verified. AST safety parameters within normal operating limits."</p>
+                    </div>
+
+                    <div class="border border-purple-800 bg-purple-950/20 p-3 flex flex-col justify-between">
+                        <div>
+                            <div class="text-purple-400 font-bold text-xs">BALTHASAR-2 (Local Edge / Pi)</div>
+                            <div class="text-[10px] text-zinc-400 mb-2">Gemma 2B Firewall Invariants</div>
+                            <p class="text-[10px] text-zinc-300 bg-black/60 p-2 border border-purple-900/50">"Local firewall rules intact. No unauthorized network egress."</p>
+                        </div>
+                        <button onclick="deployBalthasar()" class="mt-3 nerv-btn py-1 text-[9px] font-bold">+ DEPLOY EXTRA BALTHASAR NODE</button>
+                    </div>
+
+                    <div class="border border-purple-800 bg-purple-950/20 p-3">
+                        <div class="text-purple-400 font-bold text-xs">CASPER-3 (Cloud Node)</div>
+                        <div class="text-[10px] text-zinc-400 mb-2">GPT-4o / Intent Drift Monitor</div>
+                        <p class="text-[10px] text-zinc-300 bg-black/60 p-2 border border-purple-900/50">"Philosophical intent matches Naoko Akagi directives. 100% compliance."</p>
+                    </div>
+                </div>
+
+                <div class="border-t border-zinc-800 pt-3">
+                    <div class="text-xs font-bold text-[#ff6600] mb-2">SPECIALIST CONSULTANT BAYS (USA & LOCAL)</div>
+                    <div class="grid grid-cols-3 gap-2 text-[10px]">
+                        <div class="bg-black p-2 border border-zinc-800 flex justify-between items-center">
+                            <span>JASPER (Token Accounting)</span>
+                            <span class="text-emerald-400 font-bold">ACTIVE</span>
+                        </div>
+                        <div class="bg-black p-2 border border-zinc-800 flex justify-between items-center">
+                            <span>ZARA (USA Reversibility)</span>
+                            <span class="text-emerald-400 font-bold">ACTIVE</span>
+                        </div>
+                        <button onclick="deployConsultant()" class="nerv-btn py-1 font-bold">+ SPAWN USA CONSULTANT</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="col-span-12 lg:col-span-4 nerv-box p-3">
+                <div class="nerv-header-block px-2 py-0.5 text-[10px] mb-2">CONSENSUS TALLY ENGINE</div>
+                <div class="text-center p-4 bg-black border border-zinc-800 my-2">
+                    <div class="text-zinc-500 text-[10px]">REQUIRED MAJORITY</div>
+                    <div class="text-2xl font-black text-emerald-400">2 / 3 MAJORITY</div>
+                    <div class="text-[10px] text-emerald-600 mt-1">VOTING LATENCY: 42MS (KAJI MESH)</div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ================================================================================================ -->
+        <!-- TAB 03: EVA FLEET, KAJI MESH & WATERMELONS -->
+        <!-- ================================================================================================ -->
+        <main id="view-nodes" class="tab-content grid-cols-12 gap-3">
+            <section class="col-span-12 nerv-box p-3">
+                <div class="nerv-header-block px-2 py-0.5 text-[10px] mb-3">EVA HARDWARE FLEET & REGIONAL DEPLOYMENTS</div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div class="border border-emerald-900 bg-emerald-950/10 p-3">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-emerald-400 text-xs">EVA UNIT-01</span>
+                            <span class="bg-emerald-900 text-black font-bold px-1 text-[9px]">TOKYO-3</span>
+                        </div>
+                        <div class="text-[10px] space-y-1 text-zinc-400">
+                            <div>HARDWARE: Mac Mini M2</div>
+                            <div>PILOT: Shinji (Broad Scope)</div>
+                            <div>POWER: Umbilical Cable</div>
+                        </div>
+                    </div>
+
+                    <div class="border border-red-900 bg-red-950/10 p-3">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-red-400 text-xs">EVA UNIT-02</span>
+                            <span class="bg-red-900 text-white font-bold px-1 text-[9px]">GERMANY</span>
+                        </div>
+                        <div class="text-[10px] space-y-1 text-zinc-400">
+                            <div>HARDWARE: Edge GPU Node</div>
+                            <div>PILOT: Asuka (Compute)</div>
+                            <div>POWER: S² Engine</div>
+                        </div>
+                    </div>
+
+                    <div class="border border-blue-900 bg-blue-950/10 p-3">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-blue-400 text-xs">EVA UNIT-08</span>
+                            <span class="bg-blue-900 text-white font-bold px-1 text-[9px]">USA BASE</span>
+                        </div>
+                        <div class="text-[10px] space-y-1 text-zinc-400">
+                            <div>HARDWARE: AWS Graviton Node</div>
+                            <div>PILOT: Mari (Specialized)</div>
+                            <div>POWER: S² Engine</div>
+                        </div>
+                    </div>
+
+                    <div class="border border-amber-900 bg-amber-950/10 p-3 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-amber-400 text-xs">DEPLOY NEW EVA</span>
+                                <span class="bg-amber-900 text-black font-bold px-1 text-[9px]">REMOTE</span>
+                            </div>
+                            <div class="text-[10px] text-zinc-400 mb-3">Spin up an additional hardware worker node across Kaji Mesh.</div>
+                        </div>
+                        <button onclick="deployUsaEva()" class="nerv-btn py-1 text-[9px] font-bold">+ DEPLOY USA EVA-09</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ================================================================================================ -->
+        <!-- TAB 04: TERMINAL DOGMA & MCP -->
+        <!-- ================================================================================================ -->
+        <main id="view-terminal" class="tab-content grid-cols-12 gap-3">
+            <section class="col-span-12 lg:col-span-6 nerv-box p-3">
+                <div class="nerv-header-block px-2 py-0.5 text-[10px] mb-2">TERMINAL DOGMA (SQLITE & LITESTREAM)</div>
+                <div class="bg-black p-3 border border-zinc-800 font-mono text-[10px] text-zinc-400 space-y-1">
+                    <div>[0xFA41] SQLite Inbox Ledger: MOUNTED (/var/nodo/dogma.db)</div>
+                    <div>[0xFA42] Litestream S3 Streaming Replication: [SYNCHRONIZED]</div>
+                    <div>[0xFA43] Lilith Tool Registry: 24 Model Context Protocol (MCP) tools active</div>
+                </div>
+            </section>
+
+            <section class="col-span-12 lg:col-span-6 nerv-box p-3">
+                <div class="nerv-header-block px-2 py-0.5 text-[10px] mb-2">KAJI'S WATERMELONS (PROGRESSIVE TRUST PIPELINE)</div>
+                <div class="space-y-2 text-[10px]">
+                    <div class="bg-black p-2 border border-zinc-800 flex justify-between items-center">
+                        <div>
+                            <span class="text-white font-bold">web_scraper_v2.py</span>
+                            <div class="text-zinc-500">Stage: Shadow Mode (Day 2/3) [Evaluating AST]</div>
+                        </div>
+                        <span class="text-amber-400 font-bold">SHADOW</span>
+                    </div>
+                    <div class="bg-black p-2 border border-zinc-800 flex justify-between items-center">
+                        <div>
+                            <span class="text-white font-bold">sql_optimizer.py</span>
+                            <div class="text-zinc-500">Stage: Full Autonomy (Promoted to Lilith)</div>
+                        </div>
+                        <span class="text-emerald-400 font-bold">PROMOTED</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ================================================================================================ -->
+        <!-- TAB 05: PERSONAS, DIALOG BOXES & HITL -->
+        <!-- ================================================================================================ -->
+        <main id="view-chat" class="tab-content grid-cols-12 gap-3">
+            <!-- PERSONA CHAT PANELS -->
+            <section class="col-span-12 lg:col-span-8 nerv-box p-3 flex flex-col h-[520px]">
+                <div class="nerv-header-block px-2 py-0.5 text-[10px] mb-2 flex justify-between items-center">
+                    <span>PERSONA COMMS & MISATO HITL INTERLOCK</span>
+                    <div class="space-x-1">
+                        <button onclick="switchPersona('naoko')" class="px-2 py-0.5 bg-black text-xs font-bold text-[#ff6600] border border-[#ff6600]">DR. NAOKO</button>
+                        <button onclick="switchPersona('gendo')" class="px-2 py-0.5 bg-black text-xs font-bold text-red-500 border border-red-500">GENDO</button>
+                        <button onclick="switchPersona('misato')" class="px-2 py-0.5 bg-black text-xs font-bold text-blue-400 border border-blue-400">MISATO (HITL)</button>
+                    </div>
+                </div>
+
+                <!-- PERSONA HEADER BIO -->
+                <div id="persona-bio" class="bg-zinc-900 p-2 border border-zinc-800 text-[10px] mb-3 flex items-center gap-3">
+                    <div class="w-8 h-8 bg-black border border-[#ff6600] flex items-center justify-center font-bold text-[#ff6600]">NA</div>
+                    <div>
+                        <div class="font-bold text-white" id="persona-name">DR. NAOKO AKAGI (System Architect)</div>
+                        <div class="text-zinc-400" id="persona-desc">Defines system invariants, structural parameters, and core directive policies.</div>
+                    </div>
+                </div>
+
+                <!-- CHAT LOG -->
+                <div class="flex-1 bg-black p-3 border border-zinc-800 overflow-y-auto space-y-3 font-mono text-xs" id="persona-chat-log">
+                    <div class="bg-zinc-900/60 p-2 border-l-2 border-l-[#ff6600]">
+                        <span class="text-[#ff6600] font-bold">[DR. NAOKO]:</span>
+                        <span class="text-zinc-200">System architecture initialized on Tokyo-3. Awaiting directive payloads.</span>
+                    </div>
+                </div>
+
+                <div class="mt-3 flex gap-2">
+                    <input type="text" id="persona-input" placeholder="Message persona or inject authorization signature..." class="flex-1 bg-black border border-zinc-800 p-2 text-white text-xs focus:outline-none focus:border-[#ff6600]">
+                    <button onclick="sendPersonaMessage()" class="nerv-btn px-4 py-2 font-bold">TRANSMIT</button>
+                </div>
+            </section>
+
+            <section class="col-span-12 lg:col-span-4 nerv-box p-3">
+                <div class="nerv-header-block px-2 py-0.5 text-[10px] mb-2">HITL PENDING APPROVALS</div>
+                <div class="space-y-2 text-[10px]">
+                    <div class="p-3 bg-red-950/20 border border-red-900">
+                        <div class="text-red-400 font-bold mb-1">PATTERN RED INTERCEPT #409</div>
+                        <div class="text-zinc-300 mb-2">Database mutation requested by EVA-01. Sync Ratio: 74% (&lt;80%).</div>
+                        <div class="flex gap-2">
+                            <button onclick="approveHitl()" class="nerv-btn px-3 py-1 bg-emerald-950 text-emerald-400 border-emerald-600 font-bold">AUTHORIZE</button>
+                            <button onclick="rejectHitl()" class="nerv-btn-danger px-3 py-1 font-bold">ABORT</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ================================================================================================ -->
+        <!-- TAB 06: OPENCLAW / HERMES SYSTEM SETTINGS -->
+        <!-- ================================================================================================ -->
+        <main id="view-settings" class="tab-content grid-cols-12 gap-3">
+            <section class="col-span-12 nerv-box p-3">
+                <div class="nerv-header-block px-2 py-0.5 text-[10px] mb-3">SYSTEM CONFIGURATION & AGENT RUNNER SETTINGS (OPENCLAW / HERMES SPEC)</div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-[11px]">
+                    <div class="bg-black p-3 border border-zinc-800 space-y-3">
+                        <div class="font-bold text-[#ff6600] border-b border-zinc-800 pb-1">LLM PROVIDER ROUTING</div>
+                        <div>
+                            <label class="text-zinc-400 block mb-1">Primary Cloud API (Umbilical)</label>
+                            <select class="w-full bg-zinc-900 border border-zinc-700 p-1 text-white">
+                                <option>Claude 3.5 Sonnet (Anthropic)</option>
+                                <option>GPT-4o (OpenAI)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-zinc-400 block mb-1">Local Edge Fallback (S² Engine)</label>
+                            <select class="w-full bg-zinc-900 border border-zinc-700 p-1 text-white">
+                                <option>Gemma 2 9B (Ollama Local)</option>
+                                <option>Llama 3 8B Instruct</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="bg-black p-3 border border-zinc-800 space-y-3">
+                        <div class="font-bold text-[#ff6600] border-b border-zinc-800 pb-1">AUTONOMY & TRUST SETTINGS</div>
+                        <div>
+                            <label class="text-zinc-400 block mb-1">Minimum Sync Ratio for Auto-Execution</label>
+                            <input type="range" min="50" max="99" value="80" class="w-full accent-[#ff6600]">
+                            <div class="text-right text-[9px] text-zinc-500">Threshold: 80%</div>
+                        </div>
+                        <div>
+                            <label class="text-zinc-400 block mb-1">Kaji Watermelon Shadow TTL</label>
+                            <input type="text" value="72 hours" class="w-full bg-zinc-900 border border-zinc-700 p-1 text-white">
+                        </div>
+                    </div>
+
+                    <div class="bg-black p-3 border border-zinc-800 space-y-3">
+                        <div class="font-bold text-[#ff6600] border-b border-zinc-800 pb-1">KAJI MESH & SECURITY</div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-zinc-300">WireGuard Encryption</span>
+                            <span class="text-emerald-400 font-bold">ENABLED</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-zinc-300">Firecracker VM Isolation</span>
+                            <span class="text-emerald-400 font-bold">ENFORCED</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+    </div>
+
+    <!-- INTERACTIVE JAVASCRIPT LOGIC -->
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + tabId).classList.add('active');
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
+
+        function toggleScanlines() {
+            document.body.classList.toggle('scanlines-active');
+        }
+
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('sys-clock').innerText =
+                now.getFullYear() + '.' +
+                String(now.getMonth()+1).padStart(2,'0') + '.' +
+                String(now.getDate()).padStart(2,'0') + ' - ' +
+                now.toTimeString().split(' ')[0];
+        }, 1000);
+
+        function switchGeofrontNode(node) {
+            const tag = document.getElementById('active-node-tag');
+            const power = document.getElementById('node-power-mode');
+            const worker = document.getElementById('worker-display');
+            const log = document.getElementById('tactical-log');
+            const time = new Date().toTimeString().split(' ')[0];
+
+            if(node === 'tokyo3') {
+                tag.innerText = "TOKYO-3 (LOCAL)";
+                power.innerText = "S² ENGINE (LOCAL)";
+                worker.innerText = "EVA-01 (Mac Mini)";
+                log.innerHTML += `<div class="text-emerald-400">[${time}] [GEOFRONT] Switched operational base to Tokyo-3 Mac Mini local runner.</div>`;
+            } else if(node === 'usa') {
+                tag.innerText = "NERV-01 (USA)";
+                power.innerText = "UMBILICAL CABLE (AWS)";
+                worker.innerText = "EVA-08 (AWS Graviton)";
+                log.innerHTML += `<div class="text-blue-400">[${time}] [GEOFRONT] Switched base to NERV-01 USA Base via Kaji Mesh VPN. Magis 2 & 3 routed remotely.</div>`;
+            } else if(node === 'germany') {
+                tag.innerText = "NERV-02 (GERMANY)";
+                power.innerText = "S² ENGINE (EDGE)";
+                worker.innerText = "EVA-02 (Edge GPU)";
+                log.innerHTML += `<div class="text-amber-400">[${time}] [GEOFRONT] Switched base to NERV-02 Germany Edge Node.</div>`;
+            }
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function deployBalthasar() {
+            alert("Balthasar secondary consensus node instantiated successfully on NERV-01 USA Base.");
+        }
+
+        function deployConsultant() {
+            alert("Specialized AI consultant 'Zara' deployed via Kaji Mesh for risk telemetry.");
+        }
+
+        function deployUsaEva() {
+            alert("EVA Unit-09 successfully deployed at NERV-01 USA Base with S² Engine active.");
+        }
+
+        let currentPersona = 'naoko';
+        function switchPersona(p) {
+            currentPersona = p;
+            const name = document.getElementById('persona-name');
+            const desc = document.getElementById('persona-desc');
+            const bioImg = document.querySelector('#persona-bio div');
+
+            if(p === 'naoko') {
+                name.innerText = "DR. NAOKO AKAGI (System Architect)";
+                desc.innerText = "Defines system invariants, structural parameters, and core directive policies.";
+                bioImg.innerText = "NA";
+            } else if(p === 'gendo') {
+                name.innerText = "GENDO IKARI (Strategic Command)";
+                desc.innerText = "Classifies high-level task risk tiers and manages routing switchboards.";
+                bioImg.innerText = "GI";
+            } else if(p === 'misato') {
+                name.innerText = "MISATO KATSURAGI (HITL Operator)";
+                desc.innerText = "Human-in-the-loop interlock portal supervisor for Pattern Red intercepts.";
+                bioImg.innerText = "MK";
+            }
+        }
+
+        function sendPersonaMessage() {
+            const input = document.getElementById('persona-input');
+            const log = document.getElementById('persona-chat-log');
+            if(!input.value.trim()) return;
+
+            log.innerHTML += `<div class="bg-zinc-900/60 p-2 border-l-2 border-l-blue-500"><span class="text-blue-400 font-bold">[OPERATOR]:</span> <span class="text-zinc-200">${input.value}</span></div>`;
+
+            setTimeout(() => {
+                let reply = "Directive processed and logged in Terminal Dogma.";
+                if(currentPersona === 'naoko') reply = "System parameters verified against Lilith tool registries.";
+                if(currentPersona === 'gendo') reply = "Task risk classification confirmed. Routing through MAGI matrix.";
+                if(currentPersona === 'misato') reply = "Interlock signature evaluated. Awaiting final token release.";
+
+                log.innerHTML += `<div class="bg-zinc-900/60 p-2 border-l-2 border-l-[#ff6600]"><span class="text-[#ff6600] font-bold">[${currentPersona.toUpperCase()}]</span> <span class="text-zinc-200">${reply}</span></div>`;
+                log.scrollTop = log.scrollHeight;
+            }, 600);
+
+            input.value = "";
+        }
+
+        function approveHitl() {
+            alert("Manual authorization signature injected. A.T. Field token released to LCL sandbox.");
+        }
+
+        function rejectHitl() {
+            alert("Spear of Longinus triggered. Transaction aborted and rolled back.");
+        }
+    </script>
+</body>
+</html>

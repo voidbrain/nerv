@@ -1,0 +1,113 @@
+graph LR
+    %% ==========================================
+    %% STILI NERV HIGH-CONTRAST
+    %% ==========================================
+    classDef hq fill:#110505,stroke:#ff3333,stroke-width:2px,color:#ffcccc,font-weight:bold;
+    classDef magi fill:#0d0517,stroke:#a855f7,stroke-width:2px,color:#f3e8ff;
+    classDef seele fill:#0a0a0a,stroke:#ffffff,stroke-width:2px,color:#ffffff,stroke-dasharray: 4 4;
+    classDef eva fill:#04150d,stroke:#22c55e,stroke-width:2px,color:#dcfce7;
+    classDef danger fill:#280000,stroke:#ef4444,stroke-width:3px,color:#fca5a5;
+    classDef alertBlue fill:#051329,stroke:#3b82f6,stroke-width:2px,color:#bfdbfe;
+    classDef alertOrange fill:#1c0d02,stroke:#f97316,stroke-width:2px,color:#ffedd5;
+    classDef power fill:#201000,stroke:#ff9900,stroke-width:2px,color:#ffe0b2;
+
+    %% ==========================================
+    %% 1. INGRESSO & TASK CLASSIFICATION
+    %% ==========================================
+    subgraph L5_INTENT ["👤 1. INGRESS & INTENT (Layer 5)"]
+        direction TB
+        USER["👤 DR. NAOKO AKAGI<br/>(Declarative Intents)"]:::hq
+        
+        subgraph ANGELS ["👹 OPERATIONAL TASKS"]
+            PATTERN_BLUE["🔹 PATTERN BLUE (Low Risk)"]:::alertBlue
+            PATTERN_ORANGE["🔸 PATTERN ORANGE (Med Risk)"]:::alertOrange
+            PATTERN_RED["🔺 PATTERN RED (High Risk)"]:::danger
+        end
+
+        ENTRY_PLUG["🔌 ENTRY PLUG<br/>(Payload Parsing)"]:::hq
+    end
+
+    USER --> ANGELS
+    ANGELS --> ENTRY_PLUG
+
+    %% ==========================================
+    %% 2. ROUTING & MAGI CONSENSUS
+    %% ==========================================
+    subgraph ROUTER_CONSENSUS ["🏢 2. ROUTING & CONSENSUS (Layer 3 & 5)"]
+        direction TB
+        GENDO["🪑 GENDO'S OFFICE<br/>(Risk Classifier)"]:::hq
+        DUMMY_PLUG["🤖 DUMMY PLUG<br/>(Regex Fallback)"]:::hq
+        
+        subgraph MAGI_CORES ["🧠 MAGI CORES"]
+            M1["🔬 MELCHIOR-1 (Cloud)"]:::magi
+            M2["👩 BALTHASAR-1 (Local Edge)"]:::magi
+            M3["💋 CASPER-3 (Cloud)"]:::magi
+        end
+        
+        VOTE_TALLY["🗳️ MAGI VOTE TALLY<br/>(Consensus Engine)"]:::hq
+    end
+
+    ENTRY_PLUG --> GENDO
+    GENDO --> MAGI_CORES
+    GENDO -.->|Failover| DUMMY_PLUG
+    M1 --> VOTE_TALLY
+    M2 --> VOTE_TALLY
+    M3 --> VOTE_TALLY
+
+    %% ==========================================
+    %% 3. SECURITY & HITL APPROVAL
+    %% ==========================================
+    subgraph SECURITY_LAYER ["👁️ 3. SEELE SECURITY & HITL (Layer 4)"]
+        direction TB
+        RITSUKO_LAB["🔬 RITSUKO'S LAB<br/>(OpenJEV Validation)"]:::hq
+        SYNC_RATIO{"📊 SYNC RATIO"}:::hq
+        AT_FIELD["🛡️ A.T. FIELD BOUNDARY<br/>(JWT Capability Tokens)"]:::danger
+        SPEAR["🗡️ SPEAR OF LONGINUS<br/>(Emergency Rollback)"]:::danger
+        MISATO["🏠 MISATO'S APARTMENT<br/>(HITL Approval Portal)"]:::hq
+    end
+
+    VOTE_TALLY --> RITSUKO_LAB
+    RITSUKO_LAB --> SYNC_RATIO
+    SYNC_RATIO -->|Pass >= 80%| AT_FIELD
+    SYNC_RATIO -->|Fail < 80%| SPEAR
+    SYNC_RATIO -.->|Pattern Red| MISATO
+    MISATO -.->|Manual Release| AT_FIELD
+
+    %% ==========================================
+    %% 4. EXECUTION & POWER
+    %% ==========================================
+    subgraph EXECUTION_LAYER ["⚔️ 4. WORKER MATRIX & POWER (Layer 2)"]
+        direction TB
+        
+        subgraph POWER ["⚡ POWER HOUSING"]
+            UMBILICAL["🔌 UMBILICAL (Cloud API)"]:::power
+            S2_ENGINE["🔋 S² ENGINE (Offline Edge)"]:::power
+        end
+
+        subgraph WORKERS ["🧪 LCL CONTAINMENT (Sandboxes)"]
+            EVA01["🟣 EVA-01 (Coordinator)"]:::eva
+            EVA02["🔴 EVA-02 (Edge Processing)"]:::eva
+            EVA00["🔵 EVA-00 (Storage NAS)"]:::eva
+        end
+    end
+
+    AT_FIELD --> WORKERS
+    UMBILICAL -.-> EVA01
+    S2_ENGINE -.-> EVA02
+    S2_ENGINE -.-> EVA00
+
+    %% ==========================================
+    %% 5. PERSISTENCE & TRUST PIPELINE
+    %% ==========================================
+    subgraph PERSISTENCE_LAYER ["🏛️ 5. STATE PERSISTENCE & TRUST (Layer 1)"]
+        direction TB
+        DOGMA["🏛️ TERMINAL DOGMA<br/>(Durable SQLite Ledger)"]:::hq
+        LILITH["🌟 LILITH<br/>(Validated Tool Library)"]:::hq
+        WATERMELONS["🍉 KAJI'S WATERMELONS<br/>(Progressive Trust System)"]:::hq
+        DEAD_SEA["📜 DEAD SEA SCROLLS<br/>(Roadmap & Backlog)"]:::seele
+    end
+
+    WORKERS -->|State Telemetry| DOGMA
+    DOGMA --> LILITH
+    LILITH --> WATERMELONS
+    WATERMELONS -->|Skill Promotion| DEAD_SEA
