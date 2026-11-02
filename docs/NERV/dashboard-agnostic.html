@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nodo — Operations</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap");
+
+    :root {
+      --bg: #0b0c10;
+      --panel: #12141a;
+      --border: #2a2e3a;
+      --text: #e6e8ee;
+      --muted: #8b93a7;
+      --accent: #3b82f6;
+      --ok: #22c55e;
+      --warn: #f59e0b;
+      --danger: #ef4444;
+      --blue: #38bdf8;
+      --orange: #f59e0b;
+      --red: #ef4444;
+      --hdr-bg: transparent;
+      --hdr-fg: var(--muted);
+      --radius: 6px;
+      --font: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    body.theme-light {
+      --bg: #f4f5f7; --panel: #ffffff; --border: #d8dde8;
+      --text: #1a1d26; --muted: #5c657a; --accent: #2563eb;
+    }
+    body.theme-terminal {
+      --bg: #0a0f0a; --panel: #0f1a0f; --border: #1f3d1f;
+      --text: #b6f5b6; --muted: #6a9a6a; --accent: #4ade80;
+      --ok: #4ade80; --warn: #facc15; --danger: #f87171;
+    }
+    body.theme-eva-basic, body.theme-eva-full {
+      --bg: #050508; --panel: #0d0d12;
+      --border: rgba(255, 102, 0, 0.4);
+      --text: #ffaa66; --muted: #a67c52; --accent: #ff6600;
+      --ok: #22c55e; --warn: #ffcc00; --danger: #ff0033;
+      --blue: #0099ff; --orange: #ff6600; --red: #ff0033;
+      --hdr-bg: #ff6600; --hdr-fg: #000;
+      --radius: 0;
+      --font: "Share Tech Mono", ui-monospace, monospace;
+    }
+    body.theme-eva-basic { --bg: #08080c; --panel: #100e12; --radius: 2px; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 12px;
+    }
+
+    body.theme-eva-full.crt-on {
+      background-image:
+        radial-gradient(rgba(255,102,0,0.04) 1px, transparent 0),
+        linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.28) 51%);
+      background-size: 24px 24px, 100% 4px;
+    }
+    body.theme-eva-full.crt-on::after {
+      content: "";
+      position: fixed; inset: 0; pointer-events: none; z-index: 50;
+      background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.22) 50%);
+      background-size: 100% 4px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    body.theme-eva-full .panel {
+      box-shadow: inset 0 0 14px rgba(255,102,0,0.07);
+    }
+
+    .hdr {
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-size: 10px;
+      color: var(--hdr-fg);
+      background: var(--hdr-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 5px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    body.theme-eva-basic .hdr,
+    body.theme-eva-full .hdr { letter-spacing: 0.16em; }
+
+    .btn {
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      padding: 4px 8px;
+      border-radius: calc(var(--radius));
+      font-size: 11px;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn.active, .btn.primary {
+      background: var(--accent); border-color: var(--accent); color: #fff;
+    }
+    body.theme-terminal .btn.active,
+    body.theme-terminal .btn.primary,
+    body.theme-eva-basic .btn.active,
+    body.theme-eva-basic .btn.primary,
+    body.theme-eva-full .btn.active,
+    body.theme-eva-full .btn.primary { color: #000; }
+    body.theme-eva-full .btn:hover,
+    body.theme-eva-full .btn.active { box-shadow: 0 0 10px rgba(255,102,0,0.45); }
+    .btn.danger { border-color: var(--danger); color: var(--danger); }
+    .btn.danger:hover { background: var(--danger); color: #fff; }
+    body.theme-eva-full .btn.danger:hover { box-shadow: 0 0 12px rgba(255,0,51,0.6); }
+
+    .badge {
+      font-size: 9px; padding: 1px 6px; border-radius: 999px;
+      font-weight: 700; letter-spacing: 0.04em;
+    }
+    body.theme-eva-basic .badge,
+    body.theme-eva-full .badge { border-radius: 2px; }
+    .badge-blue { background: color-mix(in srgb, var(--blue) 18%, transparent); color: var(--blue); }
+    .badge-orange { background: color-mix(in srgb, var(--orange) 18%, transparent); color: var(--orange); }
+    .badge-red { background: color-mix(in srgb, var(--red) 18%, transparent); color: var(--red); }
+    .badge-ok { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
+    .badge-muted { background: color-mix(in srgb, var(--muted) 18%, transparent); color: var(--muted); }
+
+    .stage {
+      border: 1px dashed var(--border);
+      padding: 6px 8px;
+      border-radius: var(--radius);
+      color: var(--muted);
+      transition: .15s;
+      text-align: center;
+    }
+    .stage.active {
+      border-style: solid; border-color: var(--accent); color: var(--text);
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+      font-weight: 700;
+    }
+    body.theme-eva-full .stage.active { box-shadow: 0 0 10px rgba(255,102,0,0.35); }
+    .stage.done { border-style: solid; border-color: var(--ok); color: var(--ok); }
+
+    .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .muted { color: var(--muted); }
+    .ok { color: var(--ok); }
+    .warn { color: var(--warn); }
+    .danger { color: var(--danger); }
+
+    .log {
+      background: color-mix(in srgb, var(--bg) 80%, #000);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px;
+      height: 180px;
+      overflow-y: auto;
+      font-size: 11px;
+      line-height: 1.45;
+    }
+    .log .ts { color: var(--muted); margin-right: 6px; }
+
+    input, select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 4px 8px;
+      font-size: 11px;
+    }
+    input:focus, select:focus { outline: 1px solid var(--accent); }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+    body.theme-eva-full .blink { animation: blink 1.2s infinite ease-in-out; }
+
+    .brand-mark { font-weight: 900; letter-spacing: 0.12em; font-size: 13px; }
+    body.theme-eva-basic .brand-mark,
+    body.theme-eva-full .brand-mark {
+      background: var(--accent); color: #000; padding: 2px 8px; letter-spacing: 0.16em;
+    }
+
+    .avatar {
+      width: 28px; height: 28px;
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 700; flex-shrink: 0; background: var(--bg);
+    }
+    body.theme-eva-basic .avatar,
+    body.theme-eva-full .avatar { border-color: var(--accent); color: var(--accent); }
+
+    .pipe-line { width: 1px; height: 8px; background: var(--border); margin: 0 auto; }
+
+    /* MAGI triangle layout */
+    .magi-triangle {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      display: none;
+    }
+    body.theme-eva-full .magi-triangle { display: block; }
+    body.theme-eva-full .magi-plain { display: none !important; }
+
+    .magi-node {
+      position: absolute;
+      width: 110px;
+      height: 72px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 11px;
+      border: 2px solid;
+      background: #0a0a0e;
+    }
+    .magi-node .name { font-size: 9px; font-weight: 900; letter-spacing: 0.12em; }
+    .magi-node .val { font-size: 14px; font-weight: 700; margin-top: 2px; }
+    .magi-node .role { font-size: 8px; color: var(--muted); margin-top: 1px; }
+
+    /* Closed hex-like / trapezoid borders approximating classic MAGI panels */
+    .magi-melchior {
+      left: 50%; top: 4px; transform: translateX(-50%);
+      border-color: var(--ok);
+      clip-path: polygon(12% 0%, 88% 0%, 100% 18%, 100% 100%, 0% 100%, 0% 18%);
+      box-shadow: inset 0 0 16px rgba(34,197,94,0.35), 0 0 8px rgba(34,197,94,0.2);
+    }
+    .magi-balthasar {
+      left: 8%; bottom: 8px;
+      border-color: var(--ok);
+      clip-path: polygon(0% 0%, 88% 0%, 100% 22%, 100% 100%, 0% 100%);
+      box-shadow: inset 0 0 16px rgba(34,197,94,0.35), 0 0 8px rgba(34,197,94,0.2);
+    }
+    .magi-casper {
+      right: 8%; bottom: 8px;
+      border-color: var(--danger);
+      clip-path: polygon(12% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 22%);
+      box-shadow: inset 0 0 16px rgba(255,0,51,0.35), 0 0 8px rgba(255,0,51,0.2);
+      background: #1a0008;
+    }
+
+    /* Triangle connector lines */
+    .magi-tri-svg {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      pointer-events: none;
+    }
+
+    #syncCanvas, #globeCanvas {
+      width: 100%;
+      display: block;
+      background: #000;
+      border: 1px solid var(--border);
+    }
+
+    .jp { opacity: 0.85; font-size: 9px; letter-spacing: 0.08em; }
+    body:not(.theme-eva-basic):not(.theme-eva-full) .jp-only { display: none !important; }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  </style>
+</head>
+<body class="p-3">
+  <div class="max-w-[1600px] mx-auto flex flex-col gap-3 min-h-screen">
+
+    <header class="panel px-3 py-2 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="brand-mark" data-i18n="brand">NODO</div>
+        <div>
+          <div class="text-[11px] font-bold tracking-wider" data-i18n="tagline">Operations · local-first agent</div>
+          <div class="jp jp-only text-[9px] muted">特務機関NERV · 中央作戦司令部</div>
+        </div>
+        <span id="api-status" class="badge badge-ok">API CONNECTED</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <label class="muted text-[10px]" data-i18n="node">NODE</label>
+        <select id="node-select" onchange="onNodeChange(this.value)">
+          <option value="local-mac">local-mac (coordinator)</option>
+          <option value="mini-pc">mini-pc (worker)</option>
+          <option value="edge-pi">edge-pi (worker)</option>
+        </select>
+        <select id="theme-select" onchange="setTheme(this.value)">
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+          <option value="terminal">Terminal</option>
+          <option value="eva-basic">EVA Basic</option>
+          <option value="eva-full">EVA Full</option>
+        </select>
+        <button id="crt-btn" class="btn hidden" onclick="toggleCrt()">CRT</button>
+        <div class="text-right text-[10px] leading-tight">
+          <div id="clock" class="font-bold"></div>
+          <div id="health-line" class="ok" data-i18n="health">healthy · reminders ok</div>
+        </div>
+      </div>
+    </header>
+
+    <main class="grid grid-cols-12 gap-3 flex-1">
+
+      <!-- LEFT -->
+      <section class="col-span-12 lg:col-span-3 flex flex-col gap-3">
+
+        <div class="panel">
+          <div class="hdr">
+            <span data-i18n="risk">Task risk</span>
+            <span class="muted" data-i18n="router">router</span>
+          </div>
+          <div class="p-2 space-y-1.5">
+            <button onclick="submitDemo('blue')" class="btn w-full row">
+              <span><strong style="color:var(--blue)">BLUE</strong>
+                <span class="muted" data-i18n="blue-desc">read-only / routine</span>
+                <span class="jp jp-only muted"> 青</span>
+              </span>
+              <span class="badge badge-blue">AUTO</span>
+            </button>
+            <button onclick="submitDemo('orange')" class="btn w-full row">
+              <span><strong style="color:var(--orange)">ORANGE</strong>
+                <span class="muted" data-i18n="orange-desc">bounded transform</span>
+                <span class="jp jp-only muted"> 橙</span>
+              </span>
+              <span class="badge badge-orange" data-i18n="council-badge">COUNCIL</span>
+            </button>
+            <button onclick="submitDemo('red')" class="btn w-full row">
+              <span><strong style="color:var(--red)">RED</strong>
+                <span class="muted" data-i18n="red-desc">mutation / privileged</span>
+                <span class="jp jp-only muted"> 赤</span>
+              </span>
+              <span class="badge badge-red">HITL</span>
+            </button>
+            <button onclick="rollback()" class="btn danger w-full mt-1" data-i18n="rollback">Rollback last capability grant</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="hdr">
+            <span data-i18n="trust">Progressive trust</span>
+            <span class="muted" data-i18n="skills">skills / experts</span>
+          </div>
+          <div class="p-2 space-y-1.5 text-[11px]">
+            <div class="row panel p-1.5" style="border-style:dashed">
+              <div><div class="font-bold">web_scraper_v2</div><div class="muted text-[10px]">shadow · day 2/3</div></div>
+              <span class="badge badge-orange">SHADOW</span>
+            </div>
+            <div class="row panel p-1.5" style="border-style:dashed">
+              <div><div class="font-bold">sql_optimizer</div><div class="muted text-[10px]">promoted · full autonomy</div></div>
+              <span class="badge badge-ok">PROMOTED</span>
+            </div>
+            <div class="row panel p-1.5" style="border-style:dashed">
+              <div><div class="font-bold">calendar_expert</div><div class="muted text-[10px]">fixed · suggest-only</div></div>
+              <span class="badge badge-muted">SUGGEST</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active job + Sync (task-related, near live work) -->
+        <div class="panel">
+          <div class="hdr">
+            <span data-i18n="active-job">Active job</span>
+            <span id="job-id" class="muted">—</span>
+          </div>
+          <div class="p-2 text-[11px] space-y-1" id="job-box">
+            <div class="muted">No active job</div>
+          </div>
+          <div class="px-2 pb-2">
+            <div class="row mb-1">
+              <span class="text-[10px] muted" data-i18n="confidence">Confidence</span>
+              <span id="confidence-label" class="ok font-bold text-[11px]">0.94 · OK</span>
+            </div>
+            <canvas id="syncCanvas" height="56"></canvas>
+            <div class="row mt-1 text-[9px] muted">
+              <span>promote ≥ 0.80</span>
+              <span>HITL if &lt; 0.80 / RED</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel flex-1">
+          <div class="hdr">
+            <span data-i18n="doctor">Doctor</span>
+            <button class="btn" onclick="runDoctor()">Run</button>
+          </div>
+          <div class="p-2 text-[11px] space-y-1">
+            <div class="row"><span>Scheduler</span><span class="ok" id="doc-sched">ok</span></div>
+            <div class="row"><span>SQLite</span><span class="ok" id="doc-db">ok</span></div>
+            <div class="row"><span>Gateway</span><span class="ok" id="doc-gw">ok</span></div>
+            <div class="row"><span>Token burn</span><span id="doc-cost">$0.00</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CENTER -->
+      <section class="col-span-12 lg:col-span-6 flex flex-col gap-3">
+
+        <!-- MAGI + Expert pool side by side on wide -->
+        <div class="grid grid-cols-12 gap-3">
+          <div class="col-span-12 md:col-span-8 panel">
+            <div class="hdr">
+              <span data-i18n="council">Council / checks</span>
+              <span id="council-summary" class="muted">idle · Blue skips full ballot</span>
+            </div>
+            <!-- Plain cards -->
+            <div class="magi-plain p-2 grid grid-cols-3 gap-2">
+              <div class="panel p-2 text-center">
+                <div class="muted text-[10px] mb-1" data-i18n="safety">SAFETY</div>
+                <div class="font-bold text-sm" id="check-safety-val">—</div>
+              </div>
+              <div class="panel p-2 text-center">
+                <div class="muted text-[10px] mb-1" data-i18n="policy">POLICY</div>
+                <div class="font-bold text-sm" id="check-policy-val">—</div>
+              </div>
+              <div class="panel p-2 text-center">
+                <div class="muted text-[10px] mb-1" data-i18n="intent">INTENT</div>
+                <div class="font-bold text-sm" id="check-intent-val">—</div>
+              </div>
+            </div>
+            <!-- Triangle MAGI (EVA Full) -->
+            <div class="magi-triangle mx-auto" style="max-width:340px">
+              <svg class="magi-tri-svg" viewBox="0 0 340 200" preserveAspectRatio="none">
+                <polygon points="170,40 60,160 280,160" fill="none"
+                  stroke="rgba(255,102,0,0.35)" stroke-width="1" stroke-dasharray="4 3"/>
+              </svg>
+              <div class="magi-node magi-melchior">
+                <div class="name" style="color:var(--ok)">MELCHIOR</div>
+                <div class="val" id="check-policy-val-m">—</div>
+                <div class="role">政策 · policy</div>
+              </div>
+              <div class="magi-node magi-balthasar">
+                <div class="name" style="color:var(--ok)">BALTHASAR</div>
+                <div class="val" id="check-safety-val-m">—</div>
+                <div class="role">安全 · safety</div>
+              </div>
+              <div class="magi-node magi-casper">
+                <div class="name" style="color:var(--danger)">CASPER</div>
+                <div class="val" id="check-intent-val-m">—</div>
+                <div class="role">意図 · intent</div>
+              </div>
+            </div>
+            <div class="px-2 pb-2">
+              <div class="row panel p-1.5 text-[11px]">
+                <span data-i18n="resolution">Resolution</span>
+                <span id="resolution" class="font-bold muted">—</span>
+                <span id="vote-tally" class="muted">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Expert pool next to MAGI -->
+          <div class="col-span-12 md:col-span-4 panel">
+            <div class="hdr">
+              <span data-i18n="experts">Experts</span>
+              <span class="muted">suggest-only</span>
+            </div>
+            <div class="p-2 space-y-1.5 text-[11px]" id="expert-list">
+              <div class="row panel p-1.5" style="border-style:dashed">
+                <div>
+                  <div class="font-bold">safety-local</div>
+                  <div class="muted text-[10px]">always-on</div>
+                </div>
+                <span class="badge badge-ok">FIXED</span>
+              </div>
+              <div class="row panel p-1.5" style="border-style:dashed">
+                <div>
+                  <div class="font-bold">code-review</div>
+                  <div class="muted text-[10px]">on demand</div>
+                </div>
+                <span class="badge badge-muted">JIT</span>
+              </div>
+              <div class="row panel p-1.5" style="border-style:dashed">
+                <div>
+                  <div class="font-bold">cloud-reasoning</div>
+                  <div class="muted text-[10px]">remote</div>
+                </div>
+                <span class="badge badge-muted">JIT · cloud</span>
+              </div>
+            </div>
+            <div class="px-2 pb-2 text-[9px] muted jp-only">
+              外部助言 · outside council by default
+            </div>
+          </div>
+        </div>
+
+        <!-- Pipeline -->
+        <div class="panel">
+          <div class="hdr">
+            <span data-i18n="pipeline">Execution pipeline</span>
+            <span id="pipeline-state" class="muted">IDLE</span>
+          </div>
+          <div class="p-2 flex flex-col gap-0 text-[11px]">
+            <div id="stage-1" class="stage">1 · Ingress & parse</div>
+            <div class="pipe-line"></div>
+            <div class="grid grid-cols-2 gap-1.5">
+              <div id="stage-2" class="stage">2 · Risk router</div>
+              <div id="stage-3" class="stage">3 · Council (if needed)</div>
+            </div>
+            <div class="pipe-line"></div>
+            <div id="stage-4" class="stage">4 · Policy & confidence</div>
+            <div class="pipe-line"></div>
+            <div class="grid grid-cols-2 gap-1.5">
+              <div id="stage-5" class="stage">5 · Sandbox / worker</div>
+              <div id="stage-6" class="stage">6 · Ledger & notify</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stream / HITL -->
+        <div class="panel flex-1 flex flex-col">
+          <div class="hdr">
+            <div class="flex gap-1 flex-wrap">
+              <button class="btn active" id="tab-stream" onclick="switchTab('stream')" data-i18n="stream">Event stream</button>
+              <button class="btn" id="tab-hitl" onclick="switchTab('hitl')" data-i18n="hitl">HITL / Ops</button>
+            </div>
+            <div class="flex gap-1 items-center">
+              <select id="voice-select" class="text-[10px]" onchange="setVoice(this.value)">
+                <option value="ops">Ops</option>
+                <option value="misato">Misato</option>
+                <option value="gendo">Gendo</option>
+                <option value="magi">MAGI</option>
+              </select>
+              <span class="muted text-[10px]">grounded</span>
+            </div>
+          </div>
+          <div class="p-2 flex-1 flex flex-col gap-2">
+            <div id="view-stream" class="log"></div>
+            <div id="view-hitl" class="hidden flex flex-col gap-2 flex-1">
+              <div id="hitl-queue" class="space-y-1.5 text-[11px]"></div>
+              <div class="log flex-1" id="ops-log"></div>
+              <div class="flex gap-1 items-center">
+                <div class="avatar" id="chat-avatar">OP</div>
+                <input id="ops-input" class="flex-1" placeholder="status · why Red · approve…" />
+                <button class="btn primary" onclick="sendOps()">Send</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT -->
+      <section class="col-span-12 lg:col-span-3 flex flex-col gap-3">
+
+        <!-- Node map (Three.js wireframe) -->
+        <div class="panel">
+          <div class="hdr">
+            <span data-i18n="nodes">Nodes</span>
+            <span id="worker-count" class="ok">3 online</span>
+          </div>
+          <div class="p-1">
+            <canvas id="globeCanvas" height="150"></canvas>
+            <div class="text-[9px] muted px-1 py-0.5" id="map-label">active mesh</div>
+          </div>
+          <div class="p-2 space-y-1 text-[11px]" id="worker-list"></div>
+        </div>
+
+        <div class="panel">
+          <div class="hdr">
+            <span data-i18n="inbox">Inbox</span>
+            <span id="inbox-count" class="badge badge-muted">0</span>
+          </div>
+          <div class="p-2 space-y-1.5 text-[11px]" id="inbox-list">
+            <div class="muted">No pending deliveries</div>
+          </div>
+        </div>
+
+        <div class="panel flex-1">
+          <div class="hdr">
+            <span data-i18n="approvals">Pending approvals</span>
+            <span id="hitl-count" class="badge badge-red">0</span>
+          </div>
+          <div class="p-2 space-y-1.5 text-[11px]" id="approval-list">
+            <div class="muted">None</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const LABELS = {
+      neutral: {
+        brand: "NODO", tagline: "Operations · local-first agent",
+        health: "healthy · reminders ok", node: "NODE",
+        risk: "Task risk", router: "router",
+        "blue-desc": "read-only / routine", "orange-desc": "bounded transform",
+        "red-desc": "mutation / privileged", "council-badge": "COUNCIL",
+        rollback: "Rollback last capability grant",
+        trust: "Progressive trust", skills: "skills / experts",
+        confidence: "Confidence", nodes: "Nodes",
+        council: "Council / checks", safety: "SAFETY", policy: "POLICY", intent: "INTENT",
+        resolution: "Resolution", pipeline: "Execution pipeline",
+        stream: "Event stream", hitl: "HITL / Ops",
+        inbox: "Inbox", approvals: "Pending approvals",
+        experts: "Experts", doctor: "Doctor", "active-job": "Active job",
+        stages: [
+          "1 · Ingress & parse", "2 · Risk router", "3 · Council (if needed)",
+          "4 · Policy & confidence", "5 · Sandbox / worker", "6 · Ledger & notify"
+        ],
+        nodeNames: {
+          "local-mac": { name: "local-mac", role: "coordinator" },
+          "mini-pc": { name: "mini-pc", role: "worker" },
+          "edge-pi": { name: "edge-pi", role: "worker" }
+        }
+      },
+      eva: {
+        brand: "NERV", tagline: "TACTICAL COMMAND // 中央作戦司令部",
+        health: "KAJI MESH SECURE · DOGMA OK", node: "GEOFRONT",
+        risk: "PATTERN INGRESS", router: "GENDO",
+        "blue-desc": "routine / auto", "orange-desc": "MAGI path",
+        "red-desc": "HITL intercept", "council-badge": "MAGI",
+        rollback: "SPEAR OF LONGINUS (ROLLBACK)",
+        trust: "KAJI'S WATERMELONS", skills: "技能 / 専門家",
+        confidence: "SYNC RATIO", nodes: "EVA BAY / BASES",
+        council: "MAGI SYSTEM", safety: "BALTHASAR", policy: "MELCHIOR", intent: "CASPER",
+        resolution: "決議 RESOLUTION", pipeline: "EXECUTION PIPELINE",
+        stream: "LIVE STREAM", hitl: "MISATO / HITL",
+        inbox: "INBOX", approvals: "MISATO'S APARTMENT",
+        experts: "EXPERT POOL", doctor: "DOCTOR", "active-job": "ACTIVE SORTIE",
+        stages: [
+          "1 · ENTRY PLUG", "2 · GENDO ROUTER", "3 · MAGI (IF NEEDED)",
+          "4 · RITSUKO / SYNC", "5 · LCL / WORKER", "6 · TERMINAL DOGMA"
+        ],
+        nodeNames: {
+          "local-mac": { name: "TOKYO-3", role: "coordinator" },
+          "mini-pc": { name: "NERV-01", role: "worker" },
+          "edge-pi": { name: "NERV-02", role: "worker" }
+        }
+      }
+    };
+
+    const NODES = [
+      { id: "local-mac", status: "online", latency: 2, role: "coordinator", lat: 35.6, lon: 139.7 },
+      { id: "mini-pc", status: "online", latency: 18, role: "worker", lat: 37.7, lon: -122.4 },
+      { id: "edge-pi", status: "standby", latency: null, role: "worker", lat: 52.5, lon: 13.4 }
+    ];
+
+    const state = {
+      theme: "dark", crt: false, voice: "ops", node: "local-mac",
+      confidence: 0.94,
+      inbox: [{ id: "in-1", text: "Reminder: renew car insurance", due: "2030-01-15", status: "pending" }],
+      approvals: [], cost: 0, stream: [],
+      lastCouncil: { safety: "—", policy: "—", intent: "—" },
+      job: null
+    };
+
+    const stages = ["stage-1","stage-2","stage-3","stage-4","stage-5","stage-6"];
+
+    function isEva() { return state.theme === "eva-basic" || state.theme === "eva-full"; }
+    function L() { return isEva() ? LABELS.eva : LABELS.neutral; }
+
+    function applyLabels() {
+      const pack = L();
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        if (pack[key] != null) el.textContent = pack[key];
+      });
+      for (let i = 0; i < 6; i++) {
+        const el = document.getElementById("stage-" + (i + 1));
+        if (el && pack.stages[i]) {
+          const a = el.classList.contains("active"), d = el.classList.contains("done");
+          el.textContent = pack.stages[i];
+          if (a) el.classList.add("active");
+          if (d) el.classList.add("done");
+        }
+      }
+      const sel = document.getElementById("node-select");
+      [...sel.options].forEach(opt => {
+        const n = pack.nodeNames[opt.value];
+        if (n) opt.textContent = n.name + " (" + n.role + ")";
+      });
+      document.title = isEva() ? "NERV MAGI / NODO OS" : "Nodo — Operations";
+      renderNodes();
+      updateVoiceUI();
+    }
+
+    function renderNodes() {
+      const pack = L();
+      const list = document.getElementById("worker-list");
+      const online = NODES.filter(n => n.status === "online").length;
+      document.getElementById("worker-count").textContent = online + " online";
+      list.innerHTML = NODES.map(n => {
+        const nn = pack.nodeNames[n.id] || { name: n.id, role: n.role };
+        const badgeClass = n.status === "online" ? "badge-ok" : "badge-muted";
+        const badgeText = n.status === "online"
+          ? (n.role === "coordinator" ? "COORD" : "ONLINE") : "STANDBY";
+        const lat = n.latency != null ? n.latency + " ms" : "—";
+        return '<div class="row panel p-1.5" style="border-style:dashed">' +
+          "<div><div class=\"font-bold\">" + nn.name + "</div>" +
+          "<div class=\"muted text-[10px]\">" + nn.role + " · " + lat + "</div></div>" +
+          "<span class=\"badge " + badgeClass + "\">" + badgeText + "</span></div>";
+      }).join("");
+      const active = pack.nodeNames[state.node];
+      document.getElementById("map-label").textContent =
+        "ACTIVE: " + (active ? active.name : state.node);
+    }
+
+    /* ---- Sync ratio canvas (eye-ish waveform) ---- */
+    let syncPhase = 0;
+    function drawSync() {
+      const c = document.getElementById("syncCanvas");
+      if (!c) return;
+      const ctx = c.getContext("2d");
+      const dpr = window.devicePixelRatio || 1;
+      const w = c.clientWidth, h = c.height;
+      if (c.width !== w * dpr) { c.width = w * dpr; c.height = h * dpr; }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, w, h);
+
+      const v = state.confidence;
+      const amp = 8 + v * 18;
+      const col = v >= 0.8 ? "rgba(34,197,94,0.75)"
+        : v >= 0.6 ? "rgba(245,158,11,0.75)" : "rgba(239,68,68,0.8)";
+      const col2 = isEva() ? "rgba(255,102,0,0.45)" : "rgba(59,130,246,0.4)";
+
+      for (let layer = 0; layer < 4; layer++) {
+        ctx.beginPath();
+        ctx.strokeStyle = layer % 2 === 0 ? col : col2;
+        ctx.lineWidth = 1.2;
+        for (let x = 0; x < w; x += 3) {
+          const y = h / 2 +
+            Math.sin(x * 0.04 + syncPhase + layer * 0.7) * amp *
+            Math.cos((x / w) * Math.PI) *
+            (1 - layer * 0.15);
+          if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+      // center line
+      ctx.strokeStyle = "rgba(255,255,255,0.08)";
+      ctx.beginPath(); ctx.moveTo(0, h/2); ctx.lineTo(w, h/2); ctx.stroke();
+
+      syncPhase += 0.04 + (1 - v) * 0.03;
+      requestAnimationFrame(drawSync);
+    }
+
+    /* ---- Three.js wireframe globe ---- */
+    let globe = { renderer: null, scene: null, camera: null, earth: null, markers: [], anim: null };
+    function initGlobe() {
+      const canvas = document.getElementById("globeCanvas");
+      if (!canvas || typeof THREE === "undefined") return;
+      const w = canvas.clientWidth || 280, h = 150;
+      canvas.width = w; canvas.height = h;
+
+      const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+      renderer.setSize(w, h, false);
+      renderer.setClearColor(0x000000, 1);
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(35, w / h, 0.1, 100);
+      camera.position.z = 3.2;
+
+      const group = new THREE.Group();
+      scene.add(group);
+
+      // wire sphere
+      const geo = new THREE.SphereGeometry(1, 24, 18);
+      const mat = new THREE.MeshBasicMaterial({
+        color: isEva() ? 0xff6600 : 0x3b82f6,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.55
+      });
+      const earth = new THREE.Mesh(geo, mat);
+      group.add(earth);
+
+      // equator ring
+      const ringGeo = new THREE.TorusGeometry(1.02, 0.008, 8, 64);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: isEva() ? 0xff6600 : 0x3b82f6,
+        transparent: true, opacity: 0.35
+      });
+      group.add(new THREE.Mesh(ringGeo, ringMat));
+
+      // node markers
+      const markers = [];
+      NODES.forEach(n => {
+        const phi = (90 - n.lat) * (Math.PI / 180);
+        const theta = (n.lon + 180) * (Math.PI / 180);
+        const r = 1.04;
+        const x = -r * Math.sin(phi) * Math.cos(theta);
+        const y = r * Math.cos(phi);
+        const z = r * Math.sin(phi) * Math.sin(theta);
+        const mGeo = new THREE.SphereGeometry(0.045, 8, 8);
+        const mMat = new THREE.MeshBasicMaterial({
+          color: n.status === "online" ? 0x22c55e : 0x666666
+        });
+        const m = new THREE.Mesh(mGeo, mMat);
+        m.position.set(x, y, z);
+        group.add(m);
+        markers.push(m);
+      });
+
+      globe = { renderer, scene, camera, earth: group, markers, mat, anim: null };
+
+      function animate() {
+        globe.anim = requestAnimationFrame(animate);
+        group.rotation.y += 0.004;
+        group.rotation.x = Math.sin(Date.now() * 0.0003) * 0.12;
+        renderer.render(scene, camera);
+      }
+      if (globe.anim) cancelAnimationFrame(globe.anim);
+      animate();
+    }
+
+    function refreshGlobeColor() {
+      if (globe.mat) {
+        globe.mat.color.set(isEva() ? 0xff6600 : 0x3b82f6);
+      }
+    }
+
+    function setTheme(name) {
+      state.theme = name;
+      document.body.classList.remove(
+        "theme-light", "theme-terminal", "theme-eva-basic", "theme-eva-full"
+      );
+      if (name === "light") document.body.classList.add("theme-light");
+      if (name === "terminal") document.body.classList.add("theme-terminal");
+      if (name === "eva-basic") document.body.classList.add("theme-eva-basic");
+      if (name === "eva-full") document.body.classList.add("theme-eva-full");
+
+      const crtBtn = document.getElementById("crt-btn");
+      if (name === "eva-full") {
+        crtBtn.classList.remove("hidden");
+        document.body.classList.toggle("crt-on", state.crt);
+        crtBtn.classList.toggle("active", state.crt);
+      } else {
+        crtBtn.classList.add("hidden");
+        document.body.classList.remove("crt-on");
+      }
+
+      const vs = document.getElementById("voice-select");
+      if (isEva() && state.voice === "ops") { state.voice = "misato"; vs.value = "misato"; }
+      else if (!isEva() && ["misato","gendo","magi"].includes(state.voice)) {
+        state.voice = "ops"; vs.value = "ops";
+      }
+      [...vs.options].forEach(o => {
+        if (["misato","gendo","magi"].includes(o.value)) o.hidden = !isEva();
+      });
+
+      applyLabels();
+      syncCouncilDisplay();
+      refreshGlobeColor();
+      setConfidence(state.confidence);
+    }
+
+    function toggleCrt() {
+      state.crt = !state.crt;
+      document.body.classList.toggle("crt-on", state.crt);
+      document.getElementById("crt-btn").classList.toggle("active", state.crt);
+    }
+
+    function setVoice(v) { state.voice = v; updateVoiceUI(); }
+    function updateVoiceUI() {
+      const map = { ops: "OP", misato: "MK", gendo: "GI", magi: "MG" };
+      document.getElementById("chat-avatar").textContent = map[state.voice] || "OP";
+    }
+
+    function ts() { return new Date().toTimeString().split(" ")[0]; }
+
+    function log(msg, cls) {
+      cls = cls || "";
+      state.stream.push({ t: ts(), msg: msg, cls: cls });
+      const el = document.getElementById("view-stream");
+      el.innerHTML = state.stream.map(function(e) {
+        return "<div class=\"" + e.cls + "\"><span class=\"ts\">[" + e.t + "]</span>" + e.msg + "</div>";
+      }).join("");
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function switchTab(tab) {
+      document.getElementById("view-stream").classList.toggle("hidden", tab !== "stream");
+      document.getElementById("view-hitl").classList.toggle("hidden", tab !== "hitl");
+      document.getElementById("tab-stream").classList.toggle("active", tab === "stream");
+      document.getElementById("tab-hitl").classList.toggle("active", tab === "hitl");
+    }
+
+    function clearStages() {
+      stages.forEach(function(id) {
+        document.getElementById(id).classList.remove("active", "done");
+      });
+    }
+    function activateStages(ids, doneIds) {
+      doneIds = doneIds || [];
+      clearStages();
+      ids.forEach(function(id) { document.getElementById(id).classList.add("active"); });
+      doneIds.forEach(function(id) {
+        document.getElementById(id).classList.remove("active");
+        document.getElementById(id).classList.add("done");
+      });
+    }
+
+    function syncCouncilDisplay() {
+      var c = state.lastCouncil;
+      var map = { approve: "ok", reject: "danger", pending: "warn", skip: "muted", "—": "muted" };
+      function apply(id, val) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = val.toUpperCase();
+        el.className = "font-bold text-sm " + (map[val] || "muted");
+        if (state.theme === "eva-full" && val !== "—") el.classList.add("blink");
+        else el.classList.remove("blink");
+      }
+      apply("check-safety-val", c.safety);
+      apply("check-policy-val", c.policy);
+      apply("check-intent-val", c.intent);
+      apply("check-safety-val-m", c.safety);
+      apply("check-policy-val-m", c.policy);
+      apply("check-intent-val-m", c.intent);
+      // also style triangle node values
+      ["check-safety-val-m","check-policy-val-m","check-intent-val-m"].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) {
+          el.className = "val " + (map[c.safety] || "muted");
+        }
+      });
+      var elS = document.getElementById("check-safety-val-m");
+      var elP = document.getElementById("check-policy-val-m");
+      var elI = document.getElementById("check-intent-val-m");
+      if (elS) elS.className = "val " + (map[c.safety] || "muted");
+      if (elP) elP.className = "val " + (map[c.policy] || "muted");
+      if (elI) elI.className = "val " + (map[c.intent] || "muted");
+    }
+
+    function setCouncil(safety, policy, intent, resolution, tally) {
+      state.lastCouncil = { safety: safety, policy: policy, intent: intent };
+      syncCouncilDisplay();
+      document.getElementById("resolution").textContent = resolution;
+      var map = { approve: "ok", reject: "danger", pending: "warn", skip: "muted", auto: "ok", approved: "ok", hitl: "warn", "—": "muted" };
+      document.getElementById("resolution").className = "font-bold " + (map[resolution.toLowerCase()] || "muted");
+      document.getElementById("vote-tally").textContent = tally;
+    }
+
+    function setConfidence(v) {
+      state.confidence = v;
+      var suffix = isEva()
+        ? (v >= 0.8 ? " · SYNC OK" : " · REVIEW")
+        : (v >= 0.8 ? " · OK" : " · REVIEW");
+      document.getElementById("confidence-label").textContent = v.toFixed(2) + suffix;
+      document.getElementById("confidence-label").className = (v >= 0.8 ? "ok" : "warn") + " font-bold text-[11px]";
+    }
+
+    function renderInbox() {
+      var list = document.getElementById("inbox-list");
+      document.getElementById("inbox-count").textContent = state.inbox.length;
+      if (!state.inbox.length) {
+        list.innerHTML = "<div class=\"muted\">No pending deliveries</div>";
+        return;
+      }
+      list.innerHTML = state.inbox.map(function(i) {
+        return "<div class=\"row panel p-1.5\" style=\"border-style:dashed\">" +
+          "<div><div class=\"font-bold\">" + i.text + "</div>" +
+          "<div class=\"muted text-[10px]\">" + i.due + "</div></div>" +
+          "<span class=\"badge badge-orange\">" + i.status + "</span></div>";
+      }).join("");
+    }
+
+    function renderApprovals() {
+      var list = document.getElementById("approval-list");
+      var hitl = document.getElementById("hitl-queue");
+      document.getElementById("hitl-count").textContent = state.approvals.length;
+      if (!state.approvals.length) {
+        list.innerHTML = "<div class=\"muted\">None</div>";
+        hitl.innerHTML = "<div class=\"muted\">No pending HITL items</div>";
+        return;
+      }
+      function card(a) {
+        return "<div class=\"panel p-1.5 space-y-1\">" +
+          "<div class=\"row\"><strong>" + a.title + "</strong><span class=\"badge badge-red\">RED</span></div>" +
+          "<div class=\"muted text-[10px]\">" + a.detail + "</div>" +
+          "<div class=\"flex gap-1\">" +
+          "<button class=\"btn primary\" onclick=\"decideApproval('" + a.id + "', true)\">Approve</button>" +
+          "<button class=\"btn danger\" onclick=\"decideApproval('" + a.id + "', false)\">Reject</button>" +
+          "</div></div>";
+      }
+      list.innerHTML = state.approvals.map(card).join("");
+      hitl.innerHTML = state.approvals.map(card).join("");
+    }
+
+    function setJob(job) {
+      state.job = job;
+      var box = document.getElementById("job-box");
+      var idEl = document.getElementById("job-id");
+      if (!job) {
+        idEl.textContent = "—";
+        box.innerHTML = "<div class=\"muted\">No active job</div>";
+        document.getElementById("pipeline-state").textContent = "IDLE";
+        return;
+      }
+      idEl.textContent = job.id;
+      document.getElementById("pipeline-state").textContent = job.stage;
+      var nn = L().nodeNames[job.worker] || { name: job.worker };
+      box.innerHTML =
+        "<div class=\"row\"><span>Pattern</span><span class=\"badge badge-" + job.pattern + "\">" + job.pattern.toUpperCase() + "</span></div>" +
+        "<div class=\"row\"><span>Stage</span><span>" + job.stage + "</span></div>" +
+        "<div class=\"row\"><span>Worker</span><span>" + nn.name + "</span></div>";
+    }
+
+    function submitDemo(pattern) {
+      var id = "job-" + Math.random().toString(36).slice(2, 7);
+      var job = {
+        id: id, pattern: pattern, stage: "ingress", worker: state.node,
+        confidence: pattern === "blue" ? 0.96 : pattern === "orange" ? 0.84 : 0.62
+      };
+      setJob(job);
+      setConfidence(job.confidence);
+      var who = isEva()
+        ? (pattern === "red" ? "Misato" : pattern === "orange" ? "Gendo" : "system")
+        : "router";
+      log(who + ": ingress " + id + " · pattern " + pattern.toUpperCase(),
+        pattern === "red" ? "danger" : pattern === "orange" ? "warn" : "ok");
+
+      activateStages(["stage-1"]);
+      document.getElementById("council-summary").textContent =
+        pattern === "blue"
+          ? (isEva() ? "Blue · MAGI skipped" : "Blue · council skipped")
+          : "evaluating…";
+
+      setTimeout(function() {
+        activateStages(["stage-2"], ["stage-1"]);
+        log("Risk router → " + pattern.toUpperCase());
+      }, 250);
+
+      setTimeout(function() {
+        if (pattern === "blue") {
+          setCouncil("skip", "skip", "skip", "auto", "0/0");
+          activateStages(["stage-5"], ["stage-1","stage-2"]);
+          document.getElementById("council-summary").textContent = "Blue · deterministic path";
+          log(isEva() ? "MAGI skipped (Blue / high sync)" : "Council skipped (Blue / high confidence)", "ok");
+          finishJob(job, true);
+        } else {
+          activateStages(["stage-3"], ["stage-1","stage-2"]);
+          document.getElementById("council-summary").textContent =
+            isEva() ? "MAGI active" : "Council active";
+          log(isEva() ? "MAGI consulted" : "Council consulted");
+          setCouncil("pending", "pending", "pending", "pending", "—");
+          setTimeout(function() {
+            if (pattern === "orange") {
+              setCouncil("approve", "approve", "approve", "approved", "3/3");
+              activateStages(["stage-4"], ["stage-1","stage-2","stage-3"]);
+              log(isEva() ? "MAGI approved 3/3" : "Council approved 3/3", "ok");
+              setTimeout(function() {
+                activateStages(["stage-5"], ["stage-1","stage-2","stage-3","stage-4"]);
+                finishJob(job, true);
+              }, 400);
+            } else {
+              setCouncil("approve", "reject", "approve", "hitl", "2/3");
+              activateStages(["stage-4"], ["stage-1","stage-2","stage-3"]);
+              log(isEva() ? "MAGI split · Misato HITL" : "Council split · routing to HITL", "danger");
+              state.approvals.push({
+                id: "ap-" + id,
+                title: id,
+                detail: "Privileged mutation · confidence " + job.confidence.toFixed(2)
+              });
+              renderApprovals();
+              document.getElementById("council-summary").textContent =
+                isEva() ? "awaiting Misato" : "awaiting human";
+              switchTab("hitl");
+            }
+          }, 500);
+        }
+      }, 500);
+    }
+
+    function finishJob(job, ok) {
+      setTimeout(function() {
+        activateStages([], ["stage-1","stage-2","stage-3","stage-4","stage-5","stage-6"]);
+        document.getElementById("stage-6").classList.add("done");
+        job.stage = ok ? "done" : "rejected";
+        setJob(job);
+        state.cost += job.pattern === "blue" ? 0.002 : 0.02;
+        document.getElementById("doc-cost").textContent = "$" + state.cost.toFixed(3);
+        log(ok
+          ? (isEva() ? "Terminal Dogma committed · " + job.id : "Ledger committed · " + job.id)
+          : "Rejected · " + job.id,
+          ok ? "ok" : "danger");
+        setTimeout(function() {
+          clearStages();
+          setJob(null);
+          setCouncil("—","—","—","—","—");
+          document.getElementById("council-summary").textContent =
+            isEva() ? "idle · Blue skips MAGI" : "idle · Blue skips full ballot";
+        }, 1200);
+      }, 350);
+    }
+
+    function decideApproval(id, approve) {
+      state.approvals = state.approvals.filter(function(a) { return a.id !== id; });
+      renderApprovals();
+      log(approve
+        ? (isEva() ? "Misato approved " + id : "HITL approved " + id)
+        : (isEva() ? "Misato rejected " + id : "HITL rejected " + id),
+        approve ? "ok" : "danger");
+      if (approve) {
+        activateStages(["stage-5"], ["stage-1","stage-2","stage-3","stage-4"]);
+        var job = {
+          id: id.replace("ap-",""), pattern: "red", stage: "sandbox",
+          worker: state.node, confidence: state.confidence
+        };
+        setJob(job);
+        finishJob(job, true);
+      } else {
+        clearStages();
+        setJob(null);
+      }
+    }
+
+    function rollback() {
+      log(isEva()
+        ? "Spear of Longinus: capability tokens revoked · ledger compensate"
+        : "Rollback: last capability grant revoked · ledger compensate", "danger");
+    }
+
+    function onNodeChange(v) {
+      state.node = v;
+      log("Active node → " + ((L().nodeNames[v] && L().nodeNames[v].name) || v));
+      renderNodes();
+    }
+
+    function runDoctor() {
+      log("Doctor: scheduler ok · sqlite ok · gateway ok", "ok");
+      document.getElementById("doc-sched").textContent = "ok";
+      document.getElementById("doc-db").textContent = "ok";
+      document.getElementById("doc-gw").textContent = "ok";
+    }
+
+    function sendOps() {
+      var input = document.getElementById("ops-input");
+      var text = input.value.trim();
+      if (!text) return;
+      var ops = document.getElementById("ops-log");
+      var voiceNames = { ops: "ops", misato: "Misato", gendo: "Gendo", magi: "MAGI" };
+      var voice = voiceNames[state.voice] || "ops";
+      ops.innerHTML += "<div class=\"flex gap-2 items-start mb-1\">" +
+        "<div class=\"avatar\">YOU</div><div><strong>you:</strong> " + text + "</div></div>";
+      input.value = "";
+      setTimeout(function() {
+        var reply = "Acknowledged.";
+        var t = text.toLowerCase();
+        var c = state.lastCouncil;
+
+        if (state.voice === "gendo" || t.indexOf("why") >= 0 || t.indexOf("red") >= 0) {
+          if (c.policy === "reject" || c.intent === "reject" || state.approvals.length) {
+            reply = state.voice === "gendo" || isEva()
+              ? "Classification Red: privileged mutation. Policy or intent dissent. Sync below promote threshold. Human sign-off required."
+              : "Last Red path: privileged mutation + confidence below promote threshold. HITL required by policy.";
+          } else {
+            reply = "No active Red classification. Current confidence " + state.confidence.toFixed(2) + ".";
+          }
+        } else if (state.voice === "magi" || t.indexOf("dissent") >= 0 || t.indexOf("vote") >= 0) {
+          reply = "Ballot — safety: " + c.safety + ", policy: " + c.policy + ", intent: " + c.intent + ". " +
+            (c.policy === "reject" ? "Policy dissent is blocking auto-approve." : "No blocking dissent.");
+        } else if (t.indexOf("status") >= 0) {
+          reply = "Node " + ((L().nodeNames[state.node] && L().nodeNames[state.node].name) || state.node) +
+            " · " + (isEva() ? "sync" : "confidence") + " " + state.confidence.toFixed(2) +
+            " · pending " + state.approvals.length + " · inbox " + state.inbox.length + ".";
+        } else if (t.indexOf("approve") >= 0 && state.approvals.length) {
+          decideApproval(state.approvals[0].id, true);
+          reply = "Approved first pending item.";
+        } else if (state.approvals.length) {
+          reply = state.approvals.length + " approval(s) waiting. Say approve or reject.";
+        } else if (state.voice === "misato") {
+          reply = state.approvals.length
+            ? state.approvals.length + " item(s) in the apartment. Approve or reject."
+            : "No pending intercepts. Mesh quiet.";
+        }
+
+        ops.innerHTML += "<div class=\"flex gap-2 items-start mb-1 ok\">" +
+          "<div class=\"avatar\">" + document.getElementById("chat-avatar").textContent + "</div>" +
+          "<div><strong>" + voice + ":</strong> " + reply + "</div></div>";
+        ops.scrollTop = ops.scrollHeight;
+      }, 280);
+    }
+
+    setInterval(function() {
+      var n = new Date();
+      document.getElementById("clock").textContent =
+        n.toISOString().slice(0, 19).replace("T", " ");
+    }, 1000);
+
+    renderInbox();
+    renderApprovals();
+    setConfidence(0.94);
+    setCouncil("—","—","—","—","—");
+    setTheme("dark");
+    drawSync();
+    // defer globe until layout sized
+    setTimeout(initGlobe, 100);
+    window.addEventListener("resize", function() {
+      if (globe.renderer) {
+        var canvas = document.getElementById("globeCanvas");
+        var w = canvas.clientWidth || 280, h = 150;
+        globe.renderer.setSize(w, h, false);
+        globe.camera.aspect = w / h;
+        globe.camera.updateProjectionMatrix();
+      }
+    });
+    log("Nodo ops ready · EVA Full: triangular MAGI · JP labels · Three.js mesh · sync canvas · CRT off by default");
+  </script>
+</body>
+</html>
