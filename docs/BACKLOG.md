@@ -1106,13 +1106,13 @@ Current work ledger, reviewed 4 November 2026 against main `bc0dd97`. PR #1–#4
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Implemented in PR_BASE: `config.base {id, name}` (default NERV-01 · Neo Tokyo-3, id in capitals/digits/dashes up to 16, name up to 40), `init --base --name`, `base [ID "Name"]`, `base` in `/api/status` and `/api/doctor`, the live dashboard's base card and map label, the brief title, the serve banner; `launch` (serve + `open dashboard`, `--print` for the link). Checked: test/runtime.test.ts (init flags, show, change keeping other settings, mode 600, validation), test/brief.test.ts (title), headless tests (doctor names the base; `launch --print` prints the banner and a signed-in dashboard link). The Kaji line (F-005/F-006) will use the same identity for the mesh.
+**Next action / closure evidence:** Implemented in [PR #41](https://github.com/voidbrain/nerv/pull/41): `config.base {id, name}` (default NERV-01 · Neo Tokyo-3, id in capitals/digits/dashes up to 16, name up to 40), `init --base --name`, `base [ID "Name"]`, `base` in `/api/status` and `/api/doctor`, the live dashboard's base card and map label, the brief title, the serve banner; `launch` (serve + `open dashboard`, `--print` for the link). Checked: test/runtime.test.ts (init flags, show, change keeping other settings, mode 600, validation), test/brief.test.ts (title), headless tests (doctor names the base; `launch --print` prints the banner and a signed-in dashboard link). The Kaji line (F-005/F-006) will use the same identity for the mesh.
 
 **Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-04.
 
 | Field | Value |
 |---|---|
-| PR / evidence | PR_BASE |
+| PR / evidence | [PR #41](https://github.com/voidbrain/nerv/pull/41) |
 | Opened | 2026-11-04 |
 | Verification | 2026-11-04: tests above (local run; CI pending) |
 | Reviewed | 2026-11-04 |
