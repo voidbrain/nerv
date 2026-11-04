@@ -498,22 +498,20 @@ function drawEdges(s) {
   const c = el => { const r = el.getBoundingClientRect(); return { x:r.left - host.left + r.width / 2, y:r.top - host.top + r.height / 2, w:r.width, h:r.height, l:r.left - host.left, r:r.right - host.left, t:r.top - host.top, b:r.bottom - host.top }; };
   const live = liveEdges(s);
   svg.setAttribute("viewBox", "0 0 " + host.width + " " + host.height);
-  svg.innerHTML = EDGES.map(e => {
+  // Orthogonal routing: every line leaves and enters a node only at the middle of its N, S, E or W side, with 90° turns
+  // in the gaps between nodes; the loops back to Misato run in their own lanes along the right edge, never behind a node.
+  let lane = 0;
+  const paths = EDGES.map(e => {
     const A = c(nodeEl(e[0])), B = c(nodeEl(e[1])); let d;
-    if (e[2] === "loop") {
-      if (e[0] === "eva") d = "M" + A.r + "," + A.y + " C" + (host.width - 4) + "," + A.y + " " + (host.width - 4) + "," + (B.y - 4) + " " + B.r + "," + (B.y - 4);
-      else if (e[0] === "apt") d = "M" + A.r + "," + A.y + " C" + (host.width - 16) + "," + A.y + " " + (host.width - 16) + "," + (B.y + 4) + " " + B.r + "," + (B.y + 4);
-      else if (e[0] === "magi") d = "M" + (A.r - 30) + "," + (A.t + 10) + " Q" + (B.x - 10) + "," + (A.t + 4) + " " + (B.x - 10) + "," + B.b;
-      else d = "M" + A.r + "," + A.y + " L" + B.l + "," + B.y;
-    } else {
-      const y1 = A.y < B.y ? A.b : A.t, y2 = A.y < B.y ? B.t : B.b;
-      const x1 = Math.abs(A.y - B.y) < 10 ? (A.x < B.x ? A.r : A.l) : A.x, x2 = Math.abs(A.y - B.y) < 10 ? (A.x < B.x ? B.l : B.r) : B.x;
-      const yy1 = Math.abs(A.y - B.y) < 10 ? A.y : y1, yy2 = Math.abs(A.y - B.y) < 10 ? B.y : y2;
-      d = "M" + x1 + "," + yy1 + " L" + x2 + "," + yy2;
-    }
+    if (e[2] === "loop" && e[0] !== "consult") { const x = host.width - 5 - 9 * lane++; d = "M" + A.r + "," + A.y + " H" + x + " V" + B.y + " H" + B.r; }
+    else if (B.t >= A.b - 2) { const my = (A.b + B.t) / 2; d = "M" + A.x + "," + A.b + " V" + my + " H" + B.x + " V" + B.t; }
+    else if (B.b <= A.t + 2) { const my = (B.b + A.t) / 2; d = "M" + A.x + "," + A.t + " V" + my + " H" + B.x + " V" + B.b; }
+    else if (B.l >= A.r) { const mx = (A.r + B.l) / 2; d = "M" + A.r + "," + A.y + " H" + mx + " V" + B.y + " H" + B.l; }
+    else { const mx = (B.r + A.l) / 2; d = "M" + A.l + "," + A.y + " H" + mx + " V" + B.y + " H" + B.r; }
     const key = e[0] + ">" + e[1]; const cls = (e[2] ? "loop " : "") + (live[key] || passedEdge(s, e) || "");
-    return "<path d='" + d + "' class='" + cls + "'/>";
+    return "<path d='" + d + "' class='" + cls + "' marker-end='url(#edge-arrow)'/>";
   }).join("");
+  svg.innerHTML = "<defs><marker id='edge-arrow' viewBox='0 0 6 6' refX='5' refY='3' markerWidth='6' markerHeight='6' orient='auto-start-reverse'><path d='M0,0 L6,3 L0,6 z' fill='context-stroke'/></marker></defs>" + paths;
 }
 /** The route already taken: green when the step passed on its own, yellow when it went through the owner's decision
     (Misato's apartment), faded into a skipped step. Live, waiting and rejected edges are drawn by liveEdges instead. */
@@ -522,6 +520,9 @@ function passedEdge(s, e) {
   const from = stepState(s, e[0]), to = stepState(s, e[1]);
   if (from === "skip" || to === "skip") return "skip";
   if (from !== "done" || !(to === "done" || to === "on" || to === "wait")) return "";
+  // After a loop back to Misato, steps past the current one were reached in an earlier pass, not this one.
+  const order = id => STEP_IDS.indexOf(id), now = order(s.phase);
+  if (s.status !== "done" && s.status !== "failed" && s.status !== "stood-down" && now >= 0 && order(e[1]) > now && to === "done") return "earlier";
   return e[0] === "apt" || e[1] === "apt" ? "passed owner" : "passed";
 }
 function liveEdges(s) {
