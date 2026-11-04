@@ -43,6 +43,7 @@ test('init sets both roles on Ollama\'s largest model when nothing is set; a set
   assert.equal(JSON.parse(readFileSync(join(home,'config.json'),'utf8')).port,4999,'other settings are kept');
   assert.match(await setupAtInit(home,{local:{baseUrl:'http://127.0.0.1:11434/v1',model:'x'}},o.url),/already set/);
   assert.match(await setupAtInit(home,{},dead),/^Model routes: none yet\. No Ollama/);
+  assert.throws(()=>planModels({},{misato:{route:'local',model:'MODEL'}},[]),/Ollama has no models yet\. Pull one first, for example: ollama pull qwen2\.5:1\.5b/,'an empty Ollama says what to pull');
  }finally{await o.close();rmSync(home,{recursive:true,force:true});}
 });
 test('the CLI: init finds Ollama, models shows the roles, models set changes one, an unknown model is refused and nothing is written',async()=>{
@@ -52,7 +53,7 @@ test('the CLI: init finds Ollama, models shows the roles, models set changes one
   let stdout='',stderr='';c.stdout.on('data',d=>stdout+=d);c.stderr.on('data',d=>stderr+=d);c.on('close',status=>done({status,stdout,stderr}));});
  try{
   const init=await run('init');assert.equal(init.status,0,init.stderr);assert.match(init.stdout,/Misato and Casper use qwen2\.5-coder:14b/);
-  const set=await run('models','set','casper','gemma4:12b');assert.equal(set.status,0,set.stderr);assert.match(set.stdout,/^Saved\. The service is not running: the change applies when it starts\./);
+  const set=await run('models','set','casper','gemma4:12b');assert.equal(set.status,0,set.stderr);assert.match(set.stdout,/^Saved\. The NERV service is not running: the change applies when it starts\. Start it with: nerv launch/);
   assert.match((await run('models')).stdout,/Misato \(planner\): local · qwen2\.5-coder:14b\nCasper \(intent seat, always local\): gemma4:12b/);
   const before=readFileSync(join(home,'config.json'),'utf8');
   assert.match((await run('models','set','misato','llama9')).stderr,/Ollama has no model "llama9"/);assert.equal(readFileSync(join(home,'config.json'),'utf8'),before,'a refused change writes nothing');
