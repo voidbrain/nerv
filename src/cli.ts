@@ -1,11 +1,11 @@
 #!/usr/bin/env -S node --use-system-ca
 import { spawnSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
-import { chmodSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Store } from './store.ts';
 import { makeServer } from './server.ts';
-import { dataHome, databasePath, initialize, pinKajiRoot, readConfig, readScrolls, readTelegramToken, readToken, setBase, type Base } from './config.ts';
+import { dataHome, databasePath, initialize, isTelegramToken, pinKajiRoot, telegramTokenPath, readConfig, readScrolls, readTelegramToken, readToken, setBase, type Base } from './config.ts';
 import { TelegramApi, TelegramChannel, startChats, telegramBase } from './telegram.ts';
 import { composeBrief, gatherBrief } from './brief.ts';
 import { ROOT_KEY_FILE, Registry, baseKey, createRootKey, fingerprint, signRecord, unlockRootKey, type SignedRecord } from './kaji.ts';
@@ -20,7 +20,7 @@ function baseFlags(list:string[]):Base|undefined {
 }
 /** A secret typed without echo (or one line from stdin with --passphrase-stdin, for scripts and tests). Never from argv or env. */
 async function readSecret(prompt:string):Promise<string> {
-  if(args.includes('--passphrase-stdin')){let data='';for await(const chunk of process.stdin)data+=chunk;return data.split(/\r?\n/)[0] ?? '';}
+  if(args.includes('--passphrase-stdin')||args.includes('--stdin')){let data='';for await(const chunk of process.stdin)data+=chunk;return data.split(/\r?\n/)[0] ?? '';}
   if(!process.stdin.isTTY)throw new Error('A passphrase is needed: run this in a terminal (or pass --passphrase-stdin).');
   process.stdout.write(prompt);process.stdin.setRawMode(true);process.stdin.resume();
   return new Promise((done,fail)=>{let value='';const onData=(b:Buffer)=>{for(const c of b.toString('utf8')){
@@ -49,8 +49,16 @@ try {
   else if(command==='service')service(args[0] ?? '',home);
   else if(command==='telegram'){
     // telegram link [CHAT_ID]: binds Aoba to the private chat that sent /start to the bot.
-    if(args[0]!=='link')throw new Error('Usage: telegram link [CHAT_ID]');
-    const botToken=readTelegramToken(home);if(!botToken)throw new Error('No telegram-token in the data home: store the BotFather token there first (INSTALL, "Telegram").');
+    // telegram token: asks for the BotFather token without showing it, checks its format and saves it privately.
+    if(args[0]==='token'){
+      const path=telegramTokenPath(home);const token=(await readSecret('Paste the bot token from @BotFather (it is not shown), then Enter: ')).trim();
+      if(!isTelegramToken(token))throw new Error('That does not look like a BotFather token (digits, a colon, then letters and digits). Nothing was saved.');
+      mkdirSync(home,{recursive:true,mode:0o700});writeFileSync(path,token+'\n',{mode:0o600});chmodSync(path,0o600);
+      console.log(`Saved to ${path}. Now send /start to your bot in Telegram, then run: nerv telegram link`);
+    }
+    else {
+    if(args[0]!=='link')throw new Error('Usage: telegram token | telegram link [CHAT_ID]');
+    const botToken=readTelegramToken(home);if(!botToken)throw new Error(`No Telegram bot token at ${telegramTokenPath(home)}. Run: nerv telegram token (it asks for the token from @BotFather and saves it there).`);
     const chats=await startChats(new TelegramApi(botToken,telegramBase()));
     const wanted=args[1]?Number(args[1]):undefined;const pick=wanted!==undefined?chats.find(c=>c.chatId===wanted):chats.length===1?chats[0]:undefined;
     if(!pick){if(!chats.length)throw new Error('No /start found: send /start to your bot in Telegram, then run this again (within 24 hours).');throw new Error(`Several chats sent /start; choose one: ${chats.map(c=>`telegram link ${c.chatId} (${c.name})`).join(' | ')}`);}
@@ -58,6 +66,7 @@ try {
     writeFileSync(path,JSON.stringify({...current,telegram:{chatId:pick.chatId}},null,2)+'\n',{mode:0o600});chmodSync(path,0o600);readConfig(home);
     console.log(`Aoba linked to ${pick.name} (chat ${pick.chatId}). Restart the service to start it.`);
   }
+    }
   else if(command==='open'){
     // open dashboard: the same sign-in, landing on the live dashboard instead of the workspace.
     await openPage(home,args.includes('dashboard')?'/dashboard/':'/',args.includes('--print'));
@@ -117,7 +126,7 @@ try {
     if(!response.ok)throw new Error(value.error ?? 'Ask failed.');
     console.log(value.text+(value.truncated?'\n[reply truncated]':'')+`\n— ${value.route} · ${value.model}`);
   }
-  else if(!command||command==='help')console.log('NERV Agency\nCommands: init [--base ID --name "Name"] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | open [dashboard] | chat "text" | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
+  else if(!command||command==='help')console.log('NERV Agency\nCommands: init [--base ID --name "Name"] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | open [dashboard] | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
   else {
     const config=readConfig(home);
     const scrolls=readScrolls(home);

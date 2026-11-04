@@ -22,7 +22,7 @@ Each machine has a **base identity**, shown in the dashboard, `doctor` and the d
 
 NERV Agency runs on Windows 11 with Node 24 (tested on macOS and Linux; Windows checks are unit-level so far, F-037). Differences:
 
-- The data home is `%USERPROFILE%\.nerv`. Windows has no Unix permission bits, so private files (`telegram-token`, `anthropic-key`, `scrolls.json`) rely on your user profile being private to your account; do not put the data home in a shared folder. Store the bot token with PowerShell: `Read-Host -AsSecureString` is awkward for this, so paste it into a new file instead: `notepad $env:USERPROFILE\.nerv\telegram-token` (one line, save, close) — never in a chat or the repository.
+- The data home is `%USERPROFILE%\.nerv` (`C:\Users\<you>\.nerv`; `nerv doctor` prints it as `home`). Windows has no Unix permission bits, so private files (`telegram-token`, `anthropic-key`, `scrolls.json`) rely on your user profile being private to your account; do not put the data home in a shared folder. Store a bot token with `nerv telegram token`.
 - `open` and `launch` open your default browser.
 - `service install` is not automated yet: it prints the Task Scheduler command that starts `serve` at logon (`schtasks /Create /SC ONLOGON …`); run it once.
 - If `nerv` (after `npm link`) does not start, use `npm start -- …` from the checkout.
@@ -143,13 +143,7 @@ Facts you add yourself are active at once. Forgetting removes a fact from recall
 Aoba is a Telegram bot that only you can use: write to Misato from your phone, approve or reject actions with buttons, and receive due reminders. It makes outgoing HTTPS requests only, so it needs no open port, VPN or second machine.
 
 1. In Telegram, message **@BotFather**, send `/newbot`, and choose a name (for example `Aoba`) and a username ending in `bot`.
-2. Store the token it gives you privately. Run this, paste the token at the empty prompt (nothing is shown) and press Enter:
-
-   ```bash
-   read -rs TOKEN && printf '%s\n' "$TOKEN" > ~/.nerv/telegram-token && chmod 600 ~/.nerv/telegram-token && unset TOKEN
-   ```
-
-   Never paste the token into a chat or a file in the repository. If it leaks, send `/revoke` to BotFather and store the new one.
+2. Store the token it gives you: `npm start -- telegram token` (or `nerv telegram token`). Paste the token at the prompt (it is not shown) and press Enter; it checks the format and saves it privately in the data home (`~/.nerv/telegram-token`, on Windows `%USERPROFILE%\.nerv\telegram-token`). Never paste the token into a chat or a file in the repository. If it leaks, send `/revoke` to BotFather and store the new one the same way.
 3. Send `/start` to your bot, then run `npm start -- telegram link`. It finds that `/start` and saves your chat ID in `config.json` (if several chats sent `/start`, it lists them: `telegram link CHAT_ID`).
 4. Restart the service. `serve` prints `Aoba (Telegram): linked, listening.`
 

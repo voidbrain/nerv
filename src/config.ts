@@ -80,12 +80,15 @@ export function readScrolls(home:string):Scrolls {
   let value:unknown;try{value=JSON.parse(readFileSync(file,'utf8'));}catch{throw new Error('Invalid scrolls.json: not JSON.');}
   try{return {policy:validatePolicy(value),source:'scrolls.json'};}catch(e){throw new Error(`Invalid scrolls.json: ${e instanceof Error?e.message:'invalid policy'}`);}
 }
+/** BotFather's format: digits, a colon, then 30–64 URL-safe characters. */
+export const isTelegramToken=(token:string)=>/^\d{5,15}:[A-Za-z0-9_-]{30,64}$/.test(token);
+export const telegramTokenPath=(home:string)=>join(home,'telegram-token');
 /** Aoba's Telegram bot token: a private file in the data home, like the cloud key. */
 export function readTelegramToken(home:string):string|undefined {
   const file=join(home,'telegram-token');if(!existsSync(file))return undefined;
   if(!privateEnough(file,0o077))throw new Error('telegram-token must be private: chmod 600.');
   const token=readFileSync(file,'utf8').trim();
-  if(!/^\d{5,15}:[A-Za-z0-9_-]{30,64}$/.test(token))throw new Error('Invalid telegram-token file: paste the token BotFather gave you.');
+  if(!isTelegramToken(token))throw new Error(`Invalid token in ${file}: run nerv telegram token and paste the token BotFather gave you.`);
   return token;
 }
 /** Sets this machine's base identity in config.json, keeping every other setting. */

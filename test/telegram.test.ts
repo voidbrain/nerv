@@ -1,6 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtempSync,rmSync,writeFileSync,statSync} from 'node:fs';
+import {mkdtempSync,rmSync,writeFileSync,statSync,readFileSync} from 'node:fs';
+import {spawnSync} from 'node:child_process';
 import {createServer} from 'node:http';
 import {tmpdir} from 'node:os';import {join} from 'node:path';
 import {Runtime} from '../src/runtime.ts';
@@ -110,4 +111,15 @@ test('Hyuga\'s brief reaches the owner once a day, also across a restart',async(
   await wait(400);await aoba.stop();aoba=channel();await aoba.start(100);await wait(400);
   assert.equal(tg.sent().filter(m=>/Buongiorno/.test(m.text)).length,1,'one brief per day, even after a restart');
  }finally{await aoba.stop();await runtime.close();await tg.close();rmSync(home,{recursive:true,force:true});}
+});
+test('nerv telegram token saves a BotFather token privately (refusing anything else), and link names the real path when it is missing',()=>{
+ const home=mkdtempSync(join(tmpdir(),'nerv-tgtoken-'));
+ const run=(args:string[],input?:string)=>spawnSync(process.execPath,['src/cli.ts','telegram',...args],{env:{...process.env,NERV_HOME:home},encoding:'utf8',...(input!==undefined?{input}:{})});
+ try{
+  const missing=run(['link']);assert.match(missing.stderr,new RegExp(`No Telegram bot token at ${join(home,'telegram-token').replace(/[\\/.]/g,'\\$&')}\\. Run: nerv telegram token`));
+  assert.match(run(['token','--stdin'],'not a token\n').stderr,/does not look like a BotFather token.*Nothing was saved/);
+  const token='123456:'+'s'.repeat(35);const saved=run(['token','--stdin'],token+'\n');assert.equal(saved.status,0,saved.stderr);assert.match(saved.stdout,/Now send \/start to your bot/);
+  assert.equal(readFileSync(join(home,'telegram-token'),'utf8').trim(),token);assert.equal(statSync(join(home,'telegram-token')).mode&0o777,0o600);
+  assert.ok(!saved.stdout.includes(token)&&!saved.stderr.includes(token),'the token is never printed');
+ }finally{rmSync(home,{recursive:true,force:true});}
 });

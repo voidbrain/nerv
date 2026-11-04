@@ -1108,7 +1108,7 @@ Current work ledger, reviewed 4 November 2026 against main `a257673`. PR #1–#5
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Basics in [PR #43](https://github.com/voidbrain/nerv/pull/43): `privateEnough` skips the Unix bit check on win32, `open` uses `cmd /c start`, `service install` prints the exact `schtasks` command with the shared Node flags. Checked by unit tests (permission rule per platform, task command); no Windows machine in CI yet, so live Windows checks are pending the owner's install.
+**Next action / closure evidence:** Owner's live install on Tabgha (Windows 11), 2026-11-04: the service is up. The missing-token message pointed at "(INSTALL, \"Telegram\")", which the owner typed as a command; storing the token needed a shell trick. Fixed in [PR #54](https://github.com/voidbrain/nerv/pull/54): `nerv telegram token` asks for the token without showing it, checks its format and saves it privately on any OS; missing-token and model-route messages name the real path or command and docs/INSTALL.md. Basics in [PR #43](https://github.com/voidbrain/nerv/pull/43): `privateEnough` skips the Unix bit check on win32, `open` uses `cmd /c start`, `service install` prints the exact `schtasks` command with the shared Node flags. Checked by unit tests (permission rule per platform, task command); no Windows machine in CI yet, so live Windows checks are pending the owner's install.
 
 **Estimates:** Medium remaining effort; ~30% complete. Estimated 2026-11-04.
 
@@ -1116,7 +1116,7 @@ Current work ledger, reviewed 4 November 2026 against main `a257673`. PR #1–#5
 |---|---|
 | PR / evidence | [PR #43](https://github.com/voidbrain/nerv/pull/43) |
 | Opened | 2026-11-04 |
-| Verification | 2026-11-04: unit tests on macOS (local run; CI green: PR #43); Windows live: pending |
+| Verification | 2026-11-04: unit tests on macOS (local run; CI green: PR #43); Windows live 2026-11-04: install and `serve` up on Tabgha; Telegram link pending |
 | Reviewed | 2026-11-04 |
 
 </details>
