@@ -1174,13 +1174,13 @@ Current work ledger, reviewed 4 November 2026 against main `589659b`. PR #1–#4
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Basics in PR_WIN: `privateEnough` skips the Unix bit check on win32, `open` uses `cmd /c start`, `service install` prints the exact `schtasks` command with the shared Node flags. Checked by unit tests (permission rule per platform, task command); no Windows machine in CI yet, so live Windows checks are pending the owner's install.
+**Next action / closure evidence:** Basics in [PR #43](https://github.com/voidbrain/nerv/pull/43): `privateEnough` skips the Unix bit check on win32, `open` uses `cmd /c start`, `service install` prints the exact `schtasks` command with the shared Node flags. Checked by unit tests (permission rule per platform, task command); no Windows machine in CI yet, so live Windows checks are pending the owner's install.
 
 **Estimates:** Medium remaining effort; ~30% complete. Estimated 2026-11-04.
 
 | Field | Value |
 |---|---|
-| PR / evidence | PR_WIN |
+| PR / evidence | [PR #43](https://github.com/voidbrain/nerv/pull/43) |
 | Opened | 2026-11-04 |
 | Verification | 2026-11-04: unit tests on macOS (local run; CI pending); Windows live: pending |
 | Reviewed | 2026-11-04 |
