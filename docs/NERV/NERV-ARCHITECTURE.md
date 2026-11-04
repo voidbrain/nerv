@@ -11,17 +11,31 @@ Supersedes the glossary in `review-2026-11-04.md` §3 and every flow in `insight
    • signs base enrolment, rotates Ritsuko's A.T. Field signing key, decrypts backups
    • NEVER used in the normal flow · NEVER bypasses MAGI or Misato's apartment
 ══════════════════════════════════════════════════════════════════════════════════════════
- NERV ················ the agency = one NERV Agency deployment
- ├─ TOKYO-3 / GEOFRONT  HQ (Mac): coordinator · authoritative MAGI · Central + Terminal Dogma
- ├─ NERV-01 (Nevada) .. branch (mini-PC): EVA cage · S² engine with GPU · hosts MAGI seats
- ├─ NERV-02 (Germany) . branch (Pi + 10 TB): EVA cage · vault (weights, replicas, images)
+ NERV ················ the agency = federated bases, each a full NERV Agency installation
+ ├─ NERV-01 NEO TOKYO-3  main base (Mac, owner's choice): Aoba · authoritative MAGI when connected
+ ├─ NERV-02 TABGHA ..... base (mini-PC): own persona names, own bot while alone · EVA cage · S²/GPU
+ ├─ NERV-03 BETHANY .... base (planned; Pi + 10 TB vault?): EVA cage · vault (weights, replicas)
  ├─ KAJI LINE ......... encrypted base mesh (Tailscale/WireGuard)               [mesh]
  │                      heartbeat · leases · fencing · plug transfer · seat calls
  └─ MARDUK INSTITUTE .. registry: enrols bases, models, pilots; capability ads  [registry]
                         discovery ≠ trust: enrolment needs the Key's signature
 ══════════════════════════════════════════════════════════════════════════════════════════
 
- TOKYO-3 HQ — one SORTIE (job), action by action
+ FEDERATION (owner decision 2026-11-04)
+   every base is a full installation: its own scheduler, ledger, memory, gate, channel
+   alone (Kaji line down) . a base serves its own work with its own MAGI and its own bot
+   connected .............. the main base (chosen by the owner, never elected) speaks
+                            through Aoba; other bases dispatch to it; their bots go quiet;
+                            their MAGI become veto-only seats for the main base's actions
+   shared ................. Scrolls (from SEELE, via the main base) · pilots via Marduk ·
+                            Lilith facts merged by id with provenance; conflicts → owner card
+   never merged ........... Central Dogma ledgers (append-only evidence): shown side by side
+   personas ............... role names per base (Misato, Gendo… or Bob, Fritz, Tim);
+                            MAGI names fixed on every base (seats are replicas: "Casper@Tabgha")
+   remote use ............. dashboard and channels reach other bases through the main base;
+                            each base's own gate decides its own actions
+
+ NEO TOKYO-3 (main base) — one SORTIE (job), action by action
  ┌─ 1 · DETECTION ────────────────────────────────────────────────────────────────────────┐
  │ AOBA (comms) ....... Telegram · CLI · menu-bar app · PWA        you speak first [ingress]│
  │ HYUGA (watch) ...... reminders · cron · heartbeat · webhooks ·  it speaks first        │
@@ -39,7 +53,7 @@ Supersedes the glossary in `review-2026-11-04.md` §3 and every flow in `insight
  3 · GENDO (command / router) ................................................. [router]
      choose pilot(s) · base + EVA · power source · battery
        UMBILICAL = cloud model (costs, limited by battery = budget ceiling)
-       S² ENGINE = local model on TOKYO-3 / NERV-01 (no per-token cost)
+       S² ENGINE = local model on any base (no per-token cost)
      battery flat → fall back to S² · local-only data → S² or wait, never Umbilical
      no model reachable ──► DUMMY PLUG: deterministic pilots only; reminders keep firing
                                          │
@@ -88,7 +102,7 @@ Supersedes the glossary in `review-2026-11-04.md` §3 and every flow in `insight
      sent to the chosen base's cage over the Kaji line
                                          │
                                          ▼
- 9 · EVA CAGE — sandbox execution (same schema on TOKYO-3, NERV-01, NERV-02) [executor]
+ 9 · EVA CAGE — sandbox execution (same schema on every base) [executor]
      ┌───────────────────────────────────────────────────────────────────────────────┐
      │ EVA-00 PROTOTYPE   shadow / dry-run · no external effects · no egress          │
      │ EVA-01 TEST TYPE   bounded · scoped writes inside the A.T. Field               │
@@ -141,11 +155,11 @@ Supersedes the glossary in `review-2026-11-04.md` §3 and every flow in `insight
    the curated patch: duplicates merged, unused pilots retired
 
 ══════════════════════════════════════════════════════════════════════════════════════════
- NERV-01 / NERV-02 — same cage schema; shared over the Kaji line
+ OTHER BASES — same cage schema; shared over the Kaji line
    EVA cages ........ HQ places plugs on branch cages (lease + fencing token per plug)
    MAGI seats ....... branch hosts may run a seat model (e.g. Casper on the NERV-01 S²/GPU).
                       Branch MAGI copies are seats, never authority: Melchior's rules,
-                      Ritsuko's signing and Central Dogma stay at TOKYO-3.
+                      Ritsuko's signing stay at the main base; each base keeps its own Central Dogma.
    S² engines ....... local models on any base, picked by Gendo (role ≠ base ≠ model)
    NERV-02 vault .... model weights · Litestream replicas · sandbox images
    branch offline ... its plugs wait or expire; local-only work is never moved to Umbilical
