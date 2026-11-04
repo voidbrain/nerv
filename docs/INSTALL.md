@@ -44,6 +44,8 @@ The same commands install `nodo.service` under the user systemd configuration di
 
 Stop the service, update the checkout, run `npm ci` and `npm run build`, then start it again. Service definitions record absolute Node/checkout/data paths: uninstall and reinstall if these paths change, including an nvm-managed Node upgrade. An existing definition is never overwritten by install. Run doctor and inspect service status/logs if bootstrap fails; a definition left by a failed install can be removed with uninstall before retrying. Environment overrides in your shell are not automatically persisted into the service; put service settings in config.json and use init for the persistent token.
 
+Database schema 2 adds the action ledger tables to `nodo.sqlite` on first start; reminders are kept. The upgrade is one-way: an older checkout refuses a schema-2 database with "Database schema is newer", so back up `nodo.sqlite` before updating if you may roll back.
+
 The backend remains bound to loopback. Remote TLS/Tailscale deployment, service auto-update and credential rotation are not implemented. Do not expose the development server publicly.
 
 ## Frontend development

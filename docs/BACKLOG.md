@@ -557,9 +557,9 @@ Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔺 P1 | Open | 🔴 Large | ~0% |
+| 🔴 | 🔺 P1 | Open | 🟡 Medium | ~50% |
 
-💻 **→ Human action required: No**<br />Add tool effect classes, the deterministic Melchior/Balthasar seats, the Pattern and Sync Ratio, and gate every agent action at the executor.
+💻 **→ Human action required: No**<br />Connect Casper to the F-003 model route, load the Scrolls from NODO_HOME and route the first real tool executor through the gate.
 
 | | |
 |---|---|
@@ -570,15 +570,15 @@ Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Implement in `src/` without framework imports: effect classes, Scrolls policy pack, Pattern derivation, deterministic seats, Sync Ratio (0–100 % with its inputs), grant issuance with TTL and the executor check. Casper uses the F-003 model route once it exists; until then a Casper verdict is required input and the gate fails closed. Extra veto-only seats and consultants are F-025. Supersedes the request-level Gendo classification of 2026-11-02 ([NERV architecture](NERV/NERV-ARCHITECTURE.md)).
+**Next action / closure evidence:** Implemented in [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals): `src/policy.ts` (effect classes, Pattern, EVA class, Melchior/Balthasar, veto-only extra seats, Sync Ratio with inputs) and `Ledger.propose`/`authorize` (single-use grants bound to the argument hash, reject limit escalation). Remaining: Casper from the model route, a Scrolls file in NODO_HOME validated by `validatePolicy`, and the first executor calling `authorize`. Original plan: effect classes, Scrolls policy pack, Pattern derivation, deterministic seats, Sync Ratio (0–100 % with its inputs), grant issuance with TTL and the executor check. Casper uses the F-003 model route once it exists; until then a Casper verdict is required input and the gate fails closed. Extra veto-only seats and consultants are F-025. Supersedes the request-level Gendo classification of 2026-11-02 ([NERV architecture](NERV/NERV-ARCHITECTURE.md)).
 
-**Estimates:** Large remaining effort; ~0% complete. Re-scoped 2026-11-04 from request-level routing to per-action gating.
+**Estimates:** Medium remaining effort; ~50% complete. Re-scoped 2026-11-04 from request-level routing to per-action gating; reassessed 2026-11-04 after the deterministic gate landed: Casper wiring, policy file and executor integration remain.
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals) |
 | Opened | 2026-11-02 |
-| Verification | Pending |
+| Verification | Unit/integration 2026-11-04: test/ledger.test.ts covers every Pattern path, veto-only seats, reject escalation, budget, EVA-00 shadow rule and grant binding (local run; CI pending). Human: pending |
 | Reviewed | 2026-11-04 |
 
 </details>
@@ -725,9 +725,9 @@ Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔺 P1 | Open | 🟡 Medium | ~0% |
+| 🔴 | 🔺 P1 | Open | 🟡 Medium | ~40% |
 
-💻 **→ Human action required: No**<br />Store approval requests with exact action, reason and TTL; resolve approve, edit, reject or expiry exactly once.
+💻 **→ Human action required: No**<br />Deliver cards through Pen Pen (inbox, then Telegram and native notifications) and expose list/decide over the API.
 
 | | |
 |---|---|
@@ -738,15 +738,15 @@ Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Approval table and decision transitions in `src/store.ts`, API/CLI to list and decide, then Telegram buttons via F-003. Edit returns the action to the planner rather than changing it in place.
+**Next action / closure evidence:** Implemented in [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals): approval cards (action, args, effect, Pattern, Sync Ratio and inputs, verdicts, reason, TTL), once-only decisions, TTL expiry on scheduler ticks, survival across restart, CLI `approvals`/`approve`/`reject`. Remaining: Pen Pen delivery, API/RPC for the PWA and companion, edit handed back to the agent loop (F-003). Original plan: Approval table and decision transitions in `src/store.ts`, API/CLI to list and decide, then Telegram buttons via F-003. Edit returns the action to the planner rather than changing it in place.
 
-**Estimates:** Medium remaining effort; ~0% complete. Re-scoped 2026-11-04 to include the card content specification.
+**Estimates:** Medium remaining effort; ~40% complete. Re-scoped 2026-11-04 to include the card content specification; reassessed 2026-11-04 after storage, decisions and expiry landed.
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals) |
 | Opened | 2026-11-02 |
-| Verification | Pending |
+| Verification | Unit/integration 2026-11-04: once-only decisions, expiry never approves, restart, scheduler-process expiry (local run; CI pending). Real-device: pending |
 | Reviewed | 2026-11-04 |
 
 </details>
@@ -758,9 +758,9 @@ Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔺 P1 | Open | 🟡 Medium | ~0% |
+| 🔴 | 🔺 P1 | Open | 🟢 Small | ~60% |
 
-💻 **→ Human action required: No**<br />Define one versioned event schema for sorties, actions, ballots, grants and approvals, written to the ledger and read by traces and the dashboard.
+💻 **→ Human action required: No**<br />Expose paged event reads over RPC/API for the dashboard and add a schema version to event payloads.
 
 | | |
 |---|---|
@@ -771,15 +771,15 @@ Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Implement with F-017 in `src/`; OpenTelemetry export later and never blocking M2a. Merged scope with the F-019 decision-event schema on 2026-11-04.
+**Next action / closure evidence:** Implemented in [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals): schema 2 tables (sorties, actions, grants, approvals, events), append-only events enforced by SQLite triggers, paged `Ledger.events`, CLI `events`, one-way migration noted in INSTALL. Remaining: RPC/API read path and payload versioning for F-019. Original plan: implement with F-017 in `src/`; OpenTelemetry export later and never blocking M2a. Merged scope with the F-019 decision-event schema on 2026-11-04.
 
-**Estimates:** Medium remaining effort; ~0% complete. Moved from M6 to M2a and raised to P1 on 2026-11-04.
+**Estimates:** Small remaining effort; ~60% complete. Moved from M6 to M2a and raised to P1 on 2026-11-04; reassessed 2026-11-04 after the ledger landed.
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals) |
 | Opened | 2026-11-02 |
-| Verification | Pending |
+| Verification | Unit/integration 2026-11-04: append-only triggers, ordered events per sortie, version-1 migration keeps reminders (local run; CI pending) |
 | Reviewed | 2026-11-04 |
 
 </details>

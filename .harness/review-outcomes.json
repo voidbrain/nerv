@@ -3,11 +3,11 @@
     "kind": "rule",
     "disposition": "implemented",
     "target": "docs/agents/areas.md",
-    "evidence": "Project rule separates periodic health from explicit integrity diagnostics; regression test proves status cannot invoke Store.doctor."
+    "evidence": "New Action gate and ledger area rule: every action through Ledger.propose, every executor call through Ledger.authorize, deterministic Melchior/Balthasar, veto-only extra seats, single-use hash-bound grants, append-only events. test/ledger.test.ts proves each clause, including expiry from the scheduler process."
   },
   {
     "kind": "none",
     "disposition": "no-change",
-    "evidence": "No copied harness tool or generic rule changed. Existing F-013 owns remaining load/history work."
+    "evidence": "Reviewed AGENTS.md, BACKLOG-RULES.md and maintenance.md against the change: no copied harness tool or generic rule changed. F-017, F-023 and F-024 own the remaining gate work."
   }
 ]

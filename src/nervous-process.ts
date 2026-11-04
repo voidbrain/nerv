@@ -1,8 +1,9 @@
 import { Store } from './store.ts';
 import { dispatchRpc,MAX_FRAME_BYTES } from './rpc.ts';
-const store=new Store(process.argv[2]!);
-store.tick();
-const timer=setInterval(()=>{try{store.tick();}catch{console.error('Nervous scheduler tick failed.');}},250);
+import { Ledger } from './ledger.ts';
+const store=new Store(process.argv[2]!);const ledger=new Ledger(store.db);
+store.tick();ledger.expire();
+const timer=setInterval(()=>{try{store.tick();ledger.expire();}catch{console.error('Nervous scheduler tick failed.');}},250);
 process.on('message',(value:unknown)=>{
  if(Buffer.byteLength(JSON.stringify(value))>MAX_FRAME_BYTES){process.exitCode=1;stop();return;}
  void dispatchRpc(value,(method,params)=>{

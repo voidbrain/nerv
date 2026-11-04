@@ -4,6 +4,10 @@
 
 Node 24 runs erasable TypeScript directly. `src/store.ts` owns SQLite state; `src/server.ts` owns authenticated loopback HTTP; `src/cli.ts` owns process lifecycle; `src/config.ts` owns private per-user configuration and `src/service.ts` renders/manages user services. Validate untrusted input before writes. Do not expose arbitrary SQL, shell execution or tools through chat. Keep delivery creation and reminder completion in one transaction. `npm test` covers restart, duplicates, cancellation and HTTP authentication. These are Nodo's current conventions, not a published reusable Node harness profile.
 
+## Action gate and ledger
+
+`src/policy.ts` is the pure per-action ballot (F-017) and `src/ledger.ts` the sortie ledger, grants, approvals and events (F-024, F-023) in the same SQLite file, owned by A during serve. Names follow docs/NERV/NERV-ARCHITECTURE.md; code keeps plain names. Every agent action goes through `Ledger.propose` and every executor call through `Ledger.authorize`; never execute a tool from a ballot result alone. Unregistered tools are irreversible (Pattern Blue). Melchior and Balthasar stay deterministic; only Casper's verdict may come from a model and its absence escalates to the owner, never to a grant. Extra seats are veto-only. Grants are single-use, short-lived and bound to the canonical argument hash. Decisions apply once; expiry and the Spear never approve. Events are append-only (enforced by triggers): record corrections as new events. Executed effects are reported by the Spear, never assumed undone.
+
 ## Frontend
 
 Read the style guide. Angular renders registered components, never model-generated JavaScript. The frontend access token remains only in component memory; the backend token is in a mode-0600 file under NODO_HOME. Italian is the default interface language, with English switching. CLI command names and raw diagnostic messages remain English. Planned cards must say planned; no simulated live devices. Current UI uses typed reminder data and a registered Web Component status surface; model-generated selection is not implemented. PWA installation/offline caching and browser acceptance remain F-004.
