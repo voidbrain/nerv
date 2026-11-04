@@ -86,6 +86,7 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
         catch(e){if(e instanceof RpcFault&&e.code===-32602)throw new Error('Invalid ask: prompt up to 16000 characters, privacy local-only or any, route local or cloud.');if(e instanceof RpcFault&&e.code===-32010){reply(502,{error:e.message});return;}throw e;}
       }
       else if(!options.native&&admin&&req.method==='POST'&&path==='/api/session/codes'){dropExpired();if(loginCodes.size>=MAX_LOGIN_CODES){reply(429,{error:'Too many unused login codes; wait a minute.'});return;}const code=randomBytes(16).toString('hex');loginCodes.set(code,Date.now()+codeTtl);reply(201,{code,expiresInMs:codeTtl});}
+      else if(req.method==='POST'&&path==='/api/memory/consolidate'){if(!store.consolidate){reply(503,{error:'Instrumentality unavailable.'});return;}req.setTimeout(MODEL_TIMEOUT_MS*7+5000);res.once('finish',()=>req.socket.setTimeout(15000));const r=await store.consolidate();reply(r.error?502:200,r);}
       else if(req.method==='POST'&&path==='/api/models/reload'){if(!store.reloadModels){reply(503,{error:'Model routes unavailable.'});return;}const result=await store.reloadModels();reply(result.error?400:200,result);}
       else if(req.method==='POST'&&path==='/api/chat'){
         // Admin only: a request to Misato, who plans and proposes actions through the gate.

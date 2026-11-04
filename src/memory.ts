@@ -10,9 +10,13 @@ export const MEMORY_SCHEMA=`
  CREATE TABLE IF NOT EXISTS fact_history(sequence INTEGER PRIMARY KEY AUTOINCREMENT, fact_id TEXT NOT NULL, kind TEXT NOT NULL, text TEXT NOT NULL, source TEXT NOT NULL, created TEXT NOT NULL);
  CREATE TRIGGER IF NOT EXISTS fact_history_no_update BEFORE UPDATE ON fact_history BEGIN SELECT RAISE(ABORT,'fact history is append-only'); END;
  CREATE TRIGGER IF NOT EXISTS fact_history_no_delete BEFORE DELETE ON fact_history BEGIN SELECT RAISE(ABORT,'fact history is append-only'); END;
- CREATE VIRTUAL TABLE IF NOT EXISTS facts_fts USING fts5(text, fact_id UNINDEXED);`;
+ CREATE VIRTUAL TABLE IF NOT EXISTS facts_fts USING fts5(text, fact_id UNINDEXED);
+ CREATE TABLE IF NOT EXISTS episodes(id TEXT PRIMARY KEY, since TEXT NOT NULL, until TEXT NOT NULL, summary TEXT NOT NULL, exchanges INTEGER NOT NULL, proposed INTEGER NOT NULL, created TEXT NOT NULL);`;
+export interface Episode {id:string;since:string;until:string;summary:string;exchanges:number;proposed:number;created:string}
 export interface Fact {id:string;text:string;status:'active'|'forgotten';source:string;sortieId:string|null;tainted:boolean;shareable:boolean;created:string;updated:string}
 const MAX_FACT_CHARS=500;
+/** The comparison form of a fact: case, spacing and a final full stop do not make a different fact. */
+export const factKey=(text:string)=>text.trim().replace(/\s+/g,' ').replace(/[.!]+$/,'').toLowerCase();
 const clean=(text:unknown)=>{if(typeof text!=='string'||!text.trim()||text.length>MAX_FACT_CHARS)throw new Error(`A fact is 1–${MAX_FACT_CHARS} characters.`);return text.trim().replace(/\s+/g,' ');};
 type Row={id:string;text:string;status:Fact['status'];source:string;sortie_id:string|null;tainted:number;shareable:number;created:string;updated:string};
 const toFact=(r:Row):Fact=>({id:r.id,text:r.text,status:r.status,source:r.source,sortieId:r.sortie_id,tainted:r.tainted===1,shareable:r.shareable===1,created:r.created,updated:r.updated});
@@ -30,7 +34,7 @@ export class Memory {
  add(text:unknown,source:'owner'|'misato',options:{sortieId?:string;tainted?:boolean;shareable?:boolean}={},now=new Date()):Fact {
   const t=clean(text);const id=randomUUID();const at=now.toISOString();
   return this.tx(()=>{
-   const same=this.db.prepare("SELECT * FROM facts WHERE status='active' AND lower(text)=lower(?)").get(t) as Row|undefined;if(same)return toFact(same);
+   const same=(this.db.prepare("SELECT * FROM facts WHERE status='active'").all() as Row[]).find(r=>factKey(r.text)===factKey(t));if(same)return toFact(same);
    this.db.prepare('INSERT INTO facts VALUES(?,?,?,?,?,?,?,?,?)').run(id,t,'active',source,options.sortieId ?? null,options.tainted?1:0,options.shareable?1:0,at,at);
    this.db.prepare('INSERT INTO facts_fts(text,fact_id) VALUES(?,?)').run(t,id);this.history(id,'created',t,source,at);
    return toFact(this.db.prepare('SELECT * FROM facts WHERE id=?').get(id) as Row);
@@ -58,5 +62,8 @@ export class Memory {
   const q=ftsQuery(text);if(!q)return [];
   return (this.db.prepare("SELECT f.* FROM facts_fts JOIN facts f ON f.id=facts_fts.fact_id WHERE facts_fts MATCH ? AND f.status='active' ORDER BY bm25(facts_fts) LIMIT ?").all(q,Math.min(Math.max(1,limit),20)) as Row[]).map(toFact);
  }
+ /** Instrumentality's summaries, newest first; the latest one's `until` is where the next consolidation starts. */
+ episodes(limit=10):Episode[] {return this.db.prepare('SELECT * FROM episodes ORDER BY until DESC LIMIT ?').all(Math.min(Math.max(1,limit),100)) as unknown as Episode[];}
+ saveEpisode(e:Omit<Episode,'id'|'created'>,now=new Date()):Episode {const id=randomUUID();this.db.prepare('INSERT INTO episodes VALUES(?,?,?,?,?,?,?)').run(id,e.since,e.until,e.summary.slice(0,1500),e.exchanges,e.proposed,now.toISOString());return {...e,id,created:now.toISOString()};}
  historyOf(id:string):{kind:string;text:string;source:string;created:string}[] {return this.db.prepare('SELECT kind,text,source,created FROM fact_history WHERE fact_id=? ORDER BY sequence').all(id) as {kind:string;text:string;source:string;created:string}[];}
 }

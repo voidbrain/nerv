@@ -57,14 +57,14 @@ test('through every process: an Italian request is planned by Misato, gated, exe
  });
 });
 test('an unreadable plan is shown back to Misato; a Blue action asks Casper and then waits for the owner',async()=>{
- await agent(['sure, I will send it','{"action":{"tool":"mail.send","args":{"to":"ada@example.com"}}}','{"action":{"tool":"mail.send","args":{"to":"ada@example.com"}}}','{"reply":"I asked for your approval before sending the mail."}'],async(runtime,m)=>{
-  const chat=await runtime.chat('Email Ada that I am late');
+ await agent(['sure, I will send it','{"action":{"tool":"reminders.add","args":{"title":"Email Ada","due":"2030-01-15T09:00:00+01:00"}}}','{"action":{"tool":"reminders.add","args":{"title":"Email Ada","due":"2030-01-15T09:00:00+01:00"}}}','{"reply":"I asked for your approval before sending the mail."}'],async(runtime,m)=>{
+  const chat=await runtime.chat('Remind me to email Ada');
   assert.deepEqual(chat.steps.map(s=>s.outcome),['invalid','approval','invalid'],'the repeated proposal never reaches the gate');assert.equal(chat.waiting.length,1);
-  assert.match(chat.steps[1]!.reason!,/NOT done yet/);assert.match(chat.steps[2]!.error!,/already waits for the owner/);assert.equal(chat.waiting[0]!.tool,'mail.send');
+  assert.match(chat.steps[1]!.reason!,/NOT done yet/);assert.match(chat.steps[2]!.error!,/already waits for the owner/);assert.equal(chat.waiting[0]!.tool,'reminders.add');
   assert.match(chat.reply!,/approval/);
   assert.deepEqual(m.asked.map(a=>[a.who,a.model]),[['misato','qwen2.5-coder:14b'],['misato','qwen2.5-coder:14b'],['casper','gemma4:12b'],['misato','qwen2.5-coder:14b'],['misato','qwen2.5-coder:14b']]);
-  const cards=await runtime.approvals();assert.equal(cards.length,1);assert.equal(cards[0]!.card.tool,'mail.send');
- });
+  const cards=await runtime.approvals();assert.equal(cards.length,1);assert.equal(cards[0]!.card.tool,'reminders.add');
+ },{blue:['reminders.add']});
 });
 test('the loop stops at the step limit and the sortie closes failed',async()=>{
  await agent(Array.from({length:MAX_STEPS+2},()=>'{"action":{"tool":"reminders.list","args":{}}}'),async(runtime)=>{
@@ -102,5 +102,14 @@ test('a short follow-up keeps its conversation: "delete all" → Misato asks →
   assert.equal((await runtime.pendingReminders()).length,0);
   const other=await runtime.chat('sì','telegram:2222');void other;
   assert.equal((JSON.parse(m.asked.at(-1)!.prompt) as {earlier?:unknown}).earlier,undefined,'another conversation does not see this one');
+ });
+});
+test('a tool Misato was not offered (a misspelling) goes back to Misato, never to the owner as a card',async()=>{
+ await agent(['{"action":{"tool":"memore.remember","args":{"text":"I drink coffee at 8"}}}','{"action":{"tool":"memory.remember","args":{"text":"I drink coffee at 8"}}}','{"reply":"Waiting for your OK."}'],async(runtime,m)=>{
+  const chat=await runtime.chat('I always drink coffee at 8','cli');
+  assert.deepEqual(chat.steps.map(s=>[s.tool,s.outcome]),[['memore.remember','invalid'],['memory.remember','approval']]);
+  assert.match(chat.steps[0]!.error!,/Unknown tool "memore\.remember"\. Use exactly one of: .*memory\.remember/);
+  assert.deepEqual((await runtime.approvals()).map(a=>a.card.tool),['memory.remember'],'only the real tool reaches the owner');
+  void m;
  });
 });

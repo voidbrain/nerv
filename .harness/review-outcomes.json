@@ -3,11 +3,11 @@
     "kind": "rule",
     "disposition": "implemented",
     "target": "docs/agents/areas.md",
-    "evidence": "Action gate area note gains Lilith's rules: facts with provenance and append-only history (schema 4), FTS5 recall with quoted user words, memory.remember as an owner tool that is always Pattern Blue so Misato never stores a fact alone, and local-only facts dropped on the cloud route (F-022). Checked by test/memory.test.ts across store, gate, prompt and processes."
+    "evidence": "Action gate area note: Instrumentality's rules (summaries kept, candidate facts only as memory.remember cards, known or waiting facts skipped, ledger never changed) and the rule that a tool Misato was not offered goes back to it as invalid, never to the owner as a card (found live 2026-11-04, F-022). Checked by test/instrumentality.test.ts and test/misato.test.ts."
   },
   {
     "kind": "none",
     "disposition": "no-change",
-    "evidence": "No harness file or copied tool changed; INSTALL documents memory commands and the schema-4 upgrade."
+    "evidence": "No harness file or copied tool changed."
   }
 ]

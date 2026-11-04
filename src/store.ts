@@ -106,6 +106,8 @@ export class Store {
   private settle(sortieId:string,status:'done'|'failed') {
     const sortie=this.db.prepare('SELECT source FROM sorties WHERE id=?').get(sortieId) as {source:string}|undefined;
     if(sortie?.source===OWNER_SOURCE)this.ledger.close(sortieId,status);
+    // Instrumentality proposals: the sortie is done once the owner has decided every card, whatever the decisions.
+    if(sortie?.source==='instrumentality'&&!(this.db.prepare('SELECT 1 FROM approvals a JOIN actions x ON x.id=a.action_id WHERE x.sortie_id=? AND a.decision IS NULL').get(sortieId)))this.ledger.close(sortieId,'done');
   }
   events(sortieId: string, after=0, limit=50) { return this.ledger.events(sortieId,after,limit); }
   sorties(limit=20, before?: string) { return this.ledger.sorties(limit,before); }
