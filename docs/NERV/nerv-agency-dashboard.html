@@ -400,7 +400,7 @@ body.theme-eva-basic .eva-img, body.theme-eva-full .eva-img { display:block; }
       <section class="panel" id="p-bases">
         <div class="hdr"><span data-l="bases">NERV bases · Kaji line</span><span class="sub" id="bases-sub"></span></div>
         <div class="mapwrap"><canvas id="topo" width="540" height="250" aria-label="Map of NERV bases and links"></canvas></div>
-        <div class="maplegend"><span><i class="sq" style="background:var(--ok)"></i>online</span><span><i class="sq" style="background:var(--warn)"></i>standby</span><span><i class="sq" style="background:#666"></i>offline (static)</span><span>- - - Kaji line · ○ message</span></div>
+        <div class="maplegend"><span><i class="sq" style="background:var(--ok)"></i>online</span><span><i class="sq" style="background:var(--warn)"></i>standby</span><span><i class="sq" style="background:#666"></i>offline (static)</span><span>- - - Kaji line</span><span><i class="sq" style="background:var(--accent)"></i>plug</span><span><i class="sq" style="background:var(--ok)"></i>result</span><span><i class="sq" style="background:var(--info)"></i>node sync</span></div>
         <div class="pad list" id="bases"></div>
       </section>
 
@@ -469,9 +469,9 @@ const TOOLS = {
 };
 const BASES = [
   // Illustrative positions: three bases in the same hills-and-valleys district around Tokyo-3 (Hakone). A real deployment reads lat/lon from each base's enrolment.
-  { id:"tokyo3", name:"TOKYO-3", role:"HQ · coordinator · MAGI · Dogma", lat:35.233, lon:139.021, status:"online", cpu:22, gpu:null, ram:61, rtt:0, models:"S² gemma (Mac)" },
-  { id:"nerv01", name:"NERV-01", role:"branch · S² GPU · EVA cage", lat:35.296, lon:139.152, status:"online", cpu:35, gpu:58, ram:47, rtt:142, models:"S² qwen-coder (GPU)" },
-  { id:"nerv02", name:"NERV-02", role:"branch · vault · EVA cage", lat:35.171, lon:138.884, status:"standby", cpu:4, gpu:null, ram:18, rtt:null, models:"—" }
+  { id:"tokyo3", name:"TOKYO-3", role:"HQ · coordinator · MAGI · Dogma", lat:35.236, lon:138.985, status:"online", cpu:22, gpu:null, ram:61, rtt:0, models:"S² gemma (Mac)" },
+  { id:"nerv01", name:"NERV-01", role:"branch · S² GPU · EVA cage", lat:35.305, lon:139.215, status:"online", cpu:35, gpu:58, ram:47, rtt:142, models:"S² qwen-coder (GPU)" },
+  { id:"nerv02", name:"NERV-02", role:"branch · vault · EVA cage", lat:35.160, lon:139.240, status:"standby", cpu:4, gpu:null, ram:18, rtt:null, models:"—" }
 ];
 const LINKS = [["tokyo3","nerv01"],["tokyo3","nerv02"],["nerv01","nerv02"]];
 const CAGES = [
@@ -1050,7 +1050,7 @@ async function initMap() {
   // Local projection: a window around the bases, shaped to the canvas, east-west scaled by cos(latitude).
   const lats = BASES.map(b => b.lat), lons = BASES.map(b => b.lon);
   const lat0 = (Math.min(...lats) + Math.max(...lats)) / 2, lon0 = (Math.min(...lons) + Math.max(...lons)) / 2, k = Math.cos(lat0 * Math.PI / 180);
-  const latSpan = Math.max(0.2, (Math.max(...lats) - Math.min(...lats)) * 2.2), lonSpan = Math.max(latSpan * W / H / k, (Math.max(...lons) - Math.min(...lons)) * 1.5);
+  const latSpan = Math.max(0.12, (Math.max(...lats) - Math.min(...lats)) * 1.7), lonSpan = Math.max(latSpan * W / H / k, (Math.max(...lons) - Math.min(...lons)) * 1.6);
   map.proj = p => [W / 2 + (p[0] - lon0) / lonSpan * W, H / 2 - (p[1] - lat0) / latSpan * H];
   // Terrain: rolling noise, a ridge of hills between the bases and a winding valley floor they share.
   const peaks = [[0.18, 0.22, 0.13], [0.42, 0.18, 0.11], [0.63, 0.30, 0.12], [0.86, 0.20, 0.10], [0.30, 0.78, 0.10], [0.74, 0.82, 0.12], [0.95, 0.62, 0.09]];
@@ -1069,9 +1069,19 @@ async function initMap() {
     const gp = d3.geoPath(d3.geoIdentity().scale(cell));
     map.contours = cs.map(c => ({ v:c.value, p:new Path2D(gp(c)) }));
   }
-  LINKS.forEach(([a, b]) => {
+  // Kaji line: each link bends like a road through the valleys, never a straight ruler line.
+  LINKS.forEach(([a, b], n) => {
     const A = BASES.find(x => x.id === a), B = BASES.find(x => x.id === b); const pts = [];
-    for (let t = 0; t <= 48; t++) pts.push(map.proj([A.lon + (B.lon - A.lon) * t / 48, A.lat + (B.lat - A.lat) * t / 48]));
+    const [ax, ay] = map.proj([A.lon, A.lat]), [bx, by] = map.proj([B.lon, B.lat]);
+    const dx = bx - ax, dy = by - ay, len = Math.hypot(dx, dy) || 1; let nx = -dy / len, ny = dx / len;
+    // bow away from the centre of all bases, so the links of the mesh never cross
+    const c = BASES.map(x => map.proj([x.lon, x.lat])).reduce((m, p, _, all) => [m[0] + p[0] / all.length, m[1] + p[1] / all.length], [0, 0]);
+    if (((ax + bx) / 2 - c[0]) * nx + ((ay + by) / 2 - c[1]) * ny < 0) { nx = -nx; ny = -ny; }
+    const bend = len * 0.18;
+    for (let t = 0; t <= 64; t++) {
+      const u = t / 64, arc = 4 * u * (1 - u), wiggle = Math.sin(u * Math.PI * 3 + n) * len * 0.035 * arc;
+      pts.push([ax + dx * u + nx * (bend * arc + wiggle), ay + dy * u + ny * (bend * arc + wiggle)]);
+    }
     map.linkPaths[a + "|" + b] = pts;
   });
   map.ready = true;
@@ -1113,7 +1123,7 @@ function drawMap(now) {
     const key = LINKS.some(l => l[0] === pk.from && l[1] === pk.to) ? pk.from + "|" + pk.to : pk.to + "|" + pk.from;
     const pts = map.linkPaths[key]; if (!pts) return; const fwd = key.startsWith(pk.from);
     const t = Math.max(0, Math.min(1, (now - pk.t0) / pk.dur)); const idx = Math.round((fwd ? t : 1 - t) * (pts.length - 1)); const [x, y] = pts[idx];
-    ctx.fillStyle = pk.kind === "plug" ? cssVar("--accent") : cssVar("--ok"); ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = pk.kind === "plug" ? cssVar("--accent") : pk.kind === "sync" ? cssVar("--info") : cssVar("--ok"); ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill();
     if (t >= 1) { const k = Math.max(0, Math.min(1, (now - pk.t0 - pk.dur) / 900)); ctx.strokeStyle = ctx.fillStyle; ctx.globalAlpha = 1 - k; ctx.beginPath(); ctx.arc(x, y, 4 + k * 18, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1; }
   });
   // base markers: square dots
@@ -1162,6 +1172,12 @@ setInterval(() => {
   state.approvals.filter(a => a.expires <= Date.now()).forEach(a => decide(a.id, "expired"));
   renderNeeds(); renderQuestions();
 }, 1000);
+// Mesh traffic: every pair of bases talks (heartbeats, memory sync), not only through Tokyo-3.
+setInterval(() => {
+  const up = LINKS.filter(([a, b]) => [a, b].every(id => BASES.find(x => x.id === id).status !== "offline"));
+  if (!up.length) return; const [a, b] = up[Math.floor(Math.random() * up.length)];
+  if (Math.random() < 0.5) sendPacket(a, b, "sync"); else sendPacket(b, a, "sync");
+}, 2200);
 setInterval(() => { BASES.forEach(b => { if (b.status === "online") { b.cpu = Math.max(3, Math.min(95, b.cpu + Math.round((Math.random() - 0.5) * 4))); if (b.gpu != null) b.gpu = Math.max(3, Math.min(98, b.gpu + Math.round((Math.random() - 0.5) * 5))); } }); renderBases(); if (Math.random() < 0.5) sendPacket("tokyo3", Math.random() < 0.5 ? "nerv01" : "nerv02", "heartbeat"); }, 5000);
 
 document.addEventListener("click", e => {
