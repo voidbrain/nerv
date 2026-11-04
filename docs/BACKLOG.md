@@ -297,13 +297,13 @@ Current work ledger, reviewed 4 November 2026 against main `586bca3`. PR #1–#1
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Complete browser acceptance for English/Italian, dates and responsive layout. Implemented in [PR #1](https://github.com/voidbrain/nerv/pull/1) with Italian as the default; the owner switched the default to English on 2026-11-04 (PR_EN): `init` writes `en`, the server and socket fall back to `en`, the web UI and `index.html` start in English, the native menu defaults to English unless a choice is stored; the switcher stays in both. Existing installs keep the language in their `config.json` (an `init` before this wrote `it`); set `"language": "en"` there and restart. Understanding and replying in Italian is conversational work under F-003.
+**Next action / closure evidence:** Complete browser acceptance for English/Italian, dates and responsive layout. Implemented in [PR #1](https://github.com/voidbrain/nerv/pull/1) with Italian as the default; the owner switched the default to English on 2026-11-04 ([PR #17](https://github.com/voidbrain/nerv/pull/17)): `init` writes `en`, the server and socket fall back to `en`, the web UI and `index.html` start in English, the native menu defaults to English unless a choice is stored; the switcher stays in both. Existing installs keep the language in their `config.json` (an `init` before this wrote `it`); set `"language": "en"` there and restart. Understanding and replying in Italian is conversational work under F-003.
 
 **Estimates:** Small remaining effort; ~80% complete. Estimate dated 2026-11-01, reviewed 2026-11-04; not acceptance evidence.
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green; PR_EN (English default) |
+| PR / evidence | [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green; [PR #17](https://github.com/voidbrain/nerv/pull/17) (English default) |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-04: config default and RPC/doctor fallback asserted `en` in test/runtime.test.ts and test/protocol.test.ts, build, headless and Swift tests (local run; CI pending). Browser acceptance pending |
 | Reviewed | 2026-11-04 |
