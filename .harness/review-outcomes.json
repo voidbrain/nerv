@@ -1,13 +1,4 @@
 [
-  {
-    "kind": "rule",
-    "disposition": "implemented",
-    "target": "docs/agents/areas.md",
-    "evidence": "Distributed contracts area note gains the Kaji live link's rules: enrolled-address-only listener, base-signed requests and replies with replay and skew guards, sanitised last-seen merging, registry catch-up verified against the local root (F-036 phase 1b). Checked by test/kaji-link.test.ts."
-  },
-  {
-    "kind": "none",
-    "disposition": "no-change",
-    "evidence": "No harness file or copied tool changed."
-  }
+ {"kind":"rule","disposition":"implemented","target":"docs/agents/areas.md","evidence":"Distributed contracts gains the phase 2 heartbeat-health rules (own state only, at most three sanitised reasons, receiver's arrival time, first-hand never relayed, counted only while online, older peers send none; F-036 slice 1, checked by test/kaji-link.test.ts). Model routes gains F-030 route health (outages only, TCP probe of the local route with no request, cloud never probed, a down route never switches routes; checked by test/dummy-plug.test.ts). Reviewed against the existing notes: no duplicate or contradicting rule; INSTALL describes the same behaviour for the owner and stays the user-facing owner."},
+ {"kind":"none","disposition":"no-change","evidence":"No harness file or copied tool changed."}
 ]
