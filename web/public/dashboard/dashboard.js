@@ -559,7 +559,7 @@ function drawEdges(s) {
     const key = e[0] + ">" + e[1]; const cls = (e[2] ? "loop " : "") + (live[key] || passedEdge(s, e) || "");
     return "<path d='" + d + "' class='" + cls + "' marker-end='url(#edge-arrow)'/>";
   }).join("");
-  svg.innerHTML = "<defs><marker id='edge-arrow' viewBox='0 0 6 6' refX='5' refY='3' markerWidth='6' markerHeight='6' orient='auto-start-reverse'><path d='M0,0 L6,3 L0,6 z' fill='context-stroke'/></marker></defs>" + paths;
+  svg.innerHTML = "<defs><marker id='edge-arrow' viewBox='0 0 6 6' refX='5' refY='3' markerWidth='8' markerHeight='8' markerUnits='userSpaceOnUse' orient='auto-start-reverse'><path d='M0,0 L6,3 L0,6 z' fill='context-stroke'/></marker></defs>" + paths;
 }
 /** The route already taken: green when the step passed on its own, yellow when it went through the owner's decision
     (Misato's apartment), faded into a skipped step. Live, waiting and rejected edges are drawn by liveEdges instead. */

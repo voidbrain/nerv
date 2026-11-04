@@ -107,7 +107,7 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
   html,body { height:100%; } body { overflow:hidden; }
   .wrap { height:100%; }
   main.grid { flex:1; min-height:0; align-items:stretch; }
-  main.grid > .col { min-height:0; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; }
+  main.grid > .col { min-height:0; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-gutter:stable; }
 }
 .cage.planned { opacity:.55; border-style:dashed; }
 @media (max-width:1200px) { main.grid { grid-template-columns:minmax(0,1fr) minmax(0,1fr); } main.grid > .center { grid-column:1 / -1; order:-1; } .questions { grid-template-columns:repeat(3,minmax(0,1fr)); } }
@@ -162,15 +162,16 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 /* sephirot (EVA full) */
 .sephirot { position:relative; padding:10px 44px 12px 28px; }
 .sephirot svg.edges { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; }
-.sephirot svg.edges path { fill:none; stroke:rgba(255,102,0,.25); stroke-width:1.4; }
+/* one stroke width for every state (colour and dash tell them apart), so a line never looks as if it moved */
+.sephirot svg.edges path { fill:none; stroke:rgba(255,102,0,.25); stroke-width:1.8; }
 .sephirot svg.edges path.loop { stroke-dasharray:3 4; }
-.sephirot svg.edges path.passed { stroke:var(--ok); stroke-width:1.8; opacity:.9; }
+.sephirot svg.edges path.passed { stroke:var(--ok); opacity:.9; }
 .sephirot svg.edges path.passed.owner { stroke:var(--warn); }
 .sephirot svg.edges path.skip { opacity:.22; }
 .sephirot svg.edges path { fill:none; stroke-linejoin:round; }
-.sephirot svg.edges path.live { stroke:var(--accent); stroke-width:2; stroke-dasharray:6 6; animation:flow 0.9s linear infinite; }
+.sephirot svg.edges path.live { stroke:var(--accent); stroke-dasharray:6 6; animation:flow 0.9s linear infinite; }
 .sephirot svg.edges path.wait { stroke:var(--warn); stroke-dasharray:4 4; animation:flow 1.6s linear infinite; }
-.sephirot svg.edges path.reject { stroke:var(--danger); stroke-width:2; stroke-dasharray:6 6; animation:flow .7s linear infinite reverse; }
+.sephirot svg.edges path.reject { stroke:var(--danger); stroke-dasharray:6 6; animation:flow .7s linear infinite reverse; }
 @keyframes flow { to { stroke-dashoffset:-24; } }
 .sgrid { position:relative; display:grid; grid-template-columns:1fr 1.25fr 1fr; grid-auto-rows:auto; gap:10px 18px; align-items:center; }
 .snode { position:relative; z-index:1; border:1px solid var(--border); background:var(--panel2); padding:3px 8px; text-align:center; transition:.15s; }
