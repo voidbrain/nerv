@@ -35,7 +35,7 @@ The Kaji line connects your bases. Trust comes from your **Key of Nebuchadnezzar
 2. On the main base (Neo Tokyo-3): `npm start -- key init`. Type a passphrase (12+ characters, twice). It writes `~/.nerv/key-of-nebuchadnezzar.enc` (encrypted) and prints the **root fingerprint**. Copy that file to a USB stick and keep the passphrase safe: without them no base can be enrolled. To keep the key only on the stick: `key init --out /Volumes/STICK/key-of-nebuchadnezzar.enc`, then pass `--key` with that path below.
 3. Enrol the main base itself: `npm start -- kaji enrol NERV-01 "Neo Tokyo-3" self 100.x.y.z` (its Tailscale address).
 4. On the other base (Tabgha): `npm start -- base pubkey` prints its public key; copy that line to the main base and enrol it: `npm start -- kaji enrol NERV-02 "Tabgha" <that key> 100.x.y.z`.
-5. On the main base: `npm start -- kaji export bases.json`; copy the file to Tabgha and import it with the fingerprint you read in step 2: `npm start -- kaji import bases.json --root <fingerprint>`. The fingerprint check is what stops a forged list.
+5. On the main base: `npm start -- kaji export bases.json`; copy the file to Tabgha and import it with the **root** fingerprint you read in step 2 (the `Root …` line of `kaji list` on the main base — not the base's own fingerprint from `base pubkey`): `npm start -- kaji import bases.json --root <root fingerprint>`. The fingerprint check is what stops a forged list.
 6. `npm start -- kaji list` on either base shows both, marking "this base". Revoke a lost or retired base with `kaji revoke NERV-02` (then export/import again); its key is refused from then on.
 
 Each base's own key (`~/.nerv/base-key`) is created on first use and never leaves it.

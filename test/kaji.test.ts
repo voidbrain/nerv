@@ -52,7 +52,9 @@ test('two bases from the CLI: key init, enrol both, export, import pinned by fin
   assert.match(cli(a,['kaji','enrol','NERV-02','Tabgha',tabghaKey,'100.64.0.2','--passphrase-stdin'],'wrong passphrase here\n').stderr,/Wrong passphrase/);
   assert.equal(cli(a,['kaji','enrol','NERV-02','Tabgha',tabghaKey,'100.64.0.2','--passphrase-stdin'],pass).status,0);
   const bundle=join(a,'bundle.json');assert.match(cli(a,['kaji','export',bundle]).stdout,/2 signed record/);
-  assert.match(cli(b,['kaji','import',bundle,'--root','0000-0000-0000-0000-0000-0000-0000-0000']).stderr,/must match/,'no trust on first use: the fingerprint is checked');
+  const wrong=cli(b,['kaji','import',bundle,'--root','0000-0000-0000-0000-0000-0000-0000-0000']).stderr;assert.match(wrong,/does not match the one this file was signed with/,'no trust on first use: the fingerprint is checked');assert.ok(!wrong.includes(fp),'the file\'s fingerprint is never printed');
+  const own=/Fingerprint: (\S+)/.exec(cli(b,['base','pubkey']).stdout)![1]!;assert.match(cli(b,['kaji','import',bundle,'--root',own]).stderr,/That is this base's own fingerprint/);
+  assert.match(cli(b,['kaji','import',bundle]).stderr,/Give --root with the root fingerprint: the "Root …" line of nerv kaji list/);
   assert.match(cli(b,['kaji','import',bundle,'--root',fp]).stdout,/Imported 2 new record.*2 base\(s\) enrolled/);
   const listed=cli(b,['kaji','list']).stdout;assert.match(listed,new RegExp(`Root ${fp}`));assert.match(listed,/NERV-01\s+Neo Tokyo-3\s+100\.64\.0\.1\s+enrolled\n/);assert.match(listed,/NERV-02\s+Tabgha\s+100\.64\.0\.2\s+enrolled {2}\(this base\)/);
   assert.equal(cli(a,['kaji','revoke','NERV-02','--passphrase-stdin'],pass).status,0);cli(a,['kaji','export',bundle]);

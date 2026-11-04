@@ -187,7 +187,14 @@ try {
           // The root is pinned only when the owner confirms its fingerprint, read on the main base: no trust on first use.
           const file=args[1];const expect=flag('--root');if(!file)throw new Error('Usage: kaji import FILE --root FINGERPRINT');
           const bundle=JSON.parse(readFileSync(file,'utf8')) as {root:string;records:SignedRecord[]};
-          if(!config.kaji?.root){if(!expect||fingerprint(bundle.root)!==expect.toLowerCase())throw new Error('Give --root with the fingerprint shown by kaji list on the main base; it must match the file.');pinKajiRoot(home,bundle.root);}
+          if(!config.kaji?.root){
+            const given=(expect ?? '').toLowerCase();const where='the "Root …" line of nerv kaji list on the base that holds the Key of Nebuchadnezzar (also printed by key init)';
+            if(!given)throw new Error(`Give --root with the root fingerprint: ${where}.`);
+            if(given===fingerprint(me))throw new Error(`That is this base's own fingerprint (from base pubkey). --root needs the root fingerprint: ${where}.`);
+            // The file's own fingerprint is never printed: the owner compares what the main base shows with the file.
+            if(fingerprint(bundle.root)!==given)throw new Error(`The root fingerprint does not match the one this file was signed with. Check ${where}; if they really differ, the file is not from your Key: do not import it.`);
+            pinKajiRoot(home,bundle.root);
+          }
           else if(bundle.root!==config.kaji.root)throw new Error('This file is signed by a different root than the one pinned here.');
           const reg=new Registry(local().db,bundle.root);let added=0;for(const r of bundle.records)if(reg.add(r)==='added')added++;
           console.log(`Imported ${added} new record(s); ${reg.bases().filter(b=>b.status==='enrolled').length} base(s) enrolled.`);
