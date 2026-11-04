@@ -17,6 +17,8 @@ export const methodSchemas={
  'approvals.decide':{type:'object',required:['id','decision','source'],properties:{id:{type:'string',minLength:1,maxLength:100},decision:{enum:['approve','reject','edit']},source:{enum:['api','cli','telegram']}},additionalProperties:false},
  'events.page':{type:'object',required:['sortieId'],properties:{sortieId:{type:'string',minLength:1,maxLength:100},after:{type:'integer',minimum:0,maximum:Number.MAX_SAFE_INTEGER},limit:{type:'integer',minimum:1,maximum:50}},additionalProperties:false},
  'model.complete':{type:'object',required:['prompt','privacy'],properties:{prompt:{type:'string',minLength:1,maxLength:16000},system:{type:'string',maxLength:8000},privacy:{enum:['local-only','any']},route:{enum:['local','cloud']}},additionalProperties:false},
+ 'sorties.list':{type:'object',properties:{limit:{type:'integer',minimum:1,maximum:50},before:{type:'string',minLength:10,maxLength:40}},additionalProperties:false},
+ 'sorties.get':{type:'object',required:['id'],properties:{id:{type:'string',minLength:1,maxLength:100}},additionalProperties:false},
  'sorties.open':{type:'object',required:['title'],properties:{title:{type:'string',minLength:1,maxLength:500},source:{enum:['owner','misato']}},additionalProperties:false},
  'sorties.finish':{type:'object',required:['sortieId'],properties:{sortieId:{type:'string',minLength:1,maxLength:100},status:{enum:['done','failed']},reply:{type:'string',minLength:1,maxLength:4000}},additionalProperties:false},
  'misato.note':{type:'object',required:['sortieId','kind','payload'],properties:{sortieId:{type:'string',minLength:1,maxLength:100},kind:{enum:['misato.request','misato.step','misato.waiting']},payload:{type:'object'}},additionalProperties:false},
@@ -38,8 +40,8 @@ export function validateParams(method:string,params:unknown):asserts method is M
 export type Principal='interface'|'coordinator'|'nervous'|'brain';
 /** Directed edges describe permission, not routing or model capability. Deny by default. */
 export const communicationGraph=[
- {from:'interface',to:'coordinator',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.pending','reminders.add','reminders.cancel','inbox.list','inbox.page','approvals.pending','events.page']},
- {from:'coordinator',to:'nervous',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.pending','reminders.add','reminders.cancel','inbox.list','inbox.page','approvals.pending','approvals.decide','events.page','sorties.open','sorties.finish','actions.preview','actions.act','misato.note','misato.resumable','misato.claim']},
+ {from:'interface',to:'coordinator',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.pending','reminders.add','reminders.cancel','inbox.list','inbox.page','approvals.pending','events.page','sorties.list','sorties.get']},
+ {from:'coordinator',to:'nervous',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.pending','reminders.add','reminders.cancel','inbox.list','inbox.page','approvals.pending','approvals.decide','events.page','sorties.list','sorties.get','sorties.open','sorties.finish','actions.preview','actions.act','misato.note','misato.resumable','misato.claim']},
  {from:'coordinator',to:'brain',methods:['runtime.ping','model.complete','casper.verdict','misato.step','models.reload']},
 ] as const;
 export function authorize(from:Principal,to:Principal,method:string):void {

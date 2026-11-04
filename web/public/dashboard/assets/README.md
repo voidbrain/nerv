@@ -1,6 +1,6 @@
 # Dashboard image slots
 
-`../nerv-agency-dashboard.html` loads these files when they exist. Until then it draws an original pixel placeholder (abstract pattern plus initial or unit number). Images show only in the EVA Basic and EVA Full themes and are drawn with `image-rendering: pixelated`, so small pixel art stays crisp.
+`../index.html` (the dashboard) loads these files when they exist. Until then it draws an original pixel placeholder (abstract pattern plus initial or unit number). Images show only in the EVA Basic and EVA Full themes and are drawn with `image-rendering: pixelated`, so small pixel art stays crisp.
 
 Use only images you have the rights to use (your own drawings, commissioned or licensed art). Official Evangelion artwork is copyrighted; do not commit it to this repository.
 

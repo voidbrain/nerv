@@ -13,3 +13,5 @@ The status card uses the existing theme tokens through a Shadow DOM. Shadow DOM 
 The native menu uses a monochrome template drawing of the seven-eye triangle, with English default and Italian selection. The scrollable menu displays at most five pending reminders and Mac-local dates. Quit companion leaves the daemon running. Native pairing uses a SecureField; never show or copy the administrative bearer token into the app. Local forget and server revocation are distinct. Native/system error details may retain the OS language.
 
 Notification enablement says “from now”; denied/failed permissions remain visible. Stop NERV Agency uses a destructive confirmation; Quit companion is a separate action. Service loaded, daemon connected and login enabled/approval-required must be shown as distinct states. Never present OS notification submission as proof the user saw a banner.
+
+The NERV dashboard (`web/public/dashboard/`) has its own themes (EVA Full, EVA Basic, neutral, light, terminal) defined as tokens in its stylesheet. In live mode, a panel without real data says *planned · not connected yet*; it never shows the simulation's invented numbers next to real ones.

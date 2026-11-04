@@ -34,8 +34,10 @@ try {
     const response=await fetch(`http://127.0.0.1:${config.port}/api/session/codes`,{method:'POST',headers:{authorization:`Bearer ${readToken(home)}`}}).catch(()=>{throw new Error('NERV Agency is not running: start it with serve or service start.');});
     const value=await response.json() as {code?:string;error?:string};
     if(!response.ok||!value.code)throw new Error(value.error ?? 'Could not create a login code.');
-    const url=`http://127.0.0.1:${config.port}/#code=${value.code}`;
-    const opener=args[0]==='--print'?undefined:process.platform==='darwin'?'open':process.platform==='linux'?'xdg-open':undefined;
+    // open dashboard: the same sign-in, landing on the live dashboard instead of the workspace.
+    const page=args.includes('dashboard')?'/dashboard/':'/';
+    const url=`http://127.0.0.1:${config.port}${page}#code=${value.code}`;
+    const opener=args.includes('--print')?undefined:process.platform==='darwin'?'open':process.platform==='linux'?'xdg-open':undefined;
     if(opener){const run=spawnSync(opener,[url],{stdio:'ignore'});if(run.status!==0)console.log(url);}else console.log(url);
   }
   else if(command==='chat'){
@@ -79,7 +81,7 @@ try {
     if(!response.ok)throw new Error(value.error ?? 'Ask failed.');
     console.log(value.text+(value.truncated?'\n[reply truncated]':'')+`\n— ${value.route} · ${value.model}`);
   }
-  else if(!command||command==='help')console.log('NERV Agency\nCommands: init | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | open | chat "text" | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
+  else if(!command||command==='help')console.log('NERV Agency\nCommands: init | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | open [dashboard] | chat "text" | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
   else {
     const config=readConfig(home);
     const scrolls=readScrolls(home);

@@ -20,6 +20,8 @@ process.on('message',(value:unknown)=>{
    case 'approvals.pending':return store.approvals(params.limit as number|undefined);
    case 'approvals.decide':return store.decide(params.id as string,params.decision as 'approve'|'reject'|'edit',params.source as string);
    case 'events.page':return store.events(params.sortieId as string,params.after as number|undefined,params.limit as number|undefined);
+   case 'sorties.list':return store.sorties(params.limit as number|undefined,params.before as string|undefined);
+   case 'sorties.get':return store.sortie(params.id as string);
    case 'sorties.open':return store.ledger.openSortie(params.source==='misato'?MISATO_SOURCE:OWNER_SOURCE,params.title as string,'trusted');
    case 'sorties.finish':{const id=params.sortieId as string;if(params.reply)store.ledger.reply(id,params.reply as string);return params.status?store.ledger.close(id,params.status as 'done'|'failed'):false;}
    case 'misato.note':return store.ledger.note(params.sortieId as string,params.kind as 'misato.step',params.payload as never);

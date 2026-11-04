@@ -17,6 +17,8 @@ export const LEDGER_SCHEMA=`
 export interface Proposal {tool:string;args:Record<string,unknown>;stage:Stage;cost?:number;casper?:Verdict;extras?:Verdict[]}
 export interface Card {sortieId:string;actionId:string;tool:string;args:Record<string,unknown>;effect:string;pattern:string;sync:Ballot['sync'];verdicts:Verdict[];reason:string;expires:string}
 export interface Approval {id:string;card:Card;expires:string;decision:string|null}
+export interface SortieSummary {id:string;source:string;title:string;trust:string;status:string;created:string;closed:string|null;actions:number;waiting:number;patterns:string[]}
+export interface ActionDetail {id:string;tool:string;args:Record<string,unknown>;ballot:Ballot;created:string;status:'proposed'|'waiting'|'done'|'failed'|'rejected'|'stood-down'}
 export interface Proposed {actionId:string;ballot:Ballot;grantId?:string;approvalId?:string}
 export type Decision='approve'|'reject'|'edit';
 /** Bounded so a page of approval cards fits one IPC frame (rpc.ts MAX_FRAME_BYTES). */
@@ -103,6 +105,29 @@ export class Ledger {
    this.event(sortieId,null,'misato.resumed',{},now);
    return {request,steps:read('misato.step') as {step:Step;actionId?:string}[],decisions};
   });
+ }
+ private summarize(r:{id:string;source:string;title:string;trust:string;status:string;created:string;closed:string|null}):SortieSummary {
+  const actions=this.db.prepare('SELECT ballot FROM actions WHERE sortie_id=? ORDER BY created').all(r.id) as {ballot:string}[];
+  const waiting=(this.db.prepare('SELECT count(*) AS n FROM approvals a JOIN actions x ON x.id=a.action_id WHERE x.sortie_id=? AND a.decision IS NULL').get(r.id) as {n:number}).n;
+  return {...r,actions:actions.length,waiting,patterns:actions.map(a=>(JSON.parse(a.ballot) as Ballot).pattern)};
+ }
+ /** Newest sorties first, for the dashboard (F-019): status, counts and each action's Pattern, never grant IDs. */
+ sorties(limit=20,before?:string):SortieSummary[] {
+  if(!Number.isInteger(limit)||limit<1||limit>50||(before!==undefined&&(typeof before!=='string'||!Number.isFinite(Date.parse(before)))))throw new Error('Invalid sortie page.');
+  const rows=this.db.prepare(`SELECT id,source,title,trust,status,created,closed FROM sorties ${before?'WHERE created<?':''} ORDER BY created DESC LIMIT ?`).all(...(before?[before,limit]:[limit])) as Parameters<Ledger['summarize']>[0][];
+  return rows.map(r=>this.summarize(r));
+ }
+ /** One sortie with its actions: tool, arguments, ballot and what became of each. */
+ sortie(id:string):(SortieSummary&{detail:ActionDetail[]})|undefined {
+  if(typeof id!=='string'||!id||id.length>100)throw new Error('Invalid sortie.');
+  const row=this.db.prepare('SELECT id,source,title,trust,status,created,closed FROM sorties WHERE id=?').get(id) as Parameters<Ledger['summarize']>[0]|undefined;if(!row)return undefined;
+  const actions=this.db.prepare(`SELECT x.id,x.tool,x.args,x.ballot,x.created,a.decision,
+    (SELECT kind FROM events e WHERE e.action_id=x.id AND e.kind IN ('action.done','action.failed') ORDER BY sequence DESC LIMIT 1) AS ran
+    FROM actions x LEFT JOIN approvals a ON a.action_id=x.id WHERE x.sortie_id=? ORDER BY x.created`).all(id) as {id:string;tool:string;args:string;ballot:string;created:string;decision:string|null;ran:string|null}[];
+  const detail=actions.map((x):ActionDetail=>{const ballot=JSON.parse(x.ballot) as Ballot;
+   const status:ActionDetail['status']=x.ran==='action.done'?'done':x.ran==='action.failed'?'failed':ballot.outcome==='reject'?'rejected':ballot.outcome==='approval'&&x.decision===null?'waiting':ballot.outcome==='approval'&&x.decision!=='approve'?'stood-down':'proposed';
+   return {id:x.id,tool:x.tool,args:JSON.parse(x.args) as Record<string,unknown>,ballot,created:x.created,status};});
+  return {...this.summarize(row),detail};
  }
  /** Misato's reply to the owner, kept with the sortie it answers. */
  reply(sortieId:string,text:string,now=new Date()):void {this.tx(()=>this.event(sortieId,null,'misato.reply',{text:text.slice(0,4000)},now));}
