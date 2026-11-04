@@ -1,6 +1,6 @@
 import XCTest
 import ServiceManagement
-@testable import NodoMenuBar
+@testable import NervMenuBar
 private final class MemoryCheckpoint: CheckpointStorage {
     var checkpoint: InboxCheckpoint?
     var fail = false
@@ -78,12 +78,20 @@ final class NotificationTests: XCTestCase {
         XCTAssertTrue(control.matches(home: directory.path + "/data"))
         XCTAssertFalse(control.matches(home: directory.path + "/another-runtime"))
         XCTAssertFalse(control.matches(home: nil))
+        XCTAssertEqual(LaunchAgentCommand.installedLabel(home: directory.path), "io.nodo.agent", "pre-rename service still controlled")
+        let current = try PropertyListSerialization.data(fromPropertyList: ["Label":"io.nerv.agent", "EnvironmentVariables":["NERV_HOME":directory.path + "/nerv"]], format: .xml, options: 0)
+        try current.write(to: agents.appendingPathComponent("io.nerv.agent.plist"))
+        XCTAssertEqual(LaunchAgentCommand.installedLabel(home: directory.path), "io.nerv.agent")
+        XCTAssertTrue(control.matches(home: directory.path + "/nerv"))
+        XCTAssertFalse(control.matches(home: directory.path + "/data"))
     }
     func testLoginApprovalIsNotClaimedEnabledAndCommandsAreFixed() throws {
         XCTAssertEqual(SystemLoginItem.state(for: .requiresApproval), .requiresApproval)
         XCTAssertEqual(SystemLoginItem.state(for: .notFound), .unavailable)
-        XCTAssertEqual(try LaunchAgentCommand.make(.stop, uid: 501, home: "/Users/test").arguments, ["bootout", "gui/501/io.nodo.agent"])
-        XCTAssertEqual(try LaunchAgentCommand.make(.start, uid: 501, home: "/Users/test").arguments, ["bootstrap", "gui/501", "/Users/test/Library/LaunchAgents/io.nodo.agent.plist"])
+        XCTAssertEqual(try LaunchAgentCommand.make(.stop, uid: 501, home: "/Users/test").arguments, ["bootout", "gui/501/io.nerv.agent"])
+        XCTAssertEqual(try LaunchAgentCommand.make(.start, uid: 501, home: "/Users/test").arguments, ["bootstrap", "gui/501", "/Users/test/Library/LaunchAgents/io.nerv.agent.plist"])
+        XCTAssertEqual(try LaunchAgentCommand.make(.stop, uid: 501, home: "/Users/test", label: "io.nodo.agent").arguments, ["bootout", "gui/501/io.nodo.agent"])
+        XCTAssertThrowsError(try LaunchAgentCommand.make(.stop, uid: 501, home: "/Users/test", label: "io.evil.agent"))
         XCTAssertThrowsError(try LaunchAgentCommand.make(.start, uid: 501, home: "relative"))
     }
 }

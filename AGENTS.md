@@ -68,9 +68,9 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 The convention checker applies default-specific rules to the installed workspace version: standalone at v20+, OnPush at v22+. Install locked dependencies before CI checks; an unknown or cross-major uninstalled range cannot establish a default. Other text checks still run. This heuristic does not replace lint, type checking, accessibility or browser tests.
 
 
-## Project conventions (Nodo)
+## Project conventions (NERV Agency)
 
-The project is **Nodo**. The repository is `https://github.com/voidbrain/nodo`; the default branch is `main`. No hosted deployment is provisioned. Angular project: `nodo`. Backend: Node 24 native TypeScript and SQLite.
+The project is **NERV Agency**. The repository is `https://github.com/voidbrain/nodo`; the default branch is `main`. No hosted deployment is provisioned. Angular project: `nerv`. Backend: Node 24 native TypeScript and SQLite.
 
 ### Architecture
 

@@ -35,22 +35,22 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: swift build --package-path native/NodoMenuBar
+      - run: swift build --package-path native/NervMenuBar
       - name: Native pairing and pinned TLS tests
         shell: bash
         run: |
-          export NODO_NATIVE_FIXTURE="$RUNNER_TEMP/nodo-native-invitation"
+          export NERV_NATIVE_FIXTURE="$RUNNER_TEMP/nerv-native-invitation"
           node test/native-fixture.ts &
           fixture_pid=$!
           trap 'kill "$fixture_pid" 2>/dev/null || true' EXIT
           for attempt in {1..50}; do
-            test -s "$NODO_NATIVE_FIXTURE" && break
+            test -s "$NERV_NATIVE_FIXTURE" && break
             sleep 0.1
           done
-          swift test --package-path native/NodoMenuBar
+          swift test --package-path native/NervMenuBar
       - run: sh native/build-app.sh
-      - run: ditto -c -k --sequesterRsrc --keepParent dist/Nodo.app dist/Nodo-macOS.zip
+      - run: ditto -c -k --sequesterRsrc --keepParent dist/NERV.app dist/NERV-macOS.zip
       - uses: actions/upload-artifact@v4
         with:
-          name: Nodo-macOS
-          path: dist/Nodo-macOS.zip
+          name: NERV-macOS
+          path: dist/NERV-macOS.zip

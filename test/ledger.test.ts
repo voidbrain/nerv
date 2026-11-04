@@ -73,7 +73,7 @@ test('Balthasar enforces the battery and keeps shadow pilots and proactive work 
  }finally{store.close();}
 });
 test('approval decisions apply once, expiry never approves and pending cards survive restart',()=>{
- const dir=mkdtempSync(join(tmpdir(),'nodo-'));const path=join(dir,'db');
+ const dir=mkdtempSync(join(tmpdir(),'nerv-'));const path=join(dir,'db');
  try{
   let store=new Store(path);let ledger=new Ledger(store.db,{tools});
   const sortie=ledger.openSortie('telegram','Email from a stranger','tainted',now);
@@ -116,7 +116,7 @@ test('events are append-only and invalid input is rejected',()=>{
  }finally{store.close();}
 });
 test('an existing version 1 database gains the ledger without losing reminders',()=>{
- const dir=mkdtempSync(join(tmpdir(),'nodo-'));const path=join(dir,'db');
+ const dir=mkdtempSync(join(tmpdir(),'nerv-'));const path=join(dir,'db');
  try{
   const old=new DatabaseSync(path);old.exec(`CREATE TABLE reminders(id TEXT PRIMARY KEY, title TEXT NOT NULL, due TEXT NOT NULL, created TEXT NOT NULL, delivered TEXT, cancelled TEXT);CREATE TABLE deliveries(id TEXT PRIMARY KEY, reminder_id TEXT NOT NULL UNIQUE REFERENCES reminders(id), message TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT);INSERT INTO reminders VALUES('r','Insurance','2030-01-01T01:00:00.000Z','2029-12-31T00:00:00.000Z',NULL,NULL);PRAGMA user_version=1;`);old.close();
   const store=new Store(path);
@@ -124,7 +124,7 @@ test('an existing version 1 database gains the ledger without losing reminders',
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
 test('the scheduler process stands down expired approvals on its own ticks',async()=>{
- const dir=mkdtempSync(join(tmpdir(),'nodo-'));const path=join(dir,'db');
+ const dir=mkdtempSync(join(tmpdir(),'nerv-'));const path=join(dir,'db');
  const store=new Store(path);const ledger=new Ledger(store.db,{tools,approvalTtlMs:300});
  const sortie=ledger.openSortie('cli','Force push','trusted');const {approvalId}=ledger.propose(sortie,{tool:'repo.force-push',args:{},stage:'production'});
  const {Runtime}=await import('../src/runtime.ts');const runtime=new Runtime(path);
@@ -153,7 +153,7 @@ test('REST lists approval cards and applies a decision once without exposing the
  });}finally{store.close();}
 });
 test('decisions travel through the scheduler process; the socket can read cards but never decide',async()=>{
- const dir=mkdtempSync(join(tmpdir(),'nodo-'));const path=join(dir,'db');
+ const dir=mkdtempSync(join(tmpdir(),'nerv-'));const path=join(dir,'db');
  const store=new Store(path);const ledger=new Ledger(store.db,{tools});
  const sortie=ledger.openSortie('cli','Mail','trusted');const {approvalId}=ledger.propose(sortie,{tool:'mail.send',args:{to:'x'},stage:'production'});
  const {Runtime}=await import('../src/runtime.ts');const runtime=new Runtime(path);let client:WebSocket|undefined;

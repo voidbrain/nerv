@@ -13,7 +13,14 @@ protocol CheckpointStorage {
 }
 final class CheckpointFile: CheckpointStorage {
     private let file: URL
-    init(file: URL? = nil) { self.file = file ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("Nodo/notification-checkpoints.json") }
+    init(file: URL? = nil) { self.file = file ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("NERV Agency/notification-checkpoints.json"); if file == nil { Self.migrateLegacy(to: self.file) } }
+    /// Moves the pre-rename checkpoint file once, so renaming never replays old notifications.
+    static func migrateLegacy(to target: URL) {
+        let legacy = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("Nodo/notification-checkpoints.json")
+        guard !FileManager.default.fileExists(atPath: target.path), FileManager.default.fileExists(atPath: legacy.path) else { return }
+        try? FileManager.default.createDirectory(at: target.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try? FileManager.default.moveItem(at: legacy, to: target)
+    }
     private func values() throws -> [String: InboxCheckpoint] {
         guard FileManager.default.fileExists(atPath: file.path) else { return [:] }
         let data = try Data(contentsOf: file)
@@ -50,7 +57,7 @@ final class NotificationEngine {
     init(storage: CheckpointStorage) { self.storage = storage }
     func checkpoint(_ runtime: String) throws -> InboxCheckpoint { guard let value = try storage.load(runtime) else { throw NativeEventError.checkpoint }; return value }
     func baseline(_ runtime: String, head: InboxCheckpoint) throws { try storage.save(runtime, head) }
-    static func identifier(runtime: String, delivery: String) -> String { "nodo.\(runtime).\(delivery)" }
+    static func identifier(runtime: String, delivery: String) -> String { "nerv.\(runtime).\(delivery)" }
     /** Advances only after OS acceptance/reconciliation. Cross-system crash windows cannot promise exactly-once banners. */
     func consume(runtime: String, page: InboxPage, sink: NotificationSink) async throws -> Bool {
         let previous = try checkpoint(runtime)
@@ -84,7 +91,7 @@ final class SystemNotifications: NSObject, NotificationSink, UNUserNotificationC
     }
     func deliver(identifier: String, body: String) async throws {
         guard await allowed() else { throw NativeEventError.denied }
-        let content = UNMutableNotificationContent(); content.title = "Nodo"; content.body = body; content.sound = .default
+        let content = UNMutableNotificationContent(); content.title = "NERV Agency"; content.body = body; content.sound = .default
         try await center.add(UNNotificationRequest(identifier: identifier, content: content, trigger: nil))
     }
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) { completionHandler([.banner, .sound]) }

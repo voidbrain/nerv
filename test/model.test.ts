@@ -86,10 +86,10 @@ test('a failing S² does not fall back to Umbilical',async()=>{
 
 test('ask travels coordinator → brain process → S²; the socket cannot ask and a public key file is refused',{timeout:15000},async()=>{
  const p=await fake((s,res)=>json(res,200,openai('Pronto')));
- const home=mkdtempSync(join(tmpdir(),'nodo-model-'));
+ const home=mkdtempSync(join(tmpdir(),'nerv-model-'));
  writeFileSync(join(home,'config.json'),JSON.stringify({models:{local:{baseUrl:p.url+'/v1',model:'gemma'},cloud:{provider:'anthropic',enabled:true}}}));
  writeFileSync(join(home,'anthropic-key'),KEY);chmodSync(join(home,'anthropic-key'),0o600);
- const {Runtime}=await import('../src/runtime.ts');let runtime=new Runtime(join(home,'nodo.sqlite'),undefined,home);
+ const {Runtime}=await import('../src/runtime.ts');let runtime=new Runtime(join(home,'nerv.sqlite'),undefined,home);
  const token='t'.repeat(32);const server=makeServer(runtime,token);
  try{
   await runtime.ready();await new Promise<void>(done=>server.listen(0,'127.0.0.1',done));const addr=server.address();assert.ok(addr&&typeof addr==='object');
@@ -105,7 +105,7 @@ test('ask travels coordinator → brain process → S²; the socket cannot ask a
   assert.throws(()=>authorize('interface','coordinator','model.complete'));
   assert.equal(p.seen.length,1);
   await runtime.close();chmodSync(join(home,'anthropic-key'),0o644);
-  runtime=new Runtime(join(home,'nodo.sqlite'),undefined,home);await runtime.ready();
+  runtime=new Runtime(join(home,'nerv.sqlite'),undefined,home);await runtime.ready();
   await assert.rejects(runtime.ask({prompt:'x',privacy:'local-only'}),/must be private/);
  }finally{await new Promise<void>(done=>server.close(()=>done()));await runtime.close();await p.close();rmSync(home,{recursive:true,force:true});}
 });

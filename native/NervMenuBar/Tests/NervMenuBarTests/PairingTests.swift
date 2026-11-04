@@ -1,5 +1,5 @@
 import XCTest
-@testable import NodoMenuBar
+@testable import NervMenuBar
 final class PairingTests: XCTestCase {
     func encoded(_ value: Invitation) throws -> String { try JSONEncoder().encode(value).base64EncodedString().replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "") }
     func testBoundedLocalInvitation() throws {
@@ -13,7 +13,7 @@ final class PairingTests: XCTestCase {
 }
 extension PairingTests {
     func testPinnedTLSAndReadOnlySession() async throws {
-        guard let path = ProcessInfo.processInfo.environment["NODO_NATIVE_FIXTURE"] else { throw XCTSkip("Native TLS fixture not running") }
+        guard let path = ProcessInfo.processInfo.environment["NERV_NATIVE_FIXTURE"] else { throw XCTSkip("Native TLS fixture not running") }
         let invitation = try Invitation.decode(String(contentsOfFile: path, encoding: .utf8))
         let connection = NativeConnection(port: invitation.port, fingerprint: invitation.fingerprint)
         let claimData = try await connection.request("/api/pairing/claim", body: ["ticket": invitation.ticket])

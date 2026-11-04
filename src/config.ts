@@ -6,21 +6,31 @@ import { statSync } from 'node:fs';
 import { validateModels, type Models } from './model.ts';
 export interface Config {port:number; language:'it'|'en'; timeZone:string;nativePort?:number;models:Models}
 export const defaults:Omit<Config,'models'> = {port:4317,language:'it',timeZone:'Europe/Rome'};
+/** NERV_* settings; the pre-rename NODO_* names are still read as a fallback. */
+export function setting(name:'HOME'|'PORT'|'TOKEN'):string|undefined {return process.env['NERV_'+name] ?? process.env['NODO_'+name];}
+/** ~/.nerv, or the pre-rename ~/.nodo when only that exists. Nothing is moved automatically. */
 export function dataHome():string {
-  const home=resolve(process.env.NODO_HOME ?? join(homedir(),'.nodo'));
-  const legacy=resolve('.nodo');
-  if(!process.env.NODO_HOME && legacy!==home && existsSync(join(legacy,'nodo.sqlite')))throw new Error('Legacy project database found. Set NODO_HOME to its absolute .nodo path, or migrate it with Nodo stopped.');
+  const explicit=setting('HOME');
+  const home=resolve(explicit ?? join(homedir(),'.nerv')),previous=resolve(join(homedir(),'.nodo'));
+  const checkout=resolve('.nodo');
+  if(!explicit && checkout!==previous && existsSync(join(checkout,'nodo.sqlite')))throw new Error('Legacy project database found. Set NERV_HOME to its absolute .nodo path, or migrate it with NERV Agency stopped.');
+  if(!explicit && !existsSync(home) && existsSync(previous))return previous;
   return home;
+}
+/** nerv.sqlite, or the pre-rename nodo.sqlite when only that exists in the data home. */
+export function databasePath(home:string):string {
+  const current=join(home,'nerv.sqlite'),previous=join(home,'nodo.sqlite');
+  return !existsSync(current)&&existsSync(previous)?previous:current;
 }
 export function readConfig(home:string):Config {
   const path=join(home,'config.json');
   const value:unknown=existsSync(path)?JSON.parse(readFileSync(path,'utf8')):{};
   if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('Invalid config.json.');
   const raw={...defaults,...value};
-  const config:Config={port:Number(process.env.NODO_PORT ?? raw.port),language:raw.language,timeZone:raw.timeZone,models:validateModels((raw as Record<string,unknown>).models)};
+  const config:Config={port:Number(setting('PORT') ?? raw.port),language:raw.language,timeZone:raw.timeZone,models:validateModels((raw as Record<string,unknown>).models)};
   if('nativePort' in raw){const native=Number(raw.nativePort);if(!Number.isInteger(native)||native<1||native>65535||native===config.port)throw new Error('Invalid native port.');config.nativePort=native;}
   if(config.port===(config.nativePort ?? 4319))throw new Error('Web and native ports must differ.');
-  if(!Number.isInteger(config.port)||config.port<1||config.port>65535)throw new Error('Invalid Nodo port.');
+  if(!Number.isInteger(config.port)||config.port<1||config.port>65535)throw new Error('Invalid NERV Agency port.');
   if(!['it','en'].includes(config.language))throw new Error('Invalid language: use it or en.');
   if(typeof config.timeZone!=='string')throw new Error('Invalid timezone.');
   try{new Intl.DateTimeFormat('it',{timeZone:config.timeZone}).format();}catch{throw new Error('Invalid IANA timezone.');}
@@ -28,8 +38,8 @@ export function readConfig(home:string):Config {
 }
 export function readToken(home:string):string {
   const file=join(home,'token');
-  const token=process.env.NODO_TOKEN ?? (existsSync(file)?readFileSync(file,'utf8').trim():'');
-  if(token.length<24||/[\r\n]/.test(token))throw new Error('Run init first, or set NODO_TOKEN to at least 24 characters.');
+  const token=setting('TOKEN') ?? (existsSync(file)?readFileSync(file,'utf8').trim():'');
+  if(token.length<24||/[\r\n]/.test(token))throw new Error('Run init first, or set NERV_TOKEN to at least 24 characters.');
   return token;
 }
 /** Cloud route key: a private file in the data home, never an environment variable, argv or config.json. */

@@ -2,7 +2,7 @@ import {test} from 'node:test';import assert from 'node:assert/strict';import {s
 import {mkdtempSync,writeFileSync,rmSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';
 import {loadNativeTLS,NativeAuth,nativeAdmin,type Invitation} from '../src/native-auth.ts';import {readToken} from '../src/config.ts';
 test('native TLS listener joins service lifecycle and paired credentials survive restart',{timeout:15000},async()=>{
- const home=mkdtempSync(join(tmpdir(),'nodo-native-process-'));let child:ChildProcess|undefined;const env:NodeJS.ProcessEnv={...process.env,NODO_HOME:home};delete env.NODO_TOKEN;delete env.NODO_PORT;
+ const home=mkdtempSync(join(tmpdir(),'nerv-native-process-'));let child:ChildProcess|undefined;const env:NodeJS.ProcessEnv={...process.env,NERV_HOME:home};for(const k of ['NERV_TOKEN','NERV_PORT','NODO_HOME','NODO_TOKEN','NODO_PORT'])delete env[k];
  const port=async()=>{const server=createServer();await new Promise<void>(done=>server.listen(0,'127.0.0.1',done));const a=server.address();assert.ok(a&&typeof a==='object');await new Promise<void>(done=>server.close(()=>done()));return a.port;};
  const launch=async()=>{const value=spawn(process.execPath,['src/cli.ts','serve'],{env,stdio:['ignore','pipe','pipe']});child=value;await new Promise<void>((done,reject)=>{const timer=setTimeout(()=>reject(new Error('Startup timeout')),5000);value.once('exit',code=>{clearTimeout(timer);reject(new Error('Startup exited '+code));});value.stdout!.once('data',()=>{clearTimeout(timer);done();});});return value;};
  const stop=async(c:ChildProcess)=>{const exit=once(c,'exit');c.kill('SIGTERM');assert.equal((await exit)[0],0);child=undefined;};

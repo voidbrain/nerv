@@ -32,7 +32,7 @@ Names follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md); code uses plain
 
 ## Domain ownership
 
-The FPV app owns batteries, aircraft damage and maintenance state. Nodo invokes its typed API/MCP tools. Distinguish recording a charge from starting a physical charger. Calendar, insurance deadlines and absence dates are structured facts with provenance and correction, not guesses reconstructed from chat history.
+The FPV app owns batteries, aircraft damage and maintenance state. NERV Agency invokes its typed API/MCP tools. Distinguish recording a charge from starting a physical charger. Calendar, insurance deadlines and absence dates are structured facts with provenance and correction, not guesses reconstructed from chat history.
 
 ## Local lifecycle and native companion
 
@@ -48,7 +48,7 @@ An authenticated CLI uses the persisted TLS certificate to request a two-minute 
 
 The companion polls every 15 seconds while paired/running. A provides bounded inbox pages with sequence plus delivery-UUID checkpoints in a consistent read transaction. The initial notification baseline is the current inbox head, so enabling notifications does not replay history. Atomic private per-runtime checkpoints advance after OS acceptance/reconciliation. A sequence/UUID mismatch after restore triggers a visible reset to the current head, not an automatic history replay. Deterministic OS request identifiers and pending/delivered reconciliation reduce duplicates; cross-system crash/dismissal windows prevent exactly-once banner guarantees.
 
-The native service controller runs only fixed launchctl argv for the current user's io.nodo.agent. Stop is a separate confirmed action; Quit companion does not call it. A paired daemon's authenticated data directory must match the local agent NODO_HOME before these controls are enabled. SMAppService controls companion login registration independently of the daemon and displays the real approval state. These OS actions use local user authority and never broaden the read-only network credential. No CI test registers a login item, requests notification permission or starts/stops a real user service.
+The native service controller runs only fixed launchctl argv for the current user's io.nerv.agent. Stop is a separate confirmed action; Quit companion does not call it. A paired daemon's authenticated data directory must match the local agent NERV_HOME before these controls are enabled. SMAppService controls companion login registration independently of the daemon and displays the real approval state. These OS actions use local user authority and never broaden the read-only network credential. No CI test registers a login item, requests notification permission or starts/stops a real user service.
 
 ## Status versus diagnostics
 

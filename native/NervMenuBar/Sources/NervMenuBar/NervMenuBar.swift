@@ -4,13 +4,13 @@ struct RuntimeStatus: Decodable { let runtimeId: String; let language: String; l
 struct Reminder: Decodable, Identifiable { let id: String; let title: String; let due: String; let delivered: String?; let cancelled: String? }
 struct Claim: Decodable { let clientId: String; let token: String; let expiresAt: Int64; let runtimeId: String; let scopes: [String] }
 @MainActor final class Companion: ObservableObject {
-    @Published var language = UserDefaults.standard.string(forKey: "nodo.language") ?? "it" { didSet { UserDefaults.standard.set(language, forKey: "nodo.language") } }
+    @Published var language = UserDefaults.standard.string(forKey: "nerv.language") ?? "it" { didSet { UserDefaults.standard.set(language, forKey: "nerv.language") } }
     @Published var invitation = ""
-    @Published var status = "Nodo non connesso"
+    @Published var status = "NERV non connesso"
     @Published var reminders: [Reminder] = []
     @Published var busy = false
     @Published var paired = false
-    @Published var notificationsEnabled = UserDefaults.standard.bool(forKey: "nodo.notifications") { didSet { UserDefaults.standard.set(notificationsEnabled, forKey: "nodo.notifications") } }
+    @Published var notificationsEnabled = UserDefaults.standard.bool(forKey: "nerv.notifications") { didSet { UserDefaults.standard.set(notificationsEnabled, forKey: "nerv.notifications") } }
     @Published var notificationStatus = "Notifiche disattivate"
     @Published var loginState: LoginState = .disabled
     @Published var serviceLoaded = false
@@ -43,7 +43,7 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
         loginState = login.state
     }
     func controlService(start: Bool) async {
-        guard !serviceBusy else { return }; guard !paired || serviceMatchesRuntime else { controlStatus = "Il servizio locale non corrisponde al Nodo abbinato."; return }; serviceBusy = true; defer { serviceBusy = false }
+        guard !serviceBusy else { return }; guard !paired || serviceMatchesRuntime else { controlStatus = "Il servizio locale non corrisponde al NERV abbinato."; return }; serviceBusy = true; defer { serviceBusy = false }
         do { if start { try await service.start() } else { try await service.stop() }; await refreshOSState(); await refresh() } catch { controlStatus = error.localizedDescription }
     }
     func toggleNotifications() async {
@@ -62,7 +62,7 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
     }
     func tr(_ text: String) -> String {
         guard language == "en" else { return text }
-        return ["Nodo non connesso":"Nodo disconnected", "Nodo abbinato":"Nodo paired", "Nodo connesso":"Nodo connected", "Abbinamento locale rimosso":"Local pairing removed", "Genera un invito con npm start -- pair e incollalo qui.":"Generate an invitation with npm start -- pair and paste it here.", "Invito privato":"Private invitation", "Abbina Nodo":"Pair Nodo", "Apri spazio web":"Open workspace", "Aggiorna stato":"Refresh status", "Rimuovi abbinamento locale":"Forget local pairing", "Chiudere questa app lascia Nodo in esecuzione.":"Quitting this app leaves Nodo running.", "Esci dal companion":"Quit companion", "Ora locale del Mac":"Mac local time", "Servizio Nodo di questo Mac":"Nodo service on this Mac", "Il servizio locale non corrisponde al Nodo abbinato.":"The local service does not match the paired Nodo.", "Notifiche disattivate":"Notifications off", "Notifiche attive: nuovi promemoria":"Notifications on: new reminders", "Disattiva notifiche":"Turn notifications off", "Attiva notifiche da ora":"Enable notifications from now", "Cronologia cambiata: controlla la casella":"History changed: check the inbox", "Servizio caricato":"Service loaded", "Servizio non caricato o non accessibile":"Service not loaded or unavailable", "Avvia Nodo":"Start Nodo", "Ferma Nodo…":"Stop Nodo…", "Ferma Nodo":"Stop Nodo", "Annulla":"Cancel", "Avvio al login attivo":"Launch at login enabled", "Avvio al login: approvazione richiesta":"Launch at login requires approval", "Avvio al login non attivo":"Launch at login not enabled", "Disattiva avvio al login":"Disable launch at login", "Avvia companion al login":"Launch companion at login", "Apri impostazioni login":"Open login settings", "Fermare il servizio Nodo? I promemoria attendono il riavvio.":"Stop the Nodo service? Reminders will wait until it restarts."][text] ?? text
+        return ["NERV non connesso":"NERV disconnected", "NERV abbinato":"NERV paired", "NERV connesso":"NERV connected", "Abbinamento locale rimosso":"Local pairing removed", "Genera un invito con npm start -- pair e incollalo qui.":"Generate an invitation with npm start -- pair and paste it here.", "Invito privato":"Private invitation", "Abbina NERV":"Pair NERV", "Apri spazio web":"Open workspace", "Aggiorna stato":"Refresh status", "Rimuovi abbinamento locale":"Forget local pairing", "Chiudere questa app lascia NERV in esecuzione.":"Quitting this app leaves NERV running.", "Esci dal companion":"Quit companion", "Ora locale del Mac":"Mac local time", "Servizio NERV di questo Mac":"NERV service on this Mac", "Il servizio locale non corrisponde al NERV abbinato.":"The local service does not match the paired NERV.", "Notifiche disattivate":"Notifications off", "Notifiche attive: nuovi promemoria":"Notifications on: new reminders", "Disattiva notifiche":"Turn notifications off", "Attiva notifiche da ora":"Enable notifications from now", "Cronologia cambiata: controlla la casella":"History changed: check the inbox", "Servizio caricato":"Service loaded", "Servizio non caricato o non accessibile":"Service not loaded or unavailable", "Avvia NERV":"Start NERV", "Ferma NERV…":"Stop NERV…", "Ferma NERV":"Stop NERV", "Annulla":"Cancel", "Avvio al login attivo":"Launch at login enabled", "Avvio al login: approvazione richiesta":"Launch at login requires approval", "Avvio al login non attivo":"Launch at login not enabled", "Disattiva avvio al login":"Disable launch at login", "Avvia companion al login":"Launch companion at login", "Apri impostazioni login":"Open login settings", "Fermare il servizio NERV? I promemoria attendono il riavvio.":"Stop the NERV service? Reminders will wait until it restarts."][text] ?? text
     }
     func pair() async {
         guard !busy else { return }; busy = true; defer { busy = false }
@@ -72,7 +72,7 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
             let claim = try JSONDecoder().decode(Claim.self, from: await connection.request("/api/pairing/claim", body: ["ticket": value.ticket]))
             guard claim.runtimeId == value.runtimeId, claim.scopes == ["read"], claim.token.range(of: "^[a-f0-9]{64}$", options: .regularExpression) != nil else { throw NativeError.identityMismatch }
             let next = Credential(clientId: claim.clientId, token: claim.token, expiresAt: claim.expiresAt, runtimeId: claim.runtimeId, port: value.port, webPort: value.webPort, fingerprint: value.fingerprint)
-            try CredentialStore.save(next); credential = next; paired = true; invitation = ""; status = "Nodo abbinato"; startPolling()
+            try CredentialStore.save(next); credential = next; paired = true; invitation = ""; status = "NERV abbinato"; startPolling()
         } catch { status = error.localizedDescription }
     }
     func refresh() async {
@@ -84,7 +84,7 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
             guard doctor.runtimeId == credential.runtimeId else { throw NativeError.identityMismatch }
             serviceMatchesRuntime = service.matches(home: doctor.home)
             let values = try JSONDecoder().decode([Reminder].self, from: await connection.request("/api/reminders/pending", token: credential.token))
-            reminders = Array(values.filter { $0.cancelled == nil && $0.delivered == nil }.prefix(5)); status = "Nodo connesso"
+            reminders = Array(values.filter { $0.cancelled == nil && $0.delivered == nil }.prefix(5)); status = "NERV connesso"
             if notificationsEnabled {
                 do {
                     guard await notifications.allowed() else { throw NativeEventError.denied }
@@ -99,7 +99,7 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
     func forget() { do { try CredentialStore.forget(); credential = nil; paired = false; reminders = []; notificationsEnabled = false; pollTask?.cancel(); pollTask = nil; status = "Abbinamento locale rimosso" } catch { status = error.localizedDescription } }
     func openWorkspace() { if let credential { NSWorkspace.shared.open(URL(string: "http://127.0.0.1:\(credential.webPort)")!) } }
 }
-@main struct NodoMenuBarApp: App {
+@main struct NervMenuBarApp: App {
     @StateObject private var model = Companion()
     @State private var confirmStop = false
     init() { NSApplication.shared.setActivationPolicy(.accessory) }
@@ -108,13 +108,13 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
     }
     private var content: some View {
         ScrollView { VStack(alignment: .leading, spacing: 12) {
-            Text("Nodo").font(.title2)
+            Text("NERV Agency").font(.title2)
             Picker("Lingua / Language", selection: $model.language) { Text("Italiano").tag("it"); Text("English").tag("en") }
             Text(model.tr(model.status)).font(.caption).fixedSize(horizontal: false, vertical: true)
             if !model.paired {
                 Text(model.tr("Genera un invito con npm start -- pair e incollalo qui.")).font(.caption)
                 SecureField(model.tr("Invito privato"), text: $model.invitation)
-                Button(model.tr("Abbina Nodo")) { Task { await model.pair(); await model.refresh() } }.disabled(model.busy || model.invitation.isEmpty)
+                Button(model.tr("Abbina NERV")) { Task { await model.pair(); await model.refresh() } }.disabled(model.busy || model.invitation.isEmpty)
             } else {
                 Button(model.tr("Apri spazio web")) { model.openWorkspace() }
                 Button(model.tr("Aggiorna stato")) { Task { await model.refreshOSState(); await model.refresh() } }.disabled(model.busy)
@@ -124,20 +124,20 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
                 Button(model.tr("Rimuovi abbinamento locale")) { model.forget() }.disabled(model.busy)
             }
             Divider()
-            Text(model.tr("Servizio Nodo di questo Mac")).font(.caption)
+            Text(model.tr("Servizio NERV di questo Mac")).font(.caption)
             Text(model.tr(model.controlStatus)).font(.caption)
-            if model.paired && !model.serviceMatchesRuntime { Text(model.tr("Il servizio locale non corrisponde al Nodo abbinato.")).font(.caption) }
-            Button(model.tr("Avvia Nodo")) { Task { await model.controlService(start: true) } }.disabled(model.serviceBusy || model.serviceLoaded || (model.paired && !model.serviceMatchesRuntime))
-            Button(model.tr("Ferma Nodo…")) { confirmStop = true }.disabled(model.serviceBusy || !model.serviceLoaded || (model.paired && !model.serviceMatchesRuntime))
+            if model.paired && !model.serviceMatchesRuntime { Text(model.tr("Il servizio locale non corrisponde al NERV abbinato.")).font(.caption) }
+            Button(model.tr("Avvia NERV")) { Task { await model.controlService(start: true) } }.disabled(model.serviceBusy || model.serviceLoaded || (model.paired && !model.serviceMatchesRuntime))
+            Button(model.tr("Ferma NERV…")) { confirmStop = true }.disabled(model.serviceBusy || !model.serviceLoaded || (model.paired && !model.serviceMatchesRuntime))
             Text(model.tr(model.loginState == .enabled ? "Avvio al login attivo" : model.loginState == .requiresApproval ? "Avvio al login: approvazione richiesta" : "Avvio al login non attivo")).font(.caption)
             Button(model.tr(model.loginState == .enabled || model.loginState == .requiresApproval ? "Disattiva avvio al login" : "Avvia companion al login")) { model.setLoginEnabled(!(model.loginState == .enabled || model.loginState == .requiresApproval)) }
             if model.loginState == .requiresApproval { Button(model.tr("Apri impostazioni login")) { SystemLoginItem.openSettings() } }
             Divider()
-            Text(model.tr("Chiudere questa app lascia Nodo in esecuzione.")).font(.caption)
+            Text(model.tr("Chiudere questa app lascia NERV in esecuzione.")).font(.caption)
             Button(model.tr("Esci dal companion")) { NSApplication.shared.terminate(nil) }
         }.padding(18) }.frame(width: 350, height: 600).task { await model.refreshOSState(); await model.refresh() }
-        .confirmationDialog(model.tr("Fermare il servizio Nodo? I promemoria attendono il riavvio."), isPresented: $confirmStop) {
-            Button(model.tr("Ferma Nodo"), role: .destructive) { Task { await model.controlService(start: false) } }
+        .confirmationDialog(model.tr("Fermare il servizio NERV? I promemoria attendono il riavvio."), isPresented: $confirmStop) {
+            Button(model.tr("Ferma NERV"), role: .destructive) { Task { await model.controlService(start: false) } }
             Button(model.tr("Annulla"), role: .cancel) { }
         }
     }

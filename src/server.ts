@@ -14,7 +14,7 @@ async function body(req: IncomingMessage,limit=8192): Promise<Record<string,unkn
 }
 export function makeServer(store: StoreApi, token: string, options: {webRoot?:string; language?:string; timeZone?:string;tls?:{key:Buffer;cert:Buffer};native?:{auth:NativeAuth;fingerprint:string;port:number;webPort:number}} = {}) {
   if(options.native&&!options.tls)throw new Error('Native pairing requires TLS.');
-  if(token.length<24) throw new Error('NODO_TOKEN must be at least 24 characters.');
+  if(token.length<24) throw new Error('NERV_TOKEN must be at least 24 characters.');
   const listener:RequestListener=async(req,res)=>{
     res.setHeader('Content-Type','application/json'); res.setHeader('Cache-Control','no-store'); res.setHeader('X-Content-Type-Options','nosniff');
     const reply=(status:number,value:unknown)=>{res.writeHead(status);res.end(JSON.stringify(value));};
@@ -67,8 +67,8 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
       else if(req.method==='POST' && path==='/api/reminders') {const b=await body(req);if(typeof b.title!=='string'||typeof b.due!=='string') throw new Error('Title and due are required.');reply(201,await store.add(b.title,b.due));}
       else if(req.method==='DELETE' && /^\/api\/reminders\/[a-f0-9-]+$/.test(path)) reply((await store.cancel(path.split('/').at(-1)!))?200:404,{message:'Cancellation processed.'});
       else if(req.method==='GET' && path==='/api/inbox') reply(200,await store.inbox());
-      else if(req.method==='GET' && path==='/api/status')reply(200,{name:'Nodo',mode:'local-core',...await store.health(),language:options.language ?? 'it',timeZone:options.timeZone ?? 'Europe/Rome',...(options.native?{runtimeId:options.native.auth.runtimeId,home:options.native.auth.home}:{})});
-      else if(req.method==='GET' && path==='/api/doctor') reply(200,{name:'Nodo',mode:'local-core',...await store.doctor(),remoteWorkers:'not implemented',language:options.language ?? 'it',timeZone:options.timeZone ?? 'Europe/Rome',...(options.native?{runtimeId:options.native.auth.runtimeId,home:options.native.auth.home}:{} )});
+      else if(req.method==='GET' && path==='/api/status')reply(200,{name:'NERV Agency',mode:'local-core',...await store.health(),language:options.language ?? 'it',timeZone:options.timeZone ?? 'Europe/Rome',...(options.native?{runtimeId:options.native.auth.runtimeId,home:options.native.auth.home}:{})});
+      else if(req.method==='GET' && path==='/api/doctor') reply(200,{name:'NERV Agency',mode:'local-core',...await store.doctor(),remoteWorkers:'not implemented',language:options.language ?? 'it',timeZone:options.timeZone ?? 'Europe/Rome',...(options.native?{runtimeId:options.native.auth.runtimeId,home:options.native.auth.home}:{} )});
       else reply(404,{error:'Unknown operation.'});
     } catch(e) {reply(400,{error:e instanceof Error?e.message:'Invalid request.'});}
   };
