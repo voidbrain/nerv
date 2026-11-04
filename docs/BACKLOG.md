@@ -791,7 +791,7 @@ Current work ledger, reviewed 5 November 2026 against main `950ac8e`. PR #1–#7
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔶 P2 | Open | 🟢 Small | ~0% |
+| 🔴 | 🔶 P2 | Open | 🟢 Small | ~70% |
 
 💻 **→ Human action required: No**<br />Summarise closed sorties, pending approvals and failures since the last digest, from Central Dogma only.
 
@@ -804,9 +804,9 @@ Current work ledger, reviewed 5 November 2026 against main `950ac8e`. PR #1–#7
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Reviewed 2026-11-04: most of this exists. Hyuga's daily brief (F-003, src/brief.ts) is built from the ledger, not a model, and lists waiting cards, done and failed sorties since the previous brief and health; the dashboard's Debrief panel lists what ended since your last visit with links to each trace. Remaining for this Check: expired approvals in the brief, a trace reference per item (the sortie's short ID), and delivery through the inbox as well as Telegram. Small; next time the brief is touched. Original plan: ledger query plus a deterministic template after F-024; an optional model summary later must cite ledger entries.
+**Next action / closure evidence:** In [PR #80](https://github.com/voidbrain/nerv/pull/80) (2026-11-05): the brief lists approvals that expired without a decision since the previous brief (nothing ran), and every item (waiting card, expired approval, failed sortie) carries its sortie's short ID, the one the dashboard shows (`sortieRef`, coupled with live.js `short()` in .harness.json and asserted by test/brief.test.ts); `approvals.expired` reads them through the scheduler process. Checked: test/brief.test.ts (layout and both languages; through the scheduler process, an approval expired since the last brief appears with its sortie). Remaining: delivery through the inbox as well as Telegram, which needs the deliveries table to hold more than reminders (a schema migration) and Telegram to stop sending the brief directly; owner decision pending. Reviewed 2026-11-04: most of this exists. Hyuga's daily brief (F-003, src/brief.ts) is built from the ledger, not a model, and lists waiting cards, done and failed sorties since the previous brief and health; the dashboard's Debrief panel lists what ended since your last visit with links to each trace. Remaining for this Check: expired approvals in the brief, a trace reference per item (the sortie's short ID), and delivery through the inbox as well as Telegram. Small; next time the brief is touched. Original plan: ledger query plus a deterministic template after F-024; an optional model summary later must cite ledger entries.
 
-**Estimates:** Small remaining effort; ~0% complete. Estimated 2026-11-04.
+**Estimates:** Small remaining effort; ~70% complete. Estimated 2026-11-04.
 
 | Field | Value |
 |---|---|
