@@ -103,6 +103,8 @@ try {
         const nativeAuth=nativeTLS?new NativeAuth(home):undefined;
         const runtime=new Runtime(databasePath(home),undefined,home);
         try{await runtime.ready();}catch(e){await runtime.close();nativeAuth?.close();throw e;}
+        // Misato resumes after the owner decides, wherever the decision came from (F-033).
+        runtime.startResumer();
         let server:ReturnType<typeof makeServer>;let native:ReturnType<typeof makeServer>|undefined;
         try{server=makeServer(runtime,token,{webRoot,...config});native=nativeTLS&&nativeAuth?makeServer(runtime,token,{...config,tls:nativeTLS,native:{auth:nativeAuth,fingerprint:nativeTLS.fingerprint,port:config.nativePort ?? 4319,webPort:config.port}}):undefined;}catch(e){await runtime.close();nativeAuth?.close();throw e;}
         const servers=native?[server,native]:[server];let stopped=false;

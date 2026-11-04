@@ -118,7 +118,7 @@ npm start -- chat "Ricordami di rinnovare l'assicurazione auto il 15 gennaio 203
 npm start -- chat "What reminders do I have?"
 ```
 
-Misato plans one step at a time: it proposes an action, the gate reviews it, and Misato sees the outcome before the next step (at most 6 steps). The command prints each step, any action that waits for you (`approve ID` or `reject ID`), the reply, and the sortie ID for `events`. An action waiting for you has not happened; after you approve it, it runs once, but Misato does not continue that conversation yet. Misato uses `models.roles.misato` (local unless you choose the cloud route); times are converted to your configured time zone in code before Misato sees them. Locally, a step takes about 10–30 seconds with a 12–14B model.
+Misato plans one step at a time: it proposes an action, the gate reviews it, and Misato sees the outcome before the next step (at most 6 steps). The command prints each step, any action that waits for you (`approve ID` or `reject ID`), the reply, and the sortie ID for `events`. An action waiting for you has not happened. Once you decide (Telegram button, `approve`/`reject`, the API, or it expires), it runs once if approved and Misato picks the request back up with the outcome, within a few seconds; its follow-up reply goes to Telegram when Aoba is linked and is always in the sortie's events. The conversation's steps are kept in the ledger, so this also works after a restart. Misato uses `models.roles.misato` (local unless you choose the cloud route); times are converted to your configured time zone in code before Misato sees them. Locally, a step takes about 10–30 seconds with a 12–14B model.
 
 ## Gate rules (the Scrolls)
 

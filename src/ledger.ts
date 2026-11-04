@@ -1,6 +1,7 @@
 import type { DatabaseSync } from 'node:sqlite';
 import { createHash, randomUUID } from 'node:crypto';
 import { ballot, defaultPolicy, patternOf, validatePolicy, type Ballot, type Pattern, type Policy, type Stage, type Tool, type Trust, type Verdict } from './policy.ts';
+import type { Step } from './misato.ts';
 import { EVENT_SCHEMA_VERSION, MAX_SPEAR_HAPPENED, encodePayload, readPayload, type EventKind, type EventPayloads, type Happened, type SortieEvent } from './events.ts';
 /** Central Dogma (F-024): sorties, actions, grants (A.T. Fields), approvals (Misato's apartment) and append-only events. */
 export const LEDGER_SCHEMA=`
@@ -75,6 +76,33 @@ export class Ledger {
  grantAction(grantId:string):{sortieId:string;actionId:string;tool:string;args:Record<string,unknown>;used:boolean}|undefined {
   const row=this.db.prepare('SELECT x.sortie_id,x.id,x.tool,x.args,g.used FROM grants g JOIN actions x ON x.id=g.action_id WHERE g.id=?').get(grantId) as {sortie_id:string;id:string;tool:string;args:string;used:string|null}|undefined;
   return row&&{sortieId:row.sortie_id,actionId:row.id,tool:row.tool,args:JSON.parse(row.args) as Record<string,unknown>,used:row.used!==null};
+ }
+ /** Misato's loop state, kept in the ledger so a resume after the owner's decision needs no coordinator memory (F-033). */
+ note<K extends 'misato.request'|'misato.step'|'misato.waiting'>(sortieId:string,kind:K,payload:EventPayloads[K],now=new Date()):void {this.tx(()=>this.event(sortieId,null,kind,payload,now));}
+ /** Open Misato sorties whose latest wait is over: every approval it waited for is decided, and no resume has claimed it. */
+ resumable():string[] {
+  return (this.db.prepare(`SELECT s.id FROM sorties s WHERE s.source='misato' AND s.status='open'
+   AND (SELECT max(sequence) FROM events WHERE sortie_id=s.id AND kind='misato.waiting') > coalesce((SELECT max(sequence) FROM events WHERE sortie_id=s.id AND kind='misato.resumed'),0)
+   AND NOT EXISTS (SELECT 1 FROM approvals a JOIN actions x ON x.id=a.action_id WHERE x.sortie_id=s.id AND a.decision IS NULL)
+   ORDER BY s.created LIMIT 20`).all() as {id:string}[]).map(r=>r.id);
+ }
+ /** Claims one resume, once: records misato.resumed and returns the request, the steps so far and what became of each awaited approval. */
+ claimResume(sortieId:string,now=new Date()):{request:string;steps:{step:Step;actionId?:string}[];decisions:{actionId:string;tool:string;args:Record<string,unknown>;decision:string;result?:unknown;error?:string}[]}|null {
+  return this.tx(()=>{
+   if(!this.resumable().includes(sortieId))return null;
+   const read=(kind:string)=>(this.db.prepare('SELECT payload FROM events WHERE sortie_id=? AND kind=? ORDER BY sequence').all(sortieId,kind) as {payload:string}[]).map(r=>JSON.parse(r.payload) as unknown);
+   const request=(read('misato.request').at(-1) as {text:string}|undefined)?.text ?? (this.db.prepare('SELECT title FROM sorties WHERE id=?').get(sortieId) as {title:string}).title;
+   const ids=(read('misato.waiting').at(-1) as {approvalIds:string[]}).approvalIds;
+   const decisions=ids.flatMap(id=>{
+    const row=this.db.prepare('SELECT a.decision,x.id AS action_id,x.tool,x.args FROM approvals a JOIN actions x ON x.id=a.action_id WHERE a.id=?').get(id) as {decision:string;action_id:string;tool:string;args:string}|undefined;
+    if(!row)return [];
+    const done=this.db.prepare("SELECT kind,payload FROM events WHERE action_id=? AND kind IN ('action.done','action.failed') ORDER BY sequence DESC LIMIT 1").get(row.action_id) as {kind:string;payload:string}|undefined;
+    const outcome=done?JSON.parse(done.payload) as {result?:unknown;error?:string}:{};
+    return [{actionId:row.action_id,tool:row.tool,args:JSON.parse(row.args) as Record<string,unknown>,decision:row.decision,...(done?.kind==='action.done'?{result:outcome.result}:{}),...(done?.kind==='action.failed'?{error:outcome.error}:{})}];
+   });
+   this.event(sortieId,null,'misato.resumed',{},now);
+   return {request,steps:read('misato.step') as {step:Step;actionId?:string}[],decisions};
+  });
  }
  /** Misato's reply to the owner, kept with the sortie it answers. */
  reply(sortieId:string,text:string,now=new Date()):void {this.tx(()=>this.event(sortieId,null,'misato.reply',{text:text.slice(0,4000)},now));}

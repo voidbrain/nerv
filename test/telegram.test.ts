@@ -47,7 +47,7 @@ test('the Bot API base is Telegram or loopback only, and link finds the private 
 });
 test('through every process: Aoba answers only the owner, sends cards with buttons, applies a tap once and delivers reminders',async()=>{
  const token='123456:'+'t'.repeat(35);const tg=await fakeTelegram(token);
- const model=await fakeModel(['{"action":{"tool":"reminders.add","args":{"title":"Chiamare Ada","due":"2030-01-15T09:00:00+01:00"}}}','{"reply":"Ho bisogno della tua approvazione."}']);
+ const model=await fakeModel(['{"action":{"tool":"reminders.add","args":{"title":"Chiamare Ada","due":"2030-01-15T09:00:00+01:00"}}}','{"reply":"Ho bisogno della tua approvazione."}','{"reply":"Fatto: Chiamare Ada è nei promemoria."}']);
  const home=mkdtempSync(join(tmpdir(),'nerv-aoba-'));
  writeFileSync(join(home,'config.json'),JSON.stringify({models:{local:{baseUrl:model.url,model:'m'}}}));
  writeFileSync(join(home,'scrolls.json'),JSON.stringify({blue:['reminders.add']}),{mode:0o600});
@@ -55,7 +55,7 @@ test('through every process: Aoba answers only the owner, sends cards with butto
  const channel=()=>new TelegramChannel({api:new TelegramApi(token,tg.base),store:runtime,chatId:OWNER,statePath,log:l=>logs.push(l)});
  let aoba=channel();
  try{
-  await runtime.ready();await aoba.start(100);
+  await runtime.ready();runtime.startResumer(100);await aoba.start(100);
   tg.text(STRANGER,'Ricordami di chiamare Ada');await until(()=>logs.some(l=>/another chat/.test(l)));
   assert.deepEqual(tg.sent(STRANGER),[]);assert.equal(model.asked.length,0,'a stranger never reaches Misato');
   tg.text(OWNER,'Ricordami di chiamare Ada il 15 gennaio 2030 alle 9');
@@ -67,6 +67,9 @@ test('through every process: Aoba answers only the owner, sends cards with butto
   tg.tap(STRANGER,approve);await until(()=>logs.some(l=>/button press from another account/.test(l)));assert.equal((await runtime.list()).length,0);
   tg.tap(OWNER,approve);await until(()=>tg.sent().some(m=>/^Approved and done/.test(m.text)));
   assert.equal((await runtime.list()).length,1);
+  // F-033: after the tap, Misato resumes with the outcome and its follow-up reaches the chat, after the decision message.
+  await until(()=>tg.sent().some(m=>/^Fatto: Chiamare Ada/.test(m.text)));
+  const texts=tg.sent().map(m=>m.text);assert.ok(texts.findIndex(x=>/^Approved and done/.test(x))<texts.findIndex(x=>/^Fatto/.test(x)));
   tg.tap(OWNER,approve);await until(()=>tg.calls.filter(c=>c.method==='answerCallbackQuery').length>=2);await wait(200);
   assert.equal((await runtime.list()).length,1,'a second tap never runs the tool again');
   assert.ok(tg.calls.some(c=>c.method==='editMessageReplyMarkup'),'buttons are removed after a decision');
@@ -78,7 +81,7 @@ test('through every process: Aoba answers only the owner, sends cards with butto
   assert.equal(tg.sent().length,before,'no card or reminder is resent after a restart');
   assert.equal(statSync(statePath).mode&0o777,0o600);
   tg.text(OWNER,'old news',Math.floor(Date.now()/1000)-3600);await until(()=>tg.sent().some(m=>/offline when you sent/.test(m.text)));
-  assert.equal(model.asked.filter(a=>a==='misato').length,2,'a stale message never reaches Misato');
+  assert.equal(model.asked.filter(a=>a==='misato').length,3,'a stale message never reaches Misato');
  }finally{await aoba.stop();await runtime.close();await model.close();await tg.close();rmSync(home,{recursive:true,force:true});}
 });
 test('telegram link (CLI) saves the owner chat into config.json, keeping the other settings, and refuses a readable token file',async()=>{
