@@ -50,7 +50,7 @@ test('through every process: an Italian request is planned by Misato, gated, exe
   assert.equal((await runtime.list()).length,1);
   assert.deepEqual(m.asked.map(a=>[a.who,a.model]),[['misato','qwen2.5-coder:14b'],['misato','qwen2.5-coder:14b']],'Green work never asks Casper');
   assert.equal((JSON.parse(m.asked[1]!.prompt) as {steps:{outcome:string}[]}).steps[0]!.outcome,'grant','Misato sees the outcome of its step');
-  assert.deepEqual((await runtime.events(chat.sortieId)).map(e=>e.kind),['sortie.opened','ballot','grant.issued','grant.used','action.done','misato.reply','sortie.done']);
+  assert.deepEqual((await runtime.events(chat.sortieId)).map(e=>e.kind),['sortie.opened','misato.request','ballot','grant.issued','grant.used','action.done','misato.step','misato.reply','sortie.done']);
   assert.ok(!JSON.stringify(chat).includes('grantId'));
   assert.equal((await fetch(base+'/api/chat',{method:'POST',headers,body:JSON.stringify({message:''})})).status,400);
   assert.equal((await fetch(base+'/api/chat',{method:'POST',body:'{}'})).status,401);
@@ -78,7 +78,7 @@ test('a reject from the gate goes back to Misato with its reason, and nothing ru
   const chat=await runtime.chat('Cancel my reminder');
   assert.deepEqual(chat.steps.map(s=>[s.outcome,s.reason]),[['reject','melchior: Tool denied by the Scrolls.']]);
   assert.match(JSON.parse(m.asked[1]!.prompt).steps[0].reason,/denied by the Scrolls/);
-  assert.deepEqual((await runtime.events(chat.sortieId)).map(e=>e.kind),['sortie.opened','ballot','misato.reply','sortie.done']);
+  assert.deepEqual((await runtime.events(chat.sortieId)).map(e=>e.kind),['sortie.opened','misato.request','ballot','misato.step','misato.reply','sortie.done']);
  },{deny:['reminders.cancel']});
 });
 test('without any model route, chat says what to configure instead of blaming the cloud route',async()=>{

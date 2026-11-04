@@ -55,6 +55,8 @@ export class TelegramChannel {
  async start(deliverEveryMs=2000):Promise<void> {
   // First run: reminders already in the inbox are not replayed to the phone.
   if(!this.state.inbox){const page=await this.store.inboxPage(0,1);this.state.inbox=page.head;this.save();}
+  // Misato's follow-up after an approval (F-033) reaches the owner here, after the decision's own message.
+  this.store.onResumed?.(reply=>{this.queue=this.queue.then(async()=>{if(this.stopping.signal.aborted)return;await this.api.send(this.chatId,reply.reply ?? `I could not finish: ${reply.error ?? 'no reply'}`);await this.deliver();}).catch(e=>this.log(`Telegram: ${e instanceof Error?e.message:'follow-up failed'}.`));});
   void this.poll();
   this.timer=setInterval(()=>{void this.deliver();},deliverEveryMs);
   await this.deliver();

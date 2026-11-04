@@ -1,4 +1,5 @@
 import type { Ballot, Trust } from './policy.ts';
+import type { Step } from './misato.ts';
 /**
  * Sortie event schema (F-024): the one shape the ledger writes and every reader (CLI, REST, RPC, the F-019 dashboard,
  * a later OpenTelemetry export) consumes. Each stored event records the schema version it was written under.
@@ -24,13 +25,17 @@ export interface EventPayloads {
  'approval.expired':{approvalId:string;source:'ttl'};
  'spear':{reason:string;revoked:number;stoodDown:number;happenedCount:number;happened:Happened[]};
  'misato.reply':{text:string};
+ 'misato.request':{text:string};
+ 'misato.step':{step:Step;actionId?:string};
+ 'misato.waiting':{approvalIds:string[]};
+ 'misato.resumed':Record<string,never>;
  'action.done':{tool:string;result:unknown};
  'action.failed':{tool:string;error:string};
  'sortie.done':Record<string,never>;
  'sortie.failed':Record<string,never>;
 }
 export type EventKind=keyof EventPayloads;
-export const EVENT_KINDS=['sortie.opened','ballot','grant.issued','grant.used','grant.denied','approval.requested','approval.approve','approval.reject','approval.edit','approval.expired','spear','misato.reply','action.done','action.failed','sortie.done','sortie.failed'] as const satisfies readonly EventKind[];
+export const EVENT_KINDS=['sortie.opened','ballot','grant.issued','grant.used','grant.denied','approval.requested','approval.approve','approval.reject','approval.edit','approval.expired','spear','misato.reply','misato.request','misato.step','misato.waiting','misato.resumed','action.done','action.failed','sortie.done','sortie.failed'] as const satisfies readonly EventKind[];
 /** One event as read back. `v` is the schema version it was written under; events written before versioning read as 1. */
 export type SortieEvent={[K in EventKind]:{v:number;sequence:number;sortieId:string;actionId:string|null;kind:K;payload:EventPayloads[K];created:string}}[EventKind];
 /** Serialises a payload for storage, refusing unknown kinds and oversized payloads so the ledger never stores an unbounded event. */
