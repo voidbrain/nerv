@@ -621,7 +621,7 @@ function renderBases() {
 }
 function renderCages() {
   const box = document.getElementById("cages");
-  if (!box.children.length) box.innerHTML = CAGES.map(c => "<div class='cage" + (c.planned ? " planned" : "") + "'><div class='ch'><span style='color:" + c.color + "'>" + c.id + "</span><span class='tiny' id='cs-" + c.id + "'>IDLE</span></div><img class='eva-img' data-av='" + c.id.toLowerCase() + "' alt='" + c.id + "'/><canvas id='cv-" + c.id + "' height='30'></canvas><div class='cd'>" + c.label + " · @" + BASES.find(b => b.id === c.base).name + "</div></div>").join("");
+  if (!box.children.length) box.innerHTML = CAGES.map(c => "<div class='cage" + (c.planned ? " planned" : "") + "'><div class='ch'><span style='color:" + c.color + "'>" + c.id + "</span><span class='tiny' id='cs-" + c.id + "'>IDLE</span></div><img class='eva-img' data-av='" + c.id.toLowerCase() + "' alt='" + c.id + "'/><canvas id='cv-" + c.id + "' height='30'></canvas><div class='cd' title='" + esc(c.label + " · @" + BASES.find(b => b.id === c.base).name) + "'>" + c.label + " · @" + BASES.find(b => b.id === c.base).name + "</div></div>").join("");
 }
 function renderLog() {
   const el = document.getElementById("log"); if (!el) return;
