@@ -6,7 +6,7 @@ import { statSync } from 'node:fs';
 import { validateModels, type Models } from './model.ts';
 import { defaultPolicy, validatePolicy, type Policy } from './policy.ts';
 /** telegram.chatId: the one private chat (the owner's) the Aoba bot answers; set by `telegram link`. */
-export interface Config {port:number; language:'it'|'en'; timeZone:string;nativePort?:number;models:Models;telegram?:{chatId:number};brief?:{at:string};instrumentality?:{at:string}|{when:'idle'};base:Base;kaji?:{root:string}}
+export interface Config {port:number; language:'it'|'en'; timeZone:string;nativePort?:number;models:Models;telegram?:{chatId:number};brief?:{at:string};instrumentality?:{at:string}|{when:'idle'};base:Base}
 /** This machine's identity in the NERV mesh: an id (NERV-01) and a name (Neo Tokyo-3), shown in the dashboard, doctor and brief. */
 export interface Base {id:string;name:string}
 export const defaultBase:Base={id:'NERV-01',name:'Neo Tokyo-3'};
@@ -44,7 +44,6 @@ export function readConfig(home:string):Config {
     if(keys.length===1&&keys[0]==='when'&&b.when==='idle')config.instrumentality={when:'idle'};
     else if(keys.length===1&&keys[0]==='at'&&typeof b.at==='string'&&/^([01]\d|2[0-3]):[0-5]\d$/.test(b.at))config.instrumentality={at:b.at};
     else throw new Error('Invalid instrumentality: {"at": "HH:MM"} in your time zone, or {"when": "idle"}.');}
-  if('kaji' in raw){const k=raw.kaji as Record<string,unknown>;if(!k||typeof k!=='object'||Array.isArray(k)||Object.keys(k).some(x=>x!=='root')||typeof k.root!=='string'||!/^[A-Za-z0-9+/=]{40,120}$/.test(k.root))throw new Error('Invalid kaji: {"root": the root public key} (set by key init or kaji import).');config.kaji={root:k.root};}
   if('brief' in raw){const b=raw.brief as Record<string,unknown>;if(!b||typeof b!=='object'||Array.isArray(b)||Object.keys(b).some(k=>k!=='at')||typeof b.at!=='string'||!/^([01]\d|2[0-3]):[0-5]\d$/.test(b.at))throw new Error('Invalid brief: {"at": "HH:MM"} in your time zone.');config.brief={at:b.at};}
   if(config.port===(config.nativePort ?? 4319))throw new Error('Web and native ports must differ.');
   if(!Number.isInteger(config.port)||config.port<1||config.port>65535)throw new Error('Invalid NERV Agency port.');
@@ -93,11 +92,6 @@ export function setBase(home:string,base:Base):Base {
   const path=join(home,'config.json');const valid=validateBase(base);
   const current=existsSync(path)?JSON.parse(readFileSync(path,'utf8')) as Record<string,unknown>:{...defaults};
   writeFileSync(path,JSON.stringify({...current,base:valid},null,2)+'\n',{mode:0o600});chmodSync(path,0o600);readConfig(home);return valid;
-}
-/** Pins the owner's root public key on this base: every registry record must verify against it. */
-export function pinKajiRoot(home:string,root:string):void {
-  const path=join(home,'config.json');const current=existsSync(path)?JSON.parse(readFileSync(path,'utf8')) as Record<string,unknown>:{...defaults};
-  writeFileSync(path,JSON.stringify({...current,kaji:{root}},null,2)+'\n',{mode:0o600});chmodSync(path,0o600);readConfig(home);
 }
 export type ScheduleValue=string|null;
 /** The two schedules the owner may change by talking to Misato (F-003): times, "idle" or off. Nothing security-relevant. */

@@ -14,7 +14,7 @@ Read the style guide. Angular renders registered components, never model-generat
 
 ## Distributed contracts
 
-`src/kaji.ts` is the Kaji line's trust layer (F-036 phase 1a): the Key of Nebuchadnezzar (Ed25519, scrypt + AES-256-GCM file, passphrase never in argv or env), per-base Ed25519 keys created on first use, and Marduk's registry as append-only records signed by the root and verified on every base against the root pinned by fingerprint (no trust on first use); newest enrolment wins, revocation of a key always wins. No network transport yet. `src/contracts.ts` declares version 1 intentions only; it is not an implemented network protocol. Agent role, model endpoint and execution location remain independent. Node trust requires enrolment; discovery grants no permission. A future broker must enforce privacy, fencing, lease expiry, idempotency and exclusive resources before remote operations. A timeout does not prove that an external action failed. Inspect device state before replaying physical actions. Never silently send local-only input to cloud inference.
+`src/contracts.ts` declares version 1 intentions only; it is not an implemented network protocol. Agent role, model endpoint and execution location remain independent. Node trust requires enrolment; discovery grants no permission. A future broker must enforce privacy, fencing, lease expiry, idempotency and exclusive resources before remote operations. A timeout does not prove that an external action failed. Inspect device state before replaying physical actions. Never silently send local-only input to cloud inference.
 
 ### Model routes
 
