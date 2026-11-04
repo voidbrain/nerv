@@ -263,7 +263,7 @@ async function runFrom(s) { // resume the loop at the current action after an ed
 async function execute(s, a, b) {
   if (s.status === "stood-down") return;
   setPhase(s, "plug", "Ritsuko signs the A.T. Field: " + a.tool + " · single use · 60 s · args hash bound"); await wait(380);
-  const cage = CAGES.find(c => c.id === b.executor) || CAGES[1];
+  const cage = CAGES.find(c => c.id === b.executor) || CAGES.find(c => c.id === "EVA-02");
   const base = BASES.find(x => x.id === cage.base);
   if (base.id !== "tokyo3") sendPacket("tokyo3", base.id, "plug");
   activeCage[cage.id] = Date.now() + 1600;
@@ -501,7 +501,7 @@ function drawEdges(s) {
   const live = liveEdges(s);
   svg.setAttribute("viewBox", "0 0 " + host.width + " " + host.height);
   // Orthogonal routing: every line leaves and enters a node only at the middle of its N, S, E or W side, with 90° turns
-  // in the gaps between nodes; the loops back to Misato run in their own lanes along the right edge, never behind a node.
+  // in the gaps between nodes; the loops back to Misato run in their own lanes in the right padding, never behind a node.
   // One shared turning height per fan-out (edges leaving the same node downwards) and per merge (edges entering the
   // same node from above), so branches turn on one line.
   const box = {}; EDGES.forEach(e => { box[e[0]] = box[e[0]] || c(nodeEl(e[0])); box[e[1]] = box[e[1]] || c(nodeEl(e[1])); });
@@ -513,7 +513,7 @@ function drawEdges(s) {
   let lane = 0;
   const paths = EDGES.map(e => {
     const A = c(nodeEl(e[0])), B = c(nodeEl(e[1])); let d;
-    if (e[2] === "loop" && e[0] !== "consult") { const x = host.width - 5 - 9 * lane++; d = "M" + A.r + "," + A.y + " H" + x + " V" + B.y + " H" + B.r; }
+    if (e[2] === "loop" && e[0] !== "consult") { const x = host.width - 14 - 8 * lane++; d = "M" + A.r + "," + A.y + " H" + x + " V" + B.y + " H" + B.r; }
     else if (B.t >= A.b - 2) { const my = bar(e); d = "M" + A.x + "," + A.b + " V" + my + " H" + B.x + " V" + B.t; }
     else if (B.b <= A.t + 2) { const my = (B.b + A.t) / 2; d = "M" + A.x + "," + A.t + " V" + my + " H" + B.x + " V" + B.b; }
     else if (B.l >= A.r) { const mx = (A.r + B.l) / 2; d = "M" + A.r + "," + A.y + " H" + mx + " V" + B.y + " H" + B.l; }
@@ -621,7 +621,7 @@ function renderBases() {
 }
 function renderCages() {
   const box = document.getElementById("cages");
-  if (!box.children.length) box.innerHTML = CAGES.map(c => "<div class='cage'><div class='ch'><span style='color:" + c.color + "'>" + c.id + "</span><span class='tiny' id='cs-" + c.id + "'>IDLE</span></div><img class='eva-img' data-av='" + c.id.toLowerCase() + "' alt='" + c.id + "'/><canvas id='cv-" + c.id + "' height='30'></canvas><div class='cd'>" + c.label + " · @" + BASES.find(b => b.id === c.base).name + "</div></div>").join("");
+  if (!box.children.length) box.innerHTML = CAGES.map(c => "<div class='cage" + (c.planned ? " planned" : "") + "'><div class='ch'><span style='color:" + c.color + "'>" + c.id + "</span><span class='tiny' id='cs-" + c.id + "'>IDLE</span></div><img class='eva-img' data-av='" + c.id.toLowerCase() + "' alt='" + c.id + "'/><canvas id='cv-" + c.id + "' height='30'></canvas><div class='cd'>" + c.label + " · @" + BASES.find(b => b.id === c.base).name + "</div></div>").join("");
 }
 function renderLog() {
   const el = document.getElementById("log"); if (!el) return;
@@ -755,8 +755,8 @@ function drawMap(now) {
 function drawHeartbeats(now) {
   CAGES.forEach((c, i) => {
     const cv = document.getElementById("cv-" + c.id); if (!cv) return;
-    const base = BASES.find(b => b.id === c.base); const off = base.status === "offline"; const busy = (activeCage[c.id] || 0) > Date.now();
-    const st = document.getElementById("cs-" + c.id); st.textContent = off ? "OFFLINE" : busy ? "ACTIVE" : base.status === "standby" ? "STANDBY" : "IDLE"; st.className = "tiny " + (off ? "muted" : busy ? "ok" : base.status === "standby" ? "warn" : "muted");
+    const base = BASES.find(b => b.id === c.base); const off = base.status === "offline" || !!c.planned; const busy = (activeCage[c.id] || 0) > Date.now();
+    const st = document.getElementById("cs-" + c.id); st.textContent = c.planned ? "PLANNED" : off ? "OFFLINE" : busy ? "ACTIVE" : base.status === "standby" ? "STANDBY" : "IDLE"; st.className = "tiny " + (off ? "muted" : busy ? "ok" : base.status === "standby" ? "warn" : "muted");
     const dpr = window.devicePixelRatio || 1; const w = cv.clientWidth || 120, h = 30;
     if (cv.width !== Math.floor(w * dpr)) { cv.width = Math.floor(w * dpr); cv.height = Math.floor(h * dpr); }
     const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = "#000"; ctx.fillRect(0, 0, w, h);
@@ -843,7 +843,7 @@ function setTheme(name) {
 }
 
 // Live: only this machine is a base; simulated cages and pilots would point at bases that do not exist.
-if (LIVE) { state = freshState(); state.upcoming = []; BASES.splice(1); LINKS.length = 0; CAGES.splice(0, CAGES.length, { id:"EVA-02", label:"PRODUCTION · in-process executor, not sandboxed yet", base:"tokyo3", color:"#ff3b30" }); PILOTS.length = 0; PILOTS.push({ id:"owner", stage:"production" }, { id:"misato", stage:"production" }); } else seed();
+if (LIVE) { state = freshState(); state.upcoming = []; BASES.splice(1); LINKS.length = 0; CAGES.forEach(c => { c.base = "tokyo3"; c.planned = c.id !== "EVA-02"; if (c.id === "EVA-02") c.label = "PRODUCTION · in-process executor, not sandboxed yet"; else c.label = c.label.split(" · ")[0] + " · planned"; }); PILOTS.length = 0; PILOTS.push({ id:"owner", stage:"production" }, { id:"misato", stage:"production" }); } else seed();
 { const t = new URLSearchParams(location.search).get("theme"); const th = document.getElementById("theme");
   if (t && [...th.options].some(o => o.value === t)) { th.value = t; setTheme(t); } else { applyLabels(); renderAll(); } }
 initMap(); requestAnimationFrame(frame);
