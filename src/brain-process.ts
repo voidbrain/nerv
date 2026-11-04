@@ -1,6 +1,8 @@
+import {connect} from 'node:net';
 import {dispatchRpc,MAX_FRAME_BYTES,RpcFault} from './rpc.ts';
 import {readConfig,readModelKey} from './config.ts';
-import {complete,describe,forRole,ModelError,MODEL_TIMEOUT_MS,type Ask,type Models} from './model.ts';
+import {complete,describe,forRole,ModelError,MODEL_TIMEOUT_MS,selectRoute,type Ask,type Models,type Reply} from './model.ts';
+import {RouteWatch,describeChange,type RouteChange} from './route-health.ts';
 import {casperAsk,parseCasper,type CasperInput} from './casper.ts';
 import {misatoAsk,parsePlan,type Recalled,type Step,type Turn} from './misato.ts';
 import {toolDocs} from './executors.ts';
@@ -15,15 +17,35 @@ function load():{error?:string;kept?:boolean} {
  try{const config=readConfig(home);const nextKey=readModelKey(home);models=config.models;timeZone=config.timeZone;language=config.language;key=nextKey;configError=undefined;loaded=true;return {};}
  catch(e){const error=e instanceof Error?e.message:'Invalid model configuration.';if(!loaded)configError=error;return {error,kept:loaded};}
 }
-load();
+// Dummy Plug (F-030): each route's state from real calls and a probe of the local route; changes go to the service log.
+const watch=new RouteWatch();
+const note=(c:RouteChange|undefined)=>{const line=c&&describeChange(c);if(line)console.error(line);};
+const configured=()=>watch.configure({local:!!models.local,cloud:!!models.cloud?.enabled&&!!key}).forEach(note);
+/** complete() with the outcome recorded against the route it used; a configuration error (no route) is not an outage. */
+async function run(ask:Ask,m:Models):Promise<Reply> {
+ let route;try{route=selectRoute(ask,m,!!key);}catch{return complete(ask,m,key,{timeoutMs:MODEL_TIMEOUT_MS-5000});}
+ try{const reply=await complete(ask,m,key,{timeoutMs:MODEL_TIMEOUT_MS-5000});note(watch.record(route,true));return reply;}
+ catch(e){if(e instanceof ModelError)note(watch.record(route,false,e.message));throw e;}
+}
+/** A cheap reachability check of the local route: a TCP connection opened and closed, no request and no model call.
+ A reachable server that answers badly is caught by the next real call. */
+function probe():Promise<void> {
+ const local=models.local;if(!local)return Promise.resolve();
+ const url=new URL(local.baseUrl);const port=Number(url.port || (url.protocol==='https:'?443:80));
+ return new Promise(done=>{
+  const socket=connect({host:url.hostname.replace(/^\[|\]$/g,''),port});let settled=false;const end=(ok:boolean,error?:string)=>{if(settled)return;settled=true;socket.destroy();note(watch.record('local',ok,error));done();};
+  socket.setTimeout(3000,()=>end(false,'Local route (S²) timed out.'));socket.once('connect',()=>end(true));socket.once('error',()=>end(false,'Local route (S²) unreachable.'));
+ });
+}
+load();configured();void probe();setInterval(()=>{void probe();},60_000).unref();
 process.on('message',(value:unknown)=>{
  if(Buffer.byteLength(JSON.stringify(value))>MAX_FRAME_BYTES)return;
  void dispatchRpc(value,async(method,params)=>{
-  if(method==='runtime.ping')return {role:'brain',pid:process.pid,models:configError?{error:configError}:describe(models,!!key),agentLoop:'not implemented'};
-  if(method==='models.reload'){const result=load();return {...result,models:configError?{error:configError}:describe(models,!!key)};}
+  if(method==='runtime.ping')return {role:'brain',pid:process.pid,models:configError?{error:configError}:describe(models,!!key),routes:watch.snapshot(),agentLoop:'not implemented'};
+  if(method==='models.reload'){const result=load();configured();void probe();return {...result,models:configError?{error:configError}:describe(models,!!key)};}
   if(method==='model.complete'){
    if(configError)throw new RpcFault(-32010,configError);
-   try{return await complete(params as unknown as Ask,models,key,{timeoutMs:MODEL_TIMEOUT_MS-5000});}
+   try{return await run(params as unknown as Ask,models);}
    catch(e){throw new RpcFault(-32010,e instanceof ModelError?e.message:'Model route failed.');}
   }
   if(method==='misato.step'){
@@ -32,20 +54,20 @@ process.on('message',(value:unknown)=>{
    const route=models.roles?.misato?.route ?? (models.local?'local':models.cloud?.enabled?'cloud':undefined);
    if(!route)return {error:'No model route for Misato: add models.local (or enable models.cloud) in config.json, then run nerv reload. See docs/INSTALL.md, section \"Model routes\".'};
    const ask=misatoAsk({request:params.request as string,history:params.history as Step[],tools:toolDocs,now:new Date().toISOString(),timeZone,...(params.context?{context:params.context as Turn[]}:{}),...(params.memory?{memory:params.memory as Recalled[]}:{})},route);
-   try{const reply=await complete(ask,forRole(models,'misato'),key,{timeoutMs:MODEL_TIMEOUT_MS-5000});const plan=parsePlan(reply.text);return plan?{plan,model:reply.model}:{invalid:true,model:reply.model};}
+   try{const reply=await run(ask,forRole(models,'misato'));const plan=parsePlan(reply.text);return plan?{plan,model:reply.model}:{invalid:true,model:reply.model};}
    catch(e){return {error:e instanceof ModelError?e.message:'Model route failed.'};}
   }
   if(method==='instrumentality.digest'){
    // Same route and model as Misato: the digest reads the owner's own conversations.
    if(configError)return {error:configError};
    const route=models.roles?.misato?.route ?? (models.local?'local':models.cloud?.enabled?'cloud':undefined);if(!route)return {error:'No model route for Instrumentality (it uses Misato\'s).'};
-   try{const reply=await complete(digestAsk(params.exchanges as Exchange[],language,route),forRole(models,'misato'),key,{timeoutMs:MODEL_TIMEOUT_MS-5000});const digest=parseDigest(reply.text,factLimit((params.exchanges as Exchange[]).length));return digest?{digest}:{error:'The digest reply was not readable.'};}
+   try{const reply=await run(digestAsk(params.exchanges as Exchange[],language,route),forRole(models,'misato'));const digest=parseDigest(reply.text,factLimit((params.exchanges as Exchange[]).length));return digest?{digest}:{error:'The digest reply was not readable.'};}
    catch(e){return {error:e instanceof ModelError?e.message:'Model route failed.'};}
   }
   if(method==='casper.verdict'){
    // No verdict is a valid answer: the gate then asks the owner. The reason says why, for the approval card.
    if(configError)return {verdict:null,error:configError};
-   try{const reply=await complete(casperAsk(params as unknown as CasperInput),forRole(models,'casper'),key,{timeoutMs:MODEL_TIMEOUT_MS-5000});const verdict=parseCasper(reply.text);return verdict?{verdict}:{verdict:null,error:'Casper reply was not a readable verdict.'};}
+   try{const reply=await run(casperAsk(params as unknown as CasperInput),forRole(models,'casper'));const verdict=parseCasper(reply.text);return verdict?{verdict}:{verdict:null,error:'Casper reply was not a readable verdict.'};}
    catch(e){return {verdict:null,error:e instanceof ModelError?e.message:'Model route failed.'};}
   }
   throw new RpcFault(-32601,'Method not found.');

@@ -1,8 +1,9 @@
 import {ProcessClient} from './process-client.ts';
 import type {Reminder,InboxPage,ActResult} from './store.ts';
+import {degradedReasons,type RouteHealth} from './route-health.ts';
 import type {ActionDetail,Approval,Decision,SortieSummary} from './ledger.ts';
 import type {SortieEvent} from './events.ts';
-import {MODEL_TIMEOUT_MS,type Ask,type Reply} from './model.ts';
+import {MODEL_TIMEOUT_MS,type Ask,type Reply,type RouteName} from './model.ts';
 import type {Effect,Pattern,Stage,Verdict} from './policy.ts';
 import {MAX_STEPS,type Plan,type Recalled,type Step,type Turn} from './misato.ts';
 import {argsHash} from './ledger.ts';
@@ -230,7 +231,12 @@ export class Runtime implements StoreApi {
  /** Re-reads config.json and the cloud key in the brain, without restarting the service. */
  async reloadModels(){return await this.brain.call('models.reload') as {error?:string;kept?:boolean;models:unknown};}
  async ask(ask:Ask){return await this.brain.call('model.complete',{...ask},MODEL_TIMEOUT_MS) as Reply;}
- async health(){await this.nervous.call('runtime.ping');return {integrityCheck:'not-run',processes:{nervous:this.nervous.child.pid,brain:this.brain.child.pid,brainAlive:this.brain.child.connected}};}
- async doctor(){return {...await this.nervous.call('runtime.doctor') as object,processes:{nervous:this.nervous.child.pid,brain:this.brain.child.pid,brainAlive:this.brain.child.connected},models:await this.brain.call('runtime.ping').then(p=>(p as {models:unknown}).models,()=>'brain unavailable'),agentLoop:'not implemented'};}
+ /** The brain's view of the model routes (F-030); a brain that does not answer is itself the degraded reason. */
+ private async routes():Promise<{routes?:Record<RouteName,RouteHealth>;degraded:string[]}> {
+  try{const p=await this.brain.call('runtime.ping',{},2000) as {routes?:Record<RouteName,RouteHealth>};return {...(p.routes?{routes:p.routes}:{}),degraded:p.routes?degradedReasons(p.routes):[]};}
+  catch{return {degraded:['brain process not answering: model-needing requests fail until it is back']};}
+ }
+ async health(){await this.nervous.call('runtime.ping');const r=await this.routes();return {integrityCheck:'not-run',processes:{nervous:this.nervous.child.pid,brain:this.brain.child.pid,brainAlive:this.brain.child.connected},...r};}
+ async doctor(){return {...await this.nervous.call('runtime.doctor') as object,processes:{nervous:this.nervous.child.pid,brain:this.brain.child.pid,brainAlive:this.brain.child.connected},models:await this.brain.call('runtime.ping').then(p=>(p as {models:unknown}).models,()=>'brain unavailable'),...await this.routes(),agentLoop:'not implemented'};}
  async close(){if(this.resumer)clearInterval(this.resumer);if(this.instrumentality)clearInterval(this.instrumentality);await Promise.allSettled([this.nervous.close(),this.brain.close()]);}
 }

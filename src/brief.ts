@@ -39,9 +39,9 @@ export function briefDue(now:Date,timeZone:string,at:string,lastSent:string|unde
 /** Reads the brief's facts through the store interface (the running service, or the CLI's local store). */
 export async function gatherBrief(store:Pick<StoreApi,'approvals'|'list'|'sorties'|'health'>,since:Date):Promise<Pick<BriefInput,'approvals'|'reminders'|'sorties'|'health'>> {
  const [cards,reminders,sorties,health]=await Promise.all([store.approvals(5),store.list(),store.sorties(50),Promise.resolve(store.health()).catch(()=>({}))]);
- const p=(health as {processes?:{nervous?:number;brainAlive?:boolean}}).processes;
+ const p=(health as {processes?:{nervous?:number;brainAlive?:boolean}}).processes;const degraded=(health as {degraded?:unknown}).degraded;
  return {approvals:cards.map(a=>({tool:a.card.tool,expires:a.card.expires})),
   reminders:reminders.filter(r=>!r.delivered&&!r.cancelled).map(r=>({title:r.title,due:r.due})),
   sorties:sorties.filter(s=>s.closed&&Date.parse(s.closed)>since.getTime()).map(s=>({title:s.title,status:s.status,closed:s.closed})),
-  health:p&&p.brainAlive===false?['brain process not alive']:[]};
+  health:[...(p&&p.brainAlive===false?['brain process not alive']:[]),...(Array.isArray(degraded)?degraded.filter((d):d is string=>typeof d==='string').slice(0,3):[])]};
 }
