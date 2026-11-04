@@ -15,6 +15,16 @@ try {
   else if(command==='native-init'){initialize(home);initializeNativeTLS(home);console.log('Native TLS configured. Restart NERV Agency, then run pair.');}
   else if(['pair','clients','revoke'].includes(command ?? '')){const config=readConfig(home);const path=command==='pair'?'/api/pairing/tickets':command==='clients'?'/api/clients':'/api/clients/'+encodeURIComponent(args[0] ?? '');const value=await nativeAdmin(home,config.nativePort ?? 4319,readToken(home),path,command==='pair'?'POST':command==='revoke'?'DELETE':'GET',command==='pair'?{label:args[0] ?? 'NERV Agency Menu Bar'}:undefined);if(command==='pair'){const invitation=value as Invitation;console.log('Private invitation (expires in 2 minutes; paste only into the NERV Agency companion):\n'+Buffer.from(JSON.stringify(invitation)).toString('base64url'));}else console.log(JSON.stringify(value,null,2));}
   else if(command==='service')service(args[0] ?? '',home);
+  else if(command==='act'){
+    // Through the running service, like ask: the gate, Casper and the executors live there.
+    const [request,tool,json]=args;if(!request||!tool)throw new Error('Usage: act "what you want" TOOL [\'{"arg":"value"}\']');
+    let toolArgs:unknown;try{toolArgs=JSON.parse(json ?? '{}');}catch{throw new Error('Tool arguments must be a JSON object.');}
+    const config=readConfig(home);
+    const response=await fetch(`http://127.0.0.1:${config.port}/api/actions`,{method:'POST',headers:{authorization:`Bearer ${readToken(home)}`,'content-type':'application/json'},body:JSON.stringify({request,tool,args:toolArgs})}).catch(()=>{throw new Error('NERV Agency is not running: start it with serve or service start.');});
+    const value=await response.json() as {error?:string};
+    if(!response.ok)throw new Error(value.error ?? 'Action failed.');
+    console.log(JSON.stringify(value,null,2));
+  }
   else if(command==='ask'){
     // Goes through the running service so only one brain and one scheduler exist. Local-only unless --cloud.
     const cloud=args[0]==='--cloud';const prompt=(cloud?args.slice(1):args).join(' ');
@@ -25,7 +35,7 @@ try {
     if(!response.ok)throw new Error(value.error ?? 'Ask failed.');
     console.log(value.text+(value.truncated?'\n[reply truncated]':'')+`\n— ${value.route} · ${value.model}`);
   }
-  else if(!command||command==='help')console.log('NERV Agency\nCommands: init | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
+  else if(!command||command==='help')console.log('NERV Agency\nCommands: init | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | act "request" TOOL [JSON args] | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
   else {
     const config=readConfig(home);
     const scrolls=readScrolls(home);
@@ -38,7 +48,7 @@ try {
       case 'tick':console.log(JSON.stringify({delivered:local().tick()}));break;
       case 'inbox':console.log(JSON.stringify(local().inbox(),null,2));break;
       case 'approvals':console.log(JSON.stringify(local().approvals(),null,2));break;
-      case 'approve':case 'reject':console.log(JSON.stringify(local().ledger.decide(args[0] ?? '',command,'cli'),null,2));break;
+      case 'approve':case 'reject':console.log(JSON.stringify(local().decide(args[0] ?? '',command,'cli'),null,2));break;
       case 'events':console.log(JSON.stringify(local().events(args[0] ?? ''),null,2));break;
       case 'spear':console.log(JSON.stringify(local().ledger.spear(args[0] ?? '',args[1] ?? 'cli'),null,2));break;
       case 'doctor':console.log(JSON.stringify({node:process.version,home,port:config.port,language:config.language,timeZone:config.timeZone,hostTimeZone:Intl.DateTimeFormat().resolvedOptions().timeZone,...local().doctor(),delivery:'Durable local inbox; phone notifications not configured.',workers:'Contract only; no remote execution.'},null,2));break;

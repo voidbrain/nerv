@@ -1,6 +1,6 @@
 import type { DatabaseSync } from 'node:sqlite';
 import { createHash, randomUUID } from 'node:crypto';
-import { ballot, defaultPolicy, validatePolicy, type Ballot, type Policy, type Stage, type Tool, type Trust, type Verdict } from './policy.ts';
+import { ballot, defaultPolicy, patternOf, validatePolicy, type Ballot, type Pattern, type Policy, type Stage, type Tool, type Trust, type Verdict } from './policy.ts';
 import { EVENT_SCHEMA_VERSION, MAX_SPEAR_HAPPENED, encodePayload, type EventKind, type EventPayloads, type Happened, type SortieEvent } from './events.ts';
 /** Central Dogma (F-024): sorties, actions, grants (A.T. Fields), approvals (Misato's apartment) and append-only events. */
 export const LEDGER_SCHEMA=`
@@ -64,6 +64,21 @@ export class Ledger {
    this.event(sortieId,actionId,'approval.requested',{approvalId,expires:card.expires,reason:result.reason},now);
    return {actionId,ballot:result,approvalId};
   });
+ }
+ /** The Pattern a proposal would get, without recording anything: the coordinator asks Casper only when it is not Green. */
+ preview(sortieId:string,tool:string):{pattern:Pattern;effect:Ballot['effect']} {
+  const sortie=this.db.prepare('SELECT trust,status FROM sorties WHERE id=?').get(sortieId) as {trust:Trust;status:string}|undefined;
+  if(!sortie||sortie.status!=='open')throw new Error('Sortie is not open.');
+  const effect=this.tools.get(tool)?.effect ?? 'irreversible';return {pattern:patternOf(effect,sortie.trust,tool,this.policy),effect};
+ }
+ /** The reviewed action behind a grant, and whether the grant is still unused. Grant IDs stay inside this process. */
+ grantAction(grantId:string):{sortieId:string;actionId:string;tool:string;args:Record<string,unknown>;used:boolean}|undefined {
+  const row=this.db.prepare('SELECT x.sortie_id,x.id,x.tool,x.args,g.used FROM grants g JOIN actions x ON x.id=g.action_id WHERE g.id=?').get(grantId) as {sortie_id:string;id:string;tool:string;args:string;used:string|null}|undefined;
+  return row&&{sortieId:row.sortie_id,actionId:row.id,tool:row.tool,args:JSON.parse(row.args) as Record<string,unknown>,used:row.used!==null};
+ }
+ /** Records what an executor did after `authorize` let it run. */
+ finished(sortieId:string,actionId:string,tool:string,outcome:{result:unknown}|{error:string},now=new Date()):void {
+  this.tx(()=>{if('error' in outcome)this.event(sortieId,actionId,'action.failed',{tool,error:outcome.error.slice(0,500)},now);else this.event(sortieId,actionId,'action.done',{tool,result:outcome.result},now);});
  }
  pendingApprovals(now=new Date(),limit=5):Approval[] {
   if(!Number.isInteger(limit)||limit<1||limit>5)throw new Error('Invalid approval page.');

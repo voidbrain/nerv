@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-04T09:27:34.347Z",
+  "reviewed": "2026-11-04T09:34:47.907Z",
   "policy": "7ce9883fd1bff25038076e9e36015a833c38e1378e1df68043f48a64635abad4",
   "inputs": {
     "AGENTS.md": "7521203d1bc1ee4467396d9dd3576e2d7ffba835a4f6e93cb217af06af5ebee2",
     "docs/BACKLOG-RULES.md": "19798ae1614c2d96e60613af75d232c2eda19d25e07470e851ce48304df593c6",
-    "docs/agents/areas.md": "77a1ac6ad1f244a5ba35b5e27448628d0a2bc2d16336b5f2ae74f60d89b43015",
+    "docs/agents/areas.md": "270f672818622410ead4cea9ebcac9cf31f13ef24c55428fd94d6f3fc778ad98",
     "docs/agents/maintenance.md": "a7e93ce963ffab30b4592ee90bdd0e72d49ea1320f82df74f22c88f70899d899"
   },
   "measurements": {
@@ -65,12 +65,12 @@
       "kind": "rule",
       "disposition": "implemented",
       "target": "docs/agents/areas.md",
-      "evidence": "Action gate and ledger area note gains where the Scrolls come from (scrolls.json, readScrolls, validatePolicy), who loads them (CLI and scheduler process) and the fail-closed rule for invalid or others-writable files (F-017). Checked by test/ledger.test.ts (load, deny effect, scheduler-process report, CLI refusal)."
+      "evidence": "Action gate and ledger area note: Casper runs in the brain on the local route only, sees request and action, failure is no verdict; the coordinator asks it only for non-Green; executors live in the scheduler process next to the grant so grant IDs never leave it, and a repeated decision never re-runs a tool (F-017). Checked by test/gate.test.ts across HTTP, coordinator, brain, scheduler and executor."
     },
     {
       "kind": "none",
       "disposition": "no-change",
-      "evidence": "No harness file or copied tool changed; INSTALL documents the file for the owner."
+      "evidence": "No harness file or copied tool changed; ARCHITECTURE and INSTALL describe the new act path."
     }
   ]
 }

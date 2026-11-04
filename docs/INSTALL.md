@@ -76,6 +76,15 @@ Every agent action passes the per-action gate. Its rules come from `scrolls.json
 
 `deny` rejects a tool outright; `blue` always asks you; `syncThreshold` (0–100) is the Sync Ratio an Orange action needs to proceed without you; `maxRejects` (0–10) is how often a rejected plan may retry before it reaches you; `budget` caps a sortie's spend. Every field is optional, and an unknown field is an error, so a typo cannot silently relax a rule. Keep the file private (`chmod 600`): a file others can write, or an invalid one, stops `serve` and every command with a message instead of starting with weaker rules. `doctor` shows the rules in force and where they came from. Restart the service after editing.
 
+To run one action through the gate yourself, with the service running:
+
+```bash
+npm start -- act "Remind me to renew the car insurance" reminders.add '{"title":"Renew car insurance","due":"2030-01-15T09:00:00+01:00"}'
+npm start -- act "What is due?" reminders.list
+```
+
+The reply shows the Pattern, the Sync Ratio and the outcome: `grant` ran the tool and shows its result; `approval` waits for you (`npm start -- approvals`, then `approve ID` or `reject ID`; an approval runs the tool once); `reject` stopped it. The built-in tools are `reminders.list` (read), `reminders.add` and `reminders.cancel` (local writes), so they are Green and run without a model. A tool the Scrolls mark `blue`, or any unregistered tool, first asks Casper on the local route (S²) whether the action matches your request, then always asks you. Casper never uses the cloud route, because the action's arguments may be private; without S², or with an unreadable reply, the card says so and you decide. Every step is an event: `npm start -- events SORTIE_ID`.
+
 ## Frontend development
 
 `npm run dev` uses **4318**, proxies API calls to **4317** and is only needed for editing the frontend. The installed service serves the production build directly on 4317. Port 4200 is not used.

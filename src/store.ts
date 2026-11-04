@@ -2,12 +2,17 @@ import { DatabaseSync } from 'node:sqlite';
 import { randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
-import { LEDGER_SCHEMA, Ledger, type Decision } from './ledger.ts';
-import { defaultPolicy, type Policy } from './policy.ts';
+import { LEDGER_SCHEMA, Ledger, type Decision, type Proposal } from './ledger.ts';
+import { builtinTools, execute, hasExecutor } from './executors.ts';
+import { defaultPolicy, type Ballot, type Policy } from './policy.ts';
 export type Reminder = { id: string; title: string; due: string; created: string; delivered: string | null; cancelled: string | null };
 export interface InboxCheckpoint {sequence:number;id?:string}
 export interface InboxEntry {sequence:number;id:string;message:string;created:string}
 export interface InboxPage {items:InboxEntry[];head:InboxCheckpoint;next:InboxCheckpoint;reset:boolean}
+/** What one gated action came to: granted and run (result or error), waiting for the owner (approvalId), or rejected. */
+export interface ActResult {sortieId:string;actionId:string;outcome:Ballot['outcome'];pattern:Ballot['pattern'];reason:string;sync:Ballot['sync'];approvalId?:string;result?:unknown;error?:string}
+/** Sorties the owner starts directly hold one action and close once it settles. */
+export const OWNER_SOURCE='owner';
 export class Store {
   readonly db: DatabaseSync;
   readonly ledger: Ledger;
@@ -25,7 +30,7 @@ export class Store {
     // Schema 3: events record the event schema version they were written under (F-024); earlier rows read as version 1.
     if(!(this.db.prepare('PRAGMA table_info(events)').all() as {name:string}[]).some(c=>c.name==='v'))this.db.exec('ALTER TABLE events ADD COLUMN v INTEGER NOT NULL DEFAULT 1');
     this.db.exec('PRAGMA user_version=3');
-    this.ledger = new Ledger(this.db,{policy:scrolls.policy});this.policySource = scrolls.source;
+    this.ledger = new Ledger(this.db,{policy:scrolls.policy,tools:builtinTools});this.policySource = scrolls.source;
   }
   add(title: string, due: string, now = new Date()): Reminder {
     if(typeof title !== 'string' || !title.trim() || title.length > 500) throw new Error('Title must contain 1–500 characters.');
@@ -67,7 +72,33 @@ export class Store {
   }
   approvals(limit=5) { return this.ledger.pendingApprovals(new Date(),limit); }
   /** The grant ID stays inside the coordinator: callers learn only the outcome. */
-  decide(id: string, decision: Decision, source='api') { return {decision:this.ledger.decide(id,decision,source).decision}; }
+  /** Applies the owner's decision; an approval of a tool with an executor runs it once, here, with the grant it issued. */
+  decide(id: string, decision: Decision, source='api'):{decision:string;result?:unknown;error?:string} {
+    const applied=this.ledger.decide(id,decision,source);
+    const action=applied.grantId?this.ledger.grantAction(applied.grantId):undefined;
+    if(applied.grantId&&action&&!action.used&&hasExecutor(action.tool)){const outcome=this.run(action.sortieId,action.actionId,applied.grantId,action.tool,action.args);this.settle(action.sortieId,'error' in outcome?'failed':'done');return {decision:applied.decision,...outcome};}
+    const sortie=this.db.prepare('SELECT x.sortie_id AS id FROM approvals a JOIN actions x ON x.id=a.action_id WHERE a.id=?').get(id) as {id:string}|undefined;
+    if(sortie&&applied.decision!=='approve')this.settle(sortie.id,'failed');
+    return {decision:applied.decision};
+  }
+  /** One owner action through the gate (F-017): ballot, then on a grant the executor runs at once; otherwise it waits for the owner or stops. */
+  runAction(sortieId: string, proposal: Proposal):ActResult {
+    const p=this.ledger.propose(sortieId,proposal);
+    const base:ActResult={sortieId,actionId:p.actionId,outcome:p.ballot.outcome,pattern:p.ballot.pattern,reason:p.ballot.reason,sync:p.ballot.sync,...(p.approvalId?{approvalId:p.approvalId}:{})};
+    if(p.grantId&&hasExecutor(proposal.tool)){const outcome=this.run(sortieId,p.actionId,p.grantId,proposal.tool,proposal.args);this.settle(sortieId,'error' in outcome?'failed':'done');return {...base,...outcome};}
+    if(p.ballot.outcome==='reject')this.settle(sortieId,'failed');
+    return base;
+  }
+  private run(sortieId:string,actionId:string,grantId:string,tool:string,args:Record<string,unknown>):{result:unknown}|{error:string} {
+    this.ledger.authorize(grantId,tool,args);
+    let outcome:{result:unknown}|{error:string};
+    try{outcome={result:execute(this,tool,args)};}catch(e){outcome={error:e instanceof Error?e.message:'Executor failed.'};}
+    this.ledger.finished(sortieId,actionId,tool,outcome);return outcome;
+  }
+  private settle(sortieId:string,status:'done'|'failed') {
+    const sortie=this.db.prepare('SELECT source FROM sorties WHERE id=?').get(sortieId) as {source:string}|undefined;
+    if(sortie?.source===OWNER_SOURCE)this.ledger.close(sortieId,status);
+  }
   events(sortieId: string, after=0, limit=50) { return this.ledger.events(sortieId,after,limit); }
   health() { return {integrityCheck:"not-run"}; }
   doctor() { return {database:this.db.prepare('PRAGMA quick_check').get(),schema:this.db.prepare('PRAGMA user_version').get(),pending:this.db.prepare('SELECT count(*) AS count FROM reminders WHERE delivered IS NULL AND cancelled IS NULL').get(),policy:{source:this.policySource,...this.ledger.policy}}; }

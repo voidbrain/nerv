@@ -1,7 +1,8 @@
 import {dispatchRpc,MAX_FRAME_BYTES,RpcFault} from './rpc.ts';
 import {readConfig,readModelKey} from './config.ts';
 import {complete,describe,ModelError,MODEL_TIMEOUT_MS,type Ask,type Models} from './model.ts';
-// Execution boundary. Model routes only: no agent loop, browser, shell or tool execution yet.
+import {casperAsk,parseCasper,type CasperInput} from './casper.ts';
+// Execution boundary. Model routes and the Casper seat only: no agent loop, browser, shell or tool execution yet.
 // The data home arrives as argv; the cloud key is read here from its private file, never passed in env or argv.
 const home=process.argv[2];
 let models:Models={};let key:string|undefined;let configError:string|undefined;
@@ -14,6 +15,12 @@ process.on('message',(value:unknown)=>{
    if(configError)throw new RpcFault(-32010,configError);
    try{return await complete(params as unknown as Ask,models,key,{timeoutMs:MODEL_TIMEOUT_MS-5000});}
    catch(e){throw new RpcFault(-32010,e instanceof ModelError?e.message:'Model route failed.');}
+  }
+  if(method==='casper.verdict'){
+   // No verdict is a valid answer: the gate then asks the owner. The reason says why, for the approval card.
+   if(configError)return {verdict:null,error:configError};
+   try{const reply=await complete(casperAsk(params as unknown as CasperInput),models,key,{timeoutMs:MODEL_TIMEOUT_MS-5000});const verdict=parseCasper(reply.text);return verdict?{verdict}:{verdict:null,error:'Casper reply was not a readable verdict.'};}
+   catch(e){return {verdict:null,error:e instanceof ModelError?e.message:'Model route failed.'};}
   }
   throw new RpcFault(-32601,'Method not found.');
  }).then(reply=>{if(reply&&process.connected)process.send?.(reply);});
