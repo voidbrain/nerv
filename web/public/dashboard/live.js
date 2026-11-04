@@ -4,7 +4,7 @@
 (() => {
   if (!LIVE) return;
   const code = location.hash.slice(6); history.replaceState(null, "", location.pathname + location.search);
-  let token = ""; let polling = false; const detailCache = {}; const known = new Map(); let chatBusy = false;
+  let token = ""; let polling = false; let lastRan = null; const detailCache = {}; const known = new Map(); let chatBusy = false;
   const PLANNED = "<div class='muted small'>Planned · not connected yet.</div>";
   const api = async (path, init = {}) => {
     const res = await fetch("/api/" + path, { ...init, headers:{ "Content-Type":"application/json", Authorization:"Bearer " + token } });
@@ -50,12 +50,15 @@
       const selected = state.sorties.find(x => x.id === state.selected);
       const want = list.filter(s => (selected && s.id === selected.realId) || s.waiting || !detailCache[s.id] || s.status === "open").slice(0, 8);
       await Promise.all(want.map(async s => { detailCache[s.id] = await api("sorties/" + s.id); }));
+      // The one live "cage": the in-process executor beats when an action newly ran.
+      const ran = Object.values(detailCache).flatMap(d => d.detail).filter(a => a.status === "done" || a.status === "failed").map(a => a.created).sort().pop();
+      if (ran && lastRan && ran > lastRan) activeCage["EVA-02"] = Date.now() + 4000; if (ran) lastRan = ran;
       if (selected) await loadEvents(selected.realId);
       state.sorties = list.map(toSortie);
       state.approvals = cards.map(toApproval).filter(ap => state.sorties.some(s => s.id === ap.sortie));
       state.upcoming = pending.map(r => ({ at:Date.parse(r.due), title:r.title, kind:"reminder" }));
       state.doctor = doctor;
-      if (doctor.base) { BASES[0].name = doctor.base.name.toUpperCase(); BASES[0].role = doctor.base.id + " · this machine"; }
+      if (doctor.base && BASES[0].name !== doctor.base.name.toUpperCase()) { BASES[0].name = doctor.base.name.toUpperCase(); BASES[0].role = doctor.base.id + " · this machine"; document.getElementById("cages").innerHTML = ""; }
       if (!state.selected && state.sorties[0]) state.selected = state.sorties[0].id;
       renderAll();
       setBanner("<b>LIVE</b> <span class='muted'>— this NERV Agency service · " + list.length + " recent sorties · refreshed " + new Date().toTimeString().slice(0, 8) + "</span>", "live");
@@ -153,7 +156,6 @@
   });
   window.renderBudget = function () { document.getElementById("budget").innerHTML = PLANNED; };
   window.renderMelons = function () { document.getElementById("melons").innerHTML = PLANNED; };
-  window.renderCages = function () { document.getElementById("cages").innerHTML = "<div class='muted small'>Executors run inside this service; sandboxed cages are planned · not connected yet.</div>"; };
   // While you were away: from real sorties and deliveries since your last visit, remembered in this browser only.
   const VISIT = "nerv.dashboard.lastVisit";
   try { const v = Number(localStorage.getItem(VISIT)); state.lastVisit = Number.isFinite(v) && v > 0 ? v : Date.now() - 12 * HOUR; } catch { state.lastVisit = Date.now() - 12 * HOUR; }
