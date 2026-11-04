@@ -23,13 +23,14 @@ export interface EventPayloads {
  'approval.edit':{approvalId:string;source:string};
  'approval.expired':{approvalId:string;source:'ttl'};
  'spear':{reason:string;revoked:number;stoodDown:number;happenedCount:number;happened:Happened[]};
+ 'misato.reply':{text:string};
  'action.done':{tool:string;result:unknown};
  'action.failed':{tool:string;error:string};
  'sortie.done':Record<string,never>;
  'sortie.failed':Record<string,never>;
 }
 export type EventKind=keyof EventPayloads;
-export const EVENT_KINDS=['sortie.opened','ballot','grant.issued','grant.used','grant.denied','approval.requested','approval.approve','approval.reject','approval.edit','approval.expired','spear','action.done','action.failed','sortie.done','sortie.failed'] as const satisfies readonly EventKind[];
+export const EVENT_KINDS=['sortie.opened','ballot','grant.issued','grant.used','grant.denied','approval.requested','approval.approve','approval.reject','approval.edit','approval.expired','spear','misato.reply','action.done','action.failed','sortie.done','sortie.failed'] as const satisfies readonly EventKind[];
 /** One event as read back. `v` is the schema version it was written under; events written before versioning read as 1. */
 export type SortieEvent={[K in EventKind]:{v:number;sequence:number;sortieId:string;actionId:string|null;kind:K;payload:EventPayloads[K];created:string}}[EventKind];
 /** Serialises a payload for storage, refusing unknown kinds and oversized payloads so the ledger never stores an unbounded event. */

@@ -88,6 +88,17 @@ read -rs KEY && printf '%s\n' "$KEY" > ~/.nerv/anthropic-key && chmod 600 ~/.ner
 
 Paste the key and press Enter (nothing is shown). Then set `"enabled": true` under `cloud` and run `npm start -- reload`.
 
+## Talking to Misato
+
+With the service running and a model route configured:
+
+```bash
+npm start -- chat "Ricordami di rinnovare l'assicurazione auto il 15 gennaio 2030 alle 9"
+npm start -- chat "What reminders do I have?"
+```
+
+Misato plans one step at a time: it proposes an action, the gate reviews it, and Misato sees the outcome before the next step (at most 6 steps). The command prints each step, any action that waits for you (`approve ID` or `reject ID`), the reply, and the sortie ID for `events`. An action waiting for you has not happened; after you approve it, it runs once, but Misato does not continue that conversation yet. Misato uses `models.roles.misato` (local unless you choose the cloud route); times are converted to your configured time zone in code before Misato sees them. Locally, a step takes about 10–30 seconds with a 12–14B model.
+
 ## Gate rules (the Scrolls)
 
 Every agent action passes the per-action gate. Its rules come from `scrolls.json` in the data home; without the file the defaults apply. Example:

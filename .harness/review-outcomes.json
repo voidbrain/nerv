@@ -3,11 +3,11 @@
     "kind": "rule",
     "disposition": "implemented",
     "target": "docs/agents/areas.md",
-    "evidence": "Action gate area note: grant IDs stay out of events too (event schema 2; version 1 rows redacted on read), aligning the rule with the code after the owner's first act run showed grant IDs in events. Checked by test/ledger.test.ts (REST events contain no grantId; v1 row redacted)."
+    "evidence": "Action gate area note: Misato plans in the brain and never executes; Runtime.chat gates each action and stops at a reply or MAX_STEPS; facts a local model gets wrong (time zones, not-done approvals, duplicate proposals) are handled in code, found in the owner's live Ollama run 2026-11-04 (F-003). Checked by test/misato.test.ts across HTTP, coordinator, brain, scheduler."
   },
   {
     "kind": "none",
     "disposition": "no-change",
-    "evidence": "docs/.DS_Store untracked at the owner's request (.gitignore already lists .DS_Store); no harness file or copied tool changed."
+    "evidence": "No harness file or copied tool changed; README, INSTALL and ARCHITECTURE describe chat."
   }
 ]

@@ -76,6 +76,8 @@ export class Ledger {
   const row=this.db.prepare('SELECT x.sortie_id,x.id,x.tool,x.args,g.used FROM grants g JOIN actions x ON x.id=g.action_id WHERE g.id=?').get(grantId) as {sortie_id:string;id:string;tool:string;args:string;used:string|null}|undefined;
   return row&&{sortieId:row.sortie_id,actionId:row.id,tool:row.tool,args:JSON.parse(row.args) as Record<string,unknown>,used:row.used!==null};
  }
+ /** Misato's reply to the owner, kept with the sortie it answers. */
+ reply(sortieId:string,text:string,now=new Date()):void {this.tx(()=>this.event(sortieId,null,'misato.reply',{text:text.slice(0,4000)},now));}
  /** Records what an executor did after `authorize` let it run. */
  finished(sortieId:string,actionId:string,tool:string,outcome:{result:unknown}|{error:string},now=new Date()):void {
   this.tx(()=>{if('error' in outcome)this.event(sortieId,actionId,'action.failed',{tool,error:outcome.error.slice(0,500)},now);else this.event(sortieId,actionId,'action.done',{tool,result:outcome.result},now);});
