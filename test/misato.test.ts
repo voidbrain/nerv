@@ -81,3 +81,9 @@ test('a reject from the gate goes back to Misato with its reason, and nothing ru
   assert.deepEqual((await runtime.events(chat.sortieId)).map(e=>e.kind),['sortie.opened','ballot','misato.reply','sortie.done']);
  },{deny:['reminders.cancel']});
 });
+test('without any model route, chat says what to configure instead of blaming the cloud route',async()=>{
+ const home=mkdtempSync(join(tmpdir(),'nerv-noroute-'));writeFileSync(join(home,'config.json'),JSON.stringify({language:'en'}));
+ const runtime=new Runtime(join(home,'nerv.sqlite'),undefined,home);
+ try{await runtime.ready();const chat=await runtime.chat('Remind me');assert.match(chat.error!,/No model route for Misato: add models\.local/);assert.equal((await runtime.events(chat.sortieId)).at(-1)!.kind,'sortie.failed');}
+ finally{await runtime.close();rmSync(home,{recursive:true,force:true});}
+});

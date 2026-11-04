@@ -28,7 +28,8 @@ process.on('message',(value:unknown)=>{
   if(method==='misato.step'){
    // One planning turn. The route is the owner's choice for Misato; without one, local when configured.
    if(configError)return {error:configError};
-   const route=models.roles?.misato?.route ?? (models.local?'local':'cloud');
+   const route=models.roles?.misato?.route ?? (models.local?'local':models.cloud?.enabled?'cloud':undefined);
+   if(!route)return {error:'No model route for Misato: add models.local (or enable models.cloud) in config.json, then run reload. See INSTALL, "Model routes".'};
    const ask=misatoAsk({request:params.request as string,history:params.history as Step[],tools:toolDocs,now:new Date().toISOString(),timeZone},route);
    try{const reply=await complete(ask,forRole(models,'misato'),key,{timeoutMs:MODEL_TIMEOUT_MS-5000});const plan=parsePlan(reply.text);return plan?{plan,model:reply.model}:{invalid:true,model:reply.model};}
    catch(e){return {error:e instanceof ModelError?e.message:'Model route failed.'};}
