@@ -3,7 +3,7 @@
     "kind": "rule",
     "disposition": "implemented",
     "target": "docs/agents/areas.md",
-    "evidence": "New Action gate and ledger area rule: every action through Ledger.propose, every executor call through Ledger.authorize, deterministic Melchior/Balthasar, veto-only extra seats, single-use hash-bound grants, append-only events. test/ledger.test.ts proves each clause, including expiry from the scheduler process."
+    "evidence": "New Action gate and ledger area rule: every action through Ledger.propose, every executor call through Ledger.authorize, deterministic Melchior/Balthasar, veto-only extra seats, single-use hash-bound grants, append-only events. test/ledger.test.ts proves each clause, including expiry from the scheduler process. API rule added: approvals/events readable by read-only clients and the socket, decisions REST-only for the admin token, grant IDs never leave the coordinator; test/ledger.test.ts proves the socket denial across the scheduler process."
   },
   {
     "kind": "none",

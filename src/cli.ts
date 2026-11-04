@@ -7,7 +7,6 @@ import { dataHome, initialize, readConfig, readToken } from './config.ts';
 import { service } from './service.ts';
 import {initializeNativeTLS,loadNativeTLS,nativeAdmin,NativeAuth,type Invitation} from './native-auth.ts';
 import { Runtime } from './runtime.ts';
-import { Ledger } from './ledger.ts';
 const [command,...args]=process.argv.slice(2);
 let store:Store|undefined;let running=false;
 try {
@@ -27,10 +26,10 @@ try {
       case 'cancel':if(!local().cancel(args[0] ?? ''))throw new Error('No pending reminder with that ID.');console.log('Cancelled.');break;
       case 'tick':console.log(JSON.stringify({delivered:local().tick()}));break;
       case 'inbox':console.log(JSON.stringify(local().inbox(),null,2));break;
-      case 'approvals':console.log(JSON.stringify(new Ledger(local().db).pendingApprovals(),null,2));break;
-      case 'approve':case 'reject':console.log(JSON.stringify(new Ledger(local().db).decide(args[0] ?? '',command,'cli'),null,2));break;
-      case 'events':console.log(JSON.stringify(new Ledger(local().db).events(args[0] ?? ''),null,2));break;
-      case 'spear':console.log(JSON.stringify(new Ledger(local().db).spear(args[0] ?? '',args[1] ?? 'cli'),null,2));break;
+      case 'approvals':console.log(JSON.stringify(local().approvals(),null,2));break;
+      case 'approve':case 'reject':console.log(JSON.stringify(local().ledger.decide(args[0] ?? '',command,'cli'),null,2));break;
+      case 'events':console.log(JSON.stringify(local().events(args[0] ?? ''),null,2));break;
+      case 'spear':console.log(JSON.stringify(local().ledger.spear(args[0] ?? '',args[1] ?? 'cli'),null,2));break;
       case 'doctor':console.log(JSON.stringify({node:process.version,home,port:config.port,language:config.language,timeZone:config.timeZone,hostTimeZone:Intl.DateTimeFormat().resolvedOptions().timeZone,...local().doctor(),delivery:'Durable local inbox; phone notifications not configured.',workers:'Contract only; no remote execution.'},null,2));break;
       case 'serve':{
         const webRoot=resolve(fileURLToPath(new URL('../dist/web/browser',import.meta.url)));

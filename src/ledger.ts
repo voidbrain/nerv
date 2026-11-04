@@ -18,7 +18,8 @@ export interface Approval {id:string;card:Card;expires:string;decision:string|nu
 export interface Event {sequence:number;sortieId:string;actionId:string|null;kind:string;payload:unknown;created:string}
 export interface Proposed {actionId:string;ballot:Ballot;grantId?:string;approvalId?:string}
 export type Decision='approve'|'reject'|'edit';
-const MAX_ARGS_BYTES=16384;
+/** Bounded so a page of approval cards fits one IPC frame (rpc.ts MAX_FRAME_BYTES). */
+const MAX_ARGS_BYTES=8192;
 /** Key order never changes the hash, so a grant binds the exact arguments that were reviewed. */
 const canonical=(v:unknown):string=>Array.isArray(v)?`[${v.map(canonical).join(',')}]`:v&&typeof v==='object'?`{${Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical((v as Record<string,unknown>)[k])).join(',')}}`:JSON.stringify(v);
 export const argsHash=(args:Record<string,unknown>)=>createHash('sha256').update(canonical(args)).digest('hex');
@@ -59,8 +60,9 @@ export class Ledger {
    return {actionId,ballot:result,approvalId};
   });
  }
- pendingApprovals(now=new Date()):Approval[] {
-  return (this.db.prepare('SELECT id,card,expires,decision FROM approvals WHERE decision IS NULL AND expires>? ORDER BY expires LIMIT 50').all(iso(now)) as {id:string;card:string;expires:string;decision:null}[]).map(r=>({...r,card:JSON.parse(r.card) as Card}));
+ pendingApprovals(now=new Date(),limit=5):Approval[] {
+  if(!Number.isInteger(limit)||limit<1||limit>5)throw new Error('Invalid approval page.');
+  return (this.db.prepare('SELECT id,card,expires,decision FROM approvals WHERE decision IS NULL AND expires>? ORDER BY expires LIMIT ?').all(iso(now),limit) as {id:string;card:string;expires:string;decision:null}[]).map(r=>({...r,card:JSON.parse(r.card) as Card}));
  }
  /** Applied once: repeating a decision returns the first outcome. Expiry never approves. */
  decide(approvalId:string,decision:Decision,source:string,now=new Date()):{decision:string;grantId?:string} {
@@ -111,7 +113,7 @@ export class Ledger {
   return this.tx(()=>{const changed=Number(this.db.prepare("UPDATE sorties SET status=?,closed=? WHERE id=? AND status='open'").run(status,iso(now),sortieId).changes)>0;if(changed)this.event(sortieId,null,'sortie.'+status,{},now);return changed;});
  }
  events(sortieId:string,after=0,limit=50):Event[] {
-  if(!Number.isSafeInteger(after)||after<0||!Number.isInteger(limit)||limit<1||limit>200)throw new Error('Invalid event page.');
+  if(typeof sortieId!=='string'||!sortieId||sortieId.length>100||!Number.isSafeInteger(after)||after<0||!Number.isInteger(limit)||limit<1||limit>50)throw new Error('Invalid event page.');
   return (this.db.prepare('SELECT sequence,sortie_id AS sortieId,action_id AS actionId,kind,payload,created FROM events WHERE sortie_id=? AND sequence>? ORDER BY sequence LIMIT ?').all(sortieId,after,limit) as unknown as (Omit<Event,'payload'>&{payload:string})[]).map(e=>({...e,payload:JSON.parse(e.payload)}));
  }
 }
