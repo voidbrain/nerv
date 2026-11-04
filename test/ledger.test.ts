@@ -151,6 +151,7 @@ test('REST lists approval cards and applies a decision once without exposing the
   assert.deepEqual(await (await decide('approve')).json(),{decision:'approve'});assert.deepEqual(await (await decide('reject')).json(),{decision:'approve'});
   const events=await (await fetch(base+`/api/sorties/${sortie}/events?after=0&limit=50`,{headers})).json() as {kind:string}[];
   assert.deepEqual(events.map(e=>e.kind),['sortie.opened','ballot','approval.requested','approval.approve','grant.issued']);
+  assert.ok(!JSON.stringify(events).includes('grantId'),'grant IDs never leave the scheduler process');
   assert.equal((await fetch(base+`/api/sorties/${sortie}/events?limit=500`,{headers})).status,400);
  });}finally{store.close();}
 });
@@ -173,20 +174,21 @@ test('decisions travel through the scheduler process; the socket can read cards 
 test('every event records its schema version; a schema 2 database upgrades and its old events read as version 1',()=>{
  const dir=mkdtempSync(join(tmpdir(),'nerv-'));const path=join(dir,'db');
  try{
-  const old=new DatabaseSync(path);old.exec(`CREATE TABLE events(sequence INTEGER PRIMARY KEY AUTOINCREMENT, sortie_id TEXT NOT NULL, action_id TEXT, kind TEXT NOT NULL, payload TEXT NOT NULL, created TEXT NOT NULL);CREATE TRIGGER events_no_update BEFORE UPDATE ON events BEGIN SELECT RAISE(ABORT,'events are append-only'); END;INSERT INTO events(sortie_id,action_id,kind,payload,created) VALUES('s',NULL,'sortie.opened','{"source":"cli","title":"Old","trust":"trusted"}','2029-12-31T00:00:00.000Z');PRAGMA user_version=2;`);old.close();
+  const old=new DatabaseSync(path);old.exec(`CREATE TABLE events(sequence INTEGER PRIMARY KEY AUTOINCREMENT, sortie_id TEXT NOT NULL, action_id TEXT, kind TEXT NOT NULL, payload TEXT NOT NULL, created TEXT NOT NULL);CREATE TRIGGER events_no_update BEFORE UPDATE ON events BEGIN SELECT RAISE(ABORT,'events are append-only'); END;INSERT INTO events(sortie_id,action_id,kind,payload,created) VALUES('s',NULL,'sortie.opened','{"source":"cli","title":"Old","trust":"trusted"}','2029-12-31T00:00:00.000Z');INSERT INTO events(sortie_id,action_id,kind,payload,created) VALUES('s','a','grant.used','{"grantId":"secret-grant"}','2029-12-31T00:00:01.000Z');PRAGMA user_version=2;`);old.close();
   const store=new Store(path);
   try{
    assert.equal((store.db.prepare('PRAGMA user_version').get() as {user_version:number}).user_version,3);
-   assert.deepEqual(store.ledger.events('s').map(e=>[e.v,e.kind]),[[1,'sortie.opened']]);
+   assert.deepEqual(store.ledger.events('s').map(e=>[e.v,e.kind]),[[1,'sortie.opened'],[1,'grant.used']]);
+   assert.deepEqual(store.ledger.events('s')[1]!.payload,{},'version 1 grant IDs are removed on read');assert.equal(EVENT_SCHEMA_VERSION,2);
    const sortie=store.ledger.openSortie('cli','New','trusted',now);assert.equal(store.ledger.events(sortie)[0]!.v,EVENT_SCHEMA_VERSION);
    assert.throws(()=>store.db.prepare('UPDATE events SET v=2').run(),/append-only/);
   }finally{store.close();}
-  const again=new Store(path);try{assert.equal(again.ledger.events('s').length,1);}finally{again.close();}
+  const again=new Store(path);try{assert.equal(again.ledger.events('s').length,2);}finally{again.close();}
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
 test('event payloads are bounded: unknown kinds and oversized payloads are refused, model reasons and the Spear list are cut',()=>{
  assert.throws(()=>encodePayload('made.up' as 'sortie.done',{}),/Unknown event kind/);
- assert.throws(()=>encodePayload('grant.denied',{grantId:'g',reason:'x'.repeat(MAX_EVENT_PAYLOAD_BYTES)}),/too large/);
+ assert.throws(()=>encodePayload('grant.denied',{reason:'x'.repeat(MAX_EVENT_PAYLOAD_BYTES)}),/too large/);
  const {store,ledger}=setup({policy:{...defaultPolicy,budget:1000}});
  try{
   const sortie=ledger.openSortie('cli','Bounded','trusted',now);

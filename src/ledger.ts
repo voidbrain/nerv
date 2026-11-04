@@ -1,7 +1,7 @@
 import type { DatabaseSync } from 'node:sqlite';
 import { createHash, randomUUID } from 'node:crypto';
 import { ballot, defaultPolicy, patternOf, validatePolicy, type Ballot, type Pattern, type Policy, type Stage, type Tool, type Trust, type Verdict } from './policy.ts';
-import { EVENT_SCHEMA_VERSION, MAX_SPEAR_HAPPENED, encodePayload, type EventKind, type EventPayloads, type Happened, type SortieEvent } from './events.ts';
+import { EVENT_SCHEMA_VERSION, MAX_SPEAR_HAPPENED, encodePayload, readPayload, type EventKind, type EventPayloads, type Happened, type SortieEvent } from './events.ts';
 /** Central Dogma (F-024): sorties, actions, grants (A.T. Fields), approvals (Misato's apartment) and append-only events. */
 export const LEDGER_SCHEMA=`
  CREATE TABLE IF NOT EXISTS sorties(id TEXT PRIMARY KEY, source TEXT NOT NULL, title TEXT NOT NULL, trust TEXT NOT NULL, status TEXT NOT NULL, rejects INTEGER NOT NULL DEFAULT 0, spent REAL NOT NULL DEFAULT 0, created TEXT NOT NULL, closed TEXT);
@@ -39,7 +39,7 @@ export class Ledger {
  private tx<T>(work:()=>T):T {this.db.exec('BEGIN IMMEDIATE');try{const value=work();this.db.exec('COMMIT');return value;}catch(e){this.db.exec('ROLLBACK');throw e;}}
  private issue(actionId:string,tool:string,args:Record<string,unknown>,sortieId:string,now:Date):string {
   const id=randomUUID();this.db.prepare('INSERT INTO grants VALUES(?,?,?,?,?,NULL,NULL)').run(id,actionId,tool,argsHash(args),iso(now,this.grantTtlMs));
-  this.event(sortieId,actionId,'grant.issued',{grantId:id,expires:iso(now,this.grantTtlMs)},now);return id;
+  this.event(sortieId,actionId,'grant.issued',{expires:iso(now,this.grantTtlMs)},now);return id;
  }
  openSortie(source:string,title:string,trust:Trust,now=new Date()):string {
   if(typeof source!=='string'||!source||source.length>100||typeof title!=='string'||!title.trim()||title.length>500||(trust!=='trusted'&&trust!=='tainted'))throw new Error('Invalid sortie.');
@@ -112,8 +112,8 @@ export class Ledger {
    const g=this.db.prepare('SELECT g.*,x.sortie_id FROM grants g JOIN actions x ON x.id=g.action_id WHERE g.id=?').get(grantId) as {action_id:string;tool:string;args_hash:string;expires:string;used:string|null;revoked:string|null;sortie_id:string}|undefined;
    if(!g)return 'unknown grant';
    const denied=g.revoked?'revoked':g.used?'already used':g.expires<=iso(now)?'expired':g.tool!==tool||g.args_hash!==argsHash(args)?'action differs from the reviewed one':undefined;
-   if(denied){this.event(g.sortie_id,g.action_id,'grant.denied',{grantId,reason:denied},now);return denied;}
-   this.db.prepare('UPDATE grants SET used=? WHERE id=?').run(iso(now),grantId);this.event(g.sortie_id,g.action_id,'grant.used',{grantId},now);return undefined;
+   if(denied){this.event(g.sortie_id,g.action_id,'grant.denied',{reason:denied},now);return denied;}
+   this.db.prepare('UPDATE grants SET used=? WHERE id=?').run(iso(now),grantId);this.event(g.sortie_id,g.action_id,'grant.used',{},now);return undefined;
   });
   if(reason)throw new Error(`A.T. Field denied: ${reason}.`);
  }
@@ -137,7 +137,7 @@ export class Ledger {
   if(typeof sortieId!=='string'||!sortieId||sortieId.length>100||!Number.isSafeInteger(after)||after<0||!Number.isInteger(limit)||limit<1||limit>50)throw new Error('Invalid event page.');
   const rows=this.db.prepare('SELECT v,sequence,sortie_id AS sortieId,action_id AS actionId,kind,payload,created FROM events WHERE sortie_id=? AND sequence>? ORDER BY sequence LIMIT ?').all(sortieId,after,limit) as unknown as (Omit<SortieEvent,'payload'>&{payload:string})[];
   const page:SortieEvent[]=[];let bytes=0;
-  for(const r of rows){bytes+=Buffer.byteLength(r.payload);if(page.length&&bytes>EVENT_PAGE_BYTES)break;page.push({...r,payload:JSON.parse(r.payload)} as SortieEvent);}
+  for(const r of rows){bytes+=Buffer.byteLength(r.payload);if(page.length&&bytes>EVENT_PAGE_BYTES)break;page.push({...r,payload:readPayload(r.kind,r.payload)} as SortieEvent);}
   return page;
  }
 }
