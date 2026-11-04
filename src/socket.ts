@@ -27,6 +27,8 @@ export function attachRpcSocket(server:Server,store:StoreApi,token:string,option
      case 'reminders.add':throw new RpcFault(-32003,'Mutations require the REST API; durable RPC idempotency is not implemented yet.');
      case 'reminders.cancel':throw new RpcFault(-32003,'Mutations require the REST API; durable RPC idempotency is not implemented yet.');
      case 'inbox.list':return store.inbox();
+     case 'approvals.pending':return store.approvals(params.limit as number|undefined);
+     case 'events.page':return store.events(params.sortieId as string,params.after as number|undefined,params.limit as number|undefined);
      case 'inbox.page':return store.inboxPage(params.after as number|undefined,params.limit as number|undefined,params.afterId as string|undefined);
     }
    }).then(reply=>{

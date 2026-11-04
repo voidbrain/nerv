@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';import {join} from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
-import {Store} from '../src/store.ts';import {Ledger} from '../src/ledger.ts';
+import {once} from 'node:events';import {WebSocket} from 'ws';
+import {Store} from '../src/store.ts';import {Ledger} from '../src/ledger.ts';import {makeServer} from '../src/server.ts';import type {StoreApi} from '../src/runtime.ts';
 import {ballot,defaultPolicy,patternOf,validatePolicy,type Tool,type Verdict} from '../src/policy.ts';
 const now=new Date('2030-01-01T00:00:00Z');const at=(ms:number)=>new Date(now.getTime()+ms);
 const tools:Tool[]=[{name:'notes.read',effect:'read'},{name:'notes.write',effect:'write-local',inverse:'notes.restore'},{name:'mail.send',effect:'write-external'},{name:'repo.force-push',effect:'irreversible'},{name:'charger.start',effect:'physical'}];
@@ -129,4 +130,40 @@ test('the scheduler process stands down expired approvals on its own ticks',asyn
  const {Runtime}=await import('../src/runtime.ts');const runtime=new Runtime(path);
  try{await runtime.ready();await new Promise(done=>setTimeout(done,900));assert.equal(ledger.pendingApprovals().length,0);assert.equal(ledger.events(sortie).at(-1)?.kind,'approval.expired');assert.equal(ledger.decide(approvalId!,'approve','cli').decision,'expired');}
  finally{await runtime.close();store.close();rmSync(dir,{recursive:true,force:true});}
+});
+async function serve(store:StoreApi,work:(host:string,headers:Record<string,string>)=>Promise<void>) {
+ const token='a'.repeat(32);const server=makeServer(store,token);await new Promise<void>(done=>server.listen(0,'127.0.0.1',done));const addr=server.address();assert.ok(addr&&typeof addr==='object');
+ try{await work(`127.0.0.1:${addr.port}`,{Authorization:'Bearer '+token,'Content-Type':'application/json'});}finally{await new Promise<void>(done=>server.close(()=>done()));}
+}
+test('REST lists approval cards and applies a decision once without exposing the grant',async()=>{
+ const store=new Store(':memory:');const ledger=new Ledger(store.db,{tools});
+ const sortie=ledger.openSortie('cli','Force push','trusted');const {approvalId}=ledger.propose(sortie,{tool:'repo.force-push',args:{branch:'main'},stage:'production'});
+ try{await serve(store,async(host,headers)=>{
+  const base='http://'+host;
+  assert.equal((await fetch(base+'/api/approvals')).status,401);
+  const cards=await (await fetch(base+'/api/approvals',{headers})).json() as {id:string;card:{args:unknown;pattern:string}}[];
+  assert.equal(cards.length,1);assert.equal(cards[0]!.id,approvalId);assert.deepEqual(cards[0]!.card.args,{branch:'main'});assert.equal(cards[0]!.card.pattern,'blue');
+  assert.equal((await fetch(base+'/api/approvals?limit=9',{headers})).status,400);assert.equal((await fetch(base+'/api/approvals?x=1',{headers})).status,400);
+  const decide=(decision:string)=>fetch(base+'/api/approvals/'+approvalId,{method:'POST',headers,body:JSON.stringify({decision})});
+  assert.equal((await decide('yolo')).status,400);
+  assert.deepEqual(await (await decide('approve')).json(),{decision:'approve'});assert.deepEqual(await (await decide('reject')).json(),{decision:'approve'});
+  const events=await (await fetch(base+`/api/sorties/${sortie}/events?after=0&limit=50`,{headers})).json() as {kind:string}[];
+  assert.deepEqual(events.map(e=>e.kind),['sortie.opened','ballot','approval.requested','approval.approve','grant.issued']);
+  assert.equal((await fetch(base+`/api/sorties/${sortie}/events?limit=500`,{headers})).status,400);
+ });}finally{store.close();}
+});
+test('decisions travel through the scheduler process; the socket can read cards but never decide',async()=>{
+ const dir=mkdtempSync(join(tmpdir(),'nodo-'));const path=join(dir,'db');
+ const store=new Store(path);const ledger=new Ledger(store.db,{tools});
+ const sortie=ledger.openSortie('cli','Mail','trusted');const {approvalId}=ledger.propose(sortie,{tool:'mail.send',args:{to:'x'},stage:'production'});
+ const {Runtime}=await import('../src/runtime.ts');const runtime=new Runtime(path);let client:WebSocket|undefined;
+ try{await runtime.ready();await serve(runtime,async(host,headers)=>{
+  client=new WebSocket(`ws://${host}/rpc`,{headers:{Authorization:headers.Authorization!}});client.on('error',()=>{});await once(client,'open');
+  const rpc=async(method:string,params:object)=>{const message=once(client!,'message');client!.send(JSON.stringify({jsonrpc:'2.0',id:method,method,params}));return JSON.parse((await message)[0].toString());};
+  assert.equal((await rpc('approvals.pending',{})).result[0].id,approvalId);
+  assert.equal((await rpc('approvals.decide',{id:approvalId,decision:'approve',source:'api'})).error.code,-32003);
+  assert.deepEqual(await (await fetch(`http://${host}/api/approvals/${approvalId}`,{method:'POST',headers,body:JSON.stringify({decision:'reject'})})).json(),{decision:'reject'});
+  assert.equal(ledger.events(sortie).at(-1)?.kind,'approval.reject');assert.equal((await rpc('events.page',{sortieId:sortie})).result.length,4);
+  const closed=once(client,'close');client.close();await closed;
+ });}finally{await runtime.close();store.close();rmSync(dir,{recursive:true,force:true});}
 });

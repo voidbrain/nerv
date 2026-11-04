@@ -725,9 +725,9 @@ Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔺 P1 | Open | 🟡 Medium | ~40% |
+| 🔴 | 🔺 P1 | Open | 🟡 Medium | ~50% |
 
-💻 **→ Human action required: No**<br />Deliver cards through Pen Pen (inbox, then Telegram and native notifications) and expose list/decide over the API.
+💻 **→ Human action required: No**<br />Deliver cards through Pen Pen: menu-bar notification from `/api/approvals`, then Telegram buttons (F-003).
 
 | | |
 |---|---|
@@ -738,15 +738,15 @@ Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Implemented in [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals): approval cards (action, args, effect, Pattern, Sync Ratio and inputs, verdicts, reason, TTL), once-only decisions, TTL expiry on scheduler ticks, survival across restart, CLI `approvals`/`approve`/`reject`. Remaining: Pen Pen delivery, API/RPC for the PWA and companion, edit handed back to the agent loop (F-003). Original plan: Approval table and decision transitions in `src/store.ts`, API/CLI to list and decide, then Telegram buttons via F-003. Edit returns the action to the planner rather than changing it in place.
+**Next action / closure evidence:** Implemented in [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals): approval cards (action, args, effect, Pattern, Sync Ratio and inputs, verdicts, reason, TTL), once-only decisions, TTL expiry on scheduler ticks, survival across restart, CLI `approvals`/`approve`/`reject`. API added in [PR #9](https://github.com/voidbrain/nodo/pull/9) (approvals API): `GET /api/approvals` (read-only clients and socket), `POST /api/approvals/ID` (admin, REST only; grant ID never returned). Remaining: Pen Pen delivery, edit handed back to the agent loop (F-003). Original plan: Approval table and decision transitions in `src/store.ts`, API/CLI to list and decide, then Telegram buttons via F-003. Edit returns the action to the planner rather than changing it in place.
 
-**Estimates:** Medium remaining effort; ~40% complete. Re-scoped 2026-11-04 to include the card content specification; reassessed 2026-11-04 after storage, decisions and expiry landed.
+**Estimates:** Medium remaining effort; ~40% complete. Re-scoped 2026-11-04 to include the card content specification; reassessed 2026-11-04 after storage, decisions and expiry landed, and again after the API landed.
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals); [PR #9](https://github.com/voidbrain/nodo/pull/9) (approvals API) |
 | Opened | 2026-11-02 |
-| Verification | Unit/integration 2026-11-04: once-only decisions, expiry never approves, restart, scheduler-process expiry (local run; CI pending). Real-device: pending |
+| Verification | Unit/integration 2026-11-04: once-only decisions, expiry never approves, restart, scheduler-process expiry (local run; CI pending); REST once-only decision and socket decision denial across the scheduler process (local run; CI pending). Real-device: pending |
 | Reviewed | 2026-11-04 |
 
 </details>
@@ -758,9 +758,9 @@ Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔺 P1 | Open | 🟢 Small | ~60% |
+| 🔴 | 🔺 P1 | Open | 🟢 Small | ~70% |
 
-💻 **→ Human action required: No**<br />Expose paged event reads over RPC/API for the dashboard and add a schema version to event payloads.
+💻 **→ Human action required: No**<br />Add a schema version to event payloads and bind the dashboard (F-019) to the event API.
 
 | | |
 |---|---|
@@ -771,13 +771,13 @@ Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Implemented in [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals): schema 2 tables (sorties, actions, grants, approvals, events), append-only events enforced by SQLite triggers, paged `Ledger.events`, CLI `events`, one-way migration noted in INSTALL. Remaining: RPC/API read path and payload versioning for F-019. Original plan: implement with F-017 in `src/`; OpenTelemetry export later and never blocking M2a. Merged scope with the F-019 decision-event schema on 2026-11-04.
+**Next action / closure evidence:** Implemented in [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals): schema 2 tables (sorties, actions, grants, approvals, events), append-only events enforced by SQLite triggers, paged `Ledger.events`, CLI `events`, one-way migration noted in INSTALL. Paged reads added in [PR #9](https://github.com/voidbrain/nodo/pull/9) (approvals API): `events.page` RPC and `GET /api/sorties/ID/events` (max 50 per page). Remaining: payload versioning and the F-019 binding. Original plan: implement with F-017 in `src/`; OpenTelemetry export later and never blocking M2a. Merged scope with the F-019 decision-event schema on 2026-11-04.
 
-**Estimates:** Small remaining effort; ~60% complete. Moved from M6 to M2a and raised to P1 on 2026-11-04; reassessed 2026-11-04 after the ledger landed.
+**Estimates:** Small remaining effort; ~60% complete. Moved from M6 to M2a and raised to P1 on 2026-11-04; reassessed 2026-11-04 after the ledger and its read API landed.
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals); [PR #9](https://github.com/voidbrain/nodo/pull/9) (approvals API) |
 | Opened | 2026-11-02 |
 | Verification | Unit/integration 2026-11-04: append-only triggers, ordered events per sortie, version-1 migration keeps reminders (local run; CI pending) |
 | Reviewed | 2026-11-04 |

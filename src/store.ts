@@ -2,13 +2,14 @@ import { DatabaseSync } from 'node:sqlite';
 import { randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
-import { LEDGER_SCHEMA } from './ledger.ts';
+import { LEDGER_SCHEMA, Ledger, type Decision } from './ledger.ts';
 export type Reminder = { id: string; title: string; due: string; created: string; delivered: string | null; cancelled: string | null };
 export interface InboxCheckpoint {sequence:number;id?:string}
 export interface InboxEntry {sequence:number;id:string;message:string;created:string}
 export interface InboxPage {items:InboxEntry[];head:InboxCheckpoint;next:InboxCheckpoint;reset:boolean}
 export class Store {
   readonly db: DatabaseSync;
+  readonly ledger: Ledger;
   constructor(path: string) {
     if(path !== ':memory:') mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
     this.db = new DatabaseSync(path);
@@ -20,6 +21,7 @@ export class Store {
       CREATE INDEX IF NOT EXISTS reminders_due ON reminders(due);
       ${LEDGER_SCHEMA}
       PRAGMA user_version=2;`);
+    this.ledger = new Ledger(this.db);
   }
   add(title: string, due: string, now = new Date()): Reminder {
     if(typeof title !== 'string' || !title.trim() || title.length > 500) throw new Error('Title must contain 1–500 characters.');
@@ -59,6 +61,10 @@ export class Store {
       this.db.exec('COMMIT');return {items,head,next,reset:false};
     }catch(e){this.db.exec('ROLLBACK');throw e;}
   }
+  approvals(limit=5) { return this.ledger.pendingApprovals(new Date(),limit); }
+  /** The grant ID stays inside the coordinator: callers learn only the outcome. */
+  decide(id: string, decision: Decision, source='api') { return {decision:this.ledger.decide(id,decision,source).decision}; }
+  events(sortieId: string, after=0, limit=50) { return this.ledger.events(sortieId,after,limit); }
   health() { return {integrityCheck:"not-run"}; }
   doctor() { return {database:this.db.prepare('PRAGMA quick_check').get(),schema:this.db.prepare('PRAGMA user_version').get(),pending:this.db.prepare('SELECT count(*) AS count FROM reminders WHERE delivered IS NULL AND cancelled IS NULL').get()}; }
   close() { this.db.close(); }
