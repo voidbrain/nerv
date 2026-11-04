@@ -8,7 +8,7 @@ import { makeServer } from './server.ts';
 import { dataHome, databasePath, initialize, isTelegramToken, pinKajiRoot, telegramTokenPath, readConfig, readScrolls, readTelegramToken, readToken, setBase, type Base } from './config.ts';
 import { TelegramApi, TelegramChannel, startChats, telegramBase } from './telegram.ts';
 import { composeBrief, gatherBrief } from './brief.ts';
-import { ROOT_KEY_FILE, Registry, baseKey, createRootKey, fingerprint, signRecord, unlockRootKey, type SignedRecord } from './kaji.ts';
+import { ROOT_KEY_FILE, Registry, baseKey, createRootKey, enrolmentArgs, fingerprint, signRecord, unlockRootKey, type SignedRecord } from './kaji.ts';
 import { service } from './service.ts';
 import {initializeNativeTLS,loadNativeTLS,nativeAdmin,NativeAuth,type Invitation} from './native-auth.ts';
 import { Runtime } from './runtime.ts';
@@ -168,9 +168,10 @@ try {
           const root=unlockRootKey(readFileSync(path,'utf8'),await readSecret('Passphrase for the Key of Nebuchadnezzar: '));
           if(config.kaji?.root&&root.publicKey!==config.kaji.root)throw new Error('This key file does not match the root pinned on this base.');return root;};
         if(sub==='enrol'){
-          const [,id,name,pub,address]=args;if(!id||!name||!pub||!address)throw new Error('Usage: kaji enrol BASE-ID "Name" PUBKEY|self ADDRESS [--key PATH]');
-          const root=await unlock();const rec=signRecord(root.privateKey,{kind:'enrol',serial:registry.nextSerial(),baseId:id.toUpperCase(),name,publicKey:pub==='self'?me:pub,address,issued:new Date().toISOString()});
-          new Registry(local().db,root.publicKey).add(rec);console.log(`Enrolled ${rec.body.baseId} · ${name} at ${address} (key ${fingerprint(rec.body.publicKey!)}).`);
+          // Every argument is checked before the passphrase is asked for.
+          const e=enrolmentArgs(args[1],args[2],args[3],args[4],me);
+          const root=await unlock();const rec=signRecord(root.privateKey,{kind:'enrol',serial:registry.nextSerial(),baseId:e.baseId,name:e.name,publicKey:e.publicKey,address:e.address,issued:new Date().toISOString()});
+          new Registry(local().db,root.publicKey).add(rec);console.log(`Enrolled ${e.baseId} · ${e.name} at ${e.address} (key ${fingerprint(e.publicKey)}).`);
         }
         else if(sub==='revoke'){
           const id=(args[1] ?? '').toUpperCase();const entry=registry.bases().find(b=>b.baseId===id&&b.status==='enrolled');if(!entry)throw new Error('No enrolled base with that id (see kaji list).');

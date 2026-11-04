@@ -5,7 +5,7 @@ import {spawnSync} from 'node:child_process';
 import {generateKeyPairSync} from 'node:crypto';
 import {tmpdir} from 'node:os';import {join} from 'node:path';
 import {Store} from '../src/store.ts';
-import {Registry,createRootKey,fingerprint,signRecord,unlockRootKey,verifyRecord,type RegistryBody} from '../src/kaji.ts';
+import {Registry,createRootKey,enrolmentArgs,fingerprint,signRecord,unlockRootKey,verifyRecord,type RegistryBody} from '../src/kaji.ts';
 const pub=()=>generateKeyPairSync('ed25519').publicKey.export({type:'spki',format:'der'}).toString('base64');
 const enrol=(serial:number,baseId:string,publicKey:string,name='Base',address='100.64.0.9'):RegistryBody=>({kind:'enrol',serial,baseId,name,publicKey,address,issued:'2030-01-01T00:00:00.000Z'});
 test('the Key of Nebuchadnezzar: passphrase-encrypted, wrong passphrases refused, records signed and verified, tampering detected',()=>{
@@ -58,4 +58,22 @@ test('two bases from the CLI: key init, enrol both, export, import pinned by fin
   assert.equal(cli(a,['kaji','revoke','NERV-02','--passphrase-stdin'],pass).status,0);cli(a,['kaji','export',bundle]);
   assert.match(cli(b,['kaji','import',bundle]).stdout,/Imported 1 new record/);assert.match(cli(b,['kaji','list']).stdout,/NERV-02.*revoked/);
  }finally{rmSync(a,{recursive:true,force:true});rmSync(b,{recursive:true,force:true});}
+});
+test('kaji enrol arguments: key and address in either order, each mistake named, all checked before the passphrase',()=>{
+ const key=pub(),me=pub();
+ assert.deepEqual(enrolmentArgs('nerv-02','Tabgha',key,'100.64.44.94',me),{baseId:'NERV-02',name:'Tabgha',publicKey:key,address:'100.64.44.94'});
+ assert.deepEqual(enrolmentArgs('NERV-02','Tabgha','100.64.44.94',key,me),{baseId:'NERV-02',name:'Tabgha',publicKey:key,address:'100.64.44.94'},'the owner\'s swapped order works');
+ assert.equal(enrolmentArgs('NERV-01','Neo Tokyo-3','self','100.64.0.1',me).publicKey,me);
+ assert.throws(()=>enrolmentArgs('NERV 2','Tabgha',key,'100.64.0.2',me),/must look like NERV-02/);
+ assert.throws(()=>enrolmentArgs('NERV-02','Tabgha','100.64.0.2','100.64.0.3',me),/is a base public key: on that base run nerv base pubkey/);
+ assert.throws(()=>enrolmentArgs('NERV-02','Tabgha',key,'not an address!',me),/is not an address: use the base's Tailscale address/);
+ assert.throws(()=>enrolmentArgs('NERV-02','Tabgha',key,undefined,me),/Usage: kaji enrol/);
+ const home=mkdtempSync(join(tmpdir(),'nerv-enrol-'));
+ try{
+  const cli=(a:string[],input?:string)=>spawnSync(process.execPath,['src/cli.ts',...a],{env:{...process.env,NERV_HOME:home},encoding:'utf8',...(input!==undefined?{input}:{})});
+  cli(['init']);cli(['key','init','--passphrase-stdin'],'a long test passphrase\n');
+  const bad=cli(['kaji','enrol','NERV-02','Tabgha','100.64.0.2','also-not-a-key','--passphrase-stdin'],'');
+  assert.match(bad.stderr,/is a base public key/);assert.doesNotMatch(bad.stderr,/Wrong passphrase/,'refused before any passphrase is read');
+  assert.match(cli(['kaji','enrol','NERV-02','Tabgha','100.64.44.94',key,'--passphrase-stdin'],'a long test passphrase\n').stdout,/Enrolled NERV-02 · Tabgha at 100\.64\.44\.94/);
+ }finally{rmSync(home,{recursive:true,force:true});}
 });
