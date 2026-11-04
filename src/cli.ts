@@ -15,6 +15,14 @@ try {
   else if(command==='native-init'){initialize(home);initializeNativeTLS(home);console.log('Native TLS configured. Restart NERV Agency, then run pair.');}
   else if(['pair','clients','revoke'].includes(command ?? '')){const config=readConfig(home);const path=command==='pair'?'/api/pairing/tickets':command==='clients'?'/api/clients':'/api/clients/'+encodeURIComponent(args[0] ?? '');const value=await nativeAdmin(home,config.nativePort ?? 4319,readToken(home),path,command==='pair'?'POST':command==='revoke'?'DELETE':'GET',command==='pair'?{label:args[0] ?? 'NERV Agency Menu Bar'}:undefined);if(command==='pair'){const invitation=value as Invitation;console.log('Private invitation (expires in 2 minutes; paste only into the NERV Agency companion):\n'+Buffer.from(JSON.stringify(invitation)).toString('base64url'));}else console.log(JSON.stringify(value,null,2));}
   else if(command==='service')service(args[0] ?? '',home);
+  else if(command==='reload'){
+    // The running brain re-reads config.json and anthropic-key; a broken file keeps the last working settings.
+    const config=readConfig(home);
+    const response=await fetch(`http://127.0.0.1:${config.port}/api/models/reload`,{method:'POST',headers:{authorization:`Bearer ${readToken(home)}`}}).catch(()=>{throw new Error('NERV Agency is not running: start it with serve or service start.');});
+    const value=await response.json() as {error?:string;kept?:boolean;models?:unknown};
+    if(!response.ok)throw new Error(`${value.error ?? 'Reload failed.'}${value.kept?' The previous model settings stay in use.':''}`);
+    console.log(JSON.stringify(value.models,null,2));
+  }
   else if(command==='act'){
     // Through the running service, like ask: the gate, Casper and the executors live there.
     const [request,tool,json]=args;if(!request||!tool)throw new Error('Usage: act "what you want" TOOL [\'{"arg":"value"}\']');
@@ -35,7 +43,7 @@ try {
     if(!response.ok)throw new Error(value.error ?? 'Ask failed.');
     console.log(value.text+(value.truncated?'\n[reply truncated]':'')+`\n— ${value.route} · ${value.model}`);
   }
-  else if(!command||command==='help')console.log('NERV Agency\nCommands: init | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | act "request" TOOL [JSON args] | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
+  else if(!command||command==='help')console.log('NERV Agency\nCommands: init | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | act "request" TOOL [JSON args] | reload | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
   else {
     const config=readConfig(home);
     const scrolls=readScrolls(home);

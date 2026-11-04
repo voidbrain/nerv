@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createServer,type IncomingMessage,type ServerResponse} from 'node:http';
 import {mkdtempSync,rmSync,writeFileSync,chmodSync} from 'node:fs';
 import {tmpdir} from 'node:os';import {join} from 'node:path';
-import {complete,selectRoute,validateModels,MAX_REPLY_BYTES,ModelError,type Models} from '../src/model.ts';
+import {complete,describe,forRole,selectRoute,validateModels,MAX_REPLY_BYTES,ModelError,type Models} from '../src/model.ts';
 import {authorize} from '../src/rpc.ts';
 import {makeServer} from '../src/server.ts';
 const KEY='sk-test-'+'k'.repeat(32);
@@ -108,4 +108,14 @@ test('ask travels coordinator → brain process → S²; the socket cannot ask a
   runtime=new Runtime(join(home,'nerv.sqlite'),undefined,home);await runtime.ready();
   await assert.rejects(runtime.ask({prompt:'x',privacy:'local-only'}),/must be private/);
  }finally{await new Promise<void>(done=>server.close(()=>done()));await runtime.close();await p.close();rmSync(home,{recursive:true,force:true});}
+});
+
+test('roles pick a route and model per role; Casper stays on the local route',()=>{
+ const models=validateModels({local:{baseUrl:'http://127.0.0.1:11434/v1',model:'gemma4:12b'},cloud:{provider:'anthropic',enabled:true},roles:{misato:{route:'cloud'},casper:{model:'gemma4:e2b-it-q4_K_M'}}});
+ assert.deepEqual(models.roles,{misato:{route:'cloud'},casper:{model:'gemma4:e2b-it-q4_K_M'}});
+ assert.equal(forRole(models,'casper').local?.model,'gemma4:e2b-it-q4_K_M');assert.equal(forRole(models,'casper').cloud?.model,'claude-opus-5-5');
+ assert.equal(forRole(validateModels({cloud:{provider:'anthropic',enabled:true},roles:{misato:{route:'cloud',model:'claude-sonnet-5-5'}}}),'misato').cloud?.model,'claude-sonnet-5-5');
+ assert.deepEqual(describe(models,true).roles,{misato:'cloud (claude-opus-5-5)',casper:'local (gemma4:e2b-it-q4_K_M)'});
+ assert.match(describe({},false).roles.casper,/owner decides/);
+ for(const roles of [{casper:{route:'cloud'}},{misato:{route:'moon'}},{misato:{}},{gendo:{}},{casper:{model:''}}])assert.throws(()=>validateModels({roles}),/roles/,JSON.stringify(roles));
 });

@@ -19,6 +19,7 @@ export interface StoreApi {
  approvals(limit?:number):Approval[]|Promise<Approval[]>;
  decide(id:string,decision:Decision,source?:'api'|'cli'|'telegram'):{decision:string;result?:unknown;error?:string}|Promise<{decision:string;result?:unknown;error?:string}>;
  act?(action:OwnerAction):Promise<ActReply>;
+ reloadModels?():Promise<{error?:string;kept?:boolean;models:unknown}>;
  events(sortieId:string,after?:number,limit?:number):SortieEvent[]|Promise<SortieEvent[]>;
  ask?(ask:Ask):Promise<Reply>;
 }
@@ -50,6 +51,8 @@ export class Runtime implements StoreApi {
   const result=await this.nervous.call('actions.act',{sortieId,tool:action.tool,args:action.args,stage:action.stage ?? 'production',...(casper?{casper}:{})}) as ActResult;
   return casperError?{...result,casperError}:result;
  }
+ /** Re-reads config.json and the cloud key in the brain, without restarting the service. */
+ async reloadModels(){return await this.brain.call('models.reload') as {error?:string;kept?:boolean;models:unknown};}
  async ask(ask:Ask){return await this.brain.call('model.complete',{...ask},MODEL_TIMEOUT_MS) as Reply;}
  async health(){await this.nervous.call('runtime.ping');return {integrityCheck:'not-run',processes:{nervous:this.nervous.child.pid,brain:this.brain.child.pid,brainAlive:this.brain.child.connected}};}
  async doctor(){return {...await this.nervous.call('runtime.doctor') as object,processes:{nervous:this.nervous.child.pid,brain:this.brain.child.pid,brainAlive:this.brain.child.connected},models:await this.brain.call('runtime.ping').then(p=>(p as {models:unknown}).models,()=>'brain unavailable'),agentLoop:'not implemented'};}

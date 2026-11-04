@@ -64,7 +64,23 @@ NERV Agency has no model route until you add one to `config.json` in the data ho
 - **S² (local):** any OpenAI-compatible chat endpoint on this machine, such as Ollama (`http://127.0.0.1:11434/v1`) or LM Studio (`http://127.0.0.1:1234/v1`). Only loopback addresses are accepted; a model on another machine waits for enrolled nodes (milestone 3).
 - **Umbilical (cloud):** Claude, model `claude-opus-5-5` unless `model` says otherwise. It stays off until `enabled` is `true` and the API key is in `anthropic-key` in the data home, readable only by you (`chmod 600`). The key is never read from the environment, argv or `config.json`, and `doctor` never prints it.
 - `npm start -- ask "text"` is local-only and uses S². `npm start -- ask --cloud "text"` sends the text to Claude. NERV Agency never switches route on its own: when S² is down, the answer is an error, not a cloud call.
-- Restart NERV Agency after changing the configuration. `ask` talks to the running service.
+- `roles` picks the route and model per role. Misato, the planner, can use either route; Casper, the intent seat, always uses S², because it sees the action's arguments. For example, Misato on Claude and Casper on Gemma:
+
+  ```json
+  {"models":{"local":{"baseUrl":"http://127.0.0.1:11434/v1","model":"gemma4:12b"},"cloud":{"provider":"anthropic","enabled":true},"roles":{"misato":{"route":"cloud"},"casper":{"model":"gemma4:12b"}}}}
+  ```
+
+- After editing `config.json` or `anthropic-key`, run `npm start -- reload`: the running service re-reads them without a restart and prints the routes and roles now in use. A broken file is reported and the previous working settings stay in use. `ask` and `reload` talk to the running service.
+
+### Getting a Claude API key
+
+A Claude Pro or Max subscription does not include API access: the API is billed separately, per use. Sign in at [console.anthropic.com](https://console.anthropic.com), add credit under Billing (optionally set a monthly spend limit), then create a key under API Keys. Store it without it appearing in your shell history:
+
+```bash
+read -rs KEY && printf '%s\n' "$KEY" > ~/.nerv/anthropic-key && chmod 600 ~/.nerv/anthropic-key && unset KEY
+```
+
+Paste the key and press Enter (nothing is shown). Then set `"enabled": true` under `cloud` and run `npm start -- reload`.
 
 ## Gate rules (the Scrolls)
 

@@ -70,5 +70,25 @@ test('through every process: REST act, Casper on the local model, the owner appr
   assert.equal(list.outcome,'grant');assert.equal(list.result.length,1);assert.equal(model.asked.length,asked);
   assert.equal((await act({request:'x',tool:'reminders.list'})).status,400);assert.equal((await act({request:'x',tool:'reminders.list',args:[]})).status,400);
   assert.equal((await fetch(base+'/api/actions',{method:'POST',body:'{}'})).status,401);
+  const reload=await fetch(base+'/api/models/reload',{method:'POST',headers});assert.equal(reload.status,200);assert.match(JSON.stringify(await reload.json()),/casper-test/);
+  assert.equal((await fetch(base+'/api/models/reload',{method:'POST'})).status,401);
  }finally{await new Promise<void>(done=>server.close(()=>done()));await runtime.close();await model.close();rmSync(home,{recursive:true,force:true});}
+});
+
+test('reload changes the brain\'s models in place; a broken file keeps the last working settings',async()=>{
+ const model=await fakeModel(()=>'{"vote":"approve","reason":"Matches.","confidence":0.9}');const home=mkdtempSync(join(tmpdir(),'nerv-reload-'));
+ const config=(models:object)=>writeFileSync(join(home,'config.json'),JSON.stringify({models}));
+ config({local:{baseUrl:model.url,model:'gemma4:12b'}});writeFileSync(join(home,'scrolls.json'),JSON.stringify({blue:['reminders.list']}),{mode:0o600});
+ const runtime=new Runtime(join(home,'nerv.sqlite'),undefined,home);const brainPid=()=>runtime.brain.child.pid;
+ try{
+  await runtime.ready();const pid=brainPid();
+  await runtime.act({request:'What is due?',tool:'reminders.list',args:{}});assert.equal(model.asked.at(-1)!.model,'gemma4:12b');
+  config({local:{baseUrl:model.url,model:'gemma4:12b'},roles:{casper:{model:'gemma4:e2b-it-q4_K_M'}}});
+  const reloaded=await runtime.reloadModels();assert.equal(reloaded.error,undefined);assert.deepEqual((reloaded.models as {roles:{casper:string}}).roles.casper,'local (gemma4:e2b-it-q4_K_M)');
+  await runtime.act({request:'What is due?',tool:'reminders.list',args:{}});assert.equal(model.asked.at(-1)!.model,'gemma4:e2b-it-q4_K_M');
+  writeFileSync(join(home,'config.json'),'{"models":{"local":{"baseUrl":"http://10.0.0.1/v1","model":"x"}}}');
+  const broken=await runtime.reloadModels();assert.match(broken.error!,/loopback/);assert.equal(broken.kept,true);
+  await runtime.act({request:'What is due?',tool:'reminders.list',args:{}});assert.equal(model.asked.at(-1)!.model,'gemma4:e2b-it-q4_K_M','the last working settings stay');
+  assert.equal(brainPid(),pid,'no process restart');
+ }finally{await runtime.close();await model.close();rmSync(home,{recursive:true,force:true});}
 });
