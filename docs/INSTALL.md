@@ -18,6 +18,15 @@ Initialization creates `~/.nerv/config.json` and `~/.nerv/token` with private fi
 
 Each machine has a **base identity**, shown in the dashboard, `doctor` and the daily brief: give it at setup with `npm start -- init --base NERV-02 --name "Tabgha"` (both flags), see it with `npm start -- base`, change it later with `npm start -- base NERV-03 "Bethany"` (or edit `"base"` in `config.json`) and restart. Without one, a base is `NERV-01 · Neo Tokyo-3`. `npm start -- launch` is `serve` plus opening the live dashboard signed in.
 
+### Windows
+
+NERV Agency runs on Windows 11 with Node 24 (tested on macOS and Linux; Windows checks are unit-level so far, F-037). Differences:
+
+- The data home is `%USERPROFILE%\.nerv`. Windows has no Unix permission bits, so private files (`telegram-token`, `anthropic-key`, `scrolls.json`) rely on your user profile being private to your account; do not put the data home in a shared folder. Store the bot token with PowerShell: `Read-Host -AsSecureString` is awkward for this, so paste it into a new file instead: `notepad $env:USERPROFILE\.nerv\telegram-token` (one line, save, close) — never in a chat or the repository.
+- `open` and `launch` open your default browser.
+- `service install` is not automated yet: it prints the Task Scheduler command that starts `serve` at logon (`schtasks /Create /SC ONLOGON …`); run it once.
+- If `nerv` (after `npm link`) does not start, use `npm start -- …` from the checkout.
+
 ### A second machine
 
 Until the Kaji line (milestone 3) connects bases, every installation is independent: its own data home, reminders, ledger and memory. Give each one its own base identity. Only **one** installation may run Aoba with a given Telegram bot (Telegram delivers a bot's messages to one reader): when you move NERV to an always-on machine, stop the old one or remove its `telegram-token`; to run both, create a second bot. To move your data, stop both services and copy the data home (`~/.nerv`) to the new machine, then set its base identity.
