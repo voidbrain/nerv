@@ -62,6 +62,7 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
         try{reply(200,await store.ask({prompt:b.prompt,privacy:(b.privacy ?? 'local-only') as 'local-only'|'any',...(b.system!==undefined?{system:b.system as string}:{}),...(b.route!==undefined?{route:b.route as 'local'|'cloud'}:{})}));}
         catch(e){if(e instanceof RpcFault&&e.code===-32602)throw new Error('Invalid ask: prompt up to 16000 characters, privacy local-only or any, route local or cloud.');if(e instanceof RpcFault&&e.code===-32010){reply(502,{error:e.message});return;}throw e;}
       }
+      else if(req.method==='POST'&&path==='/api/models/reload'){if(!store.reloadModels){reply(503,{error:'Model routes unavailable.'});return;}const result=await store.reloadModels();reply(result.error?400:200,result);}
       else if(req.method==='POST'&&path==='/api/actions'){
         // Admin only: one owner action through the per-action gate (F-017). Grant IDs never appear in the reply.
         if(!store.act){reply(503,{error:'Action gate unavailable.'});return;}

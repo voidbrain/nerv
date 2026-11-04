@@ -21,6 +21,7 @@ export const methodSchemas={
  'actions.preview':{type:'object',required:['sortieId','tool'],properties:{sortieId:{type:'string',minLength:1,maxLength:100},tool:{type:'string',minLength:1,maxLength:100}},additionalProperties:false},
  'actions.act':{type:'object',required:['sortieId','tool','args','stage'],properties:{sortieId:{type:'string',minLength:1,maxLength:100},tool:{type:'string',minLength:1,maxLength:100},args:{type:'object',maxProperties:50},stage:{enum:['prototype','test','production']},casper:{type:'object',required:['seat','vote','reason'],properties:{seat:{const:'casper'},vote:{enum:['approve','reject','abstain']},reason:{type:'string',maxLength:500},confidence:{type:'number',minimum:0,maximum:1}},additionalProperties:false}},additionalProperties:false},
  'casper.verdict':{type:'object',required:['request','tool','args','effect'],properties:{request:{type:'string',minLength:1,maxLength:4000},tool:{type:'string',minLength:1,maxLength:100},args:{type:'object',maxProperties:50},effect:{enum:['read','write-local','write-external','irreversible','physical']}},additionalProperties:false},
+ 'models.reload':empty,
  'inbox.page':{type:'object',properties:{after:{type:'integer',minimum:0,maximum:Number.MAX_SAFE_INTEGER},afterId:{type:'string',minLength:1,maxLength:100},limit:{type:'integer',minimum:1,maximum:20}},additionalProperties:false},
 } as const;
 export type Method=keyof typeof methodSchemas;
@@ -34,7 +35,7 @@ export type Principal='interface'|'coordinator'|'nervous'|'brain';
 export const communicationGraph=[
  {from:'interface',to:'coordinator',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.pending','reminders.add','reminders.cancel','inbox.list','inbox.page','approvals.pending','events.page']},
  {from:'coordinator',to:'nervous',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.pending','reminders.add','reminders.cancel','inbox.list','inbox.page','approvals.pending','approvals.decide','events.page','sorties.open','actions.preview','actions.act']},
- {from:'coordinator',to:'brain',methods:['runtime.ping','model.complete','casper.verdict']},
+ {from:'coordinator',to:'brain',methods:['runtime.ping','model.complete','casper.verdict','models.reload']},
 ] as const;
 export function authorize(from:Principal,to:Principal,method:string):void {
  if(!communicationGraph.some(edge=>edge.from===from&&edge.to===to&&(edge.methods as readonly string[]).includes(method)))throw new RpcFault(-32003,'Communication edge denied.');

@@ -8,7 +8,9 @@ export type Privacy='local-only'|'any';
 export type RouteName='local'|'cloud';
 export interface LocalRoute {baseUrl:string;model:string}
 export interface CloudRoute {provider:'anthropic';model:string;enabled:boolean}
-export interface Models {local?:LocalRoute;cloud?:CloudRoute}
+/** Which route and model each role uses. Casper is local only: it sees the action's arguments, which may be private. */
+export interface Roles {misato?:{route:RouteName;model?:string};casper?:{model?:string}}
+export interface Models {local?:LocalRoute;cloud?:CloudRoute;roles?:Roles}
 export interface Ask {prompt:string;system?:string;privacy:Privacy;route?:RouteName}
 export interface Reply {text:string;route:RouteName;model:string;stop:string;truncated:boolean}
 export const MAX_REPLY_BYTES=16384;
@@ -20,7 +22,7 @@ export class ModelError extends Error {}
 export function validateModels(value:unknown):Models {
  if(value===undefined)return {};
  const v=value as Record<string,unknown>;
- if(!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).some(k=>!['local','cloud'].includes(k)))throw new Error('Invalid models: use local and/or cloud.');
+ if(!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).some(k=>!['local','cloud','roles'].includes(k)))throw new Error('Invalid models: use local, cloud and roles.');
  const out:Models={};
  if(v.local!==undefined){
   const l=v.local as Record<string,unknown>;
@@ -33,6 +35,14 @@ export function validateModels(value:unknown):Models {
   const c=v.cloud as Record<string,unknown>;
   if(!c||typeof c!=='object'||Object.keys(c).some(k=>!['provider','model','enabled'].includes(k))||c.provider!=='anthropic'||typeof c.enabled!=='boolean'||(c.model!==undefined&&(typeof c.model!=='string'||!c.model||c.model.length>200)))throw new Error('Invalid models.cloud: provider "anthropic" and enabled are required.');
   out.cloud={provider:'anthropic',model:(c.model as string|undefined) ?? 'claude-opus-5-5',enabled:c.enabled};
+ }
+ if(v.roles!==undefined){
+  const r=v.roles as Record<string,unknown>;const model=(x:unknown)=>x===undefined||(typeof x==='string'&&x.length>0&&x.length<=200);
+  if(!r||typeof r!=='object'||Array.isArray(r)||Object.keys(r).some(k=>!['misato','casper'].includes(k)))throw new Error('Invalid models.roles: use misato and/or casper.');
+  const roles:Roles={};
+  if(r.misato!==undefined){const m=r.misato as Record<string,unknown>;if(!m||typeof m!=='object'||Object.keys(m).some(k=>!['route','model'].includes(k))||!['local','cloud'].includes(m.route as string)||!model(m.model))throw new Error('Invalid models.roles.misato: route local or cloud, optional model.');roles.misato={route:m.route as RouteName,...(m.model?{model:m.model as string}:{})};}
+  if(r.casper!==undefined){const c=r.casper as Record<string,unknown>;if(!c||typeof c!=='object'||Object.keys(c).some(k=>k!=='model')||!model(c.model))throw new Error('Invalid models.roles.casper: only model, on the local route.');roles.casper={...(c.model?{model:c.model as string}:{})};}
+  out.roles=roles;
  }
  return out;
 }
@@ -91,6 +101,13 @@ async function completeCloud(ask:Ask,cloud:CloudRoute,key:string,options:RouteOp
  const text=message.content.flatMap(b=>b.type==='text'?[b.text]:[]).join('');
  return {...bound(text),route:'cloud',model:message.model,stop:message.stop_reason ?? 'unknown'};
 }
-export function describe(models:Models,hasKey:boolean):Record<RouteName,string> {
- return {local:models.local?`configured (${models.local.model})`:'not configured',cloud:!models.cloud?'not configured':!models.cloud.enabled?'disabled':hasKey?`enabled (${models.cloud.model})`:'enabled, API key missing'};
+/** The routes as one role sees them: its model replaces the route's default model. */
+export function forRole(models:Models,role:keyof Roles):Models {
+ const pick=models.roles?.[role];const route=role==='casper'?'local':models.roles?.misato?.route;
+ if(!pick?.model)return models;
+ return route==='cloud'?{...models,...(models.cloud?{cloud:{...models.cloud,model:pick.model}}:{})}:{...models,...(models.local?{local:{...models.local,model:pick.model}}:{})};
+}
+export function describe(models:Models,hasKey:boolean):Record<RouteName,string>&{roles:Record<keyof Roles,string>} {
+ const misato=models.roles?.misato;const casperModel=models.roles?.casper?.model ?? models.local?.model;
+ return {roles:{misato:misato?`${misato.route} (${misato.model ?? (misato.route==='cloud'?models.cloud?.model:models.local?.model) ?? 'route not configured'})`:'not set',casper:models.local?`local (${casperModel})`:'local route not configured: the owner decides every non-Green action'},local:models.local?`configured (${models.local.model})`:'not configured',cloud:!models.cloud?'not configured':!models.cloud.enabled?'disabled':hasKey?`enabled (${models.cloud.model})`:'enabled, API key missing'};
 }
