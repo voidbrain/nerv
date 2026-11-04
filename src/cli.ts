@@ -1,3 +1,4 @@
+import { spawnSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -15,6 +16,16 @@ try {
   else if(command==='native-init'){initialize(home);initializeNativeTLS(home);console.log('Native TLS configured. Restart NERV Agency, then run pair.');}
   else if(['pair','clients','revoke'].includes(command ?? '')){const config=readConfig(home);const path=command==='pair'?'/api/pairing/tickets':command==='clients'?'/api/clients':'/api/clients/'+encodeURIComponent(args[0] ?? '');const value=await nativeAdmin(home,config.nativePort ?? 4319,readToken(home),path,command==='pair'?'POST':command==='revoke'?'DELETE':'GET',command==='pair'?{label:args[0] ?? 'NERV Agency Menu Bar'}:undefined);if(command==='pair'){const invitation=value as Invitation;console.log('Private invitation (expires in 2 minutes; paste only into the NERV Agency companion):\n'+Buffer.from(JSON.stringify(invitation)).toString('base64url'));}else console.log(JSON.stringify(value,null,2));}
   else if(command==='service')service(args[0] ?? '',home);
+  else if(command==='open'){
+    // Opens the web workspace signed in: the service mints a one-use code, the page swaps it for the token in memory.
+    const config=readConfig(home);
+    const response=await fetch(`http://127.0.0.1:${config.port}/api/session/codes`,{method:'POST',headers:{authorization:`Bearer ${readToken(home)}`}}).catch(()=>{throw new Error('NERV Agency is not running: start it with serve or service start.');});
+    const value=await response.json() as {code?:string;error?:string};
+    if(!response.ok||!value.code)throw new Error(value.error ?? 'Could not create a login code.');
+    const url=`http://127.0.0.1:${config.port}/#code=${value.code}`;
+    const opener=args[0]==='--print'?undefined:process.platform==='darwin'?'open':process.platform==='linux'?'xdg-open':undefined;
+    if(opener){const run=spawnSync(opener,[url],{stdio:'ignore'});if(run.status!==0)console.log(url);}else console.log(url);
+  }
   else if(command==='chat'){
     // A request to Misato through the running service. It plans, the gate reviews each action, and the reply comes back.
     const message=args.join(' ');if(!message)throw new Error('Usage: chat "what you want"');
@@ -56,7 +67,7 @@ try {
     if(!response.ok)throw new Error(value.error ?? 'Ask failed.');
     console.log(value.text+(value.truncated?'\n[reply truncated]':'')+`\n— ${value.route} · ${value.model}`);
   }
-  else if(!command||command==='help')console.log('NERV Agency\nCommands: init | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | chat "text" | act "request" TOOL [JSON args] | reload | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
+  else if(!command||command==='help')console.log('NERV Agency\nCommands: init | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | open | chat "text" | act "request" TOOL [JSON args] | reload | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
   else {
     const config=readConfig(home);
     const scrolls=readScrolls(home);

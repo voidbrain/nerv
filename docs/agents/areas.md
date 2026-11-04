@@ -10,7 +10,7 @@ Node 24 runs erasable TypeScript directly. `src/store.ts` owns SQLite state; `sr
 
 ## Frontend
 
-Read the style guide. Angular renders registered components, never model-generated JavaScript. The frontend access token remains only in component memory; the backend token is in a mode-0600 file under NERV_HOME. Italian is the default interface language, with English switching. CLI command names and raw diagnostic messages remain English. Planned cards must say planned; no simulated live devices. Current UI uses typed reminder data and a registered Web Component status surface; model-generated selection is not implemented. PWA installation/offline caching and browser acceptance remain F-004.
+Read the style guide. Angular renders registered components, never model-generated JavaScript. The frontend access token remains only in component memory; the backend token is in a mode-0600 file under NERV_HOME. `open` signs the page in without storing anything: the CLI gets a single-use code (60 s, at most 5 unused) from the running service, the page takes `#code=` from the address, removes it from the address and history, and swaps it once for the token; the token itself never appears in a command line or URL, and the native TLS server does not offer codes. English is the default interface language, with Italian switching. CLI command names and raw diagnostic messages remain English. Planned cards must say planned; no simulated live devices. Current UI uses typed reminder data and a registered Web Component status surface; model-generated selection is not implemented. PWA installation/offline caching and browser acceptance remain F-004.
 
 ## Distributed contracts
 

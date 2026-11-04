@@ -19,7 +19,7 @@ npm start -- init
 npm start -- serve
 ```
 
-Open **http://127.0.0.1:4317** and enter the token from `~/.nerv/token`. This one service supervises the built UI/API gateway, an isolated scheduler/database process and an execution-process boundary. To run without keeping Terminal open, stop the foreground process and run `npm start -- service install`. Supports macOS launchd and Linux systemd **user** services. See [installation, updates, data migration and service controls](docs/INSTALL.md).
+Run `npm start -- open` to open **http://127.0.0.1:4317** already signed in (or open it yourself and enter the token from `~/.nerv/token`). This one service supervises the built UI/API gateway, an isolated scheduler/database process and an execution-process boundary. To run without keeping Terminal open, stop the foreground process and run `npm start -- service install`. Supports macOS launchd and Linux systemd **user** services. See [installation, updates, data migration and service controls](docs/INSTALL.md).
 
 For frontend development only, `npm run dev` uses **4318**, with its API proxy targeting 4317. Port 4200 is not used.
 

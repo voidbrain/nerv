@@ -1,7 +1,7 @@
 import { createServer, type IncomingMessage, type RequestListener } from 'node:http';
 import {createServer as createHttpsServer} from 'node:https';
 import type {NativeAuth} from './native-auth.ts';
-import { timingSafeEqual } from 'node:crypto';
+import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { realpath,stat,readFile } from 'node:fs/promises';
 import { resolve, sep, extname } from 'node:path';
 import type { StoreApi } from './runtime.ts';
@@ -13,8 +13,13 @@ async function body(req: IncomingMessage,limit=8192): Promise<Record<string,unkn
   let text=''; for await(const chunk of req) { text+=chunk; if(Buffer.byteLength(text)>limit) throw new Error('Request too large.'); }
   const value:unknown=JSON.parse(text); if(!value || typeof value!=='object' || Array.isArray(value)) throw new Error('Expected JSON object.'); return value as Record<string,unknown>;
 }
-export function makeServer(store: StoreApi, token: string, options: {webRoot?:string; language?:string; timeZone?:string;tls?:{key:Buffer;cert:Buffer};native?:{auth:NativeAuth;fingerprint:string;port:number;webPort:number}} = {}) {
+/** A login code for `open`: single use, short-lived, so the token itself never appears in a command line or a URL. */
+export const LOGIN_CODE_TTL_MS=60_000;
+const MAX_LOGIN_CODES=5;
+export function makeServer(store: StoreApi, token: string, options: {webRoot?:string; language?:string; timeZone?:string;tls?:{key:Buffer;cert:Buffer};native?:{auth:NativeAuth;fingerprint:string;port:number;webPort:number};loginCodeTtlMs?:number} = {}) {
   if(options.native&&!options.tls)throw new Error('Native pairing requires TLS.');
+  const loginCodes=new Map<string,number>();const codeTtl=options.loginCodeTtlMs ?? LOGIN_CODE_TTL_MS;
+  const dropExpired=()=>{const now=Date.now();for(const [c,expires] of loginCodes)if(expires<=now)loginCodes.delete(c);};
   if(token.length<24) throw new Error('NERV_TOKEN must be at least 24 characters.');
   const listener:RequestListener=async(req,res)=>{
     res.setHeader('Content-Type','application/json'); res.setHeader('Cache-Control','no-store'); res.setHeader('X-Content-Type-Options','nosniff');
@@ -41,6 +46,13 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
         res.writeHead(200);res.end(req.method==='HEAD'?undefined:await readFile(file));return;
       }catch{reply(404,{error:'Not found.'});return;}
     }
+    // The browser half of `open`: a valid code is swapped once for the token; the web page keeps it in memory only.
+    if(!options.native&&req.method==='POST'&&path==='/api/session/exchange'){
+      try{const value=await body(req);dropExpired();const code=value.code;
+        if(Object.keys(value).length!==1||typeof code!=='string'||!loginCodes.has(code)){reply(401,{error:'Login code invalid, used or expired: run open again.'});return;}
+        loginCodes.delete(code);reply(200,{token});}catch{reply(400,{error:'Invalid request.'});}
+      return;
+    }
     const supplied=Buffer.from(req.headers.authorization ?? ''); const expected=Buffer.from(`Bearer ${token}`);
     const admin=supplied.length===expected.length&&timingSafeEqual(supplied,expected);
     const client=!admin&&options.native?.auth.authenticate((req.headers.authorization?.startsWith('Bearer ')?req.headers.authorization.slice(7):''));
@@ -63,6 +75,7 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
         try{reply(200,await store.ask({prompt:b.prompt,privacy:(b.privacy ?? 'local-only') as 'local-only'|'any',...(b.system!==undefined?{system:b.system as string}:{}),...(b.route!==undefined?{route:b.route as 'local'|'cloud'}:{})}));}
         catch(e){if(e instanceof RpcFault&&e.code===-32602)throw new Error('Invalid ask: prompt up to 16000 characters, privacy local-only or any, route local or cloud.');if(e instanceof RpcFault&&e.code===-32010){reply(502,{error:e.message});return;}throw e;}
       }
+      else if(!options.native&&admin&&req.method==='POST'&&path==='/api/session/codes'){dropExpired();if(loginCodes.size>=MAX_LOGIN_CODES){reply(429,{error:'Too many unused login codes; wait a minute.'});return;}const code=randomBytes(16).toString('hex');loginCodes.set(code,Date.now()+codeTtl);reply(201,{code,expiresInMs:codeTtl});}
       else if(req.method==='POST'&&path==='/api/models/reload'){if(!store.reloadModels){reply(503,{error:'Model routes unavailable.'});return;}const result=await store.reloadModels();reply(result.error?400:200,result);}
       else if(req.method==='POST'&&path==='/api/chat'){
         // Admin only: a request to Misato, who plans and proposes actions through the gate.
