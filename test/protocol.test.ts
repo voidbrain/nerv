@@ -24,7 +24,7 @@ test('native WebSocket RPC requires bearer auth, denies browser origins, and is 
  let client:WebSocket|undefined;
  try{await rejected({});await rejected({Authorization:'Bearer '+token,Origin:'http://evil.test'});client=new WebSocket(url,{headers:{Authorization:'Bearer '+token}});client.on('error',()=>{});await once(client,'open');
   const request=async(method:string)=>{const message=once(client!,'message');client!.send(JSON.stringify({jsonrpc:'2.0',id:'job-1',method}));return JSON.parse((await message)[0].toString());};
-  assert.equal((await request('runtime.doctor')).result.language,'it');assert.equal((await request('shell.exec')).error.code,-32601);assert.equal((await request('reminders.cancel')).error.code,-32602);
+  assert.equal((await request('runtime.doctor')).result.language,'en');assert.equal((await request('shell.exec')).error.code,-32601);assert.equal((await request('reminders.cancel')).error.code,-32602);
   const message=once(client,'message');client.send(JSON.stringify({jsonrpc:'2.0',id:'write',method:'reminders.cancel',params:{id:'x'}}));assert.equal(JSON.parse((await message)[0].toString()).error.code,-32003);
  }finally{const closed=client?.readyState===WebSocket.OPEN?once(client,'close'):Promise.resolve();await new Promise<void>(done=>server.close(()=>done()));await closed;store.close();}
 });

@@ -10,7 +10,7 @@ Model routes exist without an agent: `ask "text"` sends one prompt to a local Op
 
 ## Run it
 
-Requires Node **24+**. Italian is the default interface language; English is selectable. CLI commands remain English. NERV Agency does not yet understand conversational Italian or English.
+Requires Node **24+**. English is the default interface language; Italian is selectable. CLI commands remain English. NERV Agency does not yet understand conversational Italian or English.
 
 ```bash
 npm ci

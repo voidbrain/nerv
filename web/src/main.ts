@@ -17,7 +17,7 @@ interface Reminder {id:string;title:string;due:string;delivered:string|null;canc
 class App {
  statusSurface=computed(()=>({version:1,component:'nerv-status-card',props:{title:this.t().doctor,detail:this.t().doctorHint,status:this.runtimeState()}}));
  runtimeState=signal<'ok'|'waiting'|'error'>('waiting');
- language=signal<'it'|'en'>('it');t=computed(()=>messages[this.language()]);
+ language=signal<'it'|'en'>('en');t=computed(()=>messages[this.language()]);
  changeLanguage(value:string){if(value==='it'||value==='en'){this.language.set(value);document.documentElement.lang=value;}}
 
  view=signal('home');connected=signal(false);error=signal('');reminders=signal<Reminder[]>([]);inbox=signal<string[]>([]);doctor=signal('');private token='';

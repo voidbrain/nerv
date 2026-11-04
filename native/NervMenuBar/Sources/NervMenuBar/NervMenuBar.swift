@@ -4,7 +4,7 @@ struct RuntimeStatus: Decodable { let runtimeId: String; let language: String; l
 struct Reminder: Decodable, Identifiable { let id: String; let title: String; let due: String; let delivered: String?; let cancelled: String? }
 struct Claim: Decodable { let clientId: String; let token: String; let expiresAt: Int64; let runtimeId: String; let scopes: [String] }
 @MainActor final class Companion: ObservableObject {
-    @Published var language = UserDefaults.standard.string(forKey: "nerv.language") ?? "it" { didSet { UserDefaults.standard.set(language, forKey: "nerv.language") } }
+    @Published var language = UserDefaults.standard.string(forKey: "nerv.language") ?? "en" { didSet { UserDefaults.standard.set(language, forKey: "nerv.language") } }
     @Published var invitation = ""
     @Published var status = "NERV non connesso"
     @Published var reminders: [Reminder] = []

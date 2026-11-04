@@ -21,7 +21,7 @@ export function attachRpcSocket(server:Server,store:StoreApi,token:string,option
     authorize('interface','coordinator',method);
     switch(method){
      case 'runtime.ping':return {role:'coordinator'};
-     case 'runtime.doctor':return {...await store.doctor(),language:options.language ?? 'it',timeZone:options.timeZone ?? 'Europe/Rome'};
+     case 'runtime.doctor':return {...await store.doctor(),language:options.language ?? 'en',timeZone:options.timeZone ?? 'Europe/Rome'};
      case 'reminders.list':return store.list();
      case 'reminders.pending':return store.pendingReminders();
      case 'reminders.add':throw new RpcFault(-32003,'Mutations require the REST API; durable RPC idempotency is not implemented yet.');
