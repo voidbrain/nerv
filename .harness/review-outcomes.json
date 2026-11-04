@@ -3,11 +3,11 @@
     "kind": "rule",
     "disposition": "implemented",
     "target": "docs/agents/areas.md",
-    "evidence": "Action gate and ledger area note gains the event-schema rule (F-024, PR #16): src/events.ts owns kinds, payloads and EVENT_SCHEMA_VERSION; a misreadable payload change bumps the version; payload, reason, Spear-list and page bounds; readers page by sequence. Checked by test/ledger.test.ts (schema-2 upgrade, bounds, paging through the scheduler process)."
+    "evidence": "Action gate and ledger area note gains where the Scrolls come from (scrolls.json, readScrolls, validatePolicy), who loads them (CLI and scheduler process) and the fail-closed rule for invalid or others-writable files (F-017). Checked by test/ledger.test.ts (load, deny effect, scheduler-process report, CLI refusal)."
   },
   {
     "kind": "none",
     "disposition": "no-change",
-    "evidence": "docs/ARCHITECTURE.md: the stale 'none of this is implemented' line now states what the ledger implements and which records stay open; no rule changed. No harness file or copied tool changed."
+    "evidence": "No harness file or copied tool changed; INSTALL documents the file for the owner."
   }
 ]

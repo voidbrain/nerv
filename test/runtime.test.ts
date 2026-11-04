@@ -7,7 +7,7 @@ import {initialize,readConfig,readToken,dataHome,databasePath,setting} from '../
 import {renderService} from '../src/service.ts';
 import {makeServer} from '../src/server.ts';import {Store} from '../src/store.ts';
 import {messages} from '../web/src/i18n.ts';
-test('init preserves credentials and configuration; Italian/Rome defaults and private files',()=>{
+test('init preserves credentials and configuration; English/Rome defaults and private files',()=>{
  const dir=mkdtempSync(join(tmpdir(),'nerv-config-'));
  try{initialize(dir);const token=readToken(dir);assert.equal(token.length,64);assert.deepEqual(readConfig(dir),{port:4317,language:'en',timeZone:'Europe/Rome',models:{}});writeFileSync(join(dir,'config.json'),JSON.stringify({port:4900,language:'en',timeZone:'UTC'}));initialize(dir);assert.equal(readToken(dir),token);assert.equal(readConfig(dir).port,4900);assert.equal(statSync(join(dir,'token')).mode&0o777,0o600);writeFileSync(join(dir,'config.json'),'{"language":"xx"}');assert.throws(()=>readConfig(dir));writeFileSync(join(dir,'config.json'),'{"timeZone":"Not/AZone"}');assert.throws(()=>readConfig(dir));}finally{rmSync(dir,{recursive:true,force:true});}
 });

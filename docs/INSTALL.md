@@ -66,6 +66,16 @@ NERV Agency has no model route until you add one to `config.json` in the data ho
 - `npm start -- ask "text"` is local-only and uses S². `npm start -- ask --cloud "text"` sends the text to Claude. NERV Agency never switches route on its own: when S² is down, the answer is an error, not a cloud call.
 - Restart NERV Agency after changing the configuration. `ask` talks to the running service.
 
+## Gate rules (the Scrolls)
+
+Every agent action passes the per-action gate. Its rules come from `scrolls.json` in the data home; without the file the defaults apply. Example:
+
+```json
+{ "deny": ["mail.send"], "blue": ["calendar.delete"], "syncThreshold": 80, "maxRejects": 3, "budget": 1 }
+```
+
+`deny` rejects a tool outright; `blue` always asks you; `syncThreshold` (0–100) is the Sync Ratio an Orange action needs to proceed without you; `maxRejects` (0–10) is how often a rejected plan may retry before it reaches you; `budget` caps a sortie's spend. Every field is optional, and an unknown field is an error, so a typo cannot silently relax a rule. Keep the file private (`chmod 600`): a file others can write, or an invalid one, stops `serve` and every command with a message instead of starting with weaker rules. `doctor` shows the rules in force and where they came from. Restart the service after editing.
+
 ## Frontend development
 
 `npm run dev` uses **4318**, proxies API calls to **4317** and is only needed for editing the frontend. The installed service serves the production build directly on 4317. Port 4200 is not used.
