@@ -2,8 +2,10 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync, chmodSync } from 'n
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { randomBytes } from 'node:crypto';
-export interface Config {port:number; language:'it'|'en'; timeZone:string;nativePort?:number}
-export const defaults: Config = {port:4317,language:'it',timeZone:'Europe/Rome'};
+import { statSync } from 'node:fs';
+import { validateModels, type Models } from './model.ts';
+export interface Config {port:number; language:'it'|'en'; timeZone:string;nativePort?:number;models:Models}
+export const defaults:Omit<Config,'models'> = {port:4317,language:'it',timeZone:'Europe/Rome'};
 export function dataHome():string {
   const home=resolve(process.env.NODO_HOME ?? join(homedir(),'.nodo'));
   const legacy=resolve('.nodo');
@@ -15,7 +17,7 @@ export function readConfig(home:string):Config {
   const value:unknown=existsSync(path)?JSON.parse(readFileSync(path,'utf8')):{};
   if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('Invalid config.json.');
   const raw={...defaults,...value};
-  const config:Config={port:Number(process.env.NODO_PORT ?? raw.port),language:raw.language,timeZone:raw.timeZone};
+  const config:Config={port:Number(process.env.NODO_PORT ?? raw.port),language:raw.language,timeZone:raw.timeZone,models:validateModels((raw as Record<string,unknown>).models)};
   if('nativePort' in raw){const native=Number(raw.nativePort);if(!Number.isInteger(native)||native<1||native>65535||native===config.port)throw new Error('Invalid native port.');config.nativePort=native;}
   if(config.port===(config.nativePort ?? 4319))throw new Error('Web and native ports must differ.');
   if(!Number.isInteger(config.port)||config.port<1||config.port>65535)throw new Error('Invalid Nodo port.');
@@ -29,6 +31,14 @@ export function readToken(home:string):string {
   const token=process.env.NODO_TOKEN ?? (existsSync(file)?readFileSync(file,'utf8').trim():'');
   if(token.length<24||/[\r\n]/.test(token))throw new Error('Run init first, or set NODO_TOKEN to at least 24 characters.');
   return token;
+}
+/** Cloud route key: a private file in the data home, never an environment variable, argv or config.json. */
+export function readModelKey(home:string):string|undefined {
+  const file=join(home,'anthropic-key');if(!existsSync(file))return undefined;
+  if(statSync(file).mode&0o077)throw new Error('anthropic-key must be private: chmod 600.');
+  const key=readFileSync(file,'utf8').trim();
+  if(key.length<20||/[\s]/.test(key))throw new Error('Invalid anthropic-key file.');
+  return key;
 }
 export function initialize(home:string):void {
   mkdirSync(home,{recursive:true,mode:0o700});

@@ -15,7 +15,17 @@ try {
   else if(command==='native-init'){initialize(home);initializeNativeTLS(home);console.log('Native TLS configured. Restart Nodo, then run pair.');}
   else if(['pair','clients','revoke'].includes(command ?? '')){const config=readConfig(home);const path=command==='pair'?'/api/pairing/tickets':command==='clients'?'/api/clients':'/api/clients/'+encodeURIComponent(args[0] ?? '');const value=await nativeAdmin(home,config.nativePort ?? 4319,readToken(home),path,command==='pair'?'POST':command==='revoke'?'DELETE':'GET',command==='pair'?{label:args[0] ?? 'Nodo Menu Bar'}:undefined);if(command==='pair'){const invitation=value as Invitation;console.log('Private invitation (expires in 2 minutes; paste only into Nodo companion):\n'+Buffer.from(JSON.stringify(invitation)).toString('base64url'));}else console.log(JSON.stringify(value,null,2));}
   else if(command==='service')service(args[0] ?? '',home);
-  else if(!command||command==='help')console.log('Nodo\nCommands: init | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
+  else if(command==='ask'){
+    // Goes through the running service so only one brain and one scheduler exist. Local-only unless --cloud.
+    const cloud=args[0]==='--cloud';const prompt=(cloud?args.slice(1):args).join(' ');
+    if(!prompt)throw new Error('Usage: ask [--cloud] "text"');
+    const config=readConfig(home);
+    const response=await fetch(`http://127.0.0.1:${config.port}/api/ask`,{method:'POST',headers:{authorization:`Bearer ${readToken(home)}`,'content-type':'application/json'},body:JSON.stringify(cloud?{prompt,privacy:'any',route:'cloud'}:{prompt,privacy:'local-only'})}).catch(()=>{throw new Error('Nodo is not running: start it with serve or service start.');});
+    const value=await response.json() as {text?:string;route?:string;model?:string;truncated?:boolean;error?:string};
+    if(!response.ok)throw new Error(value.error ?? 'Ask failed.');
+    console.log(value.text+(value.truncated?'\n[reply truncated]':'')+`\n— ${value.route} · ${value.model}`);
+  }
+  else if(!command||command==='help')console.log('Nodo\nCommands: init | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
   else {
     const config=readConfig(home);
     if(command!=='serve')store=new Store(join(home,'nodo.sqlite'));
@@ -36,7 +46,7 @@ try {
         if(!existsSync(join(webRoot,'index.html')))throw new Error('Frontend missing: run npm run build.');
         const token=readToken(home);const nativeTLS=loadNativeTLS(home);
         const nativeAuth=nativeTLS?new NativeAuth(home):undefined;
-        const runtime=new Runtime(join(home,'nodo.sqlite'));
+        const runtime=new Runtime(join(home,'nodo.sqlite'),undefined,home);
         try{await runtime.ready();}catch(e){await runtime.close();nativeAuth?.close();throw e;}
         let server:ReturnType<typeof makeServer>;let native:ReturnType<typeof makeServer>|undefined;
         try{server=makeServer(runtime,token,{webRoot,...config});native=nativeTLS&&nativeAuth?makeServer(runtime,token,{...config,tls:nativeTLS,native:{auth:nativeAuth,fingerprint:nativeTLS.fingerprint,port:config.nativePort ?? 4319,webPort:config.port}}):undefined;}catch(e){await runtime.close();nativeAuth?.close();throw e;}

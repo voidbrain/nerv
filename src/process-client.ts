@@ -20,14 +20,14 @@ export class ProcessClient {
   const fail=()=>{this.closed=true;for(const p of this.pending.values()){clearTimeout(p.timer);p.reject(new Error(`${role} process unavailable.`));}this.pending.clear();};
   this.child.once('exit',fail);this.child.once('error',fail);
  }
- async call(method:Method,params:Record<string,unknown>={}):Promise<unknown> {
+ async call(method:Method,params:Record<string,unknown>={},timeoutMs=this.timeoutMs):Promise<unknown> {
   authorize('coordinator',this.role,method);validateParams(method,params);
   if(this.closed||!this.child.connected)throw new Error(`${this.role} process unavailable.`);
   if(this.pending.size>=32)throw new RpcFault(-32004,'Process queue is full.');
   const id=randomUUID(),request={jsonrpc:'2.0',id,method,params};
   if(Buffer.byteLength(JSON.stringify(request))>MAX_FRAME_BYTES)throw new RpcFault(-32600,'Frame too large.');
   return new Promise((resolve,reject)=>{
-   const timer=setTimeout(()=>{this.pending.delete(id);reject(new RpcFault(-32001,'Request timed out; outcome may be unknown.'));},this.timeoutMs);
+   const timer=setTimeout(()=>{this.pending.delete(id);reject(new RpcFault(-32001,'Request timed out; outcome may be unknown.'));},timeoutMs);
    this.pending.set(id,{resolve,reject,timer});
    this.child.send(request,error=>{if(error){const p=this.pending.get(id);if(p){clearTimeout(p.timer);this.pending.delete(id);p.reject(error);}}});
   });

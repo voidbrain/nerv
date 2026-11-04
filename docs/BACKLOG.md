@@ -45,28 +45,28 @@ Current work ledger, reviewed 4 November 2026 against main `0ffdfc6`. PR #1–#9
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔺 P1 | Open | 🔴 Large | ~0% |
+| 🔴 | 🔺 P1 | Open | 🔴 Large | ~20% |
 
-💻 **→ Human action required: No**<br />Build the M2a slice: Aoba (Telegram) channel and the Misato agent loop on one model route; governance, memory, triggers and approvals are split into F-017, F-022–F-024, F-026–F-030.
+💻 **→ Human action required: No**<br />Model routes done; next the Misato agent loop on them through the MAGI gate, then the Aoba (Telegram) channel.
 
 | | |
 |---|---|
-| **Issue** | No provider or messaging runtime exists yet. |
+| **Issue** | Model routes exist (S² local, Umbilical cloud); no agent loop or messaging runtime yet. |
 | **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
 | **Check** | Italian/English commands, local-only privacy, no cloud fallback without permission, restart/retry/channel failure tests and live phone delivery. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** M2a umbrella, re-scoped 2026-11-04: Telegram adapter (Aoba) with delivery outbox and retry reconciliation; Misato agent loop calling one model route (Umbilical cloud or S² local) through the per-action MAGI gate (F-017); recurring timezone-aware schedules. Memory is F-022, approvals F-023, ledger/trace F-024, triggers F-026, provenance F-027, digest F-028, evals F-029, degraded mode F-030. Closure still needs: Italian/English commands, local-only privacy, no cloud fallback without permission, restart/retry/channel failure tests and live phone delivery.
+**Next action / closure evidence:** Model routes implemented in [PR #11](https://github.com/voidbrain/nodo/pull/11) (model routes): S² local OpenAI-compatible loopback endpoint and Umbilical Claude route (`claude-opus-5-5`, server-side refusal fallback, off by default, key in a private `anthropic-key` file); explicit privacy per ask, no route fallback, bounded replies; brain-process `model.complete`, admin `POST /api/ask`, CLI `ask [--cloud]`, doctor shows routes. Next: Misato loop calling `Ledger.propose`/`authorize` per tool call, then Telegram. Live acceptance needs the owner: a running local model, an API key if the cloud route is wanted, and a Telegram bot token plus phone for delivery. M2a umbrella, re-scoped 2026-11-04: Telegram adapter (Aoba) with delivery outbox and retry reconciliation; Misato agent loop calling one model route (Umbilical cloud or S² local) through the per-action MAGI gate (F-017); recurring timezone-aware schedules. Memory is F-022, approvals F-023, ledger/trace F-024, triggers F-026, provenance F-027, digest F-028, evals F-029, degraded mode F-030. Closure still needs: Italian/English commands, local-only privacy, no cloud fallback without permission, restart/retry/channel failure tests and live phone delivery.
 
-**Estimates:** Large remaining effort; ~0% complete. Bootstrap scope estimate, not verification. Estimated 2026-11-01; reassessed 2026-11-04: scope narrowed to channel + agent loop, estimate unchanged because the remaining work is still large.
+**Estimates:** Large remaining effort; ~20% complete. Bootstrap scope estimate, not verification. Estimated 2026-11-01; reassessed 2026-11-04: scope narrowed to channel + agent loop; model routes done, agent loop and Telegram remain.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks; [PR #11](https://github.com/voidbrain/nodo/pull/11) (model routes) |
 | Opened | 2026-11-01 |
-| Verification | Pending acceptance and remote CI where applicable |
+| Verification | Unit/integration 2026-11-04: test/model.test.ts covers loopback-only S², cloud off by default, no route fallback (fake cloud receives zero requests), local-only refusal, bounded replies, timeouts, refusal/auth mapping without leaking the key, coordinator → brain → S² join, socket denial, private key file (local run; CI pending). Live model, phone and Italian/English acceptance: pending |
 | Reviewed | 2026-11-04 |
 
 </details>
@@ -943,6 +943,40 @@ Current work ledger, reviewed 4 November 2026 against main `0ffdfc6`. PR #1–#9
 | Field | Value |
 |---|---|
 | PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
+| Opened | 2026-11-04 |
+| Verification | Pending |
+| Reviewed | 2026-11-04 |
+
+</details>
+
+---
+
+### F-031
+
+**Dev-server advisories in the Angular build chain**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔶 P2 | Open | 🟢 Small | ~0% |
+
+💻 **→ Human action required: No**<br />Upgrade `@angular/build` (and its pinned Angular peers) to the patch release that pulls a fixed vite.
+
+| | |
+|---|---|
+| **Issue** | `npm audit` reports a high advisory in vite 8.3.0–8.3.2 (dev server: cross-origin script execution, files outside `server.fs.allow`) and a low one in launch-editor, both through `@angular/build` 22.2.4. Dev-only: `serve` ships the built files, not the dev server. |
+| **Reproduce** | `npm audit` on main `0ffdfc6`. |
+| **Check** | `npm audit` reports no high advisory; typecheck, tests, build and `npm run dev` still work. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Found 2026-11-04 while adding the model-route dependency ([PR #11](https://github.com/voidbrain/nodo/pull/11), model routes); kept out of that PR. `npm audit fix --force` proposes `@angular/build` 22.2.5, outside the pinned set: upgrade the Angular packages together in their own PR.
+
+**Estimates:** Small remaining effort; ~0% complete. Estimated 2026-11-04.
+
+| Field | Value |
+|---|---|
+| PR / evidence | `npm audit` 2026-11-04 |
 | Opened | 2026-11-04 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |

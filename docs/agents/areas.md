@@ -16,6 +16,10 @@ Read the style guide. Angular renders registered components, never model-generat
 
 `src/contracts.ts` declares version 1 intentions only; it is not an implemented network protocol. Agent role, model endpoint and execution location remain independent. Node trust requires enrolment; discovery grants no permission. A future broker must enforce privacy, fencing, lease expiry, idempotency and exclusive resources before remote operations. A timeout does not prove that an external action failed. Inspect device state before replaying physical actions. Never silently send local-only input to cloud inference.
 
+### Model routes
+
+`src/model.ts` owns route selection and the two adapters; the brain process is the only caller. Privacy is explicit on every ask and defaults to local-only at the API. Route choice never falls back: a failed or missing route is reported, and local-only text never reaches the cloud adapter (`test/model.test.ts` proves both with a fake provider that counts requests). The cloud key lives in a private file read by the brain, never in env, argv, config, logs or doctor. `model.complete` is a coordinator→brain edge only: the socket cannot ask, REST asks need the admin token. Replies are bounded to `MAX_REPLY_BYTES`.
+
 ## Headless installation
 
 Serve built Angular assets and the API from one loopback process on 4317. Development uses 4318; both values must agree with README and tests. Service definitions contain no token, use absolute paths and run as the current user. Never install system services or enable linger on the execution host as part of a code change. Test service rendering and real process lifecycle; distinguish those from launchd/systemd acceptance on a user machine. Keep Quit companion separate from Stop Nodo in the future native SwiftUI companion. Read docs/INSTALL.md before changing service lifecycle.

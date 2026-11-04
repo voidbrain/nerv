@@ -48,6 +48,19 @@ Database schema 2 adds the action ledger tables to `nodo.sqlite` on first start;
 
 The backend remains bound to loopback. Remote TLS/Tailscale deployment, service auto-update and credential rotation are not implemented. Do not expose the development server publicly.
 
+## Model routes
+
+Nodo has no model route until you add one to `config.json` in the data home (`doctor` prints it):
+
+```json
+{"models":{"local":{"baseUrl":"http://127.0.0.1:11434/v1","model":"gemma3"},"cloud":{"provider":"anthropic","enabled":false}}}
+```
+
+- **S² (local):** any OpenAI-compatible chat endpoint on this machine, such as Ollama (`http://127.0.0.1:11434/v1`) or LM Studio (`http://127.0.0.1:1234/v1`). Only loopback addresses are accepted; a model on another machine waits for enrolled nodes (milestone 3).
+- **Umbilical (cloud):** Claude, model `claude-opus-5-5` unless `model` says otherwise. It stays off until `enabled` is `true` and the API key is in `anthropic-key` in the data home, readable only by you (`chmod 600`). The key is never read from the environment, argv or `config.json`, and `doctor` never prints it.
+- `nodo ask "text"` is local-only and uses S². `nodo ask --cloud "text"` sends the text to Claude. Nodo never switches route on its own: when S² is down, the answer is an error, not a cloud call.
+- Restart Nodo after changing the configuration. `ask` talks to the running service.
+
 ## Frontend development
 
 `npm run dev` uses **4318**, proxies API calls to **4317** and is only needed for editing the frontend. The installed service serves the production build directly on 4317. Port 4200 is not used.
