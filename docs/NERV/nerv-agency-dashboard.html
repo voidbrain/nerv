@@ -215,7 +215,18 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 /* log */
 details > summary { cursor:pointer; list-style:none; }
 details > summary::-webkit-details-marker { display:none; }
-.log { background:color-mix(in srgb,var(--bg) 80%,#000); border-top:1px solid var(--border); padding:8px; max-height:200px; overflow-y:auto; font-size:10px; line-height:1.5; }
+.av { width:20px; height:20px; image-rendering:pixelated; border:1px solid var(--border); background:#000; flex-shrink:0; display:none; }
+body.theme-eva-basic .av, body.theme-eva-full .av { display:inline-block; }
+.snode .avs { display:flex; gap:3px; justify-content:center; margin-bottom:2px; }
+.snode .av { width:22px; height:22px; }
+.eva-img { width:100%; height:42px; object-fit:contain; image-rendering:pixelated; background:#000; border:1px solid var(--border); display:none; margin-top:3px; }
+body.theme-eva-basic .eva-img, body.theme-eva-full .eva-img { display:block; }
+.msg { display:flex; gap:6px; align-items:flex-start; padding:2px 0; }
+.msg .who { margin-right:4px; letter-spacing:.06em; }
+.msg.you { background:color-mix(in srgb,var(--accent) 7%,transparent); }
+.chat { display:flex; gap:6px; align-items:center; padding:8px; border-top:1px solid var(--border); }
+.chat input { flex:1; min-width:0; }
+.log { background:color-mix(in srgb,var(--bg) 80%,#000); border-top:1px solid var(--border); padding:8px; height:300px; overflow-y:auto; font-size:10px; line-height:1.5; }
 .log .ts { color:var(--muted); margin-right:6px; }
 .timeline-up { position:relative; padding-left:12px; }
 .timeline-up::before { content:""; position:absolute; left:4px; top:4px; bottom:4px; width:1px; background:var(--border); }
@@ -313,14 +324,14 @@ details > summary::-webkit-details-marker { display:none; }
         <div class="sephirot eva-full-only" id="sephirot">
           <svg class="edges" id="edges" aria-hidden="true"></svg>
           <div class="sgrid">
-            <div class="snode round s-detect" data-n="detect"><div class="sn">1 · KETER</div><div class="st">DETECTION</div><div class="sd">Aoba comms · Hyuga watch</div></div>
-            <div class="snode s-intake" data-n="intake"><div class="sn">2 · BINAH</div><div class="st">NAOKO DESK</div><div class="sd" id="sd-intake">intake · provenance</div></div>
-            <div class="snode s-route" data-n="route"><div class="sn">3 · CHOKHMAH</div><div class="st">GENDO</div><div class="sd" id="sd-route">route · battery</div></div>
+            <div class="snode round s-detect" data-n="detect"><div class="avs"><img class="av" data-av="aoba" alt="Aoba"/><img class="av" data-av="hyuga" alt="Hyuga"/></div><div class="sn">1 · KETER</div><div class="st">DETECTION</div><div class="sd">Aoba comms · Hyuga watch</div></div>
+            <div class="snode s-intake" data-n="intake"><div class="avs"><img class="av" data-av="naoko" alt="Naoko"/></div><div class="sn">2 · BINAH</div><div class="st">NAOKO DESK</div><div class="sd" id="sd-intake">intake · provenance</div></div>
+            <div class="snode s-route" data-n="route"><div class="avs"><img class="av" data-av="gendo" alt="Gendo"/></div><div class="sn">3 · CHOKHMAH</div><div class="st">GENDO</div><div class="sd" id="sd-route">route · battery</div></div>
             <div class="snode s-consult" data-n="consult"><div class="sn">GEVURAH · CONSULTANTS</div><div class="st">ADVISE</div><div class="sd">no vote · advice into the LCL</div></div>
-            <div class="snode s-plan" data-n="plan"><div class="sn">4 · CHESED</div><div class="st">MISATO PLAN</div><div class="sd" id="sd-plan">next action</div></div>
+            <div class="snode s-plan" data-n="plan"><div class="avs"><img class="av" data-av="misato" alt="Misato"/></div><div class="sn">4 · CHESED</div><div class="st">MISATO PLAN</div><div class="sd" id="sd-plan">next action</div></div>
             <div class="s-magi">
               <div class="magi" id="magi-big">
-                <div class="mtitle">5 · TIFERET · <b>MAGI SYSTEM</b> <span class="jp-only">· 提訴</span> · <span id="mt-action">no action</span></div>
+                <div class="mtitle"><img class="av" data-av="magi" alt="" style="vertical-align:middle"/> 5 · TIFERET · <b>MAGI SYSTEM</b> <span class="jp-only">· 提訴</span> · <span id="mt-action">no action</span></div>
                 <div class="magi-grid">
                   <div class="mseat top" data-seat="balthasar" data-v="none">
                     <svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="0,0 100,0 100,62 82,100 18,100 0,62"/></svg>
@@ -339,10 +350,10 @@ details > summary::-webkit-details-marker { display:none; }
                 <div class="mres"><span><span class="jp-only">決議 · </span><b id="mres-out">—</b></span><span id="mres-pattern">—</span><span id="mres-reason" class="muted">—</span></div>
               </div>
             </div>
-            <div class="snode s-apt" data-n="apt"><div class="sn">7 · NETZACH</div><div class="st">MISATO'S APT</div><div class="sd" id="sd-apt">you · Pen Pen card</div></div>
+            <div class="snode s-apt" data-n="apt"><div class="avs"><img class="av" data-av="penpen" alt="Pen Pen"/><img class="av" data-av="you" alt="You"/></div><div class="sn">7 · NETZACH</div><div class="st">MISATO'S APT</div><div class="sd" id="sd-apt">you · Pen Pen card</div></div>
             <div class="snode s-sync" data-n="sync"><div class="sn">6 · HOD</div><div class="st">SYNC RATIO</div><div class="sd" id="sd-sync">≥ 80 % · not Blue</div></div>
-            <div class="snode s-plug" data-n="plug"><div class="sn">8 · YESOD</div><div class="st">ENTRY PLUG</div><div class="sd" id="sd-plug">A.T. Field · LCL · pilot</div></div>
-            <div class="snode s-eva" data-n="eva"><div class="sn">9 · MALKUTH</div><div class="st">EVA CAGE</div><div class="sd" id="sd-eva">sandbox · field enforced</div></div>
+            <div class="snode s-plug" data-n="plug"><div class="avs"><img class="av" data-av="ritsuko" alt="Ritsuko"/></div><div class="sn">8 · YESOD</div><div class="st">ENTRY PLUG</div><div class="sd" id="sd-plug">A.T. Field · LCL · pilot</div></div>
+            <div class="snode s-eva" data-n="eva"><div class="avs"><img class="av" id="av-eva-node" data-av="eva-01" alt="EVA unit"/></div><div class="sn">9 · MALKUTH</div><div class="st">EVA CAGE</div><div class="sd" id="sd-eva">sandbox · field enforced</div></div>
             <div class="snode round s-debrief" data-n="debrief"><div class="sn">10</div><div class="st">DEBRIEF</div><div class="sd">Central Dogma · digest</div></div>
             <div class="snode s-rail small"><div class="sn">SIDE RAILS</div><div class="sd">SPEAR · revoke &amp; inverse<br/>MAYA · trace every step<br/>THIRD IMPACT · auto Spear</div><div class="sn" style="margin-top:6px">LOOPS (dashed)</div><div class="sd">MAGI reject → plan (max 3)<br/>apartment edit → plan<br/>EVA result → plan<br/>consultants ↔ plan</div></div>
           </div>
@@ -361,11 +372,16 @@ details > summary::-webkit-details-marker { display:none; }
         <div class="pad" id="detail" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px"></div>
       </section>
 
-      <section class="panel">
-        <details id="log-box">
-          <summary class="hdr"><span data-l="log">Maya · trace log</span><span class="sub">debug detail · click to open</span></summary>
-          <div class="log" id="log"></div>
-        </details>
+      <section class="panel" id="p-comms">
+        <div class="hdr"><span data-l="log">Comms · Misato &amp; Maya trace</span>
+          <span class="filters" role="group" aria-label="Filter messages"><button class="btn sm on" data-lf="all" style="color:inherit;border-color:currentColor">All</button><button class="btn sm" data-lf="sortie" style="color:inherit;border-color:currentColor">This sortie</button><button class="btn sm" data-lf="chat" style="color:inherit;border-color:currentColor">Chat only</button></span></div>
+        <div class="log" id="log" role="log" aria-live="polite"></div>
+        <form class="chat" id="chat-form">
+          <img class="av" data-av="you" alt="" />
+          <label class="sr" for="chat-in">Message Misato</label>
+          <input id="chat-in" autocomplete="off" placeholder="Ask Misato: status · why · approve AP-… · reject AP-… · spear · or a new request" />
+          <button class="btn primary" type="submit">Send</button>
+        </form>
       </section>
     </div>
 
@@ -491,7 +507,7 @@ const STEP_IDS = ["detect","intake","route","consult","plan","magi","sync","apt"
 const LABELS = {
   eva:{ brandTitle:"NERV AGENCY // TACTICAL COMMAND", brandTag:"SEELE SCROLLS ENFORCED // CENTRAL DOGMA LEDGER · LILITH MEMORY",
     needs:"Misato's apartment · needs you", sorties:"Sorties", next:"Coming up · next 24 h", flow:"Sephirot · sortie flow",
-    detail:"Misato plan · current action", log:"Maya · trace log", away:"Debrief · while you were away", health:"Health · broken or stuck",
+    detail:"Misato plan · current action", log:"Comms · Misato & Maya trace", away:"Debrief · while you were away", health:"Health · broken or stuck",
     bases:"NERV bases · Kaji line", cages:"EVA cages · heartbeat", budget:"Battery · budget", melons:"Kaji's watermelons · pilot trust",
     spear:"SPEAR OF LONGINUS", dummy:"DUMMY PLUG ACTIVE", launch:"Launch",
     qNeeds:"Needs you", qAway:"While you were away", qNext:"Coming up", qHealth:"Broken or stuck", qBudget:"Battery today",
@@ -499,7 +515,7 @@ const LABELS = {
     seats:{ melchior:"MELCHIOR", balthasar:"BALTHASAR", casper:"CASPER" }, short:{ melchior:"MEL", balthasar:"BAL", casper:"CAS" } },
   neutral:{ brandTitle:"NERV AGENCY · OPERATIONS", brandTag:"owner rules enforced · append-only ledger · long-term memory",
     needs:"Needs your approval", sorties:"Jobs", next:"Coming up · next 24 h", flow:"Decision timeline",
-    detail:"Plan · current action", log:"Trace log", away:"While you were away", health:"Health · broken or stuck",
+    detail:"Plan · current action", log:"Messages · trace", away:"While you were away", health:"Health · broken or stuck",
     bases:"Machines · mesh", cages:"Sandboxes · heartbeat", budget:"Budget", melons:"Skill trust stages",
     spear:"STOP EVERYTHING", dummy:"MODELS UNAVAILABLE", launch:"Run",
     qNeeds:"Needs you", qAway:"While you were away", qNext:"Coming up", qHealth:"Broken or stuck", qBudget:"Budget today",
@@ -520,8 +536,52 @@ function hhmm(t) { const d = new Date(t); return d.toTimeString().slice(0, 5); }
 function ago(t) { const s = Math.max(0, Math.round((Date.now() - t) / 1000)); return s < 60 ? s + " s" : s < 3600 ? Math.round(s / 60) + " min" : (s / 3600).toFixed(1) + " h"; }
 function L() { return (state.theme === "eva-full" || state.theme === "eva-basic") ? LABELS.eva : LABELS.neutral; }
 function isEvaFull() { return state.theme === "eva-full"; }
-function log(msg, cls, sortie) {
-  state.log.push({ t:Date.now(), msg, cls:cls || "", s:sortie ? sortie.id : null });
+/* Image slots: drop files into docs/NERV/assets/ (see ASSETS below). Until then an original pixel placeholder is drawn. */
+const ASSETS = {
+  misato:{ file:"assets/avatars/misato.png", color:"#e0457b", glyph:"M", eva:"Misato", plain:"Planner" },
+  ritsuko:{ file:"assets/avatars/ritsuko.png", color:"#f2c14e", glyph:"R", eva:"Ritsuko", plain:"Reviewer" },
+  maya:{ file:"assets/avatars/maya.png", color:"#4ec9f2", glyph:"Y", eva:"Maya", plain:"Trace" },
+  aoba:{ file:"assets/avatars/aoba.png", color:"#8be04e", glyph:"A", eva:"Aoba", plain:"Channel" },
+  hyuga:{ file:"assets/avatars/hyuga.png", color:"#4e7bf2", glyph:"H", eva:"Hyuga", plain:"Trigger" },
+  gendo:{ file:"assets/avatars/gendo.png", color:"#ff6600", glyph:"G", eva:"Gendo", plain:"Router" },
+  naoko:{ file:"assets/avatars/naoko.png", color:"#b38cff", glyph:"N", eva:"Naoko", plain:"Intake" },
+  kaji:{ file:"assets/avatars/kaji.png", color:"#2fbf71", glyph:"K", eva:"Kaji", plain:"Trust" },
+  penpen:{ file:"assets/avatars/penpen.png", color:"#9ad0ff", glyph:"P", eva:"Pen Pen", plain:"Notifier" },
+  magi:{ file:"assets/avatars/magi.png", color:"#ff6600", glyph:"M", eva:"MAGI", plain:"Review" },
+  you:{ file:"assets/avatars/you.png", color:"#ffffff", glyph:"Y", eva:"You", plain:"You" },
+  "eva-00":{ file:"assets/eva/eva-00.png", color:"#2a7fff", glyph:"0", eva:"EVA-00", plain:"Sandbox 0", unit:true },
+  "eva-01":{ file:"assets/eva/eva-01.png", color:"#9b5cff", glyph:"1", eva:"EVA-01", plain:"Sandbox 1", unit:true },
+  "eva-02":{ file:"assets/eva/eva-02.png", color:"#ff3b30", glyph:"2", eva:"EVA-02", plain:"Sandbox 2", unit:true },
+  "eva-03":{ file:"assets/eva/eva-03.png", color:"#8a8a8a", glyph:"3", eva:"EVA-03", plain:"Sandbox 3", unit:true }
+};
+const GLYPHS = { M:"101111111101101", R:"110101110101101", A:"010101111101101", H:"101101111101101", G:"011100101101011", N:"110101101101101", K:"101101110101101", P:"110101110100100", Y:"101101010010010", "0":"111101101101111", "1":"010110010010111", "2":"111001111100111", "3":"111001111001111" };
+const placeholders = {};
+function placeholder(key) {
+  if (placeholders[key]) return placeholders[key];
+  const a = ASSETS[key]; const W = a.unit ? 24 : 16, H = 16; const c = document.createElement("canvas"); c.width = W; c.height = H; const x = c.getContext("2d");
+  x.fillStyle = "#07070a"; x.fillRect(0, 0, W, H);
+  let h = 0; for (const ch of key) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  x.fillStyle = a.color; x.globalAlpha = 0.28; // mirrored pattern, original and abstract
+  for (let yy = 1; yy < H - 1; yy++) for (let xx = 1; xx < W / 2; xx++) { h = (h * 1103515245 + 12345) >>> 0; if ((h >> 16) & 1) { x.fillRect(xx, yy, 1, 1); x.fillRect(W - 1 - xx, yy, 1, 1); } }
+  x.globalAlpha = 1; const g = GLYPHS[a.glyph]; const ox = Math.floor(W / 2) - 3, oy = 3;
+  for (let i = 0; i < 15; i++) if (g[i] === "1") x.fillRect(ox + (i % 3) * 2, oy + Math.floor(i / 3) * 2, 2, 2);
+  x.strokeStyle = a.color; x.lineWidth = 1; x.strokeRect(0.5, 0.5, W - 1, H - 1);
+  return (placeholders[key] = c.toDataURL());
+}
+function fillAvatars(root) {
+  (root || document).querySelectorAll("img[data-av]").forEach(img => {
+    const a = ASSETS[img.dataset.av]; if (!a || img.dataset.done === img.dataset.av) return;
+    img.dataset.done = img.dataset.av; img.onerror = () => { img.onerror = null; img.src = placeholder(img.dataset.av); }; img.src = a.file;
+  });
+}
+function speakerOf(msg) {
+  const m = [[/^Detection: Hyuga/, "hyuga"], [/^Detection/, "aoba"], [/^Naoko/, "naoko"], [/^Gendo/, "gendo"], [/^MAGI/, "magi"], [/^Approval card/, "penpen"], [/^Owner/, "you"], [/^(EVA-0\d)/, null], [/^Watermelons|^Promotion/, "kaji"], [/^Debrief|^Misato/, "misato"], [/^SPEAR|^Spear/, "gendo"]];
+  for (const [re, who] of m) { const r = re.exec(msg); if (r) return who || r[1].toLowerCase(); }
+  return "maya";
+}
+function speakerName(who) { const a = ASSETS[who] || ASSETS.maya; return (state.theme === "eva-full" || state.theme === "eva-basic") ? a.eva : a.plain; }
+function log(msg, cls, sortie, who) {
+  state.log.push({ t:Date.now(), msg, cls:cls || "", s:sortie ? sortie.id : null, who:who || speakerOf(msg) });
   if (state.log.length > 300) state.log.shift();
   renderLog();
 }
@@ -835,6 +895,7 @@ function renderFlow() {
   document.getElementById("sd-route").textContent = s ? (s.status === "waiting-route" ? "no route · waits" : "S² local · $" + s.battery.toFixed(2) + " battery") : "route · battery";
   document.getElementById("sd-intake").textContent = s ? "provenance: " + s.trust : "intake · provenance";
   document.getElementById("sd-eva").textContent = b ? b.executor + " · field enforced" : "sandbox · field enforced";
+  { const img = document.getElementById("av-eva-node"); const k = b ? b.executor.toLowerCase() : "eva-01"; if (img.dataset.av !== k) { img.dataset.av = k; fillAvatars(img.parentNode); } }
   drawEdges(s);
   renderDetail(s);
 }
@@ -964,15 +1025,17 @@ function renderBases() {
 }
 function renderCages() {
   const box = document.getElementById("cages");
-  if (!box.children.length) box.innerHTML = CAGES.map(c => "<div class='cage'><div class='ch'><span style='color:" + c.color + "'>" + c.id + "</span><span class='tiny' id='cs-" + c.id + "'>IDLE</span></div><canvas id='cv-" + c.id + "' height='30'></canvas><div class='cd'>" + c.label + " · @" + BASES.find(b => b.id === c.base).name + "</div></div>").join("");
+  if (!box.children.length) box.innerHTML = CAGES.map(c => "<div class='cage'><div class='ch'><span style='color:" + c.color + "'>" + c.id + "</span><span class='tiny' id='cs-" + c.id + "'>IDLE</span></div><img class='eva-img' data-av='" + c.id.toLowerCase() + "' alt='" + c.id + "'/><canvas id='cv-" + c.id + "' height='30'></canvas><div class='cd'>" + c.label + " · @" + BASES.find(b => b.id === c.base).name + "</div></div>").join("");
 }
 function renderLog() {
   const el = document.getElementById("log"); if (!el) return;
-  el.innerHTML = state.log.slice(-120).map(e => "<div class='" + e.cls + "'><span class='ts'>[" + new Date(e.t).toTimeString().slice(0, 8) + "]</span>" + (e.s ? "<b>" + e.s + "</b> " : "") + esc(e.msg) + "</div>").join("");
-  el.scrollTop = el.scrollHeight;
+  const f = state.logFilter || "all";
+  const rows = state.log.filter(e => f === "all" || (f === "sortie" && (e.s === state.selected || e.who === "you" || e.chat)) || (f === "chat" && (e.who === "you" || e.chat))).slice(-150);
+  el.innerHTML = rows.map(e => "<div class='msg " + (e.who === "you" ? "you " : "") + e.cls + "'><img class='av' data-av='" + e.who + "' alt=''/><div><span class='ts'>" + new Date(e.t).toTimeString().slice(0, 8) + "</span><b class='who'>" + esc(speakerName(e.who)) + "</b>" + (e.s ? "<span class='muted'>" + e.s + " · </span>" : "") + esc(e.msg) + "</div></div>").join("") || "<div class='muted'>No messages.</div>";
+  fillAvatars(el); el.scrollTop = el.scrollHeight;
 }
 function applyLabels() { const p = L(); document.querySelectorAll("[data-l]").forEach(el => { const k = el.dataset.l; if (p[k]) el.textContent = p[k]; }); }
-function renderAll() { renderQuestions(); renderNeeds(); renderSorties(); renderFlow(); renderAway(); renderNext(); renderHealth(); renderBudget(); renderMelons(); renderBases(); renderCages(); }
+function renderAll() { fillAvatars(); renderQuestions(); renderNeeds(); renderSorties(); renderFlow(); renderAway(); renderNext(); renderHealth(); renderBudget(); renderMelons(); renderBases(); renderCages(); }
 
 /* ================= MAP: real coastlines + procedural contours ================= */
 const map = { ready:false, w:540, h:250, proj:null, contours:[], base:null, linkPaths:{} };
@@ -1108,8 +1171,9 @@ setInterval(() => { BASES.forEach(b => { if (b.status === "online") { b.cpu = Ma
 document.addEventListener("click", e => {
   const t = e.target.closest("button,[data-s],a"); if (!t) return;
   if (t.dataset.ap) { decide(t.dataset.ap, t.dataset.d); return; }
-  if (t.dataset.s) { e.preventDefault(); state.selected = t.dataset.s; renderSorties(); renderFlow(); document.getElementById("p-flow").scrollIntoView({ behavior:"smooth", block:"nearest" }); return; }
-  if (t.dataset.f) { state.filter = t.dataset.f; document.querySelectorAll(".filters .btn").forEach(b => b.classList.toggle("on", b === t)); renderSorties(); return; }
+  if (t.dataset.s) { e.preventDefault(); state.selected = t.dataset.s; renderSorties(); renderFlow(); renderLog(); document.getElementById("p-flow").scrollIntoView({ behavior:"smooth", block:"nearest" }); return; }
+  if (t.dataset.lf) { state.logFilter = t.dataset.lf; t.parentNode.querySelectorAll(".btn").forEach(b => b.classList.toggle("on", b === t)); renderLog(); return; }
+  if (t.dataset.f) { state.filter = t.dataset.f; document.querySelectorAll("#p-sorties .filters .btn").forEach(b => b.classList.toggle("on", b === t)); renderSorties(); return; }
   if (t.dataset.go) { document.getElementById(t.dataset.go).scrollIntoView({ behavior:"smooth", block:"start" }); return; }
   if (t.dataset.spear) { const s = state.sorties.find(x => x.id === t.dataset.spear); state.approvals.filter(a => a.sortie === s.id).forEach(a => decide(a.id, "reject")); if (s.status === "active") { s.status = "stood-down"; s.outcome = "Spear"; finish(s); } log("Spear " + s.id + ": grants revoked · happened: " + (s.happened.map(h => h.tool).join(", ") || "none"), "danger", s); renderAll(); return; }
   if (t.dataset.promote) { const p = PILOTS.find(x => x.id === t.dataset.promote); if (p.stage === "prototype") { p.stage = "test"; log("Watermelons: " + p.id + " → test", "ok"); } else { log("Promotion of " + p.id + " to production needs you (card in Misato's apartment)", "warn"); p.stage = "production"; } renderAll(); return; }
@@ -1124,6 +1188,25 @@ document.getElementById("new-form").addEventListener("submit", e => {
   const key = preset || guessPreset(text); if (!key) { log("Misato: I can't plan that in the demo; try an example.", "warn"); return; }
   launch(key, text || null); document.getElementById("new-text").value = ""; document.getElementById("new-preset").value = "";
 });
+function say(text) { log(text, "ok", null, "misato"); state.log[state.log.length - 1].chat = true; renderLog(); }
+function cardFor(text) { const id = (text.match(/AP-[\w-]+/i) || [])[0]; const sid = (text.match(/S-\d+/i) || [])[0];
+  if (id) return state.approvals.find(a => a.id.toLowerCase() === id.toLowerCase());
+  if (sid) return state.approvals.find(a => a.sortie.toLowerCase() === sid.toLowerCase());
+  return state.approvals.length === 1 ? state.approvals[0] : null; }
+function chat(text) {
+  log(text, "", null, "you"); state.log[state.log.length - 1].chat = true;
+  const t = text.toLowerCase().trim();
+  setTimeout(() => {
+    if (/^(help|\?)$/.test(t)) return say("I understand: status · why [AP-… or S-…] · approve / reject [AP-…] · spear · or any request, which becomes a sortie.");
+    if (/^status/.test(t)) { const act = state.sorties.filter(s => s.status === "active").length; return say(state.approvals.length + " card(s) wait for you, " + act + " sortie(s) in flight, $" + state.spentToday.toFixed(2) + " of $" + SCROLLS.dailyBudget.toFixed(2) + " spent today, forecast $" + forecast().toFixed(2) + "."); }
+    if (/^why/.test(t)) { const ap = cardFor(text) || state.approvals[0]; if (!ap) return say("Nothing is waiting for you."); return say(ap.id + " (" + ap.action.tool + "): " + ap.reason + " Sync " + ap.ballot.sync.value + "% = " + syncFormula(ap.ballot) + ". Pattern " + ap.ballot.pattern.toUpperCase() + " comes from the effect class " + ap.ballot.effect + "."); }
+    if (/^(approve|reject)/.test(t)) { const ap = cardFor(text); if (!ap) return say(state.approvals.length ? "Which one? " + state.approvals.map(a => a.id + " " + a.action.tool).join(" · ") : "Nothing is waiting for you."); const d = t.startsWith("approve") ? "approve" : "reject"; decide(ap.id, d); return say((d === "approve" ? "Approved once: " : "Rejected: ") + humanAction(ap.action) + "."); }
+    if (/^spear/.test(t)) { spearAll(); return say("Spear thrown: every grant revoked, approvals stood down. Check the trace for effects that already happened."); }
+    const key = guessPreset(text); if (!key) return say("I can't plan that in this demo. Try: summarise mail · reply to Luca · delete merged branches · charge the FPV battery · save this page.");
+    launch(key, text); say("On it: opened " + state.sorties[0].id + ". The MAGI decide each action's Pattern; anything that needs you comes to the apartment.");
+  }, 250);
+}
+document.getElementById("chat-form").addEventListener("submit", e => { e.preventDefault(); const i = document.getElementById("chat-in"); const v = i.value.trim(); if (v) { chat(v); i.value = ""; } });
 function guessPreset(t) { t = t.toLowerCase(); if (/mail|inbox|summar/.test(t)) return "brief"; if (/reply|tell|write to|email/.test(t)) return "reply"; if (/branch|repo/.test(t)) return "branches"; if (/charg|battery|fpv/.test(t)) return "charger"; if (/note|clip|page|web/.test(t)) return "note"; return null; }
 document.getElementById("theme").addEventListener("change", e => setTheme(e.target.value));
 document.getElementById("btn-crt").addEventListener("click", e => { state.crt = !state.crt; document.body.classList.toggle("crt-on", state.crt); e.target.setAttribute("aria-pressed", String(state.crt)); });
@@ -1134,7 +1217,7 @@ document.getElementById("btn-reset").addEventListener("click", () => { const th 
 window.addEventListener("resize", () => drawEdges(state.sorties.find(x => x.id === state.selected)));
 function setTheme(name) {
   state.theme = name; document.body.className = "theme-" + name + (state.crt && name === "eva-full" ? " crt-on" : "");
-  applyLabels(); renderAll(); requestAnimationFrame(() => drawEdges(state.sorties.find(x => x.id === state.selected)));
+  applyLabels(); renderAll(); renderLog(); requestAnimationFrame(() => drawEdges(state.sorties.find(x => x.id === state.selected)));
 }
 
 seed();
