@@ -56,6 +56,22 @@ export function verifyRecord(rootPublicKey:string,record:SignedRecord):boolean {
  try{return verify(null,Buffer.from(canonical(record.body)),publicKeyFrom(rootPublicKey),Buffer.from(record.signature,'base64'));}catch{return false;}
 }
 const BASE_ID=/^[A-Z0-9][A-Z0-9-]{1,15}$/;
+const ADDRESS=/^[a-z0-9.:-]{1,253}$/i;
+const isKey=(v:string)=>{try{publicKeyFrom(v);return true;}catch{return false;}};
+/**
+ * Reads `kaji enrol` arguments before any passphrase is asked: the key and the address may come in either order (a
+ * base64 Ed25519 key and an address cannot be confused), and each problem is named precisely.
+ */
+export function enrolmentArgs(id:string|undefined,name:string|undefined,first:string|undefined,second:string|undefined,selfKey:string):{baseId:string;name:string;publicKey:string;address:string} {
+ if(!id||!name||!first||!second)throw new Error('Usage: kaji enrol BASE-ID "Name" PUBKEY|self ADDRESS — e.g. kaji enrol NERV-02 "Tabgha" <key from base pubkey> 100.64.0.2');
+ const baseId=id.toUpperCase();if(!BASE_ID.test(baseId))throw new Error(`Base ID "${id}" must look like NERV-02: capitals, digits and dashes, up to 16.`);
+ if(!name.trim()||name.length>40)throw new Error('The base name is 1–40 characters.');
+ const keyFirst=first==='self'||isKey(first),keySecond=second==='self'||isKey(second);
+ const [key,address]=keyFirst&&!keySecond?[first,second]:keySecond&&!keyFirst?[second,first]:[first,second];
+ if(key!=='self'&&!isKey(key))throw new Error(`Neither "${first.slice(0,24)}" nor "${second.slice(0,24)}" is a base public key: on that base run nerv base pubkey and copy its first line (or use self for this base).`);
+ if(address==='self'||isKey(address)||!ADDRESS.test(address))throw new Error(`"${address.slice(0,40)}" is not an address: use the base's Tailscale address (tailscale ip -4 on that base, 100.x.y.z).`);
+ return {baseId,name:name.trim(),publicKey:key==='self'?selfKey:key,address};
+}
 function checkBody(b:RegistryBody):void {
  if(!b||!['enrol','revoke'].includes(b.kind)||!Number.isSafeInteger(b.serial)||b.serial<1||!BASE_ID.test(b.baseId)||!Number.isFinite(Date.parse(b.issued)))throw new Error('Malformed registry record.');
  if(b.kind==='enrol'){if(typeof b.name!=='string'||!b.name.trim()||b.name.length>40||typeof b.address!=='string'||!/^[a-z0-9.:-]{1,253}$/i.test(b.address)||typeof b.publicKey!=='string')throw new Error('An enrolment needs a name, an address and a public key.');publicKeyFrom(b.publicKey);}
