@@ -1,6 +1,6 @@
 # NERV Agency
 
-**Your machines, connected.** A local-first proactive personal agent, built in TypeScript with an Angular frontend. The name evokes nodes and connections; its mark is a simple vertical monochrome marine knot.
+**Your machines, connected.** A local-first proactive personal agent, built in TypeScript with an Angular frontend. Its mark is an original inverted triangle with seven eyes, paired with a half leaf in the web sidebar.
 
 ## Current build: 0.1 foundation
 
@@ -43,7 +43,7 @@ All `/api` routes require a bearer token (except the native TLS claim route, whi
 | Path | Owns |
 |---|---|
 | `src/` | Local backend, CLI, persistence and proposed distributed contracts |
-| `web/` | Angular workspace and knot identity |
+| `web/` | Angular workspace and brand marks |
 | `test/` | Restart, cancellation, idempotency and API regression tests |
 | `docs/INSTALL.md` | Headless installation, service lifecycle and data migration |
 | `docs/decisions/runtime-boundaries.md` | Reviewed process, RPC, Web Component and native-pairing decisions |

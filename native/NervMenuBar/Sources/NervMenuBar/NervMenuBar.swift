@@ -104,7 +104,7 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
     @State private var confirmStop = false
     init() { NSApplication.shared.setActivationPolicy(.accessory) }
     var body: some Scene {
-        MenuBarExtra { content } label: { Image(nsImage: Self.knot) }.menuBarExtraStyle(.window)
+        MenuBarExtra { content } label: { Image(nsImage: Self.mark) }.menuBarExtraStyle(.window)
     }
     private var content: some View {
         ScrollView { VStack(alignment: .leading, spacing: 12) {
@@ -147,13 +147,17 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
         let formatter = DateFormatter(); formatter.locale = Locale(identifier: language == "en" ? "en_GB" : "it_IT"); formatter.dateStyle = .medium; formatter.timeStyle = .short
         return formatter.string(from: date)
     }
-    private static var knot: NSImage {
+    /// Inverted triangle with seven eyes: the same geometry as web/public/mark.svg (32x48 units, y flipped), drawn at half size.
+    private static var mark: NSImage {
         let image = NSImage(size: NSSize(width: 16, height: 24), flipped: false) { _ in
             NSColor.labelColor.setFill()
-            let scale = NSAffineTransform(); scale.scale(by: 0.5); scale.translateX(by: 32, yBy: 0); scale.rotate(byDegrees: 90); scale.concat()
-            NSBezierPath(roundedRect: NSRect(x: 0, y: 12, width: 10, height: 8), xRadius: 4, yRadius: 4).fill()
-            NSBezierPath(roundedRect: NSRect(x: 38, y: 12, width: 10, height: 8), xRadius: 4, yRadius: 4).fill()
-            for x in [10.0, 20.5, 31.0] { NSGraphicsContext.saveGraphicsState(); let t = NSAffineTransform(); t.translateX(by: x + 3.5, yBy: 16); t.rotate(byDegrees: 22); t.translateX(by: -(x + 3.5), yBy: -16); t.concat(); NSBezierPath(roundedRect: NSRect(x: x, y: 2, width: 7, height: 28), xRadius: 3.5, yRadius: 3.5).fill(); NSGraphicsContext.restoreGraphicsState() }
+            let scale = NSAffineTransform(); scale.scale(by: 0.5); scale.concat()
+            let path = NSBezierPath(); path.windingRule = .evenOdd
+            path.move(to: NSPoint(x: 1, y: 44)); path.line(to: NSPoint(x: 31, y: 44)); path.line(to: NSPoint(x: 16, y: 4)); path.close()
+            for (x, y) in [(8.0, 10.0), (13.33, 10.0), (18.67, 10.0), (24.0, 10.0), (12.5, 19.0), (19.5, 19.0), (16.0, 28.0)] {
+                path.appendOval(in: NSRect(x: x - 1.9, y: 48 - y - 1.25, width: 3.8, height: 2.5))
+            }
+            path.fill()
             return true
         }; image.isTemplate = true; return image
     }

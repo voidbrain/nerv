@@ -29,7 +29,7 @@ A value that lives in more than one place: change it in one, change it in all. B
 
 | Value | Where | Kept equal by |
 |---|---|---|
-| Vertical wrapped-knot geometry | `web/public/knot.svg` (Web SVG mark)<br>`native/NervMenuBar/Sources/NervMenuBar/NervMenuBar.swift` (Native monochrome menu template drawing) | Review both geometric renditions in branding changes; no automatic pixel equivalence claimed. |
+| Seven-eye triangle geometry and mark colour | `web/public/mark.svg` (Web SVG mark (browser icon))<br>`web/public/brand.svg` (Sidebar mark: half leaf beside the same triangle)<br>`native/NervMenuBar/Sources/NervMenuBar/NervMenuBar.swift` (Native monochrome menu template drawing)<br>`web/src/styles.css` (--mark colour token, literal in both SVGs) | test/brand.test.ts asserts the same triangle and eye centres in the three drawings and the --mark colour in both SVGs. |
 
 ## Outside the repository
 
