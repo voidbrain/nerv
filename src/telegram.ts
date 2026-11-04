@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import type { StoreApi } from './runtime.ts';
 import type { Approval } from './ledger.ts';
+import { briefDue, composeBrief, gatherBrief } from './brief.ts';
 /**
  * Aoba, the Telegram channel (F-003), with Pen Pen's deliveries (F-023). Outbound HTTPS only (long polling): no open
  * port, no mesh. It answers exactly one private chat, the owner's; everything else is ignored. Messages go to Misato,
@@ -38,16 +39,17 @@ export async function startChats(api:TelegramApi):Promise<{chatId:number;name:st
  for(const u of await api.updates(undefined,0)){const m=u.message;if(m&&m.chat.type==='private'&&m.text?.trim().startsWith('/start'))seen.set(m.chat.id,(m.chat as {username?:string;first_name?:string}).username ?? (m.chat as {first_name?:string}).first_name ?? String(m.chat.id));}
  return [...seen].map(([chatId,name])=>({chatId,name}));
 }
-interface State {offset?:number;inbox?:{sequence:number;id?:string};cards:string[]}
+interface State {offset?:number;inbox?:{sequence:number;id?:string};cards:string[];brief?:{date:string;at:string}}
 export function card(a:Approval):{text:string;buttons:Button[][]} {
  const c=a.card;const args=JSON.stringify(c.args);
  const text=[`Needs you · Pattern ${c.pattern.toUpperCase()}`,`${c.tool} ${args.length>600?args.slice(0,600)+'…':args}`,`Effect: ${c.effect}. Sync ${c.sync.value}%.`,`Why it stopped: ${c.reason}`,`Expires: ${new Date(c.expires).toUTCString()} (expiry never approves)`].join('\n');
  return {text,buttons:[[{text:'✅ Approve once',callback_data:'a:'+a.id},{text:'❌ Reject',callback_data:'r:'+a.id}]]};
 }
 export class TelegramChannel {
- readonly api:TelegramApi;readonly store:StoreApi;readonly chatId:number;readonly statePath:string;readonly log:(line:string)=>void;
+ readonly api:TelegramApi;readonly store:StoreApi;readonly chatId:number;readonly statePath:string;readonly log:(line:string)=>void;readonly brief?:{at:string;timeZone:string;language:'it'|'en'};
  private state:State={cards:[]};private stopping=new AbortController();private queue:Promise<void>=Promise.resolve();private timer?:NodeJS.Timeout;private delivery?:Promise<void>;
- constructor(options:{api:TelegramApi;store:StoreApi;chatId:number;statePath:string;log?:(line:string)=>void}) {
+ constructor(options:{api:TelegramApi;store:StoreApi;chatId:number;statePath:string;log?:(line:string)=>void;brief?:{at:string;timeZone:string;language:'it'|'en'}}) {
+  if(options.brief)this.brief=options.brief;
   this.api=options.api;this.store=options.store;this.chatId=options.chatId;this.statePath=options.statePath;this.log=options.log ?? (line=>console.error(line));
   if(existsSync(this.statePath)){try{const saved=JSON.parse(readFileSync(this.statePath,'utf8')) as Partial<State>;this.state={...saved,cards:Array.isArray(saved.cards)?saved.cards:[]};}catch{this.log('Telegram: unreadable state file; starting fresh.');}}
  }
@@ -118,6 +120,15 @@ export class TelegramChannel {
     if(page.reset){this.state.inbox=page.next;this.save();break;}
     if(!page.items.length)break;this.state.inbox=page.next;this.save();
    }
+  await this.sendBrief();
   }catch(e){this.log(`Telegram delivery: ${e instanceof Error?e.message:'failed'}.`);}
+ }
+ /** Hyuga: once a local day at the configured time; recorded before sending, so a restart never sends it twice. */
+ private async sendBrief(now=new Date()){
+  if(!this.brief)return;const date=briefDue(now,this.brief.timeZone,this.brief.at,this.state.brief?.date);if(!date)return;
+  const since=this.state.brief?new Date(this.state.brief.at):new Date(now.getTime()-86_400_000);
+  const facts=await gatherBrief(this.store,since);
+  this.state.brief={date,at:now.toISOString()};this.save();
+  await this.api.send(this.chatId,composeBrief({now,timeZone:this.brief.timeZone,language:this.brief.language,...facts}));
  }
 }

@@ -97,3 +97,16 @@ test('telegram link (CLI) saves the owner chat into config.json, keeping the oth
   chmodSync(join(home,'telegram-token'),0o644);assert.match((await run('telegram','link')).err,/must be private/);
  }finally{await tg.close();rmSync(home,{recursive:true,force:true});}
 });
+test('Hyuga\'s brief reaches the owner once a day, also across a restart',async()=>{
+ const token='123456:'+'b'.repeat(35);const tg=await fakeTelegram(token);const home=mkdtempSync(join(tmpdir(),'nerv-brief-'));
+ const runtime=new Runtime(join(home,'nerv.sqlite'));const statePath=join(home,'telegram-state.json');
+ const channel=()=>new TelegramChannel({api:new TelegramApi(token,tg.base),store:runtime,chatId:OWNER,statePath,log:()=>{},brief:{at:'00:00',timeZone:'Europe/Rome',language:'it'}});
+ let aoba=channel();
+ try{
+  await runtime.ready();await runtime.add('Rinnovare assicurazione',new Date(Date.now()+3_600_000).toISOString());
+  await aoba.start(100);await until(()=>tg.sent().some(m=>/Buongiorno/.test(m.text)));
+  const brief=tg.sent().find(m=>/Buongiorno/.test(m.text))!.text;assert.match(brief,/In scadenza nelle prossime 24 h: 1\n• .*Rinnovare assicurazione/);
+  await wait(400);await aoba.stop();aoba=channel();await aoba.start(100);await wait(400);
+  assert.equal(tg.sent().filter(m=>/Buongiorno/.test(m.text)).length,1,'one brief per day, even after a restart');
+ }finally{await aoba.stop();await runtime.close();await tg.close();rmSync(home,{recursive:true,force:true});}
+});

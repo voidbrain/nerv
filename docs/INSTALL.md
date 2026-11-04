@@ -111,6 +111,10 @@ If `telegram link` or Aoba reports `fetch failed` while `curl https://api.telegr
 
 Aoba ignores every other chat and every button pressed by another account, and logs it. A message older than 10 minutes (sent while the service was down) is not run; Aoba asks you to send it again. Approval cards arrive once, with **✅ Approve once** and **❌ Reject**; a tap uses the same decision path as `approve`, so the action runs once and a second tap changes nothing. Due reminders arrive here as well as in the local inbox; reminders delivered before Aoba was linked are not replayed. Its progress (last update, cards sent, last reminder) is in `telegram-state.json` in the data home.
 
+### Hyuga's daily brief
+
+Add `"brief": {"at": "08:00"}` to `config.json` (your time zone, 24-hour) and restart: once a day at or after that time Aoba sends a short summary in your configured language — cards waiting for you, reminders due in the next 24 hours, what finished or failed since the previous brief, and health problems. It is built from the ledger, not by a model, so it is quick and invents nothing. It is sent once per day (also across restarts; if the service starts after the time, it is sent then). `npm start -- brief` prints it now.
+
 Telegram bot chats are not end-to-end encrypted: Telegram's servers can read what you and Aoba write, including reminder titles and action arguments on cards.
 
 ## Talking to Misato

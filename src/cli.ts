@@ -7,6 +7,7 @@ import { Store } from './store.ts';
 import { makeServer } from './server.ts';
 import { dataHome, databasePath, initialize, readConfig, readScrolls, readTelegramToken, readToken } from './config.ts';
 import { TelegramApi, TelegramChannel, startChats, telegramBase } from './telegram.ts';
+import { composeBrief, gatherBrief } from './brief.ts';
 import { service } from './service.ts';
 import {initializeNativeTLS,loadNativeTLS,nativeAdmin,NativeAuth,type Invitation} from './native-auth.ts';
 import { Runtime } from './runtime.ts';
@@ -82,7 +83,7 @@ try {
     if(!response.ok)throw new Error(value.error ?? 'Ask failed.');
     console.log(value.text+(value.truncated?'\n[reply truncated]':'')+`\n— ${value.route} · ${value.model}`);
   }
-  else if(!command||command==='help')console.log('NERV Agency\nCommands: init | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | open [dashboard] | chat "text" | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
+  else if(!command||command==='help')console.log('NERV Agency\nCommands: init | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | open [dashboard] | chat "text" | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
   else {
     const config=readConfig(home);
     const scrolls=readScrolls(home);
@@ -92,6 +93,7 @@ try {
       case 'remind':console.log(JSON.stringify(local().add(args[0] ?? '',args[1] ?? ''),null,2));break;
       case 'list':console.log(JSON.stringify(local().list(),null,2));break;
       case 'cancel':if(!local().cancel(args[0] ?? ''))throw new Error('No pending reminder with that ID.');console.log('Cancelled.');break;
+      case 'brief':console.log(composeBrief({now:new Date(),timeZone:config.timeZone,language:config.language,...await gatherBrief(local(),new Date(Date.now()-86_400_000))}));break;
       case 'tick':console.log(JSON.stringify({delivered:local().tick()}));break;
       case 'inbox':console.log(JSON.stringify(local().inbox(),null,2));break;
       case 'approvals':console.log(JSON.stringify(local().approvals(),null,2));break;
@@ -118,7 +120,7 @@ try {
         if(native)await new Promise<void>((done,reject)=>{native.once('error',reject);native.listen(config.nativePort ?? 4319,'127.0.0.1',done);}).catch(e=>{close();throw e;});
         server.listen(config.port,'127.0.0.1',()=>console.log(`NERV Agency: http://127.0.0.1:${config.port} · ${config.language} · ${config.timeZone}`));running=true;
         // Aoba starts only when both the private bot token and the linked owner chat exist.
-        if(botToken&&config.telegram){aoba=new TelegramChannel({api:new TelegramApi(botToken,telegramBase()),store:runtime,chatId:config.telegram.chatId,statePath:join(home,'telegram-state.json')});await aoba.start().then(()=>console.log('Aoba (Telegram): linked, listening.'),e=>console.error(`Aoba (Telegram) did not start: ${e instanceof Error?e.message:'error'}.`));}
+        if(botToken&&config.telegram){aoba=new TelegramChannel({api:new TelegramApi(botToken,telegramBase()),store:runtime,chatId:config.telegram.chatId,statePath:join(home,'telegram-state.json'),...(config.brief?{brief:{at:config.brief.at,timeZone:config.timeZone,language:config.language}}:{})});await aoba.start().then(()=>console.log('Aoba (Telegram): linked, listening.'),e=>console.error(`Aoba (Telegram) did not start: ${e instanceof Error?e.message:'error'}.`));}
         else if(botToken)console.log('Aoba (Telegram): token found, no chat linked yet. Send /start to your bot, then run telegram link.');
         process.once('SIGINT',close);process.once('SIGTERM',close);break;
       }
