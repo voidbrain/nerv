@@ -52,13 +52,22 @@ export function sanitizeHealth(value:unknown):BaseHealth|undefined {
  const reasons=Array.isArray(h.reasons)?h.reasons.filter((r):r is string=>typeof r==='string'&&r.trim().length>0).slice(0,3).map(r=>r.replace(/[\u0000-\u001f\u007f]/g,' ').slice(0,200)):[];
  return {state:h.state,reasons:h.state==='online'?[]:reasons};
 }
+/** Missed heartbeats in a row before a peer is logged unreachable: as many as fit in the online window (3 at 30 s / 90 s). */
+export const missesToLog=(everyMs:number)=>Math.max(1,Math.ceil(ONLINE_MS/everyMs));
 const head=(records:SignedRecord[])=>({count:records.length,serial:records.reduce((m,r)=>Math.max(m,r.body.serial),0)});
 export class KajiLink {
  readonly baseId:string;readonly key:KeyObject;readonly publicKey:string;readonly port:RegistryPort;readonly log:(line:string)=>void;
  private server?:Server;private timer?:NodeJS.Timeout;private nonces=new Nonces();private listening?:string;
- /** Per peer, whether the last heartbeat reached it: logged only when that changes, so a base that is down does not flood the log. */
- private reachable=new Map<string,boolean>();
- private mark(peer:string,ok:boolean,detail=''){if(this.reachable.get(peer)!==ok)this.log(ok?`Kaji: ${peer} reachable.`:`Kaji: ${peer} unreachable${detail?` (${detail})`:''}.`);this.reachable.set(peer,ok);}
+ /** Per peer, whether heartbeats reach it, logged only when that changes. A peer counts as unreachable in the log only
+  after enough missed heartbeats in a row to fill the online window (one slow Tailscale path or a machine waking from
+  sleep is not news: the dashboard keeps it online for ONLINE_MS anyway). */
+ private reachable=new Map<string,boolean>();private misses=new Map<string,number>();
+ private mark(peer:string,ok:boolean,detail='',every=this.every){
+  if(ok){this.misses.set(peer,0);if(this.reachable.get(peer)!==true)this.log(`Kaji: ${peer} reachable.`);this.reachable.set(peer,true);return;}
+  const n=(this.misses.get(peer) ?? 0)+1;this.misses.set(peer,n);
+  if(n>=missesToLog(every)&&this.reachable.get(peer)!==false){this.log(`Kaji: ${peer} unreachable${detail?` (${detail})`:''}; ${n} heartbeats missed.`);this.reachable.set(peer,false);}
+ }
+ private every=HEARTBEAT_MS;
  constructor(options:{baseId:string;key:KeyObject;publicKey:string;registry:RegistryPort;log?:(line:string)=>void;health?:()=>Promise<BaseHealth>;onHealth?:(baseId:string,health:HeardHealth)=>void}) {
   this.baseId=options.baseId;this.key=options.key;this.publicKey=options.publicKey;this.port=options.registry;this.log=options.log ?? (l=>console.error(l));
   this.health=options.health;this.onHealth=options.onHealth;
@@ -75,7 +84,7 @@ export class KajiLink {
  private async me():Promise<BaseEntry|undefined> {return (await this.port.bases()).find(b=>b.publicKey===this.publicKey&&b.status==='enrolled');}
  async start(everyMs=HEARTBEAT_MS):Promise<void> {
   const tick=async()=>{try{await this.listen();await this.heartbeat();}catch(e){this.log(`Kaji: ${e instanceof Error?e.message:'heartbeat failed'}.`);}};
-  await tick();this.timer=setInterval(()=>{void tick();},everyMs);
+  this.every=everyMs;await tick();this.timer=setInterval(()=>{void tick();},everyMs);
  }
  async stop():Promise<void> {if(this.timer)clearInterval(this.timer);await new Promise<void>(done=>this.server?this.server.close(()=>done()):done());this.server=undefined;this.listening=undefined;}
  /** Listens on the enrolled address only; retried on every tick (Tailscale may come up later, the address may change). */

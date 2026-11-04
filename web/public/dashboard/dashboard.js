@@ -86,7 +86,7 @@ const STEP_IDS = ["detect","intake","route","consult","plan","magi","sync","apt"
 const LABELS = {
   eva:{ brandTitle:"TACTICAL COMMAND", brandTag:"SEELE SCROLLS ENFORCED // CENTRAL DOGMA LEDGER · LILITH MEMORY",
     needs:"Misato's apartment · needs you", sorties:"Sorties", next:"Coming up", flow:"Sephirot · sortie flow",
-    detail:"Misato plan · current action", log:"Comms · Misato & Maya trace", away:"Debrief · while you were away", health:"Health · this base",
+    detail:"Misato plan · current action", log:"Comms · Misato & Maya trace", away:"Debrief · while you were away", health:"Health",
     bases:"NERV bases · Kaji line", cages:"EVA cages · heartbeat", budget:"Battery · budget", melons:"Kaji's watermelons · pilot trust", lilith:"Terminal Dogma · Lilith",
     spear:"SPEAR OF LONGINUS", dummy:"DUMMY PLUG ACTIVE", launch:"Launch",
     qNeeds:"Needs you", qAway:"While you were away", qNext:"Coming up", qHealth:"Broken or stuck", qBudget:"Battery today",
@@ -94,7 +94,7 @@ const LABELS = {
     seats:{ melchior:"MELCHIOR", balthasar:"BALTHASAR", casper:"CASPER" }, short:{ melchior:"MEL", balthasar:"BAL", casper:"CAS" } },
   neutral:{ brandTitle:"OPERATIONS", brandTag:"owner rules enforced · append-only ledger · long-term memory",
     needs:"Needs your approval", sorties:"Jobs", next:"Coming up", flow:"Decision timeline",
-    detail:"Plan · current action", log:"Messages · trace", away:"While you were away", health:"Health · this base",
+    detail:"Plan · current action", log:"Messages · trace", away:"While you were away", health:"Health",
     bases:"Machines · mesh", cages:"Sandboxes · heartbeat", budget:"Budget", melons:"Skill trust stages", lilith:"Memory",
     spear:"STOP EVERYTHING", dummy:"MODELS UNAVAILABLE", launch:"Run",
     qNeeds:"Needs you", qAway:"While you were away", qNext:"Coming up", qHealth:"Broken or stuck", qBudget:"Budget today",
@@ -433,7 +433,7 @@ function renderSorties() {
   document.getElementById("sorties-sub").textContent = active + " in flight · " + (q ? list.length + " match" + (list.length === 1 ? "" : "es") : state.sorties.length + " shown");
   document.getElementById("sortie-list").innerHTML = list.map(s => {
     const pats = s.actions.map(a => a.ballot ? "<span class='badge b-" + a.ballot.pattern + "'>" + a.ballot.pattern[0].toUpperCase() + "</span>" : "<span class='badge b-muted'>·</span>").join(" ");
-    return "<div class='card sortie" + (s.id === state.selected ? " sel" : "") + "' tabindex='0' role='button' data-s='" + s.id + "'>" +
+    return "<div class='card sortie" + (s.id === state.selected ? " sel" : "") + "' tabindex='0' role='button' aria-pressed='" + (s.id === state.selected) + "' data-s='" + s.id + "'>" +
       "<div class='row'><span class='b'>" + esc(s.id) + " · " + esc(s.title) + "</span>" + sortieBadge(s) + "</div>" +
       "<div class='row small muted'><span>" + (s.source === "hyuga" ? "Hyuga" : "Aoba") + " · " + hhmm(s.started) + " · " + s.actions.length + " action" + (s.actions.length > 1 ? "s" : "") + " " + pats + "</span><span>$" + s.spent.toFixed(3) + "</span></div>" +
       (s.why ? "<div class='tiny whyline'>" + esc(s.why) + "</div>" : "") +
@@ -457,8 +457,30 @@ function stepState(s, id) {
   if (id === "apt" && !s.actions.some(a => a.ballot && a.ballot.outcome !== "grant")) return s.done.apt ? "done" : (s.status === "done" ? "skip" : "");
   return s.done[id] ? "done" : "";
 }
+/* Replay: a sortie picked in the list redraws its flow step by step (one step every REPLAY_MS), then shows it as it is.
+   Each frame is the sortie with only its first k passed steps done and the next one on. No replay with reduced motion. */
+const REPLAY_MS = 450;
+let replayTimer = null;
+function replayOrder(s) { return STEP_IDS.filter(id => ["done", "on", "wait"].includes(stepState(s, id))); }
+function replayFrame(s, k) {
+  const order = replayOrder(s); const done = {}; order.slice(0, k).forEach(id => { done[id] = true; });
+  return Object.assign({}, s, { done, phase:order[k], status:"active", note:"", ballot:k > order.indexOf("magi") ? s.ballot : null });
+}
+function startReplay(id) {
+  clearInterval(replayTimer); state.replay = null;
+  const s = state.sorties.find(x => x.id === id); if (!s) return;
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce || replayOrder(s).length < 2) return;
+  state.replay = { id, k:0 };
+  replayTimer = setInterval(() => {
+    const cur = state.sorties.find(x => x.id === id);
+    if (!state.replay || state.replay.id !== id || !cur || ++state.replay.k >= replayOrder(cur).length) { clearInterval(replayTimer); state.replay = null; }
+    renderFlow();
+  }, REPLAY_MS);
+}
 function renderFlow() {
-  const s = state.sorties.find(x => x.id === state.selected);
+  const real = state.sorties.find(x => x.id === state.selected);
+  const s = real && state.replay && state.replay.id === real.id && state.replay.k < replayOrder(real).length ? replayFrame(real, state.replay.k) : real;
   document.getElementById("flow-sub").textContent = s ? s.id + " · " + s.title : "no sortie selected";
   document.getElementById("flow-note").textContent = s ? (s.note || s.outcome || "") : "Select a sortie, or launch one.";
   // sephirot nodes
@@ -812,7 +834,12 @@ setInterval(() => { if (LIVE) return; BASES.forEach(b => { if (b.status === "onl
 document.addEventListener("click", e => {
   const t = e.target.closest("button,[data-s],a"); if (!t) return;
   if (t.dataset.ap) { decide(t.dataset.ap, t.dataset.d); return; }
-  if (t.dataset.s) { e.preventDefault(); state.selected = t.dataset.s; renderSorties(); renderFlow(); renderLog(); document.getElementById("p-flow").scrollIntoView({ behavior:"smooth", block:"nearest" }); return; }
+  if (t.dataset.s) {
+    e.preventDefault();
+    // A second click on the selected sortie's card deselects it (links elsewhere, such as Debrief's "open", always select).
+    if (t.classList.contains("sortie") && state.selected === t.dataset.s) { state.selected = null; state.deselected = true; clearInterval(replayTimer); state.replay = null; renderSorties(); renderFlow(); renderLog(); return; }
+    state.selected = t.dataset.s; state.deselected = false; startReplay(t.dataset.s); renderSorties(); renderFlow(); renderLog(); document.getElementById("p-flow").scrollIntoView({ behavior:"smooth", block:"nearest" }); return;
+  }
   if (t.dataset.lf) { state.logFilter = t.dataset.lf; t.parentNode.querySelectorAll(".btn").forEach(b => b.classList.toggle("on", b === t)); renderLog(); return; }
   if (t.dataset.f) { state.filter = t.dataset.f; document.querySelectorAll("#p-sorties .filters .btn").forEach(b => { b.classList.toggle("on", b.dataset.f === state.filter); b.setAttribute("aria-pressed", String(b.dataset.f === state.filter)); }); renderSorties(); return; }
   if (t.id === "sorties-more" && LIVE) { window.liveOlder(); return; }
