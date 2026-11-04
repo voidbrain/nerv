@@ -3,11 +3,11 @@
     "kind": "rule",
     "disposition": "implemented",
     "target": "AGENTS.md",
-    "evidence": "Project conventions renamed: project NERV Agency, Angular project nerv; the repository line keeps voidbrain/nodo until the owner renames it (F-032). BACKLOG-RULES.md and STYLE-GUIDE.md (adapted) change the product name only; no rule changed. .harness.json settings point at native/NervMenuBar paths."
+    "evidence": "This project only: the owner renamed the repository to voidbrain/nerv on 2026-11-04 (F-032), so the Project conventions repository line names https://github.com/voidbrain/nerv. Project content, not a rule; no harness rule or copied tool changed."
   },
   {
     "kind": "none",
     "disposition": "no-change",
-    "evidence": "Reviewed AGENTS.md, BACKLOG-RULES.md and maintenance.md against the rename: no copied harness tool changed; dated archives and audits are untouched as evidence. Compatibility with pre-rename installs is tested in test/runtime.test.ts (home, database, settings) and the Swift label fallback test."
+    "evidence": "Reviewed AGENTS.md, BACKLOG-RULES.md and maintenance.md against the repository rename: no copied harness tool changed; current backlog links follow the new name, dated archives, audits and the previous maintenance receipt keep the old links as evidence (GitHub redirects them)."
   }
 ]

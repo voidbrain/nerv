@@ -1,6 +1,6 @@
 # NERV Agency backlog
 
-Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#13 merged after green checks (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nodo/pull/7), [gate and ledger](https://github.com/voidbrain/nodo/pull/8), [approvals API](https://github.com/voidbrain/nodo/pull/9); [model routes](https://github.com/voidbrain/nodo/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nodo/pull/12) and [#13](https://github.com/voidbrain/nodo/pull/13); main CI run 41797097663 green); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
+Current work ledger, reviewed 4 November 2026 against main `a305e4f`. PR #1–#14 merged after green checks (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14); main CI run 41798326299 green); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
 
 ## Features and improvements
 
@@ -58,13 +58,13 @@ Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#1
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Model routes implemented in [PR #11](https://github.com/voidbrain/nodo/pull/11) (model routes): S² local OpenAI-compatible loopback endpoint and Umbilical Claude route (`claude-opus-5-5`, server-side refusal fallback, off by default, key in a private `anthropic-key` file); explicit privacy per ask, no route fallback, bounded replies; brain-process `model.complete`, admin `POST /api/ask`, CLI `ask [--cloud]`, doctor shows routes. Next: Misato loop calling `Ledger.propose`/`authorize` per tool call, then Telegram. Live acceptance needs the owner: a running local model, an API key if the cloud route is wanted, and a Telegram bot token plus phone for delivery. M2a umbrella, re-scoped 2026-11-04: Telegram adapter (Aoba) with delivery outbox and retry reconciliation; Misato agent loop calling one model route (Umbilical cloud or S² local) through the per-action MAGI gate (F-017); recurring timezone-aware schedules. Memory is F-022, approvals F-023, ledger/trace F-024, triggers F-026, provenance F-027, digest F-028, evals F-029, degraded mode F-030. Closure still needs: Italian/English commands, local-only privacy, no cloud fallback without permission, restart/retry/channel failure tests and live phone delivery.
+**Next action / closure evidence:** Model routes implemented in [PR #11](https://github.com/voidbrain/nerv/pull/11) (model routes): S² local OpenAI-compatible loopback endpoint and Umbilical Claude route (`claude-opus-5-5`, server-side refusal fallback, off by default, key in a private `anthropic-key` file); explicit privacy per ask, no route fallback, bounded replies; brain-process `model.complete`, admin `POST /api/ask`, CLI `ask [--cloud]`, doctor shows routes. Next: Misato loop calling `Ledger.propose`/`authorize` per tool call, then Telegram. Live acceptance needs the owner: a running local model, an API key if the cloud route is wanted, and a Telegram bot token plus phone for delivery. M2a umbrella, re-scoped 2026-11-04: Telegram adapter (Aoba) with delivery outbox and retry reconciliation; Misato agent loop calling one model route (Umbilical cloud or S² local) through the per-action MAGI gate (F-017); recurring timezone-aware schedules. Memory is F-022, approvals F-023, ledger/trace F-024, triggers F-026, provenance F-027, digest F-028, evals F-029, degraded mode F-030. Closure still needs: Italian/English commands, local-only privacy, no cloud fallback without permission, restart/retry/channel failure tests and live phone delivery.
 
 **Estimates:** Large remaining effort; ~20% complete. Bootstrap scope estimate, not verification. Estimated 2026-11-01; reassessed 2026-11-04: scope narrowed to channel + agent loop; model routes done, agent loop and Telegram remain.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks; [PR #11](https://github.com/voidbrain/nodo/pull/11) (model routes) |
+| PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks; [PR #11](https://github.com/voidbrain/nerv/pull/11) (model routes) |
 | Opened | 2026-11-01 |
 | Verification | Unit/integration 2026-11-04: test/model.test.ts covers loopback-only S², cloud off by default, no route fallback (fake cloud receives zero requests), local-only refusal, bounded replies, timeouts, refusal/auth mapping without leaking the key, coordinator → brain → S² join, socket denial, private key file (local run; CI green: PR #11 runs 41789288135 and 41789292689, main run 41789550905). Live model, phone and Italian/English acceptance: pending |
 | Reviewed | 2026-11-04 |
@@ -269,7 +269,7 @@ Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#1
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #1](https://github.com/voidbrain/nodo/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
+| PR / evidence | [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -303,7 +303,7 @@ Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#1
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #1](https://github.com/voidbrain/nodo/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
+| PR / evidence | [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -337,7 +337,7 @@ Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#1
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #5](https://github.com/voidbrain/nodo/pull/5) merged; Linux and macOS checks green; real OS acceptance remains pending |
+| PR / evidence | [PR #5](https://github.com/voidbrain/nerv/pull/5) merged; Linux and macOS checks green; real OS acceptance remains pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -371,7 +371,7 @@ Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#1
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #2](https://github.com/voidbrain/nodo/pull/2); plan only, no runtime implementation |
+| PR / evidence | [PR #2](https://github.com/voidbrain/nerv/pull/2); plan only, no runtime implementation |
 | Opened | 2026-11-01 |
 | Verification | Pending adapter feasibility, regression and live host tests |
 | Reviewed | 2026-11-01 |
@@ -405,7 +405,7 @@ Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#1
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #3](https://github.com/voidbrain/nodo/pull/3) runtime; [PR #5](https://github.com/voidbrain/nodo/pull/5) bounded native feeds; [PR #6](https://github.com/voidbrain/nodo/pull/6) lightweight status, CI green at merge `df0a52f` |
+| PR / evidence | [PR #3](https://github.com/voidbrain/nerv/pull/3) runtime; [PR #5](https://github.com/voidbrain/nerv/pull/5) bounded native feeds; [PR #6](https://github.com/voidbrain/nerv/pull/6) lightweight status, CI green at merge `df0a52f` |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-04 |
@@ -439,7 +439,7 @@ Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#1
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #3](https://github.com/voidbrain/nodo/pull/3); local checks and scoped audit pass; CI pending |
+| PR / evidence | [PR #3](https://github.com/voidbrain/nerv/pull/3); local checks and scoped audit pass; CI pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -473,7 +473,7 @@ Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#1
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #4](https://github.com/voidbrain/nodo/pull/4) merged; Linux and macOS checks green; live Keychain/rotation acceptance remains pending |
+| PR / evidence | [PR #4](https://github.com/voidbrain/nerv/pull/4) merged; Linux and macOS checks green; live Keychain/rotation acceptance remains pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -509,7 +509,7 @@ Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#1
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #3](https://github.com/voidbrain/nodo/pull/3); local checks and scoped audit pass; CI pending |
+| PR / evidence | [PR #3](https://github.com/voidbrain/nerv/pull/3); local checks and scoped audit pass; CI pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -537,13 +537,13 @@ Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#1
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Implemented in [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals): `src/policy.ts` (effect classes, Pattern, EVA class, Melchior/Balthasar, veto-only extra seats, Sync Ratio with inputs) and `Ledger.propose`/`authorize` (single-use grants bound to the argument hash, reject limit escalation). Remaining: Casper from the model route, a Scrolls file in NERV_HOME validated by `validatePolicy`, and the first executor calling `authorize`. Original plan: effect classes, Scrolls policy pack, Pattern derivation, deterministic seats, Sync Ratio (0–100 % with its inputs), grant issuance with TTL and the executor check. Casper uses the F-003 model route once it exists; until then a Casper verdict is required input and the gate fails closed. Extra veto-only seats and consultants are F-025. Supersedes the request-level Gendo classification of 2026-11-02 ([NERV architecture](NERV/NERV-ARCHITECTURE.md)).
+**Next action / closure evidence:** Implemented in [PR #8](https://github.com/voidbrain/nerv/pull/8) (gate, ledger, approvals): `src/policy.ts` (effect classes, Pattern, EVA class, Melchior/Balthasar, veto-only extra seats, Sync Ratio with inputs) and `Ledger.propose`/`authorize` (single-use grants bound to the argument hash, reject limit escalation). Remaining: Casper from the model route, a Scrolls file in NERV_HOME validated by `validatePolicy`, and the first executor calling `authorize`. Original plan: effect classes, Scrolls policy pack, Pattern derivation, deterministic seats, Sync Ratio (0–100 % with its inputs), grant issuance with TTL and the executor check. Casper uses the F-003 model route once it exists; until then a Casper verdict is required input and the gate fails closed. Extra veto-only seats and consultants are F-025. Supersedes the request-level Gendo classification of 2026-11-02 ([NERV architecture](NERV/NERV-ARCHITECTURE.md)).
 
 **Estimates:** Medium remaining effort; ~50% complete. Re-scoped 2026-11-04 from request-level routing to per-action gating; reassessed 2026-11-04 after the deterministic gate landed: Casper wiring, policy file and executor integration remain.
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nerv/pull/8) (gate, ledger, approvals) |
 | Opened | 2026-11-02 |
 | Verification | Unit/integration 2026-11-04: test/ledger.test.ts covers every Pattern path, veto-only seats, reject escalation, budget, EVA-00 shadow rule and grant binding (local run; CI green: PR #8 run 41749472703, PR #9 run 41749840854, main run 41787648624). Human: pending |
 | Reviewed | 2026-11-04 |
@@ -576,7 +576,7 @@ Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#1
 
 | Field | Value |
 |---|---|
-| PR / evidence | docs/NERV/nerv-agency-dashboard.html (prototype, [PR #12](https://github.com/voidbrain/nodo/pull/12) and [PR #13](https://github.com/voidbrain/nodo/pull/13): comms panel with chat, image slots listed in docs/NERV/assets/README.md); earlier docs/NERV/dashboard-agnostic-2.html; review docs/NERV/review-2026-11-04.md §6 |
+| PR / evidence | docs/NERV/nerv-agency-dashboard.html (prototype, [PR #12](https://github.com/voidbrain/nerv/pull/12) and [PR #13](https://github.com/voidbrain/nerv/pull/13): comms panel with chat, image slots listed in docs/NERV/assets/README.md); earlier docs/NERV/dashboard-agnostic-2.html; review docs/NERV/review-2026-11-04.md §6 |
 | Opened | 2026-11-02 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |
@@ -678,7 +678,7 @@ Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#1
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-02 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |
@@ -705,13 +705,13 @@ Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#1
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Implemented in [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals): approval cards (action, args, effect, Pattern, Sync Ratio and inputs, verdicts, reason, TTL), once-only decisions, TTL expiry on scheduler ticks, survival across restart, CLI `approvals`/`approve`/`reject`. API added in [PR #9](https://github.com/voidbrain/nodo/pull/9) (approvals API): `GET /api/approvals` (read-only clients and socket), `POST /api/approvals/ID` (admin, REST only; grant ID never returned). Remaining: Pen Pen delivery, edit handed back to the agent loop (F-003). Original plan: Approval table and decision transitions in `src/store.ts`, API/CLI to list and decide, then Telegram buttons via F-003. Edit returns the action to the planner rather than changing it in place.
+**Next action / closure evidence:** Implemented in [PR #8](https://github.com/voidbrain/nerv/pull/8) (gate, ledger, approvals): approval cards (action, args, effect, Pattern, Sync Ratio and inputs, verdicts, reason, TTL), once-only decisions, TTL expiry on scheduler ticks, survival across restart, CLI `approvals`/`approve`/`reject`. API added in [PR #9](https://github.com/voidbrain/nerv/pull/9) (approvals API): `GET /api/approvals` (read-only clients and socket), `POST /api/approvals/ID` (admin, REST only; grant ID never returned). Remaining: Pen Pen delivery, edit handed back to the agent loop (F-003). Original plan: Approval table and decision transitions in `src/store.ts`, API/CLI to list and decide, then Telegram buttons via F-003. Edit returns the action to the planner rather than changing it in place.
 
 **Estimates:** Medium remaining effort; ~40% complete. Re-scoped 2026-11-04 to include the card content specification; reassessed 2026-11-04 after storage, decisions and expiry landed, and again after the API landed.
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals); [PR #9](https://github.com/voidbrain/nodo/pull/9) (approvals API) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nerv/pull/8) (gate, ledger, approvals); [PR #9](https://github.com/voidbrain/nerv/pull/9) (approvals API) |
 | Opened | 2026-11-02 |
 | Verification | Unit/integration 2026-11-04: once-only decisions, expiry never approves, restart, scheduler-process expiry (local run; CI green: PR #8 run 41749472703, PR #9 run 41749840854, main run 41787648624); REST once-only decision and socket decision denial across the scheduler process (local run; CI green: PR #8 run 41749472703, PR #9 run 41749840854, main run 41787648624). Real-device: pending |
 | Reviewed | 2026-11-04 |
@@ -738,13 +738,13 @@ Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#1
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Implemented in [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals): schema 2 tables (sorties, actions, grants, approvals, events), append-only events enforced by SQLite triggers, paged `Ledger.events`, CLI `events`, one-way migration noted in INSTALL. Paged reads added in [PR #9](https://github.com/voidbrain/nodo/pull/9) (approvals API): `events.page` RPC and `GET /api/sorties/ID/events` (max 50 per page). Remaining: payload versioning and the F-019 binding. Original plan: implement with F-017 in `src/`; OpenTelemetry export later and never blocking M2a. Merged scope with the F-019 decision-event schema on 2026-11-04.
+**Next action / closure evidence:** Implemented in [PR #8](https://github.com/voidbrain/nerv/pull/8) (gate, ledger, approvals): schema 2 tables (sorties, actions, grants, approvals, events), append-only events enforced by SQLite triggers, paged `Ledger.events`, CLI `events`, one-way migration noted in INSTALL. Paged reads added in [PR #9](https://github.com/voidbrain/nerv/pull/9) (approvals API): `events.page` RPC and `GET /api/sorties/ID/events` (max 50 per page). Remaining: payload versioning and the F-019 binding. Original plan: implement with F-017 in `src/`; OpenTelemetry export later and never blocking M2a. Merged scope with the F-019 decision-event schema on 2026-11-04.
 
 **Estimates:** Small remaining effort; ~60% complete. Moved from M6 to M2a and raised to P1 on 2026-11-04; reassessed 2026-11-04 after the ledger and its read API landed.
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals); [PR #9](https://github.com/voidbrain/nodo/pull/9) (approvals API) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nerv/pull/8) (gate, ledger, approvals); [PR #9](https://github.com/voidbrain/nerv/pull/9) (approvals API) |
 | Opened | 2026-11-02 |
 | Verification | Unit/integration 2026-11-04: append-only triggers, ordered events per sortie, version-1 migration keeps reminders (local run; CI green: PR #8 run 41749472703, PR #9 run 41749840854, main run 41787648624) |
 | Reviewed | 2026-11-04 |
@@ -777,7 +777,7 @@ Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#1
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-02 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |
@@ -810,7 +810,7 @@ Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#1
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-04 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |
@@ -843,7 +843,7 @@ Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#1
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-04 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |
@@ -876,7 +876,7 @@ Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#1
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-04 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |
@@ -909,7 +909,7 @@ Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#1
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-04 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |
@@ -942,7 +942,7 @@ Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#1
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-04 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |
@@ -970,7 +970,7 @@ Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#1
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Found 2026-11-04 while adding the model-route dependency ([PR #11](https://github.com/voidbrain/nodo/pull/11), model routes); kept out of that PR. `npm audit fix --force` proposes `@angular/build` 22.2.5, outside the pinned set: upgrade the Angular packages together in their own PR.
+**Next action / closure evidence:** Found 2026-11-04 while adding the model-route dependency ([PR #11](https://github.com/voidbrain/nerv/pull/11), model routes); kept out of that PR. `npm audit fix --force` proposes `@angular/build` 22.2.5, outside the pinned set: upgrade the Angular packages together in their own PR.
 
 **Estimates:** Small remaining effort; ~0% complete. Estimated 2026-11-04.
 
@@ -993,24 +993,24 @@ Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#1
 |:---:|---|---|---|---|
 | 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~80% |
 
-🧑 **→ Human action required: Yes**<br />Decide the GitHub repository name and the web logo; verify the Keychain and LaunchAgent hand-over on your Mac.
+🧑 **→ Human action required: Yes**<br />Decide the web logo; verify the Keychain and LaunchAgent hand-over on a Mac with a pre-rename install.
 
 | | |
 |---|---|
 | **Issue** | The product is now NERV Agency, with `nerv` as the short identifier. Existing installs must keep working without a manual move. |
 | **Reproduce** | On a Mac with a pre-rename install (`~/.nodo`, `io.nodo.agent`, a paired menu-bar app): update, run `doctor`, `service install`, open `NERV.app`. |
-| **Check** | Data and database are found in `~/.nodo` until moved; `NODO_*` still read; `service install` replaces the old unit with no second scheduler; the menu-bar pairing survives the first launch; decisions: rename `voidbrain/nodo` (GitHub redirects old links) or keep it; replace or keep the knot logo. |
+| **Check** | Data and database are found in `~/.nodo` until moved; `NODO_*` still read; `service install` replaces the old unit with no second scheduler; the menu-bar pairing survives the first launch; decision: replace or keep the knot logo. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Implemented in [PR #14](https://github.com/voidbrain/nodo/pull/14) (rename): visible names say NERV Agency; identifiers use `nerv` (`~/.nerv`, `nerv.sqlite`, `NERV_*`, `io.nerv.agent`, `nerv.service`, `io.nerv.companion`, `NERV.app`, `NervMenuBar`, `nerv-status-card`, package `nerv-agency`, Angular project `nerv`). Compatibility: `~/.nodo` and `nodo.sqlite` used while they are the only ones present, `NODO_*` fallback, `service install` replaces the old unit, service actions find the old unit until then, Keychain item and notification checkpoints move on first launch. Unchanged on purpose: dated archives, audits and reviews; GitHub links (`voidbrain/nodo`) until the repository is renamed; the knot logo (it is the Nodo pun), pending your choice. Remaining: the two decisions and a real-Mac check of the hand-over.
+**Next action / closure evidence:** Implemented in [PR #14](https://github.com/voidbrain/nerv/pull/14) (rename): visible names say NERV Agency; identifiers use `nerv` (`~/.nerv`, `nerv.sqlite`, `NERV_*`, `io.nerv.agent`, `nerv.service`, `io.nerv.companion`, `NERV.app`, `NervMenuBar`, `nerv-status-card`, package `nerv-agency`, Angular project `nerv`). Compatibility: `~/.nodo` and `nodo.sqlite` used while they are the only ones present, `NODO_*` fallback, `service install` replaces the old unit, service actions find the old unit until then, Keychain item and notification checkpoints move on first launch. Unchanged on purpose: dated archives, audits and reviews; the knot logo (it is the Nodo pun), pending your choice. Repository: the owner renamed it to `voidbrain/nerv` on 2026-11-04; the AGENTS.md repository line and current backlog links follow, dated archives and audits keep the old links (GitHub redirects them). PR #14 CI green (PR run 41798137617, main run 41798326299, read through the GitHub REST API because `gh` is not installed). The owner's 2026-11-04 setup was a fresh `init` (no `~/.nodo` present), so it does not exercise the hand-over. Remaining: the logo decision and a real-Mac check of the hand-over.
 
 **Estimates:** Small remaining effort; ~80% complete. Estimated 2026-11-04.
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #14](https://github.com/voidbrain/nodo/pull/14) (rename) |
+| PR / evidence | [PR #14](https://github.com/voidbrain/nerv/pull/14) (rename) |
 | Opened | 2026-11-04 |
 | Verification | Unit/integration 2026-11-04: rename fallbacks test (home, database, settings), service render asserts, Swift label fallback and Keychain code path, headless process tests, app bundle id and display name (local run; CI pending). Real-Mac hand-over: pending |
 | Reviewed | 2026-11-04 |

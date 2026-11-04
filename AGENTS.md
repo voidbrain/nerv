@@ -70,7 +70,7 @@ The convention checker applies default-specific rules to the installed workspace
 
 ## Project conventions (NERV Agency)
 
-The project is **NERV Agency**. The repository is `https://github.com/voidbrain/nodo`; the default branch is `main`. No hosted deployment is provisioned. Angular project: `nerv`. Backend: Node 24 native TypeScript and SQLite.
+The project is **NERV Agency**. The repository is `https://github.com/voidbrain/nerv`; the default branch is `main`. No hosted deployment is provisioned. Angular project: `nerv`. Backend: Node 24 native TypeScript and SQLite.
 
 ### Architecture
 
