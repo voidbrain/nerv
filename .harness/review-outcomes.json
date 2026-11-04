@@ -3,7 +3,7 @@
     "kind": "rule",
     "disposition": "implemented",
     "target": "docs/agents/areas.md",
-    "evidence": "Action gate area note: settings.schedule is the only settings tool (brief and Instrumentality schedules, Green, reversible), re-read every minute by serve; security-relevant settings stay out of chat's reach (owner request 2026-11-04, F-003). Checked by test/misato.test.ts (chat change, executor refuses other settings)."
+    "evidence": "Distributed contracts area note gains the Kaji trust layer's rules: Ed25519 root key in a passphrase-encrypted file (never argv/env), per-base keys, append-only registry records signed by the root and verified everywhere against a root pinned by fingerprint (no trust on first use), newest enrolment wins, revocation of a key always wins; no transport yet (F-036 phase 1a). Checked by test/kaji.test.ts."
   },
   {
     "kind": "none",

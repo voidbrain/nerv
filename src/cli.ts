@@ -5,9 +5,10 @@ import { chmodSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Store } from './store.ts';
 import { makeServer } from './server.ts';
-import { dataHome, databasePath, initialize, readConfig, readScrolls, readTelegramToken, readToken, setBase, type Base } from './config.ts';
+import { dataHome, databasePath, initialize, pinKajiRoot, readConfig, readScrolls, readTelegramToken, readToken, setBase, type Base } from './config.ts';
 import { TelegramApi, TelegramChannel, startChats, telegramBase } from './telegram.ts';
 import { composeBrief, gatherBrief } from './brief.ts';
+import { ROOT_KEY_FILE, Registry, baseKey, createRootKey, fingerprint, signRecord, unlockRootKey, type SignedRecord } from './kaji.ts';
 import { service } from './service.ts';
 import {initializeNativeTLS,loadNativeTLS,nativeAdmin,NativeAuth,type Invitation} from './native-auth.ts';
 import { Runtime } from './runtime.ts';
@@ -17,6 +18,17 @@ function baseFlags(list:string[]):Base|undefined {
   const at=(flag:string)=>{const i=list.indexOf(flag);return i>=0?list[i+1]:undefined;};const id=at('--base'),name=at('--name');
   if(id===undefined&&name===undefined)return undefined;if(!id||!name)throw new Error('Give both --base ID and --name "Name".');return {id:id.toUpperCase(),name};
 }
+/** A secret typed without echo (or one line from stdin with --passphrase-stdin, for scripts and tests). Never from argv or env. */
+async function readSecret(prompt:string):Promise<string> {
+  if(args.includes('--passphrase-stdin')){let data='';for await(const chunk of process.stdin)data+=chunk;return data.split(/\r?\n/)[0] ?? '';}
+  if(!process.stdin.isTTY)throw new Error('A passphrase is needed: run this in a terminal (or pass --passphrase-stdin).');
+  process.stdout.write(prompt);process.stdin.setRawMode(true);process.stdin.resume();
+  return new Promise((done,fail)=>{let value='';const onData=(b:Buffer)=>{for(const c of b.toString('utf8')){
+    if(c==='\r'||c==='\n'){process.stdin.setRawMode(false);process.stdin.pause();process.stdin.off('data',onData);process.stdout.write('\n');done(value);return;}
+    if(c==='\u0003'){process.stdin.setRawMode(false);process.stdout.write('\n');fail(new Error('Cancelled.'));return;}
+    if(c==='\u007f'||c==='\b')value=value.slice(0,-1);else value+=c;}};process.stdin.on('data',onData);});
+}
+const flag=(name:string)=>{const i=args.indexOf(name);return i>=0?args[i+1]:undefined;};
 /** Mints a one-use login code from the running service and opens (or prints) the page signed in. */
 async function openPage(home:string,page:'/'|'/dashboard/',print:boolean) {
   const config=readConfig(home);
@@ -52,8 +64,9 @@ try {
   }
   else if(command==='base'){
     // base: show this machine's identity; base ID "Name": change it (restart the service to show it everywhere).
-    if(args.length){const b=setBase(home,{id:(args[0] ?? '').toUpperCase(),name:args.slice(1).join(' ')});console.log(`Base set: ${b.id} · ${b.name}. Restart the service to apply it.`);}
-    else{const b=readConfig(home).base;console.log(`${b.id} · ${b.name}`);}
+    if(args[0]==='pubkey'){const k=baseKey(home);console.log(`${k.publicKey}\nFingerprint: ${fingerprint(k.publicKey)}`);}
+    else if(args.length){const b=setBase(home,{id:(args[0] ?? '').toUpperCase(),name:args.slice(1).join(' ')});console.log(`Base set: ${b.id} · ${b.name}. Restart the service to apply it.`);}
+    else if(args.length===0){const b=readConfig(home).base;console.log(`${b.id} · ${b.name}`);}
   }
   else if(command==='chat'){
     // A request to Misato through the running service. It plans, the gate reviews each action, and the reply comes back.
@@ -104,7 +117,7 @@ try {
     if(!response.ok)throw new Error(value.error ?? 'Ask failed.');
     console.log(value.text+(value.truncated?'\n[reply truncated]':'')+`\n— ${value.route} · ${value.model}`);
   }
-  else if(!command||command==='help')console.log('NERV Agency\nCommands: init [--base ID --name "Name"] | base [ID "Name"] | launch | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | open [dashboard] | chat "text" | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
+  else if(!command||command==='help')console.log('NERV Agency\nCommands: init [--base ID --name "Name"] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | open [dashboard] | chat "text" | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
   else {
     const config=readConfig(home);
     const scrolls=readScrolls(home);
@@ -128,6 +141,48 @@ try {
           else if(sub==='history')console.log(m.historyOf(f.id).map(h=>`${h.created}  ${h.kind}  ${h.source}  ${h.text}`).join('\n'));
           else throw new Error('Usage: memory list | add "fact" | edit ID "fact" | forget ID | history ID | episodes');
         }
+        break;
+      }
+      case 'key':{
+        // key init [--out PATH]: creates the Key of Nebuchadnezzar on the owner's main base and pins its public half here.
+        if(args[0]!=='init')throw new Error('Usage: key init [--out PATH]');
+        const out=flag('--out') ?? join(home,ROOT_KEY_FILE);if(existsSync(out))throw new Error(`A key file already exists at ${out}; it is never overwritten.`);
+        const pass=await readSecret('New passphrase for the Key of Nebuchadnezzar (12+ characters): ');
+        if(!args.includes('--passphrase-stdin')&&pass!==await readSecret('Repeat it: '))throw new Error('The two passphrases differ.');
+        const key=createRootKey(pass);writeFileSync(out,key.file,{mode:0o600});chmodSync(out,0o600);pinKajiRoot(home,key.publicKey);
+        console.log(`Key of Nebuchadnezzar created: ${out}\nRoot fingerprint: ${fingerprint(key.publicKey)}\nKeep a second copy offline (for example on a USB stick) and the passphrase somewhere safe: without them no new base can be enrolled. It is never sent over the Kaji line.`);
+        break;
+      }
+      case 'kaji':{
+        const registry=new Registry(local().db,config.kaji?.root);const me=baseKey(home).publicKey;const [sub]=args;
+        const unlock=async()=>{const path=flag('--key') ?? join(home,ROOT_KEY_FILE);if(!existsSync(path))throw new Error(`No key file at ${path}: enrol on the base that holds the Key, or pass --key PATH.`);
+          const root=unlockRootKey(readFileSync(path,'utf8'),await readSecret('Passphrase for the Key of Nebuchadnezzar: '));
+          if(config.kaji?.root&&root.publicKey!==config.kaji.root)throw new Error('This key file does not match the root pinned on this base.');return root;};
+        if(sub==='enrol'){
+          const [,id,name,pub,address]=args;if(!id||!name||!pub||!address)throw new Error('Usage: kaji enrol BASE-ID "Name" PUBKEY|self ADDRESS [--key PATH]');
+          const root=await unlock();const rec=signRecord(root.privateKey,{kind:'enrol',serial:registry.nextSerial(),baseId:id.toUpperCase(),name,publicKey:pub==='self'?me:pub,address,issued:new Date().toISOString()});
+          new Registry(local().db,root.publicKey).add(rec);console.log(`Enrolled ${rec.body.baseId} · ${name} at ${address} (key ${fingerprint(rec.body.publicKey!)}).`);
+        }
+        else if(sub==='revoke'){
+          const id=(args[1] ?? '').toUpperCase();const entry=registry.bases().find(b=>b.baseId===id&&b.status==='enrolled');if(!entry)throw new Error('No enrolled base with that id (see kaji list).');
+          const root=await unlock();new Registry(local().db,root.publicKey).add(signRecord(root.privateKey,{kind:'revoke',serial:registry.nextSerial(),baseId:id,publicKey:entry.publicKey,issued:new Date().toISOString()}));
+          console.log(`Revoked ${id}: its key is refused from now on; re-enrolling it needs a new base key.`);
+        }
+        else if(sub==='list'||!sub){
+          const bases=registry.bases();if(!config.kaji?.root)console.log('No root pinned yet: key init (main base) or kaji import --root FINGERPRINT.');
+          else console.log(`Root ${fingerprint(config.kaji.root)}\n`+(bases.length?bases.map(b=>`${b.baseId.padEnd(8)} ${b.name.padEnd(16)} ${b.address.padEnd(24)} ${b.status}${b.publicKey===me?'  (this base)':''}`).join('\n'):'No bases enrolled yet.'));
+        }
+        else if(sub==='export'){const bundle=JSON.stringify({root:config.kaji?.root,records:registry.records()},null,2)+'\n';if(!config.kaji?.root)throw new Error('Nothing to export: no root pinned.');if(args[1]){writeFileSync(args[1],bundle);console.log(`Wrote ${registry.records().length} signed record(s) to ${args[1]}.`);}else process.stdout.write(bundle);}
+        else if(sub==='import'){
+          // The root is pinned only when the owner confirms its fingerprint, read on the main base: no trust on first use.
+          const file=args[1];const expect=flag('--root');if(!file)throw new Error('Usage: kaji import FILE --root FINGERPRINT');
+          const bundle=JSON.parse(readFileSync(file,'utf8')) as {root:string;records:SignedRecord[]};
+          if(!config.kaji?.root){if(!expect||fingerprint(bundle.root)!==expect.toLowerCase())throw new Error('Give --root with the fingerprint shown by kaji list on the main base; it must match the file.');pinKajiRoot(home,bundle.root);}
+          else if(bundle.root!==config.kaji.root)throw new Error('This file is signed by a different root than the one pinned here.');
+          const reg=new Registry(local().db,bundle.root);let added=0;for(const r of bundle.records)if(reg.add(r)==='added')added++;
+          console.log(`Imported ${added} new record(s); ${reg.bases().filter(b=>b.status==='enrolled').length} base(s) enrolled.`);
+        }
+        else throw new Error('Usage: kaji enrol | revoke | list | export [FILE] | import FILE --root FINGERPRINT');
         break;
       }
       case 'brief':console.log(composeBrief({now:new Date(),timeZone:config.timeZone,language:config.language,base:config.base.name,...await gatherBrief(local(),new Date(Date.now()-86_400_000))}));break;

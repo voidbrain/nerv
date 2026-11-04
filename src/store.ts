@@ -5,6 +5,7 @@ import { dirname } from 'node:path';
 import { LEDGER_SCHEMA, Ledger, type Decision, type Proposal } from './ledger.ts';
 import { builtinTools, execute, hasExecutor } from './executors.ts';
 import { MEMORY_SCHEMA, Memory } from './memory.ts';
+import { REGISTRY_SCHEMA } from './kaji.ts';
 import { defaultPolicy, type Ballot, type Policy } from './policy.ts';
 export type Reminder = { id: string; title: string; due: string; created: string; delivered: string | null; cancelled: string | null };
 export interface InboxCheckpoint {sequence:number;id?:string}
@@ -38,6 +39,8 @@ export class Store {
     if(!(this.db.prepare('PRAGMA table_info(events)').all() as {name:string}[]).some(c=>c.name==='v'))this.db.exec('ALTER TABLE events ADD COLUMN v INTEGER NOT NULL DEFAULT 1');
     // Schema 4: Lilith's facts, their append-only history and the FTS5 index (F-022).
     this.db.exec(MEMORY_SCHEMA);
+    // Marduk's registry for the Kaji line (F-036): signed, append-only records; an additive table, no version change.
+    this.db.exec(REGISTRY_SCHEMA);
     this.db.exec('PRAGMA user_version=4');
     this.ledger = new Ledger(this.db,{policy:scrolls.policy,tools:builtinTools});this.memory = new Memory(this.db);this.policySource = scrolls.source;
   }

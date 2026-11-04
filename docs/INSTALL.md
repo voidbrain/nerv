@@ -27,6 +27,19 @@ NERV Agency runs on Windows 11 with Node 24 (tested on macOS and Linux; Windows 
 - `service install` is not automated yet: it prints the Task Scheduler command that starts `serve` at logon (`schtasks /Create /SC ONLOGON …`); run it once.
 - If `nerv` (after `npm link`) does not start, use `npm start -- …` from the checkout.
 
+### Kaji line: enrolling your bases
+
+The Kaji line connects your bases. Trust comes from your **Key of Nebuchadnezzar**, an offline root key; the network (Tailscale) only carries the traffic. Phase 1 builds the signed list of bases; the live connection (heartbeats, sync, dashboard) comes next.
+
+1. Install **Tailscale** on every base, logged into the same account, and note each one's address: `tailscale ip -4` (100.x.y.z).
+2. On the main base (Neo Tokyo-3): `npm start -- key init`. Type a passphrase (12+ characters, twice). It writes `~/.nerv/key-of-nebuchadnezzar.enc` (encrypted) and prints the **root fingerprint**. Copy that file to a USB stick and keep the passphrase safe: without them no base can be enrolled. To keep the key only on the stick: `key init --out /Volumes/STICK/key-of-nebuchadnezzar.enc`, then pass `--key` with that path below.
+3. Enrol the main base itself: `npm start -- kaji enrol NERV-01 "Neo Tokyo-3" self 100.x.y.z` (its Tailscale address).
+4. On the other base (Tabgha): `npm start -- base pubkey` prints its public key; copy that line to the main base and enrol it: `npm start -- kaji enrol NERV-02 "Tabgha" <that key> 100.x.y.z`.
+5. On the main base: `npm start -- kaji export bases.json`; copy the file to Tabgha and import it with the fingerprint you read in step 2: `npm start -- kaji import bases.json --root <fingerprint>`. The fingerprint check is what stops a forged list.
+6. `npm start -- kaji list` on either base shows both, marking "this base". Revoke a lost or retired base with `kaji revoke NERV-02` (then export/import again); its key is refused from then on.
+
+Each base's own key (`~/.nerv/base-key`) is created on first use and never leaves it.
+
 ### A second machine
 
 Until the Kaji line (milestone 3) connects bases, every installation is independent: its own data home, reminders, ledger and memory. Give each one its own base identity. Only **one** installation may run Aoba with a given Telegram bot (Telegram delivers a bot's messages to one reader): when you move NERV to an always-on machine, stop the old one or remove its `telegram-token`; to run both, create a second bot. To move your data, stop both services and copy the data home (`~/.nerv`) to the new machine, then set its base identity.
