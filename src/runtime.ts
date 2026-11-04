@@ -29,6 +29,7 @@ export interface StoreApi {
  doctor():object|Promise<object>;
  health():object|Promise<object>;
  approvals(limit?:number):Approval[]|Promise<Approval[]>;
+ expiredApprovals?(since:string):{tool:string;sortieId:string;title:string;expired:string}[]|Promise<{tool:string;sortieId:string;title:string;expired:string}[]>;
  decide(id:string,decision:Decision,source?:'api'|'cli'|'telegram'):{decision:string;result?:unknown;error?:string}|Promise<{decision:string;result?:unknown;error?:string}>;
  act?(action:OwnerAction):Promise<ActReply>;
  chat?(message:string,conversation?:string):Promise<ChatReply>;
@@ -63,6 +64,7 @@ export class Runtime implements StoreApi {
  async update(id:string,patch:{title?:string;due?:string}){return await this.nervous.call('reminders.update',{id,...patch}) as Reminder|null;}
  async cancel(id:string){return await this.nervous.call('reminders.cancel',{id}) as boolean;}
  async inbox(){return this.nervous.call('inbox.list');}
+ async expiredApprovals(since:string){return await this.nervous.call('approvals.expired',{since}) as {tool:string;sortieId:string;title:string;expired:string}[];}
  async approvals(limit=5){return await this.nervous.call('approvals.pending',{limit}) as Approval[];}
  async decide(id:string,decision:Decision,source:'api'|'cli'|'telegram'='api'){const result=await this.nervous.call('approvals.decide',{id,decision,source}) as {decision:string;result?:unknown;error?:string};if(this.resumer)void this.sweep();return result;}
  /** Spear of Longinus for one sortie: revoke its unused grants, stand down its cards, close it; executed effects are reported. */

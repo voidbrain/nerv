@@ -172,6 +172,20 @@
         }
       ],
       "kept": "test/runtime.test.ts asserts package.json start, the nerv shebang, both service units and the child processes carry every NODE_FLAGS entry."
+    },
+    {
+      "value": "Sortie short ID (S- plus the first 4 characters of the id, upper case)",
+      "places": [
+        {
+          "file": "web/public/dashboard/live.js",
+          "what": "short(), the ID on sortie cards, cards and Comms"
+        },
+        {
+          "file": "src/brief.ts",
+          "what": "sortieRef(), the trace reference on every brief item"
+        }
+      ],
+      "kept": "test/brief.test.ts asserts sortieRef and live.js short() give the same ID for the same sortie."
     }
   ],
   "outside": [
