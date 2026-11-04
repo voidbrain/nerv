@@ -45,7 +45,7 @@ Each base's own key (`~/.nerv/base-key`) is created on first use and never leave
 
 **Each base's health.** Every heartbeat also carries the sender's own health: *online*, or *degraded* with up to three reasons (the same ones its `doctor` gives, for example a model route that is down). The other bases show it in the NERV bases panel (badge **DEGRADED** and the reasons) and as a yellow pin on the map; it is only ever what that base said about itself, never passed on by a third base. A base still on an older version sends no health and shows online/offline only, with a note.
 
-The first time, your firewall may ask whether Node may accept incoming connections: allow it. On **Windows**, if Tabgha stays offline from Neo Tokyo-3, allow the port on the Tailscale interface only, in an administrator PowerShell: `New-NetFirewallRule -DisplayName "NERV Kaji" -Direction Inbound -Protocol TCP -LocalPort 4320 -InterfaceAlias Tailscale -Action Allow`. The service log says `Kaji: listening on …`, and `… reachable` / `… unreachable (…)` whenever a base's state changes.
+The first time, your firewall may ask whether Node may accept incoming connections: allow it. On **Windows**, if Tabgha stays offline from Neo Tokyo-3, allow the port on the Tailscale interface only, in an administrator PowerShell: `New-NetFirewallRule -DisplayName "NERV Kaji" -Direction Inbound -Protocol TCP -LocalPort 4320 -InterfaceAlias Tailscale -Action Allow`. The service log says `Kaji: listening on …`, `… reachable` when a base answers again, and `… unreachable (…); 3 heartbeats missed` only after three heartbeats in a row failed (90 seconds, when the dashboard marks it offline): a single slow or missed heartbeat is not logged.
 
 ### A second machine
 

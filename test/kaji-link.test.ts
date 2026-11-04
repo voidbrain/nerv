@@ -4,7 +4,7 @@ import {generateKeyPairSync,type KeyObject} from 'node:crypto';
 import {createServer} from 'node:net';
 import {Store} from '../src/store.ts';
 import {Registry,createRootKey,signRecord,unlockRootKey,type BaseEntry,type RegistryBody,type SignedRecord} from '../src/kaji.ts';
-import {KajiLink,Nonces,endpoint,sanitizeHealth,signedHeaders,verifySigned,type BaseHealth,type HeardHealth,type RegistryPort} from '../src/kaji-link.ts';
+import {KajiLink,Nonces,endpoint,missesToLog,sanitizeHealth,signedHeaders,verifySigned,type BaseHealth,type HeardHealth,type RegistryPort} from '../src/kaji-link.ts';
 import {mkdtempSync,rmSync,writeFileSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';
 const wait=(ms:number)=>new Promise(done=>setTimeout(done,ms));
 async function until(check:()=>Promise<boolean>|boolean,ms=6000){const end=Date.now()+ms;while(!(await check())){if(Date.now()>end)throw new Error('timed out');await wait(25);}}
@@ -102,4 +102,16 @@ test('through two runtimes wired as serve does: a base whose model route is down
   assert.equal(seenByB.find(x=>x.self)!.health!.state,'online','Tabgha has no model route configured: nothing is down');
   await until(async()=>((await a.bases()) as Base[]).find(x=>x.baseId==='NERV-02')?.health?.state==='online');
  }finally{for(const l of links)await l.stop();await a.close();await b.close();rmSync(ha,{recursive:true,force:true});rmSync(hb,{recursive:true,force:true});}
+});
+test('one missed heartbeat is not logged: a peer is logged unreachable only after a full online window of misses, once',async()=>{
+ assert.equal(missesToLog(30_000),3);assert.equal(missesToLog(200_000),1);
+ const A=keys(),B=keys();const dead=await freePort();const st=new Store(':memory:');const reg=new Registry(st.db,root.publicKey);
+ for(const r of [rec({kind:'enrol',baseId:'NERV-01',name:'Neo Tokyo-3',publicKey:A.publicKey,address:'127.0.0.1:1'}),rec({kind:'enrol',baseId:'NERV-02',name:'Tabgha',publicKey:B.publicKey,address:`127.0.0.1:${dead}`})])reg.add(r);
+ const logs:string[]=[];const link=new KajiLink({baseId:'NERV-01',key:A.privateKey,publicKey:A.publicKey,registry:port(reg),log:l=>logs.push(l)});
+ try{
+  const down=()=>logs.filter(l=>/NERV-02 unreachable/.test(l));
+  await link.heartbeat();await link.heartbeat();assert.deepEqual(down(),[],'two misses at 30 s are still within the 90 s online window');
+  await link.heartbeat();assert.equal(down().length,1);assert.match(down()[0]!,/; 3 heartbeats missed\.$/);
+  await link.heartbeat();assert.equal(down().length,1,'logged once, not on every miss');
+ }finally{st.close();}
 });
