@@ -26,6 +26,7 @@ NERV Agency runs on Windows 11 with Node 24 (tested on macOS and Linux; Windows 
 - `open` and `launch` open your default browser.
 - `service install` is not automated yet: it prints the Task Scheduler command that starts `serve` at logon (`schtasks /Create /SC ONLOGON …`); run it once.
 - If `nerv` (after `npm link`) does not start, use `npm start -- …` from the checkout.
+- If `git pull` refuses because a file "will be replaced by CRLF", run `git config core.autocrlf false` and `git restore <file>` once; the repository's `.gitattributes` keeps LF line endings on every system.
 
 ### Kaji line: enrolling your bases
 
