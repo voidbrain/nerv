@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { Store } from './store.ts';
 import { makeServer } from './server.ts';
 import { dataHome, databasePath, initialize, isTelegramToken, pinKajiRoot, telegramTokenPath, readConfig, readScrolls, readTelegramToken, readToken, setBase, type Base } from './config.ts';
-import { TelegramApi, TelegramChannel, startChats, telegramBase } from './telegram.ts';
+import { TelegramApi, TelegramChannel, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
 import { composeBrief, gatherBrief } from './brief.ts';
 import { KajiLink } from './kaji-link.ts';
 import { ROOT_KEY_FILE, Registry, baseKey, createRootKey, enrolmentArgs, fingerprint, signRecord, unlockRootKey, type SignedRecord } from './kaji.ts';
@@ -60,12 +60,15 @@ try {
     else {
     if(args[0]!=='link')throw new Error('Usage: telegram token | telegram link [CHAT_ID]');
     const botToken=readTelegramToken(home);if(!botToken)throw new Error(`No Telegram bot token at ${telegramTokenPath(home)}. Run: nerv telegram token (it asks for the token from @BotFather and saves it there).`);
-    const chats=await startChats(new TelegramApi(botToken,telegramBase()));
-    const wanted=args[1]?Number(args[1]):undefined;const pick=wanted!==undefined?chats.find(c=>c.chatId===wanted):chats.length===1?chats[0]:undefined;
-    if(!pick){if(!chats.length)throw new Error('No /start found: send /start to your bot in Telegram, then run this again (within 24 hours).');throw new Error(`Several chats sent /start; choose one: ${chats.map(c=>`telegram link ${c.chatId} (${c.name})`).join(' | ')}`);}
+    if(readConfig(home).telegram&&!args.includes('--relink')){console.log(`Already linked to chat ${readConfig(home).telegram!.chatId}: nothing to do. To link another chat, run: nerv telegram link --relink`);}
+    else {
+    const api=new TelegramApi(botToken,telegramBase());const chats=await startChats(api);
+    const wanted=args[1]&&/^\d+$/.test(args[1])?Number(args[1]):undefined;const pick=wanted!==undefined?chats.find(c=>c.chatId===wanted):chats.length===1?chats[0]:undefined;
+    if(!pick){if(!chats.length)throw new Error(`No /start found. ${await diagnoseNoStart(api)}`);throw new Error(`Several chats sent /start; choose one: ${chats.map(c=>`telegram link ${c.chatId} (${c.name})`).join(' | ')}`);}
     const path=join(home,'config.json');const current=existsSync(path)?JSON.parse(readFileSync(path,'utf8')) as Record<string,unknown>:{};
     writeFileSync(path,JSON.stringify({...current,telegram:{chatId:pick.chatId}},null,2)+'\n',{mode:0o600});chmodSync(path,0o600);readConfig(home);
     console.log(`Aoba linked to ${pick.name} (chat ${pick.chatId}). Restart the service to start it.`);
+    }
   }
     }
   else if(command==='open'){
