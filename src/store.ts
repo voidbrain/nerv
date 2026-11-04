@@ -44,7 +44,8 @@ export class Store {
     this.db.exec('PRAGMA user_version=4');
     this.ledger = new Ledger(this.db,{policy:scrolls.policy,tools:builtinTools});this.memory = new Memory(this.db);this.policySource = scrolls.source;
   }
-  add(title: string, due: string, now = new Date()): Reminder {
+  /** A valid title and a future ISO date with an explicit timezone, as UTC; the same rules for a new reminder and an edit. */
+  private checkReminder(title: string, due: string, now: Date): {title: string; due: string} {
     if(typeof title !== 'string' || !title.trim() || title.length > 500) throw new Error('Title must contain 1–500 characters.');
     if(typeof due !== 'string' || !/^\d{4}-\d\d-\d\dT\d\d:\d\d(?::\d\d(?:\.\d{1,3})?)?(Z|[+-]\d\d:\d\d)$/.test(due) || !Number.isFinite(Date.parse(due))) throw new Error('Use an ISO date with an explicit timezone offset.');
     const match = /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d)(?::(\d\d)(?:\.\d{1,3})?)?(Z|[+-](\d\d):(\d\d))$/.exec(due)!;
@@ -52,13 +53,25 @@ export class Store {
     const days = new Date(Date.UTC(Number(year),Number(month),0)).getUTCDate();
     if(Number(month)<1 || Number(month)>12 || Number(day)<1 || Number(day)>days || Number(hour)>23 || Number(minute)>59 || Number(second ?? 0)>59 || (zone !== 'Z' && (Number(offsetHour)>14 || Number(offsetMinute)>59 || (Number(offsetHour)===14 && Number(offsetMinute)!==0)))) throw new Error('Invalid calendar date or timezone offset.');
     if(Date.parse(due) <= now.getTime()) throw new Error('Reminder must be in the future.');
-    const r: Reminder = {id:randomUUID(),title:title.trim(),due:new Date(due).toISOString(),created:now.toISOString(),delivered:null,cancelled:null};
+    return {title:title.trim(),due:new Date(due).toISOString()};
+  }
+  add(title: string, due: string, now = new Date()): Reminder {
+    const checked = this.checkReminder(title,due,now);
+    const r: Reminder = {id:randomUUID(),title:checked.title,due:checked.due,created:now.toISOString(),delivered:null,cancelled:null};
     this.db.prepare('INSERT INTO reminders VALUES(?,?,?,?,?,?)').run(r.id,r.title,r.due,r.created,null,null); return r;
   }
   list(): Reminder[] { return this.db.prepare('SELECT * FROM reminders ORDER BY due').all() as Reminder[]; }
   pendingReminders(): Reminder[] { return this.db.prepare('SELECT * FROM reminders WHERE delivered IS NULL AND cancelled IS NULL ORDER BY due LIMIT 5').all() as Reminder[]; }
   /** Undoes a cancellation while the reminder is still in the future and undelivered: the inverse of cancel. */
   restore(id: string): boolean { return Number(this.db.prepare('UPDATE reminders SET cancelled=NULL WHERE id=? AND delivered IS NULL AND cancelled IS NOT NULL AND due>?').run(id,new Date().toISOString()).changes) > 0; }
+  /** Changes the title and/or the time of a reminder that has not fired or been cancelled; undefined when there is none. */
+  update(id: string, patch: {title?: string; due?: string}, now = new Date()): Reminder | undefined {
+    if(typeof id !== 'string' || !id || (patch.title === undefined && patch.due === undefined)) throw new Error('Give a new title or a new due time.');
+    const row = this.db.prepare('SELECT * FROM reminders WHERE id=? AND delivered IS NULL AND cancelled IS NULL').get(id) as Reminder | undefined; if(!row) return undefined;
+    const checked = this.checkReminder(patch.title ?? row.title, patch.due ?? row.due, now);
+    this.db.prepare('UPDATE reminders SET title=?,due=? WHERE id=? AND delivered IS NULL AND cancelled IS NULL').run(checked.title,checked.due,id);
+    return {...row,...checked};
+  }
   cancel(id: string): boolean { return Number(this.db.prepare('UPDATE reminders SET cancelled=? WHERE id=? AND delivered IS NULL AND cancelled IS NULL').run(new Date().toISOString(),id).changes) > 0; }
   tick(now = new Date()): number {
     this.db.exec('BEGIN IMMEDIATE');
@@ -116,7 +129,7 @@ export class Store {
     if(sortie?.source==='instrumentality'&&!(this.db.prepare('SELECT 1 FROM approvals a JOIN actions x ON x.id=a.action_id WHERE x.sortie_id=? AND a.decision IS NULL').get(sortieId)))this.ledger.close(sortieId,'done');
   }
   events(sortieId: string, after=0, limit=50) { return this.ledger.events(sortieId,after,limit); }
-  sorties(limit=20, before?: string) { return this.ledger.sorties(limit,before); }
+  sorties(limit=20, before?: string, q?: string) { return this.ledger.sorties(limit,before,q); }
   sortie(id: string) { return this.ledger.sortie(id) ?? null; }
   health() { return {integrityCheck:"not-run"}; }
   doctor() { return {database:this.db.prepare('PRAGMA quick_check').get(),schema:this.db.prepare('PRAGMA user_version').get(),pending:this.db.prepare('SELECT count(*) AS count FROM reminders WHERE delivered IS NULL AND cancelled IS NULL').get(),policy:{source:this.policySource,...this.ledger.policy}}; }

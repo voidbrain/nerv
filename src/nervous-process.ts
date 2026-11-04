@@ -18,12 +18,13 @@ process.on('message',(value:unknown)=>{
    case 'reminders.list':return store.list();
    case 'reminders.pending':return store.pendingReminders();
    case 'reminders.add':try{return store.add(params.title as string,params.due as string);}catch{throw new Error('Invalid reminder.');}
+   case 'reminders.update':{let r;try{r=store.update(params.id as string,{...(params.title!==undefined?{title:params.title as string}:{}),...(params.due!==undefined?{due:params.due as string}:{})});}catch{throw new Error('Invalid reminder.');}return r ?? null;}
    case 'reminders.cancel':return store.cancel(params.id as string);
    case 'inbox.list':return store.inbox();
    case 'approvals.pending':return store.approvals(params.limit as number|undefined);
    case 'approvals.decide':return store.decide(params.id as string,params.decision as 'approve'|'reject'|'edit',params.source as string);
    case 'events.page':return store.events(params.sortieId as string,params.after as number|undefined,params.limit as number|undefined);
-   case 'sorties.list':return store.sorties(params.limit as number|undefined,params.before as string|undefined);
+   case 'sorties.list':return store.sorties(params.limit as number|undefined,params.before as string|undefined,params.q as string|undefined);
    case 'sorties.get':return store.sortie(params.id as string);
    case 'sorties.spear':return store.ledger.spear(params.id as string,params.reason as string);
    case 'sorties.open':return store.ledger.openSortie(params.source==='misato'?MISATO_SOURCE:params.source==='instrumentality'?'instrumentality':OWNER_SOURCE,params.title as string,'trusted');

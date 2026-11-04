@@ -21,6 +21,7 @@ export interface StoreApi {
  pendingReminders():Reminder[]|Promise<Reminder[]>;
  inboxPage(after?:number,limit?:number,afterId?:string):InboxPage|Promise<InboxPage>;
  add(title:string,due:string):Reminder|Promise<Reminder>;
+ update(id:string,patch:{title?:string;due?:string}):Reminder|undefined|null|Promise<Reminder|undefined|null>;
  cancel(id:string):boolean|Promise<boolean>;
  inbox():unknown|Promise<unknown>;
  doctor():object|Promise<object>;
@@ -38,7 +39,7 @@ export interface StoreApi {
  consolidate?():Promise<{summary?:string;exchanges:number;proposed:number;skipped:number;error?:string}>;
  spear?(id:string,reason:string):Promise<{revoked:number;stoodDown:number;happened:{actionId:string;tool:string;inverse:string|null}[]}|null>;
  events(sortieId:string,after?:number,limit?:number):SortieEvent[]|Promise<SortieEvent[]>;
- sorties(limit?:number,before?:string):SortieSummary[]|Promise<SortieSummary[]>;
+ sorties(limit?:number,before?:string,q?:string):SortieSummary[]|Promise<SortieSummary[]>;
  sortie(id:string):(SortieSummary&{detail:ActionDetail[]})|null|Promise<(SortieSummary&{detail:ActionDetail[]})|null>;
  ask?(ask:Ask):Promise<Reply>;
 }
@@ -53,13 +54,14 @@ export class Runtime implements StoreApi {
  async pendingReminders(){return await this.nervous.call('reminders.pending') as Reminder[];}
  async inboxPage(after=0,limit=5,afterId?:string){return await this.nervous.call('inbox.page',{after,limit,...(afterId?{afterId}:{})}) as InboxPage;}
  async add(title:string,due:string){return await this.nervous.call('reminders.add',{title,due}) as Reminder;}
+ async update(id:string,patch:{title?:string;due?:string}){return await this.nervous.call('reminders.update',{id,...patch}) as Reminder|null;}
  async cancel(id:string){return await this.nervous.call('reminders.cancel',{id}) as boolean;}
  async inbox(){return this.nervous.call('inbox.list');}
  async approvals(limit=5){return await this.nervous.call('approvals.pending',{limit}) as Approval[];}
  async decide(id:string,decision:Decision,source:'api'|'cli'|'telegram'='api'){const result=await this.nervous.call('approvals.decide',{id,decision,source}) as {decision:string;result?:unknown;error?:string};if(this.resumer)void this.sweep();return result;}
  /** Spear of Longinus for one sortie: revoke its unused grants, stand down its cards, close it; executed effects are reported. */
  async spear(id:string,reason:string){if(!await this.sortie(id))return null;return await this.nervous.call('sorties.spear',{id,reason}) as {revoked:number;stoodDown:number;happened:{actionId:string;tool:string;inverse:string|null}[]};}
- async sorties(limit=20,before?:string){return await this.nervous.call('sorties.list',{limit,...(before?{before}:{})}) as SortieSummary[];}
+ async sorties(limit=20,before?:string,q?:string){return await this.nervous.call('sorties.list',{limit,...(before?{before}:{}),...(q?{q}:{})}) as SortieSummary[];}
  async sortie(id:string){return await this.nervous.call('sorties.get',{id}) as (SortieSummary&{detail:ActionDetail[]})|null;}
  async events(sortieId:string,after=0,limit=50){return await this.nervous.call('events.page',{sortieId,after,limit}) as SortieEvent[];}
  /** Coordinator side of the gate: open the sortie, ask Casper only for Orange/Blue, then ballot and (on a grant) run in the scheduler process. */
