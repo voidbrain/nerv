@@ -385,7 +385,7 @@ function renderNeeds() {
     const left = Math.max(0, ap.expires - Date.now()); const mm = Math.floor(left / MIN), ss = Math.floor(left % MIN / 1000);
     return "<article class='apcard " + b.pattern + "'>" +
       "<div class='row'><span class='what'>" + esc(humanAction(a)) + "</span><span class='badge b-" + b.pattern + "'>PATTERN " + b.pattern.toUpperCase() + "</span></div>" +
-      "<div class='small muted'>" + esc(s.id) + " · " + esc(s.title) + " · pilot " + esc(s.pilot) + " (" + pilotStage(s.pilot) + ")</div>" +
+      "<div class='small muted'>" + esc(s.id) + " · " + esc(s.title) + (LIVE ? "" : " · pilot " + esc(s.pilot) + " (" + pilotStage(s.pilot) + ")") + "</div>" +
       "<code style='margin-top:4px'>" + esc(a.tool) + " " + esc(JSON.stringify(a.args, null, 1)) + "</code>" +
       "<div class='kv' style='margin-top:4px'><span>effect</span><span>" + b.effect + (TOOLS[a.tool].inverse ? " · undo: " + TOOLS[a.tool].inverse : " · <span class='danger'>no undo</span>") + "</span>" +
       "<span>executor</span><span>" + b.executor + "</span>" +
@@ -802,12 +802,6 @@ document.addEventListener("click", e => {
   if (t.id === "btn-doctor") { log("Doctor: scheduler ok · brain ok · routes " + (state.dummy ? "unreachable" : "ok") + " · SQLite integrity ok", state.dummy ? "warn" : "ok"); renderHealth(); return; }
 });
 document.addEventListener("keydown", e => { const t = e.target.closest && e.target.closest("[data-s]"); if (t && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); t.click(); } });
-document.getElementById("new-form").addEventListener("submit", e => {
-  e.preventDefault(); const text = document.getElementById("new-text").value.trim(); const preset = document.getElementById("new-preset").value;
-  if (LIVE) { if (text) chat(text); document.getElementById("new-text").value = ""; return; }
-  const key = preset || guessPreset(text); if (!key) { log("Misato: I can't plan that in the demo; try an example.", "warn"); return; }
-  launch(key, text || null); document.getElementById("new-text").value = ""; document.getElementById("new-preset").value = "";
-});
 function say(text) { log(text, "ok", null, "misato"); state.log[state.log.length - 1].chat = true; renderLog(); }
 function cardFor(text) { const id = (text.match(/AP-[\w-]+/i) || [])[0]; const sid = (text.match(/S-\d+/i) || [])[0];
   if (id) return state.approvals.find(a => a.id.toLowerCase() === id.toLowerCase());
