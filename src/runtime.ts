@@ -4,7 +4,7 @@ import type {ActionDetail,Approval,Decision,SortieSummary} from './ledger.ts';
 import type {SortieEvent} from './events.ts';
 import {MODEL_TIMEOUT_MS,type Ask,type Reply} from './model.ts';
 import type {Effect,Pattern,Stage,Verdict} from './policy.ts';
-import {MAX_STEPS,type Plan,type Step} from './misato.ts';
+import {MAX_STEPS,type Plan,type Step,type Turn} from './misato.ts';
 import {argsHash} from './ledger.ts';
 export interface ChatReply {sortieId:string;reply?:string;error?:string;steps:Step[];waiting:{approvalId:string;tool:string;reason:string}[]}
 /** An action the owner asks for directly: the request is what Casper checks the action against. */
@@ -22,7 +22,7 @@ export interface StoreApi {
  approvals(limit?:number):Approval[]|Promise<Approval[]>;
  decide(id:string,decision:Decision,source?:'api'|'cli'|'telegram'):{decision:string;result?:unknown;error?:string}|Promise<{decision:string;result?:unknown;error?:string}>;
  act?(action:OwnerAction):Promise<ActReply>;
- chat?(message:string):Promise<ChatReply>;
+ chat?(message:string,conversation?:string):Promise<ChatReply>;
  onResumed?(listener:(reply:ChatReply)=>void):void;
  reloadModels?():Promise<{error?:string;kept?:boolean;models:unknown}>;
  events(sortieId:string,after?:number,limit?:number):SortieEvent[]|Promise<SortieEvent[]>;
@@ -64,10 +64,12 @@ export class Runtime implements StoreApi {
   return casperError?{...result,casperError}:result;
  }
  /** A new request to Misato (F-003): its text and every step go to the ledger, so the loop can resume later. */
- async chat(message:string):Promise<ChatReply> {
+ async chat(message:string,conversation?:string):Promise<ChatReply> {
+  // Earlier exchanges of the same conversation (read before this request is recorded), so "yes" has its question.
+  const context=conversation?await this.nervous.call('misato.context',{conversation}).catch(()=>[]) as Turn[]:[];
   const sortieId=await this.nervous.call('sorties.open',{title:message.slice(0,500),source:'misato'}) as string;
-  await this.note(sortieId,'misato.request',{text:message});
-  return this.loop(sortieId,message,[]);
+  await this.note(sortieId,'misato.request',{text:message,...(conversation?{conversation}:{})});
+  return this.loop(sortieId,message,[],context);
  }
  private note(sortieId:string,kind:'misato.request'|'misato.step'|'misato.waiting',payload:object){return this.nervous.call('misato.note',{sortieId,kind,payload});}
  /** Records a step, cutting an oversized result so the event stays within its bound. */
@@ -79,7 +81,7 @@ export class Runtime implements StoreApi {
   * Misato's loop: plan one action, gate it, show Misato the outcome, repeat until Misato replies or the step limit is
   * reached. When actions wait for the owner, the sortie stays open and resumes once they are decided (F-033).
   */
- private async loop(sortieId:string,message:string,steps:Step[]):Promise<ChatReply> {
+ private async loop(sortieId:string,message:string,steps:Step[],context:Turn[]=[]):Promise<ChatReply> {
   const waiting:ChatReply['waiting']=[];const pending=new Set<string>();
   const finish=async(status:'done'|'failed',reply?:string,error?:string):Promise<ChatReply>=>{
    if(waiting.length&&reply){
@@ -89,7 +91,7 @@ export class Runtime implements StoreApi {
    return {sortieId,...(reply?{reply}:{}),...(error?{error}:{}),steps,waiting};
   };
   for(let turn=0;turn<MAX_STEPS;turn++){
-   const out=await this.brain.call('misato.step',{request:message,history:steps.slice(-12)},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as {plan?:Plan;invalid?:boolean;error?:string};
+   const out=await this.brain.call('misato.step',{request:message,history:steps.slice(-12),...(context.length?{context}:{})},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as {plan?:Plan;invalid?:boolean;error?:string};
    if(out.error)return finish('failed',undefined,out.error);
    if(!out.plan){await this.record(sortieId,steps,{outcome:'invalid',error:'Reply was not one JSON action or reply.'});continue;}
    if('reply' in out.plan)return finish('done',out.plan.reply);

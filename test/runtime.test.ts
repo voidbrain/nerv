@@ -47,6 +47,7 @@ test('every NERV process trusts the system certificates: npm start, both service
  const start=(JSON.parse(readFileSync('package.json','utf8')) as {scripts:{start:string}}).scripts.start;
  for(const flag of NODE_FLAGS){
   assert.ok(start.split(' ').includes(flag),`package.json start has ${flag}`);
+  assert.ok(readFileSync('src/cli.ts','utf8').split('\n')[0]!.split(' ').includes(flag),`the nerv command's shebang has ${flag}`);
   assert.ok(renderService('darwin','/h','/r','/n').includes(`<string>/n</string><string>${flag}</string>`));
   assert.ok(renderService('linux','/h','/r','/n').includes(`ExecStart="/n" ${flag} `));
  }

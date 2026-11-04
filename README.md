@@ -15,9 +15,12 @@ Requires Node **24+**. English is the default interface language; Italian is sel
 ```bash
 npm ci
 npm run build
+npm link            # once: adds the nerv command (nerv init, nerv serve, nerv chat "…", nerv open dashboard)
 npm start -- init
 npm start -- serve
 ```
+
+Every `npm start -- X` below can be written `nerv X` after `npm link`.
 
 Run `npm start -- open` to open **http://127.0.0.1:4317** already signed in (`npm start -- open dashboard` for the live NERV dashboard) (or open it yourself and enter the token from `~/.nerv/token`). This one service supervises the built UI/API gateway, an isolated scheduler/database process and an execution-process boundary. To run without keeping Terminal open, stop the foreground process and run `npm start -- service install`. Supports macOS launchd and Linux systemd **user** services. See [installation, updates, data migration and service controls](docs/INSTALL.md).
 

@@ -30,7 +30,7 @@ A value that lives in more than one place: change it in one, change it in all. B
 | Value | Where | Kept equal by |
 |---|---|---|
 | Seven-eye triangle geometry and mark colour | `web/public/mark.svg` (Web SVG mark (browser icon))<br>`web/public/brand.svg` (Sidebar mark: half leaf beside the same triangle)<br>`native/NervMenuBar/Sources/NervMenuBar/NervMenuBar.swift` (Native monochrome menu template drawing)<br>`web/src/styles.css` (--mark colour token, literal in both SVGs) | test/brand.test.ts asserts the same triangle and eye centres in the three drawings and the --mark colour in both SVGs. |
-| Node flags for every NERV process (--use-system-ca) | `src/process-client.ts` (NODE_FLAGS, used for child processes and service units)<br>`package.json` (scripts.start)<br>`src/service.ts` (launchd ProgramArguments and systemd ExecStart) | test/runtime.test.ts asserts package.json start, both service units and the child processes carry every NODE_FLAGS entry. |
+| Node flags for every NERV process (--use-system-ca) | `src/process-client.ts` (NODE_FLAGS, used for child processes and service units)<br>`package.json` (scripts.start)<br>`src/service.ts` (launchd ProgramArguments and systemd ExecStart)<br>`src/cli.ts` (shebang of the nerv command (package.json bin)) | test/runtime.test.ts asserts package.json start, the nerv shebang, both service units and the child processes carry every NODE_FLAGS entry. |
 
 ## Outside the repository
 

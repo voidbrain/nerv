@@ -1,3 +1,4 @@
+#!/usr/bin/env -S node --use-system-ca
 import { spawnSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
 import { chmodSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -44,7 +45,7 @@ try {
     // A request to Misato through the running service. It plans, the gate reviews each action, and the reply comes back.
     const message=args.join(' ');if(!message)throw new Error('Usage: chat "what you want"');
     const config=readConfig(home);
-    const response=await fetch(`http://127.0.0.1:${config.port}/api/chat`,{method:'POST',headers:{authorization:`Bearer ${readToken(home)}`,'content-type':'application/json'},body:JSON.stringify({message})}).catch(()=>{throw new Error('NERV Agency is not running: start it with serve or service start.');});
+    const response=await fetch(`http://127.0.0.1:${config.port}/api/chat`,{method:'POST',headers:{authorization:`Bearer ${readToken(home)}`,'content-type':'application/json'},body:JSON.stringify({message,conversation:'cli'})}).catch(()=>{throw new Error('NERV Agency is not running: start it with serve or service start.');});
     const value=await response.json() as {reply?:string;error?:string;sortieId?:string;steps?:{tool?:string;outcome:string;reason?:string;error?:string}[];waiting?:{approvalId:string;tool:string}[]};
     if(!response.ok)throw new Error(value.error ?? 'Chat failed.');
     for(const s of value.steps ?? [])console.log(`· ${s.tool ?? '(invalid reply)'} → ${s.outcome}${s.error?` · ${s.error}`:s.reason?` · ${s.reason}`:''}`);

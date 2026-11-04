@@ -47,6 +47,8 @@ export class Store {
   }
   list(): Reminder[] { return this.db.prepare('SELECT * FROM reminders ORDER BY due').all() as Reminder[]; }
   pendingReminders(): Reminder[] { return this.db.prepare('SELECT * FROM reminders WHERE delivered IS NULL AND cancelled IS NULL ORDER BY due LIMIT 5').all() as Reminder[]; }
+  /** Undoes a cancellation while the reminder is still in the future and undelivered: the inverse of cancel. */
+  restore(id: string): boolean { return Number(this.db.prepare('UPDATE reminders SET cancelled=NULL WHERE id=? AND delivered IS NULL AND cancelled IS NOT NULL AND due>?').run(id,new Date().toISOString()).changes) > 0; }
   cancel(id: string): boolean { return Number(this.db.prepare('UPDATE reminders SET cancelled=? WHERE id=? AND delivered IS NULL AND cancelled IS NULL').run(new Date().toISOString(),id).changes) > 0; }
   tick(now = new Date()): number {
     this.db.exec('BEGIN IMMEDIATE');

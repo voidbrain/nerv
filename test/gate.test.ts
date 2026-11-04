@@ -92,3 +92,14 @@ test('reload changes the brain\'s models in place; a broken file keeps the last 
   assert.equal(brainPid(),pid,'no process restart');
  }finally{await runtime.close();await model.close();rmSync(home,{recursive:true,force:true});}
 });
+test('reminders.cancel takes one id or up to 20 ids, and reminders.restore undoes it while the reminder is still ahead',()=>{
+ const store=new Store(':memory:');
+ try{
+  const a=store.add('A','2031-01-01T09:00:00Z'),b=store.add('B','2031-01-02T09:00:00Z');
+  const run=(tool:string,args:Record<string,unknown>)=>{const s=store.ledger.openSortie(OWNER_SOURCE,tool,'trusted');return store.runAction(s,{tool,args,stage:'production'});};
+  const cancel=run('reminders.cancel',{ids:[a.id,b.id]});assert.equal(cancel.pattern,'green');assert.deepEqual((cancel.result as {cancelled:string[]}).cancelled,[a.id,b.id]);
+  assert.equal(store.pendingReminders().length,0);
+  assert.deepEqual((run('reminders.restore',{id:a.id}).result as {restored:string[]}).restored,[a.id]);assert.deepEqual(store.pendingReminders().map(r=>r.id),[a.id]);
+  for(const args of [{},{id:'x',ids:['y']},{ids:[]},{ids:['x','x']},{ids:Array.from({length:21},(_,i)=>'r'+i)},{ids:[1]}])assert.ok(run('reminders.cancel',args).error,JSON.stringify(args));
+ }finally{store.close();}
+});

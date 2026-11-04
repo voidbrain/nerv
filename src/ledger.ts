@@ -81,6 +81,16 @@ export class Ledger {
  }
  /** Misato's loop state, kept in the ledger so a resume after the owner's decision needs no coordinator memory (F-033). */
  note<K extends 'misato.request'|'misato.step'|'misato.waiting'>(sortieId:string,kind:K,payload:EventPayloads[K],now=new Date()):void {this.tx(()=>this.event(sortieId,null,kind,payload,now));}
+ /** The last exchanges of one conversation within `withinMs`, oldest first: request, Misato's reply and the actions that ran. */
+ conversation(key:string,withinMs=30*60_000,limit=3,now=new Date()):{request:string;reply?:string;actions?:string[]}[] {
+  if(typeof key!=='string'||!/^[a-z]+(:[0-9]+)?$/.test(key)||key.length>40)throw new Error('Invalid conversation.');
+  const rows=this.db.prepare("SELECT sortie_id,payload FROM events WHERE kind='misato.request' AND json_extract(payload,'$.conversation')=? AND created>? ORDER BY sequence DESC LIMIT ?").all(key,iso(now,-withinMs),limit) as {sortie_id:string;payload:string}[];
+  return rows.reverse().map(r=>{
+   const reply=this.db.prepare("SELECT payload FROM events WHERE sortie_id=? AND kind='misato.reply' ORDER BY sequence DESC LIMIT 1").get(r.sortie_id) as {payload:string}|undefined;
+   const ran=(this.db.prepare("SELECT payload FROM events WHERE sortie_id=? AND kind='action.done' ORDER BY sequence").all(r.sortie_id) as {payload:string}[]).map(e=>{const p=JSON.parse(e.payload) as {tool:string;result:unknown};return `${p.tool} → ${JSON.stringify(p.result).slice(0,300)}`;});
+   return {request:(JSON.parse(r.payload) as {text:string}).text,...(reply?{reply:(JSON.parse(reply.payload) as {text:string}).text}:{}),...(ran.length?{actions:ran}:{})};
+  });
+ }
  /** Open Misato sorties whose latest wait is over: every approval it waited for is decided, and no resume has claimed it. */
  resumable():string[] {
   return (this.db.prepare(`SELECT s.id FROM sorties s WHERE s.source='misato' AND s.status='open'

@@ -85,10 +85,10 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
         // Admin only: a request to Misato, who plans and proposes actions through the gate.
         if(!store.chat){reply(503,{error:'Agent loop unavailable.'});return;}
         const b=await body(req,20000);
-        if(Object.keys(b).some(k=>k!=='message')||typeof b.message!=='string'||!b.message.trim()||b.message.length>4000)throw new Error('Message is required: up to 4000 characters.');
+        if(Object.keys(b).some(k=>!['message','conversation'].includes(k))||typeof b.message!=='string'||!b.message.trim()||b.message.length>4000||(b.conversation!==undefined&&(typeof b.conversation!=='string'||!/^[a-z]+$/.test(b.conversation)||b.conversation.length>20)))throw new Error('Message is required: up to 4000 characters; conversation is a short lowercase name.');
         // Each step may wait for Misato and Casper.
         const budget=MODEL_TIMEOUT_MS*MAX_STEPS*2+5000;req.setTimeout(budget);res.once('finish',()=>req.socket.setTimeout(15000));
-        reply(200,await store.chat(b.message.trim()));
+        reply(200,await store.chat(b.message.trim(),b.conversation as string|undefined));
       }
       else if(req.method==='POST'&&path==='/api/actions'){
         // Admin only: one owner action through the per-action gate (F-017). Grant IDs never appear in the reply.

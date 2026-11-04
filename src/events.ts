@@ -25,7 +25,7 @@ export interface EventPayloads {
  'approval.expired':{approvalId:string;source:'ttl'};
  'spear':{reason:string;revoked:number;stoodDown:number;happenedCount:number;happened:Happened[]};
  'misato.reply':{text:string};
- 'misato.request':{text:string};
+ 'misato.request':{text:string;conversation?:string};
  'misato.step':{step:Step;actionId?:string};
  'misato.waiting':{approvalIds:string[]};
  'misato.resumed':Record<string,never>;
