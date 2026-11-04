@@ -5,6 +5,7 @@ import {tmpdir} from 'node:os';import {join} from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {once} from 'node:events';import {WebSocket} from 'ws';
 import {Store} from '../src/store.ts';import {Ledger} from '../src/ledger.ts';import {makeServer} from '../src/server.ts';import type {StoreApi} from '../src/runtime.ts';
+import {EVENT_SCHEMA_VERSION,MAX_EVENT_PAYLOAD_BYTES,encodePayload} from '../src/events.ts';
 import {ballot,defaultPolicy,patternOf,validatePolicy,type Tool,type Verdict} from '../src/policy.ts';
 const now=new Date('2030-01-01T00:00:00Z');const at=(ms:number)=>new Date(now.getTime()+ms);
 const tools:Tool[]=[{name:'notes.read',effect:'read'},{name:'notes.write',effect:'write-local',inverse:'notes.restore'},{name:'mail.send',effect:'write-external'},{name:'repo.force-push',effect:'irreversible'},{name:'charger.start',effect:'physical'}];
@@ -120,7 +121,7 @@ test('an existing version 1 database gains the ledger without losing reminders',
  try{
   const old=new DatabaseSync(path);old.exec(`CREATE TABLE reminders(id TEXT PRIMARY KEY, title TEXT NOT NULL, due TEXT NOT NULL, created TEXT NOT NULL, delivered TEXT, cancelled TEXT);CREATE TABLE deliveries(id TEXT PRIMARY KEY, reminder_id TEXT NOT NULL UNIQUE REFERENCES reminders(id), message TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT);INSERT INTO reminders VALUES('r','Insurance','2030-01-01T01:00:00.000Z','2029-12-31T00:00:00.000Z',NULL,NULL);PRAGMA user_version=1;`);old.close();
   const store=new Store(path);
-  try{assert.equal(store.list().length,1);assert.equal((store.db.prepare('PRAGMA user_version').get() as {user_version:number}).user_version,2);new Ledger(store.db).openSortie('cli','x','trusted',now);}finally{store.close();}
+  try{assert.equal(store.list().length,1);assert.equal((store.db.prepare('PRAGMA user_version').get() as {user_version:number}).user_version,3);new Ledger(store.db).openSortie('cli','x','trusted',now);}finally{store.close();}
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
 test('the scheduler process stands down expired approvals on its own ticks',async()=>{
@@ -166,4 +167,47 @@ test('decisions travel through the scheduler process; the socket can read cards 
   assert.equal(ledger.events(sortie).at(-1)?.kind,'approval.reject');assert.equal((await rpc('events.page',{sortieId:sortie})).result.length,4);
   const closed=once(client,'close');client.close();await closed;
  });}finally{await runtime.close();store.close();rmSync(dir,{recursive:true,force:true});}
+});
+
+test('every event records its schema version; a schema 2 database upgrades and its old events read as version 1',()=>{
+ const dir=mkdtempSync(join(tmpdir(),'nerv-'));const path=join(dir,'db');
+ try{
+  const old=new DatabaseSync(path);old.exec(`CREATE TABLE events(sequence INTEGER PRIMARY KEY AUTOINCREMENT, sortie_id TEXT NOT NULL, action_id TEXT, kind TEXT NOT NULL, payload TEXT NOT NULL, created TEXT NOT NULL);CREATE TRIGGER events_no_update BEFORE UPDATE ON events BEGIN SELECT RAISE(ABORT,'events are append-only'); END;INSERT INTO events(sortie_id,action_id,kind,payload,created) VALUES('s',NULL,'sortie.opened','{"source":"cli","title":"Old","trust":"trusted"}','2029-12-31T00:00:00.000Z');PRAGMA user_version=2;`);old.close();
+  const store=new Store(path);
+  try{
+   assert.equal((store.db.prepare('PRAGMA user_version').get() as {user_version:number}).user_version,3);
+   assert.deepEqual(store.ledger.events('s').map(e=>[e.v,e.kind]),[[1,'sortie.opened']]);
+   const sortie=store.ledger.openSortie('cli','New','trusted',now);assert.equal(store.ledger.events(sortie)[0]!.v,EVENT_SCHEMA_VERSION);
+   assert.throws(()=>store.db.prepare('UPDATE events SET v=2').run(),/append-only/);
+  }finally{store.close();}
+  const again=new Store(path);try{assert.equal(again.ledger.events('s').length,1);}finally{again.close();}
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});
+test('event payloads are bounded: unknown kinds and oversized payloads are refused, model reasons and the Spear list are cut',()=>{
+ assert.throws(()=>encodePayload('made.up' as 'sortie.done',{}),/Unknown event kind/);
+ assert.throws(()=>encodePayload('grant.denied',{grantId:'g',reason:'x'.repeat(MAX_EVENT_PAYLOAD_BYTES)}),/too large/);
+ const {store,ledger}=setup({policy:{...defaultPolicy,budget:1000}});
+ try{
+  const sortie=ledger.openSortie('cli','Bounded','trusted',now);
+  ledger.propose(sortie,{tool:'mail.send',args:{to:'x'},stage:'production',casper:{...casper(),reason:'y'.repeat(5000)}},now);
+  const ballotEvent=ledger.events(sortie).find(e=>e.kind==='ballot');assert.ok(ballotEvent&&ballotEvent.kind==='ballot');
+  assert.equal(ballotEvent.payload.verdicts.find(v=>v.seat==='casper')!.reason.length,500);
+  for(let i=0;i<55;i++){const p=ledger.propose(sortie,{tool:'notes.read',args:{i},stage:'test'},now);ledger.authorize(p.grantId!,'notes.read',{i},now);}
+  const result=ledger.spear(sortie,'stop',now);assert.equal(result.happened.length,55);
+  let last=0,spear;for(;;){const page=ledger.events(sortie,last);if(!page.length)break;last=page.at(-1)!.sequence;spear=page.find(e=>e.kind==='spear')??spear;}
+  assert.ok(spear&&spear.kind==='spear');assert.equal(spear.payload.happenedCount,55);assert.equal(spear.payload.happened.length,50);
+ }finally{store.close();}
+});
+test('event pages fit one scheduler frame and page on to the end, through the scheduler process',async()=>{
+ const dir=mkdtempSync(join(tmpdir(),'nerv-'));const path=join(dir,'db');
+ const store=new Store(path);const ledger=new Ledger(store.db,{tools});
+ const sortie=ledger.openSortie('cli','Long reasons','trusted');
+ const extras=Array.from({length:12},(_,i)=>({seat:'seat'+i,vote:'approve' as const,reason:'z'.repeat(500)}));
+ for(let i=0;i<60;i++)ledger.propose(sortie,{tool:'notes.read',args:{i},stage:'test',extras});
+ const {Runtime}=await import('../src/runtime.ts');const runtime=new Runtime(path);
+ try{
+  await runtime.ready();let after=0,pages=0;const kinds:string[]=[];
+  for(;;){const page=await runtime.events(sortie,after,50);if(!page.length)break;pages++;after=page.at(-1)!.sequence;kinds.push(...page.map(e=>e.kind));assert.ok(page.every(e=>e.v===EVENT_SCHEMA_VERSION));}
+  assert.deepEqual(kinds,['sortie.opened',...Array.from({length:60},()=>['ballot','grant.issued']).flat()]);assert.ok(pages>3);
+ }finally{await runtime.close();store.close();rmSync(dir,{recursive:true,force:true});}
 });
