@@ -5,7 +5,7 @@
   if (!LIVE) return;
   const match = /^#code=([a-f0-9]{32})$/.exec(location.hash); const code = match ? match[1] : null;
   if (match) history.replaceState(null, "", location.pathname + location.search);
-  let token = ""; let polling = false; let lastRan = null; const detailCache = {}; const known = new Map(); let chatBusy = false;
+  let token = ""; let polling = false; let lastRan = null; let firstTrace = true; const detailCache = {}; const known = new Map(); let chatBusy = false;
   const PLANNED = "<div class='muted small'>Planned · not connected yet.</div>";
   const api = async (path, init = {}) => {
     const res = await fetch("/api/" + path, { ...init, headers:{ "Content-Type":"application/json", Authorization:"Bearer " + token } });
@@ -56,7 +56,13 @@
       // The one live "cage": the in-process executor beats when an action newly ran.
       const ran = Object.values(detailCache).flatMap(d => d.detail).filter(a => a.status === "done" || a.status === "failed").map(a => a.created).sort().pop();
       if (ran && lastRan && ran > lastRan) activeCage["EVA-02"] = Date.now() + 4000; if (ran) lastRan = ran;
-      if (selected) await loadEvents(selected.realId);
+      // Comms: the first refresh loads the five most recent sorties' traces (so the panel is not empty at start); later
+      // ones keep the selected sortie and every running or waiting one up to date.
+      const traced = new Set([...(firstTrace ? list.slice(0, 5) : list.filter(s => s.status === "open")).map(s => s.id), ...(selected ? [selected.realId] : [])]);
+      firstTrace = false;
+      let added = 0; for (const id of traced) added += await loadEvents(id);
+      // renderAll does not redraw Comms: redraw it when new trace lines arrived (not on every poll, so scrolling back stays put).
+      if (added) renderLog();
       state.sorties = list.map(toSortie);
       state.approvals = cards.map(toApproval).filter(ap => state.sorties.some(s => s.id === ap.sortie));
       state.upcoming = pending.map(r => ({ at:Date.parse(r.due), title:r.title, kind:"reminder" }));
@@ -71,7 +77,7 @@
   // Comms: the selected sortie's own trace (requests, steps, ballots, decisions, replies) plus what you typed here.
   const seen = new Set();
   async function loadEvents(id) {
-    let after = 0; const all = [];
+    let after = 0; const all = []; let added = 0;
     for (;;) { const page = await api("sorties/" + id + "/events?after=" + after); if (!page.length) break; all.push(...page); after = page[page.length - 1].sequence; if (page.length < 50) break; }
     for (const e of all) {
       const key = id + ":" + e.sequence; if (seen.has(key)) continue; seen.add(key);
@@ -83,9 +89,10 @@
         : e.kind === "action.done" ? ["EVA-02: " + p.tool + " done", "ok", "eva-02"] : e.kind === "action.failed" ? ["EVA-02: " + p.tool + " failed · " + p.error, "danger", "eva-02"]
         : e.kind === "misato.resumed" ? ["Misato: resuming after your decision", "", "misato"] : e.kind === "sortie.done" || e.kind === "sortie.failed" ? ["Debrief: " + e.kind.slice(7), e.kind === "sortie.done" ? "ok" : "danger", "misato"] : null;
       if (e.kind === "misato.reply") known.set(id, p.text);
-      if (line) state.log.push({ t, msg:line[0], cls:line[1], s:s.id, who:line[2], chat:e.kind.startsWith("misato.") });
+      if (line) { state.log.push({ t, msg:line[0], cls:line[1], s:s.id, who:line[2], chat:e.kind.startsWith("misato.") }); added++; }
     }
     state.log.sort((a, b) => a.t - b.t); if (state.log.length > 300) state.log.splice(0, state.log.length - 300);
+    return added;
   }
 
   // Real actions instead of simulated ones.
