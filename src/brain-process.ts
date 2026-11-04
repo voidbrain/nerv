@@ -2,7 +2,7 @@ import {dispatchRpc,MAX_FRAME_BYTES,RpcFault} from './rpc.ts';
 import {readConfig,readModelKey} from './config.ts';
 import {complete,describe,forRole,ModelError,MODEL_TIMEOUT_MS,type Ask,type Models} from './model.ts';
 import {casperAsk,parseCasper,type CasperInput} from './casper.ts';
-import {misatoAsk,parsePlan,type Step,type Turn} from './misato.ts';
+import {misatoAsk,parsePlan,type Recalled,type Step,type Turn} from './misato.ts';
 import {toolDocs} from './executors.ts';
 // Execution boundary: model routes, the Casper seat and Misato's planning step. It plans and reviews; it never executes a tool.
 // The data home arrives as argv; the cloud key is read here from its private file, never passed in env or argv.
@@ -30,7 +30,7 @@ process.on('message',(value:unknown)=>{
    if(configError)return {error:configError};
    const route=models.roles?.misato?.route ?? (models.local?'local':models.cloud?.enabled?'cloud':undefined);
    if(!route)return {error:'No model route for Misato: add models.local (or enable models.cloud) in config.json, then run reload. See INSTALL, "Model routes".'};
-   const ask=misatoAsk({request:params.request as string,history:params.history as Step[],tools:toolDocs,now:new Date().toISOString(),timeZone,...(params.context?{context:params.context as Turn[]}:{})},route);
+   const ask=misatoAsk({request:params.request as string,history:params.history as Step[],tools:toolDocs,now:new Date().toISOString(),timeZone,...(params.context?{context:params.context as Turn[]}:{}),...(params.memory?{memory:params.memory as Recalled[]}:{})},route);
    try{const reply=await complete(ask,forRole(models,'misato'),key,{timeoutMs:MODEL_TIMEOUT_MS-5000});const plan=parsePlan(reply.text);return plan?{plan,model:reply.model}:{invalid:true,model:reply.model};}
    catch(e){return {error:e instanceof ModelError?e.message:'Model route failed.'};}
   }

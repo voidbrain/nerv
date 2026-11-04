@@ -3,11 +3,11 @@
     "kind": "rule",
     "disposition": "implemented",
     "target": "docs/agents/areas.md",
-    "evidence": "Frontend area note: the dashboard lives in web/public/dashboard, live.js is active only with a login code, it must run under the service CSP (no inline script, CDN or remote font; tested), and live panels without data say planned (F-019). Checked by test/dashboard.test.ts, the headless process test and a headless Chrome run."
+    "evidence": "Action gate area note gains Lilith's rules: facts with provenance and append-only history (schema 4), FTS5 recall with quoted user words, memory.remember as an owner tool that is always Pattern Blue so Misato never stores a fact alone, and local-only facts dropped on the cloud route (F-022). Checked by test/memory.test.ts across store, gate, prompt and processes."
   },
   {
     "kind": "none",
     "disposition": "no-change",
-    "evidence": "docs/STYLE-GUIDE.md (adapted) gains project content only: the dashboard's themes and the planned-panel rule; no harness rule or copied tool changed."
+    "evidence": "No harness file or copied tool changed; INSTALL documents memory commands and the schema-4 upgrade."
   }
 ]

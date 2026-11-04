@@ -83,7 +83,7 @@ try {
     if(!response.ok)throw new Error(value.error ?? 'Ask failed.');
     console.log(value.text+(value.truncated?'\n[reply truncated]':'')+`\n— ${value.route} · ${value.model}`);
   }
-  else if(!command||command==='help')console.log('NERV Agency\nCommands: init | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | open [dashboard] | chat "text" | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
+  else if(!command||command==='help')console.log('NERV Agency\nCommands: init | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | open [dashboard] | chat "text" | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
   else {
     const config=readConfig(home);
     const scrolls=readScrolls(home);
@@ -93,6 +93,21 @@ try {
       case 'remind':console.log(JSON.stringify(local().add(args[0] ?? '',args[1] ?? ''),null,2));break;
       case 'list':console.log(JSON.stringify(local().list(),null,2));break;
       case 'cancel':if(!local().cancel(args[0] ?? ''))throw new Error('No pending reminder with that ID.');console.log('Cancelled.');break;
+      case 'memory':{
+        // The owner's direct control of Lilith: facts added here are active at once; every change keeps its history.
+        const m=local().memory;const [sub,id,...rest]=args;
+        if(sub==='list'||!sub){const facts=m.list();console.log(facts.length?facts.map(f=>`${f.id.slice(0,8)}  ${f.text}  (${f.source}${f.shareable?', shareable':''})`).join('\n'):'No facts yet.');}
+        else if(sub==='add'){const f=m.add([id,...rest].join(' '),'owner');console.log(`Remembered ${f.id.slice(0,8)}: ${f.text}`);}
+        else{
+          const match=m.list(200).filter(f=>f.id.startsWith(id ?? '-'));if(match.length!==1)throw new Error(match.length?'Several facts start with that id; give more of it.':'No active fact with that id (see memory list).');
+          const f=match[0]!;
+          if(sub==='forget'){m.forget(f.id,'owner');console.log(`Forgot ${f.id.slice(0,8)}.`);}
+          else if(sub==='edit'){const e=m.edit(f.id,rest.join(' '),'owner');console.log(`Updated ${f.id.slice(0,8)}: ${e?.text}`);}
+          else if(sub==='history')console.log(m.historyOf(f.id).map(h=>`${h.created}  ${h.kind}  ${h.source}  ${h.text}`).join('\n'));
+          else throw new Error('Usage: memory list | add "fact" | edit ID "fact" | forget ID | history ID');
+        }
+        break;
+      }
       case 'brief':console.log(composeBrief({now:new Date(),timeZone:config.timeZone,language:config.language,...await gatherBrief(local(),new Date(Date.now()-86_400_000))}));break;
       case 'tick':console.log(JSON.stringify({delivered:local().tick()}));break;
       case 'inbox':console.log(JSON.stringify(local().inbox(),null,2));break;

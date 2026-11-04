@@ -49,7 +49,7 @@ The same commands install `nerv.service` under the user systemd configuration di
 
 Stop the service, update the checkout, run `npm ci` and `npm run build`, then start it again. Service definitions record absolute Node/checkout/data paths: uninstall and reinstall if these paths change, including an nvm-managed Node upgrade. An existing definition is never overwritten by install. Run doctor and inspect service status/logs if bootstrap fails; a definition left by a failed install can be removed with uninstall before retrying. Environment overrides in your shell are not automatically persisted into the service; put service settings in config.json and use init for the persistent token.
 
-Database schema 2 adds the action ledger tables to `nerv.sqlite` on first start; reminders are kept. The upgrade is one-way: an older checkout refuses a schema-2 database with "Database schema is newer", so back up `nerv.sqlite` before updating if you may roll back. Schema 3 adds the event schema version to each ledger event (earlier events read as version 1); a schema-2 checkout refuses it the same way.
+Database schema 2 adds the action ledger tables to `nerv.sqlite` on first start; reminders are kept. The upgrade is one-way: an older checkout refuses a schema-2 database with "Database schema is newer", so back up `nerv.sqlite` before updating if you may roll back. Schema 3 adds the event schema version to each ledger event (earlier events read as version 1); a schema-2 checkout refuses it the same way. Schema 4 adds Lilith's facts, their history and a full-text index; older checkouts refuse it likewise.
 
 The backend remains bound to loopback. Remote TLS/Tailscale deployment, service auto-update and credential rotation are not implemented. Do not expose the development server publicly.
 
@@ -87,6 +87,20 @@ read -rs KEY && printf '%s\n' "$KEY" > ~/.nerv/anthropic-key && chmod 600 ~/.ner
 ```
 
 Paste the key and press Enter (nothing is shown). Then set `"enabled": true` under `cloud` and run `npm start -- reload`.
+
+## Memory (Lilith)
+
+Misato remembers facts about you that you confirmed: tell it "remember that my dentist is Dr. Rossi" and it proposes the fact as an approval card (Telegram buttons, `approve`, or the dashboard); nothing is stored until you approve. From then on, facts that match a request are offered to Misato with it, in any conversation. Facts are local-only: they are never sent to a cloud model unless marked shareable.
+
+```bash
+npm start -- memory list
+npm start -- memory add "I drink coffee at 8"
+npm start -- memory edit ID "I drink tea at 8"
+npm start -- memory forget ID
+npm start -- memory history ID
+```
+
+Facts you add yourself are active at once. Forgetting removes a fact from recall and lists; its history (created, edited, forgotten, by whom) is kept. IDs can be shortened to their first characters.
 
 ## Dashboard
 

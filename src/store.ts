@@ -4,6 +4,7 @@ import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { LEDGER_SCHEMA, Ledger, type Decision, type Proposal } from './ledger.ts';
 import { builtinTools, execute, hasExecutor } from './executors.ts';
+import { MEMORY_SCHEMA, Memory } from './memory.ts';
 import { defaultPolicy, type Ballot, type Policy } from './policy.ts';
 export type Reminder = { id: string; title: string; due: string; created: string; delivered: string | null; cancelled: string | null };
 export interface InboxCheckpoint {sequence:number;id?:string}
@@ -18,12 +19,13 @@ export const MISATO_SOURCE='misato';
 export class Store {
   readonly db: DatabaseSync;
   readonly ledger: Ledger;
+  readonly memory: Memory;
   readonly policySource: string;
   constructor(path: string, scrolls: {policy:Policy;source:string} = {policy:defaultPolicy,source:'default'}) {
     if(path !== ':memory:') mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
     this.db = new DatabaseSync(path);
     const version = this.db.prepare('PRAGMA user_version').get() as {user_version:number};
-    if(version.user_version > 3) {this.db.close();throw new Error('Database schema is newer than this NERV Agency version.');}
+    if(version.user_version > 4) {this.db.close();throw new Error('Database schema is newer than this NERV Agency version.');}
     this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
       CREATE TABLE IF NOT EXISTS reminders(id TEXT PRIMARY KEY, title TEXT NOT NULL, due TEXT NOT NULL, created TEXT NOT NULL, delivered TEXT, cancelled TEXT);
       CREATE TABLE IF NOT EXISTS deliveries(id TEXT PRIMARY KEY, reminder_id TEXT NOT NULL UNIQUE REFERENCES reminders(id), message TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT);
@@ -31,8 +33,10 @@ export class Store {
       ${LEDGER_SCHEMA}`);
     // Schema 3: events record the event schema version they were written under (F-024); earlier rows read as version 1.
     if(!(this.db.prepare('PRAGMA table_info(events)').all() as {name:string}[]).some(c=>c.name==='v'))this.db.exec('ALTER TABLE events ADD COLUMN v INTEGER NOT NULL DEFAULT 1');
-    this.db.exec('PRAGMA user_version=3');
-    this.ledger = new Ledger(this.db,{policy:scrolls.policy,tools:builtinTools});this.policySource = scrolls.source;
+    // Schema 4: Lilith's facts, their append-only history and the FTS5 index (F-022).
+    this.db.exec(MEMORY_SCHEMA);
+    this.db.exec('PRAGMA user_version=4');
+    this.ledger = new Ledger(this.db,{policy:scrolls.policy,tools:builtinTools});this.memory = new Memory(this.db);this.policySource = scrolls.source;
   }
   add(title: string, due: string, now = new Date()): Reminder {
     if(typeof title !== 'string' || !title.trim() || title.length > 500) throw new Error('Title must contain 1–500 characters.');
@@ -96,7 +100,7 @@ export class Store {
   private run(sortieId:string,actionId:string,grantId:string,tool:string,args:Record<string,unknown>):{result:unknown}|{error:string} {
     this.ledger.authorize(grantId,tool,args);
     let outcome:{result:unknown}|{error:string};
-    try{outcome={result:execute(this,tool,args)};}catch(e){outcome={error:e instanceof Error?e.message:'Executor failed.'};}
+    try{outcome={result:execute(this,tool,args,{sortieId})};}catch(e){outcome={error:e instanceof Error?e.message:'Executor failed.'};}
     this.ledger.finished(sortieId,actionId,tool,outcome);return outcome;
   }
   private settle(sortieId:string,status:'done'|'failed') {
