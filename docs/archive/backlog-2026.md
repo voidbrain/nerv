@@ -29,7 +29,7 @@ Closed records in closing-date order. Dated evidence, not current status.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Superseded by F-025 (veto-only extra seats and consultants) in this PR (NERV M2a plan); Closed 2026-11-04 |
+| PR / evidence | Superseded by F-025 (veto-only extra seats and consultants) in [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan); Closed 2026-11-04 |
 | Opened | 2026-11-02 |
 | Verification | Not applicable: closed unimplemented as superseded |
 | Reviewed | 2026-11-04 |

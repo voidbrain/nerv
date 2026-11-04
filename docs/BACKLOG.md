@@ -1,6 +1,6 @@
 # Nodo backlog
 
-Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6 merged after green checks; target-OS and browser acceptance remain pending. Owner commits `1787a30`–`6d8c330` (NERV evaluation, backlog/roadmap update, dashboard prototypes) have no PR; their CI failed on `check:backlog` (P2 icon), fixed in this PR (NERV M2a plan). Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md).
+Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6 merged after green checks; target-OS and browser acceptance remain pending. Owner commits `1787a30`–`6d8c330` (NERV evaluation, backlog/roadmap update, dashboard prototypes) have no PR; their CI failed on `check:backlog` (P2 icon), fixed in [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan). Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md).
 
 ## Features and improvements
 
@@ -576,7 +576,7 @@ Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6
 
 | Field | Value |
 |---|---|
-| PR / evidence | this PR (NERV M2a plan) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-02 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |
@@ -711,7 +711,7 @@ Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6
 
 | Field | Value |
 |---|---|
-| PR / evidence | this PR (NERV M2a plan) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-02 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |
@@ -744,7 +744,7 @@ Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6
 
 | Field | Value |
 |---|---|
-| PR / evidence | this PR (NERV M2a plan) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-02 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |
@@ -777,7 +777,7 @@ Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6
 
 | Field | Value |
 |---|---|
-| PR / evidence | this PR (NERV M2a plan) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-02 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |
@@ -810,7 +810,7 @@ Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6
 
 | Field | Value |
 |---|---|
-| PR / evidence | this PR (NERV M2a plan) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-02 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |
@@ -843,7 +843,7 @@ Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6
 
 | Field | Value |
 |---|---|
-| PR / evidence | this PR (NERV M2a plan) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-04 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |
@@ -876,7 +876,7 @@ Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6
 
 | Field | Value |
 |---|---|
-| PR / evidence | this PR (NERV M2a plan) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-04 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |
@@ -909,7 +909,7 @@ Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6
 
 | Field | Value |
 |---|---|
-| PR / evidence | this PR (NERV M2a plan) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-04 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |
@@ -942,7 +942,7 @@ Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6
 
 | Field | Value |
 |---|---|
-| PR / evidence | this PR (NERV M2a plan) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-04 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |
@@ -975,7 +975,7 @@ Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6
 
 | Field | Value |
 |---|---|
-| PR / evidence | this PR (NERV M2a plan) |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-04 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |
