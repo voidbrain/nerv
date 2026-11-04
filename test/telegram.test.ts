@@ -101,7 +101,7 @@ test('telegram link (CLI) saves the owner chat into config.json, keeping the oth
 test('Hyuga\'s brief reaches the owner once a day, also across a restart',async()=>{
  const token='123456:'+'b'.repeat(35);const tg=await fakeTelegram(token);const home=mkdtempSync(join(tmpdir(),'nerv-brief-'));
  const runtime=new Runtime(join(home,'nerv.sqlite'));const statePath=join(home,'telegram-state.json');
- const channel=()=>new TelegramChannel({api:new TelegramApi(token,tg.base),store:runtime,chatId:OWNER,statePath,log:()=>{},brief:{at:'00:00',timeZone:'Europe/Rome',language:'it'}});
+ const channel=()=>new TelegramChannel({api:new TelegramApi(token,tg.base),store:runtime,chatId:OWNER,statePath,log:()=>{},brief:()=>({at:'00:00',timeZone:'Europe/Rome',language:'it'})});
  let aoba=channel();
  try{
   await runtime.ready();await runtime.add('Rinnovare assicurazione',new Date(Date.now()+3_600_000).toISOString());

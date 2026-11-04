@@ -6,7 +6,7 @@ import { statSync } from 'node:fs';
 import { validateModels, type Models } from './model.ts';
 import { defaultPolicy, validatePolicy, type Policy } from './policy.ts';
 /** telegram.chatId: the one private chat (the owner's) the Aoba bot answers; set by `telegram link`. */
-export interface Config {port:number; language:'it'|'en'; timeZone:string;nativePort?:number;models:Models;telegram?:{chatId:number};brief?:{at:string};instrumentality?:{at:string};base:Base}
+export interface Config {port:number; language:'it'|'en'; timeZone:string;nativePort?:number;models:Models;telegram?:{chatId:number};brief?:{at:string};instrumentality?:{at:string}|{when:'idle'};base:Base}
 /** This machine's identity in the NERV mesh: an id (NERV-01) and a name (Neo Tokyo-3), shown in the dashboard, doctor and brief. */
 export interface Base {id:string;name:string}
 export const defaultBase:Base={id:'NERV-01',name:'Neo Tokyo-3'};
@@ -40,7 +40,10 @@ export function readConfig(home:string):Config {
   const config:Config={port:Number(setting('PORT') ?? raw.port),language:raw.language,timeZone:raw.timeZone,models:validateModels((raw as Record<string,unknown>).models),base:'base' in raw?validateBase((raw as Record<string,unknown>).base):defaultBase};
   if('nativePort' in raw){const native=Number(raw.nativePort);if(!Number.isInteger(native)||native<1||native>65535||native===config.port)throw new Error('Invalid native port.');config.nativePort=native;}
   if('telegram' in raw){const t=raw.telegram as Record<string,unknown>;if(!t||typeof t!=='object'||Array.isArray(t)||Object.keys(t).some(k=>k!=='chatId')||!Number.isSafeInteger(t.chatId)||(t.chatId as number)<=0)throw new Error('Invalid telegram: only chatId, a private chat id (run telegram link).');config.telegram={chatId:t.chatId as number};}
-  if('instrumentality' in raw){const b=raw.instrumentality as Record<string,unknown>;if(!b||typeof b!=='object'||Array.isArray(b)||Object.keys(b).some(k=>k!=='at')||typeof b.at!=='string'||!/^([01]\d|2[0-3]):[0-5]\d$/.test(b.at))throw new Error('Invalid instrumentality: {"at": "HH:MM"} in your time zone.');config.instrumentality={at:b.at};}
+  if('instrumentality' in raw){const b=raw.instrumentality as Record<string,unknown>;const keys=b&&typeof b==='object'&&!Array.isArray(b)?Object.keys(b):[];
+    if(keys.length===1&&keys[0]==='when'&&b.when==='idle')config.instrumentality={when:'idle'};
+    else if(keys.length===1&&keys[0]==='at'&&typeof b.at==='string'&&/^([01]\d|2[0-3]):[0-5]\d$/.test(b.at))config.instrumentality={at:b.at};
+    else throw new Error('Invalid instrumentality: {"at": "HH:MM"} in your time zone, or {"when": "idle"}.');}
   if('brief' in raw){const b=raw.brief as Record<string,unknown>;if(!b||typeof b!=='object'||Array.isArray(b)||Object.keys(b).some(k=>k!=='at')||typeof b.at!=='string'||!/^([01]\d|2[0-3]):[0-5]\d$/.test(b.at))throw new Error('Invalid brief: {"at": "HH:MM"} in your time zone.');config.brief={at:b.at};}
   if(config.port===(config.nativePort ?? 4319))throw new Error('Web and native ports must differ.');
   if(!Number.isInteger(config.port)||config.port<1||config.port>65535)throw new Error('Invalid NERV Agency port.');
@@ -89,6 +92,21 @@ export function setBase(home:string,base:Base):Base {
   const path=join(home,'config.json');const valid=validateBase(base);
   const current=existsSync(path)?JSON.parse(readFileSync(path,'utf8')) as Record<string,unknown>:{...defaults};
   writeFileSync(path,JSON.stringify({...current,base:valid},null,2)+'\n',{mode:0o600});chmodSync(path,0o600);readConfig(home);return valid;
+}
+export type ScheduleValue=string|null;
+/** The two schedules the owner may change by talking to Misato (F-003): times, "idle" or off. Nothing security-relevant. */
+export function readSchedule(home:string):{brief:string;instrumentality:string} {
+  const c=readConfig(home);return {brief:c.brief?.at ?? 'off',instrumentality:!c.instrumentality?'off':'when' in c.instrumentality?'idle':c.instrumentality.at};
+}
+export function setSchedule(home:string,patch:{brief?:string;instrumentality?:string}):{previous:{brief:string;instrumentality:string};now:{brief:string;instrumentality:string}} {
+  const time=/^([01]\d|2[0-3]):[0-5]\d$/;const previous=readSchedule(home);
+  if(patch.brief!==undefined&&patch.brief!=='off'&&!time.test(patch.brief))throw new Error('brief is HH:MM or off.');
+  if(patch.instrumentality!==undefined&&!['off','idle'].includes(patch.instrumentality)&&!time.test(patch.instrumentality))throw new Error('instrumentality is HH:MM, idle or off.');
+  const path=join(home,'config.json');const current=existsSync(path)?JSON.parse(readFileSync(path,'utf8')) as Record<string,unknown>:{...defaults};
+  if(patch.brief!==undefined){if(patch.brief==='off')delete current.brief;else current.brief={at:patch.brief};}
+  if(patch.instrumentality!==undefined){if(patch.instrumentality==='off')delete current.instrumentality;else current.instrumentality=patch.instrumentality==='idle'?{when:'idle'}:{at:patch.instrumentality};}
+  writeFileSync(path,JSON.stringify(current,null,2)+'\n',{mode:0o600});chmodSync(path,0o600);readConfig(home);
+  return {previous,now:readSchedule(home)};
 }
 export function initialize(home:string,base?:Base):void {
   mkdirSync(home,{recursive:true,mode:0o700});

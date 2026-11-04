@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {mkdtempSync,rmSync,writeFileSync} from 'node:fs';
 import {createServer} from 'node:http';
 import {tmpdir} from 'node:os';import {join} from 'node:path';
-import {digestAsk,parseDigest} from '../src/instrumentality.ts';
+import {digestAsk,factLimit,parseDigest} from '../src/instrumentality.ts';
+import {OWNER_SOURCE} from '../src/store.ts';
 import {Runtime} from '../src/runtime.ts';
 import {Store} from '../src/store.ts';
 const wait=(ms:number)=>new Promise(done=>setTimeout(done,ms));
@@ -14,7 +15,9 @@ test('the digest prompt asks only for facts the owner stated, in the configured 
  assert.deepEqual(parseDigest('ok {"summary":" A day. ","facts":["Ada is my sister","Ada is my sister","x",7]}'),{summary:'A day.',facts:['Ada is my sister']});
  assert.deepEqual(parseDigest('{"summary":"Quiet."}'),{summary:'Quiet.',facts:[]});
  for(const bad of ['nothing','{"facts":["a fact"]}','{"summary":"","facts":[]}','{"summary":"s","facts":"no"}'])assert.equal(parseDigest(bad),undefined,bad);
- assert.equal(parseDigest(`{"summary":"s","facts":${JSON.stringify(Array.from({length:9},(_,i)=>'fact number '+i))}}`)!.facts.length,5);
+ assert.equal(parseDigest(`{"summary":"s","facts":${JSON.stringify(Array.from({length:12},(_,i)=>'fact number '+i))}}`,4)!.facts.length,4);
+ assert.deepEqual([0,2,6,7,40].map(factLimit),[3,3,3,4,10],'about one per two exchanges, between 3 and 10');
+ assert.match(digestAsk(Array.from({length:14},()=>({request:'x'})),'en','local').system!,/At most 7 facts/);
 });
 async function setup(misato:string[],digest:string) {
  const asked:string[]=[];
@@ -51,8 +54,21 @@ test('Instrumentality runs once a local day at its time, and a failed digest is 
  const t=await setup(['{"reply":"ok"}'],'not json');
  try{
   await t.runtime.chat('hello','cli');
-  t.runtime.startInstrumentality('00:00','Europe/Rome',50);await wait(400);
+  t.runtime.startInstrumentality(()=>({mode:{at:'00:00'},timeZone:'Europe/Rome'}),50);await wait(400);
   assert.equal(t.asked.filter(a=>a==='digest').length,2,'one attempt today (with one retry of an unreadable reply), even though it failed');
   const store=new Store(join(t.home,'nerv.sqlite'));try{assert.equal(store.memory.episodes().length,0,'a failed digest saves no episode');}finally{store.close();}
+ }finally{await t.close();}
+});
+test('idle mode: consolidates after an hour without requests, at most once in 20 hours, only when there is something new',async()=>{
+ const t=await setup([],'{"summary":"Quiet day.","facts":[]}');
+ try{
+  const store=new Store(join(t.home,'nerv.sqlite'));
+  try{const s=store.ledger.openSortie('misato','old','trusted');store.ledger.note(s,'misato.request',{text:'I like tea'},new Date(Date.now()-2*3_600_000));}finally{store.close();}
+  t.runtime.startInstrumentality(()=>({mode:{when:'idle'},timeZone:'Europe/Rome'}),50);await wait(300);
+  assert.equal(t.asked.filter(a=>a==='digest').length,1,'idle for two hours: one consolidation');
+  const again=new Store(join(t.home,'nerv.sqlite'));
+  try{const s=again.ledger.openSortie('misato','new','trusted');again.ledger.note(s,'misato.request',{text:'I like coffee'},new Date(Date.now()-2*3_600_000+60_000));assert.equal(again.memory.episodes().length,1);}finally{again.close();}
+  await wait(300);assert.equal(t.asked.filter(a=>a==='digest').length,1,'not again within 20 hours of the last episode');
+  void OWNER_SOURCE;
  }finally{await t.close();}
 });

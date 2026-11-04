@@ -4,7 +4,7 @@ import {complete,describe,forRole,ModelError,MODEL_TIMEOUT_MS,type Ask,type Mode
 import {casperAsk,parseCasper,type CasperInput} from './casper.ts';
 import {misatoAsk,parsePlan,type Recalled,type Step,type Turn} from './misato.ts';
 import {toolDocs} from './executors.ts';
-import {digestAsk,parseDigest,type Exchange} from './instrumentality.ts';
+import {digestAsk,factLimit,parseDigest,type Exchange} from './instrumentality.ts';
 // Execution boundary: model routes, the Casper seat and Misato's planning step. It plans and reviews; it never executes a tool.
 // The data home arrives as argv; the cloud key is read here from its private file, never passed in env or argv.
 const home=process.argv[2];
@@ -39,7 +39,7 @@ process.on('message',(value:unknown)=>{
    // Same route and model as Misato: the digest reads the owner's own conversations.
    if(configError)return {error:configError};
    const route=models.roles?.misato?.route ?? (models.local?'local':models.cloud?.enabled?'cloud':undefined);if(!route)return {error:'No model route for Instrumentality (it uses Misato\'s).'};
-   try{const reply=await complete(digestAsk(params.exchanges as Exchange[],language,route),forRole(models,'misato'),key,{timeoutMs:MODEL_TIMEOUT_MS-5000});const digest=parseDigest(reply.text);return digest?{digest}:{error:'The digest reply was not readable.'};}
+   try{const reply=await complete(digestAsk(params.exchanges as Exchange[],language,route),forRole(models,'misato'),key,{timeoutMs:MODEL_TIMEOUT_MS-5000});const digest=parseDigest(reply.text,factLimit((params.exchanges as Exchange[]).length));return digest?{digest}:{error:'The digest reply was not readable.'};}
    catch(e){return {error:e instanceof ModelError?e.message:'Model route failed.'};}
   }
   if(method==='casper.verdict'){

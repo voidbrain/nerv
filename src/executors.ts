@@ -2,11 +2,12 @@ import type { Tool } from './policy.ts';
 import type { Reminder } from './store.ts';
 import type { ToolDoc } from './misato.ts';
 import type { Memory } from './memory.ts';
+import { setSchedule } from './config.ts';
 /**
  * Built-in tools with an executor in the scheduler process (F-017). Each declares its effect class for the gate; an
  * executor runs only after `Ledger.authorize` accepted the grant for these exact arguments.
  */
-export interface ReminderBackend {list():Reminder[];add(title:string,due:string):Reminder;cancel(id:string):boolean;restore(id:string):boolean;memory:Memory}
+export interface ReminderBackend {list():Reminder[];add(title:string,due:string):Reminder;cancel(id:string):boolean;restore(id:string):boolean;memory:Memory;home?:string}
 export const builtinTools:Tool[]=[
  {name:'reminders.list',effect:'read'},
  {name:'reminders.add',effect:'write-local',inverse:'reminders.cancel'},
@@ -16,6 +17,8 @@ export const builtinTools:Tool[]=[
  // A new fact is only stored after the owner approves its card: Misato never writes memory on its own.
  {name:'memory.remember',effect:'write-local',inverse:'memory.forget',owner:true},
  {name:'memory.forget',effect:'write-local'},
+ // Only the brief and Instrumentality schedules: local, reversible by setting the previous values back.
+ {name:'settings.schedule',effect:'write-local',inverse:'settings.schedule'},
 ];
 const text=(args:Record<string,unknown>,key:string)=>{const v=args[key];if(typeof v!=='string')throw new Error(`Argument ${key} must be a string.`);return v;};
 const only=(args:Record<string,unknown>,keys:string[])=>{if(Object.keys(args).some(k=>!keys.includes(k)))throw new Error(`Arguments allowed: ${keys.join(', ')||'none'}.`);};
@@ -28,6 +31,7 @@ export const toolDocs:ToolDoc[]=[
  {name:'memory.recall',effect:'read',about:'Searches the facts the owner confirmed earlier (Lilith) by keywords.',args:'{"query": words to look for}'},
  {name:'memory.remember',effect:'write-local',about:'Proposes a lasting fact about the owner (a preference, a person, a routine). It always asks the owner first; store only what they stated, in their words.',args:'{"text": one fact, up to 500 characters}'},
  {name:'memory.forget',effect:'write-local',about:'Forgets a fact by its id from memory.recall or the memory list.',args:'{"id": fact id}'},
+ {name:'settings.schedule',effect:'write-local',about:'Changes when the daily brief is sent and when Instrumentality (nightly memory consolidation) runs. Times are the owner\'s local time.',args:'{"brief": "HH:MM" or "off", "instrumentality": "HH:MM", "idle" or "off"} (one or both)'},
 ];
 /** {id} or {ids: [...]} (1–20 distinct strings): bulk changes stay one reviewed action, bound by the gate's argument hash. */
 function ids(args:Record<string,unknown>):string[] {
@@ -45,6 +49,8 @@ export function execute(backend:ReminderBackend,tool:string,args:Record<string,u
   case 'reminders.restore':{const list=ids(args);return {restored:list.filter(id=>backend.restore(id)),ids:list};}
   case 'memory.recall':only(args,['query']);return backend.memory.recall(text(args,'query')).map(f=>({id:f.id,text:f.text}));
   case 'memory.remember':{only(args,['text']);const f=backend.memory.add(text(args,'text'),'misato',{...(context.sortieId?{sortieId:context.sortieId}:{})});return {id:f.id,text:f.text};}
+  case 'settings.schedule':{only(args,['brief','instrumentality']);if(!Object.keys(args).length)throw new Error('Give brief and/or instrumentality.');if(!backend.home)throw new Error('Settings are not available here.');
+   return setSchedule(backend.home,{...(args.brief!==undefined?{brief:text(args,'brief')}:{}),...(args.instrumentality!==undefined?{instrumentality:text(args,'instrumentality')}:{})});}
   case 'memory.forget':only(args,['id']);return {forgotten:backend.memory.forget(text(args,'id'),'misato')};
   default:throw new Error('No executor for this tool.');
  }

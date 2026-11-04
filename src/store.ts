@@ -21,7 +21,10 @@ export class Store {
   readonly ledger: Ledger;
   readonly memory: Memory;
   readonly policySource: string;
-  constructor(path: string, scrolls: {policy:Policy;source:string} = {policy:defaultPolicy,source:'default'}) {
+  /** The data home, when known: the schedule tool writes config.json there. */
+  readonly home?: string;
+  constructor(path: string, scrolls: {policy:Policy;source:string} = {policy:defaultPolicy,source:'default'}, options: {home?:string} = {}) {
+    if(options.home)this.home=options.home;
     if(path !== ':memory:') mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
     this.db = new DatabaseSync(path);
     const version = this.db.prepare('PRAGMA user_version').get() as {user_version:number};
