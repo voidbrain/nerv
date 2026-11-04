@@ -6,8 +6,10 @@ import { realpath,stat,readFile } from 'node:fs/promises';
 import { resolve, sep, extname } from 'node:path';
 import type { StoreApi } from './runtime.ts';
 import {attachRpcSocket} from './socket.ts';
-async function body(req: IncomingMessage): Promise<Record<string,unknown>> {
-  let text=''; for await(const chunk of req) { text+=chunk; if(Buffer.byteLength(text)>8192) throw new Error('Request too large.'); }
+import {RpcFault} from './rpc.ts';
+import {MODEL_TIMEOUT_MS} from './model.ts';
+async function body(req: IncomingMessage,limit=8192): Promise<Record<string,unknown>> {
+  let text=''; for await(const chunk of req) { text+=chunk; if(Buffer.byteLength(text)>limit) throw new Error('Request too large.'); }
   const value:unknown=JSON.parse(text); if(!value || typeof value!=='object' || Array.isArray(value)) throw new Error('Expected JSON object.'); return value as Record<string,unknown>;
 }
 export function makeServer(store: StoreApi, token: string, options: {webRoot?:string; language?:string; timeZone?:string;tls?:{key:Buffer;cert:Buffer};native?:{auth:NativeAuth;fingerprint:string;port:number;webPort:number}} = {}) {
@@ -51,13 +53,22 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
       else if(req.method==='GET'&&path==='/api/approvals'){if([...url.searchParams.keys()].some(k=>k!=='limit'))throw new Error('Unknown approvals query.');reply(200,await store.approvals(Number(url.searchParams.get('limit') ?? 5)));}
       else if(req.method==='POST'&&/^\/api\/approvals\/[a-f0-9-]+$/.test(path)){const b=await body(req);if(Object.keys(b).length!==1||!['approve','reject','edit'].includes(b.decision as string))throw new Error('Decision must be approve, reject or edit.');reply(200,await store.decide(path.split('/').at(-1)!,b.decision as 'approve'|'reject'|'edit','api'));}
       else if(req.method==='GET'&&/^\/api\/sorties\/[a-f0-9-]+\/events$/.test(path)){if([...url.searchParams.keys()].some(k=>!['after','limit'].includes(k)))throw new Error('Unknown events query.');reply(200,await store.events(path.split('/')[3]!,Number(url.searchParams.get('after') ?? 0),Number(url.searchParams.get('limit') ?? 50)));}
+      else if(req.method==='POST'&&path==='/api/ask'){
+        // Admin only (read-only clients stop above). Privacy is explicit: local-only unless the caller says any.
+        if(!store.ask){reply(503,{error:'Model routes unavailable.'});return;}
+        const b=await body(req,40000);
+        if(Object.keys(b).some(k=>!['prompt','system','privacy','route'].includes(k))||typeof b.prompt!=='string')throw new Error('Prompt is required.');
+        req.setTimeout(MODEL_TIMEOUT_MS+5000);res.once('finish',()=>req.socket.setTimeout(15000));
+        try{reply(200,await store.ask({prompt:b.prompt,privacy:(b.privacy ?? 'local-only') as 'local-only'|'any',...(b.system!==undefined?{system:b.system as string}:{}),...(b.route!==undefined?{route:b.route as 'local'|'cloud'}:{})}));}
+        catch(e){if(e instanceof RpcFault&&e.code===-32602)throw new Error('Invalid ask: prompt up to 16000 characters, privacy local-only or any, route local or cloud.');if(e instanceof RpcFault&&e.code===-32010){reply(502,{error:e.message});return;}throw e;}
+      }
       else if(req.method==='GET'&&path==='/api/reminders/pending')reply(200,await store.pendingReminders());
       else if(req.method==='GET' && path==='/api/reminders') reply(200,await store.list());
       else if(req.method==='POST' && path==='/api/reminders') {const b=await body(req);if(typeof b.title!=='string'||typeof b.due!=='string') throw new Error('Title and due are required.');reply(201,await store.add(b.title,b.due));}
       else if(req.method==='DELETE' && /^\/api\/reminders\/[a-f0-9-]+$/.test(path)) reply((await store.cancel(path.split('/').at(-1)!))?200:404,{message:'Cancellation processed.'});
       else if(req.method==='GET' && path==='/api/inbox') reply(200,await store.inbox());
       else if(req.method==='GET' && path==='/api/status')reply(200,{name:'Nodo',mode:'local-core',...await store.health(),language:options.language ?? 'it',timeZone:options.timeZone ?? 'Europe/Rome',...(options.native?{runtimeId:options.native.auth.runtimeId,home:options.native.auth.home}:{})});
-      else if(req.method==='GET' && path==='/api/doctor') reply(200,{name:'Nodo',mode:'local-core',...await store.doctor(),remoteWorkers:'not implemented',providers:'not configured',language:options.language ?? 'it',timeZone:options.timeZone ?? 'Europe/Rome',...(options.native?{runtimeId:options.native.auth.runtimeId,home:options.native.auth.home}:{} )});
+      else if(req.method==='GET' && path==='/api/doctor') reply(200,{name:'Nodo',mode:'local-core',...await store.doctor(),remoteWorkers:'not implemented',language:options.language ?? 'it',timeZone:options.timeZone ?? 'Europe/Rome',...(options.native?{runtimeId:options.native.auth.runtimeId,home:options.native.auth.home}:{} )});
       else reply(404,{error:'Unknown operation.'});
     } catch(e) {reply(400,{error:e instanceof Error?e.message:'Invalid request.'});}
   };

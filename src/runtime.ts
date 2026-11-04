@@ -1,6 +1,7 @@
 import {ProcessClient} from './process-client.ts';
 import type {Reminder,InboxPage} from './store.ts';
 import type {Approval,Decision,Event} from './ledger.ts';
+import {MODEL_TIMEOUT_MS,type Ask,type Reply} from './model.ts';
 export interface StoreApi {
  list():Reminder[]|Promise<Reminder[]>;
  pendingReminders():Reminder[]|Promise<Reminder[]>;
@@ -13,12 +14,13 @@ export interface StoreApi {
  approvals(limit?:number):Approval[]|Promise<Approval[]>;
  decide(id:string,decision:Decision,source?:'api'|'cli'|'telegram'):{decision:string}|Promise<{decision:string}>;
  events(sortieId:string,after?:number,limit?:number):Event[]|Promise<Event[]>;
+ ask?(ask:Ask):Promise<Reply>;
 }
 export class Runtime implements StoreApi {
  readonly nervous:ProcessClient;readonly brain:ProcessClient;
- constructor(database:string,brainEntry=new URL('./brain-process.ts',import.meta.url)) {
+ constructor(database:string,brainEntry=new URL('./brain-process.ts',import.meta.url),home?:string) {
   this.nervous=new ProcessClient(new URL('./nervous-process.ts',import.meta.url),[database],'nervous');
-  this.brain=new ProcessClient(brainEntry,[],'brain',1500);
+  this.brain=new ProcessClient(brainEntry,home?[home]:[],'brain',1500);
  }
  async ready(){await this.nervous.call('runtime.ping');}
  async list(){return await this.nervous.call('reminders.list') as Reminder[];}
@@ -30,7 +32,8 @@ export class Runtime implements StoreApi {
  async approvals(limit=5){return await this.nervous.call('approvals.pending',{limit}) as Approval[];}
  async decide(id:string,decision:Decision,source:'api'|'cli'|'telegram'='api'){return await this.nervous.call('approvals.decide',{id,decision,source}) as {decision:string};}
  async events(sortieId:string,after=0,limit=50){return await this.nervous.call('events.page',{sortieId,after,limit}) as Event[];}
+ async ask(ask:Ask){return await this.brain.call('model.complete',{...ask},MODEL_TIMEOUT_MS) as Reply;}
  async health(){await this.nervous.call('runtime.ping');return {integrityCheck:'not-run',processes:{nervous:this.nervous.child.pid,brain:this.brain.child.pid,brainAlive:this.brain.child.connected}};}
- async doctor(){return {...await this.nervous.call('runtime.doctor') as object,processes:{nervous:this.nervous.child.pid,brain:this.brain.child.pid,brainAlive:this.brain.child.connected},agentLoop:'not implemented'};}
+ async doctor(){return {...await this.nervous.call('runtime.doctor') as object,processes:{nervous:this.nervous.child.pid,brain:this.brain.child.pid,brainAlive:this.brain.child.connected},models:await this.brain.call('runtime.ping').then(p=>(p as {models:unknown}).models,()=>'brain unavailable'),agentLoop:'not implemented'};}
  async close(){await Promise.allSettled([this.nervous.close(),this.brain.close()]);}
 }

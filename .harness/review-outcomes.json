@@ -3,11 +3,11 @@
     "kind": "rule",
     "disposition": "implemented",
     "target": "docs/agents/areas.md",
-    "evidence": "New Action gate and ledger area rule: every action through Ledger.propose, every executor call through Ledger.authorize, deterministic Melchior/Balthasar, veto-only extra seats, single-use hash-bound grants, append-only events. test/ledger.test.ts proves each clause, including expiry from the scheduler process. API rule added: approvals/events readable by read-only clients and the socket, decisions REST-only for the admin token, grant IDs never leave the coordinator; test/ledger.test.ts proves the socket denial across the scheduler process."
+    "evidence": "New Model routes area rule: src/model.ts owns route selection and adapters, the brain is the only caller, privacy explicit and local-only by default at the API, no route fallback, cloud key only in a private file read by the brain (never env, argv, config, logs or doctor), model.complete is coordinator→brain only, replies bounded. test/model.test.ts proves each clause, including the coordinator → brain → S² join, zero requests to the fake cloud when S² fails, socket denial and refusal of a world-readable key file."
   },
   {
     "kind": "none",
     "disposition": "no-change",
-    "evidence": "Reviewed AGENTS.md, BACKLOG-RULES.md and maintenance.md against the change: no copied harness tool or generic rule changed. F-017, F-023 and F-024 own the remaining gate work."
+    "evidence": "Reviewed AGENTS.md, BACKLOG-RULES.md and maintenance.md against the change: no copied harness tool or generic rule changed; package.json (adapted) gains a project dependency only (@anthropic-ai/sdk 1.1.0, pinned exact, released 2026-10-21). Pre-existing dev advisories in vite through @angular/build are recorded as F-031, not fixed here."
   }
 ]
