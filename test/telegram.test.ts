@@ -48,7 +48,7 @@ test('the Bot API base is Telegram or loopback only, and link finds the private 
 });
 test('through every process: Aoba answers only the owner, sends cards with buttons, applies a tap once and delivers reminders',async()=>{
  const token='123456:'+'t'.repeat(35);const tg=await fakeTelegram(token);
- const model=await fakeModel(['{"action":{"tool":"reminders.add","args":{"title":"Chiamare Ada","due":"2030-01-15T09:00:00+01:00"}}}','{"reply":"Ho bisogno della tua approvazione."}','{"reply":"Fatto: Chiamare Ada è nei promemoria."}']);
+ const model=await fakeModel(['{"action":{"tool":"reminders.add","args":{"title":"Chiamare Ada","due":"2030-01-15T09:00:00+01:00"}}}','{"reply":"Fatto: Chiamare Ada è nei promemoria."}']);
  const home=mkdtempSync(join(tmpdir(),'nerv-aoba-'));
  writeFileSync(join(home,'config.json'),JSON.stringify({models:{local:{baseUrl:model.url,model:'m'}}}));
  writeFileSync(join(home,'scrolls.json'),JSON.stringify({blue:['reminders.add']}),{mode:0o600});
@@ -60,7 +60,7 @@ test('through every process: Aoba answers only the owner, sends cards with butto
   tg.text(STRANGER,'Ricordami di chiamare Ada');await until(()=>logs.some(l=>/another chat/.test(l)));
   assert.deepEqual(tg.sent(STRANGER),[]);assert.equal(model.asked.length,0,'a stranger never reaches Misato');
   tg.text(OWNER,'Ricordami di chiamare Ada il 15 gennaio 2030 alle 9');
-  // The card (delivery tick) and Misato's reply (end of its loop) can arrive in either order: wait for both.
+  // The card (delivery tick) and the waiting reply (the service's own, in the request's language) can arrive in either order: wait for both.
   await until(()=>tg.sent().some(m=>m.reply_markup)&&tg.sent().some(m=>/approvazione/.test(m.text)));
   const [reply,cardMessage]=[tg.sent().find(m=>/approvazione/.test(m.text))!,tg.sent().find(m=>m.reply_markup)!];
   assert.ok(reply);assert.match(cardMessage.text,/Pattern BLUE/);assert.match(cardMessage.text,/reminders\.add/);
@@ -83,7 +83,7 @@ test('through every process: Aoba answers only the owner, sends cards with butto
   assert.equal(tg.sent().length,before,'no card or reminder is resent after a restart');
   assert.equal(statSync(statePath).mode&0o777,0o600);
   tg.text(OWNER,'old news',Math.floor(Date.now()/1000)-3600);await until(()=>tg.sent().some(m=>/offline when you sent/.test(m.text)));
-  assert.equal(model.asked.filter(a=>a==='misato').length,3,'a stale message never reaches Misato');
+  assert.equal(model.asked.filter(a=>a==='misato').length,2,'a stale message never reaches Misato (two calls: the plan and the follow-up; the card ends the first turn)');
  }finally{await aoba.stop();await runtime.close();await model.close();await tg.close();rmSync(home,{recursive:true,force:true});}
 });
 test('telegram link (CLI) saves the owner chat into config.json, keeping the other settings, and refuses a readable token file',async()=>{

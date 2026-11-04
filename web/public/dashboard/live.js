@@ -44,6 +44,13 @@
       ballot:{ pattern:c.pattern, effect:c.effect, executor:"—", verdicts:c.verdicts, sync:c.sync, outcome:"approval", reason:c.reason },
       reason:c.reason, created:Date.now(), expires:Date.parse(c.expires) };
   }
+  // The banner names the base this page shows, and the other bases on the Kaji line with their state.
+  const liveBaseName = d => d && d.base ? d.base.name + " · " + d.base.id : "this base";
+  function kajiSummary() {
+    const peers = (state.kajiBases || []).filter(b => !b.self && b.status === "enrolled");
+    if (!peers.length) return "no other base on the Kaji line";
+    return "Kaji line: " + peers.map(b => b.name + " " + (!b.online ? "offline" : b.health && b.health.state === "degraded" ? "degraded" : "online")).join(", ");
+  }
   async function poll() {
     if (polling || !token) return; polling = true;
     try {
@@ -75,7 +82,7 @@
       if (doctor.base && BASES[0].name !== doctor.base.name.toUpperCase()) { BASES[0].name = doctor.base.name.toUpperCase(); BASES[0].role = doctor.base.id + " · this machine"; document.getElementById("cages").innerHTML = ""; }
       if (!state.selected && state.sorties[0]) state.selected = state.sorties[0].id;
       renderAll();
-      setBanner("<b>LIVE</b> <span class='muted'>— this NERV Agency service · " + latest20.length + " recent sorties · refreshed " + new Date().toTimeString().slice(0, 8) + "</span>", "live");
+      setBanner("<b>LIVE · " + esc(liveBaseName(doctor)) + "</b> <span class='muted'>— " + esc(kajiSummary()) + " · " + latest20.length + " recent sorties · refreshed " + new Date().toTimeString().slice(0, 8) + "</span>", "live");
     } catch (e) { setBanner("<b>LIVE · CONNECTION LOST</b> <span class='muted'>— " + esc(e.message) + ". Run npm start -- open dashboard again if the service restarted.</span>"); }
     finally { polling = false; }
   }

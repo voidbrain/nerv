@@ -32,8 +32,23 @@ const system=(tools:ToolDoc[],now:string,timeZone:string):string=>[
  '"earlier" (when present) holds the previous exchanges of this conversation, oldest first, only as background. Act on the current "request": use earlier to understand a short follow-up such as "yes", "all of them" or "the first one" and carry out what was agreed; do not ask again for something the owner just confirmed, and never repeat an earlier reply.',
  'Write the reply in the same language as the "request" field of this turn, whatever language tool results use: an English request gets an English reply, an Italian request an Italian one. If the request is too short to tell (yes, ok, sì), use the language of the earlier exchanges.',
  `Tool results give "due" in UTC and "dueLocal" already in the owner's time zone (${timeZone}): in the reply, use dueLocal in plain words, never raw ISO strings or ids.`,
- 'Keep the reply short and concrete, written for the owner in your own words: never copy a step\'s reason or error text verbatim. Never claim an action happened unless its step shows a result: an "approval" step has NOT happened yet, so tell the owner, in the request\'s language, what is waiting for their approval.',
+ 'Keep the reply short and concrete, written for the owner in your own words: never copy a step\'s reason or error text verbatim. Never claim an action happened unless its step shows a result.',
 ].join('\n');
+const ITALIAN=new Set('il lo la le gli un una di da del della che non per con sono mi ti ci si è e alle alla al ho hai ha ricorda ricordami domani oggi cosa come quando dove perché sì grazie promemoria tutti tutte questo questa'.split(' '));
+const ENGLISH=new Set('the a an of to and is are i me my you your it at on in for with what when where why how remind remember tomorrow today please yes thanks all this that'.split(' '));
+/** The language of a request by its common words; too short to tell (yes, ok, sì) falls back to the earlier exchanges, then `fallback`. */
+export function requestLanguage(request:string,earlier:string[]=[],fallback:'it'|'en'='en'):'it'|'en' {
+ const score=(text:string)=>{let it=0,en=0;for(const w of text.toLowerCase().match(/[\p{L}']+/gu) ?? []){if(ITALIAN.has(w))it++;if(ENGLISH.has(w))en++;}return it-en;};
+ for(const text of [request,...[...earlier].reverse()]){const d=score(text);if(d>0)return 'it';if(d<0)return 'en';}
+ return fallback;
+}
+/** What the owner reads while a card waits, written by the service, not the model, so it can never claim the action
+    happened or was already confirmed (owner report 2026-11-04). The card itself carries the details and the buttons. */
+export function waitingReply(language:'it'|'en',tool:string,args:Record<string,unknown>):string {
+ const about=typeof args.text==='string'?args.text:typeof args.title==='string'?args.title:'';
+ const what=tool+(about?` (“${about.slice(0,120)}”)`:'');
+ return language==='it'?`In attesa della tua approvazione: ${what}. I dettagli sono nella card; proseguo appena decidi.`:`Waiting for your approval: ${what}. The card has the details; I will carry on once you decide.`;
+}
 /** Adds dueLocal next to every UTC due time, so the planner never converts time zones itself (a local model gets it wrong). */
 function localize(value:unknown,timeZone:string):unknown {
  if(Array.isArray(value))return value.map(v=>localize(v,timeZone));

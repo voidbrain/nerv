@@ -23,10 +23,10 @@ async function setup(script:string[]) {
  return {prompts,home,db,start,close:async()=>{for(const r of runtimes)await r.close();await new Promise<void>(done=>model.close(()=>done()));rmSync(home,{recursive:true,force:true});}};
 }
 test('after the owner approves, Misato resumes with the outcome, replies once and the sortie closes',async()=>{
- const t=await setup([ADD,'{"reply":"Waiting for your approval."}','{"reply":"Done: Ada is in your reminders."}']);
+ const t=await setup([ADD,'{"reply":"Done: Ada is in your reminders."}']);
  try{
   const {r,follow}=await t.start();const chat=await r.chat('Remind me to call Ada');
-  assert.equal(chat.waiting.length,1);assert.equal(chat.reply,'Waiting for your approval.');
+  assert.equal(chat.waiting.length,1);assert.match(chat.reply!,/^Waiting for your approval: reminders\.add \(“Call Ada”\)\./);
   assert.equal((await r.events(chat.sortieId)).at(-1)!.kind,'misato.waiting','the sortie stays open while it waits');
   await r.decide(chat.waiting[0]!.approvalId,'approve','telegram');
   await until(()=>follow.length===1);
@@ -40,7 +40,7 @@ test('after the owner approves, Misato resumes with the outcome, replies once an
  }finally{await t.close();}
 });
 test('a rejection resumes too, nothing runs; a decision made outside the service (CLI) is found by the sweep',async()=>{
- const t=await setup([ADD,'{"reply":"Waiting."}','{"reply":"Understood, I did not add it."}',ADD,'{"reply":"Waiting again."}','{"reply":"Added now."}']);
+ const t=await setup([ADD,'{"reply":"Understood, I did not add it."}',ADD,'{"reply":"Added now."}']);
  try{
   const {r,follow}=await t.start();
   const first=await r.chat('Remind me to call Ada');await r.decide(first.waiting[0]!.approvalId,'reject','api');
@@ -52,7 +52,7 @@ test('a rejection resumes too, nothing runs; a decision made outside the service
  }finally{await t.close();}
 });
 test('the resume lives in the ledger: decided while the service was down, it resumes after a restart',async()=>{
- const t=await setup([ADD,'{"reply":"Waiting."}','{"reply":"Done after the restart."}']);
+ const t=await setup([ADD,'{"reply":"Done after the restart."}']);
  try{
   const a=await t.start();const chat=await a.r.chat('Remind me to call Ada');await a.r.close();
   const cli=new Store(t.db);try{cli.decide(chat.waiting[0]!.approvalId,'approve','cli');}finally{cli.close();}
