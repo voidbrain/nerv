@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-04T21:14:43.604Z",
+  "reviewed": "2026-11-04T22:24:00.606Z",
   "policy": "7ce9883fd1bff25038076e9e36015a833c38e1378e1df68043f48a64635abad4",
   "inputs": {
     "AGENTS.md": "7521203d1bc1ee4467396d9dd3576e2d7ffba835a4f6e93cb217af06af5ebee2",
     "docs/BACKLOG-RULES.md": "19798ae1614c2d96e60613af75d232c2eda19d25e07470e851ce48304df593c6",
-    "docs/agents/areas.md": "f0b7ab0ce01b946df25cc492f0c1e75c6261e9d23c16625bcb10150247ed52d8",
+    "docs/agents/areas.md": "c67707ec8d7634a63fedac9683fa328c296434db84701368cf6e64200fd78dff",
     "docs/agents/maintenance.md": "a7e93ce963ffab30b4592ee90bdd0e72d49ea1320f82df74f22c88f70899d899"
   },
   "measurements": {
@@ -65,7 +65,7 @@
       "kind": "rule",
       "disposition": "implemented",
       "target": "docs/agents/areas.md",
-      "evidence": "Distributed contracts gains the phase 2 heartbeat-health rules (own state only, at most three sanitised reasons, receiver's arrival time, first-hand never relayed, counted only while online, older peers send none; F-036 slice 1, checked by test/kaji-link.test.ts). Model routes gains F-030 route health (outages only, TCP probe of the local route with no request, cloud never probed, a down route never switches routes; checked by test/dummy-plug.test.ts). Reviewed against the existing notes: no duplicate or contradicting rule; INSTALL describes the same behaviour for the owner and stays the user-facing owner."
+      "evidence": "Frontend: the memory-only token rule is replaced by the owner's decision of 2026-11-04 (F-039): the login code is swapped for a dashboard session (random, in service memory, 12 h, ended by restart or sessions revoke, cannot mint codes or revoke), kept in the dashboard tab's sessionStorage; the admin token never reaches the browser unless pasted, and a pasted one is never stored. Checked by test/session.test.ts and test/headless.integration.ts. The old rule's protection (no long-lived credential in browser storage) is kept: what is stored is short-lived, revocable and cannot renew itself."
     },
     {
       "kind": "none",

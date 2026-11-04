@@ -16,10 +16,17 @@ async function body(req: IncomingMessage,limit=8192): Promise<Record<string,unkn
 /** A login code for `open`: single use, short-lived, so the token itself never appears in a command line or a URL. */
 export const LOGIN_CODE_TTL_MS=60_000;
 const MAX_LOGIN_CODES=5;
-export function makeServer(store: StoreApi, token: string, options: {webRoot?:string; language?:string; timeZone?:string;base?:{id:string;name:string};tls?:{key:Buffer;cert:Buffer};native?:{auth:NativeAuth;fingerprint:string;port:number;webPort:number};loginCodeTtlMs?:number} = {}) {
+/** A dashboard session lasts 12 hours at most; a restart of the service ends it sooner. */
+export const SESSION_TTL_MS=12*60*60_000;
+const MAX_SESSIONS=20;
+export function makeServer(store: StoreApi, token: string, options: {webRoot?:string; language?:string; timeZone?:string;base?:{id:string;name:string};tls?:{key:Buffer;cert:Buffer};native?:{auth:NativeAuth;fingerprint:string;port:number;webPort:number};loginCodeTtlMs?:number;sessionTtlMs?:number} = {}) {
   if(options.native&&!options.tls)throw new Error('Native pairing requires TLS.');
   const loginCodes=new Map<string,number>();const codeTtl=options.loginCodeTtlMs ?? LOGIN_CODE_TTL_MS;
-  const dropExpired=()=>{const now=Date.now();for(const [c,expires] of loginCodes)if(expires<=now)loginCodes.delete(c);};
+  const dropExpired=()=>{const now=Date.now();for(const [c,expires] of loginCodes)if(expires<=now)loginCodes.delete(c);for(const [t,expires] of sessions)if(expires<=now)sessions.delete(t);};
+  // Dashboard sessions (F-039): what a login code is swapped for, instead of the admin token. Random, in this process's
+  // memory only (a restart ends them all), expiring, revocable; they may do what the admin can except mint login codes,
+  // so a session can never renew itself.
+  const sessions=new Map<string,number>();const sessionTtl=options.sessionTtlMs ?? SESSION_TTL_MS;
   if(token.length<24) throw new Error('NERV_TOKEN must be at least 24 characters.');
   const listener:RequestListener=async(req,res)=>{
     res.setHeader('Content-Type','application/json'); res.setHeader('Cache-Control','no-store'); res.setHeader('X-Content-Type-Options','nosniff');
@@ -52,11 +59,15 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
     if(!options.native&&req.method==='POST'&&path==='/api/session/exchange'){
       try{const value=await body(req);dropExpired();const code=value.code;
         if(Object.keys(value).length!==1||typeof code!=='string'||!loginCodes.has(code)){reply(401,{error:'Login code invalid, used or expired: run open again.'});return;}
-        loginCodes.delete(code);reply(200,{token});}catch{reply(400,{error:'Invalid request.'});}
+        loginCodes.delete(code);if(sessions.size>=MAX_SESSIONS)sessions.delete(sessions.keys().next().value!);
+        const session=randomBytes(32).toString('hex');sessions.set(session,Date.now()+sessionTtl);reply(200,{token:session,expiresInMs:sessionTtl});}catch{reply(400,{error:'Invalid request.'});}
       return;
     }
     const supplied=Buffer.from(req.headers.authorization ?? ''); const expected=Buffer.from(`Bearer ${token}`);
-    const admin=supplied.length===expected.length&&timingSafeEqual(supplied,expected);
+    const root=supplied.length===expected.length&&timingSafeEqual(supplied,expected);
+    const bearer=req.headers.authorization?.startsWith('Bearer ')?req.headers.authorization.slice(7):'';
+    if(!options.native&&!root&&bearer)dropExpired();
+    const admin=root||(!options.native&&sessions.has(bearer));
     const client=!admin&&options.native?.auth.authenticate((req.headers.authorization?.startsWith('Bearer ')?req.headers.authorization.slice(7):''));
     if(!admin&&!client){reply(401,{error:'Authentication required.'});return;}
     if(!admin&&!(req.method==='GET'&&(['/api/status','/api/doctor','/api/reminders','/api/reminders/pending','/api/inbox','/api/inbox/page','/api/approvals','/api/sorties'].includes(path)||/^\/api\/sorties\/[a-f0-9-]+(\/events)?$/.test(path)))){reply(403,{error:'Read-only client.'});return;}
@@ -85,7 +96,9 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
         try{reply(200,await store.ask({prompt:b.prompt,privacy:(b.privacy ?? 'local-only') as 'local-only'|'any',...(b.system!==undefined?{system:b.system as string}:{}),...(b.route!==undefined?{route:b.route as 'local'|'cloud'}:{})}));}
         catch(e){if(e instanceof RpcFault&&e.code===-32602)throw new Error('Invalid ask: prompt up to 16000 characters, privacy local-only or any, route local or cloud.');if(e instanceof RpcFault&&e.code===-32010){reply(502,{error:e.message});return;}throw e;}
       }
-      else if(!options.native&&admin&&req.method==='POST'&&path==='/api/session/codes'){dropExpired();if(loginCodes.size>=MAX_LOGIN_CODES){reply(429,{error:'Too many unused login codes; wait a minute.'});return;}const code=randomBytes(16).toString('hex');loginCodes.set(code,Date.now()+codeTtl);reply(201,{code,expiresInMs:codeTtl});}
+      else if(!options.native&&!root&&(path==='/api/session/codes'||path==='/api/session/revoke'))reply(403,{error:'Only the CLI (with the admin token) can mint login codes or revoke sessions.'});
+      else if(!options.native&&root&&req.method==='POST'&&path==='/api/session/revoke'){const n=sessions.size;sessions.clear();reply(200,{revoked:n});}
+      else if(!options.native&&root&&req.method==='POST'&&path==='/api/session/codes'){dropExpired();if(loginCodes.size>=MAX_LOGIN_CODES){reply(429,{error:'Too many unused login codes; wait a minute.'});return;}const code=randomBytes(16).toString('hex');loginCodes.set(code,Date.now()+codeTtl);reply(201,{code,expiresInMs:codeTtl});}
       else if(path==='/api/memory'||path.startsWith('/api/memory/')&&path!=='/api/memory/consolidate'){
         // Lilith for the owner: admin only (read-only clients stop above); facts are personal.
         const m=store.lilith;if(!m){reply(503,{error:'Memory unavailable.'});return;}

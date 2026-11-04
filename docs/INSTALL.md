@@ -149,6 +149,8 @@ Facts you add yourself are active at once. Forgetting removes a fact from recall
 
 In **Sorties**, the search box (or <kbd>/</kbd>) filters by ID, title, reply and the one-line *why*, and the service also searches every older sortie's title; **Load older sorties** pages back through history, 50 at a time. **Coming up** lists every pending reminder with **Edit** (title and time) and **Cancel**. On a card waiting for you, <kbd>a</kbd> approves once and <kbd>r</kbd> rejects, each in two presses: the first says what the second will do, <kbd>Esc</kbd> cancels. The API behind them: `GET /api/sorties?q=…&before=…`, `PATCH /api/reminders/ID` with `title` and/or `due`, `DELETE /api/reminders/ID`.
 
+**Staying signed in.** `open dashboard` signs the page in with a dashboard session, not your admin token. The session survives a reload in that tab and ends when you close the tab, after 12 hours, when the service restarts, or for every open dashboard at once with `npm start -- sessions revoke`; then run `open dashboard` again.
+
 ## Telegram (Aoba)
 
 Aoba is a Telegram bot that only you can use: write to Misato from your phone, approve or reject actions with buttons, and receive due reminders. It makes outgoing HTTPS requests only, so it needs no open port, VPN or second machine.

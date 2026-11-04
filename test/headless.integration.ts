@@ -14,11 +14,14 @@ test('one headless process serves UI and reminders, exits cleanly, and recovers 
   const headers={Authorization:'Bearer '+readToken(home),'Content-Type':'application/json'};const base=`http://127.0.0.1:${port}`;
   writeFileSync(join(home,'config.json'),JSON.stringify({port,language:'it',timeZone:'Europe/Rome',base:{id:'NERV-02',name:'Tabgha'}}));
   const first=await launch();assert.match(await(await fetch(base)).text(),/nerv-app/);
-  // open: the CLI asks the running service for a login code; the page's exchange returns the token once.
+  // open: the CLI asks the running service for a login code; the page's exchange returns a dashboard session once (F-039), never the admin token.
   const opened=spawnSync(process.execPath,['src/cli.ts','open','--print'],{env,encoding:'utf8'});assert.equal(opened.status,0,opened.stderr);
   const code=/#code=([a-f0-9]{32})/.exec(opened.stdout)![1];assert.ok(!opened.stdout.includes(readToken(home)),'the token never appears in the URL');
   const swapped=await fetch(base+'/api/session/exchange',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
-  assert.deepEqual(await swapped.json(),{token:readToken(home)});
+  const session=(await swapped.json() as {token:string}).token;assert.match(session,/^[a-f0-9]{64}$/);assert.notEqual(session,readToken(home));
+  assert.equal((await fetch(base+'/api/doctor',{headers:{authorization:'Bearer '+session}})).status,200,'the session signs the dashboard in');
+  const revoked=spawnSync(process.execPath,['src/cli.ts','sessions','revoke'],{env,encoding:'utf8'});assert.equal(revoked.status,0,revoked.stderr);assert.match(revoked.stdout,/^1 dashboard session\(s\) ended/);
+  assert.equal((await fetch(base+'/api/doctor',{headers:{authorization:'Bearer '+session}})).status,401,'sessions revoke ends it');
   const dashboard=spawnSync(process.execPath,['src/cli.ts','open','dashboard','--print'],{env,encoding:'utf8'});assert.match(dashboard.stdout,/\/dashboard\/#code=[a-f0-9]{32}/);
   assert.match(await(await fetch(base+'/dashboard/')).text(),/<script src="live\.js"><\/script>/,'the built dashboard is served with its live adapter');
   const health=await(await fetch(base+'/api/doctor',{headers})).json();assert.deepEqual(health.base,{id:'NERV-02',name:'Tabgha'},'doctor names this base');const pids=[health.processes.nervous,health.processes.brain] as number[];assert.equal(new Set(pids).size,2);

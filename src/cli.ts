@@ -102,6 +102,14 @@ try {
     if(!response.ok||value.error)throw new Error(value.error ?? 'Consolidation failed.');
     console.log(`${value.exchanges} exchange(s) consolidated · ${value.proposed} fact(s) proposed as cards · ${value.skipped} already known${value.summary?`\n${value.summary}`:''}`);
   }
+  else if(command==='sessions'){
+    // Ends every dashboard session (F-039): each open dashboard asks to sign in again; the admin token is unchanged.
+    if(args[0]!=='revoke')throw new Error('Usage: sessions revoke');
+    const config=readConfig(home);
+    const response=await fetch(`http://127.0.0.1:${config.port}/api/session/revoke`,{method:'POST',headers:{authorization:`Bearer ${readToken(home)}`}}).catch(()=>{throw new Error('NERV Agency is not running: start it with serve, launch or service start.');});
+    const value=await response.json() as {revoked?:number;error?:string};if(!response.ok)throw new Error(value.error ?? 'Revoke failed.');
+    console.log(`${value.revoked ?? 0} dashboard session(s) ended. Open the dashboard again with: open dashboard`);
+  }
   else if(command==='reload'){
     // The running brain re-reads config.json and anthropic-key; a broken file keeps the last working settings.
     const config=readConfig(home);
@@ -130,7 +138,7 @@ try {
     if(!response.ok)throw new Error(value.error ?? 'Ask failed.');
     console.log(value.text+(value.truncated?'\n[reply truncated]':'')+`\n— ${value.route} · ${value.model}`);
   }
-  else if(!command||command==='help')console.log('NERV Agency\nCommands: init [--base ID --name "Name"] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | open [dashboard] | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
+  else if(!command||command==='help')console.log('NERV Agency\nCommands: init [--base ID --name "Name"] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | open [dashboard] | sessions revoke | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
   else {
     const config=readConfig(home);
     const scrolls=readScrolls(home);
