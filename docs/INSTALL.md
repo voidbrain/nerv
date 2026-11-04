@@ -115,7 +115,7 @@ npm start -- memory forget ID
 npm start -- memory history ID
 ```
 
-**Instrumentality.** Add `"instrumentality": {"at": "03:00"}` to `config.json` (your time zone) and restart: once a night Misato's model reads the conversations since the previous run, writes a short summary (`npm start -- memory episodes`) and proposes up to five lasting facts you stated, each as a normal approval card (Telegram buttons, `approve`, dashboard). Facts already known, or already waiting on a card, are skipped; one-off tasks are not facts. The ledger is never changed. `npm start -- instrumentality` runs it now. If the model's reply is unreadable twice, that night is skipped and the next run covers it.
+**Instrumentality.** Add `"instrumentality": {"at": "03:00"}` (your time zone) or `{"when": "idle"}` (after an hour without requests, at most once in 20 hours, only when there is something new) to `config.json`: Misato's model reads the conversations since the previous run, writes a short summary (`npm start -- memory episodes`) and proposes lasting facts you stated (about one per two conversations, 3 to 10 at most), each as a normal approval card (Telegram buttons, `approve`, dashboard). Facts already known, or already waiting on a card, are skipped; one-off tasks are not facts. The ledger is never changed. `npm start -- instrumentality` runs it now. If the model's reply is unreadable twice, that night is skipped and the next run covers it.
 
 Facts you add yourself are active at once. Forgetting removes a fact from recall and lists; its history (created, edited, forgotten, by whom) is kept. IDs can be shortened to their first characters.
 
@@ -143,6 +143,8 @@ If `telegram link` or Aoba reports `fetch failed` while `curl https://api.telegr
 Aoba ignores every other chat and every button pressed by another account, and logs it. A message older than 10 minutes (sent while the service was down) is not run; Aoba asks you to send it again. Approval cards arrive once, with **✅ Approve once** and **❌ Reject**; a tap uses the same decision path as `approve`, so the action runs once and a second tap changes nothing. Due reminders arrive here as well as in the local inbox; reminders delivered before Aoba was linked are not replayed. Its progress (last update, cards sent, last reminder) is in `telegram-state.json` in the data home.
 
 ### Hyuga's daily brief
+
+You can also just tell Misato: "move the brief to 9", "brief at 8:30", "turn the brief off", "run Instrumentality when I'm idle". It changes only these two schedules (no card, reversible), and the change applies within a minute without a restart. Models, Telegram, the Scrolls and the base identity are never changeable by chat.
 
 Add `"brief": {"at": "08:00"}` to `config.json` (your time zone, 24-hour) and restart: once a day at or after that time Aoba sends a short summary in your configured language — cards waiting for you, reminders due in the next 24 hours, what finished or failed since the previous brief, and health problems. It is built from the ledger, not by a model, so it is quick and invents nothing. It is sent once per day (also across restarts; if the service starts after the time, it is sent then). `npm start -- brief` prints it now.
 

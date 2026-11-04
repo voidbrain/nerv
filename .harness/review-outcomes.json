@@ -3,7 +3,7 @@
     "kind": "rule",
     "disposition": "implemented",
     "target": "docs/agents/areas.md",
-    "evidence": "Action gate area note: Instrumentality's rules (summaries kept, candidate facts only as memory.remember cards, known or waiting facts skipped, ledger never changed) and the rule that a tool Misato was not offered goes back to it as invalid, never to the owner as a card (found live 2026-11-04, F-022). Checked by test/instrumentality.test.ts and test/misato.test.ts."
+    "evidence": "Action gate area note: settings.schedule is the only settings tool (brief and Instrumentality schedules, Green, reversible), re-read every minute by serve; security-relevant settings stay out of chat's reach (owner request 2026-11-04, F-003). Checked by test/misato.test.ts (chat change, executor refuses other settings)."
   },
   {
     "kind": "none",

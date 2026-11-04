@@ -113,3 +113,22 @@ test('a tool Misato was not offered (a misspelling) goes back to Misato, never t
   void m;
  });
 });
+test('"move the brief to 9": Misato changes the schedule with one Green, reversible action; nothing security-relevant is reachable',async()=>{
+ const {readSchedule,readConfig}=await import('../src/config.ts');
+ await agent(['{"action":{"tool":"settings.schedule","args":{"brief":"09:00","instrumentality":"idle"}}}','{"reply":"Il brief arriverà alle 9."}'],async(runtime,m,_base,_headers)=>{
+  const chat=await runtime.chat('sposta il brief alle 9 e fai instrumentality quando sono inattivo','telegram:1');
+  assert.deepEqual(chat.steps.map(s=>[s.tool,s.outcome]),[['settings.schedule','grant']]);
+  assert.deepEqual((chat.steps[0]!.result as {previous:unknown;now:unknown}),{previous:{brief:'off',instrumentality:'off'},now:{brief:'09:00',instrumentality:'idle'}});
+  void m;
+ });
+ // The executor only touches the two schedules and refuses anything else.
+ const {mkdtempSync:mk,writeFileSync:wf,rmSync:rm}=await import('node:fs');const {join:j}=await import('node:path');const {tmpdir:td}=await import('node:os');
+ const home=mk(j(td(),'nerv-sched-'));wf(j(home,'config.json'),JSON.stringify({language:'it',models:{}}));
+ const {Store}=await import('../src/store.ts');const store=new Store(':memory:',undefined,{home});
+ try{
+  const run=(args:Record<string,unknown>)=>store.runAction(store.ledger.openSortie('owner','s','trusted'),{tool:'settings.schedule',args,stage:'production'});
+  assert.equal(run({brief:'08:30'}).pattern,'green');assert.deepEqual(readSchedule(home),{brief:'08:30',instrumentality:'off'});assert.equal(readConfig(home).language,'it','other settings are kept');
+  for(const bad of [{},{brief:'25:00'},{instrumentality:'sometimes'},{models:{}},{telegram:{chatId:1}}])assert.ok(run(bad).error,JSON.stringify(bad));
+  run({brief:'off'});assert.equal(readSchedule(home).brief,'off');
+ }finally{store.close();rm(home,{recursive:true,force:true});}
+});

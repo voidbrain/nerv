@@ -92,6 +92,8 @@ export class Ledger {
   const rows=this.db.prepare("SELECT sortie_id,payload FROM events WHERE kind='misato.request' AND json_extract(payload,'$.conversation')=? AND created>? ORDER BY sequence DESC LIMIT ?").all(key,iso(now,-withinMs),limit) as {sortie_id:string;payload:string}[];
   return rows.reverse().map(r=>this.exchange(r.sortie_id,r.payload));
  }
+ /** When the owner last asked Misato anything, for Instrumentality's idle mode. */
+ lastRequestAt():string|null {return (this.db.prepare("SELECT max(created) AS t FROM events WHERE kind='misato.request'").get() as {t:string|null}).t;}
  /** Every exchange with Misato in [since, until), oldest first, across conversations: Instrumentality's input. */
  exchangesBetween(since:string,until:string,limit=200):{request:string;reply?:string;actions?:string[]}[] {
   const rows=this.db.prepare("SELECT sortie_id,payload FROM events WHERE kind='misato.request' AND created>=? AND created<? ORDER BY sequence LIMIT ?").all(since,until,limit) as {sortie_id:string;payload:string}[];

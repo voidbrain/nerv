@@ -108,7 +108,7 @@ try {
   else {
     const config=readConfig(home);
     const scrolls=readScrolls(home);
-    if(command!=='serve')store=new Store(databasePath(home),scrolls);
+    if(command!=='serve'&&command!=='launch')store=new Store(databasePath(home),scrolls,{home});
     const local=()=>store!;
     switch(command) {
       case 'remind':console.log(JSON.stringify(local().add(args[0] ?? '',args[1] ?? ''),null,2));break;
@@ -147,7 +147,9 @@ try {
         try{await runtime.ready();}catch(e){await runtime.close();nativeAuth?.close();throw e;}
         // Misato resumes after the owner decides, wherever the decision came from (F-033).
         runtime.startResumer();
-        if(config.instrumentality)runtime.startInstrumentality(config.instrumentality.at,config.timeZone);
+        // Schedules are re-read every minute, so the owner can change them by chat or by hand without a restart.
+        const live=()=>{try{return readConfig(home);}catch{return config;}};
+        runtime.startInstrumentality(()=>{const c=live();return {...(c.instrumentality?{mode:c.instrumentality}:{}),timeZone:c.timeZone};});
         let server:ReturnType<typeof makeServer>;let native:ReturnType<typeof makeServer>|undefined;
         try{server=makeServer(runtime,token,{webRoot,...config});native=nativeTLS&&nativeAuth?makeServer(runtime,token,{...config,tls:nativeTLS,native:{auth:nativeAuth,fingerprint:nativeTLS.fingerprint,port:config.nativePort ?? 4319,webPort:config.port}}):undefined;}catch(e){await runtime.close();nativeAuth?.close();throw e;}
         const servers=native?[server,native]:[server];let stopped=false;
@@ -159,7 +161,7 @@ try {
         // launch = serve, then open the live dashboard signed in once the server listens.
         server.listen(config.port,'127.0.0.1',()=>{console.log(`NERV Agency ${config.base.id} · ${config.base.name}: http://127.0.0.1:${config.port} · ${config.language} · ${config.timeZone}`);if(command==='launch')void openPage(home,'/dashboard/',args.includes('--print')).catch(e=>console.error(e instanceof Error?e.message:'Could not open the dashboard.'));});running=true;
         // Aoba starts only when both the private bot token and the linked owner chat exist.
-        if(botToken&&config.telegram){aoba=new TelegramChannel({api:new TelegramApi(botToken,telegramBase()),store:runtime,chatId:config.telegram.chatId,statePath:join(home,'telegram-state.json'),...(config.brief?{brief:{at:config.brief.at,timeZone:config.timeZone,language:config.language,base:config.base.name}}:{})});await aoba.start().then(()=>console.log('Aoba (Telegram): linked, listening.'),e=>console.error(`Aoba (Telegram) did not start: ${e instanceof Error?e.message:'error'}.`));}
+        if(botToken&&config.telegram){aoba=new TelegramChannel({api:new TelegramApi(botToken,telegramBase()),store:runtime,chatId:config.telegram.chatId,statePath:join(home,'telegram-state.json'),brief:()=>{const c=live();return c.brief?{at:c.brief.at,timeZone:c.timeZone,language:c.language,base:c.base.name}:undefined;}});await aoba.start().then(()=>console.log('Aoba (Telegram): linked, listening.'),e=>console.error(`Aoba (Telegram) did not start: ${e instanceof Error?e.message:'error'}.`));}
         else if(botToken)console.log('Aoba (Telegram): token found, no chat linked yet. Send /start to your bot, then run telegram link.');
         process.once('SIGINT',close);process.once('SIGTERM',close);break;
       }

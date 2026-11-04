@@ -171,15 +171,29 @@ export class Runtime implements StoreApi {
   return {summary:out.digest.summary,exchanges:exchanges.length,proposed:fresh.length,skipped:out.digest.facts.length-fresh.length};
  }
  private instrumentality?:NodeJS.Timeout;
- /** Once per local day at or after `at`: at most one attempt per day per run, so a failing model is not hammered. */
- startInstrumentality(at:string,timeZone:string,everyMs=60_000){
+ /**
+  * Instrumentality's schedule, read on every tick so a change (by chat or by hand) applies within a minute:
+  * at HH:MM once per local day, or when idle (an hour without requests, at most once in 20 hours, only with something new).
+  * Each day or idle window is marked attempted before any await, so overlapping ticks never consolidate twice.
+  */
+ startInstrumentality(schedule:()=>{mode?:{at:string}|{when:'idle'};timeZone:string},everyMs=60_000){
   let attempted:string|undefined;
-  const tick=async()=>{const day=briefDue(new Date(),timeZone,at,attempted);if(!day)return;
-   // Marked before any await, so an overlapping tick cannot start a second consolidation the same day.
-   attempted=day;
-   const last=(await this.nervous.call('memory.episodes',{limit:1}).catch(()=>[]) as {created:string}[])[0];
-   if(last&&localClock(new Date(last.created),timeZone).date===day)return;
-   await this.consolidate().catch(()=>{});};
+  const tick=async()=>{
+   const {mode,timeZone}=schedule();if(!mode)return;const now=new Date();
+   if('at' in mode){
+    const day=briefDue(now,timeZone,mode.at,attempted);if(!day)return;attempted=day;
+    const last=(await this.nervous.call('memory.episodes',{limit:1}).catch(()=>[]) as {created:string}[])[0];
+    if(last&&localClock(new Date(last.created),timeZone).date===day)return;
+    await this.consolidate().catch(()=>{});return;
+   }
+   const hour=now.toISOString().slice(0,13);if(attempted===hour)return;attempted=hour;
+   const [last,activity]=await Promise.all([this.nervous.call('memory.episodes',{limit:1}).catch(()=>[]) as Promise<{until:string}[]>,this.nervous.call('memory.lastRequest').catch(()=>null) as Promise<string|null>]);
+   const since=last[0]?.until;
+   if(!activity||(since&&activity<=since))return;
+   if(now.getTime()-Date.parse(activity)<3_600_000)return;
+   if(since&&now.getTime()-Date.parse(since)<20*3_600_000)return;
+   await this.consolidate().catch(()=>{});
+  };
   if(!this.instrumentality)this.instrumentality=setInterval(()=>{void tick();},everyMs);void tick();
  }
  /** Re-reads config.json and the cloud key in the brain, without restarting the service. */

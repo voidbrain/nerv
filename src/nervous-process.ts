@@ -4,7 +4,7 @@ import { dispatchRpc,MAX_FRAME_BYTES } from './rpc.ts';
 import { readScrolls } from './config.ts';
 import { factKey } from './memory.ts';
 // argv: database path, then the data home whose scrolls.json sets the gate rules (defaults when absent).
-const store=new Store(process.argv[2]!,process.argv[3]?readScrolls(process.argv[3]):undefined);
+const store=new Store(process.argv[2]!,process.argv[3]?readScrolls(process.argv[3]):undefined,process.argv[3]?{home:process.argv[3]}:{});
 store.tick();store.ledger.expire();
 const timer=setInterval(()=>{try{store.tick();store.ledger.expire();}catch{console.error('Nervous scheduler tick failed.');}},250);
 process.on('message',(value:unknown)=>{
@@ -28,6 +28,7 @@ process.on('message',(value:unknown)=>{
    case 'sorties.finish':{const id=params.sortieId as string;if(params.reply)store.ledger.reply(id,params.reply as string);return params.status?store.ledger.close(id,params.status as 'done'|'failed'):false;}
    case 'misato.note':return store.ledger.note(params.sortieId as string,params.kind as 'misato.step',params.payload as never);
    case 'misato.resumable':return store.ledger.resumable();
+   case 'memory.lastRequest':return store.ledger.lastRequestAt();
    case 'memory.episodes':return store.memory.episodes(params.limit as number|undefined);
    case 'memory.exchanges':return store.ledger.exchangesBetween(params.since as string,params.until as string);
    case 'memory.known':{
