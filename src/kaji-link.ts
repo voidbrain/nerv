@@ -41,6 +41,17 @@ export function verifySigned(headers:Record<string,string|undefined>,kind:'req'|
  if(!verify(null,Buffer.from(message(kind,method,path,time,nonce,body)),publicKeyFrom(base.publicKey),Buffer.from(signature,'base64')))throw new Error('bad signature');
  return id;
 }
+/** A base's own report of its health (F-036 phase 2): online, or degraded with up to three short reasons. */
+export interface BaseHealth {state:'online'|'degraded';reasons:string[]}
+/** A peer's report as this base heard it, stamped with this base's clock when it arrived. */
+export interface HeardHealth extends BaseHealth {at:string}
+/** Keeps only a well-formed report; reasons are short display text (never instructions), at most three of 200 characters. */
+export function sanitizeHealth(value:unknown):BaseHealth|undefined {
+ if(!value||typeof value!=='object'||Array.isArray(value))return undefined;const h=value as Record<string,unknown>;
+ if(h.state!=='online'&&h.state!=='degraded')return undefined;
+ const reasons=Array.isArray(h.reasons)?h.reasons.filter((r):r is string=>typeof r==='string'&&r.trim().length>0).slice(0,3).map(r=>r.replace(/[\u0000-\u001f\u007f]/g,' ').slice(0,200)):[];
+ return {state:h.state,reasons:h.state==='online'?[]:reasons};
+}
 const head=(records:SignedRecord[])=>({count:records.length,serial:records.reduce((m,r)=>Math.max(m,r.body.serial),0)});
 export class KajiLink {
  readonly baseId:string;readonly key:KeyObject;readonly publicKey:string;readonly port:RegistryPort;readonly log:(line:string)=>void;
@@ -48,9 +59,18 @@ export class KajiLink {
  /** Per peer, whether the last heartbeat reached it: logged only when that changes, so a base that is down does not flood the log. */
  private reachable=new Map<string,boolean>();
  private mark(peer:string,ok:boolean,detail=''){if(this.reachable.get(peer)!==ok)this.log(ok?`Kaji: ${peer} reachable.`:`Kaji: ${peer} unreachable${detail?` (${detail})`:''}.`);this.reachable.set(peer,ok);}
- constructor(options:{baseId:string;key:KeyObject;publicKey:string;registry:RegistryPort;log?:(line:string)=>void}) {
+ constructor(options:{baseId:string;key:KeyObject;publicKey:string;registry:RegistryPort;log?:(line:string)=>void;health?:()=>Promise<BaseHealth>;onHealth?:(baseId:string,health:HeardHealth)=>void}) {
   this.baseId=options.baseId;this.key=options.key;this.publicKey=options.publicKey;this.port=options.registry;this.log=options.log ?? (l=>console.error(l));
+  this.health=options.health;this.onHealth=options.onHealth;
  }
+ private readonly health:(()=>Promise<BaseHealth>)|undefined;private readonly onHealth:((baseId:string,health:HeardHealth)=>void)|undefined;
+ /** This base's health for a heartbeat; a check that fails is itself a degraded reason. Omitted when no check is wired. */
+ private async own():Promise<BaseHealth|undefined> {
+  if(!this.health)return undefined;
+  try{return sanitizeHealth(await this.health()) ?? {state:'degraded',reasons:['health report invalid']};}catch{return {state:'degraded',reasons:['health check failed']};}
+ }
+ /** Health is first-hand only: taken from the peer's own signed message, never relayed for a third base. */
+ private heard(from:string,value:unknown){const h=sanitizeHealth(value);if(h)this.onHealth?.(from,{...h,at:new Date().toISOString()});}
  /** This base as the registry knows it (by its own public key), if enrolled and not revoked. */
  private async me():Promise<BaseEntry|undefined> {return (await this.port.bases()).find(b=>b.publicKey===this.publicKey&&b.status==='enrolled');}
  async start(everyMs=HEARTBEAT_MS):Promise<void> {
@@ -73,9 +93,10 @@ export class KajiLink {
    let body='';for await(const chunk of req){body+=chunk;if(body.length>MAX_BODY)throw new Error('too large');}
    const bases=await this.port.bases();const from=verifySigned(req.headers as Record<string,string>,'req',req.method ?? '',req.url ?? '',body,bases,this.nonces);
    if(req.method==='POST'&&req.url==='/kaji/heartbeat'){
-    const hb=JSON.parse(body) as {seen?:Record<string,string>};const now=new Date().toISOString();
-    await this.port.seen({...sanitizeSeen(hb.seen,bases),[from]:now,[this.baseId]:now});
-    reply(200,{head:head(await this.port.records()),seen:await this.port.lastSeen()});return;
+    const hb=JSON.parse(body) as {seen?:Record<string,string>;health?:unknown};const now=new Date().toISOString();
+    await this.port.seen({...sanitizeSeen(hb.seen,bases),[from]:now,[this.baseId]:now});this.heard(from,hb.health);
+    const health=await this.own();
+    reply(200,{head:head(await this.port.records()),seen:await this.port.lastSeen(),...(health?{health}:{})});return;
    }
    if(req.method==='GET'&&req.url==='/kaji/registry'){reply(200,{records:await this.port.records()});return;}
    reply(404,{error:'unknown'});
@@ -94,11 +115,11 @@ export class KajiLink {
  /** One round: greet every other enrolled base, merge what they have seen, catch up on the registry if behind. */
  async heartbeat():Promise<void> {
   const me=await this.me();if(!me)return;const bases=await this.port.bases();
-  await this.port.seen({[this.baseId]:new Date().toISOString()});
+  await this.port.seen({[this.baseId]:new Date().toISOString()});const health=await this.own();
   for(const peer of bases.filter(b=>b.status==='enrolled'&&b.publicKey!==this.publicKey)){
    try{
-    const r=await this.call(peer,'POST','/kaji/heartbeat',{seen:await this.port.lastSeen()}) as {head:{count:number;serial:number};seen?:Record<string,string>};
-    await this.port.seen({...sanitizeSeen(r.seen,bases),[peer.baseId]:new Date().toISOString()});this.mark(peer.baseId,true);
+    const r=await this.call(peer,'POST','/kaji/heartbeat',{seen:await this.port.lastSeen(),...(health?{health}:{})}) as {head:{count:number;serial:number};seen?:Record<string,string>;health?:unknown};
+    await this.port.seen({...sanitizeSeen(r.seen,bases),[peer.baseId]:new Date().toISOString()});this.mark(peer.baseId,true);this.heard(peer.baseId,r.health);
     const mine=head(await this.port.records());
     if(r.head.count>mine.count||r.head.serial>mine.serial){const got=await this.call(peer,'GET','/kaji/registry') as {records:SignedRecord[]};const added=await this.port.add(got.records);if(added)this.log(`Kaji: ${added} new registry record(s) from ${peer.baseId}.`);}
    }catch(e){this.mark(peer.baseId,false,e instanceof Error?e.message:'error');}

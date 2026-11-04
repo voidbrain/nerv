@@ -11,7 +11,7 @@ import {toolDocs} from './executors.ts';
 import type {Digest,Exchange} from './instrumentality.ts';
 import type {Episode,Fact} from './memory.ts';
 import type {BaseEntry,SignedRecord} from './kaji.ts';
-import {ONLINE_MS,type RegistryPort} from './kaji-link.ts';
+import {ONLINE_MS,type BaseHealth,type HeardHealth,type RegistryPort} from './kaji-link.ts';
 import {briefDue,localClock} from './brief.ts';
 export interface ChatReply {sortieId:string;reply?:string;error?:string;steps:Step[];waiting:{approvalId:string;tool:string;reason:string}[]}
 /** An action the owner asks for directly: the request is what Casper checks the action against. */
@@ -191,8 +191,20 @@ export class Runtime implements StoreApi {
  private selfKey?:string;
  /** Marks which entry is this base (by its public key) for the dashboard. */
  setBaseKey(publicKey:string){this.selfKey=publicKey;}
+ /** Peers' health as each one last reported it over the Kaji line (F-036 phase 2); kept in memory, refilled within a heartbeat. */
+ private readonly heard=new Map<string,HeardHealth>();
+ notePeerHealth(baseId:string,health:HeardHealth){this.heard.set(baseId,health);}
+ /** This base's health as it reports it to its peers: degraded with the reasons doctor and status give. */
+ async baseHealth():Promise<BaseHealth> {
+  const h=await this.health();const reasons=[...new Set([...(h.processes.brainAlive===false?['brain process not alive']:[]),...h.degraded])].slice(0,3);
+  return {state:reasons.length?'degraded':'online',reasons};
+ }
  async bases(){const [list,seen]=await Promise.all([this.kaji.bases(),this.kaji.lastSeen()]);const now=Date.now();
-  return list.map(b=>({...b,lastSeen:seen[b.baseId] ?? null,online:b.status==='enrolled'&&(b.publicKey===this.selfKey||(!!seen[b.baseId]&&now-Date.parse(seen[b.baseId]!)<ONLINE_MS)),self:b.publicKey===this.selfKey}));}
+  const mine=await this.baseHealth().catch(():BaseHealth=>({state:'degraded',reasons:['health check failed']}));
+  return list.map(b=>{const self=b.publicKey===this.selfKey;const online=b.status==='enrolled'&&(self||(!!seen[b.baseId]&&now-Date.parse(seen[b.baseId]!)<ONLINE_MS));
+   // A peer's report counts only while it is online; an older base that sends none has health null (online/offline only).
+   const heard=this.heard.get(b.baseId);const health=self?{...mine,at:new Date(now).toISOString()}:online&&heard&&now-Date.parse(heard.at)<ONLINE_MS?heard:null;
+   return {...b,lastSeen:seen[b.baseId] ?? null,online,self,health};});}
  readonly lilith={
   list:async()=>await this.nervous.call('memory.list',{limit:200}) as Fact[],
   episodes:async()=>await this.nervous.call('memory.episodes',{limit:10}) as Episode[],

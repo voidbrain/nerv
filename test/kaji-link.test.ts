@@ -4,7 +4,8 @@ import {generateKeyPairSync,type KeyObject} from 'node:crypto';
 import {createServer} from 'node:net';
 import {Store} from '../src/store.ts';
 import {Registry,createRootKey,signRecord,unlockRootKey,type BaseEntry,type RegistryBody,type SignedRecord} from '../src/kaji.ts';
-import {KajiLink,Nonces,endpoint,signedHeaders,verifySigned,type RegistryPort} from '../src/kaji-link.ts';
+import {KajiLink,Nonces,endpoint,sanitizeHealth,signedHeaders,verifySigned,type BaseHealth,type HeardHealth,type RegistryPort} from '../src/kaji-link.ts';
+import {mkdtempSync,rmSync,writeFileSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';
 const wait=(ms:number)=>new Promise(done=>setTimeout(done,ms));
 async function until(check:()=>Promise<boolean>|boolean,ms=6000){const end=Date.now()+ms;while(!(await check())){if(Date.now()>end)throw new Error('timed out');await wait(25);}}
 const freePort=async()=>{const s=createServer();await new Promise<void>(d=>s.listen(0,'127.0.0.1',d));const p=(s.address() as {port:number}).port;await new Promise<void>(d=>s.close(()=>d()));return p;};
@@ -49,4 +50,55 @@ test('two bases over the link: heartbeats mark each other online, last-seen merg
   ra.add(rec({kind:'revoke',baseId:'NERV-02',publicKey:B.publicKey}));const before=logs.length;
   await until(()=>logs.slice(before).some(l=>/NERV-01 Kaji: refused a request \(unknown or revoked base\)/.test(l)));
  }finally{await la.stop();await lb.stop();sa.close();sb.close();}
+});
+test('a health report keeps only its state and up to three short reasons',()=>{
+ assert.deepEqual(sanitizeHealth({state:'degraded',reasons:['a','b','c','d',7,'','x'.repeat(300)]}),{state:'degraded',reasons:['a','b','c']});
+ assert.equal(sanitizeHealth({state:'degraded',reasons:['x'.repeat(300)]})!.reasons[0]!.length,200);
+ assert.deepEqual(sanitizeHealth({state:'degraded',reasons:['line\nbreak\u0007']}),{state:'degraded',reasons:['line break ']});
+ assert.deepEqual(sanitizeHealth({state:'online',reasons:['ignored']}),{state:'online',reasons:[]});
+ for(const bad of [null,'online',[],{state:'evil'},{reasons:[]}])assert.equal(sanitizeHealth(bad),undefined);
+});
+test('heartbeats carry each base\'s own health, both ways; a malformed report from a peer is dropped',async()=>{
+ const A=keys(),B=keys();const pa=await freePort(),pb=await freePort();
+ const sa=new Store(':memory:'),sb=new Store(':memory:');const ra=new Registry(sa.db,root.publicKey),rb=new Registry(sb.db,root.publicKey);
+ for(const r of [rec({kind:'enrol',baseId:'NERV-01',name:'Neo Tokyo-3',publicKey:A.publicKey,address:`127.0.0.1:${pa}`}),rec({kind:'enrol',baseId:'NERV-02',name:'Tabgha',publicKey:B.publicKey,address:`127.0.0.1:${pb}`})]){ra.add(r);rb.add(r);}
+ const heardA:Record<string,HeardHealth>={},heardB:Record<string,HeardHealth>={};let healthB:BaseHealth={state:'online',reasons:[]};
+ const la=new KajiLink({baseId:'NERV-01',key:A.privateKey,publicKey:A.publicKey,registry:port(ra),log:()=>{},health:async()=>({state:'degraded',reasons:['S² local route down since 09:00: Local route (S²) unreachable.']}),onHealth:(id,h)=>{heardA[id]=h;}});
+ const lb=new KajiLink({baseId:'NERV-02',key:B.privateKey,publicKey:B.publicKey,registry:port(rb),log:()=>{},health:async()=>healthB,onHealth:(id,h)=>{heardB[id]=h;}});
+ try{
+  await la.start(150);await lb.start(150);
+  await until(()=>!!heardA['NERV-02']&&!!heardB['NERV-01']);
+  assert.deepEqual([heardB['NERV-01']!.state,heardB['NERV-01']!.reasons],['degraded',['S² local route down since 09:00: Local route (S²) unreachable.']]);
+  assert.equal(heardA['NERV-02']!.state,'online');assert.ok(Date.parse(heardA['NERV-02']!.at)<=Date.now());
+  healthB={state:'degraded',reasons:['brain process not alive']};await until(()=>heardA['NERV-02']!.state==='degraded');
+  // A signed heartbeat from NERV-02 whose health is malformed: last-seen still merges, the report is ignored.
+  const before=heardA['NERV-02']!.at;const body=JSON.stringify({seen:{},health:{state:'evil',reasons:['<script>']}});
+  await la.stop();await lb.stop();
+  const lc=new KajiLink({baseId:'NERV-01',key:A.privateKey,publicKey:A.publicKey,registry:port(ra),log:()=>{},onHealth:(id,h)=>{heardA[id]=h;}});await lc.start(60_000);
+  try{const res=await fetch(`http://127.0.0.1:${pa}/kaji/heartbeat`,{method:'POST',headers:{'content-type':'application/json',...signedHeaders('NERV-02',B.privateKey,'req','POST','/kaji/heartbeat',body)},body});
+   assert.equal(res.status,200);assert.equal(heardA['NERV-02']!.at,before,'the malformed report changed nothing');
+   assert.equal(((await res.json()) as {health?:unknown}).health,undefined,'a base with no health check sends none');}
+  finally{await lc.stop();}
+ }finally{await la.stop();await lb.stop();sa.close();sb.close();}
+});
+test('through two runtimes wired as serve does: a base whose model route is down shows as degraded, with its reason, in the other base\'s /api/bases',{timeout:20000},async()=>{
+ const {Runtime}=await import('../src/runtime.ts');
+ const A=keys(),B=keys();const pa=await freePort(),pb=await freePort(),dead=await freePort();
+ const ha=mkdtempSync(join(tmpdir(),'nerv-kh-a-')),hb=mkdtempSync(join(tmpdir(),'nerv-kh-b-'));
+ writeFileSync(join(ha,'config.json'),JSON.stringify({base:{id:'NERV-01',name:'Neo Tokyo-3'},kaji:{root:root.publicKey},models:{local:{baseUrl:`http://127.0.0.1:${dead}/v1`,model:'m'}}}));
+ writeFileSync(join(hb,'config.json'),JSON.stringify({base:{id:'NERV-02',name:'Tabgha'},kaji:{root:root.publicKey}}));
+ const records=[rec({kind:'enrol',baseId:'NERV-01',name:'Neo Tokyo-3',publicKey:A.publicKey,address:`127.0.0.1:${pa}`}),rec({kind:'enrol',baseId:'NERV-02',name:'Tabgha',publicKey:B.publicKey,address:`127.0.0.1:${pb}`})];
+ const a=new Runtime(join(ha,'nerv.sqlite'),undefined,ha),b=new Runtime(join(hb,'nerv.sqlite'),undefined,hb);const links:KajiLink[]=[];
+ try{
+  await a.ready();await b.ready();assert.equal(await a.kaji.add(records),2);assert.equal(await b.kaji.add(records),2);
+  a.setBaseKey(A.publicKey);b.setBaseKey(B.publicKey);
+  for(const [r,id,k] of [[a,'NERV-01',A],[b,'NERV-02',B]] as const)links.push(new KajiLink({baseId:id,key:k.privateKey,publicKey:k.publicKey,registry:r.kaji,log:()=>{},health:()=>r.baseHealth(),onHealth:(peer,h)=>r.notePeerHealth(peer,h)}));
+  for(const l of links)await l.start(200);
+  type Base={baseId:string;online:boolean;self:boolean;health:{state:string;reasons:string[]}|null};
+  await until(async()=>((await b.bases()) as Base[]).find(x=>x.baseId==='NERV-01')?.health?.state==='degraded',15000);
+  const seenByB=(await b.bases()) as Base[];const tokyo=seenByB.find(x=>x.baseId==='NERV-01')!;
+  assert.ok(tokyo.online);assert.match(tokyo.health!.reasons[0]!,/^S² local route down since .*: Local route \(S²\) unreachable\./);
+  assert.equal(seenByB.find(x=>x.self)!.health!.state,'online','Tabgha has no model route configured: nothing is down');
+  await until(async()=>((await a.bases()) as Base[]).find(x=>x.baseId==='NERV-02')?.health?.state==='online');
+ }finally{for(const l of links)await l.stop();await a.close();await b.close();rmSync(ha,{recursive:true,force:true});rmSync(hb,{recursive:true,force:true});}
 });
