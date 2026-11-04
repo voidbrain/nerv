@@ -56,13 +56,15 @@ test('through every process: an Italian request is planned by Misato, gated, exe
   assert.equal((await fetch(base+'/api/chat',{method:'POST',body:'{}'})).status,401);
  });
 });
-test('an unreadable plan is shown back to Misato; a Blue action asks Casper and then waits for the owner',async()=>{
- await agent(['sure, I will send it','{"action":{"tool":"reminders.add","args":{"title":"Email Ada","due":"2030-01-15T09:00:00+01:00"}}}','{"action":{"tool":"reminders.add","args":{"title":"Email Ada","due":"2030-01-15T09:00:00+01:00"}}}','{"reply":"I asked for your approval before sending the mail."}'],async(runtime,m)=>{
+test('an unreadable plan is shown back to Misato; a Blue action asks Casper, and its card ends the turn with the service\'s own waiting reply',async()=>{
+ await agent(['sure, I will send it','{"action":{"tool":"reminders.add","args":{"title":"Email Ada","due":"2030-01-15T09:00:00+01:00"}}}'],async(runtime,m)=>{
   const chat=await runtime.chat('Remind me to email Ada');
-  assert.deepEqual(chat.steps.map(s=>s.outcome),['invalid','approval','invalid'],'the repeated proposal never reaches the gate');assert.equal(chat.waiting.length,1);
-  assert.match(chat.steps[1]!.reason!,/NOT done yet/);assert.match(chat.steps[2]!.error!,/already waits for the owner/);assert.equal(chat.waiting[0]!.tool,'reminders.add');
-  assert.match(chat.reply!,/approval/);
-  assert.deepEqual(m.asked.map(a=>[a.who,a.model]),[['misato','qwen2.5-coder:14b'],['misato','qwen2.5-coder:14b'],['casper','gemma4:12b'],['misato','qwen2.5-coder:14b'],['misato','qwen2.5-coder:14b']]);
+  assert.deepEqual(chat.steps.map(s=>s.outcome),['invalid','approval']);assert.equal(chat.waiting.length,1);
+  assert.match(chat.steps[1]!.reason!,/NOT done yet/);assert.equal(chat.waiting[0]!.tool,'reminders.add');
+  // Owner report 2026-11-04: asked again after the card, the model claimed the action was already confirmed. The model
+  // is no longer asked: the reply is fixed, in the request's language, and never says the action happened.
+  assert.equal(chat.reply,'Waiting for your approval: reminders.add (“Email Ada”). The card has the details; I will carry on once you decide.');
+  assert.deepEqual(m.asked.map(a=>[a.who,a.model]),[['misato','qwen2.5-coder:14b'],['misato','qwen2.5-coder:14b'],['casper','gemma4:12b']]);
   const cards=await runtime.approvals();assert.equal(cards.length,1);assert.equal(cards[0]!.card.tool,'reminders.add');
  },{blue:['reminders.add']});
 });
@@ -131,4 +133,11 @@ test('"move the brief to 9": Misato changes the schedule with one Green, reversi
   for(const bad of [{},{brief:'25:00'},{instrumentality:'sometimes'},{models:{}},{telegram:{chatId:1}}])assert.ok(run(bad).error,JSON.stringify(bad));
   run({brief:'off'});assert.equal(readSchedule(home).brief,'off');
  }finally{store.close();rm(home,{recursive:true,force:true});}
+});
+test('the waiting reply speaks the request\'s language, falls back to the conversation, and names what waits',async()=>{
+ const {requestLanguage,waitingReply}=await import('../src/misato.ts');
+ assert.equal(requestLanguage('Ricordami di chiamare Ada domani alle 9'),'it');assert.equal(requestLanguage('Remember that I drink coffee at 8'),'en');
+ assert.equal(requestLanguage('sì',['Vuoi che li cancelli tutti?']),'it');assert.equal(requestLanguage('ok',[],'it'),'it');
+ assert.equal(waitingReply('it','memory.remember',{text:'Bevo caffè alle 8'}),'In attesa della tua approvazione: memory.remember (“Bevo caffè alle 8”). I dettagli sono nella card; proseguo appena decidi.');
+ assert.doesNotMatch(waitingReply('en','reminders.cancel',{ids:['a','b']}),/done|confirmed|approved/i);
 });

@@ -86,7 +86,7 @@ const STEP_IDS = ["detect","intake","route","consult","plan","magi","sync","apt"
 const LABELS = {
   eva:{ brandTitle:"TACTICAL COMMAND", brandTag:"SEELE SCROLLS ENFORCED // CENTRAL DOGMA LEDGER · LILITH MEMORY",
     needs:"Misato's apartment · needs you", sorties:"Sorties", next:"Coming up", flow:"Sephirot · sortie flow",
-    detail:"Misato plan · current action", log:"Comms · Misato & Maya trace", away:"Debrief · while you were away", health:"Health · broken or stuck",
+    detail:"Misato plan · current action", log:"Comms · Misato & Maya trace", away:"Debrief · while you were away", health:"Health · this base",
     bases:"NERV bases · Kaji line", cages:"EVA cages · heartbeat", budget:"Battery · budget", melons:"Kaji's watermelons · pilot trust", lilith:"Terminal Dogma · Lilith",
     spear:"SPEAR OF LONGINUS", dummy:"DUMMY PLUG ACTIVE", launch:"Launch",
     qNeeds:"Needs you", qAway:"While you were away", qNext:"Coming up", qHealth:"Broken or stuck", qBudget:"Battery today",
@@ -94,7 +94,7 @@ const LABELS = {
     seats:{ melchior:"MELCHIOR", balthasar:"BALTHASAR", casper:"CASPER" }, short:{ melchior:"MEL", balthasar:"BAL", casper:"CAS" } },
   neutral:{ brandTitle:"OPERATIONS", brandTag:"owner rules enforced · append-only ledger · long-term memory",
     needs:"Needs your approval", sorties:"Jobs", next:"Coming up", flow:"Decision timeline",
-    detail:"Plan · current action", log:"Messages · trace", away:"While you were away", health:"Health · broken or stuck",
+    detail:"Plan · current action", log:"Messages · trace", away:"While you were away", health:"Health · this base",
     bases:"Machines · mesh", cages:"Sandboxes · heartbeat", budget:"Budget", melons:"Skill trust stages", lilith:"Memory",
     spear:"STOP EVERYTHING", dummy:"MODELS UNAVAILABLE", launch:"Run",
     qNeeds:"Needs you", qAway:"While you were away", qNext:"Coming up", qHealth:"Broken or stuck", qBudget:"Budget today",
