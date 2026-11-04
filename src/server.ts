@@ -8,6 +8,7 @@ import type { StoreApi } from './runtime.ts';
 import {attachRpcSocket} from './socket.ts';
 import {RpcFault} from './rpc.ts';
 import {MODEL_TIMEOUT_MS} from './model.ts';
+import {MAX_STEPS} from './misato.ts';
 async function body(req: IncomingMessage,limit=8192): Promise<Record<string,unknown>> {
   let text=''; for await(const chunk of req) { text+=chunk; if(Buffer.byteLength(text)>limit) throw new Error('Request too large.'); }
   const value:unknown=JSON.parse(text); if(!value || typeof value!=='object' || Array.isArray(value)) throw new Error('Expected JSON object.'); return value as Record<string,unknown>;
@@ -63,6 +64,15 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
         catch(e){if(e instanceof RpcFault&&e.code===-32602)throw new Error('Invalid ask: prompt up to 16000 characters, privacy local-only or any, route local or cloud.');if(e instanceof RpcFault&&e.code===-32010){reply(502,{error:e.message});return;}throw e;}
       }
       else if(req.method==='POST'&&path==='/api/models/reload'){if(!store.reloadModels){reply(503,{error:'Model routes unavailable.'});return;}const result=await store.reloadModels();reply(result.error?400:200,result);}
+      else if(req.method==='POST'&&path==='/api/chat'){
+        // Admin only: a request to Misato, who plans and proposes actions through the gate.
+        if(!store.chat){reply(503,{error:'Agent loop unavailable.'});return;}
+        const b=await body(req,20000);
+        if(Object.keys(b).some(k=>k!=='message')||typeof b.message!=='string'||!b.message.trim()||b.message.length>4000)throw new Error('Message is required: up to 4000 characters.');
+        // Each step may wait for Misato and Casper.
+        const budget=MODEL_TIMEOUT_MS*MAX_STEPS*2+5000;req.setTimeout(budget);res.once('finish',()=>req.socket.setTimeout(15000));
+        reply(200,await store.chat(b.message.trim()));
+      }
       else if(req.method==='POST'&&path==='/api/actions'){
         // Admin only: one owner action through the per-action gate (F-017). Grant IDs never appear in the reply.
         if(!store.act){reply(503,{error:'Action gate unavailable.'});return;}

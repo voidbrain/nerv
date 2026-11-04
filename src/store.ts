@@ -13,6 +13,8 @@ export interface InboxPage {items:InboxEntry[];head:InboxCheckpoint;next:InboxCh
 export interface ActResult {sortieId:string;actionId:string;outcome:Ballot['outcome'];pattern:Ballot['pattern'];reason:string;sync:Ballot['sync'];approvalId?:string;result?:unknown;error?:string}
 /** Sorties the owner starts directly hold one action and close once it settles. */
 export const OWNER_SOURCE='owner';
+/** Sorties Misato plans hold several actions; the coordinator closes them when the loop ends. */
+export const MISATO_SOURCE='misato';
 export class Store {
   readonly db: DatabaseSync;
   readonly ledger: Ledger;
