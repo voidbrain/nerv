@@ -20,7 +20,7 @@ export interface StoreApi {
 export class Runtime implements StoreApi {
  readonly nervous:ProcessClient;readonly brain:ProcessClient;
  constructor(database:string,brainEntry=new URL('./brain-process.ts',import.meta.url),home?:string) {
-  this.nervous=new ProcessClient(new URL('./nervous-process.ts',import.meta.url),[database],'nervous');
+  this.nervous=new ProcessClient(new URL('./nervous-process.ts',import.meta.url),home?[database,home]:[database],'nervous');
   this.brain=new ProcessClient(brainEntry,home?[home]:[],'brain',1500);
  }
  async ready(){await this.nervous.call('runtime.ping');}

@@ -1,6 +1,8 @@
 import { Store } from './store.ts';
 import { dispatchRpc,MAX_FRAME_BYTES } from './rpc.ts';
-const store=new Store(process.argv[2]!);
+import { readScrolls } from './config.ts';
+// argv: database path, then the data home whose scrolls.json sets the gate rules (defaults when absent).
+const store=new Store(process.argv[2]!,process.argv[3]?readScrolls(process.argv[3]):undefined);
 store.tick();store.ledger.expire();
 const timer=setInterval(()=>{try{store.tick();store.ledger.expire();}catch{console.error('Nervous scheduler tick failed.');}},250);
 process.on('message',(value:unknown)=>{

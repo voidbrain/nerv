@@ -1,6 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtempSync,rmSync} from 'node:fs';
+import {spawnSync} from 'node:child_process';
 import {tmpdir} from 'node:os';import {join} from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {once} from 'node:events';import {WebSocket} from 'ws';
@@ -210,4 +211,24 @@ test('event pages fit one scheduler frame and page on to the end, through the sc
   for(;;){const page=await runtime.events(sortie,after,50);if(!page.length)break;pages++;after=page.at(-1)!.sequence;kinds.push(...page.map(e=>e.kind));assert.ok(page.every(e=>e.v===EVENT_SCHEMA_VERSION));}
   assert.deepEqual(kinds,['sortie.opened',...Array.from({length:60},()=>['ballot','grant.issued']).flat()]);assert.ok(pages>3);
  }finally{await runtime.close();store.close();rmSync(dir,{recursive:true,force:true});}
+});
+test('the Scrolls load from scrolls.json; an invalid or tamperable file stops startup instead of relaxing the gate',async()=>{
+ const {readScrolls}=await import('../src/config.ts');const {chmodSync,writeFileSync}=await import('node:fs');
+ const home=mkdtempSync(join(tmpdir(),'nerv-scrolls-'));const file=join(home,'scrolls.json');
+ const cli=(...args:string[])=>spawnSync(process.execPath,['src/cli.ts',...args],{env:{...process.env,NERV_HOME:home},encoding:'utf8'});
+ try{
+  assert.deepEqual(readScrolls(home),{policy:defaultPolicy,source:'default'});
+  writeFileSync(file,JSON.stringify({deny:['mail.send'],syncThreshold:90}),{mode:0o600});chmodSync(file,0o600);
+  const loaded=readScrolls(home);assert.equal(loaded.source,'scrolls.json');assert.deepEqual(loaded.policy.deny,['mail.send']);assert.equal(loaded.policy.syncThreshold,90);
+  const store=new Store(':memory:',loaded);const ledger=new Ledger(store.db,{tools,policy:loaded.policy});
+  try{const sortie=ledger.openSortie('cli','Mail','trusted',now);assert.equal(ledger.propose(sortie,{tool:'mail.send',args:{},stage:'production',casper:casper()},now).ballot.outcome,'reject');assert.equal((store.doctor() as {policy:{source:string}}).policy.source,'scrolls.json');}finally{store.close();}
+  // Through the scheduler process: the data home reaches the nervous process and its ledger reports the file's rules.
+  const {Runtime}=await import('../src/runtime.ts');const runtime=new Runtime(join(home,'nerv.sqlite'),undefined,home);
+  try{await runtime.ready();const doctor=await runtime.nervous.call('runtime.doctor') as {policy:{source:string;deny:string[]}};assert.equal(doctor.policy.source,'scrolls.json');assert.deepEqual(doctor.policy.deny,['mail.send']);}finally{await runtime.close();}
+  for(const [content,message] of [['{"budget":1,"typo":true}',/Invalid scrolls.json: Invalid policy/],['not json',/not JSON/],['{"syncThreshold":120}',/Invalid policy values/]] as const){
+   writeFileSync(file,content);assert.throws(()=>readScrolls(home),message);
+   const run=cli('doctor');assert.equal(run.status,1);assert.match(run.stderr,message);
+  }
+  writeFileSync(file,'{}');chmodSync(file,0o666);assert.throws(()=>readScrolls(home),/writable by others/);
+ }finally{rmSync(home,{recursive:true,force:true});}
 });

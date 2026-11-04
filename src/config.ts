@@ -4,6 +4,7 @@ import { join, resolve } from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { statSync } from 'node:fs';
 import { validateModels, type Models } from './model.ts';
+import { defaultPolicy, validatePolicy, type Policy } from './policy.ts';
 export interface Config {port:number; language:'it'|'en'; timeZone:string;nativePort?:number;models:Models}
 export const defaults:Omit<Config,'models'> = {port:4317,language:'en',timeZone:'Europe/Rome'};
 /** NERV_* settings; the pre-rename NODO_* names are still read as a fallback. */
@@ -49,6 +50,14 @@ export function readModelKey(home:string):string|undefined {
   const key=readFileSync(file,'utf8').trim();
   if(key.length<20||/[\s]/.test(key))throw new Error('Invalid anthropic-key file.');
   return key;
+}
+export interface Scrolls {policy:Policy;source:'default'|'scrolls.json'}
+/** The Scrolls (F-017): the owner's gate rules in scrolls.json. Missing means the defaults; an invalid or tamperable file stops startup rather than relaxing a rule. */
+export function readScrolls(home:string):Scrolls {
+  const file=join(home,'scrolls.json');if(!existsSync(file))return {policy:defaultPolicy,source:'default'};
+  if(statSync(file).mode&0o022)throw new Error('scrolls.json must not be writable by others: chmod 600.');
+  let value:unknown;try{value=JSON.parse(readFileSync(file,'utf8'));}catch{throw new Error('Invalid scrolls.json: not JSON.');}
+  try{return {policy:validatePolicy(value),source:'scrolls.json'};}catch(e){throw new Error(`Invalid scrolls.json: ${e instanceof Error?e.message:'invalid policy'}`);}
 }
 export function initialize(home:string):void {
   mkdirSync(home,{recursive:true,mode:0o700});
