@@ -3,11 +3,11 @@
     "kind": "rule",
     "disposition": "implemented",
     "target": "docs/agents/areas.md",
-    "evidence": "Frontend area note: the memory-only token rule stays; open adds single-use, 60 s login codes that the page swaps once for the token after clearing them from the address (owner choice 2026-11-04, F-034). Also corrects the stale 'Italian is the default' line (English default since PR #17). Checked by test/session.test.ts, the headless process test and a headless Chrome run."
+    "evidence": "Action gate area note gains Aoba's rules: started only with a private token file and a linked owner chat, outbound long polling only, one owner chat, taps through Store.decide, per-message delivery checkpoints and a stop that waits for an in-flight delivery (a resend race found by the test), the token never echoed and the API base Telegram or loopback only (F-003, F-023). Checked by test/telegram.test.ts."
   },
   {
     "kind": "none",
     "disposition": "no-change",
-    "evidence": "No harness file or copied tool changed."
+    "evidence": "No harness file or copied tool changed; INSTALL documents setup, behaviour and the Telegram privacy limit."
   }
 ]
