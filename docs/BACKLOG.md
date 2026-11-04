@@ -891,9 +891,9 @@ Current work ledger, reviewed 4 November 2026 against main `c92dc8f`. PR #1–#6
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔶 P2 | Open | 🟢 Small | ~0% |
+| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
 
-💻 **→ Human action required: No**<br />Upgrade `@angular/build` (and its pinned Angular peers) to the patch release that pulls a fixed vite.
+💻 **→ Human action required: No**<br />Close from this PR's green CI after merge.
 
 | | |
 |---|---|
@@ -904,15 +904,15 @@ Current work ledger, reviewed 4 November 2026 against main `c92dc8f`. PR #1–#6
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Found 2026-11-04 while adding the model-route dependency ([PR #11](https://github.com/voidbrain/nerv/pull/11), model routes); kept out of that PR. `npm audit fix --force` proposes `@angular/build` 22.2.5, outside the pinned set: upgrade the Angular packages together in their own PR.
+**Next action / closure evidence:** Implemented in [PR #71](https://github.com/voidbrain/nerv/pull/71): `@angular/build` and `@angular/cli` 22.2.3 → 22.2.5 (exact pins), which pull vite 8.3.5; the framework packages are already on their latest patch, 22.2.4. Checked 2026-11-04 on a fresh `npm ci`: `npm audit` finds 0 vulnerabilities; typecheck, `npm test` (94 pass), `npm run build`, and `npm run dev` serving `/` (200 on port 4318). Earlier: found 2026-11-04 while adding the model-route dependency ([PR #11](https://github.com/voidbrain/nerv/pull/11), model routes); kept out of that PR. `npm audit fix --force` proposes `@angular/build` 22.2.5, outside the pinned set: upgrade the Angular packages together in their own PR.
 
-**Estimates:** Small remaining effort; ~0% complete. Estimated 2026-11-04.
+**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-04.
 
 | Field | Value |
 |---|---|
-| PR / evidence | `npm audit` 2026-11-04 |
+| PR / evidence | `npm audit` 2026-11-04; [PR #71](https://github.com/voidbrain/nerv/pull/71) |
 | Opened | 2026-11-04 |
-| Verification | Pending |
+| Verification | 2026-11-04: audit, typecheck, tests, build and dev server above (local run) |
 | Reviewed | 2026-11-04 |
 
 </details>
