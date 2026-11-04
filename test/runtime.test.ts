@@ -69,3 +69,14 @@ test('each machine has a base identity: set at init, shown by base, changed late
   for(const bad of [{id:'nerv 1',name:'x'},{id:'N',name:'x'},{id:'NERV-01',name:''},{id:'NERV-01',name:'<script>'},{id:'NERV-01',name:'x',extra:1}])assert.throws(()=>validateBase(bad),JSON.stringify(bad));
  }finally{rmSync(home,{recursive:true,force:true});}
 });
+test('Windows: private files rely on the profile ACLs (no Unix bits), and service install prints the Task Scheduler command',async()=>{
+ const {privateEnough}=await import('../src/config.ts');const {windowsTask}=await import('../src/service.ts');const {NODE_FLAGS}=await import('../src/process-client.ts');
+ const dir=mkdtempSync(join(tmpdir(),'nerv-win-'));const file=join(dir,'telegram-token');
+ try{
+  writeFileSync(file,'x',{mode:0o644});
+  assert.equal(privateEnough(file,0o077,'linux'),false);assert.equal(privateEnough(file,0o077,'darwin'),false);assert.equal(privateEnough(file,0o077,'win32'),true);
+  const {chmodSync}=await import('node:fs');chmodSync(file,0o600);assert.equal(privateEnough(file,0o077,'linux'),true);
+  const task=windowsTask('C:\\\\Program Files\\\\nodejs\\\\node.exe','C:\\\\nerv\\\\src\\\\cli.ts');
+  assert.match(task,/schtasks \/Create \/SC ONLOGON \/TN "NERV Agency"/);assert.ok(task.includes(NODE_FLAGS.join(' ')),'the same Node flags as every other launcher');assert.match(task,/serve"/);assert.doesNotMatch(task,/_TOKEN/);
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});

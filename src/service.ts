@@ -41,10 +41,15 @@ WantedBy=default.target
 `;
   throw new Error('Services support macOS and Linux only.');
 }
+/** Windows has no user service manager we drive yet: the equivalent Task Scheduler command, to run once by hand (F-037). */
+export function windowsTask(node:string,cli:string):string {
+  return `Windows: service install is not automated yet. To start NERV Agency at logon, run once in a terminal:\n  schtasks /Create /SC ONLOGON /TN "NERV Agency" /RL LIMITED /TR "\\"${node}\\" ${NODE_FLAGS.join(' ')} \\"${cli}\\" serve"\nRemove it with: schtasks /Delete /TN "NERV Agency" /F`;
+}
 export function service(action:string,home:string):void {
   const platform=process.platform;
-  if(platform!=='darwin'&&platform!=='linux')throw new Error('Services support macOS and Linux only.');
   const root=resolve(fileURLToPath(new URL('..',import.meta.url)));
+  if(platform==='win32')throw new Error(windowsTask(process.execPath,join(root,'src','cli.ts')));
+  if(platform!=='darwin'&&platform!=='linux')throw new Error('Services support macOS and Linux only.');
   const directory=platform==='darwin'?join(homedir(),'Library/LaunchAgents'):join(process.env.XDG_CONFIG_HOME ?? join(homedir(),'.config'),'systemd/user');
   const file=(names:{label:string;unit:string})=>join(directory,platform==='darwin'?names.label+'.plist':names.unit);
   const domain=`gui/${process.getuid?.()}`;

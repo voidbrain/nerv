@@ -24,8 +24,9 @@ async function openPage(home:string,page:'/'|'/dashboard/',print:boolean) {
   const value=await response.json() as {code?:string;error?:string};
   if(!response.ok||!value.code)throw new Error(value.error ?? 'Could not create a login code.');
   const url=`http://127.0.0.1:${config.port}${page}#code=${value.code}`;
-  const opener=print?undefined:process.platform==='darwin'?'open':process.platform==='linux'?'xdg-open':undefined;
-  if(opener){const run=spawnSync(opener,[url],{stdio:'ignore'});if(run.status!==0)console.log(url);}else console.log(url);
+  // Windows: `start` is a cmd built-in; its first quoted argument is a window title, hence the empty string.
+  const [opener,openArgs]=print?[undefined,[]]:process.platform==='darwin'?['open',[url]]:process.platform==='linux'?['xdg-open',[url]]:process.platform==='win32'?['cmd',['/c','start','',url]]:[undefined,[]];
+  if(opener){const run=spawnSync(opener,openArgs,{stdio:'ignore'});if(run.status!==0)console.log(url);}else console.log(url);
 }
 let store:Store|undefined;let running=false;
 try {

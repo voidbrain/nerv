@@ -54,10 +54,15 @@ export function readToken(home:string):string {
   if(token.length<24||/[\r\n]/.test(token))throw new Error('Run init first, or set NERV_TOKEN to at least 24 characters.');
   return token;
 }
+/**
+ * A secret or rule file is private enough when no group/other permission bits in `mask` are set. Windows has no such
+ * bits (Node reports 0o666): there the user profile's ACLs keep the data home private, so the check is the folder's.
+ */
+export function privateEnough(file:string,mask:number,platform:NodeJS.Platform=process.platform):boolean {return platform==='win32'||(statSync(file).mode&mask)===0;}
 /** Cloud route key: a private file in the data home, never an environment variable, argv or config.json. */
 export function readModelKey(home:string):string|undefined {
   const file=join(home,'anthropic-key');if(!existsSync(file))return undefined;
-  if(statSync(file).mode&0o077)throw new Error('anthropic-key must be private: chmod 600.');
+  if(!privateEnough(file,0o077))throw new Error('anthropic-key must be private: chmod 600.');
   const key=readFileSync(file,'utf8').trim();
   if(key.length<20||/[\s]/.test(key))throw new Error('Invalid anthropic-key file.');
   return key;
@@ -66,14 +71,14 @@ export interface Scrolls {policy:Policy;source:'default'|'scrolls.json'}
 /** The Scrolls (F-017): the owner's gate rules in scrolls.json. Missing means the defaults; an invalid or tamperable file stops startup rather than relaxing a rule. */
 export function readScrolls(home:string):Scrolls {
   const file=join(home,'scrolls.json');if(!existsSync(file))return {policy:defaultPolicy,source:'default'};
-  if(statSync(file).mode&0o022)throw new Error('scrolls.json must not be writable by others: chmod 600.');
+  if(!privateEnough(file,0o022))throw new Error('scrolls.json must not be writable by others: chmod 600.');
   let value:unknown;try{value=JSON.parse(readFileSync(file,'utf8'));}catch{throw new Error('Invalid scrolls.json: not JSON.');}
   try{return {policy:validatePolicy(value),source:'scrolls.json'};}catch(e){throw new Error(`Invalid scrolls.json: ${e instanceof Error?e.message:'invalid policy'}`);}
 }
 /** Aoba's Telegram bot token: a private file in the data home, like the cloud key. */
 export function readTelegramToken(home:string):string|undefined {
   const file=join(home,'telegram-token');if(!existsSync(file))return undefined;
-  if(statSync(file).mode&0o077)throw new Error('telegram-token must be private: chmod 600.');
+  if(!privateEnough(file,0o077))throw new Error('telegram-token must be private: chmod 600.');
   const token=readFileSync(file,'utf8').trim();
   if(!/^\d{5,15}:[A-Za-z0-9_-]{30,64}$/.test(token))throw new Error('Invalid telegram-token file: paste the token BotFather gave you.');
   return token;
