@@ -16,6 +16,12 @@ Run `npm start -- open` in another terminal: it opens **http://127.0.0.1:4317** 
 
 Initialization creates `~/.nerv/config.json` and `~/.nerv/token` with private file permissions. Read the token locally to connect the UI; do not paste it into chat, a URL or a repository. The token stays in tab memory. Repeat initialization preserves configuration and credentials.
 
+Each machine has a **base identity**, shown in the dashboard, `doctor` and the daily brief: give it at setup with `npm start -- init --base NERV-02 --name "Tabgha"` (both flags), see it with `npm start -- base`, change it later with `npm start -- base NERV-03 "Bethany"` (or edit `"base"` in `config.json`) and restart. Without one, a base is `NERV-01 · Neo Tokyo-3`. `npm start -- launch` is `serve` plus opening the live dashboard signed in.
+
+### A second machine
+
+Until the Kaji line (milestone 3) connects bases, every installation is independent: its own data home, reminders, ledger and memory. Give each one its own base identity. Only **one** installation may run Aoba with a given Telegram bot (Telegram delivers a bot's messages to one reader): when you move NERV to an always-on machine, stop the old one or remove its `telegram-token`; to run both, create a second bot. To move your data, stop both services and copy the data home (`~/.nerv`) to the new machine, then set its base identity.
+
 Defaults: port 4317, language `en`, timezone `Europe/Rome`. Edit config.json to select `it`, another free port or a valid IANA timezone. Restart the service after configuration changes. Date inputs are browser-local and saved as UTC; the configured timezone does not silently reinterpret them. Natural-language dates, recurring schedules and Italian voice remain future work.
 
 ### Existing 0.1 data

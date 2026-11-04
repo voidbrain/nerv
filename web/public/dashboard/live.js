@@ -54,6 +54,7 @@
       state.approvals = cards.map(toApproval).filter(ap => state.sorties.some(s => s.id === ap.sortie));
       state.upcoming = pending.map(r => ({ at:Date.parse(r.due), title:r.title, kind:"reminder" }));
       state.doctor = doctor;
+      if (doctor.base) { BASES[0].name = doctor.base.name.toUpperCase(); BASES[0].role = doctor.base.id + " · this machine"; }
       if (!state.selected && state.sorties[0]) state.selected = state.sorties[0].id;
       renderAll();
       setBanner("<b>LIVE</b> <span class='muted'>— this NERV Agency service · " + list.length + " recent sorties · refreshed " + new Date().toTimeString().slice(0, 8) + "</span>", "live");
@@ -113,7 +114,8 @@
   window.renderBases = function () {
     document.getElementById("bases-sub").textContent = "1/1 online";
     const roles = ((state.doctor || {}).models || {}).roles || {};
-    document.getElementById("bases").innerHTML = "<div class='card'><div class='row'><span class='b'>TOKYO-3</span><span class='badge b-ok'>ONLINE</span></div><div class='tiny muted'>HQ · this machine · coordinator, scheduler, brain</div><div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div></div>" +
+    const base = (state.doctor || {}).base || { id:"NERV-01", name:"Neo Tokyo-3" };
+    document.getElementById("bases").innerHTML = "<div class='card'><div class='row'><span class='b'>" + esc(base.name) + " · " + esc(base.id) + "</span><span class='badge b-ok'>ONLINE</span></div><div class='tiny muted'>this machine · coordinator, scheduler, brain</div><div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div></div>" +
       "<div class='muted small' style='margin-top:4px'>Other bases (Kaji line) are planned · not connected yet.</div>";
   };
   window.renderBudget = function () { document.getElementById("budget").innerHTML = PLANNED; };

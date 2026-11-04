@@ -46,9 +46,9 @@ export function card(a:Approval):{text:string;buttons:Button[][]} {
  return {text,buttons:[[{text:'✅ Approve once',callback_data:'a:'+a.id},{text:'❌ Reject',callback_data:'r:'+a.id}]]};
 }
 export class TelegramChannel {
- readonly api:TelegramApi;readonly store:StoreApi;readonly chatId:number;readonly statePath:string;readonly log:(line:string)=>void;readonly brief?:{at:string;timeZone:string;language:'it'|'en'};
+ readonly api:TelegramApi;readonly store:StoreApi;readonly chatId:number;readonly statePath:string;readonly log:(line:string)=>void;readonly brief?:{at:string;timeZone:string;language:'it'|'en';base?:string};
  private state:State={cards:[]};private stopping=new AbortController();private queue:Promise<void>=Promise.resolve();private timer?:NodeJS.Timeout;private delivery?:Promise<void>;
- constructor(options:{api:TelegramApi;store:StoreApi;chatId:number;statePath:string;log?:(line:string)=>void;brief?:{at:string;timeZone:string;language:'it'|'en'}}) {
+ constructor(options:{api:TelegramApi;store:StoreApi;chatId:number;statePath:string;log?:(line:string)=>void;brief?:{at:string;timeZone:string;language:'it'|'en';base?:string}}) {
   if(options.brief)this.brief=options.brief;
   this.api=options.api;this.store=options.store;this.chatId=options.chatId;this.statePath=options.statePath;this.log=options.log ?? (line=>console.error(line));
   if(existsSync(this.statePath)){try{const saved=JSON.parse(readFileSync(this.statePath,'utf8')) as Partial<State>;this.state={...saved,cards:Array.isArray(saved.cards)?saved.cards:[]};}catch{this.log('Telegram: unreadable state file; starting fresh.');}}
@@ -129,6 +129,6 @@ export class TelegramChannel {
   const since=this.state.brief?new Date(this.state.brief.at):new Date(now.getTime()-86_400_000);
   const facts=await gatherBrief(this.store,since);
   this.state.brief={date,at:now.toISOString()};this.save();
-  await this.api.send(this.chatId,composeBrief({now,timeZone:this.brief.timeZone,language:this.brief.language,...facts}));
+  await this.api.send(this.chatId,composeBrief({now,timeZone:this.brief.timeZone,language:this.brief.language,...(this.brief.base?{base:this.brief.base}:{}),...facts}));
  }
 }

@@ -16,8 +16,8 @@ Requires Node **24+**. English is the default interface language; Italian is sel
 npm ci
 npm run build
 npm link            # once: adds the nerv command (nerv init, nerv serve, nerv chat "…", nerv open dashboard)
-npm start -- init
-npm start -- serve
+npm start -- init --base NERV-01 --name "Neo Tokyo-3"
+npm start -- launch   # serve + open the live dashboard
 ```
 
 Every `npm start -- X` below can be written `nerv X` after `npm link`.

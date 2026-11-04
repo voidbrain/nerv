@@ -5,7 +5,7 @@ import type { StoreApi } from './runtime.ts';
  * failed since the previous brief, and health problems. Times are shown in the owner's time zone.
  */
 export interface BriefInput {
- now:Date;timeZone:string;language:'it'|'en';
+ now:Date;timeZone:string;language:'it'|'en';base?:string;
  approvals:{tool:string;expires:string}[];
  reminders:{title:string;due:string}[];
  sorties:{title:string;status:string;closed:string|null}[];
@@ -20,7 +20,7 @@ export function composeBrief(b:BriefInput):string {
  const at=(iso:string)=>new Intl.DateTimeFormat(b.language==='it'?'it-IT':'en-GB',{timeZone:b.timeZone,weekday:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(iso));
  const soon=b.reminders.filter(r=>{const t=Date.parse(r.due);return t>b.now.getTime()&&t<=b.now.getTime()+86_400_000;}).sort((x,y)=>Date.parse(x.due)-Date.parse(y.due));
  const done=b.sorties.filter(s=>s.status==='done'),failed=b.sorties.filter(s=>s.status==='failed');
- const lines=[`☀️ ${w.title}`,'',`${w.needs}: ${b.approvals.length}`,...(b.approvals.length?b.approvals.slice(0,5).map(a=>`• ${a.tool} (${w.expires} ${at(a.expires)})`):[w.none]),
+ const lines=[`☀️ ${w.title}${b.base?` · ${b.base}`:''}`,'',`${w.needs}: ${b.approvals.length}`,...(b.approvals.length?b.approvals.slice(0,5).map(a=>`• ${a.tool} (${w.expires} ${at(a.expires)})`):[w.none]),
   '',`${w.due}: ${soon.length}`,...(soon.length?soon.slice(0,8).map(r=>`• ${at(r.due)} ${r.title}`):[w.noDue]),
   '',`${w.since}: ${done.length} ${w.done}, ${failed.length} ${w.failed}`,...(failed.length?failed.slice(0,5).map(s=>`• ✗ ${s.title}`):done.length?[]:[w.quiet]),
   '',`${w.health}: ${b.health.length?b.health.join('; '):w.ok}`];

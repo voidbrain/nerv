@@ -12,6 +12,7 @@ test('one headless process serves UI and reminders, exits cleanly, and recovers 
   const initialized=spawnSync(process.execPath,['src/cli.ts','init'],{env,encoding:'utf8'});assert.equal(initialized.status,0,initialized.stderr);
   writeFileSync(join(home,'config.json'),JSON.stringify({port,language:'it',timeZone:'Europe/Rome'}));
   const headers={Authorization:'Bearer '+readToken(home),'Content-Type':'application/json'};const base=`http://127.0.0.1:${port}`;
+  writeFileSync(join(home,'config.json'),JSON.stringify({port,language:'it',timeZone:'Europe/Rome',base:{id:'NERV-02',name:'Tabgha'}}));
   const first=await launch();assert.match(await(await fetch(base)).text(),/nerv-app/);
   // open: the CLI asks the running service for a login code; the page's exchange returns the token once.
   const opened=spawnSync(process.execPath,['src/cli.ts','open','--print'],{env,encoding:'utf8'});assert.equal(opened.status,0,opened.stderr);
@@ -20,7 +21,7 @@ test('one headless process serves UI and reminders, exits cleanly, and recovers 
   assert.deepEqual(await swapped.json(),{token:readToken(home)});
   const dashboard=spawnSync(process.execPath,['src/cli.ts','open','dashboard','--print'],{env,encoding:'utf8'});assert.match(dashboard.stdout,/\/dashboard\/#code=[a-f0-9]{32}/);
   assert.match(await(await fetch(base+'/dashboard/')).text(),/<script src="live\.js"><\/script>/,'the built dashboard is served with its live adapter');
-  const health=await(await fetch(base+'/api/doctor',{headers})).json();const pids=[health.processes.nervous,health.processes.brain] as number[];assert.equal(new Set(pids).size,2);
+  const health=await(await fetch(base+'/api/doctor',{headers})).json();assert.deepEqual(health.base,{id:'NERV-02',name:'Tabgha'},'doctor names this base');const pids=[health.processes.nervous,health.processes.brain] as number[];assert.equal(new Set(pids).size,2);
   const due=new Date(Date.now()+1500).toISOString();assert.equal((await fetch(base+'/api/reminders',{method:'POST',headers,body:JSON.stringify({title:'Promemoria di prova',due})})).status,201);
   await stop(first);child=undefined;for(const pid of pids)assert.throws(()=>process.kill(pid,0));
   await new Promise(done=>setTimeout(done,1600));const second=await launch();
@@ -29,4 +30,14 @@ test('one headless process serves UI and reminders, exits cleanly, and recovers 
   const failing=await launch();const failureHealth=await(await fetch(base+'/api/doctor',{headers})).json();const exited=once(failing,'exit');process.kill(failureHealth.processes.nervous,'SIGKILL');const [failureCode]=await exited;assert.equal(failureCode,1);child=undefined;assert.throws(()=>process.kill(failureHealth.processes.brain,0));
   const recovered=await launch();assert.equal((await(await fetch(base+'/api/inbox',{headers})).json()).length,1);await stop(recovered);child=undefined;
  }finally{if(child&&child.exitCode===null&&child.signalCode===null){const exited=once(child,'exit');child.kill('SIGKILL');await exited;}rmSync(home,{recursive:true,force:true});}
+});
+test('launch serves and opens the live dashboard signed in (printed with --print)',{timeout:15000},async()=>{
+ const home=mkdtempSync(join(tmpdir(),'nerv-launch-'));const env:NodeJS.ProcessEnv={...process.env,NERV_HOME:home};for(const k of ['NERV_TOKEN','NERV_PORT'])delete env[k];
+ const reservation=createServer();await new Promise<void>(done=>reservation.listen(0,'127.0.0.1',done));const port=(reservation.address() as {port:number}).port;await new Promise<void>(done=>reservation.close(()=>done()));
+ spawnSync(process.execPath,['src/cli.ts','init'],{env});writeFileSync(join(home,'config.json'),JSON.stringify({port}));
+ const child=spawn(process.execPath,['src/cli.ts','launch','--print'],{env,stdio:['ignore','pipe','pipe']});let out='';child.stdout!.on('data',d=>out+=d);
+ try{
+  const end=Date.now()+8000;while(!/#code=/.test(out)){if(Date.now()>end)throw new Error('no dashboard link: '+out);await new Promise(d=>setTimeout(d,50));}
+  assert.match(out,new RegExp(`NERV Agency NERV-01 · Neo Tokyo-3: http://127\\.0\\.0\\.1:${port}`));assert.match(out,new RegExp(`http://127\\.0\\.0\\.1:${port}/dashboard/#code=[a-f0-9]{32}`));
+ }finally{const exited=once(child,'exit');child.kill('SIGTERM');await exited;rmSync(home,{recursive:true,force:true});}
 });

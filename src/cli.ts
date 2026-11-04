@@ -5,17 +5,32 @@ import { chmodSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Store } from './store.ts';
 import { makeServer } from './server.ts';
-import { dataHome, databasePath, initialize, readConfig, readScrolls, readTelegramToken, readToken } from './config.ts';
+import { dataHome, databasePath, initialize, readConfig, readScrolls, readTelegramToken, readToken, setBase, type Base } from './config.ts';
 import { TelegramApi, TelegramChannel, startChats, telegramBase } from './telegram.ts';
 import { composeBrief, gatherBrief } from './brief.ts';
 import { service } from './service.ts';
 import {initializeNativeTLS,loadNativeTLS,nativeAdmin,NativeAuth,type Invitation} from './native-auth.ts';
 import { Runtime } from './runtime.ts';
 const [command,...args]=process.argv.slice(2);
+/** --base NERV-02 --name "Tabgha" (both, or neither). */
+function baseFlags(list:string[]):Base|undefined {
+  const at=(flag:string)=>{const i=list.indexOf(flag);return i>=0?list[i+1]:undefined;};const id=at('--base'),name=at('--name');
+  if(id===undefined&&name===undefined)return undefined;if(!id||!name)throw new Error('Give both --base ID and --name "Name".');return {id:id.toUpperCase(),name};
+}
+/** Mints a one-use login code from the running service and opens (or prints) the page signed in. */
+async function openPage(home:string,page:'/'|'/dashboard/',print:boolean) {
+  const config=readConfig(home);
+  const response=await fetch(`http://127.0.0.1:${config.port}/api/session/codes`,{method:'POST',headers:{authorization:`Bearer ${readToken(home)}`}}).catch(()=>{throw new Error('NERV Agency is not running: start it with serve, launch or service start.');});
+  const value=await response.json() as {code?:string;error?:string};
+  if(!response.ok||!value.code)throw new Error(value.error ?? 'Could not create a login code.');
+  const url=`http://127.0.0.1:${config.port}${page}#code=${value.code}`;
+  const opener=print?undefined:process.platform==='darwin'?'open':process.platform==='linux'?'xdg-open':undefined;
+  if(opener){const run=spawnSync(opener,[url],{stdio:'ignore'});if(run.status!==0)console.log(url);}else console.log(url);
+}
 let store:Store|undefined;let running=false;
 try {
   const home=dataHome();
-  if(command==='init'){initialize(home);console.log(`NERV Agency configurata / configured: ${home}\nAccess token: ${join(home,'token')}`);}
+  if(command==='init'){initialize(home,baseFlags(args));const b=readConfig(home).base;console.log(`NERV Agency configured: ${home} · base ${b.id} · ${b.name}\nAccess token: ${join(home,'token')}`);}
   else if(command==='native-init'){initialize(home);initializeNativeTLS(home);console.log('Native TLS configured. Restart NERV Agency, then run pair.');}
   else if(['pair','clients','revoke'].includes(command ?? '')){const config=readConfig(home);const path=command==='pair'?'/api/pairing/tickets':command==='clients'?'/api/clients':'/api/clients/'+encodeURIComponent(args[0] ?? '');const value=await nativeAdmin(home,config.nativePort ?? 4319,readToken(home),path,command==='pair'?'POST':command==='revoke'?'DELETE':'GET',command==='pair'?{label:args[0] ?? 'NERV Agency Menu Bar'}:undefined);if(command==='pair'){const invitation=value as Invitation;console.log('Private invitation (expires in 2 minutes; paste only into the NERV Agency companion):\n'+Buffer.from(JSON.stringify(invitation)).toString('base64url'));}else console.log(JSON.stringify(value,null,2));}
   else if(command==='service')service(args[0] ?? '',home);
@@ -31,16 +46,13 @@ try {
     console.log(`Aoba linked to ${pick.name} (chat ${pick.chatId}). Restart the service to start it.`);
   }
   else if(command==='open'){
-    // Opens the web workspace signed in: the service mints a one-use code, the page swaps it for the token in memory.
-    const config=readConfig(home);
-    const response=await fetch(`http://127.0.0.1:${config.port}/api/session/codes`,{method:'POST',headers:{authorization:`Bearer ${readToken(home)}`}}).catch(()=>{throw new Error('NERV Agency is not running: start it with serve or service start.');});
-    const value=await response.json() as {code?:string;error?:string};
-    if(!response.ok||!value.code)throw new Error(value.error ?? 'Could not create a login code.');
     // open dashboard: the same sign-in, landing on the live dashboard instead of the workspace.
-    const page=args.includes('dashboard')?'/dashboard/':'/';
-    const url=`http://127.0.0.1:${config.port}${page}#code=${value.code}`;
-    const opener=args.includes('--print')?undefined:process.platform==='darwin'?'open':process.platform==='linux'?'xdg-open':undefined;
-    if(opener){const run=spawnSync(opener,[url],{stdio:'ignore'});if(run.status!==0)console.log(url);}else console.log(url);
+    await openPage(home,args.includes('dashboard')?'/dashboard/':'/',args.includes('--print'));
+  }
+  else if(command==='base'){
+    // base: show this machine's identity; base ID "Name": change it (restart the service to show it everywhere).
+    if(args.length){const b=setBase(home,{id:(args[0] ?? '').toUpperCase(),name:args.slice(1).join(' ')});console.log(`Base set: ${b.id} · ${b.name}. Restart the service to apply it.`);}
+    else{const b=readConfig(home).base;console.log(`${b.id} · ${b.name}`);}
   }
   else if(command==='chat'){
     // A request to Misato through the running service. It plans, the gate reviews each action, and the reply comes back.
@@ -83,7 +95,7 @@ try {
     if(!response.ok)throw new Error(value.error ?? 'Ask failed.');
     console.log(value.text+(value.truncated?'\n[reply truncated]':'')+`\n— ${value.route} · ${value.model}`);
   }
-  else if(!command||command==='help')console.log('NERV Agency\nCommands: init | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | open [dashboard] | chat "text" | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
+  else if(!command||command==='help')console.log('NERV Agency\nCommands: init [--base ID --name "Name"] | base [ID "Name"] | launch | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | open [dashboard] | chat "text" | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
   else {
     const config=readConfig(home);
     const scrolls=readScrolls(home);
@@ -108,7 +120,7 @@ try {
         }
         break;
       }
-      case 'brief':console.log(composeBrief({now:new Date(),timeZone:config.timeZone,language:config.language,...await gatherBrief(local(),new Date(Date.now()-86_400_000))}));break;
+      case 'brief':console.log(composeBrief({now:new Date(),timeZone:config.timeZone,language:config.language,base:config.base.name,...await gatherBrief(local(),new Date(Date.now()-86_400_000))}));break;
       case 'tick':console.log(JSON.stringify({delivered:local().tick()}));break;
       case 'inbox':console.log(JSON.stringify(local().inbox(),null,2));break;
       case 'approvals':console.log(JSON.stringify(local().approvals(),null,2));break;
@@ -116,7 +128,7 @@ try {
       case 'events':console.log(JSON.stringify(local().events(args[0] ?? ''),null,2));break;
       case 'spear':console.log(JSON.stringify(local().ledger.spear(args[0] ?? '',args[1] ?? 'cli'),null,2));break;
       case 'doctor':console.log(JSON.stringify({node:process.version,home,port:config.port,language:config.language,timeZone:config.timeZone,hostTimeZone:Intl.DateTimeFormat().resolvedOptions().timeZone,...local().doctor(),delivery:'Durable local inbox; phone notifications not configured.',workers:'Contract only; no remote execution.'},null,2));break;
-      case 'serve':{
+      case 'serve':case 'launch':{
         const webRoot=resolve(fileURLToPath(new URL('../dist/web/browser',import.meta.url)));
         if(!existsSync(join(webRoot,'index.html')))throw new Error('Frontend missing: run npm run build.');
         const token=readToken(home);const nativeTLS=loadNativeTLS(home);const botToken=readTelegramToken(home);
@@ -133,9 +145,10 @@ try {
         runtime.nervous.child.once('exit',()=>{if(!stopped){console.error('Scheduler unavailable; shutting down for supervisor recovery.');process.exitCode=1;close();}});
         for(const listener of servers)listener.on('error',e=>{console.error(e.message);process.exitCode=1;close();});
         if(native)await new Promise<void>((done,reject)=>{native.once('error',reject);native.listen(config.nativePort ?? 4319,'127.0.0.1',done);}).catch(e=>{close();throw e;});
-        server.listen(config.port,'127.0.0.1',()=>console.log(`NERV Agency: http://127.0.0.1:${config.port} · ${config.language} · ${config.timeZone}`));running=true;
+        // launch = serve, then open the live dashboard signed in once the server listens.
+        server.listen(config.port,'127.0.0.1',()=>{console.log(`NERV Agency ${config.base.id} · ${config.base.name}: http://127.0.0.1:${config.port} · ${config.language} · ${config.timeZone}`);if(command==='launch')void openPage(home,'/dashboard/',args.includes('--print')).catch(e=>console.error(e instanceof Error?e.message:'Could not open the dashboard.'));});running=true;
         // Aoba starts only when both the private bot token and the linked owner chat exist.
-        if(botToken&&config.telegram){aoba=new TelegramChannel({api:new TelegramApi(botToken,telegramBase()),store:runtime,chatId:config.telegram.chatId,statePath:join(home,'telegram-state.json'),...(config.brief?{brief:{at:config.brief.at,timeZone:config.timeZone,language:config.language}}:{})});await aoba.start().then(()=>console.log('Aoba (Telegram): linked, listening.'),e=>console.error(`Aoba (Telegram) did not start: ${e instanceof Error?e.message:'error'}.`));}
+        if(botToken&&config.telegram){aoba=new TelegramChannel({api:new TelegramApi(botToken,telegramBase()),store:runtime,chatId:config.telegram.chatId,statePath:join(home,'telegram-state.json'),...(config.brief?{brief:{at:config.brief.at,timeZone:config.timeZone,language:config.language,base:config.base.name}}:{})});await aoba.start().then(()=>console.log('Aoba (Telegram): linked, listening.'),e=>console.error(`Aoba (Telegram) did not start: ${e instanceof Error?e.message:'error'}.`));}
         else if(botToken)console.log('Aoba (Telegram): token found, no chat linked yet. Send /start to your bot, then run telegram link.');
         process.once('SIGINT',close);process.once('SIGTERM',close);break;
       }
