@@ -35,3 +35,17 @@ test('a dashboard session acts as the admin for the dashboard, cannot mint codes
   assert.equal((await as(token,'/api/approvals')).status,200,'the admin token is unchanged');
  }finally{await new Promise<void>(done=>server.close(()=>done()));store.close();}
 });
+test('POST /api/stop stops the service as Ctrl+C would: admin token only, never a session or a stranger',async()=>{
+ const store=new Store(':memory:');const token='d'.repeat(32);let stops=0;const server=makeServer(store,token,{onStop:()=>{stops++;}});
+ await new Promise<void>(done=>server.listen(0,'127.0.0.1',done));const base=`http://127.0.0.1:${(server.address() as {port:number}).port}`;
+ const stop=(bearer?:string)=>fetch(base+'/api/stop',{method:'POST',headers:bearer?{authorization:'Bearer '+bearer}:{}});
+ try{
+  assert.equal((await stop()).status,401);
+  const {code}=await (await fetch(base+'/api/session/codes',{method:'POST',headers:{authorization:'Bearer '+token}})).json() as {code:string};
+  const session=((await (await fetch(base+'/api/session/exchange',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({code})})).json()) as {token:string}).token;
+  assert.equal((await stop(session)).status,403,'a dashboard session cannot stop the service');
+  assert.equal(stops,0);assert.equal((await stop(token)).status,202);await new Promise(done=>setImmediate(done));assert.equal(stops,1);
+ }finally{await new Promise<void>(done=>server.close(()=>done()));store.close();}
+ const bare=makeServer(new Store(':memory:'),'d'.repeat(32));await new Promise<void>(done=>bare.listen(0,'127.0.0.1',done));
+ try{assert.equal((await fetch(`http://127.0.0.1:${(bare.address() as {port:number}).port}/api/stop`,{method:'POST',headers:{authorization:'Bearer '+'d'.repeat(32)}})).status,503);}finally{await new Promise<void>(done=>bare.close(()=>done()));}
+});

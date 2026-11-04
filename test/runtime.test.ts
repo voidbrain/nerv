@@ -13,7 +13,7 @@ test('init preserves credentials and configuration; English/Rome defaults and pr
 });
 test('service definitions use absolute paths, encode special characters, and contain no credentials',()=>{
  const plist=renderService('darwin','/Users/name/Nodo & data','/Users/name/Code/Nodo','/opt/node');assert.match(plist,/Nodo &amp; data/);assert.match(plist,/<key>RunAtLoad<\/key><true\/>/);assert.doesNotMatch(plist,/_TOKEN/);assert.match(plist,/<key>NERV_HOME<\/key>/);assert.match(plist,/io\.nerv\.agent/);
- const unit=renderService('linux','/home/user/data','/home/user/Code with % and $','/usr/bin/node');assert.match(unit,/Code with %% and \$\$/);assert.match(unit,/WantedBy=default.target/);assert.doesNotMatch(unit,/_TOKEN/);assert.match(unit,/NERV_HOME=/);assert.throws(()=>renderService('win32','a','b','c'));assert.throws(()=>renderService('linux','bad\npath','b','c'));
+ const unit=renderService('linux','/home/user/data','/home/user/Code with % and $','/usr/bin/node');assert.match(unit,/Code with %% and \$\$/);assert.match(unit,/WantedBy=default.target/);assert.doesNotMatch(unit,/_TOKEN/);assert.match(unit,/NERV_HOME=/);assert.throws(()=>renderService('aix','a','b','c'),/macOS, Linux and Windows only/);assert.throws(()=>renderService('linux','bad\npath','b','c'));
 });
 test('built UI is public, APIs authenticated, traversal and symlinks cannot expose private files',async()=>{
  const dir=mkdtempSync(join(tmpdir(),'nerv-static-'));const web=join(dir,'web');mkdirSync(web);writeFileSync(join(web,'index.html'),'<h1>Nodo</h1>');writeFileSync(join(dir,'secret.txt'),'secret');symlinkSync(join(dir,'secret.txt'),join(web,'linked.txt'));
@@ -69,14 +69,24 @@ test('each machine has a base identity: set at init, shown by base, changed late
   for(const bad of [{id:'nerv 1',name:'x'},{id:'N',name:'x'},{id:'NERV-01',name:''},{id:'NERV-01',name:'<script>'},{id:'NERV-01',name:'x',extra:1}])assert.throws(()=>validateBase(bad),JSON.stringify(bad));
  }finally{rmSync(home,{recursive:true,force:true});}
 });
-test('Windows: private files rely on the profile ACLs (no Unix bits), and service install prints the Task Scheduler command',async()=>{
- const {privateEnough}=await import('../src/config.ts');const {windowsTask}=await import('../src/service.ts');const {NODE_FLAGS}=await import('../src/process-client.ts');
+test('Windows: private files rely on the profile ACLs (no Unix bits), and service install registers a hidden logon task that restarts on failure',async()=>{
+ const {privateEnough}=await import('../src/config.ts');const {windowsLauncher,windowsTaskXml,renderService}=await import('../src/service.ts');const {NODE_FLAGS}=await import('../src/process-client.ts');
  const dir=mkdtempSync(join(tmpdir(),'nerv-win-'));const file=join(dir,'telegram-token');
  try{
   writeFileSync(file,'x',{mode:0o644});
   assert.equal(privateEnough(file,0o077,'linux'),false);assert.equal(privateEnough(file,0o077,'darwin'),false);assert.equal(privateEnough(file,0o077,'win32'),true);
   const {chmodSync}=await import('node:fs');chmodSync(file,0o600);assert.equal(privateEnough(file,0o077,'linux'),true);
-  const task=windowsTask('C:\\\\Program Files\\\\nodejs\\\\node.exe','C:\\\\nerv\\\\src\\\\cli.ts');
-  assert.match(task,/schtasks \/Create \/SC ONLOGON \/TN "NERV Agency"/);assert.ok(task.includes(NODE_FLAGS.join(' ')),'the same Node flags as every other launcher');assert.match(task,/serve"/);assert.doesNotMatch(task,/_TOKEN/);
+  const home='C:\\Users\\d & co\\.nerv',root='C:\\Projects\\nerv',node='C:\\Program Files\\nodejs\\node.exe';
+  const task=windowsTaskXml(home,root,'TABGHA\\d');
+  assert.match(task,/<LogonTrigger><Enabled>true<\/Enabled><UserId>TABGHA\\d<\/UserId><\/LogonTrigger>/,'at this user\'s logon');
+  assert.match(task,/<RunLevel>LeastPrivilege<\/RunLevel>/);assert.match(task,/<ExecutionTimeLimit>PT0S<\/ExecutionTimeLimit>/,'no time limit');assert.match(task,/<RestartOnFailure><Interval>PT1M<\/Interval>/);
+  assert.match(task,/<MultipleInstancesPolicy>IgnoreNew<\/MultipleInstancesPolicy>/,'never a second copy');
+  assert.match(task,/<Arguments>\/\/B \/\/Nologo "C:\\Users\\d &amp; co\\.nerv\\nerv-service\.vbs"<\/Arguments><WorkingDirectory>C:\\Projects\\nerv<\/WorkingDirectory>/,'XML-escaped paths');
+  const vbs=windowsLauncher(home,root,node);
+  assert.match(vbs,/sh\.Environment\("PROCESS"\)\("NERV_HOME"\) = "C:\\Users\\d & co\\.nerv"/);assert.match(vbs,/, 0, True\)/,'hidden window, and the exit code reaches Task Scheduler');
+  assert.ok(vbs.includes(`""C:\\Program Files\\nodejs\\node.exe"" ${NODE_FLAGS.join(' ')} ""C:\\Projects\\nerv\\src\\cli.ts"" serve >> ""C:\\Users\\d & co\\.nerv\\service.log""`),'the same Node flags as every other launcher, logs in the data home');
+  for(const text of [task,vbs])assert.doesNotMatch(text,/NERV_TOKEN|Bearer|[a-f0-9]{64}/,'no credential in the task or the launcher');
+  assert.equal(renderService('win32',home,root,node).startsWith('<?xml version="1.0" encoding="UTF-16"?>'),true);
+  assert.throws(()=>windowsLauncher('C:\\a"b',root,node),/Invalid service path/);
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
