@@ -5,7 +5,7 @@ import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'n
 import { fileURLToPath } from 'node:url';
 import { Store } from './store.ts';
 import { makeServer } from './server.ts';
-import { dataHome, databasePath, initialize, isTelegramToken, pinKajiRoot, telegramTokenPath, readConfig, readScrolls, readTelegramToken, readToken, setBase, type Base } from './config.ts';
+import { dataHome, databasePath, initialize, isTelegramToken, pinKajiRoot, telegramTokenPath, readConfig, readModelKey, readScrolls, readTelegramToken, readToken, setBase, setting, type Base } from './config.ts';
 import { TelegramApi, TelegramChannel, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
 import { composeBrief, gatherBrief } from './brief.ts';
 import { KajiLink } from './kaji-link.ts';
@@ -13,6 +13,7 @@ import { ROOT_KEY_FILE, Registry, baseKey, createRootKey, enrolmentArgs, fingerp
 import { service } from './service.ts';
 import {initializeNativeTLS,loadNativeTLS,nativeAdmin,NativeAuth,type Invitation} from './native-auth.ts';
 import { Runtime } from './runtime.ts';
+import { OLLAMA_URL, detectOllama, modelsReport, ollamaUrlOf, planModels, setupAtInit, writeModels, type ModelChange } from './model-setup.ts';
 const [command,...args]=process.argv.slice(2);
 /** --base NERV-02 --name "Tabgha" (both, or neither). */
 function baseFlags(list:string[]):Base|undefined {
@@ -20,6 +21,13 @@ function baseFlags(list:string[]):Base|undefined {
   if(id===undefined&&name===undefined)return undefined;if(!id||!name)throw new Error('Give both --base ID and --name "Name".');return {id:id.toUpperCase(),name};
 }
 /** A secret typed without echo (or one line from stdin with --passphrase-stdin, for scripts and tests). Never from argv or env. */
+/** After a change: the running service re-reads its models in place; when it is not running, the change waits for its start. */
+async function reloadIfRunning(homeDir:string,port:number):Promise<string> {
+  const response=await fetch(`http://127.0.0.1:${port}/api/models/reload`,{method:'POST',headers:{authorization:`Bearer ${readToken(homeDir)}`}}).catch(()=>undefined);
+  if(!response)return 'The service is not running: the change applies when it starts.';
+  const value=await response.json() as {error?:string;kept?:boolean};
+  return response.ok?'The running service now uses it.':`The running service refused it: ${value.error ?? 'reload failed'}${value.kept?' (it keeps the previous settings)':''}.`;
+}
 async function readSecret(prompt:string):Promise<string> {
   if(args.includes('--passphrase-stdin')||args.includes('--stdin')){let data='';for await(const chunk of process.stdin)data+=chunk;return data.split(/\r?\n/)[0] ?? '';}
   if(!process.stdin.isTTY)throw new Error('A passphrase is needed: run this in a terminal (or pass --passphrase-stdin).');
@@ -44,7 +52,7 @@ async function openPage(home:string,page:'/'|'/dashboard/',print:boolean) {
 let store:Store|undefined;let running=false;
 try {
   const home=dataHome();
-  if(command==='init'){initialize(home,baseFlags(args));const b=readConfig(home).base;console.log(`NERV Agency configured: ${home} · base ${b.id} · ${b.name}\nAccess token: ${join(home,'token')}`);}
+  if(command==='init'){initialize(home,baseFlags(args));const b=readConfig(home).base;console.log(`NERV Agency configured: ${home} · base ${b.id} · ${b.name}\nAccess token: ${join(home,'token')}`);console.log(await setupAtInit(home,readConfig(home).models,setting('OLLAMA') ?? OLLAMA_URL));}
   else if(command==='native-init'){initialize(home);initializeNativeTLS(home);console.log('Native TLS configured. Restart NERV Agency, then run pair.');}
   else if(['pair','clients','revoke'].includes(command ?? '')){const config=readConfig(home);const path=command==='pair'?'/api/pairing/tickets':command==='clients'?'/api/clients':'/api/clients/'+encodeURIComponent(args[0] ?? '');const value=await nativeAdmin(home,config.nativePort ?? 4319,readToken(home),path,command==='pair'?'POST':command==='revoke'?'DELETE':'GET',command==='pair'?{label:args[0] ?? 'NERV Agency Menu Bar'}:undefined);if(command==='pair'){const invitation=value as Invitation;console.log('Private invitation (expires in 2 minutes; paste only into the NERV Agency companion):\n'+Buffer.from(JSON.stringify(invitation)).toString('base64url'));}else console.log(JSON.stringify(value,null,2));}
   else if(command==='service')service(args[0] ?? '',home);
@@ -110,6 +118,27 @@ try {
     const value=await response.json() as {revoked?:number;error?:string};if(!response.ok)throw new Error(value.error ?? 'Revoke failed.');
     console.log(`${value.revoked ?? 0} dashboard session(s) ended. Open the dashboard again with: open dashboard`);
   }
+  else if(command==='models'){
+    // F-038: see the routes and what Ollama has; pick Misato's and Casper's model; the cloud route on or off; its key.
+    const [sub,a1,a2]=args;const config=readConfig(home);
+    if(!sub){
+      const found=await detectOllama(setting('OLLAMA') ?? ollamaUrlOf(config.models));let key=false;try{key=!!readModelKey(home);}catch{key=false;}
+      console.log(modelsReport(config.models,key,found));
+    }else if(sub==='key'){
+      const value=(await readSecret('Claude API key (not shown): ')).trim();
+      if(value.length<20||/\s/.test(value))throw new Error('That does not look like an API key: nothing was saved.');
+      const file=join(home,'anthropic-key');writeFileSync(file,value+'\n',{mode:0o600});chmodSync(file,0o600);
+      console.log(`Saved to ${file} (readable only by you). Turn the route on with: models cloud on`);
+      console.log(await reloadIfRunning(home,config.port));
+    }else{
+      const change:ModelChange=sub==='set'&&a1==='misato'&&a2==='cloud'?{misato:{route:'cloud',...(args[3]?{model:args[3]}:{})}}
+        :sub==='set'&&a1==='misato'&&a2?{misato:{route:'local',model:a2}}:sub==='set'&&a1==='casper'&&a2?{casper:{model:a2}}
+        :sub==='cloud'&&(a1==='on'||a1==='off')?{cloud:{enabled:a1==='on',...(a2?{model:a2}:{})}}:(()=>{throw new Error('Usage: models | models set misato MODEL | models set misato cloud [MODEL] | models set casper MODEL | models cloud on|off [MODEL] | models key');})();
+      const found=await detectOllama(setting('OLLAMA') ?? ollamaUrlOf(config.models));
+      writeModels(home,planModels(config.models,change,found.reachable?found.models.map(m=>m.name):undefined));
+      console.log(`Saved. ${await reloadIfRunning(home,config.port)}`);
+    }
+  }
   else if(command==='reload'){
     // The running brain re-reads config.json and anthropic-key; a broken file keeps the last working settings.
     const config=readConfig(home);
@@ -138,7 +167,7 @@ try {
     if(!response.ok)throw new Error(value.error ?? 'Ask failed.');
     console.log(value.text+(value.truncated?'\n[reply truncated]':'')+`\n— ${value.route} · ${value.model}`);
   }
-  else if(!command||command==='help')console.log('NERV Agency\nCommands: init [--base ID --name "Name"] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | open [dashboard] | sessions revoke | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
+  else if(!command||command==='help')console.log('NERV Agency\nCommands: init [--base ID --name "Name"] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | models [set misato|casper MODEL | cloud on|off | key] | ask [--cloud] "text" | open [dashboard] | sessions revoke | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
   else {
     const config=readConfig(home);
     const scrolls=readScrolls(home);

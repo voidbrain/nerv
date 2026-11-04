@@ -90,7 +90,16 @@ The backend remains bound to loopback. Remote TLS/Tailscale deployment, service 
 
 ## Model routes
 
-NERV Agency has no model route until you add one to `config.json` in the data home (`doctor` prints it):
+**The easy way.** `npm start -- init` looks for Ollama on this machine (`http://127.0.0.1:11434`, or the address in `NERV_OLLAMA`) and, when nothing is set yet, puts Misato and Casper on its largest model. After that:
+
+- `npm start -- models` shows each role's route and model, the cloud route, whether its key is saved, and the models Ollama has;
+- `models set misato MODEL`, `models set casper MODEL` pick a local model (it must be one Ollama has); `models set misato cloud` moves Misato to Claude once `models cloud on` has turned that route on;
+- `models key` asks for the Claude API key at a hidden prompt and saves it to `anthropic-key` (readable only by you): it is never typed on the dashboard, a command line or in `config.json`;
+- the dashboard's **Models** panel offers the same choice for Misato and Casper, and turns the cloud route on or off; it says when the key is missing.
+
+Every change is checked before it is written and the running service uses it at once, without a restart. You can also edit the settings by hand:
+
+Without the commands above, NERV Agency has no model route until you add one to `config.json` in the data home (`doctor` prints it):
 
 ```json
 {"models":{"local":{"baseUrl":"http://127.0.0.1:11434/v1","model":"gemma3"},"cloud":{"provider":"anthropic","enabled":false}}}

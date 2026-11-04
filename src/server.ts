@@ -7,6 +7,7 @@ import { resolve, sep, extname } from 'node:path';
 import type { StoreApi } from './runtime.ts';
 import {attachRpcSocket} from './socket.ts';
 import {RpcFault} from './rpc.ts';
+import type {ModelChange} from './model-setup.ts';
 import {MODEL_TIMEOUT_MS} from './model.ts';
 import {MAX_STEPS} from './misato.ts';
 async function body(req: IncomingMessage,limit=8192): Promise<Record<string,unknown>> {
@@ -115,6 +116,19 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
       }
       else if(req.method==='GET'&&path==='/api/bases'){if(!store.bases){reply(503,{error:'Kaji unavailable.'});return;}reply(200,await store.bases());}
       else if(req.method==='POST'&&path==='/api/memory/consolidate'){if(!store.consolidate){reply(503,{error:'Instrumentality unavailable.'});return;}req.setTimeout(MODEL_TIMEOUT_MS*7+5000);res.once('finish',()=>req.socket.setTimeout(15000));const r=await store.consolidate();reply(r.error?502:200,r);}
+      else if(req.method==='GET'&&path==='/api/models'){if(!store.modelSetup){reply(503,{error:'Model setup unavailable.'});return;}reply(200,await store.modelSetup());}
+      else if(req.method==='PUT'&&path==='/api/models'){
+        // Admin only (a dashboard session is the admin): which model Misato and Casper use, and the cloud route on or off. Never a key.
+        if(!store.changeModels){reply(503,{error:'Model setup unavailable.'});return;}
+        const b=await body(req);const str=(v:unknown)=>typeof v==='string'&&v.length>0&&v.length<=200;
+        const misato=b.misato as Record<string,unknown>|undefined,casper=b.casper as Record<string,unknown>|undefined,cloud=b.cloud as Record<string,unknown>|undefined;
+        if(!Object.keys(b).length||Object.keys(b).some(k=>!['misato','casper','cloud'].includes(k))
+          ||(misato!==undefined&&(typeof misato!=='object'||!misato||Object.keys(misato).some(k=>!['route','model'].includes(k))||!['local','cloud'].includes(misato.route as string)||(misato.model!==undefined&&!str(misato.model))))
+          ||(casper!==undefined&&(typeof casper!=='object'||!casper||Object.keys(casper).some(k=>k!=='model')||!str(casper.model)))
+          ||(cloud!==undefined&&(typeof cloud!=='object'||!cloud||Object.keys(cloud).some(k=>!['enabled','model'].includes(k))||typeof cloud.enabled!=='boolean'||(cloud.model!==undefined&&!str(cloud.model)))))
+          throw new Error('Give misato {route, model?}, casper {model} and/or cloud {enabled, model?}.');
+        const result=await store.changeModels(b as ModelChange);reply(result.error?400:200,result);
+      }
       else if(req.method==='POST'&&path==='/api/models/reload'){if(!store.reloadModels){reply(503,{error:'Model routes unavailable.'});return;}const result=await store.reloadModels();reply(result.error?400:200,result);}
       else if(req.method==='POST'&&path==='/api/chat'){
         // Admin only: a request to Misato, who plans and proposes actions through the gate.

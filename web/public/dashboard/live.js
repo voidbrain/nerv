@@ -58,7 +58,7 @@
       // The newest sorties, plus older pages the owner loaded and every match of the current search, newest first.
       const byId = new Map(); for (const x of [...latest20, ...older, ...matches]) if (!byId.has(x.id)) byId.set(x.id, x);
       const list = [...byId.values()].sort((a, b) => b.created.localeCompare(a.created)); shown = list;
-      applyBases(kajiBases, healthOf(doctor));
+      applyBases(kajiBases, healthOf(doctor)); void loadModels();
       state.lilith = Object.assign(state.lilith || { history:{} }, { facts, episodes });
       state.delivered = inbox.map(d => Date.parse(d.created));
       const selected = state.sorties.find(x => x.id === state.selected);
@@ -165,6 +165,53 @@
     editing = null; if (!Object.keys(patch).length) { renderNext(); return; }
     reminderAction("reminders/" + id, { method:"PATCH", body:JSON.stringify(patch) }, "Reminder updated: " + title + " · " + when(at));
   });
+  // Models (F-038): each role's model, picked from what Ollama has; the cloud route on or off. The key is never asked here:
+  // it is typed in a terminal (models key). The list is re-read every 30 s, and never while the owner is choosing.
+  let modelsData = null, modelsAt = 0, modelsBusy = false, modelsDraft = false;
+  const loadModels = async (force) => { if (!force && Date.now() - modelsAt < 30000) return; modelsAt = Date.now(); try { modelsData = await api("models"); } catch (e) { modelsData = { error:e.message }; } renderModels(); };
+  window.renderModels = function () {
+    const box = document.getElementById("models"); const sub = document.getElementById("models-sub"); const d = modelsData;
+    // A choice not applied yet is kept: no refresh redraws the panel under it.
+    if (modelsDraft && box.querySelector("#models-form") || box.contains(document.activeElement) && document.activeElement.tagName === "SELECT") return;
+    if (!d) { box.innerHTML = "<div class='muted small'>Reading the model routes…</div>"; return; }
+    if (d.error) { box.innerHTML = "<div class='small danger'>" + esc(d.error) + "</div>"; return; }
+    const m = d.models || {}; const roles = m.roles || {}; const local = (d.ollama.models || []).map(x => x.name);
+    const misatoRoute = roles.misato ? roles.misato.route : m.local ? "local" : m.cloud && m.cloud.enabled ? "cloud" : "";
+    const misatoModel = roles.misato && roles.misato.model || (misatoRoute === "cloud" ? (m.cloud || {}).model : (m.local || {}).model) || "";
+    const casperModel = m.local ? (roles.casper && roles.casper.model) || m.local.model : "";
+    const cloudOn = !!(m.cloud && m.cloud.enabled); const cloudModel = (m.cloud && m.cloud.model) || "claude-opus-5-5";
+    const opt = (value, label, sel, dis) => "<option value='" + esc(value) + "'" + (sel ? " selected" : "") + (dis ? " disabled" : "") + ">" + esc(label) + "</option>";
+    const known = name => local.includes(name);
+    const misatoOpts = (misatoRoute ? "" : opt("", "not set", true)) + local.map(n => opt("local:" + n, n + " (local)", misatoRoute === "local" && misatoModel === n)).join("") +
+      (misatoRoute === "local" && misatoModel && !known(misatoModel) ? opt("local:" + misatoModel, misatoModel + " (not in Ollama)", true, true) : "") +
+      opt("cloud:" + cloudModel, cloudModel + " (cloud)" + (cloudOn ? "" : d.cloudKey ? " · turn the cloud route on" : " · key missing"), misatoRoute === "cloud", !cloudOn);
+    const casperOpts = (casperModel ? "" : opt("", "not set", true)) + local.map(n => opt(n, n, casperModel === n)).join("") + (casperModel && !known(casperModel) ? opt(casperModel, casperModel + " (not in Ollama)", true, true) : "");
+    sub.textContent = d.ollama.reachable ? local.length + " local model" + (local.length === 1 ? "" : "s") : "Ollama not found";
+    box.innerHTML = (local.length || cloudOn ? "<form id='models-form' class='models-form'><label for='m-misato' class='small'>Misato</label><select id='m-misato'>" + misatoOpts + "</select>" +
+      "<label for='m-casper' class='small'>Casper</label><select id='m-casper'" + (local.length ? "" : " disabled") + ">" + casperOpts + "</select>" +
+      "<span></span><span><button class='btn sm primary' type='submit'" + (modelsBusy ? " disabled" : "") + ">" + (modelsBusy ? "Applying…" : "Apply") + "</button></span></form>" : "") +
+      "<div class='tiny muted' style='margin-top:6px'>" + (d.ollama.reachable ? "Ollama at " + esc(d.ollama.url) + (local.length ? "" : ": no models yet. Pull one: <code>ollama pull gemma4:12b</code>") : esc(d.ollama.error || "Ollama not found.")) + "</div>" +
+      "<div class='row tiny' style='margin-top:4px'><span class='muted'>Cloud (Claude): " + (cloudOn ? "on" : "off") + " · key " + (d.cloudKey ? "saved" : "missing: type it in a terminal with <code>nerv models key</code>") + "</span>" +
+      (d.cloudKey || cloudOn ? "<button class='btn sm' id='m-cloud' data-on='" + (!cloudOn) + "'>" + (cloudOn ? "Turn off" : "Turn on") + "</button>" : "") + "</div>";
+  };
+  const applyModels = async (change, done) => {
+    modelsBusy = true; modelsDraft = false; renderModels();
+    try { const r = await api("models", { method:"PUT", body:JSON.stringify(change) }); const roles = (r.models || {}).roles || {}; log(done + " · Misato " + (roles.misato || "—") + " · Casper " + (roles.casper || "—"), "ok", null, "maya"); }
+    catch (e) { log("Models: " + e.message, "danger", null, "maya"); }
+    finally { modelsBusy = false; modelsDraft = false; await loadModels(true); poll(); }
+  };
+  document.addEventListener("submit", e => {
+    if (e.target.id !== "models-form") return; e.preventDefault(); const d = modelsData; if (!d || d.error) return;
+    const change = {}; const mv = document.getElementById("m-misato").value; const cv = document.getElementById("m-casper").value;
+    const m = d.models || {}; const roles = m.roles || {};
+    if (mv) { const [route, ...rest] = mv.split(":"); const model = rest.join(":"); const cur = roles.misato ? roles.misato.route + ":" + (roles.misato.model || "") : "";
+      if (cur !== mv) change.misato = route === "cloud" ? { route:"cloud" } : { route:"local", model }; }
+    if (cv && cv !== ((roles.casper && roles.casper.model) || (m.local || {}).model)) change.casper = { model:cv };
+    if (!Object.keys(change).length) { modelsDraft = false; log("Models: nothing changed.", "", null, "maya"); return; }
+    applyModels(change, "Models applied");
+  });
+  document.addEventListener("change", e => { if (e.target.closest && e.target.closest("#models-form")) modelsDraft = true; });
+  document.addEventListener("click", e => { const t = e.target.closest("#m-cloud"); if (!t) return; e.preventDefault(); applyModels({ cloud:{ enabled:t.dataset.on === "true" } }, t.dataset.on === "true" ? "Cloud route on" : "Cloud route off"); });
   // Real actions instead of simulated ones.
   window.decide = async function (apId, decision) {
     try { const r = await api("approvals/" + apId, { method:"POST", body:JSON.stringify({ decision }) }); log("Owner " + decision + " · " + r.decision + (r.error ? " · " + r.error : ""), decision === "approve" ? "ok" : "danger", null, "you"); }

@@ -4,7 +4,7 @@ import {mkdtempSync,rmSync,writeFileSync} from 'node:fs';import {tmpdir} from 'n
 import {readToken} from '../src/config.ts';
 test('one headless process serves UI and reminders, exits cleanly, and recovers after restart',{timeout:15000},async()=>{
  const home=mkdtempSync(join(tmpdir(),'nerv-process-'));let child:ChildProcess|undefined;
- const env:NodeJS.ProcessEnv={...process.env,NERV_HOME:home};for(const k of ['NERV_TOKEN','NERV_PORT','NODO_HOME','NODO_TOKEN','NODO_PORT'])delete env[k];
+ const env:NodeJS.ProcessEnv={...process.env,NERV_HOME:home,NERV_OLLAMA:'http://127.0.0.1:9'};for(const k of ['NERV_TOKEN','NERV_PORT','NODO_HOME','NODO_TOKEN','NODO_PORT'])delete env[k];
  const reservation=createServer();await new Promise<void>(done=>reservation.listen(0,'127.0.0.1',done));const address=reservation.address();assert.ok(address&&typeof address==='object');const port=address.port;await new Promise<void>(done=>reservation.close(()=>done()));
  const launch=async()=>{const processChild=spawn(process.execPath,['src/cli.ts','serve'],{env,stdio:['ignore','pipe','pipe']});child=processChild;await new Promise<void>((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('Nodo startup timed out')),5000);processChild.once('exit',code=>{clearTimeout(timer);reject(new Error('Nodo exited during startup: '+code));});processChild.stdout!.once('data',()=>{clearTimeout(timer);resolve();});});return processChild;};
  const stop=async(c:ChildProcess)=>{const exited=once(c,'exit');c.kill('SIGTERM');const [code]=await exited;assert.equal(code,0);};
@@ -35,7 +35,7 @@ test('one headless process serves UI and reminders, exits cleanly, and recovers 
  }finally{if(child&&child.exitCode===null&&child.signalCode===null){const exited=once(child,'exit');child.kill('SIGKILL');await exited;}rmSync(home,{recursive:true,force:true});}
 });
 test('launch serves and opens the live dashboard signed in (printed with --print)',{timeout:15000},async()=>{
- const home=mkdtempSync(join(tmpdir(),'nerv-launch-'));const env:NodeJS.ProcessEnv={...process.env,NERV_HOME:home};for(const k of ['NERV_TOKEN','NERV_PORT'])delete env[k];
+ const home=mkdtempSync(join(tmpdir(),'nerv-launch-'));const env:NodeJS.ProcessEnv={...process.env,NERV_HOME:home,NERV_OLLAMA:'http://127.0.0.1:9'};for(const k of ['NERV_TOKEN','NERV_PORT'])delete env[k];
  const reservation=createServer();await new Promise<void>(done=>reservation.listen(0,'127.0.0.1',done));const port=(reservation.address() as {port:number}).port;await new Promise<void>(done=>reservation.close(()=>done()));
  spawnSync(process.execPath,['src/cli.ts','init'],{env});writeFileSync(join(home,'config.json'),JSON.stringify({port}));
  const child=spawn(process.execPath,['src/cli.ts','launch','--print'],{env,stdio:['ignore','pipe','pipe']});let out='';child.stdout!.on('data',d=>out+=d);

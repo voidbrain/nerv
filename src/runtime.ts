@@ -1,6 +1,8 @@
 import {ProcessClient} from './process-client.ts';
 import type {Reminder,InboxPage,ActResult} from './store.ts';
 import {degradedReasons,type RouteHealth} from './route-health.ts';
+import {detectOllama,ollamaUrlOf,planModels,writeModels,type ModelChange,type ModelSetup} from './model-setup.ts';
+import {readConfig,readModelKey} from './config.ts';
 import type {ActionDetail,Approval,Decision,SortieSummary} from './ledger.ts';
 import type {SortieEvent} from './events.ts';
 import {MODEL_TIMEOUT_MS,type Ask,type Reply,type RouteName} from './model.ts';
@@ -32,6 +34,8 @@ export interface StoreApi {
  chat?(message:string,conversation?:string):Promise<ChatReply>;
  onResumed?(listener:(reply:ChatReply)=>void):void;
  reloadModels?():Promise<{error?:string;kept?:boolean;models:unknown}>;
+ modelSetup?():Promise<ModelSetup>;
+ changeModels?(change:ModelChange):Promise<{error?:string;kept?:boolean;models:unknown}>;
  /** Kaji bases with their live status (F-036): online when heard from within the last 90 s. */
  bases?():Promise<(BaseEntry&{lastSeen:string|null;online:boolean;self:boolean})[]>;
  /** Lilith for the owner (dashboard): admin-only over REST, never on the read-only socket. */
@@ -45,7 +49,9 @@ export interface StoreApi {
 }
 export class Runtime implements StoreApi {
  readonly nervous:ProcessClient;readonly brain:ProcessClient;
+ private readonly home:string|undefined;
  constructor(database:string,brainEntry=new URL('./brain-process.ts',import.meta.url),home?:string) {
+  this.home=home;
   this.nervous=new ProcessClient(new URL('./nervous-process.ts',import.meta.url),home?[database,home]:[database],'nervous');
   this.brain=new ProcessClient(brainEntry,home?[home]:[],'brain',1500);
  }
@@ -238,6 +244,19 @@ export class Runtime implements StoreApi {
   if(!this.instrumentality)this.instrumentality=setInterval(()=>{void tick();},everyMs);void tick();
  }
  /** Re-reads config.json and the cloud key in the brain, without restarting the service. */
+ /** F-038: the model settings (never the key), whether the key is there, and what Ollama has. */
+ async modelSetup():Promise<ModelSetup> {
+  if(!this.home)throw new Error('Model setup needs the data home.');
+  const models=readConfig(this.home).models;let cloudKey=false;try{cloudKey=!!readModelKey(this.home);}catch{cloudKey=false;}
+  return {models,cloudKey,ollama:await detectOllama(ollamaUrlOf(models))};
+ }
+ /** Applies a change (validated, checked against Ollama's models), writes config.json and reloads the brain in place. */
+ async changeModels(change:ModelChange) {
+  if(!this.home)throw new Error('Model setup needs the data home.');
+  const current=readConfig(this.home).models;const ollama=await detectOllama(change.localUrl ?? ollamaUrlOf(current));
+  writeModels(this.home,planModels(current,change,ollama.reachable?ollama.models.map(m=>m.name):undefined));
+  return this.reloadModels();
+ }
  async reloadModels(){return await this.brain.call('models.reload') as {error?:string;kept?:boolean;models:unknown};}
  async ask(ask:Ask){return await this.brain.call('model.complete',{...ask},MODEL_TIMEOUT_MS) as Reply;}
  /** The brain's view of the model routes (F-030); a brain that does not answer is itself the degraded reason. */
