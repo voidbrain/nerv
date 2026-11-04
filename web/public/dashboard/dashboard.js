@@ -1,6 +1,7 @@
-/* Live mode (F-019): served by NERV Agency and opened with `npm start -- open dashboard`, live.js replaces the simulation
-   with this service's real sorties, events and approvals. Opened as a file, the page stays a simulation. */
-const LIVE = location.protocol !== "file:" && /^#code=[a-f0-9]{32}$/.test(location.hash);
+/* Live mode (F-019): served by NERV Agency, the page always shows this service's real data (live.js) and never the
+   simulation's invented numbers, even after a reload without a login code. The simulation runs only when the file is
+   opened from disk, or with ?demo in the address. */
+const LIVE = location.protocol !== "file:" && !/[?&]demo\b/.test(location.search);
 "use strict";
 /* ================= RULES (mirror src/policy.ts) ================= */
 const EFFECT_FACTOR = { "read":1, "write-local":1, "write-external":0.9, "irreversible":0.6, "physical":0.5 };
