@@ -2,12 +2,12 @@
   {
     "kind": "rule",
     "disposition": "implemented",
-    "target": "AGENTS.md",
-    "evidence": "This project only: the owner renamed the repository to voidbrain/nerv on 2026-11-04 (F-032), so the Project conventions repository line names https://github.com/voidbrain/nerv. Project content, not a rule; no harness rule or copied tool changed."
+    "target": "docs/agents/areas.md",
+    "evidence": "Action gate and ledger area note gains the event-schema rule (F-024, PR #16): src/events.ts owns kinds, payloads and EVENT_SCHEMA_VERSION; a misreadable payload change bumps the version; payload, reason, Spear-list and page bounds; readers page by sequence. Checked by test/ledger.test.ts (schema-2 upgrade, bounds, paging through the scheduler process)."
   },
   {
     "kind": "none",
     "disposition": "no-change",
-    "evidence": "Reviewed AGENTS.md, BACKLOG-RULES.md and maintenance.md against the repository rename: no copied harness tool changed; current backlog links follow the new name, dated archives, audits and the previous maintenance receipt keep the old links as evidence (GitHub redirects them)."
+    "evidence": "docs/ARCHITECTURE.md: the stale 'none of this is implemented' line now states what the ledger implements and which records stay open; no rule changed. No harness file or copied tool changed."
   }
 ]
