@@ -1,6 +1,6 @@
 # Nodo backlog
 
-Current work ledger, reviewed 2 November 2026 against main `2a8b901` (+ architecture discussion 2026-11-02). PR #1–#5 merged after green checks; target-OS and browser acceptance remain pending. [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md).
+Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6 merged after green checks; target-OS and browser acceptance remain pending. Owner commits `1787a30`–`6d8c330` (NERV evaluation, backlog/roadmap update, dashboard prototypes) have no PR; their CI failed on `check:backlog` (P2 icon), fixed in [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan). Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md).
 
 ## Features and improvements
 
@@ -80,7 +80,7 @@ Current work ledger, reviewed 2 November 2026 against main `2a8b901` (+ architec
 |:---:|---|---|---|---|
 | 🔴 | 🔺 P1 | Open | 🔴 Large | ~0% |
 
-💻 **→ Human action required: No**<br />Implement provider adapters and a delivery outbox with recurring timezone-aware schedules and user-editable facts. Add isk-tiered routing (Pattern Blue fast-path; Orange/Red may invoke dynamic council); structured memory + context compaction before model calls; MCP/tool registration path; HITL timeout/escrow for approvals; no multi-model ballot on Blue or high-Sync work.
+💻 **→ Human action required: No**<br />Build the M2a slice: Aoba (Telegram) channel and the Misato agent loop on one model route; governance, memory, triggers and approvals are split into F-017, F-022–F-024, F-026–F-030.
 
 | | |
 |---|---|
@@ -91,16 +91,16 @@ Current work ledger, reviewed 2 November 2026 against main `2a8b901` (+ architec
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Implement provider adapters and a delivery outbox with recurring timezone-aware schedules and user-editable facts. Italian/English commands, local-only privacy, no cloud fallback without permission, restart/retry/channel failure tests and live phone delivery.
+**Next action / closure evidence:** M2a umbrella, re-scoped 2026-11-04: Telegram adapter (Aoba) with delivery outbox and retry reconciliation; Misato agent loop calling one model route (Umbilical cloud or S² local) through the per-action MAGI gate (F-017); recurring timezone-aware schedules. Memory is F-022, approvals F-023, ledger/trace F-024, triggers F-026, provenance F-027, digest F-028, evals F-029, degraded mode F-030. Closure still needs: Italian/English commands, local-only privacy, no cloud fallback without permission, restart/retry/channel failure tests and live phone delivery.
 
-**Estimates:** Large remaining effort; ~0% complete. Bootstrap scope estimate, not verification. Estimated 2026-11-01.
+**Estimates:** Large remaining effort; ~0% complete. Bootstrap scope estimate, not verification. Estimated 2026-11-01; reassessed 2026-11-04: scope narrowed to channel + agent loop, estimate unchanged because the remaining work is still large.
 
 | Field | Value |
 |---|---|
 | PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
-| Reviewed | 2026-11-01 |
+| Reviewed | 2026-11-04 |
 
 </details>
 
@@ -434,14 +434,14 @@ Current work ledger, reviewed 2 November 2026 against main `2a8b901` (+ architec
 
 **Next action / closure evidence:** Validate process failure/backpressure regressions and finish bounded history/pagination and latency measurements before claiming load resilience. Blocked/killed Brain leaves due delivery working; Nervous failure shuts supervisor down; no orphaned children; bounded queues/frames; large histories and concurrent CLI writes have measured limits.
 
-**Estimates:** Medium remaining effort; ~70% complete. Estimated 2026-11-01; not acceptance evidence.
+**Estimates:** Medium remaining effort; ~70% complete. Estimated 2026-11-01; reassessed 2026-11-04 after PR #6 CI: unchanged, history pagination and load measurements remain.
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #3](https://github.com/voidbrain/nodo/pull/3) runtime; [PR #5](https://github.com/voidbrain/nodo/pull/5) bounded native feeds; [PR #6](https://github.com/voidbrain/nodo/pull/6) lightweight status, CI pending |
+| PR / evidence | [PR #3](https://github.com/voidbrain/nodo/pull/3) runtime; [PR #5](https://github.com/voidbrain/nodo/pull/5) bounded native feeds; [PR #6](https://github.com/voidbrain/nodo/pull/6) lightweight status, CI green at merge `df0a52f` |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
-| Reviewed | 2026-11-01 |
+| Reviewed | 2026-11-04 |
 
 </details>
 
@@ -553,79 +553,44 @@ Current work ledger, reviewed 2 November 2026 against main `2a8b901` (+ architec
 
 ### F-017
 
-**Risk-tiered dynamic council (Gendo router + conditional MAGI)**
+**Per-action MAGI ballot from tool effect classes (Pattern Green / Orange / Blue)**
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
 | 🔴 | 🔺 P1 | Open | 🔴 Large | ~0% |
 
-💻 **→ Human action required: No**<br />Implement Pattern Blue/Orange/Red classification and invoke multi-model (or multi-check) consensus only for Orange/Red or low Sync Ratio; Blue stays fast/deterministic.
+💻 **→ Human action required: No**<br />Add tool effect classes, the deterministic Melchior/Balthasar seats, the Pattern and Sync Ratio, and gate every agent action at the executor.
 
 | | |
 |---|---|
-| **Issue** | Full multi-model ballot on every non-trivial task causes latency and cost explosion. Dynamic council by risk/task was planned but not implemented. |
-| **Reproduce** | Submit Blue, Orange and Red tasks; observe routing, whether MAGI is called, and end-to-end latency/cost. |
-| **Check** | Blue (and high-Sync) path skips or uses only deterministic/cheap checks; Orange may use small core council; Red or low Sync requires stronger consensus or HITL; decision and rationale are recorded and visible to observability. |
+| **Issue** | Risk was classified once per request (Gendo) before any action existed, and a 3-model vote ran on non-trivial work. Risk belongs to each action; policy and reversibility checks are deterministic. |
+| **Reproduce** | Run actions of each effect class (read, local reversible write, external write, irreversible, physical) with trusted and Ireul-tainted context; inspect Pattern, seat verdicts, Sync Ratio and whether the A.T. Field was issued. |
+| **Check** | Every tool declares an effect class; Melchior (rules) and Balthasar (reversibility, budget, taint) are deterministic; Casper (intent) is a reasoning-blind model seat only for Orange/Blue; Green read/local work never calls a model reviewer; Blue always reaches Misato's apartment; any reject returns to the planner at most 3 times; the grant is checked on every executor call; ballots are recorded in Central Dogma. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Implement Gendo-style risk router and a small core MAGI (or equivalent multi-check) that is consulted only when policy requires it. Pattern Blue never pays for a full 2/3 multi-model vote. Persist classification, participants, votes/suggestions and final decision for the live flow view (F-019). Depends on F-003 model adapters.
+**Next action / closure evidence:** Implement in `src/` without framework imports: effect classes, Scrolls policy pack, Pattern derivation, deterministic seats, Sync Ratio (0–100 % with its inputs), grant issuance with TTL and the executor check. Casper uses the F-003 model route once it exists; until then a Casper verdict is required input and the gate fails closed. Extra veto-only seats and consultants are F-025. Supersedes the request-level Gendo classification of 2026-11-02 ([NERV architecture](NERV/NERV-ARCHITECTURE.md)).
 
-**Estimates:** Large remaining effort; ~0% complete. Estimated 2026-11-02.
+**Estimates:** Large remaining effort; ~0% complete. Re-scoped 2026-11-04 from request-level routing to per-action gating.
 
 | Field | Value |
 |---|---|
-| PR / evidence | — |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-02 |
 | Verification | Pending |
-| Reviewed | 2026-11-02 |
+| Reviewed | 2026-11-04 |
 
 </details>
 
 ---
-
-### F-018
-
-**Fixed and JIT counselors/experts (outside council, suggest-only by default)**
-
-| Signal | Priority | Status | Effort | Complete |
-|:---:|---|---|---|---|
-| 🔴 | 🔺 P1 | Open | 🔴 Large | ~0% |
-
-💻 **→ Human action required: No**<br />Support fixed local/always-on specialists and just-in-time (cloud, other-machine) experts that live outside the voting council and only suggest unless explicitly given a temporary seat.
-
-| | |
-|---|---|
-| **Issue** | Specialists are needed without making every task a large multi-model committee. Hiring and authority boundaries are undefined. |
-| **Reproduce** | Register a fixed specialist and a JIT expert; run tasks that should and should not hire them; inspect suggestions vs binding votes. |
-| **Check** | Expert roster with capability ads, cost, privacy and availability; hiring decision is cheap/rule-based; default mode is suggest-only; structured suggestion payload (proposal, confidence, evidence, cost/risk); temporary vote seat and progressive promotion are explicit and logged; MCP/API tools can appear as experts. |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Next action / closure evidence:** Define counselor/expert registry and hiring policy in the router (Gendo). Core MAGI remains small and authoritative. Fixed and JIT experts default to suggest-only; promotion into stronger roles follows progressive-trust rules (link F-007 / F-025). Remote experts are enrolled workers (F-005/F-006), not permanent council members. Dashboard expert-pool panel reflects real roster state.
-
-**Estimates:** Large remaining effort; ~0% complete. Estimated 2026-11-02.
-
-| Field | Value |
-|---|---|
-| PR / evidence | — |
-| Opened | 2026-11-02 |
-| Verification | Pending |
-| Reviewed | 2026-11-02 |
-
-</details>
-
----
-
 ### F-019
 
 **Live decision-flow observability (dashboard bound to real stages)**
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔺 P2 | Open | 🟡 Medium | ~10% |
+| 🔴 | 🔶 P2 | Open | 🟡 Medium | ~10% |
 
 💻 **→ Human action required: No**<br />Replace decorative dashboard animations with a stage-aware trace of Ingress → risk classification → optional council → token/HITL → execution → ledger.
 
@@ -638,16 +603,16 @@ Current work ledger, reviewed 2 November 2026 against main `2a8b901` (+ architec
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Define a versioned job-stage and decision-event schema emitted by the coordinator. Bind dashboard panels (and any NERV skin) to that stream. Keep Eva framing as optional skin; functional observability must work without it. Depends on F-017 classification events and F-003 job runtime.
+**Next action / closure evidence:** Define a versioned job-stage and decision-event schema emitted by the coordinator. Bind dashboard panels (and any NERV skin) to that stream. Keep Eva framing as optional skin; functional observability must work without it. Depends on the F-024 event schema (one schema for ledger, traces and the dashboard) and F-017 ballots. Redesign 2026-11-04 around outcomes: needs you (approval cards), activity and traces, upcoming, memory, nodes and channels; MAGI detail becomes a secondary view. Remove decorative-only data (per-seat GPU/CPU, globe, per-EVA sync, random jitter).
 
-**Estimates:** Medium remaining effort; ~10% complete (static UI exists). Estimated 2026-11-02.
+**Estimates:** Medium remaining effort; ~10% complete (static UI exists). Estimated 2026-11-02; reassessed 2026-11-04: unchanged, the redesign replaces rather than adds work.
 
 | Field | Value |
 |---|---|
-| PR / evidence | docs/NERV/dashboard1.html (prototype only) |
+| PR / evidence | docs/NERV/dashboard-agnostic-2.html (prototype only); review docs/NERV/review-2026-11-04.md §6 |
 | Opened | 2026-11-02 |
 | Verification | Pending |
-| Reviewed | 2026-11-02 |
+| Reviewed | 2026-11-04 |
 
 </details>
 
@@ -659,7 +624,7 @@ Current work ledger, reviewed 2 November 2026 against main `2a8b901` (+ architec
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔺 P2 | Open | 🟡 Medium | ~5% |
+| 🔴 | 🔹 P3 | Open | 🟡 Medium | ~10% |
 
 💻 **→ Human action required: No**<br />Optional conversational faces grounded in real job state: Misato as primary HITL/ops voice; Gendo optional for risk/policy explanation; pilots optional as worker identity only.
 
@@ -674,14 +639,14 @@ Current work ledger, reviewed 2 November 2026 against main `2a8b901` (+ architec
 
 **Next action / closure evidence:** Implement thin, state-grounded persona adapters after F-003 messaging and F-017 decisions exist. Prefer Misato for push/HITL. Keep Shinji/pilots as optional labels for workers, not primary chat partners. Safety: persona output never overrides capability tokens or Pattern Red rules.
 
-**Estimates:** Medium remaining effort; ~5% complete. Estimated 2026-11-02.
+**Estimates:** Medium remaining effort; ~10% complete (prototype UI; corrected from ~5% to a valid step). Estimated 2026-11-02; priority lowered to P3 on 2026-11-04 (skin, not behaviour); estimate unchanged.
 
 | Field | Value |
 |---|---|
 | PR / evidence | docs/NERV/dashboard1.html personas tab (prototype) |
 | Opened | 2026-11-02 |
 | Verification | Pending |
-| Reviewed | 2026-11-02 |
+| Reviewed | 2026-11-04 |
 
 </details>
 
@@ -706,16 +671,16 @@ Current work ledger, reviewed 2 November 2026 against main `2a8b901` (+ architec
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Choose MCP and/or OpenAPI as the registration path for Lilith/tools and counselors. Wire into risk router and suggest-only expert path. Align with F-005/F-006 worker enrolment for remote tools.
+**Next action / closure evidence:** Choose MCP and/or OpenAPI as the registration path for Lilith/tools and counselors. Milestone M2b. Registered tools must declare an F-017 effect class; MCP tools without one are treated as irreversible (Pattern Blue). Align with F-005/F-006 worker enrolment for remote tools.
 
-**Estimates:** Large remaining effort; ~0% complete. Estimated 2026-11-02.
+**Estimates:** Large remaining effort; ~0% complete. Estimated 2026-11-02; reassessed 2026-11-04: unchanged, moved to M2b.
 
 | Field | Value |
 |---|---|
 | PR / evidence | — |
 | Opened | 2026-11-02 |
 | Verification | Pending |
-| Reviewed | 2026-11-02 |
+| Reviewed | 2026-11-04 |
 
 </details>
 
@@ -723,135 +688,297 @@ Current work ledger, reviewed 2 November 2026 against main `2a8b901` (+ architec
 
 ### F-022
 
-**Structured memory and context compaction**
+**Lilith memory: facts and pilots in Terminal Dogma, LCL assembly and Instrumentality consolidation**
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
 | 🔴 | 🔺 P1 | Open | 🔴 Large | ~0% |
 
-💻 **→ Human action required: No**<br />Provide editable user/facts memory plus a context-compaction step before model/council calls so history does not blow the window.
+💻 **→ Human action required: No**<br />Add the facts store with provenance, SQLite FTS5 recall, budgeted LCL assembly and held memory writes.
 
 | | |
 |---|---|
-| **Issue** | Durable SQLite state exists; there is no structured memory layer or summarizer for model context. |
-| **Reproduce** | Accumulate multi-day history; run a task that needs prior facts; confirm relevant memory is loaded and context stays within budget. |
-| **Check** | User-editable facts with provenance; compaction/summarization before MAGI or model calls; local-only default; correction and rollback of bad memory entries. |
+| **Issue** | Durable SQLite state exists; there is no memory of facts about the owner, no recall and no context budget for model calls. |
+| **Reproduce** | Accumulate multi-day history; ask something that needs an earlier fact; propose a new fact from a conversation; edit and forget a fact. |
+| **Check** | Facts carry provenance and taint marks; recall uses FTS5 over facts and recent Central Dogma episodes; the LCL is trimmed to the battery budget; agent-proposed facts are held until the owner confirms (or a Production pilot writes them); edit/forget keeps a provenance trail; local-only facts never reach the Umbilical route; nightly Instrumentality consolidation writes summaries without deleting the ledger. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Design memory schema and compaction pipeline as part of M2 (F-003). Compaction runs before expensive council/model invocation. Link to progressive trust for memory-writing skills later (F-007).
+**Next action / closure evidence:** Schema and FTS5 recall in `src/`, then LCL assembly used by the F-003 agent loop. Vector search only if FTS5 recall proves weak on the F-029 eval set.
 
-**Estimates:** Large remaining effort; ~0% complete. Estimated 2026-11-02.
+**Estimates:** Large remaining effort; ~0% complete. Re-scoped 2026-11-04 (was "structured memory and context compaction").
 
 | Field | Value |
 |---|---|
-| PR / evidence | — |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-02 |
 | Verification | Pending |
-| Reviewed | 2026-11-02 |
+| Reviewed | 2026-11-04 |
 
 </details>
 
 ---
-
 ### F-023
 
-**HITL timeout and escrow policies**
+**Misato's apartment: approval cards with TTL, delivered by Pen Pen**
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
 | 🔴 | 🔺 P1 | Open | 🟡 Medium | ~0% |
 
-💻 **→ Human action required: No**<br />Pending Pattern Red / low-Sync approvals must expire or safe-cancel so the queue cannot block indefinitely when the human is offline.
+💻 **→ Human action required: No**<br />Store approval requests with exact action, reason and TTL; resolve approve, edit, reject or expiry exactly once.
 
 | | |
 |---|---|
-| **Issue** | HITL (Misato’s Apartment) has no TTL/escrow; a sleeping operator can stall the system. |
-| **Reproduce** | Create a Red approval request; do not respond; observe expiry, notification behaviour and final job state. |
-| **Check** | Configurable TTL; explicit expired/cancelled/needs-attention outcomes; no silent auto-approve of Red; push notification path (Telegram/PWA) when available; ledger records the timeout decision. |
+| **Issue** | Blue actions and low Sync Ratio need the owner. Without full content an approval is a rubber stamp; without a TTL a sleeping owner stalls the sortie. |
+| **Reproduce** | Create a Blue approval; approve, reject, edit, or leave it to expire; repeat the decision; restart Nodo while it is pending. |
+| **Check** | Card shows action, arguments/diff/recipients, Pattern, Sync Ratio and inputs, reason and remaining TTL; expiry stands down (never approves); a decision is applied once and is idempotent on repeat; pending cards survive restart; the decision and its source are written to Central Dogma; Pen Pen delivery reuses the inbox and later Telegram/native notifications. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Add approval-lease / escrow fields to the inbox/job model. Default safe action on timeout is cancel or hold, never escalate privilege. Surface in dashboard and Misato persona (F-019/F-020). Depends on F-003 delivery and F-017 risk path.
+**Next action / closure evidence:** Approval table and decision transitions in `src/store.ts`, API/CLI to list and decide, then Telegram buttons via F-003. Edit returns the action to the planner rather than changing it in place.
 
-**Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-02.
+**Estimates:** Medium remaining effort; ~0% complete. Re-scoped 2026-11-04 to include the card content specification.
 
 | Field | Value |
 |---|---|
-| PR / evidence | — |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-02 |
 | Verification | Pending |
-| Reviewed | 2026-11-02 |
+| Reviewed | 2026-11-04 |
 
 </details>
 
 ---
-
 ### F-024
 
-**Structured telemetry and tracing**
+**Central Dogma sortie ledger and Maya trace events**
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔺 P2 | Open | 🟡 Medium | ~0% |
+| 🔴 | 🔺 P1 | Open | 🟡 Medium | ~0% |
 
-💻 **→ Human action required: No**<br />Emit structured spans (OpenTelemetry-style or equivalent) for risk classification, council, expert suggestions, token issuance and execution so multi-step failures are debuggable.
+💻 **→ Human action required: No**<br />Define one versioned event schema for sorties, actions, ballots, grants and approvals, written to the ledger and read by traces and the dashboard.
 
 | | |
 |---|---|
-| **Issue** | Raw log streams and decorative dashboards are not enough to debug agent reasoning inside sandboxes or across nodes. |
-| **Reproduce** | Run a multi-step Orange/Red job that fails; locate the failing stage and expert/council input from traces alone. |
-| **Check** | Trace IDs across Ingress → Gendo → MAGI/experts → HITL → sandbox → ledger; exportable or queryable; no secrets in spans; feeds the live flow view (F-019). |
+| **Issue** | Ballots, approvals and agent steps need an append-only record to debug, audit and display; a separate telemetry schema would drift from the dashboard. |
+| **Reproduce** | Run a sortie with several actions including a reject and an approval; read its events back in order; locate the failing step from events alone. |
+| **Check** | Sortie and action records with append-only events; every event carries sortie id, step, time and a bounded payload without secrets; read API pages events; the same schema feeds F-019 and later OpenTelemetry export. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Define minimal span schema for decision and execution events. Prefer OpenTelemetry-compatible export later; start with structured local events that the dashboard and doctor can consume. Do not block M2 on full OTEL.
+**Next action / closure evidence:** Implement with F-017 in `src/`; OpenTelemetry export later and never blocking M2a. Merged scope with the F-019 decision-event schema on 2026-11-04.
 
-**Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-02.
+**Estimates:** Medium remaining effort; ~0% complete. Moved from M6 to M2a and raised to P1 on 2026-11-04.
 
 | Field | Value |
 |---|---|
-| PR / evidence | — |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-02 |
 | Verification | Pending |
-| Reviewed | 2026-11-02 |
+| Reviewed | 2026-11-04 |
 
 </details>
 
 ---
-
 ### F-025
 
-**Progressive trust for counselors/experts (as well as skills)**
+**Extra MAGI seats (veto-only), consultants and watermelon trust for pilots**
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔺 P2 | Open | 🟡 Medium | ~0% |
+| 🔴 | 🔶 P2 | Open | 🟡 Medium | ~0% |
 
-💻 **→ Human action required: No**<br />Apply shadow → bounded → fuller autonomy (or temporary vote seat) to fixed/JIT experts using the same evaluation and rollback discipline as skills.
+💻 **→ Human action required: No**<br />Attach extra seats by action class as veto-only, start new seats in shadow, and promote pilots through Prototype → Test → Production.
 
 | | |
 |---|---|
-| **Issue** | Progressive trust is specified for skills (Kaji’s Watermelons / F-007) but not yet for counselors and experts. |
-| **Reproduce** | Run a new expert in shadow/suggest-only; after successful evaluations, grant temporary seat or fixed specialist status; force a rollback. |
-| **Check** | Expert stages visible in roster and dashboard; promotion requires evaluation evidence; rollback revokes seat and capability without breaking the core council; never auto-grants Pattern Red authority. |
+| **Issue** | Specialists help, but a new or remote seat must never approve what the core three would refuse, and skills need earned trust. |
+| **Reproduce** | Attach a deterministic test seat and a model expert seat to code-write actions; run them in shadow; promote one; force a failure and a Spear revocation. |
+| **Check** | Extra seats can only reject; shadow seats are logged, not counted; a timed-out seat abstains; consultants advise the planner without a vote and receive only Scrolls-allowed data; pilots run only in the EVA class of their stage; promotion to Production needs the owner's confirmation; failure, override spikes or Spear demote automatically. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Extend the progressive-trust pipeline so it applies to expert/counselor identities as well as skills. Reuse evaluation and rollback machinery from F-007. Keep core MAGI membership tightly controlled.
+**Next action / closure evidence:** Seat registry via Marduk and stage tracking on top of F-017/F-024; evaluation evidence from F-029. Absorbs F-018 (closed 2026-11-04).
 
-**Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-02. Depends on F-018 and F-007.
+**Estimates:** Medium remaining effort; ~0% complete. Re-scoped 2026-11-04.
 
 | Field | Value |
 |---|---|
-| PR / evidence | — |
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-02 |
 | Verification | Pending |
-| Reviewed | 2026-11-02 |
+| Reviewed | 2026-11-04 |
+
+</details>
+
+---
+### F-026
+
+**Hyuga watch: proactive triggers (heartbeat, schedules, events)**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔺 P1 | Open | 🔴 Large | ~0% |
+
+💻 **→ Human action required: No**<br />Turn heartbeat ticks, schedules and events into sorties with budgets and quiet hours; proactive work is read-only unless the pilot is Production.
+
+| | |
+|---|---|
+| **Issue** | Nodo is meant to act first, but only reminders fire today; there is no loop that wakes the agent to check something. |
+| **Reproduce** | Configure a heartbeat check and an event trigger; let both fire inside and outside quiet hours; let the model route be down. |
+| **Check** | Triggers create sorties with their source recorded; proactive sorties run in EVA-00 (no external effects) unless the pilot is Production; quiet hours defer notifications, not deliveries already due; per-trigger budget; duplicate ticks after restart do not duplicate sorties. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Trigger table in A (scheduler) reusing tick idempotency; the agent loop from F-003 consumes the sorties.
+
+**Estimates:** Large remaining effort; ~0% complete. Estimated 2026-11-04.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
+| Opened | 2026-11-04 |
+| Verification | Pending |
+| Reviewed | 2026-11-04 |
+
+</details>
+
+---
+### F-027
+
+**Naoko desk provenance and Ireul taint with an egress allowlist**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔺 P1 | Open | 🟡 Medium | ~0% |
+
+💻 **→ Human action required: No**<br />Mark every input with its source, carry the Ireul taint through context and make tainted context escalate external effects.
+
+| | |
+|---|---|
+| **Issue** | Email, web and third-party content can carry injected instructions; nothing records where context came from. |
+| **Reproduce** | Feed a sortie an email body that asks to send data elsewhere; run the same request from the owner directly. |
+| **Check** | Every intake item records source and trust; taint propagates into the LCL and memory; a tainted context asking for an external effect is Pattern Blue; network egress only to Scrolls-allowed destinations; untrusted code runs in the EVA-03 quarantine class. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Provenance fields on intake and sortie records, consumed by the F-017 Balthasar seat. Must land before any email or web integration.
+
+**Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-04.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
+| Opened | 2026-11-04 |
+| Verification | Pending |
+| Reviewed | 2026-11-04 |
+
+</details>
+
+---
+### F-028
+
+**Debrief digest: what happened while you were away**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔶 P2 | Open | 🟢 Small | ~0% |
+
+💻 **→ Human action required: No**<br />Summarise closed sorties, pending approvals and failures since the last digest, from Central Dogma only.
+
+| | |
+|---|---|
+| **Issue** | Autonomy is only trustable if the owner can see what was done; a raw event log is not a summary. |
+| **Reproduce** | Run several sorties, approvals and a failure; request the digest; request it again. |
+| **Check** | Digest lists completed, failed, waiting and expired items with links to their traces; built from ledger data, not model memory; a repeat request shows only new items; delivered through the inbox. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Ledger query plus a deterministic template after F-024; an optional model summary later must cite ledger entries.
+
+**Estimates:** Small remaining effort; ~0% complete. Estimated 2026-11-04.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
+| Opened | 2026-11-04 |
+| Verification | Pending |
+| Reviewed | 2026-11-04 |
+
+</details>
+
+---
+### F-029
+
+**Golden sortie eval suite for Casper and pilot promotion**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔶 P2 | Open | 🟡 Medium | ~0% |
+
+💻 **→ Human action required: No**<br />Keep a versioned set of scripted sorties with expected Pattern, verdicts and outcomes, runnable without live providers.
+
+| | |
+|---|---|
+| **Issue** | Watermelon promotion and the Casper seat need regression evidence; a score without a fixed test set means nothing. |
+| **Reproduce** | Run the suite against the deterministic seats and against a recorded model seat; change a policy rule and rerun. |
+| **Check** | Suite covers each effect class, taint, rejects and expiry; deterministic part runs in CI; model-seat runs are recorded with model id and date; results feed F-025 stage evidence. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Start with deterministic cases alongside F-017 tests; add recorded model cases with F-003.
+
+**Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-04.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
+| Opened | 2026-11-04 |
+| Verification | Pending |
+| Reviewed | 2026-11-04 |
+
+</details>
+
+---
+### F-030
+
+**Dummy Plug degraded mode**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔺 P1 | Open | 🟢 Small | ~0% |
+
+💻 **→ Human action required: No**<br />Detect that no model route is reachable, show it, and keep deterministic pilots and reminders running.
+
+| | |
+|---|---|
+| **Issue** | A model outage must not stop reminders or deterministic work, and the owner must see that the agent is degraded. |
+| **Reproduce** | Make every model route unreachable; submit a reminder, a deterministic action and a model-needing request; restore the route. |
+| **Check** | Status reports degraded with reason; reminders and deterministic pilots continue; model-needing sorties wait or expire with a visible reason; no local-only request is moved to the cloud; recovery is automatic and recorded. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Route health in the F-003 model adapter plus a status field; the A/B/C split already keeps reminders alive.
+
+**Estimates:** Small remaining effort; ~0% complete. Estimated 2026-11-04.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan) |
+| Opened | 2026-11-04 |
+| Verification | Pending |
+| Reviewed | 2026-11-04 |
 
 </details>
 
