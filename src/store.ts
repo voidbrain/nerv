@@ -14,13 +14,15 @@ export class Store {
     if(path !== ':memory:') mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
     this.db = new DatabaseSync(path);
     const version = this.db.prepare('PRAGMA user_version').get() as {user_version:number};
-    if(version.user_version > 2) {this.db.close();throw new Error('Database schema is newer than this NERV Agency version.');}
+    if(version.user_version > 3) {this.db.close();throw new Error('Database schema is newer than this NERV Agency version.');}
     this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
       CREATE TABLE IF NOT EXISTS reminders(id TEXT PRIMARY KEY, title TEXT NOT NULL, due TEXT NOT NULL, created TEXT NOT NULL, delivered TEXT, cancelled TEXT);
       CREATE TABLE IF NOT EXISTS deliveries(id TEXT PRIMARY KEY, reminder_id TEXT NOT NULL UNIQUE REFERENCES reminders(id), message TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT);
       CREATE INDEX IF NOT EXISTS reminders_due ON reminders(due);
-      ${LEDGER_SCHEMA}
-      PRAGMA user_version=2;`);
+      ${LEDGER_SCHEMA}`);
+    // Schema 3: events record the event schema version they were written under (F-024); earlier rows read as version 1.
+    if(!(this.db.prepare('PRAGMA table_info(events)').all() as {name:string}[]).some(c=>c.name==='v'))this.db.exec('ALTER TABLE events ADD COLUMN v INTEGER NOT NULL DEFAULT 1');
+    this.db.exec('PRAGMA user_version=3');
     this.ledger = new Ledger(this.db);
   }
   add(title: string, due: string, now = new Date()): Reminder {

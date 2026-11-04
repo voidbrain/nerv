@@ -1,13 +1,14 @@
 import type { DatabaseSync } from 'node:sqlite';
 import { createHash, randomUUID } from 'node:crypto';
 import { ballot, defaultPolicy, validatePolicy, type Ballot, type Policy, type Stage, type Tool, type Trust, type Verdict } from './policy.ts';
+import { EVENT_SCHEMA_VERSION, MAX_SPEAR_HAPPENED, encodePayload, type EventKind, type EventPayloads, type Happened, type SortieEvent } from './events.ts';
 /** Central Dogma (F-024): sorties, actions, grants (A.T. Fields), approvals (Misato's apartment) and append-only events. */
 export const LEDGER_SCHEMA=`
  CREATE TABLE IF NOT EXISTS sorties(id TEXT PRIMARY KEY, source TEXT NOT NULL, title TEXT NOT NULL, trust TEXT NOT NULL, status TEXT NOT NULL, rejects INTEGER NOT NULL DEFAULT 0, spent REAL NOT NULL DEFAULT 0, created TEXT NOT NULL, closed TEXT);
  CREATE TABLE IF NOT EXISTS actions(id TEXT PRIMARY KEY, sortie_id TEXT NOT NULL REFERENCES sorties(id), tool TEXT NOT NULL, args TEXT NOT NULL, ballot TEXT NOT NULL, created TEXT NOT NULL);
  CREATE TABLE IF NOT EXISTS grants(id TEXT PRIMARY KEY, action_id TEXT NOT NULL UNIQUE REFERENCES actions(id), tool TEXT NOT NULL, args_hash TEXT NOT NULL, expires TEXT NOT NULL, used TEXT, revoked TEXT);
  CREATE TABLE IF NOT EXISTS approvals(id TEXT PRIMARY KEY, action_id TEXT NOT NULL UNIQUE REFERENCES actions(id), card TEXT NOT NULL, expires TEXT NOT NULL, decision TEXT, decided TEXT, source TEXT);
- CREATE TABLE IF NOT EXISTS events(sequence INTEGER PRIMARY KEY AUTOINCREMENT, sortie_id TEXT NOT NULL, action_id TEXT, kind TEXT NOT NULL, payload TEXT NOT NULL, created TEXT NOT NULL);
+ CREATE TABLE IF NOT EXISTS events(sequence INTEGER PRIMARY KEY AUTOINCREMENT, sortie_id TEXT NOT NULL, action_id TEXT, kind TEXT NOT NULL, payload TEXT NOT NULL, created TEXT NOT NULL, v INTEGER NOT NULL DEFAULT 1);
  CREATE INDEX IF NOT EXISTS events_sortie ON events(sortie_id, sequence);
  CREATE INDEX IF NOT EXISTS approvals_pending ON approvals(expires) WHERE decision IS NULL;
  CREATE TRIGGER IF NOT EXISTS events_no_update BEFORE UPDATE ON events BEGIN SELECT RAISE(ABORT,'events are append-only'); END;
@@ -15,11 +16,15 @@ export const LEDGER_SCHEMA=`
 export interface Proposal {tool:string;args:Record<string,unknown>;stage:Stage;cost?:number;casper?:Verdict;extras?:Verdict[]}
 export interface Card {sortieId:string;actionId:string;tool:string;args:Record<string,unknown>;effect:string;pattern:string;sync:Ballot['sync'];verdicts:Verdict[];reason:string;expires:string}
 export interface Approval {id:string;card:Card;expires:string;decision:string|null}
-export interface Event {sequence:number;sortieId:string;actionId:string|null;kind:string;payload:unknown;created:string}
 export interface Proposed {actionId:string;ballot:Ballot;grantId?:string;approvalId?:string}
 export type Decision='approve'|'reject'|'edit';
 /** Bounded so a page of approval cards fits one IPC frame (rpc.ts MAX_FRAME_BYTES). */
 const MAX_ARGS_BYTES=8192;
+/** A verdict reason is shown to the owner, not scored: long model text is cut so the ballot event stays bounded. */
+const MAX_REASON_CHARS=500;
+/** Payload bytes per event page, so a page fits one IPC frame (rpc.ts MAX_FRAME_BYTES) with room for the envelope. */
+const EVENT_PAGE_BYTES=32_768;
+const clampVerdict=(v:Verdict|undefined)=>v&&typeof v.reason==='string'?{...v,reason:v.reason.slice(0,MAX_REASON_CHARS)}:v;
 /** Key order never changes the hash, so a grant binds the exact arguments that were reviewed. */
 const canonical=(v:unknown):string=>Array.isArray(v)?`[${v.map(canonical).join(',')}]`:v&&typeof v==='object'?`{${Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical((v as Record<string,unknown>)[k])).join(',')}}`:JSON.stringify(v);
 export const argsHash=(args:Record<string,unknown>)=>createHash('sha256').update(canonical(args)).digest('hex');
@@ -30,7 +35,7 @@ export class Ledger {
   this.db=db;this.tools=new Map((options.tools ?? []).map(t=>[t.name,t]));this.policy=validatePolicy(options.policy ?? defaultPolicy);
   this.grantTtlMs=options.grantTtlMs ?? 60_000;this.approvalTtlMs=options.approvalTtlMs ?? 3_600_000;
  }
- private event(sortieId:string,actionId:string|null,kind:string,payload:unknown,now:Date) {this.db.prepare('INSERT INTO events(sortie_id,action_id,kind,payload,created) VALUES(?,?,?,?,?)').run(sortieId,actionId,kind,JSON.stringify(payload),iso(now));}
+ private event<K extends EventKind>(sortieId:string,actionId:string|null,kind:K,payload:EventPayloads[K],now:Date) {this.db.prepare('INSERT INTO events(sortie_id,action_id,kind,payload,created,v) VALUES(?,?,?,?,?,?)').run(sortieId,actionId,kind,encodePayload(kind,payload),iso(now),EVENT_SCHEMA_VERSION);}
  private tx<T>(work:()=>T):T {this.db.exec('BEGIN IMMEDIATE');try{const value=work();this.db.exec('COMMIT');return value;}catch(e){this.db.exec('ROLLBACK');throw e;}}
  private issue(actionId:string,tool:string,args:Record<string,unknown>,sortieId:string,now:Date):string {
   const id=randomUUID();this.db.prepare('INSERT INTO grants VALUES(?,?,?,?,?,NULL,NULL)').run(id,actionId,tool,argsHash(args),iso(now,this.grantTtlMs));
@@ -47,7 +52,7 @@ export class Ledger {
   return this.tx(()=>{
    const sortie=this.db.prepare('SELECT * FROM sorties WHERE id=?').get(sortieId) as {trust:Trust;status:string;rejects:number;spent:number}|undefined;
    if(!sortie||sortie.status!=='open')throw new Error('Sortie is not open.');
-   const result=ballot({tool:p.tool,args:p.args,trust:sortie.trust,stage:p.stage,cost:p.cost ?? 0},this.tools.get(p.tool),this.policy,sortie.spent,p.casper,p.extras);
+   const result=ballot({tool:p.tool,args:p.args,trust:sortie.trust,stage:p.stage,cost:p.cost ?? 0},this.tools.get(p.tool),this.policy,sortie.spent,clampVerdict(p.casper),p.extras?.map(v=>clampVerdict(v)!));
    if(result.outcome==='reject'&&sortie.rejects+1>this.policy.maxRejects)Object.assign(result,{outcome:'approval',reason:`Reject limit reached (${result.reason}); the owner decides.`});
    const actionId=randomUUID();this.db.prepare('INSERT INTO actions VALUES(?,?,?,?,?,?)').run(actionId,sortieId,p.tool,JSON.stringify(p.args),JSON.stringify(result),iso(now));
    this.event(sortieId,actionId,'ballot',result,now);
@@ -73,7 +78,7 @@ export class Ledger {
    if(row.decision){const grant=this.db.prepare('SELECT id FROM grants WHERE action_id=?').get(row.action_id) as {id:string}|undefined;return {decision:row.decision,...(grant?{grantId:grant.id}:{})};}
    const final=row.expires<=iso(now)?'expired':decision;
    this.db.prepare('UPDATE approvals SET decision=?,decided=?,source=? WHERE id=?').run(final,iso(now),final==='expired'?'ttl':source,approvalId);
-   this.event(row.sortie_id,row.action_id,'approval.'+final,{approvalId,source:final==='expired'?'ttl':source},now);
+   if(final==='expired')this.event(row.sortie_id,row.action_id,'approval.expired',{approvalId,source:'ttl'},now);else this.event(row.sortie_id,row.action_id,`approval.${final}`,{approvalId,source},now);
    return final==='approve'?{decision:final,grantId:this.issue(row.action_id,row.tool,JSON.parse(row.args) as Record<string,unknown>,row.sortie_id,now)}:{decision:final};
   });
  }
@@ -98,22 +103,26 @@ export class Ledger {
   if(reason)throw new Error(`A.T. Field denied: ${reason}.`);
  }
  /** Spear of Longinus: revoke grants, stand down approvals, close the sortie. Effects already executed are reported, never assumed undone. */
- spear(sortieId:string,reason:string,now=new Date()):{revoked:number;stoodDown:number;happened:{actionId:string;tool:string;inverse:string|null}[]} {
+ spear(sortieId:string,reason:string,now=new Date()):{revoked:number;stoodDown:number;happened:Happened[]} {
   return this.tx(()=>{
    const sortie=this.db.prepare('SELECT status FROM sorties WHERE id=?').get(sortieId) as {status:string}|undefined;if(!sortie)throw new Error('No sortie with that ID.');
    const revoked=Number(this.db.prepare('UPDATE grants SET revoked=? WHERE revoked IS NULL AND used IS NULL AND action_id IN (SELECT id FROM actions WHERE sortie_id=?)').run(iso(now),sortieId).changes);
    const stoodDown=Number(this.db.prepare("UPDATE approvals SET decision='revoked',decided=?,source='spear' WHERE decision IS NULL AND action_id IN (SELECT id FROM actions WHERE sortie_id=?)").run(iso(now),sortieId).changes);
    const happened=(this.db.prepare('SELECT x.id AS actionId,x.tool FROM grants g JOIN actions x ON x.id=g.action_id WHERE x.sortie_id=? AND g.used IS NOT NULL ORDER BY g.used').all(sortieId) as {actionId:string;tool:string}[]).map(h=>({...h,inverse:this.tools.get(h.tool)?.inverse ?? null}));
    this.db.prepare("UPDATE sorties SET status='revoked',closed=? WHERE id=? AND status='open'").run(iso(now),sortieId);
-   this.event(sortieId,null,'spear',{reason:String(reason).slice(0,500),revoked,stoodDown,happened},now);
+   this.event(sortieId,null,'spear',{reason:String(reason).slice(0,500),revoked,stoodDown,happenedCount:happened.length,happened:happened.slice(0,MAX_SPEAR_HAPPENED)},now);
    return {revoked,stoodDown,happened};
   });
  }
  close(sortieId:string,status:'done'|'failed',now=new Date()):boolean {
-  return this.tx(()=>{const changed=Number(this.db.prepare("UPDATE sorties SET status=?,closed=? WHERE id=? AND status='open'").run(status,iso(now),sortieId).changes)>0;if(changed)this.event(sortieId,null,'sortie.'+status,{},now);return changed;});
+  return this.tx(()=>{const changed=Number(this.db.prepare("UPDATE sorties SET status=?,closed=? WHERE id=? AND status='open'").run(status,iso(now),sortieId).changes)>0;if(changed)this.event(sortieId,null,`sortie.${status}`,{},now);return changed;});
  }
- events(sortieId:string,after=0,limit=50):Event[] {
+ /** Events in order after `after`: at most `limit`, and fewer when their payloads would exceed one frame (always at least one). Page on with the last sequence. */
+ events(sortieId:string,after=0,limit=50):SortieEvent[] {
   if(typeof sortieId!=='string'||!sortieId||sortieId.length>100||!Number.isSafeInteger(after)||after<0||!Number.isInteger(limit)||limit<1||limit>50)throw new Error('Invalid event page.');
-  return (this.db.prepare('SELECT sequence,sortie_id AS sortieId,action_id AS actionId,kind,payload,created FROM events WHERE sortie_id=? AND sequence>? ORDER BY sequence LIMIT ?').all(sortieId,after,limit) as unknown as (Omit<Event,'payload'>&{payload:string})[]).map(e=>({...e,payload:JSON.parse(e.payload)}));
+  const rows=this.db.prepare('SELECT v,sequence,sortie_id AS sortieId,action_id AS actionId,kind,payload,created FROM events WHERE sortie_id=? AND sequence>? ORDER BY sequence LIMIT ?').all(sortieId,after,limit) as unknown as (Omit<SortieEvent,'payload'>&{payload:string})[];
+  const page:SortieEvent[]=[];let bytes=0;
+  for(const r of rows){bytes+=Buffer.byteLength(r.payload);if(page.length&&bytes>EVENT_PAGE_BYTES)break;page.push({...r,payload:JSON.parse(r.payload)} as SortieEvent);}
+  return page;
  }
 }
