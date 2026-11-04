@@ -70,6 +70,12 @@ NERV Agency has no model route until you add one to `config.json` in the data ho
   {"models":{"local":{"baseUrl":"http://127.0.0.1:11434/v1","model":"gemma4:12b"},"cloud":{"provider":"anthropic","enabled":true},"roles":{"misato":{"route":"cloud"},"casper":{"model":"gemma4:12b"}}}}
   ```
 
+  Or everything on Ollama, with the reviewer on a different model from the planner:
+
+  ```json
+  {"models":{"local":{"baseUrl":"http://127.0.0.1:11434/v1","model":"gemma4:12b"},"roles":{"misato":{"route":"local","model":"qwen2.5-coder:14b"},"casper":{"model":"gemma4:12b"}}}}
+  ```
+
 - After editing `config.json` or `anthropic-key`, run `npm start -- reload`: the running service re-reads them without a restart and prints the routes and roles now in use. A broken file is reported and the previous working settings stay in use. `ask` and `reload` talk to the running service.
 
 ### Getting a Claude API key

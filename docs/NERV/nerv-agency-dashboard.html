@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <style>
 :root {
   --bg:#0b0c10; --panel:#12141a; --panel2:#0e1015; --border:#2a2e3a; --text:#e6e8ee; --muted:#8b93a7;
@@ -25,7 +24,7 @@ body.theme-eva-basic, body.theme-eva-full {
   --accent:#ff6600; --ok:#22c55e; --warn:#ffcc00; --danger:#ff0033; --info:#00aaff;
   --green:#22c55e; --orange:#ff8800; --blue:#2a7fff;
   --hdr-bg:#ff6600; --hdr-fg:#000; --brand-bg:#ff6600; --brand-fg:#000; --title:#ffaa66; --kanji:#ff0033;
-  --radius:0; --font:"Share Tech Mono",ui-monospace,monospace; --topo:rgba(255,102,0,.22); --land:#0c0a0a; --sea:#050508;
+  --radius:0; --font:"Share Tech Mono",ui-monospace,monospace; --topo:rgba(255,102,0,.42); --land:#0c0a0a; --sea:#050508;
 }
 body.theme-eva-basic { --bg:#08080c; --panel:#100e12; --radius:2px; }
 * { box-sizing:border-box; }
@@ -37,7 +36,8 @@ button,input,select { font:inherit; }
 .panel { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); min-width:0; }
 body.theme-eva-full .panel { box-shadow:inset 0 0 14px rgba(255,102,0,.07); }
 .hdr { font-weight:700; letter-spacing:.12em; text-transform:uppercase; font-size:10px; color:var(--hdr-fg); background:var(--hdr-bg); border-bottom:1px solid var(--border); padding:5px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
-.hdr .sub { font-weight:400; letter-spacing:.04em; text-transform:none; opacity:.8; }
+.hdr .sub { font-weight:400; letter-spacing:.04em; text-transform:none; background:#000; color:var(--orange); padding:1px 6px; border-radius:0; }
+.hdr .sub:empty { display:none; }
 .pad { padding:8px; }
 .row { display:flex; justify-content:space-between; align-items:center; gap:8px; }
 .col { display:flex; flex-direction:column; gap:8px; min-width:0; }
@@ -253,7 +253,7 @@ body.theme-eva-basic .eva-img, body.theme-eva-full .eva-img { display:block; }
     <div class="brand">
       <div class="brand-block"><span><span class="jp-only">特務機関</span>NERV</span><span class="ver">AGENCY</span></div>
       <div>
-        <h1><span data-l="brandTitle">NERV AGENCY // TACTICAL COMMAND</span> <span class="k jp-only">// 中央作戦司令部</span></h1>
+        <h1><span data-l="brandTitle">TACTICAL COMMAND</span> <span class="k jp-only">// 中央作戦司令部</span></h1>
         <div class="tag" data-l="brandTag">SEELE SCROLLS ENFORCED // CENTRAL DOGMA LEDGER · LILITH MEMORY</div>
       </div>
     </div>
@@ -468,10 +468,10 @@ const TOOLS = {
   "mail.send":{ effect:"write-external" }, "git.branch.delete":{ effect:"irreversible" }, "charger.start":{ effect:"physical", inverse:"charger.stop" }
 };
 const BASES = [
-  // Lore positions from NERV-ARCHITECTURE.md. A real deployment reads lat/lon from each base's enrolment.
-  { id:"tokyo3", name:"TOKYO-3", role:"HQ · coordinator · MAGI · Dogma", lat:35.23, lon:139.02, status:"online", cpu:22, gpu:null, ram:61, rtt:0, models:"S² gemma (Mac)" },
-  { id:"nerv01", name:"NERV-01", role:"branch · S² GPU · EVA cage", lat:38.80, lon:-116.42, status:"online", cpu:35, gpu:58, ram:47, rtt:142, models:"S² qwen-coder (GPU)" },
-  { id:"nerv02", name:"NERV-02", role:"branch · vault · EVA cage", lat:52.13, lon:11.62, status:"standby", cpu:4, gpu:null, ram:18, rtt:null, models:"—" }
+  // Illustrative positions: three bases in the same hills-and-valleys district around Tokyo-3 (Hakone). A real deployment reads lat/lon from each base's enrolment.
+  { id:"tokyo3", name:"TOKYO-3", role:"HQ · coordinator · MAGI · Dogma", lat:35.233, lon:139.021, status:"online", cpu:22, gpu:null, ram:61, rtt:0, models:"S² gemma (Mac)" },
+  { id:"nerv01", name:"NERV-01", role:"branch · S² GPU · EVA cage", lat:35.296, lon:139.152, status:"online", cpu:35, gpu:58, ram:47, rtt:142, models:"S² qwen-coder (GPU)" },
+  { id:"nerv02", name:"NERV-02", role:"branch · vault · EVA cage", lat:35.171, lon:138.884, status:"standby", cpu:4, gpu:null, ram:18, rtt:null, models:"—" }
 ];
 const LINKS = [["tokyo3","nerv01"],["tokyo3","nerv02"],["nerv01","nerv02"]];
 const CAGES = [
@@ -505,7 +505,7 @@ const PRESETS = {
 };
 const STEP_IDS = ["detect","intake","route","consult","plan","magi","sync","apt","plug","eva","debrief"];
 const LABELS = {
-  eva:{ brandTitle:"NERV AGENCY // TACTICAL COMMAND", brandTag:"SEELE SCROLLS ENFORCED // CENTRAL DOGMA LEDGER · LILITH MEMORY",
+  eva:{ brandTitle:"TACTICAL COMMAND", brandTag:"SEELE SCROLLS ENFORCED // CENTRAL DOGMA LEDGER · LILITH MEMORY",
     needs:"Misato's apartment · needs you", sorties:"Sorties", next:"Coming up · next 24 h", flow:"Sephirot · sortie flow",
     detail:"Misato plan · current action", log:"Comms · Misato & Maya trace", away:"Debrief · while you were away", health:"Health · broken or stuck",
     bases:"NERV bases · Kaji line", cages:"EVA cages · heartbeat", budget:"Battery · budget", melons:"Kaji's watermelons · pilot trust",
@@ -513,7 +513,7 @@ const LABELS = {
     qNeeds:"Needs you", qAway:"While you were away", qNext:"Coming up", qHealth:"Broken or stuck", qBudget:"Battery today",
     steps:{ detect:"Detect", intake:"Naoko", route:"Gendo", consult:"Consult", plan:"Misato", magi:"MAGI", sync:"Sync", apt:"Apartment", plug:"Plug", eva:"EVA", debrief:"Debrief" },
     seats:{ melchior:"MELCHIOR", balthasar:"BALTHASAR", casper:"CASPER" }, short:{ melchior:"MEL", balthasar:"BAL", casper:"CAS" } },
-  neutral:{ brandTitle:"NERV AGENCY · OPERATIONS", brandTag:"owner rules enforced · append-only ledger · long-term memory",
+  neutral:{ brandTitle:"OPERATIONS", brandTag:"owner rules enforced · append-only ledger · long-term memory",
     needs:"Needs your approval", sorties:"Jobs", next:"Coming up · next 24 h", flow:"Decision timeline",
     detail:"Plan · current action", log:"Messages · trace", away:"While you were away", health:"Health · broken or stuck",
     bases:"Machines · mesh", cages:"Sandboxes · heartbeat", budget:"Budget", melons:"Skill trust stages",
@@ -1037,7 +1037,7 @@ function renderLog() {
 function applyLabels() { const p = L(); document.querySelectorAll("[data-l]").forEach(el => { const k = el.dataset.l; if (p[k]) el.textContent = p[k]; }); }
 function renderAll() { fillAvatars(); renderQuestions(); renderNeeds(); renderSorties(); renderFlow(); renderAway(); renderNext(); renderHealth(); renderBudget(); renderMelons(); renderBases(); renderCages(); }
 
-/* ================= MAP: real coastlines + procedural contours ================= */
+/* ================= MAP: zoomed regional topography (procedural hills and valleys) ================= */
 const map = { ready:false, w:540, h:250, proj:null, contours:[], base:null, linkPaths:{} };
 const activeCage = {};
 function sendPacket(from, to, kind) { state.packets.push({ from, to, kind, t0:performance.now(), dur:1400 }); }
@@ -1047,35 +1047,31 @@ function noise(x, y) { // smooth deterministic pseudo-terrain
 async function initMap() {
   const cv = document.getElementById("topo"); const W = map.w, H = map.h; const dpr = window.devicePixelRatio || 1; cv.width = W * dpr; cv.height = H * dpr; map.dpr = dpr;
   const hasD3 = typeof d3 !== "undefined";
-  map.proj = hasD3 ? d3.geoEquirectangular().fitExtent([[4, 4], [W - 4, H - 4]], { type:"Polygon", coordinates:[[[-180, -58], [180, -58], [180, 78], [-180, 78], [-180, -58]]] })
-    : (p => [(p[0] + 180) / 360 * W, (78 - p[1]) / 136 * H]);
-  const P = hasD3 ? map.proj : map.proj;
-  // land mask
-  const mask = document.createElement("canvas"); mask.width = W; mask.height = H; const mc = mask.getContext("2d");
-  let land = null;
-  if (hasD3 && typeof topojson !== "undefined") {
-    try { const topo = await (await fetch("https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/land-110m.json")).json(); land = topojson.feature(topo, topo.objects.land); } catch (e) { land = null; }
-  }
-  if (land) { mc.filter = "blur(6px)"; mc.fillStyle = "#fff"; mc.beginPath(); d3.geoPath(map.proj, mc)(land); mc.fill(); }
-  const cell = 4, gw = Math.ceil(W / cell), gh = Math.ceil(H / cell); const vals = new Float64Array(gw * gh);
-  const md = land ? mc.getImageData(0, 0, W, H).data : null;
-  for (let j = 0; j < gh; j++) for (let i = 0; i < gw; i++) {
-    const x = i * cell, y = j * cell; const n = (noise(x, y) + 2.2) / 4.4;
-    const m = md ? md[((Math.min(H - 1, y) * W + Math.min(W - 1, x)) * 4) + 3] / 255 : 1;
-    vals[j * gw + i] = land ? (m * (0.35 + 0.65 * n) - (1 - m) * 0.2) : n;
-  }
+  // Local projection: a window around the bases, shaped to the canvas, east-west scaled by cos(latitude).
+  const lats = BASES.map(b => b.lat), lons = BASES.map(b => b.lon);
+  const lat0 = (Math.min(...lats) + Math.max(...lats)) / 2, lon0 = (Math.min(...lons) + Math.max(...lons)) / 2, k = Math.cos(lat0 * Math.PI / 180);
+  const latSpan = Math.max(0.2, (Math.max(...lats) - Math.min(...lats)) * 2.2), lonSpan = Math.max(latSpan * W / H / k, (Math.max(...lons) - Math.min(...lons)) * 1.5);
+  map.proj = p => [W / 2 + (p[0] - lon0) / lonSpan * W, H / 2 - (p[1] - lat0) / latSpan * H];
+  // Terrain: rolling noise, a ridge of hills between the bases and a winding valley floor they share.
+  const peaks = [[0.18, 0.22, 0.13], [0.42, 0.18, 0.11], [0.63, 0.30, 0.12], [0.86, 0.20, 0.10], [0.30, 0.78, 0.10], [0.74, 0.82, 0.12], [0.95, 0.62, 0.09]];
+  const height = (x, y) => {
+    const u = x / W, v = y / H; let h = 0.28 * (noise(x * 1.6, y * 1.6) + 2.2) / 4.4;
+    for (const [px, py, r] of peaks) h += 0.55 * Math.exp(-((u - px) ** 2 + ((v - py) * H / W) ** 2) / (2 * r * r));
+    const valley = 0.52 + 0.12 * Math.sin(u * 7.5 + 0.8); h -= 0.32 * Math.exp(-((v - valley) ** 2) / 0.012);
+    return h;
+  };
+  const cell = 3, gw = Math.ceil(W / cell) + 1, gh = Math.ceil(H / cell) + 1; const vals = new Float64Array(gw * gh);
+  let lo = Infinity, hi = -Infinity;
+  for (let j = 0; j < gh; j++) for (let i = 0; i < gw; i++) { const h = height(i * cell, j * cell); vals[j * gw + i] = h; lo = Math.min(lo, h); hi = Math.max(hi, h); }
+  for (let q = 0; q < vals.length; q++) vals[q] = (vals[q] - lo) / (hi - lo);
   if (hasD3) {
-    const th = d3.range(land ? 0.05 : 0.2, 1, land ? 0.075 : 0.08);
-    const cs = d3.contours().size([gw, gh]).thresholds(th)(Array.from(vals));
+    const cs = d3.contours().size([gw, gh]).thresholds(d3.range(0.06, 1, 0.055))(Array.from(vals));
     const gp = d3.geoPath(d3.geoIdentity().scale(cell));
     map.contours = cs.map(c => ({ v:c.value, p:new Path2D(gp(c)) }));
-    if (land) map.coast = new Path2D(d3.geoPath(map.proj)(land));
   }
   LINKS.forEach(([a, b]) => {
     const A = BASES.find(x => x.id === a), B = BASES.find(x => x.id === b); const pts = [];
-    const interp = hasD3 ? d3.geoInterpolate([A.lon, A.lat], [B.lon, B.lat]) : (t => [A.lon + (B.lon - A.lon) * t, A.lat + (B.lat - A.lat) * t]);
-    for (let k = 0; k <= 48; k++) pts.push(P(interp(k / 48)));
-    // break the line where it wraps around the map edge
+    for (let t = 0; t <= 48; t++) pts.push(map.proj([A.lon + (B.lon - A.lon) * t / 48, A.lat + (B.lat - A.lat) * t / 48]));
     map.linkPaths[a + "|" + b] = pts;
   });
   map.ready = true;
@@ -1086,10 +1082,10 @@ function drawMap(now) {
   if (!map.ready) return;
   const cv = document.getElementById("topo"); const ctx = cv.getContext("2d"); const W = map.w, H = map.h; ctx.setTransform(map.dpr, 0, 0, map.dpr, 0, 0);
   ctx.fillStyle = cssVar("--sea"); ctx.fillRect(0, 0, W, H);
-  if (map.coast) { ctx.fillStyle = cssVar("--land"); ctx.fill(map.coast); }
+  ctx.fillStyle = cssVar("--land"); ctx.fillRect(0, 0, W, H);
   ctx.lineWidth = 0.7; ctx.strokeStyle = cssVar("--topo");
-  map.contours.forEach(c => { ctx.globalAlpha = 0.35 + c.v * 0.6; ctx.stroke(c.p); }); ctx.globalAlpha = 1;
-  if (map.coast) { ctx.strokeStyle = cssVar("--accent"); ctx.globalAlpha = 0.5; ctx.lineWidth = 0.8; ctx.stroke(map.coast); ctx.globalAlpha = 1; }
+  // every fourth contour is an index line, drawn heavier, as on a printed topographic sheet
+  map.contours.forEach((c, i) => { const index = i % 4 === 3; ctx.lineWidth = index ? 1.3 : 0.7; ctx.globalAlpha = index ? 1 : 0.75; ctx.stroke(c.p); }); ctx.globalAlpha = 1; ctx.lineWidth = 0.7;
   // pulse waves through the contour lines, coloured by base state; offline bases stay static
   BASES.forEach((b, i) => {
     if (b.status === "offline") return;
@@ -1098,7 +1094,7 @@ function drawMap(now) {
     const g = ctx.createRadialGradient(x, y, Math.max(0, r - 7), x, y, r + 7);
     g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(0.5, col); g.addColorStop(1, "rgba(0,0,0,0)");
     ctx.strokeStyle = g; ctx.lineWidth = 1.6; ctx.globalAlpha = 1 - ph;
-    map.contours.forEach(c => ctx.stroke(c.p)); if (map.coast) ctx.stroke(map.coast);
+    map.contours.forEach(c => ctx.stroke(c.p));
     const glow = ctx.createRadialGradient(x, y, 0, x, y, 26); glow.addColorStop(0, col); glow.addColorStop(1, "rgba(0,0,0,0)");
     ctx.globalAlpha = 0.35; ctx.strokeStyle = glow; ctx.lineWidth = 1; map.contours.forEach(c => ctx.stroke(c.p));
     ctx.globalAlpha = 1;
@@ -1129,7 +1125,7 @@ function drawMap(now) {
     const lx = x + tw + 12 > W ? x - tw - 8 : x + 8; ctx.fillText(label, lx, y - 6);
   });
   ctx.fillStyle = cssVar("--muted"); ctx.font = "10px " + cssVar("--font").split(",")[0];
-  ctx.fillText("UMBILICAL ↗ cloud (Casper seat)", 8, H - 8);
+  ctx.fillText("UMBILICAL ↗ cloud · off (all models local)", 8, H - 8);
 }
 
 /* ================= EVA heartbeats ================= */
