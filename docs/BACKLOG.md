@@ -1,6 +1,6 @@
-# Nodo backlog
+# NERV Agency backlog
 
-Current work ledger, reviewed 4 November 2026 against main `7b0d054`. PR #1–#11 merged after green checks (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nodo/pull/7), [gate and ledger](https://github.com/voidbrain/nodo/pull/8), [approvals API](https://github.com/voidbrain/nodo/pull/9); [model routes](https://github.com/voidbrain/nodo/pull/11); main CI run 41789550905 green); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
+Current work ledger, reviewed 4 November 2026 against main `099ec28`. PR #1–#13 merged after green checks (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nodo/pull/7), [gate and ledger](https://github.com/voidbrain/nodo/pull/8), [approvals API](https://github.com/voidbrain/nodo/pull/9); [model routes](https://github.com/voidbrain/nodo/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nodo/pull/12) and [#13](https://github.com/voidbrain/nodo/pull/13); main CI run 41797097663 green); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
 
 ## Features and improvements
 
@@ -246,7 +246,7 @@ Current work ledger, reviewed 4 November 2026 against main `7b0d054`. PR #1–#1
 
 ### F-009
 
-**Run Nodo headless as one local user service**
+**Run NERV Agency headless as one local user service**
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
@@ -326,12 +326,12 @@ Current work ledger, reviewed 4 November 2026 against main `7b0d054`. PR #1–#1
 |---|---|
 | **Issue** | SwiftUI pairing, private notification checkpoints, bounded catch-up, opt-in OS notifications, guarded local service controls and login selection now exist. Real permission/menu/login acceptance and distribution signing remain incomplete. |
 | **Reproduce** | Follow docs/INSTALL.md and the scoped headless implementation checks. |
-| **Check** | Build and package on macOS; health/reminders, workspace launch, doctor, notifications, launch-at-login; Quit companion leaves service running; Stop Nodo is separate. |
+| **Check** | Build and package on macOS; health/reminders, workspace launch, doctor, notifications, launch-at-login; Quit companion leaves service running; Stop NERV Agency is separate. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Validate native notification permissions/banners, guarded service start/stop and login/logout on a target Mac; finish distribution signing/notarization. Build and package on macOS; health/reminders, workspace launch, doctor, notifications, launch-at-login; Quit companion leaves service running; Stop Nodo is separate.
+**Next action / closure evidence:** Validate native notification permissions/banners, guarded service start/stop and login/logout on a target Mac; finish distribution signing/notarization. Build and package on macOS; health/reminders, workspace launch, doctor, notifications, launch-at-login; Quit companion leaves service running; Stop NERV Agency is separate.
 
 **Estimates:** Large remaining effort; ~80% complete. Estimate dated 2026-11-01, not acceptance evidence.
 
@@ -358,7 +358,7 @@ Current work ledger, reviewed 4 November 2026 against main `7b0d054`. PR #1–#1
 
 | | |
 |---|---|
-| **Issue** | User wants Nodo to resume a web-chat job or Claude Code job in VS Code after a three-hour token-limit pause. This capability is not implemented. |
+| **Issue** | User wants NERV Agency to resume a web-chat job or Claude Code job in VS Code after a three-hour token-limit pause. This capability is not implemented. |
 | **Reproduce** | Ask to resume an identified job after its reported reset time; keep its worker awake and session available. |
 | **Check** | Persist target, permission, reset time, expiry and attempts; verify readiness and unchanged job identity; resume once; notify outcome; survive restart; handle longer limits, logout, closed tabs, sleeping workers, changed tasks and already-resumed jobs without duplicate actions. |
 
@@ -526,7 +526,7 @@ Current work ledger, reviewed 4 November 2026 against main `7b0d054`. PR #1–#1
 |:---:|---|---|---|---|
 | 🔴 | 🔺 P1 | Open | 🟡 Medium | ~50% |
 
-💻 **→ Human action required: No**<br />Connect Casper to the F-003 model route, load the Scrolls from NODO_HOME and route the first real tool executor through the gate.
+💻 **→ Human action required: No**<br />Connect Casper to the F-003 model route, load the Scrolls from NERV_HOME and route the first real tool executor through the gate.
 
 | | |
 |---|---|
@@ -537,7 +537,7 @@ Current work ledger, reviewed 4 November 2026 against main `7b0d054`. PR #1–#1
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Implemented in [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals): `src/policy.ts` (effect classes, Pattern, EVA class, Melchior/Balthasar, veto-only extra seats, Sync Ratio with inputs) and `Ledger.propose`/`authorize` (single-use grants bound to the argument hash, reject limit escalation). Remaining: Casper from the model route, a Scrolls file in NODO_HOME validated by `validatePolicy`, and the first executor calling `authorize`. Original plan: effect classes, Scrolls policy pack, Pattern derivation, deterministic seats, Sync Ratio (0–100 % with its inputs), grant issuance with TTL and the executor check. Casper uses the F-003 model route once it exists; until then a Casper verdict is required input and the gate fails closed. Extra veto-only seats and consultants are F-025. Supersedes the request-level Gendo classification of 2026-11-02 ([NERV architecture](NERV/NERV-ARCHITECTURE.md)).
+**Next action / closure evidence:** Implemented in [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals): `src/policy.ts` (effect classes, Pattern, EVA class, Melchior/Balthasar, veto-only extra seats, Sync Ratio with inputs) and `Ledger.propose`/`authorize` (single-use grants bound to the argument hash, reject limit escalation). Remaining: Casper from the model route, a Scrolls file in NERV_HOME validated by `validatePolicy`, and the first executor calling `authorize`. Original plan: effect classes, Scrolls policy pack, Pattern derivation, deterministic seats, Sync Ratio (0–100 % with its inputs), grant issuance with TTL and the executor check. Casper uses the F-003 model route once it exists; until then a Casper verdict is required input and the gate fails closed. Extra veto-only seats and consultants are F-025. Supersedes the request-level Gendo classification of 2026-11-02 ([NERV architecture](NERV/NERV-ARCHITECTURE.md)).
 
 **Estimates:** Medium remaining effort; ~50% complete. Re-scoped 2026-11-04 from request-level routing to per-action gating; reassessed 2026-11-04 after the deterministic gate landed: Casper wiring, policy file and executor integration remain.
 
@@ -576,7 +576,7 @@ Current work ledger, reviewed 4 November 2026 against main `7b0d054`. PR #1–#1
 
 | Field | Value |
 |---|---|
-| PR / evidence | docs/NERV/nerv-agency-dashboard.html (prototype); earlier docs/NERV/dashboard-agnostic-2.html; review docs/NERV/review-2026-11-04.md §6 |
+| PR / evidence | docs/NERV/nerv-agency-dashboard.html (prototype, [PR #12](https://github.com/voidbrain/nodo/pull/12) and [PR #13](https://github.com/voidbrain/nodo/pull/13): comms panel with chat, image slots listed in docs/NERV/assets/README.md); earlier docs/NERV/dashboard-agnostic-2.html; review docs/NERV/review-2026-11-04.md §6 |
 | Opened | 2026-11-02 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |
@@ -699,7 +699,7 @@ Current work ledger, reviewed 4 November 2026 against main `7b0d054`. PR #1–#1
 | | |
 |---|---|
 | **Issue** | Blue actions and low Sync Ratio need the owner. Without full content an approval is a rubber stamp; without a TTL a sleeping owner stalls the sortie. |
-| **Reproduce** | Create a Blue approval; approve, reject, edit, or leave it to expire; repeat the decision; restart Nodo while it is pending. |
+| **Reproduce** | Create a Blue approval; approve, reject, edit, or leave it to expire; repeat the decision; restart NERV Agency while it is pending. |
 | **Check** | Card shows action, arguments/diff/recipients, Pattern, Sync Ratio and inputs, reason and remaining TTL; expiry stands down (never approves); a decision is applied once and is idempotent on repeat; pending cards survive restart; the decision and its source are written to Central Dogma; Pen Pen delivery reuses the inbox and later Telegram/native notifications. |
 
 <details>
@@ -797,7 +797,7 @@ Current work ledger, reviewed 4 November 2026 against main `7b0d054`. PR #1–#1
 
 | | |
 |---|---|
-| **Issue** | Nodo is meant to act first, but only reminders fire today; there is no loop that wakes the agent to check something. |
+| **Issue** | NERV Agency is meant to act first, but only reminders fire today; there is no loop that wakes the agent to check something. |
 | **Reproduce** | Configure a heartbeat check and an event trigger; let both fire inside and outside quiet hours; let the model route be down. |
 | **Check** | Triggers create sorties with their source recorded; proactive sorties run in EVA-00 (no external effects) unless the pilot is Production; quiet hours defer notifications, not deliveries already due; per-trigger budget; duplicate ticks after restart do not duplicate sorties. |
 
@@ -979,6 +979,40 @@ Current work ledger, reviewed 4 November 2026 against main `7b0d054`. PR #1–#1
 | PR / evidence | `npm audit` 2026-11-04 |
 | Opened | 2026-11-04 |
 | Verification | Pending |
+| Reviewed | 2026-11-04 |
+
+</details>
+
+---
+
+### F-032
+
+**Rename Nodo to NERV Agency**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~80% |
+
+🧑 **→ Human action required: Yes**<br />Decide the GitHub repository name and the web logo; verify the Keychain and LaunchAgent hand-over on your Mac.
+
+| | |
+|---|---|
+| **Issue** | The product is now NERV Agency, with `nerv` as the short identifier. Existing installs must keep working without a manual move. |
+| **Reproduce** | On a Mac with a pre-rename install (`~/.nodo`, `io.nodo.agent`, a paired menu-bar app): update, run `doctor`, `service install`, open `NERV.app`. |
+| **Check** | Data and database are found in `~/.nodo` until moved; `NODO_*` still read; `service install` replaces the old unit with no second scheduler; the menu-bar pairing survives the first launch; decisions: rename `voidbrain/nodo` (GitHub redirects old links) or keep it; replace or keep the knot logo. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Implemented in [PR #14](https://github.com/voidbrain/nodo/pull/14) (rename): visible names say NERV Agency; identifiers use `nerv` (`~/.nerv`, `nerv.sqlite`, `NERV_*`, `io.nerv.agent`, `nerv.service`, `io.nerv.companion`, `NERV.app`, `NervMenuBar`, `nerv-status-card`, package `nerv-agency`, Angular project `nerv`). Compatibility: `~/.nodo` and `nodo.sqlite` used while they are the only ones present, `NODO_*` fallback, `service install` replaces the old unit, service actions find the old unit until then, Keychain item and notification checkpoints move on first launch. Unchanged on purpose: dated archives, audits and reviews; GitHub links (`voidbrain/nodo`) until the repository is renamed; the knot logo (it is the Nodo pun), pending your choice. Remaining: the two decisions and a real-Mac check of the hand-over.
+
+**Estimates:** Small remaining effort; ~80% complete. Estimated 2026-11-04.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #14](https://github.com/voidbrain/nodo/pull/14) (rename) |
+| Opened | 2026-11-04 |
+| Verification | Unit/integration 2026-11-04: rename fallbacks test (home, database, settings), service render asserts, Swift label fallback and Keychain code path, headless process tests, app bundle id and display name (local run; CI pending). Real-Mac hand-over: pending |
 | Reviewed | 2026-11-04 |
 
 </details>

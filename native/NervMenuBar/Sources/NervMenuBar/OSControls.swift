@@ -5,11 +5,17 @@ import Darwin
 struct LaunchAgentCommand: Equatable, Sendable {
     enum Action { case start, stop, status }
     let arguments: [String]
-    static func make(_ action: Action, uid: UInt32, home: String) throws -> LaunchAgentCommand {
-        guard home.hasPrefix("/"), !home.contains("\n"), !home.contains("\0") else { throw OSControlError.unavailable }
-        let domain = "gui/\(uid)", target = domain + "/io.nodo.agent"
+    /// Current LaunchAgent label, and the pre-rename one still controlled until `service install` replaces it.
+    static let label = "io.nerv.agent", previousLabel = "io.nodo.agent"
+    static func plist(_ label: String, home: String) -> String { home + "/Library/LaunchAgents/" + label + ".plist" }
+    static func installedLabel(home: String) -> String {
+        !FileManager.default.fileExists(atPath: plist(label, home: home)) && FileManager.default.fileExists(atPath: plist(previousLabel, home: home)) ? previousLabel : label
+    }
+    static func make(_ action: Action, uid: UInt32, home: String, label: String = LaunchAgentCommand.label) throws -> LaunchAgentCommand {
+        guard home.hasPrefix("/"), !home.contains("\n"), !home.contains("\0"), label == Self.label || label == previousLabel else { throw OSControlError.unavailable }
+        let domain = "gui/\(uid)", target = domain + "/" + label
         switch action {
-        case .start: return LaunchAgentCommand(arguments: ["bootstrap", domain, home + "/Library/LaunchAgents/io.nodo.agent.plist"])
+        case .start: return LaunchAgentCommand(arguments: ["bootstrap", domain, plist(label, home: home)])
         case .stop: return LaunchAgentCommand(arguments: ["bootout", target])
         case .status: return LaunchAgentCommand(arguments: ["print", target])
         }
@@ -57,17 +63,19 @@ struct UserServiceController {
     let home: String
     init(runner: ServiceCommandRunning = SystemServiceRunner(), uid: UInt32 = getuid(), home: String = FileManager.default.homeDirectoryForCurrentUser.path) { self.runner = runner; self.uid = uid; self.home = home }
     func matches(home runtimeHome: String?) -> Bool {
-        guard let runtimeHome, let data = try? Data(contentsOf: URL(fileURLWithPath: home + "/Library/LaunchAgents/io.nodo.agent.plist")), data.count <= 65536,
-              let value = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any], value["Label"] as? String == "io.nodo.agent",
-              let environment = value["EnvironmentVariables"] as? [String: String], let installedHome = environment["NODO_HOME"] else { return false }
+        let label = LaunchAgentCommand.installedLabel(home: home)
+        guard let runtimeHome, let data = try? Data(contentsOf: URL(fileURLWithPath: LaunchAgentCommand.plist(label, home: home))), data.count <= 65536,
+              let value = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any], value["Label"] as? String == label,
+              let environment = value["EnvironmentVariables"] as? [String: String], let installedHome = environment["NERV_HOME"] ?? environment["NODO_HOME"] else { return false }
         return URL(fileURLWithPath: runtimeHome).standardizedFileURL.resolvingSymlinksInPath() == URL(fileURLWithPath: installedHome).standardizedFileURL.resolvingSymlinksInPath()
     }
-    func loaded() async throws -> Bool { try await runner.run(LaunchAgentCommand.make(.status, uid: uid, home: home)) == 0 }
+    private var label: String { LaunchAgentCommand.installedLabel(home: home) }
+    func loaded() async throws -> Bool { try await runner.run(LaunchAgentCommand.make(.status, uid: uid, home: home, label: label)) == 0 }
     func start() async throws {
-        guard FileManager.default.fileExists(atPath: home + "/Library/LaunchAgents/io.nodo.agent.plist") else { throw OSControlError.notInstalled }
-        guard try await runner.run(LaunchAgentCommand.make(.start, uid: uid, home: home)) == 0 else { throw OSControlError.failed }
+        guard FileManager.default.fileExists(atPath: LaunchAgentCommand.plist(label, home: home)) else { throw OSControlError.notInstalled }
+        guard try await runner.run(LaunchAgentCommand.make(.start, uid: uid, home: home, label: label)) == 0 else { throw OSControlError.failed }
     }
-    func stop() async throws { guard try await runner.run(LaunchAgentCommand.make(.stop, uid: uid, home: home)) == 0 else { throw OSControlError.failed } }
+    func stop() async throws { guard try await runner.run(LaunchAgentCommand.make(.stop, uid: uid, home: home, label: label)) == 0 else { throw OSControlError.failed } }
 }
 enum LoginState: Equatable { case enabled, requiresApproval, disabled, unavailable }
 protocol LoginItemControlling { var state: LoginState { get }; func setEnabled(_ enabled: Bool) throws }

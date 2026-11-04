@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-04T06:59:59.391Z",
+  "reviewed": "2026-11-04T08:15:21.290Z",
   "policy": "7ce9883fd1bff25038076e9e36015a833c38e1378e1df68043f48a64635abad4",
   "inputs": {
-    "AGENTS.md": "3e2734e445751da996684c6b8fe988a8b57dcc3456b5850e5be5ba80e7505f0b",
-    "docs/BACKLOG-RULES.md": "829ba1b55add1a556b311782dea534f8bd39aa555d261e59d75b3545ec3a4dd5",
-    "docs/agents/areas.md": "d359e0877b00b203d3b09d565cf105ed62e01117e4c30d028f7de08ba98769be",
+    "AGENTS.md": "ca74539d56dec2916e9285b7cb39288d5cebf22e5026b6337f2d05eaefa3beaf",
+    "docs/BACKLOG-RULES.md": "19798ae1614c2d96e60613af75d232c2eda19d25e07470e851ce48304df593c6",
+    "docs/agents/areas.md": "62c37f5051da2589d794300c322d6c3426ab5b16cec77f02456d44477f5c7a23",
     "docs/agents/maintenance.md": "a7e93ce963ffab30b4592ee90bdd0e72d49ea1320f82df74f22c88f70899d899"
   },
   "measurements": {
-    "samples": 3,
-    "latestAt": "2026-11-04T06:59:59.313Z",
+    "samples": 4,
+    "latestAt": "2026-11-04T08:15:21.237Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -36,25 +36,25 @@
         }
       },
       "reconciliation": {
-        "samples": 3,
+        "samples": 4,
         "durationMs": {
-          "observed": 3,
+          "observed": 4,
           "missing": 0,
-          "median": 84
+          "median": 79.5
         },
         "conflicts": {
           "observed": 2,
-          "missing": 1,
+          "missing": 2,
           "median": 0
         },
         "unnecessaryPrompts": {
           "observed": 0,
-          "missing": 3,
+          "missing": 4,
           "median": null
         },
         "repeatedContextLoads": {
           "observed": 0,
-          "missing": 3,
+          "missing": 4,
           "median": null
         }
       }
@@ -64,13 +64,13 @@
     {
       "kind": "rule",
       "disposition": "implemented",
-      "target": "docs/agents/areas.md",
-      "evidence": "New Model routes area rule: src/model.ts owns route selection and adapters, the brain is the only caller, privacy explicit and local-only by default at the API, no route fallback, cloud key only in a private file read by the brain (never env, argv, config, logs or doctor), model.complete is coordinator→brain only, replies bounded. test/model.test.ts proves each clause, including the coordinator → brain → S² join, zero requests to the fake cloud when S² fails, socket denial and refusal of a world-readable key file."
+      "target": "AGENTS.md",
+      "evidence": "Project conventions renamed: project NERV Agency, Angular project nerv; the repository line keeps voidbrain/nodo until the owner renames it (F-032). BACKLOG-RULES.md and STYLE-GUIDE.md (adapted) change the product name only; no rule changed. .harness.json settings point at native/NervMenuBar paths."
     },
     {
       "kind": "none",
       "disposition": "no-change",
-      "evidence": "Reviewed AGENTS.md, BACKLOG-RULES.md and maintenance.md against the change: no copied harness tool or generic rule changed; package.json (adapted) gains a project dependency only (@anthropic-ai/sdk 1.1.0, pinned exact, released 2026-10-21). Pre-existing dev advisories in vite through @angular/build are recorded as F-031, not fixed here."
+      "evidence": "Reviewed AGENTS.md, BACKLOG-RULES.md and maintenance.md against the rename: no copied harness tool changed; dated archives and audits are untouched as evidence. Compatibility with pre-rename installs is tested in test/runtime.test.ts (home, database, settings) and the Swift label fallback test."
     }
   ]
 }

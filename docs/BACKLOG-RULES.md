@@ -1,6 +1,6 @@
 # Backlog maintenance rules
 
-This is the authoritative update and review procedure for the [Nodo backlog](BACKLOG.md). AGENTS and README link here; keep procedural changes here rather than adding competing instructions elsewhere. The backlog's lifecycle table is the status quick reference. Archives and audits preserve dated evidence, not current state.
+This is the authoritative update and review procedure for the [NERV Agency backlog](BACKLOG.md). AGENTS and README link here; keep procedural changes here rather than adding competing instructions elsewhere. The backlog's lifecycle table is the status quick reference. Archives and audits preserve dated evidence, not current state.
 
 ## One repository, one backlog
 

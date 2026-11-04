@@ -11,7 +11,7 @@ Supersedes the glossary in `review-2026-11-04.md` §3 and every flow in `insight
    • signs base enrolment, rotates Ritsuko's A.T. Field signing key, decrypts backups
    • NEVER used in the normal flow · NEVER bypasses MAGI or Misato's apartment
 ══════════════════════════════════════════════════════════════════════════════════════════
- NERV ················ the agency = one Nodo deployment
+ NERV ················ the agency = one NERV Agency deployment
  ├─ TOKYO-3 / GEOFRONT  HQ (Mac): coordinator · authoritative MAGI · Central + Terminal Dogma
  ├─ NERV-01 (Nevada) .. branch (mini-PC): EVA cage · S² engine with GPU · hosts MAGI seats
  ├─ NERV-02 (Germany) . branch (Pi + 10 TB): EVA cage · vault (weights, replicas, images)

@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Store } from './store.ts';
 import { makeServer } from './server.ts';
-import { dataHome, initialize, readConfig, readToken } from './config.ts';
+import { dataHome, databasePath, initialize, readConfig, readToken } from './config.ts';
 import { service } from './service.ts';
 import {initializeNativeTLS,loadNativeTLS,nativeAdmin,NativeAuth,type Invitation} from './native-auth.ts';
 import { Runtime } from './runtime.ts';
@@ -11,24 +11,24 @@ const [command,...args]=process.argv.slice(2);
 let store:Store|undefined;let running=false;
 try {
   const home=dataHome();
-  if(command==='init'){initialize(home);console.log(`Nodo configurato / configured: ${home}\nAccess token: ${join(home,'token')}`);}
-  else if(command==='native-init'){initialize(home);initializeNativeTLS(home);console.log('Native TLS configured. Restart Nodo, then run pair.');}
-  else if(['pair','clients','revoke'].includes(command ?? '')){const config=readConfig(home);const path=command==='pair'?'/api/pairing/tickets':command==='clients'?'/api/clients':'/api/clients/'+encodeURIComponent(args[0] ?? '');const value=await nativeAdmin(home,config.nativePort ?? 4319,readToken(home),path,command==='pair'?'POST':command==='revoke'?'DELETE':'GET',command==='pair'?{label:args[0] ?? 'Nodo Menu Bar'}:undefined);if(command==='pair'){const invitation=value as Invitation;console.log('Private invitation (expires in 2 minutes; paste only into Nodo companion):\n'+Buffer.from(JSON.stringify(invitation)).toString('base64url'));}else console.log(JSON.stringify(value,null,2));}
+  if(command==='init'){initialize(home);console.log(`NERV Agency configurata / configured: ${home}\nAccess token: ${join(home,'token')}`);}
+  else if(command==='native-init'){initialize(home);initializeNativeTLS(home);console.log('Native TLS configured. Restart NERV Agency, then run pair.');}
+  else if(['pair','clients','revoke'].includes(command ?? '')){const config=readConfig(home);const path=command==='pair'?'/api/pairing/tickets':command==='clients'?'/api/clients':'/api/clients/'+encodeURIComponent(args[0] ?? '');const value=await nativeAdmin(home,config.nativePort ?? 4319,readToken(home),path,command==='pair'?'POST':command==='revoke'?'DELETE':'GET',command==='pair'?{label:args[0] ?? 'NERV Agency Menu Bar'}:undefined);if(command==='pair'){const invitation=value as Invitation;console.log('Private invitation (expires in 2 minutes; paste only into the NERV Agency companion):\n'+Buffer.from(JSON.stringify(invitation)).toString('base64url'));}else console.log(JSON.stringify(value,null,2));}
   else if(command==='service')service(args[0] ?? '',home);
   else if(command==='ask'){
     // Goes through the running service so only one brain and one scheduler exist. Local-only unless --cloud.
     const cloud=args[0]==='--cloud';const prompt=(cloud?args.slice(1):args).join(' ');
     if(!prompt)throw new Error('Usage: ask [--cloud] "text"');
     const config=readConfig(home);
-    const response=await fetch(`http://127.0.0.1:${config.port}/api/ask`,{method:'POST',headers:{authorization:`Bearer ${readToken(home)}`,'content-type':'application/json'},body:JSON.stringify(cloud?{prompt,privacy:'any',route:'cloud'}:{prompt,privacy:'local-only'})}).catch(()=>{throw new Error('Nodo is not running: start it with serve or service start.');});
+    const response=await fetch(`http://127.0.0.1:${config.port}/api/ask`,{method:'POST',headers:{authorization:`Bearer ${readToken(home)}`,'content-type':'application/json'},body:JSON.stringify(cloud?{prompt,privacy:'any',route:'cloud'}:{prompt,privacy:'local-only'})}).catch(()=>{throw new Error('NERV Agency is not running: start it with serve or service start.');});
     const value=await response.json() as {text?:string;route?:string;model?:string;truncated?:boolean;error?:string};
     if(!response.ok)throw new Error(value.error ?? 'Ask failed.');
     console.log(value.text+(value.truncated?'\n[reply truncated]':'')+`\n— ${value.route} · ${value.model}`);
   }
-  else if(!command||command==='help')console.log('Nodo\nCommands: init | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
+  else if(!command||command==='help')console.log('NERV Agency\nCommands: init | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
   else {
     const config=readConfig(home);
-    if(command!=='serve')store=new Store(join(home,'nodo.sqlite'));
+    if(command!=='serve')store=new Store(databasePath(home));
     const local=()=>store!;
     switch(command) {
       case 'remind':console.log(JSON.stringify(local().add(args[0] ?? '',args[1] ?? ''),null,2));break;
@@ -46,7 +46,7 @@ try {
         if(!existsSync(join(webRoot,'index.html')))throw new Error('Frontend missing: run npm run build.');
         const token=readToken(home);const nativeTLS=loadNativeTLS(home);
         const nativeAuth=nativeTLS?new NativeAuth(home):undefined;
-        const runtime=new Runtime(join(home,'nodo.sqlite'),undefined,home);
+        const runtime=new Runtime(databasePath(home),undefined,home);
         try{await runtime.ready();}catch(e){await runtime.close();nativeAuth?.close();throw e;}
         let server:ReturnType<typeof makeServer>;let native:ReturnType<typeof makeServer>|undefined;
         try{server=makeServer(runtime,token,{webRoot,...config});native=nativeTLS&&nativeAuth?makeServer(runtime,token,{...config,tls:nativeTLS,native:{auth:nativeAuth,fingerprint:nativeTLS.fingerprint,port:config.nativePort ?? 4319,webPort:config.port}}):undefined;}catch(e){await runtime.close();nativeAuth?.close();throw e;}
@@ -55,7 +55,7 @@ try {
         runtime.nervous.child.once('exit',()=>{if(!stopped){console.error('Scheduler unavailable; shutting down for supervisor recovery.');process.exitCode=1;close();}});
         for(const listener of servers)listener.on('error',e=>{console.error(e.message);process.exitCode=1;close();});
         if(native)await new Promise<void>((done,reject)=>{native.once('error',reject);native.listen(config.nativePort ?? 4319,'127.0.0.1',done);}).catch(e=>{close();throw e;});
-        server.listen(config.port,'127.0.0.1',()=>console.log(`Nodo: http://127.0.0.1:${config.port} · ${config.language} · ${config.timeZone}`));running=true;
+        server.listen(config.port,'127.0.0.1',()=>console.log(`NERV Agency: http://127.0.0.1:${config.port} · ${config.language} · ${config.timeZone}`));running=true;
         process.once('SIGINT',close);process.once('SIGTERM',close);break;
       }
       default:throw new Error('Unknown command. Run help.');

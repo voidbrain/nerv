@@ -1,4 +1,4 @@
-# Nodo
+# NERV Agency
 
 **Your machines, connected.** A local-first proactive personal agent, built in TypeScript with an Angular frontend. The name evokes nodes and connections; its mark is a simple vertical monochrome marine knot.
 
@@ -10,7 +10,7 @@ Model routes exist without an agent: `ask "text"` sends one prompt to a local Op
 
 ## Run it
 
-Requires Node **24+**. Italian is the default interface language; English is selectable. CLI commands remain English. Nodo does not yet understand conversational Italian or English.
+Requires Node **24+**. Italian is the default interface language; English is selectable. CLI commands remain English. NERV Agency does not yet understand conversational Italian or English.
 
 ```bash
 npm ci
@@ -19,7 +19,7 @@ npm start -- init
 npm start -- serve
 ```
 
-Open **http://127.0.0.1:4317** and enter the token from `~/.nodo/token`. This one service supervises the built UI/API gateway, an isolated scheduler/database process and an execution-process boundary. To run without keeping Terminal open, stop the foreground process and run `npm start -- service install`. Supports macOS launchd and Linux systemd **user** services. See [installation, updates, data migration and service controls](docs/INSTALL.md).
+Open **http://127.0.0.1:4317** and enter the token from `~/.nerv/token`. This one service supervises the built UI/API gateway, an isolated scheduler/database process and an execution-process boundary. To run without keeping Terminal open, stop the foreground process and run `npm start -- service install`. Supports macOS launchd and Linux systemd **user** services. See [installation, updates, data migration and service controls](docs/INSTALL.md).
 
 For frontend development only, `npm run dev` uses **4318**, with its API proxy targeting 4317. Port 4200 is not used.
 
@@ -34,7 +34,7 @@ npm run typecheck
 npm run test:headless
 ```
 
-Use your actual future deadline. CLI timestamps require an explicit UTC offset. User data now defaults to `~/.nodo` (override with an absolute `NODO_HOME`). Legacy checkout-local databases trigger migration guidance rather than being silently ignored. `init` preserves existing files; token/configuration files are private. Reminders enter the local inbox while running, or catch up after restart. Sleep or logout can pause user services; use an awake always-on host for dependable scheduling.
+Use your actual future deadline. CLI timestamps require an explicit UTC offset. User data now defaults to `~/.nerv` (override with an absolute `NERV_HOME`). Legacy checkout-local databases trigger migration guidance rather than being silently ignored. `init` preserves existing files; token/configuration files are private. Reminders enter the local inbox while running, or catch up after restart. Sleep or logout can pause user services; use an awake always-on host for dependable scheduling.
 
 All `/api` routes require a bearer token (except the native TLS claim route, which requires a private single-use invitation). Lightweight `/api/status` is used for background health; explicit `/api/doctor` retains integrity diagnostics. Native clients can also use authenticated, read-only JSON-RPC 2.0 WebSockets at `/rpc`; browser ticket pairing and remote execution are not implemented. Static UI files are public on loopback and contain no credentials. No permissive CORS or public-network binding is enabled. Doctor covers local configuration/runtime/database; remote/device probes remain planned.
 

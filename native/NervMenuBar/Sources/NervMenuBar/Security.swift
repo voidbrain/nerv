@@ -44,13 +44,22 @@ final class NativeConnection {
     }
 }
 enum CredentialStore {
-    static let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: "io.nodo.companion", kSecAttrAccount as String: "paired-runtime"]
-    static func load() throws -> Credential? {
-        var request = query; request[kSecReturnData as String] = true; request[kSecMatchLimit as String] = kSecMatchLimitOne
+    static let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: "io.nerv.companion", kSecAttrAccount as String: "paired-runtime"]
+    /// Pre-rename item: moved to the new service name on first load, then deleted.
+    static let previousQuery: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: "io.nodo.companion", kSecAttrAccount as String: "paired-runtime"]
+    private static func read(_ base: [String: Any]) throws -> Data? {
+        var request = base; request[kSecReturnData as String] = true; request[kSecMatchLimit as String] = kSecMatchLimitOne
         var result: CFTypeRef?; let status = SecItemCopyMatching(request as CFDictionary, &result)
         if status == errSecItemNotFound { return nil }
         guard status == errSecSuccess, let data = result as? Data else { throw NativeError.keychain }
-        return try JSONDecoder().decode(Credential.self, from: data)
+        return data
+    }
+    static func load() throws -> Credential? {
+        if let data = try read(query) { return try JSONDecoder().decode(Credential.self, from: data) }
+        guard let data = try read(previousQuery) else { return nil }
+        let credential = try JSONDecoder().decode(Credential.self, from: data)
+        try save(credential); SecItemDelete(previousQuery as CFDictionary)
+        return credential
     }
     static func save(_ credential: Credential) throws {
         let data = try JSONEncoder().encode(credential)

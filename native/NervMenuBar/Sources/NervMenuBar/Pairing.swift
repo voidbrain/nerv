@@ -35,10 +35,10 @@ enum NativeError: LocalizedError {
     case invalidInvitation, certificateMismatch, requestFailed, identityMismatch, keychain, expired
     var errorDescription: String? {
         switch self {
-        case .invalidInvitation: return "Invito non valido o scaduto. Genera un nuovo invito con nodo pair."
-        case .certificateMismatch: return "Identità TLS di Nodo non verificata. Nessuna credenziale inviata."
-        case .requestFailed: return "Nodo non disponibile o richiesta rifiutata. Verifica servizio e abbinamento."
-        case .identityMismatch: return "L’identità di Nodo è cambiata. Ripeti l’abbinamento."
+        case .invalidInvitation: return "Invito non valido o scaduto. Genera un nuovo invito con npm start -- pair."
+        case .certificateMismatch: return "Identità TLS di NERV non verificata. Nessuna credenziale inviata."
+        case .requestFailed: return "NERV non disponibile o richiesta rifiutata. Verifica servizio e abbinamento."
+        case .identityMismatch: return "L’identità di NERV è cambiata. Ripeti l’abbinamento."
         case .keychain: return "Accesso al Portachiavi non riuscito."
         case .expired: return "Abbinamento scaduto. Genera un nuovo invito."
         }

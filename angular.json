@@ -1,7 +1,7 @@
 {
   "version": 1,
   "projects": {
-    "nodo": {
+    "nerv": {
       "projectType": "application",
       "root": "web",
       "sourceRoot": "web/src",
@@ -33,7 +33,7 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
-            "buildTarget": "nodo:build",
+            "buildTarget": "nerv:build",
             "port": 4318
           }
         }

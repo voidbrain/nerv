@@ -1,8 +1,8 @@
-# Nodo area notes
+# NERV Agency area notes
 
 ## Local core
 
-Node 24 runs erasable TypeScript directly. `src/store.ts` owns SQLite state; `src/server.ts` owns authenticated loopback HTTP; `src/cli.ts` owns process lifecycle; `src/config.ts` owns private per-user configuration and `src/service.ts` renders/manages user services. Validate untrusted input before writes. Do not expose arbitrary SQL, shell execution or tools through chat. Keep delivery creation and reminder completion in one transaction. `npm test` covers restart, duplicates, cancellation and HTTP authentication. These are Nodo's current conventions, not a published reusable Node harness profile.
+Node 24 runs erasable TypeScript directly. `src/store.ts` owns SQLite state; `src/server.ts` owns authenticated loopback HTTP; `src/cli.ts` owns process lifecycle; `src/config.ts` owns private per-user configuration and `src/service.ts` renders/manages user services. Validate untrusted input before writes. Do not expose arbitrary SQL, shell execution or tools through chat. Keep delivery creation and reminder completion in one transaction. `npm test` covers restart, duplicates, cancellation and HTTP authentication. These are NERV Agency's current conventions, not a published reusable Node harness profile.
 
 ## Action gate and ledger
 
@@ -10,7 +10,7 @@ Node 24 runs erasable TypeScript directly. `src/store.ts` owns SQLite state; `sr
 
 ## Frontend
 
-Read the style guide. Angular renders registered components, never model-generated JavaScript. The frontend access token remains only in component memory; the backend token is in a mode-0600 file under NODO_HOME. Italian is the default interface language, with English switching. CLI command names and raw diagnostic messages remain English. Planned cards must say planned; no simulated live devices. Current UI uses typed reminder data and a registered Web Component status surface; model-generated selection is not implemented. PWA installation/offline caching and browser acceptance remain F-004.
+Read the style guide. Angular renders registered components, never model-generated JavaScript. The frontend access token remains only in component memory; the backend token is in a mode-0600 file under NERV_HOME. Italian is the default interface language, with English switching. CLI command names and raw diagnostic messages remain English. Planned cards must say planned; no simulated live devices. Current UI uses typed reminder data and a registered Web Component status surface; model-generated selection is not implemented. PWA installation/offline caching and browser acceptance remain F-004.
 
 ## Distributed contracts
 
@@ -22,7 +22,7 @@ Read the style guide. Angular renders registered components, never model-generat
 
 ## Headless installation
 
-Serve built Angular assets and the API from one loopback process on 4317. Development uses 4318; both values must agree with README and tests. Service definitions contain no token, use absolute paths and run as the current user. Never install system services or enable linger on the execution host as part of a code change. Test service rendering and real process lifecycle; distinguish those from launchd/systemd acceptance on a user machine. Keep Quit companion separate from Stop Nodo in the future native SwiftUI companion. Read docs/INSTALL.md before changing service lifecycle.
+Serve built Angular assets and the API from one loopback process on 4317. Development uses 4318; both values must agree with README and tests. Service definitions contain no token, use absolute paths and run as the current user. Never install system services or enable linger on the execution host as part of a code change. Test service rendering and real process lifecycle; distinguish those from launchd/systemd acceptance on a user machine. Keep Quit companion separate from Stop NERV Agency in the future native SwiftUI companion. Read docs/INSTALL.md before changing service lifecycle.
 
 ## Isolated runtime and protocol
 
@@ -36,6 +36,6 @@ Read native/README.md and the current pairing decision. Never ship root/provider
 
 Read the native guide before changing cursor or permission semantics. Enable establishes a current-head baseline; checkpoints contain sequence plus delivery UUID and are private/atomic, never message content or credentials. Validate whole pages before posting; advance after OS acceptance/reconciliation, never on an error. Do not claim exactly-once banners. History restore resets require an explicit visible warning; corrupt local state must not silently replay old reminders. Every notification request is opt-in; tests use fake sinks and do not prompt CI.
 
-Service commands are fixed user launchctl actions with timeouts and a separate Stop confirmation. A paired runtime must match local plist NODO_HOME. SMAppService mainApp owns companion login only; display real requiresApproval/enabled states. Do not register or modify actual OS services/login items in repository tests. CI validates pure command plans, simulated notification outcomes, pinning and compilation; live Mac permission/banner/login acceptance remains separate.
+Service commands are fixed user launchctl actions with timeouts and a separate Stop confirmation. A paired runtime must match local plist NERV_HOME. SMAppService mainApp owns companion login only; display real requiresApproval/enabled states. Do not register or modify actual OS services/login items in repository tests. CI validates pure command plans, simulated notification outcomes, pinning and compilation; live Mac permission/banner/login acceptance remains separate.
 
 Native background polling uses `/api/status`, never a recurring full doctor/SQLite integrity scan. Keep an authenticated runtime ping distinct from explicit database diagnostics, and test that polling cannot call quick_check indirectly.

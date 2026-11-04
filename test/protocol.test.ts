@@ -14,7 +14,7 @@ test('JSON-RPC validates frames, preserves IDs, errors, notifications and bounde
  assert.throws(()=>authorize('brain','nervous','reminders.add'));assert.throws(()=>authorize('nervous','brain','runtime.ping'));authorize('coordinator','brain','runtime.ping');
 });
 test('surface descriptions reject executable structure and renderable names outside the catalog',()=>{
- const good={version:1,component:'nodo-status-card',props:{title:'Nodo',detail:'<script>alert(1)</script>',status:'ok'}};
+ const good={version:1,component:'nerv-status-card',props:{title:'Nodo',detail:'<script>alert(1)</script>',status:'ok'}};
  assert.equal(validateSurface(good).props.detail,good.props.detail); // text, never interpreted as HTML
  for(const value of [{...good,html:'<img onerror=alert(1)>'},{...good,component:'script'},{...good,props:{...good.props,onclick:'run()'}},{...good,props:{...good.props,detail:'x'.repeat(501)}},{...good,props:{title:'x',detail:'x',status:{toString:()=> 'ok'}}}])assert.throws(()=>validateSurface(value));
 });
