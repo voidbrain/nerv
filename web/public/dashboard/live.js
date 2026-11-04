@@ -84,7 +84,9 @@
       if (!state.selected && !state.deselected && state.sorties[0]) state.selected = state.sorties[0].id;
       renderAll();
       setBanner("<b>LIVE · " + esc(liveBaseName(doctor)) + "</b> <span class='muted'>— " + esc(kajiSummary()) + " · " + latest20.length + " recent sorties · refreshed " + new Date().toTimeString().slice(0, 8) + "</span>", "live");
-    } catch (e) { setBanner("<b>LIVE · CONNECTION LOST</b> <span class='muted'>— " + esc(e.message) + ". Run npm start -- open dashboard again if the service restarted.</span>"); }
+    } catch (e) {
+      if (/Authentication required/.test(e.message)) { token = ""; forgetSession(); signIn(SESSION_ENDED); return; }
+      setBanner("<b>LIVE · CONNECTION LOST</b> <span class='muted'>— " + esc(e.message) + ". Run npm start -- open dashboard again if the service restarted.</span>"); }
     finally { polling = false; }
   }
   // Comms: the selected sortie's own trace (requests, steps, ballots, decisions, replies) plus what you typed here.
@@ -343,7 +345,15 @@
   };
   state.upcoming = []; state.selected = null; renderAll();
   let started = false; const begin = () => { if (started) return; started = true; poll(); setInterval(poll, 3000); };
-  // Not signed in (a reload drops the one-use code): a clear bar with a token field, never the simulation's invented data.
+  // F-039: the login code is swapped for a dashboard session (never the admin token), kept in this tab's sessionStorage so a
+  // reload stays signed in; it ends after 12 h, when the service restarts, with `sessions revoke`, or when the tab closes.
+  // A token pasted by hand is the admin token: it stays in memory only and is never stored.
+  const SESSION_KEY = "nerv.dashboard.session";
+  const SESSION_ENDED = "Your dashboard session ended (after 12 h, a service restart or sessions revoke).";
+  function keepSession(t) { try { sessionStorage.setItem(SESSION_KEY, t); } catch { /* storage blocked: memory only */ } }
+  function keptSession() { try { return sessionStorage.getItem(SESSION_KEY) || ""; } catch { return ""; } }
+  function forgetSession() { try { sessionStorage.removeItem(SESSION_KEY); } catch { /* nothing kept */ } }
+  // Not signed in: a clear bar with a token field, never the simulation's invented data.
   const signIn = reason => {
     setBanner("<b>LIVE · NOT SIGNED IN</b> <span class='muted'>— " + esc(reason) + " Run <code>nerv open dashboard</code>, or paste the access token (kept in this tab's memory only):</span> " +
       "<form id='live-signin' style='display:inline-flex;gap:4px'><label class='sr-only' for='live-token'>Access token</label><input id='live-token' type='password' autocomplete='off' style='width:16em'/><button class='btn sm' type='submit'>Sign in</button></form>");
@@ -355,9 +365,13 @@
   if (code) {
     setBanner("<b>LIVE · SIGNING IN</b> <span class='muted'>— exchanging the one-use login code…</span>");
     fetch("/api/session/exchange", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ code }) })
-      .then(r => r.json().then(d => { if (!r.ok || !d.token) throw new Error(d.error || "Login failed"); token = d.token; begin(); }))
+      .then(r => r.json().then(d => { if (!r.ok || !d.token) throw new Error(d.error || "Login failed"); token = d.token; keepSession(token); begin(); }))
       .catch(e => signIn(e.message + "."));
-  } else signIn("This page was reloaded or opened without a login code.");
+  } else if (keptSession()) {
+    // A reload in the same tab: the dashboard session kept for this tab signs in again, until it ends.
+    token = keptSession(); setBanner("<b>LIVE · SIGNING IN</b> <span class='muted'>— resuming this tab's session…</span>");
+    api("status").then(begin).catch(() => { token = ""; forgetSession(); signIn(SESSION_ENDED); });
+  } else signIn("This page was opened without a login code.");
   // A click on a sortie loads its trace at once instead of waiting for the next poll.
   document.addEventListener("click", e => { const t = e.target.closest("[data-s]"); if (t) setTimeout(poll, 0); });
 })();
