@@ -88,6 +88,10 @@ read -rs KEY && printf '%s\n' "$KEY" > ~/.nerv/anthropic-key && chmod 600 ~/.ner
 
 Paste the key and press Enter (nothing is shown). Then set `"enabled": true` under `cloud` and run `npm start -- reload`.
 
+## Dashboard
+
+`npm start -- open dashboard` opens **http://127.0.0.1:4317/dashboard/** signed in, with this service's real data, refreshed every 3 seconds: your recent sorties, the selected sortie's flow, ballot and trace (requests, MAGI verdicts, cards, decisions, Misato's replies), the cards waiting for you with working **Approve once** and **Reject** buttons, the pending reminders, health from `doctor`, and TOKYO-3 (this machine) on the map. Typing in the dashboard sends the request to Misato. Panels without real data yet (budget, EVA cages, pilot trust, the away summary, other bases) say *planned · not connected yet*. Opened as a file (`web/public/dashboard/index.html`), or without a login code, the page is the simulation with invented data.
+
 ## Telegram (Aoba)
 
 Aoba is a Telegram bot that only you can use: write to Misato from your phone, approve or reject actions with buttons, and receive due reminders. It makes outgoing HTTPS requests only, so it needs no open port, VPN or second machine.

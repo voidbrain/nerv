@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-04T12:03:49.254Z",
+  "reviewed": "2026-11-04T12:21:02.925Z",
   "policy": "7ce9883fd1bff25038076e9e36015a833c38e1378e1df68043f48a64635abad4",
   "inputs": {
     "AGENTS.md": "7521203d1bc1ee4467396d9dd3576e2d7ffba835a4f6e93cb217af06af5ebee2",
     "docs/BACKLOG-RULES.md": "19798ae1614c2d96e60613af75d232c2eda19d25e07470e851ce48304df593c6",
-    "docs/agents/areas.md": "e1cec93adeb56f6fee61545fe67f907e344c257c92ad1dfe392272877bc0f1bc",
+    "docs/agents/areas.md": "7bdc8c6591d9ebcd087e8cc53582e5a8739268b7354693c3a1a6cac732e5d1d8",
     "docs/agents/maintenance.md": "a7e93ce963ffab30b4592ee90bdd0e72d49ea1320f82df74f22c88f70899d899"
   },
   "measurements": {
@@ -65,12 +65,12 @@
       "kind": "rule",
       "disposition": "implemented",
       "target": "docs/agents/areas.md",
-      "evidence": "Action gate area note: Misato's loop state lives in misato.* ledger events, so the coordinator resumes a waiting sortie from the ledger alone after every awaited approval is decided, from any decision source and across restarts; claimResume hands each resume out once (F-033). Checked by test/resume.test.ts and test/telegram.test.ts."
+      "evidence": "Frontend area note: the dashboard lives in web/public/dashboard, live.js is active only with a login code, it must run under the service CSP (no inline script, CDN or remote font; tested), and live panels without data say planned (F-019). Checked by test/dashboard.test.ts, the headless process test and a headless Chrome run."
     },
     {
       "kind": "none",
       "disposition": "no-change",
-      "evidence": "No harness file or copied tool changed; README, INSTALL and ARCHITECTURE describe the resume."
+      "evidence": "docs/STYLE-GUIDE.md (adapted) gains project content only: the dashboard's themes and the planned-panel rule; no harness rule or copied tool changed."
     }
   ]
 }

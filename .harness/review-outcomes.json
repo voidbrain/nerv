@@ -3,11 +3,11 @@
     "kind": "rule",
     "disposition": "implemented",
     "target": "docs/agents/areas.md",
-    "evidence": "Action gate area note: Misato's loop state lives in misato.* ledger events, so the coordinator resumes a waiting sortie from the ledger alone after every awaited approval is decided, from any decision source and across restarts; claimResume hands each resume out once (F-033). Checked by test/resume.test.ts and test/telegram.test.ts."
+    "evidence": "Frontend area note: the dashboard lives in web/public/dashboard, live.js is active only with a login code, it must run under the service CSP (no inline script, CDN or remote font; tested), and live panels without data say planned (F-019). Checked by test/dashboard.test.ts, the headless process test and a headless Chrome run."
   },
   {
     "kind": "none",
     "disposition": "no-change",
-    "evidence": "No harness file or copied tool changed; README, INSTALL and ARCHITECTURE describe the resume."
+    "evidence": "docs/STYLE-GUIDE.md (adapted) gains project content only: the dashboard's themes and the planned-panel rule; no harness rule or copied tool changed."
   }
 ]

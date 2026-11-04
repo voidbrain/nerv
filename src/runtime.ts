@@ -1,6 +1,6 @@
 import {ProcessClient} from './process-client.ts';
 import type {Reminder,InboxPage,ActResult} from './store.ts';
-import type {Approval,Decision} from './ledger.ts';
+import type {ActionDetail,Approval,Decision,SortieSummary} from './ledger.ts';
 import type {SortieEvent} from './events.ts';
 import {MODEL_TIMEOUT_MS,type Ask,type Reply} from './model.ts';
 import type {Effect,Pattern,Stage,Verdict} from './policy.ts';
@@ -26,6 +26,8 @@ export interface StoreApi {
  onResumed?(listener:(reply:ChatReply)=>void):void;
  reloadModels?():Promise<{error?:string;kept?:boolean;models:unknown}>;
  events(sortieId:string,after?:number,limit?:number):SortieEvent[]|Promise<SortieEvent[]>;
+ sorties(limit?:number,before?:string):SortieSummary[]|Promise<SortieSummary[]>;
+ sortie(id:string):(SortieSummary&{detail:ActionDetail[]})|null|Promise<(SortieSummary&{detail:ActionDetail[]})|null>;
  ask?(ask:Ask):Promise<Reply>;
 }
 export class Runtime implements StoreApi {
@@ -43,6 +45,8 @@ export class Runtime implements StoreApi {
  async inbox(){return this.nervous.call('inbox.list');}
  async approvals(limit=5){return await this.nervous.call('approvals.pending',{limit}) as Approval[];}
  async decide(id:string,decision:Decision,source:'api'|'cli'|'telegram'='api'){const result=await this.nervous.call('approvals.decide',{id,decision,source}) as {decision:string;result?:unknown;error?:string};if(this.resumer)void this.sweep();return result;}
+ async sorties(limit=20,before?:string){return await this.nervous.call('sorties.list',{limit,...(before?{before}:{})}) as SortieSummary[];}
+ async sortie(id:string){return await this.nervous.call('sorties.get',{id}) as (SortieSummary&{detail:ActionDetail[]})|null;}
  async events(sortieId:string,after=0,limit=50){return await this.nervous.call('events.page',{sortieId,after,limit}) as SortieEvent[];}
  /** Coordinator side of the gate: open the sortie, ask Casper only for Orange/Blue, then ballot and (on a grant) run in the scheduler process. */
  async act(action:OwnerAction):Promise<ActReply> {

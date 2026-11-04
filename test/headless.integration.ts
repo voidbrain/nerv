@@ -18,6 +18,8 @@ test('one headless process serves UI and reminders, exits cleanly, and recovers 
   const code=/#code=([a-f0-9]{32})/.exec(opened.stdout)![1];assert.ok(!opened.stdout.includes(readToken(home)),'the token never appears in the URL');
   const swapped=await fetch(base+'/api/session/exchange',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
   assert.deepEqual(await swapped.json(),{token:readToken(home)});
+  const dashboard=spawnSync(process.execPath,['src/cli.ts','open','dashboard','--print'],{env,encoding:'utf8'});assert.match(dashboard.stdout,/\/dashboard\/#code=[a-f0-9]{32}/);
+  assert.match(await(await fetch(base+'/dashboard/')).text(),/<script src="live\.js"><\/script>/,'the built dashboard is served with its live adapter');
   const health=await(await fetch(base+'/api/doctor',{headers})).json();const pids=[health.processes.nervous,health.processes.brain] as number[];assert.equal(new Set(pids).size,2);
   const due=new Date(Date.now()+1500).toISOString();assert.equal((await fetch(base+'/api/reminders',{method:'POST',headers,body:JSON.stringify({title:'Promemoria di prova',due})})).status,201);
   await stop(first);child=undefined;for(const pid of pids)assert.throws(()=>process.kill(pid,0));

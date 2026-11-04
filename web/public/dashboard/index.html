@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NERV Agency — Tactical Command</title>
+<!-- Prototype: local simulation only, no API calls. Names follow NERV-ARCHITECTURE.md. -->
+<style>
+:root {
+  --bg:#0b0c10; --panel:#12141a; --panel2:#0e1015; --border:#2a2e3a; --text:#e6e8ee; --muted:#8b93a7;
+  --accent:#3b82f6; --ok:#22c55e; --warn:#f59e0b; --danger:#ef4444; --info:#38bdf8;
+  --green:#22c55e; --orange:#f59e0b; --blue:#3b82f6;
+  --hdr-bg:transparent; --hdr-fg:var(--muted); --brand-bg:var(--accent); --brand-fg:#fff; --title:#e6e8ee; --kanji:#ef4444;
+  --radius:6px; --font:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+  --topo:#2f3646; --land:#151922; --sea:#0b0c10;
+}
+body.theme-light { --bg:#f4f5f7; --panel:#fff; --panel2:#f7f8fa; --border:#d8dde8; --text:#1a1d26; --muted:#5c657a; --accent:#2563eb; --title:#1a1d26; --kanji:#b91c1c; --topo:#c3cad8; --land:#e9ecf2; --sea:#f4f5f7; }
+body.theme-terminal { --bg:#0a0f0a; --panel:#0f1a0f; --panel2:#0b140b; --border:#1f3d1f; --text:#b6f5b6; --muted:#6a9a6a; --accent:#4ade80; --brand-fg:#000; --title:#b6f5b6; --kanji:#4ade80; --topo:#1f3d1f; --land:#0f1a0f; --sea:#0a0f0a; }
+body.theme-eva-basic, body.theme-eva-full {
+  --bg:#050508; --panel:#0d0d12; --panel2:#09090d; --border:rgba(255,102,0,.4); --text:#ffaa66; --muted:#a67c52;
+  --accent:#ff6600; --ok:#22c55e; --warn:#ffcc00; --danger:#ff0033; --info:#00aaff;
+  --green:#22c55e; --orange:#ff8800; --blue:#2a7fff;
+  --hdr-bg:#ff6600; --hdr-fg:#000; --brand-bg:#ff6600; --brand-fg:#000; --title:#ffaa66; --kanji:#ff0033;
+  --radius:0; --font:"Share Tech Mono",ui-monospace,monospace; --topo:rgba(255,102,0,.42); --land:#0c0a0a; --sea:#050508;
+}
+body.theme-eva-basic { --bg:#08080c; --panel:#100e12; --radius:2px; }
+* { box-sizing:border-box; }
+html,body { margin:0; }
+body { background:var(--bg); color:var(--text); font:12px/1.4 var(--font); padding:10px; }
+body.theme-eva-full.crt-on::after { content:""; position:fixed; inset:0; pointer-events:none; z-index:50; background:linear-gradient(rgba(0,0,0,0) 50%,rgba(0,0,0,.22) 50%); background-size:100% 4px; }
+button,input,select { font:inherit; }
+.wrap { max-width:1720px; margin:0 auto; display:flex; flex-direction:column; gap:8px; }
+.panel { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); min-width:0; }
+body.theme-eva-full .panel { box-shadow:inset 0 0 14px rgba(255,102,0,.07); }
+.hdr { font-weight:700; letter-spacing:.12em; text-transform:uppercase; font-size:10px; color:var(--hdr-fg); background:var(--hdr-bg); border-bottom:1px solid var(--border); padding:5px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.hdr .sub { font-weight:400; letter-spacing:.04em; text-transform:none; background:#000; color:var(--orange); padding:1px 6px; border-radius:0; }
+.hdr .sub:empty { display:none; }
+.pad { padding:8px; }
+.row { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.col { display:flex; flex-direction:column; gap:8px; min-width:0; }
+.muted { color:var(--muted); } .ok { color:var(--ok); } .warn { color:var(--warn); } .danger { color:var(--danger); } .info { color:var(--info); }
+.small { font-size:10px; } .tiny { font-size:9px; } .b { font-weight:700; }
+.btn { border:1px solid var(--border); background:transparent; color:var(--text); padding:4px 8px; border-radius:var(--radius); font-size:11px; cursor:pointer; letter-spacing:.04em; }
+.btn:hover,.btn:focus-visible { border-color:var(--accent); color:var(--accent); outline:none; }
+.btn.primary { background:var(--accent); border-color:var(--accent); color:var(--brand-fg); }
+.btn.danger { border-color:var(--danger); color:var(--danger); } .btn.danger:hover { background:var(--danger); color:#fff; }
+.btn.sm { padding:2px 6px; font-size:10px; }
+input,select { background:var(--bg); border:1px solid var(--border); color:var(--text); border-radius:var(--radius); padding:4px 8px; font-size:11px; }
+input:focus,select:focus { outline:1px solid var(--accent); }
+.badge { font-size:9px; padding:1px 6px; border-radius:999px; font-weight:700; letter-spacing:.05em; white-space:nowrap; }
+body.theme-eva-basic .badge, body.theme-eva-full .badge { border-radius:1px; }
+.b-green { background:color-mix(in srgb,var(--green) 18%,transparent); color:var(--green); }
+.b-orange { background:color-mix(in srgb,var(--orange) 18%,transparent); color:var(--orange); }
+.b-blue { background:color-mix(in srgb,var(--blue) 22%,transparent); color:var(--blue); }
+.b-ok { background:color-mix(in srgb,var(--ok) 18%,transparent); color:var(--ok); }
+.b-warn { background:color-mix(in srgb,var(--warn) 18%,transparent); color:var(--warn); }
+.b-danger { background:color-mix(in srgb,var(--danger) 18%,transparent); color:var(--danger); }
+.b-muted { background:color-mix(in srgb,var(--muted) 18%,transparent); color:var(--muted); }
+.b-info { background:color-mix(in srgb,var(--info) 18%,transparent); color:var(--info); }
+.meter { height:6px; background:color-mix(in srgb,var(--bg) 60%,#000); border:1px solid var(--border); position:relative; overflow:hidden; }
+.meter > i { display:block; height:100%; background:var(--ok); }
+.meter.warn > i { background:var(--warn); } .meter.danger > i { background:var(--danger); }
+.meter > .mark { position:absolute; top:-2px; bottom:-2px; width:1px; background:var(--text); opacity:.7; }
+.list > * + * { margin-top:6px; }
+.card { border:1px dashed var(--border); padding:6px 8px; border-radius:var(--radius); background:var(--panel2); }
+.card.sel { border-style:solid; border-color:var(--accent); }
+.kv { display:grid; grid-template-columns:auto 1fr; gap:1px 10px; font-size:10px; }
+.kv > :nth-child(odd) { color:var(--muted); }
+code,.code { font-family:var(--font); background:color-mix(in srgb,var(--bg) 70%,#000); border:1px solid var(--border); padding:4px 6px; display:block; white-space:pre-wrap; word-break:break-word; font-size:10px; border-radius:var(--radius); }
+.banner { border:1px solid var(--border); padding:6px 10px; font-size:11px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; }
+.banner.shadow { border-color:var(--warn); background:color-mix(in srgb,var(--warn) 9%,transparent); }
+.banner.dummy { border-color:var(--danger); background:color-mix(in srgb,var(--danger) 12%,transparent); }
+.hidden { display:none !important; }
+.jp-only { display:none; } body.theme-eva-basic .jp-only, body.theme-eva-full .jp-only { display:inline; }
+.eva-full-only { display:none; } body.theme-eva-full .eva-full-only { display:block; }
+body.theme-eva-full .not-eva-full { display:none !important; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.35} }
+body.theme-eva-full .blink { animation:blink 1.1s infinite ease-in-out; }
+
+/* ---------- header (after dashboard.html) ---------- */
+header.top { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px; padding:10px 12px; border-left:6px solid var(--brand-bg); }
+.brand { display:flex; align-items:center; gap:14px; }
+.brand-block { background:var(--brand-bg); color:var(--brand-fg); font-weight:900; padding:6px 14px; font-size:20px; letter-spacing:.16em; display:flex; align-items:center; gap:10px; }
+.brand-block .ver { font-size:10px; background:var(--brand-fg); color:var(--brand-bg); padding:1px 5px; letter-spacing:.1em; }
+.brand h1 { margin:0; font-size:17px; letter-spacing:.14em; color:var(--title); font-weight:700; }
+.brand h1 .k { color:var(--kanji); }
+.brand .tag { font-size:10px; color:var(--muted); letter-spacing:.12em; margin-top:2px; }
+.top-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.clock { text-align:right; font-size:11px; line-height:1.2; }
+.clock b { font-size:15px; color:var(--title); letter-spacing:.08em; }
+
+/* ---------- five questions ---------- */
+.questions { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; }
+.q { padding:8px 10px; cursor:pointer; text-align:left; border:1px solid var(--border); background:var(--panel); color:var(--text); border-radius:var(--radius); }
+.q:hover,.q:focus-visible { border-color:var(--accent); outline:none; }
+.q .qt,.q .qv,.q .qd { display:block; }
+.q .qt { font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+.q .qv { font-size:18px; font-weight:900; margin-top:2px; letter-spacing:.04em; }
+.q .qd { font-size:10px; color:var(--muted); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.q.alert { border-color:var(--danger); } .q.alert .qv { color:var(--danger); }
+.q.attn { border-color:var(--warn); } .q.attn .qv { color:var(--warn); }
+
+/* ---------- layout ---------- */
+main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) minmax(0,3.6fr); gap:8px; align-items:start; }
+@media (max-width:1200px) { main.grid { grid-template-columns:minmax(0,1fr) minmax(0,1fr); } main.grid > .center { grid-column:1 / -1; order:-1; } .questions { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media (max-width:720px) { main.grid { grid-template-columns:minmax(0,1fr); } .questions { grid-template-columns:repeat(2,minmax(0,1fr)); } body { padding:6px; } .brand h1 { font-size:13px; } .brand-block { font-size:15px; } }
+
+/* ---------- approval card ---------- */
+.apcard { border:1px solid var(--border); border-left:4px solid var(--warn); padding:8px; border-radius:var(--radius); background:var(--panel2); }
+.apcard.blue { border-left-color:var(--blue); } .apcard.orange { border-left-color:var(--orange); }
+.apcard .what { font-size:12px; font-weight:700; color:var(--title); }
+.apcard .why { font-size:10px; margin-top:4px; }
+.apcard .acts { display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; }
+.verdicts { display:flex; gap:4px; flex-wrap:wrap; margin-top:4px; }
+.vchip { font-size:9px; border:1px solid var(--border); padding:1px 5px; }
+.vchip.approve { border-color:var(--ok); color:var(--ok); } .vchip.reject { border-color:var(--danger); color:var(--danger); }
+.vchip.abstain,.vchip.none { color:var(--muted); } .vchip.pending { border-color:var(--warn); color:var(--warn); }
+.vchip.shadow { border-style:dashed; opacity:.75; }
+
+/* ---------- sorties ---------- */
+.sortie { cursor:pointer; }
+.sortie:focus-visible { outline:1px solid var(--accent); }
+.filters { display:flex; gap:4px; flex-wrap:wrap; }
+.filters .btn.on { border-color:var(--accent); color:var(--accent); }
+
+/* ---------- flow: shared ---------- */
+.flow-head { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:8px; border-bottom:1px solid var(--border); }
+.flow-head input { flex:1; min-width:160px; }
+.flow-note { padding:4px 8px 8px; font-size:10px; color:var(--muted); min-height:18px; }
+
+/* timeline (non EVA-full themes) */
+.timeline { display:flex; flex-wrap:wrap; gap:4px; align-items:stretch; padding:8px; }
+.tstep { border:1px solid var(--border); padding:4px 6px; font-size:10px; text-align:center; color:var(--muted); min-width:0; border-radius:var(--radius); display:flex; flex-direction:column; justify-content:center; }
+.tstep .n { font-size:8px; opacity:.7; }
+.tstep.on { border-color:var(--accent); color:var(--text); background:color-mix(in srgb,var(--accent) 13%,transparent); font-weight:700; }
+.tstep.done { border-color:var(--ok); color:var(--ok); }
+.tstep.skip { opacity:.4; border-style:dashed; }
+.tstep.wait { border-color:var(--warn); color:var(--warn); }
+.tarrow { color:var(--muted); align-self:center; font-size:10px; }
+.tmagi { display:flex; gap:3px; margin-top:3px; justify-content:center; }
+.tseat { font-size:8px; border:1px solid var(--border); padding:0 4px; }
+.tseat.approve { border-color:var(--ok); color:var(--ok); } .tseat.reject { border-color:var(--danger); color:var(--danger); }
+.tseat.pending { border-color:var(--warn); color:var(--warn); } .tseat.none,.tseat.abstain { opacity:.5; }
+.loopline { padding:0 8px 6px; font-size:10px; color:var(--muted); }
+
+/* sephirot (EVA full) */
+.sephirot { position:relative; padding:10px 8px 14px; }
+.sephirot svg.edges { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; }
+.sephirot svg.edges path { fill:none; stroke:rgba(255,102,0,.25); stroke-width:1.4; }
+.sephirot svg.edges path.loop { stroke-dasharray:3 4; }
+.sephirot svg.edges path.live { stroke:var(--accent); stroke-width:2; stroke-dasharray:6 6; animation:flow 0.9s linear infinite; }
+.sephirot svg.edges path.wait { stroke:var(--warn); stroke-dasharray:4 4; animation:flow 1.6s linear infinite; }
+.sephirot svg.edges path.reject { stroke:var(--danger); stroke-width:2; stroke-dasharray:6 6; animation:flow .7s linear infinite reverse; }
+@keyframes flow { to { stroke-dashoffset:-24; } }
+.sgrid { position:relative; display:grid; grid-template-columns:1fr 1.25fr 1fr; grid-auto-rows:auto; gap:16px 18px; align-items:center; }
+.snode { position:relative; z-index:1; border:1px solid var(--border); background:var(--panel2); padding:5px 8px; text-align:center; transition:.15s; }
+.snode .sn { font-size:8px; color:var(--muted); letter-spacing:.12em; }
+.snode .st { font-size:11px; font-weight:900; letter-spacing:.1em; }
+.snode .sd { font-size:9px; color:var(--muted); }
+.snode .sk { font-size:9px; color:var(--kanji); letter-spacing:.2em; }
+.snode.on { border-color:var(--accent); background:color-mix(in srgb,var(--accent) 14%,var(--panel2)); box-shadow:0 0 14px rgba(255,102,0,.35); }
+.snode.on .st { color:#fff; }
+.snode.done { border-color:var(--ok); } .snode.done .st { color:var(--ok); }
+.snode.wait { border-color:var(--warn); box-shadow:0 0 12px rgba(255,204,0,.3); } .snode.wait .st { color:var(--warn); }
+.snode.skip { opacity:.38; border-style:dashed; }
+.snode.round { border-radius:999px; padding:6px 10px; }
+.s-detect { grid-column:2; grid-row:1; } .s-intake { grid-column:1; grid-row:2; } .s-route { grid-column:3; grid-row:2; }
+.s-consult { grid-column:1; grid-row:3; } .s-plan { grid-column:3; grid-row:3; }
+.s-magi { grid-column:1 / -1; grid-row:4; } .s-sync { grid-column:1; grid-row:5; } .s-apt { grid-column:3; grid-row:5; }
+.s-plug { grid-column:2; grid-row:6; } .s-eva { grid-column:2; grid-row:7; } .s-debrief { grid-column:2; grid-row:8; }
+.s-rail { grid-column:1; grid-row:6 / span 3; text-align:left; align-self:stretch; }
+
+/* MAGI (big, canon layout: BALTHASAR-2 top, CASPER-3 left, MELCHIOR-1 right) */
+.magi { position:relative; z-index:1; margin:0 auto; width:100%; max-width:560px; padding:2px 0; }
+.magi .mtitle { text-align:center; font-size:10px; letter-spacing:.3em; color:var(--muted); margin-bottom:4px; }
+.magi .mtitle b { color:var(--accent); letter-spacing:.3em; }
+.magi-grid { display:grid; grid-template-columns:1fr 1fr; grid-template-rows:auto auto; gap:8px 10px; }
+.mseat { position:relative; height:104px; }
+.mseat.top { grid-column:1 / -1; width:56%; margin:0 auto; height:96px; }
+.mseat svg { position:absolute; inset:0; width:100%; height:100%; }
+.mseat svg polygon { stroke-width:2; vector-effect:non-scaling-stroke; fill:#0a0a0e; stroke:#555; transition:.2s; }
+.mseat .mb { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:8px 18px; gap:1px; }
+.mseat .mn { font-size:11px; font-weight:900; letter-spacing:.14em; }
+.mseat .mv { font-size:16px; font-weight:900; letter-spacing:.12em; }
+.mseat .mr { font-size:9px; color:var(--muted); letter-spacing:.06em; }
+.mseat .mm { font-size:9px; color:var(--text); opacity:.85; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+.mseat[data-v="approve"] polygon { stroke:#22c55e; fill:#03140b; } .mseat[data-v="approve"] .mv,.mseat[data-v="approve"] .mn { color:#22c55e; }
+.mseat[data-v="reject"] polygon { stroke:#ff0033; fill:#1a0008; } .mseat[data-v="reject"] .mv,.mseat[data-v="reject"] .mn { color:#ff0033; }
+.mseat[data-v="pending"] polygon { stroke:#ffcc00; fill:#171300; } .mseat[data-v="pending"] .mv,.mseat[data-v="pending"] .mn { color:#ffcc00; }
+.mseat[data-v="none"] .mv,.mseat[data-v="abstain"] .mv { color:var(--muted); }
+.magi .mres { display:flex; justify-content:space-between; gap:8px; margin-top:6px; font-size:10px; border:1px solid var(--border); padding:3px 8px; }
+.magi .extras { display:flex; gap:4px; flex-wrap:wrap; justify-content:center; margin-top:4px; }
+
+/* plan */
+.plan li { list-style:none; display:grid; grid-template-columns:18px 1fr auto; gap:6px; align-items:start; padding:4px 0; border-bottom:1px dashed color-mix(in srgb,var(--border) 60%,transparent); }
+.plan ol { margin:0; padding:0; }
+.plan .ix { color:var(--muted); font-size:10px; }
+
+/* map */
+.mapwrap { position:relative; }
+#topo { width:100%; height:auto; display:block; background:var(--sea); }
+.maplegend { display:flex; gap:10px; flex-wrap:wrap; font-size:9px; color:var(--muted); padding:4px 8px; }
+.sq { display:inline-block; width:7px; height:7px; margin-right:3px; vertical-align:middle; }
+
+/* EVA cages */
+.cages { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
+.cage { border:1px solid var(--border); padding:5px; background:var(--panel2); }
+.cage .ch { display:flex; justify-content:space-between; font-size:10px; font-weight:900; letter-spacing:.08em; }
+.cage canvas { width:100%; height:30px; display:block; background:#000; border:1px solid var(--border); margin-top:3px; }
+.cage .cd { font-size:9px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* log */
+details > summary { cursor:pointer; list-style:none; }
+details > summary::-webkit-details-marker { display:none; }
+.av { width:20px; height:20px; image-rendering:pixelated; border:1px solid var(--border); background:#000; flex-shrink:0; display:none; }
+body.theme-eva-basic .av, body.theme-eva-full .av { display:inline-block; }
+.snode .avs { display:flex; gap:3px; justify-content:center; margin-bottom:2px; }
+.snode .av { width:22px; height:22px; }
+.eva-img { width:100%; height:42px; object-fit:contain; image-rendering:pixelated; background:#000; border:1px solid var(--border); display:none; margin-top:3px; }
+body.theme-eva-basic .eva-img, body.theme-eva-full .eva-img { display:block; }
+.msg { display:flex; gap:6px; align-items:flex-start; padding:2px 0; }
+.msg .who { margin-right:4px; letter-spacing:.06em; }
+.msg.you { background:color-mix(in srgb,var(--accent) 7%,transparent); }
+.chat { display:flex; gap:6px; align-items:center; padding:8px; border-top:1px solid var(--border); }
+.chat input { flex:1; min-width:0; }
+.log { background:color-mix(in srgb,var(--bg) 80%,#000); border-top:1px solid var(--border); padding:8px; height:300px; overflow-y:auto; font-size:10px; line-height:1.5; }
+.log .ts { color:var(--muted); margin-right:6px; }
+.timeline-up { position:relative; padding-left:12px; }
+.timeline-up::before { content:""; position:absolute; left:4px; top:4px; bottom:4px; width:1px; background:var(--border); }
+.up { position:relative; }
+.up::before { content:""; position:absolute; left:-11px; top:5px; width:7px; height:7px; background:var(--accent); }
+.up.hyuga::before { background:var(--info); }
+::-webkit-scrollbar { width:5px; height:5px; } ::-webkit-scrollbar-thumb { background:var(--border); }
+.sr { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+</style>
+</head>
+<body class="theme-eva-full">
+<div class="wrap">
+
+  <div class="banner shadow panel" role="note">
+    <div><b>SHADOW UI · SIMULATION</b> <span class="muted">— invented data, no API calls. Patterns, MAGI verdicts and Sync Ratios are computed here with the same rules as <code style="display:inline;padding:0 4px">src/policy.ts</code>.</span></div>
+    <div class="row"><button class="btn sm" id="btn-dummy">Simulate model outage</button><button class="btn sm" id="btn-reset">Reset demo</button></div>
+  </div>
+  <div id="dummy-banner" class="banner dummy panel hidden" role="alert">
+    <div><b data-l="dummy">DUMMY PLUG ACTIVE</b> <span class="muted">— S² and Umbilical unreachable. Reminders and deterministic pilots keep running; model-needing sorties wait.</span></div>
+    <button class="btn sm" id="btn-undummy">Restore routes</button>
+  </div>
+
+  <header class="panel top">
+    <div class="brand">
+      <div class="brand-block"><span><span class="jp-only">特務機関</span>NERV</span><span class="ver">AGENCY</span></div>
+      <div>
+        <h1><span data-l="brandTitle">TACTICAL COMMAND</span> <span class="k jp-only">// 中央作戦司令部</span></h1>
+        <div class="tag" data-l="brandTag">SEELE SCROLLS ENFORCED // CENTRAL DOGMA LEDGER · LILITH MEMORY</div>
+      </div>
+    </div>
+    <div class="top-right">
+      <label class="small muted" for="theme">THEME</label>
+      <select id="theme">
+        <option value="dark">Dark</option><option value="light">Light</option><option value="terminal">Terminal</option>
+        <option value="eva-basic">EVA Basic</option><option value="eva-full" selected>EVA Full</option>
+      </select>
+      <button class="btn sm eva-full-only" id="btn-crt" aria-pressed="false">CRT</button>
+      <button class="btn danger" id="btn-spear" title="Revoke every grant, stand down approvals, cancel sorties"><span data-l="spear">SPEAR OF LONGINUS</span></button>
+      <div class="clock"><b id="clock">--:--:--</b><div class="muted" id="clock-date"></div></div>
+    </div>
+  </header>
+
+  <section class="questions" aria-label="At a glance">
+    <button class="q" id="q-needs" data-go="p-needs"><span class="qt" data-l="qNeeds">Needs you</span><span class="qv" id="qv-needs">0</span><span class="qd" id="qd-needs"></span></button>
+    <button class="q" id="q-away" data-go="p-away"><span class="qt" data-l="qAway">While you were away</span><span class="qv" id="qv-away">0</span><span class="qd" id="qd-away"></span></button>
+    <button class="q" id="q-next" data-go="p-next"><span class="qt" data-l="qNext">Coming up</span><span class="qv" id="qv-next">—</span><span class="qd" id="qd-next"></span></button>
+    <button class="q" id="q-health" data-go="p-health"><span class="qt" data-l="qHealth">Broken or stuck</span><span class="qv" id="qv-health">OK</span><span class="qd" id="qd-health"></span></button>
+    <button class="q" id="q-budget" data-go="p-budget"><span class="qt" data-l="qBudget">Budget today</span><span class="qv" id="qv-budget">$0</span><span class="qd" id="qd-budget"></span></button>
+  </section>
+
+  <main class="grid">
+    <!-- ============ LEFT ============ -->
+    <div class="col">
+      <section class="panel" id="p-needs" aria-live="polite">
+        <div class="hdr"><span data-l="needs">Misato's apartment · needs you</span><span class="badge b-danger" id="needs-count">0</span></div>
+        <div class="pad list" id="needs-list"></div>
+      </section>
+
+      <section class="panel" id="p-sorties">
+        <div class="hdr"><span data-l="sorties">Sorties</span><span class="sub" id="sorties-sub"></span></div>
+        <div class="pad">
+          <div class="filters" role="group" aria-label="Filter sorties">
+            <button class="btn sm on" data-f="all">All</button><button class="btn sm" data-f="active">Active</button>
+            <button class="btn sm" data-f="waiting">Waiting</button><button class="btn sm" data-f="done">Done</button><button class="btn sm" data-f="problem">Problems</button>
+          </div>
+          <div class="list" id="sortie-list" style="margin-top:6px"></div>
+        </div>
+      </section>
+
+      <section class="panel" id="p-next">
+        <div class="hdr"><span data-l="next">Coming up · next 24 h</span><span class="sub">reminders · Hyuga triggers</span></div>
+        <div class="pad"><div class="timeline-up list" id="next-list"></div></div>
+      </section>
+    </div>
+
+    <!-- ============ CENTER ============ -->
+    <div class="col center">
+      <section class="panel" id="p-flow">
+        <div class="hdr"><span data-l="flow">Sephirot · sortie flow</span><span class="sub" id="flow-sub">no sortie selected</span></div>
+        <form class="flow-head" id="new-form">
+          <label class="sr" for="new-text">New sortie</label>
+          <input id="new-text" placeholder="Tell Misato what to do — the system decides the Pattern" autocomplete="off" />
+          <select id="new-preset" aria-label="Example requests">
+            <option value="">Examples…</option>
+            <option value="brief">Summarise unread mail</option>
+            <option value="reply">Reply to Luca that I'm late</option>
+            <option value="branches">Delete merged branches in repo</option>
+            <option value="charger">Charge FPV battery at 18:00</option>
+            <option value="note">Save a note from this web page</option>
+          </select>
+          <button class="btn primary" type="submit" data-l="launch">Launch</button>
+        </form>
+
+        <!-- EVA full: Sephirot tree with the MAGI at its heart -->
+        <div class="sephirot eva-full-only" id="sephirot">
+          <svg class="edges" id="edges" aria-hidden="true"></svg>
+          <div class="sgrid">
+            <div class="snode round s-detect" data-n="detect"><div class="avs"><img class="av" data-av="aoba" alt="Aoba"/><img class="av" data-av="hyuga" alt="Hyuga"/></div><div class="sn">1 · KETER</div><div class="st">DETECTION</div><div class="sd">Aoba comms · Hyuga watch</div></div>
+            <div class="snode s-intake" data-n="intake"><div class="avs"><img class="av" data-av="naoko" alt="Naoko"/></div><div class="sn">2 · BINAH</div><div class="st">NAOKO DESK</div><div class="sd" id="sd-intake">intake · provenance</div></div>
+            <div class="snode s-route" data-n="route"><div class="avs"><img class="av" data-av="gendo" alt="Gendo"/></div><div class="sn">3 · CHOKHMAH</div><div class="st">GENDO</div><div class="sd" id="sd-route">route · battery</div></div>
+            <div class="snode s-consult" data-n="consult"><div class="sn">GEVURAH · CONSULTANTS</div><div class="st">ADVISE</div><div class="sd">no vote · advice into the LCL</div></div>
+            <div class="snode s-plan" data-n="plan"><div class="avs"><img class="av" data-av="misato" alt="Misato"/></div><div class="sn">4 · CHESED</div><div class="st">MISATO PLAN</div><div class="sd" id="sd-plan">next action</div></div>
+            <div class="s-magi">
+              <div class="magi" id="magi-big">
+                <div class="mtitle"><img class="av" data-av="magi" alt="" style="vertical-align:middle"/> 5 · TIFERET · <b>MAGI SYSTEM</b> <span class="jp-only">· 提訴</span> · <span id="mt-action">no action</span></div>
+                <div class="magi-grid">
+                  <div class="mseat top" data-seat="balthasar" data-v="none">
+                    <svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="0,0 100,0 100,62 82,100 18,100 0,62"/></svg>
+                    <div class="mb"><div class="mn">BALTHASAR · 2</div><div class="mv">—</div><div class="mr">母 mother · protection</div><div class="mm" data-m>deterministic</div></div>
+                  </div>
+                  <div class="mseat" data-seat="casper" data-v="none">
+                    <svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="0,0 80,0 100,26 100,100 0,100"/></svg>
+                    <div class="mb"><div class="mn">CASPER · 3</div><div class="mv">—</div><div class="mr">女 woman · intent</div><div class="mm" data-m>model seat</div></div>
+                  </div>
+                  <div class="mseat" data-seat="melchior" data-v="none">
+                    <svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="20,0 100,0 100,100 0,100 0,26"/></svg>
+                    <div class="mb"><div class="mn">MELCHIOR · 1</div><div class="mv">—</div><div class="mr">科学者 scientist · rules</div><div class="mm" data-m>deterministic</div></div>
+                  </div>
+                </div>
+                <div class="extras" id="magi-extras"></div>
+                <div class="mres"><span><span class="jp-only">決議 · </span><b id="mres-out">—</b></span><span id="mres-pattern">—</span><span id="mres-reason" class="muted">—</span></div>
+              </div>
+            </div>
+            <div class="snode s-apt" data-n="apt"><div class="avs"><img class="av" data-av="penpen" alt="Pen Pen"/><img class="av" data-av="you" alt="You"/></div><div class="sn">7 · NETZACH</div><div class="st">MISATO'S APT</div><div class="sd" id="sd-apt">you · Pen Pen card</div></div>
+            <div class="snode s-sync" data-n="sync"><div class="sn">6 · HOD</div><div class="st">SYNC RATIO</div><div class="sd" id="sd-sync">≥ 80 % · not Blue</div></div>
+            <div class="snode s-plug" data-n="plug"><div class="avs"><img class="av" data-av="ritsuko" alt="Ritsuko"/></div><div class="sn">8 · YESOD</div><div class="st">ENTRY PLUG</div><div class="sd" id="sd-plug">A.T. Field · LCL · pilot</div></div>
+            <div class="snode s-eva" data-n="eva"><div class="avs"><img class="av" id="av-eva-node" data-av="eva-01" alt="EVA unit"/></div><div class="sn">9 · MALKUTH</div><div class="st">EVA CAGE</div><div class="sd" id="sd-eva">sandbox · field enforced</div></div>
+            <div class="snode round s-debrief" data-n="debrief"><div class="sn">10</div><div class="st">DEBRIEF</div><div class="sd">Central Dogma · digest</div></div>
+            <div class="snode s-rail small"><div class="sn">SIDE RAILS</div><div class="sd">SPEAR · revoke &amp; inverse<br/>MAYA · trace every step<br/>THIRD IMPACT · auto Spear</div><div class="sn" style="margin-top:6px">LOOPS (dashed)</div><div class="sd">MAGI reject → plan (max 3)<br/>apartment edit → plan<br/>EVA result → plan<br/>consultants ↔ plan</div></div>
+          </div>
+        </div>
+
+        <!-- other themes: compact decision timeline, MAGI included -->
+        <div class="not-eva-full">
+          <div class="timeline" id="timeline"></div>
+          <div class="loopline" id="loopline">Loops: review reject → plan (max 3) · approval edit → plan · sandbox result → plan</div>
+        </div>
+        <div class="flow-note" id="flow-note">Select a sortie, or launch one.</div>
+      </section>
+
+      <section class="panel" id="p-detail">
+        <div class="hdr"><span data-l="detail">Misato plan · current action</span><span class="sub" id="detail-sub"></span></div>
+        <div class="pad" id="detail" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px"></div>
+      </section>
+
+      <section class="panel" id="p-comms">
+        <div class="hdr"><span data-l="log">Comms · Misato &amp; Maya trace</span>
+          <span class="filters" role="group" aria-label="Filter messages"><button class="btn sm on" data-lf="all" style="color:inherit;border-color:currentColor">All</button><button class="btn sm" data-lf="sortie" style="color:inherit;border-color:currentColor">This sortie</button><button class="btn sm" data-lf="chat" style="color:inherit;border-color:currentColor">Chat only</button></span></div>
+        <div class="log" id="log" role="log" aria-live="polite"></div>
+        <form class="chat" id="chat-form">
+          <img class="av" data-av="you" alt="" />
+          <label class="sr" for="chat-in">Message Misato</label>
+          <input id="chat-in" autocomplete="off" placeholder="Ask Misato: status · why · approve AP-… · reject AP-… · spear · or a new request" />
+          <button class="btn primary" type="submit">Send</button>
+        </form>
+      </section>
+    </div>
+
+    <!-- ============ RIGHT ============ -->
+    <div class="col">
+      <section class="panel" id="p-away">
+        <div class="hdr"><span data-l="away">Debrief · while you were away</span><span class="sub" id="away-since"></span></div>
+        <div class="pad" id="away"></div>
+      </section>
+
+      <section class="panel" id="p-health">
+        <div class="hdr"><span data-l="health">Health · broken or stuck</span><button class="btn sm" id="btn-doctor" style="color:inherit;border-color:currentColor">Run doctor</button></div>
+        <div class="pad" id="health"></div>
+      </section>
+
+      <section class="panel" id="p-bases">
+        <div class="hdr"><span data-l="bases">NERV bases · Kaji line</span><span class="sub" id="bases-sub"></span></div>
+        <div class="mapwrap"><canvas id="topo" width="540" height="250" aria-label="Map of NERV bases and links"></canvas></div>
+        <div class="maplegend"><span><i class="sq" style="background:var(--ok)"></i>online</span><span><i class="sq" style="background:var(--warn)"></i>standby</span><span><i class="sq" style="background:#666"></i>offline (static)</span><span>- - - Kaji line</span><span><i class="sq" style="background:var(--accent)"></i>plug</span><span><i class="sq" style="background:var(--ok)"></i>result</span><span><i class="sq" style="background:var(--info)"></i>node sync</span></div>
+        <div class="pad list" id="bases"></div>
+      </section>
+
+      <section class="panel">
+        <div class="hdr"><span data-l="cages">EVA cages · heartbeat</span><span class="sub">executors</span></div>
+        <div class="pad cages" id="cages"></div>
+      </section>
+
+      <section class="panel" id="p-budget">
+        <div class="hdr"><span data-l="budget">Battery · budget</span><span class="sub">Scrolls: $1.00 / day</span></div>
+        <div class="pad" id="budget"></div>
+      </section>
+
+      <section class="panel">
+        <div class="hdr"><span data-l="melons">Kaji's watermelons · pilot trust</span><span class="sub">prototype → test → production</span></div>
+        <div class="pad list" id="melons"></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script src="dashboard.js"></script>
+<script src="live.js"></script>
+</body>
+</html>

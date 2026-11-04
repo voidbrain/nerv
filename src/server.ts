@@ -36,7 +36,9 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
         const requested=resolve(root,'.'+decoded);
         if(!requested.startsWith(root+sep)&&requested!==root){reply(404,{error:'Not found.'});return;}
         const requestedStat=await stat(requested).catch(()=>null);
-        const candidate=requestedStat?.isFile()?requested:extname(path)?null:resolve(root,'index.html');
+        // A folder with its own index.html (the dashboard) is served as that page; any other route is the Angular app.
+        const folderIndex=requestedStat?.isDirectory()?await stat(resolve(requested,'index.html')).then(st=>st.isFile()?resolve(requested,'index.html'):null,()=>null):null;
+        const candidate=requestedStat?.isFile()?requested:folderIndex ?? (extname(path)?null:resolve(root,'index.html'));
         if(!candidate){reply(404,{error:'Not found.'});return;}
         const file=await realpath(candidate);
         if(!file.startsWith(root+sep)){reply(404,{error:'Not found.'});return;}
@@ -57,7 +59,7 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
     const admin=supplied.length===expected.length&&timingSafeEqual(supplied,expected);
     const client=!admin&&options.native?.auth.authenticate((req.headers.authorization?.startsWith('Bearer ')?req.headers.authorization.slice(7):''));
     if(!admin&&!client){reply(401,{error:'Authentication required.'});return;}
-    if(!admin&&!(req.method==='GET'&&(['/api/status','/api/doctor','/api/reminders','/api/reminders/pending','/api/inbox','/api/inbox/page','/api/approvals'].includes(path)||/^\/api\/sorties\/[a-f0-9-]+\/events$/.test(path)))){reply(403,{error:'Read-only client.'});return;}
+    if(!admin&&!(req.method==='GET'&&(['/api/status','/api/doctor','/api/reminders','/api/reminders/pending','/api/inbox','/api/inbox/page','/api/approvals','/api/sorties'].includes(path)||/^\/api\/sorties\/[a-f0-9-]+(\/events)?$/.test(path)))){reply(403,{error:'Read-only client.'});return;}
     try {
       if(options.native&&admin&&req.method==='POST'&&path==='/api/pairing/tickets'){const value=await body(req);if(Object.keys(value).length!==1||typeof value.label!=='string')throw new Error('Invalid client label.');reply(201,{version:1,...options.native.auth.issue(value.label),runtimeId:options.native.auth.runtimeId,port:options.native.port,webPort:options.native.webPort,fingerprint:options.native.fingerprint});}
       else if(options.native&&admin&&req.method==='GET'&&path==='/api/clients')reply(200,options.native.auth.clients());
@@ -65,6 +67,8 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
       else if(req.method==='GET'&&path==='/api/inbox/page'){if([...url.searchParams.keys()].some(k=>!['after','afterId','limit'].includes(k)))throw new Error('Unknown inbox query.');reply(200,await store.inboxPage(Number(url.searchParams.get('after') ?? 0),Number(url.searchParams.get('limit') ?? 5),url.searchParams.get('afterId') ?? undefined));}
       else if(req.method==='GET'&&path==='/api/approvals'){if([...url.searchParams.keys()].some(k=>k!=='limit'))throw new Error('Unknown approvals query.');reply(200,await store.approvals(Number(url.searchParams.get('limit') ?? 5)));}
       else if(req.method==='POST'&&/^\/api\/approvals\/[a-f0-9-]+$/.test(path)){const b=await body(req);if(Object.keys(b).length!==1||!['approve','reject','edit'].includes(b.decision as string))throw new Error('Decision must be approve, reject or edit.');reply(200,await store.decide(path.split('/').at(-1)!,b.decision as 'approve'|'reject'|'edit','api'));}
+      else if(req.method==='GET'&&path==='/api/sorties'){if([...url.searchParams.keys()].some(k=>!['limit','before'].includes(k)))throw new Error('Unknown sorties query.');reply(200,await store.sorties(Number(url.searchParams.get('limit') ?? 20),url.searchParams.get('before') ?? undefined));}
+      else if(req.method==='GET'&&/^\/api\/sorties\/[a-f0-9-]+$/.test(path)){const found=await store.sortie(path.split('/')[3]!);if(found)reply(200,found);else reply(404,{error:'No sortie with that ID.'});}
       else if(req.method==='GET'&&/^\/api\/sorties\/[a-f0-9-]+\/events$/.test(path)){if([...url.searchParams.keys()].some(k=>!['after','limit'].includes(k)))throw new Error('Unknown events query.');reply(200,await store.events(path.split('/')[3]!,Number(url.searchParams.get('after') ?? 0),Number(url.searchParams.get('limit') ?? 50)));}
       else if(req.method==='POST'&&path==='/api/ask'){
         // Admin only (read-only clients stop above). Privacy is explicit: local-only unless the caller says any.
