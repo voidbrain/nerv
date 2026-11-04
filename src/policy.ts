@@ -4,7 +4,8 @@ export type Pattern='green'|'orange'|'blue';
 export type Stage='prototype'|'test'|'production';
 export type Trust='trusted'|'tainted';
 export type Executor='eva-00'|'eva-01'|'eva-02'|'eva-03';
-export interface Tool {name:string;effect:Effect;inverse?:string}
+/** `owner`: every call reaches the owner (Pattern Blue) whatever the Scrolls say, e.g. a new fact in memory (F-022). */
+export interface Tool {name:string;effect:Effect;inverse?:string;owner?:true}
 /** The Scrolls: owner rules. Unknown keys are rejected so a typo cannot silently relax a rule. */
 export interface Policy {deny:string[];blue:string[];syncThreshold:number;maxRejects:number;budget:number}
 export interface Action {tool:string;args:Record<string,unknown>;trust:Trust;stage:Stage;cost:number;proactive?:boolean}
@@ -22,8 +23,8 @@ export function validatePolicy(value:unknown):Policy {
  if(!names(merged.deny)||!names(merged.blue)||!Number.isInteger(merged.syncThreshold)||merged.syncThreshold<0||merged.syncThreshold>100||!Number.isInteger(merged.maxRejects)||merged.maxRejects<0||merged.maxRejects>10||typeof merged.budget!=='number'||!Number.isFinite(merged.budget)||merged.budget<0)throw new Error('Invalid policy values.');
  return merged;
 }
-export function patternOf(effect:Effect,trust:Trust,tool:string,policy:Policy):Pattern {
- if(effect==='irreversible'||effect==='physical'||policy.blue.includes(tool)||(trust==='tainted'&&!local(effect)))return 'blue';
+export function patternOf(effect:Effect,trust:Trust,tool:string,policy:Policy,ownerOnly=false):Pattern {
+ if(ownerOnly||effect==='irreversible'||effect==='physical'||policy.blue.includes(tool)||(trust==='tainted'&&!local(effect)))return 'blue';
  return local(effect)?'green':'orange';
 }
 /** EVA-00 shadow, EVA-01 bounded, EVA-02 production, EVA-03 quarantine for tainted local work. */
@@ -45,7 +46,7 @@ export function balthasar(action:Action,effect:Effect,executor:Executor,spent:nu
 /** Extra seats are veto-only: their approvals never count, shadow seats are logged and ignored. */
 /** Unregistered tools (no Tool) are treated as irreversible, so Pattern Blue. */
 export function ballot(action:Action,tool:Tool|undefined,policy:Policy,spent:number,casper?:Verdict,extras:Verdict[]=[]):Ballot {
- const effect=tool?.effect ?? 'irreversible';const pattern=patternOf(effect,action.trust,action.tool,policy);const executor=executorOf(action,effect);
+ const effect=tool?.effect ?? 'irreversible';const pattern=patternOf(effect,action.trust,action.tool,policy,tool?.owner===true);const executor=executorOf(action,effect);
  const verdicts=[melchior(action,effect,policy),balthasar(action,effect,executor,spent,policy)];
  const needsCasper=pattern!=='green';
  if(needsCasper&&casper)verdicts.push({...casper,seat:'casper'});

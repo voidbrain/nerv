@@ -4,7 +4,7 @@ import type {ActionDetail,Approval,Decision,SortieSummary} from './ledger.ts';
 import type {SortieEvent} from './events.ts';
 import {MODEL_TIMEOUT_MS,type Ask,type Reply} from './model.ts';
 import type {Effect,Pattern,Stage,Verdict} from './policy.ts';
-import {MAX_STEPS,type Plan,type Step,type Turn} from './misato.ts';
+import {MAX_STEPS,type Plan,type Recalled,type Step,type Turn} from './misato.ts';
 import {argsHash} from './ledger.ts';
 export interface ChatReply {sortieId:string;reply?:string;error?:string;steps:Step[];waiting:{approvalId:string;tool:string;reason:string}[]}
 /** An action the owner asks for directly: the request is what Casper checks the action against. */
@@ -86,6 +86,8 @@ export class Runtime implements StoreApi {
   */
  private async loop(sortieId:string,message:string,steps:Step[],context:Turn[]=[]):Promise<ChatReply> {
   const waiting:ChatReply['waiting']=[];const pending=new Set<string>();
+  // LCL fill: Lilith's facts that match this request and its recent conversation.
+  const memory=await this.nervous.call('memory.recall',{text:[message,...context.map(t=>t.request)].join(' ').slice(0,8000)}).catch(()=>[]) as Recalled[];
   const finish=async(status:'done'|'failed',reply?:string,error?:string):Promise<ChatReply>=>{
    if(waiting.length&&reply){
     // Not finished: the reply is recorded, the sortie waits for the owner's decisions and then resumes.
@@ -94,7 +96,7 @@ export class Runtime implements StoreApi {
    return {sortieId,...(reply?{reply}:{}),...(error?{error}:{}),steps,waiting};
   };
   for(let turn=0;turn<MAX_STEPS;turn++){
-   const out=await this.brain.call('misato.step',{request:message,history:steps.slice(-12),...(context.length?{context}:{})},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as {plan?:Plan;invalid?:boolean;error?:string};
+   const out=await this.brain.call('misato.step',{request:message,history:steps.slice(-12),...(context.length?{context}:{}),...(memory.length?{memory:memory.slice(0,5)}:{})},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as {plan?:Plan;invalid?:boolean;error?:string};
    if(out.error)return finish('failed',undefined,out.error);
    if(!out.plan){await this.record(sortieId,steps,{outcome:'invalid',error:'Reply was not one JSON action or reply.'});continue;}
    if('reply' in out.plan)return finish('done',out.plan.reply);

@@ -122,7 +122,7 @@ test('an existing version 1 database gains the ledger without losing reminders',
  try{
   const old=new DatabaseSync(path);old.exec(`CREATE TABLE reminders(id TEXT PRIMARY KEY, title TEXT NOT NULL, due TEXT NOT NULL, created TEXT NOT NULL, delivered TEXT, cancelled TEXT);CREATE TABLE deliveries(id TEXT PRIMARY KEY, reminder_id TEXT NOT NULL UNIQUE REFERENCES reminders(id), message TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT);INSERT INTO reminders VALUES('r','Insurance','2030-01-01T01:00:00.000Z','2029-12-31T00:00:00.000Z',NULL,NULL);PRAGMA user_version=1;`);old.close();
   const store=new Store(path);
-  try{assert.equal(store.list().length,1);assert.equal((store.db.prepare('PRAGMA user_version').get() as {user_version:number}).user_version,3);new Ledger(store.db).openSortie('cli','x','trusted',now);}finally{store.close();}
+  try{assert.equal(store.list().length,1);assert.equal((store.db.prepare('PRAGMA user_version').get() as {user_version:number}).user_version,4);new Ledger(store.db).openSortie('cli','x','trusted',now);}finally{store.close();}
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
 test('the scheduler process stands down expired approvals on its own ticks',async()=>{
@@ -177,7 +177,7 @@ test('every event records its schema version; a schema 2 database upgrades and i
   const old=new DatabaseSync(path);old.exec(`CREATE TABLE events(sequence INTEGER PRIMARY KEY AUTOINCREMENT, sortie_id TEXT NOT NULL, action_id TEXT, kind TEXT NOT NULL, payload TEXT NOT NULL, created TEXT NOT NULL);CREATE TRIGGER events_no_update BEFORE UPDATE ON events BEGIN SELECT RAISE(ABORT,'events are append-only'); END;INSERT INTO events(sortie_id,action_id,kind,payload,created) VALUES('s',NULL,'sortie.opened','{"source":"cli","title":"Old","trust":"trusted"}','2029-12-31T00:00:00.000Z');INSERT INTO events(sortie_id,action_id,kind,payload,created) VALUES('s','a','grant.used','{"grantId":"secret-grant"}','2029-12-31T00:00:01.000Z');PRAGMA user_version=2;`);old.close();
   const store=new Store(path);
   try{
-   assert.equal((store.db.prepare('PRAGMA user_version').get() as {user_version:number}).user_version,3);
+   assert.equal((store.db.prepare('PRAGMA user_version').get() as {user_version:number}).user_version,4);
    assert.deepEqual(store.ledger.events('s').map(e=>[e.v,e.kind]),[[1,'sortie.opened'],[1,'grant.used']]);
    assert.deepEqual(store.ledger.events('s')[1]!.payload,{},'version 1 grant IDs are removed on read');assert.equal(EVENT_SCHEMA_VERSION,2);
    const sortie=store.ledger.openSortie('cli','New','trusted',now);assert.equal(store.ledger.events(sortie)[0]!.v,EVENT_SCHEMA_VERSION);

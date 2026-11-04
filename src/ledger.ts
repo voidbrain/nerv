@@ -72,7 +72,7 @@ export class Ledger {
  preview(sortieId:string,tool:string):{pattern:Pattern;effect:Ballot['effect']} {
   const sortie=this.db.prepare('SELECT trust,status FROM sorties WHERE id=?').get(sortieId) as {trust:Trust;status:string}|undefined;
   if(!sortie||sortie.status!=='open')throw new Error('Sortie is not open.');
-  const effect=this.tools.get(tool)?.effect ?? 'irreversible';return {pattern:patternOf(effect,sortie.trust,tool,this.policy),effect};
+  const t=this.tools.get(tool);const effect=t?.effect ?? 'irreversible';return {pattern:patternOf(effect,sortie.trust,tool,this.policy,t?.owner===true),effect};
  }
  /** The reviewed action behind a grant, and whether the grant is still unused. Grant IDs stay inside this process. */
  grantAction(grantId:string):{sortieId:string;actionId:string;tool:string;args:Record<string,unknown>;used:boolean}|undefined {
