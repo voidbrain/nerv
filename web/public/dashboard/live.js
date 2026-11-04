@@ -13,8 +13,8 @@
   const short = id => "S-" + id.slice(0, 4).toUpperCase();
   const banner = document.querySelector(".banner.shadow");
   const setBanner = (html, kind) => { banner.classList.toggle("shadow", kind !== "live"); banner.querySelector("div").innerHTML = html; };
-  // Simulation-only controls have no live meaning (the Spear has no live endpoint yet).
-  document.head.insertAdjacentHTML("beforeend", "<style>[data-spear],[data-toggle],[data-promote],[data-demote],[data-d=edit]{display:none}</style>");
+  // Simulation-only controls have no live meaning.
+  document.head.insertAdjacentHTML("beforeend", "<style>[data-toggle],[data-promote],[data-demote],[data-d=edit]{display:none}</style>");
   ["btn-dummy", "btn-reset", "btn-spear"].forEach(id => { const el = document.getElementById(id); if (el) el.hidden = true; });
   const preset = document.getElementById("new-preset"); if (preset) preset.hidden = true;
   document.getElementById("new-text").placeholder = "Tell Misato what to do — it plans, the gate decides each action's Pattern";
@@ -44,7 +44,8 @@
   async function poll() {
     if (polling || !token) return; polling = true;
     try {
-      const [list, cards, doctor, pending] = await Promise.all([api("sorties?limit=20"), api("approvals"), api("doctor"), api("reminders/pending")]);
+      const [list, cards, doctor, pending, inbox] = await Promise.all([api("sorties?limit=20"), api("approvals"), api("doctor"), api("reminders/pending"), api("inbox")]);
+      state.delivered = inbox.map(d => Date.parse(d.created));
       const selected = state.sorties.find(x => x.id === state.selected);
       const want = list.filter(s => (selected && s.id === selected.realId) || s.waiting || !detailCache[s.id] || s.status === "open").slice(0, 8);
       await Promise.all(want.map(async s => { detailCache[s.id] = await api("sorties/" + s.id); }));
@@ -106,7 +107,8 @@
       ["Misato", roles.misato && !/not set/.test(roles.misato) ? "ok" : "warn", roles.misato || "—"], ["Casper", roles.casper && /^local \(/.test(roles.casper) ? "ok" : "warn", roles.casper || "—"],
       ["Central Dogma (SQLite)", d.database && d.database.quick_check === "ok" ? "ok" : "danger", "schema " + ((d.schema || {}).user_version ?? "?") + " · " + ((d.database || {}).quick_check || "?")],
       ["Pending reminders", "ok", String(((d.pending || {}).count) ?? 0)]];
-    document.getElementById("health").innerHTML = rows.map(c => "<div class='row small'><span>" + c[0] + "</span><span class='" + c[1] + "'>" + (c[1] === "ok" ? "✓ " : "✗ ") + esc(c[2]) + "</span></div>").join("");
+    document.getElementById("health").innerHTML = rows.map(c => "<div class='row small'><span>" + c[0] + "</span><span class='" + c[1] + "'>" + (c[1] === "ok" ? "✓ " : "✗ ") + esc(c[2]) + "</span></div>").join("") +
+      "<div class='row small' style='margin-top:6px'><span class='muted'>Edited config.json? Apply it without a restart.</span><button class='btn sm' id='btn-reload'>Reload models</button></div>";
   };
   window.renderBases = function () {
     document.getElementById("bases-sub").textContent = "1/1 online";
@@ -117,11 +119,37 @@
   window.renderBudget = function () { document.getElementById("budget").innerHTML = PLANNED; };
   window.renderMelons = function () { document.getElementById("melons").innerHTML = PLANNED; };
   window.renderCages = function () { document.getElementById("cages").innerHTML = "<div class='muted small'>Executors run inside this service; sandboxed cages are planned · not connected yet.</div>"; };
-  window.renderAway = function () { document.getElementById("away").innerHTML = PLANNED; document.getElementById("away-since").textContent = ""; };
+  // While you were away: from real sorties and deliveries since your last visit, remembered in this browser only.
+  const VISIT = "nerv.dashboard.lastVisit";
+  try { const v = Number(localStorage.getItem(VISIT)); state.lastVisit = Number.isFinite(v) && v > 0 ? v : Date.now() - 12 * HOUR; } catch { state.lastVisit = Date.now() - 12 * HOUR; }
+  window.liveSeen = function () { try { localStorage.setItem(VISIT, String(state.lastVisit)); } catch { /* private window: forget on reload */ } };
+  window.renderAway = function () {
+    const since = state.lastVisit; const ended = state.sorties.filter(s => s.ended && s.ended > since);
+    const count = st => ended.filter(s => s.status === st).length; const delivered = (state.delivered || []).filter(t => t > since).length;
+    document.getElementById("away-since").textContent = "since " + hhmm(since);
+    document.getElementById("away").innerHTML = "<div class='small' style='margin-bottom:6px'>Since your last visit: <b class='ok'>" + count("done") + "</b> done, <b class='danger'>" + count("failed") + "</b> failed, <b class='warn'>" + count("stood-down") + "</b> stopped, and Pen Pen delivered <b>" + delivered + "</b> reminders.</div>" +
+      ended.slice(0, 8).map(s => "<div class='row small'><span><span class='" + (s.status === "done" ? "ok" : s.status === "failed" ? "danger" : "warn") + "'>■</span> " + hhmm(s.ended) + " · " + esc(s.title) + "</span><a href='#' data-s='" + s.id + "' class='muted tiny'>open</a></div>" + (s.outcome ? "<div class='tiny muted' style='margin:0 0 4px 12px'>" + esc(s.outcome) + "</div>" : "")).join("") +
+      "<button class='btn sm' id='btn-seen' style='margin-top:4px'>Mark as read</button>";
+  };
+  window.liveReload = async function () {
+    try { const r = await api("models/reload", { method:"POST" }); const roles = (r.models || {}).roles || {}; log("Models reloaded · Misato " + (roles.misato || "—") + " · Casper " + (roles.casper || "—"), "ok", null, "maya"); }
+    catch (e) { log("Reload refused: " + e.message + " (the previous settings stay in use)", "danger", null, "maya"); }
+    poll();
+  };
+  window.liveSpear = async function (shortId) {
+    const s = state.sorties.find(x => x.id === shortId); if (!s) return;
+    if (!confirm("Spear " + s.id + "? Unused grants are revoked and waiting cards stood down. Actions that already ran are not undone.")) return;
+    try { const r = await api("sorties/" + s.realId + "/spear", { method:"POST", body:JSON.stringify({ reason:"Spear from the dashboard" }) });
+      log("SPEAR " + s.id + ": " + r.revoked + " grants revoked, " + r.stoodDown + " cards stood down; already happened: " + (r.happened.map(h => h.tool + (h.inverse ? " (undo with " + h.inverse + ")" : " (no undo)")).join(", ") || "nothing"), "danger", null, "gendo"); }
+    catch (e) { log("Spear failed: " + e.message, "danger", null, "gendo"); }
+    poll();
+  };
   window.renderQuestions = function () {
     const n = state.approvals.length; document.getElementById("qv-needs").textContent = n;
     document.getElementById("qd-needs").textContent = n ? state.approvals.map(a => a.action.tool).join(" · ") : "nothing waits for you"; document.getElementById("q-needs").classList.toggle("alert", n > 0);
-    document.getElementById("qv-away").textContent = "—"; document.getElementById("qd-away").textContent = "planned · not connected yet";
+    { const ended = state.sorties.filter(s => s.ended && s.ended > state.lastVisit); const c = st => ended.filter(s => s.status === st).length; const delivered = (state.delivered || []).filter(t => t > state.lastVisit).length;
+      document.getElementById("qv-away").textContent = c("done") + " done"; document.getElementById("qd-away").textContent = c("failed") + " failed · " + c("stood-down") + " stopped · " + delivered + " reminders";
+      document.getElementById("q-away").classList.toggle("attn", c("failed") + c("stood-down") > 0); }
     const next = state.upcoming.filter(u => u.at > Date.now()).sort((a, b) => a.at - b.at)[0];
     document.getElementById("qv-next").textContent = next ? hhmm(next.at) : "—"; document.getElementById("qd-next").textContent = next ? next.title : "nothing scheduled";
     const p = (state.doctor || {}).processes || {}; const bad = !p.nervous || p.brainAlive === false;

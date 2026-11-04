@@ -46,3 +46,20 @@ test('the shipped dashboard loads no remote script or font and has no inline scr
  assert.deepEqual([...html.matchAll(/<script src="([^"]+)"/g)].map(m=>m[1]),['dashboard.js','live.js']);
  assert.doesNotMatch(readFileSync('web/public/dashboard/dashboard.js','utf8'),/\bd3\./);
 });
+test('the dashboard Spear (admin, through the scheduler process) stands down a waiting card, closes the sortie and stops a resume',async()=>{
+ const {Runtime}=await import('../src/runtime.ts');
+ const dir=mkdtempSync(join(tmpdir(),'nerv-spear-'));const path=join(dir,'nerv.sqlite');
+ writeFileSync(join(dir,'scrolls.json'),JSON.stringify({blue:['reminders.cancel']}),{mode:0o600});
+ const runtime=new Runtime(path,undefined,dir);const token='f'.repeat(32);const server=makeServer(runtime,token);
+ try{
+  await runtime.ready();await new Promise<void>(done=>server.listen(0,'127.0.0.1',done));const base=`http://127.0.0.1:${(server.address() as {port:number}).port}`;
+  const act=await runtime.act({request:'Cancel it',tool:'reminders.cancel',args:{id:'x'}});assert.equal(act.outcome,'approval');
+  const spear=(id:string,headers:Record<string,string>={authorization:'Bearer '+token})=>fetch(base+`/api/sorties/${id}/spear`,{method:'POST',headers:{...headers,'content-type':'application/json'},body:JSON.stringify({reason:'stop'})});
+  assert.equal((await spear(act.sortieId,{})).status,401);
+  const r=await (await spear(act.sortieId)).json() as {revoked:number;stoodDown:number;happened:unknown[]};
+  assert.deepEqual(r,{revoked:0,stoodDown:1,happened:[]});
+  assert.equal((await runtime.approvals()).length,0);assert.equal((await runtime.sortie(act.sortieId))!.status,'revoked');
+  assert.equal((await runtime.decide(act.approvalId!,'approve','api')).decision,'revoked','a stood-down card can no longer be approved');
+  assert.equal((await spear('00000000-0000-0000-0000-000000000000')).status,404);
+ }finally{await new Promise<void>(done=>server.close(()=>done()));await runtime.close();rmSync(dir,{recursive:true,force:true});}
+});
