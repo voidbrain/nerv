@@ -17,8 +17,6 @@
   // Simulation-only controls have no live meaning.
   document.head.insertAdjacentHTML("beforeend", "<style>[data-toggle],[data-promote],[data-demote],[data-d=edit]{display:none}</style>");
   ["btn-dummy", "btn-reset", "btn-spear"].forEach(id => { const el = document.getElementById(id); if (el) el.hidden = true; });
-  const preset = document.getElementById("new-preset"); if (preset) preset.hidden = true;
-  document.getElementById("new-text").placeholder = "Tell Misato what to do — it plans, the gate decides each action's Pattern";
   BASES[0] = Object.assign(BASES[0], { name:"TOKYO-3", role:"HQ · this machine", status:"online", cpu:null, ram:null, gpu:null, rtt:0, models:"—" });
 
   function mapStatus(s) { return s.status === "open" ? (s.waiting ? "waiting" : "active") : s.status === "done" ? "done" : s.status === "failed" ? "failed" : "stood-down"; }
@@ -180,6 +178,20 @@
     if (e.target.id !== "lilith-form") return; e.preventDefault(); const input = document.getElementById("lilith-new"); const text = input.value.trim();
     if (text) { input.value = ""; memoryAction("memory", { method:"POST", body:JSON.stringify({ text }) }, "Remembered: " + text); }
   });
+  // The sortie detail, live: who started it and its status (pilots are skills, Misato is the planner), the plan when there
+  // is one, and the Spear only while the sortie is open; no battery line while every route is local and free.
+  const baseDetail = window.renderDetail;
+  window.renderDetail = function (s) {
+    const box = document.getElementById("detail"); const sub = document.getElementById("detail-sub");
+    if (!s) { box.innerHTML = "<div class='muted'>No sortie selected.</div>"; sub.textContent = ""; return; }
+    const who = s.pilot === "misato" ? "Misato, from a chat" : "you, as a direct action";
+    const status = { active:"running", waiting:"waiting for you", done:"done", failed:"failed", "stood-down":"stopped" }[s.status] || s.status;
+    if (!s.actions.length) { box.innerHTML = "<div class='muted small'>No actions: Misato answered without using a tool.</div>" + (s.outcome ? "<div class='small' style='margin-top:4px'>Reply: " + esc(s.outcome) + "</div>" : ""); sub.textContent = "started by " + who + " · " + status; return; }
+    if (s.actions.some(a => !a.ballot || !a.ballot.verdicts)) { box.innerHTML = "<div class='muted small'>Loading this sortie…</div>"; sub.textContent = "started by " + who + " · " + status; return; }
+    baseDetail(s); sub.textContent = "started by " + who + " · " + status;
+    box.querySelectorAll(".plan .row .tiny.muted").forEach(el => { if (/battery/.test(el.textContent)) el.remove(); });
+    if (s.status !== "active" && s.status !== "waiting") box.querySelectorAll("[data-spear]").forEach(el => el.remove());
+  };
   window.renderBudget = function () { document.getElementById("budget").innerHTML = PLANNED; };
   window.renderMelons = function () { document.getElementById("melons").innerHTML = PLANNED; };
   // While you were away: from real sorties and deliveries since your last visit, remembered in this browser only.

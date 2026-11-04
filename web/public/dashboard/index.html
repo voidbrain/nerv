@@ -124,8 +124,6 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .filters .btn.on { border-color:var(--accent); color:var(--accent); }
 
 /* ---------- flow: shared ---------- */
-.flow-head { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:8px; border-bottom:1px solid var(--border); }
-.flow-head input { flex:1; min-width:160px; }
 .flow-note { padding:4px 8px 8px; font-size:10px; color:var(--muted); min-height:18px; }
 
 /* timeline (non EVA-full themes) */
@@ -171,7 +169,6 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .s-consult { grid-column:1; grid-row:3; } .s-plan { grid-column:3; grid-row:3; }
 .s-magi { grid-column:1 / -1; grid-row:4; } .s-sync { grid-column:1; grid-row:5; } .s-apt { grid-column:3; grid-row:5; }
 .s-plug { grid-column:2; grid-row:6; } .s-eva { grid-column:2; grid-row:7; } .s-debrief { grid-column:2; grid-row:8; }
-.s-rail { grid-column:1; grid-row:6 / span 3; text-align:left; align-self:stretch; }
 
 /* MAGI (big, canon layout: BALTHASAR-2 top, CASPER-3 left, MELCHIOR-1 right) */
 .magi { position:relative; z-index:1; margin:0 auto; width:100%; max-width:560px; padding:2px 0; }
@@ -311,19 +308,6 @@ body.theme-eva-basic .eva-img, body.theme-eva-full .eva-img { display:block; }
     <div class="col center">
       <section class="panel" id="p-flow">
         <div class="hdr"><span data-l="flow">Sephirot · sortie flow</span><span class="sub" id="flow-sub">no sortie selected</span></div>
-        <form class="flow-head" id="new-form">
-          <label class="sr" for="new-text">New sortie</label>
-          <input id="new-text" placeholder="Tell Misato what to do — the system decides the Pattern" autocomplete="off" />
-          <select id="new-preset" aria-label="Example requests">
-            <option value="">Examples…</option>
-            <option value="brief">Summarise unread mail</option>
-            <option value="reply">Reply to Luca that I'm late</option>
-            <option value="branches">Delete merged branches in repo</option>
-            <option value="charger">Charge FPV battery at 18:00</option>
-            <option value="note">Save a note from this web page</option>
-          </select>
-          <button class="btn primary" type="submit" data-l="launch">Launch</button>
-        </form>
 
         <!-- EVA full: Sephirot tree with the MAGI at its heart -->
         <div class="sephirot eva-full-only" id="sephirot">
@@ -360,7 +344,6 @@ body.theme-eva-basic .eva-img, body.theme-eva-full .eva-img { display:block; }
             <div class="snode s-plug" data-n="plug"><div class="avs"><img class="av" data-av="ritsuko" alt="Ritsuko"/></div><div class="sn">8 · YESOD</div><div class="st">ENTRY PLUG</div><div class="sd" id="sd-plug">A.T. Field · LCL · pilot</div></div>
             <div class="snode s-eva" data-n="eva"><div class="avs"><img class="av" id="av-eva-node" data-av="eva-01" alt="EVA unit"/></div><div class="sn">9 · MALKUTH</div><div class="st">EVA CAGE</div><div class="sd" id="sd-eva">sandbox · field enforced</div></div>
             <div class="snode round s-debrief" data-n="debrief"><div class="sn">10 · DA'AT</div><div class="st">DEBRIEF</div><div class="sd">Central Dogma · what is now known</div></div>
-            <div class="snode s-rail small"><div class="sn">SIDE RAILS</div><div class="sd">SPEAR · revoke &amp; inverse<br/>MAYA · trace every step<br/>THIRD IMPACT · auto Spear</div><div class="sn" style="margin-top:6px">LOOPS (dashed)</div><div class="sd">MAGI reject → plan (max 3)<br/>apartment edit → plan<br/>EVA result → plan<br/>consultants ↔ plan</div></div>
           </div>
         </div>
 
