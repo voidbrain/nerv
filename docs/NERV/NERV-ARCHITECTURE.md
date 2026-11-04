@@ -34,6 +34,15 @@ Supersedes the glossary in `review-2026-11-04.md` §3 and every flow in `insight
                             MAGI names fixed on every base (seats are replicas: "Casper@Tabgha")
    remote use ............. dashboard and channels reach other bases through the main base;
                             each base's own gate decides its own actions
+   Marduk registry ........ replicated on every base, never held by the main base alone: entries
+                            (enrol, revoke, main-base change) are records signed by the Key, so
+                            any copy verifies itself; bases exchange them over the Kaji line;
+                            revoke wins over enrol, newer signed record over older; last-seen is
+                            merged by taking the newest time per base
+   main base down ......... the others keep the list and each other's status, keep their own work,
+                            show the main base offline; promoting another is an owner-signed
+                            decision (fencing), never an election: the list is shared, authority
+                            stays single
 
  NEO TOKYO-3 (main base) — one SORTIE (job), action by action
  ┌─ 1 · DETECTION ────────────────────────────────────────────────────────────────────────┐
