@@ -1,0 +1,74 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtempSync,rmSync,writeFileSync} from 'node:fs';
+import {createServer} from 'node:http';
+import {tmpdir} from 'node:os';import {join} from 'node:path';
+import {casperAsk,parseCasper} from '../src/casper.ts';
+import {Store,OWNER_SOURCE} from '../src/store.ts';
+import {Runtime} from '../src/runtime.ts';
+import {makeServer} from '../src/server.ts';
+import {defaultPolicy} from '../src/policy.ts';
+test('Casper is asked on the local route with the request and the action only, and its reply is read strictly',()=>{
+ const ask=casperAsk({request:'Remind me to call Ada',tool:'reminders.add',args:{title:'Call Ada',due:'2030-01-01T09:00:00Z'},effect:'write-local'});
+ assert.equal(ask.privacy,'local-only');assert.equal(ask.route,'local');
+ assert.deepEqual(JSON.parse(ask.prompt),{request:'Remind me to call Ada',action:{tool:'reminders.add',effect:'write-local',args:{title:'Call Ada',due:'2030-01-01T09:00:00Z'}}});
+ assert.deepEqual(parseCasper('Sure. {"vote":"approve","reason":" Matches. ","confidence":0.9} done'),{seat:'casper',vote:'approve',reason:'Matches.',confidence:0.9});
+ for(const bad of ['no json','{"vote":"yes","reason":"x","confidence":0.5}','{"vote":"approve","reason":"","confidence":0.5}','{"vote":"approve","reason":"x","confidence":2}','{"vote":"approve","reason":"x"}','{"vote":"approve",'])assert.equal(parseCasper(bad),undefined,bad);
+ assert.equal(parseCasper(`{"vote":"reject","reason":"${'r'.repeat(900)}","confidence":0.1}`)!.reason.length,500);
+});
+test('a Green owner action runs at once through the grant; a failing executor is recorded and the sortie closes failed',()=>{
+ const store=new Store(':memory:');
+ try{
+  const sortie=store.ledger.openSortie(OWNER_SOURCE,'Remind me','trusted');
+  const done=store.runAction(sortie,{tool:'reminders.add',args:{title:'Call Ada',due:'2030-01-01T09:00:00Z'},stage:'production'});
+  assert.equal(done.outcome,'grant');assert.equal(done.pattern,'green');assert.deepEqual(done.result,{id:(done.result as {id:string}).id,title:'Call Ada',due:'2030-01-01T09:00:00.000Z'});
+  assert.equal(store.list().length,1);assert.ok(!JSON.stringify(done).includes('grantId'));
+  assert.deepEqual(store.events(sortie).map(e=>e.kind),['sortie.opened','ballot','grant.issued','grant.used','action.done','sortie.done']);
+  const bad=store.ledger.openSortie(OWNER_SOURCE,'Remind me badly','trusted');
+  const failed=store.runAction(bad,{tool:'reminders.add',args:{title:'x',due:'yesterday'},stage:'production'});
+  assert.match(failed.error!,/ISO date/);assert.deepEqual(store.events(bad).slice(-2).map(e=>e.kind),['action.failed','sortie.failed']);
+  const extra=store.ledger.openSortie(OWNER_SOURCE,'List','trusted');assert.match(store.runAction(extra,{tool:'reminders.list',args:{all:true},stage:'production'}).error!,/Arguments allowed: none/);
+ }finally{store.close();}
+});
+/** A loopback OpenAI-compatible model that answers as Casper and records what it was asked. */
+async function fakeModel(answer:()=>string) {
+ const asked:{model:string;messages:{role:string;content:string}[]}[]=[];
+ const server=createServer((req,res)=>{let body='';req.on('data',c=>body+=c).on('end',()=>{asked.push(JSON.parse(body));res.setHeader('content-type','application/json');res.end(JSON.stringify({choices:[{message:{content:answer()},finish_reason:'stop'}]}));});});
+ await new Promise<void>(done=>server.listen(0,'127.0.0.1',done));const port=(server.address() as {port:number}).port;
+ return {asked,url:`http://127.0.0.1:${port}/v1`,close:()=>new Promise<void>(done=>server.close(()=>done()))};
+}
+test('through every process: REST act, Casper on the local model, the owner approves and the executor runs once',async()=>{
+ let answer='{"vote":"approve","reason":"Adds the reminder the owner asked for.","confidence":0.93}';
+ const model=await fakeModel(()=>answer);const home=mkdtempSync(join(tmpdir(),'nerv-gate-'));
+ writeFileSync(join(home,'config.json'),JSON.stringify({models:{local:{baseUrl:model.url,model:'casper-test'}}}));
+ // The owner's Scrolls make reminders.add Blue, so it needs Casper and then the owner.
+ writeFileSync(join(home,'scrolls.json'),JSON.stringify({...defaultPolicy,blue:['reminders.add']}),{mode:0o600});
+ const runtime=new Runtime(join(home,'nerv.sqlite'),undefined,home);const token='b'.repeat(32);const server=makeServer(runtime,token);
+ try{
+  await runtime.ready();await new Promise<void>(done=>server.listen(0,'127.0.0.1',done));
+  const base=`http://127.0.0.1:${(server.address() as {port:number}).port}`;const headers={authorization:'Bearer '+token,'content-type':'application/json'};
+  const act=(body:object)=>fetch(base+'/api/actions',{method:'POST',headers,body:JSON.stringify(body)});
+  const request='Remind me to renew the car insurance';const args={title:'Renew car insurance',due:'2030-01-15T09:00:00+01:00'};
+  const reply=await (await act({request,tool:'reminders.add',args})).json() as {sortieId:string;outcome:string;pattern:string;approvalId:string;reason:string};
+  assert.equal(reply.pattern,'blue');assert.equal(reply.outcome,'approval');assert.ok(reply.approvalId);assert.ok(!JSON.stringify(reply).includes('grantId'));
+  assert.equal(model.asked.length,1);assert.equal(model.asked[0]!.model,'casper-test');
+  assert.deepEqual(JSON.parse(model.asked[0]!.messages.at(-1)!.content),{request,action:{tool:'reminders.add',effect:'write-local',args}});
+  const ballot=(await runtime.events(reply.sortieId)).find(e=>e.kind==='ballot');assert.ok(ballot&&ballot.kind==='ballot');
+  assert.deepEqual(ballot.payload.verdicts.find(v=>v.seat==='casper'),{seat:'casper',vote:'approve',reason:'Adds the reminder the owner asked for.',confidence:0.93});
+  assert.equal((await runtime.list()).length,0,'nothing runs before the owner decides');
+  const decided=await (await fetch(base+'/api/approvals/'+reply.approvalId,{method:'POST',headers,body:JSON.stringify({decision:'approve'})})).json() as {decision:string;result:{title:string}};
+  assert.equal(decided.decision,'approve');assert.equal(decided.result.title,'Renew car insurance');
+  const again=await (await fetch(base+'/api/approvals/'+reply.approvalId,{method:'POST',headers,body:JSON.stringify({decision:'approve'})})).json();
+  assert.deepEqual(again,{decision:'approve'});assert.equal((await runtime.list()).length,1,'a repeated decision never runs the tool twice');
+  assert.deepEqual((await runtime.events(reply.sortieId)).map(e=>e.kind),['sortie.opened','ballot','approval.requested','approval.approve','grant.issued','grant.used','action.done','sortie.done']);
+  // An unreadable Casper reply is no verdict: the card says why, and the owner decides.
+  answer='I think it is fine';
+  const unsure=await (await act({request:'Remind me again',tool:'reminders.add',args})).json() as {outcome:string;casperError:string;reason:string};
+  assert.equal(unsure.outcome,'approval');assert.match(unsure.casperError,/not a readable verdict/);assert.match(unsure.reason,/Casper \(intent\) verdict unavailable/);
+  // Green work never calls the model.
+  const asked=model.asked.length;const list=await (await act({request:'What is due?',tool:'reminders.list',args:{}})).json() as {outcome:string;result:unknown[]};
+  assert.equal(list.outcome,'grant');assert.equal(list.result.length,1);assert.equal(model.asked.length,asked);
+  assert.equal((await act({request:'x',tool:'reminders.list'})).status,400);assert.equal((await act({request:'x',tool:'reminders.list',args:[]})).status,400);
+  assert.equal((await fetch(base+'/api/actions',{method:'POST',body:'{}'})).status,401);
+ }finally{await new Promise<void>(done=>server.close(()=>done()));await runtime.close();await model.close();rmSync(home,{recursive:true,force:true});}
+});

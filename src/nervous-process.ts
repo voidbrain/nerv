@@ -1,4 +1,5 @@
-import { Store } from './store.ts';
+import { OWNER_SOURCE, Store } from './store.ts';
+import type { Verdict } from './policy.ts';
 import { dispatchRpc,MAX_FRAME_BYTES } from './rpc.ts';
 import { readScrolls } from './config.ts';
 // argv: database path, then the data home whose scrolls.json sets the gate rules (defaults when absent).
@@ -19,6 +20,9 @@ process.on('message',(value:unknown)=>{
    case 'approvals.pending':return store.approvals(params.limit as number|undefined);
    case 'approvals.decide':return store.decide(params.id as string,params.decision as 'approve'|'reject'|'edit',params.source as string);
    case 'events.page':return store.events(params.sortieId as string,params.after as number|undefined,params.limit as number|undefined);
+   case 'sorties.open':return store.ledger.openSortie(OWNER_SOURCE,params.title as string,'trusted');
+   case 'actions.preview':return store.ledger.preview(params.sortieId as string,params.tool as string);
+   case 'actions.act':return store.runAction(params.sortieId as string,{tool:params.tool as string,args:params.args as Record<string,unknown>,stage:params.stage as 'production',...(params.casper?{casper:params.casper as Verdict}:{})});
    case 'inbox.page':return store.inboxPage(params.after as number|undefined,params.limit as number|undefined,params.afterId as string|undefined);
   }
  }).then(reply=>{if(reply&&process.connected){if(Buffer.byteLength(JSON.stringify(reply))>MAX_FRAME_BYTES)process.send?.({jsonrpc:'2.0',id:reply.id,error:{code:-32005,message:'Response exceeds IPC bound; pagination required.'}});else process.send?.(reply);}}).catch(()=>{console.error('Nervous IPC failed.');});

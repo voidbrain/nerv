@@ -62,6 +62,15 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
         try{reply(200,await store.ask({prompt:b.prompt,privacy:(b.privacy ?? 'local-only') as 'local-only'|'any',...(b.system!==undefined?{system:b.system as string}:{}),...(b.route!==undefined?{route:b.route as 'local'|'cloud'}:{})}));}
         catch(e){if(e instanceof RpcFault&&e.code===-32602)throw new Error('Invalid ask: prompt up to 16000 characters, privacy local-only or any, route local or cloud.');if(e instanceof RpcFault&&e.code===-32010){reply(502,{error:e.message});return;}throw e;}
       }
+      else if(req.method==='POST'&&path==='/api/actions'){
+        // Admin only: one owner action through the per-action gate (F-017). Grant IDs never appear in the reply.
+        if(!store.act){reply(503,{error:'Action gate unavailable.'});return;}
+        const b=await body(req,40000);
+        if(Object.keys(b).some(k=>!['request','tool','args','stage'].includes(k))||typeof b.request!=='string'||!b.request.trim()||typeof b.tool!=='string'||!b.args||typeof b.args!=='object'||Array.isArray(b.args)||(b.stage!==undefined&&!['prototype','test','production'].includes(b.stage as string)))throw new Error('Action needs request, tool and args (an object); stage is prototype, test or production.');
+        req.setTimeout(MODEL_TIMEOUT_MS+5000);res.once('finish',()=>req.socket.setTimeout(15000));
+        try{reply(200,await store.act({request:b.request,tool:b.tool,args:b.args as Record<string,unknown>,...(b.stage!==undefined?{stage:b.stage as 'production'}:{})}));}
+        catch(e){if(e instanceof RpcFault&&e.code===-32602)throw new Error('Invalid action: request up to 4000 characters, tool up to 100, at most 50 arguments.');throw e;}
+      }
       else if(req.method==='GET'&&path==='/api/reminders/pending')reply(200,await store.pendingReminders());
       else if(req.method==='GET' && path==='/api/reminders') reply(200,await store.list());
       else if(req.method==='POST' && path==='/api/reminders') {const b=await body(req);if(typeof b.title!=='string'||typeof b.due!=='string') throw new Error('Title and due are required.');reply(201,await store.add(b.title,b.due));}
