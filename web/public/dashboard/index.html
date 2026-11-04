@@ -216,9 +216,10 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .sq { display:inline-block; width:7px; height:7px; margin-right:3px; vertical-align:middle; }
 
 /* EVA cages */
-.cages { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
-.cage { border:1px solid var(--border); padding:5px; background:var(--panel2); }
-.cage .ch { display:flex; justify-content:space-between; font-size:10px; font-weight:900; letter-spacing:.08em; }
+.cages { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:5px; }
+@media (max-width:720px) { .cages { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+.cage { border:1px solid var(--border); padding:4px; min-width:0; background:var(--panel2); }
+.cage .ch { display:flex; flex-wrap:wrap; column-gap:4px; justify-content:space-between; font-size:10px; font-weight:900; letter-spacing:.08em; }
 .cage canvas { width:100%; height:30px; display:block; background:#000; border:1px solid var(--border); margin-top:3px; }
 .cage .cd { font-size:9px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
