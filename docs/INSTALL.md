@@ -88,6 +88,25 @@ read -rs KEY && printf '%s\n' "$KEY" > ~/.nerv/anthropic-key && chmod 600 ~/.ner
 
 Paste the key and press Enter (nothing is shown). Then set `"enabled": true` under `cloud` and run `npm start -- reload`.
 
+## Telegram (Aoba)
+
+Aoba is a Telegram bot that only you can use: write to Misato from your phone, approve or reject actions with buttons, and receive due reminders. It makes outgoing HTTPS requests only, so it needs no open port, VPN or second machine.
+
+1. In Telegram, message **@BotFather**, send `/newbot`, and choose a name (for example `Aoba`) and a username ending in `bot`.
+2. Store the token it gives you privately. Run this, paste the token at the empty prompt (nothing is shown) and press Enter:
+
+   ```bash
+   read -rs TOKEN && printf '%s\n' "$TOKEN" > ~/.nerv/telegram-token && chmod 600 ~/.nerv/telegram-token && unset TOKEN
+   ```
+
+   Never paste the token into a chat or a file in the repository. If it leaks, send `/revoke` to BotFather and store the new one.
+3. Send `/start` to your bot, then run `npm start -- telegram link`. It finds that `/start` and saves your chat ID in `config.json` (if several chats sent `/start`, it lists them: `telegram link CHAT_ID`).
+4. Restart the service. `serve` prints `Aoba (Telegram): linked, listening.`
+
+Aoba ignores every other chat and every button pressed by another account, and logs it. A message older than 10 minutes (sent while the service was down) is not run; Aoba asks you to send it again. Approval cards arrive once, with **✅ Approve once** and **❌ Reject**; a tap uses the same decision path as `approve`, so the action runs once and a second tap changes nothing. Due reminders arrive here as well as in the local inbox; reminders delivered before Aoba was linked are not replayed. Its progress (last update, cards sent, last reminder) is in `telegram-state.json` in the data home.
+
+Telegram bot chats are not end-to-end encrypted: Telegram's servers can read what you and Aoba write, including reminder titles and action arguments on cards.
+
 ## Talking to Misato
 
 With the service running and a model route configured:
