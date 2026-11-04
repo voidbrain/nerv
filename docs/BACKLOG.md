@@ -1,6 +1,6 @@
 # NERV Agency backlog
 
-Current work ledger, reviewed 4 November 2026 against main `bc0dd97`. PR #1–#40 merged after green checks (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); main CI green); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
+Current work ledger, reviewed 4 November 2026 against main `a587757`. PR #1–#41 merged after green checks (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); main CI green); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
 
 ## Features and improvements
 
@@ -604,7 +604,7 @@ Current work ledger, reviewed 4 November 2026 against main `bc0dd97`. PR #1–#4
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Implement thin, state-grounded persona adapters after F-003 messaging and F-017 decisions exist. Prefer Misato for push/HITL. Keep Shinji/pilots as optional labels for workers, not primary chat partners. Safety: persona output never overrides capability tokens or Pattern Red rules.
+**Next action / closure evidence:** Owner decision 2026-11-04 (F-036): persona names are per base and renamable (Misato, Gendo… by default; e.g. Bob, Fritz, Tim on another base); MAGI seat names stay fixed on every base. Implement thin, state-grounded persona adapters after F-003 messaging and F-017 decisions exist. Prefer Misato for push/HITL. Keep Shinji/pilots as optional labels for workers, not primary chat partners. Safety: persona output never overrides capability tokens or Pattern Red rules.
 
 **Estimates:** Medium remaining effort; ~10% complete (prototype UI; corrected from ~5% to a valid step). Estimated 2026-11-02; priority lowered to P3 on 2026-11-04 (skin, not behaviour); estimate unchanged.
 
@@ -1114,7 +1114,41 @@ Current work ledger, reviewed 4 November 2026 against main `bc0dd97`. PR #1–#4
 |---|---|
 | PR / evidence | [PR #41](https://github.com/voidbrain/nerv/pull/41) |
 | Opened | 2026-11-04 |
-| Verification | 2026-11-04: tests above (local run; CI pending) |
+| Verification | 2026-11-04: tests above (local run; CI green: PR #41) |
+| Reviewed | 2026-11-04 |
+
+</details>
+
+---
+
+### F-036
+
+**Federated bases over the Kaji line: one main base, shared Scrolls, pilots and memory**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔶 P2 | Open | 🔴 Large | ~10% |
+
+🧑 **→ Human action required: Yes**<br />Confirm the base mapping (Mac NERV-01 Neo Tokyo-3 main, mini-PC NERV-02 Tabgha, NERV-03 Bethany planned); then design the Kaji line enrolment and main-base hand-over.
+
+| | |
+|---|---|
+| **Issue** | Owner decision 2026-11-04: every base is a full installation; connected over the Kaji line they act as one agency with an owner-chosen main base. Today bases are independent, each with its own bot. |
+| **Reproduce** | Run two bases; connect them; send a request on either channel; approve on one; look for each base's sorties and memory from the dashboard. |
+| **Check** | Enrolment signed by the Key; the owner sets the main base (no election); connected: Aoba (main base) is the one channel, other bots go quiet, other bases dispatch to the main base, their MAGI are veto-only seats; alone: each base serves its own work with its own bot and MAGI; Scrolls distributed from the main base; pilots shared via Marduk; Lilith facts merged by id with provenance, conflicting edits/forgets go to the owner as a card; ledgers never merged, shown side by side; dashboard and channels reach other bases through the main base, each base's gate deciding its own actions; persona names per base, MAGI names fixed. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Recorded in docs/NERV/NERV-ARCHITECTURE.md ("FEDERATION") in PR_FED; the base identity exists ([PR #41](https://github.com/voidbrain/nerv/pull/41), F-035). Builds on F-005/F-006 (remote workers, cross-node orchestration), F-020 (persona names per base) and F-022 (memory merge). Kept from the earlier design: branch MAGI copies are seats, never authority (split-brain safety). Open design points: main-base hand-over when the main base is offline (owner-confirmed, with fencing), how a quiet bot tells the owner which channel to use, memory merge cadence.
+
+**Estimates:** Large remaining effort; ~10% complete (identity only). Estimated 2026-11-04.
+
+| Field | Value |
+|---|---|
+| PR / evidence | PR_FED (architecture decision); [PR #41](https://github.com/voidbrain/nerv/pull/41) (base identity) |
+| Opened | 2026-11-04 |
+| Verification | Pending |
 | Reviewed | 2026-11-04 |
 
 </details>
