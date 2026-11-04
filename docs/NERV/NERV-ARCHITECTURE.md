@@ -188,12 +188,13 @@ Supersedes the glossary in `review-2026-11-04.md` §3 and every flow in `insight
 | **Extra seats are veto-only** | Adding seats can only make a ballot stricter, so an untrusted or new seat can never approve what the core three would refuse. Consultants advise Misato and never vote. |
 | **MAGI copies** at branches are seats, never authority | End of Evangelion: the branch MAGI copies attacked Tokyo-3's MAGI. |
 | MAGI personalities | Melchior (scientist) = rules, Balthasar (mother) = protection, Casper (woman) = intent. The trio is always present; only Casper is a model by default. |
-| **Ritsuko** operates MAGI and signs A.T. Fields | She maintains MAGI in the show. |
-| **Spear** revokes A.T. Fields | The Spear pierces an A.T. Field (against Arael). |
+| **Ritsuko** operates MAGI and signs and revokes A.T. Fields (routine: expiry, single use, cards withdrawn) | She maintains MAGI in the show. |
+| **Spear** = the emergency stop: pierces every A.T. Field of a sortie (or all) at once | In the show the Lance of Longinus pierced an Angel's A.T. Field from orbit (the 15th, Arael). Arael itself has no role here. |
 | Bridge crew | **Aoba** = comms, **Hyuga** = Misato's operations aide/watch, **Maya** = monitoring (she reads the sync ratios). |
 | **Pen Pen** = notifier | He lives in Misato's apartment. |
 | **Marduk Institute** = registry | It selects the Children (who may pilot). |
 | **Instrumentality** = memory consolidation | Separate episodes merged into one sea. The ledger is kept. |
 | **Sync Ratio** = 0–100 % | The show displays it as a percentage. |
 | **Key of Nebuchadnezzar** = sealed root key | Back in. It is the key to everything, but it is never used to bypass a gate. |
-| Dropped | Adam (redundant with power source + Marduk), pilots as privilege profiles, world model, mercenary seats, L1–L5 numbering |
+| **Key of Nebuchadnezzar** = the owner's offline root of trust | Signs base enrolment and registry records, rotates Ritsuko's key, decrypts backups; never sent over the Kaji line, never used day to day (bases use their own enrolled credentials). |
+| Dropped | Adam (a model-weights registry: redundant with the power source — Umbilical/S² routes per role and base — and Marduk's model enrolment), pilots as privilege profiles, world model, mercenary seats, L1–L5 numbering |

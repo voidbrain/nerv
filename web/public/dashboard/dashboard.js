@@ -831,7 +831,7 @@ function setTheme(name) {
 }
 
 // Live: only this machine is a base; simulated cages and pilots would point at bases that do not exist.
-if (LIVE) { state = freshState(); state.upcoming = []; BASES.splice(1); LINKS.length = 0; CAGES.length = 0; PILOTS.length = 0; PILOTS.push({ id:"owner", stage:"production" }, { id:"misato", stage:"production" }); } else seed();
+if (LIVE) { state = freshState(); state.upcoming = []; BASES.splice(1); LINKS.length = 0; CAGES.splice(0, CAGES.length, { id:"EVA-02", label:"PRODUCTION · in-process executor, not sandboxed yet", base:"tokyo3", color:"#ff3b30" }); PILOTS.length = 0; PILOTS.push({ id:"owner", stage:"production" }, { id:"misato", stage:"production" }); } else seed();
 { const t = new URLSearchParams(location.search).get("theme"); const th = document.getElementById("theme");
   if (t && [...th.options].some(o => o.value === t)) { th.value = t; setTheme(t); } else { applyLabels(); renderAll(); } }
 initMap(); requestAnimationFrame(frame);
