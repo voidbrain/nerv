@@ -24,7 +24,7 @@ function baseFlags(list:string[]):Base|undefined {
 /** After a change: the running service re-reads its models in place; when it is not running, the change waits for its start. */
 async function reloadIfRunning(homeDir:string,port:number):Promise<string> {
   const response=await fetch(`http://127.0.0.1:${port}/api/models/reload`,{method:'POST',headers:{authorization:`Bearer ${readToken(homeDir)}`}}).catch(()=>undefined);
-  if(!response)return 'The service is not running: the change applies when it starts.';
+  if(!response)return 'The NERV service is not running: the change applies when it starts. Start it with: nerv launch';
   const value=await response.json() as {error?:string;kept?:boolean};
   return response.ok?'The running service now uses it.':`The running service refused it: ${value.error ?? 'reload failed'}${value.kept?' (it keeps the previous settings)':''}.`;
 }

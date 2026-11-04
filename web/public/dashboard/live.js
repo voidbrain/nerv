@@ -70,10 +70,11 @@
       // Comms: the first refresh loads the five most recent sorties' traces (so the panel is not empty at start); later
       // ones keep the selected sortie and every running or waiting one up to date.
       const traced = new Set([...(firstTrace ? latest20.slice(0, 5) : latest20.filter(s => s.status === "open")).map(s => s.id), ...(selected ? [selected.realId] : [])]);
-      firstTrace = false;
+      const first = firstTrace; firstTrace = false;
       let added = 0; for (const id of traced) added += await loadEvents(id);
       // renderAll does not redraw Comms: redraw it when new trace lines arrived (not on every poll, so scrolling back stays put).
-      if (added) renderLog();
+      // The first refresh always draws Comms, so a base with no sorties yet shows its empty state, never a blank panel.
+      if (added || first) renderLog();
       state.sorties = list.map(toSortie);
       state.approvals = cards.map(toApproval).filter(ap => state.sorties.some(s => s.id === ap.sortie));
       state.reminders = reminders.filter(r => !r.delivered && !r.cancelled && Date.parse(r.due) > Date.now()).sort((a, b) => a.due.localeCompare(b.due));
@@ -185,7 +186,7 @@
     const misatoOpts = (misatoRoute ? "" : opt("", "not set", true)) + local.map(n => opt("local:" + n, n + " (local)", misatoRoute === "local" && misatoModel === n)).join("") +
       (misatoRoute === "local" && misatoModel && !known(misatoModel) ? opt("local:" + misatoModel, misatoModel + " (not in Ollama)", true, true) : "") +
       opt("cloud:" + cloudModel, cloudModel + " (cloud)" + (cloudOn ? "" : d.cloudKey ? " · turn the cloud route on" : " · key missing"), misatoRoute === "cloud", !cloudOn);
-    const casperOpts = (casperModel ? "" : opt("", "not set", true)) + local.map(n => opt(n, n, casperModel === n)).join("") + (casperModel && !known(casperModel) ? opt(casperModel, casperModel + " (not in Ollama)", true, true) : "");
+    const casperOpts = (casperModel ? "" : opt("", "not set", true)) + local.map(n => opt(n, n + " (local)", casperModel === n)).join("") + (casperModel && !known(casperModel) ? opt(casperModel, casperModel + " (not in Ollama)", true, true) : "");
     sub.textContent = d.ollama.reachable ? local.length + " local model" + (local.length === 1 ? "" : "s") : "Ollama not found";
     box.innerHTML = (local.length || cloudOn ? "<form id='models-form' class='models-form'><label for='m-misato' class='small'>Misato</label><select id='m-misato'>" + misatoOpts + "</select>" +
       "<label for='m-casper' class='small'>Casper</label><select id='m-casper'" + (local.length ? "" : " disabled") + ">" + casperOpts + "</select>" +
