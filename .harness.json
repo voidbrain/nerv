@@ -130,18 +130,26 @@
   ],
   "couplings": [
     {
-      "value": "Vertical wrapped-knot geometry",
+      "value": "Seven-eye triangle geometry and mark colour",
       "places": [
         {
-          "file": "web/public/knot.svg",
-          "what": "Web SVG mark"
+          "file": "web/public/mark.svg",
+          "what": "Web SVG mark (browser icon)"
+        },
+        {
+          "file": "web/public/brand.svg",
+          "what": "Sidebar mark: half leaf beside the same triangle"
         },
         {
           "file": "native/NervMenuBar/Sources/NervMenuBar/NervMenuBar.swift",
           "what": "Native monochrome menu template drawing"
+        },
+        {
+          "file": "web/src/styles.css",
+          "what": "--mark colour token, literal in both SVGs"
         }
       ],
-      "kept": "Review both geometric renditions in branding changes; no automatic pixel equivalence claimed."
+      "kept": "test/brand.test.ts asserts the same triangle and eye centres in the three drawings and the --mark colour in both SVGs."
     }
   ],
   "outside": [
