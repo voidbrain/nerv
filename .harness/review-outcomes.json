@@ -3,11 +3,11 @@
     "kind": "rule",
     "disposition": "implemented",
     "target": "docs/agents/areas.md",
-    "evidence": "Action gate and ledger area note: Casper runs in the brain on the local route only, sees request and action, failure is no verdict; the coordinator asks it only for non-Green; executors live in the scheduler process next to the grant so grant IDs never leave it, and a repeated decision never re-runs a tool (F-017). Checked by test/gate.test.ts across HTTP, coordinator, brain, scheduler and executor."
+    "evidence": "Action gate area note: grant IDs stay out of events too (event schema 2; version 1 rows redacted on read), aligning the rule with the code after the owner's first act run showed grant IDs in events. Checked by test/ledger.test.ts (REST events contain no grantId; v1 row redacted)."
   },
   {
     "kind": "none",
     "disposition": "no-change",
-    "evidence": "No harness file or copied tool changed; ARCHITECTURE and INSTALL describe the new act path."
+    "evidence": "docs/.DS_Store untracked at the owner's request (.gitignore already lists .DS_Store); no harness file or copied tool changed."
   }
 ]
