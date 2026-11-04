@@ -72,8 +72,9 @@ test('heartbeats carry each base\'s own health, both ways; a malformed report fr
   assert.equal(heardA['NERV-02']!.state,'online');assert.ok(Date.parse(heardA['NERV-02']!.at)<=Date.now());
   healthB={state:'degraded',reasons:['brain process not alive']};await until(()=>heardA['NERV-02']!.state==='degraded');
   // A signed heartbeat from NERV-02 whose health is malformed: last-seen still merges, the report is ignored.
+  // Stop both links and let any heartbeat already in flight land before taking the reference time.
+  await la.stop();await lb.stop();await wait(1000);
   const before=heardA['NERV-02']!.at;const body=JSON.stringify({seen:{},health:{state:'evil',reasons:['<script>']}});
-  await la.stop();await lb.stop();
   const lc=new KajiLink({baseId:'NERV-01',key:A.privateKey,publicKey:A.publicKey,registry:port(ra),log:()=>{},onHealth:(id,h)=>{heardA[id]=h;}});await lc.start(60_000);
   try{const res=await fetch(`http://127.0.0.1:${pa}/kaji/heartbeat`,{method:'POST',headers:{'content-type':'application/json',...signedHeaders('NERV-02',B.privateKey,'req','POST','/kaji/heartbeat',body)},body});
    assert.equal(res.status,200);assert.equal(heardA['NERV-02']!.at,before,'the malformed report changed nothing');
