@@ -175,9 +175,11 @@ export class Runtime implements StoreApi {
  startInstrumentality(at:string,timeZone:string,everyMs=60_000){
   let attempted:string|undefined;
   const tick=async()=>{const day=briefDue(new Date(),timeZone,at,attempted);if(!day)return;
+   // Marked before any await, so an overlapping tick cannot start a second consolidation the same day.
+   attempted=day;
    const last=(await this.nervous.call('memory.episodes',{limit:1}).catch(()=>[]) as {created:string}[])[0];
-   if(last&&localClock(new Date(last.created),timeZone).date===day){attempted=day;return;}
-   attempted=day;await this.consolidate().catch(()=>{});};
+   if(last&&localClock(new Date(last.created),timeZone).date===day)return;
+   await this.consolidate().catch(()=>{});};
   if(!this.instrumentality)this.instrumentality=setInterval(()=>{void tick();},everyMs);void tick();
  }
  /** Re-reads config.json and the cloud key in the brain, without restarting the service. */
