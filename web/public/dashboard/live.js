@@ -47,7 +47,7 @@
     if (polling || !token) return; polling = true;
     try {
       const [list, cards, doctor, pending, inbox, facts, episodes, kajiBases] = await Promise.all([api("sorties?limit=20"), api("approvals"), api("doctor"), api("reminders/pending"), api("inbox"), api("memory"), api("memory/episodes"), api("bases").catch(() => [])]);
-      applyBases(kajiBases);
+      applyBases(kajiBases, healthOf(doctor));
       state.lilith = Object.assign(state.lilith || { history:{} }, { facts, episodes });
       state.delivered = inbox.map(d => Date.parse(d.created));
       const selected = state.sorties.find(x => x.id === state.selected);
@@ -121,14 +121,33 @@
   // Kaji bases (F-036): every enrolled base with its real status; positions are a fixed layout around this base
   // (no real coordinates exist), redrawn when the set of bases or their status changes.
   let basesKey = "";
-  function applyBases(list) {
+  /** This base's health from doctor: online (all well), standby (degraded: brain down or no model route for Misato), offline (scheduler down). */
+  function healthOf(d) {
+    const p = (d && d.processes) || {}; const roles = ((d && d.models) || {}).roles || {};
+    if (!p.nervous) return "offline";
+    return p.brainAlive === false || !roles.misato || /not set|not configured/.test(roles.misato) ? "standby" : "online";
+  }
+  // Real heartbeats on the Kaji line: when a peer's last-seen time moves, a pulse travels from it to this base.
+  const heard = {};
+  function pulseHeartbeats(list) {
+    const self = list.find(b => b.self);
+    for (const b of list) {
+      if (b.self || !b.lastSeen) continue;
+      if (heard[b.baseId] && heard[b.baseId] !== b.lastSeen && self && b.online) sendPacket(b.baseId.toLowerCase(), self.baseId.toLowerCase(), "sync");
+      heard[b.baseId] = b.lastSeen;
+    }
+  }
+  function applyBases(list, health) {
     state.kajiBases = list;
-    if (!list.length) return;
-    const key = list.map(b => b.baseId + ":" + b.status + ":" + b.online).join("|"); if (key === basesKey) return; basesKey = key;
+    if (!list.length) { BASES[0].status = health; return; }
+    pulseHeartbeats(list);
+    const key = list.map(b => b.baseId + ":" + b.status + ":" + b.online).join("|") + "|" + health; if (key === basesKey) return; basesKey = key;
     const self = list.find(b => b.self) || list[0]; const others = list.filter(b => b !== self);
     const place = (b, i) => { const a = 2 * Math.PI * i / Math.max(3, others.length) - Math.PI / 2; return b === self ? [35.236, 138.985] : [35.236 + 0.09 * Math.sin(a), 138.985 + 0.2 * Math.cos(a)]; };
     const toBase = (b, i) => { const [lat, lon] = place(b, i); return { id:b.baseId.toLowerCase(), name:b.name.toUpperCase(), role:b.baseId + (b.self ? " · this machine" : " · " + b.address), lat, lon, status:b.status === "revoked" ? "offline" : b.online ? "online" : "offline", cpu:null, ram:null, gpu:null, rtt:null, models:"—" }; };
     BASES.splice(0, BASES.length, toBase(self, 0), ...others.map((b, i) => toBase(b, i)));
+    // This base's pulse and its EVA cage follow its real health; peers show online/offline (their health travels with phase 2).
+    BASES[0].status = health;
     LINKS.length = 0; const up = list.filter(b => b.status === "enrolled");
     for (let i = 0; i < up.length; i++) for (let j = i + 1; j < up.length; j++) LINKS.push([up[i].baseId.toLowerCase(), up[j].baseId.toLowerCase()]);
     CAGES.forEach(c => { c.base = BASES[0].id; }); document.getElementById("cages").innerHTML = "";
@@ -145,7 +164,7 @@
       return;
     }
     document.getElementById("bases-sub").textContent = list.filter(b => b.online).length + "/" + list.filter(b => b.status === "enrolled").length + " online";
-    document.getElementById("bases").innerHTML = list.map(b => "<div class='card'><div class='row'><span class='b'>" + esc(b.name) + " · " + esc(b.baseId) + "</span><span class='badge " + (b.status === "revoked" ? "b-muted'>REVOKED" : b.online ? "b-ok'>ONLINE" : "b-warn'>OFFLINE") + "</span></div>" +
+    document.getElementById("bases").innerHTML = list.map(b => "<div class='card'><div class='row'><span class='b'>" + esc(b.name) + " · " + esc(b.baseId) + "</span><span class='badge " + (b.status === "revoked" ? "b-muted'>REVOKED" : b.self && BASES[0].status === "standby" ? "b-warn'>DEGRADED" : b.self && BASES[0].status === "offline" ? "b-danger'>DOWN" : b.online ? "b-ok'>ONLINE" : "b-warn'>OFFLINE") + "</span></div>" +
       "<div class='tiny muted'>" + (b.self ? "this machine" : esc(b.address)) + " · key " + esc(b.fingerprint.slice(0, 9)) + " · " + (b.self ? "local" : esc(sinceText(b.lastSeen))) + "</div>" +
       (b.self ? "<div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div>" : "") + "</div>").join("");
   };
