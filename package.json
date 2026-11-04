@@ -41,5 +41,8 @@
     "@types/ws": "8.18.1",
     "linkedom": "0.18.12",
     "typescript": "~6.0.2"
+  },
+  "bin": {
+    "nerv": "src/cli.ts"
   }
 }

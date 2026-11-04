@@ -26,6 +26,7 @@ process.on('message',(value:unknown)=>{
    case 'sorties.finish':{const id=params.sortieId as string;if(params.reply)store.ledger.reply(id,params.reply as string);return params.status?store.ledger.close(id,params.status as 'done'|'failed'):false;}
    case 'misato.note':return store.ledger.note(params.sortieId as string,params.kind as 'misato.step',params.payload as never);
    case 'misato.resumable':return store.ledger.resumable();
+   case 'misato.context':return store.ledger.conversation(params.conversation as string);
    case 'misato.claim':return store.ledger.claimResume(params.sortieId as string);
    case 'actions.preview':return store.ledger.preview(params.sortieId as string,params.tool as string);
    case 'actions.act':return store.runAction(params.sortieId as string,{tool:params.tool as string,args:params.args as Record<string,unknown>,stage:params.stage as 'production',...(params.casper?{casper:params.casper as Verdict}:{})});

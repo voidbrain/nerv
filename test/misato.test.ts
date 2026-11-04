@@ -87,3 +87,20 @@ test('without any model route, chat says what to configure instead of blaming th
  try{await runtime.ready();const chat=await runtime.chat('Remind me');assert.match(chat.error!,/No model route for Misato: add models\.local/);assert.equal((await runtime.events(chat.sortieId)).at(-1)!.kind,'sortie.failed');}
  finally{await runtime.close();rmSync(home,{recursive:true,force:true});}
 });
+test('a short follow-up keeps its conversation: "delete all" → Misato asks → "sì" cancels them in one reversible action',async()=>{
+ const script:string[]=[];
+ await agent(script,async(runtime,m)=>{
+  const a=await runtime.add('Bere acqua','2030-01-01T09:00:00Z'),b=await runtime.add('Chiamare Ada','2030-01-02T09:00:00Z');
+  script.push('{"action":{"tool":"reminders.list","args":{}}}','{"reply":"Hai 2 promemoria. Li cancello tutti?"}',`{"action":{"tool":"reminders.cancel","args":{"ids":["${a.id}","${b.id}"]}}}`,'{"reply":"Fatto: cancellati entrambi."}');
+  const first=await runtime.chat('cancella tutti i promemoria','telegram:1111');assert.equal(first.reply,'Hai 2 promemoria. Li cancello tutti?');
+  const second=await runtime.chat('sì','telegram:1111');
+  const prompt=JSON.parse(m.asked.at(-2)!.prompt) as {earlier:{request:string;reply:string}[];request:string};
+  assert.equal(prompt.earlier.length,1);assert.equal(prompt.earlier[0]!.request,'cancella tutti i promemoria');assert.equal(prompt.earlier[0]!.reply,'Hai 2 promemoria. Li cancello tutti?');
+  assert.equal(prompt.request,'sì');
+  assert.deepEqual(second.steps.map(s=>[s.tool,s.outcome]),[['reminders.cancel','grant']],'one Green action: cancel has an inverse now');
+  assert.deepEqual((second.steps[0]!.result as {cancelled:string[]}).cancelled.sort(),[a.id,b.id].sort());
+  assert.equal((await runtime.pendingReminders()).length,0);
+  const other=await runtime.chat('sì','telegram:2222');void other;
+  assert.equal((JSON.parse(m.asked.at(-1)!.prompt) as {earlier?:unknown}).earlier,undefined,'another conversation does not see this one');
+ });
+});

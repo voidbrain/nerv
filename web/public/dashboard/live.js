@@ -89,7 +89,7 @@
     log(text, "", null, "you"); state.log[state.log.length - 1].chat = true;
     if (chatBusy) { log("Misato is still working on the previous request.", "warn", null, "misato"); return; }
     chatBusy = true; log("Misato is planning… (local models take 10–30 s per step)", "", null, "misato");
-    try { const r = await api("chat", { method:"POST", body:JSON.stringify({ message:text }) }); state.selected = short(r.sortieId); }
+    try { const r = await api("chat", { method:"POST", body:JSON.stringify({ message:text, conversation:"dashboard" }) }); state.selected = short(r.sortieId); }
     catch (e) { log("Misato could not answer: " + e.message, "danger", null, "misato"); }
     finally { chatBusy = false; poll(); }
   };

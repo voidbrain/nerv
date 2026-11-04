@@ -96,7 +96,7 @@ export class TelegramChannel {
   const typing=setInterval(()=>{void this.api.call('sendChatAction',{chat_id:this.chatId,action:'typing'}).catch(()=>{});},4000);
   void this.api.call('sendChatAction',{chat_id:this.chatId,action:'typing'}).catch(()=>{});
   try{
-   const reply=await this.store.chat(text.slice(0,4000));
+   const reply=await this.store.chat(text.slice(0,4000),`telegram:${this.chatId}`);
    await this.api.send(this.chatId,reply.reply ?? `I could not finish: ${reply.error ?? 'no reply'}`);
    await this.deliver();
   }finally{clearInterval(typing);}

@@ -115,12 +115,17 @@ Telegram bot chats are not end-to-end encrypted: Telegram's servers can read wha
 
 ## Talking to Misato
 
+After `npm link` (once, in the checkout) the commands are also available as `nerv`: `nerv chat "…"`, `nerv open dashboard`, `nerv reload`. `npm unlink -g nerv-agency` removes it.
+
+
 With the service running and a model route configured:
 
 ```bash
 npm start -- chat "Ricordami di rinnovare l'assicurazione auto il 15 gennaio 2030 alle 9"
 npm start -- chat "What reminders do I have?"
 ```
+
+Each Telegram chat, the CLI and the dashboard are separate conversations: Misato sees the last three exchanges of the same one from the past 30 minutes, so a short follow-up ("sì", "all of them", "the first one") is understood, and a bare "yes" with nothing to confirm does nothing. Reminders cancelled by mistake can be restored ("restore the reminder…") while they are still ahead.
 
 Misato plans one step at a time: it proposes an action, the gate reviews it, and Misato sees the outcome before the next step (at most 6 steps). The command prints each step, any action that waits for you (`approve ID` or `reject ID`), the reply, and the sortie ID for `events`. An action waiting for you has not happened. Once you decide (Telegram button, `approve`/`reject`, the API, or it expires), it runs once if approved and Misato picks the request back up with the outcome, within a few seconds; its follow-up reply goes to Telegram when Aoba is linked and is always in the sortie's events. The conversation's steps are kept in the ledger, so this also works after a restart. Misato uses `models.roles.misato` (local unless you choose the cloud route); times are converted to your configured time zone in code before Misato sees them. Locally, a step takes about 10–30 seconds with a 12–14B model.
 
