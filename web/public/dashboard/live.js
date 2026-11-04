@@ -3,7 +3,8 @@
    the dashboard's panels. Panels without real data yet say so instead of showing invented numbers. */
 (() => {
   if (!LIVE) return;
-  const code = location.hash.slice(6); history.replaceState(null, "", location.pathname + location.search);
+  const match = /^#code=([a-f0-9]{32})$/.exec(location.hash); const code = match ? match[1] : null;
+  if (match) history.replaceState(null, "", location.pathname + location.search);
   let token = ""; let polling = false; let lastRan = null; const detailCache = {}; const known = new Map(); let chatBusy = false;
   const PLANNED = "<div class='muted small'>Planned · not connected yet.</div>";
   const api = async (path, init = {}) => {
@@ -194,10 +195,22 @@
     document.getElementById("qv-budget").textContent = "$0.00"; document.getElementById("qd-budget").textContent = "local models · no per-token cost";
   };
   state.upcoming = []; state.selected = null; renderAll();
-  setBanner("<b>LIVE · SIGNING IN</b> <span class='muted'>— exchanging the one-use login code…</span>");
-  fetch("/api/session/exchange", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ code }) })
-    .then(r => r.json().then(d => { if (!r.ok || !d.token) throw new Error(d.error || "Login failed"); token = d.token; poll(); setInterval(poll, 3000); }))
-    .catch(e => setBanner("<b>LIVE · NOT SIGNED IN</b> <span class='muted'>— " + esc(e.message) + "</span>"));
+  let started = false; const begin = () => { if (started) return; started = true; poll(); setInterval(poll, 3000); };
+  // Not signed in (a reload drops the one-use code): a clear bar with a token field, never the simulation's invented data.
+  const signIn = reason => {
+    setBanner("<b>LIVE · NOT SIGNED IN</b> <span class='muted'>— " + esc(reason) + " Run <code>nerv open dashboard</code>, or paste the access token (kept in this tab's memory only):</span> " +
+      "<form id='live-signin' style='display:inline-flex;gap:4px'><label class='sr-only' for='live-token'>Access token</label><input id='live-token' type='password' autocomplete='off' style='width:16em'/><button class='btn sm' type='submit'>Sign in</button></form>");
+  };
+  document.addEventListener("submit", e => {
+    if (e.target.id !== "live-signin") return; e.preventDefault(); const input = document.getElementById("live-token"); const value = input.value.trim(); input.value = "";
+    if (!value) return; token = value; api("status").then(begin).catch(err => { token = ""; signIn("That token was refused (" + err.message + ")."); });
+  });
+  if (code) {
+    setBanner("<b>LIVE · SIGNING IN</b> <span class='muted'>— exchanging the one-use login code…</span>");
+    fetch("/api/session/exchange", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ code }) })
+      .then(r => r.json().then(d => { if (!r.ok || !d.token) throw new Error(d.error || "Login failed"); token = d.token; begin(); }))
+      .catch(e => signIn(e.message + "."));
+  } else signIn("This page was reloaded or opened without a login code.");
   // A click on a sortie loads its trace at once instead of waiting for the next poll.
   document.addEventListener("click", e => { const t = e.target.closest("[data-s]"); if (t) setTimeout(poll, 0); });
 })();
