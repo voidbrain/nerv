@@ -44,7 +44,8 @@
   async function poll() {
     if (polling || !token) return; polling = true;
     try {
-      const [list, cards, doctor, pending, inbox] = await Promise.all([api("sorties?limit=20"), api("approvals"), api("doctor"), api("reminders/pending"), api("inbox")]);
+      const [list, cards, doctor, pending, inbox, facts, episodes] = await Promise.all([api("sorties?limit=20"), api("approvals"), api("doctor"), api("reminders/pending"), api("inbox"), api("memory"), api("memory/episodes")]);
+      state.lilith = Object.assign(state.lilith || { history:{} }, { facts, episodes });
       state.delivered = inbox.map(d => Date.parse(d.created));
       const selected = state.sorties.find(x => x.id === state.selected);
       const want = list.filter(s => (selected && s.id === selected.realId) || s.waiting || !detailCache[s.id] || s.status === "open").slice(0, 8);
@@ -118,6 +119,38 @@
     document.getElementById("bases").innerHTML = "<div class='card'><div class='row'><span class='b'>" + esc(base.name) + " · " + esc(base.id) + "</span><span class='badge b-ok'>ONLINE</span></div><div class='tiny muted'>this machine · coordinator, scheduler, brain</div><div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div></div>" +
       "<div class='muted small' style='margin-top:4px'>Other bases (Kaji line) are planned · not connected yet.</div>";
   };
+  // Lilith: the owner's facts, editable here; every change is the owner's and stays in the fact's history.
+  window.renderLilith = function () {
+    const l = state.lilith || { facts:[], episodes:[], history:{} }; const open = state.lilithOpen;
+    // The panel redraws on every poll: keep what the owner is typing and where the focus is.
+    const draftEl = document.getElementById("lilith-new"); const draft = draftEl ? draftEl.value : ""; const typing = document.activeElement === draftEl;
+    document.getElementById("lilith-sub").textContent = l.facts.length + " facts";
+    const facts = l.facts.map(f => "<div class='card'><div class='row small'><span>" + esc(f.text) + "</span><span class='tiny muted'>" + esc(f.source) + (f.tainted ? " · tainted" : "") + "</span></div>" +
+      "<div class='row tiny' style='margin-top:3px'><span><button class='btn sm' data-mem-edit='" + f.id + "'>Edit</button> <button class='btn sm danger' data-mem-forget='" + f.id + "'>Forget</button> " +
+      "<button class='btn sm' data-mem-share='" + f.id + "' data-shareable='" + (!f.shareable) + "' aria-pressed='" + f.shareable + "'>" + (f.shareable ? "Shareable" : "Local-only") + "</button></span>" +
+      "<a href='#' class='muted' data-mem-hist='" + f.id + "'>" + (open === f.id ? "hide history" : "history") + "</a></div>" +
+      (open === f.id && l.history[f.id] ? "<div class='tiny muted' style='margin-top:3px'>" + l.history[f.id].map(h => esc(h.created.slice(0, 16).replace("T", " ") + " · " + h.kind + " · " + h.source + " · " + h.text)).join("<br/>") + "</div>" : "") + "</div>").join("");
+    const eps = l.episodes.filter(e => e.summary).slice(0, 3).map(e => "<div class='tiny muted' style='margin-top:3px'>" + esc(e.until.slice(0, 10)) + " · " + esc(e.summary) + "</div>").join("");
+    document.getElementById("lilith").innerHTML = (facts || "<div class='muted small'>No facts yet. Tell Misato something to remember, or add one here.</div>") +
+      "<form id='lilith-form' class='row' style='margin-top:6px;gap:4px'><label class='sr-only' for='lilith-new'>New fact</label><input id='lilith-new' maxlength='500' placeholder='Add a fact about you' style='flex:1'/><button class='btn sm' type='submit'>Remember</button></form>" +
+      (eps ? "<div class='small muted' style='margin-top:6px'>INSTRUMENTALITY · RECENT SUMMARIES</div>" + eps : "") +
+      "<div class='tiny muted' style='margin-top:4px'>Local-only facts never reach a cloud model; shareable ones may.</div>";
+    const input = document.getElementById("lilith-new"); input.value = draft; if (typing) { input.focus(); input.setSelectionRange(draft.length, draft.length); }
+  };
+  const memoryAction = async (path, init, done) => { try { await api(path, init); if (done) log(done, "ok", null, "maya"); } catch (e) { log("Memory: " + e.message, "danger", null, "maya"); } poll(); };
+  document.addEventListener("click", e => {
+    const t = e.target.closest("[data-mem-edit],[data-mem-forget],[data-mem-share],[data-mem-hist]"); if (!t) return; e.preventDefault();
+    const facts = (state.lilith || { facts:[] }).facts;
+    if (t.dataset.memEdit) { const f = facts.find(x => x.id === t.dataset.memEdit); const text = f && prompt("Edit this fact", f.text); if (text && text.trim() && text !== f.text) memoryAction("memory/" + f.id, { method:"PUT", body:JSON.stringify({ text }) }, "Fact updated."); }
+    else if (t.dataset.memForget) { const f = facts.find(x => x.id === t.dataset.memForget); if (f && confirm("Forget: " + f.text + "? Its history is kept.")) memoryAction("memory/" + f.id + "/forget", { method:"POST", body:"{}" }, "Fact forgotten."); }
+    else if (t.dataset.memShare) memoryAction("memory/" + t.dataset.memShare + "/share", { method:"POST", body:JSON.stringify({ shareable:t.dataset.shareable === "true" }) });
+    else if (t.dataset.memHist) { const id = t.dataset.memHist; if (state.lilithOpen === id) { state.lilithOpen = null; renderLilith(); return; }
+      api("memory/" + id + "/history").then(h => { state.lilith.history[id] = h; state.lilithOpen = id; renderLilith(); }).catch(err => log("Memory: " + err.message, "danger", null, "maya")); }
+  });
+  document.addEventListener("submit", e => {
+    if (e.target.id !== "lilith-form") return; e.preventDefault(); const input = document.getElementById("lilith-new"); const text = input.value.trim();
+    if (text) { input.value = ""; memoryAction("memory", { method:"POST", body:JSON.stringify({ text }) }, "Remembered: " + text); }
+  });
   window.renderBudget = function () { document.getElementById("budget").innerHTML = PLANNED; };
   window.renderMelons = function () { document.getElementById("melons").innerHTML = PLANNED; };
   window.renderCages = function () { document.getElementById("cages").innerHTML = "<div class='muted small'>Executors run inside this service; sandboxed cages are planned · not connected yet.</div>"; };

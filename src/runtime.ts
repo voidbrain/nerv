@@ -8,6 +8,7 @@ import {MAX_STEPS,type Plan,type Recalled,type Step,type Turn} from './misato.ts
 import {argsHash} from './ledger.ts';
 import {toolDocs} from './executors.ts';
 import type {Digest,Exchange} from './instrumentality.ts';
+import type {Episode,Fact} from './memory.ts';
 import {briefDue,localClock} from './brief.ts';
 export interface ChatReply {sortieId:string;reply?:string;error?:string;steps:Step[];waiting:{approvalId:string;tool:string;reason:string}[]}
 /** An action the owner asks for directly: the request is what Casper checks the action against. */
@@ -28,6 +29,8 @@ export interface StoreApi {
  chat?(message:string,conversation?:string):Promise<ChatReply>;
  onResumed?(listener:(reply:ChatReply)=>void):void;
  reloadModels?():Promise<{error?:string;kept?:boolean;models:unknown}>;
+ /** Lilith for the owner (dashboard): admin-only over REST, never on the read-only socket. */
+ lilith?:{list():Promise<Fact[]>;episodes():Promise<Episode[]>;add(text:string):Promise<Fact>;edit(id:string,text:string):Promise<Fact|null>;forget(id:string):Promise<boolean>;share(id:string,shareable:boolean):Promise<Fact|null>;history(id:string):Promise<unknown[]>};
  consolidate?():Promise<{summary?:string;exchanges:number;proposed:number;skipped:number;error?:string}>;
  spear?(id:string,reason:string):Promise<{revoked:number;stoodDown:number;happened:{actionId:string;tool:string;inverse:string|null}[]}|null>;
  events(sortieId:string,after?:number,limit?:number):SortieEvent[]|Promise<SortieEvent[]>;
@@ -170,6 +173,15 @@ export class Runtime implements StoreApi {
   await this.nervous.call('memory.saveEpisode',{since,until,summary:out.digest.summary,exchanges:exchanges.length,proposed:fresh.length});
   return {summary:out.digest.summary,exchanges:exchanges.length,proposed:fresh.length,skipped:out.digest.facts.length-fresh.length};
  }
+ readonly lilith={
+  list:async()=>await this.nervous.call('memory.list',{limit:200}) as Fact[],
+  episodes:async()=>await this.nervous.call('memory.episodes',{limit:10}) as Episode[],
+  add:async(text:string)=>await this.nervous.call('memory.add',{text}) as Fact,
+  edit:async(id:string,text:string)=>await this.nervous.call('memory.edit',{id,text}) as Fact|null,
+  forget:async(id:string)=>await this.nervous.call('memory.forget',{id}) as boolean,
+  share:async(id:string,shareable:boolean)=>await this.nervous.call('memory.share',{id,shareable}) as Fact|null,
+  history:async(id:string)=>await this.nervous.call('memory.history',{id}) as unknown[],
+ };
  private instrumentality?:NodeJS.Timeout;
  /**
   * Instrumentality's schedule, read on every tick so a change (by chat or by hand) applies within a minute:

@@ -63,3 +63,21 @@ test('the dashboard Spear (admin, through the scheduler process) stands down a w
   assert.equal((await spear('00000000-0000-0000-0000-000000000000')).status,404);
  }finally{await new Promise<void>(done=>server.close(()=>done()));await runtime.close();rmSync(dir,{recursive:true,force:true});}
 });
+test('the Lilith API (admin, through the scheduler process): add, edit, share, history and forget as the owner',async()=>{
+ const {Runtime}=await import('../src/runtime.ts');
+ const dir=mkdtempSync(join(tmpdir(),'nerv-lilith-api-'));const runtime=new Runtime(join(dir,'nerv.sqlite'),undefined,dir);const token='g'.repeat(32);const server=makeServer(runtime,token);
+ try{
+  await runtime.ready();await new Promise<void>(done=>server.listen(0,'127.0.0.1',done));const base=`http://127.0.0.1:${(server.address() as {port:number}).port}/api/memory`;
+  const call=(path:string,method='GET',body?:object,auth=true)=>fetch(base+path,{method,headers:{...(auth?{authorization:'Bearer '+token}:{}),'content-type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
+  assert.equal((await call('',undefined,undefined,false)).status,401);
+  const added=await (await call('','POST',{text:'I drink coffee at 8'})).json() as {id:string;source:string;shareable:boolean};assert.equal(added.source,'owner');assert.equal(added.shareable,false,'every fact starts local-only');
+  assert.equal((await call('','POST',{text:''})).status,400);assert.equal((await call('','POST',{text:'x',extra:1})).status,400);
+  assert.equal(((await (await call('/'+added.id,'PUT',{text:'I drink tea at 8'})).json()) as {text:string}).text,'I drink tea at 8');
+  assert.equal(((await (await call('/'+added.id+'/share','POST',{shareable:true})).json()) as {shareable:boolean}).shareable,true);
+  assert.equal((await call('/'+added.id+'/share','POST',{shareable:'yes'})).status,400);
+  assert.deepEqual(((await (await call('/'+added.id+'/history')).json()) as {kind:string;source:string}[]).map(h=>[h.kind,h.source]),[['created','owner'],['edited','owner'],['shared','owner']]);
+  assert.equal((await call('/'+added.id+'/forget','POST',{})).status,200);assert.deepEqual(await (await call('')).json(),[]);
+  assert.equal((await call('/'+added.id+'/forget','POST',{})).status,404);assert.equal((await call('/'+added.id,'PUT',{text:'again'})).status,404);
+  assert.deepEqual(await (await call('/episodes')).json(),[]);
+ }finally{await new Promise<void>(done=>server.close(()=>done()));await runtime.close();rmSync(dir,{recursive:true,force:true});}
+});

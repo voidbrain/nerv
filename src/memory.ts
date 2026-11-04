@@ -56,6 +56,15 @@ export class Memory {
    this.db.prepare("UPDATE facts SET status='forgotten',updated=? WHERE id=?").run(at,id);this.db.prepare('DELETE FROM facts_fts WHERE fact_id=?').run(id);this.history(id,'forgotten',row.text,source,at);return true;
   });
  }
+ /** Shareable facts may be offered to a cloud model; every fact starts local-only. The change is part of the history. */
+ share(id:string,shareable:boolean,source:string,now=new Date()):Fact|undefined {
+  const at=now.toISOString();
+  return this.tx(()=>{
+   const row=this.db.prepare("SELECT * FROM facts WHERE id=? AND status='active'").get(id) as Row|undefined;if(!row)return undefined;
+   if((row.shareable===1)!==shareable){this.db.prepare('UPDATE facts SET shareable=?,updated=? WHERE id=?').run(shareable?1:0,at,id);this.history(id,shareable?'shared':'local-only',row.text,source,at);}
+   return toFact(this.db.prepare('SELECT * FROM facts WHERE id=?').get(id) as Row);
+  });
+ }
  list(limit=50):Fact[] {return (this.db.prepare("SELECT * FROM facts WHERE status='active' ORDER BY updated DESC LIMIT ?").all(Math.min(Math.max(1,limit),200)) as Row[]).map(toFact);}
  /** Best matches first (BM25); an empty or wordless query finds nothing rather than everything. */
  recall(text:string,limit=5):Fact[] {
