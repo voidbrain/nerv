@@ -1,6 +1,6 @@
 # Nodo backlog
 
-Current work ledger, reviewed 4 November 2026 against main `0ffdfc6`. PR #1–#9 merged after green checks (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nodo/pull/7), [gate and ledger](https://github.com/voidbrain/nodo/pull/8), [approvals API](https://github.com/voidbrain/nodo/pull/9); main CI run 41787648624 green); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
+Current work ledger, reviewed 4 November 2026 against main `7b0d054`. PR #1–#11 merged after green checks (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nodo/pull/7), [gate and ledger](https://github.com/voidbrain/nodo/pull/8), [approvals API](https://github.com/voidbrain/nodo/pull/9); [model routes](https://github.com/voidbrain/nodo/pull/11); main CI run 41789550905 green); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
 
 ## Features and improvements
 
@@ -66,7 +66,7 @@ Current work ledger, reviewed 4 November 2026 against main `0ffdfc6`. PR #1–#9
 |---|---|
 | PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks; [PR #11](https://github.com/voidbrain/nodo/pull/11) (model routes) |
 | Opened | 2026-11-01 |
-| Verification | Unit/integration 2026-11-04: test/model.test.ts covers loopback-only S², cloud off by default, no route fallback (fake cloud receives zero requests), local-only refusal, bounded replies, timeouts, refusal/auth mapping without leaking the key, coordinator → brain → S² join, socket denial, private key file (local run; CI pending). Live model, phone and Italian/English acceptance: pending |
+| Verification | Unit/integration 2026-11-04: test/model.test.ts covers loopback-only S², cloud off by default, no route fallback (fake cloud receives zero requests), local-only refusal, bounded replies, timeouts, refusal/auth mapping without leaking the key, coordinator → brain → S² join, socket denial, private key file (local run; CI green: PR #11 runs 41789288135 and 41789292689, main run 41789550905). Live model, phone and Italian/English acceptance: pending |
 | Reviewed | 2026-11-04 |
 
 </details>
@@ -557,26 +557,26 @@ Current work ledger, reviewed 4 November 2026 against main `0ffdfc6`. PR #1–#9
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔶 P2 | Open | 🟡 Medium | ~10% |
+| 🔴 | 🔶 P2 | Open | 🟡 Medium | ~20% |
 
-💻 **→ Human action required: No**<br />Replace decorative dashboard animations with a stage-aware trace of Ingress → risk classification → optional council → token/HITL → execution → ledger.
+💻 **→ Human action required: No**<br />Bind the NERV Agency dashboard prototype to real sortie events and approvals once the F-024 event schema carries plans and ballots.
 
 | | |
 |---|---|
 | **Issue** | dashboard1.html shows MAGI, Sephiroth tree and streams as test animations. Operators need a real view of where a job is and why a decision was taken. |
-| **Reproduce** | Run Blue/Orange/Red jobs; open dashboard; confirm active stage, classification reason, council participation and final outcome match backend state. |
+| **Reproduce** | Run Green, Orange and Blue sorties; open the dashboard; confirm the active step, Pattern, MAGI verdicts, Sync Ratio inputs, approval card and outcome match the ledger. |
 | **Check** | Pipeline tree and MAGI matrix driven by job state; Live Reasoning Stream is structured and filterable; Pattern and Sync Ratio are real; decorative-only paths removed or clearly marked demo; monochrome / light / dark / terminal skins planned. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Define a versioned job-stage and decision-event schema emitted by the coordinator. Bind dashboard panels (and any NERV skin) to that stream. Keep Eva framing as optional skin; functional observability must work without it. Depends on the F-024 event schema (one schema for ledger, traces and the dashboard) and F-017 ballots. Redesign 2026-11-04 around outcomes: needs you (approval cards), activity and traces, upcoming, memory, nodes and channels; MAGI detail becomes a secondary view. Remove decorative-only data (per-seat GPU/CPU, globe, per-EVA sync, random jitter).
+**Next action / closure evidence:** Prototype 2026-11-04: `docs/NERV/nerv-agency-dashboard.html` (simulation, same ballot rules as `src/policy.ts`). It answers the five owner questions at the top (needs you, while you were away, coming up, broken or stuck, budget with limit and forecast); approval cards show the exact action, args, effect and undo, Pattern, Sync Ratio with its inputs, verdicts, why it stopped and the TTL; Pattern is the system's output (no risk buttons); the plan step is visible; a sortie list keeps history and several sorties run at once. One flow view: EVA Full draws the Sephirot tree with the big MAGI at its centre and the plan loops on the side; other themes show a compact decision timeline with the three MAGI seats inside. Owner decisions on decoration: keep MAGI (smaller), machine CPU/GPU/RAM on bases instead of per seat, a topographic map with real base positions (status-coloured pulses, dashed Kaji line, message pulses), EVA cage heartbeats instead of sync waves, no confidence slider or random jitter. Then define a versioned job-stage and decision-event schema emitted by the coordinator. Bind dashboard panels (and any NERV skin) to that stream. Keep Eva framing as optional skin; functional observability must work without it. Depends on the F-024 event schema (one schema for ledger, traces and the dashboard) and F-017 ballots. Still missing from the prototype: memory (Lilith) and channel views.
 
-**Estimates:** Medium remaining effort; ~10% complete (static UI exists). Estimated 2026-11-02; reassessed 2026-11-04: unchanged, the redesign replaces rather than adds work.
+**Estimates:** Medium remaining effort; ~20% complete (prototype settles the design; nothing is bound to the backend). Estimated 2026-11-02; reassessed 2026-11-04 after the prototype.
 
 | Field | Value |
 |---|---|
-| PR / evidence | docs/NERV/dashboard-agnostic-2.html (prototype only); review docs/NERV/review-2026-11-04.md §6 |
+| PR / evidence | docs/NERV/nerv-agency-dashboard.html (prototype); earlier docs/NERV/dashboard-agnostic-2.html; review docs/NERV/review-2026-11-04.md §6 |
 | Opened | 2026-11-02 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |
