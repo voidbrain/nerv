@@ -42,3 +42,15 @@ test('rename: ~/.nerv by default, pre-rename ~/.nodo, nodo.sqlite and NODO_* sti
   writeFileSync(join(home,'nerv.sqlite'),'');assert.equal(databasePath(home),join(home,'nerv.sqlite'));
  }finally{process.chdir(cwd);for(const [k,v] of Object.entries(saved)){if(v===undefined)delete process.env[k];else process.env[k]=v;}rmSync(dir,{recursive:true,force:true});}
 });
+test('every NERV process trusts the system certificates: npm start, both service units and the child processes',async()=>{
+ const {NODE_FLAGS}=await import('../src/process-client.ts');const {Runtime}=await import('../src/runtime.ts');
+ const start=(JSON.parse(readFileSync('package.json','utf8')) as {scripts:{start:string}}).scripts.start;
+ for(const flag of NODE_FLAGS){
+  assert.ok(start.split(' ').includes(flag),`package.json start has ${flag}`);
+  assert.ok(renderService('darwin','/h','/r','/n').includes(`<string>/n</string><string>${flag}</string>`));
+  assert.ok(renderService('linux','/h','/r','/n').includes(`ExecStart="/n" ${flag} `));
+ }
+ const dir=mkdtempSync(join(tmpdir(),'nerv-flags-'));const runtime=new Runtime(join(dir,'db'));
+ try{await runtime.ready();for(const child of [runtime.nervous.child,runtime.brain.child])for(const flag of NODE_FLAGS)assert.ok(child.spawnargs.includes(flag),`child started with ${flag}`);}
+ finally{await runtime.close();rmSync(dir,{recursive:true,force:true});}
+});

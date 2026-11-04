@@ -103,6 +103,8 @@ Aoba is a Telegram bot that only you can use: write to Misato from your phone, a
 3. Send `/start` to your bot, then run `npm start -- telegram link`. It finds that `/start` and saves your chat ID in `config.json` (if several chats sent `/start`, it lists them: `telegram link CHAT_ID`).
 4. Restart the service. `serve` prints `Aoba (Telegram): linked, listening.`
 
+If `telegram link` or Aoba reports `fetch failed` while `curl https://api.telegram.org` works, your network inspects HTTPS with a certificate your Mac trusts but Node does not: `npm start` and the service units run Node with `--use-system-ca` for that reason; reinstall the service (`npm start -- service install`) after updating.
+
 Aoba ignores every other chat and every button pressed by another account, and logs it. A message older than 10 minutes (sent while the service was down) is not run; Aoba asks you to send it again. Approval cards arrive once, with **✅ Approve once** and **❌ Reject**; a tap uses the same decision path as `approve`, so the action runs once and a second tap changes nothing. Due reminders arrive here as well as in the local inbox; reminders delivered before Aoba was linked are not replayed. Its progress (last update, cards sent, last reminder) is in `telegram-state.json` in the data home.
 
 Telegram bot chats are not end-to-end encrypted: Telegram's servers can read what you and Aoba write, including reminder titles and action arguments on cards.

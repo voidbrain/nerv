@@ -150,6 +150,24 @@
         }
       ],
       "kept": "test/brand.test.ts asserts the same triangle and eye centres in the three drawings and the --mark colour in both SVGs."
+    },
+    {
+      "value": "Node flags for every NERV process (--use-system-ca)",
+      "places": [
+        {
+          "file": "src/process-client.ts",
+          "what": "NODE_FLAGS, used for child processes and service units"
+        },
+        {
+          "file": "package.json",
+          "what": "scripts.start"
+        },
+        {
+          "file": "src/service.ts",
+          "what": "launchd ProgramArguments and systemd ExecStart"
+        }
+      ],
+      "kept": "test/runtime.test.ts asserts package.json start, both service units and the child processes carry every NODE_FLAGS entry."
     }
   ],
   "outside": [

@@ -1,4 +1,9 @@
 import { fork,type ChildProcess } from 'node:child_process';
+/**
+ * Node flags for every NERV process: trust the operating system's certificates as well as Node's own, so HTTPS works
+ * behind TLS-inspecting networks (company laptops). Kept equal to package.json "start" and the service units by test.
+ */
+export const NODE_FLAGS=['--use-system-ca'] as const;
 import { randomUUID } from 'node:crypto';
 import { MAX_FRAME_BYTES,validateParams,authorize,type Method,type Principal,RpcFault } from './rpc.ts';
 export class ProcessClient {
@@ -10,7 +15,7 @@ export class ProcessClient {
  constructor(entry:URL,args:string[],role:'nervous'|'brain',timeoutMs=5000) {
   this.role=role;this.timeoutMs=timeoutMs;
   // Explicit small environment: no provider/API/root token passed to children. Same-user process isolation is NOT a sandbox.
-  this.child=fork(entry,args,{stdio:['ignore','ignore','inherit','ipc'],env:{PATH:process.env.PATH ?? '',LANG:process.env.LANG ?? 'C.UTF-8'},execArgv:[]});
+  this.child=fork(entry,args,{stdio:['ignore','ignore','inherit','ipc'],env:{PATH:process.env.PATH ?? '',LANG:process.env.LANG ?? 'C.UTF-8'},execArgv:[...NODE_FLAGS]});
   this.child.on('message',(value:unknown)=>{
    if(!value||typeof value!=='object'||Array.isArray(value))return;
    const reply=value as Record<string,unknown>;if(reply.jsonrpc!=='2.0'||typeof reply.id!=='string')return;

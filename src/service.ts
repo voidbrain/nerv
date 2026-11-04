@@ -3,6 +3,7 @@ import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { NODE_FLAGS } from './process-client.ts';
 import { readConfig,readToken } from './config.ts';
 const label='io.nerv.agent',unit='nerv.service';
 /** Pre-rename names: install replaces them; other actions still find them until then. */
@@ -16,7 +17,7 @@ export function renderService(platform:string,home:string,root:string,node:strin
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
 <key>Label</key><string>${label}</string>
-<key>ProgramArguments</key><array><string>${xml(node)}</string><string>${xml(cli)}</string><string>serve</string></array>
+<key>ProgramArguments</key><array><string>${xml(node)}</string>${NODE_FLAGS.map(f=>`<string>${f}</string>`).join('')}<string>${xml(cli)}</string><string>serve</string></array>
 <key>WorkingDirectory</key><string>${xml(root)}</string>
 <key>EnvironmentVariables</key><dict><key>NERV_HOME</key><string>${xml(home)}</string></dict>
 <key>Umask</key><integer>63</integer>
@@ -30,7 +31,7 @@ Description=NERV Agency local personal agent
 Type=simple
 WorkingDirectory=${root.replace(/%/g,'%%')}
 Environment=${quoted('NERV_HOME='+home)}
-ExecStart=${quoted(node,true)} ${quoted(cli,true)} serve
+ExecStart=${quoted(node,true)} ${NODE_FLAGS.join(' ')} ${quoted(cli,true)} serve
 Restart=on-failure
 RestartSec=5
 UMask=0077
