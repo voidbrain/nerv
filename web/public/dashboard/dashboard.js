@@ -86,7 +86,7 @@ const LABELS = {
   eva:{ brandTitle:"TACTICAL COMMAND", brandTag:"SEELE SCROLLS ENFORCED // CENTRAL DOGMA LEDGER · LILITH MEMORY",
     needs:"Misato's apartment · needs you", sorties:"Sorties", next:"Coming up · next 24 h", flow:"Sephirot · sortie flow",
     detail:"Misato plan · current action", log:"Comms · Misato & Maya trace", away:"Debrief · while you were away", health:"Health · broken or stuck",
-    bases:"NERV bases · Kaji line", cages:"EVA cages · heartbeat", budget:"Battery · budget", melons:"Kaji's watermelons · pilot trust",
+    bases:"NERV bases · Kaji line", cages:"EVA cages · heartbeat", budget:"Battery · budget", melons:"Kaji's watermelons · pilot trust", lilith:"Terminal Dogma · Lilith",
     spear:"SPEAR OF LONGINUS", dummy:"DUMMY PLUG ACTIVE", launch:"Launch",
     qNeeds:"Needs you", qAway:"While you were away", qNext:"Coming up", qHealth:"Broken or stuck", qBudget:"Battery today",
     steps:{ detect:"Detect", intake:"Naoko", route:"Gendo", consult:"Consult", plan:"Misato", magi:"MAGI", sync:"Sync", apt:"Apartment", plug:"Plug", eva:"EVA", debrief:"Debrief" },
@@ -94,7 +94,7 @@ const LABELS = {
   neutral:{ brandTitle:"OPERATIONS", brandTag:"owner rules enforced · append-only ledger · long-term memory",
     needs:"Needs your approval", sorties:"Jobs", next:"Coming up · next 24 h", flow:"Decision timeline",
     detail:"Plan · current action", log:"Messages · trace", away:"While you were away", health:"Health · broken or stuck",
-    bases:"Machines · mesh", cages:"Sandboxes · heartbeat", budget:"Budget", melons:"Skill trust stages",
+    bases:"Machines · mesh", cages:"Sandboxes · heartbeat", budget:"Budget", melons:"Skill trust stages", lilith:"Memory",
     spear:"STOP EVERYTHING", dummy:"MODELS UNAVAILABLE", launch:"Run",
     qNeeds:"Needs you", qAway:"While you were away", qNext:"Coming up", qHealth:"Broken or stuck", qBudget:"Budget today",
     steps:{ detect:"Ingress", intake:"Intake", route:"Route", consult:"Consult", plan:"Plan", magi:"Review", sync:"Confidence", apt:"Approval", plug:"Grant", eva:"Sandbox", debrief:"Done" },
@@ -613,7 +613,18 @@ function renderLog() {
   fillAvatars(el); el.scrollTop = el.scrollHeight;
 }
 function applyLabels() { const p = L(); document.querySelectorAll("[data-l]").forEach(el => { const k = el.dataset.l; if (p[k]) el.textContent = p[k]; }); }
-function renderAll() { fillAvatars(); renderQuestions(); renderNeeds(); renderSorties(); renderFlow(); renderAway(); renderNext(); renderHealth(); renderBudget(); renderMelons(); renderBases(); renderCages(); }
+/* Lilith (memory): in the simulation, invented facts; live.js replaces this with the owner's real facts. */
+const DEMO_FACTS = [
+  { id:"f1", text:"Prefers reminders in the morning", source:"misato", shareable:false },
+  { id:"f2", text:"Coffee at 8", source:"owner", shareable:true },
+  { id:"f3", text:"Ada is a sister; birthday in May", source:"misato", shareable:false }
+];
+function renderLilith() {
+  document.getElementById("lilith-sub").textContent = DEMO_FACTS.length + " facts · simulation";
+  document.getElementById("lilith").innerHTML = DEMO_FACTS.map(f => "<div class='row small'><span>" + esc(f.text) + " <span class='tiny muted'>" + f.source + (f.shareable ? " · shareable" : " · local-only") + "</span></span></div>").join("") +
+    "<div class='tiny muted' style='margin-top:4px'>Facts are stored only after the owner approves them; Instrumentality proposes new ones each night.</div>";
+}
+function renderAll() { fillAvatars(); renderQuestions(); renderNeeds(); renderSorties(); renderFlow(); renderAway(); renderNext(); renderHealth(); renderBudget(); renderMelons(); renderBases(); renderCages(); renderLilith(); }
 
 /* ================= MAP: zoomed regional topography (procedural hills and valleys) ================= */
 const map = { ready:false, w:540, h:250, proj:null, contours:[], base:null, linkPaths:{} };

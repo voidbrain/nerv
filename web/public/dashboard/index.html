@@ -232,6 +232,7 @@ body.theme-eva-basic .eva-img, body.theme-eva-full .eva-img { display:block; }
 .up.hyuga::before { background:var(--info); }
 ::-webkit-scrollbar { width:5px; height:5px; } ::-webkit-scrollbar-thumb { background:var(--border); }
 .sr { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+.sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
 </style>
 </head>
 <body class="theme-eva-full">
@@ -414,6 +415,11 @@ body.theme-eva-basic .eva-img, body.theme-eva-full .eva-img { display:block; }
       <section class="panel">
         <div class="hdr"><span data-l="melons">Kaji's watermelons · pilot trust</span><span class="sub">prototype → test → production</span></div>
         <div class="pad list" id="melons"></div>
+      </section>
+
+      <section class="panel" id="p-lilith">
+        <div class="hdr"><span data-l="lilith">Terminal Dogma · Lilith</span><span class="sub" id="lilith-sub"></span></div>
+        <div class="pad list" id="lilith"></div>
       </section>
     </div>
   </main>

@@ -28,6 +28,13 @@ process.on('message',(value:unknown)=>{
    case 'sorties.finish':{const id=params.sortieId as string;if(params.reply)store.ledger.reply(id,params.reply as string);return params.status?store.ledger.close(id,params.status as 'done'|'failed'):false;}
    case 'misato.note':return store.ledger.note(params.sortieId as string,params.kind as 'misato.step',params.payload as never);
    case 'misato.resumable':return store.ledger.resumable();
+   // The owner's own changes (dashboard): source owner, every change in the fact's history.
+   case 'memory.list':return store.memory.list(params.limit as number|undefined);
+   case 'memory.add':return store.memory.add(params.text,'owner');
+   case 'memory.edit':return store.memory.edit(params.id as string,params.text,'owner') ?? null;
+   case 'memory.forget':return store.memory.forget(params.id as string,'owner');
+   case 'memory.share':return store.memory.share(params.id as string,params.shareable as boolean,'owner') ?? null;
+   case 'memory.history':return store.memory.historyOf(params.id as string);
    case 'memory.lastRequest':return store.ledger.lastRequestAt();
    case 'memory.episodes':return store.memory.episodes(params.limit as number|undefined);
    case 'memory.exchanges':return store.ledger.exchangesBetween(params.since as string,params.until as string);
