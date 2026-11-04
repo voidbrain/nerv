@@ -1069,19 +1069,11 @@ async function initMap() {
     const gp = d3.geoPath(d3.geoIdentity().scale(cell));
     map.contours = cs.map(c => ({ v:c.value, p:new Path2D(gp(c)) }));
   }
-  // Kaji line: each link bends like a road through the valleys, never a straight ruler line.
-  LINKS.forEach(([a, b], n) => {
+  // Kaji line: straight links between every pair of bases; the bases form a triangle, so no link runs through another base.
+  LINKS.forEach(([a, b]) => {
     const A = BASES.find(x => x.id === a), B = BASES.find(x => x.id === b); const pts = [];
     const [ax, ay] = map.proj([A.lon, A.lat]), [bx, by] = map.proj([B.lon, B.lat]);
-    const dx = bx - ax, dy = by - ay, len = Math.hypot(dx, dy) || 1; let nx = -dy / len, ny = dx / len;
-    // bow away from the centre of all bases, so the links of the mesh never cross
-    const c = BASES.map(x => map.proj([x.lon, x.lat])).reduce((m, p, _, all) => [m[0] + p[0] / all.length, m[1] + p[1] / all.length], [0, 0]);
-    if (((ax + bx) / 2 - c[0]) * nx + ((ay + by) / 2 - c[1]) * ny < 0) { nx = -nx; ny = -ny; }
-    const bend = len * 0.18;
-    for (let t = 0; t <= 64; t++) {
-      const u = t / 64, arc = 4 * u * (1 - u), wiggle = Math.sin(u * Math.PI * 3 + n) * len * 0.035 * arc;
-      pts.push([ax + dx * u + nx * (bend * arc + wiggle), ay + dy * u + ny * (bend * arc + wiggle)]);
-    }
+    for (let t = 0; t <= 64; t++) pts.push([ax + (bx - ax) * t / 64, ay + (by - ay) * t / 64]);
     map.linkPaths[a + "|" + b] = pts;
   });
   map.ready = true;
