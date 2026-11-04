@@ -511,9 +511,18 @@ function drawEdges(s) {
       const yy1 = Math.abs(A.y - B.y) < 10 ? A.y : y1, yy2 = Math.abs(A.y - B.y) < 10 ? B.y : y2;
       d = "M" + x1 + "," + yy1 + " L" + x2 + "," + yy2;
     }
-    const key = e[0] + ">" + e[1]; const cls = (e[2] ? "loop " : "") + (live[key] || "");
+    const key = e[0] + ">" + e[1]; const cls = (e[2] ? "loop " : "") + (live[key] || passedEdge(s, e) || "");
     return "<path d='" + d + "' class='" + cls + "'/>";
   }).join("");
+}
+/** The route already taken: green when the step passed on its own, yellow when it went through the owner's decision
+    (Misato's apartment), faded into a skipped step. Live, waiting and rejected edges are drawn by liveEdges instead. */
+function passedEdge(s, e) {
+  if (!s || e[2] === "loop") return "";
+  const from = stepState(s, e[0]), to = stepState(s, e[1]);
+  if (from === "skip" || to === "skip") return "skip";
+  if (from !== "done" || !(to === "done" || to === "on" || to === "wait")) return "";
+  return e[0] === "apt" || e[1] === "apt" ? "passed owner" : "passed";
 }
 function liveEdges(s) {
   const m = {}; if (!s) return m;
