@@ -7,6 +7,7 @@ import { dataHome, initialize, readConfig, readToken } from './config.ts';
 import { service } from './service.ts';
 import {initializeNativeTLS,loadNativeTLS,nativeAdmin,NativeAuth,type Invitation} from './native-auth.ts';
 import { Runtime } from './runtime.ts';
+import { Ledger } from './ledger.ts';
 const [command,...args]=process.argv.slice(2);
 let store:Store|undefined;let running=false;
 try {
@@ -15,7 +16,7 @@ try {
   else if(command==='native-init'){initialize(home);initializeNativeTLS(home);console.log('Native TLS configured. Restart Nodo, then run pair.');}
   else if(['pair','clients','revoke'].includes(command ?? '')){const config=readConfig(home);const path=command==='pair'?'/api/pairing/tickets':command==='clients'?'/api/clients':'/api/clients/'+encodeURIComponent(args[0] ?? '');const value=await nativeAdmin(home,config.nativePort ?? 4319,readToken(home),path,command==='pair'?'POST':command==='revoke'?'DELETE':'GET',command==='pair'?{label:args[0] ?? 'Nodo Menu Bar'}:undefined);if(command==='pair'){const invitation=value as Invitation;console.log('Private invitation (expires in 2 minutes; paste only into Nodo companion):\n'+Buffer.from(JSON.stringify(invitation)).toString('base64url'));}else console.log(JSON.stringify(value,null,2));}
   else if(command==='service')service(args[0] ?? '',home);
-  else if(!command||command==='help')console.log('Nodo\nCommands: init | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | serve | service install|start|stop|status|uninstall');
+  else if(!command||command==='help')console.log('Nodo\nCommands: init | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
   else {
     const config=readConfig(home);
     if(command!=='serve')store=new Store(join(home,'nodo.sqlite'));
@@ -26,6 +27,10 @@ try {
       case 'cancel':if(!local().cancel(args[0] ?? ''))throw new Error('No pending reminder with that ID.');console.log('Cancelled.');break;
       case 'tick':console.log(JSON.stringify({delivered:local().tick()}));break;
       case 'inbox':console.log(JSON.stringify(local().inbox(),null,2));break;
+      case 'approvals':console.log(JSON.stringify(new Ledger(local().db).pendingApprovals(),null,2));break;
+      case 'approve':case 'reject':console.log(JSON.stringify(new Ledger(local().db).decide(args[0] ?? '',command,'cli'),null,2));break;
+      case 'events':console.log(JSON.stringify(new Ledger(local().db).events(args[0] ?? ''),null,2));break;
+      case 'spear':console.log(JSON.stringify(new Ledger(local().db).spear(args[0] ?? '',args[1] ?? 'cli'),null,2));break;
       case 'doctor':console.log(JSON.stringify({node:process.version,home,port:config.port,language:config.language,timeZone:config.timeZone,hostTimeZone:Intl.DateTimeFormat().resolvedOptions().timeZone,...local().doctor(),delivery:'Durable local inbox; phone notifications not configured.',workers:'Contract only; no remote execution.'},null,2));break;
       case 'serve':{
         const webRoot=resolve(fileURLToPath(new URL('../dist/web/browser',import.meta.url)));

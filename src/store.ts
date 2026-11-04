@@ -2,6 +2,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
+import { LEDGER_SCHEMA } from './ledger.ts';
 export type Reminder = { id: string; title: string; due: string; created: string; delivered: string | null; cancelled: string | null };
 export interface InboxCheckpoint {sequence:number;id?:string}
 export interface InboxEntry {sequence:number;id:string;message:string;created:string}
@@ -12,12 +13,13 @@ export class Store {
     if(path !== ':memory:') mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
     this.db = new DatabaseSync(path);
     const version = this.db.prepare('PRAGMA user_version').get() as {user_version:number};
-    if(version.user_version > 1) {this.db.close();throw new Error('Database schema is newer than this Nodo version.');}
+    if(version.user_version > 2) {this.db.close();throw new Error('Database schema is newer than this Nodo version.');}
     this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
       CREATE TABLE IF NOT EXISTS reminders(id TEXT PRIMARY KEY, title TEXT NOT NULL, due TEXT NOT NULL, created TEXT NOT NULL, delivered TEXT, cancelled TEXT);
       CREATE TABLE IF NOT EXISTS deliveries(id TEXT PRIMARY KEY, reminder_id TEXT NOT NULL UNIQUE REFERENCES reminders(id), message TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT);
       CREATE INDEX IF NOT EXISTS reminders_due ON reminders(due);
-      PRAGMA user_version=1;`);
+      ${LEDGER_SCHEMA}
+      PRAGMA user_version=2;`);
   }
   add(title: string, due: string, now = new Date()): Reminder {
     if(typeof title !== 'string' || !title.trim() || title.length > 500) throw new Error('Title must contain 1–500 characters.');
