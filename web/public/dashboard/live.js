@@ -5,6 +5,7 @@
   if (!LIVE) return;
   const match = /^#code=([a-f0-9]{32})$/.exec(location.hash); const code = match ? match[1] : null;
   if (match) history.replaceState(null, "", location.pathname + location.search);
+  let older = [], matches = [], shown = [], searchSeq = 0, searchTimer = null; let editing = null;
   let token = ""; let polling = false; let lastRan = null; let firstTrace = true; const detailCache = {}; const known = new Map(); let chatBusy = false;
   const PLANNED = "<div class='muted small'>Planned · not connected yet.</div>";
   const api = async (path, init = {}) => {
@@ -34,7 +35,7 @@
     const phase = status === "waiting" ? "apt" : status === "active" ? "magi" : "debrief";
     const last = actions[actions.length - 1];
     return { id:short(s.id), realId:s.id, title:s.title, preset:null, pilot:s.source === "misato" ? "misato" : "owner", source:"aoba", proactive:false, consult:false,
-      trust:s.trust, battery:0, spent:0, started:Date.parse(s.created), ended:s.closed ? Date.parse(s.closed) : null, status, phase, done,
+      why:s.why || "", created:s.created, trust:s.trust, battery:0, spent:0, started:Date.parse(s.created), ended:s.closed ? Date.parse(s.closed) : null, status, phase, done,
       actions, current:Math.max(0, actions.length - 1), ballot:last && last.ballot && last.ballot.verdicts ? last.ballot : null, outcome:known.get(s.id) || null, happened:[], note:"" };
   }
   function toApproval(a) {
@@ -46,7 +47,10 @@
   async function poll() {
     if (polling || !token) return; polling = true;
     try {
-      const [list, cards, doctor, pending, inbox, facts, episodes, kajiBases] = await Promise.all([api("sorties?limit=20"), api("approvals"), api("doctor"), api("reminders/pending"), api("inbox"), api("memory"), api("memory/episodes"), api("bases").catch(() => [])]);
+      const [latest20, cards, doctor, reminders, inbox, facts, episodes, kajiBases] = await Promise.all([api("sorties?limit=20"), api("approvals"), api("doctor"), api("reminders"), api("inbox"), api("memory"), api("memory/episodes"), api("bases").catch(() => [])]);
+      // The newest sorties, plus older pages the owner loaded and every match of the current search, newest first.
+      const byId = new Map(); for (const x of [...latest20, ...older, ...matches]) if (!byId.has(x.id)) byId.set(x.id, x);
+      const list = [...byId.values()].sort((a, b) => b.created.localeCompare(a.created)); shown = list;
       applyBases(kajiBases, healthOf(doctor));
       state.lilith = Object.assign(state.lilith || { history:{} }, { facts, episodes });
       state.delivered = inbox.map(d => Date.parse(d.created));
@@ -58,19 +62,20 @@
       if (ran && lastRan && ran > lastRan) activeCage["EVA-02"] = Date.now() + 4000; if (ran) lastRan = ran;
       // Comms: the first refresh loads the five most recent sorties' traces (so the panel is not empty at start); later
       // ones keep the selected sortie and every running or waiting one up to date.
-      const traced = new Set([...(firstTrace ? list.slice(0, 5) : list.filter(s => s.status === "open")).map(s => s.id), ...(selected ? [selected.realId] : [])]);
+      const traced = new Set([...(firstTrace ? latest20.slice(0, 5) : latest20.filter(s => s.status === "open")).map(s => s.id), ...(selected ? [selected.realId] : [])]);
       firstTrace = false;
       let added = 0; for (const id of traced) added += await loadEvents(id);
       // renderAll does not redraw Comms: redraw it when new trace lines arrived (not on every poll, so scrolling back stays put).
       if (added) renderLog();
       state.sorties = list.map(toSortie);
       state.approvals = cards.map(toApproval).filter(ap => state.sorties.some(s => s.id === ap.sortie));
-      state.upcoming = pending.map(r => ({ at:Date.parse(r.due), title:r.title, kind:"reminder" }));
+      state.reminders = reminders.filter(r => !r.delivered && !r.cancelled && Date.parse(r.due) > Date.now()).sort((a, b) => a.due.localeCompare(b.due));
+      state.upcoming = state.reminders.map(r => ({ at:Date.parse(r.due), title:r.title, kind:"reminder" }));
       state.doctor = doctor;
       if (doctor.base && BASES[0].name !== doctor.base.name.toUpperCase()) { BASES[0].name = doctor.base.name.toUpperCase(); BASES[0].role = doctor.base.id + " · this machine"; document.getElementById("cages").innerHTML = ""; }
       if (!state.selected && state.sorties[0]) state.selected = state.sorties[0].id;
       renderAll();
-      setBanner("<b>LIVE</b> <span class='muted'>— this NERV Agency service · " + list.length + " recent sorties · refreshed " + new Date().toTimeString().slice(0, 8) + "</span>", "live");
+      setBanner("<b>LIVE</b> <span class='muted'>— this NERV Agency service · " + latest20.length + " recent sorties · refreshed " + new Date().toTimeString().slice(0, 8) + "</span>", "live");
     } catch (e) { setBanner("<b>LIVE · CONNECTION LOST</b> <span class='muted'>— " + esc(e.message) + ". Run npm start -- open dashboard again if the service restarted.</span>"); }
     finally { polling = false; }
   }
@@ -95,6 +100,61 @@
     return added;
   }
 
+  // Longer history: older pages, 50 at a time, kept until the page reloads.
+  window.liveOlder = async function () {
+    const oldest = shown[shown.length - 1]; if (!oldest || state.loadingOlder) return;
+    state.loadingOlder = true; renderSorties();
+    try { const page = await api("sorties?limit=50&before=" + encodeURIComponent(oldest.created)); older.push(...page); if (page.length < 50) state.noOlder = true; }
+    catch (e) { log("Could not load older sorties: " + e.message, "danger", null, "maya"); }
+    finally { state.loadingOlder = false; poll(); }
+  };
+  // Search: the box filters what is loaded at once; the service then finds matching titles in all history.
+  window.liveSearch = function (q) {
+    clearTimeout(searchTimer); const seq = ++searchSeq;
+    if (!q) { matches = []; poll(); return; }
+    searchTimer = setTimeout(async () => {
+      try { const found = await api("sorties?limit=50&q=" + encodeURIComponent(q.slice(0, 200))); if (seq === searchSeq) { matches = found; poll(); } }
+      catch (e) { log("Search failed: " + e.message, "danger", null, "maya"); }
+    }, 250);
+  };
+  // Coming up: pending reminders, each with Edit (title and time, inline) and Cancel reminder.
+  const pad = n => String(n).padStart(2, "0");
+  const localInput = iso => { const d = new Date(iso); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes()); };
+  const when = t => { const d = new Date(t); const today = new Date().toDateString() === d.toDateString(); return (today ? "" : d.toLocaleDateString(undefined, { weekday:"short", day:"numeric", month:"short" }) + " ") + pad(d.getHours()) + ":" + pad(d.getMinutes()); };
+  const until = t => { const m = Math.max(0, Math.round((t - Date.now()) / 60000)); return m < 60 ? "in " + m + " min" : m < 48 * 60 ? "in " + Math.round(m / 60) + " h" : "in " + Math.round(m / 1440) + " days"; };
+  window.renderNext = function () {
+    const box = document.getElementById("next-list"); const list = state.reminders || [];
+    document.getElementById("next-sub").textContent = list.length + " reminder" + (list.length === 1 ? "" : "s");
+    // While a reminder is being edited the list stays as it is, so a refresh never wipes what you are typing.
+    if (editing && list.some(r => r.id === editing) && box.querySelector("[data-rem-form]")) return;
+    if (!list.some(r => r.id === editing)) editing = null;
+    if (!list.length) { box.innerHTML = "<div class='muted small'>No reminders. Ask Misato “remind me tomorrow at 9 to call Ada” below, or on Telegram; it appears here, where you can edit or cancel it.</div>"; return; }
+    box.innerHTML = list.map(r => editing === r.id
+      ? "<form class='rem-edit' data-rem-form='" + r.id + "'><label class='sr-only' for='rem-t-" + r.id + "'>Reminder</label><input type='text' id='rem-t-" + r.id + "' maxlength='500' required value='" + esc(r.title) + "'/>" +
+        "<label class='sr-only' for='rem-d-" + r.id + "'>When</label><input type='datetime-local' id='rem-d-" + r.id + "' required value='" + localInput(r.due) + "'/>" +
+        "<button class='btn sm primary' type='submit'>Save</button><button class='btn sm' type='button' data-rem-keep>Keep as is</button></form>"
+      : "<div class='rem'><span class='small'><b>" + when(r.due) + "</b> " + esc(r.title) + "</span><span class='acts'><button class='btn sm' data-rem-edit='" + r.id + "' aria-label='Edit reminder: " + esc(r.title) + "'>Edit</button>" +
+        "<button class='btn sm danger' data-rem-cancel='" + r.id + "' aria-label='Cancel reminder: " + esc(r.title) + "'>Cancel</button></span><span class='tiny muted'>" + until(Date.parse(r.due)) + "</span></div>").join("");
+    const input = editing && document.getElementById("rem-t-" + editing); if (input) input.focus();
+  };
+  const reminderAction = async (path, init, done) => { try { await api(path, init); log(done, "ok", null, "penpen"); } catch (e) { log("Reminder: " + e.message, "danger", null, "penpen"); } poll(); };
+  document.addEventListener("click", e => {
+    const t = e.target.closest("[data-rem-edit],[data-rem-cancel],[data-rem-keep]"); if (!t) return; e.preventDefault();
+    if (t.dataset.remEdit) { editing = t.dataset.remEdit; renderNext(); return; }
+    if (t.hasAttribute("data-rem-keep")) { const id = editing; editing = null; renderNext(); const b = document.querySelector("[data-rem-edit='" + id + "']"); if (b) b.focus(); return; }
+    const r = (state.reminders || []).find(x => x.id === t.dataset.remCancel);
+    if (r && confirm("Cancel the reminder “" + r.title + "” at " + when(r.due) + "?")) reminderAction("reminders/" + r.id, { method:"DELETE" }, "Reminder cancelled: " + r.title);
+  });
+  document.addEventListener("submit", e => {
+    const form = e.target.closest("[data-rem-form]"); if (!form) return; e.preventDefault();
+    const id = form.dataset.remForm; const r = (state.reminders || []).find(x => x.id === id); if (!r) { editing = null; renderNext(); return; }
+    const title = document.getElementById("rem-t-" + id).value.trim(); const at = new Date(document.getElementById("rem-d-" + id).value);
+    if (!title || !Number.isFinite(at.getTime())) { log("Reminder: give a title and a time.", "danger", null, "penpen"); return; }
+    if (at.getTime() <= Date.now()) { log("Reminder: pick a time in the future.", "danger", null, "penpen"); return; }
+    const patch = {}; if (title !== r.title) patch.title = title; if (at.toISOString() !== new Date(r.due).toISOString()) patch.due = at.toISOString();
+    editing = null; if (!Object.keys(patch).length) { renderNext(); return; }
+    reminderAction("reminders/" + id, { method:"PATCH", body:JSON.stringify(patch) }, "Reminder updated: " + title + " · " + when(at));
+  });
   // Real actions instead of simulated ones.
   window.decide = async function (apId, decision) {
     try { const r = await api("approvals/" + apId, { method:"POST", body:JSON.stringify({ decision }) }); log("Owner " + decision + " · " + r.decision + (r.error ? " · " + r.error : ""), decision === "approve" ? "ok" : "danger", null, "you"); }
@@ -212,7 +272,7 @@
   const baseDetail = window.renderDetail;
   window.renderDetail = function (s) {
     const box = document.getElementById("detail"); const sub = document.getElementById("detail-sub");
-    if (!s) { box.innerHTML = "<div class='muted'>No sortie selected.</div>"; sub.textContent = ""; return; }
+    if (!s) { box.innerHTML = "<div class='muted'>No sortie selected. Pick one in Sorties, or ask Misato below to start one.</div>"; sub.textContent = ""; return; }
     const who = s.pilot === "misato" ? "Misato, from a chat" : "you, as a direct action";
     const status = { active:"running", waiting:"waiting for you", done:"done", failed:"failed", "stood-down":"stopped" }[s.status] || s.status;
     if (!s.actions.length) { box.innerHTML = "<div class='muted small'>No actions: Misato answered without using a tool.</div>" + (s.outcome ? "<div class='small' style='margin-top:4px'>Reply: " + esc(s.outcome) + "</div>" : ""); sub.textContent = "started by " + who + " · " + status; return; }

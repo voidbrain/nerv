@@ -81,3 +81,29 @@ test('the Lilith API (admin, through the scheduler process): add, edit, share, h
   assert.deepEqual(await (await call('/episodes')).json(),[]);
  }finally{await new Promise<void>(done=>server.close(()=>done()));await runtime.close();rmSync(dir,{recursive:true,force:true});}
 });
+test('the dashboard API (admin, through the scheduler process): search sorties by title, a why per sortie, edit and cancel a reminder',async()=>{
+ const {Runtime}=await import('../src/runtime.ts');
+ const dir=mkdtempSync(join(tmpdir(),'nerv-practical-'));writeFileSync(join(dir,'scrolls.json'),JSON.stringify({blue:['reminders.cancel']}),{mode:0o600});
+ const runtime=new Runtime(join(dir,'nerv.sqlite'),undefined,dir);const token='h'.repeat(32);const server=makeServer(runtime,token);
+ try{
+  await runtime.ready();await new Promise<void>(done=>server.listen(0,'127.0.0.1',done));const base=`http://127.0.0.1:${(server.address() as {port:number}).port}/api`;
+  const call=(path:string,method='GET',body?:object,auth=true)=>fetch(base+path,{method,headers:{...(auth?{authorization:'Bearer '+token}:{}),'content-type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
+  const added=await runtime.act({request:'Remind me to call Ada',tool:'reminders.add',args:{title:'Call Ada',due:'2031-01-01T09:00:00Z'}});
+  const waiting=await runtime.act({request:'Cancel 100%_ of it',tool:'reminders.cancel',args:{id:'x'}});assert.equal(waiting.outcome,'approval');
+  const all=await (await call('/sorties')).json() as {id:string;why:string}[];
+  assert.match(all.find(s=>s.id===waiting.sortieId)!.why,/^Waits for you to approve reminders\.cancel: /);
+  assert.match(all.find(s=>s.id===added.sortieId)!.why,/reminders\.add/);
+  const found=async(q:string)=>((await (await call('/sorties?q='+encodeURIComponent(q))).json()) as {id:string}[]).map(s=>s.id);
+  assert.deepEqual(await found('ADA'),[added.sortieId],'case-insensitive');assert.deepEqual(await found('100%_'),[waiting.sortieId]);assert.deepEqual(await found('%'),[waiting.sortieId],'% and _ are literal');
+  assert.deepEqual(await found('nothing like it'),[]);assert.equal((await found('')).length,2,'an empty search is no filter');assert.equal((await call('/sorties?q='+'x'.repeat(201))).status,400);
+  const reminder=(await runtime.list())[0]!;
+  const edited=await (await call('/reminders/'+reminder.id,'PATCH',{title:'Call Ada back',due:'2031-01-02T10:30:00+01:00'})).json() as {title:string;due:string};
+  assert.deepEqual([edited.title,edited.due],['Call Ada back','2031-01-02T09:30:00.000Z']);
+  assert.equal((await runtime.list())[0]!.title,'Call Ada back','the scheduler stored the edit');
+  assert.equal((await call('/reminders/'+reminder.id,'PATCH',{due:'2001-01-01T00:00:00Z'})).status,400,'a past time is refused');
+  assert.equal((await call('/reminders/'+reminder.id,'PATCH',{})).status,400);assert.equal((await call('/reminders/'+reminder.id,'PATCH',{title:'x',id:'y'})).status,400);
+  assert.equal((await call('/reminders/'+reminder.id,'PATCH',{title:'x'},false)).status,401);
+  assert.equal((await call('/reminders/'+reminder.id,'DELETE')).status,200);
+  assert.equal((await call('/reminders/'+reminder.id,'PATCH',{title:'too late'})).status,404,'a cancelled reminder cannot be edited');
+ }finally{await new Promise<void>(done=>server.close(()=>done()));await runtime.close();rmSync(dir,{recursive:true,force:true});}
+});

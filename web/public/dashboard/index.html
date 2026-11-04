@@ -130,6 +130,16 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .sortie:focus-visible { outline:1px solid var(--accent); }
 .filters { display:flex; gap:4px; flex-wrap:wrap; }
 .filters .btn.on { border-color:var(--accent); color:var(--accent); }
+.search { width:100%; margin-top:6px; }
+.more { width:100%; margin-top:6px; }
+.whyline { color:var(--text); opacity:.8; margin-top:2px; }
+.apcard.armed { outline:2px solid var(--accent); outline-offset:1px; }
+.keynote { font-size:10px; color:var(--warn); padding:0 8px 6px; } .keynote:empty { display:none; }
+.keyhint kbd { font:inherit; border:1px solid var(--border); padding:0 3px; border-radius:var(--radius); }
+.rem { display:grid; grid-template-columns:1fr auto; gap:2px 6px; align-items:center; padding:4px 0; border-bottom:1px dashed color-mix(in srgb,var(--border) 60%,transparent); }
+.rem .acts { display:flex; gap:4px; }
+.rem-edit { display:flex; flex-wrap:wrap; gap:4px; padding:4px 0; }
+.rem-edit input[type=text] { flex:1 1 100%; }
 
 /* ---------- flow: shared ---------- */
 .flow-note { padding:4px 8px 8px; font-size:10px; color:var(--muted); min-height:18px; }
@@ -295,6 +305,7 @@ body.theme-eva-basic .eva-img, body.theme-eva-full .eva-img { display:block; }
       <section class="panel" id="p-needs" aria-live="polite">
         <div class="hdr"><span data-l="needs">Misato's apartment · needs you</span><span class="badge b-danger" id="needs-count">0</span></div>
         <div class="pad list" id="needs-list"></div>
+        <div class="keynote" id="key-note" role="status" aria-live="assertive"></div>
       </section>
 
       <section class="panel" id="p-sorties">
@@ -304,12 +315,15 @@ body.theme-eva-basic .eva-img, body.theme-eva-full .eva-img { display:block; }
             <button class="btn sm on" data-f="all">All</button><button class="btn sm" data-f="active">Active</button>
             <button class="btn sm" data-f="waiting">Waiting</button><button class="btn sm" data-f="done">Done</button><button class="btn sm" data-f="problem">Problems</button>
           </div>
+          <label class="sr-only" for="sortie-q">Search sorties</label>
+          <input id="sortie-q" class="search" type="search" autocomplete="off" placeholder="Search sorties  ( / )" aria-keyshortcuts="/" />
           <div class="list" id="sortie-list" style="margin-top:6px"></div>
+          <button class="btn sm more" id="sorties-more" hidden>Load older sorties</button>
         </div>
       </section>
 
       <section class="panel" id="p-next">
-        <div class="hdr"><span data-l="next">Coming up · next 24 h</span><span class="sub">reminders · Hyuga triggers</span></div>
+        <div class="hdr"><span data-l="next">Coming up · next 24 h</span><span class="sub" id="next-sub">reminders · Hyuga triggers</span></div>
         <div class="pad"><div class="timeline-up list" id="next-list"></div></div>
       </section>
     </div>

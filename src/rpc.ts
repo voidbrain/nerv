@@ -11,13 +11,14 @@ export const methodSchemas={
  'reminders.list':empty,
  'reminders.pending':empty,
  'reminders.add':{type:'object',required:['title','due'],properties:{title:{type:'string',minLength:1,maxLength:500},due:{type:'string',maxLength:64}},additionalProperties:false},
+ 'reminders.update':{type:'object',required:['id'],minProperties:2,properties:{id:{type:'string',minLength:1,maxLength:100},title:{type:'string',minLength:1,maxLength:500},due:{type:'string',maxLength:64}},additionalProperties:false},
  'reminders.cancel':{type:'object',required:['id'],properties:{id:{type:'string',minLength:1,maxLength:100}},additionalProperties:false},
  'inbox.list':empty,
  'approvals.pending':{type:'object',properties:{limit:{type:'integer',minimum:1,maximum:5}},additionalProperties:false},
  'approvals.decide':{type:'object',required:['id','decision','source'],properties:{id:{type:'string',minLength:1,maxLength:100},decision:{enum:['approve','reject','edit']},source:{enum:['api','cli','telegram']}},additionalProperties:false},
  'events.page':{type:'object',required:['sortieId'],properties:{sortieId:{type:'string',minLength:1,maxLength:100},after:{type:'integer',minimum:0,maximum:Number.MAX_SAFE_INTEGER},limit:{type:'integer',minimum:1,maximum:50}},additionalProperties:false},
  'model.complete':{type:'object',required:['prompt','privacy'],properties:{prompt:{type:'string',minLength:1,maxLength:16000},system:{type:'string',maxLength:8000},privacy:{enum:['local-only','any']},route:{enum:['local','cloud']}},additionalProperties:false},
- 'sorties.list':{type:'object',properties:{limit:{type:'integer',minimum:1,maximum:50},before:{type:'string',minLength:10,maxLength:40}},additionalProperties:false},
+ 'sorties.list':{type:'object',properties:{limit:{type:'integer',minimum:1,maximum:50},before:{type:'string',minLength:10,maxLength:40},q:{type:'string',minLength:1,maxLength:200}},additionalProperties:false},
  'sorties.get':{type:'object',required:['id'],properties:{id:{type:'string',minLength:1,maxLength:100}},additionalProperties:false},
  'sorties.spear':{type:'object',required:['id','reason'],properties:{id:{type:'string',minLength:1,maxLength:100},reason:{type:'string',minLength:1,maxLength:500}},additionalProperties:false},
  'sorties.open':{type:'object',required:['title'],properties:{title:{type:'string',minLength:1,maxLength:500},source:{enum:['owner','misato','instrumentality']}},additionalProperties:false},
@@ -60,8 +61,8 @@ export function validateParams(method:string,params:unknown):asserts method is M
 export type Principal='interface'|'coordinator'|'nervous'|'brain';
 /** Directed edges describe permission, not routing or model capability. Deny by default. */
 export const communicationGraph=[
- {from:'interface',to:'coordinator',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.pending','reminders.add','reminders.cancel','inbox.list','inbox.page','approvals.pending','events.page','sorties.list','sorties.get']},
- {from:'coordinator',to:'nervous',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.pending','reminders.add','reminders.cancel','inbox.list','inbox.page','approvals.pending','approvals.decide','events.page','sorties.list','sorties.get','sorties.spear','sorties.open','sorties.finish','actions.preview','actions.act','misato.note','misato.resumable','misato.context','misato.claim','memory.recall','kaji.bases','kaji.records','kaji.lastSeen','kaji.add','kaji.seen','memory.lastRequest','memory.list','memory.add','memory.edit','memory.forget','memory.share','memory.history','memory.episodes','memory.exchanges','memory.known','memory.saveEpisode']},
+ {from:'interface',to:'coordinator',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.pending','reminders.add','reminders.update','reminders.cancel','inbox.list','inbox.page','approvals.pending','events.page','sorties.list','sorties.get']},
+ {from:'coordinator',to:'nervous',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.pending','reminders.add','reminders.update','reminders.cancel','inbox.list','inbox.page','approvals.pending','approvals.decide','events.page','sorties.list','sorties.get','sorties.spear','sorties.open','sorties.finish','actions.preview','actions.act','misato.note','misato.resumable','misato.context','misato.claim','memory.recall','kaji.bases','kaji.records','kaji.lastSeen','kaji.add','kaji.seen','memory.lastRequest','memory.list','memory.add','memory.edit','memory.forget','memory.share','memory.history','memory.episodes','memory.exchanges','memory.known','memory.saveEpisode']},
  {from:'coordinator',to:'brain',methods:['runtime.ping','model.complete','casper.verdict','misato.step','models.reload','instrumentality.digest']},
 ] as const;
 export function authorize(from:Principal,to:Principal,method:string):void {

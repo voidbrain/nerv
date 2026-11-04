@@ -85,7 +85,7 @@ const PRESETS = {
 const STEP_IDS = ["detect","intake","route","consult","plan","magi","sync","apt","plug","eva","debrief"];
 const LABELS = {
   eva:{ brandTitle:"TACTICAL COMMAND", brandTag:"SEELE SCROLLS ENFORCED // CENTRAL DOGMA LEDGER · LILITH MEMORY",
-    needs:"Misato's apartment · needs you", sorties:"Sorties", next:"Coming up · next 24 h", flow:"Sephirot · sortie flow",
+    needs:"Misato's apartment · needs you", sorties:"Sorties", next:"Coming up", flow:"Sephirot · sortie flow",
     detail:"Misato plan · current action", log:"Comms · Misato & Maya trace", away:"Debrief · while you were away", health:"Health · broken or stuck",
     bases:"NERV bases · Kaji line", cages:"EVA cages · heartbeat", budget:"Battery · budget", melons:"Kaji's watermelons · pilot trust", lilith:"Terminal Dogma · Lilith",
     spear:"SPEAR OF LONGINUS", dummy:"DUMMY PLUG ACTIVE", launch:"Launch",
@@ -93,7 +93,7 @@ const LABELS = {
     steps:{ detect:"Detect", intake:"Naoko", route:"Gendo", consult:"Consult", plan:"Misato", magi:"MAGI", sync:"Sync", apt:"Apartment", plug:"Plug", eva:"EVA", debrief:"Debrief" },
     seats:{ melchior:"MELCHIOR", balthasar:"BALTHASAR", casper:"CASPER" }, short:{ melchior:"MEL", balthasar:"BAL", casper:"CAS" } },
   neutral:{ brandTitle:"OPERATIONS", brandTag:"owner rules enforced · append-only ledger · long-term memory",
-    needs:"Needs your approval", sorties:"Jobs", next:"Coming up · next 24 h", flow:"Decision timeline",
+    needs:"Needs your approval", sorties:"Jobs", next:"Coming up", flow:"Decision timeline",
     detail:"Plan · current action", log:"Messages · trace", away:"While you were away", health:"Health · broken or stuck",
     bases:"Machines · mesh", cages:"Sandboxes · heartbeat", budget:"Budget", melons:"Skill trust stages", lilith:"Memory",
     spear:"STOP EVERYTHING", dummy:"MODELS UNAVAILABLE", launch:"Run",
@@ -381,11 +381,12 @@ function healthIssues() {
 function renderNeeds() {
   const box = document.getElementById("needs-list");
   document.getElementById("needs-count").textContent = state.approvals.length;
-  if (!state.approvals.length) { box.innerHTML = "<div class='muted small'>Nothing needs you. Cards appear here with the exact action, why it stopped and when it expires.</div>"; return; }
+  if (!state.approvals.length) { box.innerHTML = "<div class='muted small'>Nothing needs you. When an action needs your yes, its card appears here with the exact action, why it stopped and when it expires: answer here, with the keys a and r, or on Telegram.</div>"; return; }
+  if (armed && !state.approvals.some(ap => ap.id === armed.id)) armed = null;
   box.innerHTML = state.approvals.map(ap => {
     const a = ap.action, b = ap.ballot, s = state.sorties.find(x => x.id === ap.sortie);
     const left = Math.max(0, ap.expires - Date.now()); const mm = Math.floor(left / MIN), ss = Math.floor(left % MIN / 1000);
-    return "<article class='apcard " + b.pattern + "'>" +
+    return "<article class='apcard " + b.pattern + (armed && armed.id === ap.id ? " armed" : "") + "' data-card='" + ap.id + "'>" +
       "<div class='row'><span class='what'>" + esc(humanAction(a)) + "</span><span class='badge b-" + b.pattern + "'>PATTERN " + b.pattern.toUpperCase() + "</span></div>" +
       "<div class='small muted'>" + esc(s.id) + " · " + esc(s.title) + (LIVE ? "" : " · pilot " + esc(s.pilot) + " (" + pilotStage(s.pilot) + ")") + "</div>" +
       "<code style='margin-top:4px'>" + esc(a.tool) + " " + esc(JSON.stringify(a.args, null, 1)) + "</code>" +
@@ -395,9 +396,9 @@ function renderNeeds() {
       "<div class='verdicts'>" + b.verdicts.map(v => "<span class='vchip " + v.vote + (v.shadow ? " shadow" : "") + "' title='" + esc(v.reason) + "'>" + esc(seatName(v.seat)) + " " + (v.vote === "approve" ? "✓" : v.vote === "reject" ? "✗" : "·") + (v.confidence ? " " + v.confidence : "") + (v.shadow ? " (shadow)" : "") + "</span>").join("") + "</div>" +
       "<div class='why'><b>Why it stopped:</b> " + esc(ap.reason) + "</div>" +
       "<div class='row small' style='margin-top:4px'><span class='muted'>asked " + ago(ap.created) + " ago</span><span class='" + (left < 15 * MIN ? "warn b" : "muted") + "'>expires in " + mm + ":" + String(ss).padStart(2, "0") + " · expiry never approves</span></div>" +
-      "<div class='acts'><button class='btn primary' data-ap='" + ap.id + "' data-d='approve'>Approve once</button><button class='btn' data-ap='" + ap.id + "' data-d='edit'>Edit → Misato</button><button class='btn danger' data-ap='" + ap.id + "' data-d='reject'>Reject</button></div>" +
+      "<div class='acts'><button class='btn primary' data-ap='" + ap.id + "' data-d='approve' aria-keyshortcuts='a'>Approve once</button><button class='btn' data-ap='" + ap.id + "' data-d='edit'>Edit → Misato</button><button class='btn danger' data-ap='" + ap.id + "' data-d='reject' aria-keyshortcuts='r'>Reject</button></div>" +
       "</article>";
-  }).join("");
+  }).join("") + "<div class='tiny muted keyhint'>Keys: <kbd>a</kbd> approve · <kbd>r</kbd> reject (press twice to confirm; the focused card, else the first) · <kbd>/</kbd> search sorties</div>";
 }
 function humanAction(a) {
   const x = a.args;
@@ -419,18 +420,33 @@ function sortieBadge(s) {
   if (s.status === "failed") return "<span class='badge b-danger'>FAILED</span>";
   return "<span class='badge b-muted'>STOOD DOWN</span>";
 }
+/** The search box keeps sorties whose ID, title, reply or why contains every word typed (case-insensitive). */
+function matchesSearch(s, q) {
+  if (!q) return true; const text = [s.id, s.title, s.outcome, s.why].filter(Boolean).join(" ").toLowerCase();
+  return q.toLowerCase().split(/\s+/).filter(Boolean).every(w => text.includes(w));
+}
+const FILTER_NAMES = { active:"active", waiting:"waiting", done:"done", problem:"failed or stopped" };
 function renderSorties() {
-  const f = state.filter;
-  const list = state.sorties.filter(s => f === "all" || (f === "active" && s.status === "active") || (f === "waiting" && /waiting/.test(s.status)) || (f === "done" && s.status === "done") || (f === "problem" && (s.status === "failed" || s.status === "stood-down")));
+  const f = state.filter; const q = (state.search || "").trim();
+  const list = state.sorties.filter(s => f === "all" || (f === "active" && s.status === "active") || (f === "waiting" && /waiting/.test(s.status)) || (f === "done" && s.status === "done") || (f === "problem" && (s.status === "failed" || s.status === "stood-down"))).filter(s => matchesSearch(s, q));
   const active = state.sorties.filter(s => s.status === "active" || /waiting/.test(s.status)).length;
-  document.getElementById("sorties-sub").textContent = active + " in flight · " + state.sorties.length + " today";
+  document.getElementById("sorties-sub").textContent = active + " in flight · " + (q ? list.length + " match" + (list.length === 1 ? "" : "es") : state.sorties.length + " shown");
   document.getElementById("sortie-list").innerHTML = list.map(s => {
     const pats = s.actions.map(a => a.ballot ? "<span class='badge b-" + a.ballot.pattern + "'>" + a.ballot.pattern[0].toUpperCase() + "</span>" : "<span class='badge b-muted'>·</span>").join(" ");
     return "<div class='card sortie" + (s.id === state.selected ? " sel" : "") + "' tabindex='0' role='button' data-s='" + s.id + "'>" +
       "<div class='row'><span class='b'>" + esc(s.id) + " · " + esc(s.title) + "</span>" + sortieBadge(s) + "</div>" +
       "<div class='row small muted'><span>" + (s.source === "hyuga" ? "Hyuga" : "Aoba") + " · " + hhmm(s.started) + " · " + s.actions.length + " action" + (s.actions.length > 1 ? "s" : "") + " " + pats + "</span><span>$" + s.spent.toFixed(3) + "</span></div>" +
+      (s.why ? "<div class='tiny whyline'>" + esc(s.why) + "</div>" : "") +
       (s.outcome ? "<div class='tiny muted'>" + esc(s.outcome) + "</div>" : "") + "</div>";
-  }).join("") || "<div class='muted small'>No sorties match.</div>";
+  }).join("") || "<div class='muted small'>" + sortiesEmpty(f, q) + "</div>";
+  const more = document.getElementById("sorties-more");
+  if (more) { more.hidden = !LIVE || !!q || !state.sorties.length || !!state.noOlder; more.disabled = !!state.loadingOlder; more.textContent = state.loadingOlder ? "Loading…" : "Load older sorties"; }
+}
+/** What the empty Sorties list says: why it is empty and what to do next. */
+function sortiesEmpty(f, q) {
+  if (!state.sorties.length) return "No sorties yet. Ask Misato below, or message Aoba on Telegram: each request becomes a sortie here.";
+  if (q) return "No sortie matches “" + esc(q) + "”" + (LIVE ? " in all history" : "") + (f !== "all" ? " among the " + FILTER_NAMES[f] + " ones" : "") + ". Try another word, or press Esc in the box to clear it.";
+  return "No " + FILTER_NAMES[f] + " sorties right now. <button class='btn sm' data-f='all'>Show all</button>";
 }
 
 /* ================= RENDER: flow ================= */
@@ -545,7 +561,7 @@ function liveEdges(s) {
 /* ================= RENDER: detail (plan + action) ================= */
 function renderDetail(s) {
   const box = document.getElementById("detail");
-  if (!s) { box.innerHTML = "<div class='muted'>No sortie selected.</div>"; document.getElementById("detail-sub").textContent = ""; return; }
+  if (!s) { box.innerHTML = "<div class='muted'>No sortie selected. Pick one in Sorties, or ask Misato below to start one.</div>"; document.getElementById("detail-sub").textContent = ""; return; }
   document.getElementById("detail-sub").textContent = "pilot " + s.pilot + " · " + pilotStage(s.pilot) + " stage · editable by you";
   const plan = "<div class='plan'><div class='small muted' style='margin-bottom:4px'>PLAN (Misato proposes one action at a time)</div><ol>" + s.actions.map((a, i) =>
     "<li><span class='ix'>" + (i + 1) + "</span><span><b>" + esc(a.tool) + "</b><br/><span class='tiny muted'>" + esc(JSON.stringify(a.args)) + "</span></span><span>" + actionBadge(a) + "</span></li>").join("") + "</ol>" +
@@ -577,7 +593,7 @@ function renderAway() {
 }
 function renderNext() {
   const up = state.upcoming.filter(u => u.at > Date.now()).sort((a, b) => a.at - b.at);
-  document.getElementById("next-list").innerHTML = up.map(u => "<div class='up " + u.kind + "'><div class='row small'><b>" + hhmm(u.at) + "</b><span class='badge " + (u.kind === "hyuga" ? "b-info" : "b-muted") + "'>" + (u.kind === "hyuga" ? "HYUGA TRIGGER" : "REMINDER") + "</span></div><div class='small'>" + esc(u.title) + "</div><div class='tiny muted'>in " + ago(Date.now() - (u.at - Date.now())) + "</div></div>").join("") || "<div class='muted small'>Nothing in the next 24 h.</div>";
+  document.getElementById("next-list").innerHTML = up.map(u => "<div class='up " + u.kind + "'><div class='row small'><b>" + hhmm(u.at) + "</b><span class='badge " + (u.kind === "hyuga" ? "b-info" : "b-muted") + "'>" + (u.kind === "hyuga" ? "HYUGA TRIGGER" : "REMINDER") + "</span></div><div class='small'>" + esc(u.title) + "</div><div class='tiny muted'>in " + ago(Date.now() - (u.at - Date.now())) + "</div></div>").join("") || "<div class='muted small'>Nothing coming up. Ask Misato “remind me tomorrow at 9 to call Ada” below, or on Telegram.</div>";
 }
 function renderHealth() {
   const issues = healthIssues();
@@ -627,7 +643,7 @@ function renderLog() {
   const el = document.getElementById("log"); if (!el) return;
   const f = state.logFilter || "all";
   const rows = state.log.filter(e => f === "all" || (f === "sortie" && (e.s === state.selected || e.who === "you" || e.chat)) || (f === "chat" && (e.who === "you" || e.chat))).slice(-150);
-  el.innerHTML = rows.map(e => "<div class='msg " + (e.who === "you" ? "you " : "") + e.cls + "'><img class='av' data-av='" + e.who + "' alt=''/><div><span class='ts'>" + new Date(e.t).toTimeString().slice(0, 8) + "</span><b class='who'>" + esc(speakerName(e.who)) + "</b>" + (e.s ? "<span class='muted'>" + e.s + " · </span>" : "") + esc(e.msg) + "</div></div>").join("") || "<div class='muted'>No messages.</div>";
+  el.innerHTML = rows.map(e => "<div class='msg " + (e.who === "you" ? "you " : "") + e.cls + "'><img class='av' data-av='" + e.who + "' alt=''/><div><span class='ts'>" + new Date(e.t).toTimeString().slice(0, 8) + "</span><b class='who'>" + esc(speakerName(e.who)) + "</b>" + (e.s ? "<span class='muted'>" + e.s + " · </span>" : "") + esc(e.msg) + "</div></div>").join("") || "<div class='muted'>" + (f === "all" ? "No messages yet. Ask Misato something below: its steps, the MAGI's votes and its reply show here." : f === "sortie" ? "Nothing for this sortie yet. Pick another one in Sorties, or show all." : "No chat yet. Type below to talk to Misato.") + "</div>";
   fillAvatars(el); el.scrollTop = el.scrollHeight;
 }
 function applyLabels() { const p = L(); document.querySelectorAll("[data-l]").forEach(el => { const k = el.dataset.l; if (p[k]) el.textContent = p[k]; }); }
@@ -798,7 +814,8 @@ document.addEventListener("click", e => {
   if (t.dataset.ap) { decide(t.dataset.ap, t.dataset.d); return; }
   if (t.dataset.s) { e.preventDefault(); state.selected = t.dataset.s; renderSorties(); renderFlow(); renderLog(); document.getElementById("p-flow").scrollIntoView({ behavior:"smooth", block:"nearest" }); return; }
   if (t.dataset.lf) { state.logFilter = t.dataset.lf; t.parentNode.querySelectorAll(".btn").forEach(b => b.classList.toggle("on", b === t)); renderLog(); return; }
-  if (t.dataset.f) { state.filter = t.dataset.f; document.querySelectorAll("#p-sorties .filters .btn").forEach(b => b.classList.toggle("on", b === t)); renderSorties(); return; }
+  if (t.dataset.f) { state.filter = t.dataset.f; document.querySelectorAll("#p-sorties .filters .btn").forEach(b => { b.classList.toggle("on", b.dataset.f === state.filter); b.setAttribute("aria-pressed", String(b.dataset.f === state.filter)); }); renderSorties(); return; }
+  if (t.id === "sorties-more" && LIVE) { window.liveOlder(); return; }
   if (t.dataset.go) { document.getElementById(t.dataset.go).scrollIntoView({ behavior:"smooth", block:"start" }); return; }
   if (t.dataset.spear && LIVE) { window.liveSpear(t.dataset.spear); return; }
   if (t.dataset.spear) { const s = state.sorties.find(x => x.id === t.dataset.spear); state.approvals.filter(a => a.sortie === s.id).forEach(a => decide(a.id, "reject")); if (s.status === "active") { s.status = "stood-down"; s.outcome = "Spear"; finish(s); } log("Spear " + s.id + ": grants revoked · happened: " + (s.happened.map(h => h.tool).join(", ") || "none"), "danger", s); renderAll(); return; }
@@ -810,6 +827,30 @@ document.addEventListener("click", e => {
   if (t.id === "btn-doctor") { log("Doctor: scheduler ok · brain ok · routes " + (state.dummy ? "unreachable" : "ok") + " · SQLite integrity ok", state.dummy ? "warn" : "ok"); renderHealth(); return; }
 });
 document.addEventListener("keydown", e => { const t = e.target.closest && e.target.closest("[data-s]"); if (t && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); t.click(); } });
+/* Keyboard: / searches sorties; a and r approve or reject a card, always in two presses (the first arms the card and says
+   what the second will do), so a stray key never decides anything. The card is the one holding the focus, else the first. */
+var armed = null, armTimer = null; // var: renderNeeds may run before this line
+function keyNote(text) { const el = document.getElementById("key-note"); if (el) el.textContent = text; }
+function disarm(note) { armed = null; clearTimeout(armTimer); keyNote(note || ""); renderNeeds(); }
+document.addEventListener("keydown", e => {
+  if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+  const el = e.target; const tag = (el.tagName || "").toLowerCase();
+  if (el.id === "sortie-q" && e.key === "Escape") { el.value = ""; state.search = ""; if (LIVE) window.liveSearch(""); renderSorties(); el.blur(); return; }
+  if (tag === "input" || tag === "textarea" || tag === "select" || el.isContentEditable) return;
+  if (e.key === "/") { const q = document.getElementById("sortie-q"); if (q) { e.preventDefault(); q.focus(); q.select(); } return; }
+  if (e.key === "Escape" && armed) { disarm("Cancelled."); return; }
+  if (e.key !== "a" && e.key !== "r") return;
+  const d = e.key === "a" ? "approve" : "reject"; const inCard = el.closest && el.closest("[data-card]");
+  const ap = state.approvals.find(x => x.id === (inCard ? inCard.dataset.card : armed && armed.id)) || state.approvals[0];
+  if (!ap) { keyNote("Nothing waits for you."); return; }
+  e.preventDefault();
+  if (armed && armed.id === ap.id && armed.d === d) { disarm((d === "approve" ? "Approving once: " : "Rejecting: ") + humanAction(ap.action) + "."); decide(ap.id, d); return; }
+  armed = { id:ap.id, d }; clearTimeout(armTimer); armTimer = setTimeout(() => disarm(), 5000); renderNeeds();
+  keyNote("Press " + e.key + " again within 5 s to " + (d === "approve" ? "approve once" : "reject") + ": " + humanAction(ap.action) + ". Esc cancels.");
+});
+document.addEventListener("input", e => {
+  if (e.target.id !== "sortie-q") return; state.search = e.target.value; renderSorties(); if (LIVE) window.liveSearch(e.target.value.trim());
+});
 function say(text) { log(text, "ok", null, "misato"); state.log[state.log.length - 1].chat = true; renderLog(); }
 function cardFor(text) { const id = (text.match(/AP-[\w-]+/i) || [])[0]; const sid = (text.match(/S-\d+/i) || [])[0];
   if (id) return state.approvals.find(a => a.id.toLowerCase() === id.toLowerCase());

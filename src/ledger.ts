@@ -2,6 +2,7 @@ import type { DatabaseSync } from 'node:sqlite';
 import { createHash, randomUUID } from 'node:crypto';
 import { ballot, defaultPolicy, patternOf, validatePolicy, type Ballot, type Pattern, type Policy, type Stage, type Tool, type Trust, type Verdict } from './policy.ts';
 import type { Step } from './misato.ts';
+import { explainSortie } from './why.ts';
 import { EVENT_SCHEMA_VERSION, MAX_SPEAR_HAPPENED, encodePayload, readPayload, type EventKind, type EventPayloads, type Happened, type SortieEvent } from './events.ts';
 /** Central Dogma (F-024): sorties, actions, grants (A.T. Fields), approvals (Misato's apartment) and append-only events. */
 export const LEDGER_SCHEMA=`
@@ -17,7 +18,7 @@ export const LEDGER_SCHEMA=`
 export interface Proposal {tool:string;args:Record<string,unknown>;stage:Stage;cost?:number;casper?:Verdict;extras?:Verdict[]}
 export interface Card {sortieId:string;actionId:string;tool:string;args:Record<string,unknown>;effect:string;pattern:string;sync:Ballot['sync'];verdicts:Verdict[];reason:string;expires:string}
 export interface Approval {id:string;card:Card;expires:string;decision:string|null}
-export interface SortieSummary {id:string;source:string;title:string;trust:string;status:string;created:string;closed:string|null;actions:number;waiting:number;patterns:string[]}
+export interface SortieSummary {id:string;source:string;title:string;trust:string;status:string;created:string;closed:string|null;actions:number;waiting:number;patterns:string[];why:string}
 export interface ActionDetail {id:string;tool:string;args:Record<string,unknown>;ballot:Ballot;created:string;status:'proposed'|'waiting'|'done'|'failed'|'rejected'|'stood-down'}
 export interface Proposed {actionId:string;ballot:Ballot;grantId?:string;approvalId?:string}
 export type Decision='approve'|'reject'|'edit';
@@ -125,14 +126,29 @@ export class Ledger {
   });
  }
  private summarize(r:{id:string;source:string;title:string;trust:string;status:string;created:string;closed:string|null}):SortieSummary {
-  const actions=this.db.prepare('SELECT ballot FROM actions WHERE sortie_id=? ORDER BY created').all(r.id) as {ballot:string}[];
+  const actions=this.db.prepare('SELECT id,tool,ballot FROM actions WHERE sortie_id=? ORDER BY created, rowid').all(r.id) as {id:string;tool:string;ballot:string}[];
   const waiting=(this.db.prepare('SELECT count(*) AS n FROM approvals a JOIN actions x ON x.id=a.action_id WHERE x.sortie_id=? AND a.decision IS NULL').get(r.id) as {n:number}).n;
-  return {...r,actions:actions.length,waiting,patterns:actions.map(a=>(JSON.parse(a.ballot) as Ballot).pattern)};
+  const ballots=actions.map(a=>JSON.parse(a.ballot) as Ballot);
+  return {...r,actions:actions.length,waiting,patterns:ballots.map(b=>b.pattern),why:this.why(r,actions.length,actions.at(-1),ballots.at(-1))};
  }
- /** Newest sorties first, for the dashboard (F-019): status, counts and each action's Pattern, never grant IDs. */
- sorties(limit=20,before?:string):SortieSummary[] {
-  if(!Number.isInteger(limit)||limit<1||limit>50||(before!==undefined&&(typeof before!=='string'||!Number.isFinite(Date.parse(before)))))throw new Error('Invalid sortie page.');
-  const rows=this.db.prepare(`SELECT id,source,title,trust,status,created,closed FROM sorties ${before?'WHERE created<?':''} ORDER BY created DESC LIMIT ?`).all(...(before?[before,limit]:[limit])) as Parameters<Ledger['summarize']>[0][];
+ /** The facts explainSortie needs: the latest action's ballot, the owner's decision and what became of it. */
+ private why(r:{id:string;status:string},count:number,last:{id:string;tool:string}|undefined,ballot:Ballot|undefined):string {
+  const one=(sql:string,...args:string[])=>this.db.prepare(sql).get(...args) as {kind?:string;payload?:string;decision?:string|null}|undefined;
+  const ran=last?one("SELECT kind,payload FROM events WHERE action_id=? AND kind IN ('action.done','action.failed') ORDER BY sequence DESC LIMIT 1",last.id):undefined;
+  const spear=r.status==='revoked'?one("SELECT payload FROM events WHERE sortie_id=? AND kind='spear' ORDER BY sequence DESC LIMIT 1",r.id):undefined;
+  const replied=!!one("SELECT 1 AS kind FROM events WHERE sortie_id=? AND kind='misato.reply' LIMIT 1",r.id);
+  const error=ran?.kind==='action.failed'?(JSON.parse(ran.payload!) as {error?:string}).error:undefined;
+  return explainSortie({status:r.status,actions:count,replied,
+   spearReason:spear?(JSON.parse(spear.payload!) as {reason?:string}).reason:undefined,
+   last:last&&ballot?{tool:last.tool,outcome:ballot.outcome,reason:ballot.reason,decision:one('SELECT decision FROM approvals WHERE action_id=?',last.id)?.decision ?? null,ran:ran?.kind==='action.done'?'done':ran?.kind==='action.failed'?'failed':null,error}:undefined});
+ }
+ /** Newest sorties first, for the dashboard (F-019): status, counts, each action's Pattern and one sentence of why, never
+  grant IDs. `before` pages back through history; `q` keeps sorties whose title contains it (case-insensitive, literal). */
+ sorties(limit=20,before?:string,q?:string):SortieSummary[] {
+  if(!Number.isInteger(limit)||limit<1||limit>50||(before!==undefined&&(typeof before!=='string'||!Number.isFinite(Date.parse(before))))||(q!==undefined&&(typeof q!=='string'||!q.trim()||q.length>200)))throw new Error('Invalid sortie page.');
+  const where=[...(before?['created<?']:[]),...(q?["title LIKE ? ESCAPE '\\'"]:[])];
+  const like=q?'%'+q.trim().replace(/[\\%_]/g,c=>'\\'+c)+'%':undefined;
+  const rows=this.db.prepare(`SELECT id,source,title,trust,status,created,closed FROM sorties ${where.length?'WHERE '+where.join(' AND '):''} ORDER BY created DESC LIMIT ?`).all(...(before?[before]:[]),...(like?[like]:[]),limit) as Parameters<Ledger['summarize']>[0][];
   return rows.map(r=>this.summarize(r));
  }
  /** One sortie with its actions: tool, arguments, ballot and what became of each. */
