@@ -138,6 +138,8 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .keyhint kbd { font:inherit; border:1px solid var(--border); padding:0 3px; border-radius:var(--radius); }
 .rem { display:grid; grid-template-columns:1fr auto; gap:2px 6px; align-items:center; padding:4px 0; border-bottom:1px dashed color-mix(in srgb,var(--border) 60%,transparent); }
 .rem .acts { display:flex; gap:4px; }
+.models-form { display:grid; grid-template-columns:auto 1fr; gap:4px 8px; align-items:center; }
+.models-form select { min-width:0; width:100%; }
 .rem-edit { display:flex; flex-wrap:wrap; gap:4px; padding:4px 0; }
 .rem-edit input[type=text] { flex:1 1 100%; }
 
@@ -407,6 +409,11 @@ body.theme-eva-basic .eva-img, body.theme-eva-full .eva-img { display:block; }
       <section class="panel" id="p-health">
         <div class="hdr"><span data-l="health">Health</span><button class="btn sm" id="btn-doctor" style="color:inherit;border-color:currentColor">Run doctor</button></div>
         <div class="pad" id="health"></div>
+      </section>
+
+      <section class="panel" id="p-models">
+        <div class="hdr"><span data-l="models">Models · Misato &amp; Casper</span><span class="sub" id="models-sub"></span></div>
+        <div class="pad" id="models"></div>
       </section>
 
       <section class="panel" id="p-bases">

@@ -17,7 +17,7 @@ export function validateBase(value:unknown):Base {
 }
 export const defaults:Omit<Config,'models'|'base'> = {port:4317,language:'en',timeZone:'Europe/Rome'};
 /** NERV_* settings; the pre-rename NODO_* names are still read as a fallback. */
-export function setting(name:'HOME'|'PORT'|'TOKEN'):string|undefined {return process.env['NERV_'+name] ?? process.env['NODO_'+name];}
+export function setting(name:'HOME'|'PORT'|'TOKEN'|'OLLAMA'):string|undefined {return process.env['NERV_'+name] ?? process.env['NODO_'+name];}
 /** ~/.nerv, or the pre-rename ~/.nodo when only that exists. Nothing is moved automatically. */
 export function dataHome():string {
   const explicit=setting('HOME');

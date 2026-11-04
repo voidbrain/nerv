@@ -40,7 +40,7 @@ test('the registry: only records signed by the pinned root, append-only, newest 
 });
 test('two bases from the CLI: key init, enrol both, export, import pinned by fingerprint, revoke',()=>{
  const a=mkdtempSync(join(tmpdir(),'nerv-kaji-a-')),b=mkdtempSync(join(tmpdir(),'nerv-kaji-b-'));
- const cli=(home:string,args:string[],input?:string)=>spawnSync(process.execPath,['src/cli.ts',...args],{env:{...process.env,NERV_HOME:home},encoding:'utf8',...(input!==undefined?{input}:{})});
+ const cli=(home:string,args:string[],input?:string)=>spawnSync(process.execPath,['src/cli.ts',...args],{env:{...process.env,NERV_HOME:home,NERV_OLLAMA:'http://127.0.0.1:9'},encoding:'utf8',...(input!==undefined?{input}:{})});
  const pass='a long test passphrase\n';
  try{
   assert.equal(cli(a,['init','--base','NERV-01','--name','Neo Tokyo-3']).status,0);assert.equal(cli(b,['init','--base','NERV-02','--name','Tabgha']).status,0);
@@ -72,7 +72,7 @@ test('kaji enrol arguments: key and address in either order, each mistake named,
  assert.throws(()=>enrolmentArgs('NERV-02','Tabgha',key,undefined,me),/Usage: kaji enrol/);
  const home=mkdtempSync(join(tmpdir(),'nerv-enrol-'));
  try{
-  const cli=(a:string[],input?:string)=>spawnSync(process.execPath,['src/cli.ts',...a],{env:{...process.env,NERV_HOME:home},encoding:'utf8',...(input!==undefined?{input}:{})});
+  const cli=(a:string[],input?:string)=>spawnSync(process.execPath,['src/cli.ts',...a],{env:{...process.env,NERV_HOME:home,NERV_OLLAMA:'http://127.0.0.1:9'},encoding:'utf8',...(input!==undefined?{input}:{})});
   cli(['init']);cli(['key','init','--passphrase-stdin'],'a long test passphrase\n');
   const bad=cli(['kaji','enrol','NERV-02','Tabgha','100.64.0.2','also-not-a-key','--passphrase-stdin'],'');
   assert.match(bad.stderr,/is a base public key/);assert.doesNotMatch(bad.stderr,/Wrong passphrase/,'refused before any passphrase is read');

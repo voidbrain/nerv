@@ -57,7 +57,7 @@ test('every NERV process trusts the system certificates: npm start, both service
 });
 test('each machine has a base identity: set at init, shown by base, changed later, validated',async()=>{
  const {validateBase}=await import('../src/config.ts');
- const home=mkdtempSync(join(tmpdir(),'nerv-base-'));const run=(...a:string[])=>spawnSync(process.execPath,['src/cli.ts',...a],{env:{...process.env,NERV_HOME:home},encoding:'utf8'});
+ const home=mkdtempSync(join(tmpdir(),'nerv-base-'));const run=(...a:string[])=>spawnSync(process.execPath,['src/cli.ts',...a],{env:{...process.env,NERV_HOME:home,NERV_OLLAMA:'http://127.0.0.1:9'},encoding:'utf8'});
  try{
   const init=run('init','--base','nerv-02','--name','Tabgha');assert.equal(init.status,0,init.stderr);assert.match(init.stdout,/base NERV-02 · Tabgha/);
   assert.equal(run('base').stdout.trim(),'NERV-02 · Tabgha');

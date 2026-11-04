@@ -680,7 +680,12 @@ function renderLilith() {
   document.getElementById("lilith").innerHTML = DEMO_FACTS.map(f => "<div class='row small'><span>" + esc(f.text) + " <span class='tiny muted'>" + f.source + (f.shareable ? " · shareable" : " · local-only") + "</span></span></div>").join("") +
     "<div class='tiny muted' style='margin-top:4px'>Facts are stored only after the owner approves them; Instrumentality proposes new ones each night.</div>";
 }
-function renderAll() { fillAvatars(); renderQuestions(); renderNeeds(); renderSorties(); renderFlow(); renderAway(); renderNext(); renderHealth(); renderBudget(); renderMelons(); renderBases(); renderCages(); renderLilith(); }
+/* Models (F-038): in the simulation a fixed picture; live.js shows the real routes and lets the admin pick. */
+function renderModels() {
+  const box = document.getElementById("models"); if (!box) return;
+  box.innerHTML = "<div class='small'>Misato · qwen2.5-coder:14b (local)</div><div class='small'>Casper · gemma4:12b (local)</div><div class='tiny muted' style='margin-top:4px'>Simulation: live, pick each role's model from what Ollama has.</div>";
+}
+function renderAll() { fillAvatars(); renderQuestions(); renderNeeds(); renderSorties(); renderFlow(); renderAway(); renderNext(); renderHealth(); renderBudget(); renderMelons(); renderBases(); renderCages(); renderLilith(); renderModels(); }
 
 /* ================= MAP: zoomed regional topography (procedural hills and valleys) ================= */
 const map = { ready:false, w:540, h:250, proj:null, contours:[], base:null, linkPaths:{} };
