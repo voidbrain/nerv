@@ -771,11 +771,13 @@ document.addEventListener("click", e => {
   if (t.dataset.lf) { state.logFilter = t.dataset.lf; t.parentNode.querySelectorAll(".btn").forEach(b => b.classList.toggle("on", b === t)); renderLog(); return; }
   if (t.dataset.f) { state.filter = t.dataset.f; document.querySelectorAll("#p-sorties .filters .btn").forEach(b => b.classList.toggle("on", b === t)); renderSorties(); return; }
   if (t.dataset.go) { document.getElementById(t.dataset.go).scrollIntoView({ behavior:"smooth", block:"start" }); return; }
+  if (t.dataset.spear && LIVE) { window.liveSpear(t.dataset.spear); return; }
   if (t.dataset.spear) { const s = state.sorties.find(x => x.id === t.dataset.spear); state.approvals.filter(a => a.sortie === s.id).forEach(a => decide(a.id, "reject")); if (s.status === "active") { s.status = "stood-down"; s.outcome = "Spear"; finish(s); } log("Spear " + s.id + ": grants revoked · happened: " + (s.happened.map(h => h.tool).join(", ") || "none"), "danger", s); renderAll(); return; }
   if (t.dataset.promote) { const p = PILOTS.find(x => x.id === t.dataset.promote); if (p.stage === "prototype") { p.stage = "test"; log("Watermelons: " + p.id + " → test", "ok"); } else { log("Promotion of " + p.id + " to production needs you (card in Misato's apartment)", "warn"); p.stage = "production"; } renderAll(); return; }
   if (t.dataset.demote) { const p = PILOTS.find(x => x.id === t.dataset.demote); p.stage = p.stage === "production" ? "test" : "prototype"; log("Watermelons: " + p.id + " demoted → " + p.stage, "danger"); renderAll(); return; }
   if (t.dataset.toggle) { const b = BASES.find(x => x.id === t.dataset.toggle); b.status = b.status === "online" ? "offline" : "online"; if (b.status === "online") b.rtt = b.id === "tokyo3" ? 0 : 120; log(b.name + " → " + b.status, b.status === "online" ? "ok" : "warn"); renderAll(); return; }
-  if (t.id === "btn-seen") { state.lastVisit = Date.now(); renderAll(); return; }
+  if (t.id === "btn-seen") { state.lastVisit = Date.now(); if (LIVE) window.liveSeen(); renderAll(); return; }
+  if (t.id === "btn-reload" && LIVE) { window.liveReload(); return; }
   if (t.id === "btn-doctor") { log("Doctor: scheduler ok · brain ok · routes " + (state.dummy ? "unreachable" : "ok") + " · SQLite integrity ok", state.dummy ? "warn" : "ok"); renderHealth(); return; }
 });
 document.addEventListener("keydown", e => { const t = e.target.closest && e.target.closest("[data-s]"); if (t && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); t.click(); } });

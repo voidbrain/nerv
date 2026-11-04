@@ -68,6 +68,12 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
       else if(req.method==='GET'&&path==='/api/approvals'){if([...url.searchParams.keys()].some(k=>k!=='limit'))throw new Error('Unknown approvals query.');reply(200,await store.approvals(Number(url.searchParams.get('limit') ?? 5)));}
       else if(req.method==='POST'&&/^\/api\/approvals\/[a-f0-9-]+$/.test(path)){const b=await body(req);if(Object.keys(b).length!==1||!['approve','reject','edit'].includes(b.decision as string))throw new Error('Decision must be approve, reject or edit.');reply(200,await store.decide(path.split('/').at(-1)!,b.decision as 'approve'|'reject'|'edit','api'));}
       else if(req.method==='GET'&&path==='/api/sorties'){if([...url.searchParams.keys()].some(k=>!['limit','before'].includes(k)))throw new Error('Unknown sorties query.');reply(200,await store.sorties(Number(url.searchParams.get('limit') ?? 20),url.searchParams.get('before') ?? undefined));}
+      else if(req.method==='POST'&&/^\/api\/sorties\/[a-f0-9-]+\/spear$/.test(path)){
+        // Admin only (read-only clients stop above): the Spear never approves anything and never undoes executed effects.
+        if(!store.spear){reply(503,{error:'Spear unavailable.'});return;}
+        const b=await body(req);if(Object.keys(b).some(k=>k!=='reason')||(b.reason!==undefined&&(typeof b.reason!=='string'||!b.reason.trim()||b.reason.length>500)))throw new Error('Spear takes an optional reason up to 500 characters.');
+        const result=await store.spear(path.split('/')[3]!,(b.reason as string|undefined)?.trim() ?? 'dashboard');if(result)reply(200,result);else reply(404,{error:'No sortie with that ID.'});
+      }
       else if(req.method==='GET'&&/^\/api\/sorties\/[a-f0-9-]+$/.test(path)){const found=await store.sortie(path.split('/')[3]!);if(found)reply(200,found);else reply(404,{error:'No sortie with that ID.'});}
       else if(req.method==='GET'&&/^\/api\/sorties\/[a-f0-9-]+\/events$/.test(path)){if([...url.searchParams.keys()].some(k=>!['after','limit'].includes(k)))throw new Error('Unknown events query.');reply(200,await store.events(path.split('/')[3]!,Number(url.searchParams.get('after') ?? 0),Number(url.searchParams.get('limit') ?? 50)));}
       else if(req.method==='POST'&&path==='/api/ask'){
