@@ -10,7 +10,7 @@ test('the brief lists waiting cards, the next 24 h of reminders in local time, w
  assert.match(en,/Due in the next 24 h: 1\n• .*17:00 Renew insurance/,'only the next 24 hours, in Rome time');assert.doesNotMatch(en,/Far away|Past/);
  assert.match(en,/Since the last brief: 1 done, 1 failed\n• ✗ Mail Ada/);assert.match(en,/Health: All checks pass\./);
  const it=composeBrief({now,timeZone:'Europe/Rome',language:'it',...facts,approvals:[],health:['brain process not alive']});
- assert.match(it,/Buongiorno/);assert.match(it,/Ti aspettano: 0\nNulla ti aspetta\./);assert.match(it,/Stato: brain process not alive/);
+ assert.match(it,/Buongiorno/);assert.match(composeBrief({now,timeZone:'Europe/Rome',language:'en',base:'Tabgha',...facts}),/^☀️ Good morning\. Hyuga's brief · Tabgha/);assert.match(it,/Ti aspettano: 0\nNulla ti aspetta\./);assert.match(it,/Stato: brain process not alive/);
 });
 test('the brief is due once per local day, at or after its time, in the owner\'s time zone',()=>{
  assert.deepEqual(localClock(now,'Europe/Rome'),{date:'2030-01-15',minutes:8*60+30});

@@ -59,7 +59,8 @@ test('through every process: Aoba answers only the owner, sends cards with butto
   tg.text(STRANGER,'Ricordami di chiamare Ada');await until(()=>logs.some(l=>/another chat/.test(l)));
   assert.deepEqual(tg.sent(STRANGER),[]);assert.equal(model.asked.length,0,'a stranger never reaches Misato');
   tg.text(OWNER,'Ricordami di chiamare Ada il 15 gennaio 2030 alle 9');
-  await until(()=>tg.sent().some(m=>m.reply_markup));
+  // The card (delivery tick) and Misato's reply (end of its loop) can arrive in either order: wait for both.
+  await until(()=>tg.sent().some(m=>m.reply_markup)&&tg.sent().some(m=>/approvazione/.test(m.text)));
   const [reply,cardMessage]=[tg.sent().find(m=>/approvazione/.test(m.text))!,tg.sent().find(m=>m.reply_markup)!];
   assert.ok(reply);assert.match(cardMessage.text,/Pattern BLUE/);assert.match(cardMessage.text,/reminders\.add/);
   const approve=cardMessage.reply_markup!.inline_keyboard[0]![0]!.callback_data;assert.match(approve,/^a:[a-f0-9-]{36}$/);

@@ -6,8 +6,16 @@ import { statSync } from 'node:fs';
 import { validateModels, type Models } from './model.ts';
 import { defaultPolicy, validatePolicy, type Policy } from './policy.ts';
 /** telegram.chatId: the one private chat (the owner's) the Aoba bot answers; set by `telegram link`. */
-export interface Config {port:number; language:'it'|'en'; timeZone:string;nativePort?:number;models:Models;telegram?:{chatId:number};brief?:{at:string}}
-export const defaults:Omit<Config,'models'> = {port:4317,language:'en',timeZone:'Europe/Rome'};
+export interface Config {port:number; language:'it'|'en'; timeZone:string;nativePort?:number;models:Models;telegram?:{chatId:number};brief?:{at:string};base:Base}
+/** This machine's identity in the NERV mesh: an id (NERV-01) and a name (Neo Tokyo-3), shown in the dashboard, doctor and brief. */
+export interface Base {id:string;name:string}
+export const defaultBase:Base={id:'NERV-01',name:'Neo Tokyo-3'};
+export function validateBase(value:unknown):Base {
+  const b=value as Record<string,unknown>;
+  if(!b||typeof b!=='object'||Array.isArray(b)||Object.keys(b).some(k=>!['id','name'].includes(k))||typeof b.id!=='string'||!/^[A-Z0-9][A-Z0-9-]{1,15}$/.test(b.id)||typeof b.name!=='string'||!b.name.trim()||b.name.length>40||/[\u0000-\u001f<>]/.test(b.name))throw new Error('Invalid base: {"id": "NERV-01" (capitals, digits, dashes), "name": up to 40 characters}.');
+  return {id:b.id,name:b.name.trim()};
+}
+export const defaults:Omit<Config,'models'|'base'> = {port:4317,language:'en',timeZone:'Europe/Rome'};
 /** NERV_* settings; the pre-rename NODO_* names are still read as a fallback. */
 export function setting(name:'HOME'|'PORT'|'TOKEN'):string|undefined {return process.env['NERV_'+name] ?? process.env['NODO_'+name];}
 /** ~/.nerv, or the pre-rename ~/.nodo when only that exists. Nothing is moved automatically. */
@@ -29,7 +37,7 @@ export function readConfig(home:string):Config {
   const value:unknown=existsSync(path)?JSON.parse(readFileSync(path,'utf8')):{};
   if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('Invalid config.json.');
   const raw={...defaults,...value};
-  const config:Config={port:Number(setting('PORT') ?? raw.port),language:raw.language,timeZone:raw.timeZone,models:validateModels((raw as Record<string,unknown>).models)};
+  const config:Config={port:Number(setting('PORT') ?? raw.port),language:raw.language,timeZone:raw.timeZone,models:validateModels((raw as Record<string,unknown>).models),base:'base' in raw?validateBase((raw as Record<string,unknown>).base):defaultBase};
   if('nativePort' in raw){const native=Number(raw.nativePort);if(!Number.isInteger(native)||native<1||native>65535||native===config.port)throw new Error('Invalid native port.');config.nativePort=native;}
   if('telegram' in raw){const t=raw.telegram as Record<string,unknown>;if(!t||typeof t!=='object'||Array.isArray(t)||Object.keys(t).some(k=>k!=='chatId')||!Number.isSafeInteger(t.chatId)||(t.chatId as number)<=0)throw new Error('Invalid telegram: only chatId, a private chat id (run telegram link).');config.telegram={chatId:t.chatId as number};}
   if('brief' in raw){const b=raw.brief as Record<string,unknown>;if(!b||typeof b!=='object'||Array.isArray(b)||Object.keys(b).some(k=>k!=='at')||typeof b.at!=='string'||!/^([01]\d|2[0-3]):[0-5]\d$/.test(b.at))throw new Error('Invalid brief: {"at": "HH:MM"} in your time zone.');config.brief={at:b.at};}
@@ -70,10 +78,17 @@ export function readTelegramToken(home:string):string|undefined {
   if(!/^\d{5,15}:[A-Za-z0-9_-]{30,64}$/.test(token))throw new Error('Invalid telegram-token file: paste the token BotFather gave you.');
   return token;
 }
-export function initialize(home:string):void {
+/** Sets this machine's base identity in config.json, keeping every other setting. */
+export function setBase(home:string,base:Base):Base {
+  const path=join(home,'config.json');const valid=validateBase(base);
+  const current=existsSync(path)?JSON.parse(readFileSync(path,'utf8')) as Record<string,unknown>:{...defaults};
+  writeFileSync(path,JSON.stringify({...current,base:valid},null,2)+'\n',{mode:0o600});chmodSync(path,0o600);readConfig(home);return valid;
+}
+export function initialize(home:string,base?:Base):void {
   mkdirSync(home,{recursive:true,mode:0o700});
   const config=join(home,'config.json'),token=join(home,'token');
-  if(!existsSync(config))writeFileSync(config,JSON.stringify(defaults,null,2)+'\n',{flag:'wx',mode:0o600});
+  if(!existsSync(config))writeFileSync(config,JSON.stringify({...defaults,...(base?{base:validateBase(base)}:{})},null,2)+'\n',{flag:'wx',mode:0o600});
+  else if(base)setBase(home,base);
   if(!existsSync(token))writeFileSync(token,randomBytes(32).toString('hex')+'\n',{flag:'wx',mode:0o600});
   chmodSync(config,0o600);chmodSync(token,0o600);readConfig(home);readToken(home);
 }

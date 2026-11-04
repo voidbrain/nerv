@@ -9,7 +9,7 @@ import {makeServer} from '../src/server.ts';import {Store} from '../src/store.ts
 import {messages} from '../web/src/i18n.ts';
 test('init preserves credentials and configuration; English/Rome defaults and private files',()=>{
  const dir=mkdtempSync(join(tmpdir(),'nerv-config-'));
- try{initialize(dir);const token=readToken(dir);assert.equal(token.length,64);assert.deepEqual(readConfig(dir),{port:4317,language:'en',timeZone:'Europe/Rome',models:{}});writeFileSync(join(dir,'config.json'),JSON.stringify({port:4900,language:'en',timeZone:'UTC'}));initialize(dir);assert.equal(readToken(dir),token);assert.equal(readConfig(dir).port,4900);assert.equal(statSync(join(dir,'token')).mode&0o777,0o600);writeFileSync(join(dir,'config.json'),'{"language":"xx"}');assert.throws(()=>readConfig(dir));writeFileSync(join(dir,'config.json'),'{"timeZone":"Not/AZone"}');assert.throws(()=>readConfig(dir));}finally{rmSync(dir,{recursive:true,force:true});}
+ try{initialize(dir);const token=readToken(dir);assert.equal(token.length,64);assert.deepEqual(readConfig(dir),{port:4317,language:'en',timeZone:'Europe/Rome',models:{},base:{id:'NERV-01',name:'Neo Tokyo-3'}});writeFileSync(join(dir,'config.json'),JSON.stringify({port:4900,language:'en',timeZone:'UTC'}));initialize(dir);assert.equal(readToken(dir),token);assert.equal(readConfig(dir).port,4900);assert.equal(statSync(join(dir,'token')).mode&0o777,0o600);writeFileSync(join(dir,'config.json'),'{"language":"xx"}');assert.throws(()=>readConfig(dir));writeFileSync(join(dir,'config.json'),'{"timeZone":"Not/AZone"}');assert.throws(()=>readConfig(dir));}finally{rmSync(dir,{recursive:true,force:true});}
 });
 test('service definitions use absolute paths, encode special characters, and contain no credentials',()=>{
  const plist=renderService('darwin','/Users/name/Nodo & data','/Users/name/Code/Nodo','/opt/node');assert.match(plist,/Nodo &amp; data/);assert.match(plist,/<key>RunAtLoad<\/key><true\/>/);assert.doesNotMatch(plist,/_TOKEN/);assert.match(plist,/<key>NERV_HOME<\/key>/);assert.match(plist,/io\.nerv\.agent/);
@@ -54,4 +54,18 @@ test('every NERV process trusts the system certificates: npm start, both service
  const dir=mkdtempSync(join(tmpdir(),'nerv-flags-'));const runtime=new Runtime(join(dir,'db'));
  try{await runtime.ready();for(const child of [runtime.nervous.child,runtime.brain.child])for(const flag of NODE_FLAGS)assert.ok(child.spawnargs.includes(flag),`child started with ${flag}`);}
  finally{await runtime.close();rmSync(dir,{recursive:true,force:true});}
+});
+test('each machine has a base identity: set at init, shown by base, changed later, validated',async()=>{
+ const {validateBase}=await import('../src/config.ts');
+ const home=mkdtempSync(join(tmpdir(),'nerv-base-'));const run=(...a:string[])=>spawnSync(process.execPath,['src/cli.ts',...a],{env:{...process.env,NERV_HOME:home},encoding:'utf8'});
+ try{
+  const init=run('init','--base','nerv-02','--name','Tabgha');assert.equal(init.status,0,init.stderr);assert.match(init.stdout,/base NERV-02 · Tabgha/);
+  assert.equal(run('base').stdout.trim(),'NERV-02 · Tabgha');
+  writeFileSync(join(home,'config.json'),JSON.stringify({...JSON.parse(readFileSync(join(home,'config.json'),'utf8')),language:'it'}));
+  assert.match(run('base','NERV-03','Bethany').stdout,/Base set: NERV-03 · Bethany/);
+  const saved=JSON.parse(readFileSync(join(home,'config.json'),'utf8'));assert.deepEqual(saved.base,{id:'NERV-03',name:'Bethany'});assert.equal(saved.language,'it','other settings are kept');
+  assert.equal(statSync(join(home,'config.json')).mode&0o777,0o600);
+  assert.match(run('init','--base','NERV-04').stderr,/both --base ID and --name/);
+  for(const bad of [{id:'nerv 1',name:'x'},{id:'N',name:'x'},{id:'NERV-01',name:''},{id:'NERV-01',name:'<script>'},{id:'NERV-01',name:'x',extra:1}])assert.throws(()=>validateBase(bad),JSON.stringify(bad));
+ }finally{rmSync(home,{recursive:true,force:true});}
 });
