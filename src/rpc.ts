@@ -20,10 +20,15 @@ export const methodSchemas={
  'sorties.list':{type:'object',properties:{limit:{type:'integer',minimum:1,maximum:50},before:{type:'string',minLength:10,maxLength:40}},additionalProperties:false},
  'sorties.get':{type:'object',required:['id'],properties:{id:{type:'string',minLength:1,maxLength:100}},additionalProperties:false},
  'sorties.spear':{type:'object',required:['id','reason'],properties:{id:{type:'string',minLength:1,maxLength:100},reason:{type:'string',minLength:1,maxLength:500}},additionalProperties:false},
- 'sorties.open':{type:'object',required:['title'],properties:{title:{type:'string',minLength:1,maxLength:500},source:{enum:['owner','misato']}},additionalProperties:false},
+ 'sorties.open':{type:'object',required:['title'],properties:{title:{type:'string',minLength:1,maxLength:500},source:{enum:['owner','misato','instrumentality']}},additionalProperties:false},
  'sorties.finish':{type:'object',required:['sortieId'],properties:{sortieId:{type:'string',minLength:1,maxLength:100},status:{enum:['done','failed']},reply:{type:'string',minLength:1,maxLength:4000}},additionalProperties:false},
  'misato.note':{type:'object',required:['sortieId','kind','payload'],properties:{sortieId:{type:'string',minLength:1,maxLength:100},kind:{enum:['misato.request','misato.step','misato.waiting']},payload:{type:'object'}},additionalProperties:false},
  'misato.resumable':empty,
+ 'memory.episodes':{type:'object',properties:{limit:{type:'integer',minimum:1,maximum:100}},additionalProperties:false},
+ 'memory.exchanges':{type:'object',required:['since','until'],properties:{since:{type:'string',minLength:10,maxLength:40},until:{type:'string',minLength:10,maxLength:40}},additionalProperties:false},
+ 'memory.known':{type:'object',required:['texts'],properties:{texts:{type:'array',maxItems:10,items:{type:'string',maxLength:500}}},additionalProperties:false},
+ 'memory.saveEpisode':{type:'object',required:['since','until','summary','exchanges','proposed'],properties:{since:{type:'string',minLength:10,maxLength:40},until:{type:'string',minLength:10,maxLength:40},summary:{type:'string',maxLength:2000},exchanges:{type:'integer',minimum:0},proposed:{type:'integer',minimum:0}},additionalProperties:false},
+ 'instrumentality.digest':{type:'object',required:['exchanges'],properties:{exchanges:{type:'array',maxItems:200,items:{type:'object'}}},additionalProperties:false},
  'memory.recall':{type:'object',required:['text'],properties:{text:{type:'string',minLength:1,maxLength:8000}},additionalProperties:false},
  'misato.context':{type:'object',required:['conversation'],properties:{conversation:{type:'string',pattern:'^[a-z]+(:[0-9]+)?$',maxLength:40}},additionalProperties:false},
  'misato.claim':{type:'object',required:['sortieId'],properties:{sortieId:{type:'string',minLength:1,maxLength:100}},additionalProperties:false},
@@ -44,8 +49,8 @@ export type Principal='interface'|'coordinator'|'nervous'|'brain';
 /** Directed edges describe permission, not routing or model capability. Deny by default. */
 export const communicationGraph=[
  {from:'interface',to:'coordinator',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.pending','reminders.add','reminders.cancel','inbox.list','inbox.page','approvals.pending','events.page','sorties.list','sorties.get']},
- {from:'coordinator',to:'nervous',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.pending','reminders.add','reminders.cancel','inbox.list','inbox.page','approvals.pending','approvals.decide','events.page','sorties.list','sorties.get','sorties.spear','sorties.open','sorties.finish','actions.preview','actions.act','misato.note','misato.resumable','misato.context','misato.claim','memory.recall']},
- {from:'coordinator',to:'brain',methods:['runtime.ping','model.complete','casper.verdict','misato.step','models.reload']},
+ {from:'coordinator',to:'nervous',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.pending','reminders.add','reminders.cancel','inbox.list','inbox.page','approvals.pending','approvals.decide','events.page','sorties.list','sorties.get','sorties.spear','sorties.open','sorties.finish','actions.preview','actions.act','misato.note','misato.resumable','misato.context','misato.claim','memory.recall','memory.episodes','memory.exchanges','memory.known','memory.saveEpisode']},
+ {from:'coordinator',to:'brain',methods:['runtime.ping','model.complete','casper.verdict','misato.step','models.reload','instrumentality.digest']},
 ] as const;
 export function authorize(from:Principal,to:Principal,method:string):void {
  if(!communicationGraph.some(edge=>edge.from===from&&edge.to===to&&(edge.methods as readonly string[]).includes(method)))throw new RpcFault(-32003,'Communication edge denied.');

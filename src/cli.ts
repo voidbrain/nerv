@@ -68,6 +68,14 @@ try {
     console.log(`— sortie ${value.sortieId}`);
     if(!value.reply)process.exitCode=1;
   }
+  else if(command==='instrumentality'){
+    // Runs tonight's consolidation now, through the running service (it needs the brain's model).
+    const config=readConfig(home);
+    const response=await fetch(`http://127.0.0.1:${config.port}/api/memory/consolidate`,{method:'POST',headers:{authorization:`Bearer ${readToken(home)}`}}).catch(()=>{throw new Error('NERV Agency is not running: start it with serve, launch or service start.');});
+    const value=await response.json() as {summary?:string;exchanges?:number;proposed?:number;skipped?:number;error?:string};
+    if(!response.ok||value.error)throw new Error(value.error ?? 'Consolidation failed.');
+    console.log(`${value.exchanges} exchange(s) consolidated · ${value.proposed} fact(s) proposed as cards · ${value.skipped} already known${value.summary?`\n${value.summary}`:''}`);
+  }
   else if(command==='reload'){
     // The running brain re-reads config.json and anthropic-key; a broken file keeps the last working settings.
     const config=readConfig(home);
@@ -96,7 +104,7 @@ try {
     if(!response.ok)throw new Error(value.error ?? 'Ask failed.');
     console.log(value.text+(value.truncated?'\n[reply truncated]':'')+`\n— ${value.route} · ${value.model}`);
   }
-  else if(!command||command==='help')console.log('NERV Agency\nCommands: init [--base ID --name "Name"] | base [ID "Name"] | launch | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | open [dashboard] | chat "text" | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
+  else if(!command||command==='help')console.log('NERV Agency\nCommands: init [--base ID --name "Name"] | base [ID "Name"] | launch | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | ask [--cloud] "text" | open [dashboard] | chat "text" | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
   else {
     const config=readConfig(home);
     const scrolls=readScrolls(home);
@@ -110,6 +118,7 @@ try {
         // The owner's direct control of Lilith: facts added here are active at once; every change keeps its history.
         const m=local().memory;const [sub,id,...rest]=args;
         if(sub==='list'||!sub){const facts=m.list();console.log(facts.length?facts.map(f=>`${f.id.slice(0,8)}  ${f.text}  (${f.source}${f.shareable?', shareable':''})`).join('\n'):'No facts yet.');}
+        else if(sub==='episodes'){const list=m.episodes();console.log(list.length?list.map(e=>`${e.until.slice(0,16)}  ${e.exchanges} exchange(s), ${e.proposed} proposed  ${e.summary||'(nothing to consolidate)'}`).join('\n'):'No episodes yet.');}
         else if(sub==='add'){const f=m.add([id,...rest].join(' '),'owner');console.log(`Remembered ${f.id.slice(0,8)}: ${f.text}`);}
         else{
           const match=m.list(200).filter(f=>f.id.startsWith(id ?? '-'));if(match.length!==1)throw new Error(match.length?'Several facts start with that id; give more of it.':'No active fact with that id (see memory list).');
@@ -117,7 +126,7 @@ try {
           if(sub==='forget'){m.forget(f.id,'owner');console.log(`Forgot ${f.id.slice(0,8)}.`);}
           else if(sub==='edit'){const e=m.edit(f.id,rest.join(' '),'owner');console.log(`Updated ${f.id.slice(0,8)}: ${e?.text}`);}
           else if(sub==='history')console.log(m.historyOf(f.id).map(h=>`${h.created}  ${h.kind}  ${h.source}  ${h.text}`).join('\n'));
-          else throw new Error('Usage: memory list | add "fact" | edit ID "fact" | forget ID | history ID');
+          else throw new Error('Usage: memory list | add "fact" | edit ID "fact" | forget ID | history ID | episodes');
         }
         break;
       }
@@ -138,6 +147,7 @@ try {
         try{await runtime.ready();}catch(e){await runtime.close();nativeAuth?.close();throw e;}
         // Misato resumes after the owner decides, wherever the decision came from (F-033).
         runtime.startResumer();
+        if(config.instrumentality)runtime.startInstrumentality(config.instrumentality.at,config.timeZone);
         let server:ReturnType<typeof makeServer>;let native:ReturnType<typeof makeServer>|undefined;
         try{server=makeServer(runtime,token,{webRoot,...config});native=nativeTLS&&nativeAuth?makeServer(runtime,token,{...config,tls:nativeTLS,native:{auth:nativeAuth,fingerprint:nativeTLS.fingerprint,port:config.nativePort ?? 4319,webPort:config.port}}):undefined;}catch(e){await runtime.close();nativeAuth?.close();throw e;}
         const servers=native?[server,native]:[server];let stopped=false;

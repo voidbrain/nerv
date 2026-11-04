@@ -115,6 +115,8 @@ npm start -- memory forget ID
 npm start -- memory history ID
 ```
 
+**Instrumentality.** Add `"instrumentality": {"at": "03:00"}` to `config.json` (your time zone) and restart: once a night Misato's model reads the conversations since the previous run, writes a short summary (`npm start -- memory episodes`) and proposes up to five lasting facts you stated, each as a normal approval card (Telegram buttons, `approve`, dashboard). Facts already known, or already waiting on a card, are skipped; one-off tasks are not facts. The ledger is never changed. `npm start -- instrumentality` runs it now. If the model's reply is unreadable twice, that night is skipped and the next run covers it.
+
 Facts you add yourself are active at once. Forgetting removes a fact from recall and lists; its history (created, edited, forgotten, by whom) is kept. IDs can be shortened to their first characters.
 
 ## Dashboard

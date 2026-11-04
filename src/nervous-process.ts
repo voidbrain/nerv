@@ -2,6 +2,7 @@ import { MISATO_SOURCE, OWNER_SOURCE, Store } from './store.ts';
 import type { Verdict } from './policy.ts';
 import { dispatchRpc,MAX_FRAME_BYTES } from './rpc.ts';
 import { readScrolls } from './config.ts';
+import { factKey } from './memory.ts';
 // argv: database path, then the data home whose scrolls.json sets the gate rules (defaults when absent).
 const store=new Store(process.argv[2]!,process.argv[3]?readScrolls(process.argv[3]):undefined);
 store.tick();store.ledger.expire();
@@ -23,10 +24,19 @@ process.on('message',(value:unknown)=>{
    case 'sorties.list':return store.sorties(params.limit as number|undefined,params.before as string|undefined);
    case 'sorties.get':return store.sortie(params.id as string);
    case 'sorties.spear':return store.ledger.spear(params.id as string,params.reason as string);
-   case 'sorties.open':return store.ledger.openSortie(params.source==='misato'?MISATO_SOURCE:OWNER_SOURCE,params.title as string,'trusted');
+   case 'sorties.open':return store.ledger.openSortie(params.source==='misato'?MISATO_SOURCE:params.source==='instrumentality'?'instrumentality':OWNER_SOURCE,params.title as string,'trusted');
    case 'sorties.finish':{const id=params.sortieId as string;if(params.reply)store.ledger.reply(id,params.reply as string);return params.status?store.ledger.close(id,params.status as 'done'|'failed'):false;}
    case 'misato.note':return store.ledger.note(params.sortieId as string,params.kind as 'misato.step',params.payload as never);
    case 'misato.resumable':return store.ledger.resumable();
+   case 'memory.episodes':return store.memory.episodes(params.limit as number|undefined);
+   case 'memory.exchanges':return store.ledger.exchangesBetween(params.since as string,params.until as string);
+   case 'memory.known':{
+    // Known = already a fact, or already waiting on a memory.remember card: either way no second card.
+    const waiting=store.approvals(5).filter(a=>a.card.tool==='memory.remember').map(a=>String(a.card.args.text ?? ''));
+    const known=new Set([...store.memory.list(200).map(f=>f.text),...waiting].map(factKey));
+    return (params.texts as string[]).filter(t=>known.has(factKey(t)));
+   }
+   case 'memory.saveEpisode':return store.memory.saveEpisode(params as never);
    case 'memory.recall':return store.memory.recall(params.text as string).map(f=>({id:f.id,text:f.text,shareable:f.shareable,tainted:f.tainted}));
    case 'misato.context':return store.ledger.conversation(params.conversation as string);
    case 'misato.claim':return store.ledger.claimResume(params.sortieId as string);

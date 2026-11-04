@@ -6,6 +6,9 @@ import {MODEL_TIMEOUT_MS,type Ask,type Reply} from './model.ts';
 import type {Effect,Pattern,Stage,Verdict} from './policy.ts';
 import {MAX_STEPS,type Plan,type Recalled,type Step,type Turn} from './misato.ts';
 import {argsHash} from './ledger.ts';
+import {toolDocs} from './executors.ts';
+import type {Digest,Exchange} from './instrumentality.ts';
+import {briefDue,localClock} from './brief.ts';
 export interface ChatReply {sortieId:string;reply?:string;error?:string;steps:Step[];waiting:{approvalId:string;tool:string;reason:string}[]}
 /** An action the owner asks for directly: the request is what Casper checks the action against. */
 export interface OwnerAction {request:string;tool:string;args:Record<string,unknown>;stage?:Stage}
@@ -25,6 +28,7 @@ export interface StoreApi {
  chat?(message:string,conversation?:string):Promise<ChatReply>;
  onResumed?(listener:(reply:ChatReply)=>void):void;
  reloadModels?():Promise<{error?:string;kept?:boolean;models:unknown}>;
+ consolidate?():Promise<{summary?:string;exchanges:number;proposed:number;skipped:number;error?:string}>;
  spear?(id:string,reason:string):Promise<{revoked:number;stoodDown:number;happened:{actionId:string;tool:string;inverse:string|null}[]}|null>;
  events(sortieId:string,after?:number,limit?:number):SortieEvent[]|Promise<SortieEvent[]>;
  sorties(limit?:number,before?:string):SortieSummary[]|Promise<SortieSummary[]>;
@@ -56,10 +60,10 @@ export class Runtime implements StoreApi {
   const sortieId=await this.nervous.call('sorties.open',{title:action.request.slice(0,500)}) as string;
   return this.gate(sortieId,action);
  }
- private async gate(sortieId:string,action:OwnerAction):Promise<ActReply> {
+ private async gate(sortieId:string,action:OwnerAction,askCasper=true):Promise<ActReply> {
   const {pattern,effect}=await this.nervous.call('actions.preview',{sortieId,tool:action.tool}) as {pattern:Pattern;effect:Effect};
   let casper:Verdict|undefined,casperError:string|undefined;
-  if(pattern!=='green'){
+  if(pattern!=='green'&&askCasper){
    const reply=await this.brain.call('casper.verdict',{request:action.request,tool:action.tool,args:action.args,effect},MODEL_TIMEOUT_MS).catch(()=>({verdict:null,error:'Brain unavailable.'})) as {verdict:Verdict|null;error?:string};
    if(reply.verdict)casper=reply.verdict;else casperError=reply.error ?? 'No verdict.';
   }
@@ -101,6 +105,8 @@ export class Runtime implements StoreApi {
    if(!out.plan){await this.record(sortieId,steps,{outcome:'invalid',error:'Reply was not one JSON action or reply.'});continue;}
    if('reply' in out.plan)return finish('done',out.plan.reply);
    const {tool,args}=out.plan.action;
+   // A tool Misato was not offered (often a misspelling) has no executor: it goes back to Misato, never to the owner as a card.
+   if(!toolDocs.some(t=>t.name===tool)){await this.record(sortieId,steps,{tool,args,outcome:'invalid',error:`Unknown tool "${tool}". Use exactly one of: ${toolDocs.map(t=>t.name).join(', ')}.`});continue;}
    // The same action already waits for the owner: a second card would ask twice for one decision.
    const same=tool+':'+argsHash(args);
    if(pending.has(same)){await this.record(sortieId,steps,{tool,args,outcome:'invalid',error:'This exact action already waits for the owner. Do not propose it again; reply instead.'});continue;}
@@ -141,10 +147,45 @@ export class Runtime implements StoreApi {
   }
   return this.loop(sortieId,claim.request,steps);
  }
+ /**
+  * Instrumentality (F-022): Misato's exchanges since the last episode → a summary (kept) and candidate facts, each
+  * proposed as a memory.remember card. Facts already known are skipped. The ledger is never changed.
+  */
+ async consolidate(now=new Date()):Promise<{summary?:string;exchanges:number;proposed:number;skipped:number;error?:string}> {
+  const last=(await this.nervous.call('memory.episodes',{limit:1}) as {until:string}[])[0];
+  const since=last?.until ?? new Date(now.getTime()-86_400_000).toISOString();const until=now.toISOString();
+  const exchanges=await this.nervous.call('memory.exchanges',{since,until}) as Exchange[];
+  if(!exchanges.length){await this.nervous.call('memory.saveEpisode',{since,until,summary:'',exchanges:0,proposed:0});return {exchanges:0,proposed:0,skipped:0};}
+  // A local model occasionally returns an unreadable digest: one more try before giving up until tomorrow.
+  const ask=()=>this.brain.call('instrumentality.digest',{exchanges},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as Promise<{digest?:Digest;error?:string}>;
+  let out=await ask();if(!out.digest&&out.error==='The digest reply was not readable.')out=await ask();
+  if(!out.digest)return {exchanges:exchanges.length,proposed:0,skipped:0,error:out.error ?? 'No digest.'};
+  const known=new Set((await this.nervous.call('memory.known',{texts:out.digest.facts}) as string[]));
+  const fresh=out.digest.facts.filter(f=>!known.has(f));
+  if(fresh.length){
+   // An Instrumentality sortie holds the proposals; Casper is not asked (the request is ours, not the owner's), the owner decides each card.
+   const sortieId=await this.nervous.call('sorties.open',{title:`Instrumentality: ${fresh.length} fact(s) to confirm`,source:'instrumentality'}) as string;
+   for(const text of fresh)await this.gate(sortieId,{request:'Instrumentality: a fact the owner stated, to confirm before it is remembered.',tool:'memory.remember',args:{text}},false);
+  }
+  await this.nervous.call('memory.saveEpisode',{since,until,summary:out.digest.summary,exchanges:exchanges.length,proposed:fresh.length});
+  return {summary:out.digest.summary,exchanges:exchanges.length,proposed:fresh.length,skipped:out.digest.facts.length-fresh.length};
+ }
+ private instrumentality?:NodeJS.Timeout;
+ /** Once per local day at or after `at`: at most one attempt per day per run, so a failing model is not hammered. */
+ startInstrumentality(at:string,timeZone:string,everyMs=60_000){
+  let attempted:string|undefined;
+  const tick=async()=>{const day=briefDue(new Date(),timeZone,at,attempted);if(!day)return;
+   // Marked before any await, so an overlapping tick cannot start a second consolidation the same day.
+   attempted=day;
+   const last=(await this.nervous.call('memory.episodes',{limit:1}).catch(()=>[]) as {created:string}[])[0];
+   if(last&&localClock(new Date(last.created),timeZone).date===day)return;
+   await this.consolidate().catch(()=>{});};
+  if(!this.instrumentality)this.instrumentality=setInterval(()=>{void tick();},everyMs);void tick();
+ }
  /** Re-reads config.json and the cloud key in the brain, without restarting the service. */
  async reloadModels(){return await this.brain.call('models.reload') as {error?:string;kept?:boolean;models:unknown};}
  async ask(ask:Ask){return await this.brain.call('model.complete',{...ask},MODEL_TIMEOUT_MS) as Reply;}
  async health(){await this.nervous.call('runtime.ping');return {integrityCheck:'not-run',processes:{nervous:this.nervous.child.pid,brain:this.brain.child.pid,brainAlive:this.brain.child.connected}};}
  async doctor(){return {...await this.nervous.call('runtime.doctor') as object,processes:{nervous:this.nervous.child.pid,brain:this.brain.child.pid,brainAlive:this.brain.child.connected},models:await this.brain.call('runtime.ping').then(p=>(p as {models:unknown}).models,()=>'brain unavailable'),agentLoop:'not implemented'};}
- async close(){if(this.resumer)clearInterval(this.resumer);await Promise.allSettled([this.nervous.close(),this.brain.close()]);}
+ async close(){if(this.resumer)clearInterval(this.resumer);if(this.instrumentality)clearInterval(this.instrumentality);await Promise.allSettled([this.nervous.close(),this.brain.close()]);}
 }
