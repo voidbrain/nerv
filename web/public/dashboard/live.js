@@ -25,9 +25,12 @@
       TOOLS[a.tool] = TOOLS[a.tool] || { effect:a.ballot.effect };
       return { tool:a.tool, args:a.args, status:a.status, ballot:a.ballot, rejects:0 };
     }) : s.patterns.map(p => ({ tool:"", args:{}, status:"proposed", ballot:{ pattern:p } }));
-    const status = mapStatus(s); const any = st => actions.some(a => a.status === st);
-    const done = { detect:true, intake:true, route:true, plan:actions.length > 0, magi:actions.length > 0, sync:actions.length > 0,
-      apt:actions.some(a => a.ballot && a.ballot.outcome === "approval"), plug:any("done") || any("failed") || any("proposed"), eva:any("done") || any("failed"), debrief:status !== "active" && status !== "waiting" };
+    const status = mapStatus(s);
+    // One pass through the flow is one action: after the plan, only the latest action counts, so a step an earlier
+    // action passed but this one bypassed is not shown as passed.
+    const latest = actions[actions.length - 1]; const latestIs = (...st) => !!latest && st.includes(latest.status);
+    const done = { detect:true, intake:true, route:true, plan:actions.length > 0, magi:!!latest, sync:!!latest,
+      apt:!!latest && !!latest.ballot && latest.ballot.outcome === "approval", plug:latestIs("done", "failed", "proposed"), eva:latestIs("done", "failed"), debrief:status !== "active" && status !== "waiting" };
     const phase = status === "waiting" ? "apt" : status === "active" ? "magi" : "debrief";
     const last = actions[actions.length - 1];
     return { id:short(s.id), realId:s.id, title:s.title, preset:null, pilot:s.source === "misato" ? "misato" : "owner", source:"aoba", proactive:false, consult:false,
