@@ -1,42 +1,9 @@
 # Nodo backlog
 
-Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6 merged after green checks; target-OS and browser acceptance remain pending. Owner commits `1787a30`–`6d8c330` (NERV evaluation, backlog/roadmap update, dashboard prototypes) have no PR; their CI failed on `check:backlog` (P2 icon), fixed in [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan). Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md).
+Current work ledger, reviewed 4 November 2026 against main `0ffdfc6`. PR #1–#9 merged after green checks (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nodo/pull/7), [gate and ledger](https://github.com/voidbrain/nodo/pull/8), [approvals API](https://github.com/voidbrain/nodo/pull/9); main CI run 41787648624 green); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
 
 ## Features and improvements
 
-### F-001
-
-**Complete harness adoption and propose a reusable Node profile**
-
-| Signal | Priority | Status | Effort | Complete |
-|:---:|---|---|---|---|
-| 🟡 | 🔺 P1 | Implemented | 🟢 Small | ~80% |
-
-💻 **→ Human action required: No**<br />Validate the adopted tools, retain local Node conventions and record the missing reusable profile without modifying the upstream template in this bootstrap.
-
-| | |
-|---|---|
-| **Issue** | The published template has core and Angular but no Node profile. Adoption exists; remote PR/CI evidence is not available. |
-| **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
-| **Check** | All local harness checks pass; a future upstream profile has its own owned PR and fixtures. |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Next action / closure evidence:** Validate the adopted tools, retain local Node conventions and record the missing reusable profile without modifying the upstream template in this bootstrap. All local harness checks pass; a future upstream profile has its own owned PR and fixtures.
-
-**Estimates:** Small remaining effort; ~80% complete. Bootstrap scope estimate, not verification. Estimated 2026-11-01.
-
-| Field | Value |
-|---|---|
-| PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
-| Opened | 2026-11-01 |
-| Verification | Pending acceptance and remote CI where applicable |
-| Reviewed | 2026-11-01 |
-
-</details>
-
----
 
 ### F-002
 
@@ -578,7 +545,7 @@ Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6
 |---|---|
 | PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals) |
 | Opened | 2026-11-02 |
-| Verification | Unit/integration 2026-11-04: test/ledger.test.ts covers every Pattern path, veto-only seats, reject escalation, budget, EVA-00 shadow rule and grant binding (local run; CI pending). Human: pending |
+| Verification | Unit/integration 2026-11-04: test/ledger.test.ts covers every Pattern path, veto-only seats, reject escalation, budget, EVA-00 shadow rule and grant binding (local run; CI green: PR #8 run 41749472703, PR #9 run 41749840854, main run 41787648624). Human: pending |
 | Reviewed | 2026-11-04 |
 
 </details>
@@ -746,7 +713,7 @@ Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6
 |---|---|
 | PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals); [PR #9](https://github.com/voidbrain/nodo/pull/9) (approvals API) |
 | Opened | 2026-11-02 |
-| Verification | Unit/integration 2026-11-04: once-only decisions, expiry never approves, restart, scheduler-process expiry (local run; CI pending); REST once-only decision and socket decision denial across the scheduler process (local run; CI pending). Real-device: pending |
+| Verification | Unit/integration 2026-11-04: once-only decisions, expiry never approves, restart, scheduler-process expiry (local run; CI green: PR #8 run 41749472703, PR #9 run 41749840854, main run 41787648624); REST once-only decision and socket decision denial across the scheduler process (local run; CI green: PR #8 run 41749472703, PR #9 run 41749840854, main run 41787648624). Real-device: pending |
 | Reviewed | 2026-11-04 |
 
 </details>
@@ -779,7 +746,7 @@ Current work ledger, reviewed 4 November 2026 against main `6d8c330`. PR #1–#6
 |---|---|
 | PR / evidence | [PR #7](https://github.com/voidbrain/nodo/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nodo/pull/8) (gate, ledger, approvals); [PR #9](https://github.com/voidbrain/nodo/pull/9) (approvals API) |
 | Opened | 2026-11-02 |
-| Verification | Unit/integration 2026-11-04: append-only triggers, ordered events per sortie, version-1 migration keeps reminders (local run; CI pending) |
+| Verification | Unit/integration 2026-11-04: append-only triggers, ordered events per sortie, version-1 migration keeps reminders (local run; CI green: PR #8 run 41749472703, PR #9 run 41749840854, main run 41787648624) |
 | Reviewed | 2026-11-04 |
 
 </details>

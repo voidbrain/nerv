@@ -4,6 +4,42 @@ Closed records in closing-date order. Dated evidence, not current status.
 
 ## Closed 2026-11-04
 
+### F-001
+
+**Complete harness adoption and propose a reusable Node profile**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: harness adopted with local Node conventions; a reusable Node profile is template work, not this backlog's.
+
+| | |
+|---|---|
+| **Issue** | The published template has core and Angular but no Node profile. Adoption exists; remote PR/CI evidence is not available. |
+| **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
+| **Check** | All local harness checks pass; a future upstream profile has its own owned PR and fixtures. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Validate the adopted tools, retain local Node conventions and record the missing reusable profile without modifying the upstream template in this bootstrap. All local harness checks pass; a future upstream profile has its own owned PR and fixtures.
+
+**Resolution:** Closed 2026-11-04. Harness v3.1.1 core + Angular adopted; Node conventions kept as project lines in AGENTS.md; `check:harness` reports copied files match the template, and CI runs every harness check green on PR #7–#9 and main. The template has no Node stack; proposing one is a project-harness change and belongs in that repository's backlog (not recorded there as of this date).
+
+**Estimates:** Closed; ~100% complete. Estimated 2026-11-01; closed 2026-11-04.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| Opened | 2026-11-01 |
+| Verification | CI 2026-11-04: validate green on PR #8 run 41749472703, PR #9 run 41749840854, main run 41787648624 (harness, backlog, conventions, maintenance, audits, freshness) |
+| Reviewed | 2026-11-04 |
+
+</details>
+
+---
+
 ### F-018
 
 **Fixed and JIT counselors/experts (outside council, suggest-only by default)**
