@@ -8,6 +8,7 @@ import { makeServer } from './server.ts';
 import { dataHome, databasePath, initialize, isTelegramToken, pinKajiRoot, telegramTokenPath, readConfig, readScrolls, readTelegramToken, readToken, setBase, type Base } from './config.ts';
 import { TelegramApi, TelegramChannel, startChats, telegramBase } from './telegram.ts';
 import { composeBrief, gatherBrief } from './brief.ts';
+import { KajiLink } from './kaji-link.ts';
 import { ROOT_KEY_FILE, Registry, baseKey, createRootKey, enrolmentArgs, fingerprint, signRecord, unlockRootKey, type SignedRecord } from './kaji.ts';
 import { service } from './service.ts';
 import {initializeNativeTLS,loadNativeTLS,nativeAdmin,NativeAuth,type Invitation} from './native-auth.ts';
@@ -219,6 +220,8 @@ try {
         try{await runtime.ready();}catch(e){await runtime.close();nativeAuth?.close();throw e;}
         // Misato resumes after the owner decides, wherever the decision came from (F-033).
         runtime.startResumer();
+        // Kaji line (F-036): this base's own key; the link starts once a root is pinned and listens only on the enrolled address.
+        const own=baseKey(home);runtime.setBaseKey(own.publicKey);let kaji:KajiLink|undefined;
         // Schedules are re-read every minute, so the owner can change them by chat or by hand without a restart.
         const live=()=>{try{return readConfig(home);}catch{return config;}};
         runtime.startInstrumentality(()=>{const c=live();return {...(c.instrumentality?{mode:c.instrumentality}:{}),timeZone:c.timeZone};});
@@ -226,7 +229,7 @@ try {
         try{server=makeServer(runtime,token,{webRoot,...config});native=nativeTLS&&nativeAuth?makeServer(runtime,token,{...config,tls:nativeTLS,native:{auth:nativeAuth,fingerprint:nativeTLS.fingerprint,port:config.nativePort ?? 4319,webPort:config.port}}):undefined;}catch(e){await runtime.close();nativeAuth?.close();throw e;}
         const servers=native?[server,native]:[server];let stopped=false;
         let aoba:TelegramChannel|undefined;
-        const close=()=>{if(stopped)return;stopped=true;void aoba?.stop();void Promise.all(servers.map(s=>new Promise<void>(done=>{s.close(()=>done());s.closeIdleConnections();}))).then(()=>runtime.close()).finally(()=>nativeAuth?.close());};
+        const close=()=>{if(stopped)return;stopped=true;void aoba?.stop();void kaji?.stop();void Promise.all(servers.map(s=>new Promise<void>(done=>{s.close(()=>done());s.closeIdleConnections();}))).then(()=>runtime.close()).finally(()=>nativeAuth?.close());};
         runtime.nervous.child.once('exit',()=>{if(!stopped){console.error('Scheduler unavailable; shutting down for supervisor recovery.');process.exitCode=1;close();}});
         for(const listener of servers)listener.on('error',e=>{console.error(e.message);process.exitCode=1;close();});
         if(native)await new Promise<void>((done,reject)=>{native.once('error',reject);native.listen(config.nativePort ?? 4319,'127.0.0.1',done);}).catch(e=>{close();throw e;});
@@ -235,6 +238,7 @@ try {
         // Aoba starts only when both the private bot token and the linked owner chat exist.
         if(botToken&&config.telegram){aoba=new TelegramChannel({api:new TelegramApi(botToken,telegramBase()),store:runtime,chatId:config.telegram.chatId,statePath:join(home,'telegram-state.json'),brief:()=>{const c=live();return c.brief?{at:c.brief.at,timeZone:c.timeZone,language:c.language,base:c.base.name}:undefined;}});await aoba.start().then(()=>console.log('Aoba (Telegram): linked, listening.'),e=>console.error(`Aoba (Telegram) did not start: ${e instanceof Error?e.message:'error'}.`));}
         else if(botToken)console.log('Aoba (Telegram): token found, no chat linked yet. Send /start to your bot, then run telegram link.');
+        if(config.kaji?.root){kaji=new KajiLink({baseId:config.base.id,key:own.privateKey,publicKey:own.publicKey,registry:runtime.kaji});void kaji.start();}
         process.once('SIGINT',close);process.once('SIGTERM',close);break;
       }
       default:throw new Error('Unknown command. Run help.');

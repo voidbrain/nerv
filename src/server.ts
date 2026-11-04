@@ -100,6 +100,7 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
         else if(id&&req.method==='POST'&&id[3]==='share'){const b=await body(req);if(Object.keys(b).some(k=>k!=='shareable')||typeof b.shareable!=='boolean')throw new Error('shareable must be true or false.');const f=await m.share(id[1]!,b.shareable);if(f)reply(200,f);else reply(404,{error:'No active fact with that ID.'});}
         else reply(404,{error:'Unknown operation.'});
       }
+      else if(req.method==='GET'&&path==='/api/bases'){if(!store.bases){reply(503,{error:'Kaji unavailable.'});return;}reply(200,await store.bases());}
       else if(req.method==='POST'&&path==='/api/memory/consolidate'){if(!store.consolidate){reply(503,{error:'Instrumentality unavailable.'});return;}req.setTimeout(MODEL_TIMEOUT_MS*7+5000);res.once('finish',()=>req.socket.setTimeout(15000));const r=await store.consolidate();reply(r.error?502:200,r);}
       else if(req.method==='POST'&&path==='/api/models/reload'){if(!store.reloadModels){reply(503,{error:'Model routes unavailable.'});return;}const result=await store.reloadModels();reply(result.error?400:200,result);}
       else if(req.method==='POST'&&path==='/api/chat'){

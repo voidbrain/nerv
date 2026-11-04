@@ -3,7 +3,7 @@
     "kind": "rule",
     "disposition": "implemented",
     "target": "docs/agents/areas.md",
-    "evidence": "Distributed contracts area note gains the Kaji trust layer's rules: Ed25519 root key in a passphrase-encrypted file (never argv/env), per-base keys, append-only registry records signed by the root and verified everywhere against a root pinned by fingerprint (no trust on first use), newest enrolment wins, revocation of a key always wins; no transport yet (F-036 phase 1a). Checked by test/kaji.test.ts."
+    "evidence": "Distributed contracts area note gains the Kaji live link's rules: enrolled-address-only listener, base-signed requests and replies with replay and skew guards, sanitised last-seen merging, registry catch-up verified against the local root (F-036 phase 1b). Checked by test/kaji-link.test.ts."
   },
   {
     "kind": "none",

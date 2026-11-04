@@ -45,7 +45,8 @@
   async function poll() {
     if (polling || !token) return; polling = true;
     try {
-      const [list, cards, doctor, pending, inbox, facts, episodes] = await Promise.all([api("sorties?limit=20"), api("approvals"), api("doctor"), api("reminders/pending"), api("inbox"), api("memory"), api("memory/episodes")]);
+      const [list, cards, doctor, pending, inbox, facts, episodes, kajiBases] = await Promise.all([api("sorties?limit=20"), api("approvals"), api("doctor"), api("reminders/pending"), api("inbox"), api("memory"), api("memory/episodes"), api("bases").catch(() => [])]);
+      applyBases(kajiBases);
       state.lilith = Object.assign(state.lilith || { history:{} }, { facts, episodes });
       state.delivered = inbox.map(d => Date.parse(d.created));
       const selected = state.sorties.find(x => x.id === state.selected);
@@ -116,12 +117,36 @@
     document.getElementById("health").innerHTML = rows.map(c => "<div class='row small'><span>" + c[0] + "</span><span class='" + c[1] + "'>" + (c[1] === "ok" ? "✓ " : "✗ ") + esc(c[2]) + "</span></div>").join("") +
       "<div class='row small' style='margin-top:6px'><span class='muted'>Edited config.json? Apply it without a restart.</span><button class='btn sm' id='btn-reload'>Reload models</button></div>";
   };
+  // Kaji bases (F-036): every enrolled base with its real status; positions are a fixed layout around this base
+  // (no real coordinates exist), redrawn when the set of bases or their status changes.
+  let basesKey = "";
+  function applyBases(list) {
+    state.kajiBases = list;
+    if (!list.length) return;
+    const key = list.map(b => b.baseId + ":" + b.status + ":" + b.online).join("|"); if (key === basesKey) return; basesKey = key;
+    const self = list.find(b => b.self) || list[0]; const others = list.filter(b => b !== self);
+    const place = (b, i) => { const a = 2 * Math.PI * i / Math.max(3, others.length) - Math.PI / 2; return b === self ? [35.236, 138.985] : [35.236 + 0.09 * Math.sin(a), 138.985 + 0.2 * Math.cos(a)]; };
+    const toBase = (b, i) => { const [lat, lon] = place(b, i); return { id:b.baseId.toLowerCase(), name:b.name.toUpperCase(), role:b.baseId + (b.self ? " · this machine" : " · " + b.address), lat, lon, status:b.status === "revoked" ? "offline" : b.online ? "online" : "offline", cpu:null, ram:null, gpu:null, rtt:null, models:"—" }; };
+    BASES.splice(0, BASES.length, toBase(self, 0), ...others.map((b, i) => toBase(b, i)));
+    LINKS.length = 0; const up = list.filter(b => b.status === "enrolled");
+    for (let i = 0; i < up.length; i++) for (let j = i + 1; j < up.length; j++) LINKS.push([up[i].baseId.toLowerCase(), up[j].baseId.toLowerCase()]);
+    CAGES.forEach(c => { c.base = BASES[0].id; }); document.getElementById("cages").innerHTML = "";
+    initMap();
+  }
+  const sinceText = t => { if (!t) return "never heard"; const s = Math.round((Date.now() - Date.parse(t)) / 1000); return s < 90 ? "seen " + s + " s ago" : s < 5400 ? "last seen " + Math.round(s / 60) + " min ago" : "last seen " + new Date(t).toLocaleString(); };
   window.renderBases = function () {
-    document.getElementById("bases-sub").textContent = "1/1 online";
-    const roles = ((state.doctor || {}).models || {}).roles || {};
-    const base = (state.doctor || {}).base || { id:"NERV-01", name:"Neo Tokyo-3" };
-    document.getElementById("bases").innerHTML = "<div class='card'><div class='row'><span class='b'>" + esc(base.name) + " · " + esc(base.id) + "</span><span class='badge b-ok'>ONLINE</span></div><div class='tiny muted'>this machine · coordinator, scheduler, brain</div><div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div></div>" +
-      "<div class='muted small' style='margin-top:4px'>Other bases (Kaji line) are planned · not connected yet.</div>";
+    const list = state.kajiBases || []; const roles = ((state.doctor || {}).models || {}).roles || {};
+    if (!list.length) {
+      const base = (state.doctor || {}).base || { id:"NERV-01", name:"Neo Tokyo-3" };
+      document.getElementById("bases-sub").textContent = "1/1 online";
+      document.getElementById("bases").innerHTML = "<div class='card'><div class='row'><span class='b'>" + esc(base.name) + " · " + esc(base.id) + "</span><span class='badge b-ok'>ONLINE</span></div><div class='tiny muted'>this machine · coordinator, scheduler, brain</div><div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div></div>" +
+        "<div class='muted small' style='margin-top:4px'>No Kaji line yet: enrol your bases (INSTALL, Kaji line) to see them here.</div>";
+      return;
+    }
+    document.getElementById("bases-sub").textContent = list.filter(b => b.online).length + "/" + list.filter(b => b.status === "enrolled").length + " online";
+    document.getElementById("bases").innerHTML = list.map(b => "<div class='card'><div class='row'><span class='b'>" + esc(b.name) + " · " + esc(b.baseId) + "</span><span class='badge " + (b.status === "revoked" ? "b-muted'>REVOKED" : b.online ? "b-ok'>ONLINE" : "b-warn'>OFFLINE") + "</span></div>" +
+      "<div class='tiny muted'>" + (b.self ? "this machine" : esc(b.address)) + " · key " + esc(b.fingerprint.slice(0, 9)) + " · " + (b.self ? "local" : esc(sinceText(b.lastSeen))) + "</div>" +
+      (b.self ? "<div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div>" : "") + "</div>").join("");
   };
   // Lilith: the owner's facts, editable here; every change is the owner's and stays in the fact's history.
   window.renderLilith = function () {

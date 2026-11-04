@@ -9,6 +9,8 @@ import {argsHash} from './ledger.ts';
 import {toolDocs} from './executors.ts';
 import type {Digest,Exchange} from './instrumentality.ts';
 import type {Episode,Fact} from './memory.ts';
+import type {BaseEntry,SignedRecord} from './kaji.ts';
+import {ONLINE_MS,type RegistryPort} from './kaji-link.ts';
 import {briefDue,localClock} from './brief.ts';
 export interface ChatReply {sortieId:string;reply?:string;error?:string;steps:Step[];waiting:{approvalId:string;tool:string;reason:string}[]}
 /** An action the owner asks for directly: the request is what Casper checks the action against. */
@@ -29,6 +31,8 @@ export interface StoreApi {
  chat?(message:string,conversation?:string):Promise<ChatReply>;
  onResumed?(listener:(reply:ChatReply)=>void):void;
  reloadModels?():Promise<{error?:string;kept?:boolean;models:unknown}>;
+ /** Kaji bases with their live status (F-036): online when heard from within the last 90 s. */
+ bases?():Promise<(BaseEntry&{lastSeen:string|null;online:boolean;self:boolean})[]>;
  /** Lilith for the owner (dashboard): admin-only over REST, never on the read-only socket. */
  lilith?:{list():Promise<Fact[]>;episodes():Promise<Episode[]>;add(text:string):Promise<Fact>;edit(id:string,text:string):Promise<Fact|null>;forget(id:string):Promise<boolean>;share(id:string,shareable:boolean):Promise<Fact|null>;history(id:string):Promise<unknown[]>};
  consolidate?():Promise<{summary?:string;exchanges:number;proposed:number;skipped:number;error?:string}>;
@@ -173,6 +177,19 @@ export class Runtime implements StoreApi {
   await this.nervous.call('memory.saveEpisode',{since,until,summary:out.digest.summary,exchanges:exchanges.length,proposed:fresh.length});
   return {summary:out.digest.summary,exchanges:exchanges.length,proposed:fresh.length,skipped:out.digest.facts.length-fresh.length};
  }
+ /** The scheduler-process side of the Kaji link's registry. */
+ readonly kaji:RegistryPort={
+  bases:async()=>await this.nervous.call('kaji.bases') as BaseEntry[],
+  records:async()=>await this.nervous.call('kaji.records') as SignedRecord[],
+  add:async(records)=>await this.nervous.call('kaji.add',{records}) as number,
+  seen:async(updates)=>{await this.nervous.call('kaji.seen',{updates});},
+  lastSeen:async()=>await this.nervous.call('kaji.lastSeen') as Record<string,string>,
+ };
+ private selfKey?:string;
+ /** Marks which entry is this base (by its public key) for the dashboard. */
+ setBaseKey(publicKey:string){this.selfKey=publicKey;}
+ async bases(){const [list,seen]=await Promise.all([this.kaji.bases(),this.kaji.lastSeen()]);const now=Date.now();
+  return list.map(b=>({...b,lastSeen:seen[b.baseId] ?? null,online:b.status==='enrolled'&&(b.publicKey===this.selfKey||(!!seen[b.baseId]&&now-Date.parse(seen[b.baseId]!)<ONLINE_MS)),self:b.publicKey===this.selfKey}));}
  readonly lilith={
   list:async()=>await this.nervous.call('memory.list',{limit:200}) as Fact[],
   episodes:async()=>await this.nervous.call('memory.episodes',{limit:10}) as Episode[],

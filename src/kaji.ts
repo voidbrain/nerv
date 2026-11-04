@@ -10,7 +10,8 @@ import type { DatabaseSync } from 'node:sqlite';
  */
 export const REGISTRY_SCHEMA=`
  CREATE TABLE IF NOT EXISTS registry(id TEXT PRIMARY KEY, serial INTEGER NOT NULL, kind TEXT NOT NULL, base_id TEXT NOT NULL, body TEXT NOT NULL, signature TEXT NOT NULL, received TEXT NOT NULL);
- CREATE TRIGGER IF NOT EXISTS registry_no_update BEFORE UPDATE ON registry BEGIN SELECT RAISE(ABORT,'registry records are append-only'); END;`;
+ CREATE TRIGGER IF NOT EXISTS registry_no_update BEFORE UPDATE ON registry BEGIN SELECT RAISE(ABORT,'registry records are append-only'); END;
+ CREATE TABLE IF NOT EXISTS kaji_seen(base_id TEXT PRIMARY KEY, last_seen TEXT NOT NULL);`;
 export const ROOT_KEY_FILE='key-of-nebuchadnezzar.enc';
 const BASE_KEY_FILE='base-key',BASE_PUB_FILE='base.pub';
 /** Key order never changes the bytes that are signed. */
@@ -90,6 +91,9 @@ export class Registry {
   this.db.prepare('INSERT INTO registry VALUES(?,?,?,?,?,?,?)').run(id,record.body.serial,record.body.kind,record.body.baseId,canonical(record.body),record.signature,now.toISOString());
   return 'added';
  }
+ /** Merges last-seen times: per base, the newest time wins (so every base learns what any base heard). */
+ seen(updates:Record<string,string>):void {const up=this.db.prepare('INSERT INTO kaji_seen VALUES(?,?) ON CONFLICT(base_id) DO UPDATE SET last_seen=excluded.last_seen WHERE excluded.last_seen>kaji_seen.last_seen');for(const [id,at] of Object.entries(updates))if(BASE_ID.test(id)&&Number.isFinite(Date.parse(at)))up.run(id,new Date(Date.parse(at)).toISOString());}
+ lastSeen():Record<string,string> {return Object.fromEntries((this.db.prepare('SELECT base_id,last_seen FROM kaji_seen').all() as {base_id:string;last_seen:string}[]).map(r=>[r.base_id,r.last_seen]));}
  records():SignedRecord[] {return (this.db.prepare('SELECT body,signature FROM registry ORDER BY serial,id').all() as {body:string;signature:string}[]).map(r=>({body:JSON.parse(r.body) as RegistryBody,signature:r.signature}));}
  nextSerial():number {return ((this.db.prepare('SELECT max(serial) AS s FROM registry').get() as {s:number|null}).s ?? 0)+1;}
  /** Current bases: the newest enrolment per base, unless a revocation of that key exists (revoke always wins). */

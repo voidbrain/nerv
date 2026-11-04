@@ -1,12 +1,14 @@
 import { MISATO_SOURCE, OWNER_SOURCE, Store } from './store.ts';
 import type { Verdict } from './policy.ts';
 import { dispatchRpc,MAX_FRAME_BYTES } from './rpc.ts';
-import { readScrolls } from './config.ts';
+import { readConfig, readScrolls } from './config.ts';
+import { Registry, type SignedRecord } from './kaji.ts';
 import { factKey } from './memory.ts';
 // argv: database path, then the data home whose scrolls.json sets the gate rules (defaults when absent).
 const store=new Store(process.argv[2]!,process.argv[3]?readScrolls(process.argv[3]):undefined,process.argv[3]?{home:process.argv[3]}:{});
 store.tick();store.ledger.expire();
 const timer=setInterval(()=>{try{store.tick();store.ledger.expire();}catch{console.error('Nervous scheduler tick failed.');}},250);
+const registry=()=>new Registry(store.db,process.argv[3]?(()=>{try{return readConfig(process.argv[3]!).kaji?.root;}catch{return undefined;}})():undefined);
 process.on('message',(value:unknown)=>{
  if(Buffer.byteLength(JSON.stringify(value))>MAX_FRAME_BYTES){process.exitCode=1;stop();return;}
  void dispatchRpc(value,(method,params)=>{
@@ -35,6 +37,12 @@ process.on('message',(value:unknown)=>{
    case 'memory.forget':return store.memory.forget(params.id as string,'owner');
    case 'memory.share':return store.memory.share(params.id as string,params.shareable as boolean,'owner') ?? null;
    case 'memory.history':return store.memory.historyOf(params.id as string);
+   // Kaji registry for the coordinator's link: the root is re-read from config so an import while running applies.
+   case 'kaji.bases':return registry().bases();
+   case 'kaji.records':return registry().records();
+   case 'kaji.lastSeen':return registry().lastSeen();
+   case 'kaji.add':{const r=registry();let added=0;for(const rec of params.records as SignedRecord[]){try{if(r.add(rec)==='added')added++;}catch{/* a record not signed by our root is dropped */}}return added;}
+   case 'kaji.seen':return registry().seen(params.updates as Record<string,string>);
    case 'memory.lastRequest':return store.ledger.lastRequestAt();
    case 'memory.episodes':return store.memory.episodes(params.limit as number|undefined);
    case 'memory.exchanges':return store.ledger.exchangesBetween(params.since as string,params.until as string);
