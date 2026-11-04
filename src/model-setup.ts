@@ -28,7 +28,7 @@ export interface ModelChange {misato?:{route:'local'|'cloud';model?:string};casp
 /** The models settings after a change, validated; a role on a local model that Ollama does not have is refused. */
 export function planModels(current:Models,change:ModelChange,installed?:string[]):Models {
  const next:Models=JSON.parse(JSON.stringify(current)) as Models;
- const localModel=(m:string)=>{if(installed&&!installed.includes(m))throw new Error(`Ollama has no model "${m}". Installed: ${installed.join(', ') || 'none'}.`);return m;};
+ const localModel=(m:string)=>{if(installed&&!installed.includes(m))throw new Error(installed.length?`Ollama has no model "${m}". Installed: ${installed.join(', ')}.`:`Ollama has no models yet. Pull one first, for example: ollama pull qwen2.5:1.5b (small, for a test) or ollama pull gemma4:12b; then: models set misato qwen2.5:1.5b`);return m;};
  if(change.localUrl!==undefined||((change.misato?.route==='local'||change.casper)&&!next.local)){
   const model=change.misato?.route==='local'&&change.misato.model?change.misato.model:change.casper?.model ?? next.local?.model;
   if(!model)throw new Error('Pick a local model first.');
