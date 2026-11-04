@@ -40,6 +40,10 @@ The Kaji line connects your bases. Trust comes from your **Key of Nebuchadnezzar
 
 Each base's own key (`~/.nerv/base-key`) is created on first use and never leaves it.
 
+**The live link.** Once a base is enrolled and its root pinned, `serve` listens for the Kaji line on **its enrolled address only** (the Tailscale IP, port 4320 unless the address says `:port`) and greets every other enrolled base every 30 seconds. Every message is signed with the sender's base key and checked against the signed list (a known, non-revoked base; a time within two minutes; never replayed). Bases merge what they have heard, so each shows every base as online (heard in the last 90 s) or offline with its last-seen time, and a base that is behind on the list fetches the missing records and verifies each against its own pinned root. The dashboard's NERV bases panel and map show them; `GET /api/bases` (admin) returns the same.
+
+The first time, your firewall may ask whether Node may accept incoming connections: allow it. On **Windows**, if Tabgha stays offline from Neo Tokyo-3, allow the port on the Tailscale interface only, in an administrator PowerShell: `New-NetFirewallRule -DisplayName "NERV Kaji" -Direction Inbound -Protocol TCP -LocalPort 4320 -InterfaceAlias Tailscale -Action Allow`. The service log says `Kaji: listening on …`, and `… reachable` / `… unreachable (…)` whenever a base's state changes.
+
 ### A second machine
 
 Until the Kaji line (milestone 3) connects bases, every installation is independent: its own data home, reminders, ledger and memory. Give each one its own base identity. Only **one** installation may run Aoba with a given Telegram bot (Telegram delivers a bot's messages to one reader): when you move NERV to an always-on machine, stop the old one or remove its `telegram-token`; to run both, create a second bot. To move your data, stop both services and copy the data home (`~/.nerv`) to the new machine, then set its base identity.
