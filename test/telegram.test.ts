@@ -22,7 +22,7 @@ async function fakeTelegram(token:string) {
  });});
  await new Promise<void>(done=>server.listen(0,'127.0.0.1',done));
  const now=()=>Math.floor(Date.now()/1000);
- return {calls,base:`http://127.0.0.1:${(server.address() as {port:number}).port}`,
+ return {calls,updates,base:`http://127.0.0.1:${(server.address() as {port:number}).port}`,
   text:(chat:number,text:string,date=now())=>updates.push({update_id:next++,message:{date,text,chat:{id:chat,type:'private',username:chat===OWNER?'owner':'stranger'},from:{id:chat}}}),
   tap:(chat:number,data:string)=>updates.push({update_id:next++,callback_query:{id:'q'+next,data,from:{id:chat},message:{message_id:7,chat:{id:chat}}}}),
   sent:(chat=OWNER)=>calls.filter(c=>c.method==='sendMessage'&&c.body.chat_id===chat).map(c=>c.body as {text:string;reply_markup?:{inline_keyboard:{callback_data:string}[][]}}),
@@ -92,9 +92,12 @@ test('telegram link (CLI) saves the owner chat into config.json, keeping the oth
  const run=(...args:string[])=>new Promise<{status:number|null;out:string;err:string}>(done=>{const c=spawn(process.execPath,['src/cli.ts',...args],{env:{...process.env,NERV_HOME:home,NERV_TELEGRAM_API:tg.base}});let out='',err='';c.stdout.on('data',d=>out+=d);c.stderr.on('data',d=>err+=d);c.on('exit',status=>done({status,out,err}));});
  try{
   writeFileSync(join(home,'config.json'),JSON.stringify({language:'it'}));writeFileSync(join(home,'telegram-token'),token+'\n',{mode:0o600});
-  assert.match((await run('telegram','link')).err,/No \/start found/);
+  assert.match((await run('telegram','link')).err,/No \/start found\. Nothing is waiting for this bot\. Either \/start went to a different bot.*or another program reads this bot/);
+  tg.updates.push({update_id:900,message:{date:Math.floor(Date.now()/1000),text:'/start',chat:{id:-5,type:'group'},from:{id:5}}});
+  assert.match((await run('telegram','link')).err,/1 update\(s\) waiting, but no \/start in a private chat \(a message in a group chat\)/);
   tg.text(OWNER,'/start');const linked=await run('telegram','link');assert.equal(linked.status,0,linked.err);assert.match(linked.out,/linked to owner \(chat 1111\)/);
   assert.deepEqual(JSON.parse(readFileSync(join(home,'config.json'),'utf8')),{language:'it',telegram:{chatId:OWNER}});
+  assert.match((await run('telegram','link')).out,/Already linked to chat 1111: nothing to do/);
   assert.ok(!linked.out.includes(token)&&!linked.err.includes(token));
   chmodSync(join(home,'telegram-token'),0o644);assert.match((await run('telegram','link')).err,/must be private/);
  }finally{await tg.close();rmSync(home,{recursive:true,force:true});}

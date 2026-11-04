@@ -39,6 +39,20 @@ export async function startChats(api:TelegramApi):Promise<{chatId:number;name:st
  for(const u of await api.updates(undefined,0)){const m=u.message;if(m&&m.chat.type==='private'&&m.text?.trim().startsWith('/start'))seen.set(m.chat.id,(m.chat as {username?:string;first_name?:string}).username ?? (m.chat as {first_name?:string}).first_name ?? String(m.chat.id));}
  return [...seen].map(([chatId,name])=>({chatId,name}));
 }
+/**
+ * Why `telegram link` found no /start, in words the owner can act on (found on the owner's Windows base, 2026-11-04):
+ * the token's bot, a webhook that diverts messages, nothing waiting (another reader, or /start sent to another bot), or
+ * updates of other kinds (the Start button without a /start message, a group).
+ */
+export async function diagnoseNoStart(api:TelegramApi):Promise<string> {
+ const me=await api.call<{username?:string}>('getMe',{}).catch(()=>({} as {username?:string}));const bot=me.username?`@${me.username}`:'this bot';
+ const hook=await api.call<{url?:string}>('getWebhookInfo',{}).catch(()=>({} as {url?:string}));
+ if(hook.url){let host='a web address';try{host=new URL(hook.url).host;}catch{/* keep generic */}return `${bot} has a webhook (${host}), so Telegram sends its messages there instead. If nothing else uses this bot, remove it with the deleteWebhook call (docs/INSTALL.md, Telegram), then send /start again.`;}
+ const waiting=await api.call<Update[]>('getUpdates',{timeout:0}).catch(()=>[] as Update[]);
+ if(!waiting.length)return `Nothing is waiting for ${bot}. Either /start went to a different bot (open the chat with exactly ${bot}), or another program reads this bot (another NERV or a script using the same token: give each base its own bot).`;
+ const kinds=[...new Set(waiting.map(u=>u.message?`a message in a ${u.message.chat.type} chat`:Object.keys(u).filter(k=>k!=='update_id').join(', ')))];
+ return `${bot} has ${waiting.length} update(s) waiting, but no /start in a private chat (${kinds.join('; ')}). Type /start yourself in the private chat with ${bot}, then run this again.`;
+}
 interface State {offset?:number;inbox?:{sequence:number;id?:string};cards:string[];brief?:{date:string;at:string}}
 export function card(a:Approval):{text:string;buttons:Button[][]} {
  const c=a.card;const args=JSON.stringify(c.args);
