@@ -1140,13 +1140,13 @@ Current work ledger, reviewed 4 November 2026 against main `a587757`. PR #1–#4
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Recorded in docs/NERV/NERV-ARCHITECTURE.md ("FEDERATION") in PR_FED; the base identity exists ([PR #41](https://github.com/voidbrain/nerv/pull/41), F-035). Builds on F-005/F-006 (remote workers, cross-node orchestration), F-020 (persona names per base) and F-022 (memory merge). Kept from the earlier design: branch MAGI copies are seats, never authority (split-brain safety). Open design points: main-base hand-over when the main base is offline (owner-confirmed, with fencing), how a quiet bot tells the owner which channel to use, memory merge cadence.
+**Next action / closure evidence:** Recorded in docs/NERV/NERV-ARCHITECTURE.md ("FEDERATION") in [PR #42](https://github.com/voidbrain/nerv/pull/42); the base identity exists ([PR #41](https://github.com/voidbrain/nerv/pull/41), F-035). Builds on F-005/F-006 (remote workers, cross-node orchestration), F-020 (persona names per base) and F-022 (memory merge). Kept from the earlier design: branch MAGI copies are seats, never authority (split-brain safety). Open design points: main-base hand-over when the main base is offline (owner-confirmed, with fencing), how a quiet bot tells the owner which channel to use, memory merge cadence.
 
 **Estimates:** Large remaining effort; ~10% complete (identity only). Estimated 2026-11-04.
 
 | Field | Value |
 |---|---|
-| PR / evidence | PR_FED (architecture decision); [PR #41](https://github.com/voidbrain/nerv/pull/41) (base identity) |
+| PR / evidence | [PR #42](https://github.com/voidbrain/nerv/pull/42) (architecture decision); [PR #41](https://github.com/voidbrain/nerv/pull/41) (base identity) |
 | Opened | 2026-11-04 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |
