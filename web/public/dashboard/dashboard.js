@@ -177,6 +177,8 @@ function makeSortie(preset, title, opts) {
 }
 function setPhase(s, phase, note) {
   if (s.phase && s.phase !== phase) s.done[s.phase] = true;
+  // Back to the plan (a reject, an edit, the next action): the pass after the plan starts over.
+  if (phase === "plan" && s.done.magi) STEP_IDS.slice(STEP_IDS.indexOf("plan") + 1).forEach(id => { delete s.done[id]; });
   s.phase = phase; s.note = note || "";
   if (state.selected === s.id) renderFlow();
   renderSorties();
@@ -500,11 +502,19 @@ function drawEdges(s) {
   svg.setAttribute("viewBox", "0 0 " + host.width + " " + host.height);
   // Orthogonal routing: every line leaves and enters a node only at the middle of its N, S, E or W side, with 90° turns
   // in the gaps between nodes; the loops back to Misato run in their own lanes along the right edge, never behind a node.
+  // One shared turning height per fan-out (edges leaving the same node downwards) and per merge (edges entering the
+  // same node from above), so branches turn on one line.
+  const box = {}; EDGES.forEach(e => { box[e[0]] = box[e[0]] || c(nodeEl(e[0])); box[e[1]] = box[e[1]] || c(nodeEl(e[1])); });
+  const down = EDGES.filter(e => e[2] !== "loop" && box[e[1]].t >= box[e[0]].b - 2);
+  const fan = {}, merge = {};
+  down.forEach(e => { fan[e[0]] = Math.min(fan[e[0]] ?? Infinity, box[e[1]].t); merge[e[1]] = Math.max(merge[e[1]] ?? -Infinity, box[e[0]].b); });
+  const bar = e => { const outs = down.filter(x => x[0] === e[0]).length, ins = down.filter(x => x[1] === e[1]).length;
+    return outs > 1 || ins < 2 ? (box[e[0]].b + fan[e[0]]) / 2 : (merge[e[1]] + box[e[1]].t) / 2; };
   let lane = 0;
   const paths = EDGES.map(e => {
     const A = c(nodeEl(e[0])), B = c(nodeEl(e[1])); let d;
     if (e[2] === "loop" && e[0] !== "consult") { const x = host.width - 5 - 9 * lane++; d = "M" + A.r + "," + A.y + " H" + x + " V" + B.y + " H" + B.r; }
-    else if (B.t >= A.b - 2) { const my = (A.b + B.t) / 2; d = "M" + A.x + "," + A.b + " V" + my + " H" + B.x + " V" + B.t; }
+    else if (B.t >= A.b - 2) { const my = bar(e); d = "M" + A.x + "," + A.b + " V" + my + " H" + B.x + " V" + B.t; }
     else if (B.b <= A.t + 2) { const my = (B.b + A.t) / 2; d = "M" + A.x + "," + A.t + " V" + my + " H" + B.x + " V" + B.b; }
     else if (B.l >= A.r) { const mx = (A.r + B.l) / 2; d = "M" + A.r + "," + A.y + " H" + mx + " V" + B.y + " H" + B.l; }
     else { const mx = (B.r + A.l) / 2; d = "M" + A.l + "," + A.y + " H" + mx + " V" + B.y + " H" + B.r; }
@@ -520,9 +530,6 @@ function passedEdge(s, e) {
   const from = stepState(s, e[0]), to = stepState(s, e[1]);
   if (from === "skip" || to === "skip") return "skip";
   if (from !== "done" || !(to === "done" || to === "on" || to === "wait")) return "";
-  // After a loop back to Misato, steps past the current one were reached in an earlier pass, not this one.
-  const order = id => STEP_IDS.indexOf(id), now = order(s.phase);
-  if (s.status !== "done" && s.status !== "failed" && s.status !== "stood-down" && now >= 0 && order(e[1]) > now && to === "done") return "earlier";
   return e[0] === "apt" || e[1] === "apt" ? "passed owner" : "passed";
 }
 function liveEdges(s) {
