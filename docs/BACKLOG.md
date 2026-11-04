@@ -1,6 +1,6 @@
 # NERV Agency backlog
 
-Current work ledger, reviewed 4 November 2026 against main `bf7fcca`. PR #1–#15 merged after green checks (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); main CI run 41802018182 green); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
+Current work ledger, reviewed 4 November 2026 against main `586bca3`. PR #1–#16 merged after green checks (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); main CI run 41803864471 green); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
 
 ## Features and improvements
 
@@ -53,7 +53,7 @@ Current work ledger, reviewed 4 November 2026 against main `bf7fcca`. PR #1–#1
 |---|---|
 | **Issue** | Model routes exist (S² local, Umbilical cloud); no agent loop or messaging runtime yet. |
 | **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
-| **Check** | Italian/English commands, local-only privacy, no cloud fallback without permission, restart/retry/channel failure tests and live phone delivery. |
+| **Check** | Italian/English commands, replying in the language the owner wrote in (owner, 2026-11-04: English is the default, Italian must be understood and answered in Italian), local-only privacy, no cloud fallback without permission, restart/retry/channel failure tests and live phone delivery. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -280,33 +280,33 @@ Current work ledger, reviewed 4 November 2026 against main `bf7fcca`. PR #1–#1
 
 ### F-010
 
-**Italian-default interface and dedicated development port**
+**English-default interface with Italian selectable, and dedicated development port**
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
 | 🟡 | 🔺 P1 | Implemented | 🟢 Small | ~80% |
 
-💻 **→ Human action required: No**<br />Complete browser acceptance for Italian/English, dates and responsive layout; PR #1 CI is green.
+💻 **→ Human action required: No**<br />Complete browser acceptance for English/Italian, dates and responsive layout.
 
 | | |
 |---|---|
 | **Issue** | Translation and configuration implemented; natural-language interpretation remains F-003. Browser visual/accessibility checks remain unverified. |
 | **Reproduce** | Follow docs/INSTALL.md and the scoped headless implementation checks. |
-| **Check** | Italian default, matching translation keys, selectable English, unchanged reminder content, labelled browser-local dates, development port 4318. |
+| **Check** | English default (owner decision 2026-11-04, was Italian), matching translation keys, selectable Italian with the language switcher kept, unchanged reminder content, labelled browser-local dates, development port 4318. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Complete browser acceptance for Italian/English, dates and responsive layout; PR #1 CI is green. Italian default, matching translation keys, selectable English, unchanged reminder content, labelled browser-local dates, development port 4318.
+**Next action / closure evidence:** Complete browser acceptance for English/Italian, dates and responsive layout. Implemented in [PR #1](https://github.com/voidbrain/nerv/pull/1) with Italian as the default; the owner switched the default to English on 2026-11-04 (PR_EN): `init` writes `en`, the server and socket fall back to `en`, the web UI and `index.html` start in English, the native menu defaults to English unless a choice is stored; the switcher stays in both. Existing installs keep the language in their `config.json` (an `init` before this wrote `it`); set `"language": "en"` there and restart. Understanding and replying in Italian is conversational work under F-003.
 
-**Estimates:** Small remaining effort; ~80% complete. Estimate dated 2026-11-01, not acceptance evidence.
+**Estimates:** Small remaining effort; ~80% complete. Estimate dated 2026-11-01, reviewed 2026-11-04; not acceptance evidence.
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
+| PR / evidence | [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green; PR_EN (English default) |
 | Opened | 2026-11-01 |
-| Verification | Pending named acceptance |
-| Reviewed | 2026-11-01 |
+| Verification | 2026-11-04: config default and RPC/doctor fallback asserted `en` in test/runtime.test.ts and test/protocol.test.ts, build, headless and Swift tests (local run; CI pending). Browser acceptance pending |
+| Reviewed | 2026-11-04 |
 
 </details>
 
@@ -746,7 +746,7 @@ Current work ledger, reviewed 4 November 2026 against main `bf7fcca`. PR #1–#1
 |---|---|
 | PR / evidence | [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nerv/pull/8) (gate, ledger, approvals); [PR #9](https://github.com/voidbrain/nerv/pull/9) (approvals API); [PR #16](https://github.com/voidbrain/nerv/pull/16) (versioned, bounded events) |
 | Opened | 2026-11-02 |
-| Verification | Unit/integration 2026-11-04: append-only triggers, ordered events per sortie, version-1 migration keeps reminders (local run; CI green: PR #8 run 41749472703, PR #9 run 41749840854, main run 41787648624). 2026-11-04: schema-2 upgrade, version on every event, payload and page bounds, paging through the scheduler process (local run; CI pending) |
+| Verification | Unit/integration 2026-11-04: append-only triggers, ordered events per sortie, version-1 migration keeps reminders (local run; CI green: PR #8 run 41749472703, PR #9 run 41749840854, main run 41787648624). 2026-11-04: schema-2 upgrade, version on every event, payload and page bounds, paging through the scheduler process (local run; CI green: PR #16 run 41803859275, main run 41803864471) |
 | Reviewed | 2026-11-04 |
 
 </details>

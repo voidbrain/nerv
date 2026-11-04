@@ -16,7 +16,7 @@ Open **http://127.0.0.1:4317**. `serve` supervises three processes: isolated SQL
 
 Initialization creates `~/.nerv/config.json` and `~/.nerv/token` with private file permissions. Read the token locally to connect the UI; do not paste it into chat, a URL or a repository. The token stays in tab memory. Repeat initialization preserves configuration and credentials.
 
-Defaults: port 4317, language `it`, timezone `Europe/Rome`. Edit config.json to select `en`, another free port or a valid IANA timezone. Restart the service after configuration changes. Date inputs are browser-local and saved as UTC; the configured timezone does not silently reinterpret them. Natural-language dates, recurring schedules and Italian voice remain future work.
+Defaults: port 4317, language `en`, timezone `Europe/Rome`. Edit config.json to select `it`, another free port or a valid IANA timezone. Restart the service after configuration changes. Date inputs are browser-local and saved as UTC; the configured timezone does not silently reinterpret them. Natural-language dates, recurring schedules and Italian voice remain future work.
 
 ### Existing 0.1 data
 

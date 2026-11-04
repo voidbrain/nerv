@@ -5,7 +5,7 @@ import { randomBytes } from 'node:crypto';
 import { statSync } from 'node:fs';
 import { validateModels, type Models } from './model.ts';
 export interface Config {port:number; language:'it'|'en'; timeZone:string;nativePort?:number;models:Models}
-export const defaults:Omit<Config,'models'> = {port:4317,language:'it',timeZone:'Europe/Rome'};
+export const defaults:Omit<Config,'models'> = {port:4317,language:'en',timeZone:'Europe/Rome'};
 /** NERV_* settings; the pre-rename NODO_* names are still read as a fallback. */
 export function setting(name:'HOME'|'PORT'|'TOKEN'):string|undefined {return process.env['NERV_'+name] ?? process.env['NODO_'+name];}
 /** ~/.nerv, or the pre-rename ~/.nodo when only that exists. Nothing is moved automatically. */

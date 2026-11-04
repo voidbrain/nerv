@@ -67,8 +67,8 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
       else if(req.method==='POST' && path==='/api/reminders') {const b=await body(req);if(typeof b.title!=='string'||typeof b.due!=='string') throw new Error('Title and due are required.');reply(201,await store.add(b.title,b.due));}
       else if(req.method==='DELETE' && /^\/api\/reminders\/[a-f0-9-]+$/.test(path)) reply((await store.cancel(path.split('/').at(-1)!))?200:404,{message:'Cancellation processed.'});
       else if(req.method==='GET' && path==='/api/inbox') reply(200,await store.inbox());
-      else if(req.method==='GET' && path==='/api/status')reply(200,{name:'NERV Agency',mode:'local-core',...await store.health(),language:options.language ?? 'it',timeZone:options.timeZone ?? 'Europe/Rome',...(options.native?{runtimeId:options.native.auth.runtimeId,home:options.native.auth.home}:{})});
-      else if(req.method==='GET' && path==='/api/doctor') reply(200,{name:'NERV Agency',mode:'local-core',...await store.doctor(),remoteWorkers:'not implemented',language:options.language ?? 'it',timeZone:options.timeZone ?? 'Europe/Rome',...(options.native?{runtimeId:options.native.auth.runtimeId,home:options.native.auth.home}:{} )});
+      else if(req.method==='GET' && path==='/api/status')reply(200,{name:'NERV Agency',mode:'local-core',...await store.health(),language:options.language ?? 'en',timeZone:options.timeZone ?? 'Europe/Rome',...(options.native?{runtimeId:options.native.auth.runtimeId,home:options.native.auth.home}:{})});
+      else if(req.method==='GET' && path==='/api/doctor') reply(200,{name:'NERV Agency',mode:'local-core',...await store.doctor(),remoteWorkers:'not implemented',language:options.language ?? 'en',timeZone:options.timeZone ?? 'Europe/Rome',...(options.native?{runtimeId:options.native.auth.runtimeId,home:options.native.auth.home}:{} )});
       else reply(404,{error:'Unknown operation.'});
     } catch(e) {reply(400,{error:e instanceof Error?e.message:'Invalid request.'});}
   };
