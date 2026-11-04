@@ -12,7 +12,7 @@ npm start -- doctor
 npm start -- serve
 ```
 
-Open **http://127.0.0.1:4317**. `serve` supervises three processes: isolated SQLite/scheduler, an execution/health boundary and the API/static gateway. No model provider runs yet. There is no Angular development server to keep open in this mode. Before installing a service, stop this foreground process with Ctrl-C to free the port.
+Run `npm start -- open` in another terminal: it opens **http://127.0.0.1:4317** in your browser already signed in, using a single-use code that expires after 60 seconds (the token itself is never put in the address). Opening the page yourself still works with the token. `serve` supervises three processes: isolated SQLite/scheduler, an execution/health boundary and the API/static gateway. There is no Angular development server to keep open in this mode. Before installing a service, stop this foreground process with Ctrl-C to free the port.
 
 Initialization creates `~/.nerv/config.json` and `~/.nerv/token` with private file permissions. Read the token locally to connect the UI; do not paste it into chat, a URL or a repository. The token stays in tab memory. Repeat initialization preserves configuration and credentials.
 

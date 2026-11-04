@@ -13,6 +13,11 @@ test('one headless process serves UI and reminders, exits cleanly, and recovers 
   writeFileSync(join(home,'config.json'),JSON.stringify({port,language:'it',timeZone:'Europe/Rome'}));
   const headers={Authorization:'Bearer '+readToken(home),'Content-Type':'application/json'};const base=`http://127.0.0.1:${port}`;
   const first=await launch();assert.match(await(await fetch(base)).text(),/nerv-app/);
+  // open: the CLI asks the running service for a login code; the page's exchange returns the token once.
+  const opened=spawnSync(process.execPath,['src/cli.ts','open','--print'],{env,encoding:'utf8'});assert.equal(opened.status,0,opened.stderr);
+  const code=/#code=([a-f0-9]{32})/.exec(opened.stdout)![1];assert.ok(!opened.stdout.includes(readToken(home)),'the token never appears in the URL');
+  const swapped=await fetch(base+'/api/session/exchange',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
+  assert.deepEqual(await swapped.json(),{token:readToken(home)});
   const health=await(await fetch(base+'/api/doctor',{headers})).json();const pids=[health.processes.nervous,health.processes.brain] as number[];assert.equal(new Set(pids).size,2);
   const due=new Date(Date.now()+1500).toISOString();assert.equal((await fetch(base+'/api/reminders',{method:'POST',headers,body:JSON.stringify({title:'Promemoria di prova',due})})).status,201);
   await stop(first);child=undefined;for(const pid of pids)assert.throws(()=>process.kill(pid,0));
