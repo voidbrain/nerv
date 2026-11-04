@@ -121,6 +121,8 @@ read -rs KEY && printf '%s\n' "$KEY" > ~/.nerv/anthropic-key && chmod 600 ~/.ner
 
 Paste the key and press Enter (nothing is shown). Then set `"enabled": true` under `cloud` and run `npm start -- reload`.
 
+**When a route is down (Dummy Plug).** The brain tracks each route from real calls and, for the local route, a TCP check every minute (no model call). When a route cannot be reached, `doctor` and `/api/status` show `routes` and a `degraded` reason, the dashboard shows *degraded* with the reason, the daily brief lists it, and the service log prints one line (`NERV: S² local route down: …`). Reminders, the gate and rule-based actions keep running; a request that needs a model fails with that reason (Aoba replies *I could not finish: …*), and a local-only request never moves to the cloud. When the route answers again it is marked reachable on its own, and the log prints `NERV: S² local route back after N min.`
+
 ## Memory (Lilith)
 
 Misato remembers facts about you that you confirmed: tell it "remember that my dentist is Dr. Rossi" and it proposes the fact as an approval card (Telegram buttons, `approve`, or the dashboard); nothing is stored until you approve. From then on, facts that match a request are offered to Misato with it, in any conversation. Facts are local-only: they are never sent to a cloud model unless marked shareable.

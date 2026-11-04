@@ -174,15 +174,25 @@
     if (seat === "balthasar") return "reversibility · budget · taint" + (s ? " · " + s.trust : "");
     return a && a.ballot && a.ballot.pattern && a.ballot.pattern !== "green" ? "Casper · local model (S²)" : "Green: not consulted";
   };
+  // Dummy Plug (F-030): each configured model route, its state and since when; reminders never depend on it.
+  const ROUTE_NAMES = { local:"S² local route", cloud:"Umbilical cloud" };
+  function routeRows(d) {
+    const r = d.routes || {}; return ["local", "cloud"].filter(k => r[k] && r[k].state !== "off").map(k => {
+      const h = r[k]; const at = h.since ? " since " + new Date(h.since).toTimeString().slice(0, 5) : "";
+      return [ROUTE_NAMES[k], h.state === "ok" ? "ok" : h.state === "down" ? "danger" : "warn", h.state === "ok" ? "reachable" + at : h.state === "down" ? "down" + at + " · " + (h.error || "unreachable") : "not checked yet"];
+    });
+  }
   window.renderHealth = function () {
     const d = state.doctor; if (!d) { document.getElementById("health").innerHTML = "<div class='muted small'>Waiting for doctor…</div>"; return; }
     const p = d.processes || {}; const m = d.models || {}; const roles = m.roles || {};
     const rows = [["Scheduler (nervous)", p.nervous ? "ok" : "danger", p.nervous ? "pid " + p.nervous : "not running"],
       ["Brain process", p.brainAlive === false ? "danger" : "ok", p.brain ? "pid " + p.brain + (p.brainAlive === false ? " · not alive" : " · alive") : "unknown"],
+      ...routeRows(d),
       ["Misato", roles.misato && !/not set/.test(roles.misato) ? "ok" : "warn", roles.misato || "—"], ["Casper", roles.casper && /^local \(/.test(roles.casper) ? "ok" : "warn", roles.casper || "—"],
       ["Central Dogma (SQLite)", d.database && d.database.quick_check === "ok" ? "ok" : "danger", "schema " + ((d.schema || {}).user_version ?? "?") + " · " + ((d.database || {}).quick_check || "?")],
       ["Pending reminders", "ok", String(((d.pending || {}).count) ?? 0)]];
-    document.getElementById("health").innerHTML = rows.map(c => "<div class='row small'><span>" + c[0] + "</span><span class='" + c[1] + "'>" + (c[1] === "ok" ? "✓ " : "✗ ") + esc(c[2]) + "</span></div>").join("") +
+    const degraded = (d.degraded || []).length ? "<div class='small warn' style='margin-bottom:4px'>DEGRADED · Dummy Plug: reminders and rule-based actions keep running; requests that need a model fail with the reason below until it is back.</div>" : "";
+    document.getElementById("health").innerHTML = degraded + rows.map(c => "<div class='row small'><span>" + c[0] + "</span><span class='" + c[1] + "'>" + (c[1] === "ok" ? "✓ " : "✗ ") + esc(c[2]) + "</span></div>").join("") +
       "<div class='row small' style='margin-top:6px'><span class='muted'>Edited config.json? Apply it without a restart.</span><button class='btn sm' id='btn-reload'>Reload models</button></div>";
   };
   // Kaji bases (F-036): every enrolled base with its real status; positions are a fixed layout around this base
@@ -192,7 +202,7 @@
   function healthOf(d) {
     const p = (d && d.processes) || {}; const roles = ((d && d.models) || {}).roles || {};
     if (!p.nervous) return "offline";
-    return p.brainAlive === false || !roles.misato || /not set|not configured/.test(roles.misato) ? "standby" : "online";
+    return p.brainAlive === false || (d.degraded || []).length || !roles.misato || /not set|not configured/.test(roles.misato) ? "standby" : "online";
   }
   // Real heartbeats on the Kaji line: when a peer's last-seen time moves, a pulse travels from it to this base.
   const heard = {};
@@ -225,8 +235,8 @@
     const list = state.kajiBases || []; const roles = ((state.doctor || {}).models || {}).roles || {};
     if (!list.length) {
       const base = (state.doctor || {}).base || { id:"NERV-01", name:"Neo Tokyo-3" };
-      document.getElementById("bases-sub").textContent = "1/1 online";
-      document.getElementById("bases").innerHTML = "<div class='card'><div class='row'><span class='b'>" + esc(base.name) + " · " + esc(base.id) + "</span><span class='badge b-ok'>ONLINE</span></div><div class='tiny muted'>this machine · coordinator, scheduler, brain</div><div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div></div>" +
+      document.getElementById("bases-sub").textContent = BASES[0].status === "online" ? "1/1 online" : "1/1 " + (BASES[0].status === "standby" ? "degraded" : "down");
+      document.getElementById("bases").innerHTML = "<div class='card'><div class='row'><span class='b'>" + esc(base.name) + " · " + esc(base.id) + "</span>" + (BASES[0].status === "standby" ? "<span class='badge b-warn'>DEGRADED</span>" : BASES[0].status === "offline" ? "<span class='badge b-danger'>DOWN</span>" : "<span class='badge b-ok'>ONLINE</span>") + "</div><div class='tiny muted'>this machine · coordinator, scheduler, brain</div><div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div></div>" +
         "<div class='muted small' style='margin-top:4px'>No Kaji line yet: enrol your bases (INSTALL, Kaji line) to see them here.</div>";
       return;
     }
@@ -316,8 +326,9 @@
       document.getElementById("q-away").classList.toggle("attn", c("failed") + c("stood-down") > 0); }
     const next = state.upcoming.filter(u => u.at > Date.now()).sort((a, b) => a.at - b.at)[0];
     document.getElementById("qv-next").textContent = next ? hhmm(next.at) : "—"; document.getElementById("qd-next").textContent = next ? next.title : "nothing scheduled";
-    const p = (state.doctor || {}).processes || {}; const bad = !p.nervous || p.brainAlive === false;
-    document.getElementById("qv-health").textContent = bad ? "issue" : "OK"; document.getElementById("qd-health").textContent = bad ? "a process is down" : "all checks pass"; document.getElementById("q-health").classList.toggle("alert", bad);
+    const p = (state.doctor || {}).processes || {}; const bad = !p.nervous || p.brainAlive === false; const degraded = ((state.doctor || {}).degraded || []).length > 0;
+    document.getElementById("qv-health").textContent = bad ? "issue" : degraded ? "degraded" : "OK"; document.getElementById("qd-health").textContent = bad ? "a process is down" : degraded ? "a model route is down · reminders still run" : "all checks pass";
+    document.getElementById("q-health").classList.toggle("alert", bad); document.getElementById("q-health").classList.toggle("attn", !bad && degraded);
     document.getElementById("qv-budget").textContent = "$0.00"; document.getElementById("qd-budget").textContent = "local models · no per-token cost";
   };
   state.upcoming = []; state.selected = null; renderAll();
