@@ -117,7 +117,7 @@ export class Runtime implements StoreApi {
    return {sortieId,...(reply?{reply}:{}),...(error?{error}:{}),steps,waiting};
   };
   for(let turn=0;turn<MAX_STEPS;turn++){
-   const out=await this.brain.call('misato.step',{request:message,history:steps.slice(-12),...(context.length?{context}:{}),...(memory.length?{memory:memory.slice(0,5)}:{})},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as {plan?:Plan;invalid?:boolean;error?:string};
+   const out=await this.brain.call('misato.step',{request:message,history:steps.slice(-12),...(context.length?{context}:{}),...(memory.length?{memory:memory.slice(0,10)}:{})},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as {plan?:Plan;invalid?:boolean;error?:string};
    if(out.error)return finish('failed',undefined,out.error);
    if(!out.plan){await this.record(sortieId,steps,{outcome:'invalid',error:'Reply was not one JSON action or reply.'});continue;}
    if('reply' in out.plan)return finish('done',out.plan.reply);

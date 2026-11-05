@@ -54,7 +54,7 @@
   async function poll() {
     if (polling || !token) return; polling = true;
     try {
-      const [latest20, cards, doctor, reminders, inbox, facts, episodes, kajiBases] = await Promise.all([api("sorties?limit=20"), api("approvals"), api("doctor"), api("reminders"), api("inbox"), api("memory"), api("memory/episodes"), api("bases").catch(() => [])]);
+      const [latest20, cards, doctor, reminders, inbox, facts, episodes, kajiBases] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("reminders"), api("inbox"), api("memory"), api("memory/episodes"), api("bases").catch(() => [])]);
       // The newest sorties, plus older pages the owner loaded and every match of the current search, newest first.
       const byId = new Map(); for (const x of [...latest20, ...older, ...matches]) if (!byId.has(x.id)) byId.set(x.id, x);
       const list = [...byId.values()].sort((a, b) => b.created.localeCompare(a.created)); shown = list;

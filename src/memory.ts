@@ -11,7 +11,8 @@ export const MEMORY_SCHEMA=`
  CREATE TRIGGER IF NOT EXISTS fact_history_no_update BEFORE UPDATE ON fact_history BEGIN SELECT RAISE(ABORT,'fact history is append-only'); END;
  CREATE TRIGGER IF NOT EXISTS fact_history_no_delete BEFORE DELETE ON fact_history BEGIN SELECT RAISE(ABORT,'fact history is append-only'); END;
  CREATE VIRTUAL TABLE IF NOT EXISTS facts_fts USING fts5(text, fact_id UNINDEXED);
- CREATE TABLE IF NOT EXISTS episodes(id TEXT PRIMARY KEY, since TEXT NOT NULL, until TEXT NOT NULL, summary TEXT NOT NULL, exchanges INTEGER NOT NULL, proposed INTEGER NOT NULL, created TEXT NOT NULL);`;
+ CREATE TABLE IF NOT EXISTS episodes(id TEXT PRIMARY KEY, since TEXT NOT NULL, until TEXT NOT NULL, summary TEXT NOT NULL, exchanges INTEGER NOT NULL, proposed INTEGER NOT NULL, created TEXT NOT NULL);
+ CREATE VIRTUAL TABLE IF NOT EXISTS episodes_fts USING fts5(summary, episode_id UNINDEXED);`;
 export interface Episode {id:string;since:string;until:string;summary:string;exchanges:number;proposed:number;created:string}
 export interface Fact {id:string;text:string;status:'active'|'forgotten';source:string;sortieId:string|null;tainted:boolean;shareable:boolean;created:string;updated:string}
 const MAX_FACT_CHARS=500;
@@ -27,7 +28,12 @@ export function ftsQuery(text:string):string|undefined {
 }
 export class Memory {
  readonly db:DatabaseSync;
- constructor(db:DatabaseSync){this.db=db;}
+ constructor(db:DatabaseSync){
+  this.db=db;
+  // Summaries written before their index existed are indexed once (F-022: recall finds them too).
+  const indexed=(db.prepare('SELECT count(*) AS n FROM episodes_fts').get() as {n:number}).n;
+  if(!indexed)db.exec('INSERT INTO episodes_fts(summary,episode_id) SELECT summary,id FROM episodes');
+ }
  private history(id:string,kind:string,text:string,source:string,now:string){this.db.prepare('INSERT INTO fact_history(fact_id,kind,text,source,created) VALUES(?,?,?,?,?)').run(id,kind,text,source,now);}
  private tx<T>(work:()=>T):T {this.db.exec('BEGIN IMMEDIATE');try{const v=work();this.db.exec('COMMIT');return v;}catch(e){this.db.exec('ROLLBACK');throw e;}}
  /** An active fact. Misato's proposals reach here only after the owner approved the memory.remember card. */
@@ -71,8 +77,13 @@ export class Memory {
   const q=ftsQuery(text);if(!q)return [];
   return (this.db.prepare("SELECT f.* FROM facts_fts JOIN facts f ON f.id=facts_fts.fact_id WHERE facts_fts MATCH ? AND f.status='active' ORDER BY bm25(facts_fts) LIMIT ?").all(q,Math.min(Math.max(1,limit),20)) as Row[]).map(toFact);
  }
+ /** Instrumentality's summaries that match a request, best first (F-022): what was said and done on earlier days. */
+ recallEpisodes(text:string,limit=2):Episode[] {
+  const q=ftsQuery(text);if(!q)return [];
+  return this.db.prepare('SELECT e.* FROM episodes_fts JOIN episodes e ON e.id=episodes_fts.episode_id WHERE episodes_fts MATCH ? ORDER BY bm25(episodes_fts) LIMIT ?').all(q,Math.min(Math.max(1,limit),5)) as unknown as Episode[];
+ }
  /** Instrumentality's summaries, newest first; the latest one's `until` is where the next consolidation starts. */
  episodes(limit=10):Episode[] {return this.db.prepare('SELECT * FROM episodes ORDER BY until DESC LIMIT ?').all(Math.min(Math.max(1,limit),100)) as unknown as Episode[];}
- saveEpisode(e:Omit<Episode,'id'|'created'>,now=new Date()):Episode {const id=randomUUID();this.db.prepare('INSERT INTO episodes VALUES(?,?,?,?,?,?,?)').run(id,e.since,e.until,e.summary.slice(0,1500),e.exchanges,e.proposed,now.toISOString());return {...e,id,created:now.toISOString()};}
+ saveEpisode(e:Omit<Episode,'id'|'created'>,now=new Date()):Episode {const id=randomUUID();this.tx(()=>{this.db.prepare('INSERT INTO episodes VALUES(?,?,?,?,?,?,?)').run(id,e.since,e.until,e.summary.slice(0,1500),e.exchanges,e.proposed,now.toISOString());this.db.prepare('INSERT INTO episodes_fts(summary,episode_id) VALUES(?,?)').run(e.summary.slice(0,1500),id);});return {...e,id,created:now.toISOString()};}
  historyOf(id:string):{kind:string;text:string;source:string;created:string}[] {return this.db.prepare('SELECT kind,text,source,created FROM fact_history WHERE fact_id=? ORDER BY sequence').all(id) as {kind:string;text:string;source:string;created:string}[];}
 }

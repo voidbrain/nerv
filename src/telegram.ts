@@ -18,7 +18,7 @@ export function telegramBase():string {
 const POLL_SECONDS=25;
 const MAX_TEXT=4000;
 const STALE_SECONDS=600;
-interface Update {update_id:number;message?:{date:number;text?:string;chat:{id:number;type:string};from?:{id:number}};callback_query?:{id:string;data?:string;from:{id:number};message?:{message_id:number;chat:{id:number}}}}
+interface Update {update_id:number;message?:{date:number;text?:string;chat:{id:number;type:string};from?:{id:number}};callback_query?:{id:string;data?:string;from:{id:number};message?:{message_id:number;chat:{id:number};reply_markup?:{inline_keyboard?:Button[][]}}}}
 interface Button {text:string;callback_data:string}
 export class TelegramApi {
  readonly token:string;readonly base:string;
@@ -59,8 +59,19 @@ export function card(a:Approval):{text:string;buttons:Button[][]} {
  const text=[`Needs you · Pattern ${c.pattern.toUpperCase()}`,`${c.tool} ${args.length>600?args.slice(0,600)+'…':args}`,`Effect: ${c.effect}. Sync ${c.sync.value}%.`,`Why it stopped: ${c.reason}`,`Expires: ${new Date(c.expires).toUTCString()} (expiry never approves)`].join('\n');
  return {text,buttons:[[{text:'✅ Approve once',callback_data:'a:'+a.id},{text:'❌ Reject',callback_data:'r:'+a.id}]]};
 }
+/** Several facts proposed together (one Instrumentality night, F-022) as one message: each fact keeps its own approval,
+    with a ✅/❌ row; a tap decides that fact only. */
+export function bundle(cards:Approval[]):{text:string;buttons:Button[][]} {
+ const fact=(a:Approval)=>{const t=(a.card.args as {text?:unknown}).text;return typeof t==='string'?t:JSON.stringify(a.card.args);};
+ const text=[`Needs you · ${cards.length} facts to remember (memory.remember, Pattern ${cards[0]!.card.pattern.toUpperCase()})`,'Each one is stored only if you approve it:',
+  ...cards.map((a,i)=>`${i+1}. ${fact(a).slice(0,300)}`),`Expires: ${new Date(Math.min(...cards.map(a=>Date.parse(a.card.expires)))).toUTCString()} (expiry never approves)`].join('\n');
+ return {text,buttons:cards.map((a,i)=>[{text:`✅ ${i+1}`,callback_data:'a:'+a.id},{text:`❌ ${i+1}`,callback_data:'r:'+a.id}])};
+}
+/** Fact cards wait this long after they first appear, so the rest of the same night joins them in one message. */
+export const BUNDLE_WAIT_MS=3000;
 export class TelegramChannel {
  readonly api:TelegramApi;readonly store:StoreApi;readonly chatId:number;readonly statePath:string;readonly log:(line:string)=>void;readonly brief?:()=>{at:string;timeZone:string;language:'it'|'en';base?:string}|undefined;
+ private held=new Map<string,{key:string;since:number}>();
  private state:State={cards:[]};private stopping=new AbortController();private queue:Promise<void>=Promise.resolve();private timer?:NodeJS.Timeout;private delivery?:Promise<void>;
  constructor(options:{api:TelegramApi;store:StoreApi;chatId:number;statePath:string;log?:(line:string)=>void;brief?:()=>{at:string;timeZone:string;language:'it'|'en';base?:string}|undefined}) {
   if(options.brief)this.brief=options.brief;
@@ -98,7 +109,9 @@ export class TelegramChannel {
    const result=await Promise.resolve().then(()=>this.store.decide(match[2]!,decision,'telegram')).catch((e:unknown)=>({decision:'error',error:e instanceof Error?e.message:'Decision failed.'}));
    await this.api.call('answerCallbackQuery',{callback_query_id:q.id,text:result.decision==='error'?'Could not apply it.':`Decision: ${result.decision}`});
    const outcome=result.decision==='approve'?('error' in result&&result.error?`Approved, but it failed: ${result.error}`:'result' in result&&result.result!==undefined?`Approved and done: ${JSON.stringify(result.result).slice(0,500)}`:'Approved.'):result.decision==='reject'?'Rejected: nothing ran.':result.decision==='expired'?'Expired before you decided: nothing ran.':`Not applied: ${'error' in result?result.error:result.decision}`;
-   if(q.message)await this.api.call('editMessageReplyMarkup',{chat_id:this.chatId,message_id:q.message.message_id,reply_markup:{inline_keyboard:[]}}).catch(()=>{});
+   // Only the decided card's row goes: in a bundle the other facts keep their buttons.
+   const rest=(q.message?.reply_markup?.inline_keyboard ?? []).filter(row=>!row.some(b=>b.callback_data.endsWith(':'+match[2])));
+   if(q.message)await this.api.call('editMessageReplyMarkup',{chat_id:this.chatId,message_id:q.message.message_id,reply_markup:{inline_keyboard:rest}}).catch(()=>{});
    await this.api.send(this.chatId,outcome);
    return;
   }
@@ -124,8 +137,17 @@ export class TelegramChannel {
  }
  private async deliverOnce():Promise<void> {
   try{
-   const pending=await this.store.approvals(5);
-   for(const a of pending){if(this.state.cards.includes(a.id))continue;const c=card(a);await this.api.send(this.chatId,c.text,c.buttons);this.state.cards=[...this.state.cards,a.id].slice(-200);this.save();}
+   const fresh=(await this.store.approvals(20)).filter(a=>!this.state.cards.includes(a.id));
+   const sent=(ids:string[])=>{this.state.cards=[...this.state.cards,...ids].slice(-200);this.save();};
+   // Fact cards from one sortie go out together, once none has newly appeared for BUNDLE_WAIT_MS.
+   const facts=new Map<string,Approval[]>();
+   for(const a of fresh){if(a.card.tool==='memory.remember'){facts.set(a.card.sortieId,[...(facts.get(a.card.sortieId) ?? []),a]);continue;}const c=card(a);await this.api.send(this.chatId,c.text,c.buttons);sent([a.id]);}
+   const now=Date.now();
+   for(const [sortie,group] of facts){
+    const key=sortie+':'+group.length;if(this.held.get(sortie)?.key!==key)this.held.set(sortie,{key,since:now});
+    if(now-this.held.get(sortie)!.since<BUNDLE_WAIT_MS)continue;this.held.delete(sortie);
+    const c=group.length>1?bundle(group):card(group[0]!);await this.api.send(this.chatId,c.text,c.buttons);sent(group.map(a=>a.id));
+   }
    for(;;){
     const at=this.state.inbox ?? {sequence:0};const page=await this.store.inboxPage(at.sequence,5,at.id);
     // Checkpoint after every message: a stop or crash resends at most the one in flight.
