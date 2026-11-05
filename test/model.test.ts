@@ -1,5 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
+import {POSIX} from './fixtures/posix.ts';
 import {createServer,type IncomingMessage,type ServerResponse} from 'node:http';
 import {mkdtempSync,rmSync,writeFileSync,chmodSync} from 'node:fs';
 import {tmpdir} from 'node:os';import {join} from 'node:path';
@@ -107,7 +108,7 @@ test('ask travels coordinator → brain process → S²; the socket cannot ask a
   assert.equal(p.seen.filter(x=>x.path==='/v1/chat/completions').length,1);assert.ok(p.seen.every(x=>x.path==='/v1/chat/completions'||x.path==='/api/tags'));
   await runtime.close();chmodSync(join(home,'anthropic-key'),0o644);
   runtime=new Runtime(join(home,'nerv.sqlite'),undefined,home);await runtime.ready();
-  await assert.rejects(runtime.ask({prompt:'x',privacy:'local-only'}),/must be private/);
+  if(POSIX)await assert.rejects(runtime.ask({prompt:'x',privacy:'local-only'}),/must be private/,'Unix modes only; on Windows the profile ACL protects it');
  }finally{await new Promise<void>(done=>server.close(()=>done()));await runtime.close();await p.close();rmSync(home,{recursive:true,force:true});}
 });
 

@@ -1,6 +1,7 @@
 import {test} from 'node:test';
 import {spawnSync} from 'node:child_process';
 import assert from 'node:assert/strict';
+import {POSIX,assertPrivateFile} from './fixtures/posix.ts';
 import {mkdtempSync,readFileSync,writeFileSync,rmSync,statSync,mkdirSync,symlinkSync} from 'node:fs';
 import {join} from 'node:path';import {tmpdir} from 'node:os';
 import {initialize,readConfig,readToken,dataHome,databasePath,setting} from '../src/config.ts';
@@ -9,7 +10,7 @@ import {makeServer} from '../src/server.ts';import {Store} from '../src/store.ts
 import {messages} from '../web/src/i18n.ts';
 test('init preserves credentials and configuration; English/Rome defaults and private files',()=>{
  const dir=mkdtempSync(join(tmpdir(),'nerv-config-'));
- try{initialize(dir);const token=readToken(dir);assert.equal(token.length,64);assert.deepEqual(readConfig(dir),{port:4317,language:'en',timeZone:'Europe/Rome',models:{},base:{id:'NERV-01',name:'Neo Tokyo-3'}});writeFileSync(join(dir,'config.json'),JSON.stringify({port:4900,language:'en',timeZone:'UTC'}));initialize(dir);assert.equal(readToken(dir),token);assert.equal(readConfig(dir).port,4900);assert.equal(statSync(join(dir,'token')).mode&0o777,0o600);writeFileSync(join(dir,'config.json'),'{"language":"xx"}');assert.throws(()=>readConfig(dir));writeFileSync(join(dir,'config.json'),'{"timeZone":"Not/AZone"}');assert.throws(()=>readConfig(dir));}finally{rmSync(dir,{recursive:true,force:true});}
+ try{initialize(dir);const token=readToken(dir);assert.equal(token.length,64);assert.deepEqual(readConfig(dir),{port:4317,language:'en',timeZone:'Europe/Rome',models:{},base:{id:'NERV-01',name:'Neo Tokyo-3'}});writeFileSync(join(dir,'config.json'),JSON.stringify({port:4900,language:'en',timeZone:'UTC'}));initialize(dir);assert.equal(readToken(dir),token);assert.equal(readConfig(dir).port,4900);assertPrivateFile(join(dir,'token'));writeFileSync(join(dir,'config.json'),'{"language":"xx"}');assert.throws(()=>readConfig(dir));writeFileSync(join(dir,'config.json'),'{"timeZone":"Not/AZone"}');assert.throws(()=>readConfig(dir));}finally{rmSync(dir,{recursive:true,force:true});}
 });
 test('service definitions use absolute paths, encode special characters, and contain no credentials',()=>{
  const plist=renderService('darwin','/Users/name/Nodo & data','/Users/name/Code/Nodo','/opt/node');assert.match(plist,/Nodo &amp; data/);assert.match(plist,/<key>RunAtLoad<\/key><true\/>/);assert.doesNotMatch(plist,/_TOKEN/);assert.match(plist,/<key>NERV_HOME<\/key>/);assert.match(plist,/io\.nerv\.agent/);
@@ -28,10 +29,10 @@ test('systemd accepts the generated unit syntax when its validator is available'
 });
 
 test('rename: ~/.nerv by default, pre-rename ~/.nodo, nodo.sqlite and NODO_* still work until moved',()=>{
- const dir=mkdtempSync(join(tmpdir(),'nerv-rename-'));const saved={HOME:process.env.HOME,NERV_HOME:process.env.NERV_HOME,NODO_HOME:process.env.NODO_HOME,NERV_PORT:process.env.NERV_PORT,NODO_PORT:process.env.NODO_PORT};
+ const dir=mkdtempSync(join(tmpdir(),'nerv-rename-'));const saved={HOME:process.env.HOME,USERPROFILE:process.env.USERPROFILE,NERV_HOME:process.env.NERV_HOME,NODO_HOME:process.env.NODO_HOME,NERV_PORT:process.env.NERV_PORT,NODO_PORT:process.env.NODO_PORT};
  const cwd=process.cwd();
  try{
-  for(const k of ['NERV_HOME','NODO_HOME','NERV_PORT','NODO_PORT'])delete process.env[k];process.env.HOME=dir;process.chdir(dir);
+  for(const k of ['NERV_HOME','NODO_HOME','NERV_PORT','NODO_PORT'])delete process.env[k];process.env.HOME=dir;process.env.USERPROFILE=dir;process.chdir(dir);// homedir() reads USERPROFILE on Windows
   assert.equal(dataHome(),join(dir,'.nerv'));
   mkdirSync(join(dir,'.nodo'));assert.equal(dataHome(),join(dir,'.nodo'),'only the old home exists');
   mkdirSync(join(dir,'.nerv'));assert.equal(dataHome(),join(dir,'.nerv'),'the new home wins once it exists');
@@ -64,7 +65,7 @@ test('each machine has a base identity: set at init, shown by base, changed late
   writeFileSync(join(home,'config.json'),JSON.stringify({...JSON.parse(readFileSync(join(home,'config.json'),'utf8')),language:'it'}));
   assert.match(run('base','NERV-03','Bethany').stdout,/Base set: NERV-03 · Bethany/);
   const saved=JSON.parse(readFileSync(join(home,'config.json'),'utf8'));assert.deepEqual(saved.base,{id:'NERV-03',name:'Bethany'});assert.equal(saved.language,'it','other settings are kept');
-  assert.equal(statSync(join(home,'config.json')).mode&0o777,0o600);
+  assertPrivateFile(join(home,'config.json'));
   assert.match(run('init','--base','NERV-04').stderr,/both --base ID and --name/);
   for(const bad of [{id:'nerv 1',name:'x'},{id:'N',name:'x'},{id:'NERV-01',name:''},{id:'NERV-01',name:'<script>'},{id:'NERV-01',name:'x',extra:1}])assert.throws(()=>validateBase(bad),JSON.stringify(bad));
  }finally{rmSync(home,{recursive:true,force:true});}
@@ -75,7 +76,7 @@ test('Windows: private files rely on the profile ACLs (no Unix bits), and servic
  try{
   writeFileSync(file,'x',{mode:0o644});
   assert.equal(privateEnough(file,0o077,'linux'),false);assert.equal(privateEnough(file,0o077,'darwin'),false);assert.equal(privateEnough(file,0o077,'win32'),true);
-  const {chmodSync}=await import('node:fs');chmodSync(file,0o600);assert.equal(privateEnough(file,0o077,'linux'),true);
+  const {chmodSync}=await import('node:fs');chmodSync(file,0o600);if(POSIX)assert.equal(privateEnough(file,0o077,'linux'),true,'chmod has no effect on Windows');
   const home='C:\\Users\\d & co\\.nerv',root='C:\\Projects\\nerv',node='C:\\Program Files\\nodejs\\node.exe';
   const task=windowsTaskXml(home,root,'TABGHA\\d');
   assert.match(task,/<LogonTrigger><Enabled>true<\/Enabled><UserId>TABGHA\\d<\/UserId><\/LogonTrigger>/,'at this user\'s logon');

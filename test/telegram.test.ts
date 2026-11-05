@@ -1,5 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
+import {POSIX,assertPrivateFile} from './fixtures/posix.ts';
 import {mkdtempSync,rmSync,writeFileSync,statSync,readFileSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 import {createServer} from 'node:http';
@@ -81,7 +82,7 @@ test('through every process: Aoba answers only the owner, sends cards with butto
   // Restart: nothing is sent twice and old updates are not handled again.
   const before=tg.sent().length;await aoba.stop();aoba=channel();await aoba.start(100);await wait(500);
   assert.equal(tg.sent().length,before,'no card or reminder is resent after a restart');
-  assert.equal(statSync(statePath).mode&0o777,0o600);
+  assertPrivateFile(statePath);
   tg.text(OWNER,'old news',Math.floor(Date.now()/1000)-3600);await until(()=>tg.sent().some(m=>/offline when you sent/.test(m.text)));
   assert.equal(model.asked.filter(a=>a==='misato').length,2,'a stale message never reaches Misato (two calls: the plan and the follow-up; the card ends the first turn)');
  }finally{await aoba.stop();await runtime.close();await model.close();await tg.close();rmSync(home,{recursive:true,force:true});}
@@ -99,7 +100,7 @@ test('telegram link (CLI) saves the owner chat into config.json, keeping the oth
   assert.deepEqual(JSON.parse(readFileSync(join(home,'config.json'),'utf8')),{language:'it',telegram:{chatId:OWNER}});
   assert.match((await run('telegram','link')).out,/Already linked to chat 1111: nothing to do/);
   assert.ok(!linked.out.includes(token)&&!linked.err.includes(token));
-  chmodSync(join(home,'telegram-token'),0o644);assert.match((await run('telegram','link')).err,/must be private/);
+  chmodSync(join(home,'telegram-token'),0o644);if(POSIX)assert.match((await run('telegram','link')).err,/must be private/,'Unix modes only; on Windows the profile ACL protects it');
  }finally{await tg.close();rmSync(home,{recursive:true,force:true});}
 });
 test('Hyuga\'s brief reaches the owner once a day, also across a restart',async()=>{
@@ -122,7 +123,7 @@ test('nerv telegram token saves a BotFather token privately (refusing anything e
   const missing=run(['link']);assert.match(missing.stderr,new RegExp(`No Telegram bot token at ${join(home,'telegram-token').replace(/[\\/.]/g,'\\$&')}\\. Run: nerv telegram token`));
   assert.match(run(['token','--stdin'],'not a token\n').stderr,/does not look like a BotFather token.*Nothing was saved/);
   const token='123456:'+'s'.repeat(35);const saved=run(['token','--stdin'],token+'\n');assert.equal(saved.status,0,saved.stderr);assert.match(saved.stdout,/Now send \/start to your bot/);
-  assert.equal(readFileSync(join(home,'telegram-token'),'utf8').trim(),token);assert.equal(statSync(join(home,'telegram-token')).mode&0o777,0o600);
+  assert.equal(readFileSync(join(home,'telegram-token'),'utf8').trim(),token);assertPrivateFile(join(home,'telegram-token'));
   assert.ok(!saved.stdout.includes(token)&&!saved.stderr.includes(token),'the token is never printed');
  }finally{rmSync(home,{recursive:true,force:true});}
 });
