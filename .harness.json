@@ -164,14 +164,14 @@
         },
         {
           "file": "src/service.ts",
-          "what": "launchd ProgramArguments and systemd ExecStart"
+          "what": "launchd ProgramArguments, systemd ExecStart and the Windows task launcher (windowsLauncher)"
         },
         {
           "file": "src/cli.ts",
           "what": "shebang of the nerv command (package.json bin)"
         }
       ],
-      "kept": "test/runtime.test.ts asserts package.json start, the nerv shebang, both service units and the child processes carry every NODE_FLAGS entry."
+      "kept": "test/runtime.test.ts asserts package.json start, the nerv shebang, both service units and the child processes carry every NODE_FLAGS entry; test/runtime.test.ts also asserts the Windows launcher carries them."
     }
   ],
   "outside": [

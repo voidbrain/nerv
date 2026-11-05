@@ -20,11 +20,11 @@ Each machine has a **base identity**, shown in the dashboard, `doctor` and the d
 
 ### Windows
 
-NERV Agency runs on Windows 11 with Node 24 (tested on macOS and Linux; Windows checks are unit-level so far, F-037). Differences:
+NERV Agency runs on Windows 11 with Node 24; CI runs the suite and a real service install on Windows too (F-037). Differences:
 
 - The data home is `%USERPROFILE%\.nerv` (`C:\Users\<you>\.nerv`; `nerv doctor` prints it as `home`). Windows has no Unix permission bits, so private files (`telegram-token`, `anthropic-key`, `scrolls.json`) rely on your user profile being private to your account; do not put the data home in a shared folder. Store a bot token with `nerv telegram token`.
 - `open` and `launch` open your default browser.
-- `service install` is not automated yet: it prints the Task Scheduler command that starts `serve` at logon (`schtasks /Create /SC ONLOGON …`); run it once.
+- `nerv service install` (after `npm run build`) registers a Task Scheduler task, **NERV Agency**, that starts NERV at your logon with no window, restarts it a minute after a crash, and writes `service.log` and `service-error.log` in the data home. `nerv service status | start | stop | uninstall` manage it; `stop` asks NERV to shut down as Ctrl+C would, then ends the task. While the service runs, do not also start `nerv launch` (the port would be taken): open the dashboard with `nerv open dashboard`.
 - If `nerv` (after `npm link`) does not start, use `npm start -- …` from the checkout.
 - If `git pull` refuses because a file "will be replaced by CRLF", run `git config core.autocrlf false` and `git restore <file>` once; the repository's `.gitattributes` keeps LF line endings on every system.
 
