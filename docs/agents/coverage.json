@@ -1,0 +1,14 @@
+{
+ "src/": {
+  "lines": 93.1,
+  "statements": 93.1,
+  "branches": 84.2,
+  "functions": 84.1
+ },
+ "all": {
+  "lines": 93.1,
+  "statements": 93.1,
+  "branches": 84.2,
+  "functions": 84.1
+ }
+}

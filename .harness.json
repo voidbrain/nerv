@@ -277,5 +277,13 @@
   },
   "conventions": {
     "pureDirs": []
+  },
+  "coverage": {
+    "summary": "coverage/coverage-summary.json",
+    "folders": [
+      "src/"
+    ],
+    "drop": 2,
+    "enforce": false
   }
 }
