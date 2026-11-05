@@ -1,28 +1,27 @@
 # NERV Agency backlog
 
-Current work ledger, reviewed 5 November 2026 against main `e301ae7`. PR #1–#96 merged after green checks (#53–#96 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
+Current work ledger, reviewed 5 November 2026 against main `f400a23`. PR #1–#97 merged after green checks (#53–#97 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
 
 <!-- recap:start · generated by tools/backlog-recap.mjs from the records; do not edit by hand -->
 **Recap as of 2026-11-05** (window 2026-10-30 – 2026-11-05).
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 29 | 6 |
-| **Require Human 🧑** | 2 | 0 |
+| **Open** | 28 | 6 |
+| **Require Human 🧑** | 1 | 0 |
 
 ### Last 7 days
 
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **Count** | 44 | 15 | 7 | 1 |
+| **Count** | 44 | 16 | 7 | 1 |
 
 ### Require Human 🧑
 
 | Features | Bugs |
 |---|---|
-| [F-032](#f-032) | — |
-| [F-036](#f-036) |  |
+| [F-036](#f-036) | — |
 <!-- recap:end -->
 
 ## Bugs and reliability
@@ -1019,39 +1018,6 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 ---
 
 
-### F-032
-
-**Rename Nodo to NERV Agency**
-
-| Signal | Priority | Status | Effort | Complete |
-|:---:|---|---|---|---|
-| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
-
-🧑 **→ Human action required: Yes**<br />Verify the Keychain and LaunchAgent hand-over on a Mac with a pre-rename install.
-
-| | |
-|---|---|
-| **Issue** | The product is now NERV Agency, with `nerv` as the short identifier. Existing installs must keep working without a manual move. |
-| **Reproduce** | On a Mac with a pre-rename install (`~/.nodo`, `io.nodo.agent`, a paired menu-bar app): update, run `doctor`, `service install`, open `NERV.app`. |
-| **Check** | Data and database are found in `~/.nodo` until moved; `NODO_*` still read; `service install` replaces the old unit with no second scheduler; the menu-bar pairing survives the first launch; the knot logo is replaced (owner choice 2026-11-04). |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Next action / closure evidence:** Implemented in [PR #14](https://github.com/voidbrain/nerv/pull/14) (rename): visible names say NERV Agency; identifiers use `nerv` (`~/.nerv`, `nerv.sqlite`, `NERV_*`, `io.nerv.agent`, `nerv.service`, `io.nerv.companion`, `NERV.app`, `NervMenuBar`, `nerv-status-card`, package `nerv-agency`, Angular project `nerv`). Compatibility: `~/.nodo` and `nodo.sqlite` used while they are the only ones present, `NODO_*` fallback, `service install` replaces the old unit, service actions find the old unit until then, Keychain item and notification checkpoints move on first launch. Unchanged on purpose: dated archives, audits and reviews; the knot logo (it is the Nodo pun), until the owner chose a replacement. Repository: the owner renamed it to `voidbrain/nerv` on 2026-11-04; the AGENTS.md repository line and current backlog links follow, dated archives and audits keep the old links (GitHub redirects them). PR #14 CI green (PR run 41798137617, main run 41798326299, read through the GitHub REST API because `gh` is not installed). The owner's 2026-11-04 setup was a fresh `init` (no `~/.nodo` present), so it does not exercise the hand-over. Logo: the owner chose original marks on 2026-11-04 ([PR #19](https://github.com/voidbrain/nerv/pull/19)): an inverted triangle with seven eyes (`web/public/mark.svg`, browser icon and native menu drawing) and a half leaf beside it in the web sidebar (`web/public/brand.svg`), in dark NERV red `--mark` #d4002a (3.15:1 on `--bg`); evocations, not the Evangelion artwork; test/brand.test.ts keeps the three drawings and the colour equal. Leftover copy fixed ("local Nodo", "One knot"). Remaining: a real-Mac check of the hand-over, and a browser look at the sidebar mark.
-
-**Estimates:** Small remaining effort; ~80% complete. Estimated 2026-11-04.
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #14](https://github.com/voidbrain/nerv/pull/14) (rename); [PR #15](https://github.com/voidbrain/nerv/pull/15) (repository moved to `voidbrain/nerv`); [PR #19](https://github.com/voidbrain/nerv/pull/19) (seven-eye and half-leaf marks) |
-| Opened | 2026-11-04 |
-| Verification | Unit/integration 2026-11-04: rename fallbacks test (home, database, settings), service render asserts, Swift label fallback and Keychain code path, headless process tests, app bundle id and display name (local run; CI green: PR #14 run 41798137617, main run 41798326299; PR #15 run 41801930445, main run 41802018182). 2026-11-04 marks: geometry and colour coupling test, build, Swift tests, app packaging, native drawing rendered to PNG and inspected (local run; CI green: PR #19 run 41806657948, main run 41806668424). Real-Mac hand-over: pending |
-| Reviewed | 2026-11-04 |
-
-</details>
-
----
 
 
 
