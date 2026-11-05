@@ -138,6 +138,8 @@ read -rs KEY && printf '%s\n' "$KEY" > ~/.nerv/anthropic-key && chmod 600 ~/.ner
 
 Paste the key and press Enter (nothing is shown). Then set `"enabled": true` under `cloud` and run `npm start -- reload`.
 
+**After a restart.** A request NERV was still working on when the service stopped (not one waiting for your approval) is closed as *interrupted*, and you are told what had run before; it is not carried on by itself, so ask again if you still want it. Requests waiting for your approval pick up where they were once you decide.
+
 **When a route is down (Dummy Plug).** The brain tracks each route from real calls and, for the local route, a TCP check every minute (no model call). When a route cannot be reached, `doctor` and `/api/status` show `routes` and a `degraded` reason, the dashboard shows *degraded* with the reason, the daily brief lists it, and the service log prints one line (`NERV: S² local route down: …`). Reminders, the gate and rule-based actions keep running; a request that needs a model fails with that reason (Aoba replies *I could not finish: …*), and a local-only request never moves to the cloud. When the route answers again it is marked reachable on its own, and the log prints `NERV: S² local route back after N min.`
 
 ## Memory (Lilith)

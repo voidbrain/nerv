@@ -107,6 +107,24 @@ export class Ledger {
    AND NOT EXISTS (SELECT 1 FROM approvals a JOIN actions x ON x.id=a.action_id WHERE x.sortie_id=s.id AND a.decision IS NULL)
    ORDER BY s.created LIMIT 20`).all() as {id:string}[]).map(r=>r.id);
  }
+ /**
+  * B-013: Misato sorties opened before `before` (by an earlier run of the service) that are still open and wait for
+  * nothing: no approval pending and no unanswered wait. Their work was cut off by a restart; nobody would ever finish them.
+  */
+ interrupted(before:string):{id:string;title:string;ran:string[]}[] {
+  if(typeof before!=='string'||!Number.isFinite(Date.parse(before)))throw new Error('Invalid date.');
+  const rows=this.db.prepare(`SELECT s.id,s.title FROM sorties s WHERE s.source='misato' AND s.status='open' AND s.created<?
+   AND NOT EXISTS (SELECT 1 FROM approvals a JOIN actions x ON x.id=a.action_id WHERE x.sortie_id=s.id AND a.decision IS NULL)
+   AND coalesce((SELECT max(sequence) FROM events WHERE sortie_id=s.id AND kind='misato.waiting'),0) <= coalesce((SELECT max(sequence) FROM events WHERE sortie_id=s.id AND kind='misato.resumed'),0)
+   ORDER BY s.created LIMIT 20`).all(new Date(before).toISOString()) as {id:string;title:string}[];
+  return rows.map(r=>({...r,ran:(this.db.prepare("SELECT payload FROM events WHERE sortie_id=? AND kind='action.done' ORDER BY sequence").all(r.id) as {payload:string}[]).map(e=>(JSON.parse(e.payload) as {tool:string}).tool)}));
+ }
+ /** Closes one interrupted sortie as failed, with the reply the owner gets; false if it was not open any more. */
+ closeInterrupted(sortieId:string,reply:string,now=new Date()):boolean {
+  // One transaction: the reply and the close (close() opens its own, which cannot nest).
+  return this.tx(()=>{const changed=Number(this.db.prepare("UPDATE sorties SET status='failed',closed=? WHERE id=? AND status='open'").run(iso(now),sortieId).changes)>0;if(!changed)return false;
+   this.event(sortieId,null,'misato.reply',{text:reply.slice(0,4000)},now);this.event(sortieId,null,'sortie.failed',{},now);return true;});
+ }
  /** Claims one resume, once: records misato.resumed and returns the request, the steps so far and what became of each awaited approval. */
  claimResume(sortieId:string,now=new Date()):{request:string;steps:{step:Step;actionId?:string}[];decisions:{actionId:string;tool:string;args:Record<string,unknown>;decision:string;result?:unknown;error?:string}[]}|null {
   return this.tx(()=>{

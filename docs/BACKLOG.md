@@ -1,13 +1,13 @@
 # NERV Agency backlog
 
-Current work ledger, reviewed 5 November 2026 against main `951d138`. PR #1–#116 merged after green checks (#53–#116 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
+Current work ledger, reviewed 5 November 2026 against main `34fa421`. PR #1–#117 merged after green checks (#53–#117 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
 
 <!-- recap:start · generated by tools/backlog-recap.mjs from the records; do not edit by hand -->
 **Recap as of 2026-11-05** (window 2026-10-30 – 2026-11-05).
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 34 | 1 |
+| **Open** | 34 | 2 |
 | **Require Human 🧑** | 1 | 0 |
 
 ### Last 7 days
@@ -15,7 +15,7 @@ Current work ledger, reviewed 5 November 2026 against main `951d138`. PR #1–#1
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **Count** | 52 | 18 | 12 | 11 |
+| **Count** | 52 | 18 | 13 | 11 |
 
 ### Require Human 🧑
 
@@ -72,6 +72,40 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 
 
+
+### B-013
+
+**A sortie cut off by a restart stays open forever, with no reply**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
+
+💻 **→ Human action required: No**<br />Close from the merged PR's green CI; S-1EBF is closed as interrupted the first time the updated service starts.
+
+| | |
+|---|---|
+| **Issue** | Owner test 2026-11-05: *Remind me on Tabgha tomorrow at 9 pm to water the plants* (S-1EBF), then NERV was closed and relaunched; the sortie card kept *Misato is working on it* with MAGI blinking. The ledger: request and consultant advice at 19:49, then nothing. After a restart only sorties waiting for an approval are resumed; one cut off while Misato planned (or an action ran) is never finished, closed or answered. |
+| **Reproduce** | Ask Aoba something and stop the service before the reply. |
+| **Check** | When the service starts, every Misato sortie the previous run left open and not waiting for the owner is closed as failed with a reply in the request's language saying it was interrupted, what had run, and that it will not carry on by itself; the owner is told on the channels; sorties waiting for an approval are left to resume; a sortie of the current run is never touched; a test across a restart covers all three. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Fixed in [PR PR_B13] (2026-11-05): `Ledger.interrupted(before)` finds them (open, from Misato, opened before this run started, no pending approval, no unanswered wait), `closeInterrupted` closes each with its reply in one transaction, and serve calls `Runtime.closeInterrupted()` once Telegram listens, so the follow-up reaches the owner. Not resumed on purpose: an action cut off mid-way may or may not have happened. Checked: test/resume.test.ts (two runtimes on one database: two interrupted sorties closed with their replies, English and Italian, the owner told once each; the one waiting for the owner left alone; a sortie of the new run untouched); full suite 153 pass, build, headless. INSTALL and area notes updated.
+
+**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner test 2026-11-05 (S-1EBF on Neo Tokyo-3) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05: test/resume.test.ts and full suite (local run) |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
 
 ## Features and improvements
 
@@ -1189,7 +1223,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Owner decision 2026-11-05 on names: the Watermelons panel becomes **Marduk Institute · Pilots** (the real roster: domain, model, base, pinned or retired, with Kaji's watermelons as the trust-stage badges), **Pilots** in the Simple theme; the signed registry of bases is **Gehirn** (renamed from "Marduk registry" in the code comments and architecture doc in [PR #117](https://github.com/voidbrain/nerv/pull/117)); the live sortie detail's stale line "pilots are skills" goes (a pilot uses skills; trust belongs to the pilot). Owner question 2026-11-05 ("Aoba · yesterday 13:31 · 1 action G: what's the G?"): the card's one-letter Pattern badges (G Green, O Orange, B Blue, · not voted yet) are not explained and a screen reader reads only the letter; each badge gets its meaning in words (a title and an accessible name, *Pattern Green*), and the legend appears on the card or in the help. Owner, 2026-11-05: also show who contributed, on this base and from others: the Gevurah node names who advised (a pilot, the generic one, or a pilot from another base); the MAGI node shows the extra seats ("+1 shadow · Tabgha") and its detail every seat's vote; the Watermelons panel lists the real pilot roster (stage, model, base, including pilots offered by other bases); the EVA cages show which pilot runs in which instance once EVAs exist (F-049). Today: Gevurah lights without a name, peer seats appear only in the selected sortie's ballot chips (by base ID, dashed when shadow), the Watermelons panel lists only owner and misato, cages show only their class. Planned 2026-11-05 from the owner's test.
+**Next action / closure evidence:** Owner, 2026-11-05 (S-1EBF): "a node should be idle if not running": a node animates only while its step is actually running; an interrupted, finished or stuck sortie shows every node idle (the card of S-1EBF kept MAGI blinking although nothing ran, B-013). Owner decision 2026-11-05 on names: the Watermelons panel becomes **Marduk Institute · Pilots** (the real roster: domain, model, base, pinned or retired, with Kaji's watermelons as the trust-stage badges), **Pilots** in the Simple theme; the signed registry of bases is **Gehirn** (renamed from "Marduk registry" in the code comments and architecture doc in [PR #117](https://github.com/voidbrain/nerv/pull/117)); the live sortie detail's stale line "pilots are skills" goes (a pilot uses skills; trust belongs to the pilot). Owner question 2026-11-05 ("Aoba · yesterday 13:31 · 1 action G: what's the G?"): the card's one-letter Pattern badges (G Green, O Orange, B Blue, · not voted yet) are not explained and a screen reader reads only the letter; each badge gets its meaning in words (a title and an accessible name, *Pattern Green*), and the legend appears on the card or in the help. Owner, 2026-11-05: also show who contributed, on this base and from others: the Gevurah node names who advised (a pilot, the generic one, or a pilot from another base); the MAGI node shows the extra seats ("+1 shadow · Tabgha") and its detail every seat's vote; the Watermelons panel lists the real pilot roster (stage, model, base, including pilots offered by other bases); the EVA cages show which pilot runs in which instance once EVAs exist (F-049). Today: Gevurah lights without a name, peer seats appear only in the selected sortie's ballot chips (by base ID, dashed when shadow), the Watermelons panel lists only owner and misato, cages show only their class. Planned 2026-11-05 from the owner's test.
 
 **Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-05.
 

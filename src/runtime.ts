@@ -270,6 +270,23 @@ export class Runtime implements StoreApi {
  }
  /** Decisions can come from anywhere (CLI approve, expiry): a periodic sweep catches those the coordinator did not see. */
  startResumer(everyMs=2000){if(!this.resumer)this.resumer=setInterval(()=>{void this.sweep();},everyMs);}
+ private readonly startedAt=new Date();
+ /**
+  * B-013: sorties a previous run of the service left half done (cut off by a restart, not waiting for the owner) are
+  * closed as interrupted, and the owner is told what had run. Not resumed: an action cut off mid-way may or may not have
+  * happened, so the owner decides whether to ask again.
+  */
+ async closeInterrupted():Promise<number> {
+  const open=await this.nervous.call('misato.interrupted',{before:this.startedAt.toISOString()}).catch(()=>[]) as {id:string;title:string;ran:string[]}[];
+  let n=0;
+  for(const s of open){
+   const it=requestLanguage(s.title)==='it';const title=s.title.slice(0,120);
+   const ran=s.ran.length?(it?` Prima si era fatto: ${s.ran.join(', ')}.`:` It had done: ${s.ran.join(', ')}.`):(it?' Non si era fatto ancora nulla.':' Nothing had run yet.');
+   const reply=(it?`Interrotto da un riavvio mentre lavoravo a “${title}”.`:`Interrupted by a restart while working on “${title}”.`)+ran+(it?' Non continuo da solo: chiedimelo di nuovo se serve.':' I will not carry on by myself: ask again if you still want it.');
+   if(await this.nervous.call('misato.closeInterrupted',{sortieId:s.id,reply}).catch(()=>false)){n++;for(const l of this.resumeListeners)l({sortieId:s.id,reply,steps:[],waiting:[]});}
+  }
+  return n;
+ }
  private async resume(sortieId:string):Promise<ChatReply|null> {
   const claim=await this.nervous.call('misato.claim',{sortieId}) as {request:string;steps:{step:Step}[];decisions:{actionId:string;tool:string;args:Record<string,unknown>;decision:string;result?:unknown;error?:string}[]}|null;
   if(!claim)return null;
