@@ -111,7 +111,13 @@ export class Store {
   outbox(): {id:string;sortieId:string;base:string;tool:string;args:Record<string,unknown>;request:string}[] {
     return (this.db.prepare('SELECT id,sortie_id,base,tool,args,request FROM kaji_outbox WHERE done IS NULL ORDER BY created LIMIT 10').all() as {id:string;sortie_id:string;base:string;tool:string;args:string;request:string}[]).map(r=>({id:r.id,sortieId:r.sortie_id,base:r.base,tool:r.tool,args:JSON.parse(r.args) as Record<string,unknown>,request:r.request}));
   }
-  outboxDone(id: string, result: unknown): boolean { return Number(this.db.prepare('UPDATE kaji_outbox SET done=?,result=? WHERE id=? AND done IS NULL').run(new Date().toISOString(),JSON.stringify(result).slice(0,8000),id).changes)>0; }
+  /** Marks a sent action done with its result and, the first time only, records what the other base did on the sortie (B-011). */
+  outboxDone(id: string, result: unknown, said?: {base:string;text:string}): boolean {
+    const row=this.db.prepare('SELECT sortie_id,tool FROM kaji_outbox WHERE id=? AND done IS NULL').get(id) as {sortie_id:string;tool:string}|undefined;
+    const done=Number(this.db.prepare('UPDATE kaji_outbox SET done=?,result=? WHERE id=? AND done IS NULL').run(new Date().toISOString(),JSON.stringify(result).slice(0,8000),id).changes)>0;
+    if(done&&row&&said){const r=result as {outcome?:unknown;refused?:unknown};this.ledger.remoteResult(row.sortie_id,{base:said.base.slice(0,60),tool:row.tool,outcome:typeof r.refused==='string'?'refused':typeof r.outcome==='string'?r.outcome:'answered',text:said.text.slice(0,600)});}
+    return done;
+  }
   /** On the target base: the result of an action asked by another base, if it already ran here. */
   remoteRun(id: string): unknown { const r=this.db.prepare('SELECT result FROM kaji_runs WHERE id=?').get(id) as {result:string}|undefined;return r?JSON.parse(r.result):undefined; }
   saveRemoteRun(id: string, from: string, result: unknown): void { this.db.prepare('INSERT OR IGNORE INTO kaji_runs VALUES(?,?,?,?)').run(id,from,JSON.stringify(result).slice(0,8000),new Date().toISOString()); }

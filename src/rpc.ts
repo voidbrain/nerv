@@ -36,7 +36,7 @@ export const methodSchemas={
  'kaji.lastSeen':empty,
  'kaji.main':empty,
  'kaji.outbox':empty,
- 'kaji.outboxDone':{type:'object',required:['id','result'],properties:{id:{type:'string',minLength:1,maxLength:100},result:{type:'object'}},additionalProperties:false},
+ 'kaji.outboxDone':{type:'object',required:['id','result'],properties:{id:{type:'string',minLength:1,maxLength:100},result:{type:'object'},said:{type:'object',required:['base','text'],properties:{base:{type:'string',minLength:1,maxLength:60},text:{type:'string',minLength:1,maxLength:600}},additionalProperties:false}},additionalProperties:false},
  'kaji.remoteRun':{type:'object',required:['id'],properties:{id:{type:'string',minLength:1,maxLength:100}},additionalProperties:false},
  'kaji.saveRemoteRun':{type:'object',required:['id','from','result'],properties:{id:{type:'string',minLength:1,maxLength:100},from:{type:'string',minLength:1,maxLength:16},result:{type:'object'}},additionalProperties:false},
  'kaji.add':{type:'object',required:['records'],properties:{records:{type:'array',maxItems:1000,items:{type:'object'}}},additionalProperties:false},

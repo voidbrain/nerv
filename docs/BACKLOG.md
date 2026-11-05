@@ -143,9 +143,9 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🟠 | 🔶 P2 | Investigate | 🟢 Small | ~0% |
+| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
 
-💻 **→ Human action required: No**<br />Next: follow kaji.run from the approval to the result on both bases.
+💻 **→ Human action required: No**<br />Close from the merged PR's green CI.
 
 | | |
 |---|---|
@@ -156,15 +156,15 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Reported 2026-11-05. The remote run happened (the reminder exists); the result path back to the sortie is the suspect.
+**Next action / closure evidence:** Cause found 2026-11-05 (read-only, Neo Tokyo-3's ledger, S-3BFF): the sortie did finish (Misato's reply at 18:37:22 local, 23 s after *resuming after your decision*, then sortie.done) and Tabgha ran the action (outbox done at 18:37:00, outcome grant); the owner's copy was taken before the reply. The real gap: the other base's result was sent only to the follow-up listeners (Telegram), never recorded on the sortie, so the trace, the dashboard and the why answer could not show it; and the follow-up was raw JSON (*Tabgha ran reminders.add: {"id":…}*). Fixed in [PR #112](https://github.com/voidbrain/nerv/pull/112): the result is recorded once as a `kaji.result` event on the sortie (base, tool, outcome, the text the owner reads), shown in the dashboard trace (*Kaji line · …*) and in the why answer (*Kaji: …*); the follow-up is plain (*Tabgha ran reminders.add (“Water the plants”).*). Checked: test/kaji-run.test.ts (two bases: the follow-up text, the recorded event, the why answer), fails without the fix; full suite 147 pass, build, headless. Reported 2026-11-05. The remote run happened (the reminder exists); the result path back to the sortie is the suspect.
 
-**Estimates:** Small remaining effort; ~0% complete. Estimated 2026-11-05.
+**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner test on Tabgha 2026-11-05 |
+| PR / evidence | Owner test on Tabgha 2026-11-05; [PR #112](https://github.com/voidbrain/nerv/pull/112) |
 | Opened | 2026-11-05 |
-| Verification | Pending |
+| Verification | 2026-11-05: test/kaji-run.test.ts and full suite (local run) |
 | Reviewed | 2026-11-05 |
 
 </details>

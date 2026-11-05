@@ -51,7 +51,11 @@ test('kaji.run: the main base\'s Misato sends one action to a base that offers i
   a.startOutbox((base,item)=>la.run(base,item,5000),100);
   await a.decide(chat.waiting[0]!.approvalId,'approve','api');
   await until(async()=>(await b.list()).length===1);assert.equal((await b.list())[0]!.title,'Stretch');
-  await until(()=>follow.some(f=>/^Tabgha ran reminders\.add: /.test(f.reply ?? '')));
+  // B-011: in plain words, and recorded on the sortie (trace, dashboard, why).
+  await until(()=>follow.some(f=>f.reply==='Tabgha ran reminders.add (“Stretch”).'));
+  const recorded=(await a.events(chat.sortieId)).filter(e=>e.kind==='kaji.result');
+  assert.deepEqual(recorded.map(e=>e.payload),[{base:'Tabgha',tool:'reminders.add',outcome:'grant',text:'Tabgha ran reminders.add (“Stretch”).'}]);
+  assert.match((await a.chat(`why S-${chat.sortieId.slice(0,4).toUpperCase()}?`)).reply!,/Kaji: Tabgha ran reminders\.add \(“Stretch”\)\./);
   // A resend with the same id (a crash before the result was saved) returns the first result and runs nothing again.
   const twice={id:'00000000-0000-4000-8000-000000000000',request:'',tool:'reminders.add',args:{title:'Twice',due:'2031-01-01T09:00:00Z'}};
   const first=await la.run('NERV-02',twice,5000),second=await la.run('NERV-02',twice,5000);
