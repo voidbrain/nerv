@@ -183,3 +183,9 @@ test('on start the dashboard shows the real state: only a running sortie is sele
  assert.match(live,/state\.selected = running\.id; state\.autoSelected = true;/);assert.match(live,/state\.selected = null; state\.autoSelected = false;/);
  assert.match(js,/state\.selected = t\.dataset\.s; state\.deselected = false; state\.autoSelected = false;/,'a click is the owner\'s choice');
 });
+test('the route colours: advice that was given is a passed step (green); Misato\'s apartment passed through the owner\'s decision takes the decision colour (owner, 2026-11-05)',async()=>{
+ const {readFileSync}=await import('node:fs');const live=readFileSync('web/public/dashboard/live.js','utf8');const js=readFileSync('web/public/dashboard/dashboard.js','utf8');const html=readFileSync('web/public/dashboard/index.html','utf8');
+ assert.match(live,/const done = \{ detect:true, intake:true, route:true, consult:consulted\.has\(s\.id\),/,'ADVISE is passed when the consultant advised');
+ assert.match(js,/if \(st === "done" && el\.dataset\.n === "apt"\) el\.classList\.add\("owner"\);/);assert.match(js,/el\.classList\.remove\("on", "done", "wait", "skip", "owner"\)/);
+ assert.match(html,/\.snode\.done\.owner \{ border-color:var\(--warn\); \}/);assert.match(html,/\.tstep\.done\.owner \{ border-color:var\(--warn\); color:var\(--warn\); \}/,'the Simple theme timeline too');
+});
