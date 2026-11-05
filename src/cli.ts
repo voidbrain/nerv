@@ -366,7 +366,7 @@ try {
         // Slice 3b, on the main base: actions queued by kaji.run go out over the line, each until it reached its base.
         if(kaji){const link=kaji;runtime.startOutbox((base,item)=>link.run(base,item,MODEL_TIMEOUT_MS*2));}
         // Dispatch, on the other bases: while the main base is online, requests go to its Misato (one planner, one memory).
-        runtime.setDispatch(async(message,conversation)=>{const main=await runtime.mainBase();if(!main||main.self||!main.online||!kaji)return undefined;
+        runtime.setDispatch(async(message,conversation,forwarding)=>{const main=await runtime.mainBase();if(!main||main.self||!main.online||!kaji)return undefined;await forwarding({id:main.baseId,name:(await runtime.bases()).find(b=>b.baseId===main.baseId)?.name ?? main.baseId});
           return await kaji.chat(message,conversation&&/^[a-z]{1,20}$/.test(conversation)?conversation:undefined,MODEL_TIMEOUT_MS*MAX_STEPS*2) as ChatReply|undefined;});void kaji.start();}
         process.once('SIGINT',close);process.once('SIGTERM',close);break;
       }

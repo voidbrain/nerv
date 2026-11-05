@@ -232,11 +232,18 @@ test('F-051 slice 1: the running phase from the latest event, who advised, base 
 test('an answer without an action: Misato passed, a green route straight to Debrief, no line from EVA; animated lines only while a sortie runs (owner, 2026-11-05, S-B55C)',async()=>{
  const {readFileSync}=await import('node:fs');const live=readFileSync('web/public/dashboard/live.js','utf8');const js=readFileSync('web/public/dashboard/dashboard.js','utf8');
  assert.match(live,/plan:actions\.length > 0 \|\| known\.has\(s\.id\),/);
- assert.match(js,/\["plan","debrief","answer"\]/);assert.match(js,/const edges = EDGES\.filter\(e => e\[2\] !== "answer" \|\| \(s && !s\.actions\.length\)\);/,'drawn only for an answer-only sortie');
+ assert.match(js,/\["plan","debrief","answer"\]/);assert.match(js,/const edges = EDGES\.filter\(e => e\[2\] === "relay" \? !!\(s && s\.forwarded\) : e\[2\] !== "answer" \|\| \(s && !s\.actions\.length && !s\.forwarded\)\);/,'drawn only for an answer-only sortie (F-051 slice 2 added the relay route)');
  assert.match(js,/if \(!s \|\| !\(s\.status === "active" \|\| \/waiting\/\.test\(s\.status\)\)\) return m;/,'no animated line on a finished sortie');
  assert.match(js,/debrief:s\.actions\.length \? "eva" : "plan"/);
 });
 test('the apartment\'s count sits in the header like every other panel\'s sub-line, not a red badge (owner, 2026-11-05)',async()=>{
  const {readFileSync}=await import('node:fs');const html=readFileSync('web/public/dashboard/index.html','utf8');
  assert.match(html,/<span data-l="needs">Misato's apartment · needs you<\/span><span class="sub" id="needs-count">0<\/span>/);
+});
+test('F-051 slice 2: a forwarded request shows as forwarded on the asking base (relay route, the steps between skipped) and as "from <base>" on the main base',async()=>{
+ const {readFileSync}=await import('node:fs');const live=readFileSync('web/public/dashboard/live.js','utf8');const js=readFileSync('web/public/dashboard/dashboard.js','utf8');
+ assert.match(live,/if \(e\.kind === "kaji\.forwarded"\) forwardedTo\.set\(id,/);assert.match(live,/forwardedTo\.delete\(id\)/,'answered here after a drop-out: not forwarded');
+ assert.match(live,/originOf\.set\(id, baseName\(String\(p\.conversation\)\.slice\(5\)\.split\("-"\)\.slice\(0, 2\)\.join\("-"\)\)\)/,'kaji:nerv-02-dashboard is from NERV-02');
+ assert.match(js,/\["detect","debrief","relay"\]/);assert.match(js,/if \(s\.forwarded && id !== "detect" && id !== "debrief"\) return "skip";/);
+ assert.match(js,/"forwarded to " \+ s\.forwarded : s && s\.origin \? "from " \+ s\.origin/);assert.match(js,/s\.forwarded \? "→ " \+ esc\(s\.forwarded\) : s\.origin \? "from " \+ esc\(s\.origin\)/);
 });

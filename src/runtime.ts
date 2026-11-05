@@ -144,18 +144,31 @@ export class Runtime implements StoreApi {
  }
  /** A new request to Misato (F-003): its text and every step go to the ledger, so the loop can resume later. */
  /** F-036 dispatch: while another base is the main one and online, requests go to its Misato; undefined means answer here. */
- private dispatch?:(message:string,conversation?:string)=>Promise<ChatReply|undefined>;
- setDispatch(fn:(message:string,conversation?:string)=>Promise<ChatReply|undefined>){this.dispatch=fn;}
+ private dispatch?:(message:string,conversation:string|undefined,forwarding:(base:{id:string;name:string})=>Promise<void>)=>Promise<ChatReply|undefined>;
+ /** Forwarding to the main base (F-036); `forwarding(base)` is called just before the request goes, so this base records it (F-051). */
+ setDispatch(fn:(message:string,conversation:string|undefined,forwarding:(base:{id:string;name:string})=>Promise<void>)=>Promise<ChatReply|undefined>){this.dispatch=fn;}
  private pilots?:()=>Pilot[];
  /** The pilot roster (F-045), read on every request so a change applies without a restart. */
  setPilots(fn:()=>Pilot[]){this.pilots=fn;}
  pilotRoster():Pilot[] {try{return this.pilots?.() ?? [];}catch{return [];}}
  async chat(message:string,conversation?:string):Promise<ChatReply> {
-  const far=this.dispatch?await this.dispatch(message,conversation):undefined;if(far)return far;
   // Earlier exchanges of the same conversation (read before this request is recorded), so "yes" has its question.
   const context=conversation?await this.nervous.call('misato.context',{conversation}).catch(()=>[]) as Turn[]:[];
-  const sortieId=await this.nervous.call('sorties.open',{title:message.slice(0,500),source:'misato'}) as string;
-  await this.note(sortieId,'misato.request',{text:message,...(conversation?{conversation}:{})});
+  // F-051: a request going to the main base is a sortie here too: opened when it leaves, closed with the answer.
+  let forwarded:string|undefined;
+  const far=this.dispatch?await this.dispatch(message,conversation,async base=>{
+   forwarded=await this.nervous.call('sorties.open',{title:message.slice(0,500),source:'misato'}) as string;
+   await this.note(forwarded,'misato.request',{text:message,...(conversation?{conversation}:{})});
+   await this.note(forwarded,'kaji.forwarded',{base});}).catch(()=>undefined):undefined;
+  if(far){
+   if(!forwarded)return far;
+   await this.note(forwarded,'kaji.answered',{base:far.base ?? {id:'',name:''},sortieId:far.sortieId});
+   await this.nervous.call('sorties.finish',{sortieId:forwarded,status:far.reply?'done':'failed',...(far.reply?{reply:far.reply}:{})});
+   return {...far,sortieId:forwarded};
+  }
+  // Not forwarded, or the main base dropped out: answered here, in the sortie already opened if there is one.
+  const sortieId=forwarded ?? await this.nervous.call('sorties.open',{title:message.slice(0,500),source:'misato'}) as string;
+  if(!forwarded)await this.note(sortieId,'misato.request',{text:message,...(conversation?{conversation}:{})});
   // B-004: "why S-1A2B …?" is answered from the ledger, never by the model (which has no tool to read it and guessed).
   const ref=askedWhy(message);
   if(ref){const found=await this.nervous.call('sorties.explain',{ref}) as Parameters<typeof explainRecord>[0];
@@ -163,7 +176,7 @@ export class Runtime implements StoreApi {
    await this.nervous.call('sorties.finish',{sortieId,status:'done',reply});return {sortieId,reply,steps:[],waiting:[]};}
   return this.loop(sortieId,message,[],context);
  }
- private note(sortieId:string,kind:'misato.request'|'misato.step'|'misato.waiting'|'misato.consult'|'pilot.unmatched',payload:object){return this.nervous.call('misato.note',{sortieId,kind,payload});}
+ private note(sortieId:string,kind:'misato.request'|'misato.step'|'misato.waiting'|'misato.consult'|'pilot.unmatched'|'kaji.forwarded'|'kaji.answered',payload:object){return this.nervous.call('misato.note',{sortieId,kind,payload});}
  /** Records a step, cutting an oversized result so the event stays within its bound. */
  private async record(sortieId:string,steps:Step[],step:Step,actionId?:string){
   const fitted=JSON.stringify(step).length>12000?{...step,result:{truncated:true}}:step;

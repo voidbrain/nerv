@@ -31,6 +31,9 @@ export interface EventPayloads {
  /** F-025: a consultant's advice before Misato planned (no vote); kept with the sortie for the trace. */
  'misato.consult':{advice:string;model:string;pilot?:{id:string;name:string;why:'pinned'|'keywords'}};
  'misato.resumed':Record<string,never>;
+ /** F-051: this request went to the main base over the Kaji line, and what came back. */
+ 'kaji.forwarded':{base:{id:string;name:string}};
+ 'kaji.answered':{base:{id:string;name:string};sortieId:string};
  /** F-045: no specialist fitted this request; the generic pilot named its domain. Counted to propose a new pilot. */
  'pilot.unmatched':{domain:string};
  /** B-011: what another base did with an action this sortie sent it (kaji.run), as the owner reads it. */
@@ -43,7 +46,7 @@ export interface EventPayloads {
  'sortie.failed':Record<string,never>;
 }
 export type EventKind=keyof EventPayloads;
-export const EVENT_KINDS=['sortie.opened','ballot','grant.issued','grant.used','grant.denied','approval.requested','approval.approve','approval.reject','approval.edit','approval.expired','spear','misato.reply','misato.request','misato.step','misato.waiting','misato.consult','pilot.unmatched','kaji.result','ballot.shadow','misato.resumed','action.done','action.failed','sortie.done','sortie.failed'] as const satisfies readonly EventKind[];
+export const EVENT_KINDS=['sortie.opened','ballot','grant.issued','grant.used','grant.denied','approval.requested','approval.approve','approval.reject','approval.edit','approval.expired','spear','misato.reply','misato.request','misato.step','misato.waiting','misato.consult','kaji.forwarded','kaji.answered','pilot.unmatched','kaji.result','ballot.shadow','misato.resumed','action.done','action.failed','sortie.done','sortie.failed'] as const satisfies readonly EventKind[];
 /** One event as read back. `v` is the schema version it was written under; events written before versioning read as 1. */
 export type SortieEvent={[K in EventKind]:{v:number;sequence:number;sortieId:string;actionId:string|null;kind:K;payload:EventPayloads[K];created:string}}[EventKind];
 /** Serialises a payload for storage, refusing unknown kinds and oversized payloads so the ledger never stores an unbounded event. */

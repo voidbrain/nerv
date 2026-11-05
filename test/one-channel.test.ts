@@ -86,15 +86,22 @@ test('dispatch: a request asked on another base is answered by the main base\'s 
  try{
   await b.ready();assert.equal(await b.kaji.add(records),3);
   const lb=new KajiLink({baseId:'NERV-02',key:B.privateKey,publicKey:B.publicKey,registry:b.kaji,log:()=>{}});
-  b.setDispatch((m,c)=>lb.chat(m,c,800) as Promise<never>);
+  // Wired as serve does: the request is recorded here as forwarded (F-051), then sent.
+  b.setDispatch(async(m,c,forwarding)=>{await forwarding({id:'NERV-01',name:'Neo Tokyo-3'});return await lb.chat(m,c,800) as never;});
   await la.start(60_000);
   const far=await b.chat('What is on today?','dashboard');
-  assert.deepEqual([far.reply,far.base?.name,far.sortieId],['Done on Tokyo.','Neo Tokyo-3','tokyo-sortie']);assert.deepEqual(heard,[{from:'NERV-02',message:'What is on today?',conversation:'dashboard'}]);
-  assert.equal((await b.sorties()).length,0,'nothing ran on Tabgha');
+  assert.deepEqual([far.reply,far.base?.name],['Done on Tokyo.','Neo Tokyo-3']);assert.deepEqual(heard,[{from:'NERV-02',message:'What is on today?',conversation:'dashboard'}]);
+  // F-051 (changed on purpose): the forwarded request is a sortie on Tabgha too, done, with where it went and what came back.
+  const mine=(await b.sorties())[0]!;assert.equal(far.sortieId,mine.id);assert.equal(mine.status,'done');assert.equal(mine.actions,0,'nothing ran on Tabgha');
+  const kinds=(await b.events(mine.id)).map(e=>[e.kind,e.payload] as const);
+  assert.deepEqual(kinds.find(k=>k[0]==='kaji.forwarded')![1],{base:{id:'NERV-01',name:'Neo Tokyo-3'}});
+  assert.deepEqual(kinds.find(k=>k[0]==='kaji.answered')![1],{base:{id:'NERV-01',name:'Neo Tokyo-3'},sortieId:'tokyo-sortie'});
   // Sent but slow: reported, never repeated here.
-  slow=true;const late=await b.chat('Slow one','dashboard');assert.match(late.error ?? '',/NERV-01 did not answer .*not repeated here/);assert.equal((await b.sorties()).length,0);
+  slow=true;const late=await b.chat('Slow one','dashboard');assert.match(late.error ?? '',/NERV-01 did not answer .*not repeated here/);
+  assert.equal((await b.sorties())[0]!.status,'failed','the forwarded sortie records that no answer came; nothing is repeated here');assert.equal((await b.sorties()).length,2);
   // The main base is gone: answered here (this base has no model route, so its Misato says so).
-  await la.stop();const local=await b.chat('Anyone there?','dashboard');assert.equal(local.base,undefined);assert.match(local.error ?? '',/No model route for Misato/);assert.equal((await b.sorties()).length,1);
+  await la.stop();const local=await b.chat('Anyone there?','dashboard');assert.equal(local.base,undefined);assert.match(local.error ?? '',/No model route for Misato/);
+  assert.equal((await b.sorties()).length,3,'the main base gone: answered here, in the sortie opened when it was forwarded');assert.equal((await b.sorties())[0]!.id,local.sortieId);
   // Only the main base takes requests: Tabgha refuses one signed by Neo Tokyo-3.
   const lb2=new KajiLink({baseId:'NERV-02',key:B.privateKey,publicKey:B.publicKey,registry:b.kaji,log:()=>{},onChat:async()=>({sortieId:'',steps:[],waiting:[]})});await lb2.start(60_000);
   try{const body=JSON.stringify({message:'x'});const res=await fetch(`http://127.0.0.1:${pb}/kaji/chat`,{method:'POST',headers:{'content-type':'application/json',...signedHeaders('NERV-01',A.privateKey,'req','POST','/kaji/chat',body)},body});assert.equal(res.status,409);}
