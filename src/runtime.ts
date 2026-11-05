@@ -4,10 +4,11 @@ import {degradedReasons,type RouteHealth} from './route-health.ts';
 import {detectOllama,ollamaUrlOf,planModels,writeModels,type ModelChange,type ModelSetup} from './model-setup.ts';
 import {readConfig,readModelKey} from './config.ts';
 import type {ActionDetail,Approval,Decision,SortieSummary} from './ledger.ts';
+import {argsHash} from './ledger.ts';
 import type {SortieEvent} from './events.ts';
 import {MODEL_TIMEOUT_MS,type Ask,type Reply,type RouteName} from './model.ts';
 import type {Effect,Pattern,Stage,Verdict} from './policy.ts';
-import {MAX_STEPS,requestLanguage,waitingReply,type Plan,type Recalled,type Step,type Turn} from './misato.ts';
+import {MAX_STEPS,doneReply,requestLanguage,waitingReply,type Plan,type Recalled,type Step,type Turn} from './misato.ts';
 import {toolDocs} from './executors.ts';
 import type {Digest,Exchange} from './instrumentality.ts';
 import type {Episode,Fact} from './memory.ts';
@@ -122,6 +123,8 @@ export class Runtime implements StoreApi {
    }else await this.nervous.call('sorties.finish',{sortieId,status,...(reply?{reply}:{})});
    return {sortieId,...(reply?{reply}:{}),...(error?{error}:{}),steps,waiting};
   };
+  const lang=()=>requestLanguage(message,context.map(t=>t.request));
+  const ranSteps=()=>steps.filter(s=>s.outcome==='grant'&&!s.error&&s.tool).map(s=>({tool:s.tool!,args:s.args ?? {}}));
   for(let turn=0;turn<MAX_STEPS;turn++){
    const out=await this.brain.call('misato.step',{request:message,history:steps.slice(-12),...(context.length?{context}:{}),...(memory.length?{memory:memory.slice(0,10)}:{})},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as {plan?:Plan;invalid?:boolean;error?:string};
    if(out.error)return finish('failed',undefined,out.error);
@@ -130,6 +133,8 @@ export class Runtime implements StoreApi {
    const {tool,args}=out.plan.action;
    // A tool Misato was not offered (often a misspelling) has no executor: it goes back to Misato, never to the owner as a card.
    if(!toolDocs.some(t=>t.name===tool)){await this.record(sortieId,steps,{tool,args,outcome:'invalid',error:`Unknown tool "${tool}". Use exactly one of: ${toolDocs.map(t=>t.name).join(', ')}.`});continue;}
+   // The same action already ran in this sortie: running it again is never the owner's wish (a small model loops here).
+   if(steps.some(s=>s.tool===tool&&s.outcome==='grant'&&!s.error&&argsHash(s.args ?? {})===argsHash(args)))return finish('done',doneReply(lang(),ranSteps()));
    // An action the ledger refuses outright (malformed, oversized) never reached a ballot: Misato sees it as invalid.
    const r=await this.gate(sortieId,{request:message,tool,args}).catch(()=>({outcome:'invalid' as const,reason:'The gate refused this action as malformed (unknown shape or too large).'}));
    // Spelled out for the planner when it resumes: an action waiting for the owner has not happened.
@@ -139,6 +144,8 @@ export class Runtime implements StoreApi {
    // so the model is never asked to describe an action that is only waiting.
    if('approvalId' in r&&r.approvalId){waiting.push({approvalId:r.approvalId,tool,reason:r.reason});return finish('done',waitingReply(requestLanguage(message,context.map(t=>t.request)),tool,args));}
   }
+  // At the step limit, what did run is reported as done rather than "could not finish".
+  if(ranSteps().length)return finish('done',doneReply(lang(),ranSteps()));
   return finish('failed',undefined,`Step limit (${MAX_STEPS}) reached.`);
  }
  private resumeListeners:((reply:ChatReply)=>void)[]=[];private resuming=new Set<string>();private resumer?:NodeJS.Timeout;

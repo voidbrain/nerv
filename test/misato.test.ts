@@ -68,8 +68,8 @@ test('an unreadable plan is shown back to Misato; a Blue action asks Casper, and
   const cards=await runtime.approvals();assert.equal(cards.length,1);assert.equal(cards[0]!.card.tool,'reminders.add');
  },{blue:['reminders.add']});
 });
-test('the loop stops at the step limit and the sortie closes failed',async()=>{
- await agent(Array.from({length:MAX_STEPS+2},()=>'{"action":{"tool":"reminders.list","args":{}}}'),async(runtime)=>{
+test('the loop stops at the step limit and the sortie closes failed when nothing ran',async()=>{
+ await agent(Array.from({length:MAX_STEPS+2},()=>'not a plan'),async(runtime)=>{
   const chat=await runtime.chat('Keep listing');
   assert.equal(chat.steps.length,MAX_STEPS);assert.match(chat.error!,/Step limit/);assert.equal(chat.reply,undefined);
   assert.equal((await runtime.events(chat.sortieId)).at(-1)!.kind,'sortie.failed');
@@ -140,4 +140,18 @@ test('the waiting reply speaks the request\'s language, falls back to the conver
  assert.equal(requestLanguage('sì',['Vuoi che li cancelli tutti?']),'it');assert.equal(requestLanguage('ok',[],'it'),'it');
  assert.equal(waitingReply('it','memory.remember',{text:'Bevo caffè alle 8'}),'In attesa della tua approvazione: memory.remember (“Bevo caffè alle 8”). I dettagli sono nella card; proseguo appena decidi.');
  assert.doesNotMatch(waitingReply('en','reminders.cancel',{ids:['a','b']}),/done|confirmed|approved/i);
+});
+test('an action that already ran is never run again: a repeat ends the turn with the service\'s Done; at the step limit what ran is reported done',async()=>{
+ // Owner report 2026-11-05: a small model re-proposed an approved action until the step limit ("could not finish").
+ const ADD='{"action":{"tool":"reminders.add","args":{"title":"Stretch","due":"2031-01-01T09:00:00Z"}}}';
+ await agent([ADD,ADD,ADD],async(runtime,m)=>{
+  const chat=await runtime.chat('Remind me to stretch');
+  assert.equal(chat.reply,'Done: reminders.add (“Stretch”).');assert.equal((await runtime.list()).length,1,'it ran once');
+  assert.deepEqual(chat.steps.map(s=>s.outcome),['grant']);assert.equal(m.asked.filter(a=>a.who==='misato').length,2,'the repeat is caught, not run');
+ });
+ await agent(['{"action":{"tool":"reminders.list","args":{}}}',...Array.from({length:MAX_STEPS},()=>'not a plan')],async(runtime)=>{
+  const chat=await runtime.chat('Ricordami cosa ho in programma');
+  assert.equal(chat.reply,'Fatto: reminders.list.','at the limit, what ran is reported, in the request\'s language');
+  assert.equal((await runtime.events(chat.sortieId)).at(-1)!.kind,'sortie.done');
+ });
 });
