@@ -7,7 +7,9 @@ import { setSchedule } from './config.ts';
  * Built-in tools with an executor in the scheduler process (F-017). Each declares its effect class for the gate; an
  * executor runs only after `Ledger.authorize` accepted the grant for these exact arguments.
  */
-export interface ReminderBackend {list():Reminder[];add(title:string,due:string):Reminder;cancel(id:string):boolean;restore(id:string):boolean;memory:Memory;home?:string}
+export interface ReminderBackend {list():Reminder[];add(title:string,due:string):Reminder;cancel(id:string):boolean;restore(id:string):boolean;memory:Memory;home?:string;
+ /** F-036 slice 3b: queues one action for another base; the coordinator sends it over the Kaji line. */
+ queueRemote?(sortieId:string,base:string,tool:string,args:Record<string,unknown>):{id:string}}
 export const builtinTools:Tool[]=[
  {name:'reminders.list',effect:'read'},
  {name:'reminders.add',effect:'write-local',inverse:'reminders.cancel'},
@@ -19,6 +21,8 @@ export const builtinTools:Tool[]=[
  {name:'memory.forget',effect:'write-local'},
  // Only the brief and Instrumentality schedules: local, reversible by setting the previous values back.
  {name:'settings.schedule',effect:'write-local',inverse:'settings.schedule'},
+ // F-036 slice 3b: one action on another base. Owner-only for now (always a card); that base's own gate reviews it again.
+ {name:'kaji.run',effect:'write-external',owner:true},
 ];
 const text=(args:Record<string,unknown>,key:string)=>{const v=args[key];if(typeof v!=='string')throw new Error(`Argument ${key} must be a string.`);return v;};
 const only=(args:Record<string,unknown>,keys:string[])=>{if(Object.keys(args).some(k=>!keys.includes(k)))throw new Error(`Arguments allowed: ${keys.join(', ')||'none'}.`);};
@@ -52,6 +56,13 @@ export function execute(backend:ReminderBackend,tool:string,args:Record<string,u
   case 'settings.schedule':{only(args,['brief','instrumentality']);if(!Object.keys(args).length)throw new Error('Give brief and/or instrumentality.');if(!backend.home)throw new Error('Settings are not available here.');
    return setSchedule(backend.home,{...(args.brief!==undefined?{brief:text(args,'brief')}:{}),...(args.instrumentality!==undefined?{instrumentality:text(args,'instrumentality')}:{})});}
   case 'memory.forget':only(args,['id']);return {forgotten:backend.memory.forget(text(args,'id'),'misato')};
+  case 'kaji.run':{
+   only(args,['base','tool','args']);const base=text(args,'base'),tool=text(args,'tool');
+   if(!/^[A-Z0-9-]{2,16}$/.test(base)||!/^[a-z]+\.[a-z]+$/.test(tool)||tool==='kaji.run'||!args.args||typeof args.args!=='object'||Array.isArray(args.args))throw new Error('kaji.run needs a base id, one of its actions and that action\'s arguments.');
+   if(!backend.queueRemote||!context.sortieId)throw new Error('Running actions on other bases is not available here.');
+   const q=backend.queueRemote(context.sortieId,base,tool,args.args as Record<string,unknown>);
+   return {queued:true,to:base,tool,id:q.id,note:'Sent over the Kaji line; its result follows as a message.'};
+  }
   default:throw new Error('No executor for this tool.');
  }
 }
