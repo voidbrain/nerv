@@ -23,7 +23,7 @@ test('choosing the pilot: keywords as whole words or phrases; a pinned pilot fir
  assert.deepEqual(choosePilot('print the filament',[{...art,pinned:true},print]),{id:'artist',name:'artist',domain:'things',model:'m',why:'pinned'},'pinned beats more matches');
  assert.equal(choosePilot('Which filament?',[{...print,retired:true}]),undefined,'retired is never chosen');
  assert.equal(choosePilot('Remind me to call Ada',[art,print]),undefined,'nothing fits: the generic pilot advises');
- assert.match(describePilots([print],null),/^generic · Generic pilot · anything no specialist covers · off \(models set consultant MODEL\)\nprinter · Print Master/);
+ assert.match(describePilots([print],null),/^generic · Generic pilot · anything no specialist covers · off \(nerv pilots generic MODEL\)\nprinter · Print Master/);
 });
 /** A fake local model: a pilot or the generic consultant advises (each recorded with the model asked), Misato replies. */
 async function fake(){

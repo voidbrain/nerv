@@ -7,21 +7,22 @@ Current work ledger, reviewed 5 November 2026 against main `53a0685`. PR #1–#1
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 34 | 4 |
-| **Require Human 🧑** | 1 | 1 |
+| **Open** | 34 | 5 |
+| **Require Human 🧑** | 1 | 2 |
 
 ### Last 7 days
 
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **Count** | 53 | 19 | 16 | 12 |
+| **Count** | 53 | 19 | 17 | 12 |
 
 ### Require Human 🧑
 
 | Features | Bugs |
 |---|---|
 | [F-053](#f-053) | [B-014](#b-014) |
+|  | [B-017](#b-017) |
 <!-- recap:end -->
 
 ## Bugs and reliability
@@ -170,6 +171,40 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | PR / evidence | #127 windows job (run 42101963247) |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-05: test/why.test.ts (local run) |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
+### B-017
+
+**The Marduk Institute says the generic pilot is off while it is on**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
+
+🧑 **→ Human action required: Yes**<br />After updating and restarting the service, open the dashboard: the Marduk Institute's first card reads *Generic pilot · … · gemma4:12b*, and `nerv pilots generic off` then `nerv pilots generic gemma4:12b` switch it.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-05: after `nerv models set consultant gemma4:12b` (*Saved. The running service now uses it.*) the panel still read *off · Turn it on: nerv models set consultant MODEL*. The panel (#125) read the consultant from `roles` while `GET /api/models` answers `{models:{roles:…}}`; the service itself had it right. |
+| **Reproduce** | Driven in headless Chrome against the owner's service 2026-11-05: the panel listed Coder and Print Master but the generic pilot as off, while `/api/models` returned the consultant gemma4:12b. |
+| **Check** | The generic pilot shows its model whenever one is set; before the first poll the panel says it is loading, not "planned"; the hint names a pilots command; a test pins the API shape the panel reads. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Fixed in [PR #128](https://github.com/voidbrain/nerv/pull/128) (2026-11-05): the panel reads `models.roles.consultant`; *Loading pilots…* until the first poll answers; the generic pilot gets its own command, `nerv pilots generic MODEL|off` (the consultant role, so `models set consultant` keeps working), named in the hint and in `nerv pilots`. Also in the same change (owner, same report): base cards and the banner read *NERV-01 · Neo Tokyo-3*; the map is smaller with its legend on the right. Checked: test/dashboard.test.ts, test/model-setup.test.ts (the CLI command, a model Ollama lacks refused), a screenshot of the bases panel.
+
+**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner report 2026-11-05; headless Chrome against the owner's service |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05: tests (local run); owner's look pending |
 | Reviewed | 2026-11-05 |
 
 </details>

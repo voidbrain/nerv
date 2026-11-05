@@ -91,7 +91,7 @@ test('the CLI: pilots add, list, pin, retire and restore; a model Ollama lacks i
   let stdout='',stderr='';c.stdout.on('data',d=>stdout+=d);c.stderr.on('data',d=>stderr+=d);c.on('close',status=>done({status,stdout,stderr}));});
  try{
   assert.equal((await run('init')).status,0);
-  assert.match((await run('pilots')).stdout,/^generic · Generic pilot · anything no specialist covers · off \(models set consultant MODEL\)\n$/);
+  assert.match((await run('pilots')).stdout,/^generic · Generic pilot · anything no specialist covers · off \(nerv pilots generic MODEL\)\n$/);
   const add=await run('pilots','add','printer','--name','Print Master','--domain','3D printing','--keywords','filament, 3D print','--model','gemma4:12b');assert.equal(add.status,0,add.stderr);
   assert.match((await run('pilots')).stdout,/printer · Print Master · 3D printing · gemma4:12b · prototype\n   keywords: filament, 3d print/);
   const missing=await run('pilots','add','artist','--name','Artist','--domain','images','--keywords','photo','--model','no-such-model');
@@ -100,5 +100,9 @@ test('the CLI: pilots add, list, pin, retire and restore; a model Ollama lacks i
   assert.equal((await run('pilots','retire','printer')).status,0);assert.match((await run('pilots')).stdout,/pinned · retired/);
   assert.equal((await run('pilots','restore','printer')).status,0);assert.doesNotMatch((await run('pilots')).stdout,/retired/);
   assert.match((await run('pilots','retire','nobody')).stderr,/No pilot nobody/);
+  // The generic pilot is set where pilots are (owner, 2026-11-05).
+  assert.equal((await run('pilots','generic','gemma4:12b')).status,0);assert.match((await run('pilots')).stdout,/^generic · Generic pilot · anything no specialist covers · gemma4:12b\n/);
+  assert.equal((await run('pilots','generic','off')).status,0);assert.match((await run('pilots')).stdout,/^generic · Generic pilot · anything no specialist covers · off \(nerv pilots generic MODEL\)/);
+  assert.notEqual((await run('pilots','generic','no-such-model')).status,0,'a model Ollama lacks is refused');
  }finally{await o.close();rmSync(home,{recursive:true,force:true});}
 });

@@ -53,7 +53,7 @@ export function choosePilot(request:string,roster:readonly Pilot[]):Chosen|undef
 }
 /** The roster as `nerv pilots` prints it, the generic pilot first. */
 export function describePilots(roster:readonly Pilot[],generic:string|null):string {
- const lines=[`generic · Generic pilot · anything no specialist covers · ${generic ?? 'off (models set consultant MODEL)'}`];
+ const lines=[`generic · Generic pilot · anything no specialist covers · ${generic ?? 'off (nerv pilots generic MODEL)'}`];
  for(const p of roster)lines.push(`${p.id} · ${p.name} · ${p.domain} · ${p.model} · ${p.stage}${p.pinned?' · pinned':''}${p.retired?' · retired':''}${p.parent&&p.parent!==GENERIC?` · from ${p.parent}`:''}\n   keywords: ${p.keywords.join(', ')}`);
  return lines.join('\n');
 }

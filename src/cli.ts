@@ -129,9 +129,16 @@ try {
     const opt=(name:string)=>{const i=rest.indexOf('--'+name);return i>=0?rest[i+1]:undefined;};
     const find=()=>{const p=roster.find(x=>x.id===id);if(!p)throw new Error(`No pilot ${id ?? ''}: nerv pilots lists them.`);return p;};
     const checkModel=async(model:string)=>{const found=await detectOllama(setting('OLLAMA') ?? ollamaUrlOf(config.models));if(found.reachable&&!found.models.some(m=>m.name===model))throw new Error(`Ollama has no model ${model}: ollama pull ${model} first, or pick one from nerv models.`);};
-    const usage='Usage: pilots | pilots add ID --name NAME --domain "WHAT IT KNOWS" --keywords a,b,c --model MODEL [--stage prototype|test|production] [--parent ID] | pilots set ID [--name …] [--domain …] [--keywords …] [--model …] [--stage …] | pilots pin|unpin|retire|restore ID';
+    const usage='Usage: pilots | pilots generic MODEL|off | pilots add ID --name NAME --domain "WHAT IT KNOWS" --keywords a,b,c --model MODEL [--stage prototype|test|production] [--parent ID] | pilots set ID [--name …] [--domain …] [--keywords …] [--model …] [--stage …] | pilots pin|unpin|retire|restore ID';
     const list=(v:string|undefined)=>v===undefined?undefined:v.split(',').map(x=>x.trim()).filter(Boolean);
     if(!sub){console.log(describePilots(roster,config.models.roles?.consultant?.model ?? null));}
+    else if(sub==='generic'){
+      // The generic pilot is the consultant role (F-025): `pilots generic MODEL|off` is `models set consultant MODEL|off`.
+      if(!id)throw new Error('Usage: pilots generic MODEL | pilots generic off');
+      const found=await detectOllama(setting('OLLAMA') ?? ollamaUrlOf(config.models));
+      writeModels(home,planModels(config.models,{consultant:id==='off'?null:{model:id}},found.reachable?found.models.map(m=>m.name):undefined));
+      console.log(`Generic pilot ${id==='off'?'off':`on ${id}`}. ${await reloadIfRunning(home,config.port)}`);
+    }
     else if(sub==='add'){
       if(!id||!opt('name')||!opt('domain')||!opt('keywords')||!opt('model'))throw new Error(usage);await checkModel(opt('model')!);
       savePilots(home,[...roster,{id,name:opt('name')!,domain:opt('domain')!,keywords:list(opt('keywords'))!,model:opt('model')!,stage:(opt('stage') ?? 'prototype') as Stage,parent:opt('parent') ?? 'generic'}]);
@@ -195,7 +202,7 @@ try {
     if(!response.ok)throw new Error(value.error ?? 'Ask failed.');
     console.log(value.text+(value.truncated?'\n[reply truncated]':'')+`\n— ${value.route} · ${value.model}`);
   }
-  else if(!command||command==='help')console.log('NERV Agency\nCommands: init [--base ID --name "Name"] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | models [set misato| pilots [add|set|pin|unpin|retire|restore] |casper MODEL | cloud on|off | key] | ask [--cloud] "text" | open [dashboard] | sessions revoke | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
+  else if(!command||command==='help')console.log('NERV Agency\nCommands: init [--base ID --name "Name"] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | models [set misato| pilots [generic|add|set|pin|unpin|retire|restore] |casper MODEL | cloud on|off | key] | ask [--cloud] "text" | open [dashboard] | sessions revoke | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
   else {
     const config=readConfig(home);
     const scrolls=readScrolls(home);
