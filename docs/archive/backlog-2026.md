@@ -1079,3 +1079,70 @@ Closed records in closing-date order. Dated evidence, not current status.
 </details>
 
 ---
+
+### B-015
+
+**CI native-macos fails before running: GitHub no longer offers the macos-14 runner**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: verified by CI and closed.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-05 on #123: both native-macos jobs failed in about a second with *The configuration 'macos-14-arm64-us-default' is not supported*; main's last two runs (7b45844, 94b723d) had native-macos cancelled. GitHub stopped offering the image; nothing in the code changed. Every PR is blocked, since native-macos is a required check. |
+| **Reproduce** | Any PR's native-macos job on `runs-on: macos-14`. |
+| **Check** | native-macos runs and passes on a supported image named explicitly (not `latest`, so the Xcode and Swift version changes only on purpose); the runner images are listed under `outside` in .harness.json, so the audit reviews them. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-05: native-macos ran and passed on macos-15 in [PR #124](https://github.com/voidbrain/nerv/pull/124)'s CI (42095042478) and on every main run since (latest 42106421258). Fixed in [PR #124](https://github.com/voidbrain/nerv/pull/124) (2026-11-05): `runs-on: macos-15`; `outside` gains the runner images (what fails, how it shows). The job name stays native-macos, so the required check is unchanged (no repository setting touched).
+
+**Estimates:** No remaining effort; ~100% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | #123 native-macos jobs 127479057886, 127479078814 |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05: CI 42095042478, main 42106421258 |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+### B-016
+
+**A sortie ID can switch the reply language: "why S-1E0E?" answered in Italian**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: verified by CI and closed.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-05 on #127's windows job: test/resume.test.ts asked *why S-1E0E approved?* and got the answer in Italian. The language guess split the ID into letters: "1E0E" became two Italian "e" ("and"), outvoting the one English "why". It depends on the random ID, so it fails now and then, on any machine, and the owner would get a reply in the wrong language the same way. |
+| **Reproduce** | `requestLanguage('why S-1E0E approved?')` returned "it". |
+| **Check** | Sortie references and tokens with digits never vote; English and Italian questions with any ID keep their language; a test covers IDs that contain "e" and digits. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-05: its test is automated and passed in the merged [PR #127](https://github.com/voidbrain/nerv/pull/127)'s CI (42102698058) and on main (42103202794). Fixed in [PR #127](https://github.com/voidbrain/nerv/pull/127) (2026-11-05): `requestLanguage` removes sortie references first and skips any token with a digit. Checked: test/why.test.ts (the failing ID, an ID that starts with E, Italian with an ID, a token with digits), fails without the fix.
+
+**Estimates:** No remaining effort; ~100% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | #127 windows job (run 42101963247) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05: merged PR CI 42102698058 |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
