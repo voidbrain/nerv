@@ -87,7 +87,7 @@ const LABELS = {
   eva:{ brandTitle:"TACTICAL COMMAND", brandTag:"SEELE SCROLLS ENFORCED // CENTRAL DOGMA LEDGER · LILITH MEMORY",
     needs:"Misato's apartment · needs you", sorties:"Sorties", next:"Coming up", flow:"Sephirot · sortie flow",
     detail:"Misato plan · current action", log:"Comms · Misato & Maya trace", away:"Debrief · while you were away", health:"Health",
-    bases:"NERV bases · Kaji line", cages:"EVA cages · heartbeat", budget:"Battery · budget", melons:"Marduk Institute · Pilots", lilith:"Terminal Dogma · Lilith",
+    bases:"NERV bases · Kaji line", cages:"EVA cages · heartbeat", budget:"Battery · budget", melons:"Marduk Institute · Pilots", melonsSub:"Kaji's watermelons · proto → test → prod", lilith:"Terminal Dogma · Lilith",
     spear:"SPEAR OF LONGINUS", dummy:"DUMMY PLUG ACTIVE", launch:"Launch",
     qNeeds:"Needs you", qAway:"While you were away", qNext:"Coming up", qHealth:"Broken or stuck", qBudget:"Battery today",
     steps:{ detect:"Detect", intake:"Naoko", route:"Gendo", consult:"Consult", plan:"Misato", magi:"MAGI", sync:"Sync", apt:"Apartment", plug:"Plug", eva:"EVA", debrief:"Debrief" },
@@ -95,7 +95,7 @@ const LABELS = {
   neutral:{ brandTitle:"OPERATIONS", brandTag:"owner rules enforced · append-only ledger · long-term memory",
     needs:"Needs your approval", sorties:"Jobs", next:"Coming up", flow:"Decision timeline",
     detail:"Plan · current action", log:"Messages · trace", away:"While you were away", health:"Health",
-    bases:"Machines · mesh", cages:"Sandboxes · heartbeat", budget:"Budget", melons:"Pilots", lilith:"Memory",
+    bases:"Machines · mesh", cages:"Sandboxes · heartbeat", budget:"Budget", melons:"Pilots", melonsSub:"proto → test → prod", lilith:"Memory",
     spear:"STOP EVERYTHING", dummy:"MODELS UNAVAILABLE", launch:"Run",
     qNeeds:"Needs you", qAway:"While you were away", qNext:"Coming up", qHealth:"Broken or stuck", qBudget:"Budget today",
     steps:{ detect:"Ingress", intake:"Intake", route:"Route", consult:"Consult", plan:"Plan", magi:"Review", sync:"Confidence", apt:"Approval", plug:"Grant", eva:"Sandbox", debrief:"Done" },
@@ -646,7 +646,8 @@ function renderBudget() {
 }
 function renderMelons() {
   const m = { prototype:"b-info", test:"b-orange", production:"b-ok" };
-  document.getElementById("melons").innerHTML = PILOTS.map(p => "<div class='card'><div class='row'><span class='b'>" + p.id + "</span><span class='badge " + m[p.stage] + "'>" + p.stage.toUpperCase() + "</span></div>" +
+  const short = { prototype:"PROTO", test:"TEST", production:"PROD" };
+  document.getElementById("melons").innerHTML = PILOTS.map(p => "<div class='card'><div class='row'><span class='b'>" + p.id + "</span><span class='badge " + m[p.stage] + "'>" + short[p.stage] + "</span></div>" +
     "<div class='row tiny muted'><span>" + p.runs + " runs · " + p.rejects + " MAGI rejects · " + p.overrides + " your edits</span><span>" + (p.stage === "prototype" ? "EVA-00" : p.stage === "test" ? "EVA-01" : "EVA-02") + "</span></div>" +
     "<div class='row' style='margin-top:4px'>" + (p.stage !== "production" ? "<button class='btn sm' data-promote='" + p.id + "'>" + (p.stage === "test" ? "Ask to promote (needs you)" : "Promote to test") + "</button>" : "<span class='tiny muted'>production: demoted automatically on failure or Spear</span>") +
     (p.stage !== "prototype" ? "<button class='btn sm danger' data-demote='" + p.id + "'>Demote</button>" : "") + "</div></div>").join("");
@@ -845,7 +846,7 @@ document.addEventListener("click", e => {
     e.preventDefault();
     // A second click on the selected sortie's card deselects it (links elsewhere, such as Debrief's "open", always select).
     if (t.classList.contains("sortie") && state.selected === t.dataset.s) { state.selected = null; state.deselected = true; clearInterval(replayTimer); state.replay = null; renderSorties(); renderFlow(); renderLog(); return; }
-    state.selected = t.dataset.s; state.deselected = false; startReplay(t.dataset.s); renderSorties(); renderFlow(); renderLog(); document.getElementById("p-flow").scrollIntoView({ behavior:"smooth", block:"nearest" }); return;
+    state.selected = t.dataset.s; state.deselected = false; state.autoSelected = false; startReplay(t.dataset.s); renderSorties(); renderFlow(); renderLog(); document.getElementById("p-flow").scrollIntoView({ behavior:"smooth", block:"nearest" }); return;
   }
   if (t.dataset.lf) { state.logFilter = t.dataset.lf; t.parentNode.querySelectorAll(".btn").forEach(b => b.classList.toggle("on", b === t)); renderLog(); return; }
   if (t.dataset.f) { state.filter = t.dataset.f; document.querySelectorAll("#p-sorties .filters .btn").forEach(b => { b.classList.toggle("on", b.dataset.f === state.filter); b.setAttribute("aria-pressed", String(b.dataset.f === state.filter)); }); renderSorties(); return; }
