@@ -125,12 +125,15 @@ export class KajiLink {
   const tick=async()=>{try{await this.listen();await this.heartbeat();}catch(e){this.log(`Kaji: ${e instanceof Error?e.message:'heartbeat failed'}.`);}};
   this.every=everyMs;await tick();this.timer=setInterval(()=>{void tick();},everyMs);
  }
- async stop():Promise<void> {if(this.timer)clearInterval(this.timer);await new Promise<void>(done=>this.server?this.server.close(()=>done()):done());this.server=undefined;this.listening=undefined;}
+ /** Stops the heartbeat and the listener. Open connections are closed first: a server only finishes closing when none is
+     left, and a peer's keep-alive connection could otherwise hold the stop (and a service shutdown) forever. */
+ async stop():Promise<void> {if(this.timer)clearInterval(this.timer);await this.closeServer();this.listening=undefined;}
+ private async closeServer():Promise<void> {const server=this.server;this.server=undefined;if(!server)return;await new Promise<void>(done=>{server.close(()=>done());server.closeAllConnections();});}
  /** Listens on the enrolled address only; retried on every tick (Tailscale may come up later, the address may change). */
  private async listen():Promise<void> {
   const me=await this.me();if(!me){if(!this.listening)this.log('Kaji: this base is not enrolled yet (kaji list); not listening.');return;}
   if(this.listening===me.address)return;
-  if(this.server)await new Promise<void>(done=>this.server!.close(()=>done()));
+  await this.closeServer();
   const {host,port}=endpoint(me.address);const server=createServer((req,res)=>{void this.serve(req,res.writeHead.bind(res),body=>res.end(body),res.setHeader.bind(res));});
   await new Promise<void>((done,fail)=>{server.once('error',fail);server.listen(port,host,()=>{server.off('error',fail);done();});});
   this.server=server;this.listening=me.address;this.log(`Kaji: listening on ${host}:${port} as ${this.baseId}.`);

@@ -124,11 +124,12 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
         if(!store.changeModels){reply(503,{error:'Model setup unavailable.'});return;}
         const b=await body(req);const str=(v:unknown)=>typeof v==='string'&&v.length>0&&v.length<=200;
         const misato=b.misato as Record<string,unknown>|undefined,casper=b.casper as Record<string,unknown>|undefined,cloud=b.cloud as Record<string,unknown>|undefined;
-        if(!Object.keys(b).length||Object.keys(b).some(k=>!['misato','casper','cloud'].includes(k))
+        const consultant=b.consultant as Record<string,unknown>|null|undefined;
+        if(!Object.keys(b).length||Object.keys(b).some(k=>!['misato','casper','cloud','consultant'].includes(k))||(consultant!==undefined&&consultant!==null&&(typeof consultant!=='object'||Object.keys(consultant).some(k=>k!=='model')||!str(consultant.model)))
           ||(misato!==undefined&&(typeof misato!=='object'||!misato||Object.keys(misato).some(k=>!['route','model'].includes(k))||!['local','cloud'].includes(misato.route as string)||(misato.model!==undefined&&!str(misato.model))))
           ||(casper!==undefined&&(typeof casper!=='object'||!casper||Object.keys(casper).some(k=>k!=='model')||!str(casper.model)))
           ||(cloud!==undefined&&(typeof cloud!=='object'||!cloud||Object.keys(cloud).some(k=>!['enabled','model'].includes(k))||typeof cloud.enabled!=='boolean'||(cloud.model!==undefined&&!str(cloud.model)))))
-          throw new Error('Give misato {route, model?}, casper {model} and/or cloud {enabled, model?}.');
+          throw new Error('Give misato {route, model?}, casper {model}, consultant {model} or null, and/or cloud {enabled, model?}.');
         const result=await store.changeModels(b as ModelChange);reply(result.error?400:200,result);
       }
       else if(req.method==='POST'&&path==='/api/models/reload'){if(!store.reloadModels){reply(503,{error:'Model routes unavailable.'});return;}const result=await store.reloadModels();reply(result.error?400:200,result);}

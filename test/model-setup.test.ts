@@ -27,12 +27,16 @@ test('a change is planned and validated before anything is written: unknown mode
  const installed=MODELS.map(m=>m.name);
  const fresh=planModels({},{misato:{route:'local',model:'qwen2.5-coder:14b'},casper:{model:'gemma4:12b'}},installed);
  assert.deepEqual(fresh,{local:{baseUrl:'http://127.0.0.1:11434/v1',model:'qwen2.5-coder:14b'},roles:{misato:{route:'local',model:'qwen2.5-coder:14b'},casper:{model:'gemma4:12b'}}});
- assert.deepEqual(effectiveRoles(fresh),{misato:{route:'local',model:'qwen2.5-coder:14b'},casper:{model:'gemma4:12b'}});
+ assert.deepEqual(effectiveRoles(fresh),{misato:{route:'local',model:'qwen2.5-coder:14b'},casper:{model:'gemma4:12b'},consultant:null});
  assert.throws(()=>planModels(fresh,{casper:{model:'llama9'}},installed),/Ollama has no model "llama9"/);
  assert.throws(()=>planModels(fresh,{misato:{route:'cloud'}},installed),/Turn the cloud route on first/);
  const cloud=planModels(fresh,{cloud:{enabled:true},misato:{route:'cloud'}},installed);
  assert.deepEqual([cloud.cloud,effectiveRoles(cloud).misato],[{provider:'anthropic',model:'claude-opus-5-5',enabled:true},{route:'cloud',model:'claude-opus-5-5'}]);
  assert.throws(()=>planModels(cloud,{cloud:{enabled:false}},installed),/move Misato to a local model before turning the cloud route off/);
+ const withAdvisor=planModels(fresh,{consultant:{model:'gemma4:12b'}},installed);assert.deepEqual(effectiveRoles(withAdvisor).consultant,{model:'gemma4:12b'});
+ assert.equal(effectiveRoles(planModels(withAdvisor,{consultant:null},installed)).consultant,null,'off removes it');
+ assert.throws(()=>planModels(fresh,{consultant:{model:'llama9'}},installed),/Ollama has no model "llama9"/);
+ assert.match(modelsReport(withAdvisor,false,{reachable:true,url:'x',models:[]}),/Consultant \(advice before Misato plans, local\): gemma4:12b/);
  assert.equal(effectiveRoles({}).misato,null);assert.match(modelsReport({},false,{reachable:false,url:dead,models:[],error:'No Ollama.'}),/Misato \(planner\): not set[\s\S]*key missing \(models key\)[\s\S]*Ollama: No Ollama\./);
 });
 test('init sets both roles on Ollama\'s largest model when nothing is set; a set route is left alone',async()=>{
@@ -73,7 +77,7 @@ test('the dashboard API (admin, through the brain process): GET shows the roles 
   const got=await (await call()).json() as {models:object;cloudKey:boolean;ollama:{reachable:boolean;models:{name:string}[]}};
   assert.equal(got.cloudKey,true);assert.ok(!JSON.stringify(got).includes('sk-ant-'),'the key never leaves its file');assert.deepEqual(got.ollama.models.map(m=>m.name),MODELS.map(m=>m.name));
   const put=await (await call('PUT',{misato:{route:'local',model:'qwen2.5-coder:14b'},casper:{model:'tiny:1b'}})).json() as {models:{roles:{misato:string;casper:string}}};
-  assert.deepEqual(put.models.roles,{misato:'local (qwen2.5-coder:14b)',casper:'local (tiny:1b)'},'the brain uses the new models without a restart');
+  assert.deepEqual(put.models.roles,{misato:'local (qwen2.5-coder:14b)',casper:'local (tiny:1b)',consultant:'off'},'the brain uses the new models without a restart');
   assert.match(JSON.stringify((await runtime.doctor() as {models:unknown}).models),/qwen2\.5-coder:14b/);
   assert.deepEqual((await runtime.doctor() as {localModels:{models:string[]}}).localModels.models,MODELS.map(m=>m.name),'doctor lists the models this base can use (F-037)');
   assert.equal((await call('PUT',{casper:{model:'llama9'}})).status,400);assert.equal((await call('PUT',{misato:{route:'cloud'}})).status,400);

@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-05T08:15:25.689Z",
+  "reviewed": "2026-11-05T08:48:02.796Z",
   "policy": "7ce9883fd1bff25038076e9e36015a833c38e1378e1df68043f48a64635abad4",
   "inputs": {
     "AGENTS.md": "7521203d1bc1ee4467396d9dd3576e2d7ffba835a4f6e93cb217af06af5ebee2",
     "docs/BACKLOG-RULES.md": "19798ae1614c2d96e60613af75d232c2eda19d25e07470e851ce48304df593c6",
-    "docs/agents/areas.md": "def019deaf91fc3a866e6ad12d39c84a3b22a46ab538812075e60f7d10fb28b4",
+    "docs/agents/areas.md": "41d9c1cbb2a6ad871bcc35dcbe900bf75d675733ca4024d502524d9a2fa71116",
     "docs/agents/maintenance.md": "a7e93ce963ffab30b4592ee90bdd0e72d49ea1320f82df74f22c88f70899d899"
   },
   "measurements": {
@@ -65,7 +65,7 @@
       "kind": "rule",
       "disposition": "implemented",
       "target": "docs/agents/areas.md",
-      "evidence": "Distributed contracts gains the peer seat rule (F-036 phase 2): on the main base every non-Green action also asks each online base's Casper (only the main base may ask); the votes are veto-only extra ballot seats, shadow unless set to veto per base; no answer in time abstains. Checked by test/kaji-seats.test.ts. Reviewed against the ballot rules in policy.ts (extra seats veto-only, shadow logged) and the F-025 plan: consistent, no duplicate."
+      "evidence": "Model routes gains the consultant rule (F-025): roles.consultant is a local model asked once per request before Misato's first step, never on a resume; its advice is data in Misato's prompt only on the local route, never a vote or an action, recorded as misato.consult. Checked by test/consultant.test.ts. Reviewed against the route rules (local-only never reaches the cloud; routes never fall back): consistent, no duplicate."
     },
     {
       "kind": "none",

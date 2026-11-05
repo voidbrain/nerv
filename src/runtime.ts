@@ -123,7 +123,7 @@ export class Runtime implements StoreApi {
   await this.note(sortieId,'misato.request',{text:message,...(conversation?{conversation}:{})});
   return this.loop(sortieId,message,[],context);
  }
- private note(sortieId:string,kind:'misato.request'|'misato.step'|'misato.waiting',payload:object){return this.nervous.call('misato.note',{sortieId,kind,payload});}
+ private note(sortieId:string,kind:'misato.request'|'misato.step'|'misato.waiting'|'misato.consult',payload:object){return this.nervous.call('misato.note',{sortieId,kind,payload});}
  /** Records a step, cutting an oversized result so the event stays within its bound. */
  private async record(sortieId:string,steps:Step[],step:Step,actionId?:string){
   const fitted=JSON.stringify(step).length>12000?{...step,result:{truncated:true}}:step;
@@ -146,9 +146,12 @@ export class Runtime implements StoreApi {
   };
   const lang=()=>requestLanguage(message,context.map(t=>t.request));
   const ranSteps=()=>steps.filter(s=>s.outcome==='grant'&&!s.error&&s.tool).map(s=>({tool:s.tool!,args:s.args ?? {}}));
+  // F-025: a consultant's advice, once per request before the first step (not again on a resume); no vote, no action.
+  const advice=steps.length?undefined:await this.brain.call('consultant.advise',{request:message.slice(0,4000),...(context.length?{context:context.slice(-3)}:{})},MODEL_TIMEOUT_MS).then(r=>r as {advice:string|null;model?:string},()=>({advice:null})).then(async r=>{
+   if(!r.advice)return undefined;await this.note(sortieId,'misato.consult',{advice:r.advice,model:r.model ?? ''});return r.advice;});
   for(let turn=0;turn<MAX_STEPS;turn++){
    const remote=await this.remoteOffers();
-   const out=await this.brain.call('misato.step',{request:message,history:steps.slice(-12),...(remote.length?{remote}:{}),...(context.length?{context}:{}),...(memory.length?{memory:memory.slice(0,10)}:{})},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as {plan?:Plan;invalid?:boolean;error?:string};
+   const out=await this.brain.call('misato.step',{request:message,history:steps.slice(-12),...(remote.length?{remote}:{}),...(advice?{advice}:{}),...(context.length?{context}:{}),...(memory.length?{memory:memory.slice(0,10)}:{})},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as {plan?:Plan;invalid?:boolean;error?:string};
    if(out.error)return finish('failed',undefined,out.error);
    if(!out.plan){await this.record(sortieId,steps,{outcome:'invalid',error:'Reply was not one JSON action or reply.'});continue;}
    if('reply' in out.plan)return finish('done',out.plan.reply);
