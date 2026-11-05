@@ -92,13 +92,13 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Fixed in [PR PR_B13] (2026-11-05): `Ledger.interrupted(before)` finds them (open, from Misato, opened before this run started, no pending approval, no unanswered wait), `closeInterrupted` closes each with its reply in one transaction, and serve calls `Runtime.closeInterrupted()` once Telegram listens, so the follow-up reaches the owner. Not resumed on purpose: an action cut off mid-way may or may not have happened. Checked: test/resume.test.ts (two runtimes on one database: two interrupted sorties closed with their replies, English and Italian, the owner told once each; the one waiting for the owner left alone; a sortie of the new run untouched); full suite 153 pass, build, headless. INSTALL and area notes updated.
+**Next action / closure evidence:** Fixed in [PR #118](https://github.com/voidbrain/nerv/pull/118) (2026-11-05): `Ledger.interrupted(before)` finds them (open, from Misato, opened before this run started, no pending approval, no unanswered wait), `closeInterrupted` closes each with its reply in one transaction, and serve calls `Runtime.closeInterrupted()` once Telegram listens, so the follow-up reaches the owner. Not resumed on purpose: an action cut off mid-way may or may not have happened. Checked: test/resume.test.ts (two runtimes on one database: two interrupted sorties closed with their replies, English and Italian, the owner told once each; the one waiting for the owner left alone; a sortie of the new run untouched); full suite 153 pass, build, headless. INSTALL and area notes updated.
 
 **Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner test 2026-11-05 (S-1EBF on Neo Tokyo-3) |
+| PR / evidence | Owner test 2026-11-05 (S-1EBF on Neo Tokyo-3); [PR #118](https://github.com/voidbrain/nerv/pull/118) |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-05: test/resume.test.ts and full suite (local run) |
 | Reviewed | 2026-11-05 |
