@@ -19,7 +19,7 @@ async function fakeModel(script:string[]){
  const s=httpServer((req,res)=>{let raw='';req.on('data',c=>raw+=c).on('end',()=>{const r=JSON.parse(raw) as {messages:{content:string}[]};const casper=r.messages[0]!.content.startsWith('You are Casper');
   if(!casper)systems.push(r.messages[0]!.content);res.setHeader('content-type','application/json');
   res.end(JSON.stringify({choices:[{message:{content:casper?'{"vote":"approve","reason":"Matches.","confidence":0.9}':(script.shift() ?? '{"reply":"ok"}')},finish_reason:'stop'}]}));});});
- await new Promise<void>(d=>s.listen(0,'127.0.0.1',d));return {url:`http://127.0.0.1:${(s.address() as {port:number}).port}/v1`,systems,close:()=>new Promise<void>(d=>s.close(()=>d()))};
+ await new Promise<void>(d=>s.listen(0,'127.0.0.1',d));return {url:`http://127.0.0.1:${(s.address() as {port:number}).port}/v1`,systems,close:()=>new Promise<void>(d=>{s.close(()=>d());s.closeAllConnections();})};
 }
 test('offers keep action names only',()=>{
  assert.deepEqual(sanitizeOffers(['reminders.add','reminders.add','kaji.run']),['reminders.add'],'never kaji.run itself');

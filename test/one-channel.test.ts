@@ -26,7 +26,7 @@ async function fakeBot(token:string){
   res.end(JSON.stringify({ok:true,result:{message_id:calls.length}}));});});
  await new Promise<void>(d=>s.listen(0,'127.0.0.1',d));
  return {calls,base:`http://127.0.0.1:${(s.address() as {port:number}).port}`,sent:()=>calls.filter(c=>c.method==='sendMessage').map(c=>c.body as {text:string;reply_markup?:{inline_keyboard:{callback_data:string}[][]}}),
-  tap:(data:string,rows:unknown)=>updates.push({update_id:next++,callback_query:{id:'q'+next,data,from:{id:OWNER},message:{message_id:7,chat:{id:OWNER},reply_markup:{inline_keyboard:rows}}}}),close:()=>new Promise<void>(d=>s.close(()=>d()))};
+  tap:(data:string,rows:unknown)=>updates.push({update_id:next++,callback_query:{id:'q'+next,data,from:{id:OWNER},message:{message_id:7,chat:{id:OWNER},reply_markup:{inline_keyboard:rows}}}}),close:()=>new Promise<void>(d=>{s.close(()=>d());s.closeAllConnections();})};
 }
 test('the main base is the owner\'s signed choice: newest wins, a revoked base is no main base, and bases() never mistakes it for an enrolment',()=>{
  const st=new Store(':memory:');const reg=new Registry(st.db,root.publicKey);const A=keys(),B=keys();
