@@ -1146,3 +1146,103 @@ Closed records in closing-date order. Dated evidence, not current status.
 </details>
 
 ---
+
+### B-017
+
+**The Marduk Institute says the generic pilot is off while it is on**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: verified by the owner and closed.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-05: after `nerv models set consultant gemma4:12b` (*Saved. The running service now uses it.*) the panel still read *off · Turn it on: nerv models set consultant MODEL*. The panel (#125) read the consultant from `roles` while `GET /api/models` answers `{models:{roles:…}}`; the service itself had it right. |
+| **Reproduce** | Driven in headless Chrome against the owner's service 2026-11-05: the panel listed Coder and Print Master but the generic pilot as off, while `/api/models` returned the consultant gemma4:12b. |
+| **Check** | The generic pilot shows its model whenever one is set; before the first poll the panel says it is loading, not "planned"; the hint names a pilots command; a test pins the API shape the panel reads. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-05: the owner confirmed the generic pilot shows its model ("B-017 ok"); its automated checks passed in the merged PR's CI. Fixed in [PR #128](https://github.com/voidbrain/nerv/pull/128) (2026-11-05): the panel reads `models.roles.consultant`; *Loading pilots…* until the first poll answers; the generic pilot gets its own command, `nerv pilots generic MODEL|off` (the consultant role, so `models set consultant` keeps working), named in the hint and in `nerv pilots`. Also in the same change (owner, same report): base cards and the banner read *NERV-01 · Neo Tokyo-3*; the map is smaller with its legend on the right. Checked: test/dashboard.test.ts, test/model-setup.test.ts (the CLI command, a model Ollama lacks refused), a screenshot of the bases panel.
+
+**Estimates:** No remaining effort; ~100% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner report 2026-11-05; headless Chrome against the owner's service |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05: owner's check; tests in the merged PR's CI |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+### B-014
+
+**Dashboard header cut off after coming back; a refresh does not fix it**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: verified by the owner and closed.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-05: sometimes, going back to the dashboard, the header is cut off; a refresh does not fix it, only closing and reopening the tab. On wide screens the page is one fixed screen (`body { overflow:hidden }`), but hidden only removes the scrollbar: the page could still be left scrolled (by a window that was narrower for a while and scrolled, by scrollIntoView or focus), with no way to scroll back, and a refresh restores that scroll position. |
+| **Reproduce** | Reproduced in Chrome 2026-11-05: load the dashboard 1000 px wide, scroll down 700 px, widen to 1600 px: the page stays scrolled 624 px and the header sits at -527 px. |
+| **Check** | On wide screens the page itself has nothing to scroll: the body is pinned to the window and only the columns scroll; narrow-then-wide, a forced scroll and scrollIntoView leave the header in place; the layout is unchanged; a test guards the rule; the owner sees it hold. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-05: the owner confirmed the header stays in place after narrow-then-wide and coming back ("B-014 ok"); its automated check passed in the merged PR's CI. Fixed in [PR #120](https://github.com/voidbrain/nerv/pull/120) (2026-11-05): in the one-page layout (min-width 1201 px) `html { height:100%; overflow:hidden; } body { position:fixed; inset:0; overflow:clip; }`, so the document has no scroll range and the browser holds it at the top whatever tries to move it. A script guard (scroll and resize listeners) was tried first and did not hold in Chrome; it was dropped. Checked in headless Chrome with a probe page: after narrow-then-wide, then a forced scrollTo(0,500) and a scrollIntoView, the page stays at 0 and the header at its place (main before the fix: 624 px scrolled, header at -527 px); a screenshot shows the layout unchanged; test/dashboard.test.ts guards the CSS rule; full suite and build pass. The owner's check closes it.
+
+**Estimates:** No remaining effort; ~100% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner report 2026-11-05; [PR #120](https://github.com/voidbrain/nerv/pull/120) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05: owner's check; tests in the merged PR's CI |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+### F-053
+
+**CRT effect like a working tube: static scanlines, vignette, faint flicker and rolling band**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: verified by the owner and closed.
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-05 (CRT notes: static horizontal scanlines at low opacity, very subtle brightness flicker, an occasional wide faint band rolling vertically, a static vignette; never scroll the scanlines themselves). The CRT layer was one static set of scanlines at 22% black, heavier than recommended, with nothing else. |
+| **Reproduce** | Eva theme, press CRT: heavy fixed stripes only. |
+| **Check** | Scanlines static at 5–12%; a static vignette; a brightness flicker under 5%, irregular; one wide faint band rolling down every 8–15 s; no colour separation or jitter (they blur the text); with reduced motion only the static layers; still opt-in and Eva only; a test checks these limits; the owner's look. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-05: the owner confirmed the CRT ("F-053 ok"); the two lines pass on separate 17 s and 29 s cycles, so together only now and then (the owner noticed they did not overlap), by design. Second tuning in [PR #125](https://github.com/voidbrain/nerv/pull/125) (owner: edges not noticeable on dark; the line more random, maybe two at different speeds, occasionally): edges `inset 0 0 70px 22px` at 85%; two thin dark lines, 6 px on a 17 s cycle and 3 px on a 29 s cycle offset by 11 s, each passing for a few seconds only, so together they look irregular. Owner feedback 2026-11-05 after the first version: the original scanlines were right and must stay (restored: 22% black, 4 px, static); the flicker was invisible (it dimmed only the overlay: now the page itself dips to 92–95% a few times every 6 s); the wide light band was ugly (now a thin 6 px soft dark line rolling down every 12 s); the vignette only on the very borders (an inset shadow, nothing across the middle). In [PR #123](https://github.com/voidbrain/nerv/pull/123); test/dashboard.test.ts checks each part and the reduced-motion rule; screenshot reviewed. Implemented in [PR #121](https://github.com/voidbrain/nerv/pull/121) (2026-11-05): scanlines at 9% on 3 px, a radial vignette to 28% at the edges, a 7 s irregular flicker between 97.5% and 100% opacity, a 28 vh band at 3.5% white rolling down every 12 s; `prefers-reduced-motion` stops the flicker and hides the band. Checked: test/dashboard.test.ts (the limits above), a headless Chrome screenshot with CRT on (text readable). The owner's look closes it.
+
+**Estimates:** No remaining effort; ~100% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner request 2026-11-05; [PR #121](https://github.com/voidbrain/nerv/pull/121) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05: owner's check; tests in the merged PR's CI |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
