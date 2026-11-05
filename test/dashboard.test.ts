@@ -122,3 +122,27 @@ test('sortie times carry their day when not today, in browser local time; live m
  assert.match(hint,/why S-1A2B\?/);assert.doesNotMatch(hint,/\bstatus\b|AP-|spear/i,'no demo-only command in live mode');
  assert.match(live,/document\.getElementById\("chat-in"\)\.placeholder = LIVE_HINT/);
 });
+test('every theme, mode and colour reaches WCAG AA where text sits; Eva · Dark · Orange is the original EVA Full and the stylesheet default; old choices map to the nearest (F-047)',async()=>{
+ const {readFileSync}=await import('node:fs');const src=readFileSync('web/public/dashboard/dashboard.js','utf8');const html=readFileSync('web/public/dashboard/index.html','utf8');
+ const block=/\/\* palette:start[\s\S]*?\*\/([\s\S]*?)\/\* palette:end \*\//.exec(src)![1]!;
+ const {palette,migrateTheme,ACCENTS}=new Function(`${block}\nreturn {palette,migrateTheme,ACCENTS};`)() as {palette:(t:string,m:string,a:string)=>Record<string,string>;migrateTheme:(n:string)=>string[]|undefined;ACCENTS:Record<string,unknown>};
+ const lum=(hex:string)=>{const c=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255).map(v=>v<=0.03928?v/12.92:((v+0.055)/1.055)**2.4);return 0.2126*c[0]!+0.7152*c[1]!+0.0722*c[2]!;};
+ const ratio=(a:string,b:string)=>{const [x,y]=[lum(a),lum(b)].sort((p,q)=>q-p);return (x!+0.05)/(y!+0.05);};
+ const fails:string[]=[];
+ for(const theme of ['eva','simple'])for(const mode of ['dark','light'])for(const accent of Object.keys(ACCENTS)){
+  const p=palette(theme,mode,accent);const at=`${theme}·${mode}·${accent}`;
+  const need=(fg:string,bg:string,min=4.5)=>{const r=ratio(p[fg]!,p[bg]!);if(r<min)fails.push(`${at}: ${fg} on ${bg} ${r.toFixed(2)}`);};
+  for(const fg of ['text','muted','accent','ok','warn','danger','info','green','orange','blue','kanji','title'])for(const bg of ['bg','panel','panel2'])need(fg,bg);
+  if(p['hdr-bg']==='transparent')need('hdr-fg','panel');else need('hdr-fg','hdr-bg');
+  need('brand-fg','brand-bg');need('brand-fg','accent');need('on-danger','danger');
+  for(const c of ['eva00','eva01','eva02','eva03'])need(c,'panel2');
+ }
+ assert.deepEqual(fails,[],'every pair a text or the focus ring sits on');
+ const root=Object.fromEntries([.../:root \{([\s\S]*?)\n\}/.exec(html)![1]!.matchAll(/--([a-z0-9-]+):([^;]+);/g)].map(m=>[m[1],m[2]!.trim()]));
+ for(const [k,v] of Object.entries(palette('eva','dark','orange')))assert.equal(root[k]?.replace(/\s/g,''),v.replace(/\s/g,''),`:root --${k} is Eva · Dark · Orange`);
+ assert.deepEqual(palette('eva','dark','orange').text,'#ffaa66','the original EVA Full text colour');
+ assert.deepEqual(migrateTheme('eva-full'),['eva','dark','orange']);assert.deepEqual(migrateTheme('terminal'),['simple','dark','green']);assert.deepEqual(migrateTheme('light'),['simple','light','blue']);assert.equal(migrateTheme('eva'),undefined);
+ for(const id of ['theme','mode','accent'])assert.match(html,new RegExp(`<label class="small muted" for="${id}">[A-Z]+</label>\\s*<select id="${id}">`),`${id} has its label`);
+ assert.doesNotMatch(html,/body\.theme-(eva-full|eva-basic|light|terminal)\b/,'no old theme classes left');
+ assert.doesNotMatch(html.slice(html.indexOf('* { box-sizing')),/rgba\(255,102,0/,'no fixed orange outside the default: glows follow the colour');
+});

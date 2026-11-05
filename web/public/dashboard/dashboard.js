@@ -106,7 +106,7 @@ const LABELS = {
 const T0 = Date.now(); const MIN = 60000; const HOUR = 60 * MIN;
 let state;
 function freshState() {
-  const s = { theme:"eva-full", crt:false, dummy:false, selected:null, filter:"all", lastVisit:T0 - 7.5 * HOUR,
+  const s = { theme:"eva", mode:"dark", accent:"orange", crt:false, dummy:false, selected:null, filter:"all", lastVisit:T0 - 7.5 * HOUR,
     sorties:[], approvals:[], log:[], spentToday:0, routeSpend:{ s2:0, umbilical:0 }, deliveries:[], packets:[], seq:0, retries:[] };
   return s;
 }
@@ -115,8 +115,8 @@ function hhmm(t) { const d = new Date(t); return d.toTimeString().slice(0, 5); }
 /* B-002: a time with its day when it is not today (browser local time): 14:05 · yesterday 14:05 · 3 Nov 14:05 · 3 Nov 2025 14:05. */
 function dayTime(t, now) { const d = new Date(t), n = new Date(now === undefined ? Date.now() : now), y = new Date(n.getFullYear(), n.getMonth(), n.getDate() - 1); const same = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); if (same(d, n)) return hhmm(t); if (same(d, y)) return "yesterday " + hhmm(t); return d.toLocaleDateString("en-GB", d.getFullYear() === n.getFullYear() ? { day:"numeric", month:"short" } : { day:"numeric", month:"short", year:"numeric" }) + " " + hhmm(t); }
 function ago(t) { const s = Math.max(0, Math.round((Date.now() - t) / 1000)); return s < 60 ? s + " s" : s < 3600 ? Math.round(s / 60) + " min" : (s / 3600).toFixed(1) + " h"; }
-function L() { return (state.theme === "eva-full" || state.theme === "eva-basic") ? LABELS.eva : LABELS.neutral; }
-function isEvaFull() { return state.theme === "eva-full"; }
+function L() { return state.theme === "eva" ? LABELS.eva : LABELS.neutral; }
+function isEvaFull() { return state.theme === "eva"; }
 /* Image slots: drop files into docs/NERV/assets/ (see ASSETS below). Until then an original pixel placeholder is drawn. */
 const ASSETS = {
   misato:{ file:"assets/avatars/misato.png", color:"#e0457b", glyph:"M", eva:"Misato", plain:"Planner" },
@@ -160,7 +160,7 @@ function speakerOf(msg) {
   for (const [re, who] of m) { const r = re.exec(msg); if (r) return who || r[1].toLowerCase(); }
   return "maya";
 }
-function speakerName(who) { const a = ASSETS[who] || ASSETS.maya; return (state.theme === "eva-full" || state.theme === "eva-basic") ? a.eva : a.plain; }
+function speakerName(who) { const a = ASSETS[who] || ASSETS.maya; return state.theme === "eva" ? a.eva : a.plain; }
 function log(msg, cls, sortie, who) {
   state.log.push({ t:Date.now(), msg, cls:cls || "", s:sortie ? sortie.id : null, who:who || speakerOf(msg) });
   if (state.log.length > 300) state.log.shift();
@@ -503,7 +503,7 @@ function renderFlow() {
     let v = "none", label = "—", metric = seatMetric(seat, s, a);
     if (b) { const vv = b.verdicts.find(x => x.seat === seat); if (vv) { v = vv.vote; label = vv.vote === "approve" ? "承認 APPROVE" : vv.vote === "reject" ? "否決 REJECT" : "ABSTAIN"; } else { v = "none"; label = seat === "casper" ? "NOT NEEDED" : "—"; } }
     else if (s && s.phase === "magi") { v = "pending"; label = "審議中 VOTING"; }
-    if (!(state.theme === "eva-full" || state.theme === "eva-basic")) label = label.replace(/^[^\x00-\x7F]+ /, "");
+    if (state.theme !== "eva") label = label.replace(/^[^\x00-\x7F]+ /, "");
     el.dataset.v = v; el.querySelector(".mv").textContent = label; el.querySelector("[data-m]").textContent = metric;
   });
   document.getElementById("magi-extras").innerHTML = b ? b.verdicts.filter(v => v.seat.startsWith("extra:")).map(v => "<span class='vchip " + v.vote + (v.shadow ? " shadow" : "") + "'>+ " + esc(v.seat.slice(6)) + (v.shadow ? " · shadow, not counted" : " · veto-only") + "</span>").join("") : "";
@@ -661,7 +661,7 @@ function renderBases() {
 }
 function renderCages() {
   const box = document.getElementById("cages");
-  if (!box.children.length) box.innerHTML = CAGES.map(c => "<div class='cage" + (c.planned ? " planned" : "") + "'><div class='ch'><span style='color:" + c.color + "'>" + c.id + "</span><span class='tiny' id='cs-" + c.id + "'>IDLE</span></div><img class='eva-img' data-av='" + c.id.toLowerCase() + "' alt='" + c.id + "'/><canvas id='cv-" + c.id + "' height='30'></canvas><div class='cd' title='" + esc(c.label + " · @" + BASES.find(b => b.id === c.base).name) + "'>" + c.label + " · @" + BASES.find(b => b.id === c.base).name + "</div></div>").join("");
+  if (!box.children.length) box.innerHTML = CAGES.map(c => "<div class='cage" + (c.planned ? " planned" : "") + "'><div class='ch'><span style='color:var(--eva" + c.id.slice(4) + ")'>" + c.id + "</span><span class='tiny' id='cs-" + c.id + "'>IDLE</span></div><img class='eva-img' data-av='" + c.id.toLowerCase() + "' alt='" + c.id + "'/><canvas id='cv-" + c.id + "' height='30'></canvas><div class='cd' title='" + esc(c.label + " · @" + BASES.find(b => b.id === c.base).name) + "'>" + c.label + " · @" + BASES.find(b => b.id === c.base).name + "</div></div>").join("");
 }
 function renderLog() {
   const el = document.getElementById("log"); if (!el) return;
@@ -905,28 +905,57 @@ function chat(text) {
 }
 document.getElementById("chat-form").addEventListener("submit", e => { e.preventDefault(); const i = document.getElementById("chat-in"); const v = i.value.trim(); if (v) { chat(v); i.value = ""; } });
 function guessPreset(t) { t = t.toLowerCase(); if (/mail|inbox|summar/.test(t)) return "brief"; if (/reply|tell|write to|email/.test(t)) return "reply"; if (/branch|repo/.test(t)) return "branches"; if (/charg|battery|fpv/.test(t)) return "charger"; if (/note|clip|page|web/.test(t)) return "note"; return null; }
+/* palette:start · F-047: Theme (eva | simple) × Mode (dark | light) × Accent. Every colour a text sits on reaches WCAG AA
+   (test/dashboard.test.ts checks all 20); Eva · Dark · Orange is the original EVA Full, also the stylesheet's :root. */
+const ACCENTS = {
+  orange:{ base:"#ff6600", tint:"#ffaa66", soft:"#a67c52", deep:"#b34700" },
+  blue:{ base:"#2a7fff", tint:"#9cc4ff", soft:"#7d97bd", deep:"#1d5fd1" },
+  green:{ base:"#22c55e", tint:"#8ef0b0", soft:"#74a888", deep:"#166534" },
+  violet:{ base:"#a855f7", tint:"#d5b0ff", soft:"#9d88bf", deep:"#7e3fc4" },
+  ochre:{ base:"#d4a017", tint:"#f0cf7a", soft:"#a8925f", deep:"#7a5d00" }
+};
+function palette(theme, mode, accent) {
+  const a = ACCENTS[accent] || ACCENTS.orange, eva = theme !== "simple", dark = mode !== "light";
+  const rgba = (hex, al) => "rgba(" + [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)).join(",") + "," + String(al).replace(/^0\./, ".") + ")";
+  const mix = (hex, to, t) => "#" + [1, 3, 5].map(i => Math.round(parseInt(hex.slice(i, i + 2), 16) * (1 - t) + parseInt(to.slice(i, i + 2), 16) * t).toString(16).padStart(2, "0")).join("");
+  const status = dark ? { ok:"#22c55e", warn:eva ? "#ffcc00" : "#f59e0b", danger:eva ? "#ff0033" : "#ef4444", info:eva ? "#00aaff" : "#38bdf8", green:"#22c55e", orange:eva ? "#ff8800" : "#f59e0b", blue:eva ? "#2a7fff" : "#3b82f6" }
+    : { ok:"#166534", warn:"#a15c07", danger:"#b91c1c", info:"#0369a1", green:"#166534", orange:"#9a4708", blue:"#1d4ed8" };
+  // The four EVA cages keep their own colours (prototype, test, production, quarantine), deeper on light panels.
+  const base = dark ? { "on-danger":"#000", kanji:eva ? "#ff0033" : "#ef4444", eva00:"#2a7fff", eva01:"#9b5cff", eva02:"#ff3b30", eva03:"#8a8a8a" } : { "on-danger":"#fff", kanji:"#b91c1c", eva00:"#1d5fd1", eva01:"#7e3fc4", eva02:"#c0261c", eva03:"#5f5f5f" };
+  if (eva && dark) return Object.assign({ bg:"#050508", panel:"#0d0d12", panel2:"#09090d", border:rgba(a.base, .4), text:a.tint, muted:a.soft, accent:a.base, "hdr-bg":a.base, "hdr-fg":"#000", "brand-bg":a.base, "brand-fg":"#000", title:a.tint, topo:rgba(a.base, .42), land:"#0c0a0a", sea:"#050508", glow:rgba(a.base, .35) }, status, base);
+  if (eva) return Object.assign({ bg:"#f3f1ec", panel:"#ffffff", panel2:"#f8f7f3", border:rgba(a.deep, .45), text:mix(a.deep, "#000000", .5), muted:a.deep, accent:a.deep, "hdr-bg":a.base, "hdr-fg":"#000", "brand-bg":a.base, "brand-fg":"#000", title:mix(a.deep, "#000000", .5), topo:rgba(a.deep, .35), land:"#e8e5de", sea:"#f3f1ec", glow:rgba(a.deep, .25) }, status, base);
+  if (dark) return Object.assign({ bg:"#0b0c10", panel:"#12141a", panel2:"#0e1015", border:"#2a2e3a", text:"#e6e8ee", muted:"#8b93a7", accent:a.base, "hdr-bg":"transparent", "hdr-fg":"#8b93a7", "brand-bg":a.base, "brand-fg":"#000", title:"#e6e8ee", topo:"#2f3646", land:"#151922", sea:"#0b0c10", glow:rgba(a.base, .3) }, status, base);
+  return Object.assign({ bg:"#f4f5f7", panel:"#ffffff", panel2:"#f7f8fa", border:"#d8dde8", text:"#1a1d26", muted:"#5c657a", accent:a.deep, "hdr-bg":"transparent", "hdr-fg":"#5c657a", "brand-bg":a.deep, "brand-fg":"#fff", title:"#1a1d26", topo:"#c3cad8", land:"#e9ecf2", sea:"#f4f5f7", glow:rgba(a.deep, .25) }, status, base);
+}
+/* A theme chosen before F-047 (one name) maps to its nearest Theme · Mode · Accent. */
+function migrateTheme(name) { return { "eva-full":["eva", "dark", "orange"], "eva-basic":["eva", "dark", "orange"], dark:["simple", "dark", "blue"], light:["simple", "light", "blue"], terminal:["simple", "dark", "green"] }[name]; }
+/* palette:end */
 /* The chosen theme and CRT effect are remembered in this browser only (a per-viewer preference); without storage the
    page simply starts on the default. */
 const PREFS = "nerv.dashboard.prefs";
 function readPrefs() { try { const p = JSON.parse(localStorage.getItem(PREFS) || "{}"); return p && typeof p === "object" ? p : {}; } catch { return {}; } }
-function savePrefs() { try { localStorage.setItem(PREFS, JSON.stringify({ theme:state.theme, crt:!!state.crt })); } catch { /* storage blocked: not remembered */ } }
-function setCrt(on) { state.crt = on; document.body.classList.toggle("crt-on", on && state.theme === "eva-full"); const b = document.getElementById("btn-crt"); if (b) b.setAttribute("aria-pressed", String(on)); }
-document.getElementById("theme").addEventListener("change", e => { setTheme(e.target.value); savePrefs(); });
+function savePrefs() { try { localStorage.setItem(PREFS, JSON.stringify({ theme:state.theme, mode:state.mode, accent:state.accent, crt:!!state.crt })); } catch { /* storage blocked: not remembered */ } }
+function setCrt(on) { state.crt = on; document.body.classList.toggle("crt-on", on && state.theme === "eva"); const b = document.getElementById("btn-crt"); if (b) b.setAttribute("aria-pressed", String(on)); }
+for (const id of ["theme", "mode", "accent"]) document.getElementById(id).addEventListener("change", () => { setTheme(document.getElementById("theme").value, document.getElementById("mode").value, document.getElementById("accent").value); savePrefs(); });
 document.getElementById("btn-crt").addEventListener("click", () => { setCrt(!state.crt); savePrefs(); });
 document.getElementById("btn-spear").addEventListener("click", spearAll);
 document.getElementById("btn-dummy").addEventListener("click", () => { state.dummy = true; document.getElementById("dummy-banner").classList.remove("hidden"); log("Dummy Plug: S² and Umbilical unreachable", "danger"); renderAll(); });
 document.getElementById("btn-undummy").addEventListener("click", () => { state.dummy = false; document.getElementById("dummy-banner").classList.add("hidden"); log("Routes restored · waiting sorties resume", "ok"); state.sorties.filter(s => s.status === "waiting-route").forEach(s => { s.status = "active"; runSortie(s); }); renderAll(); });
-document.getElementById("btn-reset").addEventListener("click", () => { const th = state.theme; seed(); setTheme(th); });
+document.getElementById("btn-reset").addEventListener("click", () => { const th = [state.theme, state.mode, state.accent]; seed(); setTheme(...th); });
 window.addEventListener("resize", () => drawEdges(state.sorties.find(x => x.id === state.selected)));
-function setTheme(name) {
-  state.theme = name; document.body.className = "theme-" + name + (state.crt && name === "eva-full" ? " crt-on" : "");
+function setTheme(theme, mode, accent) {
+  state.theme = theme === "simple" ? "simple" : "eva"; state.mode = mode === "light" ? "light" : "dark"; state.accent = ACCENTS[accent] ? accent : "orange";
+  document.body.className = "theme-" + state.theme + " mode-" + state.mode + " accent-" + state.accent + (state.crt && state.theme === "eva" ? " crt-on" : "");
+  for (const [k, v] of Object.entries(palette(state.theme, state.mode, state.accent))) document.body.style.setProperty("--" + k, v);
+  for (const id of ["theme", "mode", "accent"]) document.getElementById(id).value = state[id];
   applyLabels(); renderAll(); renderLog(); requestAnimationFrame(() => drawEdges(state.sorties.find(x => x.id === state.selected)));
 }
 
 // Live: only this machine is a base; simulated cages and pilots would point at bases that do not exist.
 if (LIVE) { state = freshState(); state.upcoming = []; BASES.splice(1); LINKS.length = 0; CAGES.forEach(c => { c.base = "tokyo3"; c.planned = c.id !== "EVA-02"; if (c.id === "EVA-02") c.label = "PRODUCTION · in-process executor, not sandboxed yet"; else c.label = c.label.split(" · ")[0] + " · planned"; }); PILOTS.length = 0; PILOTS.push({ id:"owner", stage:"production" }, { id:"misato", stage:"production" }); } else seed();
-// ?theme= in the address wins; otherwise the theme this browser last chose.
-{ const prefs = readPrefs(); const t = new URLSearchParams(location.search).get("theme") || prefs.theme; const th = document.getElementById("theme");
+// ?theme= (and ?mode=, ?accent=) in the address win; otherwise what this browser last chose; an older single theme name
+// is mapped to its nearest Theme · Mode · Accent.
+{ const prefs = readPrefs(), q = new URLSearchParams(location.search); const t = q.get("theme") || prefs.theme; const old = migrateTheme(t);
   if (prefs.crt === true) setCrt(true);
-  if (t && [...th.options].some(o => o.value === t)) { th.value = t; setTheme(t); } else { applyLabels(); renderAll(); } }
+  setTheme(old ? old[0] : t, q.get("mode") || (old ? old[1] : prefs.mode), q.get("accent") || (old ? old[2] : prefs.accent)); }
 initMap(); requestAnimationFrame(frame);
