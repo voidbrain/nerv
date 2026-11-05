@@ -58,6 +58,7 @@ export interface StoreApi {
  spear?(id:string,reason:string):Promise<{revoked:number;stoodDown:number;happened:{actionId:string;tool:string;inverse:string|null}[]}|null>;
  events(sortieId:string,after?:number,limit?:number):SortieEvent[]|Promise<SortieEvent[]>;
  sorties(limit?:number,before?:string,q?:string):SortieSummary[]|Promise<SortieSummary[]>;
+ closedSince?(since:string):{done:number;failed:number;failures:{id:string;title:string;closed:string}[]}|Promise<{done:number;failed:number;failures:{id:string;title:string;closed:string}[]}>;
  sortie(id:string):(SortieSummary&{detail:ActionDetail[]})|null|Promise<(SortieSummary&{detail:ActionDetail[]})|null>;
  ask?(ask:Ask):Promise<Reply>;
 }
@@ -82,6 +83,7 @@ export class Runtime implements StoreApi {
  async decide(id:string,decision:Decision,source:'api'|'cli'|'telegram'='api'){const result=await this.nervous.call('approvals.decide',{id,decision,source}) as {decision:string;result?:unknown;error?:string};if(this.resumer)void this.sweep();return result;}
  /** Spear of Longinus for one sortie: revoke its unused grants, stand down its cards, close it; executed effects are reported. */
  async spear(id:string,reason:string){if(!await this.sortie(id))return null;return await this.nervous.call('sorties.spear',{id,reason}) as {revoked:number;stoodDown:number;happened:{actionId:string;tool:string;inverse:string|null}[]};}
+ async closedSince(since:string){return await this.nervous.call('sorties.closedSince',{since}) as {done:number;failed:number;failures:{id:string;title:string;closed:string}[]};}
  async sorties(limit=20,before?:string,q?:string){return await this.nervous.call('sorties.list',{limit,...(before?{before}:{}),...(q?{q}:{})}) as SortieSummary[];}
  async sortie(id:string){return await this.nervous.call('sorties.get',{id}) as (SortieSummary&{detail:ActionDetail[]})|null;}
  async events(sortieId:string,after=0,limit=50){return await this.nervous.call('events.page',{sortieId,after,limit}) as SortieEvent[];}
