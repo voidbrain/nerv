@@ -1,3 +1,4 @@
+import { validatePilots, type Pilot } from './pilots.ts';
 import { existsSync, mkdirSync, readFileSync, writeFileSync, chmodSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -6,7 +7,7 @@ import { statSync } from 'node:fs';
 import { validateModels, type Models } from './model.ts';
 import { defaultPolicy, validatePolicy, type Policy } from './policy.ts';
 /** telegram.chatId: the one private chat (the owner's) the Aoba bot answers; set by `telegram link`. */
-export interface Config {port:number; language:'it'|'en'; timeZone:string;nativePort?:number;models:Models;telegram?:{chatId:number};brief?:{at:string};instrumentality?:{at:string}|{when:'idle'};base:Base;kaji?:{root:string;offers?:string[];seats?:Record<string,'shadow'|'veto'|'off'>}}
+export interface Config {port:number; language:'it'|'en'; timeZone:string;nativePort?:number;models:Models;telegram?:{chatId:number};brief?:{at:string};instrumentality?:{at:string}|{when:'idle'};base:Base;kaji?:{root:string;offers?:string[];seats?:Record<string,'shadow'|'veto'|'off'>};pilots?:Pilot[]}
 /** This machine's identity in the NERV mesh: an id (NERV-01) and a name (Neo Tokyo-3), shown in the dashboard, doctor and brief. */
 export interface Base {id:string;name:string}
 export const defaultBase:Base={id:'NERV-01',name:'Neo Tokyo-3'};
@@ -51,6 +52,7 @@ export function readConfig(home:string):Config {
     if(k.seats!==undefined&&(!k.seats||typeof k.seats!=='object'||Array.isArray(k.seats)||Object.entries(k.seats).some(([id,m])=>!/^[A-Z0-9-]{2,16}$/.test(id)||!['shadow','veto','off'].includes(m as string))))throw new Error('Invalid kaji.seats: {"BASE-ID": "shadow" | "veto" | "off"} (set with kaji seat).');
     config.kaji={root:k.root,...(Array.isArray(k.offers)&&k.offers.length?{offers:[...new Set(k.offers as string[])]}:{}),...(k.seats&&Object.keys(k.seats).length?{seats:k.seats as Record<string,'shadow'|'veto'|'off'>}:{})};}
   if('brief' in raw){const b=raw.brief as Record<string,unknown>;if(!b||typeof b!=='object'||Array.isArray(b)||Object.keys(b).some(k=>k!=='at')||typeof b.at!=='string'||!/^([01]\d|2[0-3]):[0-5]\d$/.test(b.at))throw new Error('Invalid brief: {"at": "HH:MM"} in your time zone.');config.brief={at:b.at};}
+  if('pilots' in raw){const list=validatePilots((raw as Record<string,unknown>).pilots);if(list.length)config.pilots=list;}
   if(config.port===(config.nativePort ?? 4319))throw new Error('Web and native ports must differ.');
   if(!Number.isInteger(config.port)||config.port<1||config.port>65535)throw new Error('Invalid NERV Agency port.');
   if(!['it','en'].includes(config.language))throw new Error('Invalid language: use it or en.');
@@ -122,6 +124,12 @@ export function setKajiSeat(home:string,baseId:string,mode:'shadow'|'veto'|'off'
   writeFileSync(path,JSON.stringify({...current,kaji:{...k,seats}},null,2)+'\n',{mode:0o600});chmodSync(path,0o600);readConfig(home);
 }
 function validateKajiOffersOnly(c:Record<string,unknown>){const o=(c.kaji as {offers?:unknown}).offers;if(o!==undefined&&(!Array.isArray(o)||o.some(x=>typeof x!=='string'||!/^[a-z]+\.[a-z]+$/.test(x))))throw new Error('Invalid action names.');}
+/** Writes the pilot roster (F-045); validated first, so a bad change leaves config.json as it was. */
+export function savePilots(home:string,pilots:Pilot[]):void {
+  const path=join(home,'config.json');const current=existsSync(path)?JSON.parse(readFileSync(path,'utf8')) as Record<string,unknown>:{...defaults};
+  const list=validatePilots(pilots);const next:Record<string,unknown>={...current,pilots:list};if(!list.length)delete next.pilots;
+  writeFileSync(path,JSON.stringify(next,null,2)+'\n',{mode:0o600});chmodSync(path,0o600);readConfig(home);
+}
 export type ScheduleValue=string|null;
 /** The two schedules the owner may change by talking to Misato (F-003): times, "idle" or off. Nothing security-relevant. */
 export function readSchedule(home:string):{brief:string;instrumentality:string} {

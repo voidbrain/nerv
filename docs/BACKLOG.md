@@ -968,9 +968,9 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔶 P2 | Open | 🔴 Large | ~0% |
+| 🔴 | 🔶 P2 | Open | 🔴 Large | ~20% |
 
-💻 **→ Human action required: No**<br />Next: the pilot definition and roster with the generic pilot (first slice below).
+💻 **→ Human action required: No**<br />Next: slice 2, pilots offered by other bases (the Tabgha 3D expert) over the Kaji line.
 
 | | |
 |---|---|
@@ -981,15 +981,15 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Owner decision 2026-11-05: pilots learn by the recommendation ("F-045 … the recommendation"). Planned 2026-11-05 from the owner's questions. Supersedes F-041 (consultants are pilots in advice mode; its rules are kept above). First slices: the pilot definition and roster with the generic pilot; advice mode (the F-041 work); the coder pilot in a sandbox EVA (intent, spec and plan approved by card, an independent read-only verifier, results as a PR by card); then detection of new specialists, then split and merge. Candidate pilots discussed: coder, verifier, researcher (EVA-03, no effects), ops (read-only watch), 3D expert (Tabgha), archivist (memory hygiene, F-044); each gets its own record when it is built.
+**Next action / closure evidence:** Slice 1 in [PR #107](https://github.com/voidbrain/nerv/pull/107) (2026-11-05): the pilot definition (src/pilots.ts: id, name, domain, keywords, local model, stage, parent, pinned, retired; checked on read), a local roster in config.json (`nerv pilots` list, add, set, pin, unpin, retire, restore; a model Ollama lacks is refused), the generic pilot (the F-025 consultant, `roles.consultant`), and advice mode: before Misato plans, the pilot whose keywords the request contains advises on its own model (pinned first, then most keywords, then later stage; retired never), named in its prompt and in the trace (`misato.consult` with the pilot; dashboard Comms and the why answer show it); no match, the generic pilot. Checked: test/pilots.test.ts (roster checks, routing order, through every process: a specialist on its model, the generic one otherwise, a retire applied to the next request), test/model-setup.test.ts (the CLI); full suite 146 pass, build, headless. Remaining slices: offered by other bases; "ask both" and the fallback; detection of unmatched domains and proposals by card; the coder pilot acting in an EVA; split and merge; learning as decided. Owner decision 2026-11-05: pilots learn by the recommendation ("F-045 … the recommendation"). Planned 2026-11-05 from the owner's questions. Supersedes F-041 (consultants are pilots in advice mode; its rules are kept above). First slices: the pilot definition and roster with the generic pilot; advice mode (the F-041 work); the coder pilot in a sandbox EVA (intent, spec and plan approved by card, an independent read-only verifier, results as a PR by card); then detection of new specialists, then split and merge. Candidate pilots discussed: coder, verifier, researcher (EVA-03, no effects), ops (read-only watch), 3D expert (Tabgha), archivist (memory hygiene, F-044); each gets its own record when it is built.
 
-**Estimates:** Large remaining effort; ~0% complete. Estimated 2026-11-05.
+**Estimates:** Large remaining effort; ~20% complete (slice 1 of about six). Estimated 2026-11-05.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner questions 2026-11-05 |
+| PR / evidence | Owner questions 2026-11-05; slice 1 [PR #107](https://github.com/voidbrain/nerv/pull/107) |
 | Opened | 2026-11-05 |
-| Verification | Pending |
+| Verification | 2026-11-05 slice 1: test/pilots.test.ts, test/model-setup.test.ts, full suite (local run) |
 | Reviewed | 2026-11-05 |
 
 </details>

@@ -30,7 +30,7 @@ export const methodSchemas={
  'sorties.finish':{type:'object',required:['sortieId'],properties:{sortieId:{type:'string',minLength:1,maxLength:100},status:{enum:['done','failed']},reply:{type:'string',minLength:1,maxLength:4000}},additionalProperties:false},
  'misato.note':{type:'object',required:['sortieId','kind','payload'],properties:{sortieId:{type:'string',minLength:1,maxLength:100},kind:{enum:['misato.request','misato.step','misato.waiting','misato.consult']},payload:{type:'object'}},additionalProperties:false},
  'misato.resumable':empty,
- 'consultant.advise':{type:'object',required:['request'],properties:{request:{type:'string',minLength:1,maxLength:4000},context:{type:'array',maxItems:3,items:{type:'object'}}},additionalProperties:false},
+ 'consultant.advise':{type:'object',required:['request'],properties:{request:{type:'string',minLength:1,maxLength:4000},context:{type:'array',maxItems:3,items:{type:'object'}},pilot:{type:'object',required:['name','domain','model'],properties:{name:{type:'string',minLength:1,maxLength:40},domain:{type:'string',minLength:1,maxLength:200},model:{type:'string',minLength:1,maxLength:100}},additionalProperties:false}},additionalProperties:false},
  'kaji.bases':empty,
  'kaji.records':empty,
  'kaji.lastSeen':empty,

@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-05T12:33:59.795Z",
+  "reviewed": "2026-11-05T14:38:36.202Z",
   "policy": "7ce9883fd1bff25038076e9e36015a833c38e1378e1df68043f48a64635abad4",
   "inputs": {
     "AGENTS.md": "7521203d1bc1ee4467396d9dd3576e2d7ffba835a4f6e93cb217af06af5ebee2",
     "docs/BACKLOG-RULES.md": "19798ae1614c2d96e60613af75d232c2eda19d25e07470e851ce48304df593c6",
-    "docs/agents/areas.md": "f97fecb6636925fe9da1e76a0eaafe4a9cd3dddcffa66995803af817ff2f00eb",
+    "docs/agents/areas.md": "21168aaea40c271fd809423eaf311b11e5af8687ccc9ced178d6ea6d10c894e4",
     "docs/agents/maintenance.md": "a7e93ce963ffab30b4592ee90bdd0e72d49ea1320f82df74f22c88f70899d899"
   },
   "measurements": {
@@ -65,7 +65,7 @@
       "kind": "rule",
       "disposition": "implemented",
       "target": "docs/agents/areas.md",
-      "evidence": "Action gate and ledger gains the B-004 rule: questions about the agency's own records (\"why S-1A2B …?\") are answered from the ledger by sorties.explain and explainRecord (src/why.ts) before Misato is asked, never by a model. Checked by test/resume.test.ts (through every process, English and Italian, unknown ID, model not called) and test/why.test.ts. Reviewed against the gate and model-route rules (the ledger is append-only and read here only; no route or vote changes): consistent, no duplicate; F-042 owns the wider read tools."
+      "evidence": "Model routes gains the F-045 pilot rule: the roster is config.json pilots, read per request; choosePilot (src/pilots.ts) is pure and runs in the coordinator, passing the chosen pilot's name, domain and local model to consultant.advise; no match means the generic pilot (roles.consultant); pilots advise only (no tools, no vote); generic is reserved. Checked by test/pilots.test.ts and test/model-setup.test.ts. Reviewed against the consultant and route rules (local route only, advice is data, never on a resume): consistent, extends the F-025 rule without duplicating it."
     },
     {
       "kind": "none",

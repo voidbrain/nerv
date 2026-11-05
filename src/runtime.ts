@@ -9,6 +9,7 @@ import type {SortieEvent} from './events.ts';
 import {MODEL_TIMEOUT_MS,type Ask,type Reply,type RouteName} from './model.ts';
 import type {Effect,Pattern,Stage,Verdict} from './policy.ts';
 import {askedWhy,explainRecord} from './why.ts';
+import {choosePilot,type Pilot} from './pilots.ts';
 import {MAX_STEPS,doneReply,type RemoteOffer,requestLanguage,waitingReply,type Plan,type Recalled,type Step,type Turn} from './misato.ts';
 import {toolDocs} from './executors.ts';
 import type {Digest,Exchange} from './instrumentality.ts';
@@ -118,6 +119,9 @@ export class Runtime implements StoreApi {
  /** F-036 dispatch: while another base is the main one and online, requests go to its Misato; undefined means answer here. */
  private dispatch?:(message:string,conversation?:string)=>Promise<ChatReply|undefined>;
  setDispatch(fn:(message:string,conversation?:string)=>Promise<ChatReply|undefined>){this.dispatch=fn;}
+ private pilots?:()=>Pilot[];
+ /** The pilot roster (F-045), read on every request so a change applies without a restart. */
+ setPilots(fn:()=>Pilot[]){this.pilots=fn;}
  async chat(message:string,conversation?:string):Promise<ChatReply> {
   const far=this.dispatch?await this.dispatch(message,conversation):undefined;if(far)return far;
   // Earlier exchanges of the same conversation (read before this request is recorded), so "yes" has its question.
@@ -155,8 +159,10 @@ export class Runtime implements StoreApi {
   const lang=()=>requestLanguage(message,context.map(t=>t.request));
   const ranSteps=()=>steps.filter(s=>s.outcome==='grant'&&!s.error&&s.tool).map(s=>({tool:s.tool!,args:s.args ?? {}}));
   // F-025: a consultant's advice, once per request before the first step (not again on a resume); no vote, no action.
-  const advice=steps.length?undefined:await this.brain.call('consultant.advise',{request:message.slice(0,4000),...(context.length?{context:context.slice(-3)}:{})},MODEL_TIMEOUT_MS).then(r=>r as {advice:string|null;model?:string},()=>({advice:null})).then(async r=>{
-   if(!r.advice)return undefined;await this.note(sortieId,'misato.consult',{advice:r.advice,model:r.model ?? ''});return r.advice;});
+  // F-045: the specialist pilot whose keywords fit the request advises; none fits, the generic pilot (roles.consultant).
+  const pilot=steps.length?undefined:(()=>{try{return choosePilot(message,this.pilots?.() ?? []);}catch{return undefined;}})();
+  const advice=steps.length?undefined:await this.brain.call('consultant.advise',{request:message.slice(0,4000),...(context.length?{context:context.slice(-3)}:{}),...(pilot?{pilot:{name:pilot.name,domain:pilot.domain,model:pilot.model}}:{})},MODEL_TIMEOUT_MS).then(r=>r as {advice:string|null;model?:string},()=>({advice:null})).then(async r=>{
+   if(!r.advice)return undefined;await this.note(sortieId,'misato.consult',{advice:r.advice,model:r.model ?? '',...(pilot?{pilot:{id:pilot.id,name:pilot.name,why:pilot.why}}:{})});return r.advice;});
   for(let turn=0;turn<MAX_STEPS;turn++){
    const remote=await this.remoteOffers();
    const out=await this.brain.call('misato.step',{request:message,history:steps.slice(-12),...(remote.length?{remote}:{}),...(advice?{advice}:{}),language:lang(),...(context.length?{context}:{}),...(memory.length?{memory:memory.slice(0,10)}:{})},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as {plan?:Plan;invalid?:boolean;error?:string};

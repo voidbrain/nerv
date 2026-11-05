@@ -29,7 +29,7 @@ export interface EventPayloads {
  'misato.step':{step:Step;actionId?:string};
  'misato.waiting':{approvalIds:string[]};
  /** F-025: a consultant's advice before Misato planned (no vote); kept with the sortie for the trace. */
- 'misato.consult':{advice:string;model:string};
+ 'misato.consult':{advice:string;model:string;pilot?:{id:string;name:string;why:'pinned'|'keywords'}};
  'misato.resumed':Record<string,never>;
  'action.done':{tool:string;result:unknown};
  'action.failed':{tool:string;error:string};

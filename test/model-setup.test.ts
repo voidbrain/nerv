@@ -85,3 +85,20 @@ test('the dashboard API (admin, through the brain process): GET shows the roles 
   const on=await (await call('PUT',{cloud:{enabled:true}})).json() as {models:{cloud:string}};assert.match(on.models.cloud,/enabled/);
  }finally{await new Promise<void>(done=>server.close(()=>done()));await runtime.close();await o.close();rmSync(home,{recursive:true,force:true});}
 });
+test('the CLI: pilots add, list, pin, retire and restore; a model Ollama lacks is refused and nothing is written (F-045)',async()=>{
+ const o=await fakeOllama(MODELS);const home=mkdtempSync(join(tmpdir(),'nerv-pilots-cli-'));
+ const run=(...a:string[])=>new Promise<{status:number|null;stdout:string;stderr:string}>(done=>{const c=spawn(process.execPath,['src/cli.ts',...a],{env:{...process.env,NERV_HOME:home,NERV_OLLAMA:o.url,NERV_PORT:'9'},stdio:['ignore','pipe','pipe']});
+  let stdout='',stderr='';c.stdout.on('data',d=>stdout+=d);c.stderr.on('data',d=>stderr+=d);c.on('close',status=>done({status,stdout,stderr}));});
+ try{
+  assert.equal((await run('init')).status,0);
+  assert.match((await run('pilots')).stdout,/^generic · Generic pilot · anything no specialist covers · off \(models set consultant MODEL\)\n$/);
+  const add=await run('pilots','add','printer','--name','Print Master','--domain','3D printing','--keywords','filament, 3D print','--model','gemma4:12b');assert.equal(add.status,0,add.stderr);
+  assert.match((await run('pilots')).stdout,/printer · Print Master · 3D printing · gemma4:12b · prototype\n   keywords: filament, 3d print/);
+  const missing=await run('pilots','add','artist','--name','Artist','--domain','images','--keywords','photo','--model','no-such-model');
+  assert.notEqual(missing.status,0);assert.match(missing.stderr,/Ollama has no model no-such-model/);assert.doesNotMatch((await run('pilots')).stdout,/artist/);
+  assert.equal((await run('pilots','pin','printer')).status,0);assert.match((await run('pilots')).stdout,/prototype · pinned/);
+  assert.equal((await run('pilots','retire','printer')).status,0);assert.match((await run('pilots')).stdout,/pinned · retired/);
+  assert.equal((await run('pilots','restore','printer')).status,0);assert.doesNotMatch((await run('pilots')).stdout,/retired/);
+  assert.match((await run('pilots','retire','nobody')).stderr,/No pilot nobody/);
+ }finally{await o.close();rmSync(home,{recursive:true,force:true});}
+});

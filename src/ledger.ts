@@ -178,14 +178,14 @@ export class Ledger {
   if(!ids.length)return {found:'none'};if(ids.length>1)return {found:'many',count:ids.length};
   const s=this.sortie(ids[0]!)!;
   const consult=this.db.prepare("SELECT payload FROM events WHERE sortie_id=? AND kind='misato.consult' ORDER BY sequence LIMIT 1").get(s.id) as {payload:string}|undefined;
-  const advice=consult?JSON.parse(consult.payload) as {advice?:string;model?:string}:undefined;
+  const advice=consult?JSON.parse(consult.payload) as {advice?:string;model?:string;pilot?:{name?:string}}:undefined;
   const actions=s.detail.map(d=>{
    const ap=this.db.prepare('SELECT decision,decided,source FROM approvals WHERE action_id=?').get(d.id) as {decision:string|null;decided:string|null;source:string|null}|undefined;
    const done=this.db.prepare("SELECT kind,payload FROM events WHERE action_id=? AND kind IN ('action.done','action.failed') ORDER BY sequence DESC LIMIT 1").get(d.id) as {kind:string;payload:string}|undefined;
    return {tool:d.tool,pattern:d.ballot.pattern,outcome:d.ballot.outcome,reason:d.ballot.reason,verdicts:d.ballot.verdicts.map(v=>({seat:v.seat,vote:v.vote,reason:v.reason,...(v.shadow?{shadow:true}:{})})),
     decision:ap?.decision ?? null,decided:ap?.decided ?? null,source:ap?.source ?? null,ran:done?.kind==='action.done'?'done' as const:done?.kind==='action.failed'?'failed' as const:null,
     ...(done?.kind==='action.failed'?{error:(JSON.parse(done.payload) as {error?:string}).error}:{})};});
-  return {found:'one',record:{id:s.id,title:s.title,status:s.status,why:s.why,...(advice?.advice?{advice:{text:advice.advice,model:advice.model ?? ''}}:{}),actions}};
+  return {found:'one',record:{id:s.id,title:s.title,status:s.status,why:s.why,...(advice?.advice?{advice:{text:advice.advice,model:[advice.pilot?.name,advice.model].filter(Boolean).join(' · ')}}:{}),actions}};
  }
  /** Misato's reply to the owner, kept with the sortie it answers. */
  reply(sortieId:string,text:string,now=new Date()):void {this.tx(()=>this.event(sortieId,null,'misato.reply',{text:text.slice(0,4000)},now));}

@@ -5,7 +5,8 @@ import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'n
 import { fileURLToPath } from 'node:url';
 import { Store } from './store.ts';
 import { makeServer } from './server.ts';
-import { setKajiOffers, setKajiSeat, dataHome, databasePath, initialize, isTelegramToken, pinKajiRoot, telegramTokenPath, readConfig, readModelKey, readScrolls, readTelegramToken, readToken, setBase, setting, type Base } from './config.ts';
+import { savePilots, setKajiOffers, setKajiSeat, dataHome, databasePath, initialize, isTelegramToken, pinKajiRoot, telegramTokenPath, readConfig, readModelKey, readScrolls, readTelegramToken, readToken, setBase, setting, type Base } from './config.ts';
+import { describePilots, type Stage } from './pilots.ts';
 import { TelegramApi, TelegramChannel, decisionText, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
 import { composeBrief, gatherBrief } from './brief.ts';
 import { KajiLink } from './kaji-link.ts';
@@ -122,6 +123,29 @@ try {
     const value=await response.json() as {revoked?:number;error?:string};if(!response.ok)throw new Error(value.error ?? 'Revoke failed.');
     console.log(`${value.revoked ?? 0} dashboard session(s) ended. Open the dashboard again with: open dashboard`);
   }
+  else if(command==='pilots'){
+    // F-045: the owner's permanent agents. Slice 1: they advise Misato before it plans, by domain keywords.
+    const [sub,id,...rest]=args;const config=readConfig(home);const roster=config.pilots ?? [];
+    const opt=(name:string)=>{const i=rest.indexOf('--'+name);return i>=0?rest[i+1]:undefined;};
+    const find=()=>{const p=roster.find(x=>x.id===id);if(!p)throw new Error(`No pilot ${id ?? ''}: nerv pilots lists them.`);return p;};
+    const checkModel=async(model:string)=>{const found=await detectOllama(setting('OLLAMA') ?? ollamaUrlOf(config.models));if(found.reachable&&!found.models.some(m=>m.name===model))throw new Error(`Ollama has no model ${model}: ollama pull ${model} first, or pick one from nerv models.`);};
+    const usage='Usage: pilots | pilots add ID --name NAME --domain "WHAT IT KNOWS" --keywords a,b,c --model MODEL [--stage prototype|test|production] [--parent ID] | pilots set ID [--name …] [--domain …] [--keywords …] [--model …] [--stage …] | pilots pin|unpin|retire|restore ID';
+    const list=(v:string|undefined)=>v===undefined?undefined:v.split(',').map(x=>x.trim()).filter(Boolean);
+    if(!sub){console.log(describePilots(roster,config.models.roles?.consultant?.model ?? null));}
+    else if(sub==='add'){
+      if(!id||!opt('name')||!opt('domain')||!opt('keywords')||!opt('model'))throw new Error(usage);await checkModel(opt('model')!);
+      savePilots(home,[...roster,{id,name:opt('name')!,domain:opt('domain')!,keywords:list(opt('keywords'))!,model:opt('model')!,stage:(opt('stage') ?? 'prototype') as Stage,parent:opt('parent') ?? 'generic'}]);
+      console.log(`Pilot ${id} added (prototype unless set). It advises Misato on requests with its keywords.`);
+    }else if(sub==='set'){
+      const p=find();const model=opt('model');if(model)await checkModel(model);
+      savePilots(home,roster.map(x=>x.id!==p.id?x:{...x,...(opt('name')?{name:opt('name')!}:{}),...(opt('domain')?{domain:opt('domain')!}:{}),...(opt('keywords')?{keywords:list(opt('keywords'))!}:{}),...(model?{model}:{}),...(opt('stage')?{stage:opt('stage') as Stage}:{})}));
+      console.log(`Pilot ${p.id} changed.`);
+    }else if(['pin','unpin','retire','restore'].includes(sub)){
+      const p=find();const on=sub==='pin'||sub==='retire';const field=sub==='pin'||sub==='unpin'?'pinned':'retired';
+      savePilots(home,roster.map(x=>{if(x.id!==p.id)return x;const next={...x};if(on)next[field]=true;else delete next[field];return next;}));
+      console.log(`Pilot ${p.id} ${sub==='pin'?'pinned: chosen first when its keywords match':sub==='unpin'?'unpinned':sub==='retire'?'retired: never chosen, kept in the roster':'restored'}.`);
+    }else throw new Error(usage);
+  }
   else if(command==='models'){
     // F-038: see the routes and what Ollama has; pick Misato's and Casper's model; the cloud route on or off; its key.
     const [sub,a1,a2]=args;const config=readConfig(home);
@@ -171,7 +195,7 @@ try {
     if(!response.ok)throw new Error(value.error ?? 'Ask failed.');
     console.log(value.text+(value.truncated?'\n[reply truncated]':'')+`\n— ${value.route} · ${value.model}`);
   }
-  else if(!command||command==='help')console.log('NERV Agency\nCommands: init [--base ID --name "Name"] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | models [set misato|casper MODEL | cloud on|off | key] | ask [--cloud] "text" | open [dashboard] | sessions revoke | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
+  else if(!command||command==='help')console.log('NERV Agency\nCommands: init [--base ID --name "Name"] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | models [set misato| pilots [add|set|pin|unpin|retire|restore] |casper MODEL | cloud on|off | key] | ask [--cloud] "text" | open [dashboard] | sessions revoke | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
   else {
     const config=readConfig(home);
     const scrolls=readScrolls(home);
@@ -294,6 +318,8 @@ try {
         const own=baseKey(home);runtime.setBaseKey(own.publicKey);let kaji:KajiLink|undefined;
         // Schedules are re-read every minute, so the owner can change them by chat or by hand without a restart.
         const live=()=>{try{return readConfig(home);}catch{return config;}};
+        // F-045: the pilot roster is read on every request, so `nerv pilots …` applies without a restart.
+        runtime.setPilots(()=>live().pilots ?? []);
         // Hyuga's brief goes into the inbox (F-028); every channel delivers it from there. The last brief Telegram sent before
         // the upgrade is read once, so the upgrade day does not get a second one.
         const sentBefore=(()=>{try{return (JSON.parse(readFileSync(join(home,'telegram-state.json'),'utf8')) as {brief?:{at?:string}}).brief?.at;}catch{return undefined;}})();
