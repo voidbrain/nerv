@@ -1210,7 +1210,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔶 P2 | Open | 🟡 Medium | ~25% |
+| 🔴 | 🔶 P2 | Open | 🟡 Medium | ~30% |
 
 💻 **→ Human action required: No**<br />Next: record how long each call takes on the sortie's events.
 
@@ -1225,7 +1225,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 **Next action / closure evidence:** Item 3 in [PR #116](https://github.com/voidbrain/nerv/pull/116) (2026-11-05): `Runtime.usePeerSeats` (serve and the two-base test share it, instead of a copy in the test) returns each other base's vote as a pending promise; the gate waits for Casper and the veto seats only; a shadow vote already in goes on the card, one that comes later is recorded as `ballot.shadow` on its action (dashboard trace: *MAGI · NERV-02 (shadow, after the decision)*) and never changes the outcome. Checked: test/kaji-seats.test.ts (two runtimes, Tabgha's Casper answering after 1.5 s: in shadow the decision comes in under 1.2 s and the late reject is kept with the action; in veto it is waited for and stops the action; an absent base abstains), fails without the change (changed deliberately: the shadow vote is no longer always on the card); full suite 152 pass, build, headless. Remaining: items 1, 2, 2a and 4.
 
-**Estimates:** Medium remaining effort; ~25% complete. Estimated 2026-11-05.
+**Estimates:** Medium remaining effort; ~30% complete. Estimated 2026-11-05.
 
 | Field | Value |
 |---|---|
