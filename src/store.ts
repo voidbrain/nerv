@@ -70,8 +70,12 @@ export class Store {
     if(Date.parse(due) <= now.getTime()) throw new Error('Reminder must be in the future.');
     return {title:title.trim(),due:new Date(due).toISOString()};
   }
-  add(title: string, due: string, now = new Date()): Reminder {
+  /** Adds a reminder, or returns the pending one with the same title (ignoring case and outer spaces) and the same moment,
+      marked `existing`: a request sent twice (a retry, two channels) never makes two reminders (B-003). */
+  add(title: string, due: string, now = new Date()): Reminder & {existing?: true} {
     const checked = this.checkReminder(title,due,now);
+    const same = this.db.prepare('SELECT * FROM reminders WHERE delivered IS NULL AND cancelled IS NULL AND due=? AND lower(trim(title))=lower(trim(?)) LIMIT 1').get(checked.due,checked.title) as Reminder | undefined;
+    if(same) return {...same,existing:true};
     const r: Reminder = {id:randomUUID(),title:checked.title,due:checked.due,created:now.toISOString(),delivered:null,cancelled:null};
     this.db.prepare('INSERT INTO reminders VALUES(?,?,?,?,?,?)').run(r.id,r.title,r.due,r.created,null,null); return r;
   }
