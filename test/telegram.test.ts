@@ -5,7 +5,9 @@ import {spawnSync} from 'node:child_process';
 import {createServer} from 'node:http';
 import {tmpdir} from 'node:os';import {join} from 'node:path';
 import {Runtime} from '../src/runtime.ts';
-import {TelegramApi,TelegramChannel,startChats,telegramBase} from '../src/telegram.ts';
+import {TelegramApi,TelegramChannel,startChats,telegramBase,BUNDLE_WAIT_MS} from '../src/telegram.ts';
+import {Store} from '../src/store.ts';
+import type {StoreApi} from '../src/runtime.ts';
 const OWNER=1111,STRANGER=2222;
 const wait=(ms:number)=>new Promise(done=>setTimeout(done,ms));
 async function until(check:()=>boolean,ms=8000){const end=Date.now()+ms;while(!check()){if(Date.now()>end)throw new Error('timed out');await wait(25);}}
@@ -125,4 +127,26 @@ test('nerv telegram token saves a BotFather token privately (refusing anything e
   assert.equal(readFileSync(join(home,'telegram-token'),'utf8').trim(),token);assert.equal(statSync(join(home,'telegram-token')).mode&0o777,0o600);
   assert.ok(!saved.stdout.includes(token)&&!saved.stderr.includes(token),'the token is never printed');
  }finally{rmSync(home,{recursive:true,force:true});}
+});
+test('facts proposed together reach Telegram as one message with a ✅/❌ row each; a tap decides that fact and removes only its row',{timeout:20000},async()=>{
+ const token='123456:'+'b'.repeat(35);const tg=await fakeTelegram(token);const home=mkdtempSync(join(tmpdir(),'nerv-bundle-'));
+ const store=new Store(join(home,'nerv.sqlite'));
+ const sortie=store.ledger.openSortie('instrumentality','Instrumentality','trusted');
+ for(const text of ['Coffee at 8','Ada is a sister','Runs on Sundays'])assert.equal(store.runAction(sortie,{tool:'memory.remember',args:{text},stage:'production'}).outcome,'approval');
+ const aoba=new TelegramChannel({api:new TelegramApi(token,tg.base),store:store as unknown as StoreApi,chatId:OWNER,statePath:join(home,'telegram-state.json'),log:()=>{}});
+ try{
+  await aoba.start(100);
+  await wait(BUNDLE_WAIT_MS/2);assert.equal(tg.sent().filter(m=>m.reply_markup).length,0,'held while the night\'s cards may still arrive');
+  await until(()=>tg.sent().some(m=>m.reply_markup));
+  const sent=tg.sent().filter(m=>m.reply_markup);assert.equal(sent.length,1,'one message for the three facts');
+  assert.match(sent[0]!.text,/3 facts to remember[\s\S]*1\. Coffee at 8\n2\. Ada is a sister\n3\. Runs on Sundays/);
+  const rows=sent[0]!.reply_markup!.inline_keyboard;assert.equal(rows.length,3);
+  // Tap ✅ 2, with the message's buttons as Telegram sends them back.
+  tg.updates.push({update_id:900,callback_query:{id:'q900',data:rows[1]![0]!.callback_data,from:{id:OWNER},message:{message_id:7,chat:{id:OWNER},reply_markup:{inline_keyboard:rows}}}});
+  await until(()=>tg.calls.some(c=>c.method==='editMessageReplyMarkup'));
+  const left=(tg.calls.find(c=>c.method==='editMessageReplyMarkup')!.body.reply_markup as {inline_keyboard:{callback_data:string}[][]}).inline_keyboard;
+  assert.deepEqual(left.map(r=>r.map(b=>b.callback_data)),[rows[0]!.map(b=>b.callback_data),rows[2]!.map(b=>b.callback_data)],'the other facts keep their buttons');
+  assert.deepEqual(store.memory.list().map(f=>f.text),['Ada is a sister'],'only that fact is stored');
+  assert.equal(store.approvals(20).length,2);
+ }finally{await aoba.stop();store.close();await tg.close();rmSync(home,{recursive:true,force:true});}
 });

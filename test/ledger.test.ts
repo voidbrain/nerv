@@ -145,7 +145,7 @@ test('REST lists approval cards and applies a decision once without exposing the
   assert.equal((await fetch(base+'/api/approvals')).status,401);
   const cards=await (await fetch(base+'/api/approvals',{headers})).json() as {id:string;card:{args:unknown;pattern:string}}[];
   assert.equal(cards.length,1);assert.equal(cards[0]!.id,approvalId);assert.deepEqual(cards[0]!.card.args,{branch:'main'});assert.equal(cards[0]!.card.pattern,'blue');
-  assert.equal((await fetch(base+'/api/approvals?limit=9',{headers})).status,400);assert.equal((await fetch(base+'/api/approvals?x=1',{headers})).status,400);
+  assert.equal((await fetch(base+'/api/approvals?limit=21',{headers})).status,400,'at most 20 (F-022: a night of proposed facts fits in one bundle)');assert.equal((await fetch(base+'/api/approvals?x=1',{headers})).status,400);
   const decide=(decision:string)=>fetch(base+'/api/approvals/'+approvalId,{method:'POST',headers,body:JSON.stringify({decision})});
   assert.equal((await decide('yolo')).status,400);
   assert.deepEqual(await (await decide('approve')).json(),{decision:'approve'});assert.deepEqual(await (await decide('reject')).json(),{decision:'approve'});

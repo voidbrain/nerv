@@ -170,7 +170,8 @@ export class Ledger {
   this.tx(()=>{if('error' in outcome)this.event(sortieId,actionId,'action.failed',{tool,error:outcome.error.slice(0,500)},now);else this.event(sortieId,actionId,'action.done',{tool,result:outcome.result},now);});
  }
  pendingApprovals(now=new Date(),limit=5):Approval[] {
-  if(!Number.isInteger(limit)||limit<1||limit>5)throw new Error('Invalid approval page.');
+  // Up to 20: one Instrumentality night can propose 10 facts, sent to the owner as one bundled card (F-022).
+  if(!Number.isInteger(limit)||limit<1||limit>20)throw new Error('Invalid approval page.');
   return (this.db.prepare('SELECT id,card,expires,decision FROM approvals WHERE decision IS NULL AND expires>? ORDER BY expires LIMIT ?').all(iso(now),limit) as {id:string;card:string;expires:string;decision:null}[]).map(r=>({...r,card:JSON.parse(r.card) as Card}));
  }
  /** Applied once: repeating a decision returns the first outcome. Expiry never approves. */
