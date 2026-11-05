@@ -88,7 +88,7 @@ export function sanitizeRelay(value:unknown):Relay|undefined {
 const head=(records:SignedRecord[])=>({count:records.length,serial:records.reduce((m,r)=>Math.max(m,r.body.serial),0)});
 export class KajiLink {
  readonly baseId:string;readonly key:KeyObject;readonly publicKey:string;readonly port:RegistryPort;readonly log:(line:string)=>void;
- private server?:Server;private timer?:NodeJS.Timeout;private nonces=new Nonces();private listening?:string;
+ private server?:Server;private timer?:NodeJS.Timeout;private nonces=new Nonces();private listening?:string;private stopped=false;
  /** Per peer, whether heartbeats reach it, logged only when that changes. A peer counts as unreachable in the log only
   after enough missed heartbeats in a row to fill the online window (one slow Tailscale path or a machine waking from
   sleep is not news: the dashboard keeps it online for ONLINE_MS anyway). */
@@ -122,20 +122,24 @@ export class KajiLink {
  /** This base as the registry knows it (by its own public key), if enrolled and not revoked. */
  private async me():Promise<BaseEntry|undefined> {return (await this.port.bases()).find(b=>b.publicKey===this.publicKey&&b.status==='enrolled');}
  async start(everyMs=HEARTBEAT_MS):Promise<void> {
-  const tick=async()=>{try{await this.listen();await this.heartbeat();}catch(e){this.log(`Kaji: ${e instanceof Error?e.message:'heartbeat failed'}.`);}};
-  this.every=everyMs;await tick();this.timer=setInterval(()=>{void tick();},everyMs);
+  this.stopped=false;
+  const tick=async()=>{if(this.stopped)return;try{await this.listen();if(!this.stopped)await this.heartbeat();}catch(e){this.log(`Kaji: ${e instanceof Error?e.message:'heartbeat failed'}.`);}};
+  this.every=everyMs;await tick();if(!this.stopped)this.timer=setInterval(()=>{void tick();},everyMs);
  }
  /** Stops the heartbeat and the listener. Open connections are closed first: a server only finishes closing when none is
-     left, and a peer's keep-alive connection could otherwise hold the stop (and a service shutdown) forever. */
- async stop():Promise<void> {if(this.timer)clearInterval(this.timer);await this.closeServer();this.listening=undefined;}
+     left, and a peer's keep-alive connection could otherwise hold the stop (and a service shutdown) forever. A tick already
+     under way when stop() runs (looking up this base's address) must not open a listener or set a timer afterwards:
+     either would keep the process alive with nothing left to close it (B-001). */
+ async stop():Promise<void> {this.stopped=true;if(this.timer)clearInterval(this.timer);this.timer=undefined;await this.closeServer();this.listening=undefined;}
  private async closeServer():Promise<void> {const server=this.server;this.server=undefined;if(!server)return;await new Promise<void>(done=>{server.close(()=>done());server.closeAllConnections();});}
  /** Listens on the enrolled address only; retried on every tick (Tailscale may come up later, the address may change). */
  private async listen():Promise<void> {
-  const me=await this.me();if(!me){if(!this.listening)this.log('Kaji: this base is not enrolled yet (kaji list); not listening.');return;}
+  const me=await this.me();if(this.stopped)return;if(!me){if(!this.listening)this.log('Kaji: this base is not enrolled yet (kaji list); not listening.');return;}
   if(this.listening===me.address)return;
   await this.closeServer();
   const {host,port}=endpoint(me.address);const server=createServer((req,res)=>{void this.serve(req,res.writeHead.bind(res),body=>res.end(body),res.setHeader.bind(res));});
   await new Promise<void>((done,fail)=>{server.once('error',fail);server.listen(port,host,()=>{server.off('error',fail);done();});});
+  if(this.stopped){await new Promise<void>(done=>server.close(()=>done()));return;}
   this.server=server;this.listening=me.address;this.log(`Kaji: listening on ${host}:${port} as ${this.baseId}.`);
  }
  private async serve(req:IncomingMessage,writeHead:(s:number,h?:Record<string,string>)=>unknown,end:(b:string)=>void,setHeader:(k:string,v:string)=>unknown):Promise<void> {

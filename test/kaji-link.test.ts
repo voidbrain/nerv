@@ -115,3 +115,16 @@ test('one missed heartbeat is not logged: a peer is logged unreachable only afte
   await link.heartbeat();assert.equal(down().length,1,'logged once, not on every miss');
  }finally{st.close();}
 });
+test('a stop while a tick is still looking up the address leaves no listener and no timer behind (B-001)',async()=>{
+ const A=keys();const free=await freePort();const st=new Store(':memory:');const reg=new Registry(st.db,root.publicKey);
+ reg.add(rec({kind:'enrol',baseId:'NERV-01',name:'Neo Tokyo-3',publicKey:A.publicKey,address:`127.0.0.1:${free}`}));
+ let release=()=>{};const gate=new Promise<void>(d=>{release=d;});const logs:string[]=[];
+ const slow:RegistryPort={...port(reg),bases:async()=>{await gate;return reg.bases();}};
+ const link=new KajiLink({baseId:'NERV-01',key:A.privateKey,publicKey:A.publicKey,registry:slow,log:l=>logs.push(l)});
+ try{
+  const started=link.start(50);const stopped=link.stop();release();await started;await stopped;await wait(150);
+  assert.ok(!logs.some(l=>/listening on/.test(l)),'no listener opened after the stop');
+  const s=createServer();await new Promise<void>((d,f)=>{s.once('error',f);s.listen(free,'127.0.0.1',()=>d());});await new Promise<void>(d=>s.close(()=>d()));
+  assert.equal((link as unknown as {timer?:unknown}).timer,undefined,'no heartbeat timer set after the stop');
+ }finally{await link.stop();st.close();}
+});
