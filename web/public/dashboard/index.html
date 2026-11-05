@@ -236,6 +236,7 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 /* Owner, 2026-11-05: a smaller map, its legend on the right. */
 .maprow { display:flex; gap:6px; align-items:stretch; }
 .maprow .mapwrap { flex:1 1 auto; min-width:0; }
+mark { background:color-mix(in srgb,var(--accent) 35%,transparent); color:inherit; padding:0 1px; }
 .maplegend { display:flex; flex-direction:column; justify-content:center; gap:3px; flex:0 0 auto; font-size:9px; color:var(--muted); padding:4px 8px 4px 2px; }
 .sq { display:inline-block; width:7px; height:7px; margin-right:3px; vertical-align:middle; }
 

@@ -110,6 +110,11 @@ function freshState() {
     sorties:[], approvals:[], log:[], spentToday:0, routeSpend:{ s2:0, umbilical:0 }, deliveries:[], packets:[], seq:0, retries:[] };
   return s;
 }
+/* F-019: the searched text marked in a title: escaped first, then each case-insensitive occurrence wrapped in <mark>. */
+function highlight(text, q) {
+  const t = esc(text), n = String(q || "").trim(); if (!n) return t;
+  const needle = esc(n).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); return t.replace(new RegExp(needle, "gi"), m => "<mark>" + m + "</mark>");
+}
 function esc(v) { return String(v).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c])); }
 function hhmm(t) { const d = new Date(t); return d.toTimeString().slice(0, 5); }
 /* B-002: a time with its day when it is not today (browser local time): 14:05 · yesterday 14:05 · 3 Nov 14:05 · 3 Nov 2025 14:05. */
@@ -436,7 +441,7 @@ function renderSorties() {
   document.getElementById("sortie-list").innerHTML = list.map(s => {
     const pats = s.actions.map(a => a.ballot ? "<span class='badge b-" + a.ballot.pattern + "'>" + a.ballot.pattern[0].toUpperCase() + "</span>" : "<span class='badge b-muted'>·</span>").join(" ");
     return "<div class='card sortie" + (s.id === state.selected ? " sel" : "") + "' tabindex='0' role='button' aria-pressed='" + (s.id === state.selected) + "' data-s='" + s.id + "'>" +
-      "<div class='row'><span class='b'>" + esc(s.id) + " · " + esc(s.title) + "</span>" + sortieBadge(s) + "</div>" +
+      "<div class='row'><span class='b'>" + esc(s.id) + " · " + highlight(s.title, state.search) + "</span>" + sortieBadge(s) + "</div>" +
       "<div class='row small muted'><span>" + (s.source === "hyuga" ? "Hyuga" : "Aoba") + " · " + dayTime(s.started) + " · " + s.actions.length + " action" + (s.actions.length > 1 ? "s" : "") + " " + pats + "</span><span>$" + s.spent.toFixed(3) + "</span></div>" +
       (s.why ? "<div class='tiny whyline'>" + esc(s.why) + "</div>" : "") +
       (s.outcome ? "<div class='tiny muted'>" + esc(s.outcome) + "</div>" : "") + "</div>";
@@ -787,15 +792,19 @@ function drawMap(now) {
     if (t >= 1) { const k = Math.max(0, Math.min(1, (now - pk.t0 - pk.dur) / 900)); ctx.strokeStyle = ctx.fillStyle; ctx.globalAlpha = 1 - k; ctx.beginPath(); ctx.arc(x, y, 4 + k * 18, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1; }
   });
   // base markers: square dots
-  ctx.font = "11px " + cssVar("--font").split(",")[0];
+  // The canvas is drawn at a fixed size and shown smaller: text and markers are scaled up by that ratio, so they read at
+  // about 12 px whatever the panel's width (owner, 2026-11-05). The main base is bigger, ringed and bold.
+  const z = Math.max(1, W / ((cv.clientWidth || W))); const face = cssVar("--font") || "monospace"; const anyMain = BASES.some(x => x.main);
   BASES.forEach(b => {
-    const [x, y] = map.proj([b.lon, b.lat]); const col = statusColor(b.status); const s = b.id === "tokyo3" ? 9 : 7;
-    ctx.fillStyle = col; ctx.fillRect(x - s / 2, y - s / 2, s, s); ctx.strokeStyle = "#000"; ctx.lineWidth = 1; ctx.strokeRect(x - s / 2, y - s / 2, s, s);
+    const [x, y] = map.proj([b.lon, b.lat]); const col = statusColor(b.status); const main = !!b.main || (!anyMain && b === BASES[0]); const s = (main ? 11 : 7) * z;
+    ctx.fillStyle = col; ctx.fillRect(x - s / 2, y - s / 2, s, s); ctx.strokeStyle = "#000"; ctx.lineWidth = z; ctx.strokeRect(x - s / 2, y - s / 2, s, s);
+    if (main) { ctx.strokeStyle = col; ctx.lineWidth = 1.5 * z; ctx.beginPath(); ctx.arc(x, y, s * 1.1, 0, Math.PI * 2); ctx.stroke(); }
+    ctx.font = (main ? "bold " : "") + Math.round((main ? 13 : 12) * z) + "px " + face;
     ctx.fillStyle = cssVar("--text"); const label = b.name; const tw = ctx.measureText(label).width;
-    const lx = x + tw + 12 > W ? x - tw - 8 : x + 8; ctx.fillText(label, lx, y - 6);
+    const lx = x + tw + 12 * z > W ? x - tw - 8 * z : x + 8 * z; ctx.fillText(label, lx, y - 6 * z);
   });
-  ctx.fillStyle = cssVar("--muted"); ctx.font = "10px " + cssVar("--font").split(",")[0];
-  ctx.fillText("UMBILICAL ↗ cloud · off (all models local)", 8, H - 8);
+  ctx.fillStyle = cssVar("--muted"); ctx.font = Math.round(10 * z) + "px " + face;
+  ctx.fillText("UMBILICAL ↗ cloud · off (all models local)", 8, H - 8 * z);
 }
 
 /* ================= EVA heartbeats ================= */
