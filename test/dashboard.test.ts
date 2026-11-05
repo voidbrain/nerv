@@ -236,3 +236,7 @@ test('an answer without an action: Misato passed, a green route straight to Debr
  assert.match(js,/if \(!s \|\| !\(s\.status === "active" \|\| \/waiting\/\.test\(s\.status\)\)\) return m;/,'no animated line on a finished sortie');
  assert.match(js,/debrief:s\.actions\.length \? "eva" : "plan"/);
 });
+test('the apartment\'s count sits in the header like every other panel\'s sub-line, not a red badge (owner, 2026-11-05)',async()=>{
+ const {readFileSync}=await import('node:fs');const html=readFileSync('web/public/dashboard/index.html','utf8');
+ assert.match(html,/<span data-l="needs">Misato's apartment · needs you<\/span><span class="sub" id="needs-count">0<\/span>/);
+});
