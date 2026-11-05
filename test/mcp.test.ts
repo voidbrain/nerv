@@ -74,3 +74,9 @@ test('the CLI: tools add, list, a destructive tool refused as a read, grant pinn
   assert.equal(run('tools','revoke','notes/read_note').status,0);assert.match(run('tools').stdout,/notes\.read_note · read-only · not granted/);
  }finally{rmSync(home,{recursive:true,force:true});}
 });
+test('a server that fails at start says why: the last lines of its error output (B-019)',async()=>{
+ const {writeFileSync,mkdtempSync,rmSync}=await import('node:fs');const dir=mkdtempSync(join(tmpdir(),'nerv-mcp-bad-'));
+ const bad=join(dir,'bad.mjs');writeFileSync(bad,"console.error('Error: Cannot find module \\'./npm-cli.js\\'');process.exit(1);");
+ const c=new McpClient({id:'bad',command:process.execPath,args:[bad]});
+ try{await assert.rejects(c.listTools(),/MCP server ended \(exit 1\): Error: Cannot find module '\.\/npm-cli\.js'/);}finally{c.close();rmSync(dir,{recursive:true,force:true});}
+});

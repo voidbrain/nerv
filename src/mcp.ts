@@ -67,14 +67,18 @@ export function resultText(result:unknown,max=8000):string {
 /** One MCP server over stdio. Requests time out; the process is ended on close. Environment: PATH, HOME, LANG only. */
 export class McpClient {
  private child:ChildProcess;private buffer='';private next=1;private pending=new Map<number,{resolve:(v:unknown)=>void;reject:(e:Error)=>void;timer:NodeJS.Timeout}>();
- private ready:Promise<void>;private closed=false;private readonly timeoutMs:number;
+ private ready:Promise<void>;private closed=false;private readonly timeoutMs:number;private stderr='';
  constructor(server:McpServer,timeoutMs=20_000){
   this.timeoutMs=timeoutMs;
-  this.child=spawn(server.command,server.args,{stdio:['pipe','pipe','ignore'],env:{PATH:process.env.PATH ?? '',HOME:process.env.HOME ?? '',LANG:process.env.LANG ?? 'C.UTF-8'}});
+  this.child=spawn(server.command,server.args,{stdio:['pipe','pipe','pipe'],env:{PATH:process.env.PATH ?? '',HOME:process.env.HOME ?? '',LANG:process.env.LANG ?? 'C.UTF-8'}});
   this.child.stdout!.setEncoding('utf8');
   this.child.stdout!.on('data',(d:string)=>{this.buffer+=d;let i;while((i=this.buffer.indexOf('\n'))>=0){const line=this.buffer.slice(0,i).trim();this.buffer=this.buffer.slice(i+1);if(line)this.receive(line);}});
+  // B-019: the last lines of the server's error output, so "it ended" says why (a broken npx, a wrong path).
+  this.child.stderr!.setEncoding('utf8');this.child.stderr!.on('data',(d:string)=>{this.stderr=(this.stderr+d).slice(-2000);});
+  const tail=()=>{const lines=this.stderr.split('\n').map(l=>l.trim()).filter(Boolean).filter(l=>!/^(at |\^+$|throw |[{}\[\]]|Node\.js v|code:|requireStack|node:internal|[A-Za-z]+: \[?$)/.test(l));
+   const named=lines.find(l=>/error/i.test(l));const pick=named?[named]:lines.slice(-2);return pick.length?`: ${pick.join(' · ').slice(0,300)}`:'';};
   const fail=(why:string)=>{this.closed=true;for(const p of this.pending.values()){clearTimeout(p.timer);p.reject(new Error(why));}this.pending.clear();};
-  this.child.on('error',e=>fail(`MCP server could not start: ${e.message}`));this.child.on('exit',()=>fail('MCP server ended.'));
+  this.child.on('error',e=>fail(`MCP server could not start: ${e.message}`));this.child.on('exit',code=>fail(`MCP server ended${code!==null?` (exit ${code})`:''}${tail()}.`));
   this.ready=this.request('initialize',{protocolVersion:'2025-06-18',capabilities:{},clientInfo:{name:'nerv-agency',version:'1'}}).then(()=>{this.notify('notifications/initialized');});
  }
  private receive(line:string){
