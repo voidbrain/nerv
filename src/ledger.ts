@@ -2,7 +2,7 @@ import type { DatabaseSync } from 'node:sqlite';
 import { createHash, randomUUID } from 'node:crypto';
 import { ballot, defaultPolicy, patternOf, validatePolicy, type Ballot, type Pattern, type Policy, type Stage, type Tool, type Trust, type Verdict } from './policy.ts';
 import type { Step } from './misato.ts';
-import { explainSortie } from './why.ts';
+import { explainSortie,type WhyRecord } from './why.ts';
 import { EVENT_SCHEMA_VERSION, MAX_SPEAR_HAPPENED, encodePayload, readPayload, type EventKind, type EventPayloads, type Happened, type SortieEvent } from './events.ts';
 /** Central Dogma (F-024): sorties, actions, grants (A.T. Fields), approvals (Misato's apartment) and append-only events. */
 export const LEDGER_SCHEMA=`
@@ -162,6 +162,22 @@ export class Ledger {
    const status:ActionDetail['status']=x.ran==='action.done'?'done':x.ran==='action.failed'?'failed':ballot.outcome==='reject'?'rejected':ballot.outcome==='approval'&&x.decision===null?'waiting':ballot.outcome==='approval'&&x.decision!=='approve'?'stood-down':'proposed';
    return {id:x.id,tool:x.tool,args:JSON.parse(x.args) as Record<string,unknown>,ballot,created:x.created,status};});
   return {...this.summarize(row),detail};
+ }
+ /** A sortie by the short ID shown to the owner (a hex prefix of its ID), with what a "why" answer needs (B-004). */
+ explain(ref:string):{found:'none'|'many';count?:number}|{found:'one';record:WhyRecord} {
+  if(typeof ref!=='string'||!/^[0-9a-f]{4,36}$/.test(ref))throw new Error('Invalid sortie reference.');
+  const ids=(this.db.prepare("SELECT id FROM sorties WHERE id LIKE ? ORDER BY created DESC LIMIT 6").all(ref+'%') as {id:string}[]).map(r=>r.id);
+  if(!ids.length)return {found:'none'};if(ids.length>1)return {found:'many',count:ids.length};
+  const s=this.sortie(ids[0]!)!;
+  const consult=this.db.prepare("SELECT payload FROM events WHERE sortie_id=? AND kind='misato.consult' ORDER BY sequence LIMIT 1").get(s.id) as {payload:string}|undefined;
+  const advice=consult?JSON.parse(consult.payload) as {advice?:string;model?:string}:undefined;
+  const actions=s.detail.map(d=>{
+   const ap=this.db.prepare('SELECT decision,decided,source FROM approvals WHERE action_id=?').get(d.id) as {decision:string|null;decided:string|null;source:string|null}|undefined;
+   const done=this.db.prepare("SELECT kind,payload FROM events WHERE action_id=? AND kind IN ('action.done','action.failed') ORDER BY sequence DESC LIMIT 1").get(d.id) as {kind:string;payload:string}|undefined;
+   return {tool:d.tool,pattern:d.ballot.pattern,outcome:d.ballot.outcome,reason:d.ballot.reason,verdicts:d.ballot.verdicts.map(v=>({seat:v.seat,vote:v.vote,reason:v.reason,...(v.shadow?{shadow:true}:{})})),
+    decision:ap?.decision ?? null,decided:ap?.decided ?? null,source:ap?.source ?? null,ran:done?.kind==='action.done'?'done' as const:done?.kind==='action.failed'?'failed' as const:null,
+    ...(done?.kind==='action.failed'?{error:(JSON.parse(done.payload) as {error?:string}).error}:{})};});
+  return {found:'one',record:{id:s.id,title:s.title,status:s.status,why:s.why,...(advice?.advice?{advice:{text:advice.advice,model:advice.model ?? ''}}:{}),actions}};
  }
  /** Misato's reply to the owner, kept with the sortie it answers. */
  reply(sortieId:string,text:string,now=new Date()):void {this.tx(()=>this.event(sortieId,null,'misato.reply',{text:text.slice(0,4000)},now));}

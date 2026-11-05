@@ -70,3 +70,20 @@ test('after the owner approves, an action proposed again is not run twice: the f
   assert.equal(follow[0]!.reply,'Done: reminders.add (“Call Ada”).');assert.equal((await r.list()).length,1,'it ran once, at the approval');
  }finally{await t.close();}
 });
+test('"why S-…?" is answered from the ledger, without the model: the ballot, every seat, the owner\'s decision and what ran, in the request\'s language (B-004)',async()=>{
+ const t=await setup([ADD,'{"reply":"Done: Ada is in your reminders."}']);
+ try{
+  const {r,follow}=await t.start();const chat=await r.chat('Remind me to call Ada');
+  await r.decide(chat.waiting[0]!.approvalId,'approve','telegram');await until(()=>follow.length===1);
+  const asked=t.prompts.length;const ref=`S-${chat.sortieId.slice(0,4).toUpperCase()}`;
+  const en=(await r.chat(`why ${ref} approved?`)).reply!;
+  assert.match(en,new RegExp(`^${ref} · “Remind me to call Ada” · Status: done\\.`));
+  assert.match(en,/reminders\.add · Pattern \w+: needed your approval \(/);
+  assert.match(en,/Ballot: [^\n]*Casper approve — Matches\./,'every seat with its vote and reason');
+  assert.match(en,/You approved it on [^\n]+ via Telegram\./);assert.match(en,/It ran\./);
+  const it=(await r.chat(`perché ${ref} è stata approvata?`)).reply!;
+  assert.match(it,/Votazione: [^\n]*Casper approva/);assert.match(it,/L'hai approvata il [^\n]+ da Telegram\./);assert.match(it,/È stata eseguita\./);
+  assert.equal((await r.chat('why S-FFFF was approved?')).reply,'No sortie S-FFFF in this base\'s records.');
+  assert.equal(t.prompts.length,asked,'the model was not asked');
+ }finally{await t.close();}
+});

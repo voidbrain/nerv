@@ -8,6 +8,7 @@ import {argsHash} from './ledger.ts';
 import type {SortieEvent} from './events.ts';
 import {MODEL_TIMEOUT_MS,type Ask,type Reply,type RouteName} from './model.ts';
 import type {Effect,Pattern,Stage,Verdict} from './policy.ts';
+import {askedWhy,explainRecord} from './why.ts';
 import {MAX_STEPS,doneReply,type RemoteOffer,requestLanguage,waitingReply,type Plan,type Recalled,type Step,type Turn} from './misato.ts';
 import {toolDocs} from './executors.ts';
 import type {Digest,Exchange} from './instrumentality.ts';
@@ -121,6 +122,11 @@ export class Runtime implements StoreApi {
   const context=conversation?await this.nervous.call('misato.context',{conversation}).catch(()=>[]) as Turn[]:[];
   const sortieId=await this.nervous.call('sorties.open',{title:message.slice(0,500),source:'misato'}) as string;
   await this.note(sortieId,'misato.request',{text:message,...(conversation?{conversation}:{})});
+  // B-004: "why S-1A2B …?" is answered from the ledger, never by the model (which has no tool to read it and guessed).
+  const ref=askedWhy(message);
+  if(ref){const found=await this.nervous.call('sorties.explain',{ref}) as Parameters<typeof explainRecord>[0];
+   const reply=explainRecord(found,ref,requestLanguage(message,context.map(t=>t.request)),Intl.DateTimeFormat().resolvedOptions().timeZone);
+   await this.nervous.call('sorties.finish',{sortieId,status:'done',reply});return {sortieId,reply,steps:[],waiting:[]};}
   return this.loop(sortieId,message,[],context);
  }
  private note(sortieId:string,kind:'misato.request'|'misato.step'|'misato.waiting'|'misato.consult',payload:object){return this.nervous.call('misato.note',{sortieId,kind,payload});}
