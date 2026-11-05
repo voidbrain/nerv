@@ -2,7 +2,7 @@
 
 ## Local core
 
-Node 24 runs erasable TypeScript directly. `src/store.ts` owns SQLite state; `src/server.ts` owns authenticated loopback HTTP; `src/cli.ts` owns process lifecycle; `src/config.ts` owns private per-user configuration and `src/service.ts` renders/manages user services. Validate untrusted input before writes. Do not expose arbitrary SQL, shell execution or tools through chat. Keep delivery creation and reminder completion in one transaction. `npm test` covers restart, duplicates, cancellation and HTTP authentication. These are NERV Agency's current conventions, not a published reusable Node harness profile.
+Node 24 runs erasable TypeScript directly. `src/store.ts` owns SQLite state; `src/server.ts` owns authenticated loopback HTTP; `src/cli.ts` owns process lifecycle; `src/config.ts` owns private per-user configuration and `src/service.ts` renders/manages user services. Validate untrusted input before writes. Do not expose arbitrary SQL, shell execution or tools through chat. Keep delivery creation and reminder completion in one transaction. The inbox (`deliveries`, schema 5, F-028) holds reminders and Hyuga's briefs (`kind`); its rowids are the cursors of every channel, so a migration keeps them; the scheduler writes the brief, channels only deliver inbox items, so nothing is sent twice. `npm test` covers restart, duplicates, cancellation and HTTP authentication. These are NERV Agency's current conventions, not a published reusable Node harness profile.
 
 ## Action gate and ledger
 

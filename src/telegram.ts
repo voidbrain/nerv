@@ -1,7 +1,6 @@
 import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import type { StoreApi } from './runtime.ts';
 import type { Approval } from './ledger.ts';
-import { briefDue, composeBrief, gatherBrief } from './brief.ts';
 /**
  * Aoba, the Telegram channel (F-003), with Pen Pen's deliveries (F-023). Outbound HTTPS only (long polling): no open
  * port, no mesh. It answers exactly one private chat, the owner's; everything else is ignored. Messages go to Misato,
@@ -53,7 +52,7 @@ export async function diagnoseNoStart(api:TelegramApi):Promise<string> {
  const kinds=[...new Set(waiting.map(u=>u.message?`a message in a ${u.message.chat.type} chat`:Object.keys(u).filter(k=>k!=='update_id').join(', ')))];
  return `${bot} has ${waiting.length} update(s) waiting, but no /start in a private chat (${kinds.join('; ')}). Type /start yourself in the private chat with ${bot}, then run this again.`;
 }
-interface State {offset?:number;inbox?:{sequence:number;id?:string};cards:string[];brief?:{date:string;at:string}}
+interface State {offset?:number;inbox?:{sequence:number;id?:string};cards:string[];/** Before F-028 the brief was sent from here: kept only to read the last one once. */brief?:{date:string;at:string}}
 export function card(a:Approval):{text:string;buttons:Button[][]} {
  const c=a.card;const args=JSON.stringify(c.args);
  const text=[`Needs you · Pattern ${c.pattern.toUpperCase()}`,`${c.tool} ${args.length>600?args.slice(0,600)+'…':args}`,`Effect: ${c.effect}. Sync ${c.sync.value}%.`,`Why it stopped: ${c.reason}`,`Expires: ${new Date(c.expires).toUTCString()} (expiry never approves)`].join('\n');
@@ -79,7 +78,7 @@ export interface OneChannel {quiet():Promise<boolean>;relay(text:string,cards:{i
 /** On the main base: a tap on a card relayed from another base is decided there. */
 export interface RemoteDecide {decide(baseId:string,approvalId:string,decision:'approve'|'reject'):Promise<string>}
 export class TelegramChannel {
- readonly api:TelegramApi;readonly store:StoreApi;readonly chatId:number;readonly statePath:string;readonly log:(line:string)=>void;readonly brief?:()=>{at:string;timeZone:string;language:'it'|'en';base?:string}|undefined;
+ readonly api:TelegramApi;readonly store:StoreApi;readonly chatId:number;readonly statePath:string;readonly log:(line:string)=>void;
  private held=new Map<string,{key:string;since:number}>();private readonly one:OneChannel|undefined;private readonly remote:RemoteDecide|undefined;
  private async quiet():Promise<boolean>{return !!this.one&&await this.one.quiet().catch(()=>false);}
  /** Everything this base sends on its own (cards, reminders, brief, follow-ups): relayed while quiet, else its own bot; a failed relay falls back to its own bot, so nothing is lost. */
@@ -96,8 +95,8 @@ export class TelegramChannel {
   await this.api.send(this.chatId,`🛰 ${fromName} · ${relay.text}`,buttons.length?buttons:undefined);return true;
  }
  private state:State={cards:[]};private stopping=new AbortController();private queue:Promise<void>=Promise.resolve();private timer?:NodeJS.Timeout;private delivery?:Promise<void>;
- constructor(options:{api:TelegramApi;store:StoreApi;chatId:number;statePath:string;log?:(line:string)=>void;oneChannel?:OneChannel;remote?:RemoteDecide;brief?:()=>{at:string;timeZone:string;language:'it'|'en';base?:string}|undefined}) {
-  if(options.brief)this.brief=options.brief;this.one=options.oneChannel;this.remote=options.remote;
+ constructor(options:{api:TelegramApi;store:StoreApi;chatId:number;statePath:string;log?:(line:string)=>void;oneChannel?:OneChannel;remote?:RemoteDecide}) {
+  this.one=options.oneChannel;this.remote=options.remote;
   this.api=options.api;this.store=options.store;this.chatId=options.chatId;this.statePath=options.statePath;this.log=options.log ?? (line=>console.error(line));
   if(existsSync(this.statePath)){try{const saved=JSON.parse(readFileSync(this.statePath,'utf8')) as Partial<State>;this.state={...saved,cards:Array.isArray(saved.cards)?saved.cards:[]};}catch{this.log('Telegram: unreadable state file; starting fresh.');}}
  }
@@ -184,21 +183,11 @@ export class TelegramChannel {
    for(;;){
     const at=this.state.inbox ?? {sequence:0};const page=await this.store.inboxPage(at.sequence,5,at.id);
     // Checkpoint after every message: a stop or crash resends at most the one in flight.
-    for(const item of page.items){await this.out(`⏰ ${item.message}`);this.state.inbox={sequence:item.sequence,id:item.id};this.save();}
+    for(const item of page.items){await this.out(item.kind==='brief'?item.message:`⏰ ${item.message}`);this.state.inbox={sequence:item.sequence,id:item.id};this.save();}
     // A reset means the checkpoint no longer matches the inbox (restored database): continue from its head, replay nothing.
     if(page.reset){this.state.inbox=page.next;this.save();break;}
     if(!page.items.length)break;this.state.inbox=page.next;this.save();
    }
-  await this.sendBrief();
   }catch(e){this.log(`Telegram delivery: ${e instanceof Error?e.message:'failed'}.`);}
- }
- /** Hyuga: once a local day at the configured time; recorded before sending, so a restart never sends it twice. */
- private async sendBrief(now=new Date()){
-  // Read on every tick: a time changed by chat or by hand applies within a minute, without a restart.
-  const brief=this.brief?.();if(!brief)return;const date=briefDue(now,brief.timeZone,brief.at,this.state.brief?.date);if(!date)return;
-  const since=this.state.brief?new Date(this.state.brief.at):new Date(now.getTime()-86_400_000);
-  const facts=await gatherBrief(this.store,since);
-  this.state.brief={date,at:now.toISOString()};this.save();
-  await this.out(composeBrief({now,timeZone:brief.timeZone,language:brief.language,...(brief.base?{base:brief.base}:{}),...facts}));
  }
 }

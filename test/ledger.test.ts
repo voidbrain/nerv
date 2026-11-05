@@ -123,7 +123,7 @@ test('an existing version 1 database gains the ledger without losing reminders',
  try{
   const old=new DatabaseSync(path);old.exec(`CREATE TABLE reminders(id TEXT PRIMARY KEY, title TEXT NOT NULL, due TEXT NOT NULL, created TEXT NOT NULL, delivered TEXT, cancelled TEXT);CREATE TABLE deliveries(id TEXT PRIMARY KEY, reminder_id TEXT NOT NULL UNIQUE REFERENCES reminders(id), message TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT);INSERT INTO reminders VALUES('r','Insurance','2030-01-01T01:00:00.000Z','2029-12-31T00:00:00.000Z',NULL,NULL);PRAGMA user_version=1;`);old.close();
   const store=new Store(path);
-  try{assert.equal(store.list().length,1);assert.equal((store.db.prepare('PRAGMA user_version').get() as {user_version:number}).user_version,4);new Ledger(store.db).openSortie('cli','x','trusted',now);}finally{store.close();}
+  try{assert.equal(store.list().length,1);assert.equal((store.db.prepare('PRAGMA user_version').get() as {user_version:number}).user_version,5);new Ledger(store.db).openSortie('cli','x','trusted',now);}finally{store.close();}
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
 test('the scheduler process stands down expired approvals on its own ticks',async()=>{
@@ -178,7 +178,7 @@ test('every event records its schema version; a schema 2 database upgrades and i
   const old=new DatabaseSync(path);old.exec(`CREATE TABLE events(sequence INTEGER PRIMARY KEY AUTOINCREMENT, sortie_id TEXT NOT NULL, action_id TEXT, kind TEXT NOT NULL, payload TEXT NOT NULL, created TEXT NOT NULL);CREATE TRIGGER events_no_update BEFORE UPDATE ON events BEGIN SELECT RAISE(ABORT,'events are append-only'); END;INSERT INTO events(sortie_id,action_id,kind,payload,created) VALUES('s',NULL,'sortie.opened','{"source":"cli","title":"Old","trust":"trusted"}','2029-12-31T00:00:00.000Z');INSERT INTO events(sortie_id,action_id,kind,payload,created) VALUES('s','a','grant.used','{"grantId":"secret-grant"}','2029-12-31T00:00:01.000Z');PRAGMA user_version=2;`);old.close();
   const store=new Store(path);
   try{
-   assert.equal((store.db.prepare('PRAGMA user_version').get() as {user_version:number}).user_version,4);
+   assert.equal((store.db.prepare('PRAGMA user_version').get() as {user_version:number}).user_version,5);
    assert.deepEqual(store.ledger.events('s').map(e=>[e.v,e.kind]),[[1,'sortie.opened'],[1,'grant.used']]);
    assert.deepEqual(store.ledger.events('s')[1]!.payload,{},'version 1 grant IDs are removed on read');assert.equal(EVENT_SCHEMA_VERSION,2);
    const sortie=store.ledger.openSortie('cli','New','trusted',now);assert.equal(store.ledger.events(sortie)[0]!.v,EVENT_SCHEMA_VERSION);
@@ -234,4 +234,25 @@ test('the Scrolls load from scrolls.json; an invalid or tamperable file stops st
   }
   writeFileSync(file,'{}');chmodSync(file,0o666);if(POSIX)assert.throws(()=>readScrolls(home),/writable by others/,'Unix modes only; on Windows the profile ACL protects it');
  }finally{rmSync(home,{recursive:true,force:true});}
+});
+test('schema 5: the inbox holds briefs too; a schema 4 inbox keeps every row and rowid, so cursors neither jump nor repeat (F-028)',async()=>{
+ const {DatabaseSync}=await import('node:sqlite');const {mkdtempSync,rmSync}=await import('node:fs');const {tmpdir}=await import('node:os');const {join}=await import('node:path');
+ const dir=mkdtempSync(join(tmpdir(),'nerv-v5-'));const path=join(dir,'nerv.sqlite');
+ try{
+  const old=new DatabaseSync(path);
+  old.exec(`CREATE TABLE reminders(id TEXT PRIMARY KEY, title TEXT NOT NULL, due TEXT NOT NULL, created TEXT NOT NULL, delivered TEXT, cancelled TEXT);
+   CREATE TABLE deliveries(id TEXT PRIMARY KEY, reminder_id TEXT NOT NULL UNIQUE REFERENCES reminders(id), message TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT);
+   INSERT INTO reminders VALUES('r1','Call Ada','2030-01-01T09:00:00Z','2029-12-31T09:00:00Z','2030-01-01T09:00:00Z',NULL),('r2','Water plants','2030-01-02T09:00:00Z','2029-12-31T09:00:00Z','2030-01-02T09:00:00Z',NULL);
+   INSERT INTO deliveries(rowid,id,reminder_id,message,created,read_at) VALUES(7,'d1','r1','Call Ada','2030-01-01T09:00:00Z',NULL),(9,'d2','r2','Water plants','2030-01-02T09:00:00Z',NULL);
+   PRAGMA user_version=4;`);old.close();
+  const store=new Store(path);
+  try{
+   assert.equal((store.db.prepare('PRAGMA user_version').get() as {user_version:number}).user_version,5);
+   const page=store.inboxPage(7,5,'d1');assert.equal(page.reset,false,'a cursor saved before the upgrade is still valid');assert.deepEqual(page.items.map(i=>[i.sequence,i.id,i.kind]),[[9,'d2','reminder']]);
+   const b=store.addBrief('☀️ Good morning. Hyuga\'s brief',new Date('2030-01-03T07:00:00Z'));
+   assert.deepEqual(store.inboxPage(9,5,'d2').items.map(i=>[i.id,i.kind,i.message]),[[b.id,'brief','☀️ Good morning. Hyuga\'s brief']]);
+   assert.equal(store.lastBrief(),'2030-01-03T07:00:00.000Z');
+   store.add('Stretch','2031-01-01T09:00:00Z');assert.ok(store.list().length===3,'reminders still go in as before');
+  }finally{store.close();}
+ }finally{rmSync(dir,{recursive:true,force:true});}
 });

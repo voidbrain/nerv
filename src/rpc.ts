@@ -14,6 +14,8 @@ export const methodSchemas={
  'reminders.update':{type:'object',required:['id'],minProperties:2,properties:{id:{type:'string',minLength:1,maxLength:100},title:{type:'string',minLength:1,maxLength:500},due:{type:'string',maxLength:64}},additionalProperties:false},
  'reminders.cancel':{type:'object',required:['id'],properties:{id:{type:'string',minLength:1,maxLength:100}},additionalProperties:false},
  'inbox.list':empty,
+ 'inbox.brief':{type:'object',required:['message'],properties:{message:{type:'string',minLength:1,maxLength:4000}},additionalProperties:false},
+ 'inbox.lastBrief':empty,
  'approvals.expired':{type:'object',required:['since'],properties:{since:{type:'string',minLength:10,maxLength:40}},additionalProperties:false},
  'approvals.pending':{type:'object',properties:{limit:{type:'integer',minimum:1,maximum:20}},additionalProperties:false},
  'approvals.decide':{type:'object',required:['id','decision','source'],properties:{id:{type:'string',minLength:1,maxLength:100},decision:{enum:['approve','reject','edit']},source:{enum:['api','cli','telegram']}},additionalProperties:false},
@@ -64,7 +66,7 @@ export type Principal='interface'|'coordinator'|'nervous'|'brain';
 /** Directed edges describe permission, not routing or model capability. Deny by default. */
 export const communicationGraph=[
  {from:'interface',to:'coordinator',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.pending','reminders.add','reminders.update','reminders.cancel','inbox.list','inbox.page','approvals.pending','events.page','sorties.list','sorties.get']},
- {from:'coordinator',to:'nervous',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.pending','reminders.add','reminders.update','reminders.cancel','inbox.list','inbox.page','approvals.pending','approvals.expired','approvals.decide','events.page','sorties.list','sorties.get','sorties.spear','sorties.open','sorties.finish','actions.preview','actions.act','misato.note','misato.resumable','misato.context','misato.claim','memory.recall','kaji.bases','kaji.records','kaji.lastSeen','kaji.main','kaji.add','kaji.seen','memory.lastRequest','memory.list','memory.add','memory.edit','memory.forget','memory.share','memory.history','memory.episodes','memory.exchanges','memory.known','memory.saveEpisode']},
+ {from:'coordinator',to:'nervous',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.pending','reminders.add','reminders.update','reminders.cancel','inbox.list','inbox.brief','inbox.lastBrief','inbox.page','approvals.pending','approvals.expired','approvals.decide','events.page','sorties.list','sorties.get','sorties.spear','sorties.open','sorties.finish','actions.preview','actions.act','misato.note','misato.resumable','misato.context','misato.claim','memory.recall','kaji.bases','kaji.records','kaji.lastSeen','kaji.main','kaji.add','kaji.seen','memory.lastRequest','memory.list','memory.add','memory.edit','memory.forget','memory.share','memory.history','memory.episodes','memory.exchanges','memory.known','memory.saveEpisode']},
  {from:'coordinator',to:'brain',methods:['runtime.ping','model.complete','casper.verdict','misato.step','models.reload','instrumentality.digest']},
 ] as const;
 export function authorize(from:Principal,to:Principal,method:string):void {

@@ -60,7 +60,9 @@
       const list = [...byId.values()].sort((a, b) => b.created.localeCompare(a.created)); shown = list;
       applyBases(kajiBases, healthOf(doctor)); void loadModels();
       state.lilith = Object.assign(state.lilith || { history:{} }, { facts, episodes });
-      state.delivered = inbox.map(d => Date.parse(d.created));
+      // Reminders delivered (briefs live in the inbox too since F-028, and are shown on their own in Debrief).
+      state.delivered = inbox.filter(d => (d.kind || "reminder") === "reminder").map(d => Date.parse(d.created));
+      state.brief = inbox.find(d => d.kind === "brief") || null;
       const selected = state.sorties.find(x => x.id === state.selected);
       const want = list.filter(s => (selected && s.id === selected.realId) || s.waiting || !detailCache[s.id] || s.status === "open").slice(0, 8);
       await Promise.all(want.map(async s => { detailCache[s.id] = await api("sorties/" + s.id); }));
@@ -366,8 +368,11 @@
     document.getElementById("away-since").textContent = "since " + hhmm(since);
     document.getElementById("away").innerHTML = "<div class='small' style='margin-bottom:6px'>Since your last visit: <b class='ok'>" + count("done") + "</b> done, <b class='danger'>" + count("failed") + "</b> failed, <b class='warn'>" + count("stood-down") + "</b> stopped, and Pen Pen delivered <b>" + delivered + "</b> reminders.</div>" +
       ended.slice(0, 8).map(s => "<div class='row small'><span><span class='" + (s.status === "done" ? "ok" : s.status === "failed" ? "danger" : "warn") + "'>■</span> " + hhmm(s.ended) + " · " + esc(s.title) + "</span><a href='#' data-s='" + s.id + "' class='muted tiny'>open</a></div>" + (s.outcome ? "<div class='tiny muted' style='margin:0 0 4px 12px'>" + esc(s.outcome) + "</div>" : "")).join("") +
-      "<button class='btn sm' id='btn-seen' style='margin-top:4px'>Mark as read</button>";
+      "<button class='btn sm' id='btn-seen' style='margin-top:4px'>Mark as read</button>" +
+      (state.brief ? "<details class='brief' id='brief-box' style='margin-top:6px'" + (state.briefOpen ? " open" : "") + "><summary class='small'>Hyuga's brief · " + esc(new Date(state.brief.created).toLocaleString(undefined, { weekday:"short", hour:"2-digit", minute:"2-digit" })) + "</summary><pre class='tiny' style='white-space:pre-wrap;margin:4px 0 0'>" + esc(state.brief.message) + "</pre></details>" : "");
   };
+  // The panel redraws on every refresh: the brief stays open once the owner opened it.
+  document.addEventListener("toggle", e => { if (e.target && e.target.id === "brief-box") state.briefOpen = e.target.open; }, true);
   window.liveReload = async function () {
     try { const r = await api("models/reload", { method:"POST" }); const roles = (r.models || {}).roles || {}; log("Models reloaded · Misato " + (roles.misato || "—") + " · Casper " + (roles.casper || "—"), "ok", null, "maya"); }
     catch (e) { log("Reload refused: " + e.message + " (the previous settings stay in use)", "danger", null, "maya"); }

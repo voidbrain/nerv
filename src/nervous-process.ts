@@ -21,6 +21,8 @@ process.on('message',(value:unknown)=>{
    case 'reminders.update':{let r;try{r=store.update(params.id as string,{...(params.title!==undefined?{title:params.title as string}:{}),...(params.due!==undefined?{due:params.due as string}:{})});}catch{throw new Error('Invalid reminder.');}return r ?? null;}
    case 'reminders.cancel':return store.cancel(params.id as string);
    case 'inbox.list':return store.inbox();
+   case 'inbox.brief':return store.addBrief(params.message as string);
+   case 'inbox.lastBrief':return store.lastBrief();
    case 'approvals.expired':return store.expiredApprovals(params.since as string);
    case 'approvals.pending':return store.approvals(params.limit as number|undefined);
    case 'approvals.decide':return store.decide(params.id as string,params.decision as 'approve'|'reject'|'edit',params.source as string);
