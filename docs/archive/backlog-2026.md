@@ -811,3 +811,37 @@ Closed records in closing-date order. Dated evidence, not current status.
 </details>
 
 ---
+
+### B-002
+
+**Sortie list: older sorties show only the time, not the day**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: verified by the owner and closed.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-05: the sortie list shows hh:mm for every sortie, so one from yesterday reads like one from this morning. |
+| **Reproduce** | Open the dashboard with sorties from earlier days; their cards show only hh:mm. |
+| **Check** | Today's sorties show hh:mm; yesterday's "yesterday hh:mm"; older ones the date and time in the owner's language and time zone; a test covers the three cases. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-05: the owner checked the dashboard ("B-002 ok"); the automated check passed in [PR #104](https://github.com/voidbrain/nerv/pull/104)'s CI (42029130633). Fixed in [PR #104](https://github.com/voidbrain/nerv/pull/104): `dayTime()` in web/public/dashboard/dashboard.js gives today's time alone, "yesterday HH:MM", "3 Nov HH:MM", and the year when it differs, in browser local time (style guide); used on sortie cards and both "while you were away" lists (simulation and live). Checked: test/dashboard.test.ts (today, yesterday, earlier this year, another year, midnight, yesterday across a year), fails without the fix; full suite and build pass. Not yet seen in a browser: the owner's look closes it. Reported 2026-11-05.
+
+**Estimates:** No remaining effort; ~100% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner report 2026-11-05; [PR #104](https://github.com/voidbrain/nerv/pull/104) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05: owner's visual check; PR CI 42029130633 |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
