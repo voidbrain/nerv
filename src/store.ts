@@ -178,6 +178,7 @@ export class Store {
   sorties(limit=20, before?: string, q?: string) { return this.ledger.sorties(limit,before,q); }
   sortie(id: string) { return this.ledger.sortie(id) ?? null; }
   closedSince(since: string) { return this.ledger.closedSince(since); }
+  unmatched(domain: string, since: string) { return this.ledger.unmatched(domain,since); }
   shadowVote(sortieId: string, actionId: string, vote: {seat:string;vote:'approve'|'reject'|'abstain';reason:string;confidence?:number}) { this.ledger.shadowVote(sortieId,actionId,vote); return true; }
   explain(ref: string) { return this.ledger.explain(ref); }
   health() { return {integrityCheck:"not-run"}; }

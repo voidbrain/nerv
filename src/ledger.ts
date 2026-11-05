@@ -81,7 +81,7 @@ export class Ledger {
   return row&&{sortieId:row.sortie_id,actionId:row.id,tool:row.tool,args:JSON.parse(row.args) as Record<string,unknown>,used:row.used!==null};
  }
  /** Misato's loop state, kept in the ledger so a resume after the owner's decision needs no coordinator memory (F-033). */
- note<K extends 'misato.request'|'misato.step'|'misato.waiting'|'misato.consult'>(sortieId:string,kind:K,payload:EventPayloads[K],now=new Date()):void {this.tx(()=>this.event(sortieId,null,kind,payload,now));}
+ note<K extends 'misato.request'|'misato.step'|'misato.waiting'|'misato.consult'|'pilot.unmatched'>(sortieId:string,kind:K,payload:EventPayloads[K],now=new Date()):void {this.tx(()=>this.event(sortieId,null,kind,payload,now));}
  private exchange(sortieId:string,requestPayload:string):{request:string;reply?:string;actions?:string[]} {
   const reply=this.db.prepare("SELECT payload FROM events WHERE sortie_id=? AND kind='misato.reply' ORDER BY sequence DESC LIMIT 1").get(sortieId) as {payload:string}|undefined;
   const ran=(this.db.prepare("SELECT payload FROM events WHERE sortie_id=? AND kind='action.done' ORDER BY sequence").all(sortieId) as {payload:string}[]).map(e=>{const p=JSON.parse(e.payload) as {tool:string;result:unknown};return `${p.tool} → ${JSON.stringify(p.result).slice(0,300)}`;});
@@ -213,6 +213,15 @@ export class Ledger {
  }
  /** B-011: another base's outcome for an action this sortie sent it, kept with the sortie (also after it closed). */
  remoteResult(sortieId:string,payload:EventPayloads['kaji.result'],now=new Date()):void {this.tx(()=>this.event(sortieId,null,'kaji.result',payload,now));}
+ /** F-045: requests since `since` that no pilot fitted, for one domain, and the state of a pilots.create proposal for it. */
+ unmatched(domain:string,since:string):{count:number;sorties:{id:string;title:string}[];proposal:'pending'|'declined'|null} {
+  if(typeof domain!=='string'||!domain||domain.length>40||!Number.isFinite(Date.parse(since)))throw new Error('Invalid domain query.');
+  const at=new Date(since).toISOString();
+  const rows=this.db.prepare("SELECT s.id,s.title FROM events e JOIN sorties s ON s.id=e.sortie_id WHERE e.kind='pilot.unmatched' AND json_extract(e.payload,'$.domain')=? AND e.created>? ORDER BY e.sequence DESC").all(domain,at) as {id:string;title:string}[];
+  const p=this.db.prepare("SELECT a.decision,a.expires,a.decided FROM approvals a JOIN actions x ON x.id=a.action_id WHERE x.tool='pilots.create' AND json_extract(x.args,'$.domain')=? ORDER BY x.created DESC LIMIT 1").get(domain) as {decision:string|null;expires:string;decided:string|null}|undefined;
+  const proposal=!p?null:p.decision===null&&p.expires>iso(new Date())?'pending':p.decision&&p.decision!=='approve'&&(p.decided ?? '')>at?'declined':null;
+  return {count:rows.length,sorties:rows.slice(0,5),proposal};
+ }
  /** Misato's reply to the owner, kept with the sortie it answers. */
  reply(sortieId:string,text:string,now=new Date()):void {this.tx(()=>this.event(sortieId,null,'misato.reply',{text:text.slice(0,4000)},now));}
  /** Records what an executor did after `authorize` let it run. */

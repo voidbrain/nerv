@@ -4,7 +4,7 @@ import {readConfig,readModelKey} from './config.ts';
 import {complete,describe,forRole,ModelError,MODEL_TIMEOUT_MS,selectRoute,type Ask,type Models,type Reply} from './model.ts';
 import {RouteWatch,describeChange,type RouteChange} from './route-health.ts';
 import {casperAsk,parseCasper,type CasperInput} from './casper.ts';
-import {consultantAsk,misatoAsk,parseAdvice,parsePlan,remoteToolDoc,type RemoteOffer,type Recalled,type Step,type Turn} from './misato.ts';
+import {consultantAsk,parseConsult,misatoAsk,parseAdvice,parsePlan,remoteToolDoc,type RemoteOffer,type Recalled,type Step,type Turn} from './misato.ts';
 import {toolDocs} from './executors.ts';
 import {digestAsk,factLimit,parseDigest,type Exchange} from './instrumentality.ts';
 // Execution boundary: model routes, the Casper seat and Misato's planning step. It plans and reviews; it never executes a tool.
@@ -64,7 +64,8 @@ process.on('message',(value:unknown)=>{
    const pilot=params.pilot as {name:string;domain:string;model:string}|undefined;
    const pick=models.roles?.consultant;if(configError||!models.local||(!pilot&&!pick))return {advice:null};
    const on=pilot?{...models,local:{...models.local,model:pilot.model}}:forRole(models,'consultant');
-   try{const reply=await run(consultantAsk(params.request as string,(params.context as Turn[]|undefined) ?? [],pilot,(params.bases as {id:string;name:string}[]|undefined) ?? []),on);const advice=parseAdvice(reply.text);return advice?{advice,model:reply.model}:{advice:null};}
+   try{const reply=await run(consultantAsk(params.request as string,(params.context as Turn[]|undefined) ?? [],pilot,(params.bases as {id:string;name:string}[]|undefined) ?? []),on);if(pilot){const advice=parseAdvice(reply.text);return advice?{advice,model:reply.model}:{advice:null};}
+    const c=parseConsult(reply.text);return {advice:c.advice ?? null,...(c.advice?{model:reply.model}:{}),...(c.domain?{domain:c.domain}:{})};}
    catch(e){return {advice:null,error:e instanceof ModelError?e.message:'Consultant failed.'};}
   }
   if(method==='instrumentality.digest'){

@@ -10,6 +10,8 @@ import {MODEL_TIMEOUT_MS,type Ask,type Reply,type RouteName} from './model.ts';
 import type {Effect,Pattern,Stage,Verdict} from './policy.ts';
 import {askedWhy,explainRecord} from './why.ts';
 import {choosePilot,type Pilot} from './pilots.ts';
+/** Requests in one domain without a specialist, within 30 days, before a pilot is proposed (F-045). */
+const PILOT_THRESHOLD=3;
 import {MAX_STEPS,doneReply,type RemoteOffer,requestLanguage,waitingReply,type Plan,type Recalled,type Step,type Turn} from './misato.ts';
 import {toolDocs} from './executors.ts';
 import type {Digest,Exchange} from './instrumentality.ts';
@@ -158,7 +160,7 @@ export class Runtime implements StoreApi {
    await this.nervous.call('sorties.finish',{sortieId,status:'done',reply});return {sortieId,reply,steps:[],waiting:[]};}
   return this.loop(sortieId,message,[],context);
  }
- private note(sortieId:string,kind:'misato.request'|'misato.step'|'misato.waiting'|'misato.consult',payload:object){return this.nervous.call('misato.note',{sortieId,kind,payload});}
+ private note(sortieId:string,kind:'misato.request'|'misato.step'|'misato.waiting'|'misato.consult'|'pilot.unmatched',payload:object){return this.nervous.call('misato.note',{sortieId,kind,payload});}
  /** Records a step, cutting an oversized result so the event stays within its bound. */
  private async record(sortieId:string,steps:Step[],step:Step,actionId?:string){
   const fitted=JSON.stringify(step).length>12000?{...step,result:{truncated:true}}:step;
@@ -185,8 +187,12 @@ export class Runtime implements StoreApi {
   // F-045: the specialist pilot whose keywords fit the request advises; none fits, the generic pilot (roles.consultant).
   const pilot=steps.length?undefined:(()=>{try{return choosePilot(message,this.pilots?.() ?? []);}catch{return undefined;}})();
   const named=steps.length?[]:await this.baseNames();
-  const advice=steps.length?undefined:await this.brain.call('consultant.advise',{request:message.slice(0,4000),...(context.length?{context:context.slice(-3)}:{}),...(pilot?{pilot:{name:pilot.name,domain:pilot.domain,model:pilot.model}}:{}),...(named.length>1?{bases:named}:{})},MODEL_TIMEOUT_MS).then(r=>r as {advice:string|null;model?:string},()=>({advice:null})).then(async r=>{
+  let unmatched:string|undefined;
+  const advice=steps.length?undefined:await this.brain.call('consultant.advise',{request:message.slice(0,4000),...(context.length?{context:context.slice(-3)}:{}),...(pilot?{pilot:{name:pilot.name,domain:pilot.domain,model:pilot.model}}:{}),...(named.length>1?{bases:named}:{})},MODEL_TIMEOUT_MS).then(r=>r as {advice:string|null;model?:string;domain?:string},():{advice:string|null;model?:string;domain?:string}=>({advice:null})).then(async r=>{
+   if(!pilot&&r.domain){unmatched=r.domain;await this.note(sortieId,'pilot.unmatched',{domain:r.domain});}
    if(!r.advice)return undefined;await this.note(sortieId,'misato.consult',{advice:r.advice,model:r.model ?? '',...(pilot?{pilot:{id:pilot.id,name:pilot.name,why:pilot.why}}:{})});return r.advice;});
+  // F-045: enough requests in one domain without a specialist → a pilot is proposed (a card), in the background.
+  if(unmatched)void this.proposePilot(unmatched).catch(()=>{/* best effort */});
   for(let turn=0;turn<MAX_STEPS;turn++){
    const remote=await this.remoteOffers();
    const out=await this.brain.call('misato.step',{request:message,history:steps.slice(-12),...(remote.length?{remote}:{}),...(advice?{advice}:{}),language:lang(),...(context.length?{context}:{}),...(memory.length?{memory:memory.slice(0,10)}:{})},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as {plan?:Plan;invalid?:boolean;error?:string};
@@ -221,6 +227,23 @@ export class Runtime implements StoreApi {
  private readonly offersHeard=new Map<string,{tools:string[];at:number}>();
  notePeerOffers(baseId:string,tools:string[]){this.offersHeard.set(baseId,{tools,at:Date.now()});}
  /** Bases online now with something on offer: what Misato may send with kaji.run. */
+ /**
+  * F-045 detection: after PILOT_THRESHOLD requests in one domain within 30 days that no pilot fitted, NERV proposes a
+  * pilot for it on a card (owner-only pilots.create). Not again while that card waits, nor for 30 days after a no.
+  */
+ async proposePilot(domain:string,now=new Date()):Promise<boolean> {
+  if(choosePilot(domain,this.pilots?.() ?? []))return false;
+  const since=new Date(now.getTime()-30*86_400_000).toISOString();
+  const seen=await this.nervous.call('pilots.unmatched',{domain,since}) as {count:number;sorties:{id:string;title:string}[];proposal:string|null};
+  if(seen.count<PILOT_THRESHOLD||seen.proposal)return false;
+  const id=(/^[a-z]/.test(domain)?'':'p-')+domain.replace(/ /g,'-').slice(0,28);
+  const name=domain.replace(/\b\p{L}/gu,c=>c.toUpperCase()).slice(0,40);
+  const keywords=[...new Set([domain,...domain.split(' ').filter(w=>w.length>=4)])].slice(0,10);
+  const sortieId=await this.nervous.call('sorties.open',{title:`Marduk Institute: a pilot for ${domain}?`,source:'marduk'}) as string;
+  const why=`${seen.count} requests about ${domain} in 30 days had no specialist: ${seen.sorties.map(s=>`S-${s.id.slice(0,4).toUpperCase()} “${s.title.slice(0,60)}”`).join(', ')}.`;
+  await this.gate(sortieId,{request:`Marduk Institute proposes a pilot for ${domain}. ${why}`,tool:'pilots.create',args:{id,name,domain,keywords}},false);
+  return true;
+ }
  /** Every enrolled base by id and name (this one included), for Casper and the consultant (B-012); none without the Kaji line. */
  async baseNames():Promise<{id:string;name:string}[]> {try{return (await this.bases()).filter(b=>b.status==='enrolled').slice(0,20).map(b=>({id:b.baseId.slice(0,16),name:b.name.slice(0,60)}));}catch{return [];}}
  async remoteOffers():Promise<RemoteOffer[]> {
