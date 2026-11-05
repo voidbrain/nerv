@@ -1,4 +1,4 @@
 [
- {"kind":"rule","disposition":"implemented","target":"docs/agents/areas.md","evidence":"Distributed contracts: the base registry is renamed from Marduk's registry to the Gehirn registry (owner decision 2026-11-05: Marduk Institute names the pilot roster). Wording only; the registry's rules (signed records, append-only, replicated, revoke wins) are unchanged. Reviewed against the architecture doc's naming table, updated in the same change."},
+ {"kind":"rule","disposition":"implemented","target":"docs/agents/areas.md","evidence":"Action gate and ledger gains the B-013 rule: after a restart, Misato sorties the previous run left open and not waiting for the owner are closed as interrupted with a reply (Runtime.closeInterrupted, called once the channels listen); never resumed; sorties waiting for approval keep resuming. Checked by test/resume.test.ts. Reviewed against the resume rule (claimResume, resumable) and the ledger's append-only events: consistent, complements resumable without overlap."},
  {"kind":"none","disposition":"no-change","evidence":"No harness file or copied tool changed."}
 ]

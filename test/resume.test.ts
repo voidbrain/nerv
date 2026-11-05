@@ -87,3 +87,25 @@ test('"why S-…?" is answered from the ledger, without the model: the ballot, e
   assert.equal(t.prompts.length,asked,'the model was not asked');
  }finally{await t.close();}
 });
+test('a sortie a restart cut off is closed as interrupted with a reply saying what ran; one waiting for the owner stays; nothing runs again (B-013)',async()=>{
+ const t=await setup([ADD]);
+ try{
+  const {r}=await t.start();
+  const waiting=await r.chat('Remind me to call Ada');assert.equal(waiting.waiting.length,1,'this one waits for the owner');
+  const cut=await r.nervous.call('sorties.open',{title:'Remind me on Tabgha tomorrow at 9 pm to water the plants',source:'misato'}) as string;
+  await r.nervous.call('misato.note',{sortieId:cut,kind:'misato.request',payload:{text:'Remind me on Tabgha tomorrow at 9 pm to water the plants'}});
+  const cutIt=await r.nervous.call('sorties.open',{title:'ricordami di bere acqua',source:'misato'}) as string;
+  await r.close();
+  const {r:after,follow}=await t.start();
+  assert.equal(await after.closeInterrupted(),2);
+  const events=await after.events(cut);
+  assert.deepEqual(events.slice(-2).map(e=>e.kind),['misato.reply','sortie.failed']);
+  assert.equal((events.at(-2)!.payload as {text:string}).text,'Interrupted by a restart while working on “Remind me on Tabgha tomorrow at 9 pm to water the plants”. Nothing had run yet. I will not carry on by myself: ask again if you still want it.');
+  assert.match(((await after.events(cutIt)).at(-2)!.payload as {text:string}).text,/^Interrotto da un riavvio mentre lavoravo a “ricordami di bere acqua”\. Non si era fatto ancora nulla\./,'in the request\'s language');
+  assert.deepEqual(follow.map(f=>f.sortieId).sort(),[cut,cutIt].sort(),'the owner is told, once each');
+  assert.equal((await after.events(waiting.sortieId)).at(-1)!.kind,'misato.waiting','the one waiting for the owner is left alone');
+  const mine=await after.nervous.call('sorties.open',{title:'new',source:'misato'}) as string;
+  assert.equal(await after.closeInterrupted(),0,'nothing left, and a sortie of this run is never touched');
+  assert.equal((await after.events(mine)).at(-1)!.kind,'sortie.opened');
+ }finally{await t.close();}
+});
