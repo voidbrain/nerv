@@ -1,13 +1,13 @@
 # NERV Agency backlog
 
-Current work ledger, reviewed 5 November 2026 against main `332189a`. PR #1–#101 merged after green checks (#53–#101 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
+Current work ledger, reviewed 5 November 2026 against main `c737609`. PR #1–#104 merged after green checks (#53–#104 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
 
 <!-- recap:start · generated by tools/backlog-recap.mjs from the records; do not edit by hand -->
 **Recap as of 2026-11-05** (window 2026-10-30 – 2026-11-05).
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 28 | 4 |
+| **Open** | 28 | 1 |
 | **Require Human 🧑** | 2 | 1 |
 
 ### Last 7 days
@@ -15,7 +15,7 @@ Current work ledger, reviewed 5 November 2026 against main `332189a`. PR #1–#1
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **Count** | 45 | 17 | 7 | 3 |
+| **Count** | 45 | 17 | 7 | 6 |
 
 ### Require Human 🧑
 
@@ -64,108 +64,9 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 ---
 
-### B-003
-
-**The same reminder appears twice in Coming up**
-
-| Signal | Priority | Status | Effort | Complete |
-|:---:|---|---|---|---|
-| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
-
-💻 **→ Human action required: No**<br />Close from the merged PR's green CI. The two reminders already stored stay until you cancel one (`nerv list`, then cancel it on the dashboard).
-
-| | |
-|---|---|
-| **Issue** | Owner report 2026-11-05: "Chiamare il dentista" is shown twice, identical, under Coming up. |
-| **Reproduce** | Look at Coming up on the owner's base; `nerv reminders list` shows whether there are one or two records. |
-| **Check** | One stored reminder is listed once; asking for a reminder with the same title and time as a pending one says it already exists instead of adding a second; a test covers both. |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Next action / closure evidence:** Cause found 2026-11-05 (read-only look at the owner's ledger): two reminders were stored, not one listed twice. The same request was sent four times within 16 minutes on 4 November, each its own sortie, and two were approved, so two identical reminders were added; nothing checked for a pending one. (The year 2030 was in the request itself, a test date, not misread.) Fixed in [PR #103](https://github.com/voidbrain/nerv/pull/103): adding a reminder with the same title (ignoring case and outer spaces) and the same moment as a pending one returns that one, marked `existing`, and the action's result tells Misato it already existed; a cancelled or delivered one does not count; another time is another reminder. Checked: test/core.test.ts (the store; through the scheduler process the same action twice adds one), both fail without the fix; full suite 136 pass, build, headless. Reported 2026-11-05. Not yet known whether two requests each added one (Telegram and dashboard, or a retry) or the list repeats a record.
-
-**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
-
-| Field | Value |
-|---|---|
-| PR / evidence | Owner report 2026-11-05; [PR #103](https://github.com/voidbrain/nerv/pull/103) |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-05: test/core.test.ts and full suite (local run) |
-| Reviewed | 2026-11-05 |
-
-</details>
-
----
 
 
-### B-005
 
-**The chat placeholder suggests a command that gives a vague answer**
-
-| Signal | Priority | Status | Effort | Complete |
-|:---:|---|---|---|---|
-| 🟡 | 🔹 P3 | Implemented | 🟢 Small | ~90% |
-
-💻 **→ Human action required: No**<br />Close from the merged PR's green CI.
-
-| | |
-|---|---|
-| **Issue** | Owner report 2026-11-05: the chat field suggests "status"; on the live base it gives a vague reply, because the examples were written for the simulation. |
-| **Reproduce** | Type "status" in the live dashboard chat. |
-| **Check** | Every example in the placeholder gives a useful answer on a live base; "status" answers with this base's health, the cards waiting and the next reminder (or the placeholder stops suggesting it). |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Next action / closure evidence:** Fixed in [PR #104](https://github.com/voidbrain/nerv/pull/104): in live mode the chat placeholder says *Ask Misato: remind me to … at … · why S-1A2B? · what are my reminders?* (each answered on a live base: a request, the ledger answer of B-004, a reminders.list); the simulation keeps its demo commands. A real "status" answer is F-042. Checked: test/dashboard.test.ts (the live hint names no demo-only command and is set when live mode starts). Reported 2026-11-05.
-
-**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
-
-| Field | Value |
-|---|---|
-| PR / evidence | Owner report 2026-11-05; [PR #104](https://github.com/voidbrain/nerv/pull/104) |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-05: test/dashboard.test.ts (local run) |
-| Reviewed | 2026-11-05 |
-
-</details>
-
----
-
-### B-006
-
-**The brief says "All checks pass" when it could not read health**
-
-| Signal | Priority | Status | Effort | Complete |
-|:---:|---|---|---|---|
-| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
-
-💻 **→ Human action required: No**<br />Close from the merged PR's green CI.
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-05 reviewing the brief against Anthropic's automation guidance (a source that failed is not "nothing new"): `gatherBrief` (src/brief.ts) turns a failed health read into an empty report, which the brief prints as "All checks pass", and a failed read of expired approvals into none. It also counts only the latest 50 sorties, so a busy day is undercounted. |
-| **Reproduce** | Make `store.health()` throw in a test of `gatherBrief`; the brief reads "Health: All checks pass." |
-| **Check** | A source the brief could not read is named ("health unavailable for this brief") and never shown as fine or empty; sorties since the previous brief are all counted; tests cover a failed health read, a failed expired read and more than 50 sorties. |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Next action / closure evidence:** Fixed in [PR #102](https://github.com/voidbrain/nerv/pull/102): `gatherBrief` reads each source on its own; one that fails is listed in `unavailable` and the brief prints *could not be read for this brief* (Italian: *non leggibile per questo brief*) in that part, never *nothing* or *all checks pass*; a failed read no longer throws out of the brief's timer. Sorties closed since the previous brief are counted by the scheduler (`sorties.closedSince`: done and failed counts and the latest five failures), not taken from the newest 50. Checked: test/brief.test.ts (approvals, health and expired unreadable: named in English and Italian, the rest still written; through the scheduler process 62 closed sorties counted as 59 done and 3 failed), both fail without the fix; full suite 136 pass, build, headless. INSTALL notes the behaviour. Found 2026-11-05.
-
-**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
-
-| Field | Value |
-|---|---|
-| PR / evidence | Code review 2026-11-05 (src/brief.ts); [PR #102](https://github.com/voidbrain/nerv/pull/102) |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-05: test/brief.test.ts and full suite (local run) |
-| Reviewed | 2026-11-05 |
-
-</details>
-
----
 
 
 ## Features and improvements
