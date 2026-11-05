@@ -464,7 +464,8 @@ function stepState(s, id) {
   if (!s) return "";
   // F-051: forwarded to the main base: the steps between ran there.
   if (s.forwarded && id !== "detect" && id !== "debrief") return "skip";
-  if (id === "consult" && !s.consult) return "skip";
+  // B-020: while the consultant works the sortie is not yet marked consulted, but its step is the one running.
+  if (id === "consult" && !s.consult && s.phase !== "consult") return "skip";
   if (s.phase === id) return s.status === "waiting" || s.status === "waiting-route" ? "wait" : s.status === "active" ? "on" : "done";
   if (id === "apt" && !s.actions.some(a => a.ballot && a.ballot.outcome !== "grant")) return s.done.apt ? "done" : (s.status === "done" ? "skip" : "");
   return s.done[id] ? "done" : "";

@@ -247,3 +247,12 @@ test('F-051 slice 2: a forwarded request shows as forwarded on the asking base (
  assert.match(js,/\["detect","debrief","relay"\]/);assert.match(js,/if \(s\.forwarded && id !== "detect" && id !== "debrief"\) return "skip";/);
  assert.match(js,/"forwarded to " \+ s\.forwarded : s && s\.origin \? "from " \+ s\.origin/);assert.match(js,/s\.forwarded \? "→ " \+ esc\(s\.forwarded\) : s\.origin \? "from " \+ esc\(s\.origin\)/);
 });
+test('the advice step is lit while the consultant works, not skipped until the advice arrives (B-020)',async()=>{
+ const {readFileSync}=await import('node:fs');const src=readFileSync('web/public/dashboard/dashboard.js','utf8');
+ const i=src.indexOf('function stepState(');const body=src.slice(i,src.indexOf('\n}\n',i)+2);
+ const stepState=new Function(`${body}\nreturn stepState;`)() as (s:object,id:string)=>string;
+ const base={actions:[],done:{detect:true,intake:true,route:true}};
+ assert.equal(stepState({...base,consult:false,phase:'consult',status:'active'},'consult'),'on','running');
+ assert.equal(stepState({...base,consult:false,phase:'plan',status:'active'},'consult'),'skip','no consultant');
+ assert.equal(stepState({...base,consult:true,phase:'plan',status:'active',done:{...base.done,consult:true}},'consult'),'done','advised');
+});
