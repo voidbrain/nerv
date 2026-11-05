@@ -116,7 +116,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 |:---:|---|---|---|---|
 | 🟡 | 🔺 P1 | Implemented | 🟢 Small | ~90% |
 
-💻 **→ Human action required: No**<br />Close once native-macos passes on this PR and on main.
+💻 **→ Human action required: No**<br />Close once native-macos passes on #124 and on main.
 
 | | |
 |---|---|
@@ -135,7 +135,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 |---|---|
 | PR / evidence | #123 native-macos jobs 127479057886, 127479078814 |
 | Opened | 2026-11-05 |
-| Verification | Pending: native-macos on this PR |
+| Verification | Pending: native-macos on #124 and main |
 | Reviewed | 2026-11-05 |
 
 </details>
