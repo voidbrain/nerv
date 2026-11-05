@@ -122,3 +122,12 @@ test('Casper\'s prompt carries up to three earlier exchanges, cut to size, and n
  assert.deepEqual(p.earlier.map(t=>t.reply),['reply 2','reply 3','reply 4'],'the last three');assert.equal(p.earlier[0]!.request.length,600);
  assert.match(casperAsk(base).system ?? '',/short answer or confirmation/);
 });
+test('Casper and the consultant are told the bases by id and name when given, and nothing when not (B-012)',async()=>{
+ const {consultantAsk}=await import('../src/misato.ts');
+ const base={request:'Remind me on Tabgha to stretch',tool:'kaji.run',args:{base:'NERV-02',tool:'reminders.add',args:{}},effect:'write-external' as const};
+ assert.equal(JSON.parse(casperAsk(base).prompt).bases,undefined);
+ assert.deepEqual(JSON.parse(casperAsk({...base,bases:[{id:'NERV-02',name:'Tabgha'}]}).prompt).bases,[{id:'NERV-02',name:'Tabgha'}]);
+ assert.match(casperAsk(base).system ?? '',/"on Tabgha"\) matches an action for its id/);
+ assert.deepEqual(JSON.parse(consultantAsk('Remind me on Tabgha',[],undefined,[{id:'NERV-02',name:'Tabgha'}]).prompt).bases,[{id:'NERV-02',name:'Tabgha'}]);
+ assert.equal(JSON.parse(consultantAsk('Remind me').prompt).bases,undefined);
+});
