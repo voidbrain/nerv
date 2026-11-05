@@ -1,5 +1,5 @@
 import { createHash, randomBytes, sign, verify, type KeyObject } from 'node:crypto';
-import { createServer, type IncomingMessage, type Server } from 'node:http';
+import { createServer, request as httpRequest, type IncomingMessage, type Server } from 'node:http';
 import { canonical, publicKeyFrom, type BaseEntry, type SignedRecord } from './kaji.ts';
 /**
  * The Kaji line's live link (F-036, phase 1b). Each base listens on its enrolled address only (the Tailscale IP),
@@ -189,8 +189,8 @@ export class KajiLink {
  /** Signed request to one peer; the reply must be signed by that same peer. */
  private async call(peer:BaseEntry,method:'GET'|'POST',path:string,value?:unknown,timeoutMs=8000):Promise<unknown> {
   const body=value===undefined?'':JSON.stringify(value);const {host,port}=endpoint(peer.address);
-  const res=await fetch(`http://${host}:${port}${path}`,{method,headers:{'content-type':'application/json',...signedHeaders(this.baseId,this.key,'req',method,path,body)},...(method==='POST'?{body}:{}),signal:AbortSignal.timeout(timeoutMs),redirect:'error'});
-  const text=await res.text();const headers=Object.fromEntries(res.headers.entries());
+  const res=await send(host,port,method,path,{'content-type':'application/json',...signedHeaders(this.baseId,this.key,'req',method,path,body)},method==='POST'?body:undefined,timeoutMs);
+  const text=res.text;const headers=res.headers;
   const from=verifySigned(headers,'res',method,path,text,await this.port.bases(),this.nonces);
   if(from!==peer.baseId)throw new Error(`${peer.baseId} answered as ${from}`);
   if(!res.ok)throw new Error(`${peer.baseId} refused (${res.status})`);
@@ -251,6 +251,25 @@ export class KajiLink {
    }catch(e){this.mark(peer.baseId,false,e instanceof Error?e.message:'error');}
   }
  }
+}
+/**
+ * One request to a peer with no connection pool (agent:false): the connection closes when the answer is in, so no idle
+ * keep-alive socket is left to hold a process open (on Windows a test file never exited; a service stop could wait).
+ * Errors keep fetch's shape: a connection that never opened is a TypeError whose cause has the code (ECONNREFUSED…),
+ * a timeout is a TimeoutError, so callers can tell "never sent" from "may have arrived".
+ */
+function send(host:string,port:number,method:string,path:string,headers:Record<string,string>,body:string|undefined,timeoutMs:number):Promise<{status:number;ok:boolean;headers:Record<string,string>;text:string}> {
+ return new Promise((done,fail)=>{
+  const req=httpRequest({host,port,method,path,agent:false,headers:{...headers,...(body!==undefined?{'content-length':String(Buffer.byteLength(body))}:{})}},res=>{
+   const chunks:Buffer[]=[];let size=0;
+   res.on('data',(c:Buffer)=>{size+=c.length;if(size>MAX_BODY){req.destroy(new Error('answer too large'));return;}chunks.push(c);});
+   res.on('end',()=>{clearTimeout(timer);const h:Record<string,string>={};for(const [k,v] of Object.entries(res.headers))if(typeof v==='string')h[k]=v;done({status:res.statusCode ?? 0,ok:(res.statusCode ?? 0)>=200&&(res.statusCode ?? 0)<300,headers:h,text:Buffer.concat(chunks).toString('utf8')});});
+   res.on('error',e=>{clearTimeout(timer);fail(e);});
+  });
+  const timer=setTimeout(()=>{const e=new Error('The operation was aborted due to timeout');e.name='TimeoutError';req.destroy(e);},timeoutMs);
+  req.on('error',e=>{clearTimeout(timer);fail(e.name==='TimeoutError'?e:Object.assign(new TypeError('fetch failed'),{cause:e}));});
+  if(body!==undefined)req.write(body);req.end();
+ });
 }
 /** Only enrolled base ids and valid, not-in-the-future times are merged from a peer's view. */
 function sanitizeSeen(seen:unknown,bases:BaseEntry[]):Record<string,string> {
