@@ -57,3 +57,43 @@ test('through every process: the pilot whose keywords fit advises on its own mod
   assert.match(readFileSync(join(home,'config.json'),'utf8'),/"retired": true/);
  }finally{await r.close();await f.close();rmSync(home,{recursive:true,force:true});}
 });
+test('the generic pilot names the domain on its first line; the rest is the advice (F-045 detection)',async()=>{
+ const {parseConsult}=await import('../src/misato.ts');
+ assert.deepEqual(parseConsult('Domain: Image Editing\nCrop the photo first.'),{domain:'image editing',advice:'Crop the photo first.'});
+ assert.deepEqual(parseConsult('**Domain:** 3D printing, slicing and more words\nnone'),{domain:'3d printing slicing and'});
+ assert.deepEqual(parseConsult('Check the date.'),{advice:'Check the date.'},'no domain line: all advice, as before');
+});
+test('through every process: three requests in one domain without a specialist bring a pilots.create card; approved, the next request goes to that pilot; turned down, it is not proposed again (F-045)',{timeout:60000},async()=>{
+ const {Runtime}=await import('../src/runtime.ts');const {readConfig}=await import('../src/config.ts');
+ const asked:string[]=[];
+ const s=createServer((req,res)=>{let raw='';req.on('data',c=>raw+=c).on('end',()=>{const r=JSON.parse(raw) as {model:string;messages:{content:string}[]};const sys=r.messages[0]!.content;let out='{"reply":"ok"}';
+  const req0=(JSON.parse(r.messages.at(-1)!.content) as {request?:string}).request ?? '';
+  if(/^You are .+, the owner's pilot for/.test(sys)){asked.push('pilot:'+r.model);out='Specialist advice.';}
+  else if(sys.startsWith('You are a consultant')){asked.push('generic');out=(/wood/.test(req0)?'Domain: woodworking':'Domain: image editing')+'\nGeneric advice.';}
+  else if(sys.startsWith('You are Casper'))out='{"vote":"approve","reason":"Matches.","confidence":0.9}';
+  res.setHeader('content-type','application/json');res.end(JSON.stringify({model:r.model,choices:[{message:{content:out},finish_reason:'stop'}]}));});});
+ await new Promise<void>(d=>s.listen(0,'127.0.0.1',d));const url=`http://127.0.0.1:${(s.address() as {port:number}).port}/v1`;
+ const home=mkdtempSync(join(tmpdir(),'nerv-detect-'));
+ writeFileSync(join(home,'config.json'),JSON.stringify({models:{local:{baseUrl:url,model:'m'},roles:{misato:{route:'local'},consultant:{model:'advisor'}}}}));
+ const r=new Runtime(join(home,'nerv.sqlite'),undefined,home);r.setPilots(()=>readConfig(home).pilots ?? []);
+ const pending=async(tool='pilots.create')=>(await r.approvals(5)).filter(a=>a.card.tool===tool);
+ const until=async(f:()=>Promise<boolean>)=>{const end=Date.now()+8000;while(!(await f())){if(Date.now()>end)throw new Error('timed out');await new Promise(d=>setTimeout(d,50));}};
+ try{
+  await r.ready();
+  await r.chat('Remove the background of this photo');await r.chat('Make the photo brighter');
+  await new Promise(d=>setTimeout(d,300));assert.equal((await pending()).length,0,'two are not enough');
+  await r.chat('Crop my photo to a square');
+  await until(async()=>(await pending()).length===1);
+  const card=(await pending())[0]!.card;
+  assert.deepEqual(card.args,{id:'image-editing',name:'Image Editing',domain:'image editing',keywords:['image editing','image','editing']});
+  assert.equal(card.pattern,'blue','a new pilot always asks the owner');
+  await r.chat('Rotate the photo');await new Promise(d=>setTimeout(d,300));assert.equal((await pending()).length,1,'not proposed twice while the card waits');
+  await r.decide((await pending())[0]!.id,'approve','api');
+  assert.deepEqual(readConfig(home).pilots,[{id:'image-editing',name:'Image Editing',domain:'image editing',keywords:['image editing','image','editing'],model:'advisor',stage:'prototype',parent:'generic'}],'created at Prototype on the generic pilot\'s model');
+  await r.chat('Some image editing for this picture');assert.equal(asked.at(-1),'pilot:advisor','the next request in that domain goes to the new pilot');
+  for(const t of ['Sand the woodworking table','Plan a woodworking shelf','Glue for woodworking'])await r.chat(t);
+  await until(async()=>(await pending()).length===1);await r.decide((await pending())[0]!.id,'reject','api');
+  for(const t of ['More woodworking','Woodworking tools','Woodworking finish'])await r.chat(t);
+  await new Promise(d=>setTimeout(d,400));assert.equal((await pending()).length,0,'turned down: not proposed again for 30 days');
+ }finally{await r.close();await new Promise<void>(d=>{s.close(()=>d());s.closeAllConnections();});rmSync(home,{recursive:true,force:true});}
+});

@@ -2,7 +2,7 @@ import type { Tool } from './policy.ts';
 import type { Reminder } from './store.ts';
 import type { ToolDoc } from './misato.ts';
 import type { Memory } from './memory.ts';
-import { setSchedule } from './config.ts';
+import { readConfig, savePilots, setSchedule } from './config.ts';
 /**
  * Built-in tools with an executor in the scheduler process (F-017). Each declares its effect class for the gate; an
  * executor runs only after `Ledger.authorize` accepted the grant for these exact arguments.
@@ -21,6 +21,8 @@ export const builtinTools:Tool[]=[
  {name:'memory.forget',effect:'write-local',removes:true},
  // Only the brief and Instrumentality schedules: local, reversible by setting the previous values back.
  {name:'settings.schedule',effect:'write-local',inverse:'settings.schedule'},
+ // F-045: a new pilot only after the owner approves its card.
+ {name:'pilots.create',effect:'write-local',owner:true},
  // F-036 slice 3b: one action on another base. Owner-only for now (always a card); that base's own gate reviews it again.
  {name:'kaji.run',effect:'write-external',owner:true},
 ];
@@ -36,6 +38,7 @@ export const toolDocs:ToolDoc[]=[
  {name:'memory.remember',effect:'write-local',about:'Proposes a lasting fact about the owner (a preference, a person, a routine). It always asks the owner first; store only what they stated, in their words.',args:'{"text": one fact, up to 500 characters}'},
  {name:'memory.forget',effect:'write-local',about:'Forgets a fact by its id from memory.recall or the memory list.',args:'{"id": fact id}'},
  {name:'settings.schedule',effect:'write-local',about:'Changes when the daily brief is sent and when Instrumentality (nightly memory consolidation) runs. Times are the owner\'s local time.',args:'{"brief": "HH:MM" or "off", "instrumentality": "HH:MM", "idle" or "off"} (one or both)'},
+ {name:'pilots.create',effect:'write-local',about:'Proposes a new pilot, a permanent specialist that advises you before you plan on requests with its keywords. The owner approves it first; it starts at Prototype.',args:'{"id": lower-case letters and dashes, "name": up to 40 characters, "domain": what it knows, "keywords": [1 to 30 words or short phrases], "model": a local model (optional: the generic pilot\'s)}'},
 ];
 /** {id} or {ids: [...]} (1–20 distinct strings): bulk changes stay one reviewed action, bound by the gate's argument hash. */
 function ids(args:Record<string,unknown>):string[] {
@@ -55,6 +58,12 @@ export function execute(backend:ReminderBackend,tool:string,args:Record<string,u
   case 'memory.remember':{only(args,['text']);const f=backend.memory.add(text(args,'text'),'misato',{...(context.sortieId?{sortieId:context.sortieId}:{})});return {id:f.id,text:f.text};}
   case 'settings.schedule':{only(args,['brief','instrumentality']);if(!Object.keys(args).length)throw new Error('Give brief and/or instrumentality.');if(!backend.home)throw new Error('Settings are not available here.');
    return setSchedule(backend.home,{...(args.brief!==undefined?{brief:text(args,'brief')}:{}),...(args.instrumentality!==undefined?{instrumentality:text(args,'instrumentality')}:{})});}
+  case 'pilots.create':{only(args,['id','name','domain','keywords','model']);if(!backend.home)throw new Error('Pilots are not available here.');
+   const config=readConfig(backend.home);const model=typeof args.model==='string'&&args.model.trim()?args.model:config.models.roles?.consultant?.model ?? config.models.local?.model;
+   if(!model)throw new Error('No local model for the pilot: set one with models set consultant MODEL.');
+   const roster=config.pilots ?? [];if(roster.some(p=>p.id===args.id))throw new Error(`A pilot ${String(args.id)} already exists.`);
+   savePilots(backend.home,[...roster,{id:text(args,'id'),name:text(args,'name'),domain:text(args,'domain'),keywords:args.keywords as string[],model,stage:'prototype',parent:'generic'}]);
+   return {created:args.id,name:args.name,model,stage:'prototype'};}
   case 'memory.forget':only(args,['id']);return {forgotten:backend.memory.forget(text(args,'id'),'misato')};
   case 'kaji.run':{
    only(args,['base','tool','args']);const base=text(args,'base'),tool=text(args,'tool');
