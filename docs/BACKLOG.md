@@ -93,13 +93,13 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Fixed in [PR PR_B14] (2026-11-05): in the one-page layout (min-width 1201 px) `html { height:100%; overflow:hidden; } body { position:fixed; inset:0; overflow:clip; }`, so the document has no scroll range and the browser holds it at the top whatever tries to move it. A script guard (scroll and resize listeners) was tried first and did not hold in Chrome; it was dropped. Checked in headless Chrome with a probe page: after narrow-then-wide, then a forced scrollTo(0,500) and a scrollIntoView, the page stays at 0 and the header at its place (main before the fix: 624 px scrolled, header at -527 px); a screenshot shows the layout unchanged; test/dashboard.test.ts guards the CSS rule; full suite and build pass. The owner's check closes it.
+**Next action / closure evidence:** Fixed in [PR #120](https://github.com/voidbrain/nerv/pull/120) (2026-11-05): in the one-page layout (min-width 1201 px) `html { height:100%; overflow:hidden; } body { position:fixed; inset:0; overflow:clip; }`, so the document has no scroll range and the browser holds it at the top whatever tries to move it. A script guard (scroll and resize listeners) was tried first and did not hold in Chrome; it was dropped. Checked in headless Chrome with a probe page: after narrow-then-wide, then a forced scrollTo(0,500) and a scrollIntoView, the page stays at 0 and the header at its place (main before the fix: 624 px scrolled, header at -527 px); a screenshot shows the layout unchanged; test/dashboard.test.ts guards the CSS rule; full suite and build pass. The owner's check closes it.
 
 **Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner report 2026-11-05 |
+| PR / evidence | Owner report 2026-11-05; [PR #120](https://github.com/voidbrain/nerv/pull/120) |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-05: headless Chrome probe and screenshot; test/dashboard.test.ts (local run); owner's check pending |
 | Reviewed | 2026-11-05 |
