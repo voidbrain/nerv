@@ -879,3 +879,136 @@ Closed records in closing-date order. Dated evidence, not current status.
 </details>
 
 ---
+
+### B-009
+
+**Misato cancelled a reminder nobody asked to cancel, without a card**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟡 Medium | ~100% |
+
+💻 **→ Human action required: No**<br />None: verified by CI and closed. On Tabgha, check `nerv list` for the reminder cancelled on 2026-11-05 and add it again if you still want it.
+
+| | |
+|---|---|
+| **Issue** | Owner test on Tabgha 2026-11-05, Neo Tokyo-3 off: *remind me to eat in 30 minutes* (S-A090) ran reminders.add and then reminders.cancel, both Pattern Green, granted without a card; Misato replied that "the previous reminder has been cancelled". The owner did not ask for a cancel. Green actions skip Casper's intent check, and reminders.cancel is Green because it can be undone (reminders.restore), so an action outside the request passed the gate. |
+| **Reproduce** | On Tabgha, `nerv events` for S-A090 (or the dashboard trace) shows both actions; `nerv list` shows which reminder is cancelled. |
+| **Check** | An action that the request does not ask for is not run without the owner: either Casper checks intent for every action that changes or removes something (not only non-Green ones), or a cancel or edit of an item the request does not name needs a card; the reply never reports an unrequested change as done; the cancelled reminder is restorable and the owner is told; a test with a planner that adds and then cancels reproduces it and fails before the fix. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-05: every acceptance check is automated and passed in the merged [PR #111](https://github.com/voidbrain/nerv/pull/111)'s CI (42082501459). The owner's checks on the bases stay optional, not conditions. Fixed in [PR #111](https://github.com/voidbrain/nerv/pull/111): tools that cancel or forget (`reminders.cancel`, `memory.forget`) carry `removes`; they stay Green (undoable) but always get Casper's intent check (`intentChecked`, the ballot and the runtime gate, also the other bases' seats), so a removal the request did not ask for is refused, and without a verdict the owner decides; Casper's prompt says an unrequested removal is a reject; Misato's prompt forbids changing anything the request does not ask for. Checked: test/misato.test.ts (through every process: *remind me to eat* followed by a cancel of another reminder, Casper refuses, nothing is cancelled, Casper asked only about the cancel), test/gate.test.ts (the ballot for a Green removal: no verdict, reject, approve; a Green add unchanged), both fail without the fix; three tests changed deliberately for this requirement (a removal now needs Casper: the store test gives an approving verdict, two tests find Misato's prompts by role); full suite 149 pass, build, headless. A requested cancel costs one Casper call; a short confirmation ("sì") of a cancel needs Casper to see the conversation: B-010. Reported 2026-11-05. First: which reminder was cancelled, and what Misato saw (the step history) when it proposed the cancel.
+
+**Estimates:** No remaining effort; ~100% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner test on Tabgha 2026-11-05; [PR #111](https://github.com/voidbrain/nerv/pull/111) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05: merged PR CI 42082501459 |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+### B-011
+
+**After an approved action on another base, the follow-up never arrives and the sortie stays open**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: verified by CI and closed.
+
+| | |
+|---|---|
+| **Issue** | Owner test on Tabgha 2026-11-05 (F-036 slice 3b): *Remind me on NERV-02 tomorrow at 9 am to water the plants* (S-3BFF) asked for approval of kaji.run; after approving on Telegram the trace showed *EVA-02: kaji.run done* and *Misato: resuming after your decision*, the reminder is in `nerv list` on Tabgha, but no *Tabgha ran reminders.add* follow-up came and the sortie shows no *Debrief: done*. |
+| **Reproduce** | Repeat the slice 3b check: approve a kaji.run and wait for Aoba's follow-up. |
+| **Check** | Once the other base has run the action, its result comes back (outbox, kaji.verdict of the run) and Misato's follow-up says what ran there; the sortie closes as done (or failed with the reason); a two-base test covers the approved path end to end. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-05: every acceptance check is automated and passed in the merged [PR #112](https://github.com/voidbrain/nerv/pull/112)'s CI (42082978289). The owner's checks on the bases stay optional, not conditions. Cause found 2026-11-05 (read-only, Neo Tokyo-3's ledger, S-3BFF): the sortie did finish (Misato's reply at 18:37:22 local, 23 s after *resuming after your decision*, then sortie.done) and Tabgha ran the action (outbox done at 18:37:00, outcome grant); the owner's copy was taken before the reply. The real gap: the other base's result was sent only to the follow-up listeners (Telegram), never recorded on the sortie, so the trace, the dashboard and the why answer could not show it; and the follow-up was raw JSON (*Tabgha ran reminders.add: {"id":…}*). Fixed in [PR #112](https://github.com/voidbrain/nerv/pull/112): the result is recorded once as a `kaji.result` event on the sortie (base, tool, outcome, the text the owner reads), shown in the dashboard trace (*Kaji line · …*) and in the why answer (*Kaji: …*); the follow-up is plain (*Tabgha ran reminders.add (“Water the plants”).*). Checked: test/kaji-run.test.ts (two bases: the follow-up text, the recorded event, the why answer), fails without the fix; full suite 147 pass, build, headless. Reported 2026-11-05. The remote run happened (the reminder exists); the result path back to the sortie is the suspect.
+
+**Estimates:** No remaining effort; ~100% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner test on Tabgha 2026-11-05; [PR #112](https://github.com/voidbrain/nerv/pull/112) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05: merged PR CI 42082978289 |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+### B-010
+
+**Casper judges a follow-up without the earlier exchange and refuses a confirmed request**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: verified by CI and closed.
+
+| | |
+|---|---|
+| **Issue** | Owner test on Tabgha 2026-11-05: after *Remind me on Tabgha tomorrow at 9 to water the plants*, the owner answered *Am. Yes on Tabgha*; Casper rejected kaji.run (Pattern Blue, reject): "The action to add a plant watering reminder does not correspond to the request regarding 'Tabgha'." Casper saw only the short follow-up, not the request it confirms. |
+| **Reproduce** | Ask for something that makes Misato ask a question, answer briefly ("yes", "am"); the action Misato then proposes is refused by Casper. |
+| **Check** | Casper's intent check gets the same conversation context Misato had (the last exchanges, as data); a short confirmation of an earlier request is judged against that request; a test with a request, a question and a "yes" passes the check, and an unrelated action after a "yes" is still refused. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-05: every acceptance check is automated and passed in the merged [PR #113](https://github.com/voidbrain/nerv/pull/113)'s CI (42083387772). The owner's checks on the bases stay optional, not conditions. Fixed in [PR #113](https://github.com/voidbrain/nerv/pull/113): the gate passes the conversation's last three exchanges (`earlier`, each cut to 600 characters) to Casper's intent check, the same context Misato plans with; Casper's prompt says to judge a short answer or confirmation (yes, ok, sì, am, a time) against what the owner asked there. Since B-009 a confirmed cancel also goes to Casper, so this matters for "sì" after "delete all" too. Checked: test/misato.test.ts (through every process: a request, Misato's question, "Am. Yes": Casper sees the earlier request and approves; without it the fake Casper refuses), test/gate.test.ts (the prompt: none, at most three, cut to size), both fail without the fix; full suite 151 pass, build, headless. Not changed: the other bases' seats (shadow) still get the request alone; they would need the same context over the Kaji line. Reported 2026-11-05.
+
+**Estimates:** No remaining effort; ~100% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner test on Tabgha 2026-11-05; [PR #113](https://github.com/voidbrain/nerv/pull/113) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05: merged PR CI 42083387772 |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+### B-012
+
+**A base is not recognised by its name: "on Tabgha" fails, only "on NERV-02" works**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: verified by CI and closed.
+
+| | |
+|---|---|
+| **Issue** | Owner test on Tabgha 2026-11-05: *Remind me on Tabgha …* led to questions and a refusal; *Remind me on NERV-02 …* worked. Misato's remote tools name bases by ID only, and the consultant did not know Tabgha is a base (it asked about geofencing). |
+| **Reproduce** | Ask Aoba to remind you on Tabgha of something. |
+| **Check** | Misato's remote tools list each base as ID and name (NERV-02 · Tabgha), any case; "on Tabgha" reaches kaji.run for NERV-02; the consultant and pilots are told the base names as data; a test covers the name. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-05: every acceptance check is automated and passed in the merged [PR #114](https://github.com/voidbrain/nerv/pull/114)'s CI (42084149949). The owner's checks on the bases stay optional, not conditions. Cause corrected 2026-11-05 (read-only, Neo Tokyo-3's ledger, S-0866 and S-F57B): Misato did name bases correctly (its prompt lists *NERV-02 (Tabgha)*; it asked AM or PM, then proposed kaji.run for NERV-02). The refusal came from Casper, which compared a request saying *Tabgha* with an action saying *NERV-02* without knowing they are the same base (and without the earlier exchange, B-010); the consultant did not know Tabgha is a base either. Fixed in [PR #114](https://github.com/voidbrain/nerv/pull/114): for kaji.run Casper gets every enrolled base by id and name as data, with a rule that a base's name in the request matches its id in the action; the consultant (and pilots) get the same list when there is more than one base. Checked: test/kaji-run.test.ts (two bases: Casper's prompt lists NERV-02 · Tabgha), test/gate.test.ts (both prompts, with and without bases), both fail without the fix; full suite 152 pass, build, headless. Reported 2026-11-05.
+
+**Estimates:** No remaining effort; ~100% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner test on Tabgha 2026-11-05; [PR #114](https://github.com/voidbrain/nerv/pull/114) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05: merged PR CI 42084149949 |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
