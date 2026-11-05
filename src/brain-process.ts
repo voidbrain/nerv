@@ -60,8 +60,11 @@ process.on('message',(value:unknown)=>{
   }
   if(method==='consultant.advise'){
    // F-025: advice before Misato plans, on the consultant's local model; none when no consultant is set.
-   const pick=models.roles?.consultant;if(configError||!pick||!models.local)return {advice:null};
-   try{const reply=await run(consultantAsk(params.request as string,(params.context as Turn[]|undefined) ?? []),forRole(models,'consultant'));const advice=parseAdvice(reply.text);return advice?{advice,model:reply.model}:{advice:null};}
+   // F-045: a specialist pilot chosen by the coordinator advises on its own local model; otherwise the generic pilot.
+   const pilot=params.pilot as {name:string;domain:string;model:string}|undefined;
+   const pick=models.roles?.consultant;if(configError||!models.local||(!pilot&&!pick))return {advice:null};
+   const on=pilot?{...models,local:{...models.local,model:pilot.model}}:forRole(models,'consultant');
+   try{const reply=await run(consultantAsk(params.request as string,(params.context as Turn[]|undefined) ?? [],pilot),on);const advice=parseAdvice(reply.text);return advice?{advice,model:reply.model}:{advice:null};}
    catch(e){return {advice:null,error:e instanceof ModelError?e.message:'Consultant failed.'};}
   }
   if(method==='instrumentality.digest'){
