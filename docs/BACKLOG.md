@@ -97,7 +97,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Fixed in [PR PR_B18] (2026-11-05): `plan` passed when Misato replied; a new answer route (Misato → Debrief, its own lane on the right, entering Debrief from below), drawn only for a sortie without actions, solid, green when passed; `liveEdges` only for a running or waiting sortie, and into Debrief from Misato when no action ran. Checked in headless Chrome (S-B55C-shaped: Misato and Debrief passed, the answer route among the passed lines, no live line; with an action: no answer route) and by test/dashboard.test.ts; a screenshot.
+**Next action / closure evidence:** Fixed in [PR #134](https://github.com/voidbrain/nerv/pull/134) (2026-11-05): `plan` passed when Misato replied; a new answer route (Misato → Debrief, its own lane on the right, entering Debrief from below), drawn only for a sortie without actions, solid, green when passed; `liveEdges` only for a running or waiting sortie, and into Debrief from Misato when no action ran. Checked in headless Chrome (S-B55C-shaped: Misato and Debrief passed, the answer route among the passed lines, no live line; with an action: no answer route) and by test/dashboard.test.ts; a screenshot.
 
 **Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
 
