@@ -43,3 +43,4 @@ What can change an output with no commit here, and how we would notice.
 |---|---|---|
 | Node SQLite API and Angular dependencies | Runtime, builds and persistence compatibility | Pinned install, regression tests and doctor |
 | Host clock and timezone | Reminder deadlines | Explicit timezone inputs and doctor |
+| GitHub-hosted runner images (macos-15, windows-latest, ubuntu-latest) | CI jobs: an image GitHub retires fails the job before it runs | The job fails in about a second with "configuration … is not supported" (B-015, macos-14 retired 2026-11-05) |

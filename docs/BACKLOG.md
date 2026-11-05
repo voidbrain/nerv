@@ -7,7 +7,7 @@ Current work ledger, reviewed 5 November 2026 against main `94b723d`. PR #1–#1
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 34 | 2 |
+| **Open** | 34 | 3 |
 | **Require Human 🧑** | 1 | 1 |
 
 ### Last 7 days
@@ -15,7 +15,7 @@ Current work ledger, reviewed 5 November 2026 against main `94b723d`. PR #1–#1
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **Count** | 53 | 19 | 14 | 12 |
+| **Count** | 53 | 19 | 15 | 12 |
 
 ### Require Human 🧑
 
@@ -102,6 +102,40 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | PR / evidence | Owner report 2026-11-05; [PR #120](https://github.com/voidbrain/nerv/pull/120) |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-05: headless Chrome probe and screenshot; test/dashboard.test.ts (local run); owner's check pending |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
+### B-015
+
+**CI native-macos fails before running: GitHub no longer offers the macos-14 runner**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🟡 | 🔺 P1 | Implemented | 🟢 Small | ~90% |
+
+💻 **→ Human action required: No**<br />Close once native-macos passes on #124 and on main.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-05 on #123: both native-macos jobs failed in about a second with *The configuration 'macos-14-arm64-us-default' is not supported*; main's last two runs (7b45844, 94b723d) had native-macos cancelled. GitHub stopped offering the image; nothing in the code changed. Every PR is blocked, since native-macos is a required check. |
+| **Reproduce** | Any PR's native-macos job on `runs-on: macos-14`. |
+| **Check** | native-macos runs and passes on a supported image named explicitly (not `latest`, so the Xcode and Swift version changes only on purpose); the runner images are listed under `outside` in .harness.json, so the audit reviews them. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Fixed in [PR #124](https://github.com/voidbrain/nerv/pull/124) (2026-11-05): `runs-on: macos-15`; `outside` gains the runner images (what fails, how it shows). The job name stays native-macos, so the required check is unchanged (no repository setting touched).
+
+**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | #123 native-macos jobs 127479057886, 127479078814 |
+| Opened | 2026-11-05 |
+| Verification | Pending: native-macos on #124 and main |
 | Reviewed | 2026-11-05 |
 
 </details>
