@@ -45,3 +45,26 @@ test('through the scheduler process: an approval that expired since the last bri
   assert.deepEqual(facts.expired,[{tool:'reminders.cancel',sortie:act.sortieId,title:'Cancel it'}]);assert.deepEqual(facts.approvals,[]);
  }finally{await runtime.close();rmSync(home,{recursive:true,force:true});}
 });
+test('a source the brief cannot read is named, never shown as empty or fine, and the brief is still written (B-006)',async()=>{
+ const {gatherBrief,composeBrief}=await import('../src/brief.ts');
+ const fail=()=>{throw new Error('scheduler down');};
+ const facts=await gatherBrief({approvals:fail,list:async()=>[],sorties:async()=>[],closedSince:async()=>({done:2,failed:0,failures:[]}),health:fail,expiredApprovals:async()=>{throw new Error('x');}},new Date(Date.now()-3600_000));
+ assert.deepEqual([...facts.unavailable!].sort(),['approvals','expired','health']);
+ const en=composeBrief({now:new Date(),timeZone:'Europe/Rome',language:'en',...facts});
+ assert.match(en,/Needs you: could not be read for this brief\./);assert.match(en,/Expired without your decision \(nothing ran\): could not be read for this brief\./);
+ assert.match(en,/Health: could not be read for this brief\./);assert.doesNotMatch(en,/All checks pass|Nothing waits for you/);
+ assert.match(en,/Since the last brief: 2 done, 0 failed/);
+ assert.match(composeBrief({now:new Date(),timeZone:'Europe/Rome',language:'it',...facts}),/Stato: non leggibile per questo brief\./);
+});
+test('through the scheduler process: every sortie closed since the last brief is counted, not only the newest 50 (B-006)',{timeout:20000},async()=>{
+ const {Runtime}=await import('../src/runtime.ts');const {gatherBrief}=await import('../src/brief.ts');
+ const {mkdtempSync,rmSync}=await import('node:fs');const {tmpdir}=await import('node:os');const {join}=await import('node:path');const {Store}=await import('../src/store.ts');
+ const home=mkdtempSync(join(tmpdir(),'nerv-brief-'));const since=new Date(Date.now()-1000);
+ const direct=new Store(join(home,'nerv.sqlite'));
+ try{for(let i=0;i<62;i++){const id=direct.ledger.openSortie('owner',`Job ${i}`,'trusted');direct.ledger.close(id,i<3?'failed':'done');}}finally{direct.close();}
+ const runtime=new Runtime(join(home,'nerv.sqlite'),undefined,home);
+ try{
+  await runtime.ready();const facts=await gatherBrief(runtime,since);
+  assert.deepEqual(facts.closed,{done:59,failed:3});assert.equal(facts.sorties.length,3,'the failures are named');assert.equal(facts.unavailable,undefined);
+ }finally{await runtime.close();rmSync(home,{recursive:true,force:true});}
+});

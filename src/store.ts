@@ -167,6 +167,7 @@ export class Store {
   events(sortieId: string, after=0, limit=50) { return this.ledger.events(sortieId,after,limit); }
   sorties(limit=20, before?: string, q?: string) { return this.ledger.sorties(limit,before,q); }
   sortie(id: string) { return this.ledger.sortie(id) ?? null; }
+  closedSince(since: string) { return this.ledger.closedSince(since); }
   health() { return {integrityCheck:"not-run"}; }
   doctor() { return {database:this.db.prepare('PRAGMA quick_check').get(),schema:this.db.prepare('PRAGMA user_version').get(),pending:this.db.prepare('SELECT count(*) AS count FROM reminders WHERE delivered IS NULL AND cancelled IS NULL').get(),policy:{source:this.policySource,...this.ledger.policy}}; }
   close() { this.db.close(); }

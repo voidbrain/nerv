@@ -29,6 +29,7 @@ process.on('message',(value:unknown)=>{
    case 'events.page':return store.events(params.sortieId as string,params.after as number|undefined,params.limit as number|undefined);
    case 'sorties.list':return store.sorties(params.limit as number|undefined,params.before as string|undefined,params.q as string|undefined);
    case 'sorties.get':return store.sortie(params.id as string);
+   case 'sorties.closedSince':return store.closedSince(params.since as string);
    case 'sorties.spear':return store.ledger.spear(params.id as string,params.reason as string);
    case 'sorties.open':return store.ledger.openSortie(params.source==='misato'?MISATO_SOURCE:params.source==='instrumentality'?'instrumentality':OWNER_SOURCE,params.title as string,'trusted');
    case 'sorties.finish':{const id=params.sortieId as string;if(params.reply)store.ledger.reply(id,params.reply as string);return params.status?store.ledger.close(id,params.status as 'done'|'failed'):false;}

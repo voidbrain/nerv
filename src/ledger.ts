@@ -163,6 +163,14 @@ export class Ledger {
    return {id:x.id,tool:x.tool,args:JSON.parse(x.args) as Record<string,unknown>,ballot,created:x.created,status};});
   return {...this.summarize(row),detail};
  }
+ /** Sorties closed after `since`, counted by status, with the latest five failures (for the brief, B-006). */
+ closedSince(since:string):{done:number;failed:number;failures:{id:string;title:string;closed:string}[]} {
+  if(typeof since!=='string'||!Number.isFinite(Date.parse(since)))throw new Error('Invalid date.');
+  const at=new Date(since).toISOString();
+  const n=(status:string)=>(this.db.prepare('SELECT count(*) AS n FROM sorties WHERE closed>? AND status=?').get(at,status) as {n:number}).n;
+  const failures=this.db.prepare("SELECT id,title,closed FROM sorties WHERE closed>? AND status='failed' ORDER BY closed DESC LIMIT 5").all(at) as {id:string;title:string;closed:string}[];
+  return {done:n('done'),failed:n('failed'),failures};
+ }
  /** Misato's reply to the owner, kept with the sortie it answers. */
  reply(sortieId:string,text:string,now=new Date()):void {this.tx(()=>this.event(sortieId,null,'misato.reply',{text:text.slice(0,4000)},now));}
  /** Records what an executor did after `authorize` let it run. */
