@@ -49,13 +49,13 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Fixed in [PR PR_B2]: `dayTime()` in web/public/dashboard/dashboard.js gives today's time alone, "yesterday HH:MM", "3 Nov HH:MM", and the year when it differs, in browser local time (style guide); used on sortie cards and both "while you were away" lists (simulation and live). Checked: test/dashboard.test.ts (today, yesterday, earlier this year, another year, midnight, yesterday across a year), fails without the fix; full suite and build pass. Not yet seen in a browser: the owner's look closes it. Reported 2026-11-05.
+**Next action / closure evidence:** Fixed in [PR #104](https://github.com/voidbrain/nerv/pull/104): `dayTime()` in web/public/dashboard/dashboard.js gives today's time alone, "yesterday HH:MM", "3 Nov HH:MM", and the year when it differs, in browser local time (style guide); used on sortie cards and both "while you were away" lists (simulation and live). Checked: test/dashboard.test.ts (today, yesterday, earlier this year, another year, midnight, yesterday across a year), fails without the fix; full suite and build pass. Not yet seen in a browser: the owner's look closes it. Reported 2026-11-05.
 
 **Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner report 2026-11-05 |
+| PR / evidence | Owner report 2026-11-05; [PR #104](https://github.com/voidbrain/nerv/pull/104) |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-05: test/dashboard.test.ts (local run); visual check pending |
 | Reviewed | 2026-11-05 |
@@ -118,13 +118,13 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Fixed in [PR PR_B2]: in live mode the chat placeholder says *Ask Misato: remind me to … at … · why S-1A2B? · what are my reminders?* (each answered on a live base: a request, the ledger answer of B-004, a reminders.list); the simulation keeps its demo commands. A real "status" answer is F-042. Checked: test/dashboard.test.ts (the live hint names no demo-only command and is set when live mode starts). Reported 2026-11-05.
+**Next action / closure evidence:** Fixed in [PR #104](https://github.com/voidbrain/nerv/pull/104): in live mode the chat placeholder says *Ask Misato: remind me to … at … · why S-1A2B? · what are my reminders?* (each answered on a live base: a request, the ledger answer of B-004, a reminders.list); the simulation keeps its demo commands. A real "status" answer is F-042. Checked: test/dashboard.test.ts (the live hint names no demo-only command and is set when live mode starts). Reported 2026-11-05.
 
 **Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner report 2026-11-05 |
+| PR / evidence | Owner report 2026-11-05; [PR #104](https://github.com/voidbrain/nerv/pull/104) |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-05: test/dashboard.test.ts (local run) |
 | Reviewed | 2026-11-05 |
