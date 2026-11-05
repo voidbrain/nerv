@@ -486,14 +486,15 @@ function renderFlow() {
   document.getElementById("flow-sub").textContent = s ? s.id + " · " + s.title : "no sortie selected";
   document.getElementById("flow-note").textContent = s ? (s.note || s.outcome || "") : "Select a sortie, or launch one.";
   // sephirot nodes
-  document.querySelectorAll(".snode[data-n]").forEach(el => { el.classList.remove("on", "done", "wait", "skip"); const st = stepState(s, el.dataset.n); if (st) el.classList.add(st); });
+  // Misato's apartment passed means the owner decided: it takes the decision colour, like its lines (owner, 2026-11-05).
+  document.querySelectorAll(".snode[data-n]").forEach(el => { el.classList.remove("on", "done", "wait", "skip", "owner"); const st = stepState(s, el.dataset.n); if (st) el.classList.add(st); if (st === "done" && el.dataset.n === "apt") el.classList.add("owner"); });
   // timeline
   const steps = L().steps; const b = s && s.ballot;
   document.getElementById("timeline").innerHTML = STEP_IDS.map((id, i) => {
     let inner = "<span class='n'>" + (i + 1) + "</span>" + esc(steps[id]);
     if (id === "magi") inner += "<div class='tmagi'>" + ["melchior", "balthasar", "casper"].map(seat => { const v = b ? (b.verdicts.find(x => x.seat === seat) || { vote:"none" }).vote : (s && s.phase === "magi" ? "pending" : "none"); return "<span class='tseat " + v + "' title='" + seat + "'>" + L().short[seat] + "</span>"; }).join("") + "</div>";
     if (id === "sync" && b) inner += "<div class='tiny'>" + b.sync.value + "%</div>";
-    return (i ? "<span class='tarrow'>→</span>" : "") + "<div class='tstep " + stepState(s, id) + "'>" + inner + "</div>";
+    return (i ? "<span class='tarrow'>→</span>" : "") + "<div class='tstep " + stepState(s, id) + (id === "apt" && stepState(s, id) === "done" ? " owner" : "") + "'>" + inner + "</div>";
   }).join("");
   // magi big
   const a = s && s.actions[Math.min(s.current, s.actions.length - 1)];

@@ -158,6 +158,7 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .tstep .n { font-size:8px; opacity:.7; }
 .tstep.on { border-color:var(--accent); color:var(--text); background:color-mix(in srgb,var(--accent) 13%,transparent); font-weight:700; }
 .tstep.done { border-color:var(--ok); color:var(--ok); }
+.tstep.done.owner { border-color:var(--warn); color:var(--warn); }
 .tstep.skip { opacity:.4; border-style:dashed; }
 .tstep.wait { border-color:var(--warn); color:var(--warn); }
 .tarrow { color:var(--muted); align-self:center; font-size:10px; }
@@ -192,6 +193,7 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .snode.done { border-color:var(--ok); } .snode.done .st { color:var(--ok); }
 .snode.wait { border-color:var(--warn); box-shadow:0 0 12px color-mix(in srgb,var(--warn) 30%,transparent); } .snode.wait .st { color:var(--warn); }
 .snode.skip { opacity:.38; border-style:dashed; }
+.snode.done.owner { border-color:var(--warn); } .snode.done.owner .st { color:var(--warn); }
 .snode.round { border-radius:999px; padding:6px 10px; }
 .s-detect { grid-column:2; grid-row:1; } .s-intake { grid-column:1; grid-row:2; } .s-route { grid-column:3; grid-row:2; }
 .s-consult { grid-column:1; grid-row:3; } .s-plan { grid-column:3; grid-row:3; }
