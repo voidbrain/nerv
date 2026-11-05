@@ -198,3 +198,22 @@ test('the Marduk Institute reads the generic pilot from the models API as it ans
  assert.match(live,/esc\(b\.baseId\) \+ " · " \+ esc\(b\.name\)/);assert.match(live,/esc\(base\.id\) \+ " · " \+ esc\(base\.name\)/);assert.doesNotMatch(live,/esc\(b\.name\) \+ " · " \+ esc\(b\.baseId\)/);
  assert.match(html,/<div class="maprow">\s*<div class="mapwrap">/);assert.match(html,/\.maplegend \{ display:flex; flex-direction:column;/);
 });
+test('searching sorties marks the searched text in each title, escaped and case-insensitive (F-019)',async()=>{
+ const {readFileSync}=await import('node:fs');const src=readFileSync('web/public/dashboard/dashboard.js','utf8');
+ const fn=(name:string)=>{const i=src.indexOf(`function ${name}(`);let depth=0,j=src.indexOf('{',i);for(;j<src.length;j++){if(src[j]==='{')depth++;else if(src[j]==='}'&&--depth===0)break;}return src.slice(i,j+1);};
+ const highlight=new Function(`${fn('esc')}\n${fn('highlight')}\nreturn highlight;`)() as (t:string,q:string)=>string;
+ assert.equal(highlight('Remind me to call Ada','ada'),'Remind me to call <mark>Ada</mark>');
+ assert.equal(highlight('Water the plants, water more','WATER'),'<mark>Water</mark> the plants, <mark>water</mark> more');
+ assert.equal(highlight('a <b> & c','<b>'),'a <mark>&lt;b&gt;</mark> &amp; c','escaped first, no HTML injected');
+ assert.equal(highlight('price (1.5)','(1.5)'),'price <mark>(1.5)</mark>','regex characters are literal');
+ assert.equal(highlight('Plain','  '),'Plain');
+ assert.match(src,/highlight\(s\.title, state\.search\)/,'used on the sortie cards');
+});
+test('the map: labels scale with the canvas so they stay readable, the main base is bigger and ringed, other bases get a stable scattered spot (owner, 2026-11-05)',async()=>{
+ const {readFileSync}=await import('node:fs');const js=readFileSync('web/public/dashboard/dashboard.js','utf8');const live=readFileSync('web/public/dashboard/live.js','utf8');
+ assert.match(js,/const z = Math\.max\(1, W \/ \(\(cv\.clientWidth \|\| W\)\)\);/);assert.match(js,/ctx\.font = \(main \? "bold " : ""\) \+ Math\.round\(\(main \? 13 : 12\) \* z\)/);
+ assert.match(js,/if \(main\) \{ ctx\.strokeStyle = col;/);assert.match(js,/const main = !!b\.main \|\| \(!anyMain && b === BASES\[0\]\);/,'no base flagged: this base is the main one');assert.match(js,/const face = cssVar\("--font"\) \|\| "monospace";/,'the full font list, so a fallback applies');assert.match(live,/main:!!b\.main/);
+ assert.doesNotMatch(live,/- Math\.PI \/ 2; return b === self/,'no more column under the main base');
+ const seedSrc=/const seed = id => \{[^\n]*\};/.exec(live)![0];const seed=new Function(`${seedSrc} return seed;`)() as (id:string)=>number;
+ assert.equal(seed('NERV-02'),seed('NERV-02'),'the same spot on every reload');assert.notEqual(seed('NERV-02')%3600,seed('NERV-03')%3600);
+});
