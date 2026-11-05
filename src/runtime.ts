@@ -151,7 +151,7 @@ export class Runtime implements StoreApi {
    if(!r.advice)return undefined;await this.note(sortieId,'misato.consult',{advice:r.advice,model:r.model ?? ''});return r.advice;});
   for(let turn=0;turn<MAX_STEPS;turn++){
    const remote=await this.remoteOffers();
-   const out=await this.brain.call('misato.step',{request:message,history:steps.slice(-12),...(remote.length?{remote}:{}),...(advice?{advice}:{}),...(context.length?{context}:{}),...(memory.length?{memory:memory.slice(0,10)}:{})},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as {plan?:Plan;invalid?:boolean;error?:string};
+   const out=await this.brain.call('misato.step',{request:message,history:steps.slice(-12),...(remote.length?{remote}:{}),...(advice?{advice}:{}),language:lang(),...(context.length?{context}:{}),...(memory.length?{memory:memory.slice(0,10)}:{})},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as {plan?:Plan;invalid?:boolean;error?:string};
    if(out.error)return finish('failed',undefined,out.error);
    if(!out.plan){await this.record(sortieId,steps,{outcome:'invalid',error:'Reply was not one JSON action or reply.'});continue;}
    if('reply' in out.plan)return finish('done',out.plan.reply);
