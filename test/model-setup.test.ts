@@ -75,6 +75,7 @@ test('the dashboard API (admin, through the brain process): GET shows the roles 
   const put=await (await call('PUT',{misato:{route:'local',model:'qwen2.5-coder:14b'},casper:{model:'tiny:1b'}})).json() as {models:{roles:{misato:string;casper:string}}};
   assert.deepEqual(put.models.roles,{misato:'local (qwen2.5-coder:14b)',casper:'local (tiny:1b)'},'the brain uses the new models without a restart');
   assert.match(JSON.stringify((await runtime.doctor() as {models:unknown}).models),/qwen2\.5-coder:14b/);
+  assert.deepEqual((await runtime.doctor() as {localModels:{models:string[]}}).localModels.models,MODELS.map(m=>m.name),'doctor lists the models this base can use (F-037)');
   assert.equal((await call('PUT',{casper:{model:'llama9'}})).status,400);assert.equal((await call('PUT',{misato:{route:'cloud'}})).status,400);
   assert.equal((await call('PUT',{casper:{model:'tiny:1b'},key:'sk'})).status,400,'a key is never accepted here');
   const on=await (await call('PUT',{cloud:{enabled:true}})).json() as {models:{cloud:string}};assert.match(on.models.cloud,/enabled/);

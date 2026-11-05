@@ -1,5 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
+import {POSIX,assertPrivateFile} from './fixtures/posix.ts';
 import {mkdtempSync,rmSync,readFileSync,statSync,existsSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 import {generateKeyPairSync} from 'node:crypto';
@@ -45,10 +46,10 @@ test('two bases from the CLI: key init, enrol both, export, import pinned by fin
  try{
   assert.equal(cli(a,['init','--base','NERV-01','--name','Neo Tokyo-3']).status,0);assert.equal(cli(b,['init','--base','NERV-02','--name','Tabgha']).status,0);
   const made=cli(a,['key','init','--passphrase-stdin'],pass);assert.equal(made.status,0,made.stderr);const fp=/Root fingerprint: (\S+)/.exec(made.stdout)![1]!;
-  const keyFile=join(a,'key-of-nebuchadnezzar.enc');assert.equal(statSync(keyFile).mode&0o777,0o600);assert.doesNotMatch(readFileSync(keyFile,'utf8'),/PRIVATE KEY/);
+  const keyFile=join(a,'key-of-nebuchadnezzar.enc');assertPrivateFile(keyFile);assert.doesNotMatch(readFileSync(keyFile,'utf8'),/PRIVATE KEY/);
   assert.match(cli(a,['key','init','--passphrase-stdin'],pass).stderr,/never overwritten/);
   assert.equal(cli(a,['kaji','enrol','NERV-01','Neo Tokyo-3','self','100.64.0.1','--passphrase-stdin'],pass).status,0);
-  const tabghaKey=cli(b,['base','pubkey']).stdout.split('\n')[0]!;assert.ok(existsSync(join(b,'base-key')));assert.equal(statSync(join(b,'base-key')).mode&0o777,0o600);
+  const tabghaKey=cli(b,['base','pubkey']).stdout.split('\n')[0]!;assert.ok(existsSync(join(b,'base-key')));assertPrivateFile(join(b,'base-key'));
   assert.match(cli(a,['kaji','enrol','NERV-02','Tabgha',tabghaKey,'100.64.0.2','--passphrase-stdin'],'wrong passphrase here\n').stderr,/Wrong passphrase/);
   assert.equal(cli(a,['kaji','enrol','NERV-02','Tabgha',tabghaKey,'100.64.0.2','--passphrase-stdin'],pass).status,0);
   const bundle=join(a,'bundle.json');assert.match(cli(a,['kaji','export',bundle]).stdout,/2 signed record/);

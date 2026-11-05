@@ -267,6 +267,11 @@ export class Runtime implements StoreApi {
   catch{return {degraded:['brain process not answering: model-needing requests fail until it is back']};}
  }
  async health(){await this.nervous.call('runtime.ping');const r=await this.routes();return {integrityCheck:'not-run',processes:{nervous:this.nervous.child.pid,brain:this.brain.child.pid,brainAlive:this.brain.child.connected},...r};}
- async doctor(){return {...await this.nervous.call('runtime.doctor') as object,processes:{nervous:this.nervous.child.pid,brain:this.brain.child.pid,brainAlive:this.brain.child.connected},models:await this.brain.call('runtime.ping').then(p=>(p as {models:unknown}).models,()=>'brain unavailable'),...await this.routes(),agentLoop:'not implemented'};}
+ async doctor(){return {...await this.nervous.call('runtime.doctor') as object,processes:{nervous:this.nervous.child.pid,brain:this.brain.child.pid,brainAlive:this.brain.child.connected},models:await this.brain.call('runtime.ping').then(p=>(p as {models:unknown}).models,()=>'brain unavailable'),...await this.routes(),localModels:await this.localModels(),agentLoop:'not implemented'};}
+ /** F-037: the models this base can use on its local route (Ollama's list), for doctor; unknown without a data home. */
+ private async localModels():Promise<{reachable:boolean;url:string;models:string[]}|undefined> {
+  if(!this.home)return undefined;let url;try{url=ollamaUrlOf(readConfig(this.home).models);}catch{return undefined;}
+  const found=await detectOllama(url);return {reachable:found.reachable,url:found.url,models:found.models.map(m=>m.name)};
+ }
  async close(){if(this.resumer)clearInterval(this.resumer);if(this.instrumentality)clearInterval(this.instrumentality);await Promise.allSettled([this.nervous.close(),this.brain.close()]);}
 }

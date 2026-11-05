@@ -26,6 +26,21 @@ jobs:
         env:
           HARNESS_HOME: ${{ runner.temp }}/project-harness
 
+  # F-037: Windows bases (Tabgha). The suite, the build, and the real Task Scheduler service install.
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm test
+      - run: node --test test/windows-service.integration.ts
+
   native-macos:
     runs-on: macos-14
     steps:
