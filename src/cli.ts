@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { Store } from './store.ts';
 import { makeServer } from './server.ts';
 import { dataHome, databasePath, initialize, isTelegramToken, pinKajiRoot, telegramTokenPath, readConfig, readModelKey, readScrolls, readTelegramToken, readToken, setBase, setting, type Base } from './config.ts';
-import { TelegramApi, TelegramChannel, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
+import { TelegramApi, TelegramChannel, decisionText, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
 import { composeBrief, gatherBrief } from './brief.ts';
 import { KajiLink } from './kaji-link.ts';
 import { ROOT_KEY_FILE, Registry, baseKey, createRootKey, enrolmentArgs, fingerprint, signRecord, unlockRootKey, type SignedRecord } from './kaji.ts';
@@ -285,9 +285,14 @@ try {
         // launch = serve, then open the live dashboard signed in once the server listens.
         server.listen(config.port,'127.0.0.1',()=>{console.log(`NERV Agency ${config.base.id} · ${config.base.name}: http://127.0.0.1:${config.port} · ${config.language} · ${config.timeZone}`);if(command==='launch')void openPage(home,'/dashboard/',args.includes('--print')).catch(e=>console.error(e instanceof Error?e.message:'Could not open the dashboard.'));});running=true;
         // Aoba starts only when both the private bot token and the linked owner chat exist.
-        if(botToken&&config.telegram){aoba=new TelegramChannel({api:new TelegramApi(botToken,telegramBase()),store:runtime,chatId:config.telegram.chatId,statePath:join(home,'telegram-state.json'),brief:()=>{const c=live();return c.brief?{at:c.brief.at,timeZone:c.timeZone,language:c.language,base:c.base.name}:undefined;}});await aoba.start().then(()=>console.log('Aoba (Telegram): linked, listening.'),e=>console.error(`Aoba (Telegram) did not start: ${e instanceof Error?e.message:'error'}.`));}
+        if(botToken&&config.telegram){aoba=new TelegramChannel({api:new TelegramApi(botToken,telegramBase()),store:runtime,chatId:config.telegram.chatId,statePath:join(home,'telegram-state.json'),
+          // F-036 phase 2: quiet while another base is the main one and online; relayed cards are decided where they were made.
+          oneChannel:{quiet:async()=>{const m=await runtime.mainBase();return !!m&&!m.self&&m.online;},relay:(text,cards)=>kaji?kaji.relay({text,cards}):Promise.resolve(false)},
+          remote:{decide:(baseId,approvalId,decision)=>{if(!kaji)throw new Error('The Kaji line is not running.');return kaji.decide(baseId,approvalId,decision);}},brief:()=>{const c=live();return c.brief?{at:c.brief.at,timeZone:c.timeZone,language:c.language,base:c.base.name}:undefined;}});await aoba.start().then(()=>console.log('Aoba (Telegram): linked, listening.'),e=>console.error(`Aoba (Telegram) did not start: ${e instanceof Error?e.message:'error'}.`));}
         else if(botToken)console.log('Aoba (Telegram): token found, no chat linked yet. Send /start to your bot, then run telegram link.');
-        if(config.kaji?.root){kaji=new KajiLink({baseId:config.base.id,key:own.privateKey,publicKey:own.publicKey,registry:runtime.kaji,health:()=>runtime.baseHealth(),onHealth:(id,h)=>runtime.notePeerHealth(id,h)});void kaji.start();}
+        if(config.kaji?.root){kaji=new KajiLink({baseId:config.base.id,key:own.privateKey,publicKey:own.publicKey,registry:runtime.kaji,health:()=>runtime.baseHealth(),onHealth:(id,h)=>runtime.notePeerHealth(id,h),
+          onRelay:async(from,relay)=>{if(!aoba)return false;const name=(await runtime.bases()).find(b=>b.baseId===from)?.name ?? from;return aoba.relayed(from,name,relay);},
+          onDecide:async(approvalId,decision)=>decisionText(await runtime.decide(approvalId,decision,'telegram'))});void kaji.start();}
         process.once('SIGINT',close);process.once('SIGTERM',close);break;
       }
       default:throw new Error('Unknown command. Run help.');
