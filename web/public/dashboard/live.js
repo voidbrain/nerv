@@ -310,7 +310,7 @@
     // Each other base gets a spot from its ID (owner, 2026-11-05: a column looked dull): scattered, but the same on every reload.
     const seed = id => { let h = 2166136261; for (const c of id) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h; };
     const place = (b, i) => { if (b === self) return [35.236, 138.985]; const h = seed(b.baseId); const a = 2 * Math.PI * ((h % 3600) / 3600 + i / Math.max(3, others.length)); const r = 0.6 + ((h >>> 12) % 400) / 1000; return [35.236 + 0.09 * r * Math.sin(a), 138.985 + 0.2 * r * Math.cos(a)]; };
-    const toBase = (b, i) => { const [lat, lon] = place(b, i); return { id:b.baseId.toLowerCase(), name:b.name.toUpperCase(), role:b.baseId + (b.self ? " · this machine" : " · " + b.address), lat, lon, main:!!b.main, status:b.status === "revoked" ? "offline" : !b.online ? "offline" : b.health && b.health.state === "degraded" ? "standby" : "online", cpu:null, ram:null, gpu:null, rtt:null, models:"—" }; };
+    const toBase = (b, i) => { const [lat, lon] = place(b, i); return { id:b.baseId.toLowerCase(), name:b.name.toUpperCase(), role:b.baseId + (b.self ? " · this machine" : " · " + b.address), lat, lon, main:!!b.main, self:!!b.self, status:b.status === "revoked" ? "offline" : !b.online ? "offline" : b.health && b.health.state === "degraded" ? "standby" : "online", cpu:null, ram:null, gpu:null, rtt:null, models:"—" }; };
     BASES.splice(0, BASES.length, toBase(self, 0), ...others.map((b, i) => toBase(b, i)));
     // This base's pulse and its EVA cage follow its real health; peers show what they last reported in their heartbeat.
     BASES[0].status = health;
