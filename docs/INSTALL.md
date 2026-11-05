@@ -150,6 +150,10 @@ npm start -- memory history ID
 
 The dashboard's **Terminal Dogma · Lilith** panel lists your facts with **Edit**, **Forget** and **Local-only / Shareable**, each fact's history, an add box and the latest Instrumentality summaries. Changes there are recorded as yours. A shareable fact may be offered to a cloud model; every fact starts local-only.
 
+**What Misato is given (the LCL).** With each request Misato gets the facts that match it and up to two of Instrumentality's summaries of earlier days that match it, then the most recent exchanges of the conversation, within a size budget (smaller on the cloud route, which costs per token); what does not fit is left out whole. Summaries come from your own conversations, so like local-only facts they never reach a cloud model.
+
+**Facts proposed together.** When Instrumentality proposes several facts in one night, Telegram shows them as one message with a ✅/❌ row per fact; each fact is still approved on its own, and a tap removes only that fact's row.
+
 Facts you add yourself are active at once. Forgetting removes a fact from recall and lists; its history (created, edited, forgotten, by whom) is kept. IDs can be shortened to their first characters.
 
 ## Dashboard

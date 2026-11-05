@@ -56,7 +56,13 @@ process.on('message',(value:unknown)=>{
     return (params.texts as string[]).filter(t=>known.has(factKey(t)));
    }
    case 'memory.saveEpisode':return store.memory.saveEpisode(params as never);
-   case 'memory.recall':return store.memory.recall(params.text as string).map(f=>({id:f.id,text:f.text,shareable:f.shareable,tainted:f.tainted}));
+   case 'memory.recall':{
+    // Facts first, then up to two of Instrumentality's summaries (F-022); summaries come from the owner's own
+    // conversations, so they are local-only and never offered to the cloud route.
+    const text=params.text as string;
+    return [...store.memory.recall(text).map(f=>({id:f.id,text:f.text,shareable:f.shareable,tainted:f.tainted})),
+     ...store.memory.recallEpisodes(text,2).map(e=>({id:e.id,text:e.summary,shareable:false,tainted:false,kind:'summary',when:e.until.slice(0,10)}))];
+   }
    case 'misato.context':return store.ledger.conversation(params.conversation as string);
    case 'misato.claim':return store.ledger.claimResume(params.sortieId as string);
    case 'actions.preview':return store.ledger.preview(params.sortieId as string,params.tool as string);
