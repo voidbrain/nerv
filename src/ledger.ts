@@ -186,6 +186,12 @@ export class Ledger {
    return final==='approve'?{decision:final,grantId:this.issue(row.action_id,row.tool,JSON.parse(row.args) as Record<string,unknown>,row.sortie_id,now)}:{decision:final};
   });
  }
+ /** Approvals that expired without the owner deciding, since a time (F-028): what the brief reports as not done. */
+ expiredSince(since:string,limit=20):{tool:string;sortieId:string;title:string;expired:string}[] {
+  if(typeof since!=='string'||!Number.isFinite(Date.parse(since)))throw new Error('Invalid time.');
+  return this.db.prepare(`SELECT x.tool,x.sortie_id AS sortieId,s.title,a.decided AS expired FROM approvals a JOIN actions x ON x.id=a.action_id JOIN sorties s ON s.id=x.sortie_id
+    WHERE a.decision='expired' AND a.decided>? ORDER BY a.decided LIMIT ?`).all(new Date(Date.parse(since)).toISOString(),Math.min(Math.max(1,limit),50)) as {tool:string;sortieId:string;title:string;expired:string}[];
+ }
  /** Run on scheduler ticks: stand down approvals whose TTL passed. */
  expire(now=new Date()):number {
   return this.tx(()=>{
