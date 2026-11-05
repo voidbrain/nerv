@@ -22,7 +22,9 @@
     "ci:status": "node tools/ci-status.mjs",
     "test:headless": "node --test test/*.integration.ts",
     "backlog:recap": "node tools/backlog-recap.mjs",
-    "check:recap": "node tools/backlog-recap.mjs --check"
+    "check:recap": "node tools/backlog-recap.mjs --check",
+    "test:coverage": "node -e \"require('fs').mkdirSync('coverage',{recursive:true})\" && node --test --experimental-test-coverage --test-coverage-include='src/**' --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=coverage/lcov.info test/*.test.ts test/*.test.mjs && node tools/lcov-summary.mjs",
+    "coverage": "npm run test:coverage && node tools/coverage-table.mjs --write"
   },
   "dependencies": {
     "@angular/common": "22.2.4",

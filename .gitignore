@@ -11,3 +11,4 @@ dist/
 native/**/.build/
 native/**/.swiftpm/
 .DS_Store
+coverage/

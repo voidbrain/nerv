@@ -1,13 +1,13 @@
 # NERV Agency backlog
 
-Current work ledger, reviewed 5 November 2026 against main `e8869be`. PR #1–#136 merged after green checks (#53–#136 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
+Current work ledger, reviewed 5 November 2026 against main `22d4376`. PR #1–#137 merged after green checks (#53–#137 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
 
 <!-- recap:start · generated by tools/backlog-recap.mjs from the records; do not edit by hand -->
 **Recap as of 2026-11-05** (window 2026-10-30 – 2026-11-05).
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 34 | 2 |
+| **Open** | 35 | 2 |
 | **Require Human 🧑** | 0 | 0 |
 
 ### Last 7 days
@@ -15,7 +15,7 @@ Current work ledger, reviewed 5 November 2026 against main `e8869be`. PR #1–#1
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **Count** | 54 | 20 | 18 | 16 |
+| **Count** | 55 | 20 | 18 | 16 |
 
 ### Require Human 🧑
 
@@ -1272,6 +1272,40 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | PR / evidence | Owner request 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
+### F-055
+
+**Code coverage per folder, as the harness asks**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
+
+💻 **→ Human action required: No**<br />Close from the merged PR's green CI (the coverage table printed in validate).
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-05 ("don't the harness require code coverage?"): AGENTS.md describes `docs/agents/coverage.md`, `npm run coverage` and a table on every PR, but nothing was set up: no script, no `coverage` settings, no CI step; the copied `tools/coverage-table.mjs` was never used. It reads the json-summary that Istanbul writes (OpenBando's Angular tests); Node's test runner writes LCOV. |
+| **Reproduce** | `npm run coverage` did not exist; `docs/agents/coverage.md` was missing. |
+| **Check** | `npm run test:coverage` runs the suite once with coverage and writes the summary; `npm run coverage` also writes the page and its baseline; CI validate runs the suite through it and prints the table (warnings; `coverage.enforce` off, as OpenBando); files no test loads appear as untested; the page changes only on purpose and in audits. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Set up in [PR #138](https://github.com/voidbrain/nerv/pull/138) (2026-11-05): `tools/lcov-summary.mjs` (project tool) turns Node's LCOV into the json-summary and adds src/ files no test loaded at zero; scripts `test:coverage` and `coverage`; `.harness.json` `coverage` {summary, folders [src/], drop 2, enforce false}; validate runs `test:coverage` instead of `npm test` (the suite still once) and `coverage-table.mjs --check --github`; `coverage/` ignored. First table: src/ lines 93.1 %, branches 84.2 %, functions 84.1 % (30 files; untested: contracts.ts, types only). Limits, written in the tool: statements equal lines (LCOV has none); code run only in the scheduler and brain child processes is not counted (most of it is also tested in-process). Checked: test/coverage.test.ts (the conversion), the run above. Harness boundary: the rule and the table tool are the harness's; the coverage run, settings and converter are this project's; whether the converter becomes a template piece for Node test runner projects is the owner's call.
+
+**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner question 2026-11-05; OpenBando's coverage setup as reference |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05: npm run coverage and test/coverage.test.ts (local run) |
 | Reviewed | 2026-11-05 |
 
 </details>

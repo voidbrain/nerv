@@ -15,7 +15,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
-      - run: npm test
+      # The suite once, with coverage; the table is printed (warnings, coverage.enforce off).
+      - run: npm run test:coverage
+      - name: Code coverage table (warnings; optional enforcement)
+        run: node tools/coverage-table.mjs --check --github
       - run: npm run build
       - run: npm run test:headless
       - run: npm run check:backlog
