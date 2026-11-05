@@ -1,28 +1,27 @@
 # NERV Agency backlog
 
-Current work ledger, reviewed 5 November 2026 against main `c737609`. PR #1–#104 merged after green checks (#53–#104 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
+Current work ledger, reviewed 5 November 2026 against main `e77b463`. PR #1–#105 merged after green checks (#53–#105 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
 
 <!-- recap:start · generated by tools/backlog-recap.mjs from the records; do not edit by hand -->
 **Recap as of 2026-11-05** (window 2026-10-30 – 2026-11-05).
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 28 | 1 |
-| **Require Human 🧑** | 2 | 1 |
+| **Open** | 29 | 0 |
+| **Require Human 🧑** | 1 | 0 |
 
 ### Last 7 days
 
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **Count** | 45 | 17 | 7 | 6 |
+| **Count** | 46 | 17 | 7 | 7 |
 
 ### Require Human 🧑
 
 | Features | Bugs |
 |---|---|
-| [F-036](#f-036) | [B-002](#b-002) |
-| [F-045](#f-045) |  |
+| [F-036](#f-036) | — |
 <!-- recap:end -->
 
 ## Bugs and reliability
@@ -30,39 +29,6 @@ Current work ledger, reviewed 5 November 2026 against main `c737609`. PR #1–#1
 From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a B- record here; earlier ones stayed in their F- records (owner decision).
 
 
-### B-002
-
-**Sortie list: older sorties show only the time, not the day**
-
-| Signal | Priority | Status | Effort | Complete |
-|:---:|---|---|---|---|
-| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
-
-🧑 **→ Human action required: Yes**<br />After updating, open the dashboard (`npm start -- open dashboard`) with a sortie from an earlier day: its card reads like *Aoba · yesterday 21:03 · 1 action* or *Aoba · 3 Nov 14:05 · …* on one line, today's still *14:05*. Tell me if it wraps or reads wrong.
-
-| | |
-|---|---|
-| **Issue** | Owner report 2026-11-05: the sortie list shows hh:mm for every sortie, so one from yesterday reads like one from this morning. |
-| **Reproduce** | Open the dashboard with sorties from earlier days; their cards show only hh:mm. |
-| **Check** | Today's sorties show hh:mm; yesterday's "yesterday hh:mm"; older ones the date and time in the owner's language and time zone; a test covers the three cases. |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Next action / closure evidence:** Fixed in [PR #104](https://github.com/voidbrain/nerv/pull/104): `dayTime()` in web/public/dashboard/dashboard.js gives today's time alone, "yesterday HH:MM", "3 Nov HH:MM", and the year when it differs, in browser local time (style guide); used on sortie cards and both "while you were away" lists (simulation and live). Checked: test/dashboard.test.ts (today, yesterday, earlier this year, another year, midnight, yesterday across a year), fails without the fix; full suite and build pass. Not yet seen in a browser: the owner's look closes it. Reported 2026-11-05.
-
-**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
-
-| Field | Value |
-|---|---|
-| PR / evidence | Owner report 2026-11-05; [PR #104](https://github.com/voidbrain/nerv/pull/104) |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-05: test/dashboard.test.ts (local run); visual check pending |
-| Reviewed | 2026-11-05 |
-
-</details>
-
----
 
 
 
@@ -1004,24 +970,58 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 |:---:|---|---|---|---|
 | 🔴 | 🔶 P2 | Open | 🔴 Large | ~0% |
 
-🧑 **→ Human action required: Yes**<br />Decide how pilots learn: the recommendation below (evaluation cases automatic; domain memory in a weekly review card; skills by approval; prompt, model, tools, permissions and stage always the owner's), or pilots that never learn.
+💻 **→ Human action required: No**<br />Next: the pilot definition and roster with the generic pilot (first slice below).
 
 | | |
 |---|---|
 | **Issue** | Owner questions 2026-11-05: NERV needs permanent agents (a coder, the 3D expert on Tabgha, and others as jobs require: a Photoshop expert), a generic one for anything else, specialists that grow from it, and automatic choice. The design already names pilots (F-025: pilots run in the EVA class of their stage, watermelon trust) but has no roster. Consultants (F-041) become pilots asked only for advice (owner, 2026-11-05). |
 | **Reproduce** | Ask Aoba for an image edit or a coding job: there is no pilot to give it to. |
-| **Check** | **Definition as data:** a pilot is a role and domain (topics, keywords), skills, tools, a model, a memory scope, an EVA class and a trust stage (Prototype, Test, Production), with its parent; most share the base's model, a separate model only when its evaluations justify it. **Roster:** a registry like the Kaji one; each base offers its pilots in the heartbeat; the owner adds, renames, retires and pins. **Generic pilot:** one per base, takes any job no specialist covers, in the most restrictive EVA its stage allows. **Two ways of use:** asked for advice (the F-041 consultant rules: at most one per topic by default, the owner's pin, then the main base's own, then the best record, the next as fallback, "ask both" per topic; advice is data, never a vote or an action) or put in charge of the job (acts in its EVA, effects by card). **Choice:** Misato routes by domain and keywords, base, stage allowed for the action and record; unclear goes to the generic pilot or a question; the card shows the pilot, its stage and base, and the owner can change it; routing accuracy is measured. **New specialists found automatically:** unmatched domains, tools the generic pilot lacked and repeated failures are counted per domain; past a threshold (e.g. three unmatched in 30 days, or one missing tool) NERV proposes a pilot (or an extension of an existing one) on a card with the sorties behind it, its skills, tools and installs; created at Prototype. **Split and merge by evidence:** a split when sorties cluster in a subdomain and a narrower set scores better; a merge when two overlap and neither is better; lineage kept. **Learning (owner decision pending):** recommendation above; nothing learned from a tainted sortie becomes a skill without review; a change to skills or prompt is versioned and re-runs the pilot's evaluations, and a drop moves it back a stage. **Inside a pilot** planning, doing and checking stay one loop; promotion through the golden sortie evaluations. |
+| **Check** | **Definition as data:** a pilot is a role and domain (topics, keywords), skills, tools, a model, a memory scope, an EVA class and a trust stage (Prototype, Test, Production), with its parent; most share the base's model, a separate model only when its evaluations justify it. **Roster:** a registry like the Kaji one; each base offers its pilots in the heartbeat; the owner adds, renames, retires and pins. **Generic pilot:** one per base, takes any job no specialist covers, in the most restrictive EVA its stage allows. **Two ways of use:** asked for advice (the F-041 consultant rules: at most one per topic by default, the owner's pin, then the main base's own, then the best record, the next as fallback, "ask both" per topic; advice is data, never a vote or an action) or put in charge of the job (acts in its EVA, effects by card). **Choice:** Misato routes by domain and keywords, base, stage allowed for the action and record; unclear goes to the generic pilot or a question; the card shows the pilot, its stage and base, and the owner can change it; routing accuracy is measured. **New specialists found automatically:** unmatched domains, tools the generic pilot lacked and repeated failures are counted per domain; past a threshold (e.g. three unmatched in 30 days, or one missing tool) NERV proposes a pilot (or an extension of an existing one) on a card with the sorties behind it, its skills, tools and installs; created at Prototype. **Split and merge by evidence:** a split when sorties cluster in a subdomain and a narrower set scores better; a merge when two overlap and neither is better; lineage kept. **Learning (owner decision 2026-11-05: the recommendation):** new evaluation cases from failures are added automatically and shown; domain memory is proposed in one review card a week; skills change only by the owner's approval, versioned; prompt, model, tools, permissions and trust stage are always the owner's; nothing learned from a tainted sortie becomes a skill without review; a change to skills or prompt is versioned and re-runs the pilot's evaluations, and a drop moves it back a stage. **Inside a pilot** planning, doing and checking stay one loop; promotion through the golden sortie evaluations. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Planned 2026-11-05 from the owner's questions. Supersedes F-041 (consultants are pilots in advice mode; its rules are kept above). First slices: the pilot definition and roster with the generic pilot; advice mode (the F-041 work); the coder pilot in a sandbox EVA (intent, spec and plan approved by card, an independent read-only verifier, results as a PR by card); then detection of new specialists, then split and merge. Candidate pilots discussed: coder, verifier, researcher (EVA-03, no effects), ops (read-only watch), 3D expert (Tabgha), archivist (memory hygiene, F-044); each gets its own record when it is built.
+**Next action / closure evidence:** Owner decision 2026-11-05: pilots learn by the recommendation ("F-045 … the recommendation"). Planned 2026-11-05 from the owner's questions. Supersedes F-041 (consultants are pilots in advice mode; its rules are kept above). First slices: the pilot definition and roster with the generic pilot; advice mode (the F-041 work); the coder pilot in a sandbox EVA (intent, spec and plan approved by card, an independent read-only verifier, results as a PR by card); then detection of new specialists, then split and merge. Candidate pilots discussed: coder, verifier, researcher (EVA-03, no effects), ops (read-only watch), 3D expert (Tabgha), archivist (memory hygiene, F-044); each gets its own record when it is built.
 
 **Estimates:** Large remaining effort; ~0% complete. Estimated 2026-11-05.
 
 | Field | Value |
 |---|---|
 | PR / evidence | Owner questions 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
+### F-046
+
+**Misato checks what already exists before adding: same thing, a change, or new**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔶 P2 | Open | 🟡 Medium | ~0% |
+
+💻 **→ Human action required: No**<br />Next: a reminders.update tool for Misato and the existing-item check before any add.
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-05, after B-003 (the same dentist request sent four times, two copies approved): before adding something, Misato should look for it among what already exists (reminders, Lilith's facts, later calendar and notes); if it is the same, not add another and say so in the reply; if it changed (another time, a corrected fact), propose changing the existing one instead. Today the store drops only exact copies (B-003 for reminders, `factKey` for facts); a reminder with the same title at another time becomes a second one, and a fact that contradicts an earlier one ("I like tea" after "I don't like tea") is added next to it. Misato has no tool to change a reminder. |
+| **Reproduce** | Ask Aoba to remind you to call the dentist on 3 February at 10, then again at 11: two reminders. Tell it you like tea, then that you don't: two facts. |
+| **Check** | Before proposing reminders.add or memory.remember, Misato is shown the existing items that match (same or similar title, the same subject); the same item is not proposed again and the reply says it already exists (with its time or text); a changed one becomes a proposal to change it (reminders.update for title or time; for a fact, the edit of the existing fact, shown old → new on the card), approved like any change; a really new item is added as today; the reply says which of the three it was and why; works in English and Italian; tests cover same, changed and new for reminders and facts, through the scheduler. Calendar and notes follow the same rule when they exist. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Planned 2026-11-05 from the owner's request. Builds on B-003 (exact copies of a reminder are returned, [PR #103](https://github.com/voidbrain/nerv/pull/103)) and Lilith's exact-text check. Slices: reminders.update as a Misato tool (the dashboard's edit already has it in the scheduler); matching existing items in Misato's context before an add; facts that change or contradict an earlier one proposed as an edit (shares the spelling and split work of F-044).
+
+**Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner request 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
 | Reviewed | 2026-11-05 |
