@@ -18,10 +18,12 @@ import type {BaseEntry,SignedRecord} from './kaji.ts';
 import {ONLINE_MS,type PeerVerdict,type RunItem,type VerdictAsk,type BaseHealth,type HeardHealth,type RegistryPort} from './kaji-link.ts';
 import {briefDue,composeBrief,gatherBrief,localClock} from './brief.ts';
 /** What the owner reads when another base answered a kaji.run (F-036 slice 3b). */
-export function remoteOutcomeText(base:string,tool:string,result:Record<string,unknown>):string {
+export function remoteOutcomeText(base:string,tool:string,result:Record<string,unknown>,args:Record<string,unknown>={}):string {
  if(typeof result.refused==='string')return `${base} did not run ${tool}: ${result.refused}.`;
  const o=result.outcome;
- if(o==='grant')return typeof result.error==='string'?`${base} ran ${tool}, and it failed: ${result.error}`:`${base} ran ${tool}: ${JSON.stringify(result.result ?? {}).slice(0,400)}`;
+ // In plain words (B-011): the item's title or text, from the result or the action's arguments, never raw JSON.
+ const r=result.result as Record<string,unknown>|undefined;const about=[r?.title,r?.text,args.title,args.text].find((v):v is string=>typeof v==='string'&&!!v.trim());
+ if(o==='grant')return typeof result.error==='string'?`${base} ran ${tool}, and it failed: ${result.error}`:`${base} ran ${tool}${about?` (“${about.slice(0,120)}”)`:''}.`;
  if(o==='approval')return `${base} asks for your approval to run ${tool}: its card is waiting for you.`;
  if(o==='reject')return `${base} refused ${tool}: ${String(result.reason ?? 'its gate said no')}.`;
  return `${base} answered for ${tool}: ${JSON.stringify(result).slice(0,400)}`;
@@ -213,9 +215,10 @@ export class Runtime implements StoreApi {
     for(const q of await this.nervous.call('kaji.outbox') as {id:string;sortieId:string;base:string;tool:string;args:Record<string,unknown>;request:string}[]){
      const r=await send(q.base,{id:q.id,request:q.request,tool:q.tool,args:q.args});if(!r.reached)continue;
      const result=(r.refused?{refused:r.refused}:r.result ?? {}) as Record<string,unknown>;
-     await this.nervous.call('kaji.outboxDone',{id:q.id,result});
      const name=(await this.bases().catch(()=>[])).find(b=>b.baseId===q.base)?.name ?? q.base;
-     const reply=remoteOutcomeText(name,q.tool,result);
+     const reply=remoteOutcomeText(name,q.tool,result,q.args);
+     // B-011: recorded on the sortie too, so the trace, the dashboard and the "why" answer show what the other base did.
+     await this.nervous.call('kaji.outboxDone',{id:q.id,result,said:{base:name,text:reply}});
      for(const l of this.resumeListeners)l({sortieId:q.sortieId,reply,steps:[],waiting:[]});
     }
    }catch{/* the next tick tries again */}finally{busy=false;}

@@ -46,6 +46,8 @@ export function askedWhy(text:string):string|undefined {
 export interface WhyRecord {
  id:string;title:string;status:string;why:string;
  advice?:{text:string;model:string}|undefined;
+ /** B-011: what other bases did with actions this sortie sent them. */
+ remote?:string[]|undefined;
  actions:{tool:string;pattern:string;outcome:'grant'|'approval'|'reject';reason:string;
   verdicts:{seat:string;vote:string;reason:string;shadow?:boolean}[];
   decision:string|null;decided:string|null;source:string|null;ran:'done'|'failed'|null;error?:string|undefined}[];
@@ -83,5 +85,6 @@ export function explainRecord(found:{found:'none'|'many';count?:number}|{found:'
   else if(a.outcome==='approval'&&!a.ran)lines.push(w.waiting);
   if(a.ran==='done')lines.push(w.ran);else if(a.ran==='failed')lines.push(stop(clip(`${w.failed}: ${a.error ?? '—'}`)));
  }
+ for(const t of r.remote ?? [])lines.push('',`Kaji: ${clip(t,300)}`);
  return lines.join('\n').slice(0,3500);
 }

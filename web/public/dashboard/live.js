@@ -107,6 +107,7 @@
         : e.kind === "approval.requested" ? ["Approval card: " + p.reason, "warn", "penpen"]
         : e.kind.startsWith("approval.") ? ["Owner " + e.kind.slice(9) + " (" + (p.source || "") + ")", e.kind === "approval.approve" ? "ok" : "danger", "you"]
         : e.kind === "action.done" ? ["EVA-02: " + p.tool + " done", "ok", "eva-02"] : e.kind === "action.failed" ? ["EVA-02: " + p.tool + " failed · " + p.error, "danger", "eva-02"]
+        : e.kind === "kaji.result" ? ["Kaji line · " + p.text, p.outcome === "grant" ? "ok" : p.outcome === "refused" || p.outcome === "reject" ? "danger" : "", "maya"]
         : e.kind === "misato.consult" ? [(p.pilot && p.pilot.name ? "Pilot " + p.pilot.name : "Consultant") + (p.model ? " (" + p.model + ")" : "") + ": " + p.advice, "", "maya"]
         : e.kind === "misato.resumed" ? ["Misato: resuming after your decision", "", "misato"] : e.kind === "sortie.done" || e.kind === "sortie.failed" ? ["Debrief: " + e.kind.slice(7), e.kind === "sortie.done" ? "ok" : "danger", "misato"] : null;
       if (e.kind === "misato.reply") known.set(id, p.text);
