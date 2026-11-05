@@ -17,3 +17,22 @@ test('the why sentence says where a sortie stands and the reason, from the lates
  assert.equal(one({status:'open',last:last({outcome:'grant',ran:'done'})}),'mail.send ran; Misato is deciding the next step.');
  assert.ok(one({last:last({reason:'x'.repeat(400)})}).length<=170,'a long reason is clipped');
 });
+test('a "why" question names a sortie by its short ID, in English or Italian; anything else is not one (B-004)',async()=>{
+ const {askedWhy}=await import('../src/why.ts');
+ assert.equal(askedWhy('why S-D263 approved?'),'d263');assert.equal(askedWhy('Perché S-1a2b è stata rifiutata?'),'1a2b');
+ assert.equal(askedWhy('come mai S-00ff?'),'00ff');assert.equal(askedWhy('explain s-abcd'),'abcd');
+ assert.equal(askedWhy('S-D263 approved'),undefined,'no question word');assert.equal(askedWhy('why is the sky blue?'),undefined,'no sortie');
+ assert.equal(askedWhy('why S-12?'),undefined,'too short to name one');
+});
+test('the why answer marks shadow seats, says when an approval waits or expired, and reports a failure',async()=>{
+ const {explainRecord}=await import('../src/why.ts');
+ const rec={id:'abcd1234',title:'Send the report',status:'open',why:'',advice:{text:'Check the recipient first.',model:'gemma4:12b'},actions:[
+  {tool:'mail.send',pattern:'orange',outcome:'approval' as const,reason:'Sync Ratio 70% below 80%',verdicts:[{seat:'Melchior',vote:'approve',reason:'Fine.'},{seat:'Tabgha·Casper',vote:'reject',reason:'Wrong address.',shadow:true}],decision:null,decided:null,source:null,ran:null},
+  {tool:'files.write',pattern:'green',outcome:'grant' as const,reason:'',verdicts:[],decision:null,decided:null,source:null,ran:'failed' as const,error:'Disk full'},
+  {tool:'mail.send',pattern:'orange',outcome:'approval' as const,reason:'',verdicts:[],decision:'expired',decided:'2026-11-05T09:00:00Z',source:'ttl',ran:null}]};
+ const en=explainRecord({found:'one',record:rec},'abcd','en','UTC');
+ assert.match(en,/^S-ABCD · “Send the report” · Status: open\./);assert.match(en,/Consultant \(gemma4:12b\): Check the recipient first\./);
+ assert.match(en,/Tabgha·Casper reject \(shadow, not counted\) — Wrong address\./);assert.match(en,/It is waiting for your decision\./);
+ assert.match(en,/It failed: Disk full\./);assert.match(en,/Your approval expired \(expiry never approves\) on 5 Nov, 09:00\./);
+ assert.equal(explainRecord({found:'many',count:3},'abcd','it','UTC'),"3 sortie iniziano con S-ABCD: indica più caratteri dell'ID.");
+});
