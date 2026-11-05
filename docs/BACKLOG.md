@@ -165,7 +165,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Fixed in [PR PR_20] (2026-11-05): `stepState` skips the advice step only when the sortie is not in the consult phase. Checked: test/dashboard.test.ts runs the real `stepState` (running → on, no consultant → skip, advised → done); it fails without the fix. Not checked in a browser.
+**Next action / closure evidence:** Fixed in [PR #142](https://github.com/voidbrain/nerv/pull/142) (2026-11-05): `stepState` skips the advice step only when the sortie is not in the consult phase. Checked: test/dashboard.test.ts runs the real `stepState` (running → on, no consultant → skip, advised → done); it fails without the fix. Not checked in a browser.
 
 **Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
 
