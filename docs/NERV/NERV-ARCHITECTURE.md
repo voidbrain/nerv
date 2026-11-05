@@ -27,14 +27,14 @@ Supersedes the glossary in `review-2026-11-04.md` §3 and every flow in `insight
    connected .............. the main base (chosen by the owner, never elected) speaks
                             through Aoba; other bases dispatch to it; their bots go quiet;
                             their MAGI become veto-only seats for the main base's actions
-   shared ................. Scrolls (from SEELE, via the main base) · pilots via Marduk ·
+   shared ................. Scrolls (from SEELE, via the main base) · pilots via the Marduk Institute ·
                             Lilith facts merged by id with provenance; conflicts → owner card
    never merged ........... Central Dogma ledgers (append-only evidence): shown side by side
    personas ............... role names per base (Misato, Gendo… or Bob, Fritz, Tim);
                             MAGI names fixed on every base (seats are replicas: "Casper@Tabgha")
    remote use ............. dashboard and channels reach other bases through the main base;
                             each base's own gate decides its own actions
-   Marduk registry ........ replicated on every base, never held by the main base alone: entries
+   Gehirn registry ........ the owner's bases, replicated on every base, never held by the main base alone: entries
                             (enrol, revoke, main-base change) are records signed by the Key, so
                             any copy verifies itself; bases exchange them over the Kaji line;
                             revoke wins over enrol, newer signed record over older; last-seen is
@@ -83,7 +83,7 @@ Supersedes the glossary in `review-2026-11-04.md` §3 and every flow in `insight
      │                 context asking for external effect   always                    │
      └──────────────────────────────────────────────────────────────────────────────┘
      high-stakes classes (Scrolls) → full ballot: Melchior and Balthasar also get model seats
-     EXTRA SEATS (MAGI copies) — attached by action class via Marduk, VETO-ONLY:
+     EXTRA SEATS (MAGI copies) — attached by action class (bases from Gehirn, pilots from the Marduk Institute), VETO-ONLY:
        • deterministic checks first: tests, linters, type check, Semgrep (code writes)
        • expert pilots (models) and branch MAGI copies: shadow seat (vote logged, not
          counted) until promoted by the watermelons; even then they can only reject
@@ -192,9 +192,10 @@ Supersedes the glossary in `review-2026-11-04.md` §3 and every flow in `insight
 | **Spear** = the emergency stop: pierces every A.T. Field of a sortie (or all) at once | In the show the Lance of Longinus pierced an Angel's A.T. Field from orbit (the 15th, Arael). Arael itself has no role here. |
 | Bridge crew | **Aoba** = comms, **Hyuga** = Misato's operations aide/watch, **Maya** = monitoring (she reads the sync ratios). |
 | **Pen Pen** = notifier | He lives in Misato's apartment. |
-| **Marduk Institute** = registry | It selects the Children (who may pilot). |
+| **Marduk Institute** = the pilot roster (the dashboard's *Marduk Institute · Pilots*, with Kaji's watermelons as trust stages; *Pilots* in the Simple theme) | It selects the Children (who may pilot). |
+| **Gehirn** = the signed registry of bases (enrol, revoke, main base) | NERV's predecessor, which founded its bases. Renamed from "Marduk registry" (owner, 2026-11-05). |
 | **Instrumentality** = memory consolidation | Separate episodes merged into one sea. The ledger is kept. |
 | **Sync Ratio** = 0–100 % | The show displays it as a percentage. |
 | **Key of Nebuchadnezzar** = sealed root key | Back in. It is the key to everything, but it is never used to bypass a gate. |
 | **Key of Nebuchadnezzar** = the owner's offline root of trust | Signs base enrolment and registry records, rotates Ritsuko's key, decrypts backups; never sent over the Kaji line, never used day to day (bases use their own enrolled credentials). |
-| Dropped | Adam (a model-weights registry: redundant with the power source — Umbilical/S² routes per role and base — and Marduk's model enrolment), pilots as privilege profiles, world model, mercenary seats, L1–L5 numbering |
+| Dropped | Adam (a model-weights registry: redundant with the power source — Umbilical/S² routes per role and base — and the Marduk Institute's model enrolment), pilots as privilege profiles, world model, mercenary seats, L1–L5 numbering |

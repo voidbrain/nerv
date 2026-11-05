@@ -79,7 +79,7 @@ function checkBody(b:RegistryBody):void {
  if(b.kind==='enrol'){if(typeof b.name!=='string'||!b.name.trim()||b.name.length>40||typeof b.address!=='string'||!/^[a-z0-9.:-]{1,253}$/i.test(b.address)||typeof b.publicKey!=='string')throw new Error('An enrolment needs a name, an address and a public key.');publicKeyFrom(b.publicKey);}
 }
 export interface BaseEntry {baseId:string;name:string;publicKey:string;address:string;fingerprint:string;status:'enrolled'|'revoked';serial:number}
-/** Marduk's registry on this base: append-only signed records, all verified against the pinned root key. */
+/** The Gehirn registry (the owner's bases) on this base: append-only signed records, all verified against the pinned root key. */
 export class Registry {
  readonly db:DatabaseSync;readonly root:string|undefined;
  constructor(db:DatabaseSync,rootPublicKey?:string){this.db=db;this.root=rootPublicKey;}

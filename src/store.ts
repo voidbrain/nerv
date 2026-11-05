@@ -39,7 +39,7 @@ export class Store {
     if(!(this.db.prepare('PRAGMA table_info(events)').all() as {name:string}[]).some(c=>c.name==='v'))this.db.exec('ALTER TABLE events ADD COLUMN v INTEGER NOT NULL DEFAULT 1');
     // Schema 4: Lilith's facts, their append-only history and the FTS5 index (F-022).
     this.db.exec(MEMORY_SCHEMA);
-    // Marduk's registry for the Kaji line (F-036): signed, append-only records; an additive table, no version change.
+    // The Gehirn registry of bases for the Kaji line (F-036): signed, append-only records; an additive table, no version change.
     this.db.exec(REGISTRY_SCHEMA);
     // F-036 slice 3b, additive: actions queued for other bases, and actions other bases asked of this one (by their id, so a
     // resend after a crash returns the first result instead of running twice).
