@@ -103,7 +103,8 @@ test('ask travels coordinator → brain process → S²; the socket cannot ask a
   const doctor=JSON.stringify(await (await fetch(base+'/api/doctor',{headers})).json());
   assert.match(doctor,/configured \(gemma\)/);assert.match(doctor,/enabled \(claude-opus-5-5\)/);assert.ok(!doctor.includes(KEY));
   assert.throws(()=>authorize('interface','coordinator','model.complete'));
-  assert.equal(p.seen.length,1);
+  // One model call; doctor's read of the model list (F-037, GET /api/tags) is not a model call.
+  assert.equal(p.seen.filter(x=>x.path==='/v1/chat/completions').length,1);assert.ok(p.seen.every(x=>x.path==='/v1/chat/completions'||x.path==='/api/tags'));
   await runtime.close();chmodSync(join(home,'anthropic-key'),0o644);
   runtime=new Runtime(join(home,'nerv.sqlite'),undefined,home);await runtime.ready();
   await assert.rejects(runtime.ask({prompt:'x',privacy:'local-only'}),/must be private/);

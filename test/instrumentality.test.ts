@@ -64,7 +64,9 @@ test('idle mode: consolidates after an hour without requests, at most once in 20
  try{
   const store=new Store(join(t.home,'nerv.sqlite'));
   try{const s=store.ledger.openSortie('misato','old','trusted');store.ledger.note(s,'misato.request',{text:'I like tea'},new Date(Date.now()-2*3_600_000));}finally{store.close();}
-  t.runtime.startInstrumentality(()=>({mode:{when:'idle'},timeZone:'Europe/Rome'}),50);await wait(300);
+  t.runtime.startInstrumentality(()=>({mode:{when:'idle'},timeZone:'Europe/Rome'}),50);
+  // Until it happened (a fixed 300 ms failed under a loaded full run), then a settle time for a wrong second one.
+  for(let i=0;i<100&&!t.asked.includes('digest');i++)await wait(50);await wait(300);
   assert.equal(t.asked.filter(a=>a==='digest').length,1,'idle for two hours: one consolidation');
   const again=new Store(join(t.home,'nerv.sqlite'));
   try{const s=again.ledger.openSortie('misato','new','trusted');again.ledger.note(s,'misato.request',{text:'I like coffee'},new Date(Date.now()-2*3_600_000+60_000));assert.equal(again.memory.episodes().length,1);}finally{again.close();}
