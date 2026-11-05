@@ -36,3 +36,9 @@ test('the why answer marks shadow seats, says when an approval waits or expired,
  assert.match(en,/It failed: Disk full\./);assert.match(en,/Your approval expired \(expiry never approves\) on 5 Nov, 09:00\./);
  assert.equal(explainRecord({found:'many',count:3},'abcd','it','UTC'),"3 sortie iniziano con S-ABCD: indica più caratteri dell'ID.");
 });
+test('a sortie reference never decides the reply language: its letters are not words (B-016)',async()=>{
+ const {requestLanguage}=await import('../src/misato.ts');
+ assert.equal(requestLanguage('why S-1E0E approved?'),'en','"1E0E" once read as two Italian "e"');
+ assert.equal(requestLanguage('why S-E0E0?'),'en');assert.equal(requestLanguage('perché S-1E0E è stata approvata?'),'it');
+ assert.equal(requestLanguage('remind me at 10e30'),'en','a token with digits is not a word');
+});

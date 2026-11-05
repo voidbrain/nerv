@@ -44,7 +44,8 @@ const ITALIAN=new Set('il lo la le gli un una di da del della che non per con so
 const ENGLISH=new Set('the a an of to and is are i me my you your it at on in for with what when where why how remind remember tomorrow today please yes thanks all this that'.split(' '));
 /** The language of a request by its common words; too short to tell (yes, ok, sì) falls back to the earlier exchanges, then `fallback`. */
 export function requestLanguage(request:string,earlier:string[]=[],fallback:'it'|'en'='en'):'it'|'en' {
- const score=(text:string)=>{let it=0,en=0;for(const w of text.toLowerCase().match(/[\p{L}']+/gu) ?? []){if(ITALIAN.has(w))it++;if(ENGLISH.has(w))en++;}return it-en;};
+ // B-016: only real words vote: sortie references (S-1E0E) go first, and a token with digits is never a word ("1e0e" read as two Italian "e").
+ const score=(text:string)=>{let it=0,en=0;for(const w of text.toLowerCase().replace(/\bs-[0-9a-f]{4,12}\b/g,' ').match(/[\p{L}\p{N}']+/gu) ?? []){if(/\p{N}/u.test(w))continue;if(ITALIAN.has(w))it++;if(ENGLISH.has(w))en++;}return it-en;};
  for(const text of [request,...[...earlier].reverse()]){const d=score(text);if(d>0)return 'it';if(d<0)return 'en';}
  return fallback;
 }

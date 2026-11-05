@@ -7,7 +7,7 @@ Current work ledger, reviewed 5 November 2026 against main `f4011e3`. PR #1–#1
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 34 | 3 |
+| **Open** | 34 | 4 |
 | **Require Human 🧑** | 1 | 1 |
 
 ### Last 7 days
@@ -15,7 +15,7 @@ Current work ledger, reviewed 5 November 2026 against main `f4011e3`. PR #1–#1
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **Count** | 53 | 19 | 15 | 12 |
+| **Count** | 53 | 19 | 16 | 12 |
 
 ### Require Human 🧑
 
@@ -136,6 +136,40 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | PR / evidence | #123 native-macos jobs 127479057886, 127479078814 |
 | Opened | 2026-11-05 |
 | Verification | Pending: native-macos on #124 and main |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
+### B-016
+
+**A sortie ID can switch the reply language: "why S-1E0E?" answered in Italian**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
+
+💻 **→ Human action required: No**<br />Close from the merged PR's green CI.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-05 on #127's windows job: test/resume.test.ts asked *why S-1E0E approved?* and got the answer in Italian. The language guess split the ID into letters: "1E0E" became two Italian "e" ("and"), outvoting the one English "why". It depends on the random ID, so it fails now and then, on any machine, and the owner would get a reply in the wrong language the same way. |
+| **Reproduce** | `requestLanguage('why S-1E0E approved?')` returned "it". |
+| **Check** | Sortie references and tokens with digits never vote; English and Italian questions with any ID keep their language; a test covers IDs that contain "e" and digits. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Fixed in [PR #127](https://github.com/voidbrain/nerv/pull/127) (2026-11-05): `requestLanguage` removes sortie references first and skips any token with a digit. Checked: test/why.test.ts (the failing ID, an ID that starts with E, Italian with an ID, a token with digits), fails without the fix.
+
+**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | #127 windows job (run 42101963247) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05: test/why.test.ts (local run) |
 | Reviewed | 2026-11-05 |
 
 </details>
