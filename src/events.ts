@@ -33,13 +33,15 @@ export interface EventPayloads {
  'misato.resumed':Record<string,never>;
  /** B-011: what another base did with an action this sortie sent it (kaji.run), as the owner reads it. */
  'kaji.result':{base:string;tool:string;outcome:string;text:string};
+ /** F-052: a shadow seat's vote that arrived after the gate decided; it never changes the outcome. */
+ 'ballot.shadow':{seat:string;vote:'approve'|'reject'|'abstain';reason:string;confidence?:number};
  'action.done':{tool:string;result:unknown};
  'action.failed':{tool:string;error:string};
  'sortie.done':Record<string,never>;
  'sortie.failed':Record<string,never>;
 }
 export type EventKind=keyof EventPayloads;
-export const EVENT_KINDS=['sortie.opened','ballot','grant.issued','grant.used','grant.denied','approval.requested','approval.approve','approval.reject','approval.edit','approval.expired','spear','misato.reply','misato.request','misato.step','misato.waiting','misato.consult','kaji.result','misato.resumed','action.done','action.failed','sortie.done','sortie.failed'] as const satisfies readonly EventKind[];
+export const EVENT_KINDS=['sortie.opened','ballot','grant.issued','grant.used','grant.denied','approval.requested','approval.approve','approval.reject','approval.edit','approval.expired','spear','misato.reply','misato.request','misato.step','misato.waiting','misato.consult','kaji.result','ballot.shadow','misato.resumed','action.done','action.failed','sortie.done','sortie.failed'] as const satisfies readonly EventKind[];
 /** One event as read back. `v` is the schema version it was written under; events written before versioning read as 1. */
 export type SortieEvent={[K in EventKind]:{v:number;sequence:number;sortieId:string;actionId:string|null;kind:K;payload:EventPayloads[K];created:string}}[EventKind];
 /** Serialises a payload for storage, refusing unknown kinds and oversized payloads so the ledger never stores an unbounded event. */
