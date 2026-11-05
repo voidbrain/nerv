@@ -185,13 +185,13 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Fixed in [PR PR_B6]: `gatherBrief` reads each source on its own; one that fails is listed in `unavailable` and the brief prints *could not be read for this brief* (Italian: *non leggibile per questo brief*) in that part, never *nothing* or *all checks pass*; a failed read no longer throws out of the brief's timer. Sorties closed since the previous brief are counted by the scheduler (`sorties.closedSince`: done and failed counts and the latest five failures), not taken from the newest 50. Checked: test/brief.test.ts (approvals, health and expired unreadable: named in English and Italian, the rest still written; through the scheduler process 62 closed sorties counted as 59 done and 3 failed), both fail without the fix; full suite 136 pass, build, headless. INSTALL notes the behaviour. Found 2026-11-05.
+**Next action / closure evidence:** Fixed in [PR #102](https://github.com/voidbrain/nerv/pull/102): `gatherBrief` reads each source on its own; one that fails is listed in `unavailable` and the brief prints *could not be read for this brief* (Italian: *non leggibile per questo brief*) in that part, never *nothing* or *all checks pass*; a failed read no longer throws out of the brief's timer. Sorties closed since the previous brief are counted by the scheduler (`sorties.closedSince`: done and failed counts and the latest five failures), not taken from the newest 50. Checked: test/brief.test.ts (approvals, health and expired unreadable: named in English and Italian, the rest still written; through the scheduler process 62 closed sorties counted as 59 done and 3 failed), both fail without the fix; full suite 136 pass, build, headless. INSTALL notes the behaviour. Found 2026-11-05.
 
 **Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Code review 2026-11-05 (src/brief.ts) |
+| PR / evidence | Code review 2026-11-05 (src/brief.ts); [PR #102](https://github.com/voidbrain/nerv/pull/102) |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-05: test/brief.test.ts and full suite (local run) |
 | Reviewed | 2026-11-05 |
