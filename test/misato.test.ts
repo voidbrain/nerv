@@ -33,8 +33,8 @@ async function models(misato:string[],casper='{"vote":"approve","reason":"Matche
  await new Promise<void>(done=>server.listen(0,'127.0.0.1',done));
  return {asked,url:`http://127.0.0.1:${(server.address() as {port:number}).port}/v1`,close:()=>new Promise<void>(done=>server.close(()=>done()))};
 }
-async function agent(script:string[],work:(r:Runtime,m:Awaited<ReturnType<typeof models>>,base:string,headers:Record<string,string>)=>Promise<void>,scrolls?:object) {
- const m=await models(script);const home=mkdtempSync(join(tmpdir(),'nerv-misato-'));
+async function agent(script:string[],work:(r:Runtime,m:Awaited<ReturnType<typeof models>>,base:string,headers:Record<string,string>)=>Promise<void>,scrolls?:object,casper?:string) {
+ const m=await models(script,casper);const home=mkdtempSync(join(tmpdir(),'nerv-misato-'));
  writeFileSync(join(home,'config.json'),JSON.stringify({models:{local:{baseUrl:m.url,model:'gemma4:12b'},roles:{misato:{route:'local',model:'qwen2.5-coder:14b'},casper:{model:'gemma4:12b'}}}}));
  if(scrolls)writeFileSync(join(home,'scrolls.json'),JSON.stringify(scrolls),{mode:0o600});
  const runtime=new Runtime(join(home,'nerv.sqlite'),undefined,home);const token='c'.repeat(32);const server=makeServer(runtime,token);
@@ -79,7 +79,8 @@ test('a reject from the gate goes back to Misato with its reason, and nothing ru
  await agent(['{"action":{"tool":"reminders.cancel","args":{"id":"r1"}}}','{"reply":"I could not cancel it: the owner\'s rules deny that tool."}'],async(runtime,m)=>{
   const chat=await runtime.chat('Cancel my reminder');
   assert.deepEqual(chat.steps.map(s=>[s.outcome,s.reason]),[['reject','melchior: Tool denied by the Scrolls.']]);
-  assert.match(JSON.parse(m.asked[1]!.prompt).steps[0].reason,/denied by the Scrolls/);
+  // B-009: a removal is checked by Casper too, so Misato's prompts are found by role, not by position.
+  assert.match(JSON.parse(m.asked.filter(a=>a.who==='misato')[1]!.prompt).steps[0].reason,/denied by the Scrolls/);
   assert.deepEqual((await runtime.events(chat.sortieId)).map(e=>e.kind),['sortie.opened','misato.request','ballot','misato.step','misato.reply','sortie.done']);
  },{deny:['reminders.cancel']});
 });
@@ -96,7 +97,7 @@ test('a short follow-up keeps its conversation: "delete all" → Misato asks →
   script.push('{"action":{"tool":"reminders.list","args":{}}}','{"reply":"Hai 2 promemoria. Li cancello tutti?"}',`{"action":{"tool":"reminders.cancel","args":{"ids":["${a.id}","${b.id}"]}}}`,'{"reply":"Fatto: cancellati entrambi."}');
   const first=await runtime.chat('cancella tutti i promemoria','telegram:1111');assert.equal(first.reply,'Hai 2 promemoria. Li cancello tutti?');
   const second=await runtime.chat('sì','telegram:1111');
-  const prompt=JSON.parse(m.asked.at(-2)!.prompt) as {earlier:{request:string;reply:string}[];request:string};
+  const prompt=JSON.parse(m.asked.filter(a=>a.who==='misato').at(-2)!.prompt) as {earlier:{request:string;reply:string}[];request:string};
   assert.equal(prompt.earlier.length,1);assert.equal(prompt.earlier[0]!.request,'cancella tutti i promemoria');assert.equal(prompt.earlier[0]!.reply,'Hai 2 promemoria. Li cancello tutti?');
   assert.equal(prompt.request,'sì');
   assert.deepEqual(second.steps.map(s=>[s.tool,s.outcome]),[['reminders.cancel','grant']],'one Green action: cancel has an inverse now');
@@ -154,4 +155,16 @@ test('an action that already ran is never run again: a repeat ends the turn with
   assert.equal(chat.reply,'Fatto: reminders.list.','at the limit, what ran is reported, in the request\'s language');
   assert.equal((await runtime.events(chat.sortieId)).at(-1)!.kind,'sortie.done');
  });
+});
+test('a removal the request did not ask for is checked by Casper even though it is Green, and refused: nothing is cancelled (B-009)',async()=>{
+ const script:string[]=[];
+ await agent(script,async(runtime,m)=>{
+  const old=await runtime.add('Drink water','2030-01-01T09:00:00Z');
+  script.push('{"action":{"tool":"reminders.add","args":{"title":"Eat","due":"2030-01-01T10:00:00Z"}}}',`{"action":{"tool":"reminders.cancel","args":{"id":"${old.id}"}}}`,'{"reply":"Added the reminder to eat."}');
+  const chat=await runtime.chat('remind me to eat at 10');
+  assert.deepEqual(chat.steps.map(s=>[s.tool,s.outcome]),[['reminders.add','grant'],['reminders.cancel','reject']]);
+  assert.match(chat.steps[1]!.reason!,/^casper: Not asked for\./);
+  assert.deepEqual(m.asked.filter(a=>a.who==='casper').length,1,'Casper is asked about the removal only, not about the Green add');
+  assert.deepEqual((await runtime.pendingReminders()).map(r=>r.title).sort(),['Drink water','Eat'],'the earlier reminder is still there');
+ },undefined,'{"vote":"reject","reason":"Not asked for.","confidence":0.9}');
 });

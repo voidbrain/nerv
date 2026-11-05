@@ -96,10 +96,21 @@ test('reminders.cancel takes one id or up to 20 ids, and reminders.restore undoe
  const store=new Store(':memory:');
  try{
   const a=store.add('A','2031-01-01T09:00:00Z'),b=store.add('B','2031-01-02T09:00:00Z');
-  const run=(tool:string,args:Record<string,unknown>)=>{const s=store.ledger.openSortie(OWNER_SOURCE,tool,'trusted');return store.runAction(s,{tool,args,stage:'production'});};
+  // B-009: a removal runs only with Casper's intent check (here: approved); without one the owner decides.
+  const run=(tool:string,args:Record<string,unknown>)=>{const s=store.ledger.openSortie(OWNER_SOURCE,tool,'trusted');return store.runAction(s,{tool,args,stage:'production',casper:{seat:'casper',vote:'approve',reason:'Asked for.',confidence:0.9}});};
   const cancel=run('reminders.cancel',{ids:[a.id,b.id]});assert.equal(cancel.pattern,'green');assert.deepEqual((cancel.result as {cancelled:string[]}).cancelled,[a.id,b.id]);
   assert.equal(store.pendingReminders().length,0);
   assert.deepEqual((run('reminders.restore',{id:a.id}).result as {restored:string[]}).restored,[a.id]);assert.deepEqual(store.pendingReminders().map(r=>r.id),[a.id]);
   for(const args of [{},{id:'x',ids:['y']},{ids:[]},{ids:['x','x']},{ids:Array.from({length:21},(_,i)=>'r'+i)},{ids:[1]}])assert.ok(run('reminders.cancel',args).error,JSON.stringify(args));
  }finally{store.close();}
+});
+test('the ballot: a Green removal needs Casper (no verdict: the owner decides; reject: refused; approve: granted); a Green add does not (B-009)',async()=>{
+ const {ballot,intentChecked}=await import('../src/policy.ts');
+ const cancel={name:'reminders.cancel',effect:'write-local' as const,inverse:'reminders.restore',removes:true as const},add={name:'reminders.add',effect:'write-local' as const,inverse:'reminders.cancel'};
+ const act=(tool:string)=>({tool,args:{},stage:'production' as const,trust:'trusted' as const,cost:0,proactive:false});
+ assert.equal(intentChecked('green',cancel),true);assert.equal(intentChecked('green',add),false);assert.equal(intentChecked('orange',add),true);
+ const none=ballot(act('reminders.cancel'),cancel,defaultPolicy,0);assert.equal(none.pattern,'green');assert.equal(none.outcome,'approval');
+ const no=ballot(act('reminders.cancel'),cancel,defaultPolicy,0,{seat:'casper',vote:'reject',reason:'Not asked for.'});assert.equal(no.outcome,'reject');assert.match(no.reason,/^casper: Not asked for/);
+ const yes=ballot(act('reminders.cancel'),cancel,defaultPolicy,0,{seat:'casper',vote:'approve',reason:'Asked for.',confidence:0.9});assert.equal(yes.outcome,'grant');
+ assert.equal(ballot(act('reminders.add'),add,defaultPolicy,0).outcome,'grant','a Green add runs without Casper, as before');
 });

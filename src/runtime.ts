@@ -102,9 +102,10 @@ export class Runtime implements StoreApi {
   return reply.verdict?{vote:reply.verdict.vote,reason:reply.verdict.reason,...(typeof reply.verdict.confidence==='number'?{confidence:reply.verdict.confidence}:{})}:null;
  }
  private async gate(sortieId:string,action:OwnerAction,askCasper=true):Promise<ActReply> {
-  const {pattern,effect}=await this.nervous.call('actions.preview',{sortieId,tool:action.tool}) as {pattern:Pattern;effect:Effect};
+  const {pattern,effect,intent}=await this.nervous.call('actions.preview',{sortieId,tool:action.tool}) as {pattern:Pattern;effect:Effect;intent?:boolean};
   let casper:Verdict|undefined,casperError:string|undefined;let extras:Verdict[]=[];
-  if(pattern!=='green'&&askCasper){
+  // Casper (and the other bases' seats) for anything not Green, and for every removal even when Green (B-009).
+  if((intent ?? pattern!=='green')&&askCasper){
    // The other bases' Casper (F-036 phase 2) is asked at the same time: veto-only seats, shadow until the owner trusts them.
    const [reply,peers]=await Promise.all([
     this.brain.call('casper.verdict',{request:action.request,tool:action.tool,args:action.args,effect},MODEL_TIMEOUT_MS).catch(()=>({verdict:null,error:'Brain unavailable.'})) as Promise<{verdict:Verdict|null;error?:string}>,

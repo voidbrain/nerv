@@ -75,9 +75,9 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🟠 | 🔺 P1 | Investigate | 🟡 Medium | ~0% |
+| 🟡 | 🔺 P1 | Implemented | 🟡 Medium | ~90% |
 
-💻 **→ Human action required: No**<br />Next: read the sortie on Tabgha and stop actions the request did not ask for.
+💻 **→ Human action required: No**<br />Close from the merged PR's green CI. On Tabgha, check `nerv list` for the reminder cancelled on 2026-11-05 and add it again if you still want it.
 
 | | |
 |---|---|
@@ -88,15 +88,15 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Reported 2026-11-05. First: which reminder was cancelled, and what Misato saw (the step history) when it proposed the cancel.
+**Next action / closure evidence:** Fixed in [PR #111](https://github.com/voidbrain/nerv/pull/111): tools that cancel or forget (`reminders.cancel`, `memory.forget`) carry `removes`; they stay Green (undoable) but always get Casper's intent check (`intentChecked`, the ballot and the runtime gate, also the other bases' seats), so a removal the request did not ask for is refused, and without a verdict the owner decides; Casper's prompt says an unrequested removal is a reject; Misato's prompt forbids changing anything the request does not ask for. Checked: test/misato.test.ts (through every process: *remind me to eat* followed by a cancel of another reminder, Casper refuses, nothing is cancelled, Casper asked only about the cancel), test/gate.test.ts (the ballot for a Green removal: no verdict, reject, approve; a Green add unchanged), both fail without the fix; three tests changed deliberately for this requirement (a removal now needs Casper: the store test gives an approving verdict, two tests find Misato's prompts by role); full suite 149 pass, build, headless. A requested cancel costs one Casper call; a short confirmation ("sì") of a cancel needs Casper to see the conversation: B-010. Reported 2026-11-05. First: which reminder was cancelled, and what Misato saw (the step history) when it proposed the cancel.
 
-**Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-05.
+**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner test on Tabgha 2026-11-05 |
+| PR / evidence | Owner test on Tabgha 2026-11-05; [PR #111](https://github.com/voidbrain/nerv/pull/111) |
 | Opened | 2026-11-05 |
-| Verification | Pending |
+| Verification | 2026-11-05: test/misato.test.ts, test/gate.test.ts and full suite (local run) |
 | Reviewed | 2026-11-05 |
 
 </details>
@@ -1321,7 +1321,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Planned 2026-11-05 from the owner's test.
+**Next action / closure evidence:** Owner, 2026-11-05: also show who contributed, on this base and from others: the Gevurah node names who advised (a pilot, the generic one, or a pilot from another base); the MAGI node shows the extra seats ("+1 shadow · Tabgha") and its detail every seat's vote; the Watermelons panel lists the real pilot roster (stage, model, base, including pilots offered by other bases); the EVA cages show which pilot runs in which instance once EVAs exist (F-049). Today: Gevurah lights without a name, peer seats appear only in the selected sortie's ballot chips (by base ID, dashed when shadow), the Watermelons panel lists only owner and misato, cages show only their class. Planned 2026-11-05 from the owner's test.
 
 **Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-05.
 
