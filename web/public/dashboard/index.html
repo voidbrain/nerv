@@ -96,7 +96,9 @@ header.top { display:flex; flex-wrap:wrap; justify-content:space-between; align-
 main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) minmax(0,3.6fr); gap:8px; align-items:start; }
 /* wide screens: the whole dashboard fits one page; each column scrolls on its own */
 @media (min-width:1201px) {
-  html,body { height:100%; } body { overflow:hidden; }
+  /* B-014: the body is pinned to the window, so the page itself has nothing to scroll (only the columns do): overflow
+     hidden alone still let scrollIntoView, focus() or a narrow-then-wide window leave it scrolled, header cut off. */
+  html { height:100%; overflow:hidden; } body { position:fixed; inset:0; overflow:clip; }
   .wrap { height:100%; }
   main.grid { flex:1; min-height:0; align-items:stretch; }
   main.grid > .col { min-height:0; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-gutter:stable; }

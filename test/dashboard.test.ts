@@ -146,3 +146,9 @@ test('every theme, mode and colour reaches WCAG AA where text sits; Eva · Dark 
  assert.doesNotMatch(html,/body\.theme-(eva-full|eva-basic|light|terminal)\b/,'no old theme classes left');
  assert.doesNotMatch(html.slice(html.indexOf('* { box-sizing')),/rgba\(255,102,0/,'no fixed orange outside the default: glows follow the colour');
 });
+test('on wide screens the page itself has nothing to scroll: the body is pinned to the window, only the columns scroll (B-014)',async()=>{
+ const {readFileSync}=await import('node:fs');const html=readFileSync('web/public/dashboard/index.html','utf8');
+ const wide=/@media \(min-width:1201px\) \{([\s\S]*?)\n\}/.exec(html)![1]!;
+ assert.match(wide,/html \{ height:100%; overflow:hidden; \} body \{ position:fixed; inset:0; overflow:clip; \}/);
+ assert.doesNotMatch(wide,/html,body \{ height:100%; \} body \{ overflow:hidden; \}/,'overflow hidden alone let the page stay scrolled, header cut off');
+});
