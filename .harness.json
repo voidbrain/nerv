@@ -224,6 +224,11 @@
       "what": "Host clock and timezone",
       "affects": "Reminder deadlines",
       "noticed": "Explicit timezone inputs and doctor"
+    },
+    {
+      "what": "GitHub-hosted runner images (macos-15, windows-latest, ubuntu-latest)",
+      "affects": "CI jobs: an image GitHub retires fails the job before it runs",
+      "noticed": "The job fails in about a second with \"configuration … is not supported\" (B-015, macos-14 retired 2026-11-05)"
     }
   ],
   "pages": [
