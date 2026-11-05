@@ -32,7 +32,7 @@
     // action passed but this one bypassed is not shown as passed.
     const latest = actions[actions.length - 1]; const latestIs = (...st) => !!latest && st.includes(latest.status);
     // The consultant's advice is a passed step when it was given (owner, 2026-11-05: ADVISE stayed unlit after it advised).
-    const done = { detect:true, intake:true, route:true, consult:consulted.has(s.id), plan:actions.length > 0, magi:!!latest, sync:!!latest,
+    const done = { detect:true, intake:true, route:true, consult:consulted.has(s.id), plan:actions.length > 0 || known.has(s.id), magi:!!latest, sync:!!latest,
       apt:!!latest && !!latest.ballot && latest.ballot.outcome === "approval", plug:latestIs("done", "failed", "proposed"), eva:latestIs("done", "failed"), debrief:status !== "active" && status !== "waiting" };
     const phase = status === "waiting" ? "apt" : status === "active" ? (phaseOf.get(s.id) || "plan") : "debrief";
     const last = actions[actions.length - 1];

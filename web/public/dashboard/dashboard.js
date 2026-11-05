@@ -540,7 +540,9 @@ function renderMagiPending(s) { if (state.selected === s.id) renderFlow(); }
 const EDGES = [
   ["detect","intake"],["detect","route"],["intake","route"],["route","plan"],["consult","plan","loop"],["plan","magi"],
   ["magi","sync"],["magi","apt"],["sync","apt"],["sync","plug"],["apt","plug"],["plug","eva"],["eva","debrief"],
-  ["magi","plan","loop"],["apt","plan","loop"],["eva","plan","loop"]
+  ["magi","plan","loop"],["apt","plan","loop"],["eva","plan","loop"],
+  // Misato answered without an action: straight to Debrief (drawn only for such a sortie).
+  ["plan","debrief","answer"]
 ];
 function nodeEl(id) { return id === "magi" ? document.getElementById("magi-big") : document.querySelector(".snode[data-n='" + id + "']"); }
 function drawEdges(s) {
@@ -554,21 +556,24 @@ function drawEdges(s) {
   // in the gaps between nodes; the loops back to Misato run in their own lanes in the right padding, never behind a node.
   // One shared turning height per fan-out (edges leaving the same node downwards) and per merge (edges entering the
   // same node from above), so branches turn on one line.
-  const box = {}; EDGES.forEach(e => { box[e[0]] = box[e[0]] || c(nodeEl(e[0])); box[e[1]] = box[e[1]] || c(nodeEl(e[1])); });
-  const down = EDGES.filter(e => e[2] !== "loop" && box[e[1]].t >= box[e[0]].b - 2);
+  const edges = EDGES.filter(e => e[2] !== "answer" || (s && !s.actions.length));
+  const box = {}; edges.forEach(e => { box[e[0]] = box[e[0]] || c(nodeEl(e[0])); box[e[1]] = box[e[1]] || c(nodeEl(e[1])); });
+  const down = edges.filter(e => !e[2] && box[e[1]].t >= box[e[0]].b - 2);
   const fan = {}, merge = {};
   down.forEach(e => { fan[e[0]] = Math.min(fan[e[0]] ?? Infinity, box[e[1]].t); merge[e[1]] = Math.max(merge[e[1]] ?? -Infinity, box[e[0]].b); });
   const bar = e => { const outs = down.filter(x => x[0] === e[0]).length, ins = down.filter(x => x[1] === e[1]).length;
     return outs > 1 || ins < 2 ? (box[e[0]].b + fan[e[0]]) / 2 : (merge[e[1]] + box[e[1]].t) / 2; };
   let lane = 0;
-  const paths = EDGES.map(e => {
+  const paths = edges.map(e => {
     const A = c(nodeEl(e[0])), B = c(nodeEl(e[1])); let d;
-    if (e[2] === "loop" && e[0] !== "consult") { const x = host.width - 14 - 8 * lane++; d = "M" + A.r + "," + A.y + " H" + x + " V" + B.y + " H" + B.r; }
+    // The answer route runs in its own lane on the right, then under Debrief, entering it from below.
+    if (e[2] === "answer") { const x = host.width - 14 - 8 * lane++, yb = B.b + 6; d = "M" + A.r + "," + A.y + " H" + x + " V" + yb + " H" + B.x + " V" + B.b; }
+    else if (e[2] === "loop" && e[0] !== "consult") { const x = host.width - 14 - 8 * lane++; d = "M" + A.r + "," + A.y + " H" + x + " V" + B.y + " H" + B.r; }
     else if (B.t >= A.b - 2) { const my = bar(e); d = "M" + A.x + "," + A.b + " V" + my + " H" + B.x + " V" + B.t; }
     else if (B.b <= A.t + 2) { const my = (B.b + A.t) / 2; d = "M" + A.x + "," + A.t + " V" + my + " H" + B.x + " V" + B.b; }
     else if (B.l >= A.r) { const mx = (A.r + B.l) / 2; d = "M" + A.r + "," + A.y + " H" + mx + " V" + B.y + " H" + B.l; }
     else { const mx = (B.r + A.l) / 2; d = "M" + A.l + "," + A.y + " H" + mx + " V" + B.y + " H" + B.r; }
-    const key = e[0] + ">" + e[1]; const cls = (e[2] ? "loop " : "") + (live[key] || passedEdge(s, e) || "");
+    const key = e[0] + ">" + e[1]; const cls = (e[2] === "loop" ? "loop " : "") + (live[key] || passedEdge(s, e) || "");
     return "<path d='" + d + "' class='" + cls + "' marker-end='url(#edge-arrow)'/>";
   }).join("");
   svg.innerHTML = "<defs><marker id='edge-arrow' viewBox='0 0 6 6' refX='5' refY='3' markerWidth='8' markerHeight='8' markerUnits='userSpaceOnUse' orient='auto-start-reverse'><path d='M0,0 L6,3 L0,6 z' fill='context-stroke'/></marker></defs>" + paths;
@@ -577,14 +582,15 @@ function drawEdges(s) {
     (Misato's apartment), faded into a skipped step. Live, waiting and rejected edges are drawn by liveEdges instead. */
 function passedEdge(s, e) {
   if (!s || e[2] === "loop") return "";
+  if (e[2] === "answer") return stepState(s, "plan") === "done" && stepState(s, "debrief") === "done" ? "passed" : "";
   const from = stepState(s, e[0]), to = stepState(s, e[1]);
   if (from === "skip" || to === "skip") return "skip";
   if (from !== "done" || !(to === "done" || to === "on" || to === "wait")) return "";
   return e[0] === "apt" || e[1] === "apt" ? "passed owner" : "passed";
 }
 function liveEdges(s) {
-  const m = {}; if (!s) return m;
-  const prevOf = { intake:"detect", route:"intake", consult:"route", plan:s.consult && s.current === 0 ? "consult" : "route", magi:"plan", sync:"magi", apt:"sync", plug:s.done.apt && s.phase === "plug" ? "apt" : "sync", eva:"plug", debrief:"eva" };
+  const m = {}; if (!s || !(s.status === "active" || /waiting/.test(s.status))) return m;
+  const prevOf = { intake:"detect", route:"intake", consult:"route", plan:s.consult && s.current === 0 ? "consult" : "route", magi:"plan", sync:"magi", apt:"sync", plug:s.done.apt && s.phase === "plug" ? "apt" : "sync", eva:"plug", debrief:s.actions.length ? "eva" : "plan" };
   if (s.phase === "plan" && s.current > 0) m["eva>plan"] = "live";
   else if (s.phase === "plan" && /Rejected|Edit/.test(s.note)) m[/Edit/.test(s.note) ? "apt>plan" : "magi>plan"] = "reject";
   else if (prevOf[s.phase]) m[prevOf[s.phase] + ">" + s.phase] = s.status === "waiting" ? "wait" : "live";
