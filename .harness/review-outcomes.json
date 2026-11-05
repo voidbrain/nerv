@@ -1,4 +1,4 @@
 [
- {"kind":"rule","disposition":"implemented","target":"docs/agents/areas.md","evidence":"Action gate and ledger gains the F-052 rule: other bases' seats come from Runtime.usePeerSeats (one wiring for serve and tests); the gate waits only for Casper and veto seats; a shadow vote not in yet is recorded later as ballot.shadow and never changes the outcome. Checked by test/kaji-seats.test.ts. Reviewed against the veto-only seats rule and the B-009/B-012 rules on what Casper sees: consistent; replaces the test's copied wiring (a join tested across both sides)."},
+ {"kind":"rule","disposition":"no-change","target":"docs/agents/areas.md","evidence":"Distributed contracts: the base registry is renamed from Marduk's registry to the Gehirn registry (owner decision 2026-11-05: Marduk Institute names the pilot roster). Wording only; the registry's rules (signed records, append-only, replicated, revoke wins) are unchanged. Reviewed against the architecture doc's naming table, updated in the same change."},
  {"kind":"none","disposition":"no-change","evidence":"No harness file or copied tool changed."}
 ]
