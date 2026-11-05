@@ -1259,13 +1259,13 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Implemented in [PR PR_F53] (2026-11-05): scanlines at 9% on 3 px, a radial vignette to 28% at the edges, a 7 s irregular flicker between 97.5% and 100% opacity, a 28 vh band at 3.5% white rolling down every 12 s; `prefers-reduced-motion` stops the flicker and hides the band. Checked: test/dashboard.test.ts (the limits above), a headless Chrome screenshot with CRT on (text readable). The owner's look closes it.
+**Next action / closure evidence:** Implemented in [PR #121](https://github.com/voidbrain/nerv/pull/121) (2026-11-05): scanlines at 9% on 3 px, a radial vignette to 28% at the edges, a 7 s irregular flicker between 97.5% and 100% opacity, a 28 vh band at 3.5% white rolling down every 12 s; `prefers-reduced-motion` stops the flicker and hides the band. Checked: test/dashboard.test.ts (the limits above), a headless Chrome screenshot with CRT on (text readable). The owner's look closes it.
 
 **Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner request 2026-11-05 |
+| PR / evidence | Owner request 2026-11-05; [PR #121](https://github.com/voidbrain/nerv/pull/121) |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-05: test/dashboard.test.ts and a screenshot (local); owner's look pending |
 | Reviewed | 2026-11-05 |
