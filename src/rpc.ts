@@ -45,7 +45,7 @@ export const methodSchemas={
  'memory.saveEpisode':{type:'object',required:['since','until','summary','exchanges','proposed'],properties:{since:{type:'string',minLength:10,maxLength:40},until:{type:'string',minLength:10,maxLength:40},summary:{type:'string',maxLength:2000},exchanges:{type:'integer',minimum:0},proposed:{type:'integer',minimum:0}},additionalProperties:false},
  'instrumentality.digest':{type:'object',required:['exchanges'],properties:{exchanges:{type:'array',maxItems:200,items:{type:'object'}}},additionalProperties:false},
  'memory.recall':{type:'object',required:['text'],properties:{text:{type:'string',minLength:1,maxLength:8000}},additionalProperties:false},
- 'misato.context':{type:'object',required:['conversation'],properties:{conversation:{type:'string',pattern:'^[a-z]+(:[0-9]+)?$',maxLength:40}},additionalProperties:false},
+ 'misato.context':{type:'object',required:['conversation'],properties:{conversation:{type:'string',pattern:'^[a-z]+(:[a-z0-9-]{1,30})?$',maxLength:40}},additionalProperties:false},
  'misato.claim':{type:'object',required:['sortieId'],properties:{sortieId:{type:'string',minLength:1,maxLength:100}},additionalProperties:false},
  'misato.step':{type:'object',required:['request','history'],properties:{request:{type:'string',minLength:1,maxLength:4000},history:{type:'array',maxItems:12,items:{type:'object'}},context:{type:'array',maxItems:3,items:{type:'object'}},memory:{type:'array',maxItems:10,items:{type:'object'}}},additionalProperties:false},
  'actions.preview':{type:'object',required:['sortieId','tool'],properties:{sortieId:{type:'string',minLength:1,maxLength:100},tool:{type:'string',minLength:1,maxLength:100}},additionalProperties:false},

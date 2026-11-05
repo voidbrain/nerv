@@ -223,7 +223,10 @@
     log(text, "", null, "you"); state.log[state.log.length - 1].chat = true;
     if (chatBusy) { log("Misato is still working on the previous request.", "warn", null, "misato"); return; }
     chatBusy = true; log("Misato is planning… (local models take 10–30 s per step)", "", null, "misato");
-    try { const r = await api("chat", { method:"POST", body:JSON.stringify({ message:text, conversation:"dashboard" }) }); state.selected = short(r.sortieId); }
+    try { const r = await api("chat", { method:"POST", body:JSON.stringify({ message:text, conversation:"dashboard" }) });
+      // Dispatched (F-036): the main base answered; its sortie and cards are there, so only the reply is shown here.
+      if (r.base) log((r.reply || ("Could not finish: " + (r.error || "no reply"))) + " · answered by " + r.base.name + (r.waiting && r.waiting.length ? "; decide its card on Aoba or on " + r.base.name + "'s dashboard" : ""), r.reply ? "ok" : "danger", null, "misato");
+      else state.selected = short(r.sortieId); }
     catch (e) { log("Misato could not answer: " + e.message, "danger", null, "misato"); }
     finally { chatBusy = false; poll(); }
   };

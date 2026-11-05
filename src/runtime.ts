@@ -14,7 +14,9 @@ import type {Episode,Fact} from './memory.ts';
 import type {BaseEntry,SignedRecord} from './kaji.ts';
 import {ONLINE_MS,type BaseHealth,type HeardHealth,type RegistryPort} from './kaji-link.ts';
 import {briefDue,localClock} from './brief.ts';
-export interface ChatReply {sortieId:string;reply?:string;error?:string;steps:Step[];waiting:{approvalId:string;tool:string;reason:string}[]}
+export interface ChatReply {sortieId:string;reply?:string;error?:string;steps:Step[];waiting:{approvalId:string;tool:string;reason:string}[];
+ /** Set when the main base handled the request (F-036 dispatch): its sortie, cards and memory are there. */
+ base?:{id:string;name:string}}
 /** An action the owner asks for directly: the request is what Casper checks the action against. */
 export interface OwnerAction {request:string;tool:string;args:Record<string,unknown>;stage?:Stage}
 export type ActReply=ActResult&{casperError?:string};
@@ -88,7 +90,11 @@ export class Runtime implements StoreApi {
   return casperError?{...result,casperError}:result;
  }
  /** A new request to Misato (F-003): its text and every step go to the ledger, so the loop can resume later. */
+ /** F-036 dispatch: while another base is the main one and online, requests go to its Misato; undefined means answer here. */
+ private dispatch?:(message:string,conversation?:string)=>Promise<ChatReply|undefined>;
+ setDispatch(fn:(message:string,conversation?:string)=>Promise<ChatReply|undefined>){this.dispatch=fn;}
  async chat(message:string,conversation?:string):Promise<ChatReply> {
+  const far=this.dispatch?await this.dispatch(message,conversation):undefined;if(far)return far;
   // Earlier exchanges of the same conversation (read before this request is recorded), so "yes" has its question.
   const context=conversation?await this.nervous.call('misato.context',{conversation}).catch(()=>[]) as Turn[]:[];
   const sortieId=await this.nervous.call('sorties.open',{title:message.slice(0,500),source:'misato'}) as string;

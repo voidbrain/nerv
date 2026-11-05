@@ -89,7 +89,7 @@ export class Ledger {
  }
  /** The last exchanges of one conversation within `withinMs`, oldest first: request, Misato's reply and the actions that ran. */
  conversation(key:string,withinMs=30*60_000,limit=3,now=new Date()):{request:string;reply?:string;actions?:string[]}[] {
-  if(typeof key!=='string'||!/^[a-z]+(:[0-9]+)?$/.test(key)||key.length>40)throw new Error('Invalid conversation.');
+  if(typeof key!=='string'||!/^[a-z]+(:[a-z0-9-]{1,30})?$/.test(key)||key.length>40)throw new Error('Invalid conversation.');
   const rows=this.db.prepare("SELECT sortie_id,payload FROM events WHERE kind='misato.request' AND json_extract(payload,'$.conversation')=? AND created>? ORDER BY sequence DESC LIMIT ?").all(key,iso(now,-withinMs),limit) as {sortie_id:string;payload:string}[];
   return rows.reverse().map(r=>this.exchange(r.sortie_id,r.payload));
  }
