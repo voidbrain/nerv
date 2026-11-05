@@ -163,7 +163,9 @@ test('the CRT effect: the original static scanlines, darker borders, a slight pa
  assert.match(html,/@media \(prefers-reduced-motion:reduce\) \{ body\.theme-eva\.crt-on \.wrap, body\.theme-eva\.crt-on::before, body\.theme-eva\.crt-on \.wrap::after \{ animation:none; \}/);
  // Two boxes (owner, 2026-11-05): pilots are the Marduk Institute, skills are Kaji's watermelons.
  assert.match(html,/<span data-l="melons">Marduk Institute · Pilots<\/span><span class="sub">proto → test → prod<\/span>/);
- assert.match(html,/<span data-l="skills">Kaji's watermelons · skills<\/span>/);assert.match(html,/id="skills"><div class="muted small">Planned · not connected yet\./);
+ // Skills grow by their own stages (owner, 2026-11-05, option B): seed → sprout → ripe (Eva), create → try → use (Simple).
+ assert.match(html,/<span data-l="skills">Kaji's watermelons · skills<\/span><span class="sub" data-l="skillStages">seed → sprout → ripe<\/span>/);
+ assert.match(readFileSync('web/public/dashboard/dashboard.js','utf8'),/skills:"Skills", skillStages:"create → try → use"/);assert.match(html,/id="skills"><div class="muted small">Planned · not connected yet\./);
  const js=readFileSync('web/public/dashboard/dashboard.js','utf8');assert.match(js,/skills:"Kaji's watermelons · skills"/);assert.match(js,/skills:"Skills"/);
 });
 test('the dashboard API lists the pilot roster for the Marduk Institute panel (F-051)',async()=>{
