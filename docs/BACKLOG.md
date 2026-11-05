@@ -1,13 +1,13 @@
 # NERV Agency backlog
 
-Current work ledger, reviewed 5 November 2026 against main `9ed644f`. PR #1–#108 merged after green checks (#53–#108 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
+Current work ledger, reviewed 5 November 2026 against main `f860d82`. PR #1–#109 merged after green checks (#53–#109 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
 
 <!-- recap:start · generated by tools/backlog-recap.mjs from the records; do not edit by hand -->
 **Recap as of 2026-11-05** (window 2026-10-30 – 2026-11-05).
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 29 | 0 |
+| **Open** | 33 | 5 |
 | **Require Human 🧑** | 1 | 0 |
 
 ### Last 7 days
@@ -15,7 +15,7 @@ Current work ledger, reviewed 5 November 2026 against main `9ed644f`. PR #1–#1
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **Count** | 47 | 18 | 7 | 7 |
+| **Count** | 51 | 18 | 12 | 7 |
 
 ### Require Human 🧑
 
@@ -34,6 +34,176 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 
 
+
+### B-008
+
+**Tabgha dashboard says CONNECTION LOST while a relayed request is running**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🟠 | 🔶 P2 | Investigate | 🟢 Small | ~0% |
+
+💻 **→ Human action required: No**<br />Next: find which call timed out, and stop one failed poll from declaring the connection lost.
+
+| | |
+|---|---|
+| **Issue** | Owner test on Tabgha 2026-11-05: during a request relayed to Neo Tokyo-3 (about 80 s), Tabgha's dashboard showed *LIVE · CONNECTION LOST — Request timed out; outcome may be unknown.. Run npm start -- open dashboard again if the service restarted.* The service had been up two minutes and the reply arrived. The message is the scheduler/brain call timeout reaching the browser; one failed poll is shown as a lost connection, with a doubled full stop and a misleading restart hint. |
+| **Reproduce** | On a base that is not the main one, ask something in its dashboard chat while the main base takes over a minute to answer. |
+| **Check** | A slow or failed poll is retried before anything is shown; a real loss says what is unreachable; the call that timed out is found and fixed or given a fitting limit; no doubled punctuation; a test covers a poll that fails once. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Reported 2026-11-05.
+
+**Estimates:** Small remaining effort; ~0% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner test on Tabgha 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
+### B-009
+
+**Misato cancelled a reminder nobody asked to cancel, without a card**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🟠 | 🔺 P1 | Investigate | 🟡 Medium | ~0% |
+
+💻 **→ Human action required: No**<br />Next: read the sortie on Tabgha and stop actions the request did not ask for.
+
+| | |
+|---|---|
+| **Issue** | Owner test on Tabgha 2026-11-05, Neo Tokyo-3 off: *remind me to eat in 30 minutes* (S-A090) ran reminders.add and then reminders.cancel, both Pattern Green, granted without a card; Misato replied that "the previous reminder has been cancelled". The owner did not ask for a cancel. Green actions skip Casper's intent check, and reminders.cancel is Green because it can be undone (reminders.restore), so an action outside the request passed the gate. |
+| **Reproduce** | On Tabgha, `nerv events` for S-A090 (or the dashboard trace) shows both actions; `nerv list` shows which reminder is cancelled. |
+| **Check** | An action that the request does not ask for is not run without the owner: either Casper checks intent for every action that changes or removes something (not only non-Green ones), or a cancel or edit of an item the request does not name needs a card; the reply never reports an unrequested change as done; the cancelled reminder is restorable and the owner is told; a test with a planner that adds and then cancels reproduces it and fails before the fix. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Reported 2026-11-05. First: which reminder was cancelled, and what Misato saw (the step history) when it proposed the cancel.
+
+**Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner test on Tabgha 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
+### B-010
+
+**Casper judges a follow-up without the earlier exchange and refuses a confirmed request**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔶 P2 | Open | 🟢 Small | ~0% |
+
+💻 **→ Human action required: No**<br />Next: give Casper the earlier exchanges of the same conversation.
+
+| | |
+|---|---|
+| **Issue** | Owner test on Tabgha 2026-11-05: after *Remind me on Tabgha tomorrow at 9 to water the plants*, the owner answered *Am. Yes on Tabgha*; Casper rejected kaji.run (Pattern Blue, reject): "The action to add a plant watering reminder does not correspond to the request regarding 'Tabgha'." Casper saw only the short follow-up, not the request it confirms. |
+| **Reproduce** | Ask for something that makes Misato ask a question, answer briefly ("yes", "am"); the action Misato then proposes is refused by Casper. |
+| **Check** | Casper's intent check gets the same conversation context Misato had (the last exchanges, as data); a short confirmation of an earlier request is judged against that request; a test with a request, a question and a "yes" passes the check, and an unrelated action after a "yes" is still refused. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Reported 2026-11-05.
+
+**Estimates:** Small remaining effort; ~0% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner test on Tabgha 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
+### B-011
+
+**After an approved action on another base, the follow-up never arrives and the sortie stays open**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🟠 | 🔶 P2 | Investigate | 🟢 Small | ~0% |
+
+💻 **→ Human action required: No**<br />Next: follow kaji.run from the approval to the result on both bases.
+
+| | |
+|---|---|
+| **Issue** | Owner test on Tabgha 2026-11-05 (F-036 slice 3b): *Remind me on NERV-02 tomorrow at 9 am to water the plants* (S-3BFF) asked for approval of kaji.run; after approving on Telegram the trace showed *EVA-02: kaji.run done* and *Misato: resuming after your decision*, the reminder is in `nerv list` on Tabgha, but no *Tabgha ran reminders.add* follow-up came and the sortie shows no *Debrief: done*. |
+| **Reproduce** | Repeat the slice 3b check: approve a kaji.run and wait for Aoba's follow-up. |
+| **Check** | Once the other base has run the action, its result comes back (outbox, kaji.verdict of the run) and Misato's follow-up says what ran there; the sortie closes as done (or failed with the reason); a two-base test covers the approved path end to end. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Reported 2026-11-05. The remote run happened (the reminder exists); the result path back to the sortie is the suspect.
+
+**Estimates:** Small remaining effort; ~0% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner test on Tabgha 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
+### B-012
+
+**A base is not recognised by its name: "on Tabgha" fails, only "on NERV-02" works**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔶 P2 | Open | 🟢 Small | ~0% |
+
+💻 **→ Human action required: No**<br />Next: tell Misato each base by ID and name.
+
+| | |
+|---|---|
+| **Issue** | Owner test on Tabgha 2026-11-05: *Remind me on Tabgha …* led to questions and a refusal; *Remind me on NERV-02 …* worked. Misato's remote tools name bases by ID only, and the consultant did not know Tabgha is a base (it asked about geofencing). |
+| **Reproduce** | Ask Aoba to remind you on Tabgha of something. |
+| **Check** | Misato's remote tools list each base as ID and name (NERV-02 · Tabgha), any case; "on Tabgha" reaches kaji.run for NERV-02; the consultant and pilots are told the base names as data; a test covers the name. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Reported 2026-11-05.
+
+**Estimates:** Small remaining effort; ~0% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner test on Tabgha 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
 
 ## Features and improvements
 
@@ -843,7 +1013,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Found 2026-11-05 while adding consultants: `KajiLink.stop()` waited for its server to close, which only happens once every connection has ended, so a peer's keep-alive connection could hold the stop, and a service shutdown, forever (the full test suite hung at random with two-base tests). Fixed in [PR #92](https://github.com/voidbrain/nerv/pull/92): open connections are closed first; the suite then ran twice in about 17 s. **Next action / closure evidence:** Peers' MAGI in [PR #91](https://github.com/voidbrain/nerv/pull/91) (2026-11-05), the last phase 2 item: for every non-Green action the main base asks each online base's Casper in parallel with its own (`POST /kaji/verdict`, only from the main base; `Runtime.peerVerdict` on the base asked, on its own local model); the votes are extra ballot seats, veto-only (a reject stops, an approve adds nothing and never replaces Casper), shadow by default and set per base with `kaji seat BASE shadow|veto|off` (`kaji.seats`); no answer in time or no local model abstains; cards show them (*Other bases: …*). Checked: test/kaji-seats.test.ts (ballot rules; two runtimes, Tabgha's Casper rejecting: in shadow the card still goes to the owner with Tabgha's vote on it, with veto the action is rejected with Tabgha's reason, with Tabgha gone it abstains; a non-main base cannot ask for votes), suite 126 pass. **Next action / closure evidence:** Slice 3b in [PR #90](https://github.com/voidbrain/nerv/pull/90) (2026-11-05): actions on another base, one way (the main base sends, other bases never send actions to it). A base offers actions by name (`kaji offer …`, `kaji.offers`, none by default), first-hand in its heartbeat; Misato on the main base gets `kaji.run` only while some online base offers something (base, action, arguments); `kaji.run` is owner-only (always a card) and is checked against what that base offers before the gate; approving queues it (`kaji_outbox`), the coordinator sends it (`POST /kaji/run`, only from the main base) with an id the target remembers (`kaji_runs`), the target runs it through its own gate (`Runtime.runFromPeer`: it may run, refuse, or ask the owner again with a card relayed to Aoba), and the result reaches the owner as a follow-up (`remoteOutcomeText`). Checked: test/kaji-run.test.ts (two runtimes wired as serve: Misato sees the offer, an action not offered goes back to Misato, the card waits, after approval Tabgha's reminder is added once and the follow-up says so; a resend with the same id returns the first result; an action not offered is refused; Tabgha cannot run actions on the main base), suite 124 pass. **Next action / closure evidence:** Owner test 2026-11-05 (slice 2 verified): with Neo Tokyo-3 named main, `nerv chat "Remember that I drink tea at 5"` on Tabgha produced a card that arrived on Aoba (*🛰 Tabgha*), the tap was applied on Tabgha and its memory was updated. Owner decision 2026-11-05: dispatch is both ways, requests first. Slice 3a in [PR #85](https://github.com/voidbrain/nerv/pull/85): while the main base is online, a request asked on another base (its dashboard chat, `nerv chat`) goes to the main base's Misato (`POST /kaji/chat`, only the main base accepts; conversation `kaji:<base>-<channel>`); the reply says which base answered (`base` in the reply, shown by the CLI and the dashboard), and its cards are decided on Aoba or the main base's dashboard. A request runs locally only when it was never sent (connection refused, unreachable or connect timeout); a request that may have reached the main base and answers late is reported, never repeated. Checked: test/one-channel.test.ts (answered by the main base and nothing run locally; slow answer reported and not repeated; main base gone answered locally; a non-main base refuses requests; the conversation key), suite 118 pass. Next: slice 3b, the main base sends one action to a chosen base and gets its result back. Phase 2 slice 2 in [PR #83](https://github.com/voidbrain/nerv/pull/83) (2026-11-05), one channel: a signed `main` registry record (`kaji main BASE-ID`, newest wins, none until named, revoked base is no main; `Registry.main`, `kaji.main` RPC, `main` in `/api/bases`, MAIN badge on the dashboard and in `kaji list`); while the main base is online another base's Telegram channel is quiet (no `getUpdates`) and sends everything through `KajiLink.relay` (`POST /kaji/relay`, only the main base accepts, text plus card IDs, buttons built there as `k:BASE:a|r:ID`); a tap goes back through `KajiLink.decide` (`POST /kaji/decide`, accepted only from the main base) and the base applies it with its own decision path (`decisionText`); a failed relay falls back to the base's own bot. Checked: test/one-channel.test.ts (the main record and relay sanitising; two bases with two fake bots: Tabgha's card reaches Aoba, Tabgha's bot neither sends nor polls, a tap on Aoba stores the fact on Tabgha, a forged decide from a non-main base is refused, and with the main base gone Tabgha's own bot delivers a reminder), suite 116 pass. Remaining phase 2 slices: dispatch to the main base, peers' MAGI as veto-only seats. Owner report 2026-11-04: the log showed `Kaji: NERV-02 unreachable (The operation was aborted due to timeout)` then `reachable` with nothing else happening: one heartbeat timed out (8 s) on the Tailscale path, which the dashboard already tolerates (online for 90 s). Fixed in [PR #75](https://github.com/voidbrain/nerv/pull/75): a peer is logged unreachable only after three heartbeats in a row failed (`missesToLog`, derived from ONLINE_MS and the heartbeat interval), once, with the count; test/kaji-link.test.ts. Phase 2 slice 1 in [PR #73](https://github.com/voidbrain/nerv/pull/73) (owner request): each base's health in its heartbeat. Requests and replies carry the sender's own state (online, or degraded with at most three reasons of 200 characters: the same reasons as its doctor, such as a model route down or the brain not alive); the receiver sanitises it, stamps its own arrival time and keeps it in the coordinator's memory; `/api/bases` adds `health` per base (first-hand only, never relayed; counted only while that base is online; `null` for a base on older code). The dashboard shows a peer's DEGRADED badge, its reasons and a yellow pin, and a note for a base that sends no health. Checked: test/kaji-link.test.ts (report filtering; two links exchanging health both ways and dropping a malformed report; two Runtimes wired as `serve` does, where a base with a dead model route shows as degraded with its reason in the other's bases), full suite 99 pass. Remaining phase 2 slices, in order: Aoba as the one channel (other bots quiet while connected), dispatch to the main base, peers' MAGI as veto-only seats. Earlier: live 2026-11-04 (evening): after pulling #59 on both, the Kaji line came up — Neo Tokyo-3 (macOS) and Tabgha (Windows 11) each listening on its Tailscale address and seeing the other over signed heartbeats. Live 2026-11-04: both bases enrolled (Neo Tokyo-3 key on the Mac, Tabgha on Windows 11, root pinned on Tabgha by fingerprint, `kaji list` showing both). Phase 1b in [PR #59](https://github.com/voidbrain/nerv/pull/59): `src/kaji-link.ts` (listener on the enrolled address only, base-signed requests and replies, replay and skew guard, 30 s heartbeats, merged last-seen, registry catch-up verified against the local root), registry `kaji_seen`, scheduler RPC, `GET /api/bases`, dashboard bases panel and map from the real list (online/offline/last seen), state-change-only logging. Checked: test/kaji-link.test.ts (signature rules; two bases: online both ways, registry catch-up, impostor refused, forged record dropped, revoked base refused) and a temporary service with an unreachable second base (dashboard: NERV-01 online, NERV-02 offline, never heard). Owner's first import on Tabgha 2026-11-04 used Tabgha's own fingerprint for --root and got only "must match the file". Fixed in [PR #57](https://github.com/voidbrain/nerv/pull/57): the message says where the root fingerprint is (the "Root" line of kaji list on the base with the Key), recognises this base's own fingerprint, and still never prints the file's fingerprint (the owner's comparison is the check). Owner's first real enrolment 2026-11-04 put the address before the key; the command asked for the passphrase and then said only "An enrolment needs a name, an address and a public key". Fixed in [PR #56](https://github.com/voidbrain/nerv/pull/56): arguments are checked before the passphrase is asked, the key and the address may come in either order, and each mistake is named (base ID, name, key, address). Owner choices 2026-11-04: Tailscale for the first mesh (WireGuard underneath; swappable, since trust comes from the Key; Headscale or plain WireGuard later), the root key in a passphrase-encrypted file with an offline copy. Incident 2026-11-04: phase 1a first reached `main` by a direct push, without PR or CI (a background merge chain switched the shared checkout to `main` mid-commit, then a bare `git push` pushed it; `main` was unprotected). Reverted in [PR #51](https://github.com/voidbrain/nerv/pull/51) back to the last PR-checked state; the owner enabled branch protection on `main` (PR plus green `validate` and `native-macos`, enforced for admins, no force pushes); background jobs no longer switch the checkout and pushes name their branch. Merging lesson 2026-11-04: `gh pr merge --delete-branch` (used by merge-when-green) switches the local checkout to `main` when it deletes the branch checked out there, which moved the checkout mid-commit and changed the build the owner's running service used; development now happens in a separate worktree. Phase 1a re-landed in [PR #52](https://github.com/voidbrain/nerv/pull/52): `src/kaji.ts` (root key create/unlock, per-base keys, canonical signed records, `Registry` with pinned root, newest-enrolment and revoke-wins rules), `nerv key init [--out]`, `nerv base pubkey`, `nerv kaji enrol|revoke|list|export|import --root FINGERPRINT`. Checked: test/kaji.test.ts (encryption, wrong passphrase, tampering, foreign root, malformed records, append-only, revoke semantics, a two-base CLI run with fingerprint-checked import). Recorded in docs/NERV/NERV-ARCHITECTURE.md ("FEDERATION") in [PR #42](https://github.com/voidbrain/nerv/pull/42); the base identity exists ([PR #41](https://github.com/voidbrain/nerv/pull/41), F-035). Builds on F-005/F-006 (remote workers, cross-node orchestration), F-020 (persona names per base) and F-022 (memory merge). Kept from the earlier design: branch MAGI copies are seats, never authority (split-brain safety). Mapping confirmed by the owner 2026-11-04: Mac NERV-01 Neo Tokyo-3 (main), Windows 11 mini-PC NERV-02 Tabgha (own bot until connected; Windows support is F-037), NERV-03 Bethany planned. A base with no model route of its own (owner question 2026-11-04): connected, its Melchior and Balthasar still run locally (deterministic) and its Casper and Misato calls are served by another base's S² over the Kaji line (seat calls; the owner's own bases count as local, never Umbilical); alone, it runs as Dummy Plug (reminders fire, Green actions and owner `act` work, everything needing Casper reaches the owner). Owner 2026-11-04: anyone installs from git and owns their bases; there is no central server or public directory: each owner is their own Seele (Scrolls, Key), their Marduk registry (the list of their bases, with online/offline and last seen from Kaji heartbeats) lives on their main base, and the mesh admits only bases signed by their Key, so nobody else can see or join them. Owner 2026-11-04: the base list must not live only on the main base (single point of failure). Decided: the Marduk registry is replicated on every base as Key-signed records (enrol, revoke, main-base change) that verify themselves, exchanged over the Kaji line (revoke wins, newer signed record wins); last-seen is merged by the newest time per base; with the main base down the others keep the list, their status and their own work, and promoting another main base is an owner-signed decision with fencing. Shared list, single authority. Next for phase 2: each base's health (ok/degraded) in its heartbeat, so peers' dots show it too (owner request 2026-11-04). Open design points: main-base hand-over when the main base is offline (owner-confirmed, with fencing), how a quiet bot tells the owner which channel to use, memory merge cadence.
+**Next action / closure evidence:** Owner checks on Tabgha 2026-11-05: **relay passed** (Tabgha's chat answered *· answered by Neo Tokyo-3*), **fallback passed** (Neo Tokyo-3 off, Tabgha answered itself), **slice 3b ran** (approved kaji.run, the reminder is in `nerv list` on Tabgha) but the follow-up never came (B-011); found on the way: B-008 (CONNECTION LOST during the relay), B-009 (an unrequested cancel), B-010 (Casper without the conversation), B-012 ("on Tabgha" not recognised), and F-051 (forwarded and running display). Remaining owner check: peer seats (`nerv kaji seat`, the card's *Other bases*). Found 2026-11-05 while adding consultants: `KajiLink.stop()` waited for its server to close, which only happens once every connection has ended, so a peer's keep-alive connection could hold the stop, and a service shutdown, forever (the full test suite hung at random with two-base tests). Fixed in [PR #92](https://github.com/voidbrain/nerv/pull/92): open connections are closed first; the suite then ran twice in about 17 s. **Next action / closure evidence:** Peers' MAGI in [PR #91](https://github.com/voidbrain/nerv/pull/91) (2026-11-05), the last phase 2 item: for every non-Green action the main base asks each online base's Casper in parallel with its own (`POST /kaji/verdict`, only from the main base; `Runtime.peerVerdict` on the base asked, on its own local model); the votes are extra ballot seats, veto-only (a reject stops, an approve adds nothing and never replaces Casper), shadow by default and set per base with `kaji seat BASE shadow|veto|off` (`kaji.seats`); no answer in time or no local model abstains; cards show them (*Other bases: …*). Checked: test/kaji-seats.test.ts (ballot rules; two runtimes, Tabgha's Casper rejecting: in shadow the card still goes to the owner with Tabgha's vote on it, with veto the action is rejected with Tabgha's reason, with Tabgha gone it abstains; a non-main base cannot ask for votes), suite 126 pass. **Next action / closure evidence:** Slice 3b in [PR #90](https://github.com/voidbrain/nerv/pull/90) (2026-11-05): actions on another base, one way (the main base sends, other bases never send actions to it). A base offers actions by name (`kaji offer …`, `kaji.offers`, none by default), first-hand in its heartbeat; Misato on the main base gets `kaji.run` only while some online base offers something (base, action, arguments); `kaji.run` is owner-only (always a card) and is checked against what that base offers before the gate; approving queues it (`kaji_outbox`), the coordinator sends it (`POST /kaji/run`, only from the main base) with an id the target remembers (`kaji_runs`), the target runs it through its own gate (`Runtime.runFromPeer`: it may run, refuse, or ask the owner again with a card relayed to Aoba), and the result reaches the owner as a follow-up (`remoteOutcomeText`). Checked: test/kaji-run.test.ts (two runtimes wired as serve: Misato sees the offer, an action not offered goes back to Misato, the card waits, after approval Tabgha's reminder is added once and the follow-up says so; a resend with the same id returns the first result; an action not offered is refused; Tabgha cannot run actions on the main base), suite 124 pass. **Next action / closure evidence:** Owner test 2026-11-05 (slice 2 verified): with Neo Tokyo-3 named main, `nerv chat "Remember that I drink tea at 5"` on Tabgha produced a card that arrived on Aoba (*🛰 Tabgha*), the tap was applied on Tabgha and its memory was updated. Owner decision 2026-11-05: dispatch is both ways, requests first. Slice 3a in [PR #85](https://github.com/voidbrain/nerv/pull/85): while the main base is online, a request asked on another base (its dashboard chat, `nerv chat`) goes to the main base's Misato (`POST /kaji/chat`, only the main base accepts; conversation `kaji:<base>-<channel>`); the reply says which base answered (`base` in the reply, shown by the CLI and the dashboard), and its cards are decided on Aoba or the main base's dashboard. A request runs locally only when it was never sent (connection refused, unreachable or connect timeout); a request that may have reached the main base and answers late is reported, never repeated. Checked: test/one-channel.test.ts (answered by the main base and nothing run locally; slow answer reported and not repeated; main base gone answered locally; a non-main base refuses requests; the conversation key), suite 118 pass. Next: slice 3b, the main base sends one action to a chosen base and gets its result back. Phase 2 slice 2 in [PR #83](https://github.com/voidbrain/nerv/pull/83) (2026-11-05), one channel: a signed `main` registry record (`kaji main BASE-ID`, newest wins, none until named, revoked base is no main; `Registry.main`, `kaji.main` RPC, `main` in `/api/bases`, MAIN badge on the dashboard and in `kaji list`); while the main base is online another base's Telegram channel is quiet (no `getUpdates`) and sends everything through `KajiLink.relay` (`POST /kaji/relay`, only the main base accepts, text plus card IDs, buttons built there as `k:BASE:a|r:ID`); a tap goes back through `KajiLink.decide` (`POST /kaji/decide`, accepted only from the main base) and the base applies it with its own decision path (`decisionText`); a failed relay falls back to the base's own bot. Checked: test/one-channel.test.ts (the main record and relay sanitising; two bases with two fake bots: Tabgha's card reaches Aoba, Tabgha's bot neither sends nor polls, a tap on Aoba stores the fact on Tabgha, a forged decide from a non-main base is refused, and with the main base gone Tabgha's own bot delivers a reminder), suite 116 pass. Remaining phase 2 slices: dispatch to the main base, peers' MAGI as veto-only seats. Owner report 2026-11-04: the log showed `Kaji: NERV-02 unreachable (The operation was aborted due to timeout)` then `reachable` with nothing else happening: one heartbeat timed out (8 s) on the Tailscale path, which the dashboard already tolerates (online for 90 s). Fixed in [PR #75](https://github.com/voidbrain/nerv/pull/75): a peer is logged unreachable only after three heartbeats in a row failed (`missesToLog`, derived from ONLINE_MS and the heartbeat interval), once, with the count; test/kaji-link.test.ts. Phase 2 slice 1 in [PR #73](https://github.com/voidbrain/nerv/pull/73) (owner request): each base's health in its heartbeat. Requests and replies carry the sender's own state (online, or degraded with at most three reasons of 200 characters: the same reasons as its doctor, such as a model route down or the brain not alive); the receiver sanitises it, stamps its own arrival time and keeps it in the coordinator's memory; `/api/bases` adds `health` per base (first-hand only, never relayed; counted only while that base is online; `null` for a base on older code). The dashboard shows a peer's DEGRADED badge, its reasons and a yellow pin, and a note for a base that sends no health. Checked: test/kaji-link.test.ts (report filtering; two links exchanging health both ways and dropping a malformed report; two Runtimes wired as `serve` does, where a base with a dead model route shows as degraded with its reason in the other's bases), full suite 99 pass. Remaining phase 2 slices, in order: Aoba as the one channel (other bots quiet while connected), dispatch to the main base, peers' MAGI as veto-only seats. Earlier: live 2026-11-04 (evening): after pulling #59 on both, the Kaji line came up — Neo Tokyo-3 (macOS) and Tabgha (Windows 11) each listening on its Tailscale address and seeing the other over signed heartbeats. Live 2026-11-04: both bases enrolled (Neo Tokyo-3 key on the Mac, Tabgha on Windows 11, root pinned on Tabgha by fingerprint, `kaji list` showing both). Phase 1b in [PR #59](https://github.com/voidbrain/nerv/pull/59): `src/kaji-link.ts` (listener on the enrolled address only, base-signed requests and replies, replay and skew guard, 30 s heartbeats, merged last-seen, registry catch-up verified against the local root), registry `kaji_seen`, scheduler RPC, `GET /api/bases`, dashboard bases panel and map from the real list (online/offline/last seen), state-change-only logging. Checked: test/kaji-link.test.ts (signature rules; two bases: online both ways, registry catch-up, impostor refused, forged record dropped, revoked base refused) and a temporary service with an unreachable second base (dashboard: NERV-01 online, NERV-02 offline, never heard). Owner's first import on Tabgha 2026-11-04 used Tabgha's own fingerprint for --root and got only "must match the file". Fixed in [PR #57](https://github.com/voidbrain/nerv/pull/57): the message says where the root fingerprint is (the "Root" line of kaji list on the base with the Key), recognises this base's own fingerprint, and still never prints the file's fingerprint (the owner's comparison is the check). Owner's first real enrolment 2026-11-04 put the address before the key; the command asked for the passphrase and then said only "An enrolment needs a name, an address and a public key". Fixed in [PR #56](https://github.com/voidbrain/nerv/pull/56): arguments are checked before the passphrase is asked, the key and the address may come in either order, and each mistake is named (base ID, name, key, address). Owner choices 2026-11-04: Tailscale for the first mesh (WireGuard underneath; swappable, since trust comes from the Key; Headscale or plain WireGuard later), the root key in a passphrase-encrypted file with an offline copy. Incident 2026-11-04: phase 1a first reached `main` by a direct push, without PR or CI (a background merge chain switched the shared checkout to `main` mid-commit, then a bare `git push` pushed it; `main` was unprotected). Reverted in [PR #51](https://github.com/voidbrain/nerv/pull/51) back to the last PR-checked state; the owner enabled branch protection on `main` (PR plus green `validate` and `native-macos`, enforced for admins, no force pushes); background jobs no longer switch the checkout and pushes name their branch. Merging lesson 2026-11-04: `gh pr merge --delete-branch` (used by merge-when-green) switches the local checkout to `main` when it deletes the branch checked out there, which moved the checkout mid-commit and changed the build the owner's running service used; development now happens in a separate worktree. Phase 1a re-landed in [PR #52](https://github.com/voidbrain/nerv/pull/52): `src/kaji.ts` (root key create/unlock, per-base keys, canonical signed records, `Registry` with pinned root, newest-enrolment and revoke-wins rules), `nerv key init [--out]`, `nerv base pubkey`, `nerv kaji enrol|revoke|list|export|import --root FINGERPRINT`. Checked: test/kaji.test.ts (encryption, wrong passphrase, tampering, foreign root, malformed records, append-only, revoke semantics, a two-base CLI run with fingerprint-checked import). Recorded in docs/NERV/NERV-ARCHITECTURE.md ("FEDERATION") in [PR #42](https://github.com/voidbrain/nerv/pull/42); the base identity exists ([PR #41](https://github.com/voidbrain/nerv/pull/41), F-035). Builds on F-005/F-006 (remote workers, cross-node orchestration), F-020 (persona names per base) and F-022 (memory merge). Kept from the earlier design: branch MAGI copies are seats, never authority (split-brain safety). Mapping confirmed by the owner 2026-11-04: Mac NERV-01 Neo Tokyo-3 (main), Windows 11 mini-PC NERV-02 Tabgha (own bot until connected; Windows support is F-037), NERV-03 Bethany planned. A base with no model route of its own (owner question 2026-11-04): connected, its Melchior and Balthasar still run locally (deterministic) and its Casper and Misato calls are served by another base's S² over the Kaji line (seat calls; the owner's own bases count as local, never Umbilical); alone, it runs as Dummy Plug (reminders fire, Green actions and owner `act` work, everything needing Casper reaches the owner). Owner 2026-11-04: anyone installs from git and owns their bases; there is no central server or public directory: each owner is their own Seele (Scrolls, Key), their Marduk registry (the list of their bases, with online/offline and last seen from Kaji heartbeats) lives on their main base, and the mesh admits only bases signed by their Key, so nobody else can see or join them. Owner 2026-11-04: the base list must not live only on the main base (single point of failure). Decided: the Marduk registry is replicated on every base as Key-signed records (enrol, revoke, main-base change) that verify themselves, exchanged over the Kaji line (revoke wins, newer signed record wins); last-seen is merged by the newest time per base; with the main base down the others keep the list, their status and their own work, and promoting another main base is an owner-signed decision with fencing. Shared list, single authority. Next for phase 2: each base's health (ok/degraded) in its heartbeat, so peers' dots show it too (owner request 2026-11-04). Open design points: main-base hand-over when the main base is offline (owner-confirmed, with fencing), how a quiet bot tells the owner which channel to use, memory merge cadence.
 
 **Estimates:** Large remaining effort; ~90% complete: every phase 2 item is implemented (identity, live link, health, one channel, requests and actions, peer seats); owner checks on both bases remain. Estimated 2026-11-04.
 
@@ -879,7 +1049,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Planned 2026-11-05. B-004 is the first slice (the "why" question).
+**Next action / closure evidence:** Owner test 2026-11-05: the consultant did not know Tabgha is a base (it asked about geofencing): pilots and the consultant should get the agency's facts as data too (base names, B-012). Planned 2026-11-05. B-004 is the first slice (the "why" question).
 
 **Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-05.
 
@@ -1022,6 +1192,142 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Field | Value |
 |---|---|
 | PR / evidence | Owner request 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
+### F-048
+
+**Parallel work: a visible queue, limits per model, a lock per item**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔶 P2 | Open | 🟡 Medium | ~0% |
+
+💻 **→ Human action required: No**<br />Next: show what is queued, then the per-item lock.
+
+| | |
+|---|---|
+| **Issue** | Owner questions 2026-11-05 on parallelism. Telegram requests run one at a time in order (a queue nobody sees); dashboard and CLI requests run side by side; within a sortie the pilot advises before Misato plans, and the seats vote in parallel; the real limit is the local model server (Ollama serves one model a few requests at a time and swaps models in and out of memory). Two sorties can act on the same item at once (edit and cancel the same reminder). |
+| **Reproduce** | Send two requests on Telegram quickly; send two from the dashboard; edit a reminder in one while another cancels it. |
+| **Check** | Each channel says when a request waits and behind how many ("queued, 2 ahead"); the dashboard shows queued and running sorties; a limit of concurrent model calls per model (a setting, from what the machine can hold) queues the rest instead of overloading; actions on the same item (a reminder, a fact) never run at the same time: the second waits for the first, then re-reads; tests cover the queue order, the limit and two actions on one item. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Planned 2026-11-05 (owner).
+
+**Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner questions 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
+### F-049
+
+**EVA instances: an EVA is a class, each job gets a fresh sandbox**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔶 P2 | Open | 🔴 Large | ~0% |
+
+💻 **→ Human action required: No**<br />Next: the EVA class definition and one sandboxed instance per job, starting with EVA-00.
+
+| | |
+|---|---|
+| **Issue** | Owner questions 2026-11-05: why one EVA-00, -01, -02 per machine, two copies of a pilot, two EVA-02 with two agents. Today no EVA exists: every action runs inside the scheduler process (the dashboard's "EVA-02 · in-process executor, not sandboxed yet"), and the four cage slots were a drawing, not a rule. |
+| **Reproduce** | Look at the dashboard's EVA cages: three say planned, EVA-02 runs in process. |
+| **Check** | An EVA is a class (what a job may touch: EVA-00 no external effects, EVA-01 bounded, EVA-02 full grant, EVA-03 quarantine for untrusted input); each job runs in a fresh instance of its class, discarded afterwards; several instances run at once within limits per machine (CPU, memory, model slots); a job asks for the least class it needs, capped by its pilot's stage (a Production pilot may run in EVA-01, a Prototype one never in EVA-02); the same pilot can run two jobs at once, each in its own instance; the dashboard shows instances per class. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Planned 2026-11-05 (owner). Builds on F-045 pilots and the F-025 stages.
+
+**Estimates:** Large remaining effort; ~0% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner questions 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
+### F-050
+
+**Forwarding a whole job to another base**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔶 P2 | Open | 🔴 Large | ~0% |
+
+💻 **→ Human action required: No**<br />Next: the job message and its fallback, for capability first.
+
+| | |
+|---|---|
+| **Issue** | Owner questions 2026-11-05: can a base forward a full job to another, when it is busy or when the other does better; why, when and how. Today a base that is not the main one forwards whole requests to the main base (one channel, F-036), and the main base sends single actions to a base that offers them (slice 3b); the main base never hands a whole job to another base. |
+| **Reproduce** | Ask the main base for a job only another base can do well (Tabgha's 3D expert, its GPU, a device next to it). |
+| **Check** | The main base forwards a whole job when another base has the pilot, model, tool or device it needs (capability), when its own queue or model is busy and the other is idle (load), or when the data or device is there (locality), never a job with local-only or tainted data (the Scrolls decide what may leave); the job goes as one signed Kaji message with a job ID (it never runs twice) and only the context the Scrolls allow; the receiving base runs the whole sortie with its own Misato, pilot and gate, never looser than the main base's Scrolls; cards still reach the owner through Aoba; the result returns as a follow-up and the main ledger records where it ran and why; if the base goes silent, the job comes back once; tests across two bases. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Planned 2026-11-05 (owner). Builds on F-036, F-045 (pilots offered by other bases) and F-048.
+
+**Estimates:** Large remaining effort; ~0% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner questions 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
+### F-051
+
+**Dashboard: a sortie shows where it runs and who contributed**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔶 P2 | Open | 🟡 Medium | ~0% |
+
+💻 **→ Human action required: No**<br />Next: the forwarded notice and the running phase on the card.
+
+| | |
+|---|---|
+| **Issue** | Owner test on Tabgha 2026-11-05: on Tabgha the chat shows *Misato is planning… (local models take 10–30 s per step)* but not that the request went to Neo Tokyo-3, and the previous sortie stays selected; a running sortie card always blinks MAGI whatever its phase; the flow shows only "ok" for the MAGI, so whether shadow or peer seats voted is not visible, and Plan · current action does not say whether a pilot advised; a node the sortie did not need (Misato's Apt when no approval was needed) looks the same as one that is unavailable. |
+| **Reproduce** | Ask something on a base that is not the main one; select a finished sortie with a Green action; look at a running sortie's card. |
+| **Check** | The chat line reads *Misato is planning* (no timing note) and, for a relayed request, *Forwarded to Neo Tokyo-3*; the forwarded request appears on the asking base as a sortie card that says where it runs and links to it, and the main base shows it as a sortie from that base; a new request (or a refresh) selects the running sortie (F-019); the running card names its phase (Misato, MAGI, approval, EVA, a pilot); the MAGI detail lists every seat's vote, shadow and peer seats marked; Plan · current action names the pilot that advised; a node not needed by the sortie is shown as skipped, distinct from unavailable; the Sephirot shows a relay step when the request came from or went to another base. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Planned 2026-11-05 from the owner's test.
+
+**Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner test on Tabgha 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
 | Reviewed | 2026-11-05 |
