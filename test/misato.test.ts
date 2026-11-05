@@ -23,17 +23,17 @@ test('Misato is asked for one JSON step with the tools, the time and the latest 
  for(const bad of ['nothing','{"reply":""}','{"action":{"tool":"x","args":[]}}','{"action":{"args":{}}}','{"reply":"a","action":{"tool":"x"}}','{"reply":'])assert.equal(parsePlan(bad),undefined,bad);
 });
 /** A loopback model: Casper answers from one script, Misato from another; every request is recorded. */
-async function models(misato:string[],casper='{"vote":"approve","reason":"Matches.","confidence":0.9}') {
+async function models(misato:string[],casper:string|((prompt:string)=>string)='{"vote":"approve","reason":"Matches.","confidence":0.9}') {
  const asked:{who:string;model:string;prompt:string}[]=[];
  const server=createServer((req,res)=>{let body='';req.on('data',c=>body+=c).on('end',()=>{
   const r=JSON.parse(body) as {model:string;messages:{role:string;content:string}[]};const who=r.messages[0]!.content.startsWith('You are Casper')?'casper':'misato';
   asked.push({who,model:r.model,prompt:r.messages.at(-1)!.content});
-  res.setHeader('content-type','application/json');res.end(JSON.stringify({choices:[{message:{content:who==='casper'?casper:(misato.shift() ?? '{"reply":"done"}')},finish_reason:'stop'}]}));
+  res.setHeader('content-type','application/json');res.end(JSON.stringify({choices:[{message:{content:who==='casper'?(typeof casper==='function'?casper(r.messages.at(-1)!.content):casper):(misato.shift() ?? '{"reply":"done"}')},finish_reason:'stop'}]}));
  });});
  await new Promise<void>(done=>server.listen(0,'127.0.0.1',done));
  return {asked,url:`http://127.0.0.1:${(server.address() as {port:number}).port}/v1`,close:()=>new Promise<void>(done=>server.close(()=>done()))};
 }
-async function agent(script:string[],work:(r:Runtime,m:Awaited<ReturnType<typeof models>>,base:string,headers:Record<string,string>)=>Promise<void>,scrolls?:object,casper?:string) {
+async function agent(script:string[],work:(r:Runtime,m:Awaited<ReturnType<typeof models>>,base:string,headers:Record<string,string>)=>Promise<void>,scrolls?:object,casper?:string|((prompt:string)=>string)) {
  const m=await models(script,casper);const home=mkdtempSync(join(tmpdir(),'nerv-misato-'));
  writeFileSync(join(home,'config.json'),JSON.stringify({models:{local:{baseUrl:m.url,model:'gemma4:12b'},roles:{misato:{route:'local',model:'qwen2.5-coder:14b'},casper:{model:'gemma4:12b'}}}}));
  if(scrolls)writeFileSync(join(home,'scrolls.json'),JSON.stringify(scrolls),{mode:0o600});
@@ -167,4 +167,19 @@ test('a removal the request did not ask for is checked by Casper even though it 
   assert.deepEqual(m.asked.filter(a=>a.who==='casper').length,1,'Casper is asked about the removal only, not about the Green add');
   assert.deepEqual((await runtime.pendingReminders()).map(r=>r.title).sort(),['Drink water','Eat'],'the earlier reminder is still there');
  },undefined,'{"vote":"reject","reason":"Not asked for.","confidence":0.9}');
+});
+test('Casper judges a short confirmation against the request it confirms: it sees the earlier exchanges of the conversation (B-010)',async()=>{
+ // Casper approves only when it can see what "Am. Yes" answers; without the earlier request it would refuse.
+ const casper=(prompt:string)=>{const p=JSON.parse(prompt) as {request:string;earlier?:{request:string}[]};
+  return (p.earlier ?? []).some(t=>/water the plants/.test(t.request))?'{"vote":"approve","reason":"Confirms the plants reminder.","confidence":0.9}':'{"vote":"reject","reason":"Does not match the request.","confidence":0.9}';};
+ const ADD='{"action":{"tool":"reminders.add","args":{"title":"Water the plants","due":"2031-01-01T08:00:00Z"}}}';
+ await agent(['{"reply":"At 9 in the morning or the evening?"}',ADD,'{"reply":"Done."}'],async(runtime,m)=>{
+  const first=await runtime.chat('Remind me tomorrow at 9 to water the plants','telegram:2222');assert.equal(first.reply,'At 9 in the morning or the evening?');
+  const second=await runtime.chat('Am. Yes','telegram:2222');
+  assert.deepEqual(second.steps.map(s=>[s.tool,s.outcome]),[['reminders.add','approval']],'Casper approved; Blue still asks the owner');
+  const asked=JSON.parse(m.asked.filter(a=>a.who==='casper').at(-1)!.prompt) as {request:string;earlier:{request:string;reply:string}[]};
+  assert.equal(asked.request,'Am. Yes');assert.deepEqual(asked.earlier,[{request:'Remind me tomorrow at 9 to water the plants',reply:'At 9 in the morning or the evening?'}]);
+  const ballot=(await runtime.events(second.sortieId)).find(e=>e.kind==='ballot')!.payload as {verdicts:{seat:string;vote:string}[]};
+  assert.equal(ballot.verdicts.find(v=>v.seat==='casper')!.vote,'approve');
+ },{blue:['reminders.add']},casper);
 });
