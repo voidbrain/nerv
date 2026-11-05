@@ -233,7 +233,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Fixed in [PR PR_22] (2026-11-05): the comment on its own line. Checked: test/dashboard.test.ts runs the real `drawMap` with a recording canvas (both bases named, one marker each, drawn to the last line); it fails without the fix with *s is not defined*. The PR that caused it (#137) was checked with a probe that read the page, not the canvas.
+**Next action / closure evidence:** Fixed in [PR #143](https://github.com/voidbrain/nerv/pull/143) (2026-11-05): the comment on its own line. Checked: test/dashboard.test.ts runs the real `drawMap` with a recording canvas (both bases named, one marker each, drawn to the last line); it fails without the fix with *s is not defined*. The PR that caused it (#137) was checked with a probe that read the page, not the canvas.
 
 **Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
 
