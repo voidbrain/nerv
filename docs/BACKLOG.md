@@ -127,7 +127,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Fixed in [PR PR_CI15] (2026-11-05): `runs-on: macos-15`; `outside` gains the runner images (what fails, how it shows). The job name stays native-macos, so the required check is unchanged (no repository setting touched).
+**Next action / closure evidence:** Fixed in [PR #124](https://github.com/voidbrain/nerv/pull/124) (2026-11-05): `runs-on: macos-15`; `outside` gains the runner images (what fails, how it shows). The job name stays native-macos, so the required check is unchanged (no repository setting touched).
 
 **Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
 
