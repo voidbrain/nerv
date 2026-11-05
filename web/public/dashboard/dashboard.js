@@ -829,7 +829,8 @@ function drawMap(now) {
   // about 12 px whatever the panel's width (owner, 2026-11-05). This base (the one showing the page) is bigger, ringed and bold.
   const z = Math.max(1, W / ((cv.clientWidth || W))); const face = cssVar("--font") || "monospace"; const anySelf = BASES.some(x => x.self);
   BASES.forEach(b => {
-    const [x, y] = map.proj([b.lon, b.lat]); const col = statusColor(b.status); const main = !!b.self || (!anySelf && b === BASES[0]); // this base (owner, 2026-11-05), not the main one const s = (main ? 11 : 7) * z;
+    const [x, y] = map.proj([b.lon, b.lat]); const col = statusColor(b.status); // This base (owner, 2026-11-05), not the main one. B-022: this comment once sat before `const s`, so no base was drawn.
+    const main = !!b.self || (!anySelf && b === BASES[0]); const s = (main ? 11 : 7) * z;
     ctx.fillStyle = col; ctx.fillRect(x - s / 2, y - s / 2, s, s); ctx.strokeStyle = "#000"; ctx.lineWidth = z; ctx.strokeRect(x - s / 2, y - s / 2, s, s);
     if (main) { ctx.strokeStyle = col; ctx.lineWidth = 1.5 * z; ctx.beginPath(); ctx.arc(x, y, s * 1.1, 0, Math.PI * 2); ctx.stroke(); }
     ctx.font = (main ? "bold " : "") + Math.round((main ? 13 : 12) * z) + "px " + face;

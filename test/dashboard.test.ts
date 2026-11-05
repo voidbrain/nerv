@@ -256,3 +256,18 @@ test('the advice step is lit while the consultant works, not skipped until the a
  assert.equal(stepState({...base,consult:false,phase:'plan',status:'active'},'consult'),'skip','no consultant');
  assert.equal(stepState({...base,consult:true,phase:'plan',status:'active',done:{...base.done,consult:true}},'consult'),'done','advised');
 });
+test('the bases map draws: drawMap runs to the end and draws every base and its name (B-022)',async()=>{
+ const {readFileSync}=await import('node:fs');const src=readFileSync('web/public/dashboard/dashboard.js','utf8');
+ const i=src.indexOf('function drawMap(');const body=src.slice(i,src.indexOf('\n}\n',i)+2);
+ const calls:{m:string;a:unknown[]}[]=[];
+ const ctx=new Proxy({},{get:(_t,k)=>k==='measureText'?()=>({width:40}):k==='createRadialGradient'?()=>({addColorStop:()=>{}}):(...a:unknown[])=>{calls.push({m:String(k),a});},set:()=>true});
+ const map={ready:true,w:540,h:250,dpr:1,proj:(p:number[])=>[p[0]!,p[1]!],contours:[],linkPaths:{'nerv-01|nerv-02':[[100,100],[300,150]]}};
+ const BASES=[{id:'nerv-01',name:'Neo Tokyo-3',status:'online',self:true,lon:100,lat:100},{id:'nerv-02',name:'Tabgha',status:'offline',lon:300,lat:150}];
+ const document={getElementById:()=>({getContext:()=>ctx,clientWidth:270})};
+ const drawMap=new Function('map','BASES','LINKS','state','cssVar','statusColor','document',`${body}\nreturn drawMap;`)(map,BASES,[['nerv-01','nerv-02']],{packets:[]},()=>'#000',()=>'#0f0',document) as (now:number)=>void;
+ drawMap(1000);
+ const texts=calls.filter(c=>c.m==='fillText').map(c=>c.a[0]);
+ assert.ok(texts.includes('Neo Tokyo-3')&&texts.includes('Tabgha'),'both bases are named');
+ assert.ok(texts.some(t=>/UMBILICAL/.test(String(t))),'drawn to the end');
+ assert.equal(calls.filter(c=>c.m==='strokeRect').length,2,'one marker per base');
+});
