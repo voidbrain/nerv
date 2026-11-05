@@ -1,28 +1,27 @@
 # NERV Agency backlog
 
-Current work ledger, reviewed 5 November 2026 against main `caa1a8e`. PR #1–#107 merged after green checks (#53–#107 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
+Current work ledger, reviewed 5 November 2026 against main `9ed644f`. PR #1–#108 merged after green checks (#53–#108 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
 
 <!-- recap:start · generated by tools/backlog-recap.mjs from the records; do not edit by hand -->
 **Recap as of 2026-11-05** (window 2026-10-30 – 2026-11-05).
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 30 | 0 |
-| **Require Human 🧑** | 2 | 0 |
+| **Open** | 29 | 0 |
+| **Require Human 🧑** | 1 | 0 |
 
 ### Last 7 days
 
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **Count** | 47 | 17 | 7 | 7 |
+| **Count** | 47 | 18 | 7 | 7 |
 
 ### Require Human 🧑
 
 | Features | Bugs |
 |---|---|
 | [F-036](#f-036) | — |
-| [F-047](#f-047) |  |
 <!-- recap:end -->
 
 ## Bugs and reliability
@@ -1031,39 +1030,6 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 ---
 
-### F-047
-
-**Dashboard looks: Theme (Eva, Simple) × Mode (dark, light) × Colour**
-
-| Signal | Priority | Status | Effort | Complete |
-|:---:|---|---|---|---|
-| 🟡 | 🔶 P2 | Implemented | 🟡 Medium | ~90% |
-
-🧑 **→ Human action required: Yes**<br />After updating, open the dashboard (`npm start -- open dashboard`) and try the three menus top right (THEME, MODE, COLOUR): Eva · Dark · Orange looks as before; each other choice applies at once, stays after a refresh, and nothing becomes hard to read. Tell me any combination that looks wrong.
-
-| | |
-|---|---|
-| **Issue** | Owner request 2026-11-05: two themes, "Simple" and "Eva", and a colour menu: dark or light, and orange (the current EVA Full), blue, green, violet or ochre. The dashboard had five fixed themes (EVA Full, EVA Basic, dark, light, terminal); light mode kept dark-mode status colours, several glows were fixed orange, and white on the danger red failed AA. |
-| **Reproduce** | Open the dashboard and look for a colour choice: there is one THEME menu with five fixed looks. |
-| **Check** | THEME (Eva: lore labels, square panels, filled headers, CRT; Simple: plain), MODE (dark, light) and COLOUR (five) are independent and remembered in the browser; Eva · Dark · Orange is unchanged from EVA Full; every text and focus colour reaches WCAG AA on every background in all 20 combinations (test); glows, the Sephirot lines, the MAGI seats and the EVA cages follow the mode and colour; an older saved theme maps to its nearest; a look by the owner in a browser. |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Next action / closure evidence:** Implemented in [PR #108](https://github.com/voidbrain/nerv/pull/108) (2026-11-05): `palette(theme, mode, accent)` in web/public/dashboard/dashboard.js gives every colour token, applied on the body; the stylesheet's `:root` is Eva · Dark · Orange (a coupling kept by test); three labelled menus replace the theme menu; the old theme classes are gone (EVA Full and EVA Basic fold into Eva, Terminal into Simple · Dark · Green); fixed orange glows, black-mixed backgrounds, white-on-red and fixed MAGI seat colours now use tokens; light mode gets its own deeper status colours; planned EVA cages are no longer faded (the dashed border and PLANNED say it). Checked: test/dashboard.test.ts (WCAG contrast of text, muted, accent, status, header, brand, button and cage colours on every background, all 20 combinations; the default equals the palette; old choices mapped; each menu labelled); headless Chrome screenshots of five combinations reviewed (Eva dark orange and ochre, Eva light blue, Simple dark green, Simple light violet and ochre). Not automated: an axe run in a browser (the project has no axe tooling) and the owner's look.
-
-**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
-
-| Field | Value |
-|---|---|
-| PR / evidence | Owner request 2026-11-05; [PR #108](https://github.com/voidbrain/nerv/pull/108) |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-05: test/dashboard.test.ts (local run); screenshots; owner's look pending |
-| Reviewed | 2026-11-05 |
-
-</details>
-
----
 
 
 

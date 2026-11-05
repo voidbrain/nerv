@@ -845,3 +845,37 @@ Closed records in closing-date order. Dated evidence, not current status.
 </details>
 
 ---
+
+### F-047
+
+**Dashboard looks: Theme (Eva, Simple) × Mode (dark, light) × Colour**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟡 Medium | ~100% |
+
+💻 **→ Human action required: No**<br />None: verified by the owner and closed.
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-05: two themes, "Simple" and "Eva", and a colour menu: dark or light, and orange (the current EVA Full), blue, green, violet or ochre. The dashboard had five fixed themes (EVA Full, EVA Basic, dark, light, terminal); light mode kept dark-mode status colours, several glows were fixed orange, and white on the danger red failed AA. |
+| **Reproduce** | Open the dashboard and look for a colour choice: there is one THEME menu with five fixed looks. |
+| **Check** | THEME (Eva: lore labels, square panels, filled headers, CRT; Simple: plain), MODE (dark, light) and COLOUR (five) are independent and remembered in the browser; Eva · Dark · Orange is unchanged from EVA Full; every text and focus colour reaches WCAG AA on every background in all 20 combinations (test); glows, the Sephirot lines, the MAGI seats and the EVA cages follow the mode and colour; an older saved theme maps to its nearest; a look by the owner in a browser. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-05: the owner checked the menus in a browser ("F-047 ok"); the automated checks passed in [PR #108](https://github.com/voidbrain/nerv/pull/108)'s CI. Implemented in [PR #108](https://github.com/voidbrain/nerv/pull/108) (2026-11-05): `palette(theme, mode, accent)` in web/public/dashboard/dashboard.js gives every colour token, applied on the body; the stylesheet's `:root` is Eva · Dark · Orange (a coupling kept by test); three labelled menus replace the theme menu; the old theme classes are gone (EVA Full and EVA Basic fold into Eva, Terminal into Simple · Dark · Green); fixed orange glows, black-mixed backgrounds, white-on-red and fixed MAGI seat colours now use tokens; light mode gets its own deeper status colours; planned EVA cages are no longer faded (the dashed border and PLANNED say it). Checked: test/dashboard.test.ts (WCAG contrast of text, muted, accent, status, header, brand, button and cage colours on every background, all 20 combinations; the default equals the palette; old choices mapped; each menu labelled); headless Chrome screenshots of five combinations reviewed (Eva dark orange and ochre, Eva light blue, Simple dark green, Simple light violet and ochre). Not automated: an axe run in a browser (the project has no axe tooling) and the owner's look.
+
+**Estimates:** No remaining effort; ~100% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner request 2026-11-05; [PR #108](https://github.com/voidbrain/nerv/pull/108) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05: owner's look; PR #108 CI |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
