@@ -36,7 +36,7 @@
       apt:!!latest && !!latest.ballot && latest.ballot.outcome === "approval", plug:latestIs("done", "failed", "proposed"), eva:latestIs("done", "failed"), debrief:status !== "active" && status !== "waiting" };
     const phase = status === "waiting" ? "apt" : status === "active" ? (phaseOf.get(s.id) || "plan") : "debrief";
     const last = actions[actions.length - 1];
-    return { id:short(s.id), realId:s.id, title:s.title, preset:null, pilot:s.source === "misato" ? "misato" : "owner", source:"aoba", proactive:false, consult:consulted.has(s.id), advisor:advisedBy.get(s.id) || null, // F-025: lit when a consultant advised Misato (its advice is in Comms)
+    return { id:short(s.id), realId:s.id, title:s.title, preset:null, pilot:s.source === "misato" ? "misato" : "owner", source:"aoba", proactive:false, consult:consulted.has(s.id), advisor:advisedBy.get(s.id) || null, forwarded:forwardedTo.get(s.id) || null, origin:originOf.get(s.id) || null, // F-025: lit when a consultant advised Misato (its advice is in Comms)
      
       why:s.why || "", created:s.created, trust:s.trust, battery:0, spent:0, started:Date.parse(s.created), ended:s.closed ? Date.parse(s.closed) : null, status, phase, done,
       actions, current:Math.max(0, actions.length - 1), ballot:last && last.ballot && last.ballot.verdicts ? last.ballot : null, outcome:known.get(s.id) || null, happened:[], note:"" };
@@ -102,7 +102,7 @@
   }
   // Comms: the selected sortie's own trace (requests, steps, ballots, decisions, replies) plus what you typed here.
   const seen = new Set();
-  const phaseOf = new Map(), advisedBy = new Map();
+  const phaseOf = new Map(), advisedBy = new Map(), forwardedTo = new Map(), originOf = new Map();
   const generic = () => { const r = modelsData && modelsData.models && modelsData.models.roles; return !!(r && r.consultant && r.consultant.model); };
   async function loadEvents(id) {
     let after = 0; const all = []; let added = 0;
@@ -116,10 +116,16 @@
         : e.kind.startsWith("approval.") ? ["Owner " + e.kind.slice(9) + " (" + (p.source || "") + ")", e.kind === "approval.approve" ? "ok" : "danger", "you"]
         : e.kind === "action.done" ? ["EVA-02: " + p.tool + " done", "ok", "eva-02"] : e.kind === "action.failed" ? ["EVA-02: " + p.tool + " failed · " + p.error, "danger", "eva-02"]
         : e.kind === "ballot.shadow" ? ["MAGI · " + p.seat + " (shadow, after the decision): " + p.vote + (p.reason ? " — " + p.reason : ""), p.vote === "reject" ? "warn" : "", "magi"]
+        : e.kind === "kaji.forwarded" ? ["Kaji line · forwarded to " + (p.base && p.base.name || "the main base"), "", "maya"]
+        : e.kind === "kaji.answered" ? ["Kaji line · answered by " + (p.base && p.base.name || "the main base") + (p.sortieId ? " (its S-" + String(p.sortieId).slice(0, 4).toUpperCase() + ")" : ""), "ok", "maya"]
         : e.kind === "kaji.result" ? ["Kaji line · " + p.text, p.outcome === "grant" ? "ok" : p.outcome === "refused" || p.outcome === "reject" ? "danger" : "", "maya"]
         : e.kind === "misato.consult" ? [(p.pilot && p.pilot.name ? "Pilot " + p.pilot.name : "Consultant") + (p.model ? " (" + p.model + ")" : "") + ": " + p.advice, "", "maya"]
         : e.kind === "misato.resumed" ? ["Misato: resuming after your decision", "", "misato"] : e.kind === "sortie.done" || e.kind === "sortie.failed" ? ["Debrief: " + e.kind.slice(7), e.kind === "sortie.done" ? "ok" : "danger", "misato"] : null;
       if (e.kind === "misato.reply") known.set(id, p.text);
+      if (e.kind === "kaji.forwarded") forwardedTo.set(id, p.base && p.base.name || "the main base");
+      // The main base dropped out and this base answered in the same sortie: local work means it is not shown as forwarded.
+      if (e.kind === "misato.consult" || e.kind === "ballot" || e.kind === "misato.step") forwardedTo.delete(id);
+      if (e.kind === "misato.request" && /^kaji:/.test(p.conversation || "")) originOf.set(id, baseName(String(p.conversation).slice(5).split("-").slice(0, 2).join("-")));
       if (e.kind === "misato.consult") { consulted.add(id); advisedBy.set(id, (p.pilot && p.pilot.name ? p.pilot.name : "Generic pilot") + (p.model ? " · " + p.model : "")); }
       // F-051: the step a running sortie is on, from its latest event (not always MAGI).
       const step = { "misato.request":generic() ? "consult" : "plan", "misato.consult":"plan", "misato.resumed":"plan", "action.done":"plan", "action.failed":"plan", "approval.requested":"apt", "approval.approve":"plug", "misato.reply":"debrief" }[e.kind] || (e.kind === "ballot" ? (p.outcome === "grant" ? "plug" : p.outcome === "approval" ? "apt" : "plan") : null);

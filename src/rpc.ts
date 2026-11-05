@@ -30,7 +30,7 @@ export const methodSchemas={
  'sorties.spear':{type:'object',required:['id','reason'],properties:{id:{type:'string',minLength:1,maxLength:100},reason:{type:'string',minLength:1,maxLength:500}},additionalProperties:false},
  'sorties.open':{type:'object',required:['title'],properties:{title:{type:'string',minLength:1,maxLength:500},source:{enum:['owner','misato','instrumentality','marduk']}},additionalProperties:false},
  'sorties.finish':{type:'object',required:['sortieId'],properties:{sortieId:{type:'string',minLength:1,maxLength:100},status:{enum:['done','failed']},reply:{type:'string',minLength:1,maxLength:4000}},additionalProperties:false},
- 'misato.note':{type:'object',required:['sortieId','kind','payload'],properties:{sortieId:{type:'string',minLength:1,maxLength:100},kind:{enum:['misato.request','misato.step','misato.waiting','misato.consult','pilot.unmatched']},payload:{type:'object'}},additionalProperties:false},
+ 'misato.note':{type:'object',required:['sortieId','kind','payload'],properties:{sortieId:{type:'string',minLength:1,maxLength:100},kind:{enum:['misato.request','misato.step','misato.waiting','misato.consult','pilot.unmatched','kaji.forwarded','kaji.answered']},payload:{type:'object'}},additionalProperties:false},
  'misato.resumable':empty,
  'misato.interrupted':{type:'object',required:['before'],properties:{before:{type:'string',minLength:10,maxLength:40}},additionalProperties:false},
  'misato.closeInterrupted':{type:'object',required:['sortieId','reply'],properties:{sortieId:{type:'string',minLength:1,maxLength:100},reply:{type:'string',minLength:1,maxLength:4000}},additionalProperties:false},

@@ -445,7 +445,7 @@ function renderSorties() {
     const pats = s.actions.map(a => a.ballot ? "<span class='badge b-" + a.ballot.pattern + "' title='Pattern " + a.ballot.pattern + ": " + (meaning[a.ballot.pattern] || "") + "' aria-label='Pattern " + a.ballot.pattern + "'>" + a.ballot.pattern[0].toUpperCase() + "</span>" : "<span class='badge b-muted' title='not voted yet' aria-label='not voted yet'>·</span>").join(" ");
     return "<div class='card sortie" + (s.id === state.selected ? " sel" : "") + "' tabindex='0' role='button' aria-pressed='" + (s.id === state.selected) + "' data-s='" + s.id + "'>" +
       "<div class='row'><span class='b'>" + esc(s.id) + " · " + highlight(s.title, state.search) + "</span>" + sortieBadge(s) + "</div>" +
-      "<div class='row small muted'><span>" + (s.source === "hyuga" ? "Hyuga" : "Aoba") + " · " + dayTime(s.started) + " · " + s.actions.length + " action" + (s.actions.length > 1 ? "s" : "") + " " + pats + "</span><span>$" + s.spent.toFixed(3) + "</span></div>" +
+      "<div class='row small muted'><span>" + (s.forwarded ? "→ " + esc(s.forwarded) : s.origin ? "from " + esc(s.origin) : s.source === "hyuga" ? "Hyuga" : "Aoba") + " · " + dayTime(s.started) + " · " + s.actions.length + " action" + (s.actions.length > 1 ? "s" : "") + " " + pats + "</span><span>$" + s.spent.toFixed(3) + "</span></div>" +
       (s.why ? "<div class='tiny whyline'>" + esc(s.why) + "</div>" : "") +
       (s.outcome ? "<div class='tiny muted'>" + esc(s.outcome) + "</div>" : "") + "</div>";
   }).join("") || "<div class='muted small'>" + sortiesEmpty(f, q) + "</div>";
@@ -462,6 +462,8 @@ function sortiesEmpty(f, q) {
 /* ================= RENDER: flow ================= */
 function stepState(s, id) {
   if (!s) return "";
+  // F-051: forwarded to the main base: the steps between ran there.
+  if (s.forwarded && id !== "detect" && id !== "debrief") return "skip";
   if (id === "consult" && !s.consult) return "skip";
   if (s.phase === id) return s.status === "waiting" || s.status === "waiting-route" ? "wait" : s.status === "active" ? "on" : "done";
   if (id === "apt" && !s.actions.some(a => a.ballot && a.ballot.outcome !== "grant")) return s.done.apt ? "done" : (s.status === "done" ? "skip" : "");
@@ -495,6 +497,7 @@ function renderFlow() {
   document.getElementById("flow-note").textContent = s ? (s.note || s.outcome || "") : "Select a sortie, or launch one.";
   // sephirot nodes
   // Misato's apartment passed means the owner decided: it takes the decision colour, like its lines (owner, 2026-11-05).
+  { const sd = document.querySelector(".snode[data-n='detect'] .sd"); if (sd) sd.textContent = s && s.forwarded ? "forwarded to " + s.forwarded : s && s.origin ? "from " + s.origin : "Aoba comms · Hyuga watch"; }
   { const sd = document.querySelector(".snode[data-n='consult'] .sd"); if (sd) sd.textContent = s && s.advisor ? "advised by " + s.advisor : "no vote · advice into the LCL"; }
   document.querySelectorAll(".snode[data-n]").forEach(el => { el.classList.remove("on", "done", "wait", "skip", "owner"); const st = stepState(s, el.dataset.n); if (st) el.classList.add(st); if (st === "done" && el.dataset.n === "apt") el.classList.add("owner"); });
   // timeline
@@ -542,7 +545,9 @@ const EDGES = [
   ["magi","sync"],["magi","apt"],["sync","apt"],["sync","plug"],["apt","plug"],["plug","eva"],["eva","debrief"],
   ["magi","plan","loop"],["apt","plan","loop"],["eva","plan","loop"],
   // Misato answered without an action: straight to Debrief (drawn only for such a sortie).
-  ["plan","debrief","answer"]
+  ["plan","debrief","answer"],
+  // F-051: forwarded to the main base: Detection straight to Debrief over the Kaji line (drawn only then).
+  ["detect","debrief","relay"]
 ];
 function nodeEl(id) { return id === "magi" ? document.getElementById("magi-big") : document.querySelector(".snode[data-n='" + id + "']"); }
 function drawEdges(s) {
@@ -556,7 +561,7 @@ function drawEdges(s) {
   // in the gaps between nodes; the loops back to Misato run in their own lanes in the right padding, never behind a node.
   // One shared turning height per fan-out (edges leaving the same node downwards) and per merge (edges entering the
   // same node from above), so branches turn on one line.
-  const edges = EDGES.filter(e => e[2] !== "answer" || (s && !s.actions.length));
+  const edges = EDGES.filter(e => e[2] === "relay" ? !!(s && s.forwarded) : e[2] !== "answer" || (s && !s.actions.length && !s.forwarded));
   const box = {}; edges.forEach(e => { box[e[0]] = box[e[0]] || c(nodeEl(e[0])); box[e[1]] = box[e[1]] || c(nodeEl(e[1])); });
   const down = edges.filter(e => !e[2] && box[e[1]].t >= box[e[0]].b - 2);
   const fan = {}, merge = {};
@@ -567,7 +572,9 @@ function drawEdges(s) {
   const paths = edges.map(e => {
     const A = c(nodeEl(e[0])), B = c(nodeEl(e[1])); let d;
     // The answer route runs in its own lane on the right, then under Debrief, entering it from below.
-    if (e[2] === "answer") { const x = host.width - 14 - 8 * lane++, yb = B.b + 6; d = "M" + A.r + "," + A.y + " H" + x + " V" + yb + " H" + B.x + " V" + B.b; }
+    // The relay runs in the left padding: out of Detection's side, down, into Debrief's side.
+    if (e[2] === "relay") { const x = 6; d = "M" + A.l + "," + A.y + " H" + x + " V" + B.y + " H" + B.l; }
+    else if (e[2] === "answer") { const x = host.width - 14 - 8 * lane++, yb = B.b + 6; d = "M" + A.r + "," + A.y + " H" + x + " V" + yb + " H" + B.x + " V" + B.b; }
     else if (e[2] === "loop" && e[0] !== "consult") { const x = host.width - 14 - 8 * lane++; d = "M" + A.r + "," + A.y + " H" + x + " V" + B.y + " H" + B.r; }
     else if (B.t >= A.b - 2) { const my = bar(e); d = "M" + A.x + "," + A.b + " V" + my + " H" + B.x + " V" + B.t; }
     else if (B.b <= A.t + 2) { const my = (B.b + A.t) / 2; d = "M" + A.x + "," + A.t + " V" + my + " H" + B.x + " V" + B.b; }
@@ -583,6 +590,7 @@ function drawEdges(s) {
 function passedEdge(s, e) {
   if (!s || e[2] === "loop") return "";
   if (e[2] === "answer") return stepState(s, "plan") === "done" && stepState(s, "debrief") === "done" ? "passed" : "";
+  if (e[2] === "relay") return stepState(s, "debrief") === "done" ? "passed" : "";
   const from = stepState(s, e[0]), to = stepState(s, e[1]);
   if (from === "skip" || to === "skip") return "skip";
   if (from !== "done" || !(to === "done" || to === "on" || to === "wait")) return "";
