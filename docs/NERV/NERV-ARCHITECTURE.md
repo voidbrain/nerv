@@ -192,7 +192,7 @@ Supersedes the glossary in `review-2026-11-04.md` §3 and every flow in `insight
 | **Spear** = the emergency stop: pierces every A.T. Field of a sortie (or all) at once | In the show the Lance of Longinus pierced an Angel's A.T. Field from orbit (the 15th, Arael). Arael itself has no role here. |
 | Bridge crew | **Aoba** = comms, **Hyuga** = Misato's operations aide/watch, **Maya** = monitoring (she reads the sync ratios). |
 | **Pen Pen** = notifier | He lives in Misato's apartment. |
-| **Marduk Institute** = the pilot roster (the dashboard's *Marduk Institute · Pilots*, with Kaji's watermelons as trust stages; *Pilots* in the Simple theme) | It selects the Children (who may pilot). |
+| **Marduk Institute** = the pilot roster (the dashboard's *Marduk Institute · Pilots*; *Pilots* in the Simple theme). **Kaji's watermelons** = the skills, grown through their trust stages (its own box, *Skills* in the Simple theme) | It selects the Children (who may pilot). |
 | **Gehirn** = the signed registry of bases (enrol, revoke, main base) | NERV's predecessor, which founded its bases. Renamed from "Marduk registry" (owner, 2026-11-05). |
 | **Instrumentality** = memory consolidation | Separate episodes merged into one sea. The ledger is kept. |
 | **Sync Ratio** = 0–100 % | The show displays it as a percentage. |
