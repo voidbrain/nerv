@@ -56,6 +56,8 @@ export function sanitizeHealth(value:unknown):BaseHealth|undefined {
 }
 /** Missed heartbeats in a row before a peer is logged unreachable: as many as fit in the online window (3 at 30 s / 90 s). */
 export const missesToLog=(everyMs:number)=>Math.max(1,Math.ceil(ONLINE_MS/everyMs));
+/** The main base's answer to a dispatched request: the reply Misato gave there (its sortie and cards live there). */
+export interface DispatchedReply {sortieId:string;reply?:string;error?:string;steps:unknown[];waiting:{approvalId:string;tool:string;reason:string}[];base?:{id:string;name:string}}
 /** What a base relays to the main base's Aoba (F-036 phase 2): text to show, and the approval cards it carries. */
 export interface Relay {text:string;cards:{id:string;label:string}[]}
 const UUID=/^[a-f0-9-]{36}$/;
@@ -82,10 +84,11 @@ export class KajiLink {
  }
  private every=HEARTBEAT_MS;
  constructor(options:{baseId:string;key:KeyObject;publicKey:string;registry:RegistryPort;log?:(line:string)=>void;health?:()=>Promise<BaseHealth>;onHealth?:(baseId:string,health:HeardHealth)=>void;
-  onRelay?:(from:string,relay:Relay)=>Promise<boolean>;onDecide?:(approvalId:string,decision:'approve'|'reject')=>Promise<string>}) {
+  onRelay?:(from:string,relay:Relay)=>Promise<boolean>;onChat?:(from:string,message:string,conversation?:string)=>Promise<DispatchedReply>;onDecide?:(approvalId:string,decision:'approve'|'reject')=>Promise<string>}) {
   this.baseId=options.baseId;this.key=options.key;this.publicKey=options.publicKey;this.port=options.registry;this.log=options.log ?? (l=>console.error(l));
-  this.health=options.health;this.onHealth=options.onHealth;this.onRelay=options.onRelay;this.onDecide=options.onDecide;
+  this.health=options.health;this.onHealth=options.onHealth;this.onRelay=options.onRelay;this.onDecide=options.onDecide;this.onChat=options.onChat;
  }
+ private readonly onChat:((from:string,message:string,conversation?:string)=>Promise<DispatchedReply>)|undefined;
  private readonly onRelay:((from:string,relay:Relay)=>Promise<boolean>)|undefined;private readonly onDecide:((approvalId:string,decision:'approve'|'reject')=>Promise<string>)|undefined;
  private readonly health:(()=>Promise<BaseHealth>)|undefined;private readonly onHealth:((baseId:string,health:HeardHealth)=>void)|undefined;
  /** This base's health for a heartbeat; a check that fails is itself a degraded reason. Omitted when no check is wired. */
@@ -129,6 +132,13 @@ export class KajiLink {
     if(await this.port.main?.()!==this.baseId||!this.onRelay){reply(409,{error:'not the main base'});return;}
     reply(200,{delivered:await this.onRelay(from,relay)});return;
    }
+   // F-036 dispatch: a request asked on another base, answered by the main base's Misato.
+   if(req.method==='POST'&&req.url==='/kaji/chat'){
+    const c=JSON.parse(body) as {message?:unknown;conversation?:unknown};
+    if(typeof c.message!=='string'||!c.message.trim()||c.message.length>4000||(c.conversation!==undefined&&(typeof c.conversation!=='string'||!/^[a-z]{1,20}$/.test(c.conversation)))){reply(400,{error:'invalid request'});return;}
+    if(await this.port.main?.()!==this.baseId||!this.onChat){reply(409,{error:'not the main base'});return;}
+    reply(200,await this.onChat(from,c.message,c.conversation as string|undefined));return;
+   }
    if(req.method==='POST'&&req.url==='/kaji/decide'){
     const d=JSON.parse(body) as {approvalId?:unknown;decision?:unknown};
     if(typeof d.approvalId!=='string'||!UUID.test(d.approvalId)||(d.decision!=='approve'&&d.decision!=='reject')){reply(400,{error:'invalid decision'});return;}
@@ -139,9 +149,9 @@ export class KajiLink {
   }catch(e){this.log(`Kaji: refused a request (${e instanceof Error?e.message:'invalid'}).`);reply(403,{error:'refused'});}
  }
  /** Signed request to one peer; the reply must be signed by that same peer. */
- private async call(peer:BaseEntry,method:'GET'|'POST',path:string,value?:unknown):Promise<unknown> {
+ private async call(peer:BaseEntry,method:'GET'|'POST',path:string,value?:unknown,timeoutMs=8000):Promise<unknown> {
   const body=value===undefined?'':JSON.stringify(value);const {host,port}=endpoint(peer.address);
-  const res=await fetch(`http://${host}:${port}${path}`,{method,headers:{'content-type':'application/json',...signedHeaders(this.baseId,this.key,'req',method,path,body)},...(method==='POST'?{body}:{}),signal:AbortSignal.timeout(8000),redirect:'error'});
+  const res=await fetch(`http://${host}:${port}${path}`,{method,headers:{'content-type':'application/json',...signedHeaders(this.baseId,this.key,'req',method,path,body)},...(method==='POST'?{body}:{}),signal:AbortSignal.timeout(timeoutMs),redirect:'error'});
   const text=await res.text();const headers=Object.fromEntries(res.headers.entries());
   const from=verifySigned(headers,'res',method,path,text,await this.port.bases(),this.nonces);
   if(from!==peer.baseId)throw new Error(`${peer.baseId} answered as ${from}`);
@@ -153,6 +163,21 @@ export class KajiLink {
   const main=await this.port.main?.();if(!main||main===this.baseId)return false;
   const peer=(await this.port.bases()).find(b=>b.baseId===main&&b.status==='enrolled');if(!peer)return false;
   try{return ((await this.call(peer,'POST','/kaji/relay',relay)) as {delivered?:boolean}).delivered===true;}catch(e){this.log(`Kaji: relay to ${main} failed (${e instanceof Error?e.message:'error'}).`);return false;}
+ }
+ /** Sends a request to the main base's Misato (F-036 dispatch). undefined only when it was never sent (no main base, it is
+     this base, or it cannot be reached), so the caller may answer locally; once sent, a slow or failed answer is reported,
+     never run a second time here. */
+ async chat(message:string,conversation:string|undefined,timeoutMs:number):Promise<DispatchedReply|undefined> {
+  const main=await this.port.main?.();if(!main||main===this.baseId)return undefined;
+  const peer=(await this.port.bases()).find(b=>b.baseId===main&&b.status==='enrolled');if(!peer)return undefined;
+  try{return (await this.call(peer,'POST','/kaji/chat',{message,...(conversation?{conversation}:{})},timeoutMs)) as DispatchedReply;}
+  catch(e){
+   const text=e instanceof Error?e.message:'error';
+   // Never sent: the connection itself failed. Anything later (a reset, a timeout) may have reached Misato already.
+   const code=(e as {cause?:{code?:string}}).cause?.code;
+   if(code&&['ECONNREFUSED','EHOSTUNREACH','ENETUNREACH','EADDRNOTAVAIL','UND_ERR_CONNECT_TIMEOUT'].includes(code))return undefined;
+   return {sortieId:'',error:`${main} did not answer (${text}); it may still be working on it, so the request was not repeated here.`,steps:[],waiting:[]};
+  }
  }
  /** Passes the owner's tap on a relayed card back to the base that owns the card; its outcome text comes back. */
  async decide(baseId:string,approvalId:string,decision:'approve'|'reject'):Promise<string> {

@@ -12,7 +12,9 @@ import { KajiLink } from './kaji-link.ts';
 import { ROOT_KEY_FILE, Registry, baseKey, createRootKey, enrolmentArgs, fingerprint, signRecord, unlockRootKey, type SignedRecord } from './kaji.ts';
 import { service } from './service.ts';
 import {initializeNativeTLS,loadNativeTLS,nativeAdmin,NativeAuth,type Invitation} from './native-auth.ts';
-import { Runtime } from './runtime.ts';
+import { Runtime, type ChatReply } from './runtime.ts';
+import { MODEL_TIMEOUT_MS } from './model.ts';
+import { MAX_STEPS } from './misato.ts';
 import { OLLAMA_URL, detectOllama, modelsReport, ollamaUrlOf, planModels, setupAtInit, writeModels, type ModelChange } from './model-setup.ts';
 const [command,...args]=process.argv.slice(2);
 /** --base NERV-02 --name "Tabgha" (both, or neither). */
@@ -94,12 +96,13 @@ try {
     const message=args.join(' ');if(!message)throw new Error('Usage: chat "what you want"');
     const config=readConfig(home);
     const response=await fetch(`http://127.0.0.1:${config.port}/api/chat`,{method:'POST',headers:{authorization:`Bearer ${readToken(home)}`,'content-type':'application/json'},body:JSON.stringify({message,conversation:'cli'})}).catch(()=>{throw new Error('NERV Agency is not running: start it with serve or service start.');});
-    const value=await response.json() as {reply?:string;error?:string;sortieId?:string;steps?:{tool?:string;outcome:string;reason?:string;error?:string}[];waiting?:{approvalId:string;tool:string}[]};
+    const value=await response.json() as {reply?:string;error?:string;sortieId?:string;steps?:{tool?:string;outcome:string;reason?:string;error?:string}[];waiting?:{approvalId:string;tool:string}[];base?:{id:string;name:string}};
     if(!response.ok)throw new Error(value.error ?? 'Chat failed.');
     for(const s of value.steps ?? [])console.log(`· ${s.tool ?? '(invalid reply)'} → ${s.outcome}${s.error?` · ${s.error}`:s.reason?` · ${s.reason}`:''}`);
-    for(const w of value.waiting ?? [])console.log(`⏸ ${w.tool} waits for you: approve ${w.approvalId} | reject ${w.approvalId}`);
+    // Dispatched (F-036): the main base's Misato answered; its cards are decided there (Aoba or its dashboard).
+    for(const w of value.waiting ?? [])console.log(value.base?`⏸ ${w.tool} waits for you on ${value.base.name}: decide it on Aoba or on ${value.base.name}'s dashboard`:`⏸ ${w.tool} waits for you: approve ${w.approvalId} | reject ${w.approvalId}`);
     console.log(value.reply ?? `[no reply: ${value.error}]`);
-    console.log(`— sortie ${value.sortieId}`);
+    console.log(value.base?`— answered by ${value.base.name} (${value.base.id}), sortie ${value.sortieId} there`:`— sortie ${value.sortieId}`);
     if(!value.reply)process.exitCode=1;
   }
   else if(command==='instrumentality'){
@@ -292,7 +295,12 @@ try {
         else if(botToken)console.log('Aoba (Telegram): token found, no chat linked yet. Send /start to your bot, then run telegram link.');
         if(config.kaji?.root){kaji=new KajiLink({baseId:config.base.id,key:own.privateKey,publicKey:own.publicKey,registry:runtime.kaji,health:()=>runtime.baseHealth(),onHealth:(id,h)=>runtime.notePeerHealth(id,h),
           onRelay:async(from,relay)=>{if(!aoba)return false;const name=(await runtime.bases()).find(b=>b.baseId===from)?.name ?? from;return aoba.relayed(from,name,relay);},
-          onDecide:async(approvalId,decision)=>decisionText(await runtime.decide(approvalId,decision,'telegram'))});void kaji.start();}
+          onDecide:async(approvalId,decision)=>decisionText(await runtime.decide(approvalId,decision,'telegram')),
+          // Dispatch, on the main base: a request asked on another base, with its own conversation per base and channel.
+          onChat:async(from,message,conversation)=>({...await runtime.chat(message,`kaji:${from.toLowerCase()}${conversation?'-'+conversation:''}`),base:{id:config.base.id,name:config.base.name}})});
+        // Dispatch, on the other bases: while the main base is online, requests go to its Misato (one planner, one memory).
+        runtime.setDispatch(async(message,conversation)=>{const main=await runtime.mainBase();if(!main||main.self||!main.online||!kaji)return undefined;
+          return await kaji.chat(message,conversation&&/^[a-z]{1,20}$/.test(conversation)?conversation:undefined,MODEL_TIMEOUT_MS*MAX_STEPS*2) as ChatReply|undefined;});void kaji.start();}
         process.once('SIGINT',close);process.once('SIGTERM',close);break;
       }
       default:throw new Error('Unknown command. Run help.');

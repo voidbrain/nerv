@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {generateKeyPairSync} from 'node:crypto';
 import {createServer as httpServer} from 'node:http';
 import {createServer} from 'node:net';
-import {mkdtempSync,rmSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';
+import {mkdtempSync,rmSync,writeFileSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';
 import {Store} from '../src/store.ts';
 import {Registry,createRootKey,signRecord,unlockRootKey,type RegistryBody} from '../src/kaji.ts';
 import {KajiLink,sanitizeRelay,signedHeaders,type RegistryPort} from '../src/kaji-link.ts';
@@ -71,4 +71,36 @@ test('one channel: while the main base is online the other base\'s bot is quiet,
   mainUp=false;await sb.add('Stretch',new Date(Date.now()+300).toISOString());sb.tick(new Date(Date.now()+1000));
   await until(()=>botB.sent().some(m=>/⏰ Stretch/.test(m.text)));
  }finally{await tabgha.stop();await aoba.stop();await la.stop();await lb.stop();sa.close();sb.close();await botA.close();await botB.close();rmSync(homeA,{recursive:true,force:true});rmSync(homeB,{recursive:true,force:true});}
+});
+test('dispatch: a request asked on another base is answered by the main base\'s Misato; unreachable, it is answered locally; sent but slow, it is reported and never run twice',{timeout:40000},async()=>{
+ const {Runtime}=await import('../src/runtime.ts');
+ const A=keys(),B=keys();const pa=await freePort(),pb=await freePort();
+ const homeB=mkdtempSync(join(tmpdir(),'nerv-disp-b-'));const sa=new Store(':memory:');const ra=new Registry(sa.db,root.publicKey);
+ const records=[rec({kind:'enrol',baseId:'NERV-01',name:'Neo Tokyo-3',publicKey:A.publicKey,address:`127.0.0.1:${pa}`}),rec({kind:'enrol',baseId:'NERV-02',name:'Tabgha',publicKey:B.publicKey,address:`127.0.0.1:${pb}`}),rec({kind:'main',baseId:'NERV-01'})];
+ for(const r of records)ra.add(r);
+ const heard:{from:string;message:string;conversation?:string}[]=[];let slow=false;
+ const la=new KajiLink({baseId:'NERV-01',key:A.privateKey,publicKey:A.publicKey,registry:port(ra),log:()=>{},
+  onChat:async(from,message,conversation)=>{heard.push({from,message,...(conversation?{conversation}:{})});if(slow)await wait(1500);return {sortieId:'tokyo-sortie',reply:'Done on Tokyo.',steps:[],waiting:[],base:{id:'NERV-01',name:'Neo Tokyo-3'}};}});
+ writeFileSync(join(homeB,'config.json'),JSON.stringify({base:{id:'NERV-02',name:'Tabgha'},kaji:{root:root.publicKey}}));
+ const b=new Runtime(join(homeB,'nerv.sqlite'),undefined,homeB);
+ try{
+  await b.ready();assert.equal(await b.kaji.add(records),3);
+  const lb=new KajiLink({baseId:'NERV-02',key:B.privateKey,publicKey:B.publicKey,registry:b.kaji,log:()=>{}});
+  b.setDispatch((m,c)=>lb.chat(m,c,800) as Promise<never>);
+  await la.start(60_000);
+  const far=await b.chat('What is on today?','dashboard');
+  assert.deepEqual([far.reply,far.base?.name,far.sortieId],['Done on Tokyo.','Neo Tokyo-3','tokyo-sortie']);assert.deepEqual(heard,[{from:'NERV-02',message:'What is on today?',conversation:'dashboard'}]);
+  assert.equal((await b.sorties()).length,0,'nothing ran on Tabgha');
+  // Sent but slow: reported, never repeated here.
+  slow=true;const late=await b.chat('Slow one','dashboard');assert.match(late.error ?? '',/NERV-01 did not answer .*not repeated here/);assert.equal((await b.sorties()).length,0);
+  // The main base is gone: answered here (this base has no model route, so its Misato says so).
+  await la.stop();const local=await b.chat('Anyone there?','dashboard');assert.equal(local.base,undefined);assert.match(local.error ?? '',/No model route for Misato/);assert.equal((await b.sorties()).length,1);
+  // Only the main base takes requests: Tabgha refuses one signed by Neo Tokyo-3.
+  const lb2=new KajiLink({baseId:'NERV-02',key:B.privateKey,publicKey:B.publicKey,registry:b.kaji,log:()=>{},onChat:async()=>({sortieId:'',steps:[],waiting:[]})});await lb2.start(60_000);
+  try{const body=JSON.stringify({message:'x'});const res=await fetch(`http://127.0.0.1:${pb}/kaji/chat`,{method:'POST',headers:{'content-type':'application/json',...signedHeaders('NERV-01',A.privateKey,'req','POST','/kaji/chat',body)},body});assert.equal(res.status,409);}
+  finally{await lb2.stop();}
+ }finally{await la.stop();await b.close();sa.close();rmSync(homeB,{recursive:true,force:true});}
+});
+test('a dispatched conversation has its own key per base and channel',()=>{
+ const st=new Store(':memory:');try{assert.deepEqual(st.ledger.conversation('kaji:nerv-02-dashboard'),[]);assert.throws(()=>st.ledger.conversation('kaji:NERV 02'),/Invalid conversation/);}finally{st.close();}
 });
