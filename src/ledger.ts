@@ -1,6 +1,6 @@
 import type { DatabaseSync } from 'node:sqlite';
 import { createHash, randomUUID } from 'node:crypto';
-import { ballot, defaultPolicy, patternOf, validatePolicy, type Ballot, type Pattern, type Policy, type Stage, type Tool, type Trust, type Verdict } from './policy.ts';
+import { ballot, defaultPolicy, patternOf,intentChecked, validatePolicy, type Ballot, type Pattern, type Policy, type Stage, type Tool, type Trust, type Verdict } from './policy.ts';
 import type { Step } from './misato.ts';
 import { explainSortie,type WhyRecord } from './why.ts';
 import { EVENT_SCHEMA_VERSION, MAX_SPEAR_HAPPENED, encodePayload, readPayload, type EventKind, type EventPayloads, type Happened, type SortieEvent } from './events.ts';
@@ -70,10 +70,10 @@ export class Ledger {
   });
  }
  /** The Pattern a proposal would get, without recording anything: the coordinator asks Casper only when it is not Green. */
- preview(sortieId:string,tool:string):{pattern:Pattern;effect:Ballot['effect']} {
+ preview(sortieId:string,tool:string):{pattern:Pattern;effect:Ballot['effect'];intent:boolean} {
   const sortie=this.db.prepare('SELECT trust,status FROM sorties WHERE id=?').get(sortieId) as {trust:Trust;status:string}|undefined;
   if(!sortie||sortie.status!=='open')throw new Error('Sortie is not open.');
-  const t=this.tools.get(tool);const effect=t?.effect ?? 'irreversible';return {pattern:patternOf(effect,sortie.trust,tool,this.policy,t?.owner===true),effect};
+  const t=this.tools.get(tool);const effect=t?.effect ?? 'irreversible';const pattern=patternOf(effect,sortie.trust,tool,this.policy,t?.owner===true);return {pattern,effect,intent:intentChecked(pattern,t)};
  }
  /** The reviewed action behind a grant, and whether the grant is still unused. Grant IDs stay inside this process. */
  grantAction(grantId:string):{sortieId:string;actionId:string;tool:string;args:Record<string,unknown>;used:boolean}|undefined {

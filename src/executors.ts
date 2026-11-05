@@ -13,12 +13,12 @@ export interface ReminderBackend {list():Reminder[];add(title:string,due:string)
 export const builtinTools:Tool[]=[
  {name:'reminders.list',effect:'read'},
  {name:'reminders.add',effect:'write-local',inverse:'reminders.cancel'},
- {name:'reminders.cancel',effect:'write-local',inverse:'reminders.restore'},
+ {name:'reminders.cancel',effect:'write-local',inverse:'reminders.restore',removes:true},
  {name:'reminders.restore',effect:'write-local',inverse:'reminders.cancel'},
  {name:'memory.recall',effect:'read'},
  // A new fact is only stored after the owner approves its card: Misato never writes memory on its own.
  {name:'memory.remember',effect:'write-local',inverse:'memory.forget',owner:true},
- {name:'memory.forget',effect:'write-local'},
+ {name:'memory.forget',effect:'write-local',removes:true},
  // Only the brief and Instrumentality schedules: local, reversible by setting the previous values back.
  {name:'settings.schedule',effect:'write-local',inverse:'settings.schedule'},
  // F-036 slice 3b: one action on another base. Owner-only for now (always a card); that base's own gate reviews it again.

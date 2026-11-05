@@ -5,7 +5,8 @@ export type Stage='prototype'|'test'|'production';
 export type Trust='trusted'|'tainted';
 export type Executor='eva-00'|'eva-01'|'eva-02'|'eva-03';
 /** `owner`: every call reaches the owner (Pattern Blue) whatever the Scrolls say, e.g. a new fact in memory (F-022). */
-export interface Tool {name:string;effect:Effect;inverse?:string;owner?:true}
+/** `removes`: the action cancels or forgets something (B-009); it may be Green (undoable) but always gets Casper's intent check. */
+export interface Tool {name:string;effect:Effect;inverse?:string;owner?:true;removes?:true}
 /** The Scrolls: owner rules. Unknown keys are rejected so a typo cannot silently relax a rule. */
 export interface Policy {deny:string[];blue:string[];syncThreshold:number;maxRejects:number;budget:number}
 export interface Action {tool:string;args:Record<string,unknown>;trust:Trust;stage:Stage;cost:number;proactive?:boolean}
@@ -27,6 +28,8 @@ export function patternOf(effect:Effect,trust:Trust,tool:string,policy:Policy,ow
  if(ownerOnly||effect==='irreversible'||effect==='physical'||policy.blue.includes(tool)||(trust==='tainted'&&!local(effect)))return 'blue';
  return local(effect)?'green':'orange';
 }
+/** Casper checks intent for anything not Green, and for every action that removes something, Green or not (B-009). */
+export function intentChecked(pattern:Pattern,tool:Tool|undefined):boolean {return pattern!=='green'||tool?.removes===true;}
 /** EVA-00 shadow, EVA-01 bounded, EVA-02 production, EVA-03 quarantine for tainted local work. */
 export function executorOf(action:Action,effect:Effect):Executor {
  if(action.trust==='tainted'&&local(effect))return 'eva-03';
@@ -48,7 +51,7 @@ export function balthasar(action:Action,effect:Effect,executor:Executor,spent:nu
 export function ballot(action:Action,tool:Tool|undefined,policy:Policy,spent:number,casper?:Verdict,extras:Verdict[]=[]):Ballot {
  const effect=tool?.effect ?? 'irreversible';const pattern=patternOf(effect,action.trust,action.tool,policy,tool?.owner===true);const executor=executorOf(action,effect);
  const verdicts=[melchior(action,effect,policy),balthasar(action,effect,executor,spent,policy)];
- const needsCasper=pattern!=='green';
+ const needsCasper=intentChecked(pattern,tool);
  if(needsCasper&&casper)verdicts.push({...casper,seat:'casper'});
  verdicts.push(...extras.map(v=>({...v,seat:'extra:'+v.seat})));
  const inputs:Record<string,number>={effect:effectFactor[effect],stage:stageFactor[action.stage]};
