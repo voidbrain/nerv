@@ -5,7 +5,7 @@ import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'n
 import { fileURLToPath } from 'node:url';
 import { Store } from './store.ts';
 import { makeServer } from './server.ts';
-import { setKajiOffers, dataHome, databasePath, initialize, isTelegramToken, pinKajiRoot, telegramTokenPath, readConfig, readModelKey, readScrolls, readTelegramToken, readToken, setBase, setting, type Base } from './config.ts';
+import { setKajiOffers, setKajiSeat, dataHome, databasePath, initialize, isTelegramToken, pinKajiRoot, telegramTokenPath, readConfig, readModelKey, readScrolls, readTelegramToken, readToken, setBase, setting, type Base } from './config.ts';
 import { TelegramApi, TelegramChannel, decisionText, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
 import { composeBrief, gatherBrief } from './brief.ts';
 import { KajiLink } from './kaji-link.ts';
@@ -223,6 +223,15 @@ try {
           const root=await unlock();new Registry(local().db,root.publicKey).add(signRecord(root.privateKey,{kind:'revoke',serial:registry.nextSerial(),baseId:id,publicKey:entry.publicKey,issued:new Date().toISOString()}));
           console.log(`Revoked ${id}: its key is refused from now on; re-enrolling it needs a new base key.`);
         }
+        else if(sub==='seat'){
+          // Phase 2: how another base's Casper votes on this base's actions. shadow: shown, never counted; veto: may stop it; off.
+          const [id,mode]=[(args[1] ?? '').toUpperCase(),args[2]];const seats=config.kaji?.seats ?? {};
+          if(!id){const others=registry.bases().filter(b=>b.status==='enrolled'&&b.publicKey!==me);console.log(others.length?others.map(b=>`${b.baseId.padEnd(8)} ${b.name.padEnd(16)} ${seats[b.baseId] ?? 'shadow'}`).join('\n'):'No other base enrolled.');break;}
+          if(!['shadow','veto','off'].includes(mode ?? ''))throw new Error('Usage: kaji seat BASE-ID shadow|veto|off');
+          if(!registry.bases().some(b=>b.baseId===id&&b.status==='enrolled'))throw new Error('No enrolled base with that id (see kaji list).');
+          setKajiSeat(home,id,mode as 'shadow'|'veto'|'off');
+          console.log(mode==='veto'?`${id}'s Casper now votes on this base's actions, veto-only: its reject stops an action, its approve adds nothing.`:mode==='shadow'?`${id}'s Casper votes in shadow: shown on cards, never counted.`:`${id}'s Casper is not asked.`);
+        }
         else if(sub==='offer'){
           // Slice 3b: the actions this base lets the main base run here; each still passes this base's own gate.
           const names=args.slice(1);const offerable=builtinTools.map(t=>t.name).filter(n=>n!=='kaji.run');
@@ -261,7 +270,7 @@ try {
           const reg=new Registry(local().db,bundle.root);let added=0;for(const r of bundle.records)if(reg.add(r)==='added')added++;
           console.log(`Imported ${added} new record(s); ${reg.bases().filter(b=>b.status==='enrolled').length} base(s) enrolled.`);
         }
-        else throw new Error('Usage: kaji enrol | revoke | main [BASE-ID] | offer [ACTION…|none] | list | export [FILE] | import FILE --root FINGERPRINT');
+        else throw new Error('Usage: kaji enrol | revoke | main [BASE-ID] | offer [ACTION…|none] | seat [BASE-ID shadow|veto|off] | list | export [FILE] | import FILE --root FINGERPRINT');
         break;
       }
       case 'brief':console.log(composeBrief({now:new Date(),timeZone:config.timeZone,language:config.language,base:config.base.name,...await gatherBrief(local(),new Date(Date.now()-86_400_000))}));break;
@@ -314,7 +323,15 @@ try {
           // Slice 3b, on the base asked: only actions this base offers, once per id, through this base's own gate.
           offers:()=>live().kaji?.offers ?? [],onOffers:(id,tools)=>runtime.notePeerOffers(id,tools),
           onRun:(from,item)=>runtime.runFromPeer(from,item,live().kaji?.offers ?? []),
+          // Phase 2, on the base asked: this base's Casper votes on the main base's action.
+          onVerdict:(_from,ask)=>runtime.peerVerdict(ask),
           onChat:async(from,message,conversation)=>({...await runtime.chat(message,`kaji:${from.toLowerCase()}${conversation?'-'+conversation:''}`),base:{id:config.base.id,name:config.base.name}})});
+        // Phase 2, on the main base: every online base's Casper votes too, veto-only, shadow unless kaji seat BASE veto.
+        if(kaji){const link=kaji;runtime.setPeerSeats(async ask=>{
+          const main=await runtime.mainBase();if(!main?.self)return [];const seats=live().kaji?.seats ?? {};
+          const peers=(await runtime.bases()).filter(b=>!b.self&&b.online&&b.status==='enrolled'&&seats[b.baseId]!=='off');
+          return Promise.all(peers.map(async b=>({seat:b.baseId,...await link.verdict(b.baseId,ask,MODEL_TIMEOUT_MS),shadow:seats[b.baseId]!=='veto'})));
+        });}
         // Slice 3b, on the main base: actions queued by kaji.run go out over the line, each until it reached its base.
         if(kaji){const link=kaji;runtime.startOutbox((base,item)=>link.run(base,item,MODEL_TIMEOUT_MS*2));}
         // Dispatch, on the other bases: while the main base is online, requests go to its Misato (one planner, one memory).

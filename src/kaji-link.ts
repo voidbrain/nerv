@@ -61,6 +61,15 @@ export function sanitizeOffers(value:unknown):string[]|undefined {
  if(!Array.isArray(value)||value.length>20||value.some(v=>typeof v!=='string'||!/^[a-z]+\.[a-z]+$/.test(v)))return undefined;
  return [...new Set(value as string[])].filter(t=>t!=='kaji.run');
 }
+/** What the main base asks another base's Casper about (F-036 phase 2): the action and its request, never a grant. */
+export interface VerdictAsk {request:string;tool:string;args:Record<string,unknown>;effect:string}
+export interface PeerVerdict {vote:'approve'|'reject'|'abstain';reason:string;confidence?:number}
+/** A peer's vote, kept only when well-formed; its reason is short display text. */
+export function sanitizeVerdict(value:unknown):PeerVerdict|undefined {
+ if(!value||typeof value!=='object'||Array.isArray(value))return undefined;const v=value as Record<string,unknown>;
+ if(!['approve','reject','abstain'].includes(v.vote as string)||typeof v.reason!=='string')return undefined;
+ return {vote:v.vote as PeerVerdict['vote'],reason:v.reason.replace(/[\u0000-\u001f\u007f]/g,' ').slice(0,300),...(typeof v.confidence==='number'&&v.confidence>=0&&v.confidence<=1?{confidence:v.confidence}:{})};
+}
 /** One action the main base asks another base to run, by an id that base remembers (a resend returns the first result). */
 export interface RunItem {id:string;request:string;tool:string;args:Record<string,unknown>}
 /** The main base's answer to a dispatched request: the reply Misato gave there (its sortie and cards live there). */
@@ -92,10 +101,11 @@ export class KajiLink {
  private every=HEARTBEAT_MS;
  constructor(options:{baseId:string;key:KeyObject;publicKey:string;registry:RegistryPort;log?:(line:string)=>void;health?:()=>Promise<BaseHealth>;onHealth?:(baseId:string,health:HeardHealth)=>void;
   onRelay?:(from:string,relay:Relay)=>Promise<boolean>;onChat?:(from:string,message:string,conversation?:string)=>Promise<DispatchedReply>;
-  offers?:()=>string[];onOffers?:(baseId:string,offers:string[])=>void;onRun?:(from:string,item:RunItem)=>Promise<unknown>;onDecide?:(approvalId:string,decision:'approve'|'reject')=>Promise<string>}) {
+  offers?:()=>string[];onOffers?:(baseId:string,offers:string[])=>void;onRun?:(from:string,item:RunItem)=>Promise<unknown>;onVerdict?:(from:string,ask:VerdictAsk)=>Promise<PeerVerdict|null>;onDecide?:(approvalId:string,decision:'approve'|'reject')=>Promise<string>}) {
   this.baseId=options.baseId;this.key=options.key;this.publicKey=options.publicKey;this.port=options.registry;this.log=options.log ?? (l=>console.error(l));
-  this.health=options.health;this.onHealth=options.onHealth;this.onRelay=options.onRelay;this.onDecide=options.onDecide;this.onChat=options.onChat;this.offers=options.offers;this.onOffers=options.onOffers;this.onRun=options.onRun;
+  this.health=options.health;this.onHealth=options.onHealth;this.onRelay=options.onRelay;this.onDecide=options.onDecide;this.onChat=options.onChat;this.offers=options.offers;this.onOffers=options.onOffers;this.onRun=options.onRun;this.onVerdict=options.onVerdict;
  }
+ private readonly onVerdict:((from:string,ask:VerdictAsk)=>Promise<PeerVerdict|null>)|undefined;
  private readonly offers:(()=>string[])|undefined;private readonly onOffers:((baseId:string,offers:string[])=>void)|undefined;private readonly onRun:((from:string,item:RunItem)=>Promise<unknown>)|undefined;
  private readonly onChat:((from:string,message:string,conversation?:string)=>Promise<DispatchedReply>)|undefined;
  private readonly onRelay:((from:string,relay:Relay)=>Promise<boolean>)|undefined;private readonly onDecide:((approvalId:string,decision:'approve'|'reject')=>Promise<string>)|undefined;
@@ -149,6 +159,13 @@ export class KajiLink {
     if(typeof c.message!=='string'||!c.message.trim()||c.message.length>4000||(c.conversation!==undefined&&(typeof c.conversation!=='string'||!/^[a-z]{1,20}$/.test(c.conversation)))){reply(400,{error:'invalid request'});return;}
     if(await this.port.main?.()!==this.baseId||!this.onChat){reply(409,{error:'not the main base'});return;}
     reply(200,await this.onChat(from,c.message,c.conversation as string|undefined));return;
+   }
+   // F-036 phase 2: the main base asks this base's Casper for a vote on one of its actions (veto-only there).
+   if(req.method==='POST'&&req.url==='/kaji/verdict'){
+    const a=JSON.parse(body) as {request?:unknown;tool?:unknown;args?:unknown;effect?:unknown};
+    if(typeof a.request!=='string'||a.request.length>4000||typeof a.tool!=='string'||!/^[a-z]+\.[a-z]+$/.test(a.tool)||!a.args||typeof a.args!=='object'||Array.isArray(a.args)||typeof a.effect!=='string'){reply(400,{error:'invalid ask'});return;}
+    if(await this.port.main?.()!==from||!this.onVerdict){reply(403,{error:'only the main base asks for votes here'});return;}
+    reply(200,{verdict:await this.onVerdict(from,{request:a.request,tool:a.tool,args:a.args as Record<string,unknown>,effect:a.effect})});return;
    }
    // F-036 slice 3b: one action the main base asks this base to run (only the main base may ask; this base's gate decides).
    if(req.method==='POST'&&req.url==='/kaji/run'){
@@ -205,6 +222,12 @@ export class KajiLink {
   catch(e){const text=e instanceof Error?e.message:'error';const code=(e as {cause?:{code?:string}}).cause?.code;
    if(/refused \((400|403|409)\)/.test(text))return {reached:true,refused:text};
    return {reached:false,...(code?{refused:code}:{})};}
+ }
+ /** Asks one base's Casper for a vote; anything but a well-formed vote in time is an abstain, so a slow base never blocks. */
+ async verdict(baseId:string,ask:VerdictAsk,timeoutMs:number):Promise<PeerVerdict> {
+  const peer=(await this.port.bases()).find(b=>b.baseId===baseId&&b.status==='enrolled');if(!peer)return {vote:'abstain',reason:'not an enrolled base'};
+  try{const v=sanitizeVerdict(((await this.call(peer,'POST','/kaji/verdict',ask,timeoutMs)) as {verdict?:unknown}).verdict);return v ?? {vote:'abstain',reason:'no verdict (no local model there, or an unreadable answer)'};}
+  catch(e){return {vote:'abstain',reason:e instanceof Error&&/timeout|aborted/i.test(e.message)?'did not answer in time':'could not be reached'};}
  }
  /** Passes the owner's tap on a relayed card back to the base that owns the card; its outcome text comes back. */
  async decide(baseId:string,approvalId:string,decision:'approve'|'reject'):Promise<string> {
