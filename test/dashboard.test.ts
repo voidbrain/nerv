@@ -152,12 +152,13 @@ test('on wide screens the page itself has nothing to scroll: the body is pinned 
  assert.match(wide,/html \{ height:100%; overflow:hidden; \} body \{ position:fixed; inset:0; overflow:clip; \}/);
  assert.doesNotMatch(wide,/html,body \{ height:100%; \} body \{ overflow:hidden; \}/,'overflow hidden alone let the page stay scrolled, header cut off');
 });
-test('the CRT effect is a working tube, not interference: static scanlines under 12%, a vignette, a faint rolling band; motion off when reduced',async()=>{
+test('the CRT effect: the original static scanlines, a vignette only at the borders, a slight page flicker, a thin dark rolling line; motion off when reduced (F-053)',async()=>{
  const {readFileSync}=await import('node:fs');const html=readFileSync('web/public/dashboard/index.html','utf8');
- const after=/body\.theme-eva\.crt-on::after \{([\s\S]*?)\}/.exec(html)![1]!;
- const lines=/linear-gradient\(rgba\(0,0,0,0\) 50%,rgba\(0,0,0,([.0-9]+)\) 50%\)/.exec(after)!;assert.ok(Number(lines[1])>=0.05&&Number(lines[1])<=0.12,'scanlines 5–12 %');
- assert.match(after,/radial-gradient/,'a static vignette');assert.doesNotMatch(after,/background-position|crt-roll/,'the scanlines themselves never move');
- const flicker=/@keyframes crt-flicker \{([^\n]*)\}/.exec(html)![1]!;for(const o of flicker.matchAll(/opacity:([.0-9]+)/g))assert.ok(Number(o[1])>=0.95,'flicker under 5 %');
- assert.match(html,/animation:crt-band 12s linear infinite/,'one band every 12 s');
- assert.match(html,/@media \(prefers-reduced-motion:reduce\) \{ body\.theme-eva\.crt-on::after, body\.theme-eva\.crt-on::before \{ animation:none; \}/);
+ const after=/body\.theme-eva\.crt-on::after \{([^\n]*)\}/.exec(html)![1]!;
+ assert.match(after,/background:linear-gradient\(rgba\(0,0,0,0\) 50%,rgba\(0,0,0,\.22\) 50%\); background-size:100% 4px;/,'the owner\'s scanlines, unchanged');
+ assert.doesNotMatch(after,/animation|radial-gradient/,'static, and no vignette across the middle');assert.match(after,/box-shadow:inset 0 0 \d+px/,'vignette along the borders');
+ const band=/body\.theme-eva\.crt-on::before \{([^\n]*)\}/.exec(html)![1]!;assert.match(band,/height:6px;/);assert.match(band,/rgba\(0,0,0,/,'a dark line, not a bright band');
+ for(const o of /@keyframes crt-flicker \{([^\n]*)\}/.exec(html)![1]!.matchAll(/opacity:([.0-9]+)/g))assert.ok(Number(o[1])>=0.9,'a slight flicker, never a flash');
+ assert.match(html,/@media \(prefers-reduced-motion:reduce\) \{ body\.theme-eva\.crt-on \.wrap, body\.theme-eva\.crt-on::before \{ animation:none; \}/);
+ assert.match(html,/<span data-l="melons">Marduk Institute · Pilots<\/span>/);
 });

@@ -19,17 +19,15 @@ body.theme-simple { --radius:6px; --font:ui-monospace,SFMono-Regular,Menlo,Monac
 * { box-sizing:border-box; }
 html,body { margin:0; }
 body { background:var(--bg); color:var(--text); font:12px/1.4 var(--font); padding:10px; }
-/* CRT (Eva, opt-in), like a working tube: static scanlines at ~9%, a static vignette, a ~2% irregular brightness flicker
-   and one wide faint band rolling down every 12 s. The scanlines never move (moving lines read as interference), no colour
-   split or jitter (they blur the text); with reduced motion only the static layers stay. */
-body.theme-eva.crt-on::after { content:""; position:fixed; inset:0; pointer-events:none; z-index:50;
-  background:radial-gradient(ellipse at center,rgba(0,0,0,0) 62%,rgba(0,0,0,.28) 100%),linear-gradient(rgba(0,0,0,0) 50%,rgba(0,0,0,.09) 50%);
-  background-size:100% 100%,100% 3px; animation:crt-flicker 7s steps(1,end) infinite; }
-body.theme-eva.crt-on::before { content:""; position:fixed; left:0; right:0; top:0; height:28vh; pointer-events:none; z-index:51;
-  background:linear-gradient(rgba(255,255,255,0),rgba(255,255,255,.035) 50%,rgba(255,255,255,0)); transform:translateY(-30vh); animation:crt-band 12s linear infinite; }
-@keyframes crt-flicker { 0%,100% { opacity:1 } 23% { opacity:.97 } 24% { opacity:1 } 61% { opacity:.98 } 62% { opacity:1 } 88% { opacity:.975 } 89% { opacity:1 } }
-@keyframes crt-band { 0% { transform:translateY(-30vh) } 70%,100% { transform:translateY(105vh) } }
-@media (prefers-reduced-motion:reduce) { body.theme-eva.crt-on::after, body.theme-eva.crt-on::before { animation:none; } body.theme-eva.crt-on::before { display:none; } }
+/* CRT (Eva, opt-in), owner's tuning 2026-11-05: the original static scanlines (22%, 4 px, never moving), a vignette only
+   along the very borders, a slight irregular flicker of the page, and one thin soft dark line rolling down every 12 s.
+   No colour split or jitter (they blur the text); with reduced motion only the static layers stay. */
+body.theme-eva.crt-on::after { content:""; position:fixed; inset:0; pointer-events:none; z-index:50; background:linear-gradient(rgba(0,0,0,0) 50%,rgba(0,0,0,.22) 50%); background-size:100% 4px; box-shadow:inset 0 0 24px 4px rgba(0,0,0,.6); }
+body.theme-eva.crt-on::before { content:""; position:fixed; left:0; right:0; top:0; height:6px; pointer-events:none; z-index:51; background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.28),rgba(0,0,0,0)); transform:translateY(-10px); animation:crt-band 12s linear infinite; }
+body.theme-eva.crt-on .wrap { animation:crt-flicker 6s steps(1,end) infinite; }
+@keyframes crt-flicker { 0%,100% { opacity:1 } 17% { opacity:.93 } 18% { opacity:1 } 52% { opacity:.95 } 53.5% { opacity:1 } 81% { opacity:.92 } 82% { opacity:.97 } 83% { opacity:1 } }
+@keyframes crt-band { 0% { transform:translateY(-10px) } 60%,100% { transform:translateY(101vh) } }
+@media (prefers-reduced-motion:reduce) { body.theme-eva.crt-on .wrap, body.theme-eva.crt-on::before { animation:none; } body.theme-eva.crt-on::before { display:none; } }
 button,input,select { font:inherit; }
 .wrap { max-width:1720px; margin:0 auto; display:flex; flex-direction:column; gap:8px; }
 .panel { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); min-width:0; }
@@ -440,7 +438,7 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
       </section>
 
       <section class="panel">
-        <div class="hdr"><span data-l="melons">Kaji's watermelons · pilot trust</span><span class="sub">prototype → test → production</span></div>
+        <div class="hdr"><span data-l="melons">Marduk Institute · Pilots</span><span class="sub">prototype → test → production</span></div>
         <div class="pad list" id="melons"></div>
       </section>
 
