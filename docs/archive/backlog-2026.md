@@ -610,3 +610,37 @@ Closed records in closing-date order. Dated evidence, not current status.
 </details>
 
 ---
+
+### F-041
+
+**Consultants by topic, offered by any base (the 3D expert on Tabgha)**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟡 Medium | ~0% |
+
+💻 **→ Human action required: No**<br />None: superseded by F-045 and closed.
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-05: a base (Tabgha) has a 3D expert others should use when it fits; today the only consultant is one general local model on the main base (F-025). |
+| **Reproduce** | Offer a consultant on Tabgha for 3D printing; ask Aoba a 3D printing question; look for its advice in Comms. |
+| **Check** | A consultant declares a name, topics and keywords and its model, on any base; bases offer theirs first-hand in the heartbeat and the main base keeps a catalogue; a request matching a topic's keywords brings in that topic's consultant, the general consultant stays the default when none matches; at most one consultant per topic is asked by default, chosen by the owner's pin, else the main base's own, else the best record (answered in time, gave advice), with the next one as fallback when it does not answer; "ask both" per topic gives Misato every advice, each labelled with its source; Comms shows which consultant advised and from which base; advice stays data, never a vote or an action, and local-only rules hold (a peer consultant sees only what the Scrolls allow to leave the main base). |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-05, superseded by [F-045](../BACKLOG.md#f-045) (owner, 2026-11-05: consultants become pilots asked only for advice); its rules are kept there. Nothing was implemented here. Planned 2026-11-05 (owner decisions above). Builds on the local consultant (F-025, [PR #92](https://github.com/voidbrain/nerv/pull/92)) and the Kaji line's offers (F-036). Later: experts that also act (their actions offered as in F-036 slice 3b) and agents running on the offering base.
+
+**Estimates:** No remaining effort here (superseded); ~0% implemented. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner request 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
