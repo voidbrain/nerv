@@ -353,7 +353,7 @@
     if (e.target.id !== "lilith-form") return; e.preventDefault(); const input = document.getElementById("lilith-new"); const text = input.value.trim();
     if (text) { input.value = ""; memoryAction("memory", { method:"POST", body:JSON.stringify({ text }) }, "Remembered: " + text); }
   });
-  // The sortie detail, live: who started it and its status (pilots are skills, Misato is the planner), the plan when there
+  // The sortie detail, live: who started it and its status (Misato plans; a pilot advises, with its own skills and trust stage), the plan when there
   // is one, and the Spear only while the sortie is open; no battery line while every route is local and free.
   const baseDetail = window.renderDetail;
   window.renderDetail = function (s) {
