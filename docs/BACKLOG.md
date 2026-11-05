@@ -14,7 +14,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 |:---:|---|---|---|---|
 | 🟡 | 🔺 P1 | Implemented | 🟢 Small | ~90% |
 
-💻 **→ Human action required: No**<br />Close once the windows job passes in minutes on this PR and on main.
+💻 **→ Human action required: No**<br />Close once the windows job passes in minutes on #95 and on main.
 
 | | |
 |---|---|
@@ -25,7 +25,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Fixed in [PR #95](https://github.com/voidbrain/nerv/pull/95): the Kaji link sends each request with `node:http` and no connection pool (`agent:false`), so the connection closes when the answer is in (errors keep fetch's shape, so "never sent" and "may have arrived" stay distinguishable); the test fakes close their open connections too (after the `KajiLink.stop()` fix in [PR #92](https://github.com/voidbrain/nerv/pull/92)); every CI job has a time limit (validate 20, windows 25, native-macos 30 minutes). Checked locally: suite 129 pass in 12 s; the windows job result on this PR closes it.
+**Next action / closure evidence:** Fixed in [PR #95](https://github.com/voidbrain/nerv/pull/95): the Kaji link sends each request with `node:http` and no connection pool (`agent:false`), so the connection closes when the answer is in (errors keep fetch's shape, so "never sent" and "may have arrived" stay distinguishable); the test fakes close their open connections too (after the `KajiLink.stop()` fix in [PR #92](https://github.com/voidbrain/nerv/pull/92)); every CI job has a time limit (validate 20, windows 25, native-macos 30 minutes). Checked locally: suite 129 pass in 12 s; the windows job result on #95 closes it.
 
 **Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
 
