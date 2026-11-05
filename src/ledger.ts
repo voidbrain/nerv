@@ -35,6 +35,10 @@ export const argsHash=(args:Record<string,unknown>)=>createHash('sha256').update
 const iso=(now:Date,plus=0)=>new Date(now.getTime()+plus).toISOString();
 export class Ledger {
  readonly db:DatabaseSync;readonly tools:ReadonlyMap<string,Tool>;readonly policy:Policy;readonly grantTtlMs:number;readonly approvalTtlMs:number;
+ /** Granted MCP tools (F-021), refreshed from config by the scheduler before each preview and action. */
+ private external=new Map<string,Tool>();
+ setExternal(tools:Tool[]):void {this.external=new Map(tools.map(t=>[t.name,t]));}
+ isExternal(tool:string):boolean {return this.external.has(tool)&&!this.tools.has(tool);}
  constructor(db:DatabaseSync,options:{tools?:Tool[];policy?:Policy;grantTtlMs?:number;approvalTtlMs?:number}={}) {
   this.db=db;this.tools=new Map((options.tools ?? []).map(t=>[t.name,t]));this.policy=validatePolicy(options.policy ?? defaultPolicy);
   this.grantTtlMs=options.grantTtlMs ?? 60_000;this.approvalTtlMs=options.approvalTtlMs ?? 3_600_000;
@@ -56,7 +60,7 @@ export class Ledger {
   return this.tx(()=>{
    const sortie=this.db.prepare('SELECT * FROM sorties WHERE id=?').get(sortieId) as {trust:Trust;status:string;rejects:number;spent:number}|undefined;
    if(!sortie||sortie.status!=='open')throw new Error('Sortie is not open.');
-   const result=ballot({tool:p.tool,args:p.args,trust:sortie.trust,stage:p.stage,cost:p.cost ?? 0},this.tools.get(p.tool),this.policy,sortie.spent,clampVerdict(p.casper),p.extras?.map(v=>clampVerdict(v)!));
+   const result=ballot({tool:p.tool,args:p.args,trust:sortie.trust,stage:p.stage,cost:p.cost ?? 0},(this.tools.get(p.tool) ?? this.external.get(p.tool)),this.policy,sortie.spent,clampVerdict(p.casper),p.extras?.map(v=>clampVerdict(v)!));
    if(result.outcome==='reject'&&sortie.rejects+1>this.policy.maxRejects)Object.assign(result,{outcome:'approval',reason:`Reject limit reached (${result.reason}); the owner decides.`});
    const actionId=randomUUID();this.db.prepare('INSERT INTO actions VALUES(?,?,?,?,?,?)').run(actionId,sortieId,p.tool,JSON.stringify(p.args),JSON.stringify(result),iso(now));
    this.event(sortieId,actionId,'ballot',result,now);
@@ -73,7 +77,7 @@ export class Ledger {
  preview(sortieId:string,tool:string):{pattern:Pattern;effect:Ballot['effect'];intent:boolean} {
   const sortie=this.db.prepare('SELECT trust,status FROM sorties WHERE id=?').get(sortieId) as {trust:Trust;status:string}|undefined;
   if(!sortie||sortie.status!=='open')throw new Error('Sortie is not open.');
-  const t=this.tools.get(tool);const effect=t?.effect ?? 'irreversible';const pattern=patternOf(effect,sortie.trust,tool,this.policy,t?.owner===true);return {pattern,effect,intent:intentChecked(pattern,t)};
+  const t=this.tools.get(tool) ?? this.external.get(tool);const effect=t?.effect ?? 'irreversible';const pattern=patternOf(effect,sortie.trust,tool,this.policy,t?.owner===true);return {pattern,effect,intent:intentChecked(pattern,t)};
  }
  /** The reviewed action behind a grant, and whether the grant is still unused. Grant IDs stay inside this process. */
  grantAction(grantId:string):{sortieId:string;actionId:string;tool:string;args:Record<string,unknown>;used:boolean}|undefined {

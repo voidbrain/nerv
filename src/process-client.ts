@@ -10,14 +10,14 @@ import { randomUUID } from 'node:crypto';
 import { MAX_FRAME_BYTES,READY,validateParams,authorize,type Method,type Principal,RpcFault } from './rpc.ts';
 export class ProcessClient {
  readonly child:ChildProcess;
- readonly role:'nervous'|'brain';
+ readonly role:'nervous'|'brain'|'tools';
  private timeoutMs:number;
  private pending=new Map<string,{resolve:(v:unknown)=>void;reject:(e:Error)=>void;timer:NodeJS.Timeout}>();
  private closed=false;
  /** Settles once the child says it is ready (READY), or when it exits or fails to start. A call's own timer starts only
      after this, so a slow start-up (a busy machine, the first run after boot) never counts against the call (B-007). */
  private readonly ready:Promise<boolean>;private isReady=false;private readonly startupMs:number;
- constructor(entry:URL,args:string[],role:'nervous'|'brain',timeoutMs=5000,startupMs=STARTUP_MS) {
+ constructor(entry:URL,args:string[],role:'nervous'|'brain'|'tools',timeoutMs=5000,startupMs=STARTUP_MS) {
   this.role=role;this.timeoutMs=timeoutMs;this.startupMs=startupMs;
   let settle:(ok:boolean)=>void=()=>{};this.ready=new Promise<boolean>(done=>{settle=done;});
   // Explicit small environment: no provider/API/root token passed to children. Same-user process isolation is NOT a sandbox.
