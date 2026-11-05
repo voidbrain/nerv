@@ -17,7 +17,7 @@ let serial=0;const rec=(body:Omit<RegistryBody,'serial'|'issued'>)=>signRecord(r
 async function casperSays(vote:'approve'|'reject'){
  const s=httpServer((req,res)=>{let raw='';req.on('data',c=>raw+=c).on('end',()=>{res.setHeader('content-type','application/json');
   res.end(JSON.stringify({choices:[{message:{content:JSON.stringify({vote,reason:vote==='approve'?'Matches the request.':'This does not match what the owner asked.',confidence:0.9})},finish_reason:'stop'}]}));});});
- await new Promise<void>(d=>s.listen(0,'127.0.0.1',d));return {url:`http://127.0.0.1:${(s.address() as {port:number}).port}/v1`,close:()=>new Promise<void>(d=>s.close(()=>d()))};
+ await new Promise<void>(d=>s.listen(0,'127.0.0.1',d));return {url:`http://127.0.0.1:${(s.address() as {port:number}).port}/v1`,close:()=>new Promise<void>(d=>{s.close(()=>d());s.closeAllConnections();})};
 }
 test('peer seats are veto-only: a shadow reject is shown and never counted, a veto reject stops the action, an approve adds nothing',()=>{
  const action={tool:'reminders.cancel',args:{id:'x'},trust:'trusted' as const,stage:'production' as const,cost:0};

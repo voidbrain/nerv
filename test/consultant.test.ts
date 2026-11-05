@@ -12,7 +12,7 @@ async function fake(advice:string,script:string[]){
   else if(sys.startsWith('You are Casper'))out='{"vote":"approve","reason":"Matches.","confidence":0.9}';
   else{asked.misato.push(r.messages.at(-1)!.content);out=script.shift() ?? '{"reply":"ok"}';}
   res.setHeader('content-type','application/json');res.end(JSON.stringify({model:r.model,choices:[{message:{content:out},finish_reason:'stop'}]}));});});
- await new Promise<void>(d=>s.listen(0,'127.0.0.1',d));return {url:`http://127.0.0.1:${(s.address() as {port:number}).port}/v1`,asked,close:()=>new Promise<void>(d=>s.close(()=>d()))};
+ await new Promise<void>(d=>s.listen(0,'127.0.0.1',d));return {url:`http://127.0.0.1:${(s.address() as {port:number}).port}/v1`,asked,close:()=>new Promise<void>(d=>{s.close(()=>d());s.closeAllConnections();})};
 }
 async function runtimeWith(url:string,consultant:boolean,scrolls?:object){
  const {Runtime}=await import('../src/runtime.ts');const home=mkdtempSync(join(tmpdir(),'nerv-consult-'));
