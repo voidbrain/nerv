@@ -49,7 +49,8 @@ export function baseKey(home:string):{privateKey:KeyObject;publicKey:string} {
  if(!existsSync(priv)){const k=generateKeyPairSync('ed25519');writeFileSync(priv,k.privateKey.export({type:'pkcs8',format:'pem'}),{mode:0o600});chmodSync(priv,0o600);writeFileSync(pub,spki(k.publicKey)+'\n',{mode:0o644});}
  return {privateKey:createPrivateKey(readFileSync(priv,'utf8')),publicKey:readFileSync(pub,'utf8').trim()};
 }
-export type RecordKind='enrol'|'revoke';
+/** enrol and revoke a base; main names the owner's main base (F-036 phase 2: Aoba there is the one channel). */
+export type RecordKind='enrol'|'revoke'|'main';
 export interface RegistryBody {kind:RecordKind;serial:number;baseId:string;name?:string;publicKey?:string;address?:string;issued:string}
 export interface SignedRecord {body:RegistryBody;signature:string}
 export function signRecord(root:KeyObject,body:RegistryBody):SignedRecord {return {body,signature:sign(null,Buffer.from(canonical(body)),root).toString('base64')};}
@@ -74,7 +75,7 @@ export function enrolmentArgs(id:string|undefined,name:string|undefined,first:st
  return {baseId,name:name.trim(),publicKey:key==='self'?selfKey:key,address};
 }
 function checkBody(b:RegistryBody):void {
- if(!b||!['enrol','revoke'].includes(b.kind)||!Number.isSafeInteger(b.serial)||b.serial<1||!BASE_ID.test(b.baseId)||!Number.isFinite(Date.parse(b.issued)))throw new Error('Malformed registry record.');
+ if(!b||!['enrol','revoke','main'].includes(b.kind)||!Number.isSafeInteger(b.serial)||b.serial<1||!BASE_ID.test(b.baseId)||!Number.isFinite(Date.parse(b.issued)))throw new Error('Malformed registry record.');
  if(b.kind==='enrol'){if(typeof b.name!=='string'||!b.name.trim()||b.name.length>40||typeof b.address!=='string'||!/^[a-z0-9.:-]{1,253}$/i.test(b.address)||typeof b.publicKey!=='string')throw new Error('An enrolment needs a name, an address and a public key.');publicKeyFrom(b.publicKey);}
 }
 export interface BaseEntry {baseId:string;name:string;publicKey:string;address:string;fingerprint:string;status:'enrolled'|'revoked';serial:number}
@@ -101,9 +102,14 @@ export class Registry {
   const out=new Map<string,BaseEntry>();const revoked=new Set<string>();
   for(const {body:b} of this.records()){
    if(b.kind==='revoke')revoked.add(b.baseId+':'+(b.publicKey ?? '*'));
-   else{const cur=out.get(b.baseId);if(!cur||b.serial>cur.serial)out.set(b.baseId,{baseId:b.baseId,name:b.name!,publicKey:b.publicKey!,address:b.address!,fingerprint:fingerprint(b.publicKey!),status:'enrolled',serial:b.serial});}
+   else if(b.kind==='enrol'){const cur=out.get(b.baseId);if(!cur||b.serial>cur.serial)out.set(b.baseId,{baseId:b.baseId,name:b.name!,publicKey:b.publicKey!,address:b.address!,fingerprint:fingerprint(b.publicKey!),status:'enrolled',serial:b.serial});}
   }
   for(const e of out.values())if(revoked.has(e.baseId+':*')||revoked.has(e.baseId+':'+e.publicKey))e.status='revoked';
   return [...out.values()].sort((a,b)=>a.baseId.localeCompare(b.baseId));
+ }
+ /** The owner's main base: the newest main record, while that base is enrolled and not revoked. No election: unset until the owner names one. */
+ main():string|undefined {
+  const latest=this.records().filter(r=>r.body.kind==='main').sort((a,b)=>b.body.serial-a.body.serial)[0]?.body.baseId;
+  return latest&&this.bases().some(b=>b.baseId===latest&&b.status==='enrolled')?latest:undefined;
  }
 }

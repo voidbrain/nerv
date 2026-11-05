@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { Store } from './store.ts';
 import { makeServer } from './server.ts';
 import { dataHome, databasePath, initialize, isTelegramToken, pinKajiRoot, telegramTokenPath, readConfig, readModelKey, readScrolls, readTelegramToken, readToken, setBase, setting, type Base } from './config.ts';
-import { TelegramApi, TelegramChannel, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
+import { TelegramApi, TelegramChannel, decisionText, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
 import { composeBrief, gatherBrief } from './brief.ts';
 import { KajiLink } from './kaji-link.ts';
 import { ROOT_KEY_FILE, Registry, baseKey, createRootKey, enrolmentArgs, fingerprint, signRecord, unlockRootKey, type SignedRecord } from './kaji.ts';
@@ -219,9 +219,17 @@ try {
           const root=await unlock();new Registry(local().db,root.publicKey).add(signRecord(root.privateKey,{kind:'revoke',serial:registry.nextSerial(),baseId:id,publicKey:entry.publicKey,issued:new Date().toISOString()}));
           console.log(`Revoked ${id}: its key is refused from now on; re-enrolling it needs a new base key.`);
         }
+        else if(sub==='main'){
+          // The owner names the main base (F-036): Aoba there is the one channel while the line is up. Signed by the Key.
+          const id=(args[1] ?? '').toUpperCase();
+          if(!id){console.log(registry.main()?`Main base: ${registry.main()}`:'No main base named yet: kaji main BASE-ID (on the base that holds the Key).');break;}
+          if(!registry.bases().some(b=>b.baseId===id&&b.status==='enrolled'))throw new Error('No enrolled base with that id (see kaji list).');
+          const root=await unlock();new Registry(local().db,root.publicKey).add(signRecord(root.privateKey,{kind:'main',serial:registry.nextSerial(),baseId:id,issued:new Date().toISOString()}));
+          console.log(`Main base: ${id}. While it is online, the other bases send their cards, reminders and briefs through its Aoba and keep their own bots quiet.`);
+        }
         else if(sub==='list'||!sub){
           const bases=registry.bases();if(!config.kaji?.root)console.log('No root pinned yet: key init (main base) or kaji import --root FINGERPRINT.');
-          else console.log(`Root ${fingerprint(config.kaji.root)}\n`+(bases.length?bases.map(b=>`${b.baseId.padEnd(8)} ${b.name.padEnd(16)} ${b.address.padEnd(24)} ${b.status}${b.publicKey===me?'  (this base)':''}`).join('\n'):'No bases enrolled yet.'));
+          else {const main=registry.main();console.log(`Root ${fingerprint(config.kaji.root)}\n`+(bases.length?bases.map(b=>`${b.baseId.padEnd(8)} ${b.name.padEnd(16)} ${b.address.padEnd(24)} ${b.status}${b.publicKey===me?'  (this base)':''}${b.baseId===main?'  (main)':''}`).join('\n'):'No bases enrolled yet.'));}
         }
         else if(sub==='export'){const bundle=JSON.stringify({root:config.kaji?.root,records:registry.records()},null,2)+'\n';if(!config.kaji?.root)throw new Error('Nothing to export: no root pinned.');if(args[1]){writeFileSync(args[1],bundle);console.log(`Wrote ${registry.records().length} signed record(s) to ${args[1]}.`);}else process.stdout.write(bundle);}
         else if(sub==='import'){
@@ -240,7 +248,7 @@ try {
           const reg=new Registry(local().db,bundle.root);let added=0;for(const r of bundle.records)if(reg.add(r)==='added')added++;
           console.log(`Imported ${added} new record(s); ${reg.bases().filter(b=>b.status==='enrolled').length} base(s) enrolled.`);
         }
-        else throw new Error('Usage: kaji enrol | revoke | list | export [FILE] | import FILE --root FINGERPRINT');
+        else throw new Error('Usage: kaji enrol | revoke | main [BASE-ID] | list | export [FILE] | import FILE --root FINGERPRINT');
         break;
       }
       case 'brief':console.log(composeBrief({now:new Date(),timeZone:config.timeZone,language:config.language,base:config.base.name,...await gatherBrief(local(),new Date(Date.now()-86_400_000))}));break;
@@ -277,9 +285,14 @@ try {
         // launch = serve, then open the live dashboard signed in once the server listens.
         server.listen(config.port,'127.0.0.1',()=>{console.log(`NERV Agency ${config.base.id} · ${config.base.name}: http://127.0.0.1:${config.port} · ${config.language} · ${config.timeZone}`);if(command==='launch')void openPage(home,'/dashboard/',args.includes('--print')).catch(e=>console.error(e instanceof Error?e.message:'Could not open the dashboard.'));});running=true;
         // Aoba starts only when both the private bot token and the linked owner chat exist.
-        if(botToken&&config.telegram){aoba=new TelegramChannel({api:new TelegramApi(botToken,telegramBase()),store:runtime,chatId:config.telegram.chatId,statePath:join(home,'telegram-state.json'),brief:()=>{const c=live();return c.brief?{at:c.brief.at,timeZone:c.timeZone,language:c.language,base:c.base.name}:undefined;}});await aoba.start().then(()=>console.log('Aoba (Telegram): linked, listening.'),e=>console.error(`Aoba (Telegram) did not start: ${e instanceof Error?e.message:'error'}.`));}
+        if(botToken&&config.telegram){aoba=new TelegramChannel({api:new TelegramApi(botToken,telegramBase()),store:runtime,chatId:config.telegram.chatId,statePath:join(home,'telegram-state.json'),
+          // F-036 phase 2: quiet while another base is the main one and online; relayed cards are decided where they were made.
+          oneChannel:{quiet:async()=>{const m=await runtime.mainBase();return !!m&&!m.self&&m.online;},relay:(text,cards)=>kaji?kaji.relay({text,cards}):Promise.resolve(false)},
+          remote:{decide:(baseId,approvalId,decision)=>{if(!kaji)throw new Error('The Kaji line is not running.');return kaji.decide(baseId,approvalId,decision);}},brief:()=>{const c=live();return c.brief?{at:c.brief.at,timeZone:c.timeZone,language:c.language,base:c.base.name}:undefined;}});await aoba.start().then(()=>console.log('Aoba (Telegram): linked, listening.'),e=>console.error(`Aoba (Telegram) did not start: ${e instanceof Error?e.message:'error'}.`));}
         else if(botToken)console.log('Aoba (Telegram): token found, no chat linked yet. Send /start to your bot, then run telegram link.');
-        if(config.kaji?.root){kaji=new KajiLink({baseId:config.base.id,key:own.privateKey,publicKey:own.publicKey,registry:runtime.kaji,health:()=>runtime.baseHealth(),onHealth:(id,h)=>runtime.notePeerHealth(id,h)});void kaji.start();}
+        if(config.kaji?.root){kaji=new KajiLink({baseId:config.base.id,key:own.privateKey,publicKey:own.publicKey,registry:runtime.kaji,health:()=>runtime.baseHealth(),onHealth:(id,h)=>runtime.notePeerHealth(id,h),
+          onRelay:async(from,relay)=>{if(!aoba)return false;const name=(await runtime.bases()).find(b=>b.baseId===from)?.name ?? from;return aoba.relayed(from,name,relay);},
+          onDecide:async(approvalId,decision)=>decisionText(await runtime.decide(approvalId,decision,'telegram'))});void kaji.start();}
         process.once('SIGINT',close);process.once('SIGTERM',close);break;
       }
       default:throw new Error('Unknown command. Run help.');
