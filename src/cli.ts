@@ -285,6 +285,10 @@ try {
         const own=baseKey(home);runtime.setBaseKey(own.publicKey);let kaji:KajiLink|undefined;
         // Schedules are re-read every minute, so the owner can change them by chat or by hand without a restart.
         const live=()=>{try{return readConfig(home);}catch{return config;}};
+        // Hyuga's brief goes into the inbox (F-028); every channel delivers it from there. The last brief Telegram sent before
+        // the upgrade is read once, so the upgrade day does not get a second one.
+        const sentBefore=(()=>{try{return (JSON.parse(readFileSync(join(home,'telegram-state.json'),'utf8')) as {brief?:{at?:string}}).brief?.at;}catch{return undefined;}})();
+        runtime.startBrief(()=>{const c=live();return c.brief?{at:c.brief.at,timeZone:c.timeZone,language:c.language,base:c.base.name}:undefined;},sentBefore);
         runtime.startInstrumentality(()=>{const c=live();return {...(c.instrumentality?{mode:c.instrumentality}:{}),timeZone:c.timeZone};});
         let server:ReturnType<typeof makeServer>;let native:ReturnType<typeof makeServer>|undefined;
         let close:()=>void=()=>{};
@@ -301,7 +305,7 @@ try {
         if(botToken&&config.telegram){aoba=new TelegramChannel({api:new TelegramApi(botToken,telegramBase()),store:runtime,chatId:config.telegram.chatId,statePath:join(home,'telegram-state.json'),
           // F-036 phase 2: quiet while another base is the main one and online; relayed cards are decided where they were made.
           oneChannel:{quiet:async()=>{const m=await runtime.mainBase();return !!m&&!m.self&&m.online;},relay:(text,cards)=>kaji?kaji.relay({text,cards}):Promise.resolve(false)},
-          remote:{decide:(baseId,approvalId,decision)=>{if(!kaji)throw new Error('The Kaji line is not running.');return kaji.decide(baseId,approvalId,decision);}},brief:()=>{const c=live();return c.brief?{at:c.brief.at,timeZone:c.timeZone,language:c.language,base:c.base.name}:undefined;}});await aoba.start().then(()=>console.log('Aoba (Telegram): linked, listening.'),e=>console.error(`Aoba (Telegram) did not start: ${e instanceof Error?e.message:'error'}.`));}
+          remote:{decide:(baseId,approvalId,decision)=>{if(!kaji)throw new Error('The Kaji line is not running.');return kaji.decide(baseId,approvalId,decision);}}});await aoba.start().then(()=>console.log('Aoba (Telegram): linked, listening.'),e=>console.error(`Aoba (Telegram) did not start: ${e instanceof Error?e.message:'error'}.`));}
         else if(botToken)console.log('Aoba (Telegram): token found, no chat linked yet. Send /start to your bot, then run telegram link.');
         if(config.kaji?.root){kaji=new KajiLink({baseId:config.base.id,key:own.privateKey,publicKey:own.publicKey,registry:runtime.kaji,health:()=>runtime.baseHealth(),onHealth:(id,h)=>runtime.notePeerHealth(id,h),
           onRelay:async(from,relay)=>{if(!aoba)return false;const name=(await runtime.bases()).find(b=>b.baseId===from)?.name ?? from;return aoba.relayed(from,name,relay);},

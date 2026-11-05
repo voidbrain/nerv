@@ -9,7 +9,7 @@ import { REGISTRY_SCHEMA } from './kaji.ts';
 import { defaultPolicy, type Ballot, type Policy } from './policy.ts';
 export type Reminder = { id: string; title: string; due: string; created: string; delivered: string | null; cancelled: string | null };
 export interface InboxCheckpoint {sequence:number;id?:string}
-export interface InboxEntry {sequence:number;id:string;message:string;created:string}
+export interface InboxEntry {sequence:number;id:string;message:string;created:string;kind:'reminder'|'brief'}
 export interface InboxPage {items:InboxEntry[];head:InboxCheckpoint;next:InboxCheckpoint;reset:boolean}
 /** What one gated action came to: granted and run (result or error), waiting for the owner (approvalId), or rejected. */
 export interface ActResult {sortieId:string;actionId:string;outcome:Ballot['outcome'];pattern:Ballot['pattern'];reason:string;sync:Ballot['sync'];approvalId?:string;result?:unknown;error?:string}
@@ -29,10 +29,10 @@ export class Store {
     if(path !== ':memory:') mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
     this.db = new DatabaseSync(path);
     const version = this.db.prepare('PRAGMA user_version').get() as {user_version:number};
-    if(version.user_version > 4) {this.db.close();throw new Error('Database schema is newer than this NERV Agency version.');}
+    if(version.user_version > 5) {this.db.close();throw new Error('Database schema is newer than this NERV Agency version.');}
     this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
       CREATE TABLE IF NOT EXISTS reminders(id TEXT PRIMARY KEY, title TEXT NOT NULL, due TEXT NOT NULL, created TEXT NOT NULL, delivered TEXT, cancelled TEXT);
-      CREATE TABLE IF NOT EXISTS deliveries(id TEXT PRIMARY KEY, reminder_id TEXT NOT NULL UNIQUE REFERENCES reminders(id), message TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT);
+      CREATE TABLE IF NOT EXISTS deliveries(id TEXT PRIMARY KEY, reminder_id TEXT UNIQUE REFERENCES reminders(id), kind TEXT NOT NULL DEFAULT 'reminder', message TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT);
       CREATE INDEX IF NOT EXISTS reminders_due ON reminders(due);
       ${LEDGER_SCHEMA}`);
     // Schema 3: events record the event schema version they were written under (F-024); earlier rows read as version 1.
@@ -45,7 +45,18 @@ export class Store {
     // resend after a crash returns the first result instead of running twice).
     this.db.exec(`CREATE TABLE IF NOT EXISTS kaji_outbox(id TEXT PRIMARY KEY, sortie_id TEXT NOT NULL, base TEXT NOT NULL, tool TEXT NOT NULL, args TEXT NOT NULL, request TEXT NOT NULL, created TEXT NOT NULL, done TEXT, result TEXT);
       CREATE TABLE IF NOT EXISTS kaji_runs(id TEXT PRIMARY KEY, from_base TEXT NOT NULL, result TEXT NOT NULL, created TEXT NOT NULL);`);
-    this.db.exec('PRAGMA user_version=4');
+    // Schema 5: the inbox holds Hyuga's briefs as well as reminders (F-028). The table is rebuilt once, keeping every
+    // row's rowid: inbox cursors (Telegram, the menu-bar app) are rowids, so none of them jumps or repeats.
+    if(!(this.db.prepare('PRAGMA table_info(deliveries)').all() as {name:string}[]).some(c=>c.name==='kind')){
+      this.db.exec('BEGIN IMMEDIATE');
+      try{
+        this.db.exec(`CREATE TABLE deliveries_v5(id TEXT PRIMARY KEY, reminder_id TEXT UNIQUE REFERENCES reminders(id), kind TEXT NOT NULL DEFAULT 'reminder', message TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT);
+          INSERT INTO deliveries_v5(rowid,id,reminder_id,kind,message,created,read_at) SELECT rowid,id,reminder_id,'reminder',message,created,read_at FROM deliveries;
+          DROP TABLE deliveries;ALTER TABLE deliveries_v5 RENAME TO deliveries;`);
+        this.db.exec('COMMIT');
+      }catch(e){this.db.exec('ROLLBACK');throw e;}
+    }
+    this.db.exec('PRAGMA user_version=5');
     this.ledger = new Ledger(this.db,{policy:scrolls.policy,tools:builtinTools});this.memory = new Memory(this.db);this.policySource = scrolls.source;
   }
   /** A valid title and a future ISO date with an explicit timezone, as UTC; the same rules for a new reminder and an edit. */
@@ -82,7 +93,7 @@ export class Store {
     try {
       const due = this.db.prepare('SELECT * FROM reminders WHERE due<=? AND delivered IS NULL AND cancelled IS NULL').all(now.toISOString()) as Reminder[];
       for(const r of due) {
-        this.db.prepare('INSERT OR IGNORE INTO deliveries VALUES(?,?,?,?,NULL)').run(randomUUID(),r.id,r.title,now.toISOString());
+        this.db.prepare("INSERT OR IGNORE INTO deliveries(id,reminder_id,kind,message,created,read_at) VALUES(?,?,'reminder',?,?,NULL)").run(randomUUID(),r.id,r.title,now.toISOString());
         this.db.prepare('UPDATE reminders SET delivered=? WHERE id=?').run(now.toISOString(),r.id);
       }
       this.db.exec('COMMIT'); return due.length;
@@ -101,6 +112,14 @@ export class Store {
   remoteRun(id: string): unknown { const r=this.db.prepare('SELECT result FROM kaji_runs WHERE id=?').get(id) as {result:string}|undefined;return r?JSON.parse(r.result):undefined; }
   saveRemoteRun(id: string, from: string, result: unknown): void { this.db.prepare('INSERT OR IGNORE INTO kaji_runs VALUES(?,?,?,?)').run(id,from,JSON.stringify(result).slice(0,8000),new Date().toISOString()); }
   inbox() { return this.db.prepare('SELECT * FROM deliveries ORDER BY created DESC').all(); }
+  /** Hyuga's brief into the inbox (F-028): every channel delivers it from here, once. */
+  addBrief(message: string, now = new Date()): {id:string;created:string} {
+    if(typeof message !== 'string' || !message.trim() || message.length > 4000) throw new Error('A brief is 1–4000 characters.');
+    const id=randomUUID();this.db.prepare("INSERT INTO deliveries(id,reminder_id,kind,message,created,read_at) VALUES(?,NULL,'brief',?,?,NULL)").run(id,message,now.toISOString());
+    return {id,created:now.toISOString()};
+  }
+  /** When the latest brief was written, if any: the next brief covers what happened since. */
+  lastBrief(): string | null { return (this.db.prepare("SELECT created FROM deliveries WHERE kind='brief' ORDER BY rowid DESC LIMIT 1").get() as {created:string}|undefined)?.created ?? null; }
   inboxPage(after=0,limit=5,afterId?:string):InboxPage {
     if(!Number.isSafeInteger(after)||after<0||!Number.isInteger(limit)||limit<1||limit>20||(after>0&&(typeof afterId!=='string'||!afterId||afterId.length>100)))throw new Error('Invalid inbox checkpoint or limit.');
     this.db.exec('BEGIN');
@@ -108,7 +127,7 @@ export class Store {
       const head=(this.db.prepare('SELECT rowid AS sequence,id FROM deliveries ORDER BY rowid DESC LIMIT 1').get() as unknown as InboxCheckpoint|undefined) ?? {sequence:0};
       const previous=after?this.db.prepare('SELECT id FROM deliveries WHERE rowid=?').get(after) as {id:string}|undefined:undefined;
       if(after>0&&previous?.id!==afterId){this.db.exec('COMMIT');return {items:[],head,next:head,reset:true};}
-      const items=this.db.prepare('SELECT rowid AS sequence,id,message,created FROM deliveries WHERE rowid>? ORDER BY rowid LIMIT ?').all(after,limit) as unknown as InboxEntry[];
+      const items=this.db.prepare('SELECT rowid AS sequence,id,message,created,kind FROM deliveries WHERE rowid>? ORDER BY rowid LIMIT ?').all(after,limit) as unknown as InboxEntry[];
       const last=items.at(-1);const next=last?{sequence:last.sequence,id:last.id}:after?{sequence:after,id:afterId}:{sequence:0};
       this.db.exec('COMMIT');return {items,head,next,reset:false};
     }catch(e){this.db.exec('ROLLBACK');throw e;}
