@@ -152,13 +152,31 @@ test('on wide screens the page itself has nothing to scroll: the body is pinned 
  assert.match(wide,/html \{ height:100%; overflow:hidden; \} body \{ position:fixed; inset:0; overflow:clip; \}/);
  assert.doesNotMatch(wide,/html,body \{ height:100%; \} body \{ overflow:hidden; \}/,'overflow hidden alone let the page stay scrolled, header cut off');
 });
-test('the CRT effect: the original static scanlines, a vignette only at the borders, a slight page flicker, a thin dark rolling line; motion off when reduced (F-053)',async()=>{
+test('the CRT effect: the original static scanlines, darker borders, a slight page flicker, two thin dark lines passing now and then; motion off when reduced (F-053)',async()=>{
  const {readFileSync}=await import('node:fs');const html=readFileSync('web/public/dashboard/index.html','utf8');
  const after=/body\.theme-eva\.crt-on::after \{([^\n]*)\}/.exec(html)![1]!;
  assert.match(after,/background:linear-gradient\(rgba\(0,0,0,0\) 50%,rgba\(0,0,0,\.22\) 50%\); background-size:100% 4px;/,'the owner\'s scanlines, unchanged');
- assert.doesNotMatch(after,/animation|radial-gradient/,'static, and no vignette across the middle');assert.match(after,/box-shadow:inset 0 0 \d+px/,'vignette along the borders');
- const band=/body\.theme-eva\.crt-on::before \{([^\n]*)\}/.exec(html)![1]!;assert.match(band,/height:6px;/);assert.match(band,/rgba\(0,0,0,/,'a dark line, not a bright band');
+ assert.doesNotMatch(after,/animation|radial-gradient/,'static');const edge=/box-shadow:inset 0 0 (\d+)px (\d+)px rgba\(0,0,0,([.0-9]+)\)/.exec(after)!;assert.ok(Number(edge[1])>=60&&Number(edge[3])>=0.8,'edges strong enough to see on dark');
+ const a=/@keyframes crt-line-a \{[^\n]*\}/.exec(html)![0],b=/@keyframes crt-line-b \{[^\n]*\}/.exec(html)![0];assert.ok(a&&b,'two lines');
+ assert.match(html,/animation:crt-line-a 17s linear infinite/);assert.match(html,/animation:crt-line-b 29s linear -11s infinite/,'different cycles, offset: irregular together');
  for(const o of /@keyframes crt-flicker \{([^\n]*)\}/.exec(html)![1]!.matchAll(/opacity:([.0-9]+)/g))assert.ok(Number(o[1])>=0.9,'a slight flicker, never a flash');
- assert.match(html,/@media \(prefers-reduced-motion:reduce\) \{ body\.theme-eva\.crt-on \.wrap, body\.theme-eva\.crt-on::before \{ animation:none; \}/);
- assert.match(html,/<span data-l="melons">Marduk Institute · Pilots<\/span>/);
+ assert.match(html,/@media \(prefers-reduced-motion:reduce\) \{ body\.theme-eva\.crt-on \.wrap, body\.theme-eva\.crt-on::before, body\.theme-eva\.crt-on \.wrap::after \{ animation:none; \}/);
+ assert.match(html,/<span data-l="melons">Marduk Institute · Pilots<\/span>/);assert.match(html,/<span class="sub" data-l="melonsSub">Kaji's watermelons · proto → test → prod<\/span>/);
+});
+test('the dashboard API lists the pilot roster for the Marduk Institute panel (F-051)',async()=>{
+ const {makeServer}=await import('../src/server.ts');
+ const roster=[{id:'printer',name:'Print Master',domain:'3D printing',keywords:['filament'],model:'gemma4:12b',stage:'test' as const}];
+ const token='p'.repeat(32);const server=makeServer({pilotRoster:()=>roster} as never,token);
+ await new Promise<void>(d=>server.listen(0,'127.0.0.1',d));
+ try{const base=`http://127.0.0.1:${(server.address() as {port:number}).port}/api`;
+  assert.equal((await fetch(base+'/pilots')).status,401,'admin only');
+  assert.deepEqual(await (await fetch(base+'/pilots',{headers:{authorization:'Bearer '+token}})).json(),{pilots:roster});}
+ finally{await new Promise<void>(d=>server.close(()=>d()));}
+});
+test('on start the dashboard shows the real state: only a running sortie is selected by itself, and let go when it ends; a click keeps it (owner, 2026-11-05)',async()=>{
+ const {readFileSync}=await import('node:fs');const live=readFileSync('web/public/dashboard/live.js','utf8');const js=readFileSync('web/public/dashboard/dashboard.js','utf8');
+ assert.doesNotMatch(live,/state\.selected = state\.sorties\[0\]\.id/,'never the newest sortie by default');
+ assert.match(live,/const running = state\.sorties\.find\(x => x\.status === "active"\);/);
+ assert.match(live,/state\.selected = running\.id; state\.autoSelected = true;/);assert.match(live,/state\.selected = null; state\.autoSelected = false;/);
+ assert.match(js,/state\.selected = t\.dataset\.s; state\.deselected = false; state\.autoSelected = false;/,'a click is the owner\'s choice');
 });

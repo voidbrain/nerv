@@ -19,15 +19,19 @@ body.theme-simple { --radius:6px; --font:ui-monospace,SFMono-Regular,Menlo,Monac
 * { box-sizing:border-box; }
 html,body { margin:0; }
 body { background:var(--bg); color:var(--text); font:12px/1.4 var(--font); padding:10px; }
-/* CRT (Eva, opt-in), owner's tuning 2026-11-05: the original static scanlines (22%, 4 px, never moving), a vignette only
-   along the very borders, a slight irregular flicker of the page, and one thin soft dark line rolling down every 12 s.
-   No colour split or jitter (they blur the text); with reduced motion only the static layers stay. */
-body.theme-eva.crt-on::after { content:""; position:fixed; inset:0; pointer-events:none; z-index:50; background:linear-gradient(rgba(0,0,0,0) 50%,rgba(0,0,0,.22) 50%); background-size:100% 4px; box-shadow:inset 0 0 24px 4px rgba(0,0,0,.6); }
-body.theme-eva.crt-on::before { content:""; position:fixed; left:0; right:0; top:0; height:6px; pointer-events:none; z-index:51; background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.28),rgba(0,0,0,0)); transform:translateY(-10px); animation:crt-band 12s linear infinite; }
+/* CRT (Eva, opt-in), owner's tuning 2026-11-05: the original static scanlines (22%, 4 px, never moving), darker edges
+   along the borders, a slight irregular flicker of the page, and two thin dark lines at different speeds that each pass
+   only now and then (17 s and 29 s cycles, so together they look irregular). No colour split or jitter; with reduced
+   motion only the static layers stay. */
+body.theme-eva.crt-on::after { content:""; position:fixed; inset:0; pointer-events:none; z-index:50; background:linear-gradient(rgba(0,0,0,0) 50%,rgba(0,0,0,.22) 50%); background-size:100% 4px; box-shadow:inset 0 0 70px 22px rgba(0,0,0,.85); }
+body.theme-eva.crt-on::before, body.theme-eva.crt-on .wrap::after { content:""; position:fixed; left:0; right:0; top:0; pointer-events:none; z-index:51; transform:translateY(-12px); }
+body.theme-eva.crt-on::before { height:6px; background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.3),rgba(0,0,0,0)); animation:crt-line-a 17s linear infinite; }
+body.theme-eva.crt-on .wrap::after { height:3px; background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.35),rgba(0,0,0,0)); animation:crt-line-b 29s linear -11s infinite; }
 body.theme-eva.crt-on .wrap { animation:crt-flicker 6s steps(1,end) infinite; }
 @keyframes crt-flicker { 0%,100% { opacity:1 } 17% { opacity:.93 } 18% { opacity:1 } 52% { opacity:.95 } 53.5% { opacity:1 } 81% { opacity:.92 } 82% { opacity:.97 } 83% { opacity:1 } }
-@keyframes crt-band { 0% { transform:translateY(-10px) } 60%,100% { transform:translateY(101vh) } }
-@media (prefers-reduced-motion:reduce) { body.theme-eva.crt-on .wrap, body.theme-eva.crt-on::before { animation:none; } body.theme-eva.crt-on::before { display:none; } }
+@keyframes crt-line-a { 0% { transform:translateY(-12px) } 32% { transform:translateY(101vh) } 32.1%,100% { transform:translateY(101vh) } }
+@keyframes crt-line-b { 0%,55% { transform:translateY(-12px) } 64% { transform:translateY(101vh) } 64.1%,100% { transform:translateY(101vh) } }
+@media (prefers-reduced-motion:reduce) { body.theme-eva.crt-on .wrap, body.theme-eva.crt-on::before, body.theme-eva.crt-on .wrap::after { animation:none; } body.theme-eva.crt-on::before, body.theme-eva.crt-on .wrap::after { display:none; } }
 button,input,select { font:inherit; }
 .wrap { max-width:1720px; margin:0 auto; display:flex; flex-direction:column; gap:8px; }
 .panel { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); min-width:0; }
@@ -438,7 +442,7 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
       </section>
 
       <section class="panel">
-        <div class="hdr"><span data-l="melons">Marduk Institute · Pilots</span><span class="sub">prototype → test → production</span></div>
+        <div class="hdr"><span data-l="melons">Marduk Institute · Pilots</span><span class="sub" data-l="melonsSub">Kaji's watermelons · proto → test → prod</span></div>
         <div class="pad list" id="melons"></div>
       </section>
 

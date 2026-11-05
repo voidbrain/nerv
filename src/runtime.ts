@@ -57,6 +57,8 @@ export interface StoreApi {
  onResumed?(listener:(reply:ChatReply)=>void):void;
  reloadModels?():Promise<{error?:string;kept?:boolean;models:unknown}>;
  modelSetup?():Promise<ModelSetup>;
+ /** F-045/F-051: the pilot roster for the dashboard (config.json pilots, read now). */
+ pilotRoster?():Pilot[]|Promise<Pilot[]>;
  changeModels?(change:ModelChange):Promise<{error?:string;kept?:boolean;models:unknown}>;
  /** Kaji bases with their live status (F-036): online when heard from within the last 90 s. */
  bases?():Promise<(BaseEntry&{lastSeen:string|null;online:boolean;self:boolean})[]>;
@@ -147,6 +149,7 @@ export class Runtime implements StoreApi {
  private pilots?:()=>Pilot[];
  /** The pilot roster (F-045), read on every request so a change applies without a restart. */
  setPilots(fn:()=>Pilot[]){this.pilots=fn;}
+ pilotRoster():Pilot[] {try{return this.pilots?.() ?? [];}catch{return [];}}
  async chat(message:string,conversation?:string):Promise<ChatReply> {
   const far=this.dispatch?await this.dispatch(message,conversation):undefined;if(far)return far;
   // Earlier exchanges of the same conversation (read before this request is recorded), so "yes" has its question.

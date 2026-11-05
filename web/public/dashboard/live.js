@@ -56,11 +56,12 @@
   async function poll() {
     if (polling || !token) return; polling = true;
     try {
-      const [latest20, cards, doctor, reminders, inbox, facts, episodes, kajiBases] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("reminders"), api("inbox"), api("memory"), api("memory/episodes"), api("bases").catch(() => [])]);
+      const [latest20, cards, doctor, reminders, inbox, facts, episodes, kajiBases, pilots] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("reminders"), api("inbox"), api("memory"), api("memory/episodes"), api("bases").catch(() => []), api("pilots").catch(() => null)]);
       // The newest sorties, plus older pages the owner loaded and every match of the current search, newest first.
       const byId = new Map(); for (const x of [...latest20, ...older, ...matches]) if (!byId.has(x.id)) byId.set(x.id, x);
       const list = [...byId.values()].sort((a, b) => b.created.localeCompare(a.created)); shown = list;
       applyBases(kajiBases, healthOf(doctor)); void loadModels();
+      state.pilots = pilots && Array.isArray(pilots.pilots) ? pilots.pilots : null;
       state.lilith = Object.assign(state.lilith || { history:{} }, { facts, episodes });
       // Reminders delivered (briefs live in the inbox too since F-028, and are shown on their own in Debrief).
       state.delivered = inbox.filter(d => (d.kind || "reminder") === "reminder").map(d => Date.parse(d.created));
@@ -86,7 +87,11 @@
       state.doctor = doctor;
       if (doctor.base && BASES[0].name !== doctor.base.name.toUpperCase()) { BASES[0].name = doctor.base.name.toUpperCase(); BASES[0].role = doctor.base.id + " · this machine"; document.getElementById("cages").innerHTML = ""; }
       // The newest sortie is selected at first; after the owner deselects one, nothing is selected again by itself.
-      if (!state.selected && !state.deselected && state.sorties[0]) state.selected = state.sorties[0].id;
+      // Owner, 2026-11-05: by default the dashboard shows the real state. Nothing chosen: a running sortie is selected (F-019),
+      // otherwise none; one it picked by itself is let go when it finishes. A sortie the owner clicked stays.
+      const running = state.sorties.find(x => x.status === "active");
+      if (!state.selected && !state.deselected && running) { state.selected = running.id; state.autoSelected = true; }
+      else if (state.autoSelected && state.selected && !(state.sorties.find(x => x.id === state.selected && x.status === "active"))) { state.selected = null; state.autoSelected = false; }
       renderAll();
       setBanner("<b>LIVE · " + esc(liveBaseName(doctor)) + "</b> <span class='muted'>— " + esc(kajiSummary()) + " · " + latest20.length + " recent sorties · refreshed " + new Date().toTimeString().slice(0, 8) + "</span>", "live");
     } catch (e) {
@@ -368,7 +373,16 @@
     if (s.status !== "active" && s.status !== "waiting") box.querySelectorAll("[data-spear]").forEach(el => el.remove());
   };
   window.renderBudget = function () { document.getElementById("budget").innerHTML = PLANNED; };
-  window.renderMelons = function () { document.getElementById("melons").innerHTML = PLANNED; };
+  // F-051: the real pilot roster (config.json pilots), the generic pilot first; stages change with `nerv pilots set ID --stage`.
+  window.renderMelons = function () {
+    const roster = state.pilots; const box = document.getElementById("melons"); if (!roster) { box.innerHTML = PLANNED; return; }
+    const badge = { prototype:"b-info", test:"b-orange", production:"b-ok" }, short = { prototype:"PROTO", test:"TEST", production:"PROD" };
+    const generic = modelsData && modelsData.roles && modelsData.roles.consultant && modelsData.roles.consultant.model;
+    const card = (name, sub, right, line) => "<div class='card'><div class='row'><span class='b'>" + esc(name) + "</span>" + right + "</div><div class='row tiny muted'><span>" + esc(sub) + "</span></div>" + (line ? "<div class='tiny muted'>" + esc(line) + "</div>" : "") + "</div>";
+    box.innerHTML = card("Generic pilot", "anything no specialist covers · " + (generic || "off"), "<span class='badge b-muted'>GENERIC</span>", generic ? "" : "Turn it on: nerv models set consultant MODEL") +
+      roster.map(p => card(p.name, p.domain + " · " + p.model + (p.pinned ? " · pinned" : ""), "<span class='badge " + (p.retired ? "b-muted" : badge[p.stage]) + "'>" + (p.retired ? "RETIRED" : short[p.stage]) + "</span>", "keywords: " + p.keywords.join(", "))).join("") +
+      (roster.length ? "" : "<div class='muted small'>No specialists yet. Add one: nerv pilots add ID --name … --domain … --keywords … --model …, or approve a proposal from the Marduk Institute.</div>");
+  };
   // While you were away: from real sorties and deliveries since your last visit, remembered in this browser only.
   const VISIT = "nerv.dashboard.lastVisit";
   try { const v = Number(localStorage.getItem(VISIT)); state.lastVisit = Number.isFinite(v) && v > 0 ? v : Date.now() - 12 * HOUR; } catch { state.lastVisit = Date.now() - 12 * HOUR; }
