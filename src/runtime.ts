@@ -35,7 +35,7 @@ export interface StoreApi {
  list():Reminder[]|Promise<Reminder[]>;
  pendingReminders():Reminder[]|Promise<Reminder[]>;
  inboxPage(after?:number,limit?:number,afterId?:string):InboxPage|Promise<InboxPage>;
- add(title:string,due:string):Reminder|Promise<Reminder>;
+ add(title:string,due:string):(Reminder&{existing?:true})|Promise<Reminder&{existing?:true}>;
  update(id:string,patch:{title?:string;due?:string}):Reminder|undefined|null|Promise<Reminder|undefined|null>;
  cancel(id:string):boolean|Promise<boolean>;
  inbox():unknown|Promise<unknown>;
@@ -74,7 +74,7 @@ export class Runtime implements StoreApi {
  async list(){return await this.nervous.call('reminders.list') as Reminder[];}
  async pendingReminders(){return await this.nervous.call('reminders.pending') as Reminder[];}
  async inboxPage(after=0,limit=5,afterId?:string){return await this.nervous.call('inbox.page',{after,limit,...(afterId?{afterId}:{})}) as InboxPage;}
- async add(title:string,due:string){return await this.nervous.call('reminders.add',{title,due}) as Reminder;}
+ async add(title:string,due:string){return await this.nervous.call('reminders.add',{title,due}) as Reminder&{existing?:true};}
  async update(id:string,patch:{title?:string;due?:string}){return await this.nervous.call('reminders.update',{id,...patch}) as Reminder|null;}
  async cancel(id:string){return await this.nervous.call('reminders.cancel',{id}) as boolean;}
  async inbox(){return this.nervous.call('inbox.list');}
