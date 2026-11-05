@@ -4,11 +4,14 @@ import { dispatchRpc,MAX_FRAME_BYTES,READY } from './rpc.ts';
 import { readConfig, readScrolls } from './config.ts';
 import { Registry, type SignedRecord } from './kaji.ts';
 import { factKey } from './memory.ts';
+import { toolName } from './mcp.ts';
 // argv: database path, then the data home whose scrolls.json sets the gate rules (defaults when absent).
 const store=new Store(process.argv[2]!,process.argv[3]?readScrolls(process.argv[3]):undefined,process.argv[3]?{home:process.argv[3]}:{});
 store.tick();store.ledger.expire();
 const timer=setInterval(()=>{try{store.tick();store.ledger.expire();}catch{console.error('Nervous scheduler tick failed.');}},250);
 const registry=()=>new Registry(store.db,process.argv[3]?(()=>{try{return readConfig(process.argv[3]!).kaji?.root;}catch{return undefined;}})():undefined);
+// F-021: granted MCP tools as the gate knows them (effect class from the grant), read from config when asked.
+const external=()=>{try{const t=process.argv[3]?readConfig(process.argv[3]).tools:undefined;return (t?.grants ?? []).map(g=>({name:toolName(g.server,g.tool),effect:g.effect}));}catch{return [];}};
 process.on('message',(value:unknown)=>{
  if(Buffer.byteLength(JSON.stringify(value))>MAX_FRAME_BYTES){process.exitCode=1;stop();return;}
  void dispatchRpc(value,(method,params)=>{
@@ -77,8 +80,9 @@ process.on('message',(value:unknown)=>{
    }
    case 'misato.context':return store.ledger.conversation(params.conversation as string);
    case 'misato.claim':return store.ledger.claimResume(params.sortieId as string);
-   case 'actions.preview':return store.ledger.preview(params.sortieId as string,params.tool as string);
-   case 'actions.act':return store.runAction(params.sortieId as string,{tool:params.tool as string,args:params.args as Record<string,unknown>,stage:params.stage as 'production',...(params.casper?{casper:params.casper as Verdict}:{}),...(Array.isArray(params.extras)?{extras:params.extras as Verdict[]}:{})});
+   case 'actions.finished':return store.finishedExternal(params.sortieId as string,params.actionId as string,params.tool as string,typeof params.error==='string'?{error:params.error}:{text:String(params.text ?? '')});
+   case 'actions.preview':store.ledger.setExternal(external());return store.ledger.preview(params.sortieId as string,params.tool as string);
+   case 'actions.act':store.ledger.setExternal(external());return store.runAction(params.sortieId as string,{tool:params.tool as string,args:params.args as Record<string,unknown>,stage:params.stage as 'production',...(params.casper?{casper:params.casper as Verdict}:{}),...(Array.isArray(params.extras)?{extras:params.extras as Verdict[]}:{})});
    case 'inbox.page':return store.inboxPage(params.after as number|undefined,params.limit as number|undefined,params.afterId as string|undefined);
   }
  }).then(reply=>{if(reply&&process.connected){if(Buffer.byteLength(JSON.stringify(reply))>MAX_FRAME_BYTES)process.send?.({jsonrpc:'2.0',id:reply.id,error:{code:-32005,message:'Response exceeds IPC bound; pagination required.'}});else process.send?.(reply);}}).catch(()=>{console.error('Nervous IPC failed.');});

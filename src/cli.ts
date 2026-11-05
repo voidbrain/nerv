@@ -5,8 +5,9 @@ import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'n
 import { fileURLToPath } from 'node:url';
 import { Store } from './store.ts';
 import { makeServer } from './server.ts';
-import { savePilots, setKajiOffers, setKajiSeat, dataHome, databasePath, initialize, isTelegramToken, pinKajiRoot, telegramTokenPath, readConfig, readModelKey, readScrolls, readTelegramToken, readToken, setBase, setting, type Base } from './config.ts';
+import { savePilots, saveTools, setKajiOffers, setKajiSeat, dataHome, databasePath, initialize, isTelegramToken, pinKajiRoot, telegramTokenPath, readConfig, readModelKey, readScrolls, readTelegramToken, readToken, setBase, setting, type Base } from './config.ts';
 import { describePilots, type Stage } from './pilots.ts';
+import { McpClient, fingerprint as toolFingerprint, grantRefusal, toolName, type Eva, type McpTool } from './mcp.ts';
 import { TelegramApi, TelegramChannel, decisionText, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
 import { composeBrief, gatherBrief } from './brief.ts';
 import { KajiLink } from './kaji-link.ts';
@@ -123,6 +124,40 @@ try {
     const value=await response.json() as {revoked?:number;error?:string};if(!response.ok)throw new Error(value.error ?? 'Revoke failed.');
     console.log(`${value.revoked ?? 0} dashboard session(s) ended. Open the dashboard again with: open dashboard`);
   }
+  else if(command==='tools'){
+    // F-021: MCP servers and their tools; deny by default: a tool is offered to Misato only once granted here.
+    const [sub,target,...rest]=args;const config=readConfig(home);const tools=config.tools ?? {mcp:[],grants:[]};
+    const opt=(name:string,d:string)=>{const i=rest.indexOf('--'+name);return i>=0?rest[i+1] ?? d:d;};
+    const usage='Usage: tools | tools add ID COMMAND [ARGS…] | tools remove ID | tools grant SERVER/TOOL [--effect read] [--eva 00|01|02|03] | tools revoke SERVER/TOOL';
+    const listOf=async(id:string)=>{const s=tools.mcp.find(x=>x.id===id);if(!s)throw new Error(`No MCP server ${id}: nerv tools add ${id} COMMAND …`);const c=new McpClient(s);try{return await c.listTools();}finally{c.close();}};
+    if(!sub){
+      if(!tools.mcp.length){console.log('No MCP servers yet. Add one, for example: nerv tools add files npx -y @modelcontextprotocol/server-filesystem ~/NERV-files');}
+      for(const s of tools.mcp){
+        let list:McpTool[]=[];try{list=await listOf(s.id);}catch(e){console.log(`${s.id} · ${s.command} ${s.args.join(' ')}\n   could not list its tools: ${e instanceof Error?e.message:'unknown error'}`);continue;}
+        console.log(`${s.id} · ${s.command} ${s.args.join(' ')} · ${list.length} tool(s)`);
+        for(const t of list){const g=tools.grants.find(x=>x.server===s.id&&x.tool===t.name);const fp=toolFingerprint(t);
+          const state=!g?'not granted':g.fingerprint!==fp?'SUSPENDED: changed since granted, grant it again':`granted ${g.effect} · EVA-${g.eva}`;
+          const hint=t.annotations?.destructiveHint===true?' · destructive':t.annotations?.readOnlyHint===true?' · read-only':'';
+          console.log(`   ${toolName(s.id,t.name)}${hint} · ${state}\n      ${(t.description ?? '').split('\n')[0]!.slice(0,140)}`);}
+      }
+    }else if(sub==='add'){
+      const command=rest[0];if(!target||!command)throw new Error(usage);
+      saveTools(home,{...tools,mcp:[...tools.mcp.filter(x=>x.id!==target),{id:target,command,args:rest.slice(1)}]});
+      console.log(`MCP server ${target} added. Its tools are not offered to Misato until you grant them: nerv tools`);
+    }else if(sub==='remove'){
+      if(!target||!tools.mcp.some(x=>x.id===target))throw new Error(usage);
+      saveTools(home,{mcp:tools.mcp.filter(x=>x.id!==target),grants:tools.grants.filter(g=>g.server!==target)});console.log(`MCP server ${target} removed, with its grants.`);
+    }else if(sub==='grant'||sub==='revoke'){
+      const [server,tool]=(target ?? '').split('/');if(!server||!tool)throw new Error(usage);
+      if(sub==='revoke'){saveTools(home,{...tools,grants:tools.grants.filter(g=>!(g.server===server&&g.tool===tool))});console.log(`${toolName(server,tool)} revoked: Misato no longer sees it.`);}
+      else{
+        const t=(await listOf(server)).find(x=>x.name===tool);if(!t)throw new Error(`${server} has no tool ${tool}: nerv tools lists them.`);
+        const effect=opt('effect','read'),eva=opt('eva','00');const no=grantRefusal(t,effect,eva);if(no)throw new Error(`${toolName(server,tool)} not granted: ${no}.`);
+        saveTools(home,{...tools,grants:[...tools.grants.filter(g=>!(g.server===server&&g.tool===tool)),{server,tool,effect:'read',eva:eva as Eva,fingerprint:toolFingerprint(t)}]});
+        console.log(`${toolName(server,tool)} granted as a read (Pattern Green), EVA-${eva}${eva==='03'?': it will not run until EVAs exist (F-049)':''}. Pinned to its current description: if the server changes it, the grant is suspended.`);
+      }
+    }else throw new Error(usage);
+  }
   else if(command==='pilots'){
     // F-045: the owner's permanent agents. Slice 1: they advise Misato before it plans, by domain keywords.
     const [sub,id,...rest]=args;const config=readConfig(home);const roster=config.pilots ?? [];
@@ -202,7 +237,7 @@ try {
     if(!response.ok)throw new Error(value.error ?? 'Ask failed.');
     console.log(value.text+(value.truncated?'\n[reply truncated]':'')+`\n— ${value.route} · ${value.model}`);
   }
-  else if(!command||command==='help')console.log('NERV Agency\nCommands: init [--base ID --name "Name"] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | models [set misato| pilots [generic|add|set|pin|unpin|retire|restore] |casper MODEL | cloud on|off | key] | ask [--cloud] "text" | open [dashboard] | sessions revoke | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
+  else if(!command||command==='help')console.log('NERV Agency\nCommands: init [--base ID --name "Name"] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | models [set misato| pilots [generic|add|set|pin|unpin|retire|restore] | tools [add|remove|grant|revoke] |casper MODEL | cloud on|off | key] | ask [--cloud] "text" | open [dashboard] | sessions revoke | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
   else {
     const config=readConfig(home);
     const scrolls=readScrolls(home);

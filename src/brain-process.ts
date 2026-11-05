@@ -4,7 +4,7 @@ import {readConfig,readModelKey} from './config.ts';
 import {complete,describe,forRole,ModelError,MODEL_TIMEOUT_MS,selectRoute,type Ask,type Models,type Reply} from './model.ts';
 import {RouteWatch,describeChange,type RouteChange} from './route-health.ts';
 import {casperAsk,parseCasper,type CasperInput} from './casper.ts';
-import {consultantAsk,parseConsult,misatoAsk,parseAdvice,parsePlan,remoteToolDoc,type RemoteOffer,type Recalled,type Step,type Turn} from './misato.ts';
+import {consultantAsk,parseConsult,misatoAsk,parseAdvice,parsePlan,remoteToolDoc,type RemoteOffer,type Recalled,type Step,type ToolDoc,type Turn} from './misato.ts';
 import {toolDocs} from './executors.ts';
 import {digestAsk,factLimit,parseDigest,type Exchange} from './instrumentality.ts';
 // Execution boundary: model routes, the Casper seat and Misato's planning step. It plans and reviews; it never executes a tool.
@@ -54,7 +54,7 @@ process.on('message',(value:unknown)=>{
    const route=models.roles?.misato?.route ?? (models.local?'local':models.cloud?.enabled?'cloud':undefined);
    if(!route)return {error:'No model route for Misato: add models.local (or enable models.cloud) in config.json, then run nerv reload. See docs/INSTALL.md, section \"Model routes\".'};
    const remote=Array.isArray(params.remote)?params.remote as RemoteOffer[]:[];
-   const ask=misatoAsk({request:params.request as string,history:params.history as Step[],tools:remote.length?[...toolDocs,remoteToolDoc(remote)]:toolDocs,now:new Date().toISOString(),timeZone,...(params.context?{context:params.context as Turn[]}:{}),...(params.memory?{memory:params.memory as Recalled[]}:{}),...(typeof params.advice==='string'?{advice:params.advice}:{}),...(params.language==='it'||params.language==='en'?{language:params.language}:{})},route);
+   const ask=misatoAsk({request:params.request as string,history:params.history as Step[],tools:[...toolDocs,...((params.external as ToolDoc[]|undefined) ?? []),...(remote.length?[remoteToolDoc(remote)]:[])],now:new Date().toISOString(),timeZone,...(params.context?{context:params.context as Turn[]}:{}),...(params.memory?{memory:params.memory as Recalled[]}:{}),...(typeof params.advice==='string'?{advice:params.advice}:{}),...(params.language==='it'||params.language==='en'?{language:params.language}:{})},route);
    try{const reply=await run(ask,forRole(models,'misato'));const plan=parsePlan(reply.text);return plan?{plan,model:reply.model}:{invalid:true,model:reply.model};}
    catch(e){return {error:e instanceof ModelError?e.message:'Model route failed.'};}
   }

@@ -12,7 +12,7 @@ export interface InboxCheckpoint {sequence:number;id?:string}
 export interface InboxEntry {sequence:number;id:string;message:string;created:string;kind:'reminder'|'brief'}
 export interface InboxPage {items:InboxEntry[];head:InboxCheckpoint;next:InboxCheckpoint;reset:boolean}
 /** What one gated action came to: granted and run (result or error), waiting for the owner (approvalId), or rejected. */
-export interface ActResult {sortieId:string;actionId:string;outcome:Ballot['outcome'];pattern:Ballot['pattern'];reason:string;sync:Ballot['sync'];approvalId?:string;result?:unknown;error?:string}
+export interface ActResult {external?:boolean;sortieId:string;actionId:string;outcome:Ballot['outcome'];pattern:Ballot['pattern'];reason:string;sync:Ballot['sync'];approvalId?:string;result?:unknown;error?:string}
 /** Sorties the owner starts directly hold one action and close once it settles. */
 export const OWNER_SOURCE='owner';
 /** Sorties Misato plans hold several actions; the coordinator closes them when the loop ends. */
@@ -159,6 +159,8 @@ export class Store {
     const p=this.ledger.propose(sortieId,proposal);
     const base:ActResult={sortieId,actionId:p.actionId,outcome:p.ballot.outcome,pattern:p.ballot.pattern,reason:p.ballot.reason,sync:p.ballot.sync,...(p.approvalId?{approvalId:p.approvalId}:{})};
     if(p.grantId&&hasExecutor(proposal.tool)){const outcome=this.run(sortieId,p.actionId,p.grantId,proposal.tool,proposal.args);this.settle(sortieId,'error' in outcome?'failed':'done');return {...base,...outcome};}
+    // F-021: a granted MCP tool: the single-use grant is used here, the call is made by the tools process.
+    if(p.grantId&&this.ledger.isExternal(proposal.tool)){this.ledger.authorize(p.grantId,proposal.tool,proposal.args);return {...base,external:true};}
     if(p.ballot.outcome==='reject')this.settle(sortieId,'failed');
     return base;
   }
@@ -178,6 +180,8 @@ export class Store {
   sorties(limit=20, before?: string, q?: string) { return this.ledger.sorties(limit,before,q); }
   sortie(id: string) { return this.ledger.sortie(id) ?? null; }
   closedSince(since: string) { return this.ledger.closedSince(since); }
+  /** F-021: what an external tool returned, recorded on its action like a built-in tool's result. */
+  finishedExternal(sortieId: string, actionId: string, tool: string, outcome: {text:string}|{error:string}) { this.ledger.finished(sortieId,actionId,tool,'error' in outcome?{error:outcome.error}:{result:{text:outcome.text}}); return true; }
   unmatched(domain: string, since: string) { return this.ledger.unmatched(domain,since); }
   shadowVote(sortieId: string, actionId: string, vote: {seat:string;vote:'approve'|'reject'|'abstain';reason:string;confidence?:number}) { this.ledger.shadowVote(sortieId,actionId,vote); return true; }
   explain(ref: string) { return this.ledger.explain(ref); }

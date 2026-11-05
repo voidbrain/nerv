@@ -211,6 +211,16 @@ Each Telegram chat, the CLI and the dashboard are separate conversations: Misato
 
 Misato plans one step at a time: it proposes an action, the gate reviews it, and Misato sees the outcome before the next step (at most 6 steps). The command prints each step, any action that waits for you (`approve ID` or `reject ID`), the reply, and the sortie ID for `events`. An action waiting for you has not happened. Once you decide (Telegram button, `approve`/`reject`, the API, or it expires), it runs once if approved and Misato picks the request back up with the outcome, within a few seconds; its follow-up reply goes to Telegram when Aoba is linked and is always in the sortie's events. The conversation's steps are kept in the ledger, so this also works after a restart. Misato uses `models.roles.misato` (local unless you choose the cloud route); times are converted to your configured time zone in code before Misato sees them. Locally, a step takes about 10–30 seconds with a 12–14B model.
 
+## Tools (MCP servers)
+
+NERV can use tools from MCP servers, beyond its own reminders and memory. **Deny by default:** a server's tools are offered to Misato only after you grant them, one by one.
+
+- `nerv tools add files npx -y @modelcontextprotocol/server-filesystem ~/NERV-files` adds a server (here the reference file-system server, limited to one folder). Servers run only under NERV's tools process, never in the scheduler or the brain, with only PATH, HOME and LANG from your environment.
+- `nerv tools` lists each server's tools, marked *read-only* or *destructive* when the server says so, and whether each is granted.
+- `nerv tools grant files/read_text_file` grants one tool as a **read** (Pattern Green: it runs without a card); `--eva 00|01|02|03` names the EVA class it belongs to (EVA-03, quarantine, does not run until sandboxes exist). A tool the server marks destructive cannot be granted as a read. Writes come later, with approval cards.
+- A grant is **pinned to the tool's description**: if the server changes it (an update), the grant is suspended and Misato no longer sees the tool until you grant it again. `nerv tools revoke files/read_text_file` removes a grant, `nerv tools remove files` a server and its grants.
+- Each call goes through the gate like any other action: a ballot, a single-use grant, the result recorded on the sortie. The result is data for Misato, never instructions.
+
 ## Gate rules (the Scrolls)
 
 Every agent action passes the per-action gate. Its rules come from `scrolls.json` in the data home; without the file the defaults apply. Example:

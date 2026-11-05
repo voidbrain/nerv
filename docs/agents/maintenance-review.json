@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-05T19:20:44.602Z",
+  "reviewed": "2026-11-05T22:30:54.128Z",
   "policy": "7ce9883fd1bff25038076e9e36015a833c38e1378e1df68043f48a64635abad4",
   "inputs": {
     "AGENTS.md": "7521203d1bc1ee4467396d9dd3576e2d7ffba835a4f6e93cb217af06af5ebee2",
     "docs/BACKLOG-RULES.md": "19798ae1614c2d96e60613af75d232c2eda19d25e07470e851ce48304df593c6",
-    "docs/agents/areas.md": "4d687c281b18f2f5234707662cc3af239762f64795f28354739fb494cebba0e3",
+    "docs/agents/areas.md": "2cb6c59b3d7f371b1398afbeb928c09e1de83cfc3427daa5d3d0833645b3a502",
     "docs/agents/maintenance.md": "a7e93ce963ffab30b4592ee90bdd0e72d49ea1320f82df74f22c88f70899d899"
   },
   "measurements": {
@@ -65,7 +65,7 @@
       "kind": "rule",
       "disposition": "implemented",
       "target": "docs/agents/areas.md",
-      "evidence": "Model routes gains the F-045 detection rule: the generic pilot names the domain (parseConsult), unmatched requests record pilot.unmatched, at 3 in 30 days Runtime.proposePilot opens a marduk sortie with an owner-only pilots.create card (never twice while one waits, not again within 30 days of a no), created at Prototype. Checked by test/pilots.test.ts. Reviewed against the learning decision (prompt, model, tools and stage are the owner's: creation is by card) and the gate rules (owner-only Blue, Casper not asked for NERV's own proposals as for Instrumentality): consistent."
+      "evidence": "Isolated runtime and protocol gains the tools process (F-021): the only place MCP servers run, reached only on coordinator -> tools (tools.list, tools.call), no ledger, calls only while the fingerprint matches; it is what moves into a sandbox with F-049. Action gate and ledger gains deny-by-default MCP tools: grants in config (reads only), gated as server.tool with the grant's effect, the grant used in the scheduler, the call made by the tools process, the result recorded; ungranted back to Misato as invalid; EVA-03 does not run before F-049. Checked by test/mcp.test.ts. Reviewed against runtime-boundaries (A owns the ledger, B no secrets, C owns child lifecycle: the tools process is a C-owned child with no secrets) and the B-009 removal rule: consistent."
     },
     {
       "kind": "none",
