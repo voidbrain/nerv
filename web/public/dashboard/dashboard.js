@@ -112,6 +112,8 @@ function freshState() {
 }
 function esc(v) { return String(v).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c])); }
 function hhmm(t) { const d = new Date(t); return d.toTimeString().slice(0, 5); }
+/* B-002: a time with its day when it is not today (browser local time): 14:05 · yesterday 14:05 · 3 Nov 14:05 · 3 Nov 2025 14:05. */
+function dayTime(t, now) { const d = new Date(t), n = new Date(now === undefined ? Date.now() : now), y = new Date(n.getFullYear(), n.getMonth(), n.getDate() - 1); const same = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); if (same(d, n)) return hhmm(t); if (same(d, y)) return "yesterday " + hhmm(t); return d.toLocaleDateString("en-GB", d.getFullYear() === n.getFullYear() ? { day:"numeric", month:"short" } : { day:"numeric", month:"short", year:"numeric" }) + " " + hhmm(t); }
 function ago(t) { const s = Math.max(0, Math.round((Date.now() - t) / 1000)); return s < 60 ? s + " s" : s < 3600 ? Math.round(s / 60) + " min" : (s / 3600).toFixed(1) + " h"; }
 function L() { return (state.theme === "eva-full" || state.theme === "eva-basic") ? LABELS.eva : LABELS.neutral; }
 function isEvaFull() { return state.theme === "eva-full"; }
@@ -435,7 +437,7 @@ function renderSorties() {
     const pats = s.actions.map(a => a.ballot ? "<span class='badge b-" + a.ballot.pattern + "'>" + a.ballot.pattern[0].toUpperCase() + "</span>" : "<span class='badge b-muted'>·</span>").join(" ");
     return "<div class='card sortie" + (s.id === state.selected ? " sel" : "") + "' tabindex='0' role='button' aria-pressed='" + (s.id === state.selected) + "' data-s='" + s.id + "'>" +
       "<div class='row'><span class='b'>" + esc(s.id) + " · " + esc(s.title) + "</span>" + sortieBadge(s) + "</div>" +
-      "<div class='row small muted'><span>" + (s.source === "hyuga" ? "Hyuga" : "Aoba") + " · " + hhmm(s.started) + " · " + s.actions.length + " action" + (s.actions.length > 1 ? "s" : "") + " " + pats + "</span><span>$" + s.spent.toFixed(3) + "</span></div>" +
+      "<div class='row small muted'><span>" + (s.source === "hyuga" ? "Hyuga" : "Aoba") + " · " + dayTime(s.started) + " · " + s.actions.length + " action" + (s.actions.length > 1 ? "s" : "") + " " + pats + "</span><span>$" + s.spent.toFixed(3) + "</span></div>" +
       (s.why ? "<div class='tiny whyline'>" + esc(s.why) + "</div>" : "") +
       (s.outcome ? "<div class='tiny muted'>" + esc(s.outcome) + "</div>" : "") + "</div>";
   }).join("") || "<div class='muted small'>" + sortiesEmpty(f, q) + "</div>";
@@ -607,8 +609,8 @@ function actionBadge(a) {
 /* ================= RENDER: right column ================= */
 function renderAway() {
   const a = awaySummary();
-  document.getElementById("away-since").textContent = "since " + hhmm(a.since);
-  const items = a.list.map(s => "<div class='row small'><span><span class='" + (s.status === "done" ? "ok" : s.status === "failed" ? "danger" : "warn") + "'>■</span> " + hhmm(s.ended) + " · " + esc(s.title) + "</span><a href='#' data-s='" + s.id + "' class='muted tiny'>open</a></div><div class='tiny muted' style='margin:0 0 4px 14px'>" + esc(s.outcome) + "</div>").join("");
+  document.getElementById("away-since").textContent = "since " + dayTime(a.since);
+  const items = a.list.map(s => "<div class='row small'><span><span class='" + (s.status === "done" ? "ok" : s.status === "failed" ? "danger" : "warn") + "'>■</span> " + dayTime(s.ended) + " · " + esc(s.title) + "</span><a href='#' data-s='" + s.id + "' class='muted tiny'>open</a></div><div class='tiny muted' style='margin:0 0 4px 14px'>" + esc(s.outcome) + "</div>").join("");
   document.getElementById("away").innerHTML =
     "<div class='small' style='margin-bottom:6px'>While you were away I finished <b class='ok'>" + a.done + "</b> sorties, <b class='warn'>" + a.expired + "</b> approval expired without acting, <b class='danger'>" + a.failed + "</b> failed and is retrying, and Pen Pen delivered <b>" + a.delivered + "</b> reminders. Cost <b>$" + state.routeSpend.umbilical.toFixed(2) + "</b> on Umbilical, S² free.</div>" +
     items + "<button class='btn sm' id='btn-seen' style='margin-top:4px'>Mark as read</button>";

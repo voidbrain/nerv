@@ -1,27 +1,27 @@
 # NERV Agency backlog
 
-Current work ledger, reviewed 5 November 2026 against main `b38983a`. PR #1–#98 merged after green checks (#53–#98 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
+Current work ledger, reviewed 5 November 2026 against main `332189a`. PR #1–#101 merged after green checks (#53–#101 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
 
 <!-- recap:start · generated by tools/backlog-recap.mjs from the records; do not edit by hand -->
 **Recap as of 2026-11-05** (window 2026-10-30 – 2026-11-05).
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 28 | 6 |
-| **Require Human 🧑** | 2 | 0 |
+| **Open** | 28 | 4 |
+| **Require Human 🧑** | 2 | 1 |
 
 ### Last 7 days
 
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **Count** | 45 | 17 | 7 | 1 |
+| **Count** | 45 | 17 | 7 | 3 |
 
 ### Require Human 🧑
 
 | Features | Bugs |
 |---|---|
-| [F-036](#f-036) | — |
+| [F-036](#f-036) | [B-002](#b-002) |
 | [F-045](#f-045) |  |
 <!-- recap:end -->
 
@@ -36,9 +36,9 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔶 P2 | Open | 🟢 Small | ~0% |
+| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
 
-💻 **→ Human action required: No**<br />Next: show the day for sorties not from today.
+🧑 **→ Human action required: Yes**<br />After updating, open the dashboard (`npm start -- open dashboard`) with a sortie from an earlier day: its card reads like *Aoba · yesterday 21:03 · 1 action* or *Aoba · 3 Nov 14:05 · …* on one line, today's still *14:05*. Tell me if it wraps or reads wrong.
 
 | | |
 |---|---|
@@ -49,15 +49,15 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Reported 2026-11-05.
+**Next action / closure evidence:** Fixed in [PR #104](https://github.com/voidbrain/nerv/pull/104): `dayTime()` in web/public/dashboard/dashboard.js gives today's time alone, "yesterday HH:MM", "3 Nov HH:MM", and the year when it differs, in browser local time (style guide); used on sortie cards and both "while you were away" lists (simulation and live). Checked: test/dashboard.test.ts (today, yesterday, earlier this year, another year, midnight, yesterday across a year), fails without the fix; full suite and build pass. Not yet seen in a browser: the owner's look closes it. Reported 2026-11-05.
 
-**Estimates:** Small remaining effort; ~0% complete. Estimated 2026-11-05.
+**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner report 2026-11-05 |
+| PR / evidence | Owner report 2026-11-05; [PR #104](https://github.com/voidbrain/nerv/pull/104) |
 | Opened | 2026-11-05 |
-| Verification | Pending |
+| Verification | 2026-11-05: test/dashboard.test.ts (local run); visual check pending |
 | Reviewed | 2026-11-05 |
 
 </details>
@@ -98,39 +98,6 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 ---
 
-### B-004
-
-**"Why was S-… approved?" gets an invented answer**
-
-| Signal | Priority | Status | Effort | Complete |
-|:---:|---|---|---|---|
-| 🟡 | 🔺 P1 | Implemented | 🟡 Medium | ~90% |
-
-💻 **→ Human action required: No**<br />Close from the merged PR's green CI; optional owner check: ask Aoba `why S-…?` for a sortie you approved.
-
-| | |
-|---|---|
-| **Issue** | Owner report 2026-11-05: asked "why S-D263 approved?", Misato answered in Italian with made-up lore ("Sync Ratio 100%") instead of the ballot that approved it. Misato has no tool to read a sortie's record, so it guessed. |
-| **Reproduce** | `nerv chat "why S-D263 approved?"` (any existing sortie ID). |
-| **Check** | A "why" question about a sortie is answered from its record (the same explanation the dashboard's "why" line uses, src/why.ts): the decision, the ballot (each seat and its vote), any peer seats and consultant advice, who approved and when, in the request's language; an unknown ID says so; nothing is invented. The wider ability to read the agency is F-042. |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Next action / closure evidence:** Fixed in [PR #101](https://github.com/voidbrain/nerv/pull/101): a question with why / how come / explain / perché / come mai / spiega and a short sortie ID (`S-1A2B`) is answered from the ledger (`sorties.explain` in the scheduler, `explainRecord` in src/why.ts), never by the model: the sortie and its status, the consultant's advice if any, then each action with its Pattern and outcome, every seat's vote and reason (shadow seats marked as not counted), the owner's decision with when and where (or that it waits or expired), and whether it ran or failed; in the request's language; an unknown or ambiguous ID says so. The question is its own sortie, like any request. Checked: test/resume.test.ts (through every process: approved on Telegram, then asked in English and Italian, and an unknown ID; the model is not asked), test/why.test.ts (the question words in both languages, shadow seats, waiting, expired, failed, an ambiguous ID); full suite and build pass. Reported 2026-11-05.
-
-**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
-
-| Field | Value |
-|---|---|
-| PR / evidence | Owner report 2026-11-05; [PR #101](https://github.com/voidbrain/nerv/pull/101) |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-05: test/resume.test.ts, test/why.test.ts and full suite (local run) |
-| Reviewed | 2026-11-05 |
-
-</details>
-
----
 
 ### B-005
 
@@ -138,9 +105,9 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔹 P3 | Open | 🟢 Small | ~0% |
+| 🟡 | 🔹 P3 | Implemented | 🟢 Small | ~90% |
 
-💻 **→ Human action required: No**<br />Next: suggest only requests that work on a live base.
+💻 **→ Human action required: No**<br />Close from the merged PR's green CI.
 
 | | |
 |---|---|
@@ -151,15 +118,15 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Reported 2026-11-05.
+**Next action / closure evidence:** Fixed in [PR #104](https://github.com/voidbrain/nerv/pull/104): in live mode the chat placeholder says *Ask Misato: remind me to … at … · why S-1A2B? · what are my reminders?* (each answered on a live base: a request, the ledger answer of B-004, a reminders.list); the simulation keeps its demo commands. A real "status" answer is F-042. Checked: test/dashboard.test.ts (the live hint names no demo-only command and is set when live mode starts). Reported 2026-11-05.
 
-**Estimates:** Small remaining effort; ~0% complete. Estimated 2026-11-05.
+**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner report 2026-11-05 |
+| PR / evidence | Owner report 2026-11-05; [PR #104](https://github.com/voidbrain/nerv/pull/104) |
 | Opened | 2026-11-05 |
-| Verification | Pending |
+| Verification | 2026-11-05: test/dashboard.test.ts (local run) |
 | Reviewed | 2026-11-05 |
 
 </details>
@@ -200,39 +167,6 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 ---
 
-### B-007
-
-**A first call to a starting child process can time out on a slow machine**
-
-| Signal | Priority | Status | Effort | Complete |
-|:---:|---|---|---|---|
-| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
-
-💻 **→ Human action required: No**<br />Close once the windows job passes on this fix's PR and on main.
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-05: the windows job on main after #96 (run 42019073784) failed three tests that call the brain process right after starting it (test/misato.test.ts, test/model-setup.test.ts, test/model.test.ts), each with "Request timed out; outcome may be unknown" after about 5 s; a rerun of the same commit passed. `ProcessClient` starts a call's timer when it sends, so the child's own start-up (node, type stripping, loading modules) counts against the call. On a busy or slow machine (the Windows runner, the Tabgha mini PC right after boot) the first requests after a start can fail the same way. |
-| **Reproduce** | Run the suite on the windows runner a few times; or start a Runtime with the CPU busy and call the brain at once. |
-| **Check** | A child process says when it is ready; calls wait for that (with their own start-up limit, reported as "brain process not ready" if it passes) and only then start their timer; a test with a child that is slow to start passes; the windows job passes repeatedly. |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Next action / closure evidence:** Fixed in [PR #100](https://github.com/voidbrain/nerv/pull/100): each child process sends READY (`rpc.ts`) once it handles requests; `ProcessClient.call` sends nothing before it and starts the call's timer only then; a child that is not ready within 30 s fails the call as "not ready; nothing was sent" (a known outcome, unlike a timeout). The stand-in busy brain of test/isolation.test.ts says READY too. Checked: test/process-client.test.ts (a child slow to start answers a call with a timeout four times shorter than its start-up; a child that never says ready fails the call with nothing sent; the real brain says ready), both fail without the fix; full suite 134 pass in 13 s. Found 2026-11-05.
-
-**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
-
-| Field | Value |
-|---|---|
-| PR / evidence | CI run 42019073784 (failed, then passed on rerun); [PR #100](https://github.com/voidbrain/nerv/pull/100) |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-05: test/process-client.test.ts and full suite (local run) |
-| Reviewed | 2026-11-05 |
-
-</details>
-
----
 
 ## Features and improvements
 

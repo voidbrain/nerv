@@ -374,9 +374,9 @@
   window.renderAway = function () {
     const since = state.lastVisit; const ended = state.sorties.filter(s => s.ended && s.ended > since);
     const count = st => ended.filter(s => s.status === st).length; const delivered = (state.delivered || []).filter(t => t > since).length;
-    document.getElementById("away-since").textContent = "since " + hhmm(since);
+    document.getElementById("away-since").textContent = "since " + dayTime(since);
     document.getElementById("away").innerHTML = "<div class='small' style='margin-bottom:6px'>Since your last visit: <b class='ok'>" + count("done") + "</b> done, <b class='danger'>" + count("failed") + "</b> failed, <b class='warn'>" + count("stood-down") + "</b> stopped, and Pen Pen delivered <b>" + delivered + "</b> reminders.</div>" +
-      ended.slice(0, 8).map(s => "<div class='row small'><span><span class='" + (s.status === "done" ? "ok" : s.status === "failed" ? "danger" : "warn") + "'>■</span> " + hhmm(s.ended) + " · " + esc(s.title) + "</span><a href='#' data-s='" + s.id + "' class='muted tiny'>open</a></div>" + (s.outcome ? "<div class='tiny muted' style='margin:0 0 4px 12px'>" + esc(s.outcome) + "</div>" : "")).join("") +
+      ended.slice(0, 8).map(s => "<div class='row small'><span><span class='" + (s.status === "done" ? "ok" : s.status === "failed" ? "danger" : "warn") + "'>■</span> " + dayTime(s.ended) + " · " + esc(s.title) + "</span><a href='#' data-s='" + s.id + "' class='muted tiny'>open</a></div>" + (s.outcome ? "<div class='tiny muted' style='margin:0 0 4px 12px'>" + esc(s.outcome) + "</div>" : "")).join("") +
       "<button class='btn sm' id='btn-seen' style='margin-top:4px'>Mark as read</button>" +
       (state.brief ? "<details class='brief' id='brief-box' style='margin-top:6px'" + (state.briefOpen ? " open" : "") + "><summary class='small'>Hyuga's brief · " + esc(new Date(state.brief.created).toLocaleString(undefined, { weekday:"short", hour:"2-digit", minute:"2-digit" })) + "</summary><pre class='tiny' style='white-space:pre-wrap;margin:4px 0 0'>" + esc(state.brief.message) + "</pre></details>" : "");
   };
@@ -409,7 +409,9 @@
     document.getElementById("qv-budget").textContent = "$0.00"; document.getElementById("qd-budget").textContent = "local models · no per-token cost";
   };
   state.upcoming = []; state.selected = null; renderAll();
-  let started = false; const begin = () => { if (started) return; started = true; poll(); setInterval(poll, 3000); };
+  /* B-005: live mode suggests only what a live base answers (the simulation's status · approve AP-… commands are demo-only). */
+  const LIVE_HINT = "Ask Misato: remind me to … at … · why S-1A2B? · what are my reminders?";
+  let started = false; const begin = () => { if (started) return; started = true; document.getElementById("chat-in").placeholder = LIVE_HINT; poll(); setInterval(poll, 3000); };
   // F-039: the login code is swapped for a dashboard session (never the admin token), kept in this tab's sessionStorage so a
   // reload stays signed in; it ends after 12 h, when the service restarts, with `sessions revoke`, or when the tab closes.
   // A token pasted by hand is the admin token: it stays in memory only and is never stored.
