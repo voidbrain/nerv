@@ -231,9 +231,12 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .plan .ix { color:var(--muted); font-size:10px; }
 
 /* map */
-.mapwrap { position:relative; }
+.mapwrap { position:relative; max-width:66%; }
 #topo { width:100%; height:auto; display:block; background:var(--sea); }
-.maplegend { display:flex; gap:10px; flex-wrap:wrap; font-size:9px; color:var(--muted); padding:4px 8px; }
+/* Owner, 2026-11-05: a smaller map, its legend on the right. */
+.maprow { display:flex; gap:6px; align-items:stretch; }
+.maprow .mapwrap { flex:1 1 auto; min-width:0; }
+.maplegend { display:flex; flex-direction:column; justify-content:center; gap:3px; flex:0 0 auto; font-size:9px; color:var(--muted); padding:4px 8px 4px 2px; }
 .sq { display:inline-block; width:7px; height:7px; margin-right:3px; vertical-align:middle; }
 
 /* EVA cages */
@@ -428,8 +431,10 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
 
       <section class="panel" id="p-bases">
         <div class="hdr"><span data-l="bases">NERV bases · Kaji line</span><span class="sub" id="bases-sub"></span></div>
-        <div class="mapwrap"><canvas id="topo" width="540" height="250" aria-label="Map of NERV bases and links"></canvas></div>
-        <div class="maplegend"><span><i class="sq" style="background:var(--ok)"></i>online</span><span><i class="sq" style="background:var(--warn)"></i>standby</span><span><i class="sq" style="background:#666"></i>offline (static)</span><span>- - - Kaji line</span><span><i class="sq" style="background:var(--accent)"></i>plug</span><span><i class="sq" style="background:var(--ok)"></i>result</span><span><i class="sq" style="background:var(--info)"></i>node sync</span></div>
+        <div class="maprow">
+          <div class="mapwrap"><canvas id="topo" width="540" height="250" aria-label="Map of NERV bases and links"></canvas></div>
+          <div class="maplegend"><span><i class="sq" style="background:var(--ok)"></i>online</span><span><i class="sq" style="background:var(--warn)"></i>standby</span><span><i class="sq" style="background:#666"></i>offline (static)</span><span>- - - Kaji line</span><span><i class="sq" style="background:var(--accent)"></i>plug</span><span><i class="sq" style="background:var(--ok)"></i>result</span><span><i class="sq" style="background:var(--info)"></i>node sync</span></div>
+        </div>
         <div class="pad list" id="bases"></div>
       </section>
 

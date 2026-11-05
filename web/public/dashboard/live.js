@@ -48,7 +48,7 @@
       reason:c.reason, created:Date.now(), expires:Date.parse(c.expires) };
   }
   // The banner names the base this page shows, and the other bases on the Kaji line with their state.
-  const liveBaseName = d => d && d.base ? d.base.name + " · " + d.base.id : "this base";
+  const liveBaseName = d => d && d.base ? d.base.id + " · " + d.base.name : "this base";
   function kajiSummary() {
     const peers = (state.kajiBases || []).filter(b => !b.self && b.status === "enrolled");
     if (!peers.length) return "no other base on the Kaji line";
@@ -316,12 +316,12 @@
     if (!list.length) {
       const base = (state.doctor || {}).base || { id:"NERV-01", name:"Neo Tokyo-3" };
       document.getElementById("bases-sub").textContent = BASES[0].status === "online" ? "1/1 online" : "1/1 " + (BASES[0].status === "standby" ? "degraded" : "down");
-      document.getElementById("bases").innerHTML = "<div class='card'><div class='row'><span class='b'>" + esc(base.name) + " · " + esc(base.id) + "</span>" + (BASES[0].status === "standby" ? "<span class='badge b-warn'>DEGRADED</span>" : BASES[0].status === "offline" ? "<span class='badge b-danger'>DOWN</span>" : "<span class='badge b-ok'>ONLINE</span>") + "</div><div class='tiny muted'>this machine · coordinator, scheduler, brain</div><div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div></div>" +
+      document.getElementById("bases").innerHTML = "<div class='card'><div class='row'><span class='b'>" + esc(base.id) + " · " + esc(base.name) + "</span>" + (BASES[0].status === "standby" ? "<span class='badge b-warn'>DEGRADED</span>" : BASES[0].status === "offline" ? "<span class='badge b-danger'>DOWN</span>" : "<span class='badge b-ok'>ONLINE</span>") + "</div><div class='tiny muted'>this machine · coordinator, scheduler, brain</div><div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div></div>" +
         "<div class='muted small' style='margin-top:4px'>No Kaji line yet: enrol your bases (INSTALL, Kaji line) to see them here.</div>";
       return;
     }
     document.getElementById("bases-sub").textContent = list.filter(b => b.online).length + "/" + list.filter(b => b.status === "enrolled").length + " online";
-    document.getElementById("bases").innerHTML = list.map(b => "<div class='card'><div class='row'><span class='b'>" + esc(b.name) + " · " + esc(b.baseId) + (b.main ? " <span class='badge b-info' title='Aoba here is the one channel while the Kaji line is up'>MAIN</span>" : "") + "</span><span class='badge " + (b.status === "revoked" ? "b-muted'>REVOKED" : b.self && BASES[0].status === "standby" ? "b-warn'>DEGRADED" : b.self && BASES[0].status === "offline" ? "b-danger'>DOWN" : !b.online ? "b-warn'>OFFLINE" : b.health && b.health.state === "degraded" ? "b-warn'>DEGRADED" : "b-ok'>ONLINE") + "</span></div>" +
+    document.getElementById("bases").innerHTML = list.map(b => "<div class='card'><div class='row'><span class='b'>" + esc(b.baseId) + " · " + esc(b.name) + (b.main ? " <span class='badge b-info' title='Aoba here is the one channel while the Kaji line is up'>MAIN</span>" : "") + "</span><span class='badge " + (b.status === "revoked" ? "b-muted'>REVOKED" : b.self && BASES[0].status === "standby" ? "b-warn'>DEGRADED" : b.self && BASES[0].status === "offline" ? "b-danger'>DOWN" : !b.online ? "b-warn'>OFFLINE" : b.health && b.health.state === "degraded" ? "b-warn'>DEGRADED" : "b-ok'>ONLINE") + "</span></div>" +
       "<div class='tiny muted'>" + (b.self ? "this machine" : esc(b.address)) + " · key " + esc(b.fingerprint.slice(0, 9)) + " · " + (b.self ? "local" : esc(sinceText(b.lastSeen))) + "</div>" +
       (b.self ? "<div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div>" : "") +
       (!b.self && b.online && b.health && b.health.reasons.length ? b.health.reasons.map(r => "<div class='tiny warn'>▲ " + esc(r) + "</div>").join("") : "") +
@@ -376,11 +376,13 @@
   window.renderBudget = function () { document.getElementById("budget").innerHTML = PLANNED; };
   // F-051: the real pilot roster (config.json pilots), the generic pilot first; stages change with `nerv pilots set ID --stage`.
   window.renderMelons = function () {
-    const roster = state.pilots; const box = document.getElementById("melons"); if (!roster) { box.innerHTML = PLANNED; return; }
+    // undefined: the first poll has not answered yet; null: this service has no roster (older version).
+    const roster = state.pilots; const box = document.getElementById("melons"); if (roster === undefined) { box.innerHTML = "<div class='muted small'>Loading pilots…</div>"; return; } if (!roster) { box.innerHTML = PLANNED; return; }
     const badge = { prototype:"b-info", test:"b-orange", production:"b-ok" }, short = { prototype:"PROTO", test:"TEST", production:"PROD" };
-    const generic = modelsData && modelsData.roles && modelsData.roles.consultant && modelsData.roles.consultant.model;
+    // B-017: GET /api/models nests the roles under models (it said "off" with a consultant set).
+    const roles = modelsData && modelsData.models && modelsData.models.roles; const generic = roles && roles.consultant && roles.consultant.model;
     const card = (name, sub, right, line) => "<div class='card'><div class='row'><span class='b'>" + esc(name) + "</span>" + right + "</div><div class='row tiny muted'><span>" + esc(sub) + "</span></div>" + (line ? "<div class='tiny muted'>" + esc(line) + "</div>" : "") + "</div>";
-    box.innerHTML = card("Generic pilot", "anything no specialist covers · " + (generic || "off"), "<span class='badge b-muted'>GENERIC</span>", generic ? "" : "Turn it on: nerv models set consultant MODEL") +
+    box.innerHTML = card("Generic pilot", "anything no specialist covers · " + (generic || "off"), "<span class='badge b-muted'>GENERIC</span>", generic ? "" : "Turn it on: nerv pilots generic MODEL") +
       roster.map(p => card(p.name, p.domain + " · " + p.model + (p.pinned ? " · pinned" : ""), "<span class='badge " + (p.retired ? "b-muted" : badge[p.stage]) + "'>" + (p.retired ? "RETIRED" : short[p.stage]) + "</span>", "keywords: " + p.keywords.join(", "))).join("") +
       (roster.length ? "" : "<div class='muted small'>No specialists yet. Add one: nerv pilots add ID --name … --domain … --keywords … --model …, or approve a proposal from the Marduk Institute.</div>");
   };
