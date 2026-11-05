@@ -903,8 +903,14 @@ function chat(text) {
 }
 document.getElementById("chat-form").addEventListener("submit", e => { e.preventDefault(); const i = document.getElementById("chat-in"); const v = i.value.trim(); if (v) { chat(v); i.value = ""; } });
 function guessPreset(t) { t = t.toLowerCase(); if (/mail|inbox|summar/.test(t)) return "brief"; if (/reply|tell|write to|email/.test(t)) return "reply"; if (/branch|repo/.test(t)) return "branches"; if (/charg|battery|fpv/.test(t)) return "charger"; if (/note|clip|page|web/.test(t)) return "note"; return null; }
-document.getElementById("theme").addEventListener("change", e => setTheme(e.target.value));
-document.getElementById("btn-crt").addEventListener("click", e => { state.crt = !state.crt; document.body.classList.toggle("crt-on", state.crt); e.target.setAttribute("aria-pressed", String(state.crt)); });
+/* The chosen theme and CRT effect are remembered in this browser only (a per-viewer preference); without storage the
+   page simply starts on the default. */
+const PREFS = "nerv.dashboard.prefs";
+function readPrefs() { try { const p = JSON.parse(localStorage.getItem(PREFS) || "{}"); return p && typeof p === "object" ? p : {}; } catch { return {}; } }
+function savePrefs() { try { localStorage.setItem(PREFS, JSON.stringify({ theme:state.theme, crt:!!state.crt })); } catch { /* storage blocked: not remembered */ } }
+function setCrt(on) { state.crt = on; document.body.classList.toggle("crt-on", on && state.theme === "eva-full"); const b = document.getElementById("btn-crt"); if (b) b.setAttribute("aria-pressed", String(on)); }
+document.getElementById("theme").addEventListener("change", e => { setTheme(e.target.value); savePrefs(); });
+document.getElementById("btn-crt").addEventListener("click", () => { setCrt(!state.crt); savePrefs(); });
 document.getElementById("btn-spear").addEventListener("click", spearAll);
 document.getElementById("btn-dummy").addEventListener("click", () => { state.dummy = true; document.getElementById("dummy-banner").classList.remove("hidden"); log("Dummy Plug: S² and Umbilical unreachable", "danger"); renderAll(); });
 document.getElementById("btn-undummy").addEventListener("click", () => { state.dummy = false; document.getElementById("dummy-banner").classList.add("hidden"); log("Routes restored · waiting sorties resume", "ok"); state.sorties.filter(s => s.status === "waiting-route").forEach(s => { s.status = "active"; runSortie(s); }); renderAll(); });
@@ -917,6 +923,8 @@ function setTheme(name) {
 
 // Live: only this machine is a base; simulated cages and pilots would point at bases that do not exist.
 if (LIVE) { state = freshState(); state.upcoming = []; BASES.splice(1); LINKS.length = 0; CAGES.forEach(c => { c.base = "tokyo3"; c.planned = c.id !== "EVA-02"; if (c.id === "EVA-02") c.label = "PRODUCTION · in-process executor, not sandboxed yet"; else c.label = c.label.split(" · ")[0] + " · planned"; }); PILOTS.length = 0; PILOTS.push({ id:"owner", stage:"production" }, { id:"misato", stage:"production" }); } else seed();
-{ const t = new URLSearchParams(location.search).get("theme"); const th = document.getElementById("theme");
+// ?theme= in the address wins; otherwise the theme this browser last chose.
+{ const prefs = readPrefs(); const t = new URLSearchParams(location.search).get("theme") || prefs.theme; const th = document.getElementById("theme");
+  if (prefs.crt === true) setCrt(true);
   if (t && [...th.options].some(o => o.value === t)) { th.value = t; setTheme(t); } else { applyLabels(); renderAll(); } }
 initMap(); requestAnimationFrame(frame);

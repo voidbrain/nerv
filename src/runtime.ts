@@ -14,7 +14,7 @@ import type {Digest,Exchange} from './instrumentality.ts';
 import type {Episode,Fact} from './memory.ts';
 import type {BaseEntry,SignedRecord} from './kaji.ts';
 import {ONLINE_MS,type BaseHealth,type HeardHealth,type RegistryPort} from './kaji-link.ts';
-import {briefDue,localClock} from './brief.ts';
+import {briefDue,composeBrief,gatherBrief,localClock} from './brief.ts';
 export interface ChatReply {sortieId:string;reply?:string;error?:string;steps:Step[];waiting:{approvalId:string;tool:string;reason:string}[];
  /** Set when the main base handled the request (F-036 dispatch): its sortie, cards and memory are there. */
  base?:{id:string;name:string}}
@@ -244,6 +244,23 @@ export class Runtime implements StoreApi {
   * at HH:MM once per local day, or when idle (an hour without requests, at most once in 20 hours, only with something new).
   * Each day or idle window is marked attempted before any await, so overlapping ticks never consolidate twice.
   */
+ /**
+  * Hyuga's brief (F-003, F-028), written into the inbox once a local day at its time, so every channel delivers it from
+  * there (Telegram, the menu-bar app, the dashboard) and none sends it twice. The schedule is read on every tick, so a
+  * change by chat applies within a minute. `initial` is the last brief sent before briefs lived in the inbox.
+  */
+ startBrief(schedule:()=>{at:string;timeZone:string;language:'it'|'en';base?:string}|undefined,initial?:string,everyMs=60_000){
+  let attempted:string|undefined;
+  const tick=async()=>{
+   const b=schedule();if(!b)return;const now=new Date();
+   const last=await this.nervous.call('inbox.lastBrief').catch(()=>null) as string|null ?? initial ?? null;
+   const date=briefDue(now,b.timeZone,b.at,last?localClock(new Date(last),b.timeZone).date:undefined);if(!date||attempted===date)return;attempted=date;
+   const facts=await gatherBrief(this,last?new Date(last):new Date(now.getTime()-86_400_000));
+   await this.nervous.call('inbox.brief',{message:composeBrief({now,timeZone:b.timeZone,language:b.language,...(b.base?{base:b.base}:{}),...facts})}).catch(()=>{attempted=undefined;});
+  };
+  if(!this.briefTimer)this.briefTimer=setInterval(()=>{void tick();},everyMs);void tick();
+ }
+ private briefTimer?:NodeJS.Timeout;
  startInstrumentality(schedule:()=>{mode?:{at:string}|{when:'idle'};timeZone:string},everyMs=60_000){
   let attempted:string|undefined;
   const tick=async()=>{
@@ -292,5 +309,5 @@ export class Runtime implements StoreApi {
   if(!this.home)return undefined;let url;try{url=ollamaUrlOf(readConfig(this.home).models);}catch{return undefined;}
   const found=await detectOllama(url);return {reachable:found.reachable,url:found.url,models:found.models.map(m=>m.name)};
  }
- async close(){if(this.resumer)clearInterval(this.resumer);if(this.instrumentality)clearInterval(this.instrumentality);await Promise.allSettled([this.nervous.close(),this.brain.close()]);}
+ async close(){if(this.briefTimer)clearInterval(this.briefTimer);if(this.resumer)clearInterval(this.resumer);if(this.instrumentality)clearInterval(this.instrumentality);await Promise.allSettled([this.nervous.close(),this.brain.close()]);}
 }
