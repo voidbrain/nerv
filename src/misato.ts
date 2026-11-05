@@ -49,6 +49,12 @@ export function waitingReply(language:'it'|'en',tool:string,args:Record<string,u
  const what=tool+(about?` (“${about.slice(0,120)}”)`:'');
  return language==='it'?`In attesa della tua approvazione: ${what}. I dettagli sono nella card; proseguo appena decidi.`:`Waiting for your approval: ${what}. The card has the details; I will carry on once you decide.`;
 }
+/** What the owner reads when the action already ran and the model only repeats itself (owner report 2026-11-05: a small
+    model re-proposed an approved action until the step limit, so the owner saw "could not finish" for work that was done). */
+export function doneReply(language:'it'|'en',ran:{tool:string;args:Record<string,unknown>}[]):string {
+ const what=ran.map(r=>{const about=typeof r.args.text==='string'?r.args.text:typeof r.args.title==='string'?r.args.title:'';return r.tool+(about?` (“${about.slice(0,120)}”)`:'');}).join(', ');
+ return language==='it'?`Fatto: ${what}.`:`Done: ${what}.`;
+}
 /** Adds dueLocal next to every UTC due time, so the planner never converts time zones itself (a local model gets it wrong). */
 function localize(value:unknown,timeZone:string):unknown {
  if(Array.isArray(value))return value.map(v=>localize(v,timeZone));

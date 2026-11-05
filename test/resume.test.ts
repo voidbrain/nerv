@@ -60,3 +60,13 @@ test('the resume lives in the ledger: decided while the service was down, it res
   const claimed=new Store(t.db);try{assert.equal(claimed.ledger.claimResume(chat.sortieId),null,'a claimed resume is never handed out twice');}finally{claimed.close();}
  }finally{await t.close();}
 });
+test('after the owner approves, an action proposed again is not run twice: the follow-up says it is done',async()=>{
+ // Owner report 2026-11-05 (Tabgha, small model): the resumed loop re-proposed the approved action until the step limit.
+ const t=await setup([ADD,ADD,ADD,ADD]);
+ try{
+  const {r,follow}=await t.start();const chat=await r.chat('Remind me to call Ada');
+  await r.decide(chat.waiting[0]!.approvalId,'approve','telegram');
+  await until(()=>follow.length===1);
+  assert.equal(follow[0]!.reply,'Done: reminders.add (“Call Ada”).');assert.equal((await r.list()).length,1,'it ran once, at the approval');
+ }finally{await t.close();}
+});

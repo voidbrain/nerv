@@ -891,6 +891,40 @@ Current work ledger, reviewed 5 November 2026 against main `af08f42`. PR #1–#8
 
 ---
 
+### F-040
+
+**Misato never runs an approved action twice, and reports what ran instead of "could not finish"**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
+
+💻 **→ Human action required: No**<br />Close from this PR's green CI after merge. Optional owner check on Tabgha after updating: `nerv chat "Remember that I drink tea at 5"`, approve on Aoba; the follow-up should be *Done: memory.remember (…)*.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-05: after approving a card made on Tabgha (small model), the follow-up relayed through Aoba was *I could not finish: Step limit (6) reached*, although the fact was stored. Resumed after the decision (F-033, archived in docs/archive/backlog-2026.md), the small model kept proposing the action that had just run until the step limit. |
+| **Reproduce** | A Misato loop whose model proposes the same action again after it ran, directly or after an approval. |
+| **Check** | An action identical (tool and arguments) to one that already ran in the sortie is never run again: the turn ends with the service's *Done: …* in the request's language; at the step limit, actions that ran are reported as done instead of *could not finish*; nothing ran → still *Step limit*. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Implemented in [PR #88](https://github.com/voidbrain/nerv/pull/88): the planner loop stops on a repeat of an action that already ran (`argsHash` of tool and arguments against the sortie's granted steps) with `doneReply`, and at the step limit reports what ran (`doneReply`) when anything did. Checked: test/misato.test.ts (a repeat ends with *Done: reminders.add (“Stretch”)* and runs once; at the limit after a list, *Fatto: reminders.list.*; nothing ran, still *Step limit*), test/resume.test.ts (after an approval, a re-proposed action is not run again and the follow-up says it is done), suite 120 pass.
+
+**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner report 2026-11-05; [PR #88](https://github.com/voidbrain/nerv/pull/88) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05: tests above (local run) |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
 
 
 
