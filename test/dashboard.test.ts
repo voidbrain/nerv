@@ -161,7 +161,10 @@ test('the CRT effect: the original static scanlines, darker borders, a slight pa
  assert.match(html,/animation:crt-line-a 17s linear infinite/);assert.match(html,/animation:crt-line-b 29s linear -11s infinite/,'different cycles, offset: irregular together');
  for(const o of /@keyframes crt-flicker \{([^\n]*)\}/.exec(html)![1]!.matchAll(/opacity:([.0-9]+)/g))assert.ok(Number(o[1])>=0.9,'a slight flicker, never a flash');
  assert.match(html,/@media \(prefers-reduced-motion:reduce\) \{ body\.theme-eva\.crt-on \.wrap, body\.theme-eva\.crt-on::before, body\.theme-eva\.crt-on \.wrap::after \{ animation:none; \}/);
- assert.match(html,/<span data-l="melons">Marduk Institute · Pilots<\/span>/);assert.match(html,/<span class="sub" data-l="melonsSub">Kaji's watermelons · proto → test → prod<\/span>/);
+ // Two boxes (owner, 2026-11-05): pilots are the Marduk Institute, skills are Kaji's watermelons.
+ assert.match(html,/<span data-l="melons">Marduk Institute · Pilots<\/span><span class="sub">proto → test → prod<\/span>/);
+ assert.match(html,/<span data-l="skills">Kaji's watermelons · skills<\/span>/);assert.match(html,/id="skills"><div class="muted small">Planned · not connected yet\./);
+ const js=readFileSync('web/public/dashboard/dashboard.js','utf8');assert.match(js,/skills:"Kaji's watermelons · skills"/);assert.match(js,/skills:"Skills"/);
 });
 test('the dashboard API lists the pilot roster for the Marduk Institute panel (F-051)',async()=>{
  const {makeServer}=await import('../src/server.ts');
