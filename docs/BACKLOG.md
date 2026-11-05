@@ -104,9 +104,9 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔺 P1 | Open | 🟡 Medium | ~0% |
+| 🟡 | 🔺 P1 | Implemented | 🟡 Medium | ~90% |
 
-💻 **→ Human action required: No**<br />Next: answer "why" questions from the ledger, never from the model's imagination.
+💻 **→ Human action required: No**<br />Close from the merged PR's green CI; optional owner check: ask Aoba `why S-…?` for a sortie you approved.
 
 | | |
 |---|---|
@@ -117,15 +117,15 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Reported 2026-11-05.
+**Next action / closure evidence:** Fixed in [PR PR_B4]: a question with why / how come / explain / perché / come mai / spiega and a short sortie ID (`S-1A2B`) is answered from the ledger (`sorties.explain` in the scheduler, `explainRecord` in src/why.ts), never by the model: the sortie and its status, the consultant's advice if any, then each action with its Pattern and outcome, every seat's vote and reason (shadow seats marked as not counted), the owner's decision with when and where (or that it waits or expired), and whether it ran or failed; in the request's language; an unknown or ambiguous ID says so. The question is its own sortie, like any request. Checked: test/resume.test.ts (through every process: approved on Telegram, then asked in English and Italian, and an unknown ID; the model is not asked), test/why.test.ts (the question words in both languages, shadow seats, waiting, expired, failed, an ambiguous ID); full suite and build pass. Reported 2026-11-05.
 
-**Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-05.
+**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
 
 | Field | Value |
 |---|---|
 | PR / evidence | Owner report 2026-11-05 |
 | Opened | 2026-11-05 |
-| Verification | Pending |
+| Verification | 2026-11-05: test/resume.test.ts, test/why.test.ts and full suite (local run) |
 | Reviewed | 2026-11-05 |
 
 </details>
