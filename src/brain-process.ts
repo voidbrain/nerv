@@ -54,7 +54,7 @@ process.on('message',(value:unknown)=>{
    const route=models.roles?.misato?.route ?? (models.local?'local':models.cloud?.enabled?'cloud':undefined);
    if(!route)return {error:'No model route for Misato: add models.local (or enable models.cloud) in config.json, then run nerv reload. See docs/INSTALL.md, section \"Model routes\".'};
    const remote=Array.isArray(params.remote)?params.remote as RemoteOffer[]:[];
-   const ask=misatoAsk({request:params.request as string,history:params.history as Step[],tools:remote.length?[...toolDocs,remoteToolDoc(remote)]:toolDocs,now:new Date().toISOString(),timeZone,...(params.context?{context:params.context as Turn[]}:{}),...(params.memory?{memory:params.memory as Recalled[]}:{}),...(typeof params.advice==='string'?{advice:params.advice}:{})},route);
+   const ask=misatoAsk({request:params.request as string,history:params.history as Step[],tools:remote.length?[...toolDocs,remoteToolDoc(remote)]:toolDocs,now:new Date().toISOString(),timeZone,...(params.context?{context:params.context as Turn[]}:{}),...(params.memory?{memory:params.memory as Recalled[]}:{}),...(typeof params.advice==='string'?{advice:params.advice}:{}),...(params.language==='it'||params.language==='en'?{language:params.language}:{})},route);
    try{const reply=await run(ask,forRole(models,'misato'));const plan=parsePlan(reply.text);return plan?{plan,model:reply.model}:{invalid:true,model:reply.model};}
    catch(e){return {error:e instanceof ModelError?e.message:'Model route failed.'};}
   }
