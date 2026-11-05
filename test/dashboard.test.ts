@@ -107,3 +107,18 @@ test('the dashboard API (admin, through the scheduler process): search sorties b
   assert.equal((await call('/reminders/'+reminder.id,'PATCH',{title:'too late'})).status,404,'a cancelled reminder cannot be edited');
  }finally{await new Promise<void>(done=>server.close(()=>done()));await runtime.close();rmSync(dir,{recursive:true,force:true});}
 });
+test('sortie times carry their day when not today, in browser local time; live mode suggests only what a live base answers (B-002, B-005)',async()=>{
+ const {readFileSync}=await import('node:fs');const src=readFileSync('web/public/dashboard/dashboard.js','utf8');
+ const fn=(name:string)=>new RegExp(`^function ${name}\\(.*\\}$`,'m').exec(src)![0];
+ const dayTime=new Function(`${fn('hhmm')}\n${fn('dayTime')}\nreturn dayTime;`)() as (t:number,now:number)=>string;
+ const now=new Date(2026,10,5,15,30).getTime(),at=(y:number,m:number,d:number,h:number,mi:number)=>new Date(y,m,d,h,mi).getTime();
+ assert.equal(dayTime(at(2026,10,5,9,7),now),'09:07');
+ assert.equal(dayTime(at(2026,10,4,23,50),now),'yesterday 23:50');
+ assert.equal(dayTime(at(2026,10,3,14,5),now),'3 Nov 14:05');
+ assert.equal(dayTime(at(2025,11,31,8,0),now),'31 Dec 2025 08:00');
+ assert.equal(dayTime(at(2026,0,1,0,10),at(2026,0,1,8,0)),'00:10','midnight is still today');
+ assert.equal(dayTime(at(2025,11,31,22,0),at(2026,0,1,8,0)),'yesterday 22:00','yesterday across a year');
+ const live=readFileSync('web/public/dashboard/live.js','utf8');const hint=/const LIVE_HINT = "([^"]+)"/.exec(live)![1]!;
+ assert.match(hint,/why S-1A2B\?/);assert.doesNotMatch(hint,/\bstatus\b|AP-|spear/i,'no demo-only command in live mode');
+ assert.match(live,/document\.getElementById\("chat-in"\)\.placeholder = LIVE_HINT/);
+});
