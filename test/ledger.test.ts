@@ -1,5 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
+import {POSIX} from './fixtures/posix.ts';
 import {mkdtempSync,rmSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 import {tmpdir} from 'node:os';import {join} from 'node:path';
@@ -231,6 +232,6 @@ test('the Scrolls load from scrolls.json; an invalid or tamperable file stops st
    writeFileSync(file,content);assert.throws(()=>readScrolls(home),message);
    const run=cli('doctor');assert.equal(run.status,1);assert.match(run.stderr,message);
   }
-  writeFileSync(file,'{}');chmodSync(file,0o666);assert.throws(()=>readScrolls(home),/writable by others/);
+  writeFileSync(file,'{}');chmodSync(file,0o666);if(POSIX)assert.throws(()=>readScrolls(home),/writable by others/,'Unix modes only; on Windows the profile ACL protects it');
  }finally{rmSync(home,{recursive:true,force:true});}
 });

@@ -20,7 +20,7 @@ const MAX_LOGIN_CODES=5;
 /** A dashboard session lasts 12 hours at most; a restart of the service ends it sooner. */
 export const SESSION_TTL_MS=12*60*60_000;
 const MAX_SESSIONS=20;
-export function makeServer(store: StoreApi, token: string, options: {webRoot?:string; language?:string; timeZone?:string;base?:{id:string;name:string};tls?:{key:Buffer;cert:Buffer};native?:{auth:NativeAuth;fingerprint:string;port:number;webPort:number};loginCodeTtlMs?:number;sessionTtlMs?:number} = {}) {
+export function makeServer(store: StoreApi, token: string, options: {webRoot?:string; language?:string; timeZone?:string;base?:{id:string;name:string};tls?:{key:Buffer;cert:Buffer};native?:{auth:NativeAuth;fingerprint:string;port:number;webPort:number};loginCodeTtlMs?:number;sessionTtlMs?:number;onStop?:()=>void} = {}) {
   if(options.native&&!options.tls)throw new Error('Native pairing requires TLS.');
   const loginCodes=new Map<string,number>();const codeTtl=options.loginCodeTtlMs ?? LOGIN_CODE_TTL_MS;
   const dropExpired=()=>{const now=Date.now();for(const [c,expires] of loginCodes)if(expires<=now)loginCodes.delete(c);for(const [t,expires] of sessions)if(expires<=now)sessions.delete(t);};
@@ -97,7 +97,9 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
         try{reply(200,await store.ask({prompt:b.prompt,privacy:(b.privacy ?? 'local-only') as 'local-only'|'any',...(b.system!==undefined?{system:b.system as string}:{}),...(b.route!==undefined?{route:b.route as 'local'|'cloud'}:{})}));}
         catch(e){if(e instanceof RpcFault&&e.code===-32602)throw new Error('Invalid ask: prompt up to 16000 characters, privacy local-only or any, route local or cloud.');if(e instanceof RpcFault&&e.code===-32010){reply(502,{error:e.message});return;}throw e;}
       }
-      else if(!options.native&&!root&&(path==='/api/session/codes'||path==='/api/session/revoke'))reply(403,{error:'Only the CLI (with the admin token) can mint login codes or revoke sessions.'});
+      // Stops this service the way Ctrl+C does (F-037: `service stop` on Windows, where ending the task leaves Node running). Admin token only.
+      else if(!options.native&&root&&req.method==='POST'&&path==='/api/stop'){if(!options.onStop){reply(503,{error:'Stop unavailable.'});return;}reply(202,{message:'Stopping.'});setImmediate(options.onStop);}
+      else if(!options.native&&!root&&(path==='/api/session/codes'||path==='/api/session/revoke'||path==='/api/stop'))reply(403,{error:'Only the CLI (with the admin token) can mint login codes, revoke sessions or stop the service.'});
       else if(!options.native&&root&&req.method==='POST'&&path==='/api/session/revoke'){const n=sessions.size;sessions.clear();reply(200,{revoked:n});}
       else if(!options.native&&root&&req.method==='POST'&&path==='/api/session/codes'){dropExpired();if(loginCodes.size>=MAX_LOGIN_CODES){reply(429,{error:'Too many unused login codes; wait a minute.'});return;}const code=randomBytes(16).toString('hex');loginCodes.set(code,Date.now()+codeTtl);reply(201,{code,expiresInMs:codeTtl});}
       else if(path==='/api/memory'||path.startsWith('/api/memory/')&&path!=='/api/memory/consolidate'){

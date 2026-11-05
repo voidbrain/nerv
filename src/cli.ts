@@ -266,10 +266,11 @@ try {
         const live=()=>{try{return readConfig(home);}catch{return config;}};
         runtime.startInstrumentality(()=>{const c=live();return {...(c.instrumentality?{mode:c.instrumentality}:{}),timeZone:c.timeZone};});
         let server:ReturnType<typeof makeServer>;let native:ReturnType<typeof makeServer>|undefined;
-        try{server=makeServer(runtime,token,{webRoot,...config});native=nativeTLS&&nativeAuth?makeServer(runtime,token,{...config,tls:nativeTLS,native:{auth:nativeAuth,fingerprint:nativeTLS.fingerprint,port:config.nativePort ?? 4319,webPort:config.port}}):undefined;}catch(e){await runtime.close();nativeAuth?.close();throw e;}
+        let close:()=>void=()=>{};
+        try{server=makeServer(runtime,token,{webRoot,...config,onStop:()=>close()});native=nativeTLS&&nativeAuth?makeServer(runtime,token,{...config,tls:nativeTLS,native:{auth:nativeAuth,fingerprint:nativeTLS.fingerprint,port:config.nativePort ?? 4319,webPort:config.port}}):undefined;}catch(e){await runtime.close();nativeAuth?.close();throw e;}
         const servers=native?[server,native]:[server];let stopped=false;
         let aoba:TelegramChannel|undefined;
-        const close=()=>{if(stopped)return;stopped=true;void aoba?.stop();void kaji?.stop();void Promise.all(servers.map(s=>new Promise<void>(done=>{s.close(()=>done());s.closeIdleConnections();}))).then(()=>runtime.close()).finally(()=>nativeAuth?.close());};
+        close=()=>{if(stopped)return;stopped=true;void aoba?.stop();void kaji?.stop();void Promise.all(servers.map(s=>new Promise<void>(done=>{s.close(()=>done());s.closeIdleConnections();}))).then(()=>runtime.close()).finally(()=>nativeAuth?.close());};
         runtime.nervous.child.once('exit',()=>{if(!stopped){console.error('Scheduler unavailable; shutting down for supervisor recovery.');process.exitCode=1;close();}});
         for(const listener of servers)listener.on('error',e=>{console.error(e.message);process.exitCode=1;close();});
         if(native)await new Promise<void>((done,reject)=>{native.once('error',reject);native.listen(config.nativePort ?? 4319,'127.0.0.1',done);}).catch(e=>{close();throw e;});
