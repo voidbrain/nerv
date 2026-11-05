@@ -15,6 +15,8 @@ const SKEW_MS=120_000,NONCE_MS=10*60_000,MAX_BODY=256*1024,HEARTBEAT_MS=30_000;
 export interface RegistryPort {
  bases():Promise<BaseEntry[]>;records():Promise<SignedRecord[]>;add(records:SignedRecord[]):Promise<number>;
  seen(updates:Record<string,string>):Promise<void>;lastSeen():Promise<Record<string,string>>;
+ /** The owner's main base, if named (F-036 phase 2). Optional: a registry without one has no main base. */
+ main?():Promise<string|undefined>;
 }
 /** host or host:port; the default port is KAJI_PORT. IPv4 and hostnames only for now. */
 export function endpoint(address:string):{host:string;port:number} {
@@ -54,6 +56,17 @@ export function sanitizeHealth(value:unknown):BaseHealth|undefined {
 }
 /** Missed heartbeats in a row before a peer is logged unreachable: as many as fit in the online window (3 at 30 s / 90 s). */
 export const missesToLog=(everyMs:number)=>Math.max(1,Math.ceil(ONLINE_MS/everyMs));
+/** What a base relays to the main base's Aoba (F-036 phase 2): text to show, and the approval cards it carries. */
+export interface Relay {text:string;cards:{id:string;label:string}[]}
+const UUID=/^[a-f0-9-]{36}$/;
+/** Keeps a relay that is plain text and well-formed card references; the main base builds the buttons itself. */
+export function sanitizeRelay(value:unknown):Relay|undefined {
+ if(!value||typeof value!=='object'||Array.isArray(value))return undefined;const v=value as Record<string,unknown>;
+ if(typeof v.text!=='string'||!v.text.trim()||v.text.length>3500)return undefined;
+ const cards=Array.isArray(v.cards)?v.cards:[];if(cards.length>20)return undefined;
+ const ok=cards.every(c=>c&&typeof c==='object'&&UUID.test((c as {id?:unknown}).id as string)&&typeof (c as {label?:unknown}).label==='string'&&((c as {label:string}).label.length<=20));
+ return ok?{text:v.text,cards:cards.map(c=>({id:(c as {id:string}).id,label:(c as {label:string}).label}))}:undefined;
+}
 const head=(records:SignedRecord[])=>({count:records.length,serial:records.reduce((m,r)=>Math.max(m,r.body.serial),0)});
 export class KajiLink {
  readonly baseId:string;readonly key:KeyObject;readonly publicKey:string;readonly port:RegistryPort;readonly log:(line:string)=>void;
@@ -68,10 +81,12 @@ export class KajiLink {
   if(n>=missesToLog(every)&&this.reachable.get(peer)!==false){this.log(`Kaji: ${peer} unreachable${detail?` (${detail})`:''}; ${n} heartbeats missed.`);this.reachable.set(peer,false);}
  }
  private every=HEARTBEAT_MS;
- constructor(options:{baseId:string;key:KeyObject;publicKey:string;registry:RegistryPort;log?:(line:string)=>void;health?:()=>Promise<BaseHealth>;onHealth?:(baseId:string,health:HeardHealth)=>void}) {
+ constructor(options:{baseId:string;key:KeyObject;publicKey:string;registry:RegistryPort;log?:(line:string)=>void;health?:()=>Promise<BaseHealth>;onHealth?:(baseId:string,health:HeardHealth)=>void;
+  onRelay?:(from:string,relay:Relay)=>Promise<boolean>;onDecide?:(approvalId:string,decision:'approve'|'reject')=>Promise<string>}) {
   this.baseId=options.baseId;this.key=options.key;this.publicKey=options.publicKey;this.port=options.registry;this.log=options.log ?? (l=>console.error(l));
-  this.health=options.health;this.onHealth=options.onHealth;
+  this.health=options.health;this.onHealth=options.onHealth;this.onRelay=options.onRelay;this.onDecide=options.onDecide;
  }
+ private readonly onRelay:((from:string,relay:Relay)=>Promise<boolean>)|undefined;private readonly onDecide:((approvalId:string,decision:'approve'|'reject')=>Promise<string>)|undefined;
  private readonly health:(()=>Promise<BaseHealth>)|undefined;private readonly onHealth:((baseId:string,health:HeardHealth)=>void)|undefined;
  /** This base's health for a heartbeat; a check that fails is itself a degraded reason. Omitted when no check is wired. */
  private async own():Promise<BaseHealth|undefined> {
@@ -108,6 +123,18 @@ export class KajiLink {
     reply(200,{head:head(await this.port.records()),seen:await this.port.lastSeen(),...(health?{health}:{})});return;
    }
    if(req.method==='GET'&&req.url==='/kaji/registry'){reply(200,{records:await this.port.records()});return;}
+   // F-036 phase 2. Only the main base shows what the others relay; only a decision from the main base is applied here.
+   if(req.method==='POST'&&req.url==='/kaji/relay'){
+    const relay=sanitizeRelay(JSON.parse(body));if(!relay){reply(400,{error:'invalid relay'});return;}
+    if(await this.port.main?.()!==this.baseId||!this.onRelay){reply(409,{error:'not the main base'});return;}
+    reply(200,{delivered:await this.onRelay(from,relay)});return;
+   }
+   if(req.method==='POST'&&req.url==='/kaji/decide'){
+    const d=JSON.parse(body) as {approvalId?:unknown;decision?:unknown};
+    if(typeof d.approvalId!=='string'||!UUID.test(d.approvalId)||(d.decision!=='approve'&&d.decision!=='reject')){reply(400,{error:'invalid decision'});return;}
+    if(await this.port.main?.()!==from||!this.onDecide){reply(403,{error:'only the main base decides here'});return;}
+    reply(200,{outcome:await this.onDecide(d.approvalId,d.decision)});return;
+   }
    reply(404,{error:'unknown'});
   }catch(e){this.log(`Kaji: refused a request (${e instanceof Error?e.message:'invalid'}).`);reply(403,{error:'refused'});}
  }
@@ -120,6 +147,17 @@ export class KajiLink {
   if(from!==peer.baseId)throw new Error(`${peer.baseId} answered as ${from}`);
   if(!res.ok)throw new Error(`${peer.baseId} refused (${res.status})`);
   return JSON.parse(text);
+ }
+ /** Sends a relay to the main base (F-036 phase 2); false when there is none, it is this base, or it cannot be reached. */
+ async relay(relay:Relay):Promise<boolean> {
+  const main=await this.port.main?.();if(!main||main===this.baseId)return false;
+  const peer=(await this.port.bases()).find(b=>b.baseId===main&&b.status==='enrolled');if(!peer)return false;
+  try{return ((await this.call(peer,'POST','/kaji/relay',relay)) as {delivered?:boolean}).delivered===true;}catch(e){this.log(`Kaji: relay to ${main} failed (${e instanceof Error?e.message:'error'}).`);return false;}
+ }
+ /** Passes the owner's tap on a relayed card back to the base that owns the card; its outcome text comes back. */
+ async decide(baseId:string,approvalId:string,decision:'approve'|'reject'):Promise<string> {
+  const peer=(await this.port.bases()).find(b=>b.baseId===baseId&&b.status==='enrolled');if(!peer)throw new Error(`${baseId} is not an enrolled base.`);
+  return ((await this.call(peer,'POST','/kaji/decide',{approvalId,decision})) as {outcome?:string}).outcome ?? 'No outcome.';
  }
  /** One round: greet every other enrolled base, merge what they have seen, catch up on the registry if behind. */
  async heartbeat():Promise<void> {

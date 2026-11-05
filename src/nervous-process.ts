@@ -43,6 +43,7 @@ process.on('message',(value:unknown)=>{
    case 'kaji.bases':return registry().bases();
    case 'kaji.records':return registry().records();
    case 'kaji.lastSeen':return registry().lastSeen();
+   case 'kaji.main':return registry().main() ?? null;
    case 'kaji.add':{const r=registry();let added=0;for(const rec of params.records as SignedRecord[]){try{if(r.add(rec)==='added')added++;}catch{/* a record not signed by our root is dropped */}}return added;}
    case 'kaji.seen':return registry().seen(params.updates as Record<string,string>);
    case 'memory.lastRequest':return store.ledger.lastRequestAt();

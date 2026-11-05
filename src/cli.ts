@@ -219,9 +219,17 @@ try {
           const root=await unlock();new Registry(local().db,root.publicKey).add(signRecord(root.privateKey,{kind:'revoke',serial:registry.nextSerial(),baseId:id,publicKey:entry.publicKey,issued:new Date().toISOString()}));
           console.log(`Revoked ${id}: its key is refused from now on; re-enrolling it needs a new base key.`);
         }
+        else if(sub==='main'){
+          // The owner names the main base (F-036): Aoba there is the one channel while the line is up. Signed by the Key.
+          const id=(args[1] ?? '').toUpperCase();
+          if(!id){console.log(registry.main()?`Main base: ${registry.main()}`:'No main base named yet: kaji main BASE-ID (on the base that holds the Key).');break;}
+          if(!registry.bases().some(b=>b.baseId===id&&b.status==='enrolled'))throw new Error('No enrolled base with that id (see kaji list).');
+          const root=await unlock();new Registry(local().db,root.publicKey).add(signRecord(root.privateKey,{kind:'main',serial:registry.nextSerial(),baseId:id,issued:new Date().toISOString()}));
+          console.log(`Main base: ${id}. While it is online, the other bases send their cards, reminders and briefs through its Aoba and keep their own bots quiet.`);
+        }
         else if(sub==='list'||!sub){
           const bases=registry.bases();if(!config.kaji?.root)console.log('No root pinned yet: key init (main base) or kaji import --root FINGERPRINT.');
-          else console.log(`Root ${fingerprint(config.kaji.root)}\n`+(bases.length?bases.map(b=>`${b.baseId.padEnd(8)} ${b.name.padEnd(16)} ${b.address.padEnd(24)} ${b.status}${b.publicKey===me?'  (this base)':''}`).join('\n'):'No bases enrolled yet.'));
+          else {const main=registry.main();console.log(`Root ${fingerprint(config.kaji.root)}\n`+(bases.length?bases.map(b=>`${b.baseId.padEnd(8)} ${b.name.padEnd(16)} ${b.address.padEnd(24)} ${b.status}${b.publicKey===me?'  (this base)':''}${b.baseId===main?'  (main)':''}`).join('\n'):'No bases enrolled yet.'));}
         }
         else if(sub==='export'){const bundle=JSON.stringify({root:config.kaji?.root,records:registry.records()},null,2)+'\n';if(!config.kaji?.root)throw new Error('Nothing to export: no root pinned.');if(args[1]){writeFileSync(args[1],bundle);console.log(`Wrote ${registry.records().length} signed record(s) to ${args[1]}.`);}else process.stdout.write(bundle);}
         else if(sub==='import'){
@@ -240,7 +248,7 @@ try {
           const reg=new Registry(local().db,bundle.root);let added=0;for(const r of bundle.records)if(reg.add(r)==='added')added++;
           console.log(`Imported ${added} new record(s); ${reg.bases().filter(b=>b.status==='enrolled').length} base(s) enrolled.`);
         }
-        else throw new Error('Usage: kaji enrol | revoke | list | export [FILE] | import FILE --root FINGERPRINT');
+        else throw new Error('Usage: kaji enrol | revoke | main [BASE-ID] | list | export [FILE] | import FILE --root FINGERPRINT');
         break;
       }
       case 'brief':console.log(composeBrief({now:new Date(),timeZone:config.timeZone,language:config.language,base:config.base.name,...await gatherBrief(local(),new Date(Date.now()-86_400_000))}));break;
