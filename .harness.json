@@ -198,6 +198,20 @@
         }
       ],
       "kept": "test/brief.test.ts asserts sortieRef and live.js short() give the same ID for the same sortie."
+    },
+    {
+      "value": "Dashboard default colours (Eva · Dark · Orange)",
+      "places": [
+        {
+          "file": "web/public/dashboard/index.html",
+          "what": ":root tokens, the first paint before the script"
+        },
+        {
+          "file": "web/public/dashboard/dashboard.js",
+          "what": "palette('eva','dark','orange')"
+        }
+      ],
+      "kept": "test/dashboard.test.ts asserts every :root token equals palette('eva','dark','orange')."
     }
   ],
   "outside": [
