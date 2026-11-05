@@ -416,7 +416,9 @@ function humanAction(a) {
     default: return a.tool;
   }
 }
-function seatName(seat) { const n = L().seats; if (seat.startsWith("extra:")) return seat.slice(6); return n[seat] || seat; }
+/** Another base's seat by its name (Tabgha), not its ID, when the base is known. */
+function baseName(id) { const b = BASES.find(x => x.id === String(id).toLowerCase()); return b ? b.name.charAt(0) + b.name.slice(1).toLowerCase() : id; }
+function seatName(seat) { const n = L().seats; if (seat.startsWith("extra:")) return baseName(seat.slice(6)); return n[seat] || seat; }
 
 /* ================= RENDER: sorties ================= */
 function sortieBadge(s) {
@@ -439,7 +441,8 @@ function renderSorties() {
   const active = state.sorties.filter(s => s.status === "active" || /waiting/.test(s.status)).length;
   document.getElementById("sorties-sub").textContent = active + " in flight · " + (q ? list.length + " match" + (list.length === 1 ? "" : "es") : state.sorties.length + " shown");
   document.getElementById("sortie-list").innerHTML = list.map(s => {
-    const pats = s.actions.map(a => a.ballot ? "<span class='badge b-" + a.ballot.pattern + "'>" + a.ballot.pattern[0].toUpperCase() + "</span>" : "<span class='badge b-muted'>·</span>").join(" ");
+    const meaning = { green:"ran without a card", orange:"asked the MAGI", blue:"needed you" };
+    const pats = s.actions.map(a => a.ballot ? "<span class='badge b-" + a.ballot.pattern + "' title='Pattern " + a.ballot.pattern + ": " + (meaning[a.ballot.pattern] || "") + "' aria-label='Pattern " + a.ballot.pattern + "'>" + a.ballot.pattern[0].toUpperCase() + "</span>" : "<span class='badge b-muted' title='not voted yet' aria-label='not voted yet'>·</span>").join(" ");
     return "<div class='card sortie" + (s.id === state.selected ? " sel" : "") + "' tabindex='0' role='button' aria-pressed='" + (s.id === state.selected) + "' data-s='" + s.id + "'>" +
       "<div class='row'><span class='b'>" + esc(s.id) + " · " + highlight(s.title, state.search) + "</span>" + sortieBadge(s) + "</div>" +
       "<div class='row small muted'><span>" + (s.source === "hyuga" ? "Hyuga" : "Aoba") + " · " + dayTime(s.started) + " · " + s.actions.length + " action" + (s.actions.length > 1 ? "s" : "") + " " + pats + "</span><span>$" + s.spent.toFixed(3) + "</span></div>" +
@@ -492,6 +495,7 @@ function renderFlow() {
   document.getElementById("flow-note").textContent = s ? (s.note || s.outcome || "") : "Select a sortie, or launch one.";
   // sephirot nodes
   // Misato's apartment passed means the owner decided: it takes the decision colour, like its lines (owner, 2026-11-05).
+  { const sd = document.querySelector(".snode[data-n='consult'] .sd"); if (sd) sd.textContent = s && s.advisor ? "advised by " + s.advisor : "no vote · advice into the LCL"; }
   document.querySelectorAll(".snode[data-n]").forEach(el => { el.classList.remove("on", "done", "wait", "skip", "owner"); const st = stepState(s, el.dataset.n); if (st) el.classList.add(st); if (st === "done" && el.dataset.n === "apt") el.classList.add("owner"); });
   // timeline
   const steps = L().steps; const b = s && s.ballot;
@@ -512,7 +516,7 @@ function renderFlow() {
     if (state.theme !== "eva") label = label.replace(/^[^\x00-\x7F]+ /, "");
     el.dataset.v = v; el.querySelector(".mv").textContent = label; el.querySelector("[data-m]").textContent = metric;
   });
-  document.getElementById("magi-extras").innerHTML = b ? b.verdicts.filter(v => v.seat.startsWith("extra:")).map(v => "<span class='vchip " + v.vote + (v.shadow ? " shadow" : "") + "'>+ " + esc(v.seat.slice(6)) + (v.shadow ? " · shadow, not counted" : " · veto-only") + "</span>").join("") : "";
+  document.getElementById("magi-extras").innerHTML = b ? b.verdicts.filter(v => v.seat.startsWith("extra:")).map(v => "<span class='vchip " + v.vote + (v.shadow ? " shadow" : "") + "'>+ " + esc(baseName(v.seat.slice(6))) + (v.shadow ? " · shadow, not counted" : " · veto-only") + "</span>").join("") : "";
   document.getElementById("mres-out").textContent = b ? b.outcome.toUpperCase() : "—";
   document.getElementById("mres-out").className = b ? (b.outcome === "grant" ? "ok" : b.outcome === "reject" ? "danger" : "warn") : "";
   document.getElementById("mres-pattern").innerHTML = b ? "<span class='badge b-" + b.pattern + "'>PATTERN " + b.pattern.toUpperCase() + "</span>" : "—";
@@ -597,6 +601,7 @@ function renderDetail(s) {
     "<li><span class='ix'>" + (i + 1) + "</span><span><b>" + esc(a.tool) + "</b><br/><span class='tiny muted'>" + esc(JSON.stringify(a.args)) + "</span></span><span>" + actionBadge(a) + "</span></li>").join("") + "</ol>" +
     "<div class='row' style='margin-top:6px'><button class='btn sm danger' data-spear='" + s.id + "'>Spear this sortie</button><span class='tiny muted'>battery $" + s.spent.toFixed(3) + " / $" + s.battery.toFixed(2) + "</span></div></div>";
   const a = s.actions[Math.min(s.current, s.actions.length - 1)]; const b = a && a.ballot;
+  const advice = s.advisor ? "<div class='tiny muted' style='margin-bottom:4px'>Advised by " + esc(s.advisor) + " before Misato planned (advice only, no vote)</div>" : "";
   const act = !b ? "<div class='muted small'>Ballot not run yet for the current action.</div>" :
     "<div><div class='small muted' style='margin-bottom:4px'>CURRENT ACTION · BALLOT</div>" +
     "<div class='kv'><span>tool</span><span>" + esc(a.tool) + "</span><span>effect</span><span>" + b.effect + "</span><span>pattern</span><span><span class='badge b-" + b.pattern + "'>" + b.pattern.toUpperCase() + "</span> <span class='tiny muted'>from the effect class, never chosen by you</span></span>" +
@@ -605,7 +610,7 @@ function renderDetail(s) {
     "<div class='meter " + (b.sync.value >= SCROLLS.syncThreshold ? "" : "warn") + "' style='margin-top:3px'><i style='width:" + b.sync.value + "%'></i><span class='mark' style='left:" + SCROLLS.syncThreshold + "%'></span></div>" +
     "<div class='tiny muted' style='margin-top:2px'>" + esc(syncFormula(b)) + "</div>" +
     "<div class='verdicts'>" + b.verdicts.map(v => "<span class='vchip " + v.vote + (v.shadow ? " shadow" : "") + "'>" + esc(seatName(v.seat)) + ": " + esc(v.reason) + "</span>").join("") + "</div></div>";
-  box.innerHTML = plan + act;
+  box.innerHTML = advice + plan + act;
 }
 function actionBadge(a) {
   const m = { planned:"b-muted", proposed:"b-info", waiting:"b-warn", done:"b-ok", rejected:"b-danger", "stood-down":"b-muted", failed:"b-danger" };
@@ -650,13 +655,26 @@ function renderBudget() {
     "<div class='small muted' style='margin:6px 0 2px'>BATTERY PER LIVE SORTIE</div>" +
     (active.map(s => "<div class='row tiny'><span>" + s.id + "</span><span>$" + s.spent.toFixed(3) + " / $" + s.battery.toFixed(2) + "</span></div><div class='meter'><i style='width:" + Math.min(100, s.spent / s.battery * 100) + "%'></i></div>").join("") || "<div class='tiny muted'>none</div>");
 }
+/* F-051: stage tabs with counts, one row per section (owner, 2026-11-05): pilots Proto | Test | Prod | Retired,
+   skills Seed | Sprout | Ripe | Dropped (Simple: Create | Try | Use | Dropped). Each section remembers its tab. */
+function stageTabs(section, tabs, counts) {
+  const cur = state.tabs && state.tabs[section] || tabs[0][0];
+  return "<div class='tabs' role='group' aria-label='" + section + " by stage'>" + tabs.map(([k, label]) => "<button class='btn sm" + (k === cur ? " sel" : "") + "' aria-pressed='" + (k === cur) + "' data-stagetab='" + section + ":" + k + "'>" + label + " " + (counts[k] || 0) + "</button>").join("") + "</div>";
+}
+function currentTab(section, first) { return state.tabs && state.tabs[section] || first; }
+function renderSkills() {
+  const eva = state.theme === "eva"; const tabs = eva ? [["seed","Seed"],["sprout","Sprout"],["ripe","Ripe"],["dropped","Dropped"]] : [["seed","Create"],["sprout","Try"],["ripe","Use"],["dropped","Dropped"]];
+  document.getElementById("skills").innerHTML = stageTabs("skills", tabs, {}) + "<div class='muted small'>Planned · not connected yet. Skills are the procedures a pilot uses: each is versioned, approved by you and grows through its own stages (F-045).</div>";
+}
 function renderMelons() {
   const m = { prototype:"b-info", test:"b-orange", production:"b-ok" };
   const short = { prototype:"PROTO", test:"TEST", production:"PROD" };
-  document.getElementById("melons").innerHTML = PILOTS.map(p => "<div class='card'><div class='row'><span class='b'>" + p.id + "</span><span class='badge " + m[p.stage] + "'>" + short[p.stage] + "</span></div>" +
+  const PTABS = [["prototype","Proto"],["test","Test"],["production","Prod"],["retired","Retired"]];
+  const counts = {}; PILOTS.forEach(p => { counts[p.stage] = (counts[p.stage] || 0) + 1; }); const tab = currentTab("pilots", "prototype");
+  document.getElementById("melons").innerHTML = stageTabs("pilots", PTABS, counts) + (PILOTS.filter(p => p.stage === tab).map(p => "<div class='card'><div class='row'><span class='b'>" + p.id + "</span><span class='badge " + m[p.stage] + "'>" + short[p.stage] + "</span></div>" +
     "<div class='row tiny muted'><span>" + p.runs + " runs · " + p.rejects + " MAGI rejects · " + p.overrides + " your edits</span><span>" + (p.stage === "prototype" ? "EVA-00" : p.stage === "test" ? "EVA-01" : "EVA-02") + "</span></div>" +
     "<div class='row' style='margin-top:4px'>" + (p.stage !== "production" ? "<button class='btn sm' data-promote='" + p.id + "'>" + (p.stage === "test" ? "Ask to promote (needs you)" : "Promote to test") + "</button>" : "<span class='tiny muted'>production: demoted automatically on failure or Spear</span>") +
-    (p.stage !== "prototype" ? "<button class='btn sm danger' data-demote='" + p.id + "'>Demote</button>" : "") + "</div></div>").join("");
+    (p.stage !== "prototype" ? "<button class='btn sm danger' data-demote='" + p.id + "'>Demote</button>" : "") + "</div></div>").join("") || "<div class='muted small'>No pilot at this stage.</div>");
 }
 function renderBases() {
   document.getElementById("bases-sub").textContent = BASES.filter(b => b.status === "online").length + "/" + BASES.length + " online";
@@ -694,7 +712,7 @@ function renderModels() {
   const box = document.getElementById("models"); if (!box) return;
   box.innerHTML = "<div class='small'>Misato · qwen2.5-coder:14b (local)</div><div class='small'>Casper · gemma4:12b (local)</div><div class='tiny muted' style='margin-top:4px'>Simulation: live, pick each role's model from what Ollama has.</div>";
 }
-function renderAll() { fillAvatars(); renderQuestions(); renderNeeds(); renderSorties(); renderFlow(); renderAway(); renderNext(); renderHealth(); renderBudget(); renderMelons(); renderBases(); renderCages(); renderLilith(); renderModels(); }
+function renderAll() { renderSkills(); fillAvatars(); renderQuestions(); renderNeeds(); renderSorties(); renderFlow(); renderAway(); renderNext(); renderHealth(); renderBudget(); renderMelons(); renderBases(); renderCages(); renderLilith(); renderModels(); }
 
 /* ================= MAP: zoomed regional topography (procedural hills and valleys) ================= */
 const map = { ready:false, w:540, h:250, proj:null, contours:[], base:null, linkPaths:{} };
@@ -864,6 +882,7 @@ document.addEventListener("click", e => {
   if (t.dataset.go) { document.getElementById(t.dataset.go).scrollIntoView({ behavior:"smooth", block:"start" }); return; }
   if (t.dataset.spear && LIVE) { window.liveSpear(t.dataset.spear); return; }
   if (t.dataset.spear) { const s = state.sorties.find(x => x.id === t.dataset.spear); state.approvals.filter(a => a.sortie === s.id).forEach(a => decide(a.id, "reject")); if (s.status === "active") { s.status = "stood-down"; s.outcome = "Spear"; finish(s); } log("Spear " + s.id + ": grants revoked · happened: " + (s.happened.map(h => h.tool).join(", ") || "none"), "danger", s); renderAll(); return; }
+  if (t.dataset.stagetab) { const [sec, k] = t.dataset.stagetab.split(":"); state.tabs = Object.assign({}, state.tabs, { [sec]:k }); renderMelons(); renderSkills(); return; }
   if (t.dataset.promote) { const p = PILOTS.find(x => x.id === t.dataset.promote); if (p.stage === "prototype") { p.stage = "test"; log("Watermelons: " + p.id + " → test", "ok"); } else { log("Promotion of " + p.id + " to production needs you (card in Misato's apartment)", "warn"); p.stage = "production"; } renderAll(); return; }
   if (t.dataset.demote) { const p = PILOTS.find(x => x.id === t.dataset.demote); p.stage = p.stage === "production" ? "test" : "prototype"; log("Watermelons: " + p.id + " demoted → " + p.stage, "danger"); renderAll(); return; }
   if (t.dataset.toggle) { const b = BASES.find(x => x.id === t.dataset.toggle); b.status = b.status === "online" ? "offline" : "online"; if (b.status === "online") b.rtt = b.id === "tokyo3" ? 0 : 120; log(b.name + " → " + b.status, b.status === "online" ? "ok" : "warn"); renderAll(); return; }

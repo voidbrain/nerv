@@ -165,7 +165,7 @@ test('the CRT effect: the original static scanlines, darker borders, a slight pa
  assert.match(html,/<span data-l="melons">Marduk Institute · Pilots<\/span><span class="sub">proto → test → prod<\/span>/);
  // Skills grow by their own stages (owner, 2026-11-05, option B): seed → sprout → ripe (Eva), create → try → use (Simple).
  assert.match(html,/<span data-l="skills">Kaji's watermelons · skills<\/span><span class="sub" data-l="skillStages">seed → sprout → ripe<\/span>/);
- assert.match(readFileSync('web/public/dashboard/dashboard.js','utf8'),/skills:"Skills", skillStages:"create → try → use"/);assert.match(html,/id="skills"><div class="muted small">Planned · not connected yet\./);
+ assert.match(readFileSync('web/public/dashboard/dashboard.js','utf8'),/skills:"Skills", skillStages:"create → try → use"/);assert.match(html,/<div class="pad list" id="skills"><\/div>/,'drawn by renderSkills, with its stage tabs (F-051)');
  const js=readFileSync('web/public/dashboard/dashboard.js','utf8');assert.match(js,/skills:"Kaji's watermelons · skills"/);assert.match(js,/skills:"Skills"/);
 });
 test('the dashboard API lists the pilot roster for the Marduk Institute panel (F-051)',async()=>{
@@ -216,4 +216,16 @@ test('the map: labels scale with the canvas so they stay readable, the main base
  assert.doesNotMatch(live,/- Math\.PI \/ 2; return b === self/,'no more column under the main base');
  const seedSrc=/const seed = id => \{[^\n]*\};/.exec(live)![0];const seed=new Function(`${seedSrc} return seed;`)() as (id:string)=>number;
  assert.equal(seed('NERV-02'),seed('NERV-02'),'the same spot on every reload');assert.notEqual(seed('NERV-02')%3600,seed('NERV-03')%3600);
+});
+test('F-051 slice 1: the running phase from the latest event, who advised, base names for extra seats, skipped steps labelled, Pattern badges in words, stage tabs in both sections',async()=>{
+ const {readFileSync}=await import('node:fs');const live=readFileSync('web/public/dashboard/live.js','utf8');const js=readFileSync('web/public/dashboard/dashboard.js','utf8');const html=readFileSync('web/public/dashboard/index.html','utf8');
+ assert.match(live,/log\(main \? "Forwarded to " \+ main\.name \+ " · Misato there is planning" : "Misato is planning"/);assert.doesNotMatch(live,/local models take 10–30 s per step/);
+ assert.match(live,/status === "active" \? \(phaseOf\.get\(s\.id\) \|\| "plan"\)/,'not always MAGI');assert.match(live,/"approval\.requested":"apt"/);
+ assert.match(live,/advisedBy\.set\(id, \(p\.pilot && p\.pilot\.name \? p\.pilot\.name : "Generic pilot"\)/);assert.match(js,/"advised by " \+ s\.advisor/);
+ assert.match(js,/esc\(baseName\(v\.seat\.slice\(6\)\)\)/,'extra seats by base name');
+ assert.match(html,/\.snode\.skip \.st::after \{ content:" · skipped";/);
+ assert.match(js,/aria-label='Pattern " \+ a\.ballot\.pattern \+ "'/);
+ assert.match(js,/stageTabs\("pilots", PTABS, counts\)/);assert.match(live,/stageTabs\("pilots", \[\["prototype","Proto"\],\["test","Test"\],\["production","Prod"\],\["retired","Retired"\]\], counts\)/);
+ assert.match(js,/\["seed","Seed"\],\["sprout","Sprout"\],\["ripe","Ripe"\],\["dropped","Dropped"\]/);assert.match(js,/\["seed","Create"\],\["sprout","Try"\],\["ripe","Use"\],\["dropped","Dropped"\]/);
+ assert.match(js,/aria-pressed='" \+ \(k === cur\) \+ "'/,'tabs say which is selected');
 });
