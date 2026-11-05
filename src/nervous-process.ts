@@ -1,6 +1,6 @@
 import { MISATO_SOURCE, OWNER_SOURCE, Store } from './store.ts';
 import type { Verdict } from './policy.ts';
-import { dispatchRpc,MAX_FRAME_BYTES } from './rpc.ts';
+import { dispatchRpc,MAX_FRAME_BYTES,READY } from './rpc.ts';
 import { readConfig, readScrolls } from './config.ts';
 import { Registry, type SignedRecord } from './kaji.ts';
 import { factKey } from './memory.ts';
@@ -79,3 +79,4 @@ process.on('message',(value:unknown)=>{
 });
 let stopped=false;function stop(){if(stopped)return;stopped=true;clearInterval(timer);store.close();if(process.connected)process.disconnect();}
 process.on('disconnect',stop);process.once('SIGTERM',stop);process.once('SIGINT',stop);
+process.send?.(READY);

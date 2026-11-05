@@ -3,3 +3,4 @@ process.on('message',(value:unknown)=>{
  process.send?.({jsonrpc:'2.0',id:request.id,result:{env:Object.keys(process.env)}});
 });
 process.on('disconnect',()=>{process.exitCode=0;});
+process.send?.({nerv:'ready'});

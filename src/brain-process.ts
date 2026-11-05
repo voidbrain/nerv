@@ -1,5 +1,5 @@
 import {connect} from 'node:net';
-import {dispatchRpc,MAX_FRAME_BYTES,RpcFault} from './rpc.ts';
+import {dispatchRpc,MAX_FRAME_BYTES,READY,RpcFault} from './rpc.ts';
 import {readConfig,readModelKey} from './config.ts';
 import {complete,describe,forRole,ModelError,MODEL_TIMEOUT_MS,selectRoute,type Ask,type Models,type Reply} from './model.ts';
 import {RouteWatch,describeChange,type RouteChange} from './route-health.ts';
@@ -82,3 +82,4 @@ process.on('message',(value:unknown)=>{
 });
 function stop(){if(process.connected)process.disconnect();}
 process.on('disconnect',()=>{process.exitCode=0;});process.once('SIGTERM',stop);process.once('SIGINT',stop);
+process.send?.(READY);
