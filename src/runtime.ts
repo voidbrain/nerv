@@ -13,7 +13,7 @@ import {toolDocs} from './executors.ts';
 import type {Digest,Exchange} from './instrumentality.ts';
 import type {Episode,Fact} from './memory.ts';
 import type {BaseEntry,SignedRecord} from './kaji.ts';
-import {ONLINE_MS,type RunItem,type BaseHealth,type HeardHealth,type RegistryPort} from './kaji-link.ts';
+import {ONLINE_MS,type PeerVerdict,type RunItem,type VerdictAsk,type BaseHealth,type HeardHealth,type RegistryPort} from './kaji-link.ts';
 import {briefDue,composeBrief,gatherBrief,localClock} from './brief.ts';
 /** What the owner reads when another base answered a kaji.run (F-036 slice 3b). */
 export function remoteOutcomeText(base:string,tool:string,result:Record<string,unknown>):string {
@@ -89,14 +89,26 @@ export class Runtime implements StoreApi {
   const sortieId=await this.nervous.call('sorties.open',{title:action.request.slice(0,500)}) as string;
   return this.gate(sortieId,action);
  }
+ /** The other bases' votes on a non-Green action (F-036 phase 2), set by serve on the main base. */
+ private peerSeats?:(ask:VerdictAsk)=>Promise<Verdict[]>;
+ setPeerSeats(fn:(ask:VerdictAsk)=>Promise<Verdict[]>){this.peerSeats=fn;}
+ /** On the base asked: this base's Casper votes on the main base's action; no local model means no verdict (abstain). */
+ async peerVerdict(ask:VerdictAsk):Promise<PeerVerdict|null> {
+  const reply=await this.brain.call('casper.verdict',{request:ask.request,tool:ask.tool,args:ask.args,effect:ask.effect},MODEL_TIMEOUT_MS).catch(()=>({verdict:null})) as {verdict:Verdict|null};
+  return reply.verdict?{vote:reply.verdict.vote,reason:reply.verdict.reason,...(typeof reply.verdict.confidence==='number'?{confidence:reply.verdict.confidence}:{})}:null;
+ }
  private async gate(sortieId:string,action:OwnerAction,askCasper=true):Promise<ActReply> {
   const {pattern,effect}=await this.nervous.call('actions.preview',{sortieId,tool:action.tool}) as {pattern:Pattern;effect:Effect};
-  let casper:Verdict|undefined,casperError:string|undefined;
+  let casper:Verdict|undefined,casperError:string|undefined;let extras:Verdict[]=[];
   if(pattern!=='green'&&askCasper){
-   const reply=await this.brain.call('casper.verdict',{request:action.request,tool:action.tool,args:action.args,effect},MODEL_TIMEOUT_MS).catch(()=>({verdict:null,error:'Brain unavailable.'})) as {verdict:Verdict|null;error?:string};
+   // The other bases' Casper (F-036 phase 2) is asked at the same time: veto-only seats, shadow until the owner trusts them.
+   const [reply,peers]=await Promise.all([
+    this.brain.call('casper.verdict',{request:action.request,tool:action.tool,args:action.args,effect},MODEL_TIMEOUT_MS).catch(()=>({verdict:null,error:'Brain unavailable.'})) as Promise<{verdict:Verdict|null;error?:string}>,
+    this.peerSeats?this.peerSeats({request:action.request,tool:action.tool,args:action.args,effect}).catch(()=>[] as Verdict[]):Promise.resolve([] as Verdict[])]);
    if(reply.verdict)casper=reply.verdict;else casperError=reply.error ?? 'No verdict.';
+   extras=peers;
   }
-  const result=await this.nervous.call('actions.act',{sortieId,tool:action.tool,args:action.args,stage:action.stage ?? 'production',...(casper?{casper}:{})}) as ActResult;
+  const result=await this.nervous.call('actions.act',{sortieId,tool:action.tool,args:action.args,stage:action.stage ?? 'production',...(casper?{casper}:{}),...(extras.length?{extras}:{})}) as ActResult;
   return casperError?{...result,casperError}:result;
  }
  /** A new request to Misato (F-003): its text and every step go to the ledger, so the loop can resume later. */

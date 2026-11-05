@@ -53,9 +53,14 @@ export async function diagnoseNoStart(api:TelegramApi):Promise<string> {
  return `${bot} has ${waiting.length} update(s) waiting, but no /start in a private chat (${kinds.join('; ')}). Type /start yourself in the private chat with ${bot}, then run this again.`;
 }
 interface State {offset?:number;inbox?:{sequence:number;id?:string};cards:string[];/** Before F-028 the brief was sent from here: kept only to read the last one once. */brief?:{date:string;at:string}}
+/** The other bases' votes on a card (F-036 phase 2): veto-only seats; shadow votes are shown, never counted. */
+function peerLine(verdicts:{seat:string;vote:string;shadow?:boolean}[]|undefined):string[] {
+ const peers=(verdicts ?? []).filter(v=>v.seat.startsWith('extra:'));if(!peers.length)return [];
+ return [`Other bases: ${peers.map(v=>`${v.seat.slice(6)} ${v.vote==='approve'?'✓':v.vote==='reject'?'✗':'·'}${v.shadow?' (shadow)':''}`).join(', ')}`];
+}
 export function card(a:Approval):{text:string;buttons:Button[][]} {
  const c=a.card;const args=JSON.stringify(c.args);
- const text=[`Needs you · Pattern ${c.pattern.toUpperCase()}`,`${c.tool} ${args.length>600?args.slice(0,600)+'…':args}`,`Effect: ${c.effect}. Sync ${c.sync.value}%.`,`Why it stopped: ${c.reason}`,`Expires: ${new Date(c.expires).toUTCString()} (expiry never approves)`].join('\n');
+ const text=[`Needs you · Pattern ${c.pattern.toUpperCase()}`,`${c.tool} ${args.length>600?args.slice(0,600)+'…':args}`,`Effect: ${c.effect}. Sync ${c.sync.value}%.`,`Why it stopped: ${c.reason}`,...peerLine(c.verdicts),`Expires: ${new Date(c.expires).toUTCString()} (expiry never approves)`].join('\n');
  return {text,buttons:[[{text:'✅ Approve once',callback_data:'a:'+a.id},{text:'❌ Reject',callback_data:'r:'+a.id}]]};
 }
 /** Several facts proposed together (one Instrumentality night, F-022) as one message: each fact keeps its own approval,
