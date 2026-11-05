@@ -32,7 +32,8 @@ export interface ChatReply {sortieId:string;reply?:string;error?:string;steps:St
  /** Set when the main base handled the request (F-036 dispatch): its sortie, cards and memory are there. */
  base?:{id:string;name:string}}
 /** An action the owner asks for directly: the request is what Casper checks the action against. */
-export interface OwnerAction {request:string;tool:string;args:Record<string,unknown>;stage?:Stage}
+/** `earlier`: the conversation's previous exchanges, for Casper's intent check (B-010). */
+export interface OwnerAction {request:string;tool:string;args:Record<string,unknown>;stage?:Stage;earlier?:{request:string;reply?:string}[]}
 export type ActReply=ActResult&{casperError?:string};
 export interface StoreApi {
  list():Reminder[]|Promise<Reminder[]>;
@@ -110,7 +111,7 @@ export class Runtime implements StoreApi {
   if((intent ?? pattern!=='green')&&askCasper){
    // The other bases' Casper (F-036 phase 2) is asked at the same time: veto-only seats, shadow until the owner trusts them.
    const [reply,peers]=await Promise.all([
-    this.brain.call('casper.verdict',{request:action.request,tool:action.tool,args:action.args,effect},MODEL_TIMEOUT_MS).catch(()=>({verdict:null,error:'Brain unavailable.'})) as Promise<{verdict:Verdict|null;error?:string}>,
+    this.brain.call('casper.verdict',{request:action.request,tool:action.tool,args:action.args,effect,...(action.earlier?.length?{earlier:action.earlier.slice(-3).map(t=>({request:t.request.slice(0,600),...(t.reply?{reply:t.reply.slice(0,600)}:{})}))}:{})},MODEL_TIMEOUT_MS).catch(()=>({verdict:null,error:'Brain unavailable.'})) as Promise<{verdict:Verdict|null;error?:string}>,
     this.peerSeats?this.peerSeats({request:action.request,tool:action.tool,args:action.args,effect}).catch(()=>[] as Verdict[]):Promise.resolve([] as Verdict[])]);
    if(reply.verdict)casper=reply.verdict;else casperError=reply.error ?? 'No verdict.';
    extras=peers;
@@ -181,7 +182,7 @@ export class Runtime implements StoreApi {
    // The same action already ran in this sortie: running it again is never the owner's wish (a small model loops here).
    if(steps.some(s=>s.tool===tool&&s.outcome==='grant'&&!s.error&&argsHash(s.args ?? {})===argsHash(args)))return finish('done',doneReply(lang(),ranSteps()));
    // An action the ledger refuses outright (malformed, oversized) never reached a ballot: Misato sees it as invalid.
-   const r=await this.gate(sortieId,{request:message,tool,args}).catch(()=>({outcome:'invalid' as const,reason:'The gate refused this action as malformed (unknown shape or too large).'}));
+   const r=await this.gate(sortieId,{request:message,tool,args,...(context.length?{earlier:context.slice(-3)}:{})}).catch(()=>({outcome:'invalid' as const,reason:'The gate refused this action as malformed (unknown shape or too large).'}));
    // Spelled out for the planner when it resumes: an action waiting for the owner has not happened.
    const reason=r.outcome==='approval'?`Waiting for the owner's approval; NOT done yet. ${r.reason ?? ''}`.trim():r.reason;
    await this.record(sortieId,steps,{tool,args,outcome:r.outcome,...(reason?{reason}:{}),...('result' in r&&r.result!==undefined?{result:r.result}:{}),...('error' in r&&r.error?{error:r.error}:{})},'actionId' in r?r.actionId:undefined);

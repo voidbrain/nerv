@@ -114,3 +114,11 @@ test('the ballot: a Green removal needs Casper (no verdict: the owner decides; r
  const yes=ballot(act('reminders.cancel'),cancel,defaultPolicy,0,{seat:'casper',vote:'approve',reason:'Asked for.',confidence:0.9});assert.equal(yes.outcome,'grant');
  assert.equal(ballot(act('reminders.add'),add,defaultPolicy,0).outcome,'grant','a Green add runs without Casper, as before');
 });
+test('Casper\'s prompt carries up to three earlier exchanges, cut to size, and none when there are none (B-010)',()=>{
+ const base={request:'yes',tool:'reminders.cancel',args:{id:'x'},effect:'write-local' as const};
+ assert.equal(JSON.parse(casperAsk(base).prompt).earlier,undefined);
+ const earlier=[1,2,3,4].map(n=>({request:`ask ${n} `+'x'.repeat(700),reply:`reply ${n}`}));
+ const p=JSON.parse(casperAsk({...base,earlier}).prompt) as {earlier:{request:string;reply:string}[]};
+ assert.deepEqual(p.earlier.map(t=>t.reply),['reply 2','reply 3','reply 4'],'the last three');assert.equal(p.earlier[0]!.request.length,600);
+ assert.match(casperAsk(base).system ?? '',/short answer or confirmation/);
+});
