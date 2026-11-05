@@ -126,6 +126,18 @@
       "after": [
         "core"
       ]
+    },
+    {
+      "id": "backlog-recap",
+      "when": [
+        "docs/BACKLOG.md",
+        "docs/archive/backlog-*.md",
+        "tools/backlog-recap.mjs"
+      ],
+      "then": "Regenerate the recap at the top of docs/BACKLOG.md (open and owner-waiting records by kind, opened and closed in the last 7 days).",
+      "run": "npm run backlog:recap",
+      "checked": "npm run check:recap in CI validate",
+      "after": []
     }
   ],
   "couplings": [

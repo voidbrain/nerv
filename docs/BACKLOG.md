@@ -1,39 +1,233 @@
 # NERV Agency backlog
 
-Current work ledger, reviewed 5 November 2026 against main `c497ea2`. PR #1–#93 merged after green checks (#53–#93 read with ci:status on 4–5 November: validate and native-macos green on every run) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
+Current work ledger, reviewed 5 November 2026 against main `e301ae7`. PR #1–#96 merged after green checks (#53–#96 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
+
+<!-- recap:start · generated by tools/backlog-recap.mjs from the records; do not edit by hand -->
+**Recap as of 2026-11-05** (window 2026-10-30 – 2026-11-05).
+
+| Status | Features | Bugs |
+|---|---:|---:|
+| **Open** | 29 | 6 |
+| **Require Human 🧑** | 2 | 0 |
+
+### Last 7 days
+
+| | Features | | Bugs | |
+|---|---:|---:|---:|---:|
+| | **Opened** | **Closed** | **Opened** | **Closed** |
+| **Count** | 44 | 15 | 7 | 1 |
+
+### Require Human 🧑
+
+| Features | Bugs |
+|---|---|
+| [F-032](#f-032) | — |
+| [F-036](#f-036) |  |
+<!-- recap:end -->
 
 ## Bugs and reliability
 
 From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a B- record here; earlier ones stayed in their F- records (owner decision).
 
-### B-001
 
-**Windows CI: a test file with two bases never exits, holding the PR for hours**
+### B-002
+
+**Sortie list: older sorties show only the time, not the day**
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🟡 | 🔺 P1 | Implemented | 🟢 Small | ~90% |
+| 🔴 | 🔶 P2 | Open | 🟢 Small | ~0% |
 
-💻 **→ Human action required: No**<br />Close once the windows job passes in minutes on #95 and on main.
+💻 **→ Human action required: No**<br />Next: show the day for sorties not from today.
 
 | | |
 |---|---|
-| **Issue** | Owner report 2026-11-05: the windows job ran for an hour (and the main run for #90 over three). Its log: both tests of test/kaji-run.test.ts passed within seconds, then the file ran 11,931 s and was cancelled: something kept its process alive after the tests. The Kaji link's requests used fetch with its keep-alive pool, so idle connections between the two test bases (and to the fake model) stayed open; on Windows they held the process. The same would hold a service shutdown. |
-| **Reproduce** | The windows CI job on main since #90 (runs 41989325553 and later): `npm test` never finishes. |
-| **Check** | test/kaji-run.test.ts and test/kaji-seats.test.ts finish on Windows; the windows job completes in minutes; no CI job can run past its time limit. |
+| **Issue** | Owner report 2026-11-05: the sortie list shows hh:mm for every sortie, so one from yesterday reads like one from this morning. |
+| **Reproduce** | Open the dashboard with sorties from earlier days; their cards show only hh:mm. |
+| **Check** | Today's sorties show hh:mm; yesterday's "yesterday hh:mm"; older ones the date and time in the owner's language and time zone; a test covers the three cases. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Second cause found 2026-11-05 after #95: the full suite still hung now and then locally in test/kaji-run.test.ts (both tests passed, the process never exited; alone it finishes in under a second). A heartbeat tick under way when `KajiLink.stop()` ran, still looking up this base's address, then opened a new listener (and `start()` could set its timer) after the stop, which nothing closed. Fixed in [PR #96](https://github.com/voidbrain/nerv/pull/96): the link remembers it was stopped and a late tick opens nothing; test/kaji-link.test.ts reproduces the race (fails without the fix). Checked: three full local suite runs in 17–20 s, 130 pass, no hang. Fixed in [PR #95](https://github.com/voidbrain/nerv/pull/95): the Kaji link sends each request with `node:http` and no connection pool (`agent:false`), so the connection closes when the answer is in (errors keep fetch's shape, so "never sent" and "may have arrived" stay distinguishable); the test fakes close their open connections too (after the `KajiLink.stop()` fix in [PR #92](https://github.com/voidbrain/nerv/pull/92)); every CI job has a time limit (validate 20, windows 25, native-macos 30 minutes). Checked locally: suite 129 pass in 12 s; the windows job result on #95 closes it.
+**Next action / closure evidence:** Reported 2026-11-05.
 
-**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
+**Estimates:** Small remaining effort; ~0% complete. Estimated 2026-11-05.
 
 | Field | Value |
 |---|---|
-| PR / evidence | CI runs 41989325553, 42000654005, 42001015693; [PR #95](https://github.com/voidbrain/nerv/pull/95) |
+| PR / evidence | Owner report 2026-11-05 |
 | Opened | 2026-11-05 |
-| Verification | 2026-11-05: local suite (local run) |
+| Verification | Pending |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
+### B-003
+
+**The same reminder appears twice in Coming up**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🟠 | 🔶 P2 | Investigate | 🟢 Small | ~0% |
+
+💻 **→ Human action required: No**<br />Next: find whether two reminders were stored or one is listed twice.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-05: "Chiamare il dentista" is shown twice, identical, under Coming up. |
+| **Reproduce** | Look at Coming up on the owner's base; `nerv reminders list` shows whether there are one or two records. |
+| **Check** | One stored reminder is listed once; asking for a reminder with the same title and time as a pending one says it already exists instead of adding a second; a test covers both. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Reported 2026-11-05. Not yet known whether two requests each added one (Telegram and dashboard, or a retry) or the list repeats a record.
+
+**Estimates:** Small remaining effort; ~0% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner report 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
+### B-004
+
+**"Why was S-… approved?" gets an invented answer**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔺 P1 | Open | 🟡 Medium | ~0% |
+
+💻 **→ Human action required: No**<br />Next: answer "why" questions from the ledger, never from the model's imagination.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-05: asked "why S-D263 approved?", Misato answered in Italian with made-up lore ("Sync Ratio 100%") instead of the ballot that approved it. Misato has no tool to read a sortie's record, so it guessed. |
+| **Reproduce** | `nerv chat "why S-D263 approved?"` (any existing sortie ID). |
+| **Check** | A "why" question about a sortie is answered from its record (the same explanation the dashboard's "why" line uses, src/why.ts): the decision, the ballot (each seat and its vote), any peer seats and consultant advice, who approved and when, in the request's language; an unknown ID says so; nothing is invented. The wider ability to read the agency is F-042. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Reported 2026-11-05.
+
+**Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner report 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
+### B-005
+
+**The chat placeholder suggests a command that gives a vague answer**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔹 P3 | Open | 🟢 Small | ~0% |
+
+💻 **→ Human action required: No**<br />Next: suggest only requests that work on a live base.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-05: the chat field suggests "status"; on the live base it gives a vague reply, because the examples were written for the simulation. |
+| **Reproduce** | Type "status" in the live dashboard chat. |
+| **Check** | Every example in the placeholder gives a useful answer on a live base; "status" answers with this base's health, the cards waiting and the next reminder (or the placeholder stops suggesting it). |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Reported 2026-11-05.
+
+**Estimates:** Small remaining effort; ~0% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner report 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
+### B-006
+
+**The brief says "All checks pass" when it could not read health**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔶 P2 | Open | 🟢 Small | ~0% |
+
+💻 **→ Human action required: No**<br />Next: name what the brief could not read.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-05 reviewing the brief against Anthropic's automation guidance (a source that failed is not "nothing new"): `gatherBrief` (src/brief.ts) turns a failed health read into an empty report, which the brief prints as "All checks pass", and a failed read of expired approvals into none. It also counts only the latest 50 sorties, so a busy day is undercounted. |
+| **Reproduce** | Make `store.health()` throw in a test of `gatherBrief`; the brief reads "Health: All checks pass." |
+| **Check** | A source the brief could not read is named ("health unavailable for this brief") and never shown as fine or empty; sorties since the previous brief are all counted; tests cover a failed health read, a failed expired read and more than 50 sorties. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Found 2026-11-05.
+
+**Estimates:** Small remaining effort; ~0% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Code review 2026-11-05 (src/brief.ts) |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
+### B-007
+
+**A first call to a starting child process can time out on a slow machine**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🟠 | 🔶 P2 | Investigate | 🟢 Small | ~0% |
+
+💻 **→ Human action required: No**<br />Next: start the call timers once the child is ready.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-05: the windows job on main after #96 (run 42019073784) failed three tests that call the brain process right after starting it (test/misato.test.ts, test/model-setup.test.ts, test/model.test.ts), each with "Request timed out; outcome may be unknown" after about 5 s; a rerun of the same commit passed. `ProcessClient` starts a call's timer when it sends, so the child's own start-up (node, type stripping, loading modules) counts against the call. On a busy or slow machine (the Windows runner, the Tabgha mini PC right after boot) the first requests after a start can fail the same way. |
+| **Reproduce** | Run the suite on the windows runner a few times; or start a Runtime with the CPU busy and call the brain at once. |
+| **Check** | A child process says when it is ready; calls wait for that (with their own start-up limit, reported as "brain process not ready" if it passes) and only then start their timer; a test with a child that is slow to start passes; the windows job passes repeatedly. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Found 2026-11-05.
+
+**Estimates:** Small remaining effort; ~0% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | CI run 42019073784 (failed, then passed on rerun) |
+| Opened | 2026-11-05 |
+| Verification | Pending |
 | Reviewed | 2026-11-05 |
 
 </details>
@@ -575,7 +769,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Owner request 2026-11-05 ([PR #89](https://github.com/voidbrain/nerv/pull/89)): the chosen theme and the CRT effect are remembered in this browser (localStorage, a per-viewer preference; `?theme=` still wins; without storage the default theme); checked in headless Chrome (Light kept across a reload). **Next action / closure evidence:** Owner report 2026-11-05 ([PR #79](https://github.com/voidbrain/nerv/pull/79)): on a new base (Tabgha) Comms stayed blank until the first request: with no sorties yet nothing was added on the first refresh, so the panel was never drawn, not even its empty state. The first refresh now always draws it. Owner report 2026-11-04 ([PR #77](https://github.com/voidbrain/nerv/pull/77)): while the flow replays, the Sephirot lines changed width (1.4, 1.8 and 2 px by state) and their arrowheads grew with them, so the picture seemed to move. Now every line has one width (colour and dash tell the states apart), arrowheads are sized in pixels, and each column always reserves its scrollbar's space, so a scrollbar appearing can never shift the layout. Measured in headless Chrome on live data at 1920×1080, 1440×900 and 1280×800: no node changes position or size during a replay. **Next action / closure evidence:** Owner request 2026-11-04 ([PR #75](https://github.com/voidbrain/nerv/pull/75)): a sortie picked in the list redraws its flow step by step (450 ms a step, from Detection to where it stands; none with reduced motion), a second click on the selected card deselects it (and nothing is selected again by itself), the card says `aria-pressed`, and the Health panel is titled *Health*. Checked in headless Chrome on the demo: frames advance detect → intake → route → plan → MAGI → sync → apartment, the second click leaves no sortie selected. Earlier: Owner request 2026-11-04 ([PR #70](https://github.com/voidbrain/nerv/pull/70)): five practical additions to the dashboard. (1) **Coming up** lists every pending reminder with inline **Edit** (title and time; a refresh never wipes the form) and **Cancel**, through a new `PATCH /api/reminders/ID` (scheduler method `reminders.update`, same validation as a new reminder, admin only). (2) **Search** in Sorties (`/`) filters what is loaded at once and asks the service for matching titles in all history (`GET /api/sorties?q=`, literal and case-insensitive); **Load older sorties** pages back 50 at a time. (3) **Keys**: `a` approve, `r` reject, two presses each, the first says what the second will do; `Esc` cancels. (4) **Why**: every sortie summary carries one sentence (src/why.ts, from the ledger, no model), shown on its card. (5) **Empty states** say what to do next (needs, sorties, filters, search, coming up, Comms, detail). Tested: test/why.test.ts and an HTTP test through the scheduler process (search, why, edit, cancel); driven in headless Chrome against a throwaway service (search, Esc, two-press approve, edit surviving a refresh, Load older). A check in the owner's browser is still due. Earlier: Owner request 2026-11-04 ([PR #69](https://github.com/voidbrain/nerv/pull/69)): the four EVA cages sit in one row (two per row on phones); a cage's truncated description shows in full on hover. Checked with headless Chrome at 1920×1080 and 1440×900 in live mode. Earlier: Owner request 2026-11-04 ([PR #68](https://github.com/voidbrain/nerv/pull/68)): the dashboard fits one page on wide screens (≥1201 px: the page no longer scrolls, each column scrolls on its own); the big MAGI is at most 360 px wide; the Sephirot has side padding so the loop lanes back to Misato run inside it, not along the border; EVA cage and Da'at · Debrief share a row, with tighter row gaps and MAGI seats. The four EVA cage slots (EVA-00 prototype, EVA-01 test, EVA-02 production, EVA-03 quarantine) are reserved in live mode: only EVA-02, the in-process executor, is active; the others show PLANNED until their sandboxes exist. Checked with headless Chrome screenshots at 1920×1080 and 1440×900 (demo) and in live mode; a check in the owner's browser is still due. Earlier: Owner report 2026-11-04 ([PR #67](https://github.com/voidbrain/nerv/pull/67)): Comms was empty until a click — the trace loaded only for the selected sortie, none was selected on the first refresh, and the periodic redraw did not include Comms. Now the first refresh loads the five most recent sorties' traces, later ones keep the selected and every open sortie up to date, and Comms redraws whenever new lines arrive (not on every refresh, so scrolling back stays put). Owner review 2026-11-04 ([PR #66](https://github.com/voidbrain/nerv/pull/66)): this base's map pulse, bases badge and EVA cage beat follow its real health from doctor (online; DEGRADED in yellow when the brain is down or Misato has no model route; down when the scheduler is gone); a pulse travels the Kaji line each time a peer's heartbeat actually arrives; Entry Plug's subtitle names who acts ("Ritsuko signs the A.T. Field"; the node keeps its step name). Peers' own health in the heartbeat is next (phase 2). Owner review 2026-11-04 ([PR #65](https://github.com/voidbrain/nerv/pull/65)): fan-outs and merges share one turning bar (Detection → Binah/Chokhmah, TIFERET → Hod/Netzach, Hod/Netzach → Yesod); a loop back to Misato's plan resets every step after the plan, so only the current pass lights up and a step this pass bypasses never looks passed (live: stages after the plan come from the latest action only; simulation: returning to the plan clears them); the dim earlier-pass style is gone. Owner review 2026-11-04 ([PR #64](https://github.com/voidbrain/nerv/pull/64)): Sephirot lines are orthogonal — they leave and enter a node only at the middle of its N, S, E or W side with 90° turns in the gaps, loops back to Misato in their own lanes along the right edge, never behind a node — and end in an arrowhead; after a loop, steps reached only in an earlier pass are drawn dim dashed, so bright green means passed in this pass. Owner review 2026-11-04 ([PR #63](https://github.com/voidbrain/nerv/pull/63)): live sortie detail says who started it (you, or Misato from a chat) and its status instead of the simulation's "pilot … stage · editable by you" (pilots are skills; Misato is the planner), says when Misato answered without any action, shows the Spear only on open sorties and no battery line; the Sephirot's own request box (a duplicate of Comms' Ask Misato) and the SIDE RAILS legend are removed in both modes; approval cards drop the pilot label in live mode. Owner request 2026-11-04 ([PR #62](https://github.com/voidbrain/nerv/pull/62)): Sephirot lines show the route already taken — green when a step passed on its own, yellow (solid) through the owner's decision in Misato's apartment, faded into skipped steps — under the existing live (moving), waiting (yellow dashed) and reject (red) styles; it follows the selected sortie, so clicking any sortie shows its route. Owner report 2026-11-04: after reloading the live dashboard it showed simulated bases (TOKYO-3, NERV-01 with invented CPU) as if real — the one-use code is removed after sign-in, so a reload fell back to the simulation. Fixed in [PR #58](https://github.com/voidbrain/nerv/pull/58): served by the service the page is always live, and without a code it shows a NOT SIGNED IN bar with a memory-only token field and the `nerv open dashboard` hint; the simulation runs only from a file or with `?demo`. Checked in headless Chrome (no code: sign-in bar, no invented data; `?demo`: simulation; with a code: live). Owner 2026-11-04 ([PR #55](https://github.com/voidbrain/nerv/pull/55)): the last Sephirot node, Debrief, is named Da'at (the hidden sephira of knowledge: the sortie's outcome written into Central Dogma). Owner review 2026-11-04 ([PR #49](https://github.com/voidbrain/nerv/pull/49)): the job list scrolls on its own; in the Sephirot view TIFERET (the MAGI) is framed apart from the rest of the loop; live EVA cages show the one real executor honestly — EVA-02, in-process in the scheduler, not sandboxed yet — beating when an action newly ran (sandboxed cages remain planned). Live slice 2 in [PR #39](https://github.com/voidbrain/nerv/pull/39): **Reload models** in the Health panel (`POST /api/models/reload`, roles shown; the reload control promised on 2026-11-04), **While you were away** from real sortie closes and inbox deliveries since the last *Mark as read* (localStorage, per browser), and **Spear this sortie** backed by the new admin-only `POST /api/sorties/ID/spear` (through the scheduler process; 404 for unknown sorties; a stood-down card can no longer be approved, and a speared Misato sortie never resumes). Checked: test/dashboard.test.ts (Spear across processes: 401 without the token, card stood down, sortie revoked, late approval refused, 404) and headless Chrome (the three controls render, no console errors). Live slice 1 in [PR #36](https://github.com/voidbrain/nerv/pull/36): the dashboard moved to `web/public/dashboard/` (one copy; `docs/NERV/nerv-agency-dashboard.html` redirects there), runs under the service CSP (script in files, d3 replaced by a built-in marching-squares contour drawer, no remote font), is served at `/dashboard/`, and `npm start -- open dashboard` signs it in. `live.js` maps `GET /api/sorties` (new: newest first, counts, Patterns), `GET /api/sorties/ID` (new: actions with tool, args, ballot and outcome), events, approvals, pending reminders and doctor onto the panels; Approve/Reject call the real API, typing sends to Misato; TOKYO-3 alone on the map; panels without data say planned. Checked: test/dashboard.test.ts (reads, no grant IDs, paging, 404/400/401, `/dashboard` serving, no inline/remote script), the headless process test (`open dashboard` link and served page), and headless Chrome against a temporary service with a Green and a Blue sortie (LIVE banner, both sorties, the Blue card with buttons, planned panels, map drawn; a first-render error that stopped the map was found and fixed). Prototype 2026-11-04: `docs/NERV/nerv-agency-dashboard.html` (simulation, same ballot rules as `src/policy.ts`). It answers the five owner questions at the top (needs you, while you were away, coming up, broken or stuck, budget with limit and forecast); approval cards show the exact action, args, effect and undo, Pattern, Sync Ratio with its inputs, verdicts, why it stopped and the TTL; Pattern is the system's output (no risk buttons); the plan step is visible; a sortie list keeps history and several sorties run at once. One flow view: EVA Full draws the Sephirot tree with the big MAGI at its centre and the plan loops on the side; other themes show a compact decision timeline with the three MAGI seats inside. Owner decisions on decoration: keep MAGI (smaller), machine CPU/GPU/RAM on bases instead of per seat, a topographic map with real base positions (status-coloured pulses, dashed Kaji line, message pulses), EVA cage heartbeats instead of sync waves, no confidence slider or random jitter. Then define a versioned job-stage and decision-event schema emitted by the coordinator. Bind dashboard panels (and any NERV skin) to that stream. Keep Eva framing as optional skin; functional observability must work without it. Depends on the F-024 event schema (one schema for ledger, traces and the dashboard; now `src/events.ts`, versioned, [PR #16](https://github.com/voidbrain/nerv/pull/16): read pages by sequence, they may hold fewer than 50) and F-017 ballots. Owner review 2026-11-04 ([PR #25](https://github.com/voidbrain/nerv/pull/25)): the base map is a zoomed regional topographic sheet (procedural hills and valleys, index contours), not the world, with the three bases in the same district; panel header tags are orange on a black square tag; the title drops the "NERV Agency //" prefix already shown by the brand block; the cloud route reads off, since all models are local for now. Second pass ([PR #26](https://github.com/voidbrain/nerv/pull/26), corrected in [PR #27](https://github.com/voidbrain/nerv/pull/27)): Kaji links are straight lines (the owner's "not a straight line" meant the bases, not the links); every pair of bases exchanges node-sync messages, not only Tokyo-3; the bases form a triangle across the sheet. Still missing from the prototype: memory (Lilith) and channel views, and a model-reload control showing the roles in use (owner request 2026-11-04; admin only, calls `POST /api/models/reload`).
+**Next action / closure evidence:** Owner requests 2026-11-05: highlight the searched text in the sortie list; the same search over Lilith (memory) and Comms; relative times in years, months and days ("in 3 years 2 months", "in 1 month 12 days", never "in 1167 days"; also check that reminder's date, "Renew car insurance", which may be a misread year); a spinner on the card of a running sortie; on a new request or a refresh, select the running sortie. Owner request 2026-11-05 ([PR #89](https://github.com/voidbrain/nerv/pull/89)): the chosen theme and the CRT effect are remembered in this browser (localStorage, a per-viewer preference; `?theme=` still wins; without storage the default theme); checked in headless Chrome (Light kept across a reload). **Next action / closure evidence:** Owner report 2026-11-05 ([PR #79](https://github.com/voidbrain/nerv/pull/79)): on a new base (Tabgha) Comms stayed blank until the first request: with no sorties yet nothing was added on the first refresh, so the panel was never drawn, not even its empty state. The first refresh now always draws it. Owner report 2026-11-04 ([PR #77](https://github.com/voidbrain/nerv/pull/77)): while the flow replays, the Sephirot lines changed width (1.4, 1.8 and 2 px by state) and their arrowheads grew with them, so the picture seemed to move. Now every line has one width (colour and dash tell the states apart), arrowheads are sized in pixels, and each column always reserves its scrollbar's space, so a scrollbar appearing can never shift the layout. Measured in headless Chrome on live data at 1920×1080, 1440×900 and 1280×800: no node changes position or size during a replay. **Next action / closure evidence:** Owner request 2026-11-04 ([PR #75](https://github.com/voidbrain/nerv/pull/75)): a sortie picked in the list redraws its flow step by step (450 ms a step, from Detection to where it stands; none with reduced motion), a second click on the selected card deselects it (and nothing is selected again by itself), the card says `aria-pressed`, and the Health panel is titled *Health*. Checked in headless Chrome on the demo: frames advance detect → intake → route → plan → MAGI → sync → apartment, the second click leaves no sortie selected. Earlier: Owner request 2026-11-04 ([PR #70](https://github.com/voidbrain/nerv/pull/70)): five practical additions to the dashboard. (1) **Coming up** lists every pending reminder with inline **Edit** (title and time; a refresh never wipes the form) and **Cancel**, through a new `PATCH /api/reminders/ID` (scheduler method `reminders.update`, same validation as a new reminder, admin only). (2) **Search** in Sorties (`/`) filters what is loaded at once and asks the service for matching titles in all history (`GET /api/sorties?q=`, literal and case-insensitive); **Load older sorties** pages back 50 at a time. (3) **Keys**: `a` approve, `r` reject, two presses each, the first says what the second will do; `Esc` cancels. (4) **Why**: every sortie summary carries one sentence (src/why.ts, from the ledger, no model), shown on its card. (5) **Empty states** say what to do next (needs, sorties, filters, search, coming up, Comms, detail). Tested: test/why.test.ts and an HTTP test through the scheduler process (search, why, edit, cancel); driven in headless Chrome against a throwaway service (search, Esc, two-press approve, edit surviving a refresh, Load older). A check in the owner's browser is still due. Earlier: Owner request 2026-11-04 ([PR #69](https://github.com/voidbrain/nerv/pull/69)): the four EVA cages sit in one row (two per row on phones); a cage's truncated description shows in full on hover. Checked with headless Chrome at 1920×1080 and 1440×900 in live mode. Earlier: Owner request 2026-11-04 ([PR #68](https://github.com/voidbrain/nerv/pull/68)): the dashboard fits one page on wide screens (≥1201 px: the page no longer scrolls, each column scrolls on its own); the big MAGI is at most 360 px wide; the Sephirot has side padding so the loop lanes back to Misato run inside it, not along the border; EVA cage and Da'at · Debrief share a row, with tighter row gaps and MAGI seats. The four EVA cage slots (EVA-00 prototype, EVA-01 test, EVA-02 production, EVA-03 quarantine) are reserved in live mode: only EVA-02, the in-process executor, is active; the others show PLANNED until their sandboxes exist. Checked with headless Chrome screenshots at 1920×1080 and 1440×900 (demo) and in live mode; a check in the owner's browser is still due. Earlier: Owner report 2026-11-04 ([PR #67](https://github.com/voidbrain/nerv/pull/67)): Comms was empty until a click — the trace loaded only for the selected sortie, none was selected on the first refresh, and the periodic redraw did not include Comms. Now the first refresh loads the five most recent sorties' traces, later ones keep the selected and every open sortie up to date, and Comms redraws whenever new lines arrive (not on every refresh, so scrolling back stays put). Owner review 2026-11-04 ([PR #66](https://github.com/voidbrain/nerv/pull/66)): this base's map pulse, bases badge and EVA cage beat follow its real health from doctor (online; DEGRADED in yellow when the brain is down or Misato has no model route; down when the scheduler is gone); a pulse travels the Kaji line each time a peer's heartbeat actually arrives; Entry Plug's subtitle names who acts ("Ritsuko signs the A.T. Field"; the node keeps its step name). Peers' own health in the heartbeat is next (phase 2). Owner review 2026-11-04 ([PR #65](https://github.com/voidbrain/nerv/pull/65)): fan-outs and merges share one turning bar (Detection → Binah/Chokhmah, TIFERET → Hod/Netzach, Hod/Netzach → Yesod); a loop back to Misato's plan resets every step after the plan, so only the current pass lights up and a step this pass bypasses never looks passed (live: stages after the plan come from the latest action only; simulation: returning to the plan clears them); the dim earlier-pass style is gone. Owner review 2026-11-04 ([PR #64](https://github.com/voidbrain/nerv/pull/64)): Sephirot lines are orthogonal — they leave and enter a node only at the middle of its N, S, E or W side with 90° turns in the gaps, loops back to Misato in their own lanes along the right edge, never behind a node — and end in an arrowhead; after a loop, steps reached only in an earlier pass are drawn dim dashed, so bright green means passed in this pass. Owner review 2026-11-04 ([PR #63](https://github.com/voidbrain/nerv/pull/63)): live sortie detail says who started it (you, or Misato from a chat) and its status instead of the simulation's "pilot … stage · editable by you" (pilots are skills; Misato is the planner), says when Misato answered without any action, shows the Spear only on open sorties and no battery line; the Sephirot's own request box (a duplicate of Comms' Ask Misato) and the SIDE RAILS legend are removed in both modes; approval cards drop the pilot label in live mode. Owner request 2026-11-04 ([PR #62](https://github.com/voidbrain/nerv/pull/62)): Sephirot lines show the route already taken — green when a step passed on its own, yellow (solid) through the owner's decision in Misato's apartment, faded into skipped steps — under the existing live (moving), waiting (yellow dashed) and reject (red) styles; it follows the selected sortie, so clicking any sortie shows its route. Owner report 2026-11-04: after reloading the live dashboard it showed simulated bases (TOKYO-3, NERV-01 with invented CPU) as if real — the one-use code is removed after sign-in, so a reload fell back to the simulation. Fixed in [PR #58](https://github.com/voidbrain/nerv/pull/58): served by the service the page is always live, and without a code it shows a NOT SIGNED IN bar with a memory-only token field and the `nerv open dashboard` hint; the simulation runs only from a file or with `?demo`. Checked in headless Chrome (no code: sign-in bar, no invented data; `?demo`: simulation; with a code: live). Owner 2026-11-04 ([PR #55](https://github.com/voidbrain/nerv/pull/55)): the last Sephirot node, Debrief, is named Da'at (the hidden sephira of knowledge: the sortie's outcome written into Central Dogma). Owner review 2026-11-04 ([PR #49](https://github.com/voidbrain/nerv/pull/49)): the job list scrolls on its own; in the Sephirot view TIFERET (the MAGI) is framed apart from the rest of the loop; live EVA cages show the one real executor honestly — EVA-02, in-process in the scheduler, not sandboxed yet — beating when an action newly ran (sandboxed cages remain planned). Live slice 2 in [PR #39](https://github.com/voidbrain/nerv/pull/39): **Reload models** in the Health panel (`POST /api/models/reload`, roles shown; the reload control promised on 2026-11-04), **While you were away** from real sortie closes and inbox deliveries since the last *Mark as read* (localStorage, per browser), and **Spear this sortie** backed by the new admin-only `POST /api/sorties/ID/spear` (through the scheduler process; 404 for unknown sorties; a stood-down card can no longer be approved, and a speared Misato sortie never resumes). Checked: test/dashboard.test.ts (Spear across processes: 401 without the token, card stood down, sortie revoked, late approval refused, 404) and headless Chrome (the three controls render, no console errors). Live slice 1 in [PR #36](https://github.com/voidbrain/nerv/pull/36): the dashboard moved to `web/public/dashboard/` (one copy; `docs/NERV/nerv-agency-dashboard.html` redirects there), runs under the service CSP (script in files, d3 replaced by a built-in marching-squares contour drawer, no remote font), is served at `/dashboard/`, and `npm start -- open dashboard` signs it in. `live.js` maps `GET /api/sorties` (new: newest first, counts, Patterns), `GET /api/sorties/ID` (new: actions with tool, args, ballot and outcome), events, approvals, pending reminders and doctor onto the panels; Approve/Reject call the real API, typing sends to Misato; TOKYO-3 alone on the map; panels without data say planned. Checked: test/dashboard.test.ts (reads, no grant IDs, paging, 404/400/401, `/dashboard` serving, no inline/remote script), the headless process test (`open dashboard` link and served page), and headless Chrome against a temporary service with a Green and a Blue sortie (LIVE banner, both sorties, the Blue card with buttons, planned panels, map drawn; a first-render error that stopped the map was found and fixed). Prototype 2026-11-04: `docs/NERV/nerv-agency-dashboard.html` (simulation, same ballot rules as `src/policy.ts`). It answers the five owner questions at the top (needs you, while you were away, coming up, broken or stuck, budget with limit and forecast); approval cards show the exact action, args, effect and undo, Pattern, Sync Ratio with its inputs, verdicts, why it stopped and the TTL; Pattern is the system's output (no risk buttons); the plan step is visible; a sortie list keeps history and several sorties run at once. One flow view: EVA Full draws the Sephirot tree with the big MAGI at its centre and the plan loops on the side; other themes show a compact decision timeline with the three MAGI seats inside. Owner decisions on decoration: keep MAGI (smaller), machine CPU/GPU/RAM on bases instead of per seat, a topographic map with real base positions (status-coloured pulses, dashed Kaji line, message pulses), EVA cage heartbeats instead of sync waves, no confidence slider or random jitter. Then define a versioned job-stage and decision-event schema emitted by the coordinator. Bind dashboard panels (and any NERV skin) to that stream. Keep Eva framing as optional skin; functional observability must work without it. Depends on the F-024 event schema (one schema for ledger, traces and the dashboard; now `src/events.ts`, versioned, [PR #16](https://github.com/voidbrain/nerv/pull/16): read pages by sequence, they may hold fewer than 50) and F-017 ballots. Owner review 2026-11-04 ([PR #25](https://github.com/voidbrain/nerv/pull/25)): the base map is a zoomed regional topographic sheet (procedural hills and valleys, index contours), not the world, with the three bases in the same district; panel header tags are orange on a black square tag; the title drops the "NERV Agency //" prefix already shown by the brand block; the cloud route reads off, since all models are local for now. Second pass ([PR #26](https://github.com/voidbrain/nerv/pull/26), corrected in [PR #27](https://github.com/voidbrain/nerv/pull/27)): Kaji links are straight lines (the owner's "not a straight line" meant the bases, not the links); every pair of bases exchanges node-sync messages, not only Tokyo-3; the bases form a triangle across the sheet. Still missing from the prototype: memory (Lilith) and channel views, and a model-reload control showing the roles in use (owner request 2026-11-04; admin only, calls `POST /api/models/reload`).
 
 **Estimates:** Medium remaining effort; ~20% complete (prototype settles the design; nothing is bound to the backend). Estimated 2026-11-02; reassessed 2026-11-04 after the prototype.
 
@@ -710,7 +904,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Owner check 2026-11-05 on Neo Tokyo-3: with `models set consultant gemma4:12b`, Comms showed *Consultant (gemma4:12b): …* before Misato's reply. Consultants, local, in [PR #92](https://github.com/voidbrain/nerv/pull/92) (2026-11-05): `roles.consultant` (a local model; `models set consultant MODEL|off`, the dashboard's Models panel, `PUT /api/models`); asked once per request before Misato plans (`consultant.advise` in the brain, never on a resume), its advice (up to 600 characters, "none" is none) goes into Misato's prompt as data on the local route only and is recorded as a `misato.consult` event (Comms; the dashboard's Gevurah node lights up); no vote, no action. Checked: test/consultant.test.ts (advice in Misato's prompt and in the trace, one consultation per request, none on a resume, off and "none" add nothing, never on the cloud route), test/model.test.ts and test/model-setup.test.ts (role validation, local only, set and off), suite 129 pass. Remaining here: consultants offered by other bases, the free API seats, and the watermelon trust stages. Related (2026-11-05): the other bases' Casper is now a veto-only, shadow-first extra seat (F-036, [PR #91](https://github.com/voidbrain/nerv/pull/91)); the same ballot mechanism takes the free API seats this record plans. Seat registry via Marduk and stage tracking on top of F-017/F-024; evaluation evidence from F-029. Absorbs F-018 (closed 2026-11-04).
+**Next action / closure evidence:** Owner decisions 2026-11-05 for the free API seats: one seat per provider and model, each with its own key (terminal prompt) and trust stage; attached by action class, veto-only, shadow first, promoted one by one; each action asks one or two seats from the pool in turn to spread free quotas; a seat that hits its limit or times out abstains and is skipped for a while; only actions the Scrolls allow to leave the machine get cloud seats (never local-only or tainted data). **Optional:** `seats` checks each candidate (key, provider reachable, model still listed) and skips the unavailable ones with the reason; with an empty pool actions simply get no cloud seat, shown as information, never as degraded; re-checked periodically. Owner check 2026-11-05 on Neo Tokyo-3: with `models set consultant gemma4:12b`, Comms showed *Consultant (gemma4:12b): …* before Misato's reply. Consultants, local, in [PR #92](https://github.com/voidbrain/nerv/pull/92) (2026-11-05): `roles.consultant` (a local model; `models set consultant MODEL|off`, the dashboard's Models panel, `PUT /api/models`); asked once per request before Misato plans (`consultant.advise` in the brain, never on a resume), its advice (up to 600 characters, "none" is none) goes into Misato's prompt as data on the local route only and is recorded as a `misato.consult` event (Comms; the dashboard's Gevurah node lights up); no vote, no action. Checked: test/consultant.test.ts (advice in Misato's prompt and in the trace, one consultation per request, none on a resume, off and "none" add nothing, never on the cloud route), test/model.test.ts and test/model-setup.test.ts (role validation, local only, set and off), suite 129 pass. Remaining here: consultants offered by other bases, the free API seats, and the watermelon trust stages. Related (2026-11-05): the other bases' Casper is now a veto-only, shadow-first extra seat (F-036, [PR #91](https://github.com/voidbrain/nerv/pull/91)); the same ballot mechanism takes the free API seats this record plans. Seat registry via Marduk and stage tracking on top of F-017/F-024; evaluation evidence from F-029. Absorbs F-018 (closed 2026-11-04).
 
 **Estimates:** Medium remaining effort; ~30% complete (peer seats in F-036, local consultants). Estimated 2026-11-05.
 
@@ -779,39 +973,6 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 **Next action / closure evidence:** Provenance fields on intake and sortie records, consumed by the F-017 Balthasar seat. Must land before any email or web integration.
 
 **Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-04.
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
-| Opened | 2026-11-04 |
-| Verification | Pending |
-| Reviewed | 2026-11-04 |
-
-</details>
-
----
-### F-028
-
-**Debrief digest: what happened while you were away**
-
-| Signal | Priority | Status | Effort | Complete |
-|:---:|---|---|---|---|
-| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
-
-💻 **→ Human action required: No**<br />Close from this PR's green CI after merge. Owner check after updating both bases: tomorrow's brief arrives once on Aoba and shows under Debrief on the dashboard.
-
-| | |
-|---|---|
-| **Issue** | Autonomy is only trustable if the owner can see what was done; a raw event log is not a summary. |
-| **Reproduce** | Run several sorties, approvals and a failure; request the digest; request it again. |
-| **Check** | Digest lists completed, failed, waiting and expired items with links to their traces; built from ledger data, not model memory; a repeat request shows only new items; delivered through the inbox. |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Next action / closure evidence:** Inbox delivery in [PR #89](https://github.com/voidbrain/nerv/pull/89) (2026-11-05): schema 5 rebuilds `deliveries` once with a `kind` column and an optional reminder, keeping every rowid (the inbox cursors of Telegram and the menu-bar app); `Store.addBrief`/`lastBrief`, scheduler calls `inbox.brief` and `inbox.lastBrief`; `Runtime.startBrief` writes the brief into the inbox once a local day at its time, with or without Telegram (the schedule is read every minute; the brief Telegram sent the old way is read once so the upgrade day gets no second one); Telegram no longer sends a brief of its own and delivers inbox briefs without the reminder mark; the dashboard counts only reminders as delivered and shows the latest brief under Debrief. Checked: test/ledger.test.ts (schema 4 → 5 keeps rows and rowids, an old cursor stays valid, briefs and reminders both go in), test/telegram.test.ts (the brief goes into the inbox once a day, Telegram delivers it once, also across a restart of both; on the upgrade day a brief already sent is not repeated), headless Chrome (the brief under Debrief). In [PR #80](https://github.com/voidbrain/nerv/pull/80) (2026-11-05): the brief lists approvals that expired without a decision since the previous brief (nothing ran), and every item (waiting card, expired approval, failed sortie) carries its sortie's short ID, the one the dashboard shows (`sortieRef`, coupled with live.js `short()` in .harness.json and asserted by test/brief.test.ts); `approvals.expired` reads them through the scheduler process. Checked: test/brief.test.ts (layout and both languages; through the scheduler process, an approval expired since the last brief appears with its sortie). Remaining: delivery through the inbox as well as Telegram, which needs the deliveries table to hold more than reminders (a schema migration) and Telegram to stop sending the brief directly; owner decision 2026-11-05: yes, after F-036's dispatch slice (the deliveries table holds briefs as well as reminders, Telegram sends the brief from the inbox so it is never sent twice, and the menu-bar app and dashboard get it too). Reviewed 2026-11-04: most of this exists. Hyuga's daily brief (F-003, src/brief.ts) is built from the ledger, not a model, and lists waiting cards, done and failed sorties since the previous brief and health; the dashboard's Debrief panel lists what ended since your last visit with links to each trace. Remaining for this Check: expired approvals in the brief, a trace reference per item (the sortie's short ID), and delivery through the inbox as well as Telegram. Small; next time the brief is touched. Original plan: ledger query plus a deterministic template after F-024; an optional model summary later must cite ledger entries.
-
-**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
 
 | Field | Value |
 |---|---|
@@ -929,34 +1090,137 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 ---
 
-### F-040
 
-**Misato never runs an approved action twice, and reports what ran instead of "could not finish"**
+### F-041
+
+**Consultants by topic, offered by any base (the 3D expert on Tabgha)**
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
+| 🔴 | 🔶 P2 | Open | 🟡 Medium | ~0% |
 
-💻 **→ Human action required: No**<br />Close from this PR's green CI after merge. Optional owner check on Tabgha after updating: `nerv chat "Remember that I drink tea at 5"`, approve on Aoba; the follow-up should be *Done: memory.remember (…)*.
+💻 **→ Human action required: No**<br />Next: topics and keywords for consultants, offered over the Kaji line, chosen per request by the rules below.
 
 | | |
 |---|---|
-| **Issue** | Owner report 2026-11-05: after approving a card made on Tabgha (small model), the follow-up relayed through Aoba was *I could not finish: Step limit (6) reached*, although the fact was stored. Resumed after the decision (F-033, archived in docs/archive/backlog-2026.md), the small model kept proposing the action that had just run until the step limit. |
-| **Reproduce** | A Misato loop whose model proposes the same action again after it ran, directly or after an approval. |
-| **Check** | An action identical (tool and arguments) to one that already ran in the sortie is never run again: the turn ends with the service's *Done: …* in the request's language; at the step limit, actions that ran are reported as done instead of *could not finish*; nothing ran → still *Step limit*. |
+| **Issue** | Owner request 2026-11-05: a base (Tabgha) has a 3D expert others should use when it fits; today the only consultant is one general local model on the main base (F-025). |
+| **Reproduce** | Offer a consultant on Tabgha for 3D printing; ask Aoba a 3D printing question; look for its advice in Comms. |
+| **Check** | A consultant declares a name, topics and keywords and its model, on any base; bases offer theirs first-hand in the heartbeat and the main base keeps a catalogue; a request matching a topic's keywords brings in that topic's consultant, the general consultant stays the default when none matches; at most one consultant per topic is asked by default, chosen by the owner's pin, else the main base's own, else the best record (answered in time, gave advice), with the next one as fallback when it does not answer; "ask both" per topic gives Misato every advice, each labelled with its source; Comms shows which consultant advised and from which base; advice stays data, never a vote or an action, and local-only rules hold (a peer consultant sees only what the Scrolls allow to leave the main base). |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Implemented in [PR #88](https://github.com/voidbrain/nerv/pull/88): the planner loop stops on a repeat of an action that already ran (`argsHash` of tool and arguments against the sortie's granted steps) with `doneReply`, and at the step limit reports what ran (`doneReply`) when anything did. Checked: test/misato.test.ts (a repeat ends with *Done: reminders.add (“Stretch”)* and runs once; at the limit after a list, *Fatto: reminders.list.*; nothing ran, still *Step limit*), test/resume.test.ts (after an approval, a re-proposed action is not run again and the follow-up says it is done), suite 120 pass.
+**Next action / closure evidence:** Planned 2026-11-05 (owner decisions above). Builds on the local consultant (F-025, [PR #92](https://github.com/voidbrain/nerv/pull/92)) and the Kaji line's offers (F-036). Later: experts that also act (their actions offered as in F-036 slice 3b) and agents running on the offering base.
 
-**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
+**Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-05.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner report 2026-11-05; [PR #88](https://github.com/voidbrain/nerv/pull/88) |
+| PR / evidence | Owner request 2026-11-05 |
 | Opened | 2026-11-05 |
-| Verification | 2026-11-05: tests above (local run) |
+| Verification | Pending |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
+### F-042
+
+**Misato reads the agency: status and "why" from the records**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔶 P2 | Open | 🟡 Medium | ~0% |
+
+💻 **→ Human action required: No**<br />Next: read-only tools for Misato over sorties, ballots and health.
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-05 ("is this the answer we want? include ballot, experts and consultants?"): Misato can act but cannot read the agency itself, so questions about it are guessed (B-004). |
+| **Reproduce** | Ask Aoba "why was S-… approved?", "what is waiting for me?", "is Tabgha up?". |
+| **Check** | Read-only tools give Misato a sortie's record (decision, ballot with each seat's vote and reason, peer seats, consultant advice, approver and time), what waits for the owner, base health and the bases' status; answers quote the records in the request's language and never invent; these tools run as Green without a card; the consultant is not asked for questions about the agency itself. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Planned 2026-11-05. B-004 is the first slice (the "why" question).
+
+**Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner question 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
+### F-043
+
+**Reminder times: all day, at a time, from–to, from, until**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔶 P2 | Open | 🟡 Medium | ~0% |
+
+💻 **→ Human action required: No**<br />Next: a time kind on reminders, parsed from the request.
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-05: "Renew car insurance" needs no time; "Chiamare il dentista" could be at a time, between two times, from a time or until one. Every reminder has one exact time today. |
+| **Reproduce** | `nerv chat "remind me to renew the car insurance on 3 March"`: it gets a made-up time. |
+| **Check** | A reminder is all day, at a time, from–to, from or until; the request sets it ("on 3 March", "at 10", "between 10 and 12", "after 15", "by 18"); Coming up, the inbox and the brief show it that way; an all-day reminder arrives at the brief's time on its day; a range arrives at its start (or, for "until", ahead of the end); old reminders read as "at a time". |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Planned 2026-11-05.
+
+**Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner request 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
+### F-044
+
+**Memory: one fact per subject, a proposed spelling fix, typo-tolerant recall**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔹 P3 | Open | 🟡 Medium | ~0% |
+
+💻 **→ Human action required: No**<br />Next: split compound memories on one card, with a proposed clean-up.
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-05 about "remember i don't like wine and i play ultimate frisbbe": it is stored as one fact; facts are not linked to each other; recall matches exact words, so "frisbee" will not find "frisbbe" and the typo stays. |
+| **Reproduce** | `nerv chat "remember i don't like wine and i play ultimate frisbbe"`, approve, then ask "what sports do I play?" and look in Lilith. |
+| **Check** | A request with several facts proposes one fact per subject, on one card the owner approves or edits as a whole (each fact also editable or removable before approving); a proposed spelling fix is shown on the card next to the original (never applied silently); recall finds a fact despite a small typo (in the request or in the fact) and still ranks exact matches first; tests cover the split, the shown fix and fuzzy recall. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Planned 2026-11-05 (owner approved the three parts).
+
+**Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner question 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
 | Reviewed | 2026-11-05 |
 
 </details>
