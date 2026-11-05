@@ -80,6 +80,8 @@ export function authorize(from:Principal,to:Principal,method:string):void {
 export type RpcHandler=(method:Method,params:Record<string,unknown>)=>unknown|Promise<unknown>;
 const object=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 const error=(id:string|number|null,code:number,message:string):RpcResponse=>({jsonrpc:'2.0',id,error:{code,message}});
+/** Sent by a child process once it handles requests; the coordinator sends nothing before it (B-007). */
+export const READY={nerv:'ready'} as const;
 export async function dispatchRpc(value:unknown,handler:RpcHandler):Promise<RpcResponse|undefined> {
  if(!object(value)||value.jsonrpc!=='2.0'||typeof value.method!=='string'||Object.keys(value).some(k=>!['jsonrpc','method','params','id'].includes(k))||('id'in value&&value.id!==null&&typeof value.id!=='string'&&!(typeof value.id==='number'&&Number.isSafeInteger(value.id))))return error(null,-32600,'Invalid Request.');
  const id=value.id as string|number|null;const notification=!('id'in value);
