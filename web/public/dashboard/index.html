@@ -192,7 +192,8 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .snode.on .st { color:var(--title); }
 .snode.done { border-color:var(--ok); } .snode.done .st { color:var(--ok); }
 .snode.wait { border-color:var(--warn); box-shadow:0 0 12px color-mix(in srgb,var(--warn) 30%,transparent); } .snode.wait .st { color:var(--warn); }
-.snode.skip { opacity:.38; border-style:dashed; }
+/* F-051: skipped (this sortie did not need the step) reads differently from not reached: dashed and labelled, not greyed out. */
+.snode.skip { opacity:.7; border-style:dashed; } .snode.skip .st::after { content:" · skipped"; font-weight:400; font-size:8px; color:var(--muted); letter-spacing:.04em; }
 .snode.done.owner { border-color:var(--warn); } .snode.done.owner .st { color:var(--warn); }
 .snode.round { border-radius:999px; padding:6px 10px; }
 .s-detect { grid-column:2; grid-row:1; } .s-intake { grid-column:1; grid-row:2; } .s-route { grid-column:3; grid-row:2; }
@@ -234,6 +235,7 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .mapwrap { position:relative; max-width:66%; }
 #topo { width:100%; height:auto; display:block; background:var(--sea); }
 /* Owner, 2026-11-05: a smaller map, its legend on the right. */
+.tabs { display:flex; flex-wrap:wrap; gap:4px; margin:2px 0 6px; } .tabs .btn.sel { border-color:var(--accent); color:var(--accent); }
 .maprow { display:flex; gap:6px; align-items:stretch; }
 .maprow .mapwrap { flex:1 1 auto; min-width:0; }
 mark { background:color-mix(in srgb,var(--accent) 35%,transparent); color:inherit; padding:0 1px; }
@@ -456,7 +458,7 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
       <!-- Kaji's watermelons: the skills, their own box (owner, 2026-11-05); pilots are the Marduk Institute above. -->
       <section class="panel">
         <div class="hdr"><span data-l="skills">Kaji's watermelons · skills</span><span class="sub" data-l="skillStages">seed → sprout → ripe</span></div>
-        <div class="pad list" id="skills"><div class="muted small">Planned · not connected yet. Skills are the procedures a pilot uses: each is versioned, approved by you and grows through its own stages (F-045).</div></div>
+        <div class="pad list" id="skills"></div>
       </section>
 
       <section class="panel" id="p-lilith">

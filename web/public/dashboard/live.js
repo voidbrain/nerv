@@ -34,9 +34,9 @@
     // The consultant's advice is a passed step when it was given (owner, 2026-11-05: ADVISE stayed unlit after it advised).
     const done = { detect:true, intake:true, route:true, consult:consulted.has(s.id), plan:actions.length > 0, magi:!!latest, sync:!!latest,
       apt:!!latest && !!latest.ballot && latest.ballot.outcome === "approval", plug:latestIs("done", "failed", "proposed"), eva:latestIs("done", "failed"), debrief:status !== "active" && status !== "waiting" };
-    const phase = status === "waiting" ? "apt" : status === "active" ? "magi" : "debrief";
+    const phase = status === "waiting" ? "apt" : status === "active" ? (phaseOf.get(s.id) || "plan") : "debrief";
     const last = actions[actions.length - 1];
-    return { id:short(s.id), realId:s.id, title:s.title, preset:null, pilot:s.source === "misato" ? "misato" : "owner", source:"aoba", proactive:false, consult:consulted.has(s.id), // F-025: lit when a consultant advised Misato (its advice is in Comms)
+    return { id:short(s.id), realId:s.id, title:s.title, preset:null, pilot:s.source === "misato" ? "misato" : "owner", source:"aoba", proactive:false, consult:consulted.has(s.id), advisor:advisedBy.get(s.id) || null, // F-025: lit when a consultant advised Misato (its advice is in Comms)
      
       why:s.why || "", created:s.created, trust:s.trust, battery:0, spent:0, started:Date.parse(s.created), ended:s.closed ? Date.parse(s.closed) : null, status, phase, done,
       actions, current:Math.max(0, actions.length - 1), ballot:last && last.ballot && last.ballot.verdicts ? last.ballot : null, outcome:known.get(s.id) || null, happened:[], note:"" };
@@ -102,6 +102,8 @@
   }
   // Comms: the selected sortie's own trace (requests, steps, ballots, decisions, replies) plus what you typed here.
   const seen = new Set();
+  const phaseOf = new Map(), advisedBy = new Map();
+  const generic = () => { const r = modelsData && modelsData.models && modelsData.models.roles; return !!(r && r.consultant && r.consultant.model); };
   async function loadEvents(id) {
     let after = 0; const all = []; let added = 0;
     for (;;) { const page = await api("sorties/" + id + "/events?after=" + after); if (!page.length) break; all.push(...page); after = page[page.length - 1].sequence; if (page.length < 50) break; }
@@ -118,7 +120,10 @@
         : e.kind === "misato.consult" ? [(p.pilot && p.pilot.name ? "Pilot " + p.pilot.name : "Consultant") + (p.model ? " (" + p.model + ")" : "") + ": " + p.advice, "", "maya"]
         : e.kind === "misato.resumed" ? ["Misato: resuming after your decision", "", "misato"] : e.kind === "sortie.done" || e.kind === "sortie.failed" ? ["Debrief: " + e.kind.slice(7), e.kind === "sortie.done" ? "ok" : "danger", "misato"] : null;
       if (e.kind === "misato.reply") known.set(id, p.text);
-      if (e.kind === "misato.consult") consulted.add(id);
+      if (e.kind === "misato.consult") { consulted.add(id); advisedBy.set(id, (p.pilot && p.pilot.name ? p.pilot.name : "Generic pilot") + (p.model ? " · " + p.model : "")); }
+      // F-051: the step a running sortie is on, from its latest event (not always MAGI).
+      const step = { "misato.request":generic() ? "consult" : "plan", "misato.consult":"plan", "misato.resumed":"plan", "action.done":"plan", "action.failed":"plan", "approval.requested":"apt", "approval.approve":"plug", "misato.reply":"debrief" }[e.kind] || (e.kind === "ballot" ? (p.outcome === "grant" ? "plug" : p.outcome === "approval" ? "apt" : "plan") : null);
+      if (step) phaseOf.set(id, step);
       if (line) { state.log.push({ t, msg:line[0], cls:line[1], s:s.id, who:line[2], chat:e.kind.startsWith("misato.") }); added++; }
     }
     state.log.sort((a, b) => a.t - b.t); if (state.log.length > 300) state.log.splice(0, state.log.length - 300);
@@ -241,7 +246,9 @@
   window.chat = async function (text) {
     log(text, "", null, "you"); state.log[state.log.length - 1].chat = true;
     if (chatBusy) { log("Misato is still working on the previous request.", "warn", null, "misato"); return; }
-    chatBusy = true; log("Misato is planning… (local models take 10–30 s per step)", "", null, "misato");
+    // F-051: where the request goes, said before it goes: another online main base gets it over the Kaji line.
+    const main = (state.kajiBases || []).find(b => b.main && !b.self && b.online);
+    chatBusy = true; log(main ? "Forwarded to " + main.name + " · Misato there is planning" : "Misato is planning", "", null, "misato");
     try { const r = await api("chat", { method:"POST", body:JSON.stringify({ message:text, conversation:"dashboard" }) });
       // Dispatched (F-036): the main base answered; its sortie and cards are there, so only the reply is shown here.
       if (r.base) log((r.reply || ("Could not finish: " + (r.error || "no reply"))) + " · answered by " + r.base.name + (r.waiting && r.waiting.length ? "; decide its card on Aoba or on " + r.base.name + "'s dashboard" : ""), r.reply ? "ok" : "danger", null, "misato");
@@ -369,7 +376,7 @@
     if (!s) { box.innerHTML = "<div class='muted'>No sortie selected. Pick one in Sorties, or ask Misato below to start one.</div>"; sub.textContent = ""; return; }
     const who = s.pilot === "misato" ? "Misato, from a chat" : "you, as a direct action";
     const status = { active:"running", waiting:"waiting for you", done:"done", failed:"failed", "stood-down":"stopped" }[s.status] || s.status;
-    if (!s.actions.length) { box.innerHTML = "<div class='muted small'>No actions: Misato answered without using a tool.</div>" + (s.outcome ? "<div class='small' style='margin-top:4px'>Reply: " + esc(s.outcome) + "</div>" : ""); sub.textContent = "started by " + who + " · " + status; return; }
+    if (!s.actions.length) { box.innerHTML = (s.advisor ? "<div class='tiny muted' style='margin-bottom:4px'>Advised by " + esc(s.advisor) + " before Misato planned (advice only, no vote)</div>" : "") + "<div class='muted small'>No actions: Misato answered without using a tool.</div>" + (s.outcome ? "<div class='small' style='margin-top:4px'>Reply: " + esc(s.outcome) + "</div>" : ""); sub.textContent = "started by " + who + " · " + status; return; }
     if (s.actions.some(a => !a.ballot || !a.ballot.verdicts)) { box.innerHTML = "<div class='muted small'>Loading this sortie…</div>"; sub.textContent = "started by " + who + " · " + status; return; }
     baseDetail(s); sub.textContent = "started by " + who + " · " + status;
     box.querySelectorAll(".plan .row .tiny.muted").forEach(el => { if (/battery/.test(el.textContent)) el.remove(); });
@@ -384,9 +391,12 @@
     // B-017: GET /api/models nests the roles under models (it said "off" with a consultant set).
     const roles = modelsData && modelsData.models && modelsData.models.roles; const generic = roles && roles.consultant && roles.consultant.model;
     const card = (name, sub, right, line) => "<div class='card'><div class='row'><span class='b'>" + esc(name) + "</span>" + right + "</div><div class='row tiny muted'><span>" + esc(sub) + "</span></div>" + (line ? "<div class='tiny muted'>" + esc(line) + "</div>" : "") + "</div>";
+    const stageOf = p => p.retired ? "retired" : p.stage; const counts = {}; roster.forEach(p => { counts[stageOf(p)] = (counts[stageOf(p)] || 0) + 1; });
+    const tab = currentTab("pilots", "prototype"); const shown = roster.filter(p => stageOf(p) === tab);
     box.innerHTML = card("Generic pilot", "anything no specialist covers · " + (generic || "off"), "<span class='badge b-muted'>GENERIC</span>", generic ? "" : "Turn it on: nerv pilots generic MODEL") +
-      roster.map(p => card(p.name, p.domain + " · " + p.model + (p.pinned ? " · pinned" : ""), "<span class='badge " + (p.retired ? "b-muted" : badge[p.stage]) + "'>" + (p.retired ? "RETIRED" : short[p.stage]) + "</span>", "keywords: " + p.keywords.join(", "))).join("") +
-      (roster.length ? "" : "<div class='muted small'>No specialists yet. Add one: nerv pilots add ID --name … --domain … --keywords … --model …, or approve a proposal from the Marduk Institute.</div>");
+      stageTabs("pilots", [["prototype","Proto"],["test","Test"],["production","Prod"],["retired","Retired"]], counts) +
+      shown.map(p => card(p.name, p.domain + " · " + p.model + (p.pinned ? " · pinned" : ""), "<span class='badge " + (p.retired ? "b-muted" : badge[p.stage]) + "'>" + (p.retired ? "RETIRED" : short[p.stage]) + "</span>", "keywords: " + p.keywords.join(", "))).join("") +
+      (roster.length ? (shown.length ? "" : "<div class='muted small'>No pilot at this stage.</div>") : "<div class='muted small'>No specialists yet. Add one: nerv pilots add ID --name … --domain … --keywords … --model …, or approve a proposal from the Marduk Institute.</div>");
   };
   // While you were away: from real sorties and deliveries since your last visit, remembered in this browser only.
   const VISIT = "nerv.dashboard.lastVisit";
