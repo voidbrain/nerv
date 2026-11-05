@@ -56,6 +56,13 @@ export function sanitizeHealth(value:unknown):BaseHealth|undefined {
 }
 /** Missed heartbeats in a row before a peer is logged unreachable: as many as fit in the online window (3 at 30 s / 90 s). */
 export const missesToLog=(everyMs:number)=>Math.max(1,Math.ceil(ONLINE_MS/everyMs));
+/** The actions a base offers the main base (F-036 slice 3b): action names only, at most 20. */
+export function sanitizeOffers(value:unknown):string[]|undefined {
+ if(!Array.isArray(value)||value.length>20||value.some(v=>typeof v!=='string'||!/^[a-z]+\.[a-z]+$/.test(v)))return undefined;
+ return [...new Set(value as string[])].filter(t=>t!=='kaji.run');
+}
+/** One action the main base asks another base to run, by an id that base remembers (a resend returns the first result). */
+export interface RunItem {id:string;request:string;tool:string;args:Record<string,unknown>}
 /** The main base's answer to a dispatched request: the reply Misato gave there (its sortie and cards live there). */
 export interface DispatchedReply {sortieId:string;reply?:string;error?:string;steps:unknown[];waiting:{approvalId:string;tool:string;reason:string}[];base?:{id:string;name:string}}
 /** What a base relays to the main base's Aoba (F-036 phase 2): text to show, and the approval cards it carries. */
@@ -84,10 +91,12 @@ export class KajiLink {
  }
  private every=HEARTBEAT_MS;
  constructor(options:{baseId:string;key:KeyObject;publicKey:string;registry:RegistryPort;log?:(line:string)=>void;health?:()=>Promise<BaseHealth>;onHealth?:(baseId:string,health:HeardHealth)=>void;
-  onRelay?:(from:string,relay:Relay)=>Promise<boolean>;onChat?:(from:string,message:string,conversation?:string)=>Promise<DispatchedReply>;onDecide?:(approvalId:string,decision:'approve'|'reject')=>Promise<string>}) {
+  onRelay?:(from:string,relay:Relay)=>Promise<boolean>;onChat?:(from:string,message:string,conversation?:string)=>Promise<DispatchedReply>;
+  offers?:()=>string[];onOffers?:(baseId:string,offers:string[])=>void;onRun?:(from:string,item:RunItem)=>Promise<unknown>;onDecide?:(approvalId:string,decision:'approve'|'reject')=>Promise<string>}) {
   this.baseId=options.baseId;this.key=options.key;this.publicKey=options.publicKey;this.port=options.registry;this.log=options.log ?? (l=>console.error(l));
-  this.health=options.health;this.onHealth=options.onHealth;this.onRelay=options.onRelay;this.onDecide=options.onDecide;this.onChat=options.onChat;
+  this.health=options.health;this.onHealth=options.onHealth;this.onRelay=options.onRelay;this.onDecide=options.onDecide;this.onChat=options.onChat;this.offers=options.offers;this.onOffers=options.onOffers;this.onRun=options.onRun;
  }
+ private readonly offers:(()=>string[])|undefined;private readonly onOffers:((baseId:string,offers:string[])=>void)|undefined;private readonly onRun:((from:string,item:RunItem)=>Promise<unknown>)|undefined;
  private readonly onChat:((from:string,message:string,conversation?:string)=>Promise<DispatchedReply>)|undefined;
  private readonly onRelay:((from:string,relay:Relay)=>Promise<boolean>)|undefined;private readonly onDecide:((approvalId:string,decision:'approve'|'reject')=>Promise<string>)|undefined;
  private readonly health:(()=>Promise<BaseHealth>)|undefined;private readonly onHealth:((baseId:string,health:HeardHealth)=>void)|undefined;
@@ -96,6 +105,8 @@ export class KajiLink {
   if(!this.health)return undefined;
   try{return sanitizeHealth(await this.health()) ?? {state:'degraded',reasons:['health report invalid']};}catch{return {state:'degraded',reasons:['health check failed']};}
  }
+ /** Offers are first-hand too: what a base says it lets the main base run there. */
+ private heardOffers(from:string,value:unknown){if(value===undefined)return;const o=sanitizeOffers(value);if(o)this.onOffers?.(from,o);}
  /** Health is first-hand only: taken from the peer's own signed message, never relayed for a third base. */
  private heard(from:string,value:unknown){const h=sanitizeHealth(value);if(h)this.onHealth?.(from,{...h,at:new Date().toISOString()});}
  /** This base as the registry knows it (by its own public key), if enrolled and not revoked. */
@@ -120,10 +131,10 @@ export class KajiLink {
    let body='';for await(const chunk of req){body+=chunk;if(body.length>MAX_BODY)throw new Error('too large');}
    const bases=await this.port.bases();const from=verifySigned(req.headers as Record<string,string>,'req',req.method ?? '',req.url ?? '',body,bases,this.nonces);
    if(req.method==='POST'&&req.url==='/kaji/heartbeat'){
-    const hb=JSON.parse(body) as {seen?:Record<string,string>;health?:unknown};const now=new Date().toISOString();
-    await this.port.seen({...sanitizeSeen(hb.seen,bases),[from]:now,[this.baseId]:now});this.heard(from,hb.health);
-    const health=await this.own();
-    reply(200,{head:head(await this.port.records()),seen:await this.port.lastSeen(),...(health?{health}:{})});return;
+    const hb=JSON.parse(body) as {seen?:Record<string,string>;health?:unknown;offers?:unknown};const now=new Date().toISOString();
+    await this.port.seen({...sanitizeSeen(hb.seen,bases),[from]:now,[this.baseId]:now});this.heard(from,hb.health);this.heardOffers(from,hb.offers);
+    const health=await this.own();const offers=this.offers?.();
+    reply(200,{head:head(await this.port.records()),seen:await this.port.lastSeen(),...(health?{health}:{}),...(offers?{offers}:{})});return;
    }
    if(req.method==='GET'&&req.url==='/kaji/registry'){reply(200,{records:await this.port.records()});return;}
    // F-036 phase 2. Only the main base shows what the others relay; only a decision from the main base is applied here.
@@ -138,6 +149,13 @@ export class KajiLink {
     if(typeof c.message!=='string'||!c.message.trim()||c.message.length>4000||(c.conversation!==undefined&&(typeof c.conversation!=='string'||!/^[a-z]{1,20}$/.test(c.conversation)))){reply(400,{error:'invalid request'});return;}
     if(await this.port.main?.()!==this.baseId||!this.onChat){reply(409,{error:'not the main base'});return;}
     reply(200,await this.onChat(from,c.message,c.conversation as string|undefined));return;
+   }
+   // F-036 slice 3b: one action the main base asks this base to run (only the main base may ask; this base's gate decides).
+   if(req.method==='POST'&&req.url==='/kaji/run'){
+    const r=JSON.parse(body) as {id?:unknown;request?:unknown;tool?:unknown;args?:unknown};
+    if(typeof r.id!=='string'||!UUID.test(r.id)||typeof r.request!=='string'||r.request.length>500||typeof r.tool!=='string'||!/^[a-z]+\.[a-z]+$/.test(r.tool)||!r.args||typeof r.args!=='object'||Array.isArray(r.args)){reply(400,{error:'invalid action'});return;}
+    if(await this.port.main?.()!==from||!this.onRun){reply(403,{error:'only the main base runs actions here'});return;}
+    reply(200,{result:await this.onRun(from,{id:r.id,request:r.request,tool:r.tool,args:r.args as Record<string,unknown>})});return;
    }
    if(req.method==='POST'&&req.url==='/kaji/decide'){
     const d=JSON.parse(body) as {approvalId?:unknown;decision?:unknown};
@@ -179,6 +197,15 @@ export class KajiLink {
    return {sortieId:'',error:`${main} did not answer (${text}); it may still be working on it, so the request was not repeated here.`,steps:[],waiting:[]};
   }
  }
+ /** Sends one action to a base (F-036 slice 3b). reached:false means it never got there (send again later, same id);
+     refused carries that base's reason (it does not offer it, or it is not this base's to ask). */
+ async run(baseId:string,item:RunItem,timeoutMs:number):Promise<{reached:boolean;result?:unknown;refused?:string}> {
+  const peer=(await this.port.bases()).find(b=>b.baseId===baseId&&b.status==='enrolled');if(!peer)return {reached:true,refused:`${baseId} is not an enrolled base`};
+  try{return {reached:true,result:((await this.call(peer,'POST','/kaji/run',item,timeoutMs)) as {result?:unknown}).result};}
+  catch(e){const text=e instanceof Error?e.message:'error';const code=(e as {cause?:{code?:string}}).cause?.code;
+   if(/refused \((400|403|409)\)/.test(text))return {reached:true,refused:text};
+   return {reached:false,...(code?{refused:code}:{})};}
+ }
  /** Passes the owner's tap on a relayed card back to the base that owns the card; its outcome text comes back. */
  async decide(baseId:string,approvalId:string,decision:'approve'|'reject'):Promise<string> {
   const peer=(await this.port.bases()).find(b=>b.baseId===baseId&&b.status==='enrolled');if(!peer)throw new Error(`${baseId} is not an enrolled base.`);
@@ -190,8 +217,9 @@ export class KajiLink {
   await this.port.seen({[this.baseId]:new Date().toISOString()});const health=await this.own();
   for(const peer of bases.filter(b=>b.status==='enrolled'&&b.publicKey!==this.publicKey)){
    try{
-    const r=await this.call(peer,'POST','/kaji/heartbeat',{seen:await this.port.lastSeen(),...(health?{health}:{})}) as {head:{count:number;serial:number};seen?:Record<string,string>;health?:unknown};
-    await this.port.seen({...sanitizeSeen(r.seen,bases),[peer.baseId]:new Date().toISOString()});this.mark(peer.baseId,true);this.heard(peer.baseId,r.health);
+    const offers=this.offers?.();
+    const r=await this.call(peer,'POST','/kaji/heartbeat',{seen:await this.port.lastSeen(),...(health?{health}:{}),...(offers?{offers}:{})}) as {head:{count:number;serial:number};seen?:Record<string,string>;health?:unknown;offers?:unknown};
+    await this.port.seen({...sanitizeSeen(r.seen,bases),[peer.baseId]:new Date().toISOString()});this.mark(peer.baseId,true);this.heard(peer.baseId,r.health);this.heardOffers(peer.baseId,r.offers);
     const mine=head(await this.port.records());
     if(r.head.count>mine.count||r.head.serial>mine.serial){const got=await this.call(peer,'GET','/kaji/registry') as {records:SignedRecord[]};const added=await this.port.add(got.records);if(added)this.log(`Kaji: ${added} new registry record(s) from ${peer.baseId}.`);}
    }catch(e){this.mark(peer.baseId,false,e instanceof Error?e.message:'error');}

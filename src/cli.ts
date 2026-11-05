@@ -5,7 +5,7 @@ import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'n
 import { fileURLToPath } from 'node:url';
 import { Store } from './store.ts';
 import { makeServer } from './server.ts';
-import { dataHome, databasePath, initialize, isTelegramToken, pinKajiRoot, telegramTokenPath, readConfig, readModelKey, readScrolls, readTelegramToken, readToken, setBase, setting, type Base } from './config.ts';
+import { setKajiOffers, dataHome, databasePath, initialize, isTelegramToken, pinKajiRoot, telegramTokenPath, readConfig, readModelKey, readScrolls, readTelegramToken, readToken, setBase, setting, type Base } from './config.ts';
 import { TelegramApi, TelegramChannel, decisionText, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
 import { composeBrief, gatherBrief } from './brief.ts';
 import { KajiLink } from './kaji-link.ts';
@@ -13,6 +13,7 @@ import { ROOT_KEY_FILE, Registry, baseKey, createRootKey, enrolmentArgs, fingerp
 import { service } from './service.ts';
 import {initializeNativeTLS,loadNativeTLS,nativeAdmin,NativeAuth,type Invitation} from './native-auth.ts';
 import { Runtime, type ChatReply } from './runtime.ts';
+import { builtinTools } from './executors.ts';
 import { MODEL_TIMEOUT_MS } from './model.ts';
 import { MAX_STEPS } from './misato.ts';
 import { OLLAMA_URL, detectOllama, modelsReport, ollamaUrlOf, planModels, setupAtInit, writeModels, type ModelChange } from './model-setup.ts';
@@ -222,6 +223,15 @@ try {
           const root=await unlock();new Registry(local().db,root.publicKey).add(signRecord(root.privateKey,{kind:'revoke',serial:registry.nextSerial(),baseId:id,publicKey:entry.publicKey,issued:new Date().toISOString()}));
           console.log(`Revoked ${id}: its key is refused from now on; re-enrolling it needs a new base key.`);
         }
+        else if(sub==='offer'){
+          // Slice 3b: the actions this base lets the main base run here; each still passes this base's own gate.
+          const names=args.slice(1);const offerable=builtinTools.map(t=>t.name).filter(n=>n!=='kaji.run');
+          if(!names.length){const o=config.kaji?.offers ?? [];console.log(o.length?`This base offers: ${o.join(', ')}`:'This base offers nothing to the main base. Offer actions with: kaji offer reminders.add reminders.list (or: kaji offer none).');break;}
+          const list=names.length===1&&names[0]==='none'?[]:names;const bad=list.filter(n=>!offerable.includes(n));
+          if(bad.length)throw new Error(`Not an action this base can offer: ${bad.join(', ')}. Offerable: ${offerable.join(', ')}.`);
+          setKajiOffers(home,[...new Set(list)]);
+          console.log(list.length?`This base now offers: ${list.join(', ')}. The main base sees it at the next heartbeat; restart is not needed.`:'This base now offers nothing to the main base.');
+        }
         else if(sub==='main'){
           // The owner names the main base (F-036): Aoba there is the one channel while the line is up. Signed by the Key.
           const id=(args[1] ?? '').toUpperCase();
@@ -251,7 +261,7 @@ try {
           const reg=new Registry(local().db,bundle.root);let added=0;for(const r of bundle.records)if(reg.add(r)==='added')added++;
           console.log(`Imported ${added} new record(s); ${reg.bases().filter(b=>b.status==='enrolled').length} base(s) enrolled.`);
         }
-        else throw new Error('Usage: kaji enrol | revoke | main [BASE-ID] | list | export [FILE] | import FILE --root FINGERPRINT');
+        else throw new Error('Usage: kaji enrol | revoke | main [BASE-ID] | offer [ACTION…|none] | list | export [FILE] | import FILE --root FINGERPRINT');
         break;
       }
       case 'brief':console.log(composeBrief({now:new Date(),timeZone:config.timeZone,language:config.language,base:config.base.name,...await gatherBrief(local(),new Date(Date.now()-86_400_000))}));break;
@@ -301,7 +311,12 @@ try {
           onRelay:async(from,relay)=>{if(!aoba)return false;const name=(await runtime.bases()).find(b=>b.baseId===from)?.name ?? from;return aoba.relayed(from,name,relay);},
           onDecide:async(approvalId,decision)=>decisionText(await runtime.decide(approvalId,decision,'telegram')),
           // Dispatch, on the main base: a request asked on another base, with its own conversation per base and channel.
+          // Slice 3b, on the base asked: only actions this base offers, once per id, through this base's own gate.
+          offers:()=>live().kaji?.offers ?? [],onOffers:(id,tools)=>runtime.notePeerOffers(id,tools),
+          onRun:(from,item)=>runtime.runFromPeer(from,item,live().kaji?.offers ?? []),
           onChat:async(from,message,conversation)=>({...await runtime.chat(message,`kaji:${from.toLowerCase()}${conversation?'-'+conversation:''}`),base:{id:config.base.id,name:config.base.name}})});
+        // Slice 3b, on the main base: actions queued by kaji.run go out over the line, each until it reached its base.
+        if(kaji){const link=kaji;runtime.startOutbox((base,item)=>link.run(base,item,MODEL_TIMEOUT_MS*2));}
         // Dispatch, on the other bases: while the main base is online, requests go to its Misato (one planner, one memory).
         runtime.setDispatch(async(message,conversation)=>{const main=await runtime.mainBase();if(!main||main.self||!main.online||!kaji)return undefined;
           return await kaji.chat(message,conversation&&/^[a-z]{1,20}$/.test(conversation)?conversation:undefined,MODEL_TIMEOUT_MS*MAX_STEPS*2) as ChatReply|undefined;});void kaji.start();}

@@ -63,6 +63,13 @@ function localize(value:unknown,timeZone:string):unknown {
  for(const [k,v] of Object.entries(value)){out[k]=localize(v,timeZone);if(k==='due'&&typeof v==='string'&&Number.isFinite(Date.parse(v)))out.dueLocal=new Intl.DateTimeFormat('en-GB',{timeZone,dateStyle:'full',timeStyle:'short'}).format(new Date(v));}
  return out;
 }
+/** What another of the owner's bases lets the main base run there (F-036 slice 3b), as heard in its heartbeat. */
+export interface RemoteOffer {base:string;name:string;tools:string[]}
+/** The kaji.run tool as Misato sees it, listing the bases online now and their actions; absent when none offers anything. */
+export function remoteToolDoc(remote:RemoteOffer[]):ToolDoc {
+ const list=remote.map(r=>`${r.base} (${r.name}): ${r.tools.join(', ')}`).join('; ');
+ return {name:'kaji.run',effect:'write-external',about:`Runs one action on another of the owner's bases, which reviews it with its own gate; it always asks the owner first, and its result follows later as a message. Bases and the actions they offer: ${list}. Use it only when the owner asks for something on that base.`,args:'{"base": base id, "tool": one of that base\'s actions, "args": that action\'s arguments, as for the same tool here}'};
+}
 /** The LCL budget (F-022), in characters of the prompt's JSON besides the request and the steps: the cloud route costs
     per token, so it gets less. */
 export const LCL_CHARS:Record<RouteName,number>={local:6000,cloud:3000};

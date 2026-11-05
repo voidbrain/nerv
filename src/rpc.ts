@@ -32,6 +32,10 @@ export const methodSchemas={
  'kaji.records':empty,
  'kaji.lastSeen':empty,
  'kaji.main':empty,
+ 'kaji.outbox':empty,
+ 'kaji.outboxDone':{type:'object',required:['id','result'],properties:{id:{type:'string',minLength:1,maxLength:100},result:{type:'object'}},additionalProperties:false},
+ 'kaji.remoteRun':{type:'object',required:['id'],properties:{id:{type:'string',minLength:1,maxLength:100}},additionalProperties:false},
+ 'kaji.saveRemoteRun':{type:'object',required:['id','from','result'],properties:{id:{type:'string',minLength:1,maxLength:100},from:{type:'string',minLength:1,maxLength:16},result:{type:'object'}},additionalProperties:false},
  'kaji.add':{type:'object',required:['records'],properties:{records:{type:'array',maxItems:1000,items:{type:'object'}}},additionalProperties:false},
  'kaji.seen':{type:'object',required:['updates'],properties:{updates:{type:'object',maxProperties:64}},additionalProperties:false},
  'memory.lastRequest':empty,
@@ -49,7 +53,7 @@ export const methodSchemas={
  'memory.recall':{type:'object',required:['text'],properties:{text:{type:'string',minLength:1,maxLength:8000}},additionalProperties:false},
  'misato.context':{type:'object',required:['conversation'],properties:{conversation:{type:'string',pattern:'^[a-z]+(:[a-z0-9-]{1,30})?$',maxLength:40}},additionalProperties:false},
  'misato.claim':{type:'object',required:['sortieId'],properties:{sortieId:{type:'string',minLength:1,maxLength:100}},additionalProperties:false},
- 'misato.step':{type:'object',required:['request','history'],properties:{request:{type:'string',minLength:1,maxLength:4000},history:{type:'array',maxItems:12,items:{type:'object'}},context:{type:'array',maxItems:3,items:{type:'object'}},memory:{type:'array',maxItems:10,items:{type:'object'}}},additionalProperties:false},
+ 'misato.step':{type:'object',required:['request','history'],properties:{request:{type:'string',minLength:1,maxLength:4000},history:{type:'array',maxItems:12,items:{type:'object'}},context:{type:'array',maxItems:3,items:{type:'object'}},memory:{type:'array',maxItems:10,items:{type:'object'}},remote:{type:'array',maxItems:10,items:{type:'object'}}},additionalProperties:false},
  'actions.preview':{type:'object',required:['sortieId','tool'],properties:{sortieId:{type:'string',minLength:1,maxLength:100},tool:{type:'string',minLength:1,maxLength:100}},additionalProperties:false},
  'actions.act':{type:'object',required:['sortieId','tool','args','stage'],properties:{sortieId:{type:'string',minLength:1,maxLength:100},tool:{type:'string',minLength:1,maxLength:100},args:{type:'object',maxProperties:50},stage:{enum:['prototype','test','production']},casper:{type:'object',required:['seat','vote','reason'],properties:{seat:{const:'casper'},vote:{enum:['approve','reject','abstain']},reason:{type:'string',maxLength:500},confidence:{type:'number',minimum:0,maximum:1}},additionalProperties:false}},additionalProperties:false},
  'casper.verdict':{type:'object',required:['request','tool','args','effect'],properties:{request:{type:'string',minLength:1,maxLength:4000},tool:{type:'string',minLength:1,maxLength:100},args:{type:'object',maxProperties:50},effect:{enum:['read','write-local','write-external','irreversible','physical']}},additionalProperties:false},
@@ -66,7 +70,7 @@ export type Principal='interface'|'coordinator'|'nervous'|'brain';
 /** Directed edges describe permission, not routing or model capability. Deny by default. */
 export const communicationGraph=[
  {from:'interface',to:'coordinator',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.pending','reminders.add','reminders.update','reminders.cancel','inbox.list','inbox.page','approvals.pending','events.page','sorties.list','sorties.get']},
- {from:'coordinator',to:'nervous',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.pending','reminders.add','reminders.update','reminders.cancel','inbox.list','inbox.brief','inbox.lastBrief','inbox.page','approvals.pending','approvals.expired','approvals.decide','events.page','sorties.list','sorties.get','sorties.spear','sorties.open','sorties.finish','actions.preview','actions.act','misato.note','misato.resumable','misato.context','misato.claim','memory.recall','kaji.bases','kaji.records','kaji.lastSeen','kaji.main','kaji.add','kaji.seen','memory.lastRequest','memory.list','memory.add','memory.edit','memory.forget','memory.share','memory.history','memory.episodes','memory.exchanges','memory.known','memory.saveEpisode']},
+ {from:'coordinator',to:'nervous',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.pending','reminders.add','reminders.update','reminders.cancel','inbox.list','inbox.brief','inbox.lastBrief','inbox.page','approvals.pending','approvals.expired','approvals.decide','events.page','sorties.list','sorties.get','sorties.spear','sorties.open','sorties.finish','actions.preview','actions.act','misato.note','misato.resumable','misato.context','misato.claim','memory.recall','kaji.bases','kaji.records','kaji.lastSeen','kaji.main','kaji.outbox','kaji.outboxDone','kaji.remoteRun','kaji.saveRemoteRun','kaji.add','kaji.seen','memory.lastRequest','memory.list','memory.add','memory.edit','memory.forget','memory.share','memory.history','memory.episodes','memory.exchanges','memory.known','memory.saveEpisode']},
  {from:'coordinator',to:'brain',methods:['runtime.ping','model.complete','casper.verdict','misato.step','models.reload','instrumentality.digest']},
 ] as const;
 export function authorize(from:Principal,to:Principal,method:string):void {

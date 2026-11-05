@@ -8,13 +8,22 @@ import {argsHash} from './ledger.ts';
 import type {SortieEvent} from './events.ts';
 import {MODEL_TIMEOUT_MS,type Ask,type Reply,type RouteName} from './model.ts';
 import type {Effect,Pattern,Stage,Verdict} from './policy.ts';
-import {MAX_STEPS,doneReply,requestLanguage,waitingReply,type Plan,type Recalled,type Step,type Turn} from './misato.ts';
+import {MAX_STEPS,doneReply,type RemoteOffer,requestLanguage,waitingReply,type Plan,type Recalled,type Step,type Turn} from './misato.ts';
 import {toolDocs} from './executors.ts';
 import type {Digest,Exchange} from './instrumentality.ts';
 import type {Episode,Fact} from './memory.ts';
 import type {BaseEntry,SignedRecord} from './kaji.ts';
-import {ONLINE_MS,type BaseHealth,type HeardHealth,type RegistryPort} from './kaji-link.ts';
+import {ONLINE_MS,type RunItem,type BaseHealth,type HeardHealth,type RegistryPort} from './kaji-link.ts';
 import {briefDue,composeBrief,gatherBrief,localClock} from './brief.ts';
+/** What the owner reads when another base answered a kaji.run (F-036 slice 3b). */
+export function remoteOutcomeText(base:string,tool:string,result:Record<string,unknown>):string {
+ if(typeof result.refused==='string')return `${base} did not run ${tool}: ${result.refused}.`;
+ const o=result.outcome;
+ if(o==='grant')return typeof result.error==='string'?`${base} ran ${tool}, and it failed: ${result.error}`:`${base} ran ${tool}: ${JSON.stringify(result.result ?? {}).slice(0,400)}`;
+ if(o==='approval')return `${base} asks for your approval to run ${tool}: its card is waiting for you.`;
+ if(o==='reject')return `${base} refused ${tool}: ${String(result.reason ?? 'its gate said no')}.`;
+ return `${base} answered for ${tool}: ${JSON.stringify(result).slice(0,400)}`;
+}
 export interface ChatReply {sortieId:string;reply?:string;error?:string;steps:Step[];waiting:{approvalId:string;tool:string;reason:string}[];
  /** Set when the main base handled the request (F-036 dispatch): its sortie, cards and memory are there. */
  base?:{id:string;name:string}}
@@ -126,13 +135,17 @@ export class Runtime implements StoreApi {
   const lang=()=>requestLanguage(message,context.map(t=>t.request));
   const ranSteps=()=>steps.filter(s=>s.outcome==='grant'&&!s.error&&s.tool).map(s=>({tool:s.tool!,args:s.args ?? {}}));
   for(let turn=0;turn<MAX_STEPS;turn++){
-   const out=await this.brain.call('misato.step',{request:message,history:steps.slice(-12),...(context.length?{context}:{}),...(memory.length?{memory:memory.slice(0,10)}:{})},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as {plan?:Plan;invalid?:boolean;error?:string};
+   const remote=await this.remoteOffers();
+   const out=await this.brain.call('misato.step',{request:message,history:steps.slice(-12),...(remote.length?{remote}:{}),...(context.length?{context}:{}),...(memory.length?{memory:memory.slice(0,10)}:{})},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as {plan?:Plan;invalid?:boolean;error?:string};
    if(out.error)return finish('failed',undefined,out.error);
    if(!out.plan){await this.record(sortieId,steps,{outcome:'invalid',error:'Reply was not one JSON action or reply.'});continue;}
    if('reply' in out.plan)return finish('done',out.plan.reply);
    const {tool,args}=out.plan.action;
    // A tool Misato was not offered (often a misspelling) has no executor: it goes back to Misato, never to the owner as a card.
-   if(!toolDocs.some(t=>t.name===tool)){await this.record(sortieId,steps,{tool,args,outcome:'invalid',error:`Unknown tool "${tool}". Use exactly one of: ${toolDocs.map(t=>t.name).join(', ')}.`});continue;}
+   // kaji.run (F-036 slice 3b): only to a base online now, for an action it offers; anything else goes back to Misato.
+   if(tool==='kaji.run'){const a=args as {base?:unknown;tool?:unknown};const offer=remote.find(r=>r.base===a.base);
+    if(!offer||typeof a.tool!=='string'||!offer.tools.includes(a.tool)){await this.record(sortieId,steps,{tool,args,outcome:'invalid',error:offer?`${offer.name} does not offer "${String(a.tool)}". It offers: ${offer.tools.join(', ')}.`:`No base by that id is online and offering actions. Online: ${remote.map(r=>r.base).join(', ') || 'none'}.`});continue;}}
+   else if(!toolDocs.some(t=>t.name===tool)){await this.record(sortieId,steps,{tool,args,outcome:'invalid',error:`Unknown tool "${tool}". Use exactly one of: ${toolDocs.map(t=>t.name).join(', ')}.`});continue;}
    // The same action already ran in this sortie: running it again is never the owner's wish (a small model loops here).
    if(steps.some(s=>s.tool===tool&&s.outcome==='grant'&&!s.error&&argsHash(s.args ?? {})===argsHash(args)))return finish('done',doneReply(lang(),ranSteps()));
    // An action the ledger refuses outright (malformed, oversized) never reached a ballot: Misato sees it as invalid.
@@ -151,6 +164,44 @@ export class Runtime implements StoreApi {
  private resumeListeners:((reply:ChatReply)=>void)[]=[];private resuming=new Set<string>();private resumer?:NodeJS.Timeout;
  /** Called with Misato's follow-up after a resume (Aoba sends it to the owner). */
  onResumed(listener:(reply:ChatReply)=>void){this.resumeListeners.push(listener);}
+ /** What each other base said it lets the main base run there (F-036 slice 3b), from its own heartbeat. */
+ private readonly offersHeard=new Map<string,{tools:string[];at:number}>();
+ notePeerOffers(baseId:string,tools:string[]){this.offersHeard.set(baseId,{tools,at:Date.now()});}
+ /** Bases online now with something on offer: what Misato may send with kaji.run. */
+ async remoteOffers():Promise<RemoteOffer[]> {
+  if(!this.offersHeard.size)return [];
+  const bases=await this.bases().catch(()=>[]);
+  return bases.filter(b=>!b.self&&b.online&&b.status==='enrolled').flatMap(b=>{const o=this.offersHeard.get(b.baseId);return o&&o.tools.length&&Date.now()-o.at<ONLINE_MS?[{base:b.baseId,name:b.name,tools:o.tools}]:[];});
+ }
+ /**
+  * Sends the actions queued by kaji.run (F-036 slice 3b), oldest first, each with the same id every time until it reached
+  * the base (which runs it once through its own gate and remembers the id). The result reaches the owner as a follow-up.
+  */
+ startOutbox(send:(base:string,item:RunItem)=>Promise<{reached:boolean;result?:unknown;refused?:string}>,everyMs=3000){
+  let busy=false;
+  const tick=async()=>{if(busy)return;busy=true;
+   try{
+    for(const q of await this.nervous.call('kaji.outbox') as {id:string;sortieId:string;base:string;tool:string;args:Record<string,unknown>;request:string}[]){
+     const r=await send(q.base,{id:q.id,request:q.request,tool:q.tool,args:q.args});if(!r.reached)continue;
+     const result=(r.refused?{refused:r.refused}:r.result ?? {}) as Record<string,unknown>;
+     await this.nervous.call('kaji.outboxDone',{id:q.id,result});
+     const name=(await this.bases().catch(()=>[])).find(b=>b.baseId===q.base)?.name ?? q.base;
+     const reply=remoteOutcomeText(name,q.tool,result);
+     for(const l of this.resumeListeners)l({sortieId:q.sortieId,reply,steps:[],waiting:[]});
+    }
+   }catch{/* the next tick tries again */}finally{busy=false;}
+  };
+  if(!this.outboxTimer)this.outboxTimer=setInterval(()=>{void tick();},everyMs);void tick();
+ }
+ private outboxTimer?:NodeJS.Timeout;
+ /** On the base asked (F-036 slice 3b): an action the main base sent, run once per id, only if this base offers it, and
+     always through this base's own gate (it may run, ask the owner with a card, or refuse). */
+ async runFromPeer(from:string,item:RunItem,offered:string[]):Promise<unknown> {
+  const seen=await this.nervous.call('kaji.remoteRun',{id:item.id});if(seen)return seen;
+  const result=!offered.includes(item.tool)?{refused:`this base does not offer ${item.tool} (on it: kaji offer)`}
+   :await this.act({request:`From ${from}: ${item.request || item.tool}`.slice(0,4000),tool:item.tool,args:item.args}).catch((e:unknown)=>({outcome:'invalid',error:e instanceof Error?e.message:'failed'}));
+  await this.nervous.call('kaji.saveRemoteRun',{id:item.id,from,result:result as unknown as Record<string,unknown>});return result;
+ }
  /** Resumes every Misato sortie whose wait is over; each is claimed once in the ledger, so two sweeps never resume twice. */
  async sweep():Promise<void> {
   const ids=await this.nervous.call('misato.resumable').catch(()=>[]) as string[];
@@ -309,5 +360,5 @@ export class Runtime implements StoreApi {
   if(!this.home)return undefined;let url;try{url=ollamaUrlOf(readConfig(this.home).models);}catch{return undefined;}
   const found=await detectOllama(url);return {reachable:found.reachable,url:found.url,models:found.models.map(m=>m.name)};
  }
- async close(){if(this.briefTimer)clearInterval(this.briefTimer);if(this.resumer)clearInterval(this.resumer);if(this.instrumentality)clearInterval(this.instrumentality);await Promise.allSettled([this.nervous.close(),this.brain.close()]);}
+ async close(){if(this.outboxTimer)clearInterval(this.outboxTimer);if(this.briefTimer)clearInterval(this.briefTimer);if(this.resumer)clearInterval(this.resumer);if(this.instrumentality)clearInterval(this.instrumentality);await Promise.allSettled([this.nervous.close(),this.brain.close()]);}
 }
