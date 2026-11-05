@@ -117,7 +117,10 @@ test('roles pick a route and model per role; Casper stays on the local route',()
  assert.deepEqual(models.roles,{misato:{route:'cloud'},casper:{model:'gemma4:e2b-it-q4_K_M'}});
  assert.equal(forRole(models,'casper').local?.model,'gemma4:e2b-it-q4_K_M');assert.equal(forRole(models,'casper').cloud?.model,'claude-opus-5-5');
  assert.equal(forRole(validateModels({cloud:{provider:'anthropic',enabled:true},roles:{misato:{route:'cloud',model:'claude-sonnet-5-5'}}}),'misato').cloud?.model,'claude-sonnet-5-5');
- assert.deepEqual(describe(models,true).roles,{misato:'cloud (claude-opus-5-5)',casper:'local (gemma4:e2b-it-q4_K_M)'});
+ assert.deepEqual(describe(models,true).roles,{misato:'cloud (claude-opus-5-5)',casper:'local (gemma4:e2b-it-q4_K_M)',consultant:'off'});
+ assert.equal(describe(validateModels({local:{baseUrl:'http://127.0.0.1:11434/v1',model:'m'},roles:{consultant:{model:'gemma4:12b'}}}),false).roles.consultant,'local (gemma4:12b)');
+ assert.equal(forRole(validateModels({local:{baseUrl:'http://127.0.0.1:11434/v1',model:'m'},roles:{consultant:{model:'gemma4:12b'}}}),'consultant').local?.model,'gemma4:12b','the consultant is always on the local route');
+ assert.throws(()=>validateModels({roles:{consultant:{model:'x',route:'cloud'}}}),/consultant: a local model/);
  assert.match(describe({},false).roles.casper,/owner decides/);
  for(const roles of [{casper:{route:'cloud'}},{misato:{route:'moon'}},{misato:{}},{gendo:{}},{casper:{model:''}}])assert.throws(()=>validateModels({roles}),/roles/,JSON.stringify(roles));
 });

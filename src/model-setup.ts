@@ -24,7 +24,7 @@ export async function detectOllama(url=OLLAMA_URL,fetchFn:typeof fetch=fetch):Pr
 export function ollamaUrlOf(models:Models):string {return models.local?models.local.baseUrl.replace(/\/v1$/,''):OLLAMA_URL;}
 /** The largest installed model, by size on disk: a sensible first choice for both roles until the owner picks. */
 export function defaultModel(found:LocalModel[]):string|undefined {return [...found].sort((a,b)=>(b.size ?? 0)-(a.size ?? 0))[0]?.name;}
-export interface ModelChange {misato?:{route:'local'|'cloud';model?:string};casper?:{model:string};cloud?:{enabled:boolean;model?:string};localUrl?:string}
+export interface ModelChange {misato?:{route:'local'|'cloud';model?:string};casper?:{model:string};consultant?:{model:string}|null;cloud?:{enabled:boolean;model?:string};localUrl?:string}
 /** The models settings after a change, validated; a role on a local model that Ollama does not have is refused. */
 export function planModels(current:Models,change:ModelChange,installed?:string[]):Models {
  const next:Models=JSON.parse(JSON.stringify(current)) as Models;
@@ -40,6 +40,7 @@ export function planModels(current:Models,change:ModelChange,installed?:string[]
   roles.misato={route:change.misato.route,...(change.misato.model?{model:change.misato.route==='local'?localModel(change.misato.model):change.misato.model}:{})};
  }
  if(change.casper)roles.casper={model:localModel(change.casper.model)};
+ if(change.consultant===null)delete roles.consultant;else if(change.consultant){if(!next.local)throw new Error('The consultant runs on the local route: set a local model first.');roles.consultant={model:localModel(change.consultant.model)};}
  if(Object.keys(roles).length)next.roles=roles;
  if(change.cloud)next.cloud={provider:'anthropic',enabled:change.cloud.enabled,model:change.cloud.model ?? next.cloud?.model ?? 'claude-opus-5-5'};
  if(next.roles?.misato?.route==='cloud'&&!next.cloud?.enabled)throw new Error('Misato is on the cloud route: move Misato to a local model before turning the cloud route off.');
@@ -54,11 +55,11 @@ export function writeModels(home:string,models:Models):void {
 /** What the CLI and the dashboard show: the settings (never the key, only whether it is there) and what Ollama has. */
 export interface ModelSetup {models:Models;cloudKey:boolean;ollama:Detected}
 /** Which route and model each role really uses, after defaults: what the owner sees and picks from. */
-export function effectiveRoles(m:Models):{misato:{route:'local'|'cloud';model:string}|null;casper:{model:string}|null} {
+export function effectiveRoles(m:Models):{misato:{route:'local'|'cloud';model:string}|null;casper:{model:string}|null;consultant:{model:string}|null} {
  const route=m.roles?.misato?.route ?? (m.local?'local':m.cloud?.enabled?'cloud':undefined);
  const misatoModel=m.roles?.misato?.model ?? (route==='cloud'?m.cloud?.model:m.local?.model);
  const casperModel=m.local?(m.roles?.casper?.model ?? m.local.model):undefined;
- return {misato:route&&misatoModel?{route,model:misatoModel}:null,casper:casperModel?{model:casperModel}:null};
+ return {misato:route&&misatoModel?{route,model:misatoModel}:null,casper:casperModel?{model:casperModel}:null,consultant:m.local&&m.roles?.consultant?{model:m.roles.consultant.model}:null};
 }
 /** The `models` report: each role, each route, what Ollama has, and the commands to change them. */
 export function modelsReport(m:Models,cloudKey:boolean,found:Detected):string {
@@ -66,11 +67,12 @@ export function modelsReport(m:Models,cloudKey:boolean,found:Detected):string {
  return [
   `Misato (planner): ${r.misato?`${r.misato.route} · ${r.misato.model}`:'not set'}`,
   `Casper (intent seat, always local): ${r.casper?r.casper.model:'not set (no local route): the owner decides every non-Green action'}`,
+  `Consultant (advice before Misato plans, local): ${r.consultant?r.consultant.model:'off'}`,
   `Local route (S²): ${m.local?m.local.baseUrl:'not configured'}`,
   `Cloud route (Umbilical): ${m.cloud?.enabled?'on':'off'} · ${m.cloud?.model ?? 'claude-opus-5-5'} · key ${cloudKey?'saved':'missing (models key)'}`,
   found.reachable?`Ollama at ${found.url}: ${found.models.length?found.models.map(x=>x.name+(x.parameters?` (${x.parameters})`:'')).join(', '):'no models yet (ollama pull gemma4:12b)'}`:`Ollama: ${found.error ?? 'not found'}`,
   '',
-  'Change: models set misato MODEL | models set misato cloud [MODEL] | models set casper MODEL | models cloud on|off [MODEL] | models key',
+  'Change: models set misato MODEL | models set misato cloud [MODEL] | models set casper MODEL | models set consultant MODEL|off | models cloud on|off [MODEL] | models key',
  ].join('\n');
 }
 /** The model step of `init` (F-038): when nothing is set yet and Ollama is running, both roles start on its largest model. */

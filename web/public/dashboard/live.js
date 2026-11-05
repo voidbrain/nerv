@@ -5,6 +5,7 @@
   if (!LIVE) return;
   const match = /^#code=([a-f0-9]{32})$/.exec(location.hash); const code = match ? match[1] : null;
   if (match) history.replaceState(null, "", location.pathname + location.search);
+  const consulted = new Set();
   let older = [], matches = [], shown = [], searchSeq = 0, searchTimer = null; let editing = null;
   let token = ""; let polling = false; let lastRan = null; let firstTrace = true; const detailCache = {}; const known = new Map(); let chatBusy = false;
   const PLANNED = "<div class='muted small'>Planned · not connected yet.</div>";
@@ -34,7 +35,8 @@
       apt:!!latest && !!latest.ballot && latest.ballot.outcome === "approval", plug:latestIs("done", "failed", "proposed"), eva:latestIs("done", "failed"), debrief:status !== "active" && status !== "waiting" };
     const phase = status === "waiting" ? "apt" : status === "active" ? "magi" : "debrief";
     const last = actions[actions.length - 1];
-    return { id:short(s.id), realId:s.id, title:s.title, preset:null, pilot:s.source === "misato" ? "misato" : "owner", source:"aoba", proactive:false, consult:false,
+    return { id:short(s.id), realId:s.id, title:s.title, preset:null, pilot:s.source === "misato" ? "misato" : "owner", source:"aoba", proactive:false, consult:consulted.has(s.id), // F-025: lit when a consultant advised Misato (its advice is in Comms)
+     
       why:s.why || "", created:s.created, trust:s.trust, battery:0, spent:0, started:Date.parse(s.created), ended:s.closed ? Date.parse(s.closed) : null, status, phase, done,
       actions, current:Math.max(0, actions.length - 1), ballot:last && last.ballot && last.ballot.verdicts ? last.ballot : null, outcome:known.get(s.id) || null, happened:[], note:"" };
   }
@@ -105,8 +107,10 @@
         : e.kind === "approval.requested" ? ["Approval card: " + p.reason, "warn", "penpen"]
         : e.kind.startsWith("approval.") ? ["Owner " + e.kind.slice(9) + " (" + (p.source || "") + ")", e.kind === "approval.approve" ? "ok" : "danger", "you"]
         : e.kind === "action.done" ? ["EVA-02: " + p.tool + " done", "ok", "eva-02"] : e.kind === "action.failed" ? ["EVA-02: " + p.tool + " failed · " + p.error, "danger", "eva-02"]
+        : e.kind === "misato.consult" ? ["Consultant" + (p.model ? " (" + p.model + ")" : "") + ": " + p.advice, "", "maya"]
         : e.kind === "misato.resumed" ? ["Misato: resuming after your decision", "", "misato"] : e.kind === "sortie.done" || e.kind === "sortie.failed" ? ["Debrief: " + e.kind.slice(7), e.kind === "sortie.done" ? "ok" : "danger", "misato"] : null;
       if (e.kind === "misato.reply") known.set(id, p.text);
+      if (e.kind === "misato.consult") consulted.add(id);
       if (line) { state.log.push({ t, msg:line[0], cls:line[1], s:s.id, who:line[2], chat:e.kind.startsWith("misato.") }); added++; }
     }
     state.log.sort((a, b) => a.t - b.t); if (state.log.length > 300) state.log.splice(0, state.log.length - 300);
@@ -188,10 +192,13 @@
     const misatoOpts = (misatoRoute ? "" : opt("", "not set", true)) + local.map(n => opt("local:" + n, n + " (local)", misatoRoute === "local" && misatoModel === n)).join("") +
       (misatoRoute === "local" && misatoModel && !known(misatoModel) ? opt("local:" + misatoModel, misatoModel + " (not in Ollama)", true, true) : "") +
       opt("cloud:" + cloudModel, cloudModel + " (cloud)" + (cloudOn ? "" : d.cloudKey ? " · turn the cloud route on" : " · key missing"), misatoRoute === "cloud", !cloudOn);
+    const consultantModel = (roles.consultant && roles.consultant.model) || "";
+    const consultantOpts = opt("off", "off", !consultantModel) + local.map(n => opt(n, n + " (local)", consultantModel === n)).join("");
     const casperOpts = (casperModel ? "" : opt("", "not set", true)) + local.map(n => opt(n, n + " (local)", casperModel === n)).join("") + (casperModel && !known(casperModel) ? opt(casperModel, casperModel + " (not in Ollama)", true, true) : "");
     sub.textContent = d.ollama.reachable ? local.length + " local model" + (local.length === 1 ? "" : "s") : "Ollama not found";
     box.innerHTML = (local.length || cloudOn ? "<form id='models-form' class='models-form'><label for='m-misato' class='small'>Misato</label><select id='m-misato'>" + misatoOpts + "</select>" +
       "<label for='m-casper' class='small'>Casper</label><select id='m-casper'" + (local.length ? "" : " disabled") + ">" + casperOpts + "</select>" +
+      "<label for='m-consultant' class='small' title='Advice for Misato before it plans; no vote'>Consultant</label><select id='m-consultant'" + (local.length ? "" : " disabled") + ">" + consultantOpts + "</select>" +
       "<span></span><span><button class='btn sm primary' type='submit'" + (modelsBusy ? " disabled" : "") + ">" + (modelsBusy ? "Applying…" : "Apply") + "</button></span></form>" : "") +
       "<div class='tiny muted' style='margin-top:6px'>" + (d.ollama.reachable ? "Ollama at " + esc(d.ollama.url) + (local.length ? "" : ": no models yet. Pull one: <code>ollama pull gemma4:12b</code>") : esc(d.ollama.error || "Ollama not found.")) + "</div>" +
       "<div class='row tiny' style='margin-top:4px'><span class='muted'>Cloud (Claude): " + (cloudOn ? "on" : "off") + " · key " + (d.cloudKey ? "saved" : "missing: type it in a terminal with <code>nerv models key</code>") + "</span>" +
@@ -210,6 +217,8 @@
     if (mv) { const [route, ...rest] = mv.split(":"); const model = rest.join(":"); const cur = roles.misato ? roles.misato.route + ":" + (roles.misato.model || "") : "";
       if (cur !== mv) change.misato = route === "cloud" ? { route:"cloud" } : { route:"local", model }; }
     if (cv && cv !== ((roles.casper && roles.casper.model) || (m.local || {}).model)) change.casper = { model:cv };
+    const sv = document.getElementById("m-consultant").value; const curConsultant = (roles.consultant && roles.consultant.model) || "off";
+    if (sv && sv !== curConsultant) change.consultant = sv === "off" ? null : { model:sv };
     if (!Object.keys(change).length) { modelsDraft = false; log("Models: nothing changed.", "", null, "maya"); return; }
     applyModels(change, "Models applied");
   });

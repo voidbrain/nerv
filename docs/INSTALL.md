@@ -99,7 +99,8 @@ The backend remains bound to loopback. Remote TLS/Tailscale deployment, service 
 - `npm start -- models` shows each role's route and model, the cloud route, whether its key is saved, and the models Ollama has;
 - `models set misato MODEL`, `models set casper MODEL` pick a local model (it must be one Ollama has); `models set misato cloud` moves Misato to Claude once `models cloud on` has turned that route on;
 - `models key` asks for the Claude API key at a hidden prompt and saves it to `anthropic-key` (readable only by you): it is never typed on the dashboard, a command line or in `config.json`;
-- the dashboard's **Models** panel offers the same choice for Misato and Casper, and turns the cloud route on or off; it says when the key is missing.
+- `models set consultant MODEL` (or `off`) picks a **consultant**: a local model asked once per request, before Misato plans, for a few sentences of advice (what you most likely want, what to check, what could go wrong). It never acts and never votes; the advice goes into Misato's context as data, it is kept in the sortie's trace (Comms, and the Gevurah node lights up), and it is used only when Misato is on the local route. Off by default;
+- the dashboard's **Models** panel offers the same choice for Misato, Casper and the consultant, and turns the cloud route on or off; it says when the key is missing.
 
 Every change is checked before it is written and the running service uses it at once, without a restart. You can also edit the settings by hand:
 

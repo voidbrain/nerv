@@ -136,8 +136,8 @@ try {
       console.log(await reloadIfRunning(home,config.port));
     }else{
       const change:ModelChange=sub==='set'&&a1==='misato'&&a2==='cloud'?{misato:{route:'cloud',...(args[3]?{model:args[3]}:{})}}
-        :sub==='set'&&a1==='misato'&&a2?{misato:{route:'local',model:a2}}:sub==='set'&&a1==='casper'&&a2?{casper:{model:a2}}
-        :sub==='cloud'&&(a1==='on'||a1==='off')?{cloud:{enabled:a1==='on',...(a2?{model:a2}:{})}}:(()=>{throw new Error('Usage: models | models set misato MODEL | models set misato cloud [MODEL] | models set casper MODEL | models cloud on|off [MODEL] | models key');})();
+        :sub==='set'&&a1==='misato'&&a2?{misato:{route:'local',model:a2}}:sub==='set'&&a1==='casper'&&a2?{casper:{model:a2}}:sub==='set'&&a1==='consultant'&&a2?{consultant:a2==='off'?null:{model:a2}}
+        :sub==='cloud'&&(a1==='on'||a1==='off')?{cloud:{enabled:a1==='on',...(a2?{model:a2}:{})}}:(()=>{throw new Error('Usage: models | models set misato MODEL | models set misato cloud [MODEL] | models set casper MODEL | models set consultant MODEL|off | models cloud on|off [MODEL] | models key');})();
       const found=await detectOllama(setting('OLLAMA') ?? ollamaUrlOf(config.models));
       writeModels(home,planModels(config.models,change,found.reachable?found.models.map(m=>m.name):undefined));
       console.log(`Saved. ${await reloadIfRunning(home,config.port)}`);

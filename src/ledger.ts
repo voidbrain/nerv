@@ -81,7 +81,7 @@ export class Ledger {
   return row&&{sortieId:row.sortie_id,actionId:row.id,tool:row.tool,args:JSON.parse(row.args) as Record<string,unknown>,used:row.used!==null};
  }
  /** Misato's loop state, kept in the ledger so a resume after the owner's decision needs no coordinator memory (F-033). */
- note<K extends 'misato.request'|'misato.step'|'misato.waiting'>(sortieId:string,kind:K,payload:EventPayloads[K],now=new Date()):void {this.tx(()=>this.event(sortieId,null,kind,payload,now));}
+ note<K extends 'misato.request'|'misato.step'|'misato.waiting'|'misato.consult'>(sortieId:string,kind:K,payload:EventPayloads[K],now=new Date()):void {this.tx(()=>this.event(sortieId,null,kind,payload,now));}
  private exchange(sortieId:string,requestPayload:string):{request:string;reply?:string;actions?:string[]} {
   const reply=this.db.prepare("SELECT payload FROM events WHERE sortie_id=? AND kind='misato.reply' ORDER BY sequence DESC LIMIT 1").get(sortieId) as {payload:string}|undefined;
   const ran=(this.db.prepare("SELECT payload FROM events WHERE sortie_id=? AND kind='action.done' ORDER BY sequence").all(sortieId) as {payload:string}[]).map(e=>{const p=JSON.parse(e.payload) as {tool:string;result:unknown};return `${p.tool} → ${JSON.stringify(p.result).slice(0,300)}`;});
