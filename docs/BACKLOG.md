@@ -177,9 +177,9 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔶 P2 | Open | 🟢 Small | ~0% |
+| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
 
-💻 **→ Human action required: No**<br />Next: tell Misato each base by ID and name.
+💻 **→ Human action required: No**<br />Close from the merged PR's green CI; optional owner check after updating: ask Aoba *remind me on Tabgha tomorrow at 9 to water the plants*, the card is kaji.run for NERV-02 and Casper approves it.
 
 | | |
 |---|---|
@@ -190,15 +190,15 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Reported 2026-11-05.
+**Next action / closure evidence:** Cause corrected 2026-11-05 (read-only, Neo Tokyo-3's ledger, S-0866 and S-F57B): Misato did name bases correctly (its prompt lists *NERV-02 (Tabgha)*; it asked AM or PM, then proposed kaji.run for NERV-02). The refusal came from Casper, which compared a request saying *Tabgha* with an action saying *NERV-02* without knowing they are the same base (and without the earlier exchange, B-010); the consultant did not know Tabgha is a base either. Fixed in [PR #114](https://github.com/voidbrain/nerv/pull/114): for kaji.run Casper gets every enrolled base by id and name as data, with a rule that a base's name in the request matches its id in the action; the consultant (and pilots) get the same list when there is more than one base. Checked: test/kaji-run.test.ts (two bases: Casper's prompt lists NERV-02 · Tabgha), test/gate.test.ts (both prompts, with and without bases), both fail without the fix; full suite 152 pass, build, headless. Reported 2026-11-05.
 
-**Estimates:** Small remaining effort; ~0% complete. Estimated 2026-11-05.
+**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner test on Tabgha 2026-11-05 |
+| PR / evidence | Owner test on Tabgha 2026-11-05; [PR #114](https://github.com/voidbrain/nerv/pull/114) |
 | Opened | 2026-11-05 |
-| Verification | Pending |
+| Verification | 2026-11-05: test/kaji-run.test.ts, test/gate.test.ts and full suite (local run) |
 | Reviewed | 2026-11-05 |
 
 </details>

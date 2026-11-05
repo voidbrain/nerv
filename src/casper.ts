@@ -6,7 +6,8 @@ import type { Effect, Verdict } from './policy.ts';
  * arguments can be private), and any failure or unreadable reply means no verdict: the gate then asks the owner.
  */
 /** `earlier`: the previous exchanges of the same conversation (B-010), so a short confirmation is judged against what it confirms. */
-export interface CasperInput {request:string;tool:string;args:Record<string,unknown>;effect:Effect;earlier?:{request:string;reply?:string}[]}
+/** `bases`: the owner's NERV bases by id and name (B-012), so "on Tabgha" matches an action for NERV-02. */
+export interface CasperInput {request:string;tool:string;args:Record<string,unknown>;effect:Effect;earlier?:{request:string;reply?:string}[];bases?:{id:string;name:string}[]}
 const MAX_REQUEST_CHARS=4000;
 const MAX_REASON_CHARS=500;
 const SYSTEM=[
@@ -16,11 +17,13 @@ const SYSTEM=[
  'Reply with one JSON object and nothing else: {"vote":"approve"|"reject"|"abstain","reason":"one short sentence","confidence":number between 0 and 1}.',
  'Abstain when the request is too unclear to judge.',
  '"earlier" (when present) holds the previous exchanges of this conversation, oldest first: when the request is a short answer or confirmation (yes, ok, sì, am, a time), judge the action against what the owner asked there, as answered now; otherwise judge the request alone.',
+ '"bases" (when present) lists the owner\'s NERV bases, the machines the agent runs on, by id and name: a request naming a base by its name ("on Tabgha") matches an action for its id ("NERV-02").',
  'An action that cancels, forgets or removes something the request does not ask to remove is a reject, even if it looks tidy.',
 ].join('\n');
 export function casperAsk(input:CasperInput):Ask {
  const earlier=(input.earlier ?? []).slice(-3).map(t=>({request:t.request.slice(0,600),...(t.reply?{reply:t.reply.slice(0,600)}:{})}));
- const prompt=JSON.stringify({request:input.request.slice(0,MAX_REQUEST_CHARS),...(earlier.length?{earlier}:{}),action:{tool:input.tool,effect:input.effect,args:input.args}});
+ const bases=(input.bases ?? []).slice(0,20).map(b=>({id:b.id.slice(0,16),name:b.name.slice(0,60)}));
+ const prompt=JSON.stringify({request:input.request.slice(0,MAX_REQUEST_CHARS),...(earlier.length?{earlier}:{}),...(bases.length?{bases}:{}),action:{tool:input.tool,effect:input.effect,args:input.args}});
  return {prompt,system:SYSTEM,privacy:'local-only',route:'local'};
 }
 /** Strict: the first JSON object in the reply must carry a known vote, a reason and a confidence in [0, 1]; otherwise no verdict. */

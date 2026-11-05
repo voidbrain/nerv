@@ -109,9 +109,11 @@ export class Runtime implements StoreApi {
   let casper:Verdict|undefined,casperError:string|undefined;let extras:Verdict[]=[];
   // Casper (and the other bases' seats) for anything not Green, and for every removal even when Green (B-009).
   if((intent ?? pattern!=='green')&&askCasper){
+   // B-012: for an action on another base, Casper is told the bases by id and name.
+   const bases=action.tool==='kaji.run'?await this.baseNames():[];
    // The other bases' Casper (F-036 phase 2) is asked at the same time: veto-only seats, shadow until the owner trusts them.
    const [reply,peers]=await Promise.all([
-    this.brain.call('casper.verdict',{request:action.request,tool:action.tool,args:action.args,effect,...(action.earlier?.length?{earlier:action.earlier.slice(-3).map(t=>({request:t.request.slice(0,600),...(t.reply?{reply:t.reply.slice(0,600)}:{})}))}:{})},MODEL_TIMEOUT_MS).catch(()=>({verdict:null,error:'Brain unavailable.'})) as Promise<{verdict:Verdict|null;error?:string}>,
+    this.brain.call('casper.verdict',{request:action.request,tool:action.tool,args:action.args,effect,...(bases.length?{bases}:{}),...(action.earlier?.length?{earlier:action.earlier.slice(-3).map(t=>({request:t.request.slice(0,600),...(t.reply?{reply:t.reply.slice(0,600)}:{})}))}:{})},MODEL_TIMEOUT_MS).catch(()=>({verdict:null,error:'Brain unavailable.'})) as Promise<{verdict:Verdict|null;error?:string}>,
     this.peerSeats?this.peerSeats({request:action.request,tool:action.tool,args:action.args,effect}).catch(()=>[] as Verdict[]):Promise.resolve([] as Verdict[])]);
    if(reply.verdict)casper=reply.verdict;else casperError=reply.error ?? 'No verdict.';
    extras=peers;
@@ -165,7 +167,8 @@ export class Runtime implements StoreApi {
   // F-025: a consultant's advice, once per request before the first step (not again on a resume); no vote, no action.
   // F-045: the specialist pilot whose keywords fit the request advises; none fits, the generic pilot (roles.consultant).
   const pilot=steps.length?undefined:(()=>{try{return choosePilot(message,this.pilots?.() ?? []);}catch{return undefined;}})();
-  const advice=steps.length?undefined:await this.brain.call('consultant.advise',{request:message.slice(0,4000),...(context.length?{context:context.slice(-3)}:{}),...(pilot?{pilot:{name:pilot.name,domain:pilot.domain,model:pilot.model}}:{})},MODEL_TIMEOUT_MS).then(r=>r as {advice:string|null;model?:string},()=>({advice:null})).then(async r=>{
+  const named=steps.length?[]:await this.baseNames();
+  const advice=steps.length?undefined:await this.brain.call('consultant.advise',{request:message.slice(0,4000),...(context.length?{context:context.slice(-3)}:{}),...(pilot?{pilot:{name:pilot.name,domain:pilot.domain,model:pilot.model}}:{}),...(named.length>1?{bases:named}:{})},MODEL_TIMEOUT_MS).then(r=>r as {advice:string|null;model?:string},()=>({advice:null})).then(async r=>{
    if(!r.advice)return undefined;await this.note(sortieId,'misato.consult',{advice:r.advice,model:r.model ?? '',...(pilot?{pilot:{id:pilot.id,name:pilot.name,why:pilot.why}}:{})});return r.advice;});
   for(let turn=0;turn<MAX_STEPS;turn++){
    const remote=await this.remoteOffers();
@@ -201,6 +204,8 @@ export class Runtime implements StoreApi {
  private readonly offersHeard=new Map<string,{tools:string[];at:number}>();
  notePeerOffers(baseId:string,tools:string[]){this.offersHeard.set(baseId,{tools,at:Date.now()});}
  /** Bases online now with something on offer: what Misato may send with kaji.run. */
+ /** Every enrolled base by id and name (this one included), for Casper and the consultant (B-012); none without the Kaji line. */
+ async baseNames():Promise<{id:string;name:string}[]> {try{return (await this.bases()).filter(b=>b.status==='enrolled').slice(0,20).map(b=>({id:b.baseId.slice(0,16),name:b.name.slice(0,60)}));}catch{return [];}}
  async remoteOffers():Promise<RemoteOffer[]> {
   if(!this.offersHeard.size)return [];
   const bases=await this.bases().catch(()=>[]);

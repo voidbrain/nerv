@@ -15,11 +15,11 @@ const root=(()=>{const f=createRootKey('a long test passphrase');return unlockRo
 let serial=0;const rec=(body:Omit<RegistryBody,'serial'|'issued'>)=>signRecord(root.privateKey,{...body,serial:++serial,issued:new Date().toISOString()} as RegistryBody);
 /** A fake local model: Misato follows a script and its system prompt is kept; Casper always approves. */
 async function fakeModel(script:string[]){
- const systems:string[]=[];
+ const systems:string[]=[];const casperPrompts:string[]=[];
  const s=httpServer((req,res)=>{let raw='';req.on('data',c=>raw+=c).on('end',()=>{const r=JSON.parse(raw) as {messages:{content:string}[]};const casper=r.messages[0]!.content.startsWith('You are Casper');
-  if(!casper)systems.push(r.messages[0]!.content);res.setHeader('content-type','application/json');
+  if(!casper)systems.push(r.messages[0]!.content);else casperPrompts.push(r.messages.at(-1)!.content);res.setHeader('content-type','application/json');
   res.end(JSON.stringify({choices:[{message:{content:casper?'{"vote":"approve","reason":"Matches.","confidence":0.9}':(script.shift() ?? '{"reply":"ok"}')},finish_reason:'stop'}]}));});});
- await new Promise<void>(d=>s.listen(0,'127.0.0.1',d));return {url:`http://127.0.0.1:${(s.address() as {port:number}).port}/v1`,systems,close:()=>new Promise<void>(d=>{s.close(()=>d());s.closeAllConnections();})};
+ await new Promise<void>(d=>s.listen(0,'127.0.0.1',d));return {url:`http://127.0.0.1:${(s.address() as {port:number}).port}/v1`,systems,casperPrompts,close:()=>new Promise<void>(d=>{s.close(()=>d());s.closeAllConnections();})};
 }
 test('offers keep action names only',()=>{
  assert.deepEqual(sanitizeOffers(['reminders.add','reminders.add','kaji.run']),['reminders.add'],'never kaji.run itself');
@@ -46,7 +46,9 @@ test('kaji.run: the main base\'s Misato sends one action to a base that offers i
   const chat=await a.chat('Remind me on Tabgha to stretch');
   assert.match(model.systems[0]!,/kaji\.run[\s\S]*NERV-02 \(Tabgha\): reminders\.add/,'Misato sees what Tabgha offers');
   assert.equal(chat.steps[0]!.outcome,'invalid','an action Tabgha does not offer goes back to Misato');assert.match(chat.steps[0]!.error!,/Tabgha does not offer "reminders.cancel"/);
-  assert.equal(chat.waiting.length,1,'every kaji.run asks the owner first');assert.equal(chat.waiting[0]!.tool,'kaji.run');
+  assert.equal(chat.waiting.length,1,'every kaji.run asks the owner first');
+  // B-012: Casper is told the bases by id and name, so "on Tabgha" matches kaji.run for NERV-02.
+  assert.ok((JSON.parse(model.casperPrompts.at(-1)!) as {bases:{id:string;name:string}[]}).bases.some(b=>b.id==='NERV-02'&&b.name==='Tabgha'));assert.equal(chat.waiting[0]!.tool,'kaji.run');
   assert.equal((await b.list()).length,0,'nothing on Tabgha before the owner decides');
   a.startOutbox((base,item)=>la.run(base,item,5000),100);
   await a.decide(chat.waiting[0]!.approvalId,'approve','api');

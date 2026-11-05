@@ -1,4 +1,4 @@
 [
- {"kind":"rule","disposition":"implemented","target":"docs/agents/areas.md","evidence":"Action gate and ledger gains the B-010 rule: Casper gets the conversation's last three exchanges as data (earlier), as Misato does, so a short confirmation is judged against what it confirms; peer seats still get the request alone. Checked by test/misato.test.ts and test/gate.test.ts. Reviewed against the B-009 removal rule (a confirmed cancel now reaches Casper with its context) and the data-not-instructions rule (earlier is data in the prompt): consistent, no duplicate."},
+ {"kind":"rule","disposition":"implemented","target":"docs/agents/areas.md","evidence":"Action gate and ledger gains the B-012 rule: for kaji.run Casper is told every enrolled base by id and name (baseNames), and the consultant and pilots get the list as data when there is more than one base. Checked by test/kaji-run.test.ts and test/gate.test.ts. Reviewed against the B-010 context rule and the data-not-instructions rule (base names are data, from the signed registry): consistent, no duplicate."},
  {"kind":"none","disposition":"no-change","evidence":"No harness file or copied tool changed."}
 ]
