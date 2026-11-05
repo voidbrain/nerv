@@ -33,6 +33,8 @@ export interface ChatReply {sortieId:string;reply?:string;error?:string;steps:St
  base?:{id:string;name:string}}
 /** An action the owner asks for directly: the request is what Casper checks the action against. */
 /** `earlier`: the conversation's previous exchanges, for Casper's intent check (B-010). */
+/** One other base's seat for an action: its vote arrives when that base answers (F-052). */
+export interface PeerSeat {seat:string;shadow:boolean;verdict:Promise<PeerVerdict>}
 export interface OwnerAction {request:string;tool:string;args:Record<string,unknown>;stage?:Stage;earlier?:{request:string;reply?:string}[]}
 export type ActReply=ActResult&{casperError?:string};
 export interface StoreApi {
@@ -97,8 +99,18 @@ export class Runtime implements StoreApi {
   return this.gate(sortieId,action);
  }
  /** The other bases' votes on a non-Green action (F-036 phase 2), set by serve on the main base. */
- private peerSeats?:(ask:VerdictAsk)=>Promise<Verdict[]>;
- setPeerSeats(fn:(ask:VerdictAsk)=>Promise<Verdict[]>){this.peerSeats=fn;}
+ private peerSeats?:(ask:VerdictAsk)=>Promise<PeerSeat[]>;
+ /**
+  * The other bases' seats (F-036 phase 2), on the main base: every online enrolled base not set off, shadow unless set
+  * veto. Each vote is a pending promise, so the gate waits only for the seats that count (F-052): serve and tests wire it here.
+  */
+ usePeerSeats(link:{verdict(baseId:string,ask:VerdictAsk,timeoutMs:number):Promise<PeerVerdict>},modes:()=>Record<string,string>,timeoutMs=MODEL_TIMEOUT_MS){
+  this.peerSeats=async ask=>{
+   const main=await this.mainBase();if(!main?.self)return [];const seats=modes();
+   const peers=(await this.bases()).filter(b=>!b.self&&b.online&&b.status==='enrolled'&&seats[b.baseId]!=='off');
+   return peers.map(b=>({seat:b.baseId,shadow:seats[b.baseId]!=='veto',verdict:link.verdict(b.baseId,ask,timeoutMs).catch(():PeerVerdict=>({vote:'abstain',reason:'could not be reached'}))}));
+  };
+ }
  /** On the base asked: this base's Casper votes on the main base's action; no local model means no verdict (abstain). */
  async peerVerdict(ask:VerdictAsk):Promise<PeerVerdict|null> {
   const reply=await this.brain.call('casper.verdict',{request:ask.request,tool:ask.tool,args:ask.args,effect:ask.effect},MODEL_TIMEOUT_MS).catch(()=>({verdict:null})) as {verdict:Verdict|null};
@@ -106,19 +118,24 @@ export class Runtime implements StoreApi {
  }
  private async gate(sortieId:string,action:OwnerAction,askCasper=true):Promise<ActReply> {
   const {pattern,effect,intent}=await this.nervous.call('actions.preview',{sortieId,tool:action.tool}) as {pattern:Pattern;effect:Effect;intent?:boolean};
-  let casper:Verdict|undefined,casperError:string|undefined;let extras:Verdict[]=[];
+  let casper:Verdict|undefined,casperError:string|undefined;let extras:Verdict[]=[];let late:PeerSeat[]=[];
   // Casper (and the other bases' seats) for anything not Green, and for every removal even when Green (B-009).
   if((intent ?? pattern!=='green')&&askCasper){
    // B-012: for an action on another base, Casper is told the bases by id and name.
    const bases=action.tool==='kaji.run'?await this.baseNames():[];
    // The other bases' Casper (F-036 phase 2) is asked at the same time: veto-only seats, shadow until the owner trusts them.
-   const [reply,peers]=await Promise.all([
-    this.brain.call('casper.verdict',{request:action.request,tool:action.tool,args:action.args,effect,...(bases.length?{bases}:{}),...(action.earlier?.length?{earlier:action.earlier.slice(-3).map(t=>({request:t.request.slice(0,600),...(t.reply?{reply:t.reply.slice(0,600)}:{})}))}:{})},MODEL_TIMEOUT_MS).catch(()=>({verdict:null,error:'Brain unavailable.'})) as Promise<{verdict:Verdict|null;error?:string}>,
-    this.peerSeats?this.peerSeats({request:action.request,tool:action.tool,args:action.args,effect}).catch(()=>[] as Verdict[]):Promise.resolve([] as Verdict[])]);
+   // F-052: the gate waits for Casper and the veto seats only; a shadow vote not in by then is recorded when it comes.
+   const asking=this.brain.call('casper.verdict',{request:action.request,tool:action.tool,args:action.args,effect,...(bases.length?{bases}:{}),...(action.earlier?.length?{earlier:action.earlier.slice(-3).map(t=>({request:t.request.slice(0,600),...(t.reply?{reply:t.reply.slice(0,600)}:{})}))}:{})},MODEL_TIMEOUT_MS).catch(()=>({verdict:null,error:'Brain unavailable.'})) as Promise<{verdict:Verdict|null;error?:string}>;
+   const seats=this.peerSeats?await this.peerSeats({request:action.request,tool:action.tool,args:action.args,effect}).catch(()=>[] as PeerSeat[]):[];
+   const settled=new Map<string,PeerVerdict>();for(const s of seats)void s.verdict.then(v=>{settled.set(s.seat,v);});
+   const [reply]=await Promise.all([asking,Promise.all(seats.filter(s=>!s.shadow).map(s=>s.verdict))]);
    if(reply.verdict)casper=reply.verdict;else casperError=reply.error ?? 'No verdict.';
-   extras=peers;
+   extras=seats.filter(s=>settled.has(s.seat)).map(s=>({seat:s.seat,...settled.get(s.seat)!,shadow:s.shadow}));
+   late=seats.filter(s=>s.shadow&&!settled.has(s.seat));
   }
   const result=await this.nervous.call('actions.act',{sortieId,tool:action.tool,args:action.args,stage:action.stage ?? 'production',...(casper?{casper}:{}),...(extras.length?{extras}:{})}) as ActResult;
+  // A late shadow vote (F-052) is kept with the action when it arrives; it never changes the outcome.
+  for(const s of late)void s.verdict.then(v=>this.nervous.call('actions.shadowVote',{sortieId,actionId:result.actionId,seat:s.seat,vote:v.vote,reason:v.reason.slice(0,500),...(typeof v.confidence==='number'?{confidence:v.confidence}:{})})).catch(()=>{/* best effort */});
   return casperError?{...result,casperError}:result;
  }
  /** A new request to Misato (F-003): its text and every step go to the ledger, so the loop can resume later. */

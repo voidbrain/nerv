@@ -1,4 +1,4 @@
 [
- {"kind":"rule","disposition":"implemented","target":"docs/agents/areas.md","evidence":"Action gate and ledger gains the B-012 rule: for kaji.run Casper is told every enrolled base by id and name (baseNames), and the consultant and pilots get the list as data when there is more than one base. Checked by test/kaji-run.test.ts and test/gate.test.ts. Reviewed against the B-010 context rule and the data-not-instructions rule (base names are data, from the signed registry): consistent, no duplicate."},
+ {"kind":"rule","disposition":"implemented","target":"docs/agents/areas.md","evidence":"Action gate and ledger gains the F-052 rule: other bases' seats come from Runtime.usePeerSeats (one wiring for serve and tests); the gate waits only for Casper and veto seats; a shadow vote not in yet is recorded later as ballot.shadow and never changes the outcome. Checked by test/kaji-seats.test.ts. Reviewed against the veto-only seats rule and the B-009/B-012 rules on what Casper sees: consistent; replaces the test's copied wiring (a join tested across both sides)."},
  {"kind":"none","disposition":"no-change","evidence":"No harness file or copied tool changed."}
 ]

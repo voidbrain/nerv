@@ -353,11 +353,7 @@ try {
           onVerdict:(_from,ask)=>runtime.peerVerdict(ask),
           onChat:async(from,message,conversation)=>({...await runtime.chat(message,`kaji:${from.toLowerCase()}${conversation?'-'+conversation:''}`),base:{id:config.base.id,name:config.base.name}})});
         // Phase 2, on the main base: every online base's Casper votes too, veto-only, shadow unless kaji seat BASE veto.
-        if(kaji){const link=kaji;runtime.setPeerSeats(async ask=>{
-          const main=await runtime.mainBase();if(!main?.self)return [];const seats=live().kaji?.seats ?? {};
-          const peers=(await runtime.bases()).filter(b=>!b.self&&b.online&&b.status==='enrolled'&&seats[b.baseId]!=='off');
-          return Promise.all(peers.map(async b=>({seat:b.baseId,...await link.verdict(b.baseId,ask,MODEL_TIMEOUT_MS),shadow:seats[b.baseId]!=='veto'})));
-        });}
+        if(kaji)runtime.usePeerSeats(kaji,()=>live().kaji?.seats ?? {});
         // Slice 3b, on the main base: actions queued by kaji.run go out over the line, each until it reached its base.
         if(kaji){const link=kaji;runtime.startOutbox((base,item)=>link.run(base,item,MODEL_TIMEOUT_MS*2));}
         // Dispatch, on the other bases: while the main base is online, requests go to its Misato (one planner, one memory).

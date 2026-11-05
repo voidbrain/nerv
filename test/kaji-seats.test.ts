@@ -14,9 +14,9 @@ const keys=()=>{const k=generateKeyPairSync('ed25519');return {privateKey:k.priv
 const root=(()=>{const f=createRootKey('a long test passphrase');return unlockRootKey(f.file,'a long test passphrase');})();
 let serial=0;const rec=(body:Omit<RegistryBody,'serial'|'issued'>)=>signRecord(root.privateKey,{...body,serial:++serial,issued:new Date().toISOString()} as RegistryBody);
 /** A fake local model whose Casper always gives the same vote. */
-async function casperSays(vote:'approve'|'reject'){
+async function casperSays(vote:'approve'|'reject',delayMs=0){
  const s=httpServer((req,res)=>{let raw='';req.on('data',c=>raw+=c).on('end',()=>{res.setHeader('content-type','application/json');
-  res.end(JSON.stringify({choices:[{message:{content:JSON.stringify({vote,reason:vote==='approve'?'Matches the request.':'This does not match what the owner asked.',confidence:0.9})},finish_reason:'stop'}]}));});});
+  setTimeout(()=>res.end(JSON.stringify({choices:[{message:{content:JSON.stringify({vote,reason:vote==='approve'?'Matches the request.':'This does not match what the owner asked.',confidence:0.9})},finish_reason:'stop'}]})),delayMs);});});
  await new Promise<void>(d=>s.listen(0,'127.0.0.1',d));return {url:`http://127.0.0.1:${(s.address() as {port:number}).port}/v1`,close:()=>new Promise<void>(d=>{s.close(()=>d());s.closeAllConnections();})};
 }
 test('peer seats are veto-only: a shadow reject is shown and never counted, a veto reject stops the action, an approve adds nothing',()=>{
@@ -30,7 +30,7 @@ test('peer seats are veto-only: a shadow reject is shown and never counted, a ve
 });
 test('through two runtimes: the main base asks the other base\'s Casper; shadow shows its vote, veto lets it stop the action, an absent base abstains',{timeout:60000},async()=>{
  const {Runtime}=await import('../src/runtime.ts');
- const A=keys(),B=keys();const pa=await freePort(),pb=await freePort();const yes=await casperSays('approve'),no=await casperSays('reject');
+ const A=keys(),B=keys();const pa=await freePort(),pb=await freePort();const yes=await casperSays('approve'),no=await casperSays('reject',1500);
  const ha=mkdtempSync(join(tmpdir(),'nerv-seat-a-')),hb=mkdtempSync(join(tmpdir(),'nerv-seat-b-'));
  writeFileSync(join(ha,'config.json'),JSON.stringify({base:{id:'NERV-01',name:'Neo Tokyo-3'},kaji:{root:root.publicKey},models:{local:{baseUrl:yes.url,model:'m'}}}));
  writeFileSync(join(ha,'scrolls.json'),JSON.stringify({blue:['reminders.cancel']}),{mode:0o600});
@@ -44,15 +44,18 @@ test('through two runtimes: the main base asks the other base\'s Casper; shadow 
   lb=new KajiLink({baseId:'NERV-02',key:B.privateKey,publicKey:B.publicKey,registry:b.kaji,log:()=>{},onVerdict:(_f,ask)=>b.peerVerdict(ask)});
   await la.start(200);await lb.start(200);
   // Wired as serve does on the main base.
-  a.setPeerSeats(async ask=>{const main=await a.mainBase();if(!main?.self)return [];const peers=(await a.bases()).filter(x=>!x.self&&x.online&&x.status==='enrolled'&&seats[x.baseId]!=='off');
-   return Promise.all(peers.map(async x=>({seat:x.baseId,...await la.verdict(x.baseId,ask,3000),shadow:seats[x.baseId]!=='veto'})));});
+  a.usePeerSeats(la,()=>seats,3000);
   await until(async()=>(await a.bases()).some(x=>x.baseId==='NERV-02'&&x.online));
-  const shadow=await a.act({request:'Cancel it',tool:'reminders.cancel',args:{id:'x'}});
+  // F-052: Tabgha's Casper answers after 1.5 s. In shadow its vote never holds the decision; it is kept when it comes.
+  let t=Date.now();const shadow=await a.act({request:'Cancel it',tool:'reminders.cancel',args:{id:'x'}});
+  assert.ok(Date.now()-t<1200,`a shadow seat does not hold the gate (${Date.now()-t} ms)`);
   assert.equal(shadow.outcome,'approval','in shadow Tabgha\'s reject is not counted: the card goes to the owner');
-  const card=(await a.approvals(5))[0]!.card;const peer=card.verdicts.find(v=>v.seat==='extra:NERV-02')!;
-  assert.deepEqual([peer.vote,peer.shadow],['reject',true],'and its vote is on the card');
+  await until(async()=>(await a.events(shadow.sortieId)).some(e=>e.kind==='ballot.shadow'));
+  const late=(await a.events(shadow.sortieId)).find(e=>e.kind==='ballot.shadow')!;
+  assert.deepEqual([late.actionId,(late.payload as {seat:string}).seat,(late.payload as {vote:string}).vote],[shadow.actionId,'NERV-02','reject'],'its vote is kept with the action when it comes');
   seats={'NERV-02':'veto'};
-  const vetoed=await a.act({request:'Cancel it again',tool:'reminders.cancel',args:{id:'y'}});
+  t=Date.now();const vetoed=await a.act({request:'Cancel it again',tool:'reminders.cancel',args:{id:'y'}});
+  assert.ok(Date.now()-t>=1400,'a veto seat is waited for');
   assert.equal(vetoed.outcome,'reject');assert.match(vetoed.reason ?? '',/^extra:NERV-02: This does not match/);
   await lb.stop();lb=undefined;
   const alone=await a.act({request:'Cancel a third',tool:'reminders.cancel',args:{id:'z'}});

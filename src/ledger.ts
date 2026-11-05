@@ -188,6 +188,11 @@ export class Ledger {
   const remote=(this.db.prepare("SELECT payload FROM events WHERE sortie_id=? AND kind='kaji.result' ORDER BY sequence LIMIT 5").all(s.id) as {payload:string}[]).map(r=>(JSON.parse(r.payload) as {text:string}).text);
   return {found:'one',record:{id:s.id,title:s.title,status:s.status,why:s.why,...(remote.length?{remote}:{}),...(advice?.advice?{advice:{text:advice.advice,model:[advice.pilot?.name,advice.model].filter(Boolean).join(' · ')}}:{}),actions}};
  }
+ /** F-052: a shadow seat's late vote, kept with its action; the action must belong to the sortie. */
+ shadowVote(sortieId:string,actionId:string,payload:EventPayloads['ballot.shadow'],now=new Date()):void {
+  if(!this.db.prepare('SELECT 1 FROM actions WHERE id=? AND sortie_id=?').get(actionId,sortieId))throw new Error('Unknown action.');
+  this.tx(()=>this.event(sortieId,actionId,'ballot.shadow',payload,now));
+ }
  /** B-011: another base's outcome for an action this sortie sent it, kept with the sortie (also after it closed). */
  remoteResult(sortieId:string,payload:EventPayloads['kaji.result'],now=new Date()):void {this.tx(()=>this.event(sortieId,null,'kaji.result',payload,now));}
  /** Misato's reply to the owner, kept with the sortie it answers. */
