@@ -149,9 +149,10 @@
         "angular.json",
         "package*.json",
         "src/server.ts",
-        "test/angular.browser.mjs"
+        "test/angular.browser.mjs",
+        "src/store.ts"
       ],
-      "then": "Verify full CSS under the service CSP, English/Italian controls, unchanged reminder text and UTC times, responsive layout and axe accessibility.",
+      "then": "Verify full CSS/CSP, bilingual controls and dates, rejected sign-in and invalid writes, cancellation/retry, local inbox text/deduplication, responsive layout and axe accessibility; add dated acceptance evidence when the claimed scope changes, preserving published reports.",
       "run": "npm run test:browser",
       "checked": "CI validate browser acceptance and screenshot artifacts; manual visual review remains explicit.",
       "after": [

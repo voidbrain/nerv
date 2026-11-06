@@ -11,7 +11,7 @@ import {makeServer} from '../src/server.ts';
 const require=createRequire(import.meta.url);
 const chrome=process.env.CHROME_BIN || ['/usr/bin/google-chrome','/usr/bin/chromium','/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'].find(existsSync);
 
-test('F-010: styled bilingual workspace, local dates and responsive accessible controls',{timeout:120000},async t=>{
+test('F-002/F-010: reliable bilingual reminder flows, local dates and responsive accessible controls',{timeout:120000},async t=>{
  assert.equal(JSON.parse(readFileSync('angular.json','utf8')).projects.nerv.architect.serve.options.port,4318,'dedicated development port');
  assert.ok(chrome,'Install Chrome/Chromium or set CHROME_BIN. Run npm run build first.');
  const profile=mkdtempSync(join(tmpdir(),'nerv-browser-'));
@@ -55,6 +55,15 @@ test('F-010: styled bilingual workspace, local dates and responsive accessible c
   assert.equal(await evaluate('document.activeElement.tagName'),'SELECT','language selector is reachable by keyboard');
   await language('it');await audit('italian-disconnected-desktop');assert.ok(await evaluate(`document.querySelector('h1').textContent.includes('Il tuo mondo.')`));
   await language('en');
+  // A refused sign-in must not reveal protected reminders or enable writes.
+  await evaluate(`document.querySelector('input[type=password]').value='wrong-token';[...document.querySelectorAll('button')].find(b=>b.textContent.trim()==='Connect').click()`);
+  await until(`document.querySelector('[role=alert]')?.textContent==='Connection failed. Check the service and token.'`);
+  assert.equal(await evaluate(`document.querySelector('input[type="datetime-local"]')===null`),true);
+  assert.equal(await evaluate(`document.querySelector('input[type=password]').value`),'','credentials cleared from the control');
+  assert.deepEqual(await evaluate(`Promise.all(['/api/reminders','/api/inbox','/api/doctor'].map(path=>fetch(path).then(r=>r.status)))`),[401,401,401]);
+  assert.equal(await evaluate(`fetch('/api/reminders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:'Unauthorized',due:'2031-04-12T09:30:00Z'})}).then(r=>r.status)`),401);
+  assert.equal(store.list().length,0,'unauthenticated requests cannot create reminders');
+  await audit('english-refused-sign-in');
   await evaluate(`document.querySelector('input[type=password]').value='${token}';[...document.querySelectorAll('button')].find(b=>b.textContent.trim()==='Connect').click()`);
   await until(`document.querySelector('input[type="datetime-local"]')!==null`);
   await evaluate(`document.querySelector('input[maxlength]').value='Practice sketching / Disegno';document.querySelector('input[type="datetime-local"]').value='2031-04-12T09:30';[...document.querySelectorAll('button')].find(b=>b.textContent.trim()==='Save reminder').click()`);
@@ -74,6 +83,51 @@ test('F-010: styled bilingual workspace, local dates and responsive accessible c
    await evaluate(`document.querySelectorAll('nav button')[0].click()`);await until(`document.querySelector('article.reminder')!==null`);
   }
   assert.equal(store.list()[0].due,reminder.due,'language changes do not reinterpret stored time');
+  // Exercise UI -> authenticated HTTP -> SQLite, not a mocked success response.
+  const save=(title,due)=>evaluate(`{document.querySelector('input[maxlength]').value=${JSON.stringify(title)};document.querySelector('input[type="datetime-local"]').value=${JSON.stringify(due)};document.querySelector('.grid .panel button').click();}`);
+  for(const lang of ['en','it']){
+   await language(lang);await viewport(390,844);
+   const saveError=lang==='it'?'Impossibile salvare: verifica titolo e data futura.':'Could not save: check the title and future date.';
+   for(const [title,due] of [['','2031-04-12T09:30'],['Missing date',''],['Past date','2020-01-01T09:30']]){
+    await evaluate(`document.querySelector('header button').click()`);await until(`document.querySelector('[role=alert]')===null`);
+    const before=store.list().length;await save(title,due);
+    await until(`document.querySelector('[role=alert]')?.textContent===${JSON.stringify(saveError)}`);
+    assert.equal(store.list().length,before,'invalid input never writes: '+lang+' '+title);
+    await audit(lang+'-invalid-'+(title||'blank-title').replaceAll(' ','-'));
+   }
+   const title=lang==='it'?'Annullare questa prova':'Cancel this test';
+   await save(title,'2031-04-13T10:00');
+   await until(`[...document.querySelectorAll('article.reminder strong')].some(e=>e.textContent===${JSON.stringify(title)})`);
+   const added=store.list().find(r=>r.title===title);assert.ok(added);
+   // A failed cancellation stays visible and retryable; it is not shown as completed.
+   await evaluate(`{const original=window.fetch;window.fetch=(input,init)=>init?.method==='DELETE'?Promise.resolve(new Response(JSON.stringify({error:'Temporary test failure'}),{status:503,headers:{'Content-Type':'application/json'}})):original(input,init);window.restoreCoreFetch=()=>{window.fetch=original;delete window.restoreCoreFetch;};}`);
+   const cancel=()=>evaluate(`[...document.querySelectorAll('article.reminder')].find(e=>e.querySelector('strong').textContent===${JSON.stringify(title)}).querySelector('button').click()`);
+   await cancel();await until(`document.querySelector('[role=alert]')?.textContent===${JSON.stringify(lang==='it'?'Impossibile annullare il promemoria.':'Could not cancel the reminder.')}`);
+   assert.equal(store.list().find(r=>r.id===added.id).cancelled,null);
+   await audit(lang+'-cancel-failed');await evaluate('window.restoreCoreFetch()');
+   await cancel();
+   await until(`[...document.querySelectorAll('article.reminder')].some(e=>e.querySelector('strong').textContent===${JSON.stringify(title)}&&e.querySelector('small').textContent===${JSON.stringify(lang==='it'?'Annullato':'Cancelled')}&&e.querySelector('button')===null)`);
+   assert.ok(store.list().find(r=>r.id===added.id).cancelled,'browser cancellation reaches storage');
+   await audit(lang+'-cancelled');
+  }
+  // Cancel the original example too, then advance only the test store clock.
+  await evaluate(`document.querySelector('article.reminder button').click()`);
+  await until(`document.querySelectorAll('article.reminder button').length===0`);
+  assert.equal(store.tick(new Date('2031-04-14T00:00:00Z')),0,'cancelled reminders never enter the inbox');
+  assert.equal(store.inbox().length,0);
+  const deliveredTitle='<img src=x onerror="throw new Error(1)"> Inbox test';
+  const delivered=store.add(deliveredTitle,'2031-04-15T08:00:00Z',new Date('2031-04-14T00:00:00Z'));
+  assert.equal(store.tick(new Date('2031-04-16T00:00:00Z')),1);assert.equal(store.tick(new Date('2031-04-16T00:00:00Z')),0);
+  for(const lang of ['en','it']){
+   await language(lang);await evaluate(`document.querySelector('header button').click()`);
+   await until(`document.querySelector('.inbox').textContent.includes(${JSON.stringify(deliveredTitle)})`);
+   assert.equal(await evaluate(`document.querySelectorAll('.inbox p').length`),1,'one local delivery shown');
+   assert.equal(await evaluate(`document.querySelector('.inbox img')===null`),true,'owner content remains text');
+   assert.equal(await evaluate(`[...document.querySelectorAll('article.reminder')].find(e=>e.querySelector('strong').textContent===${JSON.stringify(deliveredTitle)}).querySelector('small').textContent`),lang==='it'?'Nella casella':'In your inbox');
+   await audit(lang+'-local-inbox');
+  }
+  assert.ok(store.list().find(r=>r.id===delivered.id).delivered);
+
   assert.deepEqual(errors,[],'no runtime exceptions or CSP violations');
  }finally{
   for(const p of pending.values()){clearTimeout(p.timer);p.fail(new Error('Browser closed'));}pending.clear();ws?.terminate();
