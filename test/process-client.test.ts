@@ -20,3 +20,11 @@ test('the real children say ready: the first call to a fresh brain answers withi
  const c=new ProcessClient(new URL('../src/brain-process.ts',import.meta.url),[],'brain',1500);
  try{const r=await c.call('runtime.ping') as {role:string};assert.equal(r.role,'brain');}finally{await c.close();}
 });
+
+test('B-008: an IPC timeout names its process, method and limit',async()=>{
+ const dir=mkdtempSync(join(tmpdir(),'nerv-timeout-'));const file=join(dir,'silent.mjs');
+ writeFileSync(file,"process.on('message',()=>{});process.on('disconnect',()=>process.exit(0));process.send({nerv:'ready'});");
+ const c=new ProcessClient(pathToFileURL(file),[],'brain',25);
+ try{await assert.rejects(c.call('runtime.ping'),/brain runtime.ping timed out after 25 ms; outcome may be unknown/);}
+ finally{await c.close();rmSync(dir,{recursive:true,force:true});}
+});
