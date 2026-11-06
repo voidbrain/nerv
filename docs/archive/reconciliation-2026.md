@@ -2,6 +2,7 @@
 
 Earlier reconciliation notes moved out of the [backlog](../BACKLOG.md) header, newest first, as written at the time. The header keeps only the latest reconciliation; when it moves to a newer `main`, the sentence it replaces is added at the top of this list. Dated evidence, not current status.
 
+- PR #172 reconciled through ci:status (42292736254/42292732322: validate, windows and native-macos green); roadmap status generation and F-062/F-063/F-064 proposal records retained.
 - PR #170 reconciled through ci:status (42289559677/42289552958: validate, windows and native-macos green); B-038/B-039/F-061 closed and archived.
 - PR #169 reconciled through ci:status (42288451247/42288444283: validate, windows and native-macos green); F-060 remains the proposed Herdr spike.
 - PR #168 reconciled through ci:status (42285906460/42285896730: validate, windows and native-macos green).
