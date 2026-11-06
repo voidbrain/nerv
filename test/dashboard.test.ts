@@ -270,7 +270,8 @@ test('the bases map draws: drawMap runs to the end and draws every base and its 
  const texts=calls.filter(c=>c.m==='fillText').map(c=>c.a[0]);
  assert.ok(texts.includes('Neo Tokyo-3')&&texts.includes('Tabgha'),'both bases are named');
  assert.ok(texts.includes('Midori'),'drawn to the end, including the round channel node');
- assert.equal(calls.filter(c=>c.m==='strokeRect').length,2,'one marker per base');
+ assert.equal(calls.filter(c=>c.m==='strokeRect').length,2,'one square per base');
+ const ring=calls.findIndex(c=>c.m==='arc'&&c.a[0]===100&&c.a[1]===100);assert.ok(ring>=0);assert.equal(calls[ring+1]!.m,'stroke','this base ring is outline-only');assert.ok(Number(calls[ring]!.a[2])>11,'ring is larger than the square');
 });
 test('the Sephirot are numbered 1 to 11 with Hebrew and Latin names, the crew top right; the MAGI seats name their role, Casper idle when nothing runs (owner, 2026-11-05)',async()=>{
  const {readFileSync}=await import('node:fs');const html=readFileSync('web/public/dashboard/index.html','utf8');

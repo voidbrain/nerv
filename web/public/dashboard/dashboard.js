@@ -851,8 +851,8 @@ function drawMap(now) {
     const [x, y] = map.proj([b.lon, b.lat]); const col = statusColor(b.status); // This base (owner, 2026-11-05), not the main one. B-022: this comment once sat before `const s`, so no base was drawn.
     const self = !!b.self || (!anySelf && b === BASES[0]); const main = !!b.main; const s = (main ? 11 : 7) * z;
     ctx.fillStyle = col; ctx.strokeStyle = cssVar("--panel"); ctx.lineWidth = z;
-    if (self) { ctx.beginPath(); ctx.arc(x,y,(main ? 9 : 7)*z,0,Math.PI*2); ctx.fill(); ctx.stroke(); }
-    if (!self || main) { ctx.fillRect(x-s/2,y-s/2,s,s); ctx.strokeRect(x-s/2,y-s/2,s,s); }
+    ctx.fillRect(x-s/2,y-s/2,s,s); ctx.strokeRect(x-s/2,y-s/2,s,s);
+    if (self) { ctx.strokeStyle = col; ctx.lineWidth = 1.5*z; ctx.beginPath(); ctx.arc(x,y,(main ? 10 : 9)*z,0,Math.PI*2); ctx.stroke(); }
     ctx.font = Math.round(12 * z) + "px " + face;
     ctx.fillStyle = col; const label = b.name; const tw = ctx.measureText(label).width;
     const lx = x + tw + 12 * z > W ? x - tw - 8 * z : x + 8 * z; ctx.fillText(label, lx, y - 6 * z);
