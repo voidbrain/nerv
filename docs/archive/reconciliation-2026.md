@@ -2,6 +2,7 @@
 
 Earlier reconciliation notes moved out of the [backlog](../BACKLOG.md) header, newest first, as written at the time. The header keeps only the latest reconciliation; when it moves to a newer `main`, the sentence it replaces is added at the top of this list. Dated evidence, not current status.
 
+- PR #174 and #175 reconciled through ci:status (42296339345/42296334279 and 42295635548/42295631065: validate, windows and native-macos green); header limit enforced, F-002 closed and archived; harness v3.2.1 (MIT licence) adopted.
 - PR #173 reconciled through ci:status (42295005293/42294998432: validate, windows and native-macos green); F-002 verified, closed and archived.
 - PR #172 reconciled through ci:status (42292736254/42292732322: validate, windows and native-macos green); roadmap status generation and F-062/F-063/F-064 proposal records retained.
 - PR #170 reconciled through ci:status (42289559677/42289552958: validate, windows and native-macos green); B-038/B-039/F-061 closed and archived.
