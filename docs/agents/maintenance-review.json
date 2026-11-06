@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-06T20:57:02.728Z",
+  "reviewed": "2026-11-06T21:15:12.425Z",
   "policy": "7ce9883fd1bff25038076e9e36015a833c38e1378e1df68043f48a64635abad4",
   "inputs": {
     "AGENTS.md": "b77ea6c179171f24fb6bccbb3dbce6df7dd10609709774a79a40fcf5f25376ea",
-    "docs/BACKLOG-RULES.md": "a32f0596df5c6b3bbce24c19926e6af0d8b5f700e48eef0b0478c2eaa5540e5a",
+    "docs/BACKLOG-RULES.md": "46ce8ffafc1909b65f0bbe35465e7153c4fced34506d0dba6b5ca1877c9856e5",
     "docs/agents/areas.md": "ecd729eae9a6b235d98a9c9399054949e8e109d52542ade89d9bdd2e338e4ffa",
     "docs/agents/maintenance.md": "a7e93ce963ffab30b4592ee90bdd0e72d49ea1320f82df74f22c88f70899d899"
   },
   "measurements": {
-    "samples": 7,
-    "latestAt": "2026-11-06T20:02:22.711Z",
+    "samples": 8,
+    "latestAt": "2026-11-06T21:12:58.866Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -36,25 +36,25 @@
         }
       },
       "reconciliation": {
-        "samples": 7,
+        "samples": 8,
         "durationMs": {
-          "observed": 7,
+          "observed": 8,
           "missing": 0,
-          "median": 115
+          "median": 31958.5
         },
         "conflicts": {
           "observed": 2,
-          "missing": 5,
+          "missing": 6,
           "median": 0
         },
         "unnecessaryPrompts": {
           "observed": 0,
-          "missing": 7,
+          "missing": 8,
           "median": null
         },
         "repeatedContextLoads": {
           "observed": 0,
-          "missing": 7,
+          "missing": 8,
           "median": null
         }
       }
@@ -64,14 +64,14 @@
     {
       "kind": "rule",
       "disposition": "implemented",
-      "target": "AGENTS.md",
-      "evidence": "Added one project-marked Work tracking line: docs/ROADMAP.md places every non-closed feature in exactly one milestone and its status table is generated from the backlog; a PR that opens, closes or changes a feature's status places it and regenerates. Reviewed against BACKLOG-RULES (backlog stays the single source of status; the roadmap carries no hand-edited status, as the 2026-11-06 architecture reassessment asks) and the impact map (new roadmap-status row after backlog-recap). No existing rule removed or duplicated."
+      "target": "docs/BACKLOG-RULES.md",
+      "evidence": "Owner correction 2026-11-06: the backlog header had grown to one ~6000-character line because each reconciliation appended to it under the 'move the header to the current main' rule. Added a project rule: at most two lines of at most 400 characters (latest reconciliation, then links); replaced sentences move to docs/archive/reconciliation-<year>.md, newest first. Existing reconciliation and conflict rules unchanged; history preserved verbatim in the archive log (22 entries)."
     },
     {
       "kind": "tool",
       "disposition": "implemented",
-      "target": "tools/roadmap-status.mjs",
-      "evidence": "Project tool (not a harness copy) reusing parseRecords from tools/backlog-recap.mjs. test/roadmap-status.test.mjs: 7 cases (state derivation, archive precedence, unplaced/duplicate/unknown/bug IDs, stale block after a status change, idempotent placement). check:roadmap added to CI validate. Full suite 213 passed, one platform skip; typecheck, conventions, integrations, backlog, recap, audits and archive-recap checks pass."
+      "target": "tools/backlog-recap.mjs",
+      "evidence": "check:recap (already in CI validate) now fails on a header longer than two lines or 400 characters per line. test/backlog-header.test.mjs: 4 cases; the previous main header fails the new check (5969 characters), the shortened one passes. check:backlog, check:roadmap, check:archive-recap, conventions and typecheck pass."
     }
   ]
 }

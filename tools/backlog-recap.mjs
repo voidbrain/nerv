@@ -5,8 +5,9 @@
 //
 //   node tools/backlog-recap.mjs            write the recap for today (UTC)
 //   node tools/backlog-recap.mjs --as-of=2026-11-05
-//   node tools/backlog-recap.mjs --check    fail if the recap differs from a recomputation for its own date, or if its
-//                                           date is older than the newest Opened/Closed date in the records
+//   node tools/backlog-recap.mjs --check    fail if the recap differs from a recomputation for its own date, if its
+//                                           date is older than the newest Opened/Closed date in the records, or if the
+//                                           header above it is longer than two short lines
 import {readFileSync,writeFileSync,readdirSync,existsSync} from 'node:fs';
 import {join} from 'node:path';
 import {run as archiveRecaps} from './archive-recap.mjs';
@@ -51,6 +52,16 @@ export function recap({active,archived},asOf){
   `| **Count** | ${k(opened,'feature')} | ${k(closed,'feature')} | ${k(opened,'bug')} | ${k(closed,'bug')} |`,'',
   '### Require Human 🧑','','| Features | Bugs |','|---|---|',...rows,END].join('\n');
 }
+/** The header between the title and the recap: at most two short lines (latest reconciliation, then links); history goes to
+ *  docs/archive/reconciliation-<year>.md. */
+export const HEADER_LINES=2,HEADER_CHARS=400;
+export function headerProblems(text){
+ const lines=text.split('\n');const end=lines.findIndex(l=>l===START||/^## /.test(l));
+ const head=lines.slice(1,end<0?lines.length:end).filter(l=>l.trim());const out=[];
+ if(head.length>HEADER_LINES)out.push(`The backlog header has ${head.length} lines; keep at most ${HEADER_LINES} (latest reconciliation, then links) and move earlier reconciliations to docs/archive/reconciliation-<year>.md.`);
+ head.forEach((l,i)=>{if(l.length>HEADER_CHARS)out.push(`Backlog header line ${i+1} has ${l.length} characters (limit ${HEADER_CHARS}): keep only the latest reconciliation and move the rest to docs/archive/reconciliation-<year>.md.`);});
+ return out;
+}
 /** Puts the block after the ledger's opening paragraph (or replaces the one already there). */
 export function place(text,block){
  if(text.includes(START)){const a=text.indexOf(START),b=text.indexOf(END,a)+END.length;return text.slice(0,a)+block+text.slice(b);}
@@ -61,6 +72,7 @@ if(import.meta.url===`file://${process.argv[1]}`){
  if(process.argv.includes('--check')){
   const at=/\*\*Recap as of (\d{4}-\d\d-\d\d)\*\*/.exec(text)?.[1];
   if(!at){console.error('docs/BACKLOG.md has no recap: run node tools/backlog-recap.mjs');process.exit(1);}
+  const head=headerProblems(text);if(head.length){for(const x of head)console.error(x);process.exit(1);}
   const newest=[...records.active,...records.archived].flatMap(r=>[r.opened,r.closed]).filter(Boolean).sort().at(-1);
   if(newest&&newest>at){console.error(`The recap is as of ${at}, older than a record dated ${newest}: run node tools/backlog-recap.mjs`);process.exit(1);}
   const want=place(text,recap(records,at));
