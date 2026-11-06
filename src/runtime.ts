@@ -262,7 +262,12 @@ export class Runtime implements StoreApi {
   * F-045 detection: after PILOT_THRESHOLD requests in one domain within 30 days that no pilot fitted, NERV proposes a
   * pilot for it on a card (owner-only pilots.create). Not again while that card waits, nor for 30 days after a no.
   */
- async proposePilot(domain:string,now=new Date()):Promise<boolean> {
+ private pilotProposal:Promise<unknown>=Promise.resolve();
+ proposePilot(domain:string,now=new Date()):Promise<boolean> {
+  const next=this.pilotProposal.then(()=>this.proposePilotOnce(domain,now));
+  this.pilotProposal=next.catch(()=>{});return next;
+ }
+ private async proposePilotOnce(domain:string,now:Date):Promise<boolean> {
   if(choosePilot(domain,this.pilots?.() ?? []))return false;
   const since=new Date(now.getTime()-30*86_400_000).toISOString();
   const seen=await this.nervous.call('pilots.unmatched',{domain,since}) as {count:number;sorties:{id:string;title:string}[];proposal:string|null};

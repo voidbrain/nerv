@@ -1554,3 +1554,38 @@ Closed records in closing-date order. Dated evidence, not current status.
 </details>
 
 ---
+
+
+### F-057
+
+**The dashboard header shows the running version; its commit on hover, copied on click**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: required browser and automated checks passed.
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-06: *add version close to hour on header, hover shows commit hash, click copies it.* It also shows when a running NERV is older than its checkout (on 2026-11-05 a process started before F-021 merged had no MCP code). |
+| **Reproduce** | Open the dashboard; look beside the clock. |
+| **Check** | `v<version>` beside the clock; hover and accessible name give the full commit the service started with; a click copies it and says *copied* (or *copy failed*); hidden without a live base. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 in [PR #150](https://github.com/voidbrain/nerv/pull/150) after reconciliation of merged PR #148: [CI run 42140503183](https://github.com/voidbrain/nerv/actions/runs/42140503183), validate, windows and native-macos passed (ci:status). Existing browser evidence below covers the recorded UI acceptance. Implemented in [PR #148](https://github.com/voidbrain/nerv/pull/148) (2026-11-06): `src/build.ts` reads the package version and `git rev-parse HEAD` once when the server starts; `/api/doctor` reports `build`; the header button (`showBuild`, `copyBuild`). Checked: test/dashboard.test.ts across the server and the dashboard functions (the doctor's commit equals the checkout's; hover text; copy; a refused clipboard); headless Chrome against a throwaway base: `v0.1.0`, the full commit on hover, the clipboard held the commit after a click; a screenshot.
+
+**Estimates:** No remaining effort; ~100% complete. Reassessed 2026-11-06 against all recorded checks.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #148](https://github.com/voidbrain/nerv/pull/148), merged; CI run 42140503183 green |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-06: test/dashboard.test.ts; headless Chrome (local) |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---

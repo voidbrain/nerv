@@ -15,6 +15,13 @@ const MAX_PILOTS=30;
 export function words(text:string):string {
  return text.normalize('NFD').replace(/\p{M}+/gu,'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
 }
+/** B-027: domain labels overlap when they share a significant whole word. */
+export function overlappingDomains(left:string,right:string):boolean {
+ const a=words(left),b=words(right);
+ if(a===b)return true;
+ const significant=(text:string)=>text.split(' ').filter(w=>w.length>=4&&!['with','from','that','this','and','for','the'].includes(w));
+ const terms=new Set(significant(a));return significant(b).some(w=>terms.has(w));
+}
 /** Checks the roster from config.json; the generic pilot is implicit (its model is roles.consultant) and never listed. */
 export function validatePilots(value:unknown):Pilot[] {
  if(!Array.isArray(value)||value.length>MAX_PILOTS)throw new Error(`Invalid pilots: a list of at most ${MAX_PILOTS}.`);
