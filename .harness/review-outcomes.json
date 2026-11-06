@@ -1,7 +1,14 @@
 [
   {
-    "kind": "none",
-    "disposition": "no-change",
-    "evidence": "Reviewed AGENTS, BACKLOG-RULES, area notes and maintenance guidance for the owner-authorized F-019/F-056 map, tabs and Midori changes. The project-only area note now matches the requested behavior: each configured Telegram bot reads its owner messages while outgoing inbox delivery routes through main. Authorization, the per-action gate, owner-only channel checks, signed first-hand telemetry, privacy and runtime boundaries remain intact. Deterministic read commands run before planning and create no sortie; unknown commands do not enter the model. Full suite: 206 passed, one platform skip; build, real-service Chrome/scoped axe/mobile review, three headless lifecycle checks and all ten Angular Chrome/axe views passed. The measured reconciliation covers project-document review through validation, including waits; counters remain unknown. No generic harness rule/tool change is warranted."
+    "kind": "tool",
+    "disposition": "implemented",
+    "target": "tools/archive-recap.mjs",
+    "evidence": "Adopted exactly from published harness v3.2.0 after project-harness PR #62 CI 42283633421 passed and the tag was pushed. Existing recap commands generate/check weekly closure indices; strict derived-block validation and historical-line checks pass on NERV actual archives, including newly closed B-036/B-037. Upstream 76 owned fixtures cover forged/stale indices, date/week/year boundaries, unsafe output and immutable history. NERV: 206 tests passed, one platform skip; build, typecheck, conventions, integration metadata, three headless lifecycle cases and ten Angular Chrome/axe views passed."
+  },
+  {
+    "kind": "rule",
+    "disposition": "implemented",
+    "target": "docs/BACKLOG-RULES.md",
+    "evidence": "Reconciled the published narrow generated-index exception; archived record immutability and dated corrections remain unchanged. Architecture/dated-review moves are project content, and the scoped 25-file review preserves undecided proposals rather than accepting or deleting them silently. Current links and historical source snapshots remain traceable. Timed NERV reconciliation overlapped the harness release and CI waits; no counters or productivity gains were inferred."
   }
 ]

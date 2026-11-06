@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "kind": "scoped",
+  "reviewed": "2026-11-06T20:00:42.330Z",
+  "baseline": "7c0b61964a1827681f83c10dd36c762b525a1911",
+  "report": "docs/audits/2026-11-06-brainstorm-retirement.md",
+  "areas": {
+    "documentation": {
+      "result": "checked",
+      "evidence": "Pinned inventory, semantic disposition mapping, preserved proposals and source-link migration.",
+      "limits": "Source retirement review only; PR #166 CI evidence is named separately and does not establish a full product or device audit."
+    },
+    "backlog": {
+      "result": "checked",
+      "evidence": "Pinned inventory, semantic disposition mapping, preserved proposals and source-link migration.",
+      "limits": "Source retirement review only; PR #166 CI evidence is named separately and does not establish a full product or device audit."
+    }
+  }
+}

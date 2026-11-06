@@ -3,7 +3,7 @@
     "path": "../harness-template",
     "repo": "https://github.com/voidbrain/project-harness"
   },
-  "version": "3.1.1",
+  "version": "3.2.0",
   "stacks": [
     "core",
     "angular"
@@ -29,7 +29,8 @@
     ".github/workflows/maintenance.yml": "core/.github/workflows/maintenance.yml",
     "tools/check-audits.mjs": "core/tools/check-audits.mjs",
     "docs/agents/audit.md": "core/docs/agents/audit.md",
-    "tools/check-conventions.mjs": "angular/tools/check-conventions.mjs"
+    "tools/check-conventions.mjs": "angular/tools/check-conventions.mjs",
+    "tools/archive-recap.mjs": "core/tools/archive-recap.mjs"
   },
   "forked": {},
   "freshness": {
@@ -132,9 +133,10 @@
       "when": [
         "docs/BACKLOG.md",
         "docs/archive/backlog-*.md",
-        "tools/backlog-recap.mjs"
+        "tools/backlog-recap.mjs",
+        "tools/archive-recap.mjs"
       ],
-      "then": "Regenerate the recap at the top of docs/BACKLOG.md (open and owner-waiting records by kind, opened and closed in the last 7 days).",
+      "then": "Regenerate the active-ledger recap and weekly archive closure indices; preserve all historical record lines.",
       "run": "npm run backlog:recap",
       "checked": "npm run check:recap in CI validate",
       "after": []
@@ -217,7 +219,7 @@
       "kept": "test/brief.test.ts asserts sortieRef and live.js short() give the same ID for the same sortie."
     },
     {
-      "value": "Dashboard default colours (Eva · Dark · Orange)",
+      "value": "Dashboard default colours (Eva \u00b7 Dark \u00b7 Orange)",
       "places": [
         {
           "file": "web/public/dashboard/index.html",
@@ -259,7 +261,7 @@
     {
       "what": "GitHub-hosted runner images (macos-15, windows-latest, ubuntu-latest)",
       "affects": "CI jobs: an image GitHub retires fails the job before it runs",
-      "noticed": "The job fails in about a second with \"configuration … is not supported\" (B-015, macos-14 retired 2026-11-05)"
+      "noticed": "The job fails in about a second with \"configuration \u2026 is not supported\" (B-015, macos-14 retired 2026-11-05)"
     },
     {
       "what": "MCP servers the owner adds (`npx -y package` fetches the newest version at each start)",

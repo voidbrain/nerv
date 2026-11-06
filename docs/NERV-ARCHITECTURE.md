@@ -1,4 +1,8 @@
-# NERV architecture schema (canonical, 2026-11-04)
+# NERV architecture vocabulary and target schema
+
+The vocabulary is canonical; the 2026-11-04 schema below is a historical target, not an implementation checklist. Current boundaries and status belong to [Architecture](ARCHITECTURE.md) and [Backlog](BACKLOG.md). The [brainstorm retirement review](audits/2026-11-06-brainstorm-retirement.md) maps the older material and preserves undecided proposals.
+
+Current corrections to the historical diagram: Gehirn is the signed base registry; Marduk is the pilot roster, and pilots and skills are distinct. Model routes never silently fall back. EVA sandboxes, cross-base memory merging, encrypted backups and automated incident responses are not established by this diagram. Each configured bot continues reading owner requests while outgoing inbox items may route through main (merged PR #166; all CI checks passed). Midori is the map’s Telegram label; Aoba remains the communications role in code.
 
 Supersedes the glossary in `review-2026-11-04.md` §3 and every flow in `insights*.md`. Lore names are labels; code uses the plain name in brackets.
 
