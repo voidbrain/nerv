@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-06T19:30:05.601Z",
+  "reviewed": "2026-11-06T20:02:22.799Z",
   "policy": "7ce9883fd1bff25038076e9e36015a833c38e1378e1df68043f48a64635abad4",
   "inputs": {
     "AGENTS.md": "7521203d1bc1ee4467396d9dd3576e2d7ffba835a4f6e93cb217af06af5ebee2",
-    "docs/BACKLOG-RULES.md": "19798ae1614c2d96e60613af75d232c2eda19d25e07470e851ce48304df593c6",
-    "docs/agents/areas.md": "b107edb50a7fb839540cb5df8ed19c4e0c72d3cded6be180f2a4d18108353a3c",
+    "docs/BACKLOG-RULES.md": "a32f0596df5c6b3bbce24c19926e6af0d8b5f700e48eef0b0478c2eaa5540e5a",
+    "docs/agents/areas.md": "ecd729eae9a6b235d98a9c9399054949e8e109d52542ade89d9bdd2e338e4ffa",
     "docs/agents/maintenance.md": "a7e93ce963ffab30b4592ee90bdd0e72d49ea1320f82df74f22c88f70899d899"
   },
   "measurements": {
-    "samples": 6,
-    "latestAt": "2026-11-06T19:29:53.733Z",
+    "samples": 7,
+    "latestAt": "2026-11-06T20:02:22.711Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -36,25 +36,25 @@
         }
       },
       "reconciliation": {
-        "samples": 6,
+        "samples": 7,
         "durationMs": {
-          "observed": 6,
+          "observed": 7,
           "missing": 0,
-          "median": 99.5
+          "median": 115
         },
         "conflicts": {
           "observed": 2,
-          "missing": 4,
+          "missing": 5,
           "median": 0
         },
         "unnecessaryPrompts": {
           "observed": 0,
-          "missing": 6,
+          "missing": 7,
           "median": null
         },
         "repeatedContextLoads": {
           "observed": 0,
-          "missing": 6,
+          "missing": 7,
           "median": null
         }
       }
@@ -62,9 +62,16 @@
   },
   "outcomes": [
     {
-      "kind": "none",
-      "disposition": "no-change",
-      "evidence": "Reviewed AGENTS, BACKLOG-RULES, area notes and maintenance guidance for the owner-authorized F-019/F-056 map, tabs and Midori changes. The project-only area note now matches the requested behavior: each configured Telegram bot reads its owner messages while outgoing inbox delivery routes through main. Authorization, the per-action gate, owner-only channel checks, signed first-hand telemetry, privacy and runtime boundaries remain intact. Deterministic read commands run before planning and create no sortie; unknown commands do not enter the model. Full suite: 206 passed, one platform skip; build, real-service Chrome/scoped axe/mobile review, three headless lifecycle checks and all ten Angular Chrome/axe views passed. The measured reconciliation covers project-document review through validation, including waits; counters remain unknown. No generic harness rule/tool change is warranted."
+      "kind": "tool",
+      "disposition": "implemented",
+      "target": "tools/archive-recap.mjs",
+      "evidence": "Adopted exactly from published harness v3.2.0 after project-harness PR #62 CI 42283633421 passed and the tag was pushed. Existing recap commands generate/check weekly closure indices; strict derived-block validation and historical-line checks pass on NERV actual archives, including newly closed B-036/B-037. Upstream 76 owned fixtures cover forged/stale indices, date/week/year boundaries, unsafe output and immutable history. NERV: 206 tests passed, one platform skip; build, typecheck, conventions, integration metadata, three headless lifecycle cases and ten Angular Chrome/axe views passed."
+    },
+    {
+      "kind": "rule",
+      "disposition": "implemented",
+      "target": "docs/BACKLOG-RULES.md",
+      "evidence": "Reconciled the published narrow generated-index exception; archived record immutability and dated corrections remain unchanged. Architecture/dated-review moves are project content, and the scoped 25-file review preserves undecided proposals rather than accepting or deleting them silently. Current links and historical source snapshots remain traceable. Timed NERV reconciliation overlapped the harness release and CI waits; no counters or productivity gains were inferred."
     }
   ]
 }

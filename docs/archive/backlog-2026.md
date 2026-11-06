@@ -2,7 +2,7 @@
 
 Closed records in closing-date order. Dated evidence, not current status.
 
-**2026-11-06 source-path note:** The canonical architecture moved to [docs/NERV-ARCHITECTURE.md](../NERV-ARCHITECTURE.md); the dated review is preserved in [audits](../audits/2026-11-04-rebrand-review.md). Historical docs/NERV references remain evidence of the [pinned source snapshot](https://github.com/voidbrain/nerv/tree/c9e34f1cb5f3cb93a0d2150f90eead730b6a7d5b/docs/NERV); see the [retirement mapping](../audits/2026-11-06-brainstorm-retirement.md). Original archived record lines are unchanged.
+**2026-11-06 source-path note:** The canonical architecture moved to [docs/NERV-ARCHITECTURE.md](../NERV-ARCHITECTURE.md); the dated review is preserved in [audits](../audits/2026-11-04-rebrand-review.md). Historical docs/NERV references remain evidence of the [pinned source snapshot](https://github.com/voidbrain/nerv/tree/7c0b61964a1827681f83c10dd36c762b525a1911/docs/NERV); see the [retirement mapping](../audits/2026-11-06-brainstorm-retirement.md). Original archived record lines are unchanged.
 
 <!-- archive-recap:start -->
 ## Weekly closure recaps
@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 24 | 33 |
+| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 24 | 35 |
 <!-- archive-recap:end -->
 
 <a id="archive-week-2026-11-02"></a>
@@ -1981,6 +1981,76 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 | PR / evidence | [PR #160](https://github.com/voidbrain/nerv/pull/160) pilot selectors/map status and owner clarification; Local source review, regression tests and Chrome/axe, 2026-11-06 |
 | Opened | 2026-11-06 |
 | Verification | 2026-11-06 Unit/integration and Browser/accessibility: focused checks passed; merged PR #160 CI run 42241192687 passed validate, windows and native-macos |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+## Closed 2026-11-06
+
+### B-036
+
+**Live map invents synchronization traffic**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: recorded acceptance passed after PR #166 merged.
+
+| | |
+|---|---|
+| **Issue** | The simulation’s 2.2-second random mesh packet interval also ran in LIVE mode, alongside the real heartbeat observer. |
+| **Reproduce** | Use two online enrolled bases with main selected; observe the live map and send an owner message to the other bot. |
+| **Check** | No simulated packets in LIVE mode; only an observed changed heartbeat emits sync activity, and actual Telegram messages emit their own directional pulses. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 after PR #166 CI runs 42280638858 and 42280632455 passed validate, windows and native-macos (ci:status); the cancelled queued job was rerun successfully.  Candidate fix 2026-11-06 in the F-019 map/Midori work. Live simulation guard and Telegram inbound polling changes have focused regressions; Chrome/scoped axe/mobile and full CI acceptance passed; no remaining required checks.
+
+**Estimates:** No remaining work; ~100% complete. Reassessed 2026-11-06 after all recorded local and merged CI acceptance passed.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #166](https://github.com/voidbrain/nerv/pull/166) map/tabs and Midori routing/status;  F-019/F-056 implementation and owner report 2026-11-06 |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-06 Focused regressions, authenticated Chrome review, full suite (206 passed, one platform skip) and PR #166 CI passed. |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### B-037
+
+**A routed base’s Telegram bot leaves owner requests unread**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: recorded acceptance passed after PR #166 merged.
+
+| | |
+|---|---|
+| **Issue** | Owner reports Tabgha does not answer while routing through main. The poll loop deliberately skipped getUpdates whenever main was online. |
+| **Reproduce** | Use two online enrolled bases with main selected; observe the live map and send an owner message to the other bot. |
+| **Check** | Both configured bots accept only their owner’s messages while outgoing inbox items still route through main; ordinary requests use existing Runtime dispatch, status answers from records, and no request is silently left unread solely because main is online. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 after PR #166 CI runs 42280638858 and 42280632455 passed validate, windows and native-macos (ci:status); the cancelled queued job was rerun successfully.  Candidate fix 2026-11-06 in the F-019 map/Midori work. Live simulation guard and Telegram inbound polling changes have focused regressions; Chrome/scoped axe/mobile and full CI acceptance passed; no remaining required checks.
+
+**Estimates:** No remaining work; ~100% complete. Reassessed 2026-11-06 after all recorded local and merged CI acceptance passed.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #166](https://github.com/voidbrain/nerv/pull/166) map/tabs and Midori routing/status;  F-019/F-056 implementation and owner report 2026-11-06 |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-06 Focused regressions, authenticated Chrome review, full suite (206 passed, one platform skip) and PR #166 CI passed. |
 | Reviewed | 2026-11-06 |
 
 </details>

@@ -1328,7 +1328,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 |---|---|
 | PR / evidence | Owner request 2026-11-06; [voidbrain/project-harness#62](https://github.com/voidbrain/project-harness/pull/62), v3.2.0 |
 | Opened | 2026-11-06 |
-| Verification | Published tag/CI verified; local archive generation, immutable-history guard and recap checks pending. |
+| Verification | Published tag/CI verified; local archive generation, immutable-history guard and recap checks passed. Full suite 206 passed/one platform skip; build, typecheck, conventions, integration metadata, headless lifecycle and Angular browser acceptance passed. Local adoption CI pending. |
 | Reviewed | 2026-11-06 |
 
 </details>
@@ -1354,7 +1354,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Owner request 2026-11-06. Scoped documentation/backlog review at c9e34f1 is in docs/audits/2026-11-06-brainstorm-retirement.md and its source manifest. All 25 tracked files were reviewed (13 images visually and with local OCR); .DS_Store is ignored metadata. Architecture vocabulary moved to docs/NERV-ARCHITECTURE.md; the dated review moved unchanged to docs/audits/2026-11-04-rebrand-review.md. No other source was removed. Three undecided proposals are retained explicitly rather than silently rejected or accepted. Current architecture links and a historical archive path note are reconciled.
+**Next action / closure evidence:** Owner request 2026-11-06. Scoped documentation/backlog review at 7c0b619 is in docs/audits/2026-11-06-brainstorm-retirement.md and its source manifest. All 25 tracked files were reviewed (13 images visually and with local OCR); .DS_Store is ignored metadata. Architecture vocabulary moved to docs/NERV-ARCHITECTURE.md; the dated review moved unchanged to docs/audits/2026-11-04-rebrand-review.md. No other source was removed. Three undecided proposals are retained explicitly rather than silently rejected or accepted. Current architecture links and a historical archive path note are reconciled.
 
 **Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-06: review, inventory and moves are done; CI acceptance remains, while user-driven deletion is outside this record.
 
