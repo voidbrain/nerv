@@ -6,6 +6,7 @@ import { realpath,stat,readFile } from 'node:fs/promises';
 import { resolve, sep, extname } from 'node:path';
 import type { StoreApi } from './runtime.ts';
 import {attachRpcSocket} from './socket.ts';
+import {buildInfo} from './build.ts';
 import {RpcFault} from './rpc.ts';
 import type {ModelChange} from './model-setup.ts';
 import {MODEL_TIMEOUT_MS} from './model.ts';
@@ -22,6 +23,8 @@ export const SESSION_TTL_MS=12*60*60_000;
 const MAX_SESSIONS=20;
 export function makeServer(store: StoreApi, token: string, options: {webRoot?:string; language?:string; timeZone?:string;base?:{id:string;name:string};tls?:{key:Buffer;cert:Buffer};native?:{auth:NativeAuth;fingerprint:string;port:number;webPort:number};loginCodeTtlMs?:number;sessionTtlMs?:number;onStop?:()=>void} = {}) {
   if(options.native&&!options.tls)throw new Error('Native pairing requires TLS.');
+  // Read now, when the service starts: the dashboard shows the code running, not what the checkout holds later.
+  const build=buildInfo();
   const loginCodes=new Map<string,number>();const codeTtl=options.loginCodeTtlMs ?? LOGIN_CODE_TTL_MS;
   const dropExpired=()=>{const now=Date.now();for(const [c,expires] of loginCodes)if(expires<=now)loginCodes.delete(c);for(const [t,expires] of sessions)if(expires<=now)sessions.delete(t);};
   // Dashboard sessions (F-039): what a login code is swapped for, instead of the admin token. Random, in this process's
@@ -160,7 +163,7 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
       else if(req.method==='DELETE' && /^\/api\/reminders\/[a-f0-9-]+$/.test(path)) reply((await store.cancel(path.split('/').at(-1)!))?200:404,{message:'Cancellation processed.'});
       else if(req.method==='GET' && path==='/api/inbox') reply(200,await store.inbox());
       else if(req.method==='GET' && path==='/api/status')reply(200,{name:'NERV Agency',mode:'local-core',...(options.base?{base:options.base}:{}),...await store.health(),language:options.language ?? 'en',timeZone:options.timeZone ?? 'Europe/Rome',...(options.native?{runtimeId:options.native.auth.runtimeId,home:options.native.auth.home}:{})});
-      else if(req.method==='GET' && path==='/api/doctor') reply(200,{name:'NERV Agency',mode:'local-core',...(options.base?{base:options.base}:{}),...await store.doctor(),remoteWorkers:'not implemented',language:options.language ?? 'en',timeZone:options.timeZone ?? 'Europe/Rome',...(options.native?{runtimeId:options.native.auth.runtimeId,home:options.native.auth.home}:{} )});
+      else if(req.method==='GET' && path==='/api/doctor') reply(200,{name:'NERV Agency',mode:'local-core',build,...(options.base?{base:options.base}:{}),...await store.doctor(),remoteWorkers:'not implemented',language:options.language ?? 'en',timeZone:options.timeZone ?? 'Europe/Rome',...(options.native?{runtimeId:options.native.auth.runtimeId,home:options.native.auth.home}:{} )});
       else reply(404,{error:'Unknown operation.'});
     } catch(e) {reply(400,{error:e instanceof Error?e.message:'Invalid request.'});}
   };
