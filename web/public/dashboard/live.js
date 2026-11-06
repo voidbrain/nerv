@@ -419,7 +419,7 @@
     // B-017: GET /api/models nests the roles under models (it said "off" with a consultant set).
     const roles = modelsData && modelsData.models && modelsData.models.roles; const generic = roles && roles.consultant && roles.consultant.model;
     const local = modelsData && modelsData.ollama ? modelsData.ollama.models.map(m => m.name) : [];
-    const selector = (id, current, fallback, name) => {
+    const selector = (id, current, fallback, name = "Generic pilot") => {
       if (!modelsData) return "<div class='tiny muted'>Reading local models…</div>";
       if (modelsData.error) return "<div class='tiny danger'>" + esc(modelsData.error) + "</div>";
       const selected = pilotDrafts.has(id) ? pilotDrafts.get(id) : current || "off";
@@ -427,7 +427,8 @@
       const options = (fallback ? option("off", "Off", false) : "") + local.map(n => option(n, n + " · local", false)).join("") +
         (current && !local.includes(current) ? option(current, current + " · unavailable locally", true) : "") + (selected !== "off" && selected !== current && !local.includes(selected) ? option(selected, selected + " · unavailable locally", true) : "");
       const busy = pilotBusy.has(id); const disabled = busy || (!fallback && !local.length);
-      return "<form class='pilot-model-form' data-pilot='" + esc(id) + "'><label class='small' for='pilot-model-" + esc(id) + "'>" + (fallback ? "Generic pilot model" : "Model for " + esc(name)) + "</label><div class='pilot-model-row'><select id='pilot-model-" + esc(id) + "'" + (disabled ? " disabled" : "") + ">" + options + "</select><button class='btn sm' type='submit'" + (disabled ? " disabled" : "") + ">" + (busy ? "Applying…" : "Apply") + "</button></div></form>";
+      const unchanged = selected === (current || "off"); const unavailable = selected !== "off" && !local.includes(selected);
+      return "<form class='pilot-model-form' data-pilot='" + esc(id) + "' data-current='" + esc(current || "off") + "'><label class='small' for='pilot-model-" + esc(id) + "'>Model</label><select id='pilot-model-" + esc(id) + "' aria-label='Model for " + esc(name) + "'" + (disabled ? " disabled" : "") + ">" + options + "</select><button class='btn sm' type='submit'" + (disabled || unchanged || unavailable ? " disabled" : "") + ">" + (busy ? "Applying…" : "Apply") + "</button></form>";
     };
     const card = (name, sub, right, line, control = "") => "<div class='card'><div class='row'><span class='b'>" + esc(name) + "</span>" + right + "</div><div class='row tiny muted'><span>" + esc(sub) + "</span></div>" + (line ? "<div class='tiny muted'>" + esc(line) + "</div>" : "") + control + "</div>";
     const stageOf = p => p.retired ? "retired" : p.stage; const counts = {}; roster.forEach(p => { counts[stageOf(p)] = (counts[stageOf(p)] || 0) + 1; });
@@ -439,19 +440,24 @@
   };
   document.addEventListener("change", e => {
     const form = e.target.closest && e.target.closest(".pilot-model-form");
-    if (form) pilotDrafts.set(form.dataset.pilot, e.target.value);
+    if (form) {
+      const id = form.dataset.pilot; const value = e.target.value;
+      if (value === form.dataset.current) pilotDrafts.delete(id); else pilotDrafts.set(id, value);
+      const option = e.target.options[e.target.selectedIndex];
+      form.querySelector("button").disabled = pilotBusy.has(id) || !value || value === form.dataset.current || !!(option && option.disabled);
+    }
   });
   document.addEventListener("submit", async e => {
     const form = e.target; if (!form.matches(".pilot-model-form")) return; e.preventDefault();
     const id = form.dataset.pilot; if (pilotBusy.has(id)) return; const restoreFocus = form.contains(document.activeElement);
-    const value = form.querySelector("select").value; if (!value) return;
+    const value = form.querySelector("select").value; if (!value || value === form.dataset.current || form.querySelector("button").disabled) return;
     pilotBusy.add(id); renderMelons(true);
     try {
       if (id === "generic") await api("models", { method:"PUT", body:JSON.stringify({ consultant:value === "off" ? null : { model:value } }) });
       else { const result = await api("pilots/" + encodeURIComponent(id) + "/model", { method:"PATCH", body:JSON.stringify({ model:value }) }); state.pilots = result.pilots; }
       pilotDrafts.delete(id); log("Pilot model applied: " + id + " · " + value, "ok", null, "maya");
     } catch (error) { log("Pilot model: " + error.message, "danger", null, "maya"); }
-    finally { pilotBusy.delete(id); await loadModels(true); renderMelons(true); if (restoreFocus) { const next = [...document.querySelectorAll(".pilot-model-form")].find(f => f.dataset.pilot === id); if (next) next.querySelector("button").focus(); } }
+    finally { pilotBusy.delete(id); await loadModels(true); renderMelons(true); if (restoreFocus) { const next = [...document.querySelectorAll(".pilot-model-form")].find(f => f.dataset.pilot === id); if (next) next.querySelector("select").focus(); } }
   });
   // While you were away: from real sorties and deliveries since your last visit, remembered in this browser only.
   const VISIT = "nerv.dashboard.lastVisit";

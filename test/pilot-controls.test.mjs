@@ -10,8 +10,10 @@ test('each pilot card owns an independent labelled model selector, drafts surviv
  render();assert.equal(document.querySelectorAll('.card').length,3);assert.equal(document.querySelectorAll('.card form').length,3);
  const selected=id=>document.getElementById('pilot-model-'+id).querySelector('option[selected]').getAttribute('value');
  assert.equal(selected('generic'),'first');assert.equal(selected('printer'),'first');assert.equal(selected('artist'),'second');
- assert.equal(document.querySelector('label[for="pilot-model-generic"]').textContent,'Generic pilot model');assert.equal(document.querySelector('label[for="pilot-model-printer"]').textContent,'Model for Print Master');
- drafts.set('printer','second');render();assert.equal(selected('printer'),'second');assert.equal(selected('artist'),'second');
+ assert.ok([...document.querySelectorAll('.pilot-model-form button')].every(b=>b.disabled),'unchanged cards cannot apply');
+ assert.equal(document.querySelector('label[for="pilot-model-generic"]').textContent,'Model');assert.equal(document.querySelector('label[for="pilot-model-printer"]').textContent,'Model');assert.equal(document.getElementById('pilot-model-printer').getAttribute('aria-label'),'Model for Print Master');
+ drafts.set('printer','second');render();assert.equal(selected('printer'),'second');assert.equal(selected('artist'),'second');assert.equal(document.querySelector('[data-pilot=printer] button').disabled,false);assert.equal(document.querySelector('[data-pilot=artist] button').disabled,true);
+ drafts.set('printer','first');render();assert.equal(document.querySelector('[data-pilot=printer] button').disabled,true,'returning to the saved value disables Apply');
  drafts.clear();roster[0].model='not installed';render();assert.match(document.querySelector('#pilot-model-printer option[selected]').textContent,/unavailable locally/);assert.ok(document.querySelector('#pilot-model-printer option[selected]').hasAttribute('disabled'));
  assert.equal(document.querySelector('#pilot-model-printer option[value="off"]'),null,'only the generic fallback can be switched off');
  assert.ok(!source.slice(source.indexOf('  window.renderModels ='),source.indexOf('  const applyModels =')).includes('m-consultant'),'Models panel keeps only role controls');

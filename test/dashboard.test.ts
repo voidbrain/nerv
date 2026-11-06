@@ -194,7 +194,7 @@ test('the route colours: advice that was given is a passed step (green); Misato\
 test('the Marduk Institute reads the generic pilot from the models API as it answers; bases read ID · name; the map leaves room for its legend (B-017, owner 2026-11-05)',async()=>{
  const {readFileSync}=await import('node:fs');const live=readFileSync('web/public/dashboard/live.js','utf8');const html=readFileSync('web/public/dashboard/index.html','utf8');
  assert.match(live,/const roles = modelsData && modelsData\.models && modelsData\.models\.roles;/,'GET /api/models nests the roles under models');
- assert.match(live,/roster === undefined\) \{ box\.innerHTML = "<div class='muted small'>Loading pilots…<\/div>"/);assert.match(live,/Generic pilot model/);
+ assert.match(live,/roster === undefined\) \{ box\.innerHTML = "<div class='muted small'>Loading pilots…<\/div>"/);assert.match(live,/pilot-model-/);
  assert.match(live,/esc\(b\.baseId\) \+ " · " \+ esc\(b\.name\)/);assert.match(live,/esc\(base\.id\) \+ " · " \+ esc\(base\.name\)/);assert.doesNotMatch(live,/esc\(b\.name\) \+ " · " \+ esc\(b\.baseId\)/);
  assert.match(html,/<div class="maprow">\s*<div class="mapwrap">/);assert.match(html,/\.maplegend \{ display:flex; flex-direction:column;/);
 });
