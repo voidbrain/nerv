@@ -1719,7 +1719,7 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Closed 2026-11-06 after [PR #157 CI](https://github.com/voidbrain/nerv/actions/runs/42225026067) passed validate (including Linux Chrome/axe), windows and native-macos; read with ci:status. Found 2026-11-06 during F-010 acceptance. Fix verified by the repeatable Chrome/axe suite and inspected screenshots; see [scope and evidence](acceptance/angular-2026-11-06.md). No remaining required checks.
+**Next action / closure evidence:** Closed 2026-11-06 in [PR #158](https://github.com/voidbrain/nerv/pull/158) after [PR #157 CI](https://github.com/voidbrain/nerv/actions/runs/42225026067) passed validate (including Linux Chrome/axe), windows and native-macos; read with ci:status. Found 2026-11-06 during F-010 acceptance. Fix verified by the repeatable Chrome/axe suite and inspected screenshots; see [scope and evidence](acceptance/angular-2026-11-06.md). No remaining required checks.
 
 **Estimates:** No remaining effort; ~100% complete. Reassessed 2026-11-06 after browser/accessibility acceptance and merged CI passed.
 
@@ -1753,7 +1753,7 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Closed 2026-11-06 after [PR #157 CI](https://github.com/voidbrain/nerv/actions/runs/42225026067) passed validate (including Linux Chrome/axe), windows and native-macos; read with ci:status. Found 2026-11-06 during F-010 acceptance. Fix verified by the repeatable Chrome/axe suite and inspected screenshots; see [scope and evidence](acceptance/angular-2026-11-06.md). No remaining required checks.
+**Next action / closure evidence:** Closed 2026-11-06 in [PR #158](https://github.com/voidbrain/nerv/pull/158) after [PR #157 CI](https://github.com/voidbrain/nerv/actions/runs/42225026067) passed validate (including Linux Chrome/axe), windows and native-macos; read with ci:status. Found 2026-11-06 during F-010 acceptance. Fix verified by the repeatable Chrome/axe suite and inspected screenshots; see [scope and evidence](acceptance/angular-2026-11-06.md). No remaining required checks.
 
 **Estimates:** No remaining effort; ~100% complete. Reassessed 2026-11-06 after browser/accessibility acceptance and merged CI passed.
 
@@ -1787,7 +1787,7 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Closed 2026-11-06 after [PR #157 CI](https://github.com/voidbrain/nerv/actions/runs/42225026067) passed validate (including Linux Chrome/axe), windows and native-macos; read with ci:status. Found 2026-11-06 during F-010 acceptance. Fix verified by the repeatable Chrome/axe suite and inspected screenshots; see [scope and evidence](acceptance/angular-2026-11-06.md). No remaining required checks.
+**Next action / closure evidence:** Closed 2026-11-06 in [PR #158](https://github.com/voidbrain/nerv/pull/158) after [PR #157 CI](https://github.com/voidbrain/nerv/actions/runs/42225026067) passed validate (including Linux Chrome/axe), windows and native-macos; read with ci:status. Found 2026-11-06 during F-010 acceptance. Fix verified by the repeatable Chrome/axe suite and inspected screenshots; see [scope and evidence](acceptance/angular-2026-11-06.md). No remaining required checks.
 
 **Estimates:** No remaining effort; ~100% complete. Reassessed 2026-11-06 after browser/accessibility acceptance and merged CI passed.
 
@@ -1821,7 +1821,7 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Closed 2026-11-06 after [PR #157 CI](https://github.com/voidbrain/nerv/actions/runs/42225026067) passed validate (including Linux Chrome/axe), windows and native-macos; read with ci:status. Found 2026-11-06 during F-010 acceptance. Fix verified by the repeatable Chrome/axe suite and inspected screenshots; see [scope and evidence](acceptance/angular-2026-11-06.md). No remaining required checks.
+**Next action / closure evidence:** Closed 2026-11-06 in [PR #158](https://github.com/voidbrain/nerv/pull/158) after [PR #157 CI](https://github.com/voidbrain/nerv/actions/runs/42225026067) passed validate (including Linux Chrome/axe), windows and native-macos; read with ci:status. Found 2026-11-06 during F-010 acceptance. Fix verified by the repeatable Chrome/axe suite and inspected screenshots; see [scope and evidence](acceptance/angular-2026-11-06.md). No remaining required checks.
 
 **Estimates:** No remaining effort; ~100% complete. Reassessed 2026-11-06 after browser/accessibility acceptance and merged CI passed.
 
@@ -1855,7 +1855,7 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Closed 2026-11-06 after [PR #157 CI](https://github.com/voidbrain/nerv/actions/runs/42225026067) passed validate (including Linux Chrome/axe), windows and native-macos; read with ci:status. 2026-11-06: repeatable Chrome/axe acceptance passed against the built UI and real local server: English default, selectable Italian, unchanged reminder text/UTC, browser-local dates, 4318 config, applied styles and responsive layout. Four discovered defects B-030–B-033 repaired; screenshots inspected. See [scope, evidence and limits](acceptance/angular-2026-11-06.md). No remaining required checks. Implemented in [PR #1](https://github.com/voidbrain/nerv/pull/1) with Italian as the default; the owner switched the default to English on 2026-11-04 ([PR #17](https://github.com/voidbrain/nerv/pull/17)): `init` writes `en`, the server and socket fall back to `en`, the web UI and `index.html` start in English, the native menu defaults to English unless a choice is stored; the switcher stays in both. Existing installs keep the language in their `config.json` (an `init` before this wrote `it`); set `"language": "en"` there and restart. Understanding and replying in Italian is conversational work under F-003.
+**Next action / closure evidence:** Closed 2026-11-06 in [PR #158](https://github.com/voidbrain/nerv/pull/158) after [PR #157 CI](https://github.com/voidbrain/nerv/actions/runs/42225026067) passed validate (including Linux Chrome/axe), windows and native-macos; read with ci:status. 2026-11-06: repeatable Chrome/axe acceptance passed against the built UI and real local server: English default, selectable Italian, unchanged reminder text/UTC, browser-local dates, 4318 config, applied styles and responsive layout. Four discovered defects B-030–B-033 repaired; screenshots inspected. See [scope, evidence and limits](acceptance/angular-2026-11-06.md). No remaining required checks. Implemented in [PR #1](https://github.com/voidbrain/nerv/pull/1) with Italian as the default; the owner switched the default to English on 2026-11-04 ([PR #17](https://github.com/voidbrain/nerv/pull/17)): `init` writes `en`, the server and socket fall back to `en`, the web UI and `index.html` start in English, the native menu defaults to English unless a choice is stored; the switcher stays in both. Existing installs keep the language in their `config.json` (an `init` before this wrote `it`); set `"language": "en"` there and restart. Understanding and replying in Italian is conversational work under F-003.
 
 **Estimates:** No remaining effort; ~100% complete. Reassessed 2026-11-06 after browser acceptance, defect fixes and merged CI passed.
 
