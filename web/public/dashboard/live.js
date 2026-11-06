@@ -7,7 +7,7 @@
   if (match) history.replaceState(null, "", location.pathname + location.search);
   const consulted = new Set();
   let older = [], matches = [], shown = [], searchSeq = 0, searchTimer = null; let editing = null;
-  let token = ""; let polling = false; let lastRan = null; let firstTrace = true; const detailCache = {}; const known = new Map(); let chatBusy = false;
+  let token = ""; let polling = false; let lastRan = null; let firstTrace = true; const detailCache = {}; const known = new Map(); let chatBusy = false; let followNew = null;
   const PLANNED = "<div class='muted small'>Planned · not connected yet.</div>";
   const api = async (path, init = {}) => {
     const res = await fetch("/api/" + path, { ...init, headers:{ "Content-Type":"application/json", Authorization:"Bearer " + token } });
@@ -90,6 +90,8 @@
       // The newest sortie is selected at first; after the owner deselects one, nothing is selected again by itself.
       // Owner, 2026-11-05: by default the dashboard shows the real state. Nothing chosen: a running sortie is selected (F-019),
       // otherwise none; one it picked by itself is let go when it finishes. A sortie the owner clicked stays.
+      // A request the owner just sent: its new sortie is selected as soon as it appears, whatever was selected before.
+      if (followNew) { const fresh = state.sorties.find(x => !followNew.has(x.realId)); if (fresh) { state.selected = fresh.id; state.autoSelected = false; state.deselected = false; followNew = null; } }
       const running = state.sorties.find(x => x.status === "active");
       if (!state.selected && !state.deselected && running) { state.selected = running.id; state.autoSelected = true; }
       else if (state.autoSelected && state.selected && !(state.sorties.find(x => x.id === state.selected && x.status === "active"))) { state.selected = null; state.autoSelected = false; }
@@ -254,6 +256,7 @@
     if (chatBusy) { log("Misato is still working on the previous request.", "warn", null, "misato"); return; }
     // F-051: where the request goes, said before it goes: another online main base gets it over the Kaji line.
     const main = (state.kajiBases || []).find(b => b.main && !b.self && b.online);
+    followNew = new Set(state.sorties.map(x => x.realId));
     chatBusy = true; log(main ? "Forwarded to " + main.name + " · Misato there is planning" : "Misato is planning", "", null, "misato");
     try { const r = await api("chat", { method:"POST", body:JSON.stringify({ message:text, conversation:"dashboard" }) });
       // Dispatched (F-036): the main base answered; its sortie and cards are there, so only the reply is shown here.
@@ -263,10 +266,13 @@
     finally { chatBusy = false; poll(); }
   };
   window.seatMetric = function (seat, s, a) {
-    if (seat === "melchior") return "rules · Scrolls · deterministic";
-    if (seat === "balthasar") return "reversibility · budget · taint" + (s ? " · " + s.trust : "");
-    return a && a.ballot && a.ballot.pattern && a.ballot.pattern !== "green" ? "Casper · local model (S²)" : "Green: not consulted";
+    // Owner, 2026-11-05: each seat's role; Casper says whether it was asked. The details are on hover (index.html).
+    if (seat === "melchior") return "rules";
+    if (seat === "balthasar") return "protection";
+    if (!s || !a) return "intent · idle";
+    return a.ballot && a.ballot.pattern ? (a.ballot.pattern !== "green" ? "intent · read by a local model" : "intent · not needed (Green)") : "intent · waiting";
   };
+
   // Dummy Plug (F-030): each configured model route, its state and since when; reminders never depend on it.
   const ROUTE_NAMES = { local:"S² local route", cloud:"Umbilical cloud" };
   function routeRows(d) {

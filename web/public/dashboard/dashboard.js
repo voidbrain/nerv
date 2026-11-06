@@ -499,7 +499,7 @@ function renderFlow() {
   // sephirot nodes
   // Misato's apartment passed means the owner decided: it takes the decision colour, like its lines (owner, 2026-11-05).
   { const sd = document.querySelector(".snode[data-n='detect'] .sd"); if (sd) sd.textContent = s && s.forwarded ? "forwarded to " + s.forwarded : s && s.origin ? "from " + s.origin : "Aoba comms · Hyuga watch"; }
-  { const sd = document.querySelector(".snode[data-n='consult'] .sd"); if (sd) sd.textContent = s && s.advisor ? "advised by " + s.advisor : "no vote · advice into the LCL"; }
+  { const sd = document.getElementById("sd-consult"); if (sd) sd.textContent = !s ? "no vote · advice into the LCL" : s.advisor ? "advised by " + s.advisor : s.phase === "consult" && s.status === "active" ? "advising · no vote" : "no advice"; }
   document.querySelectorAll(".snode[data-n]").forEach(el => { el.classList.remove("on", "done", "wait", "skip", "owner"); const st = stepState(s, el.dataset.n); if (st) el.classList.add(st); if (st === "done" && el.dataset.n === "apt") el.classList.add("owner"); });
   // timeline
   const steps = L().steps; const b = s && s.ballot;
@@ -535,10 +535,12 @@ function renderFlow() {
   renderDetail(s);
 }
 function seatMetric(seat, s, a) {
-  if (seat === "melchior") return "rules: 9 effect classes · Scrolls · <1 ms";
-  if (seat === "balthasar") return s ? "battery $" + s.spent.toFixed(3) + " / $" + s.battery.toFixed(2) + " · taint " + s.trust : "battery · reversibility · taint";
-  const needs = a && a.ballot ? a.ballot.pattern !== "green" : a && !isLocal((TOOLS[a.tool] || {}).effect || "irreversible");
-  return needs ? "Claude Opus 5.5 · Umbilical · 1.2 s · $0.004" : "Green: not consulted";
+  // Owner, 2026-11-05: each seat's role; Casper says whether it was asked. The details are on hover (index.html).
+  if (seat === "melchior") return "rules";
+  if (seat === "balthasar") return "protection";
+  if (!s || !a) return "intent · idle";
+  const needs = a.ballot && a.ballot.pattern ? a.ballot.pattern !== "green" : !isLocal((TOOLS[a.tool] || {}).effect || "irreversible");
+  return needs ? "intent · read by a local model" : "intent · not needed (Green)";
 }
 function renderMagiPending(s) { if (state.selected === s.id) renderFlow(); }
 const EDGES = [
