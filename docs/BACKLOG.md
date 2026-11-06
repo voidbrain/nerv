@@ -131,13 +131,13 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Implemented shared significant whole-word matching for unmatched requests and pending/rejected proposals, retaining the roster check with `choosePilot`. Proposal creation is serialized per runtime so overlapping concurrent requests see the first card. Regression exercises varying labels through the runtime, scheduler and ledger, suppression while pending, approval and rejection. Required next: local checks and merged CI.
+**Next action / closure evidence:** Implemented in [PR #150](https://github.com/voidbrain/nerv/pull/150): shared significant whole-word matching for unmatched requests and pending/rejected proposals, retaining the roster check with `choosePilot`. Proposal creation is serialized per runtime so overlapping concurrent requests see the first card. Regression exercises varying labels through the runtime, scheduler and ledger, suppression while pending, approval and rejection. Required next: local checks and merged CI.
 
 **Estimates:** Small remaining effort; ~90% complete. Reassessed 2026-11-06: implementation and regression ready; validation and CI remain.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Full audit 2026-11-06 (events `pilot.unmatched` on Neo Tokyo-3) |
+| PR / evidence | [PR #150](https://github.com/voidbrain/nerv/pull/150); full audit 2026-11-06 (events `pilot.unmatched` on Neo Tokyo-3) |
 | Opened | 2026-11-06 |
 | Verification | 2026-11-06 Unit/integration: npm test passed (181 passed, 1 platform skip), including varying labels across runtime/ledger and concurrent suppression; typecheck, build, integrations and conventions passed. Merged CI pending |
 | Reviewed | 2026-11-06 |
