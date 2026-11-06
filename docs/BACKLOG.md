@@ -7,7 +7,7 @@ Current work ledger, reviewed 6 November 2026 against main `da71877`. PR #167 re
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 34 | 2 |
+| **Open** | 35 | 2 |
 | **Require Human 🧑** | 0 | 0 |
 
 ### Last 7 days
@@ -15,7 +15,7 @@ Current work ledger, reviewed 6 November 2026 against main `da71877`. PR #167 re
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **Count** | 60 | 26 | 37 | 35 |
+| **Count** | 61 | 26 | 37 | 35 |
 
 ### Require Human 🧑
 
@@ -1295,6 +1295,40 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | PR / evidence | [PR #167](https://github.com/voidbrain/nerv/pull/167) archive adoption/source review and CI reconciliation;  [PR #166](https://github.com/voidbrain/nerv/pull/166) map/tabs and Midori routing/status;  [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner question 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-06 Human: owner reports Telegram /status works. Source review: deterministic router/menu and full command-set automated checks remain pending. |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### F-060
+
+**Spike: herdr-core as a coding-agent terminal runtime**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🟠 | 🔹 P3 | Investigate | 🟡 Medium | ~10% |
+
+💻 **→ Human action required: No**<br />Next: a time-boxed trial of herdr-core as the development workspace, then a written adopt/adapter/reject outcome.
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-06: is [herdr-core](https://herdr.dev/core/) (`hc`, Apache 2.0, [source](https://github.com/herdrdev/herdr-core)) useful for coding with Claude Code and Codex, and for NERV? It offers persistent terminals, agents that start and direct helper agents, attach/takeover, remote machines over SSH, explicit program status (OSC 7501) and an OpenRPC API. Not evaluated yet. |
+| **Reproduce** | Install `hc` (read the install script first) and run one implementer agent, one reviewer and one test terminal, each in its own git worktree; detach, reattach, restart the viewer, delegate a review and read its report. |
+| **Check** | A dated note in this record answering: (1) does switching, reviewing and recovering sessions get easier than today; (2) can Claude Code / Codex emit OSC 7501 status (hook or wrapper), or do they have none; (3) what `--keep` recovery preserves after a daemon or machine restart; (4) API stability and security model confirmed from the docs; (5) outcome per NERV record (F-012, F-019, F-045, F-048, F-049): adapter candidate, borrow the concept only, or not relevant. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Hypotheses from the 2026-11-06 review (landing page and repository README; the security and API pages were not read): (a) development workspace first, NERV adapter later and optional; (b) F-012: a still-running session could be found by name, status-checked and resumed with one `hc send`, but the README says “Recovery starts a fresh shell, never reruns the task”, so herdr does not cover resumption after reboot or crash; (c) F-019 / F-052: status reported by the program rather than inferred matches the observed-versus-inferred telemetry rule, but “a program that does not report status has none”; (d) F-045 / F-048: parent/child ownership, completion notices and cancel-with-parent as a lifecycle pattern for pilots and parallel work; (e) F-049: herdr runs commands with the user's full access and is not a sandbox; at most it would run inside an EVA, and attach/takeover is a separate capability. Any integration stays behind NERV's grants, action gate, isolation and ledger; `hc send` is a write action. Repository at review: 440 stars, 134 commits, no published releases. Close with the outcome note; adapter work, if chosen, gets its own record.
+
+**Estimates:** Medium remaining effort (trial over several working days plus the write-up); ~10% complete (landing page and README read, hypotheses recorded). Set 2026-11-06.
+
+| Field | Value |
+|---|---|
+| PR / evidence | — ; Owner question 2026-11-06 |
+| Opened | 2026-11-06 |
+| Verification | Documentation: Pending. Human: Pending (trial). |
 | Reviewed | 2026-11-06 |
 
 </details>
