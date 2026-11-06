@@ -7,8 +7,8 @@ import { factKey } from './memory.ts';
 import { toolName } from './mcp.ts';
 // argv: database path, then the data home whose scrolls.json sets the gate rules (defaults when absent).
 const store=new Store(process.argv[2]!,process.argv[3]?readScrolls(process.argv[3]):undefined,process.argv[3]?{home:process.argv[3]}:{});
-store.tick();store.ledger.expire();
-const timer=setInterval(()=>{try{store.tick();store.ledger.expire();}catch{console.error('Nervous scheduler tick failed.');}},250);
+store.tick();store.expire();
+const timer=setInterval(()=>{try{store.tick();store.expire();}catch{console.error('Nervous scheduler tick failed.');}},250);
 const registry=()=>new Registry(store.db,process.argv[3]?(()=>{try{return readConfig(process.argv[3]!).kaji?.root;}catch{return undefined;}})():undefined);
 // F-021: granted MCP tools as the gate knows them (effect class from the grant), read from config when asked.
 const external=()=>{try{const t=process.argv[3]?readConfig(process.argv[3]).tools:undefined;return (t?.grants ?? []).map(g=>({name:toolName(g.server,g.tool),effect:g.effect}));}catch{return [];}};
