@@ -372,6 +372,7 @@ try {
         try{server=makeServer(runtime,token,{webRoot,...config,onStop:()=>close()});native=nativeTLS&&nativeAuth?makeServer(runtime,token,{...config,tls:nativeTLS,native:{auth:nativeAuth,fingerprint:nativeTLS.fingerprint,port:config.nativePort ?? 4319,webPort:config.port}}):undefined;}catch(e){await runtime.close();nativeAuth?.close();throw e;}
         const servers=native?[server,native]:[server];let stopped=false;
         let aoba:TelegramChannel|undefined;
+        runtime.setChannelState(()=>aoba?aoba.channelState():{mode:'unavailable',checkedAt:new Date().toISOString()});
         close=()=>{if(stopped)return;stopped=true;void aoba?.stop();void kaji?.stop();void Promise.all(servers.map(s=>new Promise<void>(done=>{s.close(()=>done());s.closeIdleConnections();}))).then(()=>runtime.close()).finally(()=>nativeAuth?.close());};
         runtime.nervous.child.once('exit',()=>{if(!stopped){console.error('Scheduler unavailable; shutting down for supervisor recovery.');process.exitCode=1;close();}});
         for(const listener of servers)listener.on('error',e=>{console.error(e.message);process.exitCode=1;close();});
@@ -381,12 +382,12 @@ try {
         // Aoba starts only when both the private bot token and the linked owner chat exist.
         if(botToken&&config.telegram){aoba=new TelegramChannel({api:new TelegramApi(botToken,telegramBase()),store:runtime,chatId:config.telegram.chatId,statePath:join(home,'telegram-state.json'),
           // F-036 phase 2: quiet while another base is the main one and online; relayed cards are decided where they were made.
-          oneChannel:{quiet:async()=>{const m=await runtime.mainBase();return !!m&&!m.self&&m.online;},relay:(text,cards)=>kaji?kaji.relay({text,cards}):Promise.resolve(false)},
+          oneChannel:{destination:async()=>{const m=await runtime.mainBase();return m&&!m.self?m.baseId:undefined;},quiet:async()=>{const m=await runtime.mainBase();return !!m&&!m.self&&m.online;},relay:(text,cards)=>kaji?kaji.relay({text,cards}):Promise.resolve(false)},
           remote:{decide:(baseId,approvalId,decision)=>{if(!kaji)throw new Error('The Kaji line is not running.');return kaji.decide(baseId,approvalId,decision);}}});await aoba.start().then(()=>console.log('Aoba (Telegram): linked, listening.'),e=>console.error(`Aoba (Telegram) did not start: ${e instanceof Error?e.message:'error'}.`));}
         else if(botToken)console.log('Aoba (Telegram): token found, no chat linked yet. Send /start to your bot, then run telegram link.');
         // B-013: once the channels listen, close what the previous run left half done and tell the owner.
         void runtime.closeInterrupted().then(n=>{if(n)console.log(`Closed ${n} sortie(s) a restart had interrupted.`);});
-        if(config.kaji?.root){kaji=new KajiLink({baseId:config.base.id,key:own.privateKey,publicKey:own.publicKey,registry:runtime.kaji,health:()=>runtime.baseHealth(),onHealth:(id,h)=>runtime.notePeerHealth(id,h),
+        if(config.kaji?.root){kaji=new KajiLink({baseId:config.base.id,key:own.privateKey,publicKey:own.publicKey,registry:runtime.kaji,health:()=>runtime.baseHealth(),onHealth:(id,h)=>runtime.notePeerHealth(id,h),channel:()=>runtime.channelState(),onChannel:(id,c)=>runtime.notePeerChannel(id,c),
           onRelay:async(from,relay)=>{if(!aoba)return false;const name=(await runtime.bases()).find(b=>b.baseId===from)?.name ?? from;return aoba.relayed(from,name,relay);},
           onDecide:async(approvalId,decision)=>decisionText(await runtime.decide(approvalId,decision,'telegram')),
           // Dispatch, on the main base: a request asked on another base, with its own conversation per base and channel.

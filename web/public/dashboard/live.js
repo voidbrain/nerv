@@ -347,12 +347,25 @@
     initMap();
   }
   const sinceText = t => { if (!t) return "never heard"; const s = Math.round((Date.now() - Date.parse(t)) / 1000); return s < 90 ? "seen " + s + " s ago" : s < 5400 ? "last seen " + Math.round(s / 60) + " min ago" : "last seen " + new Date(t).toLocaleString(); };
+  // A heartbeat reports a route check, not successful delivery to a phone.
+  function channelLine(b) {
+    const c = b.channel;
+    if (!c) return "<div class='tiny muted'>Telegram · state not reported</div>";
+    const labels = { "via-main":"via main", "local-fallback":"local fallback", local:"local channel", unavailable:"unavailable · not configured", unknown:"unknown" };
+    const destination = c.destination ? " · main " + baseName(c.destination) : "";
+    const fresh = b.channelFresh;
+    const route = fresh ? labels[c.mode] || "unknown" : "unknown · last reported " + (labels[c.mode] || "unknown");
+    const d = c.lastDelivery;
+    return "<div class='tiny muted'>Telegram · " + esc(route + destination) + "</div>" +
+      "<div class='tiny muted'>Route checked " + esc(new Date(c.checkedAt).toLocaleString()) + (!fresh ? " · stale or offline" : "") + "</div>" +
+      (d ? "<div class='tiny muted'>Last send " + esc(d.result === "accepted" ? "accepted" : "failed") + " via " + esc(d.route === "main" ? "main" : "local bot") + " · " + esc(new Date(d.at).toLocaleString()) + " (phone receipt unknown)</div>" : "<div class='tiny muted'>No send result reported</div>");
+  }
   window.renderBases = function () {
     const list = state.kajiBases || []; const roles = ((state.doctor || {}).models || {}).roles || {};
     if (!list.length) {
       const base = (state.doctor || {}).base || { id:"NERV-01", name:"Neo Tokyo-3" };
       document.getElementById("bases-sub").textContent = BASES[0].status === "online" ? "1/1 online" : "1/1 " + (BASES[0].status === "standby" ? "degraded" : "down");
-      document.getElementById("bases").innerHTML = "<div class='card'><div class='row'><span class='b'>" + esc(base.id) + " · " + esc(base.name) + "</span>" + (BASES[0].status === "standby" ? "<span class='badge b-warn'>DEGRADED</span>" : BASES[0].status === "offline" ? "<span class='badge b-danger'>DOWN</span>" : "<span class='badge b-ok'>ONLINE</span>") + "</div><div class='tiny muted'>this machine · coordinator, scheduler, brain</div><div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div></div>" +
+      document.getElementById("bases").innerHTML = "<div class='card'><div class='row'><span class='b'>" + esc(base.id) + " · " + esc(base.name) + "</span>" + (BASES[0].status === "standby" ? "<span class='badge b-warn'>DEGRADED</span>" : BASES[0].status === "offline" ? "<span class='badge b-danger'>DOWN</span>" : "<span class='badge b-ok'>ONLINE</span>") + "</div><div class='tiny muted'>this machine · coordinator, scheduler, brain</div><div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div>" + channelLine({channel:(state.doctor || {}).channel,channelFresh:(state.doctor || {}).channelFresh}) + "</div>" +
         "<div class='muted small' style='margin-top:4px'>No Kaji line yet: enrol your bases (INSTALL, Kaji line) to see them here.</div>";
       return;
     }
@@ -361,7 +374,7 @@
       "<div class='tiny muted'>" + (b.self ? "this machine" : esc(b.address)) + " · key " + esc(b.fingerprint.slice(0, 9)) + " · " + (b.self ? "local" : esc(sinceText(b.lastSeen))) + "</div>" +
       (b.self ? "<div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div>" : "") +
       (!b.self && b.online && b.health && b.health.reasons.length ? b.health.reasons.map(r => "<div class='tiny warn'>▲ " + esc(r) + "</div>").join("") : "") +
-      (!b.self && b.online && !b.health ? "<div class='tiny muted'>health not reported (that base runs an older version)</div>" : "") + "</div>").join("");
+      (!b.self && b.online && !b.health ? "<div class='tiny muted'>health not reported (that base runs an older version)</div>" : "") + channelLine(b) + "</div>").join("");
   };
   // Lilith: the owner's facts, editable here; every change is the owner's and stays in the fact's history.
   window.renderLilith = function () {
