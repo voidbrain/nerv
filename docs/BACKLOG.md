@@ -1,27 +1,27 @@
 # NERV Agency backlog
 
-Current work ledger, reviewed 6 November 2026 against main `45e84fe`. PR #1–#145 merged after green checks (#53–#145 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
+Current work ledger, reviewed 6 November 2026 against main `df7a75e`. PR #1–#146 merged after green checks (#53–#146 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
 
 <!-- recap:start · generated by tools/backlog-recap.mjs from the records; do not edit by hand -->
 **Recap as of 2026-11-06** (window 2026-10-31 – 2026-11-06).
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 36 | 10 |
-| **Require Human 🧑** | 0 | 0 |
+| **Open** | 35 | 4 |
+| **Require Human 🧑** | 0 | 1 |
 
 ### Last 7 days
 
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **Count** | 56 | 20 | 26 | 16 |
+| **Count** | 56 | 21 | 28 | 24 |
 
 ### Require Human 🧑
 
 | Features | Bugs |
 |---|---|
-| — | — |
+| — | [B-028](#b-028) |
 <!-- recap:end -->
 
 ## Bugs and reliability
@@ -78,108 +78,6 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 
 
-### B-018
-
-**A sortie that answered without an action shows a wrong route: Misato unlit, a live line from EVA to Debrief**
-
-| Signal | Priority | Status | Effort | Complete |
-|:---:|---|---|---|---|
-| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
-
-💻 **→ Human action required: No**<br />Close from the merged PR's green CI; optional look: select S-B55C again.
-
-| | |
-|---|---|
-| **Issue** | Owner report 2026-11-05 (S-B55C *Csncrl*: request, advice, Misato's reply, no action): the replayed flow ended with ADVISE green, Misato and Debrief unlit (orange in Eva) and an animated dashed line from EVA to Debrief. Live mode marked Misato's step passed only when an action existed; the animated (live) lines were computed for any selected sortie, also finished ones, and always entered Debrief from EVA; the flow had no route from Misato straight to Debrief. |
-| **Reproduce** | Select a sortie Misato answered without using a tool. |
-| **Check** | Misato's step is passed when she answered; such a sortie draws a solid route Misato → Debrief, green once passed, and nothing from EVA; animated lines appear only while a sortie runs; a sortie with an action keeps its route through EVA. |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Next action / closure evidence:** Fixed in [PR #134](https://github.com/voidbrain/nerv/pull/134) (2026-11-05): `plan` passed when Misato replied; a new answer route (Misato → Debrief, its own lane on the right, entering Debrief from below), drawn only for a sortie without actions, solid, green when passed; `liveEdges` only for a running or waiting sortie, and into Debrief from Misato when no action ran. Checked in headless Chrome (S-B55C-shaped: Misato and Debrief passed, the answer route among the passed lines, no live line; with an action: no answer route) and by test/dashboard.test.ts; a screenshot.
-
-**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
-
-| Field | Value |
-|---|---|
-| PR / evidence | Owner report 2026-11-05 (S-B55C on Neo Tokyo-3) |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-05: probe, screenshot, test/dashboard.test.ts (local run) |
-| Reviewed | 2026-11-05 |
-
-</details>
-
----
-
-### B-019
-
-**A failing MCP server said only "MCP server ended", hiding why**
-
-| Signal | Priority | Status | Effort | Complete |
-|:---:|---|---|---|---|
-| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
-
-💻 **→ Human action required: No**<br />Close from the merged PR's green CI; optional look: `nerv tools` with a server that cannot start.
-
-| | |
-|---|---|
-| **Issue** | Owner report 2026-11-05: `nerv tools add files npx -y @modelcontextprotocol/server-filesystem ~/NERV-files`, then `nerv tools` printed *could not list its tools: MCP server ended.* The cause (the npm inside the owner's nvm Node lacks `npm-cli.js`, so `npx` crashes) was invisible: the client discarded the server's error output. |
-| **Reproduce** | Add a server whose command exits at start, then run `nerv tools`. |
-| **Check** | The message names the exit code and the error line from the server's error output (here *Error: Cannot find module './npm-cli.js'*), not stack lines, braces or the Node version. |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Next action / closure evidence:** Fixed in [PR #141](https://github.com/voidbrain/nerv/pull/141) (2026-11-05): src/mcp.ts keeps the last 2,000 characters of the server's error output; when the server exits, the message gives the exit code and the line naming the error (or the last two meaningful lines). Checked: test/mcp.test.ts (a fake server that fails at start), and through the CLI against the owner's broken `npx`: *MCP server ended (exit 1): Error: Cannot find module './npm-cli.js'.* The owner's npx itself is a toolchain issue outside NERV (`/usr/local/bin/npx` works, or `nvm install-latest-npm`).
-
-**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
-
-| Field | Value |
-|---|---|
-| PR / evidence | Owner report 2026-11-05 (Neo Tokyo-3) |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-05: test/mcp.test.ts and a CLI run (local) |
-| Reviewed | 2026-11-05 |
-
-</details>
-
----
-
-### B-020
-
-**While the consultant works, its sortie blinks CONSULT but the advice step in the Sephirot stays dark**
-
-| Signal | Priority | Status | Effort | Complete |
-|:---:|---|---|---|---|
-| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
-
-💻 **→ Human action required: No**<br />Close from the merged PR's green CI; optional look: ask Misato something and watch the Sephirot while Maya advises.
-
-| | |
-|---|---|
-| **Issue** | Owner report 2026-11-05 (S-E16D, S-7B04, consultant gemma4:12b): in Sorties the card's badge blinked CONSULT, while ADVISE in the Sephirot was not lit. In live mode a sortie is marked consulted only when the advice arrives (`misato.consult`); `stepState` returned *skip* for the advice step of a sortie not yet consulted before looking at its phase, so the running step was drawn as skipped. |
-| **Reproduce** | With a consultant set, ask Misato anything and look at the Sephirot before the advice arrives. |
-| **Check** | While the phase is `consult` the advice step is on (lit, its incoming line live); a sortie with no consultant still skips it; an advised one shows it passed. |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Next action / closure evidence:** Fixed in [PR #142](https://github.com/voidbrain/nerv/pull/142) (2026-11-05): `stepState` skips the advice step only when the sortie is not in the consult phase. Checked: test/dashboard.test.ts runs the real `stepState` (running → on, no consultant → skip, advised → done); it fails without the fix. Not checked in a browser.
-
-**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
-
-| Field | Value |
-|---|---|
-| PR / evidence | Owner report 2026-11-05 (S-E16D, S-7B04 on Neo Tokyo-3) |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-05: test/dashboard.test.ts (local run) |
-| Reviewed | 2026-11-05 |
-
-</details>
-
----
-
 ### B-021
 
 **A question from Misato closes the sortie, and the answer opens a new one**
@@ -214,170 +112,68 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 ---
 
-### B-022
+### B-027
 
-**The bases map is blank**
+**One field gets several pilot proposals: unmatched domains are counted by exact name**
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🟡 | 🔺 P1 | Implemented | 🟢 Small | ~90% |
+| 🔴 | 🔶 P2 | Open | 🟢 Small | ~0% |
 
-💻 **→ Human action required: No**<br />Close from the merged PR's green CI; optional look: the NERV BASES panel shows the map again.
+💻 **→ Human action required: No**<br />Next: count a domain with the unmatched ones that share its words, and propose one pilot while another for that field waits.
 
 | | |
 |---|---|
-| **Issue** | Owner report 2026-11-05: *map no more visible*. Since PR #137, a line comment sat before `const s` (each marker's size) on the same line, so `drawMap` threw *s is not defined* on every frame once it reached the bases: the canvas stayed fully transparent (probe on the live dashboard: 0 opaque pixels; calling `drawMap` gave the error). |
-| **Reproduce** | Open the dashboard; look at NERV BASES. |
-| **Check** | The map, both bases and their names are drawn. |
+| **Issue** | Full audit 2026-11-06: the generic pilot named one field *file system access*, *file management* and *file access* (S-E16D, S-7B04, S-77D5 and later); `Ledger.unmatched` counts only the exact name, so two of them reached three and two near-duplicate pilots were proposed 3 minutes apart (S-0CB7, S-8E2C); the second card was made while the first still waited. The owner approved both: the roster now has *file-system-access* and *file-management*. |
+| **Reproduce** | Ask about one field in different words three times each; look at the pilots.create cards. |
+| **Check** | Requests about one field count together whatever its exact name (shared words, or the same field as an existing or proposed pilot); no second proposal while one for an overlapping field waits; a test across the runtime and the ledger. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Fixed in [PR #143](https://github.com/voidbrain/nerv/pull/143) (2026-11-05): the comment on its own line. Checked: test/dashboard.test.ts runs the real `drawMap` with a recording canvas (both bases named, one marker each, drawn to the last line); it fails without the fix with *s is not defined*. The PR that caused it (#137) was checked with a probe that read the page, not the canvas.
+**Next action / closure evidence:** Group unmatched domains by shared significant words; check pending proposals and the roster with `choosePilot` before proposing.
 
-**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
-
-| Field | Value |
-|---|---|
-| PR / evidence | Owner report 2026-11-05 (Neo Tokyo-3) |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-05: test/dashboard.test.ts (local run); live probe after merge |
-| Reviewed | 2026-11-05 |
-
-</details>
-
----
-
-### B-023
-
-**The Sephirot does not follow a sortie while it runs; Casper says Green when idle; Gevurah has no number**
-
-| Signal | Priority | Status | Effort | Complete |
-|:---:|---|---|---|---|
-| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
-
-💻 **→ Human action required: No**<br />Close from the merged PR's green CI; optional look: send Misato a request with another sortie selected.
-
-| | |
-|---|---|
-| **Issue** | Owner report 2026-11-05: the Sephirot did not show the consultant or Misato while a request ran; Casper read *Green: not consulted* with nothing running; GEVURAH had no number. With a sortie selected, a request just sent was selected only when its reply came back, so the flow showed the old sortie meanwhile. With it, the owner's layout requests: the crew avatars top right (no *you* on Misato's apartment, no Hyuga on Detection), each Sephirah's number with its Hebrew and Latin name top left (its meaning on hover); MAGI seats Balthasar 1, Casper 2, Melchior 3, the kanji large again, each seat's role (details on hover), Casper *intent · idle* when nothing runs; ADVISE's *no vote · advice into the LCL* only with no sortie selected. |
-| **Reproduce** | Select an old sortie, then ask Misato something; watch the Sephirot. |
-| **Check** | A request sent from the dashboard selects its sortie as soon as it appears; the Sephirot is numbered 1 to 11; Casper says idle, not needed (Green) or read by a local model. |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Next action / closure evidence:** Fixed in [PR #144](https://github.com/voidbrain/nerv/pull/144) (2026-11-05). Checked: test/dashboard.test.ts (numbering 1 to 11, avatars, seat roles, Casper's states in both scripts); in headless Chrome against a throwaway base serving the branch: with an older sortie picked, a new request's sortie is selected (that run cannot show the window while the request runs, since the old code also selected it once the reply came); screenshots of the Sephirot.
-
-**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
+**Estimates:** Small remaining effort; ~0% complete. Estimated 2026-11-06.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner report 2026-11-05 (Neo Tokyo-3) |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-05: test/dashboard.test.ts, headless Chrome (local) |
-| Reviewed | 2026-11-05 |
-
-</details>
-
----
-
-### B-024
-
-**The consultant is not told which tools Misato has, so it advises against what she can do**
-
-| Signal | Priority | Status | Effort | Complete |
-|:---:|---|---|---|---|
-| 🟡 | 🔺 P1 | Implemented | 🟢 Small | ~90% |
-
-💻 **→ Human action required: No**<br />Close from the merged PR's green CI; optional look: ask Misato to read a file and read the consultant's advice.
-
-| | |
-|---|---|
-| **Issue** | Owner run 2026-11-05 (S-77D5): with `files.read_text_file` granted, the consultant advised *Explain that you lack direct filesystem access and ask them to copy and paste the text*. Misato ignored it and read the file, but the advice was wrong: `consultant.advise` gets the request, the context and the bases, not the tools. |
-| **Reproduce** | Grant an MCP tool, ask for something it does; read the consultant's advice. |
-| **Check** | The consultant's input lists the tool names Misato is offered (NERV's own and granted MCP tools), and its system prompt says to advise within them. |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Next action / closure evidence:** Fixed in [PR #146](https://github.com/voidbrain/nerv/pull/146) (2026-11-06): `consultant.advise` takes `tools` (name and the start of its description, at most 80); the runtime passes NERV's own tools and the granted MCP tools; the consultant's prompt says to advise within them and never to say Misato cannot do what one of them does. Checked: test/mcp.test.ts through every process (the consultant is told `notes.read_note` and `reminders.add`, not an ungranted tool). Not yet seen with the owner's gemma4:12b consultant.
-
-**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-06.
-
-| Field | Value |
-|---|---|
-| PR / evidence | Owner run 2026-11-05 (S-77D5 on Neo Tokyo-3) |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-06: test/mcp.test.ts (local run) |
-| Reviewed | 2026-11-06 |
-
-</details>
-
----
-
-### B-025
-
-**A granted MCP tool runs under the EVA its effect class picks, not the one it was granted for**
-
-| Signal | Priority | Status | Effort | Complete |
-|:---:|---|---|---|---|
-| 🟡 | 🔺 P1 | Implemented | 🟢 Small | ~90% |
-
-💻 **→ Human action required: No**<br />Close from the merged PR's green CI; optional look: the next file read says EVA-00 in Comms.
-
-| | |
-|---|---|
-| **Issue** | Owner run 2026-11-05 (S-77D5): `files.read_text_file` was granted with `--eva 00`, but its ballot and Comms said EVA-02. The ledger registers an MCP tool with its effect class only; the grant's EVA class is used only to refuse EVA-03. |
-| **Reproduce** | Grant a tool with `--eva 00`, use it, read the ballot's executor. |
-| **Check** | The ballot's executor is the grant's EVA (EVA-00 here); an EVA-03 grant is still refused before F-049. |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Next action / closure evidence:** Fixed in [PR #146](https://github.com/voidbrain/nerv/pull/146) (2026-11-06): each granted tool reaches the gate with its EVA class, and the executor is the stricter of that class and the stage's (quarantine, shadow, bounded, production); NERV's own tools are unchanged. Checked: test/mcp.test.ts (the stricter rule; through every process a tool granted for EVA-00 runs under EVA-00); both fail without the fix.
-
-**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-06.
-
-| Field | Value |
-|---|---|
-| PR / evidence | Owner run 2026-11-05 (S-77D5 on Neo Tokyo-3) |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-06: test/mcp.test.ts (local run) |
-| Reviewed | 2026-11-06 |
-
-</details>
-
----
-
-### B-026
-
-**A Marduk Institute proposal stays open after its card is decided, and shows as a running sortie**
-
-| Signal | Priority | Status | Effort | Complete |
-|:---:|---|---|---|---|
-| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
-
-💻 **→ Human action required: No**<br />Close from the merged PR's green CI; optional look: after a restart the two stuck sorties are done and nothing blinks.
-
-| | |
-|---|---|
-| **Issue** | Owner report 2026-11-06: *all misato tags in sorties blink at the same time*. Two Marduk Institute sorties (pilots for file system access and file management, both approved at 00:30) were still open: after a decision the store closed only the owner's own sorties and Instrumentality's proposals, so a proposal sortie stayed open and the dashboard drew it as running (Misato's phase, blinking). An expired card closed no sortie at all. |
-| **Reproduce** | Approve or turn down a `pilots.create` card; look at its sortie. |
-| **Check** | A proposal sortie closes once every card is decided, whatever the decision; on each scheduler tick that expires a card, an owner action whose card expired closes as failed and a proposal as done; Misato's sorties still wait for her resume; the first tick closes those an earlier version left open. |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Next action / closure evidence:** Fixed in [PR #145](https://github.com/voidbrain/nerv/pull/145) (2026-11-06): `settle` treats Marduk proposals like Instrumentality's; `Store.expire` (the scheduler tick) closes what nothing will finish. Checked: test/pilots.test.ts through every process (approved and turned down: closed) and test/ledger.test.ts (left open before, expired owner action, expired proposal, Misato untouched); both fail without the fix.
-
-**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-06.
-
-| Field | Value |
-|---|---|
-| PR / evidence | Owner report 2026-11-06 (S-0CB7, S-8E2C on Neo Tokyo-3) |
+| PR / evidence | Full audit 2026-11-06 (events `pilot.unmatched` on Neo Tokyo-3) |
 | Opened | 2026-11-06 |
-| Verification | 2026-11-06: test/pilots.test.ts, test/ledger.test.ts (local run) |
+| Verification | Not verified yet |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### B-028
+
+**`src/contracts.ts` is unused: node and job contracts no module imports**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔴 | 🔹 P3 | Open | 🟢 Small | ~0% |
+
+🧑 **→ Human action required: Yes**<br />Decide: remove `src/contracts.ts`, or keep it for F-006/F-050.
+
+| | |
+|---|---|
+| **Issue** | Full audit 2026-11-06: `src/contracts.ts` (Capability, NodeAdvertisement, Job, from PR #3) is imported by no module or test, so coverage lists it as never run; the Kaji line (F-036) and F-049/F-050 have their own message types since. |
+| **Reproduce** | `grep -rn contracts src test`: only the file itself. |
+| **Check** | Either removed, or imported by the module that owns the distributed contract, with its types tested. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Owner decision: remove it (the Kaji line superseded it) or keep it for F-006/F-050. Then remove it, or wire it in, in one PR.
+
+**Estimates:** Small remaining effort; ~0% complete. Estimated 2026-11-06.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Full audit 2026-11-06 |
+| Opened | 2026-11-06 |
+| Verification | Not verified yet |
 | Reviewed | 2026-11-06 |
 
 </details>
@@ -987,7 +783,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Slice 1 in [PR #140](https://github.com/voidbrain/nerv/pull/140) (2026-11-05, owner's path: F-021 first, built for F-049): a dependency-free MCP stdio client (src/mcp.ts); a fourth child process, the tools process, the only place MCP servers run (PATH, HOME, LANG only), on a new coordinator → tools edge; servers and grants in config.json (`tools`), deny by default; `nerv tools` add, list (read-only and destructive marked), grant (as a read, Pattern Green, with an EVA class; a destructive tool refused), revoke, remove; each grant pinned to a fingerprint of the tool's description, so a changed tool is suspended and not offered; granted tools are offered to Misato as `server.tool`, gated like any action (ballot, single-use grant used in the scheduler), called by the tools process, the result recorded on the action; an ungranted tool goes back to Misato as invalid; an EVA-03 grant does not run before F-049. Checked: test/mcp.test.ts (config rules, the client against a fake stdio server, through every process: offered, run, recorded; ungranted refused; changed description suspended; EVA-03 refused; the CLI), full suite 173 pass. Optional owner check: `nerv tools add files npx -y @modelcontextprotocol/server-filesystem ~/NERV-files`, `nerv tools`, `nerv tools grant files/read_text_file`, then ask Aoba to read a file in that folder. Remaining: writes with cards (slice 2), the dashboard list, other bases, remote servers, pilots' tool lists (F-045). Choose MCP and/or OpenAPI as the registration path for Lilith/tools and counselors. Milestone M2b. Registered tools must declare an F-017 effect class; MCP tools without one are treated as irreversible (Pattern Blue). Align with F-005/F-006 worker enrolment for remote tools.
+**Next action / closure evidence:** Full audit 2026-11-06: `npx -y package` fetches the newest version each time the tools process starts; the grant's fingerprint catches a changed description, not changed code, so docs/INSTALL.md now recommends a pinned version (`package@x.y.z`) and `.harness.json` lists MCP servers under `outside`. B-024 and B-025 (consultant tools, the grant's EVA) closed. Slice 1 in [PR #140](https://github.com/voidbrain/nerv/pull/140) (2026-11-05, owner's path: F-021 first, built for F-049): a dependency-free MCP stdio client (src/mcp.ts); a fourth child process, the tools process, the only place MCP servers run (PATH, HOME, LANG only), on a new coordinator → tools edge; servers and grants in config.json (`tools`), deny by default; `nerv tools` add, list (read-only and destructive marked), grant (as a read, Pattern Green, with an EVA class; a destructive tool refused), revoke, remove; each grant pinned to a fingerprint of the tool's description, so a changed tool is suspended and not offered; granted tools are offered to Misato as `server.tool`, gated like any action (ballot, single-use grant used in the scheduler), called by the tools process, the result recorded on the action; an ungranted tool goes back to Misato as invalid; an EVA-03 grant does not run before F-049. Checked: test/mcp.test.ts (config rules, the client against a fake stdio server, through every process: offered, run, recorded; ungranted refused; changed description suspended; EVA-03 refused; the CLI), full suite 173 pass. Optional owner check: `nerv tools add files npx -y @modelcontextprotocol/server-filesystem ~/NERV-files`, `nerv tools`, `nerv tools grant files/read_text_file`, then ask Aoba to read a file in that folder. Remaining: writes with cards (slice 2), the dashboard list, other bases, remote servers, pilots' tool lists (F-045). Choose MCP and/or OpenAPI as the registration path for Lilith/tools and counselors. Milestone M2b. Registered tools must declare an F-017 effect class; MCP tools without one are treated as irreversible (Pattern Blue). Align with F-005/F-006 worker enrolment for remote tools.
 
 **Estimates:** Medium remaining effort; ~40% complete. Estimated 2026-11-05.
 
@@ -996,7 +792,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | PR / evidence | — |
 | Opened | 2026-11-02 |
 | Verification | Pending |
-| Reviewed | 2026-11-04 |
+| Reviewed | 2026-11-06 |
 
 </details>
 
@@ -1120,7 +916,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Provenance fields on intake and sortie records, consumed by the F-017 Balthasar seat. Must land before any email or web integration.
+**Next action / closure evidence:** Full audit 2026-11-06: granted MCP tools (F-021) are a new source: a tool's result (a file's text) goes into Misato's next step untainted, so a planted instruction could lead to a follow-up Green action without a card; actions that remove go to Casper (B-009) and writes beyond Green still ask the owner. Taint from an MCP result is part of this record. Provenance fields on intake and sortie records, consumed by the F-017 Balthasar seat. Must land before any email or web integration.
 
 **Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-04.
 
@@ -1129,7 +925,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | PR / evidence | [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-04 |
 | Verification | Pending |
-| Reviewed | 2026-11-04 |
+| Reviewed | 2026-11-06 |
 
 </details>
 
@@ -1388,7 +1184,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 |:---:|---|---|---|---|
 | 🔴 | 🔶 P2 | Open | 🔴 Large | ~0% |
 
-💻 **→ Human action required: No**<br />Next: the EVA class definition and one sandboxed instance per job, starting with EVA-00.
+💻 **→ Human action required: No**<br />Next: the EVA class definition and one sandboxed instance per job, starting with EVA-03 (owner, 2026-11-05).
 
 | | |
 |---|---|
@@ -1399,7 +1195,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Planned 2026-11-05 (owner). Builds on F-045 pilots and the F-025 stages.
+**Next action / closure evidence:** Full audit 2026-11-06: the order is EVA-03 first, as the owner chose on 2026-11-05 (the tools process moves into it, so EVA-03 grants can run); the next action said EVA-00. Planned 2026-11-05 (owner). Builds on F-045 pilots and the F-025 stages.
 
 **Estimates:** Large remaining effort; ~0% complete. Estimated 2026-11-05.
 
@@ -1408,7 +1204,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | PR / evidence | Owner questions 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
-| Reviewed | 2026-11-05 |
+| Reviewed | 2026-11-06 |
 
 </details>
 
@@ -1544,40 +1340,6 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | PR / evidence | Owner request 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
-| Reviewed | 2026-11-05 |
-
-</details>
-
----
-
-### F-055
-
-**Code coverage per folder, as the harness asks**
-
-| Signal | Priority | Status | Effort | Complete |
-|:---:|---|---|---|---|
-| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
-
-💻 **→ Human action required: No**<br />Close from the merged PR's green CI (the coverage table printed in validate).
-
-| | |
-|---|---|
-| **Issue** | Owner question 2026-11-05 ("don't the harness require code coverage?"): AGENTS.md describes `docs/agents/coverage.md`, `npm run coverage` and a table on every PR, but nothing was set up: no script, no `coverage` settings, no CI step; the copied `tools/coverage-table.mjs` was never used. It reads the json-summary that Istanbul writes (OpenBando's Angular tests); Node's test runner writes LCOV. |
-| **Reproduce** | `npm run coverage` did not exist; `docs/agents/coverage.md` was missing. |
-| **Check** | `npm run test:coverage` runs the suite once with coverage and writes the summary; `npm run coverage` also writes the page and its baseline; CI validate runs the suite through it and prints the table (warnings; `coverage.enforce` off, as OpenBando); files no test loads appear as untested; the page changes only on purpose and in audits. |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Next action / closure evidence:** Set up in [PR #138](https://github.com/voidbrain/nerv/pull/138) (2026-11-05): `tools/lcov-summary.mjs` (project tool) turns Node's LCOV into the json-summary and adds src/ files no test loaded at zero; scripts `test:coverage` and `coverage`; `.harness.json` `coverage` {summary, folders [src/], drop 2, enforce false}; validate runs `test:coverage` instead of `npm test` (the suite still once) and `coverage-table.mjs --check --github`; `coverage/` ignored. First table: src/ lines 93.1 %, branches 84.2 %, functions 84.1 % (30 files; untested: contracts.ts, types only). Limits, written in the tool: statements equal lines (LCOV has none); code run only in the scheduler and brain child processes is not counted (most of it is also tested in-process). Checked: test/coverage.test.ts (the conversion), the run above. Harness boundary: the rule and the table tool are the harness's; the coverage run, settings and converter are this project's; whether the converter becomes a template piece for Node test runner projects is the owner's call.
-
-**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
-
-| Field | Value |
-|---|---|
-| PR / evidence | Owner question 2026-11-05; OpenBando's coverage setup as reference |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-05: npm run coverage and test/coverage.test.ts (local run) |
 | Reviewed | 2026-11-05 |
 
 </details>

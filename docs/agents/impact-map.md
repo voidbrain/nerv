@@ -44,3 +44,5 @@ What can change an output with no commit here, and how we would notice.
 | Node SQLite API and Angular dependencies | Runtime, builds and persistence compatibility | Pinned install, regression tests and doctor |
 | Host clock and timezone | Reminder deadlines | Explicit timezone inputs and doctor |
 | GitHub-hosted runner images (macos-15, windows-latest, ubuntu-latest) | CI jobs: an image GitHub retires fails the job before it runs | The job fails in about a second with "configuration … is not supported" (B-015, macos-14 retired 2026-11-05) |
+| MCP servers the owner adds (`npx -y package` fetches the newest version at each start) | What a granted tool does: its code can change with no commit here; a grant notices only a changed description (F-021) | The tool's fingerprint (description changes suspend the grant); docs/INSTALL.md recommends a pinned version; audit |
+| The Node version on each base (the owner runs Node 26 under nvm; CI runs Node 24) | Native TypeScript, node:sqlite and the bundled npm/npx (B-019: nvm Node 26.12's npm lacked npm-cli.js) | nerv doctor, the CI matrix (Node 24 only) and audit |

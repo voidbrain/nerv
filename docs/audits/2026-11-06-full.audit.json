@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "kind": "full",
+  "reviewed": "2026-11-06T00:50:27.000Z",
+  "baseline": "df7a75ea659f8bae2058b0e370cd642f82d8d79f",
+  "report": "docs/audits/2026-11-06-full.md",
+  "areas": {
+    "code": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-06-full.md: Module reading of changed code, TODO and swallowed-error scans, check:conventions; B-028",
+      "limits": "Angular web/src not re-read; reading by module, not line by line"
+    },
+    "logic": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-06-full.md: Ledger traces S-77D5, S-E983, S-0CB7, S-8E2C and pilot.unmatched; B-021, B-026, B-027",
+      "limits": "Kaji relay not exercised live: Tabgha unreachable"
+    },
+    "tests": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-06-full.md: Full suite 179 pass, CI read for #134 #138 #140-#146, coverage table refreshed",
+      "limits": "No real-device runs; spawned CLI processes are not in the coverage numbers"
+    },
+    "documentation": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-06-full.md: README, INSTALL, areas, style guide versus behaviour; INSTALL and style guide fixed",
+      "limits": "Screenshots and guides not re-recorded"
+    },
+    "harness": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-06-full.md: check:freshness (template v3.1.1, copied match), maintenance check, impact map regenerated",
+      "limits": "No harness rule changed; template main #61 unreleased"
+    },
+    "security": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-06-full.md: Secret/personal-data scan, ~/.nerv permissions, npm audit, GitHub alert endpoints, MCP trust boundary",
+      "limits": "No dynamic or penetration testing; code scanning and Dependabot not enabled (owner setting)"
+    },
+    "delivery": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-06-full.md: ci:status on merged PRs, main and maintenance workflow runs, failure triage, runtime versions",
+      "limits": "No release or deployment exists to check"
+    },
+    "backlog": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-06-full.md: All 46 active records reviewed; 9 closed and archived, F-049/F-021/F-027 updated, B-027 and B-028 filed",
+      "limits": "Older Implemented features keep their pending device checks"
+    }
+  }
+}
