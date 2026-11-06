@@ -229,6 +229,16 @@
       "what": "GitHub-hosted runner images (macos-15, windows-latest, ubuntu-latest)",
       "affects": "CI jobs: an image GitHub retires fails the job before it runs",
       "noticed": "The job fails in about a second with \"configuration … is not supported\" (B-015, macos-14 retired 2026-11-05)"
+    },
+    {
+      "what": "MCP servers the owner adds (`npx -y package` fetches the newest version at each start)",
+      "affects": "What a granted tool does: its code can change with no commit here; a grant notices only a changed description (F-021)",
+      "noticed": "The tool's fingerprint (description changes suspend the grant); docs/INSTALL.md recommends a pinned version; audit"
+    },
+    {
+      "what": "The Node version on each base (the owner runs Node 26 under nvm; CI runs Node 24)",
+      "affects": "Native TypeScript, node:sqlite and the bundled npm/npx (B-019: nvm Node 26.12's npm lacked npm-cli.js)",
+      "noticed": "nerv doctor, the CI matrix (Node 24 only) and audit"
     }
   ],
   "pages": [

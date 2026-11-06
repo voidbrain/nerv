@@ -1246,3 +1246,311 @@ Closed records in closing-date order. Dated evidence, not current status.
 </details>
 
 ---
+
+## Closed 2026-11-06
+
+### B-018
+
+**A sortie that answered without an action shows a wrong route: Misato unlit, a live line from EVA to Debrief**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: closed after the merged PR's green CI.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-05 (S-B55C *Csncrl*: request, advice, Misato's reply, no action): the replayed flow ended with ADVISE green, Misato and Debrief unlit (orange in Eva) and an animated dashed line from EVA to Debrief. Live mode marked Misato's step passed only when an action existed; the animated (live) lines were computed for any selected sortie, also finished ones, and always entered Debrief from EVA; the flow had no route from Misato straight to Debrief. |
+| **Reproduce** | Select a sortie Misato answered without using a tool. |
+| **Check** | Misato's step is passed when she answered; such a sortie draws a solid route Misato → Debrief, green once passed, and nothing from EVA; animated lines appear only while a sortie runs; a sortie with an action keeps its route through EVA. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 in the full audit: [PR #134](https://github.com/voidbrain/nerv/pull/134) merged with validate, native-macos and windows green (read with ci:status). Fixed in [PR #134](https://github.com/voidbrain/nerv/pull/134) (2026-11-05): `plan` passed when Misato replied; a new answer route (Misato → Debrief, its own lane on the right, entering Debrief from below), drawn only for a sortie without actions, solid, green when passed; `liveEdges` only for a running or waiting sortie, and into Debrief from Misato when no action ran. Checked in headless Chrome (S-B55C-shaped: Misato and Debrief passed, the answer route among the passed lines, no live line; with an action: no answer route) and by test/dashboard.test.ts; a screenshot.
+
+**Estimates:** No remaining effort; ~100% complete. Estimated 2026-11-06.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner report 2026-11-05 (S-B55C on Neo Tokyo-3) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05: probe, screenshot, test/dashboard.test.ts (local run) |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### B-019
+
+**A failing MCP server said only "MCP server ended", hiding why**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: closed after the merged PR's green CI.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-05: `nerv tools add files npx -y @modelcontextprotocol/server-filesystem ~/NERV-files`, then `nerv tools` printed *could not list its tools: MCP server ended.* The cause (the npm inside the owner's nvm Node lacks `npm-cli.js`, so `npx` crashes) was invisible: the client discarded the server's error output. |
+| **Reproduce** | Add a server whose command exits at start, then run `nerv tools`. |
+| **Check** | The message names the exit code and the error line from the server's error output (here *Error: Cannot find module './npm-cli.js'*), not stack lines, braces or the Node version. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 in the full audit: [PR #141](https://github.com/voidbrain/nerv/pull/141) merged with validate, native-macos and windows green (read with ci:status). Fixed in [PR #141](https://github.com/voidbrain/nerv/pull/141) (2026-11-05): src/mcp.ts keeps the last 2,000 characters of the server's error output; when the server exits, the message gives the exit code and the line naming the error (or the last two meaningful lines). Checked: test/mcp.test.ts (a fake server that fails at start), and through the CLI against the owner's broken `npx`: *MCP server ended (exit 1): Error: Cannot find module './npm-cli.js'.* The owner's npx itself is a toolchain issue outside NERV (`/usr/local/bin/npx` works, or `nvm install-latest-npm`).
+
+**Estimates:** No remaining effort; ~100% complete. Estimated 2026-11-06.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner report 2026-11-05 (Neo Tokyo-3) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05: test/mcp.test.ts and a CLI run (local) |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### B-020
+
+**While the consultant works, its sortie blinks CONSULT but the advice step in the Sephirot stays dark**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: closed after the merged PR's green CI.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-05 (S-E16D, S-7B04, consultant gemma4:12b): in Sorties the card's badge blinked CONSULT, while ADVISE in the Sephirot was not lit. In live mode a sortie is marked consulted only when the advice arrives (`misato.consult`); `stepState` returned *skip* for the advice step of a sortie not yet consulted before looking at its phase, so the running step was drawn as skipped. |
+| **Reproduce** | With a consultant set, ask Misato anything and look at the Sephirot before the advice arrives. |
+| **Check** | While the phase is `consult` the advice step is on (lit, its incoming line live); a sortie with no consultant still skips it; an advised one shows it passed. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 in the full audit: [PR #142](https://github.com/voidbrain/nerv/pull/142) merged with validate, native-macos and windows green (read with ci:status). Fixed in [PR #142](https://github.com/voidbrain/nerv/pull/142) (2026-11-05): `stepState` skips the advice step only when the sortie is not in the consult phase. Checked: test/dashboard.test.ts runs the real `stepState` (running → on, no consultant → skip, advised → done); it fails without the fix. Not checked in a browser.
+
+**Estimates:** No remaining effort; ~100% complete. Estimated 2026-11-06.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner report 2026-11-05 (S-E16D, S-7B04 on Neo Tokyo-3) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05: test/dashboard.test.ts (local run) |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### B-022
+
+**The bases map is blank**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: closed after the merged PR's green CI.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-05: *map no more visible*. Since PR #137, a line comment sat before `const s` (each marker's size) on the same line, so `drawMap` threw *s is not defined* on every frame once it reached the bases: the canvas stayed fully transparent (probe on the live dashboard: 0 opaque pixels; calling `drawMap` gave the error). |
+| **Reproduce** | Open the dashboard; look at NERV BASES. |
+| **Check** | The map, both bases and their names are drawn. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 in the full audit: [PR #143](https://github.com/voidbrain/nerv/pull/143) merged with validate, native-macos and windows green (read with ci:status). Live check after the rebuild: the map canvas went from 0 to fully drawn pixels on the owner's dashboard. Fixed in [PR #143](https://github.com/voidbrain/nerv/pull/143) (2026-11-05): the comment on its own line. Checked: test/dashboard.test.ts runs the real `drawMap` with a recording canvas (both bases named, one marker each, drawn to the last line); it fails without the fix with *s is not defined*. The PR that caused it (#137) was checked with a probe that read the page, not the canvas.
+
+**Estimates:** No remaining effort; ~100% complete. Estimated 2026-11-06.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner report 2026-11-05 (Neo Tokyo-3) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05: test/dashboard.test.ts (local run); live probe after merge |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### B-023
+
+**The Sephirot does not follow a sortie while it runs; Casper says Green when idle; Gevurah has no number**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: closed after the merged PR's green CI.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-05: the Sephirot did not show the consultant or Misato while a request ran; Casper read *Green: not consulted* with nothing running; GEVURAH had no number. With a sortie selected, a request just sent was selected only when its reply came back, so the flow showed the old sortie meanwhile. With it, the owner's layout requests: the crew avatars top right (no *you* on Misato's apartment, no Hyuga on Detection), each Sephirah's number with its Hebrew and Latin name top left (its meaning on hover); MAGI seats Balthasar 1, Casper 2, Melchior 3, the kanji large again, each seat's role (details on hover), Casper *intent · idle* when nothing runs; ADVISE's *no vote · advice into the LCL* only with no sortie selected. |
+| **Reproduce** | Select an old sortie, then ask Misato something; watch the Sephirot. |
+| **Check** | A request sent from the dashboard selects its sortie as soon as it appears; the Sephirot is numbered 1 to 11; Casper says idle, not needed (Green) or read by a local model. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 in the full audit: [PR #144](https://github.com/voidbrain/nerv/pull/144) merged with validate, native-macos and windows green (read with ci:status). Fixed in [PR #144](https://github.com/voidbrain/nerv/pull/144) (2026-11-05). Checked: test/dashboard.test.ts (numbering 1 to 11, avatars, seat roles, Casper's states in both scripts); in headless Chrome against a throwaway base serving the branch: with an older sortie picked, a new request's sortie is selected (that run cannot show the window while the request runs, since the old code also selected it once the reply came); screenshots of the Sephirot.
+
+**Estimates:** No remaining effort; ~100% complete. Estimated 2026-11-06.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner report 2026-11-05 (Neo Tokyo-3) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05: test/dashboard.test.ts, headless Chrome (local) |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### B-024
+
+**The consultant is not told which tools Misato has, so it advises against what she can do**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: closed after the merged PR's green CI.
+
+| | |
+|---|---|
+| **Issue** | Owner run 2026-11-05 (S-77D5): with `files.read_text_file` granted, the consultant advised *Explain that you lack direct filesystem access and ask them to copy and paste the text*. Misato ignored it and read the file, but the advice was wrong: `consultant.advise` gets the request, the context and the bases, not the tools. |
+| **Reproduce** | Grant an MCP tool, ask for something it does; read the consultant's advice. |
+| **Check** | The consultant's input lists the tool names Misato is offered (NERV's own and granted MCP tools), and its system prompt says to advise within them. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 in the full audit: [PR #146](https://github.com/voidbrain/nerv/pull/146) merged with validate, native-macos and windows green (read with ci:status). Fixed in [PR #146](https://github.com/voidbrain/nerv/pull/146) (2026-11-06): `consultant.advise` takes `tools` (name and the start of its description, at most 80); the runtime passes NERV's own tools and the granted MCP tools; the consultant's prompt says to advise within them and never to say Misato cannot do what one of them does. Checked: test/mcp.test.ts through every process (the consultant is told `notes.read_note` and `reminders.add`, not an ungranted tool). Not yet seen with the owner's gemma4:12b consultant.
+
+**Estimates:** No remaining effort; ~100% complete. Estimated 2026-11-06.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner run 2026-11-05 (S-77D5 on Neo Tokyo-3) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-06: test/mcp.test.ts (local run) |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### B-025
+
+**A granted MCP tool runs under the EVA its effect class picks, not the one it was granted for**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: closed after the merged PR's green CI.
+
+| | |
+|---|---|
+| **Issue** | Owner run 2026-11-05 (S-77D5): `files.read_text_file` was granted with `--eva 00`, but its ballot and Comms said EVA-02. The ledger registers an MCP tool with its effect class only; the grant's EVA class is used only to refuse EVA-03. |
+| **Reproduce** | Grant a tool with `--eva 00`, use it, read the ballot's executor. |
+| **Check** | The ballot's executor is the grant's EVA (EVA-00 here); an EVA-03 grant is still refused before F-049. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 in the full audit: [PR #146](https://github.com/voidbrain/nerv/pull/146) merged with validate, native-macos and windows green (read with ci:status). Fixed in [PR #146](https://github.com/voidbrain/nerv/pull/146) (2026-11-06): each granted tool reaches the gate with its EVA class, and the executor is the stricter of that class and the stage's (quarantine, shadow, bounded, production); NERV's own tools are unchanged. Checked: test/mcp.test.ts (the stricter rule; through every process a tool granted for EVA-00 runs under EVA-00); both fail without the fix.
+
+**Estimates:** No remaining effort; ~100% complete. Estimated 2026-11-06.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner run 2026-11-05 (S-77D5 on Neo Tokyo-3) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-06: test/mcp.test.ts (local run) |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### B-026
+
+**A Marduk Institute proposal stays open after its card is decided, and shows as a running sortie**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: closed after the merged PR's green CI.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-06: *all misato tags in sorties blink at the same time*. Two Marduk Institute sorties (pilots for file system access and file management, both approved at 00:30) were still open: after a decision the store closed only the owner's own sorties and Instrumentality's proposals, so a proposal sortie stayed open and the dashboard drew it as running (Misato's phase, blinking). An expired card closed no sortie at all. |
+| **Reproduce** | Approve or turn down a `pilots.create` card; look at its sortie. |
+| **Check** | A proposal sortie closes once every card is decided, whatever the decision; on each scheduler tick that expires a card, an owner action whose card expired closes as failed and a proposal as done; Misato's sorties still wait for her resume; the first tick closes those an earlier version left open. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 in the full audit: [PR #145](https://github.com/voidbrain/nerv/pull/145) merged with validate, native-macos and windows green (read with ci:status). Fixed in [PR #145](https://github.com/voidbrain/nerv/pull/145) (2026-11-06): `settle` treats Marduk proposals like Instrumentality's; `Store.expire` (the scheduler tick) closes what nothing will finish. Checked: test/pilots.test.ts through every process (approved and turned down: closed) and test/ledger.test.ts (left open before, expired owner action, expired proposal, Misato untouched); both fail without the fix.
+
+**Estimates:** No remaining effort; ~100% complete. Estimated 2026-11-06.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner report 2026-11-06 (S-0CB7, S-8E2C on Neo Tokyo-3) |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-06: test/pilots.test.ts, test/ledger.test.ts (local run) |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### F-055
+
+**Code coverage per folder, as the harness asks**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: closed after the merged PR's green CI.
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-05 ("don't the harness require code coverage?"): AGENTS.md describes `docs/agents/coverage.md`, `npm run coverage` and a table on every PR, but nothing was set up: no script, no `coverage` settings, no CI step; the copied `tools/coverage-table.mjs` was never used. It reads the json-summary that Istanbul writes (OpenBando's Angular tests); Node's test runner writes LCOV. |
+| **Reproduce** | `npm run coverage` did not exist; `docs/agents/coverage.md` was missing. |
+| **Check** | `npm run test:coverage` runs the suite once with coverage and writes the summary; `npm run coverage` also writes the page and its baseline; CI validate runs the suite through it and prints the table (warnings; `coverage.enforce` off, as OpenBando); files no test loads appear as untested; the page changes only on purpose and in audits. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 in the full audit: [PR #138](https://github.com/voidbrain/nerv/pull/138) merged with validate, native-macos and windows green (read with ci:status). Set up in [PR #138](https://github.com/voidbrain/nerv/pull/138) (2026-11-05): `tools/lcov-summary.mjs` (project tool) turns Node's LCOV into the json-summary and adds src/ files no test loaded at zero; scripts `test:coverage` and `coverage`; `.harness.json` `coverage` {summary, folders [src/], drop 2, enforce false}; validate runs `test:coverage` instead of `npm test` (the suite still once) and `coverage-table.mjs --check --github`; `coverage/` ignored. First table: src/ lines 93.1 %, branches 84.2 %, functions 84.1 % (30 files; untested: contracts.ts, types only). Limits, written in the tool: statements equal lines (LCOV has none); code run only in the scheduler and brain child processes is not counted (most of it is also tested in-process). Checked: test/coverage.test.ts (the conversion), the run above. Harness boundary: the rule and the table tool are the harness's; the coverage run, settings and converter are this project's; whether the converter becomes a template piece for Node test runner projects is the owner's call.
+
+**Estimates:** No remaining effort; ~100% complete. Estimated 2026-11-06.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner question 2026-11-05; OpenBando's coverage setup as reference |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05: npm run coverage and test/coverage.test.ts (local run) |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
