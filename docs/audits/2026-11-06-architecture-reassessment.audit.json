@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "kind": "scoped",
+  "reviewed": "2026-11-06T20:26:11.211Z",
+  "baseline": "cf77cabf38b5656a5170ff9d69c80e23b39ccd92",
+  "report": "docs/audits/2026-11-06-architecture-reassessment.md",
+  "areas": {
+    "documentation": {
+      "result": "checked",
+      "evidence": "All 14 concept dispositions and 23 crosswalk rows reassessed; source-grounded corrections and three explicitly unaccepted proposals.",
+      "limits": "Documentation/backlog scope only; source inspection does not establish full runtime, security, recovery or device acceptance."
+    },
+    "backlog": {
+      "result": "checked",
+      "evidence": "All 14 concept dispositions and 23 crosswalk rows reassessed; source-grounded corrections and three explicitly unaccepted proposals.",
+      "limits": "Documentation/backlog scope only; source inspection does not establish full runtime, security, recovery or device acceptance."
+    }
+  }
+}
