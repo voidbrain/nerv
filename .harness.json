@@ -157,6 +157,22 @@
       "after": [
         "frontend"
       ]
+    },
+    {
+      "id": "roadmap-status",
+      "when": [
+        "docs/BACKLOG.md",
+        "docs/archive/backlog-*.md",
+        "docs/ROADMAP.md",
+        "tools/roadmap-status.mjs",
+        "tools/backlog-recap.mjs"
+      ],
+      "then": "Place every open feature in one milestone's Records cell and regenerate the roadmap status table from the records.",
+      "run": "npm run roadmap:status",
+      "checked": "npm run check:roadmap in CI validate",
+      "after": [
+        "backlog-recap"
+      ]
     }
   ],
   "couplings": [
