@@ -267,7 +267,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Fixed in [PR PR_23] (2026-11-05). Checked: test/dashboard.test.ts (numbering 1 to 11, avatars, seat roles, Casper's states in both scripts); in headless Chrome against a throwaway base serving the branch: with an older sortie picked, a new request's sortie is selected (that run cannot show the window while the request runs, since the old code also selected it once the reply came); screenshots of the Sephirot.
+**Next action / closure evidence:** Fixed in [PR #144](https://github.com/voidbrain/nerv/pull/144) (2026-11-05). Checked: test/dashboard.test.ts (numbering 1 to 11, avatars, seat roles, Casper's states in both scripts); in headless Chrome against a throwaway base serving the branch: with an older sortie picked, a new request's sortie is selected (that run cannot show the window while the request runs, since the old code also selected it once the reply came); screenshots of the Sephirot.
 
 **Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-05.
 
