@@ -1401,15 +1401,15 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** OpenBando stamps v1.<deployment run number>; NERV has no deployment pipeline, so buildInfo uses the first-parent history count for v1.N from a full checkout. It reads the count against the captured commit, once at service start; shallow/source copies fall back to the package version. Full commit hover/copy remains. Checked locally: test/build.test.ts (increments, two-base equality, startup caching, shallow and source-copy fallbacks), dashboard regression, headless Chrome label/tooltip/clipboard and screenshot. CI remains.
+**Next action / closure evidence:** Implemented in [PR #151](https://github.com/voidbrain/nerv/pull/151). OpenBando stamps v1.<deployment run number>; NERV has no deployment pipeline, so buildInfo uses the first-parent history count for v1.N from a full checkout. It reads the count against the captured commit, once at service start; shallow/source copies fall back to the package version. Full commit hover/copy remains. Checked locally: test/build.test.ts (increments, two-base equality, startup caching, shallow and source-copy fallbacks), dashboard regression, headless Chrome label/tooltip/clipboard and screenshot. CI remains.
 
 **Estimates:** Small remaining effort; ~90% complete. Reassessed 2026-11-06: build counter, regression and browser checks passed; merged CI remains.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner clarification 2026-11-06; prior implementation PR #148 and closure PR #150 |
+| PR / evidence | [PR #151](https://github.com/voidbrain/nerv/pull/151); owner clarification 2026-11-06; prior implementation PR #148 and closure PR #150 |
 | Opened | 2026-11-06 |
-| Verification | 2026-11-06 Unit/integration: build and dashboard regressions passed; Browser: headless Chrome displayed v1.158 with full hash on hover and copied the full hash; screenshot inspected. Merged CI pending |
+| Verification | 2026-11-06 Unit/integration: full suite passed (183 passed, one systemd-only skip); build and dashboard regressions passed; Browser: headless Chrome displayed v1.158 with full hash on hover and copied the full hash; screenshot inspected. Merged CI pending |
 | Reviewed | 2026-11-06 |
 
 </details>
