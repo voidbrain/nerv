@@ -216,7 +216,7 @@
   // Models (F-038): each role's model, picked from what Ollama has; the cloud route on or off. The key is never asked here:
   // it is typed in a terminal (models key). The list is re-read every 30 s, and never while the owner is choosing.
   let modelsData = null, modelsAt = 0, modelsBusy = false, modelsDraft = false;
-  const loadModels = async (force) => { if (!force && Date.now() - modelsAt < 30000) return; modelsAt = Date.now(); try { modelsData = await api("models"); } catch (e) { modelsData = { error:e.message }; } renderModels(); };
+  const loadModels = async (force) => { if (!force && Date.now() - modelsAt < 30000) return; modelsAt = Date.now(); try { modelsData = await api("models"); } catch (e) { modelsData = { error:e.message }; } renderModels(); renderMelons(); };
   window.renderModels = function () {
     const box = document.getElementById("models"); const sub = document.getElementById("models-sub"); const d = modelsData;
     // A choice not applied yet is kept: no refresh redraws the panel under it.
@@ -233,13 +233,10 @@
     const misatoOpts = (misatoRoute ? "" : opt("", "not set", true)) + local.map(n => opt("local:" + n, n + " (local)", misatoRoute === "local" && misatoModel === n)).join("") +
       (misatoRoute === "local" && misatoModel && !known(misatoModel) ? opt("local:" + misatoModel, misatoModel + " (not in Ollama)", true, true) : "") +
       opt("cloud:" + cloudModel, cloudModel + " (cloud)" + (cloudOn ? "" : d.cloudKey ? " · turn the cloud route on" : " · key missing"), misatoRoute === "cloud", !cloudOn);
-    const consultantModel = (roles.consultant && roles.consultant.model) || "";
-    const consultantOpts = opt("off", "off", !consultantModel) + local.map(n => opt(n, n + " (local)", consultantModel === n)).join("");
     const casperOpts = (casperModel ? "" : opt("", "not set", true)) + local.map(n => opt(n, n + " (local)", casperModel === n)).join("") + (casperModel && !known(casperModel) ? opt(casperModel, casperModel + " (not in Ollama)", true, true) : "");
     sub.textContent = d.ollama.reachable ? local.length + " local model" + (local.length === 1 ? "" : "s") : "Ollama not found";
     box.innerHTML = (local.length || cloudOn ? "<form id='models-form' class='models-form'><label for='m-misato' class='small'>Misato</label><select id='m-misato'>" + misatoOpts + "</select>" +
       "<label for='m-casper' class='small'>Casper</label><select id='m-casper'" + (local.length ? "" : " disabled") + ">" + casperOpts + "</select>" +
-      "<label for='m-consultant' class='small' title='Advice for Misato before it plans; no vote'>Consultant</label><select id='m-consultant'" + (local.length ? "" : " disabled") + ">" + consultantOpts + "</select>" +
       "<span></span><span><button class='btn sm primary' type='submit'" + (modelsBusy ? " disabled" : "") + ">" + (modelsBusy ? "Applying…" : "Apply") + "</button></span></form>" : "") +
       "<div class='tiny muted' style='margin-top:6px'>" + (d.ollama.reachable ? "Ollama at " + esc(d.ollama.url) + (local.length ? "" : ": no models yet. Pull one: <code>ollama pull gemma4:12b</code>") : esc(d.ollama.error || "Ollama not found.")) + "</div>" +
       "<div class='row tiny' style='margin-top:4px'><span class='muted'>Cloud (Claude): " + (cloudOn ? "on" : "off") + " · key " + (d.cloudKey ? "saved" : "missing: type it in a terminal with <code>nerv models key</code>") + "</span>" +
@@ -258,8 +255,6 @@
     if (mv) { const [route, ...rest] = mv.split(":"); const model = rest.join(":"); const cur = roles.misato ? roles.misato.route + ":" + (roles.misato.model || "") : "";
       if (cur !== mv) change.misato = route === "cloud" ? { route:"cloud" } : { route:"local", model }; }
     if (cv && cv !== ((roles.casper && roles.casper.model) || (m.local || {}).model)) change.casper = { model:cv };
-    const sv = document.getElementById("m-consultant").value; const curConsultant = (roles.consultant && roles.consultant.model) || "off";
-    if (sv && sv !== curConsultant) change.consultant = sv === "off" ? null : { model:sv };
     if (!Object.keys(change).length) { modelsDraft = false; log("Models: nothing changed.", "", null, "maya"); return; }
     applyModels(change, "Models applied");
   });
@@ -414,22 +409,50 @@
     box.querySelectorAll(".plan .row .tiny.muted").forEach(el => { if (/battery/.test(el.textContent)) el.remove(); });
     if (s.status !== "active" && s.status !== "waiting") box.querySelectorAll("[data-spear]").forEach(el => el.remove());
   };
-  window.renderBudget = function () { document.getElementById("budget").innerHTML = PLANNED; };
+  window.renderBudget = function () { document.getElementById("budget-sub").textContent = "Cost tracking planned"; document.getElementById("budget").innerHTML = PLANNED; };
   // F-051: the real pilot roster (config.json pilots), the generic pilot first; stages change with `nerv pilots set ID --stage`.
-  window.renderMelons = function () {
+  const pilotDrafts = new Map(); const pilotBusy = new Set();
+  window.renderMelons = function (force = false) {
     // undefined: the first poll has not answered yet; null: this service has no roster (older version).
-    const roster = state.pilots; const box = document.getElementById("melons"); if (roster === undefined) { box.innerHTML = "<div class='muted small'>Loading pilots…</div>"; return; } if (!roster) { box.innerHTML = PLANNED; return; }
+    const roster = state.pilots; const box = document.getElementById("melons"); if (!force && box.contains(document.activeElement) && document.activeElement.closest(".pilot-model-form")) return; if (roster === undefined) { box.innerHTML = "<div class='muted small'>Loading pilots…</div>"; return; } if (!roster) { box.innerHTML = PLANNED; return; }
     const badge = { prototype:"b-info", test:"b-orange", production:"b-ok" }, short = { prototype:"PROTO", test:"TEST", production:"PROD" };
     // B-017: GET /api/models nests the roles under models (it said "off" with a consultant set).
     const roles = modelsData && modelsData.models && modelsData.models.roles; const generic = roles && roles.consultant && roles.consultant.model;
-    const card = (name, sub, right, line) => "<div class='card'><div class='row'><span class='b'>" + esc(name) + "</span>" + right + "</div><div class='row tiny muted'><span>" + esc(sub) + "</span></div>" + (line ? "<div class='tiny muted'>" + esc(line) + "</div>" : "") + "</div>";
+    const local = modelsData && modelsData.ollama ? modelsData.ollama.models.map(m => m.name) : [];
+    const selector = (id, current, fallback, name) => {
+      if (!modelsData) return "<div class='tiny muted'>Reading local models…</div>";
+      if (modelsData.error) return "<div class='tiny danger'>" + esc(modelsData.error) + "</div>";
+      const selected = pilotDrafts.has(id) ? pilotDrafts.get(id) : current || "off";
+      const option = (value, label, disabled) => "<option value='" + esc(value) + "'" + (selected === value ? " selected" : "") + (disabled ? " disabled" : "") + ">" + esc(label) + "</option>";
+      const options = (fallback ? option("off", "Off", false) : "") + local.map(n => option(n, n + " · local", false)).join("") +
+        (current && !local.includes(current) ? option(current, current + " · unavailable locally", true) : "") + (selected !== "off" && selected !== current && !local.includes(selected) ? option(selected, selected + " · unavailable locally", true) : "");
+      const busy = pilotBusy.has(id); const disabled = busy || (!fallback && !local.length);
+      return "<form class='pilot-model-form' data-pilot='" + esc(id) + "'><label class='small' for='pilot-model-" + esc(id) + "'>" + (fallback ? "Generic pilot model" : "Model for " + esc(name)) + "</label><div class='pilot-model-row'><select id='pilot-model-" + esc(id) + "'" + (disabled ? " disabled" : "") + ">" + options + "</select><button class='btn sm' type='submit'" + (disabled ? " disabled" : "") + ">" + (busy ? "Applying…" : "Apply") + "</button></div></form>";
+    };
+    const card = (name, sub, right, line, control = "") => "<div class='card'><div class='row'><span class='b'>" + esc(name) + "</span>" + right + "</div><div class='row tiny muted'><span>" + esc(sub) + "</span></div>" + (line ? "<div class='tiny muted'>" + esc(line) + "</div>" : "") + control + "</div>";
     const stageOf = p => p.retired ? "retired" : p.stage; const counts = {}; roster.forEach(p => { counts[stageOf(p)] = (counts[stageOf(p)] || 0) + 1; });
     const tab = currentTab("pilots", "prototype"); const shown = roster.filter(p => stageOf(p) === tab);
-    box.innerHTML = card("Generic pilot", "anything no specialist covers · " + (generic || "off"), "<span class='badge b-muted'>GENERIC</span>", generic ? "" : "Turn it on: nerv pilots generic MODEL") +
+    box.innerHTML = card("Generic pilot", "anything no specialist covers · " + (generic || "off"), "<span class='badge b-muted'>GENERIC</span>", "", selector("generic", generic, true)) +
       stageTabs("pilots", [["prototype","Proto"],["test","Test"],["production","Prod"],["retired","Retired"]], counts) +
-      shown.map(p => card(p.name, p.domain + " · " + p.model + (p.pinned ? " · pinned" : ""), "<span class='badge " + (p.retired ? "b-muted" : badge[p.stage]) + "'>" + (p.retired ? "RETIRED" : short[p.stage]) + "</span>", "keywords: " + p.keywords.join(", "))).join("") +
+      shown.map(p => card(p.name, p.domain + " · " + p.model + (p.pinned ? " · pinned" : ""), "<span class='badge " + (p.retired ? "b-muted" : badge[p.stage]) + "'>" + (p.retired ? "RETIRED" : short[p.stage]) + "</span>", "keywords: " + p.keywords.join(", "), selector(p.id, p.model, false, p.name))).join("") +
       (roster.length ? (shown.length ? "" : "<div class='muted small'>No pilot at this stage.</div>") : "<div class='muted small'>No specialists yet. Add one: nerv pilots add ID --name … --domain … --keywords … --model …, or approve a proposal from the Marduk Institute.</div>");
   };
+  document.addEventListener("change", e => {
+    const form = e.target.closest && e.target.closest(".pilot-model-form");
+    if (form) pilotDrafts.set(form.dataset.pilot, e.target.value);
+  });
+  document.addEventListener("submit", async e => {
+    const form = e.target; if (!form.matches(".pilot-model-form")) return; e.preventDefault();
+    const id = form.dataset.pilot; if (pilotBusy.has(id)) return; const restoreFocus = form.contains(document.activeElement);
+    const value = form.querySelector("select").value; if (!value) return;
+    pilotBusy.add(id); renderMelons(true);
+    try {
+      if (id === "generic") await api("models", { method:"PUT", body:JSON.stringify({ consultant:value === "off" ? null : { model:value } }) });
+      else { const result = await api("pilots/" + encodeURIComponent(id) + "/model", { method:"PATCH", body:JSON.stringify({ model:value }) }); state.pilots = result.pilots; }
+      pilotDrafts.delete(id); log("Pilot model applied: " + id + " · " + value, "ok", null, "maya");
+    } catch (error) { log("Pilot model: " + error.message, "danger", null, "maya"); }
+    finally { pilotBusy.delete(id); await loadModels(true); renderMelons(true); if (restoreFocus) { const next = [...document.querySelectorAll(".pilot-model-form")].find(f => f.dataset.pilot === id); if (next) next.querySelector("button").focus(); } }
+  });
   // While you were away: from real sorties and deliveries since your last visit, remembered in this browser only.
   const VISIT = "nerv.dashboard.lastVisit";
   try { const v = Number(localStorage.getItem(VISIT)); state.lastVisit = Number.isFinite(v) && v > 0 ? v : Date.now() - 12 * HOUR; } catch { state.lastVisit = Date.now() - 12 * HOUR; }
@@ -469,7 +492,7 @@
     const p = (state.doctor || {}).processes || {}; const bad = !p.nervous || p.brainAlive === false; const degraded = ((state.doctor || {}).degraded || []).length > 0;
     document.getElementById("qv-health").textContent = bad ? "issue" : degraded ? "degraded" : "OK"; document.getElementById("qd-health").textContent = bad ? "a process is down" : degraded ? "a model route is down · reminders still run" : "all checks pass";
     document.getElementById("q-health").classList.toggle("alert", bad); document.getElementById("q-health").classList.toggle("attn", !bad && degraded);
-    document.getElementById("qv-budget").textContent = "$0.00"; document.getElementById("qd-budget").textContent = "local models · no per-token cost";
+    document.getElementById("qv-budget").textContent = "—"; document.getElementById("qd-budget").textContent = "Cost tracking not connected";
   };
   state.upcoming = []; state.selected = null; renderAll();
   /* B-005: live mode suggests only what a live base answers (the simulation's status · approve AP-… commands are demo-only). */

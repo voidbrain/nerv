@@ -25,3 +25,9 @@ A live dashboard preserves its last data through one failed poll. Repeated failu
 The Angular build loads its full stylesheet directly: critical-CSS extraction is disabled because its inline activation script is blocked by the service CSP. Keep external scripts required by that policy. The registered status card follows the page h1 with an h2; subsequent content sections are also h2. `npm run test:browser` checks applied styles, bilingual controls, browser-local dates, responsive widths and axe accessibility in Chrome.
 
 At narrow widths the Angular navigation wraps rather than widening the page; the main grid item can shrink within a 320 px viewport.
+
+Pilot model controls belong in the Marduk Institute/Pilots panel: the Generic pilot model is the fallback adviser, and each specialist card has its own labelled selector and Apply button. Choices list installed local Ollama models; missing saved models are labelled unavailable. Preserve drafts during polling. The Models panel contains Misato and Casper plus cloud-route settings; pilot cloud routing remains planned.
+
+Muted badges use `--text` on their tinted background so the small labels retain AA contrast.
+
+The map legend groups NERV base states separately from links/activity and uses “Sync” for synchronization pulses. The Umbilical caption reports this base’s measured cloud-route health, including unknown; it does not aggregate unreported peer capabilities. Live budget cards show cost tracking as unavailable until accounting is connected. Telegram fallback already works; displaying its per-base mode awaits shared channel-state telemetry.

@@ -194,7 +194,7 @@ test('the route colours: advice that was given is a passed step (green); Misato\
 test('the Marduk Institute reads the generic pilot from the models API as it answers; bases read ID · name; the map leaves room for its legend (B-017, owner 2026-11-05)',async()=>{
  const {readFileSync}=await import('node:fs');const live=readFileSync('web/public/dashboard/live.js','utf8');const html=readFileSync('web/public/dashboard/index.html','utf8');
  assert.match(live,/const roles = modelsData && modelsData\.models && modelsData\.models\.roles;/,'GET /api/models nests the roles under models');
- assert.match(live,/roster === undefined\) \{ box\.innerHTML = "<div class='muted small'>Loading pilots…<\/div>"/);assert.match(live,/Turn it on: nerv pilots generic MODEL/);
+ assert.match(live,/roster === undefined\) \{ box\.innerHTML = "<div class='muted small'>Loading pilots…<\/div>"/);assert.match(live,/Generic pilot model/);
  assert.match(live,/esc\(b\.baseId\) \+ " · " \+ esc\(b\.name\)/);assert.match(live,/esc\(base\.id\) \+ " · " \+ esc\(base\.name\)/);assert.doesNotMatch(live,/esc\(b\.name\) \+ " · " \+ esc\(b\.baseId\)/);
  assert.match(html,/<div class="maprow">\s*<div class="mapwrap">/);assert.match(html,/\.maplegend \{ display:flex; flex-direction:column;/);
 });
@@ -264,7 +264,8 @@ test('the bases map draws: drawMap runs to the end and draws every base and its 
  const map={ready:true,w:540,h:250,dpr:1,proj:(p:number[])=>[p[0]!,p[1]!],contours:[],linkPaths:{'nerv-01|nerv-02':[[100,100],[300,150]]}};
  const BASES=[{id:'nerv-01',name:'Neo Tokyo-3',status:'online',self:true,lon:100,lat:100},{id:'nerv-02',name:'Tabgha',status:'offline',lon:300,lat:150}];
  const document={getElementById:()=>({getContext:()=>ctx,clientWidth:270})};
- const drawMap=new Function('map','BASES','LINKS','state','cssVar','statusColor','document',`${body}\nreturn drawMap;`)(map,BASES,[['nerv-01','nerv-02']],{packets:[]},()=>'#000',()=>'#0f0',document) as (now:number)=>void;
+ const helper=src.slice(src.indexOf('function cloudRouteCaption('),src.indexOf('\n}\n',src.indexOf('function cloudRouteCaption('))+2);
+ const drawMap=new Function('map','BASES','LINKS','state','cssVar','statusColor','document',`${helper}\n${body}\nreturn drawMap;`)(map,BASES,[['nerv-01','nerv-02']],{packets:[]},()=>'#000',()=>'#0f0',document) as (now:number)=>void;
  drawMap(1000);
  const texts=calls.filter(c=>c.m==='fillText').map(c=>c.a[0]);
  assert.ok(texts.includes('Neo Tokyo-3')&&texts.includes('Tabgha'),'both bases are named');
@@ -307,4 +308,13 @@ test('the header shows the incrementing build version: the doctor reports the ve
  assert.equal(await copyBuild(el,{writeText:async()=>{throw new Error('denied');}}),'copy failed','a refused clipboard says so');
  showBuild({version:'0.1.0',commit:null},el);assert.equal(el.textContent,'v0.1.0','outside a checkout: fall back to the package version');assert.equal(await copyBuild(el,{}),'none');
  showBuild(undefined,el);assert.equal(el.hidden,true,'no live base: hidden');
+});
+
+test('map cloud caption uses this base’s measured route and leaves missing telemetry explicit',()=>{
+ const src=readFileSync('web/public/dashboard/dashboard.js','utf8');const start=src.indexOf('function cloudRouteCaption(');const body=src.slice(start,src.indexOf('\n}\n',start)+2);
+ const caption=new Function(`${body};return cloudRouteCaption;`)() as (doctor?:object)=>string;
+ assert.match(caption(),/status unknown/);
+ for(const [state,label] of [['off','off'],['unknown','enabled · not checked'],['ok','reachable'],['down','unreachable']])assert.equal(caption({routes:{cloud:{state}}}),`UMBILICAL ↗ cloud · this base: ${label}`);
+ const live=readFileSync('web/public/dashboard/live.js','utf8');assert.match(live,/Cost tracking not connected/);assert.doesNotMatch(live,/qv-budget"\)\.textContent = "\$0\.00"/);
+ const html=readFileSync('web/public/dashboard/index.html','utf8');assert.match(html,/Map legend/);assert.match(html,/>Sync<\/span>/);assert.doesNotMatch(html,/Scrolls: \$1\.00 \/ day/);
 });

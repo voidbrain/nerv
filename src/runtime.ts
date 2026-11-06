@@ -2,7 +2,7 @@ import {ProcessClient} from './process-client.ts';
 import type {Reminder,InboxPage,ActResult} from './store.ts';
 import {degradedReasons,type RouteHealth} from './route-health.ts';
 import {detectOllama,ollamaUrlOf,planModels,writeModels,type ModelChange,type ModelSetup} from './model-setup.ts';
-import {readConfig,readModelKey} from './config.ts';
+import {readConfig,readModelKey,savePilots} from './config.ts';
 import type {ActionDetail,Approval,Decision,SortieSummary} from './ledger.ts';
 import {argsHash} from './ledger.ts';
 import type {SortieEvent} from './events.ts';
@@ -62,6 +62,7 @@ export interface StoreApi {
  modelSetup?():Promise<ModelSetup>;
  /** F-045/F-051: the pilot roster for the dashboard (config.json pilots, read now). */
  pilotRoster?():Pilot[]|Promise<Pilot[]>;
+ changePilotModel?(id:string,model:string):Promise<Pilot[]>;
  changeModels?(change:ModelChange):Promise<{error?:string;kept?:boolean;models:unknown}>;
  /** Kaji bases with their live status (F-036): online when heard from within the last 90 s. */
  bases?():Promise<(BaseEntry&{lastSeen:string|null;online:boolean;self:boolean})[]>;
@@ -495,6 +496,17 @@ export class Runtime implements StoreApi {
   return {models,cloudKey,ollama:await detectOllama(ollamaUrlOf(models))};
  }
  /** Applies a change (validated, checked against Ollama's models), writes config.json and reloads the brain in place. */
+ /** F-045: change one specialist's local model; re-read the roster after discovery so concurrent changes survive. */
+ async changePilotModel(id:string,model:string):Promise<Pilot[]> {
+  if(!this.home)throw new Error('Pilot setup needs the data home.');
+  if(typeof model!=='string'||!model.trim()||model.length>100)throw new Error('Pick a local model up to 100 characters.');
+  const found=await detectOllama(ollamaUrlOf(readConfig(this.home).models));
+  if(!found.reachable)throw new Error('Ollama is unavailable; pilot settings were not changed.');
+  if(!found.models.some(m=>m.name===model))throw new Error('Pick an installed Ollama model.');
+  const roster=readConfig(this.home).pilots ?? [];
+  if(!roster.some(p=>p.id===id))throw new Error('Unknown specialist pilot.');
+  const next=roster.map(p=>p.id===id?{...p,model}:p);savePilots(this.home,next);return next;
+ }
  async changeModels(change:ModelChange) {
   if(!this.home)throw new Error('Model setup needs the data home.');
   const current=readConfig(this.home).models;const ollama=await detectOllama(change.localUrl ?? ollamaUrlOf(current));

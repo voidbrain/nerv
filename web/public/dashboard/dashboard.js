@@ -663,6 +663,7 @@ function renderHealth() {
     (issues.length ? issues.map(i => "<div class='small " + i.sev + "'>▲ " + esc(i.text) + "</div>").join("") : "<div class='small ok'>Nothing stuck.</div>");
 }
 function renderBudget() {
+  document.getElementById("budget-sub").textContent = "Demo · Scrolls: $" + SCROLLS.dailyBudget.toFixed(2) + " / day";
   const fc = forecast(), pct = Math.min(100, state.spentToday / SCROLLS.dailyBudget * 100), fpct = Math.min(100, fc / SCROLLS.dailyBudget * 100);
   const active = state.sorties.filter(s => s.status === "active" || /waiting/.test(s.status));
   document.getElementById("budget").innerHTML =
@@ -804,6 +805,12 @@ async function copyBuild(el, clip = navigator.clipboard) {
 document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("#build"); if (b) void copyBuild(b); });
 function cssVar(n) { return getComputedStyle(document.body).getPropertyValue(n).trim(); }
 function statusColor(st) { return st === "online" ? cssVar("--ok") : st === "standby" ? cssVar("--warn") : "#666"; }
+/** Cloud health belongs to the base serving this page; peers do not publish route capabilities yet. */
+function cloudRouteCaption(doctor) {
+  const route = doctor && doctor.routes && doctor.routes.cloud;
+  const label = { off:"off", unknown:"enabled · not checked", ok:"reachable", down:"unreachable" };
+  return "UMBILICAL ↗ cloud · this base: " + (route && label[route.state] || "status unknown");
+}
 function drawMap(now) {
   if (!map.ready) return;
   const cv = document.getElementById("topo"); const ctx = cv.getContext("2d"); const W = map.w, H = map.h; ctx.setTransform(map.dpr, 0, 0, map.dpr, 0, 0);
@@ -856,7 +863,7 @@ function drawMap(now) {
     const lx = x + tw + 12 * z > W ? x - tw - 8 * z : x + 8 * z; ctx.fillText(label, lx, y - 6 * z);
   });
   ctx.fillStyle = cssVar("--muted"); ctx.font = Math.round(10 * z) + "px " + face;
-  ctx.fillText("UMBILICAL ↗ cloud · off (all models local)", 8, H - 8 * z);
+  ctx.fillText(cloudRouteCaption(state.doctor), 8, H - 8 * z);
 }
 
 /* ================= EVA heartbeats ================= */
