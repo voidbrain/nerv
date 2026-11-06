@@ -786,7 +786,7 @@ async function initMap() {
   });
   map.ready = true;
 }
-/** The running version beside the clock (owner, 2026-11-06): the commit on hover, copied on click. Hidden without a live base. */
+/** The running build number beside the clock (owner, 2026-11-06): the commit on hover, copied on click. Hidden without a live base. */
 function showBuild(b, el = document.getElementById("build")) {
   if (!el) return;
   if (!b || !b.version) { el.hidden = true; return; }
