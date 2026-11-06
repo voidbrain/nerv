@@ -758,12 +758,12 @@ function isolines(vals, gw, gh, cell, thresholds) {
   });
 }
 async function initMap() {
-  const cv = document.getElementById("topo"); const W = map.w, H = map.h; const dpr = window.devicePixelRatio || 1; cv.width = W * dpr; cv.height = H * dpr; map.dpr = dpr;
+  const cv = document.getElementById("topo"); map.w = Math.max(120, cv.clientWidth); map.h = Math.max(100, cv.clientHeight); const W = map.w, H = map.h; const dpr = window.devicePixelRatio || 1; cv.width = W * dpr; cv.height = H * dpr; map.dpr = dpr;
   // Local projection: a window around the bases, shaped to the canvas, east-west scaled by cos(latitude).
   const lats = BASES.map(b => b.lat), lons = BASES.map(b => b.lon);
   const lat0 = (Math.min(...lats) + Math.max(...lats)) / 2, lon0 = (Math.min(...lons) + Math.max(...lons)) / 2, k = Math.cos(lat0 * Math.PI / 180);
   const latSpan = Math.max(0.12, (Math.max(...lats) - Math.min(...lats)) * 1.7), lonSpan = Math.max(latSpan * W / H / k, (Math.max(...lons) - Math.min(...lons)) * 1.6);
-  map.proj = p => [W / 2 + (p[0] - lon0) / lonSpan * W, H / 2 - (p[1] - lat0) / latSpan * H];
+  map.proj = p => [(W - 72) / 2 + (p[0] - lon0) / lonSpan * (W - 88), H / 2 - (p[1] - lat0) / latSpan * (H - 24)];
   // Terrain: rolling noise, a ridge of hills between the bases and a winding valley floor they share.
   const peaks = [[0.18, 0.22, 0.13], [0.42, 0.18, 0.11], [0.63, 0.30, 0.12], [0.86, 0.20, 0.10], [0.30, 0.78, 0.10], [0.74, 0.82, 0.12], [0.95, 0.62, 0.09]];
   const height = (x, y) => {
@@ -805,12 +805,6 @@ async function copyBuild(el, clip = navigator.clipboard) {
 document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("#build"); if (b) void copyBuild(b); });
 function cssVar(n) { return getComputedStyle(document.body).getPropertyValue(n).trim(); }
 function statusColor(st) { return st === "online" ? cssVar("--ok") : st === "standby" ? cssVar("--warn") : "#666"; }
-/** Cloud health belongs to the base serving this page; peers do not publish route capabilities yet. */
-function cloudRouteCaption(doctor) {
-  const route = doctor && doctor.routes && doctor.routes.cloud;
-  const label = { off:"off", unknown:"enabled · not checked", ok:"reachable", down:"unreachable" };
-  return "UMBILICAL ↗ cloud · this base: " + (route && label[route.state] || "status unknown");
-}
 function drawMap(now) {
   if (!map.ready) return;
   const cv = document.getElementById("topo"); const ctx = cv.getContext("2d"); const W = map.w, H = map.h; ctx.setTransform(map.dpr, 0, 0, map.dpr, 0, 0);
@@ -862,8 +856,74 @@ function drawMap(now) {
     ctx.fillStyle = cssVar("--text"); const label = b.name; const tw = ctx.measureText(label).width;
     const lx = x + tw + 12 * z > W ? x - tw - 8 * z : x + 8 * z; ctx.fillText(label, lx, y - 6 * z);
   });
-  ctx.fillStyle = cssVar("--muted"); ctx.font = Math.round(10 * z) + "px " + face;
-  ctx.fillText(cloudRouteCaption(state.doctor), 8, H - 8 * z);
+  drawTelegram(ctx, now, W, H);
+}
+
+/* Models and Battery share a panel; switching only hides content, so drafts and focus survive polling. */
+function selectResourceTab(name, focus = false) {
+  document.querySelectorAll("[data-resource-tab]").forEach(tab => {
+    const selected = tab.dataset.resourceTab === name;
+    tab.setAttribute("aria-selected", String(selected)); tab.tabIndex = selected ? 0 : -1; tab.classList.toggle("sel", selected);
+    document.getElementById(tab.getAttribute("aria-controls")).hidden = !selected;
+    if (selected && focus) tab.focus();
+  });
+}
+document.addEventListener("keydown", e => {
+  const tab = e.target.closest && e.target.closest("[data-resource-tab]"); if (!tab || !["ArrowLeft","ArrowRight","Home","End"].includes(e.key)) return;
+  e.preventDefault(); selectResourceTab(e.key === "Home" ? "models" : e.key === "End" ? "battery" : tab.dataset.resourceTab === "models" ? "battery" : "models", true);
+});
+const telegramObserved = new Map(); const telegramPulses = []; let telegramBases = [];
+function telegramRoutes(bases) {
+  return bases.filter(b => b.channelFresh && b.online && b.status === "enrolled" && b.channel && ["local","local-fallback","via-main"].includes(b.channel.mode));
+}
+function observeTelegram(bases, now = performance.now()) {
+  telegramBases = bases;
+  for (const b of bases) {
+    const c = b.channel; const d = c && c.lastDelivery;
+    const events = [
+      {key:b.baseId + ":out", stamp:d ? d.at + ":" + d.route + ":" + d.result : "", at:d && d.at, accepted:d && d.result === "accepted", baseId:d && d.route === "main" ? c.destination : b.baseId, direction:"outbound"},
+      {key:b.baseId + ":in", stamp:c && c.lastReceived || "", at:c && c.lastReceived, accepted:!!(c && c.lastReceived), baseId:b.baseId, direction:"inbound"}
+    ];
+    for (const event of events) {
+      const previous = telegramObserved.get(event.key); telegramObserved.set(event.key, event.stamp);
+      if (previous === undefined || previous === event.stamp || !event.accepted || !telegramRoutes([b]).length || Date.now() - Date.parse(event.at) > 90000 || Date.parse(event.at) - Date.now() > 120000) continue;
+      telegramPulses.push({baseId:event.baseId,direction:event.direction,t0:now});
+    }
+  }
+  const routes = telegramRoutes(bases);
+  document.getElementById("topo").setAttribute("aria-label", "Map: square bases, round Telegram channel; " + routes.length + " reported Telegram routes. Phone receipt unknown.");
+}
+function telegramApiState(base, now = Date.now()) {
+  if (!base || !base.online || !base.channelFresh || !base.channel) return "unknown";
+  const c = base.channel;
+  if (c.mode === "via-main" && c.polling === false) return "standby";
+  const age = c.api ? now - Date.parse(c.api.at) : Infinity;
+  return age >= -120000 && age < 90000 ? c.api.state : "unknown";
+}
+function drawTelegram(ctx, now, W, H) {
+  const routes = telegramRoutes(telegramBases); const x = W - 36, y = H * 0.65;
+  const origins = new Set(routes.map(b => b.channel.mode === "via-main" ? b.channel.destination : b.baseId));
+  const color = status => cssVar(status === "responding" ? "--info" : status === "failed" ? "--warn" : "--muted");
+  const channelById = id => telegramBases.find(b => b.baseId === id);
+  ctx.lineWidth = 1; ctx.globalAlpha = 0.7;
+  origins.forEach(id => { const base = BASES.find(b => b.id === String(id).toLowerCase()); if (!base) return;
+    const [bx,by] = map.proj([base.lon,base.lat]); const api = telegramApiState(channelById(id)); ctx.strokeStyle = color(api); ctx.setLineDash(api === "responding" ? [] : [2,3]); ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(x,y); ctx.stroke(); ctx.setLineDash([]);
+  });
+  ctx.globalAlpha = 1;
+  for (let i = telegramPulses.length - 1; i >= 0; i--) {
+    const pulse = telegramPulses[i]; const t = (now - pulse.t0) / 1500;
+    if (t > 1) { telegramPulses.splice(i,1); continue; }
+    const base = BASES.find(b => b.id === String(pulse.baseId).toLowerCase()); if (!base || !origins.has(pulse.baseId)) continue;
+    const [bx,by] = map.proj([base.lon,base.lat]); ctx.fillStyle = cssVar("--ok"); ctx.beginPath(); const progress = pulse.direction === "inbound" ? 1-t : t; ctx.arc(bx+(x-bx)*progress,by+(y-by)*progress,3,0,Math.PI*2); ctx.fill();
+  }
+  const states = [...origins].map(id => telegramApiState(channelById(id)));
+  const status = states.includes("responding") ? "responding" : states.includes("failed") ? "failed" : "unknown";
+  telegramBases.forEach(b => { const base = BASES.find(x => x.id === b.baseId.toLowerCase()); if (!base) return;
+    const [bx,by] = map.proj([base.lon,base.lat]); ctx.strokeStyle = color(telegramApiState(b)); ctx.fillStyle = cssVar("--panel"); ctx.beginPath(); ctx.arc(bx+10,by+10,3,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  });
+  ctx.strokeStyle = color(status); ctx.fillStyle = cssVar("--panel"); ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(x,y,8,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.font = "11px " + (cssVar("--font") || "monospace"); ctx.textAlign = "center"; ctx.fillStyle = cssVar("--text"); ctx.fillText("Telegram",x,y-15); ctx.fillStyle = color(status); ctx.fillText(status === "responding" ? "API live" : status,x,y+24); ctx.textAlign = "start";
 }
 
 /* ================= EVA heartbeats ================= */
@@ -902,6 +962,7 @@ setInterval(() => {
 }, 1000);
 // Mesh traffic: every pair of bases talks (heartbeats, memory sync), not only through Tokyo-3.
 setInterval(() => {
+  if (LIVE) return;
   const up = LINKS.filter(([a, b]) => [a, b].every(id => BASES.find(x => x.id === id).status !== "offline"));
   if (!up.length) return; const [a, b] = up[Math.floor(Math.random() * up.length)];
   if (Math.random() < 0.5) sendPacket(a, b, "sync"); else sendPacket(b, a, "sync");
@@ -920,7 +981,8 @@ document.addEventListener("click", e => {
   if (t.dataset.lf) { state.logFilter = t.dataset.lf; t.parentNode.querySelectorAll(".btn").forEach(b => b.classList.toggle("on", b === t)); renderLog(); return; }
   if (t.dataset.f) { state.filter = t.dataset.f; document.querySelectorAll("#p-sorties .filters .btn").forEach(b => { b.classList.toggle("on", b.dataset.f === state.filter); b.setAttribute("aria-pressed", String(b.dataset.f === state.filter)); }); renderSorties(); return; }
   if (t.id === "sorties-more" && LIVE) { window.liveOlder(); return; }
-  if (t.dataset.go) { document.getElementById(t.dataset.go).scrollIntoView({ behavior:"smooth", block:"start" }); return; }
+  if (t.dataset.resourceTab) { selectResourceTab(t.dataset.resourceTab); return; }
+  if (t.dataset.go) { if (t.dataset.go === "p-budget") selectResourceTab("battery"); document.getElementById(t.dataset.go).scrollIntoView({ behavior:"smooth", block:"start" }); return; }
   if (t.dataset.spear && LIVE) { window.liveSpear(t.dataset.spear); return; }
   if (t.dataset.spear) { const s = state.sorties.find(x => x.id === t.dataset.spear); state.approvals.filter(a => a.sortie === s.id).forEach(a => decide(a.id, "reject")); if (s.status === "active") { s.status = "stood-down"; s.outcome = "Spear"; finish(s); } log("Spear " + s.id + ": grants revoked · happened: " + (s.happened.map(h => h.tool).join(", ") || "none"), "danger", s); renderAll(); return; }
   if (t.dataset.stagetab) { const [sec, k] = t.dataset.stagetab.split(":"); state.tabs = Object.assign({}, state.tabs, { [sec]:k }); renderMelons(); renderSkills(); return; }
@@ -1030,3 +1092,5 @@ if (LIVE) { state = freshState(); state.upcoming = []; BASES.splice(1); LINKS.le
   if (prefs.crt === true) setCrt(true);
   setTheme(old ? old[0] : t, q.get("mode") || (old ? old[1] : prefs.mode), q.get("accent") || (old ? old[2] : prefs.accent)); }
 initMap(); requestAnimationFrame(frame);
+
+new ResizeObserver(() => { void initMap(); }).observe(document.querySelector(".mapwrap"));

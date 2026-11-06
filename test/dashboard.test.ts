@@ -310,11 +310,8 @@ test('the header shows the incrementing build version: the doctor reports the ve
  showBuild(undefined,el);assert.equal(el.hidden,true,'no live base: hidden');
 });
 
-test('map cloud caption uses this base’s measured route and leaves missing telemetry explicit',()=>{
- const src=readFileSync('web/public/dashboard/dashboard.js','utf8');const start=src.indexOf('function cloudRouteCaption(');const body=src.slice(start,src.indexOf('\n}\n',start)+2);
- const caption=new Function(`${body};return cloudRouteCaption;`)() as (doctor?:object)=>string;
- assert.match(caption(),/status unknown/);
- for(const [state,label] of [['off','off'],['unknown','enabled · not checked'],['ok','reachable'],['down','unreachable']])assert.equal(caption({routes:{cloud:{state}}}),`UMBILICAL ↗ cloud · this base: ${label}`);
+test('map legend is compact, cloud caption is removed, and unavailable live costs remain explicit',()=>{
+ const src=readFileSync('web/public/dashboard/dashboard.js','utf8');assert.doesNotMatch(src,/cloudRouteCaption|UMBILICAL ↗ cloud/);
  const live=readFileSync('web/public/dashboard/live.js','utf8');assert.match(live,/Cost tracking not connected/);assert.doesNotMatch(live,/qv-budget"\)\.textContent = "\$0\.00"/);
- const html=readFileSync('web/public/dashboard/index.html','utf8');assert.match(html,/Map legend/);assert.match(html,/>Sync<\/span>/);assert.doesNotMatch(html,/Scrolls: \$1\.00 \/ day/);
+ const html=readFileSync('web/public/dashboard/index.html','utf8');assert.doesNotMatch(html,/Map legend|Links &amp; activity/);assert.match(html,/■ Bases/);assert.match(html,/>- Kaji line</);assert.match(html,/>Sync<\/span>/);assert.doesNotMatch(html,/Scrolls: \$1\.00 \/ day/);
 });
