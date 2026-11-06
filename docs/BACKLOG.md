@@ -1326,9 +1326,9 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Architecture reassessment branch; PR number recorded after creation |
+| PR / evidence | [PR #170](https://github.com/voidbrain/nerv/pull/170) |
 | Opened | 2026-11-06 |
-| Verification | Source review of policy.ts, ledger.ts, runtime.ts and model.ts; documentation checks pending. No runtime change or new product acceptance claimed. |
+| Verification | Source review of policy.ts, ledger.ts, runtime.ts and model.ts; backlog, audit scope, recap, conventions and whitespace checks passed locally; PR CI pending. No runtime change or new product acceptance claimed. |
 | Reviewed | 2026-11-06 |
 
 </details>
@@ -1360,9 +1360,9 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Architecture reassessment branch; PR number recorded after creation |
+| PR / evidence | [PR #170](https://github.com/voidbrain/nerv/pull/170) |
 | Opened | 2026-11-06 |
-| Verification | Source review of policy.ts, ledger.ts, runtime.ts and model.ts; documentation checks pending. No runtime change or new product acceptance claimed. |
+| Verification | Source review of policy.ts, ledger.ts, runtime.ts and model.ts; backlog, audit scope, recap, conventions and whitespace checks passed locally; PR CI pending. No runtime change or new product acceptance claimed. |
 | Reviewed | 2026-11-06 |
 
 </details>
