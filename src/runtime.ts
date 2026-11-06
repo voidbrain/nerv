@@ -35,7 +35,7 @@ export function remoteOutcomeText(base:string,tool:string,result:Record<string,u
  if(o==='reject')return `${base} refused ${tool}: ${String(result.reason ?? 'its gate said no')}.`;
  return `${base} answered for ${tool}: ${JSON.stringify(result).slice(0,400)}`;
 }
-export interface ChatReply {command?:boolean;sortieId:string;reply?:string;error?:string;steps:Step[];waiting:{approvalId:string;tool:string;reason:string}[];
+export interface ChatReply {command?:boolean;sortieId:string;question?:{text:string;expires:string};reply?:string;error?:string;steps:Step[];waiting:{approvalId:string;tool:string;reason:string}[];
  /** Set when the main base handled the request (F-036 dispatch): its sortie, cards and memory are there. */
  base?:{id:string;name:string}}
 /** An action the owner asks for directly: the request is what Casper checks the action against. */
@@ -157,7 +157,13 @@ export class Runtime implements StoreApi {
  /** The pilot roster (F-045), read on every request so a change applies without a restart. */
  setPilots(fn:()=>Pilot[]){this.pilots=fn;}
  pilotRoster():Pilot[] {try{return this.pilots?.() ?? [];}catch{return [];}}
- async chat(message:string,conversation?:string):Promise<ChatReply> {
+ private readonly conversations=new Map<string,Promise<ChatReply>>();
+ chat(message:string,conversation?:string):Promise<ChatReply> {
+  const key=conversation ?? 'cli';const previous=this.conversations.get(key);
+  const next=(previous?previous.catch(()=>undefined):Promise.resolve()).then(()=>this.chatOnce(message,conversation));
+  this.conversations.set(key,next);void next.finally(()=>{if(this.conversations.get(key)===next)this.conversations.delete(key);}).catch(()=>{});return next;
+ }
+ private async chatOnce(message:string,conversation?:string):Promise<ChatReply> {
   const command=readCommand(message);
   if(command){
    const it=requestLanguage(message)==='it';let reply:string;
@@ -168,20 +174,33 @@ export class Runtime implements StoreApi {
    }else reply=(command.name==='unknown'?(it?'Comando non supportato. ':'Unknown command. '):'')+(it?'Comandi disponibili: /status [base], /help.':'Available commands: /status [base], /help.');
    return {command:true,sortieId:'',reply,steps:[],waiting:[]};
   }
+  const key=conversation ?? 'cli';
+  const question=await this.nervous.call('misato.question',{conversation:key}) as {sortieId:string;sequence:number;text:string;expires:string;forwarded?:{id:string;name:string}}|null;
+  if(question&&!question.forwarded){
+   const claimed=await this.nervous.call('misato.answer',{conversation:key,sequence:question.sequence,text:message});
+   if(!claimed)return {sortieId:question.sortieId,error:'The question no longer waits for an answer.',steps:[],waiting:[]};
+   const history=await this.clarificationHistory(question.sortieId);
+   return this.loop(question.sortieId,message,history.steps,history.context,{answering:true,consult:message.trim().split(/\s+/u).length>8,advice:history.advice,conversation:key});
+  }
+  if(question?.forwarded&&(await this.kaji.main?.())!==question.forwarded.id)return {sortieId:question.sortieId,error:'The answering base is no longer the main base. The question stays waiting; this answer was not run locally.',steps:[],waiting:[]};
   // Earlier exchanges of the same conversation (read before this request is recorded), so "yes" has its question.
   const context=conversation?await this.nervous.call('misato.context',{conversation}).catch(()=>[]) as Turn[]:[];
   // F-051: a request going to the main base is a sortie here too: opened when it leaves, closed with the answer.
   let forwarded:string|undefined;
   const far=this.dispatch?await this.dispatch(message,conversation,async base=>{
-   forwarded=await this.nervous.call('sorties.open',{title:message.slice(0,500),source:'misato'}) as string;
-   await this.note(forwarded,'misato.request',{text:message,...(conversation?{conversation}:{})});
+   forwarded=question?.sortieId ?? await this.nervous.call('sorties.open',{title:message.slice(0,500),source:'misato'}) as string;
+   if(!question)await this.note(forwarded,'misato.request',{text:message,...(conversation?{conversation}:{})});
    await this.note(forwarded,'kaji.forwarded',{base});}).catch(()=>undefined):undefined;
   if(far){
    if(!forwarded)return far;
    await this.note(forwarded,'kaji.answered',{base:far.base ?? {id:'',name:''},sortieId:far.sortieId});
-   await this.nervous.call('sorties.finish',{sortieId:forwarded,status:far.reply?'done':'failed',...(far.reply?{reply:far.reply}:{})});
+   if(question&&far.error)return {...far,sortieId:forwarded};
+   if(question)await this.nervous.call('misato.answer',{conversation:key,sequence:question.sequence,text:message});
+   if(far.question&&far.reply)await this.nervous.call('misato.ask',{sortieId:forwarded,text:far.reply,conversation:key,forwarded:far.base ?? question?.forwarded});
+   else await this.nervous.call('sorties.finish',{sortieId:forwarded,status:far.reply?'done':'failed',...(far.reply?{reply:far.reply}:{})});
    return {...far,sortieId:forwarded};
   }
+  if(question)return {sortieId:question.sortieId,error:'The answering base is unavailable. The question stays waiting; this answer was not run locally.',steps:[],waiting:[]};
   // Not forwarded, or the main base dropped out: answered here, in the sortie already opened if there is one.
   const sortieId=forwarded ?? await this.nervous.call('sorties.open',{title:message.slice(0,500),source:'misato'}) as string;
   if(!forwarded)await this.note(sortieId,'misato.request',{text:message,...(conversation?{conversation}:{})});
@@ -190,7 +209,20 @@ export class Runtime implements StoreApi {
   if(ref){const found=await this.nervous.call('sorties.explain',{ref}) as Parameters<typeof explainRecord>[0];
    const reply=explainRecord(found,ref,requestLanguage(message,context.map(t=>t.request)),Intl.DateTimeFormat().resolvedOptions().timeZone);
    await this.nervous.call('sorties.finish',{sortieId,status:'done',reply});return {sortieId,reply,steps:[],waiting:[]};}
-  return this.loop(sortieId,message,[],context);
+  return this.loop(sortieId,message,[],context,{consult:true,conversation:key});
+ }
+ /** Restore through bounded event pages, keeping the original request and the latest clarification context. */
+ private async clarificationHistory(sortieId:string){
+  const events:SortieEvent[]=[];let after=0;
+  for(;;){const page=await this.nervous.call('events.page',{sortieId,after,limit:50}) as SortieEvent[];if(!page.length)break;events.push(...page);after=page.at(-1)!.sequence;}
+  const request=events.find(e=>e.kind==='misato.request');const original=request?.kind==='misato.request'?request.payload.text:'';
+  const context:Turn[]=[];
+  for(const e of events){if(e.kind==='misato.asked')context.push({request:context.length?context.at(-1)!.request:original,reply:e.payload.text});if(e.kind==='misato.answered')context.push({request:e.payload.text});}
+  // The current answer is the request, not an earlier exchange. Always retain the original intent.
+  context.pop();const earlier=context.slice(-2);if(earlier[0]?.request!==original)earlier.unshift({request:original});
+  const advice=events.find(e=>e.kind==='misato.consult');
+  const answer=events.filter(e=>e.kind==='misato.answered').at(-1);
+  return {answer:answer?.kind==='misato.answered'?answer.payload.text:undefined,steps:events.flatMap(e=>e.kind==='misato.step'?[e.payload.step]:[]),context:earlier.map(t=>({request:t.request.slice(0,1000),...(t.reply?{reply:t.reply.slice(0,1000)}:{})})),advice:advice?.kind==='misato.consult'?advice.payload.advice:undefined,conversation:request?.kind==='misato.request'?request.payload.conversation:undefined};
  }
  private note(sortieId:string,kind:'misato.request'|'misato.step'|'misato.waiting'|'misato.consult'|'pilot.unmatched'|'kaji.forwarded'|'kaji.answered',payload:object){return this.nervous.call('misato.note',{sortieId,kind,payload});}
  /** Records a step, cutting an oversized result so the event stays within its bound. */
@@ -202,7 +234,7 @@ export class Runtime implements StoreApi {
   * Misato's loop: plan one action, gate it, show Misato the outcome, repeat until Misato replies or the step limit is
   * reached. When actions wait for the owner, the sortie stays open and resumes once they are decided (F-033).
   */
- private async loop(sortieId:string,message:string,steps:Step[],context:Turn[]=[]):Promise<ChatReply> {
+ private async loop(sortieId:string,message:string,steps:Step[],context:Turn[]=[],followup?:{consult:boolean;advice?:string;conversation?:string;answering?:boolean}):Promise<ChatReply> {
   const waiting:ChatReply['waiting']=[];
   // LCL fill: Lilith's facts that match this request and its recent conversation.
   const memory=await this.nervous.call('memory.recall',{text:[message,...context.map(t=>t.request)].join(' ').slice(0,8000)}).catch(()=>[]) as Recalled[];
@@ -217,12 +249,13 @@ export class Runtime implements StoreApi {
   const ranSteps=()=>steps.filter(s=>s.outcome==='grant'&&!s.error&&s.tool).map(s=>({tool:s.tool!,args:s.args ?? {}}));
   // F-025: a consultant's advice, once per request before the first step (not again on a resume); no vote, no action.
   // F-045: the specialist pilot whose keywords fit the request advises; none fits, the generic pilot (roles.consultant).
-  const pilot=steps.length?undefined:(()=>{try{return choosePilot(message,this.pilots?.() ?? []);}catch{return undefined;}})();
-  const named=steps.length?[]:await this.baseNames();
+  const consult=followup?.consult ?? steps.length===0;
+  const pilot=!consult?undefined:(()=>{try{return choosePilot(message,this.pilots?.() ?? []);}catch{return undefined;}})();
+  const named=!consult?[]:await this.baseNames();
   // B-024: the consultant is told what Misato can do, so it never advises against a tool she has.
-  const offered=steps.length?[]:[...toolDocs,...(await this.externalTools()).docs].map(t=>({name:t.name,about:t.about.slice(0,200)}));
+  const offered=!consult?[]:[...toolDocs,...(await this.externalTools()).docs].map(t=>({name:t.name,about:t.about.slice(0,200)}));
   let unmatched:string|undefined;
-  const advice=steps.length?undefined:await this.brain.call('consultant.advise',{request:message.slice(0,4000),...(context.length?{context:context.slice(-3)}:{}),...(pilot?{pilot:{name:pilot.name,domain:pilot.domain,model:pilot.model}}:{}),...(named.length>1?{bases:named}:{}),...(offered.length?{tools:offered}:{})},MODEL_TIMEOUT_MS).then(r=>r as {advice:string|null;model?:string;domain?:string},():{advice:string|null;model?:string;domain?:string}=>({advice:null})).then(async r=>{
+  const advice=!consult?followup?.advice:await this.brain.call('consultant.advise',{request:message.slice(0,4000),...(followup?.advice?{previousAdvice:followup.advice}:{}),...(context.length?{context:context.slice(-3)}:{}),...(pilot?{pilot:{name:pilot.name,domain:pilot.domain,model:pilot.model}}:{}),...(named.length>1?{bases:named}:{}),...(offered.length?{tools:offered}:{})},MODEL_TIMEOUT_MS).then(r=>r as {advice:string|null;model?:string;domain?:string},():{advice:string|null;model?:string;domain?:string}=>({advice:null})).then(async r=>{
    if(!pilot&&r.domain){unmatched=r.domain;await this.note(sortieId,'pilot.unmatched',{domain:r.domain});}
    if(!r.advice)return undefined;await this.note(sortieId,'misato.consult',{advice:r.advice,model:r.model ?? '',...(pilot?{pilot:{id:pilot.id,name:pilot.name,why:pilot.why}}:{})});return r.advice;});
   // F-045: enough requests in one domain without a specialist → a pilot is proposed (a card), in the background.
@@ -230,9 +263,15 @@ export class Runtime implements StoreApi {
   for(let turn=0;turn<MAX_STEPS;turn++){
    const remote=await this.remoteOffers();
    const ext=await this.externalTools();
-   const out=await this.brain.call('misato.step',{request:message,history:steps.slice(-12),...(remote.length?{remote}:{}),...(ext.docs.length?{external:ext.docs}:{}),...(advice?{advice}:{}),language:lang(),...(context.length?{context}:{}),...(memory.length?{memory:memory.slice(0,10)}:{})},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as {plan?:Plan;invalid?:boolean;error?:string};
+   const out=await this.brain.call('misato.step',{...(followup?.answering&&turn===0?{clarification:true}:{}),request:message,history:steps.slice(-12),...(remote.length?{remote}:{}),...(ext.docs.length?{external:ext.docs}:{}),...(advice?{advice}:{}),language:lang(),...(context.length?{context}:{}),...(memory.length?{memory:memory.slice(0,10)}:{})},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as {plan?:Plan;invalid?:boolean;error?:string};
    if(out.error)return finish('failed',undefined,out.error);
-   if(!out.plan){await this.record(sortieId,steps,{outcome:'invalid',error:'Reply was not one JSON action or reply.'});continue;}
+   if(!out.plan){await this.record(sortieId,steps,{outcome:'invalid',error:'Reply was not one JSON action, question or reply.'});continue;}
+   if('newRequest' in out.plan){
+    if(!followup?.answering||turn!==0){await this.record(sortieId,steps,{outcome:'invalid',error:'Topic changes are allowed only for the first response to a pending question.'});continue;}
+    await this.spear(sortieId,'Owner changed topic; the pending clarification is cancelled.');
+    return this.chatOnce(message,followup.conversation);
+   }
+   if('ask' in out.plan){const question=await this.nervous.call('misato.ask',{sortieId,text:out.plan.ask,conversation:followup?.conversation ?? 'cli'}) as {text:string;expires:string};return {sortieId,reply:question.text,question,steps,waiting};}
    if('reply' in out.plan)return finish('done',out.plan.reply);
    const {tool,args}=out.plan.action;
    // A tool Misato was not offered (often a misspelling) has no executor: it goes back to Misato, never to the owner as a card.
@@ -392,7 +431,8 @@ export class Runtime implements StoreApi {
     :{tool:d.tool,args:d.args,outcome:'reject',reason:d.decision==='expired'?'The approval expired before the owner decided; nothing ran.':`The owner did not approve it (${d.decision}); nothing ran.`};
    await this.record(sortieId,steps,step,d.actionId);
   }
-  return this.loop(sortieId,claim.request,steps);
+  const history=await this.clarificationHistory(sortieId);
+  return this.loop(sortieId,history.answer ?? claim.request,steps,history.context,{consult:false,advice:history.advice,conversation:history.conversation ?? 'cli'});
  }
  /**
   * Instrumentality (F-022): Misato's exchanges since the last episode → a summary (kept) and candidate facts, each

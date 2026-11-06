@@ -166,3 +166,16 @@ test('facts proposed together reach Telegram as one message with a ✅/❌ row e
   assert.equal(store.approvals(20).length,2);
  }finally{await aoba.stop();store.close();await tg.close();rmSync(home,{recursive:true,force:true});}
 });
+
+test('B-021: Telegram question and owner answer continue one durable sortie; another chat cannot answer it',{timeout:20000},async()=>{
+ const token='345678:'+'q'.repeat(35);const tg=await fakeTelegram(token);const model=await fakeModel(['{"ask":"Which file?"}','{"reply":"File checked"}']);
+ const home=mkdtempSync(join(tmpdir(),'nerv-aoba-question-'));writeFileSync(join(home,'config.json'),JSON.stringify({models:{local:{baseUrl:model.url,model:'m'}}}));
+ const runtime=new Runtime(join(home,'db'),undefined,home);const aoba=new TelegramChannel({api:new TelegramApi(token,tg.base),store:runtime,chatId:OWNER,statePath:join(home,'telegram-state.json'),log:()=>{}});
+ try{
+  await runtime.ready();await aoba.start(50);tg.text(OWNER,'Read a file');await until(()=>tg.sent().some(m=>m.text==='Which file?'));
+  const first=(await runtime.sorties())[0]!;assert.equal(first.status,'open');assert.ok(first.question);
+  tg.text(STRANGER,'another.txt');tg.text(OWNER,'shopping.txt');await until(()=>tg.sent().some(m=>m.text==='File checked'));
+  const sorties=await runtime.sorties();assert.equal(sorties.length,1);assert.equal(sorties[0]!.id,first.id);assert.equal(sorties[0]!.status,'done');
+  const answers=(await runtime.events(first.id)).filter(e=>e.kind==='misato.answered');assert.equal(answers.length,1);assert.equal(answers[0]!.payload.text,'shopping.txt');
+ }finally{await aoba.stop();await runtime.close();await model.close();await tg.close();rmSync(home,{recursive:true,force:true});}
+});

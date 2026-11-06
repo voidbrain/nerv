@@ -78,6 +78,9 @@ process.on('message',(value:unknown)=>{
     return [...store.memory.recall(text).map(f=>({id:f.id,text:f.text,shareable:f.shareable,tainted:f.tainted})),
      ...store.memory.recallEpisodes(text,2).map(e=>({id:e.id,text:e.summary,shareable:false,tainted:false,kind:'summary',when:e.until.slice(0,10)}))];
    }
+   case 'misato.question':return store.ledger.question(params.conversation as string);
+   case 'misato.ask':return store.ledger.ask(params.sortieId as string,params.text as string,params.conversation as string,params.forwarded as {id:string;name:string}|undefined);
+   case 'misato.answer':return store.ledger.answer(params.conversation as string,params.sequence as number,params.text as string);
    case 'misato.context':return store.ledger.conversation(params.conversation as string);
    case 'misato.claim':return store.ledger.claimResume(params.sortieId as string);
    case 'actions.finished':return store.finishedExternal(params.sortieId as string,params.actionId as string,params.tool as string,typeof params.error==='string'?{error:params.error}:{text:String(params.text ?? '')});

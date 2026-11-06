@@ -123,3 +123,35 @@ test('dispatch: a request asked on another base is answered by the main base\'s 
 test('a dispatched conversation has its own key per base and channel',()=>{
  const st=new Store(':memory:');try{assert.deepEqual(st.ledger.conversation('kaji:nerv-02-dashboard'),[]);assert.throws(()=>st.ledger.conversation('kaji:NERV 02'),/Invalid conversation/);}finally{st.close();}
 });
+test('B-021 across the Kaji link: a question from the main base keeps the forwarded sortie open here, and the answer goes back to the main base, never run locally',{timeout:40000},async()=>{
+ const {Runtime}=await import('../src/runtime.ts');
+ const A=keys(),B=keys();const pa=await freePort();
+ const homeB=mkdtempSync(join(tmpdir(),'nerv-ask-b-'));const sa=new Store(':memory:');const ra=new Registry(sa.db,root.publicKey);
+ const records=[rec({kind:'enrol',baseId:'NERV-01',name:'Neo Tokyo-3',publicKey:A.publicKey,address:`127.0.0.1:${pa}`}),rec({kind:'enrol',baseId:'NERV-02',name:'Tabgha',publicKey:B.publicKey,address:'127.0.0.1:1'}),rec({kind:'main',baseId:'NERV-01'})];
+ for(const r of records)ra.add(r);
+ const heard:{message:string;conversation?:string}[]=[];
+ // The main base's side, over the real signed link: it asks first, then completes with the answer.
+ const la=new KajiLink({baseId:'NERV-01',key:A.privateKey,publicKey:A.publicKey,registry:port(ra),log:()=>{},
+  onChat:async(_from,message,conversation)=>{heard.push({message,...(conversation?{conversation}:{})});const base={id:'NERV-01',name:'Neo Tokyo-3'};
+   return heard.length===1?{sortieId:'tokyo-sortie',reply:'Which file?',question:{text:'Which file?',expires:new Date(Date.now()+86_400_000).toISOString()},steps:[],waiting:[],base}
+    :{sortieId:'tokyo-sortie',reply:'Read shopping.txt.',steps:[],waiting:[],base};}});
+ writeFileSync(join(homeB,'config.json'),JSON.stringify({base:{id:'NERV-02',name:'Tabgha'},kaji:{root:root.publicKey}}));
+ const b=new Runtime(join(homeB,'nerv.sqlite'),undefined,homeB);
+ try{
+  await b.ready();assert.equal(await b.kaji.add(records),3);
+  const lb=new KajiLink({baseId:'NERV-02',key:B.privateKey,publicKey:B.publicKey,registry:b.kaji,log:()=>{}});
+  let up=true;b.setDispatch(async(m,c,forwarding)=>{if(!up)return undefined;await forwarding({id:'NERV-01',name:'Neo Tokyo-3'});return await lb.chat(m,c,5000) as never;});
+  await la.start(60_000);
+  const q=await b.chat('Read a file','dashboard');
+  assert.deepEqual([q.reply,q.question?.text,q.base?.name],['Which file?','Which file?','Neo Tokyo-3'],'the question crosses the signed link intact');
+  assert.equal((await b.sortie(q.sortieId))!.status,'open','the forwarded sortie waits here');
+  // The main base drops out: the answer stays waiting, nothing runs here (this base has no model route at all).
+  up=false;const absent=await b.chat('shopping.txt','dashboard');assert.match(absent.error ?? '',/unavailable/);assert.equal(absent.sortieId,q.sortieId);
+  assert.equal((await b.sortie(q.sortieId))!.status,'open');assert.equal(heard.length,1);
+  up=true;const done=await b.chat('shopping.txt','dashboard');
+  assert.deepEqual([done.sortieId,done.reply],[q.sortieId,'Read shopping.txt.']);
+  assert.deepEqual(heard,[{message:'Read a file',conversation:'dashboard'},{message:'shopping.txt',conversation:'dashboard'}],'both messages went to the main base in the same conversation');
+  const mine=await b.sorties();assert.equal(mine.length,1,'the answer did not open a second sortie here');assert.equal(mine[0]!.status,'done');
+  const kinds=(await b.events(q.sortieId)).map(e=>e.kind);assert.equal(kinds.filter(k=>k==='misato.asked').length,1);assert.equal(kinds.filter(k=>k==='misato.answered').length,1);
+ }finally{await la.stop();await b.close();sa.close();rmSync(homeB,{recursive:true,force:true});}
+});
