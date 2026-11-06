@@ -72,7 +72,7 @@ test('one channel: while the main base is online the other base\'s bot is quiet,
   assert.equal(tabgha.channelState().mode,'local-fallback');
   assert.deepEqual([tabgha.channelState().lastDelivery?.route,tabgha.channelState().lastDelivery?.result],['local','accepted']);
   relayWorks=true;await sb.add('Relay recovered',new Date(Date.now()+300).toISOString());sb.tick(new Date(Date.now()+1000));
-  await until(()=>botA.sent().some(m=>/⏰ Relay recovered/.test(m.text)));assert.equal(tabgha.channelState().mode,'via-main');
+  await until(()=>botA.sent().some(m=>/⏰ Relay recovered/.test(m.text))&&tabgha.channelState().mode==='via-main');assert.equal(tabgha.channelState().mode,'via-main');
   // A forged decision from a base that is not the main one is refused by Tabgha.
   const body=JSON.stringify({approvalId:'0'.repeat(8)+'-0000-4000-8000-'+'0'.repeat(12),decision:'approve'});
   const forged=await fetch(`http://127.0.0.1:${pb}/kaji/decide`,{method:'POST',headers:{'content-type':'application/json',...signedHeaders('NERV-02',B.privateKey,'req','POST','/kaji/decide',body)},body});assert.equal(forged.status,403);
