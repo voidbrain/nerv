@@ -7,7 +7,7 @@ Current work ledger, reviewed 6 November 2026 against main `a2463ed`. PR #169 re
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 36 | 3 |
+| **Open** | 36 | 4 |
 | **Require Human 🧑** | 0 | 0 |
 
 ### Last 7 days
@@ -15,7 +15,7 @@ Current work ledger, reviewed 6 November 2026 against main `a2463ed`. PR #169 re
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **Count** | 62 | 26 | 38 | 35 |
+| **Count** | 62 | 26 | 39 | 35 |
 
 ### Require Human 🧑
 
@@ -1397,6 +1397,40 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | PR / evidence | [PR #170](https://github.com/voidbrain/nerv/pull/170) |
 | Opened | 2026-11-06 |
 | Verification | Source review of policy.ts, ledger.ts, runtime.ts and model.ts; backlog, audit scope, recap, conventions and whitespace checks passed locally; PR CI pending. No runtime change or new product acceptance claimed. |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### B-039
+
+**Telegram fallback regression asserts state before its response completes**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
+
+💻 **→ Human action required: No**<br />Next: verify the documentation PR checks, then reconcile and archive.
+
+| | |
+|---|---|
+| **Issue** | CI run 42289045658 fails one-channel.test.ts:73: fake send request is visible before the client receives acceptance and updates channel state. The parallel run passes. Wait for accepted fallback telemetry before asserting, preserving the required behavior. |
+| **Reproduce** | Run the one-channel integration fixture with coverage/concurrent test load; request receipt can precede the awaited API response. |
+| **Check** | Regression waits for the local fallback send and accepted local delivery telemetry; unchanged route and delivery assertions pass. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** CI-discovered fixture synchronization correction in PR #170; production code and expectations unchanged. Await repeat integration checks and PR CI.
+
+**Estimates:** Small; ~90% complete pending required checks.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #170](https://github.com/voidbrain/nerv/pull/170) |
+| Opened | 2026-11-06 |
+| Verification | All four one-channel integration cases passed locally with coverage after allowing local fake-server binds (sandbox EPERM was an environment restriction); full suite and final CI pending. No runtime change. |
 | Reviewed | 2026-11-06 |
 
 </details>
