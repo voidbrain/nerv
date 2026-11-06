@@ -175,7 +175,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Local Chrome screenshot and axe results, 2026-11-06; F-010 |
+| PR / evidence | [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Local Chrome screenshot and axe results, 2026-11-06; F-010 |
 | Opened | 2026-11-06 |
 | Verification | 2026-11-06 Browser/accessibility: all ten Chrome/axe views passed, screenshots inspected; merged CI pending |
 | Reviewed | 2026-11-06 |
@@ -209,7 +209,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Local Chrome screenshot and axe results, 2026-11-06; F-010 |
+| PR / evidence | [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Local Chrome screenshot and axe results, 2026-11-06; F-010 |
 | Opened | 2026-11-06 |
 | Verification | 2026-11-06 Browser/accessibility: all ten Chrome/axe views passed, screenshots inspected; merged CI pending |
 | Reviewed | 2026-11-06 |
@@ -243,7 +243,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Local Chrome screenshot and axe results, 2026-11-06; F-010 |
+| PR / evidence | [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Local Chrome screenshot and axe results, 2026-11-06; F-010 |
 | Opened | 2026-11-06 |
 | Verification | 2026-11-06 Browser/accessibility: all ten Chrome/axe views passed, screenshots inspected; merged CI pending |
 | Reviewed | 2026-11-06 |
@@ -277,7 +277,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Local Chrome screenshot and axe results, 2026-11-06; F-010 |
+| PR / evidence | [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Local Chrome screenshot and axe results, 2026-11-06; F-010 |
 | Opened | 2026-11-06 |
 | Verification | 2026-11-06 Browser/accessibility: all ten Chrome/axe views passed, screenshots inspected; merged CI pending |
 | Reviewed | 2026-11-06 |
@@ -314,7 +314,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| PR / evidence | [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-06 |
@@ -382,7 +382,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| PR / evidence | [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-06 |
@@ -587,7 +587,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green; [PR #17](https://github.com/voidbrain/nerv/pull/17) (English default) |
+| PR / evidence | [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green; [PR #17](https://github.com/voidbrain/nerv/pull/17) (English default) |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-04: config default and RPC/doctor fallback asserted `en` in test/runtime.test.ts and test/protocol.test.ts, build, headless and Swift tests (local run; CI green: PR #17 run 41804450728, main run 41804458202; record fix PR #18 run 41804775905, main run 41804783909). 2026-11-06 Browser/accessibility: ten Chrome/axe views passed and screenshots inspected; scope/limits in docs/acceptance/angular-2026-11-06.md; merged CI pending |
 | Reviewed | 2026-11-06 |
