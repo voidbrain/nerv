@@ -1,0 +1,161 @@
+{
+  "baseline": "c9e34f1cb5f3cb93a0d2150f90eead730b6a7d5b",
+  "files": [
+    {
+      "path": "docs/NERV/.DS_Store",
+      "sha256": "d65165279105ca6773180500688df4bdc69a2c7b771752f0a46ef120b7fd8ec3",
+      "bytes": 6148,
+      "disposition": "Deletable reference artwork; visual/OCR review found no independent unpreserved requirement"
+    },
+    {
+      "path": "docs/NERV/Gemini_Generated_Image_497wj4497wj4497w.jpg",
+      "sha256": "aa0c50370c95f70f45b5fa460896b141c9b19b7b1d0e6b98d41d7ee4b1980c34",
+      "bytes": 1010385,
+      "disposition": "Deletable reference artwork; visual/OCR review found no independent unpreserved requirement"
+    },
+    {
+      "path": "docs/NERV/Gemini_Generated_Image_80g37a80g37a80g3.jpg",
+      "sha256": "68993204afba7ff184fd4d00a7e0cd4fdd42c5fdb46dae858141ddf5abc53dd6",
+      "bytes": 831897,
+      "disposition": "Deletable reference artwork; visual/OCR review found no independent unpreserved requirement"
+    },
+    {
+      "path": "docs/NERV/Gemini_Generated_Image_ubgqvtubgqvtubgq.jpg",
+      "sha256": "ea81ea4c189dcefefe365d43d26c86fc04c8411b1b20bf86552643ee32b453e8",
+      "bytes": 1056237,
+      "disposition": "Deletable reference artwork; visual/OCR review found no independent unpreserved requirement"
+    },
+    {
+      "path": "docs/NERV/NERV-ARCHITECTURE.md",
+      "sha256": "af09fe9c31cf87b66c865025049b3d7bd222a9f86c962686b152b54430064f4e",
+      "bytes": 19930,
+      "disposition": "Moved to docs/NERV-ARCHITECTURE.md; vocabulary retained, historical-target limits explicit"
+    },
+    {
+      "path": "docs/NERV/Pasted 2026-11-01 at 9.32.12 PM.tiff",
+      "sha256": "9bedcfbf46d43a750e70273ac2734f92fd4b365b7e34f5b9fdc540a9ff7828d4",
+      "bytes": 6197386,
+      "disposition": "Deletable reference artwork; visual/OCR review found no independent unpreserved requirement"
+    },
+    {
+      "path": "docs/NERV/Pasted 2026-11-01 at 9.32.28 PM.tiff",
+      "sha256": "09de6d0dce0213f0b6d97efd00ac6750e3ec029c89f086e6737c55125cadc8ff",
+      "bytes": 1330558,
+      "disposition": "Deletable reference artwork; visual/OCR review found no independent unpreserved requirement"
+    },
+    {
+      "path": "docs/NERV/Pasted 2026-11-01 at 9.32.51 PM.tiff",
+      "sha256": "08f7334a6bbc1c1e0bf73c2e8132e085ccaedb8bb2d2626ad9c6b50e3026ddcb",
+      "bytes": 2749454,
+      "disposition": "Deletable reference artwork; visual/OCR review found no independent unpreserved requirement"
+    },
+    {
+      "path": "docs/NERV/Pasted 2026-11-01 at 9.33.33 PM.tiff",
+      "sha256": "706687583aa0594e91a83f16cf3a8e055e9ee39114ecf5a9f26f8242722cf00b",
+      "bytes": 33028030,
+      "disposition": "Deletable reference artwork; visual/OCR review found no independent unpreserved requirement"
+    },
+    {
+      "path": "docs/NERV/Pasted 2026-11-02 at 12.14.21 AM.tiff",
+      "sha256": "2aa9c41989119cffd36f1ebd2d621badc09d8e2797a4811ae4ac3be42c26481e",
+      "bytes": 978114,
+      "disposition": "Deletable reference artwork; visual/OCR review found no independent unpreserved requirement"
+    },
+    {
+      "path": "docs/NERV/Pasted 2026-11-02 at 12.20.39 AM.tiff",
+      "sha256": "d0868a5271836060a24668d7d6fa553713ed74f6210dde8faa5d6081bf4e2cec",
+      "bytes": 924150,
+      "disposition": "Deletable reference artwork; visual/OCR review found no independent unpreserved requirement"
+    },
+    {
+      "path": "docs/NERV/Pasted 2026-11-02 at 12.23.36 AM.tiff",
+      "sha256": "ad6fbc7cc61294d0a865071ee056adc5b042f0662392c26a6b61f16f4ff7ad58",
+      "bytes": 922134,
+      "disposition": "Deletable reference artwork; visual/OCR review found no independent unpreserved requirement"
+    },
+    {
+      "path": "docs/NERV/Pasted 2026-11-02 at 12.29.44 AM.tiff",
+      "sha256": "adc8be6ff98dd9840876ee8bfcf55534e78bed51a5a6532e6257be97487de8cb",
+      "bytes": 6224550,
+      "disposition": "Deletable reference artwork; visual/OCR review found no independent unpreserved requirement"
+    },
+    {
+      "path": "docs/NERV/Pasted 2026-11-02 at 12.31.38 AM.tiff",
+      "sha256": "75c6ec2ce51696c5d51f3a6315b8fe4c3c5e11d275438afcdecffe1646821445",
+      "bytes": 1926230,
+      "disposition": "Deletable reference artwork; visual/OCR review found no independent unpreserved requirement"
+    },
+    {
+      "path": "docs/NERV/Pasted 2026-11-02 at 12.31.55 AM.tiff",
+      "sha256": "5204f690464449b9fa44d30f6d38ed58aa74b38068ac8ec6064067832cb00270",
+      "bytes": 925014,
+      "disposition": "Deletable reference artwork; visual/OCR review found no independent unpreserved requirement"
+    },
+    {
+      "path": "docs/NERV/dashboard-agnostic-2.html",
+      "sha256": "0c9e90a66357752fbf04a96c1623a162a857cfd1584ece9eeabb0b99038c5eb7",
+      "bytes": 76978,
+      "disposition": "Deletable superseded prototype/redirect; live replacement is web/public/dashboard (F-019/F-047/F-053)"
+    },
+    {
+      "path": "docs/NERV/dashboard-agnostic.html",
+      "sha256": "f5d346b29defea290319d1646da2e8558d0de442a69d33900d564bff4791064d",
+      "bytes": 64569,
+      "disposition": "Deletable superseded prototype/redirect; live replacement is web/public/dashboard (F-019/F-047/F-053)"
+    },
+    {
+      "path": "docs/NERV/dashboard-examples.html",
+      "sha256": "ea59067a985a440ca7faa8b7d5f9ffb00a3ef37eca3f8836c8fe551941760596",
+      "bytes": 45536,
+      "disposition": "Deletable superseded prototype/redirect; live replacement is web/public/dashboard (F-019/F-047/F-053)"
+    },
+    {
+      "path": "docs/NERV/dashboard.html",
+      "sha256": "aeb092088ef7e3714a3b622075508e833e0c32884118e2aa802818ef260bde40",
+      "bytes": 38577,
+      "disposition": "Deletable superseded prototype/redirect; live replacement is web/public/dashboard (F-019/F-047/F-053)"
+    },
+    {
+      "path": "docs/NERV/dashboard1.html",
+      "sha256": "bd7ee7e3aabf4a4236c646b4fb5fefe383fdfb94ed46d6f638b9c1d886501eb9",
+      "bytes": 37044,
+      "disposition": "Deletable superseded prototype/redirect; live replacement is web/public/dashboard (F-019/F-047/F-053)"
+    },
+    {
+      "path": "docs/NERV/dashboard2.html",
+      "sha256": "c163e85d3a5ae07c3f592c7ca3f41b2bbe9846f6b7af222f9aabd86b629c4bc3",
+      "bytes": 32966,
+      "disposition": "Deletable superseded prototype/redirect; live replacement is web/public/dashboard (F-019/F-047/F-053)"
+    },
+    {
+      "path": "docs/NERV/gemini-code-1793557312919.txt",
+      "sha256": "817a0f4663029a73ac8d9b39d293ffcbb70c16f780772bbd8a47c5e17c1e1b4f",
+      "bytes": 4590,
+      "disposition": "Deletable superseded design; every concept is adopted/planned or explicitly displaced in the mapping below"
+    },
+    {
+      "path": "docs/NERV/insights.md",
+      "sha256": "b3f0a7996d4592389e1cce902bbb713e6493b760f76bc98c320a7cb7639a436d",
+      "bytes": 19418,
+      "disposition": "Deletable after this review is merged; adopted ideas mapped and undecided proposals preserved below"
+    },
+    {
+      "path": "docs/NERV/nerv-agency-dashboard.html",
+      "sha256": "b499cbeef350f22710325a90e41e3424e3bc99d627c1171107078c78279ceb0f",
+      "bytes": 421,
+      "disposition": "Deletable superseded prototype/redirect; live replacement is web/public/dashboard (F-019/F-047/F-053)"
+    },
+    {
+      "path": "docs/NERV/review-2026-11-04.md",
+      "sha256": "1b326b9bf9be456987883c10b9aef224ea88bad47fae90af277a566f3a64871e",
+      "bytes": 18944,
+      "disposition": "Moved unchanged to docs/audits/2026-11-04-rebrand-review.md; preserve dated evidence"
+    },
+    {
+      "path": "docs/NERV/stay with NERV, just do not forget initial roadma... - stay with NERV, just do not forget initial roadma....csv",
+      "sha256": "730b783772d05c7421ff1afbe6794bbedd1be8895a99f04ae1c3047ace95b1a9",
+      "bytes": 3400,
+      "disposition": "Deletable superseded design; every concept is adopted/planned or explicitly displaced in the mapping below"
+    }
+  ]
+}

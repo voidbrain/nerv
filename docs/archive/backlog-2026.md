@@ -2,6 +2,19 @@
 
 Closed records in closing-date order. Dated evidence, not current status.
 
+**2026-11-06 source-path note:** The canonical architecture moved to [docs/NERV-ARCHITECTURE.md](../NERV-ARCHITECTURE.md); the dated review is preserved in [audits](../audits/2026-11-04-rebrand-review.md). Historical docs/NERV references remain evidence of the [pinned source snapshot](https://github.com/voidbrain/nerv/tree/c9e34f1cb5f3cb93a0d2150f90eead730b6a7d5b/docs/NERV); see the [retirement mapping](../audits/2026-11-06-brainstorm-retirement.md). Original archived record lines are unchanged.
+
+<!-- archive-recap:start -->
+## Weekly closure recaps
+
+Closed records in this archive, grouped by closing date (Monday–Sunday). Links open the first section for that week; current status stays in the active backlog.
+
+| Closing week | Features closed | Bugs closed |
+|---|---:|---:|
+| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 24 | 33 |
+<!-- archive-recap:end -->
+
+<a id="archive-week-2026-11-02"></a>
 ## Closed 2026-11-04
 
 ### F-039

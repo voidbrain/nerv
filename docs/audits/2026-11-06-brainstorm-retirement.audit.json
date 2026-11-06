@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "kind": "scoped",
+  "reviewed": "2026-11-06T19:52:17.872Z",
+  "baseline": "c9e34f1cb5f3cb93a0d2150f90eead730b6a7d5b",
+  "report": "docs/audits/2026-11-06-brainstorm-retirement.md",
+  "areas": {
+    "documentation": {
+      "result": "checked",
+      "evidence": "Pinned inventory, semantic disposition mapping, preserved proposals and source-link migration.",
+      "limits": "No full product or device acceptance; pending PR #166 remains a candidate at the source baseline."
+    },
+    "backlog": {
+      "result": "checked",
+      "evidence": "Pinned inventory, semantic disposition mapping, preserved proposals and source-link migration.",
+      "limits": "No full product or device acceptance; pending PR #166 remains a candidate at the source baseline."
+    }
+  }
+}

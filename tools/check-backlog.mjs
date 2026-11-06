@@ -69,11 +69,19 @@ assert.equal((text.match(/<\/details>/g) ?? []).length, headings.length, 'Unbala
 // The folder's README describes it and is not evidence. Skipped without git or a published branch.
 const archiveDir = new URL('../docs/archive/', import.meta.url);
 const localArchives = existsSync(archiveDir) ? readdirSync(archiveDir).filter(f => f.endsWith('.md') && f !== 'README.md') : [];
+// A generated closure index may change only after exact derivation; record history still never changes.
+const recapMarker='<!-- archive-recap:start -->';
+async function history(text,validate){
+ if(!text.includes(recapMarker))return text;
+ const tool=new URL('./archive-recap.mjs',import.meta.url);
+ assert(existsSync(tool),'Archives with recaps require the optional archive-recap.mjs tool');
+ const {stripArchiveRecap}=await import(tool.href);return stripArchiveRecap(text,validate);
+}
 const have = new Map(); // line -> how many times the local archives hold it
-for (const f of localArchives) for (const line of readFileSync(new URL(f, archiveDir), 'utf8').split('\n')) have.set(line, (have.get(line) ?? 0) + 1);
+for (const f of localArchives) for (const line of (await history(readFileSync(new URL(f, archiveDir), 'utf8'),true)).split('\n')) have.set(line, (have.get(line) ?? 0) + 1);
 const published = git('ls-tree', '--name-only', `origin/${branch}`, 'docs/archive/')?.split('\n').filter(f => f.endsWith('.md') && !f.endsWith('/README.md')) ?? [];
 for (const file of published) {
-  const was = (git('show', `origin/${branch}:${file}`) ?? '').split('\n');
+  const was = (await history(git('show', `origin/${branch}:${file}`) ?? '',false)).split('\n');
   const left = new Map(have); // counted per published file: two files merged into one may share a line once
   was.forEach((line, i) => {
     if (!line.trim() || /^#{1,2} /.test(line)) return; // blank lines and file/section headings may change with a move
