@@ -2154,7 +2154,7 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 | Field | Value |
 |---|---|
 | PR / evidence | [PR #170](https://github.com/voidbrain/nerv/pull/170) |
-| Closure PR | this PR |
+| Closure PR | [PR #171](https://github.com/voidbrain/nerv/pull/171) |
 | Opened | 2026-11-06 |
 | Verification | 2026-11-06: ci:status confirms both PR #170 runs green. Four one-channel integration cases passed with coverage locally; full suite 206 passed, one platform skip. Backlog, audit scopes, recaps, conventions, links and whitespace passed. Product proposals remain unaccepted. |
 | Reviewed | 2026-11-06 |
@@ -2189,7 +2189,7 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 | Field | Value |
 |---|---|
 | PR / evidence | [PR #170](https://github.com/voidbrain/nerv/pull/170) |
-| Closure PR | this PR |
+| Closure PR | [PR #171](https://github.com/voidbrain/nerv/pull/171) |
 | Opened | 2026-11-06 |
 | Verification | 2026-11-06: ci:status confirms both PR #170 runs green. Four one-channel integration cases passed with coverage locally; full suite 206 passed, one platform skip. Backlog, audit scopes, recaps, conventions, links and whitespace passed. Product proposals remain unaccepted. |
 | Reviewed | 2026-11-06 |
@@ -2224,7 +2224,7 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 | Field | Value |
 |---|---|
 | PR / evidence | [PR #170](https://github.com/voidbrain/nerv/pull/170) |
-| Closure PR | this PR |
+| Closure PR | [PR #171](https://github.com/voidbrain/nerv/pull/171) |
 | Opened | 2026-11-06 |
 | Verification | 2026-11-06: ci:status confirms both PR #170 runs green. Four one-channel integration cases passed with coverage locally; full suite 206 passed, one platform skip. Backlog, audit scopes, recaps, conventions, links and whitespace passed. Product proposals remain unaccepted. |
 | Reviewed | 2026-11-06 |
