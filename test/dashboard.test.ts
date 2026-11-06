@@ -289,3 +289,20 @@ test('the Sephirot are numbered 1 to 11 with Hebrew and Latin names, the crew to
   assert.equal(metric('casper',{},{ballot:{pattern:'orange'}}),'intent · read by a local model',file);
  }
 });
+test('the header shows the running version: the doctor reports the version and commit read at start; the button shows the commit on hover and copies it (owner, 2026-11-06)',async()=>{
+ const {execFileSync}=await import('node:child_process');const {readFileSync}=await import('node:fs');
+ const store=new Store(':memory:',{policy:defaultPolicy,source:'test'});const dir=mkdtempSync(join(tmpdir(),'nerv-ver-'));
+ try{await serve(store,dir,async(base,headers)=>{
+  const d=await (await fetch(base+'/api/doctor',{headers})).json() as {build:{version:string;commit:string|null}};
+  assert.equal(d.build.version,(JSON.parse(readFileSync('package.json','utf8')) as {version:string}).version);
+  assert.equal(d.build.commit,execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),'the checkout\'s commit');
+ });}finally{store.close();rmSync(dir,{recursive:true,force:true});}
+ const src=readFileSync('web/public/dashboard/dashboard.js','utf8');const fn=(name:string)=>{const i=src.indexOf(`function ${name}(`);const a=src.lastIndexOf('\n',i)+1;return src.slice(a,src.indexOf('\n}\n',i)+2);};
+ const {showBuild,copyBuild}=new Function('setTimeout',`${fn('showBuild')}\n${fn('copyBuild')}\nreturn {showBuild,copyBuild};`)(()=>0) as {showBuild:(b:unknown,el:unknown)=>void;copyBuild:(el:unknown,clip:unknown)=>Promise<string>};
+ const attrs:Record<string,string>={};const el={hidden:true,textContent:'',title:'',dataset:{} as Record<string,string>,setAttribute:(k:string,v:string)=>{attrs[k]=v;}};
+ const sha='a'.repeat(40);showBuild({version:'0.1.0',commit:sha},el);
+ assert.equal(el.hidden,false);assert.equal(el.textContent,'v0.1.0');assert.match(el.title,new RegExp(`Commit ${sha} · click to copy`));assert.match(attrs['aria-label']!,/^Version 0\.1\.0\. Commit a{40}/);
+ const copied:string[]=[];assert.equal(await copyBuild(el,{writeText:async(t:string)=>{copied.push(t);}}),'copied');assert.deepEqual(copied,[sha]);
+ assert.equal(await copyBuild(el,{writeText:async()=>{throw new Error('denied');}}),'copy failed','a refused clipboard says so');
+ showBuild(undefined,el);assert.equal(el.hidden,true,'no live base: hidden');
+});

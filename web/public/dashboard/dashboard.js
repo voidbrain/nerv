@@ -786,6 +786,22 @@ async function initMap() {
   });
   map.ready = true;
 }
+/** The running version beside the clock (owner, 2026-11-06): the commit on hover, copied on click. Hidden without a live base. */
+function showBuild(b, el = document.getElementById("build")) {
+  if (!el) return;
+  if (!b || !b.version) { el.hidden = true; return; }
+  el.hidden = false; el.textContent = "v" + b.version; el.dataset.commit = b.commit || "";
+  const about = b.commit ? "Commit " + b.commit + " · click to copy" : "Not a git checkout: no commit to copy";
+  el.title = about; el.setAttribute("aria-label", "Version " + b.version + ". " + about);
+}
+async function copyBuild(el, clip = navigator.clipboard) {
+  const c = el.dataset.commit; if (!c) return "none";
+  const label = el.textContent;
+  try { await clip.writeText(c); el.textContent = "copied"; } catch (e) { el.textContent = "copy failed"; }
+  setTimeout(() => { el.textContent = label; }, 1200);
+  return el.textContent;
+}
+document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("#build"); if (b) void copyBuild(b); });
 function cssVar(n) { return getComputedStyle(document.body).getPropertyValue(n).trim(); }
 function statusColor(st) { return st === "online" ? cssVar("--ok") : st === "standby" ? cssVar("--warn") : "#666"; }
 function drawMap(now) {

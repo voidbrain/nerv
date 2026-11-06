@@ -92,6 +92,9 @@ header.top { display:flex; flex-wrap:wrap; justify-content:space-between; align-
 .top-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 .clock { text-align:right; font-size:11px; line-height:1.2; }
 .clock b { font-size:15px; color:var(--title); letter-spacing:.08em; }
+/* Owner, 2026-11-06: the running version beside the time; its commit on hover, copied on click. */
+.ver-btn { font:inherit; font-size:10px; color:var(--muted); background:transparent; border:1px solid var(--border); border-radius:var(--radius); padding:0 5px; margin-left:4px; cursor:pointer; vertical-align:2px; }
+.ver-btn:hover,.ver-btn:focus-visible { color:var(--accent); border-color:var(--accent); outline:none; }
 
 /* ---------- five questions ---------- */
 .questions { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; }
@@ -309,7 +312,7 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
       <select id="accent"><option value="orange" selected>Orange</option><option value="blue">Blue</option><option value="green">Green</option><option value="violet">Violet</option><option value="ochre">Ochre</option></select>
       <button class="btn sm eva-full-only" id="btn-crt" aria-pressed="false">CRT</button>
       <button class="btn danger" id="btn-spear" title="Revoke every grant, stand down approvals, cancel sorties"><span data-l="spear">SPEAR OF LONGINUS</span></button>
-      <div class="clock"><b id="clock">--:--:--</b><div class="muted" id="clock-date"></div></div>
+      <div class="clock"><b id="clock">--:--:--</b> <button type="button" class="ver-btn" id="build" hidden></button><div class="muted" id="clock-date"></div></div>
     </div>
   </header>
 
