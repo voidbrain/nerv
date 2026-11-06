@@ -1326,7 +1326,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | — ; Owner question 2026-11-06 |
+| PR / evidence | [PR #169](https://github.com/voidbrain/nerv/pull/169) spike record; Owner question 2026-11-06 |
 | Opened | 2026-11-06 |
 | Verification | Documentation: Pending. Human: Pending (trial). |
 | Reviewed | 2026-11-06 |
