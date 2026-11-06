@@ -271,3 +271,21 @@ test('the bases map draws: drawMap runs to the end and draws every base and its 
  assert.ok(texts.some(t=>/UMBILICAL/.test(String(t))),'drawn to the end');
  assert.equal(calls.filter(c=>c.m==='strokeRect').length,2,'one marker per base');
 });
+test('the Sephirot are numbered 1 to 11 with Hebrew and Latin names, the crew top right; the MAGI seats name their role, Casper idle when nothing runs (owner, 2026-11-05)',async()=>{
+ const {readFileSync}=await import('node:fs');const html=readFileSync('web/public/dashboard/index.html','utf8');
+ const nums=[...html.matchAll(/<div class="sn"[^>]*>(\d+) · <span class="jp-only he" lang="he"/g)].map(m=>Number(m[1])).sort((a,b)=>a-b);
+ const magi=Number(/<span title="Beauty">(\d+) · /.exec(html)![1]);
+ assert.deepEqual([...nums,magi].sort((a,b)=>a-b),[1,2,3,4,5,6,7,8,9,10,11],'every Sephirah has its own number, Gevurah included');
+ assert.doesNotMatch(html,/GEVURAH · CONSULTANTS/);
+ const node=(n:string)=>new RegExp(`<div class="snode[^"]*" data-n="${n}">.*?</div></div>`).exec(html)![0];
+ assert.doesNotMatch(node('apt'),/data-av="you"/,'no "you" avatar on Misato\'s apartment');assert.doesNotMatch(node('detect'),/data-av="hyuga"/,'no Hyuga avatar on Detection');
+ assert.match(html,/\.snode \.avs \{[^}]*position:absolute; top:3px; right:4px;/);
+ assert.match(html,/BALTHASAR · 1[\s\S]*?title="reversibility · budget · taint">protection</);
+ assert.match(html,/CASPER · 2[\s\S]*?>intent · idle</);assert.match(html,/MELCHIOR · 3[\s\S]*?title="rules · Scrolls · deterministic">rules</);
+ for(const file of ['web/public/dashboard/dashboard.js','web/public/dashboard/live.js']){
+  const src=readFileSync(file,'utf8');const i=src.indexOf('seatMetric');const start=src.indexOf('function',i);const body=src.slice(start,src.indexOf('\n  }',start)>0&&file.endsWith('live.js')?src.indexOf('\n  };',start)+4:src.indexOf('\n}\n',start)+2);
+  const metric=new Function('isLocal','TOOLS',`return (${body.replace(/^function seatMetric/,'function')});`)(()=>true,{}) as (seat:string,s?:object,a?:object)=>string;
+  assert.equal(metric('casper'),'intent · idle',file);assert.equal(metric('casper',{},{ballot:{pattern:'green'}}),'intent · not needed (Green)',file);
+  assert.equal(metric('casper',{},{ballot:{pattern:'orange'}}),'intent · read by a local model',file);
+ }
+});

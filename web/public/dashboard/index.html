@@ -184,7 +184,10 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 @keyframes flow { to { stroke-dashoffset:-24; } }
 .sgrid { position:relative; display:grid; grid-template-columns:1fr 1.25fr 1fr; grid-auto-rows:auto; gap:10px 18px; align-items:center; }
 .snode { position:relative; z-index:1; border:1px solid var(--border); background:var(--panel2); padding:3px 8px; text-align:center; transition:.15s; }
-.snode .sn { font-size:8px; color:var(--muted); letter-spacing:.12em; }
+.snode .sn { font-size:8px; color:var(--muted); letter-spacing:.12em; text-align:left; padding-right:26px; min-height:12px; }
+.snode .sn .he { font-size:10px; color:var(--kanji); } [lang="he"] { letter-spacing:0; }
+.snode.round .sn { padding-left:14px; }
+/* Owner, 2026-11-05: the crew top right, the Sephirah's number and names top left. */
 .snode .st { font-size:11px; font-weight:900; letter-spacing:.1em; }
 .snode .sd { font-size:9px; color:var(--muted); }
 .snode .sk { font-size:9px; color:var(--kanji); letter-spacing:.2em; }
@@ -218,6 +221,7 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .mseat .mn { font-size:11px; font-weight:900; letter-spacing:.14em; }
 .mseat .mv { font-size:14px; font-weight:900; letter-spacing:.12em; }
 .mseat .mr { font-size:9px; color:var(--muted); letter-spacing:.06em; }
+.mseat .mk { font-size:15px; color:var(--kanji); letter-spacing:.1em; vertical-align:-2px; }
 .mseat .mm { font-size:9px; color:var(--text); opacity:.85; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
 .mseat[data-v="approve"] polygon { stroke:var(--ok); fill:color-mix(in srgb,var(--ok) 10%,var(--panel2)); } .mseat[data-v="approve"] .mv,.mseat[data-v="approve"] .mn { color:var(--ok); }
 .mseat[data-v="reject"] polygon { stroke:var(--danger); fill:color-mix(in srgb,var(--danger) 10%,var(--panel2)); } .mseat[data-v="reject"] .mv,.mseat[data-v="reject"] .mn { color:var(--danger); }
@@ -255,8 +259,8 @@ details > summary { cursor:pointer; list-style:none; }
 details > summary::-webkit-details-marker { display:none; }
 .av { width:20px; height:20px; image-rendering:pixelated; border:1px solid var(--border); background:#000; flex-shrink:0; display:none; }
 body.theme-eva .av, body.theme-eva .av { display:inline-block; }
-.snode .avs { display:flex; gap:3px; justify-content:center; margin-bottom:2px; }
-.snode .av { width:22px; height:22px; }
+.snode .avs { display:flex; gap:3px; position:absolute; top:3px; right:4px; }
+.snode .av { width:20px; height:20px; }
 .eva-img { width:100%; height:42px; object-fit:contain; image-rendering:pixelated; background:#000; border:1px solid var(--border); display:none; margin-top:3px; }
 body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
 .msg { display:flex; gap:6px; align-items:flex-start; padding:2px 0; }
@@ -355,37 +359,37 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
         <div class="sephirot eva-full-only" id="sephirot">
           <svg class="edges" id="edges" aria-hidden="true"></svg>
           <div class="sgrid">
-            <div class="snode round s-detect" data-n="detect"><div class="avs"><img class="av" data-av="aoba" alt="Aoba"/><img class="av" data-av="hyuga" alt="Hyuga"/></div><div class="sn">1 · KETER</div><div class="st">DETECTION</div><div class="sd">Aoba comms · Hyuga watch</div></div>
-            <div class="snode s-intake" data-n="intake"><div class="avs"><img class="av" data-av="naoko" alt="Naoko"/></div><div class="sn">2 · BINAH</div><div class="st">NAOKO DESK</div><div class="sd" id="sd-intake">intake · provenance</div></div>
-            <div class="snode s-route" data-n="route"><div class="avs"><img class="av" data-av="gendo" alt="Gendo"/></div><div class="sn">3 · CHOKHMAH</div><div class="st">GENDO</div><div class="sd" id="sd-route">route · battery</div></div>
-            <div class="snode s-consult" data-n="consult"><div class="sn">GEVURAH · CONSULTANTS</div><div class="st">ADVISE</div><div class="sd">no vote · advice into the LCL</div></div>
-            <div class="snode s-plan" data-n="plan"><div class="avs"><img class="av" data-av="misato" alt="Misato"/></div><div class="sn">4 · CHESED</div><div class="st">MISATO PLAN</div><div class="sd" id="sd-plan">next action</div></div>
+            <div class="snode round s-detect" data-n="detect"><div class="avs"><img class="av" data-av="aoba" alt="Aoba"/></div><div class="sn" title="Crown">1 · <span class="jp-only he" lang="he" dir="rtl">כתר</span> KETER</div><div class="st">DETECTION</div><div class="sd">Aoba comms · Hyuga watch</div></div>
+            <div class="snode s-intake" data-n="intake"><div class="avs"><img class="av" data-av="naoko" alt="Naoko"/></div><div class="sn" title="Understanding">2 · <span class="jp-only he" lang="he" dir="rtl">בינה</span> BINAH</div><div class="st">NAOKO DESK</div><div class="sd" id="sd-intake">intake · provenance</div></div>
+            <div class="snode s-route" data-n="route"><div class="avs"><img class="av" data-av="gendo" alt="Gendo"/></div><div class="sn" title="Wisdom">3 · <span class="jp-only he" lang="he" dir="rtl">חכמה</span> CHOKHMAH</div><div class="st">GENDO</div><div class="sd" id="sd-route">route · battery</div></div>
+            <div class="snode s-consult" data-n="consult"><div class="sn" title="Severity">4 · <span class="jp-only he" lang="he" dir="rtl">גבורה</span> GEVURAH</div><div class="st">ADVISE</div><div class="sd" id="sd-consult">no vote · advice into the LCL</div></div>
+            <div class="snode s-plan" data-n="plan"><div class="avs"><img class="av" data-av="misato" alt="Misato"/></div><div class="sn" title="Mercy">5 · <span class="jp-only he" lang="he" dir="rtl">חסד</span> CHESED</div><div class="st">MISATO PLAN</div><div class="sd" id="sd-plan">next action</div></div>
             <div class="s-magi">
               <div class="magi" id="magi-big">
-                <div class="mtitle"><img class="av" data-av="magi" alt="" style="vertical-align:middle"/> 5 · TIFERET · <b>MAGI SYSTEM</b> <span class="jp-only">· 提訴</span> · <span id="mt-action">no action</span></div>
+                <div class="mtitle"><img class="av" data-av="magi" alt="" style="vertical-align:middle"/> <span title="Beauty">6 · <span class="jp-only" lang="he" dir="rtl">תפארת</span> TIFERET</span> · <b>MAGI SYSTEM</b> <span class="jp-only" style="white-space:nowrap">· 提訴</span> · <span id="mt-action">no action</span></div>
                 <div class="magi-grid">
                   <div class="mseat top" data-seat="balthasar" data-v="none">
                     <svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="0,0 100,0 100,62 82,100 18,100 0,62"/></svg>
-                    <div class="mb"><div class="mn">BALTHASAR · 2</div><div class="mv">—</div><div class="mr">母 mother · protection</div><div class="mm" data-m>deterministic</div></div>
+                    <div class="mb"><div class="mn">BALTHASAR · 1</div><div class="mv">—</div><div class="mr"><span class="mk jp-only">母</span> mother</div><div class="mm" data-m title="reversibility · budget · taint">protection</div></div>
                   </div>
                   <div class="mseat" data-seat="casper" data-v="none">
                     <svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="0,0 80,0 100,26 100,100 0,100"/></svg>
-                    <div class="mb"><div class="mn">CASPER · 3</div><div class="mv">—</div><div class="mr">女 woman · intent</div><div class="mm" data-m>model seat</div></div>
+                    <div class="mb"><div class="mn">CASPER · 2</div><div class="mv">—</div><div class="mr"><span class="mk jp-only">女</span> woman</div><div class="mm" data-m title="a local model reads the intent of non-Green actions">intent · idle</div></div>
                   </div>
                   <div class="mseat" data-seat="melchior" data-v="none">
                     <svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="20,0 100,0 100,100 0,100 0,26"/></svg>
-                    <div class="mb"><div class="mn">MELCHIOR · 1</div><div class="mv">—</div><div class="mr">科学者 scientist · rules</div><div class="mm" data-m>deterministic</div></div>
+                    <div class="mb"><div class="mn">MELCHIOR · 3</div><div class="mv">—</div><div class="mr"><span class="mk jp-only">科学者</span> scientist</div><div class="mm" data-m title="rules · Scrolls · deterministic">rules</div></div>
                   </div>
                 </div>
                 <div class="extras" id="magi-extras"></div>
                 <div class="mres"><span><span class="jp-only">決議 · </span><b id="mres-out">—</b></span><span id="mres-pattern">—</span><span id="mres-reason" class="muted">—</span></div>
               </div>
             </div>
-            <div class="snode s-apt" data-n="apt"><div class="avs"><img class="av" data-av="penpen" alt="Pen Pen"/><img class="av" data-av="you" alt="You"/></div><div class="sn">7 · NETZACH</div><div class="st">MISATO'S APT</div><div class="sd" id="sd-apt">you · Pen Pen card</div></div>
-            <div class="snode s-sync" data-n="sync"><div class="sn">6 · HOD</div><div class="st">SYNC RATIO</div><div class="sd" id="sd-sync">≥ 80 % · not Blue</div></div>
-            <div class="snode s-plug" data-n="plug"><div class="avs"><img class="av" data-av="ritsuko" alt="Ritsuko"/></div><div class="sn">8 · YESOD</div><div class="st">ENTRY PLUG</div><div class="sd" id="sd-plug">Ritsuko signs the A.T. Field</div></div>
-            <div class="snode s-eva" data-n="eva"><div class="avs"><img class="av" id="av-eva-node" data-av="eva-01" alt="EVA unit"/></div><div class="sn">9 · MALKUTH</div><div class="st">EVA CAGE</div><div class="sd" id="sd-eva">sandbox · field enforced</div></div>
-            <div class="snode round s-debrief" data-n="debrief"><div class="sn">10 · DA'AT</div><div class="st">DEBRIEF</div><div class="sd">Central Dogma · what is now known</div></div>
+            <div class="snode s-apt" data-n="apt"><div class="avs"><img class="av" data-av="penpen" alt="Pen Pen"/></div><div class="sn" title="Victory">8 · <span class="jp-only he" lang="he" dir="rtl">נצח</span> NETZACH</div><div class="st">MISATO'S APT</div><div class="sd" id="sd-apt">you · Pen Pen card</div></div>
+            <div class="snode s-sync" data-n="sync"><div class="sn" title="Splendour">7 · <span class="jp-only he" lang="he" dir="rtl">הוד</span> HOD</div><div class="st">SYNC RATIO</div><div class="sd" id="sd-sync">≥ 80 % · not Blue</div></div>
+            <div class="snode s-plug" data-n="plug"><div class="avs"><img class="av" data-av="ritsuko" alt="Ritsuko"/></div><div class="sn" title="Foundation">9 · <span class="jp-only he" lang="he" dir="rtl">יסוד</span> YESOD</div><div class="st">ENTRY PLUG</div><div class="sd" id="sd-plug">Ritsuko signs the A.T. Field</div></div>
+            <div class="snode s-eva" data-n="eva"><div class="avs"><img class="av" id="av-eva-node" data-av="eva-01" alt="EVA unit"/></div><div class="sn" title="Kingdom">10 · <span class="jp-only he" lang="he" dir="rtl">מלכות</span> MALKUTH</div><div class="st">EVA CAGE</div><div class="sd" id="sd-eva">sandbox · field enforced</div></div>
+            <div class="snode round s-debrief" data-n="debrief"><div class="sn" title="Knowledge">11 · <span class="jp-only he" lang="he" dir="rtl">דעת</span> DA'AT</div><div class="st">DEBRIEF</div><div class="sd">Central Dogma · what is now known</div></div>
           </div>
         </div>
 
