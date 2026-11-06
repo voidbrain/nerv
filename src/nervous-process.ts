@@ -11,7 +11,7 @@ store.tick();store.expire();
 const timer=setInterval(()=>{try{store.tick();store.expire();}catch{console.error('Nervous scheduler tick failed.');}},250);
 const registry=()=>new Registry(store.db,process.argv[3]?(()=>{try{return readConfig(process.argv[3]!).kaji?.root;}catch{return undefined;}})():undefined);
 // F-021: granted MCP tools as the gate knows them (effect class from the grant), read from config when asked.
-const external=()=>{try{const t=process.argv[3]?readConfig(process.argv[3]).tools:undefined;return (t?.grants ?? []).map(g=>({name:toolName(g.server,g.tool),effect:g.effect}));}catch{return [];}};
+const external=()=>{try{const t=process.argv[3]?readConfig(process.argv[3]).tools:undefined;return (t?.grants ?? []).map(g=>({name:toolName(g.server,g.tool),effect:g.effect,eva:`eva-${g.eva}` as const}));}catch{return [];}};
 process.on('message',(value:unknown)=>{
  if(Buffer.byteLength(JSON.stringify(value))>MAX_FRAME_BYTES){process.exitCode=1;stop();return;}
  void dispatchRpc(value,(method,params)=>{

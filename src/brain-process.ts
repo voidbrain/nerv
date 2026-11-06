@@ -64,7 +64,7 @@ process.on('message',(value:unknown)=>{
    const pilot=params.pilot as {name:string;domain:string;model:string}|undefined;
    const pick=models.roles?.consultant;if(configError||!models.local||(!pilot&&!pick))return {advice:null};
    const on=pilot?{...models,local:{...models.local,model:pilot.model}}:forRole(models,'consultant');
-   try{const reply=await run(consultantAsk(params.request as string,(params.context as Turn[]|undefined) ?? [],pilot,(params.bases as {id:string;name:string}[]|undefined) ?? []),on);if(pilot){const advice=parseAdvice(reply.text);return advice?{advice,model:reply.model}:{advice:null};}
+   try{const reply=await run(consultantAsk(params.request as string,(params.context as Turn[]|undefined) ?? [],pilot,(params.bases as {id:string;name:string}[]|undefined) ?? [],(params.tools as {name:string;about:string}[]|undefined) ?? []),on);if(pilot){const advice=parseAdvice(reply.text);return advice?{advice,model:reply.model}:{advice:null};}
     const c=parseConsult(reply.text);return {advice:c.advice ?? null,...(c.advice?{model:reply.model}:{}),...(c.domain?{domain:c.domain}:{})};}
    catch(e){return {advice:null,error:e instanceof ModelError?e.message:'Consultant failed.'};}
   }

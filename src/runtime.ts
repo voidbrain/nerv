@@ -206,8 +206,10 @@ export class Runtime implements StoreApi {
   // F-045: the specialist pilot whose keywords fit the request advises; none fits, the generic pilot (roles.consultant).
   const pilot=steps.length?undefined:(()=>{try{return choosePilot(message,this.pilots?.() ?? []);}catch{return undefined;}})();
   const named=steps.length?[]:await this.baseNames();
+  // B-024: the consultant is told what Misato can do, so it never advises against a tool she has.
+  const offered=steps.length?[]:[...toolDocs,...(await this.externalTools()).docs].map(t=>({name:t.name,about:t.about.slice(0,200)}));
   let unmatched:string|undefined;
-  const advice=steps.length?undefined:await this.brain.call('consultant.advise',{request:message.slice(0,4000),...(context.length?{context:context.slice(-3)}:{}),...(pilot?{pilot:{name:pilot.name,domain:pilot.domain,model:pilot.model}}:{}),...(named.length>1?{bases:named}:{})},MODEL_TIMEOUT_MS).then(r=>r as {advice:string|null;model?:string;domain?:string},():{advice:string|null;model?:string;domain?:string}=>({advice:null})).then(async r=>{
+  const advice=steps.length?undefined:await this.brain.call('consultant.advise',{request:message.slice(0,4000),...(context.length?{context:context.slice(-3)}:{}),...(pilot?{pilot:{name:pilot.name,domain:pilot.domain,model:pilot.model}}:{}),...(named.length>1?{bases:named}:{}),...(offered.length?{tools:offered}:{})},MODEL_TIMEOUT_MS).then(r=>r as {advice:string|null;model?:string;domain?:string},():{advice:string|null;model?:string;domain?:string}=>({advice:null})).then(async r=>{
    if(!pilot&&r.domain){unmatched=r.domain;await this.note(sortieId,'pilot.unmatched',{domain:r.domain});}
    if(!r.advice)return undefined;await this.note(sortieId,'misato.consult',{advice:r.advice,model:r.model ?? '',...(pilot?{pilot:{id:pilot.id,name:pilot.name,why:pilot.why}}:{})});return r.advice;});
   // F-045: enough requests in one domain without a specialist → a pilot is proposed (a card), in the background.
