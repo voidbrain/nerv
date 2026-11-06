@@ -23,3 +23,8 @@ export function sanitizeChannel(value:unknown):ChannelState|undefined {
  }
  return {mode:v.mode as ChannelState['mode'],checkedAt:v.checkedAt,...(typeof v.destination==='string'?{destination:v.destination}:{}),...(lastDelivery?{lastDelivery}:{})};
 }
+
+/** Route-check freshness is independent of heartbeat arrival or the last send result. */
+export function channelIsFresh(channel:ChannelState,now:number,maxAge:number):boolean {
+ const age=now-Date.parse(channel.checkedAt);return age>=-120_000&&age<maxAge;
+}

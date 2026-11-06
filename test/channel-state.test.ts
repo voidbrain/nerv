@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {sanitizeChannel} from '../src/channel-state.ts';
+import {channelIsFresh,sanitizeChannel} from '../src/channel-state.ts';
 const at='2030-01-01T00:00:00.000Z';
 test('channel telemetry is bounded first-hand route data, without private bot/chat/message fields',()=>{
  const report={mode:'via-main',destination:'NERV-01',checkedAt:at,lastDelivery:{route:'main',result:'accepted',at,chatId:42},token:'private',chatId:42,text:'private'};
@@ -21,4 +21,10 @@ test('failed relay and failed own-bot sends report failure without private error
   fail=false;await channel.deliver();assert.equal(channel.channelState().lastDelivery?.result,'accepted');
   const snapshot=channel.channelState();snapshot.mode='unknown';assert.equal(channel.channelState().mode,'local-fallback','caller cannot mutate cached mode');
  }finally{await channel.stop();store.close();rmSync(home,{recursive:true,force:true});}
+});
+
+test('route check freshness has a bounded age and future-clock tolerance',()=>{
+ const now=Date.parse(at);const c={mode:'local',checkedAt:at} as const;
+ assert.equal(channelIsFresh(c,now+89_999,90_000),true);assert.equal(channelIsFresh(c,now+90_000,90_000),false);
+ assert.equal(channelIsFresh(c,now-120_000,90_000),true);assert.equal(channelIsFresh(c,now-120_001,90_000),false);
 });

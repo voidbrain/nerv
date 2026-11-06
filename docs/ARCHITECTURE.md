@@ -53,3 +53,5 @@ The native service controller runs only fixed launchctl argv for the current use
 ## Status versus diagnostics
 
 `GET /api/status` is an authenticated lightweight runtime ping used by companion polling and notification enablement. It explicitly reports integrityCheck=not-run. `GET /api/doctor` remains an explicit diagnostic and may perform SQLite quick_check. Native background refresh must not invoke full diagnostics on a timer; the bounded inbox/pending reads remain separate.
+
+Telegram route telemetry (`src/channel-state.ts`, F-019) is first-hand channel state, shared in both signed Kaji heartbeat directions without credentials, chat identifiers or content. Runtime keeps reports in memory and exposes them through authenticated bases/doctor reads. Check time, receive time and last-send time have separate meanings: a new heartbeat cannot refresh an old route check or establish phone receipt. The existing online window bounds freshness; missing or malformed telemetry clears the previous peer report for compatibility with older bases.

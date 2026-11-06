@@ -101,7 +101,7 @@ export class TelegramChannel {
   return quiet;
  }
  private delivered(route:'main'|'local',result:'accepted'|'failed',fallback=false){
-  this.routeState={...this.routeState,mode:route==='main'?'via-main':fallback?'local-fallback':this.routeState.mode,lastDelivery:{route,result,at:new Date().toISOString()}};
+  this.routeState={...this.routeState,mode:route==='main'?'via-main':fallback?'local-fallback':'local',lastDelivery:{route,result,at:new Date().toISOString()}};
  }
  /** Everything this base sends on its own (cards, reminders, brief, follow-ups): relayed while quiet, else its own bot; a failed relay falls back to its own bot, so nothing is lost. */
  private async out(text:string,buttons?:Button[][]):Promise<void>{
@@ -110,9 +110,9 @@ export class TelegramChannel {
    const cards=(buttons ?? []).flatMap((row,i,all)=>{const a=row.find(b=>/^a:[a-f0-9-]{36}$/.test(b.callback_data));return a?[{id:a.callback_data.slice(2),label:all.length>1?String(i+1):''}]:[];});
    if(await this.one!.relay(text,cards).catch(()=>false)){this.delivered('main','accepted');return;}
   }
-  await this.sendLocal(text,buttons,quiet||this.routeState.mode==='local-fallback');
+  await this.sendLocal(text,buttons,quiet||this.routeState.destination!==undefined);
  }
- private async sendLocal(text:string,buttons?:Button[][],fallback=this.routeState.mode==='local-fallback'){
+ private async sendLocal(text:string,buttons?:Button[][],fallback=this.routeState.destination!==undefined){
   try{await this.api.send(this.chatId,text,buttons);this.delivered('local','accepted',fallback);}
   catch(e){this.delivered('local','failed',fallback);throw e;}
  }

@@ -120,8 +120,6 @@ test('through two runtimes wired as serve does: a base whose model route is down
    report={mode:'via-main',destination:'NERV-01',checkedAt:new Date().toISOString()};
    await until(async()=>(await read()).find(x=>x.baseId==='NERV-02')?.channel?.mode==='via-main');
    // An older peer that omits telemetry clears the previous report, rather than refreshing it.
-   b.setChannelState(()=>undefined as unknown as ChannelState);
-   // Runtime returns unknown for an invalid local reader; wire an old-version heartbeat explicitly.
    await links[1]!.stop();
    const old=new KajiLink({baseId:'NERV-02',key:B.privateKey,publicKey:B.publicKey,registry:b.kaji,log:()=>{}});
    try{await old.start(200);await until(async()=>(await read()).find(x=>x.baseId==='NERV-02')?.channel===null);}finally{await old.stop();}

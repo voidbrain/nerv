@@ -4,7 +4,6 @@ const code=source.slice(source.indexOf('  function channelLine'),source.indexOf(
 const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
 const line=new Function('esc','baseName',code+';return channelLine;')(esc,id=>id==='NERV-01'?'Neo <Tokyo>':id);
 const c={mode:'local-fallback',destination:'NERV-01',checkedAt:'2030-01-01T00:00:00.000Z',lastDelivery:{route:'local',result:'accepted',at:'2030-01-01T00:00:01.000Z'}};
-const text=html=>parseHTML('<div>'+html+'</div>').document.textContent;
 test('routing and send evidence stay distinct, escaped, and stale or absent telemetry stays unknown',()=>{
  const {document}=parseHTML('<div>'+line({channel:c,channelFresh:true})+'</div>');
  assert.match(document.toString(),/local fallback/);assert.match(document.toString(),/Neo &lt;Tokyo&gt;/);assert.equal(document.querySelector('tokyo'),null);
