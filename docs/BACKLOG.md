@@ -1,13 +1,13 @@
 # NERV Agency backlog
 
-Current work ledger, reviewed 6 November 2026 against main `5e6d769`. PR #153 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42218258228). PR #152 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42216691729). PR #151 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42216202855). PR #150 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42215185296). PR #149 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42141288422). PR #1–#148 merged after green checks (#53–#148 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
+Current work ledger, reviewed 6 November 2026 against main `f8ba93c`. PR #154 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42220503857). PR #153 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42218258228). PR #152 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42216691729). PR #151 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42216202855). PR #150 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42215185296). PR #149 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42141288422). PR #1–#148 merged after green checks (#53–#148 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
 
 <!-- recap:start · generated by tools/backlog-recap.mjs from the records; do not edit by hand -->
 **Recap as of 2026-11-06** (window 2026-10-31 – 2026-11-06).
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 35 | 4 |
+| **Open** | 35 | 3 |
 | **Require Human 🧑** | 0 | 1 |
 
 ### Last 7 days
@@ -15,7 +15,7 @@ Current work ledger, reviewed 6 November 2026 against main `5e6d769`. PR #153 re
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **Count** | 58 | 23 | 29 | 25 |
+| **Count** | 58 | 23 | 29 | 26 |
 
 ### Require Human 🧑
 
@@ -148,39 +148,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 ---
 
-### B-029
 
-**The kaji.run test timed out once in CI: the two test bases never exchanged their offers**
-
-| Signal | Priority | Status | Effort | Complete |
-|:---:|---|---|---|---|
-| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
-
-💻 **→ Human action required: No**<br />Next: verify the repaired fixture under coverage and merged CI, then close on the robust-wait acceptance path.
-
-| | |
-|---|---|
-| **Issue** | CI 2026-11-06 on PR #148 (run 42140503183, attempt 1, validate under coverage): test/kaji-run.test.ts:45 waited 15 s for `remoteOffers()` to list NERV-02 and timed out (the test took 16.5 s). The rerun passed, as do local runs under coverage (3 of 3, under 1 s each) and CI on #146 and #147. Hypotheses: a port taken between `freePort` and listen, or a first connection lost with no retry within the window. Not confirmed. |
-| **Reproduce** | Run test/kaji-run.test.ts repeatedly on a loaded machine or in CI. |
-| **Check** | The cause is named and fixed, or the wait made robust with a test for it; when it times out, the error says what each link saw (connected, offers heard). |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Next action / closure evidence:** Implemented in [PR #154](https://github.com/voidbrain/nerv/pull/154): replaced two independent free-port probes with a pair of held reservations, released immediately before concurrent link startup: the fixture cannot allocate the same port twice. Retain each link's recent logs, heard offers and both runtime base snapshots; every wait includes that state on timeout (including failed diagnostic reads). The integration deliberately starts with no advertised offers, then waits for a later real heartbeat to supply them. Separate regressions prove the reservations remain bound/distinct and timeout text retains the observed state. This follows the Check's robust-wait alternative: the historical CI cause is still unconfirmed; reservation release cannot prevent every external port race, which will now have listener diagnostics. Ten of ten local repetitions with coverage passed; full suite passed (191 passed, one systemd-only skip), alongside typecheck, build, conventions, integrations and backlog checks. Required merged CI remains.
-
-**Estimates:** Small remaining effort; ~90% complete. Reassessed 2026-11-06: robust setup/wait and diagnostics implemented and focused regression passed; ten coverage repetitions and the full suite passed; merged CI remains.
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #154](https://github.com/voidbrain/nerv/pull/154); original [CI run 42140503183](https://github.com/voidbrain/nerv/actions/runs/42140503183) (attempt 1 failed, attempt 2 green) |
-| Opened | 2026-11-06 |
-| Verification | 2026-11-06 Unit/integration: test/kaji-run.test.ts passed (4 tests), 10/10 repeated runs under coverage passed, full suite passed (191 passed, one systemd-only skip); merged CI pending |
-| Reviewed | 2026-11-06 |
-
-</details>
-
----
 
 ## Features and improvements
 
