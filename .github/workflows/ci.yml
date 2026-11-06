@@ -20,6 +20,16 @@ jobs:
       - name: Code coverage table (warnings; optional enforcement)
         run: node tools/coverage-table.mjs --check --github
       - run: npm run build
+      - name: Angular bilingual browser acceptance
+        run: npm run test:browser
+        env:
+          NERV_BROWSER_ARTIFACTS: ${{ runner.temp }}/nerv-browser
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: angular-browser
+          path: ${{ runner.temp }}/nerv-browser
+          if-no-files-found: ignore
       - run: npm run test:headless
       - run: npm run check:backlog
       - run: npm run check:recap

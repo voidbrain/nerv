@@ -21,3 +21,7 @@ In the Eva theme the dashboard carries lore scripts beside the English: Japanese
 Beside the header clock, a small outlined button shows an incrementing build version (`v1.N`, where N counts first-parent commits, advancing once per merge on main; package version is the fallback without full git history); its hover text and accessible name give the full commit, and a click copies it, saying *copied* or *copy failed* for a moment. It shows the code the service started with, not the checkout's current state, and is hidden without a live base.
 
 A live dashboard preserves its last data through one failed poll. Repeated failures say *REFRESH DELAYED* when authenticated status still answers, *STATUS UNAVAILABLE* when its HTTP reply is an error, or *SERVICE UNREACHABLE* when the probe gets no reply; both retry automatically. A successful refresh clears the warning. Errors name the API endpoint; only an authentication refusal asks for sign-in again.
+
+The Angular build loads its full stylesheet directly: critical-CSS extraction is disabled because its inline activation script is blocked by the service CSP. Keep external scripts required by that policy. The registered status card follows the page h1 with an h2; subsequent content sections are also h2. `npm run test:browser` checks applied styles, bilingual controls, browser-local dates, responsive widths and axe accessibility in Chrome.
+
+At narrow widths the Angular navigation wraps rather than widening the page; the main grid item can shrink within a 320 px viewport.

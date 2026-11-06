@@ -35,6 +35,7 @@ npm start -- inbox
 npm test
 npm run typecheck
 npm run test:headless
+npm run test:browser # after build; requires Chrome/Chromium
 ```
 
 Use your actual future deadline. CLI timestamps require an explicit UTC offset. User data now defaults to `~/.nerv` (override with an absolute `NERV_HOME`). Legacy checkout-local databases trigger migration guidance rather than being silently ignored. `init` preserves existing files; token/configuration files are private. Reminders enter the local inbox while running, or catch up after restart. Sleep or logout can pause user services; use an awake always-on host for dependable scheduling.

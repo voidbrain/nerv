@@ -138,6 +138,23 @@
       "run": "npm run backlog:recap",
       "checked": "npm run check:recap in CI validate",
       "after": []
+    },
+    {
+      "id": "angular-browser",
+      "when": [
+        "web/src/**",
+        "shared/surface.ts",
+        "angular.json",
+        "package*.json",
+        "src/server.ts",
+        "test/angular.browser.mjs"
+      ],
+      "then": "Verify full CSS under the service CSP, English/Italian controls, unchanged reminder text and UTC times, responsive layout and axe accessibility.",
+      "run": "npm run test:browser",
+      "checked": "CI validate browser acceptance and screenshot artifacts; manual visual review remains explicit.",
+      "after": [
+        "frontend"
+      ]
     }
   ],
   "couplings": [
@@ -212,6 +229,20 @@
         }
       ],
       "kept": "test/dashboard.test.ts asserts every :root token equals palette('eva','dark','orange')."
+    },
+    {
+      "value": "Angular stylesheet activation under the service CSP",
+      "places": [
+        {
+          "file": "angular.json",
+          "what": "Critical CSS extraction disabled so stylesheets do not require an inline activation script"
+        },
+        {
+          "file": "src/server.ts",
+          "what": "script-src self blocks inline activation scripts"
+        }
+      ],
+      "kept": "test/angular.browser.mjs serves the built workspace through makeServer and asserts the full grid stylesheet is applied with no CSP errors."
     }
   ],
   "outside": [
@@ -239,6 +270,11 @@
       "what": "The Node version on each base (the owner runs Node 26 under nvm; CI runs Node 24)",
       "affects": "Native TypeScript, node:sqlite and the bundled npm/npx (B-019: nvm Node 26.12's npm lacked npm-cli.js)",
       "noticed": "nerv doctor, the CI matrix (Node 24 only) and audit"
+    },
+    {
+      "what": "Chrome/Chromium installed on the execution host and GitHub Ubuntu runner",
+      "affects": "Angular bilingual browser acceptance, native control rendering, axe results and screenshots",
+      "noticed": "Browser acceptance uses an isolated profile and fails explicitly if Chrome is missing; CHROME_BIN can select a compatible executable; audit reviews runner/browser changes."
     }
   ],
   "pages": [

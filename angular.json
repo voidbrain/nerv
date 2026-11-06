@@ -22,7 +22,12 @@
                 "output": "/"
               }
             ],
-            "outputPath": "dist/web"
+            "outputPath": "dist/web",
+            "optimization": {
+              "styles": {
+                "inlineCritical": false
+              }
+            }
           },
           "configurations": {
             "production": {
