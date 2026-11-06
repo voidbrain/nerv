@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 24 | 35 |
+| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 26 | 35 |
 <!-- archive-recap:end -->
 
 <a id="archive-week-2026-11-02"></a>
@@ -2051,6 +2051,76 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 | PR / evidence | [PR #166](https://github.com/voidbrain/nerv/pull/166) map/tabs and Midori routing/status;  F-019/F-056 implementation and owner report 2026-11-06 |
 | Opened | 2026-11-06 |
 | Verification | 2026-11-06 Focused regressions, authenticated Chrome review, full suite (206 passed, one platform skip) and PR #166 CI passed. |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+## Closed 2026-11-06
+
+### F-058
+
+**Weekly closure recaps in yearly backlog archives**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: recorded review/adoption acceptance passed; no source deletion is claimed.
+
+| | |
+|---|---|
+| **Issue** | Owner requests all weekly archive recaps at the top, with links to the first closing section. The reusable index/history guard is being released in the harness. |
+| **Reproduce** | Review docs/archive/backlog-2026.md and the legacy docs/NERV sources. |
+| **Check** | Adopt published harness 3.2.0, generate Monday–Sunday closure counts/links from archived closing dates, and keep every historical record line protected. Recaps validate in existing CI; the active ledger remains the status authority. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 after PR #167 CI runs 42285102671 and 42285107921 passed validate, windows and native-macos (ci:status).  Owner request 2026-11-06. Published upstream v3.2.0 adopted after voidbrain/project-harness PR #62 CI 42283633421 passed and the tag was pushed. Copied tools are read from that tag; BACKLOG-RULES carries the strict derived-index exception; npm recap/check also generate/verify weekly archive indices. Historical record lines remain protected. The optional generic LCOV converter is not adopted here because it would change unrelated coverage behavior; the existing local converter stays unchanged.
+
+**Estimates:** No remaining review/adoption work; ~100% complete. Reassessed 2026-11-06 after merged CI acceptance. The old sources remain only marked deletable, as requested.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #167](https://github.com/voidbrain/nerv/pull/167) archive adoption/source review and CI reconciliation;  Owner request 2026-11-06; [voidbrain/project-harness#62](https://github.com/voidbrain/project-harness/pull/62), v3.2.0 |
+| Opened | 2026-11-06 |
+| Verification | Published tag/CI verified; local archive generation, immutable-history guard and recap checks passed. Full suite 206 passed/one platform skip; build, typecheck, conventions, integration metadata, headless lifecycle and Angular browser acceptance passed. Local adoption CI passed in PR #167. |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### F-059
+
+**Evaluate the NERV brainstorming folder before retirement**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: recorded review/adoption acceptance passed; no source deletion is claimed.
+
+| | |
+|---|---|
+| **Issue** | Owner intends to remove docs/NERV and asks whether its ideas have been evaluated or superseded. The folder also contains the still-referenced canonical architecture and a useful dated review. |
+| **Reproduce** | Review docs/archive/backlog-2026.md and the legacy docs/NERV sources. |
+| **Check** | Every tracked source has a disposition and pinned hash; adopted/rejected concepts map to current owners, undecided proposals are preserved, canonical vocabulary moves to docs with current links, and the dated review is preserved unchanged. No unrequested source deletion or claim that all planned work is implemented. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 after PR #167 CI runs 42285102671 and 42285107921 passed validate, windows and native-macos (ci:status).  Owner request 2026-11-06. Scoped documentation/backlog review at 7c0b619 is in docs/audits/2026-11-06-brainstorm-retirement.md and its source manifest. All 25 tracked files were reviewed (13 images visually and with local OCR); .DS_Store is ignored metadata. Architecture vocabulary moved to docs/NERV-ARCHITECTURE.md; the dated review moved unchanged to docs/audits/2026-11-04-rebrand-review.md. No other source was removed. Three undecided proposals are retained explicitly rather than silently rejected or accepted. Current architecture links and a historical archive path note are reconciled.
+
+**Estimates:** No remaining review/adoption work; ~100% complete. Reassessed 2026-11-06 after merged CI acceptance. The old sources remain only marked deletable, as requested.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #167](https://github.com/voidbrain/nerv/pull/167) archive adoption/source review and CI reconciliation;  Owner request 2026-11-06; docs/audits/2026-11-06-brainstorm-retirement.md |
+| Opened | 2026-11-06 |
+| Verification | Backlog and scoped audit manifest checks passed; CI passed in PR #167. This is a source review, not product acceptance. |
 | Reviewed | 2026-11-06 |
 
 </details>
