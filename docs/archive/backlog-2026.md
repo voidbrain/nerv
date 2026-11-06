@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 27 | 37 |
+| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 28 | 37 |
 <!-- archive-recap:end -->
 
 <a id="archive-week-2026-11-02"></a>
@@ -2227,6 +2227,42 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 | Closure PR | [PR #171](https://github.com/voidbrain/nerv/pull/171) |
 | Opened | 2026-11-06 |
 | Verification | 2026-11-06: ci:status confirms both PR #170 runs green. Four one-channel integration cases passed with coverage locally; full suite 206 passed, one platform skip. Backlog, audit scopes, recaps, conventions, links and whitespace passed. Product proposals remain unaccepted. |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+
+### F-002
+
+**Harden the reliable core**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟡 Medium | ~100% |
+
+💻 **→ Human action required: No**<br />None: F-002 acceptance passed after PR #173 merged.
+
+| | |
+|---|---|
+| **Issue** | Local core exists; phone delivery and recurrence belong to F-003. Production deployment is not provisioned. |
+| **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
+| **Check** | Restart recovery, no duplicate local inbox delivery, cancellation, auth, invalid input and clean shutdown; production operations separately documented. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06. PR #173 merged after both CI runs 42295005293/42294998432 passed validate (including 23 Chrome/axe states), windows and native-macos. The dated core acceptance report maps all F-002 checks; production code unchanged. Independent PWA, target-host install and backup acceptance remains in F-004/F-009/F-062.
+
+**Estimates:** Medium; ~100% complete. Earlier ~70% lacked browser evidence; that work and final CI are complete. Project-local impact-map reconciliation was timed; no productivity claim.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #173](https://github.com/voidbrain/nerv/pull/173); docs/acceptance/core-2026-11-06.md; [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| Closure PR | [PR #175](https://github.com/voidbrain/nerv/pull/175) |
+| Opened | 2026-11-01 |
+| Verification | 2026-11-06: ci:status confirms both PR #173 runs green for validate, windows and native-macos. Local Chrome/axe 23 states; 213 tests passed, one platform skip; three headless cases passed, one Windows-only skip. All named local-core acceptance passed; no physical-phone or hosted-deployment claim. |
 | Reviewed | 2026-11-06 |
 
 </details>
