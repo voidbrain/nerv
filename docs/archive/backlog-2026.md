@@ -1589,3 +1589,38 @@ Closed records in closing-date order. Dated evidence, not current status.
 </details>
 
 ---
+
+
+### B-027
+
+**One field gets several pilot proposals: unmatched domains are counted by exact name**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: regression and merged CI passed.
+
+| | |
+|---|---|
+| **Issue** | Full audit 2026-11-06: the generic pilot named one field *file system access*, *file management* and *file access* (S-E16D, S-7B04, S-77D5 and later); `Ledger.unmatched` counts only the exact name, so two of them reached three and two near-duplicate pilots were proposed 3 minutes apart (S-0CB7, S-8E2C); the second card was made while the first still waited. The owner approved both: the roster now has *file-system-access* and *file-management*. |
+| **Reproduce** | Ask about one field in different words three times each; look at the pilots.create cards. |
+| **Check** | Requests about one field count together whatever its exact name (shared words, or the same field as an existing or proposed pilot); no second proposal while one for an overlapping field waits; a test across the runtime and the ledger. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 in [PR #151](https://github.com/voidbrain/nerv/pull/151): [PR #150 CI](https://github.com/voidbrain/nerv/actions/runs/42215185296) passed validate, windows and native-macos; read with ci:status. Implemented in [PR #150](https://github.com/voidbrain/nerv/pull/150): shared significant whole-word matching for unmatched requests and pending/rejected proposals, retaining the roster check with `choosePilot`. Proposal creation is serialized per runtime so overlapping concurrent requests see the first card. Regression exercises varying labels through the runtime, scheduler and ledger, suppression while pending, approval and rejection. No remaining required checks.
+
+**Estimates:** No remaining effort; ~100% complete. Reassessed 2026-11-06 after all checks passed.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #150](https://github.com/voidbrain/nerv/pull/150); full audit 2026-11-06 (events `pilot.unmatched` on Neo Tokyo-3) |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-06 Unit/integration: npm test passed (181 passed, 1 platform skip), including varying labels across runtime/ledger and concurrent suppression; typecheck, build, integrations and conventions passed. Merged PR #150 CI run 42215185296 passed validate, windows and native-macos |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
