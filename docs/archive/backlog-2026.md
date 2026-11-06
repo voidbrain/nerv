@@ -1925,7 +1925,7 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Closed 2026-11-06 after [PR #160 CI](https://github.com/voidbrain/nerv/actions/runs/42241192687) passed validate, windows and native-macos (ci:status), with local scoped Chrome/axe and screenshot review. Found and candidate fix implemented 2026-11-06 during pilot-model and map review. Map cloud label now reads route health for this base, costs remain explicitly unavailable, and muted badges use --text on their existing tinted background. Focused regressions and scoped Chrome/axe passed; no remaining required checks.
+**Next action / closure evidence:** Closed 2026-11-06 in [PR #161](https://github.com/voidbrain/nerv/pull/161) after [PR #160 CI](https://github.com/voidbrain/nerv/actions/runs/42241192687) passed validate, windows and native-macos (ci:status), with local scoped Chrome/axe and screenshot review. Found and candidate fix implemented 2026-11-06 during pilot-model and map review. Map cloud label now reads route health for this base, costs remain explicitly unavailable, and muted badges use --text on their existing tinted background. Focused regressions and scoped Chrome/axe passed; no remaining required checks.
 
 **Estimates:** No remaining effort; ~100% complete. Reassessed 2026-11-06 after regression, scoped browser and green merged CI acceptance.
 
@@ -1959,7 +1959,7 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Closed 2026-11-06 after [PR #160 CI](https://github.com/voidbrain/nerv/actions/runs/42241192687) passed validate, windows and native-macos (ci:status), with local scoped Chrome/axe and screenshot review. Found and candidate fix implemented 2026-11-06 during pilot-model and map review. Map cloud label now reads route health for this base, costs remain explicitly unavailable, and muted badges use --text on their existing tinted background. Focused regressions and scoped Chrome/axe passed; no remaining required checks.
+**Next action / closure evidence:** Closed 2026-11-06 in [PR #161](https://github.com/voidbrain/nerv/pull/161) after [PR #160 CI](https://github.com/voidbrain/nerv/actions/runs/42241192687) passed validate, windows and native-macos (ci:status), with local scoped Chrome/axe and screenshot review. Found and candidate fix implemented 2026-11-06 during pilot-model and map review. Map cloud label now reads route health for this base, costs remain explicitly unavailable, and muted badges use --text on their existing tinted background. Focused regressions and scoped Chrome/axe passed; no remaining required checks.
 
 **Estimates:** No remaining effort; ~100% complete. Reassessed 2026-11-06 after regression, scoped browser and green merged CI acceptance.
 
