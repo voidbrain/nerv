@@ -1698,3 +1698,174 @@ Closed records in closing-date order. Dated evidence, not current status.
 ### Other changes — root scratch directory
 
 Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): ignore `/~/` in this project’s `.gitignore`. This is a project-only setting in an adapted harness file; the shared template is unchanged. `git check-ignore` confirms the root directory and its contents are ignored while `nested/~/example` remains unignored. Reviewed README, AGENTS/area notes, backlog rules and the style guide: no affected product claims.
+
+
+### B-030
+
+**Angular workspace styles are blocked by its service CSP**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: browser/accessibility acceptance and merged CI passed.
+
+| | |
+|---|---|
+| **Issue** | Browser acceptance for F-010: the default Angular build emits a stylesheet with media=print and an inline activation script. The service blocks inline scripts, so only critical CSS loads and the workspace appears mostly unstyled. |
+| **Reproduce** | Build and serve the Angular workspace, connect to a temporary backend, and inspect computed styles and axe results. |
+| **Check** | The built app loads its full stylesheet under the service CSP, uses the grid layout and has no CSP violations. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 after [PR #157 CI](https://github.com/voidbrain/nerv/actions/runs/42225026067) passed validate (including Linux Chrome/axe), windows and native-macos; read with ci:status. Found 2026-11-06 during F-010 acceptance. Fix verified by the repeatable Chrome/axe suite and inspected screenshots; see [scope and evidence](acceptance/angular-2026-11-06.md). No remaining required checks.
+
+**Estimates:** No remaining effort; ~100% complete. Reassessed 2026-11-06 after browser/accessibility acceptance and merged CI passed.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Local Chrome screenshot and axe results, 2026-11-06; F-010 |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-06 Browser/accessibility: all ten Chrome/axe views passed, screenshots inspected; merged PR #157 CI run 42225026067 passed validate, windows and native-macos |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### B-031
+
+**The status card skips the page heading hierarchy**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: browser/accessibility acceptance and merged CI passed.
+
+| | |
+|---|---|
+| **Issue** | F-010 browser acceptance: axe reports heading-order because the registered status card uses h3 immediately after the workspace h1. |
+| **Reproduce** | Build and serve the Angular workspace, connect to a temporary backend, and inspect computed styles and axe results. |
+| **Check** | The status card uses a level-two heading; connected English/Italian views pass axe, including the shadow tree. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 after [PR #157 CI](https://github.com/voidbrain/nerv/actions/runs/42225026067) passed validate (including Linux Chrome/axe), windows and native-macos; read with ci:status. Found 2026-11-06 during F-010 acceptance. Fix verified by the repeatable Chrome/axe suite and inspected screenshots; see [scope and evidence](acceptance/angular-2026-11-06.md). No remaining required checks.
+
+**Estimates:** No remaining effort; ~100% complete. Reassessed 2026-11-06 after browser/accessibility acceptance and merged CI passed.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Local Chrome screenshot and axe results, 2026-11-06; F-010 |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-06 Browser/accessibility: all ten Chrome/axe views passed, screenshots inspected; merged PR #157 CI run 42225026067 passed validate, windows and native-macos |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### B-032
+
+**Angular navigation widens a 320 px viewport**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: browser/accessibility acceptance and merged CI passed.
+
+| | |
+|---|---|
+| **Issue** | F-010 browser acceptance with full styles: the mobile navigation row makes a 320 px page about 344 px wide. |
+| **Reproduce** | Build and serve the Angular workspace, connect to a temporary backend, and inspect computed styles and axe results. |
+| **Check** | English and Italian layouts have no horizontal page overflow at 320, 390 and 1440 px; controls and reminder content remain usable. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 after [PR #157 CI](https://github.com/voidbrain/nerv/actions/runs/42225026067) passed validate (including Linux Chrome/axe), windows and native-macos; read with ci:status. Found 2026-11-06 during F-010 acceptance. Fix verified by the repeatable Chrome/axe suite and inspected screenshots; see [scope and evidence](acceptance/angular-2026-11-06.md). No remaining required checks.
+
+**Estimates:** No remaining effort; ~100% complete. Reassessed 2026-11-06 after browser/accessibility acceptance and merged CI passed.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Local Chrome screenshot and axe results, 2026-11-06; F-010 |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-06 Browser/accessibility: all ten Chrome/axe views passed, screenshots inspected; merged PR #157 CI run 42225026067 passed validate, windows and native-macos |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### B-033
+
+**Doctor diagnostic output cannot be keyboard-scrolled**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: browser/accessibility acceptance and merged CI passed.
+
+| | |
+|---|---|
+| **Issue** | F-010 browser acceptance at 320 px: axe reports scrollable-region-focusable because long doctor JSON scrolls inside a pre without keyboard focus. |
+| **Reproduce** | Build and serve the Angular workspace, connect to a temporary backend, and inspect computed styles and axe results. |
+| **Check** | The doctor output is a keyboard-focusable labelled region with visible focus; both languages pass axe at narrow widths. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 after [PR #157 CI](https://github.com/voidbrain/nerv/actions/runs/42225026067) passed validate (including Linux Chrome/axe), windows and native-macos; read with ci:status. Found 2026-11-06 during F-010 acceptance. Fix verified by the repeatable Chrome/axe suite and inspected screenshots; see [scope and evidence](acceptance/angular-2026-11-06.md). No remaining required checks.
+
+**Estimates:** No remaining effort; ~100% complete. Reassessed 2026-11-06 after browser/accessibility acceptance and merged CI passed.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Local Chrome screenshot and axe results, 2026-11-06; F-010 |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-06 Browser/accessibility: all ten Chrome/axe views passed, screenshots inspected; merged PR #157 CI run 42225026067 passed validate, windows and native-macos |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### F-010
+
+**English-default interface with Italian selectable, and dedicated development port**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: scoped browser acceptance and merged CI passed.
+
+| | |
+|---|---|
+| **Issue** | Translation and configuration implemented; natural-language interpretation remains F-003. Scoped browser visual/accessibility acceptance passed locally and in merged CI. |
+| **Reproduce** | Follow docs/INSTALL.md and the scoped headless implementation checks. |
+| **Check** | English default (owner decision 2026-11-04, was Italian), matching translation keys, selectable Italian with the language switcher kept, unchanged reminder content, labelled browser-local dates, development port 4318. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 after [PR #157 CI](https://github.com/voidbrain/nerv/actions/runs/42225026067) passed validate (including Linux Chrome/axe), windows and native-macos; read with ci:status. 2026-11-06: repeatable Chrome/axe acceptance passed against the built UI and real local server: English default, selectable Italian, unchanged reminder text/UTC, browser-local dates, 4318 config, applied styles and responsive layout. Four discovered defects B-030–B-033 repaired; screenshots inspected. See [scope, evidence and limits](acceptance/angular-2026-11-06.md). No remaining required checks. Implemented in [PR #1](https://github.com/voidbrain/nerv/pull/1) with Italian as the default; the owner switched the default to English on 2026-11-04 ([PR #17](https://github.com/voidbrain/nerv/pull/17)): `init` writes `en`, the server and socket fall back to `en`, the web UI and `index.html` start in English, the native menu defaults to English unless a choice is stored; the switcher stays in both. Existing installs keep the language in their `config.json` (an `init` before this wrote `it`); set `"language": "en"` there and restart. Understanding and replying in Italian is conversational work under F-003.
+
+**Estimates:** No remaining effort; ~100% complete. Reassessed 2026-11-06 after browser acceptance, defect fixes and merged CI passed.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green; [PR #17](https://github.com/voidbrain/nerv/pull/17) (English default) |
+| Opened | 2026-11-01 |
+| Verification | 2026-11-04: config default and RPC/doctor fallback asserted `en` in test/runtime.test.ts and test/protocol.test.ts, build, headless and Swift tests (local run; CI green: PR #17 run 41804450728, main run 41804458202; record fix PR #18 run 41804775905, main run 41804783909). 2026-11-06 Browser/accessibility: ten Chrome/axe views passed and screenshots inspected; scope/limits in docs/acceptance/angular-2026-11-06.md; merged PR #157 CI run 42225026067 passed validate, windows and native-macos |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
