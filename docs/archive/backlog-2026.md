@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 26 | 35 |
+| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 27 | 37 |
 <!-- archive-recap:end -->
 
 <a id="archive-week-2026-11-02"></a>
@@ -2121,6 +2121,112 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 | PR / evidence | [PR #167](https://github.com/voidbrain/nerv/pull/167) archive adoption/source review and CI reconciliation;  Owner request 2026-11-06; docs/audits/2026-11-06-brainstorm-retirement.md |
 | Opened | 2026-11-06 |
 | Verification | Backlog and scoped audit manifest checks passed; CI passed in PR #167. This is a source review, not product acceptance. |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+
+### B-038
+
+**Architecture documentation overstates Sync evidence and Spear compensation**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: recorded checks passed after PR #170 merged.
+
+| | |
+|---|---|
+| **Issue** | Confirmed documentation defect: source still uses Casper confidence in Sync, and Spear reports inverse metadata without executing it. Correct current documents and issue a dated correction to the immutable report. |
+| **Reproduce** | Compare the published retirement crosswalk and current Architecture with policy.ts ballot, Ledger.spear and model.ts route handling. |
+| **Check** | All 14 dispositions and 23 crosswalk rows have reasoned judgements, preserved proposals remain unaccepted, and current documentation accurately describes Sync, Spear and route fallback. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06. PR #170 merged after both CI runs 42289559677/42289552958 passed validate, windows and native-macos. All 14 dispositions and 23 crosswalk rows reviewed; fixture synchronization corrected without changing runtime behavior or assertions. Closure reconciliation PR linked below.
+
+**Estimates:** Small; ~100% complete. Closed 2026-11-06 after source review, local checks and merged PR #170 CI.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #170](https://github.com/voidbrain/nerv/pull/170) |
+| Closure PR | this PR |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-06: ci:status confirms both PR #170 runs green. Four one-channel integration cases passed with coverage locally; full suite 206 passed, one platform skip. Backlog, audit scopes, recaps, conventions, links and whitespace passed. Product proposals remain unaccepted. |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### B-039
+
+**Telegram fallback regression asserts state before its response completes**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: recorded checks passed after PR #170 merged.
+
+| | |
+|---|---|
+| **Issue** | CI run 42289045658 fails one-channel.test.ts:73: fake send request is visible before the client receives acceptance and updates channel state. The parallel run passes. Wait for accepted fallback telemetry before asserting, preserving the required behavior. |
+| **Reproduce** | Run the one-channel integration fixture with coverage/concurrent test load; request receipt can precede the awaited API response. |
+| **Check** | Regression waits for the local fallback send and accepted local delivery telemetry; unchanged route and delivery assertions pass. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06. PR #170 merged after both CI runs 42289559677/42289552958 passed validate, windows and native-macos. All 14 dispositions and 23 crosswalk rows reviewed; fixture synchronization corrected without changing runtime behavior or assertions. Closure reconciliation PR linked below.
+
+**Estimates:** Small; ~100% complete. Closed 2026-11-06 after source review, local checks and merged PR #170 CI.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #170](https://github.com/voidbrain/nerv/pull/170) |
+| Closure PR | this PR |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-06: ci:status confirms both PR #170 runs green. Four one-channel integration cases passed with coverage locally; full suite 206 passed, one platform skip. Backlog, audit scopes, recaps, conventions, links and whitespace passed. Product proposals remain unaccepted. |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### F-061
+
+**Reassess retired architecture concepts and preserved proposals**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: recorded checks passed after PR #170 merged.
+
+| | |
+|---|---|
+| **Issue** | Owner requests better/worse/different judgements and reasons, covering both retirement matrices and the undecided proposals. This record owns the assessment only, not implementation of its recommendations. |
+| **Reproduce** | Compare the published retirement crosswalk and current Architecture with policy.ts ballot, Ledger.spear and model.ts route handling. |
+| **Check** | All 14 dispositions and 23 crosswalk rows have reasoned judgements, preserved proposals remain unaccepted, and current documentation accurately describes Sync, Spear and route fallback. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06. PR #170 merged after both CI runs 42289559677/42289552958 passed validate, windows and native-macos. All 14 dispositions and 23 crosswalk rows reviewed; fixture synchronization corrected without changing runtime behavior or assertions. Closure reconciliation PR linked below.
+
+**Estimates:** Small; ~100% complete. Closed 2026-11-06 after source review, local checks and merged PR #170 CI.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #170](https://github.com/voidbrain/nerv/pull/170) |
+| Closure PR | this PR |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-06: ci:status confirms both PR #170 runs green. Four one-channel integration cases passed with coverage locally; full suite 206 passed, one platform skip. Backlog, audit scopes, recaps, conventions, links and whitespace passed. Product proposals remain unaccepted. |
 | Reviewed | 2026-11-06 |
 
 </details>
