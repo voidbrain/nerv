@@ -1399,7 +1399,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Implemented in [PR PR_57] (2026-11-06): `src/build.ts` reads the package version and `git rev-parse HEAD` once when the server starts; `/api/doctor` reports `build`; the header button (`showBuild`, `copyBuild`). Checked: test/dashboard.test.ts across the server and the dashboard functions (the doctor's commit equals the checkout's; hover text; copy; a refused clipboard); headless Chrome against a throwaway base: `v0.1.0`, the full commit on hover, the clipboard held the commit after a click; a screenshot.
+**Next action / closure evidence:** Implemented in [PR #148](https://github.com/voidbrain/nerv/pull/148) (2026-11-06): `src/build.ts` reads the package version and `git rev-parse HEAD` once when the server starts; `/api/doctor` reports `build`; the header button (`showBuild`, `copyBuild`). Checked: test/dashboard.test.ts across the server and the dashboard functions (the doctor's commit equals the checkout's; hover text; copy; a refused clipboard); headless Chrome against a throwaway base: `v0.1.0`, the full commit on hover, the clipboard held the commit after a click; a screenshot.
 
 **Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-06.
 
