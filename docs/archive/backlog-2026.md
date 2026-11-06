@@ -2260,7 +2260,7 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 | Field | Value |
 |---|---|
 | PR / evidence | [PR #173](https://github.com/voidbrain/nerv/pull/173); docs/acceptance/core-2026-11-06.md; [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
-| Closure PR | this PR |
+| Closure PR | [PR #175](https://github.com/voidbrain/nerv/pull/175) |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-06: ci:status confirms both PR #173 runs green for validate, windows and native-macos. Local Chrome/axe 23 states; 213 tests passed, one platform skip; three headless cases passed, one Windows-only skip. All named local-core acceptance passed; no physical-phone or hosted-deployment claim. |
 | Reviewed | 2026-11-06 |
