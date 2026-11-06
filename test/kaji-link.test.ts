@@ -1,4 +1,6 @@
 import {test} from 'node:test';
+import type {ChannelState} from '../src/channel-state.ts';
+import {makeServer} from '../src/server.ts';
 import assert from 'node:assert/strict';
 import {generateKeyPairSync,type KeyObject} from 'node:crypto';
 import {createServer} from 'node:net';
@@ -93,7 +95,9 @@ test('through two runtimes wired as serve does: a base whose model route is down
  try{
   await a.ready();await b.ready();assert.equal(await a.kaji.add(records),2);assert.equal(await b.kaji.add(records),2);
   a.setBaseKey(A.publicKey);b.setBaseKey(B.publicKey);
-  for(const [r,id,k] of [[a,'NERV-01',A],[b,'NERV-02',B]] as const)links.push(new KajiLink({baseId:id,key:k.privateKey,publicKey:k.publicKey,registry:r.kaji,log:()=>{},health:()=>r.baseHealth(),onHealth:(peer,h)=>r.notePeerHealth(peer,h)}));
+  let report:ChannelState={mode:'local-fallback',destination:'NERV-01',checkedAt:new Date().toISOString(),lastDelivery:{route:'local',result:'accepted',at:new Date().toISOString()}};
+  a.setChannelState(()=>({mode:'unavailable',checkedAt:new Date().toISOString()}));b.setChannelState(()=>report);
+  for(const [r,id,k] of [[a,'NERV-01',A],[b,'NERV-02',B]] as const)links.push(new KajiLink({baseId:id,key:k.privateKey,publicKey:k.publicKey,registry:r.kaji,log:()=>{},health:()=>r.baseHealth(),onHealth:(peer,h)=>r.notePeerHealth(peer,h),channel:()=>r.channelState(),onChannel:(peer,c)=>r.notePeerChannel(peer,c)}));
   for(const l of links)await l.start(200);
   type Base={baseId:string;online:boolean;self:boolean;health:{state:string;reasons:string[]}|null};
   await until(async()=>((await b.bases()) as Base[]).find(x=>x.baseId==='NERV-01')?.health?.state==='degraded',15000);
@@ -101,6 +105,26 @@ test('through two runtimes wired as serve does: a base whose model route is down
   assert.ok(tokyo.online);assert.match(tokyo.health!.reasons[0]!,/^S² local route down since .*: Local route \(S²\) unreachable\./);
   assert.equal(seenByB.find(x=>x.self)!.health!.state,'online','Tabgha has no model route configured: nothing is down');
   await until(async()=>((await a.bases()) as Base[]).find(x=>x.baseId==='NERV-02')?.health?.state==='online');
+  await until(async()=>(await a.bases()).find(x=>x.baseId==='NERV-02')?.channel?.mode==='local-fallback');
+  const api=makeServer(a,'a'.repeat(32));await new Promise<void>(done=>api.listen(0,'127.0.0.1',done));
+  const base=`http://127.0.0.1:${(api.address() as {port:number}).port}`;
+  const read=async()=>await (await fetch(base+'/api/bases',{headers:{authorization:'Bearer '+'a'.repeat(32)}})).json() as Awaited<ReturnType<typeof a.bases>>;
+  try{
+   assert.equal((await fetch(base+'/api/bases')).status,401);
+   let peer=(await read()).find(x=>x.baseId==='NERV-02')!;
+   assert.equal(peer.channelFresh,true);assert.equal(peer.channel?.lastDelivery?.result,'accepted');assert.equal(peer.channel?.destination,'NERV-01');
+   assert.equal((await b.bases()).find(x=>x.baseId==='NERV-01')?.channel?.mode,'unavailable','reply reports only its own channel');
+   report={...report,checkedAt:new Date(Date.now()-100_000).toISOString()};
+   await until(async()=>(await read()).find(x=>x.baseId==='NERV-02')?.channelFresh===false);
+   peer=(await read()).find(x=>x.baseId==='NERV-02')!;assert.equal(peer.online,true,'heartbeat can be online with stale channel state');
+   report={mode:'via-main',destination:'NERV-01',checkedAt:new Date().toISOString()};
+   await until(async()=>(await read()).find(x=>x.baseId==='NERV-02')?.channel?.mode==='via-main');
+   // An older peer that omits telemetry clears the previous report, rather than refreshing it.
+   await links[1]!.stop();
+   const old=new KajiLink({baseId:'NERV-02',key:B.privateKey,publicKey:B.publicKey,registry:b.kaji,log:()=>{}});
+   try{await old.start(200);await until(async()=>(await read()).find(x=>x.baseId==='NERV-02')?.channel===null);}finally{await old.stop();}
+  }finally{await new Promise<void>(done=>api.close(()=>done()));}
+
  }finally{for(const l of links)await l.stop();await a.close();await b.close();rmSync(ha,{recursive:true,force:true});rmSync(hb,{recursive:true,force:true});}
 });
 test('one missed heartbeat is not logged: a peer is logged unreachable only after a full online window of misses, once',async()=>{

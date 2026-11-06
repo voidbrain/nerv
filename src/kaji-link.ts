@@ -1,3 +1,4 @@
+import {sanitizeChannel,type ChannelState,type HeardChannel} from './channel-state.ts';
 import { createHash, randomBytes, sign, verify, type KeyObject } from 'node:crypto';
 import { createServer, request as httpRequest, type IncomingMessage, type Server } from 'node:http';
 import { canonical, publicKeyFrom, type BaseEntry, type SignedRecord } from './kaji.ts';
@@ -99,12 +100,16 @@ export class KajiLink {
   if(n>=missesToLog(every)&&this.reachable.get(peer)!==false){this.log(`Kaji: ${peer} unreachable${detail?` (${detail})`:''}; ${n} heartbeats missed.`);this.reachable.set(peer,false);}
  }
  private every=HEARTBEAT_MS;
- constructor(options:{baseId:string;key:KeyObject;publicKey:string;registry:RegistryPort;log?:(line:string)=>void;health?:()=>Promise<BaseHealth>;onHealth?:(baseId:string,health:HeardHealth)=>void;
+ constructor(options:{baseId:string;key:KeyObject;publicKey:string;registry:RegistryPort;log?:(line:string)=>void;channel?:()=>ChannelState;onChannel?:(baseId:string,channel:HeardChannel|null)=>void;health?:()=>Promise<BaseHealth>;onHealth?:(baseId:string,health:HeardHealth)=>void;
   onRelay?:(from:string,relay:Relay)=>Promise<boolean>;onChat?:(from:string,message:string,conversation?:string)=>Promise<DispatchedReply>;
   offers?:()=>string[];onOffers?:(baseId:string,offers:string[])=>void;onRun?:(from:string,item:RunItem)=>Promise<unknown>;onVerdict?:(from:string,ask:VerdictAsk)=>Promise<PeerVerdict|null>;onDecide?:(approvalId:string,decision:'approve'|'reject')=>Promise<string>}) {
   this.baseId=options.baseId;this.key=options.key;this.publicKey=options.publicKey;this.port=options.registry;this.log=options.log ?? (l=>console.error(l));
-  this.health=options.health;this.onHealth=options.onHealth;this.onRelay=options.onRelay;this.onDecide=options.onDecide;this.onChat=options.onChat;this.offers=options.offers;this.onOffers=options.onOffers;this.onRun=options.onRun;this.onVerdict=options.onVerdict;
+  this.channel=options.channel;this.onChannel=options.onChannel;this.health=options.health;this.onHealth=options.onHealth;this.onRelay=options.onRelay;this.onDecide=options.onDecide;this.onChat=options.onChat;this.offers=options.offers;this.onOffers=options.onOffers;this.onRun=options.onRun;this.onVerdict=options.onVerdict;
  }
+ private readonly channel:(()=>ChannelState)|undefined;
+ private readonly onChannel:((baseId:string,channel:HeardChannel|null)=>void)|undefined;
+ private ownChannel(){try{return sanitizeChannel(this.channel?.());}catch{return undefined;}}
+ private heardChannel(from:string,value:unknown){const c=sanitizeChannel(value);this.onChannel?.(from,c?{...c,receivedAt:new Date().toISOString()}:null);}
  private readonly onVerdict:((from:string,ask:VerdictAsk)=>Promise<PeerVerdict|null>)|undefined;
  private readonly offers:(()=>string[])|undefined;private readonly onOffers:((baseId:string,offers:string[])=>void)|undefined;private readonly onRun:((from:string,item:RunItem)=>Promise<unknown>)|undefined;
  private readonly onChat:((from:string,message:string,conversation?:string)=>Promise<DispatchedReply>)|undefined;
@@ -148,10 +153,10 @@ export class KajiLink {
    let body='';for await(const chunk of req){body+=chunk;if(body.length>MAX_BODY)throw new Error('too large');}
    const bases=await this.port.bases();const from=verifySigned(req.headers as Record<string,string>,'req',req.method ?? '',req.url ?? '',body,bases,this.nonces);
    if(req.method==='POST'&&req.url==='/kaji/heartbeat'){
-    const hb=JSON.parse(body) as {seen?:Record<string,string>;health?:unknown;offers?:unknown};const now=new Date().toISOString();
-    await this.port.seen({...sanitizeSeen(hb.seen,bases),[from]:now,[this.baseId]:now});this.heard(from,hb.health);this.heardOffers(from,hb.offers);
-    const health=await this.own();const offers=this.offers?.();
-    reply(200,{head:head(await this.port.records()),seen:await this.port.lastSeen(),...(health?{health}:{}),...(offers?{offers}:{})});return;
+    const hb=JSON.parse(body) as {seen?:Record<string,string>;health?:unknown;offers?:unknown;channel?:unknown};const now=new Date().toISOString();
+    await this.port.seen({...sanitizeSeen(hb.seen,bases),[from]:now,[this.baseId]:now});this.heard(from,hb.health);this.heardOffers(from,hb.offers);this.heardChannel(from,hb.channel);
+    const health=await this.own();const offers=this.offers?.();const channel=this.ownChannel();
+    reply(200,{head:head(await this.port.records()),seen:await this.port.lastSeen(),...(health?{health}:{}),...(offers?{offers}:{}),...(channel?{channel}:{})});return;
    }
    if(req.method==='GET'&&req.url==='/kaji/registry'){reply(200,{records:await this.port.records()});return;}
    // F-036 phase 2. Only the main base shows what the others relay; only a decision from the main base is applied here.
@@ -247,9 +252,9 @@ export class KajiLink {
   await this.port.seen({[this.baseId]:new Date().toISOString()});const health=await this.own();
   for(const peer of bases.filter(b=>b.status==='enrolled'&&b.publicKey!==this.publicKey)){
    try{
-    const offers=this.offers?.();
-    const r=await this.call(peer,'POST','/kaji/heartbeat',{seen:await this.port.lastSeen(),...(health?{health}:{}),...(offers?{offers}:{})}) as {head:{count:number;serial:number};seen?:Record<string,string>;health?:unknown;offers?:unknown};
-    await this.port.seen({...sanitizeSeen(r.seen,bases),[peer.baseId]:new Date().toISOString()});this.mark(peer.baseId,true);this.heard(peer.baseId,r.health);this.heardOffers(peer.baseId,r.offers);
+    const offers=this.offers?.();const channel=this.ownChannel();
+    const r=await this.call(peer,'POST','/kaji/heartbeat',{seen:await this.port.lastSeen(),...(health?{health}:{}),...(offers?{offers}:{}),...(channel?{channel}:{})}) as {head:{count:number;serial:number};seen?:Record<string,string>;health?:unknown;offers?:unknown;channel?:unknown};
+    await this.port.seen({...sanitizeSeen(r.seen,bases),[peer.baseId]:new Date().toISOString()});this.mark(peer.baseId,true);this.heard(peer.baseId,r.health);this.heardOffers(peer.baseId,r.offers);this.heardChannel(peer.baseId,r.channel);
     const mine=head(await this.port.records());
     if(r.head.count>mine.count||r.head.serial>mine.serial){const got=await this.call(peer,'GET','/kaji/registry') as {records:SignedRecord[]};const added=await this.port.add(got.records);if(added)this.log(`Kaji: ${added} new registry record(s) from ${peer.baseId}.`);}
    }catch(e){this.mark(peer.baseId,false,e instanceof Error?e.message:'error');}

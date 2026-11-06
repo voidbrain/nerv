@@ -1,5 +1,7 @@
 import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import type { StoreApi } from './runtime.ts';
+import { ONLINE_MS } from './kaji-link.ts';
+import type { ChannelState } from './channel-state.ts';
 import type { Approval } from './ledger.ts';
 /**
  * Aoba, the Telegram channel (F-003), with Pen Pen's deliveries (F-023). Outbound HTTPS only (long polling): no open
@@ -79,25 +81,46 @@ export function decisionText(result:{decision:string;result?:unknown;error?:stri
 }
 /** F-036 phase 2. On a base that is not the main one: while the main base is online, this base's bot is quiet and what
     it would send goes to the main base's Aoba instead (cards keep their own approvals). */
-export interface OneChannel {quiet():Promise<boolean>;relay(text:string,cards:{id:string;label:string}[]):Promise<boolean>}
+export interface OneChannel {destination?():Promise<string|undefined>;quiet():Promise<boolean>;relay(text:string,cards:{id:string;label:string}[]):Promise<boolean>}
 /** On the main base: a tap on a card relayed from another base is decided there. */
 export interface RemoteDecide {decide(baseId:string,approvalId:string,decision:'approve'|'reject'):Promise<string>}
 export class TelegramChannel {
  readonly api:TelegramApi;readonly store:StoreApi;readonly chatId:number;readonly statePath:string;readonly log:(line:string)=>void;
  private held=new Map<string,{key:string;since:number}>();private readonly one:OneChannel|undefined;private readonly remote:RemoteDecide|undefined;
- private async quiet():Promise<boolean>{return !!this.one&&await this.one.quiet().catch(()=>false);}
+ private routeState:ChannelState={mode:'unknown',checkedAt:new Date().toISOString()};
+ /** Cached actual route checks and send outcomes; reading telemetry never sends or probes Telegram. */
+ channelState():ChannelState{return {...this.routeState,...(this.routeState.lastDelivery?{lastDelivery:{...this.routeState.lastDelivery}}:{})};}
+ private async quiet():Promise<boolean>{
+  let quiet=false;let mode:ChannelState['mode']='local';
+  const destination=await this.one?.destination?.().catch(()=>undefined);
+  try{quiet=!!this.one&&await this.one.quiet();mode=quiet?'via-main':destination?'local-fallback':'local';}catch{mode='unknown';}
+  // A failed relay's local fallback stays visible until a new send or a different route check, at most 90 seconds.
+  const last=this.routeState.lastDelivery;
+  if(quiet&&this.routeState.mode==='local-fallback'&&this.routeState.destination===destination&&last&&Date.now()-Date.parse(last.at)<ONLINE_MS)mode='local-fallback';
+  this.routeState={mode,checkedAt:new Date().toISOString(),...(destination?{destination}:{}),...(last?{lastDelivery:last}:{})};
+  return quiet;
+ }
+ private delivered(route:'main'|'local',result:'accepted'|'failed',fallback=false){
+  this.routeState={...this.routeState,mode:route==='main'?'via-main':fallback?'local-fallback':'local',lastDelivery:{route,result,at:new Date().toISOString()}};
+ }
  /** Everything this base sends on its own (cards, reminders, brief, follow-ups): relayed while quiet, else its own bot; a failed relay falls back to its own bot, so nothing is lost. */
  private async out(text:string,buttons?:Button[][]):Promise<void>{
-  if(await this.quiet()){
+  const quiet=await this.quiet();
+  if(quiet){
    const cards=(buttons ?? []).flatMap((row,i,all)=>{const a=row.find(b=>/^a:[a-f0-9-]{36}$/.test(b.callback_data));return a?[{id:a.callback_data.slice(2),label:all.length>1?String(i+1):''}]:[];});
-   if(await this.one!.relay(text,cards).catch(()=>false))return;
+   if(await this.one!.relay(text,cards).catch(()=>false)){this.delivered('main','accepted');return;}
   }
-  await this.api.send(this.chatId,text,buttons);
+  await this.sendLocal(text,buttons,quiet||this.routeState.destination!==undefined);
  }
+ private async sendLocal(text:string,buttons?:Button[][],fallback=this.routeState.destination!==undefined){
+  try{await this.api.send(this.chatId,text,buttons);this.delivered('local','accepted',fallback);}
+  catch(e){this.delivered('local','failed',fallback);throw e;}
+ }
+
  /** On the main base: shows what another base relayed, its cards with buttons that decide on that base. */
  async relayed(fromId:string,fromName:string,relay:{text:string;cards:{id:string;label:string}[]}):Promise<boolean>{
   const buttons=relay.cards.map(c=>[{text:c.label?`✅ ${c.label}`:'✅ Approve once',callback_data:`k:${fromId}:a:${c.id}`},{text:c.label?`❌ ${c.label}`:'❌ Reject',callback_data:`k:${fromId}:r:${c.id}`}]);
-  await this.api.send(this.chatId,`🛰 ${fromName} · ${relay.text}`,buttons.length?buttons:undefined);return true;
+  await this.sendLocal(`🛰 ${fromName} · ${relay.text}`,buttons.length?buttons:undefined);return true;
  }
  private state:State={cards:[]};private stopping=new AbortController();private queue:Promise<void>=Promise.resolve();private timer?:NodeJS.Timeout;private delivery?:Promise<void>;
  constructor(options:{api:TelegramApi;store:StoreApi;chatId:number;statePath:string;log?:(line:string)=>void;oneChannel?:OneChannel;remote?:RemoteDecide}) {
@@ -138,7 +161,7 @@ export class TelegramChannel {
     await this.api.call('answerCallbackQuery',{callback_query_id:q.id,text:outcome.slice(0,180)});
     const rest=(q.message?.reply_markup?.inline_keyboard ?? []).filter(row=>!row.some(b=>b.callback_data.endsWith(':'+far[3])));
     if(q.message&&!outcome.startsWith('Not applied: '+far[1]+' could not'))await this.api.call('editMessageReplyMarkup',{chat_id:this.chatId,message_id:q.message.message_id,reply_markup:{inline_keyboard:rest}}).catch(()=>{});
-    await this.api.send(this.chatId,`🛰 ${far[1]} · ${outcome}`);return;
+    await this.sendLocal(`🛰 ${far[1]} · ${outcome}`);return;
    }
    const match=/^([ar]):([a-f0-9-]{36})$/.exec(q.data ?? '');
    if(!match){await this.api.call('answerCallbackQuery',{callback_query_id:q.id,text:'Unknown button.'});return;}
@@ -149,21 +172,21 @@ export class TelegramChannel {
    // Only the decided card's row goes: in a bundle the other facts keep their buttons.
    const rest=(q.message?.reply_markup?.inline_keyboard ?? []).filter(row=>!row.some(b=>b.callback_data.endsWith(':'+match[2])));
    if(q.message)await this.api.call('editMessageReplyMarkup',{chat_id:this.chatId,message_id:q.message.message_id,reply_markup:{inline_keyboard:rest}}).catch(()=>{});
-   await this.api.send(this.chatId,outcome);
+   await this.sendLocal(outcome);
    return;
   }
   const m=u.message;if(!m?.text)return;
   if(m.chat.type!=='private'||!this.owner(m.chat.id)||(m.from&&!this.owner(m.from.id))){this.log('Telegram: ignored a message from another chat.');return;}
   // Messages queued while the service was down for long are not replayed as fresh requests.
-  if(Date.now()/1000-m.date>STALE_SECONDS){await this.api.send(this.chatId,'I was offline when you sent that; send it again if it still matters.');return;}
+  if(Date.now()/1000-m.date>STALE_SECONDS){await this.sendLocal('I was offline when you sent that; send it again if it still matters.');return;}
   const text=m.text.trim();
-  if(text==='/start'){await this.api.send(this.chatId,'Aoba here. Write what you need; actions that need you arrive with buttons.');return;}
-  if(!this.store.chat){await this.api.send(this.chatId,'The agent loop is not available.');return;}
+  if(text==='/start'){await this.sendLocal('Aoba here. Write what you need; actions that need you arrive with buttons.');return;}
+  if(!this.store.chat){await this.sendLocal('The agent loop is not available.');return;}
   const typing=setInterval(()=>{void this.api.call('sendChatAction',{chat_id:this.chatId,action:'typing'}).catch(()=>{});},4000);
   void this.api.call('sendChatAction',{chat_id:this.chatId,action:'typing'}).catch(()=>{});
   try{
    const reply=await this.store.chat(text.slice(0,4000),`telegram:${this.chatId}`);
-   await this.api.send(this.chatId,reply.reply ?? `I could not finish: ${reply.error ?? 'no reply'}`);
+   await this.sendLocal(reply.reply ?? `I could not finish: ${reply.error ?? 'no reply'}`);
    await this.deliver();
   }finally{clearInterval(typing);}
  }

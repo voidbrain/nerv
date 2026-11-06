@@ -30,8 +30,10 @@ Pilot model controls belong in the Marduk Institute/Pilots panel: the Generic pi
 
 Muted badges use `--text` on their tinted background so the small labels retain AA contrast.
 
-The map legend groups NERV base states separately from links/activity and uses “Sync” for synchronization pulses. The Umbilical caption reports this base’s measured cloud-route health, including unknown; it does not aggregate unreported peer capabilities. Live budget cards show cost tracking as unavailable until accounting is connected. Telegram fallback already works; displaying its per-base mode awaits shared channel-state telemetry.
+The map legend groups NERV base states separately from links/activity and uses “Sync” for synchronization pulses. The Umbilical caption reports this base’s measured cloud-route health, including unknown; it does not aggregate unreported peer capabilities. Live budget cards show cost tracking as unavailable until accounting is connected. Telegram fallback already works; the bases panel now reports each base’s first-hand channel state from signed heartbeat telemetry.
 
 Pilot model rows keep the visible “Model” label, selector and Apply button inline. The accessible name retains the pilot identity. Apply is disabled for the saved selection, unavailable choices and in-flight changes; choosing a different installed model enables it, and saving or reverting disables it again.
 
 A forwarded sortie detail names the answering base and shows its full destination sortie reference when received. It describes actions on this base only; waiting and failed relays never claim a tool-free answer. An enrolled Kaji protocol address is not a dashboard link. Local empty sorties distinguish planning, failure, stopping and completed answers.
+
+Telegram routing in the bases panel separates route checks from send outcomes. A stale/offline report reads unknown with its last reported mode and checked time; absent telemetry reads state not reported. “Accepted” means a send was accepted through main or the local bot, with its timestamp; phone receipt remains unknown. No private channel identifiers or message content belong in telemetry.

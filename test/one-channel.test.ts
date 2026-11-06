@@ -47,12 +47,12 @@ test('one channel: while the main base is online the other base\'s bot is quiet,
  const sa=new Store(join(homeA,'nerv.sqlite')),sb=new Store(join(homeB,'nerv.sqlite'));const ra=new Registry(sa.db,root.publicKey),rb=new Registry(sb.db,root.publicKey);
  for(const r of [rec({kind:'enrol',baseId:'NERV-01',name:'Neo Tokyo-3',publicKey:A.publicKey,address:`127.0.0.1:${pa}`}),rec({kind:'enrol',baseId:'NERV-02',name:'Tabgha',publicKey:B.publicKey,address:`127.0.0.1:${pb}`}),rec({kind:'main',baseId:'NERV-01'})]){ra.add(r);rb.add(r);}
  const ta='111:'+'a'.repeat(35),tb='222:'+'b'.repeat(35);const botA=await fakeBot(ta),botB=await fakeBot(tb);
- let aoba:TelegramChannel|undefined;let mainUp=true;
- const la=new KajiLink({baseId:'NERV-01',key:A.privateKey,publicKey:A.publicKey,registry:port(ra),log:()=>{},onRelay:async(from,relay)=>aoba!.relayed(from,from==='NERV-02'?'Tabgha':from,relay)});
+ let aoba:TelegramChannel|undefined;let mainUp=true;let relayWorks=true;
+ const la=new KajiLink({baseId:'NERV-01',key:A.privateKey,publicKey:A.publicKey,registry:port(ra),log:()=>{},onRelay:async(from,relay)=>relayWorks?aoba!.relayed(from,from==='NERV-02'?'Tabgha':from,relay):false});
  const lb=new KajiLink({baseId:'NERV-02',key:B.privateKey,publicKey:B.publicKey,registry:port(rb),log:()=>{},onDecide:async(id,d)=>decisionText(sb.decide(id,d,'telegram'))});
  aoba=new TelegramChannel({api:new TelegramApi(ta,botA.base),store:sa as unknown as StoreApi,chatId:OWNER,statePath:join(homeA,'tg.json'),log:()=>{},remote:{decide:(b,id,d)=>la.decide(b,id,d)}});
  const tabgha=new TelegramChannel({api:new TelegramApi(tb,botB.base),store:sb as unknown as StoreApi,chatId:OWNER,statePath:join(homeB,'tg.json'),log:()=>{},
-  oneChannel:{quiet:async()=>mainUp,relay:(text,cards)=>lb.relay({text,cards})}});
+  oneChannel:{destination:async()=> 'NERV-01',quiet:async()=>mainUp,relay:(text,cards)=>lb.relay({text,cards})}});
  try{
   await la.start(60_000);await lb.start(60_000);await aoba.start(100);await tabgha.start(100);
   // A card on Tabgha (an owner-only action), while Neo Tokyo-3 is the main base and online.
@@ -64,12 +64,21 @@ test('one channel: while the main base is online the other base\'s bot is quiet,
   botA.tap(rows[0]![0]!.callback_data,rows);
   await until(()=>sb.memory.list().length===1);assert.equal(sb.memory.list()[0]!.text,'Coffee at 8','the tap on Aoba decided the card on Tabgha');
   await until(()=>botA.sent().some(m=>/^🛰 NERV-02 · Approved/.test(m.text)));
+  assert.equal(tabgha.channelState().mode,'via-main');assert.equal(tabgha.channelState().destination,'NERV-01');
+  assert.deepEqual([tabgha.channelState().lastDelivery?.route,tabgha.channelState().lastDelivery?.result],['main','accepted']);
+  // Main is online but cannot deliver: the existing fallback sends through this base's own bot.
+  relayWorks=false;await sb.add('Fallback test',new Date(Date.now()+300).toISOString());sb.tick(new Date(Date.now()+1000));
+  await until(()=>botB.sent().some(m=>/⏰ Fallback test/.test(m.text)));
+  assert.equal(tabgha.channelState().mode,'local-fallback');
+  assert.deepEqual([tabgha.channelState().lastDelivery?.route,tabgha.channelState().lastDelivery?.result],['local','accepted']);
+  relayWorks=true;await sb.add('Relay recovered',new Date(Date.now()+300).toISOString());sb.tick(new Date(Date.now()+1000));
+  await until(()=>botA.sent().some(m=>/⏰ Relay recovered/.test(m.text)));assert.equal(tabgha.channelState().mode,'via-main');
   // A forged decision from a base that is not the main one is refused by Tabgha.
   const body=JSON.stringify({approvalId:'0'.repeat(8)+'-0000-4000-8000-'+'0'.repeat(12),decision:'approve'});
   const forged=await fetch(`http://127.0.0.1:${pb}/kaji/decide`,{method:'POST',headers:{'content-type':'application/json',...signedHeaders('NERV-02',B.privateKey,'req','POST','/kaji/decide',body)},body});assert.equal(forged.status,403);
   // The main base goes away: Tabgha speaks with its own bot again.
   mainUp=false;await sb.add('Stretch',new Date(Date.now()+300).toISOString());sb.tick(new Date(Date.now()+1000));
-  await until(()=>botB.sent().some(m=>/⏰ Stretch/.test(m.text)));
+  await until(()=>botB.sent().some(m=>/⏰ Stretch/.test(m.text)));assert.equal(tabgha.channelState().mode,'local-fallback');
  }finally{await tabgha.stop();await aoba.stop();await la.stop();await lb.stop();sa.close();sb.close();await botA.close();await botB.close();rmSync(homeA,{recursive:true,force:true});rmSync(homeB,{recursive:true,force:true});}
 });
 test('dispatch: a request asked on another base is answered by the main base\'s Misato; unreachable, it is answered locally; sent but slow, it is reported and never run twice',{timeout:40000},async()=>{

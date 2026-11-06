@@ -1,3 +1,4 @@
+import {channelIsFresh,sanitizeChannel,type ChannelState,type HeardChannel} from './channel-state.ts';
 import {ProcessClient} from './process-client.ts';
 import type {Reminder,InboxPage,ActResult} from './store.ts';
 import {degradedReasons,type RouteHealth} from './route-health.ts';
@@ -419,6 +420,11 @@ export class Runtime implements StoreApi {
  setBaseKey(publicKey:string){this.selfKey=publicKey;}
  /** Peers' health as each one last reported it over the Kaji line (F-036 phase 2); kept in memory, refilled within a heartbeat. */
  private readonly heard=new Map<string,HeardHealth>();
+ private readonly channelsHeard=new Map<string,HeardChannel>();
+ private ownChannel:()=>ChannelState=()=>({mode:'unknown',checkedAt:new Date().toISOString()});
+ setChannelState(read:()=>ChannelState){this.ownChannel=read;}
+ channelState():ChannelState{try{const c=sanitizeChannel(this.ownChannel());if(c)return c;}catch{/* telemetry never prevents diagnostics */}return {mode:'unknown',checkedAt:new Date().toISOString()};}
+ notePeerChannel(baseId:string,channel:HeardChannel|null){if(channel)this.channelsHeard.set(baseId,channel);else this.channelsHeard.delete(baseId);}
  notePeerHealth(baseId:string,health:HeardHealth){this.heard.set(baseId,health);}
  /** This base's health as it reports it to its peers: degraded with the reasons doctor and status give. */
  async baseHealth():Promise<BaseHealth> {
@@ -430,7 +436,10 @@ export class Runtime implements StoreApi {
   return list.map(b=>{const self=b.publicKey===this.selfKey;const online=b.status==='enrolled'&&(self||(!!seen[b.baseId]&&now-Date.parse(seen[b.baseId]!)<ONLINE_MS));
    // A peer's report counts only while it is online; an older base that sends none has health null (online/offline only).
    const heard=this.heard.get(b.baseId);const health=self?{...mine,at:new Date(now).toISOString()}:online&&heard&&now-Date.parse(heard.at)<ONLINE_MS?heard:null;
-   return {...b,lastSeen:seen[b.baseId] ?? null,online,self,health,main:b.baseId===main};});}
+   const reported=this.channelsHeard.get(b.baseId);
+   const channel=self?{...this.channelState(),receivedAt:new Date(now).toISOString()}:reported ?? null;
+   const channelFresh=!!channel&&online&&now-Date.parse(channel.receivedAt)<ONLINE_MS&&channelIsFresh(channel,now,ONLINE_MS);
+   return {...b,channel,channelFresh,lastSeen:seen[b.baseId] ?? null,online,self,health,main:b.baseId===main};});}
  /** The owner's main base as this base sees it (F-036 phase 2): whether it is this base and whether it is online now. */
  async mainBase():Promise<{baseId:string;self:boolean;online:boolean}|undefined> {
   const main=await this.kaji.main?.();if(!main)return undefined;
@@ -521,7 +530,7 @@ export class Runtime implements StoreApi {
   catch{return {degraded:['brain process not answering: model-needing requests fail until it is back']};}
  }
  async health(){await this.nervous.call('runtime.ping');const r=await this.routes();return {integrityCheck:'not-run',processes:{nervous:this.nervous.child.pid,brain:this.brain.child.pid,brainAlive:this.brain.child.connected},...r};}
- async doctor(){return {...await this.nervous.call('runtime.doctor') as object,processes:{nervous:this.nervous.child.pid,brain:this.brain.child.pid,brainAlive:this.brain.child.connected},models:await this.brain.call('runtime.ping').then(p=>(p as {models:unknown}).models,()=>'brain unavailable'),...await this.routes(),localModels:await this.localModels(),agentLoop:'not implemented'};}
+ async doctor(){const channel=this.channelState();return {channel,channelFresh:channelIsFresh(channel,Date.now(),ONLINE_MS),...await this.nervous.call('runtime.doctor') as object,processes:{nervous:this.nervous.child.pid,brain:this.brain.child.pid,brainAlive:this.brain.child.connected},models:await this.brain.call('runtime.ping').then(p=>(p as {models:unknown}).models,()=>'brain unavailable'),...await this.routes(),localModels:await this.localModels(),agentLoop:'not implemented'};}
  /** F-037: the models this base can use on its local route (Ollama's list), for doctor; unknown without a data home. */
  private async localModels():Promise<{reachable:boolean;url:string;models:string[]}|undefined> {
   if(!this.home)return undefined;let url;try{url=ollamaUrlOf(readConfig(this.home).models);}catch{return undefined;}
