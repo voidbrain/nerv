@@ -167,13 +167,13 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Replaced two independent free-port probes with a pair of held reservations, released immediately before concurrent link startup: the fixture cannot allocate the same port twice. Retain each link's recent logs, heard offers and both runtime base snapshots; every wait includes that state on timeout (including failed diagnostic reads). The integration deliberately starts with no advertised offers, then waits for a later real heartbeat to supply them. Separate regressions prove the reservations remain bound/distinct and timeout text retains the observed state. This follows the Check's robust-wait alternative: the historical CI cause is still unconfirmed; reservation release cannot prevent every external port race, which will now have listener diagnostics. Ten of ten local repetitions with coverage passed; full suite passed (191 passed, one systemd-only skip), alongside typecheck, build, conventions, integrations and backlog checks. Required merged CI remains.
+**Next action / closure evidence:** Implemented in [PR #154](https://github.com/voidbrain/nerv/pull/154): replaced two independent free-port probes with a pair of held reservations, released immediately before concurrent link startup: the fixture cannot allocate the same port twice. Retain each link's recent logs, heard offers and both runtime base snapshots; every wait includes that state on timeout (including failed diagnostic reads). The integration deliberately starts with no advertised offers, then waits for a later real heartbeat to supply them. Separate regressions prove the reservations remain bound/distinct and timeout text retains the observed state. This follows the Check's robust-wait alternative: the historical CI cause is still unconfirmed; reservation release cannot prevent every external port race, which will now have listener diagnostics. Ten of ten local repetitions with coverage passed; full suite passed (191 passed, one systemd-only skip), alongside typecheck, build, conventions, integrations and backlog checks. Required merged CI remains.
 
 **Estimates:** Small remaining effort; ~90% complete. Reassessed 2026-11-06: robust setup/wait and diagnostics implemented and focused regression passed; ten coverage repetitions and the full suite passed; merged CI remains.
 
 | Field | Value |
 |---|---|
-| PR / evidence | [CI run 42140503183](https://github.com/voidbrain/nerv/actions/runs/42140503183) (attempt 1 failed, attempt 2 green) |
+| PR / evidence | [PR #154](https://github.com/voidbrain/nerv/pull/154); original [CI run 42140503183](https://github.com/voidbrain/nerv/actions/runs/42140503183) (attempt 1 failed, attempt 2 green) |
 | Opened | 2026-11-06 |
 | Verification | 2026-11-06 Unit/integration: test/kaji-run.test.ts passed (4 tests), 10/10 repeated runs under coverage passed, full suite passed (191 passed, one systemd-only skip); merged CI pending |
 | Reviewed | 2026-11-06 |
