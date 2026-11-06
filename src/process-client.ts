@@ -45,7 +45,7 @@ export class ProcessClient {
   const id=randomUUID(),request={jsonrpc:'2.0',id,method,params};
   if(Buffer.byteLength(JSON.stringify(request))>MAX_FRAME_BYTES)throw new RpcFault(-32600,'Frame too large.');
   return new Promise((resolve,reject)=>{
-   const timer=setTimeout(()=>{this.pending.delete(id);reject(new RpcFault(-32001,'Request timed out; outcome may be unknown.'));},timeoutMs);
+   const timer=setTimeout(()=>{this.pending.delete(id);reject(new RpcFault(-32001,`${this.role} ${method} timed out after ${timeoutMs} ms; outcome may be unknown.`));},timeoutMs);
    this.pending.set(id,{resolve,reject,timer});
    this.child.send(request,error=>{if(error){const p=this.pending.get(id);if(p){clearTimeout(p.timer);this.pending.delete(id);p.reject(error);}}});
   });

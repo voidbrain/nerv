@@ -7,11 +7,18 @@
   if (match) history.replaceState(null, "", location.pathname + location.search);
   const consulted = new Set();
   let older = [], matches = [], shown = [], searchSeq = 0, searchTimer = null; let editing = null;
-  let token = ""; let polling = false; let lastRan = null; let firstTrace = true; const detailCache = {}; const known = new Map(); let chatBusy = false; let followNew = null;
+  let token = ""; let polling = false; let pollFailures = 0; let lastRan = null; let firstTrace = true; const detailCache = {}; const known = new Map(); let chatBusy = false; let followNew = null;
   const PLANNED = "<div class='muted small'>Planned · not connected yet.</div>";
   const api = async (path, init = {}) => {
-    const res = await fetch("/api/" + path, { ...init, headers:{ "Content-Type":"application/json", Authorization:"Bearer " + token } });
-    const data = await res.json().catch(() => ({})); if (!res.ok) throw new Error(data.error || ("HTTP " + res.status)); return data;
+    const method = init.method || "GET";
+    try {
+      const res = await fetch("/api/" + path, { ...(method === "GET" ? { signal:AbortSignal.timeout(10000) } : {}), ...init, headers:{ "Content-Type":"application/json", Authorization:"Bearer " + token } });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw Object.assign(new Error(data.error || ("HTTP " + res.status)), { status:res.status });
+      return data;
+    } catch (e) {
+      throw Object.assign(new Error(method + " /api/" + path + ": " + (e.name === "TimeoutError" ? "read timed out" : e.message)), { status:e.status });
+    }
   };
   const short = id => "S-" + id.slice(0, 4).toUpperCase();
   const banner = document.querySelector(".banner.shadow");
@@ -96,10 +103,23 @@
       if (!state.selected && !state.deselected && running) { state.selected = running.id; state.autoSelected = true; }
       else if (state.autoSelected && state.selected && !(state.sorties.find(x => x.id === state.selected && x.status === "active"))) { state.selected = null; state.autoSelected = false; }
       renderAll();
+      pollFailures = 0;
       setBanner("<b>LIVE · " + esc(liveBaseName(doctor)) + "</b> <span class='muted'>— " + esc(kajiSummary()) + " · " + latest20.length + " recent sorties · refreshed " + new Date().toTimeString().slice(0, 8) + "</span>", "live");
     } catch (e) {
-      if (/Authentication required/.test(e.message)) { token = ""; forgetSession(); signIn(SESSION_ENDED); return; }
-      setBanner("<b>LIVE · CONNECTION LOST</b> <span class='muted'>— " + esc(e.message) + ". Run npm start -- open dashboard again if the service restarted.</span>"); }
+      if (e.status === 401) { token = ""; forgetSession(); signIn(SESSION_ENDED); return; }
+      // Keep the last successful view through one failed poll; the regular interval retries reads only.
+      if (++pollFailures < 2) return;
+      let statusFailure = null;
+      try { await api("status"); }
+      catch (statusError) {
+        if (statusError.status === 401) { token = ""; forgetSession(); signIn(SESSION_ENDED); return; }
+        statusFailure = statusError;
+      }
+      const clean = message => message.replace(/[.!\s]+$/, "");
+      const detail = clean(e.message) + (statusFailure ? ". Status check: " + clean(statusFailure.message) : "");
+      const heading = !statusFailure ? "REFRESH DELAYED" : statusFailure.status ? "STATUS UNAVAILABLE" : "SERVICE UNREACHABLE";
+      setBanner("<b>LIVE · " + heading + "</b> <span class='muted'>— " + esc(detail) + ". Showing the last available data; retrying automatically.</span>");
+    }
     finally { polling = false; }
   }
   // Comms: the selected sortie's own trace (requests, steps, ballots, decisions, replies) plus what you typed here.
