@@ -383,7 +383,7 @@ try {
         if(botToken&&config.telegram){aoba=new TelegramChannel({api:new TelegramApi(botToken,telegramBase()),store:runtime,chatId:config.telegram.chatId,statePath:join(home,'telegram-state.json'),
           // F-036 phase 2: quiet while another base is the main one and online; relayed cards are decided where they were made.
           oneChannel:{destination:async()=>{const m=await runtime.mainBase();return m&&!m.self?m.baseId:undefined;},quiet:async()=>{const m=await runtime.mainBase();return !!m&&!m.self&&m.online;},relay:(text,cards)=>kaji?kaji.relay({text,cards}):Promise.resolve(false)},
-          remote:{decide:(baseId,approvalId,decision)=>{if(!kaji)throw new Error('The Kaji line is not running.');return kaji.decide(baseId,approvalId,decision);}}});await aoba.start().then(()=>console.log('Aoba (Telegram): linked, listening.'),e=>console.error(`Aoba (Telegram) did not start: ${e instanceof Error?e.message:'error'}.`));}
+          remote:{decide:(baseId,approvalId,decision)=>{if(!kaji)throw new Error('The Kaji line is not running.');return kaji.decide(baseId,approvalId,decision);}}});await aoba.start().then(()=>console.log('Aoba (Telegram): configured; listener started.'),e=>console.error(`Aoba (Telegram) did not start: ${e instanceof Error?e.message:'error'}.`));}
         else if(botToken)console.log('Aoba (Telegram): token found, no chat linked yet. Send /start to your bot, then run telegram link.');
         // B-013: once the channels listen, close what the previous run left half done and tell the owner.
         void runtime.closeInterrupted().then(n=>{if(n)console.log(`Closed ${n} sortie(s) a restart had interrupted.`);});

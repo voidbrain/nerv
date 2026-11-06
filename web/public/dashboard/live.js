@@ -273,11 +273,13 @@
     if (chatBusy) { log("Misato is still working on the previous request.", "warn", null, "misato"); return; }
     // F-051: where the request goes, said before it goes: another online main base gets it over the Kaji line.
     const main = (state.kajiBases || []).find(b => b.main && !b.self && b.online);
-    followNew = new Set(state.sorties.map(x => x.realId));
-    chatBusy = true; log(main ? "Forwarded to " + main.name + " · Misato there is planning" : "Misato is planning", "", null, "misato");
+    const command = /^\/|^ask .*\/status[.!?]?$/i.test(text.trim());
+    followNew = command ? null : new Set(state.sorties.map(x => x.realId));
+    chatBusy = true; log(command ? "Checking command…" : main ? "Forwarded to " + main.name + " · Misato there is planning" : "Misato is planning", "", null, "misato");
     try { const r = await api("chat", { method:"POST", body:JSON.stringify({ message:text, conversation:"dashboard" }) });
       // Dispatched (F-036): the main base answered; its sortie and cards are there, so only the reply is shown here.
-      if (r.base) log((r.reply || ("Could not finish: " + (r.error || "no reply"))) + " · answered by " + r.base.name + (r.waiting && r.waiting.length ? "; decide its card on Aoba or on " + r.base.name + "'s dashboard" : ""), r.reply ? "ok" : "danger", null, "misato");
+      if (r.command) { followNew = null; log(r.reply || r.error || "No command result", r.error ? "danger" : "ok", null, "maya"); }
+      else if (r.base) log((r.reply || ("Could not finish: " + (r.error || "no reply"))) + " · answered by " + r.base.name + (r.waiting && r.waiting.length ? "; decide its card on Aoba or on " + r.base.name + "'s dashboard" : ""), r.reply ? "ok" : "danger", null, "misato");
       else state.selected = short(r.sortieId); }
     catch (e) { log("Misato could not answer: " + e.message, "danger", null, "misato"); }
     finally { chatBusy = false; poll(); }
@@ -361,8 +363,9 @@
     const apiState = telegramApiState(b);
     const connection = apiState === "unknown" && fresh && !c.api ? "not checked yet" : apiState;
     return "<div class='tiny muted'>Telegram · " + esc(route + destination) + "</div>" +
-      "<div class='tiny muted'>Telegram API · " + esc(connection) + (c.api ? " · checked " + esc(new Date(c.api.at).toLocaleString()) : "") + "</div>" +
+      "<div class='tiny muted'><span class='" + (apiState === "responding" ? "ok" : apiState === "failed" ? "warn" : "muted") + "'>● Midori API · " + esc(connection) + "</span>" + (c.api ? " · checked " + esc(new Date(c.api.at).toLocaleString()) : "") + "</div>" +
       "<div class='tiny muted'>Route checked " + esc(new Date(c.checkedAt).toLocaleString()) + (!fresh ? " · stale or offline" : "") + "</div>" +
+      (c.lastReceived ? "<div class='tiny muted'>Last received " + esc(new Date(c.lastReceived).toLocaleString()) + "</div>" : "") +
       (d ? "<div class='tiny muted'>Last send " + esc(d.result === "accepted" ? "accepted" : "failed") + " via " + esc(d.route === "main" ? "main" : "local bot") + " · " + esc(new Date(d.at).toLocaleString()) + " (phone receipt unknown)</div>" : "<div class='tiny muted'>No send result reported</div>");
   }
   window.renderBases = function () {
@@ -374,7 +377,8 @@
         "<div class='muted small' style='margin-top:4px'>No Kaji line yet: enrol your bases (INSTALL, Kaji line) to see them here.</div>";
       return;
     }
-    document.getElementById("bases-sub").textContent = list.filter(b => b.online).length + "/" + list.filter(b => b.status === "enrolled").length + " online";
+    const midori = list.some(b => telegramApiState(b) === "responding") ? "API live" : list.some(b => telegramApiState(b) === "failed") ? "API failed" : "API unchecked";
+    document.getElementById("bases-sub").innerHTML = list.filter(b => b.online).length + "/" + list.filter(b => b.status === "enrolled").length + " online · <span class='" + (midori === "API live" ? "ok" : midori === "API failed" ? "warn" : "muted") + "'>● Midori " + midori + "</span>";
     document.getElementById("bases").innerHTML = list.map(b => "<div class='card'><div class='row'><span class='b'>" + esc(b.baseId) + " · " + esc(b.name) + (b.main ? " <span class='badge b-info' title='Main base selected in the signed registry'>MAIN</span>" : "") + "</span><span class='badge " + (b.status === "revoked" ? "b-muted'>REVOKED" : b.self && BASES[0].status === "standby" ? "b-warn'>DEGRADED" : b.self && BASES[0].status === "offline" ? "b-danger'>DOWN" : !b.online ? "b-warn'>OFFLINE" : b.health && b.health.state === "degraded" ? "b-warn'>DEGRADED" : "b-ok'>ONLINE") + "</span></div>" +
       "<div class='tiny muted'>" + (b.self ? "this machine" : esc(b.address)) + " · key " + esc(b.fingerprint.slice(0, 9)) + " · " + (b.self ? "local" : esc(sinceText(b.lastSeen))) + "</div>" +
       (b.self ? "<div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div>" : "") +

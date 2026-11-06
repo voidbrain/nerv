@@ -97,11 +97,11 @@ export class TelegramChannel {
   // A failed relay's local fallback stays visible until a new send or a different route check, at most 90 seconds.
   const last=this.routeState.lastDelivery;
   if(quiet&&this.routeState.mode==='local-fallback'&&this.routeState.destination===destination&&last&&Date.now()-Date.parse(last.at)<ONLINE_MS)mode='local-fallback';
-  this.routeState={...this.routeState,mode,polling:!quiet,checkedAt:new Date().toISOString(),destination,...(last?{lastDelivery:last}:{})};
+  this.routeState={...this.routeState,mode,polling:true,checkedAt:new Date().toISOString(),destination,...(last?{lastDelivery:last}:{})};
   return quiet;
  }
  private delivered(route:'main'|'local',result:'accepted'|'failed',fallback=false){
-  this.routeState={...this.routeState,mode:route==='main'?'via-main':fallback?'local-fallback':'local',lastDelivery:{route,result,at:new Date().toISOString()}};
+  this.routeState={...this.routeState,mode:route==='main'?'via-main':fallback?'local-fallback':this.routeState.mode,lastDelivery:{route,result,at:new Date().toISOString()}};
   if(route==='local')this.apiResult(result==='accepted'?'responding':'failed');
  }
  /** Everything this base sends on its own (cards, reminders, brief, follow-ups): relayed while quiet, else its own bot; a failed relay falls back to its own bot, so nothing is lost. */
@@ -114,7 +114,7 @@ export class TelegramChannel {
   await this.sendLocal(text,buttons,quiet||this.routeState.destination!==undefined);
  }
  private apiResult(state:'responding'|'failed'){this.routeState={...this.routeState,api:{state,at:new Date().toISOString()}};}
- private async sendLocal(text:string,buttons?:Button[][],fallback=this.routeState.destination!==undefined){
+ private async sendLocal(text:string,buttons?:Button[][],fallback=false){
   try{await this.api.send(this.chatId,text,buttons);this.delivered('local','accepted',fallback);}
   catch(e){this.delivered('local','failed',fallback);throw e;}
  }
@@ -145,8 +145,8 @@ export class TelegramChannel {
  private owner(id:number|undefined){return id===this.chatId;}
  private async poll():Promise<void> {
   while(!this.stopping.signal.aborted){
-   // Quiet: the owner talks to the main base's Aoba; messages to this bot wait in Telegram until this base speaks again.
-   if(await this.quiet()){await new Promise(done=>setTimeout(done,5000));continue;}
+   // Outbound inbox deliveries use main, but either configured bot still accepts owner requests.
+   await this.quiet();
    try{
     const updates=await this.api.updates(this.state.offset,POLL_SECONDS,AbortSignal.any([this.stopping.signal,AbortSignal.timeout((POLL_SECONDS+10)*1000)]));
     this.apiResult('responding');

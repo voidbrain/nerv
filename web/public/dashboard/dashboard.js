@@ -804,7 +804,7 @@ async function copyBuild(el, clip = navigator.clipboard) {
 }
 document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("#build"); if (b) void copyBuild(b); });
 function cssVar(n) { return getComputedStyle(document.body).getPropertyValue(n).trim(); }
-function statusColor(st) { return st === "online" ? cssVar("--ok") : st === "standby" ? cssVar("--warn") : "#666"; }
+function statusColor(st) { return st === "online" ? cssVar("--ok") : st === "standby" ? cssVar("--warn") : cssVar("--muted"); }
 function drawMap(now) {
   if (!map.ready) return;
   const cv = document.getElementById("topo"); const ctx = cv.getContext("2d"); const W = map.w, H = map.h; ctx.setTransform(map.dpr, 0, 0, map.dpr, 0, 0);
@@ -817,12 +817,12 @@ function drawMap(now) {
   BASES.forEach((b, i) => {
     if (b.status === "offline") return;
     const [x, y] = map.proj([b.lon, b.lat]); const col = statusColor(b.status);
-    const period = b.status === "online" ? 2600 : 4200; const ph = ((now + i * 700) % period) / period; const r = 6 + ph * 70;
+    const period = b.status === "online" ? 2600 : 4200; const ph = ((now + i * 700) % period) / period; const r = 4 + ph * 30;
     const g = ctx.createRadialGradient(x, y, Math.max(0, r - 7), x, y, r + 7);
     g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(0.5, col); g.addColorStop(1, "rgba(0,0,0,0)");
     ctx.strokeStyle = g; ctx.lineWidth = 1.6; ctx.globalAlpha = 1 - ph;
     map.contours.forEach(c => ctx.stroke(c.p));
-    const glow = ctx.createRadialGradient(x, y, 0, x, y, 26); glow.addColorStop(0, col); glow.addColorStop(1, "rgba(0,0,0,0)");
+    const glow = ctx.createRadialGradient(x, y, 0, x, y, 14); glow.addColorStop(0, col); glow.addColorStop(1, "rgba(0,0,0,0)");
     ctx.globalAlpha = 0.35; ctx.strokeStyle = glow; ctx.lineWidth = 1; map.contours.forEach(c => ctx.stroke(c.p));
     ctx.globalAlpha = 1;
   });
@@ -849,11 +849,12 @@ function drawMap(now) {
   const z = Math.max(1, W / ((cv.clientWidth || W))); const face = cssVar("--font") || "monospace"; const anySelf = BASES.some(x => x.self);
   BASES.forEach(b => {
     const [x, y] = map.proj([b.lon, b.lat]); const col = statusColor(b.status); // This base (owner, 2026-11-05), not the main one. B-022: this comment once sat before `const s`, so no base was drawn.
-    const main = !!b.self || (!anySelf && b === BASES[0]); const s = (main ? 11 : 7) * z;
-    ctx.fillStyle = col; ctx.fillRect(x - s / 2, y - s / 2, s, s); ctx.strokeStyle = "#000"; ctx.lineWidth = z; ctx.strokeRect(x - s / 2, y - s / 2, s, s);
-    if (main) { ctx.strokeStyle = col; ctx.lineWidth = 1.5 * z; ctx.beginPath(); ctx.arc(x, y, s * 1.1, 0, Math.PI * 2); ctx.stroke(); }
-    ctx.font = (main ? "bold " : "") + Math.round((main ? 13 : 12) * z) + "px " + face;
-    ctx.fillStyle = cssVar("--text"); const label = b.name; const tw = ctx.measureText(label).width;
+    const self = !!b.self || (!anySelf && b === BASES[0]); const main = !!b.main; const s = (main ? 11 : 7) * z;
+    ctx.fillStyle = col; ctx.strokeStyle = cssVar("--panel"); ctx.lineWidth = z;
+    if (self) { ctx.beginPath(); ctx.arc(x,y,(main ? 9 : 7)*z,0,Math.PI*2); ctx.fill(); ctx.stroke(); }
+    if (!self || main) { ctx.fillRect(x-s/2,y-s/2,s,s); ctx.strokeRect(x-s/2,y-s/2,s,s); }
+    ctx.font = Math.round(12 * z) + "px " + face;
+    ctx.fillStyle = col; const label = b.name; const tw = ctx.measureText(label).width;
     const lx = x + tw + 12 * z > W ? x - tw - 8 * z : x + 8 * z; ctx.fillText(label, lx, y - 6 * z);
   });
   drawTelegram(ctx, now, W, H);
@@ -891,7 +892,7 @@ function observeTelegram(bases, now = performance.now()) {
     }
   }
   const routes = telegramRoutes(bases);
-  document.getElementById("topo").setAttribute("aria-label", "Map: square bases, round Telegram channel; " + routes.length + " reported Telegram routes. Phone receipt unknown.");
+  document.getElementById("topo").setAttribute("aria-label", "Map: square bases (larger for main), a larger circle for this base, and a small round Midori (Telegram) channel; " + routes.length + " reported Telegram routes. Phone receipt unknown.");
 }
 function telegramApiState(base, now = Date.now()) {
   if (!base || !base.online || !base.channelFresh || !base.channel) return "unknown";
@@ -918,12 +919,10 @@ function drawTelegram(ctx, now, W, H) {
   }
   const states = [...origins].map(id => telegramApiState(channelById(id)));
   const status = states.includes("responding") ? "responding" : states.includes("failed") ? "failed" : "unknown";
-  telegramBases.forEach(b => { const base = BASES.find(x => x.id === b.baseId.toLowerCase()); if (!base) return;
-    const [bx,by] = map.proj([base.lon,base.lat]); ctx.strokeStyle = color(telegramApiState(b)); ctx.fillStyle = cssVar("--panel"); ctx.beginPath(); ctx.arc(bx+10,by+10,3,0,Math.PI*2); ctx.fill(); ctx.stroke();
-  });
+
   ctx.strokeStyle = color(status); ctx.fillStyle = cssVar("--panel"); ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.arc(x,y,8,0,Math.PI*2); ctx.fill(); ctx.stroke();
-  ctx.font = "11px " + (cssVar("--font") || "monospace"); ctx.textAlign = "center"; ctx.fillStyle = cssVar("--text"); ctx.fillText("Telegram",x,y-15); ctx.fillStyle = color(status); ctx.fillText(status === "responding" ? "API live" : status,x,y+24); ctx.textAlign = "start";
+  ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.font = "11px " + (cssVar("--font") || "monospace"); ctx.textAlign = "center"; ctx.fillStyle = color(status); ctx.fillText("Midori",x,y-12); ctx.textAlign = "start";
 }
 
 /* ================= EVA heartbeats ================= */

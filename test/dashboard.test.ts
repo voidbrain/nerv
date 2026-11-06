@@ -209,17 +209,17 @@ test('searching sorties marks the searched text in each title, escaped and case-
  assert.equal(highlight('Plain','  '),'Plain');
  assert.match(src,/highlight\(s\.title, state\.search\)/,'used on the sortie cards');
 });
-test('the map: labels scale with the canvas so they stay readable, the main base is bigger and ringed, other bases get a stable scattered spot (owner, 2026-11-05)',async()=>{
+test('the map: labels scale with the canvas so they stay readable, this base has a larger square but equally sized status-coloured labels, other bases get a stable scattered spot (owner, 2026-11-05)',async()=>{
  const {readFileSync}=await import('node:fs');const js=readFileSync('web/public/dashboard/dashboard.js','utf8');const live=readFileSync('web/public/dashboard/live.js','utf8');
- assert.match(js,/const z = Math\.max\(1, W \/ \(\(cv\.clientWidth \|\| W\)\)\);/);assert.match(js,/ctx\.font = \(main \? "bold " : ""\) \+ Math\.round\(\(main \? 13 : 12\) \* z\)/);
- assert.match(js,/if \(main\) \{ ctx\.strokeStyle = col;/);assert.match(js,/const main = !!b\.self \|\| \(!anySelf && b === BASES\[0\]\);/,'this base is the strong one, not the main base');assert.match(js,/const face = cssVar\("--font"\) \|\| "monospace";/,'the full font list, so a fallback applies');assert.match(live,/self:!!b\.self/);
+ assert.match(js,/const z = Math\.max\(1, W \/ \(\(cv\.clientWidth \|\| W\)\)\);/);assert.match(js,/ctx\.font = Math\.round\(12 \* z\)/);
+ assert.doesNotMatch(js,/ctx\.arc\(x, y, s \* 1\.1/);assert.match(js,/ctx\.fillStyle = col; const label = b\.name/);assert.match(js,/const self = !!b\.self \|\| \(!anySelf && b === BASES\[0\]\); const main = !!b\.main;/,'main and this base have separate shape cues');assert.match(js,/const face = cssVar\("--font"\) \|\| "monospace";/,'the full font list, so a fallback applies');assert.match(live,/self:!!b\.self/);
  assert.doesNotMatch(live,/- Math\.PI \/ 2; return b === self/,'no more column under the main base');
  const seedSrc=/const seed = id => \{[^\n]*\};/.exec(live)![0];const seed=new Function(`${seedSrc} return seed;`)() as (id:string)=>number;
  assert.equal(seed('NERV-02'),seed('NERV-02'),'the same spot on every reload');assert.notEqual(seed('NERV-02')%3600,seed('NERV-03')%3600);
 });
 test('F-051 slice 1: the running phase from the latest event, who advised, base names for extra seats, skipped steps labelled, Pattern badges in words, stage tabs in both sections',async()=>{
  const {readFileSync}=await import('node:fs');const live=readFileSync('web/public/dashboard/live.js','utf8');const js=readFileSync('web/public/dashboard/dashboard.js','utf8');const html=readFileSync('web/public/dashboard/index.html','utf8');
- assert.match(live,/log\(main \? "Forwarded to " \+ main\.name \+ " · Misato there is planning" : "Misato is planning"/);assert.doesNotMatch(live,/local models take 10–30 s per step/);
+ assert.match(live,/log\(command \? "Checking command…" : main \? "Forwarded to " \+ main\.name \+ " · Misato there is planning" : "Misato is planning"/);assert.doesNotMatch(live,/local models take 10–30 s per step/);
  assert.match(live,/status === "active" \? \(phaseOf\.get\(s\.id\) \|\| "plan"\)/,'not always MAGI');assert.match(live,/"approval\.requested":"apt"/);
  assert.match(live,/advisedBy\.set\(id, \(p\.pilot && p\.pilot\.name \? p\.pilot\.name : "Generic pilot"\)/);assert.match(js,/"advised by " \+ s\.advisor/);
  assert.match(js,/esc\(baseName\(v\.seat\.slice\(6\)\)\)/,'extra seats by base name');
@@ -262,14 +262,14 @@ test('the bases map draws: drawMap runs to the end and draws every base and its 
  const calls:{m:string;a:unknown[]}[]=[];
  const ctx=new Proxy({},{get:(_t,k)=>k==='measureText'?()=>({width:40}):k==='createRadialGradient'?()=>({addColorStop:()=>{}}):(...a:unknown[])=>{calls.push({m:String(k),a});},set:()=>true});
  const map={ready:true,w:540,h:250,dpr:1,proj:(p:number[])=>[p[0]!,p[1]!],contours:[],linkPaths:{'nerv-01|nerv-02':[[100,100],[300,150]]}};
- const BASES=[{id:'nerv-01',name:'Neo Tokyo-3',status:'online',self:true,lon:100,lat:100},{id:'nerv-02',name:'Tabgha',status:'offline',lon:300,lat:150}];
+ const BASES=[{id:'nerv-01',name:'Neo Tokyo-3',status:'online',self:true,main:true,lon:100,lat:100},{id:'nerv-02',name:'Tabgha',status:'offline',lon:300,lat:150}];
  const document={getElementById:()=>({getContext:()=>ctx,clientWidth:270})};
- const helper=src.slice(src.indexOf('function cloudRouteCaption('),src.indexOf('\n}\n',src.indexOf('function cloudRouteCaption('))+2);
+ const helper=src.slice(src.indexOf('const telegramObserved'),src.indexOf('/* ================= EVA heartbeats'));
  const drawMap=new Function('map','BASES','LINKS','state','cssVar','statusColor','document',`${helper}\n${body}\nreturn drawMap;`)(map,BASES,[['nerv-01','nerv-02']],{packets:[]},()=>'#000',()=>'#0f0',document) as (now:number)=>void;
  drawMap(1000);
  const texts=calls.filter(c=>c.m==='fillText').map(c=>c.a[0]);
  assert.ok(texts.includes('Neo Tokyo-3')&&texts.includes('Tabgha'),'both bases are named');
- assert.ok(texts.some(t=>/UMBILICAL/.test(String(t))),'drawn to the end');
+ assert.ok(texts.includes('Midori'),'drawn to the end, including the round channel node');
  assert.equal(calls.filter(c=>c.m==='strokeRect').length,2,'one marker per base');
 });
 test('the Sephirot are numbered 1 to 11 with Hebrew and Latin names, the crew top right; the MAGI seats name their role, Casper idle when nothing runs (owner, 2026-11-05)',async()=>{
@@ -313,5 +313,5 @@ test('the header shows the incrementing build version: the doctor reports the ve
 test('map legend is compact, cloud caption is removed, and unavailable live costs remain explicit',()=>{
  const src=readFileSync('web/public/dashboard/dashboard.js','utf8');assert.doesNotMatch(src,/cloudRouteCaption|UMBILICAL ↗ cloud/);
  const live=readFileSync('web/public/dashboard/live.js','utf8');assert.match(live,/Cost tracking not connected/);assert.doesNotMatch(live,/qv-budget"\)\.textContent = "\$0\.00"/);
- const html=readFileSync('web/public/dashboard/index.html','utf8');assert.doesNotMatch(html,/Map legend|Links &amp; activity/);assert.match(html,/■ Bases/);assert.match(html,/>- Kaji line</);assert.match(html,/>Sync<\/span>/);assert.doesNotMatch(html,/Scrolls: \$1\.00 \/ day/);
+ const html=readFileSync('web/public/dashboard/index.html','utf8');assert.doesNotMatch(html,/Map legend|Links &amp; activity/);assert.match(html,/■ Bases/);assert.match(html,/>- Kaji line</);assert.match(html,/>sync<\/span>/);assert.doesNotMatch(html,/Scrolls: \$1\.00 \/ day/);
 });

@@ -1,3 +1,4 @@
+import {readCommand,statusText,type StatusBase} from './chat-command.ts';
 import {channelIsFresh,sanitizeChannel,type ChannelState,type HeardChannel} from './channel-state.ts';
 import {ProcessClient} from './process-client.ts';
 import type {Reminder,InboxPage,ActResult} from './store.ts';
@@ -34,7 +35,7 @@ export function remoteOutcomeText(base:string,tool:string,result:Record<string,u
  if(o==='reject')return `${base} refused ${tool}: ${String(result.reason ?? 'its gate said no')}.`;
  return `${base} answered for ${tool}: ${JSON.stringify(result).slice(0,400)}`;
 }
-export interface ChatReply {sortieId:string;reply?:string;error?:string;steps:Step[];waiting:{approvalId:string;tool:string;reason:string}[];
+export interface ChatReply {command?:boolean;sortieId:string;reply?:string;error?:string;steps:Step[];waiting:{approvalId:string;tool:string;reason:string}[];
  /** Set when the main base handled the request (F-036 dispatch): its sortie, cards and memory are there. */
  base?:{id:string;name:string}}
 /** An action the owner asks for directly: the request is what Casper checks the action against. */
@@ -157,6 +158,16 @@ export class Runtime implements StoreApi {
  setPilots(fn:()=>Pilot[]){this.pilots=fn;}
  pilotRoster():Pilot[] {try{return this.pilots?.() ?? [];}catch{return [];}}
  async chat(message:string,conversation?:string):Promise<ChatReply> {
+  const command=readCommand(message);
+  if(command){
+   const it=requestLanguage(message)==='it';let reply:string;
+   if(command.name==='status'){
+    let bases:StatusBase[]=await this.bases();
+    if(!bases.length){const base=this.home?readConfig(this.home).base:{id:'LOCAL',name:'This base'};const health=await this.baseHealth();const channel=this.channelState();bases=[{baseId:base.id,name:base.name,self:true,online:true,health,channel,channelFresh:channelIsFresh(channel,Date.now(),ONLINE_MS)}];}
+    reply=statusText(bases,command.target,it?'it':'en');
+   }else reply=(command.name==='unknown'?(it?'Comando non supportato. ':'Unknown command. '):'')+(it?'Comandi disponibili: /status [base], /help.':'Available commands: /status [base], /help.');
+   return {command:true,sortieId:'',reply,steps:[],waiting:[]};
+  }
   // Earlier exchanges of the same conversation (read before this request is recorded), so "yes" has its question.
   const context=conversation?await this.nervous.call('misato.context',{conversation}).catch(()=>[]) as Turn[]:[];
   // F-051: a request going to the main base is a sortie here too: opened when it leaves, closed with the answer.
