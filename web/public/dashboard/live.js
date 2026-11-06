@@ -43,7 +43,7 @@
       apt:!!latest && !!latest.ballot && latest.ballot.outcome === "approval", plug:latestIs("done", "failed", "proposed"), eva:latestIs("done", "failed"), debrief:status !== "active" && status !== "waiting" };
     const phase = status === "waiting" ? "apt" : status === "active" ? (phaseOf.get(s.id) || "plan") : "debrief";
     const last = actions[actions.length - 1];
-    return { id:short(s.id), realId:s.id, title:s.title, preset:null, pilot:s.source === "misato" ? "misato" : "owner", source:"aoba", proactive:false, consult:consulted.has(s.id), advisor:advisedBy.get(s.id) || null, forwarded:forwardedTo.get(s.id) || null, origin:originOf.get(s.id) || null, // F-025: lit when a consultant advised Misato (its advice is in Comms)
+    return { id:short(s.id), realId:s.id, title:s.title, preset:null, pilot:s.source === "misato" ? "misato" : "owner", source:"aoba", proactive:false, consult:consulted.has(s.id), advisor:advisedBy.get(s.id) || null, forwarded:forwardedTo.get(s.id) || null, origin:originOf.get(s.id) || null, remoteSortie:remoteSorties.get(s.id) || null, // F-025: lit when a consultant advised Misato (its advice is in Comms)
      
       why:s.why || "", created:s.created, trust:s.trust, battery:0, spent:0, started:Date.parse(s.created), ended:s.closed ? Date.parse(s.closed) : null, status, phase, done,
       actions, current:Math.max(0, actions.length - 1), ballot:last && last.ballot && last.ballot.verdicts ? last.ballot : null, outcome:known.get(s.id) || null, happened:[], note:"" };
@@ -124,7 +124,7 @@
   }
   // Comms: the selected sortie's own trace (requests, steps, ballots, decisions, replies) plus what you typed here.
   const seen = new Set();
-  const phaseOf = new Map(), advisedBy = new Map(), forwardedTo = new Map(), originOf = new Map();
+  const phaseOf = new Map(), advisedBy = new Map(), forwardedTo = new Map(), originOf = new Map(), remoteSorties = new Map();
   const generic = () => { const r = modelsData && modelsData.models && modelsData.models.roles; return !!(r && r.consultant && r.consultant.model); };
   async function loadEvents(id) {
     let after = 0; const all = []; let added = 0;
@@ -145,8 +145,9 @@
         : e.kind === "misato.resumed" ? ["Misato: resuming after your decision", "", "misato"] : e.kind === "sortie.done" || e.kind === "sortie.failed" ? ["Debrief: " + e.kind.slice(7), e.kind === "sortie.done" ? "ok" : "danger", "misato"] : null;
       if (e.kind === "misato.reply") known.set(id, p.text);
       if (e.kind === "kaji.forwarded") forwardedTo.set(id, p.base && p.base.name || "the main base");
+      if (e.kind === "kaji.answered" && p.sortieId) remoteSorties.set(id, String(p.sortieId));
       // The main base dropped out and this base answered in the same sortie: local work means it is not shown as forwarded.
-      if (e.kind === "misato.consult" || e.kind === "ballot" || e.kind === "misato.step") forwardedTo.delete(id);
+      if (e.kind === "misato.consult" || e.kind === "ballot" || e.kind === "misato.step") { forwardedTo.delete(id); remoteSorties.delete(id); }
       if (e.kind === "misato.request" && /^kaji:/.test(p.conversation || "")) originOf.set(id, baseName(String(p.conversation).slice(5).split("-").slice(0, 2).join("-")));
       if (e.kind === "misato.consult") { consulted.add(id); advisedBy.set(id, (p.pilot && p.pilot.name ? p.pilot.name : "Generic pilot") + (p.model ? " · " + p.model : "")); }
       // F-051: the step a running sortie is on, from its latest event (not always MAGI).
@@ -416,7 +417,17 @@
     if (!s) { box.innerHTML = "<div class='muted'>No sortie selected. Pick one in Sorties, or ask Misato below to start one.</div>"; sub.textContent = ""; return; }
     const who = s.pilot === "misato" ? "Misato, from a chat" : "you, as a direct action";
     const status = { active:"running", waiting:"waiting for you", done:"done", failed:"failed", "stood-down":"stopped" }[s.status] || s.status;
-    if (!s.actions.length) { box.innerHTML = (s.advisor ? "<div class='tiny muted' style='margin-bottom:4px'>Advised by " + esc(s.advisor) + " before Misato planned (advice only, no vote)</div>" : "") + "<div class='muted small'>No actions: Misato answered without using a tool.</div>" + (s.outcome ? "<div class='small' style='margin-top:4px'>Reply: " + esc(s.outcome) + "</div>" : ""); sub.textContent = "started by " + who + " · " + status; return; }
+    if (!s.actions.length) {
+      const message = s.forwarded ? (s.status === "active" ? "Waiting for " : s.status === "failed" ? "No answer received from " : "Answered on ") + s.forwarded + ". No actions ran on this base."
+        : s.status === "active" ? "Misato is planning. No actions yet."
+        : s.status === "failed" ? "The sortie failed before any action ran."
+        : s.status === "stood-down" ? "The sortie stopped before any action ran."
+        : "No actions: Misato answered without using a tool.";
+      box.innerHTML = (s.advisor ? "<div class='tiny muted' style='margin-bottom:4px'>Advised by " + esc(s.advisor) + " before Misato planned (advice only, no vote)</div>" : "") + "<div class='muted small'>" + esc(message) + "</div>" +
+        (s.forwarded && s.remoteSortie ? "<div class='small'>Destination sortie: <code>" + esc(s.remoteSortie) + "</code><br />Open the dashboard on " + esc(s.forwarded) + " to inspect its actions.</div>" : "") +
+        (s.outcome ? "<div class='small' style='margin-top:4px'>Reply: " + esc(s.outcome) + "</div>" : "");
+      sub.textContent = "started by " + who + " · " + status; return;
+    }
     if (s.actions.some(a => !a.ballot || !a.ballot.verdicts)) { box.innerHTML = "<div class='muted small'>Loading this sortie…</div>"; sub.textContent = "started by " + who + " · " + status; return; }
     baseDetail(s); sub.textContent = "started by " + who + " · " + status;
     box.querySelectorAll(".plan .row .tiny.muted").forEach(el => { if (/battery/.test(el.textContent)) el.remove(); });
