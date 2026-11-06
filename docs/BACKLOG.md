@@ -1,6 +1,6 @@
 # NERV Agency backlog
 
-Current work ledger, reviewed 6 November 2026 against main `084ecc0`. PR #157 reconciled 2026-11-06 through ci:status (validate including Linux Chrome/axe, windows and native-macos green, run 42225026067). PR #156 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42222074318). PR #154 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42220503857). PR #153 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42218258228). PR #152 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42216691729). PR #151 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42216202855). PR #150 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42215185296). PR #149 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42141288422). PR #1–#148 merged after green checks (#53–#148 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
+Current work ledger, reviewed 6 November 2026 against main `04e3891`. PR #158 reconciled 2026-11-06 through ci:status (validate including Chrome/axe, windows and native-macos green, run 42226245599). PR #157 reconciled 2026-11-06 through ci:status (validate including Linux Chrome/axe, windows and native-macos green, run 42225026067). PR #156 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42222074318). PR #154 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42220503857). PR #153 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42218258228). PR #152 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42216691729). PR #151 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42216202855). PR #150 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42215185296). PR #149 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42141288422). PR #1–#148 merged after green checks (#53–#148 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
 
 <!-- recap:start · generated by tools/backlog-recap.mjs from the records; do not edit by hand -->
 **Recap as of 2026-11-06** (window 2026-10-31 – 2026-11-06).
@@ -8,7 +8,7 @@ Current work ledger, reviewed 6 November 2026 against main `084ecc0`. PR #157 re
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 34 | 3 |
-| **Require Human 🧑** | 0 | 1 |
+| **Require Human 🧑** | 0 | 0 |
 
 ### Last 7 days
 
@@ -21,7 +21,7 @@ Current work ledger, reviewed 6 November 2026 against main `084ecc0`. PR #157 re
 
 | Features | Bugs |
 |---|---|
-| — | [B-028](#b-028) |
+| — | — |
 <!-- recap:end -->
 
 ## Bugs and reliability
@@ -120,9 +120,9 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔹 P3 | Open | 🟢 Small | ~0% |
+| 🟡 | 🔹 P3 | Implemented | 🟢 Small | ~90% |
 
-🧑 **→ Human action required: Yes**<br />Decide: remove `src/contracts.ts`, or keep it for F-006/F-050.
+💻 **→ Human action required: No**<br />Verify the approved removal and updated documentation, then close after merged CI.
 
 | | |
 |---|---|
@@ -133,15 +133,15 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Owner decision: remove it (the Kaji line superseded it) or keep it for F-006/F-050. Then remove it, or wire it in, in one PR.
+**Next action / closure evidence:** Owner approved deletion 2026-11-06. Removed the unused contracts file after confirming no importer; Kaji retains its implemented protocol types and shared/surface.ts remains the validated UI contract. Removed the obsolete area-note claim and corrected the README source ownership description. F-006/F-050 will define tested contracts alongside their implementations. Coverage is refreshed deliberately for the removed untested file. Typecheck, coverage suite, build and all ten Chrome/axe browser views passed. The maintenance review was refreshed after the project-only area-note cleanup; the timed consistency review includes validation and elapsed waits, with procedural counters left unknown. Required merged CI remains.
 
-**Estimates:** Small remaining effort; ~0% complete. Estimated 2026-11-06.
+**Estimates:** Small remaining effort; ~90% complete. Reassessed 2026-11-06 after owner approval: deletion, references, deliberate coverage refresh and local validation complete; merged CI remains.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Full audit 2026-11-06 |
+| PR / evidence | [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Full audit 2026-11-06 |
 | Opened | 2026-11-06 |
-| Verification | Not verified yet |
+| Verification | 2026-11-06 Documentation: no code importer found; deletion approved by owner. Typecheck, coverage suite, build, browser/axe, conventions, integration metadata and refreshed maintenance evidence passed; merged CI pending |
 | Reviewed | 2026-11-06 |
 
 </details>
@@ -318,11 +318,11 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 **Next action / closure evidence:** Implement capability-aware scheduling with independent model endpoint and execution node selection. Mini PC coder uses Mac inference; policy-approved Claude path; Pi capability route; unavailable Mac waits or expires; bounded budgets and delegation.
 
-**Estimates:** Large remaining effort; ~0% complete. Bootstrap scope estimate, not verification. Estimated 2026-11-01.
+**Estimates:** Reassessed 2026-11-06 with B-028: removing unused speculative types does not remove implemented behavior; concrete tested contracts remain part of this feature, so Large and ~0% remain valid.  Large remaining effort; ~0% complete. Bootstrap scope estimate, not verification. Estimated 2026-11-01.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| PR / evidence | [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -1177,11 +1177,11 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 **Next action / closure evidence:** Planned 2026-11-05 (owner). Builds on F-036, F-045 (pilots offered by other bases) and F-048.
 
-**Estimates:** Large remaining effort; ~0% complete. Estimated 2026-11-05.
+**Estimates:** Reassessed 2026-11-06 with B-028: removing unused speculative types does not remove implemented behavior; concrete tested contracts remain part of this feature, so Large and ~0% remain valid.  Large remaining effort; ~0% complete. Estimated 2026-11-05.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner questions 2026-11-05 |
+| PR / evidence | [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner questions 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
 | Reviewed | 2026-11-05 |
@@ -1304,23 +1304,23 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | | |
 |---|---|
-| **Issue** | Owner question 2026-11-05: can commands be used from Telegram and the chat with "/"? Only `/start` exists; everything else goes to Misato as a request, with a model call and its delay. The owner also proposed `/log` to set how much is reported (all, conversation, …). |
-| **Reproduce** | Send `/status` to Aoba: Misato tries to answer it as a request. |
+| **Issue** | Owner question 2026-11-05: can commands be used from Telegram and the chat with "/"? At that report only `/start` had a dedicated path; other text went to Misato with a model call. Owner confirmed 2026-11-06 that `/status` gets a working reply from Aoba; current source still routes it through store.chat, so model-free structured command acceptance is not established. The owner also proposed `/log` to set how much is reported (all, conversation, …). |
+| **Reproduce** | Send `/status` to Aoba and compare the returned facts with the records; check that the command router answers without a model and without a new sortie. |
 | **Check** | The same commands in Telegram (registered, so typing "/" shows the list) and the dashboard chat, answered before Misato and without a model: `/help`, `/status` (this base's health, the other bases, cards waiting, the next reminder), `/cards` (with their buttons), `/reminders`, `/why S-…`, `/brief`, `/pilots`, `/bases`, `/spear [S-…]` (with a confirmation button), `/log conversation\|steps\|all` (conversation: replies and cards, the default; steps: also one line per action that ran; all: every trace line, advice, votes with shadow seats, other bases' results); read-only commands open no sortie, `/spear` and `/log` changes are recorded; an unknown command answers with `/help`. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Planned 2026-11-05 (owner: after F-021). Builds on B-004 (the why answer), F-042 (Misato reads the agency) and F-028 (the brief).
+**Next action / closure evidence:** Owner report 2026-11-06: Telegram `/status` works. This is Human evidence of a successful reply, not of deterministic routing or the full command set. Source review: src/telegram.ts special-cases /start, then sends other owner text to store.chat; no complete slash router or Telegram menu registration is implemented. Still required: automated checks for every listed command in Telegram and the dashboard, model-free read paths/no new sortie, owner authorization and confirmation for changes, recorded /spear and /log changes, and unknown-command /help behavior. Planned 2026-11-05 (owner: after F-021). Builds on B-004 (the why answer), F-042 (Misato reads the agency) and F-028 (the brief).
 
-**Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-05.
+**Estimates:** Medium remaining effort; ~0% complete. Reassessed 2026-11-06: the observed /status reply adds human evidence, but the agreed deterministic router/menu and command checks remain unimplemented.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner question 2026-11-05 |
+| PR / evidence | [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner question 2026-11-05 |
 | Opened | 2026-11-05 |
-| Verification | Pending |
-| Reviewed | 2026-11-05 |
+| Verification | 2026-11-06 Human: owner reports Telegram /status works. Source review: deterministic router/menu and full command-set automated checks remain pending. |
+| Reviewed | 2026-11-06 |
 
 </details>
 

@@ -46,7 +46,7 @@ All `/api` routes require a bearer token (except the native TLS claim route, whi
 
 | Path | Owns |
 |---|---|
-| `src/` | Local backend, CLI, persistence and proposed distributed contracts |
+| `src/` | Local backend, CLI, persistence and Kaji network contracts |
 | `web/` | Angular workspace and brand marks |
 | `test/` | Restart, cancellation, idempotency and API regression tests |
 | `docs/INSTALL.md` | Headless installation, service lifecycle and data migration |

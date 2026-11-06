@@ -6,9 +6,9 @@ How much of the code the unit tests run, per folder. It says what ran, not that 
 
 | Folder | Files | Lines | Statements | Branches | Functions |
 |---|---|---|---|---|---|
-| `src/` | 32 | 93.6 % | 93.6 % | 83.2 % | 83.9 % |
-| **all** | 32 | 93.6 % | 93.6 % | 83.2 % | 83.9 % |
+| `src/` | 32 | 94.0 % | 94.0 % | 83.8 % | 84.2 % |
+| **all** | 32 | 94.0 % | 94.0 % | 83.8 % | 84.2 % |
 
 ## Files no unit test runs
 
-- `src/`: `contracts.ts`
+(none)
