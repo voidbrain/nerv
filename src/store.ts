@@ -173,8 +173,29 @@ export class Store {
   private settle(sortieId:string,status:'done'|'failed') {
     const sortie=this.db.prepare('SELECT source FROM sorties WHERE id=?').get(sortieId) as {source:string}|undefined;
     if(sortie?.source===OWNER_SOURCE)this.ledger.close(sortieId,status);
-    // Instrumentality proposals: the sortie is done once the owner has decided every card, whatever the decisions.
-    if(sortie?.source==='instrumentality'&&!(this.db.prepare('SELECT 1 FROM approvals a JOIN actions x ON x.id=a.action_id WHERE x.sortie_id=? AND a.decision IS NULL').get(sortieId)))this.ledger.close(sortieId,'done');
+    // Proposals (Instrumentality; Marduk Institute pilots, B-026): the sortie is done once the owner has decided every
+    // card, whatever the decisions: nothing resumes after them.
+    if((sortie?.source==='instrumentality'||sortie?.source==='marduk')&&!(this.db.prepare('SELECT 1 FROM approvals a JOIN actions x ON x.id=a.action_id WHERE x.sortie_id=? AND a.decision IS NULL').get(sortieId)))this.ledger.close(sortieId,'done');
+  }
+  private settledOnce=false;
+  /**
+   * Scheduler tick: stands down approvals past their TTL, then closes the sorties nothing will finish any more (B-026):
+   * an owner action or a proposal whose every card is decided (an expired card included). Misato's sorties resume
+   * instead. The first tick also closes those left open by an earlier version.
+   */
+  expire(now=new Date()):number {
+   const n=this.ledger.expire(now);
+   if(n||!this.settledOnce){this.settledOnce=true;
+    const stuck=this.db.prepare(`SELECT s.id,s.source FROM sorties s WHERE s.status='open' AND s.source IN (?,'instrumentality','marduk')
+     AND EXISTS (SELECT 1 FROM approvals a JOIN actions x ON x.id=a.action_id WHERE x.sortie_id=s.id)
+     AND NOT EXISTS (SELECT 1 FROM approvals a JOIN actions x ON x.id=a.action_id WHERE x.sortie_id=s.id AND a.decision IS NULL)`).all(OWNER_SOURCE) as {id:string;source:string}[];
+    for(const s of stuck){
+     // An owner action whose card expired or was refused did not happen; a proposal is settled whatever was decided.
+     const ran=this.db.prepare("SELECT 1 FROM events WHERE sortie_id=? AND kind='action.done'").get(s.id);
+     this.ledger.close(s.id,s.source===OWNER_SOURCE&&!ran?'failed':'done',now);
+    }
+   }
+   return n;
   }
   events(sortieId: string, after=0, limit=50) { return this.ledger.events(sortieId,after,limit); }
   sorties(limit=20, before?: string, q?: string) { return this.ledger.sorties(limit,before,q); }

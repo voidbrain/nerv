@@ -89,10 +89,13 @@ test('through every process: three requests in one domain without a specialist b
   assert.equal(card.pattern,'blue','a new pilot always asks the owner');
   await r.chat('Rotate the photo');await new Promise(d=>setTimeout(d,300));assert.equal((await pending()).length,1,'not proposed twice while the card waits');
   await r.decide((await pending())[0]!.id,'approve','api');
+  const marduk=async()=>(await r.sorties(50) as {source:string;status:string}[]).filter(x=>x.source==='marduk').map(x=>x.status);
+  assert.deepEqual(await marduk(),['done'],'B-026: the proposal sortie closes once its card is decided');
   assert.deepEqual(readConfig(home).pilots,[{id:'image-editing',name:'Image Editing',domain:'image editing',keywords:['image editing','image','editing'],model:'advisor',stage:'prototype',parent:'generic'}],'created at Prototype on the generic pilot\'s model');
   await r.chat('Some image editing for this picture');assert.equal(asked.at(-1),'pilot:advisor','the next request in that domain goes to the new pilot');
   for(const t of ['Sand the woodworking table','Plan a woodworking shelf','Glue for woodworking'])await r.chat(t);
   await until(async()=>(await pending()).length===1);await r.decide((await pending())[0]!.id,'reject','api');
+  assert.deepEqual(await marduk(),['done','done'],'turned down, it closes too');
   for(const t of ['More woodworking','Woodworking tools','Woodworking finish'])await r.chat(t);
   await new Promise(d=>setTimeout(d,400));assert.equal((await pending()).length,0,'turned down: not proposed again for 30 days');
  }finally{await r.close();await new Promise<void>(d=>{s.close(()=>d());s.closeAllConnections();});rmSync(home,{recursive:true,force:true});}

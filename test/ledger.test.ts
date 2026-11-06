@@ -256,3 +256,19 @@ test('schema 5: the inbox holds briefs too; a schema 4 inbox keeps every row and
   }finally{store.close();}
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
+test('B-026: decided or expired cards close the sorties nothing else will finish: owner actions and proposals, also those left open before; Misato\'s wait for her resume',async()=>{
+ const {Store,OWNER_SOURCE}=await import('../src/store.ts');const {defaultPolicy}=await import('../src/policy.ts');
+ const store=new Store(':memory:',{policy:{...defaultPolicy,blue:['reminders.cancel']},source:'test'});
+ try{
+  const card=(source:string)=>{const id=store.ledger.openSortie(source,'Cancel it','trusted');const r=store.runAction(id,{tool:'reminders.cancel',args:{id:'x'},stage:'production'});return {id,approval:r.approvalId!};};
+  const status=(id:string)=>(store.db.prepare('SELECT status FROM sorties WHERE id=?').get(id) as {status:string}).status;
+  const left=card('marduk');store.ledger.decide(left.approval,'approve','api');
+  assert.equal(status(left.id),'open','decided through the ledger alone, as an earlier version left it');
+  const owner=card(OWNER_SOURCE),proposal=card('marduk'),misato=card('misato');
+  store.expire();assert.equal(status(left.id),'done','the first tick closes a proposal left open');
+  const later=new Date(Date.now()+2*3600_000);assert.equal(store.expire(later),3);
+  assert.equal(status(owner.id),'failed','an owner action whose card expired did not happen');
+  assert.equal(status(proposal.id),'done','a proposal is settled whatever was decided');
+  assert.equal(status(misato.id),'open','Misato\'s sortie waits for her resume');
+ }finally{store.close();}
+});
