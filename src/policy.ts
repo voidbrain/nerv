@@ -6,7 +6,7 @@ export type Trust='trusted'|'tainted';
 export type Executor='eva-00'|'eva-01'|'eva-02'|'eva-03';
 /** `owner`: every call reaches the owner (Pattern Blue) whatever the Scrolls say, e.g. a new fact in memory (F-022). */
 /** `removes`: the action cancels or forgets something (B-009); it may be Green (undoable) but always gets Casper's intent check. */
-export interface Tool {name:string;effect:Effect;inverse?:string;owner?:true;removes?:true}
+export interface Tool {name:string;effect:Effect;inverse?:string;owner?:true;removes?:true;/** F-021: the EVA class an MCP tool was granted for (B-025). */eva?:Executor}
 /** The Scrolls: owner rules. Unknown keys are rejected so a typo cannot silently relax a rule. */
 export interface Policy {deny:string[];blue:string[];syncThreshold:number;maxRejects:number;budget:number}
 export interface Action {tool:string;args:Record<string,unknown>;trust:Trust;stage:Stage;cost:number;proactive?:boolean}
@@ -31,6 +31,10 @@ export function patternOf(effect:Effect,trust:Trust,tool:string,policy:Policy,ow
 /** Casper checks intent for anything not Green, and for every action that removes something, Green or not (B-009). */
 export function intentChecked(pattern:Pattern,tool:Tool|undefined):boolean {return pattern!=='green'||tool?.removes===true;}
 /** EVA-00 shadow, EVA-01 bounded, EVA-02 production, EVA-03 quarantine for tainted local work. */
+/** Most confined first: quarantine, shadow, bounded, production. */
+const CONFINEMENT:Executor[]=['eva-03','eva-00','eva-01','eva-02'];
+/** B-025: a tool granted for an EVA class never runs less confined than that class, nor less than the stage allows. */
+export function stricter(a:Executor,b:Executor|undefined):Executor {return b&&CONFINEMENT.indexOf(b)<CONFINEMENT.indexOf(a)?b:a;}
 export function executorOf(action:Action,effect:Effect):Executor {
  if(action.trust==='tainted'&&local(effect))return 'eva-03';
  if(action.proactive&&action.stage!=='production')return 'eva-00';
@@ -49,7 +53,7 @@ export function balthasar(action:Action,effect:Effect,executor:Executor,spent:nu
 /** Extra seats are veto-only: their approvals never count, shadow seats are logged and ignored. */
 /** Unregistered tools (no Tool) are treated as irreversible, so Pattern Blue. */
 export function ballot(action:Action,tool:Tool|undefined,policy:Policy,spent:number,casper?:Verdict,extras:Verdict[]=[]):Ballot {
- const effect=tool?.effect ?? 'irreversible';const pattern=patternOf(effect,action.trust,action.tool,policy,tool?.owner===true);const executor=executorOf(action,effect);
+ const effect=tool?.effect ?? 'irreversible';const pattern=patternOf(effect,action.trust,action.tool,policy,tool?.owner===true);const executor=stricter(executorOf(action,effect),tool?.eva);
  const verdicts=[melchior(action,effect,policy),balthasar(action,effect,executor,spent,policy)];
  const needsCasper=intentChecked(pattern,tool);
  if(needsCasper&&casper)verdicts.push({...casper,seat:'casper'});

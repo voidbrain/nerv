@@ -25,18 +25,18 @@ test('an MCP server over stdio: tools listed, a call answered, the fingerprint f
 });
 /** A fake local model: Misato follows its script; every system prompt (the tools Misato is offered) is kept. */
 async function model(script:string[]){
- const systems:string[]=[];
+ const systems:string[]=[],consulted:string[]=[];
  const s=createServer((req,res)=>{let raw='';req.on('data',d=>raw+=d).on('end',()=>{const r=JSON.parse(raw) as {messages:{content:string}[]};const sys=r.messages[0]!.content;
-  let out='{"reply":"ok"}';if(sys.startsWith('You are Casper'))out='{"vote":"approve","reason":"Matches.","confidence":0.9}';else if(!sys.startsWith('You are a consultant')){systems.push(sys);out=script.shift() ?? '{"reply":"done"}';}
+  let out='{"reply":"ok"}';if(sys.startsWith('You are Casper'))out='{"vote":"approve","reason":"Matches.","confidence":0.9}';else if(sys.startsWith('You are a consultant'))consulted.push(r.messages.at(-1)!.content);else{systems.push(sys);out=script.shift() ?? '{"reply":"done"}';}
   res.setHeader('content-type','application/json');res.end(JSON.stringify({choices:[{message:{content:out},finish_reason:'stop'}]}));});});
- await new Promise<void>(d=>s.listen(0,'127.0.0.1',d));return {url:`http://127.0.0.1:${(s.address() as {port:number}).port}/v1`,systems,close:()=>new Promise<void>(d=>{s.close(()=>d());s.closeAllConnections();})};
+ await new Promise<void>(d=>s.listen(0,'127.0.0.1',d));return {url:`http://127.0.0.1:${(s.address() as {port:number}).port}/v1`,systems,consulted,close:()=>new Promise<void>(d=>{s.close(()=>d());s.closeAllConnections();})};
 }
 test('through every process: a granted read runs through the gate and the tools process; an ungranted, changed or EVA-03 tool never runs (F-021)',{timeout:60000},async()=>{
  const {Runtime}=await import('../src/runtime.ts');
  const probe=new McpClient(server());const fp=fingerprint((await probe.listTools())[0]!);probe.close();
  const script=['{"action":{"tool":"notes.read_note","args":{"name":"shopping"}}}','{"reply":"Your shopping note says milk and bread."}','{"action":{"tool":"notes.delete_note","args":{"name":"shopping"}}}','{"reply":"I cannot delete notes."}'];const m=await model(script);
  const home=mkdtempSync(join(tmpdir(),'nerv-mcp-'));
- const config=(srv:McpServer,eva='00')=>writeFileSync(join(home,'config.json'),JSON.stringify({models:{local:{baseUrl:m.url,model:'m'},roles:{misato:{route:'local'}}},tools:{mcp:[srv],grants:[{server:'notes',tool:'read_note',effect:'read',eva,fingerprint:fp}]}}));
+ const config=(srv:McpServer,eva='00')=>writeFileSync(join(home,'config.json'),JSON.stringify({models:{local:{baseUrl:m.url,model:'m'},roles:{misato:{route:'local'},consultant:{model:'c'}}},tools:{mcp:[srv],grants:[{server:'notes',tool:'read_note',effect:'read',eva,fingerprint:fp}]}}));
  config(server());
  const r=new Runtime(join(home,'nerv.sqlite'),undefined,home);
  try{
@@ -46,6 +46,11 @@ test('through every process: a granted read runs through the gate and the tools 
   assert.deepEqual(one.steps.map(s=>[s.tool,s.outcome]),[['notes.read_note','grant']]);
   assert.deepEqual(one.steps[0]!.result,{text:'Note shopping: buy milk and bread.'});assert.equal(one.reply,'Your shopping note says milk and bread.');
   const ev=await r.events(one.sortieId);assert.ok(ev.some(e=>e.kind==='grant.used'),'the single-use grant was used');
+  // B-025: granted for EVA-00, it runs under EVA-00, not the EVA its stage alone would pick.
+  assert.equal((ev.find(e=>e.kind==='ballot')!.payload as {executor:string}).executor,'eva-00');
+  // B-024: the consultant is told what Misato can do: NERV's own tools and the granted one.
+  const told=(JSON.parse(m.consulted[0]!) as {tools?:{name:string;about:string}[]}).tools?.map(t=>t.name) ?? [];
+  assert.ok(told.includes('notes.read_note')&&told.includes('reminders.add'),told.join(', '));assert.ok(!told.includes('notes.delete_note'),'not an ungranted one');
   assert.deepEqual((ev.find(e=>e.kind==='action.done')!.payload as {result:unknown}).result,{text:'Note shopping: buy milk and bread.'});
   const two=await r.chat('Delete my shopping note');
   assert.deepEqual(two.steps.map(s=>[s.tool,s.outcome]),[['notes.delete_note','invalid']],'not granted: back to Misato, never a card');
@@ -79,4 +84,11 @@ test('a server that fails at start says why: the last lines of its error output 
  const bad=join(dir,'bad.mjs');writeFileSync(bad,"console.error('Error: Cannot find module \\'./npm-cli.js\\'');process.exit(1);");
  const c=new McpClient({id:'bad',command:process.execPath,args:[bad]});
  try{await assert.rejects(c.listTools(),/MCP server ended \(exit 1\): Error: Cannot find module '\.\/npm-cli\.js'/);}finally{c.close();rmSync(dir,{recursive:true,force:true});}
+});
+test('B-025: a granted tool runs under the stricter of its grant\'s EVA and the stage\'s; EVA-03 stays quarantine',async()=>{
+ const {stricter}=await import('../src/policy.ts');
+ assert.equal(stricter('eva-02','eva-00'),'eva-00','granted for EVA-00 in production: EVA-00');
+ assert.equal(stricter('eva-00','eva-02'),'eva-00','a prototype stage still confines a tool granted for EVA-02');
+ assert.equal(stricter('eva-01','eva-02'),'eva-01');assert.equal(stricter('eva-03','eva-00'),'eva-03','tainted local work stays in quarantine');
+ assert.equal(stricter('eva-02',undefined),'eva-02','NERV\'s own tools: the stage decides');
 });
