@@ -1,3 +1,4 @@
+import {overlappingDomains} from './pilots.ts';
 import type { DatabaseSync } from 'node:sqlite';
 import { createHash, randomUUID } from 'node:crypto';
 import { ballot, defaultPolicy, patternOf,intentChecked, validatePolicy, type Ballot, type Pattern, type Policy, type Stage, type Tool, type Trust, type Verdict } from './policy.ts';
@@ -221,10 +222,10 @@ export class Ledger {
  unmatched(domain:string,since:string):{count:number;sorties:{id:string;title:string}[];proposal:'pending'|'declined'|null} {
   if(typeof domain!=='string'||!domain||domain.length>40||!Number.isFinite(Date.parse(since)))throw new Error('Invalid domain query.');
   const at=new Date(since).toISOString();
-  const rows=this.db.prepare("SELECT s.id,s.title FROM events e JOIN sorties s ON s.id=e.sortie_id WHERE e.kind='pilot.unmatched' AND json_extract(e.payload,'$.domain')=? AND e.created>? ORDER BY e.sequence DESC").all(domain,at) as {id:string;title:string}[];
-  const p=this.db.prepare("SELECT a.decision,a.expires,a.decided FROM approvals a JOIN actions x ON x.id=a.action_id WHERE x.tool='pilots.create' AND json_extract(x.args,'$.domain')=? ORDER BY x.created DESC LIMIT 1").get(domain) as {decision:string|null;expires:string;decided:string|null}|undefined;
-  const proposal=!p?null:p.decision===null&&p.expires>iso(new Date())?'pending':p.decision&&p.decision!=='approve'&&(p.decided ?? '')>at?'declined':null;
-  return {count:rows.length,sorties:rows.slice(0,5),proposal};
+  const rows=(this.db.prepare("SELECT DISTINCT s.id,s.title,json_extract(e.payload,'$.domain') AS domain FROM events e JOIN sorties s ON s.id=e.sortie_id WHERE e.kind='pilot.unmatched' AND e.created>? ORDER BY e.sequence DESC").all(at) as {id:string;title:string;domain:string}[]).filter(r=>overlappingDomains(domain,r.domain));
+  const proposals=(this.db.prepare("SELECT a.decision,a.expires,a.decided,json_extract(x.args,'$.domain') AS domain FROM approvals a JOIN actions x ON x.id=a.action_id WHERE x.tool='pilots.create' AND (a.decision IS NULL OR a.decided>?) ORDER BY x.created DESC").all(at) as {decision:string|null;expires:string;decided:string|null;domain:string}[]).filter(p=>overlappingDomains(domain,p.domain));
+  const proposal=proposals.some(p=>p.decision===null&&p.expires>iso(new Date()))?'pending':proposals.some(p=>p.decision&&p.decision!=='approve'&&(p.decided ?? '')>at)?'declined':null;
+  return {count:rows.length,sorties:rows.slice(0,5).map(({id,title})=>({id,title})),proposal};
  }
  /** Misato's reply to the owner, kept with the sortie it answers. */
  reply(sortieId:string,text:string,now=new Date()):void {this.tx(()=>this.event(sortieId,null,'misato.reply',{text:text.slice(0,4000)},now));}

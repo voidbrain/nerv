@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {mkdtempSync,rmSync,writeFileSync,readFileSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';
-import {choosePilot,describePilots,hits,validatePilots,words,type Pilot} from '../src/pilots.ts';
+import {choosePilot,describePilots,hits,overlappingDomains,validatePilots,words,type Pilot} from '../src/pilots.ts';
 const pilot=(over:Partial<Pilot>&{id:string}):Pilot=>({name:over.id,domain:'things',keywords:['thing'],model:'m',stage:'prototype',...over});
 test('a pilot is data: the roster is checked, the generic pilot is implicit and reserved, a parent must exist',()=>{
  const ok=validatePilots([{id:'printer',name:'Print Master',domain:'3D printing',keywords:['3D print','Filament'],model:'gemma4:12b'}]);
@@ -69,7 +69,7 @@ test('through every process: three requests in one domain without a specialist b
  const s=createServer((req,res)=>{let raw='';req.on('data',c=>raw+=c).on('end',()=>{const r=JSON.parse(raw) as {model:string;messages:{content:string}[]};const sys=r.messages[0]!.content;let out='{"reply":"ok"}';
   const req0=(JSON.parse(r.messages.at(-1)!.content) as {request?:string}).request ?? '';
   if(/^You are .+, the owner's pilot for/.test(sys)){asked.push('pilot:'+r.model);out='Specialist advice.';}
-  else if(sys.startsWith('You are a consultant')){asked.push('generic');out=(/wood/.test(req0)?'Domain: woodworking':'Domain: image editing')+'\nGeneric advice.';}
+  else if(sys.startsWith('You are a consultant')){asked.push('generic');out=(/wood/.test(req0)?'Domain: woodworking':(/brighter/.test(req0)?'Domain: image processing':/square/.test(req0)?'Domain: image retouching':'Domain: image editing'))+'\nGeneric advice.';}
   else if(sys.startsWith('You are Casper'))out='{"vote":"approve","reason":"Matches.","confidence":0.9}';
   res.setHeader('content-type','application/json');res.end(JSON.stringify({model:r.model,choices:[{message:{content:out},finish_reason:'stop'}]}));});});
  await new Promise<void>(d=>s.listen(0,'127.0.0.1',d));const url=`http://127.0.0.1:${(s.address() as {port:number}).port}/v1`;
@@ -85,13 +85,14 @@ test('through every process: three requests in one domain without a specialist b
   await r.chat('Crop my photo to a square');
   await until(async()=>(await pending()).length===1);
   const card=(await pending())[0]!.card;
-  assert.deepEqual(card.args,{id:'image-editing',name:'Image Editing',domain:'image editing',keywords:['image editing','image','editing']});
+  assert.deepEqual(card.args,{id:'image-retouching',name:'Image Retouching',domain:'image retouching',keywords:['image retouching','image','retouching']});
   assert.equal(card.pattern,'blue','a new pilot always asks the owner');
+  assert.deepEqual(await Promise.all(['image editing','image processing','image retouching'].map(d=>r.proposePilot(d))),[false,false,false],'overlapping proposals are suppressed, including concurrent requests');
   await r.chat('Rotate the photo');await new Promise(d=>setTimeout(d,300));assert.equal((await pending()).length,1,'not proposed twice while the card waits');
   await r.decide((await pending())[0]!.id,'approve','api');
   const marduk=async()=>(await r.sorties(50) as {source:string;status:string}[]).filter(x=>x.source==='marduk').map(x=>x.status);
   assert.deepEqual(await marduk(),['done'],'B-026: the proposal sortie closes once its card is decided');
-  assert.deepEqual(readConfig(home).pilots,[{id:'image-editing',name:'Image Editing',domain:'image editing',keywords:['image editing','image','editing'],model:'advisor',stage:'prototype',parent:'generic'}],'created at Prototype on the generic pilot\'s model');
+  assert.deepEqual(readConfig(home).pilots,[{id:'image-retouching',name:'Image Retouching',domain:'image retouching',keywords:['image retouching','image','retouching'],model:'advisor',stage:'prototype',parent:'generic'}],'created at Prototype on the generic pilot\'s model');
   await r.chat('Some image editing for this picture');assert.equal(asked.at(-1),'pilot:advisor','the next request in that domain goes to the new pilot');
   for(const t of ['Sand the woodworking table','Plan a woodworking shelf','Glue for woodworking'])await r.chat(t);
   await until(async()=>(await pending()).length===1);await r.decide((await pending())[0]!.id,'reject','api');
@@ -99,4 +100,13 @@ test('through every process: three requests in one domain without a specialist b
   for(const t of ['More woodworking','Woodworking tools','Woodworking finish'])await r.chat(t);
   await new Promise(d=>setTimeout(d,400));assert.equal((await pending()).length,0,'turned down: not proposed again for 30 days');
  }finally{await r.close();await new Promise<void>(d=>{s.close(()=>d());s.closeAllConnections();});rmSync(home,{recursive:true,force:true});}
+});
+
+test('B-027: domain overlap uses significant whole words, ignoring case and accents',()=>{
+ assert.equal(overlappingDomains('File system access','file management'),true);
+ assert.equal(overlappingDomains('file access','file system access'),true);
+ assert.equal(overlappingDomains('image editing','image processing'),true);
+ assert.equal(overlappingDomains('with wood','with metal'),false);
+ assert.equal(overlappingDomains('file access','profile editing'),false);
+ assert.equal(overlappingDomains('3D printing','3d printing'),true);
 });
