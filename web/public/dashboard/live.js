@@ -28,7 +28,7 @@
   ["btn-dummy", "btn-reset", "btn-spear"].forEach(id => { const el = document.getElementById(id); if (el) el.hidden = true; });
   BASES[0] = Object.assign(BASES[0], { name:"TOKYO-3", role:"HQ · this machine", status:"online", cpu:null, ram:null, gpu:null, rtt:0, models:"—" });
 
-  function mapStatus(s) { return s.status === "open" ? (s.waiting ? "waiting" : "active") : s.status === "done" ? "done" : s.status === "failed" ? "failed" : "stood-down"; }
+  function mapStatus(s) { return s.status === "open" ? (s.waiting || s.question ? "waiting" : "active") : s.status === "done" ? "done" : s.status === "failed" ? "failed" : "stood-down"; }
   function toSortie(s) {
     const d = detailCache[s.id]; const actions = d ? d.detail.map(a => {
       TOOLS[a.tool] = TOOLS[a.tool] || { effect:a.ballot.effect };
@@ -39,7 +39,7 @@
     // action passed but this one bypassed is not shown as passed.
     const latest = actions[actions.length - 1]; const latestIs = (...st) => !!latest && st.includes(latest.status);
     // The consultant's advice is a passed step when it was given (owner, 2026-11-05: ADVISE stayed unlit after it advised).
-    const done = { detect:true, intake:true, route:true, consult:consulted.has(s.id), plan:actions.length > 0 || known.has(s.id), magi:!!latest, sync:!!latest,
+    const done = { detect:true, intake:true, route:true, consult:consulted.has(s.id), plan:actions.length > 0 || !!s.question || known.has(s.id), magi:!!latest, sync:!!latest,
       apt:!!latest && !!latest.ballot && latest.ballot.outcome === "approval", plug:latestIs("done", "failed", "proposed"), eva:latestIs("done", "failed"), debrief:status !== "active" && status !== "waiting" };
     const phase = status === "waiting" ? "apt" : status === "active" ? (phaseOf.get(s.id) || "plan") : "debrief";
     const last = actions[actions.length - 1];
@@ -133,7 +133,7 @@
     for (const e of all) {
       const key = id + ":" + e.sequence; if (seen.has(key)) continue; seen.add(key);
       const s = { id:short(id) }; const t = Date.parse(e.created); const p = e.payload || {};
-      const line = e.kind === "misato.request" ? ["Owner: " + p.text, "", "you"] : e.kind === "misato.reply" ? ["Misato: " + p.text, "ok", "misato"]
+      const line = e.kind === "misato.request" ? ["Owner: " + p.text, "", "you"] : e.kind === "misato.asked" ? ["Misato asks: " + p.text + " · waiting for your answer", "warn", "misato"] : e.kind === "misato.answered" ? ["Owner: " + p.text, "", "you"] : e.kind === "misato.unanswered" ? ["No answer within 24 hours", "warn", "misato"] : e.kind === "misato.reply" ? ["Misato: " + p.text, "ok", "misato"]
         : e.kind === "ballot" ? ["MAGI: Pattern " + p.pattern.toUpperCase() + " · " + p.outcome + " · " + p.reason, p.outcome === "grant" ? "ok" : p.outcome === "reject" ? "danger" : "warn", "magi"]
         : e.kind === "approval.requested" ? ["Approval card: " + p.reason, "warn", "penpen"]
         : e.kind.startsWith("approval.") ? ["Owner " + e.kind.slice(9) + " (" + (p.source || "") + ")", e.kind === "approval.approve" ? "ok" : "danger", "you"]
@@ -152,7 +152,7 @@
       if (e.kind === "misato.request" && /^kaji:/.test(p.conversation || "")) originOf.set(id, baseName(String(p.conversation).slice(5).split("-").slice(0, 2).join("-")));
       if (e.kind === "misato.consult") { consulted.add(id); advisedBy.set(id, (p.pilot && p.pilot.name ? p.pilot.name : "Generic pilot") + (p.model ? " · " + p.model : "")); }
       // F-051: the step a running sortie is on, from its latest event (not always MAGI).
-      const step = { "misato.request":generic() ? "consult" : "plan", "misato.consult":"plan", "misato.resumed":"plan", "action.done":"plan", "action.failed":"plan", "approval.requested":"apt", "approval.approve":"plug", "misato.reply":"debrief" }[e.kind] || (e.kind === "ballot" ? (p.outcome === "grant" ? "plug" : p.outcome === "approval" ? "apt" : "plan") : null);
+      const step = { "misato.request":generic() ? "consult" : "plan", "misato.consult":"plan", "misato.resumed":"plan", "misato.asked":"apt", "misato.answered":"plan", "action.done":"plan", "action.failed":"plan", "approval.requested":"apt", "approval.approve":"plug", "misato.reply":"debrief" }[e.kind] || (e.kind === "ballot" ? (p.outcome === "grant" ? "plug" : p.outcome === "approval" ? "apt" : "plan") : null);
       if (step) phaseOf.set(id, step);
       if (line) { state.log.push({ t, msg:line[0], cls:line[1], s:s.id, who:line[2], chat:e.kind.startsWith("misato.") }); added++; }
     }

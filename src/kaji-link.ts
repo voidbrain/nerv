@@ -74,7 +74,7 @@ export function sanitizeVerdict(value:unknown):PeerVerdict|undefined {
 /** One action the main base asks another base to run, by an id that base remembers (a resend returns the first result). */
 export interface RunItem {id:string;request:string;tool:string;args:Record<string,unknown>}
 /** The main base's answer to a dispatched request: the reply Misato gave there (its sortie and cards live there). */
-export interface DispatchedReply {sortieId:string;reply?:string;error?:string;steps:unknown[];waiting:{approvalId:string;tool:string;reason:string}[];base?:{id:string;name:string}}
+export interface DispatchedReply {sortieId:string;question?:{text:string;expires:string};reply?:string;error?:string;steps:unknown[];waiting:{approvalId:string;tool:string;reason:string}[];base?:{id:string;name:string}}
 /** What a base relays to the main base's Aoba (F-036 phase 2): text to show, and the approval cards it carries. */
 export interface Relay {text:string;cards:{id:string;label:string}[]}
 const UUID=/^[a-f0-9-]{36}$/;

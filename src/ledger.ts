@@ -19,7 +19,7 @@ export const LEDGER_SCHEMA=`
 export interface Proposal {tool:string;args:Record<string,unknown>;stage:Stage;cost?:number;casper?:Verdict;extras?:Verdict[]}
 export interface Card {sortieId:string;actionId:string;tool:string;args:Record<string,unknown>;effect:string;pattern:string;sync:Ballot['sync'];verdicts:Verdict[];reason:string;expires:string}
 export interface Approval {id:string;card:Card;expires:string;decision:string|null}
-export interface SortieSummary {id:string;source:string;title:string;trust:string;status:string;created:string;closed:string|null;actions:number;waiting:number;patterns:string[];why:string}
+export interface SortieSummary {id:string;source:string;title:string;trust:string;status:string;created:string;closed:string|null;actions:number;waiting:number;patterns:string[];why:string;question?:{text:string;expires:string}}
 export interface ActionDetail {id:string;tool:string;args:Record<string,unknown>;ballot:Ballot;created:string;status:'proposed'|'waiting'|'done'|'failed'|'rejected'|'stood-down'}
 export interface Proposed {actionId:string;ballot:Ballot;grantId?:string;approvalId?:string}
 export type Decision='approve'|'reject'|'edit';
@@ -87,6 +87,28 @@ export class Ledger {
  }
  /** Misato's loop state, kept in the ledger so a resume after the owner's decision needs no coordinator memory (F-033). */
  note<K extends 'misato.request'|'misato.step'|'misato.waiting'|'misato.consult'|'pilot.unmatched'|'kaji.forwarded'|'kaji.answered'>(sortieId:string,kind:K,payload:EventPayloads[K],now=new Date()):void {this.tx(()=>this.event(sortieId,null,kind,payload,now));}
+ /** Pending clarification in one conversation; expiry never becomes an answer. */
+ question(conversation:string,now=new Date()):{sortieId:string;sequence:number;text:string;expires:string;forwarded?:{id:string;name:string}}|null {
+  if(typeof conversation!=='string'||!/^[a-z]+(:[a-z0-9-]{1,30})?$/.test(conversation)||conversation.length>40)throw new Error('Invalid conversation.');
+  const row=this.db.prepare(`SELECT e.sortie_id,e.sequence,e.payload FROM events e JOIN sorties s ON s.id=e.sortie_id
+   WHERE s.status='open' AND e.kind='misato.asked' AND json_extract(e.payload,'$.conversation')=? AND json_extract(e.payload,'$.expires')>?
+   AND NOT EXISTS (SELECT 1 FROM events a WHERE a.sortie_id=e.sortie_id AND a.sequence>e.sequence AND a.kind IN ('misato.answered','misato.asked'))
+   ORDER BY e.sequence DESC LIMIT 1`).get(conversation,iso(now)) as {sortie_id:string;sequence:number;payload:string}|undefined;
+  if(!row)return null;const p=JSON.parse(row.payload) as EventPayloads['misato.asked'];return {sortieId:row.sortie_id,sequence:row.sequence,text:p.text,expires:p.expires,...(p.forwarded?{forwarded:p.forwarded}:{})};
+ }
+ ask(sortieId:string,text:string,conversation:string,forwarded?:{id:string;name:string},now=new Date()):{text:string;expires:string} {
+  return this.tx(()=>{
+   if(this.question(conversation,now))throw new Error('A clarification already waits in this conversation.');
+   const s=this.db.prepare('SELECT status FROM sorties WHERE id=?').get(sortieId) as {status:string}|undefined;
+   if(s?.status!=='open'||!text.trim()||text.length>4000)throw new Error('Invalid clarification.');
+   const expires=iso(now,86_400_000);this.event(sortieId,null,'misato.asked',{text,conversation,expires,...(forwarded?{forwarded}:{})},now);return {text,expires};
+  });
+ }
+ answer(conversation:string,sequence:number,text:string,now=new Date()):{sortieId:string}|null {
+  return this.tx(()=>{const q=this.question(conversation,now);if(!q||q.sequence!==sequence)return null;
+   if(typeof text!=='string'||!text.trim()||text.length>4000)throw new Error('Invalid answer.');
+   this.event(q.sortieId,null,'misato.answered',{text,questionSequence:q.sequence},now);return {sortieId:q.sortieId};});
+ }
  private exchange(sortieId:string,requestPayload:string):{request:string;reply?:string;actions?:string[]} {
   const reply=this.db.prepare("SELECT payload FROM events WHERE sortie_id=? AND kind='misato.reply' ORDER BY sequence DESC LIMIT 1").get(sortieId) as {payload:string}|undefined;
   const ran=(this.db.prepare("SELECT payload FROM events WHERE sortie_id=? AND kind='action.done' ORDER BY sequence").all(sortieId) as {payload:string}[]).map(e=>{const p=JSON.parse(e.payload) as {tool:string;result:unknown};return `${p.tool} → ${JSON.stringify(p.result).slice(0,300)}`;});
@@ -108,6 +130,7 @@ export class Ledger {
  /** Open Misato sorties whose latest wait is over: every approval it waited for is decided, and no resume has claimed it. */
  resumable():string[] {
   return (this.db.prepare(`SELECT s.id FROM sorties s WHERE s.source='misato' AND s.status='open'
+   AND NOT EXISTS (SELECT 1 FROM events q WHERE q.sortie_id=s.id AND q.kind='misato.asked' AND q.sequence>coalesce((SELECT max(sequence) FROM events a WHERE a.sortie_id=s.id AND a.kind='misato.answered'),0))
    AND (SELECT max(sequence) FROM events WHERE sortie_id=s.id AND kind='misato.waiting') > coalesce((SELECT max(sequence) FROM events WHERE sortie_id=s.id AND kind='misato.resumed'),0)
    AND NOT EXISTS (SELECT 1 FROM approvals a JOIN actions x ON x.id=a.action_id WHERE x.sortie_id=s.id AND a.decision IS NULL)
    ORDER BY s.created LIMIT 20`).all() as {id:string}[]).map(r=>r.id);
@@ -120,6 +143,7 @@ export class Ledger {
   if(typeof before!=='string'||!Number.isFinite(Date.parse(before)))throw new Error('Invalid date.');
   const rows=this.db.prepare(`SELECT s.id,s.title FROM sorties s WHERE s.source='misato' AND s.status='open' AND s.created<?
    AND NOT EXISTS (SELECT 1 FROM approvals a JOIN actions x ON x.id=a.action_id WHERE x.sortie_id=s.id AND a.decision IS NULL)
+   AND NOT EXISTS (SELECT 1 FROM events q WHERE q.sortie_id=s.id AND q.kind='misato.asked' AND q.sequence>coalesce((SELECT max(sequence) FROM events a WHERE a.sortie_id=s.id AND a.kind='misato.answered'),0))
    AND coalesce((SELECT max(sequence) FROM events WHERE sortie_id=s.id AND kind='misato.waiting'),0) <= coalesce((SELECT max(sequence) FROM events WHERE sortie_id=s.id AND kind='misato.resumed'),0)
    ORDER BY s.created LIMIT 20`).all(new Date(before).toISOString()) as {id:string;title:string}[];
   return rows.map(r=>({...r,ran:(this.db.prepare("SELECT payload FROM events WHERE sortie_id=? AND kind='action.done' ORDER BY sequence").all(r.id) as {payload:string}[]).map(e=>(JSON.parse(e.payload) as {tool:string}).tool)}));
@@ -152,7 +176,9 @@ export class Ledger {
   const actions=this.db.prepare('SELECT id,tool,ballot FROM actions WHERE sortie_id=? ORDER BY created, rowid').all(r.id) as {id:string;tool:string;ballot:string}[];
   const waiting=(this.db.prepare('SELECT count(*) AS n FROM approvals a JOIN actions x ON x.id=a.action_id WHERE x.sortie_id=? AND a.decision IS NULL').get(r.id) as {n:number}).n;
   const ballots=actions.map(a=>JSON.parse(a.ballot) as Ballot);
-  return {...r,actions:actions.length,waiting,patterns:ballots.map(b=>b.pattern),why:this.why(r,actions.length,actions.at(-1),ballots.at(-1))};
+  const q=this.db.prepare("SELECT payload FROM events WHERE sortie_id=? AND kind='misato.asked' AND sequence>coalesce((SELECT max(sequence) FROM events WHERE sortie_id=? AND kind='misato.answered'),0) ORDER BY sequence DESC LIMIT 1").get(r.id,r.id) as {payload:string}|undefined;
+  const question=r.status==='open'&&q?JSON.parse(q.payload) as {text:string;expires:string}:undefined;
+  return {...r,...(question?{question:{text:question.text,expires:question.expires}}:{}),actions:actions.length,waiting,patterns:ballots.map(b=>b.pattern),why:question?'Waiting for your answer: '+question.text:this.why(r,actions.length,actions.at(-1),ballots.at(-1))};
  }
  /** The facts explainSortie needs: the latest action's ballot, the owner's decision and what became of it. */
  private why(r:{id:string;status:string},count:number,last:{id:string;tool:string}|undefined,ballot:Ballot|undefined):string {
@@ -262,7 +288,11 @@ export class Ledger {
   return this.tx(()=>{
    const due=this.db.prepare('SELECT a.id,a.action_id,x.sortie_id FROM approvals a JOIN actions x ON x.id=a.action_id WHERE a.decision IS NULL AND a.expires<=?').all(iso(now)) as {id:string;action_id:string;sortie_id:string}[];
    for(const r of due){this.db.prepare('UPDATE approvals SET decision=?,decided=?,source=? WHERE id=?').run('expired',iso(now),'ttl',r.id);this.event(r.sortie_id,r.action_id,'approval.expired',{approvalId:r.id,source:'ttl'},now);}
-   return due.length;
+   const questions=this.db.prepare(`SELECT e.sortie_id,e.sequence FROM events e JOIN sorties s ON s.id=e.sortie_id
+    WHERE s.status='open' AND e.kind='misato.asked' AND json_extract(e.payload,'$.expires')<=?
+    AND NOT EXISTS (SELECT 1 FROM events a WHERE a.sortie_id=e.sortie_id AND a.sequence>e.sequence AND a.kind IN ('misato.answered','misato.asked'))`).all(iso(now)) as {sortie_id:string;sequence:number}[];
+   for(const q of questions){this.db.prepare("UPDATE sorties SET status='failed',closed=? WHERE id=?").run(iso(now),q.sortie_id);this.event(q.sortie_id,null,'misato.unanswered',{questionSequence:q.sequence},now);this.event(q.sortie_id,null,'misato.reply',{text:'No answer within 24 hours; this request is closed. Nothing was resumed.'},now);this.event(q.sortie_id,null,'sortie.failed',{},now);}
+   return due.length+questions.length;
   });
  }
  /** The executor's check, on every call: exact tool and arguments, unexpired, unrevoked, single use. */

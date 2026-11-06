@@ -54,7 +54,7 @@ process.on('message',(value:unknown)=>{
    const route=models.roles?.misato?.route ?? (models.local?'local':models.cloud?.enabled?'cloud':undefined);
    if(!route)return {error:'No model route for Misato: add models.local (or enable models.cloud) in config.json, then run nerv reload. See docs/INSTALL.md, section \"Model routes\".'};
    const remote=Array.isArray(params.remote)?params.remote as RemoteOffer[]:[];
-   const ask=misatoAsk({request:params.request as string,history:params.history as Step[],tools:[...toolDocs,...((params.external as ToolDoc[]|undefined) ?? []),...(remote.length?[remoteToolDoc(remote)]:[])],now:new Date().toISOString(),timeZone,...(params.context?{context:params.context as Turn[]}:{}),...(params.memory?{memory:params.memory as Recalled[]}:{}),...(typeof params.advice==='string'?{advice:params.advice}:{}),...(params.language==='it'||params.language==='en'?{language:params.language}:{})},route);
+   const ask=misatoAsk({...(params.clarification===true?{clarification:true}:{}),request:params.request as string,history:params.history as Step[],tools:[...toolDocs,...((params.external as ToolDoc[]|undefined) ?? []),...(remote.length?[remoteToolDoc(remote)]:[])],now:new Date().toISOString(),timeZone,...(params.context?{context:params.context as Turn[]}:{}),...(params.memory?{memory:params.memory as Recalled[]}:{}),...(typeof params.advice==='string'?{advice:params.advice}:{}),...(params.language==='it'||params.language==='en'?{language:params.language}:{})},route);
    try{const reply=await run(ask,forRole(models,'misato'));const plan=parsePlan(reply.text);return plan?{plan,model:reply.model}:{invalid:true,model:reply.model};}
    catch(e){return {error:e instanceof ModelError?e.message:'Model route failed.'};}
   }
@@ -64,7 +64,7 @@ process.on('message',(value:unknown)=>{
    const pilot=params.pilot as {name:string;domain:string;model:string}|undefined;
    const pick=models.roles?.consultant;if(configError||!models.local||(!pilot&&!pick))return {advice:null};
    const on=pilot?{...models,local:{...models.local,model:pilot.model}}:forRole(models,'consultant');
-   try{const reply=await run(consultantAsk(params.request as string,(params.context as Turn[]|undefined) ?? [],pilot,(params.bases as {id:string;name:string}[]|undefined) ?? [],(params.tools as {name:string;about:string}[]|undefined) ?? []),on);if(pilot){const advice=parseAdvice(reply.text);return advice?{advice,model:reply.model}:{advice:null};}
+   try{const reply=await run(consultantAsk(params.request as string,(params.context as Turn[]|undefined) ?? [],pilot,(params.bases as {id:string;name:string}[]|undefined) ?? [],(params.tools as {name:string;about:string}[]|undefined) ?? [],params.previousAdvice as string|undefined),on);if(pilot){const advice=parseAdvice(reply.text);return advice?{advice,model:reply.model}:{advice:null};}
     const c=parseConsult(reply.text);return {advice:c.advice ?? null,...(c.advice?{model:reply.model}:{}),...(c.domain?{domain:c.domain}:{})};}
    catch(e){return {advice:null,error:e instanceof ModelError?e.message:'Consultant failed.'};}
   }
