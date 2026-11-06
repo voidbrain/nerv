@@ -59,7 +59,7 @@ body.theme-eva .badge, body.theme-eva .badge { border-radius:1px; }
 .b-ok { background:color-mix(in srgb,var(--ok) 18%,transparent); color:var(--ok); }
 .b-warn { background:color-mix(in srgb,var(--warn) 18%,transparent); color:var(--warn); }
 .b-danger { background:color-mix(in srgb,var(--danger) 18%,transparent); color:var(--danger); }
-.b-muted { background:color-mix(in srgb,var(--muted) 18%,transparent); color:var(--muted); }
+.b-muted { background:color-mix(in srgb,var(--muted) 18%,transparent); color:var(--text); }
 .b-info { background:color-mix(in srgb,var(--info) 18%,transparent); color:var(--info); }
 .meter { height:6px; background:var(--panel2); border:1px solid var(--border); position:relative; overflow:hidden; }
 .meter > i { display:block; height:100%; background:var(--ok); }
@@ -149,6 +149,9 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .rem .acts { display:flex; gap:4px; }
 .models-form { display:grid; grid-template-columns:auto 1fr; gap:4px 8px; align-items:center; }
 .models-form select { min-width:0; width:100%; }
+.pilot-model-form { display:flex; align-items:center; gap:8px; margin-top:8px; }
+.pilot-model-form select { min-width:0; flex:1; }
+.pilot-model-form button:disabled { opacity:.5; cursor:default; }
 .rem-edit { display:flex; flex-wrap:wrap; gap:4px; padding:4px 0; }
 .rem-edit input[type=text] { flex:1 1 100%; }
 
@@ -443,7 +446,7 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
         <div class="hdr"><span data-l="bases">NERV bases · Kaji line</span><span class="sub" id="bases-sub"></span></div>
         <div class="maprow">
           <div class="mapwrap"><canvas id="topo" width="540" height="250" aria-label="Map of NERV bases and links"></canvas></div>
-          <div class="maplegend"><span><i class="sq" style="background:var(--ok)"></i>online</span><span><i class="sq" style="background:var(--warn)"></i>standby</span><span><i class="sq" style="background:#666"></i>offline (static)</span><span>- - - Kaji line</span><span><i class="sq" style="background:var(--accent)"></i>plug</span><span><i class="sq" style="background:var(--ok)"></i>result</span><span><i class="sq" style="background:var(--info)"></i>node sync</span></div>
+          <div class="maplegend"><b>Map legend</b><span class="tiny">NERV bases</span><span><i class="sq" style="background:var(--ok)"></i>online</span><span><i class="sq" style="background:var(--warn)"></i>standby</span><span><i class="sq" style="background:#666"></i>offline</span><span class="tiny">Links &amp; activity</span><span>- - - Kaji line</span><span><i class="sq" style="background:var(--accent)"></i>plug</span><span><i class="sq" style="background:var(--ok)"></i>result</span><span><i class="sq" style="background:var(--info)"></i>Sync</span></div>
         </div>
         <div class="pad list" id="bases"></div>
       </section>
@@ -454,7 +457,7 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
       </section>
 
       <section class="panel" id="p-budget">
-        <div class="hdr"><span data-l="budget">Battery · budget</span><span class="sub">Scrolls: $1.00 / day</span></div>
+        <div class="hdr"><span data-l="budget">Battery · budget</span><span class="sub" id="budget-sub">Cost tracking planned</span></div>
         <div class="pad" id="budget"></div>
       </section>
 

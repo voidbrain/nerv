@@ -1869,3 +1869,38 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 </details>
 
 ---
+
+
+### B-028
+
+**`src/contracts.ts` is unused: node and job contracts no module imports**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: approved removal and all required checks passed.
+
+| | |
+|---|---|
+| **Issue** | Full audit 2026-11-06: `src/contracts.ts` (Capability, NodeAdvertisement, Job, from PR #3) is imported by no module or test, so coverage lists it as never run; the Kaji line (F-036) and F-049/F-050 have their own message types since. |
+| **Reproduce** | `grep -rn contracts src test`: only the file itself. |
+| **Check** | Either removed, or imported by the module that owns the distributed contract, with its types tested. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 in [PR #160](https://github.com/voidbrain/nerv/pull/160) after [PR #159 CI](https://github.com/voidbrain/nerv/actions/runs/42233354933) passed validate, windows and native-macos; read with ci:status. The initially cancelled native job was rerun successfully. Owner approved deletion 2026-11-06. Removed the unused contracts file after confirming no importer; Kaji retains its implemented protocol types and shared/surface.ts remains the validated UI contract. Removed the obsolete area-note claim and corrected the README source ownership description. F-006/F-050 will define tested contracts alongside their implementations. Coverage is refreshed deliberately for the removed untested file. Typecheck, coverage suite, build and all ten Chrome/axe browser views passed. The maintenance review was refreshed after the project-only area-note cleanup; the timed consistency review includes validation and elapsed waits, with procedural counters left unknown. No remaining required checks.
+
+**Estimates:** No remaining effort; ~100% complete. Reassessed 2026-11-06 after owner-approved removal, documentation/coverage refresh and green merged CI.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Full audit 2026-11-06 |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-06 Documentation: no code importer found; deletion approved by owner. Typecheck, coverage suite, build, browser/axe, conventions, integration metadata and refreshed maintenance evidence passed; merged PR #159 CI run 42233354933 passed validate, windows and native-macos |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---

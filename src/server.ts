@@ -122,6 +122,12 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
       else if(req.method==='GET'&&path==='/api/bases'){if(!store.bases){reply(503,{error:'Kaji unavailable.'});return;}reply(200,await store.bases());}
       else if(req.method==='POST'&&path==='/api/memory/consolidate'){if(!store.consolidate){reply(503,{error:'Instrumentality unavailable.'});return;}req.setTimeout(MODEL_TIMEOUT_MS*7+5000);res.once('finish',()=>req.socket.setTimeout(15000));const r=await store.consolidate();reply(r.error?502:200,r);}
       else if(req.method==='GET'&&path==='/api/pilots'){reply(200,{pilots:store.pilotRoster?await store.pilotRoster():[]});}
+      else if(req.method==='PATCH'&&/^\/api\/pilots\/[a-z][a-z0-9-]{1,30}\/model$/.test(path)){
+        if(!store.changePilotModel){reply(503,{error:'Pilot setup unavailable.'});return;}
+        const b=await body(req);
+        if(Object.keys(b).length!==1||typeof b.model!=='string'||!b.model.trim()||b.model.length>100)throw new Error('A pilot model change needs only an installed local model.');
+        reply(200,{pilots:await store.changePilotModel(path.split('/')[3]!,b.model)});
+      }
       else if(req.method==='GET'&&path==='/api/models'){if(!store.modelSetup){reply(503,{error:'Model setup unavailable.'});return;}reply(200,await store.modelSetup());}
       else if(req.method==='PUT'&&path==='/api/models'){
         // Admin only (a dashboard session is the admin): which model Misato and Casper use, and the cloud route on or off. Never a key.
