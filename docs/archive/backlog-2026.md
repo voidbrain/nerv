@@ -1694,3 +1694,7 @@ Closed records in closing-date order. Dated evidence, not current status.
 </details>
 
 ---
+
+### Other changes — root scratch directory
+
+Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): ignore `/~/` in this project’s `.gitignore`. This is a project-only setting in an adapted harness file; the shared template is unchanged. `git check-ignore` confirms the root directory and its contents are ignored while `nested/~/example` remains unignored. Reviewed README, AGENTS/area notes, backlog rules and the style guide: no affected product claims.

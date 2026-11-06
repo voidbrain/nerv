@@ -12,3 +12,6 @@ native/**/.build/
 native/**/.swiftpm/
 .DS_Store
 coverage/
+
+# Project-local scratch directory
+/~/
