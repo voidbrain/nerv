@@ -242,14 +242,15 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .plan .ix { color:var(--muted); font-size:10px; }
 
 /* map */
-.mapwrap { position:relative; max-width:66%; }
-#topo { width:100%; height:auto; display:block; background:var(--sea); }
+.mapwrap { position:relative; min-width:0; }
+#topo { position:absolute; inset:0; width:100%; height:100%; display:block; background:var(--sea); }
 /* Owner, 2026-11-05: a smaller map, its legend on the right. */
 .tabs { display:flex; flex-wrap:wrap; gap:4px; margin:2px 0 6px; } .tabs .btn.sel { border-color:var(--accent); color:var(--accent); }
-.maprow { display:flex; gap:6px; align-items:stretch; }
-.maprow .mapwrap { flex:1 1 auto; min-width:0; }
+.maprow { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px; align-items:stretch; }
 mark { background:color-mix(in srgb,var(--accent) 35%,transparent); color:inherit; padding:0 1px; }
 .maplegend { display:flex; flex-direction:column; justify-content:center; gap:3px; flex:0 0 auto; font-size:9px; color:var(--muted); padding:4px 8px 4px 2px; }
+.legend-heading { font-size:10px; color:var(--text); letter-spacing:.06em; }
+[hidden] { display:none !important; }
 .sq { display:inline-block; width:7px; height:7px; margin-right:3px; vertical-align:middle; }
 
 /* EVA cages */
@@ -438,15 +439,26 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
       </section>
 
       <section class="panel" id="p-models">
-        <div class="hdr"><span data-l="models">Models · Misato &amp; Casper</span><span class="sub" id="models-sub"></span></div>
-        <div class="pad" id="models"></div>
+        <div class="hdr"><span>Models &amp; Battery</span></div>
+        <div class="pad">
+          <div class="tabs" role="tablist" aria-label="Models and Battery">
+            <button class="btn sm sel" id="tab-models" role="tab" aria-selected="true" aria-controls="models-tabpanel" tabindex="0" data-resource-tab="models">Models</button>
+            <button class="btn sm" id="tab-battery" role="tab" aria-selected="false" aria-controls="p-budget" tabindex="-1" data-resource-tab="battery">Battery</button>
+          </div>
+          <div id="models-tabpanel" role="tabpanel" aria-labelledby="tab-models" tabindex="0">
+            <div class="tiny muted" id="models-sub"></div><div id="models"></div>
+          </div>
+          <div id="p-budget" role="tabpanel" aria-labelledby="tab-battery" tabindex="0" hidden>
+            <div class="tiny muted" id="budget-sub">Cost tracking planned</div><div id="budget"></div>
+          </div>
+        </div>
       </section>
 
       <section class="panel" id="p-bases">
         <div class="hdr"><span data-l="bases">NERV bases · Kaji line</span><span class="sub" id="bases-sub"></span></div>
         <div class="maprow">
           <div class="mapwrap"><canvas id="topo" width="540" height="250" aria-label="Map of NERV bases and links"></canvas></div>
-          <div class="maplegend"><b>Map legend</b><span class="tiny">NERV bases</span><span><i class="sq" style="background:var(--ok)"></i>online</span><span><i class="sq" style="background:var(--warn)"></i>standby</span><span><i class="sq" style="background:#666"></i>offline</span><span class="tiny">Links &amp; activity</span><span>- - - Kaji line</span><span><i class="sq" style="background:var(--accent)"></i>plug</span><span><i class="sq" style="background:var(--ok)"></i>result</span><span><i class="sq" style="background:var(--info)"></i>Sync</span></div>
+          <div class="maplegend" aria-label="Map key"><b class="legend-heading">■ Bases</b><span><i class="sq" style="background:var(--ok)"></i>online</span><span><i class="sq" style="background:var(--warn)"></i>standby</span><span><i class="sq" style="background:var(--muted)"></i>offline</span><b class="legend-heading">- Kaji line</b><span><i class="sq" style="background:var(--accent)"></i>plug</span><span><i class="sq" style="background:var(--ok)"></i>result</span><span><i class="sq" style="background:var(--info)"></i>sync</span><span>○ Midori</span></div>
         </div>
         <div class="pad list" id="bases"></div>
       </section>
@@ -456,10 +468,6 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
         <div class="pad cages" id="cages"></div>
       </section>
 
-      <section class="panel" id="p-budget">
-        <div class="hdr"><span data-l="budget">Battery · budget</span><span class="sub" id="budget-sub">Cost tracking planned</span></div>
-        <div class="pad" id="budget"></div>
-      </section>
 
       <section class="panel">
         <div class="hdr"><span data-l="melons">Marduk Institute · Pilots</span><span class="sub">proto → test → prod</span></div>

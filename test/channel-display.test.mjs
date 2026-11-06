@@ -2,7 +2,8 @@ import {test} from 'node:test';import assert from 'node:assert/strict';import {r
 const source=readFileSync('web/public/dashboard/live.js','utf8');
 const code=source.slice(source.indexOf('  function channelLine'),source.indexOf('  window.renderBases ='));
 const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
-const line=new Function('esc','baseName',code+';return channelLine;')(esc,id=>id==='NERV-01'?'Neo <Tokyo>':id);
+const dashboard=readFileSync('web/public/dashboard/dashboard.js','utf8');const start=dashboard.indexOf('function telegramApiState(');const stateCode=dashboard.slice(start,dashboard.indexOf('function drawTelegram',start));
+const line=new Function('esc','baseName',stateCode+code+';return channelLine;')(esc,id=>id==='NERV-01'?'Neo <Tokyo>':id);
 const c={mode:'local-fallback',destination:'NERV-01',checkedAt:'2030-01-01T00:00:00.000Z',lastDelivery:{route:'local',result:'accepted',at:'2030-01-01T00:00:01.000Z'}};
 test('routing and send evidence stay distinct, escaped, and stale or absent telemetry stays unknown',()=>{
  const {document}=parseHTML('<div>'+line({channel:c,channelFresh:true})+'</div>');

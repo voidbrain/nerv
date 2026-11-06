@@ -95,7 +95,7 @@ test('through two runtimes wired as serve does: a base whose model route is down
  try{
   await a.ready();await b.ready();assert.equal(await a.kaji.add(records),2);assert.equal(await b.kaji.add(records),2);
   a.setBaseKey(A.publicKey);b.setBaseKey(B.publicKey);
-  let report:ChannelState={mode:'local-fallback',destination:'NERV-01',checkedAt:new Date().toISOString(),lastDelivery:{route:'local',result:'accepted',at:new Date().toISOString()}};
+  let report:ChannelState={mode:'local-fallback',destination:'NERV-01',checkedAt:new Date().toISOString(),polling:true,api:{state:'responding',at:new Date().toISOString()},lastReceived:new Date().toISOString(),lastDelivery:{route:'local',result:'accepted',at:new Date().toISOString()}};
   a.setChannelState(()=>({mode:'unavailable',checkedAt:new Date().toISOString()}));b.setChannelState(()=>report);
   for(const [r,id,k] of [[a,'NERV-01',A],[b,'NERV-02',B]] as const)links.push(new KajiLink({baseId:id,key:k.privateKey,publicKey:k.publicKey,registry:r.kaji,log:()=>{},health:()=>r.baseHealth(),onHealth:(peer,h)=>r.notePeerHealth(peer,h),channel:()=>r.channelState(),onChannel:(peer,c)=>r.notePeerChannel(peer,c)}));
   for(const l of links)await l.start(200);
@@ -112,7 +112,7 @@ test('through two runtimes wired as serve does: a base whose model route is down
   try{
    assert.equal((await fetch(base+'/api/bases')).status,401);
    let peer=(await read()).find(x=>x.baseId==='NERV-02')!;
-   assert.equal(peer.channelFresh,true);assert.equal(peer.channel?.lastDelivery?.result,'accepted');assert.equal(peer.channel?.destination,'NERV-01');
+   assert.equal(peer.channelFresh,true);assert.equal(peer.channel?.lastDelivery?.result,'accepted');assert.equal(peer.channel?.destination,'NERV-01');assert.equal(peer.channel?.api?.state,'responding');assert.ok(peer.channel?.lastReceived);assert.equal(peer.channel?.polling,true);
    assert.equal((await b.bases()).find(x=>x.baseId==='NERV-01')?.channel?.mode,'unavailable','reply reports only its own channel');
    report={...report,checkedAt:new Date(Date.now()-100_000).toISOString()};
    await until(async()=>(await read()).find(x=>x.baseId==='NERV-02')?.channelFresh===false);

@@ -26,6 +26,7 @@ async function fakeBot(token:string){
   res.end(JSON.stringify({ok:true,result:{message_id:calls.length}}));});});
  await new Promise<void>(d=>s.listen(0,'127.0.0.1',d));
  return {calls,base:`http://127.0.0.1:${(s.address() as {port:number}).port}`,sent:()=>calls.filter(c=>c.method==='sendMessage').map(c=>c.body as {text:string;reply_markup?:{inline_keyboard:{callback_data:string}[][]}}),
+  text:(text:string)=>updates.push({update_id:next++,message:{date:Math.floor(Date.now()/1000),text,chat:{id:OWNER,type:'private'},from:{id:OWNER}}}),
   tap:(data:string,rows:unknown)=>updates.push({update_id:next++,callback_query:{id:'q'+next,data,from:{id:OWNER},message:{message_id:7,chat:{id:OWNER},reply_markup:{inline_keyboard:rows}}}}),close:()=>new Promise<void>(d=>{s.close(()=>d());s.closeAllConnections();})};
 }
 test('the main base is the owner\'s signed choice: newest wins, a revoked base is no main base, and bases() never mistakes it for an enrolment',()=>{
@@ -58,7 +59,7 @@ test('one channel: while the main base is online the other base\'s bot is quiet,
   // A card on Tabgha (an owner-only action), while Neo Tokyo-3 is the main base and online.
   const s=sb.ledger.openSortie('owner','Remember it','trusted');assert.equal(sb.runAction(s,{tool:'memory.remember',args:{text:'Coffee at 8'},stage:'production'}).outcome,'approval');
   await until(()=>botA.sent().some(m=>m.text.startsWith('🛰 Tabgha · ')&&!!m.reply_markup),15000);
-  assert.equal(botB.sent().length,0,'Tabgha\'s own bot stays quiet');assert.ok(!botB.calls.some(c=>c.method==='getUpdates'),'and does not read its updates');
+  assert.equal(botB.sent().length,0,'Tabgha\'s own bot stays quiet');assert.ok(botB.calls.some(c=>c.method==='getUpdates'),'its own bot keeps accepting owner messages while outgoing inbox deliveries route through main');
   const relayed=botA.sent().find(m=>m.text.startsWith('🛰 Tabgha · '))!;const rows=relayed.reply_markup!.inline_keyboard;
   assert.match(rows[0]![0]!.callback_data,/^k:NERV-02:a:[a-f0-9-]{36}$/);
   botA.tap(rows[0]![0]!.callback_data,rows);
@@ -73,6 +74,7 @@ test('one channel: while the main base is online the other base\'s bot is quiet,
   assert.deepEqual([tabgha.channelState().lastDelivery?.route,tabgha.channelState().lastDelivery?.result],['local','accepted']);
   relayWorks=true;await sb.add('Relay recovered',new Date(Date.now()+300).toISOString());sb.tick(new Date(Date.now()+1000));
   await until(()=>botA.sent().some(m=>/⏰ Relay recovered/.test(m.text))&&tabgha.channelState().mode==='via-main');assert.equal(tabgha.channelState().mode,'via-main');
+  botB.text('/start');await until(()=>botB.sent().some(m=>/Aoba here/.test(m.text)));assert.ok(tabgha.channelState().lastReceived,'the routed bot still receives owner messages');
   // A forged decision from a base that is not the main one is refused by Tabgha.
   const body=JSON.stringify({approvalId:'0'.repeat(8)+'-0000-4000-8000-'+'0'.repeat(12),decision:'approve'});
   const forged=await fetch(`http://127.0.0.1:${pb}/kaji/decide`,{method:'POST',headers:{'content-type':'application/json',...signedHeaders('NERV-02',B.privateKey,'req','POST','/kaji/decide',body)},body});assert.equal(forged.status,403);
