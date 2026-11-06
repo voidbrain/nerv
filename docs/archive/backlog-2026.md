@@ -2008,7 +2008,7 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Closed 2026-11-06 after PR #166 CI runs 42280638858 and 42280632455 passed validate, windows and native-macos (ci:status); the cancelled queued job was rerun successfully.  Candidate fix 2026-11-06 in the F-019 map/Midori work. Live simulation guard and Telegram inbound polling changes have focused regressions; Chrome/scoped axe/mobile and full CI acceptance passed; no remaining required checks.
+**Next action / closure evidence:** Closed 2026-11-06 in [PR #167](https://github.com/voidbrain/nerv/pull/167) after PR #166 CI runs 42280638858 and 42280632455 passed validate, windows and native-macos (ci:status); the cancelled queued job was rerun successfully.  Candidate fix 2026-11-06 in the F-019 map/Midori work. Live simulation guard and Telegram inbound polling changes have focused regressions; Chrome/scoped axe/mobile and full CI acceptance passed; no remaining required checks.
 
 **Estimates:** No remaining work; ~100% complete. Reassessed 2026-11-06 after all recorded local and merged CI acceptance passed.
 
@@ -2042,7 +2042,7 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Closed 2026-11-06 after PR #166 CI runs 42280638858 and 42280632455 passed validate, windows and native-macos (ci:status); the cancelled queued job was rerun successfully.  Candidate fix 2026-11-06 in the F-019 map/Midori work. Live simulation guard and Telegram inbound polling changes have focused regressions; Chrome/scoped axe/mobile and full CI acceptance passed; no remaining required checks.
+**Next action / closure evidence:** Closed 2026-11-06 in [PR #167](https://github.com/voidbrain/nerv/pull/167) after PR #166 CI runs 42280638858 and 42280632455 passed validate, windows and native-macos (ci:status); the cancelled queued job was rerun successfully.  Candidate fix 2026-11-06 in the F-019 map/Midori work. Live simulation guard and Telegram inbound polling changes have focused regressions; Chrome/scoped axe/mobile and full CI acceptance passed; no remaining required checks.
 
 **Estimates:** No remaining work; ~100% complete. Reassessed 2026-11-06 after all recorded local and merged CI acceptance passed.
 
