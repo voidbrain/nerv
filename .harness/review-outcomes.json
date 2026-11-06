@@ -1,4 +1,7 @@
 [
- {"kind":"rule","disposition":"implemented","target":"docs/agents/areas.md","evidence":"Isolated runtime and protocol gains the tools process (F-021): the only place MCP servers run, reached only on coordinator -> tools (tools.list, tools.call), no ledger, calls only while the fingerprint matches; it is what moves into a sandbox with F-049. Action gate and ledger gains deny-by-default MCP tools: grants in config (reads only), gated as server.tool with the grant's effect, the grant used in the scheduler, the call made by the tools process, the result recorded; ungranted back to Misato as invalid; EVA-03 does not run before F-049. Checked by test/mcp.test.ts. Reviewed against runtime-boundaries (A owns the ledger, B no secrets, C owns child lifecycle: the tools process is a C-owned child with no secrets) and the B-009 removal rule: consistent."},
- {"kind":"none","disposition":"no-change","evidence":"No harness file or copied tool changed."}
+  {
+    "kind": "none",
+    "disposition": "no-change",
+    "evidence": "Reviewed AGENTS, BACKLOG-RULES, area notes and maintenance guidance for the owner-approved B-028 removal. The only area-note edit removes the obsolete factual claim about unused speculative contracts.ts; Kaji owns implemented network contracts and shared/surface.ts still owns UI data. Runtime boundaries, authorization, privacy, action-gate and maintenance safeguards are unchanged. This is project-specific documentation cleanup, not a generic harness rule change. Typecheck, coverage regression suite, build and bilingual Chrome/axe acceptance passed. Timed reconciliation includes this consistency review and those validations; no procedural counters were inferred. No further rule/tool change is justified by the removal."
+  }
 ]

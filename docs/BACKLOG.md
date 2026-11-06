@@ -8,7 +8,7 @@ Current work ledger, reviewed 6 November 2026 against main `7129b88`. PR #156 re
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 35 | 7 |
-| **Require Human 🧑** | 0 | 1 |
+| **Require Human 🧑** | 0 | 0 |
 
 ### Last 7 days
 
@@ -21,7 +21,7 @@ Current work ledger, reviewed 6 November 2026 against main `7129b88`. PR #156 re
 
 | Features | Bugs |
 |---|---|
-| — | [B-028](#b-028) |
+| — | — |
 <!-- recap:end -->
 
 ## Bugs and reliability
@@ -120,9 +120,9 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔹 P3 | Open | 🟢 Small | ~0% |
+| 🟡 | 🔹 P3 | Implemented | 🟢 Small | ~90% |
 
-🧑 **→ Human action required: Yes**<br />Decide: remove `src/contracts.ts`, or keep it for F-006/F-050.
+💻 **→ Human action required: No**<br />Verify the approved removal and updated documentation, then close after merged CI.
 
 | | |
 |---|---|
@@ -133,15 +133,15 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Owner decision: remove it (the Kaji line superseded it) or keep it for F-006/F-050. Then remove it, or wire it in, in one PR.
+**Next action / closure evidence:** Owner approved deletion 2026-11-06. Removed the unused contracts file after confirming no importer; Kaji retains its implemented protocol types and shared/surface.ts remains the validated UI contract. Removed the obsolete area-note claim and corrected the README source ownership description. F-006/F-050 will define tested contracts alongside their implementations. Coverage is refreshed deliberately for the removed untested file. Required local checks and merged CI remain.
 
-**Estimates:** Small remaining effort; ~0% complete. Estimated 2026-11-06.
+**Estimates:** Small remaining effort; ~90% complete. Reassessed 2026-11-06 after owner approval: deletion and references updated; validation and merged CI remain.
 
 | Field | Value |
 |---|---|
 | PR / evidence | Full audit 2026-11-06 |
 | Opened | 2026-11-06 |
-| Verification | Not verified yet |
+| Verification | 2026-11-06 Documentation: no code importer found; deletion approved by owner. Typecheck, coverage and CI pending |
 | Reviewed | 2026-11-06 |
 
 </details>
@@ -446,7 +446,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 **Next action / closure evidence:** Implement capability-aware scheduling with independent model endpoint and execution node selection. Mini PC coder uses Mac inference; policy-approved Claude path; Pi capability route; unavailable Mac waits or expires; bounded budgets and delegation.
 
-**Estimates:** Large remaining effort; ~0% complete. Bootstrap scope estimate, not verification. Estimated 2026-11-01.
+**Estimates:** Reassessed 2026-11-06 with B-028: removing unused speculative types does not remove implemented behavior; concrete tested contracts remain part of this feature, so Large and ~0% remain valid.  Large remaining effort; ~0% complete. Bootstrap scope estimate, not verification. Estimated 2026-11-01.
 
 | Field | Value |
 |---|---|
@@ -1337,7 +1337,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 **Next action / closure evidence:** Planned 2026-11-05 (owner). Builds on F-036, F-045 (pilots offered by other bases) and F-048.
 
-**Estimates:** Large remaining effort; ~0% complete. Estimated 2026-11-05.
+**Estimates:** Reassessed 2026-11-06 with B-028: removing unused speculative types does not remove implemented behavior; concrete tested contracts remain part of this feature, so Large and ~0% remain valid.  Large remaining effort; ~0% complete. Estimated 2026-11-05.
 
 | Field | Value |
 |---|---|
@@ -1464,23 +1464,23 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | | |
 |---|---|
-| **Issue** | Owner question 2026-11-05: can commands be used from Telegram and the chat with "/"? Only `/start` exists; everything else goes to Misato as a request, with a model call and its delay. The owner also proposed `/log` to set how much is reported (all, conversation, …). |
-| **Reproduce** | Send `/status` to Aoba: Misato tries to answer it as a request. |
+| **Issue** | Owner question 2026-11-05: can commands be used from Telegram and the chat with "/"? At that report only `/start` had a dedicated path; other text went to Misato with a model call. Owner confirmed 2026-11-06 that `/status` gets a working reply from Aoba; current source still routes it through store.chat, so model-free structured command acceptance is not established. The owner also proposed `/log` to set how much is reported (all, conversation, …). |
+| **Reproduce** | Send `/status` to Aoba and compare the returned facts with the records; check that the command router answers without a model and without a new sortie. |
 | **Check** | The same commands in Telegram (registered, so typing "/" shows the list) and the dashboard chat, answered before Misato and without a model: `/help`, `/status` (this base's health, the other bases, cards waiting, the next reminder), `/cards` (with their buttons), `/reminders`, `/why S-…`, `/brief`, `/pilots`, `/bases`, `/spear [S-…]` (with a confirmation button), `/log conversation\|steps\|all` (conversation: replies and cards, the default; steps: also one line per action that ran; all: every trace line, advice, votes with shadow seats, other bases' results); read-only commands open no sortie, `/spear` and `/log` changes are recorded; an unknown command answers with `/help`. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Planned 2026-11-05 (owner: after F-021). Builds on B-004 (the why answer), F-042 (Misato reads the agency) and F-028 (the brief).
+**Next action / closure evidence:** Owner report 2026-11-06: Telegram `/status` works. This is Human evidence of a successful reply, not of deterministic routing or the full command set. Source review: src/telegram.ts special-cases /start, then sends other owner text to store.chat; no complete slash router or Telegram menu registration is implemented. Still required: automated checks for every listed command in Telegram and the dashboard, model-free read paths/no new sortie, owner authorization and confirmation for changes, recorded /spear and /log changes, and unknown-command /help behavior. Planned 2026-11-05 (owner: after F-021). Builds on B-004 (the why answer), F-042 (Misato reads the agency) and F-028 (the brief).
 
-**Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-05.
+**Estimates:** Medium remaining effort; ~0% complete. Reassessed 2026-11-06: the observed /status reply adds human evidence, but the agreed deterministic router/menu and command checks remain unimplemented.
 
 | Field | Value |
 |---|---|
 | PR / evidence | Owner question 2026-11-05 |
 | Opened | 2026-11-05 |
-| Verification | Pending |
-| Reviewed | 2026-11-05 |
+| Verification | 2026-11-06 Human: owner reports Telegram /status works. Source review: deterministic router/menu and full command-set automated checks remain pending. |
+| Reviewed | 2026-11-06 |
 
 </details>
 

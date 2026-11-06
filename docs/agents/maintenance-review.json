@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-05T22:30:54.128Z",
+  "reviewed": "2026-11-06T14:20:45.522Z",
   "policy": "7ce9883fd1bff25038076e9e36015a833c38e1378e1df68043f48a64635abad4",
   "inputs": {
     "AGENTS.md": "7521203d1bc1ee4467396d9dd3576e2d7ffba835a4f6e93cb217af06af5ebee2",
     "docs/BACKLOG-RULES.md": "19798ae1614c2d96e60613af75d232c2eda19d25e07470e851ce48304df593c6",
-    "docs/agents/areas.md": "2cb6c59b3d7f371b1398afbeb928c09e1de83cfc3427daa5d3d0833645b3a502",
+    "docs/agents/areas.md": "b6a31057be6ee3e4a5ce72042e6654067a0505991e6dfc1c5d77f19a5fc48364",
     "docs/agents/maintenance.md": "a7e93ce963ffab30b4592ee90bdd0e72d49ea1320f82df74f22c88f70899d899"
   },
   "measurements": {
-    "samples": 4,
-    "latestAt": "2026-11-04T08:15:21.237Z",
+    "samples": 5,
+    "latestAt": "2026-11-06T14:20:04.327Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -36,25 +36,25 @@
         }
       },
       "reconciliation": {
-        "samples": 4,
+        "samples": 5,
         "durationMs": {
-          "observed": 4,
+          "observed": 5,
           "missing": 0,
-          "median": 79.5
+          "median": 84
         },
         "conflicts": {
           "observed": 2,
-          "missing": 2,
+          "missing": 3,
           "median": 0
         },
         "unnecessaryPrompts": {
           "observed": 0,
-          "missing": 4,
+          "missing": 5,
           "median": null
         },
         "repeatedContextLoads": {
           "observed": 0,
-          "missing": 4,
+          "missing": 5,
           "median": null
         }
       }
@@ -62,15 +62,9 @@
   },
   "outcomes": [
     {
-      "kind": "rule",
-      "disposition": "implemented",
-      "target": "docs/agents/areas.md",
-      "evidence": "Isolated runtime and protocol gains the tools process (F-021): the only place MCP servers run, reached only on coordinator -> tools (tools.list, tools.call), no ledger, calls only while the fingerprint matches; it is what moves into a sandbox with F-049. Action gate and ledger gains deny-by-default MCP tools: grants in config (reads only), gated as server.tool with the grant's effect, the grant used in the scheduler, the call made by the tools process, the result recorded; ungranted back to Misato as invalid; EVA-03 does not run before F-049. Checked by test/mcp.test.ts. Reviewed against runtime-boundaries (A owns the ledger, B no secrets, C owns child lifecycle: the tools process is a C-owned child with no secrets) and the B-009 removal rule: consistent."
-    },
-    {
       "kind": "none",
       "disposition": "no-change",
-      "evidence": "No harness file or copied tool changed."
+      "evidence": "Reviewed AGENTS, BACKLOG-RULES, area notes and maintenance guidance for the owner-approved B-028 removal. The only area-note edit removes the obsolete factual claim about unused speculative contracts.ts; Kaji owns implemented network contracts and shared/surface.ts still owns UI data. Runtime boundaries, authorization, privacy, action-gate and maintenance safeguards are unchanged. This is project-specific documentation cleanup, not a generic harness rule change. Typecheck, coverage regression suite, build and bilingual Chrome/axe acceptance passed. Timed reconciliation includes this consistency review and those validations; no procedural counters were inferred. No further rule/tool change is justified by the removal."
     }
   ]
 }
