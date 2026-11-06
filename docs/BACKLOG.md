@@ -9,7 +9,7 @@ Governance and naming follow the [NERV architecture](NERV-ARCHITECTURE.md). [Rul
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 37 | 2 |
-| **Require Human 🧑** | 2 | 0 |
+| **Require Human 🧑** | 2 | 1 |
 
 ### Last 7 days
 
@@ -22,7 +22,7 @@ Governance and naming follow the [NERV architecture](NERV-ARCHITECTURE.md). [Rul
 
 | Features | Bugs |
 |---|---|
-| [F-062](#f-062) | — |
+| [F-062](#f-062) | [B-021](#b-021) |
 | [F-064](#f-064) |  |
 <!-- recap:end -->
 
@@ -89,29 +89,29 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🔴 | 🔺 P1 | Open | 🟡 Medium | ~0% |
+| 🟡 | 🔺 P1 | Implemented | 🟢 Small | ~80% |
 
-💻 **→ Human action required: No**<br />Next: build it (owner, 2026-11-05: now, before F-021 slice 2).
+🧑 **→ Human action required: Yes**<br />Owner check on a real base: ask, answer, and change topic in Telegram and the dashboard (exact text in details).
 
 | | |
 |---|---|
 | **Issue** | Owner report 2026-11-05 (S-E16D, S-7B04): Misato asked *Which specific file in ~/NERV-files would you like me to read?* and the sortie closed with Debrief: done; the answer *shopping.txt* became a new sortie, and the consultant advised on it from scratch. Misato's plan has only two shapes, an action or a final reply, so a question is recorded as the final reply. |
 | **Reproduce** | Ask Misato something she must ask back about (*read a file in ~/NERV-files*), then answer. |
-| **Check** | A question keeps the sortie open, waiting for the owner (Debrief not lit, shown like an approval wait); the next message in the same conversation continues that sortie; a short answer (up to 8 words) goes straight to Misato, a longer one gets the consultant again as a follow-up with its first advice in view (it may say none); an unanswered question closes the sortie after 24 hours as no answer; a restart does not close a sortie waiting for an answer as interrupted. |
+| **Check** | A question keeps the sortie open, waiting for the owner (Debrief not lit, shown like an approval wait); the next message in the same conversation continues that sortie; a short answer (up to 8 words) goes straight to Misato, a longer one gets the consultant again as a follow-up with its first advice in view (it may say none); an unanswered question closes the sortie after 24 hours as no answer; a restart does not close a sortie waiting for an answer as interrupted. Owner addition 2026-11-06: a clearly unrelated message cancels the wait and starts a new sortie; length alone never decides. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Design agreed with the owner 2026-11-05: a third plan shape `{"ask": …}`; a `misato.asked` event and its answer; `resumable` and `interrupted` aware of it; the dashboard and Telegram show the wait. Tests across the runtime, the ledger and the dashboard.
+**Next action / closure evidence:** Implemented 2026-11-06 on `fix/misato-clarification`. Misato has a third plan shape `{"ask": …}`: the ledger records `misato.asked` (conversation, 24-hour expiry), the next message in that conversation is claimed once as `misato.answered` and continues the same sortie; up to 8 words go straight to Misato, longer answers get the consultant again with `previousAdvice`. A clear topic change makes Misato return `{"newRequest": true}` on the first turn of the answer: the old sortie is speared (nothing ran in it for the new request) and a fresh sortie answers. Questions survive restart (`resumable`/`interrupted` skip them), expire once as `misato.unanswered` (sortie failed, one reply saying nothing was resumed), and are bound to their conversation (a Telegram message cannot answer a dashboard question; messages in one conversation are serialised). An approval resume after a clarification keeps the original request and does not consult again. Forwarded questions: the sortie stays open on this base; the answer goes to the main base in the same conversation; if the main base is unavailable or changed, the answer stays waiting and is never run locally. Dashboard: a pending question shows as waiting at Misato's apartment, Debrief unlit; Comms shows the question, the answer and an expiry. Known limit: if a forwarded answer times out after the main base already took it, this base keeps waiting while the main base has moved on; the next message is then forwarded as an answer. **Owner check (paste each line, in Telegram to Aoba and then in the dashboard chat):** (1) `Read a file in ~/NERV-files` → Misato asks which file; the dashboard shows the sortie waiting, Debrief unlit. (2) `shopping.txt` → same sortie continues (same S- id in the dashboard), no second sortie. (3) Repeat (1), then `What is on my calendar tomorrow?` → the first sortie is shown as stood down, a new sortie answers. (4) Repeat (1), restart the service (`nerv service restart`, or stop and run `nerv serve`), then answer → still the same sortie.
 
-**Estimates:** Medium remaining effort; ~0% complete. Estimated 2026-11-05.
+**Estimates:** Small remaining (owner check on a real base); ~80% complete. Reassessed 2026-11-06 after implementation and automated checks.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner report 2026-11-05 (S-E16D, S-7B04 on Neo Tokyo-3) |
+| PR / evidence | — ; Owner report 2026-11-05 (S-E16D, S-7B04 on Neo Tokyo-3); owner refinement 2026-11-06 (topic change cancels the wait) |
 | Opened | 2026-11-05 |
-| Verification | Not verified yet |
-| Reviewed | 2026-11-05 |
+| Verification | 2026-11-06 Unit/integration: test/clarification.test.ts (plan shape, durable question, conversation binding, 8-word rule, approval resume, topic change, forwarded question), test/telegram.test.ts (B-021 over Aoba), test/one-channel.test.ts (question and answer across the real signed Kaji link, main base down and back), full suite 226 passed, one platform skip; build, typecheck, conventions, headless lifecycle and Angular browser acceptance passed. Browser/accessibility: Pending (dashboard waiting state not checked in Chrome). Human: Pending (owner check above). |
+| Reviewed | 2026-11-06 |
 
 </details>
 
