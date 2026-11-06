@@ -54,15 +54,15 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Partial fix 2026-11-06: one failed poll preserves the last view and retries on the regular interval; repeated failures probe authenticated status and distinguish REFRESH DELAYED, STATUS UNAVAILABLE (HTTP error) and SERVICE UNREACHABLE (no reply). A successful poll clears the warning. GET reads have a 10 s bound; writes are neither retried nor given the read timeout. API errors name method/path, IPC timeouts name process/method/limit, and the banner removes doubled punctuation and the unsupported restart hint. Regression covers transient failures, recovery, status reachability, session expiry, read bounds, no write replay, and dashboard REST reads during a pending relay. The old report lacks endpoint/method details; the original timeout cause remains unverified, so B-008 stays Investigate until reproduced and fixed or given an evidenced fitting limit.
+**Next action / closure evidence:** Partial fix in [PR #153](https://github.com/voidbrain/nerv/pull/153), 2026-11-06: one failed poll preserves the last view and retries on the regular interval; repeated failures probe authenticated status and distinguish REFRESH DELAYED, STATUS UNAVAILABLE (HTTP error) and SERVICE UNREACHABLE (no reply). A successful poll clears the warning. GET reads have a 10 s bound; writes are neither retried nor given the read timeout. API errors name method/path, IPC timeouts name process/method/limit, and the banner removes doubled punctuation and the unsupported restart hint. Regression covers transient failures, recovery, status reachability, session expiry, read bounds, no write replay, and dashboard REST reads during a pending relay. The old report lacks endpoint/method details; the original timeout cause remains unverified, so B-008 stays Investigate until reproduced and fixed or given an evidenced fitting limit.
 
 **Estimates:** Small remaining effort; ~70% complete. Reassessed 2026-11-06: misleading connection warning and missing diagnostics repaired; original timeout investigation remains.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner test on Tabgha 2026-11-05 |
+| PR / evidence | [PR #153](https://github.com/voidbrain/nerv/pull/153) partial fix and diagnostics; owner test on Tabgha 2026-11-05 |
 | Opened | 2026-11-05 |
-| Verification | 2026-11-06 Unit/integration: polling and IPC regressions passed; full suite passed (189 passed, one systemd-only skip), including the pending-relay regression. Browser: headless Chrome verified transient failure retention, delayed refresh, HTTP status failure, unreachable service and automatic recovery; screenshot inspected. Build, typecheck, conventions and integration metadata passed. Merged CI pending; original Tabgha timeout not reproduced. |
+| Verification | 2026-11-06 Unit/integration: polling and IPC regressions passed; full suite passed (189 passed, one systemd-only skip), including the pending-relay regression. Browser: headless Chrome verified transient failure retention, delayed refresh, HTTP status failure, unreachable service and automatic recovery; screenshot inspected. Build, typecheck, conventions and integration metadata passed. Remote check results are tracked by PR #153; original Tabgha timeout not reproduced. |
 | Reviewed | 2026-11-06 |
 
 </details>
