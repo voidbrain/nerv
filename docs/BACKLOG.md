@@ -1388,7 +1388,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Proposed 2026-11-06; not accepted scope until the owner picks the first circuit. The reassessment also notes that Spear does not stop an already-running external operation or run inverses; interruption and compensation stay explicit, separately authorized work, not part of a first circuit. Related F-023 (approvals) and the closed F-024 ledger. Design input 2026-11-07: the OWASP [Agent Control Standard](https://github.com/GenAI-Security-Project/agent-control-standard) v0.1.0 (a Guardian that allows, denies or modifies each tool call, deterministic layer first, optional model layer without the policy source) mirrors the MAGI gate; its reference Guardian fails open by default and its wire is not yet authenticated, so it is a comparison point for trigger and rearm vocabulary, not a component to adopt. Threat-map row ASI08 (cascading failures) points here (F-065).
+**Next action / closure evidence:** Proposed 2026-11-06; not accepted scope until the owner picks the first circuit. The reassessment also notes that Spear does not stop an already-running external operation or run inverses; interruption and compensation stay explicit, separately authorized work, not part of a first circuit. Related F-023 (approvals) and the closed F-024 ledger. Design input 2026-11-07: the OWASP [Agent Control Standard](https://github.com/GenAI-Security-Project/agent-control-standard) v0.1.0 (a Guardian that allows, denies or modifies each tool call, deterministic layer first, optional model layer without the policy source) mirrors the MAGI gate; its reference Guardian fails open by default and its wire is not yet authenticated, so it is a comparison point for trigger and rearm vocabulary, not a component to adopt. Threat-map row ASI08 (cascading failures) points here (F-065, [PR #179](https://github.com/voidbrain/nerv/pull/179)).
 
 **Estimates:** Medium for one bounded circuit; large for a cross-base incident coordinator. ~0% complete. Set 2026-11-06.
 
@@ -1427,7 +1427,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Record and roadmap placement in this PR |
+| PR / evidence | [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
 | Opened | 2026-11-07 |
 | Verification | Unit/integration: Pending. |
 | Reviewed | 2026-11-07 |
@@ -1460,7 +1460,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Record and roadmap placement in this PR |
+| PR / evidence | [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
 | Opened | 2026-11-07 |
 | Verification | Unit/integration: Pending. |
 | Reviewed | 2026-11-07 |
@@ -1493,7 +1493,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Record and roadmap placement in this PR |
+| PR / evidence | [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
 | Opened | 2026-11-07 |
 | Verification | Unit/integration: Pending. |
 | Reviewed | 2026-11-07 |
