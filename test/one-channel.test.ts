@@ -69,7 +69,8 @@ test('one channel: while the main base is online the other base\'s bot is quiet,
   assert.deepEqual([tabgha.channelState().lastDelivery?.route,tabgha.channelState().lastDelivery?.result],['main','accepted']);
   // Main is online but cannot deliver: the existing fallback sends through this base's own bot.
   relayWorks=false;await sb.add('Fallback test',new Date(Date.now()+300).toISOString());sb.tick(new Date(Date.now()+1000));
-  await until(()=>botB.sent().some(m=>/⏰ Fallback test/.test(m.text)));
+  // The fake server sees the request before the client processes its accepted response.
+  await until(()=>botB.sent().some(m=>/⏰ Fallback test/.test(m.text))&&tabgha.channelState().mode==='local-fallback'&&tabgha.channelState().lastDelivery?.route==='local'&&tabgha.channelState().lastDelivery?.result==='accepted');
   assert.equal(tabgha.channelState().mode,'local-fallback');
   assert.deepEqual([tabgha.channelState().lastDelivery?.route,tabgha.channelState().lastDelivery?.result],['local','accepted']);
   relayWorks=true;await sb.add('Relay recovered',new Date(Date.now()+300).toISOString());sb.tick(new Date(Date.now()+1000));
