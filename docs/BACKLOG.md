@@ -1335,7 +1335,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 ---
 
-### F-060
+### F-061
 
 **Reassess retired architecture concepts and preserved proposals**
 
