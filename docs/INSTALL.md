@@ -244,7 +244,7 @@ The reply shows the Pattern, the Sync Ratio and the outcome: `grant` ran the too
 
 ## Frontend development
 
-`npm run dev` uses **4318**, proxies API calls to **4317** and is only needed for editing the frontend. The installed service serves the production build directly on 4317. Port 4200 is not used.
+`npm run dev` uses **4318**, proxies API calls to **4317** and is only needed for editing the frontend. The installed service serves the production build directly on 4317. Port 4200 is not used. After `npm run build`, run `npm run test:browser` for bilingual, responsive and axe acceptance against a temporary in-memory backend. Chrome/Chromium is required (`CHROME_BIN` overrides its executable); `NERV_BROWSER_ARTIFACTS` keeps screenshots. See the [scoped browser evidence](acceptance/angular-2026-11-06.md).
 
 ## Native menu-bar companion — development preview
 

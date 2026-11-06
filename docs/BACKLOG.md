@@ -1,13 +1,13 @@
 # NERV Agency backlog
 
-Current work ledger, reviewed 6 November 2026 against main `f8ba93c`. PR #154 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42220503857). PR #153 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42218258228). PR #152 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42216691729). PR #151 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42216202855). PR #150 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42215185296). PR #149 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42141288422). PR #1–#148 merged after green checks (#53–#148 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
+Current work ledger, reviewed 6 November 2026 against main `7129b88`. PR #156 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42222074318). PR #154 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42220503857). PR #153 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42218258228). PR #152 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42216691729). PR #151 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42216202855). PR #150 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42215185296). PR #149 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42141288422). PR #1–#148 merged after green checks (#53–#148 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending. Governance and naming follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md).
 
 <!-- recap:start · generated by tools/backlog-recap.mjs from the records; do not edit by hand -->
 **Recap as of 2026-11-06** (window 2026-10-31 – 2026-11-06).
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 35 | 3 |
+| **Open** | 35 | 7 |
 | **Require Human 🧑** | 0 | 1 |
 
 ### Last 7 days
@@ -15,7 +15,7 @@ Current work ledger, reviewed 6 November 2026 against main `f8ba93c`. PR #154 re
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **Count** | 58 | 23 | 29 | 26 |
+| **Count** | 58 | 23 | 33 | 26 |
 
 ### Require Human 🧑
 
@@ -150,6 +150,142 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 
 
+### B-030
+
+**Angular workspace styles are blocked by its service CSP**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
+
+💻 **→ Human action required: No**<br />Confirm merged CI, then close.
+
+| | |
+|---|---|
+| **Issue** | Browser acceptance for F-010: the default Angular build emits a stylesheet with media=print and an inline activation script. The service blocks inline scripts, so only critical CSS loads and the workspace appears mostly unstyled. |
+| **Reproduce** | Build and serve the Angular workspace, connect to a temporary backend, and inspect computed styles and axe results. |
+| **Check** | The built app loads its full stylesheet under the service CSP, uses the grid layout and has no CSP violations. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Found 2026-11-06 during F-010 acceptance. Candidate fix verified by the repeatable Chrome/axe suite and inspected screenshots; see [scope and evidence](acceptance/angular-2026-11-06.md). Merged CI remains.
+
+**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-06: code and local browser acceptance passed; merged CI remains.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Local Chrome screenshot and axe results, 2026-11-06; F-010 |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-06 Browser/accessibility: all ten Chrome/axe views passed, screenshots inspected; merged CI pending |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### B-031
+
+**The status card skips the page heading hierarchy**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
+
+💻 **→ Human action required: No**<br />Confirm merged CI, then close.
+
+| | |
+|---|---|
+| **Issue** | F-010 browser acceptance: axe reports heading-order because the registered status card uses h3 immediately after the workspace h1. |
+| **Reproduce** | Build and serve the Angular workspace, connect to a temporary backend, and inspect computed styles and axe results. |
+| **Check** | The status card uses a level-two heading; connected English/Italian views pass axe, including the shadow tree. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Found 2026-11-06 during F-010 acceptance. Candidate fix verified by the repeatable Chrome/axe suite and inspected screenshots; see [scope and evidence](acceptance/angular-2026-11-06.md). Merged CI remains.
+
+**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-06: code and local browser acceptance passed; merged CI remains.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Local Chrome screenshot and axe results, 2026-11-06; F-010 |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-06 Browser/accessibility: all ten Chrome/axe views passed, screenshots inspected; merged CI pending |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### B-032
+
+**Angular navigation widens a 320 px viewport**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
+
+💻 **→ Human action required: No**<br />Confirm merged CI, then close.
+
+| | |
+|---|---|
+| **Issue** | F-010 browser acceptance with full styles: the mobile navigation row makes a 320 px page about 344 px wide. |
+| **Reproduce** | Build and serve the Angular workspace, connect to a temporary backend, and inspect computed styles and axe results. |
+| **Check** | English and Italian layouts have no horizontal page overflow at 320, 390 and 1440 px; controls and reminder content remain usable. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Found 2026-11-06 during F-010 acceptance. Candidate fix verified by the repeatable Chrome/axe suite and inspected screenshots; see [scope and evidence](acceptance/angular-2026-11-06.md). Merged CI remains.
+
+**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-06: code and local browser acceptance passed; merged CI remains.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Local Chrome screenshot and axe results, 2026-11-06; F-010 |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-06 Browser/accessibility: all ten Chrome/axe views passed, screenshots inspected; merged CI pending |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### B-033
+
+**Doctor diagnostic output cannot be keyboard-scrolled**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🟡 | 🔶 P2 | Implemented | 🟢 Small | ~90% |
+
+💻 **→ Human action required: No**<br />Confirm merged CI, then close.
+
+| | |
+|---|---|
+| **Issue** | F-010 browser acceptance at 320 px: axe reports scrollable-region-focusable because long doctor JSON scrolls inside a pre without keyboard focus. |
+| **Reproduce** | Build and serve the Angular workspace, connect to a temporary backend, and inspect computed styles and axe results. |
+| **Check** | The doctor output is a keyboard-focusable labelled region with visible focus; both languages pass axe at narrow widths. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Found 2026-11-06 during F-010 acceptance. Candidate fix verified by the repeatable Chrome/axe suite and inspected screenshots; see [scope and evidence](acceptance/angular-2026-11-06.md). Merged CI remains.
+
+**Estimates:** Small remaining effort; ~90% complete. Estimated 2026-11-06: code and local browser acceptance passed; merged CI remains.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Local Chrome screenshot and axe results, 2026-11-06; F-010 |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-06 Browser/accessibility: all ten Chrome/axe views passed, screenshots inspected; merged CI pending |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
 ## Features and improvements
 
 
@@ -174,14 +310,14 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 **Next action / closure evidence:** Complete browser acceptance for the core UI; calendar validation, bounded requests and process lifecycle are covered by regression tests. Restart recovery, no duplicate local inbox delivery, cancellation, auth, invalid input and clean shutdown; production operations separately documented.
 
-**Estimates:** Medium remaining effort; ~70% complete. Bootstrap scope estimate, not verification. Estimated 2026-11-01.
+**Estimates:** Reassessed 2026-11-06: F-010 now checks reminder creation and doctor presentation; core cancellation, invalid-input and broader browser acceptance still need their own checks. Medium and ~70% remain valid.  Medium remaining effort; ~70% complete. Bootstrap scope estimate, not verification. Estimated 2026-11-01.
 
 | Field | Value |
 |---|---|
 | PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
-| Reviewed | 2026-11-01 |
+| Reviewed | 2026-11-06 |
 
 </details>
 
@@ -242,14 +378,14 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 **Next action / closure evidence:** Finish browser acceptance, PWA lifecycle and a schema-validated registered component renderer. Real reminder CRUD and doctor UI; reject arbitrary component/code/action payloads; accessibility and phone install/push acceptance.
 
-**Estimates:** Large remaining effort; ~20% complete. Bootstrap scope estimate, not verification. Estimated 2026-11-01.
+**Estimates:** Reassessed 2026-11-06: F-010 establishes styled bilingual and axe acceptance for the existing workspace, not PWA lifecycle, full CRUD or generated UI. Large and ~20% remain valid.  Large remaining effort; ~20% complete. Bootstrap scope estimate, not verification. Estimated 2026-11-01.
 
 | Field | Value |
 |---|---|
 | PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
-| Reviewed | 2026-11-01 |
+| Reviewed | 2026-11-06 |
 
 </details>
 
@@ -432,29 +568,29 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🟡 | 🔺 P1 | Implemented | 🟢 Small | ~80% |
+| 🟡 | 🔺 P1 | Implemented | 🟢 Small | ~90% |
 
-💻 **→ Human action required: No**<br />Complete browser acceptance for English/Italian, dates and responsive layout.
+💻 **→ Human action required: No**<br />Browser acceptance passed locally; verify merged CI, then close.
 
 | | |
 |---|---|
-| **Issue** | Translation and configuration implemented; natural-language interpretation remains F-003. Browser visual/accessibility checks remain unverified. |
+| **Issue** | Translation and configuration implemented; natural-language interpretation remains F-003. Scoped browser visual/accessibility acceptance passed locally; merged CI remains. |
 | **Reproduce** | Follow docs/INSTALL.md and the scoped headless implementation checks. |
 | **Check** | English default (owner decision 2026-11-04, was Italian), matching translation keys, selectable Italian with the language switcher kept, unchanged reminder content, labelled browser-local dates, development port 4318. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Complete browser acceptance for English/Italian, dates and responsive layout. Implemented in [PR #1](https://github.com/voidbrain/nerv/pull/1) with Italian as the default; the owner switched the default to English on 2026-11-04 ([PR #17](https://github.com/voidbrain/nerv/pull/17)): `init` writes `en`, the server and socket fall back to `en`, the web UI and `index.html` start in English, the native menu defaults to English unless a choice is stored; the switcher stays in both. Existing installs keep the language in their `config.json` (an `init` before this wrote `it`); set `"language": "en"` there and restart. Understanding and replying in Italian is conversational work under F-003.
+**Next action / closure evidence:** 2026-11-06: repeatable Chrome/axe acceptance passed against the built UI and real local server: English default, selectable Italian, unchanged reminder text/UTC, browser-local dates, 4318 config, applied styles and responsive layout. Four discovered defects B-030–B-033 repaired; screenshots inspected. See [scope, evidence and limits](acceptance/angular-2026-11-06.md). Required merged CI remains. Implemented in [PR #1](https://github.com/voidbrain/nerv/pull/1) with Italian as the default; the owner switched the default to English on 2026-11-04 ([PR #17](https://github.com/voidbrain/nerv/pull/17)): `init` writes `en`, the server and socket fall back to `en`, the web UI and `index.html` start in English, the native menu defaults to English unless a choice is stored; the switcher stays in both. Existing installs keep the language in their `config.json` (an `init` before this wrote `it`); set `"language": "en"` there and restart. Understanding and replying in Italian is conversational work under F-003.
 
-**Estimates:** Small remaining effort; ~80% complete. Estimate dated 2026-11-01, reviewed 2026-11-04; not acceptance evidence.
+**Estimates:** Small remaining effort; ~90% complete. Reassessed 2026-11-06: browser acceptance and defect fixes passed locally; merged CI remains.
 
 | Field | Value |
 |---|---|
 | PR / evidence | [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green; [PR #17](https://github.com/voidbrain/nerv/pull/17) (English default) |
 | Opened | 2026-11-01 |
-| Verification | 2026-11-04: config default and RPC/doctor fallback asserted `en` in test/runtime.test.ts and test/protocol.test.ts, build, headless and Swift tests (local run; CI green: PR #17 run 41804450728, main run 41804458202; record fix PR #18 run 41804775905, main run 41804783909). Browser acceptance pending |
-| Reviewed | 2026-11-04 |
+| Verification | 2026-11-04: config default and RPC/doctor fallback asserted `en` in test/runtime.test.ts and test/protocol.test.ts, build, headless and Swift tests (local run; CI green: PR #17 run 41804450728, main run 41804458202; record fix PR #18 run 41804775905, main run 41804783909). 2026-11-06 Browser/accessibility: ten Chrome/axe views passed and screenshots inspected; scope/limits in docs/acceptance/angular-2026-11-06.md; merged CI pending |
+| Reviewed | 2026-11-06 |
 
 </details>
 
