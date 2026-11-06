@@ -139,7 +139,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Full audit 2026-11-06 |
+| PR / evidence | [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Full audit 2026-11-06 |
 | Opened | 2026-11-06 |
 | Verification | 2026-11-06 Documentation: no code importer found; deletion approved by owner. Typecheck, coverage suite, build, browser/axe, conventions, integration metadata and refreshed maintenance evidence passed; merged CI pending |
 | Reviewed | 2026-11-06 |
@@ -322,7 +322,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| PR / evidence | [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -1181,7 +1181,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner questions 2026-11-05 |
+| PR / evidence | [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner questions 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
 | Reviewed | 2026-11-05 |
@@ -1317,7 +1317,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner question 2026-11-05 |
+| PR / evidence | [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner question 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-06 Human: owner reports Telegram /status works. Source review: deterministic router/menu and full command-set automated checks remain pending. |
 | Reviewed | 2026-11-06 |
