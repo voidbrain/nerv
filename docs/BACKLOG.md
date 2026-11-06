@@ -162,7 +162,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | this PR; docs/acceptance/core-2026-11-06.md; [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| PR / evidence | [PR #173](https://github.com/voidbrain/nerv/pull/173); docs/acceptance/core-2026-11-06.md; [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-06: Chrome/axe 23 states passed; full suite 213 passed, one platform skip. Headless lifecycle: three passed, one Windows-only skip locally. Final cross-platform PR CI pending. |
 | Reviewed | 2026-11-06 |
