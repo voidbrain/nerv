@@ -61,7 +61,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | F-019/F-056 implementation and owner report 2026-11-06 |
+| PR / evidence | [PR #166](https://github.com/voidbrain/nerv/pull/166) map/tabs and Midori routing/status;  F-019/F-056 implementation and owner report 2026-11-06 |
 | Opened | 2026-11-06 |
 | Verification | 2026-11-06 Focused tests passed; final CI pending. |
 | Reviewed | 2026-11-06 |
@@ -95,7 +95,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | F-019/F-056 implementation and owner report 2026-11-06 |
+| PR / evidence | [PR #166](https://github.com/voidbrain/nerv/pull/166) map/tabs and Midori routing/status;  F-019/F-056 implementation and owner report 2026-11-06 |
 | Opened | 2026-11-06 |
 | Verification | 2026-11-06 Focused tests passed; final CI pending. |
 | Reviewed | 2026-11-06 |
@@ -708,7 +708,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #165](https://github.com/voidbrain/nerv/pull/165) two-tab panel plan;  [PR #164](https://github.com/voidbrain/nerv/pull/164) verified telemetry reconciliation;  [PR #163](https://github.com/voidbrain/nerv/pull/163) channel telemetry and CI reconciliation;  [PR #161](https://github.com/voidbrain/nerv/pull/161) verification reconciliation;  [PR #160](https://github.com/voidbrain/nerv/pull/160) pilot selectors/map status and owner clarification; docs/NERV/nerv-agency-dashboard.html (prototype, [PR #12](https://github.com/voidbrain/nerv/pull/12) and [PR #13](https://github.com/voidbrain/nerv/pull/13): comms panel with chat, image slots listed in docs/NERV/assets/README.md; [PR #25](https://github.com/voidbrain/nerv/pull/25): regional map, header tags, title; [PR #26](https://github.com/voidbrain/nerv/pull/26): node-to-node traffic; [PR #27](https://github.com/voidbrain/nerv/pull/27): straight links); earlier docs/NERV/dashboard-agnostic-2.html; review docs/NERV/review-2026-11-04.md §6; [PR #36](https://github.com/voidbrain/nerv/pull/36) (live slice 1); [PR #39](https://github.com/voidbrain/nerv/pull/39) (reload, away, Spear) |
+| PR / evidence | [PR #166](https://github.com/voidbrain/nerv/pull/166) map/tabs and Midori routing/status;  [PR #165](https://github.com/voidbrain/nerv/pull/165) two-tab panel plan;  [PR #164](https://github.com/voidbrain/nerv/pull/164) verified telemetry reconciliation;  [PR #163](https://github.com/voidbrain/nerv/pull/163) channel telemetry and CI reconciliation;  [PR #161](https://github.com/voidbrain/nerv/pull/161) verification reconciliation;  [PR #160](https://github.com/voidbrain/nerv/pull/160) pilot selectors/map status and owner clarification; docs/NERV/nerv-agency-dashboard.html (prototype, [PR #12](https://github.com/voidbrain/nerv/pull/12) and [PR #13](https://github.com/voidbrain/nerv/pull/13): comms panel with chat, image slots listed in docs/NERV/assets/README.md; [PR #25](https://github.com/voidbrain/nerv/pull/25): regional map, header tags, title; [PR #26](https://github.com/voidbrain/nerv/pull/26): node-to-node traffic; [PR #27](https://github.com/voidbrain/nerv/pull/27): straight links); earlier docs/NERV/dashboard-agnostic-2.html; review docs/NERV/review-2026-11-04.md §6; [PR #36](https://github.com/voidbrain/nerv/pull/36) (live slice 1); [PR #39](https://github.com/voidbrain/nerv/pull/39) (reload, away, Spear) |
 | Opened | 2026-11-02 |
 | Verification | 2026-11-06 Human: owner reports Telegram self-delivery fallback works; source review confirms existing relay/fallback paths. Per-base sharing: focused tests pass for actual relay/fallback transitions, signed two-runtime heartbeat/API state, stale reports and old-peer omission. Chrome: authenticated service with controlled bases fixtures checked local fallback, stale/offline and absent reports, zero scoped axe violations; desktop/mobile screenshots inspected, no 390 px page overflow. Full suite: 200 passed and one platform-only skip; build, static checks, three headless lifecycle cases and all ten Angular Chrome/axe views passed. Merged PR #163 CI runs 42250531835 and 42250519742 passed validate, windows and native-macos (ci:status); channel telemetry slice verified. Earlier evidence: 2026-11-04 live slice 1: tests and headless Chrome run above (local run; CI green: PR #36) |
 | Reviewed | 2026-11-06 |
@@ -1358,7 +1358,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner question 2026-11-05 |
+| PR / evidence | [PR #166](https://github.com/voidbrain/nerv/pull/166) map/tabs and Midori routing/status;  [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner question 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-06 Human: owner reports Telegram /status works. Source review: deterministic router/menu and full command-set automated checks remain pending. |
 | Reviewed | 2026-11-06 |
