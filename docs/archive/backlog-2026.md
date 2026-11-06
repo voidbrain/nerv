@@ -1904,3 +1904,72 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 </details>
 
 ---
+
+
+### B-034
+
+**Live dashboard presents hardcoded cloud and budget claims**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: browser checks and merged CI passed.
+
+| | |
+|---|---|
+| **Issue** | The map always says cloud off/all models local; budget header says $1/day and the summary says $0/local models even though cloud routing may be enabled and model cost accounting is not connected. |
+| **Reproduce** | Open the live dashboard with a cloud route configured; inspect map/budget labels and run axe on the Pilots panel. |
+| **Check** | Cloud caption follows this base’s route telemetry including unknown; budget tracking is explicitly unavailable with no fabricated daily spend or daily policy claim. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 in [PR #161](https://github.com/voidbrain/nerv/pull/161) after [PR #160 CI](https://github.com/voidbrain/nerv/actions/runs/42241192687) passed validate, windows and native-macos (ci:status), with local scoped Chrome/axe and screenshot review. Found and candidate fix implemented 2026-11-06 during pilot-model and map review. Map cloud label now reads route health for this base, costs remain explicitly unavailable, and muted badges use --text on their existing tinted background. Focused regressions and scoped Chrome/axe passed; no remaining required checks.
+
+**Estimates:** No remaining effort; ~100% complete. Reassessed 2026-11-06 after regression, scoped browser and green merged CI acceptance.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #160](https://github.com/voidbrain/nerv/pull/160) pilot selectors/map status and owner clarification; Local source review, regression tests and Chrome/axe, 2026-11-06 |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-06 Unit/integration and Browser/accessibility: focused checks passed; merged PR #160 CI run 42241192687 passed validate, windows and native-macos |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### B-035
+
+**Muted pilot badges fail small-text contrast**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: browser checks and merged CI passed.
+
+| | |
+|---|---|
+| **Issue** | Scoped axe review of the Pilots panel reports low contrast for the GENERIC badge because muted text is used on a tinted muted background. |
+| **Reproduce** | Open the live dashboard with a cloud route configured; inspect map/budget labels and run axe on the Pilots panel. |
+| **Check** | Muted badge text uses a readable theme token; scoped Chrome/axe has no contrast violations and existing theme checks pass. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 in [PR #161](https://github.com/voidbrain/nerv/pull/161) after [PR #160 CI](https://github.com/voidbrain/nerv/actions/runs/42241192687) passed validate, windows and native-macos (ci:status), with local scoped Chrome/axe and screenshot review. Found and candidate fix implemented 2026-11-06 during pilot-model and map review. Map cloud label now reads route health for this base, costs remain explicitly unavailable, and muted badges use --text on their existing tinted background. Focused regressions and scoped Chrome/axe passed; no remaining required checks.
+
+**Estimates:** No remaining effort; ~100% complete. Reassessed 2026-11-06 after regression, scoped browser and green merged CI acceptance.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #160](https://github.com/voidbrain/nerv/pull/160) pilot selectors/map status and owner clarification; Local source review, regression tests and Chrome/axe, 2026-11-06 |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-06 Unit/integration and Browser/accessibility: focused checks passed; merged PR #160 CI run 42241192687 passed validate, windows and native-macos |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
