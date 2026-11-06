@@ -33,6 +33,7 @@ jobs:
       - run: npm run test:headless
       - run: npm run check:backlog
       - run: npm run check:recap
+      - run: npm run check:roadmap
       - run: npm run check:conventions
       - run: npm run check:integrations
       - run: npm run check:maintenance

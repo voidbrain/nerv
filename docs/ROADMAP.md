@@ -1,19 +1,42 @@
 # NERV Agency roadmap
 
-| Milestone | Scope | Acceptance |
-|---|---|---|
-| 0 — Harness and contracts | v3.1.1 core + Angular adoption; project Node conventions; protocol and privacy boundaries | Harness checks, current review evidence, explicit upstream Node gap F-001 |
-| 1 — Reliable local core | CLI, SQLite reminders, local inbox, cancellation, doctor, restart recovery | Restart and duplicate regression tests; authenticated API; F-002 tracks remaining hardening |
-| 1a — Headless and bilingual workspace | Single process on 4317, dev 4318, private configuration, Italian/English UI, launchd/systemd user services | Local process/restart and configuration tests; actual OS service acceptance F-009; localization F-010: [scoped browser acceptance](acceptance/angular-2026-11-06.md) (merged CI tracked in backlog) |
-| 1a.1 — Isolated runtime foundation | A scheduler/SQLite child, B execution boundary, C API/static supervisor, validated local IPC | Brain CPU stall/crash does not stop reminders; A death triggers supervisor recovery; F-013 |
-| 1b — Native macOS companion | SwiftUI MenuBarExtra and native bridge; no Electron; Keychain client pairing, scoped credentials, independent lifecycle, health, notifications and OS controls | Pairing replay/revocation/runtime-identity tests F-015; build/sign/package on macOS; Quit companion leaves service running; F-011 |
-| 2a — Useful, gated assistant | Per-action MAGI gate from tool effect classes (Pattern Green/Orange/Blue), Central Dogma sortie ledger, Misato's apartment approvals with TTL, Dummy Plug degraded mode, one model route, Telegram, Lilith memory, Hyuga triggers, Naoko provenance and taint, debrief digest | Every action passes the gate at the executor; Blue always reaches the owner; expiry never approves; local-only never leaves machine; model outage does not stop reminders; phone delivery reconciles retries; F-003, F-017, F-022–F-024, F-026–F-030 |
-| 2b — Governed extensions | Veto-only extra seats and consultants, watermelon trust stages, MCP tool registration, golden eval suite | Extra seats can only reject; Production promotion needs the owner; unregistered effect class is Blue; F-021, F-025, F-029 |
-| 3 — Multi-node foundation | Discovery, inspection, enrolment, SSH bootstrap, optional Tailscale adapter, outbound WebSocket/JSON-RPC workers | Mac + mini PC + Pi; identity/auth, heartbeat/wake reconciliation, version/frame/backpressure limits, leases, fencing and locks; F-005/F-014 |
-| 4 — Angular PWA and GenUI | Stable Angular workspace, allowlisted Web Components with validated data, onboarding and doctor | Browser/accessibility checks, schema rejection, install/push tests on real phones; F-004 |
-| 5 — Distributed agents/models | Independent role/model/node routing, explicit directional communication graph, schema-defined tools, coding workers, bounded delegation | Gemma on Mac serves mini PC worker; optional Claude route; Pi capabilities; privacy/budget/cancellation; F-006 |
-| 5b — Coordinator relocation (later) | Durable replicated state, leader lease/epoch, fencing and restore | Partition/sleep tests prove no concurrent coordinators or duplicated effects; no automatic context-only takeover; F-016 |
-| 6 — Voice and evaluated improvement | Push-to-talk, STT/TTS, voice client; evaluated skills and rollback | Italian/English command evaluation, no silent physical activation, rejected privilege changes; F-007 |
+| Milestone | Scope | Records | Acceptance |
+|---|---|---|---|
+| 0 — Harness and contracts | v3.1.1 core + Angular adoption; project Node conventions; protocol and privacy boundaries; ledger tooling (recaps, archives, coverage) | F-001, F-031, F-032, F-055, F-058, F-059, F-061 | Harness checks, current review evidence, explicit upstream Node gap F-001 |
+| 1 — Reliable local core | CLI, SQLite reminders, local inbox, cancellation, doctor, restart recovery; reminder time ranges; backup and restore | F-002, F-043, F-062 | Restart and duplicate regression tests; authenticated API; F-002 tracks remaining hardening; recovery bounds and a restore drill in F-062 once accepted |
+| 1a — Headless and bilingual workspace | Single process on 4317, dev 4318, private configuration, Italian/English UI, launchd/systemd user services, base identity, Windows bases, browser sessions | F-009, F-010, F-034, F-035, F-037, F-039 | Local process/restart and configuration tests; actual OS service acceptance F-009; localization F-010: [scoped browser acceptance](acceptance/angular-2026-11-06.md) |
+| 1a.1 — Isolated runtime foundation | A scheduler/SQLite child, B execution boundary, C API/static supervisor, validated local IPC and versioned JSON-RPC | F-013, F-014 | Brain CPU stall/crash does not stop reminders; A death triggers supervisor recovery; version/frame/backpressure limits |
+| 1b — Native macOS companion | SwiftUI MenuBarExtra and native bridge; no Electron; Keychain client pairing, scoped credentials, independent lifecycle, health, notifications and OS controls | F-011, F-015 | Pairing replay/revocation/runtime-identity tests; build/sign/package on macOS; Quit companion leaves service running |
+| 2a — Useful, gated assistant | Per-action MAGI gate from tool effect classes (Pattern Green/Orange/Blue), Central Dogma sortie ledger, Misato's apartment approvals with TTL, Dummy Plug degraded mode, model routes, Telegram, Lilith memory, Hyuga triggers, Naoko provenance and taint, debrief digest, Misato reading the records, slash commands | F-003, F-017, F-022, F-023, F-024, F-026, F-027, F-028, F-030, F-033, F-038, F-040, F-042, F-044, F-046, F-056 | Every action passes the gate at the executor; Blue always reaches the owner; expiry never approves; local-only never leaves machine; model outage does not stop reminders; phone delivery reconciles retries |
+| 2b — Governed extensions | Veto-only extra seats and consultants, watermelon trust stages, pilot roster, MCP tool registration, golden eval suite, measured model usage and cost, bounded incident circuits | F-018, F-021, F-025, F-029, F-041, F-045, F-063, F-064 | Extra seats can only reject; Production promotion needs the owner; unregistered effect class is Blue; usage is measured or shown unknown, never zero; a circuit revokes only its scope and needs explicit rearm |
+| 3 — Multi-node foundation | Federated bases over the Kaji line (delivered first), then discovery, inspection, enrolment, SSH bootstrap, optional Tailscale adapter, outbound WebSocket/JSON-RPC workers, forwarding a job to another base | F-005, F-036, F-050 | Mac + mini PC + Pi; identity/auth, heartbeat/wake reconciliation, leases, fencing and locks |
+| 4 — Angular PWA, GenUI and live dashboard | Stable Angular workspace, allowlisted Web Components with validated data, onboarding and doctor; dashboard bound to real stages, timings and contributors | F-004, F-019, F-047, F-051, F-052, F-053, F-057 | Browser/accessibility checks, schema rejection, install/push tests on real phones; no fabricated activity or spend |
+| 5 — Distributed agents/models | Independent role/model/node routing, explicit directional communication graph, schema-defined tools, coding workers, bounded delegation, parallel queue, per-job sandboxes, resuming paused jobs | F-006, F-012, F-048, F-049, F-060 | Gemma on Mac serves mini PC worker; optional Claude route; Pi capabilities; privacy/budget/cancellation; sandbox escape and resource tests |
+| 5b — Coordinator relocation (later) | Durable replicated state, leader lease/epoch, fencing and restore | F-016 | Partition/sleep tests prove no concurrent coordinators or duplicated effects; no automatic context-only takeover |
+| 6 — Voice and evaluated improvement | Push-to-talk, STT/TTS, voice client; evaluated skills and rollback | F-007 | Italian/English command evaluation, no silent physical activation, rejected privilege changes |
+| Independent tracks | FPV app integration, optional grounded personas, the base chronicle; each has its own acceptance and blocks no milestone | F-008, F-020, F-054 | Per record |
+
+Status per milestone, derived from the records (Delivered: all closed; Awaiting verification: closed or implemented; In progress: some delivered, some open; Planned: none delivered):
+
+
+
+<!-- roadmap-status:start · generated by tools/roadmap-status.mjs from the backlog records; do not edit by hand -->
+| Milestone | Status | Closed | Implemented / verified | Open | Still open |
+|---|---|---:|---:|---:|---|
+| 0 — Harness and contracts | Delivered | 7 | 0 | 0 | — |
+| 1 — Reliable local core | In progress | 0 | 1 | 2 | F-043, F-062 |
+| 1a — Headless and bilingual workspace | Awaiting verification | 5 | 1 | 0 | — |
+| 1a.1 — Isolated runtime foundation | Awaiting verification | 0 | 2 | 0 | — |
+| 1b — Native macOS companion | Awaiting verification | 0 | 2 | 0 | — |
+| 2a — Useful, gated assistant | In progress | 8 | 0 | 8 | F-003, F-023, F-026, F-027, F-042, F-044, F-046, F-056 |
+| 2b — Governed extensions | In progress | 2 | 0 | 6 | F-021, F-025, F-029, F-045, F-063, F-064 |
+| 3 — Multi-node foundation | In progress | 1 | 0 | 2 | F-005, F-050 |
+| 4 — Angular PWA, GenUI and live dashboard | In progress | 3 | 0 | 4 | F-004, F-019, F-051, F-052 |
+| 5 — Distributed agents/models | Planned | 0 | 0 | 5 | F-006, F-012, F-048, F-049, F-060 |
+| 5b — Coordinator relocation (later) | Planned | 0 | 0 | 1 | F-016 |
+| 6 — Voice and evaluated improvement | Planned | 0 | 0 | 1 | F-007 |
+| Independent tracks | Planned | 0 | 0 | 3 | F-008, F-020, F-054 |
+<!-- roadmap-status:end -->
 
 ## NERV naming and governance (2026-11-04)
 
@@ -27,10 +50,14 @@ Names follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md): lore labels in 
 
 FPV battery/crash integration is F-008 and can proceed after typed tool/model boundaries. WhatsApp remains an optional channel after Telegram. Dedicated always-listening hardware and replicated coordinators require separate feasibility acceptance; neither is assumed necessary for the first release.
 
-Current implementation step: 2a, starting with the per-action gate and ledger (F-017, F-024) and approvals (F-023). 1b native preview and F-015 pairing remain open for distribution and real-Mac acceptance. Menu-bar pairing/read access, bounded inbox catch-up, opt-in notifications, guarded service controls and launch-at-login selection are implemented. Distribution signing and real Mac permission/menu/login acceptance remain open. Real model execution is still milestone 2. It does not replace model/channel milestone 2. Service render/process tests are not an actual macOS/systemd installation trial. Italian natural-language and voice acceptance remain in F-003/F-007; F-010 is interface localization only.
+Current implementation step (reviewed 2026-11-06): 2a is mostly delivered — the gate and ledger (F-017, F-024), Lilith memory (F-022), the debrief digest (F-028), Dummy Plug (F-030), model-route setup (F-038) and duplicate-safe resume after approval (F-033, F-040) are closed. Open in 2a: approval delivery and TTL refinements (F-023), the models/Telegram/briefs umbrella (F-003: Telegram works through Aoba; phone receipt is not established), proactive triggers (F-026), provenance and taint (F-027), and the request-quality records F-042, F-044, F-046 and F-056. 2b has started (local and per-topic consultants, F-041; read-only MCP tools under F-021). Milestone 3 began with the federated bases (F-036) ahead of worker enrolment (F-005). 1b native preview and F-015 pairing remain open for distribution and real-Mac acceptance: menu-bar pairing/read access, bounded inbox catch-up, opt-in notifications, guarded service controls and launch-at-login selection are implemented; distribution signing and real Mac permission/menu/login acceptance remain open. Service render/process tests are not an actual macOS/systemd installation trial. Italian natural-language and voice acceptance remain in F-003/F-007. The 2026-11-06 [architecture reassessment](audits/2026-11-06-architecture-reassessment.md) adds three proposals, each awaiting an owner decision: backup and restore (F-062), measured usage and cost (F-063) and bounded incident circuits (F-064). The backlog's priorities, not this order, decide what comes next.
 
 ## Waiting and resuming external jobs (F-012)
 
 Example: “When this web-chat or Claude Code job resets its token limit in three hours, resume it once and notify me.” Durable scheduling belongs to milestone 2; enrolled browser/editor execution to milestones 3/5. A timer alone cannot guarantee availability. Recheck the exact session/job and ready state, apply expiry and bounded retries, and reconcile uncertain effects before repeating. An asleep worker, closed tab, logged-out session or changed job produces a waiting/expired/needs-attention result. Resume permission never approves unrelated dialogs or bypasses the provider limit. Prefer a supported command/API; browser or desktop automation requires an explicit adapter and host permissions. Not available in the current release.
 
 Architecture evaluation and adopted/deferred boundaries: [runtime decision](decisions/runtime-boundaries.md). Web Components do not authorize raw generated HTML. JSON-RPC does not replace application permissions or durable jobs. Native addons are conditional on a measured gap; Swift OS integration is the default native path.
+
+## Keeping this page current
+
+The Records column places every feature that is not closed in exactly one milestone; closed records stay as delivery evidence. The status table is generated from the backlog by `npm run roadmap:status` and never edited by hand. `npm run check:roadmap` (CI) fails when a cited ID is not a record, an open feature is unplaced or placed twice, or the status table no longer matches the records. A PR that opens, closes or changes the status of a feature regenerates it; a new feature is placed in a milestone in the same PR. Scope, acceptance and the current-step paragraph are prose: review them when a milestone's status changes.

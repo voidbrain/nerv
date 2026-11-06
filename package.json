@@ -23,6 +23,8 @@
     "test:headless": "node --test test/*.integration.ts",
     "backlog:recap": "node tools/backlog-recap.mjs",
     "check:recap": "node tools/backlog-recap.mjs --check",
+    "roadmap:status": "node tools/roadmap-status.mjs",
+    "check:roadmap": "node tools/roadmap-status.mjs --check",
     "test:coverage": "node -e \"require('fs').mkdirSync('coverage',{recursive:true})\" && node --test --experimental-test-coverage --test-coverage-include='src/**' --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=coverage/lcov.info test/*.test.ts test/*.test.mjs && node tools/lcov-summary.mjs",
     "coverage": "npm run test:coverage && node tools/coverage-table.mjs --write",
     "test:browser": "node --test test/angular.browser.mjs",

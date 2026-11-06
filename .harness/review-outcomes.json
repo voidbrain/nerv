@@ -1,14 +1,4 @@
 [
-  {
-    "kind": "tool",
-    "disposition": "implemented",
-    "target": "tools/archive-recap.mjs",
-    "evidence": "Adopted exactly from published harness v3.2.0 after project-harness PR #62 CI 42283633421 passed and the tag was pushed. Existing recap commands generate/check weekly closure indices; strict derived-block validation and historical-line checks pass on NERV actual archives, including newly closed B-036/B-037. Upstream 76 owned fixtures cover forged/stale indices, date/week/year boundaries, unsafe output and immutable history. NERV: 206 tests passed, one platform skip; build, typecheck, conventions, integration metadata, three headless lifecycle cases and ten Angular Chrome/axe views passed."
-  },
-  {
-    "kind": "rule",
-    "disposition": "implemented",
-    "target": "docs/BACKLOG-RULES.md",
-    "evidence": "Reconciled the published narrow generated-index exception; archived record immutability and dated corrections remain unchanged. Architecture/dated-review moves are project content, and the scoped 25-file review preserves undecided proposals rather than accepting or deleting them silently. Current links and historical source snapshots remain traceable. Timed NERV reconciliation overlapped the harness release and CI waits; no counters or productivity gains were inferred."
-  }
+ {"kind":"rule","disposition":"implemented","target":"AGENTS.md","evidence":"Added one project-marked Work tracking line: docs/ROADMAP.md places every non-closed feature in exactly one milestone and its status table is generated from the backlog; a PR that opens, closes or changes a feature's status places it and regenerates. Reviewed against BACKLOG-RULES (backlog stays the single source of status; the roadmap carries no hand-edited status, as the 2026-11-06 architecture reassessment asks) and the impact map (new roadmap-status row after backlog-recap). No existing rule removed or duplicated."},
+ {"kind":"tool","disposition":"implemented","target":"tools/roadmap-status.mjs","evidence":"Project tool (not a harness copy) reusing parseRecords from tools/backlog-recap.mjs. test/roadmap-status.test.mjs: 7 cases (state derivation, archive precedence, unplaced/duplicate/unknown/bug IDs, stale block after a status change, idempotent placement). check:roadmap added to CI validate. Full suite 213 passed, one platform skip; typecheck, conventions, integrations, backlog, recap, audits and archive-recap checks pass."}
 ]
