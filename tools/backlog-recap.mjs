@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 // The recap at the top of docs/BACKLOG.md: open and owner-waiting records by kind (features F-, bugs B-), and what was
-// opened and closed in the 7 calendar days ending on the recap's date. It is computed from the records themselves
+// opened and closed in the current calendar week (Monday–Sunday, UTC), the same weeks as the archive's closure recaps. It is computed from the records themselves
 // (BACKLOG.md and the archives), never from commits, so the window does not depend on how often anything was pushed.
 //
-//   node tools/backlog-recap.mjs            write the recap for today (UTC)
-//   node tools/backlog-recap.mjs --as-of=2026-11-05
-//   node tools/backlog-recap.mjs --check    fail if the recap differs from a recomputation for its own date, if its
-//                                           date is older than the newest Opened/Closed date in the records, or if the
+//   node tools/backlog-recap.mjs            write the recap for this week (UTC)
+//   node tools/backlog-recap.mjs --as-of=2026-11-05   the week containing that date
+//   node tools/backlog-recap.mjs --check    fail if the recap differs from a recomputation for its own week, if its
+//                                           week ends before the newest Opened/Closed date in the records, or if the
 //                                           header above it is longer than two short lines
 import {readFileSync,writeFileSync,readdirSync,existsSync} from 'node:fs';
 import {join} from 'node:path';
@@ -37,19 +37,25 @@ function allRecords(){
  const archived=existsSync(ARCHIVE)?readdirSync(ARCHIVE).filter(f=>/^backlog-\d{4}\.md$/.test(f)).flatMap(f=>parseRecords(readFileSync(join(ARCHIVE,f),'utf8'),true)):[];
  return {active,archived};
 }
-/** The recap block for one date (YYYY-MM-DD). */
+/** Monday and Sunday (YYYY-MM-DD, UTC) of the week containing a date. */
+export function weekOf(date){
+ const t=Date.parse(date+'T00:00:00Z');if(!Number.isFinite(t)||iso(new Date(t))!==date)throw new Error(`Invalid date: ${date}`);
+ const monday=t-((new Date(t).getUTCDay()+6)%7)*DAY;return {from:iso(new Date(monday)),to:iso(new Date(monday+6*DAY))};
+}
+const WEEK=/\*\*Week (\d{4}-\d\d-\d\d) – (\d{4}-\d\d-\d\d)\*\*/;
+/** The recap block for the week containing a date (YYYY-MM-DD). */
 export function recap({active,archived},asOf){
- const end=Date.parse(asOf+'T00:00:00Z');const from=iso(new Date(end-6*DAY));const inWindow=d=>!!d&&d>=from&&d<=asOf;
+ const {from,to}=weekOf(asOf);const inWindow=d=>!!d&&d>=from&&d<=to;
  const live=active.filter(r=>r.status!=='Closed');const k=(list,kind)=>list.filter(r=>r.kind===kind).length;
  const human=live.filter(r=>r.human);const all=[...active,...archived];
  const opened=all.filter(r=>inWindow(r.opened)),closed=all.filter(r=>inWindow(r.closed));
  const link=r=>`[${r.id}](#${r.id.toLowerCase()})`;
  const hf=human.filter(r=>r.kind==='feature').map(link),hb=human.filter(r=>r.kind==='bug').map(link);
  const rows=Array.from({length:Math.max(hf.length,hb.length,1)},(_,i)=>`| ${hf[i] ?? (i?'':'—')} | ${hb[i] ?? (i?'':'—')} |`);
- return [START,`**Recap as of ${asOf}** (window ${from} – ${asOf}).`,'',
+ return [START,`**Week ${from} – ${to}**`,'',
+  '| | Features | | Bugs | |','|---|---:|---:|---:|---:|','| | **Opened** | **Closed** | **Opened** | **Closed** |',
+  `| **This week** | ${k(opened,'feature')} | ${k(closed,'feature')} | ${k(opened,'bug')} | ${k(closed,'bug')} |`,'',
   '| Status | Features | Bugs |','|---|---:|---:|',`| **Open** | ${k(live,'feature')} | ${k(live,'bug')} |`,`| **Require Human 🧑** | ${k(human,'feature')} | ${k(human,'bug')} |`,'',
-  '### Last 7 days','','| | Features | | Bugs | |','|---|---:|---:|---:|---:|','| | **Opened** | **Closed** | **Opened** | **Closed** |',
-  `| **Count** | ${k(opened,'feature')} | ${k(closed,'feature')} | ${k(opened,'bug')} | ${k(closed,'bug')} |`,'',
   '### Require Human 🧑','','| Features | Bugs |','|---|---|',...rows,END].join('\n');
 }
 /** The header between the title and the recap: at most two short lines (latest reconciliation, then links); history goes to
@@ -70,18 +76,18 @@ export function place(text,block){
 if(import.meta.url===`file://${process.argv[1]}`){
  const records=allRecords();const text=readFileSync(BACKLOG,'utf8');
  if(process.argv.includes('--check')){
-  const at=/\*\*Recap as of (\d{4}-\d\d-\d\d)\*\*/.exec(text)?.[1];
+  const week=WEEK.exec(text);const at=week?.[1];
   if(!at){console.error('docs/BACKLOG.md has no recap: run node tools/backlog-recap.mjs');process.exit(1);}
   const head=headerProblems(text);if(head.length){for(const x of head)console.error(x);process.exit(1);}
   const newest=[...records.active,...records.archived].flatMap(r=>[r.opened,r.closed]).filter(Boolean).sort().at(-1);
-  if(newest&&newest>at){console.error(`The recap is as of ${at}, older than a record dated ${newest}: run node tools/backlog-recap.mjs`);process.exit(1);}
+  if(newest&&newest>week[2]){console.error(`The recap is for the week ${at} – ${week[2]}, older than a record dated ${newest}: run node tools/backlog-recap.mjs`);process.exit(1);}
   const want=place(text,recap(records,at));
-  if(want!==text){console.error(`The recap does not match the records for ${at}: run node tools/backlog-recap.mjs --as-of=${at} (or without --as-of for today).`);process.exit(1);}
+  if(want!==text){console.error(`The recap does not match the records for the week ${at} – ${week[2]}: run node tools/backlog-recap.mjs --as-of=${at} (or without --as-of for this week).`);process.exit(1);}
   archiveRecaps(ROOT,['--check']);
-  console.log(`Backlog recap matches the records (as of ${at}).`);
+  console.log(`Backlog recap matches the records (week ${at} – ${week[2]}).`);
  }else{
   const asOf=/--as-of=(\d{4}-\d\d-\d\d)/.exec(process.argv.join(' '))?.[1] ?? iso(new Date());
   archiveRecaps(ROOT,[]);
-  writeFileSync(BACKLOG,place(text,recap(records,asOf)));console.log(`Backlog recap written (as of ${asOf}).`);
+  writeFileSync(BACKLOG,place(text,recap(records,asOf)));const w=weekOf(asOf);console.log(`Backlog recap written (week ${w.from} – ${w.to}).`);
  }
 }
