@@ -89,7 +89,7 @@ export class TelegramChannel {
  private held=new Map<string,{key:string;since:number}>();private readonly one:OneChannel|undefined;private readonly remote:RemoteDecide|undefined;
  private routeState:ChannelState={mode:'unknown',checkedAt:new Date().toISOString()};
  /** Cached actual route checks and send outcomes; reading telemetry never sends or probes Telegram. */
- channelState():ChannelState{return {...this.routeState,...(this.routeState.lastDelivery?{lastDelivery:{...this.routeState.lastDelivery}}:{})};}
+ channelState():ChannelState{return {...this.routeState,...(this.routeState.lastDelivery?{lastDelivery:{...this.routeState.lastDelivery}}:{}),...(this.routeState.api?{api:{...this.routeState.api}}:{})};}
  private async quiet():Promise<boolean>{
   let quiet=false;let mode:ChannelState['mode']='local';
   const destination=await this.one?.destination?.().catch(()=>undefined);
@@ -97,11 +97,12 @@ export class TelegramChannel {
   // A failed relay's local fallback stays visible until a new send or a different route check, at most 90 seconds.
   const last=this.routeState.lastDelivery;
   if(quiet&&this.routeState.mode==='local-fallback'&&this.routeState.destination===destination&&last&&Date.now()-Date.parse(last.at)<ONLINE_MS)mode='local-fallback';
-  this.routeState={mode,checkedAt:new Date().toISOString(),...(destination?{destination}:{}),...(last?{lastDelivery:last}:{})};
+  this.routeState={...this.routeState,mode,polling:true,checkedAt:new Date().toISOString(),destination,...(last?{lastDelivery:last}:{})};
   return quiet;
  }
  private delivered(route:'main'|'local',result:'accepted'|'failed',fallback=false){
-  this.routeState={...this.routeState,mode:route==='main'?'via-main':fallback?'local-fallback':'local',lastDelivery:{route,result,at:new Date().toISOString()}};
+  this.routeState={...this.routeState,mode:route==='main'?'via-main':fallback?'local-fallback':this.routeState.mode,lastDelivery:{route,result,at:new Date().toISOString()}};
+  if(route==='local')this.apiResult(result==='accepted'?'responding':'failed');
  }
  /** Everything this base sends on its own (cards, reminders, brief, follow-ups): relayed while quiet, else its own bot; a failed relay falls back to its own bot, so nothing is lost. */
  private async out(text:string,buttons?:Button[][]):Promise<void>{
@@ -112,7 +113,8 @@ export class TelegramChannel {
   }
   await this.sendLocal(text,buttons,quiet||this.routeState.destination!==undefined);
  }
- private async sendLocal(text:string,buttons?:Button[][],fallback=this.routeState.destination!==undefined){
+ private apiResult(state:'responding'|'failed'){this.routeState={...this.routeState,api:{state,at:new Date().toISOString()}};}
+ private async sendLocal(text:string,buttons?:Button[][],fallback=false){
   try{await this.api.send(this.chatId,text,buttons);this.delivered('local','accepted',fallback);}
   catch(e){this.delivered('local','failed',fallback);throw e;}
  }
@@ -143,18 +145,20 @@ export class TelegramChannel {
  private owner(id:number|undefined){return id===this.chatId;}
  private async poll():Promise<void> {
   while(!this.stopping.signal.aborted){
-   // Quiet: the owner talks to the main base's Aoba; messages to this bot wait in Telegram until this base speaks again.
-   if(await this.quiet()){await new Promise(done=>setTimeout(done,5000));continue;}
+   // Outbound inbox deliveries use main, but either configured bot still accepts owner requests.
+   await this.quiet();
    try{
     const updates=await this.api.updates(this.state.offset,POLL_SECONDS,AbortSignal.any([this.stopping.signal,AbortSignal.timeout((POLL_SECONDS+10)*1000)]));
+    this.apiResult('responding');
     for(const u of updates){this.state.offset=u.update_id+1;this.save();this.queue=this.queue.then(()=>this.handle(u)).catch(e=>this.log(`Telegram: ${e instanceof Error?e.message:'handling failed'}.`));}
-   }catch(e){if(this.stopping.signal.aborted)return;this.log(`Telegram: ${e instanceof Error?e.message:'poll failed'}; retrying in 5 s.`);await new Promise(done=>setTimeout(done,5000));}
+   }catch(e){if(this.stopping.signal.aborted)return;this.apiResult('failed');this.log(`Telegram: ${e instanceof Error?e.message:'poll failed'}; retrying in 5 s.`);await new Promise(done=>setTimeout(done,5000));}
   }
  }
  private async handle(u:Update):Promise<void> {
   if(u.callback_query){
    const q=u.callback_query;
    if(!this.owner(q.from.id)||!this.owner(q.message?.chat.id)){this.log('Telegram: ignored a button press from another account.');return;}
+   this.routeState={...this.routeState,lastReceived:new Date().toISOString()};
    const far=/^k:([A-Z0-9-]{1,16}):([ar]):([a-f0-9-]{36})$/.exec(q.data ?? '');
    if(far&&this.remote){
     const outcome=await this.remote.decide(far[1]!,far[3]!,far[2]==='a'?'approve':'reject').catch((e:unknown)=>`Not applied: ${far[1]} could not be reached (${e instanceof Error?e.message:'error'}). Try again when it is online.`);
@@ -177,6 +181,7 @@ export class TelegramChannel {
   }
   const m=u.message;if(!m?.text)return;
   if(m.chat.type!=='private'||!this.owner(m.chat.id)||(m.from&&!this.owner(m.from.id))){this.log('Telegram: ignored a message from another chat.');return;}
+  this.routeState={...this.routeState,lastReceived:new Date().toISOString()};
   // Messages queued while the service was down for long are not replayed as fresh requests.
   if(Date.now()/1000-m.date>STALE_SECONDS){await this.sendLocal('I was offline when you sent that; send it again if it still matters.');return;}
   const text=m.text.trim();

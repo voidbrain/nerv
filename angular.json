@@ -1,5 +1,8 @@
 {
   "version": 1,
+  "cli": {
+    "analytics": false
+  },
   "projects": {
     "nerv": {
       "projectType": "application",

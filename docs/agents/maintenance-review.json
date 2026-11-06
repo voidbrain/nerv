@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-06T14:20:45.522Z",
+  "reviewed": "2026-11-06T19:30:05.601Z",
   "policy": "7ce9883fd1bff25038076e9e36015a833c38e1378e1df68043f48a64635abad4",
   "inputs": {
     "AGENTS.md": "7521203d1bc1ee4467396d9dd3576e2d7ffba835a4f6e93cb217af06af5ebee2",
     "docs/BACKLOG-RULES.md": "19798ae1614c2d96e60613af75d232c2eda19d25e07470e851ce48304df593c6",
-    "docs/agents/areas.md": "b6a31057be6ee3e4a5ce72042e6654067a0505991e6dfc1c5d77f19a5fc48364",
+    "docs/agents/areas.md": "b107edb50a7fb839540cb5df8ed19c4e0c72d3cded6be180f2a4d18108353a3c",
     "docs/agents/maintenance.md": "a7e93ce963ffab30b4592ee90bdd0e72d49ea1320f82df74f22c88f70899d899"
   },
   "measurements": {
-    "samples": 5,
-    "latestAt": "2026-11-06T14:20:04.327Z",
+    "samples": 6,
+    "latestAt": "2026-11-06T19:29:53.733Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -36,25 +36,25 @@
         }
       },
       "reconciliation": {
-        "samples": 5,
+        "samples": 6,
         "durationMs": {
-          "observed": 5,
+          "observed": 6,
           "missing": 0,
-          "median": 84
+          "median": 99.5
         },
         "conflicts": {
           "observed": 2,
-          "missing": 3,
+          "missing": 4,
           "median": 0
         },
         "unnecessaryPrompts": {
           "observed": 0,
-          "missing": 5,
+          "missing": 6,
           "median": null
         },
         "repeatedContextLoads": {
           "observed": 0,
-          "missing": 5,
+          "missing": 6,
           "median": null
         }
       }
@@ -64,7 +64,7 @@
     {
       "kind": "none",
       "disposition": "no-change",
-      "evidence": "Reviewed AGENTS, BACKLOG-RULES, area notes and maintenance guidance for the owner-approved B-028 removal. The only area-note edit removes the obsolete factual claim about unused speculative contracts.ts; Kaji owns implemented network contracts and shared/surface.ts still owns UI data. Runtime boundaries, authorization, privacy, action-gate and maintenance safeguards are unchanged. This is project-specific documentation cleanup, not a generic harness rule change. Typecheck, coverage regression suite, build and bilingual Chrome/axe acceptance passed. Timed reconciliation includes this consistency review and those validations; no procedural counters were inferred. No further rule/tool change is justified by the removal."
+      "evidence": "Reviewed AGENTS, BACKLOG-RULES, area notes and maintenance guidance for the owner-authorized F-019/F-056 map, tabs and Midori changes. The project-only area note now matches the requested behavior: each configured Telegram bot reads its owner messages while outgoing inbox delivery routes through main. Authorization, the per-action gate, owner-only channel checks, signed first-hand telemetry, privacy and runtime boundaries remain intact. Deterministic read commands run before planning and create no sortie; unknown commands do not enter the model. Full suite: 206 passed, one platform skip; build, real-service Chrome/scoped axe/mobile review, three headless lifecycle checks and all ten Angular Chrome/axe views passed. The measured reconciliation covers project-document review through validation, including waits; counters remain unknown. No generic harness rule/tool change is warranted."
     }
   ]
 }

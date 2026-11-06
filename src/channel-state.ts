@@ -3,6 +3,9 @@ export interface ChannelState {
  mode:'via-main'|'local-fallback'|'local'|'unavailable'|'unknown';
  destination?:string;
  checkedAt:string;
+ polling?:boolean;
+ api?:{state:'responding'|'failed';at:string};
+ lastReceived?:string;
  lastDelivery?:{route:'main'|'local';result:'accepted'|'failed';at:string};
 }
 export interface HeardChannel extends ChannelState {receivedAt:string}
@@ -14,6 +17,15 @@ export function sanitizeChannel(value:unknown):ChannelState|undefined {
  const v=value as Record<string,unknown>;
  if(typeof v.mode!=='string'||!modes.has(v.mode)||!timestamp(v.checkedAt))return undefined;
  if(v.destination!==undefined&&(typeof v.destination!=='string'||!/^[A-Z0-9-]{1,16}$/.test(v.destination)))return undefined;
+ if(v.polling!==undefined&&typeof v.polling!=='boolean')return undefined;
+ if(v.lastReceived!==undefined&&!timestamp(v.lastReceived))return undefined;
+ let api:ChannelState['api'];
+ if(v.api!==undefined){
+  if(!v.api||typeof v.api!=='object'||Array.isArray(v.api))return undefined;
+  const a=v.api as Record<string,unknown>;
+  if((a.state!=='responding'&&a.state!=='failed')||!timestamp(a.at))return undefined;
+  api={state:a.state,at:a.at};
+ }
  let lastDelivery:ChannelState['lastDelivery'];
  if(v.lastDelivery!==undefined){
   if(!v.lastDelivery||typeof v.lastDelivery!=='object'||Array.isArray(v.lastDelivery))return undefined;
@@ -21,7 +33,7 @@ export function sanitizeChannel(value:unknown):ChannelState|undefined {
   if(!['main','local'].includes(String(d.route))||!['accepted','failed'].includes(String(d.result))||!timestamp(d.at))return undefined;
   lastDelivery={route:d.route as 'main'|'local',result:d.result as 'accepted'|'failed',at:d.at};
  }
- return {mode:v.mode as ChannelState['mode'],checkedAt:v.checkedAt,...(typeof v.destination==='string'?{destination:v.destination}:{}),...(lastDelivery?{lastDelivery}:{})};
+ return {mode:v.mode as ChannelState['mode'],checkedAt:v.checkedAt,...(typeof v.polling==='boolean'?{polling:v.polling}:{}),...(api?{api}:{}),...(typeof v.lastReceived==='string'?{lastReceived:v.lastReceived}:{}),...(typeof v.destination==='string'?{destination:v.destination}:{}),...(lastDelivery?{lastDelivery}:{})};
 }
 
 /** Route-check freshness is independent of heartbeat arrival or the last send result. */

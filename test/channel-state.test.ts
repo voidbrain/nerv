@@ -16,9 +16,9 @@ test('failed relay and failed own-bot sends report failure without private error
  const channel=new TelegramChannel({api:new Bot('test-token'),store,chatId:123,statePath:join(home,'state.json'),log:()=>{},oneChannel:{destination:async()=> 'NERV-01',quiet:async()=>true,relay:async()=>false}});
  try{
   await channel.deliver();store.add('Neutral reminder',new Date(Date.now()+1000).toISOString());store.tick(new Date(Date.now()+2000));
-  await channel.deliver();assert.equal(channel.channelState().mode,'local-fallback');assert.equal(channel.channelState().lastDelivery?.result,'failed');
+  await channel.deliver();assert.equal(channel.channelState().mode,'local-fallback');assert.equal(channel.channelState().lastDelivery?.result,'failed');assert.equal(channel.channelState().api?.state,'failed');
   assert.doesNotMatch(JSON.stringify(channel.channelState()),/test-token|123|Neutral reminder|private provider/);
-  fail=false;await channel.deliver();assert.equal(channel.channelState().lastDelivery?.result,'accepted');
+  fail=false;await channel.deliver();assert.equal(channel.channelState().lastDelivery?.result,'accepted');assert.equal(channel.channelState().api?.state,'responding');
   const snapshot=channel.channelState();snapshot.mode='unknown';assert.equal(channel.channelState().mode,'local-fallback','caller cannot mutate cached mode');
  }finally{await channel.stop();store.close();rmSync(home,{recursive:true,force:true});}
 });
@@ -27,4 +27,10 @@ test('route check freshness has a bounded age and future-clock tolerance',()=>{
  const now=Date.parse(at);const c={mode:'local',checkedAt:at} as const;
  assert.equal(channelIsFresh(c,now+89_999,90_000),true);assert.equal(channelIsFresh(c,now+90_000,90_000),false);
  assert.equal(channelIsFresh(c,now-120_000,90_000),true);assert.equal(channelIsFresh(c,now-120_001,90_000),false);
+});
+
+test('API checks, polling state and inbound activity sanitize independently of send results',()=>{
+ const data={mode:'via-main',destination:'NERV-01',checkedAt:at,polling:false,api:{state:'responding',at,token:'private'},lastReceived:at};
+ assert.deepEqual(sanitizeChannel(data),{mode:'via-main',destination:'NERV-01',checkedAt:at,polling:false,api:{state:'responding',at},lastReceived:at});
+ for(const extra of [{polling:'yes'},{api:{state:'phone-online',at}},{api:{state:'responding',at:'bad'}},{lastReceived:'bad'}])assert.equal(sanitizeChannel({...data,...extra}),undefined);
 });

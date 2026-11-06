@@ -758,12 +758,12 @@ function isolines(vals, gw, gh, cell, thresholds) {
   });
 }
 async function initMap() {
-  const cv = document.getElementById("topo"); const W = map.w, H = map.h; const dpr = window.devicePixelRatio || 1; cv.width = W * dpr; cv.height = H * dpr; map.dpr = dpr;
+  const cv = document.getElementById("topo"); map.w = Math.max(120, cv.clientWidth); map.h = Math.max(100, cv.clientHeight); const W = map.w, H = map.h; const dpr = window.devicePixelRatio || 1; cv.width = W * dpr; cv.height = H * dpr; map.dpr = dpr;
   // Local projection: a window around the bases, shaped to the canvas, east-west scaled by cos(latitude).
   const lats = BASES.map(b => b.lat), lons = BASES.map(b => b.lon);
   const lat0 = (Math.min(...lats) + Math.max(...lats)) / 2, lon0 = (Math.min(...lons) + Math.max(...lons)) / 2, k = Math.cos(lat0 * Math.PI / 180);
   const latSpan = Math.max(0.12, (Math.max(...lats) - Math.min(...lats)) * 1.7), lonSpan = Math.max(latSpan * W / H / k, (Math.max(...lons) - Math.min(...lons)) * 1.6);
-  map.proj = p => [W / 2 + (p[0] - lon0) / lonSpan * W, H / 2 - (p[1] - lat0) / latSpan * H];
+  map.proj = p => [(W - 72) / 2 + (p[0] - lon0) / lonSpan * (W - 88), H / 2 - (p[1] - lat0) / latSpan * (H - 24)];
   // Terrain: rolling noise, a ridge of hills between the bases and a winding valley floor they share.
   const peaks = [[0.18, 0.22, 0.13], [0.42, 0.18, 0.11], [0.63, 0.30, 0.12], [0.86, 0.20, 0.10], [0.30, 0.78, 0.10], [0.74, 0.82, 0.12], [0.95, 0.62, 0.09]];
   const height = (x, y) => {
@@ -804,13 +804,7 @@ async function copyBuild(el, clip = navigator.clipboard) {
 }
 document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("#build"); if (b) void copyBuild(b); });
 function cssVar(n) { return getComputedStyle(document.body).getPropertyValue(n).trim(); }
-function statusColor(st) { return st === "online" ? cssVar("--ok") : st === "standby" ? cssVar("--warn") : "#666"; }
-/** Cloud health belongs to the base serving this page; peers do not publish route capabilities yet. */
-function cloudRouteCaption(doctor) {
-  const route = doctor && doctor.routes && doctor.routes.cloud;
-  const label = { off:"off", unknown:"enabled · not checked", ok:"reachable", down:"unreachable" };
-  return "UMBILICAL ↗ cloud · this base: " + (route && label[route.state] || "status unknown");
-}
+function statusColor(st) { return st === "online" ? cssVar("--ok") : st === "standby" ? cssVar("--warn") : cssVar("--muted"); }
 function drawMap(now) {
   if (!map.ready) return;
   const cv = document.getElementById("topo"); const ctx = cv.getContext("2d"); const W = map.w, H = map.h; ctx.setTransform(map.dpr, 0, 0, map.dpr, 0, 0);
@@ -823,12 +817,12 @@ function drawMap(now) {
   BASES.forEach((b, i) => {
     if (b.status === "offline") return;
     const [x, y] = map.proj([b.lon, b.lat]); const col = statusColor(b.status);
-    const period = b.status === "online" ? 2600 : 4200; const ph = ((now + i * 700) % period) / period; const r = 6 + ph * 70;
+    const period = b.status === "online" ? 2600 : 4200; const ph = ((now + i * 700) % period) / period; const r = 4 + ph * 30;
     const g = ctx.createRadialGradient(x, y, Math.max(0, r - 7), x, y, r + 7);
     g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(0.5, col); g.addColorStop(1, "rgba(0,0,0,0)");
     ctx.strokeStyle = g; ctx.lineWidth = 1.6; ctx.globalAlpha = 1 - ph;
     map.contours.forEach(c => ctx.stroke(c.p));
-    const glow = ctx.createRadialGradient(x, y, 0, x, y, 26); glow.addColorStop(0, col); glow.addColorStop(1, "rgba(0,0,0,0)");
+    const glow = ctx.createRadialGradient(x, y, 0, x, y, 14); glow.addColorStop(0, col); glow.addColorStop(1, "rgba(0,0,0,0)");
     ctx.globalAlpha = 0.35; ctx.strokeStyle = glow; ctx.lineWidth = 1; map.contours.forEach(c => ctx.stroke(c.p));
     ctx.globalAlpha = 1;
   });
@@ -855,15 +849,80 @@ function drawMap(now) {
   const z = Math.max(1, W / ((cv.clientWidth || W))); const face = cssVar("--font") || "monospace"; const anySelf = BASES.some(x => x.self);
   BASES.forEach(b => {
     const [x, y] = map.proj([b.lon, b.lat]); const col = statusColor(b.status); // This base (owner, 2026-11-05), not the main one. B-022: this comment once sat before `const s`, so no base was drawn.
-    const main = !!b.self || (!anySelf && b === BASES[0]); const s = (main ? 11 : 7) * z;
-    ctx.fillStyle = col; ctx.fillRect(x - s / 2, y - s / 2, s, s); ctx.strokeStyle = "#000"; ctx.lineWidth = z; ctx.strokeRect(x - s / 2, y - s / 2, s, s);
-    if (main) { ctx.strokeStyle = col; ctx.lineWidth = 1.5 * z; ctx.beginPath(); ctx.arc(x, y, s * 1.1, 0, Math.PI * 2); ctx.stroke(); }
-    ctx.font = (main ? "bold " : "") + Math.round((main ? 13 : 12) * z) + "px " + face;
-    ctx.fillStyle = cssVar("--text"); const label = b.name; const tw = ctx.measureText(label).width;
+    const self = !!b.self || (!anySelf && b === BASES[0]); const main = !!b.main; const s = (main ? 11 : 7) * z;
+    ctx.fillStyle = col; ctx.strokeStyle = cssVar("--panel"); ctx.lineWidth = z;
+    ctx.fillRect(x-s/2,y-s/2,s,s); ctx.strokeRect(x-s/2,y-s/2,s,s);
+    if (self) { ctx.strokeStyle = col; ctx.lineWidth = 1.5*z; ctx.beginPath(); ctx.arc(x,y,(main ? 10 : 9)*z,0,Math.PI*2); ctx.stroke(); }
+    ctx.font = Math.round(12 * z) + "px " + face;
+    ctx.fillStyle = col; const label = b.name; const tw = ctx.measureText(label).width;
     const lx = x + tw + 12 * z > W ? x - tw - 8 * z : x + 8 * z; ctx.fillText(label, lx, y - 6 * z);
   });
-  ctx.fillStyle = cssVar("--muted"); ctx.font = Math.round(10 * z) + "px " + face;
-  ctx.fillText(cloudRouteCaption(state.doctor), 8, H - 8 * z);
+  drawTelegram(ctx, now, W, H);
+}
+
+/* Models and Battery share a panel; switching only hides content, so drafts and focus survive polling. */
+function selectResourceTab(name, focus = false) {
+  document.querySelectorAll("[data-resource-tab]").forEach(tab => {
+    const selected = tab.dataset.resourceTab === name;
+    tab.setAttribute("aria-selected", String(selected)); tab.tabIndex = selected ? 0 : -1; tab.classList.toggle("sel", selected);
+    document.getElementById(tab.getAttribute("aria-controls")).hidden = !selected;
+    if (selected && focus) tab.focus();
+  });
+}
+document.addEventListener("keydown", e => {
+  const tab = e.target.closest && e.target.closest("[data-resource-tab]"); if (!tab || !["ArrowLeft","ArrowRight","Home","End"].includes(e.key)) return;
+  e.preventDefault(); selectResourceTab(e.key === "Home" ? "models" : e.key === "End" ? "battery" : tab.dataset.resourceTab === "models" ? "battery" : "models", true);
+});
+const telegramObserved = new Map(); const telegramPulses = []; let telegramBases = [];
+function telegramRoutes(bases) {
+  return bases.filter(b => b.channelFresh && b.online && b.status === "enrolled" && b.channel && ["local","local-fallback","via-main"].includes(b.channel.mode));
+}
+function observeTelegram(bases, now = performance.now()) {
+  telegramBases = bases;
+  for (const b of bases) {
+    const c = b.channel; const d = c && c.lastDelivery;
+    const events = [
+      {key:b.baseId + ":out", stamp:d ? d.at + ":" + d.route + ":" + d.result : "", at:d && d.at, accepted:d && d.result === "accepted", baseId:d && d.route === "main" ? c.destination : b.baseId, direction:"outbound"},
+      {key:b.baseId + ":in", stamp:c && c.lastReceived || "", at:c && c.lastReceived, accepted:!!(c && c.lastReceived), baseId:b.baseId, direction:"inbound"}
+    ];
+    for (const event of events) {
+      const previous = telegramObserved.get(event.key); telegramObserved.set(event.key, event.stamp);
+      if (previous === undefined || previous === event.stamp || !event.accepted || !telegramRoutes([b]).length || Date.now() - Date.parse(event.at) > 90000 || Date.parse(event.at) - Date.now() > 120000) continue;
+      telegramPulses.push({baseId:event.baseId,direction:event.direction,t0:now});
+    }
+  }
+  const routes = telegramRoutes(bases);
+  document.getElementById("topo").setAttribute("aria-label", "Map: square bases (larger for main), a larger circle for this base, and a small round Midori (Telegram) channel; " + routes.length + " reported Telegram routes. Phone receipt unknown.");
+}
+function telegramApiState(base, now = Date.now()) {
+  if (!base || !base.online || !base.channelFresh || !base.channel) return "unknown";
+  const c = base.channel;
+  if (c.mode === "via-main" && c.polling === false) return "standby";
+  const age = c.api ? now - Date.parse(c.api.at) : Infinity;
+  return age >= -120000 && age < 90000 ? c.api.state : "unknown";
+}
+function drawTelegram(ctx, now, W, H) {
+  const routes = telegramRoutes(telegramBases); const x = W - 36, y = H * 0.65;
+  const origins = new Set(routes.map(b => b.channel.mode === "via-main" ? b.channel.destination : b.baseId));
+  const color = status => cssVar(status === "responding" ? "--info" : status === "failed" ? "--warn" : "--muted");
+  const channelById = id => telegramBases.find(b => b.baseId === id);
+  ctx.lineWidth = 1; ctx.globalAlpha = 0.7;
+  origins.forEach(id => { const base = BASES.find(b => b.id === String(id).toLowerCase()); if (!base) return;
+    const [bx,by] = map.proj([base.lon,base.lat]); const api = telegramApiState(channelById(id)); ctx.strokeStyle = color(api); ctx.setLineDash(api === "responding" ? [] : [2,3]); ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(x,y); ctx.stroke(); ctx.setLineDash([]);
+  });
+  ctx.globalAlpha = 1;
+  for (let i = telegramPulses.length - 1; i >= 0; i--) {
+    const pulse = telegramPulses[i]; const t = (now - pulse.t0) / 1500;
+    if (t > 1) { telegramPulses.splice(i,1); continue; }
+    const base = BASES.find(b => b.id === String(pulse.baseId).toLowerCase()); if (!base || !origins.has(pulse.baseId)) continue;
+    const [bx,by] = map.proj([base.lon,base.lat]); ctx.fillStyle = cssVar("--ok"); ctx.beginPath(); const progress = pulse.direction === "inbound" ? 1-t : t; ctx.arc(bx+(x-bx)*progress,by+(y-by)*progress,3,0,Math.PI*2); ctx.fill();
+  }
+  const states = [...origins].map(id => telegramApiState(channelById(id)));
+  const status = states.includes("responding") ? "responding" : states.includes("failed") ? "failed" : "unknown";
+
+  ctx.strokeStyle = color(status); ctx.fillStyle = cssVar("--panel"); ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.font = "11px " + (cssVar("--font") || "monospace"); ctx.textAlign = "center"; ctx.fillStyle = color(status); ctx.fillText("Midori",x,y-12); ctx.textAlign = "start";
 }
 
 /* ================= EVA heartbeats ================= */
@@ -902,6 +961,7 @@ setInterval(() => {
 }, 1000);
 // Mesh traffic: every pair of bases talks (heartbeats, memory sync), not only through Tokyo-3.
 setInterval(() => {
+  if (LIVE) return;
   const up = LINKS.filter(([a, b]) => [a, b].every(id => BASES.find(x => x.id === id).status !== "offline"));
   if (!up.length) return; const [a, b] = up[Math.floor(Math.random() * up.length)];
   if (Math.random() < 0.5) sendPacket(a, b, "sync"); else sendPacket(b, a, "sync");
@@ -920,7 +980,8 @@ document.addEventListener("click", e => {
   if (t.dataset.lf) { state.logFilter = t.dataset.lf; t.parentNode.querySelectorAll(".btn").forEach(b => b.classList.toggle("on", b === t)); renderLog(); return; }
   if (t.dataset.f) { state.filter = t.dataset.f; document.querySelectorAll("#p-sorties .filters .btn").forEach(b => { b.classList.toggle("on", b.dataset.f === state.filter); b.setAttribute("aria-pressed", String(b.dataset.f === state.filter)); }); renderSorties(); return; }
   if (t.id === "sorties-more" && LIVE) { window.liveOlder(); return; }
-  if (t.dataset.go) { document.getElementById(t.dataset.go).scrollIntoView({ behavior:"smooth", block:"start" }); return; }
+  if (t.dataset.resourceTab) { selectResourceTab(t.dataset.resourceTab); return; }
+  if (t.dataset.go) { if (t.dataset.go === "p-budget") selectResourceTab("battery"); document.getElementById(t.dataset.go).scrollIntoView({ behavior:"smooth", block:"start" }); return; }
   if (t.dataset.spear && LIVE) { window.liveSpear(t.dataset.spear); return; }
   if (t.dataset.spear) { const s = state.sorties.find(x => x.id === t.dataset.spear); state.approvals.filter(a => a.sortie === s.id).forEach(a => decide(a.id, "reject")); if (s.status === "active") { s.status = "stood-down"; s.outcome = "Spear"; finish(s); } log("Spear " + s.id + ": grants revoked · happened: " + (s.happened.map(h => h.tool).join(", ") || "none"), "danger", s); renderAll(); return; }
   if (t.dataset.stagetab) { const [sec, k] = t.dataset.stagetab.split(":"); state.tabs = Object.assign({}, state.tabs, { [sec]:k }); renderMelons(); renderSkills(); return; }
@@ -1030,3 +1091,5 @@ if (LIVE) { state = freshState(); state.upcoming = []; BASES.splice(1); LINKS.le
   if (prefs.crt === true) setCrt(true);
   setTheme(old ? old[0] : t, q.get("mode") || (old ? old[1] : prefs.mode), q.get("accent") || (old ? old[2] : prefs.accent)); }
 initMap(); requestAnimationFrame(frame);
+
+new ResizeObserver(() => { void initMap(); }).observe(document.querySelector(".mapwrap"));
