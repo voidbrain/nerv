@@ -1659,3 +1659,38 @@ Closed records in closing-date order. Dated evidence, not current status.
 </details>
 
 ---
+
+
+### B-029
+
+**The kaji.run test timed out once in CI: the two test bases never exchanged their offers**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: robust-wait acceptance and merged CI passed.
+
+| | |
+|---|---|
+| **Issue** | CI 2026-11-06 on PR #148 (run 42140503183, attempt 1, validate under coverage): test/kaji-run.test.ts:45 waited 15 s for `remoteOffers()` to list NERV-02 and timed out (the test took 16.5 s). The rerun passed, as do local runs under coverage (3 of 3, under 1 s each) and CI on #146 and #147. Hypotheses: a port taken between `freePort` and listen, or a first connection lost with no retry within the window. Not confirmed. |
+| **Reproduce** | Run test/kaji-run.test.ts repeatedly on a loaded machine or in CI. |
+| **Check** | The cause is named and fixed, or the wait made robust with a test for it; when it times out, the error says what each link saw (connected, offers heard). |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-06 in [PR #155](https://github.com/voidbrain/nerv/pull/155) on the recorded robust-wait acceptance path after [PR #154 CI](https://github.com/voidbrain/nerv/actions/runs/42220503857) passed validate, windows and native-macos (ci:status). Implemented in [PR #154](https://github.com/voidbrain/nerv/pull/154): replaced two independent free-port probes with a pair of held reservations, released immediately before concurrent link startup: the fixture cannot allocate the same port twice. Retain each link's recent logs, heard offers and both runtime base snapshots; every wait includes that state on timeout (including failed diagnostic reads). The integration deliberately starts with no advertised offers, then waits for a later real heartbeat to supply them. Separate regressions prove the reservations remain bound/distinct and timeout text retains the observed state. This follows the Check's robust-wait alternative: the historical CI cause is still unconfirmed; reservation release cannot prevent every external port race, which will now have listener diagnostics. Ten of ten local repetitions with coverage passed; full suite passed (191 passed, one systemd-only skip), alongside typecheck, build, conventions, integrations and backlog checks. No remaining required checks.
+
+**Estimates:** No remaining effort; ~100% complete. Reassessed 2026-11-06 after robust-wait regressions, ten coverage repetitions, full suite and merged CI passed.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #154](https://github.com/voidbrain/nerv/pull/154); original [CI run 42140503183](https://github.com/voidbrain/nerv/actions/runs/42140503183) (attempt 1 failed, attempt 2 green) |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-06 Unit/integration: test/kaji-run.test.ts passed (4 tests), 10/10 repeated runs under coverage passed, full suite passed (191 passed, one systemd-only skip); merged PR #154 CI run 42220503857 passed validate, windows and native-macos |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
