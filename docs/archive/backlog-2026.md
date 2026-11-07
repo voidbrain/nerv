@@ -2514,7 +2514,7 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 |---|---|
 | Depends on | [voidbrain/project-harness:F-045](https://github.com/voidbrain/project-harness/blob/v4.0.0/docs/BACKLOG.md#f-045) — Published v4.0.0 release |
 | Queue order | 1 — Owner-requested harness adoption before further backlog implementation |
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner instruction 2026-11-07; published upstream v4.0.0, PRs #77/#78 |
+| PR / evidence | [PR #195](https://github.com/voidbrain/nerv/pull/195) adoption closure;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner instruction 2026-11-07; published upstream v4.0.0, PRs #77/#78 |
 | Opened | 2026-11-07 |
 | Verification | 2026-11-07: typecheck and build passed; baseline suite 261 passed, one platform skip. Backlog, queue, dependencies, roadmap, recaps, rules, conventions, integrations and maintenance checks passed. Review: separate context verified copied-tool fidelity, archive preservation and scope; missing queue input and estimate prose corrected, re-review reports no remaining findings. PR #194 CI runs 42398004525/42398009143 passed every job. |
 | Reviewed | 2026-11-07 |
