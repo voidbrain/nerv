@@ -2375,7 +2375,7 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #187](https://github.com/voidbrain/nerv/pull/187) harness adoption and dependency links |
+| PR / evidence | [PR #188](https://github.com/voidbrain/nerv/pull/188) closure reconciliation;  [PR #187](https://github.com/voidbrain/nerv/pull/187) harness adoption and dependency links |
 | Opened | 2026-11-07 |
 | Verification | Documentation: 2026-11-07, fresh-context adoption review found no actionable issues. Script: 2026-11-07, typecheck/build, 240 tests (one platform skip), browser/axe and static/ledger checks passed locally. Remote CI: 2026-11-07, runs 42373292192/42373290475 all passed including native tests/package. SBOM artifact: official schema and formats passed, 389 components. |
 | Reviewed | 2026-11-07 |
