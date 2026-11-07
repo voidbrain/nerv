@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 29 | 37 |
+| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 30 | 37 |
 <!-- archive-recap:end -->
 
 <a id="archive-week-2026-11-02"></a>
@@ -2303,6 +2303,40 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 | PR / evidence | [PR #182](https://github.com/voidbrain/nerv/pull/182) bounded histories/admission and acceptance; [PR #3](https://github.com/voidbrain/nerv/pull/3) runtime; [PR #5](https://github.com/voidbrain/nerv/pull/5) bounded native feeds; [PR #6](https://github.com/voidbrain/nerv/pull/6) lightweight status, CI green at merge `df0a52f` |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-07 Unit/integration: bounded-history, admission/timeout/migration and sustained CLI load checks passed; three headless lifecycle cases passed, one Windows-only skip. Browser/accessibility: bilingual pages, focus and axe passed. [Scoped acceptance](../acceptance/runtime-2026-11-07.md) records measurements and limits. Full suite: 236 passed, one platform skip. Review: separate fresh-context reviewer found migration, timeout admission, timestamp/count race and focus issues; all fixed with regressions, no remaining blockers. PR #182 merged as 93114f8; runs [42353402738](https://github.com/voidbrain/nerv/actions/runs/42353402738) and [42353398574](https://github.com/voidbrain/nerv/actions/runs/42353398574) passed validate, windows and native-macos. Closed 2026-11-07; closure reconciliation [PR #183](https://github.com/voidbrain/nerv/pull/183). |
+| Reviewed | 2026-11-07 |
+
+</details>
+
+---
+
+### F-067
+
+**Bill of materials: dependencies, models and MCP servers in CycloneDX**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-07: implementation and every recorded acceptance check passed.
+
+| | |
+|---|---|
+| **Issue** | What NERV runs on changes without a commit: Ollama models per role, the cloud model, MCP servers and their fingerprints. Nothing records them in a standard, comparable form, and the npm dependency list is not published either. |
+| **Reproduce** | Ask which model answered as Casper last week, or which MCP server version a grant pinned on a given day: only live config and scattered events answer. |
+| **Check** | CI attaches a [CycloneDX](https://owasp.org/www-project-cyclonedx/) SBOM of the locked npm dependencies (`npm sbom --sbom-format cyclonedx`). `nerv bom` (or a doctor section) writes a CycloneDX document of this base's configured models (role, route, name, digest when Ollama reports one) and granted MCP servers (name, fingerprint, effect class), with no keys, tokens or owner data; a test validates it against the CycloneDX schema and checks a secret never appears. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Runtime inventory implemented as `nerv bom`: allowlisted configuration only, optional local Ollama digests, granted MCP services, no server execution or credential reads. CI publishes npm lock-only CycloneDX dependency inventory; official schema and real CLI privacy regressions added. All local and remote checks passed; the downloaded CI artifact was inspected and validated. Owner selected implementation after F-013 (2026-11-07). Proposed 2026-11-07 from the OWASP review (see F-065). Two slices: the CI dependency SBOM (tooling, tiny), then the runtime models and services document. The runtime part is also the input F-063 needs to report the model that actually answered.
+
+**Estimates:** Small completed scope; ~100% complete. Reassessed 2026-11-07: runtime CLI and dependency artifact implemented; local validation, independent review and remote CI/artifact acceptance passed; no remaining work.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #183](https://github.com/voidbrain/nerv/pull/183) implementation/schema/privacy tests; [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
+| Opened | 2026-11-07 |
+| Verification | 2026-11-07 Unit/integration: 239 passed, one platform skip; official CycloneDX 1.5/1.6 schema and format validation, exact locked versions, real CLI/fake Ollama, unavailable-provider behavior and secret/owner-data sentinels passed. Typecheck/build, Chrome bilingual paging/focus/axe, three headless integration cases (one Windows skip) and static/record checks passed. Review: separate fresh-context reviewer found disabled-route state, archive links and ignored formats; fixed with regressions, final review found no remaining blockers. PR #183 merged as 04a8e44; runs [42354533567](https://github.com/voidbrain/nerv/actions/runs/42354533567) and [42354530104](https://github.com/voidbrain/nerv/actions/runs/42354530104) passed validate, windows and native-macos. Downloaded dependency-sbom artifact from 42354530104: 389 components, official CycloneDX 1.5 schema/formats and exact direct locked versions passed. Closed 2026-11-07; closure reconciliation [PR #184](https://github.com/voidbrain/nerv/pull/184). Historical per-call identity/usage remains F-063, outside this configuration inventory. |
 | Reviewed | 2026-11-07 |
 
 </details>
