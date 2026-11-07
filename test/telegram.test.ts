@@ -118,12 +118,12 @@ test('Hyuga\'s brief goes into the inbox once a day, Telegram delivers it from t
  try{
   await runtime.ready();await runtime.add('Rinnovare assicurazione',new Date(Date.now()+3_600_000).toISOString());
   await aoba.start(100);runtime.startBrief(schedule,undefined,100);
-  await until(()=>tg.sent().some(m=>/Buongiorno/.test(m.text)));
-  const brief=tg.sent().find(m=>/Buongiorno/.test(m.text))!.text;assert.match(brief,/^☀️ Buongiorno/,'sent as the brief, not as a reminder');assert.match(brief,/In scadenza nelle prossime 24 h: 1\n• .*Rinnovare assicurazione/);
+  await until(()=>tg.sent().some(m=>/Il brief di Hyuga/.test(m.text)));
+  const brief=tg.sent().find(m=>/Il brief di Hyuga/.test(m.text))!.text;assert.match(brief,/^☀️ (?:Buongiorno\. |Buon pomeriggio\. |Buonasera\. )?Il brief di Hyuga/,'sent as the brief, not as a reminder');assert.match(brief,/In scadenza nelle prossime 24 h: 1\n• .*Rinnovare assicurazione/);
   const page=await runtime.inboxPage(0,20);assert.deepEqual(page.items.filter(i=>i.kind==='brief').length,1,'kept in the inbox');
   await wait(400);await aoba.stop();await runtime.close();
   runtime=new Runtime(join(home,'nerv.sqlite'));await runtime.ready();aoba=channel();await aoba.start(100);runtime.startBrief(schedule,undefined,100);await wait(600);
-  assert.equal(tg.sent().filter(m=>/Buongiorno/.test(m.text)).length,1,'one brief per day, even after a restart of both');
+  assert.equal(tg.sent().filter(m=>/Il brief di Hyuga/.test(m.text)).length,1,'one brief per day, even after a restart of both');
  }finally{await aoba.stop();await runtime.close();await tg.close();rmSync(home,{recursive:true,force:true});}
 });
 test('on the upgrade day a brief Telegram already sent the old way is not sent again',async()=>{

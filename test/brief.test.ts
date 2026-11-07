@@ -68,3 +68,18 @@ test('through the scheduler process: every sortie closed since the last brief is
   assert.deepEqual(facts.closed,{done:59,failed:3});assert.equal(facts.sorties.length,3,'the failures are named');assert.equal(facts.unavailable,undefined);
  }finally{await runtime.close();rmSync(home,{recursive:true,force:true});}
 });
+
+test('B-041: a delayed brief greets using the owner time zone at composition, including evening and midnight',()=>{
+ for(const [iso,timeZone,en,it] of [
+  ['2030-01-15T11:00:00Z','Europe/Rome','Good afternoon','Buon pomeriggio'],
+  ['2030-01-15T17:00:00Z','Europe/Rome','Good evening','Buonasera'],
+  ['2030-01-15T17:00:00Z','America/New_York','Good afternoon','Buon pomeriggio'],
+  ['2030-01-15T23:00:00Z','Europe/Rome','Hyuga\'s brief','Il brief di Hyuga'],
+ ] as const){
+  for(const [language,greeting] of [['en',en],['it',it]] as const){
+   const text=composeBrief({now:new Date(iso),timeZone,language,base:'Example base',...facts});
+   assert.ok(text.split('\n')[0]!.includes(greeting),`${iso} ${timeZone} ${language}: ${greeting}`);
+   assert.doesNotMatch(text.split('\n')[0]!,/Good morning|Buongiorno/);
+  }
+ }
+});

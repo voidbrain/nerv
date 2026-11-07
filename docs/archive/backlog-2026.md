@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 34 | 37 |
+| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 35 | 37 |
 <!-- archive-recap:end -->
 
 <a id="archive-week-2026-11-02"></a>
@@ -2481,6 +2481,42 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 | PR / evidence | [PR #193](https://github.com/voidbrain/nerv/pull/193) verified closure reconciliation; [PR #192](https://github.com/voidbrain/nerv/pull/192) durable schedule recovery, atomic outcomes, channel/language acceptance and independent P1 review; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks; [PR #11](https://github.com/voidbrain/nerv/pull/11) (model routes); [PR #24](https://github.com/voidbrain/nerv/pull/24) (roles, reload); [PR #28](https://github.com/voidbrain/nerv/pull/28) (Misato loop); [PR #30](https://github.com/voidbrain/nerv/pull/30) (no-route message); [PR #32](https://github.com/voidbrain/nerv/pull/32) (Aoba, Telegram); [PR #33](https://github.com/voidbrain/nerv/pull/33) (system certificates); [PR #37](https://github.com/voidbrain/nerv/pull/37) (conversation, bulk cancel, nerv); [PR #38](https://github.com/voidbrain/nerv/pull/38) (daily brief) |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-07 Unit/integration: model privacy/no-cloud-fallback, real-process bilingual Telegram requests, failed delivery/checkpoint/restart recovery, scheduled failure/backoff/restart/recovery, no-exchange skip, stale completion fencing and atomic episode/outcome persistence passed focused tests. Final local checks: full suite 261 passed, one platform skip; build/typecheck, Chrome/axe including /dashboard navigation restoration, three headless lifecycle cases (one Windows-only skip), rules/conventions/integration/ledger checks passed. Final brief truncation assertion passed separately. Human: 2026-11-04, recorded owner Ollama Italian/English gated requests and Telegram message/reply/reminder arrival passed; no new real-phone or paid-provider send is claimed. Review: independent fresh-context P1 review identified episode/outcome crash gap and retained failure reason; both fixed and re-reviewed without remaining blockers. Remote CI: 2026-11-07 runs 42379685099/42379679262 passed validate, windows and native-macos. |
+| Reviewed | 2026-11-07 |
+
+</details>
+
+---
+
+### F-069
+
+**Adopt harness 4.0 remaining-effort records and work queue**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />None: published release adopted, review and all CI checks passed.
+
+| | |
+|---|---|
+| **Issue** | Owner requested removing redundant completion percentages, retaining honest remaining-work estimates, and adopting a reusable queue with explicit record prioritization and visible reasons. |
+| **Reproduce** | Choose the next task across record priorities, remaining effort, roadmap placements, prerequisites and human decisions. |
+| **Check** | Reconcile published harness 4.0.0; migrate active records while preserving scope/rationale/evidence and historical archives; adopt and validate the read-only queue with per-record order/reason and roadmap context. No weighted score or status/permission inference. Project checks, independent review and green CI; then continue ready records. |
+
+<details>
+<summary>Next action, estimate and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-07 after PR #194 runs 42398004525/42398009143 passed every validate, Windows and macOS job.  Published upstream v4.0.0 at bdec31f after PR #77 CI 42397531754 and PR #78 CI 42397672129 passed. Copied files reconciled from the tag; active records migrated without changing historical archives. NERV owns only adoption and project-specific migration. The upstream release owns its tests and acceptance and does not wait for NERV. After adoption, continue B-021/F-029 agent-executable acceptance using queue context and current evidence.
+
+**Estimates:** Small remaining effort, provisionally 2–6 hours including project migration and validation, assuming clean reconciliation. Reassessed 2026-11-07: implementation complete; independent review and project CI passed; no remaining adoption work.
+
+| Field | Value |
+|---|---|
+| Depends on | [voidbrain/project-harness:F-045](https://github.com/voidbrain/project-harness/blob/v4.0.0/docs/BACKLOG.md#f-045) — Published v4.0.0 release |
+| Queue order | 1 — Owner-requested harness adoption before further backlog implementation |
+| PR / evidence | [PR #195](https://github.com/voidbrain/nerv/pull/195) adoption closure;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner instruction 2026-11-07; published upstream v4.0.0, PRs #77/#78 |
+| Opened | 2026-11-07 |
+| Verification | 2026-11-07: typecheck and build passed; baseline suite 261 passed, one platform skip. Backlog, queue, dependencies, roadmap, recaps, rules, conventions, integrations and maintenance checks passed. Review: separate context verified copied-tool fidelity, archive preservation and scope; missing queue input and estimate prose corrected, re-review reports no remaining findings. PR #194 CI runs 42398004525/42398009143 passed every job. |
 | Reviewed | 2026-11-07 |
 
 </details>
