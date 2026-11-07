@@ -66,7 +66,7 @@ Model calls retain provider-reported tokens, requested and returned models, dura
 
 ## Working on it
 
-Read [AGENTS.md](AGENTS.md), [area notes](docs/agents/areas.md), [style guide](docs/STYLE-GUIDE.md) and [backlog rules](docs/BACKLOG-RULES.md). Harness adopted from published v3.4.0. No dedicated Node profile exists upstream; see F-001. The local adoption is a starting baseline, not proof of live device acceptance or a complete personal assistant.
+Read [AGENTS.md](AGENTS.md), [area notes](docs/agents/areas.md), [style guide](docs/STYLE-GUIDE.md) and [backlog rules](docs/BACKLOG-RULES.md). Harness adopted from published v4.0.0. Remaining effort and the [derived work queue](docs/agents/backlog-queue.md) guide task selection; explicit record ordering never bypasses prerequisites or human decisions. No dedicated Node profile exists upstream; see F-001. The local adoption is a starting baseline, not proof of live device acceptance or a complete personal assistant.
 
 The dashboard groups model controls and Battery in two tabs. Its map shows Midori (Telegram) API status separately from message activity and phone receipt. Each configured bot accepts owner messages even while inbox delivery routes through main. `/status`, `/status BASE-ID-or-name` and `/help` answer from recorded state without a model; other commands are listed as unsupported until F-056 is completed. Angular CLI analytics is disabled in this workspace.
 

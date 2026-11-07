@@ -16,6 +16,8 @@ jobs:
       - run: npm ci
       - name: Backlog prerequisites and generated unlocks
         run: npm run check:dependencies
+      - name: Backlog work queue
+        run: npm run check:queue
 
       - name: Locked dependency SBOM
         run: npm sbom --package-lock-only --sbom-format cyclonedx > dependencies.cdx.json

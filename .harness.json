@@ -3,7 +3,7 @@
     "path": "../harness-template",
     "repo": "https://github.com/voidbrain/project-harness"
   },
-  "version": "3.5.0",
+  "version": "4.0.0",
   "stacks": [
     "core",
     "angular"
@@ -34,7 +34,8 @@
     "tools/check-rules.mjs": "core/tools/check-rules.mjs",
     "docs/agents/change-impact.md": "core/docs/agents/change-impact.md",
     "docs/agents/coverage-guide.md": "core/docs/agents/coverage-guide.md",
-    "tools/backlog-dependencies.mjs": "core/tools/backlog-dependencies.mjs"
+    "tools/backlog-dependencies.mjs": "core/tools/backlog-dependencies.mjs",
+    "tools/backlog-queue.mjs": "core/tools/backlog-queue.mjs"
   },
   "forked": {},
   "freshness": {
@@ -230,6 +231,20 @@
       "then": "Regenerate linked prerequisites and reverse Unlocks while preserving historical archive records.",
       "run": "npm run backlog:dependencies",
       "checked": "npm run check:dependencies in CI validate"
+    },
+    {
+      "id": "backlog-queue",
+      "when": [
+        "docs/BACKLOG.md",
+        "docs/archive/backlog-*.md",
+        "docs/ROADMAP.md",
+        "tools/backlog-queue.mjs",
+        ".harness.json",
+        "tools/backlog-dependencies.mjs"
+      ],
+      "then": "Regenerate the transparent work queue from authored records and roadmap context.",
+      "run": "npm run backlog:queue",
+      "checked": "npm run check:queue in CI validate"
     }
   ],
   "couplings": [
@@ -479,5 +494,8 @@
       "release": "v7.0.2",
       "sha": "cf430e030ddbb5b0abf93d22962f4752f3646cd9"
     }
+  },
+  "workQueue": {
+    "roadmap": "docs/ROADMAP.md"
   }
 }

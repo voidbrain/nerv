@@ -34,12 +34,10 @@ for (let i = 0; i < headings.length; i++) {
   const block = text.slice(headings[i].index, headings[i + 1]?.index ?? text.length);
   const row = block.split('\n').find(line => line.startsWith('|') && Object.values(cues).includes(cells(line)[0]));
   assert(row, `${id}: missing summary`);
-  const [signal, priority, status, effort, complete] = cells(row);
-  assert.equal(cells(row).length, 5, `${id}: summary needs five columns`);
+  const [signal, priority, status, effort] = cells(row);
+  assert.equal(cells(row).length, 4, `${id}: summary needs four columns (remove completion percentages)`);
   assert(/^\*\*[^\n]+\*\*$/m.test(block.slice(0, block.indexOf('|'))), `${id}: missing visible bold title`);
   assert(['🟢 Small', '🟡 Medium', '🔴 Large'].includes(effort), `${id}: effort needs colour and word`);
-  assert(/^~(?:0|[1-9]0|100)%$/.test(complete), `${id}: completion needs ~N% in steps of 10`);
-  assert(complete !== '~100%' || ['Verified', 'Closed'].includes(status), `${id}: pending acceptance prevents 100%`);
   assert.equal(signal, cues[status], `${id}: status cue mismatch`);
   const level = priority.match(/P([123])$/)?.[1];
   assert(level, `${id}: missing priority`);
@@ -56,7 +54,7 @@ for (let i = 0; i < headings.length; i++) {
   const detail = block.match(/<details>\s*<summary>[^<]+<\/summary>([\s\S]*?)<\/details>/);
   assert(detail, `${id}: missing/broken metadata details`);
   assert(block.indexOf('**Next action') > block.indexOf('<details>') && block.indexOf('**Next action') < block.indexOf('</details>'), `${id}: next action must be inside details`);
-  assert(/\*\*Estimates:\*\* .+/.test(detail[1]), `${id}: explain effort and completion estimates in details`);
+  assert(/\*\*Estimates:\*\* .+/.test(detail[1]), `${id}: explain remaining effort and its rationale in details`);
   const visible = block.slice(0, block.indexOf('<details>'));
   assert(['**Issue**', '**Reproduce**', '**Check**'].every(k => visible.includes(k)), `${id}: recap must stay visible`);
   assert(block.indexOf('**→ Human action') < block.indexOf('<details>'), `${id}: human action hidden in details`);
@@ -130,4 +128,4 @@ if (prNumber) {
 // a workflow command's message escapes %, CR and LF
 const annotate = (text) => text.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A');
 for (const w of warnings) console.log(process.env.GITHUB_ACTIONS ? `::warning title=Backlog::${annotate(w)}` : `! ${w}`);
-console.log(`${ids.size} backlog records passed: signal, estimates, visible recap, collapsed actions, metadata, dates, cues and table widths${published.length ? `; the archives keep every line their ${published.length} file(s) have on ${branch}` : ''}.`);
+console.log(`${ids.size} backlog records passed: signal, remaining effort, visible recap, collapsed actions, metadata, dates, cues and table widths${published.length ? `; the archives keep every line their ${published.length} file(s) have on ${branch}` : ''}.`);
