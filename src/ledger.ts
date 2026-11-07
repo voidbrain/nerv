@@ -264,6 +264,12 @@ export class Ledger {
   if(!Number.isInteger(limit)||limit<1||limit>20)throw new Error('Invalid approval page.');
   return (this.db.prepare('SELECT id,card,expires,decision FROM approvals WHERE decision IS NULL AND expires>? ORDER BY expires LIMIT ?').all(iso(now),limit) as {id:string;card:string;expires:string;decision:null}[]).map(r=>({...r,card:JSON.parse(r.card) as Card}));
  }
+ /** Authoritative point lookup: absence from a limited pending page is not a decision. */
+ pendingApprovalIds(ids:string[],now=new Date()):string[] {
+  if(!Array.isArray(ids)||ids.length>200||new Set(ids).size!==ids.length||ids.some(id=>typeof id!=='string'||!/^[a-f0-9-]{36}$/.test(id)))throw new Error('Invalid approval IDs.');
+  if(!ids.length)return [];
+  return (this.db.prepare(`SELECT id FROM approvals WHERE id IN (${ids.map(()=>'?').join(',')}) AND decision IS NULL AND expires>?`).all(...ids,iso(now)) as {id:string}[]).map(r=>r.id);
+ }
  /** Applied once: repeating a decision returns the first outcome. Expiry never approves. */
  decide(approvalId:string,decision:Decision,source:string,now=new Date()):{decision:string;grantId?:string} {
   if(!['approve','reject','edit'].includes(decision)||typeof source!=='string'||!source||source.length>100)throw new Error('Invalid decision.');

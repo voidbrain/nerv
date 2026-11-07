@@ -31,12 +31,12 @@ Depends on names a required outcome; Unlocks lists direct dependents, not verifi
 | [F-026](../BACKLOG.md#f-026) | — | — |
 | [F-027](../BACKLOG.md#f-027) | — | — |
 | [F-028](../archive/backlog-2026.md#f-028) | — | [F-054](../BACKLOG.md#f-054), [F-056](../BACKLOG.md#f-056) |
-| [F-029](../BACKLOG.md#f-029) | — | [F-045](../BACKLOG.md#f-045) |
+| [F-029](../archive/backlog-2026.md#f-029) | — | [F-045](../BACKLOG.md#f-045) |
 | [F-036](../archive/backlog-2026.md#f-036) | — | [F-050](../BACKLOG.md#f-050) |
 | [F-042](../BACKLOG.md#f-042) | — | [F-056](../BACKLOG.md#f-056) |
 | [F-043](../BACKLOG.md#f-043) | — | — |
 | [F-044](../BACKLOG.md#f-044) | — | — |
-| [F-045](../BACKLOG.md#f-045) | [F-029](../BACKLOG.md#f-029) — Golden evaluation evidence for pilot promotion; roster and advice work can proceed | [F-049](../BACKLOG.md#f-049), [F-050](../BACKLOG.md#f-050), [F-054](../BACKLOG.md#f-054) |
+| [F-045](../BACKLOG.md#f-045) | [F-029](../archive/backlog-2026.md#f-029) — Golden evaluation evidence for pilot promotion; roster and advice work can proceed | [F-049](../BACKLOG.md#f-049), [F-050](../BACKLOG.md#f-050), [F-054](../BACKLOG.md#f-054) |
 | [F-046](../BACKLOG.md#f-046) | — | — |
 | [F-048](../BACKLOG.md#f-048) | — | [F-050](../BACKLOG.md#f-050) |
 | [F-049](../BACKLOG.md#f-049) | [F-045](../BACKLOG.md#f-045) — Pilot identity and EVA class for per-job execution<br />[F-025](../BACKLOG.md#f-025) — Pilot trust-stage limits for sandbox class admission | [F-021](../BACKLOG.md#f-021) |

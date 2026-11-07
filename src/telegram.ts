@@ -54,7 +54,9 @@ export async function diagnoseNoStart(api:TelegramApi):Promise<string> {
  const kinds=[...new Set(waiting.map(u=>u.message?`a message in a ${u.message.chat.type} chat`:Object.keys(u).filter(k=>k!=='update_id').join(', ')))];
  return `${bot} has ${waiting.length} update(s) waiting, but no /start in a private chat (${kinds.join('; ')}). Type /start yourself in the private chat with ${bot}, then run this again.`;
 }
-interface State {offset?:number;inbox?:{sequence:number;id?:string};cards:string[];/** Before F-028 the brief was sent from here: kept only to read the last one once. */brief?:{date:string;at:string}}
+const rowIds=(rows:Button[][])=>[...new Set(rows.flatMap(row=>row.flatMap(b=>{const id=/(?:^|:)([a-f0-9-]{36})$/.exec(b.callback_data)?.[1];return id?[id]:[];})))];
+interface CardMessage {messageId:number;rows:Button[][];baseId?:string}
+interface State {messages?:CardMessage[];offset?:number;inbox?:{sequence:number;id?:string};cards:string[];/** Before F-028 the brief was sent from here: kept only to read the last one once. */brief?:{date:string;at:string}}
 /** The other bases' votes on a card (F-036 phase 2): veto-only seats; shadow votes are shown, never counted. */
 function peerLine(verdicts:{seat:string;vote:string;shadow?:boolean}[]|undefined):string[] {
  const peers=(verdicts ?? []).filter(v=>v.seat.startsWith('extra:'));if(!peers.length)return [];
@@ -83,7 +85,7 @@ export function decisionText(result:{decision:string;result?:unknown;error?:stri
     it would send goes to the main base's Aoba instead (cards keep their own approvals). */
 export interface OneChannel {destination?():Promise<string|undefined>;quiet():Promise<boolean>;relay(text:string,cards:{id:string;label:string}[]):Promise<boolean>}
 /** On the main base: a tap on a card relayed from another base is decided there. */
-export interface RemoteDecide {decide(baseId:string,approvalId:string,decision:'approve'|'reject'):Promise<string>}
+export interface RemoteDecide {pendingApprovalIds?(baseId:string,ids:string[]):Promise<string[]>;decide(baseId:string,approvalId:string,decision:'approve'|'reject'):Promise<string>}
 export class TelegramChannel {
  readonly api:TelegramApi;readonly store:StoreApi;readonly chatId:number;readonly statePath:string;readonly log:(line:string)=>void;
  private held=new Map<string,{key:string;since:number}>();private readonly one:OneChannel|undefined;private readonly remote:RemoteDecide|undefined;
@@ -107,6 +109,7 @@ export class TelegramChannel {
  /** Everything this base sends on its own (cards, reminders, brief, follow-ups): relayed while quiet, else its own bot; a failed relay falls back to its own bot, so nothing is lost. */
  private async out(text:string,buttons?:Button[][]):Promise<void>{
   const quiet=await this.quiet();
+  if(buttons){buttons=await this.pendingRows(buttons);if(!buttons.length)return;}
   if(quiet){
    const cards=(buttons ?? []).flatMap((row,i,all)=>{const a=row.find(b=>/^a:[a-f0-9-]{36}$/.test(b.callback_data));return a?[{id:a.callback_data.slice(2),label:all.length>1?String(i+1):''}]:[];});
    if(await this.one!.relay(text,cards).catch(()=>false)){this.delivered('main','accepted');return;}
@@ -114,15 +117,71 @@ export class TelegramChannel {
   await this.sendLocal(text,buttons,quiet||this.routeState.destination!==undefined);
  }
  private apiResult(state:'responding'|'failed'){this.routeState={...this.routeState,api:{state,at:new Date().toISOString()}};}
- private async sendLocal(text:string,buttons?:Button[][],fallback=false){
-  try{await this.api.send(this.chatId,text,buttons);this.delivered('local','accepted',fallback);}
-  catch(e){this.delivered('local','failed',fallback);throw e;}
+ private async pendingRows(rows:Button[][],baseId?:string):Promise<Button[][]>{
+  const ids=rowIds(rows);
+  const pending=baseId?await this.remote?.pendingApprovalIds?.(baseId,ids):await this.store.pendingApprovalIds(ids);
+  if(!pending)throw new Error('Approval status unavailable; card delivery deferred.');
+  const keep=new Set(pending);return rows.filter(row=>row.some(b=>keep.has(b.callback_data.split(':').at(-1)!)));
+ }
+ private markupQueue:Promise<void>=Promise.resolve();
+ private markup(messageId:number,rows:Button[][],trackedOnly=false,deadline=Date.now()+3000):Promise<void>{
+  const operation=this.markupQueue.then(async()=>{
+   if(Date.now()>=deadline)return;
+   const current=this.state.messages?.find(m=>m.messageId===messageId);
+   if(trackedOnly&&!current)return;
+   // A stale callback or status response may remove rows, never restore an already removed row.
+   const wanted=new Set(rows.flatMap(row=>row.map(b=>b.callback_data)));
+   const next=current?current.rows.filter(row=>row.some(b=>wanted.has(b.callback_data))):rows;
+   if(current&&JSON.stringify(next)===JSON.stringify(current.rows))return;
+   await this.api.call('editMessageReplyMarkup',{chat_id:this.chatId,message_id:messageId,reply_markup:{inline_keyboard:next}},AbortSignal.timeout(Math.max(1,Math.min(3000,deadline-Date.now()))));
+   this.state.messages=(this.state.messages ?? []).flatMap(m=>m.messageId===messageId?(next.length?[{...m,rows:next}]:[]):[m]);this.save();
+  });
+  this.markupQueue=operation.catch(()=>{});return operation;
+ }
+
+ private cleanup?:Promise<void>;private cleanupCursor=0;
+ private reconcile():Promise<void>{
+  if(this.cleanup)return this.cleanup;
+  this.cleanup=(async()=>{
+   const groups=new Map<string,CardMessage[]>();for(const m of this.state.messages ?? []){const key=m.baseId ?? '';groups.set(key,[...(groups.get(key) ?? []),m]);}
+   const entries=[...groups.entries()],deadline=Date.now()+8000;
+   for(let n=0;n<entries.length&&Date.now()<deadline;n++){
+    const [baseId,messages]=entries[(this.cleanupCursor+n)%entries.length]!;
+    try{
+     const ids=rowIds(messages.flatMap(m=>m.rows));
+     const pending=baseId?await this.remote?.pendingApprovalIds?.(baseId,ids):await this.store.pendingApprovalIds(ids);
+     if(!pending)throw new Error('Approval status unavailable.');const keep=new Set(pending);
+     for(const message of messages){if(Date.now()>=deadline)break;const rows=message.rows.filter(row=>row.some(b=>keep.has(b.callback_data.split(':').at(-1)!)));if(JSON.stringify(rows)!==JSON.stringify(message.rows))await this.markup(message.messageId,rows,true,deadline).catch(e=>this.log(`Telegram card cleanup: ${e instanceof Error?e.message:'failed'}.`));}
+    }catch(e){this.log(`Telegram card cleanup: ${e instanceof Error?e.message:'failed'}.`);}
+   }
+   this.cleanupCursor=(this.cleanupCursor+1)%Math.max(1,entries.length);
+  })().finally(()=>{this.cleanup=undefined;});return this.cleanup;
+ }
+
+ private cardQueue:Promise<void>=Promise.resolve();private cardWaiters=0;
+ private sendLocal(text:string,buttons?:Button[][],fallback=false,baseId?:string):Promise<void>{
+  if(!buttons)return this.sendMessage(text,undefined,fallback,baseId);
+  if(this.cardWaiters>=16)return Promise.reject(new Error('Telegram card queue is full; delivery deferred.'));
+  this.cardWaiters++;const operation=this.cardQueue.then(()=>this.sendMessage(text,buttons,fallback,baseId));
+  this.cardQueue=operation.catch(()=>{});return operation.finally(()=>{this.cardWaiters--;});
+ }
+ private async sendMessage(text:string,buttons?:Button[][],fallback=false,baseId?:string){
+  if(buttons){buttons=await this.pendingRows(buttons,baseId);if(!buttons.length)return;if((this.state.messages ?? []).reduce((n,m)=>n+rowIds(m.rows).length,0)+rowIds(buttons).length>200)throw new Error('Telegram card cleanup backlog is full; delivery deferred.');}
+  try{
+   const message=await this.api.send(this.chatId,text,buttons);this.delivered('local','accepted',fallback);
+   if(buttons?.length){
+    this.state.messages=[...(this.state.messages ?? []),{messageId:message.message_id,rows:buttons,...(baseId?{baseId}:{})}];this.save();
+    // Close this send's race without delaying a relay acknowledgement for unrelated offline bases.
+    try{const rows=await this.pendingRows(buttons,baseId);if(JSON.stringify(rows)!==JSON.stringify(buttons))await this.markup(message.message_id,rows,true);}
+    catch(e){this.log(`Telegram card cleanup: ${e instanceof Error?e.message:'failed'}.`);}
+   }
+  }catch(e){this.delivered('local','failed',fallback);throw e;}
  }
 
  /** On the main base: shows what another base relayed, its cards with buttons that decide on that base. */
  async relayed(fromId:string,fromName:string,relay:{text:string;cards:{id:string;label:string}[]}):Promise<boolean>{
   const buttons=relay.cards.map(c=>[{text:c.label?`✅ ${c.label}`:'✅ Approve once',callback_data:`k:${fromId}:a:${c.id}`},{text:c.label?`❌ ${c.label}`:'❌ Reject',callback_data:`k:${fromId}:r:${c.id}`}]);
-  await this.sendLocal(`🛰 ${fromName} · ${relay.text}`,buttons.length?buttons:undefined);return true;
+  await this.sendLocal(`🛰 ${fromName} · ${relay.text}`,buttons.length?buttons:undefined,false,fromId);return true;
  }
  private state:State={cards:[]};private stopping=new AbortController();private queue:Promise<void>=Promise.resolve();private timer?:NodeJS.Timeout;private delivery?:Promise<void>;
  constructor(options:{api:TelegramApi;store:StoreApi;chatId:number;statePath:string;log?:(line:string)=>void;oneChannel?:OneChannel;remote?:RemoteDecide}) {
@@ -141,7 +200,7 @@ export class TelegramChannel {
   await this.deliver();
  }
  /** Waits for a delivery in progress, so a restart never sends the same reminder twice. */
- async stop(){this.stopping.abort();if(this.timer)clearInterval(this.timer);await Promise.allSettled([this.queue,this.delivery]);}
+ async stop(){this.stopping.abort();if(this.timer)clearInterval(this.timer);await Promise.allSettled([this.queue,this.delivery,this.cardQueue,this.markupQueue]);}
  private owner(id:number|undefined){return id===this.chatId;}
  private async poll():Promise<void> {
   while(!this.stopping.signal.aborted){
@@ -164,7 +223,7 @@ export class TelegramChannel {
     const outcome=await this.remote.decide(far[1]!,far[3]!,far[2]==='a'?'approve':'reject').catch((e:unknown)=>`Not applied: ${far[1]} could not be reached (${e instanceof Error?e.message:'error'}). Try again when it is online.`);
     await this.api.call('answerCallbackQuery',{callback_query_id:q.id,text:outcome.slice(0,180)});
     const rest=(q.message?.reply_markup?.inline_keyboard ?? []).filter(row=>!row.some(b=>b.callback_data.endsWith(':'+far[3])));
-    if(q.message&&!outcome.startsWith('Not applied: '+far[1]+' could not'))await this.api.call('editMessageReplyMarkup',{chat_id:this.chatId,message_id:q.message.message_id,reply_markup:{inline_keyboard:rest}}).catch(()=>{});
+    if(q.message&&!outcome.startsWith('Not applied: '+far[1]+' could not'))await this.markup(q.message.message_id,rest).catch(()=>{});
     await this.sendLocal(`🛰 ${far[1]} · ${outcome}`);return;
    }
    const match=/^([ar]):([a-f0-9-]{36})$/.exec(q.data ?? '');
@@ -175,7 +234,7 @@ export class TelegramChannel {
    const outcome=decisionText(result);
    // Only the decided card's row goes: in a bundle the other facts keep their buttons.
    const rest=(q.message?.reply_markup?.inline_keyboard ?? []).filter(row=>!row.some(b=>b.callback_data.endsWith(':'+match[2])));
-   if(q.message)await this.api.call('editMessageReplyMarkup',{chat_id:this.chatId,message_id:q.message.message_id,reply_markup:{inline_keyboard:rest}}).catch(()=>{});
+   if(q.message&&result.decision!=='error')await this.markup(q.message.message_id,rest).catch(()=>{});
    await this.sendLocal(outcome);
    return;
   }
@@ -202,6 +261,7 @@ export class TelegramChannel {
  }
  private async deliverOnce():Promise<void> {
   try{
+   await this.reconcile();
    const fresh=(await this.store.approvals(20)).filter(a=>!this.state.cards.includes(a.id));
    const sent=(ids:string[])=>{this.state.cards=[...this.state.cards,...ids].slice(-200);this.save();};
    // Fact cards from one sortie go out together, once none has newly appeared for BUNDLE_WAIT_MS.

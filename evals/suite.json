@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "nerv-golden-v1",
+  "id": "nerv-golden-v2",
   "groups": [
     {
       "id": "policy",
@@ -54,15 +54,17 @@
       "id": "channels",
       "files": [
         "test/telegram.test.ts",
-        "test/one-channel.test.ts"
+        "test/one-channel.test.ts",
+        "test/telegram-reconcile.test.ts"
       ],
       "families": [
         "delivery-retry",
         "cross-channel",
         "relay",
-        "owner-authorization"
+        "owner-authorization",
+        "approval-card-reconciliation"
       ],
-      "minimumTests": 15
+      "minimumTests": 17
     },
     {
       "id": "bases",

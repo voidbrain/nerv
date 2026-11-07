@@ -50,8 +50,8 @@ test('one channel: while the main base is online the other base\'s bot is quiet,
  const ta='111:'+'a'.repeat(35),tb='222:'+'b'.repeat(35);const botA=await fakeBot(ta),botB=await fakeBot(tb);
  let aoba:TelegramChannel|undefined;let mainUp=true;let relayWorks=true;
  const la=new KajiLink({baseId:'NERV-01',key:A.privateKey,publicKey:A.publicKey,registry:port(ra),log:()=>{},onRelay:async(from,relay)=>relayWorks?aoba!.relayed(from,from==='NERV-02'?'Tabgha':from,relay):false});
- const lb=new KajiLink({baseId:'NERV-02',key:B.privateKey,publicKey:B.publicKey,registry:port(rb),log:()=>{},onDecide:async(id,d)=>decisionText(sb.decide(id,d,'telegram'))});
- aoba=new TelegramChannel({api:new TelegramApi(ta,botA.base),store:sa as unknown as StoreApi,chatId:OWNER,statePath:join(homeA,'tg.json'),log:()=>{},remote:{decide:(b,id,d)=>la.decide(b,id,d)}});
+ const lb=new KajiLink({baseId:'NERV-02',key:B.privateKey,publicKey:B.publicKey,registry:port(rb),log:()=>{},onPendingApprovals:async ids=>sb.pendingApprovalIds(ids),onDecide:async(id,d)=>decisionText(sb.decide(id,d,'telegram'))});
+ aoba=new TelegramChannel({api:new TelegramApi(ta,botA.base),store:sa as unknown as StoreApi,chatId:OWNER,statePath:join(homeA,'tg.json'),log:()=>{},remote:{pendingApprovalIds:(b,ids)=>la.pendingApprovalIds(b,ids),decide:(b,id,d)=>la.decide(b,id,d)}});
  const tabgha=new TelegramChannel({api:new TelegramApi(tb,botB.base),store:sb as unknown as StoreApi,chatId:OWNER,statePath:join(homeB,'tg.json'),log:()=>{},
   oneChannel:{destination:async()=> 'NERV-01',quiet:async()=>mainUp,relay:(text,cards)=>lb.relay({text,cards})}});
  try{
@@ -67,6 +67,12 @@ test('one channel: while the main base is online the other base\'s bot is quiet,
   await until(()=>botA.sent().some(m=>/^🛰 NERV-02 · Approved/.test(m.text)));
   assert.equal(tabgha.channelState().mode,'via-main');assert.equal(tabgha.channelState().destination,'NERV-01');
   assert.deepEqual([tabgha.channelState().lastDelivery?.route,tabgha.channelState().lastDelivery?.result],['main','accepted']);
+  // B-042: a remote dashboard decision removes the relayed buttons through authenticated status lookup.
+  const staleSortie=sb.ledger.openSortie('owner','Remember another fact','trusted');const stale=sb.runAction(staleSortie,{tool:'memory.remember',args:{text:'Tea at 9'},stage:'production'}).approvalId!;
+  await until(()=>botA.sent().some(m=>m.reply_markup?.inline_keyboard.some(row=>row.some(b=>b.callback_data.endsWith(':'+stale)))),15000);
+  sb.decide(stale,'approve','api');const beforeCleanup=botA.calls.filter(c=>c.method==='editMessageReplyMarkup').length;await aoba.deliver();
+  assert.ok(botA.calls.filter(c=>c.method==='editMessageReplyMarkup').length>beforeCleanup,'remote dashboard decision reconciles the main bot card');
+  assert.deepEqual(await la.pendingApprovalIds('NERV-02',[stale]),[]);sb.decide(stale,'approve','telegram');assert.equal(sb.memory.list().filter(m=>m.text==='Tea at 9').length,1);
   // Main is online but cannot deliver: the existing fallback sends through this base's own bot.
   relayWorks=false;await sb.add('Fallback test',new Date(Date.now()+300).toISOString());sb.tick(new Date(Date.now()+1000));
   // The fake server sees the request before the client processes its accepted response.
@@ -79,6 +85,7 @@ test('one channel: while the main base is online the other base\'s bot is quiet,
   // A forged decision from a base that is not the main one is refused by Tabgha.
   const body=JSON.stringify({approvalId:'0'.repeat(8)+'-0000-4000-8000-'+'0'.repeat(12),decision:'approve'});
   const forged=await fetch(`http://127.0.0.1:${pb}/kaji/decide`,{method:'POST',headers:{'content-type':'application/json',...signedHeaders('NERV-02',B.privateKey,'req','POST','/kaji/decide',body)},body});assert.equal(forged.status,403);
+  const statusBody=JSON.stringify({ids:[stale]});const forgedStatus=await fetch(`http://127.0.0.1:${pb}/kaji/approvals/pending`,{method:'POST',headers:{'content-type':'application/json',...signedHeaders('NERV-02',B.privateKey,'req','POST','/kaji/approvals/pending',statusBody)},body:statusBody});assert.equal(forgedStatus.status,403,'a non-main base cannot query approval status');
   // The main base goes away: Tabgha speaks with its own bot again.
   mainUp=false;await sb.add('Stretch',new Date(Date.now()+300).toISOString());sb.tick(new Date(Date.now()+1000));
   await until(()=>botB.sent().some(m=>/⏰ Stretch/.test(m.text)));assert.equal(tabgha.channelState().mode,'local-fallback');

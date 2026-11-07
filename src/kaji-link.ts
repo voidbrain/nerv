@@ -102,9 +102,9 @@ export class KajiLink {
  private every=HEARTBEAT_MS;
  constructor(options:{baseId:string;key:KeyObject;publicKey:string;registry:RegistryPort;log?:(line:string)=>void;channel?:()=>ChannelState;onChannel?:(baseId:string,channel:HeardChannel|null)=>void;health?:()=>Promise<BaseHealth>;onHealth?:(baseId:string,health:HeardHealth)=>void;
   onRelay?:(from:string,relay:Relay)=>Promise<boolean>;onChat?:(from:string,message:string,conversation?:string)=>Promise<DispatchedReply>;
-  offers?:()=>string[];onOffers?:(baseId:string,offers:string[])=>void;onRun?:(from:string,item:RunItem)=>Promise<unknown>;onVerdict?:(from:string,ask:VerdictAsk)=>Promise<PeerVerdict|null>;onDecide?:(approvalId:string,decision:'approve'|'reject')=>Promise<string>}) {
+  offers?:()=>string[];onOffers?:(baseId:string,offers:string[])=>void;onRun?:(from:string,item:RunItem)=>Promise<unknown>;onVerdict?:(from:string,ask:VerdictAsk)=>Promise<PeerVerdict|null>;onPendingApprovals?:(ids:string[])=>Promise<string[]>;onDecide?:(approvalId:string,decision:'approve'|'reject')=>Promise<string>}) {
   this.baseId=options.baseId;this.key=options.key;this.publicKey=options.publicKey;this.port=options.registry;this.log=options.log ?? (l=>console.error(l));
-  this.channel=options.channel;this.onChannel=options.onChannel;this.health=options.health;this.onHealth=options.onHealth;this.onRelay=options.onRelay;this.onDecide=options.onDecide;this.onChat=options.onChat;this.offers=options.offers;this.onOffers=options.onOffers;this.onRun=options.onRun;this.onVerdict=options.onVerdict;
+  this.channel=options.channel;this.onChannel=options.onChannel;this.health=options.health;this.onHealth=options.onHealth;this.onRelay=options.onRelay;this.onDecide=options.onDecide;this.onPendingApprovals=options.onPendingApprovals;this.onChat=options.onChat;this.offers=options.offers;this.onOffers=options.onOffers;this.onRun=options.onRun;this.onVerdict=options.onVerdict;
  }
  private readonly channel:(()=>ChannelState)|undefined;
  private readonly onChannel:((baseId:string,channel:HeardChannel|null)=>void)|undefined;
@@ -113,6 +113,7 @@ export class KajiLink {
  private readonly onVerdict:((from:string,ask:VerdictAsk)=>Promise<PeerVerdict|null>)|undefined;
  private readonly offers:(()=>string[])|undefined;private readonly onOffers:((baseId:string,offers:string[])=>void)|undefined;private readonly onRun:((from:string,item:RunItem)=>Promise<unknown>)|undefined;
  private readonly onChat:((from:string,message:string,conversation?:string)=>Promise<DispatchedReply>)|undefined;
+ private readonly onPendingApprovals:((ids:string[])=>Promise<string[]>)|undefined;
  private readonly onRelay:((from:string,relay:Relay)=>Promise<boolean>)|undefined;private readonly onDecide:((approvalId:string,decision:'approve'|'reject')=>Promise<string>)|undefined;
  private readonly health:(()=>Promise<BaseHealth>)|undefined;private readonly onHealth:((baseId:string,health:HeardHealth)=>void)|undefined;
  /** This base's health for a heartbeat; a check that fails is itself a degraded reason. Omitted when no check is wired. */
@@ -186,6 +187,12 @@ export class KajiLink {
     if(await this.port.main?.()!==from||!this.onRun){reply(403,{error:'only the main base runs actions here'});return;}
     reply(200,{result:await this.onRun(from,{id:r.id,request:r.request,tool:r.tool,args:r.args as Record<string,unknown>})});return;
    }
+   if(req.method==='POST'&&req.url==='/kaji/approvals/pending'){
+    const value=JSON.parse(body) as {ids?:unknown};
+    if(!Array.isArray(value.ids)||value.ids.length>200||new Set(value.ids).size!==value.ids.length||!value.ids.every(id=>typeof id==='string'&&UUID.test(id))){reply(400,{error:'invalid approval IDs'});return;}
+    if(await this.port.main?.()!==from||!this.onPendingApprovals){reply(403,{error:'only the main base checks cards here'});return;}
+    reply(200,{ids:await this.onPendingApprovals(value.ids)});return;
+   }
    if(req.method==='POST'&&req.url==='/kaji/decide'){
     const d=JSON.parse(body) as {approvalId?:unknown;decision?:unknown};
     if(typeof d.approvalId!=='string'||!UUID.test(d.approvalId)||(d.decision!=='approve'&&d.decision!=='reject')){reply(400,{error:'invalid decision'});return;}
@@ -240,6 +247,14 @@ export class KajiLink {
   const peer=(await this.port.bases()).find(b=>b.baseId===baseId&&b.status==='enrolled');if(!peer)return {vote:'abstain',reason:'not an enrolled base'};
   try{const v=sanitizeVerdict(((await this.call(peer,'POST','/kaji/verdict',ask,timeoutMs)) as {verdict?:unknown}).verdict);return v ?? {vote:'abstain',reason:'no verdict (no local model there, or an unreadable answer)'};}
   catch(e){return {vote:'abstain',reason:e instanceof Error&&/timeout|aborted/i.test(e.message)?'did not answer in time':'could not be reached'};}
+ }
+ /** Authoritative status for relayed cards; an unavailable/older peer leaves cleanup pending. */
+ async pendingApprovalIds(baseId:string,ids:string[]):Promise<string[]> {
+  if(ids.length>200||new Set(ids).size!==ids.length||ids.some(id=>!UUID.test(id)))throw new Error('Invalid approval IDs.');
+  const peer=(await this.port.bases()).find(b=>b.baseId===baseId&&b.status==='enrolled');if(!peer)throw new Error('Not an enrolled base.');
+  const value=await this.call(peer,'POST','/kaji/approvals/pending',{ids},2000) as {ids?:unknown};
+  if(!Array.isArray(value.ids)||value.ids.length>ids.length||!value.ids.every(id=>typeof id==='string'&&ids.includes(id)))throw new Error('Invalid approval status reply.');
+  return value.ids;
  }
  /** Passes the owner's tap on a relayed card back to the base that owns the card; its outcome text comes back. */
  async decide(baseId:string,approvalId:string,decision:'approve'|'reject'):Promise<string> {

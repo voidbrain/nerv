@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 37 | 39 |
+| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 38 | 39 |
 <!-- archive-recap:end -->
 
 <a id="archive-week-2026-11-02"></a>
@@ -2658,5 +2658,41 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 | Reviewed | 2026-11-08 |
 
 </details>
+
+---
+
+### F-029
+
+**Golden sortie eval suite for Casper and pilot promotion**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />None: evaluation feature verified and closed; model-quality failures remain in B-021.
+
+| | |
+|---|---|
+| **Issue** | Watermelon promotion and the Casper seat need regression evidence; a score without a fixed test set means nothing. |
+| **Reproduce** | Run the suite against the deterministic seats and against a recorded model seat; change a policy rule and rerun. |
+| **Check** | Suite covers each effect class, taint, rejects and expiry; deterministic part runs in CI; model-seat runs are recorded with model id and date; results feed F-025 stage evidence. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-08: PR #202 runs 42424820318/42424816395 passed every validate, Windows and native-macos job.  Versioned runner implemented: seven repository-owned policy/ledger/conversation/channel/base/stress/browser groups, append-only JSON evidence, source/input identities, explicit partial/unsupported coverage, bounded repeats and separate local Casper/Misato regression/holdout corpora. Initial full scripted run passed 178 checks; 90 cover seat/effect/taint combinations. New browser case spans real processes for clarification, same-sortie answer, approval effect, duplicate decision and topic change. Scripted execution currently supports POSIX owned process groups; Windows fails closed pending Job Object supervision (ordinary Windows tests and manifest checks remain supported). Frozen source 3c71986: full scripted suite 178 passed, repeated stress 24 passed, Casper 8/8 passed, Misato 4/5 passed with the topic-change holdout retained under B-021. Independent runner review has no remaining blockers. See docs/evaluations/README.md and dated reports. CI acceptance passed. Eval results feed stage review but do not promote or rewrite production.  Latest owner instruction 2026-11-07 resumes F-029 and sequences F-029 → B-042 after the current corrections; it supersedes the earlier pause.  Owner extension 2026-11-07: enumerate every flow branch and bounded reloop, all counted/shadow MAGI vote combinations (including opposing and changing seats), clarification, contradiction, mind changes, repeated consults, decomposition and cross-channel duplicate decisions. Run dashboard-only cases with Playwright and neutral isolated bases where needed; retain event/log evidence, language and incorrect-assumption findings. Coverage must name unsupported branches rather than imply exhaustive coverage.  Owner assessment 2026-11-07: expand the versioned scenario plan to dashboard/agent acceptance, ambiguity, contradictions, changed intent, language switching, duplicate/concurrent actions, expiry/restart, failure injection and signed multi-base cases. [Concrete assessment and test matrix](decisions/evaluation-and-improvement.md) distinguishes scripted control-flow tests from recorded real-model judgment; evidence includes actual effects, ledger, screenshots and model/seed/configuration, not just the agent’s claimed success. Start with B-021 browser acceptance and deterministic CI cases; then bounded real-model, generated/stress and multi-agent/multi-base runs on isolated neutral fixtures. The self-improvement loop proposes isolated changes, preserves regression/holdout tests and independent verification, and uses the existing owner-confirmed promotion rules (F-025/F-045/F-049). The scenario runner is now implemented; automatic repair/promotion remains outside this evaluation feature.  2026-11-06 (roadmap review of `ballot` in src/policy.ts): Casper's confidence can only lower Sync (clamped to 0–1 and multiplied), but an approving Casper that omits confidence gets the full configured value, more than one reporting 0.9. Decide here whether a missing confidence should count as unknown (owner card) rather than certain; the [reassessment](audits/2026-11-06-architecture-reassessment.md) also notes Sync is a heuristic, not a calibrated probability. Start with deterministic cases alongside F-017 tests; add recorded model cases with F-003.
+
+**Estimates:** No remaining work. Historical estimate: 1–2 focused hours for CI, evidence reconciliation and closure. Frozen model/stress evidence and outcome triage complete. Reassessed 2026-11-08: suite/runner/browser implementation and initial scripted validation complete. Previous Large estimate covered their construction; future capability branches remain owned by the manifest’s named records.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #202](https://github.com/voidbrain/nerv/pull/202) evaluation suite and frozen evidence; [PR #201](https://github.com/voidbrain/nerv/pull/201) advice route and resumed owner sequence;  [PR #200](https://github.com/voidbrain/nerv/pull/200) verified commit ID and owner pause;  [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #196](https://github.com/voidbrain/nerv/pull/196) evidence and queue reconciliation;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #193](https://github.com/voidbrain/nerv/pull/193) agent-executable acceptance and evaluation assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
+| Opened | 2026-11-04 |
+| Verification | 2026-11-08: initial scripted suite 178 checks passed, including actual browser operation; golden/runner/model-adapter unit checks passed. Final full suite 364 passed, two skips; build, typecheck, headless and repository checks passed. Frozen scripted/stress/model reports retained in docs/evaluations; independent review resolved process ownership and source identity findings. PR #202 runs 42424820318/42424816395 passed all six jobs. |
+| Reviewed | 2026-11-08 |
+
+</details>
+
+---
 
 ---

@@ -173,6 +173,7 @@ export class Store {
     }catch(e){this.db.exec('ROLLBACK');throw e;}
   }
   approvals(limit=5) { return this.ledger.pendingApprovals(new Date(),limit); }
+  pendingApprovalIds(ids:string[]) { return this.ledger.pendingApprovalIds(ids); }
   expiredApprovals(since: string) { return this.ledger.expiredSince(since); }
   /** The grant ID stays inside the coordinator: callers learn only the outcome. */
   /** Applies the owner's decision; an approval of a tool with an executor runs it once, here, with the grant it issued. */

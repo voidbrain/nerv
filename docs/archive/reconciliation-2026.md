@@ -1,5 +1,7 @@
 # Backlog reconciliation log 2026
 
+Current work ledger, reviewed 8 November 2026 against main `fa12753`. PR #201 runs 42421593024/42421597561 passed validate, windows and native-macos; B-044 verified and closed. F-029 evaluation implementation precedes B-042 per owner order.
+
 Earlier reconciliation notes moved out of the [backlog](../BACKLOG.md) header, newest first, as written at the time. The header keeps only the latest reconciliation; when it moves to a newer `main`, the sentence it replaces is added at the top of this list. Dated evidence, not current status.
 
 - Current work ledger, reviewed 7 November 2026 against main `30642bb`. PR #200 runs 42404230022/42404234032 passed validate, windows and native-macos; F-057 verified and closed. Owner resumed F-029, followed by B-042, after the advice-route correction.
