@@ -2,6 +2,7 @@
 
 Earlier reconciliation notes moved out of the [backlog](../BACKLOG.md) header, newest first, as written at the time. The header keeps only the latest reconciliation; when it moves to a newer `main`, the sentence it replaces is added at the top of this list. Dated evidence, not current status.
 
+- Current work ledger, reviewed 7 November 2026 against main `ad08865`. PR #191 runs 42378326649/42378322818 passed validate, windows and native-macos; F-019 verified, closed and archived. F-003 is next, as requested.
 - Current work ledger, reviewed 7 November 2026 against main `92be8f8`. PR #190 runs 42376407868/42376404642 passed validate, windows and native-macos; F-063 closure reconciled. Owner order: F-019, then F-003.
 - Current work ledger, reviewed 7 November 2026 against main `756eb13`. PR #189 runs 42376072311/42376068960 passed validate, windows and native-macos; F-063 backend accounting verified, closed and archived. F-019 retains dashboard display.
 - Current work ledger, reviewed 7 November 2026 against main `89eb167`. PR #188 runs 42373559974/42373555940 passed validate, windows and native-macos; dependency adoption closure reconciled. F-063 implementation in progress.

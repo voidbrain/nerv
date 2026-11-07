@@ -7,7 +7,7 @@ Depends on names a required outcome; Unlocks lists direct dependents, not verifi
 |---|---|---|
 | [B-008](../BACKLOG.md#b-008) | — | — |
 | [B-021](../BACKLOG.md#b-021) | — | — |
-| [F-003](../BACKLOG.md#f-003) | — | [F-012](../BACKLOG.md#f-012), [F-020](../BACKLOG.md#f-020) |
+| [F-003](../archive/backlog-2026.md#f-003) | — | [F-012](../BACKLOG.md#f-012), [F-020](../BACKLOG.md#f-020) |
 | [F-004](../BACKLOG.md#f-004) | — | — |
 | [F-005](../BACKLOG.md#f-005) | — | [F-012](../BACKLOG.md#f-012) |
 | [F-006](../BACKLOG.md#f-006) | — | [F-012](../BACKLOG.md#f-012) |
@@ -15,13 +15,13 @@ Depends on names a required outcome; Unlocks lists direct dependents, not verifi
 | [F-008](../BACKLOG.md#f-008) | — | — |
 | [F-009](../BACKLOG.md#f-009) | — | — |
 | [F-011](../BACKLOG.md#f-011) | — | — |
-| [F-012](../BACKLOG.md#f-012) | [F-003](../BACKLOG.md#f-003) — Durable scheduling for the named external job<br />[F-005](../BACKLOG.md#f-005) — Enrolled workers with observed execution capability<br />[F-006](../BACKLOG.md#f-006) — Bounded routing and delegation for the external execution adapter | — |
+| [F-012](../BACKLOG.md#f-012) | [F-003](../archive/backlog-2026.md#f-003) — Durable scheduling for the named external job<br />[F-005](../BACKLOG.md#f-005) — Enrolled workers with observed execution capability<br />[F-006](../BACKLOG.md#f-006) — Bounded routing and delegation for the external execution adapter | — |
 | [F-014](../BACKLOG.md#f-014) | — | — |
 | [F-015](../BACKLOG.md#f-015) | — | — |
 | [F-016](../BACKLOG.md#f-016) | — | — |
 | [F-017](../archive/backlog-2026.md#f-017) | — | [F-020](../BACKLOG.md#f-020) |
 | [F-019](../archive/backlog-2026.md#f-019) | [F-063](../archive/backlog-2026.md#f-063) — Measured usage and cost before displaying real accounting | — |
-| [F-020](../BACKLOG.md#f-020) | [F-003](../BACKLOG.md#f-003) — Messaging path for state-grounded persona replies<br />[F-017](../archive/backlog-2026.md#f-017) — Policy decisions remain authoritative over persona output | — |
+| [F-020](../BACKLOG.md#f-020) | [F-003](../archive/backlog-2026.md#f-003) — Messaging path for state-grounded persona replies<br />[F-017](../archive/backlog-2026.md#f-017) — Policy decisions remain authoritative over persona output | — |
 | [F-021](../BACKLOG.md#f-021) | [F-049](../BACKLOG.md#f-049) — EVA-03 isolation before enabling EVA-03 tool grants; other MCP slices can proceed | [F-054](../BACKLOG.md#f-054), [F-056](../BACKLOG.md#f-056) |
 | [F-023](../BACKLOG.md#f-023) | — | — |
 | [F-025](../BACKLOG.md#f-025) | — | [F-049](../BACKLOG.md#f-049) |
