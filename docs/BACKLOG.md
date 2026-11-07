@@ -437,7 +437,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Field | Value |
 |---|---|
 | Depends on | [F-003](#f-003) — Durable scheduling for the named external job<br />[F-005](#f-005) — Enrolled workers with observed execution capability<br />[F-006](#f-006) — Bounded routing and delegation for the external execution adapter |
-| PR / evidence | [PR #2](https://github.com/voidbrain/nerv/pull/2); plan only, no runtime implementation |
+| PR / evidence | [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #2](https://github.com/voidbrain/nerv/pull/2); plan only, no runtime implementation |
 | Opened | 2026-11-01 |
 | Verification | Pending adapter feasibility, regression and live host tests |
 | Reviewed | 2026-11-07 |
@@ -576,7 +576,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Field | Value |
 |---|---|
 | Depends on | [F-063](#f-063) — Measured usage and cost before displaying real accounting |
-| PR / evidence | [PR #167](https://github.com/voidbrain/nerv/pull/167) archive adoption/source review and CI reconciliation;  [PR #166](https://github.com/voidbrain/nerv/pull/166) map/tabs and Midori routing/status;  [PR #165](https://github.com/voidbrain/nerv/pull/165) two-tab panel plan;  [PR #164](https://github.com/voidbrain/nerv/pull/164) verified telemetry reconciliation;  [PR #163](https://github.com/voidbrain/nerv/pull/163) channel telemetry and CI reconciliation;  [PR #161](https://github.com/voidbrain/nerv/pull/161) verification reconciliation;  [PR #160](https://github.com/voidbrain/nerv/pull/160) pilot selectors/map status and owner clarification; docs/NERV/nerv-agency-dashboard.html (prototype, [PR #12](https://github.com/voidbrain/nerv/pull/12) and [PR #13](https://github.com/voidbrain/nerv/pull/13): comms panel with chat, image slots listed in docs/NERV/assets/README.md; [PR #25](https://github.com/voidbrain/nerv/pull/25): regional map, header tags, title; [PR #26](https://github.com/voidbrain/nerv/pull/26): node-to-node traffic; [PR #27](https://github.com/voidbrain/nerv/pull/27): straight links); earlier docs/NERV/dashboard-agnostic-2.html; review docs/audits/2026-11-04-rebrand-review.md §6; [PR #36](https://github.com/voidbrain/nerv/pull/36) (live slice 1); [PR #39](https://github.com/voidbrain/nerv/pull/39) (reload, away, Spear) |
+| PR / evidence | [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #167](https://github.com/voidbrain/nerv/pull/167) archive adoption/source review and CI reconciliation;  [PR #166](https://github.com/voidbrain/nerv/pull/166) map/tabs and Midori routing/status;  [PR #165](https://github.com/voidbrain/nerv/pull/165) two-tab panel plan;  [PR #164](https://github.com/voidbrain/nerv/pull/164) verified telemetry reconciliation;  [PR #163](https://github.com/voidbrain/nerv/pull/163) channel telemetry and CI reconciliation;  [PR #161](https://github.com/voidbrain/nerv/pull/161) verification reconciliation;  [PR #160](https://github.com/voidbrain/nerv/pull/160) pilot selectors/map status and owner clarification; docs/NERV/nerv-agency-dashboard.html (prototype, [PR #12](https://github.com/voidbrain/nerv/pull/12) and [PR #13](https://github.com/voidbrain/nerv/pull/13): comms panel with chat, image slots listed in docs/NERV/assets/README.md; [PR #25](https://github.com/voidbrain/nerv/pull/25): regional map, header tags, title; [PR #26](https://github.com/voidbrain/nerv/pull/26): node-to-node traffic; [PR #27](https://github.com/voidbrain/nerv/pull/27): straight links); earlier docs/NERV/dashboard-agnostic-2.html; review docs/audits/2026-11-04-rebrand-review.md §6; [PR #36](https://github.com/voidbrain/nerv/pull/36) (live slice 1); [PR #39](https://github.com/voidbrain/nerv/pull/39) (reload, away, Spear) |
 | Opened | 2026-11-02 |
 | Verification | 2026-11-06 Human: owner reports Telegram self-delivery fallback works; source review confirms existing relay/fallback paths. Per-base sharing: focused tests pass for actual relay/fallback transitions, signed two-runtime heartbeat/API state, stale reports and old-peer omission. Chrome: authenticated service with controlled bases fixtures checked local fallback, stale/offline and absent reports, zero scoped axe violations; desktop/mobile screenshots inspected, no 390 px page overflow. Full suite: 200 passed and one platform-only skip; build, static checks, three headless lifecycle cases and all ten Angular Chrome/axe views passed. Merged PR #163 CI runs 42250531835 and 42250519742 passed validate, windows and native-macos (ci:status); channel telemetry slice verified. Earlier evidence: 2026-11-04 live slice 1: tests and headless Chrome run above (local run; CI green: PR #36) |
 | Reviewed | 2026-11-07 |
@@ -611,7 +611,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Field | Value |
 |---|---|
 | Depends on | [F-003](#f-003) — Messaging path for state-grounded persona replies<br />[F-017](archive/backlog-2026.md#f-017) — Policy decisions remain authoritative over persona output |
-| PR / evidence | docs/NERV/dashboard1.html personas tab (prototype) |
+| PR / evidence | [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  docs/NERV/dashboard1.html personas tab (prototype) |
 | Opened | 2026-11-02 |
 | Verification | Pending |
 | Reviewed | 2026-11-07 |
@@ -646,7 +646,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Field | Value |
 |---|---|
 | Depends on | [F-049](#f-049) — EVA-03 isolation before enabling EVA-03 tool grants; other MCP slices can proceed |
-| PR / evidence | — |
+| PR / evidence | [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  — |
 | Opened | 2026-11-02 |
 | Verification | Pending |
 | Reviewed | 2026-11-07 |
@@ -957,7 +957,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Field | Value |
 |---|---|
 | Depends on | [F-029](#f-029) — Golden evaluation evidence for pilot promotion; roster and advice work can proceed |
-| PR / evidence | [PR #161](https://github.com/voidbrain/nerv/pull/161) verification reconciliation;  [PR #160](https://github.com/voidbrain/nerv/pull/160) pilot selectors/map status and owner clarification; Owner questions 2026-11-05; slice 1 [PR #107](https://github.com/voidbrain/nerv/pull/107) |
+| PR / evidence | [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #161](https://github.com/voidbrain/nerv/pull/161) verification reconciliation;  [PR #160](https://github.com/voidbrain/nerv/pull/160) pilot selectors/map status and owner clarification; Owner questions 2026-11-05; slice 1 [PR #107](https://github.com/voidbrain/nerv/pull/107) |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-06 Unit/integration and Browser/accessibility: pilot model API/DOM regressions, full suite, real-runtime Chrome flow, inline-row/Apply states and scoped axe passed; merged PR #160 CI run 42241192687 green. Earlier evidence: 2026-11-05 slice 1: test/pilots.test.ts, test/model-setup.test.ts, full suite (local run) |
 | Reviewed | 2026-11-07 |
@@ -1060,7 +1060,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Field | Value |
 |---|---|
 | Depends on | [F-045](#f-045) — Pilot identity and EVA class for per-job execution<br />[F-025](#f-025) — Pilot trust-stage limits for sandbox class admission |
-| PR / evidence | Owner questions 2026-11-05 |
+| PR / evidence | [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner questions 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
 | Reviewed | 2026-11-07 |
@@ -1095,7 +1095,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Field | Value |
 |---|---|
 | Depends on | [F-036](archive/backlog-2026.md#f-036) — Authenticated Kaji transport and enrolled bases<br />[F-045](#f-045) — Remote pilot capability offers for capability-based forwarding<br />[F-048](#f-048) — Queue and concurrency limits for load-based forwarding; capability-first work can proceed |
-| PR / evidence | [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner questions 2026-11-05 |
+| PR / evidence | [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner questions 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
 | Reviewed | 2026-11-07 |
@@ -1198,7 +1198,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Field | Value |
 |---|---|
 | Depends on | [F-021](#f-021) — Owner-selected prerequisite before chronicle work<br />[F-045](#f-045) — Chronicler pilot for the Eva narrative; plain fact collection can proceed<br />[F-028](archive/backlog-2026.md#f-028) — Durable brief delivery for the optional morning-brief entry |
-| PR / evidence | Owner request 2026-11-05 |
+| PR / evidence | [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner request 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
 | Reviewed | 2026-11-07 |
@@ -1233,7 +1233,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Field | Value |
 |---|---|
 | Depends on | [F-021](#f-021) — Owner-selected prerequisite for remaining command work<br />[F-042](#f-042) — Record-reading interface for agency query commands<br />[F-028](archive/backlog-2026.md#f-028) — Durable brief content for brief commands |
-| PR / evidence | [PR #167](https://github.com/voidbrain/nerv/pull/167) archive adoption/source review and CI reconciliation;  [PR #166](https://github.com/voidbrain/nerv/pull/166) map/tabs and Midori routing/status;  [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner question 2026-11-05 |
+| PR / evidence | [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #167](https://github.com/voidbrain/nerv/pull/167) archive adoption/source review and CI reconciliation;  [PR #166](https://github.com/voidbrain/nerv/pull/166) map/tabs and Midori routing/status;  [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner question 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-06 Human: owner reports Telegram /status works. Source review: deterministic router/menu and full command-set automated checks remain pending. |
 | Reviewed | 2026-11-07 |
@@ -1469,7 +1469,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | — |
+| PR / evidence | [PR #187](https://github.com/voidbrain/nerv/pull/187) harness adoption and dependency links |
 | Opened | 2026-11-07 |
 | Verification | Documentation: 2026-11-07, fresh-context adoption review found no actionable issues. Script: 2026-11-07, typecheck/build, 240 tests (one platform skip), browser/axe and static/ledger checks passed locally. Remote CI and SBOM artifact: Pending. |
 | Reviewed | 2026-11-07 |
