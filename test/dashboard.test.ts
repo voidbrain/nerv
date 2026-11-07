@@ -368,3 +368,15 @@ test('F-053: dynamic noise clears each frame, paints only sparse pixels, and bou
  size.innerWidth=8000;size.innerHeight=8000;api.draw(300);assert.equal(dots.at(-1)!.length,1800,'large screens retain a fixed drawing budget');
  api.off();api.draw(400);assert.equal(clears.length,3,'disabled noise schedules no paints');
 });
+
+test('F-057: clicking the running version copies seven commit characters while hover keeps the full revision',async()=>{
+ const source=readFileSync('web/public/dashboard/dashboard.js','utf8');
+ const take=(name:string)=>{const i=source.indexOf(`function ${name}(`),start=source.lastIndexOf('\n',i)+1;return source.slice(start,source.indexOf('\n}\n',i)+2);};
+ const api=new Function('setTimeout',take('showBuild')+'\n'+take('copyBuild')+'\nreturn {showBuild,copyBuild};')(()=>0) as {showBuild:(build:unknown,element:unknown)=>void;copyBuild:(element:unknown,clipboard:unknown)=>Promise<string>};
+ const element={hidden:true,textContent:'',title:'',dataset:{} as Record<string,string>,setAttribute:()=>{}};
+ const commit='39903fb47cb3a9becb565b65a7a42fbb6d17e69a';
+ api.showBuild({version:'1.205',commit},element);
+ const copied:string[]=[];await api.copyBuild(element,{writeText:async(value:string)=>{copied.push(value);}});
+ assert.deepEqual(copied,['39903fb']);assert.ok(element.title.includes(commit),'full running revision remains inspectable');
+ assert.equal(element.dataset.commit,commit,'copy formatting does not change running-build identity');
+});
