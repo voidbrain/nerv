@@ -49,6 +49,8 @@
     "@angular/compiler-cli": "22.2.4",
     "@types/node": "24.10.1",
     "@types/ws": "8.18.1",
+    "ajv-formats": "3.0.1",
+    "ajv-formats-draft2019": "1.6.1",
     "axe-core": "4.14.0",
     "linkedom": "0.18.12",
     "typescript": "~6.0.2"

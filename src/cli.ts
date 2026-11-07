@@ -1,4 +1,5 @@
 #!/usr/bin/env -S node --use-system-ca
+import {runtimeBom} from './bom.ts';
 import { spawnSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -227,6 +228,13 @@ try {
     if(!response.ok)throw new Error(value.error ?? 'Action failed.');
     console.log(JSON.stringify(value,null,2));
   }
+  else if(command==='bom'){
+    if(args.length)throw new Error('Usage: bom');
+    const config=readConfig(home);
+    const found=config.models.local?await detectOllama(ollamaUrlOf(config.models)):{reachable:false,models:[]};
+    const pkg=JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8')) as {version:string};
+    console.log(JSON.stringify(runtimeBom(config,found,pkg.version),null,2));
+  }
   else if(command==='ask'){
     // Goes through the running service so only one brain and one scheduler exist. Local-only unless --cloud.
     const cloud=args[0]==='--cloud';const prompt=(cloud?args.slice(1):args).join(' ');
@@ -237,7 +245,7 @@ try {
     if(!response.ok)throw new Error(value.error ?? 'Ask failed.');
     console.log(value.text+(value.truncated?'\n[reply truncated]':'')+`\n— ${value.route} · ${value.model}`);
   }
-  else if(!command||command==='help')console.log('NERV Agency\nCommands: init [--base ID --name "Name"] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | models [set misato| pilots [generic|add|set|pin|unpin|retire|restore] | tools [add|remove|grant|revoke] |casper MODEL | cloud on|off | key] | ask [--cloud] "text" | open [dashboard] | sessions revoke | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
+  else if(!command||command==='help')console.log('NERV Agency\nCommands: init [--base ID --name "Name"] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | bom | models [set misato| pilots [generic|add|set|pin|unpin|retire|restore] | tools [add|remove|grant|revoke] |casper MODEL | cloud on|off | key] | ask [--cloud] "text" | open [dashboard] | sessions revoke | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
   else {
     const config=readConfig(home);
     const scrolls=readScrolls(home);
