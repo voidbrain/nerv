@@ -41,3 +41,5 @@ Suite `nerv-golden-v2` adds B-042 dashboard/Telegram send-race, restart cleanup 
 [B-042 channel evidence](2026-11-08-card-reconciliation.json): v2 selected channel group passed all 19 tests on clean source `85aa894`. Includes dashboard REST → delayed Telegram send, cleanup retry across restart, bundled-row preservation and real signed remote status/decision joins. This is explicitly a partial suite and mock Bot API evidence; physical phone receipt is not asserted.
 
 Suite `nerv-golden-v3` adds brief composition and B-041 checkpoint/outage/overlapping-scheduler/atomic-rollback cases to the ledger group. Earlier baseline reports retain their original suite IDs and hashes.
+
+[B-041 full-suite evidence](2026-11-08-brief-recovery.json): v3 passed all 193 checks on clean source `058c3b8`. Reproduced failure classes include checkpoint-read uncertainty, complete source outage and overlapping schedulers; rollback, reopen and cursor preservation also pass. This does not identify which failure produced the original Tabgha messages.

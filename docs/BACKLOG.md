@@ -14,13 +14,14 @@ Governance and naming follow the [NERV architecture](NERV-ARCHITECTURE.md). [Rul
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 35 | 4 |
-| **Require Human 🧑** | 2 | 0 |
+| **Require Human 🧑** | 3 | 0 |
 
 ### Require Human 🧑
 
 | Features | Bugs |
 |---|---|
-| [F-062](#f-062) | — |
+| [F-009](#f-009) | — |
+| [F-062](#f-062) |  |
 | [F-064](#f-064) |  |
 <!-- recap:end -->
 
@@ -161,7 +162,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Queue order | 3 — Identify brief source failures and repeated-delivery identities |
 | PR / evidence | [PR #196](https://github.com/voidbrain/nerv/pull/196) evidence and queue reconciliation;  [PR #195](https://github.com/voidbrain/nerv/pull/195) project tuning and regressions;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; source assessment linked above; Test: test/brief.test.ts, B-041 delayed brief greeting, fails against the unchanged fixed-morning implementation |
 | Opened | 2026-11-07 |
-| Verification | 2026-11-08: unchanged committed checkpoint/outage/overlap regressions and rollback/cursor/reopen checks passed; 20 targeted brief/Telegram tests passed. Final suite, frozen v3 ledger evaluation and CI pending. Historical 2026-11-07: unchanged committed greeting regression and Telegram delivery/restart integration passed; full suite 263 passed, one platform skip; PR #195 CI runs 42398922334/42398926076 passed all jobs. No evidence yet attributes reported duplicate messages. |
+| Verification | 2026-11-08: unchanged committed checkpoint/outage/overlap regressions and rollback/cursor/reopen checks passed; 20 targeted brief/Telegram tests passed. Final suite 373 passed, two skips; typecheck, build, headless, conventions and repository checks passed. Frozen clean source 058c3b8: full v3 evaluation passed 193 checks in all seven groups, including Chrome/axe and real process joins; retained in docs/evaluations/2026-11-08-brief-recovery.json. CI pending. Historical 2026-11-07: unchanged committed greeting regression and Telegram delivery/restart integration passed; full suite 263 passed, one platform skip; PR #195 CI runs 42398922334/42398926076 passed all jobs. No evidence yet attributes reported duplicate messages. |
 | Reviewed | 2026-11-08 |
 
 </details>
@@ -385,7 +386,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 |:---:|---|---|---|
 | 🟡 | 🔺 P1 | Implemented | 🟡 Medium |
 
-💻 **→ Human action required: No**<br />Validate launchd/systemd installation and login/logout on target hosts; PR #1 CI is green.
+🧑 **→ Human action required: Yes**<br />Choose a separate Mac/Linux acceptance host; service installation is prohibited on this execution host.
 
 | | |
 |---|---|
@@ -396,16 +397,16 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Validate launchd/systemd installation and login/logout on target hosts; PR #1 CI is green. Single process serves production UI/API on 4317; config survives init; clean SIGTERM and restart catch-up; private credentials; install/status/start/stop/uninstall on real target OS.
+**Next action / closure evidence:** 2026-11-08: read-only launchctl/plist inspection confirms no NERV service is installed or registered on the execution Mac. docs/agents/areas.md prohibits installing services or enabling linger here; a separate target host is required for OS-service/login acceptance. Target choice requested from the owner; no service was installed, started or stopped. Portable process and recent Windows/macOS CI remain distinct from that trial.  Validate launchd/systemd installation and login/logout on target hosts; PR #1 CI is green. Single process serves production UI/API on 4317; config survives init; clean SIGTERM and restart catch-up; private credentials; install/status/start/stop/uninstall on real target OS.
 
-**Estimates:** Medium remaining effort. Estimate dated 2026-11-01, not acceptance evidence.
+**Estimates:** Medium remaining validation effort; provisionally 1–2 focused hours per target OS, excluding time waiting for access or troubleshooting. Reassessed 2026-11-08; no completion is inferred from portable tests.
 
 | Field | Value |
 |---|---|
 | PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
 | Opened | 2026-11-01 |
-| Verification | Pending named acceptance |
-| Reviewed | 2026-11-01 |
+| Verification | 2026-11-08: read-only execution-host check confirms no installed/registered launchd service. Existing portable headless checks pass; separate target-host install/status/start/stop/uninstall and login/logout acceptance remain pending. |
+| Reviewed | 2026-11-08 |
 
 </details>
 
