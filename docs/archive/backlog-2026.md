@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 31 | 37 |
+| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 32 | 37 |
 <!-- archive-recap:end -->
 
 <a id="archive-week-2026-11-02"></a>
@@ -2378,6 +2378,40 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 | PR / evidence | [PR #188](https://github.com/voidbrain/nerv/pull/188) closure reconciliation;  [PR #187](https://github.com/voidbrain/nerv/pull/187) harness adoption and dependency links |
 | Opened | 2026-11-07 |
 | Verification | Documentation: 2026-11-07, fresh-context adoption review found no actionable issues. Script: 2026-11-07, typecheck/build, 240 tests (one platform skip), browser/axe and static/ledger checks passed locally. Remote CI: 2026-11-07, runs 42373292192/42373290475 all passed including native tests/package. SBOM artifact: official schema and formats passed, 389 components. |
+| Reviewed | 2026-11-07 |
+
+</details>
+
+---
+
+### F-063
+
+**Measured model usage and cost, with the model that actually answered**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />None: backend accounting verified and closed; F-019 owns dashboard display.
+
+| | |
+|---|---|
+| **Issue** | Preserved proposal 2 of the [architecture reassessment](../audits/2026-11-06-architecture-reassessment.md#2-token-and-cost-accounting-useful-before-expanding-paid-cloud-use): the policy checks a declared action cost against the sortie budget and `Ledger.propose` defaults an omitted cost to zero, which is not provider usage. The cloud route allows same-provider server-side model substitution, so the model that answered can differ from the one asked for and is not recorded. |
+| **Reproduce** | Ask Misato something on the cloud route; the ledger records the configured model and no tokens or spend. |
+| **Check** | Per call: route, requested and returned model, provider-reported input/output tokens when available, duration, outcome and whether each value is measured, estimated or unavailable; no prompts or credentials stored to count usage; spend shown with price provenance; a timeout leaves usage unknown, never zero; a known test call reconciles. The dashboard (F-019) shows it. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-07 after PR #189 merged with runs 42376072311/42376068960 passing validate, windows and native-macos. Backend acceptance is complete; display remains F-019 as scoped before implementation.  Implemented 2026-11-07: durable pending observations before brain dispatch, provider-reported tokens and actual model, all role paths, paged authenticated API and explicit dated price snapshots. No UI change or pre-call enforcement; F-019 remains responsible for display. Known synthetic calls reconcile across provider/process/persistence/API for every model role; no paid live call or invoice reconciliation is claimed. SDK automatic retries are disabled to avoid hidden attempts. Review: fresh-context reviewer found invalid calendar price dates were accepted; corrected with round-trip date validation and rejection tests. No other actionable finding. Proposed 2026-11-06. Split out of F-019, which keeps the display: this record owns measurement and attribution in the backend. Context occupancy ("estimated input / configured context limit") is a later, lower-priority diagnostic and is not in this scope; it is never an authorization signal. A pre-call budget limit and later reconciliation are separate controls.
+
+**Estimates:** Small, ~100%. Reassessed 2026-11-07: backend implementation, independent review, local acceptance and merged remote CI complete. F-019 owns dashboard work.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #189](https://github.com/voidbrain/nerv/pull/189) F-063 backend accounting and display-scope reconciliation; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](../audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-07 Unit/integration: full suite 245 passed, one platform skip before final refinements; final six focused accounting tests passed, including all roles, restart unknowns, fallback, cache/refusal accounting and authenticated HTTP. Typecheck, build, conventions and integrations passed. Browser/accessibility: existing Angular Chrome/axe acceptance passed. Headless: three passed, one Windows-only skip. Native Swift: nine passed, one absent live-TLS fixture skip; local ad-hoc app packaging passed. Remote CI: 2026-11-07 runs 42376072311/42376068960 passed validate, windows and native-macos. |
 | Reviewed | 2026-11-07 |
 
 </details>
