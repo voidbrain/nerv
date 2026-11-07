@@ -69,3 +69,5 @@ Read [AGENTS.md](AGENTS.md), [area notes](docs/agents/areas.md), [style guide](d
 The dashboard groups model controls and Battery in two tabs. Its map shows Midori (Telegram) API status separately from message activity and phone receipt. Each configured bot accepts owner messages even while inbox delivery routes through main. `/status`, `/status BASE-ID-or-name` and `/help` answer from recorded state without a model; other commands are listed as unsupported until F-056 is completed. Angular CLI analytics is disabled in this workspace.
 
 The [architecture vocabulary](docs/NERV-ARCHITECTURE.md) now lives directly in docs. The [brainstorm retirement review](docs/audits/2026-11-06-brainstorm-retirement.md) inventories legacy sources, deletable material and preserved undecided proposals. Yearly backlog archives have weekly closure indices from harness v3.2.0. <!-- project -->
+
+Backlog sequencing: [linked prerequisites and generated unlocks](docs/agents/backlog-dependencies.md), maintained through `npm run backlog:dependencies` and checked by `npm run check:dependencies`.

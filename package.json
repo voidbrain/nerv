@@ -30,7 +30,9 @@
     "test:browser": "node --test test/angular.browser.mjs",
     "archive:recap": "node tools/archive-recap.mjs",
     "check:archive-recap": "node tools/archive-recap.mjs --check",
-    "check:rules": "node tools/check-rules.mjs"
+    "check:rules": "node tools/check-rules.mjs",
+    "backlog:dependencies": "node tools/backlog-dependencies.mjs",
+    "check:dependencies": "node tools/backlog-dependencies.mjs --check"
   },
   "dependencies": {
     "@angular/common": "22.2.4",

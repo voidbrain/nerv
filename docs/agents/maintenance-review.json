@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-07T08:26:18.323Z",
+  "reviewed": "2026-11-07T12:35:40.610Z",
   "policy": "cd034be8e9d34cd059789de7a2b48deccb39742a79581ec13aff40de0a1ac791",
   "inputs": {
     "AGENTS.md": "68c4671162697950b7e896ea069f9085392a7fbbc87752e1313de77a600c6a95",
-    "docs/BACKLOG-RULES.md": "623af538b376266aab4a138c2c7dda863a254194b9dbfbbc5e2145819867aafa",
+    "docs/BACKLOG-RULES.md": "e42f58023f68b34543c349dd00e15f1ad585dd0c1a88d5379ebded7e99debd85",
     "docs/agents/areas.md": "ecd729eae9a6b235d98a9c9399054949e8e109d52542ade89d9bdd2e338e4ffa",
     "docs/agents/audit.md": "bc5de5707f9ec5c523e73602499312c373d6112ffc498d69bf68604522527992",
     "docs/agents/change-impact.md": "2a899e8b9b6200c1ce89142492e18611a833c09cf713fb9d9f511a9bb31b43e0",
@@ -15,8 +15,8 @@
     "docs/agents/solution-profile.md": "8fa3c5a5db4ef81c7e6574fff86acc56cf60b21d438b92ea46da40bb4279a667"
   },
   "measurements": {
-    "samples": 11,
-    "latestAt": "2026-11-07T08:26:18.161Z",
+    "samples": 12,
+    "latestAt": "2026-11-07T12:35:24.728Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -42,25 +42,25 @@
         }
       },
       "reconciliation": {
-        "samples": 11,
+        "samples": 12,
         "durationMs": {
-          "observed": 11,
+          "observed": 12,
           "missing": 0,
-          "median": 63802
+          "median": 75529
         },
         "conflicts": {
           "observed": 3,
-          "missing": 8,
+          "missing": 9,
           "median": 0
         },
         "unnecessaryPrompts": {
           "observed": 0,
-          "missing": 11,
+          "missing": 12,
           "median": null
         },
         "repeatedContextLoads": {
           "observed": 0,
-          "missing": 11,
+          "missing": 12,
           "median": null
         }
       }
@@ -70,19 +70,19 @@
     {
       "kind": "rule",
       "disposition": "implemented",
-      "target": "docs/agents/skills.md",
-      "evidence": "Reconciled published harness v3.4.0, commit a2c90f5ec6de87cfa3f04ed0cb410334f15f9698, verified against the authoritative GitHub tag after an online pull. Copied skill/audit/MCP guidance, catalogue and maintenance workflow unchanged. AST10 stays explicitly draft; optional OpenCRE remains unconfigured with authenticated tools disabled. All NERV rules/settings, Node 24 CI and lock-only SBOM retained; adapted rule files did not require changes."
+      "target": "docs/BACKLOG-RULES.md",
+      "evidence": "F-068 reconciles the optional prerequisite convention from published harness v3.5.0/1865b2a10f53b293d8d76d1e8149f6bc1079439b. Reviewed upstream tag and green PR #75 CI 42372844701. NERV keeps its project-specific rules, ownership and immutable archives. New maintained Depends on rows name existing explicit prerequisites and scoped required outcomes; Unlocks is derived. No status, human cue or verification is inferred from dependency links. No behaviour runner is configured, so agent-behaviour scenarios were not run."
     },
     {
       "kind": "tool",
       "disposition": "implemented",
-      "target": "test/ci-pins.test.mjs",
-      "evidence": "Project CI actions use the published template release SHAs. Verified checkout v7.0.1, setup-node v7.1.0 and upload-artifact v7.0.2 mappings with git ls-remote against official actions repositories. Project-only ciActionPins source plus relation test guards both workflows. Final suite: 240 passed, one platform skip; typecheck/build, browser/axe, three headless cases (one Windows-only skip), rules, conventions, integration metadata, backlog/recaps/roadmap and copied parity passed. Timed sample covers reading/review, user interruption, baseline and local validation including waits; publication and remote CI follow this sample and no productivity comparison is inferred."
+      "target": "tools/backlog-dependencies.mjs",
+      "evidence": "Released generator copied byte for byte; registered scripts, impact row and CI dependency check plus v3.5.0 template pin. Upstream 118 fixtures passed including cycle/reference/archive-reopen/dangling-symlink cases. NERV typecheck, build, 240 tests (one platform skip), dependency/roadmap/backlog/recap/rules/conventions/integration metadata passed locally. Fresh-context review verified adoption, parity and graph semantics with no actionable findings. Sandbox loopback/build restrictions required unrestricted validation; blocked duplicate run stopped. Timed sample covers preview through local static/unit/build validation; final browser completion, publication and remote CI follow it. No productivity comparison inferred."
     },
     {
       "kind": "none",
       "disposition": "no-change",
-      "evidence": "Capability/skill review: existing git/gh/local checks suffice; no connection or installation is needed. apply-harness SKILL.md was read manually from voidbrain/project-harness at reviewed v3.4.0/a2c90f5ec6de87cfa3f04ed0cb410334f15f9698, MIT licensed. AST01/02/05/08: entire one-file skill and its authoritative referenced rules read; no hidden/binary/archive/bundled scripts or extra runtime dependencies. AST03/06: actions remain within existing project git/files/network authorization and sandbox; no new privilege or credential grant. AST04/10: name/description frontmatter inspected; used by manual Codex read, no automatic discovery or universal client claim. AST07/09: immutable reviewed source recorded here, re-review required for updates. Fallback is direct APPLY.md procedure. Optional catalogue additions do not justify enabling a server for this task."
+      "evidence": "Existing git, gh and Node tools suffice. No integration or shared skill was installed or invoked. Backlog dependency graph is documentation, not an execution scheduler: Markdown is authoritative and no separate mutable JSON/YAML checkpoint or runtime pointer system is introduced. Broader execution orchestration requires its own product need."
     }
   ]
 }
