@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 37 | 38 |
+| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 37 | 39 |
 <!-- archive-recap:end -->
 
 <a id="archive-week-2026-11-02"></a>
@@ -2620,6 +2620,42 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 | Opened | 2026-11-06 |
 | Verification | 2026-11-07: Git abbreviation/configuration and real prefix-collision tests passed; UI uses the server-supplied identifier. Full suite: 267 passed, one platform skip; typecheck/build/conventions passed. Chrome verified actual server metadata→button→clipboard and matching hover; scoped axe passed. Review: separate context found no actionable findings. PR #200 CI runs 42404230022/42404234032 passed every job. |
 | Reviewed | 2026-11-07 |
+
+</details>
+
+---
+
+## Closed 2026-11-08
+
+### B-044
+
+**Advise → Misato never shows its passed route**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />None: committed regression, Chrome stroke check and every CI check passed.
+
+| | |
+|---|---|
+| **Issue** | Owner reports the Advise → Misato line never marks passed. The renderer excludes all layout-loop edges from route history, including this normal advice-return route. |
+| **Reproduce** | Select a sortie with recorded consultant advice, while Misato plans or after completion. |
+| **Check** | Completed advice paints its return route green when Misato is active or passed. Unused advice remains skipped; unfinished advice and unobserved execution/replanning loops remain unpassed. No communication animation is inferred. Unit regression and ledger→API→live adapter→actual SVG stroke browser check pass, followed by CI. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-08 after PR #201 runs 42421593024/42421597561 passed every job.  Regression committed failing before the fix. Allow only the consultant-to-plan layout loop through the existing passed-edge rules; other loop-history limitations remain unchanged. Browser fixture records real ledger advice and checks the rendered stroke. All checks and CI passed.
+
+**Estimates:** No remaining work. Historical estimate: Small, 1–2 focused hours; browser and CI acceptance passed.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #201](https://github.com/voidbrain/nerv/pull/201) advice route and resumed owner sequence;  Owner report 2026-11-07; Test: test/dashboard.test.ts, B-044 completed advice marks route passed; committed failing before implementation. |
+| Opened | 2026-11-07 |
+| Verification | 2026-11-07: committed unit regression passes; Chrome verified ledger→API→adapter→passed SVG stroke; full suite 268 passed, one platform skip; build/typecheck passed. Review: separate context found no actionable findings. CI: PR #201 runs 42421593024/42421597561 passed validate, Windows and native-macos. |
+| Reviewed | 2026-11-08 |
 
 </details>
 

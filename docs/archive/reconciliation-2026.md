@@ -2,6 +2,7 @@
 
 Earlier reconciliation notes moved out of the [backlog](../BACKLOG.md) header, newest first, as written at the time. The header keeps only the latest reconciliation; when it moves to a newer `main`, the sentence it replaces is added at the top of this list. Dated evidence, not current status.
 
+- Current work ledger, reviewed 7 November 2026 against main `30642bb`. PR #200 runs 42404230022/42404234032 passed validate, windows and native-macos; F-057 verified and closed. Owner resumed F-029, followed by B-042, after the advice-route correction.
 - Current work ledger, reviewed 7 November 2026 against main `eb54b23`. PR #199 runs 42402931969/42402936170 passed validate, windows and native-macos. F-053 accepted by owner and closed; F-057 uses Git-verified unique IDs. F-029 paused at owner request.
 - Current work ledger, reviewed 7 November 2026 against main `49c6f23`. PR #196 runs 42399703878/42399707747 passed validate, windows and native-macos; the earlier Chrome startup failure passed its explicit retry. F-053 owner feedback requests stronger, more frequent CRT variants.
 - Current work ledger, reviewed 7 November 2026 against main `b731b0a`. PR #195 runs 42398922334/42398926076 passed validate, windows and native-macos. B-040 verified and closed; CRT awaits owner look, brief and stale-card investigations remain open.

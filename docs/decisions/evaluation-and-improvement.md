@@ -1,6 +1,6 @@
 # Evaluation and measured improvement
 
-Assessment requested 7 November 2026. Implementation status stays in B-021, F-029, F-025, F-045, F-049 and F-051. This document proposes an evaluation design; it does not claim the scenario runner or autonomous repair loop exists.
+Assessment requested 7 November 2026. Implementation status stays in B-021, F-029, F-025, F-045, F-049 and F-051. The initial design is implemented as a versioned scripted runner and separate local-model evaluator; see [execution and evidence](../evaluations/README.md). The autonomous repair/promotion loop remains unimplemented.
 
 ## Dashboard operation
 
@@ -19,7 +19,7 @@ Evidence: `web/public/dashboard/live.js`, `src/server.ts`, `src/runtime.ts`, `sr
 
 ## B-021 and automatic acceptance
 
-B-021's backend tests already cover questions remaining open, conversation binding, the eight-word boundary, restart, expiry, topic change, approval resume and the signed cross-base link. Its browser waiting-state assertion was still pending, while its next action unnecessarily described dashboard checks as owner-only. Browser/agent execution can perform those checks. Current tests include Chrome/CDP and axe; a new Playwright dependency is not required to prove the browser behavior.
+B-021's backend tests already cover questions remaining open, conversation binding, the eight-word boundary, restart, expiry, topic change, approval resume and the signed cross-base link. Its browser waiting-state assertion was initially pending; the golden dashboard scenario now checks a waiting apartment, unlit Debrief, same-sortie answer, approval effect and topic change across the real processes. The known forwarded-answer timeout limitation remains separate. Browser/agent execution can perform those checks. Current tests include Chrome/CDP and axe; a new Playwright dependency is not required to prove the browser behavior.
 
 Two kinds of evidence must stay distinct:
 
@@ -62,6 +62,6 @@ Production promotion remains owner-confirmed under the existing project decision
 
 Keep stable IDs and the canonical ledger's required ID order. Present a separate, derived ready-to-work view rather than treating ID numbers as chronology for execution.
 
-Use explicit owner sequence and hard prerequisite outcomes first. Separate ready work, required human decisions and blocked work. Within ready work, consider impact/priority (data loss, security and core correctness first), roadmap fit, dependents unlocked, remaining effort and confidence in the evidence. A small verification task may unblock several larger records. Percentage complete is a rough scope estimate; it is not an urgency score, measured remaining time or proof of readiness.
+Use explicit owner sequence and hard prerequisite outcomes first. Separate ready work, required human decisions and blocked work. Within ready work, consider impact/priority (data loss, security and core correctness first), roadmap fit, dependents unlocked, remaining effort and confidence in the evidence. A small verification task may unblock several larger records. Active records use remaining effort, with optional hours/days and uncertainty; completion percentages have been removed. The [derived work queue](../agents/backlog-queue.md) displays explicit owner ordering and prerequisite constraints without a weighted score.
 
 For the questions in this session, B-021's agent-executable acceptance and an initial F-029 scenario slice are valuable next candidates. F-062's backup value remains high but its recorded recovery/storage decisions still require the owner. A new weighted score, priority rewrite or automatic reprioritization has not been adopted by this assessment.

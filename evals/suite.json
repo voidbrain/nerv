@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "id": "nerv-golden-v1",
+  "groups": [
+    {
+      "id": "policy",
+      "files": [
+        "test/evaluation.test.ts"
+      ],
+      "families": [
+        "effects",
+        "taint",
+        "vote-permutations",
+        "shadow-veto",
+        "budget",
+        "confinement"
+      ],
+      "minimumTests": 90
+    },
+    {
+      "id": "ledger",
+      "files": [
+        "test/ledger.test.ts",
+        "test/gate.test.ts"
+      ],
+      "families": [
+        "expiry",
+        "single-use-grants",
+        "restart",
+        "executor-effects",
+        "approval-idempotency"
+      ],
+      "minimumTests": 27
+    },
+    {
+      "id": "conversation",
+      "files": [
+        "test/clarification.test.ts",
+        "test/misato.test.ts",
+        "test/resume.test.ts",
+        "test/why.test.ts"
+      ],
+      "families": [
+        "ambiguity",
+        "mind-change",
+        "conversation-isolation",
+        "bounded-replanning",
+        "language",
+        "explanations"
+      ],
+      "minimumTests": 30
+    },
+    {
+      "id": "channels",
+      "files": [
+        "test/telegram.test.ts",
+        "test/one-channel.test.ts"
+      ],
+      "families": [
+        "delivery-retry",
+        "cross-channel",
+        "relay",
+        "owner-authorization"
+      ],
+      "minimumTests": 15
+    },
+    {
+      "id": "bases",
+      "files": [
+        "test/kaji-run.test.ts",
+        "test/kaji-seats.test.ts"
+      ],
+      "families": [
+        "signed-bases",
+        "remote-idempotency",
+        "seat-delay",
+        "shadow-after-decision"
+      ],
+      "minimumTests": 6
+    },
+    {
+      "id": "stress",
+      "files": [
+        "test/runtime-load.test.ts",
+        "test/process-client.test.ts"
+      ],
+      "families": [
+        "bounded-queues",
+        "brain-stall",
+        "crash",
+        "parallel-writes",
+        "latency"
+      ],
+      "minimumTests": 8
+    },
+    {
+      "id": "browser",
+      "files": [
+        "test/angular.browser.mjs",
+        "test/evaluation.browser.mjs"
+      ],
+      "families": [
+        "dashboard-operator",
+        "waiting-state",
+        "approval",
+        "topic-change",
+        "accessibility"
+      ],
+      "minimumTests": 2
+    }
+  ],
+  "notCovered": [
+    {
+      "branch": "pilot-execution-and-tool-evolution",
+      "owner": "F-045/F-049",
+      "reason": "Current pilots advise; executable pilot/tool lifecycle is not implemented."
+    },
+    {
+      "branch": "plan-DAG-decomposition-and-specialist-handoffs",
+      "owner": "F-048",
+      "reason": "General coder/reviewer orchestration is not implemented."
+    },
+    {
+      "branch": "unified-remote-dashboard-navigation",
+      "owner": "F-051",
+      "reason": "Authenticated cross-base inspection is not implemented."
+    },
+    {
+      "branch": "physical-phone-receipt",
+      "owner": "F-028",
+      "reason": "Bot fixtures do not establish Telegram device display or receipt."
+    }
+  ]
+}
