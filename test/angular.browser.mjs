@@ -153,9 +153,15 @@ test('F-002/F-010: reliable bilingual reminder flows, local dates and responsive
   const price={route:'cloud',model:'actual-model',currency:'USD',source:'https://provider.example/pricing',asOf:'2026-11-07',input:2,output:10,cacheRead:1,cacheWrite:3};
   for(let n=0;n<7;n++){const id=store.usage.begin('misato.step');if(n!==6)store.usage.finish(id,{route:'cloud',requestedModel:'requested-model',returnedModel:'actual-model',inputTokens:100,outputTokens:20,cacheReadTokens:0,cacheWriteTokens:0,durationMs:30,outcome:'success'},[price]);}
   store.memory.add('accounting-lilith fact','owner');
+  const advised=store.ledger.openSortie('misato','Advice route fixture','trusted');
+  store.ledger.note(advised,'misato.request',{text:'Advice route fixture',conversation:'dashboard'});
+  store.ledger.note(advised,'misato.consult',{advice:'Use the requested local reminder tool only.',model:'fixture-adviser'});
   const login=await (await fetch(origin+'/api/session/codes',{method:'POST',headers:{authorization:'Bearer '+token}})).json();
   await viewport(1440,1000);await page('Page.navigate',{url:origin+'/dashboard/#code='+login.code});
   await until(`document.querySelector('.banner')?.textContent.includes('LIVE ·')&&!document.querySelector('.banner')?.textContent.includes('SIGNING IN')`);
+  await until(`document.querySelector('.snode[data-n="consult"]').classList.contains('done')&&document.querySelector('#edges path.loop.passed')`);
+  assert.equal(await evaluate(`(()=>{const probe=document.createElement('i');probe.style.color='var(--ok)';document.body.append(probe);const expected=getComputedStyle(probe).color;probe.remove();return getComputedStyle(document.querySelector('#edges path.loop.passed')).stroke===expected})()`),true,'completed advice route is painted as passed');
+  await screenshot('dashboard-advise-route');
   // F-057: exercise the actual header button and browser clipboard, not only the helper.
   await until(`document.querySelector('#build').dataset.commit.length>=7`);
   const reportedBuild=await (await fetch(origin+'/api/doctor',{headers:{authorization:'Bearer '+token}})).json();

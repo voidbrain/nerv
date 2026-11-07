@@ -382,3 +382,15 @@ test('F-057: clicking the running version copies and shows Git’s supplied uniq
  api.showBuild({version:'1.205',commit},element);copied.length=0;await api.copyBuild(element,{writeText:async(value:string)=>{copied.push(value);}});assert.deepEqual(copied,[commit],'older metadata falls back to the full valid ID, never a fabricated abbreviation');
  assert.equal(element.dataset.commit,commit,'copy formatting does not change running-build identity');
 });
+
+test('B-044: completed advice marks the Advise → Misato route passed without coloring unused replanning loops',()=>{
+ const source=readFileSync('web/public/dashboard/dashboard.js','utf8');
+ const take=(name:string)=>{const a=source.indexOf(`function ${name}(`);return source.slice(a,source.indexOf('\n}\n',a)+2);};
+ const passed=new Function(take('stepState')+'\n'+take('passedEdge')+'\nreturn passedEdge;')() as (sortie:object,edge:string[])=>string;
+ const sortie={status:'active',phase:'plan',consult:true,done:{detect:true,intake:true,route:true,consult:true},actions:[]};
+ assert.equal(passed(sortie,['consult','plan','loop']),'passed');
+ assert.equal(passed({...sortie,status:'done',phase:'debrief',done:{...sortie.done,plan:true,debrief:true}},['consult','plan','loop']),'passed');
+ assert.equal(passed({...sortie,consult:false,done:{route:true}},['consult','plan','loop']),'skip','unused advice stays skipped');
+ assert.equal(passed(sortie,['eva','plan','loop']),'','do not invent an execution/replanning loop');
+ assert.equal(passed({...sortie,phase:'consult',done:{route:true}},['consult','plan','loop']),'','advice still in progress is not passed');
+});

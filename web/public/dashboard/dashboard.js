@@ -591,7 +591,7 @@ function drawEdges(s) {
 /** The route already taken: green when the step passed on its own, yellow when it went through the owner's decision
     (Misato's apartment), faded into a skipped step. Step activity is shown on nodes; route history never claims an ongoing communication. */
 function passedEdge(s, e) {
-  if (!s || e[2] === "loop") return "";
+  if (!s || (e[2] === "loop" && !(e[0] === "consult" && e[1] === "plan"))) return "";
   if (e[2] === "answer") return stepState(s, "plan") === "done" && stepState(s, "debrief") === "done" ? "passed" : "";
   if (e[2] === "relay") return stepState(s, "debrief") === "done" ? "passed" : "";
   const from = stepState(s, e[0]), to = stepState(s, e[1]);
