@@ -20,6 +20,13 @@ const mainText = git('show', `origin/${branch}:docs/BACKLOG.md`) ?? '';
 // docs/BACKLOG-RULES.md is the procedure this enforces; an empty ledger is valid.
 const headings = [...text.matchAll(/^### ([BF]-\d+)$/gm)];
 const ids = new Set();
+// Evidence the rules ask for once a record is done (BACKLOG-RULES, Record and evidence requirements): warnings, not
+// failures, and only for a record this branch makes done (Verified or Closed here, not on the default branch), so records
+// finished under older rules are not flagged. The evidence sits in the PR / evidence or Verification cell, with a value,
+// not a placeholder ("Test: …", "Test: <file>").
+const warnings = [];
+const doneOnMain = new Set(mainText.split(/^(?=### [BF]-\d+$)/m).slice(1).filter(b => /^\| \S+ \| \S+ P\d \| (?:Verified|Closed) \|/m.test(b)).map(b => b.slice(4, b.indexOf('\n'))));
+const evidence = (cellsText, labels) => new RegExp(`(?:^|[\\s;(*])(?:${labels})(?:\\*\\*)?:(?:\\*\\*)?\\s*(?![…<\\s])\\S`).test(cellsText);
 const cues = {Open: '🔴', Investigate: '🟠', Implemented: '🟡', Verified: '🟢', Blocked: '🟣', Closed: '🔵'};
 for (let i = 0; i < headings.length; i++) {
   const id = headings[i][1];
@@ -59,6 +66,11 @@ for (let i = 0; i < headings.length; i++) {
     const value = detail[1].split('\n').filter(line => line.startsWith('|')).map(cells).find(row => row[0] === field)?.[1];
     assert(value, `${id}: missing ${field}`);
     if (['Opened', 'Reviewed'].includes(field)) assert(/^\d{4}-\d{2}-\d{2}$/.test(value), `${id}: invalid ${field}`);
+  }
+  if (['Verified', 'Closed'].includes(status) && !doneOnMain.has(id)) {
+    const cited = detail[1].split('\n').filter(line => line.startsWith('|')).map(cells).filter(row => ['PR / evidence', 'Verification'].includes(row[0])).map(row => row[1]).join('\n');
+    if (id.startsWith('B-') && !evidence(cited, 'No test|Test')) warnings.push(`${id}: a done bug names its failing-first test ("Test: …") or why none can show it ("No test: …"); BACKLOG-RULES, "A bug fix starts with a failing test"`);
+    if (level === '1' && !evidence(cited, 'No review|Review')) warnings.push(`${id}: a done P1 record cites its independent review ("Review: …") or why it needs none ("No review: …"); BACKLOG-RULES, "Independent review"`);
   }
 }
 assert.equal((text.match(/<details>/g) ?? []).length, headings.length, 'Metadata details count');
@@ -115,4 +127,7 @@ if (prNumber) {
   const added = text.split('\n').filter(line => placeholder.test(line) && !mainBacklog.has(line));
   assert(!added.length, `docs/BACKLOG.md: ${added.length} line(s) this branch adds say "this PR": write #${prNumber} instead (BACKLOG-RULES, Review procedure 7). First: "${added[0]?.slice(0, 100)}"`);
 }
+// a workflow command's message escapes %, CR and LF
+const annotate = (text) => text.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A');
+for (const w of warnings) console.log(process.env.GITHUB_ACTIONS ? `::warning title=Backlog::${annotate(w)}` : `! ${w}`);
 console.log(`${ids.size} backlog records passed: signal, estimates, visible recap, collapsed actions, metadata, dates, cues and table widths${published.length ? `; the archives keep every line their ${published.length} file(s) have on ${branch}` : ''}.`);

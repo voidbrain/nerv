@@ -2,6 +2,14 @@
 
 All applicable rules are binding from the start. An index can reduce repeated navigation, but never defers reading relevant instructions or makes ownership, evidence, privacy or safety optional.
 
+## In short
+
+Moved from AGENTS.md in 3.3.0, unchanged in substance; AGENTS keeps the trigger.
+
+All applicable rules must be known and followed from the start; shorter indexes never defer requirements. Use this guidance for read-only preview, mandatory timed adoption/reconciliation and input-bound review evidence. Run `node tools/maintenance.mjs check` at session start and in CI; failures require current reviewed outcomes before proceeding. At audits, repeated procedural conflicts or significant workflow changes, consolidate redundant rules with requirement/owner/exception traceability. Never remove a safeguard just because it is old or rarely triggered. Record unresolved findings on their owning outcomes; no automatic expiry or telemetry.
+
+Maintenance findings drive justified rule/tool/skill improvements through tested, owned PRs or an explicit no-change/backlog outcome, never unattended policy rewriting. Daily CI checks freshness between sessions. Coverage is separate from quality: test changed behavior and risky joins, preserve static/security checks, use optional main-baseline non-regression, never demand a percentage increase on every PR.
+
 ## Required enforcement
 
 For harness 3.0 adoption, enable `.harness.json` maintenance policy, choose the actual rule/tool input files and a review interval (7 days by default). Run `node tools/maintenance.mjs check` at session start and in PR CI. The daily read-only Maintenance freshness workflow is scheduled between sessions at 09:00 UTC (normal Actions scheduling may delay a run); failure reporting uses normal GitHub Actions notifications, not an installed background agent. No agent works while no execution host is running.
@@ -41,6 +49,14 @@ At an audit and after a repeated procedural conflict or significant workflow cha
 For each proposed consolidation record old locations, the requirement they enforce, new owner/location, preserved exceptions, why the text is redundant/obsolete, and the check establishing no requirement was lost. Replace duplicate normative text with a short pointer where useful. Explicitly preserve applicable rules from session start. Update every affected summary, template/adapted copy and test in the same change; generic changes release upstream before projects adopt them. If deletion changes behavior, treat it as a policy change with its own acceptance, not editorial cleanup.
 
 Age, rare use and no recent incident do not justify deleting ownership, evidence, privacy or safety safeguards. Do not automatically expire rules or create an empty review artifact on every edit. Track actual unresolved findings/outcomes; completed scoped reviews can record no changes with inspected scope and reasons. Session checks, PR CI and the daily read-only workflow enforce freshness. The agent closes the loop on findings: inspect evidence, produce justified rule/tool/skill improvements, test in the owning repository and submit a normal PR, or record an owned backlog/no-change outcome. Candidate suggestions from conflict/prompt/reload medians are diagnostics, not semantic conclusions or authority to rewrite policy unattended.
+
+## Agent-behaviour checks
+
+Tools check records and files; `tools/behaviour.mjs` checks whether an agent following this project's AGENTS.md and BACKLOG-RULES behaves as they say. Each scenario builds a fixture repository from the project's own rule files (`behaviour.rules` maps fixture paths to sources), gives the agent one task and grades the result without a model: files, records, commits, the remote and the transcript. `node tools/behaviour.mjs list` names the scenarios and the rule each one tests.
+
+The runner is the project's choice, set in `.harness.json` `behaviour.runner`: a shell command run in the fixture repository with the task in `$HARNESS_TASK_FILE`, whose output is the transcript, so it should print the agent's final reply rather than tool logs (for example `claude -p "$(cat "$HARNESS_TASK_FILE")"` with the permissions the owner allows for a throwaway fixture). The fixture lives in a temporary folder with a local bare remote; give the runner no credentials or network access it does not need. `npm run behaviour -- run` runs each scenario `behaviour.times` times (3 by default) and reports passes per scenario, never only a total; `--scenarios=a,b` narrows it and `--keep` leaves the fixtures for inspection. A runner that fails to start, exits non-zero or times out (`behaviour.timeoutMs`, 20 minutes by default; its whole process group is stopped) counts as a failed run, never as a graded one.
+
+Run it on demand and when the rule files it copies change (AGENTS.md, CLAUDE.md, BACKLOG-RULES: an impact-map row), never on every PR by default: each run costs agent time. Compare each scenario with its last run. A scenario that starts failing is a backlog record, with the report as evidence. A mistake seen in real work or an audit finding becomes a new scenario: a fixture, a task and a grader that reads the result. A pass shows the agent followed the rule in that fixture, not in every situation.
 
 ## Incremental quality policy
 

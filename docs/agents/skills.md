@@ -2,6 +2,12 @@
 
 Skills are optional workflow entry points. AGENTS.md owns project rules; APPLY.md owns harness adoption and release procedure. A skill must link those authorities rather than restate them or override existing authorization. A reusable master never relies on a derived project to supply missing instructions.
 
+## In short
+
+Moved from AGENTS.md in 3.3.0, unchanged in substance; AGENTS keeps the trigger.
+
+When a workflow needs an additional skill, read this guidance. Discover existing capabilities first; review source, dependencies and project-rule compatibility before use. Shared skills are optional entry points and do not replace project rules or grant installation permissions.
+
 ## Locate and share
 
 The harness publishes `skills/apply-harness/SKILL.md` in its repository. Locate it in the template checkout named by `.harness.json`, or read it from the selected verified template revision through GitHub. It is not copied into every consumer by default. Agents without skill discovery can read that file explicitly and follow the linked procedure.

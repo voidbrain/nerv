@@ -67,7 +67,6 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 
 The convention checker applies default-specific rules to the installed workspace version: standalone at v20+, OnPush at v22+. Install locked dependencies before CI checks; an unknown or cross-major uninstalled range cannot establish a default. Other text checks still run. This heuristic does not replace lint, type checking, accessibility or browser tests.
 
-
 ## Project conventions (NERV Agency)
 
 The project is **NERV Agency**. The repository is `https://github.com/voidbrain/nerv`; the default branch is `main`. No hosted deployment is provisioned. Angular project: `nerv`. Backend: Node 24 native TypeScript and SQLite.
@@ -89,10 +88,13 @@ The project is **NERV Agency**. The repository is `https://github.com/voidbrain/
 
 Open every PR against `main`, never on another PR's branch (merging it would not reach `main`). Once a PR's CI is green the owner may merge it at any moment: push no new work to it, open a new PR. Exception: a green PR that conflicts with `main` cannot merge, so it may get a push that only resolves the conflict; its checks run again before it can merge. A conflict in `docs/BACKLOG.md` is resolved record by record with `node tools/merge-backlog.mjs`, never by keeping one side's record (that silently drops the other side's edits).
 
+<!-- safety:start -->
 **What the agent does on its own, and what it asks first.**
 - On its own: branch from `main`, commit, push its branches, open PRs against `main` (then name the PR by its number in the records it touches, and push that before the checks finish), resolve conflicts on its own PRs, merge its own PR once every check on it has passed and GitHub can merge it (`node tools/merge-when-green.mjs <PR>…` waits for that and stops on any failing check or conflict), delete merged branches, reconcile and close backlog records.
 - Asks first: a decision or check a record marks 🧑; repository settings (branch protection, required checks, secrets) and dismissing a code-scanning alert; rewriting published history or force-pushing; deleting what it did not create; a harness change it cannot place as project or template ("Changing a harness file").
 - Never: merge with a failing or pending check, or bypass the branch protection. A project narrows this list with a project line.
+- Never remove a safeguard (an ownership, evidence, privacy or safety rule) because it is old or rarely triggered, and never rewrite governing rules unattended: consolidating rules keeps every requirement ([maintenance guidance](docs/agents/maintenance.md)).
+<!-- safety:end -->
 
 ```bash
 npm run check:freshness   # first, at session start: backlog behind main, merged branches, audit age
@@ -106,10 +108,8 @@ npm run check:conventions # stack conventions above and unused exports (when the
 
 - A failing test is evidence until shown otherwise: check it against the intended behaviour. Change its expectation only when the requirement deliberately changed, and say which requirement; otherwise fix the code.
 - Do not leave dead code behind when replacing a feature: its state, helpers and tests go too.
-
-### Code coverage
-
-`docs/agents/coverage.md` shows, per folder, how much of the code the unit tests run (lines, statements, branches, functions) and the files no test runs; `npm run coverage` (or the stack's coverage run, then `node tools/coverage-table.mjs --write`) refreshes it and its baseline. CI prints the current table and warns when a folder drops more than `coverage.drop` points; projects opting into `coverage.enforce` fail the check against the main-branch baseline instead. Coverage says what ran, not that the behaviour is checked: a table to find untested parts, never a number to hit. The committed page and baseline change only in a PR that changes coverage on purpose (code removed, tests added for it) and in audits, never as a side effect of other work: CI prints the live table on every PR anyway, and parallel PRs that each rewrite the page conflict.
+- A bug fix starts with a committed test that fails without the fix; the fix never edits that test to pass (BACKLOG-RULES, "A bug fix starts with a failing test").
+- A PR that closes a P1 record or changes a harness file gets a review in a fresh context before it merges; the reviewer reports, never approves or merges (BACKLOG-RULES, "Independent review").
 
 ### Changing a harness file
 
@@ -120,15 +120,22 @@ Before editing a file listed in `.harness.json` (`copied`, `forked`, `adapted`, 
 
 `npm run check:freshness` lists the harness files a branch changes, locally and on every PR.
 
-### What follows a change
+### Procedures: read before the task
 
-Everything derived from something else is a row of the impact map, `impact` in `.harness.json`: generated pages and data, recordings (clips, screenshots, films), translations, guides and tours, docs that describe a feature. A row: `{ "id", "when": [file globs], "then": "what must follow", "run": "command", "checked": "what verifies it", "after": [ids] }`. `after` makes chains: when a row it names must run again, so must this one (a catalogue rebuilt → the examples that use it → their pages).
-- Rows are as fine as the code can name things (a recording per step, not "all recordings"), and complete: a derived thing you find without a row gets one in the same PR.
-- A row watches what its output is made of, not only code: the data a recording or a generated page loads (an example, a demo file, a fixture) goes in its `inputs`, which set it off like `when`. A setting with a wide reach (a theme colour, a font, a scale) has its own row chained to every output it shows in, art included.
-- **Couplings.** A value used in two places (a timing, a colour, an offset, a size) has one source that both read. If it cannot, a test asserts the relation. Either way it is listed in `couplings` (`{ value, places: [{ file, what }], kept }`), and `check:freshness` names the other places when a branch changes one. A value copied by hand is a bug waiting to happen.
-- What can change an output with no commit here (library upgrades, the CI browser and machine, external services and data) is listed in `outside` (`{ what, affects, noticed }`) and reviewed by the audit.
-- `npm run check:freshness` lists, locally and on every PR, the rows a branch sets off and the order to run them. Do each in the same PR, or record in the backlog why not.
-- `node tools/impact-map.mjs` writes the readable page (`docs/agents/impact-map.md`): what must follow a change, content dependencies, value couplings and what lies outside the repository, with links to the project's own detailed maps (`pages`: `{ title, path, about }`). CI keeps it equal to `.harness.json`. A row that nothing checks is a candidate for a check.
+All applicable rules must be known and followed from the start; shorter indexes never defer requirements. Each procedure below is binding when its trigger applies: read it before starting that task. `npm run check:rules` fails when a never or ask-first rule lives only in a procedure.
+
+| Before you | Read |
+|---|---|
+| change tests, coverage settings or the coverage page | [coverage guide](docs/agents/coverage-guide.md) |
+| change something another output is derived from (generated pages and data, recordings, translations, guides, a value used in two places) | [change impact](docs/agents/change-impact.md); `check:freshness` lists the rows a branch sets off: do each in the same PR, or record in the backlog why not |
+| set up the project or change its stack or workflow (capability assessment) | [MCP guidance](docs/agents/mcp.md), "In short" |
+| add, configure or rely on an MCP connection | [MCP guidance](docs/agents/mcp.md) |
+| work across repositories of a solution | [solution profile](docs/agents/solution-profile.md) |
+| add or use a shared skill | [skill guidance](docs/agents/skills.md) |
+| adopt or reconcile the harness, review maintenance evidence or consolidate rules (`node tools/maintenance.mjs check` runs at session start and in CI) | [maintenance guidance](docs/agents/maintenance.md) |
+| change AGENTS.md, CLAUDE.md or BACKLOG-RULES (rerun the agent-behaviour checks when a runner is configured) | [maintenance guidance](docs/agents/maintenance.md), "Agent-behaviour checks" |
+| run an audit (`check:freshness` says when) | [audit procedure](docs/agents/audit.md) |
+| update or close a backlog record | [backlog rules](docs/BACKLOG-RULES.md) |
 
 ### Testing the joins
 
@@ -148,28 +155,15 @@ Before changing an area, read its section in [docs/agents/areas.md](docs/agents/
 | Frontend | Angular surfaces and branding |
 | Distributed contracts | Nodes, models, jobs and agents |
 
-
 ## Privacy
 
 - Never commit secrets, tokens or personal data. Test data is neutral and invented.
-
-### Capability assessment
-
-At setup and relevant stack/workflow changes, understand the project and assess existing capabilities and useful gaps. At session start, inspect `.harness.json` for selected integrations and solution context. Existing tools may suffice; assessment does not require installing an integration.
-
-### MCP recommendations
-
-Read [MCP guidance](docs/agents/mcp.md) when configured/relevant. Discover actual host tools before installing duplicates; a recommendation or generated config is not a working connection. Research fresh candidates only when the workflow needs them, following trusted sources and existing authorization. Missing optional connections do not block independent work.
-
-### Solution context
-
-Read available [solution context](docs/agents/solution-profile.md) when configured/relevant; missing coordinator access does not block independent component work. A solution coordinator owns contracts, compatibility and integration acceptance in its own backlog; components own implementation and their independent acceptance. Link records using repository-qualified IDs and derive dashboards from source ledgers without copying editable statuses or averaging completion. A reusable master never waits for downstream adoption. Only the coordinator writes its dashboard; source revisions, unavailable inputs and dirty snapshots remain explicit.
 
 ## Work tracking
 
 - Keep single responsibility and dependency inversion across repository boundaries: reusable masters define contracts; derived projects supply their adapters/configuration. A master never depends on derived implementation, deployment or adoption for its release or acceptance. Each backlog owns only its repository’s work; reject foreign next actions and closure conditions (BACKLOG-RULES, Ownership rejection and dependency direction).
 
-**At the start of every session, before other work, run `npm run check:freshness`** and do what it lists, in the session's first PR:
+**At the start of every session, before other work, run `npm run check:freshness`**, inspect `.harness.json` for selected integrations and solution context ([MCP guidance](docs/agents/mcp.md), [solution profile](docs/agents/solution-profile.md)), and do what it lists, in the session's first PR:
 - the backlog is behind `main`: read the CI of the PRs merged since (`npm run ci:status -- <numbers>`) and review any commit it lists without a PR, update or close their records, archive closed ones, move the header to the current `main`;
 - merged branches are still on GitHub: delete them (and their local branches and worktrees);
 - the scope-aware audit checker reports missing/stale/blocked areas (7 days by default): audit what changed since (docs, tests, style guide, accessibility, privacy, and what the outputs rely on outside the repository: dependency upgrades, the CI browser and machine, external services and data) and write `docs/audits/<date>.md`;
@@ -182,17 +176,3 @@ CI prints ordinary freshness findings as warnings; the required maintenance evid
 - Keep a confirmed bug, a candidate fix awaiting review, an unimplemented feature and a completed check distinct. A merge is not verification, and a passing unit test is not a verified visual, pointer or device fix. A green CI run establishes the checks it named, not the absence of bugs. Archives (`docs/archive/`) and audits (`docs/audits/`) are dated evidence, not current status; current audit coverage is reported per area by check:audits; a scoped report never resets the full-audit baseline.
 - A change to a harness file follows "Changing a harness file" above: this project only, every project (the template first), or ask.
 - A plan or promise given to the user (steps, a table to build, a later fix) becomes backlog records in the same change, and the reply names them. Nothing promised lives only in the conversation.
-
-### Optional shared skills
-
-When a workflow needs an additional skill, read [skill guidance](docs/agents/skills.md). Discover existing capabilities first; review source, dependencies and project-rule compatibility before use. Shared skills are optional entry points and do not replace project rules or grant installation permissions.
-
-### Maintenance cost and rule consolidation
-
-All applicable rules must be known and followed from the start; shorter indexes never defer requirements. Use [maintenance guidance](docs/agents/maintenance.md) for read-only preview, mandatory timed adoption/reconciliation and input-bound review evidence. Run `node tools/maintenance.mjs check` at session start and in CI; failures require current reviewed outcomes before proceeding. At audits, repeated procedural conflicts or significant workflow changes, consolidate redundant rules with requirement/owner/exception traceability. Never remove a safeguard just because it is old or rarely triggered. Record unresolved findings on their owning outcomes; no automatic expiry or telemetry.
-
-Maintenance findings drive justified rule/tool/skill improvements through tested, owned PRs or an explicit no-change/backlog outcome, never unattended policy rewriting. Daily CI checks freshness between sessions. Coverage is separate from quality: test changed behavior and risky joins, preserve static/security checks, use optional main-baseline non-regression, never demand a percentage increase on every PR.
-
-### Periodic audits and findings
-
-Follow [the audit procedure](docs/agents/audit.md). Produce a dated report and scope manifest with baseline, checked/not-applicable/blocked results, evidence, limits and findings. Full audits cover all eight areas; scope narrow reviews honestly. Separate confirmed bugs, incomplete agreed work, hypotheses, context and value-based improvement proposals. Track actionable unresolved work under owning IDs, preserving uncertainty and authorization. A fresh maintenance receipt or passing CI is not a completed product audit.

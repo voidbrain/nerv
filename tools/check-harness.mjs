@@ -42,6 +42,16 @@ const safe = (path) => {
 try {
   for (const path of ['.harness.json', ...Object.keys(stamp.copied ?? {}), ...Object.keys(stamp.forked ?? {}), ...Object.keys(stamp.adapted ?? {})]) safe(path);
 } catch(e) { warn(e.message + '; no project files merged.'); done(); }
+// The optional push guard (tools/guard.mjs, AGENTS "What the agent does on its own"): adopted means copied; installed
+// means the git pre-push hook runs it. Hooks are per clone, so CI runs skip this.
+let guard = '';
+if (stamp.copied?.['tools/guard.mjs'] && !process.env.CI && existsSync(join(root, 'tools/guard.mjs'))) {
+  try {
+    const { status } = await import(new URL('./guard.mjs', import.meta.url).href);
+    if (status(root).installed) guard = '; the push guard is installed';
+    else if (status(root).path) warn('The push guard (tools/guard.mjs) is adopted but not installed in this clone: node tools/guard.mjs install');
+  } catch (e) { warn(`The push guard (tools/guard.mjs) could not be checked: ${e.message}`); }
+}
 const home = (process.env.HARNESS_HOME ?? stamp.template?.path ?? '~/Projects/project-harness').replace(/^~(?=\/|$)/, homedir());
 if (!existsSync(join(home, 'VERSION'))) {
   // a CI run without a clone (no clone step, or the clone failed) skips quietly; locally a missing clone is something to fix
@@ -126,4 +136,4 @@ if (behind) {
   warn(`Harness template v${latest} is out (this project is on v${base}). See CHANGELOG.md in the template${log ? `; changes:\n${log}` : ''}\nReconcile the files above (APPLY.md, "Reconciling"), then set "version" in .harness.json to "${latest}".`);
 }
 const forks = Object.keys(stamp.forked ?? {}).length;
-done(`Harness: on template v${latest}; copied files match it${forks ? `, ${forks} fork(s) merged up to date` : ''}.`);
+done(`Harness: on template v${latest}; copied files match it${forks ? `, ${forks} fork(s) merged up to date` : ''}${guard}.`);

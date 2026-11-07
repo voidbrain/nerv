@@ -2,6 +2,14 @@
 
 Optional capability guidance for any project. No MCP is required just to use the harness. The catalogue is [tools/mcp-catalog.json](../../tools/mcp-catalog.json); recommendations are project content in `.harness.json`. A name or technology match is a research candidate, not an installation instruction.
 
+## In short
+
+Moved from AGENTS.md in 3.3.0, unchanged in substance; AGENTS keeps the trigger.
+
+**Capability assessment.** At setup and relevant stack/workflow changes, understand the project and assess existing capabilities and useful gaps. At session start, inspect `.harness.json` for selected integrations and solution context. Existing tools may suffice; assessment does not require installing an integration.
+
+**MCP recommendations.** Read this guidance when configured/relevant. Discover actual host tools before installing duplicates; a recommendation or generated config is not a working connection. Research fresh candidates only when the workflow needs them, following trusted sources and existing authorization. Missing optional connections do not block independent work.
+
 ## Discovery and ownership
 
 At setup, read the actual stack, source, workflow and current task. Identify capabilities that would help, then discover the session's already available connectors, MCP tools and CLI alternatives. Reuse sufficient capabilities. A cloud model can operate tools through a local agent; a hosted session can only use the connections its host exposes. A repository config file does not grant connectivity. A local model is not fully offline if its tools, credentials or services require network.

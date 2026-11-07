@@ -2,6 +2,12 @@
 
 An audit reviews evidence and records findings; it is not a guarantee of no defects. This procedure applies to the template and adopted projects, with repository-owned acceptance. Read all applicable rules first. Audits never weaken starting rules or create a master release dependency on consumers.
 
+## In short
+
+Moved from AGENTS.md in 3.3.0, unchanged in substance; AGENTS keeps the trigger.
+
+Follow this procedure. Produce a dated report and scope manifest with baseline, checked/not-applicable/blocked results, evidence, limits and findings. Full audits cover all eight areas; scope narrow reviews honestly. Separate confirmed bugs, incomplete agreed work, hypotheses, context and value-based improvement proposals. Track actionable unresolved work under owning IDs, preserving uncertainty and authorization. A fresh maintenance receipt or passing CI is not a completed product audit.
+
 ## Triggers and scope
 
 At session start and CI, run freshness plus `node tools/check-audits.mjs`. The default interval is 7 days (`audit.days`, else freshness.auditDays). The daily read-only workflow reports between sessions; no agent performs repairs while no execution host is running.
