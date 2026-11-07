@@ -64,6 +64,12 @@ export class Store {
     this.db.exec('CREATE INDEX IF NOT EXISTS deliveries_kind_created ON deliveries(kind,created); PRAGMA user_version=5');
     this.ledger = new Ledger(this.db,{policy:scrolls.policy,tools:builtinTools});this.memory = new Memory(this.db);this.policySource = scrolls.source;
   }
+  /** Same-connection writes plus external SQLite commits, without scanning events or running integrity checks. */
+  dashboardRevision():string {
+    const own=this.db.prepare('SELECT total_changes() AS n').get() as {n:number};
+    const external=this.db.prepare('PRAGMA data_version').get() as {data_version:number};
+    return `${external.data_version}:${own.n}`;
+  }
   /** A valid title and a future ISO date with an explicit timezone, as UTC; the same rules for a new reminder and an edit. */
   private checkReminder(title: string, due: string, now: Date): {title: string; due: string} {
     if(typeof title !== 'string' || !title.trim() || title.length > 500) throw new Error('Title must contain 1–500 characters.');

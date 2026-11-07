@@ -313,6 +313,6 @@ test('the header shows the incrementing build version: the doctor reports the ve
 
 test('map legend is compact, cloud caption is removed, and unavailable live costs remain explicit',()=>{
  const src=readFileSync('web/public/dashboard/dashboard.js','utf8');assert.doesNotMatch(src,/cloudRouteCaption|UMBILICAL ↗ cloud/);
- const live=readFileSync('web/public/dashboard/live.js','utf8');assert.match(live,/Cost tracking not connected/);assert.doesNotMatch(live,/qv-budget"\)\.textContent = "\$0\.00"/);
+ const live=readFileSync('web/public/dashboard/live.js','utf8');assert.match(live,/Cost unavailable/);assert.match(live,/Priced subtotal on this page/);assert.doesNotMatch(live,/qv-budget"\)\.textContent = "\$0\.00"/);
  const html=readFileSync('web/public/dashboard/index.html','utf8');assert.doesNotMatch(html,/Map legend|Links &amp; activity/);assert.match(html,/■ Bases/);assert.match(html,/>- Kaji line</);assert.match(html,/>sync<\/span>/);assert.doesNotMatch(html,/Scrolls: \$1\.00 \/ day/);
 });

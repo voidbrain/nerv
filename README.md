@@ -46,7 +46,7 @@ Use your actual future deadline. CLI timestamps require an explicit UTC offset. 
 
 All `/api` routes require a bearer token (except the native TLS claim route, which requires a private single-use invitation). Lightweight `/api/status` is used for background health; explicit `/api/doctor` retains integrity diagnostics. Native clients can also use authenticated, read-only JSON-RPC 2.0 WebSockets at `/rpc`; browser ticket pairing and remote execution are not implemented. Static UI files are public on loopback and contain no credentials. No permissive CORS or public-network binding is enabled. Doctor covers local configuration/runtime/database; remote/device probes remain planned.
 
-Model calls retain provider-reported tokens, requested and returned models, duration and outcome in SQLite. Authenticated clients can page this accounting; cost estimates require explicit dated price snapshots. Missing usage stays unknown. See [model usage](docs/model-usage.md). Dashboard display remains F-019.
+Model calls retain provider-reported tokens, requested and returned models, duration and outcome in SQLite. Authenticated clients can page this accounting; cost estimates require explicit dated price snapshots. Missing usage stays unknown. See [model usage](docs/model-usage.md). The live dashboard Battery tab displays these pages and price provenance; currency subtotals cover only the loaded page. Authenticated change notifications refresh the dashboard, with periodic polling for recovery.
 
 `nerv bom` writes a privacy-filtered CycloneDX snapshot of configured models and granted MCP tools. CI publishes the locked npm dependency SBOM separately; see [bills of materials](docs/security/bill-of-materials.md).
 

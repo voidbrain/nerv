@@ -16,7 +16,7 @@ test('F-002/F-010: reliable bilingual reminder flows, local dates and responsive
  assert.ok(chrome,'Install Chrome/Chromium or set CHROME_BIN. Run npm run build first.');
  const profile=mkdtempSync(join(tmpdir(),'nerv-browser-'));
  const artifacts=process.env.NERV_BROWSER_ARTIFACTS; if(artifacts)mkdirSync(artifacts,{recursive:true});
- const store=new Store(':memory:');const token='e'.repeat(32);
+ const store=new Store(':memory:');store.modelUsage=async(before,limit)=>store.usage.page(before,limit);store.lilith={list:async()=>store.memory.list(),episodes:async()=>store.memory.episodes()};const token='e'.repeat(32);
  const server=makeServer(store,token,{webRoot:resolve('dist/web/browser'),language:'en',timeZone:'Europe/Rome'});
  await new Promise(done=>server.listen(0,'127.0.0.1',done));const origin=`http://127.0.0.1:${server.address().port}`;
  const child=spawn(chrome,['--headless','--no-first-run','--no-default-browser-check',...(process.platform==='linux'?['--no-sandbox']:[]),'--remote-debugging-port=0',`--user-data-dir=${profile}`,'about:blank'],{stdio:['ignore','ignore','pipe']});
@@ -137,16 +137,60 @@ test('F-002/F-010: reliable bilingual reminder flows, local dates and responsive
    for(const [index,group] of groups.entries()){
     const selector=`[role=group][aria-label="${group}"]`;
     const first=await evaluate(index===0?`document.querySelector('article.reminder strong').textContent`:`document.querySelector('.inbox p').textContent`);
+    // Existing rows can still be visible while the shared paging guard is busy after Refresh/language change.
+    await until(`document.querySelector('${selector} button:last-child').getAttribute('aria-disabled')==='false'`);
     await evaluate(`document.querySelector('${selector} button:last-child').focus();document.activeElement.click()`);
-    await until(`!document.querySelector('${selector} button:first-child').disabled`);
+    await until(`!document.querySelector('${selector} button:first-child').disabled&&document.querySelector('${selector} button:first-child').getAttribute('aria-disabled')==='false'`);
     assert.equal(await evaluate(`document.activeElement.closest('[role=group]')?.getAttribute('aria-label')`),group,'keyboard focus stays in the active pager');
     assert.notEqual(await evaluate(index===0?`document.querySelector('article.reminder strong').textContent`:`document.querySelector('.inbox p').textContent`),first);
     await evaluate(`document.querySelector('${selector} button:first-child').click()`);
-    await until(`document.querySelector('${selector} button:first-child').disabled`);
+    await until(`document.querySelector('${selector} button:first-child').disabled&&document.querySelector('${selector} button:last-child').getAttribute('aria-disabled')==='false'`);
     assert.equal(await evaluate(index===0?`document.querySelector('article.reminder strong').textContent`:`document.querySelector('.inbox p').textContent`),first);
    }
    await audit(lang+'-history-pages');
   }
+  // F-019: shipped /dashboard accounting, keyboard pager, mobile layout and actual change notifications.
+  const price={route:'cloud',model:'actual-model',currency:'USD',source:'https://provider.example/pricing',asOf:'2026-11-07',input:2,output:10,cacheRead:1,cacheWrite:3};
+  for(let n=0;n<7;n++){const id=store.usage.begin('misato.step');if(n!==6)store.usage.finish(id,{route:'cloud',requestedModel:'requested-model',returnedModel:'actual-model',inputTokens:100,outputTokens:20,cacheReadTokens:0,cacheWriteTokens:0,durationMs:30,outcome:'success'},[price]);}
+  store.memory.add('accounting-lilith fact','owner');
+  const login=await (await fetch(origin+'/api/session/codes',{method:'POST',headers:{authorization:'Bearer '+token}})).json();
+  await viewport(1440,1000);await page('Page.navigate',{url:origin+'/dashboard/#code='+login.code});
+  await until(`document.querySelector('.banner')?.textContent.includes('LIVE ·')&&!document.querySelector('.banner')?.textContent.includes('SIGNING IN')`);
+  await evaluate(`document.querySelector('#tab-battery').click()`);
+  await until(`document.querySelector('#budget-sub')?.textContent.includes('5 calls')`);
+  assert.equal(await evaluate(`location.hash`),'','login code removed');
+  assert.match(await evaluate(`document.querySelector('#budget').textContent`),/actual-model/);
+  assert.match(await evaluate(`document.querySelector('#budget').textContent`),/requested-model/);
+  assert.match(await evaluate(`document.querySelector('#budget').textContent`),/Outcome and usage unknown/);
+  assert.match(await evaluate(`document.querySelector('#budget').textContent`),/price as of 2026-11-07/);
+  assert.doesNotMatch(await evaluate(`document.querySelector('#budget').textContent`),/S² free|Cost tracking planned/);
+  await evaluate(`document.querySelector('[data-usage-page="older"]').focus();document.activeElement.click()`);
+  await until(`document.querySelector('#budget-sub')?.textContent.includes('2 calls')`);
+  assert.equal(await evaluate(`document.activeElement.dataset.usagePage`),'newer');
+  await evaluate(`document.querySelector('[data-usage-page="newer"]').click()`);
+  await until(`document.querySelector('#budget-sub')?.textContent.includes('5 calls')`);
+  await evaluate(`document.querySelector('#p-budget').focus()`);
+  await evaluate(readFileSync(require.resolve('axe-core/axe.min.js'),'utf8'));
+  for(const width of [1440,390]){
+   await viewport(width,1000);
+   const violations=await evaluate(`axe.run(document.querySelector('#p-budget')).then(r=>r.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)})))`);assert.deepEqual(violations,[],'Battery axe '+width);
+   assert.equal(await evaluate(`document.documentElement.scrollWidth<=innerWidth`),true,'dashboard accounting width '+width);await screenshot('dashboard-accounting-'+width);
+  }
+  await evaluate(`{state.log.push({t:Date.now(),msg:'accounting-lilith trace',who:'maya',s:null,cls:''});const search=document.querySelector('#sortie-q');search.value='accounting-lilith';search.dispatchEvent(new Event('input',{bubbles:true}))}`);
+  assert.match(await evaluate(`document.querySelector('#lilith mark')?.textContent||''`),/accounting-lilith/);
+  assert.match(await evaluate(`document.querySelector('#log mark')?.textContent||''`),/accounting-lilith/);
+  await evaluate(`{const search=document.querySelector('#sortie-q');search.value='';search.dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('#p-budget').focus()}`);
+  // Disable recovery intervals to prove the fetch stream, rather than the 3-second poll, refreshes a changed record.
+  await evaluate(`for(let id=1;id<10000;id++)clearInterval(id)`);
+  const pushed=store.usage.begin('casper.verdict');store.usage.finish(pushed,{route:'local',requestedModel:'new-request',returnedModel:'pushed-model',inputTokens:10,outputTokens:2,cacheReadTokens:0,cacheWriteTokens:0,durationMs:10,outcome:'success'});
+  await until(`document.querySelector('#budget')?.textContent.includes('pushed-model')`);
+  // Navigate away and Back: a restored tab must resume authenticated reads/notifications.
+  await page('Page.navigate',{url:origin});await until(`document.querySelector('h1')?.textContent.includes('Your world.')`);
+  const navigation=await page('Page.getNavigationHistory');await page('Page.navigateToHistoryEntry',{entryId:navigation.entries[navigation.currentIndex-1].id});
+  await until(`document.querySelector('#tab-battery')!==null`);await evaluate(`document.querySelector('#tab-battery').click()`);
+  await until(`document.querySelector('#budget')?.textContent.includes('pushed-model')`);
+  const restored=store.usage.begin('model.complete');store.usage.finish(restored,{route:'local',requestedModel:'restored-request',returnedModel:'restored-model',inputTokens:2,outputTokens:1,cacheReadTokens:0,cacheWriteTokens:0,durationMs:4,outcome:'success'});
+  await until(`document.querySelector('#budget')?.textContent.includes('restored-model')`);
   assert.deepEqual(errors,[],'no runtime exceptions or CSP violations');
  }finally{
   for(const p of pending.values()){clearTimeout(p.timer);p.fail(new Error('Browser closed'));}pending.clear();ws?.terminate();
