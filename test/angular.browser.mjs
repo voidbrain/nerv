@@ -137,12 +137,14 @@ test('F-002/F-010: reliable bilingual reminder flows, local dates and responsive
    for(const [index,group] of groups.entries()){
     const selector=`[role=group][aria-label="${group}"]`;
     const first=await evaluate(index===0?`document.querySelector('article.reminder strong').textContent`:`document.querySelector('.inbox p').textContent`);
+    // Existing rows can still be visible while the shared paging guard is busy after Refresh/language change.
+    await until(`document.querySelector('${selector} button:last-child').getAttribute('aria-disabled')==='false'`);
     await evaluate(`document.querySelector('${selector} button:last-child').focus();document.activeElement.click()`);
-    await until(`!document.querySelector('${selector} button:first-child').disabled`);
+    await until(`!document.querySelector('${selector} button:first-child').disabled&&document.querySelector('${selector} button:first-child').getAttribute('aria-disabled')==='false'`);
     assert.equal(await evaluate(`document.activeElement.closest('[role=group]')?.getAttribute('aria-label')`),group,'keyboard focus stays in the active pager');
     assert.notEqual(await evaluate(index===0?`document.querySelector('article.reminder strong').textContent`:`document.querySelector('.inbox p').textContent`),first);
     await evaluate(`document.querySelector('${selector} button:first-child').click()`);
-    await until(`document.querySelector('${selector} button:first-child').disabled`);
+    await until(`document.querySelector('${selector} button:first-child').disabled&&document.querySelector('${selector} button:last-child').getAttribute('aria-disabled')==='false'`);
     assert.equal(await evaluate(index===0?`document.querySelector('article.reminder strong').textContent`:`document.querySelector('.inbox p').textContent`),first);
    }
    await audit(lang+'-history-pages');
