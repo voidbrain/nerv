@@ -2548,7 +2548,7 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #195](https://github.com/voidbrain/nerv/pull/195) project tuning and regressions;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; Test: test/dashboard.test.ts, B-040 active planning edge, fails with class live instead of the recorded route |
+| PR / evidence | [PR #196](https://github.com/voidbrain/nerv/pull/196) closure;  [PR #195](https://github.com/voidbrain/nerv/pull/195) project tuning and regressions;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; Test: test/dashboard.test.ts, B-040 active planning edge, fails with class live instead of the recorded route |
 | Opened | 2026-11-07 |
 | Verification | 2026-11-07: committed B-040 regression passes; full suite 263 passed, one platform skip; Chrome CRT/palette/reduced-motion checks pass. Review: fresh-context reviewer reports no remaining findings after stale legacy assertion correction. PR #195 CI runs 42398922334/42398926076 passed every validate, Windows and macOS job. |
 | Reviewed | 2026-11-07 |
