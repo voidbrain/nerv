@@ -164,11 +164,13 @@ test('F-002/F-010: reliable bilingual reminder flows, local dates and responsive
   assert.equal(await evaluate(`getComputedStyle(document.querySelector('.wrap')).animationDuration`),'31s');
   assert.equal(await evaluate(`(()=>{const probe=document.createElement('i');probe.style.color='var(--eva01)';document.body.append(probe);const expected=getComputedStyle(probe).color;probe.remove();return getComputedStyle(document.querySelector('#magi-big')).borderTopColor===expected})()`),true,'MAGI has its violet identity');
   await evaluate(readFileSync(require.resolve('axe-core/axe.min.js'),'utf8'));
+  await evaluate(`{const flicker=document.querySelector('.wrap').getAnimations().find(a=>a.animationName==='crt-flicker');flicker.pause();flicker.currentTime=21100}`);
   assert.deepEqual(await evaluate(`axe.run(document.querySelector('.s-magi')).then(r=>r.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)})))`),[],'MAGI axe with CRT');
   await until(`document.querySelector('.crt-band-a').getAnimations().length===1`);
   assert.ok(await evaluate(`document.querySelector('.crt-band-a').getAnimations()[0].effect.getTiming().duration>=4500`),'randomized band motion is running');
   assert.equal(await evaluate(`getComputedStyle(document.querySelector('.crt-static')).opacity`),'0.055');
   await screenshot('dashboard-crt-on');
+  await evaluate(`document.querySelector('.wrap').getAnimations().find(a=>a.animationName==='crt-flicker').play()`);
   await page('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
   assert.equal(await evaluate(`getComputedStyle(document.querySelector('.wrap')).animationName`),'none');
   assert.equal(await evaluate(`getComputedStyle(document.querySelector('.crt-band')).display`),'none');
