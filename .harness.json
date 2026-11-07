@@ -245,6 +245,21 @@
       "then": "Regenerate the transparent work queue from authored records and roadmap context.",
       "run": "npm run backlog:queue",
       "checked": "npm run check:queue in CI validate"
+    },
+    {
+      "id": "evaluation-suite",
+      "when": [
+        "evals/**",
+        "tools/evaluate*.mjs",
+        "test/evaluation*",
+        "test/fixtures/browser.mjs",
+        "src/policy.ts",
+        "src/casper.ts",
+        "src/runtime.ts"
+      ],
+      "then": "Validate the versioned scenarios, run affected control-flow/model groups, and retain reviewed evidence with explicit coverage limits.",
+      "run": "npm run check:evals && npm run evals -- --only=policy",
+      "checked": "Golden cases run in npm test; browser evidence runner and manifest validation run in CI."
     }
   ],
   "couplings": [

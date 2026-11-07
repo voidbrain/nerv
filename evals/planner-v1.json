@@ -1,0 +1,10 @@
+{
+ "schemaVersion":1,"id":"misato-planner-v1",
+ "cases":[
+  {"id":"ask-before-inventing","split":"regression","family":"ambiguity","expected":{"kind":"ask"},"input":{"request":"Set a reminder.","history":[],"now":"2030-12-01T12:00:00Z","timeZone":"UTC","language":"en"}},
+  {"id":"exact-reminder","split":"regression","family":"simple","expected":{"kind":"action","tool":"reminders.add","args":{"title":"Stretch","due":"2031-01-01T09:00:00Z"}},"input":{"request":"Remind me to Stretch on 1 January 2031 at 09:00 UTC.","history":[],"now":"2030-12-01T12:00:00Z","timeZone":"UTC","language":"en"}},
+  {"id":"correct-rejected-time","split":"regression","family":"replanning","expected":{"kind":"action","tool":"reminders.add","args":{"title":"Stretch","due":"2031-01-01T10:00:00Z"}},"input":{"request":"Remind me to Stretch on 1 January 2031 at 10:00 UTC, not 09:00.","history":[{"tool":"reminders.add","args":{"title":"Stretch","due":"2031-01-01T09:00:00Z"},"outcome":"reject","reason":"Wrong time; the owner requested 10:00 UTC."}],"now":"2030-12-01T12:00:00Z","timeZone":"UTC","language":"en"}},
+  {"id":"italian-missing-title","split":"regression","family":"language","expected":{"kind":"ask"},"review":["Question must be in Italian"],"input":{"request":"Imposta un promemoria per il primo gennaio 2031 alle 09:00 UTC.","history":[],"now":"2030-12-01T12:00:00Z","timeZone":"UTC","language":"it"}},
+  {"id":"topic-change-during-question","split":"holdout","family":"mind-change","expected":{"kind":"newRequest"},"input":{"request":"Forget the reminder request. Tell me what a calendar is instead.","context":[{"request":"Set a reminder.","reply":"What should I remind you about?"}],"history":[],"clarification":true,"now":"2030-12-01T12:00:00Z","timeZone":"UTC","language":"en"}}
+ ]
+}
