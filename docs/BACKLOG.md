@@ -106,7 +106,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #177](https://github.com/voidbrain/nerv/pull/177) implementation; Owner report 2026-11-05 (S-E16D, S-7B04 on Neo Tokyo-3); owner refinement 2026-11-06 (topic change cancels the wait) |
+| PR / evidence | [PR #193](https://github.com/voidbrain/nerv/pull/193) agent-executable acceptance and evaluation assessment; [PR #177](https://github.com/voidbrain/nerv/pull/177) implementation; Owner report 2026-11-05 (S-E16D, S-7B04 on Neo Tokyo-3); owner refinement 2026-11-06 (topic change cancels the wait) |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-06 Unit/integration: test/clarification.test.ts (plan shape, durable question, conversation binding, 8-word rule, approval resume, topic change, forwarded question), test/telegram.test.ts (B-021 over Aoba), test/one-channel.test.ts (question and answer across the real signed Kaji link, main base down and back), full suite 226 passed, one platform skip; build, typecheck, conventions, headless lifecycle and Angular browser acceptance passed. Browser/accessibility: Pending (dashboard waiting state not checked in Chrome). Human: no owner-only dashboard acceptance required after the 2026-11-07 assessment; real-phone display/receipt is outside the pending browser check. Recorded real-model judgment: Pending. |
 | Reviewed | 2026-11-07 |
@@ -743,7 +743,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
+| PR / evidence | [PR #193](https://github.com/voidbrain/nerv/pull/193) agent-executable acceptance and evaluation assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-04 |
 | Verification | Pending |
 | Reviewed | 2026-11-07 |
