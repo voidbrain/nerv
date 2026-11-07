@@ -177,6 +177,12 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
         const r=await store.update(path.split('/').at(-1)!,{...(b.title!==undefined?{title:b.title as string}:{}),...(b.due!==undefined?{due:b.due as string}:{})});if(r)reply(200,r);else reply(404,{error:'No pending reminder with that ID.'});}
       else if(req.method==='DELETE' && /^\/api\/reminders\/[a-f0-9-]+$/.test(path)) reply((await store.cancel(path.split('/').at(-1)!))?200:404,{message:'Cancellation processed.'});
       else if(req.method==='GET' && path==='/api/inbox') {const p=await store.inboxHistory(0,50);if(p.next)throw new Error('History requires /api/inbox/history.');reply(200,p.items);}
+      else if(req.method==='GET'&&path==='/api/model-usage'&&store.modelUsage){
+       const before=url.searchParams.has('before')?Number(url.searchParams.get('before')):undefined;
+       const limit=url.searchParams.has('limit')?Number(url.searchParams.get('limit')):undefined;
+       if((before!==undefined&&(!Number.isSafeInteger(before)||before<0))||(limit!==undefined&&(!Number.isInteger(limit)||limit<1||limit>20))){reply(400,{error:'Invalid usage page.'});return;}
+       reply(200,await store.modelUsage(before,limit));
+      }
       else if(req.method==='GET' && path==='/api/status')reply(200,{name:'NERV Agency',mode:'local-core',...(options.base?{base:options.base}:{}),...await store.health(),language:options.language ?? 'en',timeZone:options.timeZone ?? 'Europe/Rome',...(options.native?{runtimeId:options.native.auth.runtimeId,home:options.native.auth.home}:{})});
       else if(req.method==='GET' && path==='/api/doctor') reply(200,{name:'NERV Agency',mode:'local-core',build,...(options.base?{base:options.base}:{}),...await store.doctor(),remoteWorkers:'not implemented',language:options.language ?? 'en',timeZone:options.timeZone ?? 'Europe/Rome',...(options.native?{runtimeId:options.native.auth.runtimeId,home:options.native.auth.home}:{} )});
       else reply(404,{error:'Unknown operation.'});

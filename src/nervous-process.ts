@@ -1,3 +1,4 @@
+import {parsePrices,type UsageObservation} from './model-usage.ts';
 import { MISATO_SOURCE, OWNER_SOURCE, Store } from './store.ts';
 import type { Verdict } from './policy.ts';
 import { dispatchRpc,MAX_FRAME_BYTES,READY } from './rpc.ts';
@@ -16,6 +17,9 @@ process.on('message',(value:unknown)=>{
  if(Buffer.byteLength(JSON.stringify(value))>MAX_FRAME_BYTES){process.exitCode=1;stop();return;}
  void dispatchRpc(value,(method,params)=>{
   switch(method){
+   case 'usage.begin':return store.usage.begin(params.operation as string);
+   case 'usage.finish':store.usage.finish(params.id as string,params.observation as UsageObservation|null,parsePrices(params.prices));return true;
+   case 'usage.page':return store.usage.page(params.before as number|undefined,params.limit as number|undefined);
    case 'runtime.ping':return {role:'nervous',pid:process.pid};
    case 'runtime.doctor':return store.doctor();
    case 'reminders.list':{const p=store.reminderPage(0,50);if(p.next)throw new Error('Use reminders.page.');return p.items.sort((a,b)=>a.due.localeCompare(b.due));}

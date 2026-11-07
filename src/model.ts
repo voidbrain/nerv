@@ -1,3 +1,4 @@
+import {tokenCount,type UsageObservation} from './model-usage.ts';
 import type Anthropic from '@anthropic-ai/sdk';
 /**
  * Model routes (F-003). S² is a local OpenAI-compatible endpoint on this machine (Ollama, LM Studio).
@@ -66,10 +67,13 @@ function bound(text:string):{text:string;truncated:boolean} {
  const bytes=Buffer.from(text);if(bytes.length<=MAX_REPLY_BYTES)return {text,truncated:false};
  return {text:bytes.subarray(0,MAX_REPLY_BYTES).toString('utf8').replace(/�$/,''),truncated:true};
 }
-export interface RouteOptions {timeoutMs:number;fetch?:typeof fetch;cloudBaseUrl?:string}
+export interface RouteOptions {timeoutMs:number;fetch?:typeof fetch;cloudBaseUrl?:string;observe?:(observation:UsageObservation)=>void}
 export async function complete(ask:Ask,models:Models,key:string|undefined,options:RouteOptions):Promise<Reply> {
  const route=selectRoute(ask,models,!!key);
- return route==='local'?completeLocal(ask,models.local!,options):completeCloud(ask,models.cloud!,key!,options);
+ const started=performance.now();let observation:UsageObservation={route,requestedModel:(route==='local'?models.local!.model:models.cloud!.model),returnedModel:null,inputTokens:null,outputTokens:null,cacheReadTokens:null,cacheWriteTokens:null,durationMs:0,outcome:'error'};
+ const observed={...options,observe:(o:UsageObservation)=>{observation=o;}};
+ try{return await (route==='local'?completeLocal(ask,models.local!,observed):completeCloud(ask,models.cloud!,key!,observed));}
+ finally{options.observe?.({...observation,durationMs:Math.max(0,Math.round(performance.now()-started))});}
 }
 async function completeLocal(ask:Ask,local:LocalRoute,options:RouteOptions):Promise<Reply> {
  const messages=[...(ask.system?[{role:'system',content:ask.system}]:[]),{role:'user',content:ask.prompt}];
@@ -79,15 +83,18 @@ async function completeLocal(ask:Ask,local:LocalRoute,options:RouteOptions):Prom
  const raw=await response.text().catch(()=>'');
  if(Buffer.byteLength(raw)>1048576)throw new ModelError('Local route (S²) response too large.');
  if(!response.ok)throw new ModelError(`Local route (S²) failed with HTTP ${response.status}.`);
- let body:{choices?:{message?:{content?:unknown};finish_reason?:unknown}[]};
+ let body:{model?:unknown;usage?:{prompt_tokens?:unknown;completion_tokens?:unknown;prompt_tokens_details?:{cached_tokens?:unknown}};choices?:{message?:{content?:unknown};finish_reason?:unknown}[]};
  try{body=JSON.parse(raw);}catch{throw new ModelError('Local route (S²) returned invalid JSON.');}
  const choice=body.choices?.[0];
+ const returnedModel=typeof body.model==='string'&&body.model.length<=200?body.model:null;
+ const cached=body.usage?.prompt_tokens_details?.cached_tokens;
+ options.observe?.({route:'local',requestedModel:local.model,returnedModel,inputTokens:tokenCount(body.usage?.prompt_tokens),outputTokens:tokenCount(body.usage?.completion_tokens),cacheReadTokens:tokenCount(cached),cacheWriteTokens:0,durationMs:0,outcome:typeof choice?.message?.content==='string'?'success':'error'});
  if(typeof choice?.message?.content!=='string')throw new ModelError('Local route (S²) returned no text.');
- return {...bound(choice.message.content),route:'local',model:local.model,stop:typeof choice.finish_reason==='string'?choice.finish_reason:'unknown'};
+ return {...bound(choice.message.content),route:'local',model:returnedModel ?? local.model,stop:typeof choice.finish_reason==='string'?choice.finish_reason:'unknown'};
 }
 async function completeCloud(ask:Ask,cloud:CloudRoute,key:string,options:RouteOptions):Promise<Reply> {
  const {default:SDK}=await import('@anthropic-ai/sdk');
- const client=new SDK({apiKey:key,maxRetries:1,timeout:options.timeoutMs,...(options.cloudBaseUrl?{baseURL:options.cloudBaseUrl}:{})});
+ const client=new SDK({apiKey:key,maxRetries:0,timeout:options.timeoutMs,...(options.cloudBaseUrl?{baseURL:options.cloudBaseUrl}:{})});
  let message:Anthropic.Beta.BetaMessage;
  try{
   // Server-side refusal fallback stays with the same provider; the reply names the model that answered.
@@ -100,6 +107,7 @@ async function completeCloud(ask:Ask,cloud:CloudRoute,key:string,options:RouteOp
   if(e instanceof SDK.APIError)throw new ModelError(`Cloud route (Umbilical) failed with HTTP ${e.status ?? 'unknown'}.`);
   throw new ModelError('Cloud route (Umbilical) failed.');
  }
+ options.observe?.({route:'cloud',requestedModel:cloud.model,returnedModel:message.model.length<=200?message.model:null,inputTokens:tokenCount(message.usage.input_tokens),outputTokens:tokenCount(message.usage.output_tokens),cacheReadTokens:tokenCount(message.usage.cache_read_input_tokens),cacheWriteTokens:tokenCount(message.usage.cache_creation_input_tokens),durationMs:0,outcome:message.stop_reason==='refusal'?'refused':'success'});
  if(message.stop_reason==='refusal')throw new ModelError('Cloud route (Umbilical) declined the request.');
  const text=message.content.flatMap(b=>b.type==='text'?[b.text]:[]).join('');
  return {...bound(text),route:'cloud',model:message.model,stop:message.stop_reason ?? 'unknown'};

@@ -1,3 +1,7 @@
+import {readFileSync} from 'node:fs';
+import {join} from 'node:path';
+import {parsePrices,type UsageObservation,type UsageRecord,type Price} from './model-usage.ts';
+import {RpcFault,type Method} from './rpc.ts';
 import type {HistoryPage} from './history.ts';
 import {readCommand,statusText,type StatusBase} from './chat-command.ts';
 import {channelIsFresh,sanitizeChannel,type ChannelState,type HeardChannel} from './channel-state.ts';
@@ -46,6 +50,7 @@ export interface PeerSeat {seat:string;shadow:boolean;verdict:Promise<PeerVerdic
 export interface OwnerAction {request:string;tool:string;args:Record<string,unknown>;stage?:Stage;earlier?:{request:string;reply?:string}[]}
 export type ActReply=ActResult&{casperError?:string};
 export interface StoreApi {
+ modelUsage?(before?:number,limit?:number):Promise<{items:(UsageRecord&{sequence:number})[];next:number|null}>;
  reminderPage(before?:number,limit?:number):HistoryPage<Reminder&{sequence:number}>|Promise<HistoryPage<Reminder&{sequence:number}>>;
  inboxHistory(before?:number,limit?:number):HistoryPage<InboxEntry>|Promise<HistoryPage<InboxEntry>>;
  dashboardHistory(since:string):unknown|Promise<unknown>;
@@ -90,6 +95,19 @@ export class Runtime implements StoreApi {
   this.nervous=new ProcessClient(new URL('./nervous-process.ts',import.meta.url),home?[database,home]:[database],'nervous');
   this.brain=new ProcessClient(brainEntry,home?[home]:[],'brain',1500);
  }
+ /** Persist before dispatch. Missing/late brain replies keep a durable unknown record. */
+ private async modelCall(method:Method,params:Record<string,unknown>,timeoutMs:number):Promise<unknown> {
+  const id=await this.nervous.call('usage.begin',{operation:method}) as string;
+  const reply=await this.brain.call(method,params,timeoutMs) as {value?:unknown;failure?:string;accounting?:UsageObservation|null};
+  // Custom test brains and old peers may not supply accounting. Never infer tokens from their output.
+  if(!('accounting' in reply))return reply;
+  let prices:Price[]=[];
+  if(this.home){try{prices=parsePrices(JSON.parse(readFileSync(join(this.home,'model-prices.json'),'utf8')));}catch{/* Missing/invalid rates leave cost unavailable. */}}
+  await this.nervous.call('usage.finish',{id,observation:reply.accounting ?? null,prices:prices.filter(p=>p.route===reply.accounting?.route&&p.model===reply.accounting.returnedModel)});
+  if(reply.failure)throw new RpcFault(-32010,reply.failure);
+  return reply.value;
+ }
+ async modelUsage(before?:number,limit?:number){return await this.nervous.call('usage.page',{...(before===undefined?{}:{before}),...(limit===undefined?{}:{limit})}) as {items:(UsageRecord&{sequence:number})[];next:number|null};}
  async ready(){await this.nervous.call('runtime.ping');}
  async reminderPage(before=0,limit=20){return await this.nervous.call('reminders.page',{before,limit}) as HistoryPage<Reminder&{sequence:number}>;}
  async inboxHistory(before=0,limit=20){return await this.nervous.call('inbox.history',{before,limit}) as HistoryPage<InboxEntry>;}
@@ -131,7 +149,7 @@ export class Runtime implements StoreApi {
  }
  /** On the base asked: this base's Casper votes on the main base's action; no local model means no verdict (abstain). */
  async peerVerdict(ask:VerdictAsk):Promise<PeerVerdict|null> {
-  const reply=await this.brain.call('casper.verdict',{request:ask.request,tool:ask.tool,args:ask.args,effect:ask.effect},MODEL_TIMEOUT_MS).catch(()=>({verdict:null})) as {verdict:Verdict|null};
+  const reply=await this.modelCall('casper.verdict',{request:ask.request,tool:ask.tool,args:ask.args,effect:ask.effect},MODEL_TIMEOUT_MS).catch(()=>({verdict:null})) as {verdict:Verdict|null};
   return reply.verdict?{vote:reply.verdict.vote,reason:reply.verdict.reason,...(typeof reply.verdict.confidence==='number'?{confidence:reply.verdict.confidence}:{})}:null;
  }
  private async gate(sortieId:string,action:OwnerAction,askCasper=true):Promise<ActReply> {
@@ -143,7 +161,7 @@ export class Runtime implements StoreApi {
    const bases=action.tool==='kaji.run'?await this.baseNames():[];
    // The other bases' Casper (F-036 phase 2) is asked at the same time: veto-only seats, shadow until the owner trusts them.
    // F-052: the gate waits for Casper and the veto seats only; a shadow vote not in by then is recorded when it comes.
-   const asking=this.brain.call('casper.verdict',{request:action.request,tool:action.tool,args:action.args,effect,...(bases.length?{bases}:{}),...(action.earlier?.length?{earlier:action.earlier.slice(-3).map(t=>({request:t.request.slice(0,600),...(t.reply?{reply:t.reply.slice(0,600)}:{})}))}:{})},MODEL_TIMEOUT_MS).catch(()=>({verdict:null,error:'Brain unavailable.'})) as Promise<{verdict:Verdict|null;error?:string}>;
+   const asking=this.modelCall('casper.verdict',{request:action.request,tool:action.tool,args:action.args,effect,...(bases.length?{bases}:{}),...(action.earlier?.length?{earlier:action.earlier.slice(-3).map(t=>({request:t.request.slice(0,600),...(t.reply?{reply:t.reply.slice(0,600)}:{})}))}:{})},MODEL_TIMEOUT_MS).catch(()=>({verdict:null,error:'Brain unavailable.'})) as Promise<{verdict:Verdict|null;error?:string}>;
    const seats=this.peerSeats?await this.peerSeats({request:action.request,tool:action.tool,args:action.args,effect}).catch(()=>[] as PeerSeat[]):[];
    const settled=new Map<string,PeerVerdict>();for(const s of seats)void s.verdict.then(v=>{settled.set(s.seat,v);});
    const [reply]=await Promise.all([asking,Promise.all(seats.filter(s=>!s.shadow).map(s=>s.verdict))]);
@@ -263,7 +281,7 @@ export class Runtime implements StoreApi {
   // B-024: the consultant is told what Misato can do, so it never advises against a tool she has.
   const offered=!consult?[]:[...toolDocs,...(await this.externalTools()).docs].map(t=>({name:t.name,about:t.about.slice(0,200)}));
   let unmatched:string|undefined;
-  const advice=!consult?followup?.advice:await this.brain.call('consultant.advise',{request:message.slice(0,4000),...(followup?.advice?{previousAdvice:followup.advice}:{}),...(context.length?{context:context.slice(-3)}:{}),...(pilot?{pilot:{name:pilot.name,domain:pilot.domain,model:pilot.model}}:{}),...(named.length>1?{bases:named}:{}),...(offered.length?{tools:offered}:{})},MODEL_TIMEOUT_MS).then(r=>r as {advice:string|null;model?:string;domain?:string},():{advice:string|null;model?:string;domain?:string}=>({advice:null})).then(async r=>{
+  const advice=!consult?followup?.advice:await this.modelCall('consultant.advise',{request:message.slice(0,4000),...(followup?.advice?{previousAdvice:followup.advice}:{}),...(context.length?{context:context.slice(-3)}:{}),...(pilot?{pilot:{name:pilot.name,domain:pilot.domain,model:pilot.model}}:{}),...(named.length>1?{bases:named}:{}),...(offered.length?{tools:offered}:{})},MODEL_TIMEOUT_MS).then(r=>r as {advice:string|null;model?:string;domain?:string},():{advice:string|null;model?:string;domain?:string}=>({advice:null})).then(async r=>{
    if(!pilot&&r.domain){unmatched=r.domain;await this.note(sortieId,'pilot.unmatched',{domain:r.domain});}
    if(!r.advice)return undefined;await this.note(sortieId,'misato.consult',{advice:r.advice,model:r.model ?? '',...(pilot?{pilot:{id:pilot.id,name:pilot.name,why:pilot.why}}:{})});return r.advice;});
   // F-045: enough requests in one domain without a specialist → a pilot is proposed (a card), in the background.
@@ -271,7 +289,7 @@ export class Runtime implements StoreApi {
   for(let turn=0;turn<MAX_STEPS;turn++){
    const remote=await this.remoteOffers();
    const ext=await this.externalTools();
-   const out=await this.brain.call('misato.step',{...(followup?.answering&&turn===0?{clarification:true}:{}),request:message,history:steps.slice(-12),...(remote.length?{remote}:{}),...(ext.docs.length?{external:ext.docs}:{}),...(advice?{advice}:{}),language:lang(),...(context.length?{context}:{}),...(memory.length?{memory:memory.slice(0,10)}:{})},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as {plan?:Plan;invalid?:boolean;error?:string};
+   const out=await this.modelCall('misato.step',{...(followup?.answering&&turn===0?{clarification:true}:{}),request:message,history:steps.slice(-12),...(remote.length?{remote}:{}),...(ext.docs.length?{external:ext.docs}:{}),...(advice?{advice}:{}),language:lang(),...(context.length?{context}:{}),...(memory.length?{memory:memory.slice(0,10)}:{})},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as {plan?:Plan;invalid?:boolean;error?:string};
    if(out.error)return finish('failed',undefined,out.error);
    if(!out.plan){await this.record(sortieId,steps,{outcome:'invalid',error:'Reply was not one JSON action, question or reply.'});continue;}
    if('newRequest' in out.plan){
@@ -452,7 +470,7 @@ export class Runtime implements StoreApi {
   const exchanges=await this.nervous.call('memory.exchanges',{since,until}) as Exchange[];
   if(!exchanges.length){await this.nervous.call('memory.saveEpisode',{since,until,summary:'',exchanges:0,proposed:0});return {exchanges:0,proposed:0,skipped:0};}
   // A local model occasionally returns an unreadable digest: one more try before giving up until tomorrow.
-  const ask=()=>this.brain.call('instrumentality.digest',{exchanges},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as Promise<{digest?:Digest;error?:string}>;
+  const ask=()=>this.modelCall('instrumentality.digest',{exchanges},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as Promise<{digest?:Digest;error?:string}>;
   let out=await ask();if(!out.digest&&out.error==='The digest reply was not readable.')out=await ask();
   if(!out.digest)return {exchanges:exchanges.length,proposed:0,skipped:0,error:out.error ?? 'No digest.'};
   const known=new Set((await this.nervous.call('memory.known',{texts:out.digest.facts}) as string[]));
@@ -582,7 +600,7 @@ export class Runtime implements StoreApi {
   return this.reloadModels();
  }
  async reloadModels(){return await this.brain.call('models.reload') as {error?:string;kept?:boolean;models:unknown};}
- async ask(ask:Ask){return await this.brain.call('model.complete',{...ask},MODEL_TIMEOUT_MS) as Reply;}
+ async ask(ask:Ask){return await this.modelCall('model.complete',{...ask},MODEL_TIMEOUT_MS) as Reply;}
  /** The brain's view of the model routes (F-030); a brain that does not answer is itself the degraded reason. */
  private async routes():Promise<{routes?:Record<RouteName,RouteHealth>;degraded:string[]}> {
   try{const p=await this.brain.call('runtime.ping',{},2000) as {routes?:Record<RouteName,RouteHealth>};return {...(p.routes?{routes:p.routes}:{}),degraded:p.routes?degradedReasons(p.routes):[]};}
