@@ -1,16 +1,22 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-06T21:15:12.425Z",
-  "policy": "7ce9883fd1bff25038076e9e36015a833c38e1378e1df68043f48a64635abad4",
+  "reviewed": "2026-11-07T07:31:41.590Z",
+  "policy": "cd034be8e9d34cd059789de7a2b48deccb39742a79581ec13aff40de0a1ac791",
   "inputs": {
-    "AGENTS.md": "b77ea6c179171f24fb6bccbb3dbce6df7dd10609709774a79a40fcf5f25376ea",
-    "docs/BACKLOG-RULES.md": "46ce8ffafc1909b65f0bbe35465e7153c4fced34506d0dba6b5ca1877c9856e5",
+    "AGENTS.md": "68c4671162697950b7e896ea069f9085392a7fbbc87752e1313de77a600c6a95",
+    "docs/BACKLOG-RULES.md": "623af538b376266aab4a138c2c7dda863a254194b9dbfbbc5e2145819867aafa",
     "docs/agents/areas.md": "ecd729eae9a6b235d98a9c9399054949e8e109d52542ade89d9bdd2e338e4ffa",
-    "docs/agents/maintenance.md": "a7e93ce963ffab30b4592ee90bdd0e72d49ea1320f82df74f22c88f70899d899"
+    "docs/agents/audit.md": "4623fc253aa8a409e642d366c03018009db487655fdefcefd28d0d42876ec4ce",
+    "docs/agents/change-impact.md": "2a899e8b9b6200c1ce89142492e18611a833c09cf713fb9d9f511a9bb31b43e0",
+    "docs/agents/coverage-guide.md": "3d539eb8beedfa101a5e47d9973cdf85dce197436fab2ab096f760e12d208106",
+    "docs/agents/maintenance.md": "5219a64e6e85ced3fa9d437fc0adb2674bfa2d566d86fe95cca1ef321d3b8b27",
+    "docs/agents/mcp.md": "3618e3e74f8e82fd572201abff8eacf8bfc57127614b0b9fe614f9da93b737a2",
+    "docs/agents/skills.md": "514dd14058a07098fb8742cfcc466f969f3807b3971e4998b51d2432b67b46e5",
+    "docs/agents/solution-profile.md": "8fa3c5a5db4ef81c7e6574fff86acc56cf60b21d438b92ea46da40bb4279a667"
   },
   "measurements": {
-    "samples": 8,
-    "latestAt": "2026-11-06T21:12:58.866Z",
+    "samples": 10,
+    "latestAt": "2026-11-07T07:31:16.323Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -36,25 +42,25 @@
         }
       },
       "reconciliation": {
-        "samples": 8,
+        "samples": 10,
         "durationMs": {
-          "observed": 8,
+          "observed": 10,
           "missing": 0,
-          "median": 31958.5
+          "median": 39675.5
         },
         "conflicts": {
-          "observed": 2,
-          "missing": 6,
+          "observed": 3,
+          "missing": 7,
           "median": 0
         },
         "unnecessaryPrompts": {
           "observed": 0,
-          "missing": 8,
+          "missing": 10,
           "median": null
         },
         "repeatedContextLoads": {
           "observed": 0,
-          "missing": 8,
+          "missing": 10,
           "median": null
         }
       }
@@ -64,14 +70,14 @@
     {
       "kind": "rule",
       "disposition": "implemented",
-      "target": "docs/BACKLOG-RULES.md",
-      "evidence": "Owner correction 2026-11-06: the backlog header had grown to one ~6000-character line because each reconciliation appended to it under the 'move the header to the current main' rule. Added a project rule: at most two lines of at most 400 characters (latest reconciliation, then links); replaced sentences move to docs/archive/reconciliation-<year>.md, newest first. Existing reconciliation and conflict rules unchanged; history preserved verbatim in the archive log (22 entries)."
+      "target": "AGENTS.md",
+      "evidence": "PR #180: reviewed v3.3.0 APPLY and all moved sections against the project rules. Moved procedures retain their requirements in copied guides; safety rules, Angular/project conventions, roadmap exception and work tracking remain. Added required safety markers, test/review pointers and BACKLOG-RULES bullets. Optional browser coverage, behaviour runner and push guard are not adopted."
     },
     {
       "kind": "tool",
       "disposition": "implemented",
-      "target": "tools/backlog-recap.mjs",
-      "evidence": "check:recap (already in CI validate) now fails on a header longer than two lines or 400 characters per line. test/backlog-header.test.mjs: 4 cases; the previous main header fails the new check (5969 characters), the shortened one passes. check:backlog, check:roadmap, check:archive-recap, conventions and typecheck pass."
+      "target": "tools/check-rules.mjs",
+      "evidence": "PR #180: adopted unchanged published v3.3.0 rule checker, copied mappings, expanded maintenance inputs and CI check. Rule placement check passes; prior CI 42318544557 failed because maintenance.md changed without a new input-bound receipt. A fresh measured reconciliation now records the reviewed inputs. Existing gh CLI suffices; no new integration needed."
     }
   ]
 }

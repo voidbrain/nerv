@@ -1,4 +1,14 @@
 [
- {"kind":"rule","disposition":"implemented","target":"docs/BACKLOG-RULES.md","evidence":"Owner correction 2026-11-06: the backlog header had grown to one ~6000-character line because each reconciliation appended to it under the 'move the header to the current main' rule. Added a project rule: at most two lines of at most 400 characters (latest reconciliation, then links); replaced sentences move to docs/archive/reconciliation-<year>.md, newest first. Existing reconciliation and conflict rules unchanged; history preserved verbatim in the archive log (22 entries)."},
- {"kind":"tool","disposition":"implemented","target":"tools/backlog-recap.mjs","evidence":"check:recap (already in CI validate) now fails on a header longer than two lines or 400 characters per line. test/backlog-header.test.mjs: 4 cases; the previous main header fails the new check (5969 characters), the shortened one passes. check:backlog, check:roadmap, check:archive-recap, conventions and typecheck pass."}
+  {
+    "kind": "rule",
+    "disposition": "implemented",
+    "target": "AGENTS.md",
+    "evidence": "PR #180: reviewed v3.3.0 APPLY and all moved sections against the project rules. Moved procedures retain their requirements in copied guides; safety rules, Angular/project conventions, roadmap exception and work tracking remain. Added required safety markers, test/review pointers and BACKLOG-RULES bullets. Optional browser coverage, behaviour runner and push guard are not adopted."
+  },
+  {
+    "kind": "tool",
+    "disposition": "implemented",
+    "target": "tools/check-rules.mjs",
+    "evidence": "PR #180: adopted unchanged published v3.3.0 rule checker, copied mappings, expanded maintenance inputs and CI check. Rule placement check passes; prior CI 42318544557 failed because maintenance.md changed without a new input-bound receipt. A fresh measured reconciliation now records the reviewed inputs. Existing gh CLI suffices; no new integration needed."
+  }
 ]
