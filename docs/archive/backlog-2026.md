@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 35 | 37 |
+| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 35 | 38 |
 <!-- archive-recap:end -->
 
 <a id="archive-week-2026-11-02"></a>
@@ -2517,6 +2517,40 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 | PR / evidence | [PR #195](https://github.com/voidbrain/nerv/pull/195) adoption closure;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner instruction 2026-11-07; published upstream v4.0.0, PRs #77/#78 |
 | Opened | 2026-11-07 |
 | Verification | 2026-11-07: typecheck and build passed; baseline suite 261 passed, one platform skip. Backlog, queue, dependencies, roadmap, recaps, rules, conventions, integrations and maintenance checks passed. Review: separate context verified copied-tool fidelity, archive preservation and scope; missing queue input and estimate prose corrected, re-review reports no remaining findings. PR #194 CI runs 42398004525/42398009143 passed every job. |
+| Reviewed | 2026-11-07 |
+
+</details>
+
+---
+
+### B-040
+
+**Sephirot incoming edge remains active for the whole step**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟡 Medium |
+
+💻 **→ Human action required: No**<br />None: regression, browser and every CI check passed.
+
+| | |
+|---|---|
+| **Issue** | The incoming edge animates while a node works, falsely implying continuous communication. |
+| **Reproduce** | Select an active planning sortie in /dashboard. |
+| **Check** | Busy nodes and route history remain distinct; no edge animation derives from phase alone. Busy-node motion honors reduced motion. Explicit transfer-duration/recent-transfer telemetry remains F-052. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-07 after PR #195 runs 42398922334/42398926076 passed every CI job.  Regression committed failing before the fix. Removed phase-derived edge animation and its unused styles; routes remain visible and busy nodes get a gentle outline pulse. Transfer animation awaits explicit telemetry in F-052. CI passed. Earlier next action:  Commit a regression for liveEdges before changing its semantics. See [the source assessment](design/operator-flow-review-2026-11-07.md). Preserve observed communication separately from step activity; do not infer delivery or execution from a UI state.
+
+**Estimates:** No remaining defect work. Reassessed 2026-11-07: regression, browser, review and all CI passed. Historical estimate: Medium. Explicit transfer telemetry remains F-052.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #195](https://github.com/voidbrain/nerv/pull/195) project tuning and regressions;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; Test: test/dashboard.test.ts, B-040 active planning edge, fails with class live instead of the recorded route |
+| Opened | 2026-11-07 |
+| Verification | 2026-11-07: committed B-040 regression passes; full suite 263 passed, one platform skip; Chrome CRT/palette/reduced-motion checks pass. Review: fresh-context reviewer reports no remaining findings after stale legacy assertion correction. PR #195 CI runs 42398922334/42398926076 passed every validate, Windows and macOS job. |
 | Reviewed | 2026-11-07 |
 
 </details>
