@@ -158,7 +158,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; source assessment linked above |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; Test: test/dashboard.test.ts, B-040 active planning edge, fails with class live instead of the recorded route |
 | Opened | 2026-11-07 |
 | Verification | Pending: regression, integration and relevant browser checks; source inspection is not runtime acceptance. |
 | Reviewed | 2026-11-07 |

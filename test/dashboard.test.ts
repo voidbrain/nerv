@@ -158,8 +158,8 @@ test('the CRT effect: the original static scanlines, darker borders, a slight pa
  assert.match(after,/background:linear-gradient\(rgba\(0,0,0,0\) 50%,rgba\(0,0,0,\.22\) 50%\); background-size:100% 4px;/,'the owner\'s scanlines, unchanged');
  assert.doesNotMatch(after,/animation|radial-gradient/,'static');const edge=/box-shadow:inset 0 0 (\d+)px (\d+)px rgba\(0,0,0,([.0-9]+)\)/.exec(after)!;assert.ok(Number(edge[1])>=60&&Number(edge[3])>=0.8,'edges strong enough to see on dark');
  const a=/@keyframes crt-line-a \{[^\n]*\}/.exec(html)![0],b=/@keyframes crt-line-b \{[^\n]*\}/.exec(html)![0];assert.ok(a&&b,'two lines');
- assert.match(html,/animation:crt-line-a 17s linear infinite/);assert.match(html,/animation:crt-line-b 29s linear -11s infinite/,'different cycles, offset: irregular together');
- for(const o of /@keyframes crt-flicker \{([^\n]*)\}/.exec(html)![1]!.matchAll(/opacity:([.0-9]+)/g))assert.ok(Number(o[1])>=0.9,'a slight flicker, never a flash');
+ assert.match(html,/animation:crt-line-a 43s linear infinite/);assert.match(html,/animation:crt-line-b 67s linear -19s infinite/,'different cycles, offset: irregular together');
+ for(const o of /@keyframes crt-flicker \{([^\n]*)\}/.exec(html)![1]!.matchAll(/opacity:([.0-9]+)/g))assert.ok(Number(o[1])>=0.975,'a slight flicker, never a flash');
  assert.match(html,/@media \(prefers-reduced-motion:reduce\) \{ body\.theme-eva\.crt-on \.wrap, body\.theme-eva\.crt-on::before, body\.theme-eva\.crt-on \.wrap::after \{ animation:none; \}/);
  // Two boxes (owner, 2026-11-05): pilots are the Marduk Institute, skills are Kaji's watermelons.
  assert.match(html,/<span data-l="melons">Marduk Institute · Pilots<\/span><span class="sub">proto → test → prod<\/span>/);
@@ -315,4 +315,16 @@ test('map legend is compact, cloud caption is removed, and unavailable live cost
  const src=readFileSync('web/public/dashboard/dashboard.js','utf8');assert.doesNotMatch(src,/cloudRouteCaption|UMBILICAL ↗ cloud/);
  const live=readFileSync('web/public/dashboard/live.js','utf8');assert.match(live,/Cost unavailable/);assert.match(live,/Priced subtotal on this page/);assert.doesNotMatch(live,/qv-budget"\)\.textContent = "\$0\.00"/);
  const html=readFileSync('web/public/dashboard/index.html','utf8');assert.doesNotMatch(html,/Map legend|Links &amp; activity/);assert.match(html,/■ Bases/);assert.match(html,/>- Kaji line</);assert.match(html,/>sync<\/span>/);assert.doesNotMatch(html,/Scrolls: \$1\.00 \/ day/);
+});
+
+test('B-040: an active planning step alone never renders a continuously communicating edge',()=>{
+ const source=readFileSync('web/public/dashboard/dashboard.js','utf8');
+ const take=(name:string)=>{const start=source.indexOf(`function ${name}(`);return start<0?'':source.slice(start,source.indexOf('\n}\n',start)+2);};
+ const svg={innerHTML:'',setAttribute:()=>{}};
+ const bounds={left:0,right:100,top:0,bottom:40,width:100,height:40};
+ const document={getElementById:(id:string)=>id==='edges'?svg:{getBoundingClientRect:()=>({...bounds,width:400,height:400})}};
+ const draw=new Function('document','isEvaFull','EDGES','nodeEl','passedEdge',`${take('liveEdges')}\n${take('drawEdges')}\nreturn drawEdges;`)(document,()=>true,[['route','plan']],(id:string)=>({getBoundingClientRect:()=>({...bounds,top:id==='plan'?100:0,bottom:id==='plan'?140:40})}),()=> 'passed') as (s:unknown)=>void;
+ draw({status:'active',phase:'plan',current:0,done:{route:true},actions:[],note:''});
+ assert.match(svg.innerHTML,/class='passed'/,'the observed route can remain visible');
+ assert.doesNotMatch(svg.innerHTML,/class='[^']*\b(?:live|wait|reject)\b/,'a phase is not evidence of an in-flight communication');
 });
