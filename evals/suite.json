@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "nerv-golden-v2",
+  "id": "nerv-golden-v3",
   "groups": [
     {
       "id": "policy",
@@ -21,16 +21,20 @@
       "id": "ledger",
       "files": [
         "test/ledger.test.ts",
-        "test/gate.test.ts"
+        "test/gate.test.ts",
+        "test/brief.test.ts",
+        "test/brief-recovery.test.ts"
       ],
       "families": [
         "expiry",
         "single-use-grants",
         "restart",
         "executor-effects",
-        "approval-idempotency"
+        "approval-idempotency",
+        "brief-source-recovery",
+        "daily-delivery-idempotency"
       ],
-      "minimumTests": 27
+      "minimumTests": 38
     },
     {
       "id": "conversation",

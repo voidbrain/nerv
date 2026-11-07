@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 38 | 39 |
+| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 38 | 40 |
 <!-- archive-recap:end -->
 
 <a id="archive-week-2026-11-02"></a>
@@ -2689,6 +2689,42 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 | PR / evidence | [PR #202](https://github.com/voidbrain/nerv/pull/202) evaluation suite and frozen evidence; [PR #201](https://github.com/voidbrain/nerv/pull/201) advice route and resumed owner sequence;  [PR #200](https://github.com/voidbrain/nerv/pull/200) verified commit ID and owner pause;  [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #196](https://github.com/voidbrain/nerv/pull/196) evidence and queue reconciliation;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #193](https://github.com/voidbrain/nerv/pull/193) agent-executable acceptance and evaluation assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-04 |
 | Verification | 2026-11-08: initial scripted suite 178 checks passed, including actual browser operation; golden/runner/model-adapter unit checks passed. Final full suite 364 passed, two skips; build, typecheck, headless and repository checks passed. Frozen scripted/stress/model reports retained in docs/evaluations; independent review resolved process ownership and source identity findings. PR #202 runs 42424820318/42424816395 passed all six jobs. |
+| Reviewed | 2026-11-08 |
+
+</details>
+
+---
+
+---
+
+### B-042
+
+**Telegram approval card arrives after dashboard decision**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />None: local, signed-link, browser and every CI check passed.
+
+| | |
+|---|---|
+| **Issue** | An approval decided in the dashboard can still arrive as a live Telegram card and be tapped again. |
+| **Reproduce** | Pause outbound card delivery, decide in dashboard, release send, then tap the card. |
+| **Check** | Exactly one execution across dashboard and Telegram decisions; pending sends recheck status; sent cards reconcile to decided/expired state; no decision replay. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-08 after PR #203 runs 42425786736/42425784575 passed all six jobs.  2026-11-08: test/telegram-reconcile.test.ts reproduces both failures through dashboard REST and actual loopback Telegram sends: route lookup can send an already-decided card, and in-flight sends have no durable button cleanup. Both fail against unchanged production code.  The unchanged regressions now pass. Added bounded coordinator-only status RPC and main-only signed Kaji lookup; local/relayed cards recheck before sending, retain message IDs and retry decided/expired button cleanup after failures/restarts. Bundles remove only decided rows. Cleanup batches reads, serializes edits/sends and bounds tracking/queues; unavailable remote status retains cleanup. Cards predating message-ID tracking cannot be located automatically; repeat decisions remain idempotent. Golden suite v2 includes these scenarios; v1 baseline evidence is preserved. See [the source assessment](design/operator-flow-review-2026-11-07.md). Preserve observed communication separately from step activity; do not infer delivery or execution from a UI state.
+
+**Estimates:** No remaining work. Historical estimate: Small, 1–2 focused hours for final checks, CI and reconciliation. Reassessed 2026-11-08 after implementation and local/signed integration checks.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #203](https://github.com/voidbrain/nerv/pull/203) durable cross-channel card reconciliation; [PR #196](https://github.com/voidbrain/nerv/pull/196) evidence and queue reconciliation;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; source assessment linked above |
+| Opened | 2026-11-07 |
+| Verification | 2026-11-08: committed failing regressions now pass unchanged; local and real signed Kaji status/decision tests, pagination/expiry and bundled-row tests passed. Final suite 369 passed, two skips; typecheck, build, headless and repository checks passed. Chrome/axe: both browser cases passed. Expanded channel suite: 19 passed on clean frozen source 85aa894, retained in docs/evaluations/2026-11-08-card-reconciliation.json. Main-only signed status authorization and coordinator-only bounded RPC checks passed. PR #203 runs 42425786736/42425784575 passed every job. |
 | Reviewed | 2026-11-08 |
 
 </details>

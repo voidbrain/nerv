@@ -543,14 +543,22 @@ export class Runtime implements StoreApi {
   * change by chat applies within a minute. `initial` is the last brief sent before briefs lived in the inbox.
   */
  startBrief(schedule:()=>{at:string;timeZone:string;language:'it'|'en';base?:string}|undefined,initial?:string,everyMs=60_000){
-  let attempted:string|undefined;
+  let attempted:string|undefined,busy=false,lastIssue:string|undefined;
+  const issue=(reason:string|undefined)=>{if(reason!==lastIssue&&reason)console.error(`Hyuga: daily brief deferred or incomplete (${reason}).`);lastIssue=reason;};
   const tick=async()=>{
-   const b=schedule();if(!b)return;const now=new Date();
-   const last=await this.nervous.call('inbox.lastBrief').catch(()=>null) as string|null ?? initial ?? null;
-   const date=briefDue(now,b.timeZone,b.at,last?localClock(new Date(last),b.timeZone).date:undefined);if(!date||attempted===date)return;attempted=date;
-   const facts=await gatherBrief(this,last?new Date(last):new Date(now.getTime()-86_400_000));
-   await this.nervous.call('inbox.brief',{message:composeBrief({now,timeZone:b.timeZone,language:b.language,...(b.base?{base:b.base}:{}),...facts})}).catch(()=>{attempted=undefined;});
+   if(busy)return;busy=true;
+   try{
+    const b=schedule();if(!b)return;const now=new Date();let last:string|null;
+    try{last=await this.nervous.call('inbox.lastBrief') as string|null ?? initial ?? null;}
+    catch{issue('checkpoint unavailable');return;}
+    const date=briefDue(now,b.timeZone,b.at,last?localClock(new Date(last),b.timeZone).date:undefined);if(!date||attempted===date)return;
+    const facts=await gatherBrief(this,last?new Date(last):new Date(now.getTime()-86_400_000));
+    if(['approvals','reminders','sorties','health'].every(source=>facts.unavailable?.includes(source as 'approvals'|'reminders'|'sorties'|'health'))){issue('all core sources unavailable');return;}
+    await this.nervous.call('inbox.brief',{message:composeBrief({now,timeZone:b.timeZone,language:b.language,...(b.base?{base:b.base}:{}),...facts}),day:date});
+    attempted=date;issue(facts.unavailable?.length?'sources unavailable: '+[...facts.unavailable].sort().join(', '):undefined);
+   }catch{issue('storage or composition unavailable');}finally{busy=false;}
   };
+
   if(!this.briefTimer)this.briefTimer=setInterval(()=>{void tick();},everyMs);void tick();
  }
  private briefTimer?:NodeJS.Timeout;

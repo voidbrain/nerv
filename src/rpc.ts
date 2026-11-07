@@ -26,7 +26,7 @@ export const methodSchemas={
  'reminders.update':{type:'object',required:['id'],minProperties:2,properties:{id:{type:'string',minLength:1,maxLength:100},title:{type:'string',minLength:1,maxLength:500},due:{type:'string',maxLength:64}},additionalProperties:false},
  'reminders.cancel':{type:'object',required:['id'],properties:{id:{type:'string',minLength:1,maxLength:100}},additionalProperties:false},
  'inbox.list':empty,
- 'inbox.brief':{type:'object',required:['message'],properties:{message:{type:'string',minLength:1,maxLength:4000}},additionalProperties:false},
+ 'inbox.brief':{type:'object',required:['message'],properties:{message:{type:'string',minLength:1,maxLength:4000},day:{type:'string',pattern:'^\\d{4}-\\d{2}-\\d{2}$'}},additionalProperties:false},
  'inbox.lastBrief':empty,
  'approvals.expired':{type:'object',required:['since'],properties:{since:{type:'string',minLength:10,maxLength:40}},additionalProperties:false},
  'approvals.pendingIds':{type:'object',required:['ids'],properties:{ids:{type:'array',maxItems:200,uniqueItems:true,items:{type:'string',pattern:'^[a-f0-9-]{36}$'}}},additionalProperties:false},
