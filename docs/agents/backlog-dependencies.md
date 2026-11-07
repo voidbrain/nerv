@@ -20,7 +20,7 @@ Depends on names a required outcome; Unlocks lists direct dependents, not verifi
 | [F-015](../BACKLOG.md#f-015) | — | — |
 | [F-016](../BACKLOG.md#f-016) | — | — |
 | [F-017](../archive/backlog-2026.md#f-017) | — | [F-020](../BACKLOG.md#f-020) |
-| [F-019](../BACKLOG.md#f-019) | [F-063](../archive/backlog-2026.md#f-063) — Measured usage and cost before displaying real accounting | — |
+| [F-019](../archive/backlog-2026.md#f-019) | [F-063](../archive/backlog-2026.md#f-063) — Measured usage and cost before displaying real accounting | — |
 | [F-020](../BACKLOG.md#f-020) | [F-003](../BACKLOG.md#f-003) — Messaging path for state-grounded persona replies<br />[F-017](../archive/backlog-2026.md#f-017) — Policy decisions remain authoritative over persona output | — |
 | [F-021](../BACKLOG.md#f-021) | [F-049](../BACKLOG.md#f-049) — EVA-03 isolation before enabling EVA-03 tool grants; other MCP slices can proceed | [F-054](../BACKLOG.md#f-054), [F-056](../BACKLOG.md#f-056) |
 | [F-023](../BACKLOG.md#f-023) | — | — |
@@ -44,7 +44,7 @@ Depends on names a required outcome; Unlocks lists direct dependents, not verifi
 | [F-056](../BACKLOG.md#f-056) | [F-021](../BACKLOG.md#f-021) — Owner-selected prerequisite for remaining command work<br />[F-042](../BACKLOG.md#f-042) — Record-reading interface for agency query commands<br />[F-028](../archive/backlog-2026.md#f-028) — Durable brief content for brief commands | — |
 | [F-060](../BACKLOG.md#f-060) | — | — |
 | [F-062](../BACKLOG.md#f-062) | — | — |
-| [F-063](../archive/backlog-2026.md#f-063) | — | [F-019](../BACKLOG.md#f-019) |
+| [F-063](../archive/backlog-2026.md#f-063) | — | [F-019](../archive/backlog-2026.md#f-019) |
 | [F-064](../BACKLOG.md#f-064) | — | — |
 | [F-065](../BACKLOG.md#f-065) | — | — |
 | [F-066](../BACKLOG.md#f-066) | — | — |

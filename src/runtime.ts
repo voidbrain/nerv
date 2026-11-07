@@ -1,3 +1,4 @@
+import {runFailure,runMessage,type InstrumentalityRun} from './instrumentality-runs.ts';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {parsePrices,type UsageObservation,type UsageRecord,type Price} from './model-usage.ts';
@@ -466,11 +467,11 @@ export class Runtime implements StoreApi {
   * Instrumentality (F-022): Misato's exchanges since the last episode → a summary (kept) and candidate facts, each
   * proposed as a memory.remember card. Facts already known are skipped. The ledger is never changed.
   */
- async consolidate(now=new Date()):Promise<{summary?:string;exchanges:number;proposed:number;skipped:number;error?:string}> {
+ async consolidate(now=new Date(),runId?:string):Promise<{summary?:string;exchanges:number;proposed:number;skipped:number;error?:string}> {
   const last=(await this.nervous.call('memory.episodes',{limit:1}) as {until:string}[])[0];
   const since=last?.until ?? new Date(now.getTime()-86_400_000).toISOString();const until=now.toISOString();
   const exchanges=await this.nervous.call('memory.exchanges',{since,until}) as Exchange[];
-  if(!exchanges.length){await this.nervous.call('memory.saveEpisode',{since,until,summary:'',exchanges:0,proposed:0});return {exchanges:0,proposed:0,skipped:0};}
+  if(!exchanges.length){await this.nervous.call('memory.saveEpisode',{since,until,summary:'',exchanges:0,proposed:0,...(runId?{runId}:{})});return {exchanges:0,proposed:0,skipped:0};}
   // A local model occasionally returns an unreadable digest: one more try before giving up until tomorrow.
   const ask=()=>this.modelCall('instrumentality.digest',{exchanges},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as Promise<{digest?:Digest;error?:string}>;
   let out=await ask();if(!out.digest&&out.error==='The digest reply was not readable.')out=await ask();
@@ -482,7 +483,7 @@ export class Runtime implements StoreApi {
    const sortieId=await this.nervous.call('sorties.open',{title:`Instrumentality: ${fresh.length} fact(s) to confirm`,source:'instrumentality'}) as string;
    for(const text of fresh)await this.gate(sortieId,{request:'Instrumentality: a fact the owner stated, to confirm before it is remembered.',tool:'memory.remember',args:{text}},false);
   }
-  await this.nervous.call('memory.saveEpisode',{since,until,summary:out.digest.summary,exchanges:exchanges.length,proposed:fresh.length});
+  await this.nervous.call('memory.saveEpisode',{since,until,summary:out.digest.summary,exchanges:exchanges.length,proposed:fresh.length,...(runId?{runId}:{})});
   return {summary:out.digest.summary,exchanges:exchanges.length,proposed:fresh.length,skipped:out.digest.facts.length-fresh.length};
  }
  /** The scheduler-process side of the Kaji link's registry. */
@@ -535,11 +536,6 @@ export class Runtime implements StoreApi {
  };
  private instrumentality?:NodeJS.Timeout;
  /**
-  * Instrumentality's schedule, read on every tick so a change (by chat or by hand) applies within a minute:
-  * at HH:MM once per local day, or when idle (an hour without requests, at most once in 20 hours, only with something new).
-  * Each day or idle window is marked attempted before any await, so overlapping ticks never consolidate twice.
-  */
- /**
   * Hyuga's brief (F-003, F-028), written into the inbox once a local day at its time, so every channel delivers it from
   * there (Telegram, the menu-bar app, the dashboard) and none sends it twice. The schedule is read on every tick, so a
   * change by chat applies within a minute. `initial` is the last brief sent before briefs lived in the inbox.
@@ -556,25 +552,35 @@ export class Runtime implements StoreApi {
   if(!this.briefTimer)this.briefTimer=setInterval(()=>{void tick();},everyMs);void tick();
  }
  private briefTimer?:NodeJS.Timeout;
- startInstrumentality(schedule:()=>{mode?:{at:string}|{when:'idle'};timeZone:string},everyMs=60_000){
-  let attempted:string|undefined;
+ /** Durable claims survive restart; episode checkpoints and scheduled success commit together in A. */
+ private instrumentalitySchedule?:()=>{mode?:{at:string}|{when:'idle'};timeZone:string};
+ startInstrumentality(schedule:()=>{mode?:{at:string}|{when:'idle'};timeZone:string},everyMs=60_000,clock:()=>Date=()=>new Date()){
+  this.instrumentalitySchedule=schedule;let busy=false;
   const tick=async()=>{
-   const {mode,timeZone}=schedule();if(!mode)return;const now=new Date();
-   if('at' in mode){
-    const day=briefDue(now,timeZone,mode.at,attempted);if(!day)return;attempted=day;
-    const last=(await this.nervous.call('memory.episodes',{limit:1}).catch(()=>[]) as {created:string}[])[0];
-    if(last&&localClock(new Date(last.created),timeZone).date===day)return;
-    await this.consolidate().catch(()=>{});return;
-   }
-   const hour=now.toISOString().slice(0,13);if(attempted===hour)return;attempted=hour;
-   const [last,activity]=await Promise.all([this.nervous.call('memory.episodes',{limit:1}).catch(()=>[]) as Promise<{until:string}[]>,this.nervous.call('memory.lastRequest').catch(()=>null) as Promise<string|null>]);
-   const since=last[0]?.until;
-   if(!activity||(since&&activity<=since))return;
-   if(now.getTime()-Date.parse(activity)<3_600_000)return;
-   if(since&&now.getTime()-Date.parse(since)<20*3_600_000)return;
-   await this.consolidate().catch(()=>{});
+   if(busy)return;busy=true;
+   try{
+    const {mode,timeZone}=schedule();if(!mode)return;const now=clock();
+    const last=(await this.nervous.call('memory.episodes',{limit:1}) as {created:string;until:string}[])[0];
+    const day=localClock(now,timeZone).date;
+    if('at' in mode){
+     if(!briefDue(now,timeZone,mode.at,undefined))return;
+     if(last&&localClock(new Date(last.created),timeZone).date===day)return;
+    }else{
+     const activity=await this.nervous.call('memory.lastRequest') as string|null;
+     if(!activity||(last&&activity<=last.until)||now.getTime()-Date.parse(activity)<3_600_000||(last&&now.getTime()-Date.parse(last.until)<20*3_600_000))return;
+    }
+    const claim=await this.nervous.call('instrumentality.claim',{slot:('at' in mode?'at:':'idle:')+day,now:now.toISOString()}) as InstrumentalityRun|null;if(!claim)return;
+    const result=await this.consolidate(now,claim.id).catch(()=>({exchanges:0,proposed:0,skipped:0,error:'Consolidation unavailable.'}));
+    if(result.error)await this.nervous.call('instrumentality.finish',{id:claim.id,status:'failed',reason:runFailure(result.error),now:clock().toISOString()});
+   }catch{/* A durable pending claim remains unknown and is eligible for the one later attempt. */}finally{busy=false;}
   };
   if(!this.instrumentality)this.instrumentality=setInterval(()=>{void tick();},everyMs);void tick();
+ }
+ private async scheduledHealth():Promise<{instrumentality?:InstrumentalityRun|null;degraded:string[]}> {
+  try{const mode=this.instrumentalitySchedule?this.instrumentalitySchedule().mode:(this.home?readConfig(this.home).instrumentality:undefined);
+  if(!mode)return {degraded:[]};
+  const run=await this.nervous.call('instrumentality.latest') as InstrumentalityRun|null;return {instrumentality:run,degraded:run&&(run.status==='failed'||run.status==='pending'&&Date.now()-Date.parse(run.started)>3*MODEL_TIMEOUT_MS)?[runMessage(run)]:[]};}
+  catch{return {degraded:['Instrumentality status unavailable.']};}
  }
  /** Re-reads config.json and the cloud key in the brain, without restarting the service. */
  /** F-038: the model settings (never the key), whether the key is there, and what Ollama has. */
@@ -608,8 +614,8 @@ export class Runtime implements StoreApi {
   try{const p=await this.brain.call('runtime.ping',{},2000) as {routes?:Record<RouteName,RouteHealth>};return {...(p.routes?{routes:p.routes}:{}),degraded:p.routes?degradedReasons(p.routes):[]};}
   catch{return {degraded:['brain process not answering: model-needing requests fail until it is back']};}
  }
- async health(){await this.nervous.call('runtime.ping');const r=await this.routes();return {integrityCheck:'not-run',processes:{nervous:this.nervous.child.pid,brain:this.brain.child.pid,brainAlive:this.brain.child.connected},...r};}
- async doctor(){const channel=this.channelState();return {channel,channelFresh:channelIsFresh(channel,Date.now(),ONLINE_MS),...await this.nervous.call('runtime.doctor') as object,processes:{nervous:this.nervous.child.pid,brain:this.brain.child.pid,brainAlive:this.brain.child.connected},models:await this.brain.call('runtime.ping').then(p=>(p as {models:unknown}).models,()=>'brain unavailable'),...await this.routes(),localModels:await this.localModels(),agentLoop:'not implemented'};}
+ async health(){await this.nervous.call('runtime.ping');const [r,s]=await Promise.all([this.routes(),this.scheduledHealth()]);return {integrityCheck:'not-run',processes:{nervous:this.nervous.child.pid,brain:this.brain.child.pid,brainAlive:this.brain.child.connected},...r,...s,degraded:[...r.degraded,...s.degraded]};}
+ async doctor(){const channel=this.channelState();const [r,s]=await Promise.all([this.routes(),this.scheduledHealth()]);return {channel,channelFresh:channelIsFresh(channel,Date.now(),ONLINE_MS),...await this.nervous.call('runtime.doctor') as object,processes:{nervous:this.nervous.child.pid,brain:this.brain.child.pid,brainAlive:this.brain.child.connected},models:await this.brain.call('runtime.ping').then(p=>(p as {models:unknown}).models,()=>'brain unavailable'),...r,...s,degraded:[...r.degraded,...s.degraded],localModels:await this.localModels(),agentLoop:'not implemented'};}
  /** F-037: the models this base can use on its local route (Ollama's list), for doctor; unknown without a data home. */
  private async localModels():Promise<{reachable:boolean;url:string;models:string[]}|undefined> {
   if(!this.home)return undefined;let url;try{url=ollamaUrlOf(readConfig(this.home).models);}catch{return undefined;}

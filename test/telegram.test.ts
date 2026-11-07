@@ -14,29 +14,29 @@ const wait=(ms:number)=>new Promise(done=>setTimeout(done,ms));
 async function until(check:()=>boolean,ms=8000){const end=Date.now()+ms;while(!check()){if(Date.now()>end)throw new Error('timed out');await wait(25);}}
 /** A loopback Bot API: queued updates, recorded calls. */
 async function fakeTelegram(token:string) {
- const updates:object[]=[];const calls:{method:string;body:Record<string,unknown>}[]=[];let next=1;
+ let failing=false,failedSends=0;const updates:object[]=[];const calls:{method:string;body:Record<string,unknown>}[]=[];let next=1;
  const server=createServer((req,res)=>{let raw='';req.on('data',c=>raw+=c).on('end',async()=>{
   const m=/^\/bot([^/]+)\/(\w+)$/.exec(req.url ?? '');res.setHeader('content-type','application/json');
   if(!m||m[1]!==token){res.statusCode=401;res.end(JSON.stringify({ok:false,description:'Unauthorized'}));return;}
-  const body=JSON.parse(raw||'{}') as Record<string,unknown>;calls.push({method:m[2]!,body});
+  const body=JSON.parse(raw||'{}') as Record<string,unknown>;if(m[2]==='sendMessage'&&failing){failedSends++;res.statusCode=503;res.end(JSON.stringify({ok:false,description:'temporary failure'}));return;}calls.push({method:m[2]!,body});
   if(m[2]==='getUpdates'){const from=(body.offset as number|undefined) ?? 0;for(let i=0;i<10&&!updates.some(u=>(u as {update_id:number}).update_id>=from)&&body.timeout;i++)await wait(30);
    res.end(JSON.stringify({ok:true,result:updates.filter(u=>(u as {update_id:number}).update_id>=from)}));return;}
   res.end(JSON.stringify({ok:true,result:{message_id:calls.length}}));
  });});
  await new Promise<void>(done=>server.listen(0,'127.0.0.1',done));
  const now=()=>Math.floor(Date.now()/1000);
- return {calls,updates,base:`http://127.0.0.1:${(server.address() as {port:number}).port}`,
+ return {calls,updates,failSends:(on:boolean)=>{failing=on;},failedSends:()=>failedSends,base:`http://127.0.0.1:${(server.address() as {port:number}).port}`,
   text:(chat:number,text:string,date=now())=>updates.push({update_id:next++,message:{date,text,chat:{id:chat,type:'private',username:chat===OWNER?'owner':'stranger'},from:{id:chat}}}),
   tap:(chat:number,data:string)=>updates.push({update_id:next++,callback_query:{id:'q'+next,data,from:{id:chat},message:{message_id:7,chat:{id:chat}}}}),
   sent:(chat=OWNER)=>calls.filter(c=>c.method==='sendMessage'&&c.body.chat_id===chat).map(c=>c.body as {text:string;reply_markup?:{inline_keyboard:{callback_data:string}[][]}}),
   close:()=>new Promise<void>(done=>server.close(()=>done()))};
 }
 async function fakeModel(misato:string[]) {
- const asked:string[]=[];
- const server=createServer((req,res)=>{let raw='';req.on('data',c=>raw+=c).on('end',()=>{const r=JSON.parse(raw) as {messages:{content:string}[]};const casper=r.messages[0]!.content.startsWith('You are Casper');asked.push(casper?'casper':'misato');
+ const asked:string[]=[];const systems:string[]=[];
+ const server=createServer((req,res)=>{let raw='';req.on('data',c=>raw+=c).on('end',()=>{const r=JSON.parse(raw) as {messages:{content:string}[]};systems.push(r.messages[0]!.content);const casper=r.messages[0]!.content.startsWith('You are Casper');asked.push(casper?'casper':'misato');
   res.setHeader('content-type','application/json');res.end(JSON.stringify({choices:[{message:{content:casper?'{"vote":"approve","reason":"Matches.","confidence":0.9}':(misato.shift() ?? '{"reply":"done"}')},finish_reason:'stop'}]}));});});
  await new Promise<void>(done=>server.listen(0,'127.0.0.1',done));
- return {asked,url:`http://127.0.0.1:${(server.address() as {port:number}).port}/v1`,close:()=>new Promise<void>(done=>server.close(()=>done()))};
+ return {asked,systems,url:`http://127.0.0.1:${(server.address() as {port:number}).port}/v1`,close:()=>new Promise<void>(done=>server.close(()=>done()))};
 }
 test('the Bot API base is Telegram or loopback only, and link finds the private chats that sent /start',async()=>{
  const before=process.env.NERV_TELEGRAM_API;
@@ -178,4 +178,25 @@ test('B-021: Telegram question and owner answer continue one durable sortie; ano
   const sorties=await runtime.sorties();assert.equal(sorties.length,1);assert.equal(sorties[0]!.id,first.id);assert.equal(sorties[0]!.status,'done');
   const answers=(await runtime.events(first.id)).filter(e=>e.kind==='misato.answered');assert.equal(answers.length,1);assert.equal(answers[0]!.payload.text,'shopping.txt');
  }finally{await aoba.stop();await runtime.close();await model.close();await tg.close();rmSync(home,{recursive:true,force:true});}
+});
+test('F-003: failed Bot delivery keeps its checkpoint across restart, retries once accepted, and is not replayed',{timeout:15000},async()=>{
+ const token='123456:'+'r'.repeat(35),tg=await fakeTelegram(token);const home=mkdtempSync(join(tmpdir(),'nerv-channel-retry-'));const path=join(home,'telegram-state.json');let runtime=new Runtime(join(home,'nerv.sqlite'));
+ const channel=()=>new TelegramChannel({api:new TelegramApi(token,tg.base),store:runtime,chatId:OWNER,statePath:path,log:()=>{}});let aoba=channel();
+ try{
+  await runtime.ready();await aoba.start(50);tg.failSends(true);await runtime.nervous.call('inbox.brief',{message:'Neutral brief after a channel outage'});
+  await until(()=>tg.failedSends()>0);assert.equal((JSON.parse(readFileSync(path,'utf8')) as {inbox:{sequence:number}}).inbox.sequence,0);
+  await aoba.stop();await runtime.close();tg.failSends(false);runtime=new Runtime(join(home,'nerv.sqlite'));await runtime.ready();aoba=channel();await aoba.start(50);
+  await until(()=>tg.sent().some(m=>m.text==='Neutral brief after a channel outage'));await aoba.stop();await runtime.close();
+  runtime=new Runtime(join(home,'nerv.sqlite'));await runtime.ready();aoba=channel();await aoba.start(50);await wait(150);
+  assert.equal(tg.sent().filter(m=>m.text==='Neutral brief after a channel outage').length,1,'accepted delivery is checkpointed across the next restart');
+ }finally{await aoba.stop();await runtime.close();await tg.close();rmSync(home,{recursive:true,force:true});}
+});
+test('F-003: owner Italian then English messages keep their language through the real Telegram and model-process join',{timeout:15000},async()=>{
+ const token='123456:'+'b'.repeat(35),tg=await fakeTelegram(token),model=await fakeModel(['{"reply":"Ciao, sono qui."}','{"reply":"Hello, I am here."}']);const home=mkdtempSync(join(tmpdir(),'nerv-channel-language-'));
+ writeFileSync(join(home,'config.json'),JSON.stringify({models:{local:{baseUrl:model.url,model:'m'}}}));const runtime=new Runtime(join(home,'nerv.sqlite'),undefined,home);const channel=new TelegramChannel({api:new TelegramApi(token,tg.base),store:runtime,chatId:OWNER,statePath:join(home,'telegram-state.json'),log:()=>{}});
+ try{
+  await runtime.ready();await channel.start(50);tg.text(OWNER,'Ciao, come stai?');await until(()=>tg.sent().some(m=>m.text==='Ciao, sono qui.'));
+  tg.text(OWNER,'How are you today?');await until(()=>tg.sent().some(m=>m.text==='Hello, I am here.'));
+  assert.match(model.systems[0]!,/Write the reply in Italian/);assert.match(model.systems[1]!,/Write the reply in English/);assert.equal((await runtime.sorties()).filter(s=>s.status==='done').length,2);
+ }finally{await channel.stop();await runtime.close();await model.close();await tg.close();rmSync(home,{recursive:true,force:true});}
 });
