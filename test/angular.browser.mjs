@@ -156,11 +156,11 @@ test('F-002/F-010: reliable bilingual reminder flows, local dates and responsive
   const login=await (await fetch(origin+'/api/session/codes',{method:'POST',headers:{authorization:'Bearer '+token}})).json();
   await viewport(1440,1000);await page('Page.navigate',{url:origin+'/dashboard/#code='+login.code});
   await until(`document.querySelector('.banner')?.textContent.includes('LIVE ·')&&!document.querySelector('.banner')?.textContent.includes('SIGNING IN')`);
-  // F-053: shipped CRT grain is decorative, opt-in and static; motion honors the browser preference.
-  assert.equal(await evaluate(`getComputedStyle(document.querySelector('.crt-static')).display`),'none');
+  // F-053: sparse dynamic noise is decorative and opt-in; reduced motion stops and clears it.
+  assert.equal(await evaluate(`getComputedStyle(document.querySelector('.crt-noise')).display`),'none');
   await evaluate(`document.querySelector('#btn-crt').click()`);
-  assert.equal(await evaluate(`getComputedStyle(document.querySelector('.crt-static')).display`),'block');
-  assert.equal(await evaluate(`document.querySelector('.crt-static').getAttribute('aria-hidden')`),'true');
+  assert.equal(await evaluate(`getComputedStyle(document.querySelector('.crt-noise')).display`),'block');
+  assert.equal(await evaluate(`document.querySelector('.crt-noise').getAttribute('aria-hidden')`),'true');
   assert.equal(await evaluate(`getComputedStyle(document.querySelector('.wrap')).animationDuration`),'31s');
   assert.equal(await evaluate(`(()=>{const probe=document.createElement('i');probe.style.color='var(--eva01)';document.body.append(probe);const expected=getComputedStyle(probe).color;probe.remove();return getComputedStyle(document.querySelector('#magi-big')).borderTopColor===expected})()`),true,'MAGI has its violet identity');
   await evaluate(readFileSync(require.resolve('axe-core/axe.min.js'),'utf8'));
@@ -168,14 +168,19 @@ test('F-002/F-010: reliable bilingual reminder flows, local dates and responsive
   assert.deepEqual(await evaluate(`axe.run(document.querySelector('.s-magi')).then(r=>r.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)})))`),[],'MAGI axe with CRT');
   await until(`document.querySelector('.crt-band-a').getAnimations().length===1`);
   assert.ok(await evaluate(`document.querySelector('.crt-band-a').getAnimations()[0].effect.getTiming().duration>=4500`),'randomized band motion is running');
-  assert.equal(await evaluate(`getComputedStyle(document.querySelector('.crt-static')).opacity`),'0.055');
+  await until(`document.querySelector('.crt-noise').width===innerWidth`);
+  await evaluate(`window.crtNoiseFrameForTest=document.querySelector('.crt-noise').toDataURL()`);
+  await until(`document.querySelector('.crt-noise').toDataURL()!==window.crtNoiseFrameForTest`);
+  const density=await evaluate(`(()=>{const c=document.querySelector('.crt-noise'),data=c.getContext('2d').getImageData(0,0,c.width,c.height).data;let count=0;for(let i=3;i<data.length;i+=4)if(data[i])count++;return count/(c.width*c.height)})()`);
+  assert.ok(density>0&&density<=.001,'dynamic specks cover under 0.1% of the canvas; no matte field');
   await screenshot('dashboard-crt-on');
   await evaluate(`document.querySelector('.wrap').getAnimations().find(a=>a.animationName==='crt-flicker').play()`);
   await page('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
   assert.equal(await evaluate(`getComputedStyle(document.querySelector('.wrap')).animationName`),'none');
   assert.equal(await evaluate(`getComputedStyle(document.querySelector('.crt-band')).display`),'none');
-  await until(`crtMotionPreference.matches&&document.querySelector('.crt-band-a').getAnimations().length===0`);
+  await until(`crtMotionPreference.matches&&!crtMotionActive&&document.querySelector('.crt-band-a').getAnimations().length===0`);
   assert.equal(await evaluate(`document.querySelector('.crt-band-b').getAnimations().length`),0,'reduced motion cancels both JavaScript animations');
+  assert.equal(await evaluate(`(()=>{const c=document.querySelector('.crt-noise');return c.getContext('2d').getImageData(0,0,c.width,c.height).data.some((v,i)=>i%4===3&&v>0)})()`),false,'reduced motion clears all noise pixels');
   await screenshot('dashboard-crt-reduced-motion');
   await page('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'no-preference'}]});
   try{await until(`!crtMotionPreference.matches&&document.querySelector('.crt-band-a').getAnimations().length===1`);}catch(error){t.diagnostic(JSON.stringify(await evaluate(`({reduced:crtMotionPreference.matches,on:state.crt,theme:state.theme,hidden:document.hidden,generation:crtGeneration,bands:crtMotion.map(b=>({timer:b.timer,animation:!!b.animation})),lastFrame,now:performance.now(),animations:document.querySelector('.crt-band-a').getAnimations().map(a=>a.playState)})`)));t.diagnostic(JSON.stringify(errors));throw error;}

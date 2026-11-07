@@ -60,7 +60,7 @@ Within each lane: explicit Queue order, impact priority, roadmap placement order
 |---|---|---|---|---|---|---|
 | [F-062](../BACKLOG.md#f-062) · Backup and restore: agreed loss bounds, off-host snapshots and a restore drill | 🔺 P1 | Open | 🟡 Medium | 1 — Reliable local core | 🔺 P1<br />roadmap 2<br />0 direct active dependent(s)<br />🟡 Medium | Owner decides the acceptable data loss and restore time, and where encrypted off-host copies live. |
 | [F-064](../BACKLOG.md#f-064) · Bounded incident circuits instead of a global kill switch | 🔹 P3 | Open | 🟡 Medium | 2b — Governed extensions | 🔹 P3<br />roadmap 7<br />0 direct active dependent(s)<br />🟡 Medium | Owner decides which events trip which circuit, its scope, and who may rearm it. |
-| [F-053](../BACKLOG.md#f-053) · CRT: stronger varied flicker, smoothly randomized bands and visible pixel grain | 🔹 P3 | Implemented | 🟢 Small | 4 — Angular PWA, GenUI and live dashboard | 🔹 P3<br />roadmap 9<br />0 direct active dependent(s)<br />🟢 Small | Confirm the stronger flicker, visible grain and smooth random bands after CI passes. |
+| [F-053](../BACKLOG.md#f-053) · CRT: stronger varied flicker, smoothly randomized bands and dynamic signal noise | 🔹 P3 | Implemented | 🟢 Small | 4 — Angular PWA, GenUI and live dashboard | 🔹 P3<br />roadmap 9<br />0 direct active dependent(s)<br />🟢 Small | Confirm the stronger flicker, dynamic noise without a matte veil and smooth random bands after CI passes. |
 
 ## Blocked
 

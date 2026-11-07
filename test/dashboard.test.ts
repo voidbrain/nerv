@@ -162,7 +162,7 @@ test('the CRT effect: the original static scanlines, darker borders, a slight pa
  assert.match(html,/class="crt-band crt-band-b" aria-hidden="true"/);
  assert.match(jsMotion,/element\.animate\(plan\.frames/,'fresh random motion pass instead of a fixed line cycle');
  for(const o of /@keyframes crt-flicker \{([^\n]*)\}/.exec(html)![1]!.matchAll(/opacity:([.0-9]+)/g))assert.ok(Number(o[1])>=0.92,'restore the previous maximum dimming');
- assert.match(html,/@media \(prefers-reduced-motion:reduce\) \{ body\.theme-eva\.crt-on \.wrap \{ animation:none; \} body\.theme-eva\.crt-on \.crt-band \{ display:none; \}/);
+ assert.match(html,/@media \(prefers-reduced-motion:reduce\) \{ body\.theme-eva\.crt-on \.wrap \{ animation:none; \} body\.theme-eva\.crt-on \.crt-band, body\.theme-eva\.crt-on \.crt-noise \{ display:none; \}/);
  const period=Number(/animation:crt-flicker (\d+)s /.exec(html)![1])*1000;
  const pulses=[.../@keyframes crt-flicker \{([^\n]*)\}/.exec(html)![1]!.matchAll(/([0-9.]+)% \{ opacity:([.0-9]+)/g)].filter(m=>Number(m[2])<1).map(m=>Number(m[1])*period/100);
  const wrapped=[...pulses,...pulses.slice(0,2).map(t=>t+period)];
@@ -352,4 +352,19 @@ test('F-053: randomized band passes ease through bounded trajectories with varia
  assert.ok(ys.some((y,n)=>n&&y===ys[n-1]),'a sustained pause can occur');
  assert.ok(ys.some((y,n)=>n&&y<ys[n-1]!),'a short reversal can occur');
  assert.match(up.frames[0]!.transform,/103vh/);assert.match(up.frames.at(-1)!.transform,/-3vh/);
+});
+
+test('F-053: dynamic noise clears each frame, paints only sparse pixels, and bounds repaint work',()=>{
+ const source=readFileSync('web/public/dashboard/dashboard.js','utf8');const a=source.indexOf('function drawCrtNoise(');const body=source.slice(a,source.indexOf('\n}\n',a)+2);
+ const dots:number[][][]=[],clears:number[][]=[];let frame:number[][]=[];
+ const context={globalAlpha:1,fillStyle:'',clearRect:(...args:number[])=>{clears.push(args);frame=[];dots.push(frame);},fillRect:(...args:number[])=>frame.push([...args,context.globalAlpha])};
+ const canvas={width:0,height:0,getContext:()=>context},size={innerWidth:200,innerHeight:100};let value=.1;
+ const random=Object.create(Math) as Math;random.random=()=>value;
+ const api=new Function('document','window','cssVar','Math','let crtMotionActive=true,crtNoiseAt=0;'+body+';return {draw:drawCrtNoise,off:()=>{crtMotionActive=false}};')({querySelector:()=>canvas},size,()=> '#fff',random) as {draw:(time:number)=>void;off:()=>void};
+ api.draw(100);assert.equal(clears.length,1);assert.equal(canvas.width,200);assert.equal(canvas.height,100);assert.equal(dots[0]!.length,9);
+ api.draw(120);assert.equal(clears.length,1,'repaints are rate-limited');
+ value=.9;api.draw(200);assert.equal(clears.length,2,'previous pixels clear before the next frame');assert.notDeepEqual(dots[0],dots[1],'noise changes over time');
+ for(const set of dots)for(const dot of set){assert.equal(dot[2],1);assert.equal(dot[3],1);assert.ok(dot[0]!>=0&&dot[0]!<200&&dot[1]!>=0&&dot[1]!<100);assert.ok(dot[4]!>=.12&&dot[4]!<=.4);}
+ size.innerWidth=8000;size.innerHeight=8000;api.draw(300);assert.equal(dots.at(-1)!.length,1800,'large screens retain a fixed drawing budget');
+ api.off();api.draw(400);assert.equal(clears.length,3,'disabled noise schedules no paints');
 });

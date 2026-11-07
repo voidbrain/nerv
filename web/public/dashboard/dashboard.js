@@ -942,7 +942,7 @@ function drawHeartbeats(now) {
 /* ================= LOOP + EVENTS ================= */
 let lastFrame = 0;
 function frame(now) {
-  if (now - lastFrame > 33) { updateCrtMotion(); drawMap(now); drawHeartbeats(now); lastFrame = now; }
+  if (now - lastFrame > 33) { updateCrtMotion(); drawCrtNoise(now); drawMap(now); drawHeartbeats(now); lastFrame = now; }
   requestAnimationFrame(frame);
 }
 setInterval(() => {
@@ -1072,6 +1072,26 @@ function crtBandPass(index, random = Math.random) {
     return {transform:"translateY(" + (index ? 100 - position : position) + "vh)",offset:i === positions.length - 1 ? 1 : elapsed / total,easing:"cubic-bezier(.4,0,.6,1)"};
   }),duration:(index ? 6500 : 4500) + random() * 3500,wait:(index ? 7000 : 4500) + random() * (index ? 7000 : 5500)};
 }
+/* Sparse isolated pixels, cleared each frame: no translucent field that washes out the display. */
+let crtNoiseAt = 0;
+function drawCrtNoise(now) {
+  if (!crtMotionActive || now - crtNoiseAt < 90) return;
+  crtNoiseAt = now;
+  const canvas = document.querySelector(".crt-noise");
+  if (!canvas) return;
+  const context = canvas.getContext("2d");
+  if (!context) return;
+  const width = window.innerWidth, height = window.innerHeight;
+  if (canvas.width !== width || canvas.height !== height) { canvas.width = width; canvas.height = height; }
+  context.clearRect(0, 0, width, height);
+  const count = Math.min(1800, Math.ceil(width * height * .00045));
+  context.fillStyle = cssVar("--text");
+  for (let n = 0; n < count; n++) {
+    context.globalAlpha = .12 + Math.random() * .28;
+    context.fillRect(Math.floor(Math.random() * width), Math.floor(Math.random() * height), 1, 1);
+  }
+  context.globalAlpha = 1;
+}
 const crtMotionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
 let crtMotion = [], crtGeneration = 0, crtMotionActive = false;
 function updateCrtMotion() {
@@ -1082,6 +1102,9 @@ function updateCrtMotion() {
   const generation = ++crtGeneration;
   for (const band of crtMotion) { clearTimeout(band.timer); if (band.animation) band.animation.cancel(); }
   crtMotion = [];
+  crtNoiseAt = 0;
+  const noise = document.querySelector(".crt-noise"), context = noise && noise.getContext("2d");
+  if (context) context.clearRect(0, 0, noise.width, noise.height);
   if (!active) return;
   crtMotion = [...document.querySelectorAll(".crt-band")].map((element, index) => {
     const band = {animation:null,timer:undefined};
