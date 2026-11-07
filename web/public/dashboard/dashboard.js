@@ -942,7 +942,7 @@ function drawHeartbeats(now) {
 /* ================= LOOP + EVENTS ================= */
 let lastFrame = 0;
 function frame(now) {
-  if (now - lastFrame > 33) { drawMap(now); drawHeartbeats(now); lastFrame = now; }
+  if (now - lastFrame > 33) { updateCrtMotion(); drawMap(now); drawHeartbeats(now); lastFrame = now; }
   requestAnimationFrame(frame);
 }
 setInterval(() => {
@@ -1059,7 +1059,46 @@ function migrateTheme(name) { return { "eva-full":["eva", "dark", "orange"], "ev
 const PREFS = "nerv.dashboard.prefs";
 function readPrefs() { try { const p = JSON.parse(localStorage.getItem(PREFS) || "{}"); return p && typeof p === "object" ? p : {}; } catch { return {}; } }
 function savePrefs() { try { localStorage.setItem(PREFS, JSON.stringify({ theme:state.theme, mode:state.mode, accent:state.accent, crt:!!state.crt })); } catch { /* storage blocked: not remembered */ } }
-function setCrt(on) { state.crt = on; document.body.classList.toggle("crt-on", on && state.theme === "eva"); const b = document.getElementById("btn-crt"); if (b) b.setAttribute("aria-pressed", String(on)); }
+/* Each band pass varies distances and time between eased waypoints. Zero velocity at joins keeps
+   slowdowns, pauses and occasional short reversals smooth. Randomness is cosmetic only. */
+function crtBandPass(index, random = Math.random) {
+  const positions = [-3, 20 + random() * 20, 55 + random() * 20, 103];
+  if (random() < .35) positions.splice(2, 0, positions[1] - 8 - random() * 10);
+  if (random() < .3) positions.splice(2, 0, positions[1]);
+  const weights = positions.slice(1).map(() => .7 + random() * .9);
+  const total = weights.reduce((sum, value) => sum + value, 0); let elapsed = 0;
+  return {frames:positions.map((position, i) => {
+    if (i) elapsed += weights[i - 1];
+    return {transform:"translateY(" + (index ? 100 - position : position) + "vh)",offset:i === positions.length - 1 ? 1 : elapsed / total,easing:"cubic-bezier(.4,0,.6,1)"};
+  }),duration:(index ? 6500 : 4500) + random() * 3500,wait:(index ? 7000 : 4500) + random() * (index ? 7000 : 5500)};
+}
+const crtMotionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+let crtMotion = [], crtGeneration = 0, crtMotionActive = false;
+function updateCrtMotion() {
+  // Check the current preference in the existing frame loop too: media change events can be missed.
+  const active = !!state.crt && state.theme === "eva" && !crtMotionPreference.matches && !document.hidden;
+  if (active === crtMotionActive) return;
+  crtMotionActive = active;
+  const generation = ++crtGeneration;
+  for (const band of crtMotion) { clearTimeout(band.timer); if (band.animation) band.animation.cancel(); }
+  crtMotion = [];
+  if (!active) return;
+  crtMotion = [...document.querySelectorAll(".crt-band")].map((element, index) => {
+    const band = {animation:null,timer:undefined};
+    const pass = () => {
+      if (generation !== crtGeneration) return;
+      const plan = crtBandPass(index); band.timer = undefined;
+      band.animation = element.animate(plan.frames, {duration:plan.duration});
+      band.animation.finished.then(() => {
+        if (generation === crtGeneration) { band.animation = null; band.timer = setTimeout(pass, plan.wait); }
+      }).catch(() => { /* Preference/theme/visibility changes cancel the decorative pass. */ });
+    };
+    band.timer = setTimeout(pass, index * 3600); return band;
+  });
+}
+crtMotionPreference.addEventListener("change", updateCrtMotion);
+document.addEventListener("visibilitychange", updateCrtMotion);
+function setCrt(on) { state.crt = on; document.body.classList.toggle("crt-on", on && state.theme === "eva"); const b = document.getElementById("btn-crt"); if (b) b.setAttribute("aria-pressed", String(on)); updateCrtMotion(); }
 for (const id of ["theme", "mode", "accent"]) document.getElementById(id).addEventListener("change", () => { setTheme(document.getElementById("theme").value, document.getElementById("mode").value, document.getElementById("accent").value); savePrefs(); });
 document.getElementById("btn-crt").addEventListener("click", () => { setCrt(!state.crt); savePrefs(); });
 document.getElementById("btn-spear").addEventListener("click", spearAll);
@@ -1072,7 +1111,7 @@ function setTheme(theme, mode, accent) {
   document.body.className = "theme-" + state.theme + " mode-" + state.mode + " accent-" + state.accent + (state.crt && state.theme === "eva" ? " crt-on" : "");
   for (const [k, v] of Object.entries(palette(state.theme, state.mode, state.accent))) document.body.style.setProperty("--" + k, v);
   for (const id of ["theme", "mode", "accent"]) document.getElementById(id).value = state[id];
-  applyLabels(); renderAll(); renderLog(); requestAnimationFrame(() => drawEdges(state.sorties.find(x => x.id === state.selected)));
+  updateCrtMotion(); applyLabels(); renderAll(); renderLog(); requestAnimationFrame(() => drawEdges(state.sorties.find(x => x.id === state.selected)));
 }
 
 // Live: only this machine is a base; simulated cages and pilots would point at bases that do not exist.
