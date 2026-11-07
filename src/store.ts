@@ -1,3 +1,4 @@
+import {UsageStore} from './model-usage.ts';
 import {checkHistory,historyPage,type HistoryPage} from './history.ts';
 import { DatabaseSync } from 'node:sqlite';
 import { randomUUID } from 'node:crypto';
@@ -20,6 +21,7 @@ export const OWNER_SOURCE='owner';
 export const MISATO_SOURCE='misato';
 export class Store {
   readonly db: DatabaseSync;
+  readonly usage: UsageStore;
   readonly ledger: Ledger;
   readonly memory: Memory;
   readonly policySource: string;
@@ -31,6 +33,7 @@ export class Store {
     this.db = new DatabaseSync(path);
     const version = this.db.prepare('PRAGMA user_version').get() as {user_version:number};
     if(version.user_version > 5) {this.db.close();throw new Error('Database schema is newer than this NERV Agency version.');}
+    this.usage=new UsageStore(this.db);
     this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
       CREATE TABLE IF NOT EXISTS reminders(id TEXT PRIMARY KEY, title TEXT NOT NULL, due TEXT NOT NULL, created TEXT NOT NULL, delivered TEXT, cancelled TEXT);
       CREATE TABLE IF NOT EXISTS deliveries(id TEXT PRIMARY KEY, reminder_id TEXT UNIQUE REFERENCES reminders(id), kind TEXT NOT NULL DEFAULT 'reminder', message TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT);

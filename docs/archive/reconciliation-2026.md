@@ -2,6 +2,7 @@
 
 Earlier reconciliation notes moved out of the [backlog](../BACKLOG.md) header, newest first, as written at the time. The header keeps only the latest reconciliation; when it moves to a newer `main`, the sentence it replaces is added at the top of this list. Dated evidence, not current status.
 
+- Current work ledger, reviewed 7 November 2026 against main `951ff55`. PR #187 runs 42373292192/42373290475 passed validate, windows and native-macos; harness v3.5.0 dependencies verified and F-068 closed.
 - Current work ledger, reviewed 7 November 2026 against main `8dc6973`. PR #186 runs 42355908976/42355905032 passed validate, windows and native-macos; harness v3.4.0 reconciliation verified and archived.
 - Current work ledger, reviewed 7 November 2026 against main `0d17fdc`. PR #185 runs 42355574146/42355572334 passed validate, windows and native-macos; harness v3.4.0 reconciliation verified and archived.
 - Current work ledger, reviewed 7 November 2026 against main `ffb7f2f`. PR #184 runs 42354868215/42354866279 passed validate, windows and native-macos; F-013/F-067 closure reconciliation complete.

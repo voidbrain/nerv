@@ -1,3 +1,6 @@
+import {AsyncLocalStorage} from 'node:async_hooks';
+import type {UsageObservation} from './model-usage.ts';
+const accounting=new AsyncLocalStorage<{observation:UsageObservation|null}>();
 import {connect} from 'node:net';
 import {dispatchRpc,MAX_FRAME_BYTES,READY,RpcFault} from './rpc.ts';
 import {readConfig,readModelKey} from './config.ts';
@@ -23,8 +26,8 @@ const note=(c:RouteChange|undefined)=>{const line=c&&describeChange(c);if(line)c
 const configured=()=>watch.configure({local:!!models.local,cloud:!!models.cloud?.enabled&&!!key}).forEach(note);
 /** complete() with the outcome recorded against the route it used; a configuration error (no route) is not an outage. */
 async function run(ask:Ask,m:Models):Promise<Reply> {
- let route;try{route=selectRoute(ask,m,!!key);}catch{return complete(ask,m,key,{timeoutMs:MODEL_TIMEOUT_MS-5000});}
- try{const reply=await complete(ask,m,key,{timeoutMs:MODEL_TIMEOUT_MS-5000});note(watch.record(route,true));return reply;}
+ let route;try{route=selectRoute(ask,m,!!key);}catch{return complete(ask,m,key,{timeoutMs:MODEL_TIMEOUT_MS-5000,observe:o=>{const active=accounting.getStore();if(active)active.observation=o;}});}
+ try{const reply=await complete(ask,m,key,{timeoutMs:MODEL_TIMEOUT_MS-5000,observe:o=>{const active=accounting.getStore();if(active)active.observation=o;}});note(watch.record(route,true));return reply;}
  catch(e){if(e instanceof ModelError)note(watch.record(route,false,e.message));throw e;}
 }
 /** A cheap reachability check of the local route: a TCP connection opened and closed, no request and no model call.
@@ -41,6 +44,9 @@ load();configured();void probe();setInterval(()=>{void probe();},60_000).unref()
 process.on('message',(value:unknown)=>{
  if(Buffer.byteLength(JSON.stringify(value))>MAX_FRAME_BYTES)return;
  void dispatchRpc(value,async(method,params)=>{
+ const tracked=['model.complete','misato.step','casper.verdict','consultant.advise','instrumentality.digest'].includes(method);
+ const context:{observation:UsageObservation|null}={observation:null};
+ const execute=async()=>{
   if(method==='runtime.ping')return {role:'brain',pid:process.pid,models:configError?{error:configError}:describe(models,!!key),routes:watch.snapshot(),agentLoop:'not implemented'};
   if(method==='models.reload'){const result=load();configured();void probe();return {...result,models:configError?{error:configError}:describe(models,!!key)};}
   if(method==='model.complete'){
@@ -82,6 +88,9 @@ process.on('message',(value:unknown)=>{
    catch(e){return {verdict:null,error:e instanceof ModelError?e.message:'Model route failed.'};}
   }
   throw new RpcFault(-32601,'Method not found.');
+ };
+ if(!tracked)return execute();
+ return accounting.run(context,async()=>{try{return {value:await execute(),accounting:context.observation};}catch(e){return {failure:e instanceof RpcFault?e.message:'Model route failed.',accounting:context.observation};}});
  }).then(reply=>{if(reply&&process.connected)process.send?.(reply);});
 });
 function stop(){if(process.connected)process.disconnect();}
