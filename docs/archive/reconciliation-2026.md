@@ -2,6 +2,7 @@
 
 Earlier reconciliation notes moved out of the [backlog](../BACKLOG.md) header, newest first, as written at the time. The header keeps only the latest reconciliation; when it moves to a newer `main`, the sentence it replaces is added at the top of this list. Dated evidence, not current status.
 
+- Current work ledger, reviewed 7 November 2026 against main `55ef703`. PR #179: CI 42314165832/42314159364 validate, windows and native-macos green; F-065–F-067 remain proposed work, not implemented.
 - Current work ledger, reviewed 7 November 2026 against main `fe4fd37`. PR #178 reconciled through ci:status (42306441643/42306427872: validate, windows and native-macos green); recap tooling only, no record changed.
 - PR #177 reconciled through ci:status (42303818758/42303806635: validate, windows and native-macos green); B-021 implemented, owner check pending.
 - PR #176 reconciled through ci:status (42301159928: validate, windows and native-macos green); skill notes on F-045/F-007 and harness v3.2.1 adopted.
