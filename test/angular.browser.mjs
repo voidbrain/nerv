@@ -156,6 +156,15 @@ test('F-002/F-010: reliable bilingual reminder flows, local dates and responsive
   const login=await (await fetch(origin+'/api/session/codes',{method:'POST',headers:{authorization:'Bearer '+token}})).json();
   await viewport(1440,1000);await page('Page.navigate',{url:origin+'/dashboard/#code='+login.code});
   await until(`document.querySelector('.banner')?.textContent.includes('LIVE ·')&&!document.querySelector('.banner')?.textContent.includes('SIGNING IN')`);
+  // F-057: exercise the actual header button and browser clipboard, not only the helper.
+  await until(`document.querySelector('#build').dataset.commit.length>=7`);
+  const reportedBuild=await (await fetch(origin+'/api/doctor',{headers:{authorization:'Bearer '+token}})).json();
+  const runningCommit=reportedBuild.build.shortCommit;assert.match(runningCommit,/^[0-9a-f]{4,40}$/);
+  assert.equal(await evaluate(`document.querySelector('#build').dataset.copyCommit`),runningCommit,'button uses the server’s Git-verified ID');
+  await call('Browser.grantPermissions',{origin,permissions:['clipboardReadWrite','clipboardSanitizedWrite']});
+  await evaluate(`document.querySelector('#build').click()`);
+  assert.equal(await evaluate(`navigator.clipboard.readText()`),runningCommit,'header copies Git’s unique running commit');
+  assert.equal(await evaluate(`document.querySelector('#build').title`),'Commit '+runningCommit+' · click to copy','hover and clipboard use the same identifier');
   // F-053: sparse dynamic noise is decorative and opt-in; reduced motion stops and clears it.
   assert.equal(await evaluate(`getComputedStyle(document.querySelector('.crt-noise')).display`),'none');
   await evaluate(`document.querySelector('#btn-crt').click()`);

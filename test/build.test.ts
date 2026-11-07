@@ -29,7 +29,7 @@ test('F-057: build versions advance per first-parent revision, match across base
 
 test('F-057: a source copy without git metadata retains its package version',()=>{
  const root=mkdtempSync(join(tmpdir(),'nerv-source-'));
- try{writeFileSync(join(root,'package.json'),'{"version":"0.1.0"}');assert.deepEqual(info(root),{version:'0.1.0',commit:null});}
+ try{writeFileSync(join(root,'package.json'),'{"version":"0.1.0"}');assert.deepEqual(info(root),{version:'0.1.0',commit:null,shortCommit:null});}
  finally{rmSync(root,{recursive:true,force:true});}
 });
 

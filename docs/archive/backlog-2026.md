@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 35 | 38 |
+| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 36 | 38 |
 <!-- archive-recap:end -->
 
 <a id="archive-week-2026-11-02"></a>
@@ -2551,6 +2551,40 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 | PR / evidence | [PR #196](https://github.com/voidbrain/nerv/pull/196) closure;  [PR #195](https://github.com/voidbrain/nerv/pull/195) project tuning and regressions;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; Test: test/dashboard.test.ts, B-040 active planning edge, fails with class live instead of the recorded route |
 | Opened | 2026-11-07 |
 | Verification | 2026-11-07: committed B-040 regression passes; full suite 263 passed, one platform skip; Chrome CRT/palette/reduced-motion checks pass. Review: fresh-context reviewer reports no remaining findings after stale legacy assertion correction. PR #195 CI runs 42398922334/42398926076 passed every validate, Windows and macOS job. |
+| Reviewed | 2026-11-07 |
+
+</details>
+
+---
+
+### F-053
+
+**CRT: stronger varied flicker, smoothly randomized bands and dynamic signal noise**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />None: owner accepted the current CRT appearance.
+
+| | |
+|---|---|
+| **Issue** | Owner feedback on v1.205: grain is not visible, flicker was softened too much, moving lines are too infrequent. Restore prior flicker strength with fewer overall events and regular double-pulse variants; bands should smoothly, randomly slow and accelerate, including occasional pauses/reversals. Latest clarification: fixed grain makes the screen matte; replace it with changing analog-style pixel signal noise without washing out the display. |
+| **Reproduce** | Enable CRT in Eva /dashboard, compare dark orange and other palettes. |
+| **Check** | Opt-in readable effect, no layout shift; reduced motion disables animation; varied singles and regular double pulses without hazardous flashing; dynamic sparse pixel noise without a flat fill/veil; reduced motion stops and clears noise; owner visual acceptance. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-07: owner accepted the CRT (“crt ok for now”) after PR #199 merged with every CI check green; no required visual work remains.  Implemented retuning for latest owner feedback: restore 4–8% dips, five pulse groups including three doubles per 31 seconds; replace fixed 43/67-second band cycles with independently randomized eased passes (roughly 9–18 / 13.5–24 seconds including rest). Replace the rejected fixed grain with transparent-canvas signal noise: isolated 1 px specks, about 0.045% coverage capped at 1,800, refreshed no faster than 90 ms and fully cleared before each frame. No filled field, static grain or matte overlay remains. Each pass varies speed smoothly and may pause or briefly reverse. Cancel animations/timers when disabled, hidden, Simple or reduced motion. Browser lifecycle, scoped axe, randomized trajectory bounds, build/typecheck and full suite passed; owner visual acceptance remains; PR #199 runs 42402931969/42402936170 passed validate, windows and native-macos; owner visual acceptance passed. PR #198 was closed unmerged after the owner rejected the static-grain appearance; this revision keeps its stronger flicker/smooth bands and replaces only the noise. PR #197 was closed unmerged after a strongest-dip contrast check found the small MAGI heading too dim; the corrected CRT-only heading now passes axe at the 8% dip. Media-preference change events were missed in Chrome: cached eligibility checks in the existing frame loop now recover the transition without duplicate animation restarts. Prior tuning in PR #195 (1–2.5% flicker, 43/67-second bands and 2.5% grain) passed automated checks but was rejected as too faint/infrequent in the owner's v1.205 check.
+
+**Estimates:** No remaining work. Historical estimate: Small, 1–3 focused hours; latest owner acceptance completes the required visual check.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #199](https://github.com/voidbrain/nerv/pull/199) dynamic-noise revision and retained CI evidence;  [PR #198](https://github.com/voidbrain/nerv/pull/198) superseded, closed unmerged after owner clarified dynamic noise without matte appearance;  [PR #197](https://github.com/voidbrain/nerv/pull/197) superseded, closed unmerged after additional strongest-dip contrast finding;  [PR #196](https://github.com/voidbrain/nerv/pull/196) evidence and queue reconciliation;  [PR #195](https://github.com/voidbrain/nerv/pull/195) project tuning and regressions;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner request 2026-11-07; reopened from [closed history](archive/backlog-2026.md#f-053), preserving prior acceptance |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-07: earlier candidates passed strongest-dip heading contrast and motion lifecycle checks, with history in PRs #197/#198; both closed unmerged after subsequent findings/owner feedback. Current dynamic-noise revision: 265 tests passed, one platform skip; build/typecheck/conventions passed. Chrome verified changing pixel buffers, under 0.1% painted coverage, full clearing on reduced motion, band preference/theme/off lifecycle and scoped axe at the strongest dip. Screenshot inspected: sparse specks with clear surfaces. Review: separate reviewer reports no actionable findings. CI: PR #199 runs 42402931969/42402936170 passed every job. Human: 2026-11-07 owner “crt ok for now”; accepted. |
 | Reviewed | 2026-11-07 |
 
 </details>
