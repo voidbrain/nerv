@@ -84,6 +84,6 @@ export class Memory {
  }
  /** Instrumentality's summaries, newest first; the latest one's `until` is where the next consolidation starts. */
  episodes(limit=10):Episode[] {return this.db.prepare('SELECT * FROM episodes ORDER BY until DESC LIMIT ?').all(Math.min(Math.max(1,limit),100)) as unknown as Episode[];}
- saveEpisode(e:Omit<Episode,'id'|'created'>,now=new Date()):Episode {const id=randomUUID();this.tx(()=>{this.db.prepare('INSERT INTO episodes VALUES(?,?,?,?,?,?,?)').run(id,e.since,e.until,e.summary.slice(0,1500),e.exchanges,e.proposed,now.toISOString());this.db.prepare('INSERT INTO episodes_fts(summary,episode_id) VALUES(?,?)').run(e.summary.slice(0,1500),id);});return {...e,id,created:now.toISOString()};}
+ saveEpisode(e:Omit<Episode,'id'|'created'>,now=new Date(),afterSave?:()=>void):Episode {const id=randomUUID();this.tx(()=>{this.db.prepare('INSERT INTO episodes VALUES(?,?,?,?,?,?,?)').run(id,e.since,e.until,e.summary.slice(0,1500),e.exchanges,e.proposed,now.toISOString());this.db.prepare('INSERT INTO episodes_fts(summary,episode_id) VALUES(?,?)').run(e.summary.slice(0,1500),id);afterSave?.();});return {...e,id,created:now.toISOString()};}
  historyOf(id:string):{kind:string;text:string;source:string;created:string}[] {return this.db.prepare('SELECT kind,text,source,created FROM fact_history WHERE fact_id=? ORDER BY sequence').all(id) as {kind:string;text:string;source:string;created:string}[];}
 }

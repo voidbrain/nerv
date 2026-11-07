@@ -20,14 +20,14 @@ test('the digest prompt asks only for facts the owner stated, in the configured 
  assert.match(digestAsk(Array.from({length:14},()=>({request:'x'})),'en','local').system!,/At most 7 facts/);
 });
 async function setup(misato:string[],digest:string) {
- const asked:string[]=[];
+ const asked:string[]=[];let digestReply=digest;
  const model=createServer((req,res)=>{let raw='';req.on('data',c=>raw+=c).on('end',()=>{const r=JSON.parse(raw) as {messages:{content:string}[]};const sys=r.messages[0]!.content;
   const who=sys.startsWith('You are Casper')?'casper':sys.startsWith('You consolidate')?'digest':'misato';asked.push(who);
-  res.setHeader('content-type','application/json');res.end(JSON.stringify({choices:[{message:{content:who==='digest'?digest:who==='casper'?'{"vote":"approve","reason":"ok","confidence":0.9}':(misato.shift() ?? '{"reply":"ok"}')},finish_reason:'stop'}]}));});});
+  res.setHeader('content-type','application/json');res.end(JSON.stringify({choices:[{message:{content:who==='digest'?digestReply:who==='casper'?'{"vote":"approve","reason":"ok","confidence":0.9}':(misato.shift() ?? '{"reply":"ok"}')},finish_reason:'stop'}]}));});});
  await new Promise<void>(done=>model.listen(0,'127.0.0.1',done));const home=mkdtempSync(join(tmpdir(),'nerv-instr-'));
  writeFileSync(join(home,'config.json'),JSON.stringify({models:{local:{baseUrl:`http://127.0.0.1:${(model.address() as {port:number}).port}/v1`,model:'m'}}}));
  const runtime=new Runtime(join(home,'nerv.sqlite'),undefined,home);await runtime.ready();
- return {asked,home,runtime,close:async()=>{await runtime.close();await new Promise<void>(done=>model.close(()=>done()));rmSync(home,{recursive:true,force:true});}};
+ return {asked,home,runtime,setDigest:(value:string)=>{digestReply=value;},close:async()=>{await runtime.close();await new Promise<void>(done=>model.close(()=>done()));rmSync(home,{recursive:true,force:true});}};
 }
 test('through every process: the day\'s exchanges become a summary and cards for new facts only; approving stores them; the ledger is untouched',async()=>{
  const t=await setup(['{"reply":"Noted the dentist."}','{"reply":"Coffee at 8, ok."}'],'{"summary":"The owner talked about the dentist and coffee.","facts":["My dentist is Dr. Rossi","I drink coffee at 8"]}');
@@ -72,5 +72,35 @@ test('idle mode: consolidates after an hour without requests, at most once in 20
   try{const s=again.ledger.openSortie('misato','new','trusted');again.ledger.note(s,'misato.request',{text:'I like coffee'},new Date(Date.now()-2*3_600_000+60_000));assert.equal(again.memory.episodes().length,1);}finally{again.close();}
   await wait(300);assert.equal(t.asked.filter(a=>a==='digest').length,1,'not again within 20 hours of the last episode');
   void OWNER_SOURCE;
+ }finally{await t.close();}
+});
+test('F-003: failed night is durable in health and brief, retries once after an hour across restart and clears after recovery',{timeout:15000},async()=>{
+ const t=await setup([],'not json');let runtime=t.runtime;
+ let now=new Date('2030-01-02T12:00:00.000Z');
+ const schedule=()=>({mode:{at:'03:00'},timeZone:'Europe/Rome'});
+ const until=async(check:()=>Promise<boolean>)=>{const end=Date.now()+5000;while(!await check()){assert.ok(Date.now()<end,'scheduled outcome timed out');await wait(20);}};
+ try{
+  const seed=new Store(join(t.home,'nerv.sqlite'));try{const id=seed.ledger.openSortie('misato','Neutral exchange','trusted');seed.ledger.note(id,'misato.request',{text:'I prefer tea'},new Date(now.getTime()-3600000));}finally{seed.close();}
+  runtime.startInstrumentality(schedule,20,()=>now);
+  await until(async()=>((await runtime.health()).instrumentality?.status)==='failed');
+  assert.equal(t.asked.filter(a=>a==='digest').length,2,'one unreadable-reply retry within the first scheduled attempt');
+  const first=await runtime.health();assert.match(first.degraded.join(' '),/digest was unreadable/);
+  const {gatherBrief,composeBrief}=await import('../src/brief.ts');
+  const facts=await gatherBrief(runtime,new Date(now.getTime()-86400000));assert.match(composeBrief({now,timeZone:'Europe/Rome',language:'en',...facts}),/digest was unreadable/);
+  await runtime.close();runtime=new Runtime(join(t.home,'nerv.sqlite'),undefined,t.home);await runtime.ready();
+  now=new Date(now.getTime()+59*60000);runtime.startInstrumentality(schedule,20,()=>now);await wait(100);assert.equal(t.asked.filter(a=>a==='digest').length,2,'restart cannot reset retry backoff');
+  t.setDigest('{"summary":"The owner prefers tea.","facts":[]}');now=new Date(now.getTime()+60000);
+  await until(async()=>((await runtime.health()).instrumentality?.status)==='completed');
+  assert.equal(t.asked.filter(a=>a==='digest').length,3);const health=await runtime.health();assert.equal(health.instrumentality?.attempts,2);assert.equal(health.instrumentality?.reason,null,'recovery clears the prior failure reason');assert.doesNotMatch(health.degraded.join(' '),/Instrumentality/);
+  const recovered=await gatherBrief(runtime,new Date(now.getTime()-86400000));assert.match(composeBrief({now,timeZone:'Europe/Rome',language:'it',...recovered}),/recuperata al secondo tentativo/);
+  now=new Date(now.getTime()+2*3600000);await wait(100);assert.equal(t.asked.filter(a=>a==='digest').length,3,'no repeat after successful recovery');
+ }finally{await runtime.close();await t.close();}
+});
+test('F-003: a scheduled night with no exchanges is explicitly skipped without a provider call',async()=>{
+ const t=await setup([],'{}');
+ try{
+  t.runtime.startInstrumentality(()=>({mode:{at:'00:00'},timeZone:'Europe/Rome'}),20);
+  const end=Date.now()+5000;while((await t.runtime.health()).instrumentality?.status!=='skipped'){assert.ok(Date.now()<end);await wait(20);}
+  assert.equal(t.asked.length,0);assert.equal((await t.runtime.health()).instrumentality?.reason,'no-exchanges');
  }finally{await t.close();}
 });

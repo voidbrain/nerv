@@ -1,3 +1,4 @@
+import {InstrumentalityRuns} from './instrumentality-runs.ts';
 import {UsageStore} from './model-usage.ts';
 import {checkHistory,historyPage,type HistoryPage} from './history.ts';
 import { DatabaseSync } from 'node:sqlite';
@@ -6,7 +7,7 @@ import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { LEDGER_SCHEMA, Ledger, type Decision, type Proposal } from './ledger.ts';
 import { builtinTools, execute, hasExecutor } from './executors.ts';
-import { MEMORY_SCHEMA, Memory } from './memory.ts';
+import { MEMORY_SCHEMA, Memory, type Episode } from './memory.ts';
 import { REGISTRY_SCHEMA } from './kaji.ts';
 import { defaultPolicy, type Ballot, type Policy } from './policy.ts';
 export type Reminder = { id: string; title: string; due: string; created: string; delivered: string | null; cancelled: string | null };
@@ -22,6 +23,7 @@ export const MISATO_SOURCE='misato';
 export class Store {
   readonly db: DatabaseSync;
   readonly usage: UsageStore;
+  readonly instrumentality: InstrumentalityRuns;
   readonly ledger: Ledger;
   readonly memory: Memory;
   readonly policySource: string;
@@ -33,7 +35,7 @@ export class Store {
     this.db = new DatabaseSync(path);
     const version = this.db.prepare('PRAGMA user_version').get() as {user_version:number};
     if(version.user_version > 5) {this.db.close();throw new Error('Database schema is newer than this NERV Agency version.');}
-    this.usage=new UsageStore(this.db);
+    this.usage=new UsageStore(this.db);this.instrumentality=new InstrumentalityRuns(this.db);
     this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
       CREATE TABLE IF NOT EXISTS reminders(id TEXT PRIMARY KEY, title TEXT NOT NULL, due TEXT NOT NULL, created TEXT NOT NULL, delivered TEXT, cancelled TEXT);
       CREATE TABLE IF NOT EXISTS deliveries(id TEXT PRIMARY KEY, reminder_id TEXT UNIQUE REFERENCES reminders(id), kind TEXT NOT NULL DEFAULT 'reminder', message TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT);
@@ -234,7 +236,14 @@ export class Store {
   unmatched(domain: string, since: string) { return this.ledger.unmatched(domain,since); }
   shadowVote(sortieId: string, actionId: string, vote: {seat:string;vote:'approve'|'reject'|'abstain';reason:string;confidence?:number}) { this.ledger.shadowVote(sortieId,actionId,vote); return true; }
   explain(ref: string) { return this.ledger.explain(ref); }
-  health() { return {integrityCheck:"not-run"}; }
-  doctor() { return {database:this.db.prepare('PRAGMA quick_check').get(),schema:this.db.prepare('PRAGMA user_version').get(),pending:this.db.prepare('SELECT count(*) AS count FROM reminders WHERE delivered IS NULL AND cancelled IS NULL').get(),policy:{source:this.policySource,...this.ledger.policy}}; }
+  /** The scheduled outcome and episode checkpoint commit together, or neither does. */
+  saveEpisode(value:Omit<Episode,'id'|'created'>&{runId?:string}):Episode {
+    const {runId,...episode}=value;const now=new Date();
+    return this.memory.saveEpisode(episode,now,runId?()=>{
+      if(!this.instrumentality.finish(runId,episode.exchanges?'completed':'skipped',episode.exchanges?null:'no-exchanges',now.toISOString()))throw new Error('Stale consolidation claim.');
+    }:undefined);
+  }
+  health() { return {integrityCheck:"not-run",instrumentality:this.instrumentality.latest()}; }
+  doctor() { return {instrumentality:this.instrumentality.latest(),database:this.db.prepare('PRAGMA quick_check').get(),schema:this.db.prepare('PRAGMA user_version').get(),pending:this.db.prepare('SELECT count(*) AS count FROM reminders WHERE delivered IS NULL AND cancelled IS NULL').get(),policy:{source:this.policySource,...this.ledger.policy}}; }
   close() { this.db.close(); }
 }

@@ -1,3 +1,4 @@
+import {runMessage,type InstrumentalityRun} from './instrumentality-runs.ts';
 import type { StoreApi } from './runtime.ts';
 /**
  * Hyuga's brief (F-003): a short daily summary built from facts in the ledger, not by a model, so it is quick and never
@@ -12,6 +13,7 @@ export interface BriefInput {
  sorties:{title:string;status:string;closed:string|null;id?:string}[];
  expired?:{tool:string;sortie:string;title:string}[];
  health:string[];
+ instrumentality?:InstrumentalityRun;
  /** Every sortie closed since the last brief, counted by the scheduler (the sortie list above only names failures). */
  closed?:{done:number;failed:number};
  /** Sources the brief could not read: shown as such, never as "nothing" or "all fine" (B-006). */
@@ -31,7 +33,7 @@ export function composeBrief(b:BriefInput):string {
  const done=b.sorties.filter(s=>s.status==='done'),failed=b.sorties.filter(s=>s.status==='failed');
  const nDone=b.closed?.done ?? done.length,nFailed=b.closed?.failed ?? failed.length;
  const off=(k:Source)=>b.unavailable?.includes(k) ?? false;
- const lines=[`☀️ ${w.title}${b.base?` · ${b.base}`:''}`,'',
+ const lines=[`☀️ ${w.title}${b.base?` · ${b.base}`:''}`,'',...(b.instrumentality?[runMessage(b.instrumentality,b.language),'']:[]),
   ...(off('approvals')?[`${w.needs}: ${w.unread}`]:[`${w.needs}: ${b.approvals.length}`,...(b.approvals.length?b.approvals.slice(0,5).map(a=>`• ${sortieRef(a.sortie)}${a.tool} (${w.expires} ${at(a.expires)})`):[w.none])]),
   ...(off('expired')?['',`${w.expired}: ${w.unread}`]:b.expired?.length?['',`${w.expired}: ${b.expired.length}`,...b.expired.slice(0,5).map(e=>`• ⌛ ${sortieRef(e.sortie)}${e.tool} · ${e.title}`)]:[]),
   '',...(off('reminders')?[`${w.due}: ${w.unread}`]:[`${w.due}: ${soon.length}`,...(soon.length?soon.slice(0,8).map(r=>`• ${at(r.due)} ${r.title}`):[w.noDue])]),
@@ -51,7 +53,7 @@ export function briefDue(now:Date,timeZone:string,at:string,lastSent:string|unde
 }
 /** Reads the brief's facts through the store interface (the running service, or the CLI's local store). Each source is
  read on its own: one that fails is named in `unavailable`, and the brief says so instead of showing it as empty (B-006). */
-export async function gatherBrief(store:Pick<StoreApi,'approvals'|'list'|'sorties'|'health'|'expiredApprovals'|'closedSince'>,since:Date):Promise<Pick<BriefInput,'approvals'|'reminders'|'sorties'|'health'|'expired'|'closed'|'unavailable'>> {
+export async function gatherBrief(store:Pick<StoreApi,'approvals'|'list'|'sorties'|'health'|'expiredApprovals'|'closedSince'>,since:Date):Promise<Pick<BriefInput,'approvals'|'reminders'|'sorties'|'health'|'expired'|'closed'|'unavailable'|'instrumentality'>> {
  const unavailable:Source[]=[];
  const read=async<T>(k:Source,f:()=>T|Promise<T>):Promise<T|undefined>=>{try{return await f();}catch{unavailable.push(k);return undefined;}};
  const [cards,reminders,closed,health,expired]=await Promise.all([read('approvals',()=>store.approvals(5)),read('reminders',()=>store.list()),
@@ -64,6 +66,7 @@ export async function gatherBrief(store:Pick<StoreApi,'approvals'|'list'|'sortie
   reminders:(reminders ?? []).filter(r=>!r.delivered&&!r.cancelled).map(r=>({title:r.title,due:r.due})),
   sorties:closed?closed.failures.map(f=>({title:f.title,status:'failed',closed:f.closed,id:f.id})):(recent ?? []).filter(s=>s.closed&&Date.parse(s.closed)>since.getTime()).map(s=>({title:s.title,status:s.status,closed:s.closed,id:s.id})),
   ...(closed?{closed:{done:closed.done,failed:closed.failed}}:{}),
-  health:[...(p&&p.brainAlive===false?['brain process not alive']:[]),...(Array.isArray(degraded)?degraded.filter((d):d is string=>typeof d==='string').slice(0,3):[])],
+  ...((health as {instrumentality?:InstrumentalityRun}|undefined)?.instrumentality?{instrumentality:(health as {instrumentality:InstrumentalityRun}).instrumentality}:{}),
+  health:[...(p&&p.brainAlive===false?['brain process not alive']:[]),...(Array.isArray(degraded)?degraded.filter((d):d is string=>typeof d==='string'&&(!(health as {instrumentality?:unknown})?.instrumentality||!d.startsWith('Instrumentality:'))).slice(0,3):[])],
   ...(unavailable.length?{unavailable}:{})};
 }

@@ -1,3 +1,4 @@
+import type {RunReason} from './instrumentality-runs.ts';
 import {parsePrices,type UsageObservation} from './model-usage.ts';
 import { MISATO_SOURCE, OWNER_SOURCE, Store } from './store.ts';
 import type { Verdict } from './policy.ts';
@@ -17,6 +18,9 @@ process.on('message',(value:unknown)=>{
  if(Buffer.byteLength(JSON.stringify(value))>MAX_FRAME_BYTES){process.exitCode=1;stop();return;}
  void dispatchRpc(value,(method,params)=>{
   switch(method){
+   case 'instrumentality.claim':return store.instrumentality.claim(params.slot as string,params.now as string);
+   case 'instrumentality.finish':return store.instrumentality.finish(params.id as string,params.status as 'failed'|'completed'|'skipped',params.reason as RunReason|null,params.now as string);
+   case 'instrumentality.latest':return store.instrumentality.latest();
    case 'dashboard.revision':return store.dashboardRevision();
    case 'usage.begin':return store.usage.begin(params.operation as string);
    case 'usage.finish':store.usage.finish(params.id as string,params.observation as UsageObservation|null,parsePrices(params.prices));return true;
@@ -78,7 +82,7 @@ process.on('message',(value:unknown)=>{
     const known=new Set([...store.memory.list(200).map(f=>f.text),...waiting].map(factKey));
     return (params.texts as string[]).filter(t=>known.has(factKey(t)));
    }
-   case 'memory.saveEpisode':return store.memory.saveEpisode(params as never);
+   case 'memory.saveEpisode':return store.saveEpisode(params as never);
    case 'memory.recall':{
     // Facts first, then up to two of Instrumentality's summaries (F-022); summaries come from the owner's own
     // conversations, so they are local-only and never offered to the cloud route.

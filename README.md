@@ -73,3 +73,5 @@ The dashboard groups model controls and Battery in two tabs. Its map shows Midor
 The [architecture vocabulary](docs/NERV-ARCHITECTURE.md) now lives directly in docs. The [brainstorm retirement review](docs/audits/2026-11-06-brainstorm-retirement.md) inventories legacy sources, deletable material and preserved undecided proposals. Yearly backlog archives have weekly closure indices from harness v3.2.0. <!-- project -->
 
 Backlog sequencing: [linked prerequisites and generated unlocks](docs/agents/backlog-dependencies.md), maintained through `npm run backlog:dependencies` and checked by `npm run check:dependencies`.
+
+Scheduled Instrumentality runs persist their outcomes in SQLite. A failed run stays visible in health and the next brief, and gets at most one later attempt in the same local-day slot, after an hour; restarts do not reset the limit. A recovered run is labelled recovered, and no-new-exchange runs are labelled skipped. The digest’s existing bounded history/input window remains unchanged.

@@ -156,7 +156,7 @@ npm start -- memory forget ID
 npm start -- memory history ID
 ```
 
-**Instrumentality.** Add `"instrumentality": {"at": "03:00"}` (your time zone) or `{"when": "idle"}` (after an hour without requests, at most once in 20 hours, only when there is something new) to `config.json`: Misato's model reads the conversations since the previous run, writes a short summary (`npm start -- memory episodes`) and proposes lasting facts you stated (about one per two conversations, 3 to 10 at most), each as a normal approval card (Telegram buttons, `approve`, dashboard). Facts already known, or already waiting on a card, are skipped; one-off tasks are not facts. The ledger is never changed. `npm start -- instrumentality` runs it now. If the model's reply is unreadable twice, that night is skipped and the next run covers it.
+**Instrumentality.** Add `"instrumentality": {"at": "03:00"}` (your time zone) or `{"when": "idle"}` (after an hour without requests, at most once in 20 hours, only when there is something new) to `config.json`: Misato's model reads the conversations since the previous run, writes a short summary (`npm start -- memory episodes`) and proposes lasting facts you stated (about one per two conversations, 3 to 10 at most), each as a normal approval card (Telegram buttons, `approve`, dashboard). Facts already known, or already waiting on a card, are skipped; one-off tasks are not facts. The ledger is never changed. `npm start -- instrumentality` runs it now. If the model's reply is unreadable twice, that scheduled attempt fails visibly; it can make one later attempt after an hour in the same local-day slot.
 
 The dashboard's **Terminal Dogma · Lilith** panel lists your facts with **Edit**, **Forget** and **Local-only / Shareable**, each fact's history, an add box and the latest Instrumentality summaries. Changes there are recorded as yours. A shareable fact may be offered to a cloud model; every fact starts local-only.
 
@@ -263,3 +263,9 @@ Midori (Telegram on the map) reports recent Bot API checks separately from route
 ## Configuration bill of materials
 
 Run `nerv bom > runtime.cdx.json` for a CycloneDX snapshot of configured model roles/digests and granted MCP tools. It works without the service, makes an optional local Ollama tags read and emits no credentials, owner content, endpoints or command arguments. It is current configuration, not execution history. CI separately publishes the lock-only dependency SBOM. See [bills of materials](security/bill-of-materials.md).
+
+### Scheduled Instrumentality recovery
+
+At its configured local time (or the next service tick after it), Instrumentality claims a durable local-day slot before asking the model. A failed attempt is visible in service health/doctor and the next Hyuga brief, using a fixed reason rather than raw provider error text. It can retry once after an hour in that slot; a restart cannot reset the two-attempt limit. The existing immediate retry of an unreadable digest belongs to one attempt, so each local-day slot has at most four digest calls for this path. Successful recovery is reported as such; a run with no new exchanges is explicitly skipped. An attempt cut off before its outcome is saved stays pending/unknown and may use the same bounded later attempt. After both attempts fail, the next scheduled day can try again. Manual `nerv instrumentality` is separate from the scheduled attempt limit.
+
+The digest still uses its existing bounded exchange/history window; this change does not claim an unlimited historical export or replay. Candidate facts remain owner-approved cards. Model outage never authorizes cloud fallback and does not stop local reminders.
