@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-07T12:35:40.610Z",
+  "reviewed": "2026-11-07T17:45:50.369Z",
   "policy": "cd034be8e9d34cd059789de7a2b48deccb39742a79581ec13aff40de0a1ac791",
   "inputs": {
     "AGENTS.md": "68c4671162697950b7e896ea069f9085392a7fbbc87752e1313de77a600c6a95",
-    "docs/BACKLOG-RULES.md": "e42f58023f68b34543c349dd00e15f1ad585dd0c1a88d5379ebded7e99debd85",
+    "docs/BACKLOG-RULES.md": "c8ecc8d405e828d0e1897056bed77eb506ccbe3532393235b0f71733eba8032b",
     "docs/agents/areas.md": "ecd729eae9a6b235d98a9c9399054949e8e109d52542ade89d9bdd2e338e4ffa",
     "docs/agents/audit.md": "bc5de5707f9ec5c523e73602499312c373d6112ffc498d69bf68604522527992",
     "docs/agents/change-impact.md": "2a899e8b9b6200c1ce89142492e18611a833c09cf713fb9d9f511a9bb31b43e0",
@@ -12,11 +12,11 @@
     "docs/agents/maintenance.md": "5219a64e6e85ced3fa9d437fc0adb2674bfa2d566d86fe95cca1ef321d3b8b27",
     "docs/agents/mcp.md": "d813daeb38628e3f0613131ccb4e09fa1b98f82a1ad5cc647e9b27c26821a524",
     "docs/agents/skills.md": "5d60223eccfaad88c7153f57316da5ca10bfdd9d58d3a8cebc1eef25b9f0d5f5",
-    "docs/agents/solution-profile.md": "8fa3c5a5db4ef81c7e6574fff86acc56cf60b21d438b92ea46da40bb4279a667"
+    "docs/agents/solution-profile.md": "857fc0e5f5c36d1d139d2507f1f97460edfdcde4d5cd5d590a922d88c4459862"
   },
   "measurements": {
-    "samples": 12,
-    "latestAt": "2026-11-07T12:35:24.728Z",
+    "samples": 13,
+    "latestAt": "2026-11-07T17:45:15.811Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -42,26 +42,26 @@
         }
       },
       "reconciliation": {
-        "samples": 12,
+        "samples": 13,
         "durationMs": {
-          "observed": 12,
+          "observed": 13,
           "missing": 0,
-          "median": 75529
+          "median": 87256
         },
         "conflicts": {
-          "observed": 3,
+          "observed": 4,
           "missing": 9,
           "median": 0
         },
         "unnecessaryPrompts": {
-          "observed": 0,
+          "observed": 1,
           "missing": 12,
-          "median": null
+          "median": 0
         },
         "repeatedContextLoads": {
-          "observed": 0,
+          "observed": 1,
           "missing": 12,
-          "median": null
+          "median": 1
         }
       }
     }
@@ -71,18 +71,13 @@
       "kind": "rule",
       "disposition": "implemented",
       "target": "docs/BACKLOG-RULES.md",
-      "evidence": "F-068 reconciles the optional prerequisite convention from published harness v3.5.0/1865b2a10f53b293d8d76d1e8149f6bc1079439b. Reviewed upstream tag and green PR #75 CI 42372844701. NERV keeps its project-specific rules, ownership and immutable archives. New maintained Depends on rows name existing explicit prerequisites and scoped required outcomes; Unlocks is derived. No status, human cue or verification is inferred from dependency links. No behaviour runner is configured, so agent-behaviour scenarios were not run."
+      "evidence": "Adopted released v4.0.0 remaining-effort schema and transparent queue, retaining project ownership/privacy/human acceptance rules and immutable archive history."
     },
     {
       "kind": "tool",
       "disposition": "implemented",
-      "target": "tools/backlog-dependencies.mjs",
-      "evidence": "Released generator copied byte for byte; registered scripts, impact row and CI dependency check plus v3.5.0 template pin. Upstream 118 fixtures passed including cycle/reference/archive-reopen/dangling-symlink cases. NERV typecheck, build, 240 tests (one platform skip), dependency/roadmap/backlog/recap/rules/conventions/integration metadata passed locally. Fresh-context review verified adoption, parity and graph semantics with no actionable findings. Sandbox loopback/build restrictions required unrestricted validation; blocked duplicate run stopped. Timed sample covers preview through local static/unit/build validation; final browser completion, publication and remote CI follow it. No productivity comparison inferred."
-    },
-    {
-      "kind": "none",
-      "disposition": "no-change",
-      "evidence": "Existing git, gh and Node tools suffice. No integration or shared skill was installed or invoked. Backlog dependency graph is documentation, not an execution scheduler: Markdown is authoritative and no separate mutable JSON/YAML checkpoint or runtime pointer system is introduced. Broader execution orchestration requires its own product need."
+      "target": "tools/backlog-queue.mjs",
+      "evidence": "Copied released v4.0.0 tool unchanged; roadmap and explicit ordering visible, no weighted score or permission inference. Existing tools suffice; no behavior runner configured."
     }
   ]
 }
