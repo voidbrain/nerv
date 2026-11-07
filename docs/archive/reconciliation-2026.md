@@ -1,5 +1,7 @@
 # Backlog reconciliation log 2026
 
+Current work ledger, reviewed 8 November 2026 against main `c4d3c18`. PR #203 runs 42425786736/42425784575 passed all six jobs; B-042 verified and closed. B-041 is next from backlog-queue.
+
 Current work ledger, reviewed 8 November 2026 against main `b196e59`. PR #202 runs 42424820318/42424816395 passed all six jobs; F-029 verified and closed with failed model evidence retained in B-021. Next: B-042, then backlog-queue.
 
 Current work ledger, reviewed 8 November 2026 against main `fa12753`. PR #201 runs 42421593024/42421597561 passed validate, windows and native-macos; B-044 verified and closed. F-029 evaluation implementation precedes B-042 per owner order.

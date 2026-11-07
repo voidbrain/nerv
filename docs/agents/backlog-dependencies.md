@@ -7,7 +7,6 @@ Depends on names a required outcome; Unlocks lists direct dependents, not verifi
 |---|---|---|
 | [B-008](../BACKLOG.md#b-008) | — | — |
 | [B-021](../BACKLOG.md#b-021) | — | — |
-| [B-041](../BACKLOG.md#b-041) | — | — |
 | [B-043](../BACKLOG.md#b-043) | — | — |
 | [F-003](../archive/backlog-2026.md#f-003) | — | [F-012](../BACKLOG.md#f-012), [F-020](../BACKLOG.md#f-020) |
 | [F-004](../BACKLOG.md#f-004) | — | — |
