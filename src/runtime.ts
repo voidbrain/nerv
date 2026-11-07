@@ -50,6 +50,7 @@ export interface PeerSeat {seat:string;shadow:boolean;verdict:Promise<PeerVerdic
 export interface OwnerAction {request:string;tool:string;args:Record<string,unknown>;stage?:Stage;earlier?:{request:string;reply?:string}[]}
 export type ActReply=ActResult&{casperError?:string};
 export interface StoreApi {
+ dashboardRevision?():string|Promise<string>;
  modelUsage?(before?:number,limit?:number):Promise<{items:(UsageRecord&{sequence:number})[];next:number|null}>;
  reminderPage(before?:number,limit?:number):HistoryPage<Reminder&{sequence:number}>|Promise<HistoryPage<Reminder&{sequence:number}>>;
  inboxHistory(before?:number,limit?:number):HistoryPage<InboxEntry>|Promise<HistoryPage<InboxEntry>>;
@@ -108,6 +109,7 @@ export class Runtime implements StoreApi {
   return reply.value;
  }
  async modelUsage(before?:number,limit?:number){return await this.nervous.call('usage.page',{...(before===undefined?{}:{before}),...(limit===undefined?{}:{limit})}) as {items:(UsageRecord&{sequence:number})[];next:number|null};}
+ async dashboardRevision(){return await this.nervous.call('dashboard.revision') as string;}
  async ready(){await this.nervous.call('runtime.ping');}
  async reminderPage(before=0,limit=20){return await this.nervous.call('reminders.page',{before,limit}) as HistoryPage<Reminder&{sequence:number}>;}
  async inboxHistory(before=0,limit=20){return await this.nervous.call('inbox.history',{before,limit}) as HistoryPage<InboxEntry>;}

@@ -17,6 +17,7 @@ process.on('message',(value:unknown)=>{
  if(Buffer.byteLength(JSON.stringify(value))>MAX_FRAME_BYTES){process.exitCode=1;stop();return;}
  void dispatchRpc(value,(method,params)=>{
   switch(method){
+   case 'dashboard.revision':return store.dashboardRevision();
    case 'usage.begin':return store.usage.begin(params.operation as string);
    case 'usage.finish':store.usage.finish(params.id as string,params.observation as UsageObservation|null,parsePrices(params.prices));return true;
    case 'usage.page':return store.usage.page(params.before as number|undefined,params.limit as number|undefined);

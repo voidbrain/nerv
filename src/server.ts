@@ -1,3 +1,4 @@
+import {DashboardFeed} from './dashboard-feed.ts';
 import { createServer, type IncomingMessage, type RequestListener } from 'node:http';
 import {createServer as createHttpsServer} from 'node:https';
 import type {NativeAuth} from './native-auth.ts';
@@ -30,6 +31,7 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
   // Dashboard sessions (F-039): what a login code is swapped for, instead of the admin token. Random, in this process's
   // memory only (a restart ends them all), expiring, revocable; they may do what the admin can except mint login codes,
   // so a session can never renew itself.
+  const feed=store.dashboardRevision?new DashboardFeed(()=>store.dashboardRevision!()):undefined;
   const sessions=new Map<string,number>();const sessionTtl=options.sessionTtlMs ?? SESSION_TTL_MS;
   if(token.length<24) throw new Error('NERV_TOKEN must be at least 24 characters.');
   const listener:RequestListener=async(req,res)=>{
@@ -83,6 +85,11 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
         if([...url.searchParams.keys()].some(k=>!['before','limit'].includes(k)))throw new Error('Unknown history query.');
         const before=Number(url.searchParams.get('before') ?? 0),limit=Number(url.searchParams.get('limit') ?? 20);
         reply(200,path==='/api/reminders/page'?await store.reminderPage(before,limit):await store.inboxHistory(before,limit));
+      }
+      else if(req.method==='GET'&&path==='/api/dashboard/stream'){
+        if(options.native||!feed){reply(404,{error:'Dashboard stream unavailable.'});return;}
+        if(url.search){reply(400,{error:'Dashboard stream takes no query parameters.'});return;}
+        if(!feed.connect(res,()=>root||(sessions.get(bearer) ?? 0)>Date.now()))reply(503,{error:'Dashboard stream capacity reached.'});
       }
       else if(req.method==='GET'&&path==='/api/dashboard/history'){
         if([...url.searchParams.keys()].some(k=>k!=='since'))throw new Error('Unknown dashboard query.');
@@ -191,7 +198,7 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
   const server=options.tls?createHttpsServer({...options.tls,minVersion:'TLSv1.3'},listener):createServer(listener);
   const sockets=attachRpcSocket(server,store,token,options);
   const close=server.close.bind(server);
-  server.close=(callback)=>{for(const client of sockets.clients)client.terminate();sockets.close();return close(callback);};
+  server.close=(callback)=>{feed?.close();for(const client of sockets.clients)client.terminate();sockets.close();return close(callback);};
   server.requestTimeout=15000;server.headersTimeout=10000;server.timeout=15000;
   return server;
 }

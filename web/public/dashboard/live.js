@@ -1,5 +1,5 @@
 /* Live adapter for the dashboard (F-019). Runs only in LIVE mode (dashboard.js): swaps the login code for the token,
-   which stays in this tab's memory, then polls this NERV Agency service and maps its sorties, events and approvals onto
+   which stays in this tab's memory, then reads this NERV Agency service with change notifications and recovery polling and maps its sorties, events and approvals onto
    the dashboard's panels. Panels without real data yet say so instead of showing invented numbers. */
 (() => {
   if (!LIVE) return;
@@ -7,6 +7,7 @@
   if (match) history.replaceState(null, "", location.pathname + location.search);
   const consulted = new Set();
   let older = [], matches = [], shown = [], searchSeq = 0, searchTimer = null; let editing = null;
+  let usageBefore = null, usageBack = [], usageBusy = false, usageNext = null, usagePage = null, usageError = false;
   let token = ""; let polling = false; let pollFailures = 0; let lastRan = null; let firstTrace = true; const detailCache = {}; const known = new Map(); let chatBusy = false; let followNew = null;
   const PLANNED = "<div class='muted small'>Planned · not connected yet.</div>";
   const api = async (path, init = {}) => {
@@ -66,6 +67,7 @@
     const historySince = state.lastVisit;
     try {
       const [latest20, cards, doctor, history, facts, episodes, kajiBases, pilots] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("dashboard/history?since=" + encodeURIComponent(new Date(historySince).toISOString())), api("memory"), api("memory/episodes"), api("bases").catch(() => []), api("pilots").catch(() => null)]);
+      await loadUsage();
       // The newest sorties, plus older pages the owner loaded and every match of the current search, newest first.
       const byId = new Map(); for (const x of [...latest20, ...older, ...matches]) if (!byId.has(x.id)) byId.set(x.id, x);
       const list = [...byId.values()].sort((a, b) => b.created.localeCompare(a.created)); shown = list;
@@ -125,6 +127,26 @@
     finally { polling = false; }
   }
   // Comms: the selected sortie's own trace (requests, steps, ballots, decisions, replies) plus what you typed here.
+  async function loadUsage(before = usageBefore, back = usageBack) {
+    if (usageBusy) return false;
+    usageBusy = true;
+    try { const page = await api("model-usage?limit=5" + (before == null ? "" : "&before=" + before)); usageBefore = before; usageBack = back; usagePage = page; usageNext = page.next; usageError = false; return true; }
+    catch (e) { if (e.status === 401) throw e; usageError = true; return false; }
+    finally { usageBusy = false; }
+  }
+  async function moveUsage(direction) {
+    if (usageBusy) return false;
+    if (direction === "older" && usageNext != null) return loadUsage(usageNext, [...usageBack, usageBefore]);
+    if (direction === "newer" && usageBack.length) return loadUsage(usageBack[usageBack.length - 1], usageBack.slice(0,-1));
+    return false;
+  }
+  document.addEventListener("click", async e => {
+    const button = e.target.closest("[data-usage-page]"); if (!button || usageBusy) return;
+    const direction = button.dataset.usagePage;
+    try { await moveUsage(direction); }
+    catch (e) { if (e.status === 401) { token = ""; forgetSession(); signIn(SESSION_ENDED); } return; }
+    button.blur(); renderBudget(); const nextButton = document.querySelector('[data-usage-page="' + direction + '"]:not(:disabled)') || document.querySelector('[data-usage-page]:not(:disabled)'); if (nextButton) nextButton.focus();
+  });
   const seen = new Set();
   const phaseOf = new Map(), advisedBy = new Map(), forwardedTo = new Map(), originOf = new Map(), remoteSorties = new Map();
   const generic = () => { const r = modelsData && modelsData.models && modelsData.models.roles; return !!(r && r.consultant && r.consultant.model); };
@@ -182,7 +204,18 @@
   const pad = n => String(n).padStart(2, "0");
   const localInput = iso => { const d = new Date(iso); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes()); };
   const when = t => { const d = new Date(t); const today = new Date().toDateString() === d.toDateString(); return (today ? "" : d.toLocaleDateString(undefined, { weekday:"short", day:"numeric", month:"short" }) + " ") + pad(d.getHours()) + ":" + pad(d.getMinutes()); };
-  const until = t => { const m = Math.max(0, Math.round((t - Date.now()) / 60000)); return m < 60 ? "in " + m + " min" : m < 48 * 60 ? "in " + Math.round(m / 60) + " h" : "in " + Math.round(m / 1440) + " days"; };
+  const until = t => {
+    const now = new Date(), target = new Date(t); const m = Math.max(0, Math.round((t - now.getTime()) / 60000));
+    if (m < 48 * 60) return m < 60 ? "in " + m + " min" : "in " + Math.round(m / 60) + " h";
+    // Calendar months, clamped to their last day: January 31 → February 28 is one month.
+    let months = Math.max(0, (target.getFullYear() - now.getFullYear()) * 12 + target.getMonth() - now.getMonth());
+    const anchor = n => new Date(now.getFullYear(), now.getMonth() + n, Math.min(now.getDate(), new Date(now.getFullYear(), now.getMonth() + n + 1, 0).getDate()), now.getHours(), now.getMinutes());
+    if (anchor(months) > target) months--;
+    const at = anchor(months); const days = Math.max(0, Math.floor((Date.UTC(target.getFullYear(), target.getMonth(), target.getDate()) - Date.UTC(at.getFullYear(), at.getMonth(), at.getDate())) / 86400000));
+    const years = Math.floor(months / 12); months %= 12;
+    return "in " + [[years,"year"],[months,"month"],[days,"day"]].filter(([n]) => n).map(([n,word]) => n + " " + word + (n === 1 ? "" : "s")).join(" ");
+  };
+
   window.renderNext = function () {
     const box = document.getElementById("next-list"); const list = state.reminders || [];
     document.getElementById("next-sub").textContent = "Next " + list.length + " of " + (state.pendingCount ?? list.length) + " reminders";
@@ -389,17 +422,17 @@
   };
   // Lilith: the owner's facts, editable here; every change is the owner's and stays in the fact's history.
   window.renderLilith = function () {
-    const l = state.lilith || { facts:[], episodes:[], history:{} }; const open = state.lilithOpen;
+    const l = state.lilith || { facts:[], episodes:[], history:{} }; const open = state.lilithOpen; const query = (state.search || "").trim().toLowerCase(); const found = l.facts.filter(f => !query || f.text.toLowerCase().includes(query));
     // The panel redraws on every poll: keep what the owner is typing and where the focus is.
     const draftEl = document.getElementById("lilith-new"); const draft = draftEl ? draftEl.value : ""; const typing = document.activeElement === draftEl;
-    document.getElementById("lilith-sub").textContent = l.facts.length + " facts";
-    const facts = l.facts.map(f => "<div class='card'><div class='row small'><span>" + esc(f.text) + "</span><span class='tiny muted'>" + esc(f.source) + (f.tainted ? " · tainted" : "") + "</span></div>" +
+    document.getElementById("lilith-sub").textContent = (query ? found.length + " matching of " : "") + l.facts.length + " loaded facts";
+    const facts = found.map(f => "<div class='card'><div class='row small'><span>" + highlight(f.text, state.search) + "</span><span class='tiny muted'>" + esc(f.source) + (f.tainted ? " · tainted" : "") + "</span></div>" +
       "<div class='row tiny' style='margin-top:3px'><span><button class='btn sm' data-mem-edit='" + f.id + "'>Edit</button> <button class='btn sm danger' data-mem-forget='" + f.id + "'>Forget</button> " +
       "<button class='btn sm' data-mem-share='" + f.id + "' data-shareable='" + (!f.shareable) + "' aria-pressed='" + f.shareable + "'>" + (f.shareable ? "Shareable" : "Local-only") + "</button></span>" +
       "<a href='#' class='muted' data-mem-hist='" + f.id + "'>" + (open === f.id ? "hide history" : "history") + "</a></div>" +
       (open === f.id && l.history[f.id] ? "<div class='tiny muted' style='margin-top:3px'>" + l.history[f.id].map(h => esc(h.created.slice(0, 16).replace("T", " ") + " · " + h.kind + " · " + h.source + " · " + h.text)).join("<br/>") + "</div>" : "") + "</div>").join("");
-    const eps = l.episodes.filter(e => e.summary).slice(0, 3).map(e => "<div class='tiny muted' style='margin-top:3px'>" + esc(e.until.slice(0, 10)) + " · " + esc(e.summary) + "</div>").join("");
-    document.getElementById("lilith").innerHTML = (facts || "<div class='muted small'>No facts yet. Tell Misato something to remember, or add one here.</div>") +
+    const eps = l.episodes.filter(e => e.summary && (!query || e.summary.toLowerCase().includes(query))).slice(0, 3).map(e => "<div class='tiny muted' style='margin-top:3px'>" + esc(e.until.slice(0, 10)) + " · " + esc(e.summary) + "</div>").join("");
+    document.getElementById("lilith").innerHTML = (facts || (query ? "<div class='muted small'>No loaded facts match your search.</div>" : "<div class='muted small'>No facts yet. Tell Misato something to remember, or add one here.</div>")) +
       "<form id='lilith-form' class='row' style='margin-top:6px;gap:4px'><label class='sr-only' for='lilith-new'>New fact</label><input id='lilith-new' maxlength='500' placeholder='Add a fact about you' style='flex:1'/><button class='btn sm' type='submit'>Remember</button></form>" +
       (eps ? "<div class='small muted' style='margin-top:6px'>INSTRUMENTALITY · RECENT SUMMARIES</div>" + eps : "") +
       "<div class='tiny muted' style='margin-top:4px'>Local-only facts never reach a cloud model; shareable ones may.</div>";
@@ -420,7 +453,7 @@
     if (text) { input.value = ""; memoryAction("memory", { method:"POST", body:JSON.stringify({ text }) }, "Remembered: " + text); }
   });
   // The sortie detail, live: who started it and its status (Misato plans; a pilot advises, with its own skills and trust stage), the plan when there
-  // is one, and the Spear only while the sortie is open; no battery line while every route is local and free.
+  // is one, and the Spear only while the sortie is open; no declared action-cost line presented as measured model spend.
   const baseDetail = window.renderDetail;
   window.renderDetail = function (s) {
     const box = document.getElementById("detail"); const sub = document.getElementById("detail-sub");
@@ -443,7 +476,33 @@
     box.querySelectorAll(".plan .row .tiny.muted").forEach(el => { if (/battery/.test(el.textContent)) el.remove(); });
     if (s.status !== "active" && s.status !== "waiting") box.querySelectorAll("[data-spear]").forEach(el => el.remove());
   };
-  window.renderBudget = function () { document.getElementById("budget-sub").textContent = "Cost tracking planned"; document.getElementById("budget").innerHTML = PLANNED; };
+  // Accounting is page-scoped: unknown calls are counted separately and currencies are never combined.
+  function usageView(page) {
+    const items = page && Array.isArray(page.items) ? page.items : [];
+    const totals = new Map(); let unknown = 0;
+    const count = n => n == null ? "unavailable" : String(n);
+    const money = cost => cost && cost.status === "estimated" ? cost.price.currency + " " + cost.amount.toFixed(6) + " estimated" : "Cost unavailable";
+    for (const r of items) { if (r.cost && r.cost.status === "estimated") totals.set(r.cost.price.currency, (totals.get(r.cost.price.currency) || 0) + r.cost.amount); else if (r.state !== "not-called") unknown++; }
+    const summary = [...totals].map(([currency, amount]) => currency + " " + amount.toFixed(6)).join(" · ");
+    const heading = !page ? "Accounting unavailable until a recorded page loads." : items.length ? (summary ? "Priced subtotal on this page: " + summary + ". " : "No priced calls on this page. ") + unknown + " call(s) with unavailable cost." : "No recorded model calls. Ask Misato to start one.";
+    const rows = items.map(r => {
+      const o = r.observation;
+      const title = o ? o.route + " · " + (o.returnedModel || "returned model unavailable") : r.state === "not-called" ? "No provider call" : "Outcome and usage unknown";
+      const requested = o ? "Requested: " + o.requestedModel + " · " + o.outcome + " · " + o.durationMs + " ms" : "";
+      const tokens = o ? "Input: " + count(o.inputTokens) + " · output: " + count(o.outputTokens) + " · cache read: " + count(o.cacheReadTokens) + " · cache write: " + count(o.cacheWriteTokens) + " (provider reported)" : "Tokens unavailable";
+      const price = r.cost && r.cost.status === "estimated" ? " · price as of " + r.cost.price.asOf + " · " + r.cost.price.source : "";
+      return "<li style='margin-bottom:8px;overflow-wrap:anywhere'><b>" + esc(title) + "</b><div class='tiny muted'>" + esc(r.operation + " · " + new Date(r.started).toLocaleString()) + "</div><div class='small'>" + esc(requested) + "</div><div class='tiny'>" + esc(tokens) + "</div><div class='tiny'>" + esc(money(r.cost) + price) + "</div></li>";
+    }).join("");
+    return { summary, heading, html:"<p class='small'>" + esc(heading) + "</p><p class='tiny muted'>This page only · not an invoice. Budget limits and forecasts unavailable.</p><ul style='padding-left:18px'>" + rows + "</ul>" };
+  }
+  window.renderBudget = function () {
+    const box = document.getElementById("budget");
+    // Polling never removes the pager while it has keyboard focus.
+    if (box.contains(document.activeElement)) return;
+    const view = usageView(usagePage);
+    document.getElementById("budget-sub").textContent = usageError ? "Accounting refresh unavailable · last loaded page" : usagePage ? "Recorded model usage · " + (usagePage.items || []).length + " calls on this page" : "Loading recorded model usage…";
+    box.innerHTML = view.html + "<nav aria-label='Model usage pages'><button class='btn sm' data-usage-page='newer'" + (!usageBack.length ? " disabled" : "") + ">Newer calls</button> <button class='btn sm' data-usage-page='older'" + (usageNext == null ? " disabled" : "") + ">Older calls</button></nav>";
+  };
   // F-051: the real pilot roster (config.json pilots), the generic pilot first; stages change with `nerv pilots set ID --stage`.
   const pilotDrafts = new Map(); const pilotBusy = new Set();
   window.renderMelons = function (force = false) {
@@ -532,12 +591,29 @@
     const p = (state.doctor || {}).processes || {}; const bad = !p.nervous || p.brainAlive === false; const degraded = ((state.doctor || {}).degraded || []).length > 0;
     document.getElementById("qv-health").textContent = bad ? "issue" : degraded ? "degraded" : "OK"; document.getElementById("qd-health").textContent = bad ? "a process is down" : degraded ? "a model route is down · reminders still run" : "all checks pass";
     document.getElementById("q-health").classList.toggle("alert", bad); document.getElementById("q-health").classList.toggle("attn", !bad && degraded);
-    document.getElementById("qv-budget").textContent = "—"; document.getElementById("qd-budget").textContent = "Cost tracking not connected";
+    const usage = usageView(usagePage); document.querySelector('[data-l="qBudget"]').textContent = "Model usage"; document.getElementById("qv-budget").textContent = usagePage ? usagePage.items.length + " calls" : "—"; document.getElementById("qd-budget").textContent = usageError ? "Accounting refresh unavailable" : "Loaded page · " + usage.heading;
   };
   state.upcoming = []; state.selected = null; renderAll();
   /* B-005: live mode suggests only what a live base answers (the simulation's status · approve AP-… commands are demo-only). */
   const LIVE_HINT = "Ask Misato: remind me to … at … · why S-1A2B? · what are my reminders?";
-  let started = false; const begin = () => { if (started) return; started = true; document.getElementById("chat-in").placeholder = LIVE_HINT; poll(); setInterval(poll, 3000); };
+  // Header-authenticated fetch stream; reconnect re-reads current pages instead of replaying operations.
+  let streamController = null, streamTimer = null, refreshQueued = false, streamPaused = false;
+  function queueRefresh() { if (refreshQueued) return; refreshQueued = true; setTimeout(() => { refreshQueued = false; if (polling) { queueRefresh(); return; } void poll(); }, 200); }
+  async function watchChanges() {
+    clearTimeout(streamTimer); if (streamController || !token || streamPaused) return;
+    const session = token; const controller = new AbortController(); streamController = controller;
+    try {
+      const response = await fetch("/api/dashboard/stream", { headers:{Authorization:"Bearer " + session}, signal:controller.signal });
+      if (!response.ok || !response.body) return;
+      const reader = response.body.getReader(), decoder = new TextDecoder(); let pending = "";
+      try { for (;;) { const next = await reader.read(); if (next.done) break; pending += decoder.decode(next.value, {stream:true}); if (pending.length > 8192) throw new Error("Dashboard notification exceeds bound."); let end; while ((end = pending.indexOf("\n\n")) >= 0) { const message = pending.slice(0,end); pending = pending.slice(end+2); if (message.split("\n").includes("event: refresh")) queueRefresh(); } } }
+      finally { await reader.cancel().catch(() => {}); }
+    } catch { /* Periodic read recovery remains active during stream failures. */ }
+    finally { if (streamController === controller) streamController = null; if (token && !streamPaused) streamTimer = setTimeout(watchChanges, 3000); }
+  }
+  window.addEventListener("pagehide", () => { streamPaused = true; clearTimeout(streamTimer); if (streamController) streamController.abort(); });
+  window.addEventListener("pageshow", e => { if (e.persisted) { streamPaused = false; void watchChanges(); queueRefresh(); } });
+  let started = false; const begin = () => { void watchChanges(); if (started) { void poll(); return; } started = true; document.getElementById("chat-in").placeholder = LIVE_HINT; poll(); setInterval(poll, 3000); };
   // F-039: the login code is swapped for a dashboard session (never the admin token), kept in this tab's sessionStorage so a
   // reload stays signed in; it ends after 12 h, when the service restarts, with `sessions revoke`, or when the tab closes.
   // A token pasted by hand is the admin token: it stays in memory only and is never stored.
@@ -548,6 +624,7 @@
   function forgetSession() { try { sessionStorage.removeItem(SESSION_KEY); } catch { /* nothing kept */ } }
   // Not signed in: a clear bar with a token field, never the simulation's invented data.
   const signIn = reason => {
+    clearTimeout(streamTimer); if (streamController) streamController.abort();
     setBanner("<b>LIVE · NOT SIGNED IN</b> <span class='muted'>— " + esc(reason) + " Run <code>nerv open dashboard</code>, or paste the access token (kept in this tab's memory only):</span> " +
       "<form id='live-signin' style='display:inline-flex;gap:4px'><label class='sr-only' for='live-token'>Access token</label><input id='live-token' type='password' autocomplete='off' style='width:16em'/><button class='btn sm' type='submit'>Sign in</button></form>");
   };

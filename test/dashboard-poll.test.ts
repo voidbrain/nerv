@@ -9,7 +9,7 @@ function harness(api:(path:string)=>Promise<unknown>){
  const SESSION_ENDED='Session ended';let token='test',polling=false,pollFailures=0,lastRan=null,firstTrace=true,followNew=null;
  const detailCache={},known=new Map(),older=[],matches=[],BASES=[{name:'TEST'}],activeCage={};let shown=[];
  const state={lastVisit:Date.now(),sorties:[],selected:null};
- const toSortie=s=>s,toApproval=a=>a;const applyBases=()=>{},healthOf=()=>{},loadModels=()=>{},loadEvents=async()=>0,renderLog=()=>{},showBuild=()=>{},renderAll=()=>{},kajiSummary=()=>'',liveBaseName=()=> 'test',esc=s=>s.replaceAll('<','&lt;');
+ const loadUsage=async()=>{};const toSortie=s=>s,toApproval=a=>a;const applyBases=()=>{},healthOf=()=>{},loadModels=()=>{},loadEvents=async()=>0,renderLog=()=>{},showBuild=()=>{},renderAll=()=>{},kajiSummary=()=>'',liveBaseName=()=> 'test',esc=s=>s.replaceAll('<','&lt;');
  ${poll}
  return {poll,state,failures:()=>pollFailures,hasToken:()=>!!token};`)(api,(s:string)=>banners.push(s),(s:string)=>signins.push(s),()=>forgotten++) as {poll:()=>Promise<void>;state:object;failures:()=>number;hasToken:()=>boolean};
  return {...h,banners,signins,forgotten:()=>forgotten};

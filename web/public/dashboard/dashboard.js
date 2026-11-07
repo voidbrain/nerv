@@ -709,8 +709,9 @@ function renderCages() {
 function renderLog() {
   const el = document.getElementById("log"); if (!el) return;
   const f = state.logFilter || "all";
-  const rows = state.log.filter(e => f === "all" || (f === "sortie" && (e.s === state.selected || e.who === "you" || e.chat)) || (f === "chat" && (e.who === "you" || e.chat))).slice(-150);
-  el.innerHTML = rows.map(e => "<div class='msg " + (e.who === "you" ? "you " : "") + e.cls + "'><img class='av' data-av='" + e.who + "' alt=''/><div><span class='ts'>" + new Date(e.t).toTimeString().slice(0, 8) + "</span><b class='who'>" + esc(speakerName(e.who)) + "</b>" + (e.s ? "<span class='muted'>" + e.s + " · </span>" : "") + esc(e.msg) + "</div></div>").join("") || "<div class='muted'>" + (f === "all" ? "No messages yet. Ask Misato something below: its steps, the MAGI's votes and its reply show here." : f === "sortie" ? "Nothing for this sortie yet. Pick another one in Sorties, or show all." : "No chat yet. Type below to talk to Misato.") + "</div>";
+  const query = (state.search || "").trim().toLowerCase();
+  const rows = state.log.filter(e => !query || (e.msg + " " + (e.s || "")).toLowerCase().includes(query)).filter(e => f === "all" || (f === "sortie" && (e.s === state.selected || e.who === "you" || e.chat)) || (f === "chat" && (e.who === "you" || e.chat))).slice(-150);
+  el.innerHTML = rows.map(e => "<div class='msg " + (e.who === "you" ? "you " : "") + e.cls + "'><img class='av' data-av='" + e.who + "' alt=''/><div><span class='ts'>" + new Date(e.t).toTimeString().slice(0, 8) + "</span><b class='who'>" + esc(speakerName(e.who)) + "</b>" + (e.s ? "<span class='muted'>" + e.s + " · </span>" : "") + highlight(e.msg, state.search) + "</div></div>").join("") || "<div class='muted'>" + (query ? "No loaded messages match your search." : f === "all" ? "No messages yet. Ask Misato something below: its steps, the MAGI's votes and its reply show here." : f === "sortie" ? "Nothing for this sortie yet. Pick another one in Sorties, or show all." : "No chat yet. Type below to talk to Misato.") + "</div>";
   fillAvatars(el); el.scrollTop = el.scrollHeight;
 }
 function applyLabels() { const p = L(); document.querySelectorAll("[data-l]").forEach(el => { const k = el.dataset.l; if (p[k]) el.textContent = p[k]; }); }
@@ -1001,7 +1002,7 @@ function disarm(note) { armed = null; clearTimeout(armTimer); keyNote(note || ""
 document.addEventListener("keydown", e => {
   if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
   const el = e.target; const tag = (el.tagName || "").toLowerCase();
-  if (el.id === "sortie-q" && e.key === "Escape") { el.value = ""; state.search = ""; if (LIVE) window.liveSearch(""); renderSorties(); el.blur(); return; }
+  if (el.id === "sortie-q" && e.key === "Escape") { el.value = ""; state.search = ""; if (LIVE) window.liveSearch(""); renderSorties(); renderLilith(); renderLog(); el.blur(); return; }
   if (tag === "input" || tag === "textarea" || tag === "select" || el.isContentEditable) return;
   if (e.key === "/") { const q = document.getElementById("sortie-q"); if (q) { e.preventDefault(); q.focus(); q.select(); } return; }
   if (e.key === "Escape" && armed) { disarm("Cancelled."); return; }
@@ -1015,7 +1016,7 @@ document.addEventListener("keydown", e => {
   keyNote("Press " + e.key + " again within 5 s to " + (d === "approve" ? "approve once" : "reject") + ": " + humanAction(ap.action) + ". Esc cancels.");
 });
 document.addEventListener("input", e => {
-  if (e.target.id !== "sortie-q") return; state.search = e.target.value; renderSorties(); if (LIVE) window.liveSearch(e.target.value.trim());
+  if (e.target.id !== "sortie-q") return; state.search = e.target.value; renderSorties(); renderLilith(); renderLog(); if (LIVE) window.liveSearch(e.target.value.trim());
 });
 function say(text) { log(text, "ok", null, "misato"); state.log[state.log.length - 1].chat = true; renderLog(); }
 function cardFor(text) { const id = (text.match(/AP-[\w-]+/i) || [])[0]; const sid = (text.match(/S-\d+/i) || [])[0];
