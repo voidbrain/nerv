@@ -470,7 +470,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #3](https://github.com/voidbrain/nerv/pull/3) runtime; [PR #5](https://github.com/voidbrain/nerv/pull/5) bounded native feeds; [PR #6](https://github.com/voidbrain/nerv/pull/6) lightweight status, CI green at merge `df0a52f` |
+| PR / evidence | [PR #182](https://github.com/voidbrain/nerv/pull/182) bounded histories/admission and acceptance; [PR #3](https://github.com/voidbrain/nerv/pull/3) runtime; [PR #5](https://github.com/voidbrain/nerv/pull/5) bounded native feeds; [PR #6](https://github.com/voidbrain/nerv/pull/6) lightweight status, CI green at merge `df0a52f` |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-07 Unit/integration: bounded-history, admission/timeout/migration and sustained CLI load checks passed; three headless lifecycle cases passed, one Windows-only skip. Browser/accessibility: bilingual pages, focus and axe passed. [Scoped acceptance](acceptance/runtime-2026-11-07.md) records measurements and limits. Full suite: 236 passed, one platform skip. Review: separate fresh-context reviewer found migration, timeout admission, timestamp/count race and focus issues; all fixed with regressions, no remaining blockers. Final CI pending. |
 | Reviewed | 2026-11-07 |
