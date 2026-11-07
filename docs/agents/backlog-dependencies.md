@@ -10,6 +10,7 @@ Depends on names a required outcome; Unlocks lists direct dependents, not verifi
 | [B-041](../BACKLOG.md#b-041) | — | — |
 | [B-042](../BACKLOG.md#b-042) | — | — |
 | [B-043](../BACKLOG.md#b-043) | — | — |
+| [B-044](../BACKLOG.md#b-044) | — | — |
 | [F-003](../archive/backlog-2026.md#f-003) | — | [F-012](../BACKLOG.md#f-012), [F-020](../BACKLOG.md#f-020) |
 | [F-004](../BACKLOG.md#f-004) | — | — |
 | [F-005](../BACKLOG.md#f-005) | — | [F-012](../BACKLOG.md#f-012) |
@@ -45,7 +46,6 @@ Depends on names a required outcome; Unlocks lists direct dependents, not verifi
 | [F-052](../BACKLOG.md#f-052) | — | — |
 | [F-054](../BACKLOG.md#f-054) | [F-021](../BACKLOG.md#f-021) — Owner-selected prerequisite before chronicle work<br />[F-045](../BACKLOG.md#f-045) — Chronicler pilot for the Eva narrative; plain fact collection can proceed<br />[F-028](../archive/backlog-2026.md#f-028) — Durable brief delivery for the optional morning-brief entry | — |
 | [F-056](../BACKLOG.md#f-056) | [F-021](../BACKLOG.md#f-021) — Owner-selected prerequisite for remaining command work<br />[F-042](../BACKLOG.md#f-042) — Record-reading interface for agency query commands<br />[F-028](../archive/backlog-2026.md#f-028) — Durable brief content for brief commands | — |
-| [F-057](../BACKLOG.md#f-057) | — | — |
 | [F-060](../BACKLOG.md#f-060) | — | — |
 | [F-062](../BACKLOG.md#f-062) | — | — |
 | [F-063](../archive/backlog-2026.md#f-063) | — | [F-019](../archive/backlog-2026.md#f-019) |

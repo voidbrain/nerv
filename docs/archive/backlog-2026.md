@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 36 | 38 |
+| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 37 | 38 |
 <!-- archive-recap:end -->
 
 <a id="archive-week-2026-11-02"></a>
@@ -2585,6 +2585,40 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 | PR / evidence | [PR #200](https://github.com/voidbrain/nerv/pull/200) owner acceptance and closure;  [PR #199](https://github.com/voidbrain/nerv/pull/199) dynamic-noise revision and retained CI evidence;  [PR #198](https://github.com/voidbrain/nerv/pull/198) superseded, closed unmerged after owner clarified dynamic noise without matte appearance;  [PR #197](https://github.com/voidbrain/nerv/pull/197) superseded, closed unmerged after additional strongest-dip contrast finding;  [PR #196](https://github.com/voidbrain/nerv/pull/196) evidence and queue reconciliation;  [PR #195](https://github.com/voidbrain/nerv/pull/195) project tuning and regressions;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner request 2026-11-07; reopened from [closed history](archive/backlog-2026.md#f-053), preserving prior acceptance |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-07: earlier candidates passed strongest-dip heading contrast and motion lifecycle checks, with history in PRs #197/#198; both closed unmerged after subsequent findings/owner feedback. Current dynamic-noise revision: 265 tests passed, one platform skip; build/typecheck/conventions passed. Chrome verified changing pixel buffers, under 0.1% painted coverage, full clearing on reduced motion, band preference/theme/off lifecycle and scoped axe at the strongest dip. Screenshot inspected: sparse specks with clear surfaces. Review: separate reviewer reports no actionable findings. CI: PR #199 runs 42402931969/42402936170 passed every job. Human: 2026-11-07 owner “crt ok for now”; accepted. |
+| Reviewed | 2026-11-07 |
+
+</details>
+
+---
+
+### F-057
+
+**Version button shows and copies Git’s unique short commit ID**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />None: Git-backed, browser, independent review and all CI checks passed.
+
+| | |
+|---|---|
+| **Issue** | Owner reports that clicking the version copies a full hash and asks for the seven-character form. The archived acceptance specified full-hash copying. Latest clarification: use Git’s verified unique abbreviation, not fixed string truncation, and use the same short ID on hover and click. |
+| **Reproduce** | Click and hover over the dashboard version. Compare its ID with `git rev-parse --short <running-full-commit>` and verify it resolves with Git. Configure a longer abbreviation and an actual object-prefix collision in a disposable repository. |
+| **Check** | Backend captures Git’s unique abbreviation of the running commit; hover, accessible name and clipboard use that same ID without slicing. Git settings and collisions may produce more characters. Full identity/version remain cached at startup. Legacy metadata can fall back to the full usable ID, never a fabricated prefix. Actual Git collision, server-to-browser clipboard and green CI checks pass. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-07 after PR #200 runs 42404230022/42404234032 passed every validate, Windows and macOS job.  Initial seven-character clipboard expectation was superseded by the owner's explicit instruction “I don't want to truncate”; the later clarification also uses the short ID on hover. The fixed-seven test changes deliberately under that new requirement. A Git-backed regression was committed failing before backend implementation; it honors configured abbreviation length and a real object-prefix collision. Backend now runs Git against the captured full commit once at startup, and the UI uses that returned ID verbatim. Browser/review/CI passed; owner answered the format choice. Prior scope stays in [archived history](archive/backlog-2026.md#f-057).
+
+**Estimates:** No remaining work; previous Small 30–60-minute estimate covered implementation, regression, browser checks and reconciliation.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #200](https://github.com/voidbrain/nerv/pull/200) verified commit ID and owner pause;  Owner clarification 2026-11-07; Tests: test/build.test.ts Git unique abbreviation/collision regression (committed failing before backend fix), test/dashboard.test.ts supplied unique ID, test/angular.browser.mjs real server→button→clipboard. Initial fixed-seven expectation was superseded by the explicit uniqueness requirement. |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-07: Git abbreviation/configuration and real prefix-collision tests passed; UI uses the server-supplied identifier. Full suite: 267 passed, one platform skip; typecheck/build/conventions passed. Chrome verified actual server metadata→button→clipboard and matching hover; scoped axe passed. Review: separate context found no actionable findings. PR #200 CI runs 42404230022/42404234032 passed every job. |
 | Reviewed | 2026-11-07 |
 
 </details>
