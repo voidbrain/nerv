@@ -1459,7 +1459,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
+| PR / evidence | [PR #183](https://github.com/voidbrain/nerv/pull/183) implementation/schema/privacy tests; [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
 | Opened | 2026-11-07 |
 | Verification | 2026-11-07 Unit/integration: 239 passed, one platform skip; official CycloneDX 1.5/1.6 schema and format validation, exact locked versions, real CLI/fake Ollama, unavailable-provider behavior and secret/owner-data sentinels passed. Typecheck/build, Chrome bilingual paging/focus/axe, three headless integration cases (one Windows skip) and static/record checks passed. Review: separate fresh-context reviewer found disabled-route state, archive links and ignored formats; fixed with regressions, final review found no remaining blockers. Remote CI and dependency artifact inspection pending. |
 | Reviewed | 2026-11-07 |
