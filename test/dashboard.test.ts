@@ -157,10 +157,17 @@ test('the CRT effect: the original static scanlines, darker borders, a slight pa
  const after=/body\.theme-eva\.crt-on::after \{([^\n]*)\}/.exec(html)![1]!;
  assert.match(after,/background:linear-gradient\(rgba\(0,0,0,0\) 50%,rgba\(0,0,0,\.22\) 50%\); background-size:100% 4px;/,'the owner\'s scanlines, unchanged');
  assert.doesNotMatch(after,/animation|radial-gradient/,'static');const edge=/box-shadow:inset 0 0 (\d+)px (\d+)px rgba\(0,0,0,([.0-9]+)\)/.exec(after)!;assert.ok(Number(edge[1])>=60&&Number(edge[3])>=0.8,'edges strong enough to see on dark');
- const a=/@keyframes crt-line-a \{[^\n]*\}/.exec(html)![0],b=/@keyframes crt-line-b \{[^\n]*\}/.exec(html)![0];assert.ok(a&&b,'two lines');
- assert.match(html,/animation:crt-line-a 43s linear infinite/);assert.match(html,/animation:crt-line-b 67s linear -19s infinite/,'different cycles, offset: irregular together');
- for(const o of /@keyframes crt-flicker \{([^\n]*)\}/.exec(html)![1]!.matchAll(/opacity:([.0-9]+)/g))assert.ok(Number(o[1])>=0.975,'a slight flicker, never a flash');
- assert.match(html,/@media \(prefers-reduced-motion:reduce\) \{ body\.theme-eva\.crt-on \.wrap, body\.theme-eva\.crt-on::before, body\.theme-eva\.crt-on \.wrap::after \{ animation:none; \}/);
+ const jsMotion=readFileSync('web/public/dashboard/dashboard.js','utf8');
+ assert.match(html,/class="crt-band crt-band-a" aria-hidden="true"/);
+ assert.match(html,/class="crt-band crt-band-b" aria-hidden="true"/);
+ assert.match(jsMotion,/element\.animate\(plan\.frames/,'fresh random motion pass instead of a fixed line cycle');
+ for(const o of /@keyframes crt-flicker \{([^\n]*)\}/.exec(html)![1]!.matchAll(/opacity:([.0-9]+)/g))assert.ok(Number(o[1])>=0.92,'restore the previous maximum dimming');
+ assert.match(html,/@media \(prefers-reduced-motion:reduce\) \{ body\.theme-eva\.crt-on \.wrap \{ animation:none; \} body\.theme-eva\.crt-on \.crt-band, body\.theme-eva\.crt-on \.crt-noise \{ display:none; \}/);
+ const period=Number(/animation:crt-flicker (\d+)s /.exec(html)![1])*1000;
+ const pulses=[.../@keyframes crt-flicker \{([^\n]*)\}/.exec(html)![1]!.matchAll(/([0-9.]+)% \{ opacity:([.0-9]+)/g)].filter(m=>Number(m[2])<1).map(m=>Number(m[1])*period/100);
+ const wrapped=[...pulses,...pulses.slice(0,2).map(t=>t+period)];
+ for(let n=0;n<pulses.length;n++)assert.ok(wrapped[n+2]!-wrapped[n]!>1000,'at most two brightness pulses within any second, including cycle wrap');
+
  // Two boxes (owner, 2026-11-05): pilots are the Marduk Institute, skills are Kaji's watermelons.
  assert.match(html,/<span data-l="melons">Marduk Institute · Pilots<\/span><span class="sub">proto → test → prod<\/span>/);
  // Skills grow by their own stages (owner, 2026-11-05, option B): seed → sprout → ripe (Eva), create → try → use (Simple).
@@ -327,4 +334,37 @@ test('B-040: an active planning step alone never renders a continuously communic
  draw({status:'active',phase:'plan',current:0,done:{route:true},actions:[],note:''});
  assert.match(svg.innerHTML,/class='passed'/,'the observed route can remain visible');
  assert.doesNotMatch(svg.innerHTML,/class='[^']*\b(?:live|wait|reject)\b/,'a phase is not evidence of an in-flight communication');
+});
+
+test('F-053: randomized band passes ease through bounded trajectories with variable durations, pauses and reversals',()=>{
+ const source=readFileSync('web/public/dashboard/dashboard.js','utf8');const a=source.indexOf('function crtBandPass(');const body=source.slice(a,source.indexOf('\n}\n',a)+2);
+ type Pass={frames:{transform:string;offset:number;easing:string}[];duration:number;wait:number};
+ const plan=new Function(body+';return crtBandPass;')() as (index:number,random:()=>number)=>Pass;
+ const gentle=plan(0,()=>0),other=plan(0,()=>.99),up=plan(1,()=>.99);
+ assert.notDeepEqual(gentle,other,'each pass can differ in trajectory and timing');
+ for(const p of [gentle,other,up]){
+  assert.equal(p.frames[0]!.offset,0);assert.equal(p.frames.at(-1)!.offset,1);
+  for(let n=1;n<p.frames.length;n++)assert.ok(p.frames[n]!.offset>p.frames[n-1]!.offset,'positive time between waypoints');
+  assert.ok(p.duration>=4500&&p.duration<=10000);assert.ok(p.wait>=4500&&p.wait<=14000);
+  for(const frame of p.frames)assert.equal(frame.easing,'cubic-bezier(.4,0,.6,1)','zero velocity at both ends keeps joins smooth');
+ }
+ const ys=gentle.frames.map(f=>Number(/\((-?[.0-9]+)vh\)/.exec(f.transform)![1]));
+ assert.ok(ys.some((y,n)=>n&&y===ys[n-1]),'a sustained pause can occur');
+ assert.ok(ys.some((y,n)=>n&&y<ys[n-1]!),'a short reversal can occur');
+ assert.match(up.frames[0]!.transform,/103vh/);assert.match(up.frames.at(-1)!.transform,/-3vh/);
+});
+
+test('F-053: dynamic noise clears each frame, paints only sparse pixels, and bounds repaint work',()=>{
+ const source=readFileSync('web/public/dashboard/dashboard.js','utf8');const a=source.indexOf('function drawCrtNoise(');const body=source.slice(a,source.indexOf('\n}\n',a)+2);
+ const dots:number[][][]=[],clears:number[][]=[];let frame:number[][]=[];
+ const context={globalAlpha:1,fillStyle:'',clearRect:(...args:number[])=>{clears.push(args);frame=[];dots.push(frame);},fillRect:(...args:number[])=>frame.push([...args,context.globalAlpha])};
+ const canvas={width:0,height:0,getContext:()=>context},size={innerWidth:200,innerHeight:100};let value=.1;
+ const random=Object.create(Math) as Math;random.random=()=>value;
+ const api=new Function('document','window','cssVar','Math','let crtMotionActive=true,crtNoiseAt=0;'+body+';return {draw:drawCrtNoise,off:()=>{crtMotionActive=false}};')({querySelector:()=>canvas},size,()=> '#fff',random) as {draw:(time:number)=>void;off:()=>void};
+ api.draw(100);assert.equal(clears.length,1);assert.equal(canvas.width,200);assert.equal(canvas.height,100);assert.equal(dots[0]!.length,9);
+ api.draw(120);assert.equal(clears.length,1,'repaints are rate-limited');
+ value=.9;api.draw(200);assert.equal(clears.length,2,'previous pixels clear before the next frame');assert.notDeepEqual(dots[0],dots[1],'noise changes over time');
+ for(const set of dots)for(const dot of set){assert.equal(dot[2],1);assert.equal(dot[3],1);assert.ok(dot[0]!>=0&&dot[0]!<200&&dot[1]!>=0&&dot[1]!<100);assert.ok(dot[4]!>=.12&&dot[4]!<=.4);}
+ size.innerWidth=8000;size.innerHeight=8000;api.draw(300);assert.equal(dots.at(-1)!.length,1800,'large screens retain a fixed drawing budget');
+ api.off();api.draw(400);assert.equal(clears.length,3,'disabled noise schedules no paints');
 });

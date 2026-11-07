@@ -2,6 +2,7 @@
 
 Earlier reconciliation notes moved out of the [backlog](../BACKLOG.md) header, newest first, as written at the time. The header keeps only the latest reconciliation; when it moves to a newer `main`, the sentence it replaces is added at the top of this list. Dated evidence, not current status.
 
+- Current work ledger, reviewed 7 November 2026 against main `b731b0a`. PR #195 runs 42398922334/42398926076 passed validate, windows and native-macos. B-040 verified and closed; CRT awaits owner look, brief and stale-card investigations remain open.
 - Current work ledger, reviewed 7 November 2026 against main `d307175`. PR #194 runs 42398004525/42398009143 passed validate, windows and native-macos. Harness v4.0.0 adoption verified; F-069 closed and archived.
 - Current work ledger, reviewed 7 November 2026 against main `4d9d699`. PR #193 runs 42380376754/42380371599 passed validate, windows and native-macos. Harness v4.0.0 published upstream; adoption and operator-flow findings recorded.
 - Current work ledger, reviewed 7 November 2026 against main `89925ba`. PR #192 runs 42379685099/42379679262 passed validate, windows and native-macos; F-003 verified, closed and archived. B-021/F-029 assessment distinguishes agent-run acceptance from Human/device evidence.
