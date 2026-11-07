@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 28 | 37 |
+| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 29 | 37 |
 <!-- archive-recap:end -->
 
 <a id="archive-week-2026-11-02"></a>
@@ -2274,3 +2274,37 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 ## Other changes
 
 - 2026-11-07 · [PR #180](https://github.com/voidbrain/nerv/pull/180): complete published harness v3.3.0 reconciliation and repair its failing maintenance gate. Adopt rule-location checks, moved guides and input-bound review evidence; preserve project rules. Optional browser coverage, agent-behaviour runner and push guard remain unadopted. Review: separate fresh-context reviewer found no remaining bugs, security or compliance blockers after the adoption fixes. Local checks passed: typecheck, 228 unit/integration tests (one platform skip), build, browser/axe, headless integration (three passed, one Windows skip), rules, maintenance, backlog/recaps, roadmap, conventions, integration metadata, audit freshness and upstream copied-file parity. Closed 2026-11-07: PR #180 merged as `058b8ee`; ci:status confirms runs [42351766963](https://github.com/voidbrain/nerv/actions/runs/42351766963) and [42351762060](https://github.com/voidbrain/nerv/actions/runs/42351762060) both passed validate, windows and native-macos, including native tests and packaging. No maintenance action remains. Closure evidence: [PR #181](https://github.com/voidbrain/nerv/pull/181). Documentation consistency: README, AGENTS/area notes, BACKLOG-RULES and style guide reviewed; only affected claims updated.
+
+### F-013
+
+**Isolate the scheduler and execution runtime**
+
+| Signal | Priority | Status | Effort | Complete |
+|:---:|---|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-07: all recorded checks passed; no action remains.
+
+| | |
+|---|---|
+| **Issue** | A/B/C process split, validated IPC and fail-closed lifecycle exist. Web histories now have bounded keyset pages; the dashboard reads bounded facts/SQL aggregates. Brain runs model/planner calls in its own workload boundary; it is not a sandbox. Independent review found no remaining blockers; merged PR #182 CI passed. |
+| **Reproduce** | Follow docs/decisions/runtime-boundaries.md and the protocol/isolation test fixtures. |
+| **Check** | Blocked/killed Brain leaves due delivery working; Nervous failure shuts supervisor down; no orphaned children; bounded queues/frames; large histories and concurrent CLI writes have measured limits. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Owner selected F-013 first, then F-067 (2026-11-07). Completed bounded reminder/inbox web history, startup-inclusive IPC admission, failure/lifecycle regressions and the observed large-history/concurrent-CLI latency trial; independent review passed. Closed 2026-11-07: all recorded checks passed; no action remains. Blocked/killed Brain leaves due delivery working; Nervous failure shuts supervisor down; no orphaned children; bounded queues/frames; large histories and concurrent CLI writes have measured limits.
+
+**Estimates:** Small remaining effort; ~100% complete. Reassessed 2026-11-07: implementation, local load and browser acceptance passed; independent review and all remote CI checks passed; no remaining work.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #182](https://github.com/voidbrain/nerv/pull/182) bounded histories/admission and acceptance; [PR #3](https://github.com/voidbrain/nerv/pull/3) runtime; [PR #5](https://github.com/voidbrain/nerv/pull/5) bounded native feeds; [PR #6](https://github.com/voidbrain/nerv/pull/6) lightweight status, CI green at merge `df0a52f` |
+| Opened | 2026-11-01 |
+| Verification | 2026-11-07 Unit/integration: bounded-history, admission/timeout/migration and sustained CLI load checks passed; three headless lifecycle cases passed, one Windows-only skip. Browser/accessibility: bilingual pages, focus and axe passed. [Scoped acceptance](../acceptance/runtime-2026-11-07.md) records measurements and limits. Full suite: 236 passed, one platform skip. Review: separate fresh-context reviewer found migration, timeout admission, timestamp/count race and focus issues; all fixed with regressions, no remaining blockers. PR #182 merged as 93114f8; runs [42353402738](https://github.com/voidbrain/nerv/actions/runs/42353402738) and [42353398574](https://github.com/voidbrain/nerv/actions/runs/42353398574) passed validate, windows and native-macos. Closed 2026-11-07. |
+| Reviewed | 2026-11-07 |
+
+</details>
+
+---

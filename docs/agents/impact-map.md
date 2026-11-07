@@ -18,6 +18,7 @@ What must follow a change, and what must run again after it (docs/agents/change-
 | angular-browser | `web/src/**`, `shared/surface.ts`, `angular.json`, `package*.json`, `src/server.ts`, `test/angular.browser.mjs`, `src/store.ts` |  | Verify full CSS/CSP, bilingual controls and dates, rejected sign-in and invalid writes, cancellation/retry, local inbox text/deduplication, responsive layout and axe accessibility; add dated acceptance evidence when the claimed scope changes, preserving published reports. | `npm run test:browser` | frontend | CI validate browser acceptance and screenshot artifacts; manual visual review remains explicit. |
 | roadmap-status | `docs/BACKLOG.md`, `docs/archive/backlog-*.md`, `docs/ROADMAP.md`, `tools/roadmap-status.mjs`, `tools/backlog-recap.mjs` |  | Place every open feature in one milestone's Records cell and regenerate the roadmap status table from the records. | `npm run roadmap:status` | backlog-recap | npm run check:roadmap in CI validate |
 | runtime-acceptance | `src/history.ts`, `src/process-client.ts`, `src/nervous-process.ts`, `test/history.test.ts`, `test/runtime-load.test.ts`, `test/process-client.test.ts`, `test/isolation.test.ts`, `docs/decisions/runtime-boundaries.md` |  | Verify bounded history/admission and process-failure behavior; record dated load/acceptance evidence when the claimed scope changes, preserving published reports. | `node --test test/history.test.ts test/process-client.test.ts test/isolation.test.ts test/runtime-load.test.ts` | core | History HTTP/IPC, queue saturation, Brain death and concurrent CLI load regressions; CI headless supervisor lifecycle. |
+| bom-inventory | `src/bom.ts`, `src/model-setup.ts`, `src/config.ts`, `src/mcp.ts`, `src/cli.ts`, `package*.json`, `.github/workflows/ci.yml`, `test/bom.test.ts` | `test/fixtures/cyclonedx/**` | Validate runtime and lock-only dependency CycloneDX inventories with official schemas and privacy/CLI regressions; reconcile inventory documentation and verify the CI dependency artifact. | `node --test test/bom.test.ts` | core | Official schema/format validation, real CLI plus fake Ollama, secret sentinels and locked dependency versions; dependency-sbom CI artifact. |
 
 ## Content dependencies
 
@@ -25,7 +26,7 @@ What each output is made of, besides code: change one of these and the output is
 
 | Output | Made of | Redo with |
 |---|---|---|
-| (none listed) | | |
+| Validate runtime and lock-only dependency CycloneDX inventories with official schemas and privacy/CLI regressions; reconcile inventory documentation and verify the CI dependency artifact. | `test/fixtures/cyclonedx/**` | `node --test test/bom.test.ts` |
 
 ## Value couplings
 
@@ -52,3 +53,4 @@ What can change an output with no commit here, and how we would notice.
 | MCP servers the owner adds (`npx -y package` fetches the newest version at each start) | What a granted tool does: its code can change with no commit here; a grant notices only a changed description (F-021) | The tool's fingerprint (description changes suspend the grant); docs/INSTALL.md recommends a pinned version; audit |
 | The Node version on each base (the owner runs Node 26 under nvm; CI runs Node 24) | Native TypeScript, node:sqlite and the bundled npm/npx (B-019: nvm Node 26.12's npm lacked npm-cli.js) | nerv doctor, the CI matrix (Node 24 only) and audit |
 | Chrome/Chromium installed on the execution host and GitHub Ubuntu runner | Angular bilingual browser acceptance, native control rendering, axe results and screenshots | Browser acceptance uses an isolated profile and fails explicitly if Chrome is missing; CHROME_BIN can select a compatible executable; audit reviews runner/browser changes. |
+| npm sbom output version and metadata supplied by the Node/npm installation | Dependency CycloneDX artifact and official schema compatibility | test/bom.test.ts validates actual lock-only npm output and direct locked versions; CI publishes the artifact for inspection. |

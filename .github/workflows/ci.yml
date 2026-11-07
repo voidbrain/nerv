@@ -14,6 +14,13 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - name: Locked dependency SBOM
+        run: npm sbom --package-lock-only --sbom-format cyclonedx > dependencies.cdx.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dependency-sbom
+          path: dependencies.cdx.json
+          if-no-files-found: error
       - run: npm run typecheck
       # The suite once, with coverage; the table is printed (warnings, coverage.enforce off).
       - run: npm run test:coverage

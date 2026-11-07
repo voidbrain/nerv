@@ -46,6 +46,8 @@ Use your actual future deadline. CLI timestamps require an explicit UTC offset. 
 
 All `/api` routes require a bearer token (except the native TLS claim route, which requires a private single-use invitation). Lightweight `/api/status` is used for background health; explicit `/api/doctor` retains integrity diagnostics. Native clients can also use authenticated, read-only JSON-RPC 2.0 WebSockets at `/rpc`; browser ticket pairing and remote execution are not implemented. Static UI files are public on loopback and contain no credentials. No permissive CORS or public-network binding is enabled. Doctor covers local configuration/runtime/database; remote/device probes remain planned.
 
+`nerv bom` writes a privacy-filtered CycloneDX snapshot of configured models and granted MCP tools. CI publishes the locked npm dependency SBOM separately; see [bills of materials](docs/security/bill-of-materials.md).
+
 ## Where things are
 
 | Path | Owns |
