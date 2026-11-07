@@ -196,7 +196,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Queue order | 2 — Resolve reported stale cross-channel approvals before additional features |
 | PR / evidence | [PR #196](https://github.com/voidbrain/nerv/pull/196) evidence and queue reconciliation;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; source assessment linked above |
 | Opened | 2026-11-07 |
-| Verification | 2026-11-08: committed failing regressions now pass unchanged; local and real signed Kaji status/decision tests, pagination/expiry and bundled-row tests passed. Full suite 368 passed, two skips; final authorization/browser checks and CI pending. |
+| Verification | 2026-11-08: committed failing regressions now pass unchanged; local and real signed Kaji status/decision tests, pagination/expiry and bundled-row tests passed. Final suite 369 passed, two skips; typecheck, build, headless and repository checks passed. Chrome/axe: both browser cases passed. Expanded channel suite: 19 passed on clean frozen source 85aa894, retained in docs/evaluations/2026-11-08-card-reconciliation.json. Main-only signed status authorization and coordinator-only bounded RPC checks passed. CI pending. |
 | Reviewed | 2026-11-08 |
 
 </details>
