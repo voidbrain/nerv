@@ -40,3 +40,19 @@ test('B-042: a dashboard decision during send removes buttons, retries failed ed
   assert.equal(f.calls.filter(c=>c.method==='sendMessage').length,1,'cleanup never resends the card');f.store.decide(id,'approve','telegram');assert.equal(f.store.list().length,1);
  }finally{gate.release();await channel.stop();await f.close();}
 });
+test('B-042: status point lookups preserve pending cards outside the first page and exclude expiry',async()=>{
+ const f=await fixture();
+ try{const ids=Array.from({length:22},(_,i)=>f.proposal('Neutral '+i));assert.ok(!f.store.approvals(20).some(a=>a.id===ids[21]));
+  assert.deepEqual(f.store.pendingApprovalIds([ids[21]!]),[ids[21]]);assert.deepEqual(f.store.ledger.pendingApprovalIds([ids[21]!],new Date('2040-01-01')),[]);
+  for(const bad of [['bad'],Array.from({length:201},()=>ids[0]!),[ids[0]!,ids[0]!]])assert.throws(()=>f.store.pendingApprovalIds(bad),/Invalid/);
+ }finally{await f.close();}
+});
+test('B-042: dashboard decision removes only its bundled row, preserving the other pending fact',{timeout:10000},async()=>{
+ const f=await fixture(),channel=f.channel();
+ try{const sortie=f.store.ledger.openSortie('owner','Remember two neutral facts','trusted');
+  const ids=['Tea at 8','Stretch at 9'].map(text=>f.store.runAction(sortie,{tool:'memory.remember',args:{text},stage:'production'}).approvalId!);
+  await channel.deliver();await new Promise(done=>setTimeout(done,3050));await channel.deliver();await f.decide(ids[0]!);await channel.deliver();
+  const edit=f.calls.filter(c=>c.method==='editMessageReplyMarkup').at(-1)!;const rows=(edit.body.reply_markup as {inline_keyboard:{callback_data:string}[][]}).inline_keyboard;
+  assert.equal(rows.length,1);assert.ok(rows[0]!.every(b=>b.callback_data.endsWith(':'+ids[1])));assert.equal(f.store.memory.list().length,1);
+ }finally{await channel.stop();await f.close();}
+});

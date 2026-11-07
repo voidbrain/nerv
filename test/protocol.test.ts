@@ -28,3 +28,8 @@ test('native WebSocket RPC requires bearer auth, denies browser origins, and is 
   const message=once(client,'message');client.send(JSON.stringify({jsonrpc:'2.0',id:'write',method:'reminders.cancel',params:{id:'x'}}));assert.equal(JSON.parse((await message)[0].toString()).error.code,-32003);
  }finally{const closed=client?.readyState===WebSocket.OPEN?once(client,'close'):Promise.resolve();await new Promise<void>(done=>server.close(()=>done()));await closed;store.close();}
 });
+test('B-042: approval status lookup is bounded, read-only and limited to the coordinator edge',()=>{
+ const id='00000000-0000-4000-8000-000000000001';validateParams('approvals.pendingIds',{ids:[id]});authorize('coordinator','nervous','approvals.pendingIds');
+ for(const params of [{ids:['bad']},{ids:[id,id]},{ids:Array.from({length:201},(_,i)=>i.toString(16).padStart(8,'0')+'-0000-4000-8000-000000000001')},{ids:[id],decision:'approve'}])assert.throws(()=>validateParams('approvals.pendingIds',params));
+ assert.throws(()=>authorize('interface','coordinator','approvals.pendingIds'));assert.throws(()=>authorize('brain','nervous','approvals.pendingIds'));
+});

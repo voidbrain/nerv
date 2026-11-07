@@ -39,6 +39,7 @@ process.on('message',(value:unknown)=>{
    case 'inbox.brief':return store.addBrief(params.message as string);
    case 'inbox.lastBrief':return store.lastBrief();
    case 'approvals.expired':return store.expiredApprovals(params.since as string);
+   case 'approvals.pendingIds':return store.pendingApprovalIds(params.ids as string[]);
    case 'approvals.pending':return store.approvals(params.limit as number|undefined);
    case 'approvals.decide':return store.decide(params.id as string,params.decision as 'approve'|'reject'|'edit',params.source as string);
    case 'events.page':return store.events(params.sortieId as string,params.after as number|undefined,params.limit as number|undefined);

@@ -35,3 +35,5 @@ Frozen source `3c71986bf030d727b5030e1ae510989aa9e66a3a`, clean working tree; al
 | [Misato](2026-11-08-misato.json) | 4/5 passed | Four regression cases passed; topic-change holdout failed |
 
 Misato answered the unrelated calendar question with a final reply instead of returning `newRequest` while clarification was pending. The production prompt requires `newRequest`, so this is retained as a model-quality failure under B-021. No action executed in this evaluator. The expected case remains unchanged; this model result does not qualify a promotion. Independent language review passed: the Italian missing-title question naturally asks for the missing reminder content. The reviewer also confirmed the topic-change result violates the production prompt; review was report-only. These small fixed corpora establish a baseline, not broad competence or exhaustive branch coverage.
+
+Suite `nerv-golden-v2` adds B-042 dashboard/Telegram send-race, restart cleanup and bundled-row cases to the channel group. The v1 baseline above remains unchanged; later runs identify the expanded suite and their own source hashes.

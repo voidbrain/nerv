@@ -174,9 +174,9 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Signal | Priority | Status | Effort |
 |:---:|---|---|---|
-| 🟠 | 🔶 P2 | Investigate | 🟡 Medium |
+| 🟡 | 🔶 P2 | Implemented | 🟢 Small |
 
-💻 **→ Human action required: No**<br />Next: fix committed regressions for stale pre-send cards and durable in-flight cleanup.
+💻 **→ Human action required: No**<br />Next: final protocol/browser checks and green CI for card reconciliation.
 
 | | |
 |---|---|
@@ -187,17 +187,17 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** 2026-11-08: test/telegram-reconcile.test.ts reproduces both failures through dashboard REST and actual loopback Telegram sends: route lookup can send an already-decided card, and in-flight sends have no durable button cleanup. Both fail against unchanged production code.  Commit a cross-channel delayed-send regression before fixing card reconciliation. See [the source assessment](design/operator-flow-review-2026-11-07.md). Preserve observed communication separately from step activity; do not infer delivery or execution from a UI state.
+**Next action / closure evidence:** 2026-11-08: test/telegram-reconcile.test.ts reproduces both failures through dashboard REST and actual loopback Telegram sends: route lookup can send an already-decided card, and in-flight sends have no durable button cleanup. Both fail against unchanged production code.  The unchanged regressions now pass. Added bounded coordinator-only status RPC and main-only signed Kaji lookup; local/relayed cards recheck before sending, retain message IDs and retry decided/expired button cleanup after failures/restarts. Bundles remove only decided rows. Cleanup batches reads, serializes edits/sends and bounds tracking/queues; unavailable remote status retains cleanup. Cards predating message-ID tracking cannot be located automatically; repeat decisions remain idempotent. Golden suite v2 includes these scenarios; v1 baseline evidence is preserved. See [the source assessment](design/operator-flow-review-2026-11-07.md). Preserve observed communication separately from step activity; do not infer delivery or execution from a UI state.
 
-**Estimates:** Medium remaining effort. Reassessed 2026-11-07: implementation and integration verification remain; no measured duration available.
+**Estimates:** Small remaining effort, estimated 1–2 focused hours for final checks, CI and reconciliation. Reassessed 2026-11-08 after implementation and local/signed integration checks.
 
 | Field | Value |
 |---|---|
 | Queue order | 2 — Resolve reported stale cross-channel approvals before additional features |
 | PR / evidence | [PR #196](https://github.com/voidbrain/nerv/pull/196) evidence and queue reconciliation;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; source assessment linked above |
 | Opened | 2026-11-07 |
-| Verification | Pending: regression, integration and relevant browser checks; source inspection is not runtime acceptance. |
-| Reviewed | 2026-11-07 |
+| Verification | 2026-11-08: committed failing regressions now pass unchanged; local and real signed Kaji status/decision tests, pagination/expiry and bundled-row tests passed. Full suite 368 passed, two skips; final authorization/browser checks and CI pending. |
+| Reviewed | 2026-11-08 |
 
 </details>
 
