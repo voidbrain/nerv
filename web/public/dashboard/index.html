@@ -19,19 +19,21 @@ body.theme-simple { --radius:6px; --font:ui-monospace,SFMono-Regular,Menlo,Monac
 * { box-sizing:border-box; }
 html,body { margin:0; }
 body { background:var(--bg); color:var(--text); font:12px/1.4 var(--font); padding:10px; }
-/* CRT (Eva, opt-in), owner's tuning 2026-11-05: the original static scanlines (22%, 4 px, never moving), darker edges
-   along the borders, a slight irregular flicker of the page, and two thin dark lines at different speeds that each pass
-   only now and then (17 s and 29 s cycles, so together they look irregular). No colour split or jitter; with reduced
-   motion only the static layers stay. */
+/* CRT remains opt-in. Long, unequal cycles vary gentle dips and thin bands; grain is static.
+   The rare two-pulse sequence is under 3 Hz. Reduced motion keeps only scanlines, grain and vignette. */
 body.theme-eva.crt-on::after { content:""; position:fixed; inset:0; pointer-events:none; z-index:50; background:linear-gradient(rgba(0,0,0,0) 50%,rgba(0,0,0,.22) 50%); background-size:100% 4px; box-shadow:inset 0 0 70px 22px rgba(0,0,0,.85); }
+.crt-static { display:none; }
+body.theme-eva.crt-on .crt-static { display:block; position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:52; opacity:.025; }
 body.theme-eva.crt-on::before, body.theme-eva.crt-on .wrap::after { content:""; position:fixed; left:0; right:0; top:0; pointer-events:none; z-index:51; transform:translateY(-12px); }
-body.theme-eva.crt-on::before { height:6px; background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.3),rgba(0,0,0,0)); animation:crt-line-a 17s linear infinite; }
-body.theme-eva.crt-on .wrap::after { height:3px; background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.35),rgba(0,0,0,0)); animation:crt-line-b 29s linear -11s infinite; }
-body.theme-eva.crt-on .wrap { animation:crt-flicker 6s steps(1,end) infinite; }
-@keyframes crt-flicker { 0%,100% { opacity:1 } 17% { opacity:.93 } 18% { opacity:1 } 52% { opacity:.95 } 53.5% { opacity:1 } 81% { opacity:.92 } 82% { opacity:.97 } 83% { opacity:1 } }
-@keyframes crt-line-a { 0% { transform:translateY(-12px) } 32% { transform:translateY(101vh) } 32.1%,100% { transform:translateY(101vh) } }
-@keyframes crt-line-b { 0%,55% { transform:translateY(-12px) } 64% { transform:translateY(101vh) } 64.1%,100% { transform:translateY(101vh) } }
+body.theme-eva.crt-on::before { height:6px; background:linear-gradient(transparent,color-mix(in srgb,var(--bg) 22%,transparent),transparent); animation:crt-line-a 43s linear infinite; }
+body.theme-eva.crt-on .wrap::after { height:3px; background:linear-gradient(transparent,color-mix(in srgb,var(--bg) 28%,transparent),transparent); animation:crt-line-b 67s linear -19s infinite; }
+body.theme-eva.crt-on .wrap { animation:crt-flicker 47s steps(1,end) infinite; }
+@keyframes crt-flicker { 0%,100% { opacity:1 } 13% { opacity:.986 } 13.3% { opacity:1 } 41% { opacity:.975 } 41.35% { opacity:1 } 76% { opacity:.982 } 76.35% { opacity:1 } 77.1% { opacity:.99 } 77.45% { opacity:1 } }
+@keyframes crt-line-a { 0%,18% { transform:translateY(-12px) } 23% { transform:translateY(46vh) } 25% { transform:translateY(46vh) } 28% { transform:translateY(19vh) } 34%,100% { transform:translateY(101vh) } }
+@keyframes crt-line-b { 0%,51% { transform:translateY(101vh) } 56% { transform:translateY(61vh) } 58% { transform:translateY(61vh) } 64%,100% { transform:translateY(-12px) } }
 @media (prefers-reduced-motion:reduce) { body.theme-eva.crt-on .wrap, body.theme-eva.crt-on::before, body.theme-eva.crt-on .wrap::after { animation:none; } body.theme-eva.crt-on::before, body.theme-eva.crt-on .wrap::after { display:none; } }
+body.theme-eva.mode-dark.accent-orange #magi-big .mtitle b { color:var(--eva01); }
+body.theme-eva.mode-dark.accent-orange #magi-big { --glow:color-mix(in srgb,var(--eva01) 35%,transparent); border-color:var(--eva01); background:color-mix(in srgb,var(--eva01) 5%,var(--panel)); box-shadow:inset 0 0 16px color-mix(in srgb,var(--eva01) 12%,transparent); }
 button,input,select { font:inherit; }
 .wrap { max-width:1720px; margin:0 auto; display:flex; flex-direction:column; gap:8px; }
 .panel { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); min-width:0; }
@@ -184,10 +186,6 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .sephirot svg.edges path.passed.owner { stroke:var(--warn); }
 .sephirot svg.edges path.skip { opacity:.22; }
 .sephirot svg.edges path { fill:none; stroke-linejoin:round; }
-.sephirot svg.edges path.live { stroke:var(--accent); stroke-dasharray:6 6; animation:flow 0.9s linear infinite; }
-.sephirot svg.edges path.wait { stroke:var(--warn); stroke-dasharray:4 4; animation:flow 1.6s linear infinite; }
-.sephirot svg.edges path.reject { stroke:var(--danger); stroke-dasharray:6 6; animation:flow .7s linear infinite reverse; }
-@keyframes flow { to { stroke-dashoffset:-24; } }
 .sgrid { position:relative; display:grid; grid-template-columns:1fr 1.25fr 1fr; grid-auto-rows:auto; gap:10px 18px; align-items:center; }
 .snode { position:relative; z-index:1; border:1px solid var(--border); background:var(--panel2); padding:3px 8px; text-align:center; transition:.15s; }
 .snode .sn { font-size:8px; color:var(--muted); letter-spacing:.12em; text-align:left; padding-right:26px; min-height:12px; }
@@ -199,6 +197,9 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .snode .sk { font-size:9px; color:var(--kanji); letter-spacing:.2em; }
 .snode.on { border-color:var(--accent); background:color-mix(in srgb,var(--accent) 14%,var(--panel2)); box-shadow:0 0 14px var(--glow); }
 .snode.on .st { color:var(--title); }
+.snode.on, #magi-big.on { outline:1px solid var(--glow); outline-offset:2px; animation:node-busy 3.2s ease-in-out infinite; }
+@keyframes node-busy { 50% { outline-color:transparent; } }
+@media (prefers-reduced-motion:reduce) { .snode.on, #magi-big.on { animation:none; } }
 .snode.done { border-color:var(--ok); } .snode.done .st { color:var(--ok); }
 .snode.wait { border-color:var(--warn); box-shadow:0 0 12px color-mix(in srgb,var(--warn) 30%,transparent); } .snode.wait .st { color:var(--warn); }
 /* F-051: skipped (this sortie did not need the step) reads differently from not reached: dashed and labelled, not greyed out. */
@@ -288,6 +289,7 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
 </style>
 </head>
 <body class="theme-eva mode-dark accent-orange">
+<svg class="crt-static" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"><filter id="crt-noise"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="1" seed="7" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#crt-noise)"/></svg>
 <div class="wrap">
 
   <div class="banner shadow panel" role="note">

@@ -21,19 +21,22 @@ export interface BriefInput {
 }
 export type Source='approvals'|'reminders'|'sorties'|'health'|'expired';
 const words={
- en:{title:'Good morning. Hyuga\'s brief',needs:'Needs you',none:'Nothing waits for you.',expires:'expires',due:'Due in the next 24 h',noDue:'No reminders in the next 24 h.',since:'Since the last brief',done:'done',failed:'failed',quiet:'Nothing finished or failed.',expired:'Expired without your decision (nothing ran)',health:'Health',ok:'All checks pass.',unread:'could not be read for this brief.'},
- it:{title:'Buongiorno. Il brief di Hyuga',needs:'Ti aspettano',none:'Nulla ti aspetta.',expires:'scade',due:'In scadenza nelle prossime 24 h',noDue:'Nessun promemoria nelle prossime 24 h.',since:'Dall\'ultimo brief',done:'fatte',failed:'fallite',quiet:'Nulla di concluso o fallito.',expired:'Scadute senza la tua decisione (nulla è stato eseguito)',health:'Stato',ok:'Tutti i controlli sono a posto.',unread:'non leggibile per questo brief.'},
+ en:{title:'Hyuga\'s brief',greetings:['Good morning','Good afternoon','Good evening'],needs:'Needs you',none:'Nothing waits for you.',expires:'expires',due:'Due in the next 24 h',noDue:'No reminders in the next 24 h.',since:'Since the last brief',done:'done',failed:'failed',quiet:'Nothing finished or failed.',expired:'Expired without your decision (nothing ran)',health:'Health',ok:'All checks pass.',unread:'could not be read for this brief.'},
+ it:{title:'Il brief di Hyuga',greetings:['Buongiorno','Buon pomeriggio','Buonasera'],needs:'Ti aspettano',none:'Nulla ti aspetta.',expires:'scade',due:'In scadenza nelle prossime 24 h',noDue:'Nessun promemoria nelle prossime 24 h.',since:'Dall\'ultimo brief',done:'fatte',failed:'fallite',quiet:'Nulla di concluso o fallito.',expired:'Scadute senza la tua decisione (nulla è stato eseguito)',health:'Stato',ok:'Tutti i controlli sono a posto.',unread:'non leggibile per questo brief.'},
 };
 /** The sortie's short ID, as the dashboard shows it: the way to its trace. */
 export const sortieRef=(id:string|undefined)=>id?`S-${id.slice(0,4).toUpperCase()} `:'';
 export function composeBrief(b:BriefInput):string {
  const w=words[b.language];
+ const minutes=localClock(b.now,b.timeZone).minutes;
+ const greeting=minutes<360?undefined:w.greetings[minutes<720?0:minutes<1080?1:2];
+ const title=greeting?`${greeting}. ${w.title}`:w.title;
  const at=(iso:string)=>new Intl.DateTimeFormat(b.language==='it'?'it-IT':'en-GB',{timeZone:b.timeZone,weekday:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(iso));
  const soon=b.reminders.filter(r=>{const t=Date.parse(r.due);return t>b.now.getTime()&&t<=b.now.getTime()+86_400_000;}).sort((x,y)=>Date.parse(x.due)-Date.parse(y.due));
  const done=b.sorties.filter(s=>s.status==='done'),failed=b.sorties.filter(s=>s.status==='failed');
  const nDone=b.closed?.done ?? done.length,nFailed=b.closed?.failed ?? failed.length;
  const off=(k:Source)=>b.unavailable?.includes(k) ?? false;
- const lines=[`☀️ ${w.title}${b.base?` · ${b.base}`:''}`,'',...(b.instrumentality?[runMessage(b.instrumentality,b.language),'']:[]),
+ const lines=[`☀️ ${title}${b.base?` · ${b.base}`:''}`,'',...(b.instrumentality?[runMessage(b.instrumentality,b.language),'']:[]),
   ...(off('approvals')?[`${w.needs}: ${w.unread}`]:[`${w.needs}: ${b.approvals.length}`,...(b.approvals.length?b.approvals.slice(0,5).map(a=>`• ${sortieRef(a.sortie)}${a.tool} (${w.expires} ${at(a.expires)})`):[w.none])]),
   ...(off('expired')?['',`${w.expired}: ${w.unread}`]:b.expired?.length?['',`${w.expired}: ${b.expired.length}`,...b.expired.slice(0,5).map(e=>`• ⌛ ${sortieRef(e.sortie)}${e.tool} · ${e.title}`)]:[]),
   '',...(off('reminders')?[`${w.due}: ${w.unread}`]:[`${w.due}: ${soon.length}`,...(soon.length?soon.slice(0,8).map(r=>`• ${at(r.due)} ${r.title}`):[w.noDue])]),

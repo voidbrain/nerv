@@ -233,8 +233,8 @@ test('an answer without an action: Misato passed, a green route straight to Debr
  const {readFileSync}=await import('node:fs');const live=readFileSync('web/public/dashboard/live.js','utf8');const js=readFileSync('web/public/dashboard/dashboard.js','utf8');
  assert.match(live,/plan:actions\.length > 0 \|\| !!s\.question \|\| known\.has\(s\.id\),/,'B-021 (changed on purpose): a pending question also means Misato planned');
  assert.match(js,/\["plan","debrief","answer"\]/);assert.match(js,/const edges = EDGES\.filter\(e => e\[2\] === "relay" \? !!\(s && s\.forwarded\) : e\[2\] !== "answer" \|\| \(s && !s\.actions\.length && !s\.forwarded\)\);/,'drawn only for an answer-only sortie (F-051 slice 2 added the relay route)');
- assert.match(js,/if \(!s \|\| !\(s\.status === "active" \|\| \/waiting\/\.test\(s\.status\)\)\) return m;/,'no animated line on a finished sortie');
- assert.match(js,/debrief:s\.actions\.length \? "eva" : "plan"/);
+ assert.doesNotMatch(js,/function liveEdges\(/,'B-040: phase-derived animation is removed for running and finished sorties alike');
+ assert.match(js,/if \(e\[2\] === "answer"\) return stepState\(s, "plan"\) === "done" && stepState\(s, "debrief"\) === "done"/);
 });
 test('the apartment\'s count sits in the header like every other panel\'s sub-line, not a red badge (owner, 2026-11-05)',async()=>{
  const {readFileSync}=await import('node:fs');const html=readFileSync('web/public/dashboard/index.html','utf8');

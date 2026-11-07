@@ -510,6 +510,7 @@ function renderFlow() {
     return (i ? "<span class='tarrow'>→</span>" : "") + "<div class='tstep " + stepState(s, id) + (id === "apt" && stepState(s, id) === "done" ? " owner" : "") + "'>" + inner + "</div>";
   }).join("");
   // magi big
+  document.getElementById("magi-big").classList.toggle("on", stepState(s, "magi") === "on");
   const a = s && s.actions[Math.min(s.current, s.actions.length - 1)];
   document.getElementById("mt-action").textContent = a ? a.tool : "no action";
   ["melchior", "balthasar", "casper"].forEach(seat => {
@@ -558,7 +559,6 @@ function drawEdges(s) {
   const svg = document.getElementById("edges"); const host = document.getElementById("sephirot").getBoundingClientRect();
   if (!host.width) return;
   const c = el => { const r = el.getBoundingClientRect(); return { x:r.left - host.left + r.width / 2, y:r.top - host.top + r.height / 2, w:r.width, h:r.height, l:r.left - host.left, r:r.right - host.left, t:r.top - host.top, b:r.bottom - host.top }; };
-  const live = liveEdges(s);
   svg.setAttribute("viewBox", "0 0 " + host.width + " " + host.height);
   // Orthogonal routing: every line leaves and enters a node only at the middle of its N, S, E or W side, with 90° turns
   // in the gaps between nodes; the loops back to Misato run in their own lanes in the right padding, never behind a node.
@@ -583,13 +583,13 @@ function drawEdges(s) {
     else if (B.b <= A.t + 2) { const my = (B.b + A.t) / 2; d = "M" + A.x + "," + A.t + " V" + my + " H" + B.x + " V" + B.b; }
     else if (B.l >= A.r) { const mx = (A.r + B.l) / 2; d = "M" + A.r + "," + A.y + " H" + mx + " V" + B.y + " H" + B.l; }
     else { const mx = (B.r + A.l) / 2; d = "M" + A.l + "," + A.y + " H" + mx + " V" + B.y + " H" + B.r; }
-    const key = e[0] + ">" + e[1]; const cls = (e[2] === "loop" ? "loop " : "") + (live[key] || passedEdge(s, e) || "");
+    const cls = (e[2] === "loop" ? "loop " : "") + (passedEdge(s, e) || "");
     return "<path d='" + d + "' class='" + cls + "' marker-end='url(#edge-arrow)'/>";
   }).join("");
   svg.innerHTML = "<defs><marker id='edge-arrow' viewBox='0 0 6 6' refX='5' refY='3' markerWidth='8' markerHeight='8' markerUnits='userSpaceOnUse' orient='auto-start-reverse'><path d='M0,0 L6,3 L0,6 z' fill='context-stroke'/></marker></defs>" + paths;
 }
 /** The route already taken: green when the step passed on its own, yellow when it went through the owner's decision
-    (Misato's apartment), faded into a skipped step. Live, waiting and rejected edges are drawn by liveEdges instead. */
+    (Misato's apartment), faded into a skipped step. Step activity is shown on nodes; route history never claims an ongoing communication. */
 function passedEdge(s, e) {
   if (!s || e[2] === "loop") return "";
   if (e[2] === "answer") return stepState(s, "plan") === "done" && stepState(s, "debrief") === "done" ? "passed" : "";
@@ -598,15 +598,6 @@ function passedEdge(s, e) {
   if (from === "skip" || to === "skip") return "skip";
   if (from !== "done" || !(to === "done" || to === "on" || to === "wait")) return "";
   return e[0] === "apt" || e[1] === "apt" ? "passed owner" : "passed";
-}
-function liveEdges(s) {
-  const m = {}; if (!s || !(s.status === "active" || /waiting/.test(s.status))) return m;
-  const prevOf = { intake:"detect", route:"intake", consult:"route", plan:s.consult && s.current === 0 ? "consult" : "route", magi:"plan", sync:"magi", apt:"sync", plug:s.done.apt && s.phase === "plug" ? "apt" : "sync", eva:"plug", debrief:s.actions.length ? "eva" : "plan" };
-  if (s.phase === "plan" && s.current > 0) m["eva>plan"] = "live";
-  else if (s.phase === "plan" && /Rejected|Edit/.test(s.note)) m[/Edit/.test(s.note) ? "apt>plan" : "magi>plan"] = "reject";
-  else if (prevOf[s.phase]) m[prevOf[s.phase] + ">" + s.phase] = s.status === "waiting" ? "wait" : "live";
-  if (s.phase === "consult") m["consult>plan"] = "live";
-  return m;
 }
 
 /* ================= RENDER: detail (plan + action) ================= */
@@ -909,7 +900,7 @@ function drawTelegram(ctx, now, W, H) {
   const channelById = id => telegramBases.find(b => b.baseId === id);
   ctx.lineWidth = 1; ctx.globalAlpha = 0.7;
   origins.forEach(id => { const base = BASES.find(b => b.id === String(id).toLowerCase()); if (!base) return;
-    const [bx,by] = map.proj([base.lon,base.lat]); const api = telegramApiState(channelById(id)); ctx.strokeStyle = color(api); ctx.setLineDash(api === "responding" ? [] : [2,3]); ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(x,y); ctx.stroke(); ctx.setLineDash([]);
+    const [bx,by] = map.proj([base.lon,base.lat]); const api = telegramApiState(channelById(id)); ctx.strokeStyle = color(api); ctx.setLineDash([2,3]); ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(x,y); ctx.stroke(); ctx.setLineDash([]);
   });
   ctx.globalAlpha = 1;
   for (let i = telegramPulses.length - 1; i >= 0; i--) {

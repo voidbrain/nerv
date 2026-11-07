@@ -156,6 +156,22 @@ test('F-002/F-010: reliable bilingual reminder flows, local dates and responsive
   const login=await (await fetch(origin+'/api/session/codes',{method:'POST',headers:{authorization:'Bearer '+token}})).json();
   await viewport(1440,1000);await page('Page.navigate',{url:origin+'/dashboard/#code='+login.code});
   await until(`document.querySelector('.banner')?.textContent.includes('LIVE ·')&&!document.querySelector('.banner')?.textContent.includes('SIGNING IN')`);
+  // F-053: shipped CRT grain is decorative, opt-in and static; motion honors the browser preference.
+  assert.equal(await evaluate(`getComputedStyle(document.querySelector('.crt-static')).display`),'none');
+  await evaluate(`document.querySelector('#btn-crt').click()`);
+  assert.equal(await evaluate(`getComputedStyle(document.querySelector('.crt-static')).display`),'block');
+  assert.equal(await evaluate(`document.querySelector('.crt-static').getAttribute('aria-hidden')`),'true');
+  assert.equal(await evaluate(`getComputedStyle(document.querySelector('.wrap')).animationDuration`),'47s');
+  assert.equal(await evaluate(`(()=>{const probe=document.createElement('i');probe.style.color='var(--eva01)';document.body.append(probe);const expected=getComputedStyle(probe).color;probe.remove();return getComputedStyle(document.querySelector('#magi-big')).borderTopColor===expected})()`),true,'MAGI has its violet identity');
+  await evaluate(readFileSync(require.resolve('axe-core/axe.min.js'),'utf8'));
+  assert.deepEqual(await evaluate(`axe.run(document.querySelector('.s-magi')).then(r=>r.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)})))`),[],'MAGI axe with CRT');
+  await screenshot('dashboard-crt-on');
+  await page('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
+  assert.equal(await evaluate(`getComputedStyle(document.querySelector('.wrap')).animationName`),'none');
+  assert.equal(await evaluate(`getComputedStyle(document.body,'::before').display`),'none');
+  await screenshot('dashboard-crt-reduced-motion');
+  await page('Emulation.setEmulatedMedia',{features:[]});
+  await evaluate(`document.querySelector('#btn-crt').click()`);
   await evaluate(`document.querySelector('#tab-battery').click()`);
   await until(`document.querySelector('#budget-sub')?.textContent.includes('5 calls')`);
   assert.equal(await evaluate(`location.hash`),'','login code removed');
