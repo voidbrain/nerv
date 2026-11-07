@@ -36,7 +36,7 @@ process.on('message',(value:unknown)=>{
    case 'reminders.update':{let r;try{r=store.update(params.id as string,{...(params.title!==undefined?{title:params.title as string}:{}),...(params.due!==undefined?{due:params.due as string}:{})});}catch{throw new Error('Invalid reminder.');}return r ?? null;}
    case 'reminders.cancel':return store.cancel(params.id as string);
    case 'inbox.list':{const p=store.inboxHistory(0,50);if(p.next)throw new Error('Use inbox.history.');return p.items;}
-   case 'inbox.brief':return store.addBrief(params.message as string);
+   case 'inbox.brief':return store.addBrief(params.message as string,new Date(),params.day as string|undefined);
    case 'inbox.lastBrief':return store.lastBrief();
    case 'approvals.expired':return store.expiredApprovals(params.since as string);
    case 'approvals.pendingIds':return store.pendingApprovalIds(params.ids as string[]);

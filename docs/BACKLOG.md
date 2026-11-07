@@ -109,7 +109,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | PR / evidence | [PR #202](https://github.com/voidbrain/nerv/pull/202) evaluation suite and frozen evidence; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #193](https://github.com/voidbrain/nerv/pull/193) agent-executable acceptance and evaluation assessment; [PR #177](https://github.com/voidbrain/nerv/pull/177) implementation; Owner report 2026-11-05 (S-E16D, S-7B04 on Neo Tokyo-3); owner refinement 2026-11-06 (topic change cancels the wait) |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-06 Unit/integration: test/clarification.test.ts (plan shape, durable question, conversation binding, 8-word rule, approval resume, topic change, forwarded question), test/telegram.test.ts (B-021 over Aoba), test/one-channel.test.ts (question and answer across the real signed Kaji link, main base down and back), full suite 226 passed, one platform skip; build, typecheck, conventions, headless lifecycle and Angular browser acceptance passed. Browser/accessibility 2026-11-08: test/evaluation.browser.mjs passed in the frozen 178-check suite (waiting apartment, Debrief unlit, same-sortie answer, approval effect and scripted topic change; axe). Human: no owner-only dashboard acceptance required after the 2026-11-07 assessment; real-phone display/receipt is outside the pending browser check. Recorded real-model judgment 2026-11-08: gemma4:12b Misato passed four regression cases, but the topic-change holdout returned a final reply instead of newRequest; failed evidence retained in docs/evaluations/2026-11-08-misato.json. Forwarded-answer timeout remains unresolved. |
-| Reviewed | 2026-11-07 |
+| Reviewed | 2026-11-08 |
 
 </details>
 
@@ -139,9 +139,9 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Signal | Priority | Status | Effort |
 |:---:|---|---|---|
-| 🟠 | 🔶 P2 | Investigate | 🟡 Medium |
+| 🟡 | 🔶 P2 | Implemented | 🟢 Small |
 
-💻 **→ Human action required: No**<br />Next: fix the committed checkpoint, total-outage and overlapping-scheduler regressions.
+💻 **→ Human action required: No**<br />Next: final evaluation, integration checks and CI for durable brief recovery.
 
 | | |
 |---|---|
@@ -152,17 +152,17 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** 2026-11-08: three regressions in test/brief-recovery.test.ts reproduce a failed checkpoint read being treated as absence, a report with every source unavailable being sent immediately, and two schedulers writing duplicate daily deliveries. All fail against unchanged production code. These are reproduced failure classes; no retained Tabgha log identifies which occurred in the owner report.  Partial fix: greeting regression committed failing before implementation; composition now uses the owner time zone for morning/afternoon/evening, with a neutral overnight title. The older Telegram delivery test now identifies the brief by its title instead of requiring morning: the owner deliberately changed that requirement. New B-041 test remains unchanged. Unavailable sections and reported multiple messages remain unverified; do not close. Earlier next action:  Commit a greeting regression; exercise partial reads and restart/delivery recovery before attributing duplicates. See [the source assessment](design/operator-flow-review-2026-11-07.md). Preserve observed communication separately from step activity; do not infer delivery or execution from a UI state.
+**Next action / closure evidence:** 2026-11-08: three regressions in test/brief-recovery.test.ts reproduce a failed checkpoint read being treated as absence, a report with every source unavailable being sent immediately, and two schedulers writing duplicate daily deliveries. All were committed failing before the production fix; all now pass unchanged. The scheduler retries unknown checkpoints and complete core-source outages, records source names safely, and atomically commits one delivery per local day across schedulers/restarts. New rollback/cursor/reopen checks pass; the additive daily_briefs table preserves inbox rowids and UUIDs. These are reproduced failure classes; no retained Tabgha log identifies which occurred in the owner report.  Partial fix: greeting regression committed failing before implementation; composition now uses the owner time zone for morning/afternoon/evening, with a neutral overnight title. The older Telegram delivery test now identifies the brief by its title instead of requiring morning: the owner deliberately changed that requirement. New B-041 test remains unchanged. Reproduced failure-class fixes await final CI; the original Tabgha incident remains unattributed without its logs. Partial source failures remain explicit rather than being silently called healthy. Earlier next action:  Commit a greeting regression; exercise partial reads and restart/delivery recovery before attributing duplicates. See [the source assessment](design/operator-flow-review-2026-11-07.md). Preserve observed communication separately from step activity; do not infer delivery or execution from a UI state.
 
-**Estimates:** Medium remaining effort. Reassessed 2026-11-07: implementation and integration verification remain; no measured duration available.
+**Estimates:** Small remaining effort, estimated 1–2 focused hours for final full-suite/evaluation evidence, CI and reconciliation. Reassessed 2026-11-08 after reproduced failure classes were fixed.
 
 | Field | Value |
 |---|---|
 | Queue order | 3 — Identify brief source failures and repeated-delivery identities |
 | PR / evidence | [PR #196](https://github.com/voidbrain/nerv/pull/196) evidence and queue reconciliation;  [PR #195](https://github.com/voidbrain/nerv/pull/195) project tuning and regressions;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; source assessment linked above; Test: test/brief.test.ts, B-041 delayed brief greeting, fails against the unchanged fixed-morning implementation |
 | Opened | 2026-11-07 |
-| Verification | 2026-11-07: unchanged committed greeting regression and Telegram delivery/restart integration passed; full suite 263 passed, one platform skip; PR #195 CI runs 42398922334/42398926076 passed all jobs. No evidence yet attributes reported duplicate messages. |
-| Reviewed | 2026-11-07 |
+| Verification | 2026-11-08: unchanged committed checkpoint/outage/overlap regressions and rollback/cursor/reopen checks passed; 20 targeted brief/Telegram tests passed. Final suite, frozen v3 ledger evaluation and CI pending. Historical 2026-11-07: unchanged committed greeting regression and Telegram delivery/restart integration passed; full suite 263 passed, one platform skip; PR #195 CI runs 42398922334/42398926076 passed all jobs. No evidence yet attributes reported duplicate messages. |
+| Reviewed | 2026-11-08 |
 
 </details>
 

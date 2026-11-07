@@ -64,6 +64,8 @@ export class Store {
       }catch(e){this.db.exec('ROLLBACK');throw e;}
     }
     this.db.exec('CREATE INDEX IF NOT EXISTS deliveries_kind_created ON deliveries(kind,created); PRAGMA user_version=5');
+    // Additive daily identities preserve the inbox's existing rowids and UUIDs.
+    this.db.exec('CREATE TABLE IF NOT EXISTS daily_briefs(day TEXT PRIMARY KEY,delivery_id TEXT NOT NULL UNIQUE REFERENCES deliveries(id))');
     this.ledger = new Ledger(this.db,{policy:scrolls.policy,tools:builtinTools});this.memory = new Memory(this.db);this.policySource = scrolls.source;
   }
   /** Same-connection writes plus external SQLite commits, without scanning events or running integrity checks. */
@@ -153,11 +155,19 @@ export class Store {
   saveRemoteRun(id: string, from: string, result: unknown): void { this.db.prepare('INSERT OR IGNORE INTO kaji_runs VALUES(?,?,?,?)').run(id,from,JSON.stringify(result).slice(0,8000),new Date().toISOString()); }
   inbox() { return this.db.prepare('SELECT * FROM deliveries ORDER BY created DESC').all(); }
   /** Hyuga's brief into the inbox (F-028): every channel delivers it from here, once. */
-  addBrief(message: string, now = new Date()): {id:string;created:string} {
+  addBrief(message: string, now = new Date(), day?:string): {id:string;created:string;existing?:true} {
     if(typeof message !== 'string' || !message.trim() || message.length > 4000) throw new Error('A brief is 1–4000 characters.');
-    const id=randomUUID();this.db.prepare("INSERT INTO deliveries(id,reminder_id,kind,message,created,read_at) VALUES(?,NULL,'brief',?,?,NULL)").run(id,message,now.toISOString());
-    return {id,created:now.toISOString()};
+    if(day!==undefined&&(!/^\d{4}-\d{2}-\d{2}$/.test(day)||!Number.isFinite(Date.parse(day+'T00:00:00Z'))||new Date(day+'T00:00:00Z').toISOString().slice(0,10)!==day))throw new Error('Invalid daily brief date.');
+    const insert=()=>{const id=randomUUID(),created=now.toISOString();this.db.prepare("INSERT INTO deliveries(id,reminder_id,kind,message,created,read_at) VALUES(?,NULL,'brief',?,?,NULL)").run(id,message,created);return {id,created};};
+    if(day===undefined)return insert();
+    this.db.exec('BEGIN IMMEDIATE');
+    try{
+      const previous=this.db.prepare('SELECT delivery_id AS id FROM daily_briefs WHERE day=?').get(day) as {id:string}|undefined;
+      if(previous){const delivery=this.db.prepare('SELECT id,created FROM deliveries WHERE id=?').get(previous.id) as {id:string;created:string}|undefined;if(!delivery)throw new Error('Daily brief checkpoint has no delivery.');this.db.exec('COMMIT');return {...delivery,existing:true};}
+      const delivery=insert();this.db.prepare('INSERT INTO daily_briefs(day,delivery_id) VALUES(?,?)').run(day,delivery.id);this.db.exec('COMMIT');return delivery;
+    }catch(error){this.db.exec('ROLLBACK');throw error;}
   }
+
   /** When the latest brief was written, if any: the next brief covers what happened since. */
   lastBrief(): string | null { return (this.db.prepare("SELECT created FROM deliveries WHERE kind='brief' ORDER BY rowid DESC LIMIT 1").get() as {created:string}|undefined)?.created ?? null; }
   inboxPage(after=0,limit=5,afterId?:string):InboxPage {

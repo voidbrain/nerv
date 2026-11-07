@@ -38,3 +38,17 @@ test('B-041: overlapping schedulers commit one daily delivery through the real I
   await until(()=>writes===2);const items=(await f.runtime.inboxPage(0,20)).items;assert.equal(items.length,1,'the local day is a durable inbox identity across schedulers');
  }finally{release();await second.close();await f.close();}
 });
+test('B-041: daily checkpoint and inbox delivery roll back together, survive reopen and preserve cursors',()=>{
+ const home=mkdtempSync(join(tmpdir(),'nerv-daily-atomic-')),path=join(home,'db');let store=new Store(path);
+ try{
+  store.addBrief('Existing neutral inbox item');const checkpoint=store.inboxPage(0,20).head;
+  store.db.exec("CREATE TRIGGER fail_daily BEFORE INSERT ON daily_briefs BEGIN SELECT RAISE(ABORT,'synthetic checkpoint failure'); END");
+  assert.throws(()=>store.addBrief('Candidate report',new Date('2030-01-01T08:00:00Z'),'2030-01-01'),/checkpoint failure/);
+  assert.equal(store.inboxPage(checkpoint.sequence,20,checkpoint.id).items.length,0,'failed checkpoint leaves no delivery');
+  store.db.exec('DROP TRIGGER fail_daily');const first=store.addBrief('Candidate report',new Date('2030-01-01T08:00:00Z'),'2030-01-01');
+  store.close();store=new Store(path);const again=store.addBrief('Retry report',new Date('2030-01-01T09:00:00Z'),'2030-01-01');assert.equal(again.id,first.id);assert.equal(again.existing,true);
+  const page=store.inboxPage(checkpoint.sequence,20,checkpoint.id);assert.equal(page.reset,false);assert.equal(page.items.length,1);assert.equal(page.items[0]!.id,first.id);
+  store.addBrief('Next local day',new Date('2030-01-02T08:00:00Z'),'2030-01-02');assert.equal(store.inboxPage(checkpoint.sequence,20,checkpoint.id).items.length,2);
+  for(const day of ['2030-02-30','not-a-date'])assert.throws(()=>store.addBrief('Invalid day',new Date(),day),/Invalid daily brief/);
+ }finally{store.close();rmSync(home,{recursive:true,force:true});}
+});
