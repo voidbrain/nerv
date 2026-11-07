@@ -68,7 +68,7 @@ if (process.argv[1] && realpathSync(fileURLToPath(import.meta.url)) === realpath
   const page = new URL(`../${stamp.impactPage ?? 'docs/agents/impact-map.md'}`, import.meta.url);
   const cell = (s) => String(s ?? '').replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/\n/g, ' '); // backslashes first, then pipes
   let md = '<!-- Written by tools/impact-map.mjs from the "impact" rows of .harness.json: change the rows, then run it. -->\n\n';
-  md += '# Impact map\n\nWhat must follow a change, and what must run again after it (AGENTS, "What follows a change"). `npm run check:freshness` lists, on every PR, the rows a branch sets off and the order to run them.\n\n';
+  md += '# Impact map\n\nWhat must follow a change, and what must run again after it (docs/agents/change-impact.md). `npm run check:freshness` lists, on every PR, the rows a branch sets off and the order to run them.\n\n';
   const pages = Array.isArray(stamp.pages) ? stamp.pages : [];
   if (pages.length) {
     // links are relative to this page's folder

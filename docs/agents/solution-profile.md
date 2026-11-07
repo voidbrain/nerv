@@ -2,6 +2,12 @@
 
 Optional coordination for one solution composed of multiple repositories. Use a dedicated coordinator repository even for a small solution when that is the owner's preference. Apply `core/` there, then the `solution/` fragment. Apply relevant stack add-ons to each component independently. This profile creates no actual consumer repositories and requires none for the template's own release.
 
+## In short
+
+Moved from AGENTS.md in 3.3.0, unchanged in substance; AGENTS keeps the trigger.
+
+Read available solution context (this profile) when configured/relevant; missing coordinator access does not block independent component work. A solution coordinator owns contracts, compatibility and integration acceptance in its own backlog; components own implementation and their independent acceptance. Link records using repository-qualified IDs and derive dashboards from source ledgers without copying editable statuses or averaging completion. A reusable master never waits for downstream adoption. Only the coordinator writes its dashboard; source revisions, unavailable inputs and dirty snapshots remain explicit.
+
 ## Sources of truth
 
 - The reusable harness owns generic rules/tools and stays independent of its users.

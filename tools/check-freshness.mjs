@@ -68,7 +68,7 @@ const isTemplate = existsSync(new URL('../core/tools/', import.meta.url));
 const PROJECT_CONTENT = new Set(['README.md', 'docs/BACKLOG.md', 'docs/agents/areas.md']);
 const kind = (f) => (stamp.copied?.[f] ? 'copied' : stamp.forked?.[f] ? 'forked' : f === '.harness.json' ? 'settings' : stamp.adapted?.[f] && !PROJECT_CONTENT.has(f) ? 'adapted' : null);
 const touched = isTemplate ? [] : changed.filter((f) => kind(f));
-if (touched.length) warn(`This branch changes harness files: ${touched.map((f) => `${f} (${kind(f)})`).join(', ')}. Decide for each change: this project only (its content, a setting, a line marked <!-- project -->, an override) or every project (the template first). If unsure, ask before going on (AGENTS, "Changing a harness file").`);
+if (touched.length) warn(`This branch changes harness files: ${touched.map((f) => `${f} (${kind(f)})`).join(', ')}. Decide for each change: this project only (its content, a setting, a line marked <!-- project -->, an override) or every project (the template first). If unsure, ask before going on (AGENTS, "Changing a harness file"). Before it merges, the change gets a review in a fresh context (backlog rules, "Independent review").`);
 
 // 3b. the impact map (tools/impact-map.mjs): the rows this branch sets off, directly or because a row they follow runs
 // again, in the order to run them
