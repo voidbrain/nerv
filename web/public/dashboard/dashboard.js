@@ -783,12 +783,12 @@ async function initMap() {
 function showBuild(b, el = document.getElementById("build")) {
   if (!el) return;
   if (!b || !b.version) { el.hidden = true; return; }
-  el.hidden = false; el.textContent = "v" + b.version; el.dataset.commit = b.commit || "";
-  const about = b.commit ? "Commit " + b.commit + " · click to copy" : "Not a git checkout: no commit to copy";
+  el.hidden = false; el.textContent = "v" + b.version; el.dataset.commit = b.commit || ""; el.dataset.copyCommit = b.shortCommit || b.commit || "";
+  const about = b.commit ? "Commit " + el.dataset.copyCommit + " · click to copy" : "Not a git checkout: no commit to copy";
   el.title = about; el.setAttribute("aria-label", "Version " + b.version + ". " + about);
 }
 async function copyBuild(el, clip = navigator.clipboard) {
-  const c = el.dataset.commit; if (!c) return "none";
+  const c = el.dataset.copyCommit; if (!c) return "none";
   const label = el.textContent;
   try { await clip.writeText(c); el.textContent = "copied"; } catch (e) { el.textContent = "copy failed"; }
   setTimeout(() => { el.textContent = label; }, 1200);

@@ -302,17 +302,18 @@ test('the header shows the incrementing build version: the doctor reports the ve
  const {execFileSync}=await import('node:child_process');const {readFileSync}=await import('node:fs');
  const store=new Store(':memory:',{policy:defaultPolicy,source:'test'});const dir=mkdtempSync(join(tmpdir(),'nerv-ver-'));
  try{await serve(store,dir,async(base,headers)=>{
-  const d=await (await fetch(base+'/api/doctor',{headers})).json() as {build:{version:string;commit:string|null}};
+  const d=await (await fetch(base+'/api/doctor',{headers})).json() as {build:{version:string;commit:string|null;shortCommit:string|null}};
   const shallow=execFileSync('git',['rev-parse','--is-shallow-repository'],{encoding:'utf8'}).trim()==='true';
   assert.equal(d.build.version,shallow?(JSON.parse(readFileSync('package.json','utf8')) as {version:string}).version:'1.'+execFileSync('git',['rev-list','--first-parent','--count','HEAD'],{encoding:'utf8'}).trim());
   assert.equal(d.build.commit,execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),'the checkout\'s commit');
+  assert.equal(d.build.shortCommit,execFileSync('git',['rev-parse','--short',d.build.commit!],{encoding:'utf8'}).trim(),'HTTP metadata carries Git’s verified abbreviation');
  });}finally{store.close();rmSync(dir,{recursive:true,force:true});}
  const src=readFileSync('web/public/dashboard/dashboard.js','utf8');const fn=(name:string)=>{const i=src.indexOf(`function ${name}(`);const a=src.lastIndexOf('\n',i)+1;return src.slice(a,src.indexOf('\n}\n',i)+2);};
  const {showBuild,copyBuild}=new Function('setTimeout',`${fn('showBuild')}\n${fn('copyBuild')}\nreturn {showBuild,copyBuild};`)(()=>0) as {showBuild:(b:unknown,el:unknown)=>void;copyBuild:(el:unknown,clip:unknown)=>Promise<string>};
  const attrs:Record<string,string>={};const el={hidden:true,textContent:'',title:'',dataset:{} as Record<string,string>,setAttribute:(k:string,v:string)=>{attrs[k]=v;}};
- const sha='a'.repeat(40);showBuild({version:'1.151',commit:sha},el);
- assert.equal(el.hidden,false);assert.equal(el.textContent,'v1.151');assert.match(el.title,new RegExp(`Commit ${sha} · click to copy`));assert.match(attrs['aria-label']!,/^Version 1\.151\. Commit a{40}/);
- const copied:string[]=[];assert.equal(await copyBuild(el,{writeText:async(t:string)=>{copied.push(t);}}),'copied');assert.deepEqual(copied,[sha]);
+ const sha='a'.repeat(40);showBuild({version:'1.151',commit:sha,shortCommit:'a'.repeat(12)},el);
+ assert.equal(el.hidden,false);assert.equal(el.textContent,'v1.151');assert.equal(el.title,`Commit ${'a'.repeat(12)} · click to copy`);assert.match(attrs['aria-label']!,/^Version 1\.151\. Commit a{12} ·/);
+ const copied:string[]=[];assert.equal(await copyBuild(el,{writeText:async(t:string)=>{copied.push(t);}}),'copied');assert.deepEqual(copied,['a'.repeat(12)]);
  assert.equal(await copyBuild(el,{writeText:async()=>{throw new Error('denied');}}),'copy failed','a refused clipboard says so');
  showBuild({version:'0.1.0',commit:null},el);assert.equal(el.textContent,'v0.1.0','outside a checkout: fall back to the package version');assert.equal(await copyBuild(el,{}),'none');
  showBuild(undefined,el);assert.equal(el.hidden,true,'no live base: hidden');
@@ -367,4 +368,17 @@ test('F-053: dynamic noise clears each frame, paints only sparse pixels, and bou
  for(const set of dots)for(const dot of set){assert.equal(dot[2],1);assert.equal(dot[3],1);assert.ok(dot[0]!>=0&&dot[0]!<200&&dot[1]!>=0&&dot[1]!<100);assert.ok(dot[4]!>=.12&&dot[4]!<=.4);}
  size.innerWidth=8000;size.innerHeight=8000;api.draw(300);assert.equal(dots.at(-1)!.length,1800,'large screens retain a fixed drawing budget');
  api.off();api.draw(400);assert.equal(clears.length,3,'disabled noise schedules no paints');
+});
+
+test('F-057: clicking the running version copies and shows Git’s supplied unique commit ID',async()=>{
+ const source=readFileSync('web/public/dashboard/dashboard.js','utf8');
+ const take=(name:string)=>{const i=source.indexOf(`function ${name}(`),start=source.lastIndexOf('\n',i)+1;return source.slice(start,source.indexOf('\n}\n',i)+2);};
+ const api=new Function('setTimeout',take('showBuild')+'\n'+take('copyBuild')+'\nreturn {showBuild,copyBuild};')(()=>0) as {showBuild:(build:unknown,element:unknown)=>void;copyBuild:(element:unknown,clipboard:unknown)=>Promise<string>};
+ const element={hidden:true,textContent:'',title:'',dataset:{} as Record<string,string>,setAttribute:()=>{}};
+ const commit='39903fb47cb3a9becb565b65a7a42fbb6d17e69a';
+ api.showBuild({version:'1.205',commit,shortCommit:'39903fb4'},element);
+ const copied:string[]=[];await api.copyBuild(element,{writeText:async(value:string)=>{copied.push(value);}});
+ assert.deepEqual(copied,['39903fb4']);assert.equal(element.title,'Commit 39903fb4 · click to copy');
+ api.showBuild({version:'1.205',commit},element);copied.length=0;await api.copyBuild(element,{writeText:async(value:string)=>{copied.push(value);}});assert.deepEqual(copied,[commit],'older metadata falls back to the full valid ID, never a fabricated abbreviation');
+ assert.equal(element.dataset.commit,commit,'copy formatting does not change running-build identity');
 });

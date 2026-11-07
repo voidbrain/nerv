@@ -18,7 +18,7 @@ Initialization creates `~/.nerv/config.json` and `~/.nerv/token` with private fi
 
 Each machine has a **base identity**, shown in the dashboard, `doctor` and the daily brief: give it at setup with `npm start -- init --base NERV-02 --name "Tabgha"` (both flags), see it with `npm start -- base`, change it later with `npm start -- base NERV-03 "Bethany"` (or edit `"base"` in `config.json`) and restart. Without one, a base is `NERV-01 · Neo Tokyo-3`. `npm start -- launch` is `serve` plus opening the live dashboard signed in.
 
-The dashboard header shows the running build as `v1.N`: N counts first-parent commits, advancing once per merge on main. Bases on the same revision show the same number. Hover shows the full commit; clicking copies it. Both are read once at service start, so restart after updating. A shallow checkout or a source copy without git history falls back to the package version; use a full clone for the incrementing number. This identifies source revisions, not repeated builds of identical code.
+The dashboard header shows the running build as `v1.N`: N counts first-parent commits, advancing once per merge on main. Bases on the same revision show the same number. Hover and clicking use the same Git-verified unique short commit ID, honoring Git’s abbreviation settings and lengthening when needed for uniqueness. Build metadata is read once at service start, so restart after updating. A shallow checkout or a source copy without git history falls back to the package version; use a full clone for the incrementing number. This identifies source revisions, not repeated builds of identical code.
 
 ### Windows
 
