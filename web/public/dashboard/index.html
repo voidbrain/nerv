@@ -32,6 +32,9 @@ body.theme-eva.crt-on .wrap { animation:crt-flicker 31s steps(1,end) infinite; }
 @media (prefers-reduced-motion:reduce) { body.theme-eva.crt-on .wrap { animation:none; } body.theme-eva.crt-on .crt-band { display:none; } }
 body.theme-eva.mode-dark.accent-orange #magi-big .mtitle b { color:var(--eva01); }
 body.theme-eva.mode-dark.accent-orange #magi-big { --glow:color-mix(in srgb,var(--eva01) 35%,transparent); border-color:var(--eva01); background:color-mix(in srgb,var(--eva01) 5%,var(--panel)); box-shadow:inset 0 0 16px color-mix(in srgb,var(--eva01) 12%,transparent); }
+body.theme-eva.crt-on .magi .mtitle { color:var(--text); }
+body.theme-eva.crt-on .magi .mtitle b { color:color-mix(in srgb,var(--accent) 70%,var(--text)); }
+body.theme-eva.mode-dark.accent-orange.crt-on #magi-big .mtitle b { color:color-mix(in srgb,var(--eva01) 70%,var(--text)); }
 button,input,select { font:inherit; }
 .wrap { max-width:1720px; margin:0 auto; display:flex; flex-direction:column; gap:8px; }
 .panel { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); min-width:0; }
