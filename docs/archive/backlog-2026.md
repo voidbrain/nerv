@@ -2409,7 +2409,7 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #189](https://github.com/voidbrain/nerv/pull/189) F-063 backend accounting and display-scope reconciliation; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](../audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
+| PR / evidence | [PR #190](https://github.com/voidbrain/nerv/pull/190) closure reconciliation; [PR #189](https://github.com/voidbrain/nerv/pull/189) F-063 backend accounting and display-scope reconciliation; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](../audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
 | Opened | 2026-11-06 |
 | Verification | 2026-11-07 Unit/integration: full suite 245 passed, one platform skip before final refinements; final six focused accounting tests passed, including all roles, restart unknowns, fallback, cache/refusal accounting and authenticated HTTP. Typecheck, build, conventions and integrations passed. Browser/accessibility: existing Angular Chrome/axe acceptance passed. Headless: three passed, one Windows-only skip. Native Swift: nine passed, one absent live-TLS fixture skip; local ad-hoc app packaging passed. Remote CI: 2026-11-07 runs 42376072311/42376068960 passed validate, windows and native-macos. |
 | Reviewed | 2026-11-07 |
