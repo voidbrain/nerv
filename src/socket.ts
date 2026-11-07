@@ -22,12 +22,15 @@ export function attachRpcSocket(server:Server,store:StoreApi,token:string,option
     switch(method){
      case 'runtime.ping':return {role:'coordinator'};
      case 'runtime.doctor':return {...await store.doctor(),language:options.language ?? 'en',timeZone:options.timeZone ?? 'Europe/Rome'};
-     case 'reminders.list':return store.list();
+     case 'reminders.list':{const p=await store.reminderPage(0,50);if(p.next)throw new RpcFault(-32005,'Use reminders.page.');return p.items.sort((a,b)=>a.due.localeCompare(b.due));}
+     case 'reminders.page':return store.reminderPage(params.before as number|undefined,params.limit as number|undefined);
+     case 'inbox.history':return store.inboxHistory(params.before as number|undefined,params.limit as number|undefined);
+     case 'dashboard.history':return store.dashboardHistory(params.since as string);
      case 'reminders.pending':return store.pendingReminders();
      case 'reminders.add':throw new RpcFault(-32003,'Mutations require the REST API; durable RPC idempotency is not implemented yet.');
      case 'reminders.update':throw new RpcFault(-32003,'Mutations require the REST API; durable RPC idempotency is not implemented yet.');
      case 'reminders.cancel':throw new RpcFault(-32003,'Mutations require the REST API; durable RPC idempotency is not implemented yet.');
-     case 'inbox.list':return store.inbox();
+     case 'inbox.list':{const p=await store.inboxHistory(0,50);if(p.next)throw new RpcFault(-32005,'Use inbox.history.');return p.items;}
      case 'approvals.pending':return store.approvals(params.limit as number|undefined);
      case 'sorties.list':return store.sorties(params.limit as number|undefined,params.before as string|undefined);
      case 'sorties.get':return store.sortie(params.id as string);

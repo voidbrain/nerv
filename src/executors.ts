@@ -7,7 +7,7 @@ import { readConfig, savePilots, setSchedule } from './config.ts';
  * Built-in tools with an executor in the scheduler process (F-017). Each declares its effect class for the gate; an
  * executor runs only after `Ledger.authorize` accepted the grant for these exact arguments.
  */
-export interface ReminderBackend {list():Reminder[];add(title:string,due:string):Reminder&{existing?:true};cancel(id:string):boolean;restore(id:string):boolean;memory:Memory;home?:string;
+export interface ReminderBackend {pendingReminders(limit?:number):Reminder[];add(title:string,due:string):Reminder&{existing?:true};cancel(id:string):boolean;restore(id:string):boolean;memory:Memory;home?:string;
  /** F-036 slice 3b: queues one action for another base; the coordinator sends it over the Kaji line. */
  queueRemote?(sortieId:string,base:string,tool:string,args:Record<string,unknown>):{id:string}}
 export const builtinTools:Tool[]=[
@@ -50,7 +50,7 @@ function ids(args:Record<string,unknown>):string[] {
 export function hasExecutor(tool:string):boolean {return builtinTools.some(t=>t.name===tool);}
 export function execute(backend:ReminderBackend,tool:string,args:Record<string,unknown>,context:{sortieId?:string}={}):unknown {
  switch(tool){
-  case 'reminders.list':only(args,[]);return backend.list().filter(r=>!r.delivered&&!r.cancelled).slice(0,20).map(r=>({id:r.id,title:r.title,due:r.due}));
+  case 'reminders.list':only(args,[]);return backend.pendingReminders(20).map(r=>({id:r.id,title:r.title,due:r.due}));
   case 'reminders.add':{only(args,['title','due']);const r=backend.add(text(args,'title'),text(args,'due'));return {id:r.id,title:r.title,due:r.due,...(r.existing?{existing:true,note:'This reminder already existed; nothing was added.'}:{})};}
   case 'reminders.cancel':{const list=ids(args);return {cancelled:list.filter(id=>backend.cancel(id)),ids:list};}
   case 'reminders.restore':{const list=ids(args);return {restored:list.filter(id=>backend.restore(id)),ids:list};}

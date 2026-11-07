@@ -1,14 +1,19 @@
+import {HISTORY_LIMIT} from './history.ts';
 import { Ajv } from 'ajv';
 export const MAX_FRAME_BYTES=65536;
 export interface RpcError {code:number;message:string}
 export type RpcResponse={jsonrpc:'2.0';id:string|number|null;result:unknown}|{jsonrpc:'2.0';id:string|number|null;error:RpcError};
 export class RpcFault extends Error {readonly code:number;constructor(code:number,message:string){super(message);this.code=code;}}
 const ajv=new Ajv({allErrors:false,strict:true});
+const history={type:'object',properties:{before:{type:'integer',minimum:0,maximum:Number.MAX_SAFE_INTEGER},limit:{type:'integer',minimum:1,maximum:HISTORY_LIMIT}},additionalProperties:false};
 const empty={type:'object',properties:{},additionalProperties:false};
 export const methodSchemas={
  'runtime.ping':empty,
  'runtime.doctor':empty,
  'reminders.list':empty,
+ 'reminders.page':history,
+ 'inbox.history':history,
+ 'dashboard.history':{type:'object',required:['since'],properties:{since:{type:'string',minLength:20,maxLength:40}},additionalProperties:false},
  'reminders.pending':empty,
  'reminders.add':{type:'object',required:['title','due'],properties:{title:{type:'string',minLength:1,maxLength:500},due:{type:'string',maxLength:64}},additionalProperties:false},
  'reminders.update':{type:'object',required:['id'],minProperties:2,properties:{id:{type:'string',minLength:1,maxLength:100},title:{type:'string',minLength:1,maxLength:500},due:{type:'string',maxLength:64}},additionalProperties:false},
@@ -82,8 +87,8 @@ export function validateParams(method:string,params:unknown):asserts method is M
 export type Principal='interface'|'coordinator'|'nervous'|'brain'|'tools';
 /** Directed edges describe permission, not routing or model capability. Deny by default. */
 export const communicationGraph=[
- {from:'interface',to:'coordinator',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.pending','reminders.add','reminders.update','reminders.cancel','inbox.list','inbox.page','approvals.pending','events.page','sorties.list','sorties.get']},
- {from:'coordinator',to:'nervous',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.pending','reminders.add','reminders.update','reminders.cancel','inbox.list','inbox.brief','inbox.lastBrief','inbox.page','approvals.pending','approvals.expired','approvals.decide','events.page','sorties.list','sorties.get','actions.finished','pilots.unmatched','actions.shadowVote','sorties.closedSince','sorties.explain','sorties.spear','sorties.open','sorties.finish','actions.preview','actions.act','misato.note','misato.resumable','misato.interrupted','misato.closeInterrupted','misato.context','misato.question','misato.ask','misato.answer','misato.claim','memory.recall','kaji.bases','kaji.records','kaji.lastSeen','kaji.main','kaji.outbox','kaji.outboxDone','kaji.remoteRun','kaji.saveRemoteRun','kaji.add','kaji.seen','memory.lastRequest','memory.list','memory.add','memory.edit','memory.forget','memory.share','memory.history','memory.episodes','memory.exchanges','memory.known','memory.saveEpisode']},
+ {from:'interface',to:'coordinator',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.page','inbox.history','dashboard.history','reminders.pending','reminders.add','reminders.update','reminders.cancel','inbox.list','inbox.page','approvals.pending','events.page','sorties.list','sorties.get']},
+ {from:'coordinator',to:'nervous',methods:['runtime.ping','runtime.doctor','reminders.list','reminders.page','inbox.history','dashboard.history','reminders.pending','reminders.add','reminders.update','reminders.cancel','inbox.list','inbox.brief','inbox.lastBrief','inbox.page','approvals.pending','approvals.expired','approvals.decide','events.page','sorties.list','sorties.get','actions.finished','pilots.unmatched','actions.shadowVote','sorties.closedSince','sorties.explain','sorties.spear','sorties.open','sorties.finish','actions.preview','actions.act','misato.note','misato.resumable','misato.interrupted','misato.closeInterrupted','misato.context','misato.question','misato.ask','misato.answer','misato.claim','memory.recall','kaji.bases','kaji.records','kaji.lastSeen','kaji.main','kaji.outbox','kaji.outboxDone','kaji.remoteRun','kaji.saveRemoteRun','kaji.add','kaji.seen','memory.lastRequest','memory.list','memory.add','memory.edit','memory.forget','memory.share','memory.history','memory.episodes','memory.exchanges','memory.known','memory.saveEpisode']},
  {from:'coordinator',to:'tools',methods:['runtime.ping','tools.list','tools.call']},
  {from:'coordinator',to:'brain',methods:['runtime.ping','model.complete','casper.verdict','misato.step','consultant.advise','models.reload','instrumentality.digest']},
 ] as const;

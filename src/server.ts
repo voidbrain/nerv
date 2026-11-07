@@ -74,11 +74,20 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
     const admin=root||(!options.native&&sessions.has(bearer));
     const client=!admin&&options.native?.auth.authenticate((req.headers.authorization?.startsWith('Bearer ')?req.headers.authorization.slice(7):''));
     if(!admin&&!client){reply(401,{error:'Authentication required.'});return;}
-    if(!admin&&!(req.method==='GET'&&(['/api/status','/api/doctor','/api/reminders','/api/reminders/pending','/api/inbox','/api/inbox/page','/api/approvals','/api/sorties'].includes(path)||/^\/api\/sorties\/[a-f0-9-]+(\/events)?$/.test(path)))){reply(403,{error:'Read-only client.'});return;}
+    if(!admin&&!(req.method==='GET'&&(['/api/status','/api/doctor','/api/reminders','/api/reminders/pending','/api/reminders/page','/api/inbox/history','/api/dashboard/history','/api/inbox','/api/inbox/page','/api/approvals','/api/sorties'].includes(path)||/^\/api\/sorties\/[a-f0-9-]+(\/events)?$/.test(path)))){reply(403,{error:'Read-only client.'});return;}
     try {
       if(options.native&&admin&&req.method==='POST'&&path==='/api/pairing/tickets'){const value=await body(req);if(Object.keys(value).length!==1||typeof value.label!=='string')throw new Error('Invalid client label.');reply(201,{version:1,...options.native.auth.issue(value.label),runtimeId:options.native.auth.runtimeId,port:options.native.port,webPort:options.native.webPort,fingerprint:options.native.fingerprint});}
       else if(options.native&&admin&&req.method==='GET'&&path==='/api/clients')reply(200,options.native.auth.clients());
       else if(options.native&&admin&&req.method==='DELETE'&&path.startsWith('/api/clients/'))reply(options.native.auth.revoke(path.split('/').at(-1)!)?200:404,{message:'Revocation processed.'});
+      else if(req.method==='GET'&&['/api/reminders/page','/api/inbox/history'].includes(path)){
+        if([...url.searchParams.keys()].some(k=>!['before','limit'].includes(k)))throw new Error('Unknown history query.');
+        const before=Number(url.searchParams.get('before') ?? 0),limit=Number(url.searchParams.get('limit') ?? 20);
+        reply(200,path==='/api/reminders/page'?await store.reminderPage(before,limit):await store.inboxHistory(before,limit));
+      }
+      else if(req.method==='GET'&&path==='/api/dashboard/history'){
+        if([...url.searchParams.keys()].some(k=>k!=='since'))throw new Error('Unknown dashboard query.');
+        reply(200,await store.dashboardHistory(url.searchParams.get('since') ?? ''));
+      }
       else if(req.method==='GET'&&path==='/api/inbox/page'){if([...url.searchParams.keys()].some(k=>!['after','afterId','limit'].includes(k)))throw new Error('Unknown inbox query.');reply(200,await store.inboxPage(Number(url.searchParams.get('after') ?? 0),Number(url.searchParams.get('limit') ?? 5),url.searchParams.get('afterId') ?? undefined));}
       else if(req.method==='GET'&&path==='/api/approvals'){if([...url.searchParams.keys()].some(k=>k!=='limit'))throw new Error('Unknown approvals query.');reply(200,await store.approvals(Number(url.searchParams.get('limit') ?? 5)));}
       else if(req.method==='POST'&&/^\/api\/approvals\/[a-f0-9-]+$/.test(path)){const b=await body(req);if(Object.keys(b).length!==1||!['approve','reject','edit'].includes(b.decision as string))throw new Error('Decision must be approve, reject or edit.');reply(200,await store.decide(path.split('/').at(-1)!,b.decision as 'approve'|'reject'|'edit','api'));}
@@ -162,12 +171,12 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
         catch(e){if(e instanceof RpcFault&&e.code===-32602)throw new Error('Invalid action: request up to 4000 characters, tool up to 100, at most 50 arguments.');throw e;}
       }
       else if(req.method==='GET'&&path==='/api/reminders/pending')reply(200,await store.pendingReminders());
-      else if(req.method==='GET' && path==='/api/reminders') reply(200,await store.list());
+      else if(req.method==='GET' && path==='/api/reminders') {const p=await store.reminderPage(0,50);if(p.next)throw new Error('History requires /api/reminders/page.');reply(200,p.items.sort((a,b)=>a.due.localeCompare(b.due)));}
       else if(req.method==='POST' && path==='/api/reminders') {const b=await body(req);if(typeof b.title!=='string'||typeof b.due!=='string') throw new Error('Title and due are required.');reply(201,await store.add(b.title,b.due));}
       else if(req.method==='PATCH' && /^\/api\/reminders\/[a-f0-9-]+$/.test(path)) {const b=await body(req);if(!Object.keys(b).length||Object.keys(b).some(k=>!['title','due'].includes(k))||(b.title!==undefined&&typeof b.title!=='string')||(b.due!==undefined&&typeof b.due!=='string'))throw new Error('Give a new title and/or a new due time.');
         const r=await store.update(path.split('/').at(-1)!,{...(b.title!==undefined?{title:b.title as string}:{}),...(b.due!==undefined?{due:b.due as string}:{})});if(r)reply(200,r);else reply(404,{error:'No pending reminder with that ID.'});}
       else if(req.method==='DELETE' && /^\/api\/reminders\/[a-f0-9-]+$/.test(path)) reply((await store.cancel(path.split('/').at(-1)!))?200:404,{message:'Cancellation processed.'});
-      else if(req.method==='GET' && path==='/api/inbox') reply(200,await store.inbox());
+      else if(req.method==='GET' && path==='/api/inbox') {const p=await store.inboxHistory(0,50);if(p.next)throw new Error('History requires /api/inbox/history.');reply(200,p.items);}
       else if(req.method==='GET' && path==='/api/status')reply(200,{name:'NERV Agency',mode:'local-core',...(options.base?{base:options.base}:{}),...await store.health(),language:options.language ?? 'en',timeZone:options.timeZone ?? 'Europe/Rome',...(options.native?{runtimeId:options.native.auth.runtimeId,home:options.native.auth.home}:{})});
       else if(req.method==='GET' && path==='/api/doctor') reply(200,{name:'NERV Agency',mode:'local-core',build,...(options.base?{base:options.base}:{}),...await store.doctor(),remoteWorkers:'not implemented',language:options.language ?? 'en',timeZone:options.timeZone ?? 'Europe/Rome',...(options.native?{runtimeId:options.native.auth.runtimeId,home:options.native.auth.home}:{} )});
       else reply(404,{error:'Unknown operation.'});

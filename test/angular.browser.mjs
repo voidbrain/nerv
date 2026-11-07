@@ -128,6 +128,25 @@ test('F-002/F-010: reliable bilingual reminder flows, local dates and responsive
   }
   assert.ok(store.list().find(r=>r.id===delivered.id).delivered);
 
+  // Real paged UI -> HTTP -> SQLite traversal, including controls and focus in both languages.
+  for(let n=0;n<25;n++){store.add('Page reminder '+n,'2035-01-01T00:00:00Z');store.addBrief('Page brief '+n);}
+  for(const lang of ['en','it']){
+   await language(lang);await evaluate(`document.querySelector('header button').click()`);
+   await until(`document.querySelectorAll('article.reminder').length===20&&document.querySelectorAll('.inbox p').length===20`);
+   const groups=lang==='en'?['Reminder pages','Inbox pages']:['Pagine dei promemoria','Pagine della posta'];
+   for(const [index,group] of groups.entries()){
+    const selector=`[role=group][aria-label="${group}"]`;
+    const first=await evaluate(index===0?`document.querySelector('article.reminder strong').textContent`:`document.querySelector('.inbox p').textContent`);
+    await evaluate(`document.querySelector('${selector} button:last-child').focus();document.activeElement.click()`);
+    await until(`!document.querySelector('${selector} button:first-child').disabled`);
+    assert.equal(await evaluate(`document.activeElement.closest('[role=group]')?.getAttribute('aria-label')`),group,'keyboard focus stays in the active pager');
+    assert.notEqual(await evaluate(index===0?`document.querySelector('article.reminder strong').textContent`:`document.querySelector('.inbox p').textContent`),first);
+    await evaluate(`document.querySelector('${selector} button:first-child').click()`);
+    await until(`document.querySelector('${selector} button:first-child').disabled`);
+    assert.equal(await evaluate(index===0?`document.querySelector('article.reminder strong').textContent`:`document.querySelector('.inbox p').textContent`),first);
+   }
+   await audit(lang+'-history-pages');
+  }
   assert.deepEqual(errors,[],'no runtime exceptions or CSP violations');
  }finally{
   for(const p of pending.values()){clearTimeout(p.timer);p.fail(new Error('Browser closed'));}pending.clear();ws?.terminate();

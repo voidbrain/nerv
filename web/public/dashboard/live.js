@@ -63,8 +63,9 @@
   }
   async function poll() {
     if (polling || !token) return; polling = true;
+    const historySince = state.lastVisit;
     try {
-      const [latest20, cards, doctor, reminders, inbox, facts, episodes, kajiBases, pilots] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("reminders"), api("inbox"), api("memory"), api("memory/episodes"), api("bases").catch(() => []), api("pilots").catch(() => null)]);
+      const [latest20, cards, doctor, history, facts, episodes, kajiBases, pilots] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("dashboard/history?since=" + encodeURIComponent(new Date(historySince).toISOString())), api("memory"), api("memory/episodes"), api("bases").catch(() => []), api("pilots").catch(() => null)]);
       // The newest sorties, plus older pages the owner loaded and every match of the current search, newest first.
       const byId = new Map(); for (const x of [...latest20, ...older, ...matches]) if (!byId.has(x.id)) byId.set(x.id, x);
       const list = [...byId.values()].sort((a, b) => b.created.localeCompare(a.created)); shown = list;
@@ -72,8 +73,8 @@
       state.pilots = pilots && Array.isArray(pilots.pilots) ? pilots.pilots : null;
       state.lilith = Object.assign(state.lilith || { history:{} }, { facts, episodes });
       // Reminders delivered (briefs live in the inbox too since F-028, and are shown on their own in Debrief).
-      state.delivered = inbox.filter(d => (d.kind || "reminder") === "reminder").map(d => Date.parse(d.created));
-      state.brief = inbox.find(d => d.kind === "brief") || null;
+      state.deliveredCount = history.delivered;state.deliveredSince = historySince;state.pendingCount = history.pending;
+      state.brief = history.brief;
       const selected = state.sorties.find(x => x.id === state.selected);
       const want = list.filter(s => (selected && s.id === selected.realId) || s.waiting || !detailCache[s.id] || s.status === "open").slice(0, 8);
       await Promise.all(want.map(async s => { detailCache[s.id] = await api("sorties/" + s.id); }));
@@ -90,7 +91,7 @@
       if (added || first) renderLog();
       state.sorties = list.map(toSortie);
       state.approvals = cards.map(toApproval).filter(ap => state.sorties.some(s => s.id === ap.sortie));
-      state.reminders = reminders.filter(r => !r.delivered && !r.cancelled && Date.parse(r.due) > Date.now()).sort((a, b) => a.due.localeCompare(b.due));
+      state.reminders = history.reminders.filter(r => !r.delivered && !r.cancelled && Date.parse(r.due) > Date.now()).sort((a, b) => a.due.localeCompare(b.due));
       state.upcoming = state.reminders.map(r => ({ at:Date.parse(r.due), title:r.title, kind:"reminder" }));
       state.doctor = doctor; showBuild(doctor.build);
       if (!kajiBases.length && doctor.base) observeTelegram([{baseId:doctor.base.id,status:"enrolled",online:true,channel:doctor.channel,channelFresh:doctor.channelFresh}]);
@@ -184,7 +185,7 @@
   const until = t => { const m = Math.max(0, Math.round((t - Date.now()) / 60000)); return m < 60 ? "in " + m + " min" : m < 48 * 60 ? "in " + Math.round(m / 60) + " h" : "in " + Math.round(m / 1440) + " days"; };
   window.renderNext = function () {
     const box = document.getElementById("next-list"); const list = state.reminders || [];
-    document.getElementById("next-sub").textContent = list.length + " reminder" + (list.length === 1 ? "" : "s");
+    document.getElementById("next-sub").textContent = "Next " + list.length + " of " + (state.pendingCount ?? list.length) + " reminders";
     // While a reminder is being edited the list stays as it is, so a refresh never wipes what you are typing.
     if (editing && list.some(r => r.id === editing) && box.querySelector("[data-rem-form]")) return;
     if (!list.some(r => r.id === editing)) editing = null;
@@ -195,6 +196,7 @@
         "<button class='btn sm primary' type='submit'>Save</button><button class='btn sm' type='button' data-rem-keep>Keep as is</button></form>"
       : "<div class='rem'><span class='small'><b>" + when(r.due) + "</b> " + esc(r.title) + "</span><span class='acts'><button class='btn sm' data-rem-edit='" + r.id + "' aria-label='Edit reminder: " + esc(r.title) + "'>Edit</button>" +
         "<button class='btn sm danger' data-rem-cancel='" + r.id + "' aria-label='Cancel reminder: " + esc(r.title) + "'>Cancel</button></span><span class='tiny muted'>" + until(Date.parse(r.due)) + "</span></div>").join("");
+    if ((state.pendingCount || 0) > list.length) box.insertAdjacentHTML("beforeend", "<p class='small'>More reminders are scheduled. <a href='/'>Browse reminder history</a> in the workspace; run nerv open to sign in there.</p>");
     const input = editing && document.getElementById("rem-t-" + editing); if (input) input.focus();
   };
   const reminderAction = async (path, init, done) => { try { await api(path, init); log(done, "ok", null, "penpen"); } catch (e) { log("Reminder: " + e.message, "danger", null, "penpen"); } poll(); };
@@ -497,7 +499,7 @@
   window.liveSeen = function () { try { localStorage.setItem(VISIT, String(state.lastVisit)); } catch { /* private window: forget on reload */ } };
   window.renderAway = function () {
     const since = state.lastVisit; const ended = state.sorties.filter(s => s.ended && s.ended > since);
-    const count = st => ended.filter(s => s.status === st).length; const delivered = (state.delivered || []).filter(t => t > since).length;
+    const count = st => ended.filter(s => s.status === st).length; const delivered = state.deliveredSince === state.lastVisit ? state.deliveredCount || 0 : 0;
     document.getElementById("away-since").textContent = "since " + dayTime(since);
     document.getElementById("away").innerHTML = "<div class='small' style='margin-bottom:6px'>Since your last visit: <b class='ok'>" + count("done") + "</b> done, <b class='danger'>" + count("failed") + "</b> failed, <b class='warn'>" + count("stood-down") + "</b> stopped, and Pen Pen delivered <b>" + delivered + "</b> reminders.</div>" +
       ended.slice(0, 8).map(s => "<div class='row small'><span><span class='" + (s.status === "done" ? "ok" : s.status === "failed" ? "danger" : "warn") + "'>■</span> " + dayTime(s.ended) + " · " + esc(s.title) + "</span><a href='#' data-s='" + s.id + "' class='muted tiny'>open</a></div>" + (s.outcome ? "<div class='tiny muted' style='margin:0 0 4px 12px'>" + esc(s.outcome) + "</div>" : "")).join("") +
@@ -522,7 +524,7 @@
   window.renderQuestions = function () {
     const n = state.approvals.length; document.getElementById("qv-needs").textContent = n;
     document.getElementById("qd-needs").textContent = n ? state.approvals.map(a => a.action.tool).join(" · ") : "nothing waits for you"; document.getElementById("q-needs").classList.toggle("alert", n > 0);
-    { const ended = state.sorties.filter(s => s.ended && s.ended > state.lastVisit); const c = st => ended.filter(s => s.status === st).length; const delivered = (state.delivered || []).filter(t => t > state.lastVisit).length;
+    { const ended = state.sorties.filter(s => s.ended && s.ended > state.lastVisit); const c = st => ended.filter(s => s.status === st).length; const delivered = state.deliveredSince === state.lastVisit ? state.deliveredCount || 0 : 0;
       document.getElementById("qv-away").textContent = c("done") + " done"; document.getElementById("qd-away").textContent = c("failed") + " failed · " + c("stood-down") + " stopped · " + delivered + " reminders";
       document.getElementById("q-away").classList.toggle("attn", c("failed") + c("stood-down") > 0); }
     const next = state.upcoming.filter(u => u.at > Date.now()).sort((a, b) => a.at - b.at)[0];
