@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 38 | 40 |
+| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 38 | 41 |
 <!-- archive-recap:end -->
 
 <a id="archive-week-2026-11-02"></a>
@@ -2725,6 +2725,42 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 | PR / evidence | [PR #203](https://github.com/voidbrain/nerv/pull/203) durable cross-channel card reconciliation; [PR #196](https://github.com/voidbrain/nerv/pull/196) evidence and queue reconciliation;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; source assessment linked above |
 | Opened | 2026-11-07 |
 | Verification | 2026-11-08: committed failing regressions now pass unchanged; local and real signed Kaji status/decision tests, pagination/expiry and bundled-row tests passed. Final suite 369 passed, two skips; typecheck, build, headless and repository checks passed. Chrome/axe: both browser cases passed. Expanded channel suite: 19 passed on clean frozen source 85aa894, retained in docs/evaluations/2026-11-08-card-reconciliation.json. Main-only signed status authorization and coordinator-only bounded RPC checks passed. PR #203 runs 42425786736/42425784575 passed every job. |
+| Reviewed | 2026-11-08 |
+
+</details>
+
+---
+
+---
+
+### B-041
+
+**Late reconnect brief has a morning greeting and unavailable sections**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />None: reproduced recovery paths, delivery identity, browser and every CI check passed.
+
+| | |
+|---|---|
+| **Issue** | Tabgha reconnecting around 18:00 sent a morning greeting, unread sections and several messages; duplicate identity and causes remain unverified. |
+| **Reproduce** | Reconnect a base after its brief time; compare durable brief, scheduler attempts and channel delivery identities. |
+| **Check** | Time-appropriate or neutral greeting; unavailable sources reported honestly; one delivery per identity, bounded recovery and no replay of completed briefs across restarts. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-08 after PR #204 runs 42426712622/42426709846 passed every job.  2026-11-08: three regressions in test/brief-recovery.test.ts reproduce a failed checkpoint read being treated as absence, a report with every source unavailable being sent immediately, and two schedulers writing duplicate daily deliveries. All were committed failing before the production fix; all now pass unchanged. The scheduler retries unknown checkpoints and complete core-source outages, records source names safely, and atomically commits one delivery per local day across schedulers/restarts. New rollback/cursor/reopen checks pass; the additive daily_briefs table preserves inbox rowids and UUIDs. These are reproduced failure classes; no retained Tabgha log identifies which occurred in the owner report.  Earlier greeting fix: regression committed failing before implementation; composition now uses the owner time zone for morning/afternoon/evening, with a neutral overnight title. The older Telegram delivery test now identifies the brief by its title instead of requiring morning: the owner deliberately changed that requirement. New B-041 test remains unchanged. Reproduced failure-class fixes passed final CI; the original Tabgha incident remains unattributed without its logs. Partial source failures remain explicit rather than being silently called healthy. Greeting, partial reads and restart/delivery recovery are verified; the original incident is not attributed to a particular reproduced failure. See [the source assessment](design/operator-flow-review-2026-11-07.md). Preserve observed communication separately from step activity; do not infer delivery or execution from a UI state.
+
+**Estimates:** No remaining work for the reproduced failure classes. Historical estimate: Small, 1–2 focused hours for final full-suite/evaluation evidence, CI and reconciliation. Reassessed 2026-11-08 after reproduced failure classes were fixed.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #205](https://github.com/voidbrain/nerv/pull/205) closure and queue reconciliation; [PR #204](https://github.com/voidbrain/nerv/pull/204) daily brief recovery and durable identity; [PR #196](https://github.com/voidbrain/nerv/pull/196) evidence and queue reconciliation;  [PR #195](https://github.com/voidbrain/nerv/pull/195) project tuning and regressions;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; source assessment linked above; Test: test/brief.test.ts, B-041 delayed brief greeting, fails against the unchanged fixed-morning implementation |
+| Opened | 2026-11-07 |
+| Verification | 2026-11-08: unchanged committed checkpoint/outage/overlap regressions and rollback/cursor/reopen checks passed; 20 targeted brief/Telegram tests passed. Final suite 373 passed, two skips; typecheck, build, headless, conventions and repository checks passed. Frozen clean source 058c3b8: full v3 evaluation passed 193 checks in all seven groups, including Chrome/axe and real process joins; retained in docs/evaluations/2026-11-08-brief-recovery.json. PR #204 runs 42426712622/42426709846 passed all six jobs. Historical 2026-11-07: unchanged committed greeting regression and Telegram delivery/restart integration passed; full suite 263 passed, one platform skip; PR #195 CI runs 42398922334/42398926076 passed all jobs. No evidence yet attributes reported duplicate messages. |
 | Reviewed | 2026-11-08 |
 
 </details>
