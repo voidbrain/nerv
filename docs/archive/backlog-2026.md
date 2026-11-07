@@ -2616,7 +2616,7 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #200](https://github.com/voidbrain/nerv/pull/200) verified commit ID and owner pause;  Owner clarification 2026-11-07; Tests: test/build.test.ts Git unique abbreviation/collision regression (committed failing before backend fix), test/dashboard.test.ts supplied unique ID, test/angular.browser.mjs real server→button→clipboard. Initial fixed-seven expectation was superseded by the explicit uniqueness requirement. |
+| PR / evidence | [PR #201](https://github.com/voidbrain/nerv/pull/201) closure reconciliation;  [PR #200](https://github.com/voidbrain/nerv/pull/200) verified commit ID and owner pause;  Owner clarification 2026-11-07; Tests: test/build.test.ts Git unique abbreviation/collision regression (committed failing before backend fix), test/dashboard.test.ts supplied unique ID, test/angular.browser.mjs real server→button→clipboard. Initial fixed-seven expectation was superseded by the explicit uniqueness requirement. |
 | Opened | 2026-11-06 |
 | Verification | 2026-11-07: Git abbreviation/configuration and real prefix-collision tests passed; UI uses the server-supplied identifier. Full suite: 267 passed, one platform skip; typecheck/build/conventions passed. Chrome verified actual server metadata→button→clipboard and matching hover; scoped axe passed. Review: separate context found no actionable findings. PR #200 CI runs 42404230022/42404234032 passed every job. |
 | Reviewed | 2026-11-07 |

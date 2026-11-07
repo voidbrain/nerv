@@ -262,7 +262,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner report 2026-11-07; Test: test/dashboard.test.ts, B-044 completed advice marks route passed; committed failing before implementation. |
+| PR / evidence | [PR #201](https://github.com/voidbrain/nerv/pull/201) advice route and resumed owner sequence;  Owner report 2026-11-07; Test: test/dashboard.test.ts, B-044 completed advice marks route passed; committed failing before implementation. |
 | Opened | 2026-11-07 |
 | Verification | 2026-11-07: committed unit regression passes; Chrome verified ledger→API→adapter→passed SVG stroke; full suite 268 passed, one platform skip; build/typecheck passed. Review: separate context found no actionable findings. CI pending. |
 | Reviewed | 2026-11-07 |
@@ -882,7 +882,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Field | Value |
 |---|---|
 | Queue order | 1 — Owner-selected next feature, followed by B-042 |
-| PR / evidence | [PR #200](https://github.com/voidbrain/nerv/pull/200) verified commit ID and owner pause;  [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #196](https://github.com/voidbrain/nerv/pull/196) evidence and queue reconciliation;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #193](https://github.com/voidbrain/nerv/pull/193) agent-executable acceptance and evaluation assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
+| PR / evidence | [PR #201](https://github.com/voidbrain/nerv/pull/201) advice route and resumed owner sequence;  [PR #200](https://github.com/voidbrain/nerv/pull/200) verified commit ID and owner pause;  [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #196](https://github.com/voidbrain/nerv/pull/196) evidence and queue reconciliation;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #193](https://github.com/voidbrain/nerv/pull/193) agent-executable acceptance and evaluation assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-04 |
 | Verification | Pending |
 | Reviewed | 2026-11-07 |
