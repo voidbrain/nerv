@@ -3,7 +3,7 @@
     "path": "../harness-template",
     "repo": "https://github.com/voidbrain/project-harness"
   },
-  "version": "3.3.0",
+  "version": "3.4.0",
   "stacks": [
     "core",
     "angular"
@@ -324,6 +324,28 @@
         }
       ],
       "kept": "One HISTORY_LIMIT source is imported by RPC schemas; test/history.test.ts asserts serialized Unicode history pages fit HISTORY_BYTES and MAX_FRAME_BYTES."
+    },
+    {
+      "value": "Reviewed GitHub Action release and commit pins in CI and maintenance",
+      "places": [
+        {
+          "file": ".harness.json",
+          "what": "ciActionPins records the reviewed official release tag-to-commit pairs"
+        },
+        {
+          "file": ".github/workflows/ci.yml",
+          "what": "Pinned checkout/setup-node/upload-artifact actions with matching release comments"
+        },
+        {
+          "file": ".github/workflows/maintenance.yml",
+          "what": "Copied upstream checkout/setup-node pins"
+        },
+        {
+          "file": "test/ci-pins.test.mjs",
+          "what": "Every workflow action must match the reviewed manifest"
+        }
+      ],
+      "kept": "test/ci-pins.test.mjs asserts both workflows use the same reviewed tag/SHA pairs; adoption verified each pair with git ls-remote against its official actions repository."
     }
   ],
   "outside": [
@@ -431,5 +453,19 @@
       "docs/agents/*.md"
     ],
     "maxLines": 200
+  },
+  "ciActionPins": {
+    "actions/checkout": {
+      "release": "v7.0.1",
+      "sha": "3d3c42e5aac5ba805825da76410c181273ba90b1"
+    },
+    "actions/setup-node": {
+      "release": "v7.1.0",
+      "sha": "949feb2413d6458794dcd2491c4babbbce0c15c1"
+    },
+    "actions/upload-artifact": {
+      "release": "v7.0.2",
+      "sha": "cf430e030ddbb5b0abf93d22962f4752f3646cd9"
+    }
   }
 }

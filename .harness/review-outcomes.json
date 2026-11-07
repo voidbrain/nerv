@@ -2,13 +2,18 @@
   {
     "kind": "rule",
     "disposition": "implemented",
-    "target": "AGENTS.md",
-    "evidence": "PR #180: reviewed v3.3.0 APPLY and all moved sections against the project rules. Moved procedures retain their requirements in copied guides; safety rules, Angular/project conventions, roadmap exception and work tracking remain. Added required safety markers, test/review pointers and BACKLOG-RULES bullets. Optional browser coverage, behaviour runner and push guard are not adopted."
+    "target": "docs/agents/skills.md",
+    "evidence": "Reconciled published harness v3.4.0, commit a2c90f5ec6de87cfa3f04ed0cb410334f15f9698, verified against the authoritative GitHub tag after an online pull. Copied skill/audit/MCP guidance, catalogue and maintenance workflow unchanged. AST10 stays explicitly draft; optional OpenCRE remains unconfigured with authenticated tools disabled. All NERV rules/settings, Node 24 CI and lock-only SBOM retained; adapted rule files did not require changes."
   },
   {
     "kind": "tool",
     "disposition": "implemented",
-    "target": "tools/check-rules.mjs",
-    "evidence": "PR #180: adopted unchanged published v3.3.0 rule checker, copied mappings, expanded maintenance inputs and CI check. Rule placement check passes; prior CI 42318544557 failed because maintenance.md changed without a new input-bound receipt. A fresh measured reconciliation now records the reviewed inputs. Existing gh CLI suffices; no new integration needed."
+    "target": "test/ci-pins.test.mjs",
+    "evidence": "Project CI actions use the published template release SHAs. Verified checkout v7.0.1, setup-node v7.1.0 and upload-artifact v7.0.2 mappings with git ls-remote against official actions repositories. Project-only ciActionPins source plus relation test guards both workflows. Final suite: 240 passed, one platform skip; typecheck/build, browser/axe, three headless cases (one Windows-only skip), rules, conventions, integration metadata, backlog/recaps/roadmap and copied parity passed. Timed sample covers reading/review, user interruption, baseline and local validation including waits; publication and remote CI follow this sample and no productivity comparison is inferred."
+  },
+  {
+    "kind": "none",
+    "disposition": "no-change",
+    "evidence": "Capability/skill review: existing git/gh/local checks suffice; no connection or installation is needed. apply-harness SKILL.md was read manually from voidbrain/project-harness at reviewed v3.4.0/a2c90f5ec6de87cfa3f04ed0cb410334f15f9698, MIT licensed. AST01/02/05/08: entire one-file skill and its authoritative referenced rules read; no hidden/binary/archive/bundled scripts or extra runtime dependencies. AST03/06: actions remain within existing project git/files/network authorization and sandbox; no new privilege or credential grant. AST04/10: name/description frontmatter inspected; used by manual Codex read, no automatic discovery or universal client claim. AST07/09: immutable reviewed source recorded here, re-review required for updates. Fallback is direct APPLY.md procedure. Optional catalogue additions do not justify enabling a server for this task."
   }
 ]

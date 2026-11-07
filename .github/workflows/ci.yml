@@ -8,15 +8,15 @@ jobs:
     # A hang fails in minutes instead of holding the PR for hours (the Windows test hang of 2026-11-05).
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: npm
       - run: npm ci
       - name: Locked dependency SBOM
         run: npm sbom --package-lock-only --sbom-format cyclonedx > dependencies.cdx.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: dependency-sbom
           path: dependencies.cdx.json
@@ -31,7 +31,7 @@ jobs:
         run: npm run test:browser
         env:
           NERV_BROWSER_ARTIFACTS: ${{ runner.temp }}/nerv-browser
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: angular-browser
@@ -46,7 +46,7 @@ jobs:
       - run: npm run check:rules
       - run: npm run check:maintenance
       - run: npm run check:audits
-      - run: git clone --branch v3.3.0 --depth 1 https://github.com/voidbrain/project-harness "$RUNNER_TEMP/project-harness"
+      - run: git clone --branch v3.4.0 --depth 1 https://github.com/voidbrain/project-harness "$RUNNER_TEMP/project-harness"
       - run: npm run check:freshness
         env:
           HARNESS_HOME: ${{ runner.temp }}/project-harness
@@ -56,8 +56,8 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: npm
@@ -71,8 +71,8 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: npm
@@ -92,7 +92,7 @@ jobs:
           swift test --package-path native/NervMenuBar
       - run: sh native/build-app.sh
       - run: ditto -c -k --sequesterRsrc --keepParent dist/NERV.app dist/NERV-macOS.zip
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: NERV-macOS
           path: dist/NERV-macOS.zip
