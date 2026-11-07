@@ -63,7 +63,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #153](https://github.com/voidbrain/nerv/pull/153) partial fix and diagnostics; owner test on Tabgha 2026-11-05 |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #153](https://github.com/voidbrain/nerv/pull/153) partial fix and diagnostics; owner test on Tabgha 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-06 Unit/integration: polling and IPC regressions passed; full suite passed (189 passed, one systemd-only skip), including the pending-relay regression. Browser: headless Chrome verified transient failure retention, delayed refresh, HTTP status failure, unreachable service and automatic recovery; screenshot inspected. Build, typecheck, conventions and integration metadata passed. Merged PR #153 CI run 42218258228 passed validate, windows and native-macos; original Tabgha timeout not reproduced. |
 | Reviewed | 2026-11-06 |
@@ -106,7 +106,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #193](https://github.com/voidbrain/nerv/pull/193) agent-executable acceptance and evaluation assessment; [PR #177](https://github.com/voidbrain/nerv/pull/177) implementation; Owner report 2026-11-05 (S-E16D, S-7B04 on Neo Tokyo-3); owner refinement 2026-11-06 (topic change cancels the wait) |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #193](https://github.com/voidbrain/nerv/pull/193) agent-executable acceptance and evaluation assessment; [PR #177](https://github.com/voidbrain/nerv/pull/177) implementation; Owner report 2026-11-05 (S-E16D, S-7B04 on Neo Tokyo-3); owner refinement 2026-11-06 (topic change cancels the wait) |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-06 Unit/integration: test/clarification.test.ts (plan shape, durable question, conversation binding, 8-word rule, approval resume, topic change, forwarded question), test/telegram.test.ts (B-021 over Aoba), test/one-channel.test.ts (question and answer across the real signed Kaji link, main base down and back), full suite 226 passed, one platform skip; build, typecheck, conventions, headless lifecycle and Angular browser acceptance passed. Browser/accessibility: Pending (dashboard waiting state not checked in Chrome). Human: no owner-only dashboard acceptance required after the 2026-11-07 assessment; real-phone display/receipt is outside the pending browser check. Recorded real-model judgment: Pending. |
 | Reviewed | 2026-11-07 |
@@ -158,7 +158,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner report 2026-11-07; source assessment linked above |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; source assessment linked above |
 | Opened | 2026-11-07 |
 | Verification | Pending: regression, integration and relevant browser checks; source inspection is not runtime acceptance. |
 | Reviewed | 2026-11-07 |
@@ -192,7 +192,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner report 2026-11-07; source assessment linked above |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; source assessment linked above |
 | Opened | 2026-11-07 |
 | Verification | Pending: regression, integration and relevant browser checks; source inspection is not runtime acceptance. |
 | Reviewed | 2026-11-07 |
@@ -226,7 +226,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner report 2026-11-07; source assessment linked above |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; source assessment linked above |
 | Opened | 2026-11-07 |
 | Verification | Pending: regression, integration and relevant browser checks; source inspection is not runtime acceptance. |
 | Reviewed | 2026-11-07 |
@@ -263,7 +263,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-06 |
@@ -297,7 +297,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -331,7 +331,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -365,7 +365,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -399,7 +399,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-01 |
@@ -434,7 +434,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -470,7 +470,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #5](https://github.com/voidbrain/nerv/pull/5) merged; Linux and macOS checks green; real OS acceptance remains pending |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #5](https://github.com/voidbrain/nerv/pull/5) merged; Linux and macOS checks green; real OS acceptance remains pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -505,7 +505,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Field | Value |
 |---|---|
 | Depends on | [F-003](archive/backlog-2026.md#f-003) — Durable scheduling for the named external job<br />[F-005](#f-005) — Enrolled workers with observed execution capability<br />[F-006](#f-006) — Bounded routing and delegation for the external execution adapter |
-| PR / evidence | [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #2](https://github.com/voidbrain/nerv/pull/2); plan only, no runtime implementation |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #2](https://github.com/voidbrain/nerv/pull/2); plan only, no runtime implementation |
 | Opened | 2026-11-01 |
 | Verification | Pending adapter feasibility, regression and live host tests |
 | Reviewed | 2026-11-07 |
@@ -539,7 +539,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #3](https://github.com/voidbrain/nerv/pull/3); local checks and scoped audit pass; CI pending |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #3](https://github.com/voidbrain/nerv/pull/3); local checks and scoped audit pass; CI pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -573,7 +573,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #4](https://github.com/voidbrain/nerv/pull/4) merged; Linux and macOS checks green; live Keychain/rotation acceptance remains pending |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #4](https://github.com/voidbrain/nerv/pull/4) merged; Linux and macOS checks green; live Keychain/rotation acceptance remains pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -609,7 +609,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #3](https://github.com/voidbrain/nerv/pull/3); local checks and scoped audit pass; CI pending |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #3](https://github.com/voidbrain/nerv/pull/3); local checks and scoped audit pass; CI pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-01 |
@@ -644,7 +644,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Field | Value |
 |---|---|
 | Depends on | [F-003](archive/backlog-2026.md#f-003) — Messaging path for state-grounded persona replies<br />[F-017](archive/backlog-2026.md#f-017) — Policy decisions remain authoritative over persona output |
-| PR / evidence | [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  docs/NERV/dashboard1.html personas tab (prototype) |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  docs/NERV/dashboard1.html personas tab (prototype) |
 | Opened | 2026-11-02 |
 | Verification | Pending |
 | Reviewed | 2026-11-07 |
@@ -679,7 +679,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Field | Value |
 |---|---|
 | Depends on | [F-049](#f-049) — EVA-03 isolation before enabling EVA-03 tool grants; other MCP slices can proceed |
-| PR / evidence | [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  — |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  — |
 | Opened | 2026-11-02 |
 | Verification | Pending |
 | Reviewed | 2026-11-07 |
@@ -713,7 +713,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nerv/pull/8) (gate, ledger, approvals); [PR #9](https://github.com/voidbrain/nerv/pull/9) (approvals API) |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nerv/pull/8) (gate, ledger, approvals); [PR #9](https://github.com/voidbrain/nerv/pull/9) (approvals API) |
 | Opened | 2026-11-02 |
 | Verification | Unit/integration 2026-11-04: once-only decisions, expiry never approves, restart, scheduler-process expiry (local run; CI green: PR #8 run 41749472703, PR #9 run 41749840854, main run 41787648624); REST once-only decision and socket decision denial across the scheduler process (local run; CI green: PR #8 run 41749472703, PR #9 run 41749840854, main run 41787648624). Real-device: pending |
 | Reviewed | 2026-11-04 |
@@ -746,7 +746,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-02 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |
@@ -779,7 +779,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-04 |
 | Verification | Pending |
 | Reviewed | 2026-11-04 |
@@ -812,7 +812,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-04 |
 | Verification | Pending |
 | Reviewed | 2026-11-06 |
@@ -845,7 +845,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #193](https://github.com/voidbrain/nerv/pull/193) agent-executable acceptance and evaluation assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #193](https://github.com/voidbrain/nerv/pull/193) agent-executable acceptance and evaluation assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-04 |
 | Verification | Pending |
 | Reviewed | 2026-11-07 |
@@ -887,7 +887,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner question 2026-11-05 |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner question 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
 | Reviewed | 2026-11-05 |
@@ -921,7 +921,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner request 2026-11-05 |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner request 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
 | Reviewed | 2026-11-05 |
@@ -955,7 +955,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner question 2026-11-05 |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner question 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
 | Reviewed | 2026-11-05 |
@@ -990,7 +990,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Field | Value |
 |---|---|
 | Depends on | [F-029](#f-029) — Golden evaluation evidence for pilot promotion; roster and advice work can proceed |
-| PR / evidence | [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #161](https://github.com/voidbrain/nerv/pull/161) verification reconciliation;  [PR #160](https://github.com/voidbrain/nerv/pull/160) pilot selectors/map status and owner clarification; Owner questions 2026-11-05; slice 1 [PR #107](https://github.com/voidbrain/nerv/pull/107) |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #161](https://github.com/voidbrain/nerv/pull/161) verification reconciliation;  [PR #160](https://github.com/voidbrain/nerv/pull/160) pilot selectors/map status and owner clarification; Owner questions 2026-11-05; slice 1 [PR #107](https://github.com/voidbrain/nerv/pull/107) |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-06 Unit/integration and Browser/accessibility: pilot model API/DOM regressions, full suite, real-runtime Chrome flow, inline-row/Apply states and scoped axe passed; merged PR #160 CI run 42241192687 green. Earlier evidence: 2026-11-05 slice 1: test/pilots.test.ts, test/model-setup.test.ts, full suite (local run) |
 | Reviewed | 2026-11-07 |
@@ -1024,7 +1024,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner request 2026-11-05 |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner request 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
 | Reviewed | 2026-11-05 |
@@ -1058,7 +1058,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner questions 2026-11-05 |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner questions 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
 | Reviewed | 2026-11-05 |
@@ -1093,7 +1093,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Field | Value |
 |---|---|
 | Depends on | [F-045](#f-045) — Pilot identity and EVA class for per-job execution<br />[F-025](#f-025) — Pilot trust-stage limits for sandbox class admission |
-| PR / evidence | [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner questions 2026-11-05 |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner questions 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
 | Reviewed | 2026-11-07 |
@@ -1128,7 +1128,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Field | Value |
 |---|---|
 | Depends on | [F-036](archive/backlog-2026.md#f-036) — Authenticated Kaji transport and enrolled bases<br />[F-045](#f-045) — Remote pilot capability offers for capability-based forwarding<br />[F-048](#f-048) — Queue and concurrency limits for load-based forwarding; capability-first work can proceed |
-| PR / evidence | [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner questions 2026-11-05 |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner questions 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
 | Reviewed | 2026-11-07 |
@@ -1162,7 +1162,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #163](https://github.com/voidbrain/nerv/pull/163) channel telemetry and CI reconciliation;  [PR #162](https://github.com/voidbrain/nerv/pull/162) relay detail and acceptance review; Owner test on Tabgha 2026-11-05 |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #163](https://github.com/voidbrain/nerv/pull/163) channel telemetry and CI reconciliation;  [PR #162](https://github.com/voidbrain/nerv/pull/162) relay detail and acceptance review; Owner test on Tabgha 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-06 Ledger-to-live-detail regression passed for remote answer/reference, waiting, no answer, local continuation, escaping and local empty states. Chrome: real service/session and ledger fixture showed the answering base and full reference; scoped axe found zero violations and screenshot inspected. Full suite: 196 passed, one platform skip; build, typecheck, conventions and integrations passed. Merged PR #162 CI passed validate, windows and both native-macos runs (ci:status, runs 42247286378/42247282316); cross-base link and EVA labels remain unimplemented. |
 | Reviewed | 2026-11-06 |
@@ -1196,7 +1196,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner question 2026-11-05 (ledger timing of S-7663 and S-3BFF); item 3 [PR #116](https://github.com/voidbrain/nerv/pull/116) |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner question 2026-11-05 (ledger timing of S-7663 and S-3BFF); item 3 [PR #116](https://github.com/voidbrain/nerv/pull/116) |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-05 item 3: test/kaji-seats.test.ts and full suite (local run) |
 | Reviewed | 2026-11-05 |
@@ -1230,7 +1230,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner request 2026-11-07; reopened from [closed history](archive/backlog-2026.md#f-053), preserving prior acceptance |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner request 2026-11-07; reopened from [closed history](archive/backlog-2026.md#f-053), preserving prior acceptance |
 | Opened | 2026-11-05 |
 | Verification | Pending: regression, integration and relevant browser checks; source inspection is not runtime acceptance. |
 | Reviewed | 2026-11-07 |
@@ -1265,7 +1265,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Field | Value |
 |---|---|
 | Depends on | [F-021](#f-021) — Owner-selected prerequisite before chronicle work<br />[F-045](#f-045) — Chronicler pilot for the Eva narrative; plain fact collection can proceed<br />[F-028](archive/backlog-2026.md#f-028) — Durable brief delivery for the optional morning-brief entry |
-| PR / evidence | [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner request 2026-11-05 |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner request 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
 | Reviewed | 2026-11-07 |
@@ -1300,7 +1300,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Field | Value |
 |---|---|
 | Depends on | [F-021](#f-021) — Owner-selected prerequisite for remaining command work<br />[F-042](#f-042) — Record-reading interface for agency query commands<br />[F-028](archive/backlog-2026.md#f-028) — Durable brief content for brief commands |
-| PR / evidence | [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #167](https://github.com/voidbrain/nerv/pull/167) archive adoption/source review and CI reconciliation;  [PR #166](https://github.com/voidbrain/nerv/pull/166) map/tabs and Midori routing/status;  [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner question 2026-11-05 |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #167](https://github.com/voidbrain/nerv/pull/167) archive adoption/source review and CI reconciliation;  [PR #166](https://github.com/voidbrain/nerv/pull/166) map/tabs and Midori routing/status;  [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner question 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-06 Human: owner reports Telegram /status works. Source review: deterministic router/menu and full command-set automated checks remain pending. |
 | Reviewed | 2026-11-07 |
@@ -1334,7 +1334,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #169](https://github.com/voidbrain/nerv/pull/169) spike record; Owner question 2026-11-06 |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #169](https://github.com/voidbrain/nerv/pull/169) spike record; Owner question 2026-11-06 |
 | Opened | 2026-11-06 |
 | Verification | Documentation: Pending. Human: Pending (trial). |
 | Reviewed | 2026-11-06 |
@@ -1368,7 +1368,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
 | Opened | 2026-11-06 |
 | Verification | Unit/integration: Pending. Real-device: Pending (restore drill). |
 | Reviewed | 2026-11-06 |
@@ -1402,7 +1402,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
 | Opened | 2026-11-06 |
 | Verification | Unit/integration: Pending. |
 | Reviewed | 2026-11-06 |
@@ -1435,7 +1435,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
 | Opened | 2026-11-07 |
 | Verification | Unit/integration: Pending. |
 | Reviewed | 2026-11-07 |
@@ -1468,7 +1468,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
 | Opened | 2026-11-07 |
 | Verification | Unit/integration: Pending. |
 | Reviewed | 2026-11-07 |
@@ -1504,7 +1504,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 |---|---|
 | Depends on | [voidbrain/project-harness:F-045](https://github.com/voidbrain/project-harness/blob/v4.0.0/docs/BACKLOG.md#f-045) — Published v4.0.0 release |
 | Queue order | 1 — Owner-requested harness adoption before further backlog implementation |
-| PR / evidence | Owner instruction 2026-11-07; published upstream v4.0.0, PRs #77/#78 |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner instruction 2026-11-07; published upstream v4.0.0, PRs #77/#78 |
 | Opened | 2026-11-07 |
 | Verification | 2026-11-07: typecheck and build passed; baseline suite 261 passed, one platform skip. Backlog, queue, dependencies, roadmap, recaps, rules, conventions, integrations and maintenance checks passed. Review: separate context verified copied-tool fidelity, archive preservation and scope; missing queue input and estimate prose corrected, re-review reports no remaining findings. CI pending. |
 | Reviewed | 2026-11-07 |
@@ -1537,7 +1537,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner report 2026-11-07; source assessment linked above |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; source assessment linked above |
 | Opened | 2026-11-07 |
 | Verification | Pending: regression, integration and relevant browser checks; source inspection is not runtime acceptance. |
 | Reviewed | 2026-11-07 |
