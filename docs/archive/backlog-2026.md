@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 30 | 37 |
+| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 31 | 37 |
 <!-- archive-recap:end -->
 
 <a id="archive-week-2026-11-02"></a>
@@ -2346,3 +2346,40 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 ## Other changes
 
 - 2026-11-07 · [PR #185](https://github.com/voidbrain/nerv/pull/185) · Harness v3.4.0 reconciliation (owner requested after F-013/F-067): copied the published skill/audit/MCP guides, catalogue and maintenance workflow unchanged; retained NERV's Node 24 jobs, locked dependency SBOM and project rules. CI actions use official verified release SHAs with release comments; project-only `ciActionPins` and a relation test keep both workflows aligned. Baseline typecheck/build and 239 tests passed (one platform skip). Local validation: 240 tests passed (one platform skip), typecheck/build, browser/axe, three headless cases (one Windows skip), static/record checks and copied parity passed. Measured reconciliation includes the user interruption and local validation waits; publication/remote CI follow the sample. Maintenance evidence renewed and passes. Review: separate fresh-context reviewer verified copied parity, project-rule preservation, action pins and renewed receipt; no blockers. Closed 2026-11-07: merged PR #185 at 0d17fdc; CI runs [42355574146](https://github.com/voidbrain/nerv/actions/runs/42355574146) and [42355572334](https://github.com/voidbrain/nerv/actions/runs/42355572334) passed validate, windows and native-macos. Downloaded the pinned upload action’s dependency-sbom artifact from 42355574146: 389 components, official schema/formats passed. No maintenance action remains. Closure evidence: [PR #186](https://github.com/voidbrain/nerv/pull/186). Optional OpenCRE stays unconfigured; no server or skill is installed.
+
+
+## Closed 2026-11-07
+
+### F-068
+
+**Linked backlog prerequisites and generated unlocks**
+
+| Signal | Priority | Status | Effort | Complete |
+|---|---|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small | ~100% |
+
+💻 **→ Human action required: No**<br />No action remains; dependency links and generated unlocks are verified.
+
+| | |
+|---|---|
+| **Issue** | Prerequisites live in prose, making sequencing and downstream impact hard to inspect. |
+| **Reproduce** | Find the records that depend on F-063 or the execution capabilities required by F-012. |
+| **Check** | Published harness release reconciled; reviewed hard prerequisites linked with required outcomes; Unlocks generated from those fields; local graph and freshness checks in CI; backlog and roadmap consistent. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-07 after PR #187 merged with CI runs 42373292192/42373290475 passing validate, windows and native-macos. Downloaded dependency-SBOM from 42373292192: 389 components passed the official CycloneDX schema and formats. Adopted published harness [v3.5.0](https://github.com/voidbrain/project-harness/tree/v3.5.0), commit 1865b2a10f53b293d8d76d1e8149f6bc1079439b after [upstream PR #75](https://github.com/voidbrain/project-harness/pull/75) passed CI 42372844701. Copied the released generator unchanged, reconciled the optional rule, registered scripts and impact/CI checks, and reviewed existing explicit prerequisites. Generated Unlocks has one source; local checks do not infer acceptance, execute jobs or check external state. No new integration or skill needed. Review: separate fresh-context agent confirmed released-copy parity, dependency semantics, ownership and rule/CI/roadmap consistency with no actionable findings. Local typecheck/build, 240 tests (one platform skip), and backlog/recap/roadmap/dependencies/conventions/integrations/rules passed. Browser/accessibility acceptance also passed locally. Native fixture/tests/app packaging are deferred to native-macos CI because this change only adds a documentation check and updates the template pin, with no native source changes. All remote CI jobs and the dependency-SBOM artifact are now verified.
+
+**Estimates:** 2026-11-07: Small, ~100%; release/adoption, review, local checks, all CI jobs and artifact verification complete.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #188](https://github.com/voidbrain/nerv/pull/188) closure reconciliation;  [PR #187](https://github.com/voidbrain/nerv/pull/187) harness adoption and dependency links |
+| Opened | 2026-11-07 |
+| Verification | Documentation: 2026-11-07, fresh-context adoption review found no actionable issues. Script: 2026-11-07, typecheck/build, 240 tests (one platform skip), browser/axe and static/ledger checks passed locally. Remote CI: 2026-11-07, runs 42373292192/42373290475 all passed including native tests/package. SBOM artifact: official schema and formats passed, 389 components. |
+| Reviewed | 2026-11-07 |
+
+</details>
+
+---
