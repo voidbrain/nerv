@@ -1,7 +1,8 @@
+import type {HistoryPage} from './history.ts';
 import {readCommand,statusText,type StatusBase} from './chat-command.ts';
 import {channelIsFresh,sanitizeChannel,type ChannelState,type HeardChannel} from './channel-state.ts';
 import {ProcessClient} from './process-client.ts';
-import type {Reminder,InboxPage,ActResult} from './store.ts';
+import type {Reminder,InboxEntry,InboxPage,ActResult} from './store.ts';
 import {degradedReasons,type RouteHealth} from './route-health.ts';
 import {detectOllama,ollamaUrlOf,planModels,writeModels,type ModelChange,type ModelSetup} from './model-setup.ts';
 import {readConfig,readModelKey,savePilots} from './config.ts';
@@ -45,6 +46,9 @@ export interface PeerSeat {seat:string;shadow:boolean;verdict:Promise<PeerVerdic
 export interface OwnerAction {request:string;tool:string;args:Record<string,unknown>;stage?:Stage;earlier?:{request:string;reply?:string}[]}
 export type ActReply=ActResult&{casperError?:string};
 export interface StoreApi {
+ reminderPage(before?:number,limit?:number):HistoryPage<Reminder&{sequence:number}>|Promise<HistoryPage<Reminder&{sequence:number}>>;
+ inboxHistory(before?:number,limit?:number):HistoryPage<InboxEntry>|Promise<HistoryPage<InboxEntry>>;
+ dashboardHistory(since:string):unknown|Promise<unknown>;
  list():Reminder[]|Promise<Reminder[]>;
  pendingReminders():Reminder[]|Promise<Reminder[]>;
  inboxPage(after?:number,limit?:number,afterId?:string):InboxPage|Promise<InboxPage>;
@@ -87,7 +91,11 @@ export class Runtime implements StoreApi {
   this.brain=new ProcessClient(brainEntry,home?[home]:[],'brain',1500);
  }
  async ready(){await this.nervous.call('runtime.ping');}
- async list(){return await this.nervous.call('reminders.list') as Reminder[];}
+ async reminderPage(before=0,limit=20){return await this.nervous.call('reminders.page',{before,limit}) as HistoryPage<Reminder&{sequence:number}>;}
+ async inboxHistory(before=0,limit=20){return await this.nervous.call('inbox.history',{before,limit}) as HistoryPage<InboxEntry>;}
+ async dashboardHistory(since:string){return this.nervous.call('dashboard.history',{since});}
+ /** Internal brief reads yield between bounded pages; HTTP callers use reminderPage directly. */
+ async list(){const items:Reminder[]=[];let before=0;do{const p=await this.reminderPage(before,50);items.push(...p.items);before=p.next ?? 0;}while(before);return items.sort((a,b)=>a.due.localeCompare(b.due));}
  async pendingReminders(){return await this.nervous.call('reminders.pending') as Reminder[];}
  async inboxPage(after=0,limit=5,afterId?:string){return await this.nervous.call('inbox.page',{after,limit,...(afterId?{afterId}:{})}) as InboxPage;}
  async add(title:string,due:string){return await this.nervous.call('reminders.add',{title,due}) as Reminder&{existing?:true};}

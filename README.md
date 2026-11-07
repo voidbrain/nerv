@@ -40,6 +40,8 @@ npm run test:browser # after build; requires Chrome/Chromium
 
 The [local-core acceptance](docs/acceptance/core-2026-11-06.md) covers restart recovery, duplicate prevention, authentication, invalid input, cancellation/retry and the bilingual browser inbox.
 
+Reminder and inbox history in the Angular workspace has previous/next pages, newest entries first. The live dashboard shows the next ten reminders and exact delivery counts since your last visit. [Runtime acceptance](docs/acceptance/runtime-2026-11-07.md) records process failure, queue saturation and a 10,000-row load trial; it does not promise hard real-time delivery.
+
 Use your actual future deadline. CLI timestamps require an explicit UTC offset. User data now defaults to `~/.nerv` (override with an absolute `NERV_HOME`). Legacy checkout-local databases trigger migration guidance rather than being silently ignored. `init` preserves existing files; token/configuration files are private. Reminders enter the local inbox while running, or catch up after restart. Sleep or logout can pause user services; use an awake always-on host for dependable scheduling.
 
 All `/api` routes require a bearer token (except the native TLS claim route, which requires a private single-use invitation). Lightweight `/api/status` is used for background health; explicit `/api/doctor` retains integrity diagnostics. Native clients can also use authenticated, read-only JSON-RPC 2.0 WebSockets at `/rpc`; browser ticket pairing and remote execution are not implemented. Static UI files are public on loopback and contain no credentials. No permissive CORS or public-network binding is enabled. Doctor covers local configuration/runtime/database; remote/device probes remain planned.

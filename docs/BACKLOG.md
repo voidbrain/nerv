@@ -451,29 +451,29 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Signal | Priority | Status | Effort | Complete |
 |:---:|---|---|---|---|
-| 🟡 | 🔺 P1 | Implemented | 🟡 Medium | ~70% |
+| 🟡 | 🔺 P1 | Implemented | 🟢 Small | ~90% |
 
-💻 **→ Human action required: No**<br />Validate process failure/backpressure regressions and finish bounded history/pagination and latency measurements before claiming load resilience.
+💻 **→ Human action required: No**<br />Check the final independent review and CI before closure.
 
 | | |
 |---|---|
-| **Issue** | A/B/C process split, validated IPC and fail-closed lifecycle exist. Native inbox and pending-reminder reads are now bounded; background status now pings the scheduler rather than running SQLite quick_check every 15 seconds; full-history web pagination/load limits remain open. Brain is a health boundary only, not an agent/model loop or sandbox. |
+| **Issue** | A/B/C process split, validated IPC and fail-closed lifecycle exist. Web histories now have bounded keyset pages; the dashboard reads bounded facts/SQL aggregates. Brain runs model/planner calls in its own workload boundary; it is not a sandbox. Independent review found no remaining blockers; remote CI remains. |
 | **Reproduce** | Follow docs/decisions/runtime-boundaries.md and the protocol/isolation test fixtures. |
 | **Check** | Blocked/killed Brain leaves due delivery working; Nervous failure shuts supervisor down; no orphaned children; bounded queues/frames; large histories and concurrent CLI writes have measured limits. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Validate process failure/backpressure regressions and finish bounded history/pagination and latency measurements before claiming load resilience. Blocked/killed Brain leaves due delivery working; Nervous failure shuts supervisor down; no orphaned children; bounded queues/frames; large histories and concurrent CLI writes have measured limits.
+**Next action / closure evidence:** Owner selected F-013 first, then F-067 (2026-11-07). Complete bounded reminder/inbox web history, startup-inclusive IPC admission, failure/lifecycle regressions and an observed large-history/concurrent-CLI latency trial; review independently before closure. Check the final independent review and CI before closure. Blocked/killed Brain leaves due delivery working; Nervous failure shuts supervisor down; no orphaned children; bounded queues/frames; large histories and concurrent CLI writes have measured limits.
 
-**Estimates:** Medium remaining effort; ~70% complete. Estimated 2026-11-01; reassessed 2026-11-04 after PR #6 CI: unchanged, history pagination and load measurements remain.
+**Estimates:** Small remaining effort; ~90% complete. Reassessed 2026-11-07: implementation, local load and browser acceptance passed; independent review passed; remote CI remains.
 
 | Field | Value |
 |---|---|
 | PR / evidence | [PR #3](https://github.com/voidbrain/nerv/pull/3) runtime; [PR #5](https://github.com/voidbrain/nerv/pull/5) bounded native feeds; [PR #6](https://github.com/voidbrain/nerv/pull/6) lightweight status, CI green at merge `df0a52f` |
 | Opened | 2026-11-01 |
-| Verification | Pending named acceptance |
-| Reviewed | 2026-11-04 |
+| Verification | 2026-11-07 Unit/integration: bounded-history, admission/timeout/migration and sustained CLI load checks passed; three headless lifecycle cases passed, one Windows-only skip. Browser/accessibility: bilingual pages, focus and axe passed. [Scoped acceptance](acceptance/runtime-2026-11-07.md) records measurements and limits. Full suite: 236 passed, one platform skip. Review: separate fresh-context reviewer found migration, timeout admission, timestamp/count race and focus issues; all fixed with regressions, no remaining blockers. Final CI pending. |
+| Reviewed | 2026-11-07 |
 
 </details>
 
@@ -1487,7 +1487,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Proposed 2026-11-07 from the OWASP review (see F-065). Two slices: the CI dependency SBOM (tooling, tiny), then the runtime models and services document. The runtime part is also the input F-063 needs to report the model that actually answered.
+**Next action / closure evidence:** Owner selected implementation after F-013 (2026-11-07). Proposed 2026-11-07 from the OWASP review (see F-065). Two slices: the CI dependency SBOM (tooling, tiny), then the runtime models and services document. The runtime part is also the input F-063 needs to report the model that actually answered.
 
 **Estimates:** Small. ~0% complete. Set 2026-11-07.
 

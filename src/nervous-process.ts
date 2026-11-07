@@ -18,12 +18,15 @@ process.on('message',(value:unknown)=>{
   switch(method){
    case 'runtime.ping':return {role:'nervous',pid:process.pid};
    case 'runtime.doctor':return store.doctor();
-   case 'reminders.list':return store.list();
+   case 'reminders.list':{const p=store.reminderPage(0,50);if(p.next)throw new Error('Use reminders.page.');return p.items.sort((a,b)=>a.due.localeCompare(b.due));}
+   case 'reminders.page':return store.reminderPage(params.before as number|undefined,params.limit as number|undefined);
+   case 'inbox.history':return store.inboxHistory(params.before as number|undefined,params.limit as number|undefined);
+   case 'dashboard.history':return store.dashboardHistory(params.since as string);
    case 'reminders.pending':return store.pendingReminders();
    case 'reminders.add':try{return store.add(params.title as string,params.due as string);}catch{throw new Error('Invalid reminder.');}
    case 'reminders.update':{let r;try{r=store.update(params.id as string,{...(params.title!==undefined?{title:params.title as string}:{}),...(params.due!==undefined?{due:params.due as string}:{})});}catch{throw new Error('Invalid reminder.');}return r ?? null;}
    case 'reminders.cancel':return store.cancel(params.id as string);
-   case 'inbox.list':return store.inbox();
+   case 'inbox.list':{const p=store.inboxHistory(0,50);if(p.next)throw new Error('Use inbox.history.');return p.items;}
    case 'inbox.brief':return store.addBrief(params.message as string);
    case 'inbox.lastBrief':return store.lastBrief();
    case 'approvals.expired':return store.expiredApprovals(params.since as string);

@@ -177,6 +177,25 @@
       "after": [
         "backlog-recap"
       ]
+    },
+    {
+      "id": "runtime-acceptance",
+      "when": [
+        "src/history.ts",
+        "src/process-client.ts",
+        "src/nervous-process.ts",
+        "test/history.test.ts",
+        "test/runtime-load.test.ts",
+        "test/process-client.test.ts",
+        "test/isolation.test.ts",
+        "docs/decisions/runtime-boundaries.md"
+      ],
+      "then": "Verify bounded history/admission and process-failure behavior; record dated load/acceptance evidence when the claimed scope changes, preserving published reports.",
+      "run": "node --test test/history.test.ts test/process-client.test.ts test/isolation.test.ts test/runtime-load.test.ts",
+      "checked": "History HTTP/IPC, queue saturation, Brain death and concurrent CLI load regressions; CI headless supervisor lifecycle.",
+      "after": [
+        "core"
+      ]
     }
   ],
   "couplings": [
@@ -265,6 +284,24 @@
         }
       ],
       "kept": "test/angular.browser.mjs serves the built workspace through makeServer and asserts the full grid stylesheet is applied with no CSP errors."
+    },
+    {
+      "value": "History page row/payload limits and IPC frame capacity",
+      "places": [
+        {
+          "file": "src/history.ts",
+          "what": "HISTORY_LIMIT and HISTORY_BYTES cap SQL history pages"
+        },
+        {
+          "file": "src/rpc.ts",
+          "what": "History parameter schemas import HISTORY_LIMIT; MAX_FRAME_BYTES caps IPC"
+        },
+        {
+          "file": "test/history.test.ts",
+          "what": "Maximum Unicode messages remain below page and IPC bounds"
+        }
+      ],
+      "kept": "One HISTORY_LIMIT source is imported by RPC schemas; test/history.test.ts asserts serialized Unicode history pages fit HISTORY_BYTES and MAX_FRAME_BYTES."
     }
   ],
   "outside": [

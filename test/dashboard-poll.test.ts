@@ -8,13 +8,13 @@ function harness(api:(path:string)=>Promise<unknown>){
  const h=new Function('api','setBanner','signIn','forgetSession',`
  const SESSION_ENDED='Session ended';let token='test',polling=false,pollFailures=0,lastRan=null,firstTrace=true,followNew=null;
  const detailCache={},known=new Map(),older=[],matches=[],BASES=[{name:'TEST'}],activeCage={};let shown=[];
- const state={sorties:[],selected:null};
+ const state={lastVisit:Date.now(),sorties:[],selected:null};
  const toSortie=s=>s,toApproval=a=>a;const applyBases=()=>{},healthOf=()=>{},loadModels=()=>{},loadEvents=async()=>0,renderLog=()=>{},showBuild=()=>{},renderAll=()=>{},kajiSummary=()=>'',liveBaseName=()=> 'test',esc=s=>s.replaceAll('<','&lt;');
  ${poll}
  return {poll,state,failures:()=>pollFailures,hasToken:()=>!!token};`)(api,(s:string)=>banners.push(s),(s:string)=>signins.push(s),()=>forgotten++) as {poll:()=>Promise<void>;state:object;failures:()=>number;hasToken:()=>boolean};
  return {...h,banners,signins,forgotten:()=>forgotten};
 }
-const ok=(path:string)=>path==='doctor'?{}:[];
+const ok=(path:string)=>path.startsWith('dashboard/history?')?{delivered:0,pending:0,reminders:[],brief:null}:path==='doctor'?{}:[];
 test('B-008: one failed poll preserves the view; the next success recovers without a connection warning',async()=>{
  let fail=true;const h=harness(async path=>{if(path.startsWith('sorties?')&&fail)throw new Error('GET /api/sorties: timed out.');return ok(path);});
  await h.poll();assert.deepEqual(h.banners,[]);assert.equal(h.failures(),1);
@@ -55,4 +55,14 @@ test('B-008: dashboard reads keep answering while a relayed chat is waiting on t
   }
   release();assert.equal((await (await chat).json() as {reply:string}).reply,'Done');
  }finally{release();await chat?.catch(()=>{});await new Promise<void>(d=>server.close(()=>d()));await r.close();rmSync(dir,{recursive:true,force:true});}
+});
+
+test('F-013: dashboard delivery aggregates stay scoped to the last-visit cursor, including an in-flight mark read',async()=>{
+ let release:()=>void=()=>{};const waiting=new Promise<void>(done=>{release=done;});
+ const h=harness(async path=>{if(path.startsWith('dashboard/history?')){await waiting;return {delivered:37,pending:12,reminders:[],brief:null};}return ok(path);});
+ const state=h.state as {lastVisit:number;deliveredCount?:number;deliveredSince?:number};const old=state.lastVisit;const poll=h.poll();state.lastVisit=old+1000;release();await poll;assert.equal(h.failures(),0);assert.equal(state.deliveredSince,old);
+ const away=src.slice(src.indexOf('  window.renderAway ='),src.indexOf('  // The panel redraws',src.indexOf('  window.renderAway =')));
+ const box={innerHTML:'',textContent:''};const render=new Function('state','document',`const window={},dayTime=()=>'',esc=s=>s;${away};return window.renderAway;`)(state,{getElementById:()=>box}) as ()=>void;
+ render();assert.match(box.innerHTML,/delivered <b>0<\/b> reminders/,'a response for the prior visit never repopulates its count');
+ state.deliveredSince=state.lastVisit;render();assert.match(box.innerHTML,/delivered <b>37<\/b> reminders/,'the current cursor shows its exact SQL count');
 });

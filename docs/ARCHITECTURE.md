@@ -2,7 +2,7 @@
 
 ## Implemented boundary
 
-During serve, A owns SQLite/ticker/inbox in an isolated child, B provides model and health operations, and C serves REST/static UI, owns the Misato planning loop and supervises children. C accesses A through schema-validated JSON-RPC IPC; static file reads are asynchronous. Standalone CLI commands still use the Store directly. REST contracts remain compatible. Native clients can read local `/rpc` over authenticated WebSockets; remote workers and mutation RPC are not implemented. See [the runtime decision](decisions/runtime-boundaries.md) for bounds, failover and security limits.
+During serve, A owns SQLite/ticker/inbox in an isolated child, B provides model and health operations, and C serves REST/static UI, owns the Misato planning loop and supervises children. C accesses A through schema-validated JSON-RPC IPC; static file reads are asynchronous. Standalone CLI commands still use the Store directly. Reminder and inbox histories use bounded keyset pages; legacy array reads fail explicitly when pagination is required. The live dashboard uses aggregate counts instead of downloading full history. Native clients can read local `/rpc` over authenticated WebSockets; remote workers and mutation RPC are not implemented. See [the runtime decision](decisions/runtime-boundaries.md) for bounds, failover and security limits.
 
 ## Intended distributed boundary
 

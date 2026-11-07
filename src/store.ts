@@ -1,3 +1,4 @@
+import {checkHistory,historyPage,type HistoryPage} from './history.ts';
 import { DatabaseSync } from 'node:sqlite';
 import { randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
@@ -34,6 +35,7 @@ export class Store {
       CREATE TABLE IF NOT EXISTS reminders(id TEXT PRIMARY KEY, title TEXT NOT NULL, due TEXT NOT NULL, created TEXT NOT NULL, delivered TEXT, cancelled TEXT);
       CREATE TABLE IF NOT EXISTS deliveries(id TEXT PRIMARY KEY, reminder_id TEXT UNIQUE REFERENCES reminders(id), kind TEXT NOT NULL DEFAULT 'reminder', message TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT);
       CREATE INDEX IF NOT EXISTS reminders_due ON reminders(due);
+      CREATE INDEX IF NOT EXISTS reminders_pending_due ON reminders(due) WHERE delivered IS NULL AND cancelled IS NULL;
       ${LEDGER_SCHEMA}`);
     // Schema 3: events record the event schema version they were written under (F-024); earlier rows read as version 1.
     if(!(this.db.prepare('PRAGMA table_info(events)').all() as {name:string}[]).some(c=>c.name==='v'))this.db.exec('ALTER TABLE events ADD COLUMN v INTEGER NOT NULL DEFAULT 1');
@@ -56,7 +58,7 @@ export class Store {
         this.db.exec('COMMIT');
       }catch(e){this.db.exec('ROLLBACK');throw e;}
     }
-    this.db.exec('PRAGMA user_version=5');
+    this.db.exec('CREATE INDEX IF NOT EXISTS deliveries_kind_created ON deliveries(kind,created); PRAGMA user_version=5');
     this.ledger = new Ledger(this.db,{policy:scrolls.policy,tools:builtinTools});this.memory = new Memory(this.db);this.policySource = scrolls.source;
   }
   /** A valid title and a future ISO date with an explicit timezone, as UTC; the same rules for a new reminder and an edit. */
@@ -80,7 +82,24 @@ export class Store {
     this.db.prepare('INSERT INTO reminders VALUES(?,?,?,?,?,?)').run(r.id,r.title,r.due,r.created,null,null); return r;
   }
   list(): Reminder[] { return this.db.prepare('SELECT * FROM reminders ORDER BY due').all() as Reminder[]; }
-  pendingReminders(): Reminder[] { return this.db.prepare('SELECT * FROM reminders WHERE delivered IS NULL AND cancelled IS NULL ORDER BY due LIMIT 5').all() as Reminder[]; }
+  reminderPage(before=0,limit=20):HistoryPage<Reminder&{sequence:number}> {
+    checkHistory(before,limit);
+    return historyPage(this.db.prepare('SELECT rowid AS sequence,* FROM reminders WHERE rowid<? ORDER BY rowid DESC LIMIT ?').all(before||Number.MAX_SAFE_INTEGER,limit+1) as unknown as (Reminder&{sequence:number})[],limit);
+  }
+  inboxHistory(before=0,limit=20):HistoryPage<InboxEntry> {
+    checkHistory(before,limit);
+    return historyPage(this.db.prepare('SELECT rowid AS sequence,* FROM deliveries WHERE rowid<? ORDER BY rowid DESC LIMIT ?').all(before||Number.MAX_SAFE_INTEGER,limit+1) as unknown as InboxEntry[],limit);
+  }
+  /** Bounded dashboard facts; counts are SQL aggregates, never a downloaded full inbox. */
+  dashboardHistory(since:string) {
+    if(typeof since!=='string'||!Number.isFinite(Date.parse(since)))throw new Error('Invalid dashboard time.');
+    const delivered=(this.db.prepare("SELECT count(*) AS count FROM deliveries WHERE kind='reminder' AND created>?").get(new Date(since).toISOString()) as {count:number}).count;
+    const brief=this.db.prepare("SELECT message,created FROM deliveries WHERE kind='brief' ORDER BY rowid DESC LIMIT 1").get() ?? null;
+    const pending=(this.db.prepare('SELECT count(*) AS count FROM reminders WHERE delivered IS NULL AND cancelled IS NULL').get() as {count:number}).count;
+    const reminders=this.db.prepare('SELECT * FROM reminders WHERE delivered IS NULL AND cancelled IS NULL ORDER BY due LIMIT 10').all() as Reminder[];
+    return {delivered,brief,pending,reminders};
+  }
+  pendingReminders(limit=5): Reminder[] { if(!Number.isInteger(limit)||limit<1||limit>20)throw new Error('Invalid pending reminder limit.');return this.db.prepare('SELECT * FROM reminders WHERE delivered IS NULL AND cancelled IS NULL ORDER BY due LIMIT ?').all(limit) as Reminder[]; }
   /** Undoes a cancellation while the reminder is still in the future and undelivered: the inverse of cancel. */
   restore(id: string): boolean { return Number(this.db.prepare('UPDATE reminders SET cancelled=NULL WHERE id=? AND delivered IS NULL AND cancelled IS NOT NULL AND due>?').run(id,new Date().toISOString()).changes) > 0; }
   /** Changes the title and/or the time of a reminder that has not fired or been cancelled; undefined when there is none. */
