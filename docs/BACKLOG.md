@@ -9,11 +9,11 @@ Governance and naming follow the [NERV architecture](NERV-ARCHITECTURE.md). [Rul
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 56 | 35 | 42 | 38 |
+| **This week** | 56 | 35 | 43 | 38 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 37 | 4 |
+| **Open** | 37 | 5 |
 | **Require Human 🧑** | 3 | 0 |
 
 ### Require Human 🧑
@@ -198,6 +198,40 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | PR / evidence | [PR #196](https://github.com/voidbrain/nerv/pull/196) evidence and queue reconciliation;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; source assessment linked above |
 | Opened | 2026-11-07 |
 | Verification | Pending: regression, integration and relevant browser checks; source inspection is not runtime acceptance. |
+| Reviewed | 2026-11-07 |
+
+</details>
+
+---
+
+### B-043
+
+**Process queue saturation during Windows cross-base execution test**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🟠 | 🔺 P1 | Investigate | 🟡 Medium |
+
+💻 **→ Human action required: No**<br />Reproduce queue saturation and identify which background RPC producers overlap.
+
+| | |
+|---|---|
+| **Issue** | PR #198 Windows run 42401648023 failed in the existing cross-base kaji.run test: ProcessClient.call rejected Runtime.loop's finish RPC with “Process queue is full” (-32004). The other Windows run on the same candidate passed. No CRT code runs in that backend path; the exact cause remains unverified. |
+| **Reproduce** | Run test/kaji-run.test.ts with slow child replies or constrained scheduling and trace pending/waiting RPCs; the fixture starts 200 ms heartbeats and a 100 ms resumer. Overlapping periodic work is a hypothesis, not an established cause. |
+| **Check** | A deterministic regression explains the observed saturation. Background work stays bounded; preserve the process queue safeguard. The cross-base path records a terminal result or an explicit failure without lost/duplicate remote effects. Windows and full-suite checks pass; do not merely widen a timeout/queue or weaken assertions. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Investigate with a controlled slow-child fixture and per-producer request counts. Keep this finding open even if a diagnostic CI retry passes. CRT retuning does not claim to fix this backend/test reliability issue. Review source tick overlap and saturation handling before choosing the owning fix.
+
+**Estimates:** Medium remaining effort, provisionally 2–3 focused days including deterministic reproduction, fix, integration and Windows verification. Estimated 2026-11-07; root cause is uncertain and the estimate must be reassessed after reproduction.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #198](https://github.com/voidbrain/nerv/pull/198) observed failure; [Windows run 42401648023](https://github.com/voidbrain/nerv/actions/runs/42401648023), job 128490535844; existing Test: test/kaji-run.test.ts, main-base Misato remote action and approval. Same-candidate run 42401650926 Windows passed. |
+| Opened | 2026-11-07 |
+| Verification | 2026-11-07 CI failure observed: Process queue is full at ProcessClient.call → Runtime.loop finish. Deterministic reproduction/root cause/fix pending; a retry is not a fix. |
 | Reviewed | 2026-11-07 |
 
 </details>
