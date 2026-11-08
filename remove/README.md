@@ -1,13 +1,9 @@
 # Retired reference holding area
 
-Moved here on 8 November 2026 at the owner's request. Files are retained byte for byte, not deleted. They are superseded design references, simulations and artwork; do not run their scripts or treat their instructions as current authority. The application ships `web/public/`, not this folder.
+This folder retains 21 superseded UI prototypes, visual references and a metadata file. No files have been deleted and no later deletion is approved automatically. Files are not runtime assets or current requirements; the deployed dashboard is `web/public/dashboard/` at `/dashboard/`.
 
-| Retired source | Why retained here / current owner |
-|---|---|
-| `docs/NERV/` | Prior retirement assessment maps concepts/proposals; live dashboard is `/dashboard/`, current vocabulary and runtime docs are under `docs/architecture/` |
-| `docs/NERV-ARCHITECTURE.md` | Original historical target diagram mixed canonical names with planned behavior; current meanings are in the vocabulary and original bytes remain here |
-| `docs/analysis_2026_11_02.txt` | Earlier duplicated glossary/dashboard analysis with Blue/Orange/Red, model-majority and obsolete identities; superseded by current per-action policy, vocabulary, roadmap and recorded proposal dispositions |
+The 8 November recheck corrected an overly broad classification: the original NERV target plus four mixed design inputs are now preserved unchanged in [historical design inputs](../docs/archive/design-inputs/README.md), outside this folder. The [corrected active target](../docs/architecture/target-schema.md) restores their useful architecture with explicit status labels.
 
-[Manifest](manifest.json) records every old/new path, size and SHA-256. [Documentation retirement assessment](../docs/design/documentation-organization-2026-11-08.md) records requirements and uncertainty; the [earlier brainstorm retirement review](../docs/audits/2026-11-06-brainstorm-retirement.md) supplies the existing concept mapping. Dated audits, acceptance, evaluation and decision evidence remain outside this holding folder even when older.
+[Manifest](manifest.json) records original paths, initial quarantine locations, current locations, classifications and SHA-256 hashes. [File-by-file recheck](../docs/audits/2026-11-08-retirement-recheck.md) records current dispositions and valid-idea owners. Original bytes remain unchanged for all 26 entries.
 
-No deletion is scheduled. A later deletion needs a reference/requirements check; preserved Git history alone does not prove an active requirement is obsolete.
+The remaining HTML files are earlier simulations/redirects with obsolete risk/voting/host labels. Their valid UI themes remain in the shipped dashboard/style guide and owning records. Reference artwork is retained for provenance; it is not proof of a system feature. Recheck dependencies and preserved requirements before any future deletion.

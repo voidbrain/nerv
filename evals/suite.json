@@ -150,7 +150,7 @@
     {
       "branch": "device-bootstrap-and-physical-execution",
       "owner": "F-005/F-006",
-      "reason": "Enrolled worker fixtures execute registered built-ins; no device/bootstrap or physical adapter is implemented."
+      "reason": "These evaluation groups cover enrolled built-in worker fixtures, not the separately tested confirmed-bootstrap implementation. Real-host service/device acceptance and physical adapters remain outside this suite."
     }
   ]
 }

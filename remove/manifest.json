@@ -8,182 +8,288 @@
       "to": "remove/docs/NERV/.DS_Store",
       "bytes": 6148,
       "sha256": "d65165279105ca6773180500688df4bdc69a2c7b771752f0a46ef120b7fd8ec3",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Finder metadata, not a product requirement; unchanged bytes retained.",
+      "initialTo": "remove/docs/NERV/.DS_Store",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "filesystem-metadata"
     },
     {
       "from": "docs/NERV/Gemini_Generated_Image_497wj4497wj4497w.jpg",
       "to": "remove/docs/NERV/Gemini_Generated_Image_497wj4497wj4497w.jpg",
       "bytes": 1010385,
       "sha256": "aa0c50370c95f70f45b5fa460896b141c9b19b7b1d0e6b98d41d7ee4b1980c34",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Reference artwork reviewed visually; not deployed assets or executable requirements. Valid visual ideas are preserved in the active style guide/dashboard.",
+      "initialTo": "remove/docs/NERV/Gemini_Generated_Image_497wj4497wj4497w.jpg",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "visual-reference"
     },
     {
       "from": "docs/NERV/Gemini_Generated_Image_80g37a80g37a80g3.jpg",
       "to": "remove/docs/NERV/Gemini_Generated_Image_80g37a80g37a80g3.jpg",
       "bytes": 831897,
       "sha256": "68993204afba7ff184fd4d00a7e0cd4fdd42c5fdb46dae858141ddf5abc53dd6",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Reference artwork reviewed visually; not deployed assets or executable requirements. Valid visual ideas are preserved in the active style guide/dashboard.",
+      "initialTo": "remove/docs/NERV/Gemini_Generated_Image_80g37a80g37a80g3.jpg",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "visual-reference"
     },
     {
       "from": "docs/NERV/Gemini_Generated_Image_ubgqvtubgqvtubgq.jpg",
       "to": "remove/docs/NERV/Gemini_Generated_Image_ubgqvtubgqvtubgq.jpg",
       "bytes": 1056237,
       "sha256": "ea81ea4c189dcefefe365d43d26c86fc04c8411b1b20bf86552643ee32b453e8",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Reference artwork reviewed visually; not deployed assets or executable requirements. Valid visual ideas are preserved in the active style guide/dashboard.",
+      "initialTo": "remove/docs/NERV/Gemini_Generated_Image_ubgqvtubgqvtubgq.jpg",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "visual-reference"
     },
     {
       "from": "docs/NERV/Pasted 2026-11-01 at 9.32.12 PM.tiff",
       "to": "remove/docs/NERV/Pasted 2026-11-01 at 9.32.12 PM.tiff",
       "bytes": 6197386,
       "sha256": "9bedcfbf46d43a750e70273ac2734f92fd4b365b7e34f5b9fdc540a9ff7828d4",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Reference artwork reviewed visually; not deployed assets or executable requirements. Valid visual ideas are preserved in the active style guide/dashboard.",
+      "initialTo": "remove/docs/NERV/Pasted 2026-11-01 at 9.32.12 PM.tiff",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "visual-reference"
     },
     {
       "from": "docs/NERV/Pasted 2026-11-01 at 9.32.28 PM.tiff",
       "to": "remove/docs/NERV/Pasted 2026-11-01 at 9.32.28 PM.tiff",
       "bytes": 1330558,
       "sha256": "09de6d0dce0213f0b6d97efd00ac6750e3ec029c89f086e6737c55125cadc8ff",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Reference artwork reviewed visually; not deployed assets or executable requirements. Valid visual ideas are preserved in the active style guide/dashboard.",
+      "initialTo": "remove/docs/NERV/Pasted 2026-11-01 at 9.32.28 PM.tiff",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "visual-reference"
     },
     {
       "from": "docs/NERV/Pasted 2026-11-01 at 9.32.51 PM.tiff",
       "to": "remove/docs/NERV/Pasted 2026-11-01 at 9.32.51 PM.tiff",
       "bytes": 2749454,
       "sha256": "08f7334a6bbc1c1e0bf73c2e8132e085ccaedb8bb2d2626ad9c6b50e3026ddcb",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Reference artwork reviewed visually; not deployed assets or executable requirements. Valid visual ideas are preserved in the active style guide/dashboard.",
+      "initialTo": "remove/docs/NERV/Pasted 2026-11-01 at 9.32.51 PM.tiff",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "visual-reference"
     },
     {
       "from": "docs/NERV/Pasted 2026-11-01 at 9.33.33 PM.tiff",
       "to": "remove/docs/NERV/Pasted 2026-11-01 at 9.33.33 PM.tiff",
       "bytes": 33028030,
       "sha256": "706687583aa0594e91a83f16cf3a8e055e9ee39114ecf5a9f26f8242722cf00b",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Reference artwork reviewed visually; not deployed assets or executable requirements. Valid visual ideas are preserved in the active style guide/dashboard.",
+      "initialTo": "remove/docs/NERV/Pasted 2026-11-01 at 9.33.33 PM.tiff",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "visual-reference"
     },
     {
       "from": "docs/NERV/Pasted 2026-11-02 at 12.14.21 AM.tiff",
       "to": "remove/docs/NERV/Pasted 2026-11-02 at 12.14.21 AM.tiff",
       "bytes": 978114,
       "sha256": "2aa9c41989119cffd36f1ebd2d621badc09d8e2797a4811ae4ac3be42c26481e",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Reference artwork reviewed visually; not deployed assets or executable requirements. Valid visual ideas are preserved in the active style guide/dashboard.",
+      "initialTo": "remove/docs/NERV/Pasted 2026-11-02 at 12.14.21 AM.tiff",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "visual-reference"
     },
     {
       "from": "docs/NERV/Pasted 2026-11-02 at 12.20.39 AM.tiff",
       "to": "remove/docs/NERV/Pasted 2026-11-02 at 12.20.39 AM.tiff",
       "bytes": 924150,
       "sha256": "d0868a5271836060a24668d7d6fa553713ed74f6210dde8faa5d6081bf4e2cec",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Reference artwork reviewed visually; not deployed assets or executable requirements. Valid visual ideas are preserved in the active style guide/dashboard.",
+      "initialTo": "remove/docs/NERV/Pasted 2026-11-02 at 12.20.39 AM.tiff",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "visual-reference"
     },
     {
       "from": "docs/NERV/Pasted 2026-11-02 at 12.23.36 AM.tiff",
       "to": "remove/docs/NERV/Pasted 2026-11-02 at 12.23.36 AM.tiff",
       "bytes": 922134,
       "sha256": "ad6fbc7cc61294d0a865071ee056adc5b042f0662392c26a6b61f16f4ff7ad58",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Reference artwork reviewed visually; not deployed assets or executable requirements. Valid visual ideas are preserved in the active style guide/dashboard.",
+      "initialTo": "remove/docs/NERV/Pasted 2026-11-02 at 12.23.36 AM.tiff",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "visual-reference"
     },
     {
       "from": "docs/NERV/Pasted 2026-11-02 at 12.29.44 AM.tiff",
       "to": "remove/docs/NERV/Pasted 2026-11-02 at 12.29.44 AM.tiff",
       "bytes": 6224550,
       "sha256": "adc8be6ff98dd9840876ee8bfcf55534e78bed51a5a6532e6257be97487de8cb",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Reference artwork reviewed visually; not deployed assets or executable requirements. Valid visual ideas are preserved in the active style guide/dashboard.",
+      "initialTo": "remove/docs/NERV/Pasted 2026-11-02 at 12.29.44 AM.tiff",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "visual-reference"
     },
     {
       "from": "docs/NERV/Pasted 2026-11-02 at 12.31.38 AM.tiff",
       "to": "remove/docs/NERV/Pasted 2026-11-02 at 12.31.38 AM.tiff",
       "bytes": 1926230,
       "sha256": "75c6ec2ce51696c5d51f3a6315b8fe4c3c5e11d275438afcdecffe1646821445",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Reference artwork reviewed visually; not deployed assets or executable requirements. Valid visual ideas are preserved in the active style guide/dashboard.",
+      "initialTo": "remove/docs/NERV/Pasted 2026-11-02 at 12.31.38 AM.tiff",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "visual-reference"
     },
     {
       "from": "docs/NERV/Pasted 2026-11-02 at 12.31.55 AM.tiff",
       "to": "remove/docs/NERV/Pasted 2026-11-02 at 12.31.55 AM.tiff",
       "bytes": 925014,
       "sha256": "5204f690464449b9fa44d30f6d38ed58aa74b38068ac8ec6064067832cb00270",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Reference artwork reviewed visually; not deployed assets or executable requirements. Valid visual ideas are preserved in the active style guide/dashboard.",
+      "initialTo": "remove/docs/NERV/Pasted 2026-11-02 at 12.31.55 AM.tiff",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "visual-reference"
     },
     {
       "from": "docs/NERV/dashboard-agnostic-2.html",
       "to": "remove/docs/NERV/dashboard-agnostic-2.html",
       "bytes": 76978,
       "sha256": "0c9e90a66357752fbf04a96c1623a162a857cfd1584ece9eeabb0b99038c5eb7",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Simulated or redirect prototype, not the shipped dashboard; useful design concepts retain current owners in the recheck crosswalk.",
+      "initialTo": "remove/docs/NERV/dashboard-agnostic-2.html",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "superseded-prototype"
     },
     {
       "from": "docs/NERV/dashboard-agnostic.html",
       "to": "remove/docs/NERV/dashboard-agnostic.html",
       "bytes": 64569,
       "sha256": "f5d346b29defea290319d1646da2e8558d0de442a69d33900d564bff4791064d",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Simulated or redirect prototype, not the shipped dashboard; useful design concepts retain current owners in the recheck crosswalk.",
+      "initialTo": "remove/docs/NERV/dashboard-agnostic.html",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "superseded-prototype"
     },
     {
       "from": "docs/NERV/dashboard-examples.html",
       "to": "remove/docs/NERV/dashboard-examples.html",
       "bytes": 45536,
       "sha256": "ea59067a985a440ca7faa8b7d5f9ffb00a3ef37eca3f8836c8fe551941760596",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Simulated or redirect prototype, not the shipped dashboard; useful design concepts retain current owners in the recheck crosswalk.",
+      "initialTo": "remove/docs/NERV/dashboard-examples.html",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "superseded-prototype"
     },
     {
       "from": "docs/NERV/dashboard.html",
       "to": "remove/docs/NERV/dashboard.html",
       "bytes": 38577,
       "sha256": "aeb092088ef7e3714a3b622075508e833e0c32884118e2aa802818ef260bde40",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Simulated or redirect prototype, not the shipped dashboard; useful design concepts retain current owners in the recheck crosswalk.",
+      "initialTo": "remove/docs/NERV/dashboard.html",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "superseded-prototype"
     },
     {
       "from": "docs/NERV/dashboard1.html",
       "to": "remove/docs/NERV/dashboard1.html",
       "bytes": 37044,
       "sha256": "bd7ee7e3aabf4a4236c646b4fb5fefe383fdfb94ed46d6f638b9c1d886501eb9",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Simulated or redirect prototype, not the shipped dashboard; useful design concepts retain current owners in the recheck crosswalk.",
+      "initialTo": "remove/docs/NERV/dashboard1.html",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "superseded-prototype"
     },
     {
       "from": "docs/NERV/dashboard2.html",
       "to": "remove/docs/NERV/dashboard2.html",
       "bytes": 32966,
       "sha256": "c163e85d3a5ae07c3f592c7ca3f41b2bbe9846f6b7af222f9aabd86b629c4bc3",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Simulated or redirect prototype, not the shipped dashboard; useful design concepts retain current owners in the recheck crosswalk.",
+      "initialTo": "remove/docs/NERV/dashboard2.html",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "superseded-prototype"
     },
     {
       "from": "docs/NERV/gemini-code-1793557312919.txt",
-      "to": "remove/docs/NERV/gemini-code-1793557312919.txt",
+      "to": "docs/archive/design-inputs/gemini-code-1793557312919.txt",
       "bytes": 4590,
       "sha256": "817a0f4663029a73ac8d9b39d293ffcbb70c16f780772bbd8a47c5e17c1e1b4f",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Contains valid design intent alongside superseded details; retained outside remove. Current target and explicit crosswalk own present interpretation.",
+      "initialTo": "remove/docs/NERV/gemini-code-1793557312919.txt",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "historical-design-source"
     },
     {
       "from": "docs/NERV/insights.md",
-      "to": "remove/docs/NERV/insights.md",
+      "to": "docs/archive/design-inputs/insights.md",
       "bytes": 19418,
       "sha256": "b3f0a7996d4592389e1cce902bbb713e6493b760f76bc98c320a7cb7639a436d",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Contains valid design intent alongside superseded details; retained outside remove. Current target and explicit crosswalk own present interpretation.",
+      "initialTo": "remove/docs/NERV/insights.md",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "historical-design-source"
     },
     {
       "from": "docs/NERV/nerv-agency-dashboard.html",
       "to": "remove/docs/NERV/nerv-agency-dashboard.html",
       "bytes": 421,
       "sha256": "b499cbeef350f22710325a90e41e3424e3bc99d627c1171107078c78279ceb0f",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Simulated or redirect prototype, not the shipped dashboard; useful design concepts retain current owners in the recheck crosswalk.",
+      "initialTo": "remove/docs/NERV/nerv-agency-dashboard.html",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "superseded-prototype"
     },
     {
       "from": "docs/NERV/stay with NERV, just do not forget initial roadma... - stay with NERV, just do not forget initial roadma....csv",
-      "to": "remove/docs/NERV/stay with NERV, just do not forget initial roadma... - stay with NERV, just do not forget initial roadma....csv",
+      "to": "docs/archive/design-inputs/nerv-concept-mapping.csv",
       "bytes": 3400,
       "sha256": "730b783772d05c7421ff1afbe6794bbedd1be8895a99f04ae1c3047ace95b1a9",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Contains valid design intent alongside superseded details; retained outside remove. Current target and explicit crosswalk own present interpretation.",
+      "initialTo": "remove/docs/NERV/stay with NERV, just do not forget initial roadma... - stay with NERV, just do not forget initial roadma....csv",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "historical-design-source"
     },
     {
       "from": "docs/analysis_2026_11_02.txt",
-      "to": "remove/docs/analysis_2026_11_02.txt",
+      "to": "docs/archive/design-inputs/analysis_2026_11_02.txt",
       "bytes": 18148,
       "sha256": "f44eff4bfa6ae6c8513449befc12f40b3b2853eb376d981bad1d67a8ba3d3f46",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Contains valid design intent alongside superseded details; retained outside remove. Current target and explicit crosswalk own present interpretation.",
+      "initialTo": "remove/docs/analysis_2026_11_02.txt",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "historical-design-source"
     },
     {
       "from": "docs/NERV-ARCHITECTURE.md",
-      "to": "remove/docs/NERV-ARCHITECTURE.md",
+      "to": "docs/archive/design-inputs/NERV-ARCHITECTURE-2026-11-04.md",
       "bytes": 21029,
       "sha256": "5c32c16383c15cede22d60b281973f26fb14111568b9504acd0e48aab16f0b5a",
-      "reason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained"
+      "reason": "Contains valid design intent alongside superseded details; retained outside remove. Current target and explicit crosswalk own present interpretation.",
+      "initialTo": "remove/docs/NERV-ARCHITECTURE.md",
+      "originalReason": "Superseded brainstorm/prototype; requirements mapped in the retirement assessment; original bytes retained",
+      "deletionApproved": false,
+      "classification": "historical-design-source"
     }
-  ]
+  ],
+  "recheckBaseline": "7d3d09139f8281004d045545177bb7c9a163766c",
+  "recheckReport": "docs/audits/2026-11-08-retirement-recheck.md"
 }

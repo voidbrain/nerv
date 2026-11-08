@@ -4,7 +4,7 @@ Start here for document ownership. This is the NERV-specific map; the [procedure
 
 | Location | What belongs here | Current source / status |
 |---|---|---|
-| [Architecture](ARCHITECTURE.md), `architecture/` | Current boundaries and vocabulary | Maintained; planned behavior is labelled |
+| [Architecture](ARCHITECTURE.md), `architecture/` | Current boundaries, vocabulary and status-labelled target | Maintained; planned behavior is labelled |
 | [Decisions](decisions/README.md) | Design choices, alternatives and reasons | Retained until explicitly superseded, not obsolete because old |
 | [Roadmap](ROADMAP.md) | Milestones and acceptance | Authored placement plus generated status |
 | [Backlog](BACKLOG.md) | Current outcome ledger | Generated from `work/records/` and `work/layout.json` |
@@ -18,7 +18,7 @@ Start here for document ownership. This is the NERV-specific map; the [procedure
 | [Evaluations](evaluations/README.md) | Versioned scenario/model/stress run reports | Retained by revision and suite; no automatic expensive reruns |
 | `design/` | Scoped proposals/assessments not yet adopted as a decision | Findings map to existing records; no implied implementation |
 | `security/`, [installation](INSTALL.md), [model usage](model-usage.md) | Topic-specific operating guides | Maintained beside their owning subsystem |
-| [Archive](archive/README.md) | Closed records and reconciliation history | Append-only history, not a second active backlog |
-| [remove/](../remove/README.md) | Confirmed superseded brainstorms and prototypes awaiting optional deletion | Quarantined references, not runtime assets, instructions or current requirements |
+| [Archive](archive/README.md) | Closed records, reconciliation history and original design inputs | Append-only history, not a second active backlog |
+| [remove/](../remove/README.md) | Superseded prototypes, visual references and metadata; no automatic deletion approval | Quarantined references, not runtime assets, instructions or current requirements |
 
 Stable top-level entry points remain because tools, harness mappings and historical links use them. Adding another copy is not the way to reorganize an authority. The runtime dashboard is `web/public/dashboard/`, served at `/dashboard/`; the retired HTML files are not deployed.

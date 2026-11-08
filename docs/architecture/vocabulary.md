@@ -23,4 +23,6 @@ Current project meanings, reviewed 8 November 2026. Code uses plain names; lore 
 | Spear of Longinus | Revoke/stop and declared inverse effects; never assumes an external action was undone |
 | Watermelons / Ireul / Third Impact | Evaluated trust / tainted input / incident severity; lifecycle, isolation and automated response retain their owning open records |
 
-The [original historical target](../../remove/docs/NERV-ARCHITECTURE.md) and [retirement assessment](../audits/2026-11-06-brainstorm-retirement.md) preserve earlier proposals, renamed concepts and rejected alternatives. Do not use that diagram as a shipped-feature checklist.
+The [original historical target](../archive/design-inputs/NERV-ARCHITECTURE-2026-11-04.md) and [retirement assessment](../audits/2026-11-06-brainstorm-retirement.md) preserve earlier proposals, renamed concepts and rejected alternatives. Do not use that diagram as a shipped-feature checklist.
+
+Overall intended structure and status: [corrected target schema](target-schema.md).

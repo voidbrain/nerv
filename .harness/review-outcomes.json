@@ -22,5 +22,11 @@
     "disposition": "implemented",
     "target": "docs/agents/areas.md",
     "evidence": "Project-only documentation organization and path setting updates; shared harness procedures/tools remain identical to v4.2.1. Source-owned/generated/evidence roles clarified, review register uses recorded dates/conditional next runs, current decisions retained, 26 retired sources byte-preserved with hashes. Independent report-only review found staging/path/result wording corrections, applied before publication. Local work/backlog/rules/recap/roadmap/dependencies/queue/conventions/integrations/audit checks and six policy/pin regressions pass. Timing covers only final governing-input reconciliation/validation, excluding earlier inventory and writing. No model or physical/service campaign; final required CI owns full risk checks."
+  },
+  {
+    "kind": "rule",
+    "disposition": "implemented",
+    "target": ".harness.json",
+    "evidence": "Project-only verification mapping for exact remove/README.md and remove/manifest.json metadata paths. Regression999b69c is committed before mapping fix; prior mapping fails unchanged assertion and seven focused policy/pin tests now pass. Unknown executable/source paths still require full verification. Corrected target and all26 retirement dispositions independently reviewed; five mixed sources moved unchanged into historical archive,21 references/prototypes/metadata retained. Gauntlet is a boundary/reuse proposal, not a new repository/model qualification. Scoped documentation audit refreshes only its area; no model/stress/device campaign. Timing covers final governing-input reconciliation only, excluding preceding source/visual review and writing."
   }
 ]
