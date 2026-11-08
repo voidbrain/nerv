@@ -1,1 +1,14 @@
-[{"kind": "tool", "disposition": "implemented", "target": ".harness.json", "evidence": "NERV-only worker source/test globs extend protocol and evaluation impact; both socket profiles share imported RPC bounds. Full core suite 412 passed (2 platform skips), headless 3 passed (1 Windows skip), build/typecheck passed. Generic harness unchanged."}, {"kind": "none", "disposition": "no-change", "evidence": "Reviewed AGENTS, BACKLOG-RULES and affected area safeguards: enrolled identity, destination gate, secrets isolation, no assumed undo, unknown outcomes and physical verification all retained. Only factual implementation descriptions changed. Existing measurement aggregate has 13 reconciliation samples, most counters missing; no productivity claim or rule consolidation justified. No agent-behavior runner configured; governing AGENTS/BACKLOG-RULES unchanged."}]
+[
+  {
+    "kind": "tool",
+    "disposition": "implemented",
+    "target": ".harness.json",
+    "evidence": "Adopt released v4.1.0 optional planner, conservative NERV risk mappings and selected regression adapters. Five focused policy/pin tests pass; committed selection regression fails before event-risk and route-recovery fixes. Final platform validation delegated to CI, no repeated full local suite/model campaign."
+  },
+  {
+    "kind": "rule",
+    "disposition": "implemented",
+    "target": "AGENTS.md",
+    "evidence": "NERV explicitly opts into released shared selection guide. Check catalogue remains available; applicable fast/static/security/regression/acceptance/review/green-merge safeguards retained. Shared change-impact guide copied unchanged. Behavior runner not configured. Timed reconciliation includes waiting/continuation pauses; no productivity inference from elapsed duration."
+  }
+]

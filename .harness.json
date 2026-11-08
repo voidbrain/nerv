@@ -672,7 +672,8 @@
         "tests": [
           "test/model-usage.test.ts",
           "test/health.test.ts",
-          "test/dashboard-accounting.test.ts"
+          "test/dashboard-accounting.test.ts",
+          "test/dummy-plug.test.ts"
         ]
       },
       {

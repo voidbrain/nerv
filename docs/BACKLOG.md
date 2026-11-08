@@ -1363,7 +1363,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 |---|---|
 | PR / evidence | Test: test/verification-policy.test.mjs and test/ci-pins.test.mjs. Published tag v4.1.0 resolves to a8a358e. |
 | Opened | 2026-11-08 |
-| Verification | Four local adapter/policy/pin tests passed; real CI full/partial routing and independent adoption review pending. |
+| Verification | Five local adapter/policy/pin tests passed; typecheck, conventions and rule checks passed. Review: independent fresh-context review identified event privacy/schema and route recovery selection gaps; committed regression 2cedfe7 precedes mapping fixes. Follow-up independent review confirmed both mappings fixed, no remaining blockers. CI full/partial routing pending. |
 | Reviewed | 2026-11-08 |
 
 </details>
