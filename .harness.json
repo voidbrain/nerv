@@ -329,6 +329,18 @@
       "then": "Review the NERV document map and dated review register for affected links, actual dates, next conditions and retirement evidence; do not infer a run from a file edit.",
       "run": "npm run check:backlog",
       "checked": "Documentation consistency review and PR link/inventory validation"
+    },
+    {
+      "id": "gauntlet-adoption",
+      "when": [
+        "evals/gauntlet/**",
+        "tools/gauntlet*.mjs",
+        "test/gauntlet.test.mjs",
+        "vendor/**"
+      ],
+      "then": "Verify the pinned independent protocol, NERV native-runner normalization and supervision join; reconcile evaluation guide and candidate evidence without launching models.",
+      "run": "node --test test/gauntlet.test.mjs && npm run gauntlet:plan",
+      "checked": "Neutral adapter/CLI fixtures and explicitly selected policy acceptance; no full or model campaign."
     }
   ],
   "couplings": [

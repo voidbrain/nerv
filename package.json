@@ -44,7 +44,13 @@
     "work:build": "node tools/work-items.mjs build",
     "check:work": "node tools/work-items.mjs check",
     "work:tasks": "node tools/work-items.mjs tasks",
-    "work:claims": "node tools/task-claims.mjs"
+    "work:claims": "node tools/task-claims.mjs",
+    "gauntlet:plan": "node tools/gauntlet.mjs plan",
+    "gauntlet:run": "node tools/gauntlet.mjs run",
+    "gauntlet:model-plan": "node tools/gauntlet.mjs model-plan",
+    "gauntlet:model-run": "node tools/gauntlet.mjs model-run",
+    "gauntlet:compare": "node tools/gauntlet.mjs compare",
+    "gauntlet:qualify": "node tools/gauntlet.mjs qualify"
   },
   "dependencies": {
     "@angular/common": "22.2.4",
@@ -63,6 +69,7 @@
     "@angular/compiler-cli": "22.2.4",
     "@types/node": "24.10.1",
     "@types/ws": "8.18.1",
+    "@voidbrain/gauntlet-protocol": "file:vendor/voidbrain-gauntlet-protocol-0.1.1.tgz",
     "ajv-formats": "3.0.1",
     "ajv-formats-draft2019": "1.6.1",
     "axe-core": "4.14.0",

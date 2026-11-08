@@ -50,14 +50,14 @@ export function evidenceRevision(includeBuild=false){
  const state=spawnSync('git',['status','--porcelain'],{cwd:root,encoding:'utf8',timeout:3000});
  return {...buildInfo(),dirty:state.status===0?!!state.stdout.trim():null,includesBuild:includeBuild,inputs:sourceInputs(root,includeBuild)};
 }
-export function runProcess(args,{timeoutMs,env=process.env,maxBytes=2*1024*1024}={}){
+export function runProcess(args,{timeoutMs,env=process.env,maxBytes=2*1024*1024,supervised=false}={}){
  // Until a Job Object supervisor is implemented, refuse execution on Windows:
  // taskkill cannot guarantee cleanup after the original parent has exited.
  if(process.platform==='win32')return Promise.reject(Error('Evaluation execution requires POSIX process groups; Windows Job Object supervision is not implemented'));
  return new Promise(resolveRun=>{
-  const child=spawn(process.execPath,args,{cwd:root,env,detached:process.platform!=='win32',windowsHide:true,stdio:['ignore','pipe','pipe']});
+  const child=spawn(process.execPath,args,{cwd:root,env,detached:!supervised&&process.platform!=='win32',windowsHide:true,stdio:['ignore','pipe','pipe']});
   let stdout='',stderr='',bytes=0,error=null,stopping=false,force;
-  const groupKill=signal=>{try{process.kill(-child.pid,signal);}catch(e){if(e.code!=='ESRCH')error=(error||'')+' Cleanup failed: '+e.message;}};
+  const groupKill=signal=>{try{if(supervised)child.kill(signal);else process.kill(-child.pid,signal);}catch(e){if(e.code!=='ESRCH')error=(error||'')+' Cleanup failed: '+e.message;}};
   const stop=message=>{
    if(stopping)return;stopping=true;error=message;
    groupKill('SIGTERM');force=setTimeout(()=>groupKill('SIGKILL'),500);
@@ -81,7 +81,7 @@ export function writeReport(report,output){
  let parent=dirname(path);while(parent!==dirname(parent)){try{if(lstatSync(parent).isSymbolicLink())throw Error('Refusing symlink evidence parent');}catch(e){if(e.code!=='ENOENT')throw e;}parent=dirname(parent);}
  mkdirSync(dirname(path),{recursive:true,mode:0o700});writeFileSync(path,JSON.stringify(report,null,2)+'\n',{flag:'wx',mode:0o600});return path;
 }
-export async function run(args=[]){
+export async function run(args=[],{supervised=false}={}){
  const config=options(args),suite=readSuite();
  if(config.check)return {checked:true,id:suite.id,groups:suite.groups.length};
  const selected=config.only?suite.groups.filter(g=>g.id===config.only):suite.groups;
@@ -94,7 +94,7 @@ export async function run(args=[]){
    if(Date.now()>=deadline){results.push({id:group.id,iteration:iteration+1,status:'not-run',counts:{tests:0,passed:0,failed:0,skipped:0},error:'Suite time budget exhausted'});continue;}
    process.stderr.write(`Evaluating ${group.id} (${iteration+1}/${config.repeat})\n`);
    const childEnv={...process.env,NERV_EVAL_SEED:String((config.seed+iteration)>>>0)};delete childEnv.NODE_TEST_CONTEXT;
-   const begin=performance.now();const child=await runProcess(['--test','--test-reporter=tap','--test-concurrency=1',...group.files],{timeoutMs:Math.min(180000,deadline-Date.now()),env:childEnv});
+   const begin=performance.now();const child=await runProcess(['--test','--test-reporter=tap','--test-concurrency=1',...group.files],{timeoutMs:Math.min(180000,deadline-Date.now()),env:childEnv,supervised});
    const output=(child.stdout||'')+'\n'+(child.stderr||'');const count=key=>Number(new RegExp('^# '+key+' (\\d+)','m').exec(output)?.[1]||0);
    if(child.status!==0)process.stderr.write(clean(output)+'\n');
    results.push({id:group.id,iteration:iteration+1,families:group.families,files:group.files,status:!child.error&&child.status===0&&count('tests')>=group.minimumTests&&count('pass')>0&&count('fail')===0?'passed':'failed',counts:{tests:count('tests'),passed:count('pass'),failed:count('fail'),skipped:count('skipped')},durationMs:Math.round(performance.now()-begin),exitCode:child.status,error:child.error?clean(child.error):null,evidenceTruncated:output.length>24000,evidenceBytes:Buffer.byteLength(output),evidence:clean(output)});

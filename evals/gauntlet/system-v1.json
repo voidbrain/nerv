@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "id": "nerv-system-flows",
+  "version": "1.0.0",
+  "cases": [
+    {
+      "id": "policy",
+      "layer": "system",
+      "split": "regression",
+      "capabilities": [
+        "effects",
+        "taint",
+        "vote-permutations",
+        "shadow-veto",
+        "budget",
+        "confinement"
+      ],
+      "critical": true,
+      "expensive": false,
+      "runner": "policy"
+    },
+    {
+      "id": "ledger",
+      "layer": "system",
+      "split": "regression",
+      "capabilities": [
+        "expiry",
+        "single-use-grants",
+        "restart",
+        "executor-effects",
+        "approval-idempotency",
+        "brief-source-recovery",
+        "daily-delivery-idempotency"
+      ],
+      "critical": true,
+      "expensive": false,
+      "runner": "ledger"
+    },
+    {
+      "id": "conversation",
+      "layer": "system",
+      "split": "regression",
+      "capabilities": [
+        "ambiguity",
+        "mind-change",
+        "conversation-isolation",
+        "bounded-replanning",
+        "language",
+        "explanations"
+      ],
+      "critical": true,
+      "expensive": false,
+      "runner": "conversation"
+    },
+    {
+      "id": "channels",
+      "layer": "system",
+      "split": "regression",
+      "capabilities": [
+        "delivery-retry",
+        "cross-channel",
+        "relay",
+        "owner-authorization",
+        "approval-card-reconciliation"
+      ],
+      "critical": true,
+      "expensive": false,
+      "runner": "channels"
+    },
+    {
+      "id": "bases",
+      "layer": "system",
+      "split": "regression",
+      "capabilities": [
+        "signed-bases",
+        "remote-idempotency",
+        "seat-delay",
+        "shadow-after-decision",
+        "lease-fencing",
+        "outbound-reconnect",
+        "approval-locks",
+        "signed-cancellation",
+        "legacy-quarantine",
+        "hostile-frames",
+        "connection-admission"
+      ],
+      "critical": true,
+      "expensive": false,
+      "runner": "bases"
+    },
+    {
+      "id": "stress",
+      "layer": "system",
+      "split": "regression",
+      "capabilities": [
+        "bounded-queues",
+        "brain-stall",
+        "crash",
+        "parallel-writes",
+        "latency"
+      ],
+      "critical": true,
+      "expensive": true,
+      "runner": "stress"
+    },
+    {
+      "id": "browser",
+      "layer": "system",
+      "split": "regression",
+      "capabilities": [
+        "dashboard-operator",
+        "waiting-state",
+        "approval",
+        "topic-change",
+        "accessibility"
+      ],
+      "critical": true,
+      "expensive": true,
+      "runner": "browser"
+    }
+  ]
+}

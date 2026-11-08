@@ -50,6 +50,7 @@ Dates identify the documented observation/report, not a new execution today. Aut
 
 | Report | Documented date | Scope / owner | Next condition |
 |---|---|---|---|
+| [gauntlet-2026-11-09.md](../acceptance/gauntlet-2026-11-09.md) | 2026-11-09 CET (2026-11-08 23:22 UTC) | F-073 / selected native policy through protocol 0.1.1, 90 checks; six adapter/artifact/cancellation fixtures | Changed protocol pin, adapter, pack or supervision; explicit model campaign separate |
 | [angular-2026-11-06.md](../acceptance/angular-2026-11-06.md) | 2026-11-06 (report) | F-010 / Angular browser and axe | Changed Angular/CSS/localization or requested phone/PWA acceptance |
 | [assistant-2026-11-07.md](../acceptance/assistant-2026-11-07.md) | 2026-11-07 (report) | F-003 / assistant recovery and channel evidence | Changed scheduling/planner/channel joins or new reported failure |
 | [core-2026-11-06.md](../acceptance/core-2026-11-06.md) | 2026-11-06 (report) | F-002 / durable local workflows | Changed persistence/reminders/HTTP joins or recovery risk |
@@ -112,3 +113,7 @@ The [documentation map](../README.md), [procedure index](../agents/procedures.md
 [Gauntlet Protocol ownership/reuse assessment](../design/gauntlet-protocol-2026-11-08.md), 2026-11-08: proposed independent project using harness for development, with NERV-owned cases. Next condition: accepted repository/framework scope or changed evaluation requirements. No model execution/qualification date exists for this proposal.
 
 PR #221 CI 42530253552 attempt 1 also observed heartbeat-path connection loss in the Windows deferred-approval resource-retention fixture. Only the failed Windows job and marker were retried on unchanged source; attempt 2 passed. B-046 retains both occurrences without assuming a shared causal fix or production defect.
+
+## Gauntlet integration review
+
+[Independent report, 9 November 2026](2026-11-09-gauntlet.md): protocol/adapters, cost gates and cancellation join. Last execution: 2026-11-09 CET. Next: protocol pin, adapter, supervision or evidence-contract changes; real-model qualification retains a separate campaign/review trigger. No background campaign.
