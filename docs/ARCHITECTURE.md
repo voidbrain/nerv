@@ -16,6 +16,8 @@ Version negotiation, enrolled device identities, key rotation/revocation, heartb
 
 ## Discovery and bootstrap
 
+Selected-inventory discovery, fixed read-only local/SSH inspection and digest-bound manifests with operator-confirmed, journaled fresh-profile bootstrap are implemented through `nodes`. Automatic service/update/uninstall ownership flows and end-to-end device acceptance remain open in F-005; see [the contract](decisions/node-bootstrap.md). No discovery/inspection creates trust or runs installation commands.
+
 Discover using selected LAN ranges, mDNS/DNS-SD, configured SSH targets, Tailscale inventory and USB adapters where available. Inspect candidates without enrolling them. Produce a concrete installation plan listing target identity, version, permissions, dependencies, service changes and rollback. On authorized hosts, bootstrap through authenticated SSH or a pairing command with pinned checksums. Verify identity, run doctor and a harmless capability test. Support updating, revoking and uninstalling. Discovery is not a trust grant; printers may need only an API adapter.
 
 ## GenUI and interfaces
