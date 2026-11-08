@@ -2,7 +2,7 @@
   "version": 1,
   "segments": [
     {
-      "text": "# NERV Agency backlog\n\nCurrent work ledger, reviewed 8 November 2026 against main `30f8de3`. PR #217 CI 42518246797 passed all five jobs including full-suite. Documentation reorganization and review-index maintenance are recorded below.\nGovernance and naming follow the [architecture vocabulary](architecture/vocabulary.md). [Rules](BACKLOG-RULES.md) \u00b7 [Roadmap](ROADMAP.md) \u00b7 [Archive 2026](archive/backlog-2026.md) \u00b7 [Reconciliation log](archive/reconciliation-2026.md) \u00b7 [Dependencies](agents/backlog-dependencies.md) \u00b7 [Work queue](agents/backlog-queue.md).\n\n<!-- recap:start -->\n<!-- recap:end -->\n\n## Bugs and reliability\n\nFrom 2026-11-05 a defect (behaviour that breaks something meant to work) gets a B- record here; earlier ones stayed in their F- records (owner decision).\n\n\n\n\n\n\n\n\n\n\n\n"
+      "text": "# NERV Agency backlog\n\nCurrent work ledger, reviewed 8 November 2026 against main `c7f4f84`. PR #219 CI 42521677029 passed all five jobs including full-suite. Documentation organization is complete; model qualification and remaining task decomposition stay explicit.\nGovernance and naming follow the [architecture vocabulary](architecture/vocabulary.md). [Rules](BACKLOG-RULES.md) \u00b7 [Roadmap](ROADMAP.md) \u00b7 [Archive 2026](archive/backlog-2026.md) \u00b7 [Reconciliation log](archive/reconciliation-2026.md) \u00b7 [Dependencies](agents/backlog-dependencies.md) \u00b7 [Work queue](agents/backlog-queue.md).\n\n<!-- recap:start -->\n<!-- recap:end -->\n\n## Bugs and reliability\n\nFrom 2026-11-05 a defect (behaviour that breaks something meant to work) gets a B- record here; earlier ones stayed in their F- records (owner decision).\n\n\n\n\n\n\n\n\n\n\n\n"
     },
     {
       "records": "B"
@@ -14,7 +14,7 @@
       "records": "F"
     },
     {
-      "text": "\n## Other changes\n\n**Documentation organization and review register \u2014 Implemented, 2026-11-08.** [PR #219](https://github.com/voidbrain/nerv/pull/219) owner-requested documentation maintenance: clarify source/generated/evidence ownership; index all review/acceptance/evaluation reports with actual dates and next conditions; preserve current decisions; move confirmed superseded NERV prototypes, old target schema and analysis export into `remove/` with a byte-preserving manifest. Next: validate links/inventory, independent review and required CI. Closure requires no lost source bytes or requirements, current links/catalogue and green CI; this does not execute a product audit or model campaign.\n"
+      "text": "\n## Other changes\n\n**CI reliability evidence \u2014 B-046, 2026-11-08.** Original worker-cancellation failure retained, isolated diagnostic passed and only failed CI jobs were retried; root cause/fix remain open under B-046. Existing B-043 remains a separate queue-saturation finding.\n"
     }
   ]
 }

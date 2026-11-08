@@ -23,7 +23,10 @@
   ],
   "capabilities": [
     "bounded-edit",
-    "structured-tools"
+    "structured-tools",
+    "typescript",
+    "concurrency-control",
+    "budgeting"
   ],
   "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
   "validation": [

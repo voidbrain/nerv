@@ -24,7 +24,11 @@
   ],
   "capabilities": [
     "bounded-edit",
-    "structured-tools"
+    "structured-tools",
+    "swift",
+    "typescript",
+    "delivery-reconciliation",
+    "regression-design"
   ],
   "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
   "validation": [

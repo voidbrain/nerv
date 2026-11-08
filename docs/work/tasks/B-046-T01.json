@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "id": "B-046-T01",
+  "parent": "B-046",
+  "title": "Capture the worker heartbeat CI failure evidence",
+  "goal": "Record the actual failing attempt, unchanged runtime, isolated diagnostic and retry without claiming a fix",
+  "status": "closed",
+  "acceptance": [
+    "Failure and retry remain distinct dated evidence",
+    "No worker/runtime behavior or assertion is changed",
+    "Reserve the new bug ID before publishing the record"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "contract:backlog-ids",
+    "docs/work/records/B-046.md",
+    "docs/work/tasks/B-046-T01.json",
+    "generated:backlog-views",
+    "docs/work/tasks/B-046-T02.json"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools"
+  ],
+  "privacy": "Neutral repository fixtures only; no model inference, private hosts or device operations",
+  "validation": [
+    "Check actual CI attempts and source diff",
+    "Validate the record and generated views"
+  ],
+  "escalation": [
+    "Do not infer a root cause or claim a fix from a passing retry"
+  ]
+}

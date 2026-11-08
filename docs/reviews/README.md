@@ -1,12 +1,12 @@
 # Review and assessment register
 
-NERV evidence snapshot reviewed 8 November 2026 against main `30f8de3`. Times below use Europe/Rome; dates come from recorded review/run metadata, not file modification time. This register links evidence and existing rerun conditions; it does not install a schedule, run checks or certify an assessment. Refresh the affected rows when new evidence or policy changes.
+NERV evidence snapshot reviewed 8 November 2026 against main `c7f4f84`. Times below use Europe/Rome; dates come from recorded review/run metadata, not file modification time. This register links evidence and existing rerun conditions; it does not install a schedule, run checks or certify an assessment. Refresh the affected rows when new evidence or policy changes.
 
 ## Current review windows
 
 | Review | Last actual evidence | Next run / trigger | Owner and limits |
 |---|---|---|---|
-| Full deterministic verification | [PR #217 CI 42518246797](https://github.com/voidbrain/nerv/actions/runs/42518246797), 2026-11-08; all five jobs passed | By 2026-11-15 or ten first-parent integrations, whichever comes first; sooner for risk, unknown coverage or explicit request | [NERV mapping](../verification.md) / [shared policy](../agents/verification.md); no stress/model/physical acceptance implied |
+| Full deterministic verification | [PR #219 CI 42521677029](https://github.com/voidbrain/nerv/actions/runs/42521677029), 2026-11-08; all five jobs passed | By 2026-11-15 or ten first-parent integrations, whichever comes first; sooner for risk, unknown coverage or explicit request | [NERV mapping](../verification.md) / [shared policy](../agents/verification.md); no stress/model/physical acceptance implied |
 | Architecture reassessment | [2026-11-08 scoped report](../audits/2026-11-08-architecture-reassessment.md) | Significant boundary/hardware/trust change, recurring design failure or owner request; no calendar appointment | [Procedure](../agents/architecture-review.md), affected backlog owners |
 | Expensive stress / real-model campaigns | Reports below; latest run depends on suite and selection | On request, concrete changed risk or named acceptance, with explicit scope and budget; no periodic rerun date | [Evaluation procedure](../decisions/evaluation-and-improvement.md); no automatic model qualification |
 | Human / real-device acceptance | Per report and current record | When required device, signing identity, service host or human observation is available; not scheduled | F-005/F-009/F-011/F-015 and other owning records |
@@ -100,3 +100,7 @@ Current decisions stay in their owning folder until an explicit superseding deci
 | [Model profiles](../agents/model-profiles.json) | Gemma candidate; no qualifying evaluation date | Exact configuration and bounded capability evidence before qualification |
 
 The [documentation map](../README.md), [procedure index](../agents/procedures.md) and [work-source guide](../work/README.md) distinguish authorities, executable work and dated evidence. No last-run date is inferred from Git commit time or filename alone; report-only dates are labelled as such.
+
+## CI reliability finding discovered during documentation maintenance
+
+[PR #219 CI 42521677029 attempt 1](https://github.com/voidbrain/nerv/actions/runs/42521677029/attempts/1) failed deferred worker-approval cancellation with heartbeat connection loss. An unchanged-head failed-job-only retry passed; it does not establish a fix. [B-046](../BACKLOG.md#b-046) owns controlled reproduction and causal verification. The fixture’s 150 ms heartbeat budget suggests a timing hypothesis, not a proven shared cause with B-043 or a demonstrated production defect. No assertion or runtime behavior was changed.
