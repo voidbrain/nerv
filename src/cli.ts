@@ -410,7 +410,7 @@ try {
           // Dispatch, on the main base: a request asked on another base, with its own conversation per base and channel.
           // Slice 3b, on the base asked: only actions this base offers, once per id, through this base's own gate.
           offers:()=>live().kaji?.offers ?? [],onOffers:(id,tools)=>runtime.notePeerOffers(id,tools),
-          onRun:(from,item)=>runtime.runFromPeer(from,item,live().kaji?.offers ?? []),
+          onRun:(from,item,ownerKey)=>runtime.runFromPeer(from,item,live().kaji?.offers ?? [],undefined,ownerKey),
           // Phase 2, on the base asked: this base's Casper votes on the main base's action.
           onVerdict:(_from,ask)=>runtime.peerVerdict(ask),
           onChat:async(from,message,conversation)=>({...await runtime.chat(message,`kaji:${from.toLowerCase()}${conversation?'-'+conversation:''}`),base:{id:config.base.id,name:config.base.name}})});

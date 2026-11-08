@@ -1,3 +1,6 @@
+import {transaction} from './sqlite-transaction.ts';
+import type {WorkerLease} from './worker-jobs.ts';
+import {readConfig} from './config.ts';
 import {WorkerJobs} from './worker-jobs.ts';
 import {InstrumentalityRuns} from './instrumentality-runs.ts';
 import {UsageStore} from './model-usage.ts';
@@ -9,7 +12,7 @@ import { dirname } from 'node:path';
 import { LEDGER_SCHEMA, Ledger, type Decision, type Proposal } from './ledger.ts';
 import { builtinTools, execute, hasExecutor } from './executors.ts';
 import { MEMORY_SCHEMA, Memory, type Episode } from './memory.ts';
-import { REGISTRY_SCHEMA } from './kaji.ts';
+import {Registry, REGISTRY_SCHEMA } from './kaji.ts';
 import { defaultPolicy, type Ballot, type Policy } from './policy.ts';
 export type Reminder = { id: string; title: string; due: string; created: string; delivered: string | null; cancelled: string | null };
 export interface InboxCheckpoint {sequence:number;id?:string}
@@ -186,7 +189,22 @@ export class Store {
   expiredApprovals(since: string) { return this.ledger.expiredSince(since); }
   /** The grant ID stays inside the coordinator: callers learn only the outcome. */
   /** Applies the owner's decision; an approval of a tool with an executor runs it once, here, with the grant it issued. */
+  assertWorkerAuthority(owner:string,key:string,ownerKey:string):void {
+    if(!this.home)throw new Error('Worker identity unavailable.');const config=readConfig(this.home),registry=new Registry(this.db,config.kaji?.root);
+    if(registry.main()!==owner||!registry.bases().some(b=>b.baseId===owner&&b.status==='enrolled'&&b.publicKey===ownerKey)||!registry.bases().some(b=>b.baseId===config.base.id&&b.status==='enrolled'&&b.publicKey===key))throw new Error('Worker authority or destination enrollment changed.');
+  }
+  private assertWorker(lease:WorkerLease){this.assertWorkerAuthority(lease.owner,lease.key,lease.ownerKey);this.workerJobs.assertLease(lease);}
   decide(id: string, decision: Decision, source='api'):{decision:string;result?:unknown;error?:string} {
+    const lease=this.workerJobs.approval(id);if(!lease)return this.decideCore(id,decision,source);
+    return transaction(this.db,()=>{
+      const row=this.db.prepare('SELECT decision FROM approvals WHERE id=?').get(id) as {decision:string|null}|undefined;if(row?.decision)return this.decideCore(id,decision,source);
+      if(decision==='approve')try{this.assertWorker(lease);}catch{
+        const rejected=this.decideCore(id,'reject','worker-fence');this.workerJobs.finish(lease,{outcome:'reject',error:'Worker lease or authority changed before approval; nothing ran.'});return {...rejected,error:'Worker lease or authority changed; nothing ran.'};
+      }
+      const result=this.decideCore(id,decision,source);this.workerJobs.finish(lease,{outcome:result.decision==='approve'&&!result.error?'grant':'reject',...result});return result;
+    });
+  }
+  private decideCore(id: string, decision: Decision, source='api'):{decision:string;result?:unknown;error?:string} {
     const applied=this.ledger.decide(id,decision,source);
     const action=applied.grantId?this.ledger.grantAction(applied.grantId):undefined;
     if(applied.grantId&&action&&!action.used&&hasExecutor(action.tool)){const outcome=this.run(action.sortieId,action.actionId,applied.grantId,action.tool,action.args);this.settle(action.sortieId,'error' in outcome?'failed':'done');return {decision:applied.decision,...outcome};}
@@ -195,7 +213,11 @@ export class Store {
     return {decision:applied.decision};
   }
   /** One owner action through the gate (F-017): ballot, then on a grant the executor runs at once; otherwise it waits for the owner or stops. */
-  runAction(sortieId: string, proposal: Proposal):ActResult {
+  runAction(sortieId:string,proposal:Proposal,worker?:WorkerLease):ActResult {
+    if(!worker)return this.runActionCore(sortieId,proposal);
+    return transaction(this.db,()=>{this.assertWorker(worker);const result=this.runActionCore(sortieId,proposal);if(result.approvalId)this.workerJobs.bindApproval(worker,result.approvalId,result);return result;});
+  }
+  private runActionCore(sortieId: string, proposal: Proposal):ActResult {
     const p=this.ledger.propose(sortieId,proposal);
     const base:ActResult={sortieId,actionId:p.actionId,outcome:p.ballot.outcome,pattern:p.ballot.pattern,reason:p.ballot.reason,sync:p.ballot.sync,...(p.approvalId?{approvalId:p.approvalId}:{})};
     if(p.grantId&&hasExecutor(proposal.tool)){const outcome=this.run(sortieId,p.actionId,p.grantId,proposal.tool,proposal.args);this.settle(sortieId,'error' in outcome?'failed':'done');return {...base,...outcome};}

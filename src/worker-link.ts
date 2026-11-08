@@ -1,4 +1,4 @@
-import {randomUUID,type KeyObject} from 'node:crypto';
+import {createPublicKey,randomUUID,type KeyObject} from 'node:crypto';
 import type {Server,IncomingMessage} from 'node:http';
 import type {Duplex} from 'node:stream';
 import {WebSocket,WebSocketServer} from 'ws';
@@ -12,7 +12,7 @@ const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
 const object=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 const keys=(v:Record<string,unknown>,allowed:string[])=>Object.keys(v).every(k=>allowed.includes(k));
 export interface WorkerAdapter {
- open(owner:string,session:string):Promise<{epoch:number;cursor:number}>;
+ open(owner:string,session:string,key:string,ownerKey:string):Promise<{epoch:number;cursor:number}>;
  close(owner:string,session:string):Promise<void>;
  run(owner:string,item:WorkerItem,context:WorkerContext):Promise<unknown>;
 }
@@ -20,10 +20,10 @@ interface Settings {id:string;key:KeyObject;registry:RegistryPort;adapter:Worker
 interface Pending {resolve:(value:unknown)=>void;reject:(error:Error)=>void;timer:NodeJS.Timeout}
 /** Every frame is signed for its fresh session and monotonically increasing direction counter. */
 class Peer {
- readonly ws:WebSocket;readonly link:WorkerLink;readonly remote:string;readonly role:'coordinator'|'worker';session:string;
+ readonly ws:WebSocket;readonly link:WorkerLink;readonly remote:string;readonly role:'coordinator'|'worker';readonly remoteKey:string;session:string;
  ready=false;epoch=0;cursor=0;private sent=0;private received=0;private active=0;private incoming:Promise<void>=Promise.resolve();private ended=false;private pending=new Map<string,Pending>();private heartbeat?:NodeJS.Timeout;private helloTimer:NodeJS.Timeout;
- constructor(link:WorkerLink,ws:WebSocket,remote:string,role:'coordinator'|'worker',session=''){
-  this.link=link;this.ws=ws;this.remote=remote;this.role=role;this.session=session;
+ constructor(link:WorkerLink,ws:WebSocket,remote:string,role:'coordinator'|'worker',remoteKey:string,session=''){
+  this.link=link;this.ws=ws;this.remote=remote;this.role=role;this.remoteKey=remoteKey;this.session=session;
   this.helloTimer=setTimeout(()=>this.end(),5000);ws.on('error',()=>this.end());ws.once('close',()=>this.end());
   ws.on('message',(data,binary)=>{
    const bytes=Buffer.isBuffer(data)?data:Array.isArray(data)?Buffer.concat(data):Buffer.from(data);
@@ -42,7 +42,7 @@ class Peer {
    const bases=await this.link.settings.registry.bases(),main=await this.link.settings.registry.main?.();
    if(main!==(this.role==='worker'?this.remote:this.link.settings.id)||!bases.some(b=>b.baseId===this.link.settings.id&&b.status==='enrolled'))throw Error('Worker authority changed.');
    // Counter/session binding rejects replay; the fresh nonce helper here performs signature/time verification only.
-   const from=verifySigned(envelope.headers as Record<string,string>,request?'req':'res','FRAME',PATH+'/'+envelope.session,envelope.body,bases,new Nonces());if(from!==this.remote)throw Error('Unexpected worker identity.');
+   const from=verifySigned(envelope.headers as Record<string,string>,request?'req':'res','FRAME',PATH+'/'+envelope.session,envelope.body,bases,new Nonces());if(from!==this.remote||!bases.some(b=>b.baseId===from&&b.publicKey===this.remoteKey))throw Error('Unexpected worker identity.');
    this.session=envelope.session;this.received++;
    if(!request){
     if(!keys(rpc,['jsonrpc','id','result','error'])||('result' in rpc)===('error' in rpc))throw Error('Invalid worker response.');const pending=this.pending.get(rpc.id);if(!pending)throw Error('Unknown worker response.');this.pending.delete(rpc.id);clearTimeout(pending.timer);
@@ -62,7 +62,7 @@ class Peer {
   if(method==='worker.ping'&&keys(params,[])&&Object.keys(params).length===0)return {version:WORKER_PROTOCOL_VERSION};
   if(method==='worker.run'&&this.role==='worker'){
    if(!keys(params,['item','epoch','expires'])||params.epoch!==this.epoch||!object(params.item)||!Number.isSafeInteger(params.item.sequence)||Number(params.item.sequence)<1)throw Error('Invalid worker delivery.');
-   const context={session:this.session,epoch:this.epoch,expires:params.expires as number};validateParams('worker.claim',{owner:this.remote,item:params.item,context});
+   const context={session:this.session,epoch:this.epoch,expires:params.expires as number,ownerKey:this.remoteKey};validateParams('worker.claim',{owner:this.remote,ownerKey:this.remoteKey,key:createPublicKey(this.link.settings.key).export({type:'spki',format:'der'}).toString('base64'),item:params.item,context:{session:context.session,epoch:context.epoch,expires:context.expires}});
    const result=await this.link.settings.adapter.run(this.remote,params.item as unknown as WorkerItem,context);
    if(!object(result)||Buffer.byteLength(JSON.stringify(result))>WORKER_RESULT_BYTES)throw Error('Invalid worker result.');return result;
   }
@@ -103,8 +103,8 @@ export class WorkerLink {
   this.upgrades++;const deadline=setTimeout(()=>socket.destroy(),5000);
   try{
    if(await this.settings.registry.main?.()!==this.settings.id)throw Error('Not coordinator.');
-   const from=verifySigned(request.headers as Record<string,string>,'req','GET',PATH,'',await this.settings.registry.bases(),this.upgradeNonces);if(from===this.settings.id)throw Error('Self connection.');
-   if(this.stopped||socket.destroyed)throw Error('Stopped.');clearTimeout(deadline);this.server.handleUpgrade(request,socket,head,ws=>{new Peer(this,ws,from,'coordinator');});
+   const bases=await this.settings.registry.bases();const from=verifySigned(request.headers as Record<string,string>,'req','GET',PATH,'',bases,this.upgradeNonces);if(from===this.settings.id)throw Error('Self connection.');
+   if(this.stopped||socket.destroyed)throw Error('Stopped.');clearTimeout(deadline);this.server.handleUpgrade(request,socket,head,ws=>{new Peer(this,ws,from,'coordinator',bases.find(b=>b.baseId===from)!.publicKey);});
   }catch{refuse(401);}finally{clearTimeout(deadline);this.upgrades--;}
  }
  private upgradeNonces=new Nonces();
@@ -130,10 +130,10 @@ export class WorkerLink {
  private async connectOnce(){
   const owner=await this.settings.registry.main?.();if(!owner||owner===this.settings.id)return;
   const bases=await this.settings.registry.bases(),target=bases.find(b=>b.baseId===owner&&b.status==='enrolled');if(!target||!bases.some(b=>b.baseId===this.settings.id&&b.status==='enrolled'))return;
-  const session=randomUUID(),state=await this.settings.adapter.open(owner,session);let peer:Peer|undefined;
+  const session=randomUUID(),state=await this.settings.adapter.open(owner,session,createPublicKey(this.settings.key).export({type:'spki',format:'der'}).toString('base64'),target.publicKey);let peer:Peer|undefined;
   try{
    if(this.stopped)throw Error('Stopped.');const socket=new WebSocket(this.settings.address(target.address)+PATH,{headers:signedHeaders(this.settings.id,this.settings.key,'req','GET',PATH,''),maxPayload:MAX_FRAME_BYTES,perMessageDeflate:false,handshakeTimeout:5000});
-   await new Promise<void>((resolve,reject)=>{socket.once('error',reject);socket.once('open',()=>{peer=new Peer(this,socket,owner,'worker',session);peer.epoch=state.epoch;this.client=peer;resolve();});});
+   await new Promise<void>((resolve,reject)=>{socket.once('error',reject);socket.once('open',()=>{peer=new Peer(this,socket,owner,'worker',target.publicKey,session);peer.epoch=state.epoch;this.client=peer;resolve();});});
    if(this.stopped){peer!.end();return;}await peer!.negotiate(state.epoch,state.cursor);this.failures=0;this.nextAttempt=0;
   }catch(e){if(peer)peer.end();else await this.settings.adapter.close(owner,session);throw e;}
  }

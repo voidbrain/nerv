@@ -71,9 +71,9 @@ process.on('message',(value:unknown)=>{
    case 'kaji.main':return registry().main() ?? null;
    case 'kaji.outbox':return store.outbox();
    case 'kaji.outboxDone':return store.outboxDone(params.id as string,params.result,params.said as {base:string;text:string}|undefined);
-   case 'worker.open':if(registry().main()!==params.owner)throw new Error('Not the main base.');return store.workerJobs.open(params.owner as string,params.session as string);
-   case 'worker.close':store.workerJobs.close(params.owner as string,params.session as string);return true;
-   case 'worker.claim':if(registry().main()!==params.owner)throw new Error('Not the main base.');return store.workerJobs.claim(params.owner as string,params.item as unknown as WorkerItem,params.context as WorkerContext|undefined);
+   case 'worker.open':store.assertWorkerAuthority(params.owner as string,params.key as string,params.ownerKey as string);const opened=store.workerJobs.open(params.owner as string,params.session as string,Date.now(),params.key as string,params.ownerKey as string);store.expire();return opened;
+   case 'worker.close':store.workerJobs.close(params.owner as string,params.session as string);store.expire();return true;
+   case 'worker.claim':store.assertWorkerAuthority(params.owner as string,params.key as string,params.ownerKey as string);return store.workerJobs.claim(params.owner as string,params.item as unknown as WorkerItem,params.context as WorkerContext|undefined,Date.now(),params.key as string,params.ownerKey as string);
    case 'worker.finish':store.workerJobs.finish(params.lease as unknown as WorkerLease,params.result);return true;
    case 'kaji.add':{const r=registry();let added=0;for(const rec of params.records as SignedRecord[]){try{if(r.add(rec)==='added')added++;}catch{/* a record not signed by our root is dropped */}}return added;}
    case 'kaji.seen':return registry().seen(params.updates as Record<string,string>);
@@ -101,7 +101,7 @@ process.on('message',(value:unknown)=>{
    case 'misato.claim':return store.ledger.claimResume(params.sortieId as string);
    case 'actions.finished':return store.finishedExternal(params.sortieId as string,params.actionId as string,params.tool as string,typeof params.error==='string'?{error:params.error}:{text:String(params.text ?? '')});
    case 'actions.preview':store.ledger.setExternal(external());return store.ledger.preview(params.sortieId as string,params.tool as string);
-   case 'actions.act':if(params.worker){const lease=params.worker as unknown as WorkerLease;if(registry().main()!==lease.owner)throw new Error('Worker authority changed.');store.workerJobs.assertLease(lease);}store.ledger.setExternal(external());return store.runAction(params.sortieId as string,{tool:params.tool as string,args:params.args as Record<string,unknown>,stage:params.stage as 'production',...(params.casper?{casper:params.casper as Verdict}:{}),...(Array.isArray(params.extras)?{extras:params.extras as Verdict[]}:{})});
+   case 'actions.act':store.ledger.setExternal(external());return store.runAction(params.sortieId as string,{tool:params.tool as string,args:params.args as Record<string,unknown>,stage:params.stage as 'production',...(params.casper?{casper:params.casper as Verdict}:{}),...(Array.isArray(params.extras)?{extras:params.extras as Verdict[]}:{})},params.worker as unknown as WorkerLease|undefined);
    case 'inbox.page':return store.inboxPage(params.after as number|undefined,params.limit as number|undefined,params.afterId as string|undefined);
   }
  }).then(reply=>{if(reply&&process.connected){if(Buffer.byteLength(JSON.stringify(reply))>MAX_FRAME_BYTES)process.send?.({jsonrpc:'2.0',id:reply.id,error:{code:-32005,message:'Response exceeds IPC bound; pagination required.'}});else process.send?.(reply);}}).catch(()=>{console.error('Nervous IPC failed.');});

@@ -419,17 +419,20 @@ export class Runtime implements StoreApi {
  /** On the base asked (F-036 slice 3b): an action the main base sent, run once per id, only if this base offers it, and
      always through this base's own gate (it may run, ask the owner with a card, or refuse). */
  readonly worker={
-  open:async(owner:string,session:string)=>await this.nervous.call('worker.open',{owner,session}) as {epoch:number;cursor:number},
+  open:async(owner:string,session:string,key:string,ownerKey:string)=>{if(this.selfKey&&this.selfKey!==key)throw new Error('Worker key differs.');this.selfKey=key;return await this.nervous.call('worker.open',{owner,session,key,ownerKey}) as {epoch:number;cursor:number};},
   close:async(owner:string,session:string)=>{await this.nervous.call('worker.close',{owner,session});},
   run:(owner:string,item:RunItem,context:WorkerContext)=>this.runFromPeer(owner,item,this.home?readConfig(this.home).kaji?.offers ?? []:[],context),
  };
- async runFromPeer(from:string,item:RunItem,offered:string[],context?:WorkerContext):Promise<unknown> {
-  const claim=await this.nervous.call('worker.claim',{owner:from,item,...(context?{context}:{})}) as WorkerClaim;
+ async runFromPeer(from:string,item:RunItem,offered:string[],context?:WorkerContext,originKey?:string):Promise<unknown> {
+  const ownerKey=originKey ?? context?.ownerKey ?? (await this.kaji.bases()).find(b=>b.baseId===from)?.publicKey;
+  const wireContext=context?{session:context.session,epoch:context.epoch,expires:context.expires}:undefined;
+  const claim=await this.nervous.call('worker.claim',{owner:from,ownerKey,key:this.selfKey,item,...(wireContext?{context:wireContext}:{})}) as WorkerClaim;
   if(claim.state==='busy')return {retry:true,error:'Worker resource is held by an unfinished request.'};
   if(claim.state!=='claimed')return claim.result;
   const lease=claim.lease!;
   const result=!offered.includes(item.tool)||item.tool==='kaji.run'?{refused:`this base does not offer ${item.tool} (on it: kaji offer)`}
    :await this.act({request:`From ${from}: ${item.request || item.tool}`.slice(0,4000),tool:item.tool,args:item.args},lease).catch(()=>({outcome:'invalid',error:'Worker action failed or its lease/authority changed; inspect the local trace.'}));
+  if('approvalId' in result&&result.approvalId)return result;
   try{await this.nervous.call('worker.finish',{lease,result:result as Record<string,unknown>});}
   catch{await this.nervous.call('worker.finish',{lease,result:{outcome:'uncertain',error:'The action returned but its result could not be recorded within the response bound; inspect the local trace.'}});}
   return result;

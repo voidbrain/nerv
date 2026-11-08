@@ -85,7 +85,7 @@ export class KajiLink {
  private every=HEARTBEAT_MS;
  constructor(options:{worker?:WorkerAdapter;baseId:string;key:KeyObject;publicKey:string;registry:RegistryPort;log?:(line:string)=>void;channel?:()=>ChannelState;onChannel?:(baseId:string,channel:HeardChannel|null)=>void;health?:()=>Promise<BaseHealth>;onHealth?:(baseId:string,health:HeardHealth)=>void;
   onRelay?:(from:string,relay:Relay)=>Promise<boolean>;onChat?:(from:string,message:string,conversation?:string)=>Promise<DispatchedReply>;
-  offers?:()=>string[];onOffers?:(baseId:string,offers:string[])=>void;onRun?:(from:string,item:RunItem)=>Promise<unknown>;onVerdict?:(from:string,ask:VerdictAsk)=>Promise<PeerVerdict|null>;onPendingApprovals?:(ids:string[])=>Promise<string[]>;onDecide?:(approvalId:string,decision:'approve'|'reject')=>Promise<string>}) {
+  offers?:()=>string[];onOffers?:(baseId:string,offers:string[])=>void;onRun?:(from:string,item:RunItem,ownerKey:string)=>Promise<unknown>;onVerdict?:(from:string,ask:VerdictAsk)=>Promise<PeerVerdict|null>;onPendingApprovals?:(ids:string[])=>Promise<string[]>;onDecide?:(approvalId:string,decision:'approve'|'reject')=>Promise<string>}) {
   this.baseId=options.baseId;this.key=options.key;this.publicKey=options.publicKey;this.port=options.registry;this.log=options.log ?? (l=>console.error(l));
   this.channel=options.channel;this.onChannel=options.onChannel;this.health=options.health;this.onHealth=options.onHealth;this.onRelay=options.onRelay;this.onDecide=options.onDecide;this.onPendingApprovals=options.onPendingApprovals;this.onChat=options.onChat;this.offers=options.offers;this.onOffers=options.onOffers;this.onRun=options.onRun;this.onVerdict=options.onVerdict;
   if(options.worker)this.workers=new WorkerLink({id:this.baseId,key:this.key,registry:this.port,adapter:options.worker,log:this.log,address:address=>{const {host,port}=endpoint(address);return `ws://${host}:${port}`;}});
@@ -95,7 +95,7 @@ export class KajiLink {
  private ownChannel(){try{return sanitizeChannel(this.channel?.());}catch{return undefined;}}
  private heardChannel(from:string,value:unknown){const c=sanitizeChannel(value);this.onChannel?.(from,c?{...c,receivedAt:new Date().toISOString()}:null);}
  private readonly onVerdict:((from:string,ask:VerdictAsk)=>Promise<PeerVerdict|null>)|undefined;
- private readonly offers:(()=>string[])|undefined;private readonly onOffers:((baseId:string,offers:string[])=>void)|undefined;private readonly onRun:((from:string,item:RunItem)=>Promise<unknown>)|undefined;
+ private readonly offers:(()=>string[])|undefined;private readonly onOffers:((baseId:string,offers:string[])=>void)|undefined;private readonly onRun:((from:string,item:RunItem,ownerKey:string)=>Promise<unknown>)|undefined;
  private readonly onChat:((from:string,message:string,conversation?:string)=>Promise<DispatchedReply>)|undefined;
  private readonly onPendingApprovals:((ids:string[])=>Promise<string[]>)|undefined;
  private readonly onRelay:((from:string,relay:Relay)=>Promise<boolean>)|undefined;private readonly onDecide:((approvalId:string,decision:'approve'|'reject')=>Promise<string>)|undefined;
@@ -170,7 +170,7 @@ export class KajiLink {
     const r=JSON.parse(body) as {id?:unknown;request?:unknown;tool?:unknown;args?:unknown};
     if(typeof r.id!=='string'||!UUID.test(r.id)||typeof r.request!=='string'||r.request.length>500||typeof r.tool!=='string'||!/^[a-z]+\.[a-z]+$/.test(r.tool)||!r.args||typeof r.args!=='object'||Array.isArray(r.args)){reply(400,{error:'invalid action'});return;}
     if(await this.port.main?.()!==from||!this.onRun){reply(403,{error:'only the main base runs actions here'});return;}
-    reply(200,{result:await this.onRun(from,{id:r.id,request:r.request,tool:r.tool,args:r.args as Record<string,unknown>})});return;
+    reply(200,{result:await this.onRun(from,{id:r.id,request:r.request,tool:r.tool,args:r.args as Record<string,unknown>},bases.find(b=>b.baseId===from)!.publicKey)});return;
    }
    if(req.method==='POST'&&req.url==='/kaji/approvals/pending'){
     const value=JSON.parse(body) as {ids?:unknown};

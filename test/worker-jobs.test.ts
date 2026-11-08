@@ -31,3 +31,9 @@ test('F-014: a worker restart preserves uncertain work, locks and the replay cur
   const next=jobs.open(owner,'00000000-0000-4000-8000-000000000003');assert.equal(next.cursor,1);assert.equal(jobs.claim(owner,item(),{session:'00000000-0000-4000-8000-000000000003',epoch:next.epoch,expires:Date.now()+300000}).state,'uncertain');assert.equal(jobs.claim(owner,item(2),undefined).state,'busy');
  }finally{db.close();rmSync(home,{recursive:true,force:true});}
 });
+test('F-014: coordinator persists a bounded worker result as valid JSON without truncating it',async()=>{
+ const {Store}=await import('../src/store.ts');const store=new Store(':memory:');
+ try{const sortie=store.ledger.openSortie('owner','Neutral remote result','trusted'),queued=store.queueRemote(sortie,'NERV-02','reminders.list',{}),result={outcome:'grant',result:{text:'x'.repeat(12000)}};
+  store.outboxDone(queued.id,result);const row=store.db.prepare('SELECT result FROM kaji_outbox WHERE id=?').get(queued.id) as {result:string};assert.deepEqual(JSON.parse(row.result),result);
+ }finally{store.close();}
+});

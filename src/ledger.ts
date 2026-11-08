@@ -1,3 +1,4 @@
+import {transaction} from './sqlite-transaction.ts';
 import {overlappingDomains} from './pilots.ts';
 import type { DatabaseSync } from 'node:sqlite';
 import { createHash, randomUUID } from 'node:crypto';
@@ -45,7 +46,7 @@ export class Ledger {
   this.grantTtlMs=options.grantTtlMs ?? 60_000;this.approvalTtlMs=options.approvalTtlMs ?? 3_600_000;
  }
  private event<K extends EventKind>(sortieId:string,actionId:string|null,kind:K,payload:EventPayloads[K],now:Date) {this.db.prepare('INSERT INTO events(sortie_id,action_id,kind,payload,created,v) VALUES(?,?,?,?,?,?)').run(sortieId,actionId,kind,encodePayload(kind,payload),iso(now),EVENT_SCHEMA_VERSION);}
- private tx<T>(work:()=>T):T {this.db.exec('BEGIN IMMEDIATE');try{const value=work();this.db.exec('COMMIT');return value;}catch(e){this.db.exec('ROLLBACK');throw e;}}
+ private tx<T>(work:()=>T):T {return transaction(this.db,work);}
  private issue(actionId:string,tool:string,args:Record<string,unknown>,sortieId:string,now:Date):string {
   const id=randomUUID();this.db.prepare('INSERT INTO grants VALUES(?,?,?,?,?,NULL,NULL)').run(id,actionId,tool,argsHash(args),iso(now,this.grantTtlMs));
   this.event(sortieId,actionId,'grant.issued',{expires:iso(now,this.grantTtlMs)},now);return id;

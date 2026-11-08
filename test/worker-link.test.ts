@@ -23,8 +23,8 @@ async function fixture(){
  const record=(body:Omit<RegistryBody,'serial'|'issued'>)=>signRecord(root.privateKey,{...body,serial:++serial,issued:new Date().toISOString()} as RegistryBody);
  const records=[record({kind:'enrol',baseId:'NERV-01',name:'Aster',publicKey:a.publicKey,address}),record({kind:'enrol',baseId:'NERV-02',name:'Harbor',publicKey:b.publicKey,address:'127.0.0.1:1'}),record({kind:'main',baseId:'NERV-01'})];await Promise.all([ra.kaji.add(records),rb.kaji.add(records)]);
  const main=new WorkerLink({id:'NERV-01',key:a.privateKey,registry:ra.kaji,adapter:ra.worker,address:s=>'ws://'+s,heartbeatMs:150,requestMs:1000,reconnectMs:30});main.attach(server);
- let adapter:WorkerAdapter={open:(o,s)=>rb.worker.open(o,s),close:(o,s)=>rb.worker.close(o,s),run:(o,i,c)=>rb.worker.run(o,i,c)};
- const worker=()=>new WorkerLink({id:'NERV-02',key:b.privateKey,registry:rb.kaji,adapter:{open:(o,s)=>adapter.open(o,s),close:(o,s)=>adapter.close(o,s),run:(o,i,c)=>adapter.run(o,i,c)},address:s=>'ws://'+s,heartbeatMs:150,requestMs:1000,reconnectMs:30});let link=worker();const sockets:WebSocket[]=[];
+ let adapter:WorkerAdapter={open:(o,s,k,ok)=>rb.worker.open(o,s,k,ok),close:(o,s)=>rb.worker.close(o,s),run:(o,i,c)=>rb.worker.run(o,i,c)};
+ const worker=()=>new WorkerLink({id:'NERV-02',key:b.privateKey,registry:rb.kaji,adapter:{open:(o,s,k,ok)=>adapter.open(o,s,k,ok),close:(o,s)=>adapter.close(o,s),run:(o,i,c)=>adapter.run(o,i,c)},address:s=>'ws://'+s,heartbeatMs:150,requestMs:1000,reconnectMs:30});let link=worker();const sockets:WebSocket[]=[];
  return {main,get rb(){return rb;},ra,homeB,address,b,record,server,setAdapter:(next:WorkerAdapter)=>{adapter=next;},get adapter(){return adapter;},start:async()=>{main.start();link.start();await until(()=>main.connected('NERV-02'));},
   restartWorker:async()=>{await link.stop();await rb.close();rb=new Runtime(join(homeB,'nerv.sqlite'),undefined,homeB);await rb.ready();link=worker();link.start();await until(()=>main.connected('NERV-02'));},
   raw:async(headers:Record<string,string>,path='/kaji/worker')=>{const socket=new WebSocket('ws://'+address+path,{headers});sockets.push(socket);return socket;},
@@ -67,7 +67,7 @@ test('F-014 review: deferred owner approval retains the worker resource',{timeou
 test('F-014 review: approval after disconnect cannot execute with an invalidated worker lease',{timeout:30000},async()=>{
  const f=await fixture(),original=f.adapter;let closed=false;f.setAdapter({...original,close:async(o,s)=>{await original.close(o,s);closed=true;},run:(o,i,c)=>f.rb.runFromPeer(o,i,['memory.remember'],c)});
  try{await f.start();const result=await f.main.run('NERV-02',{...item(12),tool:'memory.remember',args:{text:'Neutral fact'}},5000) as {approvalId:string};f.main.dropIncoming();await until(()=>closed);
-  const decision=await f.rb.decide(result.approvalId,'approve','api');assert.notEqual(decision.decision,'approve','stale worker authority cannot create a grant');assert.equal((await f.rb.memory.list()).length,0);
+  const decision=await f.rb.decide(result.approvalId,'approve','api');assert.notEqual(decision.decision,'approve','stale worker authority cannot create a grant');assert.equal((await f.rb.lilith.list()).length,0);
  }finally{await f.close();}
 });
 test('F-014 review: destination revocation is rechecked inside the scheduler immediately before execution',{timeout:30000},async()=>{

@@ -1,3 +1,4 @@
+import {transaction} from './sqlite-transaction.ts';
 import type { DatabaseSync } from 'node:sqlite';
 import { randomUUID } from 'node:crypto';
 /**
@@ -35,7 +36,7 @@ export class Memory {
   if(!indexed)db.exec('INSERT INTO episodes_fts(summary,episode_id) SELECT summary,id FROM episodes');
  }
  private history(id:string,kind:string,text:string,source:string,now:string){this.db.prepare('INSERT INTO fact_history(fact_id,kind,text,source,created) VALUES(?,?,?,?,?)').run(id,kind,text,source,now);}
- private tx<T>(work:()=>T):T {this.db.exec('BEGIN IMMEDIATE');try{const v=work();this.db.exec('COMMIT');return v;}catch(e){this.db.exec('ROLLBACK');throw e;}}
+ private tx<T>(work:()=>T):T {return transaction(this.db,work);}
  /** An active fact. Misato's proposals reach here only after the owner approved the memory.remember card. */
  add(text:unknown,source:'owner'|'misato',options:{sortieId?:string;tainted?:boolean;shareable?:boolean}={},now=new Date()):Fact {
   const t=clean(text);const id=randomUUID();const at=now.toISOString();
