@@ -2909,4 +2909,6 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 
 ### Documentation organization and review register
 
+[PR #220](https://github.com/voidbrain/nerv/pull/220) records closure and capability follow-up.
+
 **Documentation organization and review register — Closed, 2026-11-08.** [PR #219](https://github.com/voidbrain/nerv/pull/219) owner-requested documentation maintenance: clarify source/generated/evidence ownership; index all review/acceptance/evaluation reports with actual dates and next conditions; preserve current decisions; move confirmed superseded NERV prototypes, old target schema and analysis export into `remove/` with a byte-preserving manifest. Closed 2026-11-08: all 26 original byte hashes and staged destinations validated, maintained links and source/view checks passed, independent review corrections applied, PR #219 CI 42521677029 passed all five jobs. Ten active tasks now declare specialist capability requirements and a linked table; no suggested model is fabricated. This does not execute a new product audit/model campaign or claim every remaining outcome is decomposed.

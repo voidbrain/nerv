@@ -197,7 +197,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #219](https://github.com/voidbrain/nerv/pull/219); [CI 42521677029 attempt 1](https://github.com/voidbrain/nerv/actions/runs/42521677029/attempts/1) failed Linux coverage; attempt 2 reran only failed jobs and passed, retaining Windows/native results. Test: test/worker-link.test.ts deferred-approval cancellation. Isolated Mac Node 26 coverage diagnostic passed with loopback access; an earlier sandbox-denied run was stopped and excluded from runtime conclusions. |
+| PR / evidence | [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; [PR #219](https://github.com/voidbrain/nerv/pull/219); [CI 42521677029 attempt 1](https://github.com/voidbrain/nerv/actions/runs/42521677029/attempts/1) failed Linux coverage; attempt 2 reran only failed jobs and passed, retaining Windows/native results. Test: test/worker-link.test.ts deferred-approval cancellation. Isolated Mac Node 26 coverage diagnostic passed with loopback access; an earlier sandbox-denied run was stopped and excluded from runtime conclusions. |
 | Opened | 2026-11-08 |
 | Verification | 2026-11-08: intermittent CI failure observed; isolated pass and unchanged-head retry pass do not establish a causal fix. Deterministic reproduction and fix pending. |
 | Reviewed | 2026-11-08 |
@@ -301,7 +301,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| PR / evidence | [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-08 |
@@ -649,7 +649,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nerv/pull/8) (gate, ledger, approvals); [PR #9](https://github.com/voidbrain/nerv/pull/9) (approvals API) |
+| PR / evidence | [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nerv/pull/8) (gate, ledger, approvals); [PR #9](https://github.com/voidbrain/nerv/pull/9) (approvals API) |
 | Opened | 2026-11-02 |
 | Verification | Unit/integration 2026-11-04: once-only decisions, expiry never approves, restart, scheduler-process expiry (local run; CI green: PR #8 run 41749472703, PR #9 run 41749840854, main run 41787648624); REST once-only decision and socket decision denial across the scheduler process (local run; CI green: PR #8 run 41749472703, PR #9 run 41749840854, main run 41787648624). Real-device: pending |
 | Reviewed | 2026-11-08 |
@@ -953,7 +953,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner questions 2026-11-05 |
+| PR / evidence | [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner questions 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
 | Reviewed | 2026-11-08 |
@@ -1023,7 +1023,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Field | Value |
 |---|---|
 | Depends on | [F-036](archive/backlog-2026.md#f-036) — Authenticated Kaji transport and enrolled bases<br />[F-045](#f-045) — Remote pilot capability offers for capability-based forwarding<br />[F-048](#f-048) — Queue and concurrency limits for load-based forwarding; capability-first work can proceed |
-| PR / evidence | 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner questions 2026-11-05 |
+| PR / evidence | [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner questions 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
 | Reviewed | 2026-11-08 |
