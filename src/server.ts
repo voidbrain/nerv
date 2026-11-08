@@ -39,6 +39,7 @@ export function makeServer(store: StoreApi, token: string, options: {webRoot?:st
     const reply=(status:number,value:unknown)=>{res.writeHead(status);res.end(JSON.stringify(value));};
     const url=new URL(req.url ?? '/', 'http://localhost');const path=url.pathname;
     if(options.native&&req.headers.origin){reply(403,{error:'Native clients only.'});return;}
+    if(options.native&&req.method==='POST'&&path==='/api/pairing/renew'){try{const value=await body(req);if(Object.keys(value).length!==1||typeof value.ticket!=='string'||!req.headers.authorization?.startsWith('Bearer '))throw new Error('Invalid renewal.');reply(201,options.native.auth.renew(value.ticket,req.headers.authorization.slice(7)));}catch{reply(400,{error:'Renewal refused or outcome unknown. Inspect paired clients and obtain a new invitation before recovery.'});}return;}
     if(options.native&&req.method==='POST'&&path==='/api/pairing/claim'){try{const value=await body(req);if(Object.keys(value).length!==1||typeof value.ticket!=='string')throw new Error('Invalid invitation.');reply(201,options.native.auth.claim(value.ticket));}catch{reply(400,{error:'Invalid, expired or used invitation.'});}return;}
     if(!path.startsWith('/api/') && path!=='/api') {
       if(!options.webRoot || !['GET','HEAD'].includes(req.method ?? '')) {reply(404,{error:'Unknown operation.'});return;}
