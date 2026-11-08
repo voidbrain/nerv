@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 40 | 42 |
+| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
 
 <a id="archive-week-2026-11-02"></a>
@@ -2865,6 +2865,42 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 | PR / evidence | [PR #209](https://github.com/voidbrain/nerv/pull/209) reviewed closure and partial routing evidence;  [PR #208](https://github.com/voidbrain/nerv/pull/208) adoption;  Test: test/verification-policy.test.mjs and test/ci-pins.test.mjs. Published tag v4.1.0 resolves to a8a358e. |
 | Opened | 2026-11-08 |
 | Verification | Six local adapter/policy/pin tests and 46 affected worker/adapter contracts passed; typecheck, conventions and rule checks passed. Review: independent fresh-context review identified event privacy/schema and route recovery selection gaps; committed regression 2cedfe7 precedes mapping fixes. Follow-up independent review confirmed both mappings fixed, no remaining blockers. CI 42479082275 correctly refused its full marker after Windows path-separator and worker burst failures; committed regressions adf6cde reproduce both issues, fixes pass the unchanged tests. Independent follow-up review found no blockers; final CI 42480170710 passed all five jobs, including full-suite. Linux 419 tests passed with one platform skip; browser/axe, headless, Windows and Swift/TLS packaging passed. Real merged-baseline partial plan recorded in docs/acceptance/verification-2026-11-08.md. |
+| Reviewed | 2026-11-08 |
+
+</details>
+
+---
+
+### F-072
+
+**Adopt harness v4.2.0 parallel tasks, model profiles and architecture review**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />No adoption action remains.
+
+| | |
+|---|---|
+| **Issue** | Adopt the released reusable workflow in NERV with project-owned tasks, model evidence and a scoped architecture reassessment. |
+| **Reproduce** | Inspect work sources and tasks; build/check the ledger; inspect the procedure index and candidate profile; exercise shared claim status after setup. |
+| **Check** | Migration preserves records and links; derived views agree; task dependencies/resources are explicit; unmeasured Gemma remains candidate; scoped report tracks contradictions under existing IDs; reviewed CI passes and shared registry is established without bypassing safeguards. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Resolution:** Closed 2026-11-08. PR #216 merged after all five CI jobs passed in run 42517545579. Shared registry initialized after confirming absence; status reads metadata head `b8ad0df` with fence 0 and no held tasks, preserving a clean worktree/index. Adopt released v4.2.1 (upstream regression and CI 42517786923) for the empty-active-directory fix. All adoption acceptance is complete; Gemma remains candidate and runtime feature acceptance stays open.
+
+**Historical next action:** Local consistency checks and fresh-context report-only review passed. Merge after required CI passes, then initialize the shared metadata registry and reconcile this record. Model qualification and runtime distributed orchestration remain their existing records; no model inference or physical/device action is part of adoption.
+
+**Estimates:** No remaining adoption work, reconciled 2026-11-08; elapsed measurement includes waiting, not a productivity comparison.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Harness [v4.2.1](https://github.com/voidbrain/project-harness/releases/tag/v4.2.1) (includes v4.2.0), PRs #82/#83; [PR #216](https://github.com/voidbrain/nerv/pull/216) NERV adoption |
+| Opened | 2026-11-08 |
+| Verification | 2026-11-08: exact 38-record migration; work/backlog/rules/recap/dependency/queue/roadmap/convention/audit checks and six verification/pin regressions pass. Review: independent fresh-context reviewer found no remaining blocker after prerequisite/resource corrections. PR #216 CI 42517545579 passed plan, validate, windows, native-macos and full-suite. Shared registry setup/status passed without worktree/index changes. Behavior runner/tool not adopted; no model campaign |
 | Reviewed | 2026-11-08 |
 
 </details>

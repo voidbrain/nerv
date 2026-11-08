@@ -50,7 +50,7 @@ function relocateLinks(text,fromFile,toFile,referenceIds=new Set()){
 }
 export function renderLedger(root,config){
  const layout=readJSON(local(root,config.layout));if(layout.version!==1||!Array.isArray(layout.segments))throw Error('Invalid ledger layout');
- const dir=local(root,config.records),files=readdirSync(dir).sort(),seen=new Set();
+ const dir=local(root,config.records),files=existsSync(dir)?readdirSync(dir).sort():[],seen=new Set();
  for(const file of files)if(!/^[BF]-\d{3}\.md$/.test(file))throw Error('Unknown record source: '+file);
  const referenceText=layout.segments.filter(s=>typeof s.text==='string').map(s=>s.text).join('\n')+'\n'+files.map(f=>readFileSync(local(root,config.records+'/'+f),'utf8')).join('\n');
  const referenceIds=new Set([...referenceText.matchAll(/\[([^\]]+)\]:/g)].map(m=>m[1].trim().replace(/\s+/g,' ').toLowerCase()));

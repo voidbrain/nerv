@@ -112,7 +112,7 @@ jobs:
       - run: npm run check:rules
       - run: npm run check:maintenance
       - run: npm run check:audits
-      - run: git clone --branch v4.2.0 --depth 1 https://github.com/voidbrain/project-harness "$RUNNER_TEMP/project-harness"
+      - run: git clone --branch v4.2.1 --depth 1 https://github.com/voidbrain/project-harness "$RUNNER_TEMP/project-harness"
       - run: npm run check:freshness
         env:
           HARNESS_HOME: ${{ runner.temp }}/project-harness

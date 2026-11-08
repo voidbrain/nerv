@@ -4,7 +4,7 @@
   "parent": "F-072",
   "title": "Link procedure discovery",
   "goal": "Link procedure discovery",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Preserve authoritative rules and source/evidence ownership",
     "Existing checks and independent review cover adoption"
