@@ -34,3 +34,10 @@ test('Windows glob separators normalize to repository paths before validating se
  const paths=selectedTests(config,['brief'],[],{expand:pattern=>[pattern.replaceAll('/','\\')],exists:()=>true});
  assert.deepEqual(paths,['test/brief-recovery.test.ts','test/brief.test.ts','test/telegram.test.ts']);
 });
+
+test('retired-reference metadata selects documentation checks without hiding unknown executables or source risks',()=>{
+ const metadata=plan(config.verification,{...fresh,files:['remove/README.md','remove/manifest.json']});
+ assert.equal(metadata.full,false);assert.deepEqual(metadata.groups,[]);
+ assert.equal(plan(config.verification,{...fresh,files:['remove/new-runner.mjs']}).full,true);
+ assert.equal(plan(config.verification,{...fresh,files:['src/worker-link.ts']}).full,true);
+});
