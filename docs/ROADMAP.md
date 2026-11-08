@@ -40,7 +40,7 @@ Status per milestone, derived from the records (Delivered: all closed; Awaiting 
 
 ## NERV naming and governance (2026-11-04)
 
-Names follow the [NERV architecture](NERV/NERV-ARCHITECTURE.md): lore labels in UI and docs, plain names in code. It replaces the 2026-11-02 delta (request-level risk routing and suggest-only counselors). Later milestones gain: dashboard redesign around outcomes and real events (milestone 4, F-019, F-004), optional personas (F-020, P3), MAGI seats hosted on branch bases (milestones 3/5, F-005, F-006), watermelon trust for evaluated skills (milestone 6, F-007, F-025).
+Names follow the [NERV architecture](architecture/vocabulary.md): lore labels in UI and docs, plain names in code. It replaces the 2026-11-02 delta (request-level risk routing and suggest-only counselors). Later milestones gain: dashboard redesign around outcomes and real events (milestone 4, F-019, F-004), optional personas (F-020, P3), MAGI seats hosted on branch bases (milestones 3/5, F-005, F-006), watermelon trust for evaluated skills (milestone 6, F-007, F-025).
 
 **Explicit non-goals for early milestones**
 - A multi-model ballot by default: MAGI runs one model seat (Casper) and only for Orange/Blue; Melchior and Balthasar are deterministic.

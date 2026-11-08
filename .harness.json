@@ -314,6 +314,21 @@
       "then": "Regenerate the source-owned ledger and existing recap, dependencies, queue and roadmap; review task resources and candidate model evidence.",
       "run": "npm run work:build && npm run backlog:recap && npm run backlog:dependencies && npm run backlog:queue && npm run roadmap:status",
       "checked": "check:work and existing ledger/view checks in CI"
+    },
+    {
+      "id": "documentation-register",
+      "when": [
+        "docs/audits/**",
+        "docs/acceptance/**",
+        "docs/evaluations/**",
+        "docs/decisions/**",
+        "docs/reviews/**",
+        "docs/README.md",
+        "remove/manifest.json"
+      ],
+      "then": "Review the NERV document map and dated review register for affected links, actual dates, next conditions and retirement evidence; do not infer a run from a file edit.",
+      "run": "npm run check:backlog",
+      "checked": "Documentation consistency review and PR link/inventory validation"
     }
   ],
   "couplings": [
@@ -545,6 +560,16 @@
       "title": "Architecture reassessment",
       "path": "docs/agents/architecture-review.md",
       "about": "Released harness procedure; project evidence stays in NERV records and reports"
+    },
+    {
+      "title": "Documentation map",
+      "path": "docs/README.md",
+      "about": "NERV document ownership and retirement disposition"
+    },
+    {
+      "title": "Review register",
+      "path": "docs/reviews/README.md",
+      "about": "Actual evidence dates, next conditions, scope and ownership"
     }
   ],
   "adapted": {

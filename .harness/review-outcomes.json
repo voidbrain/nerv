@@ -16,5 +16,11 @@
     "disposition": "implemented",
     "target": "tools/work-items.mjs",
     "evidence": "Reconcile published v4.2.1 copied tool unchanged after upstream regression 3ffa9b8 and green CI 42517786923. NERV adoption PR216 passed all five jobs; shared Git registry initialized once after confirmed absence and status read succeeds without worktree/index changes. Follow-up source/backlog/view checks pass. No model/device/service campaign."
+  },
+  {
+    "kind": "rule",
+    "disposition": "implemented",
+    "target": "docs/agents/areas.md",
+    "evidence": "Project-only documentation organization and path setting updates; shared harness procedures/tools remain identical to v4.2.1. Source-owned/generated/evidence roles clarified, review register uses recorded dates/conditional next runs, current decisions retained, 26 retired sources byte-preserved with hashes. Independent report-only review found staging/path/result wording corrections, applied before publication. Local work/backlog/rules/recap/roadmap/dependencies/queue/conventions/integrations/audit checks and six policy/pin regressions pass. Timing covers only final governing-input reconciliation/validation, excluding earlier inventory and writing. No model or physical/service campaign; final required CI owns full risk checks."
   }
 ]
