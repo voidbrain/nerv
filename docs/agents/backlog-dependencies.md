@@ -17,7 +17,6 @@ Depends on names a required outcome; Unlocks lists direct dependents, not verifi
 | [F-009](../BACKLOG.md#f-009) | — | — |
 | [F-011](../BACKLOG.md#f-011) | — | — |
 | [F-012](../BACKLOG.md#f-012) | [F-003](../archive/backlog-2026.md#f-003) — Durable scheduling for the named external job<br />[F-005](../BACKLOG.md#f-005) — Enrolled workers with observed execution capability<br />[F-006](../BACKLOG.md#f-006) — Bounded routing and delegation for the external execution adapter | — |
-| [F-014](../BACKLOG.md#f-014) | — | — |
 | [F-015](../BACKLOG.md#f-015) | — | — |
 | [F-016](../BACKLOG.md#f-016) | — | — |
 | [F-017](../archive/backlog-2026.md#f-017) | — | [F-020](../BACKLOG.md#f-020) |

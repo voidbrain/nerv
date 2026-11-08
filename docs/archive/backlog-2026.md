@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 38 | 41 |
+| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 39 | 41 |
 <!-- archive-recap:end -->
 
 <a id="archive-week-2026-11-02"></a>
@@ -2766,5 +2766,39 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 </details>
 
 ---
+
+---
+
+### F-014
+
+**Version and secure WebSocket JSON-RPC communication**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | — |
+
+💻 **→ Human action required: No**<br />No action remains for the enrolled outbound worker profile; local RPC stays read-only.
+
+| | |
+|---|---|
+| **Issue** | Version 1 signed outbound workers, durable receipts, leases/fences, approval locks, cancellation and legacy quarantine are implemented for advertised registered built-ins. Device/bootstrap, arbitrary tools and physical adapters remain separate work. |
+| **Reproduce** | Follow docs/decisions/runtime-boundaries.md and the protocol/isolation test fixtures. |
+| **Check** | Reject unauthenticated/Origin/browser/query-token access; validate schemas/graph; bound payloads/concurrency; reconnect and asleep-worker tests before remote execution. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-08. PR #206 merged at dde59f6 after every Linux, Windows and macOS check passed; acceptance criteria verified through repository-owned protocol/hostile-frame/reconnect/heartbeat fixtures. Independent code review found no remaining concrete blockers and independently passed 54 tests; documentation/harness review found no blockers after clarifying offline cancellation reconciliation. See [worker protocol](../decisions/worker-protocol.md). Committed regressions precede fixes for deferred approval fencing, enrolment revocation, expiry, nonce-cache poisoning and local connection/Origin admission. Full-suite compatibility retains the existing Spear response when no remote work is pending.
+
+**Estimates:** No remaining work for this record. Historical estimates covered implementation and acceptance; device/bootstrap, arbitrary execution and production-host work remain with their separate records.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #206](https://github.com/voidbrain/nerv/pull/206) implementation (first Windows CI exposed a timing-dependent seat fixture, corrected without changing expected outcomes): committed regressions in test/worker-jobs.test.ts, test/worker-link.test.ts, test/worker-outbox.test.ts and test/protocol.test.ts; [frozen evaluation evidence](../evaluations/2026-11-08-f014-scripted.json) |
+| Opened | 2026-11-01 |
+| Verification | 2026-11-08: full core 412 passed / 2 platform skips; headless 3 passed / 1 Windows skip; typecheck, build, repository checks passed. Clean cdd8a0e: v4 all seven groups 234 passed, three base repetitions 141 passed with stable inputs. Swift 9 passed / 1 skip; native packaging passed. Review: independent fresh-context report-only reviewer passed 54 tests and found no remaining code or documentation blockers; prior findings fixed. PR #206 final CI runs 42464014727/42464012081 passed all six jobs. Targeted causal peer-seat tests passed and independent diff review confirmed shadow completion before reply and veto waiting until reply. Production-host, phone and physical acceptance are not claimed. |
+| Reviewed | 2026-11-08 |
+
+</details>
 
 ---
