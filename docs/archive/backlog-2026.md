@@ -2915,4 +2915,6 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 
 ### Target-schema correction and retirement recheck
 
+[PR #222](https://github.com/voidbrain/nerv/pull/222) records closure.
+
 **Target-schema correction and retirement recheck — Closed, 2026-11-08.** [PR #221](https://github.com/voidbrain/nerv/pull/221) restores the active target with implemented/planned labels; recheck all 26 retired sources and preserve mixed design inputs outside remove/. Assess Gauntlet ownership/reuse versus existing benchmarks without creating a repository or running model campaigns. Closed 2026-11-08: all 26 hashes, source/current links, schema and view checks passed; fresh-context review found no blocker; PR #221 CI 42530253552 attempt 2 passed all five jobs. The original Windows heartbeat failure is retained under open B-046, not claimed fixed.
