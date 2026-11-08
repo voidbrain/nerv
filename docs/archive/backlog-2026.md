@@ -2828,7 +2828,7 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #208](https://github.com/voidbrain/nerv/pull/208) CI-discovered repair; Test: B-045 immediate negotiated burst in test/worker-link.test.ts. |
+| PR / evidence | [PR #209](https://github.com/voidbrain/nerv/pull/209) reviewed closure and partial routing evidence;  [PR #208](https://github.com/voidbrain/nerv/pull/208) CI-discovered repair; Test: B-045 immediate negotiated burst in test/worker-link.test.ts. |
 | Opened | 2026-11-08 |
 | Verification | 2026-11-08: 46 targeted policy/worker/outbox/Kaji tests passed, typecheck passed. Review: independent fresh-context report-only implementation and closure reviews found no blockers; confirmed admission bounds, identity/fencing and unchanged assertions, no blockers. CI 42480170710 passed all five jobs, including Windows and the full marker. |
 | Reviewed | 2026-11-08 |
@@ -2862,7 +2862,7 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #208](https://github.com/voidbrain/nerv/pull/208) adoption;  Test: test/verification-policy.test.mjs and test/ci-pins.test.mjs. Published tag v4.1.0 resolves to a8a358e. |
+| PR / evidence | [PR #209](https://github.com/voidbrain/nerv/pull/209) reviewed closure and partial routing evidence;  [PR #208](https://github.com/voidbrain/nerv/pull/208) adoption;  Test: test/verification-policy.test.mjs and test/ci-pins.test.mjs. Published tag v4.1.0 resolves to a8a358e. |
 | Opened | 2026-11-08 |
 | Verification | Six local adapter/policy/pin tests and 46 affected worker/adapter contracts passed; typecheck, conventions and rule checks passed. Review: independent fresh-context review identified event privacy/schema and route recovery selection gaps; committed regression 2cedfe7 precedes mapping fixes. Follow-up independent review confirmed both mappings fixed, no remaining blockers. CI 42479082275 correctly refused its full marker after Windows path-separator and worker burst failures; committed regressions adf6cde reproduce both issues, fixes pass the unchanged tests. Independent follow-up review found no blockers; final CI 42480170710 passed all five jobs, including full-suite. Linux 419 tests passed with one platform skip; browser/axe, headless, Windows and Swift/TLS packaging passed. Real merged-baseline partial plan recorded in docs/acceptance/verification-2026-11-08.md. |
 | Reviewed | 2026-11-08 |

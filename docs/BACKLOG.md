@@ -232,7 +232,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #208](https://github.com/voidbrain/nerv/pull/208) delivered transport repair; [F-014](archive/backlog-2026.md#f-014) transport foundation;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| PR / evidence | [PR #209](https://github.com/voidbrain/nerv/pull/209) scope reconciliation;  [PR #208](https://github.com/voidbrain/nerv/pull/208) delivered transport repair; [F-014](archive/backlog-2026.md#f-014) transport foundation;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-08 |
