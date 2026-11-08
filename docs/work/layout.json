@@ -14,7 +14,7 @@
       "records": "F"
     },
     {
-      "text": "\n## Other changes\n\n**Documentation organization and review register \u2014 Implemented, 2026-11-08.** Owner-requested documentation maintenance: clarify source/generated/evidence ownership; index all review/acceptance/evaluation reports with actual dates and next conditions; preserve current decisions; move confirmed superseded NERV prototypes, old target schema and analysis export into `remove/` with a byte-preserving manifest. Next: validate links/inventory, independent review and required CI. Closure requires no lost source bytes or requirements, current links/catalogue and green CI; this does not execute a product audit or model campaign.\n"
+      "text": "\n## Other changes\n\n**Documentation organization and review register \u2014 Implemented, 2026-11-08.** [PR #219](https://github.com/voidbrain/nerv/pull/219) owner-requested documentation maintenance: clarify source/generated/evidence ownership; index all review/acceptance/evaluation reports with actual dates and next conditions; preserve current decisions; move confirmed superseded NERV prototypes, old target schema and analysis export into `remove/` with a byte-preserving manifest. Next: validate links/inventory, independent review and required CI. Closure requires no lost source bytes or requirements, current links/catalogue and green CI; this does not execute a product audit or model campaign.\n"
     }
   ]
 }

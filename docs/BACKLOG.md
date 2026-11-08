@@ -547,7 +547,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Field | Value |
 |---|---|
 | Depends on | [F-003](archive/backlog-2026.md#f-003) — Messaging path for state-grounded persona replies<br />[F-017](archive/backlog-2026.md#f-017) — Policy decisions remain authoritative over persona output |
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [retired dashboard1 personas prototype](../remove/docs/NERV/dashboard1.html) |
+| PR / evidence | [PR #219](https://github.com/voidbrain/nerv/pull/219) retired-reference path correction; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [retired dashboard1 personas prototype](../remove/docs/NERV/dashboard1.html) |
 | Opened | 2026-11-02 |
 | Verification | Pending |
 | Reviewed | 2026-11-08 |
@@ -1341,4 +1341,4 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 ## Other changes
 
-**Documentation organization and review register — Implemented, 2026-11-08.** Owner-requested documentation maintenance: clarify source/generated/evidence ownership; index all review/acceptance/evaluation reports with actual dates and next conditions; preserve current decisions; move confirmed superseded NERV prototypes, old target schema and analysis export into `remove/` with a byte-preserving manifest. Next: validate links/inventory, independent review and required CI. Closure requires no lost source bytes or requirements, current links/catalogue and green CI; this does not execute a product audit or model campaign.
+**Documentation organization and review register — Implemented, 2026-11-08.** [PR #219](https://github.com/voidbrain/nerv/pull/219) owner-requested documentation maintenance: clarify source/generated/evidence ownership; index all review/acceptance/evaluation reports with actual dates and next conditions; preserve current decisions; move confirmed superseded NERV prototypes, old target schema and analysis export into `remove/` with a byte-preserving manifest. Next: validate links/inventory, independent review and required CI. Closure requires no lost source bytes or requirements, current links/catalogue and green CI; this does not execute a product audit or model campaign.
