@@ -467,15 +467,15 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Finish full-suite and headless/browser acceptance, document the stop-before-upgrade procedure and unknown-outcome reconciliation, then open a PR against main and merge only after all CI checks pass. Independent code review found no remaining concrete blockers and independently passed 54 tests; documentation review remains pending. See [worker protocol](decisions/worker-protocol.md). Committed regressions precede fixes for deferred approval fencing, enrolment revocation, expiry, nonce-cache poisoning and local connection/Origin admission. Full-suite compatibility retains the existing Spear response when no remote work is pending.
+**Next action / closure evidence:** Open the implementation PR against main; merge only after all CI checks pass, then reconcile closure. Independent code review found no remaining concrete blockers and independently passed 54 tests; documentation/harness review found no blockers after clarifying offline cancellation reconciliation. See [worker protocol](decisions/worker-protocol.md). Committed regressions precede fixes for deferred approval fencing, enrolment revocation, expiry, nonce-cache poisoning and local connection/Origin admission. Full-suite compatibility retains the existing Spear response when no remote work is pending.
 
-**Estimates:** Small remaining effort, approximately 2–4 focused hours for documentation review, frozen evaluation evidence and CI/reconciliation, excluding CI queue delays. Estimated 2026-11-08; no completion percentage.
+**Estimates:** Small remaining effort, approximately 30–60 focused minutes for CI review and closure reconciliation, excluding CI queue delays. Estimated 2026-11-08; no completion percentage.
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; current F-014 branch: 45 targeted tests passed; independent review 54 passed; full checks/PR pending |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; current F-014 implementation: committed regressions in test/worker-jobs.test.ts, test/worker-link.test.ts, test/worker-outbox.test.ts and test/protocol.test.ts; [frozen evaluation evidence](evaluations/2026-11-08-f014-scripted.json) |
 | Opened | 2026-11-01 |
-| Verification | Pending named acceptance |
+| Verification | 2026-11-08: full core 412 passed / 2 platform skips; headless 3 passed / 1 Windows skip; typecheck, build, repository checks passed. Clean cdd8a0e: v4 all seven groups 234 passed, three base repetitions 141 passed with stable inputs. Swift 9 passed / 1 skip; native packaging passed. Review: independent fresh-context report-only reviewer passed 54 tests and found no remaining code or documentation blockers; prior findings fixed. CI pending. Production-host, phone and physical acceptance are not claimed. |
 | Reviewed | 2026-11-08 |
 
 </details>
