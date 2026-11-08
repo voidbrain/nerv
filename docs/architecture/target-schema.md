@@ -59,3 +59,18 @@ Central Dogma also records proposals, ballots and approval transitions before ex
 ## Corrections to the original target
 
 Retain the intake → planning/advice → per-action gate → approval/grant → execution → durable-result loop. Correct quiet-secondary-bot behavior, automatic cloud-to-local fallback, EVA-as-host assumptions and unsupported learned-trust scoring. Preserve the distinction between consultants and veto seats, between base trust and discovery, and between a physical device and its execution adapter. The original artistic/schema source remains available in the historical-input archive; it was not wholly invalid just because some details were superseded.
+
+## Planned execution and memory structure
+
+F-049 owns fresh per-job instances, starting with EVA-03 as already chosen by the owner. These classes are targets, not a statement that four sandbox implementations exist:
+
+| Class | Intended restriction |
+|---|---|
+| EVA-00 Prototype | Shadow/dry-run without external effects |
+| EVA-01 Test Type | Bounded actions within explicit grants |
+| EVA-02 Production | The full grant needed by that job, still scoped and gate-controlled; no root or universal authority |
+| EVA-03 Quarantine | Untrusted input/code without ambient secrets or unapproved egress |
+
+The intended Entry Plug binds a pilot identity, bounded context, exact action/arguments, grant, budget/deadline and execution/receipt identity. It is not the intake parser. A pilot's stage caps eligible classes without forcing the broadest class. A physical base can host several instances within measured resource limits; pilot, model endpoint, base and class remain independent. Existing signed worker receipts/leases are implemented separately from this planned isolation lifecycle.
+
+LCL is working context; Central Dogma is durable episodic/action evidence; Lilith holds confirmed semantic facts, with consolidation proposing changes for the owner. Cross-base semantic merging and off-host restore are not established by this memory diagram. Maya names monitoring, while full contributor/transfer instrumentation remains F-052; a displayed busy stage is not proof of a network transfer.

@@ -1,12 +1,12 @@
 # Review and assessment register
 
-NERV evidence snapshot reviewed 8 November 2026 against main `7d3d091`. Times below use Europe/Rome; dates come from recorded review/run metadata, not file modification time. This register links evidence and existing rerun conditions; it does not install a schedule, run checks or certify an assessment. Refresh the affected rows when new evidence or policy changes.
+NERV evidence snapshot reviewed 8 November 2026 against main `2943aad`. Times below use Europe/Rome; dates come from recorded review/run metadata, not file modification time. This register links evidence and existing rerun conditions; it does not install a schedule, run checks or certify an assessment. Refresh the affected rows when new evidence or policy changes.
 
 ## Current review windows
 
 | Review | Last actual evidence | Next run / trigger | Owner and limits |
 |---|---|---|---|
-| Full deterministic verification | [PR #219 CI 42521677029](https://github.com/voidbrain/nerv/actions/runs/42521677029), 2026-11-08; all five jobs passed | By 2026-11-15 or ten first-parent integrations, whichever comes first; sooner for risk, unknown coverage or explicit request | [NERV mapping](../verification.md) / [shared policy](../agents/verification.md); no stress/model/physical acceptance implied |
+| Full deterministic verification | [PR #221 CI 42530253552](https://github.com/voidbrain/nerv/actions/runs/42530253552), 2026-11-08; all five jobs passed | By 2026-11-15 or ten first-parent integrations, whichever comes first; sooner for risk, unknown coverage or explicit request | [NERV mapping](../verification.md) / [shared policy](../agents/verification.md); no stress/model/physical acceptance implied |
 | Architecture reassessment | [2026-11-08 scoped report](../audits/2026-11-08-architecture-reassessment.md) | Significant boundary/hardware/trust change, recurring design failure or owner request; no calendar appointment | [Procedure](../agents/architecture-review.md), affected backlog owners |
 | Expensive stress / real-model campaigns | Reports below; latest run depends on suite and selection | On request, concrete changed risk or named acceptance, with explicit scope and budget; no periodic rerun date | [Evaluation procedure](../decisions/evaluation-and-improvement.md); no automatic model qualification |
 | Human / real-device acceptance | Per report and current record | When required device, signing identity, service host or human observation is available; not scheduled | F-005/F-009/F-011/F-015 and other owning records |
@@ -110,3 +110,5 @@ The [documentation map](../README.md), [procedure index](../agents/procedures.md
 [2026-11-08 retirement recheck](../audits/2026-11-08-retirement-recheck.md) ([scope manifest](../audits/2026-11-08-retirement-recheck.audit.json)): documentation-only, baseline `7d3d091`; next review on source/target/requirement changes, or its configured seven-day scoped threshold. This does not refresh other audit areas. It restores the [active target](../architecture/target-schema.md) and retains five mixed design sources in the historical-input archive.
 
 [Gauntlet Protocol ownership/reuse assessment](../design/gauntlet-protocol-2026-11-08.md), 2026-11-08: proposed independent project using harness for development, with NERV-owned cases. Next condition: accepted repository/framework scope or changed evaluation requirements. No model execution/qualification date exists for this proposal.
+
+PR #221 CI 42530253552 attempt 1 also observed heartbeat-path connection loss in the Windows deferred-approval resource-retention fixture. Only the failed Windows job and marker were retried on unchanged source; attempt 2 passed. B-046 retains both occurrences without assuming a shared causal fix or production defect.
