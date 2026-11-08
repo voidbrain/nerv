@@ -29,3 +29,8 @@ test('shared event persistence/privacy requires full verification and route reco
  assert.equal(plan(config.verification,{...fresh,files:['src/events.ts']}).full,true,'event schema and legacy grant redaction are shared persistence/privacy contracts');
  const route=plan(config.verification,{...fresh,files:['src/route-health.ts']});assert.ok(selectedTests(config,route.groups,route.files).includes('test/dummy-plug.test.ts'),'route outage/recovery must include its direct brain/runtime integration regression');
 });
+
+test('Windows glob separators normalize to repository paths before validating selected regressions',()=>{
+ const paths=selectedTests(config,['brief'],[],{expand:pattern=>[pattern.replaceAll('/','\\')],exists:()=>true});
+ assert.deepEqual(paths,['test/brief-recovery.test.ts','test/brief.test.ts','test/telegram.test.ts']);
+});

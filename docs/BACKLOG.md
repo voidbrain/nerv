@@ -9,11 +9,11 @@ Governance and naming follow the [NERV architecture](NERV-ARCHITECTURE.md). [Rul
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 58 | 39 | 44 | 41 |
+| **This week** | 58 | 39 | 45 | 41 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 35 | 3 |
+| **Open** | 35 | 4 |
 | **Require Human 🧑** | 3 | 0 |
 
 ### Require Human 🧑
@@ -164,6 +164,40 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Opened | 2026-11-07 |
 | Verification | 2026-11-07 CI failure observed: Process queue is full at ProcessClient.call → Runtime.loop finish. Deterministic reproduction/root cause/fix pending; a retry is not a fix. |
 | Reviewed | 2026-11-07 |
+
+</details>
+
+---
+
+### B-045
+
+**A newly negotiated worker loses an admitted request burst**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔴 | 🔺 P1 | Open | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Fix acknowledgement publication order and separate bounded frame parsing from incoming request admission.
+
+| | |
+|---|---|
+| **Issue** | Windows CI reproduced lost concurrent worker requests; the coordinator publishes readiness before queuing hello acknowledgement, and that response competes with four requests for the same frame admission slots. |
+| **Reproduce** | B-045 immediate-burst regression in test/worker-link.test.ts fails deterministically before the fix; CI 42479082275 also failed the overload case. |
+| **Check** | Publish only after acknowledgement is queued; accept four bounded requests plus control responses, retain four active request/pending limits, and execute one durable effect. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Fix the committed regression without changing its assertion; review protocol bounds and verify targeted contract tests plus required CI. Keep unknown-outcome/resource fencing safeguards.
+
+**Estimates:** Small remaining effort, approximately 1–2 focused hours including review and CI; queue delays excluded. Estimated 2026-11-08.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #208](https://github.com/voidbrain/nerv/pull/208) CI-discovered repair; Test: B-045 immediate negotiated burst in test/worker-link.test.ts. |
+| Opened | 2026-11-08 |
+| Verification | Committed failing regression pending fix, independent review and final CI. |
+| Reviewed | 2026-11-08 |
 
 </details>
 
@@ -1363,7 +1397,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 |---|---|
 | PR / evidence | [PR #208](https://github.com/voidbrain/nerv/pull/208) adoption;  Test: test/verification-policy.test.mjs and test/ci-pins.test.mjs. Published tag v4.1.0 resolves to a8a358e. |
 | Opened | 2026-11-08 |
-| Verification | Five local adapter/policy/pin tests passed; typecheck, conventions and rule checks passed. Review: independent fresh-context review identified event privacy/schema and route recovery selection gaps; committed regression 2cedfe7 precedes mapping fixes. Follow-up independent review confirmed both mappings fixed, no remaining blockers. CI full/partial routing pending. |
+| Verification | Five local adapter/policy/pin tests passed; typecheck, conventions and rule checks passed. Review: independent fresh-context review identified event privacy/schema and route recovery selection gaps; committed regression 2cedfe7 precedes mapping fixes. Follow-up independent review confirmed both mappings fixed, no remaining blockers. CI 42479082275 correctly refused its full marker after Windows path normalization and worker burst failures; fixes/regressions pending final CI. |
 | Reviewed | 2026-11-08 |
 
 </details>

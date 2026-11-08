@@ -166,3 +166,10 @@ test('F-014: source Spear sends signed cancellation while delivery is in flight 
   await until(async()=>(await f.ra.events(proposal.sortieId)).some(e=>e.kind==='kaji.result'&&e.payload.outcome==='uncertain'));release();await until(async()=>(await f.ra.events(proposal.sortieId)).filter(e=>e.kind==='kaji.result').length>=2);assert.equal((await f.rb.list()).length,0);
  }finally{release();await f.close();}
 });
+
+test('B-045: publishing a negotiated worker accepts an immediate admitted burst after its hello acknowledgement',{timeout:30000},async()=>{
+ const f=await fixture(10000);let burst:Promise<PromiseSettledResult<unknown>[]>|undefined;
+ f.main.settings.log=()=>{burst??=Promise.allSettled(Array.from({length:4},()=>f.main.run('NERV-02',item(108),5000)));};
+ try{await f.start();await until(()=>!!burst);const results=await burst!;assert.ok(results.some(result=>result.status==='fulfilled'),'the accepted session must not lose every admitted request behind its own hello acknowledgement');assert.equal((await f.rb.list()).length,1,'the burst executes one durable effect');}
+ finally{await f.close();}
+});
