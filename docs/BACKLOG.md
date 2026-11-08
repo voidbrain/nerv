@@ -476,7 +476,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #4](https://github.com/voidbrain/nerv/pull/4) merged; Linux and macOS checks green; live Keychain/rotation acceptance remains pending |
+| PR / evidence | [PR #213](https://github.com/voidbrain/nerv/pull/213) credential renewal and offline recovery contracts; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #4](https://github.com/voidbrain/nerv/pull/4) merged; Linux and macOS checks green; live Keychain/rotation acceptance remains pending |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-08 Unit/integration: five Node authentication/renewal contracts and one stopped-profile recovery contract pass; actual HTTPS admission, single-use tickets, old-token invalidation, independent clients, full roster, expired/revoked refusal and retained unrelated data covered. Swift: three pairing tests pass, including real pinned Swift-to-Node HTTPS renewal and identity/pin/port refusal. Typecheck/conventions pass. CI and live Keychain/OS/certificate-recovery acceptance pending; fixtures never change real credentials, services or login state. |
 | Reviewed | 2026-11-08 |
