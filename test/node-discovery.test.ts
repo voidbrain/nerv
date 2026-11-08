@@ -13,7 +13,7 @@ import {signRecord} from '../src/kaji.ts';
 const now=new Date('2026-11-08T12:00:00Z'),target=nodeTarget({host:'aster.invalid',user:'fixture'});
 const info={version:1,platform:'linux',arch:'arm64',node:'24.12.0',hostname:'aster',userId:1000,userHome:'/home/fixture',git:'git version 2.47.0',npm:'11.1.0',base:null,configured:false,runtime:'not-checked'};
 const inspect=(extra:Record<string,unknown>={})=>inspectNode(target,async()=>JSON.stringify({...info,...extra}),now);
-const options={revision:'a'.repeat(40),checkout:'/home/fixture/nerv-source',home:'/home/fixture/nerv-data',base:{id:'BASE-02',name:'Harbor'},installService:false};
+const options={sourceProtocol:1 as const,revision:'a'.repeat(40),checkout:'/home/fixture/nerv-source',home:'/home/fixture/nerv-data',base:{id:'BASE-02',name:'Harbor'},installService:false};
 
 test('F-005: inventory and literal SSH aliases remain untrusted and reject command/options injection',()=>{
  const inventory={version:1,targets:[{name:'Harbor',ssh:{host:'aster.invalid',user:'fixture',port:2222},secret:'NEUTRAL_SECRET'}]};
@@ -77,4 +77,16 @@ test('F-005: init --no-model-setup never queries the configured Ollama endpoint'
  const server=createServer((_req,res)=>{requests++;res.setHeader('content-type','application/json');res.end(JSON.stringify({models:[{name:'fixture-model'}]}));});await new Promise<void>(done=>server.listen(0,'127.0.0.1',done));
  try{const result=await new Promise<{code:number|null;out:string;error:string}>((done,fail)=>{const child=spawn(process.execPath,['src/cli.ts','init','--base','BASE-02','--name','Harbor','--no-model-setup'],{env:{...process.env,NERV_HOME:home,NERV_OLLAMA:'http://127.0.0.1:'+(server.address() as {port:number}).port},stdio:['ignore','pipe','pipe']});let out='',error='';child.stdout.on('data',d=>out+=d);child.stderr.on('data',d=>error+=d);child.once('error',fail);child.once('close',code=>done({code,out,error}));});assert.equal(result.code,0,result.error);assert.equal(requests,0,'worker initialization must not request even model inventory');const config=JSON.parse(readFileSync(join(home,'config.json'),'utf8'));assert.ok(!config.models?.local&&!config.models?.cloud);}
  finally{await new Promise<void>(done=>{server.close(()=>done());server.closeAllConnections();});rmSync(home,{recursive:true,force:true});}
+});
+
+
+test('F-005: planning verifies the pinned source capability before proposing model-free init',async()=>{
+ const dir=mkdtempSync(join(tmpdir(),'nerv-node-source-')),snapshot=await inspect();writeFileSync(join(dir,'inspection.json'),JSON.stringify(snapshot));
+ const args=['plan','--inspection',join(dir,'inspection.json'),'--revision',options.revision,'--checkout',options.checkout,'--home',options.home,'--base','BASE-02','--name','Harbor'];
+ try{
+  await assert.rejects(nodesCommand(args,async()=>JSON.stringify({version:1,initNoModelSetup:false})),/model-free/);
+  await assert.rejects(nodesCommand(args,async()=>{throw Error('unknown commit');}),/compatible NERV commit/);
+  const result=await nodesCommand(args,async request=>{assert.equal(request.program,'git');assert.equal(request.args.at(-1),options.revision+':shared/node-bootstrap.json');return JSON.stringify({version:1,initNoModelSetup:true});}) as {source:{bootstrapProtocol:number}};assert.equal(result.source.bootstrapProtocol,1);
+  const declared=JSON.parse(readFileSync('shared/node-bootstrap.json','utf8'));assert.equal(declared.initNoModelSetup,true);assert.equal(declared.version,1);
+ }finally{rmSync(dir,{recursive:true,force:true});}
 });

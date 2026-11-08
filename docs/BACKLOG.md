@@ -234,7 +234,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 |---|---|
 | PR / evidence | [PR #209](https://github.com/voidbrain/nerv/pull/209) scope reconciliation;  [PR #208](https://github.com/voidbrain/nerv/pull/208) delivered transport repair; [F-014](archive/backlog-2026.md#f-014) transport foundation;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
-| Verification | Eight focused neutral-fixture tests pass, including real bounded children and CLI/no-database/privacy joins; typecheck/conventions pass. Local Mac read-only probe observed darwin/arm64, Node/Git/npm and existing default configuration; private report/preview retained outside git. Review/CI and bootstrap/device acceptance pending; no service/remote installation or physical outcome is claimed. |
+| Verification | 17 focused node/existing-model-setup tests pass, including real bounded children and CLI/no-database/privacy joins; committed regression 533b8f6 precedes the model-free initialization fix; typecheck/conventions pass. Local Mac read-only probe observed darwin/arm64, Node/Git/npm and existing default configuration; private report/preview retained outside git. Review/CI and bootstrap/device acceptance pending; no service/remote installation or physical outcome is claimed. |
 | Reviewed | 2026-11-08 |
 
 </details>
