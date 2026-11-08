@@ -15,16 +15,16 @@ const wait=(ms:number)=>new Promise(done=>setTimeout(done,ms));
 async function until(check:()=>boolean|Promise<boolean>){const end=Date.now()+15000;while(!(await check())){if(Date.now()>end)throw Error('Worker condition timed out');await wait(20);}}
 const keys=()=>{const k=generateKeyPairSync('ed25519');return {privateKey:k.privateKey,publicKey:k.publicKey.export({type:'spki',format:'der'}).toString('base64')};};
 const item=(n:number)=>({id:`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`,sequence:n,request:'Add a neutral reminder',tool:'reminders.add',args:{title:'Neutral '+n,due:'2031-01-01T09:00:00Z'}});
-async function fixture(){
+async function fixture(heartbeatMs=150){
  const root=keys(),a=keys(),b=keys(),homeA=mkdtempSync(join(tmpdir(),'nerv-worker-a-')),homeB=mkdtempSync(join(tmpdir(),'nerv-worker-b-'));
  for(const [home,id] of [[homeA,'NERV-01'],[homeB,'NERV-02']])writeFileSync(join(home,'config.json'),JSON.stringify({base:{id,name:'Neutral fixture'},kaji:{root:root.publicKey,offers:['reminders.add']},models:{local:{baseUrl:'http://127.0.0.1:9/v1',model:'unused-fixture'}}}));
  const ra=new Runtime(join(homeA,'nerv.sqlite'),undefined,homeA);let rb=new Runtime(join(homeB,'nerv.sqlite'),undefined,homeB);await Promise.all([ra.ready(),rb.ready()]);
  const server=createServer((_req,res)=>{res.writeHead(404);res.end();});await new Promise<void>(done=>server.listen(0,'127.0.0.1',done));const address=`127.0.0.1:${(server.address() as {port:number}).port}`;let serial=0;
  const record=(body:Omit<RegistryBody,'serial'|'issued'>)=>signRecord(root.privateKey,{...body,serial:++serial,issued:new Date().toISOString()} as RegistryBody);
  const records=[record({kind:'enrol',baseId:'NERV-01',name:'Aster',publicKey:a.publicKey,address}),record({kind:'enrol',baseId:'NERV-02',name:'Harbor',publicKey:b.publicKey,address:'127.0.0.1:1'}),record({kind:'main',baseId:'NERV-01'})];await Promise.all([ra.kaji.add(records),rb.kaji.add(records)]);
- const main=new WorkerLink({id:'NERV-01',key:a.privateKey,registry:ra.kaji,adapter:ra.worker,address:s=>'ws://'+s,heartbeatMs:150,requestMs:1000,reconnectMs:30});main.attach(server);
+ const main=new WorkerLink({id:'NERV-01',key:a.privateKey,registry:ra.kaji,adapter:ra.worker,address:s=>'ws://'+s,heartbeatMs,requestMs:1000,reconnectMs:30});main.attach(server);
  let adapter:WorkerAdapter={open:(o,s,k,ok)=>rb.worker.open(o,s,k,ok),close:(o,s)=>rb.worker.close(o,s),run:(o,i,c)=>rb.worker.run(o,i,c)};
- const worker=()=>new WorkerLink({id:'NERV-02',key:b.privateKey,registry:rb.kaji,adapter:{open:(o,s,k,ok)=>adapter.open(o,s,k,ok),close:(o,s)=>adapter.close(o,s),run:(o,i,c)=>adapter.run(o,i,c)},address:s=>'ws://'+s,heartbeatMs:150,requestMs:1000,reconnectMs:30});let link=worker();const sockets:WebSocket[]=[];
+ const worker=()=>new WorkerLink({id:'NERV-02',key:b.privateKey,registry:rb.kaji,adapter:{open:(o,s,k,ok)=>adapter.open(o,s,k,ok),close:(o,s)=>adapter.close(o,s),run:(o,i,c)=>adapter.run(o,i,c)},address:s=>'ws://'+s,heartbeatMs,requestMs:1000,reconnectMs:30});let link=worker();const sockets:WebSocket[]=[];
  return {main,get rb(){return rb;},ra,homeB,address,b,record,server,setAdapter:(next:WorkerAdapter)=>{adapter=next;},get adapter(){return adapter;},start:async()=>{main.start();link.start();await until(()=>main.connected('NERV-02'));},
   restartWorker:async()=>{await link.stop();await rb.close();rb=new Runtime(join(homeB,'nerv.sqlite'),undefined,homeB);await rb.ready();link=worker();link.start();await until(()=>main.connected('NERV-02'));},
   raw:async(headers:Record<string,string>,path='/kaji/worker')=>{const socket=new WebSocket('ws://'+address+path,{headers});sockets.push(socket);return socket;},
@@ -93,5 +93,53 @@ test('F-014 review: expired pending worker approval releases only proven unexecu
  try{await f.start();const request={...item(17),tool:'memory.remember',args:{text:'Neutral fact'}};await f.main.run('NERV-02',request,5000);
   const {Store}=await import('../src/store.ts');const store=new Store(join(f.homeB,'nerv.sqlite'),undefined,{home:f.homeB});try{store.expire(new Date(Date.now()+301000));}finally{store.close();}
   assert.equal((await f.rb.approvals()).length,0,'lease-expired card is stood down without a tap');assert.equal((await f.main.run('NERV-02',request,5000) as {outcome:string}).outcome,'reject');assert.equal((await f.main.run('NERV-02',item(18),5000) as {outcome:string}).outcome,'grant');assert.equal((await f.rb.lilith.list()).length,0);
+ }finally{await f.close();}
+});
+async function rawReady(f:Awaited<ReturnType<typeof fixture>>,id='NERV-02',key=f.b.privateKey){
+ const socket=await f.raw(signedHeaders(id,key,'req','GET','/kaji/worker',''));await new Promise<void>((done,fail)=>{socket.once('open',done);socket.once('error',fail);});const session=randomUUID();
+ const frame=(sequence:number,method:string,params:object)=>{const body=JSON.stringify({sequence,rpc:{jsonrpc:'2.0',id:randomUUID(),method,params}});return JSON.stringify({session,body,headers:signedHeaders(id,key,'req','FRAME','/kaji/worker/'+session,body)});};
+ const hello=frame(1,'worker.hello',{version:1,epoch:1,cursor:0,offers:[]});const reply=new Promise<unknown>(done=>socket.once('message',raw=>done(JSON.parse(JSON.parse(raw.toString()).body).rpc)));socket.send(hello);assert.equal(((await reply) as {result:{version:number}}).result.version,1);return {socket,frame,hello,session};
+}
+test('F-014: invalid version and forbidden worker RPC never reach the destination gate',{timeout:30000},async()=>{
+ const f=await fixture(10000);
+ try{f.main.start();const raw=await rawReady(f);const response=new Promise<{error:{code:number}}>(done=>raw.socket.once('message',data=>done(JSON.parse(JSON.parse(data.toString()).body).rpc)));raw.socket.send(raw.frame(2,'approvals.decide',{id:item(1).id,decision:'approve'}));assert.equal((await response).error.code,-32003);assert.equal((await f.rb.list()).length,0);
+  raw.socket.terminate();await until(()=>!f.main.connected('NERV-02'));const socket=await f.raw(signedHeaders('NERV-02',f.b.privateKey,'req','GET','/kaji/worker',''));await new Promise<void>(done=>socket.once('open',done));const session=randomUUID(),body=JSON.stringify({sequence:1,rpc:{jsonrpc:'2.0',id:randomUUID(),method:'worker.hello',params:{version:99,epoch:1,cursor:0,offers:[]}}});
+  const refused=new Promise<{error:{code:number}}>(done=>socket.once('message',data=>done(JSON.parse(JSON.parse(data.toString()).body).rpc)));socket.send(JSON.stringify({session,body,headers:signedHeaders('NERV-02',f.b.privateKey,'req','FRAME','/kaji/worker/'+session,body)}));assert.equal((await refused).error.code,-32003);assert.equal(f.main.connected('NERV-02'),false);
+ }finally{await f.close();}
+});
+for(const attack of ['replay','gap','tamper','other-session','binary','oversized'] as const)test(`F-014: ${attack} frame closes the channel without execution`,{timeout:30000},async()=>{
+ const f=await fixture(10000);
+ try{f.main.start();const raw=await rawReady(f),closed=new Promise<void>(done=>raw.socket.once('close',()=>done()));
+  if(attack==='replay')raw.socket.send(raw.hello);
+  if(attack==='gap')raw.socket.send(raw.frame(3,'worker.ping',{offers:[]}));
+  if(attack==='tamper'){const encoded=JSON.parse(raw.frame(2,'worker.ping',{offers:[]}));encoded.body=encoded.body.replace('worker.ping','worker.run');raw.socket.send(JSON.stringify(encoded));}
+  if(attack==='other-session'){const encoded=JSON.parse(raw.frame(2,'worker.ping',{offers:[]}));encoded.session=randomUUID();raw.socket.send(JSON.stringify(encoded));}
+  if(attack==='binary')raw.socket.send(Buffer.from(raw.frame(2,'worker.ping',{offers:[]})),{binary:true});
+  if(attack==='oversized')raw.socket.send('x'.repeat(65537));
+  await closed;await until(()=>!f.main.connected('NERV-02'));assert.equal((await f.rb.list()).length,0);
+ }finally{await f.close();}
+});
+test('F-014: pending admission remains occupied after timeout until response or disconnect',{timeout:30000},async()=>{
+ const f=await fixture(10000);
+ try{f.main.start();const raw=await rawReady(f);const results=await Promise.allSettled(Array.from({length:4},(_,i)=>f.main.run('NERV-02',item(100+i),80)));assert.ok(results.every(r=>r.status==='rejected'));
+  await assert.rejects(f.main.run('NERV-02',item(104),80),/pending request bound/);assert.equal(f.main.connected('NERV-02'),true);raw.socket.terminate();await until(()=>!f.main.connected('NERV-02'));assert.equal((await f.rb.list()).length,0);
+ }finally{await f.close();}
+});
+test('F-014: an asleep peer missing signed heartbeats is disconnected without inferring that work stopped',{timeout:30000},async()=>{
+ const f=await fixture(50);
+ try{f.main.start();await rawReady(f);await until(()=>!f.main.connected('NERV-02'));await assert.rejects(f.main.run('NERV-02',item(105),100));assert.equal((await f.rb.list()).length,0);
+ }finally{await f.close();}
+});
+test('F-014: concurrent replay and overload execute the same durable request once',{timeout:30000},async()=>{
+ const f=await fixture();
+ try{await f.start();const results=await Promise.allSettled(Array.from({length:20},()=>f.main.run('NERV-02',item(106),5000)));assert.ok(results.some(r=>r.status==='fulfilled'));assert.equal((await f.rb.list()).length,1);assert.equal((await f.main.run('NERV-02',item(107),5000) as {outcome:string}).outcome,'grant');assert.equal((await f.rb.list()).length,2);
+ }finally{await f.close();}
+});
+test('F-014: global worker connection bound rejects excess upgrades and returns capacity after close',{timeout:30000},async()=>{
+ const f=await fixture(10000);
+ try{const identities=[{id:'NERV-02',key:f.b.privateKey}];const records=[];
+  for(let i=3;i<=17;i++){const key=keys(),id='NERV-'+String(i).padStart(2,'0');identities.push({id,key:key.privateKey});records.push(f.record({kind:'enrol',baseId:id,name:'Neutral '+i,address:'127.0.0.1:1',publicKey:key.publicKey}));}await f.ra.kaji.add(records);f.main.start();const peers=await Promise.all(identities.map(identity=>rawReady(f,identity.id,identity.key)));
+  const excess=await f.raw(signedHeaders('NERV-02',f.b.privateKey,'req','GET','/kaji/worker',''));await new Promise<void>((done,fail)=>{excess.once('open',()=>fail(Error('Excess connection admitted')));excess.on('error',()=>{});excess.once('unexpected-response',(_req,res)=>{assert.equal(res.statusCode,503);res.resume();excess.terminate();done();});});
+  peers[0]!.socket.terminate();await until(()=>!f.main.connected('NERV-02'));await rawReady(f);assert.equal(f.main.connected('NERV-02'),true);
  }finally{await f.close();}
 });

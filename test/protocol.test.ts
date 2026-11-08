@@ -33,3 +33,11 @@ test('B-042: approval status lookup is bounded, read-only and limited to the coo
  for(const params of [{ids:['bad']},{ids:[id,id]},{ids:Array.from({length:201},(_,i)=>i.toString(16).padStart(8,'0')+'-0000-4000-8000-000000000001')},{ids:[id],decision:'approve'}])assert.throws(()=>validateParams('approvals.pendingIds',params));
  assert.throws(()=>authorize('interface','coordinator','approvals.pendingIds'));assert.throws(()=>authorize('brain','nervous','approvals.pendingIds'));
 });
+test('F-014: local read-only RPC bounds authenticated connections globally and returns capacity on close',{timeout:20000},async()=>{
+ const store=new Store(':memory:'),token='l'.repeat(32),server=makeServer(store,token),clients:WebSocket[]=[];await new Promise<void>(done=>server.listen(0,'127.0.0.1',done));const url=`ws://127.0.0.1:${(server.address() as {port:number}).port}/rpc`;
+ const connect=async()=>{const socket=new WebSocket(url,{headers:{Authorization:'Bearer '+token}});clients.push(socket);socket.on('error',()=>{});await once(socket,'open');return socket;};
+ try{for(let i=0;i<16;i++)await connect();const excess=new WebSocket(url,{headers:{Authorization:'Bearer '+token}});clients.push(excess);excess.on('error',()=>{});
+  await new Promise<void>((done,fail)=>{excess.once('open',()=>fail(Error('Seventeenth RPC connection was admitted')));excess.once('unexpected-response',(_req,res)=>{assert.equal(res.statusCode,503);res.resume();excess.terminate();done();});});
+  const first=clients[0]!,closed=once(first,'close');first.terminate();await closed;await connect();
+ }finally{for(const client of clients)client.terminate();await new Promise<void>(done=>server.close(()=>done()));store.close();}
+});

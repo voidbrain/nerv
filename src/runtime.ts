@@ -25,7 +25,7 @@ export interface ExternalTools {docs:{name:string;effect:string;about:string;arg
 /** Requests in one domain without a specialist, within 30 days, before a pilot is proposed (F-045). */
 const PILOT_THRESHOLD=3;
 import {MAX_STEPS,doneReply,type RemoteOffer,requestLanguage,waitingReply,type Plan,type Recalled,type Step,type Turn} from './misato.ts';
-import {toolDocs} from './executors.ts';
+import {builtinTools,toolDocs} from './executors.ts';
 import type {Digest,Exchange} from './instrumentality.ts';
 import type {Episode,Fact} from './memory.ts';
 import type {BaseEntry,SignedRecord} from './kaji.ts';
@@ -434,7 +434,7 @@ export class Runtime implements StoreApi {
   if(claim.state==='busy')return {retry:true,error:'Worker resource is held by an unfinished request.'};
   if(claim.state!=='claimed')return claim.result;
   const lease=claim.lease!;
-  const result=!offered.includes(item.tool)||item.tool==='kaji.run'?{refused:`this base does not offer ${item.tool} (on it: kaji offer)`}
+  const result=!offered.includes(item.tool)||item.tool==='kaji.run'||!builtinTools.some(t=>t.name===item.tool)?{refused:`this base does not offer ${item.tool} (on it: kaji offer)`}
    :await this.act({request:`From ${from}: ${item.request || item.tool}`.slice(0,4000),tool:item.tool,args:item.args},lease).catch(()=>({outcome:'invalid',error:'Worker action failed or its lease/authority changed; inspect the local trace.'}));
   if('approvalId' in result&&result.approvalId)return result;
   try{await this.nervous.call('worker.finish',{lease,result:result as Record<string,unknown>});}

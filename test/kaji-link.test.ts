@@ -159,3 +159,6 @@ test('F-014: invalid signatures cannot consume a legitimate request nonce',()=>{
  assert.throws(()=>verifySigned(forged,'req','GET','/neutral',body,bases,nonces),/bad signature/);
  assert.equal(verifySigned(headers,'req','GET','/neutral',body,bases,nonces),'NERV-01','authentication must precede replay-cache admission');
 });
+test('F-014: authenticated replay admission is bounded and old entries expire without accepting duplicate live nonces',()=>{
+ const cache=new Nonces(2);assert.equal(cache.fresh('one',1000),true);assert.equal(cache.fresh('two',1000),true);assert.equal(cache.fresh('three',1001),false);assert.equal(cache.fresh('one',1002),false);assert.equal(cache.fresh('three',602000),true);
+});

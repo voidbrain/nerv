@@ -61,7 +61,7 @@ class Peer {
   if(!this.ready)throw Error('Worker negotiation required.');
   if(method==='worker.ping'){if(this.role==='coordinator'){if(!keys(params,['offers']))throw Error('Invalid worker heartbeat.');await this.link.observe(this.remote,params.offers);}else if(Object.keys(params).length)throw Error('Invalid coordinator heartbeat.');return {version:WORKER_PROTOCOL_VERSION};}
   if(method==='worker.run'&&this.role==='worker'){
-   if(!keys(params,['item','epoch','expires'])||params.epoch!==this.epoch||!object(params.item)||!Number.isSafeInteger(params.item.sequence)||Number(params.item.sequence)<1)throw Error('Invalid worker delivery.');
+   if(!keys(params,['item','epoch','expires'])||!Number.isSafeInteger(params.expires)||params.epoch!==this.epoch||!object(params.item)||!Number.isSafeInteger(params.item.sequence)||Number(params.item.sequence)<1)throw Error('Invalid worker delivery.');
    const context={session:this.session,epoch:this.epoch,expires:Number(params.expires)-KAJI_CLOCK_SKEW_MS,ownerKey:this.remoteKey};validateParams('worker.claim',{owner:this.remote,ownerKey:this.remoteKey,key:createPublicKey(this.link.settings.key).export({type:'spki',format:'der'}).toString('base64'),item:params.item,context:{session:context.session,epoch:context.epoch,expires:context.expires}});
    const result=await this.link.settings.adapter.run(this.remote,params.item as unknown as WorkerItem,context);
    if(!object(result)||Buffer.byteLength(JSON.stringify(result))>WORKER_RESULT_BYTES)throw Error('Invalid worker result.');return result;
@@ -93,21 +93,21 @@ class Peer {
 /** Outbound workers authenticate with their enrolled base keys, never the owner's root/API credential. */
 export class WorkerLink {
  readonly settings:Settings;readonly heartbeatMs:number;readonly requestMs:number;private reconnectMs:number;
- private server=new WebSocketServer({noServer:true,maxPayload:MAX_FRAME_BYTES,perMessageDeflate:false});private peers=new Map<string,Peer>();private client?:Peer;private connecting?:Promise<void>;private timer?:NodeJS.Timeout;private stopped=true;private upgrades=0;private nextAttempt=0;private failures=0;private cleanup=new Set<Promise<void>>();
+ private server=new WebSocketServer({noServer:true,maxPayload:MAX_FRAME_BYTES,perMessageDeflate:false});private peers=new Map<string,Peer>();private client?:Peer;private connecting?:Promise<void>;private timer?:NodeJS.Timeout;private stopped=true;private upgradeSockets=new Set<Duplex>();private connectingSocket?:WebSocket;private upgrades=0;private nextAttempt=0;private failures=0;private cleanup=new Set<Promise<void>>();
  constructor(settings:Settings){this.settings=settings;this.heartbeatMs=settings.heartbeatMs ?? 30000;this.requestMs=settings.requestMs ?? 10000;this.reconnectMs=settings.reconnectMs ?? 1000;}
  attach(server:Server){server.on('upgrade',(request,socket,head)=>{void this.upgrade(request,socket,head);});}
  private async upgrade(request:IncomingMessage,socket:Duplex,head:Buffer){
   const refuse=(status:number)=>{socket.end(`HTTP/1.1 ${status} Refused\r\nConnection: close\r\n\r\n`,()=>socket.destroy());};
   if(this.stopped||this.server.clients.size+this.upgrades>=MAX_CONNECTIONS){refuse(503);return;}
   if(request.method!=='GET'||request.url!==PATH||'origin' in request.headers||request.headers.authorization){refuse(401);return;}
-  this.upgrades++;const deadline=setTimeout(()=>socket.destroy(),5000);
+  this.upgrades++;this.upgradeSockets.add(socket);const deadline=setTimeout(()=>socket.destroy(),5000);
   try{
    if(await this.settings.registry.main?.()!==this.settings.id)throw Error('Not coordinator.');
    const bases=await this.settings.registry.bases();const from=verifySigned(request.headers as Record<string,string>,'req','GET',PATH,'',bases,this.upgradeNonces);if(from===this.settings.id)throw Error('Self connection.');
    if(this.stopped||socket.destroyed)throw Error('Stopped.');clearTimeout(deadline);this.server.handleUpgrade(request,socket,head,ws=>{new Peer(this,ws,from,'coordinator',bases.find(b=>b.baseId===from)!.publicKey);});
-  }catch{refuse(401);}finally{clearTimeout(deadline);this.upgrades--;}
+  }catch{refuse(401);}finally{clearTimeout(deadline);this.upgradeSockets.delete(socket);this.upgrades--;}
  }
- private upgradeNonces=new Nonces();
+ private upgradeNonces=new Nonces(4096);
  async observe(remote:string,offers:unknown){
   if(!Array.isArray(offers)||offers.length>20||offers.some(v=>typeof v!=='string'||!/^[a-z]+\.[a-z]+$/.test(v)||v==='kaji.run'))throw Error('Invalid worker capabilities.');
   this.settings.onOffers?.(remote,[...new Set(offers as string[])]);await this.settings.registry.seen({[remote]:new Date().toISOString()});
@@ -126,7 +126,7 @@ export class WorkerLink {
   return peer.request('worker.run',{item,epoch:peer.epoch,expires:Math.min(item.deadline ?? Number.MAX_SAFE_INTEGER,Date.now()+WORKER_LEASE_MS)},timeoutMs);
  }
  start(){if(!this.stopped)return;this.stopped=false;this.timer=setInterval(()=>{void this.connect();},this.reconnectMs);void this.connect();}
- private defer(){this.failures=Math.min(this.failures+1,5);this.nextAttempt=Date.now()+this.reconnectMs*2**this.failures;}
+ private defer(){this.failures=Math.min(this.failures+1,5);this.nextAttempt=Date.now()+Math.min(30000,this.reconnectMs*2**this.failures)*(0.8+Math.random()*0.2);}
  private connect():Promise<void>{
   if(this.stopped||this.client||Date.now()<this.nextAttempt)return Promise.resolve();if(this.connecting)return this.connecting;
   this.connecting=this.connectOnce().catch(()=>this.defer()).finally(()=>{this.connecting=undefined;});return this.connecting;
@@ -136,11 +136,11 @@ export class WorkerLink {
   const bases=await this.settings.registry.bases(),target=bases.find(b=>b.baseId===owner&&b.status==='enrolled');if(!target||!bases.some(b=>b.baseId===this.settings.id&&b.status==='enrolled'))return;
   const session=randomUUID(),state=await this.settings.adapter.open(owner,session,createPublicKey(this.settings.key).export({type:'spki',format:'der'}).toString('base64'),target.publicKey);let peer:Peer|undefined;
   try{
-   if(this.stopped)throw Error('Stopped.');const socket=new WebSocket(this.settings.address(target.address)+PATH,{headers:signedHeaders(this.settings.id,this.settings.key,'req','GET',PATH,''),maxPayload:MAX_FRAME_BYTES,perMessageDeflate:false,handshakeTimeout:5000});
-   await new Promise<void>((resolve,reject)=>{socket.once('error',reject);socket.once('open',()=>{peer=new Peer(this,socket,owner,'worker',target.publicKey,session);peer.epoch=state.epoch;this.client=peer;resolve();});});
+   if(this.stopped)throw Error('Stopped.');const socket=new WebSocket(this.settings.address(target.address)+PATH,{headers:signedHeaders(this.settings.id,this.settings.key,'req','GET',PATH,''),maxPayload:MAX_FRAME_BYTES,perMessageDeflate:false,handshakeTimeout:5000});this.connectingSocket=socket;
+   await new Promise<void>((resolve,reject)=>{socket.once('error',reject);socket.once('open',()=>{this.connectingSocket=undefined;peer=new Peer(this,socket,owner,'worker',target.publicKey,session);peer.epoch=state.epoch;this.client=peer;resolve();});});
    if(this.stopped){peer!.end();return;}await peer!.negotiate(state.epoch,state.cursor);this.failures=0;this.nextAttempt=0;
-  }catch(e){if(peer)peer.end();else await this.settings.adapter.close(owner,session);throw e;}
+  }catch(e){this.connectingSocket=undefined;if(peer)peer.end();else await this.settings.adapter.close(owner,session);throw e;}
  }
- dropIncoming(){for(const ws of this.server.clients)ws.terminate();for(const peer of this.peers.values())peer.end();this.peers.clear();}
- async stop(){this.stopped=true;if(this.timer)clearInterval(this.timer);this.client?.end();this.dropIncoming();await this.connecting;await Promise.allSettled([...this.cleanup]);}
+ dropIncoming(){for(const socket of this.upgradeSockets)socket.destroy();for(const ws of this.server.clients)ws.terminate();for(const peer of this.peers.values())peer.end();this.peers.clear();}
+ async stop(){this.stopped=true;if(this.timer)clearInterval(this.timer);this.connectingSocket?.terminate();this.client?.end();this.dropIncoming();await this.connecting;await Promise.allSettled([...this.cleanup]);}
 }
