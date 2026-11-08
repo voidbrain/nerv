@@ -85,7 +85,7 @@ export interface StoreApi {
  /** Lilith for the owner (dashboard): admin-only over REST, never on the read-only socket. */
  lilith?:{list():Promise<Fact[]>;episodes():Promise<Episode[]>;add(text:string):Promise<Fact>;edit(id:string,text:string):Promise<Fact|null>;forget(id:string):Promise<boolean>;share(id:string,shareable:boolean):Promise<Fact|null>;history(id:string):Promise<unknown[]>};
  consolidate?():Promise<{summary?:string;exchanges:number;proposed:number;skipped:number;error?:string}>;
- spear?(id:string,reason:string):Promise<{revoked:number;stoodDown:number;happened:{actionId:string;tool:string;inverse:string|null}[]}|null>;
+ spear?(id:string,reason:string):{revoked:number;stoodDown:number;happened:{actionId:string;tool:string;inverse:string|null}[]}|null|Promise<{revoked:number;stoodDown:number;happened:{actionId:string;tool:string;inverse:string|null}[]}|null>;
  events(sortieId:string,after?:number,limit?:number):SortieEvent[]|Promise<SortieEvent[]>;
  sorties(limit?:number,before?:string,q?:string):SortieSummary[]|Promise<SortieSummary[]>;
  closedSince?(since:string):{done:number;failed:number;failures:{id:string;title:string;closed:string}[]}|Promise<{done:number;failed:number;failures:{id:string;title:string;closed:string}[]}>;
@@ -131,7 +131,7 @@ export class Runtime implements StoreApi {
  async approvals(limit=5){return await this.nervous.call('approvals.pending',{limit}) as Approval[];}
  async decide(id:string,decision:Decision,source:'api'|'cli'|'telegram'='api'){const result=await this.nervous.call('approvals.decide',{id,decision,source}) as {decision:string;result?:unknown;error?:string};if(this.resumer)void this.sweep();return result;}
  /** Spear of Longinus for one sortie: revoke its unused grants, stand down its cards, close it; executed effects are reported. */
- async spear(id:string,reason:string){if(!await this.sortie(id))return null;return await this.nervous.call('sorties.spear',{id,reason}) as {revoked:number;stoodDown:number;happened:{actionId:string;tool:string;inverse:string|null}[]};}
+ async spear(id:string,reason:string){if(!await this.sortie(id))return null;const result=await this.nervous.call('sorties.spear',{id,reason}) as {remotePending:number;revoked:number;stoodDown:number;happened:{actionId:string;tool:string;inverse:string|null}[]};if(result.remotePending)void this.cancelRemote?.();return result;}
  async closedSince(since:string){return await this.nervous.call('sorties.closedSince',{since}) as {done:number;failed:number;failures:{id:string;title:string;closed:string}[]};}
  async sorties(limit=20,before?:string,q?:string){return await this.nervous.call('sorties.list',{limit,...(before?{before}:{}),...(q?{q}:{})}) as SortieSummary[];}
  async sortie(id:string){return await this.nervous.call('sorties.get',{id}) as (SortieSummary&{detail:ActionDetail[]})|null;}
@@ -399,7 +399,21 @@ export class Runtime implements StoreApi {
   * Sends the actions queued by kaji.run (F-036 slice 3b), oldest first, each with the same id every time until it reached
   * the base (which runs it once through its own gate and remembers the id). The result reaches the owner as a follow-up.
   */
- startOutbox(send:(base:string,item:RunItem,dispatching:()=>Promise<void>)=>Promise<{reached:boolean;result?:unknown;refused?:string}>,everyMs=3000){
+ startOutbox(send:(base:string,item:RunItem,dispatching:()=>Promise<void>)=>Promise<{reached:boolean;result?:unknown;refused?:string}>,everyMs=3000,cancel?:(base:string,id:string,reason:string)=>Promise<{status:string;result?:unknown}>){
+  let cancelling=false;
+  const cancelTick=async()=>{
+   if(cancelling)return;cancelling=true;
+   try{for(const q of await this.nervous.call('kaji.outboxCancels') as {sortieId:string;id:string;base:string;tool:string;reason:string;attempted:boolean;legacy:boolean}[]){
+    let result:Record<string,unknown>;
+    if(!q.attempted&&!q.legacy)result={outcome:'reject',reason:'Cancelled before dispatch; nothing was sent.'};
+    else{
+     let reply:{status:string;result?:unknown}|undefined;try{if(cancel&&!q.legacy)reply=await cancel(q.base,q.id,q.reason);}catch{/* Unknown remote cancellation remains explicit. */}
+     result=reply&&(reply.status==='completed'||reply.status==='cancelled')&&reply.result&&typeof reply.result==='object'?reply.result as Record<string,unknown>:{outcome:'uncertain',error:'Cancellation requested; remote work may have started. Inspect its receipt before releasing or repeating it.'};
+    }
+    const text=remoteOutcomeText(q.base,q.tool,result);const changed=await this.nervous.call('kaji.outboxDone',{id:q.id,result,said:{base:q.base,text}});if(changed)for(const listener of this.resumeListeners)listener({sortieId:q.sortieId,reply:text,steps:[],waiting:[]});
+   }}catch{/* Durable cancellation markers remain for the next tick. */}finally{cancelling=false;}
+  };
+  this.cancelRemote=cancelTick;
   let busy=false,checkedUpgrade=false;
   const tick=async()=>{if(busy)return;busy=true;
    try{
@@ -417,19 +431,20 @@ export class Runtime implements StoreApi {
     }
    }catch{/* the next tick tries again */}finally{busy=false;}
   };
-  if(!this.outboxTimer)this.outboxTimer=setInterval(()=>{void tick();},everyMs);void tick();
+  if(!this.outboxTimer)this.outboxTimer=setInterval(()=>{void cancelTick();void tick();},everyMs);void cancelTick();void tick();
  }
- private outboxTimer?:NodeJS.Timeout;
+ private outboxTimer?:NodeJS.Timeout;private cancelRemote?:()=>Promise<void>;
  /** On the base asked (F-036 slice 3b): an action the main base sent, run once per id, only if this base offers it, and
      always through this base's own gate (it may run, ask the owner with a card, or refuse). */
  readonly worker={
+  cancel:async(owner:string,id:string,reason:string,ownerKey:string)=>await this.nervous.call('worker.cancel',{owner,id,reason,key:this.selfKey,ownerKey}) as {status:string;result?:unknown},
   open:async(owner:string,session:string,key:string,ownerKey:string)=>{if(this.selfKey&&this.selfKey!==key)throw new Error('Worker key differs.');this.selfKey=key;return await this.nervous.call('worker.open',{owner,session,key,ownerKey}) as {epoch:number;cursor:number};},
   close:async(owner:string,session:string)=>{await this.nervous.call('worker.close',{owner,session});},
   run:(owner:string,item:RunItem,context:WorkerContext)=>this.runFromPeer(owner,item,this.home?readConfig(this.home).kaji?.offers ?? []:[],context),
  };
- async runFromPeer(from:string,item:RunItem,offered:string[],context?:WorkerContext,originKey?:string):Promise<unknown> {
-  const ownerKey=originKey ?? context?.ownerKey ?? (await this.kaji.bases()).find(b=>b.baseId===from)?.publicKey;
-  const wireContext=context?{session:context.session,epoch:context.epoch,expires:context.expires}:undefined;
+ async runFromPeer(from:string,item:RunItem,offered:string[],context:WorkerContext):Promise<unknown> {
+  if(!context.ownerKey)throw new Error('Negotiated worker authority required.');const ownerKey=context.ownerKey;
+  const wireContext={session:context.session,epoch:context.epoch,expires:context.expires};
   const claim=await this.nervous.call('worker.claim',{owner:from,ownerKey,key:this.selfKey,item,...(wireContext?{context:wireContext}:{})}) as WorkerClaim;
   if(claim.state==='busy')return {retry:true,error:'Worker resource is held by an unfinished request.'};
   if(claim.state!=='claimed')return claim.result;

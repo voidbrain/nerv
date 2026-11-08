@@ -228,6 +228,7 @@ export class KajiLink {
    if(/refused \((400|403|409)\)/.test(text))return {reached:true,refused:text};
    return {reached:false,...(code?{refused:code}:{})};}
  }
+ async cancel(baseId:string,id:string,reason:string):Promise<{status:string;result?:unknown}>{if(!this.workers)throw new Error('No worker channel configured.');return this.workers.cancel(baseId,id,reason);}
  /** Asks one base's Casper for a vote; anything but a well-formed vote in time is an abstain, so a slow base never blocks. */
  async verdict(baseId:string,ask:VerdictAsk,timeoutMs:number):Promise<PeerVerdict> {
   const peer=(await this.port.bases()).find(b=>b.baseId===baseId&&b.status==='enrolled');if(!peer)return {vote:'abstain',reason:'not an enrolled base'};

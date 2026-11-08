@@ -245,7 +245,7 @@ try {
     if(!response.ok)throw new Error(value.error ?? 'Ask failed.');
     console.log(value.text+(value.truncated?'\n[reply truncated]':'')+`\n— ${value.route} · ${value.model}`);
   }
-  else if(!command||command==='help')console.log('NERV Agency\nCommands: init [--base ID --name "Name"] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | workers pending|history|held|result|release|retry-outbox|abandon-outbox | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | bom | models [set misato| pilots [generic|add|set|pin|unpin|retire|restore] | tools [add|remove|grant|revoke] |casper MODEL | cloud on|off | key] | ask [--cloud] "text" | open [dashboard] | sessions revoke | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
+  else if(!command||command==='help')console.log('NERV Agency\nCommands: init [--base ID --name "Name"] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | workers pending|history|held|result|cancel|cancel-outbox|release|retry-outbox|abandon-outbox | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | bom | models [set misato| pilots [generic|add|set|pin|unpin|retire|restore] | tools [add|remove|grant|revoke] |casper MODEL | cloud on|off | key] | ask [--cloud] "text" | open [dashboard] | sessions revoke | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
   else {
     const config=readConfig(home);
     const scrolls=readScrolls(home);
@@ -282,7 +282,9 @@ try {
         break;
       }
       case 'workers':{
-        if(args[0]==='held'){console.log(JSON.stringify(local().heldWorkerOutbox(args[1]===undefined?undefined:Number(args[1])),null,2));}
+        if(args[0]==='cancel'){const id=args[1] ?? '',owner=local().workerJobs.owner(id);if(!owner)throw new Error('No worker receipt with that ID.');console.log(JSON.stringify(local().cancelWorker(owner,id,flag('--reason') ?? 'Owner requested cancellation','cli'),null,2));}
+        else if(args[0]==='cancel-outbox'){local().cancelWorkerOutbox(args[1] ?? '',flag('--reason') ?? 'Owner requested cancellation');console.log('Remote cancellation recorded; this does not prove the destination stopped.');}
+        else if(args[0]==='held'){console.log(JSON.stringify(local().heldWorkerOutbox(args[1]===undefined?undefined:Number(args[1])),null,2));}
         else if(args[0]==='retry-outbox'||args[0]==='abandon-outbox'){if(!args[1])throw new Error('A held request ID is required.');local().reconcileWorkerOutbox(args[1],args[0]==='retry-outbox'?'retry':'abandon',flag('--reason') ?? '',args.includes('--confirmed-not-run'));console.log('Legacy request reconciliation recorded.');}
         else if(args[0]==='history'){console.log(JSON.stringify(local().workerJobs.history(args[1]===undefined?undefined:Number(args[1])),null,2));}
         else if(args[0]==='result'){console.log(JSON.stringify(local().workerJobs.receipt(args[1] ?? '') ?? {error:'No worker receipt with that ID.'},null,2));}
@@ -365,7 +367,7 @@ try {
       case 'approvals':console.log(JSON.stringify(local().approvals(),null,2));break;
       case 'approve':case 'reject':console.log(JSON.stringify(local().decide(args[0] ?? '',command,'cli'),null,2));break;
       case 'events':console.log(JSON.stringify(local().events(args[0] ?? ''),null,2));break;
-      case 'spear':console.log(JSON.stringify(local().ledger.spear(args[0] ?? '',args[1] ?? 'cli'),null,2));break;
+      case 'spear':console.log(JSON.stringify(local().spear(args[0] ?? '',args[1] ?? 'cli'),null,2));break;
       case 'doctor':console.log(JSON.stringify({node:process.version,home,port:config.port,language:config.language,timeZone:config.timeZone,hostTimeZone:Intl.DateTimeFormat().resolvedOptions().timeZone,...local().doctor(),delivery:'Durable local inbox; phone notifications not configured.',workers:{protocol:1,unfinished:local().workerJobs.pending().length,legacyHeld:local().heldWorkerOutbox().length,counts:'Up to 20 per page; workers pending/history/held show cursors.'}},null,2));break;
       case 'serve':case 'launch':{
         const webRoot=resolve(fileURLToPath(new URL('../dist/web/browser',import.meta.url)));
@@ -420,7 +422,7 @@ try {
         // Phase 2, on the main base: every online base's Casper votes too, veto-only, shadow unless kaji seat BASE veto.
         if(kaji)runtime.usePeerSeats(kaji,()=>live().kaji?.seats ?? {});
         // Slice 3b, on the main base: actions queued by kaji.run go out over the line, each until it reached its base.
-        if(kaji){const link=kaji;runtime.startOutbox((base,item,dispatching)=>link.run(base,item,MODEL_TIMEOUT_MS*2,dispatching));}
+        if(kaji){const link=kaji;runtime.startOutbox((base,item,dispatching)=>link.run(base,item,MODEL_TIMEOUT_MS*2,dispatching),3000,(base,id,reason)=>link.cancel(base,id,reason));}
         // Dispatch, on the other bases: while the main base is online, requests go to its Misato (one planner, one memory).
         runtime.setDispatch(async(message,conversation,forwarding)=>{const main=await runtime.mainBase();if(!main||main.self||!main.online||!kaji)return undefined;await forwarding({id:main.baseId,name:(await runtime.bases()).find(b=>b.baseId===main.baseId)?.name ?? main.baseId});
           return await kaji.chat(message,conversation&&/^[a-z]{1,20}$/.test(conversation)?conversation:undefined,MODEL_TIMEOUT_MS*MAX_STEPS*2) as ChatReply|undefined;});void kaji.start();}

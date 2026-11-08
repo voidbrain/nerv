@@ -88,11 +88,15 @@
         "src/socket.ts",
         "src/process-client.ts",
         "shared/**",
-        "web/src/status-card.ts"
+        "web/src/status-card.ts",
+        "src/worker*.ts",
+        "src/kaji-auth.ts",
+        "src/sqlite-transaction.ts",
+        "test/worker*.test.ts"
       ],
       "then": "Validate protocol/schema/graph security and rebuild the registered Web Component host.",
       "run": "npm test && npm run build",
-      "checked": "Protocol/isolation/DOM fixtures; browser/remote acceptance stays explicit",
+      "checked": "Protocol/isolation/worker fixtures; production host and physical execution remain explicitly unverified",
       "after": [
         "core"
       ]
@@ -255,7 +259,10 @@
         "test/fixtures/browser.mjs",
         "src/policy.ts",
         "src/casper.ts",
-        "src/runtime.ts"
+        "src/runtime.ts",
+        "src/worker*.ts",
+        "src/kaji-auth.ts",
+        "test/worker*.test.ts"
       ],
       "then": "Validate the versioned scenarios, run affected control-flow/model groups, and retain reviewed evidence with explicit coverage limits.",
       "run": "npm run check:evals && npm run evals -- --only=policy",
@@ -388,6 +395,28 @@
         }
       ],
       "kept": "test/ci-pins.test.mjs asserts both workflows use the same reviewed tag/SHA pairs; adoption verified each pair with git ls-remote against its official actions repository."
+    },
+    {
+      "value": "RPC connection and in-flight budgets",
+      "places": [
+        {
+          "file": "src/rpc.ts",
+          "what": "MAX_RPC_CONNECTIONS and MAX_RPC_INFLIGHT shared source"
+        },
+        {
+          "file": "src/socket.ts",
+          "what": "Native read-only admission"
+        },
+        {
+          "file": "src/worker-link.ts",
+          "what": "Worker admission"
+        },
+        {
+          "file": "docs/decisions/worker-protocol.md",
+          "what": "Operator protocol bounds"
+        }
+      ],
+      "kept": "Both transports import shared constants; test/protocol.test.ts and test/worker-link.test.ts exercise overload."
     }
   ],
   "outside": [

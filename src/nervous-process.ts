@@ -50,7 +50,7 @@ process.on('message',(value:unknown)=>{
    case 'pilots.unmatched':return store.unmatched(params.domain as string,params.since as string);
    case 'actions.shadowVote':return store.shadowVote(params.sortieId as string,params.actionId as string,{seat:params.seat as string,vote:params.vote as 'approve',reason:params.reason as string,...(typeof params.confidence==='number'?{confidence:params.confidence}:{})});
    case 'sorties.explain':return store.explain(params.ref as string);
-   case 'sorties.spear':return store.ledger.spear(params.id as string,params.reason as string);
+   case 'sorties.spear':return store.spear(params.id as string,params.reason as string);
    case 'sorties.open':return store.ledger.openSortie(params.source==='misato'?MISATO_SOURCE:params.source==='instrumentality'?'instrumentality':params.source==='marduk'?'marduk':OWNER_SOURCE,params.title as string,'trusted');
    case 'sorties.finish':{const id=params.sortieId as string;if(params.reply)store.ledger.reply(id,params.reply as string);return params.status?store.ledger.close(id,params.status as 'done'|'failed'):false;}
    case 'misato.note':return store.ledger.note(params.sortieId as string,params.kind as 'misato.step',params.payload as never);
@@ -69,6 +69,7 @@ process.on('message',(value:unknown)=>{
    case 'kaji.records':return registry().records();
    case 'kaji.lastSeen':return registry().lastSeen();
    case 'kaji.main':return registry().main() ?? null;
+   case 'kaji.outboxCancels':return store.cancelledWorkerOutbox();
    case 'kaji.outboxAttempt':store.attemptWorkerOutbox(params.id as string);return true;
    case 'kaji.outboxHeld':return store.heldWorkerOutbox(params.before as number|undefined);
    case 'kaji.outbox':return store.outbox();
@@ -77,6 +78,7 @@ process.on('message',(value:unknown)=>{
    case 'worker.open':store.assertWorkerAuthority(params.owner as string,params.key as string,params.ownerKey as string);const opened=store.workerJobs.open(params.owner as string,params.session as string,Date.now(),params.key as string,params.ownerKey as string);store.expire();return opened;
    case 'worker.close':store.workerJobs.close(params.owner as string,params.session as string);store.expire();return true;
    case 'worker.claim':store.assertWorkerAuthority(params.owner as string,params.key as string,params.ownerKey as string);return store.workerJobs.claim(params.owner as string,params.item as unknown as WorkerItem,params.context as WorkerContext|undefined,Date.now(),params.key as string,params.ownerKey as string);
+   case 'worker.cancel':store.assertWorkerAuthority(params.owner as string,params.key as string,params.ownerKey as string);return store.cancelWorker(params.owner as string,params.id as string,params.reason as string,'coordinator');
    case 'worker.finish':store.workerJobs.finish(params.lease as unknown as WorkerLease,params.result);return true;
    case 'kaji.add':{const r=registry();let added=0;for(const rec of params.records as SignedRecord[]){try{if(r.add(rec)==='added')added++;}catch{/* a record not signed by our root is dropped */}}return added;}
    case 'kaji.seen':return registry().seen(params.updates as Record<string,string>);

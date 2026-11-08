@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "nerv-golden-v3",
+  "id": "nerv-golden-v4",
   "groups": [
     {
       "id": "policy",
@@ -74,15 +74,26 @@
       "id": "bases",
       "files": [
         "test/kaji-run.test.ts",
-        "test/kaji-seats.test.ts"
+        "test/kaji-seats.test.ts",
+        "test/worker-jobs.test.ts",
+        "test/worker-link.test.ts",
+        "test/worker-outbox.test.ts",
+        "test/protocol.test.ts"
       ],
       "families": [
         "signed-bases",
         "remote-idempotency",
         "seat-delay",
-        "shadow-after-decision"
+        "shadow-after-decision",
+        "lease-fencing",
+        "outbound-reconnect",
+        "approval-locks",
+        "signed-cancellation",
+        "legacy-quarantine",
+        "hostile-frames",
+        "connection-admission"
       ],
-      "minimumTests": 6
+      "minimumTests": 45
     },
     {
       "id": "stress",
@@ -135,6 +146,11 @@
       "branch": "physical-phone-receipt",
       "owner": "F-028",
       "reason": "Bot fixtures do not establish Telegram device display or receipt."
+    },
+    {
+      "branch": "device-bootstrap-and-physical-execution",
+      "owner": "F-005/F-006",
+      "reason": "Enrolled worker fixtures execute registered built-ins; no device/bootstrap or physical adapter is implemented."
     }
   ]
 }

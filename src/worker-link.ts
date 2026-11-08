@@ -14,6 +14,7 @@ const keys=(v:Record<string,unknown>,allowed:string[])=>Object.keys(v).every(k=>
 export interface WorkerAdapter {
  open(owner:string,session:string,key:string,ownerKey:string):Promise<{epoch:number;cursor:number}>;
  close(owner:string,session:string):Promise<void>;
+ cancel(owner:string,id:string,reason:string,ownerKey:string):Promise<{status:string;result?:unknown}>;
  run(owner:string,item:WorkerItem,context:WorkerContext):Promise<unknown>;
 }
 interface Settings {id:string;key:KeyObject;registry:RegistryPort;adapter:WorkerAdapter;address:(value:string)=>string;log?:(text:string)=>void;heartbeatMs?:number;requestMs?:number;reconnectMs?:number;offers?:()=>string[];onOffers?:(id:string,offers:string[])=>void}
@@ -60,6 +61,9 @@ class Peer {
   }
   if(!this.ready)throw Error('Worker negotiation required.');
   if(method==='worker.ping'){if(this.role==='coordinator'){if(!keys(params,['offers']))throw Error('Invalid worker heartbeat.');await this.link.observe(this.remote,params.offers);}else if(Object.keys(params).length)throw Error('Invalid coordinator heartbeat.');return {version:WORKER_PROTOCOL_VERSION};}
+  if(method==='worker.cancel'&&this.role==='worker'){
+   if(!keys(params,['id','reason'])||typeof params.id!=='string'||!uuid.test(params.id)||typeof params.reason!=='string'||!params.reason.trim()||params.reason.length>500)throw Error('Invalid worker cancellation.');return this.link.settings.adapter.cancel(this.remote,params.id,params.reason,this.remoteKey);
+  }
   if(method==='worker.run'&&this.role==='worker'){
    if(!keys(params,['item','epoch','expires'])||!Number.isSafeInteger(params.expires)||params.epoch!==this.epoch||!object(params.item)||!Number.isSafeInteger(params.item.sequence)||Number(params.item.sequence)<1)throw Error('Invalid worker delivery.');
    const context={session:this.session,epoch:this.epoch,expires:Number(params.expires)-KAJI_CLOCK_SKEW_MS,ownerKey:this.remoteKey};validateParams('worker.claim',{owner:this.remote,ownerKey:this.remoteKey,key:createPublicKey(this.link.settings.key).export({type:'spki',format:'der'}).toString('base64'),item:params.item,context:{session:context.session,epoch:context.epoch,expires:context.expires}});
@@ -124,6 +128,9 @@ export class WorkerLink {
  async run(base:string,item:WorkerItem,timeoutMs:number):Promise<unknown>{
   const peer=this.peers.get(base);if(!peer?.ready)throw Error('No outbound worker session.');if(!item.sequence)throw Error('Durable worker stream sequence required.');
   return peer.request('worker.run',{item,epoch:peer.epoch,expires:Math.min(item.deadline ?? Number.MAX_SAFE_INTEGER,Date.now()+WORKER_LEASE_MS)},timeoutMs);
+ }
+ async cancel(base:string,id:string,reason:string):Promise<{status:string;result?:unknown}> {
+  const peer=this.peers.get(base);if(!peer?.ready)throw Error('No outbound worker session.');const result=await peer.request('worker.cancel',{id,reason},2000);if(!object(result)||!['requested','completed','cancelled'].includes(String(result.status)))throw Error('Invalid worker cancellation result.');return result as {status:string;result?:unknown};
  }
  start(){if(!this.stopped)return;this.stopped=false;this.timer=setInterval(()=>{void this.connect();},this.reconnectMs);void this.connect();}
  private defer(){this.failures=Math.min(this.failures+1,5);this.nextAttempt=Date.now()+Math.min(30000,this.reconnectMs*2**this.failures)*(0.8+Math.random()*0.2);}

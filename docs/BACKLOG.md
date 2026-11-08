@@ -454,26 +454,26 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Signal | Priority | Status | Effort |
 |:---:|---|---|---|
-| 🟡 | 🔺 P1 | Implemented | 🔴 Large |
+| 🟡 | 🔺 P1 | Implemented | 🟢 Small |
 
-💻 **→ Human action required: No**<br />Extend the local read-only endpoint into an enrolled outbound worker protocol with heartbeat, reconnect cursor, durable idempotency, fencing and resource locks.
+💻 **→ Human action required: No**<br />Complete final protocol/documentation review and CI acceptance of the enrolled outbound worker profile; preserve local read-only RPC.
 
 | | |
 |---|---|
-| **Issue** | Authenticated loopback read-only RPC and directed method graph exist; remote transport, mutation RPC, pairing, durable delivery and stream sequencing remain unimplemented. |
+| **Issue** | Version 1 signed outbound workers, durable receipts, leases/fences, approval locks, cancellation and legacy quarantine are implemented for advertised registered built-ins. Device/bootstrap, arbitrary tools and physical adapters remain separate work. |
 | **Reproduce** | Follow docs/decisions/runtime-boundaries.md and the protocol/isolation test fixtures. |
 | **Check** | Reject unauthenticated/Origin/browser/query-token access; validate schemas/graph; bound payloads/concurrency; reconnect and asleep-worker tests before remote execution. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Owner selected 2026-11-08. Implement a signed, versioned outbound Kaji worker channel using enrolled base keys; preserve the local read-only endpoint. Durable scheduler-owned receipts bind request IDs, payloads and stream positions; leases fence execution and retain resource locks across uncertain disconnect/restart outcomes. Wire delivery through the existing owner-approved kaji.run outbox and destination gate; test actual WebSockets, replay, reconnect, revocation, expiry, malformed frames and overload. No unregistered tool or shared root token is introduced.  Extend the local read-only endpoint into an enrolled outbound worker protocol with heartbeat, reconnect cursor, durable idempotency, fencing and resource locks. Reject unauthenticated/Origin/browser/query-token access; validate schemas/graph; bound payloads/concurrency; reconnect and asleep-worker tests before remote execution.
+**Next action / closure evidence:** Finish full-suite and headless/browser acceptance, document the stop-before-upgrade procedure and unknown-outcome reconciliation, then open a PR against main and merge only after all CI checks pass. Independent code review found no remaining concrete blockers and independently passed 54 tests; documentation review remains pending. See [worker protocol](decisions/worker-protocol.md). Committed regressions precede fixes for deferred approval fencing, enrolment revocation, expiry, nonce-cache poisoning and local connection/Origin admission. Full-suite compatibility retains the existing Spear response when no remote work is pending.
 
-**Estimates:** Large remaining effort, provisionally 3–5 focused days for durable contracts, transport/runtime integration, failure testing and independent review; reassess after the first integration tests. Estimated 2026-11-08; no completion percentage.
+**Estimates:** Small remaining effort, approximately 2–4 focused hours for documentation review, frozen evaluation evidence and CI/reconciliation, excluding CI queue delays. Estimated 2026-11-08; no completion percentage.
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #3](https://github.com/voidbrain/nerv/pull/3); local checks and scoped audit pass; CI pending |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; current F-014 branch: 45 targeted tests passed; independent review 54 passed; full checks/PR pending |
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-08 |
