@@ -2955,3 +2955,5 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 </details>
 
 ---
+
+F-073 reconciliation: [PR #224](https://github.com/voidbrain/nerv/pull/224), documentation-only acceptance update against PR #223 / CI 42535553841.
