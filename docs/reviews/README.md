@@ -1,6 +1,6 @@
 # Review and assessment register
 
-NERV evidence snapshot reviewed 8 November 2026 against main `c7f4f84`. Times below use Europe/Rome; dates come from recorded review/run metadata, not file modification time. This register links evidence and existing rerun conditions; it does not install a schedule, run checks or certify an assessment. Refresh the affected rows when new evidence or policy changes.
+NERV evidence snapshot reviewed 8 November 2026 against main `7d3d091`. Times below use Europe/Rome; dates come from recorded review/run metadata, not file modification time. This register links evidence and existing rerun conditions; it does not install a schedule, run checks or certify an assessment. Refresh the affected rows when new evidence or policy changes.
 
 ## Current review windows
 
@@ -20,7 +20,7 @@ The configured interval is 7 days. Due dates below are policy thresholds, not bo
 | code | 2026-11-06 01:50 CET | [2026-11-06-full.md](../audits/2026-11-06-full.md) | 2026-11-13 01:50 CET; changed risk/request earlier |
 | logic | 2026-11-08 20:53 CET | [2026-11-08-architecture-reassessment.md](../audits/2026-11-08-architecture-reassessment.md) | 2026-11-15 20:53 CET; changed risk/request earlier |
 | tests | 2026-11-06 01:50 CET | [2026-11-06-full.md](../audits/2026-11-06-full.md) | 2026-11-13 01:50 CET; changed risk/request earlier |
-| documentation | 2026-11-08 20:53 CET | [2026-11-08-architecture-reassessment.md](../audits/2026-11-08-architecture-reassessment.md) | 2026-11-15 20:53 CET; changed risk/request earlier |
+| documentation | 2026-11-08 23:22 CET | [2026-11-08-retirement-recheck.md](../audits/2026-11-08-retirement-recheck.md) | 2026-11-15 23:22 CET; changed risk/request earlier |
 | harness | 2026-11-06 01:50 CET | [2026-11-06-full.md](../audits/2026-11-06-full.md) | 2026-11-13 01:50 CET; changed risk/request earlier |
 | security | 2026-11-06 01:50 CET | [2026-11-06-full.md](../audits/2026-11-06-full.md) | 2026-11-13 01:50 CET; changed risk/request earlier |
 | delivery | 2026-11-06 01:50 CET | [2026-11-06-full.md](../audits/2026-11-06-full.md) | 2026-11-13 01:50 CET; changed risk/request earlier |
@@ -104,3 +104,9 @@ The [documentation map](../README.md), [procedure index](../agents/procedures.md
 ## CI reliability finding discovered during documentation maintenance
 
 [PR #219 CI 42521677029 attempt 1](https://github.com/voidbrain/nerv/actions/runs/42521677029/attempts/1) failed deferred worker-approval cancellation with heartbeat connection loss. An unchanged-head failed-job-only retry passed; it does not establish a fix. [B-046](../BACKLOG.md#b-046) owns controlled reproduction and causal verification. The fixture’s 150 ms heartbeat budget suggests a timing hypothesis, not a proven shared cause with B-043 or a demonstrated production defect. No assertion or runtime behavior was changed.
+
+## Retirement correction and qualification ownership
+
+[2026-11-08 retirement recheck](../audits/2026-11-08-retirement-recheck.md) ([scope manifest](../audits/2026-11-08-retirement-recheck.audit.json)): documentation-only, baseline `7d3d091`; next review on source/target/requirement changes, or its configured seven-day scoped threshold. This does not refresh other audit areas. It restores the [active target](../architecture/target-schema.md) and retains five mixed design sources in the historical-input archive.
+
+[Gauntlet Protocol ownership/reuse assessment](../design/gauntlet-protocol-2026-11-08.md), 2026-11-08: proposed independent project using harness for development, with NERV-owned cases. Next condition: accepted repository/framework scope or changed evaluation requirements. No model execution/qualification date exists for this proposal.

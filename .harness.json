@@ -709,7 +709,9 @@
       "README.md",
       "LICENSE",
       ".editorconfig",
-      ".gitignore"
+      ".gitignore",
+      "remove/README.md",
+      "remove/manifest.json"
     ],
     "groups": [
       {

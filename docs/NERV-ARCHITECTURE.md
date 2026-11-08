@@ -1,5 +1,5 @@
 # NERV architecture reference moved
 
-Current meanings: [NERV vocabulary](architecture/vocabulary.md). Current behavior: [Architecture](ARCHITECTURE.md).
+Current structure: [corrected target schema](architecture/target-schema.md). Current meanings: [NERV vocabulary](architecture/vocabulary.md). Implemented behavior: [Runtime](architecture/runtime.md).
 
-The original target-schema document is preserved unchanged at [remove/docs/NERV-ARCHITECTURE.md](../remove/docs/NERV-ARCHITECTURE.md). This compatibility link keeps dated evidence navigable; it owns no competing architecture or requirements.
+The [original target-schema source](archive/design-inputs/NERV-ARCHITECTURE-2026-11-04.md) is preserved unchanged outside remove/. This compatibility link keeps dated evidence navigable; it owns no competing requirements.

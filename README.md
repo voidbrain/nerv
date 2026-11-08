@@ -87,3 +87,5 @@ Selected node inventories, read-only local/SSH inspection and digest-confirmed f
 Development procedures: [discovery index](docs/agents/procedures.md), [parallel tasks and model qualification](docs/agents/parallel-work.md), [architecture reassessment](docs/agents/architecture-review.md). NERV task sources live in `docs/work/`; the backlog remains the generated current-status view.
 
 Documentation: [map and ownership](docs/README.md) · [review dates and next conditions](docs/reviews/README.md) · [task/model requirements](docs/work/README.md) · [retired references](remove/README.md).
+
+The [corrected target schema](docs/architecture/target-schema.md) labels implemented and planned behavior. The [retirement recheck](docs/audits/2026-11-08-retirement-recheck.md) restores mixed sources to the historical-input archive.

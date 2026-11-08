@@ -2,7 +2,7 @@
   "version": 1,
   "segments": [
     {
-      "text": "# NERV Agency backlog\n\nCurrent work ledger, reviewed 8 November 2026 against main `c7f4f84`. PR #219 CI 42521677029 passed all five jobs including full-suite. Documentation organization is complete; model qualification and remaining task decomposition stay explicit.\nGovernance and naming follow the [architecture vocabulary](architecture/vocabulary.md). [Rules](BACKLOG-RULES.md) \u00b7 [Roadmap](ROADMAP.md) \u00b7 [Archive 2026](archive/backlog-2026.md) \u00b7 [Reconciliation log](archive/reconciliation-2026.md) \u00b7 [Dependencies](agents/backlog-dependencies.md) \u00b7 [Work queue](agents/backlog-queue.md).\n\n<!-- recap:start -->\n<!-- recap:end -->\n\n## Bugs and reliability\n\nFrom 2026-11-05 a defect (behaviour that breaks something meant to work) gets a B- record here; earlier ones stayed in their F- records (owner decision).\n\n\n\n\n\n\n\n\n\n\n\n"
+      "text": "# NERV Agency backlog\n\nCurrent work ledger, reviewed 8 November 2026 against main `7d3d091`. PR #220 CI 42522846769 passed scoped checks; full-suite skipped. Target-schema restoration and retirement recheck are recorded under Other changes.\nGovernance and naming follow the [architecture vocabulary](architecture/vocabulary.md). [Rules](BACKLOG-RULES.md) \u00b7 [Roadmap](ROADMAP.md) \u00b7 [Archive 2026](archive/backlog-2026.md) \u00b7 [Reconciliation log](archive/reconciliation-2026.md) \u00b7 [Dependencies](agents/backlog-dependencies.md) \u00b7 [Work queue](agents/backlog-queue.md).\n\n<!-- recap:start -->\n<!-- recap:end -->\n\n## Bugs and reliability\n\nFrom 2026-11-05 a defect (behaviour that breaks something meant to work) gets a B- record here; earlier ones stayed in their F- records (owner decision).\n\n\n\n\n\n\n\n\n\n\n\n"
     },
     {
       "records": "B"
@@ -14,7 +14,7 @@
       "records": "F"
     },
     {
-      "text": "\n## Other changes\n\n**CI reliability evidence \u2014 B-046, 2026-11-08.** Original worker-cancellation failure retained, isolated diagnostic passed and only failed CI jobs were retried; root cause/fix remain open under B-046. Existing B-043 remains a separate queue-saturation finding.\n"
+      "text": "\n## Other changes\n\n**CI reliability evidence \u2014 B-046, 2026-11-08.** Original worker-cancellation failure retained, isolated diagnostic passed and only failed CI jobs were retried; root cause/fix remain open under B-046. Existing B-043 remains a separate queue-saturation finding.\n\n**Target-schema correction and retirement recheck \u2014 Implemented, 2026-11-08.** Restore the active target with implemented/planned labels; recheck all 26 retired sources and preserve mixed design inputs outside remove/. Assess Gauntlet ownership/reuse versus existing benchmarks without creating a repository or running model campaigns. Local source/link/coverage metadata checks and fresh-context independent review passed. Next: required CI; archive this maintenance after its acceptance passes.\n"
     }
   ]
 }
