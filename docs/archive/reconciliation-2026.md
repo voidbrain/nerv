@@ -1,5 +1,7 @@
 # Backlog reconciliation log 2026
 
+Current work ledger, reviewed 8 November 2026 against main `7d3d091`. PR #220 CI 42522846769 passed scoped checks; full-suite skipped. Target-schema restoration and retirement recheck are recorded under Other changes.
+
 Current work ledger, reviewed 8 November 2026 against main `c7f4f84`. PR #219 CI 42521677029 passed all five jobs including full-suite. Documentation organization is complete; model qualification and remaining task decomposition stay explicit.
 
 Current work ledger, reviewed 8 November 2026 against main `30f8de3`. PR #217 CI 42518246797 passed all five jobs including full-suite. Documentation reorganization and review-index maintenance are recorded below.
