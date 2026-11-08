@@ -1,8 +1,9 @@
 #!/bin/sh
 set -eu
+[ "$#" -le 1 ] || { printf '%s\n' "Usage: sh native/build-app.sh [APP_PATH]" >&2; exit 1; }
 cd "$(dirname "$0")/.."
 swift build -c release --package-path native/NervMenuBar
-app="dist/NERV.app"
+app="${1:-dist/NERV.app}"
 mkdir -p "$app/Contents/MacOS"
 cp native/NervMenuBar/.build/release/NervMenuBar "$app/Contents/MacOS/NervMenuBar"
 cat > "$app/Contents/Info.plist" <<'PLIST'
