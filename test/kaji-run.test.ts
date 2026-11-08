@@ -51,11 +51,12 @@ test('kaji.run: the main base\'s Misato sends one action to a base that offers i
  try{
   await a.ready();await b.ready();await a.kaji.add(records);await b.kaji.add(records);a.setBaseKey(A.publicKey);b.setBaseKey(B.publicKey);
   // Wired as serve does: offers from config, heard offers kept, actions run by runFromPeer.
-  const la=new KajiLink({baseId:'NERV-01',key:A.privateKey,publicKey:A.publicKey,registry:a.kaji,log:l=>logs.push('NERV-01 '+l),onOffers:(id,t)=>{heard[id]=t;a.notePeerOffers(id,t);}});
-  const lb=new KajiLink({baseId:'NERV-02',key:B.privateKey,publicKey:B.publicKey,registry:b.kaji,log:l=>logs.push('NERV-02 '+l),offers:()=>advertise?['reminders.add']:[],onRun:(from,item)=>b.runFromPeer(from,item,['reminders.add'])});
+  const la=new KajiLink({worker:a.worker,baseId:'NERV-01',key:A.privateKey,publicKey:A.publicKey,registry:a.kaji,log:l=>logs.push('NERV-01 '+l),onOffers:(id,t)=>{heard[id]=t;a.notePeerOffers(id,t);}});
+  const lb=new KajiLink({worker:b.worker,baseId:'NERV-02',key:B.privateKey,publicKey:B.publicKey,registry:b.kaji,log:l=>logs.push('NERV-02 '+l),offers:()=>advertise?['reminders.add']:[]});
   links.push(la,lb);await reserved.release();await Promise.all([la.start(200),lb.start(200)]);a.startResumer(100);
   assert.equal((await a.remoteOffers()).length,0,'initial heartbeat has no offers yet');advertise=true;
   await until(async()=>(await a.remoteOffers()).length===1,describe);
+  await until(()=>logs.some(l=>l.includes('Worker connected: NERV-02')),describe);
   const chat=await a.chat('Remind me on Tabgha to stretch');
   assert.match(model.systems[0]!,/kaji\.run[\s\S]*NERV-02 \(Tabgha\): reminders\.add/,'Misato sees what Tabgha offers');
   assert.equal(chat.steps[0]!.outcome,'invalid','an action Tabgha does not offer goes back to Misato');assert.match(chat.steps[0]!.error!,/Tabgha does not offer "reminders.cancel"/);
@@ -63,7 +64,7 @@ test('kaji.run: the main base\'s Misato sends one action to a base that offers i
   // B-012: Casper is told the bases by id and name, so "on Tabgha" matches kaji.run for NERV-02.
   assert.ok((JSON.parse(model.casperPrompts.at(-1)!) as {bases:{id:string;name:string}[]}).bases.some(b=>b.id==='NERV-02'&&b.name==='Tabgha'));assert.equal(chat.waiting[0]!.tool,'kaji.run');
   assert.equal((await b.list()).length,0,'nothing on Tabgha before the owner decides');
-  a.startOutbox((base,item)=>la.run(base,item,5000),100);
+  a.startOutbox((base,item,dispatching)=>la.run(base,item,5000,dispatching),100);
   await a.decide(chat.waiting[0]!.approvalId,'approve','api');
   await until(async()=>(await b.list()).length===1,describe);assert.equal((await b.list())[0]!.title,'Stretch');
   // B-011: in plain words, and recorded on the sortie (trace, dashboard, why).
@@ -72,12 +73,12 @@ test('kaji.run: the main base\'s Misato sends one action to a base that offers i
   assert.deepEqual(recorded.map(e=>e.payload),[{base:'Tabgha',tool:'reminders.add',outcome:'grant',text:'Tabgha ran reminders.add (“Stretch”).'}]);
   assert.match((await a.chat(`why S-${chat.sortieId.slice(0,4).toUpperCase()}?`)).reply!,/Kaji: Tabgha ran reminders\.add \(“Stretch”\)\./);
   // A resend with the same id (a crash before the result was saved) returns the first result and runs nothing again.
-  const twice={id:'00000000-0000-4000-8000-000000000000',request:'',tool:'reminders.add',args:{title:'Twice',due:'2031-01-01T09:00:00Z'}};
+  const twice={sequence:900,id:'00000000-0000-4000-8000-000000000000',request:'',tool:'reminders.add',args:{title:'Twice',due:'2031-01-01T09:00:00Z'}};
   const first=await la.run('NERV-02',twice,5000),second=await la.run('NERV-02',twice,5000);
   assert.equal(first.reached,true);assert.deepEqual(second.result,first.result,'the first result comes back');
   assert.equal((await b.list()).filter(r=>r.title==='Twice').length,1,'the same id runs once');
   // Only what is offered, and only from the main base.
-  const refused=await la.run('NERV-02',{id:'11111111-1111-4111-8111-111111111111',request:'',tool:'reminders.cancel',args:{id:'x'}},5000);
+  const refused=await la.run('NERV-02',{sequence:901,id:'11111111-1111-4111-8111-111111111111',request:'',tool:'reminders.cancel',args:{id:'x'}},5000);
   assert.match(JSON.stringify(refused.result),/does not offer reminders\.cancel/);
   const body=JSON.stringify({id:'22222222-2222-4222-8222-222222222222',request:'',tool:'reminders.add',args:{title:'x',due:'2031-01-01T09:00:00Z'}});
   assert.equal((await fetch(`http://127.0.0.1:${pa}/kaji/run`,{method:'POST',headers:{'content-type':'application/json',...signedHeaders('NERV-02',B.privateKey,'req','POST','/kaji/run',body)},body})).status,403,'Tabgha cannot run actions on the main base');

@@ -2,20 +2,22 @@ import type {Server} from 'node:http';
 import {timingSafeEqual} from 'node:crypto';
 import {WebSocketServer,WebSocket} from 'ws';
 import type {StoreApi} from './runtime.ts';
-import {handleFrame,authorize,MAX_FRAME_BYTES,RpcFault} from './rpc.ts';
+import {handleFrame,authorize,MAX_FRAME_BYTES,MAX_RPC_CONNECTIONS,MAX_RPC_INFLIGHT,RpcFault} from './rpc.ts';
 export function attachRpcSocket(server:Server,store:StoreApi,token:string,options:{language?:string;timeZone?:string}) {
  const ws=new WebSocketServer({noServer:true,maxPayload:MAX_FRAME_BYTES,perMessageDeflate:false});
  server.on('upgrade',(request,socket,head)=>{
   const value=Buffer.from(request.headers.authorization ?? ''),expected=Buffer.from('Bearer '+token);
   // Native clients use Authorization headers. Browser ticket pairing is deliberately not implemented yet.
-  if(request.url!=='/rpc'||request.headers.origin||value.length!==expected.length||!timingSafeEqual(value,expected)){socket.write('HTTP/1.1 401 Unauthorized\r\nConnection: close\r\n\r\n');socket.destroy();return;}
+  if(request.url!=='/rpc'||request.headers.origin!==undefined||value.length!==expected.length||!timingSafeEqual(value,expected)){socket.write('HTTP/1.1 401 Unauthorized\r\nConnection: close\r\n\r\n');socket.destroy();return;}
+  if(ws.clients.size>=MAX_RPC_CONNECTIONS){socket.end('HTTP/1.1 503 Busy\r\nConnection: close\r\n\r\n',()=>socket.destroy());return;}
   ws.handleUpgrade(request,socket,head,client=>ws.emit('connection',client,request));
  });
  ws.on('connection',client=>{
+  let alive=true;const heartbeat=setInterval(()=>{if(!alive){client.terminate();return;}alive=false;if(client.readyState===WebSocket.OPEN)client.ping();},30000);heartbeat.unref();client.on('pong',()=>{alive=true;});client.once('close',()=>clearInterval(heartbeat));
   let active=0;client.on('error',()=>{});
   client.on('message',(data,binary)=>{
    if(binary){client.close(1003,'Text JSON required.');return;}
-   if(active>=4){client.close(1013,'Too many pending frames.');return;}
+   if(active>=MAX_RPC_INFLIGHT){client.close(1013,'Too many pending frames.');return;}
    active++;
    void handleFrame(data.toString(),async(method,params)=>{
     authorize('interface','coordinator',method);
@@ -27,9 +29,9 @@ export function attachRpcSocket(server:Server,store:StoreApi,token:string,option
      case 'inbox.history':return store.inboxHistory(params.before as number|undefined,params.limit as number|undefined);
      case 'dashboard.history':return store.dashboardHistory(params.since as string);
      case 'reminders.pending':return store.pendingReminders();
-     case 'reminders.add':throw new RpcFault(-32003,'Mutations require the REST API; durable RPC idempotency is not implemented yet.');
-     case 'reminders.update':throw new RpcFault(-32003,'Mutations require the REST API; durable RPC idempotency is not implemented yet.');
-     case 'reminders.cancel':throw new RpcFault(-32003,'Mutations require the REST API; durable RPC idempotency is not implemented yet.');
+     case 'reminders.add':throw new RpcFault(-32003,'This local read-only endpoint does not authorize mutations; use the authenticated REST API.');
+     case 'reminders.update':throw new RpcFault(-32003,'This local read-only endpoint does not authorize mutations; use the authenticated REST API.');
+     case 'reminders.cancel':throw new RpcFault(-32003,'This local read-only endpoint does not authorize mutations; use the authenticated REST API.');
      case 'inbox.list':{const p=await store.inboxHistory(0,50);if(p.next)throw new RpcFault(-32005,'Use inbox.history.');return p.items;}
      case 'approvals.pending':return store.approvals(params.limit as number|undefined);
      case 'sorties.list':return store.sorties(params.limit as number|undefined,params.before as string|undefined);

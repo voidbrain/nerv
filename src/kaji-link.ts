@@ -1,7 +1,10 @@
+import {WorkerLink,type WorkerAdapter} from './worker-link.ts';
 import {sanitizeChannel,type ChannelState,type HeardChannel} from './channel-state.ts';
-import { createHash, randomBytes, sign, verify, type KeyObject } from 'node:crypto';
+import type {KeyObject} from 'node:crypto';
+import {KAJI_CLOCK_SKEW_MS,signedHeaders,verifySigned,Nonces} from './kaji-auth.ts';
+export {signedHeaders,verifySigned,Nonces} from './kaji-auth.ts';
 import { createServer, request as httpRequest, type IncomingMessage, type Server } from 'node:http';
-import { canonical, publicKeyFrom, type BaseEntry, type SignedRecord } from './kaji.ts';
+import { type BaseEntry, type SignedRecord } from './kaji.ts';
 /**
  * The Kaji line's live link (F-036, phase 1b). Each base listens on its enrolled address only (the Tailscale IP),
  * speaks only to enrolled bases, and signs every request and reply with its own base key. Heartbeats every 30 s give
@@ -11,7 +14,7 @@ import { canonical, publicKeyFrom, type BaseEntry, type SignedRecord } from './k
  */
 export const KAJI_PORT=4320;
 export const ONLINE_MS=90_000;
-const SKEW_MS=120_000,NONCE_MS=10*60_000,MAX_BODY=256*1024,HEARTBEAT_MS=30_000;
+const MAX_BODY=256*1024,HEARTBEAT_MS=30_000;
 /** What the link needs from the registry, implemented by the scheduler process (or directly in tests). */
 export interface RegistryPort {
  bases():Promise<BaseEntry[]>;records():Promise<SignedRecord[]>;add(records:SignedRecord[]):Promise<number>;
@@ -22,27 +25,6 @@ export interface RegistryPort {
 /** host or host:port; the default port is KAJI_PORT. IPv4 and hostnames only for now. */
 export function endpoint(address:string):{host:string;port:number} {
  const m=/^(.*?)(?::(\d{2,5}))?$/.exec(address)!;return {host:m[1]!,port:m[2]?Number(m[2]):KAJI_PORT};
-}
-const digest=(body:string)=>createHash('sha256').update(body).digest('base64');
-const message=(kind:'req'|'res',method:string,path:string,time:string,nonce:string,body:string)=>[kind,method,path,time,nonce,digest(body)].join('\n');
-export function signedHeaders(baseId:string,key:KeyObject,kind:'req'|'res',method:string,path:string,body:string,now=new Date()):Record<string,string> {
- const time=now.toISOString(),nonce=randomBytes(16).toString('hex');
- return {'x-kaji-base':baseId,'x-kaji-time':time,'x-kaji-nonce':nonce,'x-kaji-signature':sign(null,Buffer.from(message(kind,method,path,time,nonce,body)),key).toString('base64')};
-}
-/** Replay guard: a nonce is accepted once within its window; old ones are forgotten. */
-export class Nonces {
- private seen=new Map<string,number>();
- fresh(nonce:string,now=Date.now()):boolean {for(const [n,t] of this.seen)if(t<now-NONCE_MS)this.seen.delete(n);if(this.seen.has(nonce))return false;this.seen.set(nonce,now);return true;}
-}
-/** Returns the sender's base id, or throws: unknown or revoked base, stale time, replayed nonce, bad signature. */
-export function verifySigned(headers:Record<string,string|undefined>,kind:'req'|'res',method:string,path:string,body:string,bases:BaseEntry[],nonces:Nonces,now=Date.now()):string {
- const id=headers['x-kaji-base'],time=headers['x-kaji-time'],nonce=headers['x-kaji-nonce'],signature=headers['x-kaji-signature'];
- if(!id||!time||!nonce||!signature)throw new Error('unsigned');
- const base=bases.find(b=>b.baseId===id);if(!base||base.status!=='enrolled')throw new Error('unknown or revoked base');
- if(!Number.isFinite(Date.parse(time))||Math.abs(now-Date.parse(time))>SKEW_MS)throw new Error('stale or future time');
- if(!/^[a-f0-9]{32}$/.test(nonce)||!nonces.fresh(nonce,now))throw new Error('replayed');
- if(!verify(null,Buffer.from(message(kind,method,path,time,nonce,body)),publicKeyFrom(base.publicKey),Buffer.from(signature,'base64')))throw new Error('bad signature');
- return id;
 }
 /** A base's own report of its health (F-036 phase 2): online, or degraded with up to three short reasons. */
 export interface BaseHealth {state:'online'|'degraded';reasons:string[]}
@@ -72,7 +54,7 @@ export function sanitizeVerdict(value:unknown):PeerVerdict|undefined {
  return {vote:v.vote as PeerVerdict['vote'],reason:v.reason.replace(/[\u0000-\u001f\u007f]/g,' ').slice(0,300),...(typeof v.confidence==='number'&&v.confidence>=0&&v.confidence<=1?{confidence:v.confidence}:{})};
 }
 /** One action the main base asks another base to run, by an id that base remembers (a resend returns the first result). */
-export interface RunItem {id:string;request:string;tool:string;args:Record<string,unknown>}
+export interface RunItem {deadline?:number;sequence?:number;id:string;request:string;tool:string;args:Record<string,unknown>}
 /** The main base's answer to a dispatched request: the reply Misato gave there (its sortie and cards live there). */
 export interface DispatchedReply {sortieId:string;question?:{text:string;expires:string};reply?:string;error?:string;steps:unknown[];waiting:{approvalId:string;tool:string;reason:string}[];base?:{id:string;name:string}}
 /** What a base relays to the main base's Aoba (F-036 phase 2): text to show, and the approval cards it carries. */
@@ -89,6 +71,7 @@ export function sanitizeRelay(value:unknown):Relay|undefined {
 const head=(records:SignedRecord[])=>({count:records.length,serial:records.reduce((m,r)=>Math.max(m,r.body.serial),0)});
 export class KajiLink {
  readonly baseId:string;readonly key:KeyObject;readonly publicKey:string;readonly port:RegistryPort;readonly log:(line:string)=>void;
+ private readonly workers?:WorkerLink;
  private server?:Server;private timer?:NodeJS.Timeout;private nonces=new Nonces();private listening?:string;private stopped=false;
  /** Per peer, whether heartbeats reach it, logged only when that changes. A peer counts as unreachable in the log only
   after enough missed heartbeats in a row to fill the online window (one slow Tailscale path or a machine waking from
@@ -100,18 +83,19 @@ export class KajiLink {
   if(n>=missesToLog(every)&&this.reachable.get(peer)!==false){this.log(`Kaji: ${peer} unreachable${detail?` (${detail})`:''}; ${n} heartbeats missed.`);this.reachable.set(peer,false);}
  }
  private every=HEARTBEAT_MS;
- constructor(options:{baseId:string;key:KeyObject;publicKey:string;registry:RegistryPort;log?:(line:string)=>void;channel?:()=>ChannelState;onChannel?:(baseId:string,channel:HeardChannel|null)=>void;health?:()=>Promise<BaseHealth>;onHealth?:(baseId:string,health:HeardHealth)=>void;
+ constructor(options:{worker?:WorkerAdapter;baseId:string;key:KeyObject;publicKey:string;registry:RegistryPort;log?:(line:string)=>void;channel?:()=>ChannelState;onChannel?:(baseId:string,channel:HeardChannel|null)=>void;health?:()=>Promise<BaseHealth>;onHealth?:(baseId:string,health:HeardHealth)=>void;
   onRelay?:(from:string,relay:Relay)=>Promise<boolean>;onChat?:(from:string,message:string,conversation?:string)=>Promise<DispatchedReply>;
-  offers?:()=>string[];onOffers?:(baseId:string,offers:string[])=>void;onRun?:(from:string,item:RunItem)=>Promise<unknown>;onVerdict?:(from:string,ask:VerdictAsk)=>Promise<PeerVerdict|null>;onPendingApprovals?:(ids:string[])=>Promise<string[]>;onDecide?:(approvalId:string,decision:'approve'|'reject')=>Promise<string>}) {
+  offers?:()=>string[];onOffers?:(baseId:string,offers:string[])=>void;onVerdict?:(from:string,ask:VerdictAsk)=>Promise<PeerVerdict|null>;onPendingApprovals?:(ids:string[])=>Promise<string[]>;onDecide?:(approvalId:string,decision:'approve'|'reject')=>Promise<string>}) {
   this.baseId=options.baseId;this.key=options.key;this.publicKey=options.publicKey;this.port=options.registry;this.log=options.log ?? (l=>console.error(l));
-  this.channel=options.channel;this.onChannel=options.onChannel;this.health=options.health;this.onHealth=options.onHealth;this.onRelay=options.onRelay;this.onDecide=options.onDecide;this.onPendingApprovals=options.onPendingApprovals;this.onChat=options.onChat;this.offers=options.offers;this.onOffers=options.onOffers;this.onRun=options.onRun;this.onVerdict=options.onVerdict;
+  this.channel=options.channel;this.onChannel=options.onChannel;this.health=options.health;this.onHealth=options.onHealth;this.onRelay=options.onRelay;this.onDecide=options.onDecide;this.onPendingApprovals=options.onPendingApprovals;this.onChat=options.onChat;this.offers=options.offers;this.onOffers=options.onOffers;this.onVerdict=options.onVerdict;
+  if(options.worker)this.workers=new WorkerLink({id:this.baseId,key:this.key,registry:this.port,adapter:options.worker,offers:options.offers,onOffers:options.onOffers,log:this.log,address:address=>{const {host,port}=endpoint(address);return `ws://${host}:${port}`;}});
  }
  private readonly channel:(()=>ChannelState)|undefined;
  private readonly onChannel:((baseId:string,channel:HeardChannel|null)=>void)|undefined;
  private ownChannel(){try{return sanitizeChannel(this.channel?.());}catch{return undefined;}}
  private heardChannel(from:string,value:unknown){const c=sanitizeChannel(value);this.onChannel?.(from,c?{...c,receivedAt:new Date().toISOString()}:null);}
  private readonly onVerdict:((from:string,ask:VerdictAsk)=>Promise<PeerVerdict|null>)|undefined;
- private readonly offers:(()=>string[])|undefined;private readonly onOffers:((baseId:string,offers:string[])=>void)|undefined;private readonly onRun:((from:string,item:RunItem)=>Promise<unknown>)|undefined;
+ private readonly offers:(()=>string[])|undefined;private readonly onOffers:((baseId:string,offers:string[])=>void)|undefined;
  private readonly onChat:((from:string,message:string,conversation?:string)=>Promise<DispatchedReply>)|undefined;
  private readonly onPendingApprovals:((ids:string[])=>Promise<string[]>)|undefined;
  private readonly onRelay:((from:string,relay:Relay)=>Promise<boolean>)|undefined;private readonly onDecide:((approvalId:string,decision:'approve'|'reject')=>Promise<string>)|undefined;
@@ -128,7 +112,7 @@ export class KajiLink {
  /** This base as the registry knows it (by its own public key), if enrolled and not revoked. */
  private async me():Promise<BaseEntry|undefined> {return (await this.port.bases()).find(b=>b.publicKey===this.publicKey&&b.status==='enrolled');}
  async start(everyMs=HEARTBEAT_MS):Promise<void> {
-  this.stopped=false;
+  this.stopped=false;this.workers?.start();
   const tick=async()=>{if(this.stopped)return;try{await this.listen();if(!this.stopped)await this.heartbeat();}catch(e){this.log(`Kaji: ${e instanceof Error?e.message:'heartbeat failed'}.`);}};
   this.every=everyMs;await tick();if(!this.stopped)this.timer=setInterval(()=>{void tick();},everyMs);
  }
@@ -136,14 +120,15 @@ export class KajiLink {
      left, and a peer's keep-alive connection could otherwise hold the stop (and a service shutdown) forever. A tick already
      under way when stop() runs (looking up this base's address) must not open a listener or set a timer afterwards:
      either would keep the process alive with nothing left to close it (B-001). */
- async stop():Promise<void> {this.stopped=true;if(this.timer)clearInterval(this.timer);this.timer=undefined;await this.closeServer();this.listening=undefined;}
- private async closeServer():Promise<void> {const server=this.server;this.server=undefined;if(!server)return;await new Promise<void>(done=>{server.close(()=>done());server.closeAllConnections();});}
+ async stop():Promise<void> {this.stopped=true;if(this.timer)clearInterval(this.timer);this.timer=undefined;await this.workers?.stop();await this.closeServer();this.listening=undefined;}
+ private async closeServer():Promise<void> {this.workers?.dropIncoming();const server=this.server;this.server=undefined;if(!server)return;await new Promise<void>(done=>{server.close(()=>done());server.closeAllConnections();});}
  /** Listens on the enrolled address only; retried on every tick (Tailscale may come up later, the address may change). */
  private async listen():Promise<void> {
   const me=await this.me();if(this.stopped)return;if(!me){if(!this.listening)this.log('Kaji: this base is not enrolled yet (kaji list); not listening.');return;}
   if(this.listening===me.address)return;
   await this.closeServer();
   const {host,port}=endpoint(me.address);const server=createServer((req,res)=>{void this.serve(req,res.writeHead.bind(res),body=>res.end(body),res.setHeader.bind(res));});
+  this.workers?.attach(server);
   await new Promise<void>((done,fail)=>{server.once('error',fail);server.listen(port,host,()=>{server.off('error',fail);done();});});
   if(this.stopped){await new Promise<void>(done=>server.close(()=>done()));return;}
   this.server=server;this.listening=me.address;this.log(`Kaji: listening on ${host}:${port} as ${this.baseId}.`);
@@ -182,10 +167,7 @@ export class KajiLink {
    }
    // F-036 slice 3b: one action the main base asks this base to run (only the main base may ask; this base's gate decides).
    if(req.method==='POST'&&req.url==='/kaji/run'){
-    const r=JSON.parse(body) as {id?:unknown;request?:unknown;tool?:unknown;args?:unknown};
-    if(typeof r.id!=='string'||!UUID.test(r.id)||typeof r.request!=='string'||r.request.length>500||typeof r.tool!=='string'||!/^[a-z]+\.[a-z]+$/.test(r.tool)||!r.args||typeof r.args!=='object'||Array.isArray(r.args)){reply(400,{error:'invalid action'});return;}
-    if(await this.port.main?.()!==from||!this.onRun){reply(403,{error:'only the main base runs actions here'});return;}
-    reply(200,{result:await this.onRun(from,{id:r.id,request:r.request,tool:r.tool,args:r.args as Record<string,unknown>})});return;
+    reply(await this.port.main?.()===from?409:403,{error:'Execution requires the negotiated worker protocol; nothing ran.'});return;
    }
    if(req.method==='POST'&&req.url==='/kaji/approvals/pending'){
     const value=JSON.parse(body) as {ids?:unknown};
@@ -235,13 +217,18 @@ export class KajiLink {
  }
  /** Sends one action to a base (F-036 slice 3b). reached:false means it never got there (send again later, same id);
      refused carries that base's reason (it does not offer it, or it is not this base's to ask). */
- async run(baseId:string,item:RunItem,timeoutMs:number):Promise<{reached:boolean;result?:unknown;refused?:string}> {
+ async run(baseId:string,item:RunItem,timeoutMs:number,dispatching:()=>Promise<void>=async()=>{}):Promise<{reached:boolean;result?:unknown;refused?:string}> {
   const peer=(await this.port.bases()).find(b=>b.baseId===baseId&&b.status==='enrolled');if(!peer)return {reached:true,refused:`${baseId} is not an enrolled base`};
-  try{return {reached:true,result:((await this.call(peer,'POST','/kaji/run',item,timeoutMs)) as {result?:unknown}).result};}
+  if(!this.workers?.connected(baseId)||!item.sequence)return {reached:false,refused:'Waiting for a negotiated durable worker channel.'};
+  try{
+   await dispatching();const result=await this.workers.run(baseId,item,timeoutMs);
+   return result&&typeof result==='object'&&(result as {retry?:unknown}).retry===true?{reached:false}:{reached:true,result};
+  }
   catch(e){const text=e instanceof Error?e.message:'error';const code=(e as {cause?:{code?:string}}).cause?.code;
    if(/refused \((400|403|409)\)/.test(text))return {reached:true,refused:text};
    return {reached:false,...(code?{refused:code}:{})};}
  }
+ async cancel(baseId:string,id:string,reason:string):Promise<{status:string;result?:unknown}>{if(!this.workers)throw new Error('No worker channel configured.');return this.workers.cancel(baseId,id,reason);}
  /** Asks one base's Casper for a vote; anything but a well-formed vote in time is an abstain, so a slow base never blocks. */
  async verdict(baseId:string,ask:VerdictAsk,timeoutMs:number):Promise<PeerVerdict> {
   const peer=(await this.port.bases()).find(b=>b.baseId===baseId&&b.status==='enrolled');if(!peer)return {vote:'abstain',reason:'not an enrolled base'};
@@ -298,6 +285,6 @@ function send(host:string,port:number,method:string,path:string,headers:Record<s
 /** Only enrolled base ids and valid, not-in-the-future times are merged from a peer's view. */
 function sanitizeSeen(seen:unknown,bases:BaseEntry[]):Record<string,string> {
  const out:Record<string,string>={};if(!seen||typeof seen!=='object')return out;const ids=new Set(bases.map(b=>b.baseId));
- for(const [id,at] of Object.entries(seen as Record<string,unknown>))if(ids.has(id)&&typeof at==='string'&&Number.isFinite(Date.parse(at))&&Date.parse(at)<=Date.now()+SKEW_MS)out[id]=new Date(Date.parse(at)).toISOString();
+ for(const [id,at] of Object.entries(seen as Record<string,unknown>))if(ids.has(id)&&typeof at==='string'&&Number.isFinite(Date.parse(at))&&Date.parse(at)<=Date.now()+KAJI_CLOCK_SKEW_MS)out[id]=new Date(Date.parse(at)).toISOString();
  return out;
 }

@@ -152,3 +152,13 @@ test('a stop while a tick is still looking up the address leaves no listener and
   assert.equal((link as unknown as {timer?:unknown}).timer,undefined,'no heartbeat timer set after the stop');
  }finally{await link.stop();st.close();}
 });
+test('F-014: invalid signatures cannot consume a legitimate request nonce',()=>{
+ const a=keys(),body='{}',headers=signedHeaders('NERV-01',a.privateKey,'req','GET','/neutral',body),nonces=new Nonces();
+ const bases:BaseEntry[]=[{baseId:'NERV-01',name:'Neutral',publicKey:a.publicKey,address:'127.0.0.1:9',fingerprint:'neutral',status:'enrolled',serial:1}];
+ const forged={...headers,'x-kaji-signature':signedHeaders('NERV-01',keys().privateKey,'req','GET','/neutral',body)['x-kaji-signature']!};
+ assert.throws(()=>verifySigned(forged,'req','GET','/neutral',body,bases,nonces),/bad signature/);
+ assert.equal(verifySigned(headers,'req','GET','/neutral',body,bases,nonces),'NERV-01','authentication must precede replay-cache admission');
+});
+test('F-014: authenticated replay admission is bounded and old entries expire without accepting duplicate live nonces',()=>{
+ const cache=new Nonces(2);assert.equal(cache.fresh('one',1000),true);assert.equal(cache.fresh('two',1000),true);assert.equal(cache.fresh('three',1001),false);assert.equal(cache.fresh('one',1002),false);assert.equal(cache.fresh('three',602000),true);
+});

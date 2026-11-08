@@ -1,3 +1,4 @@
+import {WORKER_RESULT_BYTES,type WorkerContext,type WorkerLease,type WorkerClaim} from './worker-jobs.ts';
 import {runFailure,runMessage,type InstrumentalityRun} from './instrumentality-runs.ts';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
@@ -24,7 +25,7 @@ export interface ExternalTools {docs:{name:string;effect:string;about:string;arg
 /** Requests in one domain without a specialist, within 30 days, before a pilot is proposed (F-045). */
 const PILOT_THRESHOLD=3;
 import {MAX_STEPS,doneReply,type RemoteOffer,requestLanguage,waitingReply,type Plan,type Recalled,type Step,type Turn} from './misato.ts';
-import {toolDocs} from './executors.ts';
+import {builtinTools,toolDocs} from './executors.ts';
 import type {Digest,Exchange} from './instrumentality.ts';
 import type {Episode,Fact} from './memory.ts';
 import type {BaseEntry,SignedRecord} from './kaji.ts';
@@ -38,6 +39,7 @@ export function remoteOutcomeText(base:string,tool:string,result:Record<string,u
  const r=result.result as Record<string,unknown>|undefined;const about=[r?.title,r?.text,args.title,args.text].find((v):v is string=>typeof v==='string'&&!!v.trim());
  if(o==='grant')return typeof result.error==='string'?`${base} ran ${tool}, and it failed: ${result.error}`:`${base} ran ${tool}${about?` (“${about.slice(0,120)}”)`:''}.`;
  if(o==='approval')return `${base} asks for your approval to run ${tool}: its card is waiting for you.`;
+ if(o==='uncertain')return `${base} could not confirm whether ${tool} finished; inspect its trace before retrying or releasing its resource.`;
  if(o==='reject')return `${base} refused ${tool}: ${String(result.reason ?? 'its gate said no')}.`;
  return `${base} answered for ${tool}: ${JSON.stringify(result).slice(0,400)}`;
 }
@@ -83,7 +85,7 @@ export interface StoreApi {
  /** Lilith for the owner (dashboard): admin-only over REST, never on the read-only socket. */
  lilith?:{list():Promise<Fact[]>;episodes():Promise<Episode[]>;add(text:string):Promise<Fact>;edit(id:string,text:string):Promise<Fact|null>;forget(id:string):Promise<boolean>;share(id:string,shareable:boolean):Promise<Fact|null>;history(id:string):Promise<unknown[]>};
  consolidate?():Promise<{summary?:string;exchanges:number;proposed:number;skipped:number;error?:string}>;
- spear?(id:string,reason:string):Promise<{revoked:number;stoodDown:number;happened:{actionId:string;tool:string;inverse:string|null}[]}|null>;
+ spear?(id:string,reason:string):{revoked:number;stoodDown:number;happened:{actionId:string;tool:string;inverse:string|null}[]}|null|Promise<{revoked:number;stoodDown:number;happened:{actionId:string;tool:string;inverse:string|null}[]}|null>;
  events(sortieId:string,after?:number,limit?:number):SortieEvent[]|Promise<SortieEvent[]>;
  sorties(limit?:number,before?:string,q?:string):SortieSummary[]|Promise<SortieSummary[]>;
  closedSince?(since:string):{done:number;failed:number;failures:{id:string;title:string;closed:string}[]}|Promise<{done:number;failed:number;failures:{id:string;title:string;closed:string}[]}>;
@@ -129,15 +131,15 @@ export class Runtime implements StoreApi {
  async approvals(limit=5){return await this.nervous.call('approvals.pending',{limit}) as Approval[];}
  async decide(id:string,decision:Decision,source:'api'|'cli'|'telegram'='api'){const result=await this.nervous.call('approvals.decide',{id,decision,source}) as {decision:string;result?:unknown;error?:string};if(this.resumer)void this.sweep();return result;}
  /** Spear of Longinus for one sortie: revoke its unused grants, stand down its cards, close it; executed effects are reported. */
- async spear(id:string,reason:string){if(!await this.sortie(id))return null;return await this.nervous.call('sorties.spear',{id,reason}) as {revoked:number;stoodDown:number;happened:{actionId:string;tool:string;inverse:string|null}[]};}
+ async spear(id:string,reason:string){if(!await this.sortie(id))return null;const result=await this.nervous.call('sorties.spear',{id,reason}) as {remotePending:number;revoked:number;stoodDown:number;happened:{actionId:string;tool:string;inverse:string|null}[]};if(result.remotePending)void this.cancelRemote?.();return result;}
  async closedSince(since:string){return await this.nervous.call('sorties.closedSince',{since}) as {done:number;failed:number;failures:{id:string;title:string;closed:string}[]};}
  async sorties(limit=20,before?:string,q?:string){return await this.nervous.call('sorties.list',{limit,...(before?{before}:{}),...(q?{q}:{})}) as SortieSummary[];}
  async sortie(id:string){return await this.nervous.call('sorties.get',{id}) as (SortieSummary&{detail:ActionDetail[]})|null;}
  async events(sortieId:string,after=0,limit=50){return await this.nervous.call('events.page',{sortieId,after,limit}) as SortieEvent[];}
  /** Coordinator side of the gate: open the sortie, ask Casper only for Orange/Blue, then ballot and (on a grant) run in the scheduler process. */
- async act(action:OwnerAction):Promise<ActReply> {
+ async act(action:OwnerAction,worker?:WorkerLease):Promise<ActReply> {
   const sortieId=await this.nervous.call('sorties.open',{title:action.request.slice(0,500)}) as string;
-  return this.gate(sortieId,action);
+  return this.gate(sortieId,action,true,worker);
  }
  /** The other bases' votes on a non-Green action (F-036 phase 2), set by serve on the main base. */
  private peerSeats?:(ask:VerdictAsk)=>Promise<PeerSeat[]>;
@@ -157,7 +159,7 @@ export class Runtime implements StoreApi {
   const reply=await this.modelCall('casper.verdict',{request:ask.request,tool:ask.tool,args:ask.args,effect:ask.effect},MODEL_TIMEOUT_MS).catch(()=>({verdict:null})) as {verdict:Verdict|null};
   return reply.verdict?{vote:reply.verdict.vote,reason:reply.verdict.reason,...(typeof reply.verdict.confidence==='number'?{confidence:reply.verdict.confidence}:{})}:null;
  }
- private async gate(sortieId:string,action:OwnerAction,askCasper=true):Promise<ActReply> {
+ private async gate(sortieId:string,action:OwnerAction,askCasper=true,worker?:WorkerLease):Promise<ActReply> {
   const {pattern,effect,intent}=await this.nervous.call('actions.preview',{sortieId,tool:action.tool}) as {pattern:Pattern;effect:Effect;intent?:boolean};
   let casper:Verdict|undefined,casperError:string|undefined;let extras:Verdict[]=[];let late:PeerSeat[]=[];
   // Casper (and the other bases' seats) for anything not Green, and for every removal even when Green (B-009).
@@ -174,7 +176,7 @@ export class Runtime implements StoreApi {
    extras=seats.filter(s=>settled.has(s.seat)).map(s=>({seat:s.seat,...settled.get(s.seat)!,shadow:s.shadow}));
    late=seats.filter(s=>s.shadow&&!settled.has(s.seat));
   }
-  const result=await this.nervous.call('actions.act',{sortieId,tool:action.tool,args:action.args,stage:action.stage ?? 'production',...(casper?{casper}:{}),...(extras.length?{extras}:{})}) as ActResult;
+  const result=await this.nervous.call('actions.act',{...(worker?{worker}:{}),sortieId,tool:action.tool,args:action.args,stage:action.stage ?? 'production',...(casper?{casper}:{}),...(extras.length?{extras}:{})}) as ActResult;
   // A late shadow vote (F-052) is kept with the action when it arrives; it never changes the outcome.
   for(const s of late)void s.verdict.then(v=>this.nervous.call('actions.shadowVote',{sortieId,actionId:result.actionId,seat:s.seat,vote:v.vote,reason:v.reason.slice(0,500),...(typeof v.confidence==='number'?{confidence:v.confidence}:{})})).catch(()=>{/* best effort */});
   return casperError?{...result,casperError}:result;
@@ -397,32 +399,64 @@ export class Runtime implements StoreApi {
   * Sends the actions queued by kaji.run (F-036 slice 3b), oldest first, each with the same id every time until it reached
   * the base (which runs it once through its own gate and remembers the id). The result reaches the owner as a follow-up.
   */
- startOutbox(send:(base:string,item:RunItem)=>Promise<{reached:boolean;result?:unknown;refused?:string}>,everyMs=3000){
-  let busy=false;
+ startOutbox(send:(base:string,item:RunItem,dispatching:()=>Promise<void>)=>Promise<{reached:boolean;result?:unknown;refused?:string}>,everyMs=3000,cancel?:(base:string,id:string,reason:string)=>Promise<{status:string;result?:unknown}>){
+  let cancelling=false;
+  const cancelTick=async()=>{
+   if(cancelling)return;cancelling=true;
+   try{for(const q of await this.nervous.call('kaji.outboxCancels') as {sortieId:string;id:string;base:string;tool:string;reason:string;attempted:boolean;legacy:boolean}[]){
+    let result:Record<string,unknown>;
+    if(!q.attempted&&!q.legacy)result={outcome:'reject',reason:'Cancelled before dispatch; nothing was sent.'};
+    else{
+     let reply:{status:string;result?:unknown}|undefined;try{if(cancel&&!q.legacy)reply=await cancel(q.base,q.id,q.reason);}catch{/* Unknown remote cancellation remains explicit. */}
+     result=reply&&(reply.status==='completed'||reply.status==='cancelled')&&reply.result&&typeof reply.result==='object'?reply.result as Record<string,unknown>:{outcome:'uncertain',error:'Cancellation requested; remote work may have started. Inspect its receipt before releasing or repeating it.'};
+    }
+    const text=remoteOutcomeText(q.base,q.tool,result);const changed=await this.nervous.call('kaji.outboxDone',{id:q.id,result,said:{base:q.base,text}});if(changed)for(const listener of this.resumeListeners)listener({sortieId:q.sortieId,reply:text,steps:[],waiting:[]});
+   }}catch{/* Durable cancellation markers remain for the next tick. */}finally{cancelling=false;}
+  };
+  this.cancelRemote=cancelTick;
+  let busy=false,checkedUpgrade=false;
   const tick=async()=>{if(busy)return;busy=true;
    try{
-    for(const q of await this.nervous.call('kaji.outbox') as {id:string;sortieId:string;base:string;tool:string;args:Record<string,unknown>;request:string}[]){
-     const r=await send(q.base,{id:q.id,request:q.request,tool:q.tool,args:q.args});if(!r.reached)continue;
-     const result=(r.refused?{refused:r.refused}:r.result ?? {}) as Record<string,unknown>;
+    if(!checkedUpgrade){const held=await this.nervous.call('kaji.outboxHeld') as unknown[];checkedUpgrade=true;if(held.length)console.error('Worker upgrade: legacy requests are held for reconciliation (workers held); no automatic replay.');}
+    for(const q of await this.nervous.call('kaji.outbox') as {attempted:boolean;deadline:number;sequence:number;id:string;sortieId:string;base:string;tool:string;args:Record<string,unknown>;request:string}[]){
+     const r=q.deadline<=Date.now()?{reached:true,result:q.attempted?{outcome:'uncertain',error:'Worker request expired after a dispatch attempt; inspect its destination receipt before any new request.'}:{outcome:'reject',reason:'Queued worker request expired before dispatch; nothing was sent.'}}:await send(q.base,{id:q.id,sequence:q.sequence,deadline:q.deadline,request:q.request,tool:q.tool,args:q.args},async()=>{await this.nervous.call('kaji.outboxAttempt',{id:q.id});});if(!r.reached)continue;
+     let result=(r.refused?{refused:r.refused}:r.result ?? {}) as Record<string,unknown>;
+     if(Buffer.byteLength(JSON.stringify(result))>WORKER_RESULT_BYTES)result={outcome:'uncertain',error:'Remote result exceeded its bound; inspect the destination trace.'};
      const name=(await this.bases().catch(()=>[])).find(b=>b.baseId===q.base)?.name ?? q.base;
      const reply=remoteOutcomeText(name,q.tool,result,q.args);
      // B-011: recorded on the sortie too, so the trace, the dashboard and the "why" answer show what the other base did.
-     await this.nervous.call('kaji.outboxDone',{id:q.id,result,said:{base:name,text:reply}});
+     const changed=await this.nervous.call(result.outcome==='approval'?'kaji.outboxProgress':'kaji.outboxDone',{id:q.id,result,said:{base:name,text:reply}});
+     if(!changed)continue;
      for(const l of this.resumeListeners)l({sortieId:q.sortieId,reply,steps:[],waiting:[]});
     }
    }catch{/* the next tick tries again */}finally{busy=false;}
   };
-  if(!this.outboxTimer)this.outboxTimer=setInterval(()=>{void tick();},everyMs);void tick();
+  if(!this.outboxTimer)this.outboxTimer=setInterval(()=>{void cancelTick();void tick();},everyMs);void cancelTick();void tick();
  }
- private outboxTimer?:NodeJS.Timeout;
+ private outboxTimer?:NodeJS.Timeout;private cancelRemote?:()=>Promise<void>;
  /** On the base asked (F-036 slice 3b): an action the main base sent, run once per id, only if this base offers it, and
      always through this base's own gate (it may run, ask the owner with a card, or refuse). */
- async runFromPeer(from:string,item:RunItem,offered:string[]):Promise<unknown> {
-  const seen=await this.nervous.call('kaji.remoteRun',{id:item.id});if(seen)return seen;
-  const result=!offered.includes(item.tool)?{refused:`this base does not offer ${item.tool} (on it: kaji offer)`}
-   :await this.act({request:`From ${from}: ${item.request || item.tool}`.slice(0,4000),tool:item.tool,args:item.args}).catch((e:unknown)=>({outcome:'invalid',error:e instanceof Error?e.message:'failed'}));
-  await this.nervous.call('kaji.saveRemoteRun',{id:item.id,from,result:result as unknown as Record<string,unknown>});return result;
+ readonly worker={
+  cancel:async(owner:string,id:string,reason:string,ownerKey:string)=>await this.nervous.call('worker.cancel',{owner,id,reason,key:this.selfKey,ownerKey}) as {status:string;result?:unknown},
+  open:async(owner:string,session:string,key:string,ownerKey:string)=>{if(this.selfKey&&this.selfKey!==key)throw new Error('Worker key differs.');this.selfKey=key;return await this.nervous.call('worker.open',{owner,session,key,ownerKey}) as {epoch:number;cursor:number};},
+  close:async(owner:string,session:string)=>{await this.nervous.call('worker.close',{owner,session});},
+  run:(owner:string,item:RunItem,context:WorkerContext)=>this.runFromPeer(owner,item,this.home?readConfig(this.home).kaji?.offers ?? []:[],context),
+ };
+ async runFromPeer(from:string,item:RunItem,offered:string[],context:WorkerContext):Promise<unknown> {
+  if(!context.ownerKey)throw new Error('Negotiated worker authority required.');const ownerKey=context.ownerKey;
+  const wireContext={session:context.session,epoch:context.epoch,expires:context.expires};
+  const claim=await this.nervous.call('worker.claim',{owner:from,ownerKey,key:this.selfKey,item,...(wireContext?{context:wireContext}:{})}) as WorkerClaim;
+  if(claim.state==='busy')return {retry:true,error:'Worker resource is held by an unfinished request.'};
+  if(claim.state!=='claimed')return claim.result;
+  const lease=claim.lease!;
+  const result=!offered.includes(item.tool)||item.tool==='kaji.run'||!builtinTools.some(t=>t.name===item.tool)?{refused:`this base does not offer ${item.tool} (on it: kaji offer)`}
+   :await this.act({request:`From ${from}: ${item.request || item.tool}`.slice(0,4000),tool:item.tool,args:item.args},lease).catch(()=>({outcome:'invalid',error:'Worker action failed or its lease/authority changed; inspect the local trace.'}));
+  if('approvalId' in result&&result.approvalId)return result;
+  try{await this.nervous.call('worker.finish',{lease,result:result as Record<string,unknown>});}
+  catch{const uncertain={outcome:'uncertain',error:'The action returned but its result could not be recorded within the response bound; inspect the local trace.'};await this.nervous.call('worker.finish',{lease,result:uncertain});return uncertain;}
+  return result;
  }
+
  /** Resumes every Misato sortie whose wait is over; each is claimed once in the ledger, so two sweeps never resume twice. */
  async sweep():Promise<void> {
   const ids=await this.nervous.call('misato.resumable').catch(()=>[]) as string[];

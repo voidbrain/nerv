@@ -1,3 +1,4 @@
+import type {WorkerItem,WorkerContext,WorkerLease} from './worker-jobs.ts';
 import type {RunReason} from './instrumentality-runs.ts';
 import {parsePrices,type UsageObservation} from './model-usage.ts';
 import { MISATO_SOURCE, OWNER_SOURCE, Store } from './store.ts';
@@ -49,7 +50,7 @@ process.on('message',(value:unknown)=>{
    case 'pilots.unmatched':return store.unmatched(params.domain as string,params.since as string);
    case 'actions.shadowVote':return store.shadowVote(params.sortieId as string,params.actionId as string,{seat:params.seat as string,vote:params.vote as 'approve',reason:params.reason as string,...(typeof params.confidence==='number'?{confidence:params.confidence}:{})});
    case 'sorties.explain':return store.explain(params.ref as string);
-   case 'sorties.spear':return store.ledger.spear(params.id as string,params.reason as string);
+   case 'sorties.spear':return store.spear(params.id as string,params.reason as string);
    case 'sorties.open':return store.ledger.openSortie(params.source==='misato'?MISATO_SOURCE:params.source==='instrumentality'?'instrumentality':params.source==='marduk'?'marduk':OWNER_SOURCE,params.title as string,'trusted');
    case 'sorties.finish':{const id=params.sortieId as string;if(params.reply)store.ledger.reply(id,params.reply as string);return params.status?store.ledger.close(id,params.status as 'done'|'failed'):false;}
    case 'misato.note':return store.ledger.note(params.sortieId as string,params.kind as 'misato.step',params.payload as never);
@@ -68,10 +69,17 @@ process.on('message',(value:unknown)=>{
    case 'kaji.records':return registry().records();
    case 'kaji.lastSeen':return registry().lastSeen();
    case 'kaji.main':return registry().main() ?? null;
+   case 'kaji.outboxCancels':return store.cancelledWorkerOutbox();
+   case 'kaji.outboxAttempt':store.attemptWorkerOutbox(params.id as string);return true;
+   case 'kaji.outboxHeld':return store.heldWorkerOutbox(params.before as number|undefined);
    case 'kaji.outbox':return store.outbox();
+   case 'kaji.outboxProgress':return store.outboxProgress(params.id as string,params.result,params.said as {base:string;text:string});
    case 'kaji.outboxDone':return store.outboxDone(params.id as string,params.result,params.said as {base:string;text:string}|undefined);
-   case 'kaji.remoteRun':return store.remoteRun(params.id as string) ?? null;
-   case 'kaji.saveRemoteRun':{store.saveRemoteRun(params.id as string,params.from as string,params.result);return true;}
+   case 'worker.open':store.assertWorkerAuthority(params.owner as string,params.key as string,params.ownerKey as string);const opened=store.workerJobs.open(params.owner as string,params.session as string,Date.now(),params.key as string,params.ownerKey as string);store.expire();return opened;
+   case 'worker.close':store.workerJobs.close(params.owner as string,params.session as string);store.expire();return true;
+   case 'worker.claim':store.assertWorkerAuthority(params.owner as string,params.key as string,params.ownerKey as string);return store.workerJobs.claim(params.owner as string,params.item as unknown as WorkerItem,params.context as WorkerContext|undefined,Date.now(),params.key as string,params.ownerKey as string);
+   case 'worker.cancel':store.assertWorkerAuthority(params.owner as string,params.key as string,params.ownerKey as string);return store.cancelWorker(params.owner as string,params.id as string,params.reason as string,'coordinator');
+   case 'worker.finish':store.workerJobs.finish(params.lease as unknown as WorkerLease,params.result);return true;
    case 'kaji.add':{const r=registry();let added=0;for(const rec of params.records as SignedRecord[]){try{if(r.add(rec)==='added')added++;}catch{/* a record not signed by our root is dropped */}}return added;}
    case 'kaji.seen':return registry().seen(params.updates as Record<string,string>);
    case 'memory.lastRequest':return store.ledger.lastRequestAt();
@@ -98,7 +106,7 @@ process.on('message',(value:unknown)=>{
    case 'misato.claim':return store.ledger.claimResume(params.sortieId as string);
    case 'actions.finished':return store.finishedExternal(params.sortieId as string,params.actionId as string,params.tool as string,typeof params.error==='string'?{error:params.error}:{text:String(params.text ?? '')});
    case 'actions.preview':store.ledger.setExternal(external());return store.ledger.preview(params.sortieId as string,params.tool as string);
-   case 'actions.act':store.ledger.setExternal(external());return store.runAction(params.sortieId as string,{tool:params.tool as string,args:params.args as Record<string,unknown>,stage:params.stage as 'production',...(params.casper?{casper:params.casper as Verdict}:{}),...(Array.isArray(params.extras)?{extras:params.extras as Verdict[]}:{})});
+   case 'actions.act':store.ledger.setExternal(external());return store.runAction(params.sortieId as string,{tool:params.tool as string,args:params.args as Record<string,unknown>,stage:params.stage as 'production',...(params.casper?{casper:params.casper as Verdict}:{}),...(Array.isArray(params.extras)?{extras:params.extras as Verdict[]}:{})},params.worker as unknown as WorkerLease|undefined);
    case 'inbox.page':return store.inboxPage(params.after as number|undefined,params.limit as number|undefined,params.afterId as string|undefined);
   }
  }).then(reply=>{if(reply&&process.connected){if(Buffer.byteLength(JSON.stringify(reply))>MAX_FRAME_BYTES)process.send?.({jsonrpc:'2.0',id:reply.id,error:{code:-32005,message:'Response exceeds IPC bound; pagination required.'}});else process.send?.(reply);}}).catch(()=>{console.error('Nervous IPC failed.');});

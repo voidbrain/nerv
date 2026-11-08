@@ -1,3 +1,4 @@
+import {transaction} from './sqlite-transaction.ts';
 import {overlappingDomains} from './pilots.ts';
 import type { DatabaseSync } from 'node:sqlite';
 import { createHash, randomUUID } from 'node:crypto';
@@ -45,7 +46,7 @@ export class Ledger {
   this.grantTtlMs=options.grantTtlMs ?? 60_000;this.approvalTtlMs=options.approvalTtlMs ?? 3_600_000;
  }
  private event<K extends EventKind>(sortieId:string,actionId:string|null,kind:K,payload:EventPayloads[K],now:Date) {this.db.prepare('INSERT INTO events(sortie_id,action_id,kind,payload,created,v) VALUES(?,?,?,?,?,?)').run(sortieId,actionId,kind,encodePayload(kind,payload),iso(now),EVENT_SCHEMA_VERSION);}
- private tx<T>(work:()=>T):T {this.db.exec('BEGIN IMMEDIATE');try{const value=work();this.db.exec('COMMIT');return value;}catch(e){this.db.exec('ROLLBACK');throw e;}}
+ private tx<T>(work:()=>T):T {return transaction(this.db,work);}
  private issue(actionId:string,tool:string,args:Record<string,unknown>,sortieId:string,now:Date):string {
   const id=randomUUID();this.db.prepare('INSERT INTO grants VALUES(?,?,?,?,?,NULL,NULL)').run(id,actionId,tool,argsHash(args),iso(now,this.grantTtlMs));
   this.event(sortieId,actionId,'grant.issued',{expires:iso(now,this.grantTtlMs)},now);return id;
@@ -56,7 +57,7 @@ export class Ledger {
   return this.tx(()=>{this.db.prepare('INSERT INTO sorties(id,source,title,trust,status,created) VALUES(?,?,?,?,?,?)').run(id,source,title.trim(),trust,'open',iso(now));this.event(id,null,'sortie.opened',{source,title:title.trim(),trust},now);return id;});
  }
  /** Every agent action passes here. A reject goes back to the planner; after maxRejects it escalates to the owner. */
- propose(sortieId:string,p:Proposal,now=new Date()):Proposed {
+ propose(sortieId:string,p:Proposal,now=new Date(),approvalUntil?:number):Proposed {
   if(!p||typeof p.tool!=='string'||!p.tool||p.tool.length>100||!p.args||typeof p.args!=='object'||Array.isArray(p.args)||Buffer.byteLength(JSON.stringify(p.args))>MAX_ARGS_BYTES)throw new Error('Invalid action.');
   return this.tx(()=>{
    const sortie=this.db.prepare('SELECT * FROM sorties WHERE id=?').get(sortieId) as {trust:Trust;status:string;rejects:number;spent:number}|undefined;
@@ -68,7 +69,7 @@ export class Ledger {
    if(result.outcome==='reject'){this.db.prepare('UPDATE sorties SET rejects=rejects+1 WHERE id=?').run(sortieId);return {actionId,ballot:result};}
    this.db.prepare('UPDATE sorties SET spent=spent+? WHERE id=?').run(p.cost ?? 0,sortieId);
    if(result.outcome==='grant')return {actionId,ballot:result,grantId:this.issue(actionId,p.tool,p.args,sortieId,now)};
-   const approvalId=randomUUID();const card:Card={sortieId,actionId,tool:p.tool,args:p.args,effect:result.effect,pattern:result.pattern,sync:result.sync,verdicts:result.verdicts,reason:result.reason,expires:iso(now,this.approvalTtlMs)};
+   const approvalId=randomUUID();const card:Card={sortieId,actionId,tool:p.tool,args:p.args,effect:result.effect,pattern:result.pattern,sync:result.sync,verdicts:result.verdicts,reason:result.reason,expires:new Date(Math.min(now.getTime()+this.approvalTtlMs,approvalUntil ?? Number.MAX_SAFE_INTEGER)).toISOString()};
    this.db.prepare('INSERT INTO approvals VALUES(?,?,?,?,NULL,NULL,NULL)').run(approvalId,actionId,JSON.stringify(card),card.expires);
    this.event(sortieId,actionId,'approval.requested',{approvalId,expires:card.expires,reason:result.reason},now);
    return {actionId,ballot:result,approvalId};
