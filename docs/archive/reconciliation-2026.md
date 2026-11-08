@@ -1,5 +1,7 @@
 # Backlog reconciliation log 2026
 
+Current work ledger, reviewed 8 November 2026 against main `30f8de3`. PR #217 CI 42518246797 passed all five jobs including full-suite. Documentation reorganization and review-index maintenance are recorded below.
+
 Current work ledger, reviewed 8 November 2026 against main `081d166`. PR #216 CI 42517545579 passed all five jobs including full-suite. F-072 adoption and shared registry setup complete; runtime/model/device acceptance remains under its owning records.
 
 Current work ledger, reviewed 8 November 2026 against main `1869340`. PR #215 CI 42504431206 passed applicable scoped checks; full-suite skipped. F-011/F-015 retain their recorded human/device acceptance limits.
