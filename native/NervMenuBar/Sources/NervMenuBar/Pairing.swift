@@ -44,3 +44,14 @@ enum NativeError: LocalizedError {
         }
     }
 }
+
+// Renewal never sends an existing credential to a newly supplied identity or certificate.
+extension Credential {
+    func renewalInvitation(_ text: String, now: Date = Date()) throws -> Invitation {
+        let next = try Invitation.decode(text, now: now)
+        guard expiresAt > Int64(now.timeIntervalSince1970 * 1000) else { throw NativeError.expired }
+        guard next.runtimeId == runtimeId, next.fingerprint == fingerprint, next.port == port, next.webPort == webPort,
+              token.range(of: "^[a-f0-9]{64}$", options: .regularExpression) != nil else { throw NativeError.identityMismatch }
+        return next
+    }
+}

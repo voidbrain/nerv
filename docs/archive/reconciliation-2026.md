@@ -1,5 +1,7 @@
 # Backlog reconciliation log 2026
 
+Current work ledger, reviewed 8 November 2026 against main `1db9bb9`. PR #211 CI 42488651230 passed scoped checks; full-suite skipped. F-005 local Mac acceptance reconciled; queue work continues with F-011.
+
 Current work ledger, reviewed 8 November 2026 against main `958d82c`. PR #210 CI 42488053148 passed all five jobs, including full-suite. F-005 isolated local Mac bootstrap completed; pairing/service and remote acceptance remain open.
 
 Current work ledger, reviewed 8 November 2026 against main `4a5e7af`. PR #209 CI 42480862698 passed scoped checks with full-suite skipped; F-071/B-045 closure reconciled. Owner selected F-005; local Mac first.

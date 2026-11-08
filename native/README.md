@@ -59,7 +59,26 @@ npm start -- clients
 npm start -- revoke CLIENT_ID
 ```
 
-These commands require the user's administrative credential and pinned native TLS. Server storage contains hashes of tickets/client tokens, not their cleartext. Revocation applies on the next request. Rimuovi abbinamento locale removes the local Keychain entry only; use revoke to revoke the server-side credential too. Restore of native-auth.sqlite restores its runtime identity and credential verifier state; retain it with the rest of a private backup. A restored or changed daemon identity is not silently trusted. Certificate/key compromise requires explicit local recovery and re-pairing; automatic rotation/recovery is not implemented.
+These commands require the user's administrative credential and pinned native TLS. Server storage contains hashes of tickets/client tokens, not their cleartext. Revocation applies on the next request. Rimuovi abbinamento locale removes the local Keychain entry only; use revoke to revoke the server-side credential too. Restore of native-auth.sqlite restores its runtime identity and credential verifier state; retain it with the rest of a private backup. A restored or changed daemon identity is not silently trusted. Certificate/key compromise requires the explicit stopped-profile recovery below; automatic certificate replacement is not implemented.
+
+### Renew an unexpired native credential
+
+Generate a fresh invitation with the trusted CLI (`npm start -- pair`). In the paired companion select **Renew pairing**, then paste that invitation into the private field. Renewal accepts only the same runtime UUID, TLS pin and native/web ports, and requires the current credential to be unexpired and unrevoked. A changed certificate or runtime requires recovery and fresh pairing instead; the old token is never sent to that newly supplied identity.
+
+`POST /api/pairing/renew` requires both the owner-issued single-use ticket and the current native bearer token. One SQLite transaction consumes the ticket, invalidates the previous token and issues a new 30-day read-only credential; other clients are unchanged. A native credential cannot mint its own ticket or gain write/admin scope. This also works at the 32-client limit because it replaces one client. The companion saves the replacement in Keychain only after validating the response. The notification checkpoint keeps the same runtime identity.
+
+If the response is lost or Keychain saving fails, the server may already have invalidated the old token. The companion shows an unconfirmed-renewal message and pauses refresh while the renewal form is open; it does not repeat the renewal automatically. Inspect `npm start -- clients`, revoke any orphan replacement with `npm start -- revoke CLIENT_ID`, generate a **new** invitation, forget the local pairing and pair again. Reusing the consumed ticket cannot renew twice. Expired or revoked credentials use this fresh-pairing path too. Forgetting locally alone does not revoke a server credential.
+
+### Recover a changed, expired or compromised native certificate
+
+This is an explicit local-owner procedure, not a live mutation command. On the chosen acceptance host:
+
+1. Stop the companion and every process using this NERV data home, including its installed service or foreground daemon. Confirm they are stopped before touching TLS/SQLite files. Do not perform this service installation/acceptance on the execution host prohibited by F-009.
+2. Make a private backup of the data home, retaining SQLite sidecars. Preserve the existing native certificate/key/config and `native-auth.sqlite` together with any `-wal`, `-shm` or `-journal` sidecars in a separate private recovery directory. Move only this native-auth/TLS set out of the active home while it is stopped; leave reminders, ledger, admin/provider credentials and other data in place. If anything fails, keep the daemon stopped and reconcile the complete set before proceeding.
+3. Run `native-init` for that exact data home to generate a new native certificate/key. Start the reviewed existing service or foreground process. A new native-auth database creates a new runtime identity; all previous native credentials are invalid on it. Never reuse a compromised verifier database or key to preserve pairing.
+4. Obtain fresh invitations through the trusted CLI using the new persisted certificate. Explicitly forget and pair each companion again, then re-enable notifications from the current head. Verify read-only access and rejection of old credentials/pins. A successful TLS setup alone is not live Keychain or notification acceptance.
+
+Do not restore old native-auth state over the new running identity: doing so can resurrect old credentials. Retain private evidence for investigation; this procedure deletes nothing and is separate from application database restore policy. An isolated fixture tests this stopped-profile replacement, new identity/pin, old-token rejection and retention of unrelated data. Actual owner/OS acceptance remains F-015.
 
 The companion uses pinned HTTPS REST in this step. The existing JSON-RPC endpoint still accepts the administrative credential only; per-client WebSocket sessions are later F-014 work. No provider/API key or root bearer credential is handed to the companion or Brain.
 
