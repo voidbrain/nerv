@@ -1364,7 +1364,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Harness [v4.2.0](https://github.com/voidbrain/project-harness/releases/tag/v4.2.0), PRs #82/#83; NERV adoption prepared on 2026-11-08 |
+| PR / evidence | Harness [v4.2.0](https://github.com/voidbrain/project-harness/releases/tag/v4.2.0), PRs #82/#83; [PR #216](https://github.com/voidbrain/nerv/pull/216) NERV adoption |
 | Opened | 2026-11-08 |
 | Verification | 2026-11-08: exact 38-record migration; work/backlog/rules/recap/dependency/queue/roadmap/convention/audit checks and six verification/pin regressions pass. Review: independent fresh-context reviewer found no remaining blocker after prerequisite/resource corrections. Final CI and registry setup pending. Behavior runner/tool not adopted; no model campaign |
 | Reviewed | 2026-11-08 |
