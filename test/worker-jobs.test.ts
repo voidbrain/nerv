@@ -37,3 +37,10 @@ test('F-014: coordinator persists a bounded worker result as valid JSON without 
   store.outboxDone(queued.id,result);const row=store.db.prepare('SELECT result FROM kaji_outbox WHERE id=?').get(queued.id) as {result:string};assert.deepEqual(JSON.parse(row.result),result);
  }finally{store.close();}
 });
+test('F-014: cancellation fences new execution, retains uncertain locks and never rewrites a completed effect',()=>{
+ const db=new DatabaseSync(':memory:'),jobs=new WorkerJobs(db);try{const state=jobs.open(owner,session),context={session,epoch:state.epoch,expires:Date.now()+300000},first=jobs.claim(owner,item(50),context);
+  assert.equal(jobs.cancel(owner,item(50).id,'Owner requested cancellation','coordinator').status,'requested');assert.throws(()=>jobs.assertLease(first.lease!),/lease/);assert.equal(jobs.claim(owner,item(51),context).state,'busy');
+  jobs.finish(first.lease!,{outcome:'grant',result:{observed:true}});const after=jobs.cancel(owner,item(50).id,'Owner asked again','coordinator');assert.equal(after.status,'completed');assert.deepEqual(after.result,{outcome:'grant',result:{observed:true}});
+  jobs.cancel(owner,item(52).id,'Cancel before acceptance','coordinator');const cancelled=jobs.claim(owner,item(52),context);assert.equal(cancelled.state,'completed');assert.equal((cancelled.result as {outcome:string}).outcome,'reject');assert.equal(jobs.claim(owner,item(51),context).state,'claimed');
+ }finally{db.close();}
+});

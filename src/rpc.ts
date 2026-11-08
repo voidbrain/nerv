@@ -1,6 +1,7 @@
 import {HISTORY_LIMIT} from './history.ts';
 import { Ajv } from 'ajv';
 export const MAX_FRAME_BYTES=65536;
+export const MAX_RPC_CONNECTIONS=16,MAX_RPC_INFLIGHT=4;
 export interface RpcError {code:number;message:string}
 export type RpcResponse={jsonrpc:'2.0';id:string|number|null;result:unknown}|{jsonrpc:'2.0';id:string|number|null;error:RpcError};
 export class RpcFault extends Error {readonly code:number;constructor(code:number,message:string){super(message);this.code=code;}}

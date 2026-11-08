@@ -4,10 +4,10 @@ import type {Duplex} from 'node:stream';
 import {WebSocket,WebSocketServer} from 'ws';
 import {KAJI_CLOCK_SKEW_MS,signedHeaders,verifySigned,Nonces} from './kaji-auth.ts';
 import type {RegistryPort} from './kaji-link.ts';
-import {validateParams,MAX_FRAME_BYTES} from './rpc.ts';
+import {validateParams,MAX_FRAME_BYTES,MAX_RPC_CONNECTIONS,MAX_RPC_INFLIGHT} from './rpc.ts';
 import {WORKER_LEASE_MS,WORKER_RESULT_BYTES,type WorkerItem,type WorkerContext} from './worker-jobs.ts';
 export const WORKER_PROTOCOL_VERSION=1;
-const PATH='/kaji/worker',MAX_CONNECTIONS=16,MAX_PENDING=4;
+const PATH='/kaji/worker';
 const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
 const object=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 const keys=(v:Record<string,unknown>,allowed:string[])=>Object.keys(v).every(k=>allowed.includes(k));
@@ -27,7 +27,7 @@ class Peer {
   this.helloTimer=setTimeout(()=>this.end(),5000);ws.on('error',()=>this.end());ws.once('close',()=>this.end());
   ws.on('message',(data,binary)=>{
    const bytes=Buffer.isBuffer(data)?data:Array.isArray(data)?Buffer.concat(data):Buffer.from(data);
-   if(binary||this.active>=MAX_PENDING||bytes.length>MAX_FRAME_BYTES){this.end();return;}this.active++;
+   if(binary||this.active>=MAX_RPC_INFLIGHT||bytes.length>MAX_FRAME_BYTES){this.end();return;}this.active++;
    this.incoming=this.incoming.then(()=>this.receive(bytes.toString())).catch(()=>this.end());
   });
  }
@@ -77,7 +77,7 @@ class Peer {
  }
  private reply(id:string,result?:unknown,failed=false){if(this.ended)return;this.write({jsonrpc:'2.0',id,...(failed?{error:{code:-32003,message:'Worker request refused.'}}:{result:result ?? null})},false);}
  request(method:string,params:Record<string,unknown>,timeoutMs=this.link.requestMs):Promise<unknown>{
-  if(this.pending.size>=MAX_PENDING)return Promise.reject(Error('Worker pending request bound reached.'));
+  if(this.pending.size>=MAX_RPC_INFLIGHT)return Promise.reject(Error('Worker pending request bound reached.'));
   return new Promise((resolve,reject)=>{const id=randomUUID(),timer=setTimeout(()=>reject(Error('Worker result unknown after timeout.')),timeoutMs);this.pending.set(id,{resolve,reject,timer});
    // Timed-out requests retain admission until a late result or disconnect; timeout does not prove cancellation.
    try{this.write({jsonrpc:'2.0',id,method,params},true);}catch(e){clearTimeout(timer);this.pending.delete(id);reject(e);}
@@ -97,8 +97,8 @@ export class WorkerLink {
  constructor(settings:Settings){this.settings=settings;this.heartbeatMs=settings.heartbeatMs ?? 30000;this.requestMs=settings.requestMs ?? 10000;this.reconnectMs=settings.reconnectMs ?? 1000;}
  attach(server:Server){server.on('upgrade',(request,socket,head)=>{void this.upgrade(request,socket,head);});}
  private async upgrade(request:IncomingMessage,socket:Duplex,head:Buffer){
-  const refuse=(status:number)=>{socket.end(`HTTP/1.1 ${status} Refused\r\nConnection: close\r\n\r\n`,()=>socket.destroy());};
-  if(this.stopped||this.server.clients.size+this.upgrades>=MAX_CONNECTIONS){refuse(503);return;}
+  const refuse=(status:number)=>{if(socket.destroyed)return;socket.end(`HTTP/1.1 ${status} Refused\r\nConnection: close\r\n\r\n`,()=>socket.destroy());};
+  if(this.stopped||this.server.clients.size+this.upgrades>=MAX_RPC_CONNECTIONS){refuse(503);return;}
   if(request.method!=='GET'||request.url!==PATH||'origin' in request.headers||request.headers.authorization){refuse(401);return;}
   this.upgrades++;this.upgradeSockets.add(socket);const deadline=setTimeout(()=>socket.destroy(),5000);
   try{
