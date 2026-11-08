@@ -4,7 +4,7 @@
   "parent": "F-072",
   "title": "Establish shared claim registry",
   "goal": "Initialize the metadata branch after reviewed adoption merges",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "No previous registry history is lost",
     "Status is readable without modifying worktree or index"

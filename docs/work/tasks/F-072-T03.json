@@ -4,7 +4,7 @@
   "parent": "F-072",
   "title": "Reassess NERV architecture",
   "goal": "Reassess NERV architecture",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Preserve authoritative rules and source/evidence ownership",
     "Existing checks and independent review cover adoption"

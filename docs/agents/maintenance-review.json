@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-08T19:54:29.857Z",
+  "reviewed": "2026-11-08T20:03:08.780Z",
   "policy": "3bc16a77cb604cb87d7c198f15f89ecc478a7e9b09c83032d12211eccdf99fd2",
   "inputs": {
     "AGENTS.md": "881d006139ad827edd6aab885c5354d5e36001ce901b1f509a8a7c46b3be150e",
@@ -17,11 +17,11 @@
     "docs/agents/skills.md": "5d60223eccfaad88c7153f57316da5ca10bfdd9d58d3a8cebc1eef25b9f0d5f5",
     "docs/agents/solution-profile.md": "857fc0e5f5c36d1d139d2507f1f97460edfdcde4d5cd5d590a922d88c4459862",
     "tools/task-claims.mjs": "05d40141b354db19e958d1f191f9a2e1b75c46126527ce3aba67f7b902ba16d2",
-    "tools/work-items.mjs": "966456218e4f5ff7830d4d9447875427802fd78a3784be03f69819447c169718"
+    "tools/work-items.mjs": "ac02388da462c72e60dbcbd86bc9b9af0dd63376689f75ce80901be789e6b4dd"
   },
   "measurements": {
-    "samples": 1,
-    "latestAt": "2026-11-08T19:54:29.800Z",
+    "samples": 2,
+    "latestAt": "2026-11-08T20:03:08.695Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -47,25 +47,25 @@
         }
       },
       "reconciliation": {
-        "samples": 1,
+        "samples": 2,
         "durationMs": {
-          "observed": 1,
+          "observed": 2,
           "missing": 0,
-          "median": 219436
+          "median": 148178.5
         },
         "conflicts": {
           "observed": 0,
-          "missing": 1,
+          "missing": 2,
           "median": null
         },
         "unnecessaryPrompts": {
           "observed": 0,
-          "missing": 1,
+          "missing": 2,
           "median": null
         },
         "repeatedContextLoads": {
           "observed": 0,
-          "missing": 1,
+          "missing": 2,
           "median": null
         }
       }
@@ -83,6 +83,12 @@
       "disposition": "implemented",
       "target": "AGENTS.md",
       "evidence": "Procedure discovery and source-owned conflict rules adopted from released template. Existing safety, ownership, failing-regression, human/device acceptance and green-merge requirements retained. Candidate Gemma is not qualified or invoked. Scoped architecture findings remain under existing IDs. Independent report-only review before merge; behavior runner not configured. Timed reconciliation measures this isolated adoption through local validation, excludes later CI/registry follow-up, and makes no productivity inference."
+    },
+    {
+      "kind": "tool",
+      "disposition": "implemented",
+      "target": "tools/work-items.mjs",
+      "evidence": "Reconcile published v4.2.1 copied tool unchanged after upstream regression 3ffa9b8 and green CI 42517786923. NERV adoption PR216 passed all five jobs; shared Git registry initialized once after confirmed absence and status read succeeds without worktree/index changes. Follow-up source/backlog/view checks pass. No model/device/service campaign."
     }
   ]
 }

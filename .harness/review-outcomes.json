@@ -1,4 +1,20 @@
 [
- {"kind":"tool","disposition":"implemented","target":"tools/work-items.mjs","evidence":"Adopt released harness v4.2.0 unchanged. Exact byte-preserving migration of 38 NERV records; 15 explicit tasks, dependency/profile/resource validation and existing backlog/recap/queue/roadmap checks pass. Six targeted verification/pin tests pass. No runtime model or service campaign."},
- {"kind":"rule","disposition":"implemented","target":"AGENTS.md","evidence":"Procedure discovery and source-owned conflict rules adopted from released template. Existing safety, ownership, failing-regression, human/device acceptance and green-merge requirements retained. Candidate Gemma is not qualified or invoked. Scoped architecture findings remain under existing IDs. Independent report-only review before merge; behavior runner not configured. Timed reconciliation measures this isolated adoption through local validation, excludes later CI/registry follow-up, and makes no productivity inference."}
+  {
+    "kind": "tool",
+    "disposition": "implemented",
+    "target": "tools/work-items.mjs",
+    "evidence": "Adopt released harness v4.2.0 unchanged. Exact byte-preserving migration of 38 NERV records; 15 explicit tasks, dependency/profile/resource validation and existing backlog/recap/queue/roadmap checks pass. Six targeted verification/pin tests pass. No runtime model or service campaign."
+  },
+  {
+    "kind": "rule",
+    "disposition": "implemented",
+    "target": "AGENTS.md",
+    "evidence": "Procedure discovery and source-owned conflict rules adopted from released template. Existing safety, ownership, failing-regression, human/device acceptance and green-merge requirements retained. Candidate Gemma is not qualified or invoked. Scoped architecture findings remain under existing IDs. Independent report-only review before merge; behavior runner not configured. Timed reconciliation measures this isolated adoption through local validation, excludes later CI/registry follow-up, and makes no productivity inference."
+  },
+  {
+    "kind": "tool",
+    "disposition": "implemented",
+    "target": "tools/work-items.mjs",
+    "evidence": "Reconcile published v4.2.1 copied tool unchanged after upstream regression 3ffa9b8 and green CI 42517786923. NERV adoption PR216 passed all five jobs; shared Git registry initialized once after confirmed absence and status read succeeds without worktree/index changes. Follow-up source/backlog/view checks pass. No model/device/service campaign."
+  }
 ]

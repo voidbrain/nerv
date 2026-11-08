@@ -1,5 +1,7 @@
 # Backlog reconciliation log 2026
 
+Current work ledger, reviewed 8 November 2026 against main `1869340`. PR #215 CI 42504431206 passed applicable scoped checks; full-suite skipped. F-011/F-015 retain their recorded human/device acceptance limits.
+
 Current work ledger, reviewed 8 November 2026 against main `a49c6da`. PR #213 CI 42489975323 passed all five jobs including full-suite. F-011/F-015 owner chose this Mac for companion UI only; service host and signing deferred.
 
 Current work ledger, reviewed 8 November 2026 against main `467667d`. PR #212 CI 42489231643 passed targeted checks; full-suite skipped. F-011 awaits native acceptance/signing selection; F-015 is next.
