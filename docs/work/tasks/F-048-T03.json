@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "F-048-T03",
+  "parent": "F-048",
+  "title": "Per-item mutation ownership",
+  "goal": "Serialize conflicting item mutations with re-read and recovery",
+  "status": "planned",
+  "acceptance": [
+    "Second edit re-reads after first mutation",
+    "Expiry alone never establishes that an external effect stopped"
+  ],
+  "dependsOn": [
+    "F-048-T01"
+  ],
+  "resources": [
+    "contract:item-locks",
+    "src/store.ts",
+    "src/ledger.ts",
+    "src/runtime.ts",
+    "docs/work/tasks/F-048-T03.json",
+    "docs/work/records/F-048.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
+  "validation": [
+    "Run affected regressions across the changed boundary and applicable fast checks",
+    "Keep human/device acceptance and independent review distinct from fixture results"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
+  ]
+}

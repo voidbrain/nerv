@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "kind": "scoped",
+  "reviewed": "2026-11-08T19:53:51.628Z",
+  "baseline": "18693406b8c0ab823d3e51ff054d7a6b501facdf",
+  "report": "docs/audits/2026-11-08-architecture-reassessment.md",
+  "areas": {
+    "logic": {
+      "result": "checked",
+      "evidence": "Source/documentation comparison and representative request/failure trace described in the report; F-006/F-048/F-050 contradictions reconciled.",
+      "limits": "Only model/native/worker ownership boundaries and related records; no full audit, model, live host or physical-device acceptance."
+    },
+    "documentation": {
+      "result": "checked",
+      "evidence": "Source/documentation comparison and representative request/failure trace described in the report; F-006/F-048/F-050 contradictions reconciled.",
+      "limits": "Only model/native/worker ownership boundaries and related records; no full audit, model, live host or physical-device acceptance."
+    },
+    "backlog": {
+      "result": "checked",
+      "evidence": "Source/documentation comparison and representative request/failure trace described in the report; F-006/F-048/F-050 contradictions reconciled.",
+      "limits": "Only model/native/worker ownership boundaries and related records; no full audit, model, live host or physical-device acceptance."
+    }
+  }
+}

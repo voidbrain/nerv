@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "F-006-T02",
+  "parent": "F-006",
+  "title": "Independent model and execution selection",
+  "goal": "Implement capability-aware routing using the reviewed endpoint contract",
+  "status": "planned",
+  "acceptance": [
+    "Model endpoint and execution worker are selected independently",
+    "No silent fallback or implicit permission"
+  ],
+  "dependsOn": [
+    "F-006-T01"
+  ],
+  "resources": [
+    "contract:model-routing",
+    "src/model.ts",
+    "src/runtime.ts",
+    "src/**",
+    "docs/work/tasks/F-006-T02.json",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
+  "validation": [
+    "Run affected regressions across the changed boundary and applicable fast checks",
+    "Keep human/device acceptance and independent review distinct from fixture results"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
+  ]
+}

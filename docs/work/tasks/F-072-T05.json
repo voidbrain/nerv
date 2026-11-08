@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "id": "F-072-T05",
+  "parent": "F-072",
+  "title": "Establish shared claim registry",
+  "goal": "Initialize the metadata branch after reviewed adoption merges",
+  "status": "planned",
+  "acceptance": [
+    "No previous registry history is lost",
+    "Status is readable without modifying worktree or index"
+  ],
+  "dependsOn": [
+    "F-072-T01"
+  ],
+  "resources": [
+    "contract:task-claim-registry",
+    "docs/work/tasks/F-072-T05.json",
+    "docs/work/records/F-072.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
+  "validation": [
+    "Run affected regressions across the changed boundary and applicable fast checks",
+    "Keep human/device acceptance and independent review distinct from fixture results"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
+  ]
+}

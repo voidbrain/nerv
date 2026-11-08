@@ -54,6 +54,8 @@ jobs:
       - run: npm ci
       - name: Backlog prerequisites and generated unlocks
         run: npm run check:dependencies
+      - name: Source-owned records, tasks and model profiles
+        run: npm run check:work
       - name: Backlog work queue
         run: npm run check:queue
 

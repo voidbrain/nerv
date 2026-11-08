@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "F-048-T02",
+  "parent": "F-048",
+  "title": "Per-model resource budgets",
+  "goal": "Bound simultaneous model work and queued admission",
+  "status": "planned",
+  "acceptance": [
+    "Configured concurrency is respected",
+    "Unavailable or cancelled work releases only safe resources"
+  ],
+  "dependsOn": [
+    "F-048-T01"
+  ],
+  "resources": [
+    "contract:request-queue",
+    "contract:model-routing",
+    "src/runtime.ts",
+    "src/model.ts",
+    "docs/work/tasks/F-048-T02.json",
+    "docs/work/records/F-048.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
+  "validation": [
+    "Run affected regressions across the changed boundary and applicable fast checks",
+    "Keep human/device acceptance and independent review distinct from fixture results"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
+  ]
+}
