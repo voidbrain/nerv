@@ -52,4 +52,3 @@ Depends on names a required outcome; Unlocks lists direct dependents, not verifi
 | [F-066](../BACKLOG.md#f-066) | — | — |
 | [F-069](../archive/backlog-2026.md#f-069) | [voidbrain/project-harness:F-045](https://github.com/voidbrain/project-harness/blob/v4.0.0/docs/BACKLOG.md#f-045) (external; not checked live) — Published v4.0.0 release | — |
 | [F-070](../BACKLOG.md#f-070) | — | — |
-| [F-073](../BACKLOG.md#f-073) | — | — |

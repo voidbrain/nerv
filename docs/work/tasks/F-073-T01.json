@@ -4,7 +4,7 @@
   "parent": "F-073",
   "title": "Integrate independent Gauntlet evidence protocol",
   "goal": "Connect NERV-owned flow packs and trusted adapters to a pinned reusable protocol without automatic model qualification",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Existing selected flow runner produces correctly normalized protocol evidence",
     "Planning and deterministic tests perform no inference or downloads",
@@ -38,7 +38,8 @@
     "docs/reviews/README.md",
     "docs/reviews/2026-11-09-gauntlet.md",
     "docs/archive/reconciliation-2026.md",
-    "docs/work/records/B-042.md"
+    "docs/work/records/B-042.md",
+    "docs/archive/backlog-2026.md"
   ],
   "capabilities": [
     "bounded-edit",
