@@ -131,7 +131,8 @@ test('F-014: an asleep peer missing signed heartbeats is disconnected without in
  }finally{await f.close();}
 });
 test('F-014: concurrent replay and overload execute the same durable request once',{timeout:30000},async()=>{
- const f=await fixture();
+ // Keep heartbeat traffic out of this deliberate four-slot saturation; heartbeat expiry has its own case.
+ const f=await fixture(10000);
  try{await f.start();const results=await Promise.allSettled(Array.from({length:20},()=>f.main.run('NERV-02',item(106),5000)));assert.ok(results.some(r=>r.status==='fulfilled'));assert.equal((await f.rb.list()).length,1);assert.equal((await f.main.run('NERV-02',item(107),5000) as {outcome:string}).outcome,'grant');assert.equal((await f.rb.list()).length,2);
  }finally{await f.close();}
 });
