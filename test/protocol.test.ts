@@ -41,3 +41,8 @@ test('F-014: local read-only RPC bounds authenticated connections globally and r
   const first=clients[0]!,closed=once(first,'close');first.terminate();await closed;await connect();
  }finally{for(const client of clients)client.terminate();await new Promise<void>(done=>server.close(()=>done()));store.close();}
 });
+test('F-014: even an empty Origin header cannot upgrade the native-only RPC endpoint',async()=>{
+ const store=new Store(':memory:'),token='o'.repeat(32),server=makeServer(store,token);await new Promise<void>(done=>server.listen(0,'127.0.0.1',done));const socket=new WebSocket(`ws://127.0.0.1:${(server.address() as {port:number}).port}/rpc`,{headers:{Authorization:'Bearer '+token,Origin:''}});socket.on('error',()=>{});
+ try{await new Promise<void>((done,fail)=>{socket.once('open',()=>fail(Error('Origin-bearing connection admitted')));socket.once('unexpected-response',(_req,res)=>{assert.equal(res.statusCode,401);res.resume();socket.terminate();done();});});}
+ finally{socket.terminate();await new Promise<void>(done=>server.close(()=>done()));store.close();}
+});
