@@ -1,6 +1,6 @@
 # NERV Agency menu-bar companion (macOS 14+)
 
-Native SwiftUI MenuBarExtra, without Electron. This is a development preview: pairing, Keychain storage, connection status, five pending reminders, background refresh, opt-in notifications, user-service controls, launch-at-login selection, language selection and workspace launch are implemented. Signed/notarized distribution and real native UI/permission/login/logout acceptance remain F-011. Quit companion leaves the daemon running.
+Native SwiftUI MenuBarExtra, without Electron. This is a development preview: pairing, Keychain storage, connection status, five pending reminders, background refresh, opt-in notifications, user-service controls, launch-at-login selection, language selection and workspace launch are implemented. An explicit Developer ID/notarization packaging path is available below; an actual signed release and real native UI/permission/login/logout acceptance remain F-011. Quit companion leaves the daemon running.
 
 ## Set up the local service
 
@@ -32,6 +32,25 @@ open dist/NERV.app
 The app has no Dock window. Open its menu-bar icon (the seven-eye triangle), paste the invitation and choose Abbina NERV. The resulting 30-day credential grants read access to doctor/reminders/inbox only; it cannot mutate reminders, create invitations or manage other clients. It is stored in macOS Keychain, never UserDefaults. Language and the notification-enabled preference use UserDefaults; neither stores credentials. Default language is Italian; English is selectable. Dates are shown in Mac local time. While paired and running, refresh occurs every 15 seconds and on menu appearance/manual request. Sleep, logout and quitting the companion stop this polling; the daemon persists inbox deliveries for later catch-up.
 
 The build script creates a local **ad-hoc signed** app. It is not Developer ID signed or notarized, and a downloaded CI artifact is not a production installer. The macOS CI job builds/tests Swift against a real temporary Node HTTPS fixture, then packages an app ZIP as an Actions artifact. Keychain prompts, menu interaction, accessibility and actual service login/logout still require target-host acceptance. Running Swift tests without the fixture skips that one network integration case explicitly; schema tests still run.
+
+## Prepare a distribution build
+
+The ordinary `sh native/build-app.sh` command remains ad-hoc only. It also accepts one output app path for isolated local package checks. The release command builds committed native source into a new output directory, signs with the selected Developer ID Application certificate, enables the hardened runtime and secure timestamp, and verifies the signature. It rejects an existing output directory and uncommitted native changes.
+
+```bash
+# First review the 40-character certificate fingerprint in your local Keychain.
+# Signed only: no notarization upload.
+node native/release-app.mjs --identity CERTIFICATE_SHA1 --out /absolute/new-release-directory
+
+# Explicit upload, using credentials already stored locally with notarytool.
+node native/release-app.mjs --identity CERTIFICATE_SHA1 --out /absolute/another-new-release-directory --submit --keychain-profile NERV-notary
+```
+
+Set up the notary profile interactively with `xcrun notarytool store-credentials NERV-notary`; keep account secrets in Keychain, never command arguments, repository settings or chat. Review the selected account/certificate and authorize the Apple upload before running the second command. This repository configures no signing secrets or automatic release upload in CI.
+
+The submit path retains the response and notary log, requires Accepted status and a log without issues, staples and validates the ticket, checks Gatekeeper assessment, then creates `NERV-macOS.zip` from the stapled app. `release.json` records the source revision, archive SHA-256 and whether notarization actually completed. Signed-only output explicitly says `notarized: false`. These checks follow [Apple's notarization workflow](https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution).
+
+A failed or timed-out command stops the run and retains its private output directory. Do not resubmit blindly: use the retained submission ID with `xcrun notarytool info ID --keychain-profile NERV-notary`, or inspect `notarytool history` when the reply was lost. Download the log with `notarytool log ID --keychain-profile NERV-notary` and review any warnings. A submission can continue at Apple after a local timeout. Do not distribute `submission.zip` or any artifact lacking a successful final receipt. No automatic retry or cleanup removes this evidence. Packaging does not publish a release or establish notification, Keychain, menu accessibility or login/logout acceptance; perform those on the chosen Mac before distribution.
 
 ## Inspect and revoke pairing
 

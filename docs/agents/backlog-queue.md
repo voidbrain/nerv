@@ -9,7 +9,6 @@ Within each lane: explicit Queue order, impact priority, roadmap placement order
 
 | Record | Priority | Status | Remaining effort | Roadmap | Why this order / required review | Next action |
 |---|---|---|---|---|---|---|
-| [F-011](../BACKLOG.md#f-011) · Native macOS menu-bar companion without Electron | 🔺 P1 | Implemented | 🔴 Large | 1b — Native macOS companion | 🔺 P1<br />roadmap 5<br />0 direct active dependent(s)<br />🔴 Large | Validate native notification permissions/banners, guarded service start/stop and login/logout on a target Mac; finish distribution signing/notarization. |
 | [F-015](../BACKLOG.md#f-015) · Pair native clients without sharing the root credential | 🔺 P1 | Implemented | 🔴 Large | 1b — Native macOS companion | 🔺 P1<br />roadmap 5<br />0 direct active dependent(s)<br />🔴 Large | Validate pinned TLS/Keychain pairing on macOS and complete renewal/rotation recovery before closing native credential acceptance. |
 | [F-023](../BACKLOG.md#f-023) · Misato's apartment: approval cards with TTL, delivered by Pen Pen | 🔺 P1 | Open | 🟡 Medium | 2a — Useful, gated assistant | 🔺 P1<br />roadmap 6<br />0 direct active dependent(s)<br />🟡 Medium | Deliver cards through Pen Pen to the menu-bar app; Telegram buttons are done ([PR #32](https://github.com/voidbrain/nerv/pull/32)). |
 | [F-027](../BACKLOG.md#f-027) · Naoko desk provenance and Ireul taint with an egress allowlist | 🔺 P1 | Open | 🟡 Medium | 2a — Useful, gated assistant | 🔺 P1<br />roadmap 6<br />0 direct active dependent(s)<br />🟡 Medium | Mark every input with its source, carry the Ireul taint through context and make tainted context escalate external effects. |
@@ -55,6 +54,7 @@ Within each lane: explicit Queue order, impact priority, roadmap placement order
 |---|---|---|---|---|---|---|
 | [F-062](../BACKLOG.md#f-062) · Backup and restore: agreed loss bounds, off-host snapshots and a restore drill | 🔺 P1 | Open | 🟡 Medium | 1 — Reliable local core | 🔺 P1<br />roadmap 2<br />0 direct active dependent(s)<br />🟡 Medium | Owner decides the acceptable data loss and restore time, and where encrypted off-host copies live. |
 | [F-009](../BACKLOG.md#f-009) · Run NERV Agency headless as one local user service | 🔺 P1 | Implemented | 🟡 Medium | 1a — Headless and bilingual workspace | 🔺 P1<br />roadmap 3<br />0 direct active dependent(s)<br />🟡 Medium | Choose a separate Mac/Linux acceptance host; service installation is prohibited on this execution host. |
+| [F-011](../BACKLOG.md#f-011) · Native macOS menu-bar companion without Electron | 🔺 P1 | Implemented | 🔴 Large | 1b — Native macOS companion | 🔺 P1<br />roadmap 5<br />0 direct active dependent(s)<br />🔴 Large | Choose the native acceptance Mac and signing identity, or defer these checks. |
 | [F-064](../BACKLOG.md#f-064) · Bounded incident circuits instead of a global kill switch | 🔹 P3 | Open | 🟡 Medium | 2b — Governed extensions | 🔹 P3<br />roadmap 7<br />0 direct active dependent(s)<br />🟡 Medium | Owner decides which events trip which circuit, its scope, and who may rearm it. |
 
 ## Blocked
