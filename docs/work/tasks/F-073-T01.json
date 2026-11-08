@@ -37,7 +37,8 @@
     "docs/acceptance/README.md",
     "docs/reviews/README.md",
     "docs/reviews/2026-11-09-gauntlet.md",
-    "docs/archive/reconciliation-2026.md"
+    "docs/archive/reconciliation-2026.md",
+    "docs/work/records/B-042.md"
   ],
   "capabilities": [
     "bounded-edit",
