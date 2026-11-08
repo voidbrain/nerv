@@ -1,5 +1,7 @@
 # Evaluation evidence
 
+[Gauntlet Protocol integration](gauntlet.md) reuses these flow runners through a pinned independent evidence contract. It does not rerun all groups or call models automatically.
+
 The versioned suite is [evals/suite.json](../../evals/suite.json). It groups repository-owned scenarios; `minimumTests` catches accidentally empty/reduced selections. Changing a case or its expected behavior requires the same requirement review as any regression, with the suite/corpus version and evidence reconciled. Expected answers are never sent to a real model.
 
 ```bash

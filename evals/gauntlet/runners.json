@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "runners": {
+    "policy": {
+      "command": "node",
+      "args": [
+        "tools/gauntlet-adapter.mjs",
+        "--group=policy",
+        "--out={report}"
+      ],
+      "cwd": "../..",
+      "layers": [
+        "system"
+      ],
+      "allowModels": false
+    },
+    "ledger": {
+      "command": "node",
+      "args": [
+        "tools/gauntlet-adapter.mjs",
+        "--group=ledger",
+        "--out={report}"
+      ],
+      "cwd": "../..",
+      "layers": [
+        "system"
+      ],
+      "allowModels": false
+    },
+    "conversation": {
+      "command": "node",
+      "args": [
+        "tools/gauntlet-adapter.mjs",
+        "--group=conversation",
+        "--out={report}"
+      ],
+      "cwd": "../..",
+      "layers": [
+        "system"
+      ],
+      "allowModels": false
+    },
+    "channels": {
+      "command": "node",
+      "args": [
+        "tools/gauntlet-adapter.mjs",
+        "--group=channels",
+        "--out={report}"
+      ],
+      "cwd": "../..",
+      "layers": [
+        "system"
+      ],
+      "allowModels": false
+    },
+    "bases": {
+      "command": "node",
+      "args": [
+        "tools/gauntlet-adapter.mjs",
+        "--group=bases",
+        "--out={report}"
+      ],
+      "cwd": "../..",
+      "layers": [
+        "system"
+      ],
+      "allowModels": false
+    },
+    "stress": {
+      "command": "node",
+      "args": [
+        "tools/gauntlet-adapter.mjs",
+        "--group=stress",
+        "--out={report}"
+      ],
+      "cwd": "../..",
+      "layers": [
+        "system"
+      ],
+      "allowModels": false
+    },
+    "browser": {
+      "command": "node",
+      "args": [
+        "tools/gauntlet-adapter.mjs",
+        "--group=browser",
+        "--out={report}"
+      ],
+      "cwd": "../..",
+      "layers": [
+        "system"
+      ],
+      "allowModels": false
+    }
+  }
+}

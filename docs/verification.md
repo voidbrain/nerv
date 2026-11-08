@@ -22,3 +22,7 @@ CI runs once per PR head, with concurrency cancellation for superseded heads, pl
 Default limits: seven days or ten first-parent integration commits. Each merged/squashed PR counts once; direct commits conservatively consume the budget. A successful full PR run can count after merge without a duplicate main run. Partial success, skipped marker, changed PR head, unmerged branch or unavailable history cannot reset the limit. Bounded lookup may request full work if the prior baseline is beyond its history window.
 
 For a manual full run, select **Actions → CI → Run workflow → full = true**. `npm run verification:plan -- --full` requests the same scope locally but only prints a plan. `npm run test:affected` executes reviewed selection from `NERV_VERIFY_GROUPS` and JSON `NERV_VERIFY_PATHS`; CI supplies these as environment variables, never interpolated shell commands. Existing `npm test`, `test:browser`, `test:headless`, `evals`, `evals:stress` and `evals:model` commands remain available.
+
+## Gauntlet adoption
+
+Protocol/pack/adapter changes run `node --test test/gauntlet.test.mjs` plus manifest validation and `gauntlet:plan`; actual native joins are selected explicitly. The pinned package/lockfile is a dependency risk and therefore requests complete deterministic CI. No check above launches real-model qualification, downloads or repeated stress campaigns. See [commands and costs](evaluations/gauntlet.md).

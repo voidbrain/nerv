@@ -3,13 +3,52 @@
   "profiles": [
     {
       "id": "gemma-local",
-      "model": "Owner-selected local Gemma; exact model version, quantization, runtime and context configuration not yet inspected",
+      "model": "Gemma 4 12B / gemma4:12b / Q4_K_M; Ollama configuration proposed in Gauntlet; not qualified for coding or autonomous task execution",
       "status": "candidate",
       "capabilities": [
         "bounded-edit",
         "structured-tools"
       ],
-      "evidence": []
+      "evidence": [
+        "Inspected local inventory 2026-11-09: approximately 8 GB weights; configuration proposal only. Prior small role corpora do not establish coding capability.",
+        "Gauntlet profile: node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json; no new model campaign executed."
+      ]
+    },
+    {
+      "id": "qwen25-coder-local",
+      "model": "qwen2.5-coder:14b / Q4_K_M; approximately 9 GB weights, local inventory candidate",
+      "status": "candidate",
+      "capabilities": [
+        "bounded-edit",
+        "structured-tools"
+      ],
+      "evidence": [
+        "Configuration proposal in docs/evaluations/gauntlet.md; no measured capability pass or production permission."
+      ]
+    },
+    {
+      "id": "devstral-small2-local",
+      "model": "devstral-small-2:24b-instruct-2512-q4_K_M; approximately 15 GB proposed weights; download not performed",
+      "status": "candidate",
+      "capabilities": [
+        "bounded-edit",
+        "structured-tools"
+      ],
+      "evidence": [
+        "Configuration proposal in docs/evaluations/gauntlet.md; no measured capability pass or production permission."
+      ]
+    },
+    {
+      "id": "qwen3-coder-local",
+      "model": "qwen3-coder:30b / Q4_K_M; approximately 19 GB proposed weights; download not performed",
+      "status": "candidate",
+      "capabilities": [
+        "bounded-edit",
+        "structured-tools"
+      ],
+      "evidence": [
+        "Configuration proposal in docs/evaluations/gauntlet.md; no measured capability pass or production permission."
+      ]
     }
   ]
 }
