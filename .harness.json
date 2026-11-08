@@ -283,6 +283,17 @@
       "then": "Verify affected selection, full-marker dependencies and fresh/full boundary behavior; use CI for final cross-platform acceptance.",
       "run": "node --test test/verification-policy.test.mjs test/ci-pins.test.mjs",
       "checked": "NERV adapter contracts plus real Actions full and partial runs."
+    },
+    {
+      "id": "node-bootstrap",
+      "when": [
+        "src/node-*.ts",
+        "src/nodes-cli.ts",
+        "test/node-discovery.test.ts"
+      ],
+      "then": "Verify candidate trust boundaries, bounded read-only probes, private outputs and review-only plan contracts; reconcile installation/architecture guidance and record real-device evidence separately.",
+      "run": "node --test test/node-discovery.test.ts",
+      "checked": "Neutral inventory, signature/revocation, command-injection, child environment/bounds, real CLI and preview fixtures; bootstrap/device acceptance remains F-005."
     }
   ],
   "couplings": [

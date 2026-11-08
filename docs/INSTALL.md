@@ -273,3 +273,22 @@ The digest still uses its existing bounded exchange/history window; this change 
 ### Enrolled worker operations
 
 Use the [worker protocol and upgrade procedure](decisions/worker-protocol.md) before enabling cross-base execution. `workers pending`, `workers history`, `workers result ID` and `workers held` inspect durable evidence. `workers release ID --confirmed-stopped --reason "..."` requires actual confirmation that old work stopped; it never reuses the old ID. `workers retry-outbox ID --confirmed-not-run --reason "..."` is for verified unexecuted legacy intents, and `workers abandon-outbox ID --reason "..."` retains uncertainty. `workers cancel ID --reason "..."` targets local incoming work; `workers cancel-outbox ID --reason "..."` requests cancellation at the destination. A cancellation request or timeout does not prove that an effect stopped or was undone.
+
+### Discover and inspect node candidates (F-005 preview)
+
+```bash
+nerv nodes discover --inventory selected-targets.json
+nerv nodes discover --ssh-config ~/.ssh/config
+nerv nodes discover --tailscale tailscale-status.json
+nerv nodes discover --tailscale-live
+nerv nodes discover --registry signed-registry.json --root-key PINNED_PUBLIC_KEY
+nerv nodes inspect --local --out local-inspection.json
+nerv nodes inspect --ssh selected-alias --out remote-inspection.json
+nerv nodes plan --inspection remote-inspection.json --revision FULL_COMMIT_SHA --checkout /home/operator/nerv-source --home /home/operator/nerv-data --base BASE-02 --name Harbor --out bootstrap-preview.json
+```
+
+An inventory has `{"version":1,"targets":[{"name":"Harbor","ssh":{"host":"selected-alias","port":22}}]}`. Use selected files/aliases, never arbitrary host-key acceptance. Tailscale integration is optional and does not install/start a client. A registry root must be the already pinned public key, independently verified; never trust a root merely because the bundle supplies it. These commands neither scan a LAN automatically nor enroll a machine.
+
+Inspecting SSH requires a pretrusted host key, noninteractive authentication and Node on the target. Local/remote inspection reads only bounded OS/version/default-configuration metadata. It does not read secrets, open a database, run doctor or prove service availability. Keep actual reports private; use `--out` for a new mode-0600 file. Existing output files are never overwritten.
+
+The plan is **review-only; execution is not implemented**. `--service` lists a proposed per-user service step with an explicit ownership/session review blocker. Existing default configuration blocks fresh installation; inspect the current runtime and follow its reviewed update path. The preview includes pinned source commands, engine-strict dependencies, permissions, pairing and recovery instructions. See [the contract and remaining scope](decisions/node-bootstrap.md). No actual OS service or remote installation is changed by these preview commands.
