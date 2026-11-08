@@ -1,3 +1,4 @@
+import type {WorkerContext,WorkerLease,WorkerClaim} from './worker-jobs.ts';
 import {runFailure,runMessage,type InstrumentalityRun} from './instrumentality-runs.ts';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
@@ -135,9 +136,9 @@ export class Runtime implements StoreApi {
  async sortie(id:string){return await this.nervous.call('sorties.get',{id}) as (SortieSummary&{detail:ActionDetail[]})|null;}
  async events(sortieId:string,after=0,limit=50){return await this.nervous.call('events.page',{sortieId,after,limit}) as SortieEvent[];}
  /** Coordinator side of the gate: open the sortie, ask Casper only for Orange/Blue, then ballot and (on a grant) run in the scheduler process. */
- async act(action:OwnerAction):Promise<ActReply> {
+ async act(action:OwnerAction,worker?:WorkerLease):Promise<ActReply> {
   const sortieId=await this.nervous.call('sorties.open',{title:action.request.slice(0,500)}) as string;
-  return this.gate(sortieId,action);
+  return this.gate(sortieId,action,true,worker);
  }
  /** The other bases' votes on a non-Green action (F-036 phase 2), set by serve on the main base. */
  private peerSeats?:(ask:VerdictAsk)=>Promise<PeerSeat[]>;
@@ -157,7 +158,7 @@ export class Runtime implements StoreApi {
   const reply=await this.modelCall('casper.verdict',{request:ask.request,tool:ask.tool,args:ask.args,effect:ask.effect},MODEL_TIMEOUT_MS).catch(()=>({verdict:null})) as {verdict:Verdict|null};
   return reply.verdict?{vote:reply.verdict.vote,reason:reply.verdict.reason,...(typeof reply.verdict.confidence==='number'?{confidence:reply.verdict.confidence}:{})}:null;
  }
- private async gate(sortieId:string,action:OwnerAction,askCasper=true):Promise<ActReply> {
+ private async gate(sortieId:string,action:OwnerAction,askCasper=true,worker?:WorkerLease):Promise<ActReply> {
   const {pattern,effect,intent}=await this.nervous.call('actions.preview',{sortieId,tool:action.tool}) as {pattern:Pattern;effect:Effect;intent?:boolean};
   let casper:Verdict|undefined,casperError:string|undefined;let extras:Verdict[]=[];let late:PeerSeat[]=[];
   // Casper (and the other bases' seats) for anything not Green, and for every removal even when Green (B-009).
@@ -174,7 +175,7 @@ export class Runtime implements StoreApi {
    extras=seats.filter(s=>settled.has(s.seat)).map(s=>({seat:s.seat,...settled.get(s.seat)!,shadow:s.shadow}));
    late=seats.filter(s=>s.shadow&&!settled.has(s.seat));
   }
-  const result=await this.nervous.call('actions.act',{sortieId,tool:action.tool,args:action.args,stage:action.stage ?? 'production',...(casper?{casper}:{}),...(extras.length?{extras}:{})}) as ActResult;
+  const result=await this.nervous.call('actions.act',{...(worker?{worker}:{}),sortieId,tool:action.tool,args:action.args,stage:action.stage ?? 'production',...(casper?{casper}:{}),...(extras.length?{extras}:{})}) as ActResult;
   // A late shadow vote (F-052) is kept with the action when it arrives; it never changes the outcome.
   for(const s of late)void s.verdict.then(v=>this.nervous.call('actions.shadowVote',{sortieId,actionId:result.actionId,seat:s.seat,vote:v.vote,reason:v.reason.slice(0,500),...(typeof v.confidence==='number'?{confidence:v.confidence}:{})})).catch(()=>{/* best effort */});
   return casperError?{...result,casperError}:result;
@@ -401,8 +402,8 @@ export class Runtime implements StoreApi {
   let busy=false;
   const tick=async()=>{if(busy)return;busy=true;
    try{
-    for(const q of await this.nervous.call('kaji.outbox') as {id:string;sortieId:string;base:string;tool:string;args:Record<string,unknown>;request:string}[]){
-     const r=await send(q.base,{id:q.id,request:q.request,tool:q.tool,args:q.args});if(!r.reached)continue;
+    for(const q of await this.nervous.call('kaji.outbox') as {sequence:number;id:string;sortieId:string;base:string;tool:string;args:Record<string,unknown>;request:string}[]){
+     const r=await send(q.base,{id:q.id,sequence:q.sequence,request:q.request,tool:q.tool,args:q.args});if(!r.reached)continue;
      const result=(r.refused?{refused:r.refused}:r.result ?? {}) as Record<string,unknown>;
      const name=(await this.bases().catch(()=>[])).find(b=>b.baseId===q.base)?.name ?? q.base;
      const reply=remoteOutcomeText(name,q.tool,result,q.args);
@@ -417,12 +418,23 @@ export class Runtime implements StoreApi {
  private outboxTimer?:NodeJS.Timeout;
  /** On the base asked (F-036 slice 3b): an action the main base sent, run once per id, only if this base offers it, and
      always through this base's own gate (it may run, ask the owner with a card, or refuse). */
- async runFromPeer(from:string,item:RunItem,offered:string[]):Promise<unknown> {
-  const seen=await this.nervous.call('kaji.remoteRun',{id:item.id});if(seen)return seen;
-  const result=!offered.includes(item.tool)?{refused:`this base does not offer ${item.tool} (on it: kaji offer)`}
-   :await this.act({request:`From ${from}: ${item.request || item.tool}`.slice(0,4000),tool:item.tool,args:item.args}).catch((e:unknown)=>({outcome:'invalid',error:e instanceof Error?e.message:'failed'}));
-  await this.nervous.call('kaji.saveRemoteRun',{id:item.id,from,result:result as unknown as Record<string,unknown>});return result;
+ readonly worker={
+  open:async(owner:string,session:string)=>await this.nervous.call('worker.open',{owner,session}) as {epoch:number;cursor:number},
+  close:async(owner:string,session:string)=>{await this.nervous.call('worker.close',{owner,session});},
+  run:(owner:string,item:RunItem,context:WorkerContext)=>this.runFromPeer(owner,item,this.home?readConfig(this.home).kaji?.offers ?? []:[],context),
+ };
+ async runFromPeer(from:string,item:RunItem,offered:string[],context?:WorkerContext):Promise<unknown> {
+  const claim=await this.nervous.call('worker.claim',{owner:from,item,...(context?{context}:{})}) as WorkerClaim;
+  if(claim.state==='busy')return {retry:true,error:'Worker resource is held by an unfinished request.'};
+  if(claim.state!=='claimed')return claim.result;
+  const lease=claim.lease!;
+  const result=!offered.includes(item.tool)||item.tool==='kaji.run'?{refused:`this base does not offer ${item.tool} (on it: kaji offer)`}
+   :await this.act({request:`From ${from}: ${item.request || item.tool}`.slice(0,4000),tool:item.tool,args:item.args},lease).catch(()=>({outcome:'invalid',error:'Worker action failed or its lease/authority changed; inspect the local trace.'}));
+  try{await this.nervous.call('worker.finish',{lease,result:result as Record<string,unknown>});}
+  catch{await this.nervous.call('worker.finish',{lease,result:{outcome:'uncertain',error:'The action returned but its result could not be recorded within the response bound; inspect the local trace.'}});}
+  return result;
  }
+
  /** Resumes every Misato sortie whose wait is over; each is claimed once in the ledger, so two sweeps never resume twice. */
  async sweep():Promise<void> {
   const ids=await this.nervous.call('misato.resumable').catch(()=>[]) as string[];

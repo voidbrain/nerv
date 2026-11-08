@@ -281,6 +281,14 @@ try {
         console.log(`Key of Nebuchadnezzar created: ${out}\nRoot fingerprint: ${fingerprint(key.publicKey)}\nKeep a second copy offline (for example on a USB stick) and the passphrase somewhere safe: without them no new base can be enrolled. It is never sent over the Kaji line.`);
         break;
       }
+      case 'workers':{
+        if(args[0]==='pending'){const before=args[1]===undefined?undefined:Number(args[1]);console.log(JSON.stringify(local().workerJobs.pending(before),null,2));}
+        else if(args[0]==='release'){
+          const reason=flag('--reason');if(!args[1]||!reason||!args.includes('--confirmed-stopped'))throw new Error('Use workers release ID --confirmed-stopped --reason "verified how it stopped".');
+          local().workerJobs.release(args[1],reason,true);console.log('Resource released after owner confirmation. The old request will never be executed again; its effects were not assumed undone.');
+        }else throw new Error('Use workers pending [BEFORE-FENCE] or workers release ID --confirmed-stopped --reason "evidence".');
+        break;
+      }
       case 'kaji':{
         const registry=new Registry(local().db,config.kaji?.root);const me=baseKey(home).publicKey;const [sub]=args;
         const unlock=async()=>{const path=flag('--key') ?? join(home,ROOT_KEY_FILE);if(!existsSync(path))throw new Error(`No key file at ${path}: enrol on the base that holds the Key, or pass --key PATH.`);
@@ -395,7 +403,7 @@ try {
         else if(botToken)console.log('Aoba (Telegram): token found, no chat linked yet. Send /start to your bot, then run telegram link.');
         // B-013: once the channels listen, close what the previous run left half done and tell the owner.
         void runtime.closeInterrupted().then(n=>{if(n)console.log(`Closed ${n} sortie(s) a restart had interrupted.`);});
-        if(config.kaji?.root){kaji=new KajiLink({baseId:config.base.id,key:own.privateKey,publicKey:own.publicKey,registry:runtime.kaji,health:()=>runtime.baseHealth(),onHealth:(id,h)=>runtime.notePeerHealth(id,h),channel:()=>runtime.channelState(),onChannel:(id,c)=>runtime.notePeerChannel(id,c),
+        if(config.kaji?.root){kaji=new KajiLink({worker:runtime.worker,baseId:config.base.id,key:own.privateKey,publicKey:own.publicKey,registry:runtime.kaji,health:()=>runtime.baseHealth(),onHealth:(id,h)=>runtime.notePeerHealth(id,h),channel:()=>runtime.channelState(),onChannel:(id,c)=>runtime.notePeerChannel(id,c),
           onRelay:async(from,relay)=>{if(!aoba)return false;const name=(await runtime.bases()).find(b=>b.baseId===from)?.name ?? from;return aoba.relayed(from,name,relay);},
           onPendingApprovals:ids=>runtime.pendingApprovalIds(ids),
           onDecide:async(approvalId,decision)=>decisionText(await runtime.decide(approvalId,decision,'telegram')),

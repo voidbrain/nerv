@@ -1,3 +1,4 @@
+import {WorkerJobs} from './worker-jobs.ts';
 import {InstrumentalityRuns} from './instrumentality-runs.ts';
 import {UsageStore} from './model-usage.ts';
 import {checkHistory,historyPage,type HistoryPage} from './history.ts';
@@ -22,6 +23,7 @@ export const OWNER_SOURCE='owner';
 export const MISATO_SOURCE='misato';
 export class Store {
   readonly db: DatabaseSync;
+  readonly workerJobs:WorkerJobs;
   readonly usage: UsageStore;
   readonly instrumentality: InstrumentalityRuns;
   readonly ledger: Ledger;
@@ -50,8 +52,7 @@ export class Store {
     this.db.exec(REGISTRY_SCHEMA);
     // F-036 slice 3b, additive: actions queued for other bases, and actions other bases asked of this one (by their id, so a
     // resend after a crash returns the first result instead of running twice).
-    this.db.exec(`CREATE TABLE IF NOT EXISTS kaji_outbox(id TEXT PRIMARY KEY, sortie_id TEXT NOT NULL, base TEXT NOT NULL, tool TEXT NOT NULL, args TEXT NOT NULL, request TEXT NOT NULL, created TEXT NOT NULL, done TEXT, result TEXT);
-      CREATE TABLE IF NOT EXISTS kaji_runs(id TEXT PRIMARY KEY, from_base TEXT NOT NULL, result TEXT NOT NULL, created TEXT NOT NULL);`);
+    this.db.exec(`CREATE TABLE IF NOT EXISTS kaji_outbox(id TEXT PRIMARY KEY, sortie_id TEXT NOT NULL, base TEXT NOT NULL, tool TEXT NOT NULL, args TEXT NOT NULL, request TEXT NOT NULL, created TEXT NOT NULL, done TEXT, result TEXT);`);
     // Schema 5: the inbox holds Hyuga's briefs as well as reminders (F-028). The table is rebuilt once, keeping every
     // row's rowid: inbox cursors (Telegram, the menu-bar app) are rowids, so none of them jumps or repeats.
     if(!(this.db.prepare('PRAGMA table_info(deliveries)').all() as {name:string}[]).some(c=>c.name==='kind')){
@@ -66,6 +67,7 @@ export class Store {
     this.db.exec('CREATE INDEX IF NOT EXISTS deliveries_kind_created ON deliveries(kind,created); PRAGMA user_version=5');
     // Additive daily identities preserve the inbox's existing rowids and UUIDs.
     this.db.exec('CREATE TABLE IF NOT EXISTS daily_briefs(day TEXT PRIMARY KEY,delivery_id TEXT NOT NULL UNIQUE REFERENCES deliveries(id))');
+    this.workerJobs=new WorkerJobs(this.db);
     this.ledger = new Ledger(this.db,{policy:scrolls.policy,tools:builtinTools});this.memory = new Memory(this.db);this.policySource = scrolls.source;
   }
   /** Same-connection writes plus external SQLite commits, without scanning events or running integrity checks. */
@@ -140,8 +142,8 @@ export class Store {
     this.db.prepare('INSERT INTO kaji_outbox VALUES(?,?,?,?,?,?,?,NULL,NULL)').run(id,sortieId,base,tool,JSON.stringify(args),title.slice(0,500),new Date().toISOString());return {id};
   }
   /** Queued actions not settled yet, oldest first: the coordinator sends them (the same id each time). */
-  outbox(): {id:string;sortieId:string;base:string;tool:string;args:Record<string,unknown>;request:string}[] {
-    return (this.db.prepare('SELECT id,sortie_id,base,tool,args,request FROM kaji_outbox WHERE done IS NULL ORDER BY created LIMIT 10').all() as {id:string;sortie_id:string;base:string;tool:string;args:string;request:string}[]).map(r=>({id:r.id,sortieId:r.sortie_id,base:r.base,tool:r.tool,args:JSON.parse(r.args) as Record<string,unknown>,request:r.request}));
+  outbox(): {sequence:number;id:string;sortieId:string;base:string;tool:string;args:Record<string,unknown>;request:string}[] {
+    return (this.db.prepare('SELECT rowid AS sequence,id,sortie_id,base,tool,args,request FROM kaji_outbox WHERE done IS NULL ORDER BY created LIMIT 10').all() as {sequence:number;id:string;sortie_id:string;base:string;tool:string;args:string;request:string}[]).map(r=>({sequence:r.sequence,id:r.id,sortieId:r.sortie_id,base:r.base,tool:r.tool,args:JSON.parse(r.args) as Record<string,unknown>,request:r.request}));
   }
   /** Marks a sent action done with its result and, the first time only, records what the other base did on the sortie (B-011). */
   outboxDone(id: string, result: unknown, said?: {base:string;text:string}): boolean {
@@ -150,9 +152,6 @@ export class Store {
     if(done&&row&&said){const r=result as {outcome?:unknown;refused?:unknown};this.ledger.remoteResult(row.sortie_id,{base:said.base.slice(0,60),tool:row.tool,outcome:typeof r.refused==='string'?'refused':typeof r.outcome==='string'?r.outcome:'answered',text:said.text.slice(0,600)});}
     return done;
   }
-  /** On the target base: the result of an action asked by another base, if it already ran here. */
-  remoteRun(id: string): unknown { const r=this.db.prepare('SELECT result FROM kaji_runs WHERE id=?').get(id) as {result:string}|undefined;return r?JSON.parse(r.result):undefined; }
-  saveRemoteRun(id: string, from: string, result: unknown): void { this.db.prepare('INSERT OR IGNORE INTO kaji_runs VALUES(?,?,?,?)').run(id,from,JSON.stringify(result).slice(0,8000),new Date().toISOString()); }
   inbox() { return this.db.prepare('SELECT * FROM deliveries ORDER BY created DESC').all(); }
   /** Hyuga's brief into the inbox (F-028): every channel delivers it from here, once. */
   addBrief(message: string, now = new Date(), day?:string): {id:string;created:string;existing?:true} {
