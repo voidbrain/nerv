@@ -90,3 +90,8 @@ Earlier reconciliation notes moved out of the [backlog](../BACKLOG.md) header, n
 ## 2026-11-09 — PR #222
 
 Reconciled main `fd503d3` using authenticated `npm run ci:status -- 222`: CI 42531104052 plan/validate/windows/native-macos succeeded; full-suite skipped. This reconciled scoped F-072 closure and target-document evidence, not B-046 runtime repair. Prior ledger baseline `2943aad` retained PR #221 CI 42530253552, passed after one failed-job retry; unresolved worker-heartbeat evidence remains B-046.
+
+
+## 2026-11-09 — PR #223
+
+Reconciled main `b15fe37` using authenticated `npm run ci:status -- 223`: CI 42535553841 passed plan, validate, Windows, native-macos and full-suite at exact head737fa53. F-073/T01 accepted and archived after clean-source policy90, six integration tests and independent report-only review. Initial CI 42535069202 failed recap-week validation and an existing Windows remote-card cleanup assertion. Recap was corrected for the owner date, no Telegram/runtime/assertion/timeouts changed, and B-042 remains Investigate despite final CI pass. B-046 remains separate unresolved heartbeat evidence. No model inference/download or production qualification occurred.

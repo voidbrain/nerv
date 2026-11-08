@@ -11,6 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
+| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 1 | 0 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
 
@@ -2918,3 +2919,41 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 [PR #222](https://github.com/voidbrain/nerv/pull/222) records closure.
 
 **Target-schema correction and retirement recheck — Closed, 2026-11-08.** [PR #221](https://github.com/voidbrain/nerv/pull/221) restores the active target with implemented/planned labels; recheck all 26 retired sources and preserve mixed design inputs outside remove/. Assess Gauntlet ownership/reuse versus existing benchmarks without creating a repository or running model campaigns. Closed 2026-11-08: all 26 hashes, source/current links, schema and view checks passed; fresh-context review found no blocker; PR #221 CI 42530253552 attempt 2 passed all five jobs. The original Windows heartbeat failure is retained under open B-046, not claimed fixed.
+
+
+<a id="archive-week-2026-11-09"></a>
+### F-073
+
+**Adopt Gauntlet Protocol for capability evidence and existing flow evaluations**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />No remaining adoption action. Protocol 0.1.1 and NERV integration are accepted; model campaigns remain explicit separate runs.
+
+| | |
+|---|---|
+| **Issue** | Reuse system flow evidence alongside independently measured model capabilities without conflating them or promoting unmeasured models. |
+| **Reproduce** | Plan NERV flow packs, run a selected existing group, normalize evidence and compare/export reviewed profiles. |
+| **Check** | Pinned independent package; actual existing runner join; no implicit model calls/downloads; private immutable evidence; candidate profiles remain candidates; documented manual campaigns and limits. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-09 after [PR #223](https://github.com/voidbrain/nerv/pull/223), exact head737fa53, merged mainb15fe37. CI 42535553841 passed plan, validate, Windows, native-macos and full-suite. Accepted pinned protocol 0.1.1, seven existing flow adapters, explicit cost/execution gates, private evidence, comparison and reviewed export. Clean-source selected policy join passed90; six new integration/artifact/cancellation tests passed. Review: fresh-context report-only review found and resolved the upstream cancellation defect, then found no remaining issues. [Acceptance](../acceptance/gauntlet-2026-11-09.md), [review](../reviews/2026-11-09-gauntlet.md), [guide](../evaluations/gauntlet.md). No live-model/coding qualification or production promotion claimed. B-042 remains Investigate after its unchanged Windows cleanup fixture passed the final head; this is not a causal fix. Consistency: source task, roadmap, generated views and guides reconciled; independent Gauntlet release has no NERV gate.
+
+**Estimates:** Small remaining effort at closure: no adoption work remains. Earlier 2–3 day estimate and under-one-day review estimate were estimates, not measured token/runtime cost.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #223](https://github.com/voidbrain/nerv/pull/223); upstream [Gauntlet #3](https://github.com/voidbrain/gauntlet-protocol/pull/3), CI 42534614317; clean-source acceptance and independent review linked above. Initial CI 42535069202 failed recap-week validation and an unchanged Windows remote-card cleanup assertion; B-042 retains that evidence, not a fix claim. |
+| Opened | 2026-11-09 |
+| Verification | 2026-11-09 Unit/integration: policy90 passed on clean source50932b4, six new integration tests pass. CI 42535553841 passed every required job/full-suite on exact head737fa53, Node24 Linux/Windows and native macOS. Review: independent report-only recheck passed. No model qualification. |
+| Reviewed | 2026-11-09 |
+
+</details>
+
+---
+
+F-073 reconciliation: [PR #224](https://github.com/voidbrain/nerv/pull/224), documentation-only acceptance update against PR #223 / CI 42535553841.
