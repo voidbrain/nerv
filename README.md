@@ -79,3 +79,5 @@ Backlog sequencing: [linked prerequisites and generated unlocks](docs/agents/bac
 Scheduled Instrumentality runs persist their outcomes in SQLite. A failed run stays visible in health and the next brief, and gets at most one later attempt in the same local-day slot, after an hour; restarts do not reset the limit. A recovered run is labelled recovered, and no-new-exchange runs are labelled skipped. The digest’s existing bounded history/input window remains unchanged.
 
 Enrolled bases can execute advertised built-in actions through the [versioned worker protocol](docs/decisions/worker-protocol.md). Both source approval and the destination gate apply; uncertain jobs retain their resource lock until reconciled.
+
+Verification uses the [scoped check policy](docs/verification.md): affected regressions by default, with full deterministic CI on risk/request or after seven days or ten integration commits. Stress and real-model campaigns remain separately triggered.

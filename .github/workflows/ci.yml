@@ -1,9 +1,47 @@
 name: CI
-on: [push, pull_request]
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      full:
+        description: Run the complete deterministic suite
+        type: boolean
+        default: true
+  schedule:
+    - cron: '0 7 * * 1'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
+  actions: read
 jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      full: ${{ steps.select.outputs.full }}
+      groups: ${{ steps.select.outputs.groups }}
+      paths: ${{ steps.select.outputs.paths }}
+      unit: ${{ steps.select.outputs.unit }}
+      frontend: ${{ steps.select.outputs.frontend }}
+      native: ${{ steps.select.outputs.native }}
+      service: ${{ steps.select.outputs.service }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - id: select
+        name: Select affected checks and verify full-run freshness
+        run: node tools/plan-verification.mjs --github-output
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NERV_FULL_CHECKS: ${{ github.event_name == 'workflow_dispatch' && inputs.full }}
   validate:
+    needs: plan
     runs-on: ubuntu-latest
     # A hang fails in minutes instead of holding the PR for hours (the Windows test hang of 2026-11-05).
     timeout-minutes: 20
@@ -27,13 +65,24 @@ jobs:
           path: dependencies.cdx.json
           if-no-files-found: error
       - run: npm run check:evals
-      - run: npm run typecheck
+      - if: needs.plan.outputs.unit == 'true'
+        run: npm run typecheck
       # The suite once, with coverage; the table is printed (warnings, coverage.enforce off).
-      - run: npm run test:coverage
+      - if: needs.plan.outputs.full == 'true'
+        run: npm run test:coverage
+      - name: Affected Node regressions
+        if: needs.plan.outputs.full != 'true' && needs.plan.outputs.unit == 'true'
+        run: node tools/selected-tests.mjs
+        env:
+          NERV_VERIFY_GROUPS: ${{ needs.plan.outputs.groups }}
+          NERV_VERIFY_PATHS: ${{ needs.plan.outputs.paths }}
       - name: Code coverage table (warnings; optional enforcement)
+        if: needs.plan.outputs.full == 'true'
         run: node tools/coverage-table.mjs --check --github
-      - run: npm run build
+      - if: needs.plan.outputs.frontend == 'true' || needs.plan.outputs.service == 'true'
+        run: npm run build
       - name: Angular bilingual browser acceptance
+        if: needs.plan.outputs.frontend == 'true'
         run: npm run test:browser
         env:
           NERV_BROWSER_ARTIFACTS: ${{ runner.temp }}/nerv-browser
@@ -51,7 +100,8 @@ jobs:
           name: angular-browser
           path: ${{ runner.temp }}/nerv-browser
           if-no-files-found: ignore
-      - run: npm run test:headless
+      - if: needs.plan.outputs.service == 'true'
+        run: npm run test:headless
       - run: npm run check:backlog
       - run: npm run check:recap
       - run: npm run check:roadmap
@@ -60,39 +110,64 @@ jobs:
       - run: npm run check:rules
       - run: npm run check:maintenance
       - run: npm run check:audits
-      - run: git clone --branch v4.0.0 --depth 1 https://github.com/voidbrain/project-harness "$RUNNER_TEMP/project-harness"
+      - run: git clone --branch v4.1.0 --depth 1 https://github.com/voidbrain/project-harness "$RUNNER_TEMP/project-harness"
       - run: npm run check:freshness
         env:
           HARNESS_HOME: ${{ runner.temp }}/project-harness
 
   # F-037: Windows bases (Tabgha). The suite, the build, and the real Task Scheduler service install.
   windows:
+    needs: plan
     runs-on: windows-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      - name: Windows scope
+        shell: bash
+        run: echo "Full=${{ needs.plan.outputs.full }}; selected Node work=${{ needs.plan.outputs.unit }}; service=${{ needs.plan.outputs.service }}"
+      - if: needs.plan.outputs.unit == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - if: needs.plan.outputs.unit == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: npm
-      - run: npm ci
-      - run: npm run typecheck
-      - run: npm run build
-      - run: npm test
-      - run: node --test test/windows-service.integration.ts
+      - if: needs.plan.outputs.unit == 'true'
+        run: npm ci
+      - if: needs.plan.outputs.unit == 'true'
+        run: npm run typecheck
+      - if: needs.plan.outputs.frontend == 'true' || needs.plan.outputs.service == 'true'
+        run: npm run build
+      - if: needs.plan.outputs.full == 'true'
+        run: npm test
+      - name: Affected Node regressions
+        if: needs.plan.outputs.full != 'true' && needs.plan.outputs.unit == 'true'
+        run: node tools/selected-tests.mjs
+        env:
+          NERV_VERIFY_GROUPS: ${{ needs.plan.outputs.groups }}
+          NERV_VERIFY_PATHS: ${{ needs.plan.outputs.paths }}
+      - if: needs.plan.outputs.service == 'true'
+        run: node --test test/windows-service.integration.ts
 
   native-macos:
+    needs: plan
     runs-on: macos-15
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      - name: macOS scope
+        run: echo "Native work selected=${{ needs.plan.outputs.native }}"
+      - if: needs.plan.outputs.native == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - if: needs.plan.outputs.native == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: npm
-      - run: npm ci
-      - run: swift build --package-path native/NervMenuBar
+      - if: needs.plan.outputs.native == 'true'
+        run: npm ci
+      - if: needs.plan.outputs.native == 'true'
+        run: swift build --package-path native/NervMenuBar
       - name: Native pairing and pinned TLS tests
+        if: needs.plan.outputs.native == 'true'
         shell: bash
         run: |
           export NERV_NATIVE_FIXTURE="$RUNNER_TEMP/nerv-native-invitation"
@@ -104,9 +179,29 @@ jobs:
             sleep 0.1
           done
           swift test --package-path native/NervMenuBar
-      - run: sh native/build-app.sh
-      - run: ditto -c -k --sequesterRsrc --keepParent dist/NERV.app dist/NERV-macOS.zip
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      - if: needs.plan.outputs.native == 'true'
+        run: sh native/build-app.sh
+      - if: needs.plan.outputs.native == 'true'
+        run: ditto -c -k --sequesterRsrc --keepParent dist/NERV.app dist/NERV-macOS.zip
+      - if: needs.plan.outputs.native == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: NERV-macOS
           path: dist/NERV-macOS.zip
+
+  full-suite:
+    needs: [plan, validate, windows, native-macos]
+    if: always() && needs.plan.outputs.full == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Establish successful complete deterministic evidence
+        env:
+          PLAN: ${{ needs.plan.result }}
+          VALIDATE: ${{ needs.validate.result }}
+          WINDOWS: ${{ needs.windows.result }}
+          NATIVE: ${{ needs.native-macos.result }}
+        run: |
+          test "$PLAN" = success
+          test "$VALIDATE" = success
+          test "$WINDOWS" = success
+          test "$NATIVE" = success

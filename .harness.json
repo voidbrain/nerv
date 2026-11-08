@@ -3,7 +3,7 @@
     "path": "../harness-template",
     "repo": "https://github.com/voidbrain/project-harness"
   },
-  "version": "4.0.0",
+  "version": "4.1.0",
   "stacks": [
     "core",
     "angular"
@@ -35,7 +35,9 @@
     "docs/agents/change-impact.md": "core/docs/agents/change-impact.md",
     "docs/agents/coverage-guide.md": "core/docs/agents/coverage-guide.md",
     "tools/backlog-dependencies.mjs": "core/tools/backlog-dependencies.mjs",
-    "tools/backlog-queue.mjs": "core/tools/backlog-queue.mjs"
+    "tools/backlog-queue.mjs": "core/tools/backlog-queue.mjs",
+    "tools/verification.mjs": "core/tools/verification.mjs",
+    "docs/agents/verification.md": "core/docs/agents/verification.md"
   },
   "forked": {},
   "freshness": {
@@ -267,6 +269,20 @@
       "then": "Validate the versioned scenarios, run affected control-flow/model groups, and retain reviewed evidence with explicit coverage limits.",
       "run": "npm run check:evals && npm run evals -- --only=policy",
       "checked": "Golden cases run in npm test; browser evidence runner and manifest validation run in CI."
+    },
+    {
+      "id": "verification-selection",
+      "when": [
+        "tools/verification.mjs",
+        "tools/plan-verification.mjs",
+        "tools/selected-tests.mjs",
+        "test/verification-policy.test.mjs",
+        ".github/workflows/ci.yml",
+        ".harness.json"
+      ],
+      "then": "Verify affected selection, full-marker dependencies and fresh/full boundary behavior; use CI for final cross-platform acceptance.",
+      "run": "node --test test/verification-policy.test.mjs test/ci-pins.test.mjs",
+      "checked": "NERV adapter contracts plus real Actions full and partial runs."
     }
   ],
   "couplings": [
@@ -541,5 +557,188 @@
   },
   "workQueue": {
     "roadmap": "docs/ROADMAP.md"
+  },
+  "verification": {
+    "enabled": true,
+    "workflow": "ci.yml",
+    "fullJob": "full-suite",
+    "days": 7,
+    "prs": 10,
+    "historyLimit": 30,
+    "risk": [
+      "package*.json",
+      "angular.json",
+      "tsconfig*.json",
+      "AGENTS.md",
+      "CLAUDE.md",
+      "docs/BACKLOG-RULES.md",
+      "shared/**",
+      "src/store.ts",
+      "src/ledger.ts",
+      "src/policy.ts",
+      "src/runtime.ts",
+      "src/rpc.ts",
+      "src/socket.ts",
+      "src/worker*.ts",
+      "src/kaji*.ts",
+      "src/config.ts",
+      "src/server.ts",
+      "src/executors.ts",
+      "src/sqlite-transaction.ts",
+      "src/*process*.ts",
+      "src/memory.ts",
+      "src/mcp.ts",
+      "src/casper.ts",
+      "src/misato.ts",
+      "src/model.ts",
+      "src/instrumentality*.ts",
+      "src/pilots.ts",
+      "src/native-auth.ts",
+      "evals/**",
+      "tools/**",
+      "test/fixtures/**",
+      "test/native-fixture.ts"
+    ],
+    "sources": [
+      "src/**",
+      "test/**",
+      "web/**",
+      "native/**"
+    ],
+    "documentation": [
+      "docs/**",
+      "README.md",
+      "LICENSE",
+      ".editorconfig",
+      ".gitignore"
+    ],
+    "groups": [
+      {
+        "id": "brief",
+        "paths": [
+          "src/brief.ts",
+          "test/brief*.test.ts"
+        ],
+        "tests": [
+          "test/brief.test.ts",
+          "test/brief-recovery.test.ts",
+          "test/telegram.test.ts"
+        ]
+      },
+      {
+        "id": "channels",
+        "paths": [
+          "src/telegram.ts",
+          "src/channel-state.ts",
+          "src/chat-command.ts",
+          "src/dashboard-feed.ts",
+          "test/telegram*.test.ts",
+          "test/one-channel.test.ts",
+          "test/channel-state.test.ts",
+          "test/chat-command.test.ts"
+        ],
+        "tests": [
+          "test/telegram.test.ts",
+          "test/telegram-reconcile.test.ts",
+          "test/one-channel.test.ts",
+          "test/channel-state.test.ts",
+          "test/chat-command.test.ts",
+          "test/dashboard.test.ts",
+          "test/dashboard-poll.test.ts"
+        ]
+      },
+      {
+        "id": "inventory",
+        "paths": [
+          "src/bom.ts",
+          "src/model-setup.ts",
+          "test/bom.test.ts",
+          "test/model-setup.test.ts"
+        ],
+        "tests": [
+          "test/bom.test.ts",
+          "test/model-setup.test.ts"
+        ]
+      },
+      {
+        "id": "usage",
+        "paths": [
+          "src/model-usage.ts",
+          "src/route-health.ts",
+          "test/model-usage.test.ts",
+          "test/health.test.ts"
+        ],
+        "tests": [
+          "test/model-usage.test.ts",
+          "test/health.test.ts",
+          "test/dashboard-accounting.test.ts"
+        ]
+      },
+      {
+        "id": "explanations",
+        "paths": [
+          "src/why.ts",
+          "src/events.ts",
+          "test/why.test.ts"
+        ],
+        "tests": [
+          "test/why.test.ts",
+          "test/sortie-detail.test.mjs"
+        ]
+      },
+      {
+        "id": "build-info",
+        "paths": [
+          "src/build.ts",
+          "test/build.test.ts"
+        ],
+        "tests": [
+          "test/build.test.ts"
+        ]
+      },
+      {
+        "id": "frontend",
+        "paths": [
+          "web/**",
+          "test/*.browser.mjs",
+          "test/fixtures/browser.mjs"
+        ],
+        "tests": [
+          "test/*.test.mjs",
+          "test/brand.test.ts"
+        ]
+      },
+      {
+        "id": "native",
+        "paths": [
+          "native/**",
+          "test/native*.ts"
+        ],
+        "tests": [
+          "test/native-auth.test.ts",
+          "test/protocol.test.ts"
+        ]
+      },
+      {
+        "id": "service",
+        "paths": [
+          "src/service.ts",
+          "src/cli.ts",
+          "test/*.integration.ts"
+        ],
+        "tests": [
+          "test/runtime.test.ts",
+          "test/core.test.ts"
+        ]
+      },
+      {
+        "id": "tests",
+        "paths": [
+          "test/*.test.ts",
+          "test/*.test.mjs"
+        ],
+        "tests": []
+      }
+    ]
   }
 }
