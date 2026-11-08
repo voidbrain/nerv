@@ -1,7 +1,7 @@
 import {transaction} from './sqlite-transaction.ts';
 import type {WorkerLease} from './worker-jobs.ts';
 import {readConfig} from './config.ts';
-import {WorkerJobs,WORKER_RESULT_BYTES} from './worker-jobs.ts';
+import {WorkerJobs,WORKER_RESULT_BYTES,WORKER_LEASE_MS} from './worker-jobs.ts';
 import {InstrumentalityRuns} from './instrumentality-runs.ts';
 import {UsageStore} from './model-usage.ts';
 import {checkHistory,historyPage,type HistoryPage} from './history.ts';
@@ -70,7 +70,11 @@ export class Store {
     this.db.exec('CREATE INDEX IF NOT EXISTS deliveries_kind_created ON deliveries(kind,created); PRAGMA user_version=5');
     // Additive daily identities preserve the inbox's existing rowids and UUIDs.
     this.db.exec('CREATE TABLE IF NOT EXISTS daily_briefs(day TEXT PRIMARY KEY,delivery_id TEXT NOT NULL UNIQUE REFERENCES deliveries(id))');
-    this.workerJobs=new WorkerJobs(this.db);
+    this.db.exec("CREATE TABLE IF NOT EXISTS worker_legacy_outbox(id TEXT PRIMARY KEY,state TEXT NOT NULL,reason TEXT NOT NULL,created TEXT NOT NULL); CREATE TABLE IF NOT EXISTS worker_outbox_attempts(id TEXT PRIMARY KEY,attempted TEXT NOT NULL); CREATE TABLE IF NOT EXISTS worker_outbox_reconciliations(id TEXT NOT NULL,action TEXT NOT NULL,reason TEXT NOT NULL,source TEXT NOT NULL,created TEXT NOT NULL)");
+    this.workerJobs=transaction(this.db,()=>{
+      const legacy=!!this.db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='kaji_runs'").get();const jobs=new WorkerJobs(this.db);
+      if(legacy)this.db.prepare("INSERT OR IGNORE INTO worker_legacy_outbox SELECT id,'pending','Predates durable worker receipts; verify the destination before replay.',? FROM kaji_outbox WHERE done IS NULL").run(new Date().toISOString());return jobs;
+    });
     this.ledger = new Ledger(this.db,{policy:scrolls.policy,tools:builtinTools});this.memory = new Memory(this.db);this.policySource = scrolls.source;
   }
   /** Same-connection writes plus external SQLite commits, without scanning events or running integrity checks. */
@@ -145,8 +149,23 @@ export class Store {
     this.db.prepare('INSERT INTO kaji_outbox VALUES(?,?,?,?,?,?,?,NULL,NULL)').run(id,sortieId,base,tool,JSON.stringify(args),title.slice(0,500),new Date().toISOString());return {id};
   }
   /** Queued actions not settled yet, oldest first: the coordinator sends them (the same id each time). */
-  outbox(): {sequence:number;id:string;sortieId:string;base:string;tool:string;args:Record<string,unknown>;request:string}[] {
-    return (this.db.prepare('SELECT rowid AS sequence,id,sortie_id,base,tool,args,request FROM kaji_outbox WHERE done IS NULL ORDER BY created LIMIT 10').all() as {sequence:number;id:string;sortie_id:string;base:string;tool:string;args:string;request:string}[]).map(r=>({sequence:r.sequence,id:r.id,sortieId:r.sortie_id,base:r.base,tool:r.tool,args:JSON.parse(r.args) as Record<string,unknown>,request:r.request}));
+  outbox(): {attempted:boolean;deadline:number;sequence:number;id:string;sortieId:string;base:string;tool:string;args:Record<string,unknown>;request:string}[] {
+    return (this.db.prepare(`SELECT rowid AS sequence,id,sortie_id,base,tool,args,request,created,EXISTS(SELECT 1 FROM worker_outbox_attempts a WHERE a.id=q.id) AS attempted FROM kaji_outbox q WHERE done IS NULL AND NOT EXISTS (SELECT 1 FROM worker_legacy_outbox h WHERE h.id=q.id AND h.state='pending') ORDER BY created LIMIT 10`).all() as {sequence:number;id:string;sortie_id:string;base:string;tool:string;args:string;request:string;created:string;attempted:number}[]).map(r=>({attempted:!!r.attempted,deadline:Date.parse(r.created)+WORKER_LEASE_MS,sequence:r.sequence,id:r.id,sortieId:r.sortie_id,base:r.base,tool:r.tool,args:JSON.parse(r.args) as Record<string,unknown>,request:r.request}));
+  }
+  attemptWorkerOutbox(id:string):void {
+    if(!this.db.prepare('SELECT 1 FROM kaji_outbox WHERE id=? AND done IS NULL').get(id))throw new Error('Worker request no longer waits.');this.db.prepare('INSERT OR IGNORE INTO worker_outbox_attempts VALUES(?,?)').run(id,new Date().toISOString());
+  }
+  heldWorkerOutbox(before=Number.MAX_SAFE_INTEGER):{sequence:number;id:string;base:string;tool:string;reason:string}[]{
+    if(!Number.isSafeInteger(before)||before<1)throw new Error('Invalid held-outbox cursor.');return this.db.prepare("SELECT q.rowid AS sequence,q.id,q.base,q.tool,h.reason FROM kaji_outbox q JOIN worker_legacy_outbox h ON h.id=q.id WHERE h.state='pending' AND q.done IS NULL AND q.rowid<? ORDER BY q.rowid DESC LIMIT 20").all(before) as {sequence:number;id:string;base:string;tool:string;reason:string}[];
+  }
+  reconcileWorkerOutbox(id:string,action:'retry'|'abandon',reason:string,confirmedNotRun=false):void {
+    if(!['retry','abandon'].includes(action)||typeof reason!=='string'||reason.trim().length<8||reason.length>500||(action==='retry'&&!confirmedNotRun))throw new Error('A reason and explicit not-run confirmation for retry are required.');
+    transaction(this.db,()=>{
+      const row=this.db.prepare("SELECT q.base FROM kaji_outbox q JOIN worker_legacy_outbox h ON h.id=q.id WHERE q.id=? AND q.done IS NULL AND h.state='pending'").get(id) as {base:string}|undefined;if(!row)throw new Error('No held legacy request with that ID.');
+      if(action==='retry'){this.db.prepare('UPDATE kaji_outbox SET created=?,result=NULL WHERE id=?').run(new Date().toISOString(),id);this.db.prepare('DELETE FROM worker_outbox_attempts WHERE id=?').run(id);}
+      else this.outboxDone(id,{outcome:'uncertain',error:'Owner stood down legacy retries; effects were not assumed undone.'},{base:row.base,text:'Owner stood down the pre-upgrade request; its prior effects remain unknown.'});
+      this.db.prepare('UPDATE worker_legacy_outbox SET state=? WHERE id=?').run(action,id);this.db.prepare("INSERT INTO worker_outbox_reconciliations VALUES(?,?,?,'cli',?)").run(id,action,reason,new Date().toISOString());
+    });
   }
   /** Marks a sent action done with its result and, the first time only, records what the other base did on the sortie (B-011). */
   outboxDone(id:string,result:unknown,said?:{base:string;text:string}):boolean {return this.recordOutbox(id,result,said,true);}
@@ -224,10 +243,10 @@ export class Store {
   /** One owner action through the gate (F-017): ballot, then on a grant the executor runs at once; otherwise it waits for the owner or stops. */
   runAction(sortieId:string,proposal:Proposal,worker?:WorkerLease):ActResult {
     if(!worker)return this.runActionCore(sortieId,proposal);
-    return transaction(this.db,()=>{this.assertWorker(worker);const result=this.runActionCore(sortieId,proposal);if(result.approvalId)this.workerJobs.bindApproval(worker,result.approvalId,result);return result;});
+    return transaction(this.db,()=>{this.assertWorker(worker);const result=this.runActionCore(sortieId,proposal,worker.expires);if(result.approvalId)this.workerJobs.bindApproval(worker,result.approvalId,result);return result;});
   }
-  private runActionCore(sortieId: string, proposal: Proposal):ActResult {
-    const p=this.ledger.propose(sortieId,proposal);
+  private runActionCore(sortieId: string, proposal: Proposal,approvalUntil?:number):ActResult {
+    const p=this.ledger.propose(sortieId,proposal,new Date(),approvalUntil);
     const base:ActResult={sortieId,actionId:p.actionId,outcome:p.ballot.outcome,pattern:p.ballot.pattern,reason:p.ballot.reason,sync:p.ballot.sync,...(p.approvalId?{approvalId:p.approvalId}:{})};
     if(p.grantId&&hasExecutor(proposal.tool)){const outcome=this.run(sortieId,p.actionId,p.grantId,proposal.tool,proposal.args);this.settle(sortieId,'error' in outcome?'failed':'done');return {...base,...outcome};}
     // F-021: a granted MCP tool: the single-use grant is used here, the call is made by the tools process.
@@ -256,6 +275,13 @@ export class Store {
    */
   expire(now=new Date()):number {
    const n=this.ledger.expire(now);
+   for(const pending of this.workerJobs.waitingApprovals())transaction(this.db,()=>{
+    // An already issued grant without a terminal receipt is uncertain, never proof that nothing ran.
+    if(pending.decision==='approve')return;
+    let invalid=!!pending.decision;
+    try{this.assertWorkerAuthority(pending.lease.owner,pending.lease.key,pending.lease.ownerKey);this.workerJobs.assertLease(pending.lease,now.getTime());}catch{invalid=true;}
+    if(invalid){if(!pending.decision)this.decideCore(pending.id,'reject','worker-fence');this.workerJobs.finish(pending.lease,{outcome:'reject',error:'Worker approval expired or its lease/authority ended; nothing ran.'});}
+   });
    if(n||!this.settledOnce){this.settledOnce=true;
     const stuck=this.db.prepare(`SELECT s.id,s.source FROM sorties s WHERE s.status='open' AND s.source IN (?,'instrumentality','marduk')
      AND EXISTS (SELECT 1 FROM approvals a JOIN actions x ON x.id=a.action_id WHERE x.sortie_id=s.id)

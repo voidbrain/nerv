@@ -2,7 +2,7 @@ import {createPublicKey,randomUUID,type KeyObject} from 'node:crypto';
 import type {Server,IncomingMessage} from 'node:http';
 import type {Duplex} from 'node:stream';
 import {WebSocket,WebSocketServer} from 'ws';
-import {signedHeaders,verifySigned,Nonces} from './kaji-auth.ts';
+import {KAJI_CLOCK_SKEW_MS,signedHeaders,verifySigned,Nonces} from './kaji-auth.ts';
 import type {RegistryPort} from './kaji-link.ts';
 import {validateParams,MAX_FRAME_BYTES} from './rpc.ts';
 import {WORKER_LEASE_MS,WORKER_RESULT_BYTES,type WorkerItem,type WorkerContext} from './worker-jobs.ts';
@@ -16,7 +16,7 @@ export interface WorkerAdapter {
  close(owner:string,session:string):Promise<void>;
  run(owner:string,item:WorkerItem,context:WorkerContext):Promise<unknown>;
 }
-interface Settings {id:string;key:KeyObject;registry:RegistryPort;adapter:WorkerAdapter;address:(value:string)=>string;log?:(text:string)=>void;heartbeatMs?:number;requestMs?:number;reconnectMs?:number}
+interface Settings {id:string;key:KeyObject;registry:RegistryPort;adapter:WorkerAdapter;address:(value:string)=>string;log?:(text:string)=>void;heartbeatMs?:number;requestMs?:number;reconnectMs?:number;offers?:()=>string[];onOffers?:(id:string,offers:string[])=>void}
 interface Pending {resolve:(value:unknown)=>void;reject:(error:Error)=>void;timer:NodeJS.Timeout}
 /** Every frame is signed for its fresh session and monotonically increasing direction counter. */
 class Peer {
@@ -54,15 +54,15 @@ class Peer {
  }
  private async handle(method:string,params:Record<string,unknown>):Promise<unknown>{
   if(method==='worker.hello'&&this.role==='coordinator'&&!this.ready){
-   if(!keys(params,['version','epoch','cursor'])||params.version!==WORKER_PROTOCOL_VERSION||!Number.isSafeInteger(params.epoch)||Number(params.epoch)<1||!Number.isSafeInteger(params.cursor)||Number(params.cursor)<0)throw Error('Unsupported worker protocol.');
-   this.epoch=Number(params.epoch);this.cursor=Number(params.cursor);this.ready=true;clearTimeout(this.helloTimer);this.link.accept(this);this.startHeartbeat();
+   if(!keys(params,['version','epoch','cursor','offers'])||params.version!==WORKER_PROTOCOL_VERSION||!Number.isSafeInteger(params.epoch)||Number(params.epoch)<1||!Number.isSafeInteger(params.cursor)||Number(params.cursor)<0)throw Error('Unsupported worker protocol.');
+   await this.link.observe(this.remote,params.offers);this.epoch=Number(params.epoch);this.cursor=Number(params.cursor);this.ready=true;clearTimeout(this.helloTimer);this.link.accept(this);this.startHeartbeat();
    return {version:WORKER_PROTOCOL_VERSION,session:this.session,epoch:this.epoch,cursor:this.cursor};
   }
   if(!this.ready)throw Error('Worker negotiation required.');
-  if(method==='worker.ping'&&keys(params,[])&&Object.keys(params).length===0)return {version:WORKER_PROTOCOL_VERSION};
+  if(method==='worker.ping'){if(this.role==='coordinator'){if(!keys(params,['offers']))throw Error('Invalid worker heartbeat.');await this.link.observe(this.remote,params.offers);}else if(Object.keys(params).length)throw Error('Invalid coordinator heartbeat.');return {version:WORKER_PROTOCOL_VERSION};}
   if(method==='worker.run'&&this.role==='worker'){
    if(!keys(params,['item','epoch','expires'])||params.epoch!==this.epoch||!object(params.item)||!Number.isSafeInteger(params.item.sequence)||Number(params.item.sequence)<1)throw Error('Invalid worker delivery.');
-   const context={session:this.session,epoch:this.epoch,expires:params.expires as number,ownerKey:this.remoteKey};validateParams('worker.claim',{owner:this.remote,ownerKey:this.remoteKey,key:createPublicKey(this.link.settings.key).export({type:'spki',format:'der'}).toString('base64'),item:params.item,context:{session:context.session,epoch:context.epoch,expires:context.expires}});
+   const context={session:this.session,epoch:this.epoch,expires:Number(params.expires)-KAJI_CLOCK_SKEW_MS,ownerKey:this.remoteKey};validateParams('worker.claim',{owner:this.remote,ownerKey:this.remoteKey,key:createPublicKey(this.link.settings.key).export({type:'spki',format:'der'}).toString('base64'),item:params.item,context:{session:context.session,epoch:context.epoch,expires:context.expires}});
    const result=await this.link.settings.adapter.run(this.remote,params.item as unknown as WorkerItem,context);
    if(!object(result)||Buffer.byteLength(JSON.stringify(result))>WORKER_RESULT_BYTES)throw Error('Invalid worker result.');return result;
   }
@@ -84,10 +84,10 @@ class Peer {
   });
  }
  async negotiate(epoch:number,cursor:number):Promise<void>{
-  this.epoch=epoch;this.cursor=cursor;const reply=await this.request('worker.hello',{version:WORKER_PROTOCOL_VERSION,epoch,cursor},5000);
+  this.epoch=epoch;this.cursor=cursor;const reply=await this.request('worker.hello',{version:WORKER_PROTOCOL_VERSION,epoch,cursor,offers:this.link.settings.offers?.() ?? []},5000);
   if(!object(reply)||reply.version!==WORKER_PROTOCOL_VERSION||reply.session!==this.session||reply.epoch!==epoch||reply.cursor!==cursor)throw Error('Worker negotiation failed.');this.ready=true;clearTimeout(this.helloTimer);this.startHeartbeat();
  }
- private startHeartbeat(){this.heartbeat=setInterval(()=>{void this.request('worker.ping',{},Math.min(this.link.heartbeatMs,this.link.requestMs)).catch(()=>this.end());},this.link.heartbeatMs);}
+ private startHeartbeat(){this.heartbeat=setInterval(()=>{void this.request('worker.ping',this.role==='worker'?{offers:this.link.settings.offers?.() ?? []}:{},Math.min(this.link.heartbeatMs,this.link.requestMs)).catch(()=>this.end());},this.link.heartbeatMs);}
  end(){if(this.ended)return;this.ended=true;this.ready=false;clearTimeout(this.helloTimer);if(this.heartbeat)clearInterval(this.heartbeat);for(const p of this.pending.values()){clearTimeout(p.timer);p.reject(Error('Worker connection lost; result may be unknown.'));}this.pending.clear();this.ws.terminate();this.link.closed(this);}
 }
 /** Outbound workers authenticate with their enrolled base keys, never the owner's root/API credential. */
@@ -108,7 +108,11 @@ export class WorkerLink {
   }catch{refuse(401);}finally{clearTimeout(deadline);this.upgrades--;}
  }
  private upgradeNonces=new Nonces();
- accept(peer:Peer){const old=this.peers.get(peer.remote);this.peers.set(peer.remote,peer);if(old&&old!==peer)old.end();}
+ async observe(remote:string,offers:unknown){
+  if(!Array.isArray(offers)||offers.length>20||offers.some(v=>typeof v!=='string'||!/^[a-z]+\.[a-z]+$/.test(v)||v==='kaji.run'))throw Error('Invalid worker capabilities.');
+  this.settings.onOffers?.(remote,[...new Set(offers as string[])]);await this.settings.registry.seen({[remote]:new Date().toISOString()});
+ }
+ accept(peer:Peer){const old=this.peers.get(peer.remote);this.peers.set(peer.remote,peer);this.settings.log?.(`Worker connected: ${peer.remote}, protocol ${WORKER_PROTOCOL_VERSION}.`);if(old&&old!==peer)old.end();}
  closed(peer:Peer){
   if(this.peers.get(peer.remote)===peer)this.peers.delete(peer.remote);
   if(this.client===peer){this.client=undefined;this.defer();}
@@ -119,7 +123,7 @@ export class WorkerLink {
  connected(base:string):boolean {return this.peers.get(base)?.ready ?? false;}
  async run(base:string,item:WorkerItem,timeoutMs:number):Promise<unknown>{
   const peer=this.peers.get(base);if(!peer?.ready)throw Error('No outbound worker session.');if(!item.sequence)throw Error('Durable worker stream sequence required.');
-  return peer.request('worker.run',{item,epoch:peer.epoch,expires:Date.now()+WORKER_LEASE_MS},timeoutMs);
+  return peer.request('worker.run',{item,epoch:peer.epoch,expires:Math.min(item.deadline ?? Number.MAX_SAFE_INTEGER,Date.now()+WORKER_LEASE_MS)},timeoutMs);
  }
  start(){if(!this.stopped)return;this.stopped=false;this.timer=setInterval(()=>{void this.connect();},this.reconnectMs);void this.connect();}
  private defer(){this.failures=Math.min(this.failures+1,5);this.nextAttempt=Date.now()+this.reconnectMs*2**this.failures;}

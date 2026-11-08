@@ -399,12 +399,13 @@ export class Runtime implements StoreApi {
   * Sends the actions queued by kaji.run (F-036 slice 3b), oldest first, each with the same id every time until it reached
   * the base (which runs it once through its own gate and remembers the id). The result reaches the owner as a follow-up.
   */
- startOutbox(send:(base:string,item:RunItem)=>Promise<{reached:boolean;result?:unknown;refused?:string}>,everyMs=3000){
-  let busy=false;
+ startOutbox(send:(base:string,item:RunItem,dispatching:()=>Promise<void>)=>Promise<{reached:boolean;result?:unknown;refused?:string}>,everyMs=3000){
+  let busy=false,checkedUpgrade=false;
   const tick=async()=>{if(busy)return;busy=true;
    try{
-    for(const q of await this.nervous.call('kaji.outbox') as {sequence:number;id:string;sortieId:string;base:string;tool:string;args:Record<string,unknown>;request:string}[]){
-     const r=await send(q.base,{id:q.id,sequence:q.sequence,request:q.request,tool:q.tool,args:q.args});if(!r.reached)continue;
+    if(!checkedUpgrade){const held=await this.nervous.call('kaji.outboxHeld') as unknown[];checkedUpgrade=true;if(held.length)console.error('Worker upgrade: legacy requests are held for reconciliation (workers held); no automatic replay.');}
+    for(const q of await this.nervous.call('kaji.outbox') as {attempted:boolean;deadline:number;sequence:number;id:string;sortieId:string;base:string;tool:string;args:Record<string,unknown>;request:string}[]){
+     const r=q.deadline<=Date.now()?{reached:true,result:q.attempted?{outcome:'uncertain',error:'Worker request expired after a dispatch attempt; inspect its destination receipt before any new request.'}:{outcome:'reject',reason:'Queued worker request expired before dispatch; nothing was sent.'}}:await send(q.base,{id:q.id,sequence:q.sequence,deadline:q.deadline,request:q.request,tool:q.tool,args:q.args},async()=>{await this.nervous.call('kaji.outboxAttempt',{id:q.id});});if(!r.reached)continue;
      let result=(r.refused?{refused:r.refused}:r.result ?? {}) as Record<string,unknown>;
      if(Buffer.byteLength(JSON.stringify(result))>WORKER_RESULT_BYTES)result={outcome:'uncertain',error:'Remote result exceeded its bound; inspect the destination trace.'};
      const name=(await this.bases().catch(()=>[])).find(b=>b.baseId===q.base)?.name ?? q.base;

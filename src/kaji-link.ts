@@ -54,7 +54,7 @@ export function sanitizeVerdict(value:unknown):PeerVerdict|undefined {
  return {vote:v.vote as PeerVerdict['vote'],reason:v.reason.replace(/[\u0000-\u001f\u007f]/g,' ').slice(0,300),...(typeof v.confidence==='number'&&v.confidence>=0&&v.confidence<=1?{confidence:v.confidence}:{})};
 }
 /** One action the main base asks another base to run, by an id that base remembers (a resend returns the first result). */
-export interface RunItem {sequence?:number;id:string;request:string;tool:string;args:Record<string,unknown>}
+export interface RunItem {deadline?:number;sequence?:number;id:string;request:string;tool:string;args:Record<string,unknown>}
 /** The main base's answer to a dispatched request: the reply Misato gave there (its sortie and cards live there). */
 export interface DispatchedReply {sortieId:string;question?:{text:string;expires:string};reply?:string;error?:string;steps:unknown[];waiting:{approvalId:string;tool:string;reason:string}[];base?:{id:string;name:string}}
 /** What a base relays to the main base's Aoba (F-036 phase 2): text to show, and the approval cards it carries. */
@@ -85,17 +85,17 @@ export class KajiLink {
  private every=HEARTBEAT_MS;
  constructor(options:{worker?:WorkerAdapter;baseId:string;key:KeyObject;publicKey:string;registry:RegistryPort;log?:(line:string)=>void;channel?:()=>ChannelState;onChannel?:(baseId:string,channel:HeardChannel|null)=>void;health?:()=>Promise<BaseHealth>;onHealth?:(baseId:string,health:HeardHealth)=>void;
   onRelay?:(from:string,relay:Relay)=>Promise<boolean>;onChat?:(from:string,message:string,conversation?:string)=>Promise<DispatchedReply>;
-  offers?:()=>string[];onOffers?:(baseId:string,offers:string[])=>void;onRun?:(from:string,item:RunItem,ownerKey:string)=>Promise<unknown>;onVerdict?:(from:string,ask:VerdictAsk)=>Promise<PeerVerdict|null>;onPendingApprovals?:(ids:string[])=>Promise<string[]>;onDecide?:(approvalId:string,decision:'approve'|'reject')=>Promise<string>}) {
+  offers?:()=>string[];onOffers?:(baseId:string,offers:string[])=>void;onVerdict?:(from:string,ask:VerdictAsk)=>Promise<PeerVerdict|null>;onPendingApprovals?:(ids:string[])=>Promise<string[]>;onDecide?:(approvalId:string,decision:'approve'|'reject')=>Promise<string>}) {
   this.baseId=options.baseId;this.key=options.key;this.publicKey=options.publicKey;this.port=options.registry;this.log=options.log ?? (l=>console.error(l));
-  this.channel=options.channel;this.onChannel=options.onChannel;this.health=options.health;this.onHealth=options.onHealth;this.onRelay=options.onRelay;this.onDecide=options.onDecide;this.onPendingApprovals=options.onPendingApprovals;this.onChat=options.onChat;this.offers=options.offers;this.onOffers=options.onOffers;this.onRun=options.onRun;this.onVerdict=options.onVerdict;
-  if(options.worker)this.workers=new WorkerLink({id:this.baseId,key:this.key,registry:this.port,adapter:options.worker,log:this.log,address:address=>{const {host,port}=endpoint(address);return `ws://${host}:${port}`;}});
+  this.channel=options.channel;this.onChannel=options.onChannel;this.health=options.health;this.onHealth=options.onHealth;this.onRelay=options.onRelay;this.onDecide=options.onDecide;this.onPendingApprovals=options.onPendingApprovals;this.onChat=options.onChat;this.offers=options.offers;this.onOffers=options.onOffers;this.onVerdict=options.onVerdict;
+  if(options.worker)this.workers=new WorkerLink({id:this.baseId,key:this.key,registry:this.port,adapter:options.worker,offers:options.offers,onOffers:options.onOffers,log:this.log,address:address=>{const {host,port}=endpoint(address);return `ws://${host}:${port}`;}});
  }
  private readonly channel:(()=>ChannelState)|undefined;
  private readonly onChannel:((baseId:string,channel:HeardChannel|null)=>void)|undefined;
  private ownChannel(){try{return sanitizeChannel(this.channel?.());}catch{return undefined;}}
  private heardChannel(from:string,value:unknown){const c=sanitizeChannel(value);this.onChannel?.(from,c?{...c,receivedAt:new Date().toISOString()}:null);}
  private readonly onVerdict:((from:string,ask:VerdictAsk)=>Promise<PeerVerdict|null>)|undefined;
- private readonly offers:(()=>string[])|undefined;private readonly onOffers:((baseId:string,offers:string[])=>void)|undefined;private readonly onRun:((from:string,item:RunItem,ownerKey:string)=>Promise<unknown>)|undefined;
+ private readonly offers:(()=>string[])|undefined;private readonly onOffers:((baseId:string,offers:string[])=>void)|undefined;
  private readonly onChat:((from:string,message:string,conversation?:string)=>Promise<DispatchedReply>)|undefined;
  private readonly onPendingApprovals:((ids:string[])=>Promise<string[]>)|undefined;
  private readonly onRelay:((from:string,relay:Relay)=>Promise<boolean>)|undefined;private readonly onDecide:((approvalId:string,decision:'approve'|'reject')=>Promise<string>)|undefined;
@@ -167,10 +167,7 @@ export class KajiLink {
    }
    // F-036 slice 3b: one action the main base asks this base to run (only the main base may ask; this base's gate decides).
    if(req.method==='POST'&&req.url==='/kaji/run'){
-    const r=JSON.parse(body) as {id?:unknown;request?:unknown;tool?:unknown;args?:unknown};
-    if(typeof r.id!=='string'||!UUID.test(r.id)||typeof r.request!=='string'||r.request.length>500||typeof r.tool!=='string'||!/^[a-z]+\.[a-z]+$/.test(r.tool)||!r.args||typeof r.args!=='object'||Array.isArray(r.args)){reply(400,{error:'invalid action'});return;}
-    if(await this.port.main?.()!==from||!this.onRun){reply(403,{error:'only the main base runs actions here'});return;}
-    reply(200,{result:await this.onRun(from,{id:r.id,request:r.request,tool:r.tool,args:r.args as Record<string,unknown>},bases.find(b=>b.baseId===from)!.publicKey)});return;
+    reply(await this.port.main?.()===from?409:403,{error:'Execution requires the negotiated worker protocol; nothing ran.'});return;
    }
    if(req.method==='POST'&&req.url==='/kaji/approvals/pending'){
     const value=JSON.parse(body) as {ids?:unknown};
@@ -220,10 +217,11 @@ export class KajiLink {
  }
  /** Sends one action to a base (F-036 slice 3b). reached:false means it never got there (send again later, same id);
      refused carries that base's reason (it does not offer it, or it is not this base's to ask). */
- async run(baseId:string,item:RunItem,timeoutMs:number):Promise<{reached:boolean;result?:unknown;refused?:string}> {
+ async run(baseId:string,item:RunItem,timeoutMs:number,dispatching:()=>Promise<void>=async()=>{}):Promise<{reached:boolean;result?:unknown;refused?:string}> {
   const peer=(await this.port.bases()).find(b=>b.baseId===baseId&&b.status==='enrolled');if(!peer)return {reached:true,refused:`${baseId} is not an enrolled base`};
+  if(!this.workers?.connected(baseId)||!item.sequence)return {reached:false,refused:'Waiting for a negotiated durable worker channel.'};
   try{
-   const result=this.workers?.connected(baseId)&&item.sequence?await this.workers.run(baseId,item,timeoutMs):((await this.call(peer,'POST','/kaji/run',item,timeoutMs)) as {result?:unknown}).result;
+   await dispatching();const result=await this.workers.run(baseId,item,timeoutMs);
    return result&&typeof result==='object'&&(result as {retry?:unknown}).retry===true?{reached:false}:{reached:true,result};
   }
   catch(e){const text=e instanceof Error?e.message:'error';const code=(e as {cause?:{code?:string}}).cause?.code;

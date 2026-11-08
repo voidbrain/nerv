@@ -3,7 +3,7 @@ import type {DatabaseSync} from 'node:sqlite';
 import {argsHash} from './ledger.ts';
 export const WORKER_LEASE_MS=300_000;
 export const WORKER_RESULT_BYTES=24*1024;
-export interface WorkerItem {id:string;sequence?:number;request:string;tool:string;args:Record<string,unknown>}
+export interface WorkerItem {id:string;sequence?:number;request:string;tool:string;args:Record<string,unknown>;deadline?:number}
 export interface WorkerContext {session:string;epoch:number;expires:number;ownerKey?:string}
 export interface WorkerLease extends WorkerContext {owner:string;id:string;fence:number;key:string;ownerKey:string}
 export interface WorkerClaim {state:'claimed'|'completed'|'waiting'|'busy'|'uncertain';lease?:WorkerLease;result?:unknown}
@@ -37,6 +37,7 @@ export class WorkerJobs {
  close(owner:string,session:string):void {this.db.prepare('UPDATE worker_sessions SET active=0 WHERE owner=? AND session=?').run(owner,session);}
  claim(owner:string,item:WorkerItem,context?:WorkerContext,now=Date.now(),key='',ownerKey=''):WorkerClaim {
   if(!base(owner)||!item||!uuid.test(item.id)||typeof item.request!=='string'||item.request.length>500||typeof item.tool!=='string'||!/^[a-z]+\.[a-z]+$/.test(item.tool)||!item.args||typeof item.args!=='object'||Array.isArray(item.args)||Buffer.byteLength(JSON.stringify(item.args))>8192||(item.sequence!==undefined&&(!Number.isSafeInteger(item.sequence)||item.sequence<1)))throw new Error('Invalid worker request.');
+  if(item.deadline!==undefined&&(!Number.isSafeInteger(item.deadline)||item.deadline<=now))throw new Error('Worker request deadline expired.');
   if(context&&(!uuid.test(context.session)||!Number.isSafeInteger(context.epoch)||context.epoch<1||!Number.isSafeInteger(context.expires)||context.expires<=now||context.expires>now+WORKER_LEASE_MS+120000))throw new Error('Invalid worker lease.');
   const hash=argsHash({request:item.request,tool:item.tool,args:item.args});
   return this.tx(()=>{

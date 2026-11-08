@@ -69,6 +69,8 @@ process.on('message',(value:unknown)=>{
    case 'kaji.records':return registry().records();
    case 'kaji.lastSeen':return registry().lastSeen();
    case 'kaji.main':return registry().main() ?? null;
+   case 'kaji.outboxAttempt':store.attemptWorkerOutbox(params.id as string);return true;
+   case 'kaji.outboxHeld':return store.heldWorkerOutbox(params.before as number|undefined);
    case 'kaji.outbox':return store.outbox();
    case 'kaji.outboxProgress':return store.outboxProgress(params.id as string,params.result,params.said as {base:string;text:string});
    case 'kaji.outboxDone':return store.outboxDone(params.id as string,params.result,params.said as {base:string;text:string}|undefined);
