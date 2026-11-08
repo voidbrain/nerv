@@ -175,9 +175,9 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Signal | Priority | Status | Effort |
 |:---:|---|---|---|
-| 🔴 | 🔺 P1 | Open | 🟢 Small |
+| 🟡 | 🔺 P1 | Implemented | 🟢 Small |
 
-💻 **→ Human action required: No**<br />Fix acknowledgement publication order and separate bounded frame parsing from incoming request admission.
+💻 **→ Human action required: No**<br />Review final CI for acknowledgement ordering and bounded frame/request admission.
 
 | | |
 |---|---|
@@ -188,7 +188,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Fix the committed regression without changing its assertion; review protocol bounds and verify targeted contract tests plus required CI. Keep unknown-outcome/resource fencing safeguards.
+**Next action / closure evidence:** Committed regression adf6cde fails before the fix and passes unchanged after it. Acknowledgement is queued before publication; parsing has an eight-frame bound, active/pending requests retain four slots, and termination stops queued parsing. Independent fresh-context review found no blockers; review final CI. Keep unknown-outcome/resource fencing safeguards.
 
 **Estimates:** Small remaining effort, approximately 1–2 focused hours including review and CI; queue delays excluded. Estimated 2026-11-08.
 
@@ -196,7 +196,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 |---|---|
 | PR / evidence | [PR #208](https://github.com/voidbrain/nerv/pull/208) CI-discovered repair; Test: B-045 immediate negotiated burst in test/worker-link.test.ts. |
 | Opened | 2026-11-08 |
-| Verification | Committed failing regression pending fix, independent review and final CI. |
+| Verification | 2026-11-08: 46 targeted policy/worker/outbox/Kaji tests passed, typecheck passed. Review: independent fresh-context report-only review confirmed admission bounds, identity/fencing and unchanged assertions, no blockers. Final CI pending. |
 | Reviewed | 2026-11-08 |
 
 </details>
@@ -1397,7 +1397,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 |---|---|
 | PR / evidence | [PR #208](https://github.com/voidbrain/nerv/pull/208) adoption;  Test: test/verification-policy.test.mjs and test/ci-pins.test.mjs. Published tag v4.1.0 resolves to a8a358e. |
 | Opened | 2026-11-08 |
-| Verification | Five local adapter/policy/pin tests passed; typecheck, conventions and rule checks passed. Review: independent fresh-context review identified event privacy/schema and route recovery selection gaps; committed regression 2cedfe7 precedes mapping fixes. Follow-up independent review confirmed both mappings fixed, no remaining blockers. CI 42479082275 correctly refused its full marker after Windows path normalization and worker burst failures; fixes/regressions pending final CI. |
+| Verification | Five local adapter/policy/pin tests passed; typecheck, conventions and rule checks passed. Review: independent fresh-context review identified event privacy/schema and route recovery selection gaps; committed regression 2cedfe7 precedes mapping fixes. Follow-up independent review confirmed both mappings fixed, no remaining blockers. CI 42479082275 correctly refused its full marker after Windows path normalization and worker burst failures; committed regressions adf6cde reproduce both issues, fixes pass the unchanged tests. Independent follow-up review found no blockers; final CI pending. |
 | Reviewed | 2026-11-08 |
 
 </details>

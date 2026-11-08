@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 export function selectedTests(config,groups,changed,{expand=pattern=>globSync(pattern),exists=existsSync}={}){
  if(!Array.isArray(groups)||!Array.isArray(changed)||changed.some(file=>typeof file!=='string'))throw Error('Invalid selected-test inputs');
  const selected=new Set(),known=new Map(config.verification.groups.map(group=>[group.id,group]));
- for(const id of groups){const group=known.get(id);if(!group)throw Error('Unknown selected test group');for(const pattern of group.tests??[]){if(!/^test\/[a-zA-Z0-9.*-]+\.test\.(ts|mjs)$/.test(pattern))throw Error('Invalid selected-test pattern');const files=expand(pattern);if(!files.length)throw Error('Selected test pattern matched no tests: '+pattern);for(const file of files)selected.add(file);}}
+ for(const id of groups){const group=known.get(id);if(!group)throw Error('Unknown selected test group');for(const pattern of group.tests??[]){if(!/^test\/[a-zA-Z0-9.*-]+\.test\.(ts|mjs)$/.test(pattern))throw Error('Invalid selected-test pattern');const files=expand(pattern);if(!files.length)throw Error('Selected test pattern matched no tests: '+pattern);for(const file of files)selected.add(file.replaceAll('\\','/'));}}
  for(const file of changed)if(/^test\/[a-zA-Z0-9.-]+\.test\.(ts|mjs)$/.test(file)&&exists(file))selected.add(file);
  if(groups.length&&!selected.size)throw Error('Affected selection has no runnable Node regressions; review deletion or mapping');
  for(const file of selected)if(!/^test\/[a-zA-Z0-9.-]+\.test\.(ts|mjs)$/.test(file)||!exists(file))throw Error('Invalid selected test file');
