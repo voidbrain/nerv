@@ -1390,7 +1390,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Implemented F-073-T01: pinned source-included protocol 0.1.1 with upstream cancellation fix, seven NERV-owned flow cases/registry, CLI plan/run/model/compare/review-export commands, private native evidence and candidate profiles. Six new integration tests pass, including owner cancellation across the actual native runner and descendants. Initial selected policy join passed90; final pinned acceptance, review and CI pending. Live model qualification and sandboxed coding campaigns require separately budgeted execution and are not established by scripted flow passes. [Accepted design](design/gauntlet-protocol-2026-11-08.md).
+**Next action / closure evidence:** Implemented F-073-T01: pinned source-included protocol 0.1.1 with upstream cancellation fix, seven NERV-owned flow cases/registry, CLI plan/run/model/compare/review-export commands, private native evidence and candidate profiles. Six new integration tests pass, including owner cancellation across the actual native runner and descendants. Final clean-source pinned policy acceptance passed90; [acceptance](acceptance/gauntlet-2026-11-09.md). Review: fresh-context report-only integration review resolved its cancellation finding upstream and found no remaining issues; [report](reviews/2026-11-09-gauntlet.md). Required final CI pending. Live model qualification and sandboxed coding campaigns require separately budgeted execution and are not established by scripted flow passes. [Accepted design](design/gauntlet-protocol-2026-11-08.md).
 
 **Estimates:** Small remaining effort, under one day for final review/CI; reassessed 2026-11-09 after implementation. Tokens and measured campaign cost remain unknown.
 
@@ -1398,7 +1398,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 |---|---|
 | PR / evidence | Pending |
 | Opened | 2026-11-09 |
-| Verification | Unit/integration: six new adapter/CLI/artifact/supervision tests pass locally. Typecheck and scoped static/ledger checks pass. Required final CI and final review pending. |
+| Verification | Unit/integration: six new adapter/CLI/artifact/supervision tests pass locally. Typecheck and scoped static/ledger checks pass. Actual native policy join: 90 passed on clean source50932b4 with stable hashes. Review: independent report-only recheck passed after upstream cancellation repair. Required final CI pending. |
 | Reviewed | 2026-11-09 |
 
 </details>
