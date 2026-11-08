@@ -406,7 +406,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #5](https://github.com/voidbrain/nerv/pull/5) merged; Linux and macOS checks green; real OS acceptance remains pending |
+| PR / evidence | [PR #212](https://github.com/voidbrain/nerv/pull/212) explicit distribution packaging and owner acceptance handoff; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #5](https://github.com/voidbrain/nerv/pull/5) merged; Linux and macOS checks green; real OS acceptance remains pending |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-08 Unit/integration: seven isolated release-path contracts pass (no actual signing/upload); signed-only, rejection, warning, timeout/failure and post-staple packaging paths checked. Real-device: temporary macOS release build, ad-hoc signature verification and bundle plist validation passed; app not installed/launched. Actual Developer ID/notarization and native OS acceptance pending. |
 | Reviewed | 2026-11-08 |
