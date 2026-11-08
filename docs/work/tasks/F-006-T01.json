@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "id": "F-006-T01",
+  "parent": "F-006",
+  "title": "Inference host trust and privacy contract",
+  "goal": "Separate loopback-local privacy from an explicitly enrolled remote inference route",
+  "status": "ready",
+  "acceptance": [
+    "Retain loopback-only local-route guarantee",
+    "Remote endpoint identity, permitted data and unavailable behavior are explicit"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "contract:model-routing",
+    "src/model.ts",
+    "docs/decisions/**",
+    "docs/work/tasks/F-006-T01.json",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
+  "validation": [
+    "Run affected regressions across the changed boundary and applicable fast checks",
+    "Keep human/device acceptance and independent review distinct from fixture results"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
+  ]
+}

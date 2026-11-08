@@ -40,7 +40,11 @@
     "evals:model": "node tools/evaluate-model.mjs",
     "evals:stress": "node tools/evaluate.mjs --repeat=3",
     "verification:plan": "node tools/plan-verification.mjs",
-    "test:affected": "node tools/selected-tests.mjs"
+    "test:affected": "node tools/selected-tests.mjs",
+    "work:build": "node tools/work-items.mjs build",
+    "check:work": "node tools/work-items.mjs check",
+    "work:tasks": "node tools/work-items.mjs tasks",
+    "work:claims": "node tools/task-claims.mjs"
   },
   "dependencies": {
     "@angular/common": "22.2.4",

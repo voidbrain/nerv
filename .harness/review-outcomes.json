@@ -1,14 +1,4 @@
 [
-  {
-    "kind": "tool",
-    "disposition": "implemented",
-    "target": ".harness.json",
-    "evidence": "Adopt released v4.1.0 optional planner, conservative NERV risk mappings and selected regression adapters. Five focused policy/pin tests pass; committed selection regression fails before event-risk and route-recovery fixes. Final platform validation delegated to CI, no repeated full local suite/model campaign."
-  },
-  {
-    "kind": "rule",
-    "disposition": "implemented",
-    "target": "AGENTS.md",
-    "evidence": "NERV explicitly opts into released shared selection guide. Check catalogue remains available; applicable fast/static/security/regression/acceptance/review/green-merge safeguards retained. Shared change-impact guide copied unchanged. Behavior runner not configured. Timed reconciliation includes waiting/continuation pauses; no productivity inference from elapsed duration."
-  }
+ {"kind":"tool","disposition":"implemented","target":"tools/work-items.mjs","evidence":"Adopt released harness v4.2.0 unchanged. Exact byte-preserving migration of 38 NERV records; 15 explicit tasks, dependency/profile/resource validation and existing backlog/recap/queue/roadmap checks pass. Six targeted verification/pin tests pass. No runtime model or service campaign."},
+ {"kind":"rule","disposition":"implemented","target":"AGENTS.md","evidence":"Procedure discovery and source-owned conflict rules adopted from released template. Existing safety, ownership, failing-regression, human/device acceptance and green-merge requirements retained. Candidate Gemma is not qualified or invoked. Scoped architecture findings remain under existing IDs. Independent report-only review before merge; behavior runner not configured. Timed reconciliation measures this isolated adoption through local validation, excludes later CI/registry follow-up, and makes no productivity inference."}
 ]

@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "id": "F-072-T01",
+  "parent": "F-072",
+  "title": "Adopt source-owned records",
+  "goal": "Adopt source-owned records",
+  "status": "implemented",
+  "acceptance": [
+    "Preserve authoritative rules and source/evidence ownership",
+    "Existing checks and independent review cover adoption"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/work/**",
+    "contract:backlog-layout",
+    "generated:backlog-views",
+    "docs/work/tasks/F-072-T01.json",
+    "docs/work/records/F-072.md"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
+  "validation": [
+    "Run affected regressions across the changed boundary and applicable fast checks",
+    "Keep human/device acceptance and independent review distinct from fixture results"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "profiles": [
+    {
+      "id": "gemma-local",
+      "model": "Owner-selected local Gemma; exact model version, quantization, runtime and context configuration not yet inspected",
+      "status": "candidate",
+      "capabilities": [
+        "bounded-edit",
+        "structured-tools"
+      ],
+      "evidence": []
+    }
+  ]
+}

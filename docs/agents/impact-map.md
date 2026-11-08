@@ -4,7 +4,7 @@
 
 What must follow a change, and what must run again after it (docs/agents/change-impact.md). `npm run check:freshness` lists, on every PR, the rows a branch sets off and the order to run them.
 
-**More detail:** [Architecture](../ARCHITECTURE.md) (Implemented and intended boundaries)
+**More detail:** [Architecture](../ARCHITECTURE.md) (Implemented and intended boundaries) · [Procedure discovery](procedures.md) (Released harness procedure; project evidence stays in NERV records and reports) · [Parallel work](parallel-work.md) (Released harness procedure; project evidence stays in NERV records and reports) · [Architecture reassessment](architecture-review.md) (Released harness procedure; project evidence stays in NERV records and reports)
 
 | Id | When these change | Made of (content) | This must follow | Command | Runs again after | Checked by |
 |---|---|---|---|---|---|---|
@@ -24,6 +24,7 @@ What must follow a change, and what must run again after it (docs/agents/change-
 | evaluation-suite | `evals/**`, `tools/evaluate*.mjs`, `test/evaluation*`, `test/fixtures/browser.mjs`, `src/policy.ts`, `src/casper.ts`, `src/runtime.ts`, `src/worker*.ts`, `src/kaji-auth.ts`, `test/worker*.test.ts` |  | Validate the versioned scenarios, run affected control-flow/model groups, and retain reviewed evidence with explicit coverage limits. | `npm run check:evals && npm run evals -- --only=policy` |  | Golden cases run in npm test; browser evidence runner and manifest validation run in CI. |
 | verification-selection | `tools/verification.mjs`, `tools/plan-verification.mjs`, `tools/selected-tests.mjs`, `test/verification-policy.test.mjs`, `.github/workflows/ci.yml`, `.harness.json` |  | Verify affected selection, full-marker dependencies and fresh/full boundary behavior; use CI for final cross-platform acceptance. | `node --test test/verification-policy.test.mjs test/ci-pins.test.mjs` |  | NERV adapter contracts plus real Actions full and partial runs. |
 | node-bootstrap | `src/node-*.ts`, `src/nodes-cli.ts`, `test/node-discovery.test.ts`, `test/node-bootstrap*.test.ts`, `test/fixtures/node-bootstrap.ts`, `shared/node-bootstrap.json` |  | Verify candidate trust, bounded probes, private outputs, digest-confirmed bootstrap and transactional uncertainty/release contracts; reconcile installation/architecture and real-device evidence separately. | `node --test test/node-discovery.test.ts test/node-bootstrap-execution.test.ts test/node-bootstrap-races.test.ts` |  | Neutral inventories, real fixed helper with stubbed commands, loss/crash/replay, immutable race regressions and exact source capabilities; real service/device acceptance remains F-005. |
+| work-items | `docs/work/**`, `docs/agents/model-profiles.json`, `tools/work-items.mjs`, `tools/task-claims.mjs` |  | Regenerate the source-owned ledger and existing recap, dependencies, queue and roadmap; review task resources and candidate model evidence. | `npm run work:build && npm run backlog:recap && npm run backlog:dependencies && npm run backlog:queue && npm run roadmap:status` |  | check:work and existing ledger/view checks in CI |
 
 ## Content dependencies
 

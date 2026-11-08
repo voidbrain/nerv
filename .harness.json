@@ -3,7 +3,7 @@
     "path": "../harness-template",
     "repo": "https://github.com/voidbrain/project-harness"
   },
-  "version": "4.1.0",
+  "version": "4.2.0",
   "stacks": [
     "core",
     "angular"
@@ -37,7 +37,12 @@
     "tools/backlog-dependencies.mjs": "core/tools/backlog-dependencies.mjs",
     "tools/backlog-queue.mjs": "core/tools/backlog-queue.mjs",
     "tools/verification.mjs": "core/tools/verification.mjs",
-    "docs/agents/verification.md": "core/docs/agents/verification.md"
+    "docs/agents/verification.md": "core/docs/agents/verification.md",
+    "tools/work-items.mjs": "core/tools/work-items.mjs",
+    "tools/task-claims.mjs": "core/tools/task-claims.mjs",
+    "docs/agents/parallel-work.md": "core/docs/agents/parallel-work.md",
+    "docs/agents/architecture-review.md": "core/docs/agents/architecture-review.md",
+    "docs/agents/procedures.md": "core/docs/agents/procedures.md"
   },
   "forked": {},
   "freshness": {
@@ -297,6 +302,18 @@
       "then": "Verify candidate trust, bounded probes, private outputs, digest-confirmed bootstrap and transactional uncertainty/release contracts; reconcile installation/architecture and real-device evidence separately.",
       "run": "node --test test/node-discovery.test.ts test/node-bootstrap-execution.test.ts test/node-bootstrap-races.test.ts",
       "checked": "Neutral inventories, real fixed helper with stubbed commands, loss/crash/replay, immutable race regressions and exact source capabilities; real service/device acceptance remains F-005."
+    },
+    {
+      "id": "work-items",
+      "when": [
+        "docs/work/**",
+        "docs/agents/model-profiles.json",
+        "tools/work-items.mjs",
+        "tools/task-claims.mjs"
+      ],
+      "then": "Regenerate the source-owned ledger and existing recap, dependencies, queue and roadmap; review task resources and candidate model evidence.",
+      "run": "npm run work:build && npm run backlog:recap && npm run backlog:dependencies && npm run backlog:queue && npm run roadmap:status",
+      "checked": "check:work and existing ledger/view checks in CI"
     }
   ],
   "couplings": [
@@ -513,6 +530,21 @@
       "title": "Architecture",
       "path": "docs/ARCHITECTURE.md",
       "about": "Implemented and intended boundaries"
+    },
+    {
+      "title": "Procedure discovery",
+      "path": "docs/agents/procedures.md",
+      "about": "Released harness procedure; project evidence stays in NERV records and reports"
+    },
+    {
+      "title": "Parallel work",
+      "path": "docs/agents/parallel-work.md",
+      "about": "Released harness procedure; project evidence stays in NERV records and reports"
+    },
+    {
+      "title": "Architecture reassessment",
+      "path": "docs/agents/architecture-review.md",
+      "about": "Released harness procedure; project evidence stays in NERV records and reports"
     }
   ],
   "adapted": {
@@ -551,7 +583,12 @@
       "docs/agents/mcp.md",
       "docs/agents/solution-profile.md",
       "docs/agents/skills.md",
-      "docs/agents/audit.md"
+      "docs/agents/audit.md",
+      "tools/work-items.mjs",
+      "tools/task-claims.mjs",
+      "docs/agents/parallel-work.md",
+      "docs/agents/architecture-review.md",
+      "docs/agents/procedures.md"
     ]
   },
   "audit": {
@@ -778,5 +815,12 @@
         "tests": []
       }
     ]
+  },
+  "workItems": {
+    "enabled": true,
+    "layout": "docs/work/layout.json",
+    "records": "docs/work/records",
+    "tasks": "docs/work/tasks",
+    "profiles": "docs/agents/model-profiles.json"
   }
 }

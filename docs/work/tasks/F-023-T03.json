@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "id": "F-023-T03",
+  "parent": "F-023",
+  "title": "Native approval delivery and reconciliation",
+  "goal": "Connect durable delivery to the reviewed native card path",
+  "status": "planned",
+  "acceptance": [
+    "Restart, duplicate decisions and Telegram/dashboard races reconcile without duplicate effects",
+    "Notification/banner delivery limits are explicit"
+  ],
+  "dependsOn": [
+    "F-023-T02"
+  ],
+  "resources": [
+    "src/server.ts",
+    "src/native-auth.ts",
+    "native/NervMenuBar/**",
+    "test/**",
+    "contract:native-approvals",
+    "docs/work/tasks/F-023-T03.json",
+    "docs/work/records/F-023.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
+  "validation": [
+    "Run affected regressions across the changed boundary and applicable fast checks",
+    "Keep human/device acceptance and independent review distinct from fixture results"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
+  ]
+}
