@@ -289,11 +289,14 @@
       "when": [
         "src/node-*.ts",
         "src/nodes-cli.ts",
-        "test/node-discovery.test.ts"
+        "test/node-discovery.test.ts",
+        "test/node-bootstrap*.test.ts",
+        "test/fixtures/node-bootstrap.ts",
+        "shared/node-bootstrap.json"
       ],
-      "then": "Verify candidate trust boundaries, bounded read-only probes, private outputs and review-only plan contracts; reconcile installation/architecture guidance and record real-device evidence separately.",
-      "run": "node --test test/node-discovery.test.ts",
-      "checked": "Neutral inventory, signature/revocation, command-injection, child environment/bounds, real CLI and preview fixtures; bootstrap/device acceptance remains F-005."
+      "then": "Verify candidate trust, bounded probes, private outputs, digest-confirmed bootstrap and transactional uncertainty/release contracts; reconcile installation/architecture and real-device evidence separately.",
+      "run": "node --test test/node-discovery.test.ts test/node-bootstrap-execution.test.ts test/node-bootstrap-races.test.ts",
+      "checked": "Neutral inventories, real fixed helper with stubbed commands, loss/crash/replay, immutable race regressions and exact source capabilities; real service/device acceptance remains F-005."
     }
   ],
   "couplings": [
@@ -444,6 +447,28 @@
         }
       ],
       "kept": "Both transports import shared constants; test/protocol.test.ts and test/worker-link.test.ts exercise overload."
+    },
+    {
+      "value": "Bootstrap source protocol 1: fresh, model-free initialization",
+      "places": [
+        {
+          "file": "shared/node-bootstrap.json",
+          "what": "Source capability declaration"
+        },
+        {
+          "file": "src/nodes-cli.ts",
+          "what": "Pinned commit capability verification"
+        },
+        {
+          "file": "src/node-bootstrap-execution.ts",
+          "what": "Target capability/initialization enforcement"
+        },
+        {
+          "file": "src/cli.ts",
+          "what": "Fresh/no-model CLI initialization"
+        }
+      ],
+      "kept": "test/node-discovery.test.ts checks the declaration, generated flags, real CLI no-Ollama boundary and fresh no-overwrite behavior; execution fixtures verify the target contract."
     }
   ],
   "outside": [

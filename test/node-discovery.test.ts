@@ -86,7 +86,17 @@ test('F-005: planning verifies the pinned source capability before proposing mod
  try{
   await assert.rejects(nodesCommand(args,async()=>JSON.stringify({version:1,initNoModelSetup:false})),/model-free/);
   await assert.rejects(nodesCommand(args,async()=>{throw Error('unknown commit');}),/compatible NERV commit/);
-  const result=await nodesCommand(args,async request=>{assert.equal(request.program,'git');assert.equal(request.args.at(-1),options.revision+':shared/node-bootstrap.json');return JSON.stringify({version:1,initNoModelSetup:true});}) as {source:{bootstrapProtocol:number}};assert.equal(result.source.bootstrapProtocol,1);
+  const result=await nodesCommand(args,async request=>{assert.equal(request.program,'git');assert.equal(request.args.at(-1),options.revision+':shared/node-bootstrap.json');return JSON.stringify({version:1,initNoModelSetup:true,freshInit:true});}) as {source:{bootstrapProtocol:number}};assert.equal(result.source.bootstrapProtocol,1);
   const declared=JSON.parse(readFileSync('shared/node-bootstrap.json','utf8'));assert.equal(declared.initNoModelSetup,true);assert.equal(declared.version,1);
  }finally{rmSync(dir,{recursive:true,force:true});}
+});
+
+test('F-005: an additional profile preserves an existing installation and can never request a second service',async()=>{
+ const snapshot=await inspect({configured:true});const separate=bootstrapPlan(snapshot,{...options,additionalProfile:true},now);assert.deepEqual(separate.blockers,[]);assert.ok(separate.permissions.some(row=>row.includes('untouched')));assert.throws(()=>bootstrapPlan(snapshot,{...options,additionalProfile:true,installService:true},now),/second OS service/);assert.throws(()=>bootstrapPlan(snapshot,{...options,home:'/home/fixture/.nerv-bootstrap/data'},now),/reserved/);
+});
+
+test('F-005: fresh initialization never rewrites existing configuration or adopts existing credentials',async()=>{
+ const {initialize}=await import('../src/config.ts');const home=mkdtempSync(join(tmpdir(),'nerv-node-fresh-'));
+ try{initialize(home,{id:'BASE-02',name:'Harbor'},true);const config=readFileSync(join(home,'config.json'),'utf8'),token=readFileSync(join(home,'token'),'utf8');assert.throws(()=>initialize(home,{id:'BASE-03',name:'Other'},true),/new empty/);assert.equal(readFileSync(join(home,'config.json'),'utf8'),config);assert.equal(readFileSync(join(home,'token'),'utf8'),token);}
+ finally{rmSync(home,{recursive:true,force:true});}
 });

@@ -215,18 +215,18 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 |:---:|---|---|---|
 | 🔴 | 🔺 P1 | Open | 🔴 Large |
 
-💻 **→ Human action required: No**<br />Finish reviewed discovery/inspection previews, then implement authenticated bootstrap/lifecycle reconciliation; local Mac first.
+💻 **→ Human action required: No**<br />Review confirmed bootstrap/receipt CI, then verify an isolated non-running profile on the local Mac.
 
 | | |
 |---|---|
-| **Issue** | F-014 delivers enrolled outbound worker transport and B-045 repairs burst admission. Selected inventories, read-only local/SSH inspection and review-only manifests are implemented in the candidate change. Bootstrap execution, update/uninstall automation, additional discovery adapters and full device acceptance remain open. |
+| **Issue** | F-014 delivers enrolled outbound worker transport and B-045 repairs burst admission. Selected inventories, read-only local/SSH inspection and review-only manifests are implemented in the candidate change. Fresh-profile bootstrap now has explicit digest confirmation, fixed local/SSH code and transactional receipts/resources. Service/update/uninstall ownership automation, additional adapters and full device acceptance remain open. |
 | **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
 | **Check** | Mac/mini PC/Pi tests for enrolment, revocation, leases, fencing, cancellation, locks, reconnect and uncertain physical results. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Complete review/CI for selected-source discovery, fixed bounded inspection and review-only manifests. Continue F-005 with authenticated bootstrap execution, durable step/outcome reconciliation and lifecycle ownership checks; reuse F-014/B-045 transport. Owner selected the local Mac first, remote targets later. Its actual read-only probe passed and found existing default configuration; it is not a fresh-bootstrap target. No OS service, remote host or credential was changed. Original Mac/mini PC/Pi enrollment, revocation, leases, fencing, cancellation, locks, reconnect and uncertain physical-result acceptance remains pending. See [node bootstrap contract](decisions/node-bootstrap.md).
+**Next action / closure evidence:** Complete review/CI for selected-source discovery, fixed bounded inspection and review-only manifests. Bootstrap execution and durable reconciliation are implemented in the candidate; finish review/CI and local isolated-profile acceptance, then validate manual service/pairing/lifecycle ownership and additional adapters; reuse F-014/B-045 transport. Owner selected the local Mac first, remote targets later. Its actual read-only probe passed and found existing default configuration; it is not a fresh-bootstrap target. No OS service, remote host or existing credential was changed. Explicit additional-profile bootstrap never starts a second service or replaces the original installation. Original Mac/mini PC/Pi enrollment, revocation, leases, fencing, cancellation, locks, reconnect and uncertain physical-result acceptance remains pending. See [node bootstrap contract](decisions/node-bootstrap.md).
 
 **Estimates:** Large remaining effort (four or more focused days) for discovery/bootstrap and multi-platform acceptance; transport is delivered. Scope and target access remain uncertain; reassess after inspection design. Estimated 2026-11-08; preview work does not establish installation or device acceptance.
 
@@ -234,7 +234,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 |---|---|
 | PR / evidence | [PR #209](https://github.com/voidbrain/nerv/pull/209) scope reconciliation;  [PR #208](https://github.com/voidbrain/nerv/pull/208) delivered transport repair; [F-014](archive/backlog-2026.md#f-014) transport foundation;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
-| Verification | 17 focused node/existing-model-setup tests pass, including real bounded children and CLI/no-database/privacy joins; committed regression 533b8f6 precedes the model-free initialization fix; typecheck/conventions pass. Local Mac read-only probe observed darwin/arm64, Node/Git/npm and existing default configuration; private report/preview retained outside git. Review/CI and bootstrap/device acceptance pending; no service/remote installation or physical outcome is claimed. |
+| Verification | 22 focused discovery/bootstrap/race contracts pass; existing model-setup regressions also pass; committed race regressions 5769e6e precede transactional resource/receipt fixes, including real bounded children and CLI/no-database/privacy joins; committed regression 533b8f6 precedes the model-free initialization fix; typecheck/conventions pass. Local Mac read-only probe observed darwin/arm64, Node/Git/npm and existing default configuration; private report/preview retained outside git. Independent review found and resolved the model-setup and concurrency gaps; final independent execution/directory/source-capability review found no blockers; CI and actual bootstrap/device acceptance pending; no service/remote installation or physical outcome is claimed. |
 | Reviewed | 2026-11-08 |
 
 </details>

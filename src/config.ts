@@ -1,6 +1,6 @@
 import { validatePilots, type Pilot } from './pilots.ts';
 import { validateTools, type ToolsConfig } from './mcp.ts';
-import { existsSync, mkdirSync, readFileSync, writeFileSync, chmodSync } from 'node:fs';
+import { existsSync,readdirSync, mkdirSync, readFileSync, writeFileSync, chmodSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { randomBytes } from 'node:crypto';
@@ -153,11 +153,12 @@ export function setSchedule(home:string,patch:{brief?:string;instrumentality?:st
   writeFileSync(path,JSON.stringify(current,null,2)+'\n',{mode:0o600});chmodSync(path,0o600);readConfig(home);
   return {previous,now:readSchedule(home)};
 }
-export function initialize(home:string,base?:Base):void {
+export function initialize(home:string,base?:Base,fresh=false):void {
+  if(fresh&&existsSync(home)&&readdirSync(home).length)throw new Error("Fresh initialization needs a new empty data directory.");
   mkdirSync(home,{recursive:true,mode:0o700});
   const config=join(home,'config.json'),token=join(home,'token');
-  if(!existsSync(config))writeFileSync(config,JSON.stringify({...defaults,...(base?{base:validateBase(base)}:{})},null,2)+'\n',{flag:'wx',mode:0o600});
+  if(fresh||!existsSync(config))writeFileSync(config,JSON.stringify({...defaults,...(base?{base:validateBase(base)}:{})},null,2)+'\n',{flag:'wx',mode:0o600});
   else if(base)setBase(home,base);
-  if(!existsSync(token))writeFileSync(token,randomBytes(32).toString('hex')+'\n',{flag:'wx',mode:0o600});
+  if(fresh||!existsSync(token))writeFileSync(token,randomBytes(32).toString('hex')+'\n',{flag:'wx',mode:0o600});
   chmodSync(config,0o600);chmodSync(token,0o600);readConfig(home);readToken(home);
 }

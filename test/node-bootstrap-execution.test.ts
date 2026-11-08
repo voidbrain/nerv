@@ -53,3 +53,10 @@ test('F-005: concurrent operators execute one plan once',async()=>{
 
  }finally{f.close();}
 });
+
+test('F-005: an explicitly separate profile never replaces existing configuration or starts a service',async()=>{
+ const f=await fixture();try{
+  const {mkdirSync}=await import('node:fs');mkdirSync(join(f.home,'.nerv'));const original=join(f.home,'.nerv','config.json');writeFileSync(original,'UNCHANGED_EXISTING_PROFILE');
+  const plan=bootstrapPlan(f.plan.inspection,{sourceProtocol:1,additionalProfile:true,revision:f.plan.source.revision,checkout:f.plan.checkout,home:f.plan.home,base:f.plan.base,installService:false},now);const result=await bootstrapOperation(plan,'apply',{confirm:plan.digest},f.runner(),now);assert.equal(result.state,'completed',result.reason);assert.equal(readFileSync(original,'utf8'),'UNCHANGED_EXISTING_PROFILE');assert.ok(!readFileSync(f.calls,'utf8').includes('service'));assert.equal(result.service,'not-installed');
+ }finally{f.close();}
+});
