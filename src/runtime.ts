@@ -1,4 +1,4 @@
-import type {WorkerContext,WorkerLease,WorkerClaim} from './worker-jobs.ts';
+import {WORKER_RESULT_BYTES,type WorkerContext,type WorkerLease,type WorkerClaim} from './worker-jobs.ts';
 import {runFailure,runMessage,type InstrumentalityRun} from './instrumentality-runs.ts';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
@@ -39,6 +39,7 @@ export function remoteOutcomeText(base:string,tool:string,result:Record<string,u
  const r=result.result as Record<string,unknown>|undefined;const about=[r?.title,r?.text,args.title,args.text].find((v):v is string=>typeof v==='string'&&!!v.trim());
  if(o==='grant')return typeof result.error==='string'?`${base} ran ${tool}, and it failed: ${result.error}`:`${base} ran ${tool}${about?` (“${about.slice(0,120)}”)`:''}.`;
  if(o==='approval')return `${base} asks for your approval to run ${tool}: its card is waiting for you.`;
+ if(o==='uncertain')return `${base} could not confirm whether ${tool} finished; inspect its trace before retrying or releasing its resource.`;
  if(o==='reject')return `${base} refused ${tool}: ${String(result.reason ?? 'its gate said no')}.`;
  return `${base} answered for ${tool}: ${JSON.stringify(result).slice(0,400)}`;
 }
@@ -404,11 +405,13 @@ export class Runtime implements StoreApi {
    try{
     for(const q of await this.nervous.call('kaji.outbox') as {sequence:number;id:string;sortieId:string;base:string;tool:string;args:Record<string,unknown>;request:string}[]){
      const r=await send(q.base,{id:q.id,sequence:q.sequence,request:q.request,tool:q.tool,args:q.args});if(!r.reached)continue;
-     const result=(r.refused?{refused:r.refused}:r.result ?? {}) as Record<string,unknown>;
+     let result=(r.refused?{refused:r.refused}:r.result ?? {}) as Record<string,unknown>;
+     if(Buffer.byteLength(JSON.stringify(result))>WORKER_RESULT_BYTES)result={outcome:'uncertain',error:'Remote result exceeded its bound; inspect the destination trace.'};
      const name=(await this.bases().catch(()=>[])).find(b=>b.baseId===q.base)?.name ?? q.base;
      const reply=remoteOutcomeText(name,q.tool,result,q.args);
      // B-011: recorded on the sortie too, so the trace, the dashboard and the "why" answer show what the other base did.
-     await this.nervous.call('kaji.outboxDone',{id:q.id,result,said:{base:name,text:reply}});
+     const changed=await this.nervous.call(result.outcome==='approval'?'kaji.outboxProgress':'kaji.outboxDone',{id:q.id,result,said:{base:name,text:reply}});
+     if(!changed)continue;
      for(const l of this.resumeListeners)l({sortieId:q.sortieId,reply,steps:[],waiting:[]});
     }
    }catch{/* the next tick tries again */}finally{busy=false;}
@@ -434,7 +437,7 @@ export class Runtime implements StoreApi {
    :await this.act({request:`From ${from}: ${item.request || item.tool}`.slice(0,4000),tool:item.tool,args:item.args},lease).catch(()=>({outcome:'invalid',error:'Worker action failed or its lease/authority changed; inspect the local trace.'}));
   if('approvalId' in result&&result.approvalId)return result;
   try{await this.nervous.call('worker.finish',{lease,result:result as Record<string,unknown>});}
-  catch{await this.nervous.call('worker.finish',{lease,result:{outcome:'uncertain',error:'The action returned but its result could not be recorded within the response bound; inspect the local trace.'}});}
+  catch{const uncertain={outcome:'uncertain',error:'The action returned but its result could not be recorded within the response bound; inspect the local trace.'};await this.nervous.call('worker.finish',{lease,result:uncertain});return uncertain;}
   return result;
  }
 

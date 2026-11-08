@@ -70,6 +70,7 @@ process.on('message',(value:unknown)=>{
    case 'kaji.lastSeen':return registry().lastSeen();
    case 'kaji.main':return registry().main() ?? null;
    case 'kaji.outbox':return store.outbox();
+   case 'kaji.outboxProgress':return store.outboxProgress(params.id as string,params.result,params.said as {base:string;text:string});
    case 'kaji.outboxDone':return store.outboxDone(params.id as string,params.result,params.said as {base:string;text:string}|undefined);
    case 'worker.open':store.assertWorkerAuthority(params.owner as string,params.key as string,params.ownerKey as string);const opened=store.workerJobs.open(params.owner as string,params.session as string,Date.now(),params.key as string,params.ownerKey as string);store.expire();return opened;
    case 'worker.close':store.workerJobs.close(params.owner as string,params.session as string);store.expire();return true;

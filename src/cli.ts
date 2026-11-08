@@ -282,11 +282,13 @@ try {
         break;
       }
       case 'workers':{
-        if(args[0]==='pending'){const before=args[1]===undefined?undefined:Number(args[1]);console.log(JSON.stringify(local().workerJobs.pending(before),null,2));}
+        if(args[0]==='history'){console.log(JSON.stringify(local().workerJobs.history(args[1]===undefined?undefined:Number(args[1])),null,2));}
+        else if(args[0]==='result'){console.log(JSON.stringify(local().workerJobs.receipt(args[1] ?? '') ?? {error:'No worker receipt with that ID.'},null,2));}
+        else if(args[0]==='pending'){const before=args[1]===undefined?undefined:Number(args[1]);console.log(JSON.stringify(local().workerJobs.pending(before),null,2));}
         else if(args[0]==='release'){
           const reason=flag('--reason');if(!args[1]||!reason||!args.includes('--confirmed-stopped'))throw new Error('Use workers release ID --confirmed-stopped --reason "verified how it stopped".');
-          local().workerJobs.release(args[1],reason,true);console.log('Resource released after owner confirmation. The old request will never be executed again; its effects were not assumed undone.');
-        }else throw new Error('Use workers pending [BEFORE-FENCE] or workers release ID --confirmed-stopped --reason "evidence".');
+          local().releaseWorker(args[1],reason,true);console.log('Resource released after owner confirmation. The old request will never be executed again; its effects were not assumed undone.');
+        }else throw new Error('Use workers pending/history [BEFORE-FENCE], workers result ID, or workers release ID --confirmed-stopped --reason "evidence".');
         break;
       }
       case 'kaji':{

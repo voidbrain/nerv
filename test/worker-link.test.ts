@@ -76,3 +76,22 @@ test('F-014 review: destination revocation is rechecked inside the scheduler imm
  try{await f.start();const result=f.main.run('NERV-02',item(13),5000).catch(e=>e);await until(()=>entered);await f.rb.kaji.add([f.record({kind:'revoke',baseId:'NERV-02',publicKey:f.b.publicKey})]);release();await until(()=>finished);await result;assert.equal((await f.rb.list()).length,0,'revoked destination cannot execute even when transport cleanup is delayed');
  }finally{release();await f.close();}
 });
+test('F-014: valid deferred approval executes once, completes its receipt and releases its resource',{timeout:30000},async()=>{
+ const f=await fixture(),original=f.adapter;f.setAdapter({...original,run:(o,i,c)=>f.rb.runFromPeer(o,i,['memory.remember','reminders.add'],c)});
+ try{await f.start();const request={...item(14),tool:'memory.remember',args:{text:'Neutral fact'}};const card=await f.main.run('NERV-02',request,5000) as {approvalId:string};assert.ok(card.approvalId);await f.rb.decide(card.approvalId,'approve','api');await f.rb.decide(card.approvalId,'approve','telegram');
+  assert.equal((await f.rb.lilith.list()).length,1);assert.equal((await f.main.run('NERV-02',request,5000) as {outcome:string}).outcome,'grant');assert.equal((await f.main.run('NERV-02',item(15),5000) as {outcome:string}).outcome,'grant');
+ }finally{await f.close();}
+});
+test('F-014: changing the main base enrolled key fences a request already inside planning',{timeout:30000},async()=>{
+ const f=await fixture(),original=f.adapter;f.setAdapter({...original,close:async()=>{}});let entered=false,finished=false;let release!:()=>void;const gate=new Promise<void>(done=>release=done),call=f.rb.nervous.call.bind(f.rb.nervous);
+ f.rb.nervous.call=async(method,params={},timeout)=>{if(method==='actions.preview'){entered=true;await gate;}try{return await call(method,params,timeout);}finally{if(method==='actions.act')finished=true;}};
+ try{await f.start();const request=f.main.run('NERV-02',item(16),5000).catch(e=>e);await until(()=>entered);const replacement=keys();await f.rb.kaji.add([f.record({kind:'enrol',baseId:'NERV-01',name:'Aster',address:f.address,publicKey:replacement.publicKey})]);release();await until(()=>finished);await request;assert.equal((await f.rb.list()).length,0);
+ }finally{release();await f.close();}
+});
+test('F-014 review: expired pending worker approval releases only proven unexecuted work without an owner tap',{timeout:30000},async()=>{
+ const f=await fixture(),original=f.adapter;f.setAdapter({...original,run:(o,i,c)=>f.rb.runFromPeer(o,i,['memory.remember','reminders.add'],c)});
+ try{await f.start();const request={...item(17),tool:'memory.remember',args:{text:'Neutral fact'}};await f.main.run('NERV-02',request,5000);
+  const {Store}=await import('../src/store.ts');const store=new Store(join(f.homeB,'nerv.sqlite'),undefined,{home:f.homeB});try{store.expire(new Date(Date.now()+301000));}finally{store.close();}
+  assert.equal((await f.rb.approvals()).length,0,'lease-expired card is stood down without a tap');assert.equal((await f.main.run('NERV-02',request,5000) as {outcome:string}).outcome,'reject');assert.equal((await f.main.run('NERV-02',item(18),5000) as {outcome:string}).outcome,'grant');assert.equal((await f.rb.lilith.list()).length,0);
+ }finally{await f.close();}
+});

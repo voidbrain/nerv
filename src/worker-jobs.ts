@@ -81,6 +81,12 @@ export class WorkerJobs {
   if(!Number.isSafeInteger(before)||before<1)throw new Error('Invalid worker receipt cursor.');
   return this.db.prepare("SELECT id,owner,fence,expires FROM worker_jobs WHERE state='running' AND fence<? ORDER BY fence DESC LIMIT 20").all(before) as {id:string;owner:string;fence:number;expires:number}[];
  }
+ history(before=Number.MAX_SAFE_INTEGER):{id:string;owner:string;sequence:number|null;fence:number;state:string}[]{
+  if(!Number.isSafeInteger(before)||before<1)throw new Error('Invalid worker receipt cursor.');return this.db.prepare('SELECT id,owner,sequence,fence,state FROM worker_jobs WHERE fence<? ORDER BY fence DESC LIMIT 20').all(before) as {id:string;owner:string;sequence:number|null;fence:number;state:string}[];
+ }
+ receipt(id:string):{id:string;state:string;result:unknown}|undefined {
+  if(!uuid.test(id))throw new Error('Invalid worker request ID.');const row=this.db.prepare('SELECT id,state,result FROM worker_jobs WHERE id=?').get(id) as {id:string;state:string;result:string|null}|undefined;return row?{...row,result:row.result?JSON.parse(row.result):null}:undefined;
+ }
  release(id:string,reason:string,confirmedStopped:boolean):void {
   if(!confirmedStopped||typeof reason!=='string'||reason.trim().length<8||reason.length>500)throw new Error('Explicit owner confirmation and a reason are required.');
   this.tx(()=>{const row=this.db.prepare("SELECT fence FROM worker_jobs WHERE id=? AND state='running'").get(id) as {fence:number}|undefined;if(!row)throw new Error('No uncertain worker request with that ID.');

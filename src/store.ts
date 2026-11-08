@@ -1,7 +1,7 @@
 import {transaction} from './sqlite-transaction.ts';
 import type {WorkerLease} from './worker-jobs.ts';
 import {readConfig} from './config.ts';
-import {WorkerJobs} from './worker-jobs.ts';
+import {WorkerJobs,WORKER_RESULT_BYTES} from './worker-jobs.ts';
 import {InstrumentalityRuns} from './instrumentality-runs.ts';
 import {UsageStore} from './model-usage.ts';
 import {checkHistory,historyPage,type HistoryPage} from './history.ts';
@@ -149,12 +149,18 @@ export class Store {
     return (this.db.prepare('SELECT rowid AS sequence,id,sortie_id,base,tool,args,request FROM kaji_outbox WHERE done IS NULL ORDER BY created LIMIT 10').all() as {sequence:number;id:string;sortie_id:string;base:string;tool:string;args:string;request:string}[]).map(r=>({sequence:r.sequence,id:r.id,sortieId:r.sortie_id,base:r.base,tool:r.tool,args:JSON.parse(r.args) as Record<string,unknown>,request:r.request}));
   }
   /** Marks a sent action done with its result and, the first time only, records what the other base did on the sortie (B-011). */
-  outboxDone(id: string, result: unknown, said?: {base:string;text:string}): boolean {
-    const row=this.db.prepare('SELECT sortie_id,tool FROM kaji_outbox WHERE id=? AND done IS NULL').get(id) as {sortie_id:string;tool:string}|undefined;
-    const done=Number(this.db.prepare('UPDATE kaji_outbox SET done=?,result=? WHERE id=? AND done IS NULL').run(new Date().toISOString(),JSON.stringify(result).slice(0,8000),id).changes)>0;
-    if(done&&row&&said){const r=result as {outcome?:unknown;refused?:unknown};this.ledger.remoteResult(row.sortie_id,{base:said.base.slice(0,60),tool:row.tool,outcome:typeof r.refused==='string'?'refused':typeof r.outcome==='string'?r.outcome:'answered',text:said.text.slice(0,600)});}
-    return done;
+  outboxDone(id:string,result:unknown,said?:{base:string;text:string}):boolean {return this.recordOutbox(id,result,said,true);}
+  outboxProgress(id:string,result:unknown,said:{base:string;text:string}):boolean {return this.recordOutbox(id,result,said,false);}
+  private recordOutbox(id:string,result:unknown,said:{base:string;text:string}|undefined,terminal:boolean):boolean {
+    const encoded=JSON.stringify(result);if(!encoded||Buffer.byteLength(encoded)>WORKER_RESULT_BYTES)throw new Error('Remote result exceeds its persistence bound.');
+    return transaction(this.db,()=>{
+      const row=this.db.prepare('SELECT sortie_id,tool,result FROM kaji_outbox WHERE id=? AND done IS NULL').get(id) as {sortie_id:string;tool:string;result:string|null}|undefined;if(!row)return false;
+      if(!terminal&&row.result&&(JSON.parse(row.result) as {approvalId?:unknown}).approvalId===(result as {approvalId?:unknown}).approvalId)return false;
+      this.db.prepare('UPDATE kaji_outbox SET done=?,result=? WHERE id=?').run(terminal?new Date().toISOString():null,encoded,id);
+      if(said){const r=result as {outcome?:unknown;refused?:unknown};this.ledger.remoteResult(row.sortie_id,{base:said.base.slice(0,60),tool:row.tool,outcome:typeof r.refused==='string'?'refused':typeof r.outcome==='string'?r.outcome:'answered',text:said.text.slice(0,600)});}return true;
+    });
   }
+
   inbox() { return this.db.prepare('SELECT * FROM deliveries ORDER BY created DESC').all(); }
   /** Hyuga's brief into the inbox (F-028): every channel delivers it from here, once. */
   addBrief(message: string, now = new Date(), day?:string): {id:string;created:string;existing?:true} {
@@ -192,6 +198,9 @@ export class Store {
   assertWorkerAuthority(owner:string,key:string,ownerKey:string):void {
     if(!this.home)throw new Error('Worker identity unavailable.');const config=readConfig(this.home),registry=new Registry(this.db,config.kaji?.root);
     if(registry.main()!==owner||!registry.bases().some(b=>b.baseId===owner&&b.status==='enrolled'&&b.publicKey===ownerKey)||!registry.bases().some(b=>b.baseId===config.base.id&&b.status==='enrolled'&&b.publicKey===key))throw new Error('Worker authority or destination enrollment changed.');
+  }
+  releaseWorker(id:string,reason:string,confirmedStopped:boolean):void {
+    transaction(this.db,()=>{if(!confirmedStopped)throw new Error('Explicit owner confirmation required.');for(const pending of this.workerJobs.waitingApprovals())if(pending.lease.id===id&&!pending.decision)this.decideCore(pending.id,'reject','worker-release');this.workerJobs.release(id,reason,confirmedStopped);});
   }
   private assertWorker(lease:WorkerLease){this.assertWorkerAuthority(lease.owner,lease.key,lease.ownerKey);this.workerJobs.assertLease(lease);}
   decide(id: string, decision: Decision, source='api'):{decision:string;result?:unknown;error?:string} {
