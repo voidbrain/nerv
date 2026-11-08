@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-08T20:03:08.780Z",
+  "reviewed": "2026-11-08T20:44:05.575Z",
   "policy": "3bc16a77cb604cb87d7c198f15f89ecc478a7e9b09c83032d12211eccdf99fd2",
   "inputs": {
     "AGENTS.md": "881d006139ad827edd6aab885c5354d5e36001ce901b1f509a8a7c46b3be150e",
     "docs/BACKLOG-RULES.md": "c984a5c68fdfdf5d7c854fc7578a8ee02c85b3de3dc1817623e6061600e90222",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
-    "docs/agents/areas.md": "d0154c3b0e946d324df30e6b3ed3f94efc519f08557c0ad8c978c8fa04cc6405",
+    "docs/agents/areas.md": "83492e37b30ac676d9c548c4ce666bec11184dfe6545bb805a61bed211cb826a",
     "docs/agents/audit.md": "bc5de5707f9ec5c523e73602499312c373d6112ffc498d69bf68604522527992",
     "docs/agents/change-impact.md": "dc1c473e274f76bd70a87ff57bbc53fc75dc75a35d121cf67baf163a2fd2e975",
     "docs/agents/coverage-guide.md": "3d539eb8beedfa101a5e47d9973cdf85dce197436fab2ab096f760e12d208106",
@@ -20,8 +20,8 @@
     "tools/work-items.mjs": "ac02388da462c72e60dbcbd86bc9b9af0dd63376689f75ce80901be789e6b4dd"
   },
   "measurements": {
-    "samples": 2,
-    "latestAt": "2026-11-08T20:03:08.695Z",
+    "samples": 1,
+    "latestAt": "2026-11-08T20:44:05.498Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -47,25 +47,25 @@
         }
       },
       "reconciliation": {
-        "samples": 2,
+        "samples": 1,
         "durationMs": {
-          "observed": 2,
+          "observed": 1,
           "missing": 0,
-          "median": 148178.5
+          "median": 114546
         },
         "conflicts": {
           "observed": 0,
-          "missing": 2,
+          "missing": 1,
           "median": null
         },
         "unnecessaryPrompts": {
           "observed": 0,
-          "missing": 2,
+          "missing": 1,
           "median": null
         },
         "repeatedContextLoads": {
           "observed": 0,
-          "missing": 2,
+          "missing": 1,
           "median": null
         }
       }
@@ -89,6 +89,12 @@
       "disposition": "implemented",
       "target": "tools/work-items.mjs",
       "evidence": "Reconcile published v4.2.1 copied tool unchanged after upstream regression 3ffa9b8 and green CI 42517786923. NERV adoption PR216 passed all five jobs; shared Git registry initialized once after confirmed absence and status read succeeds without worktree/index changes. Follow-up source/backlog/view checks pass. No model/device/service campaign."
+    },
+    {
+      "kind": "rule",
+      "disposition": "implemented",
+      "target": "docs/agents/areas.md",
+      "evidence": "Project-only documentation organization and path setting updates; shared harness procedures/tools remain identical to v4.2.1. Source-owned/generated/evidence roles clarified, review register uses recorded dates/conditional next runs, current decisions retained, 26 retired sources byte-preserved with hashes. Independent report-only review found staging/path/result wording corrections, applied before publication. Local work/backlog/rules/recap/roadmap/dependencies/queue/conventions/integrations/audit checks and six policy/pin regressions pass. Timing covers only final governing-input reconciliation/validation, excluding earlier inventory and writing. No model or physical/service campaign; final required CI owns full risk checks."
     }
   ]
 }

@@ -72,7 +72,7 @@ Read [AGENTS.md](AGENTS.md), [area notes](docs/agents/areas.md), [style guide](d
 
 The dashboard groups model controls and Battery in two tabs. Its map shows Midori (Telegram) API status separately from message activity and phone receipt. Each configured bot accepts owner messages even while inbox delivery routes through main. `/status`, `/status BASE-ID-or-name` and `/help` answer from recorded state without a model; other commands are listed as unsupported until F-056 is completed. Angular CLI analytics is disabled in this workspace.
 
-The [architecture vocabulary](docs/NERV-ARCHITECTURE.md) now lives directly in docs. The [brainstorm retirement review](docs/audits/2026-11-06-brainstorm-retirement.md) inventories legacy sources, deletable material and preserved undecided proposals. Yearly backlog archives have weekly closure indices from harness v3.2.0. <!-- project -->
+The [architecture vocabulary](docs/architecture/vocabulary.md) lives under docs/architecture. The [brainstorm retirement review](docs/audits/2026-11-06-brainstorm-retirement.md) inventories legacy sources, deletable material and preserved undecided proposals. Yearly backlog archives have weekly closure indices from harness v3.2.0. <!-- project -->
 
 Backlog sequencing: [linked prerequisites and generated unlocks](docs/agents/backlog-dependencies.md), maintained through `npm run backlog:dependencies` and checked by `npm run check:dependencies`.
 
@@ -85,3 +85,5 @@ Verification uses the [scoped check policy](docs/verification.md): affected regr
 Selected node inventories, read-only local/SSH inspection and digest-confirmed fresh-profile bootstrap are available with `nerv nodes`; see [node setup](docs/INSTALL.md#discover-inspect-and-bootstrap-node-candidates-f-005). Automatic service/lifecycle changes and full device acceptance remain F-005.
 
 Development procedures: [discovery index](docs/agents/procedures.md), [parallel tasks and model qualification](docs/agents/parallel-work.md), [architecture reassessment](docs/agents/architecture-review.md). NERV task sources live in `docs/work/`; the backlog remains the generated current-status view.
+
+Documentation: [map and ownership](docs/README.md) · [review dates and next conditions](docs/reviews/README.md) · [task/model requirements](docs/work/README.md) · [retired references](remove/README.md).

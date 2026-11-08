@@ -1,4 +1,4 @@
-/** Per-action MAGI gate (F-017). Pure and deterministic: Casper's intent verdict comes from the model route. Lore names: docs/NERV/NERV-ARCHITECTURE.md. */
+/** Per-action MAGI gate (F-017). Pure and deterministic: Casper's intent verdict comes from the model route. Lore names: docs/architecture/vocabulary.md. */
 export type Effect='read'|'write-local'|'write-external'|'irreversible'|'physical';
 export type Pattern='green'|'orange'|'blue';
 export type Stage='prototype'|'test'|'production';
