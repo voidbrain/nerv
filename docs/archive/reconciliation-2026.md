@@ -1,5 +1,7 @@
 # Backlog reconciliation log 2026
 
+Current work ledger, reviewed 8 November 2026 against main `3d36ec8`. PR #207 runs 42464810366/42464807017 passed all six jobs; F-014 closure reconciled. F-071 owns scoped verification adoption.
+
 Current work ledger, reviewed 8 November 2026 against main `dde59f6`. PR #206 runs 42464014727/42464012081 passed all six jobs; F-014 verified and closed. Production-host acceptance remains F-009.
 
 Current work ledger, reviewed 8 November 2026 against main `092b8a9`. PR #205 runs 42427150716/42427146445 passed all six jobs; closure and queue reconciled. Owner selected F-014 next.

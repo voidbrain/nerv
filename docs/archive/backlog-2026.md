@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 39 | 41 |
+| [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 40 | 42 |
 <!-- archive-recap:end -->
 
 <a id="archive-week-2026-11-02"></a>
@@ -2797,6 +2797,74 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 | PR / evidence | [PR #207](https://github.com/voidbrain/nerv/pull/207) verified closure and overload-fixture heartbeat isolation: one Windows CI run exposed accelerated 150 ms heartbeat contention during four-slot saturation while its parallel run passed; targeted overload case passes with a separate 10 s fixture heartbeat, leaving dedicated heartbeat tests and all outcome assertions unchanged;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #206](https://github.com/voidbrain/nerv/pull/206) implementation (first Windows CI exposed a timing-dependent seat fixture, corrected without changing expected outcomes): committed regressions in test/worker-jobs.test.ts, test/worker-link.test.ts, test/worker-outbox.test.ts and test/protocol.test.ts; [frozen evaluation evidence](../evaluations/2026-11-08-f014-scripted.json) |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-08: full core 412 passed / 2 platform skips; headless 3 passed / 1 Windows skip; typecheck, build, repository checks passed. Clean cdd8a0e: v4 all seven groups 234 passed, three base repetitions 141 passed with stable inputs. Swift 9 passed / 1 skip; native packaging passed. Review: fresh-context report-only PR #207 closure reviewer found no blocking documentation findings and confirmed overload-fixture isolation preserves every replay/idempotency assertion using the local diff and supplied CI evidence; no application suites rerun. Independent implementation reviewer passed 54 tests and found no remaining code or documentation blockers; prior findings fixed. PR #206 final CI runs 42464014727/42464012081 passed all six jobs. Targeted causal peer-seat tests passed and independent diff review confirmed shadow completion before reply and veto waiting until reply. Production-host, phone and physical acceptance are not claimed. |
+| Reviewed | 2026-11-08 |
+
+</details>
+
+---
+
+### B-045
+
+**A newly negotiated worker loses an admitted request burst**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | — |
+
+💻 **→ Human action required: No**<br />No action remains for the repaired bounded worker handshake.
+
+| | |
+|---|---|
+| **Issue** | Windows CI reproduced lost concurrent worker requests; the coordinator publishes readiness before queuing hello acknowledgement, and that response competes with four requests for the same frame admission slots. |
+| **Reproduce** | B-045 immediate-burst regression in test/worker-link.test.ts fails deterministically before the fix; CI 42479082275 also failed the overload case. |
+| **Check** | Publish only after acknowledgement is queued; accept four bounded requests plus control responses, retain four active request/pending limits, and execute one durable effect. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Committed regression adf6cde fails before the fix and passes unchanged after it. Acknowledgement is queued before publication; parsing has an eight-frame bound, active/pending requests retain four slots, and termination stops queued parsing. Independent fresh-context review found no blockers. Closed 2026-11-08 after PR #208 CI 42480170710 passed all five jobs; regression and admission/fencing contracts passed on Linux and Windows. Keep unknown-outcome/resource fencing safeguards.
+
+**Estimates:** No remaining work for this repair.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #209](https://github.com/voidbrain/nerv/pull/209) reviewed closure and partial routing evidence;  [PR #208](https://github.com/voidbrain/nerv/pull/208) CI-discovered repair; Test: B-045 immediate negotiated burst in test/worker-link.test.ts. |
+| Opened | 2026-11-08 |
+| Verification | 2026-11-08: 46 targeted policy/worker/outbox/Kaji tests passed, typecheck passed. Review: independent fresh-context report-only implementation and closure reviews found no blockers; confirmed admission bounds, identity/fencing and unchanged assertions, no blockers. CI 42480170710 passed all five jobs, including Windows and the full marker. |
+| Reviewed | 2026-11-08 |
+
+</details>
+
+---
+
+### F-071
+
+**Adopt scoped verification and periodic full-suite evidence**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | — |
+
+💻 **→ Human action required: No**<br />No implementation work remains; use the adopted scoped policy on subsequent jobs.
+
+| | |
+|---|---|
+| **Issue** | Repeated local/full evaluations and duplicate push/PR CI waste work; select affected checks and retain explicit periodic full verification. |
+| **Reproduce** | Run verification:plan; compare documentation, brief-only, critical runtime and missing/stale full-evidence changes. |
+| **Check** | Targeted paths select affected regressions; documentation skips app suites when full evidence is current. Risk/request/7 days/10 integrations force full. Marker cannot certify partial or failed jobs; one PR workflow only. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-08. PR #208 merged with all five jobs in CI 42480170710 passing. A documentation-only follow-up verifies the partial plan against that exact merged full-run baseline; its own CI establishes scoped workflow routing. Harness v4.1.0 is published from [project-harness PR #80](https://github.com/voidbrain/project-harness/pull/80); this record owns only NERV settings, adapter, CI and adoption. Preserve gate, review, privacy and acceptance requirements.
+
+**Estimates:** No remaining adoption work; further jobs use the configured policy.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #209](https://github.com/voidbrain/nerv/pull/209) reviewed closure and partial routing evidence;  [PR #208](https://github.com/voidbrain/nerv/pull/208) adoption;  Test: test/verification-policy.test.mjs and test/ci-pins.test.mjs. Published tag v4.1.0 resolves to a8a358e. |
+| Opened | 2026-11-08 |
+| Verification | Six local adapter/policy/pin tests and 46 affected worker/adapter contracts passed; typecheck, conventions and rule checks passed. Review: independent fresh-context review identified event privacy/schema and route recovery selection gaps; committed regression 2cedfe7 precedes mapping fixes. Follow-up independent review confirmed both mappings fixed, no remaining blockers. CI 42479082275 correctly refused its full marker after Windows path-separator and worker burst failures; committed regressions adf6cde reproduce both issues, fixes pass the unchanged tests. Independent follow-up review found no blockers; final CI 42480170710 passed all five jobs, including full-suite. Linux 419 tests passed with one platform skip; browser/axe, headless, Windows and Swift/TLS packaging passed. Real merged-baseline partial plan recorded in docs/acceptance/verification-2026-11-08.md. |
 | Reviewed | 2026-11-08 |
 
 </details>
