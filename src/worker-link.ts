@@ -8,6 +8,8 @@ import {validateParams,MAX_FRAME_BYTES,MAX_RPC_CONNECTIONS,MAX_RPC_INFLIGHT} fro
 import {WORKER_LEASE_MS,WORKER_RESULT_BYTES,type WorkerItem,type WorkerContext} from './worker-jobs.ts';
 export const WORKER_PROTOCOL_VERSION=1;
 const PATH='/kaji/worker';
+// Four requests and their four responses may arrive in one WebSocket read.
+const MAX_QUEUED_FRAMES=MAX_RPC_INFLIGHT*2;
 const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
 const object=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 const keys=(v:Record<string,unknown>,allowed:string[])=>Object.keys(v).every(k=>allowed.includes(k));
@@ -22,19 +24,18 @@ interface Pending {resolve:(value:unknown)=>void;reject:(error:Error)=>void;time
 /** Every frame is signed for its fresh session and monotonically increasing direction counter. */
 class Peer {
  readonly ws:WebSocket;readonly link:WorkerLink;readonly remote:string;readonly role:'coordinator'|'worker';readonly remoteKey:string;session:string;
- ready=false;epoch=0;cursor=0;private sent=0;private received=0;private active=0;private incoming:Promise<void>=Promise.resolve();private ended=false;private pending=new Map<string,Pending>();private heartbeat?:NodeJS.Timeout;private helloTimer:NodeJS.Timeout;
+ ready=false;epoch=0;cursor=0;private sent=0;private received=0;private active=0;private queued=0;private incoming:Promise<void>=Promise.resolve();private ended=false;private pending=new Map<string,Pending>();private heartbeat?:NodeJS.Timeout;private helloTimer:NodeJS.Timeout;
  constructor(link:WorkerLink,ws:WebSocket,remote:string,role:'coordinator'|'worker',remoteKey:string,session=''){
   this.link=link;this.ws=ws;this.remote=remote;this.role=role;this.remoteKey=remoteKey;this.session=session;
   this.helloTimer=setTimeout(()=>this.end(),5000);ws.on('error',()=>this.end());ws.once('close',()=>this.end());
   ws.on('message',(data,binary)=>{
    const bytes=Buffer.isBuffer(data)?data:Array.isArray(data)?Buffer.concat(data):Buffer.from(data);
-   if(binary||this.active>=MAX_RPC_INFLIGHT||bytes.length>MAX_FRAME_BYTES){this.end();return;}this.active++;
-   this.incoming=this.incoming.then(()=>this.receive(bytes.toString())).catch(()=>this.end());
+   if(this.ended)return;if(binary||this.queued>=MAX_QUEUED_FRAMES||bytes.length>MAX_FRAME_BYTES){this.end();return;}this.queued++;
+   this.incoming=this.incoming.then(()=>this.receive(bytes.toString())).finally(()=>{this.queued--;}).catch(()=>this.end());
   });
  }
  private async receive(raw:string):Promise<void>{
-  let handling=false;
-  try{
+  if(this.ended)return;
    const envelope:unknown=JSON.parse(raw);if(!object(envelope)||!keys(envelope,['session','body','headers'])||typeof envelope.session!=='string'||!uuid.test(envelope.session)||typeof envelope.body!=='string'||Buffer.byteLength(envelope.body)>WORKER_RESULT_BYTES+4096||!object(envelope.headers))throw Error('Invalid worker envelope.');
    if(this.session&&this.session!==envelope.session)throw Error('Worker session differs.');
    const payload:unknown=JSON.parse(envelope.body);if(!object(payload)||!keys(payload,['sequence','rpc'])||payload.sequence!==this.received+1||!object(payload.rpc))throw Error('Worker frame sequence differs.');
@@ -50,13 +51,17 @@ class Peer {
     if('error' in rpc)pending.reject(Error('Worker RPC refused.'));else pending.resolve(rpc.result);return;
    }
    if(!keys(rpc,['jsonrpc','id','method','params'])||!object(rpc.params))throw Error('Invalid worker request.');
-   handling=true;void this.handle(rpc.method as string,rpc.params).then(result=>this.reply(rpc.id as string,result),()=>this.reply(rpc.id as string,undefined,true)).finally(()=>{this.active--;}).catch(()=>this.end());
-  }finally{if(!handling)this.active--;}
+   if(this.active>=MAX_RPC_INFLIGHT)throw Error('Worker incoming request bound reached.');this.active++;
+   void this.handle(rpc.method as string,rpc.params).then(result=>{
+    this.reply(rpc.id as string,result);
+    // Publish only after the acknowledgement is queued ahead of any dispatched work.
+    if(rpc.method==='worker.hello'&&this.role==='coordinator'&&!this.ended){clearTimeout(this.helloTimer);this.link.accept(this);this.startHeartbeat();}
+   },()=>this.reply(rpc.id as string,undefined,true)).finally(()=>{this.active--;}).catch(()=>this.end());
  }
  private async handle(method:string,params:Record<string,unknown>):Promise<unknown>{
   if(method==='worker.hello'&&this.role==='coordinator'&&!this.ready){
    if(!keys(params,['version','epoch','cursor','offers'])||params.version!==WORKER_PROTOCOL_VERSION||!Number.isSafeInteger(params.epoch)||Number(params.epoch)<1||!Number.isSafeInteger(params.cursor)||Number(params.cursor)<0)throw Error('Unsupported worker protocol.');
-   await this.link.observe(this.remote,params.offers);this.epoch=Number(params.epoch);this.cursor=Number(params.cursor);this.ready=true;clearTimeout(this.helloTimer);this.link.accept(this);this.startHeartbeat();
+   await this.link.observe(this.remote,params.offers);this.epoch=Number(params.epoch);this.cursor=Number(params.cursor);this.ready=true;
    return {version:WORKER_PROTOCOL_VERSION,session:this.session,epoch:this.epoch,cursor:this.cursor};
   }
   if(!this.ready)throw Error('Worker negotiation required.');

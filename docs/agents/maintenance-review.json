@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-08T08:33:56.201Z",
+  "reviewed": "2026-11-08T12:09:37.198Z",
   "policy": "cd034be8e9d34cd059789de7a2b48deccb39742a79581ec13aff40de0a1ac791",
   "inputs": {
-    "AGENTS.md": "68c4671162697950b7e896ea069f9085392a7fbbc87752e1313de77a600c6a95",
+    "AGENTS.md": "6720b99c17e0b74013fc32a889a8a007ebfaf8b93bcbecf83ab911cbd43bb770",
     "docs/BACKLOG-RULES.md": "c8ecc8d405e828d0e1897056bed77eb506ccbe3532393235b0f71733eba8032b",
     "docs/agents/areas.md": "d0154c3b0e946d324df30e6b3ed3f94efc519f08557c0ad8c978c8fa04cc6405",
     "docs/agents/audit.md": "bc5de5707f9ec5c523e73602499312c373d6112ffc498d69bf68604522527992",
-    "docs/agents/change-impact.md": "2a899e8b9b6200c1ce89142492e18611a833c09cf713fb9d9f511a9bb31b43e0",
+    "docs/agents/change-impact.md": "dc1c473e274f76bd70a87ff57bbc53fc75dc75a35d121cf67baf163a2fd2e975",
     "docs/agents/coverage-guide.md": "3d539eb8beedfa101a5e47d9973cdf85dce197436fab2ab096f760e12d208106",
     "docs/agents/maintenance.md": "5219a64e6e85ced3fa9d437fc0adb2674bfa2d566d86fe95cca1ef321d3b8b27",
     "docs/agents/mcp.md": "d813daeb38628e3f0613131ccb4e09fa1b98f82a1ad5cc647e9b27c26821a524",
@@ -15,8 +15,8 @@
     "docs/agents/solution-profile.md": "857fc0e5f5c36d1d139d2507f1f97460edfdcde4d5cd5d590a922d88c4459862"
   },
   "measurements": {
-    "samples": 13,
-    "latestAt": "2026-11-07T17:45:15.811Z",
+    "samples": 14,
+    "latestAt": "2026-11-08T12:07:31.212Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -42,25 +42,25 @@
         }
       },
       "reconciliation": {
-        "samples": 13,
+        "samples": 14,
         "durationMs": {
-          "observed": 13,
+          "observed": 14,
           "missing": 0,
-          "median": 87256
+          "median": 131065
         },
         "conflicts": {
           "observed": 4,
-          "missing": 9,
+          "missing": 10,
           "median": 0
         },
         "unnecessaryPrompts": {
           "observed": 1,
-          "missing": 12,
+          "missing": 13,
           "median": 0
         },
         "repeatedContextLoads": {
           "observed": 1,
-          "missing": 12,
+          "missing": 13,
           "median": 1
         }
       }
@@ -71,12 +71,13 @@
       "kind": "tool",
       "disposition": "implemented",
       "target": ".harness.json",
-      "evidence": "NERV-only worker source/test globs extend protocol and evaluation impact; both socket profiles share imported RPC bounds. Full core suite 412 passed (2 platform skips), headless 3 passed (1 Windows skip), build/typecheck passed. Generic harness unchanged."
+      "evidence": "Adopt released v4.1.0 optional planner, conservative NERV risk mappings and selected regression adapters. Five focused policy/pin tests pass; committed selection regression fails before event-risk and route-recovery fixes. Final platform validation delegated to CI, no repeated full local suite/model campaign."
     },
     {
-      "kind": "none",
-      "disposition": "no-change",
-      "evidence": "Reviewed AGENTS, BACKLOG-RULES and affected area safeguards: enrolled identity, destination gate, secrets isolation, no assumed undo, unknown outcomes and physical verification all retained. Only factual implementation descriptions changed. Existing measurement aggregate has 13 reconciliation samples, most counters missing; no productivity claim or rule consolidation justified. No agent-behavior runner configured; governing AGENTS/BACKLOG-RULES unchanged."
+      "kind": "rule",
+      "disposition": "implemented",
+      "target": "AGENTS.md",
+      "evidence": "NERV explicitly opts into released shared selection guide. Check catalogue remains available; applicable fast/static/security/regression/acceptance/review/green-merge safeguards retained. Shared change-impact guide copied unchanged. Behavior runner not configured. Timed reconciliation includes waiting/continuation pauses; no productivity inference from elapsed duration."
     }
   ]
 }

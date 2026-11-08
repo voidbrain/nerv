@@ -8,6 +8,7 @@ Depends on names a required outcome; Unlocks lists direct dependents, not verifi
 | [B-008](../BACKLOG.md#b-008) | — | — |
 | [B-021](../BACKLOG.md#b-021) | — | — |
 | [B-043](../BACKLOG.md#b-043) | — | — |
+| [B-045](../BACKLOG.md#b-045) | — | — |
 | [F-003](../archive/backlog-2026.md#f-003) | — | [F-012](../BACKLOG.md#f-012), [F-020](../BACKLOG.md#f-020) |
 | [F-004](../BACKLOG.md#f-004) | — | — |
 | [F-005](../BACKLOG.md#f-005) | — | [F-012](../BACKLOG.md#f-012) |
@@ -50,3 +51,4 @@ Depends on names a required outcome; Unlocks lists direct dependents, not verifi
 | [F-066](../BACKLOG.md#f-066) | — | — |
 | [F-069](../archive/backlog-2026.md#f-069) | [voidbrain/project-harness:F-045](https://github.com/voidbrain/project-harness/blob/v4.0.0/docs/BACKLOG.md#f-045) (external; not checked live) — Published v4.0.0 release | — |
 | [F-070](../BACKLOG.md#f-070) | — | — |
+| [F-071](../BACKLOG.md#f-071) | — | — |

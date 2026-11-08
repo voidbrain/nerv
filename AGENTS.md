@@ -96,6 +96,8 @@ Open every PR against `main`, never on another PR's branch (merging it would not
 - Never remove a safeguard (an ownership, evidence, privacy or safety rule) because it is old or rarely triggered, and never rewrite governing rules unattended: consolidating rules keeps every requirement ([maintenance guidance](docs/agents/maintenance.md)).
 <!-- safety:end -->
 
+NERV has scoped verification enabled. Follow [verification selection](docs/agents/verification.md) and the [NERV check mapping](docs/verification.md): run freshness and applicable fast checks, then affected regressions. The commands below are the available check catalogue, not a requirement to repeat every suite locally on every edit. Full deterministic checks run on request, risk, unmapped changes or stale/missing full evidence; required CI validates the final revision. Stress and real-model campaigns have separate triggers/budgets. <!-- project -->
+
 ```bash
 npm run check:freshness   # first, at session start: backlog behind main, merged branches, audit age
 npm run typecheck
