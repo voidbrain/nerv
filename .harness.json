@@ -597,7 +597,8 @@
       "evals/**",
       "tools/**",
       "test/fixtures/**",
-      "test/native-fixture.ts"
+      "test/native-fixture.ts",
+      "src/events.ts"
     ],
     "sources": [
       "src/**",
