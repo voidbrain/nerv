@@ -123,3 +123,8 @@ Authenticated ci:status confirms PR230 CI42585327765 and PR231 CI42586749552 pas
 ## 2026-11-09 — PR #232
 
 Authenticated ci:status confirms CI42588026092 passed plan, validate, Windows, native-macos and full-suite at exact head1b23c68, merged maincdb4f6. Linux coverage467: 466 passed, one platform skip; headless3 passed and one Windows skip. T03 durable native approval delivery accepted and closed; F-023 remains Implemented with actual paired-Mac menu/VoiceOver/banner/sleep acceptance required. Fresh-context review found no blocking runtime/security issue and its one stale documentation sentence was corrected. No runtime/model campaign, CI retry or test relaxation followed the full run.
+
+
+## 2026-11-09 — PR #235
+
+Authenticated ci:status confirms CI42608578429 passed plan, validate, Windows, native-macos and full-suite at exactheadb4cd887, mergedmainc5323e5. Gauntlet0.3 machine/scenario contracts are independently released; NERV consumes the pinned artifact and owns only its assignment/role acceptance map. F-074-T03 closed after neutral wrapper-to-library cross-consumer reuse/admission joins and fresh-context provenance review; first Gemma T02 and F-006 load/placement campaigns remain unexecuted. No CI retry or assertion relaxation was needed. Generic development usage accounting is separately registered as harnessF-048, not measured here.

@@ -139,3 +139,5 @@ Durable native delivery accepted after PR232 exact head `1b23c68` / full CI42588
 [Host-load scenario plan](../evaluations/mac-load-scenarios.md), 2026-11-09, baseline `c743caa`: distinguish budget presets from three Mac operating conditions; owner clarified one normal home mini PC baseline with no day/night duplication. F-006-T05/T04 own future comparable-load/placement observations. Documentation only; no model or load campaign executed. Reconsider on workload/hardware/placement changes.
 
 [Gauntlet environment adoption](../acceptance/gauntlet-environments-2026-11-09.md), 2026-11-09: reusable definitions moved to released0.3; NERV retains assignment/acceptance mapping and tests actual context forwarding/reuse. No model/load observations. Reconsider on environment identity, admission, pin or host-assignment changes.
+
+Gauntlet0.3 NERV adoption accepted after PR235 exactheadb4cd887 / full CI42608578429, mergedmainc5323e5. F-074-T03 closed; first model/load evidence remains unexecuted and retains its own acceptance/budgets. Shared release acceptance remains independent.
