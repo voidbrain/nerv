@@ -2,7 +2,7 @@
 
 Scope: F-074-T05 on baseline main0968262; retain F-026 acceptance and the first failed common smoke from pending PR241 without losing their sources. This is fixture/package adoption evidence, not a real model run or native client telemetry qualification.
 
-Consume published Gauntlet0.4.0 from PR9 exacthead886cf0c / CI42679371024, mergedmain77f766d/tagv0.4.0. Source-included artifact/installed version/SHA and generated capability index are checked. Common pack remains1.1.0, NERV pack1.2.0/suitev5. Old0.3 report is retained as historical7/10 failed evidence; changed engine identity prevents silent equivalent reuse.
+Initial diagnostic implementation (superseded by the0.4.1 extension below): consumed published Gauntlet0.4.0 from PR9 exacthead886cf0c / CI42679371024, mergedmain77f766d/tagv0.4.0. Source-included artifact/installed version/SHA and generated capability index are checked. Common pack remains1.1.0, NERV pack1.2.0/suitev5. Old0.3 report is retained as historical7/10 failed evidence; changed engine identity prevents silent equivalent reuse.
 
 Ten adapter tests pass. The new real wrapper→released package→fake provider→private sidecar→report-bound inspector join executes exactly the selected three cases, preserving8K/2048/seed42/thinking-on settings and the90s/6144-output diagnostic budget. All three fixture replies deliberately fail JSON parsing: grades remain failed while inspection returns their private final content. Public report excludes it. Missing --fresh rejects before provider calls; Windows capture rejects before provider work; duplicate selection/missing inspection report fail explicitly. Earlier common reuse, cross-consumer environment scope, source normalization, cancellation, artifact and index joins still pass.
 
@@ -15,3 +15,5 @@ Observed instruction-following limit: the independent report-only reviewer confi
 ## Structured-output extension
 
 Owner accepted2026-11-09. Adoption now pins released Gauntlet0.4.1, source8d99d9f, PR11 / CI42686856664; exact artifact hash is in vendor manifest. Upstream43 deterministic tests and independent review accepted the explicit responseFormat contract. NERV schema mode selects a separate structural-only pack; eleven consumer joins pass including actual wrapper→released streaming Ollama format forwarding and semantically incorrect JSON rejection. Original prompt-only smoke remains unchanged. Moderate-load three-case schema diagnostic command is prepared with private capture and90s/6144-token budget; no live run executed. Final NERV CI remains required.
+
+Schema delta review: independent report-only reviewer re-ran all11 joins and selected CLI plan, verified artifact SHA and24 packaged source/example/contract files against8d99d9f; no implementation blocker. Stale current-pin/ten-join summaries corrected. Review job registered; actual token counters unavailable. Adoption PR #242 retains and supersedes PR241.

@@ -3031,3 +3031,5 @@ Closed 2026-11-09: PR #240 exact head `6acac44` / [CI42635119338](https://github
 </details>
 
 ---
+
+F-026 acceptance reconciliation carried from superseded [PR #241](https://github.com/voidbrain/nerv/pull/241) into [PR #242](https://github.com/voidbrain/nerv/pull/242). Runtime acceptance remains PR240 / CI42635119338; PR241 failed before jobs due to GitHub internal errors.
