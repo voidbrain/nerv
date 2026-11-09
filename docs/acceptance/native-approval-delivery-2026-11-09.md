@@ -1,6 +1,6 @@
 # Durable native approval delivery
 
-9 November 2026; F-023-T03, base main `cba3726`. Implementation candidate; final CI/review evidence is recorded before acceptance. T01/T02 authority and complete previews remain unchanged.
+9 November 2026; F-023-T03, base main `cba3726`. PR #232 implementation candidate; final CI evidence is recorded before acceptance. T01/T02 authority and complete previews remain unchanged.
 
 ## Contracts and evidence
 
