@@ -1,7 +1,7 @@
 {
   "version": 1,
   "parent": "F-027",
-  "status": "implemented",
+  "status": "closed",
   "dependsOn": [],
   "resources": [
     "src/**",
@@ -26,7 +26,7 @@
     "Process-boundary regression for MCP-result taint and later gate escalation",
     "Durable recall/conversation/resume and fact/summary propagation regressions",
     "Full deterministic checks for persistence/runtime/security changes",
-    "PR237 implementation: focused process/restart/consolidation and actual legacy-schema migration regressions pass; independent review finding fixed/rechecked. Final full CI pending."
+    "Accepted2026-11-09 after PR237 exactheadbe60c19 / CI42614209749 passed all five jobs/full-suite, mergedmain81b1106. Independent report-only final delta review passed18 focused tests with no blockers. T02 enforced egress remains blocked on actual F-049 confinement."
   ],
   "escalation": [
     "EVA-03 outside code remains denied until F-049 provides actual isolation; never claim process-wide egress enforcement from URL checks"
