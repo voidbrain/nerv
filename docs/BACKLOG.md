@@ -227,6 +227,8 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 **Next action / closure evidence:** Capture deterministic event-loop/heartbeat timing or queue evidence around deferred cancellation. The short fixture heartbeat is a hypothesis for timing sensitivity, not proof of infrastructure noise or a production defect. Keep separate from B-043 queue saturation unless a shared cause is demonstrated. No runtime fix or test expectation was changed here.
 
+**Additional observation 2026-11-09:** PR #240 [CI42633909320 attempt1](https://github.com/voidbrain/nerv/actions/runs/42633909320/attempts/1) failed the existing expired-pending-worker-approval case on Windows with `No outbound worker session` at its next dispatch;498 passed, one failed, four skipped. WorkerLink and that test are unchanged by PR240. Isolated Mac execution of the exact test passed (one test); a failed-job-only unchanged-head retry was requested. This is another session-loss observation, not a proven shared heartbeat cause or fix. Retain the original logs and investigation; F-026 cannot close on the failed run.
+
 **Estimates:** Medium remaining effort, provisionally 2–3 focused days including controlled reproduction, regression, causal fix and CI verification. Estimated 2026-11-08; reassess after evidence identifies the owner/cause.
 
 | Field | Value |
@@ -234,7 +236,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | PR / evidence | [PR #222](https://github.com/voidbrain/nerv/pull/222) evidence reconciliation; [PR #221 CI 42530253552 attempt 1](https://github.com/voidbrain/nerv/actions/runs/42530253552/attempts/1): Windows deferred owner approval retains the worker resource failed in the same heartbeat rejection path; unchanged-head failed-job retry passed. No executable worker code or test assertion changed; [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; [PR #219](https://github.com/voidbrain/nerv/pull/219); [CI 42521677029 attempt 1](https://github.com/voidbrain/nerv/actions/runs/42521677029/attempts/1) failed Linux coverage; attempt 2 reran only failed jobs and passed, retaining Windows/native results. Test: test/worker-link.test.ts deferred-approval cancellation. Isolated Mac Node 26 coverage diagnostic passed with loopback access; an earlier sandbox-denied run was stopped and excluded from runtime conclusions. |
 | Opened | 2026-11-08 |
 | Verification | 2026-11-08: intermittent CI failure observed; isolated pass and unchanged-head retry pass do not establish a causal fix. Deterministic reproduction and fix pending. |
-| Reviewed | 2026-11-08 |
+| Reviewed | 2026-11-09 |
 
 </details>
 
@@ -757,7 +759,7 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 
 **Next action / closure evidence:** T01 accepted after PR239 exacthead24c3600 / CI42624083120 passed all five jobs/full-suite, mergedmain5c7997b. T02 implementation connects validated opt-in configuration, local pilot-bound planning, durable step/action limits, approval/restart/cancellation and quiet-hour brief/card/remote follow-up delivery. [Configuration](INSTALL.md#proactive-watches-hyuga), [decision](decisions/hyuga-watch.md), [acceptance](acceptance/hyuga-watch-2026-11-09.md).
 
-Final required full CI remains pending. Independent fresh-context review found queued remote dispatch could outlive withdrawn watch authority; fixed at the actual transport callback and durable cancellation boundary, preserving prior-attempt uncertainty. Recheck32 tests passed, no remaining blocker. No live-model qualification, actual EVA sandbox or physical notification receipt is required/claimed by this automated trigger contract; those retain their owning records.
+Final required full CI remains pending. Initial PR240 Windows run failed an existing worker session-loss case, retained under B-046; all new watch cases passed. Golden suite advances to v5 for the new cases (Gauntlet system pack1.2.0). Independent fresh-context review found queued remote dispatch could outlive withdrawn watch authority; fixed at the actual transport callback and durable cancellation boundary, preserving prior-attempt uncertainty. Recheck32 tests passed, no remaining blocker. No live-model qualification, actual EVA sandbox or physical notification receipt is required/claimed by this automated trigger contract; those retain their owning records.
 
 **Estimates:** Small remaining effort, reassessed 2026-11-09: final CI/acceptance reconciliation remains after implementation and focused joins. Original Large estimate2026-11-04 retained as history in prior revisions.
 
