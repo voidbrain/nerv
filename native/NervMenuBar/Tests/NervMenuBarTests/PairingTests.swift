@@ -23,6 +23,18 @@ extension PairingTests {
         XCTAssertEqual(doctor.runtimeId, invitation.runtimeId)
         let status = try JSONDecoder().decode(RuntimeStatus.self, from: await connection.request("/api/status", token: claim.token))
         XCTAssertEqual(status.runtimeId, invitation.runtimeId)
+        let cards = try NativeApproval.page(await connection.request("/api/approvals?limit=5", token: claim.token))
+        let card = try XCTUnwrap(cards.first)
+        XCTAssertEqual(cards.count, 1)
+        XCTAssertEqual(card.card.tool, "fixture.review")
+        XCTAssertTrue(card.argumentsText.contains("review@example.invalid"))
+        XCTAssertTrue(card.argumentsText.contains("+ neutral change"))
+        XCTAssertGreaterThan(card.remainingSeconds(at: Date()), 0)
+        for decision in ["approve", "reject", "edit"] {
+            do { _ = try await connection.request("/api/approvals/\(card.id)", token: claim.token, body: ["decision": decision]); XCTFail("Read-only client decided a card") } catch { }
+        }
+        let unchanged = try NativeApproval.page(await connection.request("/api/approvals?limit=5", token: claim.token))
+        XCTAssertEqual(unchanged.map(\.id), cards.map(\.id))
         let inbox = try JSONDecoder().decode(InboxPage.self, from: await connection.request("/api/inbox/page?after=0&limit=5", token: claim.token))
         XCTAssertEqual(inbox.head.sequence, 0)
         XCTAssertTrue(inbox.items.isEmpty)

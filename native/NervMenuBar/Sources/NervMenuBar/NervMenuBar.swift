@@ -8,6 +8,8 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
     @Published var invitation = ""
     @Published var status = "NERV non connesso"
     @Published var reminders: [Reminder] = []
+    @Published var approvals: [NativeApproval] = []
+    @Published var approvalsLoaded = false
     @Published var busy = false
     @Published var paired = false
     @Published var renewing = false
@@ -87,6 +89,8 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
             guard doctor.runtimeId == credential.runtimeId else { throw NativeError.identityMismatch }
             serviceMatchesRuntime = service.matches(home: doctor.home)
             let values = try JSONDecoder().decode([Reminder].self, from: await connection.request("/api/reminders/pending", token: credential.token))
+            let cards = try NativeApproval.page(await connection.request("/api/approvals?limit=5", token: credential.token))
+            approvals = cards; approvalsLoaded = true
             reminders = Array(values.filter { $0.cancelled == nil && $0.delivered == nil }.prefix(5)); status = "NERV connesso"
             if notificationsEnabled {
                 do {
@@ -97,9 +101,14 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
                     if try await notificationEngine.consume(runtime: credential.runtimeId, page: page, sink: notifications) { notificationStatus = "Cronologia cambiata: controlla la casella" }
                 } catch { notificationStatus = error.localizedDescription }
             }
-        } catch { status = error.localizedDescription; reminders = [] }
+        } catch { status = error.localizedDescription; reminders = []; approvals = []; approvalsLoaded = false }
     }
-    func forget() { do { try CredentialStore.forget(); credential = nil; paired = false; renewing = false; invitation = ""; reminders = []; notificationsEnabled = false; pollTask?.cancel(); pollTask = nil; status = "Abbinamento locale rimosso" } catch { status = error.localizedDescription } }
+    func forget() { do { try CredentialStore.forget(); credential = nil; paired = false; renewing = false; invitation = ""; reminders = []; approvals = []; approvalsLoaded = false; notificationsEnabled = false; pollTask?.cancel(); pollTask = nil; status = "Abbinamento locale rimosso" } catch { status = error.localizedDescription } }
+    func openApprovalDashboard() {
+        guard let credential, credential.expiresAt > Int64(Date().timeIntervalSince1970 * 1000),
+              let url = NativeApproval.dashboardURL(webPort: credential.webPort) else { return }
+        NSWorkspace.shared.open(url)
+    }
     func openWorkspace() { if let credential { NSWorkspace.shared.open(URL(string: "http://127.0.0.1:\(credential.webPort)")!) } }
 }
 @main struct NervMenuBarApp: App {
@@ -122,6 +131,22 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
             } else {
                 Button(model.tr("Apri spazio web")) { model.openWorkspace() }
                 Button(model.tr("Aggiorna stato")) { Task { await model.refreshOSState(); await model.refresh() } }.disabled(model.busy)
+                Divider()
+                Text(model.language == "en" ? "Needs your review" : "Da controllare").font(.headline)
+                Text(model.language == "en" ? "Up to 5 pending approvals on this base. Read-only preview; decide in the dashboard or Telegram." : "Fino a 5 approvazioni in attesa su questa base. Anteprima in sola lettura; decidi nella dashboard o su Telegram.").font(.caption)
+                if !model.approvalsLoaded {
+                    Text(model.language == "en" ? "Approval cards unavailable. Refresh to retry." : "Schede non disponibili. Aggiorna per riprovare.").font(.caption)
+                } else if model.approvals.isEmpty {
+                    Text(model.language == "en" ? "No pending approvals on this base." : "Nessuna approvazione in attesa su questa base.").font(.caption)
+                }
+                ForEach(model.approvals) { approval in
+                    TimelineView(.periodic(from: .now, by: 1)) { context in
+                        ApprovalCardView(approval: approval, language: model.language, now: context.date) { model.openApprovalDashboard() }
+                    }
+                    Divider()
+                }
+                Text(model.language == "en" ? "The dashboard uses its own sign-in. If needed, run npm start -- open in the trusted terminal." : "La dashboard usa il proprio accesso. Se necessario, esegui npm start -- open nel terminale fidato.").font(.caption)
+                Divider()
                 ForEach(model.reminders) { item in VStack(alignment: .leading) { Text(item.title); Text(Self.date(item.due, language: model.language)).font(.caption).foregroundStyle(.secondary) } }
                 Button(model.tr(model.notificationsEnabled ? "Disattiva notifiche" : "Attiva notifiche da ora")) { Task { await model.toggleNotifications() } }.disabled(model.busy)
                 Text(model.tr(model.notificationStatus)).font(.caption)
