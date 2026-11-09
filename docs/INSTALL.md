@@ -57,7 +57,7 @@ The first time, your firewall may ask whether Node may accept incoming connectio
 
 Until the Kaji line (milestone 3) connects bases, every installation is independent: its own data home, reminders, ledger and memory. Give each one its own base identity. Only **one** installation may run Aoba with a given Telegram bot (Telegram delivers a bot's messages to one reader): when you move NERV to an always-on machine, stop the old one or remove its `telegram-token`; to run both, create a second bot. To move your data, stop both services and copy the data home (`~/.nerv`) to the new machine, then set its base identity.
 
-Defaults: port 4317, language `en`, timezone `Europe/Rome`. Edit config.json to select `it`, another free port or a valid IANA timezone. Restart the service after configuration changes. Date inputs are browser-local and saved as UTC; the configured timezone does not silently reinterpret them. Natural-language dates, recurring schedules and Italian voice remain future work.
+Defaults: port 4317, language `en`, timezone `Europe/Rome`. Edit config.json to select `it`, another free port or a valid IANA timezone. Restart the service after configuration changes. Date inputs are browser-local and saved as UTC; the configured timezone does not silently reinterpret them. Natural-language dates, recurring reminders and Italian voice remain future work.
 
 ### Existing 0.1 data
 
@@ -300,3 +300,34 @@ nerv nodes release --plan bootstrap-preview.json --confirm FULL_PLAN_DIGEST --co
 ```
 
 Apply writes only the new source/data profile and private target receipt journal; it runs pinned Git/npm/build/initialization steps and prints public identity for later owner-approved pairing. It does not enroll or start a service. Keep the plan private for status/recovery. The same uncertain or released digest never restarts effects; inspect actual target state before reconciling. `--confirmed-stopped` is an assertion requiring evidence, not a force-cancel switch. Status is read-only even after the preview expires. Receipts retain progress/reconciliation without claiming rollback or current phone/physical/service state.
+
+## Proactive watches (Hyuga)
+
+Watches are optional. Add a `watch` object to the private `config.json` in the data home; `serve` re-reads it every minute. With no configured triggers, no proactive model work runs. A trigger has a stable lower-case `id`, a request (up to 1,000 characters), one schedule, and explicit action/planner-step limits:
+
+```json
+{
+  "watch": {
+    "triggers": [
+      {
+        "id": "morning-check",
+        "request": "Read my pending reminders and give me a short summary.",
+        "schedule": {"at": "08:00"},
+        "maxActions": 1,
+        "maxSteps": 3
+      }
+    ],
+    "quietHours": {"from": "22:00", "until": "07:00"}
+  }
+}
+```
+
+Merge this object into your existing configuration. `at` uses the configured IANA `timeZone`. Other schedules are `{"everyMinutes": 30}` (an integer from 1 to 1,440) and `{"event": "sortie.failed"}` or `{"event": "sortie.done"}` for subsequent non-watch sorties. Event subscriptions start at the current event head when enabled/re-enabled/changed. Missed heartbeat buckets and days are not replayed after downtime; a repeated daylight-saving hour shares one daily identity. There are at most 20 definitions and 20 pending/running attempts.
+
+`maxActions` and `maxSteps` are each 1–6, with actions no greater than steps. Actions granted or awaiting approval reserve their allowance; declining a card does not replenish it. Planner calls reserve steps durably before dispatch, including calls whose replies are lost; approval or restart does not reset the count. Casper's separate intent checks still use the configured local route. These are count budgets; token/money limits are separate work, and model accounting retains actual/unknown provider usage.
+
+Planning uses the configured local route without cloud fallback. An optional `"pilot": "your-pilot-id"` binds the watch to that active pilot's local model and stage. Without a named pilot it starts at Prototype. Non-Production watches are read-only; existing Sync thresholds may still require owner approval for a Prototype read. Production permits other registered effects through the same gate, approvals and Scrolls. A missing/retired pilot prevents new work and revokes its prior authority. Definition, stage or model changes cancel stale attempts and queued remote effects at revalidation; a changed definition cannot recreate its current slot. Outside code requiring EVA-00/EVA-03 confinement stays refused while F-049 is unimplemented; Production watches may use explicitly granted MCP reads through existing gate rules. This feature does not supply F-049 sandboxes or the F-027 egress allowlist.
+
+Watch outcomes and remote follow-ups are durable Hyuga inbox briefs with their own identities. They do not advance daily-brief checkpoints or become owner-stated memory. `watch.quietHours` defers new watch briefs and approval notifications/cards, including resumed/remote follow-ups; existing inbox entries and due reminders remain available. The start is inclusive, the end exclusive, and crossing midnight is supported. Pending approvals remain inspectable while quiet; expiry and owner decisions retain their existing meaning. Physical phone/banner receipt is not inferred from inbox or OS acceptance.
+
+A process lost during planning is recorded as interrupted and is not automatically retried in that slot. Work durably waiting for an owner decision can resume with its remaining budget. A model clarification ends that attempt with a request to refine the configured watch request; it does not open a pending chat question. Stopping/removing a watch does not undo an already executed effect or prove an in-flight remote operation stopped; inspect its ledger and remote receipt before requesting new work. `watch` settings cannot be created or relaxed through a model tool.

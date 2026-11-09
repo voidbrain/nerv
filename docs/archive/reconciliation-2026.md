@@ -1,5 +1,7 @@
 # Backlog reconciliation log 2026
 
+- Current work ledger, reviewed 9 November 2026 against main `cd8142d`. PR #238 CI42621969384 passed scoped checks; full-suite skipped. F-027-T01 accepted, B-047 archived; F-027 egress awaits F-049. Owner continued backlog; F-026 is next.
+
 - Current work ledger, reviewed 9 November 2026 against main `81b1106`. PR #237 CI42614209749 passed all five jobs/full-suite. F-027-T01 provenance is accepted; enforced egress awaits F-049 isolation. B-047 fixture expiry is closed.
 
 - Current work ledger, reviewed 9 November 2026 against main `ff982f4`. PR #236 CI42609550077 passed plan, validate, Windows and native-macos; full-suite skipped. F-074 adoption acceptance is reconciled; model/load campaigns remain unclaimed.

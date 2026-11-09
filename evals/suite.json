@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "nerv-golden-v4",
+  "id": "nerv-golden-v5",
   "groups": [
     {
       "id": "policy",
@@ -23,7 +23,8 @@
         "test/ledger.test.ts",
         "test/gate.test.ts",
         "test/brief.test.ts",
-        "test/brief-recovery.test.ts"
+        "test/brief-recovery.test.ts",
+        "test/watch.test.ts"
       ],
       "families": [
         "expiry",
@@ -32,9 +33,12 @@
         "executor-effects",
         "approval-idempotency",
         "brief-source-recovery",
-        "daily-delivery-idempotency"
+        "daily-delivery-idempotency",
+        "proactive-admission",
+        "slot-idempotency",
+        "immutable-stage-action-limits"
       ],
-      "minimumTests": 38
+      "minimumTests": 50
     },
     {
       "id": "conversation",
@@ -42,7 +46,8 @@
         "test/clarification.test.ts",
         "test/misato.test.ts",
         "test/resume.test.ts",
-        "test/why.test.ts"
+        "test/why.test.ts",
+        "test/watch-runtime.test.ts"
       ],
       "families": [
         "ambiguity",
@@ -50,9 +55,13 @@
         "conversation-isolation",
         "bounded-replanning",
         "language",
-        "explanations"
+        "explanations",
+        "proactive-local-planning",
+        "durable-step-reservations",
+        "quiet-hours",
+        "interruption-recovery"
       ],
-      "minimumTests": 30
+      "minimumTests": 42
     },
     {
       "id": "channels",
@@ -66,9 +75,10 @@
         "cross-channel",
         "relay",
         "owner-authorization",
-        "approval-card-reconciliation"
+        "approval-card-reconciliation",
+        "proactive-quiet-delivery"
       ],
-      "minimumTests": 17
+      "minimumTests": 18
     },
     {
       "id": "bases",
@@ -91,9 +101,11 @@
         "signed-cancellation",
         "legacy-quarantine",
         "hostile-frames",
-        "connection-admission"
+        "connection-admission",
+        "proactive-dispatch-revalidation",
+        "quiet-remote-followups"
       ],
-      "minimumTests": 45
+      "minimumTests": 48
     },
     {
       "id": "stress",
@@ -130,7 +142,7 @@
     {
       "branch": "pilot-execution-and-tool-evolution",
       "owner": "F-045/F-049",
-      "reason": "Current pilots advise; executable pilot/tool lifecycle is not implemented."
+      "reason": "Ordinary chat pilots advise; explicit watch local-model/stage binding is covered here. General isolated pilot/tool lifecycle remains unimplemented."
     },
     {
       "branch": "plan-DAG-decomposition-and-specialist-handoffs",

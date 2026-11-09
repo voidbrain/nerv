@@ -4,7 +4,7 @@
   "parent": "F-026",
   "title": "Durable proactive trigger admission and immutable gate limits",
   "goal": "Persist heartbeat/daily/event identities and constrain every admitted sortie at the existing gate",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Heartbeat/daily/event trigger definitions validate before writes; repeated ticks/restart never duplicate trigger-slot sorties",
     "Scheduler-owned durable run queue admits bounded work, records source and preserves interrupted uncertainty without replay",
@@ -32,7 +32,8 @@
     "Deterministic schedule/DST and quiet-hours schema validation cases",
     "SQLite restart/deduplication/event cursor and gate-budget integration regressions",
     "Typecheck, applicable fast checks and complete deterministic CI for security/persistence changes",
-    "43 focused watch/provenance/MCP/ledger regressions pass; broad suite483 passed/two platform skips. Independent final recheck passed all12 watch tests with no blockers after subscription/cancellation/pilot-removal findings were fixed. Required full CI pending; no runtime activation."
+    "43 focused watch/provenance/MCP/ledger regressions pass; broad suite483 passed/two platform skips. Independent final recheck passed all12 watch tests with no blockers after subscription/cancellation/pilot-removal findings were fixed. Required full CI pending; no runtime activation.",
+    "Accepted2026-11-09 after PR239 exacthead24c3600 / CI42624083120 passed all five jobs/full-suite, mergedmain5c7997b. T01 inactive admission/gate acceptance complete; T02 runtime remains."
   ],
   "escalation": [
     "Actual isolation remains F-049; no outside-code or network confinement claim",

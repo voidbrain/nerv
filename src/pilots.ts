@@ -2,6 +2,7 @@
  * Pilots (F-045): the owner's permanent agents, as data. Slice 1: a local roster in config.json, the generic pilot (the
  * consultant model of F-025, for anything no specialist covers) and advice mode: before Misato plans, the pilot whose
  * domain fits the request gives short advice. Advice is data in Misato's prompt, never a vote or an action.
+ * Explicit proactive watches may bind their local planner model/stage to a named pilot (F-026); ordinary chat remains advice mode.
  * Later slices: pilots offered by other bases, pilots that act in an EVA, new specialists proposed from unmatched jobs.
  */
 export type Stage='prototype'|'test'|'production';
