@@ -4,7 +4,7 @@ import type { Ask, RouteName } from './model.ts';
  * facts. The summary is kept as an episode; the ledger is never changed. Candidate facts are only proposals: each one
  * becomes a memory.remember card, so nothing reaches Lilith without the owner's approval.
  */
-export interface Exchange {request:string;reply?:string;actions?:string[]}
+export interface Exchange {request:string;reply?:string;actions?:string[];source?:string;tainted?:boolean}
 export interface Digest {summary:string;facts:string[]}
 /** How many facts a run may propose: about one per two exchanges, at least 3 and at most 10 (each is a card for the owner). */
 export const factLimit=(exchanges:number)=>Math.min(10,Math.max(3,Math.ceil(exchanges/2)));

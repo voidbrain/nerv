@@ -1,27 +1,28 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-08T22:25:57.084Z",
-  "policy": "3bc16a77cb604cb87d7c198f15f89ecc478a7e9b09c83032d12211eccdf99fd2",
+  "reviewed": "2026-11-09T12:02:11.126Z",
+  "policy": "d87f5fd1f542723eb5bb5fd5ac7cc1ab08d3c2b54b58dcc3f0332c3de649b887",
   "inputs": {
-    "AGENTS.md": "881d006139ad827edd6aab885c5354d5e36001ce901b1f509a8a7c46b3be150e",
+    "AGENTS.md": "872cea5f7bb29dc1b48b7542a939699230a730ed53bc76192cba9b15ede50404",
     "docs/BACKLOG-RULES.md": "c984a5c68fdfdf5d7c854fc7578a8ee02c85b3de3dc1817623e6061600e90222",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
-    "docs/agents/areas.md": "83492e37b30ac676d9c548c4ce666bec11184dfe6545bb805a61bed211cb826a",
+    "docs/agents/areas.md": "47ef0999371f6612cf15af91beee70e674c24574881187bbde057e69b696c6d6",
     "docs/agents/audit.md": "bc5de5707f9ec5c523e73602499312c373d6112ffc498d69bf68604522527992",
     "docs/agents/change-impact.md": "dc1c473e274f76bd70a87ff57bbc53fc75dc75a35d121cf67baf163a2fd2e975",
     "docs/agents/coverage-guide.md": "3d539eb8beedfa101a5e47d9973cdf85dce197436fab2ab096f760e12d208106",
     "docs/agents/maintenance.md": "5219a64e6e85ced3fa9d437fc0adb2674bfa2d566d86fe95cca1ef321d3b8b27",
     "docs/agents/mcp.md": "d813daeb38628e3f0613131ccb4e09fa1b98f82a1ad5cc647e9b27c26821a524",
     "docs/agents/parallel-work.md": "1b5f50c8f3afd1a222871fd3b7a8e23f987eb83ec2bd4593af343fe70df0f892",
-    "docs/agents/procedures.md": "3737cbbfabdb51d23b73c11ad2cf4b25e3dd8c8eef8e681f2688aea168e499e3",
+    "docs/agents/procedures.md": "649de48ddc9e3ae627d0752f44f4a8d2cf25b837dc32350a597f6d4bf80e514f",
     "docs/agents/skills.md": "5d60223eccfaad88c7153f57316da5ca10bfdd9d58d3a8cebc1eef25b9f0d5f5",
     "docs/agents/solution-profile.md": "857fc0e5f5c36d1d139d2507f1f97460edfdcde4d5cd5d590a922d88c4459862",
+    "docs/agents/task-context.md": "c38395d5989a3fd7cfbf319bce53b24c17a1740822398f4376ecc2c3e95d531f",
     "tools/task-claims.mjs": "05d40141b354db19e958d1f191f9a2e1b75c46126527ce3aba67f7b902ba16d2",
     "tools/work-items.mjs": "ac02388da462c72e60dbcbd86bc9b9af0dd63376689f75ce80901be789e6b4dd"
   },
   "measurements": {
-    "samples": 1,
-    "latestAt": "2026-11-08T22:25:56.968Z",
+    "samples": 15,
+    "latestAt": "2026-11-09T11:59:55.597Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -47,26 +48,26 @@
         }
       },
       "reconciliation": {
-        "samples": 1,
+        "samples": 15,
         "durationMs": {
-          "observed": 1,
+          "observed": 15,
           "missing": 0,
-          "median": 129533
+          "median": 174874
         },
         "conflicts": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 4,
+          "missing": 11,
+          "median": 0
         },
         "unnecessaryPrompts": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 1,
+          "missing": 14,
+          "median": 0
         },
         "repeatedContextLoads": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 1,
+          "missing": 14,
+          "median": 1
         }
       }
     }
@@ -101,6 +102,12 @@
       "disposition": "implemented",
       "target": ".harness.json",
       "evidence": "Project-only verification mapping for exact remove/README.md and remove/manifest.json metadata paths. Regression999b69c is committed before mapping fix; prior mapping fails unchanged assertion and seven focused policy/pin tests now pass. Unknown executable/source paths still require full verification. Corrected target and all26 retirement dispositions independently reviewed; five mixed sources moved unchanged into historical archive,21 references/prototypes/metadata retained. Gauntlet is a boundary/reuse proposal, not a new repository/model qualification. Scoped documentation audit refreshes only its area; no model/stress/device campaign. Timing covers final governing-input reconciliation only, excluding preceding source/visual review and writing."
+    },
+    {
+      "kind": "rule",
+      "disposition": "implemented",
+      "target": "AGENTS.md",
+      "evidence": "Adopt published harness4.3.0 task-context guide/index/trigger unchanged in substance, retaining all NERV safety, review, privacy and ownership rules. Copied parity, check:rules and work/backlog checks passed; fresh-context report found no harness defect. Host reset API and behaviour runner unavailable/unconfigured; bounded continuation, no cache/token-saving claim. Timing296239ms includes initial F-027 implementation and waits, excludes final CI; not a comparable harness-only performance sample. Project-only area note documents durable monotonic provenance and remaining F-049 isolation/F-027-T02 egress gap. Independent code review reject-limit finding fixed with repeated-attempt regression; final CI pending."
     }
   ]
 }

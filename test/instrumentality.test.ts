@@ -104,3 +104,17 @@ test('F-003: a scheduled night with no exchanges is explicitly skipped without a
   assert.equal(t.asked.length,0);assert.equal((await t.runtime.health()).instrumentality?.reason,'no-exchanges');
  }finally{await t.close();}
 });
+
+test('F-027: tainted exchanges produce tainted summaries and owner-approved candidate facts across processes',async()=>{
+ const t=await setup(['{"reply":"Fixture noted."}'],'{"summary":"Fixture nectar preference.","facts":["Fixture prefers nectar"]}');
+ try{
+  const seed=new Store(join(t.home,'nerv.sqlite'));try{seed.memory.add('Fixture pollen source','owner',{tainted:true});}finally{seed.close();}
+  const chat=await t.runtime.chat('Read fixture pollen','cli');assert.equal((await t.runtime.sortie(chat.sortieId))?.trust,'tainted');
+  const digest=await t.runtime.consolidate();assert.equal(digest.proposed,1);
+  assert.equal((await t.runtime.lilith.episodes())[0]?.tainted,true);
+  const card=(await t.runtime.approvals())[0]!;await t.runtime.decide(card.id,'approve');
+  assert.equal((await t.runtime.lilith.list()).find(f=>f.text==='Fixture prefers nectar')?.tainted,true);
+  const recalled=await t.runtime.nervous.call('memory.recall',{text:'nectar'}) as {kind?:string;tainted:boolean}[];
+  assert.equal(recalled.find(f=>f.kind==='summary')?.tainted,true);
+ }finally{await t.close();}
+});

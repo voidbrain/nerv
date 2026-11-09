@@ -51,6 +51,7 @@ process.on('message',(value:unknown)=>{
    case 'actions.shadowVote':return store.shadowVote(params.sortieId as string,params.actionId as string,{seat:params.seat as string,vote:params.vote as 'approve',reason:params.reason as string,...(typeof params.confidence==='number'?{confidence:params.confidence}:{})});
    case 'sorties.explain':return store.explain(params.ref as string);
    case 'sorties.spear':return store.spear(params.id as string,params.reason as string);
+   case 'context.intake':return store.ledger.intake(params.sortieId as string,params.source as string,params.trust as 'trusted'|'tainted');
    case 'sorties.open':return store.ledger.openSortie(params.source==='misato'?MISATO_SOURCE:params.source==='instrumentality'?'instrumentality':params.source==='marduk'?'marduk':OWNER_SOURCE,params.title as string,'trusted');
    case 'sorties.finish':{const id=params.sortieId as string;if(params.reply)store.ledger.reply(id,params.reply as string);return params.status?store.ledger.close(id,params.status as 'done'|'failed'):false;}
    case 'misato.note':return store.ledger.note(params.sortieId as string,params.kind as 'misato.step',params.payload as never);
@@ -96,8 +97,8 @@ process.on('message',(value:unknown)=>{
     // Facts first, then up to two of Instrumentality's summaries (F-022); summaries come from the owner's own
     // conversations, so they are local-only and never offered to the cloud route.
     const text=params.text as string;
-    return [...store.memory.recall(text).map(f=>({id:f.id,text:f.text,shareable:f.shareable,tainted:f.tainted})),
-     ...store.memory.recallEpisodes(text,2).map(e=>({id:e.id,text:e.summary,shareable:false,tainted:false,kind:'summary',when:e.until.slice(0,10)}))];
+    return [...store.memory.recall(text).map(f=>({id:f.id,text:f.text,shareable:f.shareable,tainted:f.tainted,source:f.source})),
+     ...store.memory.recallEpisodes(text,2).map(e=>({id:e.id,text:e.summary,shareable:false,tainted:e.tainted!==false,source:'episode:'+e.id,kind:'summary',when:e.until.slice(0,10)}))];
    }
    case 'misato.question':return store.ledger.question(params.conversation as string);
    case 'misato.ask':return store.ledger.ask(params.sortieId as string,params.text as string,params.conversation as string,params.forwarded as {id:string;name:string}|undefined);

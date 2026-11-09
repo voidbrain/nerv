@@ -55,6 +55,7 @@ export function balthasar(action:Action,effect:Effect,executor:Executor,spent:nu
 export function ballot(action:Action,tool:Tool|undefined,policy:Policy,spent:number,casper?:Verdict,extras:Verdict[]=[]):Ballot {
  const effect=tool?.effect ?? 'irreversible';const pattern=patternOf(effect,action.trust,action.tool,policy,tool?.owner===true);const executor=stricter(executorOf(action,effect),tool?.eva);
  const verdicts=[melchior(action,effect,policy),balthasar(action,effect,executor,spent,policy)];
+ if(tool?.eva&&executor==='eva-03')verdicts.push({seat:'balthasar',vote:'reject',reason:'EVA-03 outside code requires isolation (F-049); it does not run.'});
  const needsCasper=intentChecked(pattern,tool);
  if(needsCasper&&casper)verdicts.push({...casper,seat:'casper'});
  verdicts.push(...extras.map(v=>({...v,seat:'extra:'+v.seat})));

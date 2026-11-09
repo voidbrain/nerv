@@ -3,7 +3,7 @@
     "path": "../harness-template",
     "repo": "https://github.com/voidbrain/project-harness"
   },
-  "version": "4.2.1",
+  "version": "4.3.0",
   "stacks": [
     "core",
     "angular"
@@ -42,7 +42,8 @@
     "tools/task-claims.mjs": "core/tools/task-claims.mjs",
     "docs/agents/parallel-work.md": "core/docs/agents/parallel-work.md",
     "docs/agents/architecture-review.md": "core/docs/agents/architecture-review.md",
-    "docs/agents/procedures.md": "core/docs/agents/procedures.md"
+    "docs/agents/procedures.md": "core/docs/agents/procedures.md",
+    "docs/agents/task-context.md": "core/docs/agents/task-context.md"
   },
   "forked": {},
   "freshness": {
@@ -637,7 +638,8 @@
       "tools/task-claims.mjs",
       "docs/agents/parallel-work.md",
       "docs/agents/architecture-review.md",
-      "docs/agents/procedures.md"
+      "docs/agents/procedures.md",
+      "docs/agents/task-context.md"
     ]
   },
   "audit": {

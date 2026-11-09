@@ -11,12 +11,12 @@ const MAX_HISTORY_CHARS=8000;
 export const MAX_REPLY_CHARS=4000;
 export interface ToolDoc {name:string;effect:string;args:string;about:string}
 /** One finished step, as Misato sees it on the next turn. */
-export interface Step {tool?:string;args?:Record<string,unknown>;outcome:'grant'|'approval'|'reject'|'invalid';reason?:string;result?:unknown;error?:string}
+export interface Step {tool?:string;args?:Record<string,unknown>;outcome:'grant'|'approval'|'reject'|'invalid';reason?:string;result?:unknown;error?:string;source?:string;tainted?:boolean}
 export type Plan={action:{tool:string;args:Record<string,unknown>}}|{reply:string}|{ask:string}|{newRequest:true};
 /** An earlier exchange in the same conversation (Telegram chat, CLI…), so a short follow-up like "yes" has its question. */
-export interface Turn {request:string;reply?:string;actions?:string[]}
+export interface Turn {request:string;reply?:string;actions?:string[];source?:string;tainted?:boolean}
 /** A fact from Lilith offered to Misato (LCL): the owner confirmed it; `tainted` keeps its Ireul mark. */
-export interface Recalled {id:string;text:string;shareable:boolean;tainted:boolean;kind?:'summary';when?:string}
+export interface Recalled {id:string;text:string;shareable:boolean;tainted:boolean;source?:string;kind?:'summary';when?:string}
 export interface StepInput {request:string;history:Step[];tools:ToolDoc[];now:string;timeZone:string;context?:Turn[];memory?:Recalled[];advice?:string;language?:'it'|'en';clarification?:boolean}
 const system=(tools:ToolDoc[],now:string,timeZone:string,language?:'it'|'en'):string=>[
  'You are Misato, the planner of a personal agent that runs on the owner\'s own machines.',
@@ -106,7 +106,7 @@ export function parseConsult(text:string):{domain?:string;advice?:string} {
 /** The LCL budget (F-022), in characters of the prompt's JSON besides the request and the steps: the cloud route costs
     per token, so it gets less. */
 export const LCL_CHARS:Record<RouteName,number>={local:6000,cloud:3000};
-type MemoryItem={id:string;text:string;tainted?:true;summary?:string};type EarlierItem={request:string;reply?:string;actions?:string[]};
+type MemoryItem={id:string;text:string;tainted?:true;summary?:string;source?:string};type EarlierItem=Turn;
 /** Fills the LCL within its budget: memory first (facts in recall order, then summaries), up to 40% of it, then the
     earlier exchanges newest first; what does not fit is left out whole, never cut in the middle. Local-only items
     (every summary, and facts not marked shareable) never go to the cloud route. */
@@ -116,9 +116,10 @@ export function fillLcl(memory:Recalled[],context:Turn[],route:RouteName,budget=
  const ordered=[...offered.filter(m=>m.kind!=='summary'),...offered.filter(m=>m.kind==='summary')];
  const outMemory:MemoryItem[]=[];let used=0;
  for(const m of ordered){const item:MemoryItem=m.kind==='summary'?{id:m.id,text:m.text.slice(0,1500),summary:m.when ?? ''}:{id:m.id,text:m.text,...(m.tainted?{tainted:true as const}:{})};
+  if(m.tainted)item.tainted=true;if(m.source)item.source=m.source;
   if(used+size(item)>budget*0.4)continue;outMemory.push(item);used+=size(item);}
  const outEarlier:EarlierItem[]=[];
- for(const t of [...context].reverse()){const item:EarlierItem={request:t.request.slice(0,1000),...(t.reply?{reply:t.reply.slice(0,1000)}:{}),...(t.actions?.length?{actions:t.actions.slice(0,10)}:{})};
+ for(const t of [...context].reverse()){const item:EarlierItem={...(t.source?{source:t.source}:{}),...(t.tainted?{tainted:true}:{}),request:t.request.slice(0,1000),...(t.reply?{reply:t.reply.slice(0,1000)}:{}),...(t.actions?.length?{actions:t.actions.slice(0,10)}:{})};
   if(used+size(item)>budget)break;outEarlier.unshift(item);used+=size(item);}
  return {memory:outMemory,earlier:outEarlier};
 }

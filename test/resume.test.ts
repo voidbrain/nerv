@@ -35,7 +35,8 @@ test('after the owner approves, Misato resumes with the outcome, replies once an
   assert.match(resumed[1]!.reason!,/owner approved it; it ran/);assert.equal((resumed[1]!.result as {title:string}).title,'Call Ada');
   assert.equal((await r.list()).length,1);
   const kinds=(await r.events(chat.sortieId)).map(e=>e.kind);
-  assert.deepEqual(kinds.slice(-4),['misato.resumed','misato.step','misato.reply','sortie.done']);
+  assert.ok(kinds.includes('context.intake'),'resumed LCL records its provenance');
+  assert.deepEqual(kinds.filter(k=>k!=='context.intake').slice(-4),['misato.resumed','misato.step','misato.reply','sortie.done']);
   await wait(400);assert.equal(follow.length,1,'one resume per wait');
  }finally{await t.close();}
 });

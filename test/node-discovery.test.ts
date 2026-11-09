@@ -81,7 +81,7 @@ test('F-005: init --no-model-setup never queries the configured Ollama endpoint'
 
 
 test('F-005: planning verifies the pinned source capability before proposing model-free init',async()=>{
- const dir=mkdtempSync(join(tmpdir(),'nerv-node-source-')),snapshot=await inspect();writeFileSync(join(dir,'inspection.json'),JSON.stringify(snapshot));
+ const dir=mkdtempSync(join(tmpdir(),'nerv-node-source-')),snapshot=await inspectNode(target,async()=>JSON.stringify(info));writeFileSync(join(dir,'inspection.json'),JSON.stringify(snapshot));
  const args=['plan','--inspection',join(dir,'inspection.json'),'--revision',options.revision,'--checkout',options.checkout,'--home',options.home,'--base','BASE-02','--name','Harbor'];
  try{
   await assert.rejects(nodesCommand(args,async()=>JSON.stringify({version:1,initNoModelSetup:false})),/model-free/);

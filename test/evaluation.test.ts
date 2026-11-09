@@ -35,10 +35,10 @@ for(const [id,tool,changes,verdict,expect] of [
  ['prototype-external',{name:action.tool,effect:'write-external'},{stage:'prototype'},approved,'reject'],
  ['prototype-read',{name:action.tool,effect:'read'},{stage:'prototype'},undefined,'approval'],
  ['test-stage-read',{name:action.tool,effect:'read'},{stage:'test'},undefined,'grant'],
- ['quarantine-grant',{name:action.tool,effect:'read',eva:'eva-03'},{},undefined,'grant'],
+ ['quarantine-denied',{name:action.tool,effect:'read',eva:'eva-03'},{},undefined,'reject'],
 ] as const){
  test('golden-v1/boundary/'+id,()=>{
   const result=ballot({...action,...changes},tool as Tool|undefined,defaultPolicy,0,verdict);
-  assert.equal(result.outcome,expect);if(id==='quarantine-grant')assert.equal(result.executor,'eva-03');
+  assert.equal(result.outcome,expect);if(id==='quarantine-denied')assert.equal(result.executor,'eva-03');
  });
 }

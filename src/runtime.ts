@@ -271,6 +271,8 @@ export class Runtime implements StoreApi {
   const waiting:ChatReply['waiting']=[];
   // LCL fill: Lilith's facts that match this request and its recent conversation.
   const memory=await this.nervous.call('memory.recall',{text:[message,...context.map(t=>t.request)].join(' ').slice(0,8000)}).catch(()=>[]) as Recalled[];
+  for(const t of context)await this.nervous.call('context.intake',{sortieId,source:('conversation:'+(t.source ?? 'legacy')).slice(0,100),trust:t.tainted?'tainted':'trusted'});
+  for(const m of memory.slice(0,10))await this.nervous.call('context.intake',{sortieId,source:('memory:'+m.id).slice(0,100),trust:m.tainted?'tainted':'trusted'});
   const finish=async(status:'done'|'failed',reply?:string,error?:string):Promise<ChatReply>=>{
    if(waiting.length&&reply){
     // Not finished: the reply is recorded, the sortie waits for the owner's decisions and then resumes.
@@ -327,7 +329,7 @@ export class Runtime implements StoreApi {
    }
    // Spelled out for the planner when it resumes: an action waiting for the owner has not happened.
    const reason=r.outcome==='approval'?`Waiting for the owner's approval; NOT done yet. ${r.reason ?? ''}`.trim():r.reason;
-   await this.record(sortieId,steps,{tool,args,outcome:r.outcome,...(reason?{reason}:{}),...('result' in r&&r.result!==undefined?{result:r.result}:{}),...('error' in r&&r.error?{error:r.error}:{})},'actionId' in r?r.actionId:undefined);
+   await this.record(sortieId,steps,{tool,args,...(granted?{source:'mcp:'+tool,tainted:true}:{}),outcome:r.outcome,...(reason?{reason}:{}),...('result' in r&&r.result!==undefined?{result:r.result}:{}),...('error' in r&&r.error?{error:r.error}:{})},'actionId' in r?r.actionId:undefined);
    // A card ends the turn: the reply is the service's, and Misato carries on after the owner decides (F-033 resume),
    // so the model is never asked to describe an action that is only waiting.
    if('approvalId' in r&&r.approvalId){waiting.push({approvalId:r.approvalId,tool,reason:r.reason});return finish('done',waitingReply(requestLanguage(message,context.map(t=>t.request)),tool,args));}
@@ -512,14 +514,16 @@ export class Runtime implements StoreApi {
   const ask=()=>this.modelCall('instrumentality.digest',{exchanges},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as Promise<{digest?:Digest;error?:string}>;
   let out=await ask();if(!out.digest&&out.error==='The digest reply was not readable.')out=await ask();
   if(!out.digest)return {exchanges:exchanges.length,proposed:0,skipped:0,error:out.error ?? 'No digest.'};
+  const tainted=exchanges.some(e=>e.tainted!==false);
   const known=new Set((await this.nervous.call('memory.known',{texts:out.digest.facts}) as string[]));
   const fresh=out.digest.facts.filter(f=>!known.has(f));
   if(fresh.length){
    // An Instrumentality sortie holds the proposals; Casper is not asked (the request is ours, not the owner's), the owner decides each card.
    const sortieId=await this.nervous.call('sorties.open',{title:`Instrumentality: ${fresh.length} fact(s) to confirm`,source:'instrumentality'}) as string;
+   if(tainted)await this.nervous.call('context.intake',{sortieId,source:'instrumentality',trust:'tainted'});
    for(const text of fresh)await this.gate(sortieId,{request:'Instrumentality: a fact the owner stated, to confirm before it is remembered.',tool:'memory.remember',args:{text}},false);
   }
-  await this.nervous.call('memory.saveEpisode',{since,until,summary:out.digest.summary,exchanges:exchanges.length,proposed:fresh.length,...(runId?{runId}:{})});
+  await this.nervous.call('memory.saveEpisode',{since,until,summary:out.digest.summary,tainted,exchanges:exchanges.length,proposed:fresh.length,...(runId?{runId}:{})});
   return {summary:out.digest.summary,exchanges:exchanges.length,proposed:fresh.length,skipped:out.digest.facts.length-fresh.length};
  }
  /** The scheduler-process side of the Kaji link's registry. */

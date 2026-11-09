@@ -10,6 +10,7 @@ Depends on names a required outcome; Unlocks lists direct dependents, not verifi
 | [B-042](../BACKLOG.md#b-042) | — | — |
 | [B-043](../BACKLOG.md#b-043) | — | — |
 | [B-046](../BACKLOG.md#b-046) | — | — |
+| [B-047](../BACKLOG.md#b-047) | — | — |
 | [F-003](../archive/backlog-2026.md#f-003) | — | [F-012](../BACKLOG.md#f-012), [F-020](../BACKLOG.md#f-020) |
 | [F-004](../BACKLOG.md#f-004) | — | — |
 | [F-005](../BACKLOG.md#f-005) | — | [F-012](../BACKLOG.md#f-012) |
@@ -28,7 +29,7 @@ Depends on names a required outcome; Unlocks lists direct dependents, not verifi
 | [F-023](../BACKLOG.md#f-023) | — | — |
 | [F-025](../BACKLOG.md#f-025) | — | [F-049](../BACKLOG.md#f-049) |
 | [F-026](../BACKLOG.md#f-026) | — | — |
-| [F-027](../BACKLOG.md#f-027) | — | — |
+| [F-027](../BACKLOG.md#f-027) | [F-049](../BACKLOG.md#f-049) — T02 only: actual outside-code isolation for enforced egress; T01 provenance can land independently | — |
 | [F-028](../archive/backlog-2026.md#f-028) | — | [F-054](../BACKLOG.md#f-054), [F-056](../BACKLOG.md#f-056) |
 | [F-029](../archive/backlog-2026.md#f-029) | — | [F-045](../BACKLOG.md#f-045) |
 | [F-036](../archive/backlog-2026.md#f-036) | — | [F-050](../BACKLOG.md#f-050) |
@@ -38,7 +39,7 @@ Depends on names a required outcome; Unlocks lists direct dependents, not verifi
 | [F-045](../BACKLOG.md#f-045) | [F-029](../archive/backlog-2026.md#f-029) — Golden evaluation evidence for pilot promotion; roster and advice work can proceed | [F-049](../BACKLOG.md#f-049), [F-050](../BACKLOG.md#f-050), [F-054](../BACKLOG.md#f-054) |
 | [F-046](../BACKLOG.md#f-046) | — | — |
 | [F-048](../BACKLOG.md#f-048) | — | [F-050](../BACKLOG.md#f-050) |
-| [F-049](../BACKLOG.md#f-049) | [F-045](../BACKLOG.md#f-045) — Pilot identity and EVA class for per-job execution<br />[F-025](../BACKLOG.md#f-025) — Pilot trust-stage limits for sandbox class admission | [F-021](../BACKLOG.md#f-021) |
+| [F-049](../BACKLOG.md#f-049) | [F-045](../BACKLOG.md#f-045) — Pilot identity and EVA class for per-job execution<br />[F-025](../BACKLOG.md#f-025) — Pilot trust-stage limits for sandbox class admission | [F-021](../BACKLOG.md#f-021), [F-027](../BACKLOG.md#f-027) |
 | [F-050](../BACKLOG.md#f-050) | [F-036](../archive/backlog-2026.md#f-036) — Authenticated Kaji transport and enrolled bases<br />[F-045](../BACKLOG.md#f-045) — Remote pilot capability offers for capability-based forwarding<br />[F-048](../BACKLOG.md#f-048) — Queue and concurrency limits for load-based forwarding; capability-first work can proceed | — |
 | [F-051](../BACKLOG.md#f-051) | — | — |
 | [F-052](../BACKLOG.md#f-052) | — | — |

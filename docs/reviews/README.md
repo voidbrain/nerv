@@ -141,3 +141,5 @@ Durable native delivery accepted after PR232 exact head `1b23c68` / full CI42588
 [Gauntlet environment adoption](../acceptance/gauntlet-environments-2026-11-09.md), 2026-11-09: reusable definitions moved to released0.3; NERV retains assignment/acceptance mapping and tests actual context forwarding/reuse. No model/load observations. Reconsider on environment identity, admission, pin or host-assignment changes.
 
 Gauntlet0.3 NERV adoption accepted after PR235 exactheadb4cd887 / full CI42608578429, mergedmainc5323e5. F-074-T03 closed; first model/load evidence remains unexecuted and retains its own acceptance/budgets. Shared release acceptance remains independent.
+
+- [F-027 provenance boundary, 2026-11-09](2026-11-09-provenance-boundary.md): durable source/taint design, conservative legacy handling and unimplemented enforced-egress boundary; rerun for changed trust, memory or isolation contracts. Independent review/CI evidence remains separate.
