@@ -1,6 +1,6 @@
 # Staged model, combination and host qualification
 
-Accepted design, 9 November 2026, baseline `cb06e90`. Implementation and acceptance remain under F-006/F-045; the delivered Gauntlet adapter and the unexecuted F-074 smoke are separate. This develops the [ownership proposal](../design/gauntlet-protocol-2026-11-08.md) without rewriting its historical status.
+Accepted design, 9 November 2026, baseline `cb06e90`. Implementation and acceptance remain under F-006/F-045; the delivered Gauntlet adapter and F-074 smoke (unexecuted at this assessment) are separate. This develops the [ownership proposal](../design/gauntlet-protocol-2026-11-08.md) without rewriting its historical status.
 
 ## Purpose and ownership
 
@@ -43,3 +43,5 @@ F-006-T03 owns NERV combination cases/adapter and T04 host-placement acceptance.
 ## Reusable environment ownership correction (9 November2026)
 
 Gauntlet0.3 now owns reusable machine/scenario definitions and context-scoped evidence matching. NERV's [assignment/acceptance map](../evaluations/mac-load-scenarios.md) references them. A common matching result can serve multiple consumers; NERV-specific source evidence remains NERV-scoped. Declared load/power is not independently verified, and functional reuse is not a fresh performance observation. This supersedes PR234's consumer-only placement without rewriting its dated report. Future campaign selection and trust/promotion remain NERV-owned.
+
+Acceptance update, 9 November 2026: the [first owner-provided common smoke](../evaluations/2026-11-09-gemma-common-smoke.md) completed with7/10 passing and three JSON parse failures. This does not qualify a role, combination or host placement; the accepted staged design above remains unchanged.

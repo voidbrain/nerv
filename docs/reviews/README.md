@@ -120,7 +120,7 @@ PR #221 CI 42530253552 attempt 1 also observed heartbeat-path connection loss in
 
 [Gauntlet0.2 adoption review](2026-11-09-gauntlet-v02.md), 2026-11-09: source/runtime-aware evidence reuse and index/telemetry adapters; next on relevant contract, pin, source/grader or admission change. Live Gemma acceptance remains a separate F-074-T02 campaign.
 
-[Gauntlet0.2 adoption acceptance](../acceptance/gauntlet-v02-2026-11-09.md), 2026-11-09: PR225 / CI42573854325 passed all five jobs; next on relevant contract/pin changes. Owner resumed backlog work on 2026-11-09; live Gemma T02 follows the queue and remains unexecuted.
+[Gauntlet0.2 adoption acceptance](../acceptance/gauntlet-v02-2026-11-09.md), 2026-11-09: PR225 / CI42573854325 passed all five jobs; next on relevant contract/pin changes. The adoption ran no model; the owner-provided first Gemma T02 campaign is now reviewed below.
 
 [Configuration qualification reassessment](2026-11-09-configuration-qualification.md), 2026-11-09, baseline `cb06e90`: accepted individual → combination → NERV/host evidence boundary, with NERV tasks F-006-T03/T04 and F-045 consumption. Documentation assessment only; no audit-area baseline, live campaign or model qualification refreshed. Reconsider on changed role/host/protocol requirements or measured campaign cost/benefit.
 
@@ -140,7 +140,7 @@ Durable native delivery accepted after PR232 exact head `1b23c68` / full CI42588
 
 [Gauntlet environment adoption](../acceptance/gauntlet-environments-2026-11-09.md), 2026-11-09: reusable definitions moved to released0.3; NERV retains assignment/acceptance mapping and tests actual context forwarding/reuse. No model/load observations. Reconsider on environment identity, admission, pin or host-assignment changes.
 
-Gauntlet0.3 NERV adoption accepted after PR235 exactheadb4cd887 / full CI42608578429, mergedmainc5323e5. F-074-T03 closed; first model/load evidence remains unexecuted and retains its own acceptance/budgets. Shared release acceptance remains independent.
+Gauntlet0.3 NERV adoption accepted after PR235 exactheadb4cd887 / full CI42608578429, mergedmainc5323e5. F-074-T03 closed; the owner-provided first moderate-load Gemma smoke is now reviewed below, separately from adoption and broader load qualification. Shared release acceptance remains independent.
 
 - [F-027 provenance boundary, 2026-11-09](2026-11-09-provenance-boundary.md): durable source/taint design, conservative legacy handling and unimplemented enforced-egress boundary; rerun for changed trust, memory or isolation contracts. Independent review/CI evidence remains separate.
 

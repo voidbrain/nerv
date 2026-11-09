@@ -1409,7 +1409,7 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 ---
 ### F-074
 
-**Adopt indexed, reusable, instrumented evaluation and run the first Gemma smoke**
+**Indexed reusable evaluations, operator campaigns and the first Gemma smoke**
 
 | Signal | Priority | Status | Effort |
 |:---:|---|---|---|
