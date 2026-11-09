@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 1 | 0 |
+| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 1 | 1 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
 
@@ -2957,3 +2957,39 @@ Closed 2026-11-06 in [PR #156](https://github.com/voidbrain/nerv/pull/156): igno
 ---
 
 F-073 reconciliation: [PR #224](https://github.com/voidbrain/nerv/pull/224), documentation-only acceptance update against PR #223 / CI 42535553841.
+
+## Closed 2026-11-09
+
+### B-047
+
+**CLI bootstrap planning test uses an expired inspection fixture**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-09 after fixture regression and full CI passed.
+
+| | |
+|---|---|
+| **Issue** | The CLI capability-planning regression uses an inspection fixed at 2026-11-08T12:00Z against the current clock, so CI fails after its 24-hour validity window. |
+| **Reproduce** | After 2026-11-09T12:00Z run the committed test named F-005: planning verifies the pinned source capability before proposing model-free init in test/node-discovery.test.ts. |
+| **Check** | The CLI planning regression passes with a current neutral inspection; deterministic fixed-clock expiry tests still reject expired/future reports; production expiry behavior stays intact. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-09. PR #237 exact head be60c19 / full CI42614209749 passed all five jobs, merged main81b1106. The committed main regression reproduced the expired neutral fixture before the fixture-only fix (6040515 precedes c8709d3). The CLI fixture now uses the current clock; every assertion, fixed-clock expiry case and production source remains unchanged. Independent report-only final review found no blocker;18 focused provenance/discovery tests passed, plus22 targeted bootstrap tests locally.
+
+**Estimates:** Small at closure, assessed 2026-11-09; no implementation or acceptance remains.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #237](https://github.com/voidbrain/nerv/pull/237); Review: independent fresh-context report in [provenance boundary](../reviews/2026-11-09-provenance-boundary.md), finding fixed and rechecked; Test: test/node-discovery.test.ts — F-005: planning verifies the pinned source capability before proposing model-free init (committed on main before fix). |
+| Opened | 2026-11-09 |
+| Verification | 2026-11-09 Unit/integration:22 targeted discovery/bootstrap tests and PR237 full CI42614209749 passed, including Linux/Windows tests and full-suite. Review: independent report-only final delta review found no blockers. |
+| Reviewed | 2026-11-09 |
+
+</details>
+
+---
