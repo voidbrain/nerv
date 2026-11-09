@@ -1,6 +1,6 @@
 # Durable native approval delivery
 
-9 November 2026; F-023-T03, base main `cba3726`. PR #232 implementation candidate; final CI evidence is recorded before acceptance. T01/T02 authority and complete previews remain unchanged.
+9 November 2026; F-023-T03, base main `cba3726`. Accepted automated delivery implementation after PR #232 exact head `1b23c68`, merged main `cdb4f6`, CI42588026092 passed plan, validate, Windows, native-macos and full-suite. T03 is closed; parent live acceptance remains pending. T01/T02 authority and complete previews remain unchanged.
 
 ## Contracts and evidence
 
@@ -19,3 +19,7 @@ Live acceptance remains with the owner under F-023/F-011: actual paired menu and
 Consistency review: README, AGENTS/area notes, backlog rules, style guide, native authority decision and roadmap reviewed; updated capability/notification copy and runtime guide, unchanged governance/milestone sequencing. Useful architecture follow-up remains F-049/F-006/F-065 from PR231. No upstream harness/Gauntlet rule or protocol change is required.
 
 [Independent fresh-context report](../reviews/2026-11-09-native-approval-delivery.md): no blocking runtime/security findings; one stale architecture sentence corrected. The reviewer independently ran five Store/inbox tests; Swift/CI/live limits remain explicit.
+
+## Final CI acceptance
+
+Authenticated `npm run ci:status -- 232` reports [CI42588026092](https://github.com/voidbrain/nerv/actions/runs/42588026092) successful for all five jobs at exact head `1b23c68f32e872ec520e5269dc6b65d8bb14c640`, merged main `cdb4f630570921c5df41d9a08515055c3ffa09b2`. Linux coverage log: 467 Node tests, 466 passed, one platform skip; headless three passed, one Windows skip. Required Windows and native-macos jobs and browser/axe acceptance passed. This accepts T03's automated delivery contract, not actual owner banner/menu/VoiceOver use. No code/assertion/timeout changes or CI retry were needed.
