@@ -70,3 +70,75 @@ The [accepted staged design](../decisions/configuration-qualification.md) separa
 ## Machine/scenario context (Gauntlet0.3)
 
 `node tools/gauntlet.mjs machine --id=<label>` returns a sanitized local machine profile. `model-plan`, `model-run`, `plan` and `run` accept paired `--machine-profile=<private-file> --scenario=<package-example>`; execution additionally needs `--confirm-scenario` and existing opt-ins. Plans validate definitions, not current load. Complete context binds shared evidence; unknown/unscoped results cannot replace requested conditions. The owner declaration is not independent power/load verification. Use `--fresh` to measure each new load observation. No new npm script, app control, schedule or provider setting is introduced.
+
+## Operator runs: common Gemma smoke and NERV system acceptance
+
+These are terminal commands, not assistant-only procedures. Run one campaign at a time. Use the already installed Gemma model; the commands download no weights and start no Ollama daemon. Keep the Mac awake, choose the scenario that describes its actual competing workload, and retain that observation with the reports. `--confirm-scenario` is your declaration, not measured proof of load.
+
+From the NERV root, this runs the authorized ten-case common Gemma smoke and saves private machine/report files:
+
+```sh
+(
+  set -eu
+  umask 077
+  gauntlet_root="$HOME/.local/state/gauntlet"
+  mkdir -p "$gauntlet_root"
+  gauntlet_run_dir=$(mktemp -d "$gauntlet_root/common-$(date +%Y%m%d-%H%M%S)-XXXXXX")
+  node tools/gauntlet.mjs machine --id=mac-local > "$gauntlet_run_dir/machine.json"
+  npm run gauntlet:model-run -- \
+    --profile=node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json \
+    --limits=node_modules/@voidbrain/gauntlet-protocol/examples/limits-day.json \
+    --machine-profile="$gauntlet_run_dir/machine.json" \
+    --scenario=node_modules/@voidbrain/gauntlet-protocol/examples/scenarios/moderate-load.json \
+    --confirm-scenario --fresh --execute --allow-models \
+    --out="$gauntlet_run_dir/common.json"
+  printf 'Results: %s\n' "$gauntlet_run_dir"
+)
+```
+
+This fixes Gemma4:12b Q4_K_M,8K context, output2048/case, seed42, thinking on, serial execution and runtime sampling defaults; one repetition,30s/case,300s/suite and20480 aggregate output tokens. Verify the actual installed identity matches the profile; do not substitute or download another model to make admission pass. For a later low-contention run, use `minimal-load.json` in the same block; it creates a new directory and fresh evidence. No second run is required merely because the first occurred during daytime.
+
+From an already prepared Gauntlet0.3.0 checkout, the equivalent common command is below. Choose this OR the NERV wrapper for the same campaign; running both would duplicate the common measurement.
+
+```sh
+(
+  set -eu
+  umask 077
+  gauntlet_root="$HOME/.local/state/gauntlet"
+  mkdir -p "$gauntlet_root"
+  gauntlet_run_dir=$(mktemp -d "$gauntlet_root/common-$(date +%Y%m%d-%H%M%S)-XXXXXX")
+  node bin/gauntlet.mjs machine --id=mac-local > "$gauntlet_run_dir/machine.json"
+  node bin/gauntlet.mjs run \
+    --pack=examples/smoke-v1.json \
+    --profile=examples/profiles/gemma4-12b.json --limits=examples/limits-day.json \
+    --machine-profile="$gauntlet_run_dir/machine.json" \
+    --scenario=examples/scenarios/moderate-load.json \
+    --confirm-scenario --fresh --execute --allow-models --telemetry \
+    --out="$gauntlet_run_dir/common.json"
+  printf 'Results: %s\n' "$gauntlet_run_dir"
+)
+```
+
+For the dedicated NERV **system** pack, run the next block from NERV. It builds the browser assets and runs all seven scripted groups, including browser and bounded stress; it does not call Gemma or another real model. The run budget is180s/group,900s/suite, one repetition. Build time is outside that run budget. `--allow-expensive` explicitly includes browser/stress costs. Requirements remain the existing Linux/macOS runner and local Chrome/browser setup.
+
+```sh
+(
+  set -eu
+  umask 077
+  gauntlet_root="$HOME/.local/state/gauntlet"
+  mkdir -p "$gauntlet_root"
+  gauntlet_run_dir=$(mktemp -d "$gauntlet_root/nerv-$(date +%Y%m%d-%H%M%S)-XXXXXX")
+  npm run build
+  node tools/gauntlet.mjs machine --id=mac-local > "$gauntlet_run_dir/machine.json"
+  npm run gauntlet:run -- \
+    --machine-profile="$gauntlet_run_dir/machine.json" \
+    --scenario=node_modules/@voidbrain/gauntlet-protocol/examples/scenarios/moderate-load.json \
+    --confirm-scenario --fresh --execute --allow-expensive \
+    --out="$gauntlet_run_dir/nerv-system.json"
+  printf 'Results: %s\n' "$gauntlet_run_dir"
+)
+```
+
+A failed/interrupted campaign may still leave useful private evidence in its new directory; inspect it before repeating. Never edit a report into a pass. Give the reviewing agent the report/directory path, actual competing apps/load, interruptions and desktop responsiveness observations. The reviewer checks hashes, actual identity/settings, failures/not-run cases, telemetry gaps and cache status before reconciling F-074/F-006. A passing common report is not NERV role qualification or full integration acceptance.
+
+The separate `evals:model` Casper/Misato commands above currently use production-shaped defaults (up to4096 output tokens, inherited context/sampling/thinking,115s/case, at most eight cases per role), with no shared300s aggregate cap. They are not an equivalent8K/2048 profile campaign. A profile-matched, bounded operator role bundle remains tracked under F-074-T04; do not treat the two commands above as that missing role evaluation. No model campaign was executed while documenting these commands.

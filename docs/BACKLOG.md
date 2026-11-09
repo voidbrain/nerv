@@ -337,6 +337,8 @@ Implement capability-aware scheduling with independent model endpoint and execut
 
 **Host-load planning 2026-11-09:** [three Mac conditions and one mini PC baseline](evaluations/mac-load-scenarios.md). T05 plans office/heavy, home/active/moderate and home/overnight/minimal Mac contention under comparable model/task/budget settings after F-074-T02. Mini PC remains at home without work apps: no separate day/night matrix; T04 only varies intended NERV inference/tools-test concurrency and Mac-dependency recovery when useful. Fresh telemetry is required for new performance observations. Reusable schemas/examples and environment evidence matching now belong to released Gauntlet0.3; NERV only maps shared conditions to role/host acceptance. Day/night budget presets are not measured operating scenarios. No additional model campaign or schedule is authorized.
 
+**Retained references 2026-11-09:** [external-project assessment](reviews/2026-11-09-external-agent-projects.md): Inspect/Scenario are optional evaluation adapters; BAML typed-boundary and AdalFlow candidate-comparison ideas remain bounded experiments. Existing protected grading, exact configuration/artifact identity and NERV acceptance remain authority; no dependency or campaign is selected here.
+
 **Estimates:** Reassessed 2026-11-06 with B-028: removing unused speculative types does not remove implemented behavior; concrete tested contracts remain part of this feature, so Large remains valid.  Large remaining effort. Bootstrap scope estimate, not verification. Estimated 2026-11-01.
 
 | Field | Value |
@@ -371,6 +373,8 @@ Implement capability-aware scheduling with independent model endpoint and execut
 
 **Next action / closure evidence:** 2026-11-06 (owner discussion of skill value): a skill is instructions plus optional scripts and references, read and followed by the model, not executed deterministically. **Every skill evaluation includes a baseline run without the skill**; a skill that does not beat the baseline (generic advice the model already follows) is not promoted, and is retired if it stops beating it after a model change. Skills worth forging encode what the model lacks: knowledge NERV gathered about the bases, tools and pilots' domains; tested scripts with checkable results; content that must be kept current. Pilot skills and their stages stay owned by F-045; this record owns the evaluation and rollback mechanism. Remaining effort reassessed: unchanged (Large), the note makes implicit acceptance explicit.  Add push-to-talk STT/TTS and isolated skill proposals with evaluation and rollback. Italian/English voice corpus; corrected memory; rejected permission escalation; promoted and rolled-back skill versions.
 
+**Retained references 2026-11-09:** [external-project assessment](reviews/2026-11-09-external-agent-projects.md): AdalFlow prompt/few-shot optimization and Agent Lightning trace/training concepts inform future evaluated improvement. Baseline/heldout grading, owner-controlled promotion and rollback remain required; no weight-training capability or budget is selected.
+
 **Estimates:** Large remaining effort. Bootstrap scope estimate, not verification. Estimated 2026-11-01.
 
 | Field | Value |
@@ -378,7 +382,7 @@ Implement capability-aware scheduling with independent model endpoint and execut
 | PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
-| Reviewed | 2026-11-01 |
+| Reviewed | 2026-11-09 |
 
 </details>
 
@@ -794,6 +798,8 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 
 T02 remains blocked on F-049 actual outside-code isolation: application URL checks cannot confine arbitrary MCP subprocess sockets, DNS or redirects. Resume T02 when supported confinement exists, then validate default-deny Scrolls destinations and denied traffic across that boundary. EVA-03 outside code fails closed meanwhile. Must finish before email/web integration; the parent is not closed by T01 acceptance.
 
+**Retained test references 2026-11-09:** [external-project assessment](reviews/2026-11-09-external-agent-projects.md): AgentDojo supplies candidate hostile-tool-output cases; AgentFS is an F-049 filesystem-layer alternative to evaluate. T02 enforced egress remains blocked on F-049; neither reference supplies acceptance evidence.
+
 **Estimates:** Medium remaining effort, reassessed 2026-11-09: egress policy/enforcement integration and its acceptance remain after F-049 isolation; original estimate 2026-11-04.
 
 | Field | Value |
@@ -1037,6 +1043,8 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 **Next action / closure evidence:** Full audit 2026-11-06: the order is EVA-03 first, as the owner chose on 2026-11-05 (the tools process moves into it, so EVA-03 grants can run); the next action said EVA-00. Planned 2026-11-05 (owner). Builds on F-045 pilots and the F-025 stages.
 
 **Accepted assessment 2026-11-09:** [execution boundaries](reviews/2026-11-09-execution-boundaries.md). T01 defines the NERV-owned deterministic runner/warden contract: existing grants remain authority; enforce per-job filesystem/network/credential/resource limits, protected grader separation, cancellation and uncertain-effect reconciliation. Preserve failed-attempt ledger evidence; sandbox discard never claims rollback of external effects. Keep the runner in NERV until extraction has a second consumer or independent lifecycle. EVA-03 remains first; this does not implement confinement or alter queue order.
+
+**Retained alternative 2026-11-09:** [external-project assessment](reviews/2026-11-09-external-agent-projects.md): assess AgentFS as a per-job filesystem/state layer against T01. Verify platform-specific filesystem/network/credential/resource enforcement and default host allows; snapshots cannot roll back central authority or external effects. No confinement is delivered by this reference.
 
 **Estimates:** Large remaining effort. Estimated 2026-11-05. Reassessed 2026-11-07: explicit prerequisite outcomes preserve the existing scope and remaining-work estimate; independent slices can proceed.
 
@@ -1349,6 +1357,8 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 
 **Accepted assessment 2026-11-09:** [execution boundaries](reviews/2026-11-09-execution-boundaries.md). Map the deterministic runner/warden controls (F-049), protected grading and artifact-bound promotion (F-006), and existing grant/recovery safeguards to actual tests or named gaps. No new LLM security authority, compliance claim or separate security project follows.
 
+**Retained test references 2026-11-09:** [external-project assessment](reviews/2026-11-09-external-agent-projects.md): AgentDojo hostile tool-output families can inform versioned NERV attack/defense cases. Map observed controls to actual tests or named gaps; a benchmark pass is neither certification nor proof of F-049 confinement.
+
 **Estimates:** Medium: the document is a day; the test-name check is small. Set 2026-11-07.
 
 | Field | Value |
@@ -1449,9 +1459,11 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 
 **Next action / closure evidence:** T03 consumes released Gauntlet0.3.0 from independent PR7 / CI42607576561: pinned source/artifact, shared machine/scenario CLI/API, report/cache/compare identity and NERV wrapper joins. Generic definitions moved upstream; NERV retains assignments and acceptance. Accepted adoption after PR #235 exactheadb4cd887 / full CI42608578429, mergedmainc5323e5; T03 closed; [independent review](reviews/2026-11-09-gauntlet-environment-adoption.md) found no blocking findings after exact source/package and nine-join checks; no model/load campaign. T02 remains the separately authorized smoke and is not executed by dependency adoption.
 
- T01 closed after PR #225, exact head11c963c, merged main8fab24c. CI42573854325 passed plan, validate, Windows, native-macos and full-suite; eight local integration/index/cache/artifact/cancellation tests and independent report-only recheck passed. Adopted Gauntlet0.2.0: generated index17cases, exact/source-aware private reuse with original timestamps, streaming/sampled telemetry and fixture-tested local-runtime adapters. [Adoption acceptance](acceptance/gauntlet-v02-2026-11-09.md). T02 is ready and unexecuted: owner resumed backlog continuation on 2026-11-09 after the earlier explicit pause. Retain the authorized ten-case Gemma-only budget and follow the queue. No live generation, model download, alternative-runtime installation or qualification occurred. The current queue now starts with F-027; F-023-T03 is accepted with live native acceptance pending; combination qualification requirements are tracked under F-006/F-045, not claimed by this smoke.
+ T01 closed after PR #225, exact head11c963c, merged main8fab24c. CI42573854325 passed plan, validate, Windows, native-macos and full-suite; eight local integration/index/cache/artifact/cancellation tests and independent report-only recheck passed. Adopted Gauntlet0.2.0: generated index17cases, exact/source-aware private reuse with original timestamps, streaming/sampled telemetry and fixture-tested local-runtime adapters. [Adoption acceptance](acceptance/gauntlet-v02-2026-11-09.md). T02 is ready and unexecuted: owner resumed backlog continuation on 2026-11-09 after the earlier explicit pause. Retain the authorized ten-case Gemma-only budget and follow the queue. No live generation, model download, alternative-runtime installation or qualification occurred. Queue order is regenerated from current record/task/dependency state; consult the generated view rather than this historical selection; F-023-T03 is accepted with live native acceptance pending; combination qualification requirements are tracked under F-006/F-045, not claimed by this smoke.
 
-**Estimates:** Small remaining effort, reassessed2026-11-09 after0.3 adoption implementation: final CI/adoption acceptance and the separately bounded first smoke/review remain. Additional load/placement comparisons stay under F-006, not this estimate. Tokens/cost unknown until observed.
+**Operator handoff and references 2026-11-09:** [Terminal commands](evaluations/gauntlet.md#operator-runs-common-gemma-smoke-and-nerv-system-acceptance) save common Gemma and dedicated scripted-system reports with explicit budgets and environment declarations. Common can run through NERV OR a prepared Gauntlet checkout without duplicating measurement. T04 retains the requested profile-matched NERV role bundle: current native role defaults do not match the common8K/2048 profile or aggregate cap. [external-project assessment](reviews/2026-11-09-external-agent-projects.md) retains optional external runners; generic adapters stay upstream. No model campaign was launched while documenting this.
+
+**Estimates:** Small remaining effort, reassessed2026-11-09 after0.3 adoption implementation: the separately bounded first smoke/review and requested operator role bundle remain; adoption CI/acceptance is complete. Additional load/placement comparisons stay under F-006, not this estimate. Tokens/cost unknown until observed.
 
 | Field | Value |
 |---|---|
@@ -1473,3 +1485,5 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 **Harness reconciliation, 2026-11-09 (PR #237).** Adopt published v4.3.0 task-context guide and triggers, preserving every NERV rule. No host thread-reset API or behaviour runner is configured; bounded continuation, no reset/cache/token-saving claim. Copied-file/rule checks passed. Fresh-context review found no harness defect; no behaviour runner is configured. Timed296239ms wall-clock sample includes initial F-027 implementation and waits, excludes final CI; it is not a comparable harness-only performance sample.
 
 **Owner continuation, 2026-11-09.** After F-027-T01 acceptance, continue actionable backlog items using the generated queue and reviewed scoped prerequisites; retain human/device decisions and separately bounded model campaigns.
+
+**External project references, 2026-11-09.** [Nine-project assessment](reviews/2026-11-09-external-agent-projects.md) retains Inspect/Scenario/AgentDojo/AgentFS as the strongest evaluation/isolation candidates; typed ingestion/optimization/browser/training ideas remain conditional references. Existing records retain ownership; no dependencies, campaigns, permission changes or audit coverage follow. Operator commands and the profile-matched role-bundle gap are recorded under F-074.
