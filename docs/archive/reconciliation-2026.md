@@ -1,5 +1,7 @@
 # Backlog reconciliation log 2026
 
+- Current work ledger, reviewed 9 November 2026 against main `3ec54b9`. PR #227 CI42581319261 passed scoped checks; full-suite skipped. Staged qualification design integrated; F-023-T01 native authority contract complete, T02 ready.
+
 - Current work ledger, reviewed 9 November 2026 against main `cb06e90`. PR #226 CI42574859898 passed scoped checks; full-suite skipped. Owner resumed backlog work; F-074 smoke remains unexecuted. Combination/host qualification is accepted design under F-006/F-045.
 
 - Current work ledger, reviewed 9 November 2026 against main `8fab24c`. PR #225 CI42573854325 passed all five jobs/full-suite. F-074-T01 adoption complete; owner paused before live Gemma T02 and backlog continuation.

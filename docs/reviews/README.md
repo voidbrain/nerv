@@ -123,3 +123,5 @@ PR #221 CI 42530253552 attempt 1 also observed heartbeat-path connection loss in
 [Gauntlet0.2 adoption acceptance](../acceptance/gauntlet-v02-2026-11-09.md), 2026-11-09: PR225 / CI42573854325 passed all five jobs; next on relevant contract/pin changes. Owner resumed backlog work on 2026-11-09; live Gemma T02 follows the queue and remains unexecuted.
 
 [Configuration qualification reassessment](2026-11-09-configuration-qualification.md), 2026-11-09, baseline `cb06e90`: accepted individual → combination → NERV/host evidence boundary, with NERV tasks F-006-T03/T04 and F-045 consumption. Documentation assessment only; no audit-area baseline, live campaign or model qualification refreshed. Reconsider on changed role/host/protocol requirements or measured campaign cost/benefit.
+
+[Native approval previews](../acceptance/native-approvals-2026-11-09.md), 2026-11-09, baseline `12a24ef`: static EN/IT rendering, schema/expiry and native HTTPS authority join. Next on card schema, credential scope, UI/expiry or delivery changes; actual menu/VoiceOver and durable notifications remain F-023/F-011 acceptance.
