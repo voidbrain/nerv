@@ -12,4 +12,10 @@ Validation: pinned artifact/hash, wrapper-to-package context/admission/reuse joi
 
 Local validation: all468 Node tests ran (466 passed, two platform skips); typecheck/Angular build, generated index, plan and applicable work/backlog/recap/dependency/queue/roadmap/convention/integration/rule/harness checks pass. Final dependency/runtime revision requires full CI. No real inference or model/load campaign.
 
-PR #235 candidate acceptance. Selected policy run on committedsourceba8282d passed all90 native checks, report7de88ebb-f126-4a6c-87e6-d5f64d44a4f7, completed2026-11-09T11:22:30Z. Complete applies to the selected policy pack only; performanceMeasuredNow:false and no model qualification. Initial /tmp symlink-parent output was rejected before execution; corrected to its canonical /private/tmp path without weakening the path safeguard.
+PR #235 selected local evidence (before final CI acceptance). Selected policy run on committedsourceba8282d passed all90 native checks, report7de88ebb-f126-4a6c-87e6-d5f64d44a4f7, completed2026-11-09T11:22:30Z. Complete applies to the selected policy pack only; performanceMeasuredNow:false and no model qualification. Initial /tmp symlink-parent output was rejected before execution; corrected to its canonical /private/tmp path without weakening the path safeguard.
+
+## Final acceptance
+
+Authenticated `npm run ci:status -- 235`: [CI42608578429](https://github.com/voidbrain/nerv/actions/runs/42608578429) passed plan, validate, Windows, native-macos and full-suite at exact headb4cd887d050aec9e6ef34c659c48acf50d645f10, merged mainc5323e5b117ac22895ca243e5f42f3c7f4b8aeb6. F-074-T03 is accepted/closed. F-074-T02's first real-model smoke and F-006's planned load/placement campaigns remain unexecuted; no fixture pass qualifies actual workload, power, trust or model suitability.
+
+Reusable development usage accounting is registered, not implemented, in [harness PR87/F-048](https://github.com/voidbrain/project-harness/pull/87). Its own150 neutral fixtures/CI passed registration; this is not a measured token breakdown or a NERV/harness release dependency.

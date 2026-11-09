@@ -4,7 +4,7 @@
   "parent": "F-074",
   "title": "Adopt reusable Gauntlet machine/scenario contracts",
   "goal": "Consume released Gauntlet environment identity and retain only NERV assignment and acceptance mapping",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Pin released0.3 artifact/provenance and retain existing evidence, admission and supervision joins",
     "NERV plans/runs reference upstream machine/scenario definitions; explicit current confirmation and runtime admission are preserved",
@@ -35,7 +35,8 @@
   "privacy": "Only repository-owned neutral fake-provider fixtures; no model calls, downloads, remote host activation, private work content or promotion.",
   "validation": [
     "Pinned package/hash and actual wrapper-to-library identity/reuse/admission tests",
-    "Applicable fast checks and required full CI for dependency/runtime integration changes"
+    "Applicable fast checks and required full CI for dependency/runtime integration changes",
+    "Accepted2026-11-09 after PR235 exactheadb4cd887 / CI42608578429 passed plan/validate/Windows/native-macos/full-suite, mergedmainc5323e5; no live model/load campaign."
   ],
   "escalation": [
     "No unscoped/idle result substitutes for an expressly requested condition",
