@@ -20,7 +20,7 @@ export const LEDGER_SCHEMA=`
  CREATE TRIGGER IF NOT EXISTS events_no_delete BEFORE DELETE ON events BEGIN SELECT RAISE(ABORT,'events are append-only'); END;`;
 export interface Proposal {tool:string;args:Record<string,unknown>;stage:Stage;cost?:number;casper?:Verdict;extras?:Verdict[]}
 export interface Card {sortieId:string;actionId:string;tool:string;args:Record<string,unknown>;effect:string;pattern:string;sync:Ballot['sync'];verdicts:Verdict[];reason:string;expires:string}
-export interface Approval {id:string;card:Card;expires:string;decision:string|null}
+export interface Approval {notify?:false;id:string;card:Card;expires:string;decision:string|null}
 export interface SortieSummary {id:string;source:string;title:string;trust:string;status:string;created:string;closed:string|null;actions:number;waiting:number;patterns:string[];why:string;question?:{text:string;expires:string}}
 export interface ActionDetail {id:string;tool:string;args:Record<string,unknown>;ballot:Ballot;created:string;status:'proposed'|'waiting'|'done'|'failed'|'rejected'|'stood-down'}
 export interface Proposed {actionId:string;ballot:Ballot;grantId?:string;approvalId?:string}
@@ -167,12 +167,12 @@ export class Ledger {
  lastRequestAt():string|null {return (this.db.prepare("SELECT max(created) AS t FROM events WHERE kind='misato.request'").get() as {t:string|null}).t;}
  /** Every exchange with Misato in [since, until), oldest first, across conversations: Instrumentality's input. */
  exchangesBetween(since:string,until:string,limit=200):{request:string;reply?:string;actions?:string[];source?:string;tainted?:boolean}[] {
-  const rows=this.db.prepare("SELECT sortie_id,payload FROM events WHERE kind='misato.request' AND created>=? AND created<? ORDER BY sequence LIMIT ?").all(since,until,limit) as {sortie_id:string;payload:string}[];
+  const rows=this.db.prepare("SELECT sortie_id,payload FROM events WHERE kind='misato.request' AND sortie_id NOT IN (SELECT id FROM sorties WHERE source='hyuga') AND created>=? AND created<? ORDER BY sequence LIMIT ?").all(since,until,limit) as {sortie_id:string;payload:string}[];
   return rows.map(r=>this.exchange(r.sortie_id,r.payload));
  }
  /** Open Misato sorties whose latest wait is over: every approval it waited for is decided, and no resume has claimed it. */
  resumable():string[] {
-  return (this.db.prepare(`SELECT s.id FROM sorties s WHERE s.source='misato' AND s.status='open'
+  return (this.db.prepare(`SELECT s.id FROM sorties s WHERE s.source IN ('misato','hyuga') AND s.status='open'
    AND NOT EXISTS (SELECT 1 FROM events q WHERE q.sortie_id=s.id AND q.kind='misato.asked' AND q.sequence>coalesce((SELECT max(sequence) FROM events a WHERE a.sortie_id=s.id AND a.kind='misato.answered'),0))
    AND (SELECT max(sequence) FROM events WHERE sortie_id=s.id AND kind='misato.waiting') > coalesce((SELECT max(sequence) FROM events WHERE sortie_id=s.id AND kind='misato.resumed'),0)
    AND NOT EXISTS (SELECT 1 FROM approvals a JOIN actions x ON x.id=a.action_id WHERE x.sortie_id=s.id AND a.decision IS NULL)

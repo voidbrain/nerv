@@ -1,4 +1,4 @@
-import {Watch} from './watch.ts';
+import {Watch,watchQuiet,type WatchWork} from './watch.ts';
 import {transaction} from './sqlite-transaction.ts';
 import type {WorkerLease} from './worker-jobs.ts';
 import {readConfig} from './config.ts';
@@ -7,7 +7,7 @@ import {InstrumentalityRuns} from './instrumentality-runs.ts';
 import {UsageStore} from './model-usage.ts';
 import {checkHistory,historyPage,type HistoryPage} from './history.ts';
 import { DatabaseSync } from 'node:sqlite';
-import { randomUUID } from 'node:crypto';
+import { createHash,randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { LEDGER_SCHEMA, Ledger, type Decision, type Proposal } from './ledger.ts';
@@ -86,7 +86,47 @@ export class Store {
       for(const approval of pending)this.deliverApproval(approval.id);
     });
   }
-  private deliverApproval(approvalId:string):void {
+  private readonly watchStarted=new Date();
+  private watchSettings(){const c=this.home?readConfig(this.home):undefined;return {definition:c?.watch ?? {triggers:[]},pilots:c?.pilots ?? [],timeZone:c?.timeZone ?? 'UTC',language:c?.language ?? 'en'};}
+  private syncWatch(now=new Date()) {
+    const settings=this.watchSettings();try{this.watch.admit(settings.definition,settings.pilots,settings.timeZone,now);}finally{this.reconcileWatchOutbox(settings,now);}return settings;
+  }
+  private reconcileWatchOutbox(settings:ReturnType<Store['watchSettings']>,now=new Date()):void {
+    const queued=this.db.prepare('SELECT q.id,q.sortie_id FROM kaji_outbox q JOIN watch_runs w ON w.sortie_id=q.sortie_id WHERE q.done IS NULL AND q.id NOT IN (SELECT id FROM worker_outbox_cancels) ORDER BY q.rowid LIMIT 20').all() as {id:string;sortie_id:string}[];
+    for(const row of queued)if(!this.watch.authorized(row.sortie_id,settings.definition,settings.pilots))this.db.prepare('INSERT OR IGNORE INTO worker_outbox_cancels VALUES(?,?,?)').run(row.id,'Proactive definition, pilot or attempt authority changed.',now.toISOString());
+  }
+  private watchIsQuiet(now=new Date()):boolean {try{const s=this.watchSettings();return watchQuiet(now,s.timeZone,s.definition.quietHours);}catch{return true;}}
+  watchContext(sortieId:string):WatchWork|null {
+    const row=this.watch.get(sortieId);if(!row)return null;
+    const settings=this.syncWatch();const run=this.watch.get(sortieId)!;
+    const trigger=settings.definition.triggers.find(t=>t.id===run.trigger),pilot=settings.pilots.find(p=>p.id===trigger?.pilot&&!p.retired);
+    return {...run,readOnly:pilot?.stage!=='production',...(pilot?{model:pilot.model}:{})};
+  }
+  watchClaim():WatchWork|null {this.syncWatch();const run=this.watch.claim();return run?this.watchContext(run.sortieId):null;}
+  watchRecover():number {const settings=this.syncWatch();const count=this.watch.interrupt(this.watchStarted);this.reconcileWatchOutbox(settings);return count;}
+  watchPlan(sortieId:string):boolean {this.syncWatch();return this.watch.reserveStep(sortieId);}
+  watchFinish(sortieId:string,status:'done'|'failed',reply:string,now=new Date()):boolean {
+    if(typeof reply!=='string'||!reply.trim()||reply.length>4000)throw Error('Watch reply must contain 1–4000 characters.');
+    this.syncWatch(now);
+    return transaction(this.db,()=>{if(!this.watch.finish(sortieId,status,now,reply))return false;this.db.prepare('INSERT OR IGNORE INTO watch_notices VALUES(?,?,?,NULL)').run('completion:'+sortieId,sortieId,reply);this.releaseWatch(now);return true;});
+  }
+  watchPoll(now=new Date()):number {this.syncWatch(now);return this.releaseWatch(now);}
+  private releaseWatch(now:Date):number {
+    const settings=this.watchSettings();
+    return transaction(this.db,()=>{
+      const fallback=settings.language==='it'?'Un controllo automatico è stato interrotto. Apri NERV per verificare cosa è successo.':'An automatic check was interrupted. Open NERV to inspect what happened.';
+      this.db.prepare("INSERT OR IGNORE INTO watch_notices SELECT 'completion:'||w.sortie_id,w.sortie_id,?,NULL FROM watch_runs w WHERE state='interrupted' AND NOT EXISTS (SELECT 1 FROM watch_notices n WHERE n.id='completion:'||w.sortie_id) LIMIT 20").run(fallback);
+      if(this.watchIsQuiet(now))return 0;
+      const notices=this.db.prepare('SELECT id,message FROM watch_notices WHERE delivery_id IS NULL ORDER BY rowid LIMIT 20').all() as {id:string;message:string}[];
+      for(const notice of notices){const delivery=this.addBrief(notice.message,now);this.db.prepare('UPDATE watch_notices SET delivery_id=? WHERE id=?').run(delivery.id,notice.id);}
+      const approvals=this.db.prepare("SELECT a.id FROM approvals a JOIN actions x ON x.id=a.action_id JOIN watch_runs w ON w.sortie_id=x.sortie_id WHERE a.decision IS NULL AND a.expires>? AND a.id NOT IN (SELECT approval_id FROM approval_deliveries) LIMIT 20").all(now.toISOString()) as {id:string}[];
+      for(const approval of approvals)this.deliverApproval(approval.id,now);
+      return notices.length;
+    });
+  }
+  private deliverApproval(approvalId:string,now=new Date()):void {
+    const origin=this.db.prepare('SELECT x.sortie_id AS id FROM approvals a JOIN actions x ON x.id=a.action_id WHERE a.id=?').get(approvalId) as {id:string}|undefined;
+    if(origin&&this.watch.get(origin.id)&&this.watchIsQuiet(now))return;
     if(this.db.prepare('SELECT 1 FROM approval_deliveries WHERE approval_id=?').get(approvalId))return;
     const row=this.db.prepare('SELECT x.created FROM approvals a JOIN actions x ON x.id=a.action_id WHERE a.id=?').get(approvalId) as {created:string};
     const id=randomUUID();
@@ -144,7 +184,7 @@ export class Store {
   dashboardHistory(since:string) {
     if(typeof since!=='string'||!Number.isFinite(Date.parse(since)))throw new Error('Invalid dashboard time.');
     const delivered=(this.db.prepare("SELECT count(*) AS count FROM deliveries WHERE kind='reminder' AND created>?").get(new Date(since).toISOString()) as {count:number}).count;
-    const brief=this.db.prepare("SELECT message,created FROM deliveries WHERE kind='brief' ORDER BY rowid DESC LIMIT 1").get() ?? null;
+    const brief=this.db.prepare("SELECT message,created FROM deliveries WHERE kind='brief' AND id NOT IN (SELECT delivery_id FROM watch_notices WHERE delivery_id IS NOT NULL) ORDER BY rowid DESC LIMIT 1").get() ?? null;
     const pending=(this.db.prepare('SELECT count(*) AS count FROM reminders WHERE delivered IS NULL AND cancelled IS NULL').get() as {count:number}).count;
     const reminders=this.db.prepare('SELECT * FROM reminders WHERE delivered IS NULL AND cancelled IS NULL ORDER BY due LIMIT 10').all() as Reminder[];
     return {delivered,brief,pending,reminders};
@@ -199,6 +239,13 @@ export class Store {
     return transaction(this.db,()=>{const result=this.ledger.spear(id,reason);this.db.prepare('INSERT OR IGNORE INTO worker_outbox_cancels SELECT id,?,? FROM kaji_outbox WHERE sortie_id=? AND done IS NULL').run(reason.slice(0,500),new Date().toISOString(),id);const remotePending=(this.db.prepare('SELECT count(*) AS n FROM kaji_outbox WHERE sortie_id=? AND done IS NULL').get(id) as {n:number}).n;return {...result,...(remotePending?{remotePending}:{})};});
   }
   attemptWorkerOutbox(id:string):void {
+    const origin=this.db.prepare('SELECT sortie_id FROM kaji_outbox WHERE id=? AND done IS NULL').get(id) as {sortie_id:string}|undefined;
+    if(origin&&this.watch.get(origin.sortie_id)){
+      try{
+        const settings=this.syncWatch();this.watch.interrupt(this.watchStarted);this.reconcileWatchOutbox(settings);
+        if(!this.watch.authorized(origin.sortie_id,settings.definition,settings.pilots)){this.cancelWorkerOutbox(id,'Proactive authority no longer permits dispatch.');throw Error('Proactive dispatch authority changed.');}
+      }catch(error){this.cancelWorkerOutbox(id,'Proactive dispatch authority is unavailable or changed.');throw error;}
+    }
     transaction(this.db,()=>{const row=this.db.prepare('SELECT created FROM kaji_outbox WHERE id=? AND done IS NULL AND NOT EXISTS (SELECT 1 FROM worker_outbox_cancels c WHERE c.id=kaji_outbox.id)').get(id) as {created:string}|undefined;
       if(!row||Date.parse(row.created)+WORKER_LEASE_MS<=Date.now())throw new Error('Worker request was cancelled or expired before dispatch.');this.db.prepare('INSERT OR IGNORE INTO worker_outbox_attempts VALUES(?,?)').run(id,new Date().toISOString());});
   }
@@ -224,6 +271,7 @@ export class Store {
       if(row.done){const previous=row.result?JSON.parse(row.result) as {outcome?:string}:{};const next=result as {outcome?:string;refused?:unknown};if(!terminal||previous.outcome!=='uncertain'||!(['grant','reject','invalid'].includes(next.outcome ?? '')||typeof next.refused==='string'))return false;}
       if(!terminal&&row.result&&(JSON.parse(row.result) as {approvalId?:unknown}).approvalId===(result as {approvalId?:unknown}).approvalId)return false;
       this.db.prepare('UPDATE kaji_outbox SET done=?,result=? WHERE id=?').run(terminal?new Date().toISOString():null,encoded,id);
+      if(said&&this.watch.get(row.sortie_id))this.db.prepare('INSERT OR IGNORE INTO watch_notices VALUES(?,?,?,NULL)').run('remote:'+id+':'+createHash('sha256').update(encoded).digest('hex'),row.sortie_id,said.text.slice(0,600));
       if(said){const r=result as {outcome?:unknown;refused?:unknown};this.ledger.remoteResult(row.sortie_id,{base:said.base.slice(0,60),tool:row.tool,outcome:typeof r.refused==='string'?'refused':typeof r.outcome==='string'?r.outcome:'answered',text:said.text.slice(0,600)});}return true;
     });
   }
@@ -244,7 +292,7 @@ export class Store {
   }
 
   /** When the latest brief was written, if any: the next brief covers what happened since. */
-  lastBrief(): string | null { return (this.db.prepare("SELECT created FROM deliveries WHERE kind='brief' ORDER BY rowid DESC LIMIT 1").get() as {created:string}|undefined)?.created ?? null; }
+  lastBrief(): string | null { return (this.db.prepare("SELECT created FROM deliveries WHERE kind='brief' AND id NOT IN (SELECT delivery_id FROM watch_notices WHERE delivery_id IS NOT NULL) ORDER BY rowid DESC LIMIT 1").get() as {created:string}|undefined)?.created ?? null; }
   inboxPage(after=0,limit=5,afterId?:string):InboxPage {
     if(!Number.isSafeInteger(after)||after<0||!Number.isInteger(limit)||limit<1||limit>20||(after>0&&(typeof afterId!=='string'||!afterId||afterId.length>100)))throw new Error('Invalid inbox checkpoint or limit.');
     this.db.exec('BEGIN');
@@ -261,7 +309,7 @@ export class Store {
       this.db.exec('COMMIT');return {items,head,next,reset:false};
     }catch(e){this.db.exec('ROLLBACK');throw e;}
   }
-  approvals(limit=5) { return this.ledger.pendingApprovals(new Date(),limit); }
+  approvals(limit=5) {let quiet:boolean|undefined;return this.ledger.pendingApprovals(new Date(),limit).map(a=>({...a,...(this.watch.get(a.card.sortieId)&&(quiet ??= this.watchIsQuiet())?{notify:false as const}:{})}));}
   pendingApprovalIds(ids:string[]) { return this.ledger.pendingApprovalIds(ids); }
   expiredApprovals(since: string) { return this.ledger.expiredSince(since); }
   /** The grant ID stays inside the coordinator: callers learn only the outcome. */
@@ -285,6 +333,7 @@ export class Store {
     });
   }
   private decideCore(id: string, decision: Decision, source='api'):{decision:string;result?:unknown;error?:string} {
+    const proactive=this.db.prepare('SELECT x.sortie_id AS id FROM approvals a JOIN actions x ON x.id=a.action_id JOIN watch_runs w ON w.sortie_id=x.sortie_id WHERE a.id=?').get(id) as {id:string}|undefined;if(proactive)this.syncWatch();
     const applied=this.ledger.decide(id,decision,source);
     const action=applied.grantId?this.ledger.grantAction(applied.grantId):undefined;
     if(applied.grantId&&action&&!action.used&&hasExecutor(action.tool)){const outcome=this.run(action.sortieId,action.actionId,applied.grantId,action.tool,action.args);this.settle(action.sortieId,'error' in outcome?'failed':'done');return {decision:applied.decision,...outcome};}
@@ -294,6 +343,7 @@ export class Store {
   }
   /** One owner action through the gate (F-017): ballot, then on a grant the executor runs at once; otherwise it waits for the owner or stops. */
   runAction(sortieId:string,proposal:Proposal,worker?:WorkerLease):ActResult {
+    if(this.watch.get(sortieId))this.syncWatch();
     if(!worker)return this.runActionCore(sortieId,proposal);
     return transaction(this.db,()=>{this.assertWorker(worker);const result=this.runActionCore(sortieId,proposal,worker.expires);if(result.approvalId)this.workerJobs.bindApproval(worker,result.approvalId,result);return result;});
   }

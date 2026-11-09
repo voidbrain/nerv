@@ -390,6 +390,7 @@ try {
         // the upgrade is read once, so the upgrade day does not get a second one.
         const sentBefore=(()=>{try{return (JSON.parse(readFileSync(join(home,'telegram-state.json'),'utf8')) as {brief?:{at?:string}}).brief?.at;}catch{return undefined;}})();
         runtime.startBrief(()=>{const c=live();return c.brief?{at:c.brief.at,timeZone:c.timeZone,language:c.language,base:c.base.name}:undefined;},sentBefore);
+        runtime.startWatch();
         runtime.startInstrumentality(()=>{const c=live();return {...(c.instrumentality?{mode:c.instrumentality}:{}),timeZone:c.timeZone};});
         let server:ReturnType<typeof makeServer>;let native:ReturnType<typeof makeServer>|undefined;
         let close:()=>void=()=>{};
