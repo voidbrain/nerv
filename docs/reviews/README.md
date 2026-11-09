@@ -129,3 +129,7 @@ PR #221 CI 42530253552 attempt 1 also observed heartbeat-path connection loss in
 Native approval card implementation accepted after PR229 exact head `f3109c1` / full CI42584230832, merged main `5933855`; F-023-T01/T02 closed, T03 ready and unimplemented. This updates deterministic evidence only; no live native interaction or notification acceptance follows.
 
 [Execution boundaries and project separation](2026-11-09-execution-boundaries.md), 2026-11-09, baseline `7f50720`: source assessment retains harness/Gauntlet/NERV ownership, plans deterministic enforcement under F-049, protected grading/promotion under F-006 and security evidence under F-065. No upstream change, audit coverage or runtime acceptance; reconsider on runner/grader/authority changes or a demonstrated extraction need.
+
+[Durable native approval delivery](../acceptance/native-approval-delivery-2026-11-09.md), 2026-11-09: Store/inbox atomicity, restart/backfill/cursors, TLS-to-Swift decoding/notification engine and Telegram reconciliation. Final CI and actual local evidence are distinguished there; live menu/VoiceOver/banner acceptance remains F-023/F-011. Reconsider on delivery identity, checkpoint, approval expiry or native authority changes.
+
+[Independent native delivery review](2026-11-09-native-approval-delivery.md), 2026-11-09: no blocking runtime/security findings, one stale architecture sentence corrected; five independently executed Store/inbox tests passed. No independent Swift/CI/live Mac claim. Next condition: material delivery/grant/checkpoint change.

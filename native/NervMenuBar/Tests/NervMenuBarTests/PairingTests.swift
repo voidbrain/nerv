@@ -1,5 +1,15 @@
 import XCTest
 @testable import NervMenuBar
+private final class FixtureCheckpoint: CheckpointStorage {
+    var value: InboxCheckpoint?
+    func load(_ runtime: String) throws -> InboxCheckpoint? { value }
+    func save(_ runtime: String, _ checkpoint: InboxCheckpoint) throws { value = checkpoint }
+}
+private final class FixtureNotificationSink: NotificationSink {
+    var delivered: Set<String> = []
+    func existingIdentifiers() async -> Set<String> { delivered }
+    func deliver(identifier: String, body: String) async throws { delivered.insert(identifier) }
+}
 final class PairingTests: XCTestCase {
     func encoded(_ value: Invitation) throws -> String { try JSONEncoder().encode(value).base64EncodedString().replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "") }
     func testBoundedLocalInvitation() throws {
@@ -36,8 +46,20 @@ extension PairingTests {
         let unchanged = try NativeApproval.page(await connection.request("/api/approvals?limit=5", token: claim.token))
         XCTAssertEqual(unchanged.map(\.id), cards.map(\.id))
         let inbox = try JSONDecoder().decode(InboxPage.self, from: await connection.request("/api/inbox/page?after=0&limit=5", token: claim.token))
-        XCTAssertEqual(inbox.head.sequence, 0)
-        XCTAssertTrue(inbox.items.isEmpty)
+        XCTAssertEqual(inbox.head.sequence, 1)
+        let notice = try XCTUnwrap(inbox.items.first)
+        XCTAssertEqual(notice.kind, "approval")
+        XCTAssertEqual(notice.approval?.id, card.id)
+        XCTAssertEqual(notice.approval?.pending, true)
+        XCTAssertEqual(notice.approval?.expires, card.expires)
+        XCTAssertFalse(notice.message.contains("review@example.invalid"))
+        XCTAssertFalse(notice.message.contains("neutral change"))
+        let storage = FixtureCheckpoint(), sink = FixtureNotificationSink()
+        let consumer = NotificationEngine(storage: storage)
+        try consumer.baseline(claim.runtimeId, head: InboxCheckpoint(sequence: 0, id: nil))
+        _ = try await consumer.consume(runtime: claim.runtimeId, page: inbox, sink: sink)
+        XCTAssertEqual(sink.delivered, [NotificationEngine.identifier(runtime: claim.runtimeId, delivery: notice.id)])
+        XCTAssertEqual(try NotificationEngine(storage: storage).checkpoint(claim.runtimeId), inbox.next)
         do { _ = try await connection.request("/api/reminders", token: claim.token, body: ["title":"forbidden", "due":"2099-01-01T00:00:00Z"]); XCTFail("Read-only client mutated state") } catch { }
         let wrong = NativeConnection(port: invitation.port, fingerprint: String(repeating: "0", count: 64))
         do { _ = try await wrong.request("/api/doctor", token: claim.token); XCTFail("Different certificate pin accepted") } catch { }

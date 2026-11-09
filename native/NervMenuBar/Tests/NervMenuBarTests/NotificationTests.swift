@@ -10,9 +10,10 @@ private final class MemoryCheckpoint: CheckpointStorage {
 private final class FakeNotifications: NotificationSink {
     var existing: Set<String> = []
     var delivered: [String] = []
+    var bodies: [String] = []
     var fail = false
     func existingIdentifiers() async -> Set<String> { existing }
-    func deliver(identifier: String, body: String) async throws { if fail { throw NativeEventError.denied }; delivered.append(identifier); existing.insert(identifier) }
+    func deliver(identifier: String, body: String) async throws { if fail { throw NativeEventError.denied }; delivered.append(identifier); bodies.append(body); existing.insert(identifier) }
 }
 final class NotificationTests: XCTestCase {
     let runtime = UUID().uuidString
@@ -93,5 +94,65 @@ final class NotificationTests: XCTestCase {
         XCTAssertEqual(try LaunchAgentCommand.make(.stop, uid: 501, home: "/Users/test", label: "io.nodo.agent").arguments, ["bootout", "gui/501/io.nodo.agent"])
         XCTAssertThrowsError(try LaunchAgentCommand.make(.stop, uid: 501, home: "/Users/test", label: "io.evil.agent"))
         XCTAssertThrowsError(try LaunchAgentCommand.make(.start, uid: 501, home: "relative"))
+    }
+}
+
+
+extension NotificationTests {
+    func approvalPage(pending: Bool = true, expires: String = "2030-01-01T01:00:00Z") -> InboxPage {
+        let id = UUID().uuidString
+        return InboxPage(items: [InboxEntry(sequence: 1, id: id, message: "Approval needs review. Open NERV to check its current status.", created: "2030-01-01T00:00:00Z", kind: "approval", approval: ApprovalNotice(id: UUID().uuidString, expires: expires, pending: pending))], head: InboxCheckpoint(sequence: 1, id: id), next: InboxCheckpoint(sequence: 1, id: id), reset: false)
+    }
+    func testApprovalDeliveryAndRestartUseExistingDurableCheckpoint() async throws {
+        let storage = MemoryCheckpoint(), sink = FakeNotifications(), page = approvalPage()
+        let engine = NotificationEngine(storage: storage)
+        try engine.baseline(runtime, head: InboxCheckpoint(sequence: 0, id: nil))
+        let now = NativeApproval.date("2030-01-01T00:30:00Z")!
+        _ = try await engine.consume(runtime: runtime, page: page, sink: sink, clock: { now })
+        XCTAssertEqual(sink.delivered.count, 1)
+        XCTAssertEqual(try NotificationEngine(storage: storage).checkpoint(runtime), page.next)
+    }
+    func testSettledOrExpiredApprovalsAdvanceWithoutNotifying() async throws {
+        let now = NativeApproval.date("2030-01-01T01:00:00Z")!
+        for page in [approvalPage(pending: false, expires: "2030-01-01T02:00:00Z"), approvalPage()] {
+            let storage = MemoryCheckpoint(), sink = FakeNotifications()
+            let consumer = NotificationEngine(storage: storage)
+            try consumer.baseline(runtime, head: InboxCheckpoint(sequence: 0, id: nil))
+            _ = try await consumer.consume(runtime: runtime, page: page, sink: sink, clock: { now })
+            XCTAssertTrue(sink.delivered.isEmpty)
+            XCTAssertEqual(storage.checkpoint, page.next)
+        }
+    }
+    func testMalformedApprovalMetadataFailsBeforeAnySubmission() async throws {
+        let storage = MemoryCheckpoint(), sink = FakeNotifications()
+        let consumer = NotificationEngine(storage: storage)
+        try consumer.baseline(runtime, head: InboxCheckpoint(sequence: 0, id: nil))
+        let id = UUID().uuidString
+        let page = InboxPage(items: [InboxEntry(sequence: 1, id: id, message: "Invalid", created: "x", kind: "approval")], head: InboxCheckpoint(sequence: 1, id: id), next: InboxCheckpoint(sequence: 1, id: id), reset: false)
+        do { _ = try await consumer.consume(runtime: runtime, page: page, sink: sink); XCTFail("Missing approval identity accepted") } catch { }
+        XCTAssertTrue(sink.delivered.isEmpty)
+        XCTAssertEqual(storage.checkpoint?.sequence, 0)
+    }
+}
+
+extension NotificationTests {
+    func testApprovalNoticeUsesItalianSystemCopyWithoutChangingUserMessages() async throws {
+        let storage = MemoryCheckpoint(), sink = FakeNotifications()
+        let consumer = NotificationEngine(storage: storage)
+        try consumer.baseline(runtime, head: InboxCheckpoint(sequence: 0, id: nil))
+        let now = NativeApproval.date("2030-01-01T00:30:00Z")!
+        _ = try await consumer.consume(runtime: runtime, page: approvalPage(), sink: sink, language: "it", clock: { now })
+        XCTAssertEqual(sink.bodies, ["È stata richiesta una revisione. Apri NERV per controllare lo stato attuale."])
+    }
+}
+
+extension NotificationTests {
+    func testDuplicateApprovalIdentityFailsBeforeAnySubmission() async throws {
+        let storage = MemoryCheckpoint(), sink = FakeNotifications()
+        let engine = NotificationEngine(storage: storage), first = approvalPage().items[0], secondID = UUID().uuidString
+        try engine.baseline(runtime, head: InboxCheckpoint(sequence: 0, id: nil))
+        let page = InboxPage(items: [first, InboxEntry(sequence: 2, id: secondID, message: first.message, created: first.created, kind: "approval", approval: first.approval)], head: InboxCheckpoint(sequence: 2, id: secondID), next: InboxCheckpoint(sequence: 2, id: secondID), reset: false)
+        do { _ = try await engine.consume(runtime: runtime, page: page, sink: sink); XCTFail("Duplicate approval accepted") } catch { }
+        XCTAssertTrue(sink.delivered.isEmpty); XCTAssertEqual(storage.checkpoint?.sequence, 0)
     }
 }

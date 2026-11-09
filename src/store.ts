@@ -16,7 +16,7 @@ import {Registry, REGISTRY_SCHEMA } from './kaji.ts';
 import { defaultPolicy, type Ballot, type Policy } from './policy.ts';
 export type Reminder = { id: string; title: string; due: string; created: string; delivered: string | null; cancelled: string | null };
 export interface InboxCheckpoint {sequence:number;id?:string}
-export interface InboxEntry {sequence:number;id:string;message:string;created:string;kind:'reminder'|'brief'}
+export interface InboxEntry {sequence:number;id:string;message:string;created:string;kind:'reminder'|'brief'|'approval';approval?:{id:string;expires:string;pending:boolean}}
 export interface InboxPage {items:InboxEntry[];head:InboxCheckpoint;next:InboxCheckpoint;reset:boolean}
 /** What one gated action came to: granted and run (result or error), waiting for the owner (approvalId), or rejected. */
 export interface ActResult {external?:boolean;sortieId:string;actionId:string;outcome:Ballot['outcome'];pattern:Ballot['pattern'];reason:string;sync:Ballot['sync'];approvalId?:string;result?:unknown;error?:string}
@@ -70,13 +70,27 @@ export class Store {
     this.db.exec('CREATE INDEX IF NOT EXISTS deliveries_kind_created ON deliveries(kind,created); PRAGMA user_version=5');
     // Additive daily identities preserve the inbox's existing rowids and UUIDs.
     this.db.exec('CREATE TABLE IF NOT EXISTS daily_briefs(day TEXT PRIMARY KEY,delivery_id TEXT NOT NULL UNIQUE REFERENCES deliveries(id))');
+    // Approval delivery identities are additive: existing reminder/brief rowids remain channel cursors.
+    this.db.exec('CREATE TABLE IF NOT EXISTS approval_deliveries(approval_id TEXT PRIMARY KEY REFERENCES approvals(id),delivery_id TEXT NOT NULL UNIQUE REFERENCES deliveries(id))');
     this.ledger = new Ledger(this.db,{policy:scrolls.policy,tools:builtinTools});this.memory = new Memory(this.db);this.policySource = scrolls.source;
     this.db.exec("CREATE TABLE IF NOT EXISTS worker_legacy_outbox(id TEXT PRIMARY KEY,state TEXT NOT NULL,reason TEXT NOT NULL,created TEXT NOT NULL); CREATE TABLE IF NOT EXISTS worker_outbox_cancels(id TEXT PRIMARY KEY,reason TEXT NOT NULL,created TEXT NOT NULL); CREATE TABLE IF NOT EXISTS worker_outbox_attempts(id TEXT PRIMARY KEY,attempted TEXT NOT NULL); CREATE TABLE IF NOT EXISTS worker_outbox_reconciliations(id TEXT NOT NULL,action TEXT NOT NULL,reason TEXT NOT NULL,source TEXT NOT NULL,created TEXT NOT NULL)");
     try{this.workerJobs=transaction(this.db,()=>{
       const legacy=!!this.db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='kaji_runs'").get();const jobs=new WorkerJobs(this.db,raw=>this.legacyWorkerResult(raw));
       if(legacy)this.db.prepare("INSERT OR IGNORE INTO worker_legacy_outbox SELECT id,'pending','Predates durable worker receipts; verify the destination before replay.',? FROM kaji_outbox WHERE done IS NULL").run(new Date().toISOString());return jobs;
     });}catch(error){this.db.close();throw error;}
-
+    // Upgrade existing pending cards once; settled/expired cards never become new notifications.
+    transaction(this.db,()=>{
+      const pending=this.db.prepare('SELECT id FROM approvals WHERE decision IS NULL AND expires>? AND id NOT IN (SELECT approval_id FROM approval_deliveries)').all(new Date().toISOString()) as {id:string}[];
+      for(const approval of pending)this.deliverApproval(approval.id);
+    });
+  }
+  private deliverApproval(approvalId:string):void {
+    if(this.db.prepare('SELECT 1 FROM approval_deliveries WHERE approval_id=?').get(approvalId))return;
+    const row=this.db.prepare('SELECT x.created FROM approvals a JOIN actions x ON x.id=a.action_id WHERE a.id=?').get(approvalId) as {created:string};
+    const id=randomUUID();
+    // No tool arguments, recipients, fact text or grant handles belong in OS notification bodies.
+    this.db.prepare("INSERT INTO deliveries(id,kind,message,created) VALUES(?,'approval',?,?)").run(id,'Approval needs review. Open NERV to check its current status.',row.created);
+    this.db.prepare('INSERT INTO approval_deliveries VALUES(?,?)').run(approvalId,id);
   }
   private legacyWorkerResult(raw:string):{state:'completed'|'running';result?:unknown} {
     const result=JSON.parse(raw) as {outcome?:string;approvalId?:string;external?:boolean};
@@ -236,7 +250,11 @@ export class Store {
       const head=(this.db.prepare('SELECT rowid AS sequence,id FROM deliveries ORDER BY rowid DESC LIMIT 1').get() as unknown as InboxCheckpoint|undefined) ?? {sequence:0};
       const previous=after?this.db.prepare('SELECT id FROM deliveries WHERE rowid=?').get(after) as {id:string}|undefined:undefined;
       if(after>0&&previous?.id!==afterId){this.db.exec('COMMIT');return {items:[],head,next:head,reset:true};}
-      const items=this.db.prepare('SELECT rowid AS sequence,id,message,created,kind FROM deliveries WHERE rowid>? ORDER BY rowid LIMIT ?').all(after,limit) as unknown as InboxEntry[];
+      const rows=this.db.prepare(`SELECT d.rowid AS sequence,d.id,d.message,d.created,d.kind,a.id AS approvalId,a.expires,a.decision
+        FROM deliveries d LEFT JOIN approval_deliveries n ON n.delivery_id=d.id LEFT JOIN approvals a ON a.id=n.approval_id
+        WHERE d.rowid>? ORDER BY d.rowid LIMIT ?`).all(after,limit) as {sequence:number;id:string;message:string;created:string;kind:InboxEntry['kind'];approvalId:string|null;expires:string|null;decision:string|null}[];
+      const now=new Date().toISOString();
+      const items:InboxEntry[]=rows.map(({approvalId,expires,decision,...item})=>({...item,...(approvalId&&expires?{approval:{id:approvalId,expires,pending:decision===null&&expires>now}}:{})}));
       const last=items.at(-1);const next=last?{sequence:last.sequence,id:last.id}:after?{sequence:after,id:afterId}:{sequence:0};
       this.db.exec('COMMIT');return {items,head,next,reset:false};
     }catch(e){this.db.exec('ROLLBACK');throw e;}
@@ -278,7 +296,11 @@ export class Store {
     return transaction(this.db,()=>{this.assertWorker(worker);const result=this.runActionCore(sortieId,proposal,worker.expires);if(result.approvalId)this.workerJobs.bindApproval(worker,result.approvalId,result);return result;});
   }
   private runActionCore(sortieId: string, proposal: Proposal,approvalUntil?:number):ActResult {
-    const p=this.ledger.propose(sortieId,proposal,new Date(),approvalUntil);
+    const p=transaction(this.db,()=>{
+      const proposed=this.ledger.propose(sortieId,proposal,new Date(),approvalUntil);
+      if(proposed.approvalId)this.deliverApproval(proposed.approvalId);
+      return proposed;
+    });
     const base:ActResult={sortieId,actionId:p.actionId,outcome:p.ballot.outcome,pattern:p.ballot.pattern,reason:p.ballot.reason,sync:p.ballot.sync,...(p.approvalId?{approvalId:p.approvalId}:{})};
     if(p.grantId&&hasExecutor(proposal.tool)){const outcome=this.run(sortieId,p.actionId,p.grantId,proposal.tool,proposal.args);this.settle(sortieId,'error' in outcome?'failed':'done');return {...base,...outcome};}
     // F-021: a granted MCP tool: the single-use grant is used here, the call is made by the tools process.

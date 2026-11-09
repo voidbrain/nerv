@@ -276,7 +276,7 @@ export class TelegramChannel {
    for(;;){
     const at=this.state.inbox ?? {sequence:0};const page=await this.store.inboxPage(at.sequence,5,at.id);
     // Checkpoint after every message: a stop or crash resends at most the one in flight.
-    for(const item of page.items){await this.out(item.kind==='brief'?item.message:`⏰ ${item.message}`);this.state.inbox={sequence:item.sequence,id:item.id};this.save();}
+    for(const item of page.items){if(item.kind!=='approval')await this.out(item.kind==='brief'?item.message:`⏰ ${item.message}`);this.state.inbox={sequence:item.sequence,id:item.id};this.save();}
     // A reset means the checkpoint no longer matches the inbox (restored database): continue from its head, replay nothing.
     if(page.reset){this.state.inbox=page.next;this.save();break;}
     if(!page.items.length)break;this.state.inbox=page.next;this.save();

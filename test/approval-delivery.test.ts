@@ -55,3 +55,13 @@ test('F-023: upgrade backfills pending approvals once and preserves prior delive
   store.close();store=new Store(path);assert.deepEqual(store.inboxPage(),page);
  }finally{store.close();rmSync(home,{recursive:true,force:true});}
 });
+
+
+test('F-023: elapsed TTL suppresses a notice before the scheduler persists expiry',()=>{
+ const store=new Store(':memory:');try{
+  const result=store.runAction(open(store),proposal);assert.ok(result.approvalId);
+  store.db.prepare('UPDATE approvals SET expires=? WHERE id=?').run('2000-01-01T00:00:00.000Z',result.approvalId);
+  assert.equal(store.inboxPage().items[0]!.approval?.pending,false);
+  assert.equal((store.db.prepare('SELECT decision FROM approvals WHERE id=?').get(result.approvalId) as {decision:null}).decision,null);
+ }finally{store.close();}
+});
