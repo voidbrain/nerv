@@ -1,0 +1,13 @@
+# Configuration qualification reassessment
+
+9 November 2026; NERV baseline `cb06e90`. Requested scope: reusable Gauntlet purpose, coder/auditor combinations, a second qualification stage and mini PC specialist support. This is a focused architecture assessment, not a full/scoped audit or independent review.
+
+Inspected: Gauntlet integration guide, pinned 0.2.0 provenance, architecture/runtime, ownership proposal, evaluation/improvement decision, F-006/F-045/F-074 records, task contracts, model profiles and derived queue. Authenticated `npm run ci:status -- 226` reports CI42574859898 plan/validate/windows/native-macos success and full-suite skipped. The preceding full baseline remains PR225 / CI42573854325. Template pull reports up to date. No live model, download, remote target or device action ran for this assessment.
+
+Findings: NERV has a delivered evidence/index/telemetry integration, but no automatic evidence-driven assignment or combination qualification. Individual smoke does not demonstrate coding/audit competence, pair interactions or device suitability. The role/inference/execution split already permits intended mini PC support, while remote routing and acceptance remain unfinished. The queue starts with F-023; no Gauntlet priority override is justified by this design discussion.
+
+Decision: adopt [staged configuration qualification](../decisions/configuration-qualification.md). Preserve independent generic ownership and NERV-owned packs/permissions. Compare a screened shortlist instead of exhaustive pairs; reject averaged individual scores and auditor agreement as acceptance. Bind the pair and placement configuration to separate evidence and independent heldout grading. Unknown performance remains unknown; critical safety failures are explicit. NERV tasks F-006-T03/T04 own remaining pack/placement work, with F-045 consuming reviewed evidence. Generic implementation is not assigned to this repository and no upstream release waits on NERV adoption.
+
+Owner continuation resumes backlog work after the earlier pause. F-074-T02 is ready within its existing Gemma-only budget and remains unexecuted; it follows the derived queue. No new live pair/hardware budget follows from documenting the design. Existing human/device gates remain.
+
+Validation: work/source equality, backlog, recap, dependencies, queue, roadmap, conventions, integrations, rules, maintenance and harness checks passed. Final planner selects documentation-only work with current PR225 full evidence; no runtime change or new measured capability is claimed. Reconsider on material workflow, hardware, trust or protocol change, repeated correlated failures, or evidence that screening/campaign cost exceeds benefit.

@@ -29,12 +29,12 @@
   ],
   "escalation": [
     "Stop on invalid identity, unsafe reuse or unknown budget consumption; do not weaken grading",
-    "Owner requested pause after adoption on2026-11-09; do not execute the live Gemma campaign until explicit resume"
+    "Owner resumed backlog work on 2026-11-09; retain the recorded Gemma-only budget, no downloads or additional model/device campaigns."
   ],
   "id": "F-074-T02",
   "title": "Run and record authorized measured Gemma smoke",
   "goal": "Run and record authorized measured Gemma smoke",
-  "status": "planned",
+  "status": "ready",
   "acceptance": [
     "Owned scope verified; evidence and limitations recorded; no automatic qualification"
   ]

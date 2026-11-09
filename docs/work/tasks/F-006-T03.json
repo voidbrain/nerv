@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "status": "planned",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "distributed-contracts",
+    "privacy-review",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository-owned cases and private evidence; no remote host activation, private project transfer, model download or production promotion. Live campaigns require their own selected targets and explicit budgets.",
+  "validation": [
+    "Validate NERV pack/adapter across the Gauntlet evidence boundary with neutral fixtures",
+    "Run applicable scoped checks and required CI; live acceptance is separately recorded"
+  ],
+  "escalation": [
+    "Missing independent isolation/grading or protocol support prevents a qualification claim",
+    "Unknown budget use, host identity, privacy authorization or external outcome stops execution"
+  ],
+  "id": "F-006-T03",
+  "title": "NERV combination qualification pack and evidence adapter",
+  "goal": "Evaluate the complete coder/auditor workflow separately from individual role evidence",
+  "dependsOn": [
+    "F-006-T01"
+  ],
+  "resources": [
+    "contract:gauntlet-adoption",
+    "evals/gauntlet/**",
+    "tools/gauntlet.mjs",
+    "tools/gauntlet-adapter.mjs",
+    "test/gauntlet.test.mjs",
+    "docs/decisions/configuration-qualification.md",
+    "docs/work/records/F-006.md",
+    "docs/work/tasks/F-006-T03.json",
+    "generated:backlog-views"
+  ],
+  "acceptance": [
+    "Versioned NERV cases include hidden immutable acceptance, deliberately flawed patches, false rejection and shared blind-spot cases",
+    "A combination result binds both configurations, handoffs, budgets, hosts and component evidence without averaging away safety failures",
+    "Record accepted task rate, escaped defects, repair rounds, reviewer effort, latency and total resource cost; missing metrics remain unknown",
+    "External runner owns coding isolation; no model self-approval, automatic qualification or grants"
+  ]
+}
