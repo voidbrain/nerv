@@ -9,7 +9,7 @@ test('recall finds Instrumentality\'s summaries as well as facts; summaries writ
  try{
   const a=new Store(path);a.memory.saveEpisode({since:'2030-01-01T00:00:00Z',until:'2030-01-02T00:00:00Z',summary:'The owner planned a trip to Kyoto with Ada.',exchanges:4,proposed:1});
   // An older install: the summary is there, its index row is not.
-  a.db.exec("INSERT INTO episodes VALUES('old','2029-12-01T00:00:00Z','2029-12-02T00:00:00Z','Bought a new espresso machine.',2,0,'2029-12-02T00:00:00Z')");a.close();
+  a.db.exec("INSERT INTO episodes(id,since,until,summary,exchanges,proposed,created) VALUES('old','2029-12-01T00:00:00Z','2029-12-02T00:00:00Z','Bought a new espresso machine.',2,0,'2029-12-02T00:00:00Z')");a.close();
   const raw=new DatabaseSync(path);raw.exec('DELETE FROM episodes_fts');raw.close();
   const b=new Store(path);
   try{

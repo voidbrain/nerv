@@ -92,3 +92,27 @@ test('B-025: a granted tool runs under the stricter of its grant\'s EVA and the 
  assert.equal(stricter('eva-01','eva-02'),'eva-01');assert.equal(stricter('eva-03','eva-00'),'eva-03','tainted local work stays in quarantine');
  assert.equal(stricter('eva-02',undefined),'eva-02','NERV\'s own tools: the stage decides');
 });
+
+test('F-027: MCP result taints the durable sortie, approved memory, resume and the next conversation turn',{timeout:60000},async()=>{
+ const {Runtime}=await import('../src/runtime.ts');
+ const probe=new McpClient(server());const fp=fingerprint((await probe.listTools())[0]!);probe.close();
+ const script=['{"action":{"tool":"notes.read_note","args":{"name":"fixture"}}}','{"action":{"tool":"memory.remember","args":{"text":"Fixture prefers tea"}}}','{"reply":"Recorded after approval."}','{"action":{"tool":"notes.read_note","args":{"name":"fixture-again"}}}',...Array.from({length:4},(_,n)=>JSON.stringify({action:{tool:'notes.read_note',args:{name:'blocked-'+n}}})),'{"reply":"Quarantine required."}'];
+ const m=await model(script);const home=mkdtempSync(join(tmpdir(),'nerv-mcp-taint-'));
+ writeFileSync(join(home,'config.json'),JSON.stringify({models:{local:{baseUrl:m.url,model:'m'},roles:{misato:{route:'local'},consultant:{model:'c'}}},tools:{mcp:[server()],grants:[{server:'notes',tool:'read_note',effect:'read',eva:'02',fingerprint:fp}]}}));
+ let r=new Runtime(join(home,'nerv.sqlite'),undefined,home);
+ try{
+  await r.ready();const first=await r.chat('Read the fixture and remember its preference','cli');
+  assert.equal((await r.sortie(first.sortieId))?.trust,'tainted');assert.equal(first.steps[0]?.tainted,true);
+  assert.equal(first.waiting[0]?.tool,'memory.remember');
+  // Restart while the card waits: propagation must not depend on coordinator memory.
+  await r.close();r=new Runtime(join(home,'nerv.sqlite'),undefined,home);await r.ready();
+  const resumed:unknown[]=[];r.onResumed(x=>resumed.push(x));
+  await r.decide(first.waiting[0]!.approvalId,'approve');await r.sweep();assert.equal(resumed.length,1);
+  assert.equal((await r.lilith.list())[0]?.tainted,true,'approval does not cleanse third-party content');
+  const next=await r.chat('Read another fixture note','cli');
+  assert.equal((await r.sortie(next.sortieId))?.trust,'tainted','earlier context retains its provenance');
+  assert.equal(next.steps.length,5);assert.ok(next.steps.every(s=>s.outcome==='reject'));assert.equal(next.waiting.length,0);
+  assert.equal(next.steps[0]?.outcome,'reject');assert.match(next.steps[0]?.reason ?? '',/EVA-03/);
+  assert.equal((await r.events(next.sortieId)).some(e=>e.kind==='grant.used'),false,'quarantined outside code never dispatches');
+ }finally{await r.close();await m.close();rmSync(home,{recursive:true,force:true});}
+});

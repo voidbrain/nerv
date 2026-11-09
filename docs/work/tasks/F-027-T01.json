@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "parent": "F-027",
+  "status": "ready",
+  "dependsOn": [],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/work/records/F-027.md",
+    "docs/work/tasks/F-027-T01.json",
+    "generated:backlog-views",
+    "docs/**",
+    ".harness.json",
+    "AGENTS.md",
+    "contract:backlog-ids"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "evidence-review",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral invented inputs only; no live model or external data. Content labels never authorize execution.",
+  "validation": [
+    "Process-boundary regression for MCP-result taint and later gate escalation",
+    "Durable recall/conversation/resume and fact/summary propagation regressions",
+    "Full deterministic checks for persistence/runtime/security changes"
+  ],
+  "escalation": [
+    "EVA-03 outside code remains denied until F-049 provides actual isolation; never claim process-wide egress enforcement from URL checks"
+  ],
+  "id": "F-027-T01",
+  "title": "Carry durable context provenance into the gate and memory",
+  "goal": "Prevent third-party context from being silently upgraded to owner trust",
+  "acceptance": [
+    "Intake and MCP output record source/trust; taint only increases within a sortie",
+    "Memory, summaries, earlier turns and resumed requests preserve taint",
+    "External effects under tainted context are Pattern Blue; external code requiring EVA-03 fails closed"
+  ]
+}

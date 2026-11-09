@@ -304,14 +304,17 @@ export class Store {
     const base:ActResult={sortieId,actionId:p.actionId,outcome:p.ballot.outcome,pattern:p.ballot.pattern,reason:p.ballot.reason,sync:p.ballot.sync,...(p.approvalId?{approvalId:p.approvalId}:{})};
     if(p.grantId&&hasExecutor(proposal.tool)){const outcome=this.run(sortieId,p.actionId,p.grantId,proposal.tool,proposal.args);this.settle(sortieId,'error' in outcome?'failed':'done');return {...base,...outcome};}
     // F-021: a granted MCP tool: the single-use grant is used here, the call is made by the tools process.
-    if(p.grantId&&this.ledger.isExternal(proposal.tool)){this.ledger.authorize(p.grantId,proposal.tool,proposal.args);return {...base,external:true};}
+    if(p.grantId&&this.ledger.isExternal(proposal.tool)){this.ledger.authorize(p.grantId,proposal.tool,proposal.args);this.ledger.intake(sortieId,'mcp:'+proposal.tool,'tainted');return {...base,external:true};}
     if(p.ballot.outcome==='reject')this.settle(sortieId,'failed');
     return base;
   }
   private run(sortieId:string,actionId:string,grantId:string,tool:string,args:Record<string,unknown>):{result:unknown}|{error:string} {
     this.ledger.authorize(grantId,tool,args);
     let outcome:{result:unknown}|{error:string};
-    try{outcome={result:execute(this,tool,args,{sortieId})};}catch(e){outcome={error:e instanceof Error?e.message:'Executor failed.'};}
+    try{outcome={result:execute(this,tool,args,{sortieId,tainted:this.ledger.trust(sortieId)==='tainted'})};}catch(e){outcome={error:e instanceof Error?e.message:'Executor failed.'};}
+    if('result' in outcome&&tool==='memory.recall'){const facts=outcome.result as {tainted:boolean}[];this.ledger.intake(sortieId,'tool:'+tool,facts.some(f=>f.tainted)?'tainted':'trusted');}
+    // Reminder text predates per-item provenance; treat recalled stored text conservatively.
+    if('result' in outcome&&tool==='reminders.list')this.ledger.intake(sortieId,'tool:'+tool,'tainted');
     this.ledger.finished(sortieId,actionId,tool,outcome);return outcome;
   }
   private settle(sortieId:string,status:'done'|'failed') {

@@ -39,3 +39,7 @@ Read the native guide before changing cursor or permission semantics. Enable est
 Service commands are fixed user launchctl actions with timeouts and a separate Stop confirmation. A paired runtime must match local plist NERV_HOME. SMAppService mainApp owns companion login only; display real requiresApproval/enabled states. Do not register or modify actual OS services/login items in repository tests. CI validates pure command plans, simulated notification outcomes, pinning and compilation; live Mac permission/banner/login acceptance remains separate.
 
 Native background polling uses `/api/status`, never a recurring full doctor/SQLite integrity scan. Keep an authenticated runtime ping distinct from explicit database diagnostics, and test that polling cannot call quick_check indirectly.
+
+## Context provenance
+
+F-027-T01 carries monotonically increasing sortie taint through `Ledger.intake` and append-only `context.intake` events. MCP dispatch marks taint before returning to the coordinator. Recalled facts/summaries and conversation turns keep source/taint; owner approval and duplicate facts never clear taint. Outside code requiring EVA-03 is refused until F-049 supplies isolation. Enforced network allowlisting remains F-027-T02; an application URL check is not process confinement. Legacy summaries and recalled reminder text with no reliable item provenance are conservatively tainted. <!-- project -->

@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "parent": "F-027",
+  "status": "planned",
+  "dependsOn": [
+    "F-027-T01",
+    "F-049-T01"
+  ],
+  "resources": [
+    "contract:egress-enforcement",
+    "docs/work/records/F-027.md",
+    "docs/work/tasks/F-027-T02.json"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "evidence-review",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral invented inputs only; no live model or external data. Content labels never authorize execution.",
+  "validation": [
+    "Network-boundary tests using neutral local servers",
+    "Review supported-platform confinement and deployment evidence"
+  ],
+  "escalation": [
+    "EVA-03 outside code remains denied until F-049 provides actual isolation; never claim process-wide egress enforcement from URL checks",
+    "F-049-T01 contract completion alone is insufficient: actual supported confinement must exist before enabling egress-dependent execution"
+  ],
+  "id": "F-027-T02",
+  "title": "Enforce Scrolls egress at the execution boundary",
+  "goal": "Restrict outside-code network access to owner-declared destinations using real isolation",
+  "acceptance": [
+    "Validated default-deny Scrolls destinations enforced for DNS, redirects and direct outside-code sockets",
+    "Join tests prove denied destinations never receive traffic",
+    "EVA-03 isolation supplied by F-049; unsupported execution fails closed"
+  ]
+}

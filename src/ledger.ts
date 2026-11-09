@@ -43,7 +43,18 @@ export class Ledger {
  isExternal(tool:string):boolean {return this.external.has(tool)&&!this.tools.has(tool);}
  constructor(db:DatabaseSync,options:{tools?:Tool[];policy?:Policy;grantTtlMs?:number;approvalTtlMs?:number}={}) {
   this.db=db;this.tools=new Map((options.tools ?? []).map(t=>[t.name,t]));this.policy=validatePolicy(options.policy ?? defaultPolicy);
+  this.upgradeProvenance();
   this.grantTtlMs=options.grantTtlMs ?? 60_000;this.approvalTtlMs=options.approvalTtlMs ?? 3_600_000;
+ }
+ /** Existing unlabelled planner context cannot be retrospectively certified as owner-only. */
+ private upgradeProvenance():void {
+  this.tx(()=>{
+   this.db.exec('CREATE TABLE IF NOT EXISTS provenance_migrations(id TEXT PRIMARY KEY)');
+   if(this.db.prepare("SELECT 1 FROM provenance_migrations WHERE id='context-v1'").get())return;
+   const rows=this.db.prepare("SELECT id FROM sorties WHERE source NOT IN ('owner') AND trust='trusted'").all() as {id:string}[];
+   for(const {id} of rows){this.db.prepare("UPDATE sorties SET trust='tainted' WHERE id=?").run(id);this.event(id,null,'context.intake',{source:'legacy:unlabelled-context',trust:'tainted'},new Date());}
+   this.db.exec("INSERT INTO provenance_migrations VALUES('context-v1')");
+  });
  }
  private event<K extends EventKind>(sortieId:string,actionId:string|null,kind:K,payload:EventPayloads[K],now:Date) {this.db.prepare('INSERT INTO events(sortie_id,action_id,kind,payload,created,v) VALUES(?,?,?,?,?,?)').run(sortieId,actionId,kind,encodePayload(kind,payload),iso(now),EVENT_SCHEMA_VERSION);}
  private tx<T>(work:()=>T):T {return transaction(this.db,work);}
@@ -56,6 +67,20 @@ export class Ledger {
   const id=randomUUID();
   return this.tx(()=>{this.db.prepare('INSERT INTO sorties(id,source,title,trust,status,created) VALUES(?,?,?,?,?,?)').run(id,source,title.trim(),trust,'open',iso(now));this.event(id,null,'sortie.opened',{source,title:title.trim(),trust},now);return id;});
  }
+ /** Naoko: persist source labels and only increase Ireul taint. Content never chooses its own trust. */
+ intake(sortieId:string,source:string,trust:Trust,now=new Date()):void {
+  if(typeof source!=='string'||!source.trim()||source.length>100||(trust!=='trusted'&&trust!=='tainted'))throw new Error('Invalid context source.');
+  this.tx(()=>{
+   const s=this.db.prepare('SELECT status FROM sorties WHERE id=?').get(sortieId) as {status:string}|undefined;
+   if(s?.status!=='open')throw new Error('Sortie is not open.');
+   if(trust==='tainted')this.db.prepare("UPDATE sorties SET trust='tainted' WHERE id=?").run(sortieId);
+   this.event(sortieId,null,'context.intake',{source,trust},now);
+  });
+ }
+ trust(sortieId:string):Trust {
+  const s=this.db.prepare('SELECT trust FROM sorties WHERE id=?').get(sortieId) as {trust:Trust}|undefined;
+  if(!s)throw new Error('No sortie with that ID.');return s.trust;
+ }
  /** Every agent action passes here. A reject goes back to the planner; after maxRejects it escalates to the owner. */
  propose(sortieId:string,p:Proposal,now=new Date(),approvalUntil?:number):Proposed {
   if(!p||typeof p.tool!=='string'||!p.tool||p.tool.length>100||!p.args||typeof p.args!=='object'||Array.isArray(p.args)||Buffer.byteLength(JSON.stringify(p.args))>MAX_ARGS_BYTES)throw new Error('Invalid action.');
@@ -63,7 +88,7 @@ export class Ledger {
    const sortie=this.db.prepare('SELECT * FROM sorties WHERE id=?').get(sortieId) as {trust:Trust;status:string;rejects:number;spent:number}|undefined;
    if(!sortie||sortie.status!=='open')throw new Error('Sortie is not open.');
    const result=ballot({tool:p.tool,args:p.args,trust:sortie.trust,stage:p.stage,cost:p.cost ?? 0},(this.tools.get(p.tool) ?? this.external.get(p.tool)),this.policy,sortie.spent,clampVerdict(p.casper),p.extras?.map(v=>clampVerdict(v)!));
-   if(result.outcome==='reject'&&sortie.rejects+1>this.policy.maxRejects)Object.assign(result,{outcome:'approval',reason:`Reject limit reached (${result.reason}); the owner decides.`});
+   if(result.outcome==='reject'&&!(result.executor==='eva-03'&&(this.tools.get(p.tool) ?? this.external.get(p.tool))?.eva)&&sortie.rejects+1>this.policy.maxRejects)Object.assign(result,{outcome:'approval',reason:`Reject limit reached (${result.reason}); the owner decides.`});
    const actionId=randomUUID();this.db.prepare('INSERT INTO actions VALUES(?,?,?,?,?,?)').run(actionId,sortieId,p.tool,JSON.stringify(p.args),JSON.stringify(result),iso(now));
    this.event(sortieId,actionId,'ballot',result,now);
    if(result.outcome==='reject'){this.db.prepare('UPDATE sorties SET rejects=rejects+1 WHERE id=?').run(sortieId);return {actionId,ballot:result};}
@@ -110,13 +135,13 @@ export class Ledger {
    if(typeof text!=='string'||!text.trim()||text.length>4000)throw new Error('Invalid answer.');
    this.event(q.sortieId,null,'misato.answered',{text,questionSequence:q.sequence},now);return {sortieId:q.sortieId};});
  }
- private exchange(sortieId:string,requestPayload:string):{request:string;reply?:string;actions?:string[]} {
+ private exchange(sortieId:string,requestPayload:string):{request:string;reply?:string;actions?:string[];source?:string;tainted?:boolean} {
   const reply=this.db.prepare("SELECT payload FROM events WHERE sortie_id=? AND kind='misato.reply' ORDER BY sequence DESC LIMIT 1").get(sortieId) as {payload:string}|undefined;
   const ran=(this.db.prepare("SELECT payload FROM events WHERE sortie_id=? AND kind='action.done' ORDER BY sequence").all(sortieId) as {payload:string}[]).map(e=>{const p=JSON.parse(e.payload) as {tool:string;result:unknown};return `${p.tool} → ${JSON.stringify(p.result).slice(0,300)}`;});
-  return {request:(JSON.parse(requestPayload) as {text:string}).text,...(reply?{reply:(JSON.parse(reply.payload) as {text:string}).text}:{}),...(ran.length?{actions:ran}:{})};
+  return {source:sortieId,tainted:this.trust(sortieId)==='tainted',request:(JSON.parse(requestPayload) as {text:string}).text,...(reply?{reply:(JSON.parse(reply.payload) as {text:string}).text}:{}),...(ran.length?{actions:ran}:{})};
  }
  /** The last exchanges of one conversation within `withinMs`, oldest first: request, Misato's reply and the actions that ran. */
- conversation(key:string,withinMs=30*60_000,limit=3,now=new Date()):{request:string;reply?:string;actions?:string[]}[] {
+ conversation(key:string,withinMs=30*60_000,limit=3,now=new Date()):{request:string;reply?:string;actions?:string[];source?:string;tainted?:boolean}[] {
   if(typeof key!=='string'||!/^[a-z]+(:[a-z0-9-]{1,30})?$/.test(key)||key.length>40)throw new Error('Invalid conversation.');
   const rows=this.db.prepare("SELECT sortie_id,payload FROM events WHERE kind='misato.request' AND json_extract(payload,'$.conversation')=? AND created>? ORDER BY sequence DESC LIMIT ?").all(key,iso(now,-withinMs),limit) as {sortie_id:string;payload:string}[];
   return rows.reverse().map(r=>this.exchange(r.sortie_id,r.payload));
@@ -124,7 +149,7 @@ export class Ledger {
  /** When the owner last asked Misato anything, for Instrumentality's idle mode. */
  lastRequestAt():string|null {return (this.db.prepare("SELECT max(created) AS t FROM events WHERE kind='misato.request'").get() as {t:string|null}).t;}
  /** Every exchange with Misato in [since, until), oldest first, across conversations: Instrumentality's input. */
- exchangesBetween(since:string,until:string,limit=200):{request:string;reply?:string;actions?:string[]}[] {
+ exchangesBetween(since:string,until:string,limit=200):{request:string;reply?:string;actions?:string[];source?:string;tainted?:boolean}[] {
   const rows=this.db.prepare("SELECT sortie_id,payload FROM events WHERE kind='misato.request' AND created>=? AND created<? ORDER BY sequence LIMIT ?").all(since,until,limit) as {sortie_id:string;payload:string}[];
   return rows.map(r=>this.exchange(r.sortie_id,r.payload));
  }

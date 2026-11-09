@@ -48,14 +48,14 @@ function ids(args:Record<string,unknown>):string[] {
  return list as string[];
 }
 export function hasExecutor(tool:string):boolean {return builtinTools.some(t=>t.name===tool);}
-export function execute(backend:ReminderBackend,tool:string,args:Record<string,unknown>,context:{sortieId?:string}={}):unknown {
+export function execute(backend:ReminderBackend,tool:string,args:Record<string,unknown>,context:{sortieId?:string;tainted?:boolean}={}):unknown {
  switch(tool){
   case 'reminders.list':only(args,[]);return backend.pendingReminders(20).map(r=>({id:r.id,title:r.title,due:r.due}));
   case 'reminders.add':{only(args,['title','due']);const r=backend.add(text(args,'title'),text(args,'due'));return {id:r.id,title:r.title,due:r.due,...(r.existing?{existing:true,note:'This reminder already existed; nothing was added.'}:{})};}
   case 'reminders.cancel':{const list=ids(args);return {cancelled:list.filter(id=>backend.cancel(id)),ids:list};}
   case 'reminders.restore':{const list=ids(args);return {restored:list.filter(id=>backend.restore(id)),ids:list};}
-  case 'memory.recall':only(args,['query']);return backend.memory.recall(text(args,'query')).map(f=>({id:f.id,text:f.text}));
-  case 'memory.remember':{only(args,['text']);const f=backend.memory.add(text(args,'text'),'misato',{...(context.sortieId?{sortieId:context.sortieId}:{})});return {id:f.id,text:f.text};}
+  case 'memory.recall':only(args,['query']);return backend.memory.recall(text(args,'query')).map(f=>({id:f.id,text:f.text,source:f.source,tainted:f.tainted}));
+  case 'memory.remember':{only(args,['text']);const f=backend.memory.add(text(args,'text'),'misato',{tainted:context.tainted,...(context.sortieId?{sortieId:context.sortieId}:{})});return {id:f.id,text:f.text};}
   case 'settings.schedule':{only(args,['brief','instrumentality']);if(!Object.keys(args).length)throw new Error('Give brief and/or instrumentality.');if(!backend.home)throw new Error('Settings are not available here.');
    return setSchedule(backend.home,{...(args.brief!==undefined?{brief:text(args,'brief')}:{}),...(args.instrumentality!==undefined?{instrumentality:text(args,'instrumentality')}:{})});}
   case 'pilots.create':{only(args,['id','name','domain','keywords','model']);if(!backend.home)throw new Error('Pilots are not available here.');

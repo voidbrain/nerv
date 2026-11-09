@@ -6,6 +6,7 @@ This index links authoritative procedures; it does not duplicate or replace them
 |---|---|---|
 | Session start | AGENTS.md; harness freshness | Actual main/CI, selected integrations/context, current blockers |
 | Update, close or sequence records | [Backlog rules](../BACKLOG-RULES.md) | Owned records, dated acceptance, dependencies and regenerated views |
+| Switch independent tasks or compact/handoff context | [Task context](task-context.md) | Persisted task state, verified host capability and honest transition/usage limits |
 | Adopt task sources, parallel ownership or model profiles | [Parallel work](parallel-work.md) | Explicit tasks/resources, shared claim evidence and reviewed model suitability |
 | Reconsider design, assumptions or alternatives | [Architecture reassessment](architecture-review.md) | Revision-scoped review, retained/superseded decisions and owned findings |
 | Run a full/scoped audit | [Audit procedure](audit.md) | Dated report/scope manifest across the named areas, exclusions and findings |

@@ -128,6 +128,7 @@ All applicable rules must be known and followed from the start; shorter indexes 
 
 | Before you | Read |
 |---|---|
+| switch independent tasks or compact/handoff context | [Task context](docs/agents/task-context.md) |
 | work on claimed tasks, parallel branches or model assignments | [Parallel work](docs/agents/parallel-work.md) |
 | reassess architecture, decisions or alternatives | [Architecture reassessment](docs/agents/architecture-review.md) |
 | change tests, coverage settings or the coverage page | [coverage guide](docs/agents/coverage-guide.md) |
@@ -162,6 +163,10 @@ Before changing an area, read its section in [docs/agents/areas.md](docs/agents/
 ## Privacy
 
 - Never commit secrets, tokens or personal data. Test data is neutral and invented.
+
+### Task context
+
+At a new independent task, follow [task context and handoffs](docs/agents/task-context.md): persist the current scope and use a fresh thread through an available authorized host capability; keep the same task's debugging/review/CI together. Compaction is for a continuing task, and provider caching is a separate capability. Preserve work, claims, approvals, uncertain effects and all governing/privacy/permission limits across transitions. If thread/compaction tools are unavailable, report that limit briefly and continue with bounded relevant context rather than claiming a reset or blocking otherwise authorized work.
 
 ## Work tracking
 

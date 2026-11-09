@@ -14,7 +14,7 @@ export const MEMORY_SCHEMA=`
  CREATE VIRTUAL TABLE IF NOT EXISTS facts_fts USING fts5(text, fact_id UNINDEXED);
  CREATE TABLE IF NOT EXISTS episodes(id TEXT PRIMARY KEY, since TEXT NOT NULL, until TEXT NOT NULL, summary TEXT NOT NULL, exchanges INTEGER NOT NULL, proposed INTEGER NOT NULL, created TEXT NOT NULL);
  CREATE VIRTUAL TABLE IF NOT EXISTS episodes_fts USING fts5(summary, episode_id UNINDEXED);`;
-export interface Episode {id:string;since:string;until:string;summary:string;exchanges:number;proposed:number;created:string}
+export interface Episode {id:string;since:string;until:string;summary:string;exchanges:number;proposed:number;created:string;tainted?:boolean}
 export interface Fact {id:string;text:string;status:'active'|'forgotten';source:string;sortieId:string|null;tainted:boolean;shareable:boolean;created:string;updated:string}
 const MAX_FACT_CHARS=500;
 /** The comparison form of a fact: case, spacing and a final full stop do not make a different fact. */
@@ -31,6 +31,13 @@ export class Memory {
  readonly db:DatabaseSync;
  constructor(db:DatabaseSync){
   this.db=db;
+  if(!(db.prepare('PRAGMA table_info(episodes)').all() as {name:string}[]).some(c=>c.name==='tainted'))db.exec('ALTER TABLE episodes ADD COLUMN tainted INTEGER NOT NULL DEFAULT 1');
+  // Pre-provenance model-written facts may have come from any earlier untrusted context.
+  this.tx(()=>{
+   db.exec('CREATE TABLE IF NOT EXISTS provenance_migrations(id TEXT PRIMARY KEY)');
+   if(db.prepare("SELECT 1 FROM provenance_migrations WHERE id='memory-v1'").get())return;
+   db.exec("INSERT INTO fact_history(fact_id,kind,text,source,created) SELECT id,'tainted',text,'legacy:unlabelled-context',strftime('%Y-%m-%dT%H:%M:%fZ','now') FROM facts WHERE source<>'owner' AND tainted=0; UPDATE facts SET tainted=1 WHERE source<>'owner'; INSERT INTO provenance_migrations VALUES('memory-v1')");
+  });
   // Summaries written before their index existed are indexed once (F-022: recall finds them too).
   const indexed=(db.prepare('SELECT count(*) AS n FROM episodes_fts').get() as {n:number}).n;
   if(!indexed)db.exec('INSERT INTO episodes_fts(summary,episode_id) SELECT summary,id FROM episodes');
@@ -41,7 +48,7 @@ export class Memory {
  add(text:unknown,source:'owner'|'misato',options:{sortieId?:string;tainted?:boolean;shareable?:boolean}={},now=new Date()):Fact {
   const t=clean(text);const id=randomUUID();const at=now.toISOString();
   return this.tx(()=>{
-   const same=(this.db.prepare("SELECT * FROM facts WHERE status='active'").all() as Row[]).find(r=>factKey(r.text)===factKey(t));if(same)return toFact(same);
+   const same=(this.db.prepare("SELECT * FROM facts WHERE status='active'").all() as Row[]).find(r=>factKey(r.text)===factKey(t));if(same){if(options.tainted&&same.tainted!==1){this.db.prepare('UPDATE facts SET tainted=1,updated=? WHERE id=?').run(at,same.id);this.history(same.id,'tainted',t,source,at);same.tainted=1;}return toFact(same);}
    this.db.prepare('INSERT INTO facts VALUES(?,?,?,?,?,?,?,?,?)').run(id,t,'active',source,options.sortieId ?? null,options.tainted?1:0,options.shareable?1:0,at,at);
    this.db.prepare('INSERT INTO facts_fts(text,fact_id) VALUES(?,?)').run(t,id);this.history(id,'created',t,source,at);
    return toFact(this.db.prepare('SELECT * FROM facts WHERE id=?').get(id) as Row);
@@ -81,10 +88,10 @@ export class Memory {
  /** Instrumentality's summaries that match a request, best first (F-022): what was said and done on earlier days. */
  recallEpisodes(text:string,limit=2):Episode[] {
   const q=ftsQuery(text);if(!q)return [];
-  return this.db.prepare('SELECT e.* FROM episodes_fts JOIN episodes e ON e.id=episodes_fts.episode_id WHERE episodes_fts MATCH ? ORDER BY bm25(episodes_fts) LIMIT ?').all(q,Math.min(Math.max(1,limit),5)) as unknown as Episode[];
+  return (this.db.prepare('SELECT e.* FROM episodes_fts JOIN episodes e ON e.id=episodes_fts.episode_id WHERE episodes_fts MATCH ? ORDER BY bm25(episodes_fts) LIMIT ?').all(q,Math.min(Math.max(1,limit),5)) as unknown as (Omit<Episode,'tainted'>&{tainted:number})[]).map(e=>({...e,tainted:e.tainted===1}));
  }
  /** Instrumentality's summaries, newest first; the latest one's `until` is where the next consolidation starts. */
- episodes(limit=10):Episode[] {return this.db.prepare('SELECT * FROM episodes ORDER BY until DESC LIMIT ?').all(Math.min(Math.max(1,limit),100)) as unknown as Episode[];}
- saveEpisode(e:Omit<Episode,'id'|'created'>,now=new Date(),afterSave?:()=>void):Episode {const id=randomUUID();this.tx(()=>{this.db.prepare('INSERT INTO episodes VALUES(?,?,?,?,?,?,?)').run(id,e.since,e.until,e.summary.slice(0,1500),e.exchanges,e.proposed,now.toISOString());this.db.prepare('INSERT INTO episodes_fts(summary,episode_id) VALUES(?,?)').run(e.summary.slice(0,1500),id);afterSave?.();});return {...e,id,created:now.toISOString()};}
+ episodes(limit=10):Episode[] {return (this.db.prepare('SELECT * FROM episodes ORDER BY until DESC LIMIT ?').all(Math.min(Math.max(1,limit),100)) as unknown as (Omit<Episode,'tainted'>&{tainted:number})[]).map(e=>({...e,tainted:e.tainted===1}));}
+ saveEpisode(e:Omit<Episode,'id'|'created'>,now=new Date(),afterSave?:()=>void):Episode {const id=randomUUID();this.tx(()=>{this.db.prepare('INSERT INTO episodes(id,since,until,summary,exchanges,proposed,created,tainted) VALUES(?,?,?,?,?,?,?,?)').run(id,e.since,e.until,e.summary.slice(0,1500),e.exchanges,e.proposed,now.toISOString(),e.tainted===false?0:1);this.db.prepare('INSERT INTO episodes_fts(summary,episode_id) VALUES(?,?)').run(e.summary.slice(0,1500),id);afterSave?.();});return {...e,tainted:e.tainted!==false,id,created:now.toISOString()};}
  historyOf(id:string):{kind:string;text:string;source:string;created:string}[] {return this.db.prepare('SELECT kind,text,source,created FROM fact_history WHERE fact_id=? ORDER BY sequence').all(id) as {kind:string;text:string;source:string;created:string}[];}
 }
