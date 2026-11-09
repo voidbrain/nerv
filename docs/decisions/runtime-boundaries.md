@@ -61,3 +61,7 @@ Optional Tailscale transport uses explicit host enrolment, scoped grants and rev
 - Agency Swarm communication: https://agency-swarm.ai/core-framework/agencies/communication-flows .
 - Tailscale grants: https://tailscale.com/docs/features/access-control/grants .
 - Apple Keychain: https://developer.apple.com/documentation/security/keychain-services .
+
+## Execution enforcement assessment (9 November 2026)
+
+The [execution-boundary assessment](../reviews/2026-11-09-execution-boundaries.md) retains these runtime/trust decisions. F-049 owns a deterministic isolated runner within NERV; the existing ledger/policy remains authority. Harness owns development workflow and Gauntlet evaluation evidence, neither OS confinement nor permission. Preserve failed attempts and uncertain effects; discard speculative artifacts without claiming external rollback. Protected grading and exact-artifact promotion are F-006 work. No runner, fourth project, MCTS or formal-verification service is implemented by this decision.

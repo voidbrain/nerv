@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "F-049-T01",
+  "parent": "F-049",
+  "title": "Define deterministic isolated runner admission and enforcement",
+  "goal": "Specify the first EVA-03 runner boundary without exposing unconfined execution",
+  "status": "ready",
+  "acceptance": [
+    "Define threat model and fixed job admission using existing NERV grants, exact arguments, deadlines and least EVA class; do not add a second approval authority",
+    "Specify per-job filesystem mounts, network egress, credentials, process cancellation and CPU/memory/output limits for supported hosts",
+    "Keep grader and promotion authority outside candidate writes; preserve failed attempts and uncertain external effects in the ledger",
+    "Define escape, credential denial, grader tampering, timeout/cancellation and recovery join tests before enabling execution",
+    "Retain pilot/trust-stage prerequisites for execution; contract design can proceed without claiming those prerequisites implemented"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/decisions/**",
+    "docs/architecture/**",
+    "docs/work/records/F-049.md",
+    "docs/work/tasks/F-049-T01.json",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "privacy-review",
+    "distributed-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository-owned fixtures/design only; no service activation, credentials, model calls or external effects.",
+  "validation": [
+    "Review against existing policy/ledger/worker recovery and F-006 grading contracts",
+    "Run applicable documentation/work/backlog checks; no runtime confinement claim"
+  ],
+  "escalation": [
+    "Unsupported host enforcement or unclear trust boundary blocks execution; do not substitute a worktree or subprocess",
+    "New upstream API work belongs to its owning repository; NERV supplies adapters"
+  ]
+}

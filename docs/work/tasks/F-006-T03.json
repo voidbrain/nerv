@@ -40,6 +40,8 @@
     "Versioned NERV cases include hidden immutable acceptance, deliberately flawed patches, false rejection and shared blind-spot cases",
     "A combination result binds both configurations, handoffs, budgets, hosts and component evidence without averaging away safety failures",
     "Record accepted task rate, escaped defects, repair rounds, reviewer effort, latency and total resource cost; missing metrics remain unknown",
-    "External runner owns coding isolation; no model self-approval, automatic qualification or grants"
+    "External runner owns coding isolation; no model self-approval, automatic qualification or grants",
+    "Candidate cannot modify the independent grader, hidden acceptance or grading credentials; tampering fails explicitly",
+    "Acceptance identifies the exact artifact and grader/configuration; promotion rejects stale or mismatched evidence and independently checks current NERV authorization"
   ]
 }

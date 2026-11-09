@@ -13,3 +13,5 @@ Current system boundaries and terminology are kept separately from historical ta
 | [Review register](reviews/README.md) | Actual assessments, last execution and next conditions |
 
 The [original target and mixed design inputs](archive/design-inputs/README.md) remain historical sources. Superseded UI prototypes and artwork remain in the [retired-reference holding area](../remove/README.md). The [documentation map](README.md) explains source ownership and folder placement.
+
+[Execution boundaries and project separation](reviews/2026-11-09-execution-boundaries.md) records the retained ownership and planned deterministic enforcement under F-049, protected grading/promotion under F-006 and threat evidence under F-065.
