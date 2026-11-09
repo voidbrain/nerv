@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-026-T01",
+  "parent": "F-026",
+  "title": "Durable proactive trigger admission and immutable gate limits",
+  "goal": "Persist heartbeat/daily/event identities and constrain every admitted sortie at the existing gate",
+  "status": "implemented",
+  "acceptance": [
+    "Heartbeat/daily/event trigger definitions validate before writes; repeated ticks/restart never duplicate trigger-slot sorties",
+    "Scheduler-owned durable run queue admits bounded work, records source and preserves interrupted uncertainty without replay",
+    "Non-Production proactive work is read-only in EVA-00; hard restrictions and per-trigger action budgets cannot become approval cards at retry limits",
+    "Freeze trigger stage from the active configured pilot and preserve stricter existing Scrolls/taint constraints",
+    "No timer/model/notification activation until T02 runtime and quiet-hour joins are implemented"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "evidence-review",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral invented definitions/events and local temporary SQLite only; no live models, external integrations, host activation or untrusted code.",
+  "validation": [
+    "Deterministic schedule/DST and quiet-hours schema validation cases",
+    "SQLite restart/deduplication/event cursor and gate-budget integration regressions",
+    "Typecheck, applicable fast checks and complete deterministic CI for security/persistence changes",
+    "43 focused watch/provenance/MCP/ledger regressions pass; broad suite483 passed/two platform skips. Independent final recheck passed all12 watch tests with no blockers after subscription/cancellation/pilot-removal findings were fixed. Required full CI pending; no runtime activation."
+  ],
+  "escalation": [
+    "Actual isolation remains F-049; no outside-code or network confinement claim",
+    "Per-trigger budgets are explicit action/step counts, not fabricated monetary or token limits"
+  ]
+}

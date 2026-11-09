@@ -1,5 +1,7 @@
 # Backlog reconciliation log 2026
 
+- Current work ledger, reviewed 9 November 2026 against main `81b1106`. PR #237 CI42614209749 passed all five jobs/full-suite. F-027-T01 provenance is accepted; enforced egress awaits F-049 isolation. B-047 fixture expiry is closed.
+
 - Current work ledger, reviewed 9 November 2026 against main `ff982f4`. PR #236 CI42609550077 passed plan, validate, Windows and native-macos; full-suite skipped. F-074 adoption acceptance is reconciled; model/load campaigns remain unclaimed.
 
 - Current work ledger, reviewed 9 November2026 against main `c5323e5`. PR #235 CI42608578429 passed all five jobs/full-suite. Gauntlet0.3 environment adoption T03 is accepted; model/load campaigns and live native acceptance remain unclaimed.

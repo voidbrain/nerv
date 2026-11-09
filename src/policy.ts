@@ -11,7 +11,7 @@ export interface Tool {name:string;effect:Effect;inverse?:string;owner?:true;rem
 export interface Policy {deny:string[];blue:string[];syncThreshold:number;maxRejects:number;budget:number}
 export interface Action {tool:string;args:Record<string,unknown>;trust:Trust;stage:Stage;cost:number;proactive?:boolean}
 export interface Verdict {seat:string;vote:'approve'|'reject'|'abstain';reason:string;confidence?:number;shadow?:boolean}
-export interface Ballot {effect:Effect;pattern:Pattern;executor:Executor;verdicts:Verdict[];sync:{value:number;inputs:Record<string,number>};outcome:'grant'|'approval'|'reject';reason:string}
+export interface Ballot {effect:Effect;pattern:Pattern;executor:Executor;verdicts:Verdict[];sync:{value:number;inputs:Record<string,number>};outcome:'grant'|'approval'|'reject';reason:string;blocked?:'isolation'|'proactive'|'budget'}
 export const effects:readonly Effect[]=['read','write-local','write-external','irreversible','physical'];
 export const defaultPolicy:Policy={deny:[],blue:[],syncThreshold:80,maxRejects:3,budget:1};
 const local=(e:Effect)=>e==='read'||e==='write-local';
@@ -55,7 +55,9 @@ export function balthasar(action:Action,effect:Effect,executor:Executor,spent:nu
 export function ballot(action:Action,tool:Tool|undefined,policy:Policy,spent:number,casper?:Verdict,extras:Verdict[]=[]):Ballot {
  const effect=tool?.effect ?? 'irreversible';const pattern=patternOf(effect,action.trust,action.tool,policy,tool?.owner===true);const executor=stricter(executorOf(action,effect),tool?.eva);
  const verdicts=[melchior(action,effect,policy),balthasar(action,effect,executor,spent,policy)];
- if(tool?.eva&&executor==='eva-03')verdicts.push({seat:'balthasar',vote:'reject',reason:'EVA-03 outside code requires isolation (F-049); it does not run.'});
+ if(action.proactive&&action.stage!=='production'&&effect!=='read')verdicts.push({seat:'balthasar',vote:'reject',reason:'Proactive work is read-only until its pilot is Production.'});
+ const isolationDenied=!!tool?.eva&&(executor==='eva-03'||(action.proactive===true&&action.stage!=='production'));
+ if(isolationDenied)verdicts.push({seat:'balthasar',vote:'reject',reason:executor==='eva-03'?'EVA-03 outside code requires isolation (F-049); it does not run.':'Proactive outside code requires EVA-00 isolation (F-049); it does not run.'});
  const needsCasper=intentChecked(pattern,tool);
  if(needsCasper&&casper)verdicts.push({...casper,seat:'casper'});
  verdicts.push(...extras.map(v=>({...v,seat:'extra:'+v.seat})));
@@ -63,7 +65,8 @@ export function ballot(action:Action,tool:Tool|undefined,policy:Policy,spent:num
  if(needsCasper&&casper?.vote==='approve'&&typeof casper.confidence==='number')inputs.casper=Math.min(1,Math.max(0,casper.confidence));
  const value=Math.round(100*Object.values(inputs).reduce((a,b)=>a*b,1));
  const veto=verdicts.find(v=>v.vote==='reject'&&!v.shadow);
- const base={effect,pattern,executor,verdicts,sync:{value,inputs}};
+ const blocked:Ballot['blocked']=isolationDenied?'isolation':action.proactive&&action.stage!=='production'&&effect!=='read'?'proactive':undefined;
+ const base={effect,pattern,executor,verdicts,sync:{value,inputs},...(blocked?{blocked}:{})};
  if(veto)return {...base,outcome:'reject',reason:`${veto.seat}: ${veto.reason}`};
  if(needsCasper&&(!casper||casper.vote!=='approve'))return {...base,outcome:'approval',reason:'Casper (intent) verdict unavailable; the owner decides.'};
  if(pattern==='blue')return {...base,outcome:'approval',reason:'Pattern Blue always needs the owner.'};

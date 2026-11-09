@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "F-026-T02",
+  "parent": "F-026",
+  "title": "Consume proactive runs with quiet-hour delivery",
+  "goal": "Wire validated owner-configured triggers into serve and the existing planner with durable once-only delivery",
+  "status": "planned",
+  "acceptance": [
+    "Serve re-reads validated explicit opt-in trigger configuration; no model work runs without it",
+    "Runtime consumes durable runs through existing Misato loop, including failure, approval, restart and cancellation paths",
+    "Quiet hours defer new proactive notification delivery without delaying reminder/inbox deliveries already due",
+    "Per-trigger steps and actions are bounded; nonproduction writes never execute; source/taint stays durable",
+    "Process/browser/channel/native regressions establish actual integration and parent closure evidence"
+  ],
+  "dependsOn": [
+    "F-026-T01"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "evidence-review",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral invented definitions/events and local temporary SQLite only; no live models, external integrations, host activation or untrusted code.",
+  "validation": [
+    "Fake-model process-boundary trigger/gate/approval/restart tests",
+    "Quiet-hour crossing with due reminders and delivery deduplication",
+    "Required full CI and independent report-only review before closing P1"
+  ],
+  "escalation": [
+    "Actual isolation remains F-049; no outside-code or network confinement claim",
+    "Per-trigger budgets are explicit action/step counts, not fabricated monetary or token limits"
+  ]
+}

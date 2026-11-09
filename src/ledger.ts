@@ -9,6 +9,7 @@ import { EVENT_SCHEMA_VERSION, MAX_SPEAR_HAPPENED, encodePayload, readPayload, t
 /** Central Dogma (F-024): sorties, actions, grants (A.T. Fields), approvals (Misato's apartment) and append-only events. */
 export const LEDGER_SCHEMA=`
  CREATE TABLE IF NOT EXISTS sorties(id TEXT PRIMARY KEY, source TEXT NOT NULL, title TEXT NOT NULL, trust TEXT NOT NULL, status TEXT NOT NULL, rejects INTEGER NOT NULL DEFAULT 0, spent REAL NOT NULL DEFAULT 0, created TEXT NOT NULL, closed TEXT);
+ CREATE TABLE IF NOT EXISTS sortie_controls(sortie_id TEXT PRIMARY KEY REFERENCES sorties(id), stage TEXT NOT NULL, max_actions INTEGER NOT NULL);
  CREATE TABLE IF NOT EXISTS actions(id TEXT PRIMARY KEY, sortie_id TEXT NOT NULL REFERENCES sorties(id), tool TEXT NOT NULL, args TEXT NOT NULL, ballot TEXT NOT NULL, created TEXT NOT NULL);
  CREATE TABLE IF NOT EXISTS grants(id TEXT PRIMARY KEY, action_id TEXT NOT NULL UNIQUE REFERENCES actions(id), tool TEXT NOT NULL, args_hash TEXT NOT NULL, expires TEXT NOT NULL, used TEXT, revoked TEXT);
  CREATE TABLE IF NOT EXISTS approvals(id TEXT PRIMARY KEY, action_id TEXT NOT NULL UNIQUE REFERENCES actions(id), card TEXT NOT NULL, expires TEXT NOT NULL, decision TEXT, decided TEXT, source TEXT);
@@ -67,6 +68,15 @@ export class Ledger {
   const id=randomUUID();
   return this.tx(()=>{this.db.prepare('INSERT INTO sorties(id,source,title,trust,status,created) VALUES(?,?,?,?,?,?)').run(id,source,title.trim(),trust,'open',iso(now));this.event(id,null,'sortie.opened',{source,title:title.trim(),trust},now);return id;});
  }
+ /** Scheduler-owned proactive limits are frozen at admission, outside planner arguments. */
+ openProactive(trigger:string,slot:string,title:string,controls:{stage:Stage;maxActions:number},now=new Date()):string {
+  if(!/^[a-z][a-z0-9-]{1,30}$/.test(trigger)||typeof slot!=='string'||!slot||slot.length>100||!['prototype','test','production'].includes(controls.stage)||!Number.isInteger(controls.maxActions)||controls.maxActions<1||controls.maxActions>6)throw new Error('Invalid proactive controls.');
+  return this.tx(()=>{
+   const id=this.openSortie('hyuga',title,'trusted',now);
+   this.db.prepare('INSERT INTO sortie_controls VALUES(?,?,?)').run(id,controls.stage,controls.maxActions);
+   this.event(id,null,'sortie.proactive',{trigger,slot,...controls},now);return id;
+  });
+ }
  /** Naoko: persist source labels and only increase Ireul taint. Content never chooses its own trust. */
  intake(sortieId:string,source:string,trust:Trust,now=new Date()):void {
   if(typeof source!=='string'||!source.trim()||source.length>100||(trust!=='trusted'&&trust!=='tainted'))throw new Error('Invalid context source.');
@@ -87,8 +97,15 @@ export class Ledger {
   return this.tx(()=>{
    const sortie=this.db.prepare('SELECT * FROM sorties WHERE id=?').get(sortieId) as {trust:Trust;status:string;rejects:number;spent:number}|undefined;
    if(!sortie||sortie.status!=='open')throw new Error('Sortie is not open.');
-   const result=ballot({tool:p.tool,args:p.args,trust:sortie.trust,stage:p.stage,cost:p.cost ?? 0},(this.tools.get(p.tool) ?? this.external.get(p.tool)),this.policy,sortie.spent,clampVerdict(p.casper),p.extras?.map(v=>clampVerdict(v)!));
-   if(result.outcome==='reject'&&!(result.executor==='eva-03'&&(this.tools.get(p.tool) ?? this.external.get(p.tool))?.eva)&&sortie.rejects+1>this.policy.maxRejects)Object.assign(result,{outcome:'approval',reason:`Reject limit reached (${result.reason}); the owner decides.`});
+   const controls=this.db.prepare('SELECT stage,max_actions FROM sortie_controls WHERE sortie_id=?').get(sortieId) as {stage:Stage;max_actions:number}|undefined;
+   const stages:Stage[]=['prototype','test','production'];
+   const stage=controls&&stages.indexOf(controls.stage)<stages.indexOf(p.stage)?controls.stage:p.stage;
+   const result=ballot({tool:p.tool,args:p.args,trust:sortie.trust,stage,cost:p.cost ?? 0,...(controls?{proactive:true}:{})},(this.tools.get(p.tool) ?? this.external.get(p.tool)),this.policy,sortie.spent,clampVerdict(p.casper),p.extras?.map(v=>clampVerdict(v)!));
+   if(controls){
+    const reserved=(this.db.prepare("SELECT count(*) AS n FROM actions WHERE sortie_id=? AND json_extract(ballot,'$.outcome') IN ('grant','approval')").get(sortieId) as {n:number}).n;
+    if(reserved>=controls.max_actions){result.verdicts.push({seat:'balthasar',vote:'reject',reason:'Proactive action budget exhausted.'});Object.assign(result,{outcome:'reject',blocked:'budget',reason:'Proactive action budget exhausted.'});}
+   }
+   if(result.outcome==='reject'&&!result.blocked&&sortie.rejects+1>this.policy.maxRejects)Object.assign(result,{outcome:'approval',reason:`Reject limit reached (${result.reason}); the owner decides.`});
    const actionId=randomUUID();this.db.prepare('INSERT INTO actions VALUES(?,?,?,?,?,?)').run(actionId,sortieId,p.tool,JSON.stringify(p.args),JSON.stringify(result),iso(now));
    this.event(sortieId,actionId,'ballot',result,now);
    if(result.outcome==='reject'){this.db.prepare('UPDATE sorties SET rejects=rejects+1 WHERE id=?').run(sortieId);return {actionId,ballot:result};}
