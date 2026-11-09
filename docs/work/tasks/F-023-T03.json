@@ -4,7 +4,7 @@
   "parent": "F-023",
   "title": "Native approval delivery and reconciliation",
   "goal": "Connect durable delivery to the reviewed native card path",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Restart, duplicate decisions and Telegram/dashboard races reconcile without duplicate effects",
     "Notification/banner delivery limits are explicit",
@@ -40,8 +40,9 @@
   "validation": [
     "Run affected regressions across the changed boundary and applicable fast checks",
     "Keep human/device acceptance and independent review distinct from fixture results",
-    "Prerequisite T02 accepted after PR229 full CI; durable delivery remains unimplemented, with explicit live-native acceptance limits.",
-    "Four new Store/inbox contracts were committed failing before implementation (1a878ac); final CI and live acceptance retain separate evidence"
+    "Prerequisite T02 accepted after PR229 full CI; T03 automated delivery now accepted after PR232 full CI, with explicit live-native acceptance limits.",
+    "Four new Store/inbox contracts were committed failing before implementation (1a878ac); final CI and live acceptance retain separate evidence",
+    "Accepted 2026-11-09 after PR232 exact head1b23c68 / CI42588026092 passed plan, Linux validate, Windows, native-macos and full-suite; merged maincdb4f6. T03 automated delivery acceptance is complete; F-023/F-011 retain actual native owner acceptance."
   ],
   "escalation": [
     "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",

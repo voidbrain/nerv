@@ -118,3 +118,8 @@ Authenticated ci:status confirms CI42573854325 passed plan, validate, Windows, n
 ## 2026-11-09 — PR #230 and #231
 
 Authenticated ci:status confirms PR230 CI42585327765 and PR231 CI42586749552 passed scoped plan/validate/windows/native-macos with full-suite skipped. Reconciled main `cba3726`; PR231 registers execution/project ownership assessment and useful F-049/F-006/F-065 acceptance without runtime/upstream changes. Prior full evidence remains PR229 CI42584230832 at merged main `5933855`; F-023-T01/T02 are closed, T03 implementation follows independently. No live Mac or model acceptance follows from these documentation runs.
+
+
+## 2026-11-09 — PR #232
+
+Authenticated ci:status confirms CI42588026092 passed plan, validate, Windows, native-macos and full-suite at exact head1b23c68, merged maincdb4f6. Linux coverage467: 466 passed, one platform skip; headless3 passed and one Windows skip. T03 durable native approval delivery accepted and closed; F-023 remains Implemented with actual paired-Mac menu/VoiceOver/banner/sleep acceptance required. Fresh-context review found no blocking runtime/security issue and its one stale documentation sentence was corrected. No runtime/model campaign, CI retry or test relaxation followed the full run.
