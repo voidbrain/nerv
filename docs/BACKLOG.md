@@ -343,7 +343,7 @@ Implement capability-aware scheduling with independent model endpoint and execut
 
 | Field | Value |
 |---|---|
-| PR / evidence | Ownership correction/adoption: [PR #235](https://github.com/voidbrain/nerv/pull/235);  Host-load plan: [PR #234](https://github.com/voidbrain/nerv/pull/234);  Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #221](https://github.com/voidbrain/nerv/pull/221) schema/reuse assessment; [Gauntlet ownership/reuse proposal](design/gauntlet-protocol-2026-11-08.md), 2026-11-08; the proposal preceded delivered Gauntlet0.1.1 adoption in PR #223 / F-073; automatic routing/qualification remains unimplemented and no consumer work gates upstream releases; [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| PR / evidence | Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Ownership correction/adoption: [PR #235](https://github.com/voidbrain/nerv/pull/235);  Host-load plan: [PR #234](https://github.com/voidbrain/nerv/pull/234);  Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #221](https://github.com/voidbrain/nerv/pull/221) schema/reuse assessment; [Gauntlet ownership/reuse proposal](design/gauntlet-protocol-2026-11-08.md), 2026-11-08; the proposal preceded delivered Gauntlet0.1.1 adoption in PR #223 / F-073; automatic routing/qualification remains unimplemented and no consumer work gates upstream releases; [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-09 |
@@ -379,7 +379,7 @@ Implement capability-aware scheduling with independent model endpoint and execut
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| PR / evidence | Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-09 |
@@ -805,7 +805,7 @@ T02 remains blocked on F-049 actual outside-code isolation: application URL chec
 | Field | Value |
 |---|---|
 | Depends on | [F-049](#f-049) — T02 only: actual outside-code isolation for enforced egress; T01 provenance can land independently |
-| PR / evidence | Acceptance: [PR #238](https://github.com/voidbrain/nerv/pull/238); [PR #237](https://github.com/voidbrain/nerv/pull/237); Review: independent fresh-context report in [provenance boundary](reviews/2026-11-09-provenance-boundary.md), finding fixed and rechecked; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
+| PR / evidence | Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Acceptance: [PR #238](https://github.com/voidbrain/nerv/pull/238); [PR #237](https://github.com/voidbrain/nerv/pull/237); Review: independent fresh-context report in [provenance boundary](reviews/2026-11-09-provenance-boundary.md), finding fixed and rechecked; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-04 |
 | Verification | 2026-11-09 Unit/integration and Browser/accessibility: PR237 exact head be60c19 / CI42614209749 passed plan, validate (coverage, browser/axe, headless), Windows, native-macos and full-suite. Focused provenance/MCP/restart/consolidation/actual-legacy-schema and repeated quarantine tests passed; independent final review18 tests passed. Enforced egress/isolation acceptance remains unimplemented under T02/F-049. |
 | Reviewed | 2026-11-09 |
@@ -1051,7 +1051,7 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 | Field | Value |
 |---|---|
 | Depends on | [F-045](#f-045) — Pilot identity and EVA class for per-job execution<br />[F-025](#f-025) — Pilot trust-stage limits for sandbox class admission |
-| PR / evidence | Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner questions 2026-11-05 |
+| PR / evidence | Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner questions 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
 | Reviewed | 2026-11-09 |
@@ -1363,7 +1363,7 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 
 | Field | Value |
 |---|---|
-| PR / evidence | Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
+| PR / evidence | Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
 | Opened | 2026-11-07 |
 | Verification | Unit/integration: Pending. |
 | Reviewed | 2026-11-09 |
@@ -1467,7 +1467,7 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 
 | Field | Value |
 |---|---|
-| PR / evidence | Acceptance reconcile: [PR #236](https://github.com/voidbrain/nerv/pull/236); Environment adoption: [PR #235](https://github.com/voidbrain/nerv/pull/235); Review: fresh-context report, no blocking findings; Test: test/gauntlet.test.mjs shared-context consumer/reuse/admission join;  [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #226](https://github.com/voidbrain/nerv/pull/226) adoption acceptance and explicit owner pause; [PR #225](https://github.com/voidbrain/nerv/pull/225); upstream Gauntlet PR #5 / CI42572655186; Review: independent report-only recheck linked above. |
+| PR / evidence | Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Acceptance reconcile: [PR #236](https://github.com/voidbrain/nerv/pull/236); Environment adoption: [PR #235](https://github.com/voidbrain/nerv/pull/235); Review: fresh-context report, no blocking findings; Test: test/gauntlet.test.mjs shared-context consumer/reuse/admission join;  [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #226](https://github.com/voidbrain/nerv/pull/226) adoption acceptance and explicit owner pause; [PR #225](https://github.com/voidbrain/nerv/pull/225); upstream Gauntlet PR #5 / CI42572655186; Review: independent report-only recheck linked above. |
 | Opened | 2026-11-09 |
 | Verification | 2026-11-09 Unit/integration: PR235 exactheadb4cd887 / CI42608578429 passed all five jobs including full-suite, mergedmainc5323e5. Nine focused context/reuse/admission/package joins, local468 Node tests (466 passed, two platform skips), typecheck/build/index and committed-source policy90 passed. Review: independent exact package/source/installed-file verification and nine joins, no blocking finding. Real-model: first bounded Gemma smoke T02 remains unexecuted; no load/model qualification. |
 | Reviewed | 2026-11-09 |
@@ -1486,4 +1486,4 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 
 **Owner continuation, 2026-11-09.** After F-027-T01 acceptance, continue actionable backlog items using the generated queue and reviewed scoped prerequisites; retain human/device decisions and separately bounded model campaigns.
 
-**External project references, 2026-11-09.** [Nine-project assessment](reviews/2026-11-09-external-agent-projects.md) retains Inspect/Scenario/AgentDojo/AgentFS as the strongest evaluation/isolation candidates; typed ingestion/optimization/browser/training ideas remain conditional references. Existing records retain ownership; no dependencies, campaigns, permission changes or audit coverage follow. Operator commands and the profile-matched role-bundle gap are recorded under F-074.
+**External project references, 2026-11-09 (PR #241).** [Nine-project assessment](reviews/2026-11-09-external-agent-projects.md) retains Inspect/Scenario/AgentDojo/AgentFS as the strongest evaluation/isolation candidates; typed ingestion/optimization/browser/training ideas remain conditional references. Existing records retain ownership; no dependencies, campaigns, permission changes or audit coverage follow. Operator commands and the profile-matched role-bundle gap are recorded under F-074.
