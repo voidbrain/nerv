@@ -127,3 +127,5 @@ PR #221 CI 42530253552 attempt 1 also observed heartbeat-path connection loss in
 [Native approval previews](../acceptance/native-approvals-2026-11-09.md), 2026-11-09, baseline `12a24ef`: static EN/IT rendering, schema/expiry and native HTTPS authority join. Next on card schema, credential scope, UI/expiry or delivery changes; actual menu/VoiceOver and durable notifications remain F-023/F-011 acceptance.
 
 Native approval card implementation accepted after PR229 exact head `f3109c1` / full CI42584230832, merged main `5933855`; F-023-T01/T02 closed, T03 ready and unimplemented. This updates deterministic evidence only; no live native interaction or notification acceptance follows.
+
+[Execution boundaries and project separation](2026-11-09-execution-boundaries.md), 2026-11-09, baseline `7f50720`: source assessment retains harness/Gauntlet/NERV ownership, plans deterministic enforcement under F-049, protected grading/promotion under F-006 and security evidence under F-065. No upstream change, audit coverage or runtime acceptance; reconsider on runner/grader/authority changes or a demonstrated extraction need.
