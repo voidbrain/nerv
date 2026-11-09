@@ -1415,7 +1415,7 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 |:---:|---|---|---|
 | 🔴 | 🔶 P2 | Open | 🟢 Small |
 
-💻 **→ Human action required: No**<br />Implement the profile-matched operator role bundle T04; the first common Gemma campaign completed with7/10 cases passing, with no qualification.
+💻 **→ Human action required: No**<br />Verify T05 private-diagnostic/job-rule adoption, then implement T04 role workflow; first common smoke remains7/10 with no qualification.
 
 | | |
 |---|---|
@@ -1434,7 +1434,11 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 
 **First campaign reviewed 2026-11-09:** [common Gemma report review](evaluations/2026-11-09-gemma-common-smoke.md), report19a5b470-e87a-4400-a2e9-920404a797d2. All10 executed,7 passed; change-mind/tool-choice/missing-input failed JSON parsing,4/4 holdouts passed. Duration64.744s,1608 output tokens, exact requested model/profile and moderate-load declaration. The run completed inside budget; candidate acceptance failed. Raw response text and human responsiveness/load observations are unavailable. Preserve failure, do not automatically rerun or weaken grading. T02 closed; T04 is unimplemented and keeps the parent Open.
 
-**Estimates:** Small remaining effort, reassessed2026-11-09 after0.3 adoption implementation: only the requested operator role bundle T04 remains; adoption and first campaign review are complete. Additional load/placement comparisons stay under F-006, not this estimate. Observed smoke usage1608 output tokens; monetary cost and future workflow usage remain unknown.
+**Diagnostics/job-rule adoption2026-11-09:** T05 consumes released Gauntlet0.4.0 (PR9 / CI42679371024, main77f766d/tagv0.4.0) and harness4.4.1 (PR91 / CI42678501222). New common selected-case capture/inspection and private development job registration are implemented; ten package/wrapper joins pass, including source-bound failed reply capture with unchanged grading and no public raw reply. Native client counters/loading and the role-profile workflow remain unverified/unimplemented, not qualification. [Adoption evidence](acceptance/gauntlet-private-diagnostics-2026-11-09.md).
+
+**Structured-output extension2026-11-09:** Owner accepted explicit Ollama schema support and a prepared moderate-load diagnostic command. T05 includes released upstream F-007 adoption: `--format=schema` selects a separate structure-only smoke pack; original unconstrained evidence remains unchanged. Medium-load live acceptance is owner-run and unexecuted; no qualification follows from fixture success.
+
+**Estimates:** Small remaining effort, reassessed2026-11-09 after0.3 adoption implementation: T05 final CI/adoption reconciliation and the requested operator role bundle T04 remain; earlier adoption and first campaign review are complete. Additional load/placement comparisons stay under F-006, not this estimate. Observed smoke usage1608 output tokens; monetary cost and future workflow usage remain unknown.
 
 | Field | Value |
 |---|---|

@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "id": "F-074-T05",
+  "parent": "F-074",
+  "title": "Adopt private diagnostics and development job registration",
+  "goal": "Consume released Gauntlet0.4.1 diagnostics and harness4.4.1 job metadata without duplicating generic implementations",
+  "status": "implemented",
+  "acceptance": [
+    "Pin released Gauntlet0.4.1 source-included artifact, source/tag/CI and SHA; expose explicit fresh failure capture, selected common cases, explicit schema mode and source-bound private inspection through NERV CLI",
+    "Adopt released harness4.4.1 optional job rule/metadata ledger and client entry bridges, preserving all NERV safety/privacy/ownership rules; unavailable native counters remain unknown",
+    "Cross-boundary fixture proves private failed response capture and report/fixture binding without public reply leakage or weakened grades",
+    "Keep first7/10 smoke as historical failed evidence; no rerun, download, native counter collection, role qualification or confinement claim",
+    "Retain pending PR241 documentation/F-026 closure and refresh source-owned generated views; full required CI and independent harness review before merge"
+  ],
+  "dependsOn": [
+    "F-074-T01",
+    "F-074-T03"
+  ],
+  "resources": [
+    "docs/**",
+    "tools/gauntlet.mjs",
+    "test/gauntlet.test.mjs",
+    "vendor/**",
+    "package.json",
+    "package-lock.json",
+    ".harness.json",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "GEMINI.md",
+    "QWEN.md",
+    ".github/copilot-instructions.md",
+    "tools/work-usage.mjs",
+    "generated:backlog-views",
+    "contract:gauntlet-adoption",
+    "contract:development-usage-adoption"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "evidence-review",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Only neutral fake-provider fixtures and private local metadata. No live model, credentials, prompt logging or actual session-counter access. Private final-reply capture remains opt-in/off by default.",
+  "validation": [
+    "Pinned artifact/source comparison and actual wrapper-to-protocol failure-capture/selection/inspection join",
+    "Applicable fast/ledger/index checks and required full CI; source-aware independent report-only review",
+    "Ten NERV/package/CLI joins pass with fake local provider; actual capture/inspection remains failed3/3 by design, source-bound, no public raw replies. Static/package/index checks pass; independent harness review and full final CI pending.",
+    "Independent review: ten joins pass; copied files match4.4.1 and32 packaged sources/contracts match77f766d, no implementation blocker. Reviewer registration omission explicitly recorded; no universal client compliance/counter qualification."
+  ],
+  "escalation": [
+    "Native role-profile bundle remains T04; generic native client source adapters remain project-harness F-048-T02",
+    "Instruction bridges do not prove client loading or expose missing counters; keep unsupported usage unknown"
+  ]
+}

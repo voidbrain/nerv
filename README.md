@@ -93,3 +93,5 @@ Development procedures: [discovery index](docs/agents/procedures.md), [parallel 
 Documentation: [map and ownership](docs/README.md) · [review dates and next conditions](docs/reviews/README.md) · [task/model requirements](docs/work/README.md) · [retired references](remove/README.md).
 
 The [corrected target schema](docs/architecture/target-schema.md) labels implemented and planned behavior. The [retirement recheck](docs/audits/2026-11-08-retirement-recheck.md) restores mixed sources to the historical-input archive.
+
+Development evaluations support [bounded private failed-reply inspection and selected diagnostics](docs/evaluations/gauntlet.md#private-failure-diagnostics-gauntlet04). The opted-in [development job usage rule](docs/agents/work-usage.md) records private metadata; actual client counters remain unknown until exposed by a supported source.

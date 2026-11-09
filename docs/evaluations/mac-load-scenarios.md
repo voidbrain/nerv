@@ -32,3 +32,5 @@ Development token spend by item/job/activity is separate work under [project-har
 ## First available observation, 9 November 2026
 
 The [first common Gemma smoke review](2026-11-09-gemma-common-smoke.md) records one owner-declared moderate-load Mac run:10 cases executed,7 passed/3 JSON parse failures,64.744s/1608 output tokens. Human responsiveness, competing-app details, power state and swap/pressure observations remain unavailable. This is a single common-pack observation, not the comparative F-006-T05/T04 campaign or NERV role/host qualification. No repeat or new load budget is implied.
+
+Harness4.4.1 generic job registration/metadata ledger is adopted in NERV; native client counter adapters remain project-harness F-048-T02. Phase annotations are not measured token splits. Gauntlet0.4 private diagnostics are available for a separately selected focused run; no low-load or overnight campaign was launched by adoption.

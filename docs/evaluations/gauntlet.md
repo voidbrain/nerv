@@ -14,7 +14,7 @@ npm run gauntlet:run -- --only=policy --execute --out=/private/tmp/nerv-policy-n
 
 Planning performs no runner/model execution. The seven system cases map to existing `evals/suite.json` groups. Stress and browser cases additionally require `--allow-expensive`; other deterministic groups remain ordinary system tests. The evidence-aware runner rejects an ineligible selection before metadata or execution; use --only or explicitly enable the costly cases. Prefer a selected group when it addresses the changed risk. No Gauntlet command is added as an automatic model/stress CI campaign.
 
-The adapter calls the existing native evaluator with inherited process-group supervision, then normalizes its selected group. The native full-suite `complete: false` is correct for a selected group; Gauntlet selected-pack completeness checks that group's actual execution, minimum checks, zero skipped checks and stable sources. It never asserts coverage of omitted groups. Native JSON logs remain private under ignored `artifacts/evaluations/`; the outer report retains a hash incorporating native evidence and adapter source. The pinned 0.3.0 protocol catches SIGINT/SIGTERM, cancels the suite and leaves later cases not-run. Supervised children inherit the Gauntlet process group so cancellation does not leave a detached native test tree. Linux/macOS external adapters are supported; Windows fails closed until Job Object supervision exists.
+The adapter calls the existing native evaluator with inherited process-group supervision, then normalizes its selected group. The native full-suite `complete: false` is correct for a selected group; Gauntlet selected-pack completeness checks that group's actual execution, minimum checks, zero skipped checks and stable sources. It never asserts coverage of omitted groups. Native JSON logs remain private under ignored `artifacts/evaluations/`; the outer report retains a hash incorporating native evidence and adapter source. The pinned0.4.0 protocol catches SIGINT/SIGTERM, cancels the suite and leaves later cases not-run. Supervised children inherit the Gauntlet process group so cancellation does not leave a detached native test tree. Linux/macOS external adapters are supported; Windows fails closed until Job Object supervision exists.
 
 ```sh
 npm run gauntlet:model-plan -- --profile=node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json
@@ -67,7 +67,7 @@ Local llama.cpp and MLX-LM adapters are included in the independent release and 
 
 The [accepted staged design](../decisions/configuration-qualification.md) separates individual role screening, complete coder/auditor workflow qualification and NERV acceptance. A combination needs its own configuration identity, component evidence, independent hidden grading and measured joint outcomes; individual passes are insufficient. Mac/mini PC comparisons include specialist inference and separate tools/tests, with explicit privacy and unavailable-host behavior. This is planned NERV work under F-006-T03/T04 and F-045, not a delivered protocol command, measured pair pass or hardware recommendation. F-074-T02's first bounded single-model smoke is now completed and reviewed below; the requested profile-matched role operator bundle remains T04.
 
-## Machine/scenario context (Gauntlet0.3)
+## Machine/scenario context
 
 `node tools/gauntlet.mjs machine --id=<label>` returns a sanitized local machine profile. `model-plan`, `model-run`, `plan` and `run` accept paired `--machine-profile=<private-file> --scenario=<package-example>`; execution additionally needs `--confirm-scenario` and existing opt-ins. Plans validate definitions, not current load. Complete context binds shared evidence; unknown/unscoped results cannot replace requested conditions. The owner declaration is not independent power/load verification. Use `--fresh` to measure each new load observation. No new npm script, app control, schedule or provider setting is introduced.
 
@@ -145,4 +145,68 @@ The separate `evals:model` Casper/Misato commands above currently use production
 
 ## First measured common smoke
 
-The [owner-provided first report](2026-11-09-gemma-common-smoke.md) completed all ten cases under the recorded moderate-load declaration:7 passed,3 JSON parse failures,64.744s and1608 output tokens. The campaign completed inside budget; candidate acceptance failed. Its engine/pack/profile/fixture identities match the pinned release. Preserve this failed report; no automatic rerun, promotion or qualification follows. F-074-T02 is closed as a completed campaign/review, while the role workflow under T04 remains unimplemented.
+The [owner-provided first report](2026-11-09-gemma-common-smoke.md) completed all ten cases under the recorded moderate-load declaration:7 passed,3 JSON parse failures,64.744s and1608 output tokens. The campaign completed inside budget; candidate acceptance failed. Its engine/pack/profile/fixture identities matched the0.3 release pinned when the report was originally reviewed; they are not relabelled as the current0.4 engine. Preserve this failed report; no automatic rerun, promotion or qualification follows. F-074-T02 is closed as a completed campaign/review, while the role workflow under T04 remains unimplemented.
+
+## Private failure diagnostics (Gauntlet0.4)
+
+The pinned0.4.1 artifact retains0.4.0 support for bounded, opt-in private final-reply captures. The first7/10 report remains frozen historical0.3 evidence; its hashes cannot recover raw replies. New diagnostic runs produce new evidence, keep failed grades and do not silently replace that run. No new model campaign was executed for this adoption.
+
+Plan the three failed regression cases without generation:
+
+```sh
+npm run gauntlet:model-plan --   --profile=node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json   --limits=node_modules/@voidbrain/gauntlet-protocol/examples/limits-diagnostic.json   --format=schema   --only=change-mind,tool-choice,missing-input
+```
+
+For a separately selected manual diagnostic run, copy this complete block from the NERV root. It saves new private machine/report files and failed replies without launching another run automatically:
+
+```sh
+(
+  set -eu
+  umask 077
+  gauntlet_root="$HOME/.local/state/gauntlet"
+  mkdir -p "$gauntlet_root"
+  gauntlet_run_dir=$(mktemp -d "$gauntlet_root/diagnostic-$(date +%Y%m%d-%H%M%S)-XXXXXX")
+  node tools/gauntlet.mjs machine --id=mac-local > "$gauntlet_run_dir/machine.json"
+  gauntlet_status=0
+  npm run gauntlet:model-run -- \
+    --profile=node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json \
+    --limits=node_modules/@voidbrain/gauntlet-protocol/examples/limits-diagnostic.json \
+    --format=schema \
+    --only=change-mind,tool-choice,missing-input \
+    --machine-profile="$gauntlet_run_dir/machine.json" \
+    --scenario=node_modules/@voidbrain/gauntlet-protocol/examples/scenarios/moderate-load.json \
+    --capture-failures="$gauntlet_run_dir/failures" \
+    --confirm-scenario --fresh --execute --allow-models \
+    --out="$gauntlet_run_dir/common.json" || gauntlet_status=$?
+  printf 'Artifacts: %s\n' "$gauntlet_run_dir"
+  exit "$gauntlet_status"
+)
+```
+
+The command preserves a failed exit status while printing the artifact directory. Capture is off unless explicitly requested, and its `failures` child must be new. The scenario is the owner's actual-load declaration; change it only to describe actual conditions.
+
+This command uses the separate schema-constrained pack from released0.4.1. The schemas specify keys/types, not expected answer values. It targets the three previously failed case IDs with strict semantic grading; its result is selected-case evidence and cannot replace the original ten-case score. Omit `--format=schema` for the original unconstrained pack. Keep model settings and actual moderate workload comparable; no low-load rerun is required.
+
+This diagnostic preset permits3 cases,30s/case,90s/suite, one repetition and6144 output tokens, preserving the8K/2048 thinking-on model profile. It is selected-case evidence, not full common-pack or NERV role acceptance. Minimal-load changes competing host workload, not model quality criteria; no overnight repeat is required merely to get a green result.
+
+Inspect the private final replies with source matching:
+
+```sh
+node tools/gauntlet.mjs inspect-failures   --directory=/absolute/private/campaign/failures   --report=/absolute/private/campaign/common.json
+```
+
+Inspection explicitly returns private untrusted model text. The sidecar records report/case/iteration/fixture/response identities, completion reason and clipping; hashes are consistency checks, not authenticated author identity. No prompt, expected answer or separate hidden-reasoning field is saved. Final replies can themselves contain sensitive text: opt in only when their private retention is allowed. Keep captures outside checkouts;10 files maximum,16KiB/file and128KiB aggregate,0700/0600 POSIX permissions, no overwrite or symlink paths. Windows capture fails before provider work because private ACL verification is unavailable; existing non-capture flows retain their own platform scope.
+
+Public0.4 reports contain only the diagnostic-enabled marker, not raw replies or private capture paths. Diagnostic instrumentation is excluded from ordinary passing-cache reuse and from non-diagnostic performance equivalence. Captures are off by default. Grading remains strict; raw evidence can distinguish fences/prose/empty/malformed content, but a clipped capture cannot prove its missing suffix. A missing/error manifest means unavailable capture evidence, not success. See the [released upstream contract](https://github.com/voidbrain/gauntlet-protocol/blob/v0.4.0/docs/FAILURES.md).
+
+## Development job registration
+
+NERV adopts [harness4.4.1 job usage](../agents/work-usage.md), enabled in this repository's `.harness.json`. AGENTS owns the startup/phase/completion rule; CLAUDE/GEMINI/QWEN/Copilot entry files point to it. The owner need not select the agent in advance unless task suitability requires it. A job records the actual client/model when observable, its task and activity; imports accept only canonical measured counter metadata. Missing usage remains unknown, and shared work stays unallocated. No exporter, transcript scraping or native client adapter is installed. These files do not prove actual loading in every client.
+
+The optional ledger is private and outside Git. This development session exposes no measured provider counters to the agent; metadata registration is not a token measurement. Native client source validation remains upstream project-harness F-048-T02. Gauntlet run usage and NERV runtime usage remain separately owned and must not be imported twice. The profile-matched NERV Casper/Misato operator bundle remains F-074-T04; adopting these common diagnostics does not implement or qualify it.
+
+Observed adoption-review limitation: a report-only agent omitted the available registration step. This was not a capability outage. No counts/phases were backfilled; reliable automatic startup needs verified host/launcher hooks under harness F-048-T02. The shared rule alone is not evidence that every agent follows it.
+
+## Structured-output mode
+
+NERV `model-plan` and `model-run` accept `--format=unconstrained` (default) or `--format=schema`. Schema mode selects upstream `neutral-smoke-schema@1.0.0`, not a mutation of the original pack; pack/report/cache identity distinguishes it. Released Gauntlet0.4.1 (PR11 / CI42686856664) forwards explicit formats through native local Ollama streaming/non-streaming requests and rejects alternative backends before metadata work. This is fixture-tested adapter support; actual Gemma schema behavior remains unmeasured. JSON validity alone never passes an incorrect decision. Upstream also supports per-case `responseFormat: "json"` for custom packs; this wrapper exposes the reviewed common structural variant. No runtime production decision path was changed.

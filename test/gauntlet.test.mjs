@@ -62,3 +62,31 @@ test('NERV consumes shared machine/scenario contracts and common evidence across
   const changed=await main(['model-run',...base,'--scenario='+moderate,'--execute','--allow-models','--confirm-scenario','--cache-dir='+join(root,'cache'),'--out='+join(root,'moderate.json')],services);assert.equal(changed.kind,'executed');assert.equal(calls,20);
  }finally{rmSync(root,{recursive:true,force:true});}
 });
+
+test('NERV selected diagnostics join the released private capture and report-bound inspector without changing grades',async()=>{
+ const {executeWithEvidence,readEvidence}=await import('@voidbrain/gauntlet-protocol');const root=mkdtempSync(join(realpathSync(tmpdir()),'nerv-private-diagnostic-'));let calls=0;
+ try{
+  const model='gemma4:12b',fetcher=async(url,init)=>{const path=new URL(String(url)).pathname;let value;if(path==='/api/version')value={version:'neutral-runtime-v04'};else if(path==='/api/show')value={details:{quantization_level:'Q4_K_M'},capabilities:['thinking']};else if(path==='/api/tags')value={models:[{name:model,size:100,digest:'b'.repeat(64)}]};else if(path==='/api/ps')value={models:[]};else if(path==='/api/generate')value={done:true,done_reason:'unload'};else if(path==='/api/chat'){calls++;const body=JSON.parse(init.body);assert.equal(body.options.num_ctx,8192);assert.equal(body.options.num_predict,2048);assert.equal(body.options.seed,42);assert.equal(body.think,true);assert.equal(Object.hasOwn(body,'expected'),false);return new Response([{model,message:{content:'PRIVATE_INVALID_NERV_REPLY'},done:false},{model,message:{content:''},done:true,eval_count:2,prompt_eval_count:10,eval_duration:1000000}].map(x=>JSON.stringify(x)).join('\n')+'\n');}else throw Error('Unexpected fixture endpoint');return new Response(JSON.stringify(value));};
+  const services={execute:(pack,profile,limits,options)=>{assert.equal(options.sourceKey,undefined);assert.equal(options.captureFailures,join(root,'failures'));assert.equal(pack.id,'neutral-smoke:selected');return executeWithEvidence(pack,profile,limits,{...options,fetch:fetcher});}};
+  const args=['model-run','--profile=node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json','--limits=node_modules/@voidbrain/gauntlet-protocol/examples/limits-diagnostic.json','--only=change-mind,tool-choice,missing-input','--execute','--allow-models','--capture-failures='+join(root,'failures'),'--cache-dir='+join(root,'cache')];
+  await assert.rejects(main([...args,'--out='+join(root,'no-fresh.json')],services),/fresh/);assert.equal(calls,0);
+  if(process.platform==='win32'){await assert.rejects(main([...args,'--fresh','--out='+join(root,'unsupported.json')],services),/unavailable on Windows/);assert.equal(calls,0);return;}
+  const out=join(root,'report.json'),result=await main([...args,'--fresh','--out='+out],services);assert.equal(result.passed,false);assert.equal(result.complete,true);assert.equal(calls,3);const report=readEvidence(out);assert.equal(report.caseCount,3);assert.equal(report.diagnostics.failureCaptures,true);assert.ok(report.results.every(r=>r.status==='failed'&&r.reason==='Invalid structured output'));assert.equal(readFileSync(out,'utf8').includes('PRIVATE_INVALID_NERV_REPLY'),false);
+  const inspection=await main(['inspect-failures','--directory='+join(root,'failures'),'--report='+out]);assert.equal(inspection.private,true);assert.equal(inspection.untrusted,true);assert.equal(inspection.failures.length,3);assert.ok(inspection.failures.every(r=>r.response==='PRIVATE_INVALID_NERV_REPLY'));await assert.rejects(main(['inspect-failures','--directory='+join(root,'failures')]),/report/);await assert.rejects(main(['model-plan','--profile=node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json','--only=missing-input,missing-input']),/duplicate/);
+ }finally{rmSync(root,{recursive:true,force:true});}
+});
+
+test('NERV schema mode reaches released Ollama adapter and preserves semantic failures',async()=>{
+ const {executeWithEvidence,readEvidence}=await import('@voidbrain/gauntlet-protocol');const root=mkdtempSync(join(realpathSync(tmpdir()),'nerv-schema-'));let calls=0;
+ try{
+  const model='gemma4:12b',fetcher=async(url,init)=>{const path=new URL(String(url)).pathname;let value;
+   if(path==='/api/version')value={version:'neutral'};else if(path==='/api/show')value={details:{quantization_level:'Q4_K_M'},capabilities:['thinking']};else if(path==='/api/tags')value={models:[{name:model,size:100,digest:'b'.repeat(64)}]};else if(path==='/api/ps')value={models:[]};else if(path==='/api/generate')value={done:true};else if(path==='/api/chat'){
+    calls++;const body=JSON.parse(init.body);assert.deepEqual(body.format,{type:'object',properties:{action:{type:'string'}},required:['action'],additionalProperties:false});assert.equal(JSON.stringify(body.format).includes('cancel'),false);
+    return new Response([{model,message:{content:'{"action":"incorrect"}'},done:false},{model,message:{content:''},done:true,eval_count:2,eval_duration:1000000}].map(x=>JSON.stringify(x)).join('\n')+'\n');
+   }else throw Error('unexpected');return new Response(JSON.stringify(value));};
+  const profile='--profile=node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json';
+  const planned=await main(['model-plan',profile,'--format=schema','--only=change-mind']);assert.equal(planned.pack,'neutral-smoke-schema:selected');assert.equal(planned.cases[0].responseFormat,'schema');assert.equal(calls,0);
+  await assert.rejects(main(['model-plan',profile,'--format=invalid']),/format/);
+  const out=join(root,'report.json');const result=await main(['model-run',profile,'--format=schema','--only=change-mind','--execute','--allow-models','--fresh','--out='+out,'--cache-dir='+join(root,'cache')],{execute:(p,m,l,o)=>executeWithEvidence(p,m,l,{...o,fetch:fetcher})});assert.equal(calls,1);assert.equal(result.passed,false);assert.equal(readEvidence(out).results[0].status,'failed');
+ }finally{rmSync(root,{recursive:true,force:true});}
+});
