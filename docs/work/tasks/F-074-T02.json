@@ -25,7 +25,8 @@
   ],
   "privacy": "Neutral fixtures and local/private authorized Gemma evidence; no secrets, remote targets, downloads or production promotion",
   "validation": [
-    "Cross-boundary tests and scoped static/ledger checks; final required CI"
+    "Cross-boundary tests and scoped static/ledger checks; final required CI",
+    "Owner-provided common report19a5b470-e87a-4400-a2e9-920404a797d2 validated and reviewed2026-11-09: all10 executed,7 passed/3 JSON parse failures,4/4 holdouts;64.744s and1608 output tokens within budget. Failed smoke, no qualification or rerun."
   ],
   "escalation": [
     "Stop on invalid identity, unsafe reuse or unknown budget consumption; do not weaken grading",
@@ -34,7 +35,7 @@
   "id": "F-074-T02",
   "title": "Run and record authorized measured Gemma smoke",
   "goal": "Run and record authorized measured Gemma smoke",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "Owned scope verified; evidence and limitations recorded; no automatic qualification"
   ]

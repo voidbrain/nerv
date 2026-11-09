@@ -6,7 +6,7 @@ NERV evidence snapshot reviewed 8 November 2026 against main `2943aad`. Times be
 
 | Review | Last actual evidence | Next run / trigger | Owner and limits |
 |---|---|---|---|
-| Full deterministic verification | [PR #237 CI42614209749](https://github.com/voidbrain/nerv/actions/runs/42614209749), 2026-11-09; all five jobs passed | By 2026-11-16 or ten first-parent integrations, whichever comes first; sooner for risk, unknown coverage or explicit request | [NERV mapping](../verification.md) / [shared policy](../agents/verification.md); no stress/model/physical acceptance implied |
+| Full deterministic verification | [PR #240 CI42635119338](https://github.com/voidbrain/nerv/actions/runs/42635119338), 2026-11-09; all five jobs passed | By 2026-11-16 or ten first-parent integrations, whichever comes first; sooner for risk, unknown coverage or explicit request | [NERV mapping](../verification.md) / [shared policy](../agents/verification.md); no stress/model/physical acceptance implied |
 | Architecture reassessment | [2026-11-08 scoped report](../audits/2026-11-08-architecture-reassessment.md) | Significant boundary/hardware/trust change, recurring design failure or owner request; no calendar appointment | [Procedure](../agents/architecture-review.md), affected backlog owners |
 | Expensive stress / real-model campaigns | Reports below; latest run depends on suite and selection | On request, concrete changed risk or named acceptance, with explicit scope and budget; no periodic rerun date | [Evaluation procedure](../decisions/evaluation-and-improvement.md); no automatic model qualification |
 | Human / real-device acceptance | Per report and current record | When required device, signing identity, service host or human observation is available; not scheduled | F-005/F-009/F-011/F-015 and other owning records |
@@ -144,8 +144,11 @@ Gauntlet0.3 NERV adoption accepted after PR235 exactheadb4cd887 / full CI4260857
 
 - [F-027 provenance boundary, 2026-11-09](2026-11-09-provenance-boundary.md): durable source/taint design, conservative legacy handling and unimplemented enforced-egress boundary; rerun for changed trust, memory or isolation contracts. Independent review/CI evidence remains separate.
 
-- [Hyuga watch assessment, 2026-11-09](../decisions/hyuga-watch.md): Original F-026-T01 admission/gate assessment plus the appended T02 runtime/quiet-hour integration evidence. Revisit for changed trust/scheduling/delivery contracts; final exact-head CI remains pending in the implementation report.
+- [Hyuga watch assessment, 2026-11-09](../decisions/hyuga-watch.md): Original F-026-T01 admission/gate assessment plus the appended T02 runtime/quiet-hour integration evidence. Revisit for changed trust/scheduling/delivery contracts; final exact-head CI passed and closure is appended to the implementation report.
 
-- [Hyuga proactive watch acceptance, 2026-11-09](../acceptance/hyuga-watch-2026-11-09.md): runtime/approval/restart, quiet-hour inbox/Telegram and remote-dispatch authority joins; fresh-context review finding fixed and rechecked. Rerun for changed scheduling, authority, model route or delivery contracts; final exact-head CI pending in this implementation report.
+- [Hyuga proactive watch acceptance, 2026-11-09](../acceptance/hyuga-watch-2026-11-09.md): runtime/approval/restart, quiet-hour inbox/Telegram and remote-dispatch authority joins; fresh-context review finding fixed and rechecked. Rerun for changed scheduling, authority, model route or delivery contracts; final exact-head CI passed and F-026 closure is appended to the implementation report.
 
 - [External agent/evaluation project assessment, 2026-11-09](2026-11-09-external-agent-projects.md): nine primary-source references; retain evaluation, hostile-input, typed-boundary, workspace and learning concepts under existing owners. No dependency installed, benchmark run, isolation certification or audit-area refresh. Revisit when an owning task selects an integration or an upstream/API/licence/enforcement change warrants review.
+
+
+[First common Gemma smoke review, 2026-11-09](../evaluations/2026-11-09-gemma-common-smoke.md): report/schema/settings/budget review of owner-provided evidence;7/10 passed, no qualification. Raw replies and human responsiveness observations unavailable; revisit with new authorized evidence or a versioned candidate.
