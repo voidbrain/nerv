@@ -1,7 +1,7 @@
 {
   "version": 1,
   "parent": "F-027",
-  "status": "ready",
+  "status": "implemented",
   "dependsOn": [],
   "resources": [
     "src/**",
