@@ -2,7 +2,7 @@
   "version": 1,
   "segments": [
     {
-      "text": "# NERV Agency backlog\n\nCurrent work ledger, reviewed 9 November 2026 against main `5933855`. PR #229 CI42584230832 passed all five jobs/full-suite. F-023-T01/T02 accepted; T03 durable approval delivery is ready and unimplemented. Live native interaction remains explicit.\nGovernance and naming follow the [architecture vocabulary](architecture/vocabulary.md). [Rules](BACKLOG-RULES.md) \u00b7 [Roadmap](ROADMAP.md) \u00b7 [Archive 2026](archive/backlog-2026.md) \u00b7 [Reconciliation log](archive/reconciliation-2026.md) \u00b7 [Dependencies](agents/backlog-dependencies.md) \u00b7 [Work queue](agents/backlog-queue.md).\n\n<!-- recap:start -->\n<!-- recap:end -->\n\n## Bugs and reliability\n\nFrom 2026-11-05 a defect (behaviour that breaks something meant to work) gets a B- record here; earlier ones stayed in their F- records (owner decision).\n\n\n\n\n\n\n\n\n\n\n\n"
+      "text": "# NERV Agency backlog\n\nCurrent work ledger, reviewed 9 November 2026 against main `7f50720`. PR #230 CI42585327765 passed scoped documentation checks (full-suite skipped); PR #229 CI42584230832 passed all five jobs/full-suite. F-023-T01/T02 accepted; T03 durable approval delivery is ready and unimplemented. Live native interaction remains explicit.\nGovernance and naming follow the [architecture vocabulary](architecture/vocabulary.md). [Rules](BACKLOG-RULES.md) \u00b7 [Roadmap](ROADMAP.md) \u00b7 [Archive 2026](archive/backlog-2026.md) \u00b7 [Reconciliation log](archive/reconciliation-2026.md) \u00b7 [Dependencies](agents/backlog-dependencies.md) \u00b7 [Work queue](agents/backlog-queue.md).\n\n<!-- recap:start -->\n<!-- recap:end -->\n\n## Bugs and reliability\n\nFrom 2026-11-05 a defect (behaviour that breaks something meant to work) gets a B- record here; earlier ones stayed in their F- records (owner decision).\n\n\n\n\n\n\n\n\n\n\n\n"
     },
     {
       "records": "B"
@@ -14,7 +14,7 @@
       "records": "F"
     },
     {
-      "text": "\n## Other changes\n\n**CI reliability evidence \u2014 B-046, 2026-11-08.** Original worker-cancellation failure retained, isolated diagnostic passed and only failed CI jobs were retried; root cause/fix remain open under B-046. Existing B-043 remains a separate queue-saturation finding.\n"
+      "text": "\n## Other changes\n\n**CI reliability evidence \u2014 B-046, 2026-11-08.** Original worker-cancellation failure retained, isolated diagnostic passed and only failed CI jobs were retried; root cause/fix remain open under B-046. Existing B-043 remains a separate queue-saturation finding.\n\n**Execution-boundary assessment, 2026-11-09.** [Source-based review](reviews/2026-11-09-execution-boundaries.md) retains project separation; useful runner/enforcement, protected grading/promotion and threat-evidence work belongs to F-049/F-006/F-065. Harness4.2.1 and Gauntlet0.2.0 already state the relevant upstream boundaries; no upstream change or new project is justified. No runtime acceptance claimed. PR: #231.\n"
     }
   ]
 }

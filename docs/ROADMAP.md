@@ -61,3 +61,5 @@ Architecture evaluation and adopted/deferred boundaries: [runtime decision](deci
 ## Keeping this page current
 
 The Records column places every feature that is not closed in exactly one milestone; closed records stay as delivery evidence. The status table is generated from the backlog by `npm run roadmap:status` and never edited by hand. `npm run check:roadmap` (CI) fails when a cited ID is not a record, an open feature is unplaced or placed twice, or the status table no longer matches the records. A PR that opens, closes or changes the status of a feature regenerates it; a new feature is placed in a milestone in the same PR. Scope, acceptance and the current-step paragraph are prose: review them when a milestone's status changes.
+
+The [9 November execution-boundary assessment](reviews/2026-11-09-execution-boundaries.md) retains milestone order: F-023-T03 stays next; F-049 plans deterministic isolated execution, F-006 protected grading and exact-artifact promotion, F-065 tested security mapping. No new project or automatic production permission follows from evaluation evidence.
