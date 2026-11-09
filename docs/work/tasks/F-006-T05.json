@@ -10,7 +10,8 @@
     "Hold model/runtime/settings/cases/grader and total comparison budgets equivalent; distinguish fresh cold/warm telemetry from reused functional evidence",
     "Report task/critical outcomes, latency, resource pressure, token cost and owner desktop impact; unsupported metrics remain unknown",
     "Select exact campaign cases/repeats/total time-token budgets before execution; no model execution or scheduling is authorized by the plan",
-    "Mini PC has one normal baseline; only T04 placement-specific inference/tools-test contention and Mac dependency recovery require separate bounded checks"
+    "Mini PC has one normal baseline; only T04 placement-specific inference/tools-test contention and Mac dependency recovery require separate bounded checks",
+    "Reference released Gauntlet machine/scenario definitions and evidence identity; NERV retains assignments and role acceptance, not duplicate generic schemas"
   ],
   "dependsOn": [
     "F-074-T02"

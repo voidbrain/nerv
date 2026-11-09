@@ -137,3 +137,5 @@ Native approval card implementation accepted after PR229 exact head `f3109c1` / 
 Durable native delivery accepted after PR232 exact head `1b23c68` / full CI42588026092, merged main `cdb4f6`. F-023-T03 closed; F-023 remains Implemented with the owner live-native cue. This establishes the named deterministic cross-platform checks, not observed banner/menu/VoiceOver delivery.
 
 [Host-load scenario plan](../evaluations/mac-load-scenarios.md), 2026-11-09, baseline `c743caa`: distinguish budget presets from three Mac operating conditions; owner clarified one normal home mini PC baseline with no day/night duplication. F-006-T05/T04 own future comparable-load/placement observations. Documentation only; no model or load campaign executed. Reconsider on workload/hardware/placement changes.
+
+[Gauntlet environment adoption](../acceptance/gauntlet-environments-2026-11-09.md), 2026-11-09: reusable definitions moved to released0.3; NERV retains assignment/acceptance mapping and tests actual context forwarding/reuse. No model/load observations. Reconsider on environment identity, admission, pin or host-assignment changes.
