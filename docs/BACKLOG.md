@@ -338,7 +338,7 @@ Implement capability-aware scheduling with independent model endpoint and execut
 
 | Field | Value |
 |---|---|
-| PR / evidence | Assessment: this PR;  [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #221](https://github.com/voidbrain/nerv/pull/221) schema/reuse assessment; [Gauntlet ownership/reuse proposal](design/gauntlet-protocol-2026-11-08.md), 2026-11-08; the proposal preceded delivered Gauntlet0.1.1 adoption in PR #223 / F-073; automatic routing/qualification remains unimplemented and no consumer work gates upstream releases; [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| PR / evidence | Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #221](https://github.com/voidbrain/nerv/pull/221) schema/reuse assessment; [Gauntlet ownership/reuse proposal](design/gauntlet-protocol-2026-11-08.md), 2026-11-08; the proposal preceded delivered Gauntlet0.1.1 adoption in PR #223 / F-073; automatic routing/qualification remains unimplemented and no consumer work gates upstream releases; [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-09 |
@@ -1033,7 +1033,7 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 | Field | Value |
 |---|---|
 | Depends on | [F-045](#f-045) — Pilot identity and EVA class for per-job execution<br />[F-025](#f-025) — Pilot trust-stage limits for sandbox class admission |
-| PR / evidence | Assessment: this PR;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner questions 2026-11-05 |
+| PR / evidence | Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner questions 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
 | Reviewed | 2026-11-09 |
@@ -1343,7 +1343,7 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 
 | Field | Value |
 |---|---|
-| PR / evidence | Assessment: this PR;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
+| PR / evidence | Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
 | Opened | 2026-11-07 |
 | Verification | Unit/integration: Pending. |
 | Reviewed | 2026-11-09 |
@@ -1456,4 +1456,4 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 
 **CI reliability evidence — B-046, 2026-11-08.** Original worker-cancellation failure retained, isolated diagnostic passed and only failed CI jobs were retried; root cause/fix remain open under B-046. Existing B-043 remains a separate queue-saturation finding.
 
-**Execution-boundary assessment, 2026-11-09.** [Source-based review](reviews/2026-11-09-execution-boundaries.md) retains project separation; useful runner/enforcement, protected grading/promotion and threat-evidence work belongs to F-049/F-006/F-065. Harness4.2.1 and Gauntlet0.2.0 already state the relevant upstream boundaries; no upstream change or new project is justified. No runtime acceptance claimed. PR: this PR.
+**Execution-boundary assessment, 2026-11-09.** [Source-based review](reviews/2026-11-09-execution-boundaries.md) retains project separation; useful runner/enforcement, protected grading/promotion and threat-evidence work belongs to F-049/F-006/F-065. Harness4.2.1 and Gauntlet0.2.0 already state the relevant upstream boundaries; no upstream change or new project is justified. No runtime acceptance claimed. PR: #231.
