@@ -9,3 +9,5 @@ The [review register](../reviews/README.md#acceptance-evidence) links every repo
 [Gauntlet0.2 adoption](gauntlet-v02-2026-11-09.md): accepted CI/integration/index/reuse contracts; live Gemma and real performance measurement explicitly paused.
 
 [Native approval previews, 9 November 2026](native-approvals-2026-11-09.md): bounded read-only cards, expiry/static bilingual render inspection and real pinned-HTTPS/write-denial contracts. Durable approval notifications and live menu/VoiceOver remain separate.
+
+[Durable native approval delivery, 9 November 2026](native-approval-delivery-2026-11-09.md): atomic inbox notices and bounded native catch-up; fixture/CI scope remains distinct from live banner/menu/VoiceOver acceptance.

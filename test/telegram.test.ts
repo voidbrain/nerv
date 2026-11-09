@@ -88,6 +88,7 @@ test('through every process: Aoba answers only the owner, sends cards with butto
   // Restart: nothing is sent twice and old updates are not handled again.
   const before=tg.sent().length;await aoba.stop();aoba=channel();await aoba.start(100);await wait(500);
   assert.equal(tg.sent().length,before,'no card or reminder is resent after a restart');
+  assert.equal(tg.sent().filter(m=>/Approval needs review/.test(m.text)).length,0,'native inbox notices never duplicate Telegram cards');
   assertPrivateFile(statePath);
   tg.text(OWNER,'old news',Math.floor(Date.now()/1000)-3600);await until(()=>tg.sent().some(m=>/offline when you sent/.test(m.text)));
   assert.equal(model.asked.filter(a=>a==='misato').length,2,'a stale message never reaches Misato (two calls: the plan and the follow-up; the card ends the first turn)');

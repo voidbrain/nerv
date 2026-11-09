@@ -5,7 +5,14 @@ struct InboxCheckpoint: Codable, Equatable {
     let id: String?
     var valid: Bool { sequence >= 0 && (sequence == 0 ? id == nil : id.flatMap(UUID.init(uuidString:)) != nil) }
 }
-struct InboxEntry: Decodable { let sequence: Int64; let id: String; let message: String; let created: String }
+struct ApprovalNotice: Decodable { let id: String; let expires: String; let pending: Bool }
+struct InboxEntry: Decodable {
+    let sequence: Int64; let id: String; let message: String; let created: String
+    let kind: String?; let approval: ApprovalNotice?
+    init(sequence: Int64, id: String, message: String, created: String, kind: String? = nil, approval: ApprovalNotice? = nil) {
+        self.sequence = sequence; self.id = id; self.message = message; self.created = created; self.kind = kind; self.approval = approval
+    }
+}
 struct InboxPage: Decodable { let items: [InboxEntry]; let head: InboxCheckpoint; let next: InboxCheckpoint; let reset: Bool }
 protocol CheckpointStorage {
     func load(_ runtime: String) throws -> InboxCheckpoint?
@@ -59,21 +66,31 @@ final class NotificationEngine {
     func baseline(_ runtime: String, head: InboxCheckpoint) throws { try storage.save(runtime, head) }
     static func identifier(runtime: String, delivery: String) -> String { "nerv.\(runtime).\(delivery)" }
     /** Advances only after OS acceptance/reconciliation. Cross-system crash windows cannot promise exactly-once banners. */
-    func consume(runtime: String, page: InboxPage, sink: NotificationSink) async throws -> Bool {
+    func consume(runtime: String, page: InboxPage, sink: NotificationSink, language: String = "en", clock: () -> Date = { Date() }) async throws -> Bool {
         let previous = try checkpoint(runtime)
         guard previous.valid, page.head.valid, page.next.valid, page.items.count <= 5 else { throw NativeEventError.invalidPage }
         if page.reset { guard page.items.isEmpty, page.next == page.head else { throw NativeEventError.invalidPage }; try storage.save(runtime, page.head); return true }
         var cursor = previous
         var identifiers: Set<String> = []
+        var approvalIdentifiers: Set<String> = []
         for entry in page.items {
             guard entry.sequence > cursor.sequence, entry.sequence <= page.head.sequence, UUID(uuidString: entry.id) != nil, entry.message.count <= 500, identifiers.insert(entry.id).inserted else { throw NativeEventError.invalidPage }
+            if let kind = entry.kind, !["reminder", "brief", "approval"].contains(kind) { throw NativeEventError.invalidPage }
+            if entry.kind == "approval" {
+                guard let approval = entry.approval, UUID(uuidString: approval.id) != nil, approvalIdentifiers.insert(approval.id).inserted,
+                      NativeApproval.date(approval.expires) != nil else { throw NativeEventError.invalidPage }
+            } else if entry.approval != nil { throw NativeEventError.invalidPage }
             cursor = InboxCheckpoint(sequence: entry.sequence, id: entry.id)
         }
         guard cursor == page.next, page.head.sequence >= cursor.sequence else { throw NativeEventError.invalidPage }
         let existing = await sink.existingIdentifiers()
         for entry in page.items {
             let identifier = Self.identifier(runtime: runtime, delivery: entry.id)
-            if !existing.contains(identifier) { try await sink.deliver(identifier: identifier, body: entry.message) }
+            // A settled/expired approval stays in inbox history but is never a new review request.
+            // The pending flag is a server snapshot; a later channel decision can still race OS submission.
+            let current = entry.approval.map { $0.pending && NativeApproval.date($0.expires)! > clock() } ?? true
+            let body = entry.kind == "approval" && language == "it" ? "È stata richiesta una revisione. Apri NERV per controllare lo stato attuale." : entry.message
+            if current && !existing.contains(identifier) { try await sink.deliver(identifier: identifier, body: body) }
             try storage.save(runtime, InboxCheckpoint(sequence: entry.sequence, id: entry.id))
         }
         return false

@@ -113,3 +113,8 @@ Authenticated ci:status confirms CI 42536093191 passed scoped plan, validate, Wi
 ## 2026-11-09 — PR #225
 
 Authenticated ci:status confirms CI42573854325 passed plan, validate, Windows, native-macos and full-suite at exacthead11c963c; merged main8fab24c. F-074-T01 adoption accepted; T02 remains planned and unexecuted because the owner requested pause after adoption. No model qualification or real runtime comparison claimed. Expired fence7 was inspected with stopped-writer evidence; automatic review required explicit owner authorization, which was obtained before recovery/reacquisition; fencing/history preserved.
+
+
+## 2026-11-09 — PR #230 and #231
+
+Authenticated ci:status confirms PR230 CI42585327765 and PR231 CI42586749552 passed scoped plan/validate/windows/native-macos with full-suite skipped. Reconciled main `cba3726`; PR231 registers execution/project ownership assessment and useful F-049/F-006/F-065 acceptance without runtime/upstream changes. Prior full evidence remains PR229 CI42584230832 at merged main `5933855`; F-023-T01/T02 are closed, T03 implementation follows independently. No live Mac or model acceptance follows from these documentation runs.
