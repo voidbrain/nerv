@@ -62,3 +62,7 @@ npm run gauntlet:model-run -- --profile=node_modules/@voidbrain/gauntlet-protoco
 ```
 
 Local llama.cpp and MLX-LM adapters are included in the independent release and tested with fixtures. They require explicitly prepared local artifacts/manifests and live model/context/fingerprint checks. They install/start/download nothing and have not received real-host acceptance here. No live alternative-runtime campaign is part of this first Ollama smoke.
+
+## Combination and host qualification
+
+The [accepted staged design](../decisions/configuration-qualification.md) separates individual role screening, complete coder/auditor workflow qualification and NERV acceptance. A combination needs its own configuration identity, component evidence, independent hidden grading and measured joint outcomes; individual passes are insufficient. Mac/mini PC comparisons include specialist inference and separate tools/tests, with explicit privacy and unavailable-host behavior. This is planned NERV work under F-006-T03/T04 and F-045, not a delivered protocol command, measured pair pass or hardware recommendation. F-074 remains the bounded single-model smoke; owner resumed backlog work on 2026-11-09 and it follows the queue.
