@@ -39,3 +39,7 @@ F-006-T03 owns NERV combination cases/adapter and T04 host-placement acceptance.
 ## Operating conditions (9 November 2026)
 
 [Host-load planning](../evaluations/mac-load-scenarios.md) defines three representative Mac conditions with equivalent configurations/cases/budgets: heavy office work, moderate active home use and minimal overnight competition. T05 owns that planned local comparison after the initial smoke. The home mini PC uses one normal baseline; T04 varies only intended inference/tools-test contention and dependency recovery when useful. Time of day is not a hardware capability, cold/warm state or permission. No new campaign, background scheduling or qualification follows from this decision.
+
+## Reusable environment ownership correction (9 November2026)
+
+Gauntlet0.3 now owns reusable machine/scenario definitions and context-scoped evidence matching. NERV's [assignment/acceptance map](../evaluations/mac-load-scenarios.md) references them. A common matching result can serve multiple consumers; NERV-specific source evidence remains NERV-scoped. Declared load/power is not independently verified, and functional reuse is not a fresh performance observation. This supersedes PR234's consumer-only placement without rewriting its dated report. Future campaign selection and trust/promotion remain NERV-owned.

@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "F-074-T03",
+  "parent": "F-074",
+  "title": "Adopt reusable Gauntlet machine/scenario contracts",
+  "goal": "Consume released Gauntlet environment identity and retain only NERV assignment and acceptance mapping",
+  "status": "implemented",
+  "acceptance": [
+    "Pin released0.3 artifact/provenance and retain existing evidence, admission and supervision joins",
+    "NERV plans/runs reference upstream machine/scenario definitions; explicit current confirmation and runtime admission are preserved",
+    "A neutral cross-boundary fixture proves matching common results reuse while changed scenario evidence executes freshly",
+    "Mac selects heavy/moderate/minimal definitions and mini PC one baseline; no new live model/load campaign or schedule",
+    "Keep generic development token accounting upstream under project-harness F-048; runtime/evaluation ownership remains separate"
+  ],
+  "dependsOn": [
+    "F-074-T01"
+  ],
+  "resources": [
+    "contract:gauntlet-adoption",
+    "vendor/**",
+    "package.json",
+    "package-lock.json",
+    "tools/gauntlet.mjs",
+    "test/gauntlet.test.mjs",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "evidence-review",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Only repository-owned neutral fake-provider fixtures; no model calls, downloads, remote host activation, private work content or promotion.",
+  "validation": [
+    "Pinned package/hash and actual wrapper-to-library identity/reuse/admission tests",
+    "Applicable fast checks and required full CI for dependency/runtime integration changes"
+  ],
+  "escalation": [
+    "No unscoped/idle result substitutes for an expressly requested condition",
+    "Owner-declared load/power is not independent measurement; missing host/privacy/budget evidence stays unknown"
+  ]
+}

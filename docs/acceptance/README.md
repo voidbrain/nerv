@@ -11,3 +11,5 @@ The [review register](../reviews/README.md#acceptance-evidence) links every repo
 [Native approval previews, 9 November 2026](native-approvals-2026-11-09.md): bounded read-only cards, expiry/static bilingual render inspection and real pinned-HTTPS/write-denial contracts. Durable approval notifications and live menu/VoiceOver remain separate.
 
 [Durable native approval delivery, 9 November 2026](native-approval-delivery-2026-11-09.md): atomic inbox notices and bounded native catch-up; fixture/CI scope remains distinct from live banner/menu/VoiceOver acceptance.
+
+[Gauntlet0.3 environment adoption](gauntlet-environments-2026-11-09.md): released shared contracts and NERV assignment/admission/reuse fixtures; no live workload/model qualification.
