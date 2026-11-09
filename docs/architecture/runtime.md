@@ -73,3 +73,7 @@ The companion now reads up to five complete bounded approval cards through pinne
 ## Native approval delivery
 
 F-023-T03 commits each approval and a generic inbox notice together in Store. An additive approval/delivery identity table backfills pending legacy approvals once without changing old delivery cursors. Native paging includes current pending/expiry metadata; the companion skips settled/expired notices and checkpoints OS submissions through the existing engine. Telegram retains its card path and skips generic notices. This changes neither native read scope nor decision authority. See [authority and delivery limits](../decisions/native-approvals.md) and [dated acceptance](../acceptance/native-approval-delivery-2026-11-09.md); actual menu/VoiceOver/banner use remains unverified.
+
+## Proactive trigger admission
+
+F-026-T01 adds an inactive scheduler-owned `Watch` queue for validated heartbeat/daily/event triggers, durable slot identities and source/taint. Frozen stage/action limits are enforced by the existing Ledger; non-Production work is read-only and hard isolation/budget denials cannot become approval cards through retries. Definition changes/pilot demotion revoke pending/running work. No timer or model consumption is enabled by this slice; runtime/quiet-hour delivery and end-to-end acceptance remain F-026-T02. See [decision and assessment](../decisions/hyuga-watch.md).

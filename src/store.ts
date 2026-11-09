@@ -1,3 +1,4 @@
+import {Watch} from './watch.ts';
 import {transaction} from './sqlite-transaction.ts';
 import type {WorkerLease} from './worker-jobs.ts';
 import {readConfig} from './config.ts';
@@ -30,6 +31,7 @@ export class Store {
   readonly usage: UsageStore;
   readonly instrumentality: InstrumentalityRuns;
   readonly ledger: Ledger;
+  readonly watch:Watch;
   readonly memory: Memory;
   readonly policySource: string;
   /** The data home, when known: the schedule tool writes config.json there. */
@@ -72,7 +74,7 @@ export class Store {
     this.db.exec('CREATE TABLE IF NOT EXISTS daily_briefs(day TEXT PRIMARY KEY,delivery_id TEXT NOT NULL UNIQUE REFERENCES deliveries(id))');
     // Approval delivery identities are additive: existing reminder/brief rowids remain channel cursors.
     this.db.exec('CREATE TABLE IF NOT EXISTS approval_deliveries(approval_id TEXT PRIMARY KEY REFERENCES approvals(id),delivery_id TEXT NOT NULL UNIQUE REFERENCES deliveries(id))');
-    this.ledger = new Ledger(this.db,{policy:scrolls.policy,tools:builtinTools});this.memory = new Memory(this.db);this.policySource = scrolls.source;
+    this.ledger = new Ledger(this.db,{policy:scrolls.policy,tools:builtinTools});this.memory = new Memory(this.db);this.watch=new Watch(this.db,this.ledger);this.policySource = scrolls.source;
     this.db.exec("CREATE TABLE IF NOT EXISTS worker_legacy_outbox(id TEXT PRIMARY KEY,state TEXT NOT NULL,reason TEXT NOT NULL,created TEXT NOT NULL); CREATE TABLE IF NOT EXISTS worker_outbox_cancels(id TEXT PRIMARY KEY,reason TEXT NOT NULL,created TEXT NOT NULL); CREATE TABLE IF NOT EXISTS worker_outbox_attempts(id TEXT PRIMARY KEY,attempted TEXT NOT NULL); CREATE TABLE IF NOT EXISTS worker_outbox_reconciliations(id TEXT NOT NULL,action TEXT NOT NULL,reason TEXT NOT NULL,source TEXT NOT NULL,created TEXT NOT NULL)");
     try{this.workerJobs=transaction(this.db,()=>{
       const legacy=!!this.db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='kaji_runs'").get();const jobs=new WorkerJobs(this.db,raw=>this.legacyWorkerResult(raw));
