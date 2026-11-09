@@ -4,6 +4,7 @@ Decisions preserve rationale and alternatives. A date alone does not make them s
 
 | Decision | Scope | Reconsider when |
 |---|---|---|
+| [Native approvals](native-approvals.md) | Read-only companion cards and existing dashboard owner authority; rendering/delivery pending F-023 | Observed owner needs require a separately authorized decision capability |
 | [Runtime boundaries](runtime-boundaries.md) | TypeScript/process isolation, RPC, registered components, native pairing and sleeping workers | A measured unmet capability or changed trust/deployment boundary invalidates the recorded assumptions |
 | [Worker protocol](worker-protocol.md) | Enrolled signed worker actions, receipts, resource ownership and uncertainty | Protocol/version, execution capabilities, authentication or recovery contract changes |
 | [Node bootstrap](node-bootstrap.md) | Explicit discovery/inspection and confirmed transactional bootstrap | Service ownership, supported hosts or enrolment/recovery behavior changes |
