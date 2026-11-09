@@ -15,6 +15,7 @@ Start here for document ownership. This is the NERV-specific map; the [procedure
 | [Review register](reviews/README.md) | Links, last actual execution, next date/condition, scope and owner | Dated snapshot; future triggers are not completed checks or a background scheduler |
 | [Audits](audits/README.md) | Dated report plus scope manifest | Immutable evidence; scoped reviews refresh only their declared areas |
 | [Acceptance](acceptance/README.md) | Observed automated/human/device acceptance and limits | Dated evidence, not current status |
+| [Test-to-capability index](test-capability-index.md) | Generated common/NERV case mapping, areas, capabilities and explicit coverage gaps | Implemented cases, not measured qualification; CI rejects drift |
 | [Gauntlet adoption](evaluations/gauntlet.md) | Independent capability protocol, NERV flow adapters and explicit model comparison commands | Pinned dependency; no automatic qualification or model campaign |
 | [Evaluations](evaluations/README.md) | Versioned scenario/model/stress run reports | Retained by revision and suite; no automatic expensive reruns |
 | `design/` | Scoped proposals/assessments not yet adopted as a decision | Findings map to existing records; no implied implementation |

@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "parent": "F-074",
+  "dependsOn": [
+    "F-074-T01"
+  ],
+  "resources": [
+    "contract:backlog-ids",
+    "contract:gauntlet-adoption",
+    "docs/**",
+    "evals/gauntlet/**",
+    "tools/gauntlet.mjs",
+    "tools/gauntlet-adapter.mjs",
+    "test/gauntlet.test.mjs",
+    "vendor/**",
+    "package.json",
+    "package-lock.json",
+    ".harness.json",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "evidence-review"
+  ],
+  "privacy": "Neutral fixtures and local/private authorized Gemma evidence; no secrets, remote targets, downloads or production promotion",
+  "validation": [
+    "Cross-boundary tests and scoped static/ledger checks; final required CI"
+  ],
+  "escalation": [
+    "Stop on invalid identity, unsafe reuse or unknown budget consumption; do not weaken grading"
+  ],
+  "id": "F-074-T02",
+  "title": "Run and record authorized measured Gemma smoke",
+  "goal": "Run and record authorized measured Gemma smoke",
+  "status": "planned",
+  "acceptance": [
+    "Owned scope verified; evidence and limitations recorded; no automatic qualification"
+  ]
+}

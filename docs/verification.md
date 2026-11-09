@@ -25,4 +25,4 @@ For a manual full run, select **Actions → CI → Run workflow → full = true*
 
 ## Gauntlet adoption
 
-Protocol/pack/adapter changes run `node --test test/gauntlet.test.mjs` plus manifest validation and `gauntlet:plan`; actual native joins are selected explicitly. The pinned package/lockfile is a dependency risk and therefore requests complete deterministic CI. No check above launches real-model qualification, downloads or repeated stress campaigns. See [commands and costs](evaluations/gauntlet.md).
+Protocol/pack/adapter changes run `node --test test/gauntlet.test.mjs` plus manifest/index drift validation and `gauntlet:plan`; actual native joins are selected explicitly. The pinned package/lockfile is a dependency risk and therefore requests complete deterministic CI. No check above launches real-model qualification, downloads or repeated stress campaigns. See [commands and costs](evaluations/gauntlet.md).

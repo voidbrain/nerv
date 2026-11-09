@@ -95,3 +95,8 @@ Reconciled main `fd503d3` using authenticated `npm run ci:status -- 222`: CI 425
 ## 2026-11-09 — PR #223
 
 Reconciled main `b15fe37` using authenticated `npm run ci:status -- 223`: CI 42535553841 passed plan, validate, Windows, native-macos and full-suite at exact head737fa53. F-073/T01 accepted and archived after clean-source policy90, six integration tests and independent report-only review. Initial CI 42535069202 failed recap-week validation and an existing Windows remote-card cleanup assertion. Recap was corrected for the owner date, no Telegram/runtime/assertion/timeouts changed, and B-042 remains Investigate despite final CI pass. B-046 remains separate unresolved heartbeat evidence. No model inference/download or production qualification occurred.
+
+
+## 2026-11-09 — PR #224
+
+Authenticated ci:status confirms CI 42536093191 passed scoped plan, validate, Windows and native-macos; full-suite skipped. Reconciled main8a4f469, F-073 closed and T01 closed. Prior implementation acceptance remains PR #223 / full CI42535553841; no repeat product/model campaign claimed.
