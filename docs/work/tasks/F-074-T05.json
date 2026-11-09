@@ -4,7 +4,7 @@
   "parent": "F-074",
   "title": "Adopt private diagnostics and development job registration",
   "goal": "Consume released Gauntlet0.4.1 diagnostics and harness4.4.1 job metadata without duplicating generic implementations",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Pin released Gauntlet0.4.1 source-included artifact, source/tag/CI and SHA; expose explicit fresh failure capture, selected common cases, explicit schema mode and source-bound private inspection through NERV CLI",
     "Adopt released harness4.4.1 optional job rule/metadata ledger and client entry bridges, preserving all NERV safety/privacy/ownership rules; unavailable native counters remain unknown",
@@ -46,7 +46,8 @@
     "Pinned artifact/source comparison and actual wrapper-to-protocol failure-capture/selection/inspection join",
     "Applicable fast/ledger/index checks and required full CI; source-aware independent report-only review",
     "Ten NERV/package/CLI joins pass with fake local provider; actual capture/inspection remains failed3/3 by design, source-bound, no public raw replies. Static/package/index checks pass; independent harness review and full final CI pending.",
-    "Independent review: ten joins pass; copied files match4.4.1 and32 packaged sources/contracts match77f766d, no implementation blocker. Reviewer registration omission explicitly recorded; no universal client compliance/counter qualification."
+    "Independent review: ten joins pass; copied files match4.4.1 and32 packaged sources/contracts match77f766d, no implementation blocker. Reviewer registration omission explicitly recorded; no universal client compliance/counter qualification.",
+    "Accepted2026-11-10: PR242 exacthead03c0721 / CI42687439382 passed plan, validate, Windows, native-macos and full-suite; mergedmainbc7a9c3. Eleven fixture joins and independent copied/source/schema review passed. No real model campaign; T04 remains unimplemented."
   ],
   "escalation": [
     "Native role-profile bundle remains T04; generic native client source adapters remain project-harness F-048-T02",
