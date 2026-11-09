@@ -1429,7 +1429,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | — |
+| PR / evidence | [PR #225](https://github.com/voidbrain/nerv/pull/225); upstream Gauntlet PR #5 / CI42572655186; Review: independent report-only recheck linked above. |
 | Opened | 2026-11-09 |
 | Verification | Unit/integration:8neutral adapter/index/cache/artifact/cancellation tests pass locally. Upstream0.2.0 Node24 CI42572655186 passed28tests and fresh-context review. Actual Gemma campaign still pending T02; no inference claimed. |
 | Reviewed | 2026-11-09 |
