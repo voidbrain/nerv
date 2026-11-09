@@ -52,6 +52,12 @@ process.on('message',(value:unknown)=>{
    case 'sorties.explain':return store.explain(params.ref as string);
    case 'sorties.spear':return store.spear(params.id as string,params.reason as string);
    case 'context.intake':return store.ledger.intake(params.sortieId as string,params.source as string,params.trust as 'trusted'|'tainted');
+   case 'watch.poll':return store.watchPoll();
+   case 'watch.recover':return store.watchRecover();
+   case 'watch.claim':return store.watchClaim();
+   case 'watch.get':return store.watchContext(params.sortieId as string);
+   case 'watch.plan':return store.watchPlan(params.sortieId as string);
+   case 'watch.finish':return store.watchFinish(params.sortieId as string,params.status as 'done'|'failed',params.reply as string);
    case 'sorties.open':return store.ledger.openSortie(params.source==='misato'?MISATO_SOURCE:params.source==='instrumentality'?'instrumentality':params.source==='marduk'?'marduk':OWNER_SOURCE,params.title as string,'trusted');
    case 'sorties.finish':{const id=params.sortieId as string;if(params.reply)store.ledger.reply(id,params.reply as string);return params.status?store.ledger.close(id,params.status as 'done'|'failed'):false;}
    case 'misato.note':return store.ledger.note(params.sortieId as string,params.kind as 'misato.step',params.payload as never);
@@ -106,7 +112,7 @@ process.on('message',(value:unknown)=>{
    case 'misato.context':return store.ledger.conversation(params.conversation as string);
    case 'misato.claim':return store.ledger.claimResume(params.sortieId as string);
    case 'actions.finished':return store.finishedExternal(params.sortieId as string,params.actionId as string,params.tool as string,typeof params.error==='string'?{error:params.error}:{text:String(params.text ?? '')});
-   case 'actions.preview':store.ledger.setExternal(external());return store.ledger.preview(params.sortieId as string,params.tool as string);
+   case 'actions.preview':store.watchContext(params.sortieId as string);store.ledger.setExternal(external());return store.ledger.preview(params.sortieId as string,params.tool as string);
    case 'actions.act':store.ledger.setExternal(external());return store.runAction(params.sortieId as string,{tool:params.tool as string,args:params.args as Record<string,unknown>,stage:params.stage as 'production',...(params.casper?{casper:params.casper as Verdict}:{}),...(Array.isArray(params.extras)?{extras:params.extras as Verdict[]}:{})},params.worker as unknown as WorkerLease|undefined);
    case 'inbox.page':return store.inboxPage(params.after as number|undefined,params.limit as number|undefined,params.afterId as string|undefined);
   }

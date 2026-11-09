@@ -144,4 +144,6 @@ Gauntlet0.3 NERV adoption accepted after PR235 exactheadb4cd887 / full CI4260857
 
 - [F-027 provenance boundary, 2026-11-09](2026-11-09-provenance-boundary.md): durable source/taint design, conservative legacy handling and unimplemented enforced-egress boundary; rerun for changed trust, memory or isolation contracts. Independent review/CI evidence remains separate.
 
-- [Hyuga watch assessment, 2026-11-09](../decisions/hyuga-watch.md): F-026-T01 durable admission, immutable gate budgets, cancellation and event-source boundaries. Revisit for changed trust/scheduling/delivery contracts; T02 runtime and quiet-hour delivery remain unimplemented.
+- [Hyuga watch assessment, 2026-11-09](../decisions/hyuga-watch.md): Original F-026-T01 admission/gate assessment plus the appended T02 runtime/quiet-hour integration evidence. Revisit for changed trust/scheduling/delivery contracts; final exact-head CI remains pending in the implementation report.
+
+- [Hyuga proactive watch acceptance, 2026-11-09](../acceptance/hyuga-watch-2026-11-09.md): runtime/approval/restart, quiet-hour inbox/Telegram and remote-dispatch authority joins; fresh-context review finding fixed and rechecked. Rerun for changed scheduling, authority, model route or delivery contracts; final exact-head CI pending in this implementation report.

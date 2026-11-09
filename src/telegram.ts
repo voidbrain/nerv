@@ -262,7 +262,7 @@ export class TelegramChannel {
  private async deliverOnce():Promise<void> {
   try{
    await this.reconcile();
-   const fresh=(await this.store.approvals(20)).filter(a=>!this.state.cards.includes(a.id));
+   const fresh=(await this.store.approvals(20)).filter(a=>a.notify!==false&&!this.state.cards.includes(a.id));
    const sent=(ids:string[])=>{this.state.cards=[...this.state.cards,...ids].slice(-200);this.save();};
    // Fact cards from one sortie go out together, once none has newly appeared for BUNDLE_WAIT_MS.
    const facts=new Map<string,Approval[]>();

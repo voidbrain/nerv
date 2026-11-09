@@ -57,11 +57,12 @@ process.on('message',(value:unknown)=>{
   if(method==='misato.step'){
    // One planning turn. The route is the owner's choice for Misato; without one, local when configured.
    if(configError)return {error:configError};
-   const route=models.roles?.misato?.route ?? (models.local?'local':models.cloud?.enabled?'cloud':undefined);
+   const proactive=params.watch as {readOnly:boolean;model?:string}|undefined;
+   const route=proactive?'local':models.roles?.misato?.route ?? (models.local?'local':models.cloud?.enabled?'cloud':undefined);
    if(!route)return {error:'No model route for Misato: add models.local (or enable models.cloud) in config.json, then run nerv reload. See docs/INSTALL.md, section \"Model routes\".'};
    const remote=Array.isArray(params.remote)?params.remote as RemoteOffer[]:[];
-   const ask=misatoAsk({...(params.clarification===true?{clarification:true}:{}),request:params.request as string,history:params.history as Step[],tools:[...toolDocs,...((params.external as ToolDoc[]|undefined) ?? []),...(remote.length?[remoteToolDoc(remote)]:[])],now:new Date().toISOString(),timeZone,...(params.context?{context:params.context as Turn[]}:{}),...(params.memory?{memory:params.memory as Recalled[]}:{}),...(typeof params.advice==='string'?{advice:params.advice}:{}),...(params.language==='it'||params.language==='en'?{language:params.language}:{})},route);
-   try{const reply=await run(ask,forRole(models,'misato'));const plan=parsePlan(reply.text);return plan?{plan,model:reply.model}:{invalid:true,model:reply.model};}
+   const ask=misatoAsk({...(params.clarification===true?{clarification:true}:{}),request:params.request as string,history:params.history as Step[],tools:[...toolDocs.filter(t=>!proactive?.readOnly||t.effect==='read'),...((params.external as ToolDoc[]|undefined) ?? []),...(remote.length?[remoteToolDoc(remote)]:[])],now:new Date().toISOString(),timeZone,...(params.context?{context:params.context as Turn[]}:{}),...(params.memory?{memory:params.memory as Recalled[]}:{}),...(typeof params.advice==='string'?{advice:params.advice}:{}),...(params.language==='it'||params.language==='en'?{language:params.language}:{})},route);
+   try{const on=proactive&&proactive.model&&models.local?{...models,local:{...models.local,model:proactive.model}}:forRole(models,'misato');const reply=await run(ask,on);const plan=parsePlan(reply.text);return plan?{plan,model:reply.model}:{invalid:true,model:reply.model};}
    catch(e){return {error:e instanceof ModelError?e.message:'Model route failed.'};}
   }
   if(method==='consultant.advise'){

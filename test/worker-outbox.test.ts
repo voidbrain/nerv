@@ -41,3 +41,48 @@ test('F-014: legacy approval migration rejects still-pending cards, preserves ob
   store.close();store=new Store(path);assert.equal(store.approvals().length,0);assert.equal((store.workerJobs.receipt(ids[0]!)!.result as {outcome:string}).outcome,'reject');assert.equal((store.workerJobs.receipt(ids[1]!)!.result as {outcome:string}).outcome,'grant');assert.equal(store.memory.list().length,1);assert.equal(store.workerJobs.receipt(ids[2]!)!.state,'running');assert.equal(store.workerJobs.pending().length,1);assert.equal((store.workerJobs.receipt(ids[3]!)!.result as {outcome:string}).outcome,'reject');
  }finally{store.close();rmSync(home,{recursive:true,force:true});}
 });
+
+test('F-026: proactive remote progress/results persist atomically, respect quiet hours and never use direct resumed callbacks',{timeout:15000},async()=>{
+ const home=mkdtempSync(join(tmpdir(),'nerv-watch-outbox-')),path=join(home,'nerv.sqlite');const minutes=new Date().getUTCHours()*60+new Date().getUTCMinutes(),clock=(n:number)=>String(Math.floor(((n+1440)%1440)/60)).padStart(2,'0')+':'+String((n+1440)%60).padStart(2,'0');
+ const pilot={id:'fixture-pilot',name:'Fixture',domain:'Fixture',keywords:['fixture'],model:'unused-fixture',stage:'production' as const};
+ const config={timeZone:'UTC',models:{local:{model:'unused-fixture',baseUrl:'http://127.0.0.1:9/v1'}},pilots:[pilot],watch:{triggers:[{id:'fixture-check',request:'Read remote fixture',schedule:{everyMinutes:1440},maxActions:1,maxSteps:2,pilot:pilot.id}],quietHours:{from:clock(minutes-30),until:clock(minutes+30)} as {from:string;until:string}|undefined}};
+ const save=()=>writeFileSync(join(home,'config.json'),JSON.stringify(config));save();const store=new Store(path,undefined,{home});let sortieId:string;
+ try{const run=store.watch.admit(config.watch,config.pilots,'UTC')[0]!;sortieId=run.sortieId;store.watch.claim();store.queueRemote(sortieId,'NERV-02','reminders.list',{});store.watch.finish(sortieId,'done');}finally{store.close();}
+ const runtime=new Runtime(path,undefined,home);const follow:unknown[]=[];let completed=false;
+ try{
+  await runtime.ready();runtime.onResumed(x=>follow.push(x));runtime.startOutbox(async(_base,_item,dispatching)=>{await dispatching();return {reached:true,result:completed?{outcome:'grant',result:[]}:{outcome:'approval',approvalId:'00000000-0000-4000-8000-000000000222'}};},20);
+  await until(async()=>(await runtime.events(sortieId)).filter(e=>e.kind==='kaji.result').length===1);completed=true;
+  await until(async()=>(await runtime.events(sortieId)).filter(e=>e.kind==='kaji.result').length===2);
+  assert.equal(follow.length,0);await runtime.nervous.call('watch.poll');assert.equal((await runtime.inboxPage()).items.length,0);
+  config.watch.quietHours=undefined;save();assert.equal(await runtime.nervous.call('watch.poll'),2);assert.equal(await runtime.nervous.call('watch.poll'),0);
+  const messages=(await runtime.inboxPage()).items;assert.equal(messages.length,2);assert.ok(messages.every(m=>m.kind==='brief'));assert.match(messages[0]!.message,/approval/);assert.match(messages[1]!.message,/ran/);assert.equal(await runtime.nervous.call('inbox.lastBrief'),null);
+ }finally{await runtime.close();rmSync(home,{recursive:true,force:true});}
+});
+
+test('F-026: transport dispatch revalidates removed/demoted/replaced watch authority, including already completed planners',()=>{
+ for(const change of ['remove','demote','model','retire'] as const)for(const completed of [false,true]){
+  const home=mkdtempSync(join(tmpdir(),'nerv-watch-dispatch-')),path=join(home,'db');
+  const pilot={id:'fixture-pilot',name:'Fixture',domain:'Fixture',keywords:['fixture'],model:'fixture-model',stage:'production' as 'prototype'|'test'|'production',retired:false};
+  const config={pilots:[pilot],watch:{triggers:[{id:'fixture-check',request:'Read remote fixture',schedule:{everyMinutes:1440},maxActions:1,maxSteps:2,pilot:pilot.id}]}};
+  const save=()=>writeFileSync(join(home,'config.json'),JSON.stringify(config));save();const store=new Store(path,undefined,{home});
+  try{
+   const run=store.watch.admit(config.watch,config.pilots,'UTC')[0]!;store.watch.claim();const queued=store.queueRemote(run.sortieId,'NERV-02','reminders.list',{});if(completed)store.watch.finish(run.sortieId,'done');
+   if(change==='remove')config.watch.triggers=[];else if(change==='demote')pilot.stage='prototype';else if(change==='model')pilot.model='replacement-model';else pilot.retired=true;save();
+   // No poll is allowed to hide a dispatch-time validation gap.
+   assert.throws(()=>store.attemptWorkerOutbox(queued.id));assert.equal(store.outbox().length,0);assert.equal(store.cancelledWorkerOutbox().find(q=>q.id===queued.id)?.attempted,false);
+   assert.equal(store.db.prepare('SELECT 1 FROM worker_outbox_attempts WHERE id=?').get(queued.id),undefined);
+  }finally{store.close();rmSync(home,{recursive:true,force:true});}
+ }
+});
+
+test('F-026: watch polling creates remote cancellation intents; restart interruption preserves attempted uncertainty',()=>{
+ const home=mkdtempSync(join(tmpdir(),'nerv-watch-interrupt-outbox-')),path=join(home,'db');const config={watch:{triggers:[{id:'fixture-check',request:'Read remote fixture',schedule:{everyMinutes:1440},maxActions:1,maxSteps:2}]}};
+ writeFileSync(join(home,'config.json'),JSON.stringify(config));let store=new Store(path,undefined,{home});
+ try{
+  const run=store.watch.admit(config.watch,[],'UTC')[0]!;store.watch.claim();const queued=store.queueRemote(run.sortieId,'NERV-02','reminders.list',{});store.attemptWorkerOutbox(queued.id);
+  // Age the neutral unfinished-attempt fixture before reopening; the dispatch above belongs to its original process.
+  store.db.prepare('UPDATE watch_runs SET started=? WHERE sortie_id=?').run(new Date(Date.now()-1000).toISOString(),run.sortieId);
+  store.close();store=new Store(path,undefined,{home});assert.throws(()=>store.attemptWorkerOutbox(queued.id));assert.equal(store.watch.get(run.sortieId)?.state,'interrupted');assert.equal(store.cancelledWorkerOutbox().find(q=>q.id===queued.id)?.attempted,true,'attempted work stays uncertain until its remote receipt is reconciled');
+  const next=store.watch.admit({triggers:[{...config.watch.triggers[0]!,id:'second-fixture'}]},[],'UTC')[0]!;store.watch.claim();const second=store.queueRemote(next.sortieId,'NERV-02','reminders.list',{});config.watch.triggers=[];writeFileSync(join(home,'config.json'),JSON.stringify(config));store.watchPoll();assert.ok(store.cancelledWorkerOutbox().some(q=>q.id===second.id));
+ }finally{store.close();rmSync(home,{recursive:true,force:true});}
+});

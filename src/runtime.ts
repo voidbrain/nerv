@@ -1,3 +1,4 @@
+import type {WatchWork} from './watch.ts';
 import {WORKER_RESULT_BYTES,type WorkerContext,type WorkerLease,type WorkerClaim} from './worker-jobs.ts';
 import {runFailure,runMessage,type InstrumentalityRun} from './instrumentality-runs.ts';
 import {readFileSync} from 'node:fs';
@@ -24,7 +25,7 @@ import {toolName,type McpTool} from './mcp.ts';
 export interface ExternalTools {docs:{name:string;effect:string;about:string;args:string}[];byName:Map<string,{server:string;tool:string;fingerprint:string;eva:string}>;suspended:{name:string;why:string}[]}
 /** Requests in one domain without a specialist, within 30 days, before a pilot is proposed (F-045). */
 const PILOT_THRESHOLD=3;
-import {MAX_STEPS,doneReply,type RemoteOffer,requestLanguage,waitingReply,type Plan,type Recalled,type Step,type Turn} from './misato.ts';
+import {MAX_REPLY_CHARS,MAX_STEPS,doneReply,type RemoteOffer,requestLanguage,waitingReply,type Plan,type Recalled,type Step,type Turn} from './misato.ts';
 import {builtinTools,toolDocs} from './executors.ts';
 import type {Digest,Exchange} from './instrumentality.ts';
 import type {Episode,Fact} from './memory.ts';
@@ -43,7 +44,7 @@ export function remoteOutcomeText(base:string,tool:string,result:Record<string,u
  if(o==='reject')return `${base} refused ${tool}: ${String(result.reason ?? 'its gate said no')}.`;
  return `${base} answered for ${tool}: ${JSON.stringify(result).slice(0,400)}`;
 }
-export interface ChatReply {command?:boolean;sortieId:string;question?:{text:string;expires:string};reply?:string;error?:string;steps:Step[];waiting:{approvalId:string;tool:string;reason:string}[];
+export interface ChatReply {proactive?:true;command?:boolean;sortieId:string;question?:{text:string;expires:string};reply?:string;error?:string;steps:Step[];waiting:{approvalId:string;tool:string;reason:string}[];
  /** Set when the main base handled the request (F-036 dispatch): its sortie, cards and memory are there. */
  base?:{id:string;name:string}}
 /** An action the owner asks for directly: the request is what Casper checks the action against. */
@@ -267,8 +268,8 @@ export class Runtime implements StoreApi {
   * Misato's loop: plan one action, gate it, show Misato the outcome, repeat until Misato replies or the step limit is
   * reached. When actions wait for the owner, the sortie stays open and resumes once they are decided (F-033).
   */
- private async loop(sortieId:string,message:string,steps:Step[],context:Turn[]=[],followup?:{consult:boolean;advice?:string;conversation?:string;answering?:boolean}):Promise<ChatReply> {
-  const waiting:ChatReply['waiting']=[];
+ private async loop(sortieId:string,message:string,steps:Step[],context:Turn[]=[],followup?:{consult:boolean;advice?:string;conversation?:string;answering?:boolean;watch?:WatchWork}):Promise<ChatReply> {
+  const waiting:ChatReply['waiting']=[];const proactive=followup?.watch;
   // LCL fill: Lilith's facts that match this request and its recent conversation.
   const memory=await this.nervous.call('memory.recall',{text:[message,...context.map(t=>t.request)].join(' ').slice(0,8000)}).catch(()=>[]) as Recalled[];
   for(const t of context)await this.nervous.call('context.intake',{sortieId,source:('conversation:'+(t.source ?? 'legacy')).slice(0,100),trust:t.tainted?'tainted':'trusted'});
@@ -277,8 +278,11 @@ export class Runtime implements StoreApi {
    if(waiting.length&&reply){
     // Not finished: the reply is recorded, the sortie waits for the owner's decisions and then resumes.
     await this.nervous.call('sorties.finish',{sortieId,reply});await this.note(sortieId,'misato.waiting',{approvalIds:waiting.map(w=>w.approvalId)});
+   }else if(proactive){
+    const summary=reply ?? (lang()==='it'?'Il controllo automatico non è terminato. Apri NERV per verificare lo stato.':'The automatic check did not finish. Open NERV to inspect its status.');
+    const recorded=await this.nervous.call('watch.finish',{sortieId,status,reply:summary}).catch(()=>false);if(!recorded)return {proactive:true,sortieId,error:'Watch state changed; inspect its trace.',steps,waiting};
    }else await this.nervous.call('sorties.finish',{sortieId,status,...(reply?{reply}:{})});
-   return {sortieId,...(reply?{reply}:{}),...(error?{error}:{}),steps,waiting};
+   return {...(proactive?{proactive:true as const}:{}),sortieId,...(reply?{reply}:{}),...(error?{error}:{}),steps,waiting};
   };
   const lang=()=>requestLanguage(message,context.map(t=>t.request));
   const ranSteps=()=>steps.filter(s=>s.outcome==='grant'&&!s.error&&s.tool).map(s=>({tool:s.tool!,args:s.args ?? {}}));
@@ -296,9 +300,10 @@ export class Runtime implements StoreApi {
   // F-045: enough requests in one domain without a specialist → a pilot is proposed (a card), in the background.
   if(unmatched)void this.proposePilot(unmatched).catch(()=>{/* best effort */});
   for(let turn=0;turn<MAX_STEPS;turn++){
-   const remote=await this.remoteOffers();
-   const ext=await this.externalTools();
-   const out=await this.modelCall('misato.step',{...(followup?.answering&&turn===0?{clarification:true}:{}),request:message,history:steps.slice(-12),...(remote.length?{remote}:{}),...(ext.docs.length?{external:ext.docs}:{}),...(advice?{advice}:{}),language:lang(),...(context.length?{context}:{}),...(memory.length?{memory:memory.slice(0,10)}:{})},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as {plan?:Plan;invalid?:boolean;error?:string};
+   if(proactive&&!await this.nervous.call('watch.plan',{sortieId}).catch(()=>false))break;
+   const remote=proactive?.readOnly?[]:await this.remoteOffers();
+   const ext=proactive?.readOnly?{docs:[],byName:new Map(),suspended:[]}:await this.externalTools();
+   const out=await this.modelCall('misato.step',{...(proactive?{watch:{readOnly:proactive.readOnly,...(proactive.model?{model:proactive.model}:{})}}:{}),...(followup?.answering&&turn===0?{clarification:true}:{}),request:message,history:steps.slice(-12),...(remote.length?{remote}:{}),...(ext.docs.length?{external:ext.docs}:{}),...(advice?{advice}:{}),language:lang(),...(context.length?{context}:{}),...(memory.length?{memory:memory.slice(0,10)}:{})},MODEL_TIMEOUT_MS).catch(()=>({error:'Brain unavailable.'})) as {plan?:Plan;invalid?:boolean;error?:string};
    if(out.error)return finish('failed',undefined,out.error);
    if(!out.plan){await this.record(sortieId,steps,{outcome:'invalid',error:'Reply was not one JSON action, question or reply.'});continue;}
    if('newRequest' in out.plan){
@@ -306,6 +311,7 @@ export class Runtime implements StoreApi {
     await this.spear(sortieId,'Owner changed topic; the pending clarification is cancelled.');
     return this.chatOnce(message,followup.conversation);
    }
+   if('ask' in out.plan&&proactive){const prefix=lang()==='it'?'Il controllo automatico richiede altri dettagli. Aggiorna la richiesta: ':'This automatic check needs more detail. Update its request: ';return finish('failed',prefix+out.plan.ask.slice(0,MAX_REPLY_CHARS-prefix.length));}
    if('ask' in out.plan){const question=await this.nervous.call('misato.ask',{sortieId,text:out.plan.ask,conversation:followup?.conversation ?? 'cli'}) as {text:string;expires:string};return {sortieId,reply:question.text,question,steps,waiting};}
    if('reply' in out.plan)return finish('done',out.plan.reply);
    const {tool,args}=out.plan.action;
@@ -412,7 +418,7 @@ export class Runtime implements StoreApi {
      let reply:{status:string;result?:unknown}|undefined;try{if(cancel&&!q.legacy)reply=await cancel(q.base,q.id,q.reason);}catch{/* Unknown remote cancellation remains explicit. */}
      result=reply&&(reply.status==='completed'||reply.status==='cancelled')&&reply.result&&typeof reply.result==='object'?reply.result as Record<string,unknown>:{outcome:'uncertain',error:'Cancellation requested; remote work may have started. Inspect its receipt before releasing or repeating it.'};
     }
-    const text=remoteOutcomeText(q.base,q.tool,result);const changed=await this.nervous.call('kaji.outboxDone',{id:q.id,result,said:{base:q.base,text}});if(changed)for(const listener of this.resumeListeners)listener({sortieId:q.sortieId,reply:text,steps:[],waiting:[]});
+    const text=remoteOutcomeText(q.base,q.tool,result);const changed=await this.nervous.call('kaji.outboxDone',{id:q.id,result,said:{base:q.base,text}});if(changed&&!await this.nervous.call('watch.get',{sortieId:q.sortieId}).catch(()=>true))for(const listener of this.resumeListeners)listener({sortieId:q.sortieId,reply:text,steps:[],waiting:[]});
    }}catch{/* Durable cancellation markers remain for the next tick. */}finally{cancelling=false;}
   };
   this.cancelRemote=cancelTick;
@@ -429,7 +435,7 @@ export class Runtime implements StoreApi {
      // B-011: recorded on the sortie too, so the trace, the dashboard and the "why" answer show what the other base did.
      const changed=await this.nervous.call(result.outcome==='approval'?'kaji.outboxProgress':'kaji.outboxDone',{id:q.id,result,said:{base:name,text:reply}});
      if(!changed)continue;
-     for(const l of this.resumeListeners)l({sortieId:q.sortieId,reply,steps:[],waiting:[]});
+     if(!await this.nervous.call('watch.get',{sortieId:q.sortieId}).catch(()=>true))for(const l of this.resumeListeners)l({sortieId:q.sortieId,reply,steps:[],waiting:[]});
     }
    }catch{/* the next tick tries again */}finally{busy=false;}
   };
@@ -464,7 +470,7 @@ export class Runtime implements StoreApi {
   const ids=await this.nervous.call('misato.resumable').catch(()=>[]) as string[];
   for(const id of ids){
    if(this.resuming.has(id))continue;this.resuming.add(id);
-   try{const reply=await this.resume(id);if(reply)for(const l of this.resumeListeners)l(reply);}
+   try{const reply=await this.resume(id);if(reply&&!reply.proactive)for(const l of this.resumeListeners)l(reply);}
    catch{/* the next sweep will not retry a claimed sortie; its events show where it stopped */}
    finally{this.resuming.delete(id);}
   }
@@ -489,6 +495,11 @@ export class Runtime implements StoreApi {
   return n;
  }
  private async resume(sortieId:string):Promise<ChatReply|null> {
+  const proactive=await this.nervous.call('watch.get',{sortieId}) as WatchWork|null;
+  if(!proactive)return this.resumeCore(sortieId);
+  const prior=this.watchWork;const work=(prior?prior.catch(()=>null):Promise.resolve(null)).then(()=>this.resumeCore(sortieId,proactive));return this.trackWatch(work);
+ }
+ private async resumeCore(sortieId:string,proactive?:WatchWork):Promise<ChatReply|null> {
   const claim=await this.nervous.call('misato.claim',{sortieId}) as {request:string;steps:{step:Step}[];decisions:{actionId:string;tool:string;args:Record<string,unknown>;decision:string;result?:unknown;error?:string}[]}|null;
   if(!claim)return null;
   const steps=claim.steps.map(s=>s.step);
@@ -499,7 +510,7 @@ export class Runtime implements StoreApi {
    await this.record(sortieId,steps,step,d.actionId);
   }
   const history=await this.clarificationHistory(sortieId);
-  return this.loop(sortieId,history.answer ?? claim.request,steps,history.context,{consult:false,advice:history.advice,conversation:history.conversation ?? 'cli'});
+  return this.loop(sortieId,history.answer ?? claim.request,steps,history.context,{consult:false,advice:history.advice,conversation:history.conversation ?? 'cli',...(proactive?{watch:proactive}:{})});
  }
  /**
   * Instrumentality (F-022): Misato's exchanges since the last episode → a summary (kept) and candidate facts, each
@@ -600,6 +611,23 @@ export class Runtime implements StoreApi {
   if(!this.briefTimer)this.briefTimer=setInterval(()=>{void tick();},everyMs);void tick();
  }
  private briefTimer?:NodeJS.Timeout;
+ private watchTimer?:NodeJS.Timeout;private watchRecovered=false;private watchWork?:Promise<ChatReply|null>;
+ /** One serial proactive attempt; admission, claim and planner reservations are durable in A. */
+ checkWatch():Promise<ChatReply|null> {
+  if(this.watchWork)return this.watchWork;
+  return this.trackWatch(this.runWatch());
+ }
+ private trackWatch(work:Promise<ChatReply|null>):Promise<ChatReply|null> {this.watchWork=work;void work.finally(()=>{if(this.watchWork===work)this.watchWork=undefined;}).catch(()=>{});return work;}
+ private async runWatch():Promise<ChatReply|null> {
+  if(!this.watchRecovered){await this.nervous.call('watch.recover');this.watchRecovered=true;}
+  await this.nervous.call('watch.poll');const run=await this.nervous.call('watch.claim') as WatchWork|null;if(!run)return null;
+  await this.note(run.sortieId,'misato.request',{text:run.request});
+  return this.loop(run.sortieId,run.request,[],[],{consult:false,watch:run});
+ }
+ startWatch(everyMs=60_000){
+  const tick=()=>{void this.checkWatch().catch(()=>{console.error('Hyuga: proactive watch unavailable; no attempt was retried.');});};
+  if(!this.watchTimer)this.watchTimer=setInterval(tick,everyMs);tick();
+ }
  /** Durable claims survive restart; episode checkpoints and scheduled success commit together in A. */
  private instrumentalitySchedule?:()=>{mode?:{at:string}|{when:'idle'};timeZone:string};
  startInstrumentality(schedule:()=>{mode?:{at:string}|{when:'idle'};timeZone:string},everyMs=60_000,clock:()=>Date=()=>new Date()){
@@ -669,5 +697,5 @@ export class Runtime implements StoreApi {
   if(!this.home)return undefined;let url;try{url=ollamaUrlOf(readConfig(this.home).models);}catch{return undefined;}
   const found=await detectOllama(url);return {reachable:found.reachable,url:found.url,models:found.models.map(m=>m.name)};
  }
- async close(){if(this.toolsClient)await this.toolsClient.close();if(this.outboxTimer)clearInterval(this.outboxTimer);if(this.briefTimer)clearInterval(this.briefTimer);if(this.resumer)clearInterval(this.resumer);if(this.instrumentality)clearInterval(this.instrumentality);await Promise.allSettled([this.nervous.close(),this.brain.close()]);}
+ async close(){if(this.watchTimer)clearInterval(this.watchTimer);if(this.toolsClient)await this.toolsClient.close();if(this.outboxTimer)clearInterval(this.outboxTimer);if(this.briefTimer)clearInterval(this.briefTimer);if(this.resumer)clearInterval(this.resumer);if(this.instrumentality)clearInterval(this.instrumentality);await Promise.allSettled([this.nervous.close(),this.brain.close()]);}
 }

@@ -4,13 +4,17 @@
   "parent": "F-026",
   "title": "Consume proactive runs with quiet-hour delivery",
   "goal": "Wire validated owner-configured triggers into serve and the existing planner with durable once-only delivery",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Serve re-reads validated explicit opt-in trigger configuration; no model work runs without it",
     "Runtime consumes durable runs through existing Misato loop, including failure, approval, restart and cancellation paths",
     "Quiet hours defer new proactive notification delivery without delaying reminder/inbox deliveries already due",
     "Per-trigger steps and actions are bounded; nonproduction writes never execute; source/taint stays durable",
-    "Process/browser/channel/native regressions establish actual integration and parent closure evidence"
+    "Process/browser/channel/native regressions establish actual integration and parent closure evidence",
+    "Use configured local planner route without automatic cloud fallback; bind named pilot model/stage and revalidate changed authority at each effect",
+    "Publish proactive outcomes as source-tagged Hyuga briefs with their own identities; daily-brief checkpoints and already-due reminders remain unaffected",
+    "Defer new proactive approval notices/cards during quiet hours while retaining owner inspection and current TTL/decision authority",
+    "Reserve planner-call steps durably before model dispatch so approval/restart never resets a run budget"
   ],
   "dependsOn": [
     "F-026-T01"
@@ -19,7 +23,10 @@
     "src/**",
     "test/**",
     "docs/**",
-    "generated:backlog-views"
+    "generated:backlog-views",
+    "README.md",
+    "evals/**",
+    "contract:gauntlet-adoption"
   ],
   "capabilities": [
     "bounded-edit",
@@ -33,7 +40,9 @@
   "validation": [
     "Fake-model process-boundary trigger/gate/approval/restart tests",
     "Quiet-hour crossing with due reminders and delivery deduplication",
-    "Required full CI and independent report-only review before closing P1"
+    "Required full CI and independent report-only review before closing P1",
+    "Local broad498 passed/two skips; targeted runtime/admission/Telegram/outbox/dispatch and actual serve/restart tests pass; browser/axe/build pass. Fresh-context P1 review dispatch finding fixed and32 tests rechecked without blocker. Final full CI pending.",
+    "NERV golden ledger/conversation/channel/base groups now select watch admission/runtime and quiet/dispatch regressions; system pack1.2 and generated capability index retain source-qualified coverage."
   ],
   "escalation": [
     "Actual isolation remains F-049; no outside-code or network confinement claim",

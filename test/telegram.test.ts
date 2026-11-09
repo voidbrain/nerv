@@ -201,3 +201,22 @@ test('F-003: owner Italian then English messages keep their language through the
   assert.match(model.systems[0]!,/Write the reply in Italian/);assert.match(model.systems[1]!,/Write the reply in English/);assert.equal((await runtime.sorties()).filter(s=>s.status==='done').length,2);
  }finally{await channel.stop();await runtime.close();await model.close();await tg.close();rmSync(home,{recursive:true,force:true});}
 });
+
+test('F-026: Telegram defers proactive cards and resumed replies during quiet hours while owner/due delivery stays normal',{timeout:20000},async()=>{
+ const token='123456:'+'w'.repeat(35),tg=await fakeTelegram(token),model=await fakeModel(['{"action":{"tool":"reminders.list","args":{}}}','{"reply":"Fixture background check finished."}']);
+ const home=mkdtempSync(join(tmpdir(),'nerv-watch-telegram-'));const m=new Date().getUTCHours()*60+new Date().getUTCMinutes(),clock=(n:number)=>String(Math.floor(((n+1440)%1440)/60)).padStart(2,'0')+':'+String((n+1440)%60).padStart(2,'0');
+ const quiet={from:clock(m-30),until:clock(m+30)};const config={timeZone:'UTC',models:{local:{baseUrl:model.url,model:'m'}},watch:{triggers:[{id:'fixture-check',request:'Read fixture status',schedule:{everyMinutes:1440},maxActions:1,maxSteps:2}],quietHours:quiet as typeof quiet|undefined}};
+ const save=()=>writeFileSync(join(home,'config.json'),JSON.stringify(config));save();const runtime=new Runtime(join(home,'nerv.sqlite'),undefined,home);const channel=new TelegramChannel({api:new TelegramApi(token,tg.base),store:runtime,chatId:OWNER,statePath:join(home,'telegram-state.json'),log:()=>{}});
+ try{
+  await runtime.ready();runtime.startResumer(50);await channel.start(50);const watch=await runtime.checkWatch();assert.equal(watch?.waiting.length,1);
+  await runtime.add('Due watch fixture reminder',new Date(Date.now()+200).toISOString());await until(()=>tg.sent().some(m=>m.text.includes('Due watch fixture reminder')));
+  assert.ok(tg.sent().every(m=>!m.reply_markup?.inline_keyboard),'quiet proactive card is not sent through the direct card path');
+  config.watch.quietHours=undefined;save();await runtime.nervous.call('watch.poll');await until(()=>tg.sent().some(m=>!!m.reply_markup?.inline_keyboard));
+  const card=tg.sent().find(m=>m.reply_markup?.inline_keyboard)!;const approve=card.reply_markup!.inline_keyboard.flat().map(b=>b.callback_data).find(x=>x.startsWith('a:'))!;assert.ok(approve);
+  config.watch.quietHours=quiet;save();tg.tap(OWNER,approve);
+  const end=Date.now()+8000;while((await runtime.sortie(watch!.sortieId))?.status!=='done'){if(Date.now()>end)throw Error('watch did not resume');await wait(25);}
+  assert.equal(tg.sent().some(m=>m.text==='Fixture background check finished.'),false,'resume listener must not bypass quiet-hour inbox delivery');
+  config.watch.quietHours=undefined;save();await runtime.nervous.call('watch.poll');await until(()=>tg.sent().some(m=>m.text==='Fixture background check finished.'));
+  assert.equal(tg.sent().filter(m=>m.text==='Fixture background check finished.').length,1);
+ }finally{await channel.stop();await runtime.close();await model.close();await tg.close();rmSync(home,{recursive:true,force:true});}
+});

@@ -1,3 +1,4 @@
+import {validateWatch,type WatchConfig} from './watch.ts';
 import { validatePilots, type Pilot } from './pilots.ts';
 import { validateTools, type ToolsConfig } from './mcp.ts';
 import { existsSync,readdirSync, mkdirSync, readFileSync, writeFileSync, chmodSync } from 'node:fs';
@@ -8,7 +9,7 @@ import { statSync } from 'node:fs';
 import { validateModels, type Models } from './model.ts';
 import { defaultPolicy, validatePolicy, type Policy } from './policy.ts';
 /** telegram.chatId: the one private chat (the owner's) the Aoba bot answers; set by `telegram link`. */
-export interface Config {port:number; language:'it'|'en'; timeZone:string;nativePort?:number;models:Models;telegram?:{chatId:number};brief?:{at:string};instrumentality?:{at:string}|{when:'idle'};base:Base;kaji?:{root:string;offers?:string[];seats?:Record<string,'shadow'|'veto'|'off'>};pilots?:Pilot[];tools?:ToolsConfig}
+export interface Config {port:number; language:'it'|'en'; timeZone:string;nativePort?:number;models:Models;telegram?:{chatId:number};brief?:{at:string};instrumentality?:{at:string}|{when:'idle'};base:Base;kaji?:{root:string;offers?:string[];seats?:Record<string,'shadow'|'veto'|'off'>};pilots?:Pilot[];tools?:ToolsConfig;watch?:WatchConfig}
 /** This machine's identity in the NERV mesh: an id (NERV-01) and a name (Neo Tokyo-3), shown in the dashboard, doctor and brief. */
 export interface Base {id:string;name:string}
 export const defaultBase:Base={id:'NERV-01',name:'Neo Tokyo-3'};
@@ -54,6 +55,7 @@ export function readConfig(home:string):Config {
     config.kaji={root:k.root,...(Array.isArray(k.offers)&&k.offers.length?{offers:[...new Set(k.offers as string[])]}:{}),...(k.seats&&Object.keys(k.seats).length?{seats:k.seats as Record<string,'shadow'|'veto'|'off'>}:{})};}
   if('brief' in raw){const b=raw.brief as Record<string,unknown>;if(!b||typeof b!=='object'||Array.isArray(b)||Object.keys(b).some(k=>k!=='at')||typeof b.at!=='string'||!/^([01]\d|2[0-3]):[0-5]\d$/.test(b.at))throw new Error('Invalid brief: {"at": "HH:MM"} in your time zone.');config.brief={at:b.at};}
   if('tools' in raw){const t=validateTools((raw as Record<string,unknown>).tools);if(t.mcp.length||t.grants.length)config.tools=t;}
+  if('watch' in raw)config.watch=validateWatch((raw as Record<string,unknown>).watch);
   if('pilots' in raw){const list=validatePilots((raw as Record<string,unknown>).pilots);if(list.length)config.pilots=list;}
   if(config.port===(config.nativePort ?? 4319))throw new Error('Web and native ports must differ.');
   if(!Number.isInteger(config.port)||config.port<1||config.port>65535)throw new Error('Invalid NERV Agency port.');
