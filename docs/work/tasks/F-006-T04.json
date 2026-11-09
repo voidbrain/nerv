@@ -39,6 +39,8 @@
     "Compare Mac-only baseline, Mac coder plus mini PC specialist/auditor, and mini PC tools/tests with Mac inference under equivalent tasks and budgets",
     "Bind exact model/runtime/hardware, memory and concurrent load; measure task outcomes, queue, network, latency and resource cost",
     "Unavailable Mac, disconnected auditor, cancellation and uncertain outcomes preserve privacy, leases and permission gates",
-    "Only selected authorized enrolled targets run live cases; fixture evidence cannot establish real-device suitability"
+    "Only selected authorized enrolled targets run live cases; fixture evidence cannot establish real-device suitability",
+    "Use one normal home mini PC baseline, not separate office/home/day/night conditions; vary inference/tools-test contention only when intended concurrent NERV work justifies it",
+    "Use F-006-T05 Mac operating-condition evidence when relevant; Mac sleep/unavailability remains a dependency/recovery check"
   ]
 }
