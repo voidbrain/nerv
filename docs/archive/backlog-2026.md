@@ -2993,3 +2993,5 @@ F-073 reconciliation: [PR #224](https://github.com/voidbrain/nerv/pull/224), doc
 </details>
 
 ---
+
+B-047 acceptance reconciliation: [PR #238](https://github.com/voidbrain/nerv/pull/238).

@@ -797,7 +797,7 @@ T02 remains blocked on F-049 actual outside-code isolation: application URL chec
 | Field | Value |
 |---|---|
 | Depends on | [F-049](#f-049) — T02 only: actual outside-code isolation for enforced egress; T01 provenance can land independently |
-| PR / evidence | [PR #237](https://github.com/voidbrain/nerv/pull/237); Review: independent fresh-context report in [provenance boundary](reviews/2026-11-09-provenance-boundary.md), finding fixed and rechecked; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
+| PR / evidence | Acceptance: [PR #238](https://github.com/voidbrain/nerv/pull/238); [PR #237](https://github.com/voidbrain/nerv/pull/237); Review: independent fresh-context report in [provenance boundary](reviews/2026-11-09-provenance-boundary.md), finding fixed and rechecked; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-04 |
 | Verification | 2026-11-09 Unit/integration and Browser/accessibility: PR237 exact head be60c19 / CI42614209749 passed plan, validate (coverage, browser/axe, headless), Windows, native-macos and full-suite. Focused provenance/MCP/restart/consolidation/actual-legacy-schema and repeated quarantine tests passed; independent final review18 tests passed. Enforced egress/isolation acceptance remains unimplemented under T02/F-049. |
 | Reviewed | 2026-11-09 |
