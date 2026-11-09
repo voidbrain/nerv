@@ -27,7 +27,6 @@ Depends on names a required outcome; Unlocks lists direct dependents, not verifi
 | [F-021](../BACKLOG.md#f-021) | [F-049](../BACKLOG.md#f-049) — EVA-03 isolation before enabling EVA-03 tool grants; other MCP slices can proceed | [F-054](../BACKLOG.md#f-054), [F-056](../BACKLOG.md#f-056) |
 | [F-023](../BACKLOG.md#f-023) | — | — |
 | [F-025](../BACKLOG.md#f-025) | — | [F-049](../BACKLOG.md#f-049) |
-| [F-026](../BACKLOG.md#f-026) | — | — |
 | [F-027](../BACKLOG.md#f-027) | [F-049](../BACKLOG.md#f-049) — T02 only: actual outside-code isolation for enforced egress; T01 provenance can land independently | — |
 | [F-028](../archive/backlog-2026.md#f-028) | — | [F-054](../BACKLOG.md#f-054), [F-056](../BACKLOG.md#f-056) |
 | [F-029](../archive/backlog-2026.md#f-029) | — | [F-045](../BACKLOG.md#f-045) |

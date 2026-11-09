@@ -52,4 +52,7 @@ After that frozen F-014 run, Windows CI exposed contention in the existing peer-
 
 [Host-load scenario plan](mac-load-scenarios.md): three representative Mac conditions, one normal home mini PC baseline, fair comparison settings and optional cold/warm, sustained-load and recovery checks. This is future campaign planning under F-006-T05/T04, not an evaluation result.
 
+[Operator commands](gauntlet.md#operator-runs-common-gemma-smoke-and-nerv-system-acceptance) distinguish common Gemma, scripted NERV system and native role evaluation settings. [External project assessment](../reviews/2026-11-09-external-agent-projects.md) retains optional runner/attack/conversation references without adoption.
 Suite `nerv-golden-v5` adds F-026 watch admission/runtime, quiet-hour channel delivery and remote-dispatch revalidation to the ledger, conversation, channel and base groups. The matching NERV Gauntlet system pack is version1.2.0; earlier reports keep their original suite IDs and input hashes. Focused local groups passed50,42,20 and51 checks respectively on the candidate tree; these scripted results do not qualify a real model.
+
+[First common Gemma smoke review](2026-11-09-gemma-common-smoke.md): owner-provided Gauntlet0.3 report completed10 cases,7 passed/3 JSON parse failures,4/4 holdouts passed; requested profile/budget retained, no qualification.

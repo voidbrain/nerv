@@ -65,3 +65,7 @@ Optional Tailscale transport uses explicit host enrolment, scoped grants and rev
 ## Execution enforcement assessment (9 November 2026)
 
 The [execution-boundary assessment](../reviews/2026-11-09-execution-boundaries.md) retains these runtime/trust decisions. F-049 owns a deterministic isolated runner within NERV; the existing ledger/policy remains authority. Harness owns development workflow and Gauntlet evaluation evidence, neither OS confinement nor permission. Preserve failed attempts and uncertain effects; discard speculative artifacts without claiming external rollback. Protected grading and exact-artifact promotion are F-006 work. No runner, fourth project, MCTS or formal-verification service is implemented by this decision.
+
+## External alternatives reviewed 9 November 2026
+
+The [nine-project assessment](../reviews/2026-11-09-external-agent-projects.md) retains AgentFS filesystem/state ideas for F-049 and typed BAML boundaries as optional adapter experiments. Existing TypeScript runtime and ledger/grant authority remain selected. No filesystem snapshot substitutes for verified network/credential isolation or external-effect reconciliation. The current runtime does not adopt these dependencies.

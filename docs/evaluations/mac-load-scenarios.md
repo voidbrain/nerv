@@ -28,3 +28,7 @@ Cold/warm residency and separately budgeted sustained-load checks are orthogonal
 NERV's wrapper forwards upstream environment context unchanged. Common model evidence has no NERV source dependency and can serve another authorized consumer for the same complete configuration/context and freshness contract. Different machine/scenario or unscoped reports cannot substitute for a requested condition. Source-specific system reports still bind NERV's actual source/adapter. Reuse retains original dates and `performanceMeasuredNow:false`; one idle observation does not establish active-load performance.
 
 Development token spend by item/job/activity is separate work under [project-harness F-048](https://github.com/voidbrain/project-harness/blob/main/docs/BACKLOG.md#f-048). Gauntlet retains evaluation-run usage, NERV retains runtime usage, and future imports must avoid counting the same provider event twice. No measured phase breakdown of this development session is available or inferred.
+
+## First available observation, 9 November 2026
+
+The [first common Gemma smoke review](2026-11-09-gemma-common-smoke.md) records one owner-declared moderate-load Mac run:10 cases executed,7 passed/3 JSON parse failures,64.744s/1608 output tokens. Human responsiveness, competing-app details, power state and swap/pressure observations remain unavailable. This is a single common-pack observation, not the comparative F-006-T05/T04 campaign or NERV role/host qualification. No repeat or new load budget is implied.
