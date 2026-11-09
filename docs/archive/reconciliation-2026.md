@@ -1,5 +1,7 @@
 # Backlog reconciliation log 2026
 
+- Current work ledger, reviewed 9 November 2026 against main `5c7997b`. PR #239 CI42624083120 passed all five jobs/full-suite. F-026-T01 admission/gate limits accepted; runtime and quiet-hour delivery T02 is next. F-027 enforced egress still awaits F-049.
+
 - Current work ledger, reviewed 9 November 2026 against main `cd8142d`. PR #238 CI42621969384 passed scoped checks; full-suite skipped. F-027-T01 accepted, B-047 archived; F-027 egress awaits F-049. Owner continued backlog; F-026 is next.
 
 - Current work ledger, reviewed 9 November 2026 against main `81b1106`. PR #237 CI42614209749 passed all five jobs/full-suite. F-027-T01 provenance is accepted; enforced egress awaits F-049 isolation. B-047 fixture expiry is closed.

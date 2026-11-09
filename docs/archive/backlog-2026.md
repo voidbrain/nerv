@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 1 | 1 |
+| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 2 | 1 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
 
@@ -2995,3 +2995,41 @@ F-073 reconciliation: [PR #224](https://github.com/voidbrain/nerv/pull/224), doc
 ---
 
 B-047 acceptance reconciliation: [PR #238](https://github.com/voidbrain/nerv/pull/238).
+
+### F-026
+
+**Hyuga watch: proactive triggers (heartbeat, schedules, events)**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-09 after automated trigger, budget and quiet-delivery acceptance.
+
+| | |
+|---|---|
+| **Issue** | Background checks need explicit triggers, durable permission limits and quiet-hour notification behavior. |
+| **Reproduce** | Configure a heartbeat check and an event trigger; let both fire inside and outside quiet hours; let the model route be down. |
+| **Check** | Triggers create sorties with their source recorded; proactive sorties run in EVA-00 (no external effects) unless the pilot is Production; quiet hours defer notifications, not deliveries already due; per-trigger budget; duplicate ticks after restart do not duplicate sorties. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** T01 accepted after PR239 exacthead24c3600 / CI42624083120 passed all five jobs/full-suite, mergedmain5c7997b. T02 implementation connects validated opt-in configuration, local pilot-bound planning, durable step/action limits, approval/restart/cancellation and quiet-hour brief/card/remote follow-up delivery. [Configuration](../INSTALL.md#proactive-watches-hyuga), [decision](../decisions/hyuga-watch.md), [acceptance](../acceptance/hyuga-watch-2026-11-09.md).
+
+Closed 2026-11-09: PR #240 exact head `6acac44` / [CI42635119338](https://github.com/voidbrain/nerv/actions/runs/42635119338) passed plan, validate, Windows, native-macos and full-suite; merged main `0968262`. Golden suite v5 and Gauntlet system pack1.2.0 select the new watch joins. Historical PR240 initial Windows session-loss failure is retained under B-046; the final revision passed without changing that test or WorkerLink. This is not a causal B-046 fix. Independent fresh-context review found queued remote dispatch could outlive withdrawn watch authority; fixed at the actual transport callback and durable cancellation boundary, preserving prior-attempt uncertainty. Recheck32 tests passed, no remaining blocker. No live-model qualification, actual EVA sandbox or physical notification receipt is required/claimed by this automated trigger contract; those retain their owning records.
+
+**Estimates:** Small at closure, reassessed 2026-11-09; no F-026 implementation or acceptance remains. Original Large estimate2026-11-04 remains historical.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Acceptance reconciliation: [PR #241](https://github.com/voidbrain/nerv/pull/241); [PR #240](https://github.com/voidbrain/nerv/pull/240) T02 runtime/delivery; [PR #239](https://github.com/voidbrain/nerv/pull/239) T01 admission/gate implementation; Review: independent fresh-context report-only implementation review, dispatch finding fixed and32 tests rechecked without blocker; No review: closure reconciliation is documentation-only and introduces no runtime change; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
+| Opened | 2026-11-04 |
+| Verification | 2026-11-09 Unit/integration: PR #240 exact head `6acac44` / [CI42635119338](https://github.com/voidbrain/nerv/actions/runs/42635119338) passed plan, validate, Windows, native-macos and full-suite; merged main `0968262`. Linux coverage, Windows full tests/service lifecycle, browser/axe/headless and macOS Swift/TLS/package checks passed. Local joins and fresh-context review establish the recorded trigger/budget/quiet-delivery contract; no live-model qualification, OS confinement or phone receipt claimed. |
+| Reviewed | 2026-11-09 |
+
+</details>
+
+---
+
+F-026 acceptance reconciliation carried from superseded [PR #241](https://github.com/voidbrain/nerv/pull/241) into [PR #242](https://github.com/voidbrain/nerv/pull/242). Runtime acceptance remains PR240 / CI42635119338; PR241 failed before jobs due to GitHub internal errors.

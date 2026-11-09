@@ -15,3 +15,5 @@ The [review register](../reviews/README.md#acceptance-evidence) links every repo
 [Gauntlet0.3 environment adoption](gauntlet-environments-2026-11-09.md): released shared contracts and NERV assignment/admission/reuse fixtures; no live workload/model qualification.
 
 [Hyuga proactive watches, 9 November 2026](hyuga-watch-2026-11-09.md): local fixture acceptance for explicit triggers, gate/planner budgets, restart/cancellation, dispatch authority and quiet-hour channel/inbox joins; no live-model or physical receipt claim.
+
+- [Private diagnostic adoption, 2026-11-09](gauntlet-private-diagnostics-2026-11-09.md): released0.4 wrapper/private-inspection joins and harness4.4.1 job metadata rule; no model campaign or native counter qualification.

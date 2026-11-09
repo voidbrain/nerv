@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "F-074-T04",
+  "parent": "F-074",
+  "title": "Provide a profile-matched operator role-evaluation bundle",
+  "goal": "Let the owner launch bounded NERV-specific role checks with explicit common-profile settings and saved reviewable evidence",
+  "status": "planned",
+  "acceptance": [
+    "One documented operator command selects explicit model/runtime/context/output/sampling/thinking settings and machine/load scenario for synthetic Casper/Misato cases",
+    "Preflight and execution preserve a reviewed aggregate time/call/output budget; reject unsupported settings rather than silently inheriting defaults",
+    "Save requested/actual configuration, source/case identities, partial/failure outcomes and telemetry gaps to new private reports; no proposed tool executes",
+    "Keep common smoke reuse distinct from NERV role/system acceptance; do not duplicate a campaign or claim qualification",
+    "Keep reusable protocol behavior upstream and NERV role adapters/configuration here"
+  ],
+  "dependsOn": [
+    "F-074-T01",
+    "F-074-T03"
+  ],
+  "resources": [
+    "docs/**",
+    "tools/evaluate-model.mjs",
+    "tools/evaluate.mjs",
+    "test/evaluation-model.test.mjs",
+    "test/evaluation-runner.test.mjs",
+    "tools/gauntlet.mjs",
+    "test/gauntlet.test.mjs",
+    "evals/**",
+    "contract:gauntlet-adoption",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "evidence-review",
+    "regression-design"
+  ],
+  "privacy": "Neutral synthetic cases and new private local reports only; no secrets, downloads, production effects or automatic cloud fallback. No live campaign as part of implementing the operator workflow.",
+  "validation": [
+    "Regression fixtures verify exact settings, aggregate-budget stop, interruption and report identity across the evaluator/provider join",
+    "Documented command plans and shell syntax validate without real-model execution; final applicable CI"
+  ],
+  "escalation": [
+    "Native evals:model currently inherits production defaults and has no shared300s aggregate cap; do not present it as profile-matched until implemented",
+    "Owner reviews any additional live campaign scope/budget; preparation itself runs no models",
+    "External project references are conditional alternatives, not required dependencies"
+  ]
+}

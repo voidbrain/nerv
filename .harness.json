@@ -3,7 +3,7 @@
     "path": "../harness-template",
     "repo": "https://github.com/voidbrain/project-harness"
   },
-  "version": "4.3.0",
+  "version": "4.4.1",
   "stacks": [
     "core",
     "angular"
@@ -43,7 +43,9 @@
     "docs/agents/parallel-work.md": "core/docs/agents/parallel-work.md",
     "docs/agents/architecture-review.md": "core/docs/agents/architecture-review.md",
     "docs/agents/procedures.md": "core/docs/agents/procedures.md",
-    "docs/agents/task-context.md": "core/docs/agents/task-context.md"
+    "docs/agents/task-context.md": "core/docs/agents/task-context.md",
+    "tools/work-usage.mjs": "core/tools/work-usage.mjs",
+    "docs/agents/work-usage.md": "core/docs/agents/work-usage.md"
   },
   "forked": {},
   "freshness": {
@@ -612,7 +614,10 @@
     "docs/archive/README.md": "core/docs/archive/README.md",
     ".editorconfig": "core/.editorconfig",
     ".gitignore": "core/gitignore.txt",
-    "package.json": "angular/package-scripts.json"
+    "package.json": "angular/package-scripts.json",
+    "GEMINI.md": "core/GEMINI.md",
+    "QWEN.md": "core/QWEN.md",
+    ".github/copilot-instructions.md": "core/.github/copilot-instructions.md"
   },
   "ciStatus": {
     "workflow": "CI",
@@ -639,7 +644,9 @@
       "docs/agents/parallel-work.md",
       "docs/agents/architecture-review.md",
       "docs/agents/procedures.md",
-      "docs/agents/task-context.md"
+      "docs/agents/task-context.md",
+      "tools/work-usage.mjs",
+      "docs/agents/work-usage.md"
     ]
   },
   "audit": {
@@ -875,5 +882,8 @@
     "records": "docs/work/records",
     "tasks": "docs/work/tasks",
     "profiles": "docs/agents/model-profiles.json"
+  },
+  "workUsage": {
+    "enabled": true
   }
 }
