@@ -25,7 +25,8 @@
   "validation": [
     "Process-boundary regression for MCP-result taint and later gate escalation",
     "Durable recall/conversation/resume and fact/summary propagation regressions",
-    "Full deterministic checks for persistence/runtime/security changes"
+    "Full deterministic checks for persistence/runtime/security changes",
+    "PR237 implementation: focused process/restart/consolidation and actual legacy-schema migration regressions pass; independent review finding fixed/rechecked. Final full CI pending."
   ],
   "escalation": [
     "EVA-03 outside code remains denied until F-049 provides actual isolation; never claim process-wide egress enforcement from URL checks"

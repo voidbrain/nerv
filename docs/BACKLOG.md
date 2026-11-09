@@ -264,9 +264,9 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Test: test/node-discovery.test.ts — F-005: planning verifies the pinned source capability before proposing model-free init (committed on main before fix). |
+| PR / evidence | [PR #237](https://github.com/voidbrain/nerv/pull/237); Review: independent fresh-context report in [provenance boundary](reviews/2026-11-09-provenance-boundary.md), finding fixed and rechecked; Test: test/node-discovery.test.ts — F-005: planning verifies the pinned source capability before proposing model-free init (committed on main before fix). |
 | Opened | 2026-11-09 |
-| Verification | 2026-11-09 Unit/integration: committed regression fails after fixture expiry; fixture correction implemented; 21 targeted discovery/bootstrap tests passed; final CI pending. |
+| Verification | 2026-11-09 Unit/integration: committed regression fails after fixture expiry; fixture correction implemented; 22 targeted discovery/bootstrap tests passed; final CI pending. |
 | Reviewed | 2026-11-09 |
 
 </details>
@@ -830,7 +830,7 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 | Field | Value |
 |---|---|
 | Depends on | [F-049](#f-049) — T02 only: actual outside-code isolation for enforced egress; T01 provenance can land independently |
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
+| PR / evidence | [PR #237](https://github.com/voidbrain/nerv/pull/237); Review: independent fresh-context report in [provenance boundary](reviews/2026-11-09-provenance-boundary.md), finding fixed and rechecked; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-04 |
 | Verification | 2026-11-09 Unit/integration: focused provenance/MCP/restart checks passed; full local suite initially469 passed/two skips with one event-order assertion updated for required intake events. Browser/accessibility and build passed; Swift19 passed/one skip. Headless initial concurrent run timed out, isolated two-case lifecycle rerun passed. Second full local run472 passed/two skips, failed unrelated expired inspection fixture B-047. Final CI and enforced network egress remain pending. |
 | Reviewed | 2026-11-09 |
@@ -1501,4 +1501,4 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 
 **Execution-boundary assessment, 2026-11-09.** [Source-based review](reviews/2026-11-09-execution-boundaries.md) retains project separation; useful runner/enforcement, protected grading/promotion and threat-evidence work belongs to F-049/F-006/F-065. Harness4.2.1 and Gauntlet0.2.0 already state the relevant upstream boundaries; no upstream change or new project is justified. No runtime acceptance claimed. PR: #231.
 
-**Harness reconciliation, 2026-11-09.** Adopt published v4.3.0 task-context guide and triggers, preserving every NERV rule. No host thread-reset API or behaviour runner is configured; bounded continuation, no reset/cache/token-saving claim. Copied-file/rule checks passed. Fresh-context review found no harness defect; no behaviour runner is configured. Timed296239ms wall-clock sample includes initial F-027 implementation and waits, excludes final CI; it is not a comparable harness-only performance sample.
+**Harness reconciliation, 2026-11-09 (PR #237).** Adopt published v4.3.0 task-context guide and triggers, preserving every NERV rule. No host thread-reset API or behaviour runner is configured; bounded continuation, no reset/cache/token-saving claim. Copied-file/rule checks passed. Fresh-context review found no harness defect; no behaviour runner is configured. Timed296239ms wall-clock sample includes initial F-027 implementation and waits, excludes final CI; it is not a comparable harness-only performance sample.
