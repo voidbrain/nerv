@@ -4,7 +4,7 @@
   "parent": "F-023",
   "title": "Native approval authority contract",
   "goal": "Define how the read-only companion presents cards and obtains an explicitly authorized decision path",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "Existing read-only credentials cannot decide",
     "Choose a supported owner decision path without silently widening token scope"
@@ -26,7 +26,8 @@
   "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
   "validation": [
     "Run affected regressions across the changed boundary and applicable fast checks",
-    "Keep human/device acceptance and independent review distinct from fixture results"
+    "Keep human/device acceptance and independent review distinct from fixture results",
+    "2026-11-09: docs/decisions/native-approvals.md adopts read-only preview plus existing dashboard owner authority; inspected server allowlist and Store.decide, no runtime changes"
   ],
   "escalation": [
     "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",

@@ -4,10 +4,12 @@
   "parent": "F-023",
   "title": "Bounded full approval cards",
   "goal": "Render the complete bounded card and expiry state in the companion",
-  "status": "planned",
+  "status": "ready",
   "acceptance": [
     "Action, arguments, reason, pattern and remaining TTL visible",
-    "Expired or reconciled cards cannot offer a misleading decision"
+    "Expired or reconciled cards cannot offer a misleading decision",
+    "Use the read-only preview and existing dashboard owner decision path from docs/decisions/native-approvals.md; no paired credential write authority",
+    "Decode actual native HTTPS cards in Swift and demonstrate decision denial and cross-channel removal"
   ],
   "dependsOn": [
     "F-023-T01"
@@ -17,7 +19,16 @@
     "contract:native-approvals",
     "docs/work/tasks/F-023-T02.json",
     "docs/work/records/F-023.md",
-    "generated:backlog-views"
+    "generated:backlog-views",
+    "test/native-auth.test.ts",
+    "test/native-fixture.ts",
+    "native/README.md",
+    "docs/STYLE-GUIDE.md",
+    "docs/architecture/runtime.md",
+    "docs/acceptance/**",
+    "docs/reviews/**",
+    "docs/work/layout.json",
+    "docs/archive/reconciliation-2026.md"
   ],
   "capabilities": [
     "bounded-edit",
