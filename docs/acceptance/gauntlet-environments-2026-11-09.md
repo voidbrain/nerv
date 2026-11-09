@@ -11,3 +11,5 @@ Validation: pinned artifact/hash, wrapper-to-package context/admission/reuse joi
 [Independent report](../reviews/2026-11-09-gauntlet-environment-adoption.md): no blocking findings, released source/package identity checked and nine focused joins passed. Local typecheck/build/index/plan checks pass; final full CI remains the exact-revision acceptance gate.
 
 Local validation: all468 Node tests ran (466 passed, two platform skips); typecheck/Angular build, generated index, plan and applicable work/backlog/recap/dependency/queue/roadmap/convention/integration/rule/harness checks pass. Final dependency/runtime revision requires full CI. No real inference or model/load campaign.
+
+PR #235 candidate acceptance. Selected policy run on committedsourceba8282d passed all90 native checks, report7de88ebb-f126-4a6c-87e6-d5f64d44a4f7, completed2026-11-09T11:22:30Z. Complete applies to the selected policy pack only; performanceMeasuredNow:false and no model qualification. Initial /tmp symlink-parent output was rejected before execution; corrected to its canonical /private/tmp path without weakening the path safeguard.
