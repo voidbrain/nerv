@@ -17,3 +17,7 @@ Observed instruction-following limit: the independent report-only reviewer confi
 Owner accepted2026-11-09. Adoption now pins released Gauntlet0.4.1, source8d99d9f, PR11 / CI42686856664; exact artifact hash is in vendor manifest. Upstream43 deterministic tests and independent review accepted the explicit responseFormat contract. NERV schema mode selects a separate structural-only pack; eleven consumer joins pass including actual wrapper→released streaming Ollama format forwarding and semantically incorrect JSON rejection. Original prompt-only smoke remains unchanged. Moderate-load three-case schema diagnostic command is prepared with private capture and90s/6144-token budget; no live run executed. Final NERV CI remains required.
 
 Schema delta review: independent report-only reviewer re-ran all11 joins and selected CLI plan, verified artifact SHA and24 packaged source/example/contract files against8d99d9f; no implementation blocker. Stale current-pin/ten-join summaries corrected. Review job registered; actual token counters unavailable. Adoption PR #242 retains and supersedes PR241.
+
+## Acceptance reconciliation,10 November2026
+
+PR #242 exacthead03c0721 / CI42687439382 passed plan, validate, Windows, native-macos and full-suite; mergedmainbc7a9c3. T05 closed. F-026 was already closed/archived by that merge against PR240 runtime evidence. F-074 remains Open for T04. No real Gemma schema run or native-counter qualification occurred.
