@@ -1,5 +1,7 @@
 # Backlog reconciliation log 2026
 
+- Current work ledger, reviewed 9 November 2026 against main `12a24ef`. PR #228 CI42581988579 passed scoped checks; full-suite skipped. F-023-T02 native cards implemented with read-only authority; durable delivery and live acceptance remain open.
+
 - Current work ledger, reviewed 9 November 2026 against main `3ec54b9`. PR #227 CI42581319261 passed scoped checks; full-suite skipped. Staged qualification design integrated; F-023-T01 native authority contract complete, T02 ready.
 
 - Current work ledger, reviewed 9 November 2026 against main `cb06e90`. PR #226 CI42574859898 passed scoped checks; full-suite skipped. Owner resumed backlog work; F-074 smoke remains unexecuted. Combination/host qualification is accepted design under F-006/F-045.

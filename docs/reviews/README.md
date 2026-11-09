@@ -6,7 +6,7 @@ NERV evidence snapshot reviewed 8 November 2026 against main `2943aad`. Times be
 
 | Review | Last actual evidence | Next run / trigger | Owner and limits |
 |---|---|---|---|
-| Full deterministic verification | [PR #221 CI 42530253552](https://github.com/voidbrain/nerv/actions/runs/42530253552), 2026-11-08; all five jobs passed | By 2026-11-15 or ten first-parent integrations, whichever comes first; sooner for risk, unknown coverage or explicit request | [NERV mapping](../verification.md) / [shared policy](../agents/verification.md); no stress/model/physical acceptance implied |
+| Full deterministic verification | [PR #229 CI42584230832](https://github.com/voidbrain/nerv/actions/runs/42584230832), 2026-11-09; all five jobs passed | By 2026-11-16 or ten first-parent integrations, whichever comes first; sooner for risk, unknown coverage or explicit request | [NERV mapping](../verification.md) / [shared policy](../agents/verification.md); no stress/model/physical acceptance implied |
 | Architecture reassessment | [2026-11-08 scoped report](../audits/2026-11-08-architecture-reassessment.md) | Significant boundary/hardware/trust change, recurring design failure or owner request; no calendar appointment | [Procedure](../agents/architecture-review.md), affected backlog owners |
 | Expensive stress / real-model campaigns | Reports below; latest run depends on suite and selection | On request, concrete changed risk or named acceptance, with explicit scope and budget; no periodic rerun date | [Evaluation procedure](../decisions/evaluation-and-improvement.md); no automatic model qualification |
 | Human / real-device acceptance | Per report and current record | When required device, signing identity, service host or human observation is available; not scheduled | F-005/F-009/F-011/F-015 and other owning records |
@@ -125,3 +125,5 @@ PR #221 CI 42530253552 attempt 1 also observed heartbeat-path connection loss in
 [Configuration qualification reassessment](2026-11-09-configuration-qualification.md), 2026-11-09, baseline `cb06e90`: accepted individual → combination → NERV/host evidence boundary, with NERV tasks F-006-T03/T04 and F-045 consumption. Documentation assessment only; no audit-area baseline, live campaign or model qualification refreshed. Reconsider on changed role/host/protocol requirements or measured campaign cost/benefit.
 
 [Native approval previews](../acceptance/native-approvals-2026-11-09.md), 2026-11-09, baseline `12a24ef`: static EN/IT rendering, schema/expiry and native HTTPS authority join. Next on card schema, credential scope, UI/expiry or delivery changes; actual menu/VoiceOver and durable notifications remain F-023/F-011 acceptance.
+
+Native approval card implementation accepted after PR229 exact head `f3109c1` / full CI42584230832, merged main `5933855`; F-023-T01/T02 closed, T03 ready and unimplemented. This updates deterministic evidence only; no live native interaction or notification acceptance follows.

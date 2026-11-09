@@ -4,7 +4,7 @@
   "parent": "F-023",
   "title": "Native approval delivery and reconciliation",
   "goal": "Connect durable delivery to the reviewed native card path",
-  "status": "planned",
+  "status": "ready",
   "acceptance": [
     "Restart, duplicate decisions and Telegram/dashboard races reconcile without duplicate effects",
     "Notification/banner delivery limits are explicit"
@@ -20,7 +20,8 @@
     "contract:native-approvals",
     "docs/work/tasks/F-023-T03.json",
     "docs/work/records/F-023.md",
-    "generated:backlog-views"
+    "generated:backlog-views",
+    "docs/**"
   ],
   "capabilities": [
     "bounded-edit",
@@ -33,7 +34,8 @@
   "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
   "validation": [
     "Run affected regressions across the changed boundary and applicable fast checks",
-    "Keep human/device acceptance and independent review distinct from fixture results"
+    "Keep human/device acceptance and independent review distinct from fixture results",
+    "Prerequisite T02 accepted after PR229 full CI; durable delivery remains unimplemented, with explicit live-native acceptance limits."
   ],
   "escalation": [
     "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",

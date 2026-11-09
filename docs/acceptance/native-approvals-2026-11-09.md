@@ -12,3 +12,9 @@ Evidence:
 - Typecheck and convention checks passed. Local ad-hoc native package built successfully; this is not a notarized release. Planner requests complete deterministic CI because the native HTTPS fixture is risk-mapped; final PR CI owns cross-platform acceptance.
 
 Remaining: durable approval inbox/notification delivery, checkpoint/restart/restore and cross-channel notification races are F-023-T03. No new approval banners were delivered. Actual paired menu navigation, VoiceOver, permissions, sleep and owner observation remain native acceptance; no broader accessibility or real-device claim follows from static render inspection. F-023 remains open.
+
+## Final CI acceptance
+
+PR #229 exact head `f3109c1` merged to main `5933855` after [CI42584230832](https://github.com/voidbrain/nerv/actions/runs/42584230832) passed plan, validate, Windows, native-macos and full-suite. Authenticated `npm run ci:status -- 229` confirms all five jobs. Full deterministic coverage includes Linux coverage/browser/axe/headless, Windows tests/service and native Swift/pinned-HTTPS/package checks. This closes the bounded card implementation task T02, not parent F-023 or live interaction/banner acceptance. T03 is ready; its durable approval delivery remains unimplemented.
+
+The successful native CI job log was inspected: all 15 Swift tests passed, including all four approval tests and the live temporary pinned-HTTPS fixture; no Swift test was skipped in that job.

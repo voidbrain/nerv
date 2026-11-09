@@ -4,7 +4,7 @@
   "parent": "F-023",
   "title": "Bounded full approval cards",
   "goal": "Render the complete bounded card and expiry state in the companion",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Action, arguments, reason, pattern and remaining TTL visible",
     "Expired or reconciled cards cannot offer a misleading decision",
@@ -40,7 +40,8 @@
   "validation": [
     "Run affected regressions across the changed boundary and applicable fast checks",
     "Keep human/device acceptance and independent review distinct from fixture results",
-    "2026-11-09: Swift schema/render tests and real pinned HTTPS decoding/write denial pass; Node TLS race/idempotency test and full Node suite pass (460 passed, 2 platform skips); native ad-hoc package builds. Static EN/IT images inspected; live menu/VoiceOver remain parent acceptance."
+    "2026-11-09: Swift schema/render tests and real pinned HTTPS decoding/write denial pass; Node TLS race/idempotency test and full Node suite pass (460 passed, 2 platform skips); native ad-hoc package builds. Static EN/IT images inspected; live menu/VoiceOver remain parent acceptance.",
+    "Accepted after PR229 exact head f3109c1 merged main5933855; CI42584230832 passed plan/validate/windows/native-macos/full-suite. Static card contract complete; live native interaction remains parent acceptance."
   ],
   "escalation": [
     "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
