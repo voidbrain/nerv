@@ -100,3 +100,8 @@ Reconciled main `b15fe37` using authenticated `npm run ci:status -- 223`: CI 425
 ## 2026-11-09 — PR #224
 
 Authenticated ci:status confirms CI 42536093191 passed scoped plan, validate, Windows and native-macos; full-suite skipped. Reconciled main8a4f469, F-073 closed and T01 closed. Prior implementation acceptance remains PR #223 / full CI42535553841; no repeat product/model campaign claimed.
+
+
+## 2026-11-09 — PR #225
+
+Authenticated ci:status confirms CI42573854325 passed plan, validate, Windows, native-macos and full-suite at exacthead11c963c; merged main8fab24c. F-074-T01 adoption accepted; T02 remains planned and unexecuted because the owner requested pause after adoption. No model qualification or real runtime comparison claimed. Expired fence7 was inspected with stopped-writer evidence; automatic review required explicit owner authorization, which was obtained before recovery/reacquisition; fencing/history preserved.
