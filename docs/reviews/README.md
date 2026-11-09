@@ -117,3 +117,5 @@ PR #221 CI 42530253552 attempt 1 also observed heartbeat-path connection loss in
 ## Gauntlet integration review
 
 [Independent report, 9 November 2026](2026-11-09-gauntlet.md): protocol/adapters, cost gates and cancellation join. Last execution: 2026-11-09 CET. Next: protocol pin, adapter, supervision or evidence-contract changes; real-model qualification retains a separate campaign/review trigger. No background campaign.
+
+[Gauntlet0.2 adoption review](2026-11-09-gauntlet-v02.md), 2026-11-09: source/runtime-aware evidence reuse and index/telemetry adapters; next on relevant contract, pin, source/grader or admission change. Live Gemma acceptance remains a separate F-074-T02 campaign.

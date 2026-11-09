@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "nerv-system-flows",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "cases": [
     {
       "id": "policy",
@@ -17,7 +17,11 @@
       ],
       "critical": true,
       "expensive": false,
-      "runner": "policy"
+      "runner": "policy",
+      "area": "security-permissions",
+      "requirements": [
+        "posix-process-groups"
+      ]
     },
     {
       "id": "ledger",
@@ -34,7 +38,11 @@
       ],
       "critical": true,
       "expensive": false,
-      "runner": "ledger"
+      "runner": "ledger",
+      "area": "security-permissions",
+      "requirements": [
+        "posix-process-groups"
+      ]
     },
     {
       "id": "conversation",
@@ -50,7 +58,11 @@
       ],
       "critical": true,
       "expensive": false,
-      "runner": "conversation"
+      "runner": "conversation",
+      "area": "conversation-memory",
+      "requirements": [
+        "posix-process-groups"
+      ]
     },
     {
       "id": "channels",
@@ -65,7 +77,11 @@
       ],
       "critical": true,
       "expensive": false,
-      "runner": "channels"
+      "runner": "channels",
+      "area": "distributed-coordination",
+      "requirements": [
+        "posix-process-groups"
+      ]
     },
     {
       "id": "bases",
@@ -86,7 +102,11 @@
       ],
       "critical": true,
       "expensive": false,
-      "runner": "bases"
+      "runner": "bases",
+      "area": "distributed-coordination",
+      "requirements": [
+        "posix-process-groups"
+      ]
     },
     {
       "id": "stress",
@@ -101,7 +121,11 @@
       ],
       "critical": true,
       "expensive": true,
-      "runner": "stress"
+      "runner": "stress",
+      "area": "ci-operations",
+      "requirements": [
+        "posix-process-groups"
+      ]
     },
     {
       "id": "browser",
@@ -116,7 +140,12 @@
       ],
       "critical": true,
       "expensive": true,
-      "runner": "browser"
+      "runner": "browser",
+      "area": "ui-visual",
+      "requirements": [
+        "posix-process-groups",
+        "built-browser-assets"
+      ]
     }
   ]
 }

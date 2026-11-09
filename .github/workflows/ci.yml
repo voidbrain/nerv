@@ -67,6 +67,7 @@ jobs:
           path: dependencies.cdx.json
           if-no-files-found: error
       - run: npm run check:evals
+      - run: npm run check:gauntlet-index
       - if: needs.plan.outputs.unit == 'true'
         run: npm run typecheck
       # The suite once, with coverage; the table is printed (warnings, coverage.enforce off).

@@ -341,6 +341,18 @@
       "then": "Verify the pinned independent protocol, NERV native-runner normalization and supervision join; reconcile evaluation guide and candidate evidence without launching models.",
       "run": "node --test test/gauntlet.test.mjs && npm run gauntlet:plan",
       "checked": "Neutral adapter/CLI fixtures and explicitly selected policy acceptance; no full or model campaign."
+    },
+    {
+      "id": "gauntlet-index",
+      "when": [
+        "evals/gauntlet/**",
+        "vendor/**",
+        "tools/gauntlet.mjs",
+        "docs/test-capability-index.md"
+      ],
+      "then": "Regenerate the source-owned capability index; validate exact evidence reuse, telemetry and runtime adapter joins without live models.",
+      "run": "npm run gauntlet:index && npm run check:gauntlet-index && node --test test/gauntlet.test.mjs",
+      "checked": "Generated index contract and neutral private-cache/HTTP fixtures; live campaign separate F-074-T02."
     }
   ],
   "couplings": [
