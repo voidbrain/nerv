@@ -24,7 +24,8 @@
   ],
   "privacy": "Neutral fixtures and local/private authorized Gemma evidence; no secrets, remote targets, downloads or production promotion",
   "validation": [
-    "Cross-boundary tests and scoped static/ledger checks; final required CI"
+    "Cross-boundary tests and scoped static/ledger checks; final required CI",
+    "Accepted PR225 exacthead11c963c / CI42573854325: all five jobs passed; independent review complete"
   ],
   "escalation": [
     "Stop on invalid identity, unsafe reuse or unknown budget consumption; do not weaken grading"
@@ -32,7 +33,7 @@
   "id": "F-074-T01",
   "title": "Adopt indexed and instrumented Gauntlet contracts",
   "goal": "Adopt indexed and instrumented Gauntlet contracts",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Owned scope verified; evidence and limitations recorded; no automatic qualification"
   ]

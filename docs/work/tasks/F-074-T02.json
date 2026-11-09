@@ -28,7 +28,8 @@
     "Cross-boundary tests and scoped static/ledger checks; final required CI"
   ],
   "escalation": [
-    "Stop on invalid identity, unsafe reuse or unknown budget consumption; do not weaken grading"
+    "Stop on invalid identity, unsafe reuse or unknown budget consumption; do not weaken grading",
+    "Owner requested pause after adoption on2026-11-09; do not execute the live Gemma campaign until explicit resume"
   ],
   "id": "F-074-T02",
   "title": "Run and record authorized measured Gemma smoke",
