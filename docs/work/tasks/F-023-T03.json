@@ -7,7 +7,10 @@
   "status": "ready",
   "acceptance": [
     "Restart, duplicate decisions and Telegram/dashboard races reconcile without duplicate effects",
-    "Notification/banner delivery limits are explicit"
+    "Notification/banner delivery limits are explicit",
+    "Approval creation and one generic durable inbox notice commit atomically; existing pending approvals backfill once without changing old inbox cursors",
+    "Native catch-up skips settled/expired approvals and checkpoints them; Telegram retains one card path without duplicate notice sends",
+    "No private arguments in OS notification bodies; read-only native credentials never decide or mint browser sessions"
   ],
   "dependsOn": [
     "F-023-T02"
@@ -21,7 +24,9 @@
     "docs/work/tasks/F-023-T03.json",
     "docs/work/records/F-023.md",
     "generated:backlog-views",
-    "docs/**"
+    "docs/**",
+    "src/store.ts",
+    "src/telegram.ts"
   ],
   "capabilities": [
     "bounded-edit",
