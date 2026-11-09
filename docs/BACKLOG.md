@@ -1430,7 +1430,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #225](https://github.com/voidbrain/nerv/pull/225); upstream Gauntlet PR #5 / CI42572655186; Review: independent report-only recheck linked above. |
+| PR / evidence | [PR #226](https://github.com/voidbrain/nerv/pull/226) adoption acceptance and explicit owner pause; [PR #225](https://github.com/voidbrain/nerv/pull/225); upstream Gauntlet PR #5 / CI42572655186; Review: independent report-only recheck linked above. |
 | Opened | 2026-11-09 |
 | Verification | 2026-11-09 adoption: PR225 / CI42573854325 all five jobs passed, independent review and eight neutral integration tests accepted. Upstream PR5 / CI42572655186 passed28tests. Live Gemma smoke and actual hardware/runtime comparison remain unexecuted T02, paused by owner. |
 | Reviewed | 2026-11-09 |
