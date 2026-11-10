@@ -1,7 +1,7 @@
 {
   "version": 1,
   "parent": "F-005",
-  "status": "ready",
+  "status": "implemented",
   "capabilities": [
     "bounded-edit",
     "structured-tools",
@@ -11,11 +11,11 @@
   "privacy": "No credentials, real host/account/path/public registry data or private keys in git/chat/logs. Neutral fixtures; actual artifacts private outside git. New root/private encrypted key never transferred to peers.",
   "id": "F-005-T04",
   "title": "Implement and accept Mac default-profile service lifecycle",
-  "goal": "Use the owner-selected Mac NERV-01 default profile to deliver ownership-aware service install/update/uninstall and durable recovery; retain data/configuration/keys",
+  "goal": "Deliver ownership-aware current-code Mac default-profile install/start/stop/uninstall and durable recovery; accept an identical-runtime metadata revision update while executable/schema upgrades remain F-005-T06",
   "acceptance": [
     "Owner selected Mac default profile; no need to ask that scope decision again. Read-only baseline: current/legacy definitions/registrations absent and configured API not responsive; recheck before effects",
     "Implement reviewed service ownership/path/session/source checks and fenced durable receipts/resource lifecycle with uncertainty and explicit stopped recovery",
-    "Validate actual install/status/start/stop/update/uninstall and partial failure/replay without deleting or overwriting another definition or profile",
+    "Validate actual install/status/start/stop/uninstall, identical-runtime metadata revision update and partial failure/replay without deleting or overwriting another definition/profile; reject executable/schema upgrades before effects",
     "Retain data, keys and config; do not install a second isolated-profile service, system daemon or linger",
     "A default installation is the chosen test target, not mandatory for F-005 closure; broader platform and multi-device acceptance remains explicit"
   ],
@@ -31,11 +31,14 @@
     "generated:backlog-views",
     "contract:service-lifecycle",
     "src/node-bootstrap.ts",
-    "src/node-bootstrap-execution.ts"
+    "src/node-bootstrap-execution.ts",
+    "src/node-lifecycle-execution.ts",
+    "src/cli.ts"
   ],
   "validation": [
     "Meaningful cross-boundary ownership/session/effect/journal/recovery tests, applicable static/build/headless checks and final CI",
-    "Explicit actual Mac service evidence with baseline, changed state and retained data; mocks and merge are not actual OS acceptance"
+    "Explicit actual Mac service evidence with baseline, changed state and retained data; mocks and merge are not actual OS acceptance",
+    "Candidate2ab189f: independent restricted-scope review22/22 pass, no remaining code blockers. Committed failing startup/compatibility/public-mode regressions8683354 and rename regressiond330735 precede unchanged-test fixes. Local full atdf1a8e8:552 pass/2 skip, build and headless5 pass/1 skip; final rename fix targeted22/22/typecheck/conventions pass. Read-only actual Mac preflight schema6/session/settled work/current-legacy absence confirmed; no service installed yet. Final CI and actual OS acceptance pending."
   ],
   "escalation": [
     "Pause for changed/foreign service ownership, live/uncertain descendants, missing session or conflicting active work",

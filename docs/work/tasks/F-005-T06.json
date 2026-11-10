@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "id": "F-005-T06",
+  "status": "planned",
+  "title": "Review executable and schema upgrade compatibility",
+  "goal": "Extend the conservative service update boundary with reviewed executable/runtime/schema compatibility before permitting application upgrades",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "acceptance": [
+    "Bind actual input schema and candidate reader/migration behavior to a reviewed source contract and meaningful cross-version regressions before checkout/dependency effects",
+    "Preserve source/profile/service ownership, durable fencing, consistent backups, uncertainty and explicit recovery; no marker-only admission or automatic downgrade",
+    "Accept real application/runtime upgrade on an explicitly selected target; documentation-only revision changes do not establish this"
+  ],
+  "dependsOn": [
+    "F-005-T04"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle"
+  ],
+  "validation": [
+    "Directed reader/schema/dependency/update/recovery joins and independent review",
+    "Final required CI plus actual target upgrade evidence; never infer migration compatibility from textual markers"
+  ],
+  "escalation": [
+    "Any destructive restore, changed ownership or unresolved physical/worker effects requires explicit reconciliation; general restore remains F-062"
+  ]
+}

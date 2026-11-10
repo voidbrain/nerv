@@ -4,10 +4,10 @@
   "parent": "F-005",
   "title": "Prepare and verify isolated local profile enrollment",
   "goal": "Use the retained files-only Mac profile for owner-selected enrollment testing without service changes or remote targets",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Recheck completed bootstrap receipt, unchanged public identity and isolated profile source/configuration",
-    "Prepare exact local coordinator signing and public-registry import steps; owner types the existing root passphrase in a terminal, never chat, argv or environment",
+    "Use owner-authorized replacement-root staging/migration after the rejected original-root unlock; import only the signed public bundle pinned by independently verified fingerprint, never expose passphrases or private roots",
     "Check signed registry and target import before claiming enrollment; record unavailable checks and retain pending worker/service/device acceptance",
     "Never start an additional OS service, mutate existing service definitions, auto-create a root or contact a remote target"
   ],
@@ -40,7 +40,8 @@
     "2026-11-10 owner terminal unlock rejected before signing. Actual read-only recheck: coordinator registry count unchanged/signatures valid, test base absent, isolated root/database absent; encrypted envelope structure/public root consistent, payload integrity cannot be established without successful unlock. Retry/recovery requires owner local interaction; never reset/replace root automatically.",
     "Owner confirms no original root passphrase or recovery backup. Existing-root enrollment blocked; two enrolled bases retain current trust. Await explicit scope choice between separate disposable test trust, retaining the block, or a reviewed two-base migration plan; no new root/trust reset authorized.",
     "Owner paused disposable test trust, retried/considered current passphrase, then explicitly authorized real migration/root regeneration. F-005-T03 owns replacement-root preparation; T02 enrollment remains unverified until supported new-root activation/import.",
-    "Replacement root is now staged/verified under T03. Existing-root direct enrollment path superseded by owner-authorized migration; actual enrollment remains pending T05 activation, not claimed by stage verification."
+    "Replacement root is now staged/verified under T03. Existing-root direct enrollment path superseded by owner-authorized migration; actual enrollment remains pending T05 activation, not claimed by stage verification.",
+    "2026-11-10 T05 live Mac/Windows replacement-root activation completed. Current reviewed CLI imported binding1/public registry into the isolated profile: four signatures verified, root/identity match, private root absent, no runtime/service started. Earlier pinned checkout remains unchanged; runnable-reader upgrade and worker/device acceptance are not claimed. Owner-authorized migration supersedes unavailable original-root signing."
   ],
   "escalation": [
     "Stop for missing owner root signing/passphrase interaction or changed/colliding base identity/address",

@@ -175,3 +175,8 @@ Authenticated ci:status confirms CI42779886527 passed scoped plan/validate/windo
 ## 2026-11-10 — PR #250
 
 Authenticated ci:status confirms CI42786283211 passed scoped plan/validate/windows/native-macos; full-suite skipped. Mergedmaine846279 accepts staged-root and selected-host read-only evidence and T03 preparation. Owner explicitly said proceed with both activation and Mac default-profile service work, and confirmed independent encrypted-root backup. T05 candidate activation code and T04 service execution remain separately verified outcomes; no live activation/service effect follows from the documentation merge. Full baseline remains PR245 CI42775093119.
+
+
+## 2026-11-10 — PR #252
+
+Authenticated ci:status confirms full CI42823700687 passed at94228b0; mergedmainc3a550b has the same tree. The unchanged Windows150ms-heartbeat worker-approval test failed attempt1 and passed attempt2 without code/assertion changes; no blanket absence-of-bugs claim. Initial PR251 was closed unmerged after independent blockers; regressions/fixes and independent exact-ee8501f follow-up are retained. Actual Mac/Windows root activation, preservation and authenticated peer/isolated-public-import evidence are recorded separately. T02 files-only enrollment closes; T05 harmless capability approval and T04 selected Mac service execution remain open.

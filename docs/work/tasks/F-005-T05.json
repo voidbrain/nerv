@@ -1,7 +1,7 @@
 {
   "version": 1,
   "parent": "F-005",
-  "status": "implemented",
+  "status": "closed",
   "capabilities": [
     "bounded-edit",
     "structured-tools",
@@ -34,7 +34,9 @@
   "validation": [
     "Neutral old/new trust isolation, immutable history, crash points, concurrent/stale ownership, replay/rollback and full directed security joins",
     "Final required CI and explicit actual Mac/Windows migration evidence; do not infer activation from stage completion or successful read-only checks",
-    "Candidate implementation includes immutable generation bindings, schema6 fencing, verified backups and forward recovery. Independent review rejected the PR251 candidate: historical revocations and mixed-root peer authentication required fixes. Committed failing regressions b1e1e92 and80665cc precede unchanged-test fixes fbccae6 and ee8501f. Canonical decoded Ed25519 identities prevent encoding aliases bypassing revocation/root reuse. Root-bound HTTP/WebSocket signatures prevent retained base keys silently crossing generations. Targeted migration/auth/CLI/Kaji33 pass; typecheck/conventions pass. Independent exact-ee8501f follow-up reports no unresolved code blockers with67 tests passing; full local Node538 pass/2 skip. Final full CI and live deployment/activation remain pending; independent encrypted-root backup is owner-attested."
+    "Candidate implementation includes immutable generation bindings, schema6 fencing, verified backups and forward recovery. Independent review rejected the PR251 candidate: historical revocations and mixed-root peer authentication required fixes. Committed failing regressions b1e1e92 and80665cc precede unchanged-test fixes fbccae6 and ee8501f. Canonical decoded Ed25519 identities prevent encoding aliases bypassing revocation/root reuse. Root-bound HTTP/WebSocket signatures prevent retained base keys silently crossing generations. Targeted migration/auth/CLI/Kaji33 pass; typecheck/conventions pass. Independent exact-ee8501f follow-up reports no unresolved code blockers with67 tests passing; full local Node538 pass/2 skip. Final full CI and live deployment/activation remain pending; independent encrypted-root backup is owner-attested.",
+    "2026-11-10 actual two-base activation completed at reviewed mainc3a550b, tree-identical to full-green PR252 head94228b0. Private snapshots prove credentials/business data/other configuration and all old signed rows retained; each DB has7 rows/schema6/integrity-ok. New-root binding/receipts and signed peer registry boundary verified; both bases online and worker session connected. Windows task restored without changing its definition; isolated public trust imported without private root/runtime/service. Explicit harmless worker approval remains pending; T04 service work proceeds separately.",
+    "Owner explicitly approved the exact neutral future reminder and its cancellation. First combined-intent proposal was definitively rejected without an outbox/effect; an accurate creation-only proposal used the normal gate and exact matching Pattern Blue approval. Destination completed worker receipt/one new reminder verified; completed retry refused, only that new reminder cancelled and never delivered, no pending worker jobs. Controlled selected Windows restart verified stopped descendants and a second root-bound worker connection. Temporary Mac acceptance runtime and both children then stopped before T04 development; Tabgha remains running. T05 acceptance complete; no broader F-005 platform/service closure inferred."
   ],
   "escalation": [
     "Owner already authorized migration and root regeneration; do not repeat that scope approval",

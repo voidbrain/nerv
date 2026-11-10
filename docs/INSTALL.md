@@ -303,7 +303,21 @@ Apply writes only the new source/data profile and private target receipt journal
 
 ### Service lifecycle review (F-005)
 
-`nerv nodes lifecycle-plan --input FILE [--out FILE]` reviews supplied ownership evidence for install/update/uninstall. `nerv nodes lifecycle-recovery-check --receipt FILE --evidence FILE [--out FILE]` checks a proposed stopped-operation release. Both are review-only: they do not inspect a service, run target commands or change a journal/service. An empty blocker list is not execution authority. Keep inputs private and follow the [input and recovery contract](decisions/node-lifecycle.md); actual evidence collection, durable execution and Windows lifecycle adapters remain unimplemented. Existing manual `service` commands and the fresh-files `nodes apply` restrictions are unchanged.
+`nerv nodes lifecycle-plan --input FILE [--out FILE]` reviews supplied ownership evidence for install/update/uninstall. `nerv nodes lifecycle-recovery-check --receipt FILE --evidence FILE [--out FILE]` checks a proposed stopped-operation release. Both are review-only: they do not inspect a service, run target commands or change a journal/service. An empty blocker list is not execution authority. Keep inputs private and follow the [input and recovery contract](decisions/node-lifecycle.md); the local Mac adapter below collects actual evidence and executes fenced operations. Windows/Linux execution adapters remain open. The fresh-files `nodes apply` restrictions are unchanged.
+
+### Local Mac default-profile service
+
+The owner-selected existing default profile has a durable workflow. It requires a clean canonical checkout, built assets, private matching credentials, an available unprivileged GUI session, settled workers and exact definition/manager ownership. Additional profiles, legacy replacements and unknown ownership are refused.
+
+```bash
+nerv nodes lifecycle-inspect --action install --out service-plan.json
+nerv nodes lifecycle-apply --plan service-plan.json --confirm PLAN_DIGEST
+nerv nodes lifecycle-status --digest PLAN_DIGEST
+```
+
+Generate a fresh plan for `stop`, `start` or `uninstall`; stop before uninstall or update. Keep plan/receipt files private. `update --revision FULL_SHA` currently permits only revisions changing documentation/README, with identical executable/dependency/configuration trees and actual database schema5/6. Executable, runtime-path or schema upgrades require the separate F-005-T06 compatibility work; marker strings cannot authorize them. Update takes a consistent private backup, advances the pinned revision, runs locked dependencies/build and verifies the restarted runtime. General restore/downgrade remains F-062.
+
+Every accepted operation records a fence/nonce/handler identity and started effects before executing. Replay returns its receipt, including uncertainty, without restarting effects. An unresolved operation blocks ordinary CLI startup/mutations; only its exact manager-owned, source/profile-bound start can pass. For recovery, inspect the selected job and all descendants, stop only a verified owned job, and retain observed effects. `nodes lifecycle-release --receipt FILE --evidence FILE` requires matching ownership, stopped-handler/descendant/operator confirmations and a reason. It does not undo files or data. PID absence or elapsed time alone is insufficient. See [the execution/recovery contract](decisions/node-lifecycle.md).
 
 ## Proactive watches (Hyuga)
 
