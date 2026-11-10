@@ -155,3 +155,8 @@ Authenticated ci:status confirms CI42775093119 passed plan, validate, Windows, n
 ## 2026-11-10 — PR #246
 
 Authenticated ci:status confirms CI42776413148 passed scoped plan/validate/windows/native-macos; full-suite skipped. Mergedmain8d1cf09 retains PR245/fullCI42775093119 as the deterministic baseline. Isolated-profile enrollment preparation is recorded, not completed enrollment. Subsequent owner terminal unlock failed before signing; read-only reconciliation confirms no registry enrollment or target-root/database change. Root-passphrase/payload validity remains unresolved; never reset trust to bypass it.
+
+
+## 2026-11-10 — PR #247
+
+Authenticated ci:status confirms CI42777729124 passed scoped plan/validate/windows/native-macos; full-suite skipped. Mergedmain42a853c records the rejected unlock/no-enrollment checks; full evidence remains PR245 CI42775093119. Owner then confirmed no original passphrase or recovery backup. F-005 existing-root enrollment is blocked pending a new scope decision; two enrolled bases retain existing trust. No root replacement/reset or disposable test root has been authorized.
