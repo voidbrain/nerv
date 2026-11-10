@@ -34,4 +34,6 @@ Recovery instructions retain checkout/data/keys/logs and require reconciling obs
 
 ## Remaining F-005 work
 
+[Lifecycle review contracts](node-lifecycle.md) now validate supplied ownership evidence and recovery decisions for macOS/Linux. They do not collect service evidence or extend this executor; `--service` remains blocked.
+
 Automated service/update/uninstall ownership flows, additional discovery adapters and full real-device pairing/worker/lifecycle acceptance remain open. The supported executor is fresh filesystem/configuration bootstrap only; manual lifecycle commands remain independently reviewed. The local Mac is the first acceptance target; an existing default NERV configuration prevents treating it as a fresh machine. No remote host was chosen or modified. F-014/B-045 supply the enrolled worker transport; this feature reuses it rather than opening an execution tunnel in local `/rpc`.

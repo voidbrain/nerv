@@ -138,3 +138,10 @@ Authenticated ci:status confirms CI42588026092 passed plan, validate, Windows, n
 ## 2026-11-09 — PR #235
 
 Authenticated ci:status confirms CI42608578429 passed plan, validate, Windows, native-macos and full-suite at exactheadb4cd887, mergedmainc5323e5. Gauntlet0.3 machine/scenario contracts are independently released; NERV consumes the pinned artifact and owns only its assignment/role acceptance map. F-074-T03 closed after neutral wrapper-to-library cross-consumer reuse/admission joins and fresh-context provenance review; first Gemma T02 and F-006 load/placement campaigns remain unexecuted. No CI retry or assertion relaxation was needed. Generic development usage accounting is separately registered as harnessF-048, not measured here.
+
+
+## 2026-11-10 — PR #244
+
+Reconciled main `d869d8c` using authenticated `npm run ci:status -- 244`: CI42724533046 passed plan, validate, windows and native-macos; full-suite skipped. Owner-selected F-005 then F-006 queue order is retained. This is scoped documentation evidence, not lifecycle/device acceptance; current full evidence remains PR242 CI42687439382.
+
+Prior ledger header context retained: PR242 diagnostic/schema/job-rule adoption T05 accepted; PR240 CI42635119338 established F-026 runtime acceptance. F-026 proactive runtime/quiet delivery accepted and archived; F-027 enforced egress awaits F-049. B-046 session-loss investigation remains open.

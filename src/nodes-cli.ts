@@ -3,18 +3,21 @@ import {inventoryCandidates,sshCandidates,tailscaleCandidates,registryCandidates
 import {inspectLocalNode,inspectNode,runNodeCommand,type CommandRunner} from './node-inspection.ts';
 import {fileURLToPath} from 'node:url';
 import {bootstrapOperation} from './node-bootstrap-execution.ts';
+import {lifecyclePlan,lifecycleRecovery} from './node-lifecycle.ts';
 import {bootstrapPlan} from './node-bootstrap.ts';
-const NODES_HELP='nodes discover --inventory FILE | --ssh-config FILE | --tailscale FILE | --tailscale-live | --registry FILE --root-key PUBKEY; nodes inspect --local | --ssh HOST [--user USER] [--port PORT] [--out FILE]; nodes plan --inspection FILE --revision FULL-SHA --checkout ABS --home ABS --base ID --name NAME [--service | --additional-profile] [--out FILE]; nodes apply --plan FILE --confirm DIGEST; nodes status --plan FILE; nodes release --plan FILE --confirm DIGEST --confirmed-stopped --reason EVIDENCE';
+const NODES_HELP='nodes lifecycle-plan --input FILE [--out FILE]; nodes lifecycle-recovery-check --receipt FILE --evidence FILE [--out FILE] (review only; no service or journal changes); nodes discover --inventory FILE | --ssh-config FILE | --tailscale FILE | --tailscale-live | --registry FILE --root-key PUBKEY; nodes inspect --local | --ssh HOST [--user USER] [--port PORT] [--out FILE]; nodes plan --inspection FILE --revision FULL-SHA --checkout ABS --home ABS --base ID --name NAME [--service | --additional-profile] [--out FILE]; nodes apply --plan FILE --confirm DIGEST; nodes status --plan FILE; nodes release --plan FILE --confirm DIGEST --confirmed-stopped --reason EVIDENCE';
 function file(path:string):string {const fd=openSync(path,'r');try{const stat=fstatSync(fd);if(!stat.isFile()||stat.size>NODE_INVENTORY_BYTES)throw Error('Node input must be a regular file up to 256 KiB.');const bytes=Buffer.alloc(NODE_INVENTORY_BYTES+1);let size=0,n=0;while(size<bytes.length&&(n=readSync(fd,bytes,size,bytes.length-size,null))>0)size+=n;if(size>NODE_INVENTORY_BYTES)throw Error('Node input exceeds 256 KiB.');return bytes.subarray(0,size).toString('utf8');}finally{closeSync(fd);}}
 export async function nodesCommand(args:string[],runner:CommandRunner=runNodeCommand):Promise<unknown>{
  const [command,...rest]=args,values=new Map<string,string>(),switches=new Set<string>();
- const schema:Record<string,{values:string[];switches:string[]}>= {discover:{values:['inventory','ssh-config','tailscale','registry','root-key'],switches:['tailscale-live']},inspect:{values:['ssh','user','port','out'],switches:['local']},plan:{values:['inspection','revision','checkout','home','base','name','out'],switches:['service','additional-profile']},apply:{values:['plan','confirm','out'],switches:[]},status:{values:['plan','out'],switches:[]},release:{values:['plan','confirm','reason','out'],switches:['confirmed-stopped']}};
+ const schema:Record<string,{values:string[];switches:string[]}>= {'lifecycle-plan':{values:['input','out'],switches:[]},'lifecycle-recovery-check':{values:['receipt','evidence','out'],switches:[]},discover:{values:['inventory','ssh-config','tailscale','registry','root-key'],switches:['tailscale-live']},inspect:{values:['ssh','user','port','out'],switches:['local']},plan:{values:['inspection','revision','checkout','home','base','name','out'],switches:['service','additional-profile']},apply:{values:['plan','confirm','out'],switches:[]},status:{values:['plan','out'],switches:[]},release:{values:['plan','confirm','reason','out'],switches:['confirmed-stopped']}};
  if(!command||command==='help')return {usage:NODES_HELP,execution:'none'};if(!schema[command])throw Error(NODES_HELP);const allowed=schema[command]!;
  for(let i=0;i<rest.length;i++){const key=rest[i]!.replace(/^--/,'');if(!rest[i]!.startsWith('--')||values.has(key)||switches.has(key))throw Error('Invalid or duplicate nodes option.');if(allowed.switches.includes(key))switches.add(key);else if(allowed.values.includes(key)&&rest[i+1]&&!rest[i+1]!.startsWith('--'))values.set(key,rest[++i]!);else throw Error('Invalid nodes option: '+key);}
  const required=(key:string)=>{const value=values.get(key);if(!value)throw Error('Missing --'+key);return value;};
  if(values.has('out')&&existsSync(values.get('out')!))throw Error('EEXIST: choose a new output file; nothing was inspected.');
  let result:unknown;
- if(command==='discover'){
+ if(command==='lifecycle-plan')result=lifecyclePlan(parseNodeInput(file(required('input'))));
+ else if(command==='lifecycle-recovery-check')result={execution:'none',decision:lifecycleRecovery(parseNodeInput(file(required('receipt'))),parseNodeInput(file(required('evidence'))))};
+ else if(command==='discover'){
   const sources:NodeCandidate[][]=[];
   if(values.has('inventory'))sources.push(inventoryCandidates(parseNodeInput(file(required('inventory')))));
   if(values.has('ssh-config'))sources.push(sshCandidates(file(required('ssh-config'))));

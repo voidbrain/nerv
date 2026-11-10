@@ -1,18 +1,20 @@
 import { existsSync, mkdirSync, writeFileSync, unlinkSync } from 'node:fs';
-import { join, resolve, win32 } from 'node:path';
+import { join, resolve, win32, posix } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { NODE_FLAGS } from './process-client.ts';
 import { readConfig,readToken } from './config.ts';
 const label='io.nerv.agent',unit='nerv.service';
+const unixServicePath=posix.join;
 /** Pre-rename names: install replaces them; other actions still find them until then. */
 const previous={label:'io.nodo.agent',unit:'nodo.service'};
 const xml=(s:string)=>s.replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&apos;'}[c]!));
 const quoted=(s:string,command=false)=>'"'+s.replace(/[%\\"$]/g,c=>c==='%'?'%%':c==='$'?(command?'$$':'$'):'\\'+c)+'"';
 export function renderService(platform:string,home:string,root:string,node:string):string {
   for(const value of [home,root,node])if(/[\r\n\0]/.test(value))throw new Error('Invalid service path.');
-  const cli=join(root,'src/cli.ts');
+  const servicePath=platform==='win32'?win32.join:unixServicePath;
+  const cli=servicePath(root,'src/cli.ts');
   if(platform==='darwin')return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
@@ -22,8 +24,8 @@ export function renderService(platform:string,home:string,root:string,node:strin
 <key>EnvironmentVariables</key><dict><key>NERV_HOME</key><string>${xml(home)}</string></dict>
 <key>Umask</key><integer>63</integer>
 <key>RunAtLoad</key><true/><key>KeepAlive</key><true/><key>ThrottleInterval</key><integer>10</integer>
-<key>StandardOutPath</key><string>${xml(join(home,'service.log'))}</string>
-<key>StandardErrorPath</key><string>${xml(join(home,'service-error.log'))}</string>
+<key>StandardOutPath</key><string>${xml(servicePath(home,'service.log'))}</string>
+<key>StandardErrorPath</key><string>${xml(servicePath(home,'service-error.log'))}</string>
 </dict></plist>\n`;
   if(platform==='linux')return `[Unit]
 Description=NERV Agency local personal agent
