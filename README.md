@@ -86,7 +86,7 @@ Enrolled bases can execute advertised built-in actions through the [versioned wo
 
 Verification uses the [scoped check policy](docs/verification.md): affected regressions by default, with full deterministic CI on risk/request or after seven days or ten integration commits. Stress and real-model campaigns remain separately triggered.
 
-Selected node inventories, read-only local/SSH inspection and digest-confirmed fresh-profile bootstrap are available with `nerv nodes`; see [node setup](docs/INSTALL.md#discover-inspect-and-bootstrap-node-candidates-f-005). Automatic service/lifecycle changes and full device acceptance remain F-005.
+Selected node inventories, read-only local/SSH inspection and digest-confirmed fresh-profile bootstrap are available with `nerv nodes`; see [node setup](docs/INSTALL.md#discover-inspect-and-bootstrap-node-candidates-f-005). [Review-only lifecycle contracts](docs/decisions/node-lifecycle.md) validate supplied service ownership/recovery evidence; automatic service/lifecycle changes and full device acceptance remain F-005.
 
 Development procedures: [discovery index](docs/agents/procedures.md), [parallel tasks and model qualification](docs/agents/parallel-work.md), [architecture reassessment](docs/agents/architecture-review.md). NERV task sources live in `docs/work/`; the backlog remains the generated current-status view.
 

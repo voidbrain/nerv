@@ -301,6 +301,10 @@ nerv nodes release --plan bootstrap-preview.json --confirm FULL_PLAN_DIGEST --co
 
 Apply writes only the new source/data profile and private target receipt journal; it runs pinned Git/npm/build/initialization steps and prints public identity for later owner-approved pairing. It does not enroll or start a service. Keep the plan private for status/recovery. The same uncertain or released digest never restarts effects; inspect actual target state before reconciling. `--confirmed-stopped` is an assertion requiring evidence, not a force-cancel switch. Status is read-only even after the preview expires. Receipts retain progress/reconciliation without claiming rollback or current phone/physical/service state.
 
+### Service lifecycle review (F-005)
+
+`nerv nodes lifecycle-plan --input FILE [--out FILE]` reviews supplied ownership evidence for install/update/uninstall. `nerv nodes lifecycle-recovery-check --receipt FILE --evidence FILE [--out FILE]` checks a proposed stopped-operation release. Both are review-only: they do not inspect a service, run target commands or change a journal/service. An empty blocker list is not execution authority. Keep inputs private and follow the [input and recovery contract](decisions/node-lifecycle.md); actual evidence collection, durable execution and Windows lifecycle adapters remain unimplemented. Existing manual `service` commands and the fresh-files `nodes apply` restrictions are unchanged.
+
 ## Proactive watches (Hyuga)
 
 Watches are optional. Add a `watch` object to the private `config.json` in the data home; `serve` re-reads it every minute. With no configured triggers, no proactive model work runs. A trigger has a stable lower-case `id`, a request (up to 1,000 characters), one schedule, and explicit action/planner-step limits:

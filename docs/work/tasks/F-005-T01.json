@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "F-005-T01",
+  "parent": "F-005",
+  "title": "Define service lifecycle ownership and recovery contracts",
+  "goal": "Make install/update/uninstall eligibility and uncertain-operation recovery explicit before any existing installation or OS service changes",
+  "status": "implemented",
+  "acceptance": [
+    "Validate selected installation, current and legacy definitions, user/session ownership and exact definition digests before planning any effect",
+    "Fail closed on missing evidence, another profile, legacy migration, live/unknown processes, mismatched source or unresolved operations",
+    "Specify digest-bound receipts, fencing, progress, uncertainty and explicit stopped-operation release without automatic retry or data deletion",
+    "No OS service, enrollment, existing configuration, checkout or remote target is changed"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/node-lifecycle.ts",
+    "test/node-lifecycle.test.ts",
+    "docs/decisions/node-lifecycle.md",
+    "docs/work/tasks/F-005-T01.json",
+    "docs/work/records/F-005.md",
+    "docs/work/layout.json",
+    "docs/decisions/node-bootstrap.md",
+    "docs/decisions/README.md",
+    "docs/INSTALL.md",
+    "README.md",
+    "docs/archive/reconciliation-2026.md",
+    "generated:backlog-views",
+    "src/nodes-cli.ts",
+    "src/service.ts"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral invented fixtures only. No credential/config contents, real host paths, remote access or OS service commands. Actual usage counters unavailable.",
+  "validation": [
+    "Typed contract and cross-boundary renderer/ownership/recovery regression tests",
+    "Applicable fast checks, planner and required final CI",
+    "Review contract assumptions and explicitly retain real-device/OS/session acceptance limits",
+    "2026-11-10: 35 focused lifecycle/bootstrap/runtime tests pass, one platform skip; five lifecycle contract/CLI tests cover actual renderer, ownership and recovery joins. Typecheck/conventions and fast checks pass. Final CI pending; no service/device acceptance claimed."
+  ],
+  "escalation": [
+    "Owner chooses the installation and pairing/service intent after reviewing the concrete contract; remote targets stay deferred",
+    "No execution adapter may infer ownership from a filename, receipt or process ID alone"
+  ]
+}
