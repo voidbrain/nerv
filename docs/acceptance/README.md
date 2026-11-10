@@ -21,3 +21,5 @@ The [review register](../reviews/README.md#acceptance-evidence) links every repo
 [Isolated local enrollment preparation, 10 November 2026](node-enrollment-2026-11-10.md): actual retained receipt/public identity/source and signed registry checks; private terminal handoff reviewed, signing/import and worker acceptance pending owner terminal interaction.
 
 [Root activation, 2026-11-10](node-root-activation-2026-11-10.md): actual two-base trust migration, preservation and signed connectivity; isolated public enrollment, with capability/service/platform acceptance distinguished.
+
+[Mac default-profile service, 2026-11-10](node-service-2026-11-10.md): actual install/stop/start/uninstall/reinstall, interrupted-operation recovery, retained data/backups and restricted forward revision update.
