@@ -451,27 +451,27 @@ Implement capability-aware scheduling with independent model endpoint and execut
 |:---:|---|---|---|
 | 🟡 | 🔺 P1 | Implemented | 🟡 Medium |
 
-🧑 **→ Human action required: Yes**<br />Choose a separate Mac/Linux acceptance host; service installation is prohibited on this execution host.
+🧑 **→ Human action required: Yes**<br />Complete selected Mac login/logout acceptance and choose a Linux acceptance target.
 
 | | |
 |---|---|
-| **Issue** | Service commands and definitions implemented. Linux tests validate rendering and process lifecycle; no service is installed on this execution host. |
+| **Issue** | Service commands and definitions implemented. Portable tests validate rendering/process lifecycle; later owner-authorized F-005 Mac default-profile service operations passed. Linux/session acceptance remains incomplete. |
 | **Reproduce** | Follow docs/INSTALL.md and the scoped headless implementation checks. |
 | **Check** | Single process serves production UI/API on 4317; config survives init; clean SIGTERM and restart catch-up; private credentials; install/status/start/stop/uninstall on real target OS. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** 2026-11-08: read-only launchctl/plist inspection confirms no NERV service is installed or registered on the execution Mac. docs/agents/areas.md prohibits installing services or enabling linger here; a separate target host is required for OS-service/login acceptance. Target choice requested from the owner; no service was installed, started or stopped. Portable process and recent Windows/macOS CI remain distinct from that trial.  Validate launchd/systemd installation and login/logout on target hosts; PR #1 CI is green. Single process serves production UI/API on 4317; config survives init; clean SIGTERM and restart catch-up; private credentials; install/status/start/stop/uninstall on real target OS.
+**Next action / closure evidence:** Owner later selected this Mac default installation and authorized service work on2026-11-10 under F-005. [PR #253](https://github.com/voidbrain/nerv/pull/253) / full CI42874665479 and [accepted service evidence](acceptance/node-service-2026-11-10.md) establish the selected per-user Mac install/status/stop/start/uninstall/reinstall and recovery checks; this is not a system service or linger exception. Actual login/logout and a selected Linux service target remain pending; no fresh owner choice for the already selected Mac is required. The following is earlier history, not a current prohibition: 2026-11-08: read-only launchctl/plist inspection confirms no NERV service is installed or registered on the execution Mac. docs/agents/areas.md prohibits installing services or enabling linger here; a separate target host is required for OS-service/login acceptance. Target choice requested from the owner; no service was installed, started or stopped. Portable process and recent Windows/macOS CI remain distinct from that trial.  Validate launchd/systemd installation and login/logout on target hosts; PR #1 CI is green. Single process serves production UI/API on 4317; config survives init; clean SIGTERM and restart catch-up; private credentials; install/status/start/stop/uninstall on real target OS.
 
 **Estimates:** Medium remaining validation effort; provisionally 1–2 focused hours per target OS, excluding time waiting for access or troubleshooting. Reassessed 2026-11-08; no completion is inferred from portable tests.
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
+| PR / evidence | [PR #255](https://github.com/voidbrain/nerv/pull/255) related-state reconciliation; [PR #254](https://github.com/voidbrain/nerv/pull/254) accepted Mac service evidence under F-005; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
 | Opened | 2026-11-01 |
-| Verification | 2026-11-08: read-only execution-host check confirms no installed/registered launchd service. Existing portable headless checks pass; separate target-host install/status/start/stop/uninstall and login/logout acceptance remain pending. |
-| Reviewed | 2026-11-08 |
+| Verification | 2026-11-10 selected per-user Mac lifecycle operations accepted under F-005-T04; actual session/login and Linux target acceptance remain pending. Earlier2026-11-08: read-only execution-host check confirms no installed/registered launchd service. Existing portable headless checks pass; separate target-host install/status/start/stop/uninstall and login/logout acceptance remain pending. |
+| Reviewed | 2026-11-10 |
 
 </details>
 
@@ -487,7 +487,7 @@ Implement capability-aware scheduling with independent model endpoint and execut
 |:---:|---|---|---|
 | 🟡 | 🔺 P1 | Implemented | 🔴 Large |
 
-🧑 **→ Human action required: Yes**<br />Complete remaining companion acceptance; service host and signing identity are deferred.
+🧑 **→ Human action required: Yes**<br />Complete remaining companion acceptance and select the signing identity.
 
 | | |
 |---|---|
@@ -498,16 +498,16 @@ Implement capability-aware scheduling with independent model endpoint and execut
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Owner chose this Mac for companion UI only; service acceptance host and Developer ID identity remain deferred. The tested PR #213 CI app was downloaded to a private temporary directory, its ad-hoc signature verified and its arm64 executable launched. A matching process was observed and macOS reported launch complete; a visible menu and live OS acceptance are not inferred from that observation. This session lacks Accessibility access and does not change it; the owner confirmed the menu icon appears and opens normally (2026-11-08). No service, login, notification or pairing control was invoked by the agent. The prepared release command requires an explicit certificate fingerprint and upload opt-in, retains uncertainty/logs, staples/validates and assesses before final packaging. Menu visibility/opening is accepted; prepare the remaining notification/Keychain UI checks separately, then later review the exact release/upload and service-host plan. Service installation is prohibited on this execution host (F-009); a local companion-only check does not establish service/login acceptance. Local build/package checks passed; the later owner-authorized launch uses the exact PR #213 CI artifact without installing it. Notification banners/permissions, menu accessibility, guarded service controls, login/logout, Quit-vs-Stop and actual Developer ID/notary acceptance remain pending. See [native guide](../native/README.md#prepare-a-distribution-build).
+**Next action / closure evidence:** Current2026-11-10: this Mac default installation was selected for owner-authorized F-005 service acceptance, which is recorded separately. This does not establish native service buttons, login/logout, pairing/Keychain, notifications or signing/notarization acceptance; those checks remain pending. Earlier2026-11-08 owner choice was companion UI only, with service host and Developer ID identity deferred. The tested PR #213 CI app was downloaded to a private temporary directory, its ad-hoc signature verified and its arm64 executable launched. A matching process was observed and macOS reported launch complete; a visible menu and live OS acceptance are not inferred from that observation. This session lacks Accessibility access and does not change it; the owner confirmed the menu icon appears and opens normally (2026-11-08). No service, login, notification or pairing control was invoked by the agent. The prepared release command requires an explicit certificate fingerprint and upload opt-in, retains uncertainty/logs, staples/validates and assesses before final packaging. Menu visibility/opening is accepted; prepare the remaining notification/Keychain UI checks separately, then later review the exact release/upload and service-host plan. The earlier companion-only trial did not authorize service installation. The later F-005 authorization covers only the selected default installation; a companion-only check still does not establish native service/login acceptance. Local build/package checks passed; the later owner-authorized launch uses the exact PR #213 CI artifact without installing it. Notification banners/permissions, menu accessibility, guarded service controls, login/logout, Quit-vs-Stop and actual Developer ID/notary acceptance remain pending. See [native guide](../native/README.md#prepare-a-distribution-build).
 
 **Estimates:** Large remaining effort (four or more focused days), reassessed 2026-11-08: real Mac acceptance, identity/account access and distribution troubleshooting remain uncertain; packaging automation alone does not establish them.
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #215](https://github.com/voidbrain/nerv/pull/215) owner-confirmed icon/menu acceptance and deferred scope; [PR #212](https://github.com/voidbrain/nerv/pull/212) explicit distribution packaging and owner acceptance handoff; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #5](https://github.com/voidbrain/nerv/pull/5) merged; Linux and macOS checks green; real OS acceptance remains pending |
+| PR / evidence | [PR #255](https://github.com/voidbrain/nerv/pull/255) related-state reconciliation; [PR #254](https://github.com/voidbrain/nerv/pull/254) separate F-005 Mac service acceptance; [PR #215](https://github.com/voidbrain/nerv/pull/215) owner-confirmed icon/menu acceptance and deferred scope; [PR #212](https://github.com/voidbrain/nerv/pull/212) explicit distribution packaging and owner acceptance handoff; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #5](https://github.com/voidbrain/nerv/pull/5) merged; Linux and macOS checks green; real OS acceptance remains pending |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-08 Unit/integration: seven isolated release-path contracts pass (no actual signing/upload); signed-only, rejection, warning, timeout/failure and post-staple packaging paths checked. Real-device: temporary macOS release build, ad-hoc signature verification and bundle plist validation passed; that temporary build was not installed/launched. Later UI-only trial: verified/downloaded PR #213 CI app launch completed according to macOS process state; Human 2026-11-08: owner confirms icon appears and menu opens normally; no Accessibility permission granted to this session. PR #212 CI 42489231643 passed targeted native/auth/packaging checks, including actual macOS Swift tests/build/package; full-suite skipped. Actual Developer ID/notarization and native OS acceptance pending. |
-| Reviewed | 2026-11-08 |
+| Reviewed | 2026-11-10 |
 
 </details>
 
@@ -1264,23 +1264,23 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 
 | | |
 |---|---|
-| **Issue** | Preserved proposal 1 of the [architecture reassessment](audits/2026-11-06-architecture-reassessment.md#1-backups-and-recovery-highest-reliability-value): reminders, memory, ledger, enrollment and grant state live in one SQLite database per base; losing the disk loses them. Litestream was dropped with Terminal Dogma, and the recovery outcome was dropped with it. No backup exists. |
+| **Issue** | Preserved proposal 1 of the [architecture reassessment](audits/2026-11-06-architecture-reassessment.md#1-backups-and-recovery-highest-reliability-value): reminders, memory, ledger, enrollment and grant state live in one SQLite database per base; losing the disk loses them. Litestream was dropped with Terminal Dogma, and the recovery outcome was dropped with it. No scheduled encrypted off-host backup and accepted general restore drill exists; one-off lifecycle/root snapshots do not satisfy this feature. |
 | **Reproduce** | Remove `~/.nerv` on a disposable base: nothing restores reminders, memory, identity or revoked grants. |
 | **Check** | Owner-agreed loss window and restore time; consistent live snapshots (SQLite backup API) on a schedule; retained, encrypted off-host copies with keys kept apart from routine runtime authority; a restore drill onto another location within the agreed bounds that keeps identities, revoked grants and notification checkpoints and replays no old work; no secrets in logs. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Proposed 2026-11-06 from the reassessment; not accepted scope until the owner sets the bounds. Recommendation: a scheduled snapshot first (simpler, likely enough for personal use); continuous replication such as Litestream only if the agreed loss window is smaller, since it adds storage credentials, monitoring and a dependency, and replication alone copies a damaging deletion. Retention and a tested restore matter more than the tool. Related F-002 (core hardening). P1 because it is data integrity.
+**Next action / closure evidence:** Reconciled2026-11-10: F-005 root/service operations took consistent private snapshots and verified backup integrity. The owner attested an independent encrypted-root backup. Neither establishes the business-data loss/recovery bounds, scheduled off-host retention or general restore drill required here. No acceptance or human cue is cleared. Proposed 2026-11-06 from the reassessment; not accepted scope until the owner sets the bounds. Recommendation: a scheduled snapshot first (simpler, likely enough for personal use); continuous replication such as Litestream only if the agreed loss window is smaller, since it adds storage credentials, monitoring and a dependency, and replication alone copies a damaging deletion. Retention and a tested restore matter more than the tool. Related F-002 (core hardening). P1 because it is data integrity.
 
 **Estimates:** Medium remaining effort for a bounded snapshot/restore path; higher for unattended replication and key recovery. Set 2026-11-06.
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
+| PR / evidence | [PR #255](https://github.com/voidbrain/nerv/pull/255) distinguishes one-off lifecycle/root snapshots from general recovery acceptance; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
 | Opened | 2026-11-06 |
 | Verification | Unit/integration: Pending. Real-device: Pending (restore drill). |
-| Reviewed | 2026-11-06 |
+| Reviewed | 2026-11-10 |
 
 </details>
 
@@ -1471,7 +1471,7 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 
 ## Other changes
 
-**Harness reconciliation and F-005 plan, 2026-11-10 ([PR #255](https://github.com/voidbrain/nerv/pull/255)).** Adopt published v4.7.0 (harness PR97/98/99) planning/usage tooling, metadata-only Codex/Claude adapters and optional explicit job launcher. Preserve NERV rules, privacy and runtime ownership. F-005 receives the requested initial T06–T11 plan; other existing NERV features are not retroactively replanned and global featurePlans enforcement is not enabled here. Source task files own current status/effort; the F-005 table is explicitly dated initial-plan evidence. This change uses a separate worktree and changes no installation, runtime, engine or service. No host counters/behaviour runner are available; shared plan usage remains feature-only/unassigned to individual steps. Local source/backlog/recap/dependency/queue/roadmap/rules/conventions/integration checks,7 verification-policy/pin fixtures and Angular build pass. Review: independent fresh-context consumer_plans_review found no content blocker; its maintenance finding is resolved by current input-bound evidence. Final full CI owns mapped browser/platform/BOM acceptance; no new UI or runtime claim is made.
+**Harness reconciliation and F-005 plan, 2026-11-10 ([PR #255](https://github.com/voidbrain/nerv/pull/255)).** Adopt published v4.7.0 (harness PR97/98/99) planning/usage tooling, metadata-only Codex/Claude adapters and optional explicit job launcher. Preserve NERV rules, privacy and runtime ownership. F-005 receives the requested initial T06–T11 plan; other existing NERV features are not retroactively replanned and global featurePlans enforcement is not enabled here. Source task files own current status/effort; the F-005 table is explicitly dated initial-plan evidence. This change uses a separate worktree and changes no installation, runtime, engine or service. No host counters/behaviour runner are available; shared plan usage remains feature-only/unassigned to individual steps. Local source/backlog/recap/dependency/queue/roadmap/rules/conventions/integration checks,7 verification-policy/pin fixtures and Angular build pass. Review: independent fresh-context consumer_plans_review found no content blocker; its maintenance finding is resolved by current input-bound evidence. Final full CI owns mapped browser/platform/BOM acceptance; no new UI or runtime claim is made. Related F-009/F-011/F-062 are reconciled against accepted F-005 service/snapshot evidence: old execution-host prohibitions remain dated history, while actual login/native/general-restore checks stay pending.
 
 **CI reliability evidence — B-046, 2026-11-08.** Original worker-cancellation failure retained, isolated diagnostic passed and only failed CI jobs were retried; root cause/fix remain open under B-046. Existing B-043 remains a separate queue-saturation finding.
 
