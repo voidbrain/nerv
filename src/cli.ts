@@ -14,6 +14,7 @@ import { McpClient, fingerprint as toolFingerprint, grantRefusal, toolName, type
 import { TelegramApi, TelegramChannel, decisionText, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
 import { composeBrief, gatherBrief } from './brief.ts';
 import { KajiLink } from './kaji-link.ts';
+import {guardLocalService} from './node-lifecycle-execution.ts';
 import { ROOT_KEY_FILE, keyIdentity, Registry, baseKey, createRootKey, enrolmentArgs, fingerprint, signRecord, unlockRootKey, type SignedRecord } from './kaji.ts';
 import { service } from './service.ts';
 import {initializeNativeTLS,loadNativeTLS,nativeAdmin,NativeAuth,type Invitation} from './native-auth.ts';
@@ -61,6 +62,7 @@ let store:Store|undefined;let running=false;
 try {
   const home=dataHome();
   if(!['root-migration','nodes','help'].includes(command??'help'))assertRootMigrationReady(home);
+  if(!['nodes','help'].includes(command??'help')&&!(command==='root-migration'&&args[0]!=='apply')&&!(command==='service'&&args[0]==='status'))await guardLocalService(home,command==='serve'||command==='launch');
   if(command==='root-migration'){console.log(JSON.stringify(await rootMigrationCommand(home,args),null,2));}
   else if(command==='nodes'){const result=await nodesCommand(args);console.log(JSON.stringify(result,null,2));if(result&&typeof result==='object'&&'state' in result&&!['completed','released','absent'].includes(String(result.state)))process.exitCode=1;}
   else if(command==='init'){initialize(home,baseFlags(args),args.includes('--fresh'));const b=readConfig(home).base;console.log(`NERV Agency configured: ${home} · base ${b.id} · ${b.name}\nAccess token: ${join(home,'token')}`);console.log(args.includes('--no-model-setup')?'Automatic model setup skipped; model routes were left unchanged.':await setupAtInit(home,readConfig(home).models,setting('OLLAMA') ?? OLLAMA_URL));}
