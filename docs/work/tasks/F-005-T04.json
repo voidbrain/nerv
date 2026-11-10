@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "status": "ready",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "No credentials, real host/account/path/public registry data or private keys in git/chat/logs. Neutral fixtures; actual artifacts private outside git. New root/private encrypted key never transferred to peers.",
+  "id": "F-005-T04",
+  "title": "Implement and accept Mac default-profile service lifecycle",
+  "goal": "Use the owner-selected Mac NERV-01 default profile to deliver ownership-aware service install/update/uninstall and durable recovery; retain data/configuration/keys",
+  "acceptance": [
+    "Owner selected Mac default profile; no need to ask that scope decision again. Read-only baseline: current/legacy definitions/registrations absent and configured API not responsive; recheck before effects",
+    "Implement reviewed service ownership/path/session/source checks and fenced durable receipts/resource lifecycle with uncertainty and explicit stopped recovery",
+    "Validate actual install/status/start/stop/update/uninstall and partial failure/replay without deleting or overwriting another definition or profile",
+    "Retain data, keys and config; do not install a second isolated-profile service, system daemon or linger",
+    "A default installation is the chosen test target, not mandatory for F-005 closure; broader platform and multi-device acceptance remains explicit"
+  ],
+  "dependsOn": [
+    "F-005-T01"
+  ],
+  "resources": [
+    "src/service.ts",
+    "src/node-lifecycle.ts",
+    "src/nodes-cli.ts",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle",
+    "src/node-bootstrap.ts",
+    "src/node-bootstrap-execution.ts"
+  ],
+  "validation": [
+    "Meaningful cross-boundary ownership/session/effect/journal/recovery tests, applicable static/build/headless checks and final CI",
+    "Explicit actual Mac service evidence with baseline, changed state and retained data; mocks and merge are not actual OS acceptance"
+  ],
+  "escalation": [
+    "Pause for changed/foreign service ownership, live/uncertain descendants, missing session or conflicting active work",
+    "Root activation belongs to T05; service target selection does not authorize dropping trust/history or replaying physical actions"
+  ]
+}

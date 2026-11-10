@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "status": "ready",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "No credentials, real host/account/path/public registry data or private keys in git/chat/logs. Neutral fixtures; actual artifacts private outside git. New root/private encrypted key never transferred to peers.",
+  "id": "F-005-T05",
+  "title": "Implement and apply history-preserving root activation",
+  "goal": "Deliver supported two-base root migration from the verified replacement stage without deleting old signed history, private identities or uncertain worker effects",
+  "acceptance": [
+    "Use bound old/new roots and immutable public bundle, verified base identities/main choice and current host/source snapshots",
+    "Implement root-generation-aware registry selection/storage, durable crash/fencing/replay recovery and atomic/recoverable root/key/config activation; retain old signed history and append-only safeguards",
+    "Require consistent validated backups, independent offline encrypted-root backup and safely retained new passphrase before live activation",
+    "Quiesce both selected runtimes and reconcile active leases/outboxes/locks/uncertain effects; no unsafe replay or automatic rollback",
+    "Use strict selected-host SSH and owner-authorized private credential helper; no passwords in argv/environment/logs/chat; no root/admin/provider secrets or encrypted root copied to Tabgha",
+    "Verify each activated root/registry/source, main selection, cross-base authentication/sync, old-root rejection, reconnect and one approved harmless capability; enrollment test still pending until actual import/activation succeeds"
+  ],
+  "dependsOn": [
+    "F-005-T03"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:root-migration"
+  ],
+  "validation": [
+    "Neutral old/new trust isolation, immutable history, crash points, concurrent/stale ownership, replay/rollback and full directed security joins",
+    "Final required CI and explicit actual Mac/Windows migration evidence; do not infer activation from stage completion or successful read-only checks"
+  ],
+  "escalation": [
+    "Owner already authorized migration and root regeneration; do not repeat that scope approval",
+    "External backup location/evidence and controlled runtime quiescence remain required before effects",
+    "Any changed identity/root/source/registry snapshot requires reconciliation; never clear tables, remove triggers or silently repin to bypass import refusal"
+  ]
+}
