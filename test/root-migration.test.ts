@@ -164,3 +164,30 @@ test('real CLI export/import propagates migrated root binding to a new profile w
   const home=join(f.root,'fresh');mkdirSync(home,{mode:0o700});initialize(home,{id:'BASE-03',name:'Workshop'});const {fingerprint}=await import('../src/kaji.ts');const imported=spawnSync(process.execPath,['src/cli.ts','kaji','import',bundle,'--root',fingerprint(f.next.publicKey)],{env:{...process.env,NERV_HOME:home},encoding:'utf8',timeout:5000});assert.equal(imported.status,0,imported.stderr);assert.equal(readConfig(home).kaji?.rootBinding,true);assert.equal(existsSync(join(home,ROOT_KEY_FILE)),false);
  }finally{rmSync(f.root,{recursive:true,force:true});}
 });
+
+test('review regression: noncanonical revoked base-key aliases cannot bypass migration validation',async()=>{
+ const f=await fixture();try{
+  const historical=pub(),issued=new Date().toISOString(),store=new Store(join(f.home,'nerv.sqlite')),old=new Registry(store.db,f.old.publicKey),current=old.bases().find(b=>b.baseId==='BASE-02')!;
+  old.add(signRecord(f.oldPrivate,{kind:'enrol',serial:4,baseId:current.baseId,name:current.name,publicKey:historical,address:current.address,issued}));old.add(signRecord(f.oldPrivate,{kind:'revoke',serial:5,baseId:current.baseId,publicKey:historical,issued}));old.add(signRecord(f.oldPrivate,{kind:'enrol',serial:6,baseId:current.baseId,name:current.name,publicKey:current.publicKey,address:current.address,issued}));store.close();
+  const records=[...f.bundle.records,signRecord(f.nextPrivate,{kind:'enrol',serial:4,baseId:'BASE-03',name:'Workshop',publicKey:historical+'=',address:'127.0.0.1:14522',issued})];assert.throws(()=>planRootMigration(f.home,{...f.bundle,records},f.keyPath),/canonical|revoked/);
+ }finally{rmSync(f.root,{recursive:true,force:true});}
+});
+
+test('review regression: legacy alias spelling in a revocation still revokes its decoded key identity',async()=>{
+ const f=await fixture();try{
+  const historical=pub(),issued=new Date().toISOString(),store=new Store(join(f.home,'nerv.sqlite')),old=new Registry(store.db,f.old.publicKey),current=old.bases().find(b=>b.baseId==='BASE-02')!;
+  old.add(signRecord(f.oldPrivate,{kind:'enrol',serial:4,baseId:current.baseId,name:current.name,publicKey:historical,address:current.address,issued}));old.add(signRecord(f.oldPrivate,{kind:'revoke',serial:5,baseId:current.baseId,publicKey:historical+'=',issued}));old.add(signRecord(f.oldPrivate,{kind:'enrol',serial:6,baseId:current.baseId,name:current.name,publicKey:current.publicKey,address:current.address,issued}));store.close();
+  const records=[...f.bundle.records,signRecord(f.nextPrivate,{kind:'enrol',serial:4,baseId:'BASE-03',name:'Workshop',publicKey:historical,address:'127.0.0.1:14522',issued})];assert.throws(()=>planRootMigration(f.home,{...f.bundle,records},f.keyPath),/revoked/);
+ }finally{rmSync(f.root,{recursive:true,force:true});}
+});
+
+async function legacyAliasFixture(){
+ const f=await fixture();const {renameSync}=await import('node:fs');const {canonical}=await import('../src/kaji.ts');renameSync(join(f.home,'nerv.sqlite'),join(f.root,'modern-fixture.sqlite'));
+ const db=new DatabaseSync(join(f.home,'nerv.sqlite'));db.exec("CREATE TABLE registry(id TEXT PRIMARY KEY,serial INTEGER NOT NULL,kind TEXT NOT NULL,base_id TEXT NOT NULL,body TEXT NOT NULL,signature TEXT NOT NULL,received TEXT NOT NULL);CREATE TRIGGER registry_no_update BEFORE UPDATE ON registry BEGIN SELECT RAISE(ABORT,'registry records are append-only');END;CREATE TABLE kaji_seen(base_id TEXT PRIMARY KEY,last_seen TEXT NOT NULL);PRAGMA user_version=5;");for(const r of f.before)db.prepare('INSERT INTO registry VALUES(?,?,?,?,?,?,?)').run(createHash('sha256').update(canonical(r)).digest('hex'),r.body.serial,r.body.kind,r.body.baseId,canonical(r.body),r.signature,new Date().toISOString());db.close();const file=join(f.home,'config.json'),config=JSON.parse(readFileSync(file,'utf8'));config.kaji.root=f.old.publicKey+'=';writeFileSync(file,JSON.stringify(config),{mode:0o600});return f;
+}
+test('review regression: a legacy alias of the current root is not a fresh replacement root',async()=>{
+ const f=await legacyAliasFixture();try{writeFileSync(f.keyPath,f.old.file,{mode:0o600});assert.throws(()=>planRootMigration(f.home,{root:f.old.publicKey,records:f.before},f.keyPath),/different|fresh|canonical/);}finally{rmSync(f.root,{recursive:true,force:true});}
+});
+test('review regression: historical root reuse is rejected even when its stored root label used an alias',async()=>{
+ const f=await legacyAliasFixture();try{const first=planRootMigration(f.home,f.bundle,f.keyPath);await applyRootMigration(first,options(first.digest));const path=join(f.root,'retired-root.enc');writeFileSync(path,f.old.file,{mode:0o600});assert.throws(()=>planRootMigration(f.home,{root:f.old.publicKey,records:f.before},path),/historical.*reuse|fresh/);}finally{rmSync(f.root,{recursive:true,force:true});}
+});
