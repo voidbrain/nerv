@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "F-005-T03",
+  "parent": "F-005",
+  "title": "Prepare replacement-root generation and existing-base trust migration",
+  "goal": "Stage a new encrypted root and signed replacement registry through owner-local passphrase input; preserve old trust until supported per-base migration is ready",
+  "status": "implemented",
+  "acceptance": [
+    "Record explicit owner authorization to migrate/regenerate; disposable test trust is not the selected path",
+    "Prepare a private terminal command that creates a new encrypted root and signs only reviewed existing enrolled identities/main choice plus the selected isolated test profile",
+    "Preserve current root keys, signed registry history, base private keys, data and service definitions; no live trust pin/reset or registry deletion in preparation",
+    "Make remote Tabgha access, consistent backup, old-history retention, stopped-runtime activation, rollback/uncertainty and actual multi-base verification explicit remaining gates",
+    "Passphrase stays in the owner terminal and subprocess stdin, never argv/environment/chat/repository; staged artifacts remain private"
+  ],
+  "dependsOn": [
+    "F-005-T01"
+  ],
+  "resources": [
+    "docs/work/tasks/F-005-T02.json",
+    "docs/work/tasks/F-005-T03.json",
+    "docs/work/records/F-005.md",
+    "docs/work/layout.json",
+    "docs/archive/reconciliation-2026.md",
+    "docs/decisions/node-root-migration.md",
+    "docs/decisions/README.md",
+    "docs/reviews/2026-11-10-root-migration.md",
+    "docs/reviews/README.md",
+    "docs/acceptance/node-enrollment-2026-11-10.md",
+    "generated:backlog-views",
+    "contract:root-migration"
+  ],
+  "capabilities": [
+    "structured-tools",
+    "evidence-review",
+    "privacy-review"
+  ],
+  "privacy": "Actual paths, root/public identities, registry bundles and staging scripts stay private outside git. No production secret copied into chat or repository. New encrypted root remains local and is not distributed to peers.",
+  "validation": [
+    "Read-only current-root/base/source/signed-registry snapshot and collision checks",
+    "Neutral staged-generation/signature fixtures and private file permissions; no production passphrase in tools",
+    "Applicable documentation/generated checks and scoped CI; actual root generation/activation remains pending owner terminal/target access",
+    "2026-11-10: private snapshot/read-only review pass. Neutral generation fixtures verify encrypted-root roundtrip, four new-root-only signatures, three exact public identities/main choice,0700/0600 modes, short-pass/snapshot-mismatch/overwrite refusal and unchanged old key/config/registry. Actual key generation waits for owner Terminal; live activation adapter/backup/Tabgha access pending."
+  ],
+  "escalation": [
+    "User authorized migration and key regeneration; do not ask that decision again",
+    "New root passphrase requires owner local terminal; never replace encrypted root or pin live trust before reviewed migration/backup/runtime gates",
+    "Remote-base access is not established; record that gate rather than claiming Tabgha migrated"
+  ]
+}

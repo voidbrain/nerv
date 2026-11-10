@@ -4,6 +4,8 @@ NERV evidence snapshot reviewed 8 November 2026 against main `2943aad`. Times be
 
 [Isolated enrollment preparation, 2026-11-10](../acceptance/node-enrollment-2026-11-10.md): F-005 receipt/public-key/source/registry checks and private terminal handoff reviewed. Next: owner terminal signing, then verify isolated import; no enrollment, service or worker acceptance claimed.
 
+[Root migration preparation, 2026-11-10](2026-11-10-root-migration.md): source assessment and neutral staging fixtures; actual key generation/activation, backup and two-base acceptance pending.
+
 ## Current review windows
 
 | Review | Last actual evidence | Next run / trigger | Owner and limits |

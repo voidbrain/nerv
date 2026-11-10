@@ -38,7 +38,8 @@
     "Documentation and source-owned ledger consistency checks; runtime enrollment only after owner signing",
     "2026-11-10 actual local read-only receipt/public-key/clean-source/root/registry checks pass. Private handoff syntax and review pass; non-terminal signing refuses with unchanged profile config and coordinator record count. Signing/import not run; owner local terminal/passphrase interaction required.",
     "2026-11-10 owner terminal unlock rejected before signing. Actual read-only recheck: coordinator registry count unchanged/signatures valid, test base absent, isolated root/database absent; encrypted envelope structure/public root consistent, payload integrity cannot be established without successful unlock. Retry/recovery requires owner local interaction; never reset/replace root automatically.",
-    "Owner confirms no original root passphrase or recovery backup. Existing-root enrollment blocked; two enrolled bases retain current trust. Await explicit scope choice between separate disposable test trust, retaining the block, or a reviewed two-base migration plan; no new root/trust reset authorized."
+    "Owner confirms no original root passphrase or recovery backup. Existing-root enrollment blocked; two enrolled bases retain current trust. Await explicit scope choice between separate disposable test trust, retaining the block, or a reviewed two-base migration plan; no new root/trust reset authorized.",
+    "Owner paused disposable test trust, retried/considered current passphrase, then explicitly authorized real migration/root regeneration. F-005-T03 owns replacement-root preparation; T02 enrollment remains unverified until supported new-root activation/import."
   ],
   "escalation": [
     "Stop for missing owner root signing/passphrase interaction or changed/colliding base identity/address",
