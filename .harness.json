@@ -3,7 +3,7 @@
     "path": "../harness-template",
     "repo": "https://github.com/voidbrain/project-harness"
   },
-  "version": "4.4.1",
+  "version": "4.7.0",
   "stacks": [
     "core",
     "angular"
@@ -45,7 +45,8 @@
     "docs/agents/procedures.md": "core/docs/agents/procedures.md",
     "docs/agents/task-context.md": "core/docs/agents/task-context.md",
     "tools/work-usage.mjs": "core/tools/work-usage.mjs",
-    "docs/agents/work-usage.md": "core/docs/agents/work-usage.md"
+    "docs/agents/work-usage.md": "core/docs/agents/work-usage.md",
+    "tools/usage-launch.mjs": "core/tools/usage-launch.mjs"
   },
   "forked": {},
   "freshness": {
@@ -646,7 +647,8 @@
       "docs/agents/procedures.md",
       "docs/agents/task-context.md",
       "tools/work-usage.mjs",
-      "docs/agents/work-usage.md"
+      "docs/agents/work-usage.md",
+      "tools/usage-launch.mjs"
     ]
   },
   "audit": {

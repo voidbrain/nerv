@@ -3,7 +3,7 @@
   "parent": "F-005",
   "id": "F-005-T06",
   "status": "planned",
-  "title": "Review executable and schema upgrade compatibility",
+  "title": "Safe upgrades: executable, runtime and schema compatibility",
   "goal": "Extend the conservative service update boundary with reviewed executable/runtime/schema compatibility before permitting application upgrades",
   "capabilities": [
     "bounded-edit",
@@ -34,5 +34,11 @@
   ],
   "escalation": [
     "Any destructive restore, changed ownership or unresolved physical/worker effects requires explicit reconciliation; general restore remains F-062"
-  ]
+  ],
+  "effort": {
+    "size": "large",
+    "estimate": "4–6 focused days",
+    "basis": "Initial remaining estimate for reviewed upgrade admission, real cross-version joins, recovery and selected-target acceptance. Migration behavior is uncertain.",
+    "reviewed": "2026-11-10"
+  }
 }

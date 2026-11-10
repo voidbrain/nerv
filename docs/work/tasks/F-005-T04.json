@@ -44,5 +44,11 @@
   "escalation": [
     "Pause for changed/foreign service ownership, live/uncertain descendants, missing session or conflicting active work",
     "Root activation belongs to T05; service target selection does not authorize dropping trust/history or replaying physical actions"
-  ]
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Closed with existing dated acceptance; original per-step effort was not measured and is not reconstructed.",
+    "reviewed": "2026-11-10"
+  }
 }

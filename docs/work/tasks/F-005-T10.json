@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "status": "planned",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "id": "F-005-T10",
+  "title": "Linux service lifecycle execution and target acceptance",
+  "goal": "Implement the existing reviewed lifecycle contracts for supported Linux user services",
+  "acceptance": [
+    "Implement validated install/status/start/stop/update/uninstall/recovery for supported Linux user services with explicit account/login policy",
+    "Preserve profile/source/root ownership, fencing, backups, interruption and uncertain workers; do not enable system-wide or linger behavior implicitly",
+    "Demonstrate selected mini PC/Pi or equivalent Linux target lifecycle and reconnect; fixtures do not prove login/boot behavior"
+  ],
+  "dependsOn": [
+    "F-005-T01"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle"
+  ],
+  "validation": [
+    "Meaningful cross-boundary regressions and required final CI",
+    "Explicit selected-target acceptance where service, install or real device behavior is required; static/unit passes do not substitute"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never change an unowned installation, service, engine or uncertain physical effect without explicit reconciliation"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2–3 focused days",
+    "basis": "Initial estimate reuses the lifecycle contract; Linux distribution, service/session policy and target access are uncertain.",
+    "reviewed": "2026-11-10"
+  }
+}

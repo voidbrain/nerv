@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "status": "planned",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "id": "F-005-T08",
+  "title": "Prerequisites: Node and optional management of multiple engines",
+  "goal": "Check installation prerequisites and optionally manage explicitly owned local model engines without coupling NERV to Ollama",
+  "acceptance": [
+    "Check supported Node version, executable and non-interactive service environment before install/start/update; report missing or incompatible prerequisites",
+    "Provide explicit supported-platform Node installation/upgrade choices with reviewed ownership, permission and recovery; never silently replace a user-managed runtime",
+    "Support different and multiple engine/provider instances and endpoints together, including local engines and remote endpoints; Ollama is one adapter example, not the contract",
+    "Keep readiness probing separate from management ownership. Optional start-at-login/on-demand local engine management applies only to selected owned instances and configured policy; external services are not stopped or reconfigured",
+    "Bind engine adapters to declared capabilities/version support, endpoint identity, port/resource conflicts, credential privacy and recovery; a remote endpoint does not imply a local installation",
+    "Join prerequisite checks to service bootstrap/update and demonstrate configured optional engine startup on an explicitly selected target"
+  ],
+  "dependsOn": [
+    "F-005-T04"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle"
+  ],
+  "validation": [
+    "Meaningful cross-boundary regressions and required final CI",
+    "Explicit selected-target acceptance where service, install or real device behavior is required; static/unit passes do not substitute"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never change an unowned installation, service, engine or uncertain physical effect without explicit reconciliation"
+  ],
+  "effort": {
+    "size": "large",
+    "estimate": "4–6 focused days",
+    "basis": "Initial estimate: prerequisite checks plus platform/runtime installation choices and optional engine ownership joins. Engine/platform support matrix requires review; no implementation or installation requested here.",
+    "reviewed": "2026-11-10"
+  }
+}
