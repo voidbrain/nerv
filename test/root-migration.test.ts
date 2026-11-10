@@ -129,3 +129,38 @@ test('review regression: a rotated-away historically revoked key cannot be re-en
   assert.throws(()=>planRootMigration(f.home,bundle,f.keyPath),/revoked|resurrect/);
  }finally{rmSync(f.root,{recursive:true,force:true});}
 });
+
+test('migration enables root binding, guards downgrade and ordinary root-init/repin bypasses',async()=>{
+ const f=await fixture();try{
+  assert.throws(()=>pinKajiRoot(f.home,f.next.publicKey),/cannot be repinned/);assert.equal(readConfig(f.home).kaji?.root,f.old.publicKey);
+  const attempted=join(f.root,'unexpected-root.enc'),child=spawnSync(process.execPath,['src/cli.ts','key','init','--out',attempted,'--passphrase-stdin'],{env:{...process.env,NERV_HOME:f.home},input:pass,encoding:'utf8',timeout:5000});assert.notEqual(child.status,0);assert.equal(existsSync(attempted),false);
+  await applyRootMigration(f.plan,options(f.plan.digest));assert.equal(readConfig(f.home).kaji?.rootBinding,true);
+  const path=join(f.home,'config.json'),config=JSON.parse(readFileSync(path,'utf8'));delete config.kaji.rootBinding;writeFileSync(path,JSON.stringify(config),{mode:0o600});assert.throws(()=>assertRootMigrationReady(f.home),/root-bound/);assert.throws(()=>new Store(join(f.home,'nerv.sqlite'),undefined,{home:f.home}),/root-bound/);assert.equal(rootMigrationStatus(f.home,f.plan.digest).state,'completed');
+ }finally{rmSync(f.root,{recursive:true,force:true});}
+});
+
+test('replacement roots use canonical encoding rather than aliases of an existing key',async()=>{
+ const f=await fixture();try{assert.throws(()=>planRootMigration(f.home,{...f.bundle,root:f.bundle.root+'='},f.keyPath),/canonical/);}finally{rmSync(f.root,{recursive:true,force:true});}
+});
+
+test('revocation history remains effective across a later replacement-root migration',async()=>{
+ const f=await fixture();try{
+  const historical=pub(),issued=new Date().toISOString(),store=new Store(join(f.home,'nerv.sqlite')),registry=new Registry(store.db,f.old.publicKey),peer=registry.bases().find(b=>b.baseId==='BASE-02')!;
+  registry.add(signRecord(f.oldPrivate,{kind:'enrol',serial:4,baseId:peer.baseId,name:peer.name,publicKey:historical,address:peer.address,issued}));registry.add(signRecord(f.oldPrivate,{kind:'revoke',serial:5,baseId:peer.baseId,publicKey:historical,issued}));registry.add(signRecord(f.oldPrivate,{kind:'enrol',serial:6,baseId:peer.baseId,name:peer.name,publicKey:peer.publicKey,address:peer.address,issued}));store.close();
+  const first=planRootMigration(f.home,f.bundle,f.keyPath);await applyRootMigration(first,options(first.digest));
+  const third=createRootKey(pass),key=unlockRootKey(third.file,pass).privateKey,path=join(f.root,'third.enc');writeFileSync(path,third.file,{mode:0o600});const records=f.bundle.records.map(r=>signRecord(key,r.body));records.push(signRecord(key,{kind:'enrol',serial:4,baseId:'BASE-03',name:'Workshop',publicKey:historical,address:'127.0.0.1:14522',issued}));assert.throws(()=>planRootMigration(f.home,{root:third.publicKey,records},path),/historically revoked/);
+ }finally{rmSync(f.root,{recursive:true,force:true});}
+});
+
+test('wildcard revocation is not erased by re-enrolling its base with another key in the replacement bundle',async()=>{
+ const f=await fixture();try{
+  const store=new Store(join(f.home,'nerv.sqlite')),registry=new Registry(store.db,f.old.publicKey),issued=new Date().toISOString();registry.add(signRecord(f.oldPrivate,{kind:'enrol',serial:4,baseId:'BASE-03',name:'Workshop',publicKey:pub(),address:'127.0.0.1:14522',issued}));registry.add(signRecord(f.oldPrivate,{kind:'revoke',serial:5,baseId:'BASE-03',issued}));store.close();const bundle={...f.bundle,records:[...f.bundle.records,signRecord(f.nextPrivate,{kind:'enrol',serial:4,baseId:'BASE-03',name:'Workshop',publicKey:pub(),address:'127.0.0.1:14522',issued})]};assert.throws(()=>planRootMigration(f.home,bundle,f.keyPath),/wildcard-revoked/);
+ }finally{rmSync(f.root,{recursive:true,force:true});}
+});
+
+test('real CLI export/import propagates migrated root binding to a new profile without private root material',async()=>{
+ const f=await fixture();try{
+  await applyRootMigration(f.plan,options(f.plan.digest));const bundle=join(f.root,'public.json'),env={...process.env,NERV_HOME:f.home};const exported=spawnSync(process.execPath,['src/cli.ts','kaji','export',bundle],{env,encoding:'utf8',timeout:5000});assert.equal(exported.status,0,exported.stderr);const data=JSON.parse(readFileSync(bundle,'utf8'));assert.equal(data.rootBinding,1);assert.deepEqual(data.records,f.bundle.records);
+  const home=join(f.root,'fresh');mkdirSync(home,{mode:0o700});initialize(home,{id:'BASE-03',name:'Workshop'});const {fingerprint}=await import('../src/kaji.ts');const imported=spawnSync(process.execPath,['src/cli.ts','kaji','import',bundle,'--root',fingerprint(f.next.publicKey)],{env:{...process.env,NERV_HOME:home},encoding:'utf8',timeout:5000});assert.equal(imported.status,0,imported.stderr);assert.equal(readConfig(home).kaji?.rootBinding,true);assert.equal(existsSync(join(home,ROOT_KEY_FILE)),false);
+ }finally{rmSync(f.root,{recursive:true,force:true});}
+});

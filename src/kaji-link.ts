@@ -1,7 +1,7 @@
 import {WorkerLink,type WorkerAdapter} from './worker-link.ts';
 import {sanitizeChannel,type ChannelState,type HeardChannel} from './channel-state.ts';
 import type {KeyObject} from 'node:crypto';
-import {KAJI_CLOCK_SKEW_MS,signedHeaders,verifySigned,Nonces} from './kaji-auth.ts';
+import {KAJI_CLOCK_SKEW_MS,signedHeaders,verifySigned,Nonces,type RootTrust} from './kaji-auth.ts';
 export {signedHeaders,verifySigned,Nonces} from './kaji-auth.ts';
 import { createServer, request as httpRequest, type IncomingMessage, type Server } from 'node:http';
 import { type BaseEntry, type SignedRecord } from './kaji.ts';
@@ -83,12 +83,13 @@ export class KajiLink {
   if(n>=missesToLog(every)&&this.reachable.get(peer)!==false){this.log(`Kaji: ${peer} unreachable${detail?` (${detail})`:''}; ${n} heartbeats missed.`);this.reachable.set(peer,false);}
  }
  private every=HEARTBEAT_MS;
- constructor(options:{worker?:WorkerAdapter;baseId:string;key:KeyObject;publicKey:string;registry:RegistryPort;log?:(line:string)=>void;channel?:()=>ChannelState;onChannel?:(baseId:string,channel:HeardChannel|null)=>void;health?:()=>Promise<BaseHealth>;onHealth?:(baseId:string,health:HeardHealth)=>void;
+ private readonly trust?:RootTrust;
+ constructor(options:{trust?:RootTrust;worker?:WorkerAdapter;baseId:string;key:KeyObject;publicKey:string;registry:RegistryPort;log?:(line:string)=>void;channel?:()=>ChannelState;onChannel?:(baseId:string,channel:HeardChannel|null)=>void;health?:()=>Promise<BaseHealth>;onHealth?:(baseId:string,health:HeardHealth)=>void;
   onRelay?:(from:string,relay:Relay)=>Promise<boolean>;onChat?:(from:string,message:string,conversation?:string)=>Promise<DispatchedReply>;
   offers?:()=>string[];onOffers?:(baseId:string,offers:string[])=>void;onVerdict?:(from:string,ask:VerdictAsk)=>Promise<PeerVerdict|null>;onPendingApprovals?:(ids:string[])=>Promise<string[]>;onDecide?:(approvalId:string,decision:'approve'|'reject')=>Promise<string>}) {
-  this.baseId=options.baseId;this.key=options.key;this.publicKey=options.publicKey;this.port=options.registry;this.log=options.log ?? (l=>console.error(l));
+  this.trust=options.trust;this.baseId=options.baseId;this.key=options.key;this.publicKey=options.publicKey;this.port=options.registry;this.log=options.log ?? (l=>console.error(l));
   this.channel=options.channel;this.onChannel=options.onChannel;this.health=options.health;this.onHealth=options.onHealth;this.onRelay=options.onRelay;this.onDecide=options.onDecide;this.onPendingApprovals=options.onPendingApprovals;this.onChat=options.onChat;this.offers=options.offers;this.onOffers=options.onOffers;this.onVerdict=options.onVerdict;
-  if(options.worker)this.workers=new WorkerLink({id:this.baseId,key:this.key,registry:this.port,adapter:options.worker,offers:options.offers,onOffers:options.onOffers,log:this.log,address:address=>{const {host,port}=endpoint(address);return `ws://${host}:${port}`;}});
+  if(options.worker)this.workers=new WorkerLink({trust:this.trust,id:this.baseId,key:this.key,registry:this.port,adapter:options.worker,offers:options.offers,onOffers:options.onOffers,log:this.log,address:address=>{const {host,port}=endpoint(address);return `ws://${host}:${port}`;}});
  }
  private readonly channel:(()=>ChannelState)|undefined;
  private readonly onChannel:((baseId:string,channel:HeardChannel|null)=>void)|undefined;
@@ -134,10 +135,10 @@ export class KajiLink {
   this.server=server;this.listening=me.address;this.log(`Kaji: listening on ${host}:${port} as ${this.baseId}.`);
  }
  private async serve(req:IncomingMessage,writeHead:(s:number,h?:Record<string,string>)=>unknown,end:(b:string)=>void,setHeader:(k:string,v:string)=>unknown):Promise<void> {
-  const reply=(status:number,value:unknown)=>{const body=JSON.stringify(value);const h=signedHeaders(this.baseId,this.key,'res',req.method ?? '',req.url ?? '',body);for(const [k,v] of Object.entries(h))setHeader(k,v);writeHead(status,{'content-type':'application/json'});end(body);};
+  const reply=(status:number,value:unknown)=>{const body=JSON.stringify(value);const h=signedHeaders(this.baseId,this.key,'res',req.method ?? '',req.url ?? '',body,undefined,this.trust?.required?this.trust.root:undefined);for(const [k,v] of Object.entries(h))setHeader(k,v);writeHead(status,{'content-type':'application/json'});end(body);};
   try{
    let body='';for await(const chunk of req){body+=chunk;if(body.length>MAX_BODY)throw new Error('too large');}
-   const bases=await this.port.bases();const from=verifySigned(req.headers as Record<string,string>,'req',req.method ?? '',req.url ?? '',body,bases,this.nonces);
+   const bases=await this.port.bases();const from=verifySigned(req.headers as Record<string,string>,'req',req.method ?? '',req.url ?? '',body,bases,this.nonces,undefined,this.trust);
    if(req.method==='POST'&&req.url==='/kaji/heartbeat'){
     const hb=JSON.parse(body) as {seen?:Record<string,string>;health?:unknown;offers?:unknown;channel?:unknown};const now=new Date().toISOString();
     await this.port.seen({...sanitizeSeen(hb.seen,bases),[from]:now,[this.baseId]:now});this.heard(from,hb.health);this.heardOffers(from,hb.offers);this.heardChannel(from,hb.channel);
@@ -187,9 +188,9 @@ export class KajiLink {
  /** Signed request to one peer; the reply must be signed by that same peer. */
  private async call(peer:BaseEntry,method:'GET'|'POST',path:string,value?:unknown,timeoutMs=8000):Promise<unknown> {
   const body=value===undefined?'':JSON.stringify(value);const {host,port}=endpoint(peer.address);
-  const res=await send(host,port,method,path,{'content-type':'application/json',...signedHeaders(this.baseId,this.key,'req',method,path,body)},method==='POST'?body:undefined,timeoutMs);
+  const res=await send(host,port,method,path,{'content-type':'application/json',...signedHeaders(this.baseId,this.key,'req',method,path,body,undefined,this.trust?.required?this.trust.root:undefined)},method==='POST'?body:undefined,timeoutMs);
   const text=res.text;const headers=res.headers;
-  const from=verifySigned(headers,'res',method,path,text,await this.port.bases(),this.nonces);
+  const from=verifySigned(headers,'res',method,path,text,await this.port.bases(),this.nonces,undefined,this.trust);
   if(from!==peer.baseId)throw new Error(`${peer.baseId} answered as ${from}`);
   if(!res.ok)throw new Error(`${peer.baseId} refused (${res.status})`);
   return JSON.parse(text);

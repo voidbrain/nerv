@@ -43,6 +43,7 @@ export class Store {
     const version = this.db.prepare('PRAGMA user_version').get() as {user_version:number};
     if(version.user_version > 6) {this.db.close();throw new Error('Database schema is newer than this NERV Agency version.');}
     if(this.db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='root_migration_resource'").get()&&this.db.prepare('SELECT 1 FROM root_migration_resource').get()){this.db.close();throw new Error('Root migration is unresolved; inspect its receipt before starting NERV.');}
+    if(version.user_version>=6&&options.home&&readConfig(options.home).kaji?.rootBinding!==true){this.db.close();throw new Error('Migrated trust requires root-bound peer authentication.');}
     this.usage=new UsageStore(this.db);this.instrumentality=new InstrumentalityRuns(this.db);
     this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
       CREATE TABLE IF NOT EXISTS reminders(id TEXT PRIMARY KEY, title TEXT NOT NULL, due TEXT NOT NULL, created TEXT NOT NULL, delivered TEXT, cancelled TEXT);

@@ -2,7 +2,7 @@ import {createPublicKey,randomUUID,type KeyObject} from 'node:crypto';
 import type {Server,IncomingMessage} from 'node:http';
 import type {Duplex} from 'node:stream';
 import {WebSocket,WebSocketServer} from 'ws';
-import {KAJI_CLOCK_SKEW_MS,signedHeaders,verifySigned,Nonces} from './kaji-auth.ts';
+import {KAJI_CLOCK_SKEW_MS,signedHeaders,verifySigned,Nonces,type RootTrust} from './kaji-auth.ts';
 import type {RegistryPort} from './kaji-link.ts';
 import {validateParams,MAX_FRAME_BYTES,MAX_RPC_CONNECTIONS,MAX_RPC_INFLIGHT} from './rpc.ts';
 import {WORKER_LEASE_MS,WORKER_RESULT_BYTES,type WorkerItem,type WorkerContext} from './worker-jobs.ts';
@@ -19,7 +19,7 @@ export interface WorkerAdapter {
  cancel(owner:string,id:string,reason:string,ownerKey:string):Promise<{status:string;result?:unknown}>;
  run(owner:string,item:WorkerItem,context:WorkerContext):Promise<unknown>;
 }
-interface Settings {id:string;key:KeyObject;registry:RegistryPort;adapter:WorkerAdapter;address:(value:string)=>string;log?:(text:string)=>void;heartbeatMs?:number;requestMs?:number;reconnectMs?:number;offers?:()=>string[];onOffers?:(id:string,offers:string[])=>void}
+interface Settings {trust?:RootTrust;id:string;key:KeyObject;registry:RegistryPort;adapter:WorkerAdapter;address:(value:string)=>string;log?:(text:string)=>void;heartbeatMs?:number;requestMs?:number;reconnectMs?:number;offers?:()=>string[];onOffers?:(id:string,offers:string[])=>void}
 interface Pending {resolve:(value:unknown)=>void;reject:(error:Error)=>void;timer:NodeJS.Timeout}
 /** Every frame is signed for its fresh session and monotonically increasing direction counter. */
 class Peer {
@@ -44,7 +44,7 @@ class Peer {
    const bases=await this.link.settings.registry.bases(),main=await this.link.settings.registry.main?.();
    if(main!==(this.role==='worker'?this.remote:this.link.settings.id)||!bases.some(b=>b.baseId===this.link.settings.id&&b.status==='enrolled'))throw Error('Worker authority changed.');
    // Counter/session binding rejects replay; the fresh nonce helper here performs signature/time verification only.
-   const from=verifySigned(envelope.headers as Record<string,string>,request?'req':'res','FRAME',PATH+'/'+envelope.session,envelope.body,bases,new Nonces());if(from!==this.remote||!bases.some(b=>b.baseId===from&&b.publicKey===this.remoteKey))throw Error('Unexpected worker identity.');
+   const from=verifySigned(envelope.headers as Record<string,string>,request?'req':'res','FRAME',PATH+'/'+envelope.session,envelope.body,bases,new Nonces(),undefined,this.link.settings.trust);if(from!==this.remote||!bases.some(b=>b.baseId===from&&b.publicKey===this.remoteKey))throw Error('Unexpected worker identity.');
    this.session=envelope.session;this.received++;
    if(!request){
     if(!keys(rpc,['jsonrpc','id','result','error'])||('result' in rpc)===('error' in rpc))throw Error('Invalid worker response.');const pending=this.pending.get(rpc.id);if(!pending)throw Error('Unknown worker response.');this.pending.delete(rpc.id);clearTimeout(pending.timer);
@@ -80,7 +80,7 @@ class Peer {
  private write(rpc:Record<string,unknown>,request:boolean):void {
   if(this.ended||this.ws.readyState!==WebSocket.OPEN)throw Error('Worker connection closed.');
   const body=JSON.stringify({sequence:this.sent+1,rpc});if(Buffer.byteLength(body)>WORKER_RESULT_BYTES+4096)throw Error('Worker message exceeds its bound.');
-  const encoded=JSON.stringify({session:this.session,body,headers:signedHeaders(this.link.settings.id,this.link.settings.key,request?'req':'res','FRAME',PATH+'/'+this.session,body)});
+  const encoded=JSON.stringify({session:this.session,body,headers:signedHeaders(this.link.settings.id,this.link.settings.key,request?'req':'res','FRAME',PATH+'/'+this.session,body,undefined,this.link.settings.trust?.required?this.link.settings.trust.root:undefined)});
   if(Buffer.byteLength(encoded)>MAX_FRAME_BYTES||this.ws.bufferedAmount+Buffer.byteLength(encoded)>MAX_FRAME_BYTES){this.end();throw Error('Worker transport saturated.');}
   this.sent++;this.ws.send(encoded,e=>{if(e)this.end();});
  }
@@ -112,7 +112,7 @@ export class WorkerLink {
   this.upgrades++;this.upgradeSockets.add(socket);const deadline=setTimeout(()=>socket.destroy(),5000);
   try{
    if(await this.settings.registry.main?.()!==this.settings.id)throw Error('Not coordinator.');
-   const bases=await this.settings.registry.bases();const from=verifySigned(request.headers as Record<string,string>,'req','GET',PATH,'',bases,this.upgradeNonces);if(from===this.settings.id)throw Error('Self connection.');
+   const bases=await this.settings.registry.bases();const from=verifySigned(request.headers as Record<string,string>,'req','GET',PATH,'',bases,this.upgradeNonces,undefined,this.settings.trust);if(from===this.settings.id)throw Error('Self connection.');
    if(this.stopped||socket.destroyed)throw Error('Stopped.');clearTimeout(deadline);this.server.handleUpgrade(request,socket,head,ws=>{new Peer(this,ws,from,'coordinator',bases.find(b=>b.baseId===from)!.publicKey);});
   }catch{refuse(401);}finally{clearTimeout(deadline);this.upgradeSockets.delete(socket);this.upgrades--;}
  }
@@ -148,7 +148,7 @@ export class WorkerLink {
   const bases=await this.settings.registry.bases(),target=bases.find(b=>b.baseId===owner&&b.status==='enrolled');if(!target||!bases.some(b=>b.baseId===this.settings.id&&b.status==='enrolled'))return;
   const session=randomUUID(),state=await this.settings.adapter.open(owner,session,createPublicKey(this.settings.key).export({type:'spki',format:'der'}).toString('base64'),target.publicKey);let peer:Peer|undefined;
   try{
-   if(this.stopped)throw Error('Stopped.');const socket=new WebSocket(this.settings.address(target.address)+PATH,{headers:signedHeaders(this.settings.id,this.settings.key,'req','GET',PATH,''),maxPayload:MAX_FRAME_BYTES,perMessageDeflate:false,handshakeTimeout:5000});this.connectingSocket=socket;
+   if(this.stopped)throw Error('Stopped.');const socket=new WebSocket(this.settings.address(target.address)+PATH,{headers:signedHeaders(this.settings.id,this.settings.key,'req','GET',PATH,'',undefined,this.settings.trust?.required?this.settings.trust.root:undefined),maxPayload:MAX_FRAME_BYTES,perMessageDeflate:false,handshakeTimeout:5000});this.connectingSocket=socket;
    await new Promise<void>((resolve,reject)=>{socket.once('error',reject);socket.once('open',()=>{this.connectingSocket=undefined;peer=new Peer(this,socket,owner,'worker',target.publicKey,session);peer.epoch=state.epoch;this.client=peer;resolve();});});
    if(this.stopped){peer!.end();return;}await peer!.negotiate(state.epoch,state.cursor);this.failures=0;this.nextAttempt=0;
   }catch(e){this.connectingSocket=undefined;if(peer)peer.end();else await this.settings.adapter.close(owner,session);throw e;}

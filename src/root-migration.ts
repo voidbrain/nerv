@@ -39,7 +39,7 @@ function openDatabase(home:string,readOnly=true):DatabaseSync {
 }
 function bundleOf(value:unknown):Bundle {
  if(!object(value)||typeof value.root!=='string'||!Array.isArray(value.records)||!value.records.length||value.records.length>256)throw Error('Invalid public migration bundle.');
- publicKeyFrom(value.root);const db=new DatabaseSync(':memory:');
+ if(publicKeyFrom(value.root).export({type:'spki',format:'der'}).toString('base64')!==value.root)throw Error('Migration root must use canonical public-key encoding.');const db=new DatabaseSync(':memory:');
  try{db.exec(REGISTRY_SCHEMA);const registry=new Registry(db,value.root),serials=new Set<number>();
   for(const raw of value.records){if(!object(raw)||!object(raw.body)||typeof raw.signature!=='string'||raw.signature.length>128)throw Error('Invalid migration record.');const r=raw as unknown as SignedRecord;if(serials.has(r.body.serial))throw Error('Migration serials must be unique.');serials.add(r.body.serial);registry.add(r);}
   const records=registry.records();if(records.length!==value.records.length)throw Error('Duplicate migration record.');return {root:value.root,records};
@@ -54,6 +54,12 @@ function validateMembership(db:DatabaseSync,root:string,bundle:Bundle,identity:s
  try{temp.exec(REGISTRY_SCHEMA);const next=new Registry(temp,bundle.root);for(const record of bundle.records)next.add(record);
   const bases=next.bases();if(!bases.some(b=>b.publicKey===identity&&b.status==='enrolled'))throw Error('Replacement registry does not enroll this base.');
   for(const b of old.bases())if(b.status==='enrolled'&&!bases.some(n=>n.status==='enrolled'&&n.baseId===b.baseId&&n.publicKey===b.publicKey&&n.address===b.address&&n.name===b.name)||b.status==='revoked'&&bases.some(n=>n.status==='enrolled'&&n.publicKey===b.publicKey))throw Error('Migration must retain enrolled identities and cannot resurrect revoked keys.');
+  const tagged=!!db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='registry_roots'").get();
+  const history=tagged?(db.prepare('SELECT r.body,r.signature,g.root FROM registry r LEFT JOIN registry_roots g ON g.id=r.id').all() as {body:string;signature:string;root:string|null}[]).map(r=>({root:r.root??root,record:{body:JSON.parse(r.body),signature:r.signature} as SignedRecord})):old.records().map(record=>({root,record}));
+  const revokedKeys=new Set<string>(),wildcards=new Set<string>(),currentWildcardIds=new Set<string>();
+  for(const item of history){if(!verifyRecord(item.root,item.record))throw Error('Historical root binding/signature is invalid.');const b=item.record.body;if(b.kind==='revoke'){if(b.publicKey)revokedKeys.add(b.publicKey);else{wildcards.add(item.root+'\n'+b.baseId);if(item.root===root)currentWildcardIds.add(b.baseId);}}}
+  for(const {root:authority,record:{body:b}} of history)if(b.kind==='enrol'&&wildcards.has(authority+'\n'+b.baseId))revokedKeys.add(b.publicKey!);
+  if(bases.some(b=>b.status==='enrolled'&&(revokedKeys.has(b.publicKey)||currentWildcardIds.has(b.baseId))))throw Error('Migration cannot resurrect a historically revoked key or wildcard-revoked base.');
   if(old.main()!==next.main())throw Error('Migration must retain the selected main base.');
  }finally{temp.close();}
 }
@@ -87,7 +93,7 @@ export function rootMigrationStatus(home:string,digest:string):Receipt|{state:'a
  const db=openDatabase(checkHome(home));try{if(!db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='root_migrations'").get())return {state:'absent'};const row=op(db,digest);return row?receipt(row):{state:'absent'};}finally{db.close();}
 }
 export function assertRootMigrationReady(home:string):void {
- if(!existsSync(databasePath(home)))return;const db=new DatabaseSync(databasePath(home),{readOnly:true});try{if(db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='root_migration_resource'").get()&&db.prepare('SELECT 1 FROM root_migration_resource').get())throw Error('Root migration is unresolved; use root-migration status/apply --resume.');}finally{db.close();}
+ if(!existsSync(databasePath(home)))return;const db=new DatabaseSync(databasePath(home),{readOnly:true});try{if(db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='root_migration_resource'").get()&&db.prepare('SELECT 1 FROM root_migration_resource').get())throw Error('Root migration is unresolved; use root-migration status/apply --resume.');if(Number((db.prepare('PRAGMA user_version').get() as {user_version:number}).user_version)>=6&&readConfig(home).kaji?.rootBinding!==true)throw Error('Migrated trust requires root-bound peer authentication; do not downgrade the binding.');}finally{db.close();}
 }
 function writeExclusive(path:string,value:string|Buffer):void {const fd=openSync(path,'wx',0o600);try{writeFileSync(fd,value);fsyncSync(fd);}finally{closeSync(fd);}}
 function fileHash(path:string):string {
@@ -140,8 +146,8 @@ export async function applyRootMigration(value:unknown,options:RootApplyOptions)
   const replace=(path:string,bytes:Buffer|string,oldHash:string|null,newHash:string)=>{owns();const current=existsSync(path)?hash(readFile(path,1048576,true)):null;if(current===newHash)return;if(current!==oldHash)throw Error('Live migration file changed; retain uncertainty.');const candidate=join(backup,'candidate-'+nonce+'-'+randomUUID());writeExclusive(candidate,bytes);if((existsSync(path)?hash(readFile(path,1048576,true)):null)!==oldHash)throw Error('Migration file changed before atomic replacement.');renameSync(candidate,path);syncDirectory(dirname(path));};
   if(plan.newKeyPath){const bytes=readFile(plan.newKeyPath,65536,true);if(hash(bytes)!==plan.newKeyHash)throw Error('Replacement encrypted key changed.');replace(join(plan.home,ROOT_KEY_FILE),bytes,plan.oldKeyHash,plan.newKeyHash!);}
   progress('key');options.onPhase?.('key');
-  const config=JSON.parse(original.toString('utf8')) as Record<string,unknown>;const next=JSON.stringify({...config,kaji:{...(config.kaji as object),root:plan.bundle.root}},null,2)+'\n';replace(join(plan.home,'config.json'),next,plan.configHash,hash(next));progress('config');options.onPhase?.('config');
-  if(readConfig(plan.home).kaji?.root!==plan.bundle.root||hash(canonical(new Registry(db,plan.bundle.root).records()))!==hash(canonical(plan.bundle.records)))throw Error('Post-activation root/registry verification failed.');
+  const config=JSON.parse(original.toString('utf8')) as Record<string,unknown>;const next=JSON.stringify({...config,kaji:{...(config.kaji as object),root:plan.bundle.root,rootBinding:true}},null,2)+'\n';replace(join(plan.home,'config.json'),next,plan.configHash,hash(next));progress('config');options.onPhase?.('config');
+  if(readConfig(plan.home).kaji?.root!==plan.bundle.root||readConfig(plan.home).kaji?.rootBinding!==true||hash(canonical(new Registry(db,plan.bundle.root).records()))!==hash(canonical(plan.bundle.records)))throw Error('Post-activation root/registry verification failed.');
   transaction(db,()=>{owns();db.prepare("UPDATE root_migrations SET state='completed' WHERE digest=?").run(plan.digest);db.prepare('DELETE FROM root_migration_resource WHERE id=1 AND nonce=? AND fence=?').run(nonce,fence);});owned=false;return receipt(op(db,plan.digest)!);
  }catch(error){if(owned)try{transaction(db,()=>{owns();db.prepare("UPDATE root_migrations SET state='uncertain' WHERE digest=?").run(plan.digest);});}catch{}throw error;}
  finally{releasePort?.();db.close();}

@@ -279,6 +279,7 @@ try {
       case 'key':{
         // key init [--out PATH]: creates the Key of Nebuchadnezzar on the owner's main base and pins its public half here.
         if(args[0]!=='init')throw new Error('Usage: key init [--out PATH]');
+        if(config.kaji?.root)throw new Error('A root is already pinned; use root-migration rather than key init to replace it.');
         const out=flag('--out') ?? join(home,ROOT_KEY_FILE);if(existsSync(out))throw new Error(`A key file already exists at ${out}; it is never overwritten.`);
         const pass=await readSecret('New passphrase for the Key of Nebuchadnezzar (12+ characters): ');
         if(!args.includes('--passphrase-stdin')&&pass!==await readSecret('Repeat it: '))throw new Error('The two passphrases differ.');
@@ -346,20 +347,22 @@ try {
           const bases=registry.bases();if(!config.kaji?.root)console.log('No root pinned yet: key init (main base) or kaji import --root FINGERPRINT.');
           else {const main=registry.main();console.log(`Root ${fingerprint(config.kaji.root)}\n`+(bases.length?bases.map(b=>`${b.baseId.padEnd(8)} ${b.name.padEnd(16)} ${b.address.padEnd(24)} ${b.status}${b.publicKey===me?'  (this base)':''}${b.baseId===main?'  (main)':''}`).join('\n'):'No bases enrolled yet.'));}
         }
-        else if(sub==='export'){const bundle=JSON.stringify({root:config.kaji?.root,records:registry.records()},null,2)+'\n';if(!config.kaji?.root)throw new Error('Nothing to export: no root pinned.');if(args[1]){writeFileSync(args[1],bundle);console.log(`Wrote ${registry.records().length} signed record(s) to ${args[1]}.`);}else process.stdout.write(bundle);}
+        else if(sub==='export'){const bundle=JSON.stringify({root:config.kaji?.root,...(config.kaji?.rootBinding?{rootBinding:1}:{}),records:registry.records()},null,2)+'\n';if(!config.kaji?.root)throw new Error('Nothing to export: no root pinned.');if(args[1]){writeFileSync(args[1],bundle);console.log(`Wrote ${registry.records().length} signed record(s) to ${args[1]}.`);}else process.stdout.write(bundle);}
         else if(sub==='import'){
           // The root is pinned only when the owner confirms its fingerprint, read on the main base: no trust on first use.
           const file=args[1];const expect=flag('--root');if(!file)throw new Error('Usage: kaji import FILE --root FINGERPRINT');
-          const bundle=JSON.parse(readFileSync(file,'utf8')) as {root:string;records:SignedRecord[]};
+          const bundle=JSON.parse(readFileSync(file,'utf8')) as {root:string;rootBinding?:number;records:SignedRecord[]};
+          if(bundle.rootBinding!==undefined&&bundle.rootBinding!==1)throw new Error('Unsupported root-binding version.');
           if(!config.kaji?.root){
             const given=(expect ?? '').toLowerCase();const where='the "Root …" line of nerv kaji list on the base that holds the Key of Nebuchadnezzar (also printed by key init)';
             if(!given)throw new Error(`Give --root with the root fingerprint: ${where}.`);
             if(given===fingerprint(me))throw new Error(`That is this base's own fingerprint (from base pubkey). --root needs the root fingerprint: ${where}.`);
             // The file's own fingerprint is never printed: the owner compares what the main base shows with the file.
             if(fingerprint(bundle.root)!==given)throw new Error(`The root fingerprint does not match the one this file was signed with. Check ${where}; if they really differ, the file is not from your Key: do not import it.`);
-            pinKajiRoot(home,bundle.root);
+            pinKajiRoot(home,bundle.root,bundle.rootBinding===1);
           }
           else if(bundle.root!==config.kaji.root)throw new Error('This file is signed by a different root than the one pinned here.');
+          else if(bundle.rootBinding===1&&!config.kaji.rootBinding)pinKajiRoot(home,bundle.root,true);
           const reg=new Registry(local().db,bundle.root);let added=0;for(const r of bundle.records)if(reg.add(r)==='added')added++;
           console.log(`Imported ${added} new record(s); ${reg.bases().filter(b=>b.status==='enrolled').length} base(s) enrolled.`);
         }
@@ -415,7 +418,7 @@ try {
         else if(botToken)console.log('Aoba (Telegram): token found, no chat linked yet. Send /start to your bot, then run telegram link.');
         // B-013: once the channels listen, close what the previous run left half done and tell the owner.
         void runtime.closeInterrupted().then(n=>{if(n)console.log(`Closed ${n} sortie(s) a restart had interrupted.`);});
-        if(config.kaji?.root){kaji=new KajiLink({worker:runtime.worker,baseId:config.base.id,key:own.privateKey,publicKey:own.publicKey,registry:runtime.kaji,health:()=>runtime.baseHealth(),onHealth:(id,h)=>runtime.notePeerHealth(id,h),channel:()=>runtime.channelState(),onChannel:(id,c)=>runtime.notePeerChannel(id,c),
+        if(config.kaji?.root){kaji=new KajiLink({trust:{root:config.kaji.root,required:config.kaji.rootBinding===true},worker:runtime.worker,baseId:config.base.id,key:own.privateKey,publicKey:own.publicKey,registry:runtime.kaji,health:()=>runtime.baseHealth(),onHealth:(id,h)=>runtime.notePeerHealth(id,h),channel:()=>runtime.channelState(),onChannel:(id,c)=>runtime.notePeerChannel(id,c),
           onRelay:async(from,relay)=>{if(!aoba)return false;const name=(await runtime.bases()).find(b=>b.baseId===from)?.name ?? from;return aoba.relayed(from,name,relay);},
           onPendingApprovals:ids=>runtime.pendingApprovalIds(ids),
           onDecide:async(approvalId,decision)=>decisionText(await runtime.decide(approvalId,decision,'telegram')),
