@@ -145,3 +145,8 @@ Authenticated ci:status confirms CI42608578429 passed plan, validate, Windows, n
 Reconciled main `d869d8c` using authenticated `npm run ci:status -- 244`: CI42724533046 passed plan, validate, windows and native-macos; full-suite skipped. Owner-selected F-005 then F-006 queue order is retained. This is scoped documentation evidence, not lifecycle/device acceptance; current full evidence remains PR242 CI42687439382.
 
 Prior ledger header context retained: PR242 diagnostic/schema/job-rule adoption T05 accepted; PR240 CI42635119338 established F-026 runtime acceptance. F-026 proactive runtime/quiet delivery accepted and archived; F-027 enforced egress awaits F-049. B-046 session-loss investigation remains open.
+
+
+## 2026-11-10 — PR #245
+
+Authenticated ci:status confirms CI42775093119 passed plan, validate, Windows, native-macos and full-suite at exactheada965a10; mergedmain77b22da. F-005-T01 review-only Unix lifecycle ownership/recovery contracts accepted and closed. The committed controller-path regression069d9b2 passes unchanged with the target-path renderer fix. Local full suite508 pass/2 skips plus stale-built-version failure; rebuilt dashboard30 pass unchanged. No service observation/execution or device acceptance follows. Owner selected isolated-profile enrollment testing; existing-default service work and remote targets remain deferred.
