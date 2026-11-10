@@ -53,7 +53,8 @@
     "gauntlet:qualify": "node tools/gauntlet.mjs qualify",
     "gauntlet:index": "node tools/gauntlet.mjs index",
     "check:gauntlet-index": "node tools/gauntlet.mjs index --check",
-    "work:usage": "node tools/work-usage.mjs"
+    "work:usage": "node tools/work-usage.mjs",
+    "work:launch": "node tools/usage-launch.mjs"
   },
   "dependencies": {
     "@angular/common": "22.2.4",

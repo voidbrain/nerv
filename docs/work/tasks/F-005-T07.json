@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "status": "planned",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "id": "F-005-T07",
+  "title": "Update experience: availability, status and opt-in automatic updates",
+  "goal": "Present consistent update information and controlled update policy across companion, dashboard and status reports",
+  "acceptance": [
+    "Show installed/running and available revisions/channel with compatibility, checked time and explicit unavailable/offline states on companion, dashboard and status report",
+    "Use one validated backend update contract across all surfaces; an available version is not an applied update",
+    "Offer reviewed manual updates through T06 admission/recovery and an explicit opt-in automatic update policy for selected supported channels/targets; preserve fencing, backups, ownership, interruption and pending-work checks",
+    "Automatic updates remain disabled unless configured and accepted; never silently downgrade schema or bypass unsupported compatibility/recovery; report failures and next recovery action"
+  ],
+  "dependsOn": [
+    "F-005-T06"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "web/**",
+    "native/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle"
+  ],
+  "validation": [
+    "Meaningful cross-boundary regressions and required final CI",
+    "Explicit selected-target acceptance where service, install or real device behavior is required; static/unit passes do not substitute"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never change an unowned installation, service, engine or uncertain physical effect without explicit reconciliation"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2–3 focused days",
+    "basis": "Initial estimate for availability contract, three surfaces and policy joins after safe upgrade execution. Artifact/channel discovery and actual compatibility may widen work.",
+    "reviewed": "2026-11-10"
+  }
+}

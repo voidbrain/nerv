@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-09T19:24:29.438Z",
-  "policy": "a2f50e1b7640b2d4f196aa45081c016f13db6f162a8397118991a3cc0b45c19e",
+  "reviewed": "2026-11-10T19:44:43.681Z",
+  "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
-    "AGENTS.md": "9b2622c18c96a0212f872232731c062c97814988344584b789325abe57dea384",
-    "docs/BACKLOG-RULES.md": "c984a5c68fdfdf5d7c854fc7578a8ee02c85b3de3dc1817623e6061600e90222",
+    "AGENTS.md": "3d76fc2a6f1b0ec739686eff74d01bd89437c793ed859b8e93f223dc5c52fe2d",
+    "docs/BACKLOG-RULES.md": "e3461291a0ceb6b483d60093ffb4e67c45799896b68bdbee0a8a19ec0ebdf287",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
     "docs/agents/areas.md": "0ff9805a7d720ee177505cef670e53169a6d640299762dfa86185be46fa8737c",
     "docs/agents/audit.md": "bc5de5707f9ec5c523e73602499312c373d6112ffc498d69bf68604522527992",
@@ -12,19 +12,20 @@
     "docs/agents/coverage-guide.md": "3d539eb8beedfa101a5e47d9973cdf85dce197436fab2ab096f760e12d208106",
     "docs/agents/maintenance.md": "5219a64e6e85ced3fa9d437fc0adb2674bfa2d566d86fe95cca1ef321d3b8b27",
     "docs/agents/mcp.md": "d813daeb38628e3f0613131ccb4e09fa1b98f82a1ad5cc647e9b27c26821a524",
-    "docs/agents/parallel-work.md": "1b5f50c8f3afd1a222871fd3b7a8e23f987eb83ec2bd4593af343fe70df0f892",
+    "docs/agents/parallel-work.md": "e6bdd99075598d2e33fb23373d87fd5b48ed1c86028a20dbad0b5759a62b2e13",
     "docs/agents/procedures.md": "649de48ddc9e3ae627d0752f44f4a8d2cf25b837dc32350a597f6d4bf80e514f",
     "docs/agents/skills.md": "5d60223eccfaad88c7153f57316da5ca10bfdd9d58d3a8cebc1eef25b9f0d5f5",
     "docs/agents/solution-profile.md": "857fc0e5f5c36d1d139d2507f1f97460edfdcde4d5cd5d590a922d88c4459862",
     "docs/agents/task-context.md": "c38395d5989a3fd7cfbf319bce53b24c17a1740822398f4376ecc2c3e95d531f",
-    "docs/agents/work-usage.md": "9f430c7fe6f1bfc7511ee3b777a17131b72e50c019a9439f7ba9d3e9dceb2dd2",
+    "docs/agents/work-usage.md": "4b179506a4d431b4e9559b3932ee0ef64020cbf7c27985178e0cb0f5c1f7c7d1",
     "tools/task-claims.mjs": "05d40141b354db19e958d1f191f9a2e1b75c46126527ce3aba67f7b902ba16d2",
-    "tools/work-items.mjs": "ac02388da462c72e60dbcbd86bc9b9af0dd63376689f75ce80901be789e6b4dd",
-    "tools/work-usage.mjs": "ed2f6c2032127301e323a1fa84d7ab80ebd880d8e01711e741370e2f3ee48dd4"
+    "tools/usage-launch.mjs": "ac8713a3e4c4359cfdda5b4b6eb5d18e957408fb77b85609853ba2cda5f4a4e0",
+    "tools/work-items.mjs": "f3175c3150286bf569fc108d86a3640a4bbfd30deda940ddbb9c27d8fabe56f4",
+    "tools/work-usage.mjs": "c09a6a4f7ad6d0b65565bf6847b0727967f7d921dba816b92446450c0c90ca36"
   },
   "measurements": {
     "samples": 1,
-    "latestAt": "2026-11-09T19:24:29.365Z",
+    "latestAt": "2026-11-10T19:44:43.549Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -54,7 +55,7 @@
         "durationMs": {
           "observed": 1,
           "missing": 0,
-          "median": 1136499
+          "median": 592079
         },
         "conflicts": {
           "observed": 0,
@@ -78,14 +79,14 @@
     {
       "kind": "rule",
       "disposition": "implemented",
-      "target": "AGENTS.md",
-      "evidence": "Adopt released harness4.4.1 optional development job rule, private canonical-metadata ledger and entry bridges. Preserve every NERV safety/privacy/ownership/permission/verification gate. Ten package/wrapper joins and independent copied/source parity review pass; no implementation blocker. A reviewer omitted available registration; recorded as an actual compliance gap, not tool unavailability. Native source adapters/host hooks remain upstreamF-048-T02; no universal telemetry or token measurement claimed. Behavior runner and host reset API unavailable/unconfigured; bounded continuation. Isolated timer covers adoption implementation, review and waits, excludes earlier upstream work; not a comparable adoption-only performance sample."
+      "target": "docs/BACKLOG-RULES.md",
+      "evidence": "Reconcile published4.7.0 optional upfront-plan policy and safety pointer, preserving NERV rules and all ownership/privacy/device acceptance safeguards. F005 initial plan records Safe upgrades, Update experience, engine-neutral multiple-instance prerequisites and existing remaining Windows/Linux/device outcomes. Global featurePlans is not enabled for unrelated NERV features. Dated initial snapshot is evidence; task files own later current effort/status. No runtime/service/install or model-engine operation performed."
     },
     {
-      "kind": "rule",
+      "kind": "tool",
       "disposition": "implemented",
-      "target": "docs/agents/areas.md",
-      "evidence": "Project-only factual clarification preserves ordinary-chat pilot advice and distinguishes the already accepted explicit watch planner binding. Existing gate/stage/isolation restrictions and F-045/F-049 incompleteness preserved; no runtime authority, UI, provider setting or model campaign changed. F-026 code acceptance remains PR240 full CI42635119338."
+      "target": "tools/work-items.mjs",
+      "evidence": "Copied published4.7.0 tools/guides byte-identically; upstream169 deterministic fixtures plus independent recheck accepted. Local work/backlog/rules/conventions/integration/roadmap checks pass with42 task files; PR254 CI42878276038 inspected and header reconciled. Actual token counters and behaviour runner unavailable. Scoped planner requests full final CI for workflow risk; local app suites not repeated for copied tooling/docs. Separate worktree protects running source. Timed reconcile includes cross-repository coordination and waits; not a comparable focused-work sample."
     }
   ]
 }

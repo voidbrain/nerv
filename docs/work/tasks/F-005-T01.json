@@ -47,5 +47,11 @@
   "escalation": [
     "Owner chooses the installation and pairing/service intent after reviewing the concrete contract; remote targets stay deferred",
     "No execution adapter may infer ownership from a filename, receipt or process ID alone"
-  ]
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Closed with existing dated acceptance; original per-step effort was not measured and is not reconstructed.",
+    "reviewed": "2026-11-10"
+  }
 }

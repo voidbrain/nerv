@@ -46,5 +46,11 @@
   "escalation": [
     "Stop for missing owner root signing/passphrase interaction or changed/colliding base identity/address",
     "User selected only isolated-profile enrollment testing; default-service lifecycle and remote targets remain deferred"
-  ]
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Closed with existing dated acceptance; original per-step effort was not measured and is not reconstructed.",
+    "reviewed": "2026-11-10"
+  }
 }

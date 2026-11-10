@@ -48,5 +48,11 @@
     "User authorized migration and key regeneration; do not ask that decision again",
     "New root passphrase requires owner local terminal; never replace encrypted root or pin live trust before reviewed migration/backup/runtime gates",
     "Remote-base access is not established; record that gate rather than claiming Tabgha migrated"
-  ]
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Closed with existing dated acceptance; original per-step effort was not measured and is not reconstructed.",
+    "reviewed": "2026-11-10"
+  }
 }

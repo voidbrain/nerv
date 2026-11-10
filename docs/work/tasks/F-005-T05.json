@@ -42,5 +42,11 @@
     "Owner already authorized migration and root regeneration; do not repeat that scope approval",
     "External backup location/evidence and controlled runtime quiescence remain required before effects",
     "Any changed identity/root/source/registry snapshot requires reconciliation; never clear tables, remove triggers or silently repin to bypass import refusal"
-  ]
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Closed with existing dated acceptance; original per-step effort was not measured and is not reconstructed.",
+    "reviewed": "2026-11-10"
+  }
 }

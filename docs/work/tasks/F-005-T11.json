@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "status": "planned",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "id": "F-005-T11",
+  "title": "Complete multi-device worker and lifecycle acceptance",
+  "goal": "Verify remaining F-005 outcomes on the agreed device matrix and reconcile parent closure",
+  "acceptance": [
+    "Record actual Mac/mini PC/Pi or agreed-equivalent enrollment, revocation, leases, fencing, cancellation, locks, reconnect and uncertain physical-result outcomes",
+    "Verify supported upgrades/prerequisites/update policy and platform lifecycle acceptance without repeating already accepted root/Mac evidence as if new",
+    "Retain failure/retry and unknown-device evidence; close the parent only after every agreed acceptance outcome passes or an owner-approved scope change is recorded"
+  ],
+  "dependsOn": [
+    "F-005-T06",
+    "F-005-T07",
+    "F-005-T08",
+    "F-005-T09",
+    "F-005-T10"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle"
+  ],
+  "validation": [
+    "Meaningful cross-boundary regressions and required final CI",
+    "Explicit selected-target acceptance where service, install or real device behavior is required; static/unit passes do not substitute"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never change an unowned installation, service, engine or uncertain physical effect without explicit reconciliation"
+  ],
+  "effort": {
+    "size": "large",
+    "estimate": "4 or more focused days",
+    "basis": "Initial acceptance estimate includes device access, recovery/failure cases and evidence. Available target matrix may require an owner decision before execution.",
+    "reviewed": "2026-11-10"
+  }
+}

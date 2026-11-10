@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "status": "planned",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "id": "F-005-T09",
+  "title": "Windows service lifecycle execution and target acceptance",
+  "goal": "Implement the existing reviewed ownership/update/uninstall contracts for a selected Windows user installation",
+  "acceptance": [
+    "Implement validated install/status/start/stop/update/uninstall/recovery for supported Windows user services without changing unrelated tasks/installations",
+    "Preserve profile/source/root ownership, fencing, backups, interrupted operations and uncertain workers",
+    "Demonstrate selected Windows target lifecycle and reconnect, separating mocked fixtures from actual device evidence"
+  ],
+  "dependsOn": [
+    "F-005-T01"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle"
+  ],
+  "validation": [
+    "Meaningful cross-boundary regressions and required final CI",
+    "Explicit selected-target acceptance where service, install or real device behavior is required; static/unit passes do not substitute"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never change an unowned installation, service, engine or uncertain physical effect without explicit reconciliation"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2–3 focused days",
+    "basis": "Initial estimate reuses existing lifecycle contracts; Windows account/service behavior and target access remain uncertain.",
+    "reviewed": "2026-11-10"
+  }
+}
