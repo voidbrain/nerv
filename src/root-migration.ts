@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {createServer} from 'node:net';
 import {DatabaseSync} from 'node:sqlite';
 import {databasePath,readConfig} from './config.ts';
-import {canonical,Registry,REGISTRY_SCHEMA,ROOT_KEY_FILE,publicKeyFrom,verifyRecord,type SignedRecord} from './kaji.ts';
+import {canonical,Registry,REGISTRY_SCHEMA,ROOT_KEY_FILE,publicKeyFrom,keyIdentity,verifyRecord,type SignedRecord} from './kaji.ts';
 import {transaction} from './sqlite-transaction.ts';
 
 interface Bundle {root:string;records:SignedRecord[]}
@@ -39,9 +39,9 @@ function openDatabase(home:string,readOnly=true):DatabaseSync {
 }
 function bundleOf(value:unknown):Bundle {
  if(!object(value)||typeof value.root!=='string'||!Array.isArray(value.records)||!value.records.length||value.records.length>256)throw Error('Invalid public migration bundle.');
- if(publicKeyFrom(value.root).export({type:'spki',format:'der'}).toString('base64')!==value.root)throw Error('Migration root must use canonical public-key encoding.');const db=new DatabaseSync(':memory:');
+ if(keyIdentity(value.root)!==value.root)throw Error('Migration root must use canonical public-key encoding.');const db=new DatabaseSync(':memory:');
  try{db.exec(REGISTRY_SCHEMA);const registry=new Registry(db,value.root),serials=new Set<number>();
-  for(const raw of value.records){if(!object(raw)||!object(raw.body)||typeof raw.signature!=='string'||raw.signature.length>128)throw Error('Invalid migration record.');const r=raw as unknown as SignedRecord;if(serials.has(r.body.serial))throw Error('Migration serials must be unique.');serials.add(r.body.serial);registry.add(r);}
+  for(const raw of value.records){if(!object(raw)||!object(raw.body)||typeof raw.signature!=='string'||raw.signature.length>128)throw Error('Invalid migration record.');const r=raw as unknown as SignedRecord;if((r.body.kind==='enrol'||r.body.kind==='revoke'&&r.body.publicKey!==undefined)&&keyIdentity(r.body.publicKey!)!==r.body.publicKey)throw Error('Replacement base keys must use canonical public-key encoding.');if(serials.has(r.body.serial))throw Error('Migration serials must be unique.');serials.add(r.body.serial);registry.add(r);}
   const records=registry.records();if(records.length!==value.records.length)throw Error('Duplicate migration record.');return {root:value.root,records};
  }finally{db.close();}
 }
@@ -52,28 +52,28 @@ function idle(db:DatabaseSync):void {
 function validateMembership(db:DatabaseSync,root:string,bundle:Bundle,identity:string):void {
  const old=new Registry(db,root),temp=new DatabaseSync(':memory:');
  try{temp.exec(REGISTRY_SCHEMA);const next=new Registry(temp,bundle.root);for(const record of bundle.records)next.add(record);
-  const bases=next.bases();if(!bases.some(b=>b.publicKey===identity&&b.status==='enrolled'))throw Error('Replacement registry does not enroll this base.');
-  for(const b of old.bases())if(b.status==='enrolled'&&!bases.some(n=>n.status==='enrolled'&&n.baseId===b.baseId&&n.publicKey===b.publicKey&&n.address===b.address&&n.name===b.name)||b.status==='revoked'&&bases.some(n=>n.status==='enrolled'&&n.publicKey===b.publicKey))throw Error('Migration must retain enrolled identities and cannot resurrect revoked keys.');
+  const bases=next.bases();if(!bases.some(b=>keyIdentity(b.publicKey)===keyIdentity(identity)&&b.status==='enrolled'))throw Error('Replacement registry does not enroll this base.');
+  for(const b of old.bases())if(b.status==='enrolled'&&!bases.some(n=>n.status==='enrolled'&&n.baseId===b.baseId&&keyIdentity(n.publicKey)===keyIdentity(b.publicKey)&&n.address===b.address&&n.name===b.name)||b.status==='revoked'&&bases.some(n=>n.status==='enrolled'&&keyIdentity(n.publicKey)===keyIdentity(b.publicKey)))throw Error('Migration must retain enrolled identities and cannot resurrect revoked keys.');
   const tagged=!!db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='registry_roots'").get();
   const history=tagged?(db.prepare('SELECT r.body,r.signature,g.root FROM registry r LEFT JOIN registry_roots g ON g.id=r.id').all() as {body:string;signature:string;root:string|null}[]).map(r=>({root:r.root??root,record:{body:JSON.parse(r.body),signature:r.signature} as SignedRecord})):old.records().map(record=>({root,record}));
   const revokedKeys=new Set<string>(),wildcards=new Set<string>(),currentWildcardIds=new Set<string>();
-  for(const item of history){if(!verifyRecord(item.root,item.record))throw Error('Historical root binding/signature is invalid.');const b=item.record.body;if(b.kind==='revoke'){if(b.publicKey)revokedKeys.add(b.publicKey);else{wildcards.add(item.root+'\n'+b.baseId);if(item.root===root)currentWildcardIds.add(b.baseId);}}}
-  for(const {root:authority,record:{body:b}} of history)if(b.kind==='enrol'&&wildcards.has(authority+'\n'+b.baseId))revokedKeys.add(b.publicKey!);
-  if(bases.some(b=>b.status==='enrolled'&&(revokedKeys.has(b.publicKey)||currentWildcardIds.has(b.baseId))))throw Error('Migration cannot resurrect a historically revoked key or wildcard-revoked base.');
+  for(const item of history){if(!verifyRecord(item.root,item.record))throw Error('Historical root binding/signature is invalid.');const b=item.record.body;if(b.kind==='revoke'){if(b.publicKey)revokedKeys.add(keyIdentity(b.publicKey));else{wildcards.add(keyIdentity(item.root)+'\n'+b.baseId);if(keyIdentity(item.root)===keyIdentity(root))currentWildcardIds.add(b.baseId);}}}
+  for(const {root:authority,record:{body:b}} of history)if(b.kind==='enrol'&&wildcards.has(keyIdentity(authority)+'\n'+b.baseId))revokedKeys.add(keyIdentity(b.publicKey!));
+  if(bases.some(b=>b.status==='enrolled'&&(revokedKeys.has(keyIdentity(b.publicKey))||currentWildcardIds.has(b.baseId))))throw Error('Migration cannot resurrect a historically revoked key or wildcard-revoked base.');
   if(old.main()!==next.main())throw Error('Migration must retain the selected main base.');
  }finally{temp.close();}
 }
 export function planRootMigration(home:string,value:unknown,newKeyPath?:string):RootPlan {
  home=checkHome(home);const configBytes=readFile(join(home,'config.json'),65536,true),config=readConfig(home),oldRoot=config.kaji?.root;
  if(!oldRoot)throw Error('Existing-root migration needs an already pinned root.');publicKeyFrom(oldRoot);
- const bundle=bundleOf(value);if(bundle.root===oldRoot)throw Error('Select a different replacement root.');
+ const bundle=bundleOf(value);if(keyIdentity(bundle.root)===keyIdentity(oldRoot))throw Error('Select a different replacement root.');
  const identity=readFile(join(home,'base.pub'),256).toString('utf8').trim();publicKeyFrom(identity);
  const oldKey=join(home,ROOT_KEY_FILE),oldKeyHash=existsSync(oldKey)?hash(readFile(oldKey,65536,true)):null;
  let newKeyHash:string|null=null;const keyPath=newKeyPath?resolve(newKeyPath):null;
  if(oldKeyHash&&!keyPath||keyPath&&!oldKeyHash)throw Error('Only the existing root-holder supplies a replacement encrypted key.');
  if(keyPath){const bytes=readFile(keyPath,65536,true);let key:unknown;try{key=JSON.parse(bytes.toString('utf8'));}catch{throw Error('Invalid replacement encrypted key.');}if(!object(key)||key.version!==1||key.kdf!=='scrypt'||key.publicKey!==bundle.root||key.n!==32768||!['salt','iv','tag','secret'].every((field,i)=>typeof key[field]==='string'&&/^[A-Za-z0-9+/]+={0,2}$/.test(key[field] as string)&&Buffer.from(key[field] as string,'base64').length===[16,12,16,48][i]&&Buffer.from(key[field] as string,'base64').toString('base64')===key[field]))throw Error('Replacement encrypted key does not match the signed bundle.');newKeyHash=hash(bytes);}
  const db=openDatabase(home);let registryHash:string;
- try{idle(db);if(db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='root_migration_resource'").get()&&db.prepare('SELECT 1 FROM root_migration_resource').get())throw Error('A migration resource is held; inspect its receipt.');if(db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='registry_roots'").get()&&db.prepare('SELECT 1 FROM registry_roots WHERE root=? LIMIT 1').get(bundle.root))throw Error('Replacement root must be fresh; historical root reuse is not supported.');validateMembership(db,oldRoot,bundle,identity);registryHash=hash(canonical(new Registry(db,oldRoot).records()));}finally{db.close();}
+ try{idle(db);if(db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='root_migration_resource'").get()&&db.prepare('SELECT 1 FROM root_migration_resource').get())throw Error('A migration resource is held; inspect its receipt.');if(db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='registry_roots'").get()&&(db.prepare('SELECT DISTINCT root FROM registry_roots').all() as {root:string}[]).some(r=>keyIdentity(r.root)===keyIdentity(bundle.root)))throw Error('Replacement root must be fresh; historical root reuse is not supported.');validateMembership(db,oldRoot,bundle,identity);registryHash=hash(canonical(new Registry(db,oldRoot).records()));}finally{db.close();}
  const body={version:1 as const,kind:'root-migration' as const,home,oldRoot,bundle,configHash:hash(configBytes),registryHash,oldKeyHash,newKeyPath:keyPath,newKeyHash,identity,port:config.port,handlerHash:handlerHash()};return {...body,digest:hash(canonical(body))};
 }
 function planOf(value:unknown):RootPlan {

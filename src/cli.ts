@@ -14,7 +14,7 @@ import { McpClient, fingerprint as toolFingerprint, grantRefusal, toolName, type
 import { TelegramApi, TelegramChannel, decisionText, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
 import { composeBrief, gatherBrief } from './brief.ts';
 import { KajiLink } from './kaji-link.ts';
-import { ROOT_KEY_FILE, Registry, baseKey, createRootKey, enrolmentArgs, fingerprint, signRecord, unlockRootKey, type SignedRecord } from './kaji.ts';
+import { ROOT_KEY_FILE, keyIdentity, Registry, baseKey, createRootKey, enrolmentArgs, fingerprint, signRecord, unlockRootKey, type SignedRecord } from './kaji.ts';
 import { service } from './service.ts';
 import {initializeNativeTLS,loadNativeTLS,nativeAdmin,NativeAuth,type Invitation} from './native-auth.ts';
 import { Runtime, type ChatReply } from './runtime.ts';
@@ -279,7 +279,7 @@ try {
       case 'key':{
         // key init [--out PATH]: creates the Key of Nebuchadnezzar on the owner's main base and pins its public half here.
         if(args[0]!=='init')throw new Error('Usage: key init [--out PATH]');
-        if(config.kaji?.root)throw new Error('A root is already pinned; use root-migration rather than key init to replace it.');
+        if(config.kaji?.root)throw new Error('A root is already pinned and is never overwritten; use root-migration rather than key init to replace it.');
         const out=flag('--out') ?? join(home,ROOT_KEY_FILE);if(existsSync(out))throw new Error(`A key file already exists at ${out}; it is never overwritten.`);
         const pass=await readSecret('New passphrase for the Key of Nebuchadnezzar (12+ characters): ');
         if(!args.includes('--passphrase-stdin')&&pass!==await readSecret('Repeat it: '))throw new Error('The two passphrases differ.');
@@ -305,7 +305,7 @@ try {
         const registry=new Registry(local().db,config.kaji?.root);const me=baseKey(home).publicKey;const [sub]=args;
         const unlock=async()=>{const path=flag('--key') ?? join(home,ROOT_KEY_FILE);if(!existsSync(path))throw new Error(`No key file at ${path}: enrol on the base that holds the Key, or pass --key PATH.`);
           const root=unlockRootKey(readFileSync(path,'utf8'),await readSecret('Passphrase for the Key of Nebuchadnezzar: '));
-          if(config.kaji?.root&&root.publicKey!==config.kaji.root)throw new Error('This key file does not match the root pinned on this base.');return root;};
+          if(config.kaji?.root&&keyIdentity(root.publicKey)!==keyIdentity(config.kaji.root))throw new Error('This key file does not match the root pinned on this base.');return root;};
         if(sub==='enrol'){
           // Every argument is checked before the passphrase is asked for.
           const e=enrolmentArgs(args[1],args[2],args[3],args[4],me);
@@ -361,7 +361,7 @@ try {
             if(fingerprint(bundle.root)!==given)throw new Error(`The root fingerprint does not match the one this file was signed with. Check ${where}; if they really differ, the file is not from your Key: do not import it.`);
             pinKajiRoot(home,bundle.root,bundle.rootBinding===1);
           }
-          else if(bundle.root!==config.kaji.root)throw new Error('This file is signed by a different root than the one pinned here.');
+          else if(keyIdentity(bundle.root)!==keyIdentity(config.kaji.root))throw new Error('This file is signed by a different root than the one pinned here.');
           else if(bundle.rootBinding===1&&!config.kaji.rootBinding)pinKajiRoot(home,bundle.root,true);
           const reg=new Registry(local().db,bundle.root);let added=0;for(const r of bundle.records)if(reg.add(r)==='added')added++;
           console.log(`Imported ${added} new record(s); ${reg.bases().filter(b=>b.status==='enrolled').length} base(s) enrolled.`);

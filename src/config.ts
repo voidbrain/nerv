@@ -1,3 +1,4 @@
+import {keyIdentity} from './kaji.ts';
 import {validateWatch,type WatchConfig} from './watch.ts';
 import { validatePilots, type Pilot } from './pilots.ts';
 import { validateTools, type ToolsConfig } from './mcp.ts';
@@ -52,6 +53,7 @@ export function readConfig(home:string):Config {
     if(k.offers!==undefined&&(!Array.isArray(k.offers)||k.offers.length>20||k.offers.some(o=>typeof o!=='string'||!/^[a-z]+\.[a-z]+$/.test(o))))throw new Error('Invalid kaji.offers: a list of action names such as "reminders.add" (set with kaji offer).');
     // F-036 phase 2: how the other bases' Casper votes on this base's actions; a base not listed is a shadow seat.
     if(k.seats!==undefined&&(!k.seats||typeof k.seats!=='object'||Array.isArray(k.seats)||Object.entries(k.seats).some(([id,m])=>!/^[A-Z0-9-]{2,16}$/.test(id)||!['shadow','veto','off'].includes(m as string))))throw new Error('Invalid kaji.seats: {"BASE-ID": "shadow" | "veto" | "off"} (set with kaji seat).');
+    if(k.rootBinding===true&&keyIdentity(k.root)!==k.root)throw new Error('Root-bound trust requires canonical root encoding.');
     if(k.rootBinding!==undefined&&k.rootBinding!==true)throw new Error('Invalid kaji.rootBinding: migrated trust requires true.');
     config.kaji={root:k.root,...(k.rootBinding===true?{rootBinding:true as const}:{}),...(Array.isArray(k.offers)&&k.offers.length?{offers:[...new Set(k.offers as string[])]}:{}),...(k.seats&&Object.keys(k.seats).length?{seats:k.seats as Record<string,'shadow'|'veto'|'off'>}:{})};}
   if('brief' in raw){const b=raw.brief as Record<string,unknown>;if(!b||typeof b!=='object'||Array.isArray(b)||Object.keys(b).some(k=>k!=='at')||typeof b.at!=='string'||!/^([01]\d|2[0-3]):[0-5]\d$/.test(b.at))throw new Error('Invalid brief: {"at": "HH:MM"} in your time zone.');config.brief={at:b.at};}
@@ -112,7 +114,7 @@ export function setBase(home:string,base:Base):Base {
 /** Pins the owner's root public key on this base: every registry record must verify against it. */
 export function pinKajiRoot(home:string,root:string,rootBinding=false):void {
   const path=join(home,'config.json');const current=existsSync(path)?JSON.parse(readFileSync(path,'utf8')) as Record<string,unknown>:{...defaults};
-  const previous=current.kaji as Record<string,unknown>|undefined;if(previous?.root&&previous.root!==root)throw new Error('Existing root cannot be repinned; use the reviewed root-migration workflow.');
+  const previous=current.kaji as Record<string,unknown>|undefined;if(previous?.root&&keyIdentity(String(previous.root))!==keyIdentity(root))throw new Error('Existing root cannot be repinned; use the reviewed root-migration workflow.');
   writeFileSync(path,JSON.stringify({...current,kaji:{...(current.kaji as object|undefined),root,...(rootBinding?{rootBinding:true}:{})}},null,2)+'\n',{mode:0o600});chmodSync(path,0o600);readConfig(home);
 }
 /** The actions this base offers to the main base (F-036 slice 3b); an empty list offers nothing. */

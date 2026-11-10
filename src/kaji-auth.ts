@@ -1,5 +1,5 @@
 import {createHash,randomBytes,sign,verify,type KeyObject} from 'node:crypto';
-import {publicKeyFrom,type BaseEntry} from './kaji.ts';
+import {publicKeyFrom,keyIdentity,type BaseEntry} from './kaji.ts';
 export const KAJI_CLOCK_SKEW_MS=120_000;
 const NONCE_MS=10*60_000;
 const digest=(body:string)=>createHash('sha256').update(body).digest('base64');
@@ -20,7 +20,8 @@ export function verifySigned(headers:Record<string,string|undefined>,kind:'req'|
  const id=headers['x-kaji-base'],time=headers['x-kaji-time'],nonce=headers['x-kaji-nonce'],signature=headers['x-kaji-signature'];
  if(typeof id!=='string'||typeof time!=='string'||typeof nonce!=='string'||typeof signature!=='string'||!id||!time||!nonce||!signature)throw new Error('unsigned');
  const root=headers['x-kaji-root'];if(root!==undefined&&(typeof root!=='string'||!/^([A-Za-z0-9+/=]{40,120})$/.test(root)))throw new Error('invalid root generation');
- if(trust&&(root!==undefined&&root!==trust.root||root===undefined&&trust.required))throw new Error('root generation mismatch or required binding missing');
+ if(root!==undefined&&keyIdentity(root)!==root)throw new Error('noncanonical root generation');
+ if(trust&&(root!==undefined&&keyIdentity(root)!==keyIdentity(trust.root)||root===undefined&&trust.required))throw new Error('root generation mismatch or required binding missing');
  const base=bases.find(b=>b.baseId===id);if(!base||base.status!=='enrolled')throw new Error('unknown or revoked base');
  if(!Number.isFinite(Date.parse(time))||Math.abs(now-Date.parse(time))>KAJI_CLOCK_SKEW_MS)throw new Error('stale or future time');
  if(!/^[a-f0-9]{32}$/.test(nonce))throw new Error('replayed');
