@@ -150,3 +150,8 @@ Prior ledger header context retained: PR242 diagnostic/schema/job-rule adoption 
 ## 2026-11-10 — PR #245
 
 Authenticated ci:status confirms CI42775093119 passed plan, validate, Windows, native-macos and full-suite at exactheada965a10; mergedmain77b22da. F-005-T01 review-only Unix lifecycle ownership/recovery contracts accepted and closed. The committed controller-path regression069d9b2 passes unchanged with the target-path renderer fix. Local full suite508 pass/2 skips plus stale-built-version failure; rebuilt dashboard30 pass unchanged. No service observation/execution or device acceptance follows. Owner selected isolated-profile enrollment testing; existing-default service work and remote targets remain deferred.
+
+
+## 2026-11-10 — PR #246
+
+Authenticated ci:status confirms CI42776413148 passed scoped plan/validate/windows/native-macos; full-suite skipped. Mergedmain8d1cf09 retains PR245/fullCI42775093119 as the deterministic baseline. Isolated-profile enrollment preparation is recorded, not completed enrollment. Subsequent owner terminal unlock failed before signing; read-only reconciliation confirms no registry enrollment or target-root/database change. Root-passphrase/payload validity remains unresolved; never reset trust to bypass it.
