@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-005-T02",
+  "parent": "F-005",
+  "title": "Prepare and verify isolated local profile enrollment",
+  "goal": "Use the retained files-only Mac profile for owner-selected enrollment testing without service changes or remote targets",
+  "status": "implemented",
+  "acceptance": [
+    "Recheck completed bootstrap receipt, unchanged public identity and isolated profile source/configuration",
+    "Prepare exact local coordinator signing and public-registry import steps; owner types the existing root passphrase in a terminal, never chat, argv or environment",
+    "Check signed registry and target import before claiming enrollment; record unavailable checks and retain pending worker/service/device acceptance",
+    "Never start an additional OS service, mutate existing service definitions, auto-create a root or contact a remote target"
+  ],
+  "dependsOn": [
+    "F-005-T01"
+  ],
+  "resources": [
+    "docs/work/tasks/F-005-T01.json",
+    "docs/work/tasks/F-005-T02.json",
+    "docs/work/records/F-005.md",
+    "docs/work/layout.json",
+    "docs/archive/reconciliation-2026.md",
+    "docs/acceptance/node-enrollment-2026-11-10.md",
+    "docs/acceptance/README.md",
+    "docs/reviews/README.md",
+    "generated:backlog-views",
+    "contract:local-isolated-enrollment"
+  ],
+  "capabilities": [
+    "structured-tools",
+    "evidence-review",
+    "privacy-review"
+  ],
+  "privacy": "Machine paths, host identities, public registry bundles and handoff scripts remain private outside git; no private key/passphrase/token is copied into the chat or repository. No remote target.",
+  "validation": [
+    "Read-only receipt and public-identity/source checks on retained local profile",
+    "Reviewed private terminal handoff; verify signed root/registry before isolated import",
+    "Documentation and source-owned ledger consistency checks; runtime enrollment only after owner signing",
+    "2026-11-10 actual local read-only receipt/public-key/clean-source/root/registry checks pass. Private handoff syntax and review pass; non-terminal signing refuses with unchanged profile config and coordinator record count. Signing/import not run; owner local terminal/passphrase interaction required."
+  ],
+  "escalation": [
+    "Stop for missing owner root signing/passphrase interaction or changed/colliding base identity/address",
+    "User selected only isolated-profile enrollment testing; default-service lifecycle and remote targets remain deferred"
+  ]
+}

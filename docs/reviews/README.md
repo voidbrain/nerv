@@ -2,6 +2,8 @@
 
 NERV evidence snapshot reviewed 8 November 2026 against main `2943aad`. Times below use Europe/Rome; dates come from recorded review/run metadata, not file modification time. This register links evidence and existing rerun conditions; it does not install a schedule, run checks or certify an assessment. Refresh the affected rows when new evidence or policy changes.
 
+[Isolated enrollment preparation, 2026-11-10](../acceptance/node-enrollment-2026-11-10.md): F-005 receipt/public-key/source/registry checks and private terminal handoff reviewed. Next: owner terminal signing, then verify isolated import; no enrollment, service or worker acceptance claimed.
+
 ## Current review windows
 
 | Review | Last actual evidence | Next run / trigger | Owner and limits |
