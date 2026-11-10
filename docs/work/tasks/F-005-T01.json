@@ -39,7 +39,8 @@
     "Typed contract and cross-boundary renderer/ownership/recovery regression tests",
     "Applicable fast checks, planner and required final CI",
     "Review contract assumptions and explicitly retain real-device/OS/session acceptance limits",
-    "2026-11-10: 35 focused lifecycle/bootstrap/runtime tests pass, one platform skip; five lifecycle contract/CLI tests cover actual renderer, ownership and recovery joins. Typecheck/conventions and fast checks pass. Final CI pending; no service/device acceptance claimed."
+    "2026-11-10: 35 focused lifecycle/bootstrap/runtime tests pass, one platform skip; five lifecycle contract/CLI tests cover actual renderer, ownership and recovery joins. Typecheck/conventions and fast checks pass. Final CI pending; no service/device acceptance claimed.",
+    "Committed069d9b2 reproduces controller-path mismatch before renderer fix; unchanged test passes after target-specific join selection. Six lifecycle tests pass; build and headless4 pass/1 Windows skip; full CI required for unmapped paths."
   ],
   "escalation": [
     "Owner chooses the installation and pairing/service intent after reviewing the concrete contract; remote targets stay deferred",
