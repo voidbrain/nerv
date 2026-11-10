@@ -170,3 +170,8 @@ Authenticated ci:status confirms CI42778028106 passed scoped plan/validate/windo
 ## 2026-11-10 — PR #249
 
 Authenticated ci:status confirms CI42779886527 passed scoped plan/validate/windows/native-macos; full-suite skipped. Mergedmain48a8b69 records replacement-root preparation. Owner-generated stage is now verified and selected Tabgha read-only SSH/public-trust checks pass; existing absolute Node24.22.2 used, no install/service/trust writes. T03 preparation complete; T05 owns activation/history/backup/recovery and T04 owns owner-selected Mac default-profile service execution. No live migration or service effect is claimed. Full baseline remains PR245 CI42775093119.
+
+
+## 2026-11-10 — PR #250
+
+Authenticated ci:status confirms CI42786283211 passed scoped plan/validate/windows/native-macos; full-suite skipped. Mergedmaine846279 accepts staged-root and selected-host read-only evidence and T03 preparation. Owner explicitly said proceed with both activation and Mac default-profile service work, and confirmed independent encrypted-root backup. T05 candidate activation code and T04 service execution remain separately verified outcomes; no live activation/service effect follows from the documentation merge. Full baseline remains PR245 CI42775093119.

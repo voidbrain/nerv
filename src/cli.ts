@@ -1,4 +1,5 @@
 #!/usr/bin/env -S node --use-system-ca
+import {assertRootMigrationReady,rootMigrationCommand} from './root-migration.ts';
 import {nodesCommand} from './nodes-cli.ts';
 import {runtimeBom} from './bom.ts';
 import { spawnSync } from 'node:child_process';
@@ -59,7 +60,9 @@ async function openPage(home:string,page:'/'|'/dashboard/',print:boolean) {
 let store:Store|undefined;let running=false;
 try {
   const home=dataHome();
-  if(command==='nodes'){const result=await nodesCommand(args);console.log(JSON.stringify(result,null,2));if(result&&typeof result==='object'&&'state' in result&&!['completed','released','absent'].includes(String(result.state)))process.exitCode=1;}
+  if(!['root-migration','nodes','help'].includes(command??'help'))assertRootMigrationReady(home);
+  if(command==='root-migration'){console.log(JSON.stringify(await rootMigrationCommand(home,args),null,2));}
+  else if(command==='nodes'){const result=await nodesCommand(args);console.log(JSON.stringify(result,null,2));if(result&&typeof result==='object'&&'state' in result&&!['completed','released','absent'].includes(String(result.state)))process.exitCode=1;}
   else if(command==='init'){initialize(home,baseFlags(args),args.includes('--fresh'));const b=readConfig(home).base;console.log(`NERV Agency configured: ${home} · base ${b.id} · ${b.name}\nAccess token: ${join(home,'token')}`);console.log(args.includes('--no-model-setup')?'Automatic model setup skipped; model routes were left unchanged.':await setupAtInit(home,readConfig(home).models,setting('OLLAMA') ?? OLLAMA_URL));}
   else if(command==='native-init'){initialize(home);initializeNativeTLS(home);console.log('Native TLS configured. Restart NERV Agency, then run pair.');}
   else if(['pair','clients','revoke'].includes(command ?? '')){const config=readConfig(home);const path=command==='pair'?'/api/pairing/tickets':command==='clients'?'/api/clients':'/api/clients/'+encodeURIComponent(args[0] ?? '');const value=await nativeAdmin(home,config.nativePort ?? 4319,readToken(home),path,command==='pair'?'POST':command==='revoke'?'DELETE':'GET',command==='pair'?{label:args[0] ?? 'NERV Agency Menu Bar'}:undefined);if(command==='pair'){const invitation=value as Invitation;console.log('Private invitation (expires in 2 minutes; paste only into the NERV Agency companion):\n'+Buffer.from(JSON.stringify(invitation)).toString('base64url'));}else console.log(JSON.stringify(value,null,2));}
@@ -247,7 +250,7 @@ try {
     if(!response.ok)throw new Error(value.error ?? 'Ask failed.');
     console.log(value.text+(value.truncated?'\n[reply truncated]':'')+`\n— ${value.route} · ${value.model}`);
   }
-  else if(!command||command==='help')console.log('NERV Agency\nCommands: init [--base ID --name "Name"] [--no-model-setup] [--fresh] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | nodes discover|inspect|plan|apply|status|release | workers pending|history|held|result|cancel|cancel-outbox|release|retry-outbox|abandon-outbox | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | bom | models [set misato| pilots [generic|add|set|pin|unpin|retire|restore] | tools [add|remove|grant|revoke] |casper MODEL | cloud on|off | key] | ask [--cloud] "text" | open [dashboard] | sessions revoke | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
+  else if(!command||command==='help')console.log('NERV Agency\nCommands: root-migration plan|apply|status | init [--base ID --name "Name"] [--no-model-setup] [--fresh] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | nodes discover|inspect|plan|apply|status|release | workers pending|history|held|result|cancel|cancel-outbox|release|retry-outbox|abandon-outbox | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | bom | models [set misato| pilots [generic|add|set|pin|unpin|retire|restore] | tools [add|remove|grant|revoke] |casper MODEL | cloud on|off | key] | ask [--cloud] "text" | open [dashboard] | sessions revoke | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall');
   else {
     const config=readConfig(home);
     const scrolls=readScrolls(home);

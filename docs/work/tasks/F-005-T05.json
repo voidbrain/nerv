@@ -1,7 +1,7 @@
 {
   "version": 1,
   "parent": "F-005",
-  "status": "ready",
+  "status": "implemented",
   "capabilities": [
     "bounded-edit",
     "structured-tools",
@@ -33,7 +33,8 @@
   ],
   "validation": [
     "Neutral old/new trust isolation, immutable history, crash points, concurrent/stale ownership, replay/rollback and full directed security joins",
-    "Final required CI and explicit actual Mac/Windows migration evidence; do not infer activation from stage completion or successful read-only checks"
+    "Final required CI and explicit actual Mac/Windows migration evidence; do not infer activation from stage completion or successful read-only checks",
+    "Candidate implementation: immutable root bindings and generation-scoped seen state, schema6 old-reader fencing, digest/backup/quiescence checks, private consistent backups, monotonic fenced journal, startup guard and explicit forward recovery. 14 activation tests plus existing Kaji/isolation/worker joins pass; full local Node suite523 pass/2 skip and build/typecheck/conventions pass before final small validation refinements. Final CI and actual deployment/activation pending. Owner confirms independent encrypted-root backup; no passphrase collected."
   ],
   "escalation": [
     "Owner already authorized migration and root regeneration; do not repeat that scope approval",

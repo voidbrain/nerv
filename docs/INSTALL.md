@@ -92,7 +92,7 @@ Stop the service, update the checkout, run `npm ci` and `npm run build`, then st
 
 Database schema 2 adds the action ledger tables to `nerv.sqlite` on first start; reminders are kept. The upgrade is one-way: an older checkout refuses a schema-2 database with "Database schema is newer", so back up `nerv.sqlite` before updating if you may roll back. Schema 3 adds the event schema version to each ledger event (earlier events read as version 1); a schema-2 checkout refuses it the same way. Schema 4 adds Lilith's facts, their history and a full-text index; older checkouts refuse it likewise.
 
-The backend remains bound to loopback. Remote TLS/Tailscale deployment, service auto-update and credential rotation are not implemented. Do not expose the development server publicly.
+The backend remains bound to loopback. Remote TLS/Tailscale deployment, service auto-update and administrative/provider credential rotation are not implemented. Explicit offline Kaji root migration is described below. Do not expose the development server publicly.
 
 ## Model routes
 
@@ -335,3 +335,30 @@ Planning uses the configured local route without cloud fallback. An optional `"p
 Watch outcomes and remote follow-ups are durable Hyuga inbox briefs with their own identities. They do not advance daily-brief checkpoints or become owner-stated memory. `watch.quietHours` defers new watch briefs and approval notifications/cards, including resumed/remote follow-ups; existing inbox entries and due reminders remain available. The start is inclusive, the end exclusive, and crossing midnight is supported. Pending approvals remain inspectable while quiet; expiry and owner decisions retain their existing meaning. Physical phone/banner receipt is not inferred from inbox or OS acceptance.
 
 A process lost during planning is recorded as interrupted and is not automatically retried in that slot. Work durably waiting for an owner decision can resume with its remaining budget. A model clarification ends that attempt with a request to refine the configured watch request; it does not open a pending chat question. Stopping/removing a watch does not undo an already executed effect or prove an in-flight remote operation stopped; inspect its ledger and remote receipt before requesting new work. `watch` settings cannot be created or relaxed through a model tool.
+
+
+## Explicit Kaji root migration
+
+Use the tested `root-migration` command on each selected existing base after reviewing the exact replacement public registry and its independently verified new root fingerprint. Upgrade both bases to the root-generation-aware reader **before** activation. Keep both runtimes/descendants stopped until both roots and registries are verified. Never clear the registry, remove its triggers or edit only the pinned root.
+
+```bash
+# Root holder only: keep its new encrypted key local.
+nerv root-migration plan --bundle replacement-public-registry.json --new-key /PRIVATE/PATH/replacement.enc --out activation.json
+# A peer omits --new-key. Transfer only the signed public registry to it.
+nerv root-migration apply --plan activation.json --confirm EXACT_DIGEST --confirmed-stopped --backup-confirmed
+nerv root-migration status --digest EXACT_DIGEST
+```
+
+Planning is read-only. Apply requires actual confirmation that the selected runtime and descendants stopped, an independent offline copy of the encrypted new root and safe retention of its passphrase. It refuses a bound configured runtime port, pending/uncertain workers/outboxes, mismatched source handler/plan/config/key/registry or changed profile identity. A private consistent SQLite/config/old-encrypted-key backup is made and verified before activation. The peer receives no encrypted/private root material. Base private keys, business data and old signed records remain intact.
+
+Activation writes database schema6 only for a migrating base; normal non-migrated stores remain schema5. Older schema5 binaries refuse a migrated database. Immutable per-record root bindings preserve old history while the active reader selects and verifies only its pinned generation. Peer last-seen timestamps are generation-scoped. No automatic database downgrade or rollback is performed.
+
+A disconnect/crash/failure retains its operation lock and blocks normal CLI/runtime startup. Repeating a digest returns its receipt, not effects. Inspect the receipt and partial state. After **observing** the old handler and descendants stopped, recover explicitly with the same plan:
+
+```bash
+nerv root-migration apply --plan activation.json --confirm EXACT_DIGEST --confirmed-stopped --backup-confirmed --resume --reason "Verified old handler/descendants stopped and inspected the partial state"
+```
+
+Recovery compares digest/fence/nonce/PID, takes a new monotonic fence, checks the retained backup and repeats only bounded idempotent forward steps. A live handler, changed file, corrupt backup or stale owner is refused. An uncertain backup/artifact that cannot be validated needs manual reconciliation; do not delete it or force past the lock. Completed receipts describe that operation, not later live connectivity. SQLite/full-file syncing and atomic replacement are used; Windows does not expose the POSIX directory-sync primitive, so physical power-loss durability is not asserted beyond filesystem guarantees.
+
+Restore/downgrade requires a separately reviewed consistent-data procedure (F-062); restoring the backup's held migration resource does not establish that old effects/descendants stopped. See [root-migration decisions and acceptance](decisions/node-root-migration.md). Normal `key init` overwrite and different-root `kaji import` refusals remain intact.
