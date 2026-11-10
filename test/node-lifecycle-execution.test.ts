@@ -1,10 +1,11 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync,writeFileSync,existsSync,lstatSync,symlinkSync} from 'node:fs';
+import {readFileSync,writeFileSync,existsSync,lstatSync,symlinkSync,chmodSync} from 'node:fs';
 import {join} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {DatabaseSync} from 'node:sqlite';
-import {createHash} from 'node:crypto';
+import {createHash,generateKeyPairSync} from 'node:crypto';
+import * as lifecycle from '../src/node-lifecycle-execution.ts';
 import {serviceFixture} from './mac-service-fixture.ts';
 import {planService,applyService,serviceReceipt,releaseService,macServiceHost,type ServiceReceipt} from '../src/node-lifecycle-execution.ts';
 import {canonical} from '../src/kaji.ts';
@@ -49,3 +50,21 @@ test('clock rollback and symlinked journal never initialize replacement fencing 
  const g=serviceFixture();try{symlinkSync(join(g.directory,'missing'),join(g.directory,'.nerv-lifecycle'));await assert.rejects(planService(g.host,'install'));assert.equal(lstatSync(join(g.directory,'.nerv-lifecycle')).isSymbolicLink(),true);}finally{g.close();}
 });
 test('production adapter refuses additional profiles and unsupported/root hosts without installing anything',()=>{assert.throws(()=>macServiceHost('/neutral/additional-profile'),/additional|unprivileged/);});
+test('review regression: retained lifecycle uncertainty blocks ordinary startup, including the real CLI front door',supported,async()=>{
+ const f=serviceFixture();try{const p=await planService(f.host,'install');f.setBeforeCommand(()=>{throw Error('Neutral interrupted service start');});await assert.rejects(applyService(f.host,p,p.digest));
+  const guard=Reflect.get(lifecycle,'assertServiceStartup') as ((host:typeof f.host,managed?:boolean)=>Promise<void>)|undefined;
+  assert.equal(typeof guard,'function','normal startup needs the durable lifecycle guard');await assert.rejects(guard!(f.host),/lifecycle|unresolved/i);
+  const code='const os=(await import(\'node:os\')).default;os.homedir=()=>'+JSON.stringify(f.directory)+';(await import(\'node:module\')).syncBuiltinESMExports();Object.defineProperty(process,\'platform\',{value:\'darwin\'});process.argv=[process.execPath,\'cli.ts\',\'serve\'];await import('+JSON.stringify(new URL('../src/cli.ts',import.meta.url).href)+');';
+  let stderr='';try{execFileSync(process.execPath,['--input-type=module','-e',code],{env:{...process.env,NERV_HOME:f.host.context.home},stdio:'pipe'});}catch(error){stderr=String((error as {stderr?:Buffer}).stderr??'');}assert.match(stderr,/lifecycle|unresolved/i,'CLI must refuse the retained resource before touching the runtime');
+ }finally{f.close();}
+});
+test('review regression: unchanged compatibility markers cannot authorize changed executable/reader code; actual schema is bound',supported,async()=>{
+ const f=serviceFixture();try{const compatible=Reflect.get(lifecycle,'compatibleServiceRevision') as ((context:typeof f.host.context,revision:string)=>Promise<boolean>)|undefined;assert.equal(typeof compatible,'function','production update needs an actual source/schema compatibility boundary');
+  const git=(args:string[])=>execFileSync('git',['-C',f.host.context.source,'-c','user.name=Neutral Fixture','-c','user.email=fixture@example.invalid','-c','commit.gpgsign=false',...args],{encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();git(['init']);writeFileSync(join(f.host.context.source,'reader.ts'),'export const markers=[1,6]; export const supported=[5,6];');git(['add','.']);git(['commit','-m','Neutral reader']);const base=git(['rev-parse','HEAD']);writeFileSync(join(f.host.context.source,'reader.ts'),'export const markers=[1,6]; export const supported=[7];');git(['add','.']);git(['commit','-m','Incompatible reader retaining markers']);const bad=git(['rev-parse','HEAD']);git(['checkout','--detach',base]);assert.equal(await compatible!(f.host.context,bad),false);assert.equal(git(['rev-parse','HEAD']),base);
+  writeFileSync(join(f.host.context.source,'README.md'),'Neutral documentation change');git(['add','.']);git(['commit','-m','Identical executable tree']);const docs=git(['rev-parse','HEAD']);git(['checkout','--detach',base]);const db=new DatabaseSync(f.data);db.exec('PRAGMA user_version=6');db.close();assert.equal(await compatible!(f.host.context,docs),true);const future=new DatabaseSync(f.data);future.exec('PRAGMA user_version=7');future.close();assert.equal(await compatible!(f.host.context,docs),false);assert.equal(git(['rev-parse','HEAD']),base);
+ }finally{f.close();}
+});
+test('read-only regression: standard public base.pub mode644 is accepted while credentials stay private',supported,()=>{
+ const f=serviceFixture();try{const inspect=Reflect.get(lifecycle,'serviceProfileIdentity') as ((context:typeof f.host.context)=>string)|undefined;assert.equal(typeof inspect,'function','validate the production profile with its actual public-key convention');const keys=generateKeyPairSync('ed25519');writeFileSync(join(f.host.context.home,'base-key'),keys.privateKey.export({type:'pkcs8',format:'pem'}));writeFileSync(join(f.host.context.home,'base.pub'),keys.publicKey.export({type:'spki',format:'der'}).toString('base64')+'\n');chmodSync(join(f.host.context.home,'base.pub'),0o644);writeFileSync(join(f.host.context.home,'token'),'c'.repeat(32));assert.match(inspect!(f.host.context),/^[a-f0-9]{64}$/);chmodSync(join(f.host.context.home,'token'),0o644);assert.throws(()=>inspect!(f.host.context),/permission|private/i);
+ }finally{f.close();}
+});
