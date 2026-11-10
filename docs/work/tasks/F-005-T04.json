@@ -1,7 +1,7 @@
 {
   "version": 1,
   "parent": "F-005",
-  "status": "implemented",
+  "status": "closed",
   "capabilities": [
     "bounded-edit",
     "structured-tools",
@@ -38,7 +38,8 @@
   "validation": [
     "Meaningful cross-boundary ownership/session/effect/journal/recovery tests, applicable static/build/headless checks and final CI",
     "Explicit actual Mac service evidence with baseline, changed state and retained data; mocks and merge are not actual OS acceptance",
-    "Candidate2ab189f: independent restricted-scope review22/22 pass, no remaining code blockers. Committed failing startup/compatibility/public-mode regressions8683354 and rename regressiond330735 precede unchanged-test fixes. Local full atdf1a8e8:552 pass/2 skip, build and headless5 pass/1 skip; final rename fix targeted22/22/typecheck/conventions pass. Read-only actual Mac preflight schema6/session/settled work/current-legacy absence confirmed; no service installed yet. Final CI and actual OS acceptance pending."
+    "Candidate2ab189f: independent restricted-scope review22/22 pass, no remaining code blockers. Committed failing startup/compatibility/public-mode regressions8683354 and rename regressiond330735 precede unchanged-test fixes. Local full atdf1a8e8:552 pass/2 skip, build and headless5 pass/1 skip; final rename fix targeted22/22/typecheck/conventions pass. Read-only actual Mac preflight schema6/session/settled work/current-legacy absence confirmed; no service installed yet. Final CI and actual OS acceptance pending.",
+    "2026-11-10 actual default-profile Mac acceptance passed after PR253 full CI42874665479 at6f21738, mergedtree12a9cfd identical. Injected handler exit86 after owned definition creation retained the receipt/resource/file; ordinary serve/manual-start blocked and cached replay ran no effects. Exact stopped recovery retained the file, then fenced uninstall removed only that owned definition. Actual install/status/stop/start/uninstall/reinstall and forward identical-runtime update completed, fences1..10 (one released,nine completed), no held resource. Private consistent DB/credential backup integrity verified; configuration/credential file hashes, registry rows and existing reminder identity/content/schedule retained, schema6 integrity-ok. Root-bound Tabgha online/worker reconnections observed. Additional-profile service refused. No executable/schema migration, system daemon, isolated service, logout/reboot or broader platform acceptance claimed."
   ],
   "escalation": [
     "Pause for changed/foreign service ownership, live/uncertain descendants, missing session or conflicting active work",

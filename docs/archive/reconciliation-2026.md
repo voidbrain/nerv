@@ -180,3 +180,8 @@ Authenticated ci:status confirms CI42786283211 passed scoped plan/validate/windo
 ## 2026-11-10 — PR #252
 
 Authenticated ci:status confirms full CI42823700687 passed at94228b0; mergedmainc3a550b has the same tree. The unchanged Windows150ms-heartbeat worker-approval test failed attempt1 and passed attempt2 without code/assertion changes; no blanket absence-of-bugs claim. Initial PR251 was closed unmerged after independent blockers; regressions/fixes and independent exact-ee8501f follow-up are retained. Actual Mac/Windows root activation, preservation and authenticated peer/isolated-public-import evidence are recorded separately. T02 files-only enrollment closes; T05 harmless capability approval and T04 selected Mac service execution remain open.
+
+
+## 2026-11-10 — PR #253
+
+Authenticated ci:status confirms full CI42874665479 passed at6f21738, merged12a9cfd tree-identical. Actual selected Mac default-profile service install/status/start/stop/uninstall/reinstall, interrupted-operation recovery/startup fencing and forward identical-runtime update passed with retained credentials/data and verified private backups. T04 closes; T06 executable/schema compatibility and broader platform/device acceptance remain explicit. Earlier review/CI failures are preserved in dated review/acceptance evidence; a green merge alone is not the OS acceptance.

@@ -11,3 +11,7 @@ Exact2ab189fbd347958bc9749f5238cbaf3071c31975 follow-up independently passed22 l
 Local full validation atdf1a8e8:552 pass/2 skip; build and headless5 pass/1 platform skip. Narrow rename fix:22/22, typecheck/conventions pass. Final required CI and actual OS lifecycle remain pending. Read-only Mac preflight confirms schema6, GUI session, settled work and absent current/legacy definitions/registrations; it installed nothing.
 
 Consistency review covers INSTALL, lifecycle decision, owning records/tasks and generated views. No style token, shared UI component or governing rule changed. Re-review on ownership, startup, journal/recovery or supported-update changes.
+
+## Integration and target acceptance
+
+PR253 full CI42874665479 passed at6f21738; merged12a9cfd tree matches. [Actual Mac acceptance](../acceptance/node-service-2026-11-10.md) confirms the positive launchd startup permit and selected lifecycle/recovery/data/backup checks. This is operator evidence after review, not an independent reviewer claim of OS execution. T06 remains unimplemented.
