@@ -1,3 +1,4 @@
+import {transaction} from './sqlite-transaction.ts';
 import { createCipheriv, createDecipheriv, createHash, createPrivateKey, createPublicKey, generateKeyPairSync, randomBytes, scryptSync, sign, verify, type KeyObject } from 'node:crypto';
 import { chmodSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -11,6 +12,11 @@ import type { DatabaseSync } from 'node:sqlite';
 export const REGISTRY_SCHEMA=`
  CREATE TABLE IF NOT EXISTS registry(id TEXT PRIMARY KEY, serial INTEGER NOT NULL, kind TEXT NOT NULL, base_id TEXT NOT NULL, body TEXT NOT NULL, signature TEXT NOT NULL, received TEXT NOT NULL);
  CREATE TRIGGER IF NOT EXISTS registry_no_update BEFORE UPDATE ON registry BEGIN SELECT RAISE(ABORT,'registry records are append-only'); END;
+ CREATE TRIGGER IF NOT EXISTS registry_no_delete BEFORE DELETE ON registry BEGIN SELECT RAISE(ABORT,'registry records are append-only'); END;
+ CREATE TABLE IF NOT EXISTS registry_roots(id TEXT PRIMARY KEY REFERENCES registry(id),root TEXT NOT NULL);
+ CREATE TRIGGER IF NOT EXISTS registry_roots_no_update BEFORE UPDATE ON registry_roots BEGIN SELECT RAISE(ABORT,'registry root bindings are immutable'); END;
+ CREATE TRIGGER IF NOT EXISTS registry_roots_no_delete BEFORE DELETE ON registry_roots BEGIN SELECT RAISE(ABORT,'registry root bindings are immutable'); END;
+ CREATE TABLE IF NOT EXISTS registry_seen(root TEXT NOT NULL,base_id TEXT NOT NULL,last_seen TEXT NOT NULL,PRIMARY KEY(root,base_id));
  CREATE TABLE IF NOT EXISTS kaji_seen(base_id TEXT PRIMARY KEY, last_seen TEXT NOT NULL);`;
 export const ROOT_KEY_FILE='key-of-nebuchadnezzar.enc';
 const BASE_KEY_FILE='base-key',BASE_PUB_FILE='base.pub';
@@ -23,6 +29,8 @@ export function publicKeyFrom(text:string):KeyObject {
  let key:KeyObject;try{key=createPublicKey({key:Buffer.from(text,'base64'),format:'der',type:'spki'});}catch{throw new Error('Not a public key: paste the base64 text that `base pubkey` printed.');}
  if(key.asymmetricKeyType!=='ed25519')throw new Error('Kaji keys are Ed25519.');return key;
 }
+/** Canonical cryptographic identity; signed/stored spellings are never rewritten. */
+export function keyIdentity(value:string):string{return publicKeyFrom(value).export({type:'spki',format:'der'}).toString('base64');}
 /** The root key, encrypted with a key derived from the passphrase (scrypt) using AES-256-GCM. */
 export function createRootKey(passphrase:string):{file:string;publicKey:string} {
  if(passphrase.length<12)throw new Error('Use a passphrase of at least 12 characters.');
@@ -88,14 +96,36 @@ export class Registry {
   if(!this.root)throw new Error('No root key pinned on this base: run kaji import --root FINGERPRINT, or key init on the main base.');
   checkBody(record.body);if(!verifyRecord(this.root,record))throw new Error(`Registry record for ${record.body.baseId} is not signed by your Key of Nebuchadnezzar.`);
   const id=createHash('sha256').update(canonical(record)).digest('hex');
-  if(this.db.prepare('SELECT 1 FROM registry WHERE id=?').get(id))return 'known';
-  this.db.prepare('INSERT INTO registry VALUES(?,?,?,?,?,?,?)').run(id,record.body.serial,record.body.kind,record.body.baseId,canonical(record.body),record.signature,now.toISOString());
-  return 'added';
+  return transaction(this.db,()=>{
+   if(this.db.prepare('SELECT 1 FROM registry WHERE id=?').get(id))return 'known';
+   this.db.prepare('INSERT INTO registry VALUES(?,?,?,?,?,?,?)').run(id,record.body.serial,record.body.kind,record.body.baseId,canonical(record.body),record.signature,now.toISOString());
+   this.db.prepare('INSERT INTO registry_roots VALUES(?,?)').run(id,keyIdentity(this.root!));return 'added';
+  });
  }
  /** Merges last-seen times: per base, the newest time wins (so every base learns what any base heard). */
- seen(updates:Record<string,string>):void {const up=this.db.prepare('INSERT INTO kaji_seen VALUES(?,?) ON CONFLICT(base_id) DO UPDATE SET last_seen=excluded.last_seen WHERE excluded.last_seen>kaji_seen.last_seen');for(const [id,at] of Object.entries(updates))if(BASE_ID.test(id)&&Number.isFinite(Date.parse(at)))up.run(id,new Date(Date.parse(at)).toISOString());}
- lastSeen():Record<string,string> {return Object.fromEntries((this.db.prepare('SELECT base_id,last_seen FROM kaji_seen').all() as {base_id:string;last_seen:string}[]).map(r=>[r.base_id,r.last_seen]));}
- records():SignedRecord[] {return (this.db.prepare('SELECT body,signature FROM registry ORDER BY serial,id').all() as {body:string;signature:string}[]).map(r=>({body:JSON.parse(r.body) as RegistryBody,signature:r.signature}));}
+ private scopedSeen():boolean{return Number((this.db.prepare('PRAGMA user_version').get() as {user_version:number}).user_version)>=6&&!!this.db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='registry_seen'").get();}
+ private rootLabels(table:'registry_roots'|'registry_seen'):string[]{const selected=keyIdentity(this.root!);return (this.db.prepare('SELECT DISTINCT root FROM '+table).all() as {root:string}[]).map(r=>r.root).filter(root=>keyIdentity(root)===selected);}
+ seen(updates:Record<string,string>):void {
+  if(!this.root)return;
+  for(const [id,at] of Object.entries(updates))if(BASE_ID.test(id)&&Number.isFinite(Date.parse(at))){
+   const time=new Date(Date.parse(at)).toISOString();
+   if(this.scopedSeen())this.db.prepare('INSERT INTO registry_seen VALUES(?,?,?) ON CONFLICT(root,base_id) DO UPDATE SET last_seen=excluded.last_seen WHERE excluded.last_seen>registry_seen.last_seen').run(keyIdentity(this.root),id,time);
+   else this.db.prepare('INSERT INTO kaji_seen VALUES(?,?) ON CONFLICT(base_id) DO UPDATE SET last_seen=excluded.last_seen WHERE excluded.last_seen>kaji_seen.last_seen').run(id,time);
+  }
+ }
+ lastSeen():Record<string,string> {
+  if(!this.root)return {};
+  const labels=this.scopedSeen()?this.rootLabels('registry_seen'):[];
+  const rows=this.scopedSeen()?(labels.length?this.db.prepare('SELECT base_id,last_seen FROM registry_seen WHERE root IN ('+labels.map(()=>'?').join(',')+') ORDER BY last_seen').all(...labels):[]):this.db.prepare('SELECT base_id,last_seen FROM kaji_seen').all();
+  return Object.fromEntries((rows as {base_id:string;last_seen:string}[]).map(r=>[r.base_id,r.last_seen]));
+ }
+ records():SignedRecord[] {
+  if(!this.root)return [];
+  const scoped=!!this.db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='registry_roots'").get();
+  const labels=scoped?this.rootLabels('registry_roots'):[];
+  const rows=(scoped?this.db.prepare('SELECT r.body,r.signature FROM registry r LEFT JOIN registry_roots g ON g.id=r.id WHERE '+(labels.length?'g.root IN ('+labels.map(()=>'?').join(',')+') OR ':'')+'g.root IS NULL ORDER BY r.serial,r.id').all(...labels):this.db.prepare('SELECT body,signature FROM registry ORDER BY serial,id').all()) as {body:string;signature:string}[];
+  return rows.map(r=>{const record={body:JSON.parse(r.body) as RegistryBody,signature:r.signature};if(!verifyRecord(this.root!,record))throw Error('Stored registry signature does not match the selected root.');return record;});
+ }
  nextSerial():number {return ((this.db.prepare('SELECT max(serial) AS s FROM registry').get() as {s:number|null}).s ?? 0)+1;}
  /** Current bases: the newest enrolment per base, unless a revocation of that key exists (revoke always wins). */
  bases():BaseEntry[] {

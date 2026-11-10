@@ -1,0 +1,11 @@
+# Root activation implementation review — 10 November 2026
+
+F-005-T05, successor to closed/unmerged PR251. Independent report-only reviewer started in a fresh context and did not edit, approve, merge or activate. Scope: immutable registry generations, migration backup/journal/recovery, retained identities, peer authentication and CLI joins. Actual two-base activation remains pending.
+
+Initial review found two P1 blockers despite PR251 full green CI42792502512: a replaced historical revoked key could be enrolled under another ID, and retained base keys could authenticate across mixed roots. Committed failing tests b1e1e92 precede fixes fbccae6. Follow-up found equivalent Ed25519 keys with different Base64 spellings bypassed string-based revocation/root-reuse checks. Four committed failing regressions80665cc precede fix ee8501f; their bodies remain unchanged.
+
+At ee8501f, cryptographic identity comparisons preserve original signed bytes and reject noncanonical replacement keys. Root generation is part of HTTP and WebSocket signed messages, including frames; migrated peers reject missing or foreign binding. Actual CLI wiring and export/import preserve the requirement. Targeted migration/auth/CLI/Kaji33 tests, typecheck and conventions pass locally. Independent follow-up at exact ee8501fc8ac8d4faac8df9ce1e1a94d62a2e8711 reports no unresolved code blockers within reviewed scope, with67 independently executed migration/auth/CLI/Kaji/worker tests passing and clean diff whitespace. Full local Node suite538 pass/2 skip; final required CI is pending; no live activation or service acceptance is claimed here.
+
+Consistency review covers INSTALL, root-migration decision, F-005/task records and generated views. README, AGENTS, area notes and style guide need no changed rule/token. Re-review for material migration, trust, recovery or transport changes. General restore/downgrade remains F-062.
+
+CI42822946578 exposed a test placement error: the real CLI startup test requires built frontend assets, while the Node coverage phase runs before build. Its complete body/assertions were retained and the file moved to the existing post-build `*.integration.ts` headless suite. This changes test sequencing, not the root-authentication requirement or production guard. Targeted post-build execution passes; final successor CI must validate both phases.

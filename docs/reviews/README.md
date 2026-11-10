@@ -158,3 +158,5 @@ Gauntlet0.3 NERV adoption accepted after PR235 exactheadb4cd887 / full CI4260857
 [First common Gemma smoke review, 2026-11-09](../evaluations/2026-11-09-gemma-common-smoke.md): report/schema/settings/budget review of owner-provided evidence;7/10 passed, no qualification. Raw replies and human responsiveness observations unavailable; revisit with new authorized evidence or a versioned candidate.
 
 - [Private diagnostic adoption, 2026-11-09](../acceptance/gauntlet-private-diagnostics-2026-11-09.md): ten package/wrapper joins, fake-provider private failure inspection and optional job metadata rule. Revisit on protocol/privacy/report/source adapter changes; actual client loading/counters and role workflow remain separately unverified.
+
+[Root activation implementation review, 2026-11-10](2026-11-10-root-activation.md): independent historical-revocation, mixed-root transport and key-encoding findings, regression/fix commits and candidate validation; final follow-up/CI and actual target acceptance remain separate. Re-review on migration/trust/recovery changes.

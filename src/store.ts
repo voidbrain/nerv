@@ -41,7 +41,9 @@ export class Store {
     if(path !== ':memory:') mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
     this.db = new DatabaseSync(path);
     const version = this.db.prepare('PRAGMA user_version').get() as {user_version:number};
-    if(version.user_version > 5) {this.db.close();throw new Error('Database schema is newer than this NERV Agency version.');}
+    if(version.user_version > 6) {this.db.close();throw new Error('Database schema is newer than this NERV Agency version.');}
+    if(this.db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='root_migration_resource'").get()&&this.db.prepare('SELECT 1 FROM root_migration_resource').get()){this.db.close();throw new Error('Root migration is unresolved; inspect its receipt before starting NERV.');}
+    if(version.user_version>=6&&options.home&&readConfig(options.home).kaji?.rootBinding!==true){this.db.close();throw new Error('Migrated trust requires root-bound peer authentication.');}
     this.usage=new UsageStore(this.db);this.instrumentality=new InstrumentalityRuns(this.db);
     this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
       CREATE TABLE IF NOT EXISTS reminders(id TEXT PRIMARY KEY, title TEXT NOT NULL, due TEXT NOT NULL, created TEXT NOT NULL, delivered TEXT, cancelled TEXT);
@@ -69,7 +71,7 @@ export class Store {
         this.db.exec('COMMIT');
       }catch(e){this.db.exec('ROLLBACK');throw e;}
     }
-    this.db.exec('CREATE INDEX IF NOT EXISTS deliveries_kind_created ON deliveries(kind,created); PRAGMA user_version=5');
+    this.db.exec('CREATE INDEX IF NOT EXISTS deliveries_kind_created ON deliveries(kind,created); PRAGMA user_version='+Math.max(5,version.user_version));
     // Additive daily identities preserve the inbox's existing rowids and UUIDs.
     this.db.exec('CREATE TABLE IF NOT EXISTS daily_briefs(day TEXT PRIMARY KEY,delivery_id TEXT NOT NULL UNIQUE REFERENCES deliveries(id))');
     // Approval delivery identities are additive: existing reminder/brief rowids remain channel cursors.
