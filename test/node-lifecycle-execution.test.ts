@@ -78,6 +78,9 @@ test('startup permit is specific to the recorded live start; ordinary, missing-m
   });await applyService(f.host,p,p.digest);await assertServiceStartup(f.host);
  }finally{f.close();}
 });
+test('review regression: moving executable source into documentation cannot hide its deletion in rename detection',supported,async()=>{
+ const f=serviceFixture();try{const git=(args:string[])=>execFileSync('git',['-C',f.host.context.source,'-c','user.name=Neutral Fixture','-c','user.email=fixture@example.invalid','-c','commit.gpgsign=false',...args],{encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();git(['init']);writeFileSync(join(f.host.context.source,'reader.ts'),'export const supported=[5,6];');git(['add','.']);git(['commit','-m','Neutral executable']);const base=git(['rev-parse','HEAD']);mkdirSync(join(f.host.context.source,'docs'));git(['mv','reader.ts','docs/reader.ts']);git(['commit','-m','Move executable into documentation']);const next=git(['rev-parse','HEAD']);git(['checkout','--detach',base]);assert.equal(await lifecycle.compatibleServiceRevision(f.host.context,next),false,'deleted executable must be considered even if Git detects an unchanged rename');assert.equal(git(['rev-parse','HEAD']),base);}finally{f.close();}
+});
 test('production command adapter joins manager parsing, process discovery, authenticated doctor and real backup files',supported,async()=>{
  const f=serviceFixture();let server:Server|undefined;try{
   const reservation=createServer();await new Promise<void>(done=>reservation.listen(0,'127.0.0.1',done));const port=(reservation.address() as {port:number}).port;await new Promise<void>(done=>reservation.close(()=>done()));
