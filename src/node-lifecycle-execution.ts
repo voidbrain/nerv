@@ -124,7 +124,7 @@ export function serviceProfileIdentity(c:ServiceContext):string {
 /** Until a migration contract is reviewed, executable, dependency and configuration changes cannot enter this update path. */
 export async function compatibleServiceRevision(c:ServiceContext,revision:string,run:typeof command=command):Promise<boolean> {
  if(!/^[a-f0-9]{40}$/.test(revision))return false;const db=new DatabaseSync(databasePath(c.home),{readOnly:true});let schema:number;try{schema=Number(db.prepare('PRAGMA user_version').get()!.user_version);}finally{db.close();}if(schema<5||schema>SERVICE_READER_SCHEMA)return false;
- const diff=await run('git',['-C',c.source,'diff','--name-only','-z','HEAD',revision,'--']);return diff.status===0&&diff.out.split('\0').filter(Boolean).every(path=>path.startsWith('docs/')||path==='README.md');
+ const diff=await run('git',['-C',c.source,'diff','--no-renames','--name-only','-z','HEAD',revision,'--']);return diff.status===0&&diff.out.split('\0').filter(Boolean).every(path=>path.startsWith('docs/')||path==='README.md');
 }
 export function macRegistrationMatches(output:string,c:ServiceContext):boolean {
  const field=(name:string)=>output.match(new RegExp('^\\s*'+name+' = (.+)$','m'))?.[1]?.trim();
