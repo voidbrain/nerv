@@ -120,3 +120,12 @@ test('concurrent root activation processes cannot acquire two resources or appen
   const db=new DatabaseSync(join(f.home,'nerv.sqlite'),{readOnly:true});assert.equal(db.prepare('SELECT count(*) AS n FROM registry').get()!.n,6);assert.equal(db.prepare('SELECT count(*) AS n FROM root_migration_resource').get()!.n,0);assert.equal(db.prepare('SELECT count(*) AS n FROM root_migrations').get()!.n,1);db.close();
  }finally{rmSync(f.root,{recursive:true,force:true});}
 });
+
+test('review regression: a rotated-away historically revoked key cannot be re-enrolled under another base ID',async()=>{
+ const f=await fixture();try{
+  const historical=pub(),issued=new Date().toISOString(),store=new Store(join(f.home,'nerv.sqlite')),old=new Registry(store.db,f.old.publicKey),current=old.bases().find(b=>b.baseId==='BASE-02')!;
+  old.add(signRecord(f.oldPrivate,{kind:'enrol',serial:4,baseId:'BASE-02',name:current.name,publicKey:historical,address:current.address,issued}));old.add(signRecord(f.oldPrivate,{kind:'revoke',serial:5,baseId:'BASE-02',publicKey:historical,issued}));old.add(signRecord(f.oldPrivate,{kind:'enrol',serial:6,baseId:'BASE-02',name:current.name,publicKey:current.publicKey,address:current.address,issued}));store.close();
+  const bundle={...f.bundle,records:[...f.bundle.records,signRecord(f.nextPrivate,{kind:'enrol',serial:4,baseId:'BASE-03',name:'Workshop',publicKey:historical,address:'127.0.0.1:14522',issued})]};
+  assert.throws(()=>planRootMigration(f.home,bundle,f.keyPath),/revoked|resurrect/);
+ }finally{rmSync(f.root,{recursive:true,force:true});}
+});
