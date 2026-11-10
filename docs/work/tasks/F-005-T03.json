@@ -4,7 +4,7 @@
   "parent": "F-005",
   "title": "Prepare replacement-root generation and existing-base trust migration",
   "goal": "Stage a new encrypted root and signed replacement registry through owner-local passphrase input; preserve old trust until supported per-base migration is ready",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Record explicit owner authorization to migrate/regenerate; disposable test trust is not the selected path",
     "Prepare a private terminal command that creates a new encrypted root and signs only reviewed existing enrolled identities/main choice plus the selected isolated test profile",
@@ -27,7 +27,9 @@
     "docs/reviews/README.md",
     "docs/acceptance/node-enrollment-2026-11-10.md",
     "generated:backlog-views",
-    "contract:root-migration"
+    "contract:root-migration",
+    "docs/work/tasks/F-005-T04.json",
+    "docs/work/tasks/F-005-T05.json"
   ],
   "capabilities": [
     "structured-tools",
@@ -39,7 +41,8 @@
     "Read-only current-root/base/source/signed-registry snapshot and collision checks",
     "Neutral staged-generation/signature fixtures and private file permissions; no production passphrase in tools",
     "Applicable documentation/generated checks and scoped CI; actual root generation/activation remains pending owner terminal/target access",
-    "2026-11-10: private snapshot/read-only review pass. Neutral generation fixtures verify encrypted-root roundtrip, four new-root-only signatures, three exact public identities/main choice,0700/0600 modes, short-pass/snapshot-mismatch/overwrite refusal and unchanged old key/config/registry. Actual key generation waits for owner Terminal; live activation adapter/backup/Tabgha access pending."
+    "2026-11-10: private snapshot/read-only review pass. Neutral generation fixtures verify encrypted-root roundtrip, four new-root-only signatures, three exact public identities/main choice,0700/0600 modes, short-pass/snapshot-mismatch/overwrite refusal and unchanged old key/config/registry. Actual key generation waits for owner Terminal; live activation adapter/backup/Tabgha access pending.",
+    "2026-11-10 preparation scope complete: owner-generated stage found/verified, four new-root signatures and exact two existing plus isolated identities/main retained, encrypted-file0600 and Mac old-root pin unchanged. Tabgha SSH/public-trust inspection succeeds via private target-restricted helper; existing Node24.22.2 absolute path, root/base key and three old-root signatures match. Actual live activation/backup/quiescence is T05, service execution is T04; parent remains Open."
   ],
   "escalation": [
     "User authorized migration and key regeneration; do not ask that decision again",

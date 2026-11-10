@@ -165,3 +165,8 @@ Authenticated ci:status confirms CI42777729124 passed scoped plan/validate/windo
 ## 2026-11-10 — PR #248
 
 Authenticated ci:status confirms CI42778028106 passed scoped plan/validate/windows/native-macos; full-suite skipped. Mergedmainf0e9a29 recorded the existing-root access blocker. Owner subsequently explicitly authorized real root regeneration/migration under F-005-T03, after considering a candidate passphrase and pausing disposable test trust. Private staging preparation/neutral fixtures do not activate a root or migrate either base. Prior full baseline remains PR245 CI42775093119.
+
+
+## 2026-11-10 — PR #249
+
+Authenticated ci:status confirms CI42779886527 passed scoped plan/validate/windows/native-macos; full-suite skipped. Mergedmain48a8b69 records replacement-root preparation. Owner-generated stage is now verified and selected Tabgha read-only SSH/public-trust checks pass; existing absolute Node24.22.2 used, no install/service/trust writes. T03 preparation complete; T05 owns activation/history/backup/recovery and T04 owns owner-selected Mac default-profile service execution. No live migration or service effect is claimed. Full baseline remains PR245 CI42775093119.
