@@ -19,3 +19,5 @@ The [review register](../reviews/README.md#acceptance-evidence) links every repo
 - [Private diagnostic adoption, 2026-11-09](gauntlet-private-diagnostics-2026-11-09.md): released0.4 wrapper/private-inspection joins and harness4.4.1 job metadata rule; no model campaign or native counter qualification.
 
 [Isolated local enrollment preparation, 10 November 2026](node-enrollment-2026-11-10.md): actual retained receipt/public identity/source and signed registry checks; private terminal handoff reviewed, signing/import and worker acceptance pending owner terminal interaction.
+
+[Root activation, 2026-11-10](node-root-activation-2026-11-10.md): actual two-base trust migration, preservation and signed connectivity; isolated public enrollment, with capability/service/platform acceptance distinguished.

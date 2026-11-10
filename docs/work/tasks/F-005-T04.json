@@ -31,7 +31,9 @@
     "generated:backlog-views",
     "contract:service-lifecycle",
     "src/node-bootstrap.ts",
-    "src/node-bootstrap-execution.ts"
+    "src/node-bootstrap-execution.ts",
+    "src/node-lifecycle-execution.ts",
+    "src/cli.ts"
   ],
   "validation": [
     "Meaningful cross-boundary ownership/session/effect/journal/recovery tests, applicable static/build/headless checks and final CI",
