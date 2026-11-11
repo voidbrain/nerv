@@ -1,14 +1,4 @@
 [
-  {
-    "kind": "rule",
-    "disposition": "implemented",
-    "target": "docs/BACKLOG-RULES.md",
-    "evidence": "Reconciled published harness v5.2.0: the Evaluation dependencies paragraph and the AGENTS session-start bullet carried by hand; NERV declares Gauntlet as an evaluation dependency and adds the stricter project CI check check:gauntlet-runs. No check, never or ask-first rule, or safeguard removed. No behaviour runner configured."
-  },
-  {
-    "kind": "tool",
-    "disposition": "implemented",
-    "target": "tools/check-freshness.mjs",
-    "evidence": "Copied byte-identically from tag v5.2.0; check-harness --strict passes. Session start reports 50 pending Gauntlet cases, named by F-074-T09."
-  }
+  {"kind":"rule","disposition":"implemented","target":"docs/BACKLOG-RULES.md","evidence":"Reconciled published harness 5.4.0 (from 5.2.0): the Optional upfront feature plans paragraph and the new Estimate calibration paragraph carried verbatim from the template; owner-confirmed thresholds. 158 open steps backfilled with days/baselineDays from their current estimates, stated in each basis. No check, never or ask-first rule, or safeguard removed. No behaviour runner configured."},
+  {"kind":"tool","disposition":"implemented","target":"tools/work-items.mjs","evidence":"tools/work-items.mjs and tools/check-freshness.mjs copied byte-identically from v5.4.0; queue order and backlog totals adopted; CI clones the template at v5.4.0. Friction sample covers this reconcile from the start, but also the Gauntlet pin done in the same branch."}
 ]

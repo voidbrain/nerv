@@ -38,7 +38,9 @@
   "effort": {
     "size": "medium",
     "estimate": "1.5 focused days",
-    "basis": "Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement.",
-    "reviewed": "2026-11-11"
+    "basis": "Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one.",
+    "reviewed": "2026-11-11",
+    "days": 1.5,
+    "baselineDays": 1.5
   }
 }

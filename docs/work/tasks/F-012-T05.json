@@ -33,7 +33,9 @@
   "effort": {
     "size": "small",
     "estimate": "1 focused day plus owner time",
-    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
-    "reviewed": "2026-11-11"
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one.",
+    "reviewed": "2026-11-11",
+    "days": 1.0,
+    "baselineDays": 1.0
   }
 }

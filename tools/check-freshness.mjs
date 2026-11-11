@@ -204,6 +204,31 @@ for (const e of Array.isArray(stamp.evaluations) ? stamp.evaluations : []) {
     );
 }
 
+// 3d. estimate drift (workItems.estimation, F-054): closed steps whose actual effort keeps differing from their
+// baseline ask for a re-estimation of the open steps. Read-only; projects without work items or the helper skip it.
+const workItemsHelper = new URL('./work-items.mjs', import.meta.url);
+if (
+  stamp.workItems?.enabled &&
+  stamp.workItems.featurePlans &&
+  stamp.workItems.estimation !== false &&
+  existsSync(workItemsHelper)
+) {
+  try {
+    const { settings, taskCatalog, calibrate } = await import(workItemsHelper.href);
+    if (typeof calibrate === 'function') {
+      const root = fileURLToPath(new URL('..', import.meta.url)),
+        config = settings(root),
+        result = calibrate(taskCatalog(root, config).tasks, config.estimation);
+      if (result.due)
+        warn(
+          `Estimates drift from actual effort: ${result.reasons.join('; ')}. Re-estimate the open steps (effort.days with a dated basis citing \`node tools/work-items.mjs calibrate\`; keep baselineDays; a material increase goes to the owner), then set workItems.estimation.since to today. Open steps: ${result.reestimate.slice(0, 10).join(', ')}${result.reestimate.length > 10 ? ` and ${result.reestimate.length - 10} more` : ''}.`,
+        );
+    }
+  } catch (e) {
+    warn(`Estimate calibration could not run: ${e.message}`);
+  }
+}
+
 // 4. audit coverage per declared area (legacy date-only fallback)
 const auditHelper = new URL('./check-audits.mjs', import.meta.url);
 let last, days;

@@ -41,7 +41,9 @@
   "effort": {
     "size": "medium",
     "estimate": "1.5 focused days",
-    "basis": "Estimate added at featurePlans adoption (2026-11-11): Per-item mutation ownership with concurrency tests. Estimate, not a measurement.",
-    "reviewed": "2026-11-11"
+    "basis": "Estimate added at featurePlans adoption (2026-11-11): Per-item mutation ownership with concurrency tests. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one.",
+    "reviewed": "2026-11-11",
+    "days": 1.5,
+    "baselineDays": 1.5
   }
 }

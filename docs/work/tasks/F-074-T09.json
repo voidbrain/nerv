@@ -3,11 +3,11 @@
   "parent": "F-074",
   "id": "F-074-T09",
   "status": "planned",
-  "title": "T09 \u2014 First ledger-covered run of every common pack and the expensive system cases",
+  "title": "T09 — First ledger-covered run of every common pack and the expensive system cases",
   "goal": "First runs recorded in the ledger for the common packs neutral-smoke (10), neutral-smoke-schema (10) and general-assistant-expanded (28, never run in NERV), on the authorized Gemma profile, and for the expensive NERV system cases nerv-system-flows/stress and nerv-system-flows/browser. The 2026-11-09 smoke run predates the ledger and its report is not in the repository; the owner may supply that report to `npm run gauntlet:ledger` instead of a rerun.",
   "acceptance": [
     "Pending cases this task covers (listed for check:gauntlet-runs): neutral-smoke/*, neutral-smoke-schema/*, general-assistant-expanded/*, nerv-system-flows/stress, nerv-system-flows/browser. Still pending after the owner's run of 2026-11-11: general-assistant-expanded/prompt-injection-r2, general-assistant-expanded/prompt-injection-h1, general-assistant-expanded/prompt-injection-h2, general-assistant-expanded/combined-r1, general-assistant-expanded/combined-r2, general-assistant-expanded/combined-h1, general-assistant-expanded/combined-h2",
-    "Owner approves the budget: the hard limits `gauntlet:all` prints and enforces before running. For the authorized gemma4-12b profile (local Ollama, no money spent): 48 model cases at 30 s per case, at most 14 + 5 + 5 = 24 min and 98,304 output tokens in total (general-assistant-expanded 840 s / 57,344; neutral-smoke-schema 300 s / 20,480; neutral-smoke 300 s / 20,480); the two expensive system cases (stress, browser) at most 180 s each and 15 min in total. Expected actual use from the first smoke (10 cases, 65 s, 1,608 tokens): about 5 min and 8,000 tokens for the 48 model cases. `npm run gauntlet:all -- --profile=\u2026 --allow-models --allow-expensive --execute --out-dir=\u2026` then runs them",
+    "Owner approves the budget: the hard limits `gauntlet:all` prints and enforces before running. For the authorized gemma4-12b profile (local Ollama, no money spent): 48 model cases at 30 s per case, at most 14 + 5 + 5 = 24 min and 98,304 output tokens in total (general-assistant-expanded 840 s / 57,344; neutral-smoke-schema 300 s / 20,480; neutral-smoke 300 s / 20,480); the two expensive system cases (stress, browser) at most 180 s each and 15 min in total. Expected actual use from the first smoke (10 cases, 65 s, 1,608 tokens): about 5 min and 8,000 tokens for the 48 model cases. `npm run gauntlet:all -- --profile=… --allow-models --allow-expensive --execute --out-dir=…` then runs them",
     "Saved private reports; a summary in docs/evaluations with pass/fail per case, telemetry gaps explicit and no qualification claim",
     "The ledger records every run, and `npm run check:gauntlet-runs` reports nothing pending"
   ],
@@ -39,7 +39,9 @@
   "effort": {
     "size": "small",
     "estimate": "0.25 day including owner time",
-    "basis": "Reassessed 2026-11-11 after the owner run: 41 of 48 model cases and both expensive system cases are recorded; the last 7 cases of general-assistant-expanded were not graded in that run (the ledger records only passed or failed results) and need one more run, plus the evidence summary. Estimate, not a measurement.",
-    "reviewed": "2026-11-11"
+    "basis": "Reassessed 2026-11-11 after the owner run: 41 of 48 model cases and both expensive system cases are recorded; the last 7 cases of general-assistant-expanded were not graded in that run (the ledger records only passed or failed results) and need one more run, plus the evidence summary. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one.",
+    "reviewed": "2026-11-11",
+    "days": 0.25,
+    "baselineDays": 0.25
   }
 }

@@ -83,7 +83,7 @@
     "@eslint/js": "10.0.1",
     "@types/node": "24.10.1",
     "@types/ws": "8.18.1",
-    "@voidbrain/gauntlet-protocol": "file:vendor/voidbrain-gauntlet-protocol-0.6.0.tgz",
+    "@voidbrain/gauntlet-protocol": "file:vendor/voidbrain-gauntlet-protocol-0.7.1.tgz",
     "ajv-formats": "3.0.1",
     "ajv-formats-draft2019": "1.6.1",
     "axe-core": "4.14.0",

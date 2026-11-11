@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-11T12:44:51.839Z",
+  "reviewed": "2026-11-11T18:02:27.332Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
     "AGENTS.md": "3baab88d7088bab8f454e3052d852d0761e3319454edac9ed0ca1c7985b4991c",
-    "docs/BACKLOG-RULES.md": "48eb157a29382b012c40f2a46ae2e4a9d7b63533be20d65feedc93db81296a1e",
+    "docs/BACKLOG-RULES.md": "2baa779140d2ca359a9ef9c6c88cf3dacaa36c1501f0b895b7e08c5b48a682d4",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
     "docs/agents/areas.md": "0ff9805a7d720ee177505cef670e53169a6d640299762dfa86185be46fa8737c",
     "docs/agents/audit.md": "bc5de5707f9ec5c523e73602499312c373d6112ffc498d69bf68604522527992",
@@ -20,12 +20,12 @@
     "docs/agents/work-usage.md": "e2f7c484f1c07f4b47fd1133857d8744ccab0ad2a7b85b220946c115a002bebc",
     "tools/task-claims.mjs": "2a7b7d0ea9e23fb36eceba5e5433eb640fee3e3633426066e4050f0fa8ebb9cf",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
-    "tools/work-items.mjs": "c5e40c70ef45011ccaa20c951e8e645cc3e9f2fb65a4563779e7af83882df839",
+    "tools/work-items.mjs": "06641539d02ce4c60b50ef9d4bf394c112c98c948dba172c6aca40f958c84b4f",
     "tools/work-usage.mjs": "4329262c0b9e723e046dd8878e15a99cff5f590201cd0918563f3204bbe79219"
   },
   "measurements": {
-    "samples": 1,
-    "latestAt": "2026-11-11T12:44:51.796Z",
+    "samples": 17,
+    "latestAt": "2026-11-11T18:02:27.249Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -51,26 +51,26 @@
         }
       },
       "reconciliation": {
-        "samples": 1,
+        "samples": 17,
         "durationMs": {
-          "observed": 1,
+          "observed": 17,
           "missing": 0,
-          "median": 44
+          "median": 240846
         },
         "conflicts": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 5,
+          "missing": 12,
+          "median": 0
         },
         "unnecessaryPrompts": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 1,
+          "missing": 16,
+          "median": 0
         },
         "repeatedContextLoads": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 1,
+          "missing": 16,
+          "median": 1
         }
       }
     }
@@ -80,13 +80,13 @@
       "kind": "rule",
       "disposition": "implemented",
       "target": "docs/BACKLOG-RULES.md",
-      "evidence": "Reconciled published harness v5.2.0: the Evaluation dependencies paragraph and the AGENTS session-start bullet carried by hand; NERV declares Gauntlet as an evaluation dependency and adds the stricter project CI check check:gauntlet-runs. No check, never or ask-first rule, or safeguard removed. No behaviour runner configured."
+      "evidence": "Reconciled published harness 5.4.0 (from 5.2.0): the Optional upfront feature plans paragraph and the new Estimate calibration paragraph carried verbatim from the template; owner-confirmed thresholds. 158 open steps backfilled with days/baselineDays from their current estimates, stated in each basis. No check, never or ask-first rule, or safeguard removed. No behaviour runner configured."
     },
     {
       "kind": "tool",
       "disposition": "implemented",
-      "target": "tools/check-freshness.mjs",
-      "evidence": "Copied byte-identically from tag v5.2.0; check-harness --strict passes. Session start reports 50 pending Gauntlet cases, named by F-074-T09."
+      "target": "tools/work-items.mjs",
+      "evidence": "tools/work-items.mjs and tools/check-freshness.mjs copied byte-identically from v5.4.0; queue order and backlog totals adopted; CI clones the template at v5.4.0. Friction sample covers this reconcile from the start, but also the Gauntlet pin done in the same branch."
     }
   ]
 }
