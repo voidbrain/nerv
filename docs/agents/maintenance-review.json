@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-11T11:00:54.414Z",
+  "reviewed": "2026-11-11T11:27:13.861Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
     "AGENTS.md": "6b0b10183f9295795c06246a6e85673bf16d0d16e7479c47db8006c6430b531c",
@@ -25,7 +25,7 @@
   },
   "measurements": {
     "samples": 1,
-    "latestAt": "2026-11-11T11:00:54.373Z",
+    "latestAt": "2026-11-11T11:27:13.794Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -55,12 +55,12 @@
         "durationMs": {
           "observed": 1,
           "missing": 0,
-          "median": 9421
+          "median": 56923
         },
         "conflicts": {
           "observed": 1,
           "missing": 0,
-          "median": 1
+          "median": 0
         },
         "unnecessaryPrompts": {
           "observed": 0,
@@ -77,16 +77,10 @@
   },
   "outcomes": [
     {
-      "kind": "rule",
-      "disposition": "implemented",
-      "target": "docs/BACKLOG-RULES.md",
-      "evidence": "Reconciled published harness v5.1.0: the Independent review paragraph gains the copy-only reconcile exemption (requires check-harness --strict) and matches the reviewer model to the change; AGENTS.md pointer says the exemptions are listed there. No check, never or ask-first rule, or safeguard removed. No behaviour runner configured."
-    },
-    {
-      "kind": "tool",
-      "disposition": "implemented",
-      "target": "tools/check-harness.mjs",
-      "evidence": "Copied byte-identically from tag v5.1.0 with .claude/agents/mechanical-reviewer.md and design-reviewer.md; check-harness --strict reports copied files match v5.1.0."
+      "kind": "none",
+      "disposition": "no-change",
+      "target": "",
+      "evidence": "Harness 5.1.1 changes only the template's default .gitignore (node_modules without the trailing slash, so a worktree symlink is ignored); NERV's .gitignore line updated to match. No rule, safeguard or tool changes; copied files unchanged and check-harness --strict passes against v5.1.1. CI's template clone moved from v5.0.0 to v5.1.1. No behaviour runner configured."
     }
   ]
 }
