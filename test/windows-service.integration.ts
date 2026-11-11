@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createServer } from 'node:net';
@@ -26,6 +26,18 @@ test(
         return false;
       }
     };
+    // Node, cmd and wscript processes with their command lines: the candidates for holding the data folder.
+    const holders = () =>
+      spawnSync(
+        'powershell',
+        [
+          '-NoProfile',
+          '-Command',
+          "Get-CimInstance Win32_Process -Filter \"Name='node.exe' or Name='cmd.exe' or Name='wscript.exe'\" | Select-Object ProcessId,ParentProcessId,Name,CommandLine | Format-List | Out-String -Width 400",
+        ],
+        { encoding: 'utf8' },
+      ).stdout;
+    let failure: unknown;
     try {
       assert.equal(cli('init').status, 0);
       const c = JSON.parse(readFileSync(join(home, 'config.json'), 'utf8'));
@@ -36,7 +48,8 @@ test(
       assert.ok(query(), 'the task exists');
       assert.ok(existsSync(join(home, 'nerv-service.vbs')) && existsSync(join(home, 'nerv-task.xml')));
       assert.match(cli('service', 'install').stderr, /task exists\. Uninstall it explicitly/, 'never a second task');
-      assert.equal(cli('service', 'status').status, 0);
+      const status = cli('service', 'status');
+      assert.equal(status.status, 0, status.stderr + status.stdout);
       // The task started at install: wait for the service, then stop it as service stop does.
       let started = false;
       for (let i = 0; i < 60 && !(started = await up()); i++) await new Promise((r) => setTimeout(r, 500));
@@ -55,9 +68,26 @@ test(
         'its files are gone',
       );
       assert.match(cli('service', 'status').stderr, /not installed/);
-    } finally {
-      spawnSync('schtasks', ['/Delete', '/TN', 'NERV Agency', '/F']);
-      rmSync(home, { recursive: true, force: true });
+    } catch (e) {
+      failure = e;
     }
+    // B-048: an early failure leaves NERV running, so stop it before removing the task, and never let a cleanup
+    // error replace the failure that caused it: report both, with what still holds the data folder.
+    if (query()) cli('service', 'stop');
+    spawnSync('schtasks', ['/Delete', '/TN', 'NERV Agency', '/F']);
+    try {
+      rmSync(home, { recursive: true, force: true });
+    } catch (cleanup) {
+      throw new Error(
+        [
+          `Cleanup could not remove ${home}: ${(cleanup as Error).message}`,
+          failure === undefined ? 'The test steps passed.' : `The test failed first: ${(failure as Error).stack}`,
+          `Left in the folder: ${JSON.stringify(readdirSync(home, { recursive: true }))}`,
+          `Processes: ${holders()}`,
+        ].join('\n'),
+        { cause: failure },
+      );
+    }
+    if (failure !== undefined) throw failure;
   },
 );
