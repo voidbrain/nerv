@@ -4,6 +4,8 @@
 
 The development dependency is a versioned, source-included npm artifact in `vendor/`, with SHA256 and source provenance in [the manifest](../../vendor/gauntlet-protocol.json). It needs no private GitHub token at installation. Update the independent project first, then replace the pinned artifact, lockfile and provenance together; do not edit extracted copies or vendor a fork silently.
 
+Pinned release: **0.5.0** (tag `v0.5.0`, 2026-11-11). It adds the separate 28-case `general-assistant-expanded@1.0.0` pack and repeatable candidate comparisons with full identity, mismatch reasons and error/not-run counts (upstream `docs/COMPARISONS.md`, shipped in the artifact). NERV's commands and the generated index still use the ten-case smoke packs: the expanded pack is not wired into `gauntlet:model-plan`/`model-run`, and no model run was made for this update. Reports stay protocol 0.4; earlier evidence remains readable.
+
 ## Commands and costs
 
 ```sh
@@ -149,7 +151,7 @@ The [owner-provided first report](2026-11-09-gemma-common-smoke.md) completed al
 
 ## Private failure diagnostics (Gauntlet0.4)
 
-The pinned0.4.1 artifact retains0.4.0 support for bounded, opt-in private final-reply captures. The first7/10 report remains frozen historical0.3 evidence; its hashes cannot recover raw replies. New diagnostic runs produce new evidence, keep failed grades and do not silently replace that run. No new model campaign was executed for this adoption.
+The pinned artifact (0.5.0 since 2026-11-11) retains0.4.0 support for bounded, opt-in private final-reply captures. The first7/10 report remains frozen historical0.3 evidence; its hashes cannot recover raw replies. New diagnostic runs produce new evidence, keep failed grades and do not silently replace that run. No new model campaign was executed for this adoption.
 
 Plan the three failed regression cases without generation:
 

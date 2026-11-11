@@ -200,3 +200,8 @@ Authenticated ci:status confirms CI42928609476 passed plan, validate, windows, n
 ## 2026-11-11 — PR #257
 
 Authenticated ci:status confirms CI42930317635 passed plan, validate, windows, native-macos and full-suite; merged main ee9cbb6. F-005-T06 first slice (reader contract, review-only rehearsal); update admission unchanged and no rehearsal was run on actual private data. The review fixes had no second independent review. Previous header: reviewed 11 November 2026 against main `65a79ad`. PR #256 CI42928609476 passed all five jobs/full-suite: harness v4.8.0 reconciled.
+
+
+## 2026-11-11 — PR #258
+
+Authenticated ci:status confirms CI42973361363 passed plan, validate, windows, native-macos and full-suite; merged main 119ac42. F-005-T06 second slice: journaled rehearse step and refused outcome; admission unchanged, no independent review of this slice yet and not exercised on the actual Mac service. One local full-suite run saw the known B-042 one-channel timing failure, which passed three isolated reruns and CI. Previous header: reviewed 11 November 2026 against main `ee9cbb6`. PR #257 CI42930317635 passed all five jobs/full-suite: F-005-T06 first slice merged.
