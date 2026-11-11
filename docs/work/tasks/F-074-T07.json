@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "parent": "F-074",
+  "id": "F-074-T07",
+  "status": "planned",
+  "title": "T07 — Raise a run-new-tests item when a pack is added or changed",
+  "goal": "Detect new or changed cases (pack id, version and case hash) against a committed run ledger, and make CI and check:freshness raise them in the backlog",
+  "acceptance": [
+    "A committed metadata-only ledger (no outputs, prompts or timings) records per case identity the last accepted run: report hash, model/profile identity and date",
+    "npm run check:gauntlet-runs lists cases with no ledger entry or a changed hash, and fails CI unless an open backlog item names them",
+    "A .harness.json impact row on vendor/gauntlet-protocol.json and evals/gauntlet/** tells the agent to raise or update that item in the same PR",
+    "A newer published Gauntlet release is reported at session start (as check:freshness does for the harness) and raises a pin-and-run item; NERV pulls, Gauntlet never pushes to or runs in its consumers"
+  ],
+  "dependsOn": [
+    "F-074-T06"
+  ],
+  "resources": [
+    "tools/gauntlet.mjs",
+    "test/gauntlet.test.mjs",
+    "evals/**",
+    "docs/evaluations/**",
+    "docs/test-capability-index.md",
+    "contract:gauntlet-adoption",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "evidence-review",
+    "regression-design"
+  ],
+  "privacy": "Neutral synthetic cases and private local reports only; no secrets, downloads or production effects.",
+  "validation": [
+    "Fixtures: a new pack, a changed case and an unchanged case give exactly the expected new/changed/current lists",
+    "Final applicable CI"
+  ],
+  "escalation": [
+    "The run itself is an owner-approved real-model campaign (AGENTS: separate triggers and budgets); this task only raises it"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Owner request 2026-11-11: NERV always consumes every common Gauntlet pack plus its own, and a pack added or changed raises a run-new-tests item. Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

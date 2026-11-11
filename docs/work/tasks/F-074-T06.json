@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "parent": "F-074",
+  "id": "F-074-T06",
+  "status": "planned",
+  "title": "T06 — Consume every common pack shipped in the pinned Gauntlet release",
+  "goal": "Replace the hard-coded smoke-v1 path with discovery of every pack in the pinned artifact, so a pin that adds a pack (0.5.0 added general-assistant-expanded, 28 cases) reaches NERV without a code change",
+  "acceptance": [
+    "model-plan/model-run accept --pack=<id> and default to all discovered common packs; smoke-schema keeps its --format=schema path",
+    "The generated capability index lists every common pack and every NERV pack with its upstream link at the pinned tag",
+    "A regression fails when the artifact ships a pack NERV neither consumes nor excludes with a recorded reason"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "tools/gauntlet.mjs",
+    "test/gauntlet.test.mjs",
+    "evals/**",
+    "docs/evaluations/**",
+    "docs/test-capability-index.md",
+    "contract:gauntlet-adoption",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "evidence-review",
+    "regression-design"
+  ],
+  "privacy": "Neutral synthetic cases and private local reports only; no secrets, downloads or production effects.",
+  "validation": [
+    "test/gauntlet.test.mjs covers discovery, explicit exclusion and the index across the join with the vendored artifact",
+    "npm run gauntlet:plan and check:gauntlet-index pass; no model run"
+  ],
+  "escalation": [
+    "Excluding a common pack is an owner decision recorded in the evaluation docs"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 focused day",
+    "basis": "Owner request 2026-11-11: NERV always consumes every common Gauntlet pack plus its own, and a pack added or changed raises a run-new-tests item. Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

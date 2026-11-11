@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "parent": "F-074",
+  "id": "F-074-T09",
+  "status": "planned",
+  "title": "T09 — Run the 28 new expanded-pack cases on the authorized Gemma profile",
+  "goal": "First run of general-assistant-expanded@1.0.0 (Gauntlet 0.5.0), never run in NERV, under the same authorized bounded profile as the first smoke",
+  "acceptance": [
+    "Owner approves the budget; the plan from gauntlet:all shows the 28 expanded cases as new and the 10 smoke cases as reused (or stale)",
+    "Saved private report; a summary in docs/evaluations with pass/fail per case, telemetry gaps explicit and no qualification claim",
+    "The T07 ledger records the run, and check:gauntlet-runs reports no pending cases"
+  ],
+  "dependsOn": [
+    "F-074-T08"
+  ],
+  "resources": [
+    "tools/gauntlet.mjs",
+    "test/gauntlet.test.mjs",
+    "evals/**",
+    "docs/evaluations/**",
+    "docs/test-capability-index.md",
+    "contract:gauntlet-adoption",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "evidence-review",
+    "regression-design"
+  ],
+  "privacy": "Neutral synthetic cases and private local reports only; no secrets, downloads or production effects.",
+  "validation": [
+    "Report admitted by the pinned Gauntlet release; summary numbers match the report"
+  ],
+  "escalation": [
+    "Owner action: approve and start the real-model campaign (first smoke: 10 cases in about 65 s, so 28 cases are expected in a few minutes)"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 day including review",
+    "basis": "Owner request 2026-11-11: NERV always consumes every common Gauntlet pack plus its own, and a pack added or changed raises a run-new-tests item. Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

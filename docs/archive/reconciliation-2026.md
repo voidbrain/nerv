@@ -237,3 +237,7 @@ Authenticated ci:status confirms CI43005607280 (#265) and CI43007427908 (#264) p
 ## 2026-11-11 — PR #266
 
 Authenticated ci:status confirms CI43010405505 passed plan, validate, windows, native-macos and full-suite; merged main 00b0b22. Harness 5.1.0 reconciled: reviewer agents and `check-harness --strict` copied, Independent review paragraph reconciled by hand; fresh-context design review found no blockers, its should-fix items applied before merge. A further Windows failure on that run's history is recorded on B-046. Previous header: reviewed 11 November 2026 against main `73a96cc`. PRs #264 and #265 passed all five jobs: approved F-005/F-006/F-016/F-007 slices recorded as tasks; B-048 fixed, awaiting five clean `main` runs. Harness 5.1.0 reconciled (PR #266).
+
+## 2026-11-11 — PR #267
+
+Authenticated ci:status confirms CI43013239139 passed plan, validate, windows, native-macos and full-suite; merged main 74c3cee. Harness 5.1.1 reconciled (`node_modules` symlink ignored, CI clones the template at v5.1.1). The first run on that PR (CI43012116246) failed Windows on the B-042 one-channel case with no runtime change; recorded on B-042, and the next push passed. Previous header: reviewed 11 November 2026 against main `00b0b22`. PR #266 CI43010405505 passed all five jobs: harness 5.1.0 reconciled. Harness 5.1.1 reconciled (PR #267); B-048 awaits five clean `main` runs.
