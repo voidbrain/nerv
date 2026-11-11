@@ -5,11 +5,11 @@ import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, realpathSy
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { pathToFileURL } from 'node:url';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { createServer } from 'node:net';
 import { DatabaseSync } from 'node:sqlite';
 import { Store } from '../src/store.ts';
-import { initialize, pinKajiRoot, readConfig } from '../src/config.ts';
+import { databasePath, initialize, pinKajiRoot, readConfig } from '../src/config.ts';
 import {
   Registry,
   baseKey,
@@ -789,5 +789,31 @@ test('review regression: historical root reuse is rejected even when its stored 
     );
   } finally {
     rmSync(f.root, { recursive: true, force: true });
+  }
+});
+
+// B-048: every CLI command runs this check first; while serve opens the database and switches it to WAL, it holds a
+// write lock, so the check waits for it like Store does instead of failing at once with "database is locked".
+test('the root-migration check waits for a brief database lock instead of failing', async () => {
+  const home = mkdtempSync(join(tmpdir(), 'nerv-rm-lock-'));
+  try {
+    const file = databasePath(home);
+    new DatabaseSync(file).close();
+    const holder = spawn(
+      process.execPath,
+      [
+        '-e',
+        "const {DatabaseSync}=require('node:sqlite');const d=new DatabaseSync(process.argv[1]);d.exec('BEGIN EXCLUSIVE');" +
+          "console.log('locked');setTimeout(()=>{d.exec('COMMIT');d.close();},400);",
+        file,
+      ],
+      { stdio: ['ignore', 'pipe', 'inherit'] },
+    );
+    const exited = new Promise((done) => holder.once('exit', done));
+    await new Promise<void>((done) => holder.stdout.once('data', () => done()));
+    assert.doesNotThrow(() => assertRootMigrationReady(home));
+    await exited;
+  } finally {
+    rmSync(home, { recursive: true, force: true });
   }
 });
