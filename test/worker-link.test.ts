@@ -653,6 +653,63 @@ test(
     }
   },
 );
+// B-046 (#275 Windows run 43084555427): the grace budget's own timer can fire late too. A second stall that starts
+// after the peer answered the stalled ping leaves the answer unread in the socket when that timer fires; the verdict
+// must read it first, not end a healthy session.
+test(
+  'B-046: an answer that arrives during a second stall is read before the grace budget ends the session',
+  { timeout: 30000 },
+  async () => {
+    const f = await fixture(150);
+    const send = WebSocket.prototype.send;
+    let hellos = 0,
+      armed = false,
+      stalledId = '',
+      done = false;
+    const stall = (ms: number) => {
+      const end = Date.now() + ms;
+      while (Date.now() < end) {
+        /* busy on purpose */
+      }
+    };
+    const rpcOf = (data: unknown) => {
+      try {
+        return JSON.parse(JSON.parse(String(data)).body).rpc as { id?: string; method?: string; result?: unknown };
+      } catch {
+        return {};
+      }
+    };
+    WebSocket.prototype.send = function (this: WebSocket, data: unknown, ...rest: unknown[]) {
+      const sent = (send as (...args: unknown[]) => void).call(this, data, ...rest);
+      if (String(data).includes('worker.hello')) hellos++;
+      const rpc = rpcOf(data);
+      if (armed && rpc.method === 'worker.ping' && rpc.id) {
+        armed = false;
+        stalledId = rpc.id;
+        setImmediate(() => stall(200));
+      } else if (stalledId && rpc.id === stalledId && 'result' in rpc) {
+        stalledId = '';
+        // The answer is written; stall again past the grace budget before this process reads it.
+        setImmediate(() => {
+          stall(200);
+          done = true;
+        });
+      }
+      return sent;
+    } as typeof send;
+    try {
+      await f.start();
+      const negotiated = hellos;
+      armed = true;
+      await until(() => done);
+      await wait(400);
+      assert.equal(hellos - negotiated, 0, 'an answer already received must not be judged a timeout');
+    } finally {
+      WebSocket.prototype.send = send;
+      await f.close();
+    }
+  },
+);
 test('F-014: concurrent replay and overload execute the same durable request once', { timeout: 30000 }, async () => {
   // Keep heartbeat traffic out of this deliberate four-slot saturation; heartbeat expiry has its own case.
   const f = await fixture(10000);
