@@ -886,7 +886,8 @@
     "layout": "docs/work/layout.json",
     "records": "docs/work/records",
     "tasks": "docs/work/tasks",
-    "profiles": "docs/agents/model-profiles.json"
+    "profiles": "docs/agents/model-profiles.json",
+    "featurePlans": true
   },
   "workUsage": {
     "enabled": true

@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-012-T03",
+  "parent": "F-012",
+  "title": "Claude Code (VS Code) adapter feasibility and adapter",
+  "goal": "Claude Code (VS Code) adapter feasibility and adapter",
+  "status": "planned",
+  "acceptance": [
+    "Supported command/API used where available; capability observed, not inferred; adapter or documented infeasibility"
+  ],
+  "dependsOn": [
+    "F-012-T02"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 focused days",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

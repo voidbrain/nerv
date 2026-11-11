@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "id": "F-015-T02",
+  "parent": "F-015",
+  "title": "Isolated live pairing and Keychain trial",
+  "goal": "Isolated live pairing and Keychain trial",
+  "status": "planned",
+  "acceptance": [
+    "Owner pairs the companion on the Mac in an isolated profile; expired/replayed tickets fail live; no token in URLs, argv or logs"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Owner-observed result recorded in the parent record"
+  ],
+  "escalation": [
+    "Owner action: this step needs the owner's access, choice or observation"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

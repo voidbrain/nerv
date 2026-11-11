@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-066-T02",
+  "parent": "F-066",
+  "title": "Client kind on ledger events",
+  "goal": "Client kind on ledger events",
+  "status": "planned",
+  "acceptance": [
+    "Events record dashboard session, CLI, API token or Telegram; a test distinguishes API-token from dashboard decisions"
+  ],
+  "dependsOn": [
+    "F-066-T01"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 focused day",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

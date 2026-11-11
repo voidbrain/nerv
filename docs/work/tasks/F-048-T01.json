@@ -34,5 +34,11 @@
   "escalation": [
     "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
     "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
-  ]
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 focused days",
+    "basis": "Estimate added at featurePlans adoption (2026-11-11): Visible bounded request queue with UI and tests; one of three steps of a Large parent. Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
 }

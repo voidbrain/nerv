@@ -54,5 +54,11 @@
   "escalation": [
     "Stop on unknown model consumption or configuration identity",
     "Keep live-model evidence separate from scripted system passes"
-  ]
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Completed before featurePlans adoption; original effort unmeasured.",
+    "reviewed": "2026-11-11"
+  }
 }

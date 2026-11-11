@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-021-T05",
+  "parent": "F-021",
+  "title": "Dashboard tool listing",
+  "goal": "Dashboard tool listing",
+  "status": "planned",
+  "acceptance": [
+    "Registered tools, versions and grants listed in the dashboard; axe passes"
+  ],
+  "dependsOn": [
+    "F-021-T04"
+  ],
+  "resources": [
+    "web/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

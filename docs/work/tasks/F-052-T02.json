@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "F-052-T02",
+  "parent": "F-052",
+  "title": "Per-call duration recording",
+  "goal": "Per-call duration recording",
+  "status": "planned",
+  "acceptance": [
+    "Each consultant/pilot, Misato step, Casper, other bases' seats and executor call has a recorded duration; transfer and step durations distinct"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 focused days",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

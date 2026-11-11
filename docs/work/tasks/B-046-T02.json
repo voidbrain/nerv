@@ -37,5 +37,11 @@
   "escalation": [
     "Do not merely widen timeouts or weaken assertions",
     "Keep uncertain external effects held until reconciled"
-  ]
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 focused days",
+    "basis": "Estimate added at featurePlans adoption (2026-11-11): Controlled reproduction of the deferred-cancellation heartbeat loss under CPU contention, then classification; parent Investigate/Medium. Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
 }

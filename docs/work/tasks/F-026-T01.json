@@ -38,5 +38,11 @@
   "escalation": [
     "Actual isolation remains F-049; no outside-code or network confinement claim",
     "Per-trigger budgets are explicit action/step counts, not fabricated monetary or token limits"
-  ]
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Completed before featurePlans adoption; original effort unmeasured.",
+    "reviewed": "2026-11-11"
+  }
 }

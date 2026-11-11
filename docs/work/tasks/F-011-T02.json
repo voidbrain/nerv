@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "id": "F-011-T02",
+  "parent": "F-011",
+  "title": "Live menu, service-button and login acceptance on the Mac",
+  "goal": "Live menu, service-button and login acceptance on the Mac",
+  "status": "planned",
+  "acceptance": [
+    "Health, reminders, workspace launch, doctor and launch-at-login checked live; Quit leaves the service running; Stop is separate"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Owner-observed result recorded in the parent record"
+  ],
+  "escalation": [
+    "Owner action: this step needs the owner's access, choice or observation"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

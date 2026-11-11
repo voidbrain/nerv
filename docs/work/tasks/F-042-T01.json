@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "F-042-T01",
+  "parent": "F-042",
+  "title": "Read-only agency tools for Misato",
+  "goal": "Read-only agency tools for Misato",
+  "status": "planned",
+  "acceptance": [
+    "Sortie record, ballot with each seat's vote and reason, peer seats, consultant advice, approver and time; what waits; base health and status; Green without a card"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 focused days",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

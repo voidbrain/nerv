@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-004-T03",
+  "parent": "F-004",
+  "title": "Doctor view",
+  "goal": "Doctor view",
+  "status": "planned",
+  "acceptance": [
+    "Doctor results rendered read-only with severity and fix hints; no secrets shown; axe passes"
+  ],
+  "dependsOn": [
+    "F-004-T02"
+  ],
+  "resources": [
+    "web/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

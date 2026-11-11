@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "F-009-T01",
+  "parent": "F-009",
+  "title": "Single-process service, config and lifecycle commands",
+  "goal": "Single-process service, config and lifecycle commands",
+  "status": "closed",
+  "acceptance": [
+    "Delivered: one process on 4317, config survives init, clean SIGTERM, restart catch-up, Mac per-user install/status/start/stop/uninstall"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Delivered before featurePlans adoption; see the record.",
+    "reviewed": "2026-11-11"
+  }
+}

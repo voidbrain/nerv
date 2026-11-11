@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "F-051-T05",
+  "parent": "F-051",
+  "title": "Authenticated cross-base inspection",
+  "goal": "Authenticated cross-base inspection",
+  "status": "planned",
+  "acceptance": [
+    "Remote sortie details navigable with authentication; truthful directional base/channel topology"
+  ],
+  "dependsOn": [
+    "F-051-T04"
+  ],
+  "resources": [
+    "web/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "src/**"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 focused days",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

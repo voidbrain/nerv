@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-046-T02",
+  "parent": "F-046",
+  "title": "Matching existing items before an add",
+  "goal": "Matching existing items before an add",
+  "status": "planned",
+  "acceptance": [
+    "Matching reminders and facts shown to Misato; same item not re-proposed and the reply says it exists"
+  ],
+  "dependsOn": [
+    "F-046-T01"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

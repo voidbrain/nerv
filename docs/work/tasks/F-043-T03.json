@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "F-043-T03",
+  "parent": "F-043",
+  "title": "Delivery and display",
+  "goal": "Delivery and display",
+  "status": "planned",
+  "acceptance": [
+    "All-day at the brief's time; range at its start; until ahead of the end; Coming up, inbox and brief show the kind"
+  ],
+  "dependsOn": [
+    "F-043-T02"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "web/**"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

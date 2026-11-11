@@ -41,5 +41,11 @@
   "escalation": [
     "No unscoped/idle result substitutes for an expressly requested condition",
     "Owner-declared load/power is not independent measurement; missing host/privacy/budget evidence stays unknown"
-  ]
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Completed before featurePlans adoption; original effort unmeasured.",
+    "reviewed": "2026-11-11"
+  }
 }

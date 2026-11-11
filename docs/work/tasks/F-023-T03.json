@@ -47,5 +47,11 @@
   "escalation": [
     "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
     "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
-  ]
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Completed before featurePlans adoption; original effort unmeasured.",
+    "reviewed": "2026-11-11"
+  }
 }

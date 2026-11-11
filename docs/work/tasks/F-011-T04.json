@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "F-011-T04",
+  "parent": "F-011",
+  "title": "Signed and notarized release",
+  "goal": "Signed and notarized release",
+  "status": "planned",
+  "acceptance": [
+    "A Developer ID-signed, notarized build installs and passes Gatekeeper on a clean account"
+  ],
+  "dependsOn": [
+    "F-011-T03"
+  ],
+  "resources": [
+    "native/**",
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Owner-observed result recorded in the parent record"
+  ],
+  "escalation": [
+    "Owner action: this step needs the owner's access, choice or observation"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 focused days including account troubleshooting",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

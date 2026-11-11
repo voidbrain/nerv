@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "id": "F-062-T01",
+  "parent": "F-062",
+  "title": "Owner-agreed loss window and restore time",
+  "goal": "Owner-agreed loss window and restore time",
+  "status": "planned",
+  "acceptance": [
+    "Bounds agreed and recorded"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Owner-observed result recorded in the parent record"
+  ],
+  "escalation": [
+    "Owner action: this step needs the owner's access, choice or observation"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 day including owner time",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

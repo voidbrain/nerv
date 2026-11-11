@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "F-004-T06",
+  "parent": "F-004",
+  "title": "Phone install and push acceptance",
+  "goal": "Phone install and push acceptance",
+  "status": "planned",
+  "acceptance": [
+    "Owner installs on a phone, receives a reminder push and completes it from the PWA; result recorded"
+  ],
+  "dependsOn": [
+    "F-004-T05"
+  ],
+  "resources": [
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Owner-observed result recorded in the parent record"
+  ],
+  "escalation": [
+    "Owner action: this step needs the owner's access, choice or observation"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 day including owner time",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

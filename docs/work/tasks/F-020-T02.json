@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-020-T02",
+  "parent": "F-020",
+  "title": "Misato HITL surfacing with audit",
+  "goal": "Misato HITL surfacing with audit",
+  "status": "planned",
+  "acceptance": [
+    "Misato surfaces pending HITL and accepts/rejects through the existing decision path with audit"
+  ],
+  "dependsOn": [
+    "F-020-T01"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}
