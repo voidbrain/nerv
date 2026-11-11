@@ -37,8 +37,8 @@
   ],
   "effort": {
     "size": "large",
-    "estimate": "4–6 focused days",
-    "basis": "Initial remaining estimate for reviewed upgrade admission, real cross-version joins, recovery and selected-target acceptance. Migration behavior is uncertain.",
-    "reviewed": "2026-11-10"
+    "estimate": "3–5 focused days",
+    "basis": "Revised 2026-11-11 after the first slice (reader contract and review-only rehearsal, candidate awaiting review). Remaining: journaled rehearsal bound to the plan, admission beyond documentation, forward recovery and selected-target acceptance. Migration behavior and review findings remain uncertain; initial estimate was 4–6 focused days.",
+    "reviewed": "2026-11-11"
   }
 }

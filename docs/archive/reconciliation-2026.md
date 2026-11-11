@@ -190,3 +190,8 @@ Authenticated ci:status confirms full CI42874665479 passed at6f21738, merged12a9
 ## 2026-11-11 — PR #255
 
 Authenticated ci:status confirms CI42889510020 passed plan, validate, windows, native-macos and full-suite; merged main b68802d. Planning and harness4.7.0 reconciliation only: F-005 keeps its dated initial T06–T11 plan, no acceptance advances and no runtime/service/engine effect follows. Previous header: reviewed 10 November 2026 against main `2f85f06`. PR #253 full CI42874665479 passed at6f21738; merged tree matches. T02/T04/T05 selected enrollment, root migration and Mac service accepted. PR #254 CI42878276038 passed plan/validate/platform jobs; its docs-only scope does not claim a new full marker. F-005 remains open with initial T06–T11 delivery plan.
+
+
+## 2026-11-11 — PR #256
+
+Authenticated ci:status confirms CI42928609476 passed plan, validate, windows, native-macos and full-suite; merged main 65a79ad. Harness v4.8.0 copied tool/guide and maintenance receipt only; no NERV rule, runtime or service change. No Claude allowance snapshot observed yet. Previous header: reviewed 11 November 2026 against main `b68802d`. PR #255 CI42889510020 passed all five jobs/full-suite; F-005 stays open with T06–T11 planned, T06 safe upgrades next.
