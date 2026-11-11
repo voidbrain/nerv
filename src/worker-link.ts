@@ -283,10 +283,11 @@ class Peer {
   request(method: string, params: Record<string, unknown>, timeoutMs = this.link.requestMs): Promise<unknown> {
     if (this.pending.size >= MAX_RPC_INFLIGHT) return Promise.reject(Error('Worker pending request bound reached.'));
     return new Promise((resolve, reject) => {
-      // B-046: a timeout that fires late because this process was stalled (a busy loop, a sleeping laptop) is not
-      // evidence the peer is gone: the peer did not get its full budget, and expired timers run before sockets are
-      // read. Such a late verdict is deferred once by a fresh budget from the moment the loop resumed; a peer that
-      // really is gone still times out after it. An on-time timeout is final, as before.
+      // B-046: a timeout that fires late because this process's event loop was stalled is not evidence the peer is
+      // gone: the peer did not get its full budget, and expired timers run before sockets are read. Such a late verdict
+      // is deferred once by a fresh budget from the moment the loop resumed; a peer that really is gone still times out
+      // after it (worst case: budget + stall + budget). An on-time timeout is final, as before. Whether a system
+      // sleep counts as a stall depends on the platform's monotonic clock; it is not relied on here.
       const id = randomUUID(),
         started = performance.now(),
         expire = () => reject(Error('Worker result unknown after timeout.')),
