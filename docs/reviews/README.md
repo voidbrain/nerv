@@ -162,3 +162,5 @@ Gauntlet0.3 NERV adoption accepted after PR235 exactheadb4cd887 / full CI4260857
 [Root activation implementation review, 2026-11-10](2026-11-10-root-activation.md): independent historical-revocation, mixed-root transport and key-encoding findings, regression/fix commits and candidate validation; final follow-up/CI and actual target acceptance remain separate. Re-review on migration/trust/recovery changes.
 
 [Mac service lifecycle review, 2026-11-10](2026-11-10-mac-service.md): independent startup/compatibility/rename findings and unchanged-test fixes;22 tests passed at2ab189f, with actual OS acceptance and final CI separate.
+
+[Upgrade rehearsal review, 2026-11-11](2026-11-11-upgrade-rehearsal.md): independent blocker (real lifecycle backups refused) and comparison gaps with failing regressions before fixes; review-only tool, update admission unchanged, fixes not independently re-reviewed.

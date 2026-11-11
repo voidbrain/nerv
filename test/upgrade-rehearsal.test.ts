@@ -25,7 +25,6 @@ function backup(options:{schema?:number;config?:string}={}) {
  return {root,directory,database,remove:()=>rmSync(root,{recursive:true,force:true})};
 }
 const edit=(sql:string):UpgradeReader=>database=>{const db=new DatabaseSync(database);try{db.exec(sql);}finally{db.close();}};
-const rehearsals=()=>readdirSync(realpathSync(tmpdir())).filter(name=>name.startsWith('nerv-rehearsal-')&&!name.startsWith('nerv-rehearsal-test-')).length;
 
 test('the reviewed contract is what the Store and the service lifecycle actually enforce',()=>{
  assert.equal(SERVICE_READER_SCHEMA,UPGRADE_CONTRACT.readerSchema);
@@ -35,11 +34,11 @@ test('the reviewed contract is what the Store and the service lifecycle actually
 
 test('the real reader opens a copy of real data twice; the backup stays byte-identical and no copy remains',supported,async()=>{
  const f=backup();try{
-  const before=digest(f.database),files=readdirSync(f.directory),leftovers=rehearsals();
-  const report=await rehearseUpgrade(f.directory);
+  const before=digest(f.database),files=readdirSync(f.directory);let work='';
+  const report=await rehearseUpgrade(f.directory,(database,home)=>{work=home;return currentReader(database,home);});
   assert.deepEqual(report.blockers,[]);assert.equal(report.execution,'rehearsal-only');assert.equal(report.source.digest,before);
   assert.equal(report.source.schema,5);assert.deepEqual(report.result&&{schema:report.result.schema,forwardOnly:report.result.forwardOnly},{schema:5,forwardOnly:false});assert.ok(report.result!.rows>=4);
-  assert.equal(digest(f.database),before);assert.deepEqual(readdirSync(f.directory),files);assert.equal(rehearsals(),leftovers);
+  assert.equal(digest(f.database),before);assert.deepEqual(readdirSync(f.directory),files);assert.ok(work&&!existsSync(work),'the private working copy is removed');
   assert.ok(!JSON.stringify(report).includes('Neutral first'),'a report carries counts and names of tables, never row content');
  }finally{f.remove();}
 });
@@ -51,9 +50,9 @@ test('root-bound schema 6 data is rehearsed with its copied configuration, and r
  }finally{bound.remove();bare.remove();}
 });
 
-test('an unsupported or damaged input is refused before any reader runs',supported,async()=>{
+test('an input schema outside the lifecycle range is refused before any reader runs',supported,async()=>{
  let ran=0;const spy:UpgradeReader=()=>{ran++;};
- for(const schema of [UPGRADE_CONTRACT.minimumServiceSchema-1,UPGRADE_CONTRACT.readerSchema+1]){const f=backup({schema});try{const report=await rehearseUpgrade(f.directory,spy);assert.match(report.blockers.join(' '),/outside what this reader supports/);assert.equal(report.result,undefined);}finally{f.remove();}}
+ for(const schema of [UPGRADE_CONTRACT.minimumServiceSchema-1,UPGRADE_CONTRACT.readerSchema+1]){const f=backup({schema});try{const report=await rehearseUpgrade(f.directory,spy);assert.match(report.blockers.join(' '),/outside what the service lifecycle accepts/);assert.equal(report.result,undefined);}finally{f.remove();}}
  assert.equal(ran,0);
 });
 
@@ -62,7 +61,7 @@ test('a reader that loses, renumbers or downgrades existing data is reported, wh
   ['deleted row',edit("DELETE FROM deliveries WHERE id='d-second'"),/Table deliveries lost or renumbered 1 existing row/],
   ['renumbered inbox cursor',edit("UPDATE deliveries SET rowid=20 WHERE id='d-second'"),/Table deliveries lost or renumbered 1 existing row/],
   ['dropped table',edit('DROP TABLE deliveries'),/Table deliveries is missing/],
-  ['dropped key column',edit('CREATE TABLE r2(title TEXT,due TEXT,created TEXT);INSERT INTO r2 SELECT title,due,created FROM reminders;PRAGMA foreign_keys=OFF;DROP TABLE reminders;ALTER TABLE r2 RENAME TO reminders'),/Table reminders lost a key column.*foreign keys that can no longer be checked|foreign keys that can no longer be checked.*Table reminders lost a key column/],
+  ['dropped key column',edit('CREATE TABLE r2(title TEXT,due TEXT,created TEXT);INSERT INTO r2 SELECT title,due,created FROM reminders;PRAGMA foreign_keys=OFF;DROP TABLE reminders;ALTER TABLE r2 RENAME TO reminders'),/foreign keys that can no longer be checked.*Table reminders lost column id/],
   ['downgrade',edit('PRAGMA user_version=4'),/lowered the schema from 5 to 4/],
   ['beyond its contract',edit('PRAGMA user_version='+(UPGRADE_CONTRACT.readerSchema+1)),/beyond its own contract/],
   ['failure',()=>{throw Error('Neutral reader\nfailure');},/first open: Neutral reader failure/]

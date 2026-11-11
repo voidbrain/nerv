@@ -25,7 +25,8 @@ export interface ServiceReceipt {digest:string;resource:string;fence:number;nonc
 /** Trusted adapter injection is for tests; no manifest or CLI input can select an adapter or command text. */
 export interface ServiceHost {context:ServiceContext;inspect():Promise<ServiceObservation>;command(step:'register'|'unregister'|'fetch'|'checkout'|'dependencies'|'build',plan:ServicePlan):Promise<void>;compatible(revision:string):Promise<boolean>;backup(path:string):Promise<void>;authorizedStart?(plan:ServicePlan):Promise<boolean>}
 const hash=(value:string|Buffer)=>createHash('sha256').update(value).digest('hex');
-const handler=()=>hash(readFileSync(fileURLToPath(import.meta.url)));
+/** The handler identity covers this file and the reader contract it enforces, so a plan made under other bounds is refused. */
+const handler=()=>hash(Buffer.concat([readFileSync(fileURLToPath(import.meta.url)),Buffer.from(canonical(UPGRADE_CONTRACT))]));
 const object=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 const definition=(c:ServiceContext)=>join(c.userHome,'Library/LaunchAgents/io.nerv.agent.plist');
 const area=(c:ServiceContext)=>join(c.userHome,'.nerv-lifecycle');
