@@ -2,6 +2,7 @@ import {Watch,watchQuiet,type WatchWork} from './watch.ts';
 import {transaction} from './sqlite-transaction.ts';
 import type {WorkerLease} from './worker-jobs.ts';
 import {readConfig} from './config.ts';
+import {UPGRADE_CONTRACT} from './upgrade-contract.ts';
 import {WorkerJobs,WORKER_RESULT_BYTES,WORKER_LEASE_MS} from './worker-jobs.ts';
 import {InstrumentalityRuns} from './instrumentality-runs.ts';
 import {UsageStore} from './model-usage.ts';
@@ -41,7 +42,7 @@ export class Store {
     if(path !== ':memory:') mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
     this.db = new DatabaseSync(path);
     const version = this.db.prepare('PRAGMA user_version').get() as {user_version:number};
-    if(version.user_version > 6) {this.db.close();throw new Error('Database schema is newer than this NERV Agency version.');}
+    if(version.user_version > UPGRADE_CONTRACT.readerSchema) {this.db.close();throw new Error('Database schema is newer than this NERV Agency version.');}
     if(this.db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='root_migration_resource'").get()&&this.db.prepare('SELECT 1 FROM root_migration_resource').get()){this.db.close();throw new Error('Root migration is unresolved; inspect its receipt before starting NERV.');}
     if(version.user_version>=6&&options.home&&readConfig(options.home).kaji?.rootBinding!==true){this.db.close();throw new Error('Migrated trust requires root-bound peer authentication.');}
     this.usage=new UsageStore(this.db);this.instrumentality=new InstrumentalityRuns(this.db);

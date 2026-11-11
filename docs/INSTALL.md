@@ -317,6 +317,14 @@ nerv nodes lifecycle-status --digest PLAN_DIGEST
 
 Generate a fresh plan for `stop`, `start` or `uninstall`; stop before uninstall or update. Keep plan/receipt files private. `update --revision FULL_SHA` currently permits only revisions changing documentation/README, with identical executable/dependency/configuration trees and actual database schema5/6. Executable, runtime-path or schema upgrades require the separate F-005-T06 compatibility work; marker strings cannot authorize them. Update takes a consistent private backup, advances the pinned revision, runs locked dependencies/build and verifies the restarted runtime. General restore/downgrade remains F-062.
 
+Before any application upgrade is admitted, you can rehearse a candidate reader on a backup. From a separate clone or worktree checked out at the candidate commit:
+
+```bash
+nerv nodes upgrade-rehearse --backup "$HOME/.nerv-lifecycle/backups/PLAN_DIGEST" --out rehearsal.json
+```
+
+It copies the backup to a private temporary directory, opens the copy twice with that checkout's real database reader, and reports lost or renumbered rows, missing tables, integrity failures and schema direction. The backup, the data home, the running service and both checkouts are not changed. A report with no blockers is review evidence, not permission to upgrade; see the [upgrade decision](decisions/node-upgrades.md).
+
 Every accepted operation records a fence/nonce/handler identity and started effects before executing. Replay returns its receipt, including uncertainty, without restarting effects. An unresolved operation blocks ordinary CLI startup/mutations; only its exact manager-owned, source/profile-bound start can pass. For recovery, inspect the selected job and all descendants, stop only a verified owned job, and retain observed effects. `nodes lifecycle-release --receipt FILE --evidence FILE` requires matching ownership, stopped-handler/descendant/operator confirmations and a reason. It does not undo files or data. PID absence or elapsed time alone is insufficient. See [the execution/recovery contract](decisions/node-lifecycle.md).
 
 ## Proactive watches (Hyuga)

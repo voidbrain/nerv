@@ -12,9 +12,10 @@ import {NODE_FLAGS} from './process-client.ts';
 import {assertRootMigrationReady} from './root-migration.ts';
 import {lifecycleRecovery} from './node-lifecycle.ts';
 import {transaction} from './sqlite-transaction.ts';
+import {UPGRADE_CONTRACT} from './upgrade-contract.ts';
 
 export const SERVICE_LIFECYCLE_PROTOCOL = 1;
-export const SERVICE_READER_SCHEMA = 6;
+export const SERVICE_READER_SCHEMA = UPGRADE_CONTRACT.readerSchema;
 type Action='install'|'start'|'stop'|'update'|'uninstall';
 type State='running'|'completed'|'uncertain'|'released';
 export interface ServiceContext {userHome:string;home:string;source:string;node:string;uid:number}
@@ -51,7 +52,7 @@ function journal(c:ServiceContext,write=false):DatabaseSync|undefined {
 function stored(db:DatabaseSync|undefined,digest:string):ServiceReceipt|undefined {if(!db||!db.prepare("SELECT 1 FROM sqlite_master WHERE name='operations'").get())return;const row=db.prepare('SELECT receipt FROM operations WHERE digest=?').get(digest) as {receipt:string}|undefined;return row?JSON.parse(row.receipt) as ServiceReceipt:undefined;}
 function held(db:DatabaseSync|undefined):boolean {return !!db?.prepare("SELECT 1 FROM sqlite_master WHERE name='resource'").get()&&!!db.prepare('SELECT 1 FROM resource').get();}
 function blockers(action:Action,o:ServiceObservation,next?:string):string[] {
- const out:string[]=[];if(o.schema<5||o.schema>SERVICE_READER_SCHEMA)out.push('The selected database schema is unsupported.');if(!o.session)out.push('The selected GUI user session is unavailable.');if(!o.clean)out.push('The source checkout must be clean.');if(o.legacy)out.push('Legacy service ownership requires a separate review.');if(o.pending)out.push('Reconcile pending or uncertain work first.');if(!o.built&&action!=='uninstall')out.push('Build the selected source first.');
+ const out:string[]=[];if(o.schema<UPGRADE_CONTRACT.minimumServiceSchema||o.schema>SERVICE_READER_SCHEMA)out.push('The selected database schema is unsupported.');if(!o.session)out.push('The selected GUI user session is unavailable.');if(!o.clean)out.push('The source checkout must be clean.');if(o.legacy)out.push('Legacy service ownership requires a separate review.');if(o.pending)out.push('Reconcile pending or uncertain work first.');if(!o.built&&action!=='uninstall')out.push('Build the selected source first.');
  if(o.definition==='foreign'||o.registration==='foreign'||o.runtime==='unknown')out.push('Service or runtime ownership is unknown or belongs elsewhere.');
  if(action==='install'&&(o.definition!=='absent'||o.registration!=='absent'||o.runtime!=='stopped'))out.push('Install requires absent definition/registration and stopped runtime.');
  if(action!=='install'&&o.definition!=='owned')out.push('The definition must exactly match this profile, source and Node.');
@@ -123,7 +124,7 @@ export function serviceProfileIdentity(c:ServiceContext):string {
 }
 /** Until a migration contract is reviewed, executable, dependency and configuration changes cannot enter this update path. */
 export async function compatibleServiceRevision(c:ServiceContext,revision:string,run:typeof command=command):Promise<boolean> {
- if(!/^[a-f0-9]{40}$/.test(revision))return false;const db=new DatabaseSync(databasePath(c.home),{readOnly:true});let schema:number;try{schema=Number(db.prepare('PRAGMA user_version').get()!.user_version);}finally{db.close();}if(schema<5||schema>SERVICE_READER_SCHEMA)return false;
+ if(!/^[a-f0-9]{40}$/.test(revision))return false;const db=new DatabaseSync(databasePath(c.home),{readOnly:true});let schema:number;try{schema=Number(db.prepare('PRAGMA user_version').get()!.user_version);}finally{db.close();}if(schema<UPGRADE_CONTRACT.minimumServiceSchema||schema>SERVICE_READER_SCHEMA)return false;
  const diff=await run('git',['-C',c.source,'diff','--no-renames','--name-only','-z','HEAD',revision,'--']);return diff.status===0&&diff.out.split('\0').filter(Boolean).every(path=>path.startsWith('docs/')||path==='README.md');
 }
 export function macRegistrationMatches(output:string,c:ServiceContext):boolean {
