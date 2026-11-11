@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "id": "F-005-T22",
+  "status": "planned",
+  "title": "T08e — Demonstration of prerequisites and optional engine management on an owner-selected target",
+  "goal": "Demonstration of prerequisites and optional engine management on an owner-selected target.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "acceptance": [
+    "Demonstration of prerequisites and optional engine management on an owner-selected target",
+    "Check supported Node version, executable and non-interactive service environment before install/start/update; report missing or incompatible prerequisites",
+    "Provide explicit supported-platform Node installation/upgrade choices with reviewed ownership, permission and recovery; never silently replace a user-managed runtime",
+    "Support different and multiple engine/provider instances and endpoints together, including local engines and remote endpoints; Ollama is one adapter example, not the contract",
+    "Keep readiness probing separate from management ownership. Optional start-at-login/on-demand local engine management applies only to selected owned instances and configured policy; external services are not stopped or reconfigured",
+    "Bind engine adapters to declared capabilities/version support, endpoint identity, port/resource conflicts, credential privacy and recovery; a remote endpoint does not imply a local installation",
+    "Join prerequisite checks to service bootstrap/update and demonstrate configured optional engine startup on an explicitly selected target"
+  ],
+  "dependsOn": [
+    "F-005-T21"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "web/**",
+    "native/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle"
+  ],
+  "validation": [
+    "Meaningful cross-boundary regressions and required final CI",
+    "Explicit selected-target acceptance where service, install or real device behavior is required; static/unit passes do not substitute"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never change an unowned installation, service, engine or uncertain physical effect without explicit reconciliation"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 focused day plus the owner run",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Slice T08e of the step \"Prerequisites: Node and optional management of multiple engines\". Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

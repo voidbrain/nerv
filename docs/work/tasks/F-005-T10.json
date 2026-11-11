@@ -1,7 +1,10 @@
 {
   "version": 1,
   "parent": "F-005",
+  "id": "F-005-T10",
   "status": "planned",
+  "title": "T10a — Linux user-service adapter (systemd --user), with no implicit linger or system-wide service",
+  "goal": "Linux user-service adapter (systemd --user), with no implicit linger or system-wide service.",
   "capabilities": [
     "bounded-edit",
     "structured-tools",
@@ -9,13 +12,8 @@
     "privacy-review"
   ],
   "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
-  "id": "F-005-T10",
-  "title": "Linux service lifecycle execution and target acceptance",
-  "goal": "Implement the existing reviewed lifecycle contracts for supported Linux user services",
   "acceptance": [
-    "Implement validated install/status/start/stop/update/uninstall/recovery for supported Linux user services with explicit account/login policy",
-    "Preserve profile/source/root ownership, fencing, backups, interruption and uncertain workers; do not enable system-wide or linger behavior implicitly",
-    "Demonstrate selected mini PC/Pi or equivalent Linux target lifecycle and reconnect; fixtures do not prove login/boot behavior"
+    "Linux user-service adapter (systemd --user), with no implicit linger or system-wide service"
   ],
   "dependsOn": [
     "F-005-T01"
@@ -23,14 +21,15 @@
   "resources": [
     "src/**",
     "shared/**",
+    "web/**",
+    "native/**",
     "test/**",
     "docs/**",
     "generated:backlog-views",
     "contract:service-lifecycle"
   ],
   "validation": [
-    "Meaningful cross-boundary regressions and required final CI",
-    "Explicit selected-target acceptance where service, install or real device behavior is required; static/unit passes do not substitute"
+    "Directed regressions or recorded evidence for this slice; final required CI"
   ],
   "escalation": [
     "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
@@ -38,8 +37,8 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "2–3 focused days",
-    "basis": "Initial estimate reuses the lifecycle contract; Linux distribution, service/session policy and target access are uncertain.",
-    "reviewed": "2026-11-10"
+    "estimate": "1.5 focused days",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Slice T10a of the step \"Linux service lifecycle execution and target acceptance\". Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
   }
 }

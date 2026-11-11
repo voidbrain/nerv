@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "parent": "F-007",
+  "id": "F-007-T05",
+  "status": "planned",
+  "title": "Step 2c — Voice corpus evaluation run and report",
+  "goal": "Voice corpus evaluation run and report.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review",
+    "evaluation-design"
+  ],
+  "privacy": "Neutral voice and skill fixtures only in git; real recordings, transcripts and memories remain private.",
+  "acceptance": [
+    "Voice corpus evaluation run and report"
+  ],
+  "dependsOn": [
+    "F-007-T04"
+  ],
+  "resources": [
+    "src/**",
+    "web/**",
+    "native/**",
+    "test/**",
+    "evals/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "No silent physical activation, permission change or skill promotion without the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 focused day",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Step 2, slice c. Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

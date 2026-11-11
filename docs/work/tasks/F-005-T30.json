@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "id": "F-005-T30",
+  "status": "planned",
+  "title": "T11e — Parent acceptance and closure reconciliation",
+  "goal": "Parent acceptance and closure reconciliation.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "acceptance": [
+    "Parent acceptance and closure reconciliation",
+    "Record actual Mac/mini PC/Pi or agreed-equivalent enrollment, revocation, leases, fencing, cancellation, locks, reconnect and uncertain physical-result outcomes",
+    "Verify supported upgrades/prerequisites/update policy and platform lifecycle acceptance without repeating already accepted root/Mac evidence as if new",
+    "Retain failure/retry and unknown-device evidence; close the parent only after every agreed acceptance outcome passes or an owner-approved scope change is recorded"
+  ],
+  "dependsOn": [
+    "F-005-T29"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "web/**",
+    "native/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle"
+  ],
+  "validation": [
+    "Meaningful cross-boundary regressions and required final CI",
+    "Explicit selected-target acceptance where service, install or real device behavior is required; static/unit passes do not substitute"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never change an unowned installation, service, engine or uncertain physical effect without explicit reconciliation"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 focused day",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Slice T11e of the step \"Complete multi-device worker and lifecycle acceptance\". Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

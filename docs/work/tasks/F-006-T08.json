@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "id": "F-006-T08",
+  "status": "planned",
+  "title": "T02c — Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route",
+  "goal": "Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
+  "acceptance": [
+    "Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route",
+    "Model endpoint and execution worker are selected independently",
+    "No silent fallback or implicit permission"
+  ],
+  "dependsOn": [
+    "F-006-T07"
+  ],
+  "resources": [
+    "contract:model-routing",
+    "src/model.ts",
+    "docs/decisions/**",
+    "docs/work/tasks/F-006-T01.json",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views"
+  ],
+  "validation": [
+    "Run affected regressions across the changed boundary and applicable fast checks",
+    "Keep human/device acceptance and independent review distinct from fixture results"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Slice T02c of the step \"Independent model and execution selection\". Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "id": "F-005-T29",
+  "status": "planned",
+  "title": "T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix",
+  "goal": "Upgrades, prerequisites, update policy and platform lifecycle on the device matrix.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "acceptance": [
+    "Upgrades, prerequisites, update policy and platform lifecycle on the device matrix"
+  ],
+  "dependsOn": [
+    "F-005-T28"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "web/**",
+    "native/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never change an unowned installation, service, engine or uncertain physical effect without explicit reconciliation"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Slice T11d of the step \"Complete multi-device worker and lifecycle acceptance\". Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

@@ -14,19 +14,15 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 34 | 6 |
-| **Require Human 🧑** | 10 | 0 |
+| **Require Human 🧑** | 6 | 0 |
 
 ### Require Human 🧑
 
 | Features | Bugs |
 |---|---|
-| [F-005](#f-005) | — |
-| [F-006](#f-006) |  |
-| [F-007](#f-007) |  |
-| [F-009](#f-009) |  |
+| [F-009](#f-009) | — |
 | [F-011](#f-011) |  |
 | [F-015](#f-015) |  |
-| [F-016](#f-016) |  |
 | [F-023](#f-023) |  |
 | [F-062](#f-062) |  |
 | [F-064](#f-064) |  |
@@ -200,6 +196,8 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 **Code evidence 2026-11-11 ([PR #261](https://github.com/voidbrain/nerv/pull/261)):** the [timing reassessment](reviews/2026-11-11-timing-reassessment.md) found three periodic jobs without the `busy` guard the other ticks use: the resumer (`startResumer`), the proactive watch (`startWatch`) and the base heartbeat tick in `src/kaji-link.ts`. Each can start again before its previous run finished and all share the 32-request child bound; this fixture runs them at 100 and 200 ms. This supports the overlap hypothesis but is not a reproduction: the slow-child regression this record requires is still the next step, before any guard is added.
 
+**Observation 2026-11-11:** [PR #264](https://github.com/voidbrain/nerv/pull/264), which changes only records, failed the Windows job once with the same `Process queue is full` in the cross-base `kaji.run` test (CI 42994952185); the rerun then hit B-048 instead. The [timing reassessment](reviews/2026-11-11-timing-reassessment.md) found three periodic jobs without an overlap guard; not reproduced yet.
+
 **Estimates:** Medium remaining effort, provisionally 2–3 focused days including deterministic reproduction, fix, integration and Windows verification. Estimated 2026-11-07; root cause is uncertain and the estimate must be reassessed after reproduction.
 
 | Field | Value |
@@ -335,7 +333,7 @@ Final PR240 revision6acac44 / CI42635119338 passed all five/full-suite checks. I
 |:---:|---|---|---|
 | 🔴 | 🔺 P1 | Open | 🔴 Large |
 
-🧑 **→ Human action required: Yes**<br />Owner decision: approve or change the proposed lettered slices for T07–T11 (below) before any of them starts. Next agent work: T06e (F-005-T12), the independent review of the update path.
+💻 **→ Human action required: No**<br />Slices approved 2026-11-11 and recorded as tasks. Next agent work: T06e (F-005-T12), the independent review of the update path.
 
 | | |
 |---|---|
@@ -382,7 +380,7 @@ Ollama is an example adapter. Different engines and multiple instances/endpoints
 | [T15](work/tasks/F-005-T15.json) | T06h | Upgrades that raise the schema version (separate; needs F-062) | 2–3 days | Planned |
 | [T07](work/tasks/F-005-T07.json)–[T11](work/tasks/F-005-T11.json) | | Update experience, prerequisites, Windows, Linux, device acceptance | see proposal below | Planned; slices await approval |
 
-**Proposed slices for T07–T11 (owner decision pending; nothing implemented):**
+**Slices for T07–T11 (approved by the owner 2026-11-11; recorded as task sources):**
 
 | Step | Slice | Scope | Estimate |
 |---|---|---|---|
@@ -435,7 +433,7 @@ Totals against the accepted plan: T07 3.5 days (was 2–3, a material increase t
 |:---:|---|---|---|
 | 🔴 | 🔺 P1 | Open | 🔴 Large |
 
-🧑 **→ Human action required: Yes**<br />Owner decision: approve or change the proposed slices below before work starts. Then: Implement capability-aware scheduling with independent model endpoint and execution node selection. Add: counselors/experts are hired (fixed or JIT) and default to suggest-only; only a small core council holds vote authority; capability ads + cost/privacy policy drive hiring; progressive trust can later promote a reliable expert into a stronger role.
+💻 **→ Human action required: No**<br />Slices approved 2026-11-11 and recorded as tasks. Next agent work: T01a (F-006-T01), the remote inference endpoint decision.
 
 | | |
 |---|---|
@@ -446,7 +444,7 @@ Totals against the accepted plan: T07 3.5 days (was 2–3, a material increase t
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Proposed slices, 2026-11-11 ([PR #264](https://github.com/voidbrain/nerv/pull/264); owner decision pending, nothing implemented):** existing steps T01–T05 had no estimates. Each is split into slices of at most two days.
+**Proposed slices, 2026-11-11 ([PR #264](https://github.com/voidbrain/nerv/pull/264); approved by the owner 2026-11-11 and recorded as task sources):** existing steps T01–T05 had no estimates. Each is split into slices of at most two days.
 
 | Step | Slice | Scope | Estimate |
 |---|---|---|---|
@@ -499,7 +497,7 @@ Implement capability-aware scheduling with independent model endpoint and execut
 |:---:|---|---|---|
 | 🔴 | 🔺 P1 | Open | 🔴 Large |
 
-🧑 **→ Human action required: Yes**<br />Owner decision: approve or change the proposed slices below before work starts. Then: Add push-to-talk STT/TTS and isolated skill proposals with evaluation and rollback.
+💻 **→ Human action required: No**<br />Slices approved 2026-11-11 and recorded as tasks. Next agent work: Step 1a (F-007-T01) voice feasibility, or Step 3a (F-007-T06) skill packages, which does not wait for voice.
 
 | | |
 |---|---|
@@ -510,7 +508,7 @@ Implement capability-aware scheduling with independent model endpoint and execut
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Proposed slices, 2026-11-11 ([PR #264](https://github.com/voidbrain/nerv/pull/264); owner decision pending, nothing implemented):** no steps existed. Proposed steps, each split into slices.
+**Proposed slices, 2026-11-11 ([PR #264](https://github.com/voidbrain/nerv/pull/264); approved by the owner 2026-11-11 and recorded as task sources):** no steps existed. Proposed steps, each split into slices.
 
 | Step | Slice | Scope | Estimate |
 |---|---|---|---|
@@ -725,7 +723,7 @@ Total about 9.5 focused days (was Large, unestimated). Uncertainty: STT/TTS qual
 |:---:|---|---|---|
 | 🔴 | 🔺 P1 | Open | 🔴 Large |
 
-🧑 **→ Human action required: Yes**<br />Owner decision: approve or change the proposed slices below before work starts. Then: Keep the coordinator on an always-on host initially; design later replicated state, leader epochs/leases, fencing and restore.
+💻 **→ Human action required: No**<br />Slices approved 2026-11-11 and recorded as tasks. Next agent work: Step 1a (F-016-T01), the coordinator relocation decision.
 
 | | |
 |---|---|
@@ -738,7 +736,7 @@ Total about 9.5 focused days (was Large, unestimated). Uncertainty: STT/TTS qual
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Proposed slices, 2026-11-11 ([PR #264](https://github.com/voidbrain/nerv/pull/264); owner decision pending, nothing implemented):** no steps existed; milestone 5b was deferred. Proposed steps, each split into slices.
+**Proposed slices, 2026-11-11 ([PR #264](https://github.com/voidbrain/nerv/pull/264); approved by the owner 2026-11-11 and recorded as task sources):** no steps existed; milestone 5b was deferred. Proposed steps, each split into slices.
 
 | Step | Slice | Scope | Estimate |
 |---|---|---|---|

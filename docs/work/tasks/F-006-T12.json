@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "id": "F-006-T12",
+  "status": "planned",
+  "title": "T04c — Placement report and recommendation",
+  "goal": "Placement report and recommendation.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
+  "acceptance": [
+    "Placement report and recommendation",
+    "Compare Mac-only baseline, Mac coder plus mini PC specialist/auditor, and mini PC tools/tests with Mac inference under equivalent tasks and budgets",
+    "Bind exact model/runtime/hardware, memory and concurrent load; measure task outcomes, queue, network, latency and resource cost",
+    "Unavailable Mac, disconnected auditor, cancellation and uncertain outcomes preserve privacy, leases and permission gates",
+    "Only selected authorized enrolled targets run live cases; fixture evidence cannot establish real-device suitability",
+    "Use one normal home mini PC baseline, not separate office/home/day/night conditions; vary inference/tools-test contention only when intended concurrent NERV work justifies it",
+    "Use F-006-T05 Mac operating-condition evidence when relevant; Mac sleep/unavailability remains a dependency/recovery check"
+  ],
+  "dependsOn": [
+    "F-006-T11"
+  ],
+  "resources": [
+    "contract:model-routing",
+    "src/model.ts",
+    "docs/decisions/**",
+    "docs/work/tasks/F-006-T01.json",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views"
+  ],
+  "validation": [
+    "Validate NERV pack/adapter across the Gauntlet evidence boundary with neutral fixtures",
+    "Run applicable scoped checks and required CI; live acceptance is separately recorded"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 focused day",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Slice T04c of the step \"Compare NERV Mac and mini PC role placement\". Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

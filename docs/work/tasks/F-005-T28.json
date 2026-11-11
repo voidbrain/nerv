@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "id": "F-005-T28",
+  "status": "planned",
+  "title": "T11c — Reconnect, locks and uncertain physical results across the device matrix",
+  "goal": "Reconnect, locks and uncertain physical results across the device matrix.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "acceptance": [
+    "Reconnect, locks and uncertain physical results across the device matrix"
+  ],
+  "dependsOn": [
+    "F-005-T27"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "web/**",
+    "native/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never change an unowned installation, service, engine or uncertain physical effect without explicit reconciliation"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 focused days",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Slice T11c of the step \"Complete multi-device worker and lifecycle acceptance\". Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

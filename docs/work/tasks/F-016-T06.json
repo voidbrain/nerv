@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "parent": "F-016",
+  "id": "F-016-T06",
+  "status": "planned",
+  "title": "Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake",
+  "goal": "Lease renewal and expiry; an asleep old leader is refused on wake.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "regression-design",
+    "distributed-contracts"
+  ],
+  "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
+  "acceptance": [
+    "Lease renewal and expiry; an asleep old leader is refused on wake"
+  ],
+  "dependsOn": [
+    "F-016-T05"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:coordinator-authority"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never let two coordinators act, or copy context as authority, to make progress"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 focused days",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Step 3, slice b. Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

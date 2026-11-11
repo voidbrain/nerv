@@ -1,13 +1,20 @@
 {
   "version": 1,
-  "id": "F-006-T01",
   "parent": "F-006",
-  "title": "Inference host trust and privacy contract",
-  "goal": "Separate loopback-local privacy from an explicitly enrolled remote inference route",
+  "id": "F-006-T01",
   "status": "ready",
+  "title": "T01a — Decision: remote inference endpoint identity, permitted data and behaviour when unavailable",
+  "goal": "Decision: remote inference endpoint identity, permitted data and behaviour when unavailable.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
   "acceptance": [
-    "Retain loopback-only local-route guarantee",
-    "Remote endpoint identity, permitted data and unavailable behavior are explicit"
+    "Decision: remote inference endpoint identity, permitted data and behaviour when unavailable"
   ],
   "dependsOn": [],
   "resources": [
@@ -18,20 +25,17 @@
     "docs/work/records/F-006.md",
     "generated:backlog-views"
   ],
-  "capabilities": [
-    "bounded-edit",
-    "structured-tools",
-    "architecture-review",
-    "privacy-review",
-    "distributed-contracts"
-  ],
-  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
   "validation": [
-    "Run affected regressions across the changed boundary and applicable fast checks",
-    "Keep human/device acceptance and independent review distinct from fixture results"
+    "Directed regressions or recorded evidence for this slice; final required CI"
   ],
   "escalation": [
     "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
     "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
-  ]
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Slice T01a of the step \"Inference host trust and privacy contract\". Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
 }

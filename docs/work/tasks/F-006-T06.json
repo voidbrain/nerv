@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "id": "F-006-T06",
+  "status": "planned",
+  "title": "T01b — Configuration validation for remote endpoints; the loopback-only local route stays guaranteed; regressions",
+  "goal": "Configuration validation for remote endpoints; the loopback-only local route stays guaranteed; regressions.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
+  "acceptance": [
+    "Configuration validation for remote endpoints; the loopback-only local route stays guaranteed; regressions",
+    "Retain loopback-only local-route guarantee",
+    "Remote endpoint identity, permitted data and unavailable behavior are explicit"
+  ],
+  "dependsOn": [
+    "F-006-T01"
+  ],
+  "resources": [
+    "contract:model-routing",
+    "src/model.ts",
+    "docs/decisions/**",
+    "docs/work/tasks/F-006-T01.json",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views"
+  ],
+  "validation": [
+    "Run affected regressions across the changed boundary and applicable fast checks",
+    "Keep human/device acceptance and independent review distinct from fixture results"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Slice T01b of the step \"Inference host trust and privacy contract\". Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

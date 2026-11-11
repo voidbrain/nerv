@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "id": "F-005-T24",
+  "status": "planned",
+  "title": "T09c — Acceptance on an owner-selected Windows machine",
+  "goal": "Acceptance on an owner-selected Windows machine.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "acceptance": [
+    "Acceptance on an owner-selected Windows machine",
+    "Implement validated install/status/start/stop/update/uninstall/recovery for supported Windows user services without changing unrelated tasks/installations",
+    "Preserve profile/source/root ownership, fencing, backups, interrupted operations and uncertain workers",
+    "Demonstrate selected Windows target lifecycle and reconnect, separating mocked fixtures from actual device evidence"
+  ],
+  "dependsOn": [
+    "F-005-T23"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "web/**",
+    "native/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle"
+  ],
+  "validation": [
+    "Meaningful cross-boundary regressions and required final CI",
+    "Explicit selected-target acceptance where service, install or real device behavior is required; static/unit passes do not substitute"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never change an unowned installation, service, engine or uncertain physical effect without explicit reconciliation"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 focused day plus the owner run",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Slice T09c of the step \"Windows service lifecycle execution and target acceptance\". Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

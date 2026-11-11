@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "id": "F-006-T14",
+  "status": "planned",
+  "title": "T05c — Mac operating-conditions report",
+  "goal": "Mac operating-conditions report.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
+  "acceptance": [
+    "Mac operating-conditions report",
+    "Record office/heavy, home/active/moderate and home/overnight/minimal conditions with actual workload/resource observations; time/location labels alone are insufficient",
+    "Hold model/runtime/settings/cases/grader and total comparison budgets equivalent; distinguish fresh cold/warm telemetry from reused functional evidence",
+    "Report task/critical outcomes, latency, resource pressure, token cost and owner desktop impact; unsupported metrics remain unknown",
+    "Select exact campaign cases/repeats/total time-token budgets before execution; no model execution or scheduling is authorized by the plan",
+    "Mini PC has one normal baseline; only T04 placement-specific inference/tools-test contention and Mac dependency recovery require separate bounded checks",
+    "Reference released Gauntlet machine/scenario definitions and evidence identity; NERV retains assignments and role acceptance, not duplicate generic schemas"
+  ],
+  "dependsOn": [
+    "F-006-T13"
+  ],
+  "resources": [
+    "contract:model-routing",
+    "src/model.ts",
+    "docs/decisions/**",
+    "docs/work/tasks/F-006-T01.json",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views"
+  ],
+  "validation": [
+    "Review scenario/configuration identity, comparable budgets and fresh measured telemetry",
+    "Run applicable work/backlog/doc checks; distinguish planning from executed load evidence"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 focused day",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Slice T05c of the step \"Compare Mac heavy, moderate and idle operating conditions\". Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}
