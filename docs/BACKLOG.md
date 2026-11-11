@@ -259,7 +259,7 @@ Final PR240 revision6acac44 / CI42635119338 passed all five/full-suite checks. I
 |:---:|---|---|---|
 | 🟡 | 🔶 P2 | Implemented | 🟢 Small |
 
-💻 **→ Human action required: No**<br />Verify: the Windows job passes on PR #265 and on the next five runs on `main`.
+💻 **→ Human action required: No**<br />Verify: the Windows job passes on the next five runs on `main`.
 
 | | |
 |---|---|
@@ -280,7 +280,7 @@ Final PR240 revision6acac44 / CI42635119338 passed all five/full-suite checks. I
 |---|---|
 | PR / evidence | [PR #265](https://github.com/voidbrain/nerv/pull/265): diagnostic CI 43004476280 (first failure `service status`) and 43004894442 (`database is locked`). Failing runs before: [CI 42986531117](https://github.com/voidbrain/nerv/actions/runs/42986531117/attempts/1), [CI 42988602602](https://github.com/voidbrain/nerv/actions/runs/42988602602/attempts/1), CI 42993629496, CI 42994952185. |
 | Opened | 2026-11-11 |
-| Verification | 2026-11-11: cause reproduced on macOS by the regression test (fails before the fix, passes after). Windows CI passed on PR #265 (CI 43005607280) and on PR #264 after the merge (CI 43007427908); five clean runs on `main` pending. |
+| Verification | 2026-11-11: cause reproduced on macOS by the regression test (fails before the fix, passes after). Windows CI passed on PR #265 (CI 43005607280) and on PR #264 after merging main into it (CI 43007427908); five clean runs on `main` pending. |
 | Reviewed | 2026-11-11 |
 
 </details>
