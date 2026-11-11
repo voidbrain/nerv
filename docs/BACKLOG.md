@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 2 | 2 | 1 | 1 |
+| **This week** | 2 | 2 | 2 | 1 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 34 | 5 |
+| **Open** | 34 | 6 |
 | **Require Human 🧑** | 6 | 0 |
 
 ### Require Human 🧑
@@ -244,6 +244,39 @@ Final PR240 revision6acac44 / CI42635119338 passed all five/full-suite checks. I
 | PR / evidence | [PR #261](https://github.com/voidbrain/nerv/pull/261) timing reassessment; [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  PR240 final-result reconciliation: [PR #241](https://github.com/voidbrain/nerv/pull/241); [PR #222](https://github.com/voidbrain/nerv/pull/222) evidence reconciliation; [PR #221 CI 42530253552 attempt 1](https://github.com/voidbrain/nerv/actions/runs/42530253552/attempts/1): Windows deferred owner approval retains the worker resource failed in the same heartbeat rejection path; unchanged-head failed-job retry passed. No executable worker code or test assertion changed; [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; [PR #219](https://github.com/voidbrain/nerv/pull/219); [CI 42521677029 attempt 1](https://github.com/voidbrain/nerv/actions/runs/42521677029/attempts/1) failed Linux coverage; attempt 2 reran only failed jobs and passed, retaining Windows/native results. Test: test/worker-link.test.ts deferred-approval cancellation. Isolated Mac Node 26 coverage diagnostic passed with loopback access; an earlier sandbox-denied run was stopped and excluded from runtime conclusions. |
 | Opened | 2026-11-08 |
 | Verification | 2026-11-08: intermittent CI failure observed; isolated pass and unchanged-head retry pass do not establish a causal fix. Deterministic reproduction and fix pending. |
+| Reviewed | 2026-11-11 |
+
+</details>
+
+---
+### B-048
+
+**Windows service test cannot delete its data folder after stopping NERV**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🟠 | 🔶 P2 | Investigate | 🟡 Medium |
+
+💻 **→ Human action required: No**<br />Find which process still holds a file in the test's data folder after `service stop` and `service uninstall` on Windows.
+
+| | |
+|---|---|
+| **Issue** | `test/windows-service.integration.ts` failed on the Windows CI job with `EPERM, Permission denied` when its `finally` block removes the temporary data folder (`nerv-winsvc-*`), after install, stop and uninstall. Observed on the first attempt of PR #262 (CI 42986531117) and of PR #263 (CI 42988602602); #262's failed-job rerun passed. The four PRs before #262 passed this job. #262 changed only macOS lifecycle code and tests; #263 changes no Windows code. Cause unproven. |
+| **Reproduce** | Windows runner: `node --test test/windows-service.integration.ts`; after `service stop`, list processes and open handles under the data folder (for example with `handle.exe` or by retrying `rmSync` and logging which file is locked) before the folder is removed. |
+| **Check** | A controlled observation names the holder. Hypotheses, unverified: a NERV child (brain or nervous process) or the SQLite database still open briefly after `service stop` returns; a scheduled-task instance still running; a runner image change. `service stop` must leave no NERV process holding the data home; the test must not merely retry or ignore the error. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Capture which file and process hold the folder on a failing run, then decide whether `service stop` or the test's cleanup is wrong. Two failures in a row after four passes is a pattern, not proof of a code regression; a passing retry is not a fix.
+
+**Estimates:** Medium, provisionally 1–3 focused days, mostly CI round trips on Windows. Estimated 2026-11-11; not measured.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #263](https://github.com/voidbrain/nerv/pull/263) records it; failures in [CI 42986531117 attempt 1](https://github.com/voidbrain/nerv/actions/runs/42986531117/attempts/1) and [CI 42988602602 attempt 1](https://github.com/voidbrain/nerv/actions/runs/42988602602/attempts/1). Test: test/windows-service.integration.ts. |
+| Opened | 2026-11-11 |
+| Verification | 2026-11-11: two observed CI failures with the same `EPERM` on the data folder; no reproduction yet. |
 | Reviewed | 2026-11-11 |
 
 </details>
