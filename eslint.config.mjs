@@ -1,23 +1,29 @@
 // From the harness default (core/eslint.config.mjs), with TypeScript rules for the backend, its tests and the web entry.
 // Formatting is Prettier's job; these rules look for mistakes.
+import { readFileSync } from 'node:fs';
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 
+// Copied harness tools stay byte-identical to the template, which lints them itself; NERV's own tools are linted here.
+const copied = Object.keys(JSON.parse(readFileSync(new URL('./.harness.json', import.meta.url), 'utf8')).copied);
+
 export default tseslint.config(
-  // Copied harness tools, vendored, generated and fixture files are not this project's source.
+  // Vendored, generated, data and fixture files are not this project's source.
   {
     ignores: [
       'node_modules/**',
       'dist/**',
       'coverage/**',
       'vendor/**',
-      'tools/**',
       'evals/**',
-      'native/**',
-      'web/public/**',
+      'native/NervMenuBar/**',
       'test/fixtures/**',
       '.harness/**',
       '.angular/**',
+      // The hand-written static dashboard has four known findings (a misplaced "use strict", two functions nothing
+      // calls, one ternary statement). Fixing them changes a shipped page, so they are recorded in F-004, not hidden.
+      'web/public/dashboard/**',
+      ...copied,
     ],
   },
   js.configs.recommended,

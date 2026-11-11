@@ -107,7 +107,7 @@ npm run check:integrations
 npm run check:backlog     # active record layout and lifecycle cues
 npm run check:conventions # stack conventions above and unused exports (when the stack has one)
 npm run format:check      # Prettier on src/, test/ and web/src TypeScript and JavaScript; `npm run format` fixes it <!-- project -->
-npm run lint              # ESLint with TypeScript rules on the same folders <!-- project -->
+npm run lint              # ESLint with TypeScript rules: backend, tests, NERV's own tools, web/src <!-- project -->
 npm run check:tooling     # a formatter check and a linter exist and run in CI (required for every stack)
 ```
 
