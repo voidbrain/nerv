@@ -365,6 +365,18 @@ Ollama is an example adapter. Different engines and multiple instances/endpoints
 
 **Lettered slices, 2026-11-11 ([PR #264](https://github.com/voidbrain/nerv/pull/264)):** the owner asked that every large step be split into lettered slices with an estimate each, defined before work starts. T06 had instead been delivered as three slices discovered one at a time, with only the whole-step estimate revised. Approved split of T06: a–d done (T06, now 0 remaining, implemented until T06e's review); T06e independent review of the update path (F-005-T12, 0.5 day); T06f first real lifecycle update on the Mac (F-005-T13, 0.5 day plus the owner run); T06g after-start health check in the receipt (F-005-T14, 1 day); T06h upgrades that raise the schema version (F-005-T15, 2–3 days, separate: T06 does not wait for it). Slices e–h use free step numbers because step IDs are two digits.
 
+
+**Current steps, 2026-11-11** (task sources own status and estimates; the 2026-11-10 table above is the original plan):
+
+| Step | Slice | Scope | Remaining | Status |
+|---|---|---|---|---|
+| [T06](work/tasks/F-005-T06.json) | a–d | Rehearsal, journaled rehearsal, admission of schema-preserving upgrades, first Mac move | 0 | Implemented; verified by T06e |
+| [T12](work/tasks/F-005-T12.json) | T06e | Independent review of the update path | 0.5 day | Planned (next) |
+| [T13](work/tasks/F-005-T13.json) | T06f | First real lifecycle update on the Mac | 0.5 day plus owner run | Planned |
+| [T14](work/tasks/F-005-T14.json) | T06g | After-start health check in the receipt | 1 day | Planned |
+| [T15](work/tasks/F-005-T15.json) | T06h | Upgrades that raise the schema version (separate; needs F-062) | 2–3 days | Planned |
+| [T07](work/tasks/F-005-T07.json)–[T11](work/tasks/F-005-T11.json) | | Update experience, prerequisites, Windows, Linux, device acceptance | see proposal below | Planned; slices await approval |
+
 **Proposed slices for T07–T11 (owner decision pending; nothing implemented):**
 
 | Step | Slice | Scope | Estimate |
