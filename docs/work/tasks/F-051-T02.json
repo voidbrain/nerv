@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-051-T02",
+  "parent": "F-051",
+  "title": "Running sortie selection and phase label",
+  "goal": "Running sortie selection and phase label",
+  "status": "planned",
+  "acceptance": [
+    "A new request or refresh selects the running sortie; the card names its phase"
+  ],
+  "dependsOn": [
+    "F-051-T01"
+  ],
+  "resources": [
+    "web/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

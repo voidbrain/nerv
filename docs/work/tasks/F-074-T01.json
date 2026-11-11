@@ -36,5 +36,11 @@
   "status": "closed",
   "acceptance": [
     "Owned scope verified; evidence and limitations recorded; no automatic qualification"
-  ]
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Completed before featurePlans adoption; original effort unmeasured.",
+    "reviewed": "2026-11-11"
+  }
 }

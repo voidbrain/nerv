@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "id": "F-009-T02",
+  "parent": "F-009",
+  "title": "Mac login/logout acceptance",
+  "goal": "Mac login/logout acceptance",
+  "status": "planned",
+  "acceptance": [
+    "Service survives logout/login of the selected Mac user as documented; evidence recorded"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Owner-observed result recorded in the parent record"
+  ],
+  "escalation": [
+    "Owner action: this step needs the owner's access, choice or observation"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1–2 focused hours plus owner access",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

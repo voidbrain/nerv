@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-045-T03",
+  "parent": "F-045",
+  "title": "Advice mode",
+  "goal": "Advice mode",
+  "status": "planned",
+  "acceptance": [
+    "F-041 consultant rules: at most one per topic, owner pin, main base's own, then best record"
+  ],
+  "dependsOn": [
+    "F-045-T02"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

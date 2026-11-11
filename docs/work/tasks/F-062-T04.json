@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-062-T04",
+  "parent": "F-062",
+  "title": "Restore drill",
+  "goal": "Restore drill",
+  "status": "planned",
+  "acceptance": [
+    "Restore onto another location within the bounds keeping identities, revoked grants and checkpoints; no old work replayed"
+  ],
+  "dependsOn": [
+    "F-062-T03"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

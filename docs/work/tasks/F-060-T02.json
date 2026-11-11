@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "F-060-T02",
+  "parent": "F-060",
+  "title": "Answer the five questions and per-record outcomes",
+  "goal": "Answer the five questions and per-record outcomes",
+  "status": "planned",
+  "acceptance": [
+    "Dated note: OSC 7501 support, --keep recovery, API stability and security, outcome for F-012, F-019, F-045, F-048, F-049"
+  ],
+  "dependsOn": [
+    "F-060-T01"
+  ],
+  "resources": [
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

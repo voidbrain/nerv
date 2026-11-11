@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "F-070-T01",
+  "parent": "F-070",
+  "title": "Operator alias ownership and signed directory contract",
+  "goal": "Operator alias ownership and signed directory contract",
+  "status": "planned",
+  "acceptance": [
+    "Per-base configurable names and defaults; signed directory contract; no private channel IDs exposed"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

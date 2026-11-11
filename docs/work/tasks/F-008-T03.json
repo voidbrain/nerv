@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "F-008-T03",
+  "parent": "F-008",
+  "title": "Acceptance against the real FPV app",
+  "goal": "Acceptance against the real FPV app",
+  "status": "planned",
+  "acceptance": [
+    "Owner connects the FPV app; the three Check records round-trip; evidence recorded"
+  ],
+  "dependsOn": [
+    "F-008-T02"
+  ],
+  "resources": [
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Owner-observed result recorded in the parent record"
+  ],
+  "escalation": [
+    "Owner action: this step needs the owner's access, choice or observation"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 day including owner time",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

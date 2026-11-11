@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "F-015-T03",
+  "parent": "F-015",
+  "title": "Live failure, recovery and rotation acceptance",
+  "goal": "Live failure, recovery and rotation acceptance",
+  "status": "planned",
+  "acceptance": [
+    "Lost reply, Keychain failure, revocation and offline TLS/auth rotation exercised on the real host; evidence recorded"
+  ],
+  "dependsOn": [
+    "F-015-T02"
+  ],
+  "resources": [
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Owner-observed result recorded in the parent record"
+  ],
+  "escalation": [
+    "Owner action: this step needs the owner's access, choice or observation"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

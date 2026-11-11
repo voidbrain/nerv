@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-012-T05",
+  "parent": "F-012",
+  "title": "Edge cases and real-host acceptance",
+  "goal": "Edge cases and real-host acceptance",
+  "status": "planned",
+  "acceptance": [
+    "Longer limits, logout, closed tab, sleeping worker, changed task and already-resumed job handled without duplicates; one real resume observed"
+  ],
+  "dependsOn": [
+    "F-012-T04"
+  ],
+  "resources": [
+    "docs/**",
+    "generated:backlog-views",
+    "src/**",
+    "test/**"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Owner-observed result recorded in the parent record"
+  ],
+  "escalation": [
+    "Owner action: this step needs the owner's access, choice or observation"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day plus owner time",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-012-T02",
+  "parent": "F-012",
+  "title": "Readiness check and once-only resume engine",
+  "goal": "Readiness check and once-only resume engine",
+  "status": "planned",
+  "acceptance": [
+    "At the deadline availability is inspected (not assumed); job identity rechecked; resumes once under an execution lease; outcome notified"
+  ],
+  "dependsOn": [
+    "F-012-T01"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 focused days",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

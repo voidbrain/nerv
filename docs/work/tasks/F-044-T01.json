@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "id": "F-044-T01",
+  "parent": "F-044",
+  "title": "One fact per subject on one editable card",
+  "goal": "One fact per subject on one editable card",
+  "status": "planned",
+  "acceptance": [
+    "A multi-fact request proposes one fact per subject; each editable or removable before approving the card"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "web/**"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

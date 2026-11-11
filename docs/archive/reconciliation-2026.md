@@ -249,3 +249,7 @@ Authenticated ci:status confirms CI43015017327 passed plan, validate, windows an
 ## 2026-11-11 — PR #269
 
 Authenticated ci:status confirms CI43016078610 passed plan, validate, windows and native-macos; full-suite skipped by scoped verification (records only); merged main 3c4a283. F-074-T07 now adopts upstream detection (gauntlet-protocol PR #33, F-010; project-harness PR #109, F-052). Previous header: Reviewed 11 November 2026 against main `a40f89d`. PR #268 CI43015017327 passed plan, validate, windows and native-macos (full-suite skipped, records only): F-074 T06–T09 planned. T07 now adopts upstream Gauntlet F-010 and harness F-052 (PR #269); B-048 awaits five clean `main` runs.
+
+## 2026-11-11 — PR #270
+
+Authenticated ci:status confirms CI43017157201 passed plan, validate, windows and native-macos; full-suite skipped by scoped verification (records only); merged main 0c3de0f. F-074 listed its steps T01–T09 in the record (NERV had no featurePlans setting). Previous header: Reviewed 11 November 2026 against main `3c4a283`. PR #269 CI43016078610 passed plan, validate, windows and native-macos (full-suite skipped, records only): F-074-T07 adopts upstream Gauntlet F-010 and harness F-052. F-074 now lists its steps T01–T09 (PR #270); B-048 awaits five clean `main` runs.

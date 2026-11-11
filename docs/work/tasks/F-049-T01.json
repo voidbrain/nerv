@@ -36,5 +36,11 @@
   "escalation": [
     "Unsupported host enforcement or unclear trust boundary blocks execution; do not substitute a worktree or subprocess",
     "New upstream API work belongs to its owning repository; NERV supplies adapters"
-  ]
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 focused days",
+    "basis": "Estimate added at featurePlans adoption (2026-11-11): Deterministic isolated runner admission and enforcement; F-049 is Large, so later steps must be planned before this one is accepted (open question for the owner). Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
 }

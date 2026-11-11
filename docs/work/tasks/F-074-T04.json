@@ -44,5 +44,11 @@
     "Native evals:model currently inherits production defaults and has no shared300s aggregate cap; do not present it as profile-matched until implemented",
     "Owner reviews any additional live campaign scope/budget; preparation itself runs no models",
     "External project references are conditional alternatives, not required dependencies"
-  ]
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Estimate added at featurePlans adoption (2026-11-11): Profile-matched operator role bundle; earlier record estimate Small for T04 alone. Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
 }

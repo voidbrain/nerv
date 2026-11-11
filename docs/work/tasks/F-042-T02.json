@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-042-T02",
+  "parent": "F-042",
+  "title": "Grounded answers and agency facts as data",
+  "goal": "Grounded answers and agency facts as data",
+  "status": "planned",
+  "acceptance": [
+    "Answers quote records in the request's language and never invent; consultant not asked about the agency; pilots and consultant get base names as data (B-012)"
+  ],
+  "dependsOn": [
+    "F-042-T01"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

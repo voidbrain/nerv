@@ -38,5 +38,11 @@
     "Intake and MCP output record source/trust; taint only increases within a sortie",
     "Memory, summaries, earlier turns and resumed requests preserve taint",
     "External effects under tainted context are Pattern Blue; external code requiring EVA-03 fails closed"
-  ]
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Completed before featurePlans adoption; original effort unmeasured.",
+    "reviewed": "2026-11-11"
+  }
 }

@@ -52,5 +52,11 @@
   "escalation": [
     "Native role-profile bundle remains T04; generic native client source adapters remain project-harness F-048-T02",
     "Instruction bridges do not prove client loading or expose missing counters; keep unsupported usage unknown"
-  ]
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Completed before featurePlans adoption; original effort unmeasured.",
+    "reviewed": "2026-11-11"
+  }
 }

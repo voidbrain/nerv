@@ -34,5 +34,11 @@
     "Validated default-deny Scrolls destinations enforced for DNS, redirects and direct outside-code sockets",
     "Join tests prove denied destinations never receive traffic",
     "EVA-03 isolation supplied by F-049; unsupported execution fails closed"
-  ]
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 focused days",
+    "basis": "Estimate added at featurePlans adoption (2026-11-11): Enforce Scrolls egress at the execution boundary with regressions; parent Blocked/Medium, so the estimate starts after the block clears. Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
 }

@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-021-T04",
+  "parent": "F-021",
+  "title": "Remote (other-machine) endpoints",
+  "goal": "Remote (other-machine) endpoints",
+  "status": "planned",
+  "acceptance": [
+    "Tools on another base are callable through the authenticated Kaji line with the same grant checks"
+  ],
+  "dependsOn": [
+    "F-021-T03"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 focused days",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

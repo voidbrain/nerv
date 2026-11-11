@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-025-T02",
+  "parent": "F-025",
+  "title": "Free API seat pool",
+  "goal": "Free API seat pool",
+  "status": "planned",
+  "acceptance": [
+    "One seat per provider/model with its own key; rotation across actions; limited or unavailable seats skipped with reason; only Scrolls-allowed data leaves"
+  ],
+  "dependsOn": [
+    "F-025-T01"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 focused days",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}

@@ -29,5 +29,11 @@
   ],
   "escalation": [
     "Do not infer a root cause or claim a fix from a passing retry"
-  ]
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Completed before featurePlans adoption; original effort unmeasured.",
+    "reviewed": "2026-11-11"
+  }
 }

@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-064-T03",
+  "parent": "F-064",
+  "title": "Fault-injection tests",
+  "goal": "Fault-injection tests",
+  "status": "planned",
+  "acceptance": [
+    "Injected faults revoke only the intended authority and keep recovery access; benign input never trips it"
+  ],
+  "dependsOn": [
+    "F-064-T02"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise.",
+    "reviewed": "2026-11-11"
+  }
+}
