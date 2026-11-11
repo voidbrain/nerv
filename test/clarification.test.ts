@@ -309,7 +309,8 @@ test(
       if (late)
         return {
           sortieId: '',
-          error: 'NERV-01 did not answer (timeout); it may still be working on it, so the request was not repeated here.',
+          error:
+            'NERV-01 did not answer (timeout); it may still be working on it, so the request was not repeated here.',
           steps: [],
           waiting: [],
         };
@@ -354,10 +355,7 @@ test('B-021: the first turn of an answer names the pending question and its job,
     tools: [],
     now: '2030-12-01T12:00:00Z',
     timeZone: 'UTC',
-    context: [
-      { request: 'Set a reminder.' },
-      { request: 'For tomorrow', reply: 'What should I remind you about?' },
-    ],
+    context: [{ request: 'Set a reminder.' }, { request: 'For tomorrow', reply: 'What should I remind you about?' }],
   };
   const answer = misatoAsk({ ...base, clarification: true }, 'local');
   const prompt = JSON.parse(answer.prompt) as Record<string, unknown>;
