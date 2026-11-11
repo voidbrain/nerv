@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "F-049-T04",
+  "parent": "F-049",
+  "title": "EVA-03 instance per job",
+  "goal": "A fresh EVA-03 instance per job with the chosen mechanism, discarded afterwards; the tools process moves into it so EVA-03 grants can run",
+  "status": "planned",
+  "acceptance": [
+    "Create, run and discard per job; no state carried between jobs",
+    "Mounts, network, credentials, deadline and cancellation as T01 specifies",
+    "Failed attempts and uncertain external effects stay in the ledger; discard never claims rollback"
+  ],
+  "dependsOn": [
+    "F-049-T02",
+    "F-049-T03"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/architecture/**",
+    "docs/decisions/**",
+    "docs/work/records/F-049.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "privacy-review",
+    "distributed-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "Unit and join tests; npm test"
+  ],
+  "escalation": [
+    "New upstream API work belongs to its owning repository; NERV supplies adapters"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 focused days",
+    "basis": "Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-074",
   "id": "F-074-T07",
-  "status": "implemented",
+  "status": "closed",
   "title": "T07 — Adopt upstream pending-case detection so new or changed packs raise a run",
   "goal": "Use Gauntlet's consumer-agnostic `pending` command and ledger (gauntlet-protocol F-010) and the harness evaluation-dependency setting (project-harness F-052) so new or changed cases raise a backlog item; NERV owns only its ledger, configuration and rule",
   "acceptance": [
@@ -41,8 +41,8 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0 remaining; verification pending",
-    "basis": "Owner decision 2026-11-11: harness and Gauntlet are reused by future projects, so the comparison moves upstream (Gauntlet F-010, about 1.5 days; harness F-052, about 1 day) and NERV only adopts it. Estimate, not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Owner decision 2026-11-11: harness and Gauntlet are reused by future projects, so the comparison moves upstream (Gauntlet F-010, about 1.5 days; harness F-052, about 1 day) and NERV only adopts it. Estimate, not a measurement. Closed 2026-11-11 after PR #272 merged with CI 43023793222 green on all five jobs (plan, validate, windows, native-macos, full-suite).",
     "reviewed": "2026-11-11"
   }
 }

@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-049-T09",
+  "parent": "F-049",
+  "title": "Dashboard shows instances per class",
+  "goal": "Replace the drawn EVA cages with live instances per class, per machine",
+  "status": "planned",
+  "acceptance": [
+    "Instances per class with pilot, job and state; empty classes say so",
+    "Follows docs/STYLE-GUIDE.md; passes AXE and WCAG AA",
+    "Browser test"
+  ],
+  "dependsOn": [
+    "F-049-T07"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/architecture/**",
+    "docs/decisions/**",
+    "docs/work/records/F-049.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "privacy-review",
+    "distributed-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "Browser/accessibility test; npm run build"
+  ],
+  "escalation": [
+    "New upstream API work belongs to its owning repository; NERV supplies adapters"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

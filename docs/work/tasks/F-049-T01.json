@@ -40,7 +40,7 @@
   "effort": {
     "size": "medium",
     "estimate": "2 focused days",
-    "basis": "Estimate added at featurePlans adoption (2026-11-11): Deterministic isolated runner admission and enforcement; F-049 is Large, so later steps must be planned before this one is accepted (open question for the owner). Estimate, not a measurement.",
+    "basis": "Estimate added at featurePlans adoption (2026-11-11): deterministic isolated runner admission and enforcement contract. Later steps F-049-T02–T10 planned 2026-11-11. Estimate, not a measurement.",
     "reviewed": "2026-11-11"
   }
 }

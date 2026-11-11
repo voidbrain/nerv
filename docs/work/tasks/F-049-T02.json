@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-049-T02",
+  "parent": "F-049",
+  "title": "EVA class definitions and least-class admission",
+  "goal": "EVA-00…03 as data in src/ with what each may touch, and admission that picks the least class a job needs and refuses a job asking above its grant",
+  "status": "planned",
+  "acceptance": [
+    "EVA-00 no external effects, EVA-01 bounded, EVA-02 full grant, EVA-03 quarantine for untrusted input, defined as data with filesystem, network, credential and resource fields",
+    "Admission uses existing NERV grants and the T01 contract; it never adds an approval authority",
+    "Unit tests for least-class choice and refusal"
+  ],
+  "dependsOn": [
+    "F-049-T01"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/architecture/**",
+    "docs/decisions/**",
+    "docs/work/records/F-049.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "privacy-review",
+    "distributed-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "Plain TypeScript unit tests; npm test"
+  ],
+  "escalation": [
+    "New upstream API work belongs to its owning repository; NERV supplies adapters"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

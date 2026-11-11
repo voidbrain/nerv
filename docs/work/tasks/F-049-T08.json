@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "F-049-T08",
+  "parent": "F-049",
+  "title": "Pilot trust stage caps the class",
+  "goal": "A job's class is capped by its pilot's stage (a Prototype pilot never runs in EVA-02)",
+  "status": "planned",
+  "acceptance": [
+    "Admission reads the pilot and stage from F-045 and F-025; the cap only lowers, never raises, a class",
+    "Tests for each stage and class"
+  ],
+  "dependsOn": [
+    "F-049-T07",
+    "F-045-T01",
+    "F-025-T04"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/architecture/**",
+    "docs/decisions/**",
+    "docs/work/records/F-049.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "privacy-review",
+    "distributed-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "Unit and join tests; npm test"
+  ],
+  "escalation": [
+    "Waits on F-045-T01 (pilot registry) and F-025-T04 (trust stages)"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

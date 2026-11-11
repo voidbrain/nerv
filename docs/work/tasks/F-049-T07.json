@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "F-049-T07",
+  "parent": "F-049",
+  "title": "EVA-00, EVA-01 and EVA-02 on the runner",
+  "goal": "The other three classes run on the same runner and the in-process EVA-02 executor is removed",
+  "status": "planned",
+  "acceptance": [
+    "EVA-00 with no network and no writes outside its scratch space; EVA-01 with bounded egress and mounts; EVA-02 with the full grant",
+    "The scheduler no longer runs actions in process; the dead in-process path and its tests go",
+    "Join tests per class"
+  ],
+  "dependsOn": [
+    "F-049-T05",
+    "F-049-T06"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/architecture/**",
+    "docs/decisions/**",
+    "docs/work/records/F-049.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "privacy-review",
+    "distributed-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "Join tests; full suite"
+  ],
+  "escalation": [
+    "New upstream API work belongs to its owning repository; NERV supplies adapters"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 focused days",
+    "basis": "Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}
