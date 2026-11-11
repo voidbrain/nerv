@@ -13,3 +13,4 @@ test/fixtures/
 *.svg
 *.css
 *.html
+.harness/

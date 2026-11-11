@@ -209,6 +209,7 @@ test(
       tb = '222:' + 'b'.repeat(35);
     const botA = await fakeBot(ta),
       botB = await fakeBot(tb);
+    // eslint-disable-next-line prefer-const -- assigned below, after the relay closure has captured it
     let aoba: TelegramChannel | undefined;
     let mainUp = true;
     let relayWorks = true;

@@ -241,7 +241,7 @@ export async function planService(host: ServiceHost, action: Action, nextRevisio
     throw Error('Invalid service action or pinned revision.');
   const before = await host.inspect(),
     db = journal(host.context);
-  let pending = false;
+  let pending: boolean;
   try {
     pending = held(db);
   } finally {

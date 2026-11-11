@@ -183,7 +183,7 @@ export class McpClient {
         .map((l) => l.trim())
         .filter(Boolean)
         .filter(
-          (l) => !/^(at |\^+$|throw |[{}\[\]]|Node\.js v|code:|requireStack|node:internal|[A-Za-z]+: \[?$)/.test(l),
+          (l) => !/^(at |\^+$|throw |[{}[\]]|Node\.js v|code:|requireStack|node:internal|[A-Za-z]+: \[?$)/.test(l),
         );
       const named = lines.find((l) => /error/i.test(l));
       const pick = named ? [named] : lines.slice(-2);

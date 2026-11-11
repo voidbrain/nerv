@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-11T07:38:10.084Z",
+  "reviewed": "2026-11-11T08:32:01.065Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
-    "AGENTS.md": "95e19851513530ca545ca9a03ac0d7ac9641c9dabd119dc28870f1c8c4141643",
-    "docs/BACKLOG-RULES.md": "e3461291a0ceb6b483d60093ffb4e67c45799896b68bdbee0a8a19ec0ebdf287",
+    "AGENTS.md": "397d47f005aa7b8ea8496e5b819e5b9e51fd5e4a0ffac6e0b925e493798d457b",
+    "docs/BACKLOG-RULES.md": "c4edf7298a59751733168521e8eec915990f1d656233521121f2975b2a34e15b",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
     "docs/agents/areas.md": "0ff9805a7d720ee177505cef670e53169a6d640299762dfa86185be46fa8737c",
     "docs/agents/audit.md": "bc5de5707f9ec5c523e73602499312c373d6112ffc498d69bf68604522527992",
@@ -18,14 +18,14 @@
     "docs/agents/solution-profile.md": "857fc0e5f5c36d1d139d2507f1f97460edfdcde4d5cd5d590a922d88c4459862",
     "docs/agents/task-context.md": "c38395d5989a3fd7cfbf319bce53b24c17a1740822398f4376ecc2c3e95d531f",
     "docs/agents/work-usage.md": "e2f7c484f1c07f4b47fd1133857d8744ccab0ad2a7b85b220946c115a002bebc",
-    "tools/task-claims.mjs": "05d40141b354db19e958d1f191f9a2e1b75c46126527ce3aba67f7b902ba16d2",
-    "tools/usage-launch.mjs": "ac8713a3e4c4359cfdda5b4b6eb5d18e957408fb77b85609853ba2cda5f4a4e0",
-    "tools/work-items.mjs": "f3175c3150286bf569fc108d86a3640a4bbfd30deda940ddbb9c27d8fabe56f4",
-    "tools/work-usage.mjs": "0fdd6f4c8106c986c7798badec4d655119341edf6bb6f60c30e1cfc97bd786cb"
+    "tools/task-claims.mjs": "2a7b7d0ea9e23fb36eceba5e5433eb640fee3e3633426066e4050f0fa8ebb9cf",
+    "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
+    "tools/work-items.mjs": "c5e40c70ef45011ccaa20c951e8e645cc3e9f2fb65a4563779e7af83882df839",
+    "tools/work-usage.mjs": "4329262c0b9e723e046dd8878e15a99cff5f590201cd0918563f3204bbe79219"
   },
   "measurements": {
-    "samples": 2,
-    "latestAt": "2026-11-11T07:38:10.030Z",
+    "samples": 1,
+    "latestAt": "2026-11-11T08:32:01.019Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -51,26 +51,26 @@
         }
       },
       "reconciliation": {
-        "samples": 2,
+        "samples": 1,
         "durationMs": {
-          "observed": 2,
+          "observed": 1,
           "missing": 0,
-          "median": 61
+          "median": 1012
         },
         "conflicts": {
-          "observed": 1,
+          "observed": 0,
           "missing": 1,
-          "median": 0
+          "median": null
         },
         "unnecessaryPrompts": {
-          "observed": 1,
+          "observed": 0,
           "missing": 1,
-          "median": 0
+          "median": null
         },
         "repeatedContextLoads": {
-          "observed": 1,
+          "observed": 0,
           "missing": 1,
-          "median": 0
+          "median": null
         }
       }
     }
@@ -80,13 +80,13 @@
       "kind": "rule",
       "disposition": "implemented",
       "target": "AGENTS.md",
-      "evidence": "One project line (marked <!-- project -->) adds npm run format:check to the check catalogue for the Prettier adoption in PR #260; no template rule, safeguard or ask-first/never rule is changed or removed. Formatting covers src/, test/ and web/src TypeScript; copied harness tools are excluded and check-harness still reports them matching v4.8.0. No behaviour runner configured; token counters unavailable."
+      "evidence": "Reconciled published harness v5.0.0: the session-start bullet and the BACKLOG-RULES reconcile sentence fold reconciliation into the next working PR (due at 10 merged PRs or one day behind, or at once for a commit without a PR); the check catalogue gains lint and check:tooling. No never or ask-first rule is removed; evidence requirements are unchanged. No behaviour runner configured; token counters unavailable."
     },
     {
-      "kind": "none",
-      "disposition": "no-change",
-      "target": "",
-      "evidence": "BACKLOG-RULES and area notes are unchanged by this change; the owner's question about batching reconciliation PRs is a harness rule decision still open with the owner and is not changed here."
+      "kind": "tool",
+      "disposition": "implemented",
+      "target": "tools/check-tooling.mjs",
+      "evidence": "Copied byte-identically from tag v5.0.0 with the 23 reformatted copied tools; check-harness reports copied files match. ESLint adopted with 21 hand fixes; typecheck and the full suite pass."
     }
   ]
 }

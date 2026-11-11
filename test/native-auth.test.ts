@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { POSIX, assertPrivateFile } from './fixtures/posix.ts';
-import { mkdtempSync, rmSync, readFileSync, statSync } from 'node:fs';
+import { assertPrivateFile } from './fixtures/posix.ts';
+import { mkdtempSync, rmSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { request } from 'node:https';

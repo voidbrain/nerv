@@ -55,7 +55,7 @@ async function fixture() {
   const registry = new Registry(store.db, old.publicKey);
   let serial = 0;
   for (const e of entries) registry.add(signRecord(oldPrivate, { kind: 'enrol', serial: ++serial, ...e, issued }));
-  registry.add(signRecord(oldPrivate, { kind: 'main', serial: ++serial, baseId: 'BASE-01', issued }));
+  registry.add(signRecord(oldPrivate, { kind: 'main', serial: serial + 1, baseId: 'BASE-01', issued }));
   registry.seen({ 'BASE-02': issued });
   store.db.exec(
     "INSERT INTO reminders VALUES('retained','Neutral reminder','2030-01-01T00:00:00Z','2020-01-01T00:00:00Z',NULL,NULL)",

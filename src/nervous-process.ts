@@ -251,7 +251,7 @@ process.on('message', (value: unknown) => {
           params.result,
           params.said as { base: string; text: string } | undefined,
         );
-      case 'worker.open':
+      case 'worker.open': {
         store.assertWorkerAuthority(params.owner as string, params.key as string, params.ownerKey as string);
         const opened = store.workerJobs.open(
           params.owner as string,
@@ -262,6 +262,7 @@ process.on('message', (value: unknown) => {
         );
         store.expire();
         return opened;
+      }
       case 'worker.close':
         store.workerJobs.close(params.owner as string, params.session as string);
         store.expire();

@@ -1817,7 +1817,7 @@ export class Runtime implements StoreApi {
   async modelSetup(): Promise<ModelSetup> {
     if (!this.home) throw new Error('Model setup needs the data home.');
     const models = readConfig(this.home).models;
-    let cloudKey = false;
+    let cloudKey: boolean;
     try {
       cloudKey = !!readModelKey(this.home);
     } catch {

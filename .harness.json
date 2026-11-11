@@ -3,7 +3,7 @@
     "path": "../harness-template",
     "repo": "https://github.com/voidbrain/project-harness"
   },
-  "version": "4.8.0",
+  "version": "5.0.0",
   "stacks": [
     "core",
     "angular"
@@ -11,6 +11,7 @@
   "copied": {
     "tools/check-backlog.mjs": "core/tools/check-backlog.mjs",
     "tools/check-freshness.mjs": "core/tools/check-freshness.mjs",
+    "tools/check-tooling.mjs": "core/tools/check-tooling.mjs",
     "tools/impact-map.mjs": "core/tools/impact-map.mjs",
     "tools/coverage-table.mjs": "core/tools/coverage-table.mjs",
     "tools/check-harness.mjs": "core/tools/check-harness.mjs",

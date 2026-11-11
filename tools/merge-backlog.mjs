@@ -14,9 +14,15 @@ import { writeFileSync } from 'node:fs';
 
 const FILE = 'docs/BACKLOG.md';
 const stage = (n) => {
-  try { return execFileSync('git', ['show', `:${n}:${FILE}`], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }); } catch { return null; }
+  try {
+    return execFileSync('git', ['show', `:${n}:${FILE}`], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+  } catch {
+    return null;
+  }
 };
-const base = stage(1) ?? '', ours = stage(2), theirs = stage(3);
+const base = stage(1) ?? '',
+  ours = stage(2),
+  theirs = stage(3);
 if (ours === null || theirs === null) {
   console.error(`${FILE} is not in conflict: run this while a merge stopped on it.`);
   process.exit(2);
@@ -34,14 +40,18 @@ const sectionOf = (text, id) => {
   return [...text.matchAll(/^## .*$/gm)].filter((h) => h.index < at).at(-1)?.[0];
 };
 
-const B = records(base), O = records(ours), T = records(theirs);
+const B = records(base),
+  O = records(ours),
+  T = records(theirs);
 let out = theirs;
 const byHand = [];
 for (const [id, rec] of O) {
-  const was = B.get(id), main = T.get(id);
+  const was = B.get(id),
+    main = T.get(id);
   if (main !== undefined) {
     if (rec === main || rec === was) continue; // the same, or only the default branch changed it
-    if (main === was) out = out.replace(main, () => rec); // only the branch changed it
+    if (main === was)
+      out = out.replace(main, () => rec); // only the branch changed it
     else byHand.push(id);
     continue;
   }
@@ -58,14 +68,22 @@ for (const [id, was] of B) {
   else byHand.push(id);
 }
 // "## Other changes": paragraphs only the branch wrote
-const other = (text) => (text.split(/^## Other changes\n/m)[1] ?? '').split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
+const other = (text) =>
+  (text.split(/^## Other changes\n/m)[1] ?? '')
+    .split(/\n\n+/)
+    .map((p) => p.trim())
+    .filter(Boolean);
 const have = new Set(other(out));
 const added = other(ours).filter((p) => !have.has(p) && !other(base).includes(p));
 if (added.length) out = out.replace(/^## Other changes\n\n?/m, (h) => `${h.trimEnd()}\n\n${added.join('\n\n')}\n\n`);
 
 writeFileSync(FILE, out);
-console.log(`${FILE}: ${records(out).size} records merged three ways${added.length ? `, ${added.length} paragraph(s) of Other changes added` : ''}. Check it, then git add it.`);
+console.log(
+  `${FILE}: ${records(out).size} records merged three ways${added.length ? `, ${added.length} paragraph(s) of Other changes added` : ''}. Check it, then git add it.`,
+);
 if (byHand.length) {
-  console.error(`Both sides changed ${byHand.join(', ')}: the default branch's version is in the file; merge the branch's edits by hand.`);
+  console.error(
+    `Both sides changed ${byHand.join(', ')}: the default branch's version is in the file; merge the branch's edits by hand.`,
+  );
   process.exit(1);
 }

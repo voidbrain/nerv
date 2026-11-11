@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { POSIX, assertPrivateFile } from './fixtures/posix.ts';
-import { mkdtempSync, rmSync, readFileSync, statSync, existsSync } from 'node:fs';
+import { assertPrivateFile } from './fixtures/posix.ts';
+import { mkdtempSync, rmSync, readFileSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { generateKeyPairSync } from 'node:crypto';
 import { tmpdir } from 'node:os';
