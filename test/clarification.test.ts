@@ -399,3 +399,39 @@ test(
     }
   },
 );
+
+test(
+  'B-021: an answer the main base refuses outright (nothing ran there) keeps the question waiting here',
+  { timeout: 30000 },
+  async () => {
+    const main = await fixture(['{"ask":"Which file?"}', '{"reply":"Read shopping.txt."}']);
+    const secondary = await fixture([]);
+    let refuse = false;
+    secondary.runtime.kaji.main = async () => 'NERV-01';
+    secondary.runtime.setDispatch(async (message, _conversation, forward) => {
+      const base = { id: 'NERV-01', name: 'Main' };
+      await forward(base);
+      // What KajiLink.chat returns for a 400/401/403/409: the main base turned the request away before running anything.
+      if (refuse)
+        return { sortieId: '', error: 'NERV-01 refused (409)', refused: true, steps: [], waiting: [] } as never;
+      return { ...(await main.runtime.chat(message, 'kaji:nerv-02-dashboard')), base };
+    });
+    try {
+      const q = await secondary.runtime.chat('Read a file', 'dashboard');
+      refuse = true;
+      const refused = await secondary.runtime.chat('shopping.txt', 'dashboard');
+      assert.equal(refused.sortieId, q.sortieId);
+      assert.match(refused.error ?? '', /refused/);
+      assert.equal((await secondary.runtime.sortie(q.sortieId))!.status, 'open', 'the question still waits');
+      assert.equal((await secondary.runtime.events(q.sortieId)).filter((e) => e.kind === 'misato.answered').length, 0);
+      refuse = false;
+      const done = await secondary.runtime.chat('shopping.txt', 'dashboard');
+      assert.deepEqual([done.sortieId, done.reply], [q.sortieId, 'Read shopping.txt.']);
+      assert.equal((await secondary.runtime.sortie(q.sortieId))!.status, 'done');
+      assert.equal(secondary.asked.plans.length, 0, 'nothing was planned on this base');
+    } finally {
+      await secondary.close();
+      await main.close();
+    }
+  },
+);
