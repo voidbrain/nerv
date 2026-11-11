@@ -33,7 +33,8 @@ const item = (n: number) => ({
   tool: 'reminders.add',
   args: { title: 'Neutral ' + n, due: '2031-01-01T09:00:00Z' },
 });
-async function fixture(heartbeatMs = 150) {
+// workerHeartbeatMs lets a test keep the worker side quiet, so only the coordinator heartbeat is in flight.
+async function fixture(heartbeatMs = 150, workerHeartbeatMs = heartbeatMs) {
   const root = keys(),
     a = keys(),
     b = keys(),
@@ -98,7 +99,7 @@ async function fixture(heartbeatMs = 150) {
         run: (o, i, c) => adapter.run(o, i, c),
       },
       address: (s) => 'ws://' + s,
-      heartbeatMs,
+      heartbeatMs: workerHeartbeatMs,
       requestMs: 1000,
       reconnectMs: 30,
     });
@@ -621,7 +622,8 @@ test(
   'B-046: after a stall, a peer that never answers is still disconnected after one grace budget',
   { timeout: 30000 },
   async () => {
-    const f = await fixture(200);
+    // Budget 400 ms against a 600 ms stall: one grace ends the session near 1,000 ms, a second deferral near 1,400 ms.
+    const f = await fixture(400);
     const send = WebSocket.prototype.send;
     let pingAt = 0;
     WebSocket.prototype.send = function (this: WebSocket, data: unknown, ...rest: unknown[]) {
@@ -629,7 +631,7 @@ test(
       if (!pingAt && String(data).includes('worker.ping')) {
         pingAt = performance.now();
         setImmediate(() => {
-          const end = Date.now() + 500;
+          const end = Date.now() + 600;
           while (Date.now() < end) {
             /* busy on purpose */
           }
@@ -643,10 +645,110 @@ test(
       await until(() => pingAt > 0);
       await until(() => !f.main.connected('NERV-02'));
       const elapsed = performance.now() - pingAt;
-      // Stall (500 ms) plus one fresh budget (200 ms), with scheduling slack; a second deferral would add another budget
-      // and repeated deferrals would never end the session.
-      assert.ok(elapsed >= 500, `disconnected after ${Math.round(elapsed)} ms, before the stall ended`);
-      assert.ok(elapsed < 500 + 2 * 200 + 300, `disconnected only after ${Math.round(elapsed)} ms`);
+      // Stall (600 ms) plus one fresh budget (400 ms), with 300 ms scheduling slack. Heartbeats sent after the stall also
+      // end the session near this time, so the once-only grace itself is checked on a single request below.
+      assert.ok(elapsed >= 600, `disconnected after ${Math.round(elapsed)} ms, before the stall ended`);
+      assert.ok(elapsed < 600 + 400 + 300, `disconnected only after ${Math.round(elapsed)} ms`);
+    } finally {
+      WebSocket.prototype.send = send;
+      await f.close();
+    }
+  },
+);
+// B-046 review of #278: the grace is granted once per request. With no heartbeat traffic, a request the peer never
+// answers is rejected after the stall plus one fresh budget (about 1,000 ms), not after a second one (about 1,400 ms).
+test('B-046: a stalled request the peer never answers gets one grace budget, not two', { timeout: 30000 }, async () => {
+  const f = await fixture(60000);
+  const send = WebSocket.prototype.send;
+  let sentAt = 0;
+  WebSocket.prototype.send = function (this: WebSocket, data: unknown, ...rest: unknown[]) {
+    const sent = (send as (...args: unknown[]) => void).call(this, data, ...rest);
+    if (!sentAt && String(data).includes('worker.run')) {
+      sentAt = performance.now();
+      setImmediate(() => {
+        const end = Date.now() + 600;
+        while (Date.now() < end) {
+          /* busy on purpose */
+        }
+      });
+    }
+    return sent;
+  } as typeof send;
+  try {
+    f.main.start();
+    await rawReady(f);
+    await assert.rejects(f.main.run('NERV-02', item(108), 400), /Worker result unknown after timeout/);
+    const elapsed = performance.now() - sentAt;
+    // Timers run on the loop's millisecond clock and can fire a fraction of a millisecond before performance.now() says
+    // the budget is over (#278 CI run 43106952492: 1000 ms rounded, failing an exact bound); 50 ms of slack still
+    // separates "rejected when the stall ended" (about 600 ms) from "after one grace budget" (about 1,000 ms).
+    assert.ok(
+      elapsed >= 600 + 400 - 50,
+      `rejected after ${Math.round(elapsed)} ms, before stall plus one grace budget`,
+    );
+    assert.ok(elapsed < 600 + 400 + 300, `rejected only after ${Math.round(elapsed)} ms: more than one grace budget`);
+  } finally {
+    WebSocket.prototype.send = send;
+    await f.close();
+  }
+});
+// B-046 (#275 Windows run 43084555427): the grace budget's own timer can fire late too. A second stall that starts
+// after the peer answered the stalled ping leaves the answer unread in the socket when that timer fires; the verdict
+// must read it first, not end a healthy session.
+test(
+  'B-046: an answer that arrives during a second stall is read before the grace budget ends the session',
+  { timeout: 30000 },
+  async () => {
+    // Only the coordinator heartbeat runs: both peers share this process, so the stalls would also freeze the peer
+    // that answers a reverse-direction ping, which a real remote peer would not (measured 3 of 15 failures from that).
+    const f = await fixture(150, 60000);
+    const send = WebSocket.prototype.send;
+    let hellos = 0,
+      armed = false,
+      stalledId = '',
+      done = false;
+    const stall = (ms: number) => {
+      const end = Date.now() + ms;
+      while (Date.now() < end) {
+        /* busy on purpose */
+      }
+    };
+    const rpcOf = (data: unknown) => {
+      try {
+        return JSON.parse(JSON.parse(String(data)).body).rpc as { id?: string; method?: string; result?: unknown };
+      } catch {
+        return {};
+      }
+    };
+    WebSocket.prototype.send = function (this: WebSocket, data: unknown, ...rest: unknown[]) {
+      const sent = (send as (...args: unknown[]) => void).call(this, data, ...rest);
+      if (String(data).includes('worker.hello')) hellos++;
+      const rpc = rpcOf(data);
+      if (armed && rpc.method === 'worker.ping' && rpc.id) {
+        armed = false;
+        stalledId = rpc.id;
+        setImmediate(() => stall(200));
+      } else if (stalledId && rpc.id === stalledId && 'result' in rpc) {
+        stalledId = '';
+        // The answer is written; stall again past the grace budget before this process reads it.
+        setImmediate(() => {
+          stall(200);
+          done = true;
+        });
+      }
+      return sent;
+    } as typeof send;
+    try {
+      await f.start();
+      const negotiated = hellos;
+      armed = true;
+      await until(() => done);
+      // Sample the session directly, so a lost session that reconnects slowly cannot pass as a kept one.
+      for (let i = 0; i < 40; i++) {
+        assert.ok(f.main.connected('NERV-02'), 'an answer already received must not be judged a timeout');
+        await wait(10);
+      }
+      assert.equal(hellos - negotiated, 0, 'an answer already received must not be judged a timeout');
     } finally {
       WebSocket.prototype.send = send;
       await f.close();
@@ -861,6 +963,50 @@ test(
       );
       assert.equal((await f.rb.list()).length, 1, 'the burst executes one durable effect');
     } finally {
+      await f.close();
+    }
+  },
+);
+
+// B-046 (diagnosis 2026-11-11, "Worker pending request bound reached" under load): a heartbeat counted against the
+// work in-flight bound, so a link whose four request slots are busy (deferred approvals, slow runs) refused its own
+// heartbeat and ended a healthy session; a fifth incoming request (the ping) did the same on the receiving side.
+test(
+  'B-046: a link whose request slots are all busy keeps its heartbeat and its session',
+  { timeout: 30000 },
+  async () => {
+    const f = await fixture(150);
+    const original = f.adapter;
+    let release = () => {};
+    const held = new Promise<void>((done) => (release = done));
+    f.setAdapter({
+      ...original,
+      run: async (o, i, c) => {
+        await held;
+        return original.run(o, i, c);
+      },
+    });
+    const send = WebSocket.prototype.send;
+    let hellos = 0;
+    WebSocket.prototype.send = function (this: WebSocket, data: unknown, ...rest: unknown[]) {
+      if (String(data).includes('worker.hello')) hellos++;
+      return (send as (...args: unknown[]) => void).call(this, data, ...rest);
+    } as typeof send;
+    try {
+      await f.start();
+      const negotiated = hellos;
+      const busy = [12, 13, 14, 15].map((n) => f.main.run('NERV-02', item(n), 10000).catch((e: unknown) => e));
+      // Several heartbeat ticks while every request slot is taken.
+      for (let i = 0; i < 60; i++) {
+        assert.ok(f.main.connected('NERV-02'), 'a busy link must keep its session');
+        await wait(10);
+      }
+      assert.equal(hellos - negotiated, 0, 'a busy link must not reconnect');
+      release();
+      await Promise.all(busy);
+    } finally {
+      release();
+      WebSocket.prototype.send = send;
       await f.close();
     }
   },
