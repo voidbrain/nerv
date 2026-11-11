@@ -1,6 +1,6 @@
 # Safe application upgrades (F-005-T06)
 
-2026-11-11, baseline main `b68802d`. Scope: the one per-user NERV service (launchd `io.nerv.agent` on the selected Mac) with its single checkout, data home and SQLite database. The brain and nervous processes are children of that service and upgrade with it. Local model engines are F-005-T08; Windows and Linux adapters are T09/T10. The first slice added a reader contract and a review-only rehearsal; the second makes the rehearsal a journaled step of every update. Neither widens admission: `nodes lifecycle-inspect --action update` still accepts only documentation/README changes.
+2026-11-11, baseline main `b68802d`. Scope: the one per-user NERV service (launchd `io.nerv.agent` on the selected Mac) with its single checkout, data home and SQLite database. The brain and nervous processes are children of that service and upgrade with it. Local model engines are F-005-T08; Windows and Linux adapters are T09/T10. The first slice added a reader contract and a review-only rehearsal; the second makes the rehearsal a journaled step of every update. The third slice widens admission to application changes that leave the schema where it is.
 
 ## Why a rehearsal, not a marker
 
@@ -39,6 +39,24 @@ The handler identity in a plan now also covers `src/upgrade-rehearsal.ts`, so a 
 
 Alternatives considered: let the candidate tree run the whole rehearsal and report; rejected because a faulty candidate would then also own the comparison. `git worktree add` for the export; rejected because it writes into the installed checkout's Git metadata. Treat a blocker as `uncertain`; rejected because the outcome is known and a held claim would block starting the unchanged service until a manual release.
 
+## Admission beyond documentation
+
+Baseline main `6a960bf`. `nodes lifecycle-inspect --action update --revision FULL-SHA` now admits two kinds of revision, with the actual database schema inside the contract range in both cases:
+
+1. **Documentation only**, as before: the diff from the installed revision touches only `docs/` and `README.md`.
+2. **An application change**, when all of these hold before any effect:
+   - the candidate **descends from the installed revision**. An ancestor or an unrelated line is refused, so there is no downgrade through this path;
+   - the candidate tree carries the reader entry `src/upgrade-reader.ts`, so there is something to rehearse;
+   - the candidate's `package.json` declares a Node range in the plain `>=X.Y.Z` form and the service's own Node meets it. Another form, or none, is refused rather than guessed.
+
+Admission lets the attempt start; it does not vouch for the data. Inside the operation the rehearsal still decides, and it now also refuses a candidate whose reader **moves the schema forward**: after such a migration the installed revision could no longer read the data, and the recovery for that is not built (step 3). So this slice admits upgrades that keep the schema, which is every revision between the reader contract's introduction and today.
+
+The candidate commit must already be in the checkout when the plan is made (`git -C CHECKOUT fetch origin FULL-SHA`), because admission reads its tree.
+
+If `dependencies`, `build` or `start` fails after the checkout moved, the operation stays `uncertain` as for any interrupted update. The data is as the backup has it or, after a start, as a reader that was rehearsed to lose nothing left it. Recovery is manual and explicit: reconcile and release the operation, check out the previous revision by hand, rebuild, and apply a fresh `start` plan. An `update` plan back to the previous revision is refused as a downgrade by design.
+
+Alternatives considered: allow-listing more paths; rejected earlier, a changed reader cannot be judged by its paths. Reading the candidate's contract values from its source; rejected as a marker, the rehearsal shows what the reader does. A full semver range evaluator; rejected for now, one plain form covers this project and anything else fails closed.
+
 ## What this does not establish
 
 - The standalone `upgrade-rehearse` command trusts the checkout it runs from. Inside an update the candidate tree is the pinned one and the result is bound to the plan digest.
@@ -54,7 +72,7 @@ Alternatives considered: let the candidate tree run the whole rehearsal and repo
 ## Remaining T06 work
 
 1. Done (second slice, above): journaled `rehearse` step between `fetch` and `checkout`.
-2. Admission beyond documentation: candidate must descend from the installed revision (no downgrade), carry this contract, and satisfy the engine range before dependency effects; the receipt records prior revision, schemas and backup.
+2. Done (third slice, above) for upgrades that keep the schema: descendant-only, reader entry and engine range; forward migrations are refused until step 3.
 3. Post-start acceptance and explicit forward recovery when build or start fails after a forward-only migration.
 4. Independent review, then a real application upgrade on the owner-selected Mac.
 

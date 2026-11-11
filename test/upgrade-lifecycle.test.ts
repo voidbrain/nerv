@@ -19,6 +19,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { serviceFixture } from './mac-service-fixture.ts';
 import {
   applyService,
+  compatibleServiceRevision,
   macServiceAdapter,
   planService,
   serviceReceipt,
@@ -309,3 +310,111 @@ test(
     }
   },
 );
+
+test(
+  'admission beyond documentation: descendant, reader entry and engine range; never a downgrade',
+  supported,
+  async () => {
+    const f = serviceFixture();
+    try {
+      const source = f.host.context.source;
+      const git = (args: string[]) =>
+        execFileSync(
+          'git',
+          [
+            '-C',
+            source,
+            '-c',
+            'user.name=Neutral Fixture',
+            '-c',
+            'user.email=fixture@example.invalid',
+            '-c',
+            'commit.gpgsign=false',
+            ...args,
+          ],
+          { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
+        ).trim();
+      const commit = (files: Record<string, string | null>, label: string) => {
+        mkdirSync(join(source, 'src'), { recursive: true });
+        for (const [path, text] of Object.entries(files))
+          if (text === null) rmSync(join(source, path), { force: true });
+          else writeFileSync(join(source, path), text);
+        git(['add', '-A']);
+        git(['commit', '--allow-empty', '-m', label]);
+        return git(['rev-parse', 'HEAD']);
+      };
+      const manifest = (node: string | undefined) =>
+        JSON.stringify({ name: 'neutral', ...(node ? { engines: { node } } : {}) });
+      git(['init']);
+      const older = commit(
+        { 'src/app.ts': 'export const v = 0;', 'package.json': manifest('>=24.0.0') },
+        'Neutral older',
+      );
+      const installed = commit(
+        { [READER_ENTRY]: READER('SELECT 1'), 'src/app.ts': 'export const v = 1;' },
+        'Neutral installed',
+      );
+      const upgrade = commit({ 'src/app.ts': 'export const v = 2;' }, 'Neutral application change');
+      const noEntry = commit({ [READER_ENTRY]: null }, 'Neutral candidate without a reader entry');
+      git(['checkout', '--detach', upgrade]);
+      const tooNew = commit({ 'package.json': manifest('>=99.0.0') }, 'Neutral candidate needing a newer Node');
+      git(['checkout', '--detach', upgrade]);
+      const caret = commit({ 'package.json': manifest('^24.0.0') }, 'Neutral candidate with another range form');
+      git(['checkout', '--detach', upgrade]);
+      const unstated = commit({ 'package.json': manifest(undefined) }, 'Neutral candidate without an engine range');
+      git(['checkout', '--detach', older]);
+      const sibling = commit(
+        { [READER_ENTRY]: READER('SELECT 1'), 'src/app.ts': 'export const v = 9;' },
+        'Neutral unrelated line',
+      );
+      git(['checkout', '--detach', installed]);
+      const admitted = (revision: string) => compatibleServiceRevision(f.host.context, revision);
+      assert.equal(await admitted(upgrade), true, 'a descendant application change with the reader entry is admitted');
+      assert.equal(await admitted(older), false, 'an ancestor is a downgrade');
+      assert.equal(await admitted(sibling), false, 'a revision that does not contain the installed one is refused');
+      assert.equal(await admitted(noEntry), false, 'without the reader entry there is nothing to rehearse');
+      assert.equal(await admitted(tooNew), false, 'the declared Node range must be met by this runtime');
+      assert.equal(await admitted(caret), false, 'a range form this check cannot evaluate is refused, not guessed');
+      assert.equal(await admitted(unstated), false);
+      assert.equal(await admitted('f'.repeat(40)), false, 'an unknown commit is refused');
+      assert.equal(git(['rev-parse', 'HEAD']), installed);
+      assert.equal(git(['status', '--porcelain']), '', 'admission changes nothing');
+    } finally {
+      f.close();
+    }
+  },
+);
+
+test('a candidate that migrates the schema forward is refused before the checkout changes', supported, async () => {
+  const f = serviceFixture();
+  try {
+    await stopped(f);
+    const before = f.calls.length;
+    f.setReader((database) => {
+      const db = new DatabaseSync(database);
+      try {
+        db.exec('PRAGMA user_version=6');
+      } finally {
+        db.close();
+      }
+    });
+    const plan = await planService(f.host, 'update', NEXT),
+      receipt = await applyService(f.host, plan, plan.digest);
+    assert.equal(receipt.state, 'refused');
+    assert.match(
+      receipt.rehearsal!.blockers.join(' '),
+      /migrates the data from schema 5 to 6; forward migrations are not admitted/,
+    );
+    assert.equal(receipt.rehearsal!.result!.forwardOnly, true);
+    assert.deepEqual(f.calls.slice(before), ['fetch']);
+    assert.equal(readFileSync(f.revision, 'utf8'), 'a'.repeat(40));
+    const live = new DatabaseSync(f.data, { readOnly: true });
+    try {
+      assert.equal(live.prepare('PRAGMA user_version').get()!.user_version, 5, 'live data is not migrated');
+    } finally {
+      live.close();
+    }
+  } finally {
+    f.close();
+  }
+});
