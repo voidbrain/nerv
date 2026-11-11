@@ -251,7 +251,7 @@ export async function planService(host: ServiceHost, action: Action, nextRevisio
   if (pending) issues.push('A lifecycle operation owns this user service.');
   if (action === 'update' && nextRevision && !(await host.compatible(nextRevision)))
     issues.push(
-      'This update path requires identical executable/dependency trees and supported actual schema; application upgrades need a separate compatibility review.',
+      'This revision is not admitted: beyond documentation it must descend from the installed revision, carry the upgrade reader entry and declare a Node range this runtime meets, with a supported actual schema.',
     );
   const body = {
     version: SERVICE_LIFECYCLE_PROTOCOL as 1,
@@ -517,12 +517,20 @@ export async function applyService(
         await settled(p.before.revision);
         const report = await host.rehearse(p, join(area(host.context), 'backups', p.digest));
         await settled(p.before.revision);
-        receipt!.rehearsal = {
-          source: report.source,
-          ...(report.result ? { result: report.result } : {}),
-          blockers: report.blockers,
-        };
-        refused = report.blockers.length > 0;
+        // A reader that moves the schema forward cannot be undone by checking out the old revision; that recovery is
+        // not built yet, so such an upgrade ends here.
+        const blockers = report.result?.forwardOnly
+          ? [
+              ...report.blockers,
+              'The candidate migrates the data from schema ' +
+                report.source.schema +
+                ' to ' +
+                report.result.schema +
+                '; forward migrations are not admitted until their recovery exists.',
+            ]
+          : report.blockers;
+        receipt!.rehearsal = { source: report.source, ...(report.result ? { result: report.result } : {}), blockers };
+        refused = blockers.length > 0;
       });
       // A reported blocker is a determinate end: source, data and service are as planned, so the claim is released without uncertainty.
       if (refused) {
@@ -713,7 +721,20 @@ export function serviceProfileIdentity(c: ServiceContext): string {
     }),
   );
 }
-/** Until a migration contract is reviewed, executable, dependency and configuration changes cannot enter this update path. */
+/** The Node range a candidate declares must be the plain `>=X.Y.Z` form and be met by the service's own runtime. */
+function engineSatisfied(range: unknown, version: string): boolean {
+  const need = typeof range === 'string' ? /^>=(\d+)\.(\d+)\.(\d+)$/.exec(range.trim()) : null,
+    have = /^v(\d+)\.(\d+)\.(\d+)$/.exec(version.trim());
+  if (!need || !have) return false;
+  for (let i = 1; i <= 3; i++) if (Number(have[i]) !== Number(need[i])) return Number(have[i]) > Number(need[i]);
+  return true;
+}
+/**
+ * Admission of an update, before any effect. The pin must be a commit that descends from the installed revision
+ * (never a downgrade or another line). One that changes only documentation needs nothing more. Any other must carry
+ * the reader entry the rehearsal runs and declare a Node range this runtime meets. This admits the attempt, not the data: the journaled rehearsal then
+ * runs the candidate's reader on the operation's backup and can still refuse it.
+ */
 export async function compatibleServiceRevision(
   c: ServiceContext,
   revision: string,
@@ -728,14 +749,29 @@ export async function compatibleServiceRevision(
     db.close();
   }
   if (schema < UPGRADE_CONTRACT.minimumServiceSchema || schema > SERVICE_READER_SCHEMA) return false;
-  const diff = await run('git', ['-C', c.source, 'diff', '--no-renames', '--name-only', '-z', 'HEAD', revision, '--']);
-  return (
-    diff.status === 0 &&
+  const git = (args: string[]) => run('git', ['-C', c.source, ...args]);
+  // The pin must be a commit (a tag object would check out as another id) that contains the installed revision.
+  const kind = await git(['cat-file', '-t', revision]);
+  if (kind.status !== 0 || kind.out.trim() !== 'commit') return false;
+  if ((await git(['merge-base', '--is-ancestor', 'HEAD', revision])).status !== 0) return false;
+  const diff = await git(['diff', '--no-renames', '--name-only', '-z', 'HEAD', revision, '--']);
+  if (diff.status !== 0) return false;
+  if (
     diff.out
       .split('\0')
       .filter(Boolean)
       .every((path) => path.startsWith('docs/') || path === 'README.md')
-  );
+  )
+    return true;
+  if ((await git(['cat-file', '-e', revision + ':' + READER_ENTRY])).status !== 0) return false;
+  const manifest = await git(['show', revision + ':package.json']),
+    runtime = await run(c.node, ['--version']);
+  if (manifest.status !== 0 || runtime.status !== 0) return false;
+  try {
+    return engineSatisfied((JSON.parse(manifest.out) as { engines?: { node?: unknown } }).engines?.node, runtime.out);
+  } catch {
+    return false;
+  }
 }
 export function macRegistrationMatches(output: string, c: ServiceContext): boolean {
   const field = (name: string) => output.match(new RegExp('^\\s*' + name + ' = (.+)$', 'm'))?.[1]?.trim();
@@ -924,7 +960,8 @@ export function macServiceAdapter(context: ServiceContext, run: typeof command =
       else
         r = await run(
           'npm',
-          step === 'dependencies' ? ['ci', '--engine-strict'] : ['run', 'build'],
+          // No install scripts: an admitted application upgrade may change the lockfile, and package scripts are not rehearsed.
+          step === 'dependencies' ? ['ci', '--engine-strict', '--ignore-scripts'] : ['run', 'build'],
           context.source,
           600000,
         );
