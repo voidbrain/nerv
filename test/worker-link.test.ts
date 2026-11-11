@@ -968,6 +968,41 @@ test(
   },
 );
 
+// B-046 review of #278: a peer on earlier code pings on every tick, so a second ping can arrive while the first is still
+// handled. It takes a work slot, as before the heartbeat got its own slot, and the session stays up.
+test(
+  'B-046: an overlapping ping from a peer on earlier code is answered, not refused',
+  { timeout: 30000 },
+  async () => {
+    const f = await fixture(60000);
+    try {
+      f.main.start();
+      const raw = await rawReady(f);
+      // Hold the first ping in its handler (the coordinator records presence) until the second one has arrived.
+      const seen = f.ra.kaji.seen.bind(f.ra.kaji);
+      let release = () => {};
+      const gate = new Promise<void>((done) => (release = done));
+      let calls = 0;
+      (f.ra.kaji as unknown as { seen: (u: Record<string, string>) => unknown }).seen = async (updates) => {
+        if (++calls === 1) await gate;
+        return seen(updates);
+      };
+      const answers: unknown[] = [];
+      raw.socket.on('message', (data) => answers.push(JSON.parse(JSON.parse(data.toString()).body).rpc));
+      raw.socket.send(raw.frame(2, 'worker.ping', { offers: [] }));
+      raw.socket.send(raw.frame(3, 'worker.ping', { offers: [] }));
+      await until(() => calls >= 2 || !f.main.connected('NERV-02'));
+      assert.ok(f.main.connected('NERV-02'), 'an overlapping ping does not end the session');
+      release();
+      await until(() => answers.length >= 2);
+      for (const a of answers) assert.ok(a && typeof a === 'object' && 'result' in a, 'both pings are answered');
+      assert.ok(f.main.connected('NERV-02'), 'an overlapping ping does not end the session');
+    } finally {
+      await f.close();
+    }
+  },
+);
+
 // B-046 (diagnosis 2026-11-11, "Worker pending request bound reached" under load): a heartbeat counted against the
 // work in-flight bound, so a link whose four request slots are busy (deferred approvals, slow runs) refused its own
 // heartbeat and ended a healthy session; a fifth incoming request (the ping) did the same on the receiving side.
