@@ -1,1 +1,14 @@
-[{"kind":"tool","disposition":"implemented","target":"tools/work-usage.mjs","evidence":"Copied published v4.8.0 tools/work-usage.mjs and docs/agents/work-usage.md byte-identically from the tag; check-harness reports copied files match. Adds optional allowance snapshots, private report --out and calibration groups; no store migration and no NERV rule, runtime or service change. A user-level Claude status line already invokes claude-status but no Claude allowance snapshot has been observed, so Claude percentages remain unknown; Codex collection not run in this reconcile. Friction session was already open at 2026-11-10T23:50Z before this job began, so its duration includes earlier unobserved time and is not a comparable focused-work sample. No behaviour runner configured; token counters unavailable."},{"kind":"none","disposition":"no-change","target":"","evidence":"Rule inputs AGENTS.md, BACKLOG-RULES and area notes are unchanged by v4.8.0; the release touches only the optional usage tool and guide, so no rule consolidation or new safeguard is warranted in this reconcile."}]
+[
+  {
+    "kind": "rule",
+    "disposition": "implemented",
+    "target": "AGENTS.md",
+    "evidence": "One project line (marked <!-- project -->) adds npm run format:check to the check catalogue for the Prettier adoption in PR #260; no template rule, safeguard or ask-first/never rule is changed or removed. Formatting covers src/, test/ and web/src TypeScript; copied harness tools are excluded and check-harness still reports them matching v4.8.0. No behaviour runner configured; token counters unavailable."
+  },
+  {
+    "kind": "none",
+    "disposition": "no-change",
+    "target": "",
+    "evidence": "BACKLOG-RULES and area notes are unchanged by this change; the owner's question about batching reconciliation PRs is a harness rule decision still open with the owner and is not changed here."
+  }
+]

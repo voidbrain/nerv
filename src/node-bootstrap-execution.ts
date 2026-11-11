@@ -1,17 +1,42 @@
-import {canonical,publicKeyFrom} from './kaji.ts';
-import {bootstrapPlan,type BootstrapPlan} from './node-bootstrap.ts';
-import {runNodeCommand,sshInspectionRequest,type CommandRunner} from './node-inspection.ts';
-export type BootstrapState='completed'|'uncertain'|'refused'|'busy'|'absent'|'released';
-export interface BootstrapReceipt {version:1;digest:string;state:BootstrapState;steps:string[];reason?:string;publicKey?:string;handlerPid?:number;service:'not-installed';pairing:'required'}
-const object=(value:unknown):value is Record<string,unknown>=>!!value&&typeof value==='object'&&!Array.isArray(value);
+import { canonical, publicKeyFrom } from './kaji.ts';
+import { bootstrapPlan, type BootstrapPlan } from './node-bootstrap.ts';
+import { runNodeCommand, sshInspectionRequest, type CommandRunner } from './node-inspection.ts';
+export type BootstrapState = 'completed' | 'uncertain' | 'refused' | 'busy' | 'absent' | 'released';
+export interface BootstrapReceipt {
+  version: 1;
+  digest: string;
+  state: BootstrapState;
+  steps: string[];
+  reason?: string;
+  publicKey?: string;
+  handlerPid?: number;
+  service: 'not-installed';
+  pairing: 'required';
+}
+const object = (value: unknown): value is Record<string, unknown> =>
+  !!value && typeof value === 'object' && !Array.isArray(value);
 /** Reconstruct every command from validated fields; a saved command list is never executable authority. */
-export function validateBootstrapPlan(value:unknown,now=new Date(),recovery=false):BootstrapPlan {
- if(!object(value)||!object(value.source)||!Array.isArray(value.steps)||!object(value.inspection))throw Error('Invalid bootstrap manifest.');
- const plan=bootstrapPlan(value.inspection,{sourceProtocol:value.source.bootstrapProtocol as 1,revision:value.source.revision as string,checkout:value.checkout as string,home:value.home as string,base:value.base as BootstrapPlan['base'],additionalProfile:value.additionalProfile as boolean,installService:value.steps.some(step=>object(step)&&step.id==='per-user-service')},recovery?new Date(String(value.inspection.observedAt)):now);
- if(canonical(plan)!==canonical(value))throw Error('Bootstrap manifest differs from its validated plan.');return plan;
+export function validateBootstrapPlan(value: unknown, now = new Date(), recovery = false): BootstrapPlan {
+  if (!object(value) || !object(value.source) || !Array.isArray(value.steps) || !object(value.inspection))
+    throw Error('Invalid bootstrap manifest.');
+  const plan = bootstrapPlan(
+    value.inspection,
+    {
+      sourceProtocol: value.source.bootstrapProtocol as 1,
+      revision: value.source.revision as string,
+      checkout: value.checkout as string,
+      home: value.home as string,
+      base: value.base as BootstrapPlan['base'],
+      additionalProfile: value.additionalProfile as boolean,
+      installService: value.steps.some((step) => object(step) && step.id === 'per-user-service'),
+    },
+    recovery ? new Date(String(value.inspection.observedAt)) : now,
+  );
+  if (canonical(plan) !== canonical(value)) throw Error('Bootstrap manifest differs from its validated plan.');
+  return plan;
 }
 /** Fixed target-side program. Never run saved shell text or return command output/credentials. */
-const TARGET_BOOTSTRAP=String.raw`
+const TARGET_BOOTSTRAP = String.raw`
 const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),cp=require('node:child_process'),crypto=require('node:crypto');
 const {plan:p,mode,reason,confirmedStopped}=input,digest=p.digest,steps=[];
 const result=(state,why,extra={})=>({version:1,digest,state,steps:[...steps],...(why?{reason:why}:{}),service:'not-installed',pairing:'required',...extra});
@@ -70,23 +95,93 @@ try{
 }finally{try{db?.close();}catch{}}
 `;
 /** Generate fixed code plus a data literal; saved commands and report text never become JavaScript. */
-export function bootstrapRequest(plan:BootstrapPlan,mode:'apply'|'status'|'release',reason?:string,confirmedStopped=false){
- if(!['apply','status','release'].includes(mode))throw Error('Invalid bootstrap operation.');
- const input=JSON.stringify({plan,mode,reason,confirmedStopped});const script=`const input=${input};const receipt=(()=>{${TARGET_BOOTSTRAP}})();process.stdout.write(JSON.stringify(receipt));`;
- const request=plan.inspection.transport==='local'?{program:process.execPath,args:['--input-type=commonjs','-'],timeoutMs:900000,maxBytes:32768}:sshInspectionRequest(plan.target);
- return {...request,input:script,timeoutMs:mode==='apply'?900000:15000,mayWrite:mode!=='status'};
+export function bootstrapRequest(
+  plan: BootstrapPlan,
+  mode: 'apply' | 'status' | 'release',
+  reason?: string,
+  confirmedStopped = false,
+) {
+  if (!['apply', 'status', 'release'].includes(mode)) throw Error('Invalid bootstrap operation.');
+  const input = JSON.stringify({ plan, mode, reason, confirmedStopped });
+  const script = `const input=${input};const receipt=(()=>{${TARGET_BOOTSTRAP}})();process.stdout.write(JSON.stringify(receipt));`;
+  const request =
+    plan.inspection.transport === 'local'
+      ? { program: process.execPath, args: ['--input-type=commonjs', '-'], timeoutMs: 900000, maxBytes: 32768 }
+      : sshInspectionRequest(plan.target);
+  return { ...request, input: script, timeoutMs: mode === 'apply' ? 900000 : 15000, mayWrite: mode !== 'status' };
 }
-export async function bootstrapOperation(raw:unknown,mode:'apply'|'status'|'release',options:{confirm?:string;reason?:string;confirmedStopped?:boolean}={},runner:CommandRunner=runNodeCommand,now=new Date()):Promise<BootstrapReceipt>{
- if(!['apply','status','release'].includes(mode))throw Error('Invalid bootstrap operation.');
- const plan=validateBootstrapPlan(raw,now,mode!=='apply');if(mode!=='status'&&options.confirm!==plan.digest)throw Error('Confirm the exact reviewed plan digest.');
- if(mode==='apply'&&plan.blockers.length)throw Error('Bootstrap is blocked: '+plan.blockers.join(' '));
- if(mode==='release'&&(!options.confirmedStopped||!options.reason||options.reason.trim().length<8||options.reason.length>500))throw Error('Release needs explicit stopped confirmation and an evidence reason.');
- let value:unknown;try{const output=await runner(bootstrapRequest(plan,mode,options.reason,options.confirmedStopped));if(Buffer.byteLength(output)>32768)throw Error('oversize');value=JSON.parse(output);}catch{return {version:1,digest:plan.digest,state:'uncertain',steps:[],reason:'Transport/process outcome unknown; inspect the target receipt before retrying.',service:'not-installed',pairing:'required'};}
- if(!object(value)||value.version!==1||value.digest!==plan.digest||!['completed','uncertain','refused','busy','absent','released'].includes(String(value.state))||!Array.isArray(value.steps)||value.steps.length>20||value.steps.some(step=>typeof step!=='string'||!/^[-a-z]+:(?:started|completed)$/.test(step)))throw Error('Invalid target bootstrap receipt; outcome remains unknown.');
- if(value.state==='completed'&&(typeof value.publicKey!=='string'||value.steps.length!==plan.steps.length||value.steps.some((step,i)=>step!==plan.steps[i]!.id+':completed')))throw Error('Incomplete success receipt; outcome remains unknown.');
- const receipt:BootstrapReceipt={version:1,digest:plan.digest,state:value.state as BootstrapState,steps:value.steps as string[],service:'not-installed',pairing:'required'};
- if(value.handlerPid!==undefined){if(!Number.isSafeInteger(value.handlerPid)||Number(value.handlerPid)<1)throw Error('Invalid bootstrap handler reference.');receipt.handlerPid=Number(value.handlerPid);}
- if(typeof value.reason==='string'&&/^[a-z0-9:-]{1,100}$/.test(value.reason))receipt.reason=value.reason;
- if(value.publicKey!==undefined){if(typeof value.publicKey!=='string'||value.publicKey.length>128||!/^[A-Za-z0-9+/=]+$/.test(value.publicKey))throw Error('Invalid bootstrap public identity; pairing is not established.');publicKeyFrom(value.publicKey);receipt.publicKey=value.publicKey;}
- return receipt;
+export async function bootstrapOperation(
+  raw: unknown,
+  mode: 'apply' | 'status' | 'release',
+  options: { confirm?: string; reason?: string; confirmedStopped?: boolean } = {},
+  runner: CommandRunner = runNodeCommand,
+  now = new Date(),
+): Promise<BootstrapReceipt> {
+  if (!['apply', 'status', 'release'].includes(mode)) throw Error('Invalid bootstrap operation.');
+  const plan = validateBootstrapPlan(raw, now, mode !== 'apply');
+  if (mode !== 'status' && options.confirm !== plan.digest) throw Error('Confirm the exact reviewed plan digest.');
+  if (mode === 'apply' && plan.blockers.length) throw Error('Bootstrap is blocked: ' + plan.blockers.join(' '));
+  if (
+    mode === 'release' &&
+    (!options.confirmedStopped || !options.reason || options.reason.trim().length < 8 || options.reason.length > 500)
+  )
+    throw Error('Release needs explicit stopped confirmation and an evidence reason.');
+  let value: unknown;
+  try {
+    const output = await runner(bootstrapRequest(plan, mode, options.reason, options.confirmedStopped));
+    if (Buffer.byteLength(output) > 32768) throw Error('oversize');
+    value = JSON.parse(output);
+  } catch {
+    return {
+      version: 1,
+      digest: plan.digest,
+      state: 'uncertain',
+      steps: [],
+      reason: 'Transport/process outcome unknown; inspect the target receipt before retrying.',
+      service: 'not-installed',
+      pairing: 'required',
+    };
+  }
+  if (
+    !object(value) ||
+    value.version !== 1 ||
+    value.digest !== plan.digest ||
+    !['completed', 'uncertain', 'refused', 'busy', 'absent', 'released'].includes(String(value.state)) ||
+    !Array.isArray(value.steps) ||
+    value.steps.length > 20 ||
+    value.steps.some((step) => typeof step !== 'string' || !/^[-a-z]+:(?:started|completed)$/.test(step))
+  )
+    throw Error('Invalid target bootstrap receipt; outcome remains unknown.');
+  if (
+    value.state === 'completed' &&
+    (typeof value.publicKey !== 'string' ||
+      value.steps.length !== plan.steps.length ||
+      value.steps.some((step, i) => step !== plan.steps[i]!.id + ':completed'))
+  )
+    throw Error('Incomplete success receipt; outcome remains unknown.');
+  const receipt: BootstrapReceipt = {
+    version: 1,
+    digest: plan.digest,
+    state: value.state as BootstrapState,
+    steps: value.steps as string[],
+    service: 'not-installed',
+    pairing: 'required',
+  };
+  if (value.handlerPid !== undefined) {
+    if (!Number.isSafeInteger(value.handlerPid) || Number(value.handlerPid) < 1)
+      throw Error('Invalid bootstrap handler reference.');
+    receipt.handlerPid = Number(value.handlerPid);
+  }
+  if (typeof value.reason === 'string' && /^[a-z0-9:-]{1,100}$/.test(value.reason)) receipt.reason = value.reason;
+  if (value.publicKey !== undefined) {
+    if (
+      typeof value.publicKey !== 'string' ||
+      value.publicKey.length > 128 ||
+      !/^[A-Za-z0-9+/=]+$/.test(value.publicKey)
+    )
+      throw Error('Invalid bootstrap public identity; pairing is not established.');
+    publicKeyFrom(value.publicKey);
+    receipt.publicKey = value.publicKey;
+  }
+  return receipt;
 }

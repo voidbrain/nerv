@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-11T00:05:13.847Z",
+  "reviewed": "2026-11-11T07:38:10.084Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
-    "AGENTS.md": "3d76fc2a6f1b0ec739686eff74d01bd89437c793ed859b8e93f223dc5c52fe2d",
+    "AGENTS.md": "95e19851513530ca545ca9a03ac0d7ac9641c9dabd119dc28870f1c8c4141643",
     "docs/BACKLOG-RULES.md": "e3461291a0ceb6b483d60093ffb4e67c45799896b68bdbee0a8a19ec0ebdf287",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
     "docs/agents/areas.md": "0ff9805a7d720ee177505cef670e53169a6d640299762dfa86185be46fa8737c",
@@ -24,8 +24,8 @@
     "tools/work-usage.mjs": "0fdd6f4c8106c986c7798badec4d655119341edf6bb6f60c30e1cfc97bd786cb"
   },
   "measurements": {
-    "samples": 16,
-    "latestAt": "2026-11-11T00:02:55.702Z",
+    "samples": 2,
+    "latestAt": "2026-11-11T07:38:10.030Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -51,42 +51,42 @@
         }
       },
       "reconciliation": {
-        "samples": 16,
+        "samples": 2,
         "durationMs": {
-          "observed": 16,
+          "observed": 2,
           "missing": 0,
-          "median": 207860
+          "median": 61
         },
         "conflicts": {
-          "observed": 4,
-          "missing": 12,
+          "observed": 1,
+          "missing": 1,
           "median": 0
         },
         "unnecessaryPrompts": {
           "observed": 1,
-          "missing": 15,
+          "missing": 1,
           "median": 0
         },
         "repeatedContextLoads": {
           "observed": 1,
-          "missing": 15,
-          "median": 1
+          "missing": 1,
+          "median": 0
         }
       }
     }
   },
   "outcomes": [
     {
-      "kind": "tool",
+      "kind": "rule",
       "disposition": "implemented",
-      "target": "tools/work-usage.mjs",
-      "evidence": "Copied published v4.8.0 tools/work-usage.mjs and docs/agents/work-usage.md byte-identically from the tag; check-harness reports copied files match. Adds optional allowance snapshots, private report --out and calibration groups; no store migration and no NERV rule, runtime or service change. A user-level Claude status line already invokes claude-status but no Claude allowance snapshot has been observed, so Claude percentages remain unknown; Codex collection not run in this reconcile. Friction session was already open at 2026-11-10T23:50Z before this job began, so its duration includes earlier unobserved time and is not a comparable focused-work sample. No behaviour runner configured; token counters unavailable."
+      "target": "AGENTS.md",
+      "evidence": "One project line (marked <!-- project -->) adds npm run format:check to the check catalogue for the Prettier adoption in PR #260; no template rule, safeguard or ask-first/never rule is changed or removed. Formatting covers src/, test/ and web/src TypeScript; copied harness tools are excluded and check-harness still reports them matching v4.8.0. No behaviour runner configured; token counters unavailable."
     },
     {
       "kind": "none",
       "disposition": "no-change",
       "target": "",
-      "evidence": "Rule inputs AGENTS.md, BACKLOG-RULES and area notes are unchanged by v4.8.0; the release touches only the optional usage tool and guide, so no rule consolidation or new safeguard is warranted in this reconcile."
+      "evidence": "BACKLOG-RULES and area notes are unchanged by this change; the owner's question about batching reconciliation PRs is a harness rule decision still open with the owner and is not changed here."
     }
   ]
 }
