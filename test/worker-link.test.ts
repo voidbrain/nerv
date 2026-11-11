@@ -33,7 +33,8 @@ const item = (n: number) => ({
   tool: 'reminders.add',
   args: { title: 'Neutral ' + n, due: '2031-01-01T09:00:00Z' },
 });
-async function fixture(heartbeatMs = 150) {
+// workerHeartbeatMs lets a test keep the worker side quiet, so only the coordinator heartbeat is in flight.
+async function fixture(heartbeatMs = 150, workerHeartbeatMs = heartbeatMs) {
   const root = keys(),
     a = keys(),
     b = keys(),
@@ -98,7 +99,7 @@ async function fixture(heartbeatMs = 150) {
         run: (o, i, c) => adapter.run(o, i, c),
       },
       address: (s) => 'ws://' + s,
-      heartbeatMs,
+      heartbeatMs: workerHeartbeatMs,
       requestMs: 1000,
       reconnectMs: 30,
     });
@@ -698,7 +699,9 @@ test(
   'B-046: an answer that arrives during a second stall is read before the grace budget ends the session',
   { timeout: 30000 },
   async () => {
-    const f = await fixture(150);
+    // Only the coordinator heartbeat runs: both peers share this process, so the stalls would also freeze the peer
+    // that answers a reverse-direction ping, which a real remote peer would not (measured 3 of 15 failures from that).
+    const f = await fixture(150, 60000);
     const send = WebSocket.prototype.send;
     let hellos = 0,
       armed = false,
