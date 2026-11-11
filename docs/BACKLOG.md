@@ -14,16 +14,19 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 34 | 6 |
-| **Require Human 🧑** | 7 | 0 |
+| **Require Human 🧑** | 10 | 0 |
 
 ### Require Human 🧑
 
 | Features | Bugs |
 |---|---|
 | [F-005](#f-005) | — |
+| [F-006](#f-006) |  |
+| [F-007](#f-007) |  |
 | [F-009](#f-009) |  |
 | [F-011](#f-011) |  |
 | [F-015](#f-015) |  |
+| [F-016](#f-016) |  |
 | [F-023](#f-023) |  |
 | [F-062](#f-062) |  |
 | [F-064](#f-064) |  |
@@ -432,7 +435,7 @@ Totals against the accepted plan: T07 3.5 days (was 2–3, a material increase t
 |:---:|---|---|---|
 | 🔴 | 🔺 P1 | Open | 🔴 Large |
 
-💻 **→ Human action required: No**<br />Implement capability-aware scheduling with independent model endpoint and execution node selection. Add: counselors/experts are hired (fixed or JIT) and default to suggest-only; only a small core council holds vote authority; capability ads + cost/privacy policy drive hiring; progressive trust can later promote a reliable expert into a stronger role.
+🧑 **→ Human action required: Yes**<br />Owner decision: approve or change the proposed slices below before work starts. Then: Implement capability-aware scheduling with independent model endpoint and execution node selection. Add: counselors/experts are hired (fixed or JIT) and default to suggest-only; only a small core council holds vote authority; capability ads + cost/privacy policy drive hiring; progressive trust can later promote a reliable expert into a stronger role.
 
 | | |
 |---|---|
@@ -442,6 +445,27 @@ Totals against the accepted plan: T07 3.5 days (was 2–3, a material increase t
 
 <details>
 <summary>Next action, estimates and evidence</summary>
+
+**Proposed slices, 2026-11-11 ([PR #264](https://github.com/voidbrain/nerv/pull/264); owner decision pending, nothing implemented):** existing steps T01–T05 had no estimates. Each is split into slices of at most two days.
+
+| Step | Slice | Scope | Estimate |
+|---|---|---|---|
+| T01 | a | Decision: remote inference endpoint identity, permitted data, behaviour when unavailable | 1 day |
+| T01 | b | Configuration validation for remote endpoints; the loopback-only local route stays guaranteed; regressions | 1 day |
+| T02 | a | Selection contract: model endpoint and execution worker chosen independently; no silent fallback | 1 day |
+| T02 | b | Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol | 1.5 days |
+| T02 | c | Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route | 1 day |
+| T03 | a | Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases | 1.5 days |
+| T03 | b | Evidence adapter binding both configurations, handoffs, budgets and hosts | 1 day |
+| T03 | c | Grader tamper protection; stale or mismatched evidence rejected; authority rechecked | 1.5 days |
+| T04 | a | Placement campaign plan with exact cases, repeats and budgets for owner approval | 0.5 day |
+| T04 | b | Run on the enrolled Mac and mini PC | 1 day plus owner run |
+| T04 | c | Report and placement recommendation | 0.5 day |
+| T05 | a | Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.5 day |
+| T05 | b | Three condition runs | 1 day plus owner time |
+| T05 | c | Report | 0.5 day |
+
+Total about 14.5 focused days (no previous per-step estimate; the record said Large). Estimates only, not measurements; owner-run device or campaign time is not counted.
 
 **Next action / closure evidence:** Owner integration 2026-11-09: [staged configuration qualification](decisions/configuration-qualification.md) is accepted design. T03 owns the NERV combination pack/adapter and separately identified coder–auditor results, with hidden acceptance, seeded flawed patches and correlated-failure/cost checks. T04 owns NERV host-placement comparison for Mac inference, mini PC specialist inference or mini PC tool/test execution; actual remote targets remain deferred until selected and authorized. Generic protocol implementation stays upstream; no dependency on NERV adoption may gate its releases. Neither task is delivered or qualified by the single-model smoke.
 
@@ -475,7 +499,7 @@ Implement capability-aware scheduling with independent model endpoint and execut
 |:---:|---|---|---|
 | 🔴 | 🔺 P1 | Open | 🔴 Large |
 
-💻 **→ Human action required: No**<br />Add push-to-talk STT/TTS and isolated skill proposals with evaluation and rollback.
+🧑 **→ Human action required: Yes**<br />Owner decision: approve or change the proposed slices below before work starts. Then: Add push-to-talk STT/TTS and isolated skill proposals with evaluation and rollback.
 
 | | |
 |---|---|
@@ -485,6 +509,22 @@ Implement capability-aware scheduling with independent model endpoint and execut
 
 <details>
 <summary>Next action, estimates and evidence</summary>
+
+**Proposed slices, 2026-11-11 ([PR #264](https://github.com/voidbrain/nerv/pull/264); owner decision pending, nothing implemented):** no steps existed. Proposed steps, each split into slices.
+
+| Step | Slice | Scope | Estimate |
+|---|---|---|---|
+| T01 | a | Feasibility: local STT and TTS candidates measured on the Mac in Italian and English | 1 day |
+| T01 | b | Command corpus in Italian and English with expected intents | 1 day |
+| T02 | a | Push-to-talk on the dashboard and companion: speech to text, shown for confirmation, no silent physical activation | 1.5 days |
+| T02 | b | Spoken replies (TTS) | 1 day |
+| T02 | c | Corpus evaluation run and report | 0.5 day |
+| T03 | a | Skill package format, isolated storage and versions | 1 day |
+| T03 | b | Evaluation with a baseline run without the skill and held-out cases | 1.5 days |
+| T03 | c | Owner promotion, rollback and retirement after a model change | 1 day |
+| T03 | d | Rejected permission escalation and corrected-memory cases | 1 day |
+
+Total about 9.5 focused days (was Large, unestimated). Uncertainty: STT/TTS quality on local hardware (T01a) may change T02. Estimates only, not measurements; owner-run device or campaign time is not counted.
 
 **Next action / closure evidence:** 2026-11-06 (owner discussion of skill value): a skill is instructions plus optional scripts and references, read and followed by the model, not executed deterministically. **Every skill evaluation includes a baseline run without the skill**; a skill that does not beat the baseline (generic advice the model already follows) is not promoted, and is retired if it stops beating it after a model change. Skills worth forging encode what the model lacks: knowledge NERV gathered about the bases, tools and pilots' domains; tested scripts with checkable results; content that must be kept current. Pilot skills and their stages stay owned by F-045; this record owns the evaluation and rollback mechanism. Remaining effort reassessed: unchanged (Large), the note makes implicit acceptance explicit.  Add push-to-talk STT/TTS and isolated skill proposals with evaluation and rollback. Italian/English voice corpus; corrected memory; rejected permission escalation; promoted and rolled-back skill versions.
 
@@ -685,7 +725,7 @@ Implement capability-aware scheduling with independent model endpoint and execut
 |:---:|---|---|---|
 | 🔴 | 🔺 P1 | Open | 🔴 Large |
 
-💻 **→ Human action required: No**<br />Keep the coordinator on an always-on host initially; design later replicated state, leader epochs/leases, fencing and restore.
+🧑 **→ Human action required: Yes**<br />Owner decision: approve or change the proposed slices below before work starts. Then: Keep the coordinator on an always-on host initially; design later replicated state, leader epochs/leases, fencing and restore.
 
 | | |
 |---|---|
@@ -697,6 +737,22 @@ Implement capability-aware scheduling with independent model endpoint and execut
 
 <details>
 <summary>Next action, estimates and evidence</summary>
+
+**Proposed slices, 2026-11-11 ([PR #264](https://github.com/voidbrain/nerv/pull/264); owner decision pending, nothing implemented):** no steps existed; milestone 5b was deferred. Proposed steps, each split into slices.
+
+| Step | Slice | Scope | Estimate |
+|---|---|---|---|
+| T01 | a | Decision: replicated state, leader lease and epoch, fencing tokens, restore | 1.5 days |
+| T01 | b | Independent review of that decision | 0.5 day |
+| T02 | a | Signed state snapshot export and import to a standby (read-only) | 1.5 days |
+| T02 | b | Incremental log shipping to the standby | 1.5 days |
+| T03 | a | Leader epoch in signed registry records; every effect checks the fencing token | 1.5 days |
+| T03 | b | Lease renewal and expiry; an asleep old leader is refused on wake | 1.5 days |
+| T04 | a | Owner-initiated relocation with restore, never context-only takeover | 1.5 days |
+| T05 | a | Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 1.5 days |
+| T05 | b | Two-device acceptance | 1 day plus owner run |
+
+Total about 12 focused days (was Large, unestimated). Highest uncertainty of the three: the replication design (T01) may change T02–T03. Estimates only, not measurements; owner-run device or campaign time is not counted.
 
 **Next action / closure evidence:** Keep the coordinator on an always-on host initially; design later replicated state, leader epochs/leases, fencing and restore. Network partitions, asleep old leaders and reconnect cannot create simultaneous authorities or duplicate physical effects. Context copying alone never grants leadership.
 
