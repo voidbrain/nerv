@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-11T07:29:33.361Z",
+  "reviewed": "2026-11-11T07:38:10.084Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
-    "AGENTS.md": "7ce388a7e769eba894091ae9b3deab72da99c528cfec84c6b4b02be877f4d9ae",
+    "AGENTS.md": "95e19851513530ca545ca9a03ac0d7ac9641c9dabd119dc28870f1c8c4141643",
     "docs/BACKLOG-RULES.md": "e3461291a0ceb6b483d60093ffb4e67c45799896b68bdbee0a8a19ec0ebdf287",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
     "docs/agents/areas.md": "0ff9805a7d720ee177505cef670e53169a6d640299762dfa86185be46fa8737c",
@@ -24,8 +24,8 @@
     "tools/work-usage.mjs": "0fdd6f4c8106c986c7798badec4d655119341edf6bb6f60c30e1cfc97bd786cb"
   },
   "measurements": {
-    "samples": 1,
-    "latestAt": "2026-11-11T07:29:33.311Z",
+    "samples": 2,
+    "latestAt": "2026-11-11T07:38:10.030Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -51,25 +51,25 @@
         }
       },
       "reconciliation": {
-        "samples": 1,
+        "samples": 2,
         "durationMs": {
-          "observed": 1,
+          "observed": 2,
           "missing": 0,
-          "median": 82
+          "median": 61
         },
         "conflicts": {
           "observed": 1,
-          "missing": 0,
+          "missing": 1,
           "median": 0
         },
         "unnecessaryPrompts": {
           "observed": 1,
-          "missing": 0,
+          "missing": 1,
           "median": 0
         },
         "repeatedContextLoads": {
           "observed": 1,
-          "missing": 0,
+          "missing": 1,
           "median": 0
         }
       }

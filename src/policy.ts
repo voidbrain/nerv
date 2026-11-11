@@ -51,11 +51,11 @@ export const effects: readonly Effect[] = ['read', 'write-local', 'write-externa
 export const defaultPolicy: Policy = { deny: [], blue: [], syncThreshold: 80, maxRejects: 3, budget: 1 };
 const local = (e: Effect) => e === 'read' || e === 'write-local';
 const effectFactor: Record<Effect, number> = {
-  read: 1,
+  'read': 1,
   'write-local': 1,
   'write-external': 0.9,
-  irreversible: 0.6,
-  physical: 0.5,
+  'irreversible': 0.6,
+  'physical': 0.5,
 };
 const stageFactor: Record<Stage, number> = { prototype: 0.6, test: 0.85, production: 1 };
 export function validatePolicy(value: unknown): Policy {

@@ -20,7 +20,7 @@ export interface EventPayloads {
   'sortie.opened': { source: string; title: string; trust: Trust };
   'sortie.proactive': { trigger: string; slot: string; stage: string; maxActions: number };
   'context.intake': { source: string; trust: Trust };
-  ballot: Ballot;
+  'ballot': Ballot;
   'grant.issued': { expires: string };
   'grant.used': Record<string, never>;
   'grant.denied': { reason: string };
@@ -29,7 +29,7 @@ export interface EventPayloads {
   'approval.reject': { approvalId: string; source: string };
   'approval.edit': { approvalId: string; source: string };
   'approval.expired': { approvalId: string; source: 'ttl' };
-  spear: { reason: string; revoked: number; stoodDown: number; happenedCount: number; happened: Happened[] };
+  'spear': { reason: string; revoked: number; stoodDown: number; happenedCount: number; happened: Happened[] };
   'misato.reply': { text: string };
   'misato.asked': { text: string; conversation: string; expires: string; forwarded?: { id: string; name: string } };
   'misato.answered': { text: string; questionSequence: number };
