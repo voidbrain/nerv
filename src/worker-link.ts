@@ -159,8 +159,10 @@ class Peer {
     }
     if (!keys(rpc, ['jsonrpc', 'id', 'method', 'params']) || !object(rpc.params))
       throw Error('Invalid worker request.');
-    const ping = rpc.method === 'worker.ping';
-    if (ping ? this.pingActive : this.active >= MAX_RPC_INFLIGHT) throw Error('Worker incoming request bound reached.');
+    // One ping at a time has its own slot; an overlapping one (a peer on code before this change pings on every tick)
+    // takes a work slot under the usual bound, as before, rather than ending the session.
+    const ping = rpc.method === 'worker.ping' && !this.pingActive;
+    if (!ping && this.active >= MAX_RPC_INFLIGHT) throw Error('Worker incoming request bound reached.');
     if (ping) this.pingActive = true;
     else this.active++;
     void this.handle(rpc.method as string, rpc.params)
@@ -338,6 +340,7 @@ class Peer {
                       lastFrameAgoMs: this.lastFrameAt ? Math.round(now - this.lastFrameAt) : null,
                       pending: this.pending.size,
                       incomingActive: this.active,
+                      incomingPing: this.pingActive,
                     },
                   }),
                 );
