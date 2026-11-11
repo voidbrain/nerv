@@ -53,6 +53,12 @@ class Peer {
   private received = 0;
   private active = 0;
   private queued = 0;
+  private lastFrameAt = 0;
+  // B-046: at most one heartbeat in flight per direction, outside the work in-flight bound (MAX_RPC_INFLIGHT), so busy
+  // work slots (deferred approvals, slow runs) never refuse the heartbeat that proves the session is alive.
+  private pingOutstanding = false;
+  private pingId = '';
+  private pingActive = false;
   private incoming: Promise<void> = Promise.resolve();
   private ended = false;
   private pending = new Map<string, Pending>();
@@ -78,6 +84,7 @@ class Peer {
     ws.on('message', (data, binary) => {
       const bytes = Buffer.isBuffer(data) ? data : Array.isArray(data) ? Buffer.concat(data) : Buffer.from(data);
       if (this.ended) return;
+      this.lastFrameAt = performance.now();
       if (binary || this.queued >= MAX_QUEUED_FRAMES || bytes.length > MAX_FRAME_BYTES) {
         this.end();
         return;
@@ -152,8 +159,12 @@ class Peer {
     }
     if (!keys(rpc, ['jsonrpc', 'id', 'method', 'params']) || !object(rpc.params))
       throw Error('Invalid worker request.');
-    if (this.active >= MAX_RPC_INFLIGHT) throw Error('Worker incoming request bound reached.');
-    this.active++;
+    // One ping at a time has its own slot; an overlapping one (a peer on code before this change pings on every tick)
+    // takes a work slot under the usual bound, as before, rather than ending the session.
+    const ping = rpc.method === 'worker.ping' && !this.pingActive;
+    if (!ping && this.active >= MAX_RPC_INFLIGHT) throw Error('Worker incoming request bound reached.');
+    if (ping) this.pingActive = true;
+    else this.active++;
     void this.handle(rpc.method as string, rpc.params)
       .then(
         (result) => {
@@ -168,7 +179,8 @@ class Peer {
         () => this.reply(rpc.id as string, undefined, true),
       )
       .finally(() => {
-        this.active--;
+        if (ping) this.pingActive = false;
+        else this.active--;
       })
       .catch(() => this.end());
   }
@@ -280,24 +292,73 @@ class Peer {
       false,
     );
   }
-  request(method: string, params: Record<string, unknown>, timeoutMs = this.link.requestMs): Promise<unknown> {
-    if (this.pending.size >= MAX_RPC_INFLIGHT) return Promise.reject(Error('Worker pending request bound reached.'));
+  request(
+    method: string,
+    params: Record<string, unknown>,
+    timeoutMs = this.link.requestMs,
+    heartbeat = false,
+  ): Promise<unknown> {
+    // The outstanding heartbeat (one at most, see startHeartbeat) does not take a work slot.
+    if (!heartbeat && this.pending.size - (this.pending.has(this.pingId) ? 1 : 0) >= MAX_RPC_INFLIGHT)
+      return Promise.reject(Error('Worker pending request bound reached.'));
     return new Promise((resolve, reject) => {
       // B-046: a timeout that fires late because this process's event loop was stalled is not evidence the peer is
       // gone: the peer did not get its full budget, and expired timers run before sockets are read. Such a late verdict
       // is deferred once by a fresh budget from the moment the loop resumed; a peer that really is gone still times out
-      // after it (worst case: budget + stall + budget). An on-time timeout is final, as before. Whether a system
+      // after it (worst case: budget + stall + budget, plus at most one budget while received frames are still being
+      // verified, below). An on-time timeout is final, as before. Whether a system
       // sleep counts as a stall depends on the platform's monotonic clock; it is not relied on here.
+      // Every verdict (on time, late, or after the grace budget, whose timer can itself fire late after a second stall)
+      // first lets an answer already received win. It waits one full loop turn (two nested setImmediate): on Unix the
+      // poll phase reads the socket before the first one runs, but on Windows (IOCP) the poll phase only collects the
+      // completion and the read callback runs in the next turn's pending phase (#278 Windows CI run 43105159883).
+      // The verdict then waits for the frames already queued on `incoming` to be verified and applied, for at most one
+      // more budget: each queued frame awaits the registry (in serve, nervous-process calls with their own timeouts), so
+      // waiting for the whole queue could delay a verdict by many budgets.
       const id = randomUUID(),
         started = performance.now(),
-        expire = () => reject(Error('Worker result unknown after timeout.')),
+        afterLoopTurn = (next: () => void) => setImmediate(() => setImmediate(next)),
+        // B-046 diagnosis: a timeout verdict carries what it saw (no payload, identity or secret), so a CI failure that
+        // ends a session says whether the loop was stalled, frames were still queued or nothing arrived.
+        timing: Record<string, unknown> = { method, role: this.role, budgetMs: timeoutMs },
+        expire = () =>
+          afterLoopTurn(() => {
+            let cap: NodeJS.Timeout | undefined;
+            const queuedAtVerdict = this.queued;
+            void Promise.race([this.incoming, new Promise<void>((done) => (cap = setTimeout(done, timeoutMs)))]).then(
+              () => {
+                clearTimeout(cap);
+                if (!this.pending.has(id)) return;
+                const now = performance.now();
+                reject(
+                  Error('Worker result unknown after timeout.', {
+                    cause: {
+                      ...timing,
+                      elapsedMs: Math.round(now - started),
+                      queuedAtVerdict,
+                      queuedAfterWait: this.queued,
+                      lastFrameAgoMs: this.lastFrameAt ? Math.round(now - this.lastFrameAt) : null,
+                      pending: this.pending.size,
+                      incomingActive: this.active,
+                      incomingPing: this.pingActive,
+                    },
+                  }),
+                );
+              },
+            );
+          }),
         timer = setTimeout(() => {
           const pending = this.pending.get(id);
-          if (pending && performance.now() - started > timeoutMs + Math.max(25, timeoutMs / 4))
+          if (!pending) return;
+          const late = performance.now() - started - timeoutMs;
+          timing.firstLatenessMs = Math.round(late);
+          if (late > Math.max(25, timeoutMs / 4)) {
+            timing.graced = true;
             pending.timer = setTimeout(expire, timeoutMs);
-          else expire();
+          } else expire();
         }, timeoutMs);
       this.pending.set(id, { resolve, reject, timer });
+      if (heartbeat) this.pingId = id;
       // Timed-out requests retain admission until a late result or disconnect; timeout does not prove cancellation.
       try {
         this.write({ jsonrpc: '2.0', id, method, params }, true);
@@ -330,14 +391,24 @@ class Peer {
   }
   private startHeartbeat() {
     this.heartbeat = setInterval(() => {
-      void this.request(
+      // The ping still in flight decides liveness (its verdict ends the session); a tick does not stack another one.
+      if (this.pingOutstanding) return;
+      this.pingOutstanding = true;
+      this.request(
         'worker.ping',
         this.role === 'worker' ? { offers: this.link.settings.offers?.() ?? [] } : {},
         Math.min(this.link.heartbeatMs, this.link.requestMs),
-      ).catch(() => this.end());
+        true,
+      ).then(
+        () => {
+          this.pingOutstanding = false;
+        },
+        (e: unknown) => this.end(e),
+      );
     }, this.link.heartbeatMs);
   }
-  end() {
+  /** `cause` (B-046 diagnosis) is attached to the rejections of requests still pending, never to a reply. */
+  end(cause?: unknown) {
     if (this.ended) return;
     this.ended = true;
     this.ready = false;
@@ -345,7 +416,7 @@ class Peer {
     if (this.heartbeat) clearInterval(this.heartbeat);
     for (const p of this.pending.values()) {
       clearTimeout(p.timer);
-      p.reject(Error('Worker connection lost; result may be unknown.'));
+      p.reject(Error('Worker connection lost; result may be unknown.', cause === undefined ? undefined : { cause }));
     }
     this.pending.clear();
     this.ws.terminate();
