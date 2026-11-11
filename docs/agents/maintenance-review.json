@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-10T19:44:43.681Z",
+  "reviewed": "2026-11-11T00:05:13.847Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
     "AGENTS.md": "3d76fc2a6f1b0ec739686eff74d01bd89437c793ed859b8e93f223dc5c52fe2d",
@@ -17,15 +17,15 @@
     "docs/agents/skills.md": "5d60223eccfaad88c7153f57316da5ca10bfdd9d58d3a8cebc1eef25b9f0d5f5",
     "docs/agents/solution-profile.md": "857fc0e5f5c36d1d139d2507f1f97460edfdcde4d5cd5d590a922d88c4459862",
     "docs/agents/task-context.md": "c38395d5989a3fd7cfbf319bce53b24c17a1740822398f4376ecc2c3e95d531f",
-    "docs/agents/work-usage.md": "4b179506a4d431b4e9559b3932ee0ef64020cbf7c27985178e0cb0f5c1f7c7d1",
+    "docs/agents/work-usage.md": "e2f7c484f1c07f4b47fd1133857d8744ccab0ad2a7b85b220946c115a002bebc",
     "tools/task-claims.mjs": "05d40141b354db19e958d1f191f9a2e1b75c46126527ce3aba67f7b902ba16d2",
     "tools/usage-launch.mjs": "ac8713a3e4c4359cfdda5b4b6eb5d18e957408fb77b85609853ba2cda5f4a4e0",
     "tools/work-items.mjs": "f3175c3150286bf569fc108d86a3640a4bbfd30deda940ddbb9c27d8fabe56f4",
-    "tools/work-usage.mjs": "c09a6a4f7ad6d0b65565bf6847b0727967f7d921dba816b92446450c0c90ca36"
+    "tools/work-usage.mjs": "0fdd6f4c8106c986c7798badec4d655119341edf6bb6f60c30e1cfc97bd786cb"
   },
   "measurements": {
-    "samples": 1,
-    "latestAt": "2026-11-10T19:44:43.549Z",
+    "samples": 16,
+    "latestAt": "2026-11-11T00:02:55.702Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -51,42 +51,42 @@
         }
       },
       "reconciliation": {
-        "samples": 1,
+        "samples": 16,
         "durationMs": {
-          "observed": 1,
+          "observed": 16,
           "missing": 0,
-          "median": 592079
+          "median": 207860
         },
         "conflicts": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 4,
+          "missing": 12,
+          "median": 0
         },
         "unnecessaryPrompts": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 1,
+          "missing": 15,
+          "median": 0
         },
         "repeatedContextLoads": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 1,
+          "missing": 15,
+          "median": 1
         }
       }
     }
   },
   "outcomes": [
     {
-      "kind": "rule",
-      "disposition": "implemented",
-      "target": "docs/BACKLOG-RULES.md",
-      "evidence": "Reconcile published4.7.0 optional upfront-plan policy and safety pointer, preserving NERV rules and all ownership/privacy/device acceptance safeguards. F005 initial plan records Safe upgrades, Update experience, engine-neutral multiple-instance prerequisites and existing remaining Windows/Linux/device outcomes. Global featurePlans is not enabled for unrelated NERV features. Dated initial snapshot is evidence; task files own later current effort/status. No runtime/service/install or model-engine operation performed."
-    },
-    {
       "kind": "tool",
       "disposition": "implemented",
-      "target": "tools/work-items.mjs",
-      "evidence": "Copied published4.7.0 tools/guides byte-identically; upstream169 deterministic fixtures plus independent recheck accepted. Local work/backlog/rules/conventions/integration/roadmap checks pass with42 task files; PR254 CI42878276038 inspected and header reconciled. Actual token counters and behaviour runner unavailable. Scoped planner requests full final CI for workflow risk; local app suites not repeated for copied tooling/docs. Separate worktree protects running source. Timed reconcile includes cross-repository coordination and waits; not a comparable focused-work sample."
+      "target": "tools/work-usage.mjs",
+      "evidence": "Copied published v4.8.0 tools/work-usage.mjs and docs/agents/work-usage.md byte-identically from the tag; check-harness reports copied files match. Adds optional allowance snapshots, private report --out and calibration groups; no store migration and no NERV rule, runtime or service change. A user-level Claude status line already invokes claude-status but no Claude allowance snapshot has been observed, so Claude percentages remain unknown; Codex collection not run in this reconcile. Friction session was already open at 2026-11-10T23:50Z before this job began, so its duration includes earlier unobserved time and is not a comparable focused-work sample. No behaviour runner configured; token counters unavailable."
+    },
+    {
+      "kind": "none",
+      "disposition": "no-change",
+      "target": "",
+      "evidence": "Rule inputs AGENTS.md, BACKLOG-RULES and area notes are unchanged by v4.8.0; the release touches only the optional usage tool and guide, so no rule consolidation or new safeguard is warranted in this reconcile."
     }
   ]
 }

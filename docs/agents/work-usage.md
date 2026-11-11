@@ -2,6 +2,34 @@
 
 Optional metadata accounting, enabled by `workUsage.enabled` in `.harness.json`. The shared rule is in AGENTS. It applies to any agent that has actually loaded repository instructions and can run local tools. It does not configure a client, expose hidden counters or replace execution permissions. API/model identity, task owner and client name are separate fields; owner assignment before launch is optional unless task suitability requires it.
 
+## Subscription allowance snapshots
+
+Subscription allowance is a separate account-level signal from tokens and currency. Codex collection makes one read-only `account/rateLimits/read` request through the installed CLI app server; it does not invoke a model, change login/account state or expose credentials:
+
+```bash
+node tools/work-usage.mjs collect-codex --job=JOB_UUID
+```
+
+Omit `--job` for an unassigned account observation. The collector stores only documented percentages, window lengths and reset times. A linked job permits a qualified before/after comparison, but account activity may include other clients or people, so the report labels the change as shared-account metadata rather than exact task usage.
+
+Claude Code exposes Pro/Max allowance percentages in its documented status-line JSON after the first API response. Configure the status-line command deliberately in the relevant Claude settings, composing it with any existing status line instead of overwriting one:
+
+```json
+{"statusLine":{"type":"command","command":"node /absolute/path/to/tools/work-usage.mjs claude-status --store=/absolute/private/store --source=claude-statusline"}}
+```
+
+The command reads the JSON payload on stdin, persists only `rate_limits.five_hour` and `rate_limits.seven_day`, and prints a short percentage line. Session ID, transcript path, cost fields and all other input are discarded. Before rate-limit fields exist it prints `Claude allowance unavailable`. Use `--job=JOB_UUID` when the status-line process inherits a known active job. Identical observations within five minutes for the same job/source are coalesced to avoid status refresh spam; changed counters and later boundary samples remain immutable.
+
+For reviewed fixtures or another authorized adapter, `allowance --format=normalized|codex-rate-limits --file=/private/metadata.json [--job=JOB_UUID]` imports a bounded file. Normalized records require a stable event ID, provider, observation time and explicit buckets. Do not point any allowance command at transcripts, credential stores or arbitrary logs.
+
+`report` includes allowance history and conservative changes only when provider/bucket/reset identity is stable and the percentage does not decrease. A reset/decrease is a boundary, not negative consumption. It never converts subscription percentage into tokens, API price, a fixed subscription charge or an automatic backlog estimate.
+
+## Save a private report
+
+`report` still prints JSON. Add `--out=/absolute/private/report.json` to also save exactly that JSON as a new mode-0600 file. The parent directory must be private and outside every checkout; symlinks and overwrite are refused. A report snapshot is output, not an import format, so saving it cannot double-count ledger events.
+
+The `calibration.completedWork` groups successfully completed (`done`) jobs by repository/task and reports sample size, elapsed range and complete token samples when available; failed and interrupted attempts remain in effectiveness reporting, not this comparison pool. `calibration.allowanceSamples` requires stable provider, source, bucket, window length and reset identity, and names jobs whose lifetimes overlap the observation interval. Compare scope, model/client configuration, overlap and source coverage manually; the tool does not recommend or rewrite estimates.
+
 ## Start, label and finish
 
 Start one job at an independently attributable task boundary, before its model work when the host supports that boundary. Record the actual agent and model; omit model when unexposed. Keep a continuing debugging/review/CI job coherent. A phase annotation alone does not split a provider turn's tokens. Mixed turns use an explicit source mapping or remain `unallocated`; repeated attribution to several items is refused.
