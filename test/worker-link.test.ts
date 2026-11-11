@@ -615,6 +615,44 @@ test(
     }
   },
 );
+// B-046 review: the late-timeout grace is granted once. A peer that never answers still loses its session after a stall:
+// within the stall plus the grace budget, not kept alive by repeated deferrals.
+test(
+  'B-046: after a stall, a peer that never answers is still disconnected after one grace budget',
+  { timeout: 30000 },
+  async () => {
+    const f = await fixture(200);
+    const send = WebSocket.prototype.send;
+    let pingAt = 0;
+    WebSocket.prototype.send = function (this: WebSocket, data: unknown, ...rest: unknown[]) {
+      const sent = (send as (...args: unknown[]) => void).call(this, data, ...rest);
+      if (!pingAt && String(data).includes('worker.ping')) {
+        pingAt = performance.now();
+        setImmediate(() => {
+          const end = Date.now() + 500;
+          while (Date.now() < end) {
+            /* busy on purpose */
+          }
+        });
+      }
+      return sent;
+    } as typeof send;
+    try {
+      f.main.start();
+      await rawReady(f);
+      await until(() => pingAt > 0);
+      await until(() => !f.main.connected('NERV-02'));
+      const elapsed = performance.now() - pingAt;
+      // Stall (500 ms) plus one fresh budget (200 ms), with scheduling slack; a second deferral would add another budget
+      // and repeated deferrals would never end the session.
+      assert.ok(elapsed >= 500, `disconnected after ${Math.round(elapsed)} ms, before the stall ended`);
+      assert.ok(elapsed < 500 + 2 * 200 + 300, `disconnected only after ${Math.round(elapsed)} ms`);
+    } finally {
+      WebSocket.prototype.send = send;
+      await f.close();
+    }
+  },
+);
 test('F-014: concurrent replay and overload execute the same durable request once', { timeout: 30000 }, async () => {
   // Keep heartbeat traffic out of this deliberate four-slot saturation; heartbeat expiry has its own case.
   const f = await fixture(10000);
@@ -828,11 +866,11 @@ test(
   },
 );
 
-// B-046 reproduction (timing reassessment 2026-11-11). It fails today and is marked todo so the suite stays green;
-// the fix removes the todo. The peer is healthy throughout: only this process's event loop is busy.
+// B-046 reproduction (timing reassessment 2026-11-11), committed as todo before the fix; the fix removed the todo.
+// The peer is healthy throughout: only this process's event loop is busy.
 test(
   'B-046: a healthy session survives an event-loop stall longer than the heartbeat budget',
-  { timeout: 30000, todo: 'B-046: the timeout verdict runs before a reply that has already arrived is read' },
+  { timeout: 30000 },
   async () => {
     const f = await fixture(150);
     const send = WebSocket.prototype.send;

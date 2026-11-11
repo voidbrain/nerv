@@ -4,7 +4,7 @@
   "parent": "B-046",
   "title": "Reproduce and identify deferred cancellation heartbeat loss",
   "goal": "Create a controlled failing regression and identify event-loop, heartbeat or admission evidence before choosing a causal fix",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "A committed deterministic regression explains the observed worker connection loss",
     "Distinguish fixture timing sensitivity from production behavior",
@@ -39,9 +39,9 @@
     "Keep uncertain external effects held until reconciled"
   ],
   "effort": {
-    "size": "medium",
-    "estimate": "2 focused days",
-    "basis": "Estimate added at featurePlans adoption (2026-11-11): Controlled reproduction of the deferred-cancellation heartbeat loss under CPU contention, then classification; parent Investigate/Medium. Estimate, not a measurement.",
+    "size": "small",
+    "estimate": "review and CI only",
+    "basis": "Estimate added at featurePlans adoption (2026-11-11): Controlled reproduction of the deferred-cancellation heartbeat loss under CPU contention, then classification; parent Investigate/Medium. Estimate, not a measurement. Implemented 2026-11-11 in about 0.75 agent hours (stated: mechanism read from the timing reassessment, one failed one-turn attempt, the late-timeout grace, local runs); review and CI remain.",
     "reviewed": "2026-11-11"
   }
 }
