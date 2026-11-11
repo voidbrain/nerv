@@ -185,3 +185,8 @@ Authenticated ci:status confirms full CI42823700687 passed at94228b0; mergedmain
 ## 2026-11-10 — PR #253
 
 Authenticated ci:status confirms full CI42874665479 passed at6f21738, merged12a9cfd tree-identical. Actual selected Mac default-profile service install/status/start/stop/uninstall/reinstall, interrupted-operation recovery/startup fencing and forward identical-runtime update passed with retained credentials/data and verified private backups. T04 closes; T06 executable/schema compatibility and broader platform/device acceptance remain explicit. Earlier review/CI failures are preserved in dated review/acceptance evidence; a green merge alone is not the OS acceptance.
+
+
+## 2026-11-11 — PR #255
+
+Authenticated ci:status confirms CI42889510020 passed plan, validate, windows, native-macos and full-suite; merged main b68802d. Planning and harness4.7.0 reconciliation only: F-005 keeps its dated initial T06–T11 plan, no acceptance advances and no runtime/service/engine effect follows. Previous header: reviewed 10 November 2026 against main `2f85f06`. PR #253 full CI42874665479 passed at6f21738; merged tree matches. T02/T04/T05 selected enrollment, root migration and Mac service accepted. PR #254 CI42878276038 passed plan/validate/platform jobs; its docs-only scope does not claim a new full marker. F-005 remains open with initial T06–T11 delivery plan.
