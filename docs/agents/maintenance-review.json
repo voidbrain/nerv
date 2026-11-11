@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-11T11:27:13.861Z",
+  "reviewed": "2026-11-11T12:44:51.839Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
-    "AGENTS.md": "6b0b10183f9295795c06246a6e85673bf16d0d16e7479c47db8006c6430b531c",
-    "docs/BACKLOG-RULES.md": "ced030091c2fab50de8f04be15b1b195e4a1fa83145fe5379dd761232b4f77a0",
+    "AGENTS.md": "3baab88d7088bab8f454e3052d852d0761e3319454edac9ed0ca1c7985b4991c",
+    "docs/BACKLOG-RULES.md": "48eb157a29382b012c40f2a46ae2e4a9d7b63533be20d65feedc93db81296a1e",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
     "docs/agents/areas.md": "0ff9805a7d720ee177505cef670e53169a6d640299762dfa86185be46fa8737c",
     "docs/agents/audit.md": "bc5de5707f9ec5c523e73602499312c373d6112ffc498d69bf68604522527992",
@@ -25,7 +25,7 @@
   },
   "measurements": {
     "samples": 1,
-    "latestAt": "2026-11-11T11:27:13.794Z",
+    "latestAt": "2026-11-11T12:44:51.796Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -55,12 +55,12 @@
         "durationMs": {
           "observed": 1,
           "missing": 0,
-          "median": 56923
+          "median": 44
         },
         "conflicts": {
-          "observed": 1,
-          "missing": 0,
-          "median": 0
+          "observed": 0,
+          "missing": 1,
+          "median": null
         },
         "unnecessaryPrompts": {
           "observed": 0,
@@ -77,10 +77,16 @@
   },
   "outcomes": [
     {
-      "kind": "none",
-      "disposition": "no-change",
-      "target": "",
-      "evidence": "Harness 5.1.1 changes only the template's default .gitignore (node_modules without the trailing slash, so a worktree symlink is ignored); NERV's .gitignore line updated to match. No rule, safeguard or tool changes; copied files unchanged and check-harness --strict passes against v5.1.1. CI's template clone moved from v5.0.0 to v5.1.1. No behaviour runner configured."
+      "kind": "rule",
+      "disposition": "implemented",
+      "target": "docs/BACKLOG-RULES.md",
+      "evidence": "Reconciled published harness v5.2.0: the Evaluation dependencies paragraph and the AGENTS session-start bullet carried by hand; NERV declares Gauntlet as an evaluation dependency and adds the stricter project CI check check:gauntlet-runs. No check, never or ask-first rule, or safeguard removed. No behaviour runner configured."
+    },
+    {
+      "kind": "tool",
+      "disposition": "implemented",
+      "target": "tools/check-freshness.mjs",
+      "evidence": "Copied byte-identically from tag v5.2.0; check-harness --strict passes. Session start reports 50 pending Gauntlet cases, named by F-074-T09."
     }
   ]
 }

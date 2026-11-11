@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "name": "@voidbrain/gauntlet-protocol",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "repository": "https://github.com/voidbrain/gauntlet-protocol",
-  "sourceCommit": "0d46c4a139a111ade29a8c7f052c92e099d3190c",
-  "implementationPR": "https://github.com/voidbrain/gauntlet-protocol/pull/29",
-  "ciRun": "42973762775",
-  "artifact": "voidbrain-gauntlet-protocol-0.5.0.tgz",
-  "sha256": "b9dbc6498b3e99d07f14f745ef20312c153e00291d956fddecae75a1176944ae",
+  "sourceCommit": "fc6ec021c68caa6d46d652b3516f1de41871f37b",
+  "implementationPR": "https://github.com/voidbrain/gauntlet-protocol/pull/34",
+  "ciRun": "43020317739",
+  "artifact": "voidbrain-gauntlet-protocol-0.6.0.tgz",
+  "sha256": "026015714daf27589391f9c2472341635cbe0c9fb6b7297c09afdd4d1e62050b",
   "reason": "Pinned source-included npm artifact allows deterministic installation without private repository credentials; not a copied mutable implementation.",
-  "releaseTag": "v0.5.0"
+  "releaseTag": "v0.6.0"
 }

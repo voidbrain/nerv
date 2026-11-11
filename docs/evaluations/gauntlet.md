@@ -4,7 +4,29 @@
 
 The development dependency is a versioned, source-included npm artifact in `vendor/`, with SHA256 and source provenance in [the manifest](../../vendor/gauntlet-protocol.json). It needs no private GitHub token at installation. Update the independent project first, then replace the pinned artifact, lockfile and provenance together; do not edit extracted copies or vendor a fork silently.
 
-Pinned release: **0.5.0** (tag `v0.5.0`, 2026-11-11). It adds the separate 28-case `general-assistant-expanded@1.0.0` pack and repeatable candidate comparisons with full identity, mismatch reasons and error/not-run counts (upstream `docs/COMPARISONS.md`, shipped in the artifact). `npm run gauntlet:compare` passes straight to the upstream comparison, so its behaviour changes with this pin: it needs 2 to 64 reports (one report is refused), and each entry now carries `baseline`, `requested`, `observed`, `contract`, `mismatchReasons`, per-result rows and `tokenCoverage` in place of the earlier top-level `profile`, `pack`, `version`, `packHash` and `tokens`. No NERV code read the old keys. The expanded pack is not wired in: `gauntlet:model-plan`/`model-run` and the generated index still use the ten-case smoke packs. No model run was made for this update. Reports stay protocol 0.4; earlier evidence remains readable.
+Pinned release: **0.6.0** (tag `v0.6.0`, 2026-11-11; upstream PR #34 / CI 43020317739). It adds the run ledger and `pending` (upstream `docs/LEDGER.md`). Packs, grading and protocol 0.4 evidence are unchanged; the engine hash changes, so Gauntlet's cache reuses only evidence produced by 0.6.0.
+
+Earlier pin, 0.5.0: It adds the separate 28-case `general-assistant-expanded@1.0.0` pack and repeatable candidate comparisons with full identity, mismatch reasons and error/not-run counts (upstream `docs/COMPARISONS.md`, shipped in the artifact). `npm run gauntlet:compare` passes straight to the upstream comparison, so its behaviour changes with this pin: it needs 2 to 64 reports (one report is refused), and each entry now carries `baseline`, `requested`, `observed`, `contract`, `mismatchReasons`, per-result rows and `tokenCoverage` in place of the earlier top-level `profile`, `pack`, `version`, `packHash` and `tokens`. No NERV code read the old keys. At that pin the expanded pack was not wired in; F-074-T06 consumes it. No model run was made for this update. Reports stay protocol 0.4; earlier evidence remains readable.
+
+## Every common pack, the run ledger and the root command (F-074-T06..T08)
+
+NERV consumes **every pack the pinned release ships** (today `neutral-smoke`, `neutral-smoke-schema`, `general-assistant-expanded`) plus its own `nerv-system-flows`; `npm run gauntlet:packs` lists them. A pack is left out only by `evals/gauntlet/consumption.json` `exclude` with a reason, and an exclusion naming no shipped pack fails. The generated index lists every consumed pack. `gauntlet:model-plan`/`model-run` take `--pack=<id>` (default `neutral-smoke`; `--format=schema` still selects `neutral-smoke-schema`). Model limits scale Gauntlet's day limits per case (30 s and 2,048 output tokens a case), so a ten-case pack keeps exactly the day limits and the 28-case pack gets 28 cases, 840 s and 57,344 tokens; a `--only` subset gets limits for its own size unless `--limits` is given. `NERV_GAUNTLET_LEDGER` and `NERV_GAUNTLET_CONSUMPTION` override the two file paths (for tests).
+
+`evals/gauntlet/ledger.json` is the committed, metadata-only run ledger (Gauntlet 0.6.0 format): which case definitions ran, under which profile, with which result and report hash; no prompts, outputs or timings. Only graded results cover a case: an error from an unanswering runtime does not.
+
+```sh
+npm run gauntlet:pending                     # one line per case with no covering run; exit 1 when any
+npm run check:gauntlet-runs                  # CI: fails while a pending case is not listed by an unfinished task (pack/case or pack/*)
+npm run gauntlet:all                         # plan: per pack, what runs (new/changed/stale) and what is reused
+npm run gauntlet:all -- --execute --out-dir=/private/tmp/nerv-all-new   # runs uncovered NERV system cases
+# Only after an owner-approved budget:
+npm run gauntlet:all -- --profile=node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json --allow-models --allow-expensive --execute --out-dir=/private/tmp/nerv-all-new
+npm run gauntlet:ledger -- --report=/private/report.json --pack=neutral-smoke   # record a saved report
+```
+
+`gauntlet:all` runs only the cases the ledger does not cover, or every case with `--fresh`, and records each report in the ledger; `--max-age-days=N` also reruns cases whose last run is older and passes the same age to Gauntlet's cache (which caps it at 30 days), so an older cached report is not reused (the default age is an owner decision, proposed 30 days; none is applied today). `gauntlet:all` exits 1 when any executed case fails. NERV system cases need no model and run one per report; `stress` and `browser` need `--allow-expensive`. Model cases need `--allow-models` and `--profile`, and remain an owner-approved campaign. Session start reports pending cases through the harness setting `evaluations` (`.harness.json`, harness 5.2.0), and the `gauntlet-runs` impact row tells the agent to raise or update the backlog item in the PR that bumps the pin.
+
+Ledger state at adoption (2026-11-11): the five ordinary system cases ran and passed locally with this branch; `stress`, `browser` and all 48 common model cases are pending and listed by F-074-T09 (`pack/*` or `pack/case`; a pending case counts as raised only when an unfinished task lists it). The 2026-11-09 Gemma smoke predates the ledger; its report is not in the repository.
 
 ## Commands and costs
 

@@ -1,8 +1,14 @@
 [
   {
-    "kind": "none",
-    "disposition": "no-change",
-    "target": "",
-    "evidence": "Harness 5.1.1 changes only the template's default .gitignore (node_modules without the trailing slash, so a worktree symlink is ignored); NERV's .gitignore line updated to match. No rule, safeguard or tool changes; copied files unchanged and check-harness --strict passes against v5.1.1. CI's template clone moved from v5.0.0 to v5.1.1. No behaviour runner configured."
+    "kind": "rule",
+    "disposition": "implemented",
+    "target": "docs/BACKLOG-RULES.md",
+    "evidence": "Reconciled published harness v5.2.0: the Evaluation dependencies paragraph and the AGENTS session-start bullet carried by hand; NERV declares Gauntlet as an evaluation dependency and adds the stricter project CI check check:gauntlet-runs. No check, never or ask-first rule, or safeguard removed. No behaviour runner configured."
+  },
+  {
+    "kind": "tool",
+    "disposition": "implemented",
+    "target": "tools/check-freshness.mjs",
+    "evidence": "Copied byte-identically from tag v5.2.0; check-harness --strict passes. Session start reports 50 pending Gauntlet cases, named by F-074-T09."
   }
 ]

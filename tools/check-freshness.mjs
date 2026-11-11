@@ -1,8 +1,8 @@
 // Is the backlog behind the default branch, are merged branches left over, does this branch change harness files or files
-// the impact map names, is the last audit too old, and is the harness template newer? Prints what to do first (AGENTS: session start). Ordinary reminders are warnings; required maintenance and invalid/enforced audit evidence fail.
+// the impact map names, do declared evaluation dependencies have pending cases, is the last audit too old, and is the harness template newer? Prints what to do first (AGENTS: session start). Ordinary reminders are warnings; required maintenance and invalid/enforced audit evidence fail.
 // --github formats reminders for GitHub Actions.
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { couplingsTouched, describe, plan } from './impact-map.mjs';
 
@@ -156,6 +156,53 @@ for (const { coupling: c, files } of couplingsTouched(stamp.couplings, changed))
   warn(
     `Coupled value "${c.value}": ${files.join(', ')} changed; it also lives in ${(c.places ?? []).map((p) => `${p.file}${p.what ? ` (${p.what})` : ''}`).join(', ')}: keep them equal${c.kept ? ` (kept by ${c.kept})` : ' (nothing keeps them equal)'}.`,
   );
+
+// 3c. evaluation dependencies (.harness.json "evaluations"): each names a project-owned command that exits 0 when every
+// case of the dependency's pinned test content has a covering run, and 1 listing the pending cases otherwise. Reported
+// only; a failing or slow command is reported, never fatal. The project decides whether CI also fails on it.
+if (stamp.evaluations !== undefined && !Array.isArray(stamp.evaluations))
+  warn('"evaluations" in .harness.json must be an array of { name, pending, timeoutMs? }; ignored.');
+for (const e of Array.isArray(stamp.evaluations) ? stamp.evaluations : []) {
+  const name = typeof e?.name === 'string' && e.name ? e.name : 'unnamed';
+  if (!Array.isArray(e?.pending) || !e.pending.length || e.pending.some((a) => typeof a !== 'string')) {
+    warn(
+      `Evaluation ${name}: "pending" must be a command as an array of strings, e.g. ["npm", "run", "-s", "check:runs"].`,
+    );
+    continue;
+  }
+  const validTimeout = Number.isSafeInteger(e.timeoutMs) && e.timeoutMs > 0;
+  if (e.timeoutMs !== undefined && !validTimeout)
+    warn(`Evaluation ${name}: "timeoutMs" must be a whole number of milliseconds above 0; using 60000.`);
+  let r;
+  try {
+    r = spawnSync(e.pending[0], e.pending.slice(1), {
+      cwd: fileURLToPath(new URL('..', import.meta.url)),
+      encoding: 'utf8',
+      timeout: validTimeout ? e.timeoutMs : 60000,
+      killSignal: 'SIGKILL',
+    });
+  } catch (error) {
+    r = { status: null, stdout: '', stderr: '', error };
+  }
+  if (r.status === 0) continue;
+  const why = (r.stderr ?? '')
+    .split('\n')
+    .find((l) => l.trim())
+    ?.trim();
+  const cases = (r.stdout ?? '')
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
+  if (r.status === 1 && cases.length) {
+    const shown = cases.slice(0, 10).join(', ') + (cases.length > 10 ? `, and ${cases.length - 10} more` : '');
+    warn(
+      `Evaluation ${name}: ${cases.length} pending case(s) with no covering run: ${shown}. Keep an open backlog record naming them until a run covers them; running real models needs the owner's approval (BACKLOG-RULES, "Evaluation dependencies").`,
+    );
+  } else
+    warn(
+      `Evaluation ${name}: its pending command (${e.pending.join(' ')}) ${r.error ? `could not run: ${r.error.code ?? r.error.message}` : r.status === 1 ? 'exited 1 but listed no cases' : `exited ${r.status ?? r.signal}`}${why ? ` (${why})` : ''}; pending cases unknown.`,
+    );
+}
 
 // 4. audit coverage per declared area (legacy date-only fallback)
 const auditHelper = new URL('./check-audits.mjs', import.meta.url);
