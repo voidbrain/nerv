@@ -253,3 +253,7 @@ Authenticated ci:status confirms CI43016078610 passed plan, validate, windows an
 ## 2026-11-11 — PR #270
 
 Authenticated ci:status confirms CI43017157201 passed plan, validate, windows and native-macos; full-suite skipped by scoped verification (records only); merged main 0c3de0f. F-074 listed its steps T01–T09 in the record (NERV had no featurePlans setting). Previous header: Reviewed 11 November 2026 against main `3c4a283`. PR #269 CI43016078610 passed plan, validate, windows and native-macos (full-suite skipped, records only): F-074-T07 adopts upstream Gauntlet F-010 and harness F-052. F-074 now lists its steps T01–T09 (PR #270); B-048 awaits five clean `main` runs.
+
+## 2026-11-11 — PR #271
+
+Authenticated ci:status confirms CI43021907516 passed plan, validate, windows, native-macos and full-suite; merged main aade3c8. Upfront feature plans adopted (featurePlans: true): 24 features got initial plans and 26 tasks estimates. Its first run (CI43020769457) failed Windows on two F-014 worker-link tests with the B-046 stall assertion, recorded on B-046. Previous header: Reviewed 11 November 2026 against main `0c3de0f`. PR #270 CI43017157201 passed plan, validate, windows and native-macos (full-suite skipped, records only). Feature plans adopted: every feature lists its steps (PR #271); B-048 awaits five clean `main` runs.
