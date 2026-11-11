@@ -1,47 +1,43 @@
 {
   "version": 1,
   "parent": "F-006",
+  "id": "F-006-T03",
   "status": "planned",
+  "title": "T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases",
+  "goal": "Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases.",
   "capabilities": [
     "bounded-edit",
     "structured-tools",
-    "typescript",
-    "distributed-contracts",
+    "architecture-review",
     "privacy-review",
-    "regression-design"
+    "distributed-contracts"
   ],
-  "privacy": "Neutral repository-owned cases and private evidence; no remote host activation, private project transfer, model download or production promotion. Live campaigns require their own selected targets and explicit budgets.",
-  "validation": [
-    "Validate NERV pack/adapter across the Gauntlet evidence boundary with neutral fixtures",
-    "Run applicable scoped checks and required CI; live acceptance is separately recorded"
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
+  "acceptance": [
+    "Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases"
   ],
-  "escalation": [
-    "Missing independent isolation/grading or protocol support prevents a qualification claim",
-    "Unknown budget use, host identity, privacy authorization or external outcome stops execution"
-  ],
-  "id": "F-006-T03",
-  "title": "NERV combination qualification pack and evidence adapter",
-  "goal": "Evaluate the complete coder/auditor workflow separately from individual role evidence",
   "dependsOn": [
-    "F-006-T01"
+    "F-006-T06"
   ],
   "resources": [
-    "contract:gauntlet-adoption",
-    "evals/gauntlet/**",
-    "tools/gauntlet.mjs",
-    "tools/gauntlet-adapter.mjs",
-    "test/gauntlet.test.mjs",
-    "docs/decisions/configuration-qualification.md",
+    "contract:model-routing",
+    "src/model.ts",
+    "docs/decisions/**",
+    "docs/work/tasks/F-006-T01.json",
     "docs/work/records/F-006.md",
-    "docs/work/tasks/F-006-T03.json",
     "generated:backlog-views"
   ],
-  "acceptance": [
-    "Versioned NERV cases include hidden immutable acceptance, deliberately flawed patches, false rejection and shared blind-spot cases",
-    "A combination result binds both configurations, handoffs, budgets, hosts and component evidence without averaging away safety failures",
-    "Record accepted task rate, escaped defects, repair rounds, reviewer effort, latency and total resource cost; missing metrics remain unknown",
-    "External runner owns coding isolation; no model self-approval, automatic qualification or grants",
-    "Candidate cannot modify the independent grader, hidden acceptance or grading credentials; tampering fails explicitly",
-    "Acceptance identifies the exact artifact and grader/configuration; promotion rejects stale or mismatched evidence and independently checks current NERV authorization"
-  ]
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 focused days",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Slice T03a of the step \"NERV combination qualification pack and evidence adapter\". Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
 }

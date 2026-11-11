@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "id": "F-005-T13",
+  "status": "planned",
+  "title": "T06f — First real lifecycle update on the Mac service",
+  "goal": "Run one update through nodes lifecycle-inspect/apply on the owner-selected Mac and record the evidence",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "acceptance": [
+    "The owner runs an update plan to a reviewed later revision; the receipt shows backup, fetch, rehearse, checkout, dependencies, build, start and verify completed",
+    "Running build, data integrity and service ownership are checked after it; a refusal or uncertainty is recorded, not retried silently"
+  ],
+  "dependsOn": [
+    "F-005-T12"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle"
+  ],
+  "validation": [
+    "Owner-run copy-paste commands with expected results; receipt and doctor output; acceptance note"
+  ],
+  "escalation": [
+    "Any destructive restore, changed ownership or unresolved physical/worker effects requires explicit reconciliation; general restore remains F-062"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 focused day plus the owner run",
+    "basis": "Owner-approved split of the original T06 (4–6 focused days) into lettered slices on 2026-11-11, after the work had been delivered as unplanned slices; slices e–h use free step numbers because step IDs are two digits. Needs a later reviewed revision to update to; the agent prepares commands, the owner runs them.",
+    "reviewed": "2026-11-11"
+  }
+}

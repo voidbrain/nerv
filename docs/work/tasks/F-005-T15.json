@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "id": "F-005-T15",
+  "status": "planned",
+  "title": "T06h — Upgrades that raise the schema version",
+  "goal": "Admit candidates whose reader migrates the schema forward, with an explicit recovery to the operation backup",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "acceptance": [
+    "A forward migration is admitted only with a reviewed recovery that restores the operation backup and the previous revision on failure",
+    "Recovery never runs automatically without the owner; the previous revision is never started on migrated data"
+  ],
+  "dependsOn": [
+    "F-005-T14"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle"
+  ],
+  "validation": [
+    "Cross-version regressions; independent review; one owner-selected target trial"
+  ],
+  "escalation": [
+    "Any destructive restore, changed ownership or unresolved physical/worker effects requires explicit reconciliation; general restore remains F-062"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2–3 focused days",
+    "basis": "Owner-approved split of the original T06 (4–6 focused days) into lettered slices on 2026-11-11, after the work had been delivered as unplanned slices; slices e–h use free step numbers because step IDs are two digits. Approved as separate: T06 does not wait for it, since nothing needs a schema raise today. Needs the general restore of F-062 first; uncertain until that design exists.",
+    "reviewed": "2026-11-11"
+  }
+}

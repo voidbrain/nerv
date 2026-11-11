@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "parent": "F-016",
+  "id": "F-016-T08",
+  "status": "planned",
+  "title": "Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects",
+  "goal": "Partition, sleep and reconnect fixtures proving one authority and no duplicate effects.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "regression-design",
+    "distributed-contracts"
+  ],
+  "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
+  "acceptance": [
+    "Partition, sleep and reconnect fixtures proving one authority and no duplicate effects"
+  ],
+  "dependsOn": [
+    "F-016-T07"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:coordinator-authority"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never let two coordinators act, or copy context as authority, to make progress"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 focused days",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Step 5, slice a. Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

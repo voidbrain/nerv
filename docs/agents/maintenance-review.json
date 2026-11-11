@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-11T08:37:04.139Z",
+  "reviewed": "2026-11-11T09:14:31.149Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
     "AGENTS.md": "38877ab8b28933ca2c92a3fd80acde54ff4fa639610810cdef20b4fcca9c98ae",
@@ -24,8 +24,8 @@
     "tools/work-usage.mjs": "4329262c0b9e723e046dd8878e15a99cff5f590201cd0918563f3204bbe79219"
   },
   "measurements": {
-    "samples": 3,
-    "latestAt": "2026-11-11T08:37:04.100Z",
+    "samples": 1,
+    "latestAt": "2026-11-11T09:14:31.103Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -51,25 +51,25 @@
         }
       },
       "reconciliation": {
-        "samples": 3,
+        "samples": 1,
         "durationMs": {
-          "observed": 3,
+          "observed": 1,
           "missing": 0,
-          "median": 922
+          "median": 925
         },
         "conflicts": {
           "observed": 0,
-          "missing": 3,
+          "missing": 1,
           "median": null
         },
         "unnecessaryPrompts": {
           "observed": 0,
-          "missing": 3,
+          "missing": 1,
           "median": null
         },
         "repeatedContextLoads": {
           "observed": 0,
-          "missing": 3,
+          "missing": 1,
           "median": null
         }
       }
@@ -77,16 +77,10 @@
   },
   "outcomes": [
     {
-      "kind": "rule",
-      "disposition": "implemented",
-      "target": "AGENTS.md",
-      "evidence": "Reconciled published harness v5.0.0: the session-start bullet and the BACKLOG-RULES reconcile sentence fold reconciliation into the next working PR (due at 10 merged PRs or one day behind, or at once for a commit without a PR); the check catalogue gains lint and check:tooling. No never or ask-first rule is removed; evidence requirements are unchanged. No behaviour runner configured; token counters unavailable."
-    },
-    {
-      "kind": "tool",
-      "disposition": "implemented",
-      "target": "tools/check-tooling.mjs",
-      "evidence": "Copied byte-identically from tag v5.0.0 with the 23 reformatted copied tools; check-harness reports copied files match. ESLint adopted with 21 hand fixes; typecheck and the full suite pass."
+      "kind": "none",
+      "disposition": "no-change",
+      "target": "",
+      "evidence": "Harness 5.0.1 and 5.0.2 change only the template's default ESLint/Prettier configs and APPLY guidance, which NERV already has its own versions of (its eslint.config.mjs and .prettierignore ignore .harness/ since PR #263); copied tools are unchanged since 5.0.0 and check-harness reports them matching. Stamp moved to 5.0.2. No rule, safeguard or tool changes in NERV. No behaviour runner configured."
     }
   ]
 }

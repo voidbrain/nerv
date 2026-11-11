@@ -1,14 +1,8 @@
 [
   {
-    "kind": "rule",
-    "disposition": "implemented",
-    "target": "AGENTS.md",
-    "evidence": "Reconciled published harness v5.0.0: the session-start bullet and the BACKLOG-RULES reconcile sentence fold reconciliation into the next working PR (due at 10 merged PRs or one day behind, or at once for a commit without a PR); the check catalogue gains lint and check:tooling. No never or ask-first rule is removed; evidence requirements are unchanged. No behaviour runner configured; token counters unavailable."
-  },
-  {
-    "kind": "tool",
-    "disposition": "implemented",
-    "target": "tools/check-tooling.mjs",
-    "evidence": "Copied byte-identically from tag v5.0.0 with the 23 reformatted copied tools; check-harness reports copied files match. ESLint adopted with 21 hand fixes; typecheck and the full suite pass."
+    "kind": "none",
+    "disposition": "no-change",
+    "target": "",
+    "evidence": "Harness 5.0.1 and 5.0.2 change only the template's default ESLint/Prettier configs and APPLY guidance, which NERV already has its own versions of (its eslint.config.mjs and .prettierignore ignore .harness/ since PR #263); copied tools are unchanged since 5.0.0 and check-harness reports them matching. Stamp moved to 5.0.2. No rule, safeguard or tool changes in NERV. No behaviour runner configured."
   }
 ]

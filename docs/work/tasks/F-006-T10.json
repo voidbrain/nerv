@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "id": "F-006-T10",
+  "status": "planned",
+  "title": "T03c — Grader tamper protection; stale or mismatched evidence rejected; authority rechecked",
+  "goal": "Grader tamper protection; stale or mismatched evidence rejected; authority rechecked.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
+  "acceptance": [
+    "Grader tamper protection; stale or mismatched evidence rejected; authority rechecked",
+    "Versioned NERV cases include hidden immutable acceptance, deliberately flawed patches, false rejection and shared blind-spot cases",
+    "A combination result binds both configurations, handoffs, budgets, hosts and component evidence without averaging away safety failures",
+    "Record accepted task rate, escaped defects, repair rounds, reviewer effort, latency and total resource cost; missing metrics remain unknown",
+    "External runner owns coding isolation; no model self-approval, automatic qualification or grants",
+    "Candidate cannot modify the independent grader, hidden acceptance or grading credentials; tampering fails explicitly",
+    "Acceptance identifies the exact artifact and grader/configuration; promotion rejects stale or mismatched evidence and independently checks current NERV authorization"
+  ],
+  "dependsOn": [
+    "F-006-T09"
+  ],
+  "resources": [
+    "contract:model-routing",
+    "src/model.ts",
+    "docs/decisions/**",
+    "docs/work/tasks/F-006-T01.json",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views"
+  ],
+  "validation": [
+    "Validate NERV pack/adapter across the Gauntlet evidence boundary with neutral fixtures",
+    "Run applicable scoped checks and required CI; live acceptance is separately recorded"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 focused days",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Slice T03c of the step \"NERV combination qualification pack and evidence adapter\". Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "id": "F-006-T13",
+  "status": "planned",
+  "title": "T05b — Three Mac operating-condition runs",
+  "goal": "Three Mac operating-condition runs.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
+  "acceptance": [
+    "Three Mac operating-condition runs"
+  ],
+  "dependsOn": [
+    "F-006-T05"
+  ],
+  "resources": [
+    "contract:model-routing",
+    "src/model.ts",
+    "docs/decisions/**",
+    "docs/work/tasks/F-006-T01.json",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day plus owner time",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Slice T05b of the step \"Compare Mac heavy, moderate and idle operating conditions\". Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

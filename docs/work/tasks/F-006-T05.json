@@ -1,42 +1,43 @@
 {
   "version": 1,
-  "id": "F-006-T05",
   "parent": "F-006",
-  "title": "Compare Mac heavy, moderate and idle operating conditions",
-  "goal": "Measure useful candidate configurations under the owner's three representative Mac loads without duplicating mini PC day/night scenarios",
+  "id": "F-006-T05",
   "status": "planned",
+  "title": "T05a — Mac operating-conditions plan (heavy, moderate, idle) with budgets",
+  "goal": "Mac operating-conditions plan (heavy, moderate, idle) with budgets.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
   "acceptance": [
-    "Record office/heavy, home/active/moderate and home/overnight/minimal conditions with actual workload/resource observations; time/location labels alone are insufficient",
-    "Hold model/runtime/settings/cases/grader and total comparison budgets equivalent; distinguish fresh cold/warm telemetry from reused functional evidence",
-    "Report task/critical outcomes, latency, resource pressure, token cost and owner desktop impact; unsupported metrics remain unknown",
-    "Select exact campaign cases/repeats/total time-token budgets before execution; no model execution or scheduling is authorized by the plan",
-    "Mini PC has one normal baseline; only T04 placement-specific inference/tools-test contention and Mac dependency recovery require separate bounded checks",
-    "Reference released Gauntlet machine/scenario definitions and evidence identity; NERV retains assignments and role acceptance, not duplicate generic schemas"
+    "Mac operating-conditions plan (heavy, moderate, idle) with budgets"
   ],
   "dependsOn": [
     "F-074-T02"
   ],
   "resources": [
-    "contract:gauntlet-adoption",
-    "docs/evaluations/**",
-    "evals/gauntlet/**",
+    "contract:model-routing",
+    "src/model.ts",
+    "docs/decisions/**",
+    "docs/work/tasks/F-006-T01.json",
     "docs/work/records/F-006.md",
-    "docs/work/tasks/F-006-T05.json",
     "generated:backlog-views"
   ],
-  "capabilities": [
-    "bounded-edit",
-    "structured-tools",
-    "evidence-review",
-    "privacy-review"
-  ],
-  "privacy": "Neutral task fixtures and reviewed private local observations; no window titles, work content, private prompts, downloads or automatic remote transfer. Owner-selected campaign budgets are required before additional model runs.",
   "validation": [
-    "Review scenario/configuration identity, comparable budgets and fresh measured telemetry",
-    "Run applicable work/backlog/doc checks; distinguish planning from executed load evidence"
+    "Directed regressions or recorded evidence for this slice; final required CI"
   ],
   "escalation": [
-    "Stop on unknown budget use, privacy/host authorization or uncertain effects",
-    "Do not manufacture load by disrupting owner work or silently prevent sleep; do not expand the bounded Gemma smoke"
-  ]
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 focused day",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Slice T05a of the step \"Compare Mac heavy, moderate and idle operating conditions\". Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
 }

@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "id": "F-005-T25",
+  "status": "planned",
+  "title": "T10b — Linux update and recovery",
+  "goal": "Linux update and recovery.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "acceptance": [
+    "Linux update and recovery"
+  ],
+  "dependsOn": [
+    "F-005-T10"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "web/**",
+    "native/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never change an unowned installation, service, engine or uncertain physical effect without explicit reconciliation"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Slice T10b of the step \"Linux service lifecycle execution and target acceptance\". Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

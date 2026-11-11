@@ -2,9 +2,9 @@
   "version": 1,
   "parent": "F-005",
   "id": "F-005-T06",
-  "status": "planned",
-  "title": "Safe upgrades: executable, runtime and schema compatibility",
-  "goal": "Extend the conservative service update boundary with reviewed executable/runtime/schema compatibility before permitting application upgrades",
+  "status": "implemented",
+  "title": "Safe upgrades, slices T06a–T06d: rehearsal, journaled rehearsal, admission of schema-preserving upgrades, first Mac move",
+  "goal": "Deliver the upgrade mechanism up to admission of application upgrades that keep the schema version, and move the Mac service once by hand onto it",
   "capabilities": [
     "bounded-edit",
     "structured-tools",
@@ -13,9 +13,10 @@
   ],
   "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
   "acceptance": [
-    "Bind actual input schema and candidate reader/migration behavior to a reviewed source contract and meaningful cross-version regressions before checkout/dependency effects",
-    "Preserve source/profile/service ownership, durable fencing, consistent backups, uncertainty and explicit recovery; no marker-only admission or automatic downgrade",
-    "Accept real application/runtime upgrade on an explicitly selected target; documentation-only revision changes do not establish this"
+    "T06a: reader contract and review-only rehearsal on a private backup copy (PR #257)",
+    "T06b: journaled rehearse step between fetch and checkout; a blocker ends the update as refused with the claim released (PR #258)",
+    "T06c: admission of application upgrades that descend from the installed revision, carry the reader entry and meet the Node range; forward migrations refused (PR #262)",
+    "T06d: one owner-run move of the Mac service to the new code, with a clean rehearsal (2026-11-11, running build 2a3448d)"
   ],
   "dependsOn": [
     "F-005-T04"
@@ -29,16 +30,16 @@
     "contract:service-lifecycle"
   ],
   "validation": [
-    "Directed reader/schema/dependency/update/recovery joins and independent review",
-    "Final required CI plus actual target upgrade evidence; never infer migration compatibility from textual markers"
+    "Merged CI of PR #257, #258 and #262; independent review of #257 and #262; owner-run rehearsal output (no blockers, schema 6, no forward migration) and running build 2a3448d",
+    "The joint independent review of T06b and T06c is T06e (F-005-T12)"
   ],
   "escalation": [
     "Any destructive restore, changed ownership or unresolved physical/worker effects requires explicit reconciliation; general restore remains F-062"
   ],
   "effort": {
-    "size": "large",
-    "estimate": "1–3 focused days",
-    "basis": "Revised 2026-11-11 after three slices (reader contract and rehearsal, journaled rehearsal step, admission of schema-preserving application upgrades in review). Remaining: post-start acceptance and forward recovery, independent review of the final code and selected-target acceptance, which needs a one-time owner-run first upgrade. Initial estimate was 4–6 focused days.",
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Owner-approved split of the original T06 (4–6 focused days) into lettered slices on 2026-11-11, after the work had been delivered as unplanned slices; slices e–h use free step numbers because step IDs are two digits. T06 now covers slices a–d, all done. It stays implemented until T06e's review, because T06b was never independently reviewed. Elapsed work was not measured.",
     "reviewed": "2026-11-11"
   }
 }

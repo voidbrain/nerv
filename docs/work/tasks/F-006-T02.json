@@ -1,41 +1,43 @@
 {
   "version": 1,
-  "id": "F-006-T02",
   "parent": "F-006",
-  "title": "Independent model and execution selection",
-  "goal": "Implement capability-aware routing using the reviewed endpoint contract",
+  "id": "F-006-T02",
   "status": "planned",
+  "title": "T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback",
+  "goal": "Selection contract: model endpoint and execution worker chosen independently; no silent fallback.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
   "acceptance": [
-    "Model endpoint and execution worker are selected independently",
-    "No silent fallback or implicit permission"
+    "Selection contract: model endpoint and execution worker chosen independently; no silent fallback"
   ],
   "dependsOn": [
-    "F-006-T01"
+    "F-006-T06"
   ],
   "resources": [
     "contract:model-routing",
     "src/model.ts",
-    "src/runtime.ts",
-    "src/**",
-    "docs/work/tasks/F-006-T02.json",
+    "docs/decisions/**",
+    "docs/work/tasks/F-006-T01.json",
     "docs/work/records/F-006.md",
     "generated:backlog-views"
   ],
-  "capabilities": [
-    "bounded-edit",
-    "structured-tools",
-    "typescript",
-    "distributed-contracts",
-    "privacy-review",
-    "regression-design"
-  ],
-  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
   "validation": [
-    "Run affected regressions across the changed boundary and applicable fast checks",
-    "Keep human/device acceptance and independent review distinct from fixture results"
+    "Directed regressions or recorded evidence for this slice; final required CI"
   ],
   "escalation": [
     "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
     "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
-  ]
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Slice T02a of the step \"Independent model and execution selection\". Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
 }

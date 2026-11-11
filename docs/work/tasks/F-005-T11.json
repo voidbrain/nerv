@@ -1,7 +1,10 @@
 {
   "version": 1,
   "parent": "F-005",
+  "id": "F-005-T11",
   "status": "planned",
+  "title": "T11a — Agree the device matrix for final acceptance (owner decision)",
+  "goal": "Agree the device matrix for final acceptance (owner decision).",
   "capabilities": [
     "bounded-edit",
     "structured-tools",
@@ -9,41 +12,40 @@
     "privacy-review"
   ],
   "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
-  "id": "F-005-T11",
-  "title": "Complete multi-device worker and lifecycle acceptance",
-  "goal": "Verify remaining F-005 outcomes on the agreed device matrix and reconcile parent closure",
   "acceptance": [
-    "Record actual Mac/mini PC/Pi or agreed-equivalent enrollment, revocation, leases, fencing, cancellation, locks, reconnect and uncertain physical-result outcomes",
-    "Verify supported upgrades/prerequisites/update policy and platform lifecycle acceptance without repeating already accepted root/Mac evidence as if new",
-    "Retain failure/retry and unknown-device evidence; close the parent only after every agreed acceptance outcome passes or an owner-approved scope change is recorded"
+    "Agree the device matrix for final acceptance (owner decision)"
   ],
   "dependsOn": [
     "F-005-T06",
-    "F-005-T07",
-    "F-005-T08",
-    "F-005-T09",
-    "F-005-T10"
+    "F-005-T18",
+    "F-005-T22",
+    "F-005-T24",
+    "F-005-T26",
+    "F-005-T12",
+    "F-005-T13",
+    "F-005-T14"
   ],
   "resources": [
     "src/**",
     "shared/**",
+    "web/**",
+    "native/**",
     "test/**",
     "docs/**",
     "generated:backlog-views",
     "contract:service-lifecycle"
   ],
   "validation": [
-    "Meaningful cross-boundary regressions and required final CI",
-    "Explicit selected-target acceptance where service, install or real device behavior is required; static/unit passes do not substitute"
+    "Directed regressions or recorded evidence for this slice; final required CI"
   ],
   "escalation": [
     "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
     "Never change an unowned installation, service, engine or uncertain physical effect without explicit reconciliation"
   ],
   "effort": {
-    "size": "large",
-    "estimate": "4 or more focused days",
-    "basis": "Initial acceptance estimate includes device access, recovery/failure cases and evidence. Available target matrix may require an owner decision before execution.",
-    "reviewed": "2026-11-10"
+    "size": "small",
+    "estimate": "0.25 focused day",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Slice T11a of the step \"Complete multi-device worker and lifecycle acceptance\". Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
   }
 }

@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "parent": "F-016",
+  "id": "F-016-T09",
+  "status": "planned",
+  "title": "Step 5b — Two-device relocation acceptance",
+  "goal": "Two-device relocation acceptance.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "regression-design",
+    "distributed-contracts"
+  ],
+  "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
+  "acceptance": [
+    "Two-device relocation acceptance"
+  ],
+  "dependsOn": [
+    "F-016-T08"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:coordinator-authority"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never let two coordinators act, or copy context as authority, to make progress"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day plus the owner run",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Step 5, slice b. Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

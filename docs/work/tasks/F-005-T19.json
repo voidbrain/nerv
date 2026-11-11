@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "id": "F-005-T19",
+  "status": "planned",
+  "title": "T08b — Node install or upgrade choices with ownership and recovery; never replaces a user-managed runtime silently",
+  "goal": "Node install or upgrade choices with ownership and recovery; never replaces a user-managed runtime silently.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "acceptance": [
+    "Node install or upgrade choices with ownership and recovery; never replaces a user-managed runtime silently"
+  ],
+  "dependsOn": [
+    "F-005-T08"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "web/**",
+    "native/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never change an unowned installation, service, engine or uncertain physical effect without explicit reconciliation"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1–1.5 focused days",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Slice T08b of the step \"Prerequisites: Node and optional management of multiple engines\". Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

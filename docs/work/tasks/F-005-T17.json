@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "id": "F-005-T17",
+  "status": "planned",
+  "title": "T07c — Manual update action through the lifecycle update path, with its refusals and recovery shown",
+  "goal": "Manual update action through the lifecycle update path, with its refusals and recovery shown.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "acceptance": [
+    "Manual update action through the lifecycle update path, with its refusals and recovery shown"
+  ],
+  "dependsOn": [
+    "F-005-T16"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "web/**",
+    "native/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never change an unowned installation, service, engine or uncertain physical effect without explicit reconciliation"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 focused day",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Slice T07c of the step \"Update experience: availability, status and opt-in automatic updates\". Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}
