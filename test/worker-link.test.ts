@@ -828,11 +828,11 @@ test(
   },
 );
 
-// B-046 reproduction (timing reassessment 2026-11-11). It fails today and is marked todo so the suite stays green;
-// the fix removes the todo. The peer is healthy throughout: only this process's event loop is busy.
+// B-046 reproduction (timing reassessment 2026-11-11), committed as todo before the fix; the fix removed the todo.
+// The peer is healthy throughout: only this process's event loop is busy.
 test(
   'B-046: a healthy session survives an event-loop stall longer than the heartbeat budget',
-  { timeout: 30000, todo: 'B-046: the timeout verdict runs before a reply that has already arrived is read' },
+  { timeout: 30000 },
   async () => {
     const f = await fixture(150);
     const send = WebSocket.prototype.send;

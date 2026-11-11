@@ -283,8 +283,19 @@ class Peer {
   request(method: string, params: Record<string, unknown>, timeoutMs = this.link.requestMs): Promise<unknown> {
     if (this.pending.size >= MAX_RPC_INFLIGHT) return Promise.reject(Error('Worker pending request bound reached.'));
     return new Promise((resolve, reject) => {
+      // B-046: a timeout that fires late because this process was stalled (a busy loop, a sleeping laptop) is not
+      // evidence the peer is gone: the peer did not get its full budget, and expired timers run before sockets are
+      // read. Such a late verdict is deferred once by a fresh budget from the moment the loop resumed; a peer that
+      // really is gone still times out after it. An on-time timeout is final, as before.
       const id = randomUUID(),
-        timer = setTimeout(() => reject(Error('Worker result unknown after timeout.')), timeoutMs);
+        started = performance.now(),
+        expire = () => reject(Error('Worker result unknown after timeout.')),
+        timer = setTimeout(() => {
+          const pending = this.pending.get(id);
+          if (pending && performance.now() - started > timeoutMs + Math.max(25, timeoutMs / 4))
+            pending.timer = setTimeout(expire, timeoutMs);
+          else expire();
+        }, timeoutMs);
       this.pending.set(id, { resolve, reject, timer });
       // Timed-out requests retain admission until a late result or disconnect; timeout does not prove cancellation.
       try {
