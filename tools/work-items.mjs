@@ -101,18 +101,32 @@ const quarterDays = (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0
 const effortKeys = ['size', 'estimate', 'basis', 'reviewed'],
   numericEffortKeys = ['days', 'baselineDays'],
   // F-054/F-056: effort spent on a step in focused days (final when closed, so far when open), measured or stated.
-  actualKeys = ['actualDays', 'actualSource'];
+  actualKeys = ['actualDays', 'actualSource'],
+  // F-058: agent hours, the unit agent-run steps are estimated in, with the owner's own time kept apart. Quarter hours.
+  hourKeys = ['agentHours', 'ownerHours', 'baselineAgentHours', 'actualAgentHours'];
 const actualDays = (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 100;
+const quarterHours = (v) =>
+  typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 200 && Number.isInteger(v * 4);
+// The unit a step is estimated in: hours once it has any hour field, otherwise days (before 5.6.0), otherwise none.
+const inHours = (e) => hourKeys.some((k) => k in (e ?? {}));
+const hoursKnown = (e) => typeof e?.agentHours === 'number' || typeof e?.ownerHours === 'number';
+// Whether a step has a remaining estimate in its own unit.
+const remainingKnown = (e) => (inHours(e) ? hoursKnown(e) : typeof e?.days === 'number');
 function validateEffort(e, status) {
   if (
     !e ||
     typeof e !== 'object' ||
     Array.isArray(e) ||
     !effortKeys.every((k) => k in e) ||
-    Object.keys(e).some((k) => ![...effortKeys, ...numericEffortKeys, ...actualKeys].includes(k)) ||
-    actualKeys.filter((k) => k in e).length === 1 ||
-    ('actualDays' in e &&
-      (status === 'planned' || !actualDays(e.actualDays) || !['measured', 'stated'].includes(e.actualSource))) ||
+    Object.keys(e).some((k) => ![...effortKeys, ...numericEffortKeys, ...actualKeys, ...hourKeys].includes(k)) ||
+    hourKeys.some((k) => k in e && !quarterHours(e[k])) ||
+    ('actualDays' in e && inHours(e)) ||
+    'actualSource' in e !== ('actualDays' in e || 'actualAgentHours' in e) ||
+    (('actualDays' in e || 'actualAgentHours' in e) &&
+      (status === 'planned' ||
+        ('actualDays' in e && !actualDays(e.actualDays)) ||
+        !['measured', 'stated'].includes(e.actualSource))) ||
+    (status === 'closed' && (e.agentHours ?? 0) + (e.ownerHours ?? 0) !== 0) ||
     numericEffortKeys.some((k) => k in e && !quarterDays(e[k])) ||
     (status === 'closed' && 'days' in e && e.days !== 0) ||
     !['small', 'medium', 'large'].includes(e.size) ||
@@ -167,22 +181,25 @@ const stats = (list) => {
 // reviewed date). Never rewrites an estimate; `due` says whether open steps should be re-estimated, and why.
 export function calibrate(tasks, estimation = estimationDefaults) {
   const e = estimationSettings(estimation) ?? null;
+  // Actual and baseline in the same unit: agent hours when the step has them, days otherwise.
+  const pair = (f) =>
+    inHours(f) ? [f.actualAgentHours, f.baselineAgentHours, 'hours'] : [f.actualDays, f.baselineDays, 'days'];
   const samples = tasks
-    .filter(
-      (t) =>
+    .filter((t) => {
+      const [actual, baseline] = pair(t.effort ?? {});
+      return (
         t.status === 'closed' &&
-        typeof t.effort?.actualDays === 'number' &&
-        t.effort.actualDays > 0 &&
-        t.effort.baselineDays > 0 &&
+        typeof actual === 'number' &&
+        actual > 0 &&
+        baseline > 0 &&
         // `reviewed` is set to the close date when the actual is recorded; `since` is the last re-estimation day.
-        (!e?.since || t.effort.reviewed > e.since),
-    )
-    .map((t) => ({
-      id: t.id,
-      size: t.effort.size,
-      source: t.effort.actualSource,
-      ratio: t.effort.actualDays / t.effort.baselineDays,
-    }));
+        (!e?.since || t.effort.reviewed > e.since)
+      );
+    })
+    .map((t) => {
+      const [actual, baseline, unit] = pair(t.effort);
+      return { id: t.id, size: t.effort.size, source: t.effort.actualSource, unit, ratio: actual / baseline };
+    });
   const by = (key) =>
     Object.fromEntries(
       [...new Set(samples.map((x) => x[key]))].sort().map((v) => [v, stats(samples.filter((x) => x[key] === v))]),
@@ -204,29 +221,50 @@ export function calibrate(tasks, estimation = estimationDefaults) {
     all,
     bySize: by('size'),
     bySource: by('source'),
+    byUnit: by('unit'),
     due: reasons.length > 0,
     reasons,
     reestimate: reasons.length ? open : [],
   };
 }
 const dayText = (n) => `${Number(n.toFixed(2))} ${n === 1 ? 'day' : 'days'}`;
+const hourText = (n) => `${Number(n.toFixed(2))} h`;
+// "2 h + 0.5 h owner", "1.5 days", or both when a set mixes units; 0 when nothing is known.
+const amount = (agentHours, ownerHours, days, hasHours, hasDays) =>
+  [
+    ...(hasHours ? [`${hourText(agentHours)}${ownerHours ? ` + ${hourText(ownerHours)} owner` : ''}`] : []),
+    ...(hasDays ? [dayText(days)] : []),
+  ].join(' and ') || dayText(0);
 // Remaining, baseline and actual totals over a set of steps. Steps without a number are counted (remainingUnknown,
 // baselineKnown, actualKnown); the renderers name those counts instead of passing an unknown off as 0.
 export function effortTotals(steps) {
   const open = steps.filter((t) => t.status !== 'closed');
   const sum = (list, k) => list.reduce((n, t) => n + (typeof t.effort?.[k] === 'number' ? t.effort[k] : 0), 0);
+  const hours = (list) => list.filter((t) => inHours(t.effort)),
+    days = (list) => list.filter((t) => !inHours(t.effort));
   return {
     steps: steps.length,
     open: open.length,
-    remainingDays: sum(open, 'days'),
-    remainingUnknown: open.filter((t) => typeof t.effort?.days !== 'number').length,
-    baselineDays: sum(steps, 'baselineDays'),
-    baselineKnown: steps.filter((t) => typeof t.effort?.baselineDays === 'number').length,
-    actualDays: sum(steps, 'actualDays'),
-    actualKnown: steps.filter((t) => typeof t.effort?.actualDays === 'number').length,
+    // Hours and days are never added together; a step in neither is unknown.
+    remainingAgentHours: sum(hours(open), 'agentHours'),
+    remainingOwnerHours: sum(hours(open), 'ownerHours'),
+    remainingHoursSteps: hours(open).filter((t) => hoursKnown(t.effort)).length,
+    remainingDays: sum(days(open), 'days'),
+    remainingDaysSteps: days(open).filter((t) => typeof t.effort?.days === 'number').length,
+    remainingUnknown: open.filter((t) => !remainingKnown(t.effort)).length,
+    baselineAgentHours: sum(hours(steps), 'baselineAgentHours'),
+    baselineDays: sum(days(steps), 'baselineDays'),
+    baselineKnown: steps.filter(
+      (t) => typeof (inHours(t.effort) ? t.effort.baselineAgentHours : t.effort?.baselineDays) === 'number',
+    ).length,
+    actualAgentHours: sum(hours(steps), 'actualAgentHours'),
+    actualDays: sum(days(steps), 'actualDays'),
+    actualKnown: steps.filter(
+      (t) => typeof (inHours(t.effort) ? t.effort.actualAgentHours : t.effort?.actualDays) === 'number',
+    ).length,
   };
 }
-const unknownText = (n) => (n ? ` (${n} open ${n === 1 ? 'step' : 'steps'} without days)` : '');
+const unknownText = (n) => (n ? ` (${n} open ${n === 1 ? 'step' : 'steps'} without an estimate)` : '');
 const cell = (value) =>
   String(value)
     .replaceAll('&', '&amp;')
@@ -241,15 +279,53 @@ const cell = (value) =>
     .replaceAll('*', '&#42;')
     .replaceAll('_', '&#95;')
     .replaceAll('\\', '&#92;');
+const stepBaseline = (e) =>
+  inHours(e)
+    ? typeof e.baselineAgentHours === 'number'
+      ? hourText(e.baselineAgentHours)
+      : '—'
+    : typeof e.baselineDays === 'number'
+      ? dayText(e.baselineDays)
+      : '—';
+const stepActual = (t) => {
+  const e = t.effort,
+    v = inHours(e) ? e.actualAgentHours : e.actualDays;
+  if (typeof v !== 'number') return inHours(e) ? hourText(0) : dayText(0);
+  return `${inHours(e) ? hourText(v) : dayText(v)}${t.status === 'closed' ? '' : ' so far'} (${e.actualSource})`;
+};
+const stepRemaining = (e, status) => {
+  if (inHours(e)) {
+    if (status === 'closed') return hourText(0);
+    const parts = [
+      ...(typeof e.agentHours === 'number' ? [hourText(e.agentHours)] : []),
+      ...(e.ownerHours ? [`${hourText(e.ownerHours)} owner`] : []),
+    ];
+    return parts.length ? parts.join(' + ') : cell(e.estimate);
+  }
+  return typeof e.days === 'number' ? dayText(e.days) : cell(e.estimate);
+};
 function totalRow(steps) {
   const t = effortTotals(steps);
+  const anyHours = steps.some((x) => inHours(x.effort)),
+    anyDays = steps.some((x) => !inHours(x.effort));
   const baseline = t.baselineKnown
-    ? `${dayText(t.baselineDays)}${t.baselineKnown < t.steps ? ` (${t.baselineKnown} of ${t.steps} steps)` : ''}`
+    ? `${amount(t.baselineAgentHours, 0, t.baselineDays, anyHours, anyDays)}${t.baselineKnown < t.steps ? ` (${t.baselineKnown} of ${t.steps} steps)` : ''}`
     : '—';
   // A step row without a recorded actual shows 0 (owner choice, 2026-11-11); the total names how many steps
   // recorded one, so an unrecorded 0 never reads as measured.
-  const actual = `${dayText(t.actualDays)}${t.actualKnown < t.steps ? ` (${t.actualKnown} of ${t.steps} steps recorded)` : ''}`;
-  return `| **Total** | ${baseline} | ${actual} | ${dayText(t.remainingDays)}${unknownText(t.remainingUnknown)} | ${t.steps - t.open} of ${t.steps} completed |`;
+  // Name a unit only where an actual was recorded in it; with none recorded, the step's own unit.
+  const recordedHours = steps.some((x) => inHours(x.effort) && typeof x.effort.actualAgentHours === 'number'),
+    recordedDays = steps.some((x) => !inHours(x.effort) && typeof x.effort?.actualDays === 'number'),
+    none = !recordedHours && !recordedDays;
+  const actual = `${amount(t.actualAgentHours, 0, t.actualDays, recordedHours || (none && anyHours), recordedDays || (none && !anyHours))}${t.actualKnown < t.steps ? ` (${t.actualKnown} of ${t.steps} steps recorded)` : ''}`;
+  const remaining = amount(
+    t.remainingAgentHours,
+    t.remainingOwnerHours,
+    t.remainingDays,
+    t.remainingHoursSteps > 0 || !anyDays,
+    t.remainingDaysSteps > 0,
+  );
+  return `| **Total** | ${baseline} | ${actual} | ${remaining}${unknownText(t.remainingUnknown)} | ${t.steps - t.open} of ${t.steps} completed |`;
 }
 // The one-line backlog total placed between the totals markers of the layout.
 function ledgerTotals(tasks, active) {
@@ -258,11 +334,20 @@ function ledgerTotals(tasks, active) {
   const records = new Set(steps.filter((s) => s.status !== 'closed').map((s) => s.parent));
   const features = [...records].filter((id) => id.startsWith('F-')).length,
     others = records.size - features;
+  const hoursActual = steps.some((x) => inHours(x.effort) && typeof x.effort.actualAgentHours === 'number'),
+    daysActual = steps.some((x) => !inHours(x.effort) && typeof x.effort?.actualDays === 'number');
   const spent = t.actualKnown
-    ? ` ${dayText(t.actualDays)} of actual effort recorded on ${t.actualKnown} ${t.actualKnown === 1 ? 'step' : 'steps'}.`
+    ? ` ${amount(t.actualAgentHours, 0, t.actualDays, hoursActual, daysActual)} of actual effort recorded on ${t.actualKnown} ${t.actualKnown === 1 ? 'step' : 'steps'}.`
     : '';
+  const remaining = amount(
+    t.remainingAgentHours,
+    t.remainingOwnerHours,
+    t.remainingDays,
+    t.remainingHoursSteps > 0,
+    t.remainingDaysSteps > 0,
+  );
   const line = t.open
-    ? `**Remaining effort:** ${dayText(t.remainingDays)} across ${t.open} open ${t.open === 1 ? 'step' : 'steps'} of ${features} ${features === 1 ? 'feature' : 'features'}${others ? ` and ${others} other ${others === 1 ? 'record' : 'records'}` : ''}${unknownText(t.remainingUnknown)}.`
+    ? `**Remaining effort:** ${remaining} across ${t.open} open ${t.open === 1 ? 'step' : 'steps'} of ${features} ${features === 1 ? 'feature' : 'features'}${others ? ` and ${others} other ${others === 1 ? 'record' : 'records'}` : ''}${unknownText(t.remainingUnknown)}.`
     : '**Remaining effort:** no open steps.';
   return `<!-- totals:start -->\n${line}${spent} Generated from the task files.\n<!-- totals:end -->`;
 }
@@ -280,17 +365,11 @@ function featurePlan(text, id, tasks) {
   for (const t of steps) validateEffort(t.effort, t.status);
   // Compact table (F-055): one line per step; the dated basis of each estimate goes into the record details.
   const table =
-    '**Feature steps** (baseline: accepted estimate; actual: effort spent, so far while open; status is not parent acceptance)\n\n| Step | Baseline | Actual | Remaining | Status |\n|---|---|---|---|---|\n' +
+    '**Feature steps** (baseline: accepted estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)\n\n| Step | Baseline | Actual | Remaining | Status |\n|---|---|---|---|---|\n' +
     steps
       .map(
         (t) =>
-          `| ${t.id} — ${cell(t.title)} | ${typeof t.effort.baselineDays === 'number' ? dayText(t.effort.baselineDays) : '—'} | ${
-            typeof t.effort.actualDays === 'number'
-              ? `${dayText(t.effort.actualDays)}${t.status === 'closed' ? '' : ' so far'} (${t.effort.actualSource})`
-              : dayText(0)
-          } | ${sizes[t.effort.size]} — ${
-            typeof t.effort.days === 'number' ? dayText(t.effort.days) : cell(t.effort.estimate)
-          } | ${states[t.status]} |`,
+          `| ${t.id} — ${cell(t.title)} | ${stepBaseline(t.effort)} | ${stepActual(t)} | ${sizes[t.effort.size]} — ${stepRemaining(t.effort, t.status)} | ${states[t.status]} |`,
       )
       .join('\n') +
     '\n' +
@@ -318,14 +397,58 @@ function featurePlan(text, id, tasks) {
 // Work-queue order (F-055): rank each active record by tools/backlog-queue.mjs over the ID-ordered ledger, its
 // archives and the configured roadmap, lanes first (agent candidates, prerequisite review, human action, blocked).
 // Records the queue leaves out (closed) follow, by ID. Content does not depend on order, so the ranking is stable.
-function queueRank(root, config) {
-  const sources = [{ file: 'docs/BACKLOG.md', text: renderLedger(root, { ...config, order: 'id' }) }];
+function withArchives(root, ledger) {
+  const sources = [{ file: 'docs/BACKLOG.md', text: ledger }];
   const archive = join(root, 'docs/archive');
   if (existsSync(archive))
     for (const name of readdirSync(archive)
       .filter((n) => /^backlog-\d{4}\.md$/.test(n))
       .sort())
       sources.push({ file: `docs/archive/${name}`, text: readFileSync(local(root, `docs/archive/${name}`), 'utf8') });
+  return sources;
+}
+// Depends on and Unlocks next to each record's summary (F-057), from tools/backlog-dependencies.mjs when the project
+// has it. The authored Depends on row in the details stays the source; Unlocks are its reverse links.
+function dependencyLines(root, config) {
+  const helper = new URL('./backlog-dependencies.mjs', import.meta.url);
+  if (!existsSync(helper)) return null;
+  const { graph } = createRequire(import.meta.url)('./backlog-dependencies.mjs');
+  const all = graph(withArchives(root, renderLedger(root, { ...config, order: 'id' }, false)));
+  const link = (r) => `[${r.id}](${r.file === 'docs/BACKLOG.md' ? '' : r.file.slice(5)}#${r.id.toLowerCase()})`;
+  const lines = new Map();
+  for (const record of all.values()) {
+    if (record.file !== 'docs/BACKLOG.md') continue;
+    const depends = record.dependencies.map((d) => (d.external ? `[${d.id}](${d.url})` : link(all.get(d.id))));
+    const unlocks = [...all.values()]
+      .filter((r) => r.dependencies.some((d) => !d.external && d.id === record.id))
+      .sort((a, b) => a.id.localeCompare(b.id))
+      .map(link);
+    if (depends.length || unlocks.length)
+      lines.set(record.id, `**Depends on:** ${depends.join(', ') || '—'} · **Unlocks:** ${unlocks.join(', ') || '—'}`);
+  }
+  return lines;
+}
+// Places a record's dependency line under its summary table, found by its header cells whatever the spacing. A
+// record with links but no summary table fails the build rather than losing its line.
+function placeDependencyLine(text, line, id) {
+  const lines = text.split('\n');
+  const at = lines.findIndex(
+    (l, i) =>
+      l.trim().startsWith('|') &&
+      l
+        .split('|')
+        .slice(1, -1)
+        .map((c) => c.trim())
+        .join('|') === 'Signal|Priority|Status|Effort' &&
+      /^\|[\s:|-]+\|$/.test((lines[i + 1] ?? '').trim()) &&
+      (lines[i + 2] ?? '').trim().startsWith('|'),
+  );
+  if (at < 0) throw Error(`${id}: no summary table to place its Depends on / Unlocks line under`);
+  lines.splice(at + 3, 0, '', line);
+  return lines.join('\n');
+}
+function queueRank(root, config) {
+  const sources = withArchives(root, renderLedger(root, { ...config, order: 'id' }));
   const roadmap = config.queueRoadmap ? readFileSync(local(root, config.queueRoadmap), 'utf8') : '';
   const lanes = ['Agent candidates', 'Prerequisite review', 'Human action', 'Blocked'];
   // Loaded only for queue order: the work queue is an optional adoption (APPLY, work queue).
@@ -369,6 +492,7 @@ export function renderLedger(root, config, withPlans = true) {
     ? ledgerTotals(plannedTasks ?? taskCatalog(root, config).tasks, new Set(files.map((f) => f.slice(0, -3))))
     : null;
   const rank = withPlans && config.order === 'queue' ? queueRank(root, config) : null;
+  const depLines = withPlans ? dependencyLines(root, config) : null;
   const ordered = rank
     ? [...files].sort((a, b) => (rank.get(a) ?? Infinity) - (rank.get(b) ?? Infinity) || a.localeCompare(b))
     : files;
@@ -388,12 +512,14 @@ export function renderLedger(root, config, withPlans = true) {
           /^### [BF]-\d{3}$/m.test(text.slice(text.indexOf('\n') + 1))
         )
           throw Error('Record identity mismatch: ' + file);
-        output += relocateLinks(
+        const relocated = relocateLinks(
           plannedTasks && file.startsWith('F-') ? featurePlan(text, file.slice(0, -3), plannedTasks) : text,
           local(root, config.records + '/' + file),
           join(root, 'docs/BACKLOG.md'),
           referenceIds,
         );
+        const line = depLines?.get(file.slice(0, -3));
+        output += line ? placeDependencyLine(relocated, line, file.slice(0, -3)) : relocated;
       }
     } else throw Error('Invalid layout segment');
   }
@@ -571,7 +697,7 @@ export function checkWorkItems(root = process.cwd()) {
   const catalog = taskCatalog(root, config);
   // Open steps without a day estimate leave the totals incomplete: reported, not an error.
   const withoutDays = config.featurePlans
-    ? catalog.tasks.filter((t) => t.status !== 'closed' && typeof t.effort?.days !== 'number').map((t) => t.id)
+    ? catalog.tasks.filter((t) => t.status !== 'closed' && !remainingKnown(t.effort)).map((t) => t.id)
     : [];
   return {
     enabled: true,
@@ -599,7 +725,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       console.log(JSON.stringify(result, null, 2));
       if (result.withoutDays)
         console.warn(
-          `! ${result.withoutDays.length} open step(s) have no effort.days, so totals count them as unknown: ${result.withoutDays.slice(0, 10).join(', ')}${result.withoutDays.length > 10 ? ` and ${result.withoutDays.length - 10} more` : ''}`,
+          `! ${result.withoutDays.length} open step(s) have no remaining estimate (effort.agentHours/ownerHours, or days), so totals count them as unknown: ${result.withoutDays.slice(0, 10).join(', ')}${result.withoutDays.length > 10 ? ` and ${result.withoutDays.length - 10} more` : ''}`,
         );
     }
   } catch (e) {

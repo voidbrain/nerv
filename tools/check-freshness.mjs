@@ -221,7 +221,7 @@ if (
         result = calibrate(taskCatalog(root, config).tasks, config.estimation);
       if (result.due)
         warn(
-          `Estimates drift from actual effort: ${result.reasons.join('; ')}. Re-estimate the open steps (effort.days with a dated basis citing \`node tools/work-items.mjs calibrate\`; keep baselineDays; a material increase goes to the owner), then set workItems.estimation.since to today. Open steps: ${result.reestimate.slice(0, 10).join(', ')}${result.reestimate.length > 10 ? ` and ${result.reestimate.length - 10} more` : ''}.`,
+          `Estimates drift from actual effort: ${result.reasons.join('; ')}. Re-estimate the open steps (effort.agentHours, or days for steps not yet in hours, with a dated basis citing \`node tools/work-items.mjs calibrate\`; keep every baseline; a material increase goes to the owner), then set workItems.estimation.since to today. Open steps: ${result.reestimate.slice(0, 10).join(', ')}${result.reestimate.length > 10 ? ` and ${result.reestimate.length - 10} more` : ''}.`,
         );
     }
   } catch (e) {

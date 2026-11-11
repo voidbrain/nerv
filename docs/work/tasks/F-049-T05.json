@@ -37,10 +37,11 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "1.5 focused days",
-    "basis": "Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one.",
+    "estimate": "2.25 hours agent",
+    "basis": "Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge: median 0.56 h, p75 2.1 h, p90 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement) put a focused day at about 1.5 agent hours, with 0.75 h the least for one PR with review and CI. Estimate, not a measurement; baselineDays 1.5 kept as history.",
     "reviewed": "2026-11-11",
-    "days": 1.5,
-    "baselineDays": 1.5
+    "baselineDays": 1.5,
+    "agentHours": 2.25,
+    "baselineAgentHours": 2.25
   }
 }

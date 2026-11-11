@@ -1,6 +1,6 @@
 # Work sources, tasks and model requirements
 
-[Backlog](../BACKLOG.md) is the generated current-status view. `records/ID.md` owns each active outcome and `layout.json` owns its surrounding text. The [queue](../agents/backlog-queue.md) orders reviewed candidates; it is not another editable backlog.
+[Backlog](../BACKLOG.md) is the generated current-status view. `records/ID.md` owns each active outcome and `layout.json` owns its surrounding text. The ledger lists each group in work-queue order (`tools/backlog-queue.mjs`), and each record shows its Depends on · Unlocks line; neither is another editable backlog.
 
 As of 8 November 2026, all 38 active outcomes have separate record sources. Detailed decomposition is partial: F-006 has four tasks, F-023 three, F-048 three and F-050 two; B-046 has a completed evidence task and a remaining reproduction task; F-072's five adoption tasks are closed. Other outcomes still need explicit, reviewed task decomposition before parallel delegation. No claim that every feature or bug has been broken down is made.
 
