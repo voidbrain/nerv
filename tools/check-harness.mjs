@@ -1,5 +1,6 @@
 // Is this project behind the harness template it was applied from? Compares .harness.json with the template's release
-// tags and says, per file, what to reconcile. Never fails: run by check-freshness at session start; --github prints
+// tags and says, per file, what to reconcile. Never fails, except with --strict, which exits 1 when the template is
+// missing or a copied file differs from the latest tag (the evidence an exempt reconcile cites). Run by check-freshness at session start; --github prints
 // GitHub warnings. The template is a local clone (HARNESS_HOME, else template.path in .harness.json; the Angular CI
 // workflow clones it); without one the check is skipped. --merge three-way merges every forked file the template
 // changed since its base, writes the result (with conflict markers if any) and moves the base of the clean ones forward.
@@ -11,13 +12,20 @@ import { fileURLToPath } from 'node:url';
 
 const github = process.argv.includes('--github');
 const merge = process.argv.includes('--merge');
+const strict = process.argv.includes('--strict');
+// --strict passes only after the copied files were actually compared with the stamped version, and it is the latest
+// tag; every early exit (no stamp, invalid stamp, unknown version, no template or tags) leaves it false.
+let copiesMatch = false;
+let copyDiffers = false;
 const root = fileURLToPath(new URL('..', import.meta.url));
 const notes = [];
 const warn = (text) => notes.push(text);
 const done = (ok) => {
   if (!notes.length && ok) console.log(ok);
   for (const n of notes) console.log(github ? `::warning title=Harness template::${n}` : `! ${n}`);
-  process.exit(0);
+  if (strict && !copiesMatch)
+    console.error('Strict: copied files do not all match the template tag (or the template is missing).');
+  process.exit(strict && !copiesMatch ? 1 : 0);
 };
 
 const stampFile = join(root, '.harness.json');
@@ -93,6 +101,7 @@ if (!existsSync(join(home, 'VERSION'))) {
   const text = `Harness template not found at ${home}${stamp.template?.repo ? `: clone it (git clone ${stamp.template.repo} ${home})` : ''}; template check skipped.`;
   if (process.env.CI) console.log(text);
   else warn(text);
+  copiesMatch = false;
   done();
 }
 
@@ -154,8 +163,9 @@ for (const [path, source] of Object.entries(stamp.copied ?? {})) {
   const was = at(base, source),
     now = at(latest, source),
     here = mine(path);
+  if (here === now) continue;
+  copyDiffers = true;
   if (here === null) warn(`${path} is missing: copy ${source} from template v${latest}.`);
-  else if (here === now) continue;
   else if (here === was)
     warn(`${path}: template v${latest} updated it; copy ${source} from the template (${diff(source)}).`);
   else if (was === now)
@@ -164,6 +174,7 @@ for (const [path, source] of Object.entries(stamp.copied ?? {})) {
     );
   else warn(`${path}: CONFLICT, changed here and in the template since v${base}; merge by hand (${diff(source)}).`);
 }
+copiesMatch = !copyDiffers && base === latest;
 
 // Forked files are copied files the project changed on purpose. The template's file at the fork's base is the common
 // ancestor: a template change since then is merged three-way, so both sides' edits survive and only overlaps conflict.

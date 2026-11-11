@@ -115,7 +115,7 @@ npm run check:tooling     # a formatter check and a linter exist and run in CI (
 - A failing test is evidence until shown otherwise: check it against the intended behaviour. Change its expectation only when the requirement deliberately changed, and say which requirement; otherwise fix the code.
 - Do not leave dead code behind when replacing a feature: its state, helpers and tests go too.
 - A bug fix starts with a committed test that fails without the fix; the fix never edits that test to pass (BACKLOG-RULES, "A bug fix starts with a failing test").
-- A PR that closes a P1 record or changes a harness file gets a review in a fresh context before it merges; the reviewer reports, never approves or merges (BACKLOG-RULES, "Independent review").
+- A PR that closes a P1 record or changes a harness file gets a review in a fresh context before it merges, with the exemptions listed there; the reviewer reports, never approves or merges (BACKLOG-RULES, "Independent review").
 
 ### Changing a harness file
 
