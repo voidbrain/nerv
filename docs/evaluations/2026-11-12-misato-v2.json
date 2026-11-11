@@ -1,0 +1,484 @@
+{
+  "schemaVersion": 1,
+  "sourceStable": true,
+  "suite": "misato-planner-v2",
+  "mode": "real-model-judgment",
+  "role": "misato",
+  "started": "2026-11-11T23:50:00.191Z",
+  "finished": "2026-11-11T23:51:14.831Z",
+  "revision": {
+    "version": "1.285",
+    "commit": "aef407bd38d61314d37bba2f51f4c7553fb477d6",
+    "shortCommit": "aef407b",
+    "dirty": true,
+    "includesBuild": false,
+    "inputs": {
+      ".harness.json": "ab8fa8df65f300dfbf06e0b737831cf3af41cf84c8d3d26d7a2d2b43dd4eba01",
+      "angular.json": "f9cfca7c34f1a147c50a69cfd8240c93eaeb5d1707b2f03032dc7d7c777fcb24",
+      "evals/casper-v1.json": "7119b3a6fb6b058cf16fa25afee3b47e4788b9d5ee7242562536614d262b8204",
+      "evals/gauntlet/consumption.json": "a17c5193a46abbfca53f28301e33b4176cb9009b257f48b068088a96342030c6",
+      "evals/gauntlet/ledger.json": "16df33c81943b3fa0cf01269b7a578a4389b6eccda3401c278ea89441d3a788c",
+      "evals/gauntlet/limits.json": "b10f525895d08dc8c7331a203620d235d51e3d5098133460eb54b00739cc45a7",
+      "evals/gauntlet/runners.json": "40a6035a58ee1e82a777c079837c45919eebbdc702f4a0c0e9f4b2b1f7a5e82b",
+      "evals/gauntlet/system-v1.json": "8fa9bfebcf7e820a1fa2afdaf209dec05b70d7f1031885d8299161af41cbb4b1",
+      "evals/planner-v1.json": "b71ef0f3afcb9ae14171c8f4057826792c9262668b8e6a06bf9fbeb8c10c6a54",
+      "evals/suite.json": "cb35e93440778b47dcd4a31552d86a1948f6af3b987b85f8345e127753df2708",
+      "package-lock.json": "7eec08de91163c4c27b9e4cbf213ffa8e738666435b20fee1c9bc3af8fbd626e",
+      "package.json": "7ef7f77859e1d122476b97ad73ca9c2a731ab57c0fc15c6231aaefb64150f44e",
+      "shared/node-bootstrap.json": "231d14a6446af3f6268cd156d71a39f5ffdc3b07f16d14ebdfa69c5e07206e4e",
+      "shared/surface.ts": "5d6151cb9481ace12855bf343e66191817af7aa36d5ad2d83bb81e10fd30dacf",
+      "src/bom.ts": "66d644ff876f50b19a82d11305927f6db832122b4ff033f04990bf5cf23d2a98",
+      "src/brain-process.ts": "6d8ef63572b121a77f97e626b97046a03f6a1823ce8f96a709b8ba346d6f63a1",
+      "src/brief.ts": "ba66d0a966fc1bfd01852ca3e66b7359fb2d6a886652a4b57970fad972691db1",
+      "src/build.ts": "6984d71a16103a3749e987926046ad230465c85ddd68cfdc284b89f8e0387b46",
+      "src/casper.ts": "52bfe8deade902ea70e9e7ea15fa6894add2f0175a85b865fec9454e3dc12cb9",
+      "src/channel-state.ts": "328c86c7e99f34ce12c38d4235804e04d17914fd4c8e204d905959e5c75b0cd8",
+      "src/chat-command.ts": "924ab46b7e768a86e643c5f49d221eb2c52b49e140b867f75e883b14e601c5fb",
+      "src/cli.ts": "36dff437bbb9d4afa40e9a4b8276f49d23c44470284a35b196f202307e046eb3",
+      "src/config.ts": "a3f6e880f31c7010da79fd4fa6767a8eb0e0d808289371de6eb2873f02f571dc",
+      "src/dashboard-feed.ts": "7d93a910892503f185d77dc5b0511293e5db86fb2564dbedce3f6ad69b468772",
+      "src/events.ts": "8fe2564058d383e5299b7162152fc205583d50220f86c4e5a1583cb3eb8573c3",
+      "src/executors.ts": "13fa1d08369222df3e0c385aeffbade3d4baa9f69fd5e0d5f28b77a07f9200c5",
+      "src/history.ts": "3c90d9709d217d769ccf7d5575f273fcd4ef0efe4621c4f3847c1d598676ca21",
+      "src/instrumentality-runs.ts": "5aa1c4952dbbd4c19dc4e51645939dc5ac23184961810303736ba47f19b5be4e",
+      "src/instrumentality.ts": "b6e1c1682e3ed977d73855c9d7f1d6d2ac6308a09d511821cbb7c677467d628e",
+      "src/kaji-auth.ts": "05a1dbc788e644284da915450cc030417267f9715f02391374478bb995b5732a",
+      "src/kaji-link.ts": "598a8cd73c597cfca6457f2466245a559db639b18c03bcd99112c77e1797dc9f",
+      "src/kaji.ts": "bcd9217ad8b206c867378986ce0b2ac30350525ec1ea7cde4acbc4ea233faaca",
+      "src/ledger.ts": "8e15514004e3ad3a6d1007c96c4fc4ddab5502c5764b777c86556abc3897b07e",
+      "src/mcp.ts": "69f0a7db805dc555534d838b1e94d3164c0690f9363ead2e63ee2647495abd64",
+      "src/memory.ts": "089dd1a283969ce0fe861d954c021dbd945f2f76857f387af9753a2918ba2649",
+      "src/misato.ts": "30fbf555028d8e8bae781d58123ac3120785ea5976f48bf1e2fb3cefc7e6b1f9",
+      "src/model-setup.ts": "4b8d27a4e1a758355b405e41db00df780e506ab8d1ef283d640b215943c52054",
+      "src/model-usage.ts": "3431e4f03efd6e6befce079533acf5c8831245f5d165b95f24c983869856c6bf",
+      "src/model.ts": "e6d1b075e0fa756d46fc22853e80dd915c1c97cc4a33e72e28c05c170504b2e8",
+      "src/native-auth.ts": "be07c76e4b1927247557634b165c6c8928f4bf202c0edb73241ce81d265454d6",
+      "src/nervous-process.ts": "a5806c14b1e3bb6e3729999dcdd9268f4a3231fa54cbe18e14302dae6a9b9e1b",
+      "src/node-bootstrap-execution.ts": "421a6b2ba15d65fc49bbc07d22d9f62e5154b0e7d9faf70cf13ffd24a37db2c2",
+      "src/node-bootstrap.ts": "5ccb553a72d71f53864161894b7dbfdfa4edb52bb4143d5222ef7f44a44eade6",
+      "src/node-discovery.ts": "cf73647906c0efd2c9e627919f1205392d6ba999ab36065e1b7b6376d8860a3b",
+      "src/node-inspection.ts": "cfb3132676da474698f2b9aef26fc77db506fa0b3377615a4617b595663bfeb4",
+      "src/node-lifecycle-execution.ts": "565312a1bd671234bec77ed7667db8abf4e0cfcef6cdaac6b1226033905c8704",
+      "src/node-lifecycle.ts": "26afecedaef71cc63d4208b4bc4efc9ff0a4272a9c22947bc986539a09132834",
+      "src/nodes-cli.ts": "60236a006e6dbe632242239f4016f312d5c4df36eecb91aa3c49aafa4f22ecf5",
+      "src/pilots.ts": "c5c5773d93334dea62707d40e7b736824637ee87324c60a4f5d77db4b5082f26",
+      "src/policy.ts": "f1db30a2e6dc0bbc2d0b0e27aad7f2cff542acdaad1b764e228432d73694fddc",
+      "src/process-client.ts": "4382b0327365bd44fec4a1edc8a66301aa3084f9a5dd1a6061cbf53033082f08",
+      "src/root-migration.ts": "86d8d5fcb99ef46f95d89805fab4384a030309d75ba24bb9bd343c2a8e51eab9",
+      "src/route-health.ts": "67a6be6ce568bbd8cef15c6871a21be144bc6ba69aaf757127efb31761d87f3e",
+      "src/rpc.ts": "ffd6287f5a89907a516d89abcb5bdc55792e970dd859d5d3161816865f80dfc6",
+      "src/runtime.ts": "a305636cf45bc01bf80e3403e6460fbeada739939ad8b5d6e2dcdebfce939379",
+      "src/server.ts": "0cfff2547d2c5873f9f519afb0035e386c81e61097c4758578ef2d785a02c821",
+      "src/service.ts": "80f785ad26dafc4e42fafbf268dad3d9e40b7a194f4e19c5782fdc35320bd85e",
+      "src/socket.ts": "04851169c4f869049a2380e203cf221306cb3126f4caff64a67d3d3addb724b4",
+      "src/sqlite-transaction.ts": "7ee5211768a145114fb0875c928f16054c7bdc4c576606073d209a48b382314d",
+      "src/store.ts": "49e91718d047b39a812dba325757a892c794171ca7977ea23f3b443e3e2eb0ca",
+      "src/telegram.ts": "755009a1b28abb7062c9dd6f4b28b6e574614084e850e074a1ff95a95a567b20",
+      "src/tools-process.ts": "0d52021a26eef0558b51aa8d071f7d08ac012ba22dd5875e2169f82e5b6ae5f0",
+      "src/upgrade-contract.ts": "b5e17617ae325e31723a21475c3f75be3b3ae913023d574894bb03547e7629ee",
+      "src/upgrade-reader.ts": "c7070ad6ac27ad66e18903473761032ce03f03d5ee3c11e0ee2a98dc3b94f003",
+      "src/upgrade-rehearsal.ts": "b725c828a94e72e419c5300c59cc240301035c76a3f9baafd6ac0893a6452d29",
+      "src/watch.ts": "d178ee09bbf239d598a96baaf8dd55b85c5e6f96684530e1c4d97af8221f29b2",
+      "src/why.ts": "4a4557bf464e0905f8c53381882884a316dbf72f2ebe4d4208c4c7a7743d69d3",
+      "src/worker-jobs.ts": "53bc49a3ab688f38068a11c241c72ad136a9368948ce218ff020c3d4971a85d6",
+      "src/worker-link.ts": "3d630c0138e22360a0d6b5ae8ce0b4cc743bc318dc07853ff77838d3bd297856",
+      "test/angular.browser.mjs": "9c54cf4faedc9bb7292a9fcdad50532f578812f7c9c72875aba8f9b45c3ac8f6",
+      "test/approval-delivery.test.ts": "ff60c1a01eb17792c6eea87387a1a10287c258590ce4b63401c65b964622a20e",
+      "test/backlog-header.test.mjs": "19699ae41a29a695b2d307f8106c8bc07c24e55945bf2fc3c18c59ae14595e2d",
+      "test/backlog-recap.test.mjs": "1d38ac60eb5117bebd78e79ee46a074ee9e6fcebdf5cc8ae28e6e2491c0c308c",
+      "test/bom.test.ts": "185a0b69276f414ff9a5b2404c0764e44621ff180a754c94f07243cf2bd7ed01",
+      "test/brand.test.ts": "92bb70b7817f4e7fbbb192d86282844d66e6aa8db359a39d5d7d5ec8307989cb",
+      "test/brief-recovery.test.ts": "a147759f2da9b2d18feb39c30b8939129ec24658379c0feafff659ce816ff79f",
+      "test/brief.test.ts": "1d17bdec91da0688c0a726b7df16b29ffb196b54b7c622aa8c65ad43d45e63d6",
+      "test/build.test.ts": "416d04dd75e00e32c695a05c91a0b3b012dc4f78f380d230728cdc9f9b5186cc",
+      "test/channel-display.test.mjs": "abe3ea5344bf70823f51a1a2cc96b5bf5fa6c2f32e41b41c73b604fe3ff534f9",
+      "test/channel-state.test.ts": "99ac970fa6c091e0019d623af58795ae0c8c6b622dae1e8a80d203f5664196ea",
+      "test/chat-command.test.ts": "e3bdd2865a28ed3066dc967de28cadef9fcefd67b1a54efc0fb83262430fc2cc",
+      "test/ci-pins.test.mjs": "f5a1cb48c77539907675e9d57f6f081a74def3684d67918045f8de1c37e01f4b",
+      "test/clarification.test.ts": "ae34fb431d5677079457604a320e2000fa9f8e82f53dc9473a41cb8816f18235",
+      "test/consultant.test.ts": "5605a58ab1d256c92359707d8b57a314bb8400f0705a18ac2c759fa7c89fc7d3",
+      "test/core.test.ts": "a8210ecf1a99a8c3904ffc707a33add07a8ef785194a311a7078617ec00b2635",
+      "test/coverage.test.ts": "5966878b4e34c1b48033789f8a7071c065db73653311f8bcfb1af9d260fce7e5",
+      "test/dashboard-accounting.test.ts": "1dd7e5acc616980b236ae2c9f364e6d2c4e7f02f0690007960db66ff1c947581",
+      "test/dashboard-poll.test.ts": "eea4f96297d9ae74b69285a9ec09440c82c168fecdc13ae0e25795ee0a0e3740",
+      "test/dashboard.test.ts": "01793699cb4d61d85fe0cd726ca0cac540b0999e75166b032de1994f6898af27",
+      "test/dummy-plug.test.ts": "8751a1fdf2715f1004b7e9ebf6766fb3677fd70cfeb655fe8d973e9deff9360c",
+      "test/evaluation-model.test.mjs": "05672ce32c7c7a198860e14493b64b0cd1eec55c4f7389cbf83fd7c218271108",
+      "test/evaluation-runner.test.mjs": "8be15cf90f8479a91f06a0e09dd2afd0efd3e9a7e0e38516bca8439f5432c149",
+      "test/evaluation.browser.mjs": "48b553e8f2eaa431123b49e6b7393de921fcb644d088bcad3d0ccdf57ab9ac4c",
+      "test/evaluation.test.ts": "6f90f03b0056b8f360245e68cbf4425c851a155e2875fd86af09e09278aae458",
+      "test/fixtures/browser.mjs": "29c7933cf315baae66a29e28c3481e819bf82b7a27f45284c711349844a8733f",
+      "test/fixtures/busy-brain.ts": "c27c8452546d667428d75f9f6bb1ac9bdc300d1c15d7658e49efd232913a65b9",
+      "test/fixtures/cyclonedx/LICENSE": "6c29f22a4a7385285c6f579ec9f33c5e989f00739d6b257243a0b082ec9447ae",
+      "test/fixtures/cyclonedx/README.md": "61a4f88f87b15b71a82f071ec928531d3689db010f4709252b60b88e8d784603",
+      "test/fixtures/cyclonedx/bom-1.5.schema.json": "067f7824b08653839ea050ae9e09ca48375eadc2652b0e2a299476e7db90335b",
+      "test/fixtures/cyclonedx/bom-1.6.schema.json": "3e92dddbc30cf7f6a02b80f0942b1a4cfd4fb1c26f1dfc4310afa9d613cafb93",
+      "test/fixtures/cyclonedx/jsf-0.82.schema.json": "8bae002c25e723db7ee1f26afde680ae1a2b1a8f6b4b4b0fd65dc3becb090aae",
+      "test/fixtures/cyclonedx/spdx.schema.json": "baa9d3bd1ed57b6751b0887edead6b5063ff53ff7429cf85d476c6c94af0166e",
+      "test/fixtures/fake-mcp.mjs": "65f5ced99edd3414769b39b2d80e7a93a4c1160aa051d076053797fb98b3ee63",
+      "test/fixtures/node-bootstrap.ts": "decbbd917ebc85b86edd8773529759fe77210b198a24c11ae64987335783a7d5",
+      "test/fixtures/posix.ts": "1b9d1dc398343bc0c89902e77dd25c8c121525c901246b4c01691f391664d97d",
+      "test/gate.test.ts": "0d85e66f95e38f47e2c4c45d127c3caef6906b33702ec84af2f55ac8638b495f",
+      "test/gauntlet.test.mjs": "3eb311d98441860f82c90d2a82a65fb2db879838f5a0358dbe38e95ee262f707",
+      "test/headless.integration.ts": "c2125eac166ff701642e46c453be67f56e6572e1874d2079e5e3bae1b4fce933",
+      "test/health.test.ts": "f0f01253b4f279e535856df14d7f9a7129d00ae33e23541dcd87113640347b28",
+      "test/history.test.ts": "ca47f5305e3d370ffac54d3e82da8825a607e41eb6a0b47ce3c123e8d549ca40",
+      "test/inbox-page.test.ts": "74f538a3b2ba33b2a190f23a9ba0be1891c2d447fbc3b53bea525363587ef2c8",
+      "test/instrumentality-runs.test.ts": "7a091ac4061691ee2beac3d38f63dfd7cab7f89614faed9525b62a8803821f28",
+      "test/instrumentality.test.ts": "466c8705de7e5d5b64ecee1276cb7c587edbd8154230a4afecad779300c96fb8",
+      "test/isolation.test.ts": "5003c031170da64c05484be46a5b87e6f5b864fbcf9f2fc6b2117c7c20820dd5",
+      "test/kaji-link.test.ts": "26a18b8c6967132b6d6c22e6c7254d28c8f443646f5297c69fce7ed0bdb0a360",
+      "test/kaji-run.test.ts": "1e93300fbbe0e815e862baa50d69c4be5ea047d919d5803f1f7fbbb01894a018",
+      "test/kaji-seats.test.ts": "4303f8e0a9b82ec097add274593d121081042724bd2b51a9d6a663ab9b9b71c0",
+      "test/kaji.test.ts": "8a7b26b0f6e6df6347e4cf81b955108ae6dfd1e36e758706dea6ac1e8f435cba",
+      "test/lcl.test.ts": "3cbcbfc98a77a3be9218abcb0237a0ce79a743ce8415b006ca8f5bd612a0ed83",
+      "test/ledger.test.ts": "a532f8092e8d65fdf200027b503f2abf178cfa9d7970be37e041644551b21050",
+      "test/mac-service-fixture.ts": "b559da8a74326db5ecea9629413281b760a83ff34aa692aa9ce17dd7093fe941",
+      "test/map-tabs.test.mjs": "9062a7b17dd1a1cdf071647ef30f3aac001c94e5bbd6aca2cf3e74ae0638e67c",
+      "test/mcp.test.ts": "3dcdb1447b7b1d700676145a08d2f7159da4a3d12ea3caba374b0c90ad0be5ee",
+      "test/memory.test.ts": "d710036f30410555e0c24edc1bfb91908ab4e1e3d7cf458563382a2bae8ed41f",
+      "test/misato.test.ts": "b7c0738c0aee01ee87cdb6106ee522c568b7f686038a3048c2aa5d65583ad17b",
+      "test/model-setup.test.ts": "b9999960ccb3e189f4579b3ebc465ca578cda5976a961fb8d8147ff31737ad61",
+      "test/model-usage.test.ts": "10492874e9eb5f1dd4511bf586752c65079e2288870ec1c2eb455af0252f35c2",
+      "test/model.test.ts": "e709d3e158ae342ef1ae7c9942bceb29750cb93beada5941bc7a70feebd704c9",
+      "test/native-auth.test.ts": "33935e05a52c5a23332c4ec33dba98a375797521c6b9d77d7d93487f0657c2b3",
+      "test/native-fixture.ts": "5feca721f2daa31733cf1173a9e1a264f523649f2e5011cdfb232744c752b0e1",
+      "test/native-process.integration.ts": "6b69c7082a0766a4d5cdcb57bf824d0e3a78640266b7599e023dae7e9857f3a5",
+      "test/native-recovery.test.ts": "3f4945abc09170ed222766cebce9cc4e7d65f707b0f916e8e8fc890fa145e75a",
+      "test/native-release.test.mjs": "6645ed314481a026eabe71f021492d065655b8877dc92270a7bdeefa0c276126",
+      "test/native-renewal.test.ts": "6e5f531dd7c019bf70e5ab20a908d837d0f4e1a117fb30dc00f1e7c035ae1c38",
+      "test/node-bootstrap-execution.test.ts": "c0ccc202041e02d316b5c03bda130a62dc1c020cefb92d189e97ef62e34e1371",
+      "test/node-bootstrap-races.test.ts": "577decd8a5796a09bd87b32295d8587d13e530e5cdeb85a4267c2ffa374a30c3",
+      "test/node-discovery.test.ts": "ae08548923fb87a507d24ba4266dd7dc479e3ddac67e378fb92abb14b17ef63f",
+      "test/node-lifecycle-execution.test.ts": "dbf2c29c7dd8fd8c2311202ad8285e5b975dc403d90e2b1f383f52e6d0817b9e",
+      "test/node-lifecycle.test.ts": "150f9fe8c1b8222299c2086f45e240c5293d420c1ccfdb45ac8cdd8f2cb91156",
+      "test/one-channel.test.ts": "36abb31b0c05955aca027fe9eb2ec3a233b2dfe4180c9f96fdf92a3a0dd2c493",
+      "test/pilot-controls.test.mjs": "2c8de54873f890eafa98918f0de23f7febc682df1e0446d0de7484b45573e543",
+      "test/pilot-model.test.ts": "dc02625d32ae00453cebd61f92ce4ec98d7f74fe238435b9eda4eee293765aa2",
+      "test/pilots.test.ts": "7248b852c008ae20ba8ea27e7ba1ffffe2c117918517c7d0c8fa4ae842eeee98",
+      "test/process-client.test.ts": "be0fa1fb7e49283187d38ed08ff79841ef18b5680300368cb5caaf6e1c3ae58e",
+      "test/protocol.test.ts": "1a0516dc464d36e443a3724f55c0afafb32eda5c52a9abb12547243b4c8edc9d",
+      "test/provenance.test.ts": "af92df4d0941b949f057d32a004ad93faa1751915407fc8c8fc47e47631c7831",
+      "test/resume.test.ts": "f36aca2a93f39fc5e174d85802f19eb032e7763c386b6c280d4b6a83c348c1ff",
+      "test/roadmap-status.test.mjs": "ce00e2e0f64d7959442700b814ecda9aadee32758f3939df0812e956db80288f",
+      "test/root-generation-auth.test.ts": "9135dac8972df53861367186c901997bc48e2a76094edf41cac4e0d51c0a81e6",
+      "test/root-generation-cli.integration.ts": "6bf611cd3ae82218d0022132e05449540afc8f428a002b078019edd03a9a2901",
+      "test/root-migration.test.ts": "1cb345b3ceec022019e8e97b6fe2e7023959e97d39f85751fff83797bb0b4eb1",
+      "test/runtime-load.test.ts": "f2664050d1b820aa8db14418d5d915abd9f3fa092338f929780cbcc63e3d8311",
+      "test/runtime.test.ts": "160ba60af92f695bf7a15d569f71eb17c1fa9b1b55d28813a7d41f34712daafd",
+      "test/session.test.ts": "2a346753fc8beb9408bc7c97e0cf702b24854396809309284ae1f08aa4fe40ba",
+      "test/sortie-detail.test.mjs": "cce744fd7af1877e86908ef77509d8c743febf2f2106d31af9f6478b57b12d24",
+      "test/surface-dom.test.mjs": "f2b401600c75c2f01cef3273615068529ded6259c690b66df6ce590c4d42efca",
+      "test/telegram-reconcile.test.ts": "923af61987ed2ec56fc553fa3e7dfd032d569f70e5d25d5e68d05cba7ad0e537",
+      "test/telegram.test.ts": "dff2b9fba64d475aecf7578b7a24c68fcc93e75a70e45344a4bb7f37189a536d",
+      "test/upgrade-lifecycle.test.ts": "09a3245fe332583c491c8dc664de943c0a4f03d6951f04d90d795bf744896043",
+      "test/upgrade-rehearsal-review.test.ts": "8a077d801cc5951bcae753bf9342920577e9a70f99cb908bd480e316933ab265",
+      "test/upgrade-rehearsal.test.ts": "6fd6380c5e4f3962f300adbb75dbb299154389861c05e7972a3e452ba5b16b62",
+      "test/verification-policy.test.mjs": "12318726c33bd9252f28761fc71c22490273d29c3951920f4ca30ab1c46c60a8",
+      "test/watch-runtime.test.ts": "b1d8cae3a82c60bc389481eba5b2bc3b1c3d2d3cbf3f5171ac704b9907d75337",
+      "test/watch.integration.ts": "16b15b18a6d68265034e2fa4bdb731e7786481f6993655db48ac77c5e42d5b92",
+      "test/watch.test.ts": "600f984c8d352e3d108e672b2deebaefa030289c4e88056bd09417bc6f3ad543",
+      "test/why.test.ts": "6c41c97785e80c11b4bbe5dbade6a1395566b64e92115494318444c79fbfec8b",
+      "test/windows-service.integration.ts": "2b90ff8e7b039fd169b08d46d2eac219664c93b1f1d6f5c2b2f966d663e14c48",
+      "test/worker-jobs.test.ts": "0c7864aa3035dc9efadec10070886f33066fb354d80bb5f64fd46229d496c37b",
+      "test/worker-link.test.ts": "0e042ae126181ef18524572b11296d15fc6556c57a564ecc01c171893f48ef7f",
+      "test/worker-outbox.test.ts": "3a05f58a62044a50dc6bc8dd0b1a970d192e044928e72cbc651e1e2e70a47a7c",
+      "tools/evaluate-model.mjs": "591a7b67cad1d3ed7dd5dceee2c8c449be3e50d00475b28fa2c7a853d4e780ec",
+      "tools/evaluate.mjs": "9f7c59fd4ba70a67f25bfb42264b2f77b5ff54deaaa1f85daa3f2ceab134d8b7",
+      "tsconfig.json": "d2c357bb8245e2849b523576834d106bc6820bfb7ffbb2689d4d9977f92089c4",
+      "web/public/brand.svg": "16acaa915a5a7dbf7019ff0a950347004373fc7da661ee1f4528897e3b88181a",
+      "web/public/dashboard/assets/README.md": "75350257241b5c80470f10ae20865b99ff09eb1615011b4f0fd68a9266ee74fe",
+      "web/public/dashboard/dashboard.js": "6b3a12f9046aee6b435402c76be390aff085876b131d0978c3efb134c83007de",
+      "web/public/dashboard/index.html": "21665c3ff9de24cab1530fdc5bd4819ca2387cc4a34426986fb909e9a11c2284",
+      "web/public/dashboard/live.js": "270247bcc51581cb9a8ec47f09b8d944da250501200e3a5f1c0c0e3eb99b335e",
+      "web/public/mark.svg": "4684f1df167531cc08a0a3c23b5f6ea7a6e995e239637d319d466f69817c78a1",
+      "web/src/i18n.ts": "7111fadaa590a6a77d11f6c46ca6761fd9660d8ed621ce039fcbcaba76f9a113",
+      "web/src/index.html": "5a904b194fc9f74d7a15afe449e17aac19c0de715daf3e2e3aab310fe4baf6eb",
+      "web/src/main.ts": "5ed9e869bdab2613b472ba54ba1de617f4422073a2a5532c4ebd90d17ef7d716",
+      "web/src/status-card.ts": "c420f3ac83ef73cbdacbbb013bdcf373f8850935d3751ff33256194f0b43690b",
+      "web/src/styles.css": "705bcbcd1560c375f8f51af653a94572e3715bf3ded058d80060a9f051e813e1",
+      "web/tsconfig.app.json": "bfd447d7a0c9fbe104a7d087cca9b0fc9d9b29b7a054f03fe90a05d841de6a5a"
+    }
+  },
+  "node": "v26.12.0",
+  "platform": "darwin",
+  "model": {
+    "requested": "gemma4:12b",
+    "requestedDigest": "6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b",
+    "route": "local",
+    "seed": null,
+    "temperature": "provider default; no override supplied"
+  },
+  "results": [
+    {
+      "id": "ask-before-inventing",
+      "split": "regression",
+      "family": "ambiguity",
+      "expected": {
+        "kind": "ask"
+      },
+      "observed": {
+        "ask": "What would you like the reminder to say, and when should it be set for?"
+      },
+      "status": "passed",
+      "reviewRequired": [],
+      "returnedModel": "gemma4:12b",
+      "usage": {
+        "route": "local",
+        "requestedModel": "gemma4:12b",
+        "returnedModel": "gemma4:12b",
+        "inputTokens": 1227,
+        "outputTokens": 96,
+        "cacheReadTokens": 1093,
+        "cacheWriteTokens": 0,
+        "durationMs": 3743,
+        "outcome": "success"
+      },
+      "responseTruncated": false,
+      "response": "{\"ask\":\"What would you like the reminder to say, and when should it be set for?\"}"
+    },
+    {
+      "id": "exact-reminder",
+      "split": "regression",
+      "family": "simple",
+      "expected": {
+        "kind": "action",
+        "tool": "reminders.add",
+        "args": {
+          "title": "Stretch",
+          "due": "2031-01-01T09:00:00Z"
+        }
+      },
+      "observed": {
+        "action": {
+          "tool": "reminders.add",
+          "args": {
+            "title": "Stretch",
+            "due": "2031-01-01T09:00:00Z"
+          }
+        }
+      },
+      "status": "passed",
+      "reviewRequired": [],
+      "returnedModel": "gemma4:12b",
+      "usage": {
+        "route": "local",
+        "requestedModel": "gemma4:12b",
+        "returnedModel": "gemma4:12b",
+        "inputTokens": 1246,
+        "outputTokens": 202,
+        "cacheReadTokens": 1214,
+        "cacheWriteTokens": 0,
+        "durationMs": 5748,
+        "outcome": "success"
+      },
+      "responseTruncated": false,
+      "response": "{\"action\":{\"tool\":\"reminders.add\",\"args\":{\"title\":\"Stretch\",\"due\":\"2031-01-01T09:00:00Z\"}}}"
+    },
+    {
+      "id": "correct-rejected-time",
+      "split": "regression",
+      "family": "replanning",
+      "expected": {
+        "kind": "action",
+        "tool": "reminders.add",
+        "args": {
+          "title": "Stretch",
+          "due": "2031-01-01T10:00:00Z"
+        }
+      },
+      "observed": {
+        "action": {
+          "tool": "reminders.add",
+          "args": {
+            "title": "Stretch",
+            "due": "2031-01-01T10:00:00Z"
+          }
+        }
+      },
+      "status": "passed",
+      "reviewRequired": [],
+      "returnedModel": "gemma4:12b",
+      "usage": {
+        "route": "local",
+        "requestedModel": "gemma4:12b",
+        "returnedModel": "gemma4:12b",
+        "inputTokens": 1311,
+        "outputTokens": 200,
+        "cacheReadTokens": 1230,
+        "cacheWriteTokens": 0,
+        "durationMs": 6027,
+        "outcome": "success"
+      },
+      "responseTruncated": false,
+      "response": "{\"action\":{\"tool\":\"reminders.add\",\"args\":{\"title\":\"Stretch\",\"due\":\"2031-01-01T10:00:00Z\"}}}"
+    },
+    {
+      "id": "italian-missing-title",
+      "split": "regression",
+      "family": "language",
+      "expected": {
+        "kind": "ask"
+      },
+      "observed": {
+        "ask": "Quale titolo desideri dare al promemoria?"
+      },
+      "status": "passed",
+      "reviewRequired": [
+        "Question must be in Italian"
+      ],
+      "returnedModel": "gemma4:12b",
+      "usage": {
+        "route": "local",
+        "requestedModel": "gemma4:12b",
+        "returnedModel": "gemma4:12b",
+        "inputTokens": 1247,
+        "outputTokens": 703,
+        "cacheReadTokens": 1096,
+        "cacheWriteTokens": 0,
+        "durationMs": 24685,
+        "outcome": "success"
+      },
+      "responseTruncated": false,
+      "response": "{\"ask\": \"Quale titolo desideri dare al promemoria?\"}"
+    },
+    {
+      "id": "topic-change-during-question",
+      "split": "holdout",
+      "family": "mind-change",
+      "expected": {
+        "kind": "newRequest"
+      },
+      "observed": {
+        "newRequest": true
+      },
+      "status": "passed",
+      "reviewRequired": [],
+      "returnedModel": "gemma4:12b",
+      "usage": {
+        "route": "local",
+        "requestedModel": "gemma4:12b",
+        "returnedModel": "gemma4:12b",
+        "inputTokens": 1450,
+        "outputTokens": 157,
+        "cacheReadTokens": 1095,
+        "cacheWriteTokens": 0,
+        "durationMs": 6508,
+        "outcome": "success"
+      },
+      "responseTruncated": false,
+      "response": "{\"newRequest\":true}"
+    },
+    {
+      "id": "answer-continues-short",
+      "split": "regression",
+      "family": "ambiguity",
+      "expected": {
+        "kind": "action",
+        "tool": "reminders.add",
+        "args": {
+          "title": "Stretch",
+          "due": "2031-01-01T09:00:00Z"
+        }
+      },
+      "observed": {
+        "action": {
+          "tool": "reminders.add",
+          "args": {
+            "title": "Stretch",
+            "due": "2031-01-01T09:00:00+00:00"
+          }
+        }
+      },
+      "status": "passed",
+      "reviewRequired": [],
+      "returnedModel": "gemma4:12b",
+      "usage": {
+        "route": "local",
+        "requestedModel": "gemma4:12b",
+        "returnedModel": "gemma4:12b",
+        "inputTokens": 1455,
+        "outputTokens": 410,
+        "cacheReadTokens": 1386,
+        "cacheWriteTokens": 0,
+        "durationMs": 12262,
+        "outcome": "success"
+      },
+      "responseTruncated": false,
+      "response": "```json\n{\"action\":{\"tool\":\"reminders.add\",\"args\":{\"title\":\"Stretch\",\"due\":\"2031-01-01T09:00:00+00:00\"}}}\n```"
+    },
+    {
+      "id": "answer-continues-long",
+      "split": "regression",
+      "family": "ambiguity",
+      "expected": {
+        "kind": "action",
+        "tool": "reminders.add",
+        "args": {
+          "title": "Stretch",
+          "due": "2031-01-01T09:00:00Z"
+        }
+      },
+      "observed": {
+        "action": {
+          "tool": "reminders.add",
+          "args": {
+            "title": "Stretch",
+            "due": "2031-01-01T09:00:00Z"
+          }
+        }
+      },
+      "status": "passed",
+      "reviewRequired": [],
+      "returnedModel": "gemma4:12b",
+      "usage": {
+        "route": "local",
+        "requestedModel": "gemma4:12b",
+        "returnedModel": "gemma4:12b",
+        "inputTokens": 1468,
+        "outputTokens": 312,
+        "cacheReadTokens": 1430,
+        "cacheWriteTokens": 0,
+        "durationMs": 9683,
+        "outcome": "success"
+      },
+      "responseTruncated": false,
+      "response": "```json\n{\"action\":{\"tool\":\"reminders.add\",\"args\":{\"title\":\"Stretch\",\"due\":\"2031-01-01T09:00:00Z\"}}}\n```"
+    },
+    {
+      "id": "topic-change-unrelated-question",
+      "split": "holdout",
+      "family": "mind-change",
+      "expected": {
+        "kind": "newRequest"
+      },
+      "observed": {
+        "newRequest": true
+      },
+      "status": "passed",
+      "reviewRequired": [],
+      "returnedModel": "gemma4:12b",
+      "usage": {
+        "route": "local",
+        "requestedModel": "gemma4:12b",
+        "returnedModel": "gemma4:12b",
+        "inputTokens": 1458,
+        "outputTokens": 151,
+        "cacheReadTokens": 1385,
+        "cacheWriteTokens": 0,
+        "durationMs": 5753,
+        "outcome": "success"
+      },
+      "responseTruncated": false,
+      "response": "{\"newRequest\":true}"
+    }
+  ],
+  "notRun": [],
+  "complete": true,
+  "passed": true,
+  "promotion": {
+    "automatic": false,
+    "eligible": false,
+    "reason": "Evaluation is evidence only; existing independent verification and owner promotion gates still apply."
+  }
+}

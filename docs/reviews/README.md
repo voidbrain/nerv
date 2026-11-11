@@ -78,6 +78,8 @@ Read the exact suite, frozen revision, selection and not-covered fields in each 
 | [2026-11-08-f014-bases-stress.json](../evaluations/2026-11-08-f014-bases-stress.json) | 2026-11-08 09:35 CET | nerv-golden-v4; scripted-control-flow; `cdd8a0e` | pass; partial | Affected flow/protocol changes or requested bounded stress campaign |
 | [2026-11-08-f014-scripted.json](../evaluations/2026-11-08-f014-scripted.json) | 2026-11-08 09:35 CET | nerv-golden-v4; scripted-control-flow; `cdd8a0e` | pass; complete | Affected flow/scenario changes; full suite only on its own trigger |
 | [2026-11-08-misato.json](../evaluations/2026-11-08-misato.json) | 2026-11-08 00:19 CET | misato-planner-v1; real-model-judgment; `3c71986` | failed; complete | Changed model/prompt/runtime or requested budgeted judgment campaign |
+| [2026-11-12-misato-b021.json](../evaluations/2026-11-12-misato-b021.json) | 2026-11-12 00:44 CET | misato-planner-v1 id (eight cases); real-model-judgment; `46604ee` | failed (7/8); complete | Changed model/prompt/runtime or requested budgeted judgment campaign |
+| [2026-11-12-misato-v2.json](../evaluations/2026-11-12-misato-v2.json) | 2026-11-12 00:51 CET | misato-planner-v2; real-model-judgment; `aef407b` | pass; complete | Changed model/prompt/runtime or requested budgeted judgment campaign |
 | [2026-11-08-scripted.json](../evaluations/2026-11-08-scripted.json) | 2026-11-08 00:17 CET | nerv-golden-v1; scripted-control-flow; `3c71986` | pass; complete | Affected flow/scenario changes; full suite only on its own trigger |
 | [2026-11-08-stress.json](../evaluations/2026-11-08-stress.json) | 2026-11-08 00:18 CET | nerv-golden-v1; scripted-control-flow; `3c71986` | pass; partial | Affected flow/protocol changes or requested bounded stress campaign |
 

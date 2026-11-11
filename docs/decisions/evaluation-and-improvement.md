@@ -19,14 +19,14 @@ Evidence: `web/public/dashboard/live.js`, `src/server.ts`, `src/runtime.ts`, `sr
 
 ## B-021 and automatic acceptance
 
-B-021's backend tests already cover questions remaining open, conversation binding, the eight-word boundary, restart, expiry, topic change, approval resume and the signed cross-base link. Its browser waiting-state assertion was initially pending; the golden dashboard scenario now checks a waiting apartment, unlit Debrief, same-sortie answer, approval effect and topic change across the real processes. The known forwarded-answer timeout limitation remains separate. Browser/agent execution can perform those checks. Current tests include Chrome/CDP and axe; a new Playwright dependency is not required to prove the browser behavior.
+B-021's backend tests already cover questions remaining open, conversation binding, the eight-word boundary, restart, expiry, topic change, approval resume and the signed cross-base link. Its browser waiting-state assertion was initially pending; the golden dashboard scenario now checks a waiting apartment, unlit Debrief, same-sortie answer, approval effect and topic change across the real processes. The forwarded-answer timeout limitation was fixed on 12 November 2026: a late reply closes the forwarding base's copy, and the main base owns its question. Browser/agent execution can perform those checks. Current tests include Chrome/CDP and axe; a new Playwright dependency is not required to prove the browser behavior.
 
 Two kinds of evidence must stay distinct:
 
 - A scripted provider returns known asks/plans/replies. The browser and real processes must preserve the right sortie, wait state, decision, effect count and trace. This tests the control flow reproducibly.
 - A real configured model receives ambiguous requests, contradictions and topic changes. Record its actual requested/returned model, configuration, language and outcome. This evaluates whether it chooses the appropriate ask/plan; scripted output does not prove that model judgment.
 
-The agent can run both kinds on disposable data and suitable accessible models. A missing model is a runtime dependency, not automatically an owner-only test. Real Telegram device acceptance is needed for claims about phone display/receipt; Bot protocol tests cover other channel mechanics. B-021 remains open until the required evidence exists; changing the actor does not establish verification or erase its known forwarded-answer timeout limitation.
+The agent can run both kinds on disposable data and suitable accessible models. A missing model is a runtime dependency, not automatically an owner-only test. Real Telegram device acceptance is needed for claims about phone display/receipt; Bot protocol tests cover other channel mechanics. B-021 remained open until the required evidence existed; changing the actor did not establish verification. On 12 November 2026 the topic-change decision was moved to an explicit check on the answer's first turn, and an owner-approved `gemma4:12b` run passed both topic-change cases (see [evaluation evidence](../evaluations/README.md)).
 
 ## F-029 scenario suite
 
