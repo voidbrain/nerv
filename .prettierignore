@@ -1,0 +1,15 @@
+# Formatting covers the code people review. Generated, vendored, copied-harness and fixture files stay byte-identical.
+*
+!src/
+!src/**
+!test/
+!test/**
+!web/
+!web/src/
+!web/src/**
+test/fixtures/
+*.md
+*.json
+*.svg
+*.css
+*.html

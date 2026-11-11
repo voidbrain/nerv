@@ -53,6 +53,8 @@
     "gauntlet:qualify": "node tools/gauntlet.mjs qualify",
     "gauntlet:index": "node tools/gauntlet.mjs index",
     "check:gauntlet-index": "node tools/gauntlet.mjs index --check",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "work:usage": "node tools/work-usage.mjs",
     "work:launch": "node tools/usage-launch.mjs"
   },
@@ -78,6 +80,7 @@
     "ajv-formats-draft2019": "1.6.1",
     "axe-core": "4.14.0",
     "linkedom": "0.18.12",
+    "prettier": "3.9.10",
     "typescript": "~6.0.2"
   },
   "bin": {

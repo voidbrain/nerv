@@ -4,36 +4,41 @@ import { spawnSync } from 'node:child_process';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { NODE_FLAGS } from './process-client.ts';
-import { readConfig,readToken } from './config.ts';
-const label='io.nerv.agent',unit='nerv.service';
-const unixServicePath=posix.join;
+import { readConfig, readToken } from './config.ts';
+const label = 'io.nerv.agent',
+  unit = 'nerv.service';
+const unixServicePath = posix.join;
 /** Pre-rename names: install replaces them; other actions still find them until then. */
-const previous={label:'io.nodo.agent',unit:'nodo.service'};
-const xml=(s:string)=>s.replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&apos;'}[c]!));
-const quoted=(s:string,command=false)=>'"'+s.replace(/[%\\"$]/g,c=>c==='%'?'%%':c==='$'?(command?'$$':'$'):'\\'+c)+'"';
-export function renderService(platform:string,home:string,root:string,node:string):string {
-  for(const value of [home,root,node])if(/[\r\n\0]/.test(value))throw new Error('Invalid service path.');
-  const servicePath=platform==='win32'?win32.join:unixServicePath;
-  const cli=servicePath(root,'src/cli.ts');
-  if(platform==='darwin')return `<?xml version="1.0" encoding="UTF-8"?>
+const previous = { label: 'io.nodo.agent', unit: 'nodo.service' };
+const xml = (s: string) =>
+  s.replace(/[<>&"']/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' })[c]!);
+const quoted = (s: string, command = false) =>
+  '"' + s.replace(/[%\\"$]/g, (c) => (c === '%' ? '%%' : c === '$' ? (command ? '$$' : '$') : '\\' + c)) + '"';
+export function renderService(platform: string, home: string, root: string, node: string): string {
+  for (const value of [home, root, node]) if (/[\r\n\0]/.test(value)) throw new Error('Invalid service path.');
+  const servicePath = platform === 'win32' ? win32.join : unixServicePath;
+  const cli = servicePath(root, 'src/cli.ts');
+  if (platform === 'darwin')
+    return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
 <key>Label</key><string>${label}</string>
-<key>ProgramArguments</key><array><string>${xml(node)}</string>${NODE_FLAGS.map(f=>`<string>${f}</string>`).join('')}<string>${xml(cli)}</string><string>serve</string></array>
+<key>ProgramArguments</key><array><string>${xml(node)}</string>${NODE_FLAGS.map((f) => `<string>${f}</string>`).join('')}<string>${xml(cli)}</string><string>serve</string></array>
 <key>WorkingDirectory</key><string>${xml(root)}</string>
 <key>EnvironmentVariables</key><dict><key>NERV_HOME</key><string>${xml(home)}</string></dict>
 <key>Umask</key><integer>63</integer>
 <key>RunAtLoad</key><true/><key>KeepAlive</key><true/><key>ThrottleInterval</key><integer>10</integer>
-<key>StandardOutPath</key><string>${xml(servicePath(home,'service.log'))}</string>
-<key>StandardErrorPath</key><string>${xml(servicePath(home,'service-error.log'))}</string>
+<key>StandardOutPath</key><string>${xml(servicePath(home, 'service.log'))}</string>
+<key>StandardErrorPath</key><string>${xml(servicePath(home, 'service-error.log'))}</string>
 </dict></plist>\n`;
-  if(platform==='linux')return `[Unit]
+  if (platform === 'linux')
+    return `[Unit]
 Description=NERV Agency local personal agent
 [Service]
 Type=simple
-WorkingDirectory=${root.replace(/%/g,'%%')}
-Environment=${quoted('NERV_HOME='+home)}
-ExecStart=${quoted(node,true)} ${NODE_FLAGS.join(' ')} ${quoted(cli,true)} serve
+WorkingDirectory=${root.replace(/%/g, '%%')}
+Environment=${quoted('NERV_HOME=' + home)}
+ExecStart=${quoted(node, true)} ${NODE_FLAGS.join(' ')} ${quoted(cli, true)} serve
 Restart=on-failure
 RestartSec=5
 UMask=0077
@@ -41,27 +46,45 @@ NoNewPrivileges=true
 [Install]
 WantedBy=default.target
 `;
-  if(platform==='win32')return windowsTaskXml(home,root,process.env.USERDOMAIN&&process.env.USERNAME?`${process.env.USERDOMAIN}\\${process.env.USERNAME}`:process.env.USERNAME ?? '');
+  if (platform === 'win32')
+    return windowsTaskXml(
+      home,
+      root,
+      process.env.USERDOMAIN && process.env.USERNAME
+        ? `${process.env.USERDOMAIN}\\${process.env.USERNAME}`
+        : (process.env.USERNAME ?? ''),
+    );
   throw new Error('Services support macOS, Linux and Windows only.');
 }
 /** Windows (F-037): the Task Scheduler name, and the launcher and task files kept in the data home. */
-export const WINDOWS_TASK='NERV Agency';
-const winPath=(s:string)=>{if(/["\r\n\0]/.test(s))throw new Error('Invalid service path.');return s;};
+export const WINDOWS_TASK = 'NERV Agency';
+const winPath = (s: string) => {
+  if (/["\r\n\0]/.test(s)) throw new Error('Invalid service path.');
+  return s;
+};
 /** The hidden launcher: sets NERV_HOME, starts serve with every Node flag, appends its output to the data home's logs,
     and hands serve's exit code back, so Task Scheduler's restart-on-failure sees a crash. No console window opens. */
-export function windowsLauncher(home:string,root:string,node:string):string {
-  const cli=win32.join(winPath(root),'src','cli.ts');winPath(home);winPath(node);
+export function windowsLauncher(home: string, root: string, node: string): string {
+  const cli = win32.join(winPath(root), 'src', 'cli.ts');
+  winPath(home);
+  winPath(node);
   // cmd /c strips the outer pair of quotes; inside, each path keeps its own. VBScript then doubles every quote once.
-  const command=`cmd /d /c ""${node}" ${NODE_FLAGS.join(' ')} "${cli}" serve >> "${win32.join(home,'service.log')}" 2>> "${win32.join(home,'service-error.log')}""`;
-  const vbs=(text:string)=>'"'+text.replace(/"/g,'""')+'"';
-  return ["' NERV Agency launcher for Task Scheduler (F-037). Generated by service install; removed by service uninstall.",
-   'Set sh = CreateObject("WScript.Shell")',`sh.Environment("PROCESS")("NERV_HOME") = ${vbs(home)}`,`sh.CurrentDirectory = ${vbs(root)}`,
-   `WScript.Quit sh.Run(${vbs(command)}, 0, True)`,''].join('\r\n');
+  const command = `cmd /d /c ""${node}" ${NODE_FLAGS.join(' ')} "${cli}" serve >> "${win32.join(home, 'service.log')}" 2>> "${win32.join(home, 'service-error.log')}""`;
+  const vbs = (text: string) => '"' + text.replace(/"/g, '""') + '"';
+  return [
+    "' NERV Agency launcher for Task Scheduler (F-037). Generated by service install; removed by service uninstall.",
+    'Set sh = CreateObject("WScript.Shell")',
+    `sh.Environment("PROCESS")("NERV_HOME") = ${vbs(home)}`,
+    `sh.CurrentDirectory = ${vbs(root)}`,
+    `WScript.Quit sh.Run(${vbs(command)}, 0, True)`,
+    '',
+  ].join('\r\n');
 }
 /** The logon task: starts at this user's logon, least privilege, no time limit, restarted every minute if serve stops
     with an error, never a second copy. It runs the hidden launcher with wscript; no credential is stored in it. */
-export function windowsTaskXml(home:string,root:string,user:string):string {
-  const launcher=win32.join(winPath(home),'nerv-service.vbs');const who=user?`<UserId>${xml(user)}</UserId>`:'';
+export function windowsTaskXml(home: string, root: string, user: string): string {
+  const launcher = win32.join(winPath(home), 'nerv-service.vbs');
+  const who = user ? `<UserId>${xml(user)}</UserId>` : '';
   return `<?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <RegistrationInfo><Description>NERV Agency local personal agent</Description></RegistrationInfo>
@@ -80,73 +103,134 @@ export function windowsTaskXml(home:string,root:string,user:string):string {
 </Task>
 `;
 }
-export function service(action:string,home:string):void {
-  const platform=process.platform;
-  const root=resolve(fileURLToPath(new URL('..',import.meta.url)));
-  if(platform==='win32'){windowsService(action,home,root);return;}
-  if(platform!=='darwin'&&platform!=='linux')throw new Error('Services support macOS and Linux only.');
-  const directory=platform==='darwin'?join(homedir(),'Library/LaunchAgents'):join(process.env.XDG_CONFIG_HOME ?? join(homedir(),'.config'),'systemd/user');
-  const file=(names:{label:string;unit:string})=>join(directory,platform==='darwin'?names.label+'.plist':names.unit);
-  const domain=`gui/${process.getuid?.()}`;
-  const run=(program:string,args:string[],allowFailure=false)=>{const result=spawnSync(program,args,{stdio:'inherit'});if(!allowFailure&&(result.error||result.status!==0))throw new Error(`${program} failed; inspect service status and logs.`);};
-  const current={label,unit},legacy=!existsSync(file(current))&&existsSync(file(previous));
-  const names=legacy&&action!=='install'?previous:current;const path=file(names);
-  if(action==='install') {
-    if(!existsSync(join(home,'config.json'))||!existsSync(join(home,'token')))throw new Error('Run init first: installed services require persistent config and token files.');
-    readConfig(home);readToken(home);
-    if(!existsSync(join(root,'dist/web/browser/index.html')))throw new Error('Run npm run build before service install.');
-    mkdirSync(directory,{recursive:true});
-    if(existsSync(path))throw new Error('Service file exists. Uninstall it explicitly before reinstalling.');
-    if(legacy){ // replace the pre-rename Nodo service so two schedulers never run
-      if(platform==='darwin')run('launchctl',['bootout',domain+'/'+previous.label],true);else run('systemctl',['--user','disable','--now',previous.unit],true);
-      unlinkSync(file(previous));console.log(`Replaced the previous Nodo service: ${file(previous)}`);
+export function service(action: string, home: string): void {
+  const platform = process.platform;
+  const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
+  if (platform === 'win32') {
+    windowsService(action, home, root);
+    return;
+  }
+  if (platform !== 'darwin' && platform !== 'linux') throw new Error('Services support macOS and Linux only.');
+  const directory =
+    platform === 'darwin'
+      ? join(homedir(), 'Library/LaunchAgents')
+      : join(process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config'), 'systemd/user');
+  const file = (names: { label: string; unit: string }) =>
+    join(directory, platform === 'darwin' ? names.label + '.plist' : names.unit);
+  const domain = `gui/${process.getuid?.()}`;
+  const run = (program: string, args: string[], allowFailure = false) => {
+    const result = spawnSync(program, args, { stdio: 'inherit' });
+    if (!allowFailure && (result.error || result.status !== 0))
+      throw new Error(`${program} failed; inspect service status and logs.`);
+  };
+  const current = { label, unit },
+    legacy = !existsSync(file(current)) && existsSync(file(previous));
+  const names = legacy && action !== 'install' ? previous : current;
+  const path = file(names);
+  if (action === 'install') {
+    if (!existsSync(join(home, 'config.json')) || !existsSync(join(home, 'token')))
+      throw new Error('Run init first: installed services require persistent config and token files.');
+    readConfig(home);
+    readToken(home);
+    if (!existsSync(join(root, 'dist/web/browser/index.html')))
+      throw new Error('Run npm run build before service install.');
+    mkdirSync(directory, { recursive: true });
+    if (existsSync(path)) throw new Error('Service file exists. Uninstall it explicitly before reinstalling.');
+    if (legacy) {
+      // replace the pre-rename Nodo service so two schedulers never run
+      if (platform === 'darwin') run('launchctl', ['bootout', domain + '/' + previous.label], true);
+      else run('systemctl', ['--user', 'disable', '--now', previous.unit], true);
+      unlinkSync(file(previous));
+      console.log(`Replaced the previous Nodo service: ${file(previous)}`);
     }
-    writeFileSync(path,renderService(platform,home,root,process.execPath),{flag:'wx',mode:0o600});
-    if(platform==='darwin')run('launchctl',['bootstrap',domain,path]);else{run('systemctl',['--user','daemon-reload']);run('systemctl',['--user','enable','--now',unit]);}
-    console.log(`Service installed: ${path}`);return;
+    writeFileSync(path, renderService(platform, home, root, process.execPath), { flag: 'wx', mode: 0o600 });
+    if (platform === 'darwin') run('launchctl', ['bootstrap', domain, path]);
+    else {
+      run('systemctl', ['--user', 'daemon-reload']);
+      run('systemctl', ['--user', 'enable', '--now', unit]);
+    }
+    console.log(`Service installed: ${path}`);
+    return;
   }
-  if(!['start','stop','status','uninstall'].includes(action))throw new Error('Use service install|start|stop|status|uninstall.');
-  if(!existsSync(path))throw new Error('NERV Agency service is not installed.');
-  if(platform==='darwin') {
-    if(action==='status')run('launchctl',['print',domain+'/'+names.label]);
-    if(action==='stop'||action==='uninstall')run('launchctl',['bootout',domain+'/'+names.label],action==='uninstall');
-    if(action==='start')run('launchctl',['bootstrap',domain,path]);
+  if (!['start', 'stop', 'status', 'uninstall'].includes(action))
+    throw new Error('Use service install|start|stop|status|uninstall.');
+  if (!existsSync(path)) throw new Error('NERV Agency service is not installed.');
+  if (platform === 'darwin') {
+    if (action === 'status') run('launchctl', ['print', domain + '/' + names.label]);
+    if (action === 'stop' || action === 'uninstall')
+      run('launchctl', ['bootout', domain + '/' + names.label], action === 'uninstall');
+    if (action === 'start') run('launchctl', ['bootstrap', domain, path]);
   } else {
-    if(action==='uninstall')run('systemctl',['--user','disable','--now',names.unit]);
-    else run('systemctl',['--user',action,names.unit]);
+    if (action === 'uninstall') run('systemctl', ['--user', 'disable', '--now', names.unit]);
+    else run('systemctl', ['--user', action, names.unit]);
   }
-  if(action==='uninstall'){unlinkSync(path);if(platform==='linux')run('systemctl',['--user','daemon-reload']);console.log('Service removed; reminders and credentials retained.');}
+  if (action === 'uninstall') {
+    unlinkSync(path);
+    if (platform === 'linux') run('systemctl', ['--user', 'daemon-reload']);
+    console.log('Service removed; reminders and credentials retained.');
+  }
 }
 /** Windows (F-037): the logon task through schtasks; the launcher and the task's XML live in the data home. */
-function windowsService(action:string,home:string,root:string):void {
-  const run=(args:string[],allowFailure=false)=>{const r=spawnSync('schtasks',args,{stdio:allowFailure?'pipe':'inherit',windowsHide:true});if(!allowFailure&&(r.error||r.status!==0))throw new Error(`schtasks ${args[0]} failed; see the message above.`);return r.status===0;};
-  const exists=()=>run(['/Query','/TN',WINDOWS_TASK],true);
-  const launcher=join(home,'nerv-service.vbs'),task=join(home,'nerv-task.xml');
-  if(action==='install'){
-    if(!existsSync(join(home,'config.json'))||!existsSync(join(home,'token')))throw new Error('Run init first: installed services require persistent config and token files.');
-    readConfig(home);readToken(home);
-    if(!existsSync(join(root,'dist/web/browser/index.html')))throw new Error('Run npm run build before service install.');
-    if(exists())throw new Error(`The "${WINDOWS_TASK}" task exists. Uninstall it explicitly before reinstalling: service uninstall`);
-    writeFileSync(launcher,windowsLauncher(home,root,process.execPath),{mode:0o600});
+function windowsService(action: string, home: string, root: string): void {
+  const run = (args: string[], allowFailure = false) => {
+    const r = spawnSync('schtasks', args, { stdio: allowFailure ? 'pipe' : 'inherit', windowsHide: true });
+    if (!allowFailure && (r.error || r.status !== 0))
+      throw new Error(`schtasks ${args[0]} failed; see the message above.`);
+    return r.status === 0;
+  };
+  const exists = () => run(['/Query', '/TN', WINDOWS_TASK], true);
+  const launcher = join(home, 'nerv-service.vbs'),
+    task = join(home, 'nerv-task.xml');
+  if (action === 'install') {
+    if (!existsSync(join(home, 'config.json')) || !existsSync(join(home, 'token')))
+      throw new Error('Run init first: installed services require persistent config and token files.');
+    readConfig(home);
+    readToken(home);
+    if (!existsSync(join(root, 'dist/web/browser/index.html')))
+      throw new Error('Run npm run build before service install.');
+    if (exists())
+      throw new Error(
+        `The "${WINDOWS_TASK}" task exists. Uninstall it explicitly before reinstalling: service uninstall`,
+      );
+    writeFileSync(launcher, windowsLauncher(home, root, process.execPath), { mode: 0o600 });
     // schtasks reads task XML as UTF-16 with a byte-order mark.
-    writeFileSync(task,Buffer.from('\ufeff'+renderService('win32',home,root,process.execPath),'utf16le'),{mode:0o600});
-    run(['/Create','/TN',WINDOWS_TASK,'/XML',task]);
-    const started=run(['/Run','/TN',WINDOWS_TASK],true);
-    console.log(`Service installed: the "${WINDOWS_TASK}" task starts NERV Agency at your logon${started?' and is starting now':''}. Logs: ${join(home,'service.log')}`);return;
+    writeFileSync(task, Buffer.from('\ufeff' + renderService('win32', home, root, process.execPath), 'utf16le'), {
+      mode: 0o600,
+    });
+    run(['/Create', '/TN', WINDOWS_TASK, '/XML', task]);
+    const started = run(['/Run', '/TN', WINDOWS_TASK], true);
+    console.log(
+      `Service installed: the "${WINDOWS_TASK}" task starts NERV Agency at your logon${started ? ' and is starting now' : ''}. Logs: ${join(home, 'service.log')}`,
+    );
+    return;
   }
-  if(!['start','stop','status','uninstall'].includes(action))throw new Error('Use service install|start|stop|status|uninstall.');
-  if(!exists())throw new Error('NERV Agency service is not installed.');
-  if(action==='status')run(['/Query','/TN',WINDOWS_TASK,'/V','/FO','LIST']);
-  if(action==='start')run(['/Run','/TN',WINDOWS_TASK]);
-  if(action==='stop'||action==='uninstall'){stopRunning(home);run(['/End','/TN',WINDOWS_TASK],true);}
-  if(action==='uninstall'){run(['/Delete','/TN',WINDOWS_TASK,'/F']);for(const f of [launcher,task])if(existsSync(f))unlinkSync(f);console.log('Service removed; reminders and credentials retained.');}
+  if (!['start', 'stop', 'status', 'uninstall'].includes(action))
+    throw new Error('Use service install|start|stop|status|uninstall.');
+  if (!exists()) throw new Error('NERV Agency service is not installed.');
+  if (action === 'status') run(['/Query', '/TN', WINDOWS_TASK, '/V', '/FO', 'LIST']);
+  if (action === 'start') run(['/Run', '/TN', WINDOWS_TASK]);
+  if (action === 'stop' || action === 'uninstall') {
+    stopRunning(home);
+    run(['/End', '/TN', WINDOWS_TASK], true);
+  }
+  if (action === 'uninstall') {
+    run(['/Delete', '/TN', WINDOWS_TASK, '/F']);
+    for (const f of [launcher, task]) if (existsSync(f)) unlinkSync(f);
+    console.log('Service removed; reminders and credentials retained.');
+  }
 }
 /** Asks the running service to stop as Ctrl+C would (POST /api/stop, admin token) and waits until its port is free. */
-function stopRunning(home:string):void {
-  const {port}=readConfig(home);const token=readToken(home);
-  const script=`fetch('http://127.0.0.1:${port}/api/stop',{method:'POST',headers:{authorization:'Bearer '+process.env.T}}).then(()=>{},()=>{});`+
+function stopRunning(home: string): void {
+  const { port } = readConfig(home);
+  const token = readToken(home);
+  const script =
+    `fetch('http://127.0.0.1:${port}/api/stop',{method:'POST',headers:{authorization:'Bearer '+process.env.T}}).then(()=>{},()=>{});` +
     `(async()=>{for(let i=0;i<60;i++){try{await fetch('http://127.0.0.1:${port}/api/status',{signal:AbortSignal.timeout(500)});}catch{return;}await new Promise(r=>setTimeout(r,250));}process.exitCode=1;})();`;
   // A child Node keeps the token out of argv (it travels in the environment of that one process only).
-  const r=spawnSync(process.execPath,['-e',script],{env:{...process.env,T:token},stdio:'ignore',windowsHide:true});
-  if(r.status!==0)console.error('NERV Agency did not stop within 15 s; ending the task anyway.');
+  const r = spawnSync(process.execPath, ['-e', script], {
+    env: { ...process.env, T: token },
+    stdio: 'ignore',
+    windowsHide: true,
+  });
+  if (r.status !== 0) console.error('NERV Agency did not stop within 15 s; ending the task anyway.');
 }

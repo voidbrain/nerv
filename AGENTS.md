@@ -106,6 +106,7 @@ npm run build
 npm run check:integrations
 npm run check:backlog     # active record layout and lifecycle cues
 npm run check:conventions # stack conventions above and unused exports (when the stack has one)
+npm run format:check      # Prettier on src/, test/ and web/src TypeScript; `npm run format` fixes it <!-- project -->
 ```
 
 - A failing test is evidence until shown otherwise: check it against the intended behaviour. Change its expectation only when the requirement deliberately changed, and say which requirement; otherwise fix the code.

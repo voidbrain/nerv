@@ -1,123 +1,408 @@
-import type {WorkerItem,WorkerContext,WorkerLease} from './worker-jobs.ts';
-import type {RunReason} from './instrumentality-runs.ts';
-import {parsePrices,type UsageObservation} from './model-usage.ts';
+import type { WorkerItem, WorkerContext, WorkerLease } from './worker-jobs.ts';
+import type { RunReason } from './instrumentality-runs.ts';
+import { parsePrices, type UsageObservation } from './model-usage.ts';
 import { MISATO_SOURCE, OWNER_SOURCE, Store } from './store.ts';
 import type { Verdict } from './policy.ts';
-import { dispatchRpc,MAX_FRAME_BYTES,READY } from './rpc.ts';
+import { dispatchRpc, MAX_FRAME_BYTES, READY } from './rpc.ts';
 import { readConfig, readScrolls } from './config.ts';
 import { Registry, type SignedRecord } from './kaji.ts';
 import { factKey } from './memory.ts';
 import { toolName } from './mcp.ts';
 // argv: database path, then the data home whose scrolls.json sets the gate rules (defaults when absent).
-const store=new Store(process.argv[2]!,process.argv[3]?readScrolls(process.argv[3]):undefined,process.argv[3]?{home:process.argv[3]}:{});
-store.tick();store.expire();
-const timer=setInterval(()=>{try{store.tick();store.expire();}catch{console.error('Nervous scheduler tick failed.');}},250);
-const registry=()=>new Registry(store.db,process.argv[3]?(()=>{try{return readConfig(process.argv[3]!).kaji?.root;}catch{return undefined;}})():undefined);
-// F-021: granted MCP tools as the gate knows them (effect class from the grant), read from config when asked.
-const external=()=>{try{const t=process.argv[3]?readConfig(process.argv[3]).tools:undefined;return (t?.grants ?? []).map(g=>({name:toolName(g.server,g.tool),effect:g.effect,eva:`eva-${g.eva}` as const}));}catch{return [];}};
-process.on('message',(value:unknown)=>{
- if(Buffer.byteLength(JSON.stringify(value))>MAX_FRAME_BYTES){process.exitCode=1;stop();return;}
- void dispatchRpc(value,(method,params)=>{
-  switch(method){
-   case 'instrumentality.claim':return store.instrumentality.claim(params.slot as string,params.now as string);
-   case 'instrumentality.finish':return store.instrumentality.finish(params.id as string,params.status as 'failed'|'completed'|'skipped',params.reason as RunReason|null,params.now as string);
-   case 'instrumentality.latest':return store.instrumentality.latest();
-   case 'dashboard.revision':return store.dashboardRevision();
-   case 'usage.begin':return store.usage.begin(params.operation as string);
-   case 'usage.finish':store.usage.finish(params.id as string,params.observation as UsageObservation|null,parsePrices(params.prices));return true;
-   case 'usage.page':return store.usage.page(params.before as number|undefined,params.limit as number|undefined);
-   case 'runtime.ping':return {role:'nervous',pid:process.pid};
-   case 'runtime.doctor':return store.doctor();
-   case 'reminders.list':{const p=store.reminderPage(0,50);if(p.next)throw new Error('Use reminders.page.');return p.items.sort((a,b)=>a.due.localeCompare(b.due));}
-   case 'reminders.page':return store.reminderPage(params.before as number|undefined,params.limit as number|undefined);
-   case 'inbox.history':return store.inboxHistory(params.before as number|undefined,params.limit as number|undefined);
-   case 'dashboard.history':return store.dashboardHistory(params.since as string);
-   case 'reminders.pending':return store.pendingReminders();
-   case 'reminders.add':try{return store.add(params.title as string,params.due as string);}catch{throw new Error('Invalid reminder.');}
-   case 'reminders.update':{let r;try{r=store.update(params.id as string,{...(params.title!==undefined?{title:params.title as string}:{}),...(params.due!==undefined?{due:params.due as string}:{})});}catch{throw new Error('Invalid reminder.');}return r ?? null;}
-   case 'reminders.cancel':return store.cancel(params.id as string);
-   case 'inbox.list':{const p=store.inboxHistory(0,50);if(p.next)throw new Error('Use inbox.history.');return p.items;}
-   case 'inbox.brief':return store.addBrief(params.message as string,new Date(),params.day as string|undefined);
-   case 'inbox.lastBrief':return store.lastBrief();
-   case 'approvals.expired':return store.expiredApprovals(params.since as string);
-   case 'approvals.pendingIds':return store.pendingApprovalIds(params.ids as string[]);
-   case 'approvals.pending':return store.approvals(params.limit as number|undefined);
-   case 'approvals.decide':return store.decide(params.id as string,params.decision as 'approve'|'reject'|'edit',params.source as string);
-   case 'events.page':return store.events(params.sortieId as string,params.after as number|undefined,params.limit as number|undefined);
-   case 'sorties.list':return store.sorties(params.limit as number|undefined,params.before as string|undefined,params.q as string|undefined);
-   case 'sorties.get':return store.sortie(params.id as string);
-   case 'sorties.closedSince':return store.closedSince(params.since as string);
-   case 'pilots.unmatched':return store.unmatched(params.domain as string,params.since as string);
-   case 'actions.shadowVote':return store.shadowVote(params.sortieId as string,params.actionId as string,{seat:params.seat as string,vote:params.vote as 'approve',reason:params.reason as string,...(typeof params.confidence==='number'?{confidence:params.confidence}:{})});
-   case 'sorties.explain':return store.explain(params.ref as string);
-   case 'sorties.spear':return store.spear(params.id as string,params.reason as string);
-   case 'context.intake':return store.ledger.intake(params.sortieId as string,params.source as string,params.trust as 'trusted'|'tainted');
-   case 'watch.poll':return store.watchPoll();
-   case 'watch.recover':return store.watchRecover();
-   case 'watch.claim':return store.watchClaim();
-   case 'watch.get':return store.watchContext(params.sortieId as string);
-   case 'watch.plan':return store.watchPlan(params.sortieId as string);
-   case 'watch.finish':return store.watchFinish(params.sortieId as string,params.status as 'done'|'failed',params.reply as string);
-   case 'sorties.open':return store.ledger.openSortie(params.source==='misato'?MISATO_SOURCE:params.source==='instrumentality'?'instrumentality':params.source==='marduk'?'marduk':OWNER_SOURCE,params.title as string,'trusted');
-   case 'sorties.finish':{const id=params.sortieId as string;if(params.reply)store.ledger.reply(id,params.reply as string);return params.status?store.ledger.close(id,params.status as 'done'|'failed'):false;}
-   case 'misato.note':return store.ledger.note(params.sortieId as string,params.kind as 'misato.step',params.payload as never);
-   case 'misato.resumable':return store.ledger.resumable();
-   case 'misato.interrupted':return store.ledger.interrupted(params.before as string);
-   case 'misato.closeInterrupted':return store.ledger.closeInterrupted(params.sortieId as string,params.reply as string);
-   // The owner's own changes (dashboard): source owner, every change in the fact's history.
-   case 'memory.list':return store.memory.list(params.limit as number|undefined);
-   case 'memory.add':return store.memory.add(params.text,'owner');
-   case 'memory.edit':return store.memory.edit(params.id as string,params.text,'owner') ?? null;
-   case 'memory.forget':return store.memory.forget(params.id as string,'owner');
-   case 'memory.share':return store.memory.share(params.id as string,params.shareable as boolean,'owner') ?? null;
-   case 'memory.history':return store.memory.historyOf(params.id as string);
-   // Kaji registry for the coordinator's link: the root is re-read from config so an import while running applies.
-   case 'kaji.bases':return registry().bases();
-   case 'kaji.records':return registry().records();
-   case 'kaji.lastSeen':return registry().lastSeen();
-   case 'kaji.main':return registry().main() ?? null;
-   case 'kaji.outboxCancels':return store.cancelledWorkerOutbox();
-   case 'kaji.outboxAttempt':store.attemptWorkerOutbox(params.id as string);return true;
-   case 'kaji.outboxHeld':return store.heldWorkerOutbox(params.before as number|undefined);
-   case 'kaji.outbox':return store.outbox();
-   case 'kaji.outboxProgress':return store.outboxProgress(params.id as string,params.result,params.said as {base:string;text:string});
-   case 'kaji.outboxDone':return store.outboxDone(params.id as string,params.result,params.said as {base:string;text:string}|undefined);
-   case 'worker.open':store.assertWorkerAuthority(params.owner as string,params.key as string,params.ownerKey as string);const opened=store.workerJobs.open(params.owner as string,params.session as string,Date.now(),params.key as string,params.ownerKey as string);store.expire();return opened;
-   case 'worker.close':store.workerJobs.close(params.owner as string,params.session as string);store.expire();return true;
-   case 'worker.claim':store.assertWorkerAuthority(params.owner as string,params.key as string,params.ownerKey as string);return store.workerJobs.claim(params.owner as string,params.item as unknown as WorkerItem,params.context as WorkerContext|undefined,Date.now(),params.key as string,params.ownerKey as string);
-   case 'worker.cancel':store.assertWorkerAuthority(params.owner as string,params.key as string,params.ownerKey as string);return store.cancelWorker(params.owner as string,params.id as string,params.reason as string,'coordinator');
-   case 'worker.finish':store.workerJobs.finish(params.lease as unknown as WorkerLease,params.result);return true;
-   case 'kaji.add':{const r=registry();let added=0;for(const rec of params.records as SignedRecord[]){try{if(r.add(rec)==='added')added++;}catch{/* a record not signed by our root is dropped */}}return added;}
-   case 'kaji.seen':return registry().seen(params.updates as Record<string,string>);
-   case 'memory.lastRequest':return store.ledger.lastRequestAt();
-   case 'memory.episodes':return store.memory.episodes(params.limit as number|undefined);
-   case 'memory.exchanges':return store.ledger.exchangesBetween(params.since as string,params.until as string);
-   case 'memory.known':{
-    // Known = already a fact, or already waiting on a memory.remember card: either way no second card.
-    const waiting=store.approvals(5).filter(a=>a.card.tool==='memory.remember').map(a=>String(a.card.args.text ?? ''));
-    const known=new Set([...store.memory.list(200).map(f=>f.text),...waiting].map(factKey));
-    return (params.texts as string[]).filter(t=>known.has(factKey(t)));
-   }
-   case 'memory.saveEpisode':return store.saveEpisode(params as never);
-   case 'memory.recall':{
-    // Facts first, then up to two of Instrumentality's summaries (F-022); summaries come from the owner's own
-    // conversations, so they are local-only and never offered to the cloud route.
-    const text=params.text as string;
-    return [...store.memory.recall(text).map(f=>({id:f.id,text:f.text,shareable:f.shareable,tainted:f.tainted,source:f.source})),
-     ...store.memory.recallEpisodes(text,2).map(e=>({id:e.id,text:e.summary,shareable:false,tainted:e.tainted!==false,source:'episode:'+e.id,kind:'summary',when:e.until.slice(0,10)}))];
-   }
-   case 'misato.question':return store.ledger.question(params.conversation as string);
-   case 'misato.ask':return store.ledger.ask(params.sortieId as string,params.text as string,params.conversation as string,params.forwarded as {id:string;name:string}|undefined);
-   case 'misato.answer':return store.ledger.answer(params.conversation as string,params.sequence as number,params.text as string);
-   case 'misato.context':return store.ledger.conversation(params.conversation as string);
-   case 'misato.claim':return store.ledger.claimResume(params.sortieId as string);
-   case 'actions.finished':return store.finishedExternal(params.sortieId as string,params.actionId as string,params.tool as string,typeof params.error==='string'?{error:params.error}:{text:String(params.text ?? '')});
-   case 'actions.preview':store.watchContext(params.sortieId as string);store.ledger.setExternal(external());return store.ledger.preview(params.sortieId as string,params.tool as string);
-   case 'actions.act':store.ledger.setExternal(external());return store.runAction(params.sortieId as string,{tool:params.tool as string,args:params.args as Record<string,unknown>,stage:params.stage as 'production',...(params.casper?{casper:params.casper as Verdict}:{}),...(Array.isArray(params.extras)?{extras:params.extras as Verdict[]}:{})},params.worker as unknown as WorkerLease|undefined);
-   case 'inbox.page':return store.inboxPage(params.after as number|undefined,params.limit as number|undefined,params.afterId as string|undefined);
+const store = new Store(
+  process.argv[2]!,
+  process.argv[3] ? readScrolls(process.argv[3]) : undefined,
+  process.argv[3] ? { home: process.argv[3] } : {},
+);
+store.tick();
+store.expire();
+const timer = setInterval(() => {
+  try {
+    store.tick();
+    store.expire();
+  } catch {
+    console.error('Nervous scheduler tick failed.');
   }
- }).then(reply=>{if(reply&&process.connected){if(Buffer.byteLength(JSON.stringify(reply))>MAX_FRAME_BYTES)process.send?.({jsonrpc:'2.0',id:reply.id,error:{code:-32005,message:'Response exceeds IPC bound; pagination required.'}});else process.send?.(reply);}}).catch(()=>{console.error('Nervous IPC failed.');});
+}, 250);
+const registry = () =>
+  new Registry(
+    store.db,
+    process.argv[3]
+      ? (() => {
+          try {
+            return readConfig(process.argv[3]!).kaji?.root;
+          } catch {
+            return undefined;
+          }
+        })()
+      : undefined,
+  );
+// F-021: granted MCP tools as the gate knows them (effect class from the grant), read from config when asked.
+const external = () => {
+  try {
+    const t = process.argv[3] ? readConfig(process.argv[3]).tools : undefined;
+    return (t?.grants ?? []).map((g) => ({
+      name: toolName(g.server, g.tool),
+      effect: g.effect,
+      eva: `eva-${g.eva}` as const,
+    }));
+  } catch {
+    return [];
+  }
+};
+process.on('message', (value: unknown) => {
+  if (Buffer.byteLength(JSON.stringify(value)) > MAX_FRAME_BYTES) {
+    process.exitCode = 1;
+    stop();
+    return;
+  }
+  void dispatchRpc(value, (method, params) => {
+    switch (method) {
+      case 'instrumentality.claim':
+        return store.instrumentality.claim(params.slot as string, params.now as string);
+      case 'instrumentality.finish':
+        return store.instrumentality.finish(
+          params.id as string,
+          params.status as 'failed' | 'completed' | 'skipped',
+          params.reason as RunReason | null,
+          params.now as string,
+        );
+      case 'instrumentality.latest':
+        return store.instrumentality.latest();
+      case 'dashboard.revision':
+        return store.dashboardRevision();
+      case 'usage.begin':
+        return store.usage.begin(params.operation as string);
+      case 'usage.finish':
+        store.usage.finish(
+          params.id as string,
+          params.observation as UsageObservation | null,
+          parsePrices(params.prices),
+        );
+        return true;
+      case 'usage.page':
+        return store.usage.page(params.before as number | undefined, params.limit as number | undefined);
+      case 'runtime.ping':
+        return { role: 'nervous', pid: process.pid };
+      case 'runtime.doctor':
+        return store.doctor();
+      case 'reminders.list': {
+        const p = store.reminderPage(0, 50);
+        if (p.next) throw new Error('Use reminders.page.');
+        return p.items.sort((a, b) => a.due.localeCompare(b.due));
+      }
+      case 'reminders.page':
+        return store.reminderPage(params.before as number | undefined, params.limit as number | undefined);
+      case 'inbox.history':
+        return store.inboxHistory(params.before as number | undefined, params.limit as number | undefined);
+      case 'dashboard.history':
+        return store.dashboardHistory(params.since as string);
+      case 'reminders.pending':
+        return store.pendingReminders();
+      case 'reminders.add':
+        try {
+          return store.add(params.title as string, params.due as string);
+        } catch {
+          throw new Error('Invalid reminder.');
+        }
+      case 'reminders.update': {
+        let r;
+        try {
+          r = store.update(params.id as string, {
+            ...(params.title !== undefined ? { title: params.title as string } : {}),
+            ...(params.due !== undefined ? { due: params.due as string } : {}),
+          });
+        } catch {
+          throw new Error('Invalid reminder.');
+        }
+        return r ?? null;
+      }
+      case 'reminders.cancel':
+        return store.cancel(params.id as string);
+      case 'inbox.list': {
+        const p = store.inboxHistory(0, 50);
+        if (p.next) throw new Error('Use inbox.history.');
+        return p.items;
+      }
+      case 'inbox.brief':
+        return store.addBrief(params.message as string, new Date(), params.day as string | undefined);
+      case 'inbox.lastBrief':
+        return store.lastBrief();
+      case 'approvals.expired':
+        return store.expiredApprovals(params.since as string);
+      case 'approvals.pendingIds':
+        return store.pendingApprovalIds(params.ids as string[]);
+      case 'approvals.pending':
+        return store.approvals(params.limit as number | undefined);
+      case 'approvals.decide':
+        return store.decide(
+          params.id as string,
+          params.decision as 'approve' | 'reject' | 'edit',
+          params.source as string,
+        );
+      case 'events.page':
+        return store.events(
+          params.sortieId as string,
+          params.after as number | undefined,
+          params.limit as number | undefined,
+        );
+      case 'sorties.list':
+        return store.sorties(
+          params.limit as number | undefined,
+          params.before as string | undefined,
+          params.q as string | undefined,
+        );
+      case 'sorties.get':
+        return store.sortie(params.id as string);
+      case 'sorties.closedSince':
+        return store.closedSince(params.since as string);
+      case 'pilots.unmatched':
+        return store.unmatched(params.domain as string, params.since as string);
+      case 'actions.shadowVote':
+        return store.shadowVote(params.sortieId as string, params.actionId as string, {
+          seat: params.seat as string,
+          vote: params.vote as 'approve',
+          reason: params.reason as string,
+          ...(typeof params.confidence === 'number' ? { confidence: params.confidence } : {}),
+        });
+      case 'sorties.explain':
+        return store.explain(params.ref as string);
+      case 'sorties.spear':
+        return store.spear(params.id as string, params.reason as string);
+      case 'context.intake':
+        return store.ledger.intake(
+          params.sortieId as string,
+          params.source as string,
+          params.trust as 'trusted' | 'tainted',
+        );
+      case 'watch.poll':
+        return store.watchPoll();
+      case 'watch.recover':
+        return store.watchRecover();
+      case 'watch.claim':
+        return store.watchClaim();
+      case 'watch.get':
+        return store.watchContext(params.sortieId as string);
+      case 'watch.plan':
+        return store.watchPlan(params.sortieId as string);
+      case 'watch.finish':
+        return store.watchFinish(params.sortieId as string, params.status as 'done' | 'failed', params.reply as string);
+      case 'sorties.open':
+        return store.ledger.openSortie(
+          params.source === 'misato'
+            ? MISATO_SOURCE
+            : params.source === 'instrumentality'
+              ? 'instrumentality'
+              : params.source === 'marduk'
+                ? 'marduk'
+                : OWNER_SOURCE,
+          params.title as string,
+          'trusted',
+        );
+      case 'sorties.finish': {
+        const id = params.sortieId as string;
+        if (params.reply) store.ledger.reply(id, params.reply as string);
+        return params.status ? store.ledger.close(id, params.status as 'done' | 'failed') : false;
+      }
+      case 'misato.note':
+        return store.ledger.note(params.sortieId as string, params.kind as 'misato.step', params.payload as never);
+      case 'misato.resumable':
+        return store.ledger.resumable();
+      case 'misato.interrupted':
+        return store.ledger.interrupted(params.before as string);
+      case 'misato.closeInterrupted':
+        return store.ledger.closeInterrupted(params.sortieId as string, params.reply as string);
+      // The owner's own changes (dashboard): source owner, every change in the fact's history.
+      case 'memory.list':
+        return store.memory.list(params.limit as number | undefined);
+      case 'memory.add':
+        return store.memory.add(params.text, 'owner');
+      case 'memory.edit':
+        return store.memory.edit(params.id as string, params.text, 'owner') ?? null;
+      case 'memory.forget':
+        return store.memory.forget(params.id as string, 'owner');
+      case 'memory.share':
+        return store.memory.share(params.id as string, params.shareable as boolean, 'owner') ?? null;
+      case 'memory.history':
+        return store.memory.historyOf(params.id as string);
+      // Kaji registry for the coordinator's link: the root is re-read from config so an import while running applies.
+      case 'kaji.bases':
+        return registry().bases();
+      case 'kaji.records':
+        return registry().records();
+      case 'kaji.lastSeen':
+        return registry().lastSeen();
+      case 'kaji.main':
+        return registry().main() ?? null;
+      case 'kaji.outboxCancels':
+        return store.cancelledWorkerOutbox();
+      case 'kaji.outboxAttempt':
+        store.attemptWorkerOutbox(params.id as string);
+        return true;
+      case 'kaji.outboxHeld':
+        return store.heldWorkerOutbox(params.before as number | undefined);
+      case 'kaji.outbox':
+        return store.outbox();
+      case 'kaji.outboxProgress':
+        return store.outboxProgress(params.id as string, params.result, params.said as { base: string; text: string });
+      case 'kaji.outboxDone':
+        return store.outboxDone(
+          params.id as string,
+          params.result,
+          params.said as { base: string; text: string } | undefined,
+        );
+      case 'worker.open':
+        store.assertWorkerAuthority(params.owner as string, params.key as string, params.ownerKey as string);
+        const opened = store.workerJobs.open(
+          params.owner as string,
+          params.session as string,
+          Date.now(),
+          params.key as string,
+          params.ownerKey as string,
+        );
+        store.expire();
+        return opened;
+      case 'worker.close':
+        store.workerJobs.close(params.owner as string, params.session as string);
+        store.expire();
+        return true;
+      case 'worker.claim':
+        store.assertWorkerAuthority(params.owner as string, params.key as string, params.ownerKey as string);
+        return store.workerJobs.claim(
+          params.owner as string,
+          params.item as unknown as WorkerItem,
+          params.context as WorkerContext | undefined,
+          Date.now(),
+          params.key as string,
+          params.ownerKey as string,
+        );
+      case 'worker.cancel':
+        store.assertWorkerAuthority(params.owner as string, params.key as string, params.ownerKey as string);
+        return store.cancelWorker(params.owner as string, params.id as string, params.reason as string, 'coordinator');
+      case 'worker.finish':
+        store.workerJobs.finish(params.lease as unknown as WorkerLease, params.result);
+        return true;
+      case 'kaji.add': {
+        const r = registry();
+        let added = 0;
+        for (const rec of params.records as SignedRecord[]) {
+          try {
+            if (r.add(rec) === 'added') added++;
+          } catch {
+            /* a record not signed by our root is dropped */
+          }
+        }
+        return added;
+      }
+      case 'kaji.seen':
+        return registry().seen(params.updates as Record<string, string>);
+      case 'memory.lastRequest':
+        return store.ledger.lastRequestAt();
+      case 'memory.episodes':
+        return store.memory.episodes(params.limit as number | undefined);
+      case 'memory.exchanges':
+        return store.ledger.exchangesBetween(params.since as string, params.until as string);
+      case 'memory.known': {
+        // Known = already a fact, or already waiting on a memory.remember card: either way no second card.
+        const waiting = store
+          .approvals(5)
+          .filter((a) => a.card.tool === 'memory.remember')
+          .map((a) => String(a.card.args.text ?? ''));
+        const known = new Set([...store.memory.list(200).map((f) => f.text), ...waiting].map(factKey));
+        return (params.texts as string[]).filter((t) => known.has(factKey(t)));
+      }
+      case 'memory.saveEpisode':
+        return store.saveEpisode(params as never);
+      case 'memory.recall': {
+        // Facts first, then up to two of Instrumentality's summaries (F-022); summaries come from the owner's own
+        // conversations, so they are local-only and never offered to the cloud route.
+        const text = params.text as string;
+        return [
+          ...store.memory
+            .recall(text)
+            .map((f) => ({ id: f.id, text: f.text, shareable: f.shareable, tainted: f.tainted, source: f.source })),
+          ...store.memory.recallEpisodes(text, 2).map((e) => ({
+            id: e.id,
+            text: e.summary,
+            shareable: false,
+            tainted: e.tainted !== false,
+            source: 'episode:' + e.id,
+            kind: 'summary',
+            when: e.until.slice(0, 10),
+          })),
+        ];
+      }
+      case 'misato.question':
+        return store.ledger.question(params.conversation as string);
+      case 'misato.ask':
+        return store.ledger.ask(
+          params.sortieId as string,
+          params.text as string,
+          params.conversation as string,
+          params.forwarded as { id: string; name: string } | undefined,
+        );
+      case 'misato.answer':
+        return store.ledger.answer(params.conversation as string, params.sequence as number, params.text as string);
+      case 'misato.context':
+        return store.ledger.conversation(params.conversation as string);
+      case 'misato.claim':
+        return store.ledger.claimResume(params.sortieId as string);
+      case 'actions.finished':
+        return store.finishedExternal(
+          params.sortieId as string,
+          params.actionId as string,
+          params.tool as string,
+          typeof params.error === 'string' ? { error: params.error } : { text: String(params.text ?? '') },
+        );
+      case 'actions.preview':
+        store.watchContext(params.sortieId as string);
+        store.ledger.setExternal(external());
+        return store.ledger.preview(params.sortieId as string, params.tool as string);
+      case 'actions.act':
+        store.ledger.setExternal(external());
+        return store.runAction(
+          params.sortieId as string,
+          {
+            tool: params.tool as string,
+            args: params.args as Record<string, unknown>,
+            stage: params.stage as 'production',
+            ...(params.casper ? { casper: params.casper as Verdict } : {}),
+            ...(Array.isArray(params.extras) ? { extras: params.extras as Verdict[] } : {}),
+          },
+          params.worker as unknown as WorkerLease | undefined,
+        );
+      case 'inbox.page':
+        return store.inboxPage(
+          params.after as number | undefined,
+          params.limit as number | undefined,
+          params.afterId as string | undefined,
+        );
+    }
+  })
+    .then((reply) => {
+      if (reply && process.connected) {
+        if (Buffer.byteLength(JSON.stringify(reply)) > MAX_FRAME_BYTES)
+          process.send?.({
+            jsonrpc: '2.0',
+            id: reply.id,
+            error: { code: -32005, message: 'Response exceeds IPC bound; pagination required.' },
+          });
+        else process.send?.(reply);
+      }
+    })
+    .catch(() => {
+      console.error('Nervous IPC failed.');
+    });
 });
-let stopped=false;function stop(){if(stopped)return;stopped=true;clearInterval(timer);store.close();if(process.connected)process.disconnect();}
-process.on('disconnect',stop);process.once('SIGTERM',stop);process.once('SIGINT',stop);
+let stopped = false;
+function stop() {
+  if (stopped) return;
+  stopped = true;
+  clearInterval(timer);
+  store.close();
+  if (process.connected) process.disconnect();
+}
+process.on('disconnect', stop);
+process.once('SIGTERM', stop);
+process.once('SIGINT', stop);
 process.send?.(READY);

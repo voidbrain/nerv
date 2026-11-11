@@ -3,4 +3,4 @@
  * test/upgrade-rehearsal.test.ts binds them to what the reader actually does. A revision that changes schema support
  * changes this file, its migration and those regressions together; the numbers alone never admit an upgrade.
  */
-export const UPGRADE_CONTRACT={version:1,readerSchema:6,minimumServiceSchema:5} as const;
+export const UPGRADE_CONTRACT = { version: 1, readerSchema: 6, minimumServiceSchema: 5 } as const;
