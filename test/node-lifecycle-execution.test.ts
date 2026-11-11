@@ -74,7 +74,7 @@ test('ownership, drift, legacy, pending work and incompatible source block effec
     assert.equal(readFileSync(f.definition, 'utf8'), 'foreign definition');
     const altered = structuredClone(plan);
     altered.context.home = join(f.directory, 'another-profile');
-    const { digest, ...body } = altered;
+    const { digest: _digest, ...body } = altered;
     altered.digest = createHash('sha256').update(canonical(body)).digest('hex');
     await assert.rejects(applyService(f.host, altered, altered.digest), /Invalid local/);
   } finally {

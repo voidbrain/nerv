@@ -283,7 +283,7 @@ test('the CLI: pilots add, list, pin, retire and restore; a model Ollama lacks i
     assert.equal(add.status, 0, add.stderr);
     assert.match(
       (await run('pilots')).stdout,
-      /printer · Print Master · 3D printing · gemma4:12b · prototype\n   keywords: filament, 3d print/,
+      /printer · Print Master · 3D printing · gemma4:12b · prototype\n {3}keywords: filament, 3d print/,
     );
     const missing = await run(
       'pilots',

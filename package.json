@@ -55,6 +55,8 @@
     "check:gauntlet-index": "node tools/gauntlet.mjs index --check",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "check:tooling": "node tools/check-tooling.mjs",
     "work:usage": "node tools/work-usage.mjs",
     "work:launch": "node tools/usage-launch.mjs"
   },
@@ -73,15 +75,18 @@
     "@angular/build": "22.2.5",
     "@angular/cli": "22.2.5",
     "@angular/compiler-cli": "22.2.4",
+    "@eslint/js": "10.0.1",
     "@types/node": "24.10.1",
     "@types/ws": "8.18.1",
     "@voidbrain/gauntlet-protocol": "file:vendor/voidbrain-gauntlet-protocol-0.5.0.tgz",
     "ajv-formats": "3.0.1",
     "ajv-formats-draft2019": "1.6.1",
     "axe-core": "4.14.0",
+    "eslint": "10.14.0",
     "linkedom": "0.18.12",
     "prettier": "3.9.10",
-    "typescript": "~6.0.2"
+    "typescript": "~6.0.2",
+    "typescript-eslint": "8.72.2"
   },
   "bin": {
     "nerv": "src/cli.ts"

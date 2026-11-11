@@ -84,7 +84,7 @@ function compare(prior: string, next: string): Comparison {
     db = new DatabaseSync(prior, { readOnly: true });
   let tables = 0,
     rows = 0,
-    schema = -1;
+    schema: number;
   try {
     db.prepare('ATTACH DATABASE ? AS rehearsed').run(next);
     schema = Number(db.prepare('PRAGMA rehearsed.user_version').get()!.user_version);

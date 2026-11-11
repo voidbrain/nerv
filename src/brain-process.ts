@@ -169,7 +169,7 @@ process.on('message', (value: unknown) => {
         if (!route)
           return {
             error:
-              'No model route for Misato: add models.local (or enable models.cloud) in config.json, then run nerv reload. See docs/INSTALL.md, section \"Model routes\".',
+              'No model route for Misato: add models.local (or enable models.cloud) in config.json, then run nerv reload. See docs/INSTALL.md, section "Model routes".',
           };
         const remote = Array.isArray(params.remote) ? (params.remote as RemoteOffer[]) : [];
         const ask = misatoAsk(

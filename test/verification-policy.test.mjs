@@ -44,8 +44,8 @@ test('changed tests join mapped dependencies; missing or empty selections fail r
     }
 });
 test('CI has one PR trigger, manual/periodic selection and a full marker gated on every required outcome', () => {
-  assert.match(workflow, /on:\n  pull_request:/);
-  assert.doesNotMatch(workflow, /^  push:/m);
+  assert.match(workflow, /on:\n {2}pull_request:/);
+  assert.doesNotMatch(workflow, /^ {2}push:/m);
   assert.match(workflow, /workflow_dispatch:/);
   assert.match(workflow, /schedule:/);
   assert.match(workflow, /cancel-in-progress: true/);

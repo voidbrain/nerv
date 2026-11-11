@@ -8,7 +8,7 @@ export const NODE_FLAGS = ['--use-system-ca'] as const;
 export const STARTUP_MS = 30_000;
 export const MAX_CHILD_REQUESTS = 32;
 import { randomUUID } from 'node:crypto';
-import { MAX_FRAME_BYTES, READY, validateParams, authorize, type Method, type Principal, RpcFault } from './rpc.ts';
+import { MAX_FRAME_BYTES, READY, validateParams, authorize, type Method, RpcFault } from './rpc.ts';
 export class ProcessClient {
   readonly child: ChildProcess;
   readonly role: 'nervous' | 'brain' | 'tools';

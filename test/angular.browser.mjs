@@ -89,7 +89,8 @@ test(
           if (p) {
             pending.delete(m.id);
             clearTimeout(p.timer);
-            m.error ? p.fail(new Error(JSON.stringify(m.error))) : p.done(m.result);
+            if (m.error) p.fail(new Error(JSON.stringify(m.error)));
+            else p.done(m.result);
           }
         }
         if (m.method === 'Runtime.exceptionThrown') errors.push(m.params.exceptionDetails);

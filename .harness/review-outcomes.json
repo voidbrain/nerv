@@ -3,12 +3,12 @@
     "kind": "rule",
     "disposition": "implemented",
     "target": "AGENTS.md",
-    "evidence": "One project line (marked <!-- project -->) adds npm run format:check to the check catalogue for the Prettier adoption in PR #260; no template rule, safeguard or ask-first/never rule is changed or removed. Formatting covers src/, test/ and web/src TypeScript; copied harness tools are excluded and check-harness still reports them matching v4.8.0. No behaviour runner configured; token counters unavailable."
+    "evidence": "Reconciled published harness v5.0.0: the session-start bullet and the BACKLOG-RULES reconcile sentence fold reconciliation into the next working PR (due at 10 merged PRs or one day behind, or at once for a commit without a PR); the check catalogue gains lint and check:tooling. No never or ask-first rule is removed; evidence requirements are unchanged. No behaviour runner configured; token counters unavailable."
   },
   {
-    "kind": "none",
-    "disposition": "no-change",
-    "target": "",
-    "evidence": "BACKLOG-RULES and area notes are unchanged by this change; the owner's question about batching reconciliation PRs is a harness rule decision still open with the owner and is not changed here."
+    "kind": "tool",
+    "disposition": "implemented",
+    "target": "tools/check-tooling.mjs",
+    "evidence": "Copied byte-identically from tag v5.0.0 with the 23 reformatted copied tools; check-harness reports copied files match. ESLint adopted with 21 hand fixes; typecheck and the full suite pass."
   }
 ]

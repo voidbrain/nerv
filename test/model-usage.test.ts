@@ -168,6 +168,7 @@ test(
   async () => {
     const provider = createServer(async (req, res) => {
       for await (const _ of req) {
+        /* drain the request body */
       }
       res.setHeader('content-type', 'application/json');
       res.end(
@@ -243,6 +244,7 @@ test(
     const provider = createServer(async (req, res) => {
       requests++;
       for await (const _ of req) {
+        /* drain the request body */
       }
       res.setHeader('content-type', 'application/json');
       if (mode === 'fail') {

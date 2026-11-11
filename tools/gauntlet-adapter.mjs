@@ -4,7 +4,6 @@ import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {hash,writeEvidence} from '@voidbrain/gauntlet-protocol';
 import {run,readSuite} from './evaluate.mjs';
-const root=fileURLToPath(new URL('..',import.meta.url));
 const adapter=fileURLToPath(import.meta.url);
 export function normalize(native,group,suite=readSuite()){
  const entry=suite.groups.find(x=>x.id===group);

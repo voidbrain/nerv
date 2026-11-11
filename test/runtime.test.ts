@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import { spawnSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 import { POSIX, assertPrivateFile } from './fixtures/posix.ts';
-import { mkdtempSync, readFileSync, writeFileSync, rmSync, statSync, mkdirSync, symlinkSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync, rmSync, mkdirSync, symlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { initialize, readConfig, readToken, dataHome, databasePath, setting } from '../src/config.ts';

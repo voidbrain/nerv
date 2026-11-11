@@ -244,7 +244,7 @@ export class TelegramChannel {
   }
   private async quiet(): Promise<boolean> {
     let quiet = false;
-    let mode: ChannelState['mode'] = 'local';
+    let mode: ChannelState['mode'];
     const destination = await this.one?.destination?.().catch(() => undefined);
     try {
       quiet = !!this.one && (await this.one.quiet());
