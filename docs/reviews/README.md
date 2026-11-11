@@ -164,3 +164,5 @@ Gauntlet0.3 NERV adoption accepted after PR235 exactheadb4cd887 / full CI4260857
 [Mac service lifecycle review, 2026-11-10](2026-11-10-mac-service.md): independent startup/compatibility/rename findings and unchanged-test fixes;22 tests passed at2ab189f, with actual OS acceptance and final CI separate.
 
 [Upgrade rehearsal review, 2026-11-11](2026-11-11-upgrade-rehearsal.md): independent blocker (real lifecycle backups refused) and comparison gaps with failing regressions before fixes; review-only tool, update admission unchanged, fixes not independently re-reviewed.
+
+[Timing reassessment, 2026-11-11](2026-11-11-timing-reassessment.md): owner-approved focused architecture reassessment of B-042/B-043/B-046. One mechanism reproduced (heartbeat verdict before a waiting reply is read), one supported by code only (unguarded periodic ticks), one still a hypothesis. Next: B-046 fix against its todo regression; reconsider if heartbeat-loss failures persist after it.
