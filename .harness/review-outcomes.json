@@ -1,14 +1,8 @@
 [
   {
-    "kind": "rule",
-    "disposition": "implemented",
-    "target": "docs/BACKLOG-RULES.md",
-    "evidence": "Reconciled published harness v5.1.0: the Independent review paragraph gains the copy-only reconcile exemption (requires check-harness --strict) and matches the reviewer model to the change; AGENTS.md pointer says the exemptions are listed there. No check, never or ask-first rule, or safeguard removed. No behaviour runner configured."
-  },
-  {
-    "kind": "tool",
-    "disposition": "implemented",
-    "target": "tools/check-harness.mjs",
-    "evidence": "Copied byte-identically from tag v5.1.0 with .claude/agents/mechanical-reviewer.md and design-reviewer.md; check-harness --strict reports copied files match v5.1.0."
+    "kind": "none",
+    "disposition": "no-change",
+    "target": "",
+    "evidence": "Harness 5.1.1 changes only the template's default .gitignore (node_modules without the trailing slash, so a worktree symlink is ignored); NERV's .gitignore line updated to match. No rule, safeguard or tool changes; copied files unchanged and check-harness --strict passes against v5.1.1. CI's template clone moved from v5.0.0 to v5.1.1. No behaviour runner configured."
   }
 ]
