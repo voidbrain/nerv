@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { Store } from '../src/store.ts';
 import { Runtime } from '../src/runtime.ts';
 import { makeServer } from '../src/server.ts';
-import { parsePlan } from '../src/misato.ts';
+import { misatoAsk, parsePlan } from '../src/misato.ts';
 import { authorize, validateParams } from '../src/rpc.ts';
 
 test('clarification shape is explicit, bounded and exclusive; only the coordinator can claim an answer', () => {
@@ -343,6 +343,61 @@ test(
     } finally {
       await secondary.close();
       await main.close();
+    }
+  },
+);
+
+test('B-021: the first turn of an answer names the pending question and its job, and puts the topic decision last', () => {
+  const base = {
+    request: 'Tell me what a calendar is instead.',
+    history: [],
+    tools: [],
+    now: '2030-12-01T12:00:00Z',
+    timeZone: 'UTC',
+    context: [
+      { request: 'Set a reminder.' },
+      { request: 'For tomorrow', reply: 'What should I remind you about?' },
+    ],
+  };
+  const answer = misatoAsk({ ...base, clarification: true }, 'local');
+  const prompt = JSON.parse(answer.prompt) as Record<string, unknown>;
+  assert.equal(prompt.clarification, true);
+  assert.equal(prompt.originalRequest, 'Set a reminder.');
+  assert.equal(prompt.pendingQuestion, 'What should I remind you about?');
+  const last = answer.system!.split('\n').slice(-3).join('\n');
+  assert.match(last, /\{"newRequest":true\}/);
+  assert.match(last, /even when you could answer it yourself/);
+  assert.match(last, /Length alone never decides/);
+  const plain = misatoAsk(base, 'local');
+  const ordinary = JSON.parse(plain.prompt) as Record<string, unknown>;
+  assert.equal(ordinary.pendingQuestion, undefined);
+  assert.equal(ordinary.originalRequest, undefined);
+  assert.doesNotMatch(plain.system!, /even when you could answer it yourself/);
+});
+
+test(
+  'B-021: the coordinator gives the answer turn its pending question and original request; later turns get neither',
+  { timeout: 30000 },
+  async () => {
+    const f = await fixture([
+      '{"ask":"Which file?"}',
+      '{"action":{"tool":"reminders.list","args":{}}}',
+      '{"reply":"Read shopping.txt"}',
+    ]);
+    try {
+      const q = await f.runtime.chat('Read a file', 'dashboard');
+      const answer = await f.runtime.chat('shopping.txt', 'dashboard');
+      assert.equal(answer.sortieId, q.sortieId);
+      assert.deepEqual(
+        [f.asked.plans[1]!.clarification, f.asked.plans[1]!.originalRequest, f.asked.plans[1]!.pendingQuestion],
+        [true, 'Read a file', 'Which file?'],
+      );
+      assert.deepEqual(
+        [f.asked.plans[2]!.clarification, f.asked.plans[2]!.originalRequest, f.asked.plans[2]!.pendingQuestion],
+        [undefined, undefined, undefined],
+      );
+    } finally {
+      await f.close();
     }
   },
 );
