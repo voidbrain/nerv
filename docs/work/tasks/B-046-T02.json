@@ -40,11 +40,11 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 hours agent",
-    "basis": "Estimate added at featurePlans adoption (2026-11-11): Controlled reproduction of the deferred-cancellation heartbeat loss under CPU contention, then classification; parent Investigate/Medium. Estimate, not a measurement. Implemented 2026-11-11 in about 0.75 agent hours (stated: mechanism read from the timing reassessment, one failed one-turn attempt, the late-timeout grace, local runs); review and CI remain. Numbers backfilled 2026-11-11 at harness 5.4.0: baseline 2 days from the original estimate; remaining 0.25 day for review and CI. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 0.5 hours agent; implemented in about 0.75 agent hours (stated); 0.5 h remains for review and CI. Method: NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge: median 0.56 h, p75 2.1 h, p90 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement) put a focused day at about 1.5 agent hours, with 0.75 h the least for one PR with review and CI. Baseline 1.25 h = 0.75 h spent + 0.5 h remaining. Estimate, not a measurement; baselineDays 2 kept as history.",
+    "estimate": "1.5 hours agent",
+    "basis": "Estimate added at featurePlans adoption (2026-11-11): Controlled reproduction of the deferred-cancellation heartbeat loss under CPU contention, then classification; parent Investigate/Medium. Estimate, not a measurement. Implemented 2026-11-11 in about 0.75 agent hours (stated: mechanism read from the timing reassessment, one failed one-turn attempt, the late-timeout grace, local runs); review and CI remain. Numbers backfilled 2026-11-11 at harness 5.4.0: baseline 2 days from the original estimate; remaining 0.25 day for review and CI. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 0.5 hours agent; implemented in about 0.75 agent hours (stated); 0.5 h remains for review and CI. Method: NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge: median 0.56 h, p75 2.1 h, p90 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement) put a focused day at about 1.5 agent hours, with 0.75 h the least for one PR with review and CI. Baseline 1.25 h = 0.75 h spent + 0.5 h remaining. Estimate, not a measurement; baselineDays 2 kept as history. Revised 2026-11-11: run 43084555427 failed the new regression on Windows after the fix, so 1.5 h remains (reproduce the Windows timing, correct the fix or the fixture, review and CI) instead of 0.5 h; baseline 1.25 h unchanged.",
     "reviewed": "2026-11-11",
     "baselineDays": 2,
-    "agentHours": 0.5,
+    "agentHours": 1.5,
     "baselineAgentHours": 1.25,
     "actualAgentHours": 0.75,
     "actualSource": "stated"
