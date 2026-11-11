@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-11T09:14:31.149Z",
+  "reviewed": "2026-11-11T11:00:54.414Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
-    "AGENTS.md": "38877ab8b28933ca2c92a3fd80acde54ff4fa639610810cdef20b4fcca9c98ae",
-    "docs/BACKLOG-RULES.md": "c4edf7298a59751733168521e8eec915990f1d656233521121f2975b2a34e15b",
+    "AGENTS.md": "6b0b10183f9295795c06246a6e85673bf16d0d16e7479c47db8006c6430b531c",
+    "docs/BACKLOG-RULES.md": "ced030091c2fab50de8f04be15b1b195e4a1fa83145fe5379dd761232b4f77a0",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
     "docs/agents/areas.md": "0ff9805a7d720ee177505cef670e53169a6d640299762dfa86185be46fa8737c",
     "docs/agents/audit.md": "bc5de5707f9ec5c523e73602499312c373d6112ffc498d69bf68604522527992",
@@ -25,7 +25,7 @@
   },
   "measurements": {
     "samples": 1,
-    "latestAt": "2026-11-11T09:14:31.103Z",
+    "latestAt": "2026-11-11T11:00:54.373Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -55,12 +55,12 @@
         "durationMs": {
           "observed": 1,
           "missing": 0,
-          "median": 925
+          "median": 9421
         },
         "conflicts": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 1,
+          "missing": 0,
+          "median": 1
         },
         "unnecessaryPrompts": {
           "observed": 0,
@@ -77,10 +77,16 @@
   },
   "outcomes": [
     {
-      "kind": "none",
-      "disposition": "no-change",
-      "target": "",
-      "evidence": "Harness 5.0.1 and 5.0.2 change only the template's default ESLint/Prettier configs and APPLY guidance, which NERV already has its own versions of (its eslint.config.mjs and .prettierignore ignore .harness/ since PR #263); copied tools are unchanged since 5.0.0 and check-harness reports them matching. Stamp moved to 5.0.2. No rule, safeguard or tool changes in NERV. No behaviour runner configured."
+      "kind": "rule",
+      "disposition": "implemented",
+      "target": "docs/BACKLOG-RULES.md",
+      "evidence": "Reconciled published harness v5.1.0: the Independent review paragraph gains the copy-only reconcile exemption (requires check-harness --strict) and matches the reviewer model to the change; AGENTS.md pointer says the exemptions are listed there. No check, never or ask-first rule, or safeguard removed. No behaviour runner configured."
+    },
+    {
+      "kind": "tool",
+      "disposition": "implemented",
+      "target": "tools/check-harness.mjs",
+      "evidence": "Copied byte-identically from tag v5.1.0 with .claude/agents/mechanical-reviewer.md and design-reviewer.md; check-harness --strict reports copied files match v5.1.0."
     }
   ]
 }
