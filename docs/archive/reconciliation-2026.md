@@ -241,3 +241,7 @@ Authenticated ci:status confirms CI43010405505 passed plan, validate, windows, n
 ## 2026-11-11 — PR #267
 
 Authenticated ci:status confirms CI43013239139 passed plan, validate, windows, native-macos and full-suite; merged main 74c3cee. Harness 5.1.1 reconciled (`node_modules` symlink ignored, CI clones the template at v5.1.1). The first run on that PR (CI43012116246) failed Windows on the B-042 one-channel case with no runtime change; recorded on B-042, and the next push passed. Previous header: reviewed 11 November 2026 against main `00b0b22`. PR #266 CI43010405505 passed all five jobs: harness 5.1.0 reconciled. Harness 5.1.1 reconciled (PR #267); B-048 awaits five clean `main` runs.
+
+## 2026-11-11 — PR #268
+
+Authenticated ci:status confirms CI43015017327 passed plan, validate, windows and native-macos; full-suite skipped by scoped verification (records only); merged main a40f89d. F-074 gained T06–T09 after the gap where the 0.5.0 pin's expanded pack was never run. Previous header: Reviewed 11 November 2026 against main `74c3cee`. PR #267 CI43013239139 passed all five jobs: harness 5.1.1 reconciled. F-074 gains T06–T09: every common Gauntlet pack consumed, new packs raise a run (PR #268); B-048 awaits five clean `main` runs.
