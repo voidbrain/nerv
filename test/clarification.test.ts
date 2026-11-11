@@ -289,3 +289,60 @@ test(
     }
   },
 );
+
+test(
+  'B-021: a forwarded answer that times out after the main base took it leaves no question waiting here; the next message is a new sortie',
+  { timeout: 30000 },
+  async () => {
+    const main = await fixture(['{"ask":"Which file?"}', '{"reply":"Read shopping.txt."}', '{"reply":"Sunny"}']);
+    const secondary = await fixture([]);
+    const heard: string[] = [];
+    let late = false;
+    secondary.runtime.kaji.main = async () => 'NERV-01';
+    secondary.runtime.setDispatch(async (message, _conversation, forward) => {
+      const base = { id: 'NERV-01', name: 'Main' };
+      await forward(base);
+      heard.push(message);
+      const there = await main.runtime.chat(message, 'kaji:nerv-02-dashboard');
+      // What KajiLink.chat returns when the request was sent but its reply did not arrive in time: the main base has
+      // already taken the answer and moved on.
+      if (late)
+        return {
+          sortieId: '',
+          error: 'NERV-01 did not answer (timeout); it may still be working on it, so the request was not repeated here.',
+          steps: [],
+          waiting: [],
+        };
+      return { ...there, base };
+    });
+    try {
+      const q = await secondary.runtime.chat('Read a file', 'dashboard');
+      assert.ok(q.question);
+      late = true;
+      const timedOut = await secondary.runtime.chat('shopping.txt', 'dashboard');
+      assert.match(timedOut.error ?? '', /did not answer .*not repeated here/);
+      assert.equal(timedOut.sortieId, q.sortieId);
+      const mainId = (await main.runtime.sorties())[0]!.id;
+      assert.equal((await main.runtime.sortie(mainId))!.status, 'done', 'the main base took the answer');
+      assert.notEqual(
+        (await secondary.runtime.sortie(q.sortieId))!.status,
+        'open',
+        'this base does not keep waiting for a question the main base no longer asks',
+      );
+      const answered = async () =>
+        (await secondary.runtime.events(q.sortieId)).filter((e) => e.kind === 'misato.answered').length;
+      assert.equal(await answered(), 1, 'the answer left this base once');
+      late = false;
+      const next = await secondary.runtime.chat('What is the weather tomorrow?', 'dashboard');
+      assert.notEqual(next.sortieId, q.sortieId, 'the next message is not recorded as an answer to the old question');
+      assert.equal(next.reply, 'Sunny');
+      assert.deepEqual(heard, ['Read a file', 'shopping.txt', 'What is the weather tomorrow?']);
+      assert.equal((await main.runtime.sorties()).length, 2, 'the main base saw a new request, not a second answer');
+      assert.equal(await answered(), 1);
+      assert.equal(secondary.asked.plans.length, 0, 'nothing was planned on this base');
+    } finally {
+      await secondary.close();
+      await main.close();
+    }
+  },
+);
