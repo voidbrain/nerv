@@ -678,7 +678,13 @@ test('B-046: a stalled request the peer never answers gets one grace budget, not
     await rawReady(f);
     await assert.rejects(f.main.run('NERV-02', item(108), 400), /Worker result unknown after timeout/);
     const elapsed = performance.now() - sentAt;
-    assert.ok(elapsed >= 600 + 400, `rejected after ${Math.round(elapsed)} ms, before stall plus one grace budget`);
+    // Timers run on the loop's millisecond clock and can fire a fraction of a millisecond before performance.now() says
+    // the budget is over (#278 CI run 43106952492: 1000 ms rounded, failing an exact bound); 50 ms of slack still
+    // separates "rejected when the stall ended" (about 600 ms) from "after one grace budget" (about 1,000 ms).
+    assert.ok(
+      elapsed >= 600 + 400 - 50,
+      `rejected after ${Math.round(elapsed)} ms, before stall plus one grace budget`,
+    );
     assert.ok(elapsed < 600 + 400 + 300, `rejected only after ${Math.round(elapsed)} ms: more than one grace budget`);
   } finally {
     WebSocket.prototype.send = send;
