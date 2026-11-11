@@ -1,5 +1,5 @@
 {
- "schemaVersion":1,"id":"misato-planner-v1",
+ "schemaVersion":1,"id":"misato-planner-v2",
  "cases":[
   {"id":"ask-before-inventing","split":"regression","family":"ambiguity","expected":{"kind":"ask"},"input":{"request":"Set a reminder.","history":[],"now":"2030-12-01T12:00:00Z","timeZone":"UTC","language":"en"}},
   {"id":"exact-reminder","split":"regression","family":"simple","expected":{"kind":"action","tool":"reminders.add","args":{"title":"Stretch","due":"2031-01-01T09:00:00Z"}},"input":{"request":"Remind me to Stretch on 1 January 2031 at 09:00 UTC.","history":[],"now":"2030-12-01T12:00:00Z","timeZone":"UTC","language":"en"}},
