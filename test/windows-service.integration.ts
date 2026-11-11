@@ -48,7 +48,8 @@ test(
       assert.ok(query(), 'the task exists');
       assert.ok(existsSync(join(home, 'nerv-service.vbs')) && existsSync(join(home, 'nerv-task.xml')));
       assert.match(cli('service', 'install').stderr, /task exists\. Uninstall it explicitly/, 'never a second task');
-      assert.equal(cli('service', 'status').status, 0);
+      const status = cli('service', 'status');
+      assert.equal(status.status, 0, status.stderr + status.stdout);
       // The task started at install: wait for the service, then stop it as service stop does.
       let started = false;
       for (let i = 0; i < 60 && !(started = await up()); i++) await new Promise((r) => setTimeout(r, 500));

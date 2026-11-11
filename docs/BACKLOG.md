@@ -257,18 +257,18 @@ Final PR240 revision6acac44 / CI42635119338 passed all five/full-suite checks. I
 |:---:|---|---|---|
 | 🟠 | 🔶 P2 | Investigate | 🟡 Medium |
 
-💻 **→ Human action required: No**<br />Read the first failure the Windows service test now reports, and what still held its data folder, on the next failing CI run.
+💻 **→ Human action required: No**<br />Read why `service status` exits 1 right after install: the test now prints its output on the next failing CI run.
 
 | | |
 |---|---|
-| **Issue** | `test/windows-service.integration.ts` failed on the Windows CI job with `EPERM, Permission denied` when its `finally` block removes the temporary data folder (`nerv-winsvc-*`), after install, stop and uninstall. Observed on the first attempt of PR #262 (CI 42986531117) and of PR #263 (CI 42988602602); #262's failed-job rerun passed. The four PRs before #262 passed this job. #262 changed only macOS lifecycle code and tests; #263 changes no Windows code. The same failure hit PR #264's branch twice (CI 42993629496, 42994952185). Finding, 2026-11-11: every failing run lasted 2.1–2.8 s against 5.9 s for a pass, and a run where the task never starts takes at least 30 s, so each failing run left the test steps early. The `EPERM` is thrown in `finally`, which replaces the error that left the steps, and `finally` removed the task without stopping NERV. Most likely an earlier assertion failed with NERV still running, and the running service held the folder; unproven until the first error is seen. |
+| **Issue** | `test/windows-service.integration.ts` failed on the Windows CI job with `EPERM, Permission denied` when its `finally` block removes the temporary data folder (`nerv-winsvc-*`), after install, stop and uninstall. Observed on the first attempt of PR #262 (CI 42986531117) and of PR #263 (CI 42988602602); #262's failed-job rerun passed. The four PRs before #262 passed this job. #262 changed only macOS lifecycle code and tests; #263 changes no Windows code. The same failure hit PR #264's branch twice (CI 42993629496, 42994952185). Finding, 2026-11-11: every failing run lasted 2.1–2.8 s against 5.9 s for a pass, and a run where the task never starts takes at least 30 s, so each failing run left the test steps early. The `EPERM` is thrown in `finally`, which replaces the error that left the steps, and `finally` removed the task without stopping NERV. Most likely an earlier assertion failed with NERV still running, and the running service held the folder; unproven until the first error is seen.Confirmed on PR #265 (CI 43004476280): the first failure was `service status` exiting 1 right after install (`schtasks /Query /V /FO LIST`), and with NERV stopped first the cleanup removed the folder. The folder error was a symptom; why `status` fails is still unknown. |
 | **Reproduce** | Windows runner: `node --test test/windows-service.integration.ts`; after `service stop`, list processes and open handles under the data folder (for example with `handle.exe` or by retrying `rmSync` and logging which file is locked) before the folder is removed. |
 | **Check** | A controlled observation names the holder. Hypotheses, unverified: a NERV child (brain or nervous process) or the SQLite database still open briefly after `service stop` returns; a scheduled-task instance still running; a runner image change. `service stop` must leave no NERV process holding the data home; the test must not merely retry or ignore the error. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** [PR #265](https://github.com/voidbrain/nerv/pull/265) makes the test stop NERV before removing the task, and report the first failure together with any cleanup error, the files left in the folder and the node, cmd and wscript processes. On the next failing run, fix what the first failure names (with a test that fails without the fix). Separately, `service stop` returns once the port refuses, before Node and its `cmd` log redirect exit; if the holder list shows those, `service stop` must wait for them. Two failures in a row after four passes is a pattern, not proof of a code regression; a passing retry is not a fix.
+**Next action / closure evidence:** [PR #265](https://github.com/voidbrain/nerv/pull/265) makes the test stop NERV before removing the task, and report the first failure together with any cleanup error, the files left in the folder and the node, cmd and wscript processes. The first failure is `service status` (CI 43004476280); its output is now in the assertion. Fix that (with a test that fails without the fix). Separately, `service stop` returns once the port refuses, before Node and its `cmd` log redirect exit; if the holder list shows those, `service stop` must wait for them. Two failures in a row after four passes is a pattern, not proof of a code regression; a passing retry is not a fix.
 
 **Estimates:** Medium, provisionally 1–3 focused days, mostly CI round trips on Windows. Estimated 2026-11-11; not measured.
 
@@ -276,7 +276,7 @@ Final PR240 revision6acac44 / CI42635119338 passed all five/full-suite checks. I
 |---|---|
 | PR / evidence | [PR #263](https://github.com/voidbrain/nerv/pull/263) records it; failures in [CI 42986531117 attempt 1](https://github.com/voidbrain/nerv/actions/runs/42986531117/attempts/1) and [CI 42988602602 attempt 1](https://github.com/voidbrain/nerv/actions/runs/42988602602/attempts/1). Test: test/windows-service.integration.ts. |
 | Opened | 2026-11-11 |
-| Verification | 2026-11-11: four observed CI failures with the same `EPERM` on the data folder; no reproduction yet. The diagnostic test change is not a fix. |
+| Verification | 2026-11-11: five observed CI failures; the fifth shows the first failure, `service status` exit 1. Four with the same `EPERM` on the data folder; no reproduction yet. The diagnostic test change is not a fix. |
 | Reviewed | 2026-11-11 |
 
 </details>
