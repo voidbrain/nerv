@@ -377,6 +377,27 @@ test(
       assert.equal(await admitted(caret), false, 'a range form this check cannot evaluate is refused, not guessed');
       assert.equal(await admitted(unstated), false);
       assert.equal(await admitted('f'.repeat(40)), false, 'an unknown commit is refused');
+      git(['tag', '-a', 'neutral-tag', '-m', 'Neutral annotated tag', upgrade]);
+      assert.equal(await admitted(git(['rev-parse', 'neutral-tag'])), false, 'a tag object is not a commit to pin');
+      git(['checkout', '--detach', upgrade]);
+      const docsOnly = (parent: string, label: string) => {
+        git(['checkout', '--detach', parent]);
+        return commit({ 'README.md': label }, label);
+      };
+      const docsAhead = docsOnly(upgrade, 'Neutral documentation ahead'),
+        docsBehind = docsOnly(older, 'Neutral documentation on an older line');
+      git(['checkout', '--detach', upgrade]);
+      assert.equal(
+        await admitted(docsAhead),
+        true,
+        'documentation that descends from the installed revision is admitted',
+      );
+      assert.equal(
+        await admitted(docsBehind),
+        false,
+        'no path admits a revision that does not contain the installed one',
+      );
+      git(['checkout', '--detach', installed]);
       assert.equal(git(['rev-parse', 'HEAD']), installed);
       assert.equal(git(['status', '--porcelain']), '', 'admission changes nothing');
     } finally {
