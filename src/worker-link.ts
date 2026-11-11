@@ -54,6 +54,11 @@ class Peer {
   private active = 0;
   private queued = 0;
   private lastFrameAt = 0;
+  // B-046: at most one heartbeat in flight per direction, outside the work in-flight bound (MAX_RPC_INFLIGHT), so busy
+  // work slots (deferred approvals, slow runs) never refuse the heartbeat that proves the session is alive.
+  private pingOutstanding = false;
+  private pingId = '';
+  private pingActive = false;
   private incoming: Promise<void> = Promise.resolve();
   private ended = false;
   private pending = new Map<string, Pending>();
@@ -154,8 +159,10 @@ class Peer {
     }
     if (!keys(rpc, ['jsonrpc', 'id', 'method', 'params']) || !object(rpc.params))
       throw Error('Invalid worker request.');
-    if (this.active >= MAX_RPC_INFLIGHT) throw Error('Worker incoming request bound reached.');
-    this.active++;
+    const ping = rpc.method === 'worker.ping';
+    if (ping ? this.pingActive : this.active >= MAX_RPC_INFLIGHT) throw Error('Worker incoming request bound reached.');
+    if (ping) this.pingActive = true;
+    else this.active++;
     void this.handle(rpc.method as string, rpc.params)
       .then(
         (result) => {
@@ -170,7 +177,8 @@ class Peer {
         () => this.reply(rpc.id as string, undefined, true),
       )
       .finally(() => {
-        this.active--;
+        if (ping) this.pingActive = false;
+        else this.active--;
       })
       .catch(() => this.end());
   }
@@ -282,8 +290,15 @@ class Peer {
       false,
     );
   }
-  request(method: string, params: Record<string, unknown>, timeoutMs = this.link.requestMs): Promise<unknown> {
-    if (this.pending.size >= MAX_RPC_INFLIGHT) return Promise.reject(Error('Worker pending request bound reached.'));
+  request(
+    method: string,
+    params: Record<string, unknown>,
+    timeoutMs = this.link.requestMs,
+    heartbeat = false,
+  ): Promise<unknown> {
+    // The outstanding heartbeat (one at most, see startHeartbeat) does not take a work slot.
+    if (!heartbeat && this.pending.size - (this.pending.has(this.pingId) ? 1 : 0) >= MAX_RPC_INFLIGHT)
+      return Promise.reject(Error('Worker pending request bound reached.'));
     return new Promise((resolve, reject) => {
       // B-046: a timeout that fires late because this process's event loop was stalled is not evidence the peer is
       // gone: the peer did not get its full budget, and expired timers run before sockets are read. Such a late verdict
@@ -340,6 +355,7 @@ class Peer {
           } else expire();
         }, timeoutMs);
       this.pending.set(id, { resolve, reject, timer });
+      if (heartbeat) this.pingId = id;
       // Timed-out requests retain admission until a late result or disconnect; timeout does not prove cancellation.
       try {
         this.write({ jsonrpc: '2.0', id, method, params }, true);
@@ -372,11 +388,20 @@ class Peer {
   }
   private startHeartbeat() {
     this.heartbeat = setInterval(() => {
-      void this.request(
+      // The ping still in flight decides liveness (its verdict ends the session); a tick does not stack another one.
+      if (this.pingOutstanding) return;
+      this.pingOutstanding = true;
+      this.request(
         'worker.ping',
         this.role === 'worker' ? { offers: this.link.settings.offers?.() ?? [] } : {},
         Math.min(this.link.heartbeatMs, this.link.requestMs),
-      ).catch((e: unknown) => this.end(e));
+        true,
+      ).then(
+        () => {
+          this.pingOutstanding = false;
+        },
+        (e: unknown) => this.end(e),
+      );
     }, this.link.heartbeatMs);
   }
   /** `cause` (B-046 diagnosis) is attached to the rejections of requests still pending, never to a reply. */
