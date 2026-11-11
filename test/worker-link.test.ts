@@ -52,8 +52,30 @@ async function fixture(heartbeatMs = 150, workerHeartbeatMs = heartbeatMs) {
         models: { local: { baseUrl: 'http://127.0.0.1:9/v1', model: 'unused-fixture' } },
       }),
     );
-  const ra = new Runtime(join(homeA, 'nerv.sqlite'), undefined, homeA);
-  let rb = new Runtime(join(homeB, 'nerv.sqlite'), undefined, homeB);
+  // B-046 mechanism (3) diagnosis: every frame a link receives awaits its registry, two calls to that side's nervous
+  // process, so a ping is answered only after the nervous process gets to them. Nervous calls of 50 ms or more are
+  // printed at close (side, method, duration, start on the process clock, calls already in flight; no payload), to
+  // compare with the `atMs` of a heartbeat timeout verdict.
+  const slow: string[] = [];
+  const timed = (runtime: Runtime, side: string) => {
+    const call = runtime.nervous.call.bind(runtime.nervous);
+    let inflight = 0;
+    runtime.nervous.call = async (method, params, timeout) => {
+      const start = performance.now(),
+        before = inflight++;
+      try {
+        return await call(method, params, timeout);
+      } finally {
+        inflight--;
+        const ms = performance.now() - start;
+        if (ms >= 50 && method !== 'runtime.ping')
+          slow.push(`${side} ${method} ${Math.round(ms)}ms at ${Math.round(start)} behind ${before}`);
+      }
+    };
+    return runtime;
+  };
+  const ra = timed(new Runtime(join(homeA, 'nerv.sqlite'), undefined, homeA), 'coordinator');
+  let rb = timed(new Runtime(join(homeB, 'nerv.sqlite'), undefined, homeB), 'worker');
   await Promise.all([ra.ready(), rb.ready()]);
   const server = createServer((_req, res) => {
     res.writeHead(404);
@@ -130,7 +152,7 @@ async function fixture(heartbeatMs = 150, workerHeartbeatMs = heartbeatMs) {
     restartWorker: async () => {
       await link.stop();
       await rb.close();
-      rb = new Runtime(join(homeB, 'nerv.sqlite'), undefined, homeB);
+      rb = timed(new Runtime(join(homeB, 'nerv.sqlite'), undefined, homeB), 'worker');
       await rb.ready();
       link = worker();
       link.start();
@@ -149,6 +171,7 @@ async function fixture(heartbeatMs = 150, workerHeartbeatMs = heartbeatMs) {
       await Promise.all([ra.close(), rb.close()]);
       rmSync(homeA, { recursive: true, force: true });
       rmSync(homeB, { recursive: true, force: true });
+      if (slow.length) process.stderr.write(`B-046 slow nervous calls: ${slow.join('; ')}\n`);
     },
   };
 }
@@ -749,6 +772,45 @@ test(
         await wait(10);
       }
       assert.equal(hellos - negotiated, 0, 'an answer already received must not be judged a timeout');
+    } finally {
+      WebSocket.prototype.send = send;
+      await f.close();
+    }
+  },
+);
+// B-046 mechanism (3), PR #280: every frame a link receives is verified against its registry, calls to the receiving
+// side's nervous process, so the worker answers a ping only after its nervous process has served what was queued ahead.
+// Linux coverage run 43121587426 lost a session this way: the worker's `kaji.bases` for the ping waited 225 ms behind a
+// 271 ms `usage.finish` write, with this process's loop on time. Here the worker's store answers 300 ms late while the
+// loop stays free: with the fixtures' 150 ms ping budget the healthy session ends (production budget: 10 s). todo until
+// the owner chooses the remedy recorded in B-046; it fails today and does not fail the suite.
+test(
+  'B-046: a ping waiting on a slow store on the worker does not end a healthy session',
+  { timeout: 30000, todo: 'B-046 mechanism (3): remedy is an owner decision' },
+  async () => {
+    const f = await fixture(150, 60000);
+    const send = WebSocket.prototype.send;
+    let hellos = 0;
+    WebSocket.prototype.send = function (this: WebSocket, data: unknown, ...rest: unknown[]) {
+      if (String(data).includes('worker.hello')) hellos++;
+      return (send as (...args: unknown[]) => void).call(this, data, ...rest);
+    } as typeof send;
+    try {
+      await f.start();
+      const negotiated = hellos,
+        call = f.rb.nervous.call.bind(f.rb.nervous);
+      let slowed = 0;
+      f.rb.nervous.call = async (method, params = {}, timeout) => {
+        // The next registry read waits as if a durable write were ahead of it; no event-loop stall.
+        if (method === 'kaji.bases' && !slowed++) await wait(300);
+        return call(method, params, timeout);
+      };
+      await until(() => slowed > 0);
+      for (let i = 0; i < 60; i++) {
+        assert.ok(f.main.connected('NERV-02'), 'a slow store on the worker is not a lost peer');
+        await wait(10);
+      }
+      assert.equal(hellos - negotiated, 0, 'a slow store on the worker is not a lost peer');
     } finally {
       WebSocket.prototype.send = send;
       await f.close();

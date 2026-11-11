@@ -334,6 +334,7 @@ class Peer {
                   Error('Worker result unknown after timeout.', {
                     cause: {
                       ...timing,
+                      atMs: Math.round(now),
                       elapsedMs: Math.round(now - started),
                       queuedAtVerdict,
                       queuedAfterWait: this.queued,
