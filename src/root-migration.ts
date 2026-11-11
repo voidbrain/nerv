@@ -380,7 +380,8 @@ export function rootMigrationStatus(home: string, digest: string): Receipt | { s
 }
 export function assertRootMigrationReady(home: string): void {
   if (!existsSync(databasePath(home))) return;
-  const db = new DatabaseSync(databasePath(home), { readOnly: true });
+  // Every CLI command runs this check; it waits for a starting service's write lock as Store does (B-048).
+  const db = new DatabaseSync(databasePath(home), { readOnly: true, timeout: 5000 });
   try {
     if (
       db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='root_migration_resource'").get() &&
