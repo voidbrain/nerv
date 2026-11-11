@@ -19,7 +19,8 @@
     "Automatic updates remain disabled unless configured and accepted; never silently downgrade schema or bypass unsupported compatibility/recovery; report failures and next recovery action"
   ],
   "dependsOn": [
-    "F-005-T06"
+    "F-005-T06",
+    "F-005-T14"
   ],
   "resources": [
     "src/**",

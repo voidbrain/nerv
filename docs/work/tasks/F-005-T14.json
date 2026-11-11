@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "id": "F-005-T14",
+  "status": "planned",
+  "title": "T06g — After-start health check in the update receipt",
+  "goal": "Accept an update only when the started service is healthy, not just running",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "acceptance": [
+    "After start, verify the running build commit, base identity, database integrity and that the brain and nervous processes answer; record the result in the receipt",
+    "A failed check leaves the operation uncertain with the ordered manual recovery, never a silent success"
+  ],
+  "dependsOn": [
+    "F-005-T12"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle"
+  ],
+  "validation": [
+    "Regressions through the real adapter with a fixture service; independent review; final required CI"
+  ],
+  "escalation": [
+    "Any destructive restore, changed ownership or unresolved physical/worker effects requires explicit reconciliation; general restore remains F-062"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 focused day",
+    "basis": "Owner-approved split of the original T06 (4–6 focused days) into lettered slices on 2026-11-11, after the work had been delivered as unplanned slices; slices e–h use free step numbers because step IDs are two digits. Uncertain: which health signals are reliable right after start.",
+    "reviewed": "2026-11-11"
+  }
+}

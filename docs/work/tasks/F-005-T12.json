@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "id": "F-005-T12",
+  "status": "planned",
+  "title": "T06e — Independent review of the update path",
+  "goal": "Review the merged journaled rehearsal and admission code together in a fresh context",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "acceptance": [
+    "A fresh-context review of the update path as merged (rehearse step, refused state, admission, forward-migration refusal, manual recovery text) reports blockers and gaps",
+    "Each finding gets a committed failing regression before its fix, or a recorded reason it is not a defect"
+  ],
+  "dependsOn": [
+    "F-005-T06"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle"
+  ],
+  "validation": [
+    "Review report under docs/reviews/; fixes with regressions; final required CI"
+  ],
+  "escalation": [
+    "Any destructive restore, changed ownership or unresolved physical/worker effects requires explicit reconciliation; general restore remains F-062"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 focused day",
+    "basis": "Owner-approved split of the original T06 (4–6 focused days) into lettered slices on 2026-11-11, after the work had been delivered as unplanned slices; slices e–h use free step numbers because step IDs are two digits. Assumes no blocker; a blocker adds its own fix effort, estimated when found.",
+    "reviewed": "2026-11-11"
+  }
+}
