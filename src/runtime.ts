@@ -601,7 +601,8 @@ export class Runtime implements StoreApi {
     if (far) {
       if (!forwarded) return far;
       await this.note(forwarded, 'kaji.answered', { base: far.base ?? { id: '', name: '' }, sortieId: far.sortieId });
-      if (question && far.error) return { ...far, sortieId: forwarded };
+      // B-021: once sent, the answer is the main base's. A late or failed reply (it may have taken the answer and moved
+      // on) closes this copy like any forwarded request, so a later message is never taken as a second answer here.
       if (question)
         await this.nervous.call('misato.answer', { conversation: key, sequence: question.sequence, text: message });
       if (far.question && far.reply)
