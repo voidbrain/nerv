@@ -43,7 +43,7 @@
     "estimate": "2 focused days",
     "basis": "Estimate added at featurePlans adoption (2026-11-11): Controlled reproduction of the deferred-cancellation heartbeat loss under CPU contention, then classification; parent Investigate/Medium. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one.",
     "reviewed": "2026-11-11",
-    "days": 2.0,
-    "baselineDays": 2.0
+    "days": 2,
+    "baselineDays": 2
   }
 }

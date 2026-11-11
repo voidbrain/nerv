@@ -849,8 +849,20 @@ test('the root command runs only uncovered cases, records them and reports nothi
     assert.equal(run.stillPending, 0);
     assert.equal(typeof run.passed, 'boolean');
     assert.deepEqual((await main(['pending'])).pendingLines, []);
-    const recorded = JSON.parse(readFileSync(ledger, 'utf8')).entries;
+    const written = JSON.parse(readFileSync(ledger, 'utf8'));
+    const recorded = written.entries;
     assert.equal(recorded.length, 55);
+    // Gauntlet 0.7: the ledger is written as schema 2; new runs carry their identity, the schema 1 entries it started
+    // with are kept as unknown identity.
+    assert.equal(written.schemaVersion, 2);
+    const identity = ['modelDigest', 'runtimeHash', 'scenarioHash', 'sourceKey'];
+    const newRuns = recorded.filter((e) => e.pack !== system.id);
+    assert.equal(newRuns.length, 48);
+    assert.ok(newRuns.every((e) => identity.every((k) => k in e)));
+    assert.ok(
+      recorded.filter((e) => e.pack === system.id).every((e) => identity.every((k) => !(k in e))),
+      'schema 1 entries keep unknown identity',
+    );
     assert.ok(
       recorded.every((e) => !JSON.stringify(e).includes('content')),
       'metadata only',

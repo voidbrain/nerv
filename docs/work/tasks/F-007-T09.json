@@ -40,7 +40,7 @@
     "estimate": "1 focused day",
     "basis": "Owner-approved slice, 2026-11-11 (PR #264). Step 3, slice d. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one.",
     "reviewed": "2026-11-11",
-    "days": 1.0,
-    "baselineDays": 1.0
+    "days": 1,
+    "baselineDays": 1
   }
 }

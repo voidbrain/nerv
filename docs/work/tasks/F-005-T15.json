@@ -38,7 +38,7 @@
     "estimate": "2–3 focused days",
     "basis": "Owner-approved split of the original T06 (4–6 focused days) into lettered slices on 2026-11-11, after the work had been delivered as unplanned slices; slices e–h use free step numbers because step IDs are two digits. Approved as separate: T06 does not wait for it, since nothing needs a schema raise today. Needs the general restore of F-062 first; uncertain until that design exists. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (upper bound of the range, rounded up to a quarter day); the baseline is this estimate, not an original one.",
     "reviewed": "2026-11-11",
-    "days": 3.0,
-    "baselineDays": 3.0
+    "days": 3,
+    "baselineDays": 3
   }
 }
