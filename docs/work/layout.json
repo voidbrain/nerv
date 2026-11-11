@@ -2,7 +2,7 @@
   "version": 1,
   "segments": [
     {
-      "text": "# NERV Agency backlog\n\nCurrent work ledger, reviewed 11 November 2026 against main `d2bb481`. PR #259 CI42974448234 passed all five jobs/full-suite: Gauntlet 0.5.0 pinned. F-005-T06 stays in progress; no application upgrade is admitted yet.\nGovernance and naming follow the [architecture vocabulary](architecture/vocabulary.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md) · [Reconciliation log](archive/reconciliation-2026.md) · [Dependencies](agents/backlog-dependencies.md) · [Work queue](agents/backlog-queue.md).\n\n<!-- recap:start -->\n<!-- recap:end -->\n\n## Bugs and reliability\n\nFrom 2026-11-05 a defect (behaviour that breaks something meant to work) gets a B- record here; earlier ones stayed in their F- records (owner decision).\n\n\n\n\n\n\n\n\n\n\n\n"
+      "text": "# NERV Agency backlog\n\nCurrent work ledger, reviewed 11 November 2026 against main `84a5de6`. PR #260 CI42980951125 passed all five jobs/full-suite: Prettier adopted. F-005-T06 stays in progress; no application upgrade is admitted yet.\nGovernance and naming follow the [architecture vocabulary](architecture/vocabulary.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md) · [Reconciliation log](archive/reconciliation-2026.md) · [Dependencies](agents/backlog-dependencies.md) · [Work queue](agents/backlog-queue.md).\n\n<!-- recap:start -->\n<!-- recap:end -->\n\n## Bugs and reliability\n\nFrom 2026-11-05 a defect (behaviour that breaks something meant to work) gets a B- record here; earlier ones stayed in their F- records (owner decision).\n\n\n\n\n\n\n\n\n\n\n\n"
     },
     {
       "records": "B"

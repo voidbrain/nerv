@@ -827,3 +827,47 @@ test(
     }
   },
 );
+
+// B-046 reproduction (timing reassessment 2026-11-11). It fails today and is marked todo so the suite stays green;
+// the fix removes the todo. The peer is healthy throughout: only this process's event loop is busy.
+test(
+  'B-046: a healthy session survives an event-loop stall longer than the heartbeat budget',
+  { timeout: 30000, todo: 'B-046: the timeout verdict runs before a reply that has already arrived is read' },
+  async () => {
+    const f = await fixture(150);
+    const send = WebSocket.prototype.send;
+    let pings = 0,
+      hellos = 0,
+      armed = false;
+    const stall = (ms: number) => {
+      const end = Date.now() + ms;
+      while (Date.now() < end) {
+        /* busy on purpose */
+      }
+    };
+    WebSocket.prototype.send = function (this: WebSocket, data: unknown, ...rest: unknown[]) {
+      const sent = (send as (...args: unknown[]) => void).call(this, data, ...rest);
+      if (String(data).includes('worker.hello')) hellos++;
+      if (armed && String(data).includes('worker.ping')) {
+        pings++;
+        armed = false;
+        setImmediate(() => stall(200));
+      }
+      return sent;
+    } as typeof send;
+    try {
+      await f.start();
+      const negotiated = hellos;
+      for (let i = 0; i < 4; i++) {
+        const before = pings;
+        armed = true;
+        await until(() => pings > before);
+        await wait(260);
+      }
+      assert.equal(hellos - negotiated, 0, 'a reply that arrived during the stall must not end the session');
+    } finally {
+      WebSocket.prototype.send = send;
+      await f.close();
+    }
+  },
+);

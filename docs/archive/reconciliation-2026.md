@@ -210,3 +210,8 @@ Authenticated ci:status confirms CI42973361363 passed plan, validate, windows, n
 ## 2026-11-11 — PR #259
 
 Authenticated ci:status confirms CI42974448234 passed plan, validate, windows, native-macos and full-suite; merged main d2bb481. Vendored Gauntlet 0.5.0 (tag v0.5.0); `gauntlet:compare` now needs 2–64 reports and returns the new upstream shape; expanded pack not wired; no model run. Independent review found the first wording understated the compare change; corrected before merge. Previous header: reviewed 11 November 2026 against main `119ac42`. PR #258 CI42973361363 passed all five jobs/full-suite: F-005-T06 journaled rehearsal merged.
+
+
+## 2026-11-11 — PR #260
+
+Authenticated ci:status confirms CI42980951125 passed plan, validate, windows, native-macos and full-suite; merged main 84a5de6. Prettier 3.9.10 with a CI format check; mechanical reformat of 148 files, literals equal to the previous main and one redundant-parenthesis difference. Independent review found a reformatted Angular template and an author check that had not run; both corrected before merge and not re-reviewed. Previous header: reviewed 11 November 2026 against main `d2bb481`. PR #259 CI42974448234 passed all five jobs/full-suite: Gauntlet 0.5.0 pinned.
