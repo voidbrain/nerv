@@ -621,7 +621,8 @@ test(
   'B-046: after a stall, a peer that never answers is still disconnected after one grace budget',
   { timeout: 30000 },
   async () => {
-    const f = await fixture(200);
+    // Budget 400 ms against a 600 ms stall: one grace ends the session near 1,000 ms, a second deferral near 1,400 ms.
+    const f = await fixture(400);
     const send = WebSocket.prototype.send;
     let pingAt = 0;
     WebSocket.prototype.send = function (this: WebSocket, data: unknown, ...rest: unknown[]) {
@@ -629,7 +630,7 @@ test(
       if (!pingAt && String(data).includes('worker.ping')) {
         pingAt = performance.now();
         setImmediate(() => {
-          const end = Date.now() + 500;
+          const end = Date.now() + 600;
           while (Date.now() < end) {
             /* busy on purpose */
           }
@@ -643,16 +644,47 @@ test(
       await until(() => pingAt > 0);
       await until(() => !f.main.connected('NERV-02'));
       const elapsed = performance.now() - pingAt;
-      // Stall (500 ms) plus one fresh budget (200 ms), with scheduling slack; a second deferral would add another budget
-      // and repeated deferrals would never end the session.
-      assert.ok(elapsed >= 500, `disconnected after ${Math.round(elapsed)} ms, before the stall ended`);
-      assert.ok(elapsed < 500 + 2 * 200 + 300, `disconnected only after ${Math.round(elapsed)} ms`);
+      // Stall (600 ms) plus one fresh budget (400 ms), with 300 ms scheduling slack. Heartbeats sent after the stall also
+      // end the session near this time, so the once-only grace itself is checked on a single request below.
+      assert.ok(elapsed >= 600, `disconnected after ${Math.round(elapsed)} ms, before the stall ended`);
+      assert.ok(elapsed < 600 + 400 + 300, `disconnected only after ${Math.round(elapsed)} ms`);
     } finally {
       WebSocket.prototype.send = send;
       await f.close();
     }
   },
 );
+// B-046 review of #278: the grace is granted once per request. With no heartbeat traffic, a request the peer never
+// answers is rejected after the stall plus one fresh budget (about 1,000 ms), not after a second one (about 1,400 ms).
+test('B-046: a stalled request the peer never answers gets one grace budget, not two', { timeout: 30000 }, async () => {
+  const f = await fixture(60000);
+  const send = WebSocket.prototype.send;
+  let sentAt = 0;
+  WebSocket.prototype.send = function (this: WebSocket, data: unknown, ...rest: unknown[]) {
+    const sent = (send as (...args: unknown[]) => void).call(this, data, ...rest);
+    if (!sentAt && String(data).includes('worker.run')) {
+      sentAt = performance.now();
+      setImmediate(() => {
+        const end = Date.now() + 600;
+        while (Date.now() < end) {
+          /* busy on purpose */
+        }
+      });
+    }
+    return sent;
+  } as typeof send;
+  try {
+    f.main.start();
+    await rawReady(f);
+    await assert.rejects(f.main.run('NERV-02', item(108), 400), /Worker result unknown after timeout/);
+    const elapsed = performance.now() - sentAt;
+    assert.ok(elapsed >= 600 + 400, `rejected after ${Math.round(elapsed)} ms, before stall plus one grace budget`);
+    assert.ok(elapsed < 600 + 400 + 300, `rejected only after ${Math.round(elapsed)} ms: more than one grace budget`);
+  } finally {
+    WebSocket.prototype.send = send;
+    await f.close();
+  }
+});
 // B-046 (#275 Windows run 43084555427): the grace budget's own timer can fire late too. A second stall that starts
 // after the peer answered the stalled ping leaves the answer unread in the socket when that timer fires; the verdict
 // must read it first, not end a healthy session.
@@ -702,7 +734,11 @@ test(
       const negotiated = hellos;
       armed = true;
       await until(() => done);
-      await wait(400);
+      // Sample the session directly, so a lost session that reconnects slowly cannot pass as a kept one.
+      for (let i = 0; i < 40; i++) {
+        assert.ok(f.main.connected('NERV-02'), 'an answer already received must not be judged a timeout');
+        await wait(10);
+      }
       assert.equal(hellos - negotiated, 0, 'an answer already received must not be judged a timeout');
     } finally {
       WebSocket.prototype.send = send;

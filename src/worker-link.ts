@@ -286,19 +286,25 @@ class Peer {
       // B-046: a timeout that fires late because this process's event loop was stalled is not evidence the peer is
       // gone: the peer did not get its full budget, and expired timers run before sockets are read. Such a late verdict
       // is deferred once by a fresh budget from the moment the loop resumed; a peer that really is gone still times out
-      // after it (worst case: budget + stall + budget). An on-time timeout is final, as before. Whether a system
+      // after it (worst case: budget + stall + budget, plus at most one budget while received frames are still being
+      // verified, below). An on-time timeout is final, as before. Whether a system
       // sleep counts as a stall depends on the platform's monotonic clock; it is not relied on here.
       // Every verdict (on time, late, or after the grace budget, whose timer can itself fire late after a second stall)
       // first lets an answer already received win: setImmediate runs after the poll phase has read the socket, and the
-      // verdict then waits for the frames already queued on `incoming` (bounded by MAX_QUEUED_FRAMES; request handling
-      // is not awaited there) to be verified and applied.
+      // verdict then waits for the frames already queued on `incoming` to be verified and applied, for at most one more
+      // budget: each queued frame awaits the registry (in serve, nervous-process calls with their own timeouts), so
+      // waiting for the whole queue could delay a verdict by many budgets.
       const id = randomUUID(),
         started = performance.now(),
         expire = () =>
           setImmediate(() => {
-            void this.incoming.then(() => {
-              if (this.pending.has(id)) reject(Error('Worker result unknown after timeout.'));
-            });
+            let cap: NodeJS.Timeout | undefined;
+            void Promise.race([this.incoming, new Promise<void>((done) => (cap = setTimeout(done, timeoutMs)))]).then(
+              () => {
+                clearTimeout(cap);
+                if (this.pending.has(id)) reject(Error('Worker result unknown after timeout.'));
+              },
+            );
           }),
         timer = setTimeout(() => {
           const pending = this.pending.get(id);
