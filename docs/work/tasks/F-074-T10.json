@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "parent": "F-074",
+  "resources": [
+    "tools/gauntlet.mjs",
+    "test/gauntlet.test.mjs",
+    "evals/**",
+    "docs/evaluations/**",
+    "docs/test-capability-index.md",
+    "contract:gauntlet-adoption",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "evidence-review",
+    "regression-design"
+  ],
+  "privacy": "Neutral synthetic cases and private local reports only; no secrets, downloads or production effects.",
+  "id": "F-074-T10",
+  "status": "planned",
+  "title": "T10 — Adopt identity-bound ledger coverage",
+  "goal": "Pin the Gauntlet release that closes gauntlet-protocol B-002, so a case becomes pending when its model digest, runtime, machine scenario or (for system cases) NERV source changes, and reuse never depends on a timer",
+  "acceptance": [
+    "Pin the release; `gauntlet ledger record` passes NERV's source key (from the existing evaluate.mjs source inputs) for system cases",
+    "`pending`, `gauntlet:all` and `check:gauntlet-runs` pass the intended model digest, runtime, scenario and source key, and the plan names the new reasons",
+    "A NERV source change makes the affected system cases pending; schema 1 ledger entries are reported as unknown identity, not silently covering",
+    "No default max age (owner 2026-11-11); `--max-age-days` stays opt-in"
+  ],
+  "dependsOn": [
+    "F-074-T08"
+  ],
+  "validation": [
+    "Join test across the vendored release, the ledger, NERV's source key and check:gauntlet-runs: a source edit in a fixture makes a system case pending",
+    "Final applicable CI"
+  ],
+  "escalation": [
+    "Upstream dependency: voidbrain/gauntlet-protocol B-002 release (PR #36 plans it, about 1 focused day)",
+    "A schema 1 ledger re-run is an owner-approved campaign like F-074-T09"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 focused day after the upstream release",
+    "basis": "Owner 2026-11-11 asked to plan the F-074-T08 known limit. Adoption mirrors T07 (pin, pass options, join test). Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-049-T10",
+  "parent": "F-049",
+  "title": "Linux host enforcement for the mini PC",
+  "goal": "The same runner contract on the Linux mini PC host, with the T05 join tests",
+  "status": "planned",
+  "acceptance": [
+    "Enforcement mechanism chosen for Linux against the T01 threat model",
+    "T05 join tests pass on Linux in CI",
+    "Owner runs the first job on the mini PC"
+  ],
+  "dependsOn": [
+    "F-049-T05"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/architecture/**",
+    "docs/decisions/**",
+    "docs/work/records/F-049.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "privacy-review",
+    "distributed-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "Join tests on Linux CI; owner real-device check"
+  ],
+  "escalation": [
+    "Owner check: first job on the real mini PC"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 focused days",
+    "basis": "Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

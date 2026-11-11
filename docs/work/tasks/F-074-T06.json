@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-074",
   "id": "F-074-T06",
-  "status": "implemented",
+  "status": "closed",
   "title": "T06 — Consume every common pack shipped in the pinned Gauntlet release",
   "goal": "Replace the hard-coded smoke-v1 path with discovery of every pack in the pinned artifact, so a pin that adds a pack (0.5.0 added general-assistant-expanded, 28 cases) reaches NERV without a code change",
   "acceptance": [
@@ -36,8 +36,8 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0 remaining; verification pending",
-    "basis": "Owner request 2026-11-11: NERV always consumes every common Gauntlet pack plus its own, and a pack added or changed raises a run-new-tests item. Estimate, not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Owner request 2026-11-11: NERV always consumes every common Gauntlet pack plus its own, and a pack added or changed raises a run-new-tests item. Estimate, not a measurement. Closed 2026-11-11 after PR #272 merged with CI 43023793222 green on all five jobs (plan, validate, windows, native-macos, full-suite).",
     "reviewed": "2026-11-11"
   }
 }

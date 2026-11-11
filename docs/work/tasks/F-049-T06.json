@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-049-T06",
+  "parent": "F-049",
+  "title": "Concurrent instances within per-machine limits",
+  "goal": "Several instances at once within CPU, memory and model-slot limits per machine; the same pilot can run two jobs, each in its own instance",
+  "status": "planned",
+  "acceptance": [
+    "Per-machine limits as configuration; a job over the limit waits in the queue, it is not refused silently",
+    "Two jobs of one pilot run in two instances with separate state",
+    "Tests for limits, queueing and same-pilot concurrency"
+  ],
+  "dependsOn": [
+    "F-049-T04"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/architecture/**",
+    "docs/decisions/**",
+    "docs/work/records/F-049.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "privacy-review",
+    "distributed-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "Unit and join tests; npm test"
+  ],
+  "escalation": [
+    "New upstream API work belongs to its owning repository; NERV supplies adapters"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 focused days",
+    "basis": "Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}

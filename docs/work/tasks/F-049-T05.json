@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "F-049-T05",
+  "parent": "F-049",
+  "title": "Escape and recovery join tests",
+  "goal": "The T01 join tests across runtime, ledger and runner before execution is enabled",
+  "status": "planned",
+  "acceptance": [
+    "Escape (filesystem, network), credential denial, grader tampering, timeout and cancellation, worker recovery with uncertain effects",
+    "Each test fails on an unconfined runner (proved once with the enforcement turned off in a fixture)"
+  ],
+  "dependsOn": [
+    "F-049-T04"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/architecture/**",
+    "docs/decisions/**",
+    "docs/work/records/F-049.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "privacy-review",
+    "distributed-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "Join tests in CI on macOS; npm test"
+  ],
+  "escalation": [
+    "New upstream API work belongs to its owning repository; NERV supplies adapters"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 focused days",
+    "basis": "Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement.",
+    "reviewed": "2026-11-11"
+  }
+}
