@@ -3,7 +3,7 @@
     "path": "../harness-template",
     "repo": "https://github.com/voidbrain/project-harness"
   },
-  "version": "5.2.0",
+  "version": "5.6.0",
   "stacks": [
     "core",
     "angular"
@@ -251,10 +251,11 @@
       "when": [
         "docs/BACKLOG.md",
         "docs/archive/backlog-*.md",
-        "tools/backlog-dependencies.mjs"
+        "tools/backlog-dependencies.mjs",
+        "tools/work-items.mjs"
       ],
-      "then": "Regenerate linked prerequisites and reverse Unlocks while preserving historical archive records.",
-      "run": "npm run backlog:dependencies",
+      "then": "Validate linked prerequisites; work-items build shows Depends on · Unlocks in each record (5.5.0).",
+      "run": "npm run check:dependencies",
       "checked": "npm run check:dependencies in CI validate"
     },
     {
@@ -267,8 +268,8 @@
         ".harness.json",
         "tools/backlog-dependencies.mjs"
       ],
-      "then": "Regenerate the transparent work queue from authored records and roadmap context.",
-      "run": "npm run backlog:queue",
+      "then": "Validate the work queue that orders the generated ledger (workItems.order queue).",
+      "run": "npm run check:queue",
       "checked": "npm run check:queue in CI validate"
     },
     {
@@ -325,8 +326,8 @@
         "tools/work-items.mjs",
         "tools/task-claims.mjs"
       ],
-      "then": "Regenerate the source-owned ledger and existing recap, dependencies, queue and roadmap; review task resources and candidate model evidence.",
-      "run": "npm run work:build && npm run backlog:recap && npm run backlog:dependencies && npm run backlog:queue && npm run roadmap:status",
+      "then": "Regenerate the source-owned ledger (queue order, Depends on · Unlocks lines, totals), recap and roadmap; review task resources and candidate model evidence.",
+      "run": "npm run work:build && npm run backlog:recap && npm run roadmap:status",
       "checked": "check:work and existing ledger/view checks in CI"
     },
     {
@@ -904,7 +905,11 @@
     "records": "docs/work/records",
     "tasks": "docs/work/tasks",
     "profiles": "docs/agents/model-profiles.json",
-    "featurePlans": true
+    "featurePlans": true,
+    "order": "queue",
+    "estimation": {
+      "since": "2026-11-11"
+    }
   },
   "workUsage": {
     "enabled": true

@@ -135,8 +135,9 @@ export function recordSelected(ledger, report, full, selected) {
     )
       entries.set(entryKey(entry), entry);
   }
+  // Gauntlet 0.7 ledgers are schema 2: entries carry run identity; schema 1 entries are kept as unknown identity.
   return validateLedger({
-    schemaVersion: 1,
+    schemaVersion: 2,
     entries: [...entries.values()].sort((a, b) => (entryKey(a) < entryKey(b) ? -1 : 1)),
   });
 }

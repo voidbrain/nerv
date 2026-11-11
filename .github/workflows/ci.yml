@@ -52,11 +52,11 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - name: Backlog prerequisites and generated unlocks
+      - name: Backlog prerequisite validation
         run: npm run check:dependencies
       - name: Source-owned records, tasks and model profiles
         run: npm run check:work
-      - name: Backlog work queue
+      - name: Backlog work-queue validation
         run: npm run check:queue
 
       - name: Locked dependency SBOM
@@ -117,7 +117,7 @@ jobs:
       - run: npm run check:rules
       - run: npm run check:maintenance
       - run: npm run check:audits
-      - run: git clone --branch v5.2.0 --depth 1 https://github.com/voidbrain/project-harness "$RUNNER_TEMP/project-harness"
+      - run: git clone --branch v5.6.0 --depth 1 https://github.com/voidbrain/project-harness "$RUNNER_TEMP/project-harness"
       - run: npm run check:freshness
         env:
           HARNESS_HOME: ${{ runner.temp }}/project-harness

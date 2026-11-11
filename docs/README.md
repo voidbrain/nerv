@@ -9,7 +9,6 @@ Start here for document ownership. This is the NERV-specific map; the [procedure
 | [Roadmap](ROADMAP.md) | Milestones and acceptance | Authored placement plus generated status |
 | [Backlog](BACKLOG.md) | Current outcome ledger | Generated from `work/records/` and `work/layout.json` |
 | [Work sources/tasks](work/README.md) | Authored records, bounded tasks, required capabilities and model evidence links | Edit sources; task completion never closes its parent automatically |
-| [Queue](agents/backlog-queue.md), [dependencies](agents/backlog-dependencies.md) | Derived order and prerequisite views | Generated; neither replaces the backlog |
 | [Agent procedures](agents/procedures.md), [area rules](agents/areas.md) | Repository workflow authorities and project-specific constraints | Maintained; copied harness files retain release ownership |
 | [Verification mapping](verification.md) | NERV commands and selected test groups | Complements the [shared selection procedure](agents/verification.md); these are distinct roles |
 | [Review register](reviews/README.md) | Links, last actual execution, next date/condition, scope and owner | Dated snapshot; future triggers are not completed checks or a background scheduler |
