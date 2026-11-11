@@ -1,6 +1,6 @@
 # Safe application upgrades (F-005-T06)
 
-2026-11-11, baseline main `b68802d`. Scope: the one per-user NERV service (launchd `io.nerv.agent` on the selected Mac) with its single checkout, data home and SQLite database. The brain and nervous processes are children of that service and upgrade with it. Local model engines are F-005-T08; Windows and Linux adapters are T09/T10. This slice adds a reader contract and a **review-only rehearsal**. It admits no upgrade: `nodes lifecycle-inspect --action update` still accepts only documentation/README changes.
+2026-11-11, baseline main `b68802d`. Scope: the one per-user NERV service (launchd `io.nerv.agent` on the selected Mac) with its single checkout, data home and SQLite database. The brain and nervous processes are children of that service and upgrade with it. Local model engines are F-005-T08; Windows and Linux adapters are T09/T10. The first slice added a reader contract and a review-only rehearsal; the second makes the rehearsal a journaled step of every update. Neither widens admission: `nodes lifecycle-inspect --action update` still accepts only documentation/README changes.
 
 ## Why a rehearsal, not a marker
 
@@ -24,9 +24,26 @@ Alternatives considered: trust a version field in the candidate tree; rejected a
 
 The report carries the source digest, schemas, table and row counts and blockers; never row content. A reader failure is reported with its fixed message; a parse failure is reported without the text it quotes. `forwardOnly: true` means the reader moved the schema forward: the installed revision may no longer read that data, and undoing it is a separately reviewed restore. Renumbering or dropping existing rows is reported even for an intended migration: that case needs its own review rather than a relaxed check.
 
+## Rehearsal inside the update operation
+
+Baseline main `ee9cbb6`. An update now runs `backup`, `fetch`, **`rehearse`**, `checkout`, `dependencies`, `build`, `start`, `verify`, each journaled as started and completed under the operation's fence.
+
+1. The pinned revision is exported with `git archive` into `~/.nerv-lifecycle/staging/<plan digest>` (private) and unpacked there. It is never checked out: the installed checkout and its dependencies stay as they are. The export is removed when the step ends.
+2. The candidate's reader is its own file `src/upgrade-reader.ts`, run as a separate process from the exported tree: `node src/upgrade-reader.ts DATABASE HOME`. It opens the private copy with that tree's real `Store` and prints nothing. The entry is part of the contract: a tree without it fails the rehearsal.
+3. The copying, the schema and integrity checks and the comparison are the **installed** revision's code, on the backup this same operation took. The candidate does not judge itself.
+4. The receipt records the rehearsal (source digest, schemas, counts, blockers; no row content).
+5. A reported blocker ends the operation with state `refused`. Source, data and service are re-inspected as unchanged first, and the claim on the service is released in the same transaction, so the installed revision can be started again with a fresh `start` plan and no recovery release. Replaying the plan returns the refusal.
+6. Anything else stays `uncertain` as before: the export failing, the source or runtime changing during the step, or the handler being interrupted.
+
+The handler identity in a plan now also covers `src/upgrade-rehearsal.ts`, so a plan made under another comparison is refused.
+
+Alternatives considered: let the candidate tree run the whole rehearsal and report; rejected because a faulty candidate would then also own the comparison. `git worktree add` for the export; rejected because it writes into the installed checkout's Git metadata. Treat a blocker as `uncertain`; rejected because the outcome is known and a held claim would block starting the unchanged service until a manual release.
+
 ## What this does not establish
 
-- The rehearsal trusts the checkout it runs from. Running it from the candidate revision is still manual: a separate clone or worktree at the pinned commit. It is not yet bound to a lifecycle plan digest.
+- The standalone `upgrade-rehearse` command trusts the checkout it runs from. Inside an update the candidate tree is the pinned one and the result is bound to the plan digest.
+- The exported tree has no installed dependencies. A candidate reader that needs an npm package fails and the update is refused; today's reader needs none. The reader runs as the owner's user, like the revision would after checkout.
+- An interrupted step can leave `~/.nerv-lifecycle/staging/<plan digest>` and its `.tar` (private); remove them after reconciling the operation.
 - It does not test dependencies, the build, the runtime after start, in-flight worker or outbox state, or configuration files other than `config.json`.
 - Row presence is not content equality: a reader that rewrites values, or changes a column's type or an index's or trigger's definition while keeping its name, is not detected. Search indexes are checked by count, not content.
 - An interrupted run (SIGINT/SIGKILL) can leave the private working copy (mode 0700/0600) in the temporary directory; remove `nerv-rehearsal-*` there. Two full copies are made with no free-space check.
@@ -36,11 +53,11 @@ The report carries the source digest, schemas, table and row counts and blockers
 
 ## Remaining T06 work
 
-1. Journaled `rehearse` step in the update operation, after `backup` and `fetch` and before `checkout`: export the pinned candidate tree to a private staging directory, run its reader on the operation's own backup, and compare with the installed revision's code. A blocker ends the operation before the checkout changes.
+1. Done (second slice, above): journaled `rehearse` step between `fetch` and `checkout`.
 2. Admission beyond documentation: candidate must descend from the installed revision (no downgrade), carry this contract, and satisfy the engine range before dependency effects; the receipt records prior revision, schemas and backup.
 3. Post-start acceptance and explicit forward recovery when build or start fails after a forward-only migration.
 4. Independent review, then a real application upgrade on the owner-selected Mac.
 
 ## Review
 
-[Independent review, 2026-11-11](../reviews/2026-11-11-upgrade-rehearsal.md): one blocker (real lifecycle backups were refused) and nine comparison/safety gaps, each with a committed failing regression before its fix.
+[Independent review, 2026-11-11](../reviews/2026-11-11-upgrade-rehearsal.md): one blocker (real lifecycle backups were refused) and nine comparison/safety gaps, each with a committed failing regression before its fix. The second slice (journaled step, `refused` state) has not had an independent review yet; it is due before admission widens (step 4).

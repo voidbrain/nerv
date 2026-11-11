@@ -12,6 +12,8 @@ import {UPGRADE_CONTRACT} from './upgrade-contract.ts';
  * data home, the checkout nor any service is changed. A clean report is evidence for a review, never an admission.
  */
 export type UpgradeReader=(database:string,home:string)=>void|Promise<void>;
+/** Where a candidate tree keeps the reader an installed revision runs: `node READER_ENTRY DATABASE HOME`. */
+export const READER_ENTRY='src/upgrade-reader.ts';
 export interface RehearsalReport {
  version:1;execution:'rehearsal-only';contract:typeof UPGRADE_CONTRACT;
  source:{digest:string;schema:number};
