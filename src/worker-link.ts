@@ -290,14 +290,17 @@ class Peer {
       // verified, below). An on-time timeout is final, as before. Whether a system
       // sleep counts as a stall depends on the platform's monotonic clock; it is not relied on here.
       // Every verdict (on time, late, or after the grace budget, whose timer can itself fire late after a second stall)
-      // first lets an answer already received win: setImmediate runs after the poll phase has read the socket, and the
-      // verdict then waits for the frames already queued on `incoming` to be verified and applied, for at most one more
-      // budget: each queued frame awaits the registry (in serve, nervous-process calls with their own timeouts), so
+      // first lets an answer already received win. It waits one full loop turn (two nested setImmediate): on Unix the
+      // poll phase reads the socket before the first one runs, but on Windows (IOCP) the poll phase only collects the
+      // completion and the read callback runs in the next turn's pending phase (#278 Windows CI run 43105159883).
+      // The verdict then waits for the frames already queued on `incoming` to be verified and applied, for at most one
+      // more budget: each queued frame awaits the registry (in serve, nervous-process calls with their own timeouts), so
       // waiting for the whole queue could delay a verdict by many budgets.
       const id = randomUUID(),
         started = performance.now(),
+        afterLoopTurn = (next: () => void) => setImmediate(() => setImmediate(next)),
         expire = () =>
-          setImmediate(() => {
+          afterLoopTurn(() => {
             let cap: NodeJS.Timeout | undefined;
             void Promise.race([this.incoming, new Promise<void>((done) => (cap = setTimeout(done, timeoutMs)))]).then(
               () => {
