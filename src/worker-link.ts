@@ -288,12 +288,22 @@ class Peer {
       // is deferred once by a fresh budget from the moment the loop resumed; a peer that really is gone still times out
       // after it (worst case: budget + stall + budget). An on-time timeout is final, as before. Whether a system
       // sleep counts as a stall depends on the platform's monotonic clock; it is not relied on here.
+      // Every verdict (on time, late, or after the grace budget, whose timer can itself fire late after a second stall)
+      // first lets an answer already received win: setImmediate runs after the poll phase has read the socket, and the
+      // verdict then waits for the frames already queued on `incoming` (bounded by MAX_QUEUED_FRAMES; request handling
+      // is not awaited there) to be verified and applied.
       const id = randomUUID(),
         started = performance.now(),
-        expire = () => reject(Error('Worker result unknown after timeout.')),
+        expire = () =>
+          setImmediate(() => {
+            void this.incoming.then(() => {
+              if (this.pending.has(id)) reject(Error('Worker result unknown after timeout.'));
+            });
+          }),
         timer = setTimeout(() => {
           const pending = this.pending.get(id);
-          if (pending && performance.now() - started > timeoutMs + Math.max(25, timeoutMs / 4))
+          if (!pending) return;
+          if (performance.now() - started > timeoutMs + Math.max(25, timeoutMs / 4))
             pending.timer = setTimeout(expire, timeoutMs);
           else expire();
         }, timeoutMs);
