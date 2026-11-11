@@ -770,8 +770,13 @@ test('the root command runs only uncovered cases, records them and reports nothi
     const before = await main(['pending']);
     assert.equal(before.pendingLines.length, 48);
     assert.equal(before.pendingLines.filter((l) => l.startsWith('general-assistant-expanded/')).length, 28);
-    // Named by an open record (F-074-T09 names the three common packs), so the CI check passes.
+    // Named by an unfinished task (F-074-T09 lists the three common packs as pack/*), so the CI check passes.
     assert.deepEqual((await main(['pending', '--check-records'])).pendingLines, []);
+    // Max age and another profile make covered cases pending again; --fresh plans every case.
+    const old = await main(['all', '--max-age-days=1']);
+    assert.ok(old.plan.find((p) => p.pack === 'nerv-system-flows').run.every((r) => r.reason === 'stale'));
+    const fresh = await main(['all', '--fresh']);
+    assert.ok(fresh.plan.every((p) => p.run.length > 0 && p.run.every((r) => r.reason === 'fresh')));
     // Without approval the plan blocks every model case and runs nothing.
     const plan = await main(['all']);
     assert.equal(plan.modelCallsAuthorized, false);
@@ -842,6 +847,7 @@ test('the root command runs only uncovered cases, records them and reports nothi
       ],
     );
     assert.equal(run.stillPending, 0);
+    assert.equal(typeof run.passed, 'boolean');
     assert.deepEqual((await main(['pending'])).pendingLines, []);
     const recorded = JSON.parse(readFileSync(ledger, 'utf8')).entries;
     assert.equal(recorded.length, 55);
@@ -849,9 +855,23 @@ test('the root command runs only uncovered cases, records them and reports nothi
       recorded.every((e) => !JSON.stringify(e).includes('content')),
       'metadata only',
     );
-    // A second run finds nothing to do.
+    // A second run finds nothing to do; another profile has run nothing yet.
     const again = await main(['all']);
     assert.ok(again.plan.every((p) => p.run.length === 0));
+    const other = join(dir, 'other-profile.json');
+    const base = JSON.parse(
+      readFileSync('node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json', 'utf8'),
+    );
+    writeFileSync(other, JSON.stringify({ ...base, id: 'other', seed: 7 }));
+    const otherPlan = await main(['all', '--profile=' + other]);
+    assert.ok(
+      otherPlan.plan
+        .filter((p) => p.layer === 'model')
+        .every(
+          (p) => p.run.length === p.reuse.length + p.run.length && p.run.every((r) => r.reason === 'other-profile'),
+        ),
+    );
+    assert.deepEqual(otherPlan.plan.find((p) => p.layer === 'system').run, [], 'system cases need no profile');
   } finally {
     delete process.env.NERV_GAUNTLET_LEDGER;
     rmSync(dir, { recursive: true, force: true });
@@ -874,4 +894,15 @@ test('pending and ledger keep the harness contract: lines and exit 1 when pendin
   writeFileSync(join(dir, 'bad.json'), '{"schemaVersion":1,"entries":[{"x":1}]}');
   assert.equal(cli(['pending'], { NERV_GAUNTLET_LEDGER: join(dir, 'bad.json') }).status, 2);
   assert.equal(cli(['ledger', '--pack=nerv-system-flows']).status, 2);
+});
+
+test('check:gauntlet-runs fails for a pending case that no unfinished task lists', async () => {
+  const { unnamedPending } = await import('../tools/gauntlet.mjs');
+  const changed = { pack: 'nerv-system-flows', case: 'policy', reason: 'changed' };
+  // Prose that mentions the pack id does not name it; history in a record never counts.
+  assert.deepEqual(unnamedPending([changed], 'F-074 consumes nerv-system-flows and neutral-smoke'), [changed]);
+  assert.deepEqual(unnamedPending([changed], 'see nerv-system-flows/policy-old'), [changed]);
+  assert.deepEqual(unnamedPending([changed], 'covers nerv-system-flows/policy'), []);
+  assert.deepEqual(unnamedPending([changed], 'covers nerv-system-flows/*'), []);
+  assert.deepEqual(unnamedPending([changed], 'covers neutral-smoke/*'), [changed]);
 });

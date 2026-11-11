@@ -6,6 +6,7 @@
   "title": "T09 — First ledger-covered run of every common pack and the expensive system cases",
   "goal": "First runs recorded in the ledger for the common packs neutral-smoke (10), neutral-smoke-schema (10) and general-assistant-expanded (28, never run in NERV), on the authorized Gemma profile, and for the expensive NERV system cases nerv-system-flows/stress and nerv-system-flows/browser. The 2026-11-09 smoke run predates the ledger and its report is not in the repository; the owner may supply that report to `npm run gauntlet:ledger` instead of a rerun.",
   "acceptance": [
+    "Pending cases this task covers (listed for check:gauntlet-runs): neutral-smoke/*, neutral-smoke-schema/*, general-assistant-expanded/*, nerv-system-flows/stress, nerv-system-flows/browser",
     "Owner approves the budget; `npm run gauntlet:all -- --profile=… --allow-models --allow-expensive --execute --out-dir=…` runs the 48 model cases and the two expensive system cases",
     "Saved private reports; a summary in docs/evaluations with pass/fail per case, telemetry gaps explicit and no qualification claim",
     "The ledger records every run, and `npm run check:gauntlet-runs` reports nothing pending"

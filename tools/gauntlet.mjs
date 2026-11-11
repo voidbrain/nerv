@@ -149,22 +149,21 @@ const selectedPack = (pack, ids, model) =>
         cases: pack.cases.filter((c) => ids.includes(c.id)),
       };
 
-// An open backlog item names a pending case when an active record or an unfinished task mentions the case as
-// `pack/case` or its whole pack by id.
-function openBacklogText() {
-  const records = readdirSync(here('docs/work/records'))
-    .filter((f) => f.endsWith('.md'))
-    .map((f) => readFileSync(here('docs/work/records/' + f), 'utf8'));
-  const tasks = readdirSync(here('docs/work/tasks'))
+// A pending case is named only by an unfinished task (status other than closed) that lists it explicitly as
+// `pack/case`, or a whole pack as `pack/*`. Record history and closed tasks never count, so a pack id that merely
+// appears in prose cannot silence the check.
+function openTaskText() {
+  return readdirSync(here('docs/work/tasks'))
     .filter((f) => f.endsWith('.json'))
     .map((f) => readJSON(here('docs/work/tasks/' + f)))
     .filter((t) => t.status !== 'closed')
-    .map((t) => JSON.stringify(t));
-  return [...records, ...tasks].join('\n');
+    .map((t) => JSON.stringify(t))
+    .join('\n');
 }
-const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const named = (text, p) =>
-  text.includes(`${p.pack}/${p.case}`) || new RegExp(`(^|[^\\w-])${escape(p.pack)}([^\\w-]|$)`, 'm').test(text);
+export function unnamedPending(list, text) {
+  const names = new Set(text.match(/[a-z0-9][a-z0-9.-]*\/(?:\*|[a-z0-9][a-z0-9.-]*)/gi) ?? []);
+  return list.filter((p) => !names.has(`${p.pack}/${p.case}`) && !names.has(`${p.pack}/*`));
+}
 export function pending({ maxAgeDays, profile } = {}) {
   return pendingCases(
     allPacks().map((p) => p.pack),
@@ -303,10 +302,11 @@ export async function main(args = process.argv.slice(2), services = { execute: e
       profile: options.profile ? validateProfile(load('profile')) : undefined,
     });
     if (!options['check-records']) return { pendingLines: list.map((p) => `${p.pack}/${p.case} (${p.reason})`) };
-    const text = openBacklogText();
-    const unnamed = list.filter((p) => !named(text, p));
+    const unnamed = unnamedPending(list, openTaskText());
     return {
-      pendingLines: unnamed.map((p) => `${p.pack}/${p.case} (${p.reason}): no open backlog record names it`),
+      pendingLines: unnamed.map(
+        (p) => `${p.pack}/${p.case} (${p.reason}): no unfinished task lists ${p.pack}/${p.case} or ${p.pack}/*`,
+      ),
       pending: list.length,
       named: list.length - unnamed.length,
     };
@@ -481,7 +481,9 @@ async function all(options, { profile, execute, limitsFor, maxAgeDays }) {
     for (const batch of batches) {
       const selected = selectedPack(pack, batch, model);
       const out = join(outDir, `${pack.id}${model ? '' : '-' + batch[0]}.json`);
-      const result = await execute(selected, model, model ? profile : null, out);
+      const result = await execute(selected, model, model ? profile : null, out, {
+        ...(maxAgeDays !== undefined ? { maxAgeMs: maxAgeDays * 86400000 } : {}),
+      });
       next = recordSelected(next, result.report, pack, selected);
       results.push({
         pack: pack.id,
@@ -497,6 +499,7 @@ async function all(options, { profile, execute, limitsFor, maxAgeDays }) {
   return {
     plan: summary,
     results,
+    passed: results.every((r) => r.passed),
     ledger: ledgerFile,
     stillPending: pendingCases(
       allPacks().map((p) => p.pack),

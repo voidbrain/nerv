@@ -10,13 +10,13 @@ Earlier pin, 0.5.0: It adds the separate 28-case `general-assistant-expanded@1.0
 
 ## Every common pack, the run ledger and the root command (F-074-T06..T08)
 
-NERV consumes **every pack the pinned release ships** (today `neutral-smoke`, `neutral-smoke-schema`, `general-assistant-expanded`) plus its own `nerv-system-flows`; `npm run gauntlet:packs` lists them. A pack is left out only by `evals/gauntlet/consumption.json` `exclude` with a reason, and an exclusion naming no shipped pack fails. The generated index lists every consumed pack. `gauntlet:model-plan`/`model-run` take `--pack=<id>` (default `neutral-smoke`; `--format=schema` still selects `neutral-smoke-schema`). Model limits scale Gauntlet's day limits per case (30 s and 2,048 output tokens a case), so a ten-case pack keeps exactly the day limits and the 28-case pack gets 28 cases, 840 s and 57,344 tokens.
+NERV consumes **every pack the pinned release ships** (today `neutral-smoke`, `neutral-smoke-schema`, `general-assistant-expanded`) plus its own `nerv-system-flows`; `npm run gauntlet:packs` lists them. A pack is left out only by `evals/gauntlet/consumption.json` `exclude` with a reason, and an exclusion naming no shipped pack fails. The generated index lists every consumed pack. `gauntlet:model-plan`/`model-run` take `--pack=<id>` (default `neutral-smoke`; `--format=schema` still selects `neutral-smoke-schema`). Model limits scale Gauntlet's day limits per case (30 s and 2,048 output tokens a case), so a ten-case pack keeps exactly the day limits and the 28-case pack gets 28 cases, 840 s and 57,344 tokens; a `--only` subset gets limits for its own size unless `--limits` is given. `NERV_GAUNTLET_LEDGER` and `NERV_GAUNTLET_CONSUMPTION` override the two file paths (for tests).
 
 `evals/gauntlet/ledger.json` is the committed, metadata-only run ledger (Gauntlet 0.6.0 format): which case definitions ran, under which profile, with which result and report hash; no prompts, outputs or timings. Only graded results cover a case: an error from an unanswering runtime does not.
 
 ```sh
 npm run gauntlet:pending                     # one line per case with no covering run; exit 1 when any
-npm run check:gauntlet-runs                  # CI: fails while a pending case has no open backlog item naming it
+npm run check:gauntlet-runs                  # CI: fails while a pending case is not listed by an unfinished task (pack/case or pack/*)
 npm run gauntlet:all                         # plan: per pack, what runs (new/changed/stale) and what is reused
 npm run gauntlet:all -- --execute --out-dir=/private/tmp/nerv-all-new   # runs uncovered NERV system cases
 # Only after an owner-approved budget:
@@ -24,9 +24,9 @@ npm run gauntlet:all -- --profile=node_modules/@voidbrain/gauntlet-protocol/exam
 npm run gauntlet:ledger -- --report=/private/report.json --pack=neutral-smoke   # record a saved report
 ```
 
-`gauntlet:all` runs only the cases the ledger does not cover, or every case with `--fresh`, and records each report in the ledger; `--max-age-days=N` also reruns cases whose last run is older (the default age is an owner decision, proposed 30 days; none is applied today). NERV system cases need no model and run one per report; `stress` and `browser` need `--allow-expensive`. Model cases need `--allow-models` and `--profile`, and remain an owner-approved campaign. Session start reports pending cases through the harness setting `evaluations` (`.harness.json`, harness 5.2.0), and the `gauntlet-runs` impact row tells the agent to raise or update the backlog item in the PR that bumps the pin.
+`gauntlet:all` runs only the cases the ledger does not cover, or every case with `--fresh`, and records each report in the ledger; `--max-age-days=N` also reruns cases whose last run is older and passes the same age to Gauntlet's cache (which caps it at 30 days), so an older cached report is not reused (the default age is an owner decision, proposed 30 days; none is applied today). `gauntlet:all` exits 1 when any executed case fails. NERV system cases need no model and run one per report; `stress` and `browser` need `--allow-expensive`. Model cases need `--allow-models` and `--profile`, and remain an owner-approved campaign. Session start reports pending cases through the harness setting `evaluations` (`.harness.json`, harness 5.2.0), and the `gauntlet-runs` impact row tells the agent to raise or update the backlog item in the PR that bumps the pin.
 
-Ledger state at adoption (2026-11-11): the five ordinary system cases ran and passed locally with this branch; `stress`, `browser` and all 48 common model cases are pending and named by F-074-T09. The 2026-11-09 Gemma smoke predates the ledger; its report is not in the repository.
+Ledger state at adoption (2026-11-11): the five ordinary system cases ran and passed locally with this branch; `stress`, `browser` and all 48 common model cases are pending and listed by F-074-T09 (`pack/*` or `pack/case`; a pending case counts as raised only when an unfinished task lists it). The 2026-11-09 Gemma smoke predates the ledger; its report is not in the repository.
 
 ## Commands and costs
 
