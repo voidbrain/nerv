@@ -245,3 +245,7 @@ Authenticated ci:status confirms CI43013239139 passed plan, validate, windows, n
 ## 2026-11-11 — PR #268
 
 Authenticated ci:status confirms CI43015017327 passed plan, validate, windows and native-macos; full-suite skipped by scoped verification (records only); merged main a40f89d. F-074 gained T06–T09 after the gap where the 0.5.0 pin's expanded pack was never run. Previous header: Reviewed 11 November 2026 against main `74c3cee`. PR #267 CI43013239139 passed all five jobs: harness 5.1.1 reconciled. F-074 gains T06–T09: every common Gauntlet pack consumed, new packs raise a run (PR #268); B-048 awaits five clean `main` runs.
+
+## 2026-11-11 — PR #269
+
+Authenticated ci:status confirms CI43016078610 passed plan, validate, windows and native-macos; full-suite skipped by scoped verification (records only); merged main 3c4a283. F-074-T07 now adopts upstream detection (gauntlet-protocol PR #33, F-010; project-harness PR #109, F-052). Previous header: Reviewed 11 November 2026 against main `a40f89d`. PR #268 CI43015017327 passed plan, validate, windows and native-macos (full-suite skipped, records only): F-074 T06–T09 planned. T07 now adopts upstream Gauntlet F-010 and harness F-052 (PR #269); B-048 awaits five clean `main` runs.
