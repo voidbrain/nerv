@@ -43,17 +43,27 @@ Alternatives considered: let the candidate tree run the whole rehearsal and repo
 
 Baseline main `6a960bf`. `nodes lifecycle-inspect --action update --revision FULL-SHA` now admits two kinds of revision, with the actual database schema inside the contract range in both cases:
 
-1. **Documentation only**, as before: the diff from the installed revision touches only `docs/` and `README.md`.
-2. **An application change**, when all of these hold before any effect:
-   - the candidate **descends from the installed revision**. An ancestor or an unrelated line is refused, so there is no downgrade through this path;
+Every candidate must be a commit (not a tag object) that **descends from the installed revision**. An ancestor or an unrelated line is refused, documentation-only or not, so there is no downgrade through this path. Then:
+
+1. **Documentation only**: the diff from the installed revision touches only `docs/` and `README.md`. Nothing more is asked.
+2. **An application change**, when both of these also hold before any effect:
    - the candidate tree carries the reader entry `src/upgrade-reader.ts`, so there is something to rehearse;
    - the candidate's `package.json` declares a Node range in the plain `>=X.Y.Z` form and the service's own Node meets it. Another form, or none, is refused rather than guessed.
 
-Admission lets the attempt start; it does not vouch for the data. Inside the operation the rehearsal still decides, and it now also refuses a candidate whose reader **moves the schema forward**: after such a migration the installed revision could no longer read the data, and the recovery for that is not built (step 3). So this slice admits upgrades that keep the schema, which is every revision between the reader contract's introduction and today.
+Admission lets the attempt start; it does not vouch for the data. Inside the operation the rehearsal still decides, and it now also refuses a candidate whose reader **moves the schema forward**: after such a migration the installed revision could no longer read the data, and the recovery for that is not built (step 3). So this slice admits upgrades that keep the schema version (`user_version`). That is narrower than "keeps the schema": the Store adds tables and columns without raising the version, and such additive changes pass, by design, because the installed revision still reads them. The refusal looks at the version after the first and second open; a reader that migrated only on a later open, or rebuilt a table without changing the version, would not be caught by it (the row, column and row-id comparison still applies to the first two opens).
 
 The candidate commit must already be in the checkout when the plan is made (`git -C CHECKOUT fetch origin FULL-SHA`), because admission reads its tree.
 
-If `dependencies`, `build` or `start` fails after the checkout moved, the operation stays `uncertain` as for any interrupted update. The data is as the backup has it or, after a start, as a reader that was rehearsed to lose nothing left it. Recovery is manual and explicit: reconcile and release the operation, check out the previous revision by hand, rebuild, and apply a fresh `start` plan. An `update` plan back to the previous revision is refused as a downgrade by design.
+Dependencies are installed with `npm ci --engine-strict --ignore-scripts`: an admitted candidate may change the lockfile, and package install scripts are neither reviewed by the rehearsal nor needed by this project's build. `npm run build` and the started service do run candidate code as the owner, with access to the live data home; the pinned revision is what authorises that.
+
+If `dependencies`, `build` or `start` fails after the checkout moved, the operation stays `uncertain` as for any interrupted update. If the failure came before `start`, the candidate never opened the live data. After `start` it may have: the rehearsal covered what the reader does on open, not everything a running service does. Recovery is manual and explicit, in this order:
+
+1. Inspect whether the candidate is registered or running (`launchctl print gui/UID/io.nerv.agent`). If it is, stop it before anything else, and confirm no descendant process remains.
+2. Reconcile and release the operation with that evidence (`nodes lifecycle-release`).
+3. Check out the previous revision by hand, then `npm ci --ignore-scripts && npm run build`. Both are needed: `npm ci` replaced `node_modules`, and the lifecycle only checks that a build exists, not which revision built it.
+4. Apply a fresh `start` plan.
+
+An `update` plan back to the previous revision is refused as a downgrade by design. If the data was changed in a way the previous revision cannot read, that is a restore from the operation's backup, which stays a separately reviewed step (F-062).
 
 Alternatives considered: allow-listing more paths; rejected earlier, a changed reader cannot be judged by its paths. Reading the candidate's contract values from its source; rejected as a marker, the rehearsal shows what the reader does. A full semver range evaluator; rejected for now, one plain form covers this project and anything else fails closed.
 

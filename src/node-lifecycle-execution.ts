@@ -730,9 +730,9 @@ function engineSatisfied(range: unknown, version: string): boolean {
   return true;
 }
 /**
- * Admission of an update, before any effect. A revision that changes only documentation is admitted as before. Any
- * other revision must descend from the installed one (never a downgrade), carry the reader entry the rehearsal runs,
- * and declare a Node range this runtime meets. This admits the attempt, not the data: the journaled rehearsal then
+ * Admission of an update, before any effect. The pin must be a commit that descends from the installed revision
+ * (never a downgrade or another line). One that changes only documentation needs nothing more. Any other must carry
+ * the reader entry the rehearsal runs and declare a Node range this runtime meets. This admits the attempt, not the data: the journaled rehearsal then
  * runs the candidate's reader on the operation's backup and can still refuse it.
  */
 export async function compatibleServiceRevision(
@@ -749,7 +749,12 @@ export async function compatibleServiceRevision(
     db.close();
   }
   if (schema < UPGRADE_CONTRACT.minimumServiceSchema || schema > SERVICE_READER_SCHEMA) return false;
-  const diff = await run('git', ['-C', c.source, 'diff', '--no-renames', '--name-only', '-z', 'HEAD', revision, '--']);
+  const git = (args: string[]) => run('git', ['-C', c.source, ...args]);
+  // The pin must be a commit (a tag object would check out as another id) that contains the installed revision.
+  const kind = await git(['cat-file', '-t', revision]);
+  if (kind.status !== 0 || kind.out.trim() !== 'commit') return false;
+  if ((await git(['merge-base', '--is-ancestor', 'HEAD', revision])).status !== 0) return false;
+  const diff = await git(['diff', '--no-renames', '--name-only', '-z', 'HEAD', revision, '--']);
   if (diff.status !== 0) return false;
   if (
     diff.out
@@ -758,8 +763,6 @@ export async function compatibleServiceRevision(
       .every((path) => path.startsWith('docs/') || path === 'README.md')
   )
     return true;
-  const git = (args: string[]) => run('git', ['-C', c.source, ...args]);
-  if ((await git(['merge-base', '--is-ancestor', 'HEAD', revision])).status !== 0) return false;
   if ((await git(['cat-file', '-e', revision + ':' + READER_ENTRY])).status !== 0) return false;
   const manifest = await git(['show', revision + ':package.json']),
     runtime = await run(c.node, ['--version']);
@@ -957,7 +960,8 @@ export function macServiceAdapter(context: ServiceContext, run: typeof command =
       else
         r = await run(
           'npm',
-          step === 'dependencies' ? ['ci', '--engine-strict'] : ['run', 'build'],
+          // No install scripts: an admitted application upgrade may change the lockfile, and package scripts are not rehearsed.
+          step === 'dependencies' ? ['ci', '--engine-strict', '--ignore-scripts'] : ['run', 'build'],
           context.source,
           600000,
         );
