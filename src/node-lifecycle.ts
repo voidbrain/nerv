@@ -127,14 +127,14 @@ interface Receipt {
   resource: string;
   fence: number;
   nonce: string;
-  state: 'accepted' | 'running' | 'completed' | 'uncertain' | 'released';
+  state: 'accepted' | 'running' | 'completed' | 'uncertain' | 'released' | 'refused';
 }
 /** Release decision only. A durable adapter must compare this exact snapshot atomically before updating its journal. */
 export function lifecycleRecovery(value: unknown, confirmation: unknown): { action: 'return-receipt' | 'retain' | 'release'; snapshot: Receipt; reason?: string } {
   const v = object(value), c = object(confirmation);
   if (typeof v.resource !== 'string' || !/^user-service:[1-9]\d*:(darwin|linux)$/.test(v.resource) || !Number.isSafeInteger(v.fence) || Number(v.fence) < 1 || typeof v.nonce !== 'string' || !/^[a-f0-9]{32}$/.test(v.nonce)) throw Error('Invalid lifecycle receipt ownership.');
-  const snapshot: Receipt = { digest: digest(v.digest), resource: v.resource, fence: Number(v.fence), nonce: v.nonce, state: choice(v.state, ['accepted', 'running', 'completed', 'uncertain', 'released']) };
-  if (snapshot.state === 'completed' || snapshot.state === 'released') return { action: 'return-receipt', snapshot };
+  const snapshot: Receipt = { digest: digest(v.digest), resource: v.resource, fence: Number(v.fence), nonce: v.nonce, state: choice(v.state, ['accepted', 'running', 'completed', 'uncertain', 'released', 'refused']) };
+  if (snapshot.state === 'completed' || snapshot.state === 'released' || snapshot.state === 'refused') return { action: 'return-receipt', snapshot };
   if (c.digest !== snapshot.digest || c.fence !== snapshot.fence || c.nonce !== snapshot.nonce || c.resource !== snapshot.resource) throw Error('Lifecycle ownership changed; reconcile the current receipt.');
   if (c.handlerStopped !== true || c.descendantsStopped !== true || c.operatorConfirmed !== true) return { action: 'retain', snapshot };
   if (typeof c.reason !== 'string' || !c.reason.trim() || c.reason.length > 500 || /[\x00-\x1f\x7f]/.test(c.reason)) throw Error('Record bounded stopped-operation evidence.');

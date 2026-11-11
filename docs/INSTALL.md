@@ -315,9 +315,9 @@ nerv nodes lifecycle-apply --plan service-plan.json --confirm PLAN_DIGEST
 nerv nodes lifecycle-status --digest PLAN_DIGEST
 ```
 
-Generate a fresh plan for `stop`, `start` or `uninstall`; stop before uninstall or update. Keep plan/receipt files private. `update --revision FULL_SHA` currently permits only revisions changing documentation/README, with identical executable/dependency/configuration trees and actual database schema5/6. Executable, runtime-path or schema upgrades require the separate F-005-T06 compatibility work; marker strings cannot authorize them. Update takes a consistent private backup, advances the pinned revision, runs locked dependencies/build and verifies the restarted runtime. General restore/downgrade remains F-062.
+Generate a fresh plan for `stop`, `start` or `uninstall`; stop before uninstall or update. Keep plan/receipt files private. `update --revision FULL_SHA` currently permits only revisions changing documentation/README, with identical executable/dependency/configuration trees and actual database schema5/6. Executable, runtime-path or schema upgrades require the separate F-005-T06 compatibility work; marker strings cannot authorize them. Update takes a consistent private backup, fetches the pinned revision, rehearses that revision's database reader on a private copy of the backup, and only then advances the checkout, runs locked dependencies/build and verifies the restarted runtime. If the rehearsal reports a problem the receipt says `refused` with the reasons: nothing was changed, and a fresh `start` plan brings the installed revision back up. General restore/downgrade remains F-062.
 
-Before any application upgrade is admitted, you can rehearse a candidate reader on a backup. From a separate clone or worktree checked out at the candidate commit:
+You can also rehearse a reader on an existing backup by hand. From a separate clone or worktree checked out at the candidate commit:
 
 ```bash
 nerv nodes upgrade-rehearse --backup "$HOME/.nerv-lifecycle/backups/PLAN_DIGEST" --out rehearsal.json

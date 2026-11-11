@@ -1,5 +1,5 @@
 import {createHash,randomBytes,createPrivateKey,createPublicKey} from 'node:crypto';
-import {chmodSync,closeSync,existsSync,fsyncSync,lstatSync,mkdirSync,openSync,readFileSync,readSync,realpathSync,unlinkSync,writeFileSync} from 'node:fs';
+import {chmodSync,closeSync,existsSync,fsyncSync,lstatSync,mkdirSync,openSync,readFileSync,readSync,realpathSync,rmSync,unlinkSync,writeFileSync} from 'node:fs';
 import {dirname,join,resolve} from 'node:path';
 import {homedir} from 'node:os';
 import {fileURLToPath} from 'node:url';
@@ -13,20 +13,21 @@ import {assertRootMigrationReady} from './root-migration.ts';
 import {lifecycleRecovery} from './node-lifecycle.ts';
 import {transaction} from './sqlite-transaction.ts';
 import {UPGRADE_CONTRACT} from './upgrade-contract.ts';
+import {rehearseUpgrade,READER_ENTRY,type RehearsalReport} from './upgrade-rehearsal.ts';
 
 export const SERVICE_LIFECYCLE_PROTOCOL = 1;
 export const SERVICE_READER_SCHEMA = UPGRADE_CONTRACT.readerSchema;
 type Action='install'|'start'|'stop'|'update'|'uninstall';
-type State='running'|'completed'|'uncertain'|'released';
+type State='running'|'completed'|'uncertain'|'released'|'refused';
 export interface ServiceContext {userHome:string;home:string;source:string;node:string;uid:number}
 export interface ServiceObservation {revision:string;schema:number;profile:string;definition:'absent'|'owned'|'foreign';registration:'absent'|'owned'|'foreign';runtime:'stopped'|'owned'|'unknown';pids:number[];session:boolean;clean:boolean;legacy:boolean;pending:boolean;built:boolean}
 export interface ServicePlan {version:1;kind:'mac-service';action:Action;context:ServiceContext;before:ServiceObservation;nextRevision?:string;handler:string;nonce:string;created:string;blockers:string[];digest:string}
-export interface ServiceReceipt {digest:string;resource:string;fence:number;nonce:string;pid:number;identity:string;state:State;steps:string[]}
+export interface ServiceReceipt {digest:string;resource:string;fence:number;nonce:string;pid:number;identity:string;state:State;steps:string[];rehearsal?:Pick<RehearsalReport,'source'|'result'|'blockers'>}
 /** Trusted adapter injection is for tests; no manifest or CLI input can select an adapter or command text. */
-export interface ServiceHost {context:ServiceContext;inspect():Promise<ServiceObservation>;command(step:'register'|'unregister'|'fetch'|'checkout'|'dependencies'|'build',plan:ServicePlan):Promise<void>;compatible(revision:string):Promise<boolean>;backup(path:string):Promise<void>;authorizedStart?(plan:ServicePlan):Promise<boolean>}
+export interface ServiceHost {context:ServiceContext;inspect():Promise<ServiceObservation>;command(step:'register'|'unregister'|'fetch'|'checkout'|'dependencies'|'build',plan:ServicePlan):Promise<void>;compatible(revision:string):Promise<boolean>;backup(path:string):Promise<void>;rehearse(plan:ServicePlan,backup:string):Promise<RehearsalReport>;authorizedStart?(plan:ServicePlan):Promise<boolean>}
 const hash=(value:string|Buffer)=>createHash('sha256').update(value).digest('hex');
-/** The handler identity covers this file and the reader contract it enforces, so a plan made under other bounds is refused. */
-const handler=()=>hash(Buffer.concat([readFileSync(fileURLToPath(import.meta.url)),Buffer.from(canonical(UPGRADE_CONTRACT))]));
+/** The handler identity covers this file, the rehearsal comparison it gates updates on and the reader contract, so a plan made under other code or bounds is refused. */
+const handler=()=>hash(Buffer.concat([readFileSync(fileURLToPath(import.meta.url)),readFileSync(fileURLToPath(new URL('./upgrade-rehearsal.ts',import.meta.url))),Buffer.from(canonical(UPGRADE_CONTRACT))]));
 const object=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 const definition=(c:ServiceContext)=>join(c.userHome,'Library/LaunchAgents/io.nerv.agent.plist');
 const area=(c:ServiceContext)=>join(c.userHome,'.nerv-lifecycle');
@@ -98,7 +99,14 @@ export async function applyService(host:ServiceHost,raw:unknown,confirm:string,o
   if(p.action==='uninstall')await step('remove-definition',async()=>{const current=await inspectOwned(false);if(current.runtime!=='stopped'||current.pids.length)throw Error('Runtime descendants remain.');safe(definition(host.context),host.context.uid,true);if(hash(readFileSync(definition(host.context)))!==hash(renderService('darwin',host.context.home,host.context.source,host.context.node)))throw Error('Definition changed before removal.');unlinkSync(definition(host.context));syncDirectory(dirname(definition(host.context)));});
   if(p.action==='update'){
    await step('backup',async()=>{await inspectOwned(false);const root=join(area(host.context),'backups');if(!existsSync(root))mkdirSync(root,{mode:0o700});safe(root,host.context.uid,true);const dest=join(root,p.digest);mkdirSync(dest,{mode:0o700});await host.backup(dest);});
-   for(const command of ['fetch','checkout','dependencies','build'] as const)await step(command,async()=>{const current=await inspectOwned(false);if(current.runtime!=='stopped'||current.pids.length||!current.clean||current.revision!==(['dependencies','build'].includes(command)?p.nextRevision:p.before.revision))throw Error('Runtime or source changed during update.');await host.command(command,p);});
+   const settled=async(revision:string)=>{const current=await inspectOwned(false);if(current.runtime!=='stopped'||current.pids.length||!current.clean||current.revision!==revision)throw Error('Runtime or source changed during update.');};
+   const source=(command:'fetch'|'checkout'|'dependencies'|'build')=>step(command,async()=>{await settled(['dependencies','build'].includes(command)?p.nextRevision!:p.before.revision);await host.command(command,p);});
+   await source('fetch');
+   // The candidate's reader runs on this operation's own backup before the checkout changes; the installed code compares.
+   let refused=false;await step('rehearse',async()=>{await settled(p.before.revision);const report=await host.rehearse(p,join(area(host.context),'backups',p.digest));await settled(p.before.revision);receipt!.rehearsal={source:report.source,...(report.result?{result:report.result}:{}),blockers:report.blockers};refused=report.blockers.length>0;});
+   // A reported blocker is a determinate end: source, data and service are as planned, so the claim is released without uncertainty.
+   if(refused){transaction(db,()=>{owns();receipt!.state='refused';save();db!.prepare('DELETE FROM resource WHERE id=1 AND fence=? AND nonce=?').run(receipt!.fence,receipt!.nonce);});return receipt!;}
+   for(const command of ['checkout','dependencies','build'] as const)await source(command);
   }
   if(['install','start','update'].includes(p.action))await step('start',async()=>{const current=await inspectOwned(false);if(current.runtime!=='stopped'||current.pids.length||!current.clean||current.revision!==(p.nextRevision??p.before.revision))throw Error('Selected runtime/source changed before start.');await host.command('register',p);await waitFor(async()=>{const next=await host.inspect();return next.registration==='owned'&&next.runtime==='owned'&&next.profile===p.before.profile&&next.revision===(p.nextRevision??p.before.revision);});});
   await step('verify',async()=>{const current=await host.inspect();if(p.action==='uninstall'?(current.definition!=='absent'||current.registration!=='absent'||current.runtime!=='stopped'):p.action==='stop'?(current.definition!=='owned'||current.registration!=='absent'||current.runtime!=='stopped'):(current.definition!=='owned'||current.registration!=='owned'||current.runtime!=='owned'))throw Error('Final service state did not match the operation.');});
@@ -112,8 +120,8 @@ export function releaseService(host:ServiceHost,snapshot:unknown,evidence:unknow
 async function waitFor(check:()=>Promise<boolean>):Promise<void> {for(let i=0;i<80;i++){if(await check())return;await new Promise(done=>setTimeout(done,250));}throw Error('Service outcome is unconfirmed; inspect the retained receipt.');}
 
 interface Result {status:number|null;out:string;err:string}
-async function command(program:string,args:string[],cwd?:string,timeout=15000):Promise<Result> {
- const env=Object.fromEntries(['PATH','HOME','USER','TMPDIR','LANG','LC_ALL'].filter(k=>process.env[k]!==undefined).map(k=>[k,process.env[k]]));env.PATH=dirname(process.execPath)+':'+(env.PATH??'');
+async function command(program:string,args:string[],cwd?:string,timeout=15000,extra:Record<string,string>={}):Promise<Result> {
+ const env:Record<string,string|undefined>={...Object.fromEntries(['PATH','HOME','USER','TMPDIR','LANG','LC_ALL'].filter(k=>process.env[k]!==undefined).map(k=>[k,process.env[k]])),...extra};env.PATH=dirname(process.execPath)+':'+(env.PATH??'');
  return new Promise((done,fail)=>{const child=spawn(program,args,{cwd,env,stdio:['ignore','pipe','pipe']});let out='',err='',bytes=0;const timer=setTimeout(()=>{child.kill();fail(Error('Lifecycle command timed out; effects remain uncertain.'));},timeout);const add=(target:'out'|'err',b:Buffer)=>{bytes+=b.length;if(bytes>1048576){child.kill();clearTimeout(timer);fail(Error('Lifecycle command output exceeded its bound.'));}else if(target==='out')out+=b;else err+=b;};child.stdout.on('data',(b:Buffer)=>add('out',b));child.stderr.on('data',(b:Buffer)=>add('err',b));child.once('error',()=>{clearTimeout(timer);fail(Error('Lifecycle command could not start.'));});child.once('close',status=>{clearTimeout(timer);done({status,out,err});});});
 }
 /** Public keys follow baseKey's mode644 convention; private credentials and matching key identity remain mandatory. */
@@ -162,6 +170,15 @@ export function macServiceAdapter(context:ServiceContext,run:typeof command=comm
   compatible:revision=>compatibleServiceRevision(context,revision,run),
   authorizedStart:async p=>{if(process.ppid!==1||await git(['status','--porcelain'])!==''||serviceProfileIdentity(context)!==p.before.profile||await git(['rev-parse','HEAD'])!==(p.nextRevision??p.before.revision))return false;const manager=await registration('io.nerv.agent');return !!manager&&macRegistrationMatches(manager.out,context)&&Number(manager.out.match(/^\s*pid = (\d+)$/m)?.[1])===process.pid&&hash(readFileSync(definition(context)))===hash(expected)&&manager.out.includes('NERV_HOME => '+context.home)&&manager.out.includes('program = '+context.node);},
   command:async(step,p)=>{let r:Result;if(step==='register')r=await run('launchctl',['bootstrap',gui,definition(context)]);else if(step==='unregister')r=await run('launchctl',['bootout',target]);else if(step==='fetch')r=await run('git',['-C',context.source,'fetch','--no-tags','origin',p.nextRevision!],undefined,120000);else if(step==='checkout')r=await run('git',['-C',context.source,'checkout','--detach',p.nextRevision!]);else r=await run('npm',step==='dependencies'?['ci','--engine-strict']:['run','build'],context.source,600000);if(r.status!==0)throw Error('Service '+step+' did not confirm completion; retain uncertainty.');},
+  rehearse:async(p,backup)=>{
+   const root=join(area(context),'staging');if(!present(root))mkdirSync(root,{mode:0o700});safe(root,context.uid,true);
+   const tree=join(root,p.digest),archive=tree+'.tar';mkdirSync(tree,{mode:0o700});
+   try{
+    // The pinned tree is exported, never checked out: the installed checkout and its dependencies stay as they are.
+    if((await run('git',['-C',context.source,'archive','--format=tar','-o',archive,p.nextRevision!],undefined,120000)).status!==0||(await run('tar',['-xf',archive,'-C',tree],undefined,120000)).status!==0)throw Error('The pinned revision could not be exported for rehearsal.');
+    return await rehearseUpgrade(backup,async(database,home)=>{const r=await run(context.node,[...NODE_FLAGS,join(tree,READER_ENTRY),database,home],tree,120000,{NERV_HOME:home});if(r.status!==0)throw Error('The candidate reader exited with a failure.');});
+   }finally{rmSync(tree,{recursive:true,force:true});rmSync(archive,{force:true});}
+  },
   backup:async path=>{safe(databasePath(context.home),context.uid);const file=join(path,'database.sqlite'),db=new DatabaseSync(databasePath(context.home));try{db.prepare('VACUUM INTO ?').run(file);}finally{db.close();}chmodSync(file,0o600);const fd=openSync(file,'r+');try{fsyncSync(fd);}finally{closeSync(fd);}const check=new DatabaseSync(file,{readOnly:true});try{if(check.prepare('PRAGMA quick_check').get()!.quick_check!=='ok')throw Error('Consistent update backup failed integrity check.');}finally{check.close();}const sums:Record<string,string>={};for(const name of ['config.json','token','base-key','base.pub',ROOT_KEY_FILE,'anthropic-key','telegram-token']){const src=join(context.home,name);if(existsSync(src)){safe(src,context.uid,name!=='base.pub');const bytes=readFileSync(src);exclusive(join(path,name),bytes);sums[name]=hash(bytes);}}exclusive(join(path,'manifest.json'),JSON.stringify({files:sums,database:fileHash(file),restore:'separately reviewed; never automatic'}));}
  };return host;
 }

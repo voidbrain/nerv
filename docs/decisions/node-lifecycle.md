@@ -44,7 +44,7 @@ Update requires a consistent private data backup and migration/rollback compatib
 
 ## Recovery decision, no journal mutation
 
-`nerv nodes lifecycle-recovery-check --receipt FILE --evidence FILE [--out FILE]` returns `execution: none` and a decision. Receipt fields are `digest`, target-local `resource`, positive safe-integer `fence`, 32-lowercase-hex `nonce` and `state` (`accepted`, `running`, `completed`, `uncertain`, `released`).
+`nerv nodes lifecycle-recovery-check --receipt FILE --evidence FILE [--out FILE]` returns `execution: none` and a decision. Receipt fields are `digest`, target-local `resource`, positive safe-integer `fence`, 32-lowercase-hex `nonce` and `state` (`accepted`, `running`, `completed`, `uncertain`, `released`, `refused`). `refused` is a terminal update outcome: the rehearsal reported a blocker before the checkout changed and the claim was released ([upgrade decision](node-upgrades.md)); like `completed` it needs no release.
 
 For a nonterminal receipt, evidence must match all four ownership fields exactly. Missing explicit `handlerStopped`, `descendantsStopped` or `operatorConfirmed: true` retains ownership. A release recommendation also requires a nonempty bounded single-line `reason`. Lease expiry, PID absence or elapsed timeout is insufficient. Completed/released receipts only return their stored state, never authorize new effects.
 
