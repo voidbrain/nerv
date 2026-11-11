@@ -52,8 +52,30 @@ async function fixture(heartbeatMs = 150, workerHeartbeatMs = heartbeatMs) {
         models: { local: { baseUrl: 'http://127.0.0.1:9/v1', model: 'unused-fixture' } },
       }),
     );
-  const ra = new Runtime(join(homeA, 'nerv.sqlite'), undefined, homeA);
-  let rb = new Runtime(join(homeB, 'nerv.sqlite'), undefined, homeB);
+  // B-046 mechanism (3) diagnosis: every frame a link receives awaits its registry, two calls to that side's nervous
+  // process, so a ping is answered only after the nervous process gets to them. Nervous calls of 50 ms or more are
+  // printed at close (side, method, duration, start on the process clock, calls already in flight; no payload), to
+  // compare with the `atMs` of a heartbeat timeout verdict.
+  const slow: string[] = [];
+  const timed = (runtime: Runtime, side: string) => {
+    const call = runtime.nervous.call.bind(runtime.nervous);
+    let inflight = 0;
+    runtime.nervous.call = async (method, params, timeout) => {
+      const start = performance.now(),
+        before = inflight++;
+      try {
+        return await call(method, params, timeout);
+      } finally {
+        inflight--;
+        const ms = performance.now() - start;
+        if (ms >= 50 && method !== 'runtime.ping')
+          slow.push(`${side} ${method} ${Math.round(ms)}ms at ${Math.round(start)} behind ${before}`);
+      }
+    };
+    return runtime;
+  };
+  const ra = timed(new Runtime(join(homeA, 'nerv.sqlite'), undefined, homeA), 'coordinator');
+  let rb = timed(new Runtime(join(homeB, 'nerv.sqlite'), undefined, homeB), 'worker');
   await Promise.all([ra.ready(), rb.ready()]);
   const server = createServer((_req, res) => {
     res.writeHead(404);
@@ -130,7 +152,7 @@ async function fixture(heartbeatMs = 150, workerHeartbeatMs = heartbeatMs) {
     restartWorker: async () => {
       await link.stop();
       await rb.close();
-      rb = new Runtime(join(homeB, 'nerv.sqlite'), undefined, homeB);
+      rb = timed(new Runtime(join(homeB, 'nerv.sqlite'), undefined, homeB), 'worker');
       await rb.ready();
       link = worker();
       link.start();
@@ -149,6 +171,7 @@ async function fixture(heartbeatMs = 150, workerHeartbeatMs = heartbeatMs) {
       await Promise.all([ra.close(), rb.close()]);
       rmSync(homeA, { recursive: true, force: true });
       rmSync(homeB, { recursive: true, force: true });
+      if (slow.length) process.stderr.write(`B-046 slow nervous calls: ${slow.join('; ')}\n`);
     },
   };
 }
