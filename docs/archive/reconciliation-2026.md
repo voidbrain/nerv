@@ -220,3 +220,8 @@ Authenticated ci:status confirms CI42980951125 passed plan, validate, windows, n
 ## 2026-11-11 — PR #261
 
 Authenticated ci:status confirms CI42984056330 passed; merged main 6a960bf. Timing reassessment report, a todo regression reproducing the B-046 mechanism and record updates; no runtime code changed and no status changed. Previous header: reviewed 11 November 2026 against main `84a5de6`. PR #260 CI42980951125 passed all five jobs/full-suite: Prettier adopted.
+
+
+## 2026-11-11 — PR #262
+
+Authenticated ci:status confirms CI42986531117 passed plan, validate, windows, native-macos and full-suite on attempt 2; merged main 565a302. F-005-T06 third slice: admission of application upgrades that descend from the installed revision, with a forward-migration refusal; independent review found no blocker and its two findings had failing regressions before the fixes; the fixes were not re-reviewed. Attempt 1 failed only the Windows job: `test/windows-service.integration.ts` ended with `EPERM` removing its temporary directory after the service test, in code this PR does not touch; the unchanged-head rerun of the failed jobs passed. A passing retry is not a causal fix: this is a first observation of that failure, to be opened as a bug if it recurs. Previous header: reviewed 11 November 2026 against main `6a960bf`. PR #261 CI42984056330 passed its checks: timing reassessment of B-042/B-043/B-046 recorded.
