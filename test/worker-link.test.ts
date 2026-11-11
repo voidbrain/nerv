@@ -778,6 +778,45 @@ test(
     }
   },
 );
+// B-046 mechanism (3), PR #280: every frame a link receives is verified against its registry, calls to the receiving
+// side's nervous process, so the worker answers a ping only after its nervous process has served what was queued ahead.
+// Linux coverage run 43121587426 lost a session this way: the worker's `kaji.bases` for the ping waited 225 ms behind a
+// 271 ms `usage.finish` write, with this process's loop on time. Here the worker's store answers 300 ms late while the
+// loop stays free: with the fixtures' 150 ms ping budget the healthy session ends (production budget: 10 s). todo until
+// the owner chooses the remedy recorded in B-046; it fails today and does not fail the suite.
+test(
+  'B-046: a ping waiting on a slow store on the worker does not end a healthy session',
+  { timeout: 30000, todo: 'B-046 mechanism (3): remedy is an owner decision' },
+  async () => {
+    const f = await fixture(150, 60000);
+    const send = WebSocket.prototype.send;
+    let hellos = 0;
+    WebSocket.prototype.send = function (this: WebSocket, data: unknown, ...rest: unknown[]) {
+      if (String(data).includes('worker.hello')) hellos++;
+      return (send as (...args: unknown[]) => void).call(this, data, ...rest);
+    } as typeof send;
+    try {
+      await f.start();
+      const negotiated = hellos,
+        call = f.rb.nervous.call.bind(f.rb.nervous);
+      let slowed = 0;
+      f.rb.nervous.call = async (method, params = {}, timeout) => {
+        // The next registry read waits as if a durable write were ahead of it; no event-loop stall.
+        if (method === 'kaji.bases' && !slowed++) await wait(300);
+        return call(method, params, timeout);
+      };
+      await until(() => slowed > 0);
+      for (let i = 0; i < 60; i++) {
+        assert.ok(f.main.connected('NERV-02'), 'a slow store on the worker is not a lost peer');
+        await wait(10);
+      }
+      assert.equal(hellos - negotiated, 0, 'a slow store on the worker is not a lost peer');
+    } finally {
+      WebSocket.prototype.send = send;
+      await f.close();
+    }
+  },
+);
 test('F-014: concurrent replay and overload execute the same durable request once', { timeout: 30000 }, async () => {
   // Keep heartbeat traffic out of this deliberate four-slot saturation; heartbeat expiry has its own case.
   const f = await fixture(10000);
