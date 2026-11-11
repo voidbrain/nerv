@@ -965,6 +965,50 @@ test(
   },
 );
 
+// B-046 (diagnosis 2026-11-11, "Worker pending request bound reached" under load): a heartbeat counted against the
+// work in-flight bound, so a link whose four request slots are busy (deferred approvals, slow runs) refused its own
+// heartbeat and ended a healthy session; a fifth incoming request (the ping) did the same on the receiving side.
+test(
+  'B-046: a link whose request slots are all busy keeps its heartbeat and its session',
+  { timeout: 30000 },
+  async () => {
+    const f = await fixture(150);
+    const original = f.adapter;
+    let release = () => {};
+    const held = new Promise<void>((done) => (release = done));
+    f.setAdapter({
+      ...original,
+      run: async (o, i, c) => {
+        await held;
+        return original.run(o, i, c);
+      },
+    });
+    const send = WebSocket.prototype.send;
+    let hellos = 0;
+    WebSocket.prototype.send = function (this: WebSocket, data: unknown, ...rest: unknown[]) {
+      if (String(data).includes('worker.hello')) hellos++;
+      return (send as (...args: unknown[]) => void).call(this, data, ...rest);
+    } as typeof send;
+    try {
+      await f.start();
+      const negotiated = hellos;
+      const busy = [12, 13, 14, 15].map((n) => f.main.run('NERV-02', item(n), 10000).catch((e: unknown) => e));
+      // Several heartbeat ticks while every request slot is taken.
+      for (let i = 0; i < 60; i++) {
+        assert.ok(f.main.connected('NERV-02'), 'a busy link must keep its session');
+        await wait(10);
+      }
+      assert.equal(hellos - negotiated, 0, 'a busy link must not reconnect');
+      release();
+      await Promise.all(busy);
+    } finally {
+      release();
+      WebSocket.prototype.send = send;
+      await f.close();
+    }
+  },
+);
+
 // B-046 reproduction (timing reassessment 2026-11-11), committed as todo before the fix; the fix removed the todo.
 // The peer is healthy throughout: only this process's event loop is busy.
 test(
