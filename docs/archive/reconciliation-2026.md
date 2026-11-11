@@ -215,3 +215,8 @@ Authenticated ci:status confirms CI42974448234 passed plan, validate, windows, n
 ## 2026-11-11 — PR #260
 
 Authenticated ci:status confirms CI42980951125 passed plan, validate, windows, native-macos and full-suite; merged main 84a5de6. Prettier 3.9.10 with a CI format check; mechanical reformat of 148 files, literals equal to the previous main and one redundant-parenthesis difference. Independent review found a reformatted Angular template and an author check that had not run; both corrected before merge and not re-reviewed. Previous header: reviewed 11 November 2026 against main `d2bb481`. PR #259 CI42974448234 passed all five jobs/full-suite: Gauntlet 0.5.0 pinned.
+
+
+## 2026-11-11 — PR #261
+
+Authenticated ci:status confirms CI42984056330 passed; merged main 6a960bf. Timing reassessment report, a todo regression reproducing the B-046 mechanism and record updates; no runtime code changed and no status changed. Previous header: reviewed 11 November 2026 against main `84a5de6`. PR #260 CI42980951125 passed all five jobs/full-suite: Prettier adopted.

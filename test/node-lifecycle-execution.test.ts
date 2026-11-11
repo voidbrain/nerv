@@ -528,7 +528,9 @@ test(
                     ? 'README.md\0'
                     : op === 'checkout'
                       ? (revision = args.at(-1)!)
-                      : '',
+                      : op === 'cat-file'
+                        ? 'commit'
+                        : '',
           };
         }
         if (program === 'ps')
