@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-074",
   "id": "F-074-T08",
-  "status": "planned",
+  "status": "implemented",
   "title": "T08 — One root command runs NERV and common tests, reusing exact evidence",
   "goal": "npm run gauntlet:all from the NERV root plans and runs NERV system packs and every common pack; by default it runs only new, changed or stale cases and reuses evidence whose identity matches exactly",
   "acceptance": [
@@ -36,11 +36,12 @@
     "Final applicable CI"
   ],
   "escalation": [
-    "Default max age for reused model evidence is an owner decision (proposed 30 days)"
+    "Default max age for reused model evidence is an owner decision (proposed 30 days)",
+    "Known limit 2026-11-11: ledger coverage is by case definition and profile (Gauntlet 0.6.0); runtime identity, machine scenario and the NERV source key are not part of it, so a NERV code change does not make system cases pending (CI still runs the NERV tests). Gauntlet's cache still requires them before reusing executed evidence. Binding them into coverage needs new ledger fields upstream: owner decision whether to plan it."
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 focused day",
+    "estimate": "0 remaining; verification pending",
     "basis": "Owner request 2026-11-11: NERV always consumes every common Gauntlet pack plus its own, and a pack added or changed raises a run-new-tests item. Estimate, not a measurement.",
     "reviewed": "2026-11-11"
   }

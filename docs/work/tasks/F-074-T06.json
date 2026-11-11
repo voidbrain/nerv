@@ -2,11 +2,11 @@
   "version": 1,
   "parent": "F-074",
   "id": "F-074-T06",
-  "status": "planned",
+  "status": "implemented",
   "title": "T06 — Consume every common pack shipped in the pinned Gauntlet release",
   "goal": "Replace the hard-coded smoke-v1 path with discovery of every pack in the pinned artifact, so a pin that adds a pack (0.5.0 added general-assistant-expanded, 28 cases) reaches NERV without a code change",
   "acceptance": [
-    "model-plan/model-run accept --pack=<id> and default to all discovered common packs; smoke-schema keeps its --format=schema path",
+    "model-plan/model-run accept --pack=<id> for any discovered common pack (default neutral-smoke, --format=schema kept); `gauntlet:all` covers every pack at once (refined 2026-11-11: one report per run keeps model-run single-pack)",
     "The generated capability index lists every common pack and every NERV pack with its upstream link at the pinned tag",
     "A regression fails when the artifact ships a pack NERV neither consumes nor excludes with a recorded reason"
   ],
@@ -36,7 +36,7 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 focused day",
+    "estimate": "0 remaining; verification pending",
     "basis": "Owner request 2026-11-11: NERV always consumes every common Gauntlet pack plus its own, and a pack added or changed raises a run-new-tests item. Estimate, not a measurement.",
     "reviewed": "2026-11-11"
   }

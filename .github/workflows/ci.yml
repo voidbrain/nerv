@@ -68,6 +68,7 @@ jobs:
           if-no-files-found: error
       - run: npm run check:evals
       - run: npm run check:gauntlet-index
+      - run: npm run check:gauntlet-runs
       - run: npm run format:check
       - run: npm run lint
       - run: npm run check:tooling
@@ -116,7 +117,7 @@ jobs:
       - run: npm run check:rules
       - run: npm run check:maintenance
       - run: npm run check:audits
-      - run: git clone --branch v5.1.1 --depth 1 https://github.com/voidbrain/project-harness "$RUNNER_TEMP/project-harness"
+      - run: git clone --branch v5.2.0 --depth 1 https://github.com/voidbrain/project-harness "$RUNNER_TEMP/project-harness"
       - run: npm run check:freshness
         env:
           HARNESS_HOME: ${{ runner.temp }}/project-harness

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
-import { mkdtempSync, realpathSync, writeFileSync, readFileSync, rmSync, existsSync } from 'node:fs';
+import { mkdtempSync, realpathSync, writeFileSync, readFileSync, rmSync, existsSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { pathToFileURL } from 'node:url';
@@ -677,4 +677,201 @@ test('NERV compare command joins released 0.5 comparison: baseline, mismatch rea
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
+});
+
+// F-074-T06..T08: every common pack, the run ledger, pending cases and the root command.
+test('every pack the pinned Gauntlet release ships is consumed unless excluded with a reason', async () => {
+  const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-packs-'));
+  const examples = 'node_modules/@voidbrain/gauntlet-protocol/examples';
+  const shipped = readdirSync(examples)
+    .filter((f) => f.endsWith('.json'))
+    .map((f) => JSON.parse(readFileSync(join(examples, f), 'utf8')))
+    .filter((p) => Array.isArray(p.cases))
+    .map((p) => p.id)
+    .sort();
+  try {
+    const listed = (await main(['packs'])).packs;
+    assert.deepEqual(
+      listed
+        .filter((p) => p.source === 'common')
+        .map((p) => p.id)
+        .sort(),
+      shipped,
+    );
+    assert.ok(shipped.includes('general-assistant-expanded'), '0.5.0+ ships the expanded pack');
+    assert.deepEqual(
+      listed.filter((p) => p.source === 'nerv').map((p) => p.id),
+      ['nerv-system-flows'],
+    );
+    // The index lists every consumed pack.
+    const index = readFileSync('docs/test-capability-index.md', 'utf8');
+    for (const id of [...shipped, 'nerv-system-flows']) assert.match(index, new RegExp(`\\[${id}@`));
+    // An exclusion needs a reason and must name a shipped pack.
+    const config = (value) => {
+      const p = join(dir, `consumption-${Math.random()}.json`);
+      writeFileSync(p, JSON.stringify(value));
+      return p;
+    };
+    const withConfig = async (value, fn) => {
+      process.env.NERV_GAUNTLET_CONSUMPTION = config(value);
+      try {
+        return await fn();
+      } finally {
+        delete process.env.NERV_GAUNTLET_CONSUMPTION;
+      }
+    };
+    await withConfig({ schemaVersion: 1, exclude: { 'neutral-smoke-schema': 'covered by neutral-smoke' } }, async () =>
+      assert.equal(
+        (await main(['packs'])).packs.some((p) => p.id === 'neutral-smoke-schema'),
+        false,
+      ),
+    );
+    await withConfig({ schemaVersion: 1, exclude: { 'neutral-smoke-schema': '' } }, () =>
+      assert.rejects(main(['packs']), /needs a reason/),
+    );
+    await withConfig({ schemaVersion: 1, exclude: { 'no-such-pack': 'gone' } }, () =>
+      assert.rejects(main(['packs']), /not in the pinned release/),
+    );
+    // model commands select any common pack; legacy --format still works.
+    const profile = '--profile=node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json';
+    assert.equal((await main(['model-plan', profile, '--pack=general-assistant-expanded'])).cases.length, 28);
+    assert.equal((await main(['model-plan', profile, '--format=schema'])).cases.length, 10);
+    await assert.rejects(main(['model-plan', profile, '--pack=unknown']), /Unknown common pack/);
+    await assert.rejects(main(['model-plan', profile, '--pack=neutral-smoke', '--format=schema']), /not both/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('the root command runs only uncovered cases, records them and reports nothing pending afterwards', async () => {
+  const { executeWithEvidence, caseHash } = await import('@voidbrain/gauntlet-protocol');
+  const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-all-'));
+  const ledger = join(dir, 'ledger.json');
+  process.env.NERV_GAUNTLET_LEDGER = ledger;
+  try {
+    // NERV's system cases are already covered (by a profile-less run); every common case is new.
+    const system = JSON.parse(readFileSync('evals/gauntlet/system-v1.json', 'utf8'));
+    writeFileSync(
+      ledger,
+      JSON.stringify({
+        schemaVersion: 1,
+        entries: system.cases.map((c) => ({
+          pack: system.id,
+          packVersion: system.version,
+          case: c.id,
+          caseHash: caseHash(c),
+          profileHash: null,
+          status: 'passed',
+          reportHash: 'c'.repeat(64),
+          finished: '2026-11-11T00:00:00.000Z',
+        })),
+      }),
+    );
+    const before = await main(['pending']);
+    assert.equal(before.pendingLines.length, 48);
+    assert.equal(before.pendingLines.filter((l) => l.startsWith('general-assistant-expanded/')).length, 28);
+    // Named by an open record (F-074-T09 names the three common packs), so the CI check passes.
+    assert.deepEqual((await main(['pending', '--check-records'])).pendingLines, []);
+    // Without approval the plan blocks every model case and runs nothing.
+    const plan = await main(['all']);
+    assert.equal(plan.modelCallsAuthorized, false);
+    assert.deepEqual(
+      plan.plan.map((p) => [p.pack, p.run.length, p.reuse.length, p.blocked?.cases.length ?? 0]),
+      [
+        ['general-assistant-expanded', 28, 0, 28],
+        ['neutral-smoke-schema', 10, 0, 10],
+        ['neutral-smoke', 10, 0, 10],
+        ['nerv-system-flows', 0, 7, 0],
+      ],
+    );
+    await assert.rejects(main(['all', '--execute']), /out-dir/);
+    // With approval, a fixture runtime answers every case; system cases are reused, not rerun.
+    const model = 'gemma4:12b';
+    let resident = false,
+      chats = 0;
+    const fetcher = async (url) => {
+      const path = new URL(String(url)).pathname;
+      let value;
+      if (path === '/api/version') value = { version: 'neutral-test-runtime' };
+      else if (path === '/api/show') value = { details: { quantization_level: 'Q4_K_M' }, capabilities: ['thinking'] };
+      else if (path === '/api/tags') value = { models: [{ name: model, size: 100, digest: 'a'.repeat(64) }] };
+      else if (path === '/api/ps') value = { models: resident ? [{ name: model, size_vram: 128 }] : [] };
+      else if (path === '/api/generate') {
+        resident = false;
+        value = { done: true, done_reason: 'unload' };
+      } else if (path === '/api/chat') {
+        chats++;
+        resident = true;
+        const done = { model, message: { content: '' }, done: true, eval_count: 3, prompt_eval_count: 10 };
+        return new Response(
+          [{ model, message: { content: '{}' }, done: false }, done].map((x) => JSON.stringify(x)).join('\n') + '\n',
+        );
+      } else throw Error('Unexpected fixture endpoint');
+      return new Response(JSON.stringify(value));
+    };
+    const systemRuns = [];
+    const services = {
+      execute: (pack, profile, limits, options) => {
+        if (!profile) systemRuns.push(pack.id);
+        return executeWithEvidence(pack, profile, limits, {
+          ...options,
+          fetch: fetcher,
+          environmentKey: 'neutral-nerv-all-fixture',
+        });
+      },
+    };
+    const run = await main(
+      [
+        'all',
+        '--profile=node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json',
+        '--allow-models',
+        '--execute',
+        '--out-dir=' + join(dir, 'reports'),
+        '--cache-dir=' + join(dir, 'cache'),
+      ],
+      services,
+    );
+    assert.deepEqual(systemRuns, []);
+    assert.equal(chats, 48);
+    assert.deepEqual(
+      run.results.map((r) => [r.pack, r.cases.length]),
+      [
+        ['general-assistant-expanded', 28],
+        ['neutral-smoke-schema', 10],
+        ['neutral-smoke', 10],
+      ],
+    );
+    assert.equal(run.stillPending, 0);
+    assert.deepEqual((await main(['pending'])).pendingLines, []);
+    const recorded = JSON.parse(readFileSync(ledger, 'utf8')).entries;
+    assert.equal(recorded.length, 55);
+    assert.ok(
+      recorded.every((e) => !JSON.stringify(e).includes('content')),
+      'metadata only',
+    );
+    // A second run finds nothing to do.
+    const again = await main(['all']);
+    assert.ok(again.plan.every((p) => p.run.length === 0));
+  } finally {
+    delete process.env.NERV_GAUNTLET_LEDGER;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('pending and ledger keep the harness contract: lines and exit 1 when pending, exit 2 on errors', (t) => {
+  const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-cli-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const cli = (args, env = {}) =>
+    spawnSync(process.execPath, ['tools/gauntlet.mjs', ...args], {
+      encoding: 'utf8',
+      env: { ...process.env, NERV_GAUNTLET_LEDGER: join(dir, 'ledger.json'), ...env },
+    });
+  const listed = cli(['pending']);
+  assert.equal(listed.status, 1);
+  assert.equal(listed.stdout.trim().split('\n').length, 55);
+  assert.match(listed.stdout, /^nerv-system-flows\/policy \(new\)$/m);
+  assert.equal(cli(['pending', '--max-age-days=x']).status, 2);
+  writeFileSync(join(dir, 'bad.json'), '{"schemaVersion":1,"entries":[{"x":1}]}');
+  assert.equal(cli(['pending'], { NERV_GAUNTLET_LEDGER: join(dir, 'bad.json') }).status, 2);
+  assert.equal(cli(['ledger', '--pack=nerv-system-flows']).status, 2);
 });
