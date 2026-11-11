@@ -165,7 +165,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #261](https://github.com/voidbrain/nerv/pull/261) timing reassessment; [PR #223](https://github.com/voidbrain/nerv/pull/223); [CI 42535069202 attempt 1](https://github.com/voidbrain/nerv/actions/runs/42535069202/attempts/1) Windows failed card-cleanup assertion, Linux later failed only recap week validation. Test: test/one-channel.test.ts remote dashboard decision reconciles the main bot card. Earlier closure: PR #203 CI 42425786736/42425784575; preserved in archive. |
+| PR / evidence | [PR #267 CI 43012116246](https://github.com/voidbrain/nerv/actions/runs/43012116246) (2026-11-11, harness/records-only PR: `.gitignore`, version stamp, CI template clone): Windows failed this one-channel case on `remote dashboard decision reconciles the main bot card` again; another occurrence with no runtime change. [PR #261](https://github.com/voidbrain/nerv/pull/261) timing reassessment; [PR #223](https://github.com/voidbrain/nerv/pull/223); [CI 42535069202 attempt 1](https://github.com/voidbrain/nerv/actions/runs/42535069202/attempts/1) Windows failed card-cleanup assertion, Linux later failed only recap week validation. Test: test/one-channel.test.ts remote dashboard decision reconciles the main bot card. Earlier closure: PR #203 CI 42425786736/42425784575; preserved in archive. |
 | Opened | 2026-11-07 |
 | Verification | 2026-11-09: Windows failure observed. Isolated unchanged Mac Node26 one-channel file passed all five cases; does not establish a causal fix. Final unchanged head737fa53 passed Windows in CI 42535553841; investigation still pending, not a causal fix. |
 | Reviewed | 2026-11-11 |
