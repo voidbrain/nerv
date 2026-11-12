@@ -1,8 +1,8 @@
 [
   {
-    "kind": "tool",
+    "kind": "rule",
     "disposition": "implemented",
-    "target": "tools/work-items.mjs",
-    "evidence": "Reconciled harness 6.3.0–7.1.1 (PR #312): parallel-work, work-items, check-backlog, backlog-queue and solution copied byte-identically; AGENTS 'On its own' line and the NERV service-checkout project line; BACKLOG-RULES paragraphs carried verbatim; NERV backlog-recap reads the merged Status (failing test first). Fresh-context design review: no blocker; should-fix (stale solution.mjs) fixed by copying v7.1.1. No rule removed."
+    "target": "docs/BACKLOG-RULES.md",
+    "evidence": "Harness 8.0.0 reconciled from template PR #137 (fresh-context review there, no blocker): the human-action cue names its kind (Procedure, Decision, Both, No) in update step 5 and the record-format paragraph; the generated summary shows Procedures and Decision cells. No rule removed: the Yes meaning is split into the two kinds, archives keep Yes. NERV's recap splits the Require Human table the same way (tools/backlog-recap.mjs, failing test first)."
   }
 ]

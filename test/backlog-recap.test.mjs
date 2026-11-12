@@ -66,3 +66,37 @@ test('the status is read from the generated summary where Status carries its col
     ],
   );
 });
+
+test('Require Human splits each kind into Procedures and Decision (harness 8.0.0)', () => {
+  const generated = (id, procedure, decision) =>
+    `### ${id}\n\n**Title**\n\n| Status | Priority | Effort | Remaining | Procedures | Decision |\n|---|---|---|---|:---:|:---:|\n| 🔴 Open | 🔶 P2 | 🟢 Small | 2 h | ${procedure} | ${decision} |\n\n${procedure === '🧑' || decision === '🧑' ? '🧑' : '💻'} **→** Next.\n\n---\n`;
+  const authored = (id, kind) =>
+    `### ${id}\n\n**Title**\n\n| Signal | Priority | Status | Effort |\n|:---:|---|---|---|\n| 🔴 | 🔶 P2 | Open | 🟢 Small |\n\n🧑 **→ Human action required: ${kind}**<br />Next.\n\n---\n`;
+  const records = parseRecords(
+    generated('F-001', '🧑', '—') +
+      generated('F-002', '—', '🧑') +
+      generated('B-001', '🧑', '🧑') +
+      generated('B-002', '—', '—') +
+      authored('F-003', 'Both') +
+      authored('B-003', 'Decision'),
+  );
+  assert.deepEqual(
+    records.map((x) => [x.id, x.human, x.procedure, x.decision]),
+    [
+      ['F-001', true, true, false],
+      ['F-002', true, false, true],
+      ['B-001', true, true, true],
+      ['B-002', false, false, false],
+      ['F-003', true, true, true],
+      ['B-003', true, false, true],
+    ],
+  );
+  const block = recap({ active: records, archived: [] }, '2026-11-12');
+  assert.match(block, /\| \*\*Require Human 🧑\*\* \| 3 \| 2 \|/, 'a record counts once whatever its kind');
+  assert.match(
+    block,
+    /### Require Human 🧑\n\n\| Features \| \| Bugs \| \|\n\|---\|---\|---\|---\|\n\| \*\*Procedures\*\* \| \*\*Decision\*\* \| \*\*Procedures\*\* \| \*\*Decision\*\* \|\n\| \[F-001\]\(#f-001\) \| \[F-002\]\(#f-002\) \| \[B-001\]\(#b-001\) \| \[B-001\]\(#b-001\) \|\n\| \[F-003\]\(#f-003\) | \[F-003\]\(#f-003\) \| {2}\| \[B-003\]\(#b-003\) \|\n<!-- recap:end -->/,
+  );
+  const none = recap({ active: [records[3]], archived: [] }, '2026-11-12');
+  assert.match(none, /\*\*Decision\*\* \|\n\| — \| — \| — \| — \|\n<!-- recap:end -->/, 'empty columns show —');
+});

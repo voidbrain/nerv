@@ -63,8 +63,10 @@ function summary(record) {
   assert(rows.length === 1, `${record.id}: missing or ambiguous summary`);
   const row = rows[0];
   const legacy = row[1] === record.id;
-  // The generated ledger (F-059) adds Remaining, optional Depends on / Unlocks, and Human action as the last cell.
-  const generated = [6, 8].includes(row.length) && /^(?:🧑|💻) (?:Yes|No)$/.test(row.at(-1));
+  // The generated ledger (F-059) adds Remaining, optional Depends on / Unlocks, and the Procedures and Decision cells
+  // last (8.0.0).
+  const kind = { '🧑🧑': 'Both', '🧑—': 'Procedure', '—🧑': 'Decision', '——': 'No' }[row.slice(-2).join('')];
+  const generated = [7, 9].includes(row.length) && kind !== undefined;
   if (record.file !== 'docs/BACKLOG.md' && ![4, 5].includes(row.length) && !generated)
     return { status: 'Unknown', priority: 'Unknown', effort: 'Unknown' };
   assert([4, 5].includes(row.length) || generated, `${record.id}: unsupported summary`);
@@ -82,7 +84,7 @@ function summary(record) {
   );
   const priority = legacy ? row[2] : row[1],
     effort = legacy ? 'Unknown' : row[3];
-  return { status, priority, effort, ...(generated ? { human: row.at(-1).split(' ')[1] } : {}) };
+  return { status, priority, effort, ...(generated ? { human: kind } : {}) };
 }
 function placements(markdown) {
   const map = new Map();
@@ -129,9 +131,11 @@ export function queue(sources, roadmap = '') {
       const s = summaries.get(record.id);
       assert(/^\S+ P[123]$/.test(s.priority), `${record.id}: unknown priority`);
       assert(['🟢 Small', '🟡 Medium', '🔴 Large', '🟣 Very large'].includes(s.effort), `${record.id}: unknown effort`);
-      const humans = s.human ? [[null, s.human]] : [...record.body.matchAll(/Human action required: (Yes|No)/g)];
+      const humans = s.human
+        ? [[null, s.human]]
+        : [...record.body.matchAll(/Human action required: (Procedure|Decision|Both|No)\*\*/g)];
       assert(
-        humans.length === 1 && ['Yes', 'No'].includes(humans[0][1]),
+        humans.length === 1 && ['Procedure', 'Decision', 'Both', 'No'].includes(humans[0][1]),
         `${record.id}: missing or ambiguous human cue`,
       );
       const human = humans[0][1];
@@ -152,7 +156,7 @@ export function queue(sources, roadmap = '') {
       const lane =
         s.status === 'Blocked'
           ? 'Blocked'
-          : human === 'Yes'
+          : human !== 'No'
             ? 'Human action'
             : unresolved.length
               ? 'Prerequisite review'
@@ -168,8 +172,9 @@ export function queue(sources, roadmap = '') {
         .sort();
       const milestone = milestones.get(record.id);
       const next =
-        record.body.match(/(?:Human action required: (?:Yes|No)\*\*<br \/>|^(?:🧑|💻) \*\*→\*\* )([^\n]+)/m)?.[1] ??
-        'Read the owning record.';
+        record.body.match(
+          /(?:Human action required: (?:Procedure|Decision|Both|No)\*\*<br \/>|^(?:🧑|💻) \*\*→\*\* )([^\n]+)/m,
+        )?.[1] ?? 'Read the owning record.';
       const title = record.body.match(/^\*\*([^\n]+)\*\*$/m)?.[1];
       assert(title, `${record.id}: missing title`);
       return {
