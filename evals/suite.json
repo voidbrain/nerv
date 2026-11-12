@@ -126,14 +126,16 @@
       "id": "browser",
       "files": [
         "test/angular.browser.mjs",
-        "test/evaluation.browser.mjs"
+        "test/evaluation.browser.mjs",
+        "test/pwa.browser.mjs"
       ],
       "families": [
         "dashboard-operator",
         "waiting-state",
         "approval",
         "topic-change",
-        "accessibility"
+        "accessibility",
+        "pwa-lifecycle"
       ],
       "minimumTests": 2
     }

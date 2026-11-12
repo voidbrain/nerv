@@ -180,9 +180,12 @@
         "package*.json",
         "src/server.ts",
         "test/angular.browser.mjs",
-        "src/store.ts"
+        "src/store.ts",
+        "web/ngsw-config.json",
+        "web/public/manifest.webmanifest",
+        "test/pwa.browser.mjs"
       ],
-      "then": "Verify full CSS/CSP, bilingual controls and dates, rejected sign-in and invalid writes, cancellation/retry, local inbox text/deduplication, responsive layout and axe accessibility; add dated acceptance evidence when the claimed scope changes, preserving published reports.",
+      "then": "Verify full CSS/CSP, bilingual controls and dates, rejected sign-in and invalid writes, cancellation/retry, local inbox text/deduplication, responsive layout, axe accessibility and the PWA lifecycle (installable manifest, offline shell, an update prompt that waits for Reload); add dated acceptance evidence when the claimed scope changes, preserving published reports.",
       "run": "npm run test:browser",
       "checked": "CI validate browser acceptance and screenshot artifacts; manual visual review remains explicit.",
       "after": [
@@ -399,9 +402,35 @@
         {
           "file": "web/src/styles.css",
           "what": "--mark colour token, literal in both SVGs"
+        },
+        {
+          "file": "web/public/icons/",
+          "what": "PWA icons rendered from mark.svg on the --bg square by tools/render-icons.mjs"
         }
       ],
-      "kept": "test/brand.test.ts asserts the same triangle and eye centres in the three drawings and the --mark colour in both SVGs."
+      "kept": "test/brand.test.ts asserts the same triangle and eye centres in the three drawings and the --mark colour in both SVGs. The PWA icons are re-rendered with node tools/render-icons.mjs; test/pwa.test.mjs checks their sizes against the manifest."
+    },
+    {
+      "value": "Workspace background colour (--bg) in the installed app",
+      "places": [
+        {
+          "file": "web/src/styles.css",
+          "what": "--bg token"
+        },
+        {
+          "file": "web/public/manifest.webmanifest",
+          "what": "theme_color and background_color"
+        },
+        {
+          "file": "web/src/index.html",
+          "what": "theme-color meta"
+        },
+        {
+          "file": "web/public/icons/",
+          "what": "Icon background, rendered by tools/render-icons.mjs"
+        }
+      ],
+      "kept": "test/pwa.test.mjs asserts the manifest colours and the theme-color meta equal the --bg token; icons are re-rendered with node tools/render-icons.mjs."
     },
     {
       "value": "Node flags for every NERV process (--use-system-ca)",

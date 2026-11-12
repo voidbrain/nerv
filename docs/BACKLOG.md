@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 275.25 h + 19.5 h owner and 0 days across 162 open steps of 33 features and 4 other records. 11.5 h of actual effort recorded on 6 steps. Generated from the task files.
+**Remaining effort:** 274.75 h + 19.5 h owner and 0 days across 163 open steps of 33 features and 5 other records. 13 h of actual effort recorded on 8 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Bugs and reliability
@@ -142,6 +142,47 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 ---
 
 
+### B-042
+
+**Telegram approval card arrives after dashboard decision**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🟡 | 🔶 P2 | Implemented | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Verify: the fix's CI passes on PR #285 (Windows included) and the next ten CI runs on `main` and PRs show no `remote dashboard decision reconciles the main bot card` failure.
+
+| | |
+|---|---|
+| **Issue** | Reopened after PR #223 Windows test/one-channel.test.ts failed the existing remote dashboard decision reconciles the main bot card assertion; later seen on macOS under load and once on Linux coverage. Cause (2026-11-12): an awaited `deliver()` could return a pass already running whose cleanup had read the card's status before the decision (runtime), and the fixture's wait could pass before Aoba tracked the card (fixture). |
+| **Reproduce** | Any platform: `node --test --test-name-pattern="not a pass that read status" test/telegram-reconcile.test.ts` stalls a periodic pass's status lookup after it read the card as pending, decides on the dashboard, then awaits `deliver()`; before the fix no `editMessageReplyMarkup` is sent. |
+| **Check** | Explain the failure with controlled evidence; preserve exactly-once effects, eventual stale-button removal, retry/restart and signed lookup. A passing retry is not a causal fix. Do not weaken assertions or merely widen timeouts. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Verified when PR #285's CI passes (Windows and full suite) and the next ten CI runs show no recurrence; a recurrence returns it to Investigate, first checking whether Aoba's timer pass and the test's awaited pass are still distinct (mechanism 1) and whether the card was tracked before the decision (mechanism 2).
+
+**Cause and fix 2026-11-12 ([PR #285](https://github.com/voidbrain/nerv/pull/285), B-042-T01):** **Recheck first.** Failed-job logs of every CI run since #277's run 43093410846 were searched (43098344555, 43105159883, 43105169242, 43106362909, 43106952492, 43108272198, 43118800708, 43121587426): none failed this assertion (their failures were B-046 and F-014 worker-link cases); every other completed run since then passed, all on attempt 1, including 7 runs after #279 merged and 43164854081 after #282. Too few runs to call the rarer B-042 failure gone, and none of #278/#279/#280/#282 touches the mechanism: they shorten worker-link and nervous-child latency, which only narrows the window below. **Mechanism 1 (runtime, reproduced):** Aoba delivers every 100 ms in the fixture; each pass starts with `reconcile()`, whose remote-card status is a signed lookup across the Kaji link. `deliver()` returned a pass already in progress, so when the test decided the card while a timer pass was between its lookup and its edits, `await aoba.deliver()` resolved with that pass's pre-decision snapshot and sent no edit. A slower lookup (loaded runner, slow child) widens the window: consistent with the load-dependent, cross-platform failures. Committed regression first (`test/telegram-reconcile.test.ts`, the stalled-lookup case above): failed at 95bf226, passes after. Fix: callers of `deliver()` while a pass runs share one follow-up pass that starts after it; passes never overlap; the periodic tick still skips while a pass runs, so a slow pass queues no ticks; `stop()` waits for the follow-up, which starts no pass after stop. **Mechanism 2 (fixture):** the fixture waited until the fake Bot API server recorded the relayed `sendMessage`, which happens before Aoba reads the response and tracks the card (the same gap the fallback step's comment already names); a decision in that gap is caught by `sendMessage`'s own post-send status check, which the awaited delivery does not wait for. The fixture now waits until Aoba tracks the card (read in memory). No timeout widened, no assertion changed. **Ruled out:** cleanup coalescing (`reconcile()` is only called from the serialized `deliverOnce`); the B-046 verdict race (the lookup completes, it is just stale). **Fresh-context review 2026-11-12 (design-reviewer):** no must-fix; verified fail-before/pass-after and no overlap in the microtask gap. Applied: the fixture first polled Aoba's state file, which on Windows could make Aoba's own atomic save fail while the file is open; it now reads the tracked cards in memory. Noted: an awaited `deliver()` can now take up to two passes (each cleanup bounded at 8 s), so the next Telegram update in the serialized queue may wait longer when a remote base is slow; bounded, no starvation. Channels regressions pass locally (63 of 63, macOS); one-channel 3 of 3 runs.
+
+Earlier next action (2026-11-09, done above): inspect event ordering for remote card registration, status snapshot and a concurrent/coalesced deliver pass, then reproduce under controlled scheduling before any fix. These are hypotheses, not proof of a production regression or harmless infrastructure noise. Existing deliver() coalesces an active pass; the fixture expects a new cleanup edit after explicitly awaiting delivery. No Telegram/Kaji executable or assertion changed in PR #223. Retain the [original B-042 closure](archive/backlog-2026.md#b-042) and its regression/browser evidence; this observation does not erase the earlier successful scope.
+
+**Observation 2026-11-11 ([PR #261](https://github.com/voidbrain/nerv/pull/261)):** during an unrelated local full-suite run on macOS (Node 26) the one-channel case failed once and passed 3 of 3 alone, then 16 of 16 in the [timing reassessment](reviews/2026-11-11-timing-reassessment.md) runs, 8 of them under CPU contention. The failure is therefore load-dependent and not Windows-only; cause still unproven. Re-examine after B-046 and B-043, which reduce background churn in the same fixtures.
+
+**Observation 2026-11-11 ([PR #277](https://github.com/voidbrain/nerv/pull/277), run [43093410846](https://github.com/voidbrain/nerv/actions/runs/43093410846)):** Linux `validate` (`npm run test:coverage`) failed this case on `remote dashboard decision reconciles the main bot card`; the same command passed locally on macOS (585 passed, 0 failed) at the same head. #277 changes no runtime code (harness tools, records and docs), so this is another occurrence with no runtime change, and the first seen on Linux. The case crosses the worker link; whether it shares the B-046 cause fixed in [PR #278](https://github.com/voidbrain/nerv/pull/278) (a verdict before frames already received were applied) is unproven: recheck after #278 merges.
+
+**Estimates:** Re-estimated 2026-11-12 in agent hours (harness 5.6.0): B-042-T01 has 0.5 h agent remaining (CI, merge); about 1.25 h spent (stated); method in the task basis. Day figures are dated history: 2–3 focused days estimated 2026-11-09.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Fix: [PR #285](https://github.com/voidbrain/nerv/pull/285) (B-042-T01); last occurrence [PR #277 run 43093410846](https://github.com/voidbrain/nerv/actions/runs/43093410846) (Linux coverage). [PR #267 CI 43012116246](https://github.com/voidbrain/nerv/actions/runs/43012116246) (2026-11-11, harness/records-only PR: `.gitignore`, version stamp, CI template clone): Windows failed this one-channel case on `remote dashboard decision reconciles the main bot card` again; another occurrence with no runtime change. [PR #261](https://github.com/voidbrain/nerv/pull/261) timing reassessment; [PR #223](https://github.com/voidbrain/nerv/pull/223); [CI 42535069202 attempt 1](https://github.com/voidbrain/nerv/actions/runs/42535069202/attempts/1) Windows failed card-cleanup assertion, Linux later failed only recap week validation. Test: test/one-channel.test.ts remote dashboard decision reconciles the main bot card. Earlier closure: PR #203 CI 42425786736/42425784575; preserved in archive. |
+| Opened | 2026-11-07 |
+| Verification | 2026-11-09: Windows failure observed. Isolated unchanged Mac Node26 one-channel file passed all five cases; does not establish a causal fix. Final unchanged head737fa53 passed Windows in CI 42535553841; investigation still pending, not a causal fix. 2026-11-12: mechanism reproduced deterministically (test/telegram-reconcile.test.ts fails before the fix, passes after; local macOS). CI on the fix and later runs pending. |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
 ### B-048
 
 **Windows service test cannot delete its data folder after stopping NERV**
@@ -206,43 +247,6 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 | Opened | 2026-11-12 |
 | Verification | Pending. |
 | Reviewed | 2026-11-12 |
-
-</details>
-
----
-### B-042
-
-**Telegram approval card arrives after dashboard decision**
-
-| Signal | Priority | Status | Effort |
-|:---:|---|---|---|
-| 🟠 | 🔶 P2 | Investigate | 🟡 Medium |
-
-💻 **→ Human action required: No**<br />Determine whether the Windows remote-card cleanup failure is a runtime regression or an asynchronous fixture assumption.
-
-| | |
-|---|---|
-| **Issue** | Reopened after PR #223 Windows test/one-channel.test.ts failed the existing remote dashboard decision reconciles the main bot card assertion. Gauntlet adds no Telegram/Kaji runtime or assertion changes; the isolated unchanged Mac fixture passes. Cause remains unproven. |
-| **Reproduce** | CI 42535069202 attempt 1, Windows, one-channel case line74; compare pending remote card, signed status lookup and overlapping deliver passes around dashboard decision. |
-| **Check** | Explain the failure with controlled evidence; preserve exactly-once effects, eventual stale-button removal, retry/restart and signed lookup. A passing retry is not a causal fix. Do not weaken assertions or merely widen timeouts. |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Next action / closure evidence:** Inspect event ordering for remote card registration, status snapshot and a concurrent/coalesced deliver pass, then reproduce under controlled scheduling before any fix. These are hypotheses, not proof of a production regression or harmless infrastructure noise. Existing deliver() coalesces an active pass; the fixture expects a new cleanup edit after explicitly awaiting delivery. No Telegram/Kaji executable or assertion changed in PR #223. Retain the [original B-042 closure](archive/backlog-2026.md#b-042) and its regression/browser evidence; this observation does not erase the earlier successful scope.
-
-**Observation 2026-11-11 ([PR #261](https://github.com/voidbrain/nerv/pull/261)):** during an unrelated local full-suite run on macOS (Node 26) the one-channel case failed once and passed 3 of 3 alone, then 16 of 16 in the [timing reassessment](reviews/2026-11-11-timing-reassessment.md) runs, 8 of them under CPU contention. The failure is therefore load-dependent and not Windows-only; cause still unproven. Re-examine after B-046 and B-043, which reduce background churn in the same fixtures.
-
-**Observation 2026-11-11 ([PR #277](https://github.com/voidbrain/nerv/pull/277), run [43093410846](https://github.com/voidbrain/nerv/actions/runs/43093410846)):** Linux `validate` (`npm run test:coverage`) failed this case on `remote dashboard decision reconciles the main bot card`; the same command passed locally on macOS (585 passed, 0 failed) at the same head. #277 changes no runtime code (harness tools, records and docs), so this is another occurrence with no runtime change, and the first seen on Linux. The case crosses the worker link; whether it shares the B-046 cause fixed in [PR #278](https://github.com/voidbrain/nerv/pull/278) (a verdict before frames already received were applied) is unproven: recheck after #278 merges.
-
-**Estimates:** Medium remaining effort, provisionally 2–3 focused days for controlled reproduction, classification and any causal fix; estimated 2026-11-09. No measured duration or fix claim.
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #267 CI 43012116246](https://github.com/voidbrain/nerv/actions/runs/43012116246) (2026-11-11, harness/records-only PR: `.gitignore`, version stamp, CI template clone): Windows failed this one-channel case on `remote dashboard decision reconciles the main bot card` again; another occurrence with no runtime change. [PR #261](https://github.com/voidbrain/nerv/pull/261) timing reassessment; [PR #223](https://github.com/voidbrain/nerv/pull/223); [CI 42535069202 attempt 1](https://github.com/voidbrain/nerv/actions/runs/42535069202/attempts/1) Windows failed card-cleanup assertion, Linux later failed only recap week validation. Test: test/one-channel.test.ts remote dashboard decision reconciles the main bot card. Earlier closure: PR #203 CI 42425786736/42425784575; preserved in archive. |
-| Opened | 2026-11-07 |
-| Verification | 2026-11-09: Windows failure observed. Isolated unchanged Mac Node26 one-channel file passed all five cases; does not establish a causal fix. Final unchanged head737fa53 passed Windows in CI 42535553841; investigation still pending, not a causal fix. |
-| Reviewed | 2026-11-11 |
 
 </details>
 
@@ -463,7 +467,7 @@ Implement capability-aware scheduling with independent model endpoint and execut
 
 | | |
 |---|---|
-| **Issue** | Angular source exists; no generated UI, service worker or push configuration yet. |
+| **Issue** | Angular source exists with an installable PWA shell (F-004-T01, PR #286: manifest, icons, shell-only service worker, update prompt); no reminder CRUD UI beyond create/cancel, doctor view, generated UI or push configuration yet. |
 | **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
 | **Check** | Real reminder CRUD and doctor UI; reject arbitrary component/code/action payloads; accessibility and phone install/push acceptance. |
 
@@ -471,25 +475,27 @@ Implement capability-aware scheduling with independent model endpoint and execut
 
 | Step | Baseline | Actual | Remaining | Status |
 |---|---|---|---|---|
-| F-004-T01 — Installable PWA shell: manifest, service worker and update prompt | 1.5 h | 0 h | 🟢 Small — 1.5 h | Planned |
+| F-004-T01 — Installable PWA shell: manifest, service worker and update prompt | 1.5 h | 0.25 h so far (stated) | 🟢 Small — 0.5 h | Implemented; verification pending |
 | F-004-T02 — Reminder CRUD in the workspace | 3 h | 0 h | 🟡 Medium — 3 h | Planned |
 | F-004-T03 — Doctor view | 1.5 h | 0 h | 🟢 Small — 1.5 h | Planned |
 | F-004-T04 — Schema-validated registered component renderer (GenUI) | 3 h | 0 h | 🟡 Medium — 3 h | Planned |
 | F-004-T05 — Web push subscription and delivery | 3 h | 0 h | 🟡 Medium — 3 h | Planned |
 | F-004-T06 — Phone install and push acceptance | 0.5 h | 0 h | 🟢 Small — 0.5 h + 0.5 h owner | Planned |
-| **Total** | 12.5 h | 0 h (0 of 6 steps recorded) | 12.5 h + 0.5 h owner | 0 of 6 completed |
+| **Total** | 12.5 h | 0.25 h (1 of 6 steps recorded) | 11.5 h + 0.5 h owner | 0 of 6 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
 **Step estimates** (dated basis; generated from the task files)
 
-- F-004-T01: 1.5 hours agent (2026-11-11). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history.
+- F-004-T01: 1.5 hours agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Revised 2026-11-12 (PR #286): implemented with browser acceptance (test/pwa.browser.mjs) and file checks (test/pwa.test.mjs); about 0.25 h spent so far (stated: worktree created 06:09 UTC, PR opened 06:17 UTC; reading the records before that not counted separately). About 0.5 h remains: fresh-context design review, CI on #286, merge. Baseline 1.5 h unchanged.
 - F-004-T02: 3 hours agent (2026-11-11). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history.
 - F-004-T03: 1.5 hours agent (2026-11-11). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history.
 - F-004-T04: 3 hours agent (2026-11-11). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history.
 - F-004-T05: 3 hours agent (2026-11-11). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history.
 - F-004-T06: 0.5 hours agent + 0.5 hours owner (2026-11-11). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 0.5 hours agent + 0.5 hours owner; agent prepares the checklist and records evidence; the owner installs on a phone and completes a pushed reminder. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 0.5 kept as history.
+
+**F-004-T01, 2026-11-12 ([PR #286](https://github.com/voidbrain/nerv/pull/286)):** installable PWA shell implemented. `@angular/service-worker` 22.2.4 added (exactly the installed Angular 22.2.4; needed for the Angular service worker and `SwUpdate`). The manifest uses the `--bg` colours and PNG icons rendered from the owner's `mark.svg` (`node tools/render-icons.mjs`; the icons only place the existing mark on `--bg`, no new art). `web/ngsw-config.json` caches the shell only: no API data group, and `/api/**` and `/dashboard/**` are left to the service. Every API call of the workspace and of `dashboard/live.js` (including the long-lived `/api/dashboard/stream`) sends `ngsw-bypass`, so the worker, whose scope is the whole origin, never proxies it. A new build shows `nerv-update-prompt` (Reload / Later, English and Italian; Later moves focus to the main content) and the page reloads only on Reload. Escape hatch: to remove the worker, serve the shipped `safety-worker.js` as `ngsw-worker.js` for one visit. Evidence: `test/pwa.browser.mjs` (Chrome against `makeServer` and the production build: manifest media type and parse, Chrome installability errors empty, worker in control, dashboard not served the shell, API calls not proxied by the worker (with a control call that is), offline shell with the service stopped and no cached API answer, prompt without a silent reload, axe in both languages, Later and Reload) and `test/pwa.test.mjs` (colours equal `--bg`, icon sizes, registration only outside dev mode, no API/dashboard caching). Lighthouse itself is not run; Chrome's own installability check is. Known limit for F-004-T05/T06: a service worker registers only in a secure context (HTTPS or localhost), so phone install over plain LAN HTTP needs HTTPS first. Follow-up kept here: the Frontend section of `docs/agents/areas.md` still says PWA installation/offline caching remain F-004; update it with the next maintenance-reviewed change (it is a maintenance review input). Review: fresh-context `design-reviewer` agent on #286, 2026-11-12: no must-fix; two should-fix applied with tests (API and dashboard calls bypass the worker; focus after Later), nits applied (no empty named region while idle, Reload not left disabled if activation never settles, escape hatch documented); not verified by it: a long-running dashboard stream behind the worker, phone install.
 
 **Lint scope note, 2026-11-11 ([PR #263](https://github.com/voidbrain/nerv/pull/263)):** ESLint now covers the backend, tests, NERV's own tools and `web/src` with TypeScript rules. Two gaps belong to this record: (1) the static dashboard under `web/public/dashboard/` is excluded with four known findings in `dashboard.js` (a `"use strict"` placed after the first statement, so it never took effect; `showBuild` and `observeTelegram` not called from the page itself; one ternary used as a statement) and is not formatted by Prettier either; (2) `web/src` gets no Angular or template lint rules, although the harness names `angular/eslint.config.mjs` for the Angular stack. Resolve both when this record replaces the static dashboard with the Angular PWA: adopt angular-eslint then, and fix or retire the static file.
 
@@ -499,10 +505,10 @@ Implement capability-aware scheduling with independent model endpoint and execut
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| PR / evidence | [PR #286](https://github.com/voidbrain/nerv/pull/286) F-004-T01 PWA shell (test/pwa.browser.mjs, test/pwa.test.mjs); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
-| Reviewed | 2026-11-06 |
+| Reviewed | 2026-11-12 |
 
 </details>
 

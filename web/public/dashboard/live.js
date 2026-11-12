@@ -13,7 +13,7 @@
   const api = async (path, init = {}) => {
     const method = init.method || "GET";
     try {
-      const res = await fetch("/api/" + path, { ...(method === "GET" ? { signal:AbortSignal.timeout(10000) } : {}), ...init, headers:{ "Content-Type":"application/json", Authorization:"Bearer " + token } });
+      const res = await fetch("/api/" + path, { ...(method === "GET" ? { signal:AbortSignal.timeout(10000) } : {}), ...init, headers:{ "Content-Type":"application/json", Authorization:"Bearer " + token, "ngsw-bypass":"1" } });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw Object.assign(new Error(data.error || ("HTTP " + res.status)), { status:res.status });
       return data;
@@ -603,7 +603,7 @@
     clearTimeout(streamTimer); if (streamController || !token || streamPaused) return;
     const session = token; const controller = new AbortController(); streamController = controller;
     try {
-      const response = await fetch("/api/dashboard/stream", { headers:{Authorization:"Bearer " + session}, signal:controller.signal });
+      const response = await fetch("/api/dashboard/stream", { headers:{Authorization:"Bearer " + session, "ngsw-bypass":"1"}, signal:controller.signal });
       if (!response.ok || !response.body) return;
       const reader = response.body.getReader(), decoder = new TextDecoder(); let pending = "";
       try { for (;;) { const next = await reader.read(); if (next.done) break; pending += decoder.decode(next.value, {stream:true}); if (pending.length > 8192) throw new Error("Dashboard notification exceeds bound."); let end; while ((end = pending.indexOf("\n\n")) >= 0) { const message = pending.slice(0,end); pending = pending.slice(end+2); if (message.split("\n").includes("event: refresh")) queueRefresh(); } } }
@@ -634,7 +634,7 @@
   });
   if (code) {
     setBanner("<b>LIVE · SIGNING IN</b> <span class='muted'>— exchanging the one-use login code…</span>");
-    fetch("/api/session/exchange", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ code }) })
+    fetch("/api/session/exchange", { method:"POST", headers:{ "Content-Type":"application/json", "ngsw-bypass":"1" }, body:JSON.stringify({ code }) })
       .then(r => r.json().then(d => { if (!r.ok || !d.token) throw new Error(d.error || "Login failed"); token = d.token; keepSession(token); begin(); }))
       .catch(e => signIn(e.message + "."));
   } else if (keptSession()) {
