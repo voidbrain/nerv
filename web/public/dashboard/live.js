@@ -363,15 +363,15 @@
     if (u && typeof u.status === "string") {
       const short = rev => typeof rev === "string" && rev.length >= 7 ? rev.slice(0, 7) : "?";
       const label = u.status === "update-available"
-        ? ["warn", "update available · " + short(u.available) + " (" + (u.channel || "main") + ")"]
+        ? ["warn", "update available · " + short(u.availableRevision) + " (" + (u.channel || "main") + ")"]
         : u.restartRequired
-          ? ["warn", "restart required · installed " + short(u.installed)]
+          ? ["warn", "restart required · installed " + short(u.installedRevision)]
           : u.status === "up-to-date"
-            ? ["ok", "up to date · " + short(u.running) + " (" + (u.channel || "main") + ")"]
+            ? ["ok", "up to date · " + short(u.runningRevision) + " (" + (u.channel || "main") + ")"]
             : u.status === "ahead"
-              ? ["ok", "ahead · " + short(u.running) + " (" + (u.channel || "main") + ")"]
+              ? ["ok", "ahead · " + short(u.runningRevision) + " (" + (u.channel || "main") + ")"]
               : u.status === "offline"
-                ? ["warn", "offline · " + short(u.running)]
+                ? ["warn", "offline · " + short(u.runningRevision)]
                 : ["warn", "unknown"];
       rows.push(["Update availability", label[0], label[1]]);
     }

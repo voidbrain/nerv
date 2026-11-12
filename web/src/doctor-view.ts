@@ -342,9 +342,9 @@ export class DoctorView {
       | {
           status?: string;
           channel?: string;
-          installed?: string | null;
-          running?: string | null;
-          available?: string | null;
+          installedRevision?: string | null;
+          runningRevision?: string | null;
+          availableRevision?: string | null;
           restartRequired?: boolean;
         }
       | undefined;
@@ -355,15 +355,15 @@ export class DoctorView {
         (upd.status === 'up-to-date' && !upd.restartRequired) || upd.status === 'ahead' ? 'ok' : 'warn';
       const detail =
         upd.status === 'update-available'
-          ? `update available · ${short(upd.available)} (${ch})`
+          ? `update available · ${short(upd.availableRevision)} (${ch})`
           : upd.restartRequired
-            ? `restart required · installed ${short(upd.installed)} · running ${short(upd.running)}`
+            ? `restart required · installed ${short(upd.installedRevision)} · running ${short(upd.runningRevision)}`
             : upd.status === 'up-to-date'
-              ? `up to date · ${short(upd.running)} (${ch})`
+              ? `up to date · ${short(upd.runningRevision)} (${ch})`
               : upd.status === 'ahead'
-                ? `ahead · ${short(upd.running)} (${ch})`
+                ? `ahead · ${short(upd.runningRevision)} (${ch})`
                 : upd.status === 'offline'
-                  ? `offline · ${short(upd.running)} (${ch})`
+                  ? `offline · ${short(upd.runningRevision)} (${ch})`
                   : 'unknown';
       result.push({
         id: 'update',

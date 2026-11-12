@@ -1,23 +1,23 @@
 import SwiftUI
 import AppKit
 struct UpdateAvailability: Decodable {
-    let status: String; let channel: String; let installed: String?; let running: String?; let available: String?; let restartRequired: Bool; let lastCheckedAt: String
+    let status: String; let channel: String; let installedRevision: String?; let runningRevision: String?; let availableRevision: String?; let restartRequired: Bool; let checkedAt: String?
     func label(language: String) -> String {
         let short: (String?) -> String = { v in guard let v, v.count >= 7 else { return "?" }; return String(v.prefix(7)) }
         if status == "update-available" {
-            return language == "en" ? "Update available: \(short(available)) (\(channel))" : "Aggiornamento disponibile: \(short(available)) (\(channel))"
+            return language == "en" ? "Update available: \(short(availableRevision)) (\(channel))" : "Aggiornamento disponibile: \(short(availableRevision)) (\(channel))"
         }
         if restartRequired {
-            return language == "en" ? "Restart required: installed \(short(installed))" : "Riavvio richiesto: installata \(short(installed))"
+            return language == "en" ? "Restart required: installed \(short(installedRevision))" : "Riavvio richiesto: installata \(short(installedRevision))"
         }
         if status == "up-to-date" {
-            return language == "en" ? "Up to date: \(short(running)) (\(channel))" : "Aggiornato: \(short(running)) (\(channel))"
+            return language == "en" ? "Up to date: \(short(runningRevision)) (\(channel))" : "Aggiornato: \(short(runningRevision)) (\(channel))"
         }
         if status == "ahead" {
-            return language == "en" ? "Ahead of \(channel): \(short(running))" : "Avanti rispetto a \(channel): \(short(running))"
+            return language == "en" ? "Ahead of \(channel): \(short(runningRevision))" : "Avanti rispetto a \(channel): \(short(runningRevision))"
         }
         if status == "offline" {
-            return language == "en" ? "Update check offline (\(short(running)))" : "Controllo aggiornamenti offline (\(short(running)))"
+            return language == "en" ? "Update check offline (\(short(runningRevision)))" : "Controllo aggiornamenti offline (\(short(runningRevision)))"
         }
         return language == "en" ? "Update status unknown" : "Stato aggiornamenti sconosciuto"
     }
