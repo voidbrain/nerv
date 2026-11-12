@@ -13,6 +13,7 @@ Decisions preserve rationale and alternatives. A date alone does not make them s
 | [Node upgrades](node-upgrades.md) | Reader contract and review-only upgrade rehearsal on a private backup copy; no application upgrade admitted yet (F-005-T06) | Journaled rehearsal step, admission beyond documentation, schema or migration change, Windows support |
 | [Node bootstrap](node-bootstrap.md) | Explicit discovery/inspection and confirmed transactional bootstrap | Service ownership, supported hosts or enrolment/recovery behavior changes |
 | [Configuration qualification](configuration-qualification.md) | Accepted staged individual, combination and NERV/host qualification; implementation pending F-006/F-045 | Changed role/workflow/host boundary or measured campaign benefit |
+| [Remote inference](remote-inference.md) | Enrolled base endpoint identity, owner-bases privacy class, no silent fallback and bounded expiry; F-006-T01 proposed | Worker protocol changes, Tailscale overlay replaced, non-owner host proposed, or waiting budgets adjusted |
 | [Evaluation and improvement](evaluation-and-improvement.md) | Evidence, browser/channel parity and bounded improvement | New flow branches, repeated failures, new model configuration or changed promotion rules |
 
 No decision in this folder was found to be wholly superseded in this reorganization. Their latest review evidence and rerun conditions are in the [review register](../reviews/README.md).
