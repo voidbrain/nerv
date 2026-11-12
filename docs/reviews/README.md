@@ -178,3 +178,5 @@ Gauntlet0.3 NERV adoption accepted after PR235 exactheadb4cd887 / full CI4260857
 [B-008 Tabgha reproduction](../acceptance/b008-tabgha-2026-11-12.md), 2026-11-12, Tabgha 8c58ee5 / Neo Tokyo-3 f8b8116: dashboard banner and /api/ reads during long relays, not reproduced; found B-054 and B-055. Rerun if the banner or relay path changes or the owner sees the message again.
 
 [F-015 isolated pairing and Keychain trial](../acceptance/f015-keychain-trial-2026-11-12.md), 2026-11-12, companion and profile at 214b7cb: live pairing, invitation replay and expiry, secret exposure checks; found B-056. Rerun on changes to pairing, renewal, Keychain storage or native TLS.
+
+[F-015 live failure, recovery and rotation](../acceptance/f015-live-failures-2026-11-12.md), 2026-11-12, profile 829418f, companion 214b7cb: revocation, lost renewal reply, Keychain failure, offline rotation with recovery; found B-057. Rerun on changes to pairing, renewal, Keychain storage, native TLS or the recovery procedure.
