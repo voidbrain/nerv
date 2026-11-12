@@ -305,16 +305,24 @@ const stepActual = (t) => {
   if (typeof v !== 'number') return inHours(e) ? hourText(0) : dayText(0);
   return `${inHours(e) ? hourText(v) : dayText(v)}${t.status === 'closed' ? '' : ' so far'} (${e.actualSource})`;
 };
+// A re-estimated open step names the baseline it was planned at, "1 h (planned 1.5)", so a remaining time below the
+// baseline with no actual reads as a revision, not as work done. Always the baseline, never the previous estimate:
+// after several re-estimates the steps between stay in the dated basis and git history.
+const planned = (remaining, baseline) =>
+  typeof baseline === 'number' && baseline !== remaining ? ` (planned ${Number(baseline.toFixed(2))})` : '';
 const stepRemaining = (e, status) => {
   if (inHours(e)) {
     if (status === 'closed') return hourText(0);
     const parts = [
-      ...(typeof e.agentHours === 'number' ? [hourText(e.agentHours)] : []),
+      ...(typeof e.agentHours === 'number'
+        ? [`${hourText(e.agentHours)}${planned(e.agentHours, e.baselineAgentHours)}`]
+        : []),
       ...(e.ownerHours ? [`${hourText(e.ownerHours)} owner`] : []),
     ];
     return parts.length ? parts.join(' + ') : cell(e.estimate);
   }
-  return typeof e.days === 'number' ? dayText(e.days) : cell(e.estimate);
+  if (typeof e.days !== 'number') return cell(e.estimate);
+  return `${dayText(e.days)}${status === 'closed' ? '' : planned(e.days, e.baselineDays)}`;
 };
 function totalRow(steps) {
   const t = effortTotals(steps);

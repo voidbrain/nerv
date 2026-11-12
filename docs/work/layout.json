@@ -2,7 +2,7 @@
   "version": 1,
   "segments": [
     {
-      "text": "# NERV Agency backlog\n\nCurrent work ledger, reviewed 12 November 2026 against main `33126e6`. PR #306 passed CI (B-043 closed). B-046 closed: 11 CI runs after remedy (a) (#293) passed every worker-link heartbeat test on Windows and Linux coverage.\nGovernance and naming follow the [architecture vocabulary](architecture/vocabulary.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md) · [Reconciliation log](archive/reconciliation-2026.md).\n\n<!-- recap:start -->\n<!-- recap:end -->\n\n<!-- totals:start -->\n<!-- totals:end -->\n\n## Work items\n\nBugs (B-) and features (F-) in one list, most urgent first. From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a B- record here; earlier ones stayed in their F- records (owner decision).\n\n"
+      "text": "# NERV Agency backlog\n\nCurrent work ledger, reviewed 12 November 2026 against main `e821c11`. PRs #307 (F-016-T01 decision) and #308 (B-046 closed) passed CI; harness v6.2.0: a re-estimated step names its baseline (`1 h (planned 1.5)`).\nGovernance and naming follow the [architecture vocabulary](architecture/vocabulary.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md) · [Reconciliation log](archive/reconciliation-2026.md).\n\n<!-- recap:start -->\n<!-- recap:end -->\n\n<!-- totals:start -->\n<!-- totals:end -->\n\n## Work items\n\nBugs (B-) and features (F-) in one list, most urgent first. From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a B- record here; earlier ones stayed in their F- records (owner decision).\n\n"
     },
     {
       "records": "all"

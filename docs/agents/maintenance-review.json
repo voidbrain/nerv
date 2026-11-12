@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-12T12:04:52.815Z",
+  "reviewed": "2026-11-12T16:05:50.239Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
     "AGENTS.md": "3baab88d7088bab8f454e3052d852d0761e3319454edac9ed0ca1c7985b4991c",
-    "docs/BACKLOG-RULES.md": "c7197fadb5e7807f18f57e7d26fc43ab93df597601d04d1ff22a1368c9df8db9",
+    "docs/BACKLOG-RULES.md": "77886e678137f5e9f5b033a83dc02c34c328082976a0d846cf00729640dd2e44",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
     "docs/agents/areas.md": "0ff9805a7d720ee177505cef670e53169a6d640299762dfa86185be46fa8737c",
     "docs/agents/audit.md": "bc5de5707f9ec5c523e73602499312c373d6112ffc498d69bf68604522527992",
@@ -20,12 +20,12 @@
     "docs/agents/work-usage.md": "e2f7c484f1c07f4b47fd1133857d8744ccab0ad2a7b85b220946c115a002bebc",
     "tools/task-claims.mjs": "2a7b7d0ea9e23fb36eceba5e5433eb640fee3e3633426066e4050f0fa8ebb9cf",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
-    "tools/work-items.mjs": "7cf21340b775002aa44609906ac49f03a64565bdb5f45ebc62c9d42437704de1",
+    "tools/work-items.mjs": "8e1002dab92a36f1204a883d747467f07c311ceea4b9f6e8d5971b874cf8def4",
     "tools/work-usage.mjs": "4329262c0b9e723e046dd8878e15a99cff5f590201cd0918563f3204bbe79219"
   },
   "measurements": {
-    "samples": 18,
-    "latestAt": "2026-11-12T12:02:37.724Z",
+    "samples": 1,
+    "latestAt": "2026-11-12T16:05:50.178Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -51,42 +51,36 @@
         }
       },
       "reconciliation": {
-        "samples": 18,
+        "samples": 1,
         "durationMs": {
-          "observed": 18,
+          "observed": 1,
           "missing": 0,
-          "median": 207860
+          "median": 71837
         },
         "conflicts": {
-          "observed": 5,
-          "missing": 13,
+          "observed": 1,
+          "missing": 0,
           "median": 0
         },
         "unnecessaryPrompts": {
           "observed": 1,
-          "missing": 17,
+          "missing": 0,
           "median": 0
         },
         "repeatedContextLoads": {
           "observed": 1,
-          "missing": 17,
-          "median": 1
+          "missing": 0,
+          "median": 0
         }
       }
     }
   },
   "outcomes": [
     {
-      "kind": "rule",
-      "disposition": "implemented",
-      "target": "docs/BACKLOG-RULES.md",
-      "evidence": "Reconciled published harness 6.1.0 (from 6.0.0): the BACKLOG-RULES template diff v6.0.0..v6.1.0 applied byte-identically (estimate calibration by kind, per-kind band check). No check, never or ask-first rule, or safeguard removed. No behaviour runner configured."
-    },
-    {
       "kind": "tool",
       "disposition": "implemented",
       "target": "tools/work-items.mjs",
-      "evidence": "work-items copied byte-identically from tag v6.1.0; check-harness --strict passes; CI clones v6.1.0. calibrate reports byKind: bug n=5 median 0.6, feature n=1 (too few). Friction sample: wall-clock from worktree creation (13:01:33 +0100) to the review; the template change (PR #128, #129) before it is not included."
+      "evidence": "Reconciled harness v6.2.0 (project-harness PR #130, F-061): copied work-items.mjs; BACKLOG-RULES estimate-calibration paragraph gains the '(planned <baseline>)' clause, no NERV override touched, no rule removed. Ledger regenerated: F-042-T02 reads '1 h (planned 1.5)'."
     }
   ]
 }
