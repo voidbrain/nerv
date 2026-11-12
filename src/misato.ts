@@ -305,20 +305,29 @@ export function misatoAsk(input: StepInput, route: RouteName): Ask {
   );
   while (steps.length > 1 && JSON.stringify(steps).length > MAX_HISTORY_CHARS) steps = steps.slice(1);
   if (JSON.stringify(steps).length > MAX_HISTORY_CHARS) steps = [];
+  // B-021: on the answer's first turn, the question and the job it belongs to are named, not left to be found in earlier.
+  const pendingQuestion = input.clarification
+    ? input.context?.findLast((t) => t.reply)?.reply?.slice(0, 1000)
+    : undefined;
+  const originalRequest = input.clarification ? input.context?.[0]?.request.slice(0, 1000) : undefined;
+  // They are LCL too: counted inside the route's budget, so earlier exchanges and memory get what is left.
+  const named = [originalRequest, pendingQuestion].reduce((n, t) => n + (t ? JSON.stringify(t).length + 1 : 0), 0);
   // The LCL: memory and earlier exchanges within the route's budget; local-only items never leave the machine.
-  const { memory, earlier } = fillLcl(input.memory ?? [], (input.context ?? []).slice(-3), route);
+  const { memory, earlier } = fillLcl(
+    input.memory ?? [],
+    (input.context ?? []).slice(-3),
+    route,
+    LCL_CHARS[route] - named,
+  );
   // A consultant's advice is local: it never goes to the cloud route with the request it was written for.
   const advice = input.advice && route === 'local' ? input.advice.slice(0, 600) : undefined;
-  // B-021: on the answer's first turn, the question and the job it belongs to are named, not left to be found in earlier.
-  const pendingQuestion = input.clarification ? input.context?.findLast((t) => t.reply)?.reply : undefined;
-  const originalRequest = input.clarification ? input.context?.[0]?.request : undefined;
   const prompt = JSON.stringify({
     ...(memory.length ? { memory } : {}),
     ...(earlier.length ? { earlier } : {}),
     ...(advice ? { advice } : {}),
     ...(input.clarification ? { clarification: true } : {}),
-    ...(originalRequest ? { originalRequest: originalRequest.slice(0, 1000) } : {}),
-    ...(pendingQuestion ? { pendingQuestion: pendingQuestion.slice(0, 1000) } : {}),
+    ...(originalRequest ? { originalRequest } : {}),
+    ...(pendingQuestion ? { pendingQuestion } : {}),
     request: input.request.slice(0, MAX_REQUEST_CHARS),
     steps,
   });
