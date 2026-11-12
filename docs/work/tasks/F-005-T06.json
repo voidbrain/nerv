@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-005",
   "id": "F-005-T06",
-  "status": "implemented",
+  "status": "closed",
   "title": "Safe upgrades, slices T06a–T06d: rehearsal, journaled rehearsal, admission of schema-preserving upgrades, first Mac move",
   "goal": "Deliver the upgrade mechanism up to admission of application upgrades that keep the schema version, and move the Mac service once by hand onto it",
   "capabilities": [

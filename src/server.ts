@@ -8,6 +8,12 @@ import { resolve, sep, extname } from 'node:path';
 import type { StoreApi } from './runtime.ts';
 import { attachRpcSocket } from './socket.ts';
 import { buildInfo } from './build.ts';
+import {
+  checkUpdateAvailability,
+  parseUpdateChannel,
+  validateUpdateAvailability,
+  type UpdateAvailability,
+} from './update-availability.ts';
 import { RpcFault } from './rpc.ts';
 import type { ModelChange } from './model-setup.ts';
 import { MODEL_TIMEOUT_MS } from './model.ts';
@@ -41,6 +47,7 @@ export function makeServer(
     loginCodeTtlMs?: number;
     sessionTtlMs?: number;
     onStop?: () => void;
+    updateCheck?: (options: { channel: string; refresh: boolean }) => Promise<UpdateAvailability>;
   } = {},
 ) {
   if (options.native && !options.tls) throw new Error('Native pairing requires TLS.');
@@ -58,6 +65,8 @@ export function makeServer(
   // so a session can never renew itself.
   const feed = store.dashboardRevision ? new DashboardFeed(() => store.dashboardRevision!()) : undefined;
   const sessions = new Map<string, number>();
+  let cachedUpdate: { at: number; channel: string; value: UpdateAvailability } | undefined;
+  const UPDATE_CHECK_TTL_MS = 5 * 60_000;
   const sessionTtl = options.sessionTtlMs ?? SESSION_TTL_MS;
   if (token.length < 24) throw new Error('NERV_TOKEN must be at least 24 characters.');
   const listener: RequestListener = async (req, res) => {
@@ -204,6 +213,7 @@ export function makeServer(
         ([
           '/api/status',
           '/api/doctor',
+          '/api/update',
           '/api/push/key',
           '/api/push/status',
           '/api/reminders',
@@ -686,7 +696,25 @@ export function makeServer(
           timeZone: options.timeZone ?? 'Europe/Rome',
           ...(options.native ? { runtimeId: options.native.auth.runtimeId, home: options.native.auth.home } : {}),
         });
-      else reply(404, { error: 'Unknown operation.' });
+      else if (req.method === 'GET' && path === '/api/update') {
+        const channel = parseUpdateChannel(url.searchParams.get('channel') ?? undefined);
+        const refresh = url.searchParams.get('refresh') === '1';
+        const now = Date.now();
+        if (
+          refresh ||
+          !cachedUpdate ||
+          cachedUpdate.channel !== channel ||
+          now - cachedUpdate.at >= UPDATE_CHECK_TTL_MS
+        ) {
+          const value = validateUpdateAvailability(
+            options.updateCheck
+              ? await options.updateCheck({ channel, refresh })
+              : await checkUpdateAvailability({ channel, runningRevision: build.commit }),
+          );
+          cachedUpdate = { at: now, channel, value };
+        }
+        reply(200, cachedUpdate.value);
+      } else reply(404, { error: 'Unknown operation.' });
     } catch (e) {
       reply(400, { error: e instanceof Error ? e.message : 'Invalid request.' });
     }

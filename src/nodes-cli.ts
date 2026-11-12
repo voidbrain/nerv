@@ -21,11 +21,12 @@ import {
   serviceReceipt,
   releaseObservedService,
 } from './node-lifecycle-execution.ts';
-import { dataHome } from './config.ts';
+import { dataHome, readConfig, readToken } from './config.ts';
 import { rehearseUpgrade } from './upgrade-rehearsal.ts';
 import { bootstrapPlan } from './node-bootstrap.ts';
+import { checkUpdateAvailability } from './update-availability.ts';
 const NODES_HELP =
-  'nodes lifecycle-inspect --action install|start|stop|update|uninstall [--revision FULL-SHA] [--out FILE]; nodes lifecycle-apply --plan FILE --confirm DIGEST; nodes lifecycle-status --digest DIGEST; nodes lifecycle-release --receipt FILE --evidence FILE (local Mac default profile only); nodes upgrade-rehearse --backup ABS-DIR [--out FILE] (the reader of this checkout on a private copy of a backup; review only, admits no upgrade); nodes lifecycle-plan --input FILE [--out FILE]; nodes lifecycle-recovery-check --receipt FILE --evidence FILE [--out FILE] (review only; no service or journal changes); nodes discover --inventory FILE | --ssh-config FILE | --tailscale FILE | --tailscale-live | --registry FILE --root-key PUBKEY; nodes inspect --local | --ssh HOST [--user USER] [--port PORT] [--out FILE]; nodes plan --inspection FILE --revision FULL-SHA --checkout ABS --home ABS --base ID --name NAME [--service | --additional-profile] [--out FILE]; nodes apply --plan FILE --confirm DIGEST; nodes status --plan FILE; nodes release --plan FILE --confirm DIGEST --confirmed-stopped --reason EVIDENCE';
+  'nodes update-check [--channel main] [--offline] [--out FILE]; nodes lifecycle-inspect --action install|start|stop|update|uninstall [--revision FULL-SHA] [--out FILE]; nodes lifecycle-apply --plan FILE --confirm DIGEST; nodes lifecycle-status --digest DIGEST; nodes lifecycle-release --receipt FILE --evidence FILE (local Mac default profile only); nodes upgrade-rehearse --backup ABS-DIR [--out FILE] (the reader of this checkout on a private copy of a backup; review only, admits no upgrade); nodes lifecycle-plan --input FILE [--out FILE]; nodes lifecycle-recovery-check --receipt FILE --evidence FILE [--out FILE] (review only; no service or journal changes); nodes discover --inventory FILE | --ssh-config FILE | --tailscale FILE | --tailscale-live | --registry FILE --root-key PUBKEY; nodes inspect --local | --ssh HOST [--user USER] [--port PORT] [--out FILE]; nodes plan --inspection FILE --revision FULL-SHA --checkout ABS --home ABS --base ID --name NAME [--service | --additional-profile] [--out FILE]; nodes apply --plan FILE --confirm DIGEST; nodes status --plan FILE; nodes release --plan FILE --confirm DIGEST --confirmed-stopped --reason EVIDENCE';
 function file(path: string): string {
   const fd = openSync(path, 'r');
   try {
@@ -47,6 +48,7 @@ export async function nodesCommand(args: string[], runner: CommandRunner = runNo
     values = new Map<string, string>(),
     switches = new Set<string>();
   const schema: Record<string, { values: string[]; switches: string[] }> = {
+    'update-check': { values: ['channel', 'out'], switches: ['offline'] },
     'lifecycle-inspect': { values: ['action', 'revision', 'out'], switches: [] },
     'lifecycle-apply': { values: ['plan', 'confirm', 'out'], switches: [] },
     'lifecycle-status': { values: ['digest', 'out'], switches: [] },
@@ -103,6 +105,28 @@ export async function nodesCommand(args: string[], runner: CommandRunner = runNo
         parseNodeInput(file(required('receipt'))),
         parseNodeInput(file(required('evidence'))),
       );
+  } else if (command === 'update-check') {
+    let runningRevision: string | null = null;
+    try {
+      const home = dataHome();
+      const config = readConfig(home);
+      const token = readToken(home);
+      const r = await fetch(`http://127.0.0.1:${config.port}/api/doctor`, {
+        headers: { authorization: `Bearer ${token}` },
+        signal: AbortSignal.timeout(1500),
+      });
+      if (r.ok) {
+        const body = (await r.json()) as { build?: { commit?: unknown } };
+        if (typeof body.build?.commit === 'string') runningRevision = body.build.commit;
+      }
+    } catch {
+      /* stopped or uninitialized profile: runningRevision stays null */
+    }
+    result = await checkUpdateAvailability({
+      channel: values.get('channel'),
+      offline: switches.has('offline'),
+      runningRevision,
+    });
   } else if (command === 'upgrade-rehearse') result = await rehearseUpgrade(required('backup'));
   else if (command === 'lifecycle-plan') result = lifecyclePlan(parseNodeInput(file(required('input'))));
   else if (command === 'lifecycle-recovery-check')
