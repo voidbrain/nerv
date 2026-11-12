@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-016",
   "id": "F-016-T01",
-  "status": "planned",
+  "status": "implemented",
   "title": "Step 1a — Decision: replicated state, leader lease and epoch, fencing tokens and restore",
   "goal": "Decision: replicated state, leader lease and epoch, fencing tokens and restore.",
   "capabilities": [
@@ -34,12 +34,14 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "1.25 h agent + 0.25 hours owner",
-    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Step 1, slice a. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent + 0.25 hours owner; agent writes the decision at the usual rate; the owner agrees it. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept.",
+    "estimate": "0.25 hours owner",
+    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Step 1, slice a. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent + 0.25 hours owner; agent writes the decision at the usual rate; the owner agrees it. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept. Authoring decision record docs/decisions/coordinator-relocation.md completed 2026-11-12 in 0.5 h agent (stated); 0.25 h owner remains for agreement.",
     "reviewed": "2026-11-12",
     "baselineDays": 1.5,
-    "agentHours": 1.25,
+    "agentHours": 0,
     "ownerHours": 0.25,
-    "baselineAgentHours": 2.25
+    "baselineAgentHours": 2.25,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
   }
 }

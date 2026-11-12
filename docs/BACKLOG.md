@@ -14,7 +14,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 34 | 5 |
-| **Require Human 🧑** | 10 | 1 |
+| **Require Human 🧑** | 11 | 1 |
 
 ### Require Human 🧑
 
@@ -28,96 +28,18 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-011](#f-011) |  |
 | [F-023](#f-023) |  |
 | [F-004](#f-004) |  |
+| [F-016](#f-016) |  |
 | [F-074](#f-074) |  |
 | [F-064](#f-064) |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 164.25 h + 19.5 h owner and 0 days across 155 open steps of 33 features and 4 other records. 16 h of actual effort recorded on 13 steps. Generated from the task files.
+**Remaining effort:** 163 h + 19.5 h owner and 0 days across 155 open steps of 33 features and 4 other records. 16.5 h of actual effort recorded on 14 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
 
 Bugs (B-) and features (F-) in one list, most urgent first. From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a B- record here; earlier ones stayed in their F- records (owner decision).
-
-### F-016
-
-**Relocate the logical coordinator without split brain**
-
-| Signal | Priority | Status | Effort | Remaining | Depends on | Unlocks | Human action |
-|:---:|---|---|---|---|---|---|:---:|
-| 🔴 | 🔺 P1 | Open | 🔴 Large | 9.75 h + 1.25 h owner | — | — | 💻 No |
-
-💻 **→** Slices approved 2026-11-11 and recorded as tasks. Next agent work: Step 1a (F-016-T01), the coordinator relocation decision.
-
-| | |
-|---|---|
-| **Issue** | Deferred milestone 5b. No distributed election, replication or automatic failover is implemented. |
-| **Reproduce** | Follow docs/decisions/runtime-boundaries.md and the protocol/isolation test fixtures. |
-| **Check** | Network partitions, asleep old leaders and reconnect cannot create simultaneous authorities or duplicate physical effects. Context copying alone never grants leadership. |
-
-
-
-**Feature steps** (baseline: accepted estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Step | Baseline | Actual | Remaining | Status |
-|---|---|---|---|---|
-| F-016-T01 — Step 1a — Decision: replicated state, leader lease and epoch, fencing tokens and restore | 2.25 h | 0 h | 🟡 Medium — 1.25 h + 0.25 h owner | Planned |
-| F-016-T02 — Step 1b — Independent review of the coordinator relocation decision | 0.75 h | 0 h | 🟢 Small — 0.5 h | Planned |
-| F-016-T03 — Step 2a — Signed state snapshot export and import to a read-only standby | 2.25 h | 0 h | 🟡 Medium — 1.25 h | Planned |
-| F-016-T04 — Step 2b — Incremental log shipping to the standby | 2.25 h | 0 h | 🟡 Medium — 1.25 h | Planned |
-| F-016-T05 — Step 3a — Leader epoch in signed registry records; every effect checks the fencing token | 2.25 h | 0 h | 🟡 Medium — 1.25 h | Planned |
-| F-016-T06 — Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake | 2.25 h | 0 h | 🟡 Medium — 1.25 h | Planned |
-| F-016-T07 — Step 4a — Owner-initiated relocation with restore; never a context-only takeover | 2.25 h | 0 h | 🟡 Medium — 1.25 h | Planned |
-| F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 2.25 h | 0 h | 🟡 Medium — 1.25 h | Planned |
-| F-016-T09 — Step 5b — Two-device relocation acceptance | 1 h | 0 h | 🟢 Small — 0.5 h + 1 h owner | Planned |
-| **Total** | 17.5 h | 0 h (0 of 9 steps recorded) | 9.75 h + 1.25 h owner | 0 of 9 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- F-016-T01: 1.25 h agent + 0.25 hours owner (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 1, slice a. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent + 0.25 hours owner; agent writes the decision at the usual rate; the owner agrees it. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept.
-- F-016-T02: 0.5 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 1, slice b. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 0.75 hours agent; one fresh-context review on the strongest model. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 0.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 0.75 h → 0.5 h, min 0.5 h; owner hours and baseline kept.
-- F-016-T03: 1.25 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 2, slice a. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept.
-- F-016-T04: 1.25 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 2, slice b. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept.
-- F-016-T05: 1.25 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 3, slice a. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept.
-- F-016-T06: 1.25 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 3, slice b. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept.
-- F-016-T07: 1.25 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 4, slice a. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept.
-- F-016-T08: 1.25 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 5, slice a. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept.
-- F-016-T09: 0.5 h agent + 1 hour owner (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 5, slice b. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1 hour agent + 1 hour owner; agent prepares and records; the owner operates the two devices. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1 h → 0.5 h, min 0.5 h; owner hours and baseline kept.
-
-**Proposed slices, 2026-11-11 ([PR #264](https://github.com/voidbrain/nerv/pull/264); approved by the owner 2026-11-11 and recorded as task sources):** no steps existed; milestone 5b was deferred. Proposed steps, each split into slices.
-
-| Step | Slice | Scope | Estimate |
-|---|---|---|---|
-| T01 | a | Decision: replicated state, leader lease and epoch, fencing tokens, restore | 1.5 days |
-| T01 | b | Independent review of that decision | 0.5 day |
-| T02 | a | Signed state snapshot export and import to a standby (read-only) | 1.5 days |
-| T02 | b | Incremental log shipping to the standby | 1.5 days |
-| T03 | a | Leader epoch in signed registry records; every effect checks the fencing token | 1.5 days |
-| T03 | b | Lease renewal and expiry; an asleep old leader is refused on wake | 1.5 days |
-| T04 | a | Owner-initiated relocation with restore, never context-only takeover | 1.5 days |
-| T05 | a | Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 1.5 days |
-| T05 | b | Two-device acceptance | 1 day plus owner run |
-
-Total about 12 focused days (was Large, unestimated). Highest uncertainty of the three: the replication design (T01) may change T02–T03. Estimates only, not measurements; owner-run device or campaign time is not counted.
-
-**Next action / closure evidence:** Keep the coordinator on an always-on host initially; design later replicated state, leader epochs/leases, fencing and restore. Network partitions, asleep old leaders and reconnect cannot create simultaneous authorities or duplicate physical effects. Context copying alone never grants leadership.
-
-**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 9 open steps total 9.75 h agent + 1.25 h owner (steps table; each task basis gives old → new). Figures after this sentence are dated history. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): the 9 open steps in hours total 17.5 h agent + 1.25 h owner (steps table; method in each task basis). Day figures below are dated history. Large remaining effort. Estimated 2026-11-01; not acceptance evidence.
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #3](https://github.com/voidbrain/nerv/pull/3); local checks and scoped audit pass; CI pending |
-| Opened | 2026-11-01 |
-| Verification | Pending named acceptance |
-| Reviewed | 2026-11-01 |
-
-</details>
-
----
 
 ### F-007
 
@@ -2178,6 +2100,87 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 | PR / evidence | Reconcile: [PR #304](https://github.com/voidbrain/nerv/pull/304). [PR #303](https://github.com/voidbrain/nerv/pull/303) F-004-T05 web push (test/push.test.ts, test/angular.browser.mjs); [PR #300](https://github.com/voidbrain/nerv/pull/300) F-004-T04 GenUI renderer (test/protocol.test.ts, test/surface-dom.test.mjs, test/angular.browser.mjs); [PR #299](https://github.com/voidbrain/nerv/pull/299) F-004-T03 doctor view (test/angular.browser.mjs); [PR #298](https://github.com/voidbrain/nerv/pull/298) F-004-T02 reminder CRUD (test/angular.browser.mjs); Reconcile: [PR #288](https://github.com/voidbrain/nerv/pull/288). [PR #286](https://github.com/voidbrain/nerv/pull/286) F-004-T01 PWA shell, CI [43168006619](https://github.com/voidbrain/nerv/actions/runs/43168006619) (attempt 1 validate failed on B-050, attempt 2 green) (test/pwa.browser.mjs, test/pwa.test.mjs); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Browser/accessibility 2026-11-12 (F-004-T01, F-004-T02, F-004-T03, F-004-T04, F-004-T05): test/pwa.browser.mjs, test/pwa.test.mjs, test/push.test.ts, and test/angular.browser.mjs passed with AXE checks; GenUI registered component renderer and Web Push subscription/delivery verified in PR #303 CI (run 43226982598). Phone install/push acceptance pending (F-004-T06). |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+
+### F-016
+
+**Relocate the logical coordinator without split brain**
+
+| Signal | Priority | Status | Effort | Remaining | Depends on | Unlocks | Human action |
+|:---:|---|---|---|---|---|---|:---:|
+| 🔴 | 🔺 P1 | Open | 🔴 Large | 8.5 h + 1.25 h owner | — | — | 🧑 Yes |
+
+🧑 **→** Owner agreement on coordinator relocation decision (docs/decisions/coordinator-relocation.md); independent review (F-016-T02) next.
+
+| | |
+|---|---|
+| **Issue** | Deferred milestone 5b. No distributed election, replication or automatic failover is implemented. |
+| **Reproduce** | Follow docs/decisions/runtime-boundaries.md and the protocol/isolation test fixtures. |
+| **Check** | Network partitions, asleep old leaders and reconnect cannot create simultaneous authorities or duplicate physical effects. Context copying alone never grants leadership. |
+
+
+
+**Feature steps** (baseline: accepted estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
+
+| Step | Baseline | Actual | Remaining | Status |
+|---|---|---|---|---|
+| F-016-T01 — Step 1a — Decision: replicated state, leader lease and epoch, fencing tokens and restore | 2.25 h | 0.5 h so far (stated) | 🟡 Medium — 0 h + 0.25 h owner | Implemented; verification pending |
+| F-016-T02 — Step 1b — Independent review of the coordinator relocation decision | 0.75 h | 0 h | 🟢 Small — 0.5 h | Planned |
+| F-016-T03 — Step 2a — Signed state snapshot export and import to a read-only standby | 2.25 h | 0 h | 🟡 Medium — 1.25 h | Planned |
+| F-016-T04 — Step 2b — Incremental log shipping to the standby | 2.25 h | 0 h | 🟡 Medium — 1.25 h | Planned |
+| F-016-T05 — Step 3a — Leader epoch in signed registry records; every effect checks the fencing token | 2.25 h | 0 h | 🟡 Medium — 1.25 h | Planned |
+| F-016-T06 — Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake | 2.25 h | 0 h | 🟡 Medium — 1.25 h | Planned |
+| F-016-T07 — Step 4a — Owner-initiated relocation with restore; never a context-only takeover | 2.25 h | 0 h | 🟡 Medium — 1.25 h | Planned |
+| F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 2.25 h | 0 h | 🟡 Medium — 1.25 h | Planned |
+| F-016-T09 — Step 5b — Two-device relocation acceptance | 1 h | 0 h | 🟢 Small — 0.5 h + 1 h owner | Planned |
+| **Total** | 17.5 h | 0.5 h (1 of 9 steps recorded) | 8.5 h + 1.25 h owner | 0 of 9 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- F-016-T01: 0.25 hours owner (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 1, slice a. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent + 0.25 hours owner; agent writes the decision at the usual rate; the owner agrees it. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept. Authoring decision record docs/decisions/coordinator-relocation.md completed 2026-11-12 in 0.5 h agent (stated); 0.25 h owner remains for agreement.
+- F-016-T02: 0.5 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 1, slice b. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 0.75 hours agent; one fresh-context review on the strongest model. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 0.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 0.75 h → 0.5 h, min 0.5 h; owner hours and baseline kept.
+- F-016-T03: 1.25 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 2, slice a. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept.
+- F-016-T04: 1.25 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 2, slice b. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept.
+- F-016-T05: 1.25 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 3, slice a. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept.
+- F-016-T06: 1.25 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 3, slice b. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept.
+- F-016-T07: 1.25 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 4, slice a. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept.
+- F-016-T08: 1.25 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 5, slice a. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept.
+- F-016-T09: 0.5 h agent + 1 hour owner (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 5, slice b. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1 hour agent + 1 hour owner; agent prepares and records; the owner operates the two devices. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1 h → 0.5 h, min 0.5 h; owner hours and baseline kept.
+
+**F-016-T01 (Step 1a) proposed 2026-11-12:** [Coordinator relocation](decisions/coordinator-relocation.md) decision authored: logical agency tables in `nerv.sqlite` replicate via signed snapshots (F-016-T03) and base-key-signed incremental log batches (F-016-T04) while preserving exact `deliveries.rowid` sequences and keeping private keys, tokens and `native-auth.sqlite` strictly host-local; root-signed `main` records carry a monotonic `leaderEpoch` (F-016-T05) paired with a bounded coordinator lease and monotonic/wall-clock wake refusal (F-016-T06); every local `Store`/`Ledger`, `KajiLink`, `WorkerJobs` and channel effect checks `(leaderEpoch, fenceSeq)`; relocation is always owner-initiated (`kaji relocate`) with drain receipt or lease+skew wait and quarantine of `attempted` outbox work, never automatic failover or context-only takeover (F-016-T07). Awaiting owner agreement and independent review (F-016-T02).
+
+**Proposed slices, 2026-11-11 ([PR #264](https://github.com/voidbrain/nerv/pull/264); approved by the owner 2026-11-11 and recorded as task sources):** no steps existed; milestone 5b was deferred. Proposed steps, each split into slices.
+
+| Step | Slice | Scope | Estimate |
+|---|---|---|---|
+| T01 | a | Decision: replicated state, leader lease and epoch, fencing tokens, restore | 1.5 days |
+| T01 | b | Independent review of that decision | 0.5 day |
+| T02 | a | Signed state snapshot export and import to a standby (read-only) | 1.5 days |
+| T02 | b | Incremental log shipping to the standby | 1.5 days |
+| T03 | a | Leader epoch in signed registry records; every effect checks the fencing token | 1.5 days |
+| T03 | b | Lease renewal and expiry; an asleep old leader is refused on wake | 1.5 days |
+| T04 | a | Owner-initiated relocation with restore, never context-only takeover | 1.5 days |
+| T05 | a | Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 1.5 days |
+| T05 | b | Two-device acceptance | 1 day plus owner run |
+
+Total about 12 focused days (was Large, unestimated). Highest uncertainty of the three: the replication design (T01) may change T02–T03. Estimates only, not measurements; owner-run device or campaign time is not counted.
+
+**Next action / closure evidence:** Keep the coordinator on an always-on host initially; design later replicated state, leader epochs/leases, fencing and restore. Network partitions, asleep old leaders and reconnect cannot create simultaneous authorities or duplicate physical effects. Context copying alone never grants leadership.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 9 open steps total 9.75 h agent + 1.25 h owner (steps table; each task basis gives old → new). Figures after this sentence are dated history. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): the 9 open steps in hours total 17.5 h agent + 1.25 h owner (steps table; method in each task basis). Day figures below are dated history. Large remaining effort. Estimated 2026-11-01; not acceptance evidence.
+
+| Field | Value |
+|---|---|
+| PR / evidence | F-016-T01 decision (`docs/decisions/coordinator-relocation.md`); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #3](https://github.com/voidbrain/nerv/pull/3); local checks and scoped audit pass; CI pending |
+| Opened | 2026-11-01 |
+| Verification | Pending named acceptance |
 | Reviewed | 2026-11-12 |
 
 </details>
