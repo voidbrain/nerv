@@ -30,7 +30,7 @@
   ],
   "validation": [
     "Directed regressions or recorded evidence for this slice; final required CI",
-    "2026-11-12: test/update-availability.test.ts (/api/doctor, /api/status, dashboard, companion, doctor-view)"
+    "2026-11-12: PR #323, test/update-availability.test.ts (/api/doctor, /api/status, dashboard, companion, doctor-view)"
   ],
   "escalation": [
     "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
