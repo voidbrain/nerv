@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "id": "B-053-T01",
+  "parent": "B-053",
+  "title": "Find and remove the liveness race in the F-029 descendant-process test",
+  "goal": "The test decides on one observation per process and fails only when a descendant really survives the group timeout",
+  "status": "planned",
+  "acceptance": [
+    "A committed test or measurement shows the cause of the CI failure of run 43286749372 before any change to the test",
+    "A real surviving descendant still fails the test; no assertion is weakened",
+    "Repeated Linux CI coverage runs pass"
+  ],
+  "dependsOn": [],
+  "resources": ["test/evaluation-runner.test.mjs", "src/**", "docs/work/records/**", "generated:backlog-views"],
+  "capabilities": ["regression-design", "bounded-edit"],
+  "privacy": "No private data involved.",
+  "validation": ["node --test test/evaluation-runner.test.mjs", "npm run test:coverage on Linux CI"],
+  "escalation": ["A real descendant leak in the runner is reported under F-029 before the test is touched"],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-12: read the runner's group termination, reproduce under load on Linux, one bounded test change. Not a measurement.",
+    "reviewed": "2026-11-12",
+    "agentHours": 1,
+    "baselineAgentHours": 1
+  }
+}

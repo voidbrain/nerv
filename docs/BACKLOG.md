@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 2 | 3 | 6 | 6 |
+| **This week** | 2 | 3 | 7 | 6 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 33 | 5 |
+| **Open** | 33 | 6 |
 | **Require Human 🧑** | 9 | 1 |
 
 ### Require Human 🧑
@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 158.25 h agent + 18.25 h owner across 150 open steps of 32 features and 4 other records. 12.75 h of actual effort recorded on 17 steps. Generated from the task files.
+**Remaining effort:** 159.25 h agent + 18.25 h owner across 151 open steps of 32 features and 5 other records. 12.75 h of actual effort recorded on 17 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -863,6 +863,50 @@ Earlier next action (2026-11-09, done above): inspect event ordering for remote 
 | PR / evidence | Test: test/evaluation.browser.mjs "B-050: until retries through evaluated expression exceptions and resolves when condition holds" (committed failing in feb13de, passes after fix). Test: test/evaluation.browser.mjs "B-050: until still fails with timeout when throwing condition never holds" (committed failing in feb13de, passes after fix). Recorded in [PR #288](https://github.com/voidbrain/nerv/pull/288). Observed: CI 43168006619 attempt 1, job validate (job 131014457197), `test/evaluation.browser.mjs:62` via `until` in `test/fixtures/browser.mjs`; attempt 2 job validate (131017084799) passed on the same head. Same run, attempt 1: F-004-T01's own browser case passed. |
 | Opened | 2026-11-12 |
 | Verification | Pending. 2026-11-12: one CI failure observed; a rerun on the same head and 3 of 3 local runs (F-004 agent) passed. Not reproduced deterministically yet. |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+### B-053
+
+**F-029 descendant-process test failed once in CI with every process already gone**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Human action |
+|---|---|---|---|---|---|:---:|
+| 🟠 Investigate | 🔶 P2 | 🟢 Small | 1 h | — | — | 💻 No |
+
+💻 **→** Next: find why the second liveness check saw a PID the first one did not, and make the test decide on one observation (B-053-T01).
+
+| | |
+|---|---|
+| **Issue** | PR #316's validate job (run 43286749372, `npm run test:coverage`, Linux) failed `F-029: a timed-out scenario terminates its owned descendant process` with `no executing child survives the group timeout`, actual `[3708]`. The test took 5,030 ms in total: the 5 s run budget plus about 30 ms, so its wait loop (`while (owned.some(alive))`, up to 5 s) ended at once with nothing alive, and the following `owned.filter(alive)` found PID 3708 alive. The PR does not touch the runner or the test. Likely a race between the two separate liveness reads (PID reuse under coverage load, or the zombie check in `/proc/<pid>/stat` reading differently); inferred, not observed. |
+| **Reproduce** | `node --test --test-name-pattern='terminates its owned descendant' test/evaluation-runner.test.mjs` passed 5 of 5 locally on macOS on 2026-11-12; the failure was seen once on Linux CI under coverage. |
+| **Check** | A committed test or measurement shows the two-read race (or names another cause); the test decides on one observation per process and still fails when a descendant really survives; CI passes repeatedly. |
+
+**Steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | B-053-T01 — Find and remove the liveness race in the F-029 descendant-process test | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- B-053-T01: 1 h (2026-11-12). Estimated 2026-11-12: read the runner's group termination, reproduce under load on Linux, one bounded test change. Not a measurement.
+
+**Next action / closure evidence:** B-053-T01. If the runner really leaves a descendant, that is a runner defect under F-029 and the fix goes there, test unchanged.
+
+**Estimates:** Small, estimated 2026-11-12, not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Seen on [PR #316](https://github.com/voidbrain/nerv/pull/316), CI run 43286749372 job validate. |
+| Opened | 2026-11-12 |
+| Verification | Pending. |
 | Reviewed | 2026-11-12 |
 
 </details>
