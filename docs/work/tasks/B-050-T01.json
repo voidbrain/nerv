@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "B-050-T01",
+  "parent": "B-050",
+  "title": "Fix browser fixture until abortion on evaluated expression exceptions",
+  "goal": "A committed deterministic test shows until aborts immediately on expression exceptions during navigation; after the fix until catches evaluation errors, retries until timeout, and includes error detail on failure",
+  "status": "implemented",
+  "acceptance": [
+    "A committed deterministic test fails before the fix: until aborts immediately when an expression throws during page loading",
+    "After the fix until catches expression exceptions and retries until the condition holds or timeout expires",
+    "Timeout failure includes condition and last error detail",
+    "No assertion weakened and no timeout widened",
+    "Full browser suite passes"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "test/fixtures/browser.mjs",
+    "test/evaluation.browser.mjs",
+    "docs/work/records/B-050.md",
+    "docs/work/tasks/B-050-T01.json",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "browser-tests"
+  ],
+  "privacy": "Neutral repository fixtures only; no model inference, private hosts or device operations",
+  "validation": [
+    "test/evaluation.browser.mjs fails before the fix and passes after it",
+    "npm run test:browser passes all browser cases",
+    "Local typecheck, lint, formatting and backlog checks"
+  ],
+  "escalation": [
+    "Do not weaken assertions or merely widen timeouts"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h remaining",
+    "basis": "Task added 2026-11-12 when B-050 was taken up. Baseline 1.5 h agent (baselineAgentHours), the estimate recorded when B-050 was opened. Regression test committed first (feb13de), until retry in test/fixtures/browser.mjs, all browser tests passing. 0.5 h remains for review and CI.",
+    "reviewed": "2026-11-12",
+    "agentHours": 0.5,
+    "baselineAgentHours": 1.5,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
+  }
+}
