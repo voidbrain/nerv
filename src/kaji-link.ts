@@ -156,6 +156,18 @@ export class KajiLink {
   /** B-043: one tick at a time, across a stop and start too. A tick still waiting on the registry (the nervous process)
   or a slow peer is not joined by another every interval; their requests would pile up against the process queue bound. */
   private ticking = false;
+  /** B-051: coalesce concurrent bases() lookups while a call is in flight, so concurrent inbound requests (or an unverified
+  probe) do not flood the nervous child process queue. Once settled, the in-flight reference is cleared so subsequent
+  requests make a fresh lookup, preserving revocation freshness per lookup. */
+  private inFlightBases?: Promise<BaseEntry[]>;
+  private async bases(): Promise<BaseEntry[]> {
+    if (this.inFlightBases) return this.inFlightBases;
+    const promise = this.port.bases().finally(() => {
+      if (this.inFlightBases === promise) this.inFlightBases = undefined;
+    });
+    this.inFlightBases = promise;
+    return promise;
+  }
   /** Per peer, whether heartbeats reach it, logged only when that changes. A peer counts as unreachable in the log only
   after enough missed heartbeats in a row to fill the online window (one slow Tailscale path or a machine waking from
   sleep is not news: the dashboard keeps it online for ONLINE_MS anyway). */
@@ -275,7 +287,7 @@ export class KajiLink {
   }
   /** This base as the registry knows it (by its own public key), if enrolled and not revoked. */
   private async me(): Promise<BaseEntry | undefined> {
-    return (await this.port.bases()).find((b) => b.publicKey === this.publicKey && b.status === 'enrolled');
+    return (await this.bases()).find((b) => b.publicKey === this.publicKey && b.status === 'enrolled');
   }
   async start(everyMs = HEARTBEAT_MS): Promise<void> {
     this.stopped = false;
@@ -379,7 +391,7 @@ export class KajiLink {
         body += chunk;
         if (body.length > MAX_BODY) throw new Error('too large');
       }
-      const bases = await this.port.bases();
+      const bases = await this.bases();
       const from = verifySigned(
         req.headers as Record<string, string>,
         'req',
@@ -570,7 +582,7 @@ export class KajiLink {
       method,
       path,
       text,
-      await this.port.bases(),
+      await this.bases(),
       this.nonces,
       undefined,
       this.trust,
@@ -583,7 +595,7 @@ export class KajiLink {
   async relay(relay: Relay): Promise<boolean> {
     const main = await this.port.main?.();
     if (!main || main === this.baseId) return false;
-    const peer = (await this.port.bases()).find((b) => b.baseId === main && b.status === 'enrolled');
+    const peer = (await this.bases()).find((b) => b.baseId === main && b.status === 'enrolled');
     if (!peer) return false;
     try {
       return ((await this.call(peer, 'POST', '/kaji/relay', relay)) as { delivered?: boolean }).delivered === true;
@@ -602,7 +614,7 @@ export class KajiLink {
   ): Promise<DispatchedReply | undefined> {
     const main = await this.port.main?.();
     if (!main || main === this.baseId) return undefined;
-    const peer = (await this.port.bases()).find((b) => b.baseId === main && b.status === 'enrolled');
+    const peer = (await this.bases()).find((b) => b.baseId === main && b.status === 'enrolled');
     if (!peer) return undefined;
     try {
       const answer = (await this.call(
@@ -648,7 +660,7 @@ export class KajiLink {
     timeoutMs: number,
     dispatching: () => Promise<void> = async () => {},
   ): Promise<{ reached: boolean; result?: unknown; refused?: string }> {
-    const peer = (await this.port.bases()).find((b) => b.baseId === baseId && b.status === 'enrolled');
+    const peer = (await this.bases()).find((b) => b.baseId === baseId && b.status === 'enrolled');
     if (!peer) return { reached: true, refused: `${baseId} is not an enrolled base` };
     if (!this.workers?.connected(baseId) || !item.sequence)
       return { reached: false, refused: 'Waiting for a negotiated durable worker channel.' };
@@ -671,7 +683,7 @@ export class KajiLink {
   }
   /** Asks one base's Casper for a vote; anything but a well-formed vote in time is an abstain, so a slow base never blocks. */
   async verdict(baseId: string, ask: VerdictAsk, timeoutMs: number): Promise<PeerVerdict> {
-    const peer = (await this.port.bases()).find((b) => b.baseId === baseId && b.status === 'enrolled');
+    const peer = (await this.bases()).find((b) => b.baseId === baseId && b.status === 'enrolled');
     if (!peer) return { vote: 'abstain', reason: 'not an enrolled base' };
     try {
       const v = sanitizeVerdict(
@@ -690,7 +702,7 @@ export class KajiLink {
   async pendingApprovalIds(baseId: string, ids: string[]): Promise<string[]> {
     if (ids.length > 200 || new Set(ids).size !== ids.length || ids.some((id) => !UUID.test(id)))
       throw new Error('Invalid approval IDs.');
-    const peer = (await this.port.bases()).find((b) => b.baseId === baseId && b.status === 'enrolled');
+    const peer = (await this.bases()).find((b) => b.baseId === baseId && b.status === 'enrolled');
     if (!peer) throw new Error('Not an enrolled base.');
     const value = (await this.call(peer, 'POST', '/kaji/approvals/pending', { ids }, 2000)) as { ids?: unknown };
     if (
@@ -703,7 +715,7 @@ export class KajiLink {
   }
   /** Passes the owner's tap on a relayed card back to the base that owns the card; its outcome text comes back. */
   async decide(baseId: string, approvalId: string, decision: 'approve' | 'reject'): Promise<string> {
-    const peer = (await this.port.bases()).find((b) => b.baseId === baseId && b.status === 'enrolled');
+    const peer = (await this.bases()).find((b) => b.baseId === baseId && b.status === 'enrolled');
     if (!peer) throw new Error(`${baseId} is not an enrolled base.`);
     return (
       ((await this.call(peer, 'POST', '/kaji/decide', { approvalId, decision })) as { outcome?: string }).outcome ??
@@ -714,7 +726,7 @@ export class KajiLink {
   async heartbeat(): Promise<void> {
     const me = await this.me();
     if (!me) return;
-    const bases = await this.port.bases();
+    const bases = await this.bases();
     await this.port.seen({ [this.baseId]: new Date().toISOString() });
     const health = await this.own();
     for (const peer of bases.filter((b) => b.status === 'enrolled' && b.publicKey !== this.publicKey)) {

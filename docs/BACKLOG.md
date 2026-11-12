@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 273 h + 19.5 h owner and 0 days across 158 open steps of 33 features and 2 other records. 12 h of actual effort recorded on 6 steps. Generated from the task files.
+**Remaining effort:** 273 h + 19.5 h owner and 0 days across 159 open steps of 33 features and 3 other records. 12.75 h of actual effort recorded on 7 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Bugs and reliability
@@ -152,9 +152,9 @@ Final PR240 revision6acac44 / CI42635119338 passed all five/full-suite checks. I
 
 | Signal | Priority | Status | Effort |
 |:---:|---|---|---|
-| 🔴 | 🔺 P1 | Open | 🟢 Small |
+| 🟡 | 🔺 P1 | Implemented | 🟢 Small |
 
-💻 **→ Human action required: No**<br />Owner agreed 2026-11-12 to fix it; not started (owner: finish current work first). Next: a failing test, then bound or share the lookup.
+💻 **→ Human action required: No**<br />Fix implemented with coalesced in-flight bases() lookups and passing deterministic regression; review and CI pending.
 
 | | |
 |---|---|
@@ -165,15 +165,17 @@ Final PR240 revision6acac44 / CI42635119338 passed all five/full-suite checks. I
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** Write the failing test above, then share one in-flight `bases()` lookup across concurrent inbound requests (and/or cap concurrent unverified requests), keeping revocation freshness per lookup. Fresh-context review (security) before merge.
+**Reproduction and fix 2026-11-12 (B-051-T01):** Committed deterministic regression in `test/periodic-overlap.test.ts` (commit 951c779): with nervous child calls held, 37 unsigned requests filled the process queue (`child.held('kaji.bases')` was 32), the test failed before the fix, and an unrelated caller's `kaji.main` was blocked. Fix in `src/kaji-link.ts`: `KajiLink` coalesces in-flight `bases()` lookups so concurrent requests share one in-flight call while the registry is answering, and clears the reference in `finally` so subsequent lookups are fresh and revocation takes effect immediately on the next lookup. After the fix, `child.held('kaji.bases')` is 1, all unverified requests are rejected with 401/403, `kaji.main` gets through, signed heartbeat requests succeed, and revoked peers are rejected on the next lookup.
 
-**Estimates:** Small, about 1.5 h agent (estimated 2026-11-12, not a measurement): test, a small change in `serve`, review and CI.
+**Next action / closure evidence:** Fresh-context review (security/design) and CI before merge.
+
+**Estimates:** Small, 1.5 h agent baseline (B-051-T01); 0.75 h spent to implement.
 
 | Field | Value |
 |---|---|
-| PR / evidence | Recorded in [PR #289](https://github.com/voidbrain/nerv/pull/289). Found in the B-043 design review of #282; code confirmed on main: `serve` calls `this.port.bases()` before `verifySigned`. |
+| PR / evidence | Test: test/periodic-overlap.test.ts. Recorded in [PR #289](https://github.com/voidbrain/nerv/pull/289). Found in the B-043 design review of #282; code confirmed on main: `serve` calls `this.port.bases()` before `verifySigned`. |
 | Opened | 2026-11-12 |
-| Verification | Pending. |
+| Verification | Unit/integration: 2026-11-12 test/periodic-overlap.test.ts reproduces queue saturation before fix (32 held) and passes after fix (1 held, legitimate and revocation checks pass). |
 | Reviewed | 2026-11-12 |
 
 </details>
