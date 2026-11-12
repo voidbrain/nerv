@@ -67,6 +67,16 @@ export interface ServicePlan {
   blockers: string[];
   digest: string;
 }
+export interface ServiceHealthCheck {
+  ok: boolean;
+  checkedAt: string;
+  commit: string | null;
+  baseId: string | null;
+  database: string | null;
+  nervous: boolean;
+  brain: boolean;
+  failures: string[];
+}
 export interface ServiceReceipt {
   digest: string;
   resource: string;
@@ -77,6 +87,8 @@ export interface ServiceReceipt {
   state: State;
   steps: string[];
   rehearsal?: Pick<RehearsalReport, 'source' | 'result' | 'blockers'>;
+  health?: ServiceHealthCheck;
+  recovery?: string[];
 }
 /** Trusted adapter injection is for tests; no manifest or CLI input can select an adapter or command text. */
 export interface ServiceHost {
@@ -89,6 +101,7 @@ export interface ServiceHost {
   compatible(revision: string): Promise<boolean>;
   backup(path: string): Promise<void>;
   rehearse(plan: ServicePlan, backup: string): Promise<RehearsalReport>;
+  health?(plan: ServicePlan): Promise<ServiceHealthCheck>;
   authorizedStart?(plan: ServicePlan): Promise<boolean>;
 }
 const hash = (value: string | Buffer) => createHash('sha256').update(value).digest('hex');
@@ -352,6 +365,20 @@ export async function guardLocalService(home: string, managedStart = false): Pro
   const host = macServiceHost(join(homedir(), '.nerv'));
   await assertServiceStartup(host, managedStart && resolve(home) === host.context.home);
 }
+const manualRecoverySteps = (p: ServicePlan): string[] =>
+  p.action === 'update'
+    ? [
+        `Inspect and stop the candidate service before anything else (launchctl print gui/${p.context.uid}/io.nerv.agent; launchctl bootout gui/${p.context.uid}/io.nerv.agent), and confirm no descendant process remains.`,
+        'If dependencies failed or node_modules is missing, run npm ci --ignore-scripts in the checkout as it is so the CLI can load; do not start the service from it.',
+        'Release the held operation with nodes lifecycle-release --receipt FILE --evidence FILE (refused while the service or any descendant remains).',
+        `Check out the previous revision (${p.before.revision}) by hand and run npm ci --ignore-scripts && npm run build.`,
+        'Inspect and apply a fresh start plan (nodes lifecycle-inspect --action start, then nodes lifecycle-apply).',
+      ]
+    : [
+        `Inspect and stop the service before anything else (launchctl print gui/${p.context.uid}/io.nerv.agent; launchctl bootout gui/${p.context.uid}/io.nerv.agent), and confirm no descendant process remains.`,
+        'Release the held operation with nodes lifecycle-release --receipt FILE --evidence FILE (refused while the service or any descendant remains).',
+        'Inspect and apply a fresh plan after resolving the reported failure.',
+      ];
 export async function applyService(
   host: ServiceHost,
   raw: unknown,
@@ -569,6 +596,21 @@ export async function applyService(
       });
     await step('verify', async () => {
       const current = await host.inspect();
+      if (['install', 'start', 'update'].includes(p.action) && (host.health || p.action === 'update')) {
+        if (!host.health) throw Error('Post-start health check is required for updates.');
+        const health = await host.health(p);
+        transaction(db!, () => {
+          owns();
+          receipt!.health = health;
+          save();
+        });
+        if (!health.ok)
+          throw Error(
+            'Started service failed post-start health check (' +
+              health.failures.join('; ') +
+              '); effects remain uncertain — follow ordered manual recovery.',
+          );
+      }
       if (
         p.action === 'uninstall'
           ? current.definition !== 'absent' || current.registration !== 'absent' || current.runtime !== 'stopped'
@@ -591,6 +633,7 @@ export async function applyService(
         transaction(db, () => {
           owns();
           receipt!.state = 'uncertain';
+          if (['install', 'start', 'update'].includes(p.action)) receipt!.recovery = manualRecoverySteps(p);
           save();
         });
       } catch {}
@@ -936,6 +979,66 @@ export function macServiceAdapter(context: ServiceContext, run: typeof command =
         legacy: present(join(dirname(current), 'io.nodo.agent.plist')) || !!legacyManager,
         pending,
         built: existsSync(join(context.source, 'dist/web/browser/index.html')),
+      };
+    },
+    health: async (p) => {
+      const expectedRevision = p.nextRevision ?? p.before.revision;
+      const checkedAt = new Date().toISOString();
+      const failures: string[] = [];
+      let commit: string | null = null;
+      let baseId: string | null = null;
+      let database: string | null = null;
+      let nervous = false;
+      let brain = false;
+      try {
+        const config = readConfig(context.home);
+        const token = readToken(context.home);
+        const r = await fetch('http://127.0.0.1:' + config.port + '/api/doctor', {
+          headers: { authorization: 'Bearer ' + token },
+          signal: AbortSignal.timeout(5000),
+        });
+        if (!r.ok) {
+          failures.push(`doctor returned HTTP ${r.status}`);
+        } else {
+          const body = (await r.json()) as Record<string, unknown>;
+          const build = object(body.build) ? body.build : undefined;
+          const base = object(body.base) ? body.base : undefined;
+          const dbInfo = object(body.database) ? body.database : undefined;
+          const processes = object(body.processes) ? body.processes : undefined;
+          commit = typeof build?.commit === 'string' ? build.commit : null;
+          baseId = typeof base?.id === 'string' ? base.id : null;
+          database = typeof dbInfo?.quick_check === 'string' ? dbInfo.quick_check : null;
+          nervous =
+            typeof processes?.nervous === 'number' &&
+            Number.isSafeInteger(processes.nervous) &&
+            processes.nervous > 0 &&
+            dbInfo !== undefined;
+          brain =
+            typeof processes?.brain === 'number' &&
+            Number.isSafeInteger(processes.brain) &&
+            processes.brain > 0 &&
+            processes.brainAlive === true &&
+            object(body.models);
+          if (commit !== expectedRevision)
+            failures.push(`build commit ${commit ?? 'missing'} did not match ${expectedRevision}`);
+          if (baseId !== config.base.id)
+            failures.push(`base identity ${baseId ?? 'missing'} did not match ${config.base.id}`);
+          if (database !== 'ok') failures.push(`database quick_check ${database ?? 'missing'} is not ok`);
+          if (!nervous) failures.push('nervous process did not answer doctor');
+          if (!brain) failures.push('brain process did not answer ping');
+        }
+      } catch (e) {
+        failures.push(e instanceof Error ? e.message : 'doctor request failed');
+      }
+      return {
+        ok: failures.length === 0,
+        checkedAt,
+        commit,
+        baseId,
+        database,
+        nervous,
+        brain,
+        failures,
       };
     },
     compatible: (revision) => compatibleServiceRevision(context, revision, run),

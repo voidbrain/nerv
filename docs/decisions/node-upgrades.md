@@ -86,7 +86,7 @@ Alternatives considered: allow-listing more paths; rejected earlier, a changed r
 
 1. Done (second slice, above): journaled `rehearse` step between `fetch` and `checkout`.
 2. Done (third slice, above) for upgrades that keep the schema: descendant-only, reader entry and engine range; forward migrations are refused until step 3.
-3. Post-start acceptance and explicit forward recovery when build or start fails after a forward-only migration.
+89. Post-start acceptance (T06g / F-005-T14): `verify` queries `/api/doctor` and records `receipt.health` (build commit, base identity, `database.quick_check === 'ok'`, nervous `runtime.doctor`, and brain `runtime.ping`); any failed check leaves the operation `uncertain` with `receipt.recovery` carrying the ordered manual recovery steps. Forward recovery when build or start fails after a forward-only migration remains T06h (F-005-T15).
 4. Independent review, then a real application upgrade on the owner-selected Mac.
 
 ## Review

@@ -563,7 +563,15 @@ test(
             assert.equal(req.url, '/api/doctor');
             assert.equal(req.headers.authorization, 'Bearer ' + 'c'.repeat(32));
             res.setHeader('content-type', 'application/json');
-            res.end(JSON.stringify({ base: { id: 'BASE-01' }, build: { commit: revision } }));
+            res.end(
+              JSON.stringify({
+                base: { id: 'BASE-01' },
+                build: { commit: revision },
+                database: { quick_check: 'ok' },
+                processes: { nervous: 9999998, brain: 9999997, brainAlive: true },
+                models: { misato: 'neutral-local' },
+              }),
+            );
           });
           await new Promise<void>((done) => server!.listen(port, '127.0.0.1', done));
           return { status: 0, err: '', out: '' };

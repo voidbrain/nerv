@@ -14,7 +14,12 @@ import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { createHash } from 'node:crypto';
 import { renderService } from '../src/service.ts';
-import type { ServiceHost, ServiceObservation, ServicePlan } from '../src/node-lifecycle-execution.ts';
+import type {
+  ServiceHealthCheck,
+  ServiceHost,
+  ServiceObservation,
+  ServicePlan,
+} from '../src/node-lifecycle-execution.ts';
 import { rehearseUpgrade, type UpgradeReader } from '../src/upgrade-rehearsal.ts';
 export function serviceFixture(directory = realpathSync(mkdtempSync(join(tmpdir(), 'nerv-service-')))) {
   const context = {
@@ -51,6 +56,7 @@ export function serviceFixture(directory = realpathSync(mkdtempSync(join(tmpdir(
     controls = { clean: true, session: true, pending: false, legacy: false, built: true, compatible: true };
   let beforeCommand: ((step: string, plan: ServicePlan) => Promise<void> | void) | undefined;
   let reader: UpgradeReader = () => {};
+  let healthOverride: ((plan: ServicePlan) => Promise<ServiceHealthCheck> | ServiceHealthCheck) | undefined;
   const host: ServiceHost = {
     context,
     inspect: async () => {
@@ -102,6 +108,19 @@ export function serviceFixture(directory = realpathSync(mkdtempSync(join(tmpdir(
       if (step === 'checkout') writeFileSync(revision, plan.nextRevision!);
     },
     rehearse: (_plan, backup) => rehearseUpgrade(backup, reader),
+    health: async (plan) =>
+      healthOverride
+        ? healthOverride(plan)
+        : {
+            ok: true,
+            checkedAt: new Date().toISOString(),
+            commit: plan.nextRevision ?? plan.before.revision,
+            baseId: 'BASE-01',
+            database: 'ok',
+            nervous: true,
+            brain: true,
+            failures: [],
+          },
     backup: async (dest) => {
       const db = new DatabaseSync(data);
       try {
@@ -125,6 +144,9 @@ export function serviceFixture(directory = realpathSync(mkdtempSync(join(tmpdir(
     },
     setReader: (f: UpgradeReader) => {
       reader = f;
+    },
+    setHealth: (f: typeof healthOverride) => {
+      healthOverride = f;
     },
     setManager: (on: boolean) => writeFileSync(manager, JSON.stringify(on)),
     close: () => rmSync(directory, { recursive: true, force: true }),
