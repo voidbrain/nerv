@@ -63,6 +63,55 @@ export function askedWhy(text: string): string | undefined {
     return undefined;
   return /\bS-([0-9a-f]{4,12})\b/i.exec(text)?.[1]?.toLowerCase();
 }
+/**
+ * F-042: whether a request asks about the agency itself (sorties, ballots, pending approvals/questions, or base health
+ * and status). The consultant is not asked for these: Misato reads the records directly with her read-only tools.
+ */
+export function isAgencyQuestion(text: string, bases: { id: string; name: string }[] = []): boolean {
+  const t = text.trim();
+  if (!t) return false;
+  if (/\bS-[0-9a-f]{4,12}\b/i.test(t)) return true;
+  if (/\b(remind(\s+me)?|ricordami|ricorda|remember|add\s+a\s+reminder|aggiungi)\b/iu.test(t)) return false;
+  if (
+    /\b(sorties?|ballots?|votazion[ei]|magi|casper|melchior|balthasar|pending\s+approvals?|approval\s+cards?|approvazioni\s+in\s+attesa|schede\s+in\s+attesa)\b/iu.test(
+      t,
+    )
+  )
+    return true;
+  if (
+    /\b(what('s|\s+is)\s+waiting(\s+for\s+me)?|anything\s+waiting(\s+for\s+me)?|waiting\s+for\s+(me|my\s+approval)|cosa\s+(c['’]è\s+|sta\s+)?in\s+attesa|cosa\s+mi\s+aspetta|qualcosa\s+in\s+attesa)\b/iu.test(
+      t,
+    )
+  )
+    return true;
+  if (
+    /\b((agency|base|bases)\s+(status|health)|(status|health)\s+of\s+(the\s+)?(agency|bases?)|how\s+(is|are)\s+(the\s+)?(agency|this\s+base|bases?)|(stato|salute)\s+(dell['’]agenzia|dell[ae]\s+bas[ei])|come\s+(sta|va|stanno)\s+(l['’]agenzia|l[ae]\s+bas[ei]))\b/iu.test(
+      t,
+    )
+  )
+    return true;
+  if (
+    /^\s*(?:is|are)\s+[\p{L}\p{N}_-]{2,40}\s+(?:up|down|online|offline|reachable|healthy|degraded|alive)\s*[?.!]*$/iu.test(
+      t,
+    ) ||
+    /^\s*[\p{L}\p{N}_-]{2,40}\s+è\s+(?:online|offline|attiv[ao]|raggiungibile|degradat[ao]|su|giù)\s*[?.!]*$/iu.test(t)
+  )
+    return true;
+  const lower = t.toLowerCase();
+  const namesBase = bases.some(
+    (b) =>
+      (b.id && lower.includes(b.id.toLowerCase())) ||
+      (b.name && b.name.length >= 2 && lower.includes(b.name.toLowerCase())),
+  );
+  if (
+    namesBase &&
+    /\b(up|down|online|offline|status|stato|health|salute|reachable|raggiungibile|degraded|degradat[ao]|how\s+is|come\s+sta)\b/iu.test(
+      t,
+    )
+  )
+    return true;
+  return false;
+}
 /** What the ledger holds for one sortie, as the "why" answer needs it. */
 export interface WhyRecord {
   id: string;
@@ -145,7 +194,7 @@ const WORDS = {
 };
 /** Seat IDs as the owner reads them: melchior → Melchior, tabgha:casper → Tabgha:Casper. */
 const seatName = (seat: string) =>
-  seat.replace(/(^|[^\p{L}])(\p{L})/gu, (_, b: string, c: string) => b + c.toUpperCase());
+  seat.replace(/^extra:/i, '').replace(/(^|[^\p{L}])(\p{L})/gu, (_, b: string, c: string) => b + c.toUpperCase());
 const bare = (text: string) => text.replace(/[.\s]+$/, '');
 const when = (iso: string, timeZone: string, lang: 'it' | 'en') => {
   try {

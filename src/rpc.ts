@@ -752,6 +752,19 @@ export const methodSchemas = {
       context: { type: 'array', maxItems: 3, items: { type: 'object' } },
       memory: { type: 'array', maxItems: 10, items: { type: 'object' } },
       remote: { type: 'array', maxItems: 10, items: { type: 'object' } },
+      bases: {
+        type: 'array',
+        maxItems: 20,
+        items: {
+          type: 'object',
+          required: ['id', 'name'],
+          properties: {
+            id: { type: 'string', minLength: 1, maxLength: 16 },
+            name: { type: 'string', minLength: 1, maxLength: 60 },
+          },
+          additionalProperties: false,
+        },
+      },
       external: {
         type: 'array',
         maxItems: 40,
@@ -817,6 +830,7 @@ export const methodSchemas = {
           additionalProperties: false,
         },
       },
+      agency: { type: 'object' },
     },
     additionalProperties: false,
   },

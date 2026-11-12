@@ -1,9 +1,27 @@
 import type { Tool } from './policy.ts';
+import type { Approval, SortieSummary } from './ledger.ts';
 import type { Reminder, ReminderInput } from './store.ts';
 import type { ToolDoc } from './misato.ts';
 import type { Memory } from './memory.ts';
 import { readConfig, savePilots, setSchedule } from './config.ts';
 import { reconcileReminderArgs } from './reminder-time.ts';
+import { explainRecord, type WhyRecord } from './why.ts';
+export interface AgencyBaseSnapshot {
+  baseId: string;
+  name: string;
+  status: string;
+  self: boolean;
+  main: boolean;
+  online: boolean;
+  lastSeen: string | null;
+  health: { state: string; reasons: string[] } | null;
+  channel: { mode: string; destination?: string } | null;
+}
+export interface AgencySnapshot {
+  health: { state: 'online' | 'degraded'; reasons: string[] };
+  routes?: Record<string, unknown>;
+  bases?: AgencyBaseSnapshot[];
+}
 /**
  * Built-in tools with an executor in the scheduler process (F-017). Each declares its effect class for the gate; an
  * executor runs only after `Ledger.authorize` accepted the grant for these exact arguments.
@@ -15,6 +33,11 @@ export interface ReminderBackend {
   restore(id: string): boolean;
   rescheduleAllDayReminders?(briefAt?: string, timeZone?: string): void;
   sortie?(id: string): { title: string } | null | undefined;
+  sorties?(limit?: number, before?: string, q?: string): SortieSummary[];
+  explain?(ref: string): { found: 'none' | 'many'; count?: number } | { found: 'one'; record: WhyRecord };
+  approvals?(limit?: number): Approval[];
+  waitingQuestions?(): { sortieId: string; title: string; text: string; expires: string }[];
+  agencyStatus?(target?: string, live?: AgencySnapshot): unknown;
   reminderDefaults?(): { timeZone: string; briefAt: string; language: 'en' | 'it' };
   memory: Memory;
   home?: string;
@@ -30,6 +53,10 @@ export const builtinTools: Tool[] = [
   // A new fact is only stored after the owner approves its card: Misato never writes memory on its own.
   { name: 'memory.remember', effect: 'write-local', inverse: 'memory.forget', owner: true },
   { name: 'memory.forget', effect: 'write-local', removes: true },
+  // F-042: read-only agency tools over sorties/ballots, waiting approvals/questions, and base health/status.
+  { name: 'sorties.explain', effect: 'read' },
+  { name: 'approvals.list', effect: 'read' },
+  { name: 'agency.status', effect: 'read' },
   // Only the brief and Instrumentality schedules: local, reversible by setting the previous values back.
   { name: 'settings.schedule', effect: 'write-local', inverse: 'settings.schedule' },
   // F-045: a new pilot only after the owner approves its card.
@@ -94,6 +121,27 @@ export const toolDocs: ToolDoc[] = [
     args: '{"id": fact id}',
   },
   {
+    name: 'sorties.explain',
+    effect: 'read',
+    about:
+      'Reads a sortie\'s record from the ledger by its short ID (such as "S-1A2B" or "1a2b"), or lists recent sorties when no ref is given: decision, ballot with each seat\'s vote and reason, peer seats, consultant advice, approver and time.',
+    args: '{"ref"?: "S-1A2B" or hex prefix, "limit"?: 1 to 20}',
+  },
+  {
+    name: 'approvals.list',
+    effect: 'read',
+    about:
+      'Lists what is currently waiting for the owner: pending approval cards (sortie short ID, title, tool, arguments, Pattern, reason, ballot verdicts and expiry) and open clarification questions.',
+    args: 'none, {}',
+  },
+  {
+    name: 'agency.status',
+    effect: 'read',
+    about:
+      "Reads this base's health (state, degraded reasons, model routes and pending reminders) and the status of all enrolled NERV bases (id, name, whether it is this base or the main base, online or offline, last seen, health state and reasons, and channel).",
+    args: '{"base"?: base id or name}',
+  },
+  {
     name: 'settings.schedule',
     effect: 'write-local',
     about:
@@ -130,9 +178,89 @@ export function execute(
   backend: ReminderBackend,
   tool: string,
   args: Record<string, unknown>,
-  context: { sortieId?: string; tainted?: boolean } = {},
+  context: { sortieId?: string; tainted?: boolean; agency?: AgencySnapshot } = {},
 ): unknown {
   switch (tool) {
+    case 'sorties.explain': {
+      only(args, ['ref', 'limit']);
+      if (args.ref !== undefined) {
+        if (!backend.explain) throw new Error('Sortie records are not available here.');
+        const clean = text(args, 'ref').trim().replace(/^s-/i, '').toLowerCase();
+        if (!/^[0-9a-f]{4,36}$/.test(clean)) throw new Error('ref must be a sortie short ID such as S-1A2B.');
+        const found = backend.explain(clean);
+        const defaults = backend.reminderDefaults
+          ? backend.reminderDefaults()
+          : { timeZone: 'Europe/Rome', briefAt: '08:00', language: 'en' as const };
+        const summary = explainRecord(found, clean, defaults.language, defaults.timeZone);
+        if (found.found !== 'one')
+          return {
+            found: found.found,
+            ref: 'S-' + clean.slice(0, 4).toUpperCase(),
+            ...(found.count ? { count: found.count } : {}),
+            summary,
+          };
+        return {
+          found: 'one',
+          shortId: 'S-' + found.record.id.slice(0, 4).toUpperCase(),
+          ...found.record,
+          actions: found.record.actions.map((a) => ({
+            ...a,
+            ...(a.decision === 'approve' || a.decision === 'reject' || a.decision === 'edit'
+              ? { approver: 'owner' }
+              : {}),
+          })),
+          summary,
+        };
+      }
+      if (!backend.sorties) throw new Error('Sortie records are not available here.');
+      const limit = args.limit === undefined ? 10 : Number(args.limit);
+      if (!Number.isInteger(limit) || limit < 1 || limit > 20) throw new Error('limit must be 1–20.');
+      return backend.sorties(limit).map((s) => ({
+        id: s.id,
+        shortId: 'S-' + s.id.slice(0, 4).toUpperCase(),
+        source: s.source,
+        title: s.title,
+        status: s.status,
+        why: s.why,
+        actions: s.actions,
+        waiting: s.waiting,
+        patterns: s.patterns,
+        created: s.created,
+        ...(s.closed ? { closed: s.closed } : {}),
+        ...(s.question ? { question: s.question } : {}),
+      }));
+    }
+    case 'approvals.list': {
+      only(args, []);
+      const approvals = (backend.approvals ? backend.approvals(20) : []).map((a) => ({
+        id: a.id,
+        sortieId: a.card.sortieId,
+        shortId: 'S-' + a.card.sortieId.slice(0, 4).toUpperCase(),
+        title: (backend.sortie ? backend.sortie(a.card.sortieId)?.title : undefined) ?? '',
+        tool: a.card.tool,
+        args: a.card.args,
+        effect: a.card.effect,
+        pattern: a.card.pattern,
+        reason: a.card.reason,
+        verdicts: a.card.verdicts,
+        expires: a.expires,
+      }));
+      const questions = (backend.waitingQuestions ? backend.waitingQuestions() : []).map((q) => ({
+        sortieId: q.sortieId,
+        shortId: 'S-' + q.sortieId.slice(0, 4).toUpperCase(),
+        title: q.title,
+        question: q.text,
+        expires: q.expires,
+      }));
+      return { approvals, questions };
+    }
+    case 'agency.status': {
+      only(args, ['base']);
+      const target = args.base !== undefined ? text(args, 'base').trim() : undefined;
+      if (target !== undefined && (!target || target.length > 80)) throw new Error('base must be 1–80 characters.');
+      if (!backend.agencyStatus) throw new Error('Agency status is not available here.');
+      return backend.agencyStatus(target, context.agency);
+    }
     case 'reminders.list':
       only(args, []);
       return backend.pendingReminders(20).map((r) => ({

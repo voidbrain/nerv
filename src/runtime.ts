@@ -26,7 +26,7 @@ import { argsHash } from './ledger.ts';
 import type { SortieEvent } from './events.ts';
 import { MODEL_TIMEOUT_MS, type Ask, type Reply, type RouteName } from './model.ts';
 import type { Effect, Pattern, Stage, Verdict } from './policy.ts';
-import { askedWhy, explainRecord } from './why.ts';
+import { askedWhy, explainRecord, isAgencyQuestion } from './why.ts';
 import { choosePilot, type Pilot } from './pilots.ts';
 import { toolName, type McpTool } from './mcp.ts';
 /** Granted MCP tools as Misato sees them, and those suspended (F-021). */
@@ -49,7 +49,7 @@ import {
   type Step,
   type Turn,
 } from './misato.ts';
-import { builtinTools, toolDocs } from './executors.ts';
+import { builtinTools, toolDocs, type AgencySnapshot } from './executors.ts';
 import type { Digest, Exchange } from './instrumentality.ts';
 import type { Episode, Fact } from './memory.ts';
 import type { BaseEntry, SignedRecord } from './kaji.ts';
@@ -480,6 +480,30 @@ export class Runtime implements StoreApi {
         .map((s) => ({ seat: s.seat, ...settled.get(s.seat)!, shadow: s.shadow }));
       late = seats.filter((s) => s.shadow && !settled.has(s.seat));
     }
+    const agency: AgencySnapshot | undefined =
+      action.tool === 'agency.status'
+        ? await Promise.all([
+            this.bases().catch(() => []),
+            this.baseHealth().catch((): BaseHealth => ({ state: 'online', reasons: [] })),
+            this.routes().catch((): { routes?: Record<RouteName, RouteHealth>; degraded: string[] } => ({
+              degraded: [],
+            })),
+          ]).then(([bases, health, routes]) => ({
+            health: { state: health.state, reasons: health.reasons },
+            ...(routes.routes ? { routes: routes.routes as Record<string, unknown> } : {}),
+            bases: bases.map((b) => ({
+              baseId: b.baseId,
+              name: b.name,
+              status: b.status,
+              self: b.self,
+              main: b.main,
+              online: b.online,
+              lastSeen: b.lastSeen,
+              health: b.health ? { state: b.health.state, reasons: b.health.reasons } : null,
+              channel: b.channel ? { mode: b.channel.mode } : null,
+            })),
+          }))
+        : undefined;
     const result = (await this.nervous.call('actions.act', {
       ...(worker ? { worker } : {}),
       sortieId,
@@ -488,6 +512,7 @@ export class Runtime implements StoreApi {
       stage: action.stage ?? 'production',
       ...(casper ? { casper } : {}),
       ...(extras.length ? { extras } : {}),
+      ...(agency ? { agency } : {}),
     })) as ActResult;
     // A late shadow vote (F-052) is kept with the action when it arrives; it never changes the outcome.
     for (const s of late)
@@ -809,8 +834,10 @@ export class Runtime implements StoreApi {
         .filter((s) => s.outcome === 'grant' && !s.error && s.tool)
         .map((s) => ({ tool: s.tool!, args: s.args ?? {} }));
     // F-025: a consultant's advice, once per request before the first step (not again on a resume); no vote, no action.
+    // F-042: the consultant is not asked for questions about the agency itself; pilots, consultant, and Misato get enrolled base names as data (B-012).
     // F-045: the specialist pilot whose keywords fit the request advises; none fits, the generic pilot (roles.consultant).
-    const consult = followup?.consult ?? steps.length === 0;
+    const named = await this.baseNames();
+    const consult = (followup?.consult ?? steps.length === 0) && !isAgencyQuestion(message, named);
     const pilot = !consult
       ? undefined
       : (() => {
@@ -820,7 +847,6 @@ export class Runtime implements StoreApi {
             return undefined;
           }
         })();
-    const named = !consult ? [] : await this.baseNames();
     // B-024: the consultant is told what Misato can do, so it never advises against a tool she has.
     const offered = !consult
       ? []
@@ -838,7 +864,7 @@ export class Runtime implements StoreApi {
             ...(followup?.advice ? { previousAdvice: followup.advice } : {}),
             ...(context.length ? { context: context.slice(-3) } : {}),
             ...(pilot ? { pilot: { name: pilot.name, domain: pilot.domain, model: pilot.model } } : {}),
-            ...(named.length > 1 ? { bases: named } : {}),
+            ...(named.length ? { bases: named } : {}),
             ...(offered.length ? { tools: offered } : {}),
           },
           MODEL_TIMEOUT_MS,
@@ -878,6 +904,7 @@ export class Runtime implements StoreApi {
           ...(followup?.answering && turn === 0 ? { clarification: true } : {}),
           request: message,
           history: steps.slice(-12),
+          ...(named.length ? { bases: named } : {}),
           ...(remote.length ? { remote } : {}),
           ...(ext.docs.length ? { external: ext.docs } : {}),
           ...(advice ? { advice } : {}),

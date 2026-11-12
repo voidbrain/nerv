@@ -12,7 +12,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { LEDGER_SCHEMA, Ledger, type Decision, type Proposal } from './ledger.ts';
-import { builtinTools, execute, hasExecutor } from './executors.ts';
+import { builtinTools, execute, hasExecutor, type AgencyBaseSnapshot, type AgencySnapshot } from './executors.ts';
 import { MEMORY_SCHEMA, Memory, type Episode } from './memory.ts';
 import { Registry, REGISTRY_SCHEMA } from './kaji.ts';
 import { MILESTONE_SCHEMA } from './milestones.ts';
@@ -1067,6 +1067,82 @@ export class Store {
       ...(this.watch.get(a.card.sortieId) && (quiet ??= this.watchIsQuiet()) ? { notify: false as const } : {}),
     }));
   }
+  waitingQuestions(now = new Date()) {
+    return this.ledger.waitingQuestions(now);
+  }
+  agencyStatus(target?: string, live?: AgencySnapshot) {
+    const pendingReminders = (
+      this.db
+        .prepare('SELECT count(*) AS count FROM reminders WHERE delivered IS NULL AND cancelled IS NULL')
+        .get() as { count: number }
+    ).count;
+    const instrumentality = this.instrumentality.latest();
+    const health = {
+      state: live?.health.state ?? ('online' as const),
+      reasons: live?.health.reasons ?? [],
+      pendingReminders,
+      ...(live?.routes ? { routes: live.routes } : {}),
+      ...(instrumentality ? { instrumentality } : {}),
+    };
+    const cfg = (() => {
+      try {
+        return this.home ? readConfig(this.home) : undefined;
+      } catch {
+        return undefined;
+      }
+    })();
+    let bases: AgencyBaseSnapshot[] = live?.bases ? [...live.bases] : [];
+    if (!bases.length) {
+      const reg = new Registry(this.db, cfg?.kaji?.root);
+      const enrolled = reg.bases();
+      if (enrolled.length) {
+        const seen = reg.lastSeen();
+        const main = reg.main();
+        const now = Date.now();
+        bases = enrolled.map((b) => {
+          const self = cfg?.base.id ? b.baseId === cfg.base.id : false;
+          const online =
+            b.status === 'enrolled' && (self || (!!seen[b.baseId] && now - Date.parse(seen[b.baseId]!) < 90_000));
+          return {
+            baseId: b.baseId,
+            name: b.name,
+            status: b.status,
+            self,
+            main: b.baseId === main,
+            online,
+            lastSeen: seen[b.baseId] ?? null,
+            health: self ? { state: health.state, reasons: health.reasons } : null,
+            channel: null,
+          };
+        });
+      } else {
+        const base = cfg?.base ?? { id: 'LOCAL', name: 'This base' };
+        bases = [
+          {
+            baseId: base.id,
+            name: base.name,
+            status: 'enrolled',
+            self: true,
+            main: true,
+            online: true,
+            lastSeen: null,
+            health: { state: health.state, reasons: health.reasons },
+            channel: null,
+          },
+        ];
+      }
+    }
+    const filtered = target
+      ? bases.filter(
+          (b) => b.baseId.toLowerCase() === target.toLowerCase() || b.name.toLowerCase() === target.toLowerCase(),
+        )
+      : bases;
+    return {
+      health,
+      bases: filtered,
+      ...(target && !filtered.length ? { notFound: target } : {}),
+    };
+  }
   pendingApprovalIds(ids: string[]) {
     return this.ledger.pendingApprovalIds(ids);
   }
@@ -1149,17 +1225,22 @@ export class Store {
     return { decision: applied.decision };
   }
   /** One owner action through the gate (F-017): ballot, then on a grant the executor runs at once; otherwise it waits for the owner or stops. */
-  runAction(sortieId: string, proposal: Proposal, worker?: WorkerLease): ActResult {
+  runAction(sortieId: string, proposal: Proposal, worker?: WorkerLease, agency?: AgencySnapshot): ActResult {
     if (this.watch.get(sortieId)) this.syncWatch();
-    if (!worker) return this.runActionCore(sortieId, proposal);
+    if (!worker) return this.runActionCore(sortieId, proposal, undefined, agency);
     return transaction(this.db, () => {
       this.assertWorker(worker);
-      const result = this.runActionCore(sortieId, proposal, worker.expires);
+      const result = this.runActionCore(sortieId, proposal, worker.expires, agency);
       if (result.approvalId) this.workerJobs.bindApproval(worker, result.approvalId, result);
       return result;
     });
   }
-  private runActionCore(sortieId: string, proposal: Proposal, approvalUntil?: number): ActResult {
+  private runActionCore(
+    sortieId: string,
+    proposal: Proposal,
+    approvalUntil?: number,
+    agency?: AgencySnapshot,
+  ): ActResult {
     const p = transaction(this.db, () => {
       const proposed = this.ledger.propose(sortieId, proposal, new Date(), approvalUntil);
       if (proposed.approvalId) this.deliverApproval(proposed.approvalId);
@@ -1175,7 +1256,7 @@ export class Store {
       ...(p.approvalId ? { approvalId: p.approvalId } : {}),
     };
     if (p.grantId && hasExecutor(proposal.tool)) {
-      const outcome = this.run(sortieId, p.actionId, p.grantId, proposal.tool, proposal.args);
+      const outcome = this.run(sortieId, p.actionId, p.grantId, proposal.tool, proposal.args, agency);
       this.settle(sortieId, 'error' in outcome ? 'failed' : 'done');
       return { ...base, ...outcome };
     }
@@ -1194,11 +1275,18 @@ export class Store {
     grantId: string,
     tool: string,
     args: Record<string, unknown>,
+    agency?: AgencySnapshot,
   ): { result: unknown } | { error: string } {
     this.ledger.authorize(grantId, tool, args);
     let outcome: { result: unknown } | { error: string };
     try {
-      outcome = { result: execute(this, tool, args, { sortieId, tainted: this.ledger.trust(sortieId) === 'tainted' }) };
+      outcome = {
+        result: execute(this, tool, args, {
+          sortieId,
+          tainted: this.ledger.trust(sortieId) === 'tainted',
+          ...(agency ? { agency } : {}),
+        }),
+      };
     } catch (e) {
       outcome = { error: e instanceof Error ? e.message : 'Executor failed.' };
     }
@@ -1208,6 +1296,25 @@ export class Store {
     }
     // Reminder text predates per-item provenance; treat recalled stored text conservatively.
     if ('result' in outcome && tool === 'reminders.list') this.ledger.intake(sortieId, 'tool:' + tool, 'tainted');
+    if ('result' in outcome && tool === 'sorties.explain') {
+      const res = outcome.result as { id?: string } | { id: string }[];
+      const ids = Array.isArray(res) ? res.map((s) => s.id) : res.id ? [res.id] : [];
+      this.ledger.intake(
+        sortieId,
+        'tool:' + tool,
+        ids.some((id) => this.ledger.trust(id) === 'tainted') ? 'tainted' : 'trusted',
+      );
+    }
+    if ('result' in outcome && tool === 'approvals.list') {
+      const res = outcome.result as { approvals: { sortieId: string }[]; questions: { sortieId: string }[] };
+      const ids = [...res.approvals.map((a) => a.sortieId), ...res.questions.map((q) => q.sortieId)];
+      this.ledger.intake(
+        sortieId,
+        'tool:' + tool,
+        ids.some((id) => this.ledger.trust(id) === 'tainted') ? 'tainted' : 'trusted',
+      );
+    }
+    if ('result' in outcome && tool === 'agency.status') this.ledger.intake(sortieId, 'tool:' + tool, 'trusted');
     this.ledger.finished(sortieId, actionId, tool, outcome);
     return outcome;
   }

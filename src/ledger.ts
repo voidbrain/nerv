@@ -806,17 +806,28 @@ export class Ledger {
           "SELECT kind,payload FROM events WHERE action_id=? AND kind IN ('action.done','action.failed') ORDER BY sequence DESC LIMIT 1",
         )
         .get(d.id) as { kind: string; payload: string } | undefined;
+      const late = (
+        this.db
+          .prepare("SELECT payload FROM events WHERE action_id=? AND kind='ballot.shadow' ORDER BY sequence")
+          .all(d.id) as { payload: string }[]
+      ).map((r) => {
+        const p = JSON.parse(r.payload) as { seat: string; vote: string; reason: string };
+        return { seat: 'extra:' + p.seat, vote: p.vote, reason: p.reason, shadow: true };
+      });
       return {
         tool: d.tool,
         pattern: d.ballot.pattern,
         outcome: d.ballot.outcome,
         reason: d.ballot.reason,
-        verdicts: d.ballot.verdicts.map((v) => ({
-          seat: v.seat,
-          vote: v.vote,
-          reason: v.reason,
-          ...(v.shadow ? { shadow: true } : {}),
-        })),
+        verdicts: [
+          ...d.ballot.verdicts.map((v) => ({
+            seat: v.seat,
+            vote: v.vote,
+            reason: v.reason,
+            ...(v.shadow ? { shadow: true } : {}),
+          })),
+          ...late,
+        ],
         decision: ap?.decision ?? null,
         decided: ap?.decided ?? null,
         source: ap?.source ?? null,
@@ -916,6 +927,23 @@ export class Ledger {
         )
         .all(iso(now), limit) as { id: string; card: string; expires: string; decision: null }[]
     ).map((r) => ({ ...r, card: JSON.parse(r.card) as Card }));
+  }
+  /** F-042: open clarification questions currently waiting for the owner's answer. */
+  waitingQuestions(now = new Date(), limit = 10): { sortieId: string; title: string; text: string; expires: string }[] {
+    const rows = this.db
+      .prepare(
+        `SELECT s.id AS sortie_id,s.title,q.payload FROM sorties s JOIN events q ON q.sortie_id=s.id
+         WHERE s.status='open' AND q.kind='misato.asked'
+         AND q.sequence=(SELECT max(sequence) FROM events e WHERE e.sortie_id=s.id AND e.kind='misato.asked')
+         AND q.sequence>coalesce((SELECT max(sequence) FROM events a WHERE a.sortie_id=s.id AND a.kind='misato.answered'),0)
+         ORDER BY q.sequence DESC LIMIT ?`,
+      )
+      .all(limit) as { sortie_id: string; title: string; payload: string }[];
+    const at = iso(now);
+    return rows.flatMap((r) => {
+      const p = JSON.parse(r.payload) as { text: string; expires: string };
+      return p.expires > at ? [{ sortieId: r.sortie_id, title: r.title, text: p.text, expires: p.expires }] : [];
+    });
   }
   /** Authoritative point lookup: absence from a limited pending page is not a decision. */
   pendingApprovalIds(ids: string[], now = new Date()): string[] {

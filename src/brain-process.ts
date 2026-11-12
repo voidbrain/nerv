@@ -186,6 +186,7 @@ process.on('message', (value: unknown) => {
             timeZone,
             ...(params.context ? { context: params.context as Turn[] } : {}),
             ...(params.memory ? { memory: params.memory as Recalled[] } : {}),
+            ...(Array.isArray(params.bases) ? { bases: params.bases as { id: string; name: string }[] } : {}),
             ...(typeof params.advice === 'string' ? { advice: params.advice } : {}),
             ...(params.language === 'it' || params.language === 'en' ? { language: params.language } : {}),
           },
