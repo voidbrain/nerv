@@ -38,6 +38,7 @@ const consumptionFile = 'evals/gauntlet/consumption.json';
 // Tests point these at temporary copies; production uses the committed files.
 const ledgerPath = () => resolve(process.env.NERV_GAUNTLET_LEDGER ?? here(ledgerFile));
 const consumptionPath = () => resolve(process.env.NERV_GAUNTLET_CONSUMPTION ?? here(consumptionFile));
+const tasksPath = () => resolve(process.env.NERV_GAUNTLET_TASKS ?? here('docs/work/tasks'));
 const releaseTag = () => readJSON(here('vendor/gauntlet-protocol.json')).releaseTag;
 
 export function systemSourceKey(pack) {
@@ -154,9 +155,9 @@ const selectedPack = (pack, ids, model) =>
 // `pack/case`, or a whole pack as `pack/*`. Record history and closed tasks never count, so a pack id that merely
 // appears in prose cannot silence the check.
 function openTaskText() {
-  return readdirSync(here('docs/work/tasks'))
+  return readdirSync(tasksPath())
     .filter((f) => f.endsWith('.json'))
-    .map((f) => readJSON(here('docs/work/tasks/' + f)))
+    .map((f) => readJSON(join(tasksPath(), f)))
     .filter((t) => t.status !== 'closed')
     .map((t) => JSON.stringify(t))
     .join('\n');
