@@ -308,4 +308,4 @@ Authenticated ci:status confirms #321 CI43298181723 and #322 CI43297509679 passe
 
 ## 2026-11-12 — PR #TBD (harness 8.0.0)
 
-Authenticated ci:status confirms #324 CI43308935497 and #326 CI43307205792 passed; merged main 9909971. Both updated their own F-005 records. Previous header: Current work ledger, reviewed 12 November 2026 against main `4154b84`. PRs #321 (F-005-T08), #322 (F-015-T02) and #323 (F-005-T16) passed CI; F-015-T03 live failure cases done, F-015 verified, owner decides closure; B-057 opened.
+Authenticated ci:status confirms #324 CI43308935497 and #326 CI43307205792 passed; merged main 94ea97c. Both updated their own F-005 records. Previous header: Current work ledger, reviewed 12 November 2026 against main `4154b84`. PRs #321 (F-005-T08), #322 (F-015-T02) and #323 (F-005-T16) passed CI; F-015-T03 live failure cases done, F-015 verified, owner decides closure; B-057 opened.
