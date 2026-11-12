@@ -95,7 +95,7 @@ test('Require Human splits each kind into Procedures and Decision (harness 8.0.0
   assert.match(block, /\| \*\*Require Human 🧑\*\* \| 3 \| 2 \|/, 'a record counts once whatever its kind');
   assert.match(
     block,
-    /### Require Human 🧑\n\n\| Features \| \| Bugs \| \|\n\|---\|---\|---\|---\|\n\| \*\*Procedures\*\* \| \*\*Decision\*\* \| \*\*Procedures\*\* \| \*\*Decision\*\* \|\n\| \[F-001\]\(#f-001\) \| \[F-002\]\(#f-002\) \| \[B-001\]\(#b-001\) \| \[B-001\]\(#b-001\) \|\n\| \[F-003\]\(#f-003\) | \[F-003\]\(#f-003\) \| {2}\| \[B-003\]\(#b-003\) \|\n<!-- recap:end -->/,
+    /### Require Human 🧑\n\n\| Features \| \| Bugs \| \|\n\|---\|---\|---\|---\|\n\| \*\*Procedures\*\* \| \*\*Decision\*\* \| \*\*Procedures\*\* \| \*\*Decision\*\* \|\n\| \[F-001\]\(#f-001\) \| \[F-002\]\(#f-002\) \| \[B-001\]\(#b-001\) \| \[B-001\]\(#b-001\) \|\n\| \[F-003\]\(#f-003\) \| \[F-003\]\(#f-003\) \| {2}\| \[B-003\]\(#b-003\) \|\n<!-- recap:end -->/,
   );
   const none = recap({ active: [records[3]], archived: [] }, '2026-11-12');
   assert.match(none, /\*\*Decision\*\* \|\n\| — \| — \| — \| — \|\n<!-- recap:end -->/, 'empty columns show —');
