@@ -4,7 +4,7 @@
   "parent": "F-004",
   "title": "Web push subscription and delivery",
   "goal": "Web push subscription and delivery",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Opt-in subscription stored per device; a reminder reaches a subscribed browser; unsubscribe works"
   ],
