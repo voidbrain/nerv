@@ -14,13 +14,20 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 34 | 6 |
-| **Require Human 🧑** | 0 | 0 |
+| **Require Human 🧑** | 8 | 1 |
 
 ### Require Human 🧑
 
 | Features | Bugs |
 |---|---|
-| — | — |
+| [F-005](#f-005) | [B-008](#b-008) |
+| [F-062](#f-062) |  |
+| [F-009](#f-009) |  |
+| [F-015](#f-015) |  |
+| [F-011](#f-011) |  |
+| [F-023](#f-023) |  |
+| [F-074](#f-074) |  |
+| [F-064](#f-064) |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
