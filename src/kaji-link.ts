@@ -275,13 +275,19 @@ export class KajiLink {
   async start(everyMs = HEARTBEAT_MS): Promise<void> {
     this.stopped = false;
     this.workers?.start();
+    // B-043: one tick at a time. A tick still waiting on the registry (the nervous process) or a slow peer is not joined
+    // by another every interval; their requests would pile up against the process queue bound.
+    let busy = false;
     const tick = async () => {
-      if (this.stopped) return;
+      if (this.stopped || busy) return;
+      busy = true;
       try {
         await this.listen();
         if (!this.stopped) await this.heartbeat();
       } catch (e) {
         this.log(`Kaji: ${e instanceof Error ? e.message : 'heartbeat failed'}.`);
+      } finally {
+        busy = false;
       }
     };
     this.every = everyMs;
