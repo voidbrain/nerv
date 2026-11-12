@@ -15,6 +15,15 @@ import {
   type UpdateAvailability,
 } from './update-availability.ts';
 import { executeManualUpdate, type ManualUpdateResult } from './manual-update.ts';
+import { dataHome, readConfig, setUpdatePolicy } from './config.ts';
+import {
+  defaultAutoUpdatePolicy,
+  evaluateAutoUpdate,
+  validateAutoUpdatePolicy,
+  type AutoUpdateEvaluation,
+  type AutoUpdatePolicy,
+  type AutoUpdateSchemaCheck,
+} from './update-policy.ts';
 import type { ServiceHost } from './node-lifecycle-execution.ts';
 import { RpcFault } from './rpc.ts';
 import type { ModelChange } from './model-setup.ts';
@@ -52,6 +61,9 @@ export function makeServer(
     updateCheck?: (options: { channel: string; refresh: boolean }) => Promise<UpdateAvailability>;
     lifecycleHost?: () => ServiceHost;
     manualUpdate?: (input: { channel?: string; revision?: string }) => Promise<ManualUpdateResult>;
+    updatePolicy?: AutoUpdatePolicy;
+    saveUpdatePolicy?: (policy: AutoUpdatePolicy) => AutoUpdatePolicy | Promise<AutoUpdatePolicy>;
+    checkSchemaSafety?: (revision?: string) => Promise<AutoUpdateSchemaCheck> | AutoUpdateSchemaCheck;
   } = {},
 ) {
   if (options.native && !options.tls) throw new Error('Native pairing requires TLS.');
@@ -70,6 +82,16 @@ export function makeServer(
   const feed = store.dashboardRevision ? new DashboardFeed(() => store.dashboardRevision!()) : undefined;
   const sessions = new Map<string, number>();
   let updateInFlight = false;
+  let configuredPolicy = options.updatePolicy ? validateAutoUpdatePolicy(options.updatePolicy) : undefined;
+  let lastAutoUpdate: AutoUpdateEvaluation | undefined;
+  const readPolicy = (): AutoUpdatePolicy => {
+    if (configuredPolicy) return configuredPolicy;
+    try {
+      return readConfig(dataHome()).updatePolicy ?? defaultAutoUpdatePolicy();
+    } catch {
+      return defaultAutoUpdatePolicy();
+    }
+  };
   let cachedUpdate: { at: number; channel: string; value: UpdateAvailability } | undefined;
   const UPDATE_CHECK_TTL_MS = 5 * 60_000;
   const resolveUpdate = async (
@@ -239,6 +261,7 @@ export function makeServer(
           '/api/status',
           '/api/doctor',
           '/api/update',
+          '/api/update/policy',
           '/api/push/key',
           '/api/push/status',
           '/api/reminders',
@@ -727,6 +750,61 @@ export function makeServer(
         const channel = parseUpdateChannel(url.searchParams.get('channel') ?? undefined);
         const refresh = url.searchParams.get('refresh') === '1';
         reply(200, await resolveUpdate(channel, refresh));
+      } else if (req.method === 'GET' && path === '/api/update/policy') {
+        reply(200, { policy: readPolicy(), ...(lastAutoUpdate ? { lastAttempt: lastAutoUpdate } : {}) });
+      } else if (req.method === 'POST' && path === '/api/update/policy') {
+        const value = await body(req);
+        const validated = validateAutoUpdatePolicy(value);
+        const nextPolicy: AutoUpdatePolicy =
+          validated.enabled && !validated.acceptedAt
+            ? { ...validated, acceptedAt: new Date().toISOString() }
+            : validated;
+        if (options.saveUpdatePolicy) {
+          configuredPolicy = await options.saveUpdatePolicy(nextPolicy);
+        } else if (options.updatePolicy) {
+          configuredPolicy = nextPolicy;
+        } else {
+          configuredPolicy = setUpdatePolicy(dataHome(), nextPolicy);
+        }
+        reply(200, { policy: configuredPolicy });
+      } else if (req.method === 'POST' && path === '/api/update/auto') {
+        if (updateInFlight) {
+          reply(409, { error: 'An update is already in progress.' });
+          return;
+        }
+        const value = await body(req);
+        for (const k of Object.keys(value))
+          if (k !== 'target' && k !== 'channel' && k !== 'revision')
+            throw new Error(`Unsupported automatic update parameter: ${k}`);
+        if (value.target !== undefined && typeof value.target !== 'string')
+          throw new Error('Invalid automatic update target.');
+        if (value.channel !== undefined && typeof value.channel !== 'string')
+          throw new Error('Invalid update channel.');
+        if (value.revision !== undefined && typeof value.revision !== 'string')
+          throw new Error('Invalid update revision.');
+        const target = value.target ?? options.base?.id ?? 'local';
+        updateInFlight = true;
+        try {
+          const evaluation = await evaluateAutoUpdate(
+            {
+              resolveUpdate,
+              ...(options.lifecycleHost ? { lifecycleHost: options.lifecycleHost } : {}),
+              ...(options.checkSchemaSafety ? { checkSchemaSafety: options.checkSchemaSafety } : {}),
+              countActiveRuns: async () => (await store.sorties(50)).filter((s) => s.closed === null).length,
+              countPendingApprovals: async () => (await store.approvals(50)).filter((a) => a.decision === null).length,
+            },
+            {
+              policy: readPolicy(),
+              target,
+              ...(value.channel !== undefined ? { channel: value.channel } : {}),
+              ...(value.revision !== undefined ? { revision: value.revision } : {}),
+            },
+          );
+          lastAutoUpdate = evaluation;
+          reply(200, evaluation);
+        } finally {
+          updateInFlight = false;
+        }
       } else if (req.method === 'POST' && path === '/api/update/apply') {
         if (updateInFlight) {
           reply(409, { error: 'A manual update is already in progress.' });

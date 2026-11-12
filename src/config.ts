@@ -9,6 +9,7 @@ import { randomBytes } from 'node:crypto';
 import { statSync } from 'node:fs';
 import { validateModels, type Models } from './model.ts';
 import { defaultPolicy, validatePolicy, type Policy } from './policy.ts';
+import { validateAutoUpdatePolicy, type AutoUpdatePolicy } from './update-policy.ts';
 /** telegram.chatId: the one private chat (the owner's) the Aoba bot answers; set by `telegram link`. */
 export interface Config {
   port: number;
@@ -24,6 +25,7 @@ export interface Config {
   pilots?: Pilot[];
   tools?: ToolsConfig;
   watch?: WatchConfig;
+  updatePolicy?: AutoUpdatePolicy;
 }
 /** This machine's identity in the NERV mesh: an id (NERV-01) and a name (Neo Tokyo-3), shown in the dashboard, doctor and brief. */
 export interface Base {
@@ -177,6 +179,8 @@ export function readConfig(home: string): Config {
     if (t.mcp.length || t.grants.length) config.tools = t;
   }
   if ('watch' in raw) config.watch = validateWatch((raw as Record<string, unknown>).watch);
+  if ('updatePolicy' in raw)
+    config.updatePolicy = validateAutoUpdatePolicy((raw as Record<string, unknown>).updatePolicy);
   if ('pilots' in raw) {
     const list = validatePilots((raw as Record<string, unknown>).pilots);
     if (list.length) config.pilots = list;
@@ -258,6 +262,18 @@ export function setBase(home: string, base: Base): Base {
     ? (JSON.parse(readFileSync(path, 'utf8')) as Record<string, unknown>)
     : { ...defaults };
   writeFileSync(path, JSON.stringify({ ...current, base: valid }, null, 2) + '\n', { mode: 0o600 });
+  chmodSync(path, 0o600);
+  readConfig(home);
+  return valid;
+}
+/** Persists the opt-in automatic update policy in config.json, keeping every other setting. */
+export function setUpdatePolicy(home: string, policy: unknown): AutoUpdatePolicy {
+  const path = join(home, 'config.json');
+  const valid = validateAutoUpdatePolicy(policy);
+  const current = existsSync(path)
+    ? (JSON.parse(readFileSync(path, 'utf8')) as Record<string, unknown>)
+    : { ...defaults };
+  writeFileSync(path, JSON.stringify({ ...current, updatePolicy: valid }, null, 2) + '\n', { mode: 0o600 });
   chmodSync(path, 0o600);
   readConfig(home);
   return valid;
