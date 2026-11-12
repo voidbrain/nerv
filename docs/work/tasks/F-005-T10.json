@@ -29,7 +29,7 @@
     "contract:service-lifecycle"
   ],
   "validation": [
-    "2026-11-12: F-005-T10 Linux user-service adapter (src/node-lifecycle-execution.ts linuxServiceHost/linuxServiceAdapter, src/nodes-cli.ts), Test: test/linux-service-lifecycle.test.ts"
+    "2026-11-12: PR #327, F-005-T10 Linux user-service adapter (src/node-lifecycle-execution.ts linuxServiceHost/linuxServiceAdapter, src/nodes-cli.ts), Test: test/linux-service-lifecycle.test.ts"
   ],
   "escalation": [
     "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
