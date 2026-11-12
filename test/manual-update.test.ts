@@ -224,6 +224,7 @@ test('F-005-T17: POST /api/update/apply enforces admin auth and returns manual u
     assert.ok(body.recovery.length > 0);
   } finally {
     await new Promise<void>((resolve) => server.close(() => resolve()));
+    store.close();
     rmSync(dir, { recursive: true, force: true });
   }
 });
