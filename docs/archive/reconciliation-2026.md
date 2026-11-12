@@ -315,3 +315,7 @@ Authenticated ci:status confirms #324 CI43308935497, #326 CI43307205792 and #327
 PR #329 (harness 8.0.0) passed CI; harness 8.1.0 reconciled: the header is generated from this log, archives merge as union, step evidence lives in task files.
 
 Previous authored header, now retired: Current work ledger, reviewed 12 November 2026 against main `4e55eb5`. PRs #324 (F-005-T19), #326 (F-005-T17) and #327 (F-005-T10) passed CI; harness 8.0.0 reconciled: human cues name Procedure, Decision or Both, and the Require Human table shows both kinds per column.
+
+## 2026-11-12 — main `fbd5458`
+
+PRs #328 (F-005-T18), #331 (F-005-T20, CI43314523726) and #330 (F-005-T09, CI43318667103) passed CI; harness 8.1.0 reconciled (PR #332, fresh-context review: no blockers).
