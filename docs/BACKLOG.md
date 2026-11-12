@@ -149,7 +149,7 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 |:---:|---|---|---|
 | 🟢 | 🔶 P2 | Verified | 🟢 Small |
 
-💻 **→ Human action required: No**<br />Verified 2026-11-12: no `database is locked` or `EPERM` in 34 Windows CI jobs since the fix; close and archive at the next backlog reconcile.
+💻 **→ Human action required: No**<br />Verified 2026-11-12: no `database is locked` or `EPERM` in 34 Windows CI jobs since the fix; close and archive at the next backlog reconcile ([PR #284](https://github.com/voidbrain/nerv/pull/284)).
 
 | | |
 |---|---|
