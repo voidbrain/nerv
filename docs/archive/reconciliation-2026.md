@@ -293,3 +293,7 @@ Authenticated ci:status confirms #314 CI43282005793 and #315 CI43280986607 passe
 ## 2026-11-12 — PR #318 (B-008)
 
 Authenticated ci:status confirms #316 CI43289305898 passed plan, native-macos, windows, validate and full-suite (an earlier run, 43286749372, failed validate on the F-029 test recorded as B-053); merged main 78d946d. #316 updated its own F-074 and B-053 records. Previous header: Current work ledger, reviewed 12 November 2026 against main `8c58ee5`. PRs #314 (F-042 read-only agency tools, F-043 records) and #315 (F-005-T13) passed CI; F-074-T09 done: every Gauntlet pack has a ledger-covered run.
+
+## 2026-11-12 — PR #TBD (B-008 closed)
+
+Authenticated ci:status confirms #318 CI43290861912 passed plan, native-macos, windows and validate (full-suite skipped by plan); merged main 1d5cc15. #318 updated its own B-008, B-054 and B-055 records. Previous header: Current work ledger, reviewed 12 November 2026 against main `78d946d`. PR #316 (F-074-T09, B-053) passed CI; B-008 not reproduced on Tabgha at 8c58ee5 (owner decides closure); B-054 and B-055 opened.
