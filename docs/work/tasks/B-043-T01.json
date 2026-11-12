@@ -41,13 +41,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.75 hour agent",
-    "basis": "Task added 2026-11-12 when B-043 was taken up. Baseline 2.5 days (baselineDays, history: the record's 2–3 focused days of 2026-11-07), re-estimated 2026-11-12 in agent hours (harness 5.6.0) as 2 h, the session's time box (baselineAgentHours). About 1.25 h spent (stated: CI log retrieval, slow-child regression, per-producer counts, fix, local suite, records). 0.75 h remains: fresh-context review, CI rounds including Windows, merge.",
+    "estimate": "0.5 hour agent",
+    "basis": "Task added 2026-11-12 when B-043 was taken up. Baseline 2.5 days (baselineDays, history: the record's 2–3 focused days of 2026-11-07), re-estimated 2026-11-12 in agent hours (harness 5.6.0) as 2 h, the session's time box (baselineAgentHours). About 1.75 h spent (stated: CI log retrieval, slow-child regression, per-producer counts, fix, local suite, records, fresh-context review and its should-fix items). 0.5 h remains: CI rounds including Windows, merge.",
     "reviewed": "2026-11-12",
     "baselineDays": 2.5,
-    "agentHours": 0.75,
+    "agentHours": 0.5,
     "baselineAgentHours": 2,
-    "actualAgentHours": 1.25,
+    "actualAgentHours": 1.75,
     "actualSource": "stated"
   }
 }

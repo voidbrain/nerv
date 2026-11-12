@@ -151,6 +151,9 @@ export class KajiLink {
   private nonces = new Nonces();
   private listening?: string;
   private stopped = false;
+  /** B-043: one tick at a time, across a stop and start too. A tick still waiting on the registry (the nervous process)
+  or a slow peer is not joined by another every interval; their requests would pile up against the process queue bound. */
+  private ticking = false;
   /** Per peer, whether heartbeats reach it, logged only when that changes. A peer counts as unreachable in the log only
   after enough missed heartbeats in a row to fill the online window (one slow Tailscale path or a machine waking from
   sleep is not news: the dashboard keeps it online for ONLINE_MS anyway). */
@@ -275,19 +278,16 @@ export class KajiLink {
   async start(everyMs = HEARTBEAT_MS): Promise<void> {
     this.stopped = false;
     this.workers?.start();
-    // B-043: one tick at a time. A tick still waiting on the registry (the nervous process) or a slow peer is not joined
-    // by another every interval; their requests would pile up against the process queue bound.
-    let busy = false;
     const tick = async () => {
-      if (this.stopped || busy) return;
-      busy = true;
+      if (this.stopped || this.ticking) return;
+      this.ticking = true;
       try {
         await this.listen();
         if (!this.stopped) await this.heartbeat();
       } catch (e) {
         this.log(`Kaji: ${e instanceof Error ? e.message : 'heartbeat failed'}.`);
       } finally {
-        busy = false;
+        this.ticking = false;
       }
     };
     this.every = everyMs;
