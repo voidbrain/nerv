@@ -9,7 +9,8 @@ import type { HistoryPage } from './history.ts';
 import { readCommand, statusText, type StatusBase } from './chat-command.ts';
 import { channelIsFresh, sanitizeChannel, type ChannelState, type HeardChannel } from './channel-state.ts';
 import { ProcessClient } from './process-client.ts';
-import type { Reminder, InboxEntry, InboxPage, ActResult, PushSubscriptionRecord } from './store.ts';
+import type { Reminder, ReminderInput, InboxEntry, InboxPage, ActResult, PushSubscriptionRecord } from './store.ts';
+import { reconcileReminderArgs } from './reminder-time.ts';
 import { degradedReasons, type RouteHealth } from './route-health.ts';
 import {
   detectOllama,
@@ -131,10 +132,15 @@ export interface StoreApi {
   list(): Reminder[] | Promise<Reminder[]>;
   pendingReminders(): Reminder[] | Promise<Reminder[]>;
   inboxPage(after?: number, limit?: number, afterId?: string): InboxPage | Promise<InboxPage>;
-  add(title: string, due: string): (Reminder & { existing?: true }) | Promise<Reminder & { existing?: true }>;
+  add(
+    title: string,
+    due: string,
+    now?: Date,
+    options?: ReminderInput,
+  ): (Reminder & { existing?: true }) | Promise<Reminder & { existing?: true }>;
   update(
     id: string,
-    patch: { title?: string; due?: string },
+    patch: { title?: string; due?: string; kind?: string; end?: string | null },
   ): Reminder | undefined | null | Promise<Reminder | undefined | null>;
   cancel(id: string): boolean | Promise<boolean>;
   pushPublicKey?(): Promise<string> | string;
@@ -288,10 +294,15 @@ export class Runtime implements StoreApi {
   async inboxPage(after = 0, limit = 5, afterId?: string) {
     return (await this.nervous.call('inbox.page', { after, limit, ...(afterId ? { afterId } : {}) })) as InboxPage;
   }
-  async add(title: string, due: string) {
-    return (await this.nervous.call('reminders.add', { title, due })) as Reminder & { existing?: true };
+  async add(title: string, due: string, _now?: Date, options?: ReminderInput) {
+    return (await this.nervous.call('reminders.add', {
+      title,
+      due,
+      ...(options?.kind !== undefined ? { kind: options.kind } : {}),
+      ...(options?.end !== undefined ? { end: options.end } : {}),
+    })) as Reminder & { existing?: true };
   }
-  async update(id: string, patch: { title?: string; due?: string }) {
+  async update(id: string, patch: { title?: string; due?: string; kind?: string; end?: string | null }) {
     return (await this.nervous.call('reminders.update', { id, ...patch })) as Reminder | null;
   }
   async cancel(id: string) {
@@ -911,7 +922,15 @@ export class Runtime implements StoreApi {
         return { sortieId, reply: question.text, question, steps, waiting };
       }
       if ('reply' in out.plan) return finish('done', out.plan.reply);
-      const { tool, args } = out.plan.action;
+      const { tool } = out.plan.action;
+      const cfg = tool === 'reminders.add' && this.home ? readConfig(this.home) : undefined;
+      const args =
+        tool === 'reminders.add'
+          ? reconcileReminderArgs(message, out.plan.action.args, {
+              timeZone: cfg?.timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+              briefAt: cfg?.brief?.at ?? '08:00',
+            })
+          : out.plan.action.args;
       // A tool Misato was not offered (often a misspelling) has no executor: it goes back to Misato, never to the owner as a card.
       // kaji.run (F-036 slice 3b): only to a base online now, for an action it offers; anything else goes back to Misato.
       if (tool === 'kaji.run') {

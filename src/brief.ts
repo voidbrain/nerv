@@ -1,4 +1,5 @@
 import { runMessage, type InstrumentalityRun } from './instrumentality-runs.ts';
+import { normalizeReminderKind, type ReminderKind } from './reminder-time.ts';
 import type { StoreApi } from './runtime.ts';
 /**
  * Hyuga's brief (F-003): a short daily summary built from facts in the ledger, not by a model, so it is quick and never
@@ -12,7 +13,7 @@ export interface BriefInput {
   language: 'it' | 'en';
   base?: string;
   approvals: { tool: string; expires: string; sortie?: string }[];
-  reminders: { title: string; due: string }[];
+  reminders: { title: string; due: string; kind?: ReminderKind | string; end?: string | null }[];
   sorties: { title: string; status: string; closed: string | null; id?: string }[];
   expired?: { tool: string; sortie: string; title: string }[];
   health: string[];
@@ -66,17 +67,41 @@ export function composeBrief(b: BriefInput): string {
   const minutes = localClock(b.now, b.timeZone).minutes;
   const greeting = minutes < 360 ? undefined : w.greetings[minutes < 720 ? 0 : minutes < 1080 ? 1 : 2];
   const title = greeting ? `${greeting}. ${w.title}` : w.title;
+  const locale = b.language === 'it' ? 'it-IT' : 'en-GB';
   const at = (iso: string) =>
-    new Intl.DateTimeFormat(b.language === 'it' ? 'it-IT' : 'en-GB', {
+    new Intl.DateTimeFormat(locale, {
       timeZone: b.timeZone,
       weekday: 'short',
       hour: '2-digit',
       minute: '2-digit',
     }).format(new Date(iso));
+  const dayOnly = (iso: string) =>
+    new Intl.DateTimeFormat(locale, {
+      timeZone: b.timeZone,
+      weekday: 'short',
+    }).format(new Date(iso));
+  const clockOnly = (iso: string) =>
+    new Intl.DateTimeFormat(locale, {
+      timeZone: b.timeZone,
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(new Date(iso));
+  const reminderWhen = (r: BriefInput['reminders'][number]) => {
+    const kind = normalizeReminderKind(r.kind);
+    const it = b.language === 'it';
+    if (kind === 'all-day') return `${dayOnly(r.due)}, ${it ? 'tutto il giorno' : 'all day'}`;
+    if (kind === 'from-to' && r.end) return `${dayOnly(r.due)}, ${clockOnly(r.due)}–${clockOnly(r.end)}`;
+    if (kind === 'from') return `${dayOnly(r.due)}, ${it ? 'dalle' : 'from'} ${clockOnly(r.due)}`;
+    if (kind === 'until') {
+      const endIso = r.end ?? r.due;
+      return `${dayOnly(endIso)}, ${it ? 'entro le' : 'until'} ${clockOnly(endIso)}`;
+    }
+    return at(r.due);
+  };
   const soon = b.reminders
     .filter((r) => {
       const t = Date.parse(r.due);
-      return t > b.now.getTime() && t <= b.now.getTime() + 86_400_000;
+      return t >= b.now.getTime() && t <= b.now.getTime() + 86_400_000;
     })
     .sort((x, y) => Date.parse(x.due) - Date.parse(y.due));
   const done = b.sorties.filter((s) => s.status === 'done'),
@@ -110,7 +135,7 @@ export function composeBrief(b: BriefInput): string {
       ? [`${w.due}: ${w.unread}`]
       : [
           `${w.due}: ${soon.length}`,
-          ...(soon.length ? soon.slice(0, 8).map((r) => `• ${at(r.due)} ${r.title}`) : [w.noDue]),
+          ...(soon.length ? soon.slice(0, 8).map((r) => `• ${reminderWhen(r)} ${r.title}`) : [w.noDue]),
         ]),
     '',
     ...(off('sorties')
@@ -191,7 +216,12 @@ export async function gatherBrief(
     expired: (expired ?? []).map((e) => ({ tool: e.tool, sortie: e.sortieId, title: e.title })),
     reminders: (reminders ?? [])
       .filter((r) => !r.delivered && !r.cancelled)
-      .map((r) => ({ title: r.title, due: r.due })),
+      .map((r) => ({
+        title: r.title,
+        due: r.due,
+        ...(r.kind && r.kind !== 'at' ? { kind: r.kind } : {}),
+        ...(r.end ? { end: r.end } : {}),
+      })),
     sorties: closed
       ? closed.failures.map((f) => ({ title: f.title, status: 'failed', closed: f.closed, id: f.id }))
       : (recent ?? [])

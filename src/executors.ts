@@ -1,17 +1,21 @@
 import type { Tool } from './policy.ts';
-import type { Reminder } from './store.ts';
+import type { Reminder, ReminderInput } from './store.ts';
 import type { ToolDoc } from './misato.ts';
 import type { Memory } from './memory.ts';
 import { readConfig, savePilots, setSchedule } from './config.ts';
+import { reconcileReminderArgs } from './reminder-time.ts';
 /**
  * Built-in tools with an executor in the scheduler process (F-017). Each declares its effect class for the gate; an
  * executor runs only after `Ledger.authorize` accepted the grant for these exact arguments.
  */
 export interface ReminderBackend {
   pendingReminders(limit?: number): Reminder[];
-  add(title: string, due: string): Reminder & { existing?: true };
+  add(title: string, due: string, now?: Date, options?: ReminderInput): Reminder & { existing?: true };
   cancel(id: string): boolean;
   restore(id: string): boolean;
+  rescheduleAllDayReminders?(briefAt?: string, timeZone?: string): void;
+  sortie?(id: string): { title: string } | null | undefined;
+  reminderDefaults?(): { timeZone: string; briefAt: string; language: 'en' | 'it' };
   memory: Memory;
   home?: string;
   /** F-036 slice 3b: queues one action for another base; the coordinator sends it over the Kaji line. */
@@ -53,8 +57,9 @@ export const toolDocs: ToolDoc[] = [
   {
     name: 'reminders.add',
     effect: 'write-local',
-    about: 'Adds a reminder delivered to the local inbox when due.',
-    args: '{"title": text up to 500 characters, "due": ISO 8601 date-time in the future with an explicit offset}',
+    about:
+      'Adds a reminder delivered to the local inbox when due. Set kind from the request: "all-day" for a day with no clock time ("on 3 March"), "at" for a clock time ("at 10"), "from-to" with "end" for a range ("between 10 and 12"), "from" for an open start ("after 15"), or "until" for a deadline ("by 18"). Never make up a clock time when the request only gives a day.',
+    args: '{"title": text up to 500 characters, "due": ISO 8601 date-time in the future with an explicit offset or YYYY-MM-DD for all-day, "kind"?: "all-day" | "at" | "from-to" | "from" | "until", "end"?: ISO 8601 date-time with offset for from-to or until}',
   },
   {
     name: 'reminders.cancel',
@@ -130,14 +135,30 @@ export function execute(
   switch (tool) {
     case 'reminders.list':
       only(args, []);
-      return backend.pendingReminders(20).map((r) => ({ id: r.id, title: r.title, due: r.due }));
+      return backend.pendingReminders(20).map((r) => ({
+        id: r.id,
+        title: r.title,
+        due: r.due,
+        ...(r.kind && r.kind !== 'at' ? { kind: r.kind } : {}),
+        ...(r.end ? { end: r.end } : {}),
+      }));
     case 'reminders.add': {
-      only(args, ['title', 'due']);
-      const r = backend.add(text(args, 'title'), text(args, 'due'));
+      only(args, ['title', 'due', 'kind', 'end']);
+      const defaults = backend.reminderDefaults
+        ? backend.reminderDefaults()
+        : { timeZone: 'Europe/Rome', briefAt: '08:00' };
+      const sortieTitle = context.sortieId && backend.sortie ? backend.sortie(context.sortieId)?.title : undefined;
+      const effective = sortieTitle ? reconcileReminderArgs(sortieTitle, args, defaults) : args;
+      const r = backend.add(text(effective, 'title'), text(effective, 'due'), new Date(), {
+        ...(effective.kind !== undefined && effective.kind !== null ? { kind: text(effective, 'kind') } : {}),
+        ...(effective.end !== undefined && effective.end !== null ? { end: text(effective, 'end') } : {}),
+      });
       return {
         id: r.id,
         title: r.title,
         due: r.due,
+        ...(r.kind !== 'at' ? { kind: r.kind } : {}),
+        ...(r.end ? { end: r.end } : {}),
         ...(r.existing ? { existing: true, note: 'This reminder already existed; nothing was added.' } : {}),
       };
     }
@@ -166,10 +187,14 @@ export function execute(
       only(args, ['brief', 'instrumentality']);
       if (!Object.keys(args).length) throw new Error('Give brief and/or instrumentality.');
       if (!backend.home) throw new Error('Settings are not available here.');
-      return setSchedule(backend.home, {
+      const updated = setSchedule(backend.home, {
         ...(args.brief !== undefined ? { brief: text(args, 'brief') } : {}),
         ...(args.instrumentality !== undefined ? { instrumentality: text(args, 'instrumentality') } : {}),
       });
+      if (args.brief !== undefined && backend.rescheduleAllDayReminders) {
+        backend.rescheduleAllDayReminders();
+      }
+      return updated;
     }
     case 'pilots.create': {
       only(args, ['id', 'name', 'domain', 'keywords', 'model']);

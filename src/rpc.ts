@@ -188,7 +188,12 @@ export const methodSchemas = {
   'reminders.add': {
     type: 'object',
     required: ['title', 'due'],
-    properties: { title: { type: 'string', minLength: 1, maxLength: 500 }, due: { type: 'string', maxLength: 64 } },
+    properties: {
+      title: { type: 'string', minLength: 1, maxLength: 500 },
+      due: { type: 'string', maxLength: 64 },
+      kind: { type: 'string', maxLength: 32 },
+      end: { type: ['string', 'null'], maxLength: 64 },
+    },
     additionalProperties: false,
   },
   'reminders.update': {
@@ -199,6 +204,8 @@ export const methodSchemas = {
       id: { type: 'string', minLength: 1, maxLength: 100 },
       title: { type: 'string', minLength: 1, maxLength: 500 },
       due: { type: 'string', maxLength: 64 },
+      kind: { type: 'string', maxLength: 32 },
+      end: { type: ['string', 'null'], maxLength: 64 },
     },
     additionalProperties: false,
   },
