@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "id": "B-056-T01",
+  "parent": "B-056",
+  "title": "Separate a refused renewal from an unconfirmed one in the companion",
+  "goal": "A renewal refused before any request names the reason and says the pairing is unchanged; only unknown outcomes say not confirmed",
+  "status": "planned",
+  "acceptance": [
+    "A committed Swift test fails before the fix for a renewal refused on the Mac",
+    "Unknown outcomes (no reply, Keychain save failure after a reply) keep the unconfirmed message",
+    "English and Italian texts"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "native/NervMenuBar/**",
+    "docs/work/records/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "regression-design",
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures only.",
+  "validation": [
+    "swift test --package-path native/NervMenuBar"
+  ],
+  "escalation": [
+    "Any change to what is sent during renewal goes to a fresh-context review"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-12: split the catch in pair() by phase, two texts, one Swift test. Not a measurement.",
+    "reviewed": "2026-11-12",
+    "agentHours": 1,
+    "baselineAgentHours": 1
+  }
+}
