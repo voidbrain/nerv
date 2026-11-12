@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { Store } from '../src/store.ts';
 import { Runtime } from '../src/runtime.ts';
 import { makeServer } from '../src/server.ts';
-import { parsePlan } from '../src/misato.ts';
+import { misatoAsk, parsePlan } from '../src/misato.ts';
 import { authorize, validateParams } from '../src/rpc.ts';
 
 test('clarification shape is explicit, bounded and exclusive; only the coordinator can claim an answer', () => {
@@ -283,6 +283,152 @@ test(
       assert.equal((await main.runtime.sorties()).length, 1);
       assert.equal((await main.runtime.sortie(mainId))!.status, 'done');
       assert.equal((await secondary.runtime.sortie(q.sortieId))!.status, 'done');
+    } finally {
+      await secondary.close();
+      await main.close();
+    }
+  },
+);
+
+test(
+  'B-021: a forwarded answer that times out after the main base took it leaves no question waiting here; the next message is a new sortie',
+  { timeout: 30000 },
+  async () => {
+    const main = await fixture(['{"ask":"Which file?"}', '{"reply":"Read shopping.txt."}', '{"reply":"Sunny"}']);
+    const secondary = await fixture([]);
+    const heard: string[] = [];
+    let late = false;
+    secondary.runtime.kaji.main = async () => 'NERV-01';
+    secondary.runtime.setDispatch(async (message, _conversation, forward) => {
+      const base = { id: 'NERV-01', name: 'Main' };
+      await forward(base);
+      heard.push(message);
+      const there = await main.runtime.chat(message, 'kaji:nerv-02-dashboard');
+      // What KajiLink.chat returns when the request was sent but its reply did not arrive in time: the main base has
+      // already taken the answer and moved on.
+      if (late)
+        return {
+          sortieId: '',
+          error:
+            'NERV-01 did not answer (timeout); it may still be working on it, so the request was not repeated here.',
+          steps: [],
+          waiting: [],
+        };
+      return { ...there, base };
+    });
+    try {
+      const q = await secondary.runtime.chat('Read a file', 'dashboard');
+      assert.ok(q.question);
+      late = true;
+      const timedOut = await secondary.runtime.chat('shopping.txt', 'dashboard');
+      assert.match(timedOut.error ?? '', /did not answer .*not repeated here/);
+      assert.equal(timedOut.sortieId, q.sortieId);
+      const mainId = (await main.runtime.sorties())[0]!.id;
+      assert.equal((await main.runtime.sortie(mainId))!.status, 'done', 'the main base took the answer');
+      assert.notEqual(
+        (await secondary.runtime.sortie(q.sortieId))!.status,
+        'open',
+        'this base does not keep waiting for a question the main base no longer asks',
+      );
+      const answered = async () =>
+        (await secondary.runtime.events(q.sortieId)).filter((e) => e.kind === 'misato.answered').length;
+      assert.equal(await answered(), 1, 'the answer left this base once');
+      late = false;
+      const next = await secondary.runtime.chat('What is the weather tomorrow?', 'dashboard');
+      assert.notEqual(next.sortieId, q.sortieId, 'the next message is not recorded as an answer to the old question');
+      assert.equal(next.reply, 'Sunny');
+      assert.deepEqual(heard, ['Read a file', 'shopping.txt', 'What is the weather tomorrow?']);
+      assert.equal((await main.runtime.sorties()).length, 2, 'the main base saw a new request, not a second answer');
+      assert.equal(await answered(), 1);
+      assert.equal(secondary.asked.plans.length, 0, 'nothing was planned on this base');
+    } finally {
+      await secondary.close();
+      await main.close();
+    }
+  },
+);
+
+test('B-021: the first turn of an answer names the pending question and its job, and puts the topic decision last', () => {
+  const base = {
+    request: 'Tell me what a calendar is instead.',
+    history: [],
+    tools: [],
+    now: '2030-12-01T12:00:00Z',
+    timeZone: 'UTC',
+    context: [{ request: 'Set a reminder.' }, { request: 'For tomorrow', reply: 'What should I remind you about?' }],
+  };
+  const answer = misatoAsk({ ...base, clarification: true }, 'local');
+  const prompt = JSON.parse(answer.prompt) as Record<string, unknown>;
+  assert.equal(prompt.clarification, true);
+  assert.equal(prompt.originalRequest, 'Set a reminder.');
+  assert.equal(prompt.pendingQuestion, 'What should I remind you about?');
+  const last = answer.system!.split('\n').slice(-3).join('\n');
+  assert.match(last, /\{"newRequest":true\}/);
+  assert.match(last, /even when you could answer it yourself/);
+  assert.match(last, /Length alone never decides/);
+  const plain = misatoAsk(base, 'local');
+  const ordinary = JSON.parse(plain.prompt) as Record<string, unknown>;
+  assert.equal(ordinary.pendingQuestion, undefined);
+  assert.equal(ordinary.originalRequest, undefined);
+  assert.doesNotMatch(plain.system!, /even when you could answer it yourself/);
+});
+
+test(
+  'B-021: the coordinator gives the answer turn its pending question and original request; later turns get neither',
+  { timeout: 30000 },
+  async () => {
+    const f = await fixture([
+      '{"ask":"Which file?"}',
+      '{"action":{"tool":"reminders.list","args":{}}}',
+      '{"reply":"Read shopping.txt"}',
+    ]);
+    try {
+      const q = await f.runtime.chat('Read a file', 'dashboard');
+      const answer = await f.runtime.chat('shopping.txt', 'dashboard');
+      assert.equal(answer.sortieId, q.sortieId);
+      assert.deepEqual(
+        [f.asked.plans[1]!.clarification, f.asked.plans[1]!.originalRequest, f.asked.plans[1]!.pendingQuestion],
+        [true, 'Read a file', 'Which file?'],
+      );
+      assert.deepEqual(
+        [f.asked.plans[2]!.clarification, f.asked.plans[2]!.originalRequest, f.asked.plans[2]!.pendingQuestion],
+        [undefined, undefined, undefined],
+      );
+    } finally {
+      await f.close();
+    }
+  },
+);
+
+test(
+  'B-021: an answer the main base refuses outright (nothing ran there) keeps the question waiting here',
+  { timeout: 30000 },
+  async () => {
+    const main = await fixture(['{"ask":"Which file?"}', '{"reply":"Read shopping.txt."}']);
+    const secondary = await fixture([]);
+    let refuse = false;
+    secondary.runtime.kaji.main = async () => 'NERV-01';
+    secondary.runtime.setDispatch(async (message, _conversation, forward) => {
+      const base = { id: 'NERV-01', name: 'Main' };
+      await forward(base);
+      // What KajiLink.chat returns for a 400/401/403/409: the main base turned the request away before running anything.
+      if (refuse)
+        return { sortieId: '', error: 'NERV-01 refused (409)', refused: true, steps: [], waiting: [] } as never;
+      return { ...(await main.runtime.chat(message, 'kaji:nerv-02-dashboard')), base };
+    });
+    try {
+      const q = await secondary.runtime.chat('Read a file', 'dashboard');
+      refuse = true;
+      const refused = await secondary.runtime.chat('shopping.txt', 'dashboard');
+      assert.equal(refused.sortieId, q.sortieId);
+      assert.match(refused.error ?? '', /refused/);
+      assert.equal((await secondary.runtime.sortie(q.sortieId))!.status, 'open', 'the question still waits');
+      assert.equal((await secondary.runtime.events(q.sortieId)).filter((e) => e.kind === 'misato.answered').length, 0);
+      refuse = false;
+      const done = await secondary.runtime.chat('shopping.txt', 'dashboard');
+      assert.deepEqual([done.sortieId, done.reply], [q.sortieId, 'Read shopping.txt.']);
+      assert.equal((await secondary.runtime.sortie(q.sortieId))!.status, 'done');
+      assert.equal(secondary.asked.plans.length, 0, 'nothing was planned on this base');
     } finally {
       await secondary.close();
       await main.close();

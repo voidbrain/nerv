@@ -97,6 +97,8 @@ export interface ChatReply {
   waiting: { approvalId: string; tool: string; reason: string }[];
   /** Set when the main base handled the request (F-036 dispatch): its sortie, cards and memory are there. */
   base?: { id: string; name: string };
+  /** Dispatch only: the main base turned the request away before running anything (B-021). */
+  refused?: true;
 }
 /** An action the owner asks for directly: the request is what Casper checks the action against. */
 /** `earlier`: the conversation's previous exchanges, for Casper's intent check (B-010). */
@@ -601,7 +603,10 @@ export class Runtime implements StoreApi {
     if (far) {
       if (!forwarded) return far;
       await this.note(forwarded, 'kaji.answered', { base: far.base ?? { id: '', name: '' }, sortieId: far.sortieId });
-      if (question && far.error) return { ...far, sortieId: forwarded };
+      // B-021: an answer the main base turned away outright never reached its Misato: the question still waits here.
+      if (question && far.refused) return { ...far, sortieId: forwarded };
+      // B-021: once sent, the answer is the main base's. A late or failed reply (it may have taken the answer and moved
+      // on) closes this copy like any forwarded request, so a later message is never taken as a second answer here.
       if (question)
         await this.nervous.call('misato.answer', { conversation: key, sequence: question.sequence, text: message });
       if (far.question && far.reply)
