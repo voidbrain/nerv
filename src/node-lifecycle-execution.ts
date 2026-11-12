@@ -345,7 +345,7 @@ async function processIdentity(pid: number): Promise<string | undefined> {
       '-NoProfile',
       '-NonInteractive',
       '-Command',
-      `Get-CimInstance Win32_Process -Filter "ProcessId=${pid}" | ForEach-Object { "$($_.CreationDate)|$($_.CommandLine)" }`,
+      `try { $p = [Diagnostics.Process]::GetProcessById(${pid}); "$($p.StartTime.ToFileTimeUtc())|$($p.MainModule.FileName)" } catch { exit 1 }`,
     ]);
     return r.status === 0 && r.out.trim() ? hash(r.out.trim()) : undefined;
   }
