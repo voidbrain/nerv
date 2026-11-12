@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 266 h + 19.5 h owner and 0 days across 160 open steps of 33 features and 4 other records. 15.5 h of actual effort recorded on 11 steps. Generated from the task files.
+**Remaining effort:** 266 h + 19.5 h owner and 0 days across 161 open steps of 33 features and 4 other records. 16.5 h of actual effort recorded on 12 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1287,7 +1287,7 @@ Earlier next action (2026-11-09, done above): inspect event ordering for remote 
 
 | Signal | Priority | Status | Effort | Remaining | Depends on | Unlocks | Human action |
 |:---:|---|---|---|---|---|---|:---:|
-| 🔴 | 🔺 P1 | Open | 🔴 Large | 9 h | [F-049](#f-049) | [F-054](#f-054), [F-056](#f-056) | 💻 No |
+| 🔴 | 🔺 P1 | Open | 🔴 Large | 9 h | [F-049](#f-049) | [F-056](#f-056) | 💻 No |
 
 💻 **→** Next: slice 2, writes with approval cards; then the dashboard tools list, tools on other bases, remote (HTTP) servers. Optional owner check below.
 
@@ -1567,45 +1567,51 @@ Earlier next action (2026-11-09, done above): inspect event ordering for remote 
 
 | Signal | Priority | Status | Effort | Remaining | Depends on | Unlocks | Human action |
 |:---:|---|---|---|---|---|---|:---:|
-| 🔴 | 🔹 P3 | Open | 🟡 Medium | 4.5 h | [F-021](#f-021), [F-045](#f-045), [F-028](archive/backlog-2026.md#f-028) | — | 💻 No |
+| 🔴 | 🔹 P3 | Open | 🟡 Medium | 4.5 h | [F-045](#f-045), [F-028](archive/backlog-2026.md#f-028) | — | 💻 No |
 
-💻 **→** Next: after F-021; collect the day's milestones from the ledger and the Gehirn registry.
+💻 **→** F-054-T01 (Simple chronicle from recorded facts) implemented; next F-054-T02 (Eva version) and F-054-T04 (record the missing facts).
 
 | | |
 |---|---|
 | **Issue** | Owner request 2026-11-05: the base should keep a log of what happened ("today we established connection with Tabgha"), in Eva lore or in two versions. The ledger is evidence, not a story; Instrumentality summarises the owner's conversations, not the agency's own milestones. |
 | **Reproduce** | Look for a record of when Tabgha joined, the first relayed request or the first pilot: only scattered events. |
-| **Check** | One entry per day, built only from recorded facts (bases enrolled or online for the first time, a new main base, pilots created or promoted, the first action run on another base, outages and recoveries, bugs closed), never invented; two versions by theme: Simple, plain and without a model; Eva, the same facts retold in the lore voice by a *Chronicler* pilot (Fuyutsuki), a writer only, starting at Proto, its text checked to name only the day's facts; shown as a Chronicle tab, with an optional line in the morning brief; each entry links its sources (sortie IDs, registry records). |
+| **Check** | One entry per day, built only from recorded facts (bases enrolled or online for the first time, a new main base, pilots created or promoted, the first action run on another base, outages and recoveries; bugs closed left out by owner decision 2026-11-12), never invented; two versions by theme: Simple, plain and without a model; Eva, the same facts retold in the lore voice by a *Chronicler* pilot (Fuyutsuki), a writer only, starting at Proto, its text checked to name only the day's facts; shown as a Chronicle tab, with an optional line in the morning brief; each entry links its sources (sortie IDs, registry records). |
 
 **Feature steps** (baseline: accepted estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
 
 | Step | Baseline | Actual | Remaining | Status |
 |---|---|---|---|---|
-| F-054-T01 — Daily chronicle facts from records | 1.5 h | 0 h | 🟢 Small — 1.5 h | Planned |
+| F-054-T01 — Daily chronicle facts from records | 1.5 h | 1 h so far (stated) | 🟢 Small — 0 h | Implemented; verification pending |
 | F-054-T02 — Eva version by the Chronicler pilot | 1.5 h | 0 h | 🟢 Small — 1.5 h | Planned |
 | F-054-T03 — Chronicle tab and brief line | 1.5 h | 0 h | 🟢 Small — 1.5 h | Planned |
-| **Total** | 4.5 h | 0 h (0 of 3 steps recorded) | 4.5 h | 0 of 3 completed |
+| F-054-T04 — Record the milestones not stored today | 1.5 h | 0 h | 🟢 Small — 1.5 h | Planned |
+| **Total** | 6 h | 1 h (1 of 4 steps recorded) | 4.5 h | 0 of 4 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
 **Step estimates** (dated basis; generated from the task files)
 
-- F-054-T01: 1.5 hours agent (2026-11-11). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history.
+- F-054-T01: 0 hours (implemented; awaiting CI) (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Implemented 2026-11-12 (src/chronicle.ts, &#96;chronicle &#91;DAYS&#93;&#96;, test/chronicle.test.ts) in about 1 h agent (stated). Scope by owner decision 2026-11-12: facts already recorded only; the unrecorded ones move to F-054-T04; bugs closed left out.
 - F-054-T02: 1.5 hours agent (2026-11-11). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history.
 - F-054-T03: 1.5 hours agent (2026-11-11). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history.
+- F-054-T04: 1.5 hours agent (2026-11-12). Added 2026-11-12 on the owner's decision to record these facts from now on (F-054-T01 found they are not stored: only last&#95;seen per base, route health in memory, pilot stages edited by hand). A judged 1.5 agent hours like the other F-054 steps; estimate, not a measurement.
 
-**Next action / closure evidence:** Planned 2026-11-05 (owner: yes, after F-021). Builds on the ledger, the Gehirn registry, F-045 (pilots) and F-028 (the brief).
+**Owner decisions, 2026-11-12:** (1) F-054 starts now, ahead of the rest of F-021 (F-021-T02 to T05 stay open): F-021 is no longer a prerequisite. (2) Facts the agency does not store today (a base online for the first time: only `last_seen` is kept; outages and recoveries: route and base health live in memory; pilot promotions: a stage change is a hand edit of config.json) are recorded from now on, without backfill: new step F-054-T04. (3) Bugs closed are left out: they live in the git backlog, not in the agency's data, and the running service does not read its development repository.
+
+**F-054-T01, 2026-11-12:** `src/chronicle.ts` builds the Simple chronicle without a model: one entry per local day (owner's time zone), only days with something recorded, each line with its source (`registry:<record id>` or a sortie's short ID). Facts: base enrolled, enrolled again, revoked and named main (signed registry records under the pinned root, dated by their signed `issued` time), pilot created (an approved `pilots.create` that ran), and per base the first remote action that ran without an error. `chronicle [DAYS]` prints it (last 30 days by default), in English or Italian. Evidence: `test/chronicle.test.ts` (day grouping across midnight in Rome, no entry for empty days, unreadable times and unknown kinds left out, both languages, and a join test across Store, Ledger and Registry: only the approved pilot, the first remote action that ran (not a failed, a later or a waiting one), registry sources equal to the stored record IDs, then the CLI command). Dashboard tab and brief line are F-054-T03.
+
+**Next action / closure evidence:** Planned 2026-11-05 (owner: yes, after F-021; superseded 2026-11-12, see above). Builds on the ledger, the Gehirn registry, F-045 (pilots) and F-028 (the brief).
 
 **Estimates:** Medium remaining effort. Estimated 2026-11-05. Reassessed 2026-11-07: explicit prerequisite outcomes preserve the existing scope and remaining-work estimate; independent slices can proceed.
 
 | Field | Value |
 |---|---|
-| Depends on | [F-021](#f-021) — Owner-selected prerequisite before chronicle work<br />[F-045](#f-045) — Chronicler pilot for the Eva narrative; plain fact collection can proceed<br />[F-028](archive/backlog-2026.md#f-028) — Durable brief delivery for the optional morning-brief entry |
+| Depends on | [F-045](#f-045) — Chronicler pilot for the Eva narrative; plain fact collection can proceed<br />[F-028](archive/backlog-2026.md#f-028) — Durable brief delivery for the optional morning-brief entry |
 | PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner request 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
-| Reviewed | 2026-11-07 |
+| Reviewed | 2026-11-12 |
 
 </details>
 
