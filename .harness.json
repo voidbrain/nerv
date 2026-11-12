@@ -3,7 +3,7 @@
     "path": "../harness-template",
     "repo": "https://github.com/voidbrain/project-harness"
   },
-  "version": "6.2.0",
+  "version": "7.1.1",
   "stacks": [
     "core",
     "angular"
@@ -39,6 +39,7 @@
     "docs/agents/coverage-guide.md": "core/docs/agents/coverage-guide.md",
     "tools/backlog-dependencies.mjs": "core/tools/backlog-dependencies.mjs",
     "tools/backlog-queue.mjs": "core/tools/backlog-queue.mjs",
+    "tools/solution.mjs": "core/tools/solution.mjs",
     "tools/verification.mjs": "core/tools/verification.mjs",
     "docs/agents/verification.md": "core/docs/agents/verification.md",
     "tools/work-items.mjs": "core/tools/work-items.mjs",

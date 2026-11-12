@@ -47,11 +47,16 @@ function field(record, name) {
   assert(!rows.length || rows[0].length === 2, `${record.id}: malformed ${name}`);
   return rows[0]?.[1];
 }
+// F-063: the generated ledger merges Signal into Status ("🔴 Open"); read such a row in the authored column order.
+const unmerge = (c) => {
+  const m = /^(🔴|🟠|🟡|🟢|🟣|🔵) (Open|Investigate|Implemented|Verified|Blocked|Closed)$/.exec(c[0] ?? '');
+  return m ? [m[1], c[1], m[2], ...c.slice(2)] : c;
+};
 function summary(record) {
   const rows = record.body
     .split('\n')
     .filter((l) => l.startsWith('|'))
-    .map(cells)
+    .map((l) => unmerge(cells(l)))
     .filter((c) => cues.includes(c[0]));
   if (record.file !== 'docs/BACKLOG.md' && rows.length !== 1)
     return { status: 'Unknown', priority: 'Unknown', effort: 'Unknown' };
@@ -123,7 +128,7 @@ export function queue(sources, roadmap = '') {
     .map((record) => {
       const s = summaries.get(record.id);
       assert(/^\S+ P[123]$/.test(s.priority), `${record.id}: unknown priority`);
-      assert(['🟢 Small', '🟡 Medium', '🔴 Large'].includes(s.effort), `${record.id}: unknown effort`);
+      assert(['🟢 Small', '🟡 Medium', '🔴 Large', '🟣 Very large'].includes(s.effort), `${record.id}: unknown effort`);
       const humans = s.human ? [[null, s.human]] : [...record.body.matchAll(/Human action required: (Yes|No)/g)];
       assert(
         humans.length === 1 && ['Yes', 'No'].includes(humans[0][1]),
@@ -182,7 +187,7 @@ export function queue(sources, roadmap = '') {
         impact: field(record, 'Impact'),
       };
     });
-  const effort = { '🟢 Small': 0, '🟡 Medium': 1, '🔴 Large': 2 };
+  const effort = { '🟢 Small': 0, '🟡 Medium': 1, '🔴 Large': 2, '🟣 Very large': 3 };
   records.sort(
     (a, b) =>
       a.order - b.order ||

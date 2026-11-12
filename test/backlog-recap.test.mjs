@@ -50,3 +50,19 @@ test('the human cue is read from the generated summary table as well as the auth
     ],
   );
 });
+
+test('the status is read from the generated summary where Status carries its colour (harness 7.0.0)', () => {
+  const record = (id, status, cue) =>
+    `### ${id}\n\n**Title**\n\n| Status | Priority | Effort | Remaining | Depends on | Unlocks | Human action |\n|---|---|---|---|---|---|:---:|\n| ${cue} ${status} | 🔶 P2 | 🟣 Very large | 9 h | — | — | 💻 No |\n\n💻 **→** Next.\n\n---\n`;
+  const records = parseRecords(
+    record('F-001', 'Implemented', '🟡') + record('B-002', 'Blocked', '🟣') + record('F-003', 'Open', '🔴'),
+  );
+  assert.deepEqual(
+    records.map((r) => [r.id, r.status]),
+    [
+      ['F-001', 'Implemented'],
+      ['B-002', 'Blocked'],
+      ['F-003', 'Open'],
+    ],
+  );
+});

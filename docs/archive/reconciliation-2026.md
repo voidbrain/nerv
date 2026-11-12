@@ -1,6 +1,8 @@
 # Backlog reconciliation log 2026
 
-- Current work ledger, reviewed 12 November 2026 against main `1f714bc`. PR #309 (harness v6.2.0) passed CI; F-043 reminder time kinds implemented (PR #310); B-052 opened: owner actions link their procedure (F-005 T13 procedure now a page). F-007 and F-008 lowered to P3 (owner, 2026-11-12).
+- Current work ledger, reviewed 12 November 2026 against main `ed580bc`. PRs #310 (F-043) and #311 (F-005 procedure, B-052) passed CI; harness 6.3.0–7.1.1 reconciled: worktree rule, effort sized from remaining agent hours, Status with its colour, human actions link their procedure. F-007 and F-008 lowered to P3 (owner, PR #313).
+
+- Current work ledger, reviewed 12 November 2026 against main `1f714bc`. PR #309 (harness v6.2.0) passed CI; F-043 reminder time kinds implemented (PR #310); B-052 opened: owner actions link their procedure (F-005 T13 procedure now a page).
 
 - Current work ledger, reviewed 12 November 2026 against main `5700ccf`. PRs #302, #304 and #305 passed CI; F-054-T04 closed. B-043 closed: five full Windows runs after the fix with no queue saturation.
 

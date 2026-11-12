@@ -38,11 +38,12 @@
   "effort": {
     "size": "small",
     "estimate": "0.5 h remaining",
-    "basis": "Task added 2026-11-12 when B-050 was taken up. Baseline 1.5 h agent (baselineAgentHours), the estimate recorded when B-050 was opened. Regression test committed first (feb13de), until retry in test/fixtures/browser.mjs, all browser tests passing. 0.5 h remains for review and CI. Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 0.5 h → 0.5 h, min 0.5 h; owner hours and baseline kept.",
+    "basis": "Task added 2026-11-12 when B-050 was taken up. Baseline 1.5 h agent (baselineAgentHours), the estimate recorded when B-050 was opened. Regression test committed first (feb13de), until retry in test/fixtures/browser.mjs, all browser tests passing. 0.5 h remains for review and CI. Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 0.5 h → 0.5 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.",
     "reviewed": "2026-11-12",
     "agentHours": 0.5,
     "baselineAgentHours": 1.5,
     "actualAgentHours": 0.5,
-    "actualSource": "stated"
+    "actualSource": "stated",
+    "estimateAgentHours": 1
   }
 }
