@@ -91,11 +91,14 @@ async function makeLinuxEnv() {
     mode: 0o600,
   });
 
+  const nodeBin = join(root, 'node-bin');
+  writeFileSync(nodeBin, `#!/bin/sh\necho ${process.version}\n`, { mode: 0o755 });
+
   const context: ServiceContext = {
     userHome,
     home,
     source,
-    node: realpathSync(process.execPath),
+    node: nodeBin,
     uid: process.getuid!(),
   };
 
@@ -128,7 +131,7 @@ async function makeLinuxEnv() {
       if (args[1] === 'enable' && args[2] === '--now' && args[3] === 'nerv.service') {
         registered = true;
         active = true;
-        serviceProc = spawn(context.node, ['-e', 'setInterval(() => {}, 1000)'], { stdio: 'ignore' });
+        serviceProc = spawn(process.execPath, ['-e', 'setInterval(() => {}, 1000)'], { stdio: 'ignore' });
         return { status: 0, out: '', err: '' };
       }
       if (args[1] === 'disable' && args[2] === '--now' && args[3] === 'nerv.service') {
