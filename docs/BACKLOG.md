@@ -170,7 +170,7 @@ Final PR240 revision6acac44 / CI42635119338 passed all five/full-suite checks. I
 
 | Field | Value |
 |---|---|
-| PR / evidence | Recorded in the records follow-up of 2026-11-12 (this PR). Found in the B-043 design review of #282; code confirmed on main: `serve` calls `this.port.bases()` before `verifySigned`. |
+| PR / evidence | Recorded in [PR #289](https://github.com/voidbrain/nerv/pull/289). Found in the B-043 design review of #282; code confirmed on main: `serve` calls `this.port.bases()` before `verifySigned`. |
 | Opened | 2026-11-12 |
 | Verification | Pending. |
 | Reviewed | 2026-11-12 |
