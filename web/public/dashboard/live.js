@@ -376,7 +376,20 @@
       rows.push(["Update availability", label[0], label[1]]);
     }
     const degraded = (d.degraded || []).length ? "<div class='small warn' style='margin-bottom:4px'>DEGRADED · Dummy Plug: reminders and rule-based actions keep running; requests that need a model fail with the reason below until it is back.</div>" : "";
+    const mu = state.manualUpdate;
+    const updateActionHtml = u && u.status === "update-available"
+      ? "<div class='row small' style='margin-top:6px'><span class='muted'>Update ready (" + esc(short(u.availableRevision)) + " · " + esc(u.channel || "main") + ")</span><button class='btn sm' id='btn-apply-update'" + (state.manualUpdateBusy ? " disabled" : "") + ">" + (state.manualUpdateBusy ? "Applying…" : "Apply update") + "</button></div>"
+      : "";
+    const updateResultHtml = mu
+      ? "<div class='small " + (mu.outcome === "completed" ? "ok" : mu.outcome === "refused" ? "warn" : "danger") + "' style='margin-top:6px'>" +
+        "<div><strong>Manual update " + esc(mu.outcome) + "</strong>" + (mu.revision ? " · " + esc(mu.revision.slice(0, 7)) : "") + (mu.planDigest ? " · plan " + esc(mu.planDigest.slice(0, 7)) : "") + "</div>" +
+        ((mu.reasons || []).length ? "<ul style='margin:4px 0 0 16px;padding:0'>" + mu.reasons.map(r => "<li>" + esc(r) + "</li>").join("") + "</ul>" : "") +
+        ((mu.recovery || []).length ? "<div class='muted' style='margin-top:4px'>Recovery:<ol style='margin:2px 0 0 16px;padding:0'>" + mu.recovery.map(s => "<li>" + esc(s) + "</li>").join("") + "</ol></div>" : "") +
+        "</div>"
+      : "";
     document.getElementById("health").innerHTML = degraded + rows.map(c => "<div class='row small'><span>" + c[0] + "</span><span class='" + c[1] + "'>" + (c[1] === "ok" ? "✓ " : "✗ ") + esc(c[2]) + "</span></div>").join("") +
+      updateActionHtml +
+      updateResultHtml +
       "<div class='row small' style='margin-top:6px'><span class='muted'>Edited config.json? Apply it without a restart.</span><button class='btn sm' id='btn-reload'>Reload models</button></div>";
   };
   // Kaji bases (F-036): every enrolled base with its real status; positions are a fixed layout around this base
@@ -603,6 +616,32 @@
     catch (e) { log("Reload refused: " + e.message + " (the previous settings stay in use)", "danger", null, "maya"); }
     poll();
   };
+  window.liveApplyUpdate = async function () {
+    if (state.manualUpdateBusy) return;
+    const channel = (state.update && state.update.channel) || "main";
+    state.manualUpdateBusy = true;
+    renderHealth();
+    try {
+      const result = await api("update/apply", { method:"POST", body:JSON.stringify({ channel }) });
+      state.manualUpdate = result;
+      const summary = "Manual update " + result.outcome + (result.revision ? " (" + result.revision.slice(0, 7) + ")" : "") +
+        ((result.reasons || []).length ? ": " + result.reasons.join("; ") : "");
+      log(summary, result.outcome === "completed" ? "ok" : result.outcome === "refused" ? "warn" : "danger", null, "maya");
+    } catch (e) {
+      state.manualUpdate = { outcome:"refused", channel, revision:null, reasons:[e.message], recovery:["Inspect /api/update and lifecycle status before retrying."] };
+      log("Manual update error: " + e.message, "danger", null, "maya");
+    } finally {
+      state.manualUpdateBusy = false;
+      renderHealth();
+      poll();
+    }
+  };
+  document.addEventListener("click", e => {
+    const t = e.target && e.target.closest && e.target.closest("#btn-apply-update");
+    if (!t) return;
+    e.preventDefault();
+    void window.liveApplyUpdate();
+  });
   window.liveSpear = async function (shortId) {
     const s = state.sorties.find(x => x.id === shortId); if (!s) return;
     if (!confirm("Spear " + s.id + "? Unused grants are revoked and waiting cards stood down. Actions that already ran are not undone.")) return;

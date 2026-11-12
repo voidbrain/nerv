@@ -14,6 +14,8 @@ import {
   validateUpdateAvailability,
   type UpdateAvailability,
 } from './update-availability.ts';
+import { executeManualUpdate, type ManualUpdateResult } from './manual-update.ts';
+import type { ServiceHost } from './node-lifecycle-execution.ts';
 import { RpcFault } from './rpc.ts';
 import type { ModelChange } from './model-setup.ts';
 import { MODEL_TIMEOUT_MS } from './model.ts';
@@ -48,6 +50,8 @@ export function makeServer(
     sessionTtlMs?: number;
     onStop?: () => void;
     updateCheck?: (options: { channel: string; refresh: boolean }) => Promise<UpdateAvailability>;
+    lifecycleHost?: () => ServiceHost;
+    manualUpdate?: (input: { channel?: string; revision?: string }) => Promise<ManualUpdateResult>;
   } = {},
 ) {
   if (options.native && !options.tls) throw new Error('Native pairing requires TLS.');
@@ -65,6 +69,7 @@ export function makeServer(
   // so a session can never renew itself.
   const feed = store.dashboardRevision ? new DashboardFeed(() => store.dashboardRevision!()) : undefined;
   const sessions = new Map<string, number>();
+  let updateInFlight = false;
   let cachedUpdate: { at: number; channel: string; value: UpdateAvailability } | undefined;
   const UPDATE_CHECK_TTL_MS = 5 * 60_000;
   const resolveUpdate = async (
@@ -722,6 +727,37 @@ export function makeServer(
         const channel = parseUpdateChannel(url.searchParams.get('channel') ?? undefined);
         const refresh = url.searchParams.get('refresh') === '1';
         reply(200, await resolveUpdate(channel, refresh));
+      } else if (req.method === 'POST' && path === '/api/update/apply') {
+        if (updateInFlight) {
+          reply(409, { error: 'A manual update is already in progress.' });
+          return;
+        }
+        const value = await body(req);
+        for (const k of Object.keys(value))
+          if (k !== 'channel' && k !== 'revision') throw new Error(`Unsupported update parameter: ${k}`);
+        if (value.channel !== undefined && typeof value.channel !== 'string')
+          throw new Error('Invalid update channel.');
+        if (value.revision !== undefined && typeof value.revision !== 'string')
+          throw new Error('Invalid update revision.');
+        const input = {
+          ...(value.channel !== undefined ? { channel: value.channel } : {}),
+          ...(value.revision !== undefined ? { revision: value.revision } : {}),
+        };
+        updateInFlight = true;
+        try {
+          const result = options.manualUpdate
+            ? await options.manualUpdate(input)
+            : await executeManualUpdate(
+                {
+                  resolveUpdate,
+                  ...(options.lifecycleHost ? { lifecycleHost: options.lifecycleHost } : {}),
+                },
+                input,
+              );
+          reply(200, result);
+        } finally {
+          updateInFlight = false;
+        }
       } else reply(404, { error: 'Unknown operation.' });
     } catch (e) {
       reply(400, { error: e instanceof Error ? e.message : 'Invalid request.' });
