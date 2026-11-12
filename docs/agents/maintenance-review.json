@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-11T21:48:43.185Z",
+  "reviewed": "2026-11-12T11:32:08.896Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
     "AGENTS.md": "3baab88d7088bab8f454e3052d852d0761e3319454edac9ed0ca1c7985b4991c",
-    "docs/BACKLOG-RULES.md": "987aede083797a7ec21b7e5004a5b90b33df0562299a73d87e072f43678d9ff0",
+    "docs/BACKLOG-RULES.md": "b9a3315e2144bd75b18fec9e903959d8826cd5bce76810833534b50bfa1d0266",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
     "docs/agents/areas.md": "0ff9805a7d720ee177505cef670e53169a6d640299762dfa86185be46fa8737c",
     "docs/agents/audit.md": "bc5de5707f9ec5c523e73602499312c373d6112ffc498d69bf68604522527992",
@@ -20,12 +20,12 @@
     "docs/agents/work-usage.md": "e2f7c484f1c07f4b47fd1133857d8744ccab0ad2a7b85b220946c115a002bebc",
     "tools/task-claims.mjs": "2a7b7d0ea9e23fb36eceba5e5433eb640fee3e3633426066e4050f0fa8ebb9cf",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
-    "tools/work-items.mjs": "3c696a26b1bf0d5dc7e1ac76f55dc09cd8ac93d3d22b9a9d967cb2b8b745f08a",
+    "tools/work-items.mjs": "6b9f25f077ec2c29f7ded46e75a6ef229068d4ab6a8469348d9d40ec7404a905",
     "tools/work-usage.mjs": "4329262c0b9e723e046dd8878e15a99cff5f590201cd0918563f3204bbe79219"
   },
   "measurements": {
     "samples": 17,
-    "latestAt": "2026-11-11T18:02:27.249Z",
+    "latestAt": "2026-11-12T11:32:08.848Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -80,13 +80,13 @@
       "kind": "rule",
       "disposition": "implemented",
       "target": "docs/BACKLOG-RULES.md",
-      "evidence": "Reconciled published harness 5.6.0 (5.5.0 included) from 5.4.0 in PR #277: the Linked prerequisites, Optional work queue, Optional upfront feature plans and Estimate calibration paragraphs carried verbatim from the template (fresh-context review: byte-identical, no project line dropped). No check, never or ask-first rule, or safeguard removed; queue and dependency checks stay in CI. 157 open steps re-estimated in agent hours with the method stated in each basis; estimation.since 2026-11-11. No behaviour runner configured."
+      "evidence": "Reconciled published harness 6.0.0 (from 5.6.0): the BACKLOG-RULES template diff v5.6.0..v6.0.0 applied byte-identically (one priority-ordered list, the generated summary table with Remaining, Depends on, Unlocks and Human action, every record with a step). No check, never or ask-first rule, or safeguard removed. No behaviour runner configured."
     },
     {
       "kind": "tool",
       "disposition": "implemented",
       "target": "tools/work-items.mjs",
-      "evidence": "tools/work-items.mjs, backlog-queue.mjs, backlog-dependencies.mjs and check-freshness.mjs copied byte-identically from v5.6.0 (41 copied files compared with the tag, 0 differ); retired queue and dependency pages, their scripts and links removed; impact map regenerated; CI clones the template at v5.6.0. This reconcile was not timed with friction start/finish (missed at session start), so no friction sample is recorded for it; the latest measurement is the 5.4.0 reconcile of the same day."
+      "evidence": "work-items, check-backlog and backlog-queue copied byte-identically from tag v6.0.0; check-harness --strict passes; CI clones v6.0.0. Layout uses one records: all segment; B-049-T01 added so every record has a step. Friction sample: wall-clock from worktree creation (12:25:52 +0100), waits for PR #294 included."
     }
   ]
 }
