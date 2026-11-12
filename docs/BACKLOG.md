@@ -861,7 +861,7 @@ Earlier next action (2026-11-09, done above): inspect event ordering for remote 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #311](https://github.com/voidbrain/nerv/pull/311): F-005 procedure moved to [docs/acceptance/f005-t13-mac-update-procedure.md](acceptance/f005-t13-mac-update-procedure.md) in this PR. |
+| PR / evidence | [PR #311](https://github.com/voidbrain/nerv/pull/311): F-005 procedure moved to [docs/acceptance/f005-t13-mac-update-procedure.md](acceptance/f005-t13-mac-update-procedure.md). |
 | Opened | 2026-11-12 |
 | Verification | Pending. |
 | Reviewed | 2026-11-12 |
@@ -1519,7 +1519,7 @@ Ollama is an example adapter. Different engines and multiple instances/endpoints
 - **Should-fix (recorded in the report):** partial backup scope and unpruned credential copies, SIGTERM-only timeouts, and `built` not tied to a revision.
 - **Tests:** failing regressions 93b89cc in `test/update-path-review.test.ts` precede the fixes and are unchanged by them. The fixes have not been independently re-reviewed.
 - **Found in the review:** the live checkout had been fast-forwarded by `git pull` to `90d797d` while the service still runs build `2a3448d`. Every lifecycle plan is blocked in that state, and a restart would run unbuilt code. **Never `git pull` the service checkout**; agent work belongs in worktrees.
-- **Limit for T13:** the update is applied by the installed code (`2a3448d`), so this PR's release check and local fetch do not protect T13. The [T13 Mac update procedure](acceptance/f005-t13-mac-update-procedure.md) covers both by hand. B1's fix runs in the candidate, so it does apply.
+- **Limit for T13:** the update is applied by the installed code (`2a3448d`), so PR #287's release check and local fetch do not protect T13. The [T13 Mac update procedure](acceptance/f005-t13-mac-update-procedure.md) covers both by hand. B1's fix runs in the candidate, so it does apply.
 
 **T13 owner procedure (T06f):** [T13 Mac update procedure](acceptance/f005-t13-mac-update-procedure.md) (moved out of this record 2026-11-12 so the human action can link it directly).
 
