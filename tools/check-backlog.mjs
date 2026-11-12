@@ -56,31 +56,44 @@ const doneOnMain = new Set(
 );
 const evidence = (cellsText, labels) =>
   new RegExp(`(?:^|[\\s;(*])(?:${labels})(?:\\*\\*)?:(?:\\*\\*)?\\s*(?![…<\\s])\\S`).test(cellsText);
+// F-063: the generated ledger merges Signal into Status ("🔴 Open"); read such a row in the authored column order.
+const unmerge = (c) => {
+  const m = /^(🔴|🟠|🟡|🟢|🟣|🔵) (Open|Investigate|Implemented|Verified|Blocked|Closed)$/.exec(c[0] ?? '');
+  return m ? [m[1], c[1], m[2], ...c.slice(2)] : c;
+};
 const cues = { Open: '🔴', Investigate: '🟠', Implemented: '🟡', Verified: '🟢', Blocked: '🟣', Closed: '🔵' };
 for (let i = 0; i < headings.length; i++) {
   const id = headings[i][1];
   assert(!ids.has(id), `Duplicate ${id}`);
   ids.add(id);
   const block = text.slice(headings[i].index, headings[i + 1]?.index ?? text.length);
-  const row = block.split('\n').find((line) => line.startsWith('|') && Object.values(cues).includes(cells(line)[0]));
+  const row = block
+    .split('\n')
+    .find((line) => line.startsWith('|') && Object.values(cues).includes(unmerge(cells(line))[0]));
   assert(row, `${id}: missing summary`);
-  const [signal, priority, status, effort] = cells(row);
+  const [signal, priority, status, effort] = unmerge(cells(row));
   // Authored records have four columns; the generated ledger (F-059) adds Remaining, Depends on / Unlocks when the
-  // dependency helper is adopted, and Human action, which then replaces the label of the human-action line.
+  // dependency helper is adopted, and Human action, which then replaces the label of the human-action line; F-063
+  // merges its Signal into Status.
   const lines = block.split('\n');
   const header = cells(lines[lines.indexOf(row) - 2] ?? '');
   const generated = header.length > 4;
   assert(
     generated
       ? [
-          'Signal|Priority|Status|Effort|Remaining|Human action',
-          'Signal|Priority|Status|Effort|Remaining|Depends on|Unlocks|Human action',
-        ].includes(header.join('|')) && cells(row).length === header.length
+          'Status|Priority|Effort|Remaining|Human action',
+          'Status|Priority|Effort|Remaining|Depends on|Unlocks|Human action',
+        ].includes(header.join('|')) &&
+          cells(row).length === header.length &&
+          cells(row)[0] !== signal
       : cells(row).length === 4,
-    `${id}: summary needs four columns, or the generated Remaining / Depends on / Unlocks / Human action columns (remove completion percentages)`,
+    `${id}: summary needs four columns, or the generated Status / Priority / Effort / Remaining / Depends on / Unlocks / Human action columns (a 6.x generated ledger: run work-items build; remove completion percentages)`,
   );
   assert(/^\*\*[^\n]+\*\*$/m.test(block.slice(0, block.indexOf('|'))), `${id}: missing visible bold title`);
-  assert(['🟢 Small', '🟡 Medium', '🔴 Large'].includes(effort), `${id}: effort needs colour and word`);
+  assert(
+    ['🟢 Small', '🟡 Medium', '🔴 Large', '🟣 Very large'].includes(effort),
+    `${id}: effort needs colour and word`,
+  );
   assert.equal(signal, cues[status], `${id}: status cue mismatch`);
   const level = priority.match(/P([123])$/)?.[1];
   assert(level, `${id}: missing priority`);

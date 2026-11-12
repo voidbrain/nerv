@@ -1,14 +1,8 @@
 [
   {
-    "kind": "rule",
-    "disposition": "implemented",
-    "target": "docs/BACKLOG-RULES.md",
-    "evidence": "Reconciled published harness 6.1.0 (from 6.0.0): the BACKLOG-RULES template diff v6.0.0..v6.1.0 applied byte-identically (estimate calibration by kind, per-kind band check). No check, never or ask-first rule, or safeguard removed. No behaviour runner configured."
-  },
-  {
     "kind": "tool",
     "disposition": "implemented",
     "target": "tools/work-items.mjs",
-    "evidence": "work-items copied byte-identically from tag v6.1.0; check-harness --strict passes; CI clones v6.1.0. calibrate reports byKind: bug n=5 median 0.6, feature n=1 (too few). Friction sample: wall-clock from worktree creation (13:01:33 +0100) to the review; the template change (PR #128, #129) before it is not included."
+    "evidence": "Reconciled harness 6.3.0–7.1.1 (PR #312): parallel-work, work-items, check-backlog, backlog-queue and solution copied byte-identically; AGENTS 'On its own' line and the NERV service-checkout project line; BACKLOG-RULES paragraphs carried verbatim; NERV backlog-recap reads the merged Status (failing test first). Fresh-context design review: no blocker; should-fix (stale solution.mjs) fixed by copying v7.1.1. No rule removed."
   }
 ]

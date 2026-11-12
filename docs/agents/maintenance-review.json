@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-12T16:05:50.239Z",
+  "reviewed": "2026-11-12T18:06:47.215Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
-    "AGENTS.md": "3baab88d7088bab8f454e3052d852d0761e3319454edac9ed0ca1c7985b4991c",
-    "docs/BACKLOG-RULES.md": "77886e678137f5e9f5b033a83dc02c34c328082976a0d846cf00729640dd2e44",
+    "AGENTS.md": "f8e8646a9dfcf43bee1cbb0160e779f198f5db0d7cdeee58284d59a4e5e696a1",
+    "docs/BACKLOG-RULES.md": "86f1a3e420510f5ba4d4d1764fcd2400668e457b42f9e342facbbcd9aefea8a0",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
     "docs/agents/areas.md": "0ff9805a7d720ee177505cef670e53169a6d640299762dfa86185be46fa8737c",
     "docs/agents/audit.md": "bc5de5707f9ec5c523e73602499312c373d6112ffc498d69bf68604522527992",
@@ -12,7 +12,7 @@
     "docs/agents/coverage-guide.md": "3d539eb8beedfa101a5e47d9973cdf85dce197436fab2ab096f760e12d208106",
     "docs/agents/maintenance.md": "5219a64e6e85ced3fa9d437fc0adb2674bfa2d566d86fe95cca1ef321d3b8b27",
     "docs/agents/mcp.md": "d813daeb38628e3f0613131ccb4e09fa1b98f82a1ad5cc647e9b27c26821a524",
-    "docs/agents/parallel-work.md": "e6bdd99075598d2e33fb23373d87fd5b48ed1c86028a20dbad0b5759a62b2e13",
+    "docs/agents/parallel-work.md": "30c647889e206abbd97d36d7b8fe3a86bf1ffd1ffd4d737ad951650a8f18c1db",
     "docs/agents/procedures.md": "649de48ddc9e3ae627d0752f44f4a8d2cf25b837dc32350a597f6d4bf80e514f",
     "docs/agents/skills.md": "5d60223eccfaad88c7153f57316da5ca10bfdd9d58d3a8cebc1eef25b9f0d5f5",
     "docs/agents/solution-profile.md": "857fc0e5f5c36d1d139d2507f1f97460edfdcde4d5cd5d590a922d88c4459862",
@@ -20,12 +20,12 @@
     "docs/agents/work-usage.md": "e2f7c484f1c07f4b47fd1133857d8744ccab0ad2a7b85b220946c115a002bebc",
     "tools/task-claims.mjs": "2a7b7d0ea9e23fb36eceba5e5433eb640fee3e3633426066e4050f0fa8ebb9cf",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
-    "tools/work-items.mjs": "8e1002dab92a36f1204a883d747467f07c311ceea4b9f6e8d5971b874cf8def4",
+    "tools/work-items.mjs": "9504bf718eb19a071508e8308708b9bb182ea5cdc06e2d05ec9ae5294f37e8d4",
     "tools/work-usage.mjs": "4329262c0b9e723e046dd8878e15a99cff5f590201cd0918563f3204bbe79219"
   },
   "measurements": {
     "samples": 1,
-    "latestAt": "2026-11-12T16:05:50.178Z",
+    "latestAt": "2026-11-12T18:06:47.153Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -55,22 +55,22 @@
         "durationMs": {
           "observed": 1,
           "missing": 0,
-          "median": 71837
+          "median": 3272
         },
         "conflicts": {
-          "observed": 1,
-          "missing": 0,
-          "median": 0
+          "observed": 0,
+          "missing": 1,
+          "median": null
         },
         "unnecessaryPrompts": {
-          "observed": 1,
-          "missing": 0,
-          "median": 0
+          "observed": 0,
+          "missing": 1,
+          "median": null
         },
         "repeatedContextLoads": {
-          "observed": 1,
-          "missing": 0,
-          "median": 0
+          "observed": 0,
+          "missing": 1,
+          "median": null
         }
       }
     }
@@ -80,7 +80,7 @@
       "kind": "tool",
       "disposition": "implemented",
       "target": "tools/work-items.mjs",
-      "evidence": "Reconciled harness v6.2.0 (project-harness PR #130, F-061): copied work-items.mjs; BACKLOG-RULES estimate-calibration paragraph gains the '(planned <baseline>)' clause, no NERV override touched, no rule removed. Ledger regenerated: F-042-T02 reads '1 h (planned 1.5)'."
+      "evidence": "Reconciled harness 6.3.0–7.1.1 (PR #312): parallel-work, work-items, check-backlog, backlog-queue and solution copied byte-identically; AGENTS 'On its own' line and the NERV service-checkout project line; BACKLOG-RULES paragraphs carried verbatim; NERV backlog-recap reads the merged Status (failing test first). Fresh-context design review: no blocker; should-fix (stale solution.mjs) fixed by copying v7.1.1. No rule removed."
     }
   ]
 }
