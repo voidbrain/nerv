@@ -48,7 +48,7 @@ test(
     const port = server.address().port;
     const origin = `http://127.0.0.1:${port}`;
     try {
-      await browser(async ({ page, evaluate, errors }) => {
+      await browser(async ({ page, evaluate, errors, network }) => {
         // Evaluations retry across a navigation (the old context disappears while the page reloads).
         const until = async (expression, ms = 30000) => {
           const end = Date.now() + ms;
@@ -101,6 +101,16 @@ test(
         // The worker controls the whole origin but leaves the NERV dashboard to the network: it is not the Angular shell.
         await page('Page.navigate', { url: origin + '/dashboard/' });
         await until(`document.title === 'NERV Agency — Tactical Command' && !document.querySelector('nerv-app')`);
+        // API calls carry ngsw-bypass, so the browser fetches them itself: the worker never proxies the dashboard's
+        // long-lived stream or a signed-in request. Without the header the worker would answer (fromServiceWorker).
+        await page('Network.enable');
+        await evaluate(
+          `Promise.all([fetch('/api/status?bypass',{headers:{'ngsw-bypass':'1'}}),fetch('/api/status?proxied')]).then(()=>true)`,
+        );
+        const via = (query) => network.find((r) => r.url.endsWith('/api/status?' + query))?.fromServiceWorker;
+        assert.equal(via('bypass'), false, 'a bypassed API call does not go through the worker');
+        assert.equal(via('proxied'), true, 'control: without the header the worker would proxy it');
+        await page('Network.disable');
         await page('Page.navigate', { url: origin });
         await until(`!!navigator.serviceWorker.controller && !!document.querySelector('h1')`);
 
@@ -146,6 +156,16 @@ test(
           `[...document.querySelectorAll('nerv-update-prompt button')].find(b=>b.textContent.trim()==='Più tardi').click()`,
         );
         await until(`${prompt} === '' && !document.querySelector('nerv-update-prompt button')`);
+        assert.equal(
+          await evaluate(`document.activeElement?.tagName`),
+          'MAIN',
+          '"Later" moves focus to the main content',
+        );
+        assert.equal(
+          await evaluate(`document.querySelector('nerv-update-prompt section').hasAttribute('aria-label')`),
+          false,
+          'no empty named region while idle',
+        );
         assert.equal(await evaluate(`window.nervSameDocument === true`), true, '"Later" does not reload');
 
         // Another build: Reload is the only way the page changes, and it lands on the newest build.

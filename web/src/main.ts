@@ -5,6 +5,8 @@ import { messages } from './i18n';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideServiceWorker } from '@angular/service-worker';
 import { UpdatePrompt } from './update-prompt';
+/** F-004-T01: API calls go straight to the service; the service worker never sees or holds them. */
+const SW_BYPASS = { 'ngsw-bypass': '1' };
 interface Page<T> {
   items: T[];
   next: number | null;
@@ -66,7 +68,7 @@ class App {
   async request(path: string, init: RequestInit = {}) {
     const response = await fetch('/api/' + path, {
       ...init,
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + this.token },
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + this.token, ...SW_BYPASS },
     });
     const data: unknown = await response.json();
     if (!response.ok) throw new Error((data as { error?: string }).error ?? 'Request failed');
@@ -88,7 +90,7 @@ class App {
     try {
       const response = await fetch('/api/session/exchange', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...SW_BYPASS },
         body: JSON.stringify({ code }),
       });
       const data = (await response.json()) as { token?: string };

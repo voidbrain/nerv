@@ -49,3 +49,15 @@ test('the service worker caches only the shell: never the API, never the dashboa
     files.join(),
   );
 });
+
+test('every API call of the workspace and the dashboard bypasses the service worker', () => {
+  const live = read('web/public/dashboard/live.js');
+  const calls = [...live.matchAll(/fetch\("\/api\/[^\n]*/g)].map((m) => m[0]);
+  assert.equal(calls.length, 3, 'live.js API calls');
+  for (const call of calls) assert.match(call, /"ngsw-bypass":"1"/, call);
+  const main = read('web/src/main.ts');
+  assert.match(main, /const SW_BYPASS = \{ 'ngsw-bypass': '1' \};/);
+  const fetches = [...main.matchAll(/await fetch\('\/api\/[\s\S]*?\}\);/g)].map((m) => m[0]);
+  assert.equal(fetches.length, 2, 'main.ts API calls');
+  for (const call of fetches) assert.match(call, /\.\.\.SW_BYPASS/, call);
+});
