@@ -22,7 +22,8 @@ const NEXT = 'b'.repeat(40);
 
 function adapterFixture(doctorFor: (revision: string, callCount: number) => { status: number; body: unknown }) {
   const f = serviceFixture();
-  const c: ServiceContext = f.host.context;
+  const c: ServiceContext = { ...f.host.context, node: join(f.directory, 'neutral-node') };
+  writeFileSync(c.node, 'Neutral command-adapter executable metadata', { mode: 0o700 });
   let revision = PREV;
   let registered = false;
   let doctorCalls = 0;
