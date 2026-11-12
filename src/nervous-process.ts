@@ -119,6 +119,22 @@ process.on('message', (value: unknown) => {
       }
       case 'reminders.cancel':
         return store.cancel(params.id as string);
+      case 'push.key':
+        return store.pushPublicKey();
+      case 'push.subscribe':
+        store.savePushSubscription({
+          endpoint: params.endpoint as string,
+          p256dh: params.p256dh as string,
+          auth: params.auth as string,
+          ...(params.userAgent ? { userAgent: params.userAgent as string } : {}),
+        });
+        return { ok: true };
+      case 'push.unsubscribe':
+        return { ok: store.deletePushSubscription(params.endpoint as string) };
+      case 'push.status': {
+        const subs = store.listPushSubscriptions();
+        return { subscribed: subs.length > 0, count: subs.length };
+      }
       case 'inbox.list': {
         const p = store.inboxHistory(0, 50);
         if (p.next) throw new Error('Use inbox.history.');
