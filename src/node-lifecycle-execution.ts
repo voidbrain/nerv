@@ -14,7 +14,7 @@ import {
   unlinkSync,
   writeFileSync,
 } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
@@ -40,6 +40,14 @@ export interface ServiceContext {
   node: string;
   uid: number;
 }
+export interface ServicePrerequisites {
+  ok: boolean;
+  nodeVersion: string | null;
+  requiredNode: string;
+  executableOk: boolean;
+  nonInteractiveOk: boolean;
+  issues: string[];
+}
 export interface ServiceObservation {
   revision: string;
   schema: number;
@@ -53,6 +61,7 @@ export interface ServiceObservation {
   legacy: boolean;
   pending: boolean;
   built: boolean;
+  prerequisites?: ServicePrerequisites;
 }
 export interface ServicePlan {
   version: 1;
@@ -243,6 +252,10 @@ function blockers(action: Action, o: ServiceObservation, next?: string): string[
     out.push('A foreground runtime must be stopped separately.');
   if (action === 'update' && (!next || next === o.revision))
     out.push('Select a distinct reviewed compatible revision.');
+  if (['install', 'start', 'update'].includes(action) && o.prerequisites && !o.prerequisites.ok) {
+    if (o.prerequisites.issues.length) out.push(...o.prerequisites.issues);
+    else out.push('Service prerequisites are not satisfied.');
+  }
   return out;
 }
 export async function planService(host: ServiceHost, action: Action, nextRevision?: string): Promise<ServicePlan> {
@@ -777,6 +790,89 @@ export function serviceProfileIdentity(c: ServiceContext): string {
     }),
   );
 }
+/**
+ * Checks Node version, Node/CLI executable readiness, and non-interactive service environment
+ * before install, start, or update.
+ */
+export async function checkServicePrerequisites(
+  c: ServiceContext,
+  run: typeof command = command,
+  options: { session?: boolean } = {},
+): Promise<ServicePrerequisites> {
+  const issues: string[] = [];
+  let requiredNode = '>=24.0.0';
+  try {
+    const pkg = JSON.parse(readFileSync(join(c.source, 'package.json'), 'utf8')) as {
+      engines?: { node?: unknown };
+    };
+    if (typeof pkg.engines?.node === 'string' && pkg.engines.node.trim()) {
+      requiredNode = pkg.engines.node.trim();
+    } else {
+      issues.push('Source package.json must declare a valid engines.node range.');
+    }
+  } catch {
+    issues.push('Source package.json could not be read for Node prerequisite check.');
+  }
+
+  let executableOk = true;
+  let nodeVersion: string | null = null;
+  try {
+    safe(c.node, c.uid);
+    const stat = lstatSync(c.node);
+    if (!stat.isFile() || (stat.mode & 0o111) === 0) {
+      executableOk = false;
+      issues.push('Configured Node binary is not a regular executable file.');
+    }
+  } catch {
+    executableOk = false;
+    issues.push('Configured Node executable failed ownership, permission or canonical path checks.');
+  }
+  if (!existsSync(join(c.source, 'src/cli.ts'))) {
+    executableOk = false;
+    issues.push('NERV CLI entrypoint src/cli.ts is missing from the selected source.');
+  }
+
+  const versionResult = await run(c.node, [...NODE_FLAGS, '--version']).catch(() => ({
+    status: -1,
+    out: '',
+    err: '',
+  }));
+  if (versionResult.status !== 0) {
+    executableOk = false;
+    issues.push('Configured Node executable failed non-interactive startup.');
+  } else {
+    nodeVersion = versionResult.out.trim() || null;
+    if (!nodeVersion || !engineSatisfied(requiredNode, nodeVersion)) {
+      issues.push(`Node ${nodeVersion ?? 'unknown'} does not satisfy required ${requiredNode}.`);
+    }
+  }
+
+  const pathsCanonical =
+    isAbsolute(c.node) &&
+    isAbsolute(c.source) &&
+    isAbsolute(c.home) &&
+    !/[\r\n\0]/.test(c.node) &&
+    !/[\r\n\0]/.test(c.source) &&
+    !/[\r\n\0]/.test(c.home);
+  const sessionOk =
+    options.session !== undefined
+      ? options.session
+      : (await run('launchctl', ['print', 'gui/' + c.uid]).catch(() => ({ status: -1, out: '', err: '' }))).status ===
+        0;
+  const nonInteractiveOk = pathsCanonical && sessionOk && versionResult.status === 0;
+  if (!pathsCanonical || !sessionOk) {
+    issues.push('Non-interactive service environment is unavailable (canonical paths or user service session failed).');
+  }
+
+  return {
+    ok: issues.length === 0,
+    nodeVersion,
+    requiredNode,
+    executableOk,
+    nonInteractiveOk,
+    issues,
+  };
+}
 /** The Node range a candidate declares must be the plain `>=X.Y.Z` form and be met by the service's own runtime. */
 function engineSatisfied(range: unknown, version: string): boolean {
   const need = typeof range === 'string' ? /^>=(\d+)\.(\d+)\.(\d+)$/.exec(range.trim()) : null,
@@ -882,7 +978,6 @@ export function macServiceAdapter(context: ServiceContext, run: typeof command =
       safe(context.userHome, context.uid);
       safe(context.home, context.uid, true);
       safe(context.source, context.uid);
-      safe(context.node, context.uid);
       assertRootMigrationReady(context.home);
       const config = readConfig(context.home),
         token = readToken(context.home);
@@ -894,7 +989,7 @@ export function macServiceAdapter(context: ServiceContext, run: typeof command =
       )
         throw Error('Use the canonical reviewed NERV checkout.');
       const session = (await run('launchctl', ['print', gui])).status === 0;
-      if (!session) throw Error('The current GUI user session is unavailable.');
+      const prerequisites = await checkServicePrerequisites(context, run, { session });
       const current = definition(context),
         currentKind = !present(current)
           ? 'absent'
@@ -979,6 +1074,7 @@ export function macServiceAdapter(context: ServiceContext, run: typeof command =
         legacy: present(join(dirname(current), 'io.nodo.agent.plist')) || !!legacyManager,
         pending,
         built: existsSync(join(context.source, 'dist/web/browser/index.html')),
+        prerequisites,
       };
     },
     health: async (p) => {

@@ -478,6 +478,12 @@ test(
       const c = { ...f.host.context, node: join(f.directory, 'neutral-node') },
         keys = generateKeyPairSync('ed25519');
       writeFileSync(c.node, 'Neutral command-adapter executable metadata', { mode: 0o700 });
+      writeFileSync(
+        join(c.source, 'package.json'),
+        JSON.stringify({ name: 'nerv-agency', engines: { node: '>=24.0.0' } }),
+      );
+      mkdirSync(join(c.source, 'src'), { recursive: true });
+      writeFileSync(join(c.source, 'src/cli.ts'), '// Neutral CLI entrypoint\n');
       mkdirSync(join(c.source, 'dist/web/browser'), { recursive: true });
       writeFileSync(join(c.source, 'dist/web/browser/index.html'), '<html>Neutral fixture</html>');
       writeFileSync(join(c.home, 'base-key'), keys.privateKey.export({ type: 'pkcs8', format: 'pem' }));
@@ -548,7 +554,8 @@ test(
                 join(c.source, 'src/nervous-process.ts')
               : '',
           };
-        if (program === 'npm' || program === 'tar' || program === c.node) return { status: 0, err: '', out: '' };
+        if (program === c.node) return { status: 0, err: '', out: 'v24.0.0\n' };
+        if (program === 'npm' || program === 'tar') return { status: 0, err: '', out: '' };
         assert.equal(program, 'launchctl');
         if (args[0] === 'print') {
           if (args[1] === 'gui/' + c.uid) return { status: 0, err: '', out: 'Neutral GUI session' };
@@ -617,6 +624,138 @@ test(
         server.closeIdleConnections();
         await new Promise<void>((done) => server!.close(() => done()));
       }
+      f.close();
+    }
+  },
+);
+
+test(
+  'F-005-T08: prerequisite check (Node version, executable, non-interactive environment) joins install, start and update',
+  supported,
+  async () => {
+    const f = serviceFixture();
+    try {
+      const c = { ...f.host.context, node: join(f.directory, 'neutral-node') },
+        keys = generateKeyPairSync('ed25519');
+      writeFileSync(c.node, 'Neutral executable', { mode: 0o700 });
+      writeFileSync(
+        join(c.source, 'package.json'),
+        JSON.stringify({ name: 'nerv-agency', engines: { node: '>=24.0.0' } }),
+      );
+      mkdirSync(join(c.source, 'src'), { recursive: true });
+      writeFileSync(join(c.source, 'src/cli.ts'), '// Neutral CLI\n');
+      mkdirSync(join(c.source, 'dist/web/browser'), { recursive: true });
+      writeFileSync(join(c.source, 'dist/web/browser/index.html'), '<html>Neutral</html>');
+      writeFileSync(join(c.home, 'base-key'), keys.privateKey.export({ type: 'pkcs8', format: 'pem' }));
+      writeFileSync(
+        join(c.home, 'base.pub'),
+        keys.publicKey.export({ type: 'spki', format: 'der' }).toString('base64'),
+      );
+      chmodSync(join(c.home, 'base.pub'), 0o644);
+      writeFileSync(join(c.home, 'token'), 'c'.repeat(32));
+      writeFileSync(join(c.home, 'config.json'), JSON.stringify({ base: { id: 'BASE-01', name: 'Neutral' }, port: 1 }));
+      const data = new DatabaseSync(f.data);
+      data.exec(
+        'CREATE TABLE worker_jobs(state TEXT);CREATE TABLE kaji_outbox(done TEXT);CREATE TABLE worker_legacy_outbox(state TEXT)',
+      );
+      data.close();
+
+      let nodeVersion = 'v24.0.0';
+      let nodeExit = 0;
+      let sessionOk = true;
+      const run = async (program: string, args: string[]) => {
+        if (program === c.node) return { status: nodeExit, err: '', out: nodeExit === 0 ? `${nodeVersion}\n` : '' };
+        if (program === 'git') {
+          const op = args[2];
+          return {
+            status: 0,
+            err: '',
+            out:
+              op === 'rev-parse'
+                ? 'a'.repeat(40)
+                : op === 'remote'
+                  ? 'https://github.com/voidbrain/nerv.git'
+                  : op === 'diff'
+                    ? 'README.md\0'
+                    : op === 'cat-file'
+                      ? 'commit'
+                      : '',
+          };
+        }
+        if (program === 'ps') return { status: 0, err: '', out: '' };
+        if (program === 'launchctl' && args[0] === 'print' && args[1] === 'gui/' + c.uid) {
+          return { status: sessionOk ? 0 : 1, err: '', out: '' };
+        }
+        if (program === 'launchctl' && args[0] === 'print') {
+          return { status: 113, err: 'Could not find service', out: '' };
+        }
+        return { status: 0, err: '', out: '' };
+      };
+
+      const ok = await lifecycle.checkServicePrerequisites(c, run);
+      assert.equal(ok.ok, true);
+      assert.equal(ok.nodeVersion, 'v24.0.0');
+      assert.equal(ok.executableOk, true);
+      assert.equal(ok.nonInteractiveOk, true);
+      assert.deepEqual(ok.issues, []);
+
+      const host = macServiceAdapter(c, run);
+
+      // 1. Outdated Node version blocks install, start and update
+      nodeVersion = 'v22.11.0';
+      for (const [action, rev] of [
+        ['install', undefined],
+        ['start', undefined],
+        ['update', 'b'.repeat(40)],
+      ] as const) {
+        const plan = await planService(host, action, rev);
+        assert.ok(plan.blockers.some((b) => b.includes('v22.11.0') && b.includes('>=24.0.0')));
+        await assert.rejects(applyService(host, plan, plan.digest), /blocked/);
+      }
+
+      // 2. Non-executable / failing binary blocks install, start and update
+      nodeVersion = 'v24.0.0';
+      chmodSync(c.node, 0o600);
+      nodeExit = 1;
+      for (const [action, rev] of [
+        ['install', undefined],
+        ['start', undefined],
+        ['update', 'b'.repeat(40)],
+      ] as const) {
+        const plan = await planService(host, action, rev);
+        assert.ok(plan.blockers.some((b) => b.includes('not a regular executable file')));
+        assert.ok(plan.blockers.some((b) => b.includes('failed non-interactive startup')));
+        await assert.rejects(applyService(host, plan, plan.digest), /blocked/);
+      }
+
+      // 3. Unavailable non-interactive service environment blocks install, start and update
+      chmodSync(c.node, 0o700);
+      nodeExit = 0;
+      sessionOk = false;
+      for (const [action, rev] of [
+        ['install', undefined],
+        ['start', undefined],
+        ['update', 'b'.repeat(40)],
+      ] as const) {
+        const plan = await planService(host, action, rev);
+        assert.ok(plan.blockers.some((b) => b.includes('Non-interactive service environment is unavailable')));
+        await assert.rejects(applyService(host, plan, plan.digest), /blocked/);
+      }
+
+      // 4. Stop and uninstall are not blocked by Node version/executable prerequisite checks
+      sessionOk = true;
+      nodeVersion = 'v22.11.0';
+      const stopPlan = await planService(host, 'stop');
+      assert.equal(
+        stopPlan.blockers.some((b) => b.includes('>=24.0.0')),
+        false,
+      );
+      const uninstallPlan = await planService(host, 'uninstall');
+      assert.equal(
+        uninstallPlan.blockers.some((b) => b.includes('>=24.0.0')),
+        false,
+      );
+    } finally {
       f.close();
     }
   },

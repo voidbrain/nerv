@@ -24,6 +24,9 @@ function adapterFixture(doctorFor: (revision: string, callCount: number) => { st
   const f = serviceFixture();
   const c: ServiceContext = { ...f.host.context, node: join(f.directory, 'neutral-node') };
   writeFileSync(c.node, 'Neutral command-adapter executable metadata', { mode: 0o700 });
+  writeFileSync(join(c.source, 'package.json'), JSON.stringify({ name: 'nerv-agency', engines: { node: '>=24.0.0' } }));
+  mkdirSync(join(c.source, 'src'), { recursive: true });
+  writeFileSync(join(c.source, 'src/cli.ts'), '// Neutral CLI\n');
   let revision = PREV;
   let registered = false;
   let doctorCalls = 0;
@@ -111,7 +114,8 @@ function adapterFixture(doctorFor: (revision: string, callCount: number) => { st
           : '',
       };
     }
-    if (program === 'npm' || program === 'tar' || program === c.node) return { status: 0, err: '', out: '' };
+    if (program === c.node) return { status: 0, err: '', out: 'v24.0.0\n' };
+    if (program === 'npm' || program === 'tar') return { status: 0, err: '', out: '' };
     if (program !== 'launchctl') throw Error('Unexpected program: ' + program);
     if (args[0] === 'print') {
       if (args[1] === 'gui/' + c.uid) return { status: 0, err: '', out: 'Neutral GUI session' };
