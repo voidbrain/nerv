@@ -20,7 +20,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 
 | Features | | Bugs | |
 |---|---|---|---|
-| **Procedures** | **Decision** | **Procedures** | **Decision** |
+| **Procedures** | **Decisions** | **Procedures** | **Decisions** |
 | [F-009](#f-009) | [F-006](#f-006) | — | — |
 | [F-011](#f-011) | [F-062](#f-062) |  |  |
 | [F-023](#f-023) | [F-009](#f-009) |  |  |
@@ -46,7 +46,7 @@ Bugs (B-) and features (F-) in one list, most urgent first. From 2026-11-05 a de
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔺 P1 | 🟣 Very large | 11.5 h agent + 5.25 h owner | — | [F-012](#f-012) | — | — |
 
-💻 **→** Agent: F-005-T15 (upgrades raising schema version). F-005-T06, T12, T07, T08, T16, T17, T19, T10, T18, T20 and T09 (T09a Windows lifecycle adapter) closed on 2026-11-12.
+💻 **→** Next: F-005-T15 — T06h — Upgrades that raise the schema version (Planned).
 
 | | |
 |---|---|

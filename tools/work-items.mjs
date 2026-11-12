@@ -128,7 +128,8 @@ function validateEffort(e, status) {
     typeof e !== 'object' ||
     Array.isArray(e) ||
     !effortKeys.every((k) => k in e) ||
-    Object.keys(e).some((k) => ![...effortKeys, ...numericEffortKeys, ...actualKeys, ...hourKeys].includes(k)) ||
+    Object.keys(e).some((k) => ![...effortKeys, ...numericEffortKeys, ...actualKeys, ...hourKeys, 'ownerKind'].includes(k)) ||
+    ('ownerKind' in e && !['procedure', 'decision', 'both'].includes(e.ownerKind)) ||
     hourKeys.some((k) => k in e && !quarterHours(e[k])) ||
     ('actualDays' in e && inHours(e)) ||
     'actualSource' in e !== ('actualDays' in e || 'actualAgentHours' in e) ||
