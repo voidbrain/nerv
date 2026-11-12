@@ -351,8 +351,7 @@ export class DoctorView {
     if (upd && typeof upd.status === 'string') {
       const short = (rev?: string | null) => (typeof rev === 'string' && rev.length >= 7 ? rev.slice(0, 7) : '?');
       const ch = upd.channel ?? 'main';
-      const status: 'ok' | 'warn' =
-        (upd.status === 'up-to-date' && !upd.restartRequired) || upd.status === 'ahead' ? 'ok' : 'warn';
+      const status: 'ok' | 'warn' = upd.restartRequired ? 'warn' : 'ok';
       const detail =
         upd.status === 'update-available'
           ? `update available · ${short(upd.availableRevision)} (${ch})`
