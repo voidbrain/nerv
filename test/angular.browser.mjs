@@ -146,13 +146,17 @@ test(
       await evaluate(readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8'));
       const audit = async (name) => {
         const result = await evaluate(
-          `axe.run().then(r=>({violations:r.violations.map(v=>({id:v.id,impact:v.impact,targets:v.nodes.map(n=>n.target)})),incomplete:r.incomplete.map(v=>v.id)}))`,
+          `axe.run().then(r=>({violations:r.violations.map(v=>({id:v.id,impact:v.impact,targets:v.nodes.map(n=>n.target)})),incomplete:r.incomplete.map(v=>v.id),details:r.incomplete.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,any:n.any?.map(a=>a.message)}))}))}))`,
         );
         await screenshot(name);
         assert.deepEqual(result.violations, [], name);
         assert.ok(
           result.incomplete.every((id) => id === 'label-content-name-mismatch'),
-          name + ': unexpected manual review required: ' + JSON.stringify(result.incomplete),
+          name +
+            ': unexpected manual review required: ' +
+            JSON.stringify(result.incomplete) +
+            ' ' +
+            JSON.stringify(result.details),
         );
         t.diagnostic(name + ': axe passed; manual-review categories ' + result.incomplete.join(', '));
       };

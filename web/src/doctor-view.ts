@@ -146,12 +146,15 @@ function sanitize(data: unknown): Record<string, unknown> {
     .doctor-check-row {
       display: flex;
       align-items: center;
-      gap: 8px;
+      flex-wrap: wrap;
+      gap: 6px 8px;
     }
     .doctor-check-row strong {
       font-size: 13px;
       color: var(--text);
-      flex: 1;
+      flex: 1 1 auto;
+      min-width: 0;
+      word-break: break-word;
     }
     .doctor-badge {
       display: inline-flex;
@@ -168,9 +171,8 @@ function sanitize(data: unknown): Record<string, unknown> {
       color: var(--ink);
     }
     .badge-warn {
-      background: transparent;
-      border: 1px solid var(--accent);
-      color: var(--accent);
+      background: var(--line);
+      color: var(--text);
     }
     .badge-error {
       background: var(--error);
@@ -179,6 +181,7 @@ function sanitize(data: unknown): Record<string, unknown> {
     .severity-label {
       font-size: 11px;
       color: var(--muted);
+      flex-shrink: 0;
     }
     .doctor-detail {
       font-size: 12px;
@@ -195,6 +198,8 @@ function sanitize(data: unknown): Record<string, unknown> {
       padding: 6px 10px;
       border-radius: 0 4px 4px 0;
       margin-top: 4px;
+      word-break: break-word;
+      min-width: 0;
     }
     .check-error .doctor-fix {
       border-left-color: var(--error);
