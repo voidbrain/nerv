@@ -61,7 +61,22 @@ export interface StepInput {
   language?: 'it' | 'en';
   clarification?: boolean;
 }
-const system = (tools: ToolDoc[], now: string, timeZone: string, language?: 'it' | 'en'): string =>
+/** B-021: the first turn after Misato asked something decides, before anything else, whether the message answers her
+    question or starts something new. Recorded real-model evidence (2026-11-08) showed a local model answering a new
+    question in the old job, so this turn spells the decision out, last, where the model reads it before replying. */
+const TOPIC_CHECK = [
+  'This turn is special: clarification is true. You asked the owner "pendingQuestion" about "originalRequest", and "request" is their next message.',
+  'Decide first whether "request" answers pendingQuestion or adds details to originalRequest (a name, a file, a time, a choice, a correction, however long or short).',
+  'If instead it asks for something else (another question, another task, or it drops the original request), return exactly {"newRequest":true} and nothing else, even when you could answer it yourself: the service starts it as a new job and you will answer it there. Never reply to or act on a different request in this job.',
+  'Only when it does answer or add details, continue originalRequest with one action, reply or ask as usual. Length alone never decides this.',
+];
+const system = (
+  tools: ToolDoc[],
+  now: string,
+  timeZone: string,
+  language?: 'it' | 'en',
+  clarification?: boolean,
+): string =>
   [
     "You are Misato, the planner of a personal agent that runs on the owner's own machines.",
     `Now: ${now}. The owner's time zone: ${timeZone}. Write dates as ISO 8601 with an explicit offset.`,
@@ -86,6 +101,7 @@ const system = (tools: ToolDoc[], now: string, timeZone: string, language?: 'it'
       : 'Write the reply in the same language as the "request" field of this turn, whatever language tool results use: an English request gets an English reply, an Italian request an Italian one. If the request is too short to tell (yes, ok, sì), use the language of the earlier exchanges.',
     `Tool results give "due" in UTC and "dueLocal" already in the owner's time zone (${timeZone}): in the reply, use dueLocal in plain words, never raw ISO strings or ids.`,
     "Keep the reply short and concrete, written for the owner in your own words: never copy a step's reason or error text verbatim. Never claim an action happened unless its step shows a result.",
+    ...(clarification ? TOPIC_CHECK : []),
   ].join('\n');
 const ITALIAN = new Set(
   'il lo la le gli un una di da del della che non per con sono mi ti ci si è e alle alla al ho hai ha ricorda ricordami domani oggi cosa come quando dove perché sì grazie promemoria tutti tutte questo questa'.split(
@@ -289,8 +305,20 @@ export function misatoAsk(input: StepInput, route: RouteName): Ask {
   );
   while (steps.length > 1 && JSON.stringify(steps).length > MAX_HISTORY_CHARS) steps = steps.slice(1);
   if (JSON.stringify(steps).length > MAX_HISTORY_CHARS) steps = [];
+  // B-021: on the answer's first turn, the question and the job it belongs to are named, not left to be found in earlier.
+  const pendingQuestion = input.clarification
+    ? input.context?.findLast((t) => t.reply)?.reply?.slice(0, 1000)
+    : undefined;
+  const originalRequest = input.clarification ? input.context?.[0]?.request.slice(0, 1000) : undefined;
+  // They are LCL too: counted inside the route's budget, so earlier exchanges and memory get what is left.
+  const named = [originalRequest, pendingQuestion].reduce((n, t) => n + (t ? JSON.stringify(t).length + 1 : 0), 0);
   // The LCL: memory and earlier exchanges within the route's budget; local-only items never leave the machine.
-  const { memory, earlier } = fillLcl(input.memory ?? [], (input.context ?? []).slice(-3), route);
+  const { memory, earlier } = fillLcl(
+    input.memory ?? [],
+    (input.context ?? []).slice(-3),
+    route,
+    LCL_CHARS[route] - named,
+  );
   // A consultant's advice is local: it never goes to the cloud route with the request it was written for.
   const advice = input.advice && route === 'local' ? input.advice.slice(0, 600) : undefined;
   const prompt = JSON.stringify({
@@ -298,12 +326,14 @@ export function misatoAsk(input: StepInput, route: RouteName): Ask {
     ...(earlier.length ? { earlier } : {}),
     ...(advice ? { advice } : {}),
     ...(input.clarification ? { clarification: true } : {}),
+    ...(originalRequest ? { originalRequest } : {}),
+    ...(pendingQuestion ? { pendingQuestion } : {}),
     request: input.request.slice(0, MAX_REQUEST_CHARS),
     steps,
   });
   return {
     prompt,
-    system: system(input.tools, input.now, input.timeZone, input.language),
+    system: system(input.tools, input.now, input.timeZone, input.language, input.clarification),
     privacy: route === 'local' ? 'local-only' : 'any',
     route,
   };

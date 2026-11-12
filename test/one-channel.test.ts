@@ -631,3 +631,76 @@ test(
     }
   },
 );
+test(
+  'B-021: a dispatched request the main base refuses outright is marked refused; a sent request that fails later is not',
+  { timeout: 20000 },
+  async () => {
+    const A = keys(),
+      B = keys();
+    const pa = await freePort();
+    const records = [
+      rec({
+        kind: 'enrol',
+        baseId: 'NERV-01',
+        name: 'Neo Tokyo-3',
+        publicKey: A.publicKey,
+        address: `127.0.0.1:${pa}`,
+      }),
+      rec({ kind: 'enrol', baseId: 'NERV-02', name: 'Tabgha', publicKey: B.publicKey, address: '127.0.0.1:1' }),
+      rec({ kind: 'main', baseId: 'NERV-01' }),
+    ];
+    const sa = new Store(':memory:'),
+      sb = new Store(':memory:');
+    const ra = new Registry(sa.db, root.publicKey),
+      rb = new Registry(sb.db, root.publicKey);
+    for (const r of records) {
+      ra.add(r);
+      rb.add(r);
+    }
+    // Neo Tokyo-3 refuses chat (409, "not the main base") until it is given a handler that fails after taking the request.
+    const la = new KajiLink({
+      baseId: 'NERV-01',
+      key: A.privateKey,
+      publicKey: A.publicKey,
+      registry: port(ra),
+      log: () => {},
+    });
+    const lb = new KajiLink({
+      baseId: 'NERV-02',
+      key: B.privateKey,
+      publicKey: B.publicKey,
+      registry: port(rb),
+      log: () => {},
+    });
+    await la.start(60_000);
+    try {
+      const refused = await lb.chat('shopping.txt', 'dashboard', 2000);
+      assert.equal(refused?.refused, true, 'a 409 means nothing ran there');
+      assert.match(refused?.error ?? '', /refused \(409\)/);
+      await la.stop();
+      const lf = new KajiLink({
+        baseId: 'NERV-01',
+        key: A.privateKey,
+        publicKey: A.publicKey,
+        registry: port(ra),
+        log: () => {},
+        onChat: async () => {
+          await new Promise((done) => setTimeout(done, 1500));
+          return { sortieId: 'late', steps: [], waiting: [] };
+        },
+      });
+      await lf.start(60_000);
+      try {
+        const late = await lb.chat('shopping.txt', 'dashboard', 300);
+        assert.equal(late?.refused, undefined, 'a timeout may have reached Misato: never marked refused');
+        assert.match(late?.error ?? '', /did not answer/);
+      } finally {
+        await lf.stop();
+      }
+    } finally {
+      await la.stop();
+      sa.close();
+      sb.close();
+    }
+  },
+);

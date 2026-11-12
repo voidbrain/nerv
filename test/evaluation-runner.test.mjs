@@ -15,7 +15,11 @@ test('F-029: suite references owned scenarios and records unsupported branches e
   const model = corpus();
   assert.equal(model.cases.length, 8);
   assert.equal(model.cases.filter((c) => c.split === 'holdout').length, 2);
-  assert.equal(corpus('misato').cases.length, 5);
+  // B-021 (2026-11-12) added two continuation cases and a topic-change holdout: suite misato-planner-v2.
+  const planner = corpus('misato');
+  assert.equal(planner.id, 'misato-planner-v2');
+  assert.equal(planner.cases.length, 8);
+  assert.equal(planner.cases.filter((c) => c.split === 'holdout').length, 2);
 });
 test('F-029: bounded runner options reject unknown, repeated and unbounded controls', () => {
   assert.deepEqual(options(['--only=policy', '--repeat=2', '--seed=7']), {

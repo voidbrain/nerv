@@ -38,6 +38,17 @@ Frozen source `3c71986bf030d727b5030e1ae510989aa9e66a3a`, clean working tree; al
 
 Misato answered the unrelated calendar question with a final reply instead of returning `newRequest` while clarification was pending. The production prompt requires `newRequest`, so this is retained as a model-quality failure under B-021. No action executed in this evaluator. The expected case remains unchanged; this model result does not qualify a promotion. Independent language review passed: the Italian missing-title question naturally asks for the missing reminder content. The reviewer also confirmed the topic-change result violates the production prompt; review was report-only. These small fixed corpora establish a baseline, not broad competence or exhaustive branch coverage.
 
+## B-021 topic-change fix, 12 November 2026
+
+Owner-approved run for B-021 (local `gemma4:12b`, loopback Ollama, no paid usage). Suite `misato-planner-v2` adds three B-021 cases to the planner corpus: `answer-continues-short` and `answer-continues-long` (an answer that continues the job, under and over eight words) and an unseen `topic-change-unrelated-question` holdout. `topic-change-during-question` was used while developing the fix: it keeps its `holdout` label in the corpus and in both reports, but only `topic-change-unrelated-question` is unseen evidence.
+
+| Evidence | Outcome | Scope |
+|---|---|---|
+| [Misato v2](2026-11-12-misato-v2.json) | 8/8 passed | All eight cases, source `aef407b` (uncommitted record edits only; source inputs stable) |
+| [Misato, v1 suite id](2026-11-12-misato-b021.json) | 7/8 passed | The same eight cases before the suite id was bumped, source `46604ee`; `italian-missing-title` invented a title (B-049) |
+
+Both topic-change cases returned `newRequest` in both runs; both continuations planned the reminder. Development probes on the same model: the original holdout returned `newRequest` 2 of 3 before the fix and 5 of 5 after. `italian-missing-title` has the same prompt as before the fix and asked 2 of 5 times on 2026-11-12; it is tracked in B-049. These small corpora are competence evidence for this model only.
+
 Suite `nerv-golden-v2` adds B-042 dashboard/Telegram send-race, restart cleanup and bundled-row cases to the channel group. The v1 baseline above remains unchanged; later runs identify the expanded suite and their own source hashes.
 
 [B-042 channel evidence](2026-11-08-card-reconciliation.json): v2 selected channel group passed all 19 tests on clean source `85aa894`. Includes dashboard REST → delayed Telegram send, cleanup retry across restart, bundled-row preservation and real signed remote status/decision joins. This is explicitly a partial suite and mock Bot API evidence; physical phone receipt is not asserted.

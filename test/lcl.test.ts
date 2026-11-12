@@ -162,3 +162,32 @@ test(
     }
   },
 );
+test('B-021: on an answer turn, originalRequest and pendingQuestion count inside the LCL budget of each route', () => {
+  const long = (w: string) => `${w} `.repeat(400).trim();
+  const context = [
+    { request: long('original') },
+    { request: long('second'), reply: long('first question') },
+    { request: long('third'), reply: long('pending question') },
+  ];
+  for (const route of ['local', 'cloud'] as const) {
+    const prompt = JSON.parse(
+      misatoAsk(
+        {
+          request: 'an answer',
+          history: [],
+          tools: [],
+          now: '2030-01-03T08:00:00Z',
+          timeZone: 'UTC',
+          context,
+          clarification: true,
+        },
+        route,
+      ).prompt,
+    ) as Record<string, unknown>;
+    assert.ok(prompt.originalRequest && prompt.pendingQuestion);
+    const used = ['earlier', 'memory', 'originalRequest', 'pendingQuestion']
+      .filter((k) => prompt[k] !== undefined)
+      .reduce((n, k) => n + JSON.stringify(prompt[k]).length + 1, 0);
+    assert.ok(used <= LCL_CHARS[route], `${route}: ${used} > ${LCL_CHARS[route]}`);
+  }
+});
