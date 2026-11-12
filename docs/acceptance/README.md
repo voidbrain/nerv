@@ -10,6 +10,8 @@ The [review register](../reviews/README.md#acceptance-evidence) links every repo
 
 [B-008 reproduction on Tabgha, 12 November 2026](b008-tabgha-2026-11-12.md): real dashboard in headless Edge on Tabgha at 8c58ee5, relays of 47.5 s and 209.6 s to Neo Tokyo-3; banner stayed live, no failed or slow read. Not reproduced; agent-run over SSH with owner approval.
 
+[F-015 isolated pairing and Keychain trial, 12 November 2026](f015-keychain-trial-2026-11-12.md): companion from 214b7cb paired live to an isolated profile; used and expired invitations refused; no token in logs, arguments or URLs; re-paired to the live service. Owner pasted and observed, agent prepared and checked.
+
 [Gauntlet integration, 9 November 2026](gauntlet-2026-11-09.md): clean-source selected policy join and bounded adapter/cancellation fixtures; no model qualification.
 
 [Gauntlet0.2 adoption](gauntlet-v02-2026-11-09.md): accepted CI/integration/index/reuse contracts; live Gemma and real performance measurement explicitly paused.

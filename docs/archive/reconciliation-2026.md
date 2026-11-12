@@ -297,3 +297,7 @@ Authenticated ci:status confirms #316 CI43289305898 passed plan, native-macos, w
 ## 2026-11-12 — PR #319 (B-008 closed)
 
 Authenticated ci:status confirms #318 CI43290861912 passed plan, native-macos, windows and validate (full-suite skipped by plan); merged main 1d5cc15. #318 updated its own B-008, B-054 and B-055 records. Previous header: Current work ledger, reviewed 12 November 2026 against main `78d946d`. PR #316 (F-074-T09, B-053) passed CI; B-008 not reproduced on Tabgha at 8c58ee5 (owner decides closure); B-054 and B-055 opened.
+
+## 2026-11-12 — PR #TBD (F-015-T02)
+
+Authenticated ci:status confirms #317 CI43292206806, #319 CI43291684068 and #320 CI43295160685 passed; merged main 5a18130. #317 and #320 updated their own F-005 records; #319 is this session's B-008/F-015 change. Previous header: Current work ledger, reviewed 12 November 2026 against main `1d5cc15`. PR #318 (B-008 reproduction, B-054, B-055) passed CI; B-008 closed as not reproduced (owner); F-015 trial moves to the agent.
