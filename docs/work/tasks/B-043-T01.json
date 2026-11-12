@@ -4,7 +4,7 @@
   "parent": "B-043",
   "title": "Reproduce and bound process-queue saturation from overlapping periodic work",
   "goal": "A controlled slow-child regression shows which background producers fill the nervous process queue, and an overlap guard keeps them bounded without widening the bound or a timeout",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A committed deterministic regression fails before the fix with the observed saturation and passes after it",
     "Per-producer request counts under a stalled child name the producers",
@@ -41,13 +41,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 hour agent",
-    "basis": "Task added 2026-11-12 when B-043 was taken up. Baseline 2.5 days (baselineDays, history: the record's 2–3 focused days of 2026-11-07), re-estimated 2026-11-12 in agent hours (harness 5.6.0) as 2 h, the session's time box (baselineAgentHours). About 1.75 h spent (stated: CI log retrieval, slow-child regression, per-producer counts, fix, local suite, records, fresh-context review and its should-fix items). 0.5 h remains: CI rounds including Windows, merge.",
+    "estimate": "0 remaining",
+    "basis": "Task added 2026-11-12 when B-043 was taken up. Baseline 2.5 days (baselineDays, history: the record's 2–3 focused days of 2026-11-07), re-estimated 2026-11-12 in agent hours (harness 5.6.0) as 2 h, the session's time box (baselineAgentHours). About 1.75 h spent (stated: CI log retrieval, slow-child regression, per-producer counts, fix, local suite, records, fresh-context review and its should-fix items). 0.5 h remains: CI rounds including Windows, merge. Closed 2026-11-12 in the reconcile of PR #288: PR #282 merged at 00:17 UTC after CI 43125296727 passed all five jobs (Windows and full-suite included), so every acceptance item is met. Actual 2 h agent (stated): the 1.75 h above plus CI and merge from 00:10 to 00:17 UTC (GitHub timestamps), rounded up to a quarter hour. The parent's five-run observation is not part of this step.",
     "reviewed": "2026-11-12",
     "baselineDays": 2.5,
-    "agentHours": 0.5,
+    "agentHours": 0,
     "baselineAgentHours": 2,
-    "actualAgentHours": 1.75,
+    "actualAgentHours": 2,
     "actualSource": "stated"
   }
 }
