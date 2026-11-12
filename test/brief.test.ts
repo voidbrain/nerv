@@ -207,3 +207,53 @@ test('B-041: a delayed brief greets using the owner time zone at composition, in
     }
   }
 });
+
+test("F-043: Hyuga's brief displays all-day, at, from-to, from and until reminders in English and Italian", () => {
+  const briefNow = new Date('2030-03-03T07:00:00.000Z'); // 08:00 in Europe/Rome
+  const reminders = [
+    { title: 'Renew car insurance', due: '2030-03-03T07:00:00.000Z', kind: 'all-day' as const, end: null },
+    { title: 'Call Ada', due: '2030-03-03T09:00:00.000Z', kind: 'at' as const, end: null },
+    {
+      title: 'Team workshop',
+      due: '2030-03-03T09:00:00.000Z',
+      kind: 'from-to' as const,
+      end: '2030-03-03T11:00:00.000Z',
+    },
+    { title: 'Call bank', due: '2030-03-03T14:00:00.000Z', kind: 'from' as const, end: null },
+    {
+      title: 'Send report',
+      due: '2030-03-03T16:00:00.000Z',
+      kind: 'until' as const,
+      end: '2030-03-03T17:00:00.000Z',
+    },
+  ];
+  const en = composeBrief({
+    now: briefNow,
+    timeZone: 'Europe/Rome',
+    language: 'en',
+    approvals: [],
+    reminders,
+    sorties: [],
+    health: [],
+  });
+  assert.match(en, /• .*all day Renew car insurance/);
+  assert.match(en, /• .*10:00 Call Ada/);
+  assert.match(en, /• .*10:00–12:00 Team workshop/);
+  assert.match(en, /• .*from 15:00 Call bank/);
+  assert.match(en, /• .*until 18:00 Send report/);
+
+  const it = composeBrief({
+    now: briefNow,
+    timeZone: 'Europe/Rome',
+    language: 'it',
+    approvals: [],
+    reminders,
+    sorties: [],
+    health: [],
+  });
+  assert.match(it, /• .*tutto il giorno Renew car insurance/);
+  assert.match(it, /• .*10:00 Call Ada/);
+  assert.match(it, /• .*10:00–12:00 Team workshop/);
+  assert.match(it, /• .*dalle 15:00 Call bank/);
+  assert.match(it, /• .*entro le 18:00 Send report/);
+});

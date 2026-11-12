@@ -18,15 +18,33 @@ import { Registry, REGISTRY_SCHEMA } from './kaji.ts';
 import { MILESTONE_SCHEMA } from './milestones.ts';
 import { defaultPolicy, type Ballot, type Policy } from './policy.ts';
 import { generateVapidKeys, sendWebPush, formatReminderPushPayload, type PushSubscriptionRecord } from './push.ts';
+import {
+  DEFAULT_BRIEF_AT,
+  formatInboxReminderMessage,
+  localDayTimeToUtc,
+  localParts,
+  normalizeReminderKind,
+  resolveReminderTime,
+  type ReminderKind,
+} from './reminder-time.ts';
+export { REMINDER_KINDS, normalizeReminderKind, type ReminderKind } from './reminder-time.ts';
 export type { PushSubscriptionRecord } from './push.ts';
 export type Reminder = {
   id: string;
   title: string;
   due: string;
+  kind: ReminderKind;
+  end: string | null;
   created: string;
   delivered: string | null;
   cancelled: string | null;
 };
+export interface ReminderInput {
+  kind?: ReminderKind | string | undefined;
+  end?: string | null | undefined;
+  timeZone?: string | undefined;
+  briefAt?: string | undefined;
+}
 export interface InboxCheckpoint {
   sequence: number;
   id?: string;
@@ -102,10 +120,14 @@ export class Store {
     this.instrumentality = new InstrumentalityRuns(this.db);
     this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
       CREATE TABLE IF NOT EXISTS reminders(id TEXT PRIMARY KEY, title TEXT NOT NULL, due TEXT NOT NULL, created TEXT NOT NULL, delivered TEXT, cancelled TEXT);
+      CREATE TABLE IF NOT EXISTS reminder_times(reminder_id TEXT PRIMARY KEY REFERENCES reminders(id) ON DELETE CASCADE, kind TEXT NOT NULL DEFAULT 'at', "end" TEXT);
       CREATE TABLE IF NOT EXISTS deliveries(id TEXT PRIMARY KEY, reminder_id TEXT UNIQUE REFERENCES reminders(id), kind TEXT NOT NULL DEFAULT 'reminder', message TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT);
       CREATE INDEX IF NOT EXISTS reminders_due ON reminders(due);
       CREATE INDEX IF NOT EXISTS reminders_pending_due ON reminders(due) WHERE delivered IS NULL AND cancelled IS NULL;
       ${LEDGER_SCHEMA}`);
+    this.db.exec(
+      'INSERT OR IGNORE INTO reminder_times(reminder_id, kind, "end") SELECT id, \'at\', NULL FROM reminders',
+    );
     // Schema 3: events record the event schema version they were written under (F-024); earlier rows read as version 1.
     if (!(this.db.prepare('PRAGMA table_info(events)').all() as { name: string }[]).some((c) => c.name === 'v'))
       this.db.exec('ALTER TABLE events ADD COLUMN v INTEGER NOT NULL DEFAULT 1');
@@ -357,66 +379,93 @@ export class Store {
     const external = this.db.prepare('PRAGMA data_version').get() as { data_version: number };
     return `${external.data_version}:${own.n}`;
   }
+  reminderDefaults(): { timeZone: string; briefAt: string; language: 'en' | 'it' } {
+    const c = this.home ? readConfig(this.home) : undefined;
+    return {
+      timeZone: c?.timeZone ?? 'Europe/Rome',
+      briefAt: c?.brief?.at ?? DEFAULT_BRIEF_AT,
+      language: c?.language ?? 'en',
+    };
+  }
+  private normalizeRow<T extends { kind?: unknown; end?: string | null | undefined }>(
+    row: T,
+  ): T & { kind: ReminderKind; end: string | null } {
+    return {
+      ...row,
+      kind: normalizeReminderKind(row.kind),
+      end: row.end ?? null,
+    };
+  }
   /** A valid title and a future ISO date with an explicit timezone, as UTC; the same rules for a new reminder and an edit. */
-  private checkReminder(title: string, due: string, now: Date): { title: string; due: string } {
+  private checkReminder(
+    title: string,
+    due: string,
+    now: Date,
+    options: ReminderInput = {},
+  ): { title: string; due: string; kind: ReminderKind; end: string | null } {
     if (typeof title !== 'string' || !title.trim() || title.length > 500)
       throw new Error('Title must contain 1–500 characters.');
-    if (
-      typeof due !== 'string' ||
-      !/^\d{4}-\d\d-\d\dT\d\d:\d\d(?::\d\d(?:\.\d{1,3})?)?(Z|[+-]\d\d:\d\d)$/.test(due) ||
-      !Number.isFinite(Date.parse(due))
-    )
-      throw new Error('Use an ISO date with an explicit timezone offset.');
-    const match = /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d)(?::(\d\d)(?:\.\d{1,3})?)?(Z|[+-](\d\d):(\d\d))$/.exec(due)!;
-    const [, year, month, day, hour, minute, second, zone, offsetHour, offsetMinute] = match;
-    const days = new Date(Date.UTC(Number(year), Number(month), 0)).getUTCDate();
-    if (
-      Number(month) < 1 ||
-      Number(month) > 12 ||
-      Number(day) < 1 ||
-      Number(day) > days ||
-      Number(hour) > 23 ||
-      Number(minute) > 59 ||
-      Number(second ?? 0) > 59 ||
-      (zone !== 'Z' &&
-        (Number(offsetHour) > 14 ||
-          Number(offsetMinute) > 59 ||
-          (Number(offsetHour) === 14 && Number(offsetMinute) !== 0)))
-    )
-      throw new Error('Invalid calendar date or timezone offset.');
-    if (Date.parse(due) <= now.getTime()) throw new Error('Reminder must be in the future.');
-    return { title: title.trim(), due: new Date(due).toISOString() };
+    const defaults = this.reminderDefaults();
+    const resolved = resolveReminderTime({
+      due,
+      kind: options.kind,
+      end: options.end,
+      now,
+      timeZone: options.timeZone ?? defaults.timeZone,
+      briefAt: options.briefAt ?? defaults.briefAt,
+    });
+    return {
+      title: title.trim(),
+      due: resolved.due,
+      kind: resolved.kind,
+      end: resolved.end,
+    };
   }
   /** Adds a reminder, or returns the pending one with the same title (ignoring case and outer spaces) and the same moment,
       marked `existing`: a request sent twice (a retry, two channels) never makes two reminders (B-003). */
-  add(title: string, due: string, now = new Date()): Reminder & { existing?: true } {
-    const checked = this.checkReminder(title, due, now);
+  add(title: string, due: string, now = new Date(), options: ReminderInput = {}): Reminder & { existing?: true } {
+    const checked = this.checkReminder(title, due, now, options);
     const same = this.db
       .prepare(
-        'SELECT * FROM reminders WHERE delivered IS NULL AND cancelled IS NULL AND due=? AND lower(trim(title))=lower(trim(?)) LIMIT 1',
+        "SELECT r.*, COALESCE(rt.kind, 'at') AS kind, rt.\"end\" AS \"end\" FROM reminders r LEFT JOIN reminder_times rt ON rt.reminder_id=r.id WHERE r.delivered IS NULL AND r.cancelled IS NULL AND r.due=? AND COALESCE(rt.kind,'at')=? AND COALESCE(rt.\"end\",'')=COALESCE(?,'') AND lower(trim(r.title))=lower(trim(?)) LIMIT 1",
       )
-      .get(checked.due, checked.title) as Reminder | undefined;
-    if (same) return { ...same, existing: true };
+      .get(checked.due, checked.kind, checked.end, checked.title) as Reminder | undefined;
+    if (same) return { ...this.normalizeRow(same), existing: true };
     const r: Reminder = {
       id: randomUUID(),
       title: checked.title,
       due: checked.due,
+      kind: checked.kind,
+      end: checked.end,
       created: now.toISOString(),
       delivered: null,
       cancelled: null,
     };
-    this.db.prepare('INSERT INTO reminders VALUES(?,?,?,?,?,?)').run(r.id, r.title, r.due, r.created, null, null);
+    this.db.prepare('INSERT INTO reminders VALUES(?,?,?,?,NULL,NULL)').run(r.id, r.title, r.due, r.created);
+    this.db
+      .prepare('INSERT OR REPLACE INTO reminder_times(reminder_id, kind, "end") VALUES(?,?,?)')
+      .run(r.id, r.kind, r.end);
     return r;
   }
   list(): Reminder[] {
-    return this.db.prepare('SELECT * FROM reminders ORDER BY due').all() as Reminder[];
+    return (
+      this.db
+        .prepare(
+          'SELECT r.*, COALESCE(rt.kind, \'at\') AS kind, rt."end" AS "end" FROM reminders r LEFT JOIN reminder_times rt ON rt.reminder_id=r.id ORDER BY r.due',
+        )
+        .all() as Reminder[]
+    ).map((r) => this.normalizeRow(r));
   }
   reminderPage(before = 0, limit = 20): HistoryPage<Reminder & { sequence: number }> {
     checkHistory(before, limit);
     return historyPage(
-      this.db
-        .prepare('SELECT rowid AS sequence,* FROM reminders WHERE rowid<? ORDER BY rowid DESC LIMIT ?')
-        .all(before || Number.MAX_SAFE_INTEGER, limit + 1) as unknown as (Reminder & { sequence: number })[],
+      (
+        this.db
+          .prepare(
+            'SELECT r.rowid AS sequence, r.*, COALESCE(rt.kind, \'at\') AS kind, rt."end" AS "end" FROM reminders r LEFT JOIN reminder_times rt ON rt.reminder_id=r.id WHERE r.rowid<? ORDER BY r.rowid DESC LIMIT ?',
+          )
+          .all(before || Number.MAX_SAFE_INTEGER, limit + 1) as unknown as (Reminder & { sequence: number })[]
+      ).map((r) => this.normalizeRow(r)),
       limit,
     );
   }
@@ -448,16 +497,24 @@ export class Store {
         .prepare('SELECT count(*) AS count FROM reminders WHERE delivered IS NULL AND cancelled IS NULL')
         .get() as { count: number }
     ).count;
-    const reminders = this.db
-      .prepare('SELECT * FROM reminders WHERE delivered IS NULL AND cancelled IS NULL ORDER BY due LIMIT 10')
-      .all() as Reminder[];
+    const reminders = (
+      this.db
+        .prepare(
+          'SELECT r.*, COALESCE(rt.kind, \'at\') AS kind, rt."end" AS "end" FROM reminders r LEFT JOIN reminder_times rt ON rt.reminder_id=r.id WHERE r.delivered IS NULL AND r.cancelled IS NULL ORDER BY r.due LIMIT 10',
+        )
+        .all() as Reminder[]
+    ).map((r) => this.normalizeRow(r));
     return { delivered, brief, pending, reminders };
   }
   pendingReminders(limit = 5): Reminder[] {
     if (!Number.isInteger(limit) || limit < 1 || limit > 20) throw new Error('Invalid pending reminder limit.');
-    return this.db
-      .prepare('SELECT * FROM reminders WHERE delivered IS NULL AND cancelled IS NULL ORDER BY due LIMIT ?')
-      .all(limit) as Reminder[];
+    return (
+      this.db
+        .prepare(
+          'SELECT r.*, COALESCE(rt.kind, \'at\') AS kind, rt."end" AS "end" FROM reminders r LEFT JOIN reminder_times rt ON rt.reminder_id=r.id WHERE r.delivered IS NULL AND r.cancelled IS NULL ORDER BY r.due LIMIT ?',
+        )
+        .all(limit) as Reminder[]
+    ).map((r) => this.normalizeRow(r));
   }
   /** Undoes a cancellation while the reminder is still in the future and undelivered: the inverse of cancel. */
   restore(id: string): boolean {
@@ -472,18 +529,62 @@ export class Store {
     );
   }
   /** Changes the title and/or the time of a reminder that has not fired or been cancelled; undefined when there is none. */
-  update(id: string, patch: { title?: string; due?: string }, now = new Date()): Reminder | undefined {
-    if (typeof id !== 'string' || !id || (patch.title === undefined && patch.due === undefined))
+  update(
+    id: string,
+    patch: { title?: string; due?: string; kind?: ReminderKind | string; end?: string | null },
+    now = new Date(),
+  ): Reminder | undefined {
+    if (
+      typeof id !== 'string' ||
+      !id ||
+      (patch.title === undefined && patch.due === undefined && patch.kind === undefined && patch.end === undefined)
+    )
       throw new Error('Give a new title or a new due time.');
-    const row = this.db
-      .prepare('SELECT * FROM reminders WHERE id=? AND delivered IS NULL AND cancelled IS NULL')
+    const rawRow = this.db
+      .prepare(
+        'SELECT r.*, COALESCE(rt.kind, \'at\') AS kind, rt."end" AS "end" FROM reminders r LEFT JOIN reminder_times rt ON rt.reminder_id=r.id WHERE r.id=? AND r.delivered IS NULL AND r.cancelled IS NULL',
+      )
       .get(id) as Reminder | undefined;
-    if (!row) return undefined;
-    const checked = this.checkReminder(patch.title ?? row.title, patch.due ?? row.due, now);
+    if (!rawRow) return undefined;
+    const row = this.normalizeRow(rawRow);
+    const nextKind = patch.kind !== undefined ? normalizeReminderKind(patch.kind) : row.kind;
+    const nextDue = patch.due ?? (nextKind === 'until' && patch.end === undefined && row.end ? row.end : row.due);
+    const nextEnd =
+      patch.end !== undefined
+        ? patch.end
+        : nextKind === 'from-to'
+          ? row.end
+          : nextKind === 'until' && patch.due === undefined
+            ? row.end
+            : undefined;
+    const checked = this.checkReminder(patch.title ?? row.title, nextDue, now, {
+      kind: nextKind,
+      end: nextEnd,
+    });
     this.db
       .prepare('UPDATE reminders SET title=?,due=? WHERE id=? AND delivered IS NULL AND cancelled IS NULL')
       .run(checked.title, checked.due, id);
+    this.db
+      .prepare('INSERT OR REPLACE INTO reminder_times(reminder_id, kind, "end") VALUES(?,?,?)')
+      .run(id, checked.kind, checked.end);
     return { ...row, ...checked };
+  }
+  rescheduleAllDayReminders(briefAt?: string, timeZone?: string): void {
+    const defaults = this.reminderDefaults();
+    const targetAt = briefAt ?? defaults.briefAt;
+    const targetTz = timeZone ?? defaults.timeZone;
+    const pending = this.db
+      .prepare(
+        "SELECT r.id, r.due FROM reminders r JOIN reminder_times rt ON rt.reminder_id=r.id WHERE rt.kind='all-day' AND r.delivered IS NULL AND r.cancelled IS NULL",
+      )
+      .all() as { id: string; due: string }[];
+    for (const r of pending) {
+      const dayKey = localParts(new Date(r.due), targetTz).dayKey;
+      const nextDue = localDayTimeToUtc(dayKey, targetAt, targetTz).toISOString();
+      if (nextDue !== r.due) {
+        this.db.prepare('UPDATE reminders SET due=? WHERE id=?').run(nextDue, r.id);
+      }
+    }
   }
   cancel(id: string): boolean {
     return (
@@ -495,17 +596,27 @@ export class Store {
     );
   }
   tick(now = new Date()): number {
+    const config = this.home ? readConfig(this.home) : undefined;
+    const timeZone = config?.timeZone ?? 'Europe/Rome';
+    const lang = config?.language ?? 'en';
     this.db.exec('BEGIN IMMEDIATE');
     try {
-      const due = this.db
-        .prepare('SELECT * FROM reminders WHERE due<=? AND delivered IS NULL AND cancelled IS NULL')
-        .all(now.toISOString()) as Reminder[];
+      if (config?.brief?.at) {
+        this.rescheduleAllDayReminders(config.brief.at, timeZone);
+      }
+      const due = (
+        this.db
+          .prepare(
+            'SELECT r.*, COALESCE(rt.kind, \'at\') AS kind, rt."end" AS "end" FROM reminders r LEFT JOIN reminder_times rt ON rt.reminder_id=r.id WHERE r.due<=? AND r.delivered IS NULL AND r.cancelled IS NULL',
+          )
+          .all(now.toISOString()) as Reminder[]
+      ).map((r) => this.normalizeRow(r));
       for (const r of due) {
         this.db
           .prepare(
             "INSERT OR IGNORE INTO deliveries(id,reminder_id,kind,message,created,read_at) VALUES(?,?,'reminder',?,?,NULL)",
           )
-          .run(randomUUID(), r.id, r.title, now.toISOString());
+          .run(randomUUID(), r.id, formatInboxReminderMessage(r, timeZone, lang), now.toISOString());
         this.db.prepare('UPDATE reminders SET delivered=? WHERE id=?').run(now.toISOString(), r.id);
       }
       this.db.exec('COMMIT');

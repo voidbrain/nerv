@@ -102,7 +102,10 @@ process.on('message', (value: unknown) => {
         return store.pendingReminders();
       case 'reminders.add':
         try {
-          return store.add(params.title as string, params.due as string);
+          return store.add(params.title as string, params.due as string, new Date(), {
+            ...(params.kind !== undefined ? { kind: params.kind as string } : {}),
+            ...(params.end !== undefined ? { end: params.end as string | null } : {}),
+          });
         } catch {
           throw new Error('Invalid reminder.');
         }
@@ -112,6 +115,8 @@ process.on('message', (value: unknown) => {
           r = store.update(params.id as string, {
             ...(params.title !== undefined ? { title: params.title as string } : {}),
             ...(params.due !== undefined ? { due: params.due as string } : {}),
+            ...(params.kind !== undefined ? { kind: params.kind as string } : {}),
+            ...(params.end !== undefined ? { end: params.end as string | null } : {}),
           });
         } catch {
           throw new Error('Invalid reminder.');

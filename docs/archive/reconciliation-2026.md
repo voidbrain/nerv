@@ -273,3 +273,7 @@ Authenticated ci:status confirms CI43021907516 passed plan, validate, windows, n
 ## 2026-11-12 — PRs #307, #308
 
 Authenticated ci:status confirms #307 CI43240473540 passed plan, native-macos, windows and validate (full-suite skipped by scoped verification) and #308 CI43238639679 passed plan, windows, native-macos, validate and full-suite; merged main e821c11. F-016 names the passing run; B-046 was already closed and archived by #308. Previous header: Current work ledger, reviewed 12 November 2026 against main `33126e6`. PR #306 passed CI (B-043 closed). B-046 closed: 11 CI runs after remedy (a) (#293) passed every worker-link heartbeat test on Windows and Linux coverage.
+
+## 2026-11-12 — PR #309
+
+Authenticated ci:status confirms #309 CI43255004715 passed plan, native-macos, windows, validate and full-suite; merged main 1f714bc. Reconciled harness v6.2.0 and PRs #307, #308. Previous header: Current work ledger, reviewed 12 November 2026 against main `e821c11`. PRs #307 (F-016-T01 decision) and #308 (B-046 closed) passed CI; harness v6.2.0: a re-estimated step names its baseline (`1 h (planned 1.5)`).
