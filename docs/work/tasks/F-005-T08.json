@@ -30,7 +30,7 @@
   ],
   "validation": [
     "Directed regressions or recorded evidence for this slice; final required CI",
-    "2026-11-12: test/node-lifecycle-execution.test.ts (checkServicePrerequisites and install/start/update blocking)"
+    "2026-11-12: PR #321, test/node-lifecycle-execution.test.ts (checkServicePrerequisites and install/start/update blocking)"
   ],
   "escalation": [
     "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
