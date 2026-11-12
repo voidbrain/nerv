@@ -154,6 +154,11 @@ test('F-005-T19: managed Node activation refuses external paths and recovers to 
 test('F-005-T19: nodes node-runtime-plan CLI returns ownership and choices', async () => {
   const env = makeEnv();
   try {
+    const userNode = join(env.dir, 'user-node');
+    if (process.platform !== 'win32') {
+      writeFileSync(userNode, '#!/bin/sh\necho v24.0.0\n', { mode: 0o755 });
+    }
+    const nodeTarget = process.platform === 'win32' ? realpathSync(process.execPath) : userNode;
     const plan = (await nodesCommand([
       'node-runtime-plan',
       '--home',
@@ -161,7 +166,7 @@ test('F-005-T19: nodes node-runtime-plan CLI returns ownership and choices', asy
       '--source',
       env.source,
       '--node',
-      realpathSync(process.execPath),
+      nodeTarget,
     ])) as { ownership: string; satisfied: boolean; recommendedChoice: string };
     assert.equal(plan.ownership, 'user-managed');
     assert.equal(plan.satisfied, true);
