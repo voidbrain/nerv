@@ -289,3 +289,7 @@ Authenticated ci:status confirms #312 CI43276538572 (plan, windows, native-macos
 ## 2026-11-12 — PR #316 (F-074-T09)
 
 Authenticated ci:status confirms #314 CI43282005793 and #315 CI43280986607 passed; merged main 8c58ee5. #314 updated its own F-042 and F-043 records; #315 is this session's F-005-T13 record. Previous header: Current work ledger, reviewed 12 November 2026 against main `5bcf955`. PRs #310 (F-043 closed), #311 (F-005, B-052), #312 (harness 7.1.1) and #313 (F-007, F-008 P3) passed CI; F-005-T13 done (f8b8116); F-042 agency read tools implemented (PR #314).
+
+## 2026-11-12 — PR #TBD (B-008)
+
+Authenticated ci:status confirms #316 CI43289305898 passed plan, native-macos, windows, validate and full-suite (an earlier run, 43286749372, failed validate on the F-029 test recorded as B-053); merged main 78d946d. #316 updated its own F-074 and B-053 records. Previous header: Current work ledger, reviewed 12 November 2026 against main `8c58ee5`. PRs #314 (F-042 read-only agency tools, F-043 records) and #315 (F-005-T13) passed CI; F-074-T09 done: every Gauntlet pack has a ledger-covered run.

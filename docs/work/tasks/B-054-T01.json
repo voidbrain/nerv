@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "B-054-T01",
+  "parent": "B-054",
+  "title": "Long replies within the output allowance do not time out the model route",
+  "goal": "Measure where the 210 s went and fix it with a failing test first",
+  "status": "planned",
+  "acceptance": [
+    "The cause of the 2026-11-12 timeout is measured (calls, tokens, durations per step)",
+    "A committed test fails before the fix",
+    "No limit widened without a measured rate; one slow reply does not mark the route down"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/model.ts",
+    "src/**",
+    "test/**",
+    "docs/work/records/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "regression-design",
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures only; no real paths, tokens or machine data in git.",
+  "validation": [
+    "A committed test fails before the fix",
+    "npm test"
+  ],
+  "escalation": [
+    "A change to a model or time limit needs measured evidence that it fits"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-12: one measurement on the Mac, one bounded change with a failing test first. Not a measurement.",
+    "reviewed": "2026-11-12",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5
+  }
+}

@@ -174,3 +174,5 @@ Gauntlet0.3 NERV adoption accepted after PR235 exactheadb4cd887 / full CI4260857
 [Timing reassessment, 2026-11-11](2026-11-11-timing-reassessment.md): owner-approved focused architecture reassessment of B-042/B-043/B-046. One mechanism reproduced (heartbeat verdict before a waiting reply is read), one supported by code only (unguarded periodic ticks), one still a hypothesis. Next: B-046 fix against its todo regression; reconsider if heartbeat-loss failures persist after it.
 
 [First Mac lifecycle update](../acceptance/node-update-2026-11-12.md), 2026-11-12, 2a3448d → f8b8116: F-005-T13 inspect/apply on the live service, eight update steps and every after-check passed. Agent-run with owner approval; hand usability of the procedure and a real refused/uncertain outcome remain untested. Next on any lifecycle, backup, rehearsal or service-definition change.
+
+[B-008 Tabgha reproduction](../acceptance/b008-tabgha-2026-11-12.md), 2026-11-12, Tabgha 8c58ee5 / Neo Tokyo-3 f8b8116: dashboard banner and /api/ reads during long relays, not reproduced; found B-054 and B-055. Rerun if the banner or relay path changes or the owner sees the message again.
