@@ -204,6 +204,8 @@ export function makeServer(
         ([
           '/api/status',
           '/api/doctor',
+          '/api/push/key',
+          '/api/push/status',
           '/api/reminders',
           '/api/reminders/pending',
           '/api/reminders/page',
@@ -588,9 +590,49 @@ export function makeServer(
         });
         if (r) reply(200, r);
         else reply(404, { error: 'No pending reminder with that ID.' });
-      } else if (req.method === 'DELETE' && /^\/api\/reminders\/[a-f0-9-]+$/.test(path))
+      } else if (req.method === 'DELETE' && /^\/api\/reminders\/[a-f0-9-]+$/.test(path)) {
         reply((await store.cancel(path.split('/').at(-1)!)) ? 200 : 404, { message: 'Cancellation processed.' });
-      else if (req.method === 'GET' && path === '/api/inbox') {
+      } else if (req.method === 'GET' && path === '/api/push/key') {
+        const key = store.pushPublicKey ? await store.pushPublicKey() : '';
+        reply(200, { publicKey: key });
+      } else if (req.method === 'GET' && path === '/api/push/status') {
+        if (store.pushStatus) {
+          reply(200, await store.pushStatus());
+        } else if (store.listPushSubscriptions) {
+          const subs = await store.listPushSubscriptions();
+          reply(200, { subscribed: subs.length > 0, count: subs.length });
+        } else {
+          reply(200, { subscribed: false, count: 0 });
+        }
+      } else if (req.method === 'POST' && path === '/api/push/subscribe') {
+        const b = await body(req);
+        if (
+          !b ||
+          typeof b.endpoint !== 'string' ||
+          !b.keys ||
+          typeof b.keys !== 'object' ||
+          typeof (b.keys as Record<string, unknown>).p256dh !== 'string' ||
+          typeof (b.keys as Record<string, unknown>).auth !== 'string'
+        ) {
+          throw new Error('endpoint and keys (p256dh, auth) are required.');
+        }
+        if (store.savePushSubscription) {
+          await store.savePushSubscription({
+            endpoint: b.endpoint,
+            p256dh: (b.keys as Record<string, unknown>).p256dh as string,
+            auth: (b.keys as Record<string, unknown>).auth as string,
+            ...(typeof b.userAgent === 'string' ? { userAgent: b.userAgent } : {}),
+          });
+        }
+        reply(201, { ok: true });
+      } else if (req.method === 'POST' && path === '/api/push/unsubscribe') {
+        const b = await body(req);
+        if (!b || typeof b.endpoint !== 'string') {
+          throw new Error('endpoint is required.');
+        }
+        const removed = store.deletePushSubscription ? await store.deletePushSubscription(b.endpoint) : false;
+        reply(200, { ok: true, removed });
+      } else if (req.method === 'GET' && path === '/api/inbox') {
         const p = await store.inboxHistory(0, 50);
         if (p.next) throw new Error('History requires /api/inbox/history.');
         reply(200, p.items);

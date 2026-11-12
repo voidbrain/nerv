@@ -26,7 +26,7 @@ interface Reminder {
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
 <div class="shell"><aside><a class="brand" href="/"><img ngSrc="brand.svg" priority width="48" height="36" alt="NERV Agency">NERV<span>{{t().agent}}</span></a><nav [attr.aria-label]="t().workspace"><button (click)="view.set('home')" [class.active]="view()==='home'">◈ &nbsp; {{t().overview}}</button><button (click)="view.set('reminders')" [class.active]="view()==='reminders'">◷ &nbsp; {{t().reminders}}</button><button (click)="view.set('doctor')" [class.active]="view()==='doctor'">+ &nbsp; {{t().doctor}}</button></nav><div class="sidebar-foot"><i></i> Nodo · v0.1<br><small>{{t().foot}}</small></div></aside>
-<main><nerv-update-prompt [t]="t()" /><header><label class="language">Lingua / Language <select #languageSelect [value]="language()" (change)="changeLanguage(languageSelect.value)"><option value="it">Italiano</option><option value="en">English</option></select></label><span>{{t().workspace}}</span><button class="quiet" (click)="refresh()">{{t().refresh}}</button></header><section class="intro"><p class="eyebrow">{{t().tagline}}</p><h1>{{t().world}}<br><em>{{t().together}}</em></h1><p>{{t().intro}}</p></section>
+<main><nerv-update-prompt [t]="t()" /><header><label class="language">Lingua / Language <select #languageSelect [value]="language()" (change)="changeLanguage(languageSelect.value)"><option value="it">Italiano</option><option value="en">English</option></select></label><span>{{t().workspace}}</span><button class="quiet refresh-btn" (click)="refresh()">{{t().refresh}}</button>@if(connected()&&pushSupported()){<button class="quiet push-toggle" [class.active]="pushSubscribed()" [attr.aria-pressed]="pushSubscribed()" [disabled]="pushPending()" (click)="togglePush()">{{pushSubscribed()?t().pushActive:t().pushInactive}}</button>}</header><section class="intro"><p class="eyebrow">{{t().tagline}}</p><h1>{{t().world}}<br><em>{{t().together}}</em></h1><p>{{t().intro}}</p></section>
 @if(!connected()){<section class="connect panel"><h2>{{t().connectTitle}}</h2><p>{{t().connectHint}}</p><label>{{t().token}}<input #token type="password" autocomplete="off" placeholder="NERV_TOKEN"></label><button (click)="connect(token.value);token.value=''">{{t().connect}}</button></section>}
 @if(error()){<p role="alert" class="error">{{error()}}</p>}
 @if(connected()){<nerv-surface-renderer [surface]="statusSurface()" [t]="t()"></nerv-surface-renderer>
@@ -63,6 +63,9 @@ class App {
   private revision = 0;
   view = signal('home');
   connected = signal(false);
+  pushSupported = signal(false);
+  pushSubscribed = signal(false);
+  pushPending = signal(false);
   error = signal('');
   reminders = signal<Reminder[]>([]);
   editingId = signal<string | null>(null);
@@ -92,18 +95,87 @@ class App {
   async connect(token: string) {
     this.token = token;
     await this.refresh();
+    await this.checkPushSubscription();
   }
   /** `npm start -- open` lands here with #code=…: drop it from the address and history first, then swap it once for the token. */
   constructor() {
     if (typeof window !== 'undefined') {
       (window as unknown as { __nervSetSurface?: (s: unknown) => void }).__nervSetSurface = (s: unknown) =>
         this.customSurface.set(s);
+      (window as unknown as { __nervApp?: App }).__nervApp = this;
+      (window as unknown as { __nervTogglePush?: () => Promise<void> }).__nervTogglePush = () => this.togglePush();
+      if ('serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window) {
+        this.pushSupported.set(true);
+      }
     }
     const match = /^#code=([a-f0-9]{32})$/.exec(window.location.hash);
     if (match) {
       window.history.replaceState(null, '', window.location.pathname + window.location.search);
       void this.exchange(match[1]!);
     }
+  }
+  async checkPushSubscription() {
+    if (!this.pushSupported()) return;
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.getSubscription();
+      this.pushSubscribed.set(!!sub);
+    } catch {
+      // service worker or pushManager unavailable
+    }
+  }
+  async togglePush() {
+    if (!this.pushSupported() || this.pushPending()) return;
+    this.pushPending.set(true);
+    this.error.set('');
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const existing = await reg.pushManager.getSubscription();
+      if (existing) {
+        await existing.unsubscribe();
+        await this.request('push/unsubscribe', {
+          method: 'POST',
+          body: JSON.stringify({ endpoint: existing.endpoint }),
+        });
+        this.pushSubscribed.set(false);
+      } else {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          throw new Error('Permission denied');
+        }
+        const keyData = (await this.request('push/key')) as { publicKey?: string };
+        if (!keyData?.publicKey) throw new Error('No VAPID key');
+        const rawKey = this.urlBase64ToUint8Array(keyData.publicKey);
+        const sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: rawKey as unknown as BufferSource,
+        });
+        const subJson = sub.toJSON();
+        await this.request('push/subscribe', {
+          method: 'POST',
+          body: JSON.stringify({
+            endpoint: sub.endpoint,
+            keys: subJson.keys,
+            userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+          }),
+        });
+        this.pushSubscribed.set(true);
+      }
+    } catch {
+      this.error.set(this.t().pushError);
+    } finally {
+      this.pushPending.set(false);
+    }
+  }
+  private urlBase64ToUint8Array(base64String: string): Uint8Array {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
   }
   async exchange(code: string) {
     try {
