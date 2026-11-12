@@ -21,7 +21,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { spawn } from 'node:child_process';
 import { databasePath, readConfig, readToken } from './config.ts';
 import { canonical, keyIdentity, ROOT_KEY_FILE } from './kaji.ts';
-import { renderService } from './service.ts';
+import { WINDOWS_TASK, renderService, windowsLauncher } from './service.ts';
 import { NODE_FLAGS } from './process-client.ts';
 import { assertRootMigrationReady } from './root-migration.ts';
 import { lifecycleRecovery } from './node-lifecycle.ts';
@@ -31,6 +31,7 @@ import { rehearseUpgrade, READER_ENTRY, type RehearsalReport } from './upgrade-r
 
 export const SERVICE_LIFECYCLE_PROTOCOL = 1;
 export const SERVICE_READER_SCHEMA = UPGRADE_CONTRACT.readerSchema;
+export type ServiceKind = 'mac-service' | 'windows-service';
 type Action = 'install' | 'start' | 'stop' | 'update' | 'uninstall';
 type State = 'running' | 'completed' | 'uncertain' | 'released' | 'refused';
 export interface ServiceContext {
@@ -65,7 +66,7 @@ export interface ServiceObservation {
 }
 export interface ServicePlan {
   version: 1;
-  kind: 'mac-service';
+  kind: ServiceKind;
   action: Action;
   context: ServiceContext;
   before: ServiceObservation;
@@ -101,6 +102,7 @@ export interface ServiceReceipt {
 }
 /** Trusted adapter injection is for tests; no manifest or CLI input can select an adapter or command text. */
 export interface ServiceHost {
+  kind?: ServiceKind;
   context: ServiceContext;
   inspect(): Promise<ServiceObservation>;
   command(
@@ -124,16 +126,27 @@ const handler = () =>
     ]),
   );
 const object = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
-const definition = (c: ServiceContext) => join(c.userHome, 'Library/LaunchAgents/io.nerv.agent.plist');
+const hostKind = (host: ServiceHost): ServiceKind => host.kind ?? 'mac-service';
+const definition = (c: ServiceContext, kind: ServiceKind = 'mac-service') =>
+  kind === 'windows-service'
+    ? join(c.home, 'nerv-task.xml')
+    : join(c.userHome, 'Library/LaunchAgents/io.nerv.agent.plist');
+const windowsLauncherPath = (c: ServiceContext) => join(c.home, 'nerv-service.vbs');
+const expectedDefinition = (c: ServiceContext, kind: ServiceKind = 'mac-service'): string | Buffer =>
+  kind === 'windows-service'
+    ? Buffer.from('\ufeff' + renderService('win32', c.home, c.source, c.node), 'utf16le')
+    : renderService('darwin', c.home, c.source, c.node);
 const area = (c: ServiceContext) => join(c.userHome, '.nerv-lifecycle');
-const resource = (c: ServiceContext) => 'user-service:' + c.uid + ':darwin';
+const resource = (c: ServiceContext, kind: ServiceKind = 'mac-service') =>
+  kind === 'windows-service' ? 'user-service:' + c.uid + ':win32' : 'user-service:' + c.uid + ':darwin';
 function safe(path: string, uid: number, privateMode = false): void {
   const stat = lstatSync(path);
   if (
     stat.isSymbolicLink() ||
-    (stat.uid !== uid && stat.uid !== 0) ||
-    stat.mode & 0o022 ||
-    (privateMode && (stat.uid !== uid || !!(stat.mode & 0o077)))
+    (process.platform !== 'win32' &&
+      ((stat.uid !== uid && stat.uid !== 0) ||
+        stat.mode & 0o022 ||
+        (privateMode && (stat.uid !== uid || !!(stat.mode & 0o077)))))
   )
     throw Error('Service path ownership, permissions or symlink requires review.');
   const actual = realpathSync(path);
@@ -149,6 +162,7 @@ function present(path: string): boolean {
   }
 }
 function syncDirectory(path: string): void {
+  if (process.platform === 'win32') return;
   const fd = openSync(path, 'r');
   try {
     fsyncSync(fd);
@@ -281,7 +295,7 @@ export async function planService(host: ServiceHost, action: Action, nextRevisio
     );
   const body = {
     version: SERVICE_LIFECYCLE_PROTOCOL as 1,
-    kind: 'mac-service' as const,
+    kind: hostKind(host),
     action,
     context: host.context,
     before,
@@ -297,7 +311,7 @@ function planOf(raw: unknown, host: ServiceHost): ServicePlan {
   if (
     !object(raw) ||
     raw.version !== SERVICE_LIFECYCLE_PROTOCOL ||
-    raw.kind !== 'mac-service' ||
+    raw.kind !== hostKind(host) ||
     typeof raw.digest !== 'string' ||
     !['install', 'start', 'stop', 'update', 'uninstall'].includes(String(raw.action)) ||
     canonical(raw.context) !== canonical(host.context) ||
@@ -374,24 +388,34 @@ export async function assertServiceStartup(host: ServiceHost, managedStart = fal
   }
 }
 export async function guardLocalService(home: string, managedStart = false): Promise<void> {
-  if (process.platform !== 'darwin' || !present(join(homedir(), '.nerv-lifecycle'))) return;
-  const host = macServiceHost(join(homedir(), '.nerv'));
-  await assertServiceStartup(host, managedStart && resolve(home) === host.context.home);
+  if (!present(join(homedir(), '.nerv-lifecycle'))) return;
+  if (process.platform === 'darwin') {
+    const host = macServiceHost(join(homedir(), '.nerv'));
+    await assertServiceStartup(host, managedStart && resolve(home) === host.context.home);
+  } else if (process.platform === 'win32') {
+    const host = windowsServiceHost(join(homedir(), '.nerv'));
+    await assertServiceStartup(host, managedStart && resolve(home) === host.context.home);
+  }
 }
-const manualRecoverySteps = (p: ServicePlan): string[] =>
-  p.action === 'update'
+const manualRecoverySteps = (p: ServicePlan): string[] => {
+  const stopHint =
+    p.kind === 'windows-service'
+      ? `Inspect and stop the Windows Task Scheduler task before anything else (schtasks /Query /TN "${WINDOWS_TASK}" /V /FO LIST; schtasks /End /TN "${WINDOWS_TASK}"), and confirm no descendant process remains.`
+      : `Inspect and stop the service before anything else (launchctl print gui/${p.context.uid}/io.nerv.agent; launchctl bootout gui/${p.context.uid}/io.nerv.agent), and confirm no descendant process remains.`;
+  return p.action === 'update'
     ? [
-        `Inspect and stop the candidate service before anything else (launchctl print gui/${p.context.uid}/io.nerv.agent; launchctl bootout gui/${p.context.uid}/io.nerv.agent), and confirm no descendant process remains.`,
+        stopHint,
         'If dependencies failed or node_modules is missing, run npm ci --ignore-scripts in the checkout as it is so the CLI can load; do not start the service from it.',
         'Release the held operation with nodes lifecycle-release --receipt FILE --evidence FILE (refused while the service or any descendant remains).',
         `Check out the previous revision (${p.before.revision}) by hand and run npm ci --ignore-scripts && npm run build.`,
         'Inspect and apply a fresh start plan (nodes lifecycle-inspect --action start, then nodes lifecycle-apply).',
       ]
     : [
-        `Inspect and stop the service before anything else (launchctl print gui/${p.context.uid}/io.nerv.agent; launchctl bootout gui/${p.context.uid}/io.nerv.agent), and confirm no descendant process remains.`,
+        stopHint,
         'Release the held operation with nodes lifecycle-release --receipt FILE --evidence FILE (refused while the service or any descendant remains).',
         'Inspect and apply a fresh plan after resolving the reported failure.',
       ];
+};
 export async function applyService(
   host: ServiceHost,
   raw: unknown,
@@ -474,9 +498,10 @@ export async function applyService(
       if (held(db)) throw Error('Another lifecycle operation holds the user service.');
       db!.prepare('UPDATE clock SET value=value+1 WHERE id=1').run();
       const fence = Number(db!.prepare('SELECT value FROM clock').get()!.value);
+      const kind = hostKind(host);
       receipt = {
         digest: p.digest,
-        resource: resource(host.context),
+        resource: resource(host.context, kind),
         fence,
         nonce: randomBytes(16).toString('hex'),
         pid: process.pid,
@@ -490,17 +515,22 @@ export async function applyService(
     });
     if (cached) return cached;
     onStep?.('accepted');
+    const kind = hostKind(host);
     if (p.action === 'install')
       await step('definition', async () => {
         const fresh = await host.inspect();
         if (canonical(fresh) !== canonical(p.before)) throw Error('Installation evidence changed.');
-        const dir = dirname(definition(host.context));
+        const defPath = definition(host.context, kind);
+        const dir = dirname(defPath);
         if (!existsSync(dir)) mkdirSync(dir, { mode: 0o700 });
         safe(dir, host.context.uid);
-        exclusive(
-          definition(host.context),
-          renderService('darwin', host.context.home, host.context.source, host.context.node),
-        );
+        if (kind === 'windows-service') {
+          exclusive(
+            windowsLauncherPath(host.context),
+            windowsLauncher(host.context.home, host.context.source, host.context.node),
+          );
+        }
+        exclusive(defPath, expectedDefinition(host.context, kind));
       });
     if (p.action === 'stop')
       await step('stop', async () => {
@@ -523,14 +553,15 @@ export async function applyService(
       await step('remove-definition', async () => {
         const current = await inspectOwned(false);
         if (current.runtime !== 'stopped' || current.pids.length) throw Error('Runtime descendants remain.');
-        safe(definition(host.context), host.context.uid, true);
-        if (
-          hash(readFileSync(definition(host.context))) !==
-          hash(renderService('darwin', host.context.home, host.context.source, host.context.node))
-        )
+        const defPath = definition(host.context, kind);
+        safe(defPath, host.context.uid, true);
+        if (hash(readFileSync(defPath)) !== hash(expectedDefinition(host.context, kind)))
           throw Error('Definition changed before removal.');
-        unlinkSync(definition(host.context));
-        syncDirectory(dirname(definition(host.context)));
+        unlinkSync(defPath);
+        if (kind === 'windows-service' && present(windowsLauncherPath(host.context))) {
+          unlinkSync(windowsLauncherPath(host.context));
+        }
+        syncDirectory(dirname(defPath));
       });
     if (p.action === 'update') {
       await step('backup', async () => {
@@ -1261,6 +1292,240 @@ export function macServiceAdapter(context: ServiceContext, run: typeof command =
         join(path, 'manifest.json'),
         JSON.stringify({ files: sums, database: fileHash(file), restore: 'separately reviewed; never automatic' }),
       );
+    },
+  };
+  return host;
+}
+
+/**
+ * Windows Task Scheduler registration check: verifies the scheduled task runs `wscript.exe`
+ * with our hidden launcher `nerv-service.vbs` inside `context.home` and `context.source`.
+ */
+export function windowsRegistrationMatches(output: string, c: ServiceContext): boolean {
+  const launcher = windowsLauncherPath(c).replace(/\\/g, '/').toLowerCase();
+  const normalized = output.replace(/\\/g, '/').toLowerCase();
+  const hasWscript = normalized.includes('wscript.exe') || normalized.includes('wscript');
+  const hasLauncher = normalized.includes(launcher);
+  const hasTaskName = normalized.includes(WINDOWS_TASK.toLowerCase());
+  return hasTaskName && hasWscript && hasLauncher;
+}
+
+/** Production Windows adapter: current unprivileged Windows user, current checkout and default `.nerv` data home. */
+export function windowsServiceHost(home: string): ServiceHost {
+  if (process.platform !== 'win32') {
+    throw Error('Durable Windows local lifecycle requires Windows.');
+  }
+  const context: ServiceContext = {
+    userHome: homedir(),
+    home: resolve(home),
+    source: realpathSync(fileURLToPath(new URL('..', import.meta.url))),
+    node: realpathSync(process.execPath),
+    uid: 0,
+  };
+  if (context.home !== join(context.userHome, '.nerv')) {
+    throw Error('An additional or legacy profile cannot manage this OS service.');
+  }
+  return windowsServiceAdapter(context);
+}
+
+/** Windows Task Scheduler lifecycle adapter (`windows-service`) under the shared fencing journal. */
+export function windowsServiceAdapter(context: ServiceContext, run: typeof command = command): ServiceHost {
+  const expectedTask = expectedDefinition(context, 'windows-service');
+  const expectedVbs = windowsLauncher(context.home, context.source, context.node);
+  const mac = macServiceAdapter(context, run);
+  const git = async (args: string[]) => {
+    const r = await run('git', ['-C', context.source, ...args]);
+    if (r.status !== 0) throw Error('Selected source could not be verified.');
+    return r.out.trim();
+  };
+  const queryTask = async (): Promise<Result | undefined> => {
+    const r = await run('schtasks', ['/Query', '/TN', WINDOWS_TASK, '/V', '/FO', 'LIST']);
+    if (r.status === 0) return r;
+    if (/cannot find|does not exist|the system cannot find/i.test(r.err + '\n' + r.out)) return undefined;
+    throw Error('The Windows Task Scheduler result is unknown.');
+  };
+  const queryProcesses = async (): Promise<number[]> => {
+    const ps = await run('powershell', [
+      '-NoProfile',
+      '-Command',
+      "Get-CimInstance Win32_Process | Where-Object { $_.Name -eq 'node.exe' -or $_.Name -eq 'wscript.exe' } | ForEach-Object { \"$($_.ProcessId)|$($_.ParentProcessId)|$($_.Name)|$($_.CommandLine)\" }",
+    ]);
+    if (ps.status !== 0) throw Error('Windows process ownership could not be inspected.');
+    const rows = ps.out.split(/\r?\n/).flatMap((line) => {
+      const parts = line.split('|');
+      if (parts.length < 4) return [];
+      const pid = Number(parts[0]);
+      const parent = Number(parts[1]);
+      if (!Number.isInteger(pid) || pid <= 0) return [];
+      return [{ pid, parent, name: parts[2]!.toLowerCase(), args: parts.slice(3).join('|') }];
+    });
+    const launcher = windowsLauncherPath(context).toLowerCase();
+    const roots = rows.filter(
+      (r) =>
+        (r.name === 'node.exe' && /src[\\/]cli\.ts\s+(serve|launch)(\s|$)/i.test(r.args)) ||
+        (r.name === 'wscript.exe' && r.args.toLowerCase().includes(launcher)),
+    );
+    const ids = new Set(roots.map((r) => r.pid));
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (const r of rows) {
+        if (ids.has(r.parent) && !ids.has(r.pid)) {
+          ids.add(r.pid);
+          changed = true;
+        }
+      }
+    }
+    return [...ids].sort((a, b) => a - b);
+  };
+
+  const host: ServiceHost = {
+    kind: 'windows-service',
+    context,
+    inspect: async () => {
+      safe(context.userHome, context.uid);
+      safe(context.home, context.uid, true);
+      safe(context.source, context.uid);
+      assertRootMigrationReady(context.home);
+      const config = readConfig(context.home);
+      const token = readToken(context.home);
+      const profile = serviceProfileIdentity(context);
+      const revision = await git(['rev-parse', 'HEAD']);
+      if (
+        !/^[a-f0-9]{40}$/.test(revision) ||
+        (await git(['remote', 'get-url', 'origin'])) !== 'https://github.com/voidbrain/nerv.git'
+      ) {
+        throw Error('Use the canonical reviewed NERV checkout.');
+      }
+      const prerequisites = await checkServicePrerequisites(context, run, { session: true });
+      const taskPath = definition(context, 'windows-service');
+      const vbsPath = windowsLauncherPath(context);
+      const defKind: ServiceObservation['definition'] = !present(taskPath)
+        ? 'absent'
+        : (() => {
+            try {
+              safe(taskPath, context.uid, true);
+              const taskMatches = hash(readFileSync(taskPath)) === hash(expectedTask);
+              const vbsMatches =
+                present(vbsPath) &&
+                (() => {
+                  safe(vbsPath, context.uid, true);
+                  return hash(readFileSync(vbsPath)) === hash(expectedVbs);
+                })();
+              return taskMatches && vbsMatches ? 'owned' : 'foreign';
+            } catch {
+              return 'foreign';
+            }
+          })();
+
+      const task = await queryTask();
+      const registered: ServiceObservation['registration'] = !task
+        ? 'absent'
+        : windowsRegistrationMatches(task.out, context)
+          ? 'owned'
+          : 'foreign';
+      const pids = await queryProcesses();
+      let runtime: ServiceObservation['runtime'] = pids.length ? 'unknown' : 'stopped';
+      try {
+        const r = await fetch('http://127.0.0.1:' + config.port + '/api/doctor', {
+          headers: { authorization: 'Bearer ' + token },
+          signal: AbortSignal.timeout(1500),
+        });
+        if (r.ok) {
+          const body = (await r.json()) as { base?: { id: string }; build?: { commit: string } };
+          runtime =
+            body.base?.id === config.base.id &&
+            body.build?.commit === revision &&
+            registered === 'owned' &&
+            pids.length > 0
+              ? 'owned'
+              : 'unknown';
+        } else {
+          runtime = 'unknown';
+        }
+      } catch {}
+
+      safe(databasePath(context.home), context.uid);
+      const db = new DatabaseSync(databasePath(context.home), { readOnly: true });
+      let pending: boolean;
+      let schema: number;
+      try {
+        schema = Number(db.prepare('PRAGMA user_version').get()!.user_version);
+        pending =
+          !!db
+            .prepare("SELECT 1 FROM worker_jobs WHERE state NOT IN ('completed','cancelled','released') LIMIT 1")
+            .get() ||
+          !!db.prepare('SELECT 1 FROM kaji_outbox WHERE done IS NULL LIMIT 1').get() ||
+          !!db.prepare("SELECT 1 FROM worker_legacy_outbox WHERE state='pending' LIMIT 1").get();
+      } finally {
+        db.close();
+      }
+
+      return {
+        revision,
+        schema,
+        profile,
+        definition: defKind,
+        registration: registered,
+        runtime,
+        pids,
+        session: true,
+        clean: (await git(['status', '--porcelain'])) === '',
+        legacy: false,
+        pending,
+        built: existsSync(join(context.source, 'dist/web/browser/index.html')),
+        prerequisites,
+      };
+    },
+    health: mac.health!,
+    compatible: mac.compatible,
+    rehearse: mac.rehearse,
+    backup: mac.backup,
+    authorizedStart: async (p) => {
+      if (
+        (await git(['status', '--porcelain'])) !== '' ||
+        serviceProfileIdentity(context) !== p.before.profile ||
+        (await git(['rev-parse', 'HEAD'])) !== (p.nextRevision ?? p.before.revision)
+      ) {
+        return false;
+      }
+      const task = await queryTask();
+      const taskPath = definition(context, 'windows-service');
+      const vbsPath = windowsLauncherPath(context);
+      return (
+        !!task &&
+        windowsRegistrationMatches(task.out, context) &&
+        present(taskPath) &&
+        present(vbsPath) &&
+        hash(readFileSync(taskPath)) === hash(expectedTask) &&
+        hash(readFileSync(vbsPath)) === hash(expectedVbs)
+      );
+    },
+    command: async (step, p) => {
+      if (step === 'register') {
+        const created = await run('schtasks', [
+          '/Create',
+          '/TN',
+          WINDOWS_TASK,
+          '/XML',
+          definition(context, 'windows-service'),
+        ]);
+        if (created.status !== 0) throw Error('Service register did not confirm completion; retain uncertainty.');
+        const started = await run('schtasks', ['/Run', '/TN', WINDOWS_TASK]);
+        if (started.status !== 0) throw Error('Service register did not confirm start; retain uncertainty.');
+        return;
+      }
+      if (step === 'unregister') {
+        await run('schtasks', ['/End', '/TN', WINDOWS_TASK]);
+        const pids = await queryProcesses();
+        for (const pid of pids) {
+          await run('taskkill', ['/PID', String(pid), '/T', '/F']);
+        }
+        const deleted = await run('schtasks', ['/Delete', '/TN', WINDOWS_TASK, '/F']);
+        if (deleted.status !== 0) throw Error('Service unregister did not confirm completion; retain uncertainty.');
+        return;
+      }
+      await mac.command(step, p);
     },
   };
   return host;

@@ -16,6 +16,7 @@ import { bootstrapOperation } from './node-bootstrap-execution.ts';
 import { lifecyclePlan, lifecycleRecovery } from './node-lifecycle.ts';
 import {
   macServiceHost,
+  windowsServiceHost,
   planService,
   applyService,
   serviceReceipt,
@@ -89,7 +90,7 @@ export async function nodesCommand(args: string[], runner: CommandRunner = runNo
     throw Error('EEXIST: choose a new output file; nothing was inspected.');
   let result: unknown;
   if (['lifecycle-inspect', 'lifecycle-apply', 'lifecycle-status', 'lifecycle-release'].includes(command)) {
-    const host = macServiceHost(dataHome());
+    const host = process.platform === 'win32' ? windowsServiceHost(dataHome()) : macServiceHost(dataHome());
     if (command === 'lifecycle-inspect')
       result = await planService(
         host,
