@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-12T21:26:32.771Z",
+  "reviewed": "2026-11-12T22:39:53.094Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
     "AGENTS.md": "f8e8646a9dfcf43bee1cbb0160e779f198f5db0d7cdeee58284d59a4e5e696a1",
-    "docs/BACKLOG-RULES.md": "763815b94e2d8c08f71741013f45c522550950d180b65cb2efece8c5b5dc6ebd",
+    "docs/BACKLOG-RULES.md": "e2e12ec52b76442c2024faeef76143ddfc432cf342d593fda6cf0b715f870002",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
     "docs/agents/areas.md": "0ff9805a7d720ee177505cef670e53169a6d640299762dfa86185be46fa8737c",
     "docs/agents/audit.md": "bc5de5707f9ec5c523e73602499312c373d6112ffc498d69bf68604522527992",
@@ -20,7 +20,7 @@
     "docs/agents/work-usage.md": "e2f7c484f1c07f4b47fd1133857d8744ccab0ad2a7b85b220946c115a002bebc",
     "tools/task-claims.mjs": "ef755fe7951544e5c05b20de7c64a7b53778b6d039a11a2abeb079e7d42b6fd2",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
-    "tools/work-items.mjs": "0879134d54cbd0e62d1105daa31a65ddf50ede80fe385cdc0b97c982f5690ba5",
+    "tools/work-items.mjs": "7ef23a1beb896b28048d740ca64a13fedb40eb6befd3a943fff130d0b8a64a23",
     "tools/work-usage.mjs": "4329262c0b9e723e046dd8878e15a99cff5f590201cd0918563f3204bbe79219"
   },
   "measurements": {
@@ -80,7 +80,7 @@
       "kind": "rule",
       "disposition": "implemented",
       "target": "docs/BACKLOG-RULES.md",
-      "evidence": "Harness 8.0.0 reconciled from template PR #137 (fresh-context review there, no blocker): the human-action cue names its kind (Procedure, Decision, Both, No) in update step 5 and the record-format paragraph; the generated summary shows Procedures and Decision cells. No rule removed: the Yes meaning is split into the two kinds, archives keep Yes. NERV's recap splits the Require Human table the same way (tools/backlog-recap.mjs, failing test first)."
+      "evidence": "Harness 8.1.0 reconciled (template PR #139, fresh-context review there): generated header from the reconciliation log, union merge for archives, step evidence in task files; the project header line now says the header is generated. No rule removed."
     }
   ]
 }

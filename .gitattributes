@@ -4,3 +4,7 @@
 *.ico binary
 *.jpg binary
 *.sqlite binary
+
+# harness: append-only records (archives, reconciliation log): when two branches both add lines, git keeps both
+# sides instead of reporting a conflict. Never for generated files.
+docs/archive/*.md merge=union

@@ -3,7 +3,7 @@
     "path": "../harness-template",
     "repo": "https://github.com/voidbrain/project-harness"
   },
-  "version": "8.0.0",
+  "version": "8.1.0",
   "stacks": [
     "core",
     "angular"
@@ -943,7 +943,8 @@
     "order": "queue",
     "estimation": {
       "since": "2026-11-12"
-    }
+    },
+    "repository": "voidbrain/nerv"
   },
   "workUsage": {
     "enabled": true
