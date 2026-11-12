@@ -552,6 +552,70 @@ test(
         }
         await audit(lang + '-history-pages');
       }
+
+      // F-004-T04: GenUI schema-validated registered component renderer
+      // 1. Initial valid status surface rendered through nerv-surface-renderer
+      assert.ok(await evaluate(`document.querySelector('nerv-surface-renderer nerv-status-card')!==null`));
+      assert.equal(
+        await evaluate(
+          `document.querySelector('nerv-status-card').shadowRoot.querySelector('h2').textContent.length > 0`,
+        ),
+        true,
+        'registered status card rendered with validated props',
+      );
+
+      // 2. Extensible catalog: switch to registered notice card
+      await evaluate(
+        `window.__nervSetSurface({ version: 1, component: 'nerv-notice-card', props: { topic: 'Subsystem', message: 'Operational snapshot verified.', tone: 'info' } })`,
+      );
+      await until(`document.querySelector('nerv-surface-renderer nerv-notice-card')!==null`);
+      assert.equal(
+        await evaluate(`document.querySelector('nerv-notice-card').shadowRoot.querySelector('h3').textContent`),
+        'Subsystem',
+      );
+      assert.equal(
+        await evaluate(`document.querySelector('nerv-notice-card').shadowRoot.querySelector('span').textContent`),
+        'INFO',
+      );
+
+      // 3. Reject arbitrary unregistered component name
+      await evaluate(`window.__nervSetSurface({ version: 1, component: 'script', props: { src: 'evil.js' } })`);
+      await until(`document.querySelector('nerv-surface-renderer .surface-rejection')!==null`);
+      assert.equal(await evaluate(`document.querySelector('nerv-surface-renderer script')`), null);
+      assert.ok(
+        await evaluate(`window.__nervSurfaceRejections.some(r => r.reason.includes('Unregistered component'))`),
+        'unregistered component rejection logged',
+      );
+
+      // 4. Reject arbitrary code payload
+      await evaluate(
+        `window.__nervSetSurface({ version: 1, component: 'nerv-status-card', props: { title: 't', detail: 'd', status: 'ok' }, code: 'alert(1)' })`,
+      );
+      await until(`document.querySelector('nerv-surface-renderer .surface-rejection')!==null`);
+      assert.ok(
+        await evaluate(
+          `window.__nervSurfaceRejections.some(r => r.reason.includes('Forbidden key or action payload'))`,
+        ),
+        'code payload rejection logged',
+      );
+
+      // 5. Reject arbitrary action payload
+      await evaluate(
+        `window.__nervSetSurface({ version: 1, component: 'nerv-status-card', props: { title: 't', detail: 'd', status: 'ok' }, action: 'reboot' })`,
+      );
+      await until(`document.querySelector('nerv-surface-renderer .surface-rejection')!==null`);
+      assert.ok(
+        await evaluate(`window.__nervSurfaceRejections.some(r => r.raw.action === 'reboot')`),
+        'action payload rejection logged',
+      );
+
+      // 6. Accessible rejection alert passes AXE
+      await audit('genui-rejected-surface');
+
+      // 7. Reset back to valid surface
+      await evaluate(`window.__nervSetSurface(null)`);
+      await until(`document.querySelector('nerv-surface-renderer nerv-status-card')!==null`);
+
       // F-019: shipped /dashboard accounting, keyboard pager, mobile layout and actual change notifications.
       const price = {
         route: 'cloud',
