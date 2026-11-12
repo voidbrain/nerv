@@ -1,3 +1,4 @@
+import { recordHealth } from './milestones.ts';
 import type { WorkerItem, WorkerContext, WorkerLease } from './worker-jobs.ts';
 import type { RunReason } from './instrumentality-runs.ts';
 import { parsePrices, type UsageObservation } from './model-usage.ts';
@@ -311,6 +312,16 @@ process.on('message', (value: unknown) => {
         }
         return added;
       }
+      case 'milestones.health':
+        return (
+          recordHealth(
+            store.db,
+            params.scope as 'base' | 'route',
+            params.subject as string,
+            params.ok as boolean,
+            params.at as string,
+          ) ?? null
+        );
       case 'kaji.seen':
         return registry().seen(params.updates as Record<string, string>);
       case 'memory.lastRequest':

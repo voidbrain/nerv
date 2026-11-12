@@ -15,6 +15,7 @@ import { LEDGER_SCHEMA, Ledger, type Decision, type Proposal } from './ledger.ts
 import { builtinTools, execute, hasExecutor } from './executors.ts';
 import { MEMORY_SCHEMA, Memory, type Episode } from './memory.ts';
 import { Registry, REGISTRY_SCHEMA } from './kaji.ts';
+import { MILESTONE_SCHEMA } from './milestones.ts';
 import { defaultPolicy, type Ballot, type Policy } from './policy.ts';
 import { generateVapidKeys, sendWebPush, formatReminderPushPayload, type PushSubscriptionRecord } from './push.ts';
 export type { PushSubscriptionRecord } from './push.ts';
@@ -112,6 +113,8 @@ export class Store {
     this.db.exec(MEMORY_SCHEMA);
     // The Gehirn registry of bases for the Kaji line (F-036): signed, append-only records; an additive table, no version change.
     this.db.exec(REGISTRY_SCHEMA);
+    // F-054-T04, additive: milestones recorded from now on (first online, outages and recoveries, promotions).
+    this.db.exec(MILESTONE_SCHEMA);
     // F-036 slice 3b, additive: actions queued for other bases, and actions other bases asked of this one (by their id, so a
     // resend after a crash returns the first result instead of running twice).
     this.db.exec(

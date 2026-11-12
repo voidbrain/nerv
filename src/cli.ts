@@ -1,4 +1,5 @@
 #!/usr/bin/env -S node --use-system-ca
+import { recordPromotion } from './milestones.ts';
 import { assertRootMigrationReady, rootMigrationCommand } from './root-migration.ts';
 import { nodesCommand } from './nodes-cli.ts';
 import { runtimeBom } from './bom.ts';
@@ -28,7 +29,7 @@ import {
   setting,
   type Base,
 } from './config.ts';
-import { describePilots, type Stage } from './pilots.ts';
+import { STAGES, describePilots, type Stage } from './pilots.ts';
 import { McpClient, fingerprint as toolFingerprint, grantRefusal, toolName, type Eva, type McpTool } from './mcp.ts';
 import { TelegramApi, TelegramChannel, decisionText, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
 import { chronicleDays, composeChronicle, gatherMilestones } from './chronicle.ts';
@@ -526,7 +527,23 @@ try {
               },
         ),
       );
-      console.log(`Pilot ${p.id} changed.`);
+      // F-054-T04: a move to a later stage is a promotion, kept for the chronicle (append-only; the config edit stays).
+      const stage = opt('stage');
+      let promoted = '';
+      if (stage && STAGES.indexOf(stage as Stage) > STAGES.indexOf(p.stage)) {
+        try {
+          const s = new Store(databasePath(home), readScrolls(home), { home });
+          try {
+            recordPromotion(s.db, p, p.stage, stage, new Date().toISOString());
+            promoted = ` Promoted from ${p.stage} to ${stage}: in the chronicle.`;
+          } finally {
+            s.db.close();
+          }
+        } catch {
+          promoted = ' The promotion could not be recorded in the chronicle.';
+        }
+      }
+      console.log(`Pilot ${p.id} changed.${promoted}`);
     } else if (['pin', 'unpin', 'retire', 'restore'].includes(sub)) {
       const p = find();
       const on = sub === 'pin' || sub === 'retire';
@@ -1127,6 +1144,7 @@ try {
             : undefined;
         }, sentBefore);
         runtime.startWatch();
+        runtime.startRouteLog();
         runtime.startInstrumentality(() => {
           const c = live();
           return { ...(c.instrumentality ? { mode: c.instrumentality } : {}), timeZone: c.timeZone };

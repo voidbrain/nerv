@@ -1,4 +1,5 @@
 import { transaction } from './sqlite-transaction.ts';
+import { recordFirstOnline } from './milestones.ts';
 import {
   createCipheriv,
   createDecipheriv,
@@ -289,6 +290,11 @@ export class Registry {
     for (const [id, at] of Object.entries(updates))
       if (BASE_ID.test(id) && Number.isFinite(Date.parse(at))) {
         const time = new Date(Date.parse(at)).toISOString();
+        // F-054-T04: a base with no last-seen time under any root is heard of for the first time.
+        const known =
+          !!this.db.prepare('SELECT 1 FROM kaji_seen WHERE base_id=?').get(id) ||
+          (this.scopedSeen() && !!this.db.prepare('SELECT 1 FROM registry_seen WHERE base_id=?').get(id));
+        recordFirstOnline(this.db, id, time, known);
         if (this.scopedSeen())
           this.db
             .prepare(

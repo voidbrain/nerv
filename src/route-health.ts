@@ -77,18 +77,18 @@ export class RouteWatch {
     return { local: { ...this.routes.local }, cloud: { ...this.routes.cloud } };
   }
 }
-const NAME: Record<RouteName, string> = { local: 'S² local route', cloud: 'Umbilical cloud route' };
+export const ROUTE_NAME: Record<RouteName, string> = { local: 'S² local route', cloud: 'Umbilical cloud route' };
 /** One log line per change, for the service log: when a route went down and why, and how long it was down. */
 export function describeChange(c: RouteChange): string | undefined {
   if (c.to === 'down')
-    return `NERV: ${NAME[c.route]} down: ${c.error ?? 'unreachable'} Reminders and deterministic actions continue; model-needing requests fail with this reason until it is back.`;
+    return `NERV: ${ROUTE_NAME[c.route]} down: ${c.error ?? 'unreachable'} Reminders and deterministic actions continue; model-needing requests fail with this reason until it is back.`;
   if (c.to === 'ok' && c.from === 'down')
-    return `NERV: ${NAME[c.route]} back after ${Math.max(1, Math.round((c.downFor ?? 0) / 60000))} min.`;
+    return `NERV: ${ROUTE_NAME[c.route]} back after ${Math.max(1, Math.round((c.downFor ?? 0) / 60000))} min.`;
   return undefined;
 }
 /** The degraded reasons for status, doctor and the brief: every configured route that is down, with its reason. */
 export function degradedReasons(routes: Record<RouteName, RouteHealth>): string[] {
   return (['local', 'cloud'] as const)
     .filter((r) => routes[r].state === 'down')
-    .map((r) => `${NAME[r]} down since ${routes[r].since}: ${routes[r].error ?? 'unreachable'}`);
+    .map((r) => `${ROUTE_NAME[r]} down since ${routes[r].since}: ${routes[r].error ?? 'unreachable'}`);
 }

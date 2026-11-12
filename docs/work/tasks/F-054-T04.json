@@ -4,7 +4,7 @@
   "parent": "F-054",
   "title": "Record the milestones not stored today",
   "goal": "Record durable events, from now on and without backfill, for a base online for the first time, outages and recoveries, and pilot promotions, and show them in the chronicle.",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "A base seen online for the first time, a base or model route going down and coming back, and a pilot promoted to a later stage each leave one durable, append-only record with its time, from the change onward (no backfill)",
     "The Simple chronicle shows them with their sources; a promotion appears once a promote action exists (stage changes today are hand edits of config.json)",
@@ -34,10 +34,12 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.5 hours agent",
-    "basis": "Added 2026-11-12 on the owner's decision to record these facts from now on (F-054-T01 found they are not stored: only last_seen per base, route health in memory, pilot stages edited by hand). A judged 1.5 agent hours like the other F-054 steps; estimate, not a measurement.",
+    "estimate": "0 hours (implemented; awaiting CI)",
+    "basis": "Added 2026-11-12 on the owner's decision to record these facts from now on (F-054-T01 found they are not stored: only last_seen per base, route health in memory, pilot stages edited by hand). A judged 1.5 agent hours like the other F-054 steps; estimate, not a measurement. Implemented 2026-11-12 (src/milestones.ts; hooks in Registry.seen, KajiLink.mark, Runtime.logRoutes and `pilots set`) in about 1 h agent (stated).",
     "reviewed": "2026-11-12",
-    "agentHours": 1.5,
-    "baselineAgentHours": 1.5
+    "agentHours": 0,
+    "baselineAgentHours": 1.5,
+    "actualAgentHours": 1,
+    "actualSource": "stated"
   }
 }
