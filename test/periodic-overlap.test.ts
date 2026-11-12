@@ -28,6 +28,7 @@ function stall(runtime: Runtime) {
   return {
     held: (method: string) => held.filter((h) => (h.message as { method?: string }).method === method).length,
     release() {
+      if (child.send === original) return;
       child.send = original;
       for (const h of held.splice(0)) original(h.message, h.callback);
     },
@@ -37,9 +38,10 @@ function stall(runtime: Runtime) {
 test('B-043: a stalled nervous child does not let the resumer fill the process queue; other callers still get in', async () => {
   const home = mkdtempSync(join(tmpdir(), 'nerv-overlap-'));
   const runtime = new Runtime(join(home, 'nerv.sqlite'), undefined, home);
+  let child: ReturnType<typeof stall> | undefined;
   try {
     await runtime.ready();
-    const child = stall(runtime);
+    child = stall(runtime);
     runtime.startResumer(10);
     // Far more than MAX_CHILD_REQUESTS ticks of the resumer while the child does not answer.
     await wait(MAX_CHILD_REQUESTS * 10 * 2);
@@ -58,6 +60,7 @@ test('B-043: a stalled nervous child does not let the resumer fill the process q
     // The resumer keeps working once the child answers again.
     await runtime.sweep();
   } finally {
+    child?.release();
     await runtime.close();
     rmSync(home, { recursive: true, force: true });
   }
@@ -66,9 +69,10 @@ test('B-043: a stalled nervous child does not let the resumer fill the process q
 test('B-043: a sweep asked for while one is polling gets a fresh poll after it, and many such asks share one', async () => {
   const home = mkdtempSync(join(tmpdir(), 'nerv-overlap-'));
   const runtime = new Runtime(join(home, 'nerv.sqlite'), undefined, home);
+  let child: ReturnType<typeof stall> | undefined;
   try {
     await runtime.ready();
-    const child = stall(runtime);
+    child = stall(runtime);
     const first = runtime.sweep();
     await wait(20);
     // A decision lands while the first poll is held; its sweep must not reuse the answer to the earlier poll.
@@ -85,6 +89,7 @@ test('B-043: a sweep asked for while one is polling gets a fresh poll after it, 
     await Promise.all([first, ...asked]);
     assert.equal(polls, 1, 'the sweeps asked for during the first poll share one fresh poll after it');
   } finally {
+    child?.release();
     await runtime.close();
     rmSync(home, { recursive: true, force: true });
   }
@@ -131,3 +136,57 @@ test('B-043: a heartbeat tick does not start again while the previous one still 
     await link.stop();
   }
 });
+
+test(
+  'B-043: a restart of the link while a tick still waits on the registry does not run two ticks side by side',
+  { timeout: 20000 },
+  async () => {
+    const { privateKey, publicKey } = generateKeyPairSync('ed25519');
+    let open = true;
+    let calls = 0;
+    let release = () => {};
+    const gate = new Promise<void>((d) => {
+      release = d;
+    });
+    const registry: RegistryPort = {
+      bases: async () => {
+        calls++;
+        if (!open) await gate;
+        return [];
+      },
+      records: async () => [],
+      add: async () => 0,
+      seen: async () => {},
+      lastSeen: async () => ({}),
+      main: async () => undefined,
+    };
+    const link = new KajiLink({
+      baseId: 'NERV-01',
+      key: privateKey,
+      publicKey: publicKey.export({ type: 'spki', format: 'der' }).toString('base64'),
+      registry,
+      log: () => {},
+    });
+    let restarted: Promise<void> = Promise.resolve();
+    try {
+      await link.start(10);
+      open = false;
+      const before = calls;
+      await wait(50);
+      assert.equal(calls - before, 1, 'a tick is waiting on the registry');
+      await link.stop();
+      // Not awaited: before B-043's fix its first tick would wait on the registry as well.
+      restarted = link.start(10);
+      await wait(MAX_CHILD_REQUESTS * 10 * 2);
+      assert.equal(
+        calls - before,
+        1,
+        `the restarted link waits for the tick still out (${calls - before} lookups started)`,
+      );
+    } finally {
+      release();
+      await restarted;
+      await link.stop();
+    }
+  },
+);
