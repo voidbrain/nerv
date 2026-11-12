@@ -16,7 +16,7 @@ export async function browser(work){
   const {targetId}=await call('Target.createTarget',{url:'about:blank'}),{sessionId}=await call('Target.attachToTarget',{targetId,flatten:true});
   const page=(method,params={})=>call(method,params,sessionId);
   const evaluate=async expression=>{const result=await page('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(result.exceptionDetails)throw Error(JSON.stringify(result.exceptionDetails));return result.result.value;};
-  const until=async expression=>{const end=Date.now()+15000;while(!(await evaluate(expression))){if(Date.now()>end)throw Error('Browser condition timed out: '+expression);await new Promise(done=>setTimeout(done,50));}};
+  const until=async (expression,timeoutMs=15000)=>{const end=Date.now()+timeoutMs;let lastError;while(true){try{if(await evaluate(expression))return;}catch(e){lastError=e;}if(Date.now()>end){const detail=lastError?' (last error: '+lastError.message+')':'';throw Error('Browser condition timed out: '+expression+detail);}await new Promise(done=>setTimeout(done,50));}};
   await page('Page.enable');await page('Runtime.enable');await page('Page.bringToFront');await page('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
   await work({page,evaluate,until,errors,network});
  }finally{

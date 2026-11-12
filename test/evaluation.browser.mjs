@@ -133,3 +133,29 @@ test(
     }
   },
 );
+
+test(
+  'B-050: until retries through evaluated expression exceptions and resolves when condition holds',
+  { timeout: 30000 },
+  async () => {
+    await browser(async ({ evaluate, until }) => {
+      setTimeout(async () => {
+        try {
+          await evaluate(
+            `{const el=document.createElement('div');el.className='late-banner';el.textContent='LIVE · ready';document.body.appendChild(el);}`,
+          );
+        } catch {}
+      }, 150);
+      await until(`document.querySelector('.late-banner').textContent.includes('LIVE ·')`);
+    });
+  },
+);
+
+test('B-050: until still fails with timeout when throwing condition never holds', { timeout: 30000 }, async () => {
+  await browser(async ({ until }) => {
+    await assert.rejects(
+      until(`document.querySelector('.nonexistent-banner').textContent.includes('NEVER')`, 300),
+      /Browser condition timed out: document\.querySelector\('\.nonexistent-banner'\)\.textContent\.includes\('NEVER'\)/,
+    );
+  });
+});
