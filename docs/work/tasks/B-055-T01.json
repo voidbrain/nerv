@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "B-055-T01",
+  "parent": "B-055",
+  "title": "Service definitions record a stable Node executable",
+  "goal": "Resolve the Node path at install to a stable target, tested on all three service definitions",
+  "status": "planned",
+  "acceptance": [
+    "A committed test with a per-shell (fnm-style) path fails before the fix",
+    "Install writes the resolved stable path or refuses with a clear message",
+    "launchd and systemd definitions follow the same rule"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/service.ts",
+    "test/**",
+    "docs/INSTALL.md",
+    "docs/work/records/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "regression-design",
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures only; no real paths, tokens or machine data in git.",
+  "validation": [
+    "A committed test fails before the fix",
+    "npm test"
+  ],
+  "escalation": [
+    "A change to a model or time limit needs measured evidence that it fits"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-12: path resolution plus one test per service definition. Not a measurement.",
+    "reviewed": "2026-11-12",
+    "agentHours": 1,
+    "baselineAgentHours": 1
+  }
+}

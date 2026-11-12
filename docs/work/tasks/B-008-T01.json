@@ -4,7 +4,7 @@
   "parent": "B-008",
   "title": "Identify the IPC call that timed out during a relayed request on Tabgha",
   "goal": "Name the endpoint, process and method of the original 2026-11-05 timeout from a fresh reproduction on Tabgha, then fix it or give it an evidenced fitting limit with a regression that fails before the fix",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "The banner or service log of a reproduction on Tabgha (Windows) names the endpoint, process, method and limit, or a stated owner reproduction shows no timeout",
     "A committed regression reproduces the identified slow call and fails before the fix",
@@ -39,13 +39,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h agent, 0.25 hour owner",
-    "basis": "Task added 2026-11-12 when B-008 was taken up, time box 2 h agent (the record's Small effort had no hours). About 1.5 h spent (stated: reading the relay and poll paths, history of the original message, a seeded poll measurement, Windows CI timing, records); parked without a cause. Remaining: 0.25 h owner to repeat the reproduction on Tabgha and paste the banner text, then 0.75 h agent to write the failing regression and fix or bound the named call, review and CI; more if the named call needs a design change. Estimate, not a measurement. Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 0.75 h → 0.5 h, min 0.5 h; owner hours and baseline kept.",
+    "estimate": "0 h agent, 0.25 h owner (decision)",
+    "basis": "Task added 2026-11-12 when B-008 was taken up, time box 2 h agent (the record's Small effort had no hours). About 1.5 h spent (stated: reading the relay and poll paths, history of the original message, a seeded poll measurement, Windows CI timing, records); parked without a cause. Remaining: 0.25 h owner to repeat the reproduction on Tabgha and paste the banner text, then 0.75 h agent to write the failing regression and fix or bound the named call, review and CI; more if the named call needs a design change. Estimate, not a measurement. Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 0.75 h → 0.5 h, min 0.5 h; owner hours and baseline kept. 2026-11-12: reproduction on current main done by the agent over SSH (not reproduced); remaining is the owner's close-or-keep decision. Actual 2.5 h stated, including the earlier 1.5 h.",
     "reviewed": "2026-11-12",
-    "agentHours": 0.5,
+    "agentHours": 0,
     "ownerHours": 0.25,
     "baselineAgentHours": 2,
-    "actualAgentHours": 1.5,
+    "actualAgentHours": 2.5,
     "actualSource": "stated"
   }
 }
