@@ -1,4 +1,5 @@
 import { writeFileSync, existsSync, openSync, fstatSync, readSync, closeSync } from 'node:fs';
+import { resolve } from 'node:path';
 import {
   inventoryCandidates,
   sshCandidates,
@@ -15,6 +16,7 @@ import { fileURLToPath } from 'node:url';
 import { bootstrapOperation } from './node-bootstrap-execution.ts';
 import { lifecyclePlan, lifecycleRecovery } from './node-lifecycle.ts';
 import {
+  linuxServiceHost,
   macServiceHost,
   windowsServiceHost,
   planService,
@@ -26,6 +28,7 @@ import { dataHome, readConfig, readToken } from './config.ts';
 import { rehearseUpgrade } from './upgrade-rehearsal.ts';
 import { bootstrapPlan } from './node-bootstrap.ts';
 import { checkUpdateAvailability } from './update-availability.ts';
+import { activateManagedNodeRuntime, planNodeRuntime, recoverManagedNodeRuntime } from './node-runtime.ts';
 const NODES_HELP =
   'nodes update-check [--channel main] [--offline] [--out FILE]; nodes lifecycle-inspect --action install|start|stop|update|uninstall [--revision FULL-SHA] [--out FILE]; nodes lifecycle-apply --plan FILE --confirm DIGEST; nodes lifecycle-status --digest DIGEST; nodes lifecycle-release --receipt FILE --evidence FILE (local Mac default profile only); nodes upgrade-rehearse --backup ABS-DIR [--out FILE] (the reader of this checkout on a private copy of a backup; review only, admits no upgrade); nodes lifecycle-plan --input FILE [--out FILE]; nodes lifecycle-recovery-check --receipt FILE --evidence FILE [--out FILE] (review only; no service or journal changes); nodes discover --inventory FILE | --ssh-config FILE | --tailscale FILE | --tailscale-live | --registry FILE --root-key PUBKEY; nodes inspect --local | --ssh HOST [--user USER] [--port PORT] [--out FILE]; nodes plan --inspection FILE --revision FULL-SHA --checkout ABS --home ABS --base ID --name NAME [--service | --additional-profile] [--out FILE]; nodes apply --plan FILE --confirm DIGEST; nodes status --plan FILE; nodes release --plan FILE --confirm DIGEST --confirmed-stopped --reason EVIDENCE';
 function file(path: string): string {
@@ -50,6 +53,12 @@ export async function nodesCommand(args: string[], runner: CommandRunner = runNo
     switches = new Set<string>();
   const schema: Record<string, { values: string[]; switches: string[] }> = {
     'update-check': { values: ['channel', 'out'], switches: ['offline'] },
+    'node-runtime-plan': { values: ['node', 'home', 'source', 'target-version', 'out'], switches: [] },
+    'node-runtime-activate': {
+      values: ['home', 'source', 'binary', 'version', 'confirm-choice', 'out'],
+      switches: [],
+    },
+    'node-runtime-recover': { values: ['home', 'out'], switches: [] },
     'lifecycle-inspect': { values: ['action', 'revision', 'out'], switches: [] },
     'lifecycle-apply': { values: ['plan', 'confirm', 'out'], switches: [] },
     'lifecycle-status': { values: ['digest', 'out'], switches: [] },
@@ -90,7 +99,12 @@ export async function nodesCommand(args: string[], runner: CommandRunner = runNo
     throw Error('EEXIST: choose a new output file; nothing was inspected.');
   let result: unknown;
   if (['lifecycle-inspect', 'lifecycle-apply', 'lifecycle-status', 'lifecycle-release'].includes(command)) {
-    const host = process.platform === 'win32' ? windowsServiceHost(dataHome()) : macServiceHost(dataHome());
+    const host =
+      process.platform === 'win32'
+        ? windowsServiceHost(dataHome())
+        : process.platform === 'linux'
+          ? linuxServiceHost(dataHome())
+          : macServiceHost(dataHome());
     if (command === 'lifecycle-inspect')
       result = await planService(
         host,
@@ -106,6 +120,49 @@ export async function nodesCommand(args: string[], runner: CommandRunner = runNo
         parseNodeInput(file(required('receipt'))),
         parseNodeInput(file(required('evidence'))),
       );
+  } else if (command === 'node-runtime-plan') {
+    const source = values.get('source') ?? resolve(fileURLToPath(new URL('..', import.meta.url)));
+    const home = values.get('home') ?? dataHome();
+    const nodePath = values.get('node') ?? process.execPath;
+    result = await planNodeRuntime(
+      {
+        home,
+        source,
+        nodePath,
+        ...(values.has('target-version') ? { targetVersion: values.get('target-version')! } : {}),
+      },
+      async (program, cmdArgs) => {
+        try {
+          const out = await runner({ program, args: cmdArgs, timeoutMs: 5000, maxBytes: 4096 });
+          return { status: 0, out, err: '' };
+        } catch (e) {
+          return { status: 1, out: '', err: e instanceof Error ? e.message : 'Command failed.' };
+        }
+      },
+    );
+  } else if (command === 'node-runtime-activate') {
+    const source = values.get('source') ?? resolve(fileURLToPath(new URL('..', import.meta.url)));
+    const home = values.get('home') ?? dataHome();
+    const confirmChoice = required('confirm-choice') as 'install-nerv-managed' | 'upgrade-nerv-managed';
+    result = await activateManagedNodeRuntime(
+      {
+        home,
+        source,
+        candidateBinary: required('binary'),
+        version: required('version'),
+        confirmChoice,
+      },
+      async (program, cmdArgs) => {
+        try {
+          const out = await runner({ program, args: cmdArgs, timeoutMs: 5000, maxBytes: 4096 });
+          return { status: 0, out, err: '' };
+        } catch (e) {
+          return { status: 1, out: '', err: e instanceof Error ? e.message : 'Command failed.' };
+        }
+      },
+    );
+  } else if (command === 'node-runtime-recover') {
+    result = recoverManagedNodeRuntime(values.get('home') ?? dataHome());
   } else if (command === 'update-check') {
     let runningRevision: string | null = null;
     try {

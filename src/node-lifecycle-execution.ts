@@ -31,9 +31,9 @@ import { rehearseUpgrade, READER_ENTRY, type RehearsalReport } from './upgrade-r
 
 export const SERVICE_LIFECYCLE_PROTOCOL = 1;
 export const SERVICE_READER_SCHEMA = UPGRADE_CONTRACT.readerSchema;
-export type ServiceKind = 'mac-service' | 'windows-service';
 type Action = 'install' | 'start' | 'stop' | 'update' | 'uninstall';
 type State = 'running' | 'completed' | 'uncertain' | 'released' | 'refused';
+export type ServiceKind = 'mac-service' | 'linux-service' | 'windows-service';
 export interface ServiceContext {
   userHome: string;
   home: string;
@@ -102,7 +102,8 @@ export interface ServiceReceipt {
 }
 /** Trusted adapter injection is for tests; no manifest or CLI input can select an adapter or command text. */
 export interface ServiceHost {
-  kind?: ServiceKind;
+  readonly kind?: ServiceKind;
+  readonly definitionPath?: string;
   context: ServiceContext;
   inspect(): Promise<ServiceObservation>;
   command(
@@ -127,18 +128,23 @@ const handler = () =>
   );
 const object = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
 const hostKind = (host: ServiceHost): ServiceKind => host.kind ?? 'mac-service';
-const definition = (c: ServiceContext, kind: ServiceKind = 'mac-service') =>
-  kind === 'windows-service'
+const platformOf = (kind: ServiceKind): 'darwin' | 'linux' | 'win32' =>
+  kind === 'windows-service' ? 'win32' : kind === 'linux-service' ? 'linux' : 'darwin';
+const definition = (c: ServiceContext, kind: ServiceKind = 'mac-service', overridePath?: string) =>
+  overridePath ??
+  (kind === 'windows-service'
     ? join(c.home, 'nerv-task.xml')
-    : join(c.userHome, 'Library/LaunchAgents/io.nerv.agent.plist');
+    : kind === 'linux-service'
+      ? join(process.env.XDG_CONFIG_HOME || join(c.userHome, '.config'), 'systemd/user/nerv.service')
+      : join(c.userHome, 'Library/LaunchAgents/io.nerv.agent.plist'));
 const windowsLauncherPath = (c: ServiceContext) => join(c.home, 'nerv-service.vbs');
 const expectedDefinition = (c: ServiceContext, kind: ServiceKind = 'mac-service'): string | Buffer =>
   kind === 'windows-service'
     ? Buffer.from('\ufeff' + renderService('win32', c.home, c.source, c.node), 'utf16le')
-    : renderService('darwin', c.home, c.source, c.node);
+    : renderService(platformOf(kind), c.home, c.source, c.node);
 const area = (c: ServiceContext) => join(c.userHome, '.nerv-lifecycle');
 const resource = (c: ServiceContext, kind: ServiceKind = 'mac-service') =>
-  kind === 'windows-service' ? 'user-service:' + c.uid + ':win32' : 'user-service:' + c.uid + ':darwin';
+  'user-service:' + c.uid + ':' + platformOf(kind);
 function safe(path: string, uid: number, privateMode = false): void {
   const stat = lstatSync(path);
   if (
@@ -388,34 +394,39 @@ export async function assertServiceStartup(host: ServiceHost, managedStart = fal
   }
 }
 export async function guardLocalService(home: string, managedStart = false): Promise<void> {
-  if (!present(join(homedir(), '.nerv-lifecycle'))) return;
-  if (process.platform === 'darwin') {
-    const host = macServiceHost(join(homedir(), '.nerv'));
-    await assertServiceStartup(host, managedStart && resolve(home) === host.context.home);
-  } else if (process.platform === 'win32') {
-    const host = windowsServiceHost(join(homedir(), '.nerv'));
-    await assertServiceStartup(host, managedStart && resolve(home) === host.context.home);
-  }
+  if (
+    (process.platform !== 'darwin' && process.platform !== 'linux' && process.platform !== 'win32') ||
+    !present(join(homedir(), '.nerv-lifecycle'))
+  )
+    return;
+  const host =
+    process.platform === 'win32'
+      ? windowsServiceHost(join(homedir(), '.nerv'))
+      : process.platform === 'linux'
+        ? linuxServiceHost(join(homedir(), '.nerv'))
+        : macServiceHost(join(homedir(), '.nerv'));
+  await assertServiceStartup(host, managedStart && resolve(home) === host.context.home);
 }
-const manualRecoverySteps = (p: ServicePlan): string[] => {
-  const stopHint =
-    p.kind === 'windows-service'
-      ? `Inspect and stop the Windows Task Scheduler task before anything else (schtasks /Query /TN "${WINDOWS_TASK}" /V /FO LIST; schtasks /End /TN "${WINDOWS_TASK}"), and confirm no descendant process remains.`
+const inspectHint = (p: ServicePlan): string =>
+  p.kind === 'windows-service'
+    ? `Inspect and stop the Windows Task Scheduler task before anything else (schtasks /Query /TN "${WINDOWS_TASK}" /V /FO LIST; schtasks /End /TN "${WINDOWS_TASK}"), and confirm no descendant process remains.`
+    : p.kind === 'linux-service'
+      ? 'Inspect and stop the user service before anything else (systemctl --user status nerv.service; systemctl --user disable --now nerv.service), and confirm no descendant process remains.'
       : `Inspect and stop the service before anything else (launchctl print gui/${p.context.uid}/io.nerv.agent; launchctl bootout gui/${p.context.uid}/io.nerv.agent), and confirm no descendant process remains.`;
-  return p.action === 'update'
+const manualRecoverySteps = (p: ServicePlan): string[] =>
+  p.action === 'update'
     ? [
-        stopHint,
+        inspectHint(p),
         'If dependencies failed or node_modules is missing, run npm ci --ignore-scripts in the checkout as it is so the CLI can load; do not start the service from it.',
         'Release the held operation with nodes lifecycle-release --receipt FILE --evidence FILE (refused while the service or any descendant remains).',
         `Check out the previous revision (${p.before.revision}) by hand and run npm ci --ignore-scripts && npm run build.`,
         'Inspect and apply a fresh start plan (nodes lifecycle-inspect --action start, then nodes lifecycle-apply).',
       ]
     : [
-        stopHint,
+        inspectHint(p),
         'Release the held operation with nodes lifecycle-release --receipt FILE --evidence FILE (refused while the service or any descendant remains).',
         'Inspect and apply a fresh plan after resolving the reported failure.',
       ];
-};
 export async function applyService(
   host: ServiceHost,
   raw: unknown,
@@ -498,10 +509,9 @@ export async function applyService(
       if (held(db)) throw Error('Another lifecycle operation holds the user service.');
       db!.prepare('UPDATE clock SET value=value+1 WHERE id=1').run();
       const fence = Number(db!.prepare('SELECT value FROM clock').get()!.value);
-      const kind = hostKind(host);
       receipt = {
         digest: p.digest,
-        resource: resource(host.context, kind),
+        resource: resource(host.context, hostKind(host)),
         fence,
         nonce: randomBytes(16).toString('hex'),
         pid: process.pid,
@@ -515,22 +525,21 @@ export async function applyService(
     });
     if (cached) return cached;
     onStep?.('accepted');
-    const kind = hostKind(host);
     if (p.action === 'install')
       await step('definition', async () => {
         const fresh = await host.inspect();
         if (canonical(fresh) !== canonical(p.before)) throw Error('Installation evidence changed.');
-        const defPath = definition(host.context, kind);
+        const defPath = definition(host.context, hostKind(host), host.definitionPath);
         const dir = dirname(defPath);
-        if (!existsSync(dir)) mkdirSync(dir, { mode: 0o700 });
+        if (!existsSync(dir)) mkdirSync(dir, { recursive: true, mode: 0o700 });
         safe(dir, host.context.uid);
-        if (kind === 'windows-service') {
+        if (hostKind(host) === 'windows-service') {
           exclusive(
             windowsLauncherPath(host.context),
             windowsLauncher(host.context.home, host.context.source, host.context.node),
           );
         }
-        exclusive(defPath, expectedDefinition(host.context, kind));
+        exclusive(defPath, expectedDefinition(host.context, hostKind(host)));
       });
     if (p.action === 'stop')
       await step('stop', async () => {
@@ -553,12 +562,12 @@ export async function applyService(
       await step('remove-definition', async () => {
         const current = await inspectOwned(false);
         if (current.runtime !== 'stopped' || current.pids.length) throw Error('Runtime descendants remain.');
-        const defPath = definition(host.context, kind);
+        const defPath = definition(host.context, hostKind(host), host.definitionPath);
         safe(defPath, host.context.uid, true);
-        if (hash(readFileSync(defPath)) !== hash(expectedDefinition(host.context, kind)))
+        if (hash(readFileSync(defPath)) !== hash(expectedDefinition(host.context, hostKind(host))))
           throw Error('Definition changed before removal.');
         unlinkSync(defPath);
-        if (kind === 'windows-service' && present(windowsLauncherPath(host.context))) {
+        if (hostKind(host) === 'windows-service' && present(windowsLauncherPath(host.context))) {
           unlinkSync(windowsLauncherPath(host.context));
         }
         syncDirectory(dirname(defPath));
@@ -1297,6 +1306,218 @@ export function macServiceAdapter(context: ServiceContext, run: typeof command =
   return host;
 }
 
+function systemdField(output: string, key: string): string {
+  const match = output.match(new RegExp(`^${key}=(.*)$`, 'm'));
+  return match ? match[1]!.trim() : '';
+}
+
+function linuxRegistrationMatches(output: string, c: ServiceContext): boolean {
+  const execStart = systemdField(output, 'ExecStart');
+  const workDir = systemdField(output, 'WorkingDirectory');
+  const env = systemdField(output, 'Environment');
+  const expectedCli = join(c.source, 'src/cli.ts');
+  return (
+    systemdField(output, 'LoadState') === 'loaded' &&
+    workDir === c.source &&
+    env.includes(`NERV_HOME=${c.home}`) &&
+    execStart.includes(c.node) &&
+    execStart.includes(expectedCli) &&
+    execStart.includes('serve')
+  );
+}
+
+/**
+ * Production Linux user-service adapter (`systemd --user`, F-005-T10): requires an unprivileged user session,
+ * default `~/.nerv` profile, canonical checkout, and never enables lingering or touches system-wide services.
+ */
+export function linuxServiceHost(home: string): ServiceHost {
+  if (process.platform !== 'linux' || !process.getuid?.())
+    throw Error('Durable Linux lifecycle currently requires an unprivileged user.');
+  const context: ServiceContext = {
+    userHome: homedir(),
+    home: resolve(home),
+    source: realpathSync(fileURLToPath(new URL('..', import.meta.url))),
+    node: realpathSync(process.execPath),
+    uid: process.getuid(),
+  };
+  if (context.home !== join(context.userHome, '.nerv'))
+    throw Error('An additional or legacy profile cannot manage this OS service.');
+  return linuxServiceAdapter(context);
+}
+
+export function linuxServiceAdapter(
+  context: ServiceContext,
+  run: typeof command = command,
+  unitPath = definition(context, 'linux-service'),
+): ServiceHost {
+  const expected = renderService('linux', context.home, context.source, context.node);
+  const macShared = macServiceAdapter(context, run);
+  const git = async (args: string[]) => {
+    const r = await run('git', ['-C', context.source, ...args]);
+    if (r.status !== 0) throw Error('Selected source could not be verified.');
+    return r.out.trim();
+  };
+  const showUnit = async (unitName: string): Promise<Result | undefined> => {
+    const r = await run('systemctl', [
+      '--user',
+      'show',
+      '--no-pager',
+      '--property=LoadState,ActiveState,SubState,MainPID,ExecStart,WorkingDirectory,Environment',
+      unitName,
+    ]);
+    if (r.status !== 0) return undefined;
+    if (systemdField(r.out, 'LoadState') === 'not-found') return undefined;
+    return r;
+  };
+  return {
+    kind: 'linux-service',
+    definitionPath: unitPath,
+    context,
+    inspect: async () => {
+      safe(context.userHome, context.uid);
+      safe(context.home, context.uid, true);
+      safe(context.source, context.uid);
+      assertRootMigrationReady(context.home);
+      const config = readConfig(context.home);
+      const token = readToken(context.home);
+      const profile = serviceProfileIdentity(context);
+      const revision = await git(['rev-parse', 'HEAD']);
+      if (
+        !/^[a-f0-9]{40}$/.test(revision) ||
+        (await git(['remote', 'get-url', 'origin'])) !== 'https://github.com/voidbrain/nerv.git'
+      )
+        throw Error('Use the canonical reviewed NERV checkout.');
+      const session = (await run('systemctl', ['--user', 'show-environment'])).status === 0;
+      const prerequisites = await checkServicePrerequisites(context, run, { session });
+      const currentKind: ServiceObservation['definition'] = !present(unitPath)
+        ? 'absent'
+        : (() => {
+            try {
+              safe(unitPath, context.uid, true);
+              return hash(readFileSync(unitPath)) === hash(expected) ? 'owned' : 'foreign';
+            } catch {
+              return 'foreign';
+            }
+          })();
+      const manager = await showUnit('nerv.service');
+      const legacyManager = await showUnit('nodo.service');
+      let registered: ServiceObservation['registration'] = 'absent';
+      let managerPid = 0;
+      if (manager) {
+        registered = linuxRegistrationMatches(manager.out, context) ? 'owned' : 'foreign';
+        const rawPid = Number(systemdField(manager.out, 'MainPID'));
+        managerPid = Number.isSafeInteger(rawPid) && rawPid > 0 ? rawPid : 0;
+      }
+      const ps = await run('ps', ['-axo', 'pid=,ppid=,comm=,args=']);
+      if (ps.status !== 0) throw Error('Process ownership could not be inspected.');
+      const rows = ps.out.split('\n').flatMap((line) => {
+        const m = /^\s*(\d+)\s+(\d+)\s+(\S+)\s+(.*)$/.exec(line);
+        return m ? [{ pid: Number(m[1]), parent: Number(m[2]), comm: m[3]!, args: m[4]! }] : [];
+      });
+      const roots = rows.filter(
+        (r) => (r.comm === 'node' || r.comm.endsWith('/node')) && /src\/cli\.ts\s+(serve|launch)(\s|$)/.test(r.args),
+      );
+      const ids = new Set(roots.map((r) => r.pid));
+      if (managerPid) ids.add(managerPid);
+      let changed = true;
+      while (changed) {
+        changed = false;
+        for (const r of rows)
+          if (ids.has(r.parent) && !ids.has(r.pid)) {
+            ids.add(r.pid);
+            changed = true;
+          }
+      }
+      const pids = [...ids].sort((a, b) => a - b);
+      let runtime: ServiceObservation['runtime'] = pids.length ? 'unknown' : 'stopped';
+      try {
+        const r = await fetch('http://127.0.0.1:' + config.port + '/api/doctor', {
+          headers: { authorization: 'Bearer ' + token },
+          signal: AbortSignal.timeout(1500),
+        });
+        if (r.ok) {
+          const body = (await r.json()) as { base?: { id: string }; build?: { commit: string } };
+          runtime =
+            body.base?.id === config.base.id &&
+            body.build?.commit === revision &&
+            registered === 'owned' &&
+            systemdField(manager?.out ?? '', 'ActiveState') === 'active' &&
+            pids.includes(managerPid)
+              ? 'owned'
+              : 'unknown';
+        } else runtime = 'unknown';
+      } catch {}
+      safe(databasePath(context.home), context.uid);
+      const db = new DatabaseSync(databasePath(context.home), { readOnly: true });
+      let pending: boolean;
+      let schema: number;
+      try {
+        schema = Number(db.prepare('PRAGMA user_version').get()!.user_version);
+        pending =
+          !!db
+            .prepare("SELECT 1 FROM worker_jobs WHERE state NOT IN ('completed','cancelled','released') LIMIT 1")
+            .get() ||
+          !!db.prepare('SELECT 1 FROM kaji_outbox WHERE done IS NULL LIMIT 1').get() ||
+          !!db.prepare("SELECT 1 FROM worker_legacy_outbox WHERE state='pending' LIMIT 1").get();
+      } finally {
+        db.close();
+      }
+      return {
+        revision,
+        schema,
+        profile,
+        definition: currentKind,
+        registration: registered,
+        runtime,
+        pids,
+        session,
+        clean: (await git(['status', '--porcelain'])) === '',
+        legacy: present(join(dirname(unitPath), 'nodo.service')) || !!legacyManager,
+        pending,
+        built: existsSync(join(context.source, 'dist/web/browser/index.html')),
+        prerequisites,
+      };
+    },
+    health: macShared.health,
+    compatible: macShared.compatible,
+    rehearse: macShared.rehearse,
+    backup: macShared.backup,
+    authorizedStart: async (p) => {
+      if (
+        (await git(['status', '--porcelain'])) !== '' ||
+        serviceProfileIdentity(context) !== p.before.profile ||
+        (await git(['rev-parse', 'HEAD'])) !== (p.nextRevision ?? p.before.revision)
+      )
+        return false;
+      const manager = await showUnit('nerv.service');
+      return (
+        !!manager &&
+        linuxRegistrationMatches(manager.out, context) &&
+        systemdField(manager.out, 'ActiveState') === 'active' &&
+        Number(systemdField(manager.out, 'MainPID')) === process.pid &&
+        hash(readFileSync(unitPath)) === hash(expected)
+      );
+    },
+    command: async (step, p) => {
+      if (step === 'register') {
+        const reload = await run('systemctl', ['--user', 'daemon-reload']);
+        if (reload.status !== 0) throw Error('Service register did not confirm completion; retain uncertainty.');
+        const enable = await run('systemctl', ['--user', 'enable', '--now', 'nerv.service']);
+        if (enable.status !== 0) throw Error('Service register did not confirm completion; retain uncertainty.');
+        return;
+      }
+      if (step === 'unregister') {
+        const disable = await run('systemctl', ['--user', 'disable', '--now', 'nerv.service']);
+        if (disable.status !== 0) throw Error('Service unregister did not confirm completion; retain uncertainty.');
+        const reload = await run('systemctl', ['--user', 'daemon-reload']);
+        if (reload.status !== 0) throw Error('Service unregister did not confirm completion; retain uncertainty.');
+        return;
+      }
+      await macShared.command(step, p);
+    },
+  };
+}
+
 /**
  * Windows Task Scheduler registration check: verifies the scheduled task runs `wscript.exe`
  * with our hidden launcher `nerv-service.vbs` inside `context.home` and `context.source`.
@@ -1379,7 +1600,7 @@ export function windowsServiceAdapter(context: ServiceContext, run: typeof comma
     return [...ids].sort((a, b) => a - b);
   };
 
-  const host: ServiceHost = {
+  return {
     kind: 'windows-service',
     context,
     inspect: async () => {
@@ -1528,5 +1749,4 @@ export function windowsServiceAdapter(context: ServiceContext, run: typeof comma
       await mac.command(step, p);
     },
   };
-  return host;
 }
