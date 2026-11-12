@@ -30,7 +30,7 @@
   ],
   "validation": [
     "Directed regressions or recorded evidence for this slice; final required CI",
-    "2026-11-12: test/node-runtime.test.ts (ownership classification, explicit choices, non-replacement, recovery, nodes CLI)"
+    "2026-11-12: PR #324, test/node-runtime.test.ts (ownership classification, explicit choices, non-replacement, recovery, nodes CLI)"
   ],
   "escalation": [
     "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
