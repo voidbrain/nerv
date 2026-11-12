@@ -29,7 +29,7 @@
   ],
   "validation": [
     "Review report under docs/reviews/; fixes with regressions; final required CI",
-    "2026-11-12: report docs/reviews/2026-11-12-update-path.md; failing regressions 93b89cc (test/update-path-review.test.ts) before the fixes; PR #PRNUM"
+    "2026-11-12: report docs/reviews/2026-11-12-update-path.md; failing regressions 93b89cc (test/update-path-review.test.ts) before the fixes; PR #287"
   ],
   "escalation": [
     "Any destructive restore, changed ownership or unresolved physical/worker effects requires explicit reconciliation; general restore remains F-062"
