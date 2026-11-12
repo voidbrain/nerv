@@ -40,7 +40,7 @@ Misato answered the unrelated calendar question with a final reply instead of re
 
 ## B-021 topic-change fix, 12 November 2026
 
-Owner-approved run for B-021 (local `gemma4:12b`, loopback Ollama, no paid usage). Suite `misato-planner-v2` adds three B-021 cases to the planner corpus: `answer-continues-short` and `answer-continues-long` (an answer that continues the job, under and over eight words) and an unseen `topic-change-unrelated-question` holdout. `topic-change-during-question` was used while developing the fix, so it no longer counts as unseen.
+Owner-approved run for B-021 (local `gemma4:12b`, loopback Ollama, no paid usage). Suite `misato-planner-v2` adds three B-021 cases to the planner corpus: `answer-continues-short` and `answer-continues-long` (an answer that continues the job, under and over eight words) and an unseen `topic-change-unrelated-question` holdout. `topic-change-during-question` was used while developing the fix: it keeps its `holdout` label in the corpus and in both reports, but only `topic-change-unrelated-question` is unseen evidence.
 
 | Evidence | Outcome | Scope |
 |---|---|---|

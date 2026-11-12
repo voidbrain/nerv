@@ -8,7 +8,7 @@
   "acceptance": [
     "A committed regression fails before the fix: the forwarding base keeps the question open after a late reply",
     "After the fix the forwarding base closes its copy as failed and the next message is a new sortie, forwarded as a new request",
-    "An answer that never reached the main base still keeps the question waiting and never runs locally"
+    "An answer that never reached the main base (connection failed, not seen as main here, or turned away with 400/401/403/409) still keeps the question waiting and never runs locally"
   ],
   "dependsOn": [],
   "resources": [
@@ -17,6 +17,7 @@
     "test/one-channel.test.ts",
     "docs/work/records/B-021.md",
     "docs/work/tasks/B-021-T01.json",
+    "src/kaji-link.ts",
     "generated:backlog-views"
   ],
   "capabilities": [
@@ -37,12 +38,12 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 hours agent",
-    "basis": "Planned 2026-11-12 at the start of the B-021 session (00:30 CET) at 1.5 h agent: reproduce with a two-runtime fixture, a one-line control-flow change, record, review and CI; baseline recorded after the work started, from that plan. Implemented 2026-11-12 in about 0.25 h (stated: test and fix from 00:33 to 00:40 CET). 0.5 h remains for review, CI and the closing reconcile, shared with B-021-T02. Estimate, not a measurement.",
+    "estimate": "0 remaining (CI counted under B-021-T02)",
+    "basis": "Planned 2026-11-12 at the start of the B-021 session (00:30 CET) at 1.5 h agent: reproduce with a two-runtime fixture, a one-line control-flow change, record, review and CI; baseline recorded after the work started, from that plan. Implemented 2026-11-12 in about 0.25 h (stated: test and fix from 00:33 to 00:40 CET). Review should-fix (a definite refusal keeps the question waiting) done 2026-11-12 in about 0.25 h more (stated), so about 0.5 h so far. The remaining 0.25 h for CI and the closing reconcile of the shared PR is counted under B-021-T02, not twice. Estimate, not a measurement.",
     "reviewed": "2026-11-12",
-    "agentHours": 0.5,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
-    "actualAgentHours": 0.25,
+    "actualAgentHours": 0.5,
     "actualSource": "stated"
   }
 }

@@ -18,6 +18,11 @@
     "docs/evaluations/2026-11-12-misato-b021.json",
     "docs/work/records/B-021.md",
     "docs/work/tasks/B-021-T02.json",
+    "test/lcl.test.ts",
+    "docs/evaluations/2026-11-12-misato-v2.json",
+    "docs/evaluations/README.md",
+    "docs/reviews/README.md",
+    "docs/work/records/B-049.md",
     "generated:backlog-views"
   ],
   "capabilities": [
@@ -39,12 +44,12 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 hours agent",
-    "basis": "Planned 2026-11-12 at the start of the B-021 session (00:30 CET) at 2.5 h agent: prompt change, deterministic tests, new cases, real-model run, record, review and CI; baseline recorded after the work started, from that plan. Machine time of the model run is not counted. Implemented 2026-11-12 in about 0.75 h (stated: probes, fix, tests, run and records from 00:40 CET). 0.5 h remains for review, CI and the closing reconcile, shared with B-021-T01. Estimate, not a measurement.",
+    "estimate": "0.25 hours agent",
+    "basis": "Planned 2026-11-12 at the start of the B-021 session (00:30 CET) at 2.5 h agent: prompt change, deterministic tests, new cases, real-model run, record, review and CI; baseline recorded after the work started, from that plan. Machine time of the model run is not counted. Implemented 2026-11-12 in about 0.75 h (stated: probes, fix, tests, run and records from 00:40 CET). Review (fresh context) and its should-fix (LCL budget) done 2026-11-12 in about 0.5 h more (stated), so about 1.25 h so far. 0.25 h remains for CI and the closing reconcile of the shared PR #281 (counted here only). Estimate, not a measurement.",
     "reviewed": "2026-11-12",
-    "agentHours": 0.5,
+    "agentHours": 0.25,
     "baselineAgentHours": 2.5,
-    "actualAgentHours": 0.75,
+    "actualAgentHours": 1.25,
     "actualSource": "stated"
   }
 }
