@@ -31,7 +31,7 @@
   ],
   "validation": [
     "Directed regressions or recorded evidence for this slice; final required CI",
-    "2026-11-12: test/update-availability.test.ts (contract states, GET /api/update, nodes update-check --offline)"
+    "2026-11-12: PR #320, test/update-availability.test.ts (contract states, GET /api/update, nodes update-check --offline)"
   ],
   "escalation": [
     "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
