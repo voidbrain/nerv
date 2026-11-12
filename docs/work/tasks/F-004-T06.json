@@ -4,7 +4,7 @@
   "parent": "F-004",
   "title": "Phone install and push acceptance",
   "goal": "Phone install and push acceptance",
-  "status": "planned",
+  "status": "ready",
   "acceptance": [
     "Owner installs on a phone, receives a reminder push and completes it from the PWA; result recorded"
   ],
