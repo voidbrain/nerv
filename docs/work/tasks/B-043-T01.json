@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "id": "B-043-T01",
+  "parent": "B-043",
+  "title": "Reproduce and bound process-queue saturation from overlapping periodic work",
+  "goal": "A controlled slow-child regression shows which background producers fill the nervous process queue, and an overlap guard keeps them bounded without widening the bound or a timeout",
+  "status": "implemented",
+  "acceptance": [
+    "A committed deterministic regression fails before the fix with the observed saturation and passes after it",
+    "Per-producer request counts under a stalled child name the producers",
+    "The process queue bound (MAX_CHILD_REQUESTS) and every timeout stay unchanged",
+    "A decision made while a resumable poll is out is still seen without waiting for the next resumer tick",
+    "Windows and full-suite CI pass on the PR"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/runtime.ts",
+    "src/kaji-link.ts",
+    "test/periodic-overlap.test.ts",
+    "docs/work/records/B-043.md",
+    "docs/work/tasks/B-043-T01.json",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "distributed-contracts",
+    "regression-design",
+    "concurrency-control"
+  ],
+  "privacy": "Neutral repository fixtures only; no model inference, private hosts or device operations",
+  "validation": [
+    "test/periodic-overlap.test.ts fails before the fix and passes after it",
+    "Affected resume, Kaji link, Kaji run, clarification and watch regressions; full deterministic CI including Windows",
+    "Fresh-context design review before the parent is verified"
+  ],
+  "escalation": [
+    "Do not merely widen timeouts or the queue bound, or weaken assertions",
+    "Keep the parent open until Windows runs on main show no recurrence"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 hour agent",
+    "basis": "Task added 2026-11-12 when B-043 was taken up. Baseline 2.5 days (baselineDays, history: the record's 2–3 focused days of 2026-11-07), re-estimated 2026-11-12 in agent hours (harness 5.6.0) as 2 h, the session's time box (baselineAgentHours). About 1.25 h spent (stated: CI log retrieval, slow-child regression, per-producer counts, fix, local suite, records). 0.75 h remains: fresh-context review, CI rounds including Windows, merge.",
+    "reviewed": "2026-11-12",
+    "baselineDays": 2.5,
+    "agentHours": 0.75,
+    "baselineAgentHours": 2,
+    "actualAgentHours": 1.25,
+    "actualSource": "stated"
+  }
+}
