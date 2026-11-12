@@ -616,6 +616,77 @@ test(
       await evaluate(`window.__nervSetSurface(null)`);
       await until(`document.querySelector('nerv-surface-renderer nerv-status-card')!==null`);
 
+      // F-004-T05: Web push subscription and delivery in the workspace
+      // Mock PushManager in headless Chrome where external FCM servers are unreachable
+      await evaluate(`(() => {
+        let currentSub = null;
+        const mockPushManager = {
+          getSubscription: async () => currentSub,
+          subscribe: async (opts) => {
+            currentSub = {
+              endpoint: window.location.origin + '/mock-push-endpoint/' + Math.random().toString(36).slice(2),
+              unsubscribe: async () => { currentSub = null; return true; },
+              toJSON: () => ({
+                endpoint: currentSub.endpoint,
+                keys: {
+                  p256dh: 'BIiSg_bF84f_w5pY51_mock_p256dh_key_base64url',
+                  auth: 'mock_auth_secret_16'
+                }
+              })
+            };
+            return currentSub;
+          }
+        };
+        const mockRegistration = {
+          pushManager: mockPushManager,
+          showNotification: async (title, opts) => {}
+        };
+        Object.defineProperty(navigator.serviceWorker, 'ready', {
+          configurable: true,
+          get: () => Promise.resolve(mockRegistration)
+        });
+        window.Notification = {
+          permission: 'granted',
+          requestPermission: async () => 'granted'
+        };
+        window.PushManager = function() {};
+        window.__nervApp.pushSupported.set(true);
+      })()`);
+
+      // Refresh push subscription check
+      await evaluate(`window.__nervApp.checkPushSubscription()`);
+      await until(`document.querySelector('button.push-toggle') !== null`);
+
+      // 1. Initial state: inactive
+      assert.equal(
+        await evaluate(`document.querySelector('button.push-toggle').getAttribute('aria-pressed')`),
+        'false',
+        'push toggle initially aria-pressed=false',
+      );
+      assert.equal(await evaluate(`window.__nervApp.pushSubscribed()`), false, 'pushSubscribed is false initially');
+      await audit('push-toggle-inactive');
+
+      // 2. Click to subscribe
+      await evaluate(`document.querySelector('button.push-toggle').click()`);
+      await until(`window.__nervApp.pushSubscribed() === true`);
+      assert.equal(
+        await evaluate(`document.querySelector('button.push-toggle').getAttribute('aria-pressed')`),
+        'true',
+        'push toggle aria-pressed=true after subscription',
+      );
+      assert.equal(store.listPushSubscriptions().length, 1, 'subscription stored in sqlite');
+      await audit('push-toggle-active');
+
+      // 3. Click to unsubscribe
+      await evaluate(`document.querySelector('button.push-toggle').click()`);
+      await until(`window.__nervApp.pushSubscribed() === false`);
+      assert.equal(
+        await evaluate(`document.querySelector('button.push-toggle').getAttribute('aria-pressed')`),
+        'false',
+        'push toggle aria-pressed=false after unsubscribe',
+      );
+      assert.equal(store.listPushSubscriptions().length, 0, 'subscription removed from sqlite');
+
       // F-019: shipped /dashboard accounting, keyboard pager, mobile layout and actual change notifications.
       const price = {
         route: 'cloud',

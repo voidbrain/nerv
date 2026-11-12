@@ -4,7 +4,7 @@
   "parent": "F-004",
   "title": "Doctor view",
   "goal": "Doctor view",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Doctor results rendered read-only with severity and fix hints; no secrets shown; axe passes"
   ],

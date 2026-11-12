@@ -4,7 +4,7 @@
   "parent": "F-004",
   "title": "Reminder CRUD in the workspace",
   "goal": "Reminder CRUD in the workspace",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Create, edit, complete and delete reminders through the existing API with validation and errors shown; axe passes"
   ],

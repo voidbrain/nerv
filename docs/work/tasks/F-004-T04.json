@@ -4,7 +4,7 @@
   "parent": "F-004",
   "title": "Schema-validated registered component renderer (GenUI)",
   "goal": "Schema-validated registered component renderer (GenUI)",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Only registered components with validated props render; arbitrary component, code or action payloads are rejected and logged"
   ],

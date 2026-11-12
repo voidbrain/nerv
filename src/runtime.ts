@@ -9,7 +9,7 @@ import type { HistoryPage } from './history.ts';
 import { readCommand, statusText, type StatusBase } from './chat-command.ts';
 import { channelIsFresh, sanitizeChannel, type ChannelState, type HeardChannel } from './channel-state.ts';
 import { ProcessClient } from './process-client.ts';
-import type { Reminder, InboxEntry, InboxPage, ActResult } from './store.ts';
+import type { Reminder, InboxEntry, InboxPage, ActResult, PushSubscriptionRecord } from './store.ts';
 import { degradedReasons, type RouteHealth } from './route-health.ts';
 import {
   detectOllama,
@@ -137,6 +137,16 @@ export interface StoreApi {
     patch: { title?: string; due?: string },
   ): Reminder | undefined | null | Promise<Reminder | undefined | null>;
   cancel(id: string): boolean | Promise<boolean>;
+  pushPublicKey?(): Promise<string> | string;
+  savePushSubscription?(sub: {
+    endpoint: string;
+    p256dh: string;
+    auth: string;
+    userAgent?: string;
+  }): Promise<void> | void;
+  deletePushSubscription?(endpoint: string): Promise<boolean> | boolean;
+  listPushSubscriptions?(): Promise<PushSubscriptionRecord[]> | PushSubscriptionRecord[];
+  pushStatus?(): Promise<{ subscribed: boolean; count: number }> | { subscribed: boolean; count: number };
   inbox(): unknown | Promise<unknown>;
   doctor(): object | Promise<object>;
   health(): object | Promise<object>;
@@ -286,6 +296,19 @@ export class Runtime implements StoreApi {
   }
   async cancel(id: string) {
     return (await this.nervous.call('reminders.cancel', { id })) as boolean;
+  }
+  async pushPublicKey() {
+    return (await this.nervous.call('push.key')) as string;
+  }
+  async savePushSubscription(sub: { endpoint: string; p256dh: string; auth: string; userAgent?: string }) {
+    await this.nervous.call('push.subscribe', sub);
+  }
+  async deletePushSubscription(endpoint: string) {
+    const res = (await this.nervous.call('push.unsubscribe', { endpoint })) as { ok: boolean };
+    return res.ok;
+  }
+  async pushStatus() {
+    return (await this.nervous.call('push.status')) as { subscribed: boolean; count: number };
   }
   async inbox() {
     return this.nervous.call('inbox.list');

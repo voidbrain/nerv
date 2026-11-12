@@ -16,6 +16,8 @@ import { builtinTools, execute, hasExecutor } from './executors.ts';
 import { MEMORY_SCHEMA, Memory, type Episode } from './memory.ts';
 import { Registry, REGISTRY_SCHEMA } from './kaji.ts';
 import { defaultPolicy, type Ballot, type Policy } from './policy.ts';
+import { generateVapidKeys, sendWebPush, formatReminderPushPayload, type PushSubscriptionRecord } from './push.ts';
+export type { PushSubscriptionRecord } from './push.ts';
 export type Reminder = {
   id: string;
   title: string;
@@ -68,6 +70,7 @@ export class Store {
   readonly watch: Watch;
   readonly memory: Memory;
   readonly policySource: string;
+  pushFetch: typeof fetch = fetch;
   /** The data home, when known: the schedule tool writes config.json there. */
   readonly home?: string;
   constructor(
@@ -142,6 +145,11 @@ export class Store {
     // Approval delivery identities are additive: existing reminder/brief rowids remain channel cursors.
     this.db.exec(
       'CREATE TABLE IF NOT EXISTS approval_deliveries(approval_id TEXT PRIMARY KEY REFERENCES approvals(id),delivery_id TEXT NOT NULL UNIQUE REFERENCES deliveries(id))',
+    );
+    // F-004-T05: Web push subscription storage and VAPID keypair
+    this.db.exec(
+      `CREATE TABLE IF NOT EXISTS push_subscriptions(endpoint TEXT PRIMARY KEY, p256dh TEXT NOT NULL, auth TEXT NOT NULL, created TEXT NOT NULL, user_agent TEXT);
+       CREATE TABLE IF NOT EXISTS push_vapid(id TEXT PRIMARY KEY, public_key TEXT NOT NULL, private_key TEXT NOT NULL, created TEXT NOT NULL);`,
     );
     this.ledger = new Ledger(this.db, { policy: scrolls.policy, tools: builtinTools });
     this.memory = new Memory(this.db);
@@ -498,10 +506,80 @@ export class Store {
         this.db.prepare('UPDATE reminders SET delivered=? WHERE id=?').run(now.toISOString(), r.id);
       }
       this.db.exec('COMMIT');
+      if (due.length > 0) {
+        void this.dispatchPushReminders(due).catch(() => {});
+      }
       return due.length;
     } catch (e) {
       this.db.exec('ROLLBACK');
       throw e;
+    }
+  }
+  getOrGenerateVapidKeys(): { publicKey: string; privateKey: string } {
+    const existing = this.db.prepare('SELECT public_key, private_key FROM push_vapid WHERE id=?').get('vapid') as
+      { public_key: string; private_key: string } | undefined;
+    if (existing) {
+      return { publicKey: existing.public_key, privateKey: existing.private_key };
+    }
+    const generated = generateVapidKeys();
+    this.db
+      .prepare('INSERT OR IGNORE INTO push_vapid(id, public_key, private_key, created) VALUES(?, ?, ?, ?)')
+      .run('vapid', generated.publicKey, generated.privateKey, new Date().toISOString());
+    return generated;
+  }
+  pushPublicKey(): string {
+    return this.getOrGenerateVapidKeys().publicKey;
+  }
+  savePushSubscription(sub: { endpoint: string; p256dh: string; auth: string; userAgent?: string }): void {
+    if (!sub || typeof sub !== 'object') throw new Error('Invalid subscription.');
+    if (typeof sub.endpoint !== 'string' || !/^https?:\/\//.test(sub.endpoint) || sub.endpoint.length > 1024)
+      throw new Error('Invalid subscription endpoint.');
+    if (typeof sub.p256dh !== 'string' || !sub.p256dh || sub.p256dh.length > 256)
+      throw new Error('Invalid subscription p256dh key.');
+    if (typeof sub.auth !== 'string' || !sub.auth || sub.auth.length > 256)
+      throw new Error('Invalid subscription auth secret.');
+    this.db
+      .prepare(
+        'INSERT INTO push_subscriptions(endpoint, p256dh, auth, created, user_agent) VALUES(?, ?, ?, ?, ?) ON CONFLICT(endpoint) DO UPDATE SET p256dh=excluded.p256dh, auth=excluded.auth, user_agent=excluded.user_agent',
+      )
+      .run(sub.endpoint, sub.p256dh, sub.auth, new Date().toISOString(), sub.userAgent ?? null);
+  }
+  deletePushSubscription(endpoint: string): boolean {
+    if (typeof endpoint !== 'string' || !endpoint) return false;
+    return this.db.prepare('DELETE FROM push_subscriptions WHERE endpoint=?').run(endpoint).changes > 0;
+  }
+  listPushSubscriptions(): PushSubscriptionRecord[] {
+    return this.db
+      .prepare(
+        'SELECT endpoint, p256dh, auth, created, user_agent AS userAgent FROM push_subscriptions ORDER BY created DESC',
+      )
+      .all() as unknown as PushSubscriptionRecord[];
+  }
+  getPushSubscription(endpoint: string): PushSubscriptionRecord | null {
+    return (
+      (this.db
+        .prepare(
+          'SELECT endpoint, p256dh, auth, created, user_agent AS userAgent FROM push_subscriptions WHERE endpoint=?',
+        )
+        .get(endpoint) as unknown as PushSubscriptionRecord | undefined) ?? null
+    );
+  }
+  async dispatchPushReminders(reminders: Reminder[]): Promise<void> {
+    const subs = this.listPushSubscriptions();
+    if (subs.length === 0 || reminders.length === 0) return;
+    const vapid = this.getOrGenerateVapidKeys();
+    for (const reminder of reminders) {
+      const payload = formatReminderPushPayload(reminder);
+      for (const sub of subs) {
+        try {
+          const res = await sendWebPush(sub, payload, vapid, this.pushFetch);
+          if (res.expired) {
+            this.deletePushSubscription(sub.endpoint);
+          }
+        } catch {
+          // Push dispatch error does not break local delivery
+        }
+      }
     }
   }
   queueRemote(sortieId: string, base: string, tool: string, args: Record<string, unknown>): { id: string } {
