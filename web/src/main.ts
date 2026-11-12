@@ -5,6 +5,7 @@ import { messages } from './i18n';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideServiceWorker } from '@angular/service-worker';
 import { UpdatePrompt } from './update-prompt';
+import { DoctorView } from './doctor-view';
 /** F-004-T01: API calls go straight to the service; the service worker never sees or holds them. */
 const SW_BYPASS = { 'ngsw-bypass': '1' };
 interface Page<T> {
@@ -20,7 +21,7 @@ interface Reminder {
 }
 @Component({
   selector: 'nerv-app',
-  imports: [NgOptimizedImage, UpdatePrompt],
+  imports: [NgOptimizedImage, UpdatePrompt, DoctorView],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
 <div class="shell"><aside><a class="brand" href="/"><img ngSrc="brand.svg" priority width="48" height="36" alt="NERV Agency">NERV<span>{{t().agent}}</span></a><nav [attr.aria-label]="t().workspace"><button (click)="view.set('home')" [class.active]="view()==='home'">◈ &nbsp; {{t().overview}}</button><button (click)="view.set('reminders')" [class.active]="view()==='reminders'">◷ &nbsp; {{t().reminders}}</button><button (click)="view.set('doctor')" [class.active]="view()==='doctor'">+ &nbsp; {{t().doctor}}</button></nav><div class="sidebar-foot"><i></i> Nodo · v0.1<br><small>{{t().foot}}</small></div></aside>
@@ -29,7 +30,7 @@ interface Reminder {
 @if(error()){<p role="alert" class="error">{{error()}}</p>}
 @if(connected()){<nerv-status-card [surface]="statusSurface()"></nerv-status-card>
 @if(view()!=='doctor'){<div class="section-heading"><h2>{{view()==='home'?t().horizon:t().reminders}}</h2><span>{{reminders().length}} {{t().recorded}}</span></div><div class="grid"><section class="panel"><h3>{{t().keep}}</h3><label>{{t().what}}<input #title [placeholder]="t().example" maxlength="500"></label><label>{{t().when}} <small>{{t().browserTime}}</small><input #due type="datetime-local"></label><button (click)="add(title.value,due.value,title,due)">{{t().tie}}</button><p class="hint">{{t().delivery}}</p></section><section class="panel"><h3>{{t().horizon}}</h3>@for(r of reminders();track r.id){@if(editingId()!==r.id){<article class="reminder" [attr.data-reminder-id]="r.id"><div><strong>{{r.title}}</strong><p>{{format(r.due)}}</p><small>{{r.cancelled?t().cancelled:r.delivered?t().delivered:t().scheduled}}</small></div>@if(!r.cancelled&&!r.delivered){<div class="reminder-actions"><button class="quiet cancel-btn" (click)="cancel(r.id)" [attr.aria-label]="t().cancel+' '+r.title">×</button><button class="quiet edit-btn" (click)="startEdit(r)" [attr.aria-label]="t().edit+' '+r.title">{{t().edit}}</button></div>}</article>}@if(editingId()===r.id){<article class="reminder editing" [attr.data-reminder-id]="r.id"><form class="rem-edit" (submit)="saveEdit($event,r.id)" novalidate><label [attr.for]="'rem-edit-title-'+r.id">{{t().what}}</label><input [id]="'rem-edit-title-'+r.id" type="text" [value]="editTitle()" (input)="editTitle.set($any($event.target).value)" maxlength="500"><label [attr.for]="'rem-edit-due-'+r.id">{{t().when}} <small>{{t().browserTime}}</small></label><input [id]="'rem-edit-due-'+r.id" type="datetime-local" [value]="editDue()" (input)="editDue.set($any($event.target).value)"><div class="edit-actions"><button type="submit" class="save-btn">{{t().save}}</button><button type="button" class="quiet keep-btn" (click)="cancelEdit(r.id)">{{t().keepAsIs}}</button></div></form></article>}}@empty{<p class="empty">{{t().empty}}</p>}<div role="group" data-history="reminders" [attr.aria-label]="t().reminderPages"><button class="quiet" (click)="pageReminders(false)" [disabled]="reminderBefore().length===1" [attr.aria-disabled]="paging()||reminderBefore().length===1">{{t().previous}}</button><button class="quiet" (click)="pageReminders(true)" [disabled]="reminderNext()===null" [attr.aria-disabled]="paging()||reminderNext()===null">{{t().next}}</button></div></section></div><section class="panel inbox"><h3>{{t().inbox}}</h3>@for(message of inbox();track $index){<p>{{message}}</p>}@empty{<p class="hint">{{t().inboxHint}}</p>}<div role="group" data-history="inbox" [attr.aria-label]="t().inboxPages"><button class="quiet" (click)="pageInbox(false)" [disabled]="inboxBefore().length===1" [attr.aria-disabled]="paging()||inboxBefore().length===1">{{t().previous}}</button><button class="quiet" (click)="pageInbox(true)" [disabled]="inboxNext()===null" [attr.aria-disabled]="paging()||inboxNext()===null">{{t().next}}</button></div><div role="status">{{paging()?t().loading:t().pageReady}}</div></section>}
-@if(view()==='doctor'){<section class="panel"><h2>{{t().doctor}}</h2><p>{{t().doctorHint}}</p><pre tabindex="0" role="region" [attr.aria-label]="t().doctor">{{doctor()}}</pre></section>}
+@if(view()==='doctor'){<nerv-doctor-view [t]="t()" [raw]="doctorRaw()"></nerv-doctor-view>}
 <section class="roadmap"><span class="eyebrow">{{t().network}}</span><h2>{{t().room}}</h2><div class="cards"><article><span>01 / MAC</span><h3>{{t().models}}</h3><p>{{t().modelsHint}}</p><small>{{t().planned}}</small></article><article><span>02 / MINI PC</span><h3>{{t().home}}</h3><p>{{t().homeHint}}</p><small>{{t().planned}}</small></article><article><span>03 / RASPBERRY PI</span><h3>{{t().devices}}</h3><p>{{t().devicesHint}}</p><small>{{t().planned}}</small></article></div></section>}
 <footer>NERV Agency <span>{{t().control}}</span></footer></main></div>`,
 })
@@ -64,6 +65,7 @@ class App {
   editDue = signal('');
   inbox = signal<string[]>([]);
   doctor = signal('');
+  doctorRaw = signal<unknown>({});
   private token = '';
   localInput(iso: string) {
     const d = new Date(iso);
@@ -132,6 +134,7 @@ class App {
       this.inboxNext.set((i as Page<{ message: string }>).next);
       this.inboxBefore.set([0]);
       this.doctor.set(JSON.stringify(d, null, 2));
+      this.doctorRaw.set(d);
       this.runtimeState.set(
         (d as { processes?: { brainAlive?: boolean } }).processes?.brainAlive === false ? 'waiting' : 'ok',
       );

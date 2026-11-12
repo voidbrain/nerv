@@ -146,13 +146,17 @@ test(
       await evaluate(readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8'));
       const audit = async (name) => {
         const result = await evaluate(
-          `axe.run().then(r=>({violations:r.violations.map(v=>({id:v.id,impact:v.impact,targets:v.nodes.map(n=>n.target)})),incomplete:r.incomplete.map(v=>v.id)}))`,
+          `axe.run().then(r=>({violations:r.violations.map(v=>({id:v.id,impact:v.impact,targets:v.nodes.map(n=>n.target)})),incomplete:r.incomplete.map(v=>v.id),details:r.incomplete.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,any:n.any?.map(a=>a.message)}))}))}))`,
         );
         await screenshot(name);
         assert.deepEqual(result.violations, [], name);
         assert.ok(
           result.incomplete.every((id) => id === 'label-content-name-mismatch'),
-          name + ': unexpected manual review required',
+          name +
+            ': unexpected manual review required: ' +
+            JSON.stringify(result.incomplete) +
+            ' ' +
+            JSON.stringify(result.details),
         );
         t.diagnostic(name + ': axe passed; manual-review categories ' + result.incomplete.join(', '));
       };
@@ -267,11 +271,59 @@ test(
           await audit(lang + '-reminders-' + width);
         }
         await evaluate(`document.querySelectorAll('nav button')[2].click()`);
+        await until(`document.querySelector('nerv-doctor-view')!==null`);
         await until(`document.querySelector('main pre')!==null`);
         assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true, lang + ' doctor layout');
+        assert.equal(
+          await evaluate(`document.querySelector('.doctor-overall-badge').textContent.trim()`),
+          lang === 'it' ? 'Tutti i controlli superati' : 'All checks passing',
+        );
+        assert.ok(
+          (await evaluate(`document.querySelectorAll('.doctor-check').length`)) >= 4,
+          'structured doctor checks rendered',
+        );
+        assert.equal(
+          await evaluate(`document.querySelector('.doctor-check strong').textContent.trim()`),
+          lang === 'it' ? 'Central Dogma (database SQLite)' : 'Central Dogma (SQLite database)',
+        );
         await evaluate(`document.querySelector('pre').focus()`);
         assert.equal(await evaluate('document.activeElement.tagName'), 'PRE');
         await audit(lang + '-doctor-mobile');
+
+        // F-004-T03: doctor results with severity, issues and fix hints
+        await evaluate(`{
+          const original = window.fetch;
+          window.fetch = (input, init) => String(input).includes('/api/doctor')
+            ? Promise.resolve(new Response(JSON.stringify({
+                database: { quick_check: 'failed' },
+                processes: { nervous: 0, brain: 1234, brainAlive: false },
+                routes: { local: { state: 'down', error: 'ECONNREFUSED' } },
+                degraded: ['test degraded notice']
+              }), { status: 200, headers: { 'Content-Type': 'application/json', 'ngsw-bypass': '1' } }))
+            : original(input, init);
+          window.restoreDoctorFetch = () => { window.fetch = original; delete window.restoreDoctorFetch; };
+        }`);
+        await evaluate(`document.querySelector('header button').click()`);
+        await until(`document.querySelector('.doctor-check.check-error')!==null`);
+        assert.equal(
+          await evaluate(`document.querySelector('.doctor-overall-badge').textContent.trim()`),
+          lang === 'it' ? 'Rilevati problemi' : 'Issues detected',
+        );
+        assert.ok(
+          await evaluate(
+            `document.querySelector('.doctor-fix')?.textContent.includes(${JSON.stringify(lang === 'it' ? 'Esegui il controllo' : 'Run database')})`,
+          ),
+          'database fix hint rendered',
+        );
+        assert.ok(
+          (await evaluate(`document.querySelectorAll('.doctor-fix').length`)) >= 3,
+          'multiple fix hints rendered for issues and degraded items',
+        );
+        await audit(lang + '-doctor-issues');
+        await evaluate('window.restoreDoctorFetch()');
+        await evaluate(`document.querySelector('header button').click()`);
+        await until(`document.querySelector('.doctor-check.check-error')===null`);
+
         await evaluate(`document.querySelectorAll('nav button')[0].click()`);
         await until(`document.querySelector('article.reminder')!==null`);
       }
