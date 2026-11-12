@@ -1,8 +1,12 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, computed, signal } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, computed, isDevMode, signal } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { registerSurfaces } from './status-card';
 import { messages } from './i18n';
 import { bootstrapApplication } from '@angular/platform-browser';
+import { provideServiceWorker } from '@angular/service-worker';
+import { UpdatePrompt } from './update-prompt';
+/** F-004-T01: API calls go straight to the service; the service worker never sees or holds them. */
+const SW_BYPASS = { 'ngsw-bypass': '1' };
 interface Page<T> {
   items: T[];
   next: number | null;
@@ -16,11 +20,11 @@ interface Reminder {
 }
 @Component({
   selector: 'nerv-app',
-  imports: [NgOptimizedImage],
+  imports: [NgOptimizedImage, UpdatePrompt],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
 <div class="shell"><aside><a class="brand" href="/"><img ngSrc="brand.svg" priority width="48" height="36" alt="NERV Agency">NERV<span>{{t().agent}}</span></a><nav [attr.aria-label]="t().workspace"><button (click)="view.set('home')" [class.active]="view()==='home'">◈ &nbsp; {{t().overview}}</button><button (click)="view.set('reminders')" [class.active]="view()==='reminders'">◷ &nbsp; {{t().reminders}}</button><button (click)="view.set('doctor')" [class.active]="view()==='doctor'">+ &nbsp; {{t().doctor}}</button></nav><div class="sidebar-foot"><i></i> Nodo · v0.1<br><small>{{t().foot}}</small></div></aside>
-<main><header><label class="language">Lingua / Language <select #languageSelect [value]="language()" (change)="changeLanguage(languageSelect.value)"><option value="it">Italiano</option><option value="en">English</option></select></label><span>{{t().workspace}}</span><button class="quiet" (click)="refresh()">{{t().refresh}}</button></header><section class="intro"><p class="eyebrow">{{t().tagline}}</p><h1>{{t().world}}<br><em>{{t().together}}</em></h1><p>{{t().intro}}</p></section>
+<main><nerv-update-prompt [t]="t()" /><header><label class="language">Lingua / Language <select #languageSelect [value]="language()" (change)="changeLanguage(languageSelect.value)"><option value="it">Italiano</option><option value="en">English</option></select></label><span>{{t().workspace}}</span><button class="quiet" (click)="refresh()">{{t().refresh}}</button></header><section class="intro"><p class="eyebrow">{{t().tagline}}</p><h1>{{t().world}}<br><em>{{t().together}}</em></h1><p>{{t().intro}}</p></section>
 @if(!connected()){<section class="connect panel"><h2>{{t().connectTitle}}</h2><p>{{t().connectHint}}</p><label>{{t().token}}<input #token type="password" autocomplete="off" placeholder="NERV_TOKEN"></label><button (click)="connect(token.value);token.value=''">{{t().connect}}</button></section>}
 @if(error()){<p role="alert" class="error">{{error()}}</p>}
 @if(connected()){<nerv-status-card [surface]="statusSurface()"></nerv-status-card>
@@ -64,7 +68,7 @@ class App {
   async request(path: string, init: RequestInit = {}) {
     const response = await fetch('/api/' + path, {
       ...init,
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + this.token },
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + this.token, ...SW_BYPASS },
     });
     const data: unknown = await response.json();
     if (!response.ok) throw new Error((data as { error?: string }).error ?? 'Request failed');
@@ -86,7 +90,7 @@ class App {
     try {
       const response = await fetch('/api/session/exchange', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...SW_BYPASS },
         body: JSON.stringify({ code }),
       });
       const data = (await response.json()) as { token?: string };
@@ -200,4 +204,7 @@ class App {
   }
 }
 registerSurfaces();
-bootstrapApplication(App).catch(console.error);
+// F-004-T01: the production build registers the service worker (offline shell, update prompt); `ng serve` does not.
+bootstrapApplication(App, {
+  providers: [provideServiceWorker('ngsw-worker.js', { enabled: !isDevMode() })],
+}).catch(console.error);
