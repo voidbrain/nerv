@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, writeFileSync, chmodSync } from 'node:fs';
 import { join } from 'node:path';
 import { validateModels, type Models } from './model.ts';
+import { ollamaProvider } from './engine-provider.ts';
 /**
  * Model setup (F-038): find Ollama on this machine and the models it has, and change which model Misato and Casper use,
  * from the CLI, `init` and the dashboard. Every change goes through validateModels before it is written, so a bad choice
@@ -21,31 +22,22 @@ export interface Detected {
 }
 /** Ollama's own list of installed models (`/api/tags`); nothing is pulled or loaded. */
 export async function detectOllama(url = OLLAMA_URL, fetchFn: typeof fetch = fetch): Promise<Detected> {
-  try {
-    const res = await fetchFn(url.replace(/\/$/, '') + '/api/tags', { signal: AbortSignal.timeout(3000) });
-    if (!res.ok) return { reachable: false, url, models: [], error: `Ollama answered HTTP ${res.status}.` };
-    const body = (await res.json()) as {
-      models?: { name?: unknown; digest?: unknown; size?: unknown; details?: { parameter_size?: unknown } }[];
-    };
-    const models = (body.models ?? [])
-      .filter((m) => typeof m.name === 'string' && m.name.length > 0 && m.name.length <= 200)
-      .map((m) => ({
-        name: m.name as string,
-        ...(typeof m.digest === 'string' && /^(?:sha256:)?[a-f0-9]{64}$/i.test(m.digest)
-          ? { digest: m.digest.replace(/^sha256:/i, '').toLowerCase() }
-          : {}),
-        ...(typeof m.size === 'number' ? { size: m.size } : {}),
-        ...(typeof m.details?.parameter_size === 'string' ? { parameters: m.details.parameter_size } : {}),
-      }));
-    return { reachable: true, url, models };
-  } catch {
-    return {
-      reachable: false,
-      url,
-      models: [],
-      error: `No Ollama at ${url}. Install it from https://ollama.com, start it, and pull a model (for example: ollama pull gemma4:12b).`,
-    };
-  }
+  const result = await ollamaProvider.probe(
+    {
+      id: 'ollama-default',
+      provider: 'ollama',
+      locality: 'local',
+      baseUrl: url,
+      model: '',
+    },
+    { fetch: fetchFn, timeoutMs: 3000 },
+  );
+  return {
+    reachable: result.reachable,
+    url: result.url,
+    models: result.models,
+    ...(result.error ? { error: result.error } : {}),
+  };
 }
 /** The Ollama server a local route points at (its /v1 endpoint minus /v1), or the default one. */
 export function ollamaUrlOf(models: Models): string {
