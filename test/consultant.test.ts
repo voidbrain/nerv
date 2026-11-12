@@ -8,7 +8,7 @@ import { consultantAsk, misatoAsk, parseAdvice } from '../src/misato.ts';
 const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
 /** A fake local model: the consultant gives `advice`, Casper approves, Misato follows its script; every Misato prompt is kept. */
 async function fake(advice: string, script: string[]) {
-  const asked = { consultant: 0, misato: [] as string[], systems: [] as string[] };
+  const asked = { consultant: 0, consultantPrompts: [] as string[], misato: [] as string[], systems: [] as string[] };
   const s = createServer((req, res) => {
     let raw = '';
     req
@@ -19,6 +19,7 @@ async function fake(advice: string, script: string[]) {
         let out: string;
         if (sys.startsWith('You are a consultant')) {
           asked.consultant++;
+          asked.consultantPrompts.push(r.messages.at(-1)!.content);
           out = advice;
         } else if (sys.startsWith('You are Casper')) out = '{"vote":"approve","reason":"Matches.","confidence":0.9}';
         else {
@@ -173,6 +174,129 @@ test(
       assert.match(f.asked.systems[2]!, /Write the reply in English/, 'the follow-up after the approval too');
     } finally {
       await t.close();
+      await f.close();
+    }
+  },
+);
+test(
+  'F-042: agency questions skip the consultant, Misato reads approvals.list, agency.status and sorties.explain as Pattern Green, and consultant and Misato get enrolled bases as data (B-012)',
+  { timeout: 30000 },
+  async () => {
+    const { generateKeyPairSync } = await import('node:crypto');
+    const { createRootKey, signRecord, unlockRootKey } = await import('../src/kaji.ts');
+    const { Runtime } = await import('../src/runtime.ts');
+    const rootFile = createRootKey('a long test passphrase');
+    const root = unlockRootKey(rootFile.file, 'a long test passphrase');
+    const k1 = generateKeyPairSync('ed25519').publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+    const k2 = generateKeyPairSync('ed25519').publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+
+    const f = await fake('Check the date first.', [
+      // 1. Normal action request ("Remind me on Tabgha to stretch"): consultant IS asked, action creates a Blue card
+      '{"action":{"tool":"reminders.add","args":{"title":"Stretch","due":"2031-01-01T09:00:00Z"}}}',
+      // 2. Agency question in EN ("what is waiting for me?"): consultant is NOT asked, Misato calls approvals.list (Green)
+      '{"action":{"tool":"approvals.list","args":{}}}',
+      '{"reply":"One approval card is waiting for you: reminders.add (“Stretch”)."}',
+      // 3. Agency question in IT ("Tabgha è online?"): consultant is NOT asked, Misato calls agency.status (Green)
+      '{"action":{"tool":"agency.status","args":{"base":"Tabgha"}}}',
+      '{"reply":"Sì, Tabgha (NERV-02) è online."}',
+      // 4. Agency question about recent sorties ("which sorties are open?"): consultant is NOT asked, Misato calls sorties.explain (Green)
+      '{"action":{"tool":"sorties.explain","args":{"limit":5}}}',
+      '{"reply":"Sortie “Remind me on Tabgha to stretch” is open and waiting for your approval on reminders.add."}',
+    ]);
+    const home = mkdtempSync(join(tmpdir(), 'nerv-f042-'));
+    writeFileSync(
+      join(home, 'config.json'),
+      JSON.stringify({
+        base: { id: 'NERV-01', name: 'Neo Tokyo-3' },
+        kaji: { root: root.publicKey },
+        models: {
+          local: { baseUrl: f.url, model: 'm' },
+          roles: { misato: { route: 'local' }, consultant: { model: 'advisor' } },
+        },
+      }),
+    );
+    writeFileSync(join(home, 'scrolls.json'), JSON.stringify({ blue: ['reminders.add'] }), { mode: 0o600 });
+    const r = new Runtime(join(home, 'nerv.sqlite'), undefined, home);
+    await r.ready();
+    r.setBaseKey(k1);
+    const issued = new Date().toISOString();
+    await r.kaji.add([
+      signRecord(root.privateKey, {
+        kind: 'enrol',
+        serial: 1,
+        issued,
+        baseId: 'NERV-01',
+        name: 'Neo Tokyo-3',
+        publicKey: k1,
+        address: '127.0.0.1:9001',
+      }),
+      signRecord(root.privateKey, {
+        kind: 'enrol',
+        serial: 2,
+        issued,
+        baseId: 'NERV-02',
+        name: 'Tabgha',
+        publicKey: k2,
+        address: '127.0.0.1:9002',
+      }),
+      signRecord(root.privateKey, { kind: 'main', serial: 3, issued, baseId: 'NERV-01' }),
+    ]);
+    await r.kaji.seen({ 'NERV-02': new Date().toISOString() });
+
+    try {
+      // 1. Normal request: consultant is asked and both consultant and Misato receive enrolled bases as data (B-012)
+      const first = await r.chat('Remind me on Tabgha to stretch');
+      assert.equal(f.asked.consultant, 1);
+      assert.equal(first.waiting.length, 1);
+      assert.deepEqual(JSON.parse(f.asked.consultantPrompts[0]!).bases, [
+        { id: 'NERV-01', name: 'Neo Tokyo-3' },
+        { id: 'NERV-02', name: 'Tabgha' },
+      ]);
+      assert.deepEqual(JSON.parse(f.asked.misato[0]!).bases, [
+        { id: 'NERV-01', name: 'Neo Tokyo-3' },
+        { id: 'NERV-02', name: 'Tabgha' },
+      ]);
+
+      // 2. "what is waiting for me?" -> consultant not asked, approvals.list runs Green without a card
+      const waitingReply = await r.chat('what is waiting for me?');
+      assert.equal(f.asked.consultant, 1, 'consultant is not asked for agency questions');
+      assert.equal(waitingReply.waiting.length, 0);
+      assert.equal(waitingReply.steps[0]?.tool, 'approvals.list');
+      assert.equal(waitingReply.steps[0]?.outcome, 'grant');
+      assert.match(waitingReply.reply ?? '', /reminders\.add/);
+      const seenByMisatoWaiting = JSON.parse(f.asked.misato[2]!).steps[0].result as {
+        approvals: { shortId: string; tool: string; title: string }[];
+      };
+      assert.equal(seenByMisatoWaiting.approvals.length, 1);
+      assert.equal(seenByMisatoWaiting.approvals[0]!.tool, 'reminders.add');
+      assert.equal(seenByMisatoWaiting.approvals[0]!.title, 'Remind me on Tabgha to stretch');
+
+      // 3. "Tabgha è online?" -> consultant not asked, agency.status runs Green, Italian reply grounded in tool result
+      const statusReply = await r.chat('Tabgha è online?');
+      assert.equal(f.asked.consultant, 1, 'consultant is not asked for base status questions');
+      assert.equal(statusReply.waiting.length, 0);
+      assert.equal(statusReply.steps[0]?.tool, 'agency.status');
+      assert.equal(statusReply.steps[0]?.outcome, 'grant');
+      assert.match(statusReply.reply ?? '', /Tabgha \(NERV-02\) è online/);
+      const seenByMisatoStatus = JSON.parse(f.asked.misato[4]!).steps[0].result as {
+        bases: { baseId: string; name: string; online: boolean; lastSeenLocal?: string }[];
+      };
+      assert.equal(seenByMisatoStatus.bases.length, 1);
+      assert.equal(seenByMisatoStatus.bases[0]!.baseId, 'NERV-02');
+      assert.equal(seenByMisatoStatus.bases[0]!.name, 'Tabgha');
+      assert.equal(seenByMisatoStatus.bases[0]!.online, true);
+      assert.ok(seenByMisatoStatus.bases[0]!.lastSeenLocal, 'lastSeenLocal is attached in local time');
+
+      // 4. "which sorties are open?" -> consultant not asked, sorties.explain runs Green
+      const sortiesReply = await r.chat('which sorties are open?');
+      assert.equal(f.asked.consultant, 1, 'consultant is not asked for sortie questions');
+      assert.equal(sortiesReply.waiting.length, 0);
+      assert.equal(sortiesReply.steps[0]?.tool, 'sorties.explain');
+      assert.equal(sortiesReply.steps[0]?.outcome, 'grant');
+      assert.match(sortiesReply.reply ?? '', /Remind me on Tabgha to stretch/);
+    } finally {
+      await r.close();
+      rmSync(home, { recursive: true, force: true });
       await f.close();
     }
   },

@@ -3,6 +3,7 @@ import type { WorkerItem, WorkerContext, WorkerLease } from './worker-jobs.ts';
 import type { RunReason } from './instrumentality-runs.ts';
 import { parsePrices, type UsageObservation } from './model-usage.ts';
 import { MISATO_SOURCE, OWNER_SOURCE, Store } from './store.ts';
+import type { AgencySnapshot } from './executors.ts';
 import type { Verdict } from './policy.ts';
 import { dispatchRpc, MAX_FRAME_BYTES, READY } from './rpc.ts';
 import { readConfig, readScrolls } from './config.ts';
@@ -403,6 +404,7 @@ process.on('message', (value: unknown) => {
             ...(Array.isArray(params.extras) ? { extras: params.extras as Verdict[] } : {}),
           },
           params.worker as unknown as WorkerLease | undefined,
+          params.agency as AgencySnapshot | undefined,
         );
       case 'inbox.page':
         return store.inboxPage(
