@@ -484,10 +484,16 @@ function remainingCell(steps) {
   );
 }
 // The generated summary table (F-059): the authored Signal | Priority | Status | Effort table gains Remaining, Depends
-// on and Unlocks (when the dependency helper is adopted) and Human action, and the authored human-action line keeps
+// on and Unlocks (when the dependency helper is adopted) and the human-action kind as Procedures and Decision cells
+// (8.0.0: 🧑 where the cue is Procedure, Decision or Both, — otherwise), and the authored human-action line keeps
 // only its icon and sentence. F-063: Signal merges into Status ("🔴 Open"), and Effort is read from the remaining
 // agent hours when every open step is in hours. Record sources keep the authored form.
-export const HUMAN_LINE = /^(🧑|💻) \*\*→ Human action required: (Yes|No)\*\*<br \/>(.+)$/m;
+export const HUMAN_LINE = /^(🧑|💻) \*\*→ Human action required: (Procedure|Decision|Both|No)\*\*<br \/>(.+)$/m;
+// The two generated cells for a cue kind: Procedures (someone runs or checks something) and Decision.
+export const humanCells = (kind) => [
+  ['Procedure', 'Both'].includes(kind) ? '🧑' : '—',
+  ['Decision', 'Both'].includes(kind) ? '🧑' : '—',
+];
 function summaryTable(text, id, { remaining, size, links }) {
   const lines = text.split('\n');
   const at = lines.findIndex(
@@ -516,7 +522,8 @@ function summaryTable(text, id, { remaining, size, links }) {
           ['Unlocks', links.unlocks],
         ]
       : []),
-    ['Human action', human ? `${human[1]} ${human[2]}` : '—'],
+    ['Procedures', human ? humanCells(human[2])[0] : '—'],
+    ['Decision', human ? humanCells(human[2])[1] : '—'],
   ];
   const [signal, priority, status, effort] = lines[at + 2]
     .trim()
@@ -524,7 +531,8 @@ function summaryTable(text, id, { remaining, size, links }) {
     .slice(1, -1)
     .map((c) => c.trim());
   lines[at] = '| Status | Priority | Effort |' + extra.map(([h]) => ` ${h} |`).join('');
-  lines[at + 1] = '|---|---|---|' + extra.map(([h]) => (h === 'Human action' ? ':---:|' : '---|')).join('');
+  lines[at + 1] =
+    '|---|---|---|' + extra.map(([h]) => (['Procedures', 'Decision'].includes(h) ? ':---:|' : '---|')).join('');
   lines[at + 2] =
     `| ${signal} ${status} | ${priority} | ${size ?? effort} |` + extra.map(([, v]) => ` ${v} |`).join('');
   const out = lines.join('\n');
