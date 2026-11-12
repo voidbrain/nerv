@@ -194,3 +194,38 @@ test(
     }
   },
 );
+test('B-042: a delivery awaited after a dashboard decision is not a pass that read status before it', async () => {
+  const f = await fixture(),
+    channel = f.channel(),
+    entered = pause(),
+    gate = pause();
+  const lookup = f.store.pendingApprovalIds.bind(f.store);
+  try {
+    const id = f.proposal('Stretch');
+    await channel.deliver();
+    assert.equal(f.calls.filter((c) => c.method === 'sendMessage').length, 1, 'the card is sent and tracked');
+    // A periodic pass reads the card's status while it is still pending, then stalls.
+    f.store.pendingApprovalIds = (ids: string[]) => {
+      const snapshot = lookup(ids);
+      entered.release();
+      return gate.promise.then(() => snapshot) as unknown as string[];
+    };
+    const periodic = channel.deliver();
+    await entered.promise;
+    f.store.pendingApprovalIds = lookup;
+    await f.decide(id);
+    const awaited = channel.deliver();
+    gate.release();
+    await awaited;
+    assert.ok(
+      f.calls.some((c) => c.method === 'editMessageReplyMarkup'),
+      'the awaited delivery reconciles the decision it follows',
+    );
+    await periodic;
+  } finally {
+    f.store.pendingApprovalIds = lookup;
+    gate.release();
+    await channel.stop();
+    await f.close();
+  }
+});
