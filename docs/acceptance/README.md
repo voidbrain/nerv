@@ -4,6 +4,8 @@ Dated observations for specific revisions, test methods and devices. Reports pre
 
 The [review register](../reviews/README.md#acceptance-evidence) links every report, its observation date and the next acceptance condition. Earlier evidence is retained when later reports narrow or supersede its applicability.
 
+**Owner procedures to run now:** [F-005-T13 Mac service update](f005-t13-mac-update-procedure.md) (copy-paste blocks with expected output).
+
 [Gauntlet integration, 9 November 2026](gauntlet-2026-11-09.md): clean-source selected policy join and bounded adapter/cancellation fixtures; no model qualification.
 
 [Gauntlet0.2 adoption](gauntlet-v02-2026-11-09.md): accepted CI/integration/index/reuse contracts; live Gemma and real performance measurement explicitly paused.
