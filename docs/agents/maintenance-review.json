@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-12T12:02:37.771Z",
+  "reviewed": "2026-11-12T12:04:52.815Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
     "AGENTS.md": "3baab88d7088bab8f454e3052d852d0761e3319454edac9ed0ca1c7985b4991c",
@@ -24,7 +24,7 @@
     "tools/work-usage.mjs": "4329262c0b9e723e046dd8878e15a99cff5f590201cd0918563f3204bbe79219"
   },
   "measurements": {
-    "samples": 1,
+    "samples": 18,
     "latestAt": "2026-11-12T12:02:37.724Z",
     "operations": {
       "adoption": {
@@ -51,26 +51,26 @@
         }
       },
       "reconciliation": {
-        "samples": 1,
+        "samples": 18,
         "durationMs": {
-          "observed": 1,
+          "observed": 18,
           "missing": 0,
-          "median": 64000
+          "median": 207860
         },
         "conflicts": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 5,
+          "missing": 13,
+          "median": 0
         },
         "unnecessaryPrompts": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 1,
+          "missing": 17,
+          "median": 0
         },
         "repeatedContextLoads": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 1,
+          "missing": 17,
+          "median": 1
         }
       }
     }
