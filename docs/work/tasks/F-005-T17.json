@@ -29,7 +29,7 @@
     "contract:service-lifecycle"
   ],
   "validation": [
-    "2026-11-12: F-005-T17 manual update execution (src/manual-update.ts, POST /api/update/apply, dashboard live.js), Test: test/manual-update.test.ts"
+    "2026-11-12: PR #326, F-005-T17 manual update execution (src/manual-update.ts, POST /api/update/apply, dashboard live.js), Test: test/manual-update.test.ts"
   ],
   "escalation": [
     "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
