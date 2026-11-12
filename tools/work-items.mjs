@@ -103,7 +103,9 @@ const effortKeys = ['size', 'estimate', 'basis', 'reviewed'],
   // F-054/F-056: effort spent on a step in focused days (final when closed, so far when open), measured or stated.
   actualKeys = ['actualDays', 'actualSource'],
   // F-058: agent hours, the unit agent-run steps are estimated in, with the owner's own time kept apart. Quarter hours.
-  hourKeys = ['agentHours', 'ownerHours', 'baselineAgentHours', 'actualAgentHours'];
+  // F-063: estimateAgentHours, the latest whole-step estimate (set with agentHours at each re-estimation; the baseline
+  // until then). The steps table shows it; calibration keeps comparing actual with baseline.
+  hourKeys = ['agentHours', 'ownerHours', 'baselineAgentHours', 'estimateAgentHours', 'actualAgentHours'];
 const actualDays = (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 100;
 const quarterHours = (v) =>
   typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 200 && Number.isInteger(v * 4);
@@ -241,12 +243,36 @@ export function calibrate(tasks, estimation = estimationDefaults) {
 }
 const dayText = (n) => `${Number(n.toFixed(2))} ${n === 1 ? 'day' : 'days'}`;
 const hourText = (n) => `${Number(n.toFixed(2))} h`;
-// "2 h + 0.5 h owner", "1.5 days", or both when a set mixes units; 0 when nothing is known.
+// "2 h", "2 h agent + 0.5 h owner", "1.5 days", or both units when a set mixes them. A unit whose total is 0 is left
+// out (F-063: "22.75 h agent + 6 h owner", not "… and 0 days"); 0 in the set's own unit when nothing is left.
 const amount = (agentHours, ownerHours, days, hasHours, hasDays) =>
   [
-    ...(hasHours ? [`${hourText(agentHours)}${ownerHours ? ` + ${hourText(ownerHours)} owner` : ''}`] : []),
-    ...(hasDays ? [dayText(days)] : []),
-  ].join(' and ') || dayText(0);
+    ...(hasHours && (agentHours || ownerHours)
+      ? [
+          ownerHours
+            ? `${agentHours ? `${hourText(agentHours)} agent + ` : ''}${hourText(ownerHours)} owner`
+            : hourText(agentHours),
+        ]
+      : []),
+    ...(hasDays && days ? [dayText(days)] : []),
+  ].join(' and ') || (hasHours ? hourText(0) : dayText(0));
+// F-063: the size of a step or record in hours is read from its remaining agent hours, owner time apart: up to 1 h
+// Small, up to 4 h Medium, up to 8 h Large, more Very large. Steps in days keep their authored size.
+export const sizeOfHours = (h) => (h <= 1 ? '🟢 Small' : h <= 4 ? '🟡 Medium' : h <= 8 ? '🔴 Large' : '🟣 Very large');
+const sizes = { small: '🟢 Small', medium: '🟡 Medium', large: '🔴 Large' };
+const stepSize = (t) =>
+  t.status === 'closed'
+    ? '—'
+    : inHours(t.effort) && hoursKnown(t.effort)
+      ? sizeOfHours(t.effort.agentHours ?? 0)
+      : sizes[t.effort.size];
+// A record's size from its steps when every open step is in hours; null keeps the authored size, also when no step
+// is open (B-017: a record awaiting verification keeps a size word, which the summary and the queue need).
+function recordSize(steps) {
+  const open = steps.filter((t) => t.status !== 'closed');
+  if (!open.length || open.some((t) => !inHours(t.effort) || !hoursKnown(t.effort))) return null;
+  return sizeOfHours(open.reduce((n, t) => n + (t.effort.agentHours ?? 0), 0));
+}
 // Remaining, baseline and actual totals over a set of steps. Steps without a number are counted (remainingUnknown,
 // baselineKnown, actualKnown); the renderers name those counts instead of passing an unknown off as 0.
 export function effortTotals(steps) {
@@ -291,45 +317,38 @@ const cell = (value) =>
     .replaceAll('*', '&#42;')
     .replaceAll('_', '&#95;')
     .replaceAll('\\', '&#92;');
-const stepBaseline = (e) =>
-  inHours(e)
-    ? typeof e.baselineAgentHours === 'number'
-      ? hourText(e.baselineAgentHours)
-      : '—'
-    : typeof e.baselineDays === 'number'
-      ? dayText(e.baselineDays)
-      : '—';
+// The latest whole-step estimate (F-063): estimateAgentHours, else the baseline; a step in days shows its baseline.
+const estimateOf = (e) => (inHours(e) ? (e.estimateAgentHours ?? e.baselineAgentHours) : e.baselineDays);
+const stepEstimate = (e) =>
+  typeof estimateOf(e) !== 'number' ? '—' : inHours(e) ? hourText(estimateOf(e)) : dayText(estimateOf(e));
 const stepActual = (t) => {
   const e = t.effort,
     v = inHours(e) ? e.actualAgentHours : e.actualDays;
   if (typeof v !== 'number') return inHours(e) ? hourText(0) : dayText(0);
   return `${inHours(e) ? hourText(v) : dayText(v)}${t.status === 'closed' ? '' : ' so far'} (${e.actualSource})`;
 };
-// A re-estimated open step names the baseline it was planned at, "1 h (planned 1.5)", so a remaining time below the
-// baseline with no actual reads as a revision, not as work done. Always the baseline, never the previous estimate:
-// after several re-estimates the steps between stay in the dated basis and git history.
-const planned = (remaining, baseline) =>
-  typeof baseline === 'number' && baseline !== remaining ? ` (planned ${Number(baseline.toFixed(2))})` : '';
 const stepRemaining = (e, status) => {
   if (inHours(e)) {
     if (status === 'closed') return hourText(0);
     const parts = [
-      ...(typeof e.agentHours === 'number'
-        ? [`${hourText(e.agentHours)}${planned(e.agentHours, e.baselineAgentHours)}`]
-        : []),
+      ...(typeof e.agentHours === 'number' ? [`${hourText(e.agentHours)}${e.ownerHours ? ' agent' : ''}`] : []),
       ...(e.ownerHours ? [`${hourText(e.ownerHours)} owner`] : []),
     ];
     return parts.length ? parts.join(' + ') : cell(e.estimate);
   }
   if (typeof e.days !== 'number') return cell(e.estimate);
-  return `${dayText(e.days)}${status === 'closed' ? '' : planned(e.days, e.baselineDays)}`;
+  return dayText(e.days);
 };
 function totalRow(steps) {
   const t = effortTotals(steps);
   const anyHours = steps.some((x) => inHours(x.effort)),
     anyDays = steps.some((x) => !inHours(x.effort));
-  const baseline = t.baselineKnown
-    ? `${amount(t.baselineAgentHours, 0, t.baselineDays, anyHours, anyDays)}${t.baselineKnown < t.steps ? ` (${t.baselineKnown} of ${t.steps} steps)` : ''}`
+  const estimated = steps.filter((x) => typeof estimateOf(x.effort) === 'number'),
+    sumOf = (list) => list.reduce((n, x) => n + estimateOf(x.effort), 0),
+    estimateHours = estimated.filter((x) => inHours(x.effort)),
+    estimateDays = estimated.filter((x) => !inHours(x.effort));
+  const estimate = estimated.length
+    ? `${amount(sumOf(estimateHours), 0, sumOf(estimateDays), estimateHours.length > 0 || !estimateDays.length, estimateDays.length > 0)}${estimated.length < t.steps ? ` (${estimated.length} of ${t.steps} steps)` : ''}`
     : '—';
   // A step row without a recorded actual shows 0 (owner choice, 2026-11-11); the total names how many steps
   // recorded one, so an unrecorded 0 never reads as measured.
@@ -345,7 +364,8 @@ function totalRow(steps) {
     t.remainingHoursSteps > 0 || !anyDays,
     t.remainingDaysSteps > 0,
   );
-  return `| **Total** | ${baseline} | ${actual} | ${remaining}${unknownText(t.remainingUnknown)} | ${t.steps - t.open} of ${t.steps} completed |`;
+  // The Total row sizes the remaining work: — when no step is open, blank when the record keeps its authored size.
+  return `| ${t.open ? (recordSize(steps) ?? '') : '—'} | **Total** | ${estimate} | ${actual} | ${remaining}${unknownText(t.remainingUnknown)} | ${t.steps - t.open} of ${t.steps} completed |`;
 }
 // The one-line backlog total placed between the totals markers of the layout.
 function ledgerTotals(tasks, active) {
@@ -375,22 +395,21 @@ function featurePlan(text, id, tasks) {
   const steps = tasks.filter((t) => t.parent === id);
   // F-059: with feature plans every active record, bugs included, has at least one step (owner, 2026-11-12).
   if (!steps.length) throw Error(`${id.startsWith('F-') ? 'Feature' : 'Record'} needs an upfront task plan: ${id}`);
-  const sizes = { small: '🟢 Small', medium: '🟡 Medium', large: '🔴 Large' },
-    states = {
-      planned: 'Planned',
-      ready: 'Ready',
-      implemented: 'Implemented; verification pending',
-      verified: 'Verified',
-      closed: 'Completed',
-    };
+  const states = {
+    planned: 'Planned',
+    ready: 'Ready',
+    implemented: 'Implemented; verification pending',
+    verified: 'Verified',
+    closed: 'Completed',
+  };
   for (const t of steps) validateEffort(t.effort, t.status);
   // Compact table (F-055): one line per step; the dated basis of each estimate goes into the record details.
   const table =
-    `**${id.startsWith('F-') ? 'Feature steps' : 'Steps'}** (baseline: accepted estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)\n\n| Step | Baseline | Actual | Remaining | Status |\n|---|---|---|---|---|\n` +
+    `**${id.startsWith('F-') ? 'Feature steps' : 'Steps'}** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)\n\n| Effort | Step | Estimate | Actual | Remaining | Status |\n|---|---|---|---|---|---|\n` +
     steps
       .map(
         (t) =>
-          `| ${t.id} — ${cell(t.title)} | ${stepBaseline(t.effort)} | ${stepActual(t)} | ${sizes[t.effort.size]} — ${stepRemaining(t.effort, t.status)} | ${states[t.status]} |`,
+          `| ${stepSize(t)} | ${t.id} — ${cell(t.title)} | ${stepEstimate(t.effort)} | ${stepActual(t)} | ${stepRemaining(t.effort, t.status)} | ${states[t.status]} |`,
       )
       .join('\n') +
     '\n' +
@@ -466,9 +485,10 @@ function remainingCell(steps) {
 }
 // The generated summary table (F-059): the authored Signal | Priority | Status | Effort table gains Remaining, Depends
 // on and Unlocks (when the dependency helper is adopted) and Human action, and the authored human-action line keeps
-// only its icon and sentence. Record sources keep the authored form.
+// only its icon and sentence. F-063: Signal merges into Status ("🔴 Open"), and Effort is read from the remaining
+// agent hours when every open step is in hours. Record sources keep the authored form.
 export const HUMAN_LINE = /^(🧑|💻) \*\*→ Human action required: (Yes|No)\*\*<br \/>(.+)$/m;
-function summaryTable(text, id, { remaining, links }) {
+function summaryTable(text, id, { remaining, size, links }) {
   const lines = text.split('\n');
   const at = lines.findIndex(
     (l, i) =>
@@ -498,9 +518,15 @@ function summaryTable(text, id, { remaining, links }) {
       : []),
     ['Human action', human ? `${human[1]} ${human[2]}` : '—'],
   ];
-  lines[at] = lines[at].trimEnd() + extra.map(([h]) => ` ${h} |`).join('');
-  lines[at + 1] = lines[at + 1].trimEnd() + extra.map(([h]) => (h === 'Human action' ? ':---:|' : '---|')).join('');
-  lines[at + 2] = lines[at + 2].trimEnd() + extra.map(([, v]) => ` ${v} |`).join('');
+  const [signal, priority, status, effort] = lines[at + 2]
+    .trim()
+    .split('|')
+    .slice(1, -1)
+    .map((c) => c.trim());
+  lines[at] = '| Status | Priority | Effort |' + extra.map(([h]) => ` ${h} |`).join('');
+  lines[at + 1] = '|---|---|---|' + extra.map(([h]) => (h === 'Human action' ? ':---:|' : '---|')).join('');
+  lines[at + 2] =
+    `| ${signal} ${status} | ${priority} | ${size ?? effort} |` + extra.map(([, v]) => ` ${v} |`).join('');
   const out = lines.join('\n');
   return human ? out.replace(HUMAN_LINE, `${human[1]} **→** ${human[3]}`) : out;
 }
@@ -588,7 +614,11 @@ export function renderLedger(root, config, withPlans = true) {
         );
         const id = file.slice(0, -3);
         output += stepsOf
-          ? summaryTable(relocated, id, { remaining: remainingCell(stepsOf(id)), links: links?.get(id) ?? null })
+          ? summaryTable(relocated, id, {
+              remaining: remainingCell(stepsOf(id)),
+              size: recordSize(stepsOf(id)),
+              links: links?.get(id) ?? null,
+            })
           : relocated;
       }
     } else throw Error('Invalid layout segment');
@@ -769,11 +799,25 @@ export function checkWorkItems(root = process.cwd()) {
   const withoutDays = config.featurePlans
     ? catalog.tasks.filter((t) => t.status !== 'closed' && !remainingKnown(t.effort)).map((t) => t.id)
     : [];
+  // F-063: an open step whose actual plus remaining agent hours exceed the estimate it shows was re-estimated without
+  // estimateAgentHours (the column then shows the baseline): reported, not an error.
+  const staleEstimates = config.featurePlans
+    ? catalog.tasks
+        .filter(
+          (t) =>
+            t.status !== 'closed' &&
+            inHours(t.effort) &&
+            typeof estimateOf(t.effort) === 'number' &&
+            (t.effort.agentHours ?? 0) + (t.effort.actualAgentHours ?? 0) > estimateOf(t.effort),
+        )
+        .map((t) => t.id)
+    : [];
   return {
     enabled: true,
     records: (actual.match(/^### [BF]-\d{3}$/gm) || []).length,
     tasks: catalog.tasks.length,
     ...(withoutDays.length ? { withoutDays } : {}),
+    ...(staleEstimates.length ? { staleEstimates } : {}),
   };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
@@ -793,6 +837,10 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     else {
       const result = command === 'check' ? checkWorkItems(root) : taskCatalog(root, config);
       console.log(JSON.stringify(result, null, 2));
+      if (result.staleEstimates)
+        console.warn(
+          `! ${result.staleEstimates.length} open step(s) have more actual plus remaining agent hours than the estimate they show: set effort.estimateAgentHours with the re-estimate: ${result.staleEstimates.slice(0, 10).join(', ')}${result.staleEstimates.length > 10 ? ` and ${result.staleEstimates.length - 10} more` : ''}`,
+        );
       if (result.withoutDays)
         console.warn(
           `! ${result.withoutDays.length} open step(s) have no remaining estimate (effort.agentHours/ownerHours, or days), so totals count them as unknown: ${result.withoutDays.slice(0, 10).join(', ')}${result.withoutDays.length > 10 ? ` and ${result.withoutDays.length - 10} more` : ''}`,

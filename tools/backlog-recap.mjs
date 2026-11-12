@@ -24,7 +24,8 @@ export function parseRecords(text,archived=false){
   const h=/^### ([FB])-(\d{3,})\s*$/.exec(lines[i]);if(!h)continue;
   let j=i+1;while(j<lines.length&&!/^### [FB]-\d/.test(lines[j])&&!/^## /.test(lines[j]))j++;
   const body=lines.slice(i,j).join('\n');
-  const status=/^\|[^|]*\|[^|]*P\d\s*\|\s*([A-Za-z]+)\s*\|/m.exec(body)?.[1] ?? 'Open';
+  // Authored and 6.x generated rows: | cue | P | Status |; the 7.0.0 generated row merges them: | cue Status | P |.
+  const status=(/^\|[^|]*\|[^|]*P\d\s*\|\s*([A-Za-z]+)\s*\|/m.exec(body) ?? /^\|\s*(?:🔴|🟠|🟡|🟢|🟣|🔵) ([A-Za-z]+)\s*\|[^|]*P\d\s*\|/mu.exec(body))?.[1] ?? 'Open';
   const opened=/^\| Opened \| (\d{4}-\d\d-\d\d) \|/m.exec(body)?.[1] ?? null;
   const closed=archived?(/Closed (\d{4}-\d\d-\d\d)/.exec(body)?.[1] ?? closedOn):(status==='Closed'?/Closed (\d{4}-\d\d-\d\d)/.exec(body)?.[1] ?? null:null);
   out.push({id:`${h[1]}-${h[2]}`,kind:h[1]==='F'?'feature':'bug',status,human:/🧑 \*\*→ Human action required: Yes\*\*/.test(body)||/^\|[^\n]*\| 🧑 Yes \|$/m.test(body),opened,closed,archived});
