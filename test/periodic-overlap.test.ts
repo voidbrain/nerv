@@ -1,13 +1,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { generateKeyPairSync } from 'node:crypto';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { createServer, type Server } from 'node:net';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Runtime } from '../src/runtime.ts';
-import { KajiLink, type RegistryPort } from '../src/kaji-link.ts';
+import { KajiLink, signedHeaders, type RegistryPort } from '../src/kaji-link.ts';
 import { MAX_CHILD_REQUESTS } from '../src/process-client.ts';
 import type { RpcFault } from '../src/rpc.ts';
+import { createRootKey, signRecord, unlockRootKey, type RegistryBody } from '../src/kaji.ts';
 
 const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
 
@@ -190,3 +192,143 @@ test(
     }
   },
 );
+
+const keys = () => {
+  const k = generateKeyPairSync('ed25519');
+  return {
+    privateKey: k.privateKey,
+    publicKey: k.publicKey.export({ type: 'spki', format: 'der' }).toString('base64'),
+  };
+};
+
+const root = (() => {
+  const f = createRootKey('a long test passphrase');
+  return unlockRootKey(f.file, 'a long test passphrase');
+})();
+
+let serial = 0;
+const rec = (body: Omit<RegistryBody, 'serial' | 'issued'>) =>
+  signRecord(root.privateKey, { ...body, serial: ++serial, issued: new Date().toISOString() } as RegistryBody);
+
+async function reservePorts(count: number) {
+  const servers: Server[] = [];
+  const ports: number[] = [];
+  let released = false;
+  const release = async () => {
+    if (released) return;
+    released = true;
+    await Promise.all(servers.map((s) => new Promise<void>((done, fail) => s.close((e) => (e ? fail(e) : done())))));
+  };
+  try {
+    for (let i = 0; i < count; i++) {
+      const s = createServer();
+      servers.push(s);
+      await new Promise<void>((done, fail) => {
+        s.once('error', fail);
+        s.listen(0, '127.0.0.1', () => {
+          s.off('error', fail);
+          done();
+        });
+      });
+      ports.push((s.address() as { port: number }).port);
+    }
+  } catch (e) {
+    await Promise.allSettled(
+      servers.filter((s) => s.listening).map((s) => new Promise<void>((done) => s.close(() => done()))),
+    );
+    throw e;
+  }
+  return { ports, release };
+}
+
+test('B-051: concurrent unsigned requests while the child is slow do not fill the process queue; lookups share one in-flight call', async () => {
+  const { ports, release: releasePorts } = await reservePorts(1);
+  const port = ports[0]!;
+  await releasePorts();
+  const home = mkdtempSync(join(tmpdir(), 'nerv-b051-'));
+  writeFileSync(
+    join(home, 'config.json'),
+    JSON.stringify({
+      base: { id: 'NERV-01', name: 'Main' },
+      kaji: { root: root.publicKey },
+    }),
+  );
+  const runtime = new Runtime(join(home, 'nerv.sqlite'), undefined, home);
+  const A = keys();
+  const records = [
+    rec({ kind: 'enrol', baseId: 'NERV-01', name: 'Main', publicKey: A.publicKey, address: `127.0.0.1:${port}` }),
+    rec({ kind: 'main', baseId: 'NERV-01' }),
+  ];
+  let child: ReturnType<typeof stall> | undefined;
+  const link = new KajiLink({
+    baseId: 'NERV-01',
+    key: A.privateKey,
+    publicKey: A.publicKey,
+    registry: runtime.kaji,
+    log: () => {},
+  });
+  try {
+    await runtime.ready();
+    assert.equal(await runtime.kaji.add(records), 2);
+    await link.start(5000);
+    child = stall(runtime);
+    // Send more unsigned requests than the child process queue bound (MAX_CHILD_REQUESTS = 32)
+    // while the child is not answering.
+    const sends = Array.from({ length: MAX_CHILD_REQUESTS + 5 }, () =>
+      fetch(`http://127.0.0.1:${port}/kaji/relay`, {
+        method: 'POST',
+        body: JSON.stringify({ text: 'unsigned probe' }),
+      }).then(
+        (r) => ({ status: r.status }),
+        (e) => ({ status: 0, error: e instanceof Error ? e.message : String(e) }),
+      ),
+    );
+    await wait(50);
+    // Before the fix, every request calls runtime.kaji.bases() separately, so 32 requests fill the
+    // queue and any further request or an unrelated caller fails with "Process queue is full" (-32004).
+    // After the fix, concurrent lookups share one in-flight call (held <= 1).
+    assert.ok(
+      child.held('kaji.bases') <= 1,
+      `inbound lookups share one in-flight bases() call (${child.held('kaji.bases')} held)`,
+    );
+    // An unrelated nervous call (e.g. kaji.main) is not refused with "Process queue is full".
+    const other = runtime.nervous.call('kaji.main').then(
+      () => 'answered',
+      (e: RpcFault) => `refused ${e.code}`,
+    );
+    await wait(0);
+    child.release();
+    assert.equal(await other, 'answered');
+    const results = await Promise.all(sends);
+    for (const res of results) {
+      assert.ok([401, 403].includes(res.status), `unverified request rejected with 401/403 (got ${res.status})`);
+    }
+    // Revocation freshness: an enrolled peer's signed request passes, and once revoked, the next lookup rejects it.
+    const B = keys();
+    await runtime.kaji.add([
+      rec({ kind: 'enrol', baseId: 'NERV-02', name: 'Tabgha', publicKey: B.publicKey, address: '127.0.0.1:9999' }),
+    ]);
+    const signedBody = JSON.stringify({ seen: {} });
+    const signedH = signedHeaders('NERV-02', B.privateKey, 'req', 'POST', '/kaji/heartbeat', signedBody);
+    const res1 = await fetch(`http://127.0.0.1:${port}/kaji/heartbeat`, {
+      method: 'POST',
+      headers: signedH,
+      body: signedBody,
+    });
+    assert.equal(res1.status, 200, 'signed request from enrolled peer passes');
+
+    await runtime.kaji.add([rec({ kind: 'revoke', baseId: 'NERV-02', publicKey: B.publicKey })]);
+    const signedH2 = signedHeaders('NERV-02', B.privateKey, 'req', 'POST', '/kaji/heartbeat', signedBody);
+    const res2 = await fetch(`http://127.0.0.1:${port}/kaji/heartbeat`, {
+      method: 'POST',
+      headers: signedH2,
+      body: signedBody,
+    });
+    assert.equal(res2.status, 403, 'revoked peer is rejected on next lookup');
+  } finally {
+    child?.release();
+    await link.stop();
+    await runtime.close();
+    rmSync(home, { recursive: true, force: true });
+  }
+});
