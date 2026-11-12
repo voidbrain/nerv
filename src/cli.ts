@@ -31,6 +31,7 @@ import {
 import { describePilots, type Stage } from './pilots.ts';
 import { McpClient, fingerprint as toolFingerprint, grantRefusal, toolName, type Eva, type McpTool } from './mcp.ts';
 import { TelegramApi, TelegramChannel, decisionText, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
+import { chronicleDays, composeChronicle, gatherMilestones } from './chronicle.ts';
 import { composeBrief, gatherBrief } from './brief.ts';
 import { KajiLink } from './kaji-link.ts';
 import { guardLocalService } from './node-lifecycle-execution.ts';
@@ -658,7 +659,7 @@ try {
     console.log(value.text + (value.truncated ? '\n[reply truncated]' : '') + `\n— ${value.route} · ${value.model}`);
   } else if (!command || command === 'help')
     console.log(
-      'NERV Agency\nCommands: root-migration plan|apply|status | init [--base ID --name "Name"] [--no-model-setup] [--fresh] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | nodes discover|inspect|plan|apply|status|release | workers pending|history|held|result|cancel|cancel-outbox|release|retry-outbox|abandon-outbox | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | bom | models [set misato| pilots [generic|add|set|pin|unpin|retire|restore] | tools [add|remove|grant|revoke] |casper MODEL | cloud on|off | key] | ask [--cloud] "text" | open [dashboard] | sessions revoke | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall',
+      'NERV Agency\nCommands: root-migration plan|apply|status | init [--base ID --name "Name"] [--no-model-setup] [--fresh] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | nodes discover|inspect|plan|apply|status|release | workers pending|history|held|result|cancel|cancel-outbox|release|retry-outbox|abandon-outbox | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | bom | models [set misato| pilots [generic|add|set|pin|unpin|retire|restore] | tools [add|remove|grant|revoke] |casper MODEL | cloud on|off | key] | ask [--cloud] "text" | open [dashboard] | sessions revoke | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | chronicle [DAYS] | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall',
     );
   else {
     const config = readConfig(home);
@@ -1018,6 +1019,22 @@ try {
           }),
         );
         break;
+      case 'chronicle': {
+        // F-054: the Simple chronicle, from recorded milestones only; DAYS limits it to the last N days (default 30).
+        const days = args[0] === undefined ? 30 : Number(args[0]);
+        if (!Number.isSafeInteger(days) || days < 1 || days > 3660) throw new Error('Usage: chronicle [DAYS] (1–3660)');
+        console.log(
+          composeChronicle(
+            chronicleDays(
+              gatherMilestones(local().db, config.kaji?.root),
+              config.timeZone,
+              new Date(Date.now() - days * 86_400_000),
+            ),
+            config.language,
+          ),
+        );
+        break;
+      }
       case 'tick':
         console.log(JSON.stringify({ delivered: local().tick() }));
         break;
