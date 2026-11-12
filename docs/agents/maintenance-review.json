@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-12T11:32:08.896Z",
+  "reviewed": "2026-11-12T12:04:52.815Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
     "AGENTS.md": "3baab88d7088bab8f454e3052d852d0761e3319454edac9ed0ca1c7985b4991c",
-    "docs/BACKLOG-RULES.md": "b9a3315e2144bd75b18fec9e903959d8826cd5bce76810833534b50bfa1d0266",
+    "docs/BACKLOG-RULES.md": "c7197fadb5e7807f18f57e7d26fc43ab93df597601d04d1ff22a1368c9df8db9",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
     "docs/agents/areas.md": "0ff9805a7d720ee177505cef670e53169a6d640299762dfa86185be46fa8737c",
     "docs/agents/audit.md": "bc5de5707f9ec5c523e73602499312c373d6112ffc498d69bf68604522527992",
@@ -20,12 +20,12 @@
     "docs/agents/work-usage.md": "e2f7c484f1c07f4b47fd1133857d8744ccab0ad2a7b85b220946c115a002bebc",
     "tools/task-claims.mjs": "2a7b7d0ea9e23fb36eceba5e5433eb640fee3e3633426066e4050f0fa8ebb9cf",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
-    "tools/work-items.mjs": "6b9f25f077ec2c29f7ded46e75a6ef229068d4ab6a8469348d9d40ec7404a905",
+    "tools/work-items.mjs": "7cf21340b775002aa44609906ac49f03a64565bdb5f45ebc62c9d42437704de1",
     "tools/work-usage.mjs": "4329262c0b9e723e046dd8878e15a99cff5f590201cd0918563f3204bbe79219"
   },
   "measurements": {
-    "samples": 17,
-    "latestAt": "2026-11-12T11:32:08.848Z",
+    "samples": 18,
+    "latestAt": "2026-11-12T12:02:37.724Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -51,25 +51,25 @@
         }
       },
       "reconciliation": {
-        "samples": 17,
+        "samples": 18,
         "durationMs": {
-          "observed": 17,
+          "observed": 18,
           "missing": 0,
-          "median": 240846
+          "median": 207860
         },
         "conflicts": {
           "observed": 5,
-          "missing": 12,
+          "missing": 13,
           "median": 0
         },
         "unnecessaryPrompts": {
           "observed": 1,
-          "missing": 16,
+          "missing": 17,
           "median": 0
         },
         "repeatedContextLoads": {
           "observed": 1,
-          "missing": 16,
+          "missing": 17,
           "median": 1
         }
       }
@@ -80,13 +80,13 @@
       "kind": "rule",
       "disposition": "implemented",
       "target": "docs/BACKLOG-RULES.md",
-      "evidence": "Reconciled published harness 6.0.0 (from 5.6.0): the BACKLOG-RULES template diff v5.6.0..v6.0.0 applied byte-identically (one priority-ordered list, the generated summary table with Remaining, Depends on, Unlocks and Human action, every record with a step). No check, never or ask-first rule, or safeguard removed. No behaviour runner configured."
+      "evidence": "Reconciled published harness 6.1.0 (from 6.0.0): the BACKLOG-RULES template diff v6.0.0..v6.1.0 applied byte-identically (estimate calibration by kind, per-kind band check). No check, never or ask-first rule, or safeguard removed. No behaviour runner configured."
     },
     {
       "kind": "tool",
       "disposition": "implemented",
       "target": "tools/work-items.mjs",
-      "evidence": "work-items, check-backlog and backlog-queue copied byte-identically from tag v6.0.0; check-harness --strict passes; CI clones v6.0.0. Layout uses one records: all segment; B-049-T01 added so every record has a step. Friction sample: wall-clock from worktree creation (12:25:52 +0100), waits for PR #294 included."
+      "evidence": "work-items copied byte-identically from tag v6.1.0; check-harness --strict passes; CI clones v6.1.0. calibrate reports byKind: bug n=5 median 0.6, feature n=1 (too few). Friction sample: wall-clock from worktree creation (13:01:33 +0100) to the review; the template change (PR #128, #129) before it is not included."
     }
   ]
 }

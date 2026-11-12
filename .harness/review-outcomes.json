@@ -3,12 +3,12 @@
     "kind": "rule",
     "disposition": "implemented",
     "target": "docs/BACKLOG-RULES.md",
-    "evidence": "Reconciled published harness 5.6.0 (5.5.0 included) from 5.4.0 in PR #277: the Linked prerequisites, Optional work queue, Optional upfront feature plans and Estimate calibration paragraphs carried verbatim from the template (fresh-context review: byte-identical, no project line dropped). No check, never or ask-first rule, or safeguard removed; queue and dependency checks stay in CI. 157 open steps re-estimated in agent hours with the method stated in each basis; estimation.since 2026-11-11. No behaviour runner configured."
+    "evidence": "Reconciled published harness 6.1.0 (from 6.0.0): the BACKLOG-RULES template diff v6.0.0..v6.1.0 applied byte-identically (estimate calibration by kind, per-kind band check). No check, never or ask-first rule, or safeguard removed. No behaviour runner configured."
   },
   {
     "kind": "tool",
     "disposition": "implemented",
     "target": "tools/work-items.mjs",
-    "evidence": "tools/work-items.mjs, backlog-queue.mjs, backlog-dependencies.mjs and check-freshness.mjs copied byte-identically from v5.6.0 (41 copied files compared with the tag, 0 differ); retired queue and dependency pages, their scripts and links removed; impact map regenerated; CI clones the template at v5.6.0. This reconcile was not timed with friction start/finish (missed at session start), so no friction sample is recorded for it; the latest measurement is the 5.4.0 reconcile of the same day."
+    "evidence": "work-items copied byte-identically from tag v6.1.0; check-harness --strict passes; CI clones v6.1.0. calibrate reports byKind: bug n=5 median 0.6, feature n=1 (too few). Friction sample: wall-clock from worktree creation (13:01:33 +0100) to the review; the template change (PR #128, #129) before it is not included."
   }
 ]

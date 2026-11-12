@@ -198,19 +198,30 @@ export function calibrate(tasks, estimation = estimationDefaults) {
     })
     .map((t) => {
       const [actual, baseline, unit] = pair(t.effort);
-      return { id: t.id, size: t.effort.size, source: t.effort.actualSource, unit, ratio: actual / baseline };
+      // B- steps are bug work, F- steps feature work (BACKLOG-RULES IDs); judged apart, same formula.
+      const kind = { B: 'bug', F: 'feature' }[(t.parent ?? t.id)[0]] ?? 'other';
+      return { id: t.id, size: t.effort.size, source: t.effort.actualSource, unit, kind, ratio: actual / baseline };
     });
   const by = (key) =>
     Object.fromEntries(
       [...new Set(samples.map((x) => x[key]))].sort().map((v) => [v, stats(samples.filter((x) => x[key] === v))]),
     );
   const all = stats(samples);
+  const byKind = by('kind');
   const reasons = [];
+  const off = (s) => s.n >= e.minSamples && (s.median > e.ratio || s.median < 1 / e.ratio);
   if (e) {
-    if (all.n >= e.minSamples && (all.median > e.ratio || all.median < 1 / e.ratio))
+    if (off(all))
       reasons.push(
         `median actual/baseline ${all.median} over ${all.n} closed steps is outside ${round(1 / e.ratio)}–${e.ratio}`,
       );
+    // With more than one kind, each kind is also judged on its own: one can drift while the pooled median hides it.
+    if (Object.keys(byKind).length > 1)
+      for (const [kind, s] of Object.entries(byKind))
+        if (off(s))
+          reasons.push(
+            `${kind} steps: median actual/baseline ${s.median} over ${s.n} is outside ${round(1 / e.ratio)}–${e.ratio}`,
+          );
     for (const x of samples)
       if (x.ratio >= e.outlier || x.ratio <= 1 / e.outlier)
         reasons.push(`${x.id} took ${round(x.ratio)}x its baseline (outlier threshold ${e.outlier}x)`);
@@ -222,6 +233,7 @@ export function calibrate(tasks, estimation = estimationDefaults) {
     bySize: by('size'),
     bySource: by('source'),
     byUnit: by('unit'),
+    byKind,
     due: reasons.length > 0,
     reasons,
     reestimate: reasons.length ? open : [],
