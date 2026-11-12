@@ -37,10 +37,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "2 hours agent",
-    "basis": "Added 2026-11-12 at the harness 6.0.0 reconcile, which gives every record a step: the record's own Small estimate (classification, a guard or prompt change with tests, an owner-approved rerun) in agent hours, judged at the NERV rate of about 1.5 agent hours per former focused day plus review and CI; model time of the rerun not counted. Estimate, not a measurement.",
+    "estimate": "1.25 h agent",
+    "basis": "Added 2026-11-12 at the harness 6.0.0 reconcile, which gives every record a step: the record's own Small estimate (classification, a guard or prompt change with tests, an owner-approved rerun) in agent hours, judged at the NERV rate of about 1.5 agent hours per former focused day plus review and CI; model time of the rerun not counted. Estimate, not a measurement. Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2 h → 1.25 h, min 0.5 h; owner hours and baseline kept.",
     "reviewed": "2026-11-12",
-    "agentHours": 2,
+    "agentHours": 1.25,
     "baselineAgentHours": 2
   }
 }
