@@ -147,6 +147,7 @@ export function makeServer(
           '.png': 'image/png',
           '.ico': 'image/x-icon',
           '.json': 'application/json',
+          '.webmanifest': 'application/manifest+json',
         };
         res.setHeader('Content-Type', types[extname(file)] ?? 'application/octet-stream');
         res.setHeader(

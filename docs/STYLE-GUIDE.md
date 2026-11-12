@@ -26,6 +26,8 @@ The Angular build loads its full stylesheet directly: critical-CSS extraction is
 
 At narrow widths the Angular navigation wraps rather than widening the page; the main grid item can shrink within a 320 px viewport.
 
+The workspace is an installable PWA (F-004-T01). Its icons in `web/public/icons/` are the seven-eye mark on the `--bg` square, rendered from `mark.svg` by `node tools/render-icons.mjs` (rerun it after changing the mark or `--bg`); the maskable icon keeps the mark inside the central safe zone. The manifest's `theme_color` and `background_color` and the page's `theme-color` carry the `--bg` value literally, kept equal by test/pwa.test.mjs. A new build never reloads the page by itself: the update prompt (`nerv-update-prompt`, at the top of `main`) is a `--panel` band outlined in `--accent`, says in plain words that a new version is ready and that nothing changes until the owner reloads, and offers Reload and Later in English and Italian; its message is a polite live region. When the worker reports an unrecoverable offline copy it says so and offers Reload only. The service worker caches the shell only: API answers and the NERV dashboard always come from the service.
+
 Pilot model controls belong in the Marduk Institute/Pilots panel: the Generic pilot model is the fallback adviser, and each specialist card has its own labelled selector and Apply button. Choices list installed local Ollama models; missing saved models are labelled unavailable. Preserve drafts during polling. The Models panel contains Misato and Casper plus cloud-route settings; pilot cloud routing remains planned.
 
 Muted badges use `--text` on their tinted background so the small labels retain AA contrast.

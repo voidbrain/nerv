@@ -30,7 +30,8 @@
               "styles": {
                 "inlineCritical": false
               }
-            }
+            },
+            "serviceWorker": "web/ngsw-config.json"
           },
           "configurations": {
             "production": {
