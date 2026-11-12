@@ -4,7 +4,7 @@
   "parent": "B-051",
   "title": "Reproduce and bound concurrent unsigned registry lookups in KajiLink.serve",
   "goal": "A committed regression shows concurrent unsigned requests while the child is slow fill the nervous process queue; after the fix inbound lookups share one in-flight call and legitimate requests still pass",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A committed deterministic regression fails before the fix: concurrent unsigned requests while the child is slow fill the process queue",
     "After the fix concurrent inbound lookups share one in-flight bases() call and the child is not flooded",
@@ -41,7 +41,7 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Task added 2026-11-12 when B-051 was taken up. Baseline 1.5 h agent (baselineAgentHours), the estimate recorded when B-051 was opened. Regression test committed first (951c779), coalesced in-flight bases() lookup in KajiLink (PR #291), review and CI. Implemented in 0.75 h agent (stated).",
+    "basis": "Task added 2026-11-12 when B-051 was taken up. Baseline 1.5 h agent (baselineAgentHours), the estimate recorded when B-051 was opened. Regression test committed first (951c779), coalesced in-flight bases() lookup in KajiLink (PR #291), review and CI. Closed 2026-11-12 after PR #291 merged into main 9497e89 with all CI jobs passing.",
     "reviewed": "2026-11-12",
     "agentHours": 0,
     "baselineAgentHours": 1.5,
