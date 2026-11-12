@@ -165,7 +165,7 @@ Final PR240 revision6acac44 / CI42635119338 passed all five/full-suite checks. I
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Reproduction and fix 2026-11-12 (B-051-T01):** Committed deterministic regression in `test/periodic-overlap.test.ts` (commit 951c779): with nervous child calls held, 37 unsigned requests filled the process queue (`child.held('kaji.bases')` was 32), the test failed before the fix, and an unrelated caller's `kaji.main` was blocked. Fix in `src/kaji-link.ts`: `KajiLink` coalesces in-flight `bases()` lookups so concurrent requests share one in-flight call while the registry is answering, and clears the reference in `finally` so subsequent lookups are fresh and revocation takes effect immediately on the next lookup. After the fix, `child.held('kaji.bases')` is 1, all unverified requests are rejected with 401/403, `kaji.main` gets through, signed heartbeat requests succeed, and revoked peers are rejected on the next lookup.
+**Reproduction and fix 2026-11-12 ([PR #291](https://github.com/voidbrain/nerv/pull/291), B-051-T01):** Committed deterministic regression in `test/periodic-overlap.test.ts` (commit 951c779): with nervous child calls held, 37 unsigned requests filled the process queue (`child.held('kaji.bases')` was 32), the test failed before the fix, and an unrelated caller's `kaji.main` was blocked. Fix in `src/kaji-link.ts`: `KajiLink` coalesces in-flight `bases()` lookups so concurrent requests share one in-flight call while the registry is answering, and clears the reference in `finally` so subsequent lookups are fresh and revocation takes effect immediately on the next lookup. After the fix, `child.held('kaji.bases')` is 1, all unverified requests are rejected with 401/403, `kaji.main` gets through, signed heartbeat requests succeed, and revoked peers are rejected on the next lookup.
 
 **Next action / closure evidence:** Fresh-context review (security/design) and CI before merge.
 
@@ -173,7 +173,7 @@ Final PR240 revision6acac44 / CI42635119338 passed all five/full-suite checks. I
 
 | Field | Value |
 |---|---|
-| PR / evidence | Test: test/periodic-overlap.test.ts. Recorded in [PR #289](https://github.com/voidbrain/nerv/pull/289). Found in the B-043 design review of #282; code confirmed on main: `serve` calls `this.port.bases()` before `verifySigned`. |
+| PR / evidence | [PR #291](https://github.com/voidbrain/nerv/pull/291) (B-051-T01), Test: test/periodic-overlap.test.ts. Recorded in [PR #289](https://github.com/voidbrain/nerv/pull/289). Found in the B-043 design review of #282; code confirmed on main: `serve` calls `this.port.bases()` before `verifySigned`. |
 | Opened | 2026-11-12 |
 | Verification | Unit/integration: 2026-11-12 test/periodic-overlap.test.ts reproduces queue saturation before fix (32 held) and passes after fix (1 held, legitimate and revocation checks pass). |
 | Reviewed | 2026-11-12 |

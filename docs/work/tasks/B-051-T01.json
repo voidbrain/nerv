@@ -41,7 +41,7 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Task added 2026-11-12 when B-051 was taken up. Baseline 1.5 h agent (baselineAgentHours), the estimate recorded when B-051 was opened. Regression test committed first (951c779), coalesced in-flight bases() lookup in KajiLink, review and CI. Implemented in 0.75 h agent (stated).",
+    "basis": "Task added 2026-11-12 when B-051 was taken up. Baseline 1.5 h agent (baselineAgentHours), the estimate recorded when B-051 was opened. Regression test committed first (951c779), coalesced in-flight bases() lookup in KajiLink (PR #291), review and CI. Implemented in 0.75 h agent (stated).",
     "reviewed": "2026-11-12",
     "agentHours": 0,
     "baselineAgentHours": 1.5,
