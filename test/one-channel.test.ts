@@ -300,6 +300,13 @@ test(
             ),
         15000,
       );
+      // The fake server sees the send before Aoba reads its response and tracks the card (B-042): wait for tracking.
+      // Read in memory: polling the state file could make Aoba's own atomic save fail on Windows.
+      const tracked = () =>
+        (
+          (aoba as unknown as { state: { messages?: { rows: { callback_data: string }[][] }[] } }).state.messages ?? []
+        ).some((m) => m.rows.some((row) => row.some((b) => b.callback_data.endsWith(':' + stale))));
+      await until(tracked, 15000);
       sb.decide(stale, 'approve', 'api');
       const beforeCleanup = botA.calls.filter((c) => c.method === 'editMessageReplyMarkup').length;
       await aoba.deliver();

@@ -29,4 +29,5 @@ These are required capabilities, not measured model passes. Suggested model: **u
 | [F-050-T01](tasks/F-050-T01.json) | distributed-contracts, privacy-review, recovery-design |
 | [F-050-T02](tasks/F-050-T02.json) | typescript, distributed-contracts, recovery-design, regression-design |
 | [B-043-T01](tasks/B-043-T01.json) | typescript, distributed-contracts, regression-design, concurrency-control |
+| [B-042-T01](tasks/B-042-T01.json) | typescript, delivery-reconciliation, regression-design, concurrency-control |
 | [B-046-T02](tasks/B-046-T02.json) | typescript, distributed-contracts, regression-design, concurrency-control |

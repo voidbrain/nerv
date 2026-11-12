@@ -488,16 +488,14 @@ export class TelegramChannel {
         .catch((e) => this.log(`Telegram: ${e instanceof Error ? e.message : 'follow-up failed'}.`));
     });
     void this.poll();
-    this.timer = setInterval(() => {
-      void this.deliver();
-    }, deliverEveryMs);
+    this.timer = setInterval(() => this.tick(), deliverEveryMs);
     await this.deliver();
   }
   /** Waits for a delivery in progress, so a restart never sends the same reminder twice. */
   async stop() {
     this.stopping.abort();
     if (this.timer) clearInterval(this.timer);
-    await Promise.allSettled([this.queue, this.delivery, this.cardQueue, this.markupQueue]);
+    await Promise.allSettled([this.queue, this.delivery, this.followUp, this.cardQueue, this.markupQueue]);
   }
   private owner(id: number | undefined) {
     return id === this.chatId;
@@ -608,9 +606,27 @@ export class TelegramChannel {
       clearInterval(typing);
     }
   }
-  /** Pen Pen: new approval cards and newly delivered reminders, each sent once (remembered across restarts). */
+  /**
+   * Pen Pen: new approval cards and newly delivered reminders, each sent once (remembered across restarts).
+   * The pass a caller awaits starts after its call (B-042): a pass already running may have read card status
+   * before the caller's change, so callers share one follow-up pass instead. Passes never overlap.
+   */
   deliver(): Promise<void> {
-    if (this.delivery || this.stopping.signal.aborted) return this.delivery ?? Promise.resolve();
+    if (this.stopping.signal.aborted) return this.delivery ?? Promise.resolve();
+    if (this.followUp) return this.followUp;
+    if (!this.delivery) return this.deliverPass();
+    this.followUp = this.delivery.then(() => {
+      this.followUp = undefined;
+      return this.stopping.signal.aborted ? undefined : this.deliverPass();
+    });
+    return this.followUp;
+  }
+  /** The periodic tick: skipped while a pass runs, so a slow pass never queues ticks behind it. */
+  private tick() {
+    if (!this.delivery) void this.deliver();
+  }
+  private followUp?: Promise<void>;
+  private deliverPass(): Promise<void> {
     this.delivery = this.deliverOnce().finally(() => {
       this.delivery = undefined;
     });
