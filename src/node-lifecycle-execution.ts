@@ -339,6 +339,16 @@ export function serviceReceipt(host: ServiceHost, digest: string): ServiceReceip
   }
 }
 async function processIdentity(pid: number): Promise<string | undefined> {
+  if (!Number.isInteger(pid) || pid <= 0) return undefined;
+  if (process.platform === 'win32') {
+    const r = await command('powershell', [
+      '-NoProfile',
+      '-NonInteractive',
+      '-Command',
+      `Get-CimInstance Win32_Process -Filter "ProcessId=${pid}" | ForEach-Object { "$($_.CreationDate)|$($_.CommandLine)" }`,
+    ]);
+    return r.status === 0 && r.out.trim() ? hash(r.out.trim()) : undefined;
+  }
   const r = await command('ps', ['-p', String(pid), '-o', 'lstart=', '-o', 'args=']);
   return r.status === 0 && r.out.trim() ? hash(r.out.trim()) : undefined;
 }
