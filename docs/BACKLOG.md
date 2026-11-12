@@ -1892,11 +1892,12 @@ mkdir -m 700 -p ~/nerv-t13 && ls ~/nerv-t13
 Expected: the nvm Node path (`…/node/v26.12.0/bin/node`), a 40-character commit, and an empty `~/nerv-t13`.
 
 ```bash
-# 1. The service runs 2a3448d. Put its checkout back there, without restarting anything.
-git status --porcelain; git checkout -q --detach 2a3448d6dca6471323758f721f57ea58a41dd452 && git rev-parse HEAD && git status --porcelain
+# 1. The service runs 2a3448d. Confirm it (read-only), then put the checkout back there, without restarting anything.
+"$N" -e 'const fs=require("fs"),h=require("os").homedir(),c=JSON.parse(fs.readFileSync(h+"/.nerv/config.json"));fetch("http://127.0.0.1:"+(c.port??4317)+"/api/doctor",{headers:{authorization:"Bearer "+fs.readFileSync(h+"/.nerv/token","utf8").trim()}}).then(r=>r.json()).then(b=>console.log(b.build?.commit,b.base?.id))'
+test -z "$(git status --porcelain)" && git checkout -q --detach 2a3448d6dca6471323758f721f57ea58a41dd452 && git rev-parse HEAD && git status --porcelain
 ps -axo pid=,lstart=,args= | grep -E 'src/cli\.ts (serve|launch)' | grep -v grep
 ```
-Expected: no `git status` output either time, and `2a3448d6dca6471323758f721f57ea58a41dd452`. Exactly one `serve` line from `~/Projects/NERV/NERV/src/cli.ts`. A second line (a worktree or test server) must be stopped first, or the plan reports the runtime as `unknown`.
+Expected: the doctor prints `2a3448d… NERV-01` (a different commit: stop and paste it). Then `2a3448d6dca6471323758f721f57ea58a41dd452` and no `git status` output; if the tree is dirty, nothing is checked out and nothing prints (stop and paste `git status`). Exactly one `serve` line from `~/Projects/NERV/NERV/src/cli.ts`. A second line (a worktree or test server) must be stopped first, or the plan reports the runtime as `unknown`.
 
 ```bash
 # 2. Stop plan, then apply it.
@@ -1912,7 +1913,13 @@ ps -axo pid=,args= | grep -E 'src/cli\.ts (serve|launch)' | grep -v grep; launch
 Expected: a receipt with `"state": "completed"` and steps `stop:completed`, `verify:completed`. No `serve` line. `Could not find service`.
 
 ```bash
-# 3. Bring the target commit into the checkout (the update also fetches it; the network must be up).
+# 2b. Match dependencies and build to 2a3448d (the checkout was pulled to a later revision and its node_modules holds that revision's lockfile, e.g. Gauntlet 0.7.1 instead of 0.5.0). Only now, with the service stopped.
+npm ci --ignore-scripts && npm run build && git status --porcelain && echo matched
+```
+Expected: `npm ci` and the build finish without errors, no `git status` output, then `matched`. This also makes the `refused` path below start 2a3448d with its own dependencies.
+
+```bash
+# 3. Bring the target commit into the checkout. The update is run by the installed 2a3448d code, whose fetch step fetches again (PR #287's local-commit fetch applies only to later updates), so keep the network up.
 git fetch -q origin "$T" && git cat-file -t "$T" && git merge-base --is-ancestor HEAD "$T" && echo descends
 "$N" --use-system-ca src/cli.ts nodes lifecycle-inspect --action update --revision "$T" --out ~/nerv-t13/update-plan.json
 "$N" -p 'const p=require(process.argv[1]);[p.digest,JSON.stringify(p.blockers),p.before.schema,p.nextRevision].join(" ")' ~/nerv-t13/update-plan.json
@@ -1935,7 +1942,7 @@ sqlite3 -readonly ~/.nerv/nerv.sqlite 'PRAGMA quick_check; PRAGMA user_version;'
 ```
 Expected: `HEAD` is `<T>` with a clean tree. One `serve` line started just now. `state = running`, with the plist's Node as `program`. The doctor prints `<T> NERV-01`. Then `ok` and `6`. Paste all of it back; the agent records it in T13.
 
-**If the receipt says `refused`:** nothing changed. Paste the `rehearsal.blockers`. To bring 2a3448d back up, make a `start` plan and apply it (`lifecycle-inspect --action start`, then `lifecycle-apply`).
+**If the receipt says `refused`:** nothing changed (dependencies and build already match 2a3448d after step 2b). Paste the `rehearsal.blockers`. To bring 2a3448d back up, make a `start` plan and apply it (`lifecycle-inspect --action start`, then `lifecycle-apply`).
 
 **If the command fails or the receipt says `uncertain`:** do not retry. Paste the output and `lifecycle-status --digest UPDATE_DIGEST`, then follow the order in the [upgrade decision](decisions/node-upgrades.md):
 1. Stop a running candidate with `launchctl bootout gui/$(id -u)/io.nerv.agent` and check that no `serve` line remains. The installed code does not check this for you.
@@ -1945,6 +1952,8 @@ Expected: `HEAD` is `<T>` with a clean tree. One `serve` line started just now. 
 5. Apply a fresh `start` plan.
 
 The agent can prepare the evidence file from the pasted receipt.
+
+**Procedure revised 2026-11-12 after the fresh-context review of #287's fixes (design-reviewer, no blocker):** step 1 now confirms the running build with the doctor and checks out only on a clean tree; step 2b reinstalls dependencies and rebuilds at 2a3448d once the service is stopped; step 3 says why the network must stay up. Recorded follow-up, not done: a CLI-level test that `nodes lifecycle-release` refuses while the service is registered or running (the #287 test calls `releaseObservedService` directly).
 
 **Lettered slices, 2026-11-11 ([PR #264](https://github.com/voidbrain/nerv/pull/264)):** the owner asked that every large step be split into lettered slices with an estimate each, defined before work starts. T06 had instead been delivered as three slices discovered one at a time, with only the whole-step estimate revised. Approved split of T06: a–d done (T06, now 0 remaining, implemented until T06e's review); T06e independent review of the update path (F-005-T12, 0.5 day); T06f first real lifecycle update on the Mac (F-005-T13, 0.5 day plus the owner run); T06g after-start health check in the receipt (F-005-T14, 1 day); T06h upgrades that raise the schema version (F-005-T15, 2–3 days, separate: T06 does not wait for it). Slices e–h use free step numbers because step IDs are two digits.
 
