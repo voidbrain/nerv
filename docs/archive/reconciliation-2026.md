@@ -301,3 +301,7 @@ Authenticated ci:status confirms #318 CI43290861912 passed plan, native-macos, w
 ## 2026-11-12 — PR #322 (F-015-T02)
 
 Authenticated ci:status confirms #317 CI43292206806, #319 CI43291684068 and #320 CI43295160685 passed; merged main 5a18130. #317 and #320 updated their own F-005 records; #319 is this session's B-008/F-015 change. Previous header: Current work ledger, reviewed 12 November 2026 against main `1d5cc15`. PR #318 (B-008 reproduction, B-054, B-055) passed CI; B-008 closed as not reproduced (owner); F-015 trial moves to the agent.
+
+## 2026-11-12 — PR #325 (F-015-T03)
+
+Authenticated ci:status confirms #321 CI43298181723 and #322 CI43297509679 passed; merged main ca0cd66; #323 (CI read with ci:status) merged as 4154b84 and updated its own F-005 records. #321 updated its own F-005 records; #322 is this session's F-015-T02 record. Previous header: Current work ledger, reviewed 12 November 2026 against main `5a18130`. PRs #317 (F-005-T14), #319 (B-008 closed) and #320 (F-005-T07) passed CI; F-015-T02 Keychain trial done, B-056 opened.

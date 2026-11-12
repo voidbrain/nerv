@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "id": "B-057-T01",
+  "parent": "B-057",
+  "title": "Translated, specific companion error messages",
+  "goal": "Every companion error has English and Italian text, and revoked, unreachable and changed-certificate cases are told apart",
+  "status": "planned",
+  "acceptance": [
+    "A committed Swift test fails before the fix for an English error text and for a 401 mapped to the pair-again message",
+    "A pin mismatch says the certificate changed and nothing was sent",
+    "No credential, ticket or token appears in any message"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "native/NervMenuBar/**",
+    "docs/work/records/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "regression-design",
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures only.",
+  "validation": [
+    "swift test --package-path native/NervMenuBar"
+  ],
+  "escalation": [
+    "A change to what is sent or to pinning goes to a fresh-context review"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-12: status-code and pin-failure mapping, English texts, Swift tests. Not a measurement.",
+    "reviewed": "2026-11-12",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5
+  }
+}

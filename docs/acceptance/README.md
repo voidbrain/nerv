@@ -12,6 +12,8 @@ The [review register](../reviews/README.md#acceptance-evidence) links every repo
 
 [F-015 isolated pairing and Keychain trial, 12 November 2026](f015-keychain-trial-2026-11-12.md): companion from 214b7cb paired live to an isolated profile; used and expired invitations refused; no token in logs, arguments or URLs; re-paired to the live service. Owner pasted and observed, agent prepared and checked.
 
+[F-015 live failure, recovery and rotation, 12 November 2026](f015-live-failures-2026-11-12.md): revocation, a lost renewal reply, a Keychain save failure and offline TLS/auth rotation, each live on an isolated profile and recovered by the README procedure; found B-057.
+
 [Gauntlet integration, 9 November 2026](gauntlet-2026-11-09.md): clean-source selected policy join and bounded adapter/cancellation fixtures; no model qualification.
 
 [Gauntlet0.2 adoption](gauntlet-v02-2026-11-09.md): accepted CI/integration/index/reuse contracts; live Gemma and real performance measurement explicitly paused.
