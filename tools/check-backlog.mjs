@@ -2,6 +2,11 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
+// The cue kind from the generated Procedures and Decision cells (8.0.0); undefined for any other content.
+const kindOf = ([p, d]) =>
+  ['🧑', '—'].includes(p) && ['🧑', '—'].includes(d)
+    ? { '🧑🧑': 'Both', '🧑—': 'Procedure', '—🧑': 'Decision', '——': 'No' }[p + d]
+    : undefined;
 
 const text = readFileSync(new URL('../docs/BACKLOG.md', import.meta.url), 'utf8');
 const cells = (line) =>
@@ -73,7 +78,8 @@ for (let i = 0; i < headings.length; i++) {
   assert(row, `${id}: missing summary`);
   const [signal, priority, status, effort] = unmerge(cells(row));
   // Authored records have four columns; the generated ledger (F-059) adds Remaining, Depends on / Unlocks when the
-  // dependency helper is adopted, and Human action, which then replaces the label of the human-action line; F-063
+  // dependency helper is adopted, and the Procedures and Decision cells (8.0.0), which then replace the label of the
+  // human-action line; F-063
   // merges its Signal into Status.
   const lines = block.split('\n');
   const header = cells(lines[lines.indexOf(row) - 2] ?? '');
@@ -81,13 +87,13 @@ for (let i = 0; i < headings.length; i++) {
   assert(
     generated
       ? [
-          'Status|Priority|Effort|Remaining|Human action',
-          'Status|Priority|Effort|Remaining|Depends on|Unlocks|Human action',
+          'Status|Priority|Effort|Remaining|Procedures|Decision',
+          'Status|Priority|Effort|Remaining|Depends on|Unlocks|Procedures|Decision',
         ].includes(header.join('|')) &&
           cells(row).length === header.length &&
           cells(row)[0] !== signal
       : cells(row).length === 4,
-    `${id}: summary needs four columns, or the generated Status / Priority / Effort / Remaining / Depends on / Unlocks / Human action columns (a 6.x generated ledger: run work-items build; remove completion percentages)`,
+    `${id}: summary needs four columns, or the generated Status / Priority / Effort / Remaining / Depends on / Unlocks / Procedures / Decision columns (an older generated ledger: run work-items build; remove completion percentages)`,
   );
   assert(/^\*\*[^\n]+\*\*$/m.test(block.slice(0, block.indexOf('|'))), `${id}: missing visible bold title`);
   assert(
@@ -104,16 +110,17 @@ for (let i = 0; i < headings.length; i++) {
     1,
     `${id}: next action must occur exactly once`,
   );
+  // 8.0.0: the cue names the kind of human action (Procedure, Decision or Both) instead of Yes.
+  assert(
+    !/^🧑 \*\*→ Human action required: Yes\*\*/m.test(block),
+    `${id}: human-action cue Yes is replaced by Procedure, Decision or Both (8.0.0)`,
+  );
   const human = generated
-    ? [...block.matchAll(/^(🧑|💻) \*\*→\*\* .+/gm)].map((m) => Object.assign(m, { 2: cells(row).at(-1) }))
-    : [...block.matchAll(/^(🧑|💻) \*\*→ Human action required: (Yes|No)\*\*<br \/>.+/gm)];
+    ? [...block.matchAll(/^(🧑|💻) \*\*→\*\* .+/gm)].map((m) => Object.assign(m, { 2: kindOf(cells(row).slice(-2)) }))
+    : [...block.matchAll(/^(🧑|💻) \*\*→ Human action required: (Procedure|Decision|Both|No)\*\*<br \/>.+/gm)];
   assert.equal(human.length, 1, `${id}: missing visible human action/cue`);
-  if (generated) {
-    assert(/^(🧑|💻) (Yes|No)$/.test(human[0][2]), `${id}: Human action cell needs 🧑 Yes or 💻 No`);
-    assert.equal(human[0][2].split(' ')[0], human[0][1], `${id}: human-action cue mismatch`);
-    human[0][2] = human[0][2].split(' ')[1];
-  }
-  assert.equal(human[0][1], human[0][2] === 'Yes' ? '🧑' : '💻', `${id}: human-action cue mismatch`);
+  if (generated) assert(human[0][2], `${id}: Procedures and Decision cells need 🧑 or —`);
+  assert.equal(human[0][1], human[0][2] === 'No' ? '💻' : '🧑', `${id}: human-action cue mismatch`);
   const humanAt = block.indexOf(human[0][0]);
   const after = block
     .slice(block.indexOf(human[0][0]) + human[0][0].length)

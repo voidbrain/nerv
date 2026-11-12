@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-12T18:06:47.215Z",
+  "reviewed": "2026-11-12T21:26:32.771Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
     "AGENTS.md": "f8e8646a9dfcf43bee1cbb0160e779f198f5db0d7cdeee58284d59a4e5e696a1",
-    "docs/BACKLOG-RULES.md": "86f1a3e420510f5ba4d4d1764fcd2400668e457b42f9e342facbbcd9aefea8a0",
+    "docs/BACKLOG-RULES.md": "763815b94e2d8c08f71741013f45c522550950d180b65cb2efece8c5b5dc6ebd",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
     "docs/agents/areas.md": "0ff9805a7d720ee177505cef670e53169a6d640299762dfa86185be46fa8737c",
     "docs/agents/audit.md": "bc5de5707f9ec5c523e73602499312c373d6112ffc498d69bf68604522527992",
@@ -18,14 +18,14 @@
     "docs/agents/solution-profile.md": "857fc0e5f5c36d1d139d2507f1f97460edfdcde4d5cd5d590a922d88c4459862",
     "docs/agents/task-context.md": "c38395d5989a3fd7cfbf319bce53b24c17a1740822398f4376ecc2c3e95d531f",
     "docs/agents/work-usage.md": "e2f7c484f1c07f4b47fd1133857d8744ccab0ad2a7b85b220946c115a002bebc",
-    "tools/task-claims.mjs": "2a7b7d0ea9e23fb36eceba5e5433eb640fee3e3633426066e4050f0fa8ebb9cf",
+    "tools/task-claims.mjs": "ef755fe7951544e5c05b20de7c64a7b53778b6d039a11a2abeb079e7d42b6fd2",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
-    "tools/work-items.mjs": "9504bf718eb19a071508e8308708b9bb182ea5cdc06e2d05ec9ae5294f37e8d4",
+    "tools/work-items.mjs": "0879134d54cbd0e62d1105daa31a65ddf50ede80fe385cdc0b97c982f5690ba5",
     "tools/work-usage.mjs": "4329262c0b9e723e046dd8878e15a99cff5f590201cd0918563f3204bbe79219"
   },
   "measurements": {
-    "samples": 1,
-    "latestAt": "2026-11-12T18:06:47.153Z",
+    "samples": 19,
+    "latestAt": "2026-11-12T21:26:32.719Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -51,36 +51,36 @@
         }
       },
       "reconciliation": {
-        "samples": 1,
+        "samples": 19,
         "durationMs": {
-          "observed": 1,
+          "observed": 19,
           "missing": 0,
-          "median": 3272
+          "median": 240846
         },
         "conflicts": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 6,
+          "missing": 13,
+          "median": 0
         },
         "unnecessaryPrompts": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 2,
+          "missing": 17,
+          "median": 0
         },
         "repeatedContextLoads": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 2,
+          "missing": 17,
+          "median": 1
         }
       }
     }
   },
   "outcomes": [
     {
-      "kind": "tool",
+      "kind": "rule",
       "disposition": "implemented",
-      "target": "tools/work-items.mjs",
-      "evidence": "Reconciled harness 6.3.0–7.1.1 (PR #312): parallel-work, work-items, check-backlog, backlog-queue and solution copied byte-identically; AGENTS 'On its own' line and the NERV service-checkout project line; BACKLOG-RULES paragraphs carried verbatim; NERV backlog-recap reads the merged Status (failing test first). Fresh-context design review: no blocker; should-fix (stale solution.mjs) fixed by copying v7.1.1. No rule removed."
+      "target": "docs/BACKLOG-RULES.md",
+      "evidence": "Harness 8.0.0 reconciled from template PR #137 (fresh-context review there, no blocker): the human-action cue names its kind (Procedure, Decision, Both, No) in update step 5 and the record-format paragraph; the generated summary shows Procedures and Decision cells. No rule removed: the Yes meaning is split into the two kinds, archives keep Yes. NERV's recap splits the Require Human table the same way (tools/backlog-recap.mjs, failing test first)."
     }
   ]
 }
