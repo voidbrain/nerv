@@ -1,5 +1,7 @@
 # F-005-T13: Mac service update, owner procedure
 
+**Run 2026-11-12** by the agent with the owner's approval: [evidence](node-update-2026-11-12.md). Kept as the procedure for the next hand-run update; the digest is now read from the plan file instead of a placeholder.
+
 Prepared 2026-11-12 for [F-005](../BACKLOG.md#f-005) step F-005-T13 (T06f), the first lifecycle update of the Mac service. [PR #287](https://github.com/voidbrain/nerv/pull/287) merged on 2026-11-12; run it once its main CI has passed. Use a local Terminal on the Mac (not SSH), with the Mac on power, and keep the Terminal open. Paste each block and compare the output with the expected result. Stop at the first difference and paste the output back to the agent. Do not retry.
 
 ```bash
@@ -27,10 +29,11 @@ Expected: the doctor prints `2a3448d… NERV-01` (a different commit: stop and p
 Expected: `{"saved": …, "execution": "none"}`, then `DIGEST [] owned 2a3448d6…`. Non-empty blockers: stop and paste them.
 
 ```bash
-"$N" --use-system-ca src/cli.ts nodes lifecycle-apply --plan ~/nerv-t13/stop-plan.json --confirm STOP_DIGEST
+D=$("$N" -p 'require(process.argv[1]).digest' ~/nerv-t13/stop-plan.json); echo "$D"
+"$N" --use-system-ca src/cli.ts nodes lifecycle-apply --plan ~/nerv-t13/stop-plan.json --confirm "$D"
 ps -axo pid=,args= | grep -E 'src/cli\.ts (serve|launch)' | grep -v grep; launchctl print gui/$(id -u)/io.nerv.agent 2>&1 | head -1
 ```
-Expected: a receipt with `"state": "completed"` and steps `stop:completed`, `verify:completed`. No `serve` line. `Could not find service`.
+Expected: a receipt with `"state": "completed"` and steps `stop:completed`, `verify:completed`. No `serve` line. `Could not find service` (some shells print `Bad request.` instead; then `launchctl list | grep io.nerv.agent` prints nothing).
 
 ```bash
 # 2b. Match dependencies and build to 2a3448d (the checkout was pulled to a later revision and its node_modules holds that revision's lockfile, e.g. Gauntlet 0.7.1 instead of 0.5.0). Only now, with the service stopped.
@@ -48,9 +51,10 @@ Expected: `commit`, `descends`, then `DIGEST [] 6 <T>`.
 
 ```bash
 # 4. The update. It takes a few minutes (backup, fetch, rehearsal, checkout, npm ci, build, start) and prints only at the end.
-caffeinate -i "$N" --use-system-ca src/cli.ts nodes lifecycle-apply --plan ~/nerv-t13/update-plan.json --confirm UPDATE_DIGEST | tee ~/nerv-t13/update-receipt.json
+D=$("$N" -p 'require(process.argv[1]).digest' ~/nerv-t13/update-plan.json); echo "$D"
+caffeinate -i "$N" --use-system-ca src/cli.ts nodes lifecycle-apply --plan ~/nerv-t13/update-plan.json --confirm "$D" | tee ~/nerv-t13/update-receipt.json
 ```
-Expected: `"state": "completed"` and steps `backup`, `fetch`, `rehearse`, `checkout`, `dependencies`, `build`, `start` and `verify`, each `:completed`. `rehearsal.blockers` is `[]`, `source.schema` and `result.schema` are both 6, and `forwardOnly` is false. From a second Terminal, `"$N" src/cli.ts nodes lifecycle-status --digest UPDATE_DIGEST` shows progress without changing anything.
+Expected: `"state": "completed"` and steps `backup`, `fetch`, `rehearse`, `checkout`, `dependencies`, `build`, `start` and `verify`, each `:completed`. `rehearsal.blockers` is `[]`, `source.schema` and `result.schema` are both 6, and `forwardOnly` is false. From a second Terminal, `"$N" src/cli.ts nodes lifecycle-status --digest "$D"` shows progress without changing anything.
 
 ```bash
 # 5. After-checks (read-only).
@@ -64,7 +68,7 @@ Expected: `HEAD` is `<T>` with a clean tree. One `serve` line started just now. 
 
 **If the receipt says `refused`:** nothing changed (dependencies and build already match 2a3448d after step 2b). Paste the `rehearsal.blockers`. To bring 2a3448d back up, make a `start` plan and apply it (`lifecycle-inspect --action start`, then `lifecycle-apply`).
 
-**If the command fails or the receipt says `uncertain`:** do not retry. Paste the output and `lifecycle-status --digest UPDATE_DIGEST`, then follow the order in the [upgrade decision](../decisions/node-upgrades.md):
+**If the command fails or the receipt says `uncertain`:** do not retry. Paste the output and `lifecycle-status --digest "$D"`, then follow the order in the [upgrade decision](../decisions/node-upgrades.md):
 1. Stop a running candidate with `launchctl bootout gui/$(id -u)/io.nerv.agent` and check that no `serve` line remains. The installed code does not check this for you.
 2. If `dependencies` failed, run `npm ci --ignore-scripts` in the checkout as it is.
 3. Release the operation with `nodes lifecycle-release --receipt FILE --evidence FILE`. The evidence is the receipt's `digest`, `resource`, `fence` and `nonce`, plus `"handlerStopped": true`, `"descendantsStopped": true`, `"operatorConfirmed": true` and a one-line `reason`.

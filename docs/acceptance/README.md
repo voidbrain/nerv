@@ -4,7 +4,9 @@ Dated observations for specific revisions, test methods and devices. Reports pre
 
 The [review register](../reviews/README.md#acceptance-evidence) links every report, its observation date and the next acceptance condition. Earlier evidence is retained when later reports narrow or supersede its applicability.
 
-**Owner procedures to run now:** [F-005-T13 Mac service update](f005-t13-mac-update-procedure.md) (copy-paste blocks with expected output).
+**Owner procedures to run now:** none. [F-005-T13 Mac service update](f005-t13-mac-update-procedure.md) ran on 2026-11-12.
+
+[First lifecycle update of the Mac service, 12 November 2026](node-update-2026-11-12.md): 2a3448d → f8b8116 through inspect/apply, all steps and after-checks passed; agent-run with owner approval, so hand usability of the procedure is not shown.
 
 [Gauntlet integration, 9 November 2026](gauntlet-2026-11-09.md): clean-source selected policy join and bounded adapter/cancellation fixtures; no model qualification.
 
