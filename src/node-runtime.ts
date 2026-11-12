@@ -90,9 +90,11 @@ function safeExecutable(path: string, uid: number): boolean {
   try {
     const stat = lstatSync(path);
     if (stat.isSymbolicLink() || !stat.isFile()) return false;
-    if (stat.uid !== uid && stat.uid !== 0) return false;
-    if (stat.mode & 0o022) return false;
-    if ((stat.mode & 0o111) === 0) return false;
+    if (process.platform !== 'win32') {
+      if (stat.uid !== uid && stat.uid !== 0) return false;
+      if (stat.mode & 0o022) return false;
+      if ((stat.mode & 0o111) === 0) return false;
+    }
     return realpathSync(path) === resolve(path);
   } catch {
     return false;

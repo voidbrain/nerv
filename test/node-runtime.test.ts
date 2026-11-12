@@ -38,12 +38,14 @@ test('F-005-T19: classifyNodeOwnership distinguishes nerv-managed, user-managed,
     assert.equal(classifyNodeOwnership(join(env.dir, 'absent-node'), env.home), 'missing');
     assert.equal(classifyNodeOwnership(null, env.home), 'missing');
 
-    const linked = join(env.dir, 'linked-node');
-    symlinkSync(userNode, linked);
-    assert.equal(classifyNodeOwnership(linked, env.home), 'unknown');
+    if (process.platform !== 'win32') {
+      const linked = join(env.dir, 'linked-node');
+      symlinkSync(userNode, linked);
+      assert.equal(classifyNodeOwnership(linked, env.home), 'unknown');
 
-    chmodSync(userNode, 0o600);
-    assert.equal(classifyNodeOwnership(userNode, env.home), 'unknown');
+      chmodSync(userNode, 0o600);
+      assert.equal(classifyNodeOwnership(userNode, env.home), 'unknown');
+    }
   } finally {
     env.cleanup();
   }
