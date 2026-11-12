@@ -1,5 +1,10 @@
-import { tokenCount, type UsageObservation } from './model-usage.ts';
-import type Anthropic from '@anthropic-ai/sdk';
+import type { UsageObservation } from './model-usage.ts';
+import {
+  completeAnthropicCompatible,
+  completeOpenAICompatible,
+  validateEngineInstances,
+  type EngineInstance,
+} from './engine-provider.ts';
 /**
  * Model routes (F-003). S² is a local OpenAI-compatible endpoint on this machine (Ollama, LM Studio).
  * Umbilical is the Claude cloud route, off until the owner enables it. There is no automatic fallback
@@ -27,6 +32,7 @@ export interface Models {
   local?: LocalRoute;
   cloud?: CloudRoute;
   roles?: Roles;
+  engines?: EngineInstance[];
 }
 export interface Ask {
   prompt: string;
@@ -44,7 +50,6 @@ export interface Reply {
 export const MAX_REPLY_BYTES = 16384;
 /** Coordinator wait for a brain model call; the route itself gives up 5 s earlier so the brain can answer. */
 export const MODEL_TIMEOUT_MS = 120000;
-const MAX_TOKENS = 4096;
 const loopback = new Set(['127.0.0.1', 'localhost', '[::1]']);
 export class ModelError extends Error {}
 export function validateModels(value: unknown): Models {
@@ -54,9 +59,9 @@ export function validateModels(value: unknown): Models {
     !v ||
     typeof v !== 'object' ||
     Array.isArray(v) ||
-    Object.keys(v).some((k) => !['local', 'cloud', 'roles'].includes(k))
+    Object.keys(v).some((k) => !['local', 'cloud', 'roles', 'engines'].includes(k))
   )
-    throw new Error('Invalid models: use local, cloud and roles.');
+    throw new Error('Invalid models: use local, cloud, roles and engines.');
   const out: Models = {};
   if (v.local !== undefined) {
     const l = v.local as Record<string, unknown>;
@@ -146,6 +151,7 @@ export function validateModels(value: unknown): Models {
     }
     out.roles = roles;
   }
+  if (v.engines !== undefined) out.engines = validateEngineInstances(v.engines);
   return out;
 }
 /** Picks the route without side effects. Never substitutes one route for another. */
@@ -160,11 +166,6 @@ export function selectRoute(ask: Ask, models: Models, hasKey: boolean): RouteNam
   }
   if (!models.local) throw new ModelError('Local route (S²) is not configured.');
   return 'local';
-}
-function bound(text: string): { text: string; truncated: boolean } {
-  const bytes = Buffer.from(text);
-  if (bytes.length <= MAX_REPLY_BYTES) return { text, truncated: false };
-  return { text: bytes.subarray(0, MAX_REPLY_BYTES).toString('utf8').replace(/�$/, ''), truncated: true };
 }
 export interface RouteOptions {
   timeoutMs: number;
@@ -199,113 +200,16 @@ export async function complete(
   };
   try {
     return await (route === 'local'
-      ? completeLocal(ask, models.local!, observed)
-      : completeCloud(ask, models.cloud!, key!, observed));
+      ? completeOpenAICompatible(ask, models.local!, { ...observed, route: 'local', routeLabel: 'Local route (S²)' })
+      : completeAnthropicCompatible(
+          ask,
+          { model: models.cloud!.model, ...(options.cloudBaseUrl ? { baseUrl: options.cloudBaseUrl } : {}) },
+          key!,
+          { ...observed, route: 'cloud', routeLabel: 'Cloud route (Umbilical)' },
+        ));
   } finally {
     options.observe?.({ ...observation, durationMs: Math.max(0, Math.round(performance.now() - started)) });
   }
-}
-async function completeLocal(ask: Ask, local: LocalRoute, options: RouteOptions): Promise<Reply> {
-  const messages = [
-    ...(ask.system ? [{ role: 'system', content: ask.system }] : []),
-    { role: 'user', content: ask.prompt },
-  ];
-  let response: Response;
-  try {
-    response = await (options.fetch ?? fetch)(local.baseUrl + '/chat/completions', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ model: local.model, messages, max_tokens: MAX_TOKENS, stream: false }),
-      signal: AbortSignal.timeout(options.timeoutMs),
-      redirect: 'error',
-    });
-  } catch (e) {
-    throw new ModelError(
-      e instanceof Error && e.name === 'TimeoutError' ? 'Local route (S²) timed out.' : 'Local route (S²) unreachable.',
-    );
-  }
-  const raw = await response.text().catch(() => '');
-  if (Buffer.byteLength(raw) > 1048576) throw new ModelError('Local route (S²) response too large.');
-  if (!response.ok) throw new ModelError(`Local route (S²) failed with HTTP ${response.status}.`);
-  let body: {
-    model?: unknown;
-    usage?: {
-      prompt_tokens?: unknown;
-      completion_tokens?: unknown;
-      prompt_tokens_details?: { cached_tokens?: unknown };
-    };
-    choices?: { message?: { content?: unknown }; finish_reason?: unknown }[];
-  };
-  try {
-    body = JSON.parse(raw);
-  } catch {
-    throw new ModelError('Local route (S²) returned invalid JSON.');
-  }
-  const choice = body.choices?.[0];
-  const returnedModel = typeof body.model === 'string' && body.model.length <= 200 ? body.model : null;
-  const cached = body.usage?.prompt_tokens_details?.cached_tokens;
-  options.observe?.({
-    route: 'local',
-    requestedModel: local.model,
-    returnedModel,
-    inputTokens: tokenCount(body.usage?.prompt_tokens),
-    outputTokens: tokenCount(body.usage?.completion_tokens),
-    cacheReadTokens: tokenCount(cached),
-    cacheWriteTokens: 0,
-    durationMs: 0,
-    outcome: typeof choice?.message?.content === 'string' ? 'success' : 'error',
-  });
-  if (typeof choice?.message?.content !== 'string') throw new ModelError('Local route (S²) returned no text.');
-  return {
-    ...bound(choice.message.content),
-    route: 'local',
-    model: returnedModel ?? local.model,
-    stop: typeof choice.finish_reason === 'string' ? choice.finish_reason : 'unknown',
-  };
-}
-async function completeCloud(ask: Ask, cloud: CloudRoute, key: string, options: RouteOptions): Promise<Reply> {
-  const { default: SDK } = await import('@anthropic-ai/sdk');
-  const client = new SDK({
-    apiKey: key,
-    maxRetries: 0,
-    timeout: options.timeoutMs,
-    ...(options.cloudBaseUrl ? { baseURL: options.cloudBaseUrl } : {}),
-  });
-  let message: Anthropic.Beta.BetaMessage;
-  try {
-    // Server-side refusal fallback stays with the same provider; the reply names the model that answered.
-    message = await client.beta.messages.create({
-      model: cloud.model,
-      max_tokens: MAX_TOKENS,
-      output_config: { effort: 'medium' },
-      betas: ['server-side-fallback-2026-07-01'],
-      fallbacks: 'default',
-      ...(ask.system ? { system: ask.system } : {}),
-      messages: [{ role: 'user', content: ask.prompt }],
-    });
-  } catch (e) {
-    if (e instanceof SDK.AuthenticationError) throw new ModelError('Cloud route (Umbilical) rejected the API key.');
-    if (e instanceof SDK.RateLimitError) throw new ModelError('Cloud route (Umbilical) is rate limited; try later.');
-    if (e instanceof SDK.APIConnectionTimeoutError) throw new ModelError('Cloud route (Umbilical) timed out.');
-    if (e instanceof SDK.APIConnectionError) throw new ModelError('Cloud route (Umbilical) unreachable.');
-    if (e instanceof SDK.APIError)
-      throw new ModelError(`Cloud route (Umbilical) failed with HTTP ${e.status ?? 'unknown'}.`);
-    throw new ModelError('Cloud route (Umbilical) failed.');
-  }
-  options.observe?.({
-    route: 'cloud',
-    requestedModel: cloud.model,
-    returnedModel: message.model.length <= 200 ? message.model : null,
-    inputTokens: tokenCount(message.usage.input_tokens),
-    outputTokens: tokenCount(message.usage.output_tokens),
-    cacheReadTokens: tokenCount(message.usage.cache_read_input_tokens),
-    cacheWriteTokens: tokenCount(message.usage.cache_creation_input_tokens),
-    durationMs: 0,
-    outcome: message.stop_reason === 'refusal' ? 'refused' : 'success',
-  });
-  if (message.stop_reason === 'refusal') throw new ModelError('Cloud route (Umbilical) declined the request.');
-  const text = message.content.flatMap((b) => (b.type === 'text' ? [b.text] : [])).join('');
-  return { ...bound(text), route: 'cloud', model: message.model, stop: message.stop_reason ?? 'unknown' };
 }
 /** The routes as one role sees them: its model replaces the route's default model. */
 export function forRole(models: Models, role: keyof Roles): Models {
