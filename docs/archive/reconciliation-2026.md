@@ -315,3 +315,19 @@ Authenticated ci:status confirms #324 CI43308935497, #326 CI43307205792 and #327
 PRs #328 (F-005-T18), #331 (F-005-T20, CI43314523726) and #330 (F-005-T09, CI43318667103) passed CI; harness 8.1.0 reconciled (PR #332, fresh-context review: no blockers).
 
 Previous authored header, now retired: Current work ledger, reviewed 12 November 2026 against main `4e55eb5`. PRs #324 (F-005-T19), #326 (F-005-T17) and #327 (F-005-T10) passed CI; harness 8.0.0 reconciled: human cues name Procedure, Decision or Both, and the Require Human table shows both kinds per column.
+
+## Archived Other changes (moved from BACKLOG.md on 2026-11-13)
+
+**Harness v5.6.0 reconciliation (5.5.0 included), 2026-11-11 ([PR #277](https://github.com/voidbrain/nerv/pull/277)).** Template F-057 and F-058: `tools/work-items.mjs`, `tools/backlog-queue.mjs`, `tools/backlog-dependencies.mjs` and `tools/check-freshness.mjs` copied byte-identically from v5.6.0; the Linked prerequisites, Optional work queue, Optional upfront feature plans and Estimate calibration paragraphs of BACKLOG-RULES carried verbatim; CI clones the template at v5.6.0.
+
+**Harness v5.4.0 and Gauntlet 0.7.1 reconciliation, 2026-11-11 ([PR #275](https://github.com/voidbrain/nerv/pull/275), superseded by [PR #277](https://github.com/voidbrain/nerv/pull/277)).** Template F-053–F-056: NERV adopts queue order and backlog totals; 158 open steps backfilled with `days` and `baselineDays`; Gauntlet pinned to 0.7.1.
+
+**Harness v5.2.0 reconciliation, 2026-11-11 ([PR #272](https://github.com/voidbrain/nerv/pull/272)).** Template F-052: `.harness.json` `evaluations` declares Gauntlet (`node tools/gauntlet.mjs pending`).
+
+**Upfront feature plans adopted, 2026-11-11 ([PR #271](https://github.com/voidbrain/nerv/pull/271)).** `workItems.featurePlans` enabled across 24 features.
+
+**Harness v5.1.1 / v5.1.0 / v5.0.0 reconciliations, 2026-11-11 ([PR #267](https://github.com/voidbrain/nerv/pull/267), [PR #266](https://github.com/voidbrain/nerv/pull/266), [PR #263](https://github.com/voidbrain/nerv/pull/263)).** `.gitignore` worktree fix, reviewer definitions, Prettier + ESLint tooling enforcement (`check:tooling`), and reconciliation cadence rules.
+
+**Formatter, 2026-11-11 ([PR #260](https://github.com/voidbrain/nerv/pull/260)).** Prettier 3.9.10 added for `src/`, `test/`, and `web/src`.
+
+**Harness reconciliations & assessments, 2026-11-08 – 2026-11-11 ([PR #256](https://github.com/voidbrain/nerv/pull/256), [PR #255](https://github.com/voidbrain/nerv/pull/255), [PR #237](https://github.com/voidbrain/nerv/pull/237), [PR #231](https://github.com/voidbrain/nerv/pull/231), [PR #241](https://github.com/voidbrain/nerv/pull/241)).** Usage/allowance tooling (v4.8.0), F-005 initial plan (v4.7.0), task-context guide (v4.3.0), execution-boundary assessment, B-046 CI evidence, and external-project references.

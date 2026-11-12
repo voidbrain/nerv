@@ -21,8 +21,9 @@ export function parseRecords(text,archived=false){
  const out=[];let closedOn=null;const lines=text.split('\n');
  for(let i=0;i<lines.length;i++){
   const day=/^## Closed (\d{4}-\d\d-\d\d)/.exec(lines[i]);if(day){closedOn=day[1];continue;}
-  const h=/^### ([FB])-(\d{3,})\s*$/.exec(lines[i]);if(!h)continue;
-  let j=i+1;while(j<lines.length&&!/^### [FB]-\d/.test(lines[j])&&!/^## /.test(lines[j]))j++;
+  const HEAD=/^### (?:<a id="[fb]-\d+"><\/a>)?(?:\[(?:✨|🐞) )?([FB])-(\d{3,})(?:\]\(#top\))?\s*$/;
+  const h=HEAD.exec(lines[i]);if(!h)continue;
+  let j=i+1;while(j<lines.length&&!HEAD.test(lines[j])&&!/^## /.test(lines[j]))j++;
   const body=lines.slice(i,j).join('\n');
   // Authored and 6.x generated rows: | cue | P | Status |; the 7.0.0 generated row merges them: | cue Status | P |.
   const status=(/^\|[^|]*\|[^|]*P\d\s*\|\s*([A-Za-z]+)\s*\|/m.exec(body) ?? /^\|\s*(?:🔴|🟠|🟡|🟢|🟣|🔵) ([A-Za-z]+)\s*\|[^|]*P\d\s*\|/mu.exec(body))?.[1] ?? 'Open';

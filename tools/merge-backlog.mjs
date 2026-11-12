@@ -31,7 +31,10 @@ if (ours === null || theirs === null) {
 /** Every record (`### B-001` up to and including its `---` line) by ID. */
 const records = (text) => {
   const out = new Map();
-  for (const m of text.matchAll(/^### ([BF]-\d+)\n[\s\S]*?^---\n/gm)) out.set(m[1], m[0]);
+  for (const m of text.matchAll(
+    /^### (?:<a id="[fb]-\d+"><\/a>)?(?:\[(?:✨|🐞) )?([BF]-\d+)(?:\]\(#top\))?\n[\s\S]*?^---\n/gm,
+  ))
+    out.set(m[1], m[0]);
   return out;
 };
 /** The `## ` section heading a record sits under. */

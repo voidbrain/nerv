@@ -58,7 +58,11 @@ const unmerge = (c) => {
 };
 function records(markdown, label, file, archived = false) {
   const out = new Map(),
-    blocks = [...markdown.matchAll(/^### ([BF]-\d+)\n([\s\S]*?)(?=^### [BF]-\d+\n|^## |$(?![\s\S]))/gm)];
+    blocks = [
+      ...markdown.matchAll(
+        /^### (?:<a id="[fb]-\d+"><\/a>)?(?:\[(?:✨|🐞) )?([BF]-\d+)(?:\]\(#top\))?\n([\s\S]*?)(?=^### (?:<a id="[fb]-\d+"><\/a>)?(?:\[(?:✨|🐞) )?[BF]-\d+(?:\]\(#top\))?\n|^## |$(?![\s\S]))/gm,
+      ),
+    ];
   for (const b of blocks) {
     const id = b[1],
       block = b[2];

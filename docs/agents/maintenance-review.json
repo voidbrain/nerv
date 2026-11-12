@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-12T22:39:53.094Z",
+  "reviewed": "2026-11-12T23:21:11.019Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
     "AGENTS.md": "f8e8646a9dfcf43bee1cbb0160e779f198f5db0d7cdeee58284d59a4e5e696a1",
@@ -20,12 +20,12 @@
     "docs/agents/work-usage.md": "e2f7c484f1c07f4b47fd1133857d8744ccab0ad2a7b85b220946c115a002bebc",
     "tools/task-claims.mjs": "ef755fe7951544e5c05b20de7c64a7b53778b6d039a11a2abeb079e7d42b6fd2",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
-    "tools/work-items.mjs": "7ef23a1beb896b28048d740ca64a13fedb40eb6befd3a943fff130d0b8a64a23",
+    "tools/work-items.mjs": "96c7db2823536dd8c014409dc4a0da45ebfbd4b709d5baefeb33888b4280e497",
     "tools/work-usage.mjs": "4329262c0b9e723e046dd8878e15a99cff5f590201cd0918563f3204bbe79219"
   },
   "measurements": {
-    "samples": 19,
-    "latestAt": "2026-11-12T21:26:32.719Z",
+    "samples": 1,
+    "latestAt": "2026-11-12T23:21:10.968Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -51,36 +51,36 @@
         }
       },
       "reconciliation": {
-        "samples": 19,
+        "samples": 1,
         "durationMs": {
-          "observed": 19,
+          "observed": 1,
           "missing": 0,
-          "median": 240846
+          "median": 46
         },
         "conflicts": {
-          "observed": 6,
-          "missing": 13,
-          "median": 0
+          "observed": 0,
+          "missing": 1,
+          "median": null
         },
         "unnecessaryPrompts": {
-          "observed": 2,
-          "missing": 17,
-          "median": 0
+          "observed": 0,
+          "missing": 1,
+          "median": null
         },
         "repeatedContextLoads": {
-          "observed": 2,
-          "missing": 17,
-          "median": 1
+          "observed": 0,
+          "missing": 1,
+          "median": null
         }
       }
     }
   },
   "outcomes": [
     {
-      "kind": "rule",
+      "kind": "tool",
       "disposition": "implemented",
-      "target": "docs/BACKLOG-RULES.md",
-      "evidence": "Harness 8.1.0 reconciled (template PR #139, fresh-context review there): generated header from the reconciliation log, union merge for archives, step evidence in task files; the project header line now says the header is generated. No rule removed."
+      "target": "tools/work-items.mjs",
+      "evidence": "Reconciled project-harness PR #140 backlog ledger UX (icon+top-link headings, priority-first queue order, closed-dep omission, single legend); updated backlog-recap.mjs + test/backlog-recap.test.mjs, layout.json legends, and closed Depends on cleanup."
     }
   ]
 }

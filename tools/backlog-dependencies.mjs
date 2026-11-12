@@ -40,7 +40,9 @@ function records(text, file) {
   });
   const out = [];
   for (let i = 0; i < lines.length; i++) {
-    const match = new RegExp(`^### (${ID})\\s*$`).exec(lines[i]);
+    const match = new RegExp(`^### (?:<a id="[fb]-\\d+"><\\/a>)?(?:\\[(?:✨|🐞) )?(${ID})(?:\\]\\(#top\\))?\\s*$`).exec(
+      lines[i],
+    );
     if (!match) continue;
     let end = i + 1;
     while (end < lines.length && !/^#{1,3} /.test(lines[end])) end++;
