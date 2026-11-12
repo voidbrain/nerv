@@ -1344,7 +1344,7 @@ export class Runtime implements StoreApi {
 
   /** Resumes every Misato sortie whose wait is over; each is claimed once in the ledger, so two sweeps never resume twice. */
   async sweep(): Promise<void> {
-    const ids = (await this.nervous.call('misato.resumable').catch(() => [])) as string[];
+    const ids = await this.resumable();
     for (const id of ids) {
       if (this.resuming.has(id)) continue;
       this.resuming.add(id);
@@ -1358,11 +1358,39 @@ export class Runtime implements StoreApi {
       }
     }
   }
+  private poll?: Promise<string[]>;
+  private nextPoll?: Promise<string[]>;
+  /**
+   * B-043: at most one resumable-sorties poll is with the nervous process at a time. A sweep asked for while one is out
+   * (a resumer tick, a decision) waits for one fresh poll after it, shared by every such ask, so a decision made during
+   * the poll is still seen and a slow child never collects one poll per tick against the process queue bound.
+   */
+  private resumable(): Promise<string[]> {
+    if (!this.poll) {
+      const poll: Promise<string[]> = this.nervous
+        .call('misato.resumable')
+        .then(
+          (ids) => ids as string[],
+          () => [],
+        )
+        .finally(() => {
+          if (this.poll === poll) this.poll = undefined;
+        });
+      this.poll = poll;
+      return poll;
+    }
+    this.nextPoll ??= this.poll.then(() => {
+      this.nextPoll = undefined;
+      return this.resumable();
+    });
+    return this.nextPoll;
+  }
   /** Decisions can come from anywhere (CLI approve, expiry): a periodic sweep catches those the coordinator did not see. */
   startResumer(everyMs = 2000) {
     if (!this.resumer)
       this.resumer = setInterval(() => {
-        void this.sweep();
+        // A tick while a poll is still out adds nothing: the next tick polls afresh (B-043).
+        if (!this.poll) void this.sweep();
       }, everyMs);
   }
   private readonly startedAt = new Date();
