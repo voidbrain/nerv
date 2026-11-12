@@ -94,7 +94,7 @@
       state.sorties = list.map(toSortie);
       state.approvals = cards.map(toApproval).filter(ap => state.sorties.some(s => s.id === ap.sortie));
       state.reminders = history.reminders.filter(r => !r.delivered && !r.cancelled && Date.parse(r.due) > Date.now()).sort((a, b) => a.due.localeCompare(b.due));
-      state.upcoming = state.reminders.map(r => ({ at:Date.parse(r.due), title:r.title, kind:"reminder" }));
+      state.upcoming = state.reminders.map(r => ({ at:Date.parse(r.due), title:r.title, kind:"reminder", label:when(r) }));
       state.doctor = doctor; showBuild(doctor.build);
       if (!kajiBases.length && doctor.base) observeTelegram([{baseId:doctor.base.id,status:"enrolled",online:true,channel:doctor.channel,channelFresh:doctor.channelFresh}]);
       if (doctor.base && BASES[0].name !== doctor.base.name.toUpperCase()) { BASES[0].name = doctor.base.name.toUpperCase(); BASES[0].role = doctor.base.id + " · this machine"; document.getElementById("cages").innerHTML = ""; }
@@ -203,7 +203,20 @@
   // Coming up: pending reminders, each with Edit (title and time, inline) and Cancel reminder.
   const pad = n => String(n).padStart(2, "0");
   const localInput = iso => { const d = new Date(iso); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes()); };
-  const when = t => { const d = new Date(t); const today = new Date().toDateString() === d.toDateString(); return (today ? "" : d.toLocaleDateString(undefined, { weekday:"short", day:"numeric", month:"short" }) + " ") + pad(d.getHours()) + ":" + pad(d.getMinutes()); };
+  const when = r => {
+    const obj = typeof r === "object" && r && !(r instanceof Date);
+    const kind = obj ? (r.kind || "at") : "at";
+    const iso = obj ? (kind === "until" && r.end ? r.end : r.due) : r;
+    const d = new Date(iso);
+    const today = new Date().toDateString() === d.toDateString();
+    const day = today ? "" : d.toLocaleDateString(undefined, { weekday:"short", day:"numeric", month:"short" }) + " ";
+    const clock = dt => pad(dt.getHours()) + ":" + pad(dt.getMinutes());
+    if (kind === "all-day") return day + "all day";
+    if (kind === "from-to" && obj && r.end) return day + clock(d) + "–" + clock(new Date(r.end));
+    if (kind === "from") return day + "from " + clock(d);
+    if (kind === "until") return day + "until " + clock(d);
+    return day + clock(d);
+  };
   const until = t => {
     const now = new Date(), target = new Date(t); const m = Math.max(0, Math.round((t - now.getTime()) / 60000));
     if (m < 48 * 60) return m < 60 ? "in " + m + " min" : "in " + Math.round(m / 60) + " h";
@@ -225,9 +238,9 @@
     if (!list.length) { box.innerHTML = "<div class='muted small'>No reminders. Ask Misato “remind me tomorrow at 9 to call Ada” below, or on Telegram; it appears here, where you can edit or cancel it.</div>"; return; }
     box.innerHTML = list.map(r => editing === r.id
       ? "<form class='rem-edit' data-rem-form='" + r.id + "'><label class='sr-only' for='rem-t-" + r.id + "'>Reminder</label><input type='text' id='rem-t-" + r.id + "' maxlength='500' required value='" + esc(r.title) + "'/>" +
-        "<label class='sr-only' for='rem-d-" + r.id + "'>When</label><input type='datetime-local' id='rem-d-" + r.id + "' required value='" + localInput(r.due) + "'/>" +
+        "<label class='sr-only' for='rem-d-" + r.id + "'>When</label><input type='datetime-local' id='rem-d-" + r.id + "' required value='" + localInput(r.kind === "until" && r.end ? r.end : r.due) + "'/>" +
         "<button class='btn sm primary' type='submit'>Save</button><button class='btn sm' type='button' data-rem-keep>Keep as is</button></form>"
-      : "<div class='rem'><span class='small'><b>" + when(r.due) + "</b> " + esc(r.title) + "</span><span class='acts'><button class='btn sm' data-rem-edit='" + r.id + "' aria-label='Edit reminder: " + esc(r.title) + "'>Edit</button>" +
+      : "<div class='rem'><span class='small'><b>" + when(r) + "</b> " + esc(r.title) + "</span><span class='acts'><button class='btn sm' data-rem-edit='" + r.id + "' aria-label='Edit reminder: " + esc(r.title) + "'>Edit</button>" +
         "<button class='btn sm danger' data-rem-cancel='" + r.id + "' aria-label='Cancel reminder: " + esc(r.title) + "'>Cancel</button></span><span class='tiny muted'>" + until(Date.parse(r.due)) + "</span></div>").join("");
     if ((state.pendingCount || 0) > list.length) box.insertAdjacentHTML("beforeend", "<p class='small'>More reminders are scheduled. <a href='/'>Browse reminder history</a> in the workspace; run nerv open to sign in there.</p>");
     const input = editing && document.getElementById("rem-t-" + editing); if (input) input.focus();
@@ -238,7 +251,7 @@
     if (t.dataset.remEdit) { editing = t.dataset.remEdit; renderNext(); return; }
     if (t.hasAttribute("data-rem-keep")) { const id = editing; editing = null; renderNext(); const b = document.querySelector("[data-rem-edit='" + id + "']"); if (b) b.focus(); return; }
     const r = (state.reminders || []).find(x => x.id === t.dataset.remCancel);
-    if (r && confirm("Cancel the reminder “" + r.title + "” at " + when(r.due) + "?")) reminderAction("reminders/" + r.id, { method:"DELETE" }, "Reminder cancelled: " + r.title);
+    if (r && confirm("Cancel the reminder “" + r.title + "” at " + when(r) + "?")) reminderAction("reminders/" + r.id, { method:"DELETE" }, "Reminder cancelled: " + r.title);
   });
   document.addEventListener("submit", e => {
     const form = e.target.closest("[data-rem-form]"); if (!form) return; e.preventDefault();
@@ -246,9 +259,10 @@
     const title = document.getElementById("rem-t-" + id).value.trim(); const at = new Date(document.getElementById("rem-d-" + id).value);
     if (!title || !Number.isFinite(at.getTime())) { log("Reminder: give a title and a time.", "danger", null, "penpen"); return; }
     if (at.getTime() <= Date.now()) { log("Reminder: pick a time in the future.", "danger", null, "penpen"); return; }
-    const patch = {}; if (title !== r.title) patch.title = title; if (at.toISOString() !== new Date(r.due).toISOString()) patch.due = at.toISOString();
+    const refIso = r.kind === "until" && r.end ? r.end : r.due;
+    const patch = {}; if (title !== r.title) patch.title = title; if (at.toISOString() !== new Date(refIso).toISOString()) patch.due = at.toISOString();
     editing = null; if (!Object.keys(patch).length) { renderNext(); return; }
-    reminderAction("reminders/" + id, { method:"PATCH", body:JSON.stringify(patch) }, "Reminder updated: " + title + " · " + when(at));
+    reminderAction("reminders/" + id, { method:"PATCH", body:JSON.stringify(patch) }, "Reminder updated: " + title + " · " + when(Object.assign({}, r, patch, r.kind === "until" && patch.due ? { end:patch.due } : {})));
   });
   // Models (F-038): each role's model, picked from what Ollama has; the cloud route on or off. The key is never asked here:
   // it is typed in a terminal (models key). The list is re-read every 30 s, and never while the owner is choosing.
@@ -587,7 +601,7 @@
       document.getElementById("qv-away").textContent = c("done") + " done"; document.getElementById("qd-away").textContent = c("failed") + " failed · " + c("stood-down") + " stopped · " + delivered + " reminders";
       document.getElementById("q-away").classList.toggle("attn", c("failed") + c("stood-down") > 0); }
     const next = state.upcoming.filter(u => u.at > Date.now()).sort((a, b) => a.at - b.at)[0];
-    document.getElementById("qv-next").textContent = next ? hhmm(next.at) : "—"; document.getElementById("qd-next").textContent = next ? next.title : "nothing scheduled";
+    document.getElementById("qv-next").textContent = next ? (next.label || hhmm(next.at)) : "—"; document.getElementById("qd-next").textContent = next ? next.title : "nothing scheduled";
     const p = (state.doctor || {}).processes || {}; const bad = !p.nervous || p.brainAlive === false; const degraded = ((state.doctor || {}).degraded || []).length > 0;
     document.getElementById("qv-health").textContent = bad ? "issue" : degraded ? "degraded" : "OK"; document.getElementById("qd-health").textContent = bad ? "a process is down" : degraded ? "a model route is down · reminders still run" : "all checks pass";
     document.getElementById("q-health").classList.toggle("alert", bad); document.getElementById("q-health").classList.toggle("attn", !bad && degraded);

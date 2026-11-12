@@ -478,6 +478,18 @@ test(
       const delivered = store.add(deliveredTitle, '2031-04-15T08:00:00Z', new Date('2031-04-14T00:00:00Z'));
       assert.equal(store.tick(new Date('2031-04-16T00:00:00Z')), 1);
       assert.equal(store.tick(new Date('2031-04-16T00:00:00Z')), 0);
+      // F-043-T03: workspace displays all-day, from-to, from and until reminder kinds in EN and IT.
+      const kindNow = new Date('2031-04-16T00:00:00Z');
+      const kindAllDay = store.add('Kind all-day', '2031-06-10T08:00:00Z', kindNow, { kind: 'all-day' });
+      const kindFromTo = store.add('Kind from-to', '2031-06-11T10:00:00Z', kindNow, {
+        kind: 'from-to',
+        end: '2031-06-11T12:00:00Z',
+      });
+      const kindFrom = store.add('Kind from', '2031-06-12T15:00:00Z', kindNow, { kind: 'from' });
+      const kindUntil = store.add('Kind until', '2031-06-13T17:00:00Z', kindNow, {
+        kind: 'until',
+        end: '2031-06-13T18:00:00Z',
+      });
       for (const lang of ['en', 'it']) {
         await language(lang);
         await evaluate(`document.querySelector('header button').click()`);
@@ -490,8 +502,17 @@ test(
           ),
           lang === 'it' ? 'Nella casella' : 'In your inbox',
         );
+        const textOf = (title) =>
+          evaluate(
+            `[...document.querySelectorAll('article.reminder')].find(e=>e.querySelector('strong').textContent===${JSON.stringify(title)})?.querySelector('p')?.textContent`,
+          );
+        assert.match(await textOf('Kind all-day'), lang === 'it' ? /tutto il giorno/ : /all day/);
+        assert.match(await textOf('Kind from-to'), /–/);
+        assert.match(await textOf('Kind from'), lang === 'it' ? /dalle / : /from /);
+        assert.match(await textOf('Kind until'), lang === 'it' ? /entro le / : /until /);
         await audit(lang + '-local-inbox');
       }
+      for (const r of [kindAllDay, kindFromTo, kindFrom, kindUntil]) store.cancel(r.id);
       assert.ok(store.list().find((r) => r.id === delivered.id).delivered);
 
       // Real paged UI -> HTTP -> SQLite traversal, including controls and focus in both languages.

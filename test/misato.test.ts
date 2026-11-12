@@ -541,3 +541,91 @@ test('Casper judges a short confirmation against the request it confirms: it see
     casper,
   );
 });
+
+test('F-043: EN and IT reminder time kinds parse cleanly, and "remind me to renew the car insurance on 3 March" stores an all-day reminder instead of a made-up clock time', async () => {
+  const { parseReminderRequest } = await import('../src/misato.ts');
+  const opts = {
+    now: new Date('2030-01-15T08:00:00.000Z'),
+    timeZone: 'Europe/Rome',
+    briefAt: '08:00',
+  };
+
+  // All-day (date without clock time) in EN and IT
+  const enAllDay = parseReminderRequest('remind me to renew the car insurance on 3 March', {
+    ...opts,
+    fallbackDue: '2030-03-03T14:23:00+01:00',
+  })!;
+  assert.equal(enAllDay.kind, 'all-day');
+  assert.equal(enAllDay.due, '2030-03-03T07:00:00.000Z');
+  assert.equal(enAllDay.end, null);
+
+  const itAllDay = parseReminderRequest("ricordami di rinnovare l'assicurazione il 3 marzo", {
+    ...opts,
+    fallbackDue: '2030-03-03T16:00:00+01:00',
+  })!;
+  assert.equal(itAllDay.kind, 'all-day');
+  assert.equal(itAllDay.due, '2030-03-03T07:00:00.000Z');
+
+  // At a time ("at 10" / "alle 10")
+  const enAt = parseReminderRequest('remind me to call Ada on 3 March at 10', opts)!;
+  assert.equal(enAt.kind, 'at');
+  assert.equal(enAt.due, '2030-03-03T09:00:00.000Z');
+
+  const itAt = parseReminderRequest('ricordami di chiamare Ada il 3 marzo alle 10', opts)!;
+  assert.equal(itAt.kind, 'at');
+  assert.equal(itAt.due, '2030-03-03T09:00:00.000Z');
+
+  // From–to ("between 10 and 12" / "tra le 10 e le 12" / "dalle 10 alle 12")
+  for (const text of [
+    'remind me to meet Bob on 3 March between 10 and 12',
+    'remind me to meet Bob on 3 March from 10 to 12',
+    'ricordami di incontrare Bob il 3 marzo tra le 10 e le 12',
+    'ricordami di incontrare Bob il 3 marzo dalle 10 alle 12',
+  ]) {
+    const parsed = parseReminderRequest(text, opts)!;
+    assert.equal(parsed.kind, 'from-to', text);
+    assert.equal(parsed.due, '2030-03-03T09:00:00.000Z', text);
+    assert.equal(parsed.end, '2030-03-03T11:00:00.000Z', text);
+  }
+
+  // From ("after 15" / "dopo le 15" / "dalle 15")
+  for (const text of [
+    'remind me to call the bank on 3 March after 15',
+    'ricordami di chiamare la banca il 3 marzo dopo le 15',
+    'ricordami di chiamare la banca il 3 marzo dalle 15',
+  ]) {
+    const parsed = parseReminderRequest(text, opts)!;
+    assert.equal(parsed.kind, 'from', text);
+    assert.equal(parsed.due, '2030-03-03T14:00:00.000Z', text);
+    assert.equal(parsed.end, null, text);
+  }
+
+  // Until ("by 18" / "until 18" / "entro le 18" / "fino alle 18")
+  for (const text of [
+    'remind me to send the report on 3 March by 18',
+    'remind me to send the report on 3 March until 18',
+    'ricordami di inviare il report il 3 marzo entro le 18',
+    'ricordami di inviare il report il 3 marzo fino alle 18',
+  ]) {
+    const parsed = parseReminderRequest(text, opts)!;
+    assert.equal(parsed.kind, 'until', text);
+    assert.equal(parsed.end, '2030-03-03T17:00:00.000Z', text);
+    assert.equal(parsed.due, '2030-03-03T16:00:00.000Z', text);
+  }
+
+  // End-to-end through runtime.chat: Misato invents a clock time (14:37), NERV reconciles it to an all-day reminder
+  await agent(
+    [
+      '{"action":{"tool":"reminders.add","args":{"title":"Renew the car insurance","due":"2030-03-03T14:37:00+01:00"}}}',
+      '{"reply":"Done: I will remind you to renew the car insurance on 3 March."}',
+    ],
+    async (runtime) => {
+      const chat = await runtime.chat('remind me to renew the car insurance on 3 March');
+      assert.equal(chat.steps[0]?.outcome, 'grant');
+      const items = await runtime.list();
+      assert.equal(items.length, 1);
+      assert.equal(items[0]!.title, 'Renew the car insurance');
+      assert.equal(items[0]!.kind, 'all-day');
+    },
+  );
+});

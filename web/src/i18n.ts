@@ -89,6 +89,9 @@ export const messages = {
     pushEnable: 'Attiva notifiche',
     pushDisable: 'Disattiva notifiche',
     pushError: 'Impossibile aggiornare le notifiche push.',
+    allDay: 'tutto il giorno',
+    fromTime: 'dalle',
+    untilTime: 'entro le',
   },
   en: {
     previous: 'Previous page',
@@ -180,5 +183,8 @@ export const messages = {
     pushEnable: 'Enable push',
     pushDisable: 'Disable push',
     pushError: 'Failed to update push notifications.',
+    allDay: 'all day',
+    fromTime: 'from',
+    untilTime: 'until',
   },
 } as const;

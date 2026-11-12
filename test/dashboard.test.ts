@@ -1060,3 +1060,20 @@ test('B-044: completed advice marks the Advise → Misato route passed without c
     'advice still in progress is not passed',
   );
 });
+
+test('F-043: Coming up (when) formats all-day, at, from-to, from and until reminders', () => {
+  const src = readFileSync('web/public/dashboard/live.js', 'utf8');
+  const start = src.indexOf('const pad =');
+  const end = src.indexOf('const until =');
+  const when = new Function(`${src.slice(start, end)}\nreturn when;`)() as (r: unknown) => string;
+  const now = new Date();
+  const iso = (h: number, min = 0, dayOffset = 0) =>
+    new Date(now.getFullYear(), now.getMonth(), now.getDate() + dayOffset, h, min, 0).toISOString();
+
+  assert.equal(when({ due: iso(8, 0), kind: 'all-day', end: null }), 'all day');
+  assert.match(when({ due: iso(8, 0, 1), kind: 'all-day', end: null }), / all day$/);
+  assert.equal(when({ due: iso(10, 0), kind: 'at', end: null }), '10:00');
+  assert.equal(when({ due: iso(10, 0), kind: 'from-to', end: iso(12, 0) }), '10:00–12:00');
+  assert.equal(when({ due: iso(15, 0), kind: 'from', end: null }), 'from 15:00');
+  assert.equal(when({ due: iso(17, 0), kind: 'until', end: iso(18, 0) }), 'until 18:00');
+});

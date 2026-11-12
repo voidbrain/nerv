@@ -1,5 +1,6 @@
 import { words } from './pilots.ts';
 import type { Ask, RouteName } from './model.ts';
+export { parseReminderRequest, reconcileReminderArgs, type ParsedReminderRequest } from './reminder-time.ts';
 /**
  * Misato, the planner (F-003). One step at a time: given the owner's request, the tool catalogue and what happened so
  * far, the model proposes exactly one action or gives the final reply. It never executes anything: every action it
@@ -161,13 +162,33 @@ export function doneReply(language: 'it' | 'en', ran: { tool: string; args: Reco
 function localize(value: unknown, timeZone: string): unknown {
   if (Array.isArray(value)) return value.map((v) => localize(v, timeZone));
   if (!value || typeof value !== 'object') return value;
+  const raw = value as Record<string, unknown>;
   const out: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(value)) {
+  for (const [k, v] of Object.entries(raw)) {
     out[k] = localize(v, timeZone);
-    if (k === 'due' && typeof v === 'string' && Number.isFinite(Date.parse(v)))
-      out.dueLocal = new Intl.DateTimeFormat('en-GB', { timeZone, dateStyle: 'full', timeStyle: 'short' }).format(
-        new Date(v),
-      );
+    if (k === 'due' && typeof v === 'string' && Number.isFinite(Date.parse(v))) {
+      const kind = typeof raw.kind === 'string' ? raw.kind : 'at';
+      const dateLabel = new Intl.DateTimeFormat('en-GB', { timeZone, dateStyle: 'full' }).format(new Date(v));
+      if (kind === 'all-day') {
+        out.dueLocal = `${dateLabel}, all day`;
+      } else if (kind === 'from-to' && typeof raw.end === 'string' && Number.isFinite(Date.parse(raw.end))) {
+        const startT = new Intl.DateTimeFormat('en-GB', { timeZone, timeStyle: 'short' }).format(new Date(v));
+        const endT = new Intl.DateTimeFormat('en-GB', { timeZone, timeStyle: 'short' }).format(new Date(raw.end));
+        out.dueLocal = `${dateLabel}, ${startT}–${endT}`;
+      } else if (kind === 'from') {
+        const startT = new Intl.DateTimeFormat('en-GB', { timeZone, timeStyle: 'short' }).format(new Date(v));
+        out.dueLocal = `${dateLabel}, from ${startT}`;
+      } else if (kind === 'until') {
+        const endIso = typeof raw.end === 'string' && Number.isFinite(Date.parse(raw.end)) ? raw.end : v;
+        const endDate = new Intl.DateTimeFormat('en-GB', { timeZone, dateStyle: 'full' }).format(new Date(endIso));
+        const endT = new Intl.DateTimeFormat('en-GB', { timeZone, timeStyle: 'short' }).format(new Date(endIso));
+        out.dueLocal = `${endDate}, until ${endT}`;
+      } else {
+        out.dueLocal = new Intl.DateTimeFormat('en-GB', { timeZone, dateStyle: 'full', timeStyle: 'short' }).format(
+          new Date(v),
+        );
+      }
+    }
   }
   return out;
 }

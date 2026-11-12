@@ -573,20 +573,37 @@ export function makeServer(
         );
       } else if (req.method === 'POST' && path === '/api/reminders') {
         const b = await body(req);
-        if (typeof b.title !== 'string' || typeof b.due !== 'string') throw new Error('Title and due are required.');
-        reply(201, await store.add(b.title, b.due));
+        if (
+          typeof b.title !== 'string' ||
+          typeof b.due !== 'string' ||
+          Object.keys(b).some((k) => !['title', 'due', 'kind', 'end'].includes(k)) ||
+          (b.kind !== undefined && typeof b.kind !== 'string') ||
+          (b.end !== undefined && b.end !== null && typeof b.end !== 'string')
+        )
+          throw new Error('Title and due are required.');
+        reply(
+          201,
+          await store.add(b.title, b.due, new Date(), {
+            ...(b.kind !== undefined ? { kind: b.kind as string } : {}),
+            ...(b.end !== undefined ? { end: b.end as string | null } : {}),
+          }),
+        );
       } else if (req.method === 'PATCH' && /^\/api\/reminders\/[a-f0-9-]+$/.test(path)) {
         const b = await body(req);
         if (
           !Object.keys(b).length ||
-          Object.keys(b).some((k) => !['title', 'due'].includes(k)) ||
+          Object.keys(b).some((k) => !['title', 'due', 'kind', 'end'].includes(k)) ||
           (b.title !== undefined && typeof b.title !== 'string') ||
-          (b.due !== undefined && typeof b.due !== 'string')
+          (b.due !== undefined && typeof b.due !== 'string') ||
+          (b.kind !== undefined && typeof b.kind !== 'string') ||
+          (b.end !== undefined && b.end !== null && typeof b.end !== 'string')
         )
           throw new Error('Give a new title and/or a new due time.');
         const r = await store.update(path.split('/').at(-1)!, {
           ...(b.title !== undefined ? { title: b.title as string } : {}),
           ...(b.due !== undefined ? { due: b.due as string } : {}),
+          ...(b.kind !== undefined ? { kind: b.kind as string } : {}),
+          ...(b.end !== undefined ? { end: b.end as string | null } : {}),
         });
         if (r) reply(200, r);
         else reply(404, { error: 'No pending reminder with that ID.' });
