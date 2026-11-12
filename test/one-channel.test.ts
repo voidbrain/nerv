@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { generateKeyPairSync } from 'node:crypto';
 import { createServer as httpServer } from 'node:http';
 import { createServer } from 'node:net';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Store } from '../src/store.ts';
@@ -300,6 +300,16 @@ test(
             ),
         15000,
       );
+      // The fake server sees the send before Aoba reads its response and tracks the card (B-042): wait for tracking.
+      // A read that meets the atomic rename on Windows retries on the next poll.
+      const tracked = () => {
+        try {
+          return readFileSync(join(homeA, 'tg.json'), 'utf8').includes(':' + stale + '"');
+        } catch {
+          return false;
+        }
+      };
+      await until(tracked, 15000);
       sb.decide(stale, 'approve', 'api');
       const beforeCleanup = botA.calls.filter((c) => c.method === 'editMessageReplyMarkup').length;
       await aoba.deliver();
