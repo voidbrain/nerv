@@ -27,7 +27,7 @@ export function parseRecords(text,archived=false){
   const status=/^\|[^|]*\|[^|]*P\d\s*\|\s*([A-Za-z]+)\s*\|/m.exec(body)?.[1] ?? 'Open';
   const opened=/^\| Opened \| (\d{4}-\d\d-\d\d) \|/m.exec(body)?.[1] ?? null;
   const closed=archived?(/Closed (\d{4}-\d\d-\d\d)/.exec(body)?.[1] ?? closedOn):(status==='Closed'?/Closed (\d{4}-\d\d-\d\d)/.exec(body)?.[1] ?? null:null);
-  out.push({id:`${h[1]}-${h[2]}`,kind:h[1]==='F'?'feature':'bug',status,human:/🧑 \*\*→ Human action required: Yes\*\*/.test(body),opened,closed,archived});
+  out.push({id:`${h[1]}-${h[2]}`,kind:h[1]==='F'?'feature':'bug',status,human:/🧑 \*\*→ Human action required: Yes\*\*/.test(body)||/^\|[^\n]*\| 🧑 Yes \|$/m.test(body),opened,closed,archived});
   i=j-1;
  }
  return out;
