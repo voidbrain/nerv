@@ -45,7 +45,8 @@ const branch =
   'main';
 const mainText = git('show', `origin/${branch}:docs/BACKLOG.md`) ?? '';
 // docs/BACKLOG-RULES.md is the procedure this enforces; an empty ledger is valid.
-const headings = [...text.matchAll(/^### ([BF]-\d+)$/gm)];
+const HEADING_RE = /^### (?:<a id="[fb]-\d+"><\/a>)?(?:\[(?:✨|🐞) )?([BF]-\d+)(?:\]\(#top\))?$/;
+const headings = [...text.matchAll(new RegExp(HEADING_RE.source, 'gm'))];
 const ids = new Set();
 // Evidence the rules ask for once a record is done (BACKLOG-RULES, Record and evidence requirements): warnings, not
 // failures, and only for a record this branch makes done (Verified or Closed here, not on the default branch), so records
@@ -54,10 +55,11 @@ const ids = new Set();
 const warnings = [];
 const doneOnMain = new Set(
   mainText
-    .split(/^(?=### [BF]-\d+$)/m)
+    .split(/(?=^### (?:<a id="[fb]-\d+"><\/a>)?(?:\[(?:✨|🐞) )?[BF]-\d+(?:\]\(#top\))?$)/m)
     .slice(1)
     .filter((b) => /^\| \S+ \| \S+ P\d \| (?:Verified|Closed) \|/m.test(b))
-    .map((b) => b.slice(4, b.indexOf('\n'))),
+    .map((b) => HEADING_RE.exec(b.slice(0, b.indexOf('\n')))?.[1])
+    .filter(Boolean),
 );
 const evidence = (cellsText, labels) =>
   new RegExp(`(?:^|[\\s;(*])(?:${labels})(?:\\*\\*)?:(?:\\*\\*)?\\s*(?![…<\\s])\\S`).test(cellsText);

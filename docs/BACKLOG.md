@@ -1,4 +1,4 @@
-# NERV Agency backlog
+# <a id="top"></a>NERV Agency backlog
 
 Current work ledger, reviewed 12 November 2026 against main `fbd5458`. PRs #328 (F-005-T18), #331 (F-005-T20, CI43314523726) and #330 (F-005-T09, CI43318667103) passed CI; harness 8.1.0 reconciled (PR #332, fresh-context review: no blockers).
 Governance and naming follow the [architecture vocabulary](architecture/vocabulary.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md) · [Reconciliation log](archive/reconciliation-2026.md).
@@ -36,9 +36,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 
 ## Work items
 
-Bugs (B-) and features (F-) in one list, most urgent first. From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a B- record here; earlier ones stayed in their F- records (owner decision).
+Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → `P2` → `P3`), then actionability. Click any item heading to return to top. From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a B- record here; earlier ones stayed in their F- records (owner decision).
 
-### F-005
+- **Status:** 🔴 Open · 🟠 Investigate · 🟡 Implemented · 🟢 Verified · 🟣 Blocked · 🔵 Closed
+- **Steps:** `effort` = remaining agent time (🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more); `estimate` = latest whole-step estimate; `actual` = effort spent so far; `h` = agent hours (owner time apart); step status is not parent acceptance.
+
+### <a id="f-005"></a>[✨ F-005](#top)
 
 **Discover, install and operate enrolled remote workers**
 
@@ -54,7 +57,7 @@ Bugs (B-) and features (F-) in one list, most urgent first. From 2026-11-05 a de
 | **Reproduce** | Update path as run on the Mac: the [T13 Mac update procedure](acceptance/f005-t13-mac-update-procedure.md) and its [2026-11-12 evidence](acceptance/node-update-2026-11-12.md). Node commands: [node setup](INSTALL.md#discover-inspect-and-bootstrap-node-candidates-f-005); milestone: [ROADMAP](ROADMAP.md), milestone 3. |
 | **Check** | Mac/mini PC/Pi tests for enrolment, revocation, leases, fencing, cancellation, locks, reconnect and uncertain physical results. |
 
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
+**Feature steps**
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
@@ -220,1290 +223,7 @@ Totals against the accepted plan: T07 3.5 days (was 2–3, a material increase t
 
 ---
 
-### F-074
-
-**Indexed reusable evaluations, operator campaigns and the first Gemma smoke**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | — | — |
-
-💻 **→** Agent: F-074-T10, identity-bound ledger coverage. F-074-T09 completed on 2026-11-12 ([summary](evaluations/2026-11-12-gauntlet-t09.md)).
-
-| | |
-|---|---|
-| **Issue** | NERV needs discoverable test capabilities and reusable measured evidence without confusing common model results with system acceptance. |
-| **Reproduce** | Generate the combined index, validate evidence reuse/mismatch, then execute the ten-case Gemma pack under explicit bounded settings. |
-| **Check** | Every common pack in the pinned release is consumed or excluded with a reason; a new or changed case raises a backlog item until a run covers it; one root command runs NERV and common packs, reusing only exact-identity evidence. Profile-matched bounded operator role command with saved reports; pinned independent release; generated index current; common reuse exact/fresh and system-source aware; measured cold/warm telemetry with unknown metrics explicit; one authorized Gemma4:12b Q4_K_M 8K serial/default-sampling/thinking-on smoke, output2048/case and explicit time/token limits. No model downloads or live alternative-runtime campaigns. |
-
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| — | F-074-T01 — Adopt indexed and instrumented Gauntlet contracts | — | 0 days | 0 remaining | Completed |
-| — | F-074-T02 — Run and record authorized measured Gemma smoke | — | 0 days | 0 remaining | Completed |
-| — | F-074-T03 — Adopt reusable Gauntlet machine/scenario contracts | — | 0 days | 0 remaining | Completed |
-| 🟢 Small | F-074-T04 — Provide a profile-matched operator role-evaluation bundle | 1 h | 0 h | 1 h | Planned |
-| — | F-074-T05 — Adopt private diagnostics and development job registration | — | 0 days | 0 remaining | Completed |
-| — | F-074-T06 — T06 — Consume every common pack shipped in the pinned Gauntlet release | — | 0 days | 0 remaining | Completed |
-| — | F-074-T07 — T07 — Adopt upstream pending-case detection so new or changed packs raise a run | — | 0 days | 0 remaining | Completed |
-| — | F-074-T08 — T08 — One root command runs NERV and common tests, reusing exact evidence | — | 0 days | 0 remaining | Completed |
-| — | F-074-T09 — T09 — First ledger-covered run of every common pack and the expensive system cases | 0.5 h | 0.75 h (stated) | 0 h | Completed |
-| 🟢 Small | F-074-T10 — T10 — Adopt identity-bound ledger coverage | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟡 Medium | **Total** | 2 h (3 of 10 steps) | 0.75 h (1 of 10 steps recorded) | 1.5 h | 8 of 10 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- F-074-T01: 0 remaining (2026-11-11). Completed before featurePlans adoption; original effort unmeasured.
-- F-074-T02: 0 remaining (2026-11-11). Completed before featurePlans adoption; original effort unmeasured.
-- F-074-T03: 0 remaining (2026-11-11). Completed before featurePlans adoption; original effort unmeasured.
-- F-074-T04: 1 h agent (2026-11-12). Estimate added at featurePlans adoption (2026-11-11): Profile-matched operator role bundle; earlier record estimate Small for T04 alone. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-074-T05: 0 remaining (2026-11-11). Completed before featurePlans adoption; original effort unmeasured.
-- F-074-T06: 0 remaining (2026-11-11). Owner request 2026-11-11: NERV always consumes every common Gauntlet pack plus its own, and a pack added or changed raises a run-new-tests item. Estimate, not a measurement. Closed 2026-11-11 after PR #272 merged with CI 43023793222 green on all five jobs (plan, validate, windows, native-macos, full-suite).
-- F-074-T07: 0 remaining (2026-11-11). Owner decision 2026-11-11: harness and Gauntlet are reused by future projects, so the comparison moves upstream (Gauntlet F-010, about 1.5 days; harness F-052, about 1 day) and NERV only adopts it. Estimate, not a measurement. Closed 2026-11-11 after PR #272 merged with CI 43023793222 green on all five jobs (plan, validate, windows, native-macos, full-suite).
-- F-074-T08: 0 remaining (2026-11-11). Owner request 2026-11-11: NERV always consumes every common Gauntlet pack plus its own, and a pack added or changed raises a run-new-tests item. Estimate, not a measurement. Closed 2026-11-11 after PR #272 merged with CI 43023793222 green on all five jobs (plan, validate, windows, native-macos, full-suite). The identity part of the reuse acceptance moves to F-074-T10.
-- F-074-T09: 0 remaining (2026-11-12). Reassessed 2026-11-11 after the owner run: 41 of 48 model cases and both expensive system cases are recorded; the last 7 cases of general-assistant-expanded were not graded in that run (the ledger records only passed or failed results) and need one more run, plus the evidence summary. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 0.5 hours agent + 0.5 hours owner; agent records the ledger; the owner approves the limits and starts the run (machine time not counted). Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 0.25 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 0.5 h → 0.5 h, min 0.5 h; owner hours and baseline kept. Closed 2026-11-12: the agent ran the last 7 cases with the owner's approval (a 90 s case limit after a 30 s attempt timed out on case 1); summary docs/evaluations/2026-11-12-gauntlet-t09.md. Actual 0.75 h stated, the agent's own account; model time not counted.
-- F-074-T10: 0.5 h agent (2026-11-12). Owner 2026-11-11 asked to plan the F-074-T08 known limit. Adoption mirrors T07 (pin, pass options, join test). Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 0.75 hours agent; pin and adopt after the upstream release; one PR. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 0.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 0.75 h → 0.5 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (0.5 h); the baseline stays for calibration.
-
-**Next action / closure evidence:** T03 consumes released Gauntlet0.3.0 from independent PR7 / CI42607576561: pinned source/artifact, shared machine/scenario CLI/API, report/cache/compare identity and NERV wrapper joins. Generic definitions moved upstream; NERV retains assignments and acceptance. Accepted adoption after PR #235 exactheadb4cd887 / full CI42608578429, mergedmainc5323e5; T03 closed; [independent review](reviews/2026-11-09-gauntlet-environment-adoption.md) found no blocking findings after exact source/package and nine-join checks; no model/load campaign. T02 was separately executed by the owner and reviewed below; dependency adoption itself ran no model.
-
- T01 closed after PR #225, exact head11c963c, merged main8fab24c. CI42573854325 passed plan, validate, Windows, native-macos and full-suite; eight local integration/index/cache/artifact/cancellation tests and independent report-only recheck passed. Adopted Gauntlet0.2.0: generated index17cases, exact/source-aware private reuse with original timestamps, streaming/sampled telemetry and fixture-tested local-runtime adapters. [Adoption acceptance](acceptance/gauntlet-v02-2026-11-09.md). T02 is closed after the owner-provided first ten-case Gemma run and evidence review; the report below records the actual measured failure. No model download, alternative-runtime installation or qualification occurred. Queue order is regenerated from current record/task/dependency state; consult the generated view rather than this historical selection; F-023-T03 is accepted with live native acceptance pending; combination qualification requirements are tracked under F-006/F-045, not claimed by this smoke.
-
-**Operator handoff and references 2026-11-09:** [Terminal commands](evaluations/gauntlet.md#operator-runs-common-gemma-smoke-and-nerv-system-acceptance) save common Gemma and dedicated scripted-system reports with explicit budgets and environment declarations. Common can run through NERV OR a prepared Gauntlet checkout without duplicating measurement. T04 retains the requested profile-matched NERV role bundle: current native role defaults do not match the common8K/2048 profile or aggregate cap. [external-project assessment](reviews/2026-11-09-external-agent-projects.md) retains optional external runners; generic adapters stay upstream. No model campaign was launched while documenting this.
-
-**First campaign reviewed 2026-11-09:** [common Gemma report review](evaluations/2026-11-09-gemma-common-smoke.md), report19a5b470-e87a-4400-a2e9-920404a797d2. All10 executed,7 passed; change-mind/tool-choice/missing-input failed JSON parsing,4/4 holdouts passed. Duration64.744s,1608 output tokens, exact requested model/profile and moderate-load declaration. The run completed inside budget; candidate acceptance failed. Raw response text and human responsiveness/load observations are unavailable. Preserve failure, do not automatically rerun or weaken grading. T02 closed; T04 is unimplemented and keeps the parent Open.
-
-**Diagnostics/job-rule adoption2026-11-09:** T05 consumes released Gauntlet0.4.1 (PR11 / CI42686856664, main8d99d9f/tagv0.4.1) and harness4.4.1 (PR91 / CI42678501222). New common selected-case capture/inspection and private development job registration are implemented; eleven package/wrapper joins pass, including source-bound failed reply capture with unchanged grading and no public raw reply. Native client counters/loading and the role-profile workflow remain unverified/unimplemented, not qualification. [Adoption evidence](acceptance/gauntlet-private-diagnostics-2026-11-09.md).
-
-**Gauntlet 0.5.0 pin, 2026-11-11 ([PR #259](https://github.com/voidbrain/nerv/pull/259)):** merged d2bb481, CI42974448234 passed all five jobs. Replaces the vendored artifact, lockfile and provenance with released 0.5.0 (tag v0.5.0, source 0d46c4a, upstream PR #29 / CI 42973762775, SHA256 in the vendor manifest) and regenerates the capability index links. Upstream adds the 28-case expanded pack and repeatable candidate comparisons. The expanded pack is not wired in; NERV's model commands keep the ten-case smoke packs. `gauntlet:compare` forwards to upstream, so its behaviour changes: 2–64 reports required and a new output shape (identity, mismatch reasons, per-result rows); no NERV code read the old keys, and a new regression joins the command to two saved reports. No model campaign ran. test/gauntlet.test.mjs (12 tests) and `gauntlet:plan` pass against the new artifact. [Independent fresh-context review](https://github.com/voidbrain/nerv/pull/259) verified artifact provenance against tag v0.5.0, the lockfile scope and tests, and found the first wording understated the compare change; corrected here. T04/T05 status unchanged.
-
-**Structured-output extension2026-11-09:** Owner accepted explicit Ollama schema support and a prepared moderate-load diagnostic command. T05 includes released upstream F-007 adoption: `--format=schema` selects a separate structure-only smoke pack; original unconstrained evidence remains unchanged. Medium-load live acceptance is owner-run and unexecuted; no qualification follows from fixture success.
-
-**Adoption accepted2026-11-10:** T05 closed after PR #242 exacthead03c0721 / CI42687439382 passed all five jobs including full-suite, mergedmainbc7a9c3. Independent harness/source/schema review and eleven joins passed. Prepared moderate-load schema diagnostic remains owner-run and unexecuted; T04 remains planned and the parent stays Open.
-
-**F-074-T06–T08 implemented 2026-11-11 ([PR #272](https://github.com/voidbrain/nerv/pull/272)):** Gauntlet 0.6.0 pinned; every shipped pack consumed (`neutral-smoke`, `neutral-smoke-schema`, `general-assistant-expanded`) plus `nerv-system-flows`, with exclusions only by reasoned config; committed metadata-only run ledger `evals/gauntlet/ledger.json`; `gauntlet:pending` (harness `evaluations` setting, reported at session start), `check:gauntlet-runs` in CI (fails while a pending case has no open record), `gauntlet-runs` impact row; `gauntlet:all` plans and runs only uncovered cases and records them. Model limits scale the day limits per case. The five ordinary system cases ran and passed locally and are in the ledger; 50 cases stay pending, named by F-074-T09. Known limit: ledger coverage ignores runtime identity, machine scenario and NERV source key (see F-074-T08). Review: fresh-context design review (Opus): one blocker (check:gauntlet-runs accepted any mention of a pack id, including record history, so a changed case passed CI unraised) and should-fix items (`--max-age-days` did not reach Gauntlet's cache; `gauntlet:all` exited 0 on failures; F-074-T08 acceptance and fixtures), fixed in #272: only unfinished tasks listing `pack/case` or `pack/*` raise a case, with a failing-path test; age passed through; exit 1 on failure; F-074-T08 acceptance states the unmet part; fixtures for --fresh, max age and another profile. Provenance verified: the tgz matches tag v0.6.0.
-
-**Gauntlet 0.7.1 pinned 2026-11-11 ([PR #275](https://github.com/voidbrain/nerv/pull/275)):** artifact, lockfile and provenance replaced together; NERV records new runs in ledger schema 2. F-074-T10's first acceptance (pin) is done; passing the intended identity remains.
-
-**F-074-T09 completed 2026-11-12 ([PR #316](https://github.com/voidbrain/nerv/pull/316)):** the agent ran the 7 pending expanded cases with the owner's approval. A first attempt at the default 30 s per case stopped on case 1 (7 s model load plus about 24 tokens/s of thinking; not the 840 s pack limit as first thought) and recorded nothing; with a 90 s case limit approved by the owner (`--limits`, 630 s, same 14,336-token cap) all 7 passed in 103 s and 2,195 tokens. The ledger now covers all 48 model and 7 system cases and `gauntlet:pending` is empty. [Summary](evaluations/2026-11-12-gauntlet-t09.md). NERV's default model limits stay at 30 s per case, too short for long thinking replies with this profile: a later fresh run with it needs an owner-approved `--limits`.
-
-**Owner run 2026-11-11 (F-074-T09, partial; [PR #274](https://github.com/voidbrain/nerv/pull/274)):** the ledger now records 41 of the 48 model cases (neutral-smoke 10, neutral-smoke-schema 10, general-assistant-expanded 21; corrected 2026-11-12 from the ledger: 38 passed, neutral-smoke change-mind, missing-input and tool-choice failed) and the expensive system cases `browser` and `stress`, from the owner's run (expanded report finished 13:49:56Z). The last seven expanded cases (prompt-injection-r2, -h1, -h2, combined-r1, -r2, -h1, -h2) were not graded in that report: Gauntlet records only passed or failed results, so an error or not-run result covers nothing and the cases stay pending. The likely cause is the 840 s suite limit for 28 cases being reached before the last ones ran; the report's per-case status confirms it. `gauntlet:all` reruns only those seven. **Gauntlet 0.7.0 published 2026-11-11** (gauntlet-protocol B-002, PRs #37/#38): ledger coverage follows model digest, runtime, scenario and source key; F-074-T10 is no longer blocked.
-
-**Owner answers 2026-11-11 ([PR #273](https://github.com/voidbrain/nerv/pull/273)):** the T09 "budget" is the hard time and output-token limits `gauntlet:all` prints and enforces, now stated in F-074-T09. No default max age for reuse: a run stays valid until its identity changes; an age limit would only cover identity the ledger does not bind. That gap (F-074-T08 known limit) is planned: upstream [gauntlet-protocol PR #36](https://github.com/voidbrain/gauntlet-protocol/pull/36) opens B-002 (ledger records model digest, runtime, scenario and a consumer source key; `pending` names the change), and F-074-T10 adopts it. B-002 is a bug upstream: F-010-T01's acceptance named runtime and machine scenario, and v0.6.0 shipped without them.
-
-**Gap found 2026-11-11:** the 0.5.0 pin (PR #259) shipped the 28-case `general-assistant-expanded@1.0.0` pack, but tools/gauntlet.mjs names `smoke-v1.json` by path, and nothing compares the artifact's packs with the ones NERV uses, so the new pack was never run or indexed. Owner decision the same day: NERV always consumes every common pack plus its own; a pack added or changed raises a run-new-tests item; `gauntlet:all` from the root runs new, changed or stale cases and reuses exact-identity evidence. Tasks T06–T09. Same day, because the harness and Gauntlet are reused by future projects: the generic comparison moves upstream ([gauntlet-protocol PR #33](https://github.com/voidbrain/gauntlet-protocol/pull/33), F-010: run ledger and `gauntlet pending`; [project-harness PR #109](https://github.com/voidbrain/project-harness/pull/109), F-052: declared evaluation dependencies reported by check:freshness, with the backlog rule). T07 only adopts them.
-
-**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 3 open steps total 2 h agent + 0.5 h owner (steps table; each task basis gives old → new). Figures after this sentence are dated history. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): the 3 open steps in hours total 2.75 h agent + 0.5 h owner (steps table; method in each task basis). Day figures below are dated history. Small remaining effort, reassessed 2026-11-11 after F-074-T06–T08: F-074-T09 (0.5 day including owner time), F-074-T04 (1 focused day) and F-074-T10 (0.5 focused day; pinned 0.7.1) remain. Earlier the same day: Medium, about 3 focused days (T06 0.5, T07 1, T08 1, T09 0.5, plus T04). Reassessed 2026-11-11 after the owner asked that NERV always consume every common pack and that new packs raise a run; previous estimate Small covered T04 only. Estimates, not measurements.
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #259](https://github.com/voidbrain/nerv/pull/259) Gauntlet 0.5.0 pin; [PR #243](https://github.com/voidbrain/nerv/pull/243) adoption acceptance;  [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Acceptance reconcile: [PR #236](https://github.com/voidbrain/nerv/pull/236); Environment adoption: [PR #235](https://github.com/voidbrain/nerv/pull/235); Review: fresh-context report, no blocking findings; Test: test/gauntlet.test.mjs shared-context consumer/reuse/admission join;  [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #226](https://github.com/voidbrain/nerv/pull/226) adoption acceptance and explicit owner pause; [PR #225](https://github.com/voidbrain/nerv/pull/225); upstream Gauntlet PR #5 / CI42572655186; Review: independent report-only recheck linked above. |
-| Opened | 2026-11-09 |
-| Verification | 2026-11-10 Unit/integration: PR242 exacthead03c0721 / CI42687439382 passed all five jobs/full-suite; eleven fixture joins and independent harness/source/schema review passed; T05 closed, no live schema campaign. Earlier2026-11-09 Unit/integration: PR235 exactheadb4cd887 / CI42608578429 passed all five jobs including full-suite, mergedmainc5323e5. Nine focused context/reuse/admission/package joins, local468 Node tests (466 passed, two platform skips), typecheck/build/index and committed-source policy90 passed. Review: independent exact package/source/installed-file verification and nine joins, no blocking finding. Real-model2026-11-09: owner-provided common smoke validated and reviewed, complete10cases,7 passed/3 failed,64.744s/1608 tokens; no load/model qualification. T04 implementation pending. |
-| Reviewed | 2026-11-11 |
-
-</details>
-
----
-### F-042
-
-**Misato reads the agency: status and "why" from the records**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | [F-056](#f-056) | — | — |
-
-💻 **→** Next: verify and close when [PR #314](https://github.com/voidbrain/nerv/pull/314) merges with green CI.
-
-| | |
-|---|---|
-| **Issue** | Owner question 2026-11-05 ("is this the answer we want? include ballot, experts and consultants?"): Misato can act but cannot read the agency itself, so questions about it are guessed (B-004). |
-| **Reproduce** | Ask Aoba "why was S-… approved?", "what is waiting for me?", "is Tabgha up?". |
-| **Check** | Read-only tools give Misato a sortie's record (decision, ballot with each seat's vote and reason, peer seats, consultant advice, approver and time), what waits for the owner, base health and the bases' status; answers quote the records in the request's language and never invent; these tools run as Green without a card; the consultant is not asked for questions about the agency itself. |
-
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-042-T01 — Read-only agency tools for Misato | 0.25 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending |
-| 🟢 Small | F-042-T02 — Grounded answers and agency facts as data | 0.25 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 0.5 h | 0.5 h | 0 h | 0 of 2 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- F-042-T01: 0 hours (implemented; awaiting CI) (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration. Implemented 2026-11-12 (sorties.explain, approvals.list and agency.status read-only Green tools in src/executors.ts, src/ledger.ts, src/store.ts, src/runtime.ts, src/rpc.ts, src/nervous-process.ts; test/why.test.ts, test/consultant.test.ts) in about 0.25 h agent (stated).
-- F-042-T02: 0 hours (implemented; awaiting CI) (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration. Implemented 2026-11-12 (isAgencyQuestion in src/why.ts, consultant skip on agency questions and enrolled bases passed as data to consultant/pilots and Misato in src/runtime.ts, src/brain-process.ts, src/misato.ts; test/why.test.ts, test/consultant.test.ts) in about 0.25 h agent (stated).
-
-**F-042-T01–T02, 2026-11-12 ([PR #314](https://github.com/voidbrain/nerv/pull/314)):**
-- **F-042-T01 (`src/executors.ts`, `src/ledger.ts`, `src/store.ts`, `src/runtime.ts`, `src/rpc.ts`, `src/nervous-process.ts`):** Added three Pattern Green read-only built-in tools (`effect: 'read'`, running inside the scheduler process without an approval card): `sorties.explain` (returns a sortie's record by short ID with decision, ballot and each seat's vote and reason, peer seats including late shadow votes `ballot.shadow`, consultant/pilot advice, approver and decision time, or recent sorties when `ref` is omitted), `approvals.list` (returns pending approval cards with sortie short ID, title, tool, arguments, Pattern, reason, ballot verdicts and expiry, plus open clarification questions waiting for the owner via `Ledger.waitingQuestions`), and `agency.status` (returns this base's health, degraded reasons, model routes, pending reminders and Instrumentality status, plus enrolled NERV bases with `baseId`, `name`, `status`, `self`, `main`, `online`, `lastSeen`, `health` and `channel`, optionally filtered by `base` id or name).
-- **F-042-T02 (`src/why.ts`, `src/misato.ts`, `src/runtime.ts`, `src/brain-process.ts`, `src/rpc.ts`):** Added `isAgencyQuestion(text, bases)` in `src/why.ts` so `Runtime.loop` skips the consultant when the owner asks about sorties, ballots, waiting approvals/questions, or base/agency health and status (while still consulting on action requests such as `"Remind me on Tabgha to stretch"`). Passed enrolled base names (`bases: [{ id, name }]`) as data to the consultant/pilots and to Misato (`B-012`), localized `decided`, `expires`, and `lastSeen` timestamps (`decidedLocal`, `expiresLocal`, `lastSeenLocal`) in `misatoAsk`, and updated Misato's system prompt to call `sorties.explain`, `approvals.list` or `agency.status` and quote the records in the request's language without inventing. Note: host thread-reset APIs and token counters are not exposed in this environment (bounded continuation; `work-usage` coverage `unavailable`).
-
-**Next action / closure evidence:** Verify and close when [PR #314](https://github.com/voidbrain/nerv/pull/314) merges with green CI. Owner test 2026-11-05: the consultant did not know Tabgha is a base (it asked about geofencing): pilots and the consultant should get the agency's facts as data too (base names, B-012). Planned 2026-11-05. B-004 is the first slice (the "why" question).
-
-**Estimates:** 0 h remaining (2 steps implemented 2026-11-12 in 0.5 h agent stated total; awaiting CI). Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 2 open steps total 2.75 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort. Estimated 2026-11-05.
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #314](https://github.com/voidbrain/nerv/pull/314) (F-042-T01–T02 implementation and regressions: `test/why.test.ts`, `test/consultant.test.ts`); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner question 2026-11-05 |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-12: Unit/integration passed (`test/why.test.ts`, `test/consultant.test.ts`, `test/misato.test.ts`, `test/pilots.test.ts`, `test/gate.test.ts`, `test/resume.test.ts`, `test/kaji-seats.test.ts`); CI pending |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
-
-### F-046
-
-**Misato checks what already exists before adding: same thing, a change, or new**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h | — | — | — | — |
-
-💻 **→** Next: a reminders.update tool for Misato and the existing-item check before any add.
-
-| | |
-|---|---|
-| **Issue** | Owner request 2026-11-05, after B-003 (the same dentist request sent four times, two copies approved): before adding something, Misato should look for it among what already exists (reminders, Lilith's facts, later calendar and notes); if it is the same, not add another and say so in the reply; if it changed (another time, a corrected fact), propose changing the existing one instead. Today the store drops only exact copies (B-003 for reminders, `factKey` for facts); a reminder with the same title at another time becomes a second one, and a fact that contradicts an earlier one ("I like tea" after "I don't like tea") is added next to it. Misato has no tool to change a reminder. |
-| **Reproduce** | Ask Aoba to remind you to call the dentist on 3 February at 10, then again at 11: two reminders. Tell it you like tea, then that you don't: two facts. |
-| **Check** | Before proposing reminders.add or memory.remember, Misato is shown the existing items that match (same or similar title, the same subject); the same item is not proposed again and the reply says it already exists (with its time or text); a changed one becomes a proposal to change it (reminders.update for title or time; for a fact, the edit of the existing fact, shown old → new on the card), approved like any change; a really new item is added as today; the reply says which of the three it was and why; works in English and Italian; tests cover same, changed and new for reminders and facts, through the scheduler. Calendar and notes follow the same rule when they exist. |
-
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-046-T01 — reminders.update as a Misato tool | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-046-T02 — Matching existing items before an add | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-046-T03 — Changed facts proposed as edits | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | **Total** | 3 h | 0 h (0 of 3 steps recorded) | 3 h | 0 of 3 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- F-046-T01: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-046-T02: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-046-T03: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-
-**Next action / closure evidence:** Planned 2026-11-05 from the owner's request. Builds on B-003 (exact copies of a reminder are returned, [PR #103](https://github.com/voidbrain/nerv/pull/103)) and Lilith's exact-text check. Slices: reminders.update as a Misato tool (the dashboard's edit already has it in the scheduler); matching existing items in Misato's context before an add; facts that change or contradict an earlier one proposed as an edit (shares the spelling and split work of F-044).
-
-**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 3 open steps total 3 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort. Estimated 2026-11-05.
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner request 2026-11-05 |
-| Opened | 2026-11-05 |
-| Verification | Pending |
-| Reviewed | 2026-11-05 |
-
-</details>
-
----
-
-### F-045
-
-**Pilots: a roster of permanent agents that grows, specialises and is chosen per request**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟣 Very large | 8.25 h | [F-029](archive/backlog-2026.md#f-029) | [F-049](#f-049), [F-050](#f-050), [F-054](#f-054) | — | — |
-
-💻 **→** Next: pilots offered by other bases over the Kaji line; other-provider/cloud pilot routing remains planned.
-
-| | |
-|---|---|
-| **Issue** | Owner questions 2026-11-05: NERV needs permanent agents (a coder, the 3D expert on Tabgha, and others as jobs require: a Photoshop expert), a generic one for anything else, specialists that grow from it, and automatic choice. The design already names pilots (F-025: pilots run in the EVA class of their stage, watermelon trust) but has no roster. Consultants (F-041) become pilots asked only for advice (owner, 2026-11-05). |
-| **Reproduce** | Ask Aoba for an image edit or a coding job: there is no pilot to give it to. |
-| **Check** | **Definition as data:** a pilot is a role and domain (topics, keywords), skills, tools, a model, a memory scope, an EVA class and a trust stage (Prototype, Test, Production), with its parent; most share the base's model, a separate model only when its evaluations justify it. **Roster:** a registry like the Kaji one; each base offers its pilots in the heartbeat; the owner adds, renames, retires and pins. **Generic pilot:** one per base, takes any job no specialist covers, in the most restrictive EVA its stage allows. **Two ways of use:** asked for advice (the F-041 consultant rules: at most one per topic by default, the owner's pin, then the main base's own, then the best record, the next as fallback, "ask both" per topic; advice is data, never a vote or an action) or put in charge of the job (acts in its EVA, effects by card). **Choice:** Misato routes by domain and keywords, base, stage allowed for the action and record; unclear goes to the generic pilot or a question; the card shows the pilot, its stage and base, and the owner can change it; routing accuracy is measured. **New specialists found automatically:** unmatched domains, tools the generic pilot lacked and repeated failures are counted per domain; past a threshold (e.g. three unmatched in 30 days, or one missing tool) NERV proposes a pilot (or an extension of an existing one) on a card with the sorties behind it, its skills, tools and installs; created at Prototype. **Split and merge by evidence:** a split when sorties cluster in a subdomain and a narrower set scores better; a merge when two overlap and neither is better; lineage kept. **Learning (owner decision 2026-11-05: the recommendation):** new evaluation cases from failures are added automatically and shown; domain memory is proposed in one review card a week; skills change only by the owner's approval, versioned; prompt, model, tools, permissions and trust stage are always the owner's; nothing learned from a tainted sortie becomes a skill without review; a change to skills or prompt is versioned and re-runs the pilot's evaluations, and a drop moves it back a stage. **Inside a pilot** planning, doing and checking stay one loop; promotion through the golden sortie evaluations. |
-
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | F-045-T01 — Pilot definition as data and registry | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟢 Small | F-045-T02 — Owner roster management | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-045-T03 — Advice mode | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-045-T04 — Execution mode and automatic choice | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟡 Medium | F-045-T05 — Remote pilots | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟢 Small | F-045-T06 — Evidence-based placement | 1 h | 0 h | 1 h | Planned |
-| 🟣 Very large | **Total** | 8.25 h | 0 h (0 of 6 steps recorded) | 8.25 h | 0 of 6 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- F-045-T01: 1.75 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
-- F-045-T02: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-045-T03: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-045-T04: 1.75 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
-- F-045-T05: 1.75 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
-- F-045-T06: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-
-**Next action / closure evidence:** Owner integration 2026-11-09: pilot selection and promotion must distinguish individual-role evidence from separately measured combination/workflow evidence as specified in [configuration qualification](decisions/configuration-qualification.md). Bind coder, auditor, prompts, skills/tools, handoffs and host/runtime settings; independent hidden acceptance determines success, not auditor agreement. Consume NERV-owned evidence from F-006-T03/T04 before claiming evaluated pair or specialist placement; retain owner promotion and suggest-only defaults. No pair selection or mini PC acceptance is implemented by this documentation.
-
-Owner extension 2026-11-07: show pilot description, proposal rationale and request evidence, consultation/sortie outcomes and evaluation sample sizes. Investigate generic Time Request PROTO proposal quality. Distinguish advice from execution assignment/history; assess tool acquisition/discard, evidence-based specialization, split and merge with versioned lineage and explicit promotion gates. No autonomous capability change is implied by the current roster.  Owner discussion 2026-11-06 (skill marketplaces): **skills found outside NERV are untrusted input**, like intake. A found skill (marketplace, repository, another agent's SKILL.md) is adopted only as a reviewed, **pinned copy**: source, version, content hash and licence recorded, and the licence must allow keeping a copy; it enters at seed. A change at the source is a new version: re-review, re-run evaluations, back to seed. **Never load a skill remotely at run time**: that excludes delivery models that always serve the latest version and forbid saving (e.g. Agensi's MCP delivery, terms §5.2/§8.2). **Bundled scripts are code**: they run in the pilot's EVA and their effects go through the gate; a skill's text never widens the pilot's tools or permissions. This applies F-021's pinning lesson (a description fingerprint is not a code pin) to skills.  Owner refinement 2026-11-06: use an inline Model/select/Apply row without repeating the pilot name; retain identity in the accessible name. Apply stays disabled until an installed choice differs from the saved model, and disables again on revert/save or while applying.  Owner request 2026-11-06: move consultant/model selection out of Models and into each pilot card. Candidate implementation: generic fallback plus an independent specialist selector, installed local Ollama models only; per-specialist API validates owner authorization and discovery, preserves the rest of the roster, and applies to the next request. Drafts survive polling; unavailable saved models remain explicit. Future cloud/other-engine options require provider-aware pilot routing and explicit privacy permission; no placeholder executable choices are added. API/DOM regression and Chrome against the real runtime/config passed, including independent changes, generic-off, draft retention, next-request routing and scoped axe (zero violations). Full suite passed (194 passed, one systemd-only skip), build and process/browser checks passed. The local selector slice is verified in merged PR #160 (run 42241192687: validate, windows and native-macos green).  Owner decision 2026-11-05 on promotion, time and evidence: a pilot (and a skill) becomes eligible for the next stage after a minimum time there and enough clean runs (for example 7 days in Proto and 10 runs without a MAGI reject or an owner edit; skills count uses); its card shows the progress (*eligible in 5 d · 6/10 runs*, then *ready to promote*); when ready, NERV proposes the promotion on a card, never automatic; Prod always needs the owner; a failure or the Spear moves it back a stage. Needs a per-pilot record of runs, rejects and edits (and F-029's evaluations). Owner decision 2026-11-05 on skill stages (option B): skills grow by their own stages, **seed → sprout → ripe** (Eva, Kaji's watermelons) and **create → try → use** (Simple), distinct from the pilots' proto → test → prod; shown on the skills box in [PR #129](https://github.com/voidbrain/nerv/pull/129). Detection slice in [PR #122](https://github.com/voidbrain/nerv/pull/122) (2026-11-05): the generic pilot names the request's domain on its first line (*Domain: image editing*, no extra model call; no generic pilot, no detection); a request no specialist fits records `pilot.unmatched`; after 3 in 30 days the Marduk Institute opens a sortie with an owner-only `pilots.create` card (id, name, domain, keywords; the requests behind it in the card's reason), never twice while one waits, not again for 30 days after a no; approved, the pilot is written at Prototype on the generic pilot's model and the next request in that domain goes to it. Misato can propose `pilots.create` too when asked. Checked: test/pilots.test.ts (the domain line; through every process: two requests no card, the third a card, a fourth no second card, approved then used, a rejected domain not proposed again); full suite and build pass. Not yet: the missing-tool and repeated-failure signals, extension of an existing pilot instead of a new one. Slice 1 in [PR #107](https://github.com/voidbrain/nerv/pull/107) (2026-11-05): the pilot definition (src/pilots.ts: id, name, domain, keywords, local model, stage, parent, pinned, retired; checked on read), a local roster in config.json (`nerv pilots` list, add, set, pin, unpin, retire, restore; a model Ollama lacks is refused), the generic pilot (the F-025 consultant, `roles.consultant`), and advice mode: before Misato plans, the pilot whose keywords the request contains advises on its own model (pinned first, then most keywords, then later stage; retired never), named in its prompt and in the trace (`misato.consult` with the pilot; dashboard Comms and the why answer show it); no match, the generic pilot. Checked: test/pilots.test.ts (roster checks, routing order, through every process: a specialist on its model, the generic one otherwise, a retire applied to the next request), test/model-setup.test.ts (the CLI); full suite 146 pass, build, headless. Remaining slices: offered by other bases; "ask both" and the fallback; detection of unmatched domains and proposals by card; the coder pilot acting in an EVA; split and merge; learning as decided. Owner decision 2026-11-05: pilots learn by the recommendation ("F-045 … the recommendation"). Planned 2026-11-05 from the owner's questions. Supersedes F-041 (consultants are pilots in advice mode; its rules are kept above). First slices: the pilot definition and roster with the generic pilot; advice mode (the F-041 work); the coder pilot in a sandbox EVA (intent, spec and plan approved by card, an independent read-only verifier, results as a PR by card); then detection of new specialists, then split and merge. Candidate pilots discussed: coder, verifier, researcher (EVA-03, no effects), ops (read-only watch), 3D expert (Tabgha), archivist (memory hygiene, F-044); each gets its own record when it is built.
-
-**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 6 open steps total 8.25 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Reassessed 2026-11-06 for pilot-owned model selectors: the local selector slice passed local and merged CI acceptance; remote pilots, execution and future provider/cloud routing remain, so Large remains valid.  Reassessed 2026-11-06 with B-027: duplicate-proposal matching is repaired; the remaining remote-pilot and execution scope is unchanged, so Large remains valid.  Large remaining effort (roster, advice, detection). Estimated 2026-11-05. Reassessed 2026-11-07: explicit prerequisite outcomes preserve the existing scope and remaining-work estimate; independent slices can proceed. Reassessed 2026-11-07: Large remains valid: proposal evidence and outcomes, tool evolution and split/merge lineage need evaluated lifecycle contracts beyond the current adviser roster.
-
-| Field | Value |
-|---|---|
-| Depends on | [F-029](archive/backlog-2026.md#f-029) — Golden evaluation evidence for pilot promotion; roster and advice work can proceed |
-| PR / evidence | [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #221](https://github.com/voidbrain/nerv/pull/221) schema/reuse assessment; [Gauntlet ownership/reuse proposal](design/gauntlet-protocol-2026-11-08.md), 2026-11-08; the proposal preceded delivered Gauntlet0.1.1 adoption in PR #223 / F-073; automatic routing/qualification remains unimplemented and no consumer work gates upstream releases; [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #161](https://github.com/voidbrain/nerv/pull/161) verification reconciliation;  [PR #160](https://github.com/voidbrain/nerv/pull/160) pilot selectors/map status and owner clarification; Owner questions 2026-11-05; slice 1 [PR #107](https://github.com/voidbrain/nerv/pull/107) |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-06 Unit/integration and Browser/accessibility: pilot model API/DOM regressions, full suite, real-runtime Chrome flow, inline-row/Apply states and scoped axe passed; merged PR #160 CI run 42241192687 green. Earlier evidence: 2026-11-05 slice 1: test/pilots.test.ts, test/model-setup.test.ts, full suite (local run) |
-| Reviewed | 2026-11-09 |
-
-</details>
-
----
-
-### F-025
-
-**Extra MAGI seats (veto-only), consultants and watermelon trust for pilots**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 5.5 h | — | [F-049](#f-049) | — | — |
-
-💻 **→** Attach extra seats by action class as veto-only, start new seats in shadow, and promote pilots through Prototype → Test → Production.
-
-| | |
-|---|---|
-| **Issue** | Specialists help, but a new or remote seat must never approve what the core three would refuse, and skills need earned trust. |
-| **Reproduce** | Attach a deterministic test seat and a model expert seat to code-write actions; run them in shadow; promote one; force a failure and a Spear revocation. |
-| **Check** | Extra seats can only reject; shadow seats are logged, not counted; a timed-out seat abstains; consultants advise the planner without a vote and receive only Scrolls-allowed data; pilots run only in the EVA class of their stage; promotion to Production needs the owner's confirmation; failure, override spikes or Spear demote automatically. |
-
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-025-T01 — Veto-only extra seats with shadow logging | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-025-T02 — Free API seat pool | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟢 Small | F-025-T03 — Consultants without a vote | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-025-T04 — Watermelon trust stages and demotion | 1.75 h | 0 h | 1.75 h | Planned |
-| 🔴 Large | **Total** | 5.5 h | 0 h (0 of 4 steps recorded) | 5.5 h | 0 of 4 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- F-025-T01: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-025-T02: 1.75 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
-- F-025-T03: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-025-T04: 1.75 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
-
-**Next action / closure evidence:** Owner decisions 2026-11-05 for the free API seats: one seat per provider and model, each with its own key (terminal prompt) and trust stage; attached by action class, veto-only, shadow first, promoted one by one; each action asks one or two seats from the pool in turn to spread free quotas; a seat that hits its limit or times out abstains and is skipped for a while; only actions the Scrolls allow to leave the machine get cloud seats (never local-only or tainted data). **Optional:** `seats` checks each candidate (key, provider reachable, model still listed) and skips the unavailable ones with the reason; with an empty pool actions simply get no cloud seat, shown as information, never as degraded; re-checked periodically. Owner check 2026-11-05 on Neo Tokyo-3: with `models set consultant gemma4:12b`, Comms showed *Consultant (gemma4:12b): …* before Misato's reply. Consultants, local, in [PR #92](https://github.com/voidbrain/nerv/pull/92) (2026-11-05): `roles.consultant` (a local model; `models set consultant MODEL|off`, the dashboard's Models panel, `PUT /api/models`); asked once per request before Misato plans (`consultant.advise` in the brain, never on a resume), its advice (up to 600 characters, "none" is none) goes into Misato's prompt as data on the local route only and is recorded as a `misato.consult` event (Comms; the dashboard's Gevurah node lights up); no vote, no action. Checked: test/consultant.test.ts (advice in Misato's prompt and in the trace, one consultation per request, none on a resume, off and "none" add nothing, never on the cloud route), test/model.test.ts and test/model-setup.test.ts (role validation, local only, set and off), suite 129 pass. Remaining here: consultants offered by other bases, the free API seats, and the watermelon trust stages. Related (2026-11-05): the other bases' Casper is now a veto-only, shadow-first extra seat (F-036, [PR #91](https://github.com/voidbrain/nerv/pull/91)); the same ballot mechanism takes the free API seats this record plans. Seat registry via Marduk and stage tracking on top of F-017/F-024; evaluation evidence from F-029. Absorbs F-018 (closed 2026-11-04).
-
-**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 4 open steps total 5.5 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort (peer seats in F-036, local consultants). Estimated 2026-11-05.
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
-| Opened | 2026-11-02 |
-| Verification | Pending |
-| Reviewed | 2026-11-04 |
-
-</details>
-
----
-### F-065
-
-**Agentic threat map: each OWASP risk tied to a NERV control and the test that proves it**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h | — | — | — | — |
-
-💻 **→** Write `docs/security/agentic-threats.md` and a check that every row names an existing test.
-
-| | |
-|---|---|
-| **Issue** | The gate, grants, Lilith, the Kaji line and the tools process already answer most published agentic risks, but nothing maps them: a reviewer cannot see which risk a control covers, which risk has no control, or which claim no test backs. The [architecture reassessment](audits/2026-11-06-architecture-reassessment.md#3-automatic-incident-response-bounded-circuits-before-a-global-kill-switch) cites only OWASP's prompt-injection cheat sheet. |
-| **Reproduce** | Ask which NERV test covers OWASP ASI08 (cascading failures) or LLM06:2026 (unbounded consumption): no document answers, and the honest answer today is none. |
-| **Check** | One row per risk from the [OWASP Top 10 for Agentic Applications](https://genai.owasp.org/initiatives/agentic-security-initiative/) (ASI01–ASI10), the [LLM Top 10 2026](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/) (LLM01–LLM10) and the [MCP Top 10](https://owasp.org/www-project-mcp-top-10/) (MCP01–MCP10, beta), each citing version-pinned [AISVS](https://github.com/OWASP/AISVS) requirements (`v1.01-C<chapter>.<section>.<req>`, mainly C5, C8, C9, C10, C12), the NERV control (source path) and a test name, or "gap" with the owning record. A tool run in CI fails when a cited test does not exist or a row is neither tested nor a named gap. Not-applicable rows say why (LLM09: no embeddings, Lilith uses FTS5). |
-
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-065-T01 — Threat map document | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-065-T02 — CI check for cited tests | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | **Total** | 2 h | 0 h (0 of 2 steps recorded) | 2 h | 0 of 2 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- F-065-T01: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-065-T02: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-
-**Next action / closure evidence:** Proposed 2026-11-07 from an OWASP standards review in the session (Agentic Top 10, LLM Top 10 2026, MCP Top 10, AISVS 1.01, Agent Control Standard). Known gaps to land as rows: ASI08 cascading failures (F-064), LLM06:2026 unbounded consumption (F-063), credential rotation (F-066). Candidate gap to verify first: MCP results flowing into later prompts (LLM08:2026 hidden context exposure, MCP10). Map, not certification: a row says what a test shows, never that the risk is gone.
-
-**Accepted assessment 2026-11-09:** [execution boundaries](reviews/2026-11-09-execution-boundaries.md). Map the deterministic runner/warden controls (F-049), protected grading and artifact-bound promotion (F-006), and existing grant/recovery safeguards to actual tests or named gaps. No new LLM security authority, compliance claim or separate security project follows.
-
-**Retained test references 2026-11-09:** [external-project assessment](reviews/2026-11-09-external-agent-projects.md): AgentDojo hostile tool-output families can inform versioned NERV attack/defense cases. Map observed controls to actual tests or named gaps; a benchmark pass is neither certification nor proof of F-049 confinement.
-
-**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 2 open steps total 2 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium: the document is a day; the test-name check is small. Set 2026-11-07.
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
-| Opened | 2026-11-07 |
-| Verification | Unit/integration: Pending. |
-| Reviewed | 2026-11-09 |
-
-</details>
-
----
-### F-070
-
-**Authenticated directory of base communication operators**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.75 h | — | — | — | — |
-
-💻 **→** Next: Define operator alias ownership and signed directory contract before changing routing.
-
-| | |
-|---|---|
-| **Issue** | Resolve tell Aoba on another base through configured operator aliases, without guessing from role labels or changing a destination silently. |
-| **Reproduce** | Address an enrolled base by operator alias; rename it; exercise duplicate and unknown aliases. |
-| **Check** | Explicit per-base configurable names/defaults; authenticated discovery; ambiguity asks for clarification; stale/unknown names fail safely; no private channel IDs exposed. |
-
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-070-T01 — Operator alias ownership and signed directory contract | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-070-T02 — Authenticated discovery and safe resolution | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟡 Medium | **Total** | 2.75 h | 0 h (0 of 2 steps recorded) | 2.75 h | 0 of 2 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- F-070-T01: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-070-T02: 1.75 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
-
-**Next action / closure evidence:** Define operator alias ownership and signed directory contract before changing routing. See [the source assessment](design/operator-flow-review-2026-11-07.md). Preserve observed communication separately from step activity; do not infer delivery or execution from a UI state.
-
-**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 2 open steps total 2.75 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort. Reassessed 2026-11-07: implementation and integration verification remain; no measured duration available.
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; source assessment linked above |
-| Opened | 2026-11-07 |
-| Verification | Pending: regression, integration and relevant browser checks; source inspection is not runtime acceptance. |
-| Reviewed | 2026-11-07 |
-
-</details>
-
----
-### F-051
-
-**Dashboard: a sortie shows where it runs and who contributed**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 5.75 h | — | — | — | — |
-
-💻 **→** Next: define authenticated destination-dashboard navigation; it needs an authenticated cross-base inspection contract, and EVA cage pilot labels await F-049.
-
-| | |
-|---|---|
-| **Issue** | Owner test on Tabgha 2026-11-05: on Tabgha the chat shows *Misato is planning… (local models take 10–30 s per step)* but not that the request went to Neo Tokyo-3, and the previous sortie stays selected; a running sortie card always blinks MAGI whatever its phase; the flow shows only "ok" for the MAGI, so whether shadow or peer seats voted is not visible, and Plan · current action does not say whether a pilot advised; a node the sortie did not need (Misato's Apt when no approval was needed) looks the same as one that is unavailable. |
-| **Reproduce** | Ask something on a base that is not the main one; select a finished sortie with a Green action; look at a running sortie's card. |
-| **Check** | The chat line reads *Misato is planning* (no timing note) and, for a relayed request, *Forwarded to Neo Tokyo-3*; the forwarded request appears on the asking base as a sortie card that says where it runs and links to it, and the main base shows it as a sortie from that base; a new request (or a refresh) selects the running sortie (F-019); the running card names its phase (Misato, MAGI, approval, EVA, a pilot); the MAGI detail lists every seat's vote, shadow and peer seats marked; Plan · current action names the pilot that advised; a node not needed by the sortie is shown as skipped, distinct from unavailable; the Sephirot shows a relay step when the request came from or went to another base. |
-
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-051-T01 — Chat line and relay visibility | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-051-T02 — Running sortie selection and phase label | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-051-T03 — MAGI and pilot contributors | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-051-T04 — Skipped versus unavailable nodes and relay step | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-051-T05 — Authenticated cross-base inspection | 1.75 h | 0 h | 1.75 h | Planned |
-| 🔴 Large | **Total** | 5.75 h | 0 h (0 of 5 steps recorded) | 5.75 h | 0 of 5 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- F-051-T01: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-051-T02: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-051-T03: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-051-T04: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-051-T05: 1.75 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
-
-**Next action / closure evidence:** 2026-11-07 partial visual implementation: MAGI border/background/title use existing violet EVA identity in dark orange; Midori links stay dotted in every API state. Kaji/base/channel topology and consultant arrows remain design work.  Owner extension 2026-11-07: model real Kaji/base request and return I/O in Sephirot; explain Tabgha destination, channel exit and Aoba/Midori identities. Verify detection/intake routing against runtime before removing or adding topology; distinguish consultant request from returned advice. Give MAGI a violet identity in Eva dark orange via palette tokens; communicate busy nodes accessibly, separate from transient edges (B-040). Midori connections should be dotted; blue currently denotes responding API, not a base identity.  Review 2026-11-06: the existing relay cards/flow and contributor labels are implemented, but this record cannot close on F-049 alone. The destination sortie ID existed only in Comms; the detail incorrectly claimed a forwarded request answered without tools locally, and also claimed an active or failed action-free request had answered. [PR #162](https://github.com/voidbrain/nerv/pull/162) carries the recorded destination reference into the live detail, names the answering base, distinguishes waiting/failure/local planning/stopped states, and clears remote metadata when work continues here. A ledger-event → live adapter → DOM regression checks the join and escaping. There is no published authenticated remote dashboard URL: the signed Kaji address is a protocol endpoint, not a dashboard address, and sessions belong to one base. Show the full destination reference with instructions to inspect that base; a direct destination link remains unmet pending an explicit inspection contract. EVA instance/pilot display remains F-049.  Slice 2 in [PR #139](https://github.com/voidbrain/nerv/pull/139) (2026-11-05): a request forwarded to the main base is a sortie on the asking base too, opened when it leaves (`kaji.forwarded`, before the request goes) and closed with the answer (`kaji.answered` with the main base's sortie ID) or as failed when none came; if the main base drops out, this base answers in the same sortie. The flow draws a relay route Detection → Debrief with the steps between skipped and Detection reading *forwarded to Neo Tokyo-3*; on the main base a relayed request reads *from Tabgha* (card and Detection). Checked: test/one-channel.test.ts (forwarded, answered, no answer, drop-out answered here; expectations changed on purpose: the asking base now keeps a sortie), test/dashboard.test.ts. Owner, 2026-11-05: the apartment's count is the header's sub-line (`.sub`), like every other panel, not a red badge ([PR #135](https://github.com/voidbrain/nerv/pull/135)). Slice 1 in [PR #133](https://github.com/voidbrain/nerv/pull/133) (2026-11-05): the chat says *Misato is planning*, or *Forwarded to Neo Tokyo-3 · Misato there is planning* when another online base is the main one; a running card names its real step from the sortie's latest event (Advise, Misato, MAGI, EVA, your card) instead of always MAGI; ADVISE names who advised (*advised by Print Master · gemma4:12b*) and the current action says so too; extra seats show the base's name (*+ Tabgha · shadow, not counted*); a skipped step is dashed and labelled *skipped*, not greyed out; Pattern badges carry their meaning (title and accessible name); stage tabs with counts in both sections (pilots Proto, Test, Prod, Retired; skills Seed, Sprout, Ripe, Dropped, or Create, Try, Use in Simple). Checked: test/dashboard.test.ts, a screenshot of both sections. Remaining: slice 2 (the relay step and the forwarded card on the asking base); EVA cages with the pilot inside (F-049). Owner decision 2026-11-05 on the two sections: they stay separate, each with stage tabs and a count per tab: Marduk Institute · Pilots `Proto | Test | Prod | Retired`, Kaji's watermelons · Skills `Seed | Sprout | Ripe | Dropped` (Simple: `Create | Try | Use | Dropped`); the generic pilot above the pilots' tabs (it has no stage). The Marduk Institute panel shows the real roster in [PR #125](https://github.com/voidbrain/nerv/pull/125) (owner, 2026-11-05: "dont see the 2 manually created"): `GET /api/pilots` (admin) and the live panel list the generic pilot (with the consultant model, or how to turn it on) and each pilot with name, domain, model, stage (PROTO, TEST, PROD) or RETIRED, pinned and keywords; the sub-line reads *proto → test → prod*. Kaji's watermelons is its own box, for the skills (owner, 2026-11-05: pilots are the Marduk Institute, skills are Kaji's watermelons): *Kaji's watermelons · skills* (Eva), *Skills* (Simple), planned until skills exist (F-045); fixed in [PR #126](https://github.com/voidbrain/nerv/pull/126) after #125 had put the watermelons into the pilots box by mistake. Stages change with `nerv pilots set ID --stage`; promoting from the panel is still to come. The panel title is renamed in [PR #123](https://github.com/voidbrain/nerv/pull/123): *Marduk Institute · Pilots* (Eva), *Pilots* (Simple, was "Skill trust stages"); its content (the real roster) is still to come. Owner, 2026-11-05 (S-1EBF): "a node should be idle if not running": a node animates only while its step is actually running; an interrupted, finished or stuck sortie shows every node idle (the card of S-1EBF kept MAGI blinking although nothing ran, B-013). Owner decision 2026-11-05 on names: the Watermelons panel becomes **Marduk Institute · Pilots** (the real roster: domain, model, base, pinned or retired, with Kaji's watermelons as the trust-stage badges), **Pilots** in the Simple theme; the signed registry of bases is **Gehirn** (renamed from "Marduk registry" in the code comments and architecture doc in [PR #117](https://github.com/voidbrain/nerv/pull/117)); the live sortie detail's stale line "pilots are skills" goes (a pilot uses skills; trust belongs to the pilot). Owner question 2026-11-05 ("Aoba · yesterday 13:31 · 1 action G: what's the G?"): the card's one-letter Pattern badges (G Green, O Orange, B Blue, · not voted yet) are not explained and a screen reader reads only the letter; each badge gets its meaning in words (a title and an accessible name, *Pattern Green*), and the legend appears on the card or in the help. Owner, 2026-11-05: also show who contributed, on this base and from others: the Gevurah node names who advised (a pilot, the generic one, or a pilot from another base); the MAGI node shows the extra seats ("+1 shadow · Tabgha") and its detail every seat's vote; the Watermelons panel lists the real pilot roster (stage, model, base, including pilots offered by other bases); the EVA cages show which pilot runs in which instance once EVAs exist (F-049). Today: Gevurah lights without a name, peer seats appear only in the selected sortie's ballot chips (by base ID, dashed when shadow), the Watermelons panel lists only owner and misato, cages show only their class. Planned 2026-11-05 from the owner's test.
-
-**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 5 open steps total 5.75 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): the 5 open steps in hours total 9 h agent (steps table; method in each task basis). Day figures below are dated history. Medium remaining effort. Reassessed 2026-11-06: local rendering gaps repaired, but authenticated cross-base navigation and F-049 instance data still prevent closure; remaining work still needs browser/CI acceptance. Reassessed 2026-11-07: Raised to Large remaining effort: authenticated remote inspection, truthful directional base/channel topology and contributor/execution joins exceed three focused days; visual color/line tuning alone does not complete them.
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #195](https://github.com/voidbrain/nerv/pull/195) project tuning and regressions;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #163](https://github.com/voidbrain/nerv/pull/163) channel telemetry and CI reconciliation;  [PR #162](https://github.com/voidbrain/nerv/pull/162) relay detail and acceptance review; Owner test on Tabgha 2026-11-05 |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-06 Ledger-to-live-detail regression passed for remote answer/reference, waiting, no answer, local continuation, escaping and local empty states. Chrome: real service/session and ledger fixture showed the answering base and full reference; scoped axe found zero violations and screenshot inspected. Full suite: 196 passed, one platform skip; build, typecheck, conventions and integrations passed. Merged PR #162 CI passed validate, windows and both native-macos runs (ci:status, runs 42247286378/42247282316); cross-base link and EVA labels remain unimplemented. |
-| Reviewed | 2026-11-07 |
-
-</details>
-
----
-
-### F-052
-
-**Timings for every step, live in the Sephirot; shadow seats never make you wait**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 4.75 h | — | — | — | — |
-
-💻 **→** Next: record how long each call takes on the sortie's events.
-
-| | |
-|---|---|
-| **Issue** | Owner question 2026-11-05: how long did the job take, how long Misato, the EVA, is the ghost (shadow) voter slowing it? The ledger stamps only step boundaries: in S-3BFF, Misato's planning, Casper and Tabgha's shadow seat fall in one 95.7 s gap, so nobody can tell who was slow. The gate waited for every seat, also shadow ones whose vote does not count. |
-| **Reproduce** | Read a sortie's events: there is no duration per model call, per seat or per executor. |
-| **Check** | 1. Each call's duration is recorded with the sortie (consultant or pilot, each Misato step, Casper, each other base's seat, the executor). 2. The sortie detail and the why answer show them (*Misato 38 s · Casper 6 s · Tabgha (shadow) 41 s · EVA-02 0.1 s*); 2a. while a sortie runs, the Sephirot shows the elapsed time on the active node and each finished node's time (owner, 2026-11-05). 3. Shadow seats never delay: the gate decides once Casper and the veto seats have voted; a later shadow vote is recorded, never counted. 4. A daily summary (brief or health): median and slowest time per role, so a slow model or base stands out. |
-
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| — | F-052-T01 — Shadow seats never delay | — | 0 days | 0 remaining | Completed |
-| 🟡 Medium | F-052-T02 — Per-call duration recording | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟢 Small | F-052-T03 — Durations in sortie detail and why answer | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-052-T04 — Live elapsed time in the Sephirot | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-052-T05 — Daily timing summary | 1 h | 0 h | 1 h | Planned |
-| 🔴 Large | **Total** | 4.75 h (4 of 5 steps) | 0 h (0 of 5 steps recorded) | 4.75 h | 1 of 5 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- F-052-T01: 0 remaining (2026-11-11). Delivered before featurePlans adoption; see the record.
-- F-052-T02: 1.75 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
-- F-052-T03: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-052-T04: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-052-T05: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-
-**Next action / closure evidence:** Owner extension 2026-11-07: transfer duration and step duration are different. A minimum recent-transfer pulse may improve visibility but must not claim the network is still communicating (B-040).  Item 3 in [PR #116](https://github.com/voidbrain/nerv/pull/116) (2026-11-05): `Runtime.usePeerSeats` (serve and the two-base test share it, instead of a copy in the test) returns each other base's vote as a pending promise; the gate waits for Casper and the veto seats only; a shadow vote already in goes on the card, one that comes later is recorded as `ballot.shadow` on its action (dashboard trace: *MAGI · NERV-02 (shadow, after the decision)*) and never changes the outcome. Checked: test/kaji-seats.test.ts (two runtimes, Tabgha's Casper answering after 1.5 s: in shadow the decision comes in under 1.2 s and the late reject is kept with the action; in veto it is waited for and stops the action; an absent base abstains), fails without the change (changed deliberately: the shadow vote is no longer always on the card); full suite 152 pass, build, headless. Remaining: items 1, 2, 2a and 4.
-
-**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 4 open steps total 4.75 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort. Estimated 2026-11-05. Reassessed 2026-11-07: Raised to Large remaining effort: explicit call/transfer boundaries, live elapsed display, cross-base seats and summary statistics need instrumentation and end-to-end evidence across several components.
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner question 2026-11-05 (ledger timing of S-7663 and S-3BFF); item 3 [PR #116](https://github.com/voidbrain/nerv/pull/116) |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-05 item 3: test/kaji-seats.test.ts and full suite (local run) |
-| Reviewed | 2026-11-07 |
-
-</details>
-
----
-
-### F-048
-
-**Parallel work: a visible queue, limits per model, a lock per item**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.75 h | — | [F-050](#f-050) | — | — |
-
-💻 **→** Next: show what is queued, then the per-item lock.
-
-| | |
-|---|---|
-| **Issue** | Owner questions 2026-11-05 on parallelism. Telegram requests run one at a time in order (a queue nobody sees); dashboard and CLI requests run side by side; within a sortie the pilot advises before Misato plans, and the seats vote in parallel; the real limit is the local model server (Ollama serves one model a few requests at a time and swaps models in and out of memory). Two sorties can act on the same item at once (edit and cancel the same reminder). |
-| **Reproduce** | Send two requests on Telegram quickly; send two from the dashboard; edit a reminder in one while another cancels it. |
-| **Check** | Each channel says when a request waits and behind how many ("queued, 2 ahead"); the dashboard shows queued and running sorties; a limit of concurrent model calls per model (a setting, from what the machine can hold) queues the rest instead of overloading; actions on the same item (a reminder, a fact) never run at the same time: the second waits for the first, then re-reads; tests cover the queue order, the limit and two actions on one item. |
-
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | F-048-T01 — Visible bounded request queue | 1.25 h | 0 h | 1.25 h | Ready |
-| 🟡 Medium | F-048-T02 — Per-model resource budgets | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟡 Medium | F-048-T03 — Per-item mutation ownership | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟡 Medium | **Total** | 3.75 h | 0 h (0 of 3 steps recorded) | 3.75 h | 0 of 3 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- F-048-T01: 1.25 h agent (2026-11-12). Estimate added at featurePlans adoption (2026-11-11): Visible bounded request queue with UI and tests; one of three steps of a Large parent. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.25 h); the baseline stays for calibration.
-- F-048-T02: 1.25 h agent (2026-11-12). Estimate added at featurePlans adoption (2026-11-11): Per-model resource budgets with admission and tests. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.25 h); the baseline stays for calibration.
-- F-048-T03: 1.25 h agent (2026-11-12). Estimate added at featurePlans adoption (2026-11-11): Per-item mutation ownership with concurrency tests. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.25 h); the baseline stays for calibration.
-
-**Next action / closure evidence:** Owner extension 2026-11-07: large plans need bounded chunking, separate coder/reviewer consultants, ordered dependencies, multiple review/refinement loops and resumable handoff history; define orchestration before claiming multi-step specialist execution.  Planned 2026-11-05 (owner).
-
-**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 3 open steps total 3.75 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Large remaining effort. Original Medium estimate dated 2026-11-05 is superseded by the expanded orchestration scope. Reassessed 2026-11-07: Large remains valid: chunking, multiple consultants and coder/reviewer handoffs need resumable orchestration and integration evidence.
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner questions 2026-11-05 |
-| Opened | 2026-11-05 |
-| Verification | Pending |
-| Reviewed | 2026-11-08 |
-
-</details>
-
----
-
-### B-042
-
-**Telegram approval card arrives after dashboard decision**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | — | — | — |
-
-💻 **→** Verify: PR #285's CI passed; 2 of the next ten CI runs are clean so far, with no `remote dashboard decision reconciles the main bot card` failure.
-
-| | |
-|---|---|
-| **Issue** | Reopened after PR #223 Windows test/one-channel.test.ts failed the existing remote dashboard decision reconciles the main bot card assertion; later seen on macOS under load and once on Linux coverage. Cause (2026-11-12): an awaited `deliver()` could return a pass already running whose cleanup had read the card's status before the decision (runtime), and the fixture's wait could pass before Aoba tracked the card (fixture). |
-| **Reproduce** | Any platform: `node --test --test-name-pattern="not a pass that read status" test/telegram-reconcile.test.ts` stalls a periodic pass's status lookup after it read the card as pending, decides on the dashboard, then awaits `deliver()`; before the fix no `editMessageReplyMarkup` is sent. |
-| **Check** | Explain the failure with controlled evidence; preserve exactly-once effects, eventual stale-button removal, retry/restart and signed lookup. A passing retry is not a causal fix. Do not weaken assertions or merely widen timeouts. |
-
-**Steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| — | B-042-T01 — Explain and fix the remote card cleanup that an awaited delivery missed | 2 h | 1.5 h (stated) | 0 h | Completed |
-| — | **Total** | 2 h | 1.5 h | 0 h | 1 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- B-042-T01: 0 remaining (2026-11-12). Task added 2026-11-12 when B-042 was taken up. Baseline 2.5 days (baselineDays, history: the record's 2–3 focused days of 2026-11-09), re-estimated 2026-11-12 in agent hours (harness 5.6.0) as 2 h, the session's time box (baselineAgentHours). About 1.25 h spent (stated: CI log search since #277, code-path reading, deterministic regression, fix, fixture precondition, channels regressions, records, fresh-context review and its should-fix item). 0.5 h remains: CI rounds including Windows, merge. Closed 2026-11-12 in the reconcile of PR #288: PR #285 merged at 06:20 UTC after CI 43166751719 passed plan, validate, Windows and native-macos; full-suite was skipped by the scoped selection, which ran the channel regressions on Windows. The whole suite with this fix first passed in #286's CI 43168006619 (head 94e3a0a merges #285; Windows, Linux coverage, full-suite on attempt 2); that run stands in for the full-suite item, stated here rather than assumed. Actual 1.5 h agent (stated): the 1.25 h above plus CI and merge from 06:14 to 06:20 UTC (GitHub timestamps), rounded up to a quarter hour. The parent's ten-run observation is not part of this step.
-
-**Next action / closure evidence:** Verified when PR #285's CI passes (Windows and full suite) and the next ten CI runs show no recurrence; a recurrence returns it to Investigate, first checking whether Aoba's timer pass and the test's awaited pass are still distinct (mechanism 1) and whether the card was tracked before the decision (mechanism 2).
-
-**Reconcile 2026-11-12 ([PR #288](https://github.com/voidbrain/nerv/pull/288)):** [PR #285](https://github.com/voidbrain/nerv/pull/285) merged into main `9aec642` at 06:20 UTC; its CI [43166751719](https://github.com/voidbrain/nerv/actions/runs/43166751719) passed plan, validate, Windows and native-macos, with full-suite skipped: the scoped selection ran test/one-channel.test.ts, test/telegram-reconcile.test.ts and the other channel regressions on Windows, not the whole Node suite. The whole suite with the fix included first ran in #286's CI [43168006619](https://github.com/voidbrain/nerv/actions/runs/43168006619) (head `94e3a0a` merges #285): Windows passed, Linux coverage passed on both attempts (attempt 1 failed only the browser step, [B-050](work/records/B-042.md#b-050)), full-suite passed on attempt 2. Runs since the merge that ran this case: 43168006619 (#286) and 43168381380 (F-005-T12 branch; Windows ran the suite, validate stopped at `check:work` before tests). No failure of this case in either (logs searched 2026-11-12). 2 of 10 so far; it stays Implemented. B-042-T01 closed.
-
-**Cause and fix 2026-11-12 ([PR #285](https://github.com/voidbrain/nerv/pull/285), B-042-T01):** **Recheck first.** Failed-job logs of every CI run since #277's run 43093410846 were searched (43098344555, 43105159883, 43105169242, 43106362909, 43106952492, 43108272198, 43118800708, 43121587426): none failed this assertion (their failures were B-046 and F-014 worker-link cases); every other completed run since then passed, all on attempt 1, including 7 runs after #279 merged and 43164854081 after #282. Too few runs to call the rarer B-042 failure gone, and none of #278/#279/#280/#282 touches the mechanism: they shorten worker-link and nervous-child latency, which only narrows the window below. **Mechanism 1 (runtime, reproduced):** Aoba delivers every 100 ms in the fixture; each pass starts with `reconcile()`, whose remote-card status is a signed lookup across the Kaji link. `deliver()` returned a pass already in progress, so when the test decided the card while a timer pass was between its lookup and its edits, `await aoba.deliver()` resolved with that pass's pre-decision snapshot and sent no edit. A slower lookup (loaded runner, slow child) widens the window: consistent with the load-dependent, cross-platform failures. Committed regression first (`test/telegram-reconcile.test.ts`, the stalled-lookup case above): failed at 95bf226, passes after. Fix: callers of `deliver()` while a pass runs share one follow-up pass that starts after it; passes never overlap; the periodic tick still skips while a pass runs, so a slow pass queues no ticks; `stop()` waits for the follow-up, which starts no pass after stop. **Mechanism 2 (fixture):** the fixture waited until the fake Bot API server recorded the relayed `sendMessage`, which happens before Aoba reads the response and tracks the card (the same gap the fallback step's comment already names); a decision in that gap is caught by `sendMessage`'s own post-send status check, which the awaited delivery does not wait for. The fixture now waits until Aoba tracks the card (read in memory). No timeout widened, no assertion changed. **Ruled out:** cleanup coalescing (`reconcile()` is only called from the serialized `deliverOnce`); the B-046 verdict race (the lookup completes, it is just stale). **Fresh-context review 2026-11-12 (design-reviewer):** no must-fix; verified fail-before/pass-after and no overlap in the microtask gap. Applied: the fixture first polled Aoba's state file, which on Windows could make Aoba's own atomic save fail while the file is open; it now reads the tracked cards in memory. Noted: an awaited `deliver()` can now take up to two passes (each cleanup bounded at 8 s), so the next Telegram update in the serialized queue may wait longer when a remote base is slow; bounded, no starvation. Channels regressions pass locally (63 of 63, macOS); one-channel 3 of 3 runs.
-
-Earlier next action (2026-11-09, done above): inspect event ordering for remote card registration, status snapshot and a concurrent/coalesced deliver pass, then reproduce under controlled scheduling before any fix. These are hypotheses, not proof of a production regression or harmless infrastructure noise. Existing deliver() coalesces an active pass; the fixture expects a new cleanup edit after explicitly awaiting delivery. No Telegram/Kaji executable or assertion changed in PR #223. Retain the [original B-042 closure](archive/backlog-2026.md#b-042) and its regression/browser evidence; this observation does not erase the earlier successful scope.
-
-**Observation 2026-11-11 ([PR #261](https://github.com/voidbrain/nerv/pull/261)):** during an unrelated local full-suite run on macOS (Node 26) the one-channel case failed once and passed 3 of 3 alone, then 16 of 16 in the [timing reassessment](reviews/2026-11-11-timing-reassessment.md) runs, 8 of them under CPU contention. The failure is therefore load-dependent and not Windows-only; cause still unproven. Re-examine after B-046 and B-043, which reduce background churn in the same fixtures.
-
-**Observation 2026-11-11 ([PR #277](https://github.com/voidbrain/nerv/pull/277), run [43093410846](https://github.com/voidbrain/nerv/actions/runs/43093410846)):** Linux `validate` (`npm run test:coverage`) failed this case on `remote dashboard decision reconciles the main bot card`; the same command passed locally on macOS (585 passed, 0 failed) at the same head. #277 changes no runtime code (harness tools, records and docs), so this is another occurrence with no runtime change, and the first seen on Linux. The case crosses the worker link; whether it shares the B-046 cause fixed in [PR #278](https://github.com/voidbrain/nerv/pull/278) (a verdict before frames already received were applied) is unproven: recheck after #278 merges.
-
-**Estimates:** 2026-11-12: B-042-T01 closed at about 1.5 h agent (stated) against 2 h; remaining work is observation of the next eight runs only. Re-estimated 2026-11-12 in agent hours (harness 5.6.0): B-042-T01 had 0.5 h agent remaining (CI, merge); about 1.25 h spent (stated); method in the task basis. Day figures are dated history: 2–3 focused days estimated 2026-11-09.
-
-| Field | Value |
-|---|---|
-| PR / evidence | Reconcile: [PR #288](https://github.com/voidbrain/nerv/pull/288). Fix: [PR #285](https://github.com/voidbrain/nerv/pull/285) (B-042-T01), CI [43166751719](https://github.com/voidbrain/nerv/actions/runs/43166751719) green (full-suite skipped); last occurrence [PR #277 run 43093410846](https://github.com/voidbrain/nerv/actions/runs/43093410846) (Linux coverage). [PR #267 CI 43012116246](https://github.com/voidbrain/nerv/actions/runs/43012116246) (2026-11-11, harness/records-only PR: `.gitignore`, version stamp, CI template clone): Windows failed this one-channel case on `remote dashboard decision reconciles the main bot card` again; another occurrence with no runtime change. [PR #261](https://github.com/voidbrain/nerv/pull/261) timing reassessment; [PR #223](https://github.com/voidbrain/nerv/pull/223); [CI 42535069202 attempt 1](https://github.com/voidbrain/nerv/actions/runs/42535069202/attempts/1) Windows failed card-cleanup assertion, Linux later failed only recap week validation. Test: test/one-channel.test.ts remote dashboard decision reconciles the main bot card. Earlier closure: PR #203 CI 42425786736/42425784575; preserved in archive. |
-| Opened | 2026-11-07 |
-| Verification | 2026-11-09: Windows failure observed. Isolated unchanged Mac Node26 one-channel file passed all five cases; does not establish a causal fix. Final unchanged head737fa53 passed Windows in CI 42535553841; investigation still pending, not a causal fix. 2026-11-12: mechanism reproduced deterministically (test/telegram-reconcile.test.ts fails before the fix, passes after; local macOS). CI on the fix passed (PR #285 CI 43166751719, scoped; full suite with the fix in #286 CI 43168006619). Later runs: 2 of 10 clean (43168006619, 43168381380); eight pending. |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
-### B-050
-
-**Dashboard browser test reads the banner before the page has loaded**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.5 h | — | — | — | — |
-
-💻 **→** Fix implemented in [PR #294](https://github.com/voidbrain/nerv/pull/294): until retries through navigation evaluation exceptions until condition holds. Next: CI and merge.
-
-| | |
-|---|---|
-| **Issue** | [PR #286](https://github.com/voidbrain/nerv/pull/286) CI [43168006619](https://github.com/voidbrain/nerv/actions/runs/43168006619/attempts/1) attempt 1, job validate (`npm run test:browser`): `test/evaluation.browser.mjs` case golden-v1/dashboard failed with `TypeError: Cannot read properties of null (reading 'textContent')` on the first `until` right after `Page.navigate` (`document.querySelector('.banner')` was null). The fixture's `until` (`test/fixtures/browser.mjs`) throws as soon as the evaluated expression throws instead of retrying, so a page that has not loaded yet fails the test. Attempt 2 (failed jobs rerun, same head `94e3a0a`) passed; local runs passed 3 of 3. Whether #286's service worker plays a part is not established (the test uses a fresh browser profile, per the F-004 agent). |
-| **Reproduce** | `npm run build && node --test test/evaluation.browser.mjs` (case golden-v1/dashboard); intermittent, seen once in CI. Deterministically: evaluate the case's first `until` expression before the dashboard document has its `.banner` (for example against `about:blank`, or with the dashboard response delayed). |
-| **Check** | A committed test fails before the fix: `until` on an expression that throws while the page is still loading fails at once. After the fix the wait retries across navigation, or waits for the document to load, and still fails with a clear timeout when the condition never holds. The case's assertion (`LIVE ·` shown, `SIGNING IN` gone) is unchanged; no timeout widened. Browser CI passes. |
-
-**Steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | B-050-T01 — Fix browser fixture until abortion on evaluated expression exceptions | 1 h | 0.5 h so far (stated) | 0.5 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 1 h | 0.5 h | 0.5 h | 0 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- B-050-T01: 0.5 h remaining (2026-11-12). Task added 2026-11-12 when B-050 was taken up. Baseline 1.5 h agent (baselineAgentHours), the estimate recorded when B-050 was opened. Regression test committed first (feb13de), until retry in test/fixtures/browser.mjs, all browser tests passing. 0.5 h remains for review and CI. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 0.5 h → 0.5 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-
-**Fix implemented 2026-11-12 ([PR #294](https://github.com/voidbrain/nerv/pull/294)):** committed failing tests in `test/evaluation.browser.mjs` (commit `feb13de`) reproducing immediate `until` failure on expression exceptions during page loading and timeout error format. In `test/fixtures/browser.mjs`, `until` now catches evaluation exceptions and retries until the condition holds or timeout expires, including last error message on timeout. All browser tests pass. Next: CI and merge.
-
-**Next action / closure evidence:** Write a failing test for the race in the browser fixture, then fix the wait: retry `until` while the expression throws during navigation (keeping the last error for the timeout message), or wait for the navigated document to load before the first `until`. Do not weaken the assertion or widen the 15 s timeout. Check whether other `until` callers right after `Page.navigate` (test/evaluation.browser.mjs, test/pwa.browser.mjs and the other browser tests) share the race, and whether the service worker added in #286 changes page timing in the CI browser. Verified when the fix's CI passes and later browser runs show no recurrence.
-
-**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 1 open step has 0.5 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Small, about 1.5 h agent (estimated 2026-11-12, not a measurement): a fixture-level failing test, a small change to `until` or the navigation wait, the browser suite locally, review and CI. Uncertain if the service worker turns out to be involved.
-
-| Field | Value |
-|---|---|
-| PR / evidence | Test: test/evaluation.browser.mjs "B-050: until retries through evaluated expression exceptions and resolves when condition holds" (committed failing in feb13de, passes after fix). Test: test/evaluation.browser.mjs "B-050: until still fails with timeout when throwing condition never holds" (committed failing in feb13de, passes after fix). Recorded in [PR #288](https://github.com/voidbrain/nerv/pull/288). Observed: CI 43168006619 attempt 1, job validate (job 131014457197), `test/evaluation.browser.mjs:62` via `until` in `test/fixtures/browser.mjs`; attempt 2 job validate (131017084799) passed on the same head. Same run, attempt 1: F-004-T01's own browser case passed. |
-| Opened | 2026-11-12 |
-| Verification | Pending. 2026-11-12: one CI failure observed; a rerun on the same head and 3 of 3 local runs (F-004 agent) passed. Not reproduced deterministically yet. |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
-### B-053
-
-**F-029 descendant-process test failed once in CI with every process already gone**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟠 Investigate | 🔶 P2 | 🟢 Small | 1 h | — | — | — | — |
-
-💻 **→** Next: find why the second liveness check saw a PID the first one did not, and make the test decide on one observation (B-053-T01).
-
-| | |
-|---|---|
-| **Issue** | PR #316's validate job (run 43286749372, `npm run test:coverage`, Linux) failed `F-029: a timed-out scenario terminates its owned descendant process` with `no executing child survives the group timeout`, actual `[3708]`. The test took 5,030 ms in total: the 5 s run budget plus about 30 ms, so its wait loop (`while (owned.some(alive))`, up to 5 s) ended at once with nothing alive, and the following `owned.filter(alive)` found PID 3708 alive. The PR does not touch the runner or the test. Likely a race between the two separate liveness reads (PID reuse under coverage load, or the zombie check in `/proc/<pid>/stat` reading differently); inferred, not observed. |
-| **Reproduce** | `node --test --test-name-pattern='terminates its owned descendant' test/evaluation-runner.test.mjs` passed 5 of 5 locally on macOS on 2026-11-12; the failure was seen once on Linux CI under coverage. |
-| **Check** | A committed test or measurement shows the two-read race (or names another cause); the test decides on one observation per process and still fails when a descendant really survives; CI passes repeatedly. |
-
-**Steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | B-053-T01 — Find and remove the liveness race in the F-029 descendant-process test | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- B-053-T01: 1 h (2026-11-12). Estimated 2026-11-12: read the runner's group termination, reproduce under load on Linux, one bounded test change. Not a measurement.
-
-**Next action / closure evidence:** B-053-T01. If the runner really leaves a descendant, that is a runner defect under F-029 and the fix goes there, test unchanged.
-
-**Estimates:** Small, estimated 2026-11-12, not a measurement.
-
-| Field | Value |
-|---|---|
-| PR / evidence | Seen on [PR #316](https://github.com/voidbrain/nerv/pull/316), CI run 43286749372 job validate. |
-| Opened | 2026-11-12 |
-| Verification | Pending. |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
-### B-055
-
-**The Windows service launcher runs Node from an fnm per-shell path**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟠 Investigate | 🔶 P2 | 🟢 Small | 1 h | — | — | — | — |
-
-💻 **→** Next: resolve the Node path at install to a stable target and test it on all three service definitions (B-055-T01).
-
-| | |
-|---|---|
-| **Issue** | 2026-11-12 on Tabgha: `nerv-service.vbs` runs `…\fnm_multishells\<id>\node.exe`, a junction fnm creates for one shell session; `service install` wrote it from `process.execPath` (src/service.ts). Over SSH that path did not run, while the permanent install (`…\fnm\node-versions\v24.22.2\installation\node.exe`) did. If fnm's per-shell junctions are cleaned up, the scheduled task can no longer start NERV. |
-| **Reproduce** | On Windows with Node from fnm, run `service install` from an fnm shell and read the Node path in `%USERPROFILE%\.nerv\nerv-service.vbs`. |
-| **Check** | `service install` records a stable Node path (the junction's target, or refuses with a clear message naming the fix) on Windows, and the same rule holds for the launchd and systemd definitions; a test covers a per-shell path. |
-
-**Steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | B-055-T01 — Service definitions record a stable Node executable | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- B-055-T01: 1 h (2026-11-12). Estimated 2026-11-12: path resolution plus one test per service definition. Not a measurement.
-
-**Next action / closure evidence:** B-055-T01. A bug fix starts with a committed failing test.
-
-**Estimates:** Small, estimated 2026-11-12, not a measurement.
-
-| Field | Value |
-|---|---|
-| PR / evidence | Found during the B-008 reproduction, [evidence](acceptance/b008-tabgha-2026-11-12.md); [PR #318](https://github.com/voidbrain/nerv/pull/318). |
-| Opened | 2026-11-12 |
-| Verification | Pending. |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
-### B-049
-
-**Misato invents a reminder title instead of asking, when an Italian request gives none**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.25 h | — | — | — | — |
-
-💻 **→** Next: classify (prompt, plan validation or model choice) and plan a fix with a failing case first.
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-12 in the owner-approved B-021 real-model run (gemma4:12b, local): for `Imposta un promemoria per il primo gennaio 2031 alle 09:00 UTC.` (no title), Misato proposed `reminders.add` with an invented title (`Promemoria`, `Promemoria per il primo gennaio 2031`) instead of asking. The prompt for this case is byte-identical to main before B-021's change. The same case passed on 2026-11-08. Misato's prompt already says never to invent a title. |
-| **Reproduce** | `npm run evals:model -- --role=misato --model=gemma4:12b --limit=4` (case `italian-missing-title` in evals/planner-v1.json), or the probe of the same case; 2 of 5 attempts asked on 2026-11-12. |
-| **Check** | A request without a title gets a question in the request's language, never an invented title; measured on the frozen case over repeated runs with its rate recorded, and any deterministic guard covered by a test. |
-
-**Steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | B-049-T01 — Classify and fix the invented reminder title | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟡 Medium | **Total** | 1.25 h | 0 h (0 of 1 steps recorded) | 1.25 h | 0 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- B-049-T01: 1.25 h agent (2026-11-12). Added 2026-11-12 at the harness 6.0.0 reconcile, which gives every record a step: the record's own Small estimate (classification, a guard or prompt change with tests, an owner-approved rerun) in agent hours, judged at the NERV rate of about 1.5 agent hours per former focused day plus review and CI; model time of the rerun not counted. Estimate, not a measurement. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2 h → 1.25 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.25 h); the baseline stays for calibration.
-
-**Owner approval 2026-11-12:** real-model reruns for B-049, at most 12 invocations and 60 minutes of model time, gemma4:12b on loopback Ollama, no cloud route and no paid usage (the same limits as B-021). State the exact cases before running. Not started (owner: finish current work first).
-
-**Next action / closure evidence:** Classify the failure: model competence on gemma4:12b (a prompt or model change), or a deterministic guard (for example, a reminder title that occurs nowhere in the request or earlier exchanges goes back to Misato as invalid). Plan a fix with a failing case first. Real-model reruns need the owner's approval and budget.
-
-**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 1 open step has 1.25 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Small: classification, a guard or prompt change with tests, and an owner-approved rerun. Estimated 2026-11-12, not a measurement.
-
-| Field | Value |
-|---|---|
-| PR / evidence | docs/evaluations/2026-11-12-misato-b021.json (`italian-missing-title` failed: invented title `Promemoria`); development probe of the same case 2026-11-12: 1 of 3 asked, 2 invented a title; docs/evaluations/2026-11-12-misato-v2.json (passed: it asked); docs/evaluations/2026-11-08-misato.json (passed). Found in B-021's run. |
-| Opened | 2026-11-12 |
-| Verification | Pending. |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
-### B-052
-
-**Owner actions point at procedures the owner has to hunt for**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.5 h | — | — | — | — |
-
-💻 **→** Next: give each listed owner action a linked copy-paste procedure (B-052-T01).
-
-| | |
-|---|---|
-| **Issue** | Owner, 2026-11-12, on F-005: its human action said "run the T13 copy-paste procedure below", but the procedure sat inside the collapsed details, the Reproduce row said only "Follow README commands and the owning milestone in ROADMAP" with no link, and the cue still waited on an already merged PR. "I should not manually search for files and lose myself between pointers of pointers." F-005 fixed here; F-006 and F-016 now link their decisions. Still without a linked procedure: B-008 ("steps in details"), F-004, F-009, F-011, F-015, F-023. |
-| **Reproduce** | Open [the backlog]() and read the human-action line of B-008, F-004, F-009, F-011, F-015 or F-023: none links the exact commands or steps to run and their expected result. |
-| **Check** | Every 🧑 line that asks the owner to run or check something links one page (or a visible section of the record) with copy-paste blocks and the expected result; its Reproduce row links the same; no "below", "in details" or bare path. Harness rule: project-harness F-064. |
-
-**Steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | B-052-T01 — Linked copy-paste procedures for the remaining owner actions | 2.5 h | 0 h | 2.5 h | Planned |
-| 🟡 Medium | **Total** | 2.5 h | 0 h (0 of 1 steps recorded) | 2.5 h | 0 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- B-052-T01: 2.5 h (2026-11-12). Estimated 2026-11-12: about 25 minutes per procedure for six, drafted from each record's existing evidence, plus links and checks. Not a measurement.
-
-**Next action / closure evidence:** B-052-T01: write the missing procedures under docs/acceptance/ (macOS Terminal for Neo Tokyo-3, PowerShell for Tabgha) and link them from each human-action line and Reproduce row. Template rule requested upstream as project-harness F-064; this record owns only NERV's records.
-
-**Estimates:** Small: six procedures drafted from the existing evidence in each record. Estimated 2026-11-12, not a measurement.
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #311](https://github.com/voidbrain/nerv/pull/311): F-005 procedure moved to [docs/acceptance/f005-t13-mac-update-procedure.md](acceptance/f005-t13-mac-update-procedure.md). |
-| Opened | 2026-11-12 |
-| Verification | Pending. |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
-### B-054
-
-**A long chat reply on the main base fails at the 120 s model-call limit**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟠 Investigate | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | — | — |
-
-💻 **→** Next: measure where the 210 s went (plan steps, tokens, thinking) and decide limit, output cap or streaming (B-054-T01).
-
-| | |
-|---|---|
-| **Issue** | 2026-11-12, B-008 reproduction: a five-paragraph request relayed from Tabgha ran 209.6 s and ended *Could not finish: Local route (S²) timed out.*; Neo Tokyo-3's log: *S² local route down … back after 1 min*. Misato there runs `gemma4:12b` with thinking at about 24 tokens/s on this Mac (Ollama log, F-074-T09), so about 2,900 tokens fit in `MODEL_TIMEOUT_MS` (120 s): an ordinary long answer can exceed it, and the route is then marked down for every request. |
-| **Reproduce** | On the main base with Misato on `gemma4:12b` (thinking on), ask in chat for five detailed paragraphs on any topic; watch the reply and the service log. |
-| **Check** | A long reply within the configured output allowance completes, or fails with a reason that says the answer was too long rather than marking the route down; any new limit is backed by a measured token rate; one slow reply does not take the route down for other requests. |
-
-**Steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | B-054-T01 — Long replies within the output allowance do not time out the model route | 1.5 h | 0 h | 1.5 h | Planned |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- B-054-T01: 1.5 h (2026-11-12). Estimated 2026-11-12: one measurement on the Mac, one bounded change with a failing test first. Not a measurement.
-
-**Next action / closure evidence:** B-054-T01. A bug fix starts with a committed failing test.
-
-**Estimates:** Small, estimated 2026-11-12, not a measurement.
-
-| Field | Value |
-|---|---|
-| PR / evidence | Found during the B-008 reproduction, [evidence](acceptance/b008-tabgha-2026-11-12.md); [PR #318](https://github.com/voidbrain/nerv/pull/318). |
-| Opened | 2026-11-12 |
-| Verification | Pending. |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
-### B-057
-
-**Companion error messages are Italian only and do not say what went wrong**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | — | — |
-
-💻 **→** Next: translate every companion error and name revoked, unreachable and changed-certificate cases apart (B-057-T01).
-
-| | |
-|---|---|
-| **Issue** | 2026-11-12, F-015-T03: with English selected, a revoked credential showed *NERV non disponibile o richiesta rifiutata. Verifica servizio e abbinamento.*: `NativeError` descriptions are Italian strings and `tr()` has no English for them. The same text covers a stopped service, a refused (revoked or expired) credential and any other non-2xx reply, so it does not tell the owner to pair again. After a certificate rotation the pin refusal showed a bare system *cancelled* (the TLS challenge is cancelled), not that the certificate no longer matches the pairing. |
-| **Reproduce** | Select English in the companion; revoke its client with `npm start -- revoke CLIENT_ID` and choose Refresh status; or stop the service; or rotate the native certificate as in native/README.md and refresh. |
-| **Check** | Every companion error text exists in English and Italian; a 401 says the pairing was revoked or expired and to pair again; an unreachable service says so; a certificate that no longer matches says so and that nothing was sent; Swift tests cover each mapping. |
-
-**Steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | B-057-T01 — Translated, specific companion error messages | 1.5 h | 0 h | 1.5 h | Planned |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- B-057-T01: 1.5 h (2026-11-12). Estimated 2026-11-12: status-code and pin-failure mapping, English texts, Swift tests. Not a measurement.
-
-**Next action / closure evidence:** B-057-T01. A bug fix starts with a committed failing test.
-
-**Estimates:** Small, estimated 2026-11-12, not a measurement.
-
-| Field | Value |
-|---|---|
-| PR / evidence | Found in F-015-T03, [evidence](acceptance/f015-live-failures-2026-11-12.md); [PR #325](https://github.com/voidbrain/nerv/pull/325). |
-| Opened | 2026-11-12 |
-| Verification | Pending. |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
-### F-044
-
-**Memory: one fact per subject, a proposed spelling fix, typo-tolerant recall**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h | — | — | — | — |
-
-💻 **→** Next: split compound memories on one card, with a proposed clean-up.
-
-| | |
-|---|---|
-| **Issue** | Owner question 2026-11-05 about "remember i don't like wine and i play ultimate frisbbe": it is stored as one fact; facts are not linked to each other; recall matches exact words, so "frisbee" will not find "frisbbe" and the typo stays. |
-| **Reproduce** | `nerv chat "remember i don't like wine and i play ultimate frisbbe"`, approve, then ask "what sports do I play?" and look in Lilith. |
-| **Check** | A request with several facts proposes one fact per subject, on one card the owner approves or edits as a whole (each fact also editable or removable before approving); a proposed spelling fix is shown on the card next to the original (never applied silently); recall finds a fact despite a small typo (in the request or in the fact) and still ranks exact matches first; tests cover the split, the shown fix and fuzzy recall. |
-
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-044-T01 — One fact per subject on one editable card | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-044-T02 — Shown spelling fix | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-044-T03 — Typo-tolerant recall | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | **Total** | 3 h | 0 h (0 of 3 steps recorded) | 3 h | 0 of 3 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- F-044-T01: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-044-T02: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-044-T03: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-
-**Next action / closure evidence:** Planned 2026-11-05 (owner approved the three parts).
-
-**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 3 open steps total 3 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort. Estimated 2026-11-05.
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner question 2026-11-05 |
-| Opened | 2026-11-05 |
-| Verification | Pending |
-| Reviewed | 2026-11-05 |
-
-</details>
-
----
-
-### F-066
-
-**Machine credentials: rotation and telling owner use from automated use**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 1.5 h | — | — | — | — |
-
-💻 **→** Add rotation for the admin token, Telegram token and cloud key, and a test for NHI10.
-
-| | |
-|---|---|
-| **Issue** | Checked against the [OWASP Non-Human Identities Top 10](https://owasp.org/www-project-non-human-identities-top-10/) (2025): grants are short-lived (NHI7), base keys are per base (NHI9) and revocation wins (NHI1), but the admin token, the Telegram token and the cloud key have no rotation path (NHI7, long-lived secrets), and nothing shows whether a ledger entry came from the owner by hand or from an automated client using the same token (NHI10, human use of NHI). |
-| **Reproduce** | Look for a command that replaces the admin token, Telegram token or cloud key while running and invalidates the old one: none. Make one REST decision by hand and one from a script with the admin token: the ledger cannot tell them apart. |
-| **Check** | A rotation command per credential: the new one works at once, the old one is refused, no restart or re-enrolment needed, no secret printed or logged. `doctor` reports each credential's age (never its value). Ledger events record the client kind that acted (dashboard session, CLI, API token, Telegram) and a test proves an API-token decision is distinguishable from a dashboard one. |
-
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-066-T01 — Credential rotation commands and doctor ages | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-066-T02 — Client kind on ledger events | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 2 steps recorded) | 1.5 h | 0 of 2 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- F-066-T01: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-066-T02: 0.5 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 0.75 hours agent; former 0.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 0.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 0.75 h → 0.5 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (0.5 h); the baseline stays for calibration.
-
-**Next action / closure evidence:** Proposed 2026-11-07 from the OWASP review (see F-065). Check first which client kinds `Store.decide` sources already record (`telegram`, API, CLI, expiry): NHI10 may need only the API-token versus dashboard-session split. Rotation of base keys and the root key belongs to F-036's enrolment and stays out of scope.
-
-**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 2 open steps total 1.5 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Small. Set 2026-11-07.
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
-| Opened | 2026-11-07 |
-| Verification | Unit/integration: Pending. |
-| Reviewed | 2026-11-07 |
-
-</details>
-
----
-
-### F-060
-
-**Spike: herdr-core as a coding-agent terminal runtime**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟠 Investigate | 🔹 P3 | 🟡 Medium | 1.5 h agent + 2 h owner | — | — | — | — |
-
-💻 **→** Next: a time-boxed trial of herdr-core as the development workspace, then a written adopt/adapter/reject outcome.
-
-| | |
-|---|---|
-| **Issue** | Owner question 2026-11-06: is [herdr-core](https://herdr.dev/core/) (`hc`, Apache 2.0, [source](https://github.com/herdrdev/herdr-core)) useful for coding with Claude Code and Codex, and for NERV? It offers persistent terminals, agents that start and direct helper agents, attach/takeover, remote machines over SSH, explicit program status (OSC 7501) and an OpenRPC API. Not evaluated yet. |
-| **Reproduce** | Install `hc` (read the install script first) and run one implementer agent, one reviewer and one test terminal, each in its own git worktree; detach, reattach, restart the viewer, delegate a review and read its report. |
-| **Check** | A dated note in this record answering: (1) does switching, reviewing and recovering sessions get easier than today; (2) can Claude Code / Codex emit OSC 7501 status (hook or wrapper), or do they have none; (3) what `--keep` recovery preserves after a daemon or machine restart; (4) API stability and security model confirmed from the docs; (5) outcome per NERV record (F-012, F-019, F-045, F-048, F-049): adapter candidate, borrow the concept only, or not relevant. |
-
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-060-T01 — herdr-core trial in the development workspace | 0.5 h | 0 h | 0.5 h agent + 2 h owner | Planned |
-| 🟢 Small | F-060-T02 — Answer the five questions and per-record outcomes | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 2 steps recorded) | 1.5 h agent + 2 h owner | 0 of 2 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- F-060-T01: 0.5 h agent + 2 hours owner (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1 hour agent + 2 hours owner; agent sets up the trial; the owner uses it over a week and keeps notes. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1 h → 0.5 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (0.5 h); the baseline stays for calibration.
-- F-060-T02: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-
-**Next action / closure evidence:** Hypotheses from the 2026-11-06 review (landing page and repository README; the security and API pages were not read): (a) development workspace first, NERV adapter later and optional; (b) F-012: a still-running session could be found by name, status-checked and resumed with one `hc send`, but the README says “Recovery starts a fresh shell, never reruns the task”, so herdr does not cover resumption after reboot or crash; (c) F-019 / F-052: status reported by the program rather than inferred matches the observed-versus-inferred telemetry rule, but “a program that does not report status has none”; (d) F-045 / F-048: parent/child ownership, completion notices and cancel-with-parent as a lifecycle pattern for pilots and parallel work; (e) F-049: herdr runs commands with the user's full access and is not a sandbox; at most it would run inside an EVA, and attach/takeover is a separate capability. Any integration stays behind NERV's grants, action gate, isolation and ledger; `hc send` is a write action. Repository at review: 440 stars, 134 commits, no published releases. Close with the outcome note; adapter work, if chosen, gets its own record.
-
-**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 2 open steps total 1.5 h agent + 2 h owner (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort (trial over several working days plus the write-up) (landing page and README read, hypotheses recorded). Set 2026-11-06.
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #169](https://github.com/voidbrain/nerv/pull/169) spike record; Owner question 2026-11-06 |
-| Opened | 2026-11-06 |
-| Verification | Documentation: Pending. Human: Pending (trial). |
-| Reviewed | 2026-11-06 |
-
-</details>
-
----
-
-### F-007
-
-**Voice and evaluated skill improvement**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟣 Very large | 9 h agent + 0.5 h owner | — | — | — | — |
-
-💻 **→** Slices approved 2026-11-11 and recorded as tasks. Next agent work: Step 1a (F-007-T01) voice feasibility, or Step 3a (F-007-T06) skill packages, which does not wait for voice.
-
-| | |
-|---|---|
-| **Issue** | Not implemented; dedicated voice hardware follows measured feasibility. |
-| **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
-| **Check** | Italian/English voice corpus; corrected memory; rejected permission escalation; promoted and rolled-back skill versions. |
-
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-007-T01 — Step 1a — Feasibility: local speech-to-text and text-to-speech candidates measured on the Mac in Italian and English | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-007-T02 — Step 1b — Voice command corpus in Italian and English with expected intents | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-007-T03 — Step 2a — Push-to-talk on the dashboard and companion: speech to text shown for confirmation, no silent physical activation | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟢 Small | F-007-T04 — Step 2b — Spoken replies (text-to-speech) | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-007-T05 — Step 2c — Voice corpus evaluation run and report | 0.5 h | 0 h | 0.5 h agent + 0.5 h owner | Planned |
-| 🟢 Small | F-007-T06 — Step 3a — Skill package format, isolated storage and versions | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-007-T07 — Step 3b — Skill evaluation with a baseline run without the skill and held-out cases | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟢 Small | F-007-T08 — Step 3c — Owner promotion, rollback and retirement of skills after a model change | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-007-T09 — Step 3d — Rejected permission escalation and corrected-memory cases | 1 h | 0 h | 1 h | Planned |
-| 🟣 Very large | **Total** | 9 h | 0 h (0 of 9 steps recorded) | 9 h agent + 0.5 h owner | 0 of 9 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- F-007-T01: 1 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 1, slice a. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-007-T02: 1 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 1, slice b. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-007-T03: 1.25 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 2, slice a. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.25 h); the baseline stays for calibration.
-- F-007-T04: 1 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 2, slice b. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-007-T05: 0.5 h agent + 0.5 hours owner (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 2, slice c. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 0.75 hours agent + 0.5 hours owner; agent runs the evaluation and reports; the owner speaks or approves the recorded samples. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 0.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 0.75 h → 0.5 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (0.5 h); the baseline stays for calibration.
-- F-007-T06: 1 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 3, slice a. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-007-T07: 1.25 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 3, slice b. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.25 h); the baseline stays for calibration.
-- F-007-T08: 1 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 3, slice c. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-007-T09: 1 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 3, slice d. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-
-**Proposed slices, 2026-11-11 ([PR #264](https://github.com/voidbrain/nerv/pull/264); approved by the owner 2026-11-11 and recorded as task sources):** no steps existed. Proposed steps, each split into slices.
-
-| Step | Slice | Scope | Estimate |
-|---|---|---|---|
-| T01 | a | Feasibility: local STT and TTS candidates measured on the Mac in Italian and English | 1 day |
-| T01 | b | Command corpus in Italian and English with expected intents | 1 day |
-| T02 | a | Push-to-talk on the dashboard and companion: speech to text, shown for confirmation, no silent physical activation | 1.5 days |
-| T02 | b | Spoken replies (TTS) | 1 day |
-| T02 | c | Corpus evaluation run and report | 0.5 day |
-| T03 | a | Skill package format, isolated storage and versions | 1 day |
-| T03 | b | Evaluation with a baseline run without the skill and held-out cases | 1.5 days |
-| T03 | c | Owner promotion, rollback and retirement after a model change | 1 day |
-| T03 | d | Rejected permission escalation and corrected-memory cases | 1 day |
-
-Total about 9.5 focused days (was Large, unestimated). Uncertainty: STT/TTS quality on local hardware (T01a) may change T02. Estimates only, not measurements; owner-run device or campaign time is not counted.
-
-**Priority:** P1 → P3, owner decision 2026-11-12 (no reason given), PR #313.
-
-**Next action / closure evidence:** 2026-11-06 (owner discussion of skill value): a skill is instructions plus optional scripts and references, read and followed by the model, not executed deterministically. **Every skill evaluation includes a baseline run without the skill**; a skill that does not beat the baseline (generic advice the model already follows) is not promoted, and is retired if it stops beating it after a model change. Skills worth forging encode what the model lacks: knowledge NERV gathered about the bases, tools and pilots' domains; tested scripts with checkable results; content that must be kept current. Pilot skills and their stages stay owned by F-045; this record owns the evaluation and rollback mechanism. Remaining effort reassessed: unchanged (Large), the note makes implicit acceptance explicit.  Add push-to-talk STT/TTS and isolated skill proposals with evaluation and rollback. Italian/English voice corpus; corrected memory; rejected permission escalation; promoted and rolled-back skill versions.
-
-**Retained references 2026-11-09:** [external-project assessment](reviews/2026-11-09-external-agent-projects.md): AdalFlow prompt/few-shot optimization and Agent Lightning trace/training concepts inform future evaluated improvement. Baseline/heldout grading, owner-controlled promotion and rollback remain required; no weight-training capability or budget is selected.
-
-**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 9 open steps total 9 h agent + 0.5 h owner (steps table; each task basis gives old → new). Figures after this sentence are dated history. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): the 9 open steps in hours total 14.25 h agent + 0.5 h owner (steps table; method in each task basis). Day figures below are dated history. Large remaining effort. Bootstrap scope estimate, not verification. Estimated 2026-11-01.
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
-| Opened | 2026-11-01 |
-| Verification | Pending acceptance and remote CI where applicable |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
-
-### F-008
-
-**Integrate the FPV app**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 3.25 h agent + 0.5 h owner | — | — | — | — |
-
-💻 **→** Define an adapter for authoritative battery, crash and maintenance operations owned by the FPV app.
-
-| | |
-|---|---|
-| **Issue** | No FPV application or device connection is provisioned here. |
-| **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
-| **Check** | Record battery 2 charge once; record aircraft-specific motor damage and inspection; distinguish record from charger actuation. |
-
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-008-T01 — FPV app adapter contract | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-008-T02 — Battery and maintenance records through the adapter | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟢 Small | F-008-T03 — Acceptance against the real FPV app | 0.5 h | 0 h | 0.5 h agent + 0.5 h owner | Planned |
-| 🟡 Medium | **Total** | 3.25 h | 0 h (0 of 3 steps recorded) | 3.25 h agent + 0.5 h owner | 0 of 3 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- F-008-T01: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-008-T02: 1.75 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
-- F-008-T03: 0.5 h agent + 0.5 hours owner (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 0.5 hours agent + 0.5 hours owner; agent prepares and records; the owner connects the real FPV app. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 0.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 0.5 h → 0.5 h, min 0.5 h; owner hours and baseline kept.
-
-**Priority:** P1 → P3, owner decision 2026-11-12 (no reason given), PR #313.
-
-**Next action / closure evidence:** Define an adapter for authoritative battery, crash and maintenance operations owned by the FPV app. Record battery 2 charge once; record aircraft-specific motor damage and inspection; distinguish record from charger actuation.
-
-**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 3 open steps total 3.25 h agent + 0.5 h owner (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort. Bootstrap scope estimate, not verification. Estimated 2026-11-01.
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
-| Opened | 2026-11-01 |
-| Verification | Pending acceptance and remote CI where applicable |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
-
-
-### F-020
-
-**Grounded personas for HITL and explanation (Misato primary)**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h | [F-003](archive/backlog-2026.md#f-003), [F-017](archive/backlog-2026.md#f-017) | — | — | — |
-
-💻 **→** Optional conversational faces grounded in real job state: Misato as primary HITL/ops voice; Gendo optional for risk/policy explanation; pilots optional as worker identity only.
-
-| | |
-|---|---|
-| **Issue** | Personas Codec Chat exists as UI prototype. Free-form roleplay without grounding is a distraction and safety risk. |
-| **Reproduce** | Request approval, status brief, or “why was this Red?”; confirm answers cite real job/decision data and cannot bypass policy. |
-| **Check** | Misato can surface pending HITL and accept/reject with audit; Gendo (or Command) can explain classification; no persona can grant capabilities the backend policy denies; persona layer can be disabled; responses remain useful in non-Eva skins. |
-
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-020-T01 — Persona adapter contract | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-020-T02 — Misato HITL surfacing with audit | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-020-T03 — Explanation persona and non-Eva skins | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | **Total** | 3 h | 0 h (0 of 3 steps recorded) | 3 h | 0 of 3 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- F-020-T01: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-020-T02: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-020-T03: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-
-**Next action / closure evidence:** Owner decision 2026-11-04 (F-036): persona names are per base and renamable (Misato, Gendo… by default; e.g. Bob, Fritz, Tim on another base); MAGI seat names stay fixed on every base. Implement thin, state-grounded persona adapters after F-003 messaging and F-017 decisions exist. Prefer Misato for push/HITL. Keep Shinji/pilots as optional labels for workers, not primary chat partners. Safety: persona output never overrides capability tokens or Pattern Red rules.
-
-**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 3 open steps total 3 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort (prototype UI). Estimated 2026-11-02; priority lowered to P3 on 2026-11-04 (skin, not behaviour); estimate unchanged. Reassessed 2026-11-07: explicit prerequisite outcomes preserve the existing scope and remaining-work estimate; independent slices can proceed.
-
-| Field | Value |
-|---|---|
-| Depends on | [F-003](archive/backlog-2026.md#f-003) — Messaging path for state-grounded persona replies<br />[F-017](archive/backlog-2026.md#f-017) — Policy decisions remain authoritative over persona output |
-| PR / evidence | [PR #219](https://github.com/voidbrain/nerv/pull/219) retired-reference path correction; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [retired dashboard1 personas prototype](../remove/docs/NERV/dashboard1.html) |
-| Opened | 2026-11-02 |
-| Verification | Pending |
-| Reviewed | 2026-11-08 |
-
-</details>
-
----
-
-### B-056
-
-**A renewal the companion refuses on the Mac says it was not confirmed**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | — | — |
-
-💻 **→** Next: show a definite refusal for a renewal rejected before anything is sent (B-056-T01).
-
-| | |
-|---|---|
-| **Issue** | 2026-11-12, F-015 trial: with the companion paired, the owner pasted an invitation for another runtime. `renewalInvitation` refused it on the Mac (identity mismatch), so nothing was sent and the credential was unchanged, but `pair()` shows the same text for every renewal error: *Renewal not confirmed. Inspect clients; use a new invitation to recover the pairing.* That text is for a lost reply, where the server may already have replaced the token; here it sent the owner looking for a problem that did not exist. Also seen 2026-11-12 (F-015-T03): after a failed renewal the private field keeps the previous invitation, shown only as dots, so the next paste is appended to it and fails again with the same message. |
-| **Reproduce** | Pair the companion, open Renew pairing, paste an invitation from a different NERV profile (or an expired one) and choose Renew pairing. |
-| **Check** | A renewal refused before any request (identity mismatch, expired credential, malformed or expired invitation) says what was wrong and that the current pairing is unchanged; only an outcome that is really unknown (no reply, Keychain save failure after the server answered) keeps the unconfirmed message; the field is empty when renewal opens again; a Swift test covers each. |
-
-**Steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | B-056-T01 — Separate a refused renewal from an unconfirmed one in the companion | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- B-056-T01: 1 h (2026-11-12). Estimated 2026-11-12: split the catch in pair() by phase, two texts, one Swift test. Not a measurement.
-
-**Next action / closure evidence:** B-056-T01. A bug fix starts with a committed failing test.
-
-**Estimates:** Small, estimated 2026-11-12, not a measurement.
-
-| Field | Value |
-|---|---|
-| PR / evidence | Found in the F-015-T02 trial, [evidence](acceptance/f015-keychain-trial-2026-11-12.md); [PR #322](https://github.com/voidbrain/nerv/pull/322); leftover field text found in F-015-T03 ([evidence](acceptance/f015-live-failures-2026-11-12.md)), [PR #325](https://github.com/voidbrain/nerv/pull/325). |
-| Opened | 2026-11-12 |
-| Verification | Pending. |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
-### F-021
+### <a id="f-021"></a>[✨ F-021](#top)
 
 **MCP and standardized tool/expert protocol**
 
@@ -1519,7 +239,7 @@ Total about 9.5 focused days (was Large, unestimated). Uncertainty: STT/TTS qual
 | **Reproduce** | Register a tool/expert via MCP or OpenAPI descriptor; invoke from a task; confirm schema validation, capability scope and audit. |
 | **Check** | Versioned tool descriptors (from MCP servers and NERV's own tools); deny-by-default capability binding to Misato and to each pilot (a pilot lists the tools it may use, F-045); works for local and remote (other-machine) endpoints; the registered tools are listed in the dashboard; no silent privilege escalation. (Wording corrected 2026-11-05: "expert roster (F-018)" predates F-045; tools are actions, skills are procedures, pilots are agents that use both.) |
 
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
+**Feature steps**
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
@@ -1557,13 +277,13 @@ Total about 9.5 focused days (was Large, unestimated). Uncertainty: STT/TTS qual
 
 ---
 
-### F-012
+### <a id="f-012"></a>[✨ F-012](#top)
 
 **Resume a specific paused job after its provider limit resets**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🔴 Large | 7.25 h agent + 0.5 h owner | [F-003](archive/backlog-2026.md#f-003), [F-005](#f-005), [F-006](#f-006) | — | — | — |
+| 🔴 Open | 🔺 P1 | 🔴 Large | 7.25 h agent + 0.5 h owner | [F-005](#f-005), [F-006](#f-006) | — | — | — |
 
 💻 **→** Define durable waiting jobs and implement an authorized browser/editor adapter that rechecks the exact job before resuming once.
 
@@ -1573,7 +293,7 @@ Total about 9.5 focused days (was Large, unestimated). Uncertainty: STT/TTS qual
 | **Reproduce** | Ask to resume an identified job after its reported reset time; keep its worker awake and session available. |
 | **Check** | Persist target, permission, reset time, expiry and attempts; verify readiness and unchanged job identity; resume once; notify outcome; survive restart; handle longer limits, logout, closed tabs, sleeping workers, changed tasks and already-resumed jobs without duplicate actions. |
 
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
+**Feature steps**
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
@@ -1601,7 +321,7 @@ Total about 9.5 focused days (was Large, unestimated). Uncertainty: STT/TTS qual
 
 | Field | Value |
 |---|---|
-| Depends on | [F-003](archive/backlog-2026.md#f-003) — Durable scheduling for the named external job<br />[F-005](#f-005) — Enrolled workers with observed execution capability<br />[F-006](#f-006) — Bounded routing and delegation for the external execution adapter |
+| Depends on | [F-005](#f-005) — Enrolled workers with observed execution capability<br />[F-006](#f-006) — Bounded routing and delegation for the external execution adapter |
 | PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #2](https://github.com/voidbrain/nerv/pull/2); plan only, no runtime implementation |
 | Opened | 2026-11-01 |
 | Verification | Pending adapter feasibility, regression and live host tests |
@@ -1611,239 +331,7 @@ Total about 9.5 focused days (was Large, unestimated). Uncertainty: STT/TTS qual
 
 ---
 
-### F-056
-
-**Slash commands in Telegram and the dashboard chat, and how much Aoba tells you**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 5.75 h | [F-021](#f-021), [F-042](#f-042), [F-028](archive/backlog-2026.md#f-028) | — | — | — |
-
-💻 **→** Next: remaining commands, Telegram command menu and /log controls; status/help read router implemented before Misato.
-
-| | |
-|---|---|
-| **Issue** | Owner question 2026-11-05: can commands be used from Telegram and the chat with "/"? At that report only `/start` had a dedicated path; other text went to Misato with a model call. Owner confirmed 2026-11-06 that `/status` gets a working reply from Aoba; at that time source still routed it through store.chat; the status/help slice below now provides deterministic acceptance. The owner also proposed `/log` to set how much is reported (all, conversation, …). |
-| **Reproduce** | Send `/status` to Aoba and compare the returned facts with the records; check that the command router answers without a model and without a new sortie. |
-| **Check** | The same commands in Telegram (registered, so typing "/" shows the list) and the dashboard chat, answered before Misato and without a model: `/help`, `/status` (this base's health, the other bases, cards waiting, the next reminder), `/cards` (with their buttons), `/reminders`, `/why S-…`, `/brief`, `/pilots`, `/bases`, `/spear [S-…]` (with a confirmation button), `/log conversation\|steps\|all` (conversation: replies and cards, the default; steps: also one line per action that ran; all: every trace line, advice, votes with shadow seats, other bases' results); read-only commands open no sortie, `/spear` and `/log` changes are recorded; an unknown command answers with `/help`. |
-
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-056-T01 — Shared command catalog and deterministic router | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-056-T02 — Read-only commands | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟢 Small | F-056-T03 — /spear and /log | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-056-T04 — Telegram menu registration and dashboard slash menu | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-056-T05 — Group and connected-account assessment | 1 h | 0 h | 1 h | Planned |
-| 🔴 Large | **Total** | 5.75 h | 0 h (0 of 5 steps recorded) | 5.75 h | 0 of 5 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- F-056-T01: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-056-T02: 1.75 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
-- F-056-T03: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-056-T04: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-056-T05: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-
-**Next action / closure evidence:** Owner extension 2026-11-07: assess one Telegram group with multiple base bots, welcome/common-action panel and slash menus generated from the shared command catalog. Current private-owner-chat authorization must not be silently widened. Assess official connected-business-bot or separately authorized user-client messaging as a distinct capability; never impersonate the owner through an ambient browser session.  Owner report 2026-11-06: “Ask Tabgha his /status” went to a consultant/model and returned a guessed capability description in Italian despite an English request. Implemented a read-only pre-planning router for /status [base], /help, unknown slash help and that narrow English alias. Status is from local records and each base’s last report, explicitly labelled; no model, dispatch or new sortie. Dashboard displays command replies without selecting a nonexistent sortie. Existing configured bots continue reading owner messages while main handles outgoing delivery; see B-037. Automated REST/runtime and actual Telegram process tests verify no model call/sortie; merged PR #166 passed validate, windows and native-macos (runs 42280638858/42280632455). This fixes the reported status path, not every possible language-following failure in model replies. The full listed command set, menu and /log acceptance remain outstanding.  Owner report 2026-11-06: Telegram `/status` works. This is Human evidence of a successful reply, not of deterministic routing or the full command set. Before the current slice, src/telegram.ts special-cased /start then sent other owner text to store.chat; the new Runtime read-command router handles status/help there. Full slash routing and Telegram menu registration are still incomplete. Still required: automated checks for every listed command in Telegram and the dashboard, model-free read paths/no new sortie, owner authorization and confirmation for changes, recorded /spear and /log changes, and unknown-command /help behavior. Planned 2026-11-05 (owner: after F-021). Builds on B-004 (the why answer), F-042 (Misato reads the agency) and F-028 (the brief).
-
-**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 5 open steps total 5.75 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort. Reassessed 2026-11-06: status/help entry points are implemented, while most commands, menu and verbosity controls remain.  Reassessed 2026-11-06: the observed /status reply adds human evidence, but the agreed deterministic router/menu and command checks remain unimplemented. Reassessed 2026-11-07: explicit prerequisite outcomes preserve the existing scope and remaining-work estimate; independent slices can proceed. Reassessed 2026-11-07: Raised to Large remaining effort: the shared command catalog, welcome/common-action UI and group/account-integration assessments exceed the current two-command surface; account messaging remains assessment scope, not an implemented integration.
-
-| Field | Value |
-|---|---|
-| Depends on | [F-021](#f-021) — Owner-selected prerequisite for remaining command work<br />[F-042](#f-042) — Record-reading interface for agency query commands<br />[F-028](archive/backlog-2026.md#f-028) — Durable brief content for brief commands |
-| PR / evidence | [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #167](https://github.com/voidbrain/nerv/pull/167) archive adoption/source review and CI reconciliation;  [PR #166](https://github.com/voidbrain/nerv/pull/166) map/tabs and Midori routing/status;  [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner question 2026-11-05 |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-06 Human: owner reports Telegram /status works. Source review: deterministic router/menu and full command-set automated checks remain pending. |
-| Reviewed | 2026-11-07 |
-
-</details>
-
----
-
-### F-050
-
-**Forwarding a whole job to another base**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.5 h | [F-036](archive/backlog-2026.md#f-036), [F-045](#f-045), [F-048](#f-048) | — | — | — |
-
-💻 **→** Next: the job message and its fallback, for capability first.
-
-| | |
-|---|---|
-| **Issue** | Owner questions 2026-11-05: can a base forward a full job to another, when it is busy or when the other does better; why, when and how. Today a base that is not the main one forwards whole requests to the main base (one channel, F-036), and the main base sends single actions to a base that offers them (slice 3b); the main base never hands a whole job to another base. |
-| **Reproduce** | Ask the main base for a job only another base can do well (Tabgha's 3D expert, its GPU, a device next to it). |
-| **Check** | The main base forwards a whole job when another base has the pilot, model, tool or device it needs (capability), when its own queue or model is busy and the other is idle (load), or when the data or device is there (locality), never a job with local-only or tainted data (the Scrolls decide what may leave); the job goes as one signed Kaji message with a job ID (it never runs twice) and only the context the Scrolls allow; the receiving base runs the whole sortie with its own Misato, pilot and gate, never looser than the main base's Scrolls; cards still reach the owner through Aoba; the result returns as a follow-up and the main ledger records where it ran and why; if the base goes silent, reconcile durable job receipts and resource ownership before any retry or reassignment; silence alone never proves execution stopped; tests across two bases. |
-
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | F-050-T01 — Whole-job handoff contract | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟡 Medium | F-050-T02 — Uncertain handoff reconciliation | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟡 Medium | **Total** | 3.5 h | 0 h (0 of 2 steps recorded) | 3.5 h | 0 of 2 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- F-050-T01: 1.75 h agent (2026-11-12). Estimate added at featurePlans adoption (2026-11-11): Whole-job handoff contract and regressions. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
-- F-050-T02: 1.75 h agent (2026-11-12). Estimate added at featurePlans adoption (2026-11-11): Uncertain handoff reconciliation and regressions. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
-
-**Next action / closure evidence:** Planned 2026-11-05 (owner). Builds on F-036, F-045 (pilots offered by other bases) and F-048.
-
-**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 2 open steps total 3.5 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Reassessed 2026-11-06 with B-028: removing unused speculative types does not remove implemented behavior; concrete tested contracts remain part of this feature, so Large remains valid.  Large remaining effort. Estimated 2026-11-05. Reassessed 2026-11-07: explicit prerequisite outcomes preserve the existing scope and remaining-work estimate; independent slices can proceed.
-
-| Field | Value |
-|---|---|
-| Depends on | [F-036](archive/backlog-2026.md#f-036) — Authenticated Kaji transport and enrolled bases<br />[F-045](#f-045) — Remote pilot capability offers for capability-based forwarding<br />[F-048](#f-048) — Queue and concurrency limits for load-based forwarding; capability-first work can proceed |
-| PR / evidence | [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner questions 2026-11-05 |
-| Opened | 2026-11-05 |
-| Verification | Pending |
-| Reviewed | 2026-11-08 |
-
-</details>
-
----
-
-### F-049
-
-**EVA instances: an EVA is a class, each job gets a fresh sandbox**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟣 Very large | 13.75 h agent + 0.75 h owner | [F-045](#f-045), [F-025](#f-025) | [F-021](#f-021), [F-027](#f-027) | — | — |
-
-💻 **→** Next: the EVA class definition and one sandboxed instance per job, starting with EVA-03 (owner, 2026-11-05).
-
-| | |
-|---|---|
-| **Issue** | Owner questions 2026-11-05: why one EVA-00, -01, -02 per machine, two copies of a pilot, two EVA-02 with two agents. Today no EVA exists: every action runs inside the scheduler process (the dashboard's "EVA-02 · in-process executor, not sandboxed yet"), and the four cage slots were a drawing, not a rule. |
-| **Reproduce** | Look at the dashboard's EVA cages: three say planned, EVA-02 runs in process. |
-| **Check** | An EVA is a class (what a job may touch: EVA-00 no external effects, EVA-01 bounded, EVA-02 full grant, EVA-03 quarantine for untrusted input); each job runs in a fresh instance of its class, discarded afterwards; several instances run at once within limits per machine (CPU, memory, model slots); a job asks for the least class it needs, capped by its pilot's stage (a Production pilot may run in EVA-01, a Prototype one never in EVA-02); the same pilot can run two jobs at once, each in its own instance; the dashboard shows instances per class. |
-
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | F-049-T01 — Define deterministic isolated runner admission and enforcement | 1.75 h | 0 h | 1.75 h | Ready |
-| 🟢 Small | F-049-T02 — EVA class definitions and least-class admission | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-049-T03 — Choose the macOS host enforcement mechanism | 1.25 h | 0 h | 1.25 h agent + 0.25 h owner | Planned |
-| 🟡 Medium | F-049-T04 — EVA-03 instance per job | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟡 Medium | F-049-T05 — Escape and recovery join tests | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟡 Medium | F-049-T06 — Concurrent instances within per-machine limits | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟡 Medium | F-049-T07 — EVA-00, EVA-01 and EVA-02 on the runner | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟢 Small | F-049-T08 — Pilot trust stage caps the class | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-049-T09 — Dashboard shows instances per class | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-049-T10 — Linux host enforcement for the mini PC | 1.75 h | 0 h | 1.75 h agent + 0.5 h owner | Planned |
-| 🟣 Very large | **Total** | 13.75 h | 0 h (0 of 10 steps recorded) | 13.75 h agent + 0.75 h owner | 0 of 10 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- F-049-T01: 1.75 h agent (2026-11-12). Estimate added at featurePlans adoption (2026-11-11): deterministic isolated runner admission and enforcement contract. Later steps F-049-T02–T10 planned 2026-11-11. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
-- F-049-T02: 1 h agent (2026-11-12). Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-049-T03: 1.25 h agent + 0.25 hours owner (2026-11-12). Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent + 0.25 hours owner; agent evaluates candidates at the usual rate; the owner chooses when more than one passes. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.25 h); the baseline stays for calibration.
-- F-049-T04: 1.75 h agent (2026-11-12). Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
-- F-049-T05: 1.25 h agent (2026-11-12). Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.25 h); the baseline stays for calibration.
-- F-049-T06: 1.25 h agent (2026-11-12). Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.25 h); the baseline stays for calibration.
-- F-049-T07: 1.75 h agent (2026-11-12). Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
-- F-049-T08: 1 h agent (2026-11-12). Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-049-T09: 1 h agent (2026-11-12). Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-- F-049-T10: 1.75 h agent + 0.5 hours owner (2026-11-12). Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent + 0.5 hours owner; agent work at the usual rate; the owner runs the first job on the mini PC. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
-
-**Next action / closure evidence:** Full audit 2026-11-06: the order is EVA-03 first, as the owner chose on 2026-11-05 (the tools process moves into it, so EVA-03 grants can run); the next action said EVA-00. Planned 2026-11-05 (owner). Builds on F-045 pilots and the F-025 stages.
-
-**Accepted assessment 2026-11-09:** [execution boundaries](reviews/2026-11-09-execution-boundaries.md). T01 defines the NERV-owned deterministic runner/warden contract: existing grants remain authority; enforce per-job filesystem/network/credential/resource limits, protected grader separation, cancellation and uncertain-effect reconciliation. Preserve failed-attempt ledger evidence; sandbox discard never claims rollback of external effects. Keep the runner in NERV until extraction has a second consumer or independent lifecycle. EVA-03 remains first; this does not implement confinement or alter queue order.
-
-**Retained alternative 2026-11-09:** [external-project assessment](reviews/2026-11-09-external-agent-projects.md): assess AgentFS as a per-job filesystem/state layer against T01. Verify platform-specific filesystem/network/credential/resource enforcement and default host allows; snapshots cannot roll back central authority or external effects. No confinement is delivered by this reference.
-
-**Plan 2026-11-11 ([PR #273](https://github.com/voidbrain/nerv/pull/273)):** the owner asked why only F-049-T01 was planned when featurePlans was adopted (PR #271). The rule asks for a first plan covering the agreed outcome; T01 alone did not. Steps F-049-T02–T10 now cover the whole Check: class definitions and admission, the macOS enforcement choice (owner decision when more than one mechanism passes), EVA-03 instances, escape and recovery join tests, concurrency limits, the other three classes, the pilot-stage cap (waits on F-045-T01 and F-025-T04), the dashboard and the Linux mini PC host. T03's findings may change the later steps.
-
-**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 10 open steps total 13.75 h agent + 0.75 h owner (steps table; each task basis gives old → new). Figures after this sentence are dated history. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): the 10 open steps in hours total 23.25 h agent + 0.75 h owner (steps table; method in each task basis). Day figures below are dated history. Large remaining effort, about 16 focused days: T01 2, T02 1, T03 1.5, T04 2, T05 1.5, T06 1.5, T07 2, T08 1, T09 1, T10 2. Planned 2026-11-11; earlier: Large, estimated 2026-11-05. Estimates, not measurements.
-
-| Field | Value |
-|---|---|
-| Depends on | [F-045](#f-045) — Pilot identity and EVA class for per-job execution<br />[F-025](#f-025) — Pilot trust-stage limits for sandbox class admission |
-| PR / evidence | [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner questions 2026-11-05 |
-| Opened | 2026-11-05 |
-| Verification | Pending |
-| Reviewed | 2026-11-09 |
-
-</details>
-
----
-
-### F-054
-
-**The base chronicle: a daily log of the agency's milestones, plain and in Eva lore**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h | [F-045](#f-045), [F-028](archive/backlog-2026.md#f-028) | — | — | — |
-
-💻 **→** F-054-T01 (Simple chronicle from recorded facts) and F-054-T04 (record the missing facts) closed; next F-054-T02 (Eva version).
-
-| | |
-|---|---|
-| **Issue** | Owner request 2026-11-05: the base should keep a log of what happened ("today we established connection with Tabgha"), in Eva lore or in two versions. The ledger is evidence, not a story; Instrumentality summarises the owner's conversations, not the agency's own milestones. |
-| **Reproduce** | Look for a record of when Tabgha joined, the first relayed request or the first pilot: only scattered events. |
-| **Check** | One entry per day, built only from recorded facts (bases enrolled or online for the first time, a new main base, pilots created or promoted, the first action run on another base, outages and recoveries; bugs closed left out by owner decision 2026-11-12), never invented; two versions by theme: Simple, plain and without a model; Eva, the same facts retold in the lore voice by a *Chronicler* pilot (Fuyutsuki), a writer only, starting at Proto, its text checked to name only the day's facts; shown as a Chronicle tab, with an optional line in the morning brief; each entry links its sources (sortie IDs, registry records). |
-
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| — | F-054-T01 — Daily chronicle facts from records | 1.5 h | 1 h (stated) | 0 h | Completed |
-| 🟡 Medium | F-054-T02 — Eva version by the Chronicler pilot | 1.5 h | 0 h | 1.5 h | Planned |
-| 🟡 Medium | F-054-T03 — Chronicle tab and brief line | 1.5 h | 0 h | 1.5 h | Planned |
-| — | F-054-T04 — Record the milestones not stored today | 1.5 h | 1 h (stated) | 0 h | Completed |
-| 🟡 Medium | **Total** | 6 h | 2 h (2 of 4 steps recorded) | 3 h | 2 of 4 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- F-054-T01: 0 remaining (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Implemented 2026-11-12 (src/chronicle.ts, &#96;chronicle &#91;DAYS&#93;&#96;, test/chronicle.test.ts) in about 1 h agent (stated). Scope by owner decision 2026-11-12: facts already recorded only; the unrecorded ones move to F-054-T04; bugs closed left out.
-- F-054-T02: 1.5 hours agent (2026-11-11). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history.
-- F-054-T03: 1.5 hours agent (2026-11-11). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history.
-- F-054-T04: 0 remaining (2026-11-12). Added 2026-11-12 on the owner's decision to record these facts from now on (F-054-T01 found they are not stored: only last&#95;seen per base, route health in memory, pilot stages edited by hand). A judged 1.5 agent hours like the other F-054 steps; estimate, not a measurement. Implemented 2026-11-12 (src/milestones.ts; hooks in Registry.seen, KajiLink.mark, Runtime.logRoutes and &#96;pilots set&#96;) in about 1 h agent (stated). Closed 2026-11-12 in the reconcile of PR #306: PR #305 merged into main &#96;5700ccf&#96; after CI 43232448595 passed all five jobs (plan, validate, windows, native-macos, full-suite). Actual 1 h agent (stated).
-
-**Owner decisions, 2026-11-12:** (1) F-054 starts now, ahead of the rest of F-021 (F-021-T02 to T05 stay open): F-021 is no longer a prerequisite. (2) Facts the agency does not store today (a base online for the first time: only `last_seen` is kept; outages and recoveries: route and base health live in memory; pilot promotions: a stage change is a hand edit of config.json) are recorded from now on, without backfill: new step F-054-T04. (3) Bugs closed are left out: they live in the git backlog, not in the agency's data, and the running service does not read its development repository.
-
-**F-054-T01, 2026-11-12 ([PR #301](https://github.com/voidbrain/nerv/pull/301)):** `src/chronicle.ts` builds the Simple chronicle without a model: one entry per local day (owner's time zone), only days with something recorded, each line with its source (`registry:<record id>` or a sortie's short ID). Facts: base enrolled, enrolled again, revoked and named main (signed registry records under the pinned root, dated by their signed `issued` time), pilot created (an approved `pilots.create` that ran), and per base the first remote action that ran without an error. `chronicle [DAYS]` prints it (last 30 days by default), in English or Italian. Evidence: `test/chronicle.test.ts` (day grouping across midnight in Rome, no entry for empty days, unreadable times and unknown kinds left out, both languages, and a join test across Store, Ledger and Registry: only the approved pilot, the first remote action that ran (not a failed, a later or a waiting one), registry sources equal to the stored record IDs, then the CLI command). Dashboard tab and brief line are F-054-T03.
-
-**Reconcile 2026-11-12 ([PR #306](https://github.com/voidbrain/nerv/pull/306)):** [PR #305](https://github.com/voidbrain/nerv/pull/305) merged into main `5700ccf`; its CI [43232448595](https://github.com/voidbrain/nerv/actions/runs/43232448595) passed all five jobs. F-054-T04 closed (1 h agent, stated, against 1.5 h). F-054 stays Open: F-054-T02 and F-054-T03 are planned.
-
-**F-054-T04, 2026-11-12 ([PR #305](https://github.com/voidbrain/nerv/pull/305)):** `src/milestones.ts` keeps an append-only `milestones` table (additive, no schema version change; update and delete refused by triggers), recorded from now on with no backfill: a base heard of for the first time (`Registry.seen`, only when no last-seen time was stored for it under any root), another base unreachable after a full online window of missed heartbeats and back on its next answer (`KajiLink.mark` → `milestones.health` in the nervous process), a model route down and back (`Runtime.logRoutes`, once a minute from the brain's route health, so a flap shorter than the poll is not recorded), and a pilot promoted to a later stage by `pilots set ID --stage …` (a demotion or another edit is not). Only a change adds a row, and a report not newer than the last one for that subject is ignored, so repeats and restarts add nothing. The chronicle shows them with source `milestone:<row id>`, in English and Italian. Evidence: `test/milestones.test.ts` (rules, append-only, no backfill, and three joins: Kaji link → runtime → nervous process → chronicle; brain route health → runtime → chronicle; `pilots set` → `chronicle` CLI).
-
-**Next action / closure evidence:** Planned 2026-11-05 (owner: yes, after F-021; superseded 2026-11-12, see above). Builds on the ledger, the Gehirn registry, F-045 (pilots) and F-028 (the brief).
-
-**Estimates:** Medium remaining effort. Estimated 2026-11-05. Reassessed 2026-11-07: explicit prerequisite outcomes preserve the existing scope and remaining-work estimate; independent slices can proceed.
-
-| Field | Value |
-|---|---|
-| Depends on | [F-045](#f-045) — Chronicler pilot for the Eva narrative; plain fact collection can proceed<br />[F-028](archive/backlog-2026.md#f-028) — Durable brief delivery for the optional morning-brief entry |
-| PR / evidence | [PR #305](https://github.com/voidbrain/nerv/pull/305) F-054-T04 milestones (src/milestones.ts, test/milestones.test.ts); [PR #301](https://github.com/voidbrain/nerv/pull/301) F-054-T01 Simple chronicle (src/chronicle.ts, test/chronicle.test.ts); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner request 2026-11-05 |
-| Opened | 2026-11-05 |
-| Verification | Pending |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
-
-### F-006
+### <a id="f-006"></a>[✨ F-006](#top)
 
 **Orchestrate agents and models across nodes**
 
@@ -1859,7 +347,7 @@ Total about 9.5 focused days (was Large, unestimated). Uncertainty: STT/TTS qual
 | **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
 | **Check** | Mini PC coder uses Mac inference; policy-approved Claude path; Pi capability route; unavailable Mac waits or expires; bounded budgets and delegation. |
 
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
+**Feature steps**
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
@@ -1946,7 +434,7 @@ Implement capability-aware scheduling with independent model endpoint and execut
 
 ---
 
-### F-062
+### <a id="f-062"></a>[✨ F-062](#top)
 
 **Backup and restore: agreed loss bounds, off-host snapshots and a restore drill**
 
@@ -1962,7 +450,7 @@ Implement capability-aware scheduling with independent model endpoint and execut
 | **Reproduce** | Remove `~/.nerv` on a disposable base: nothing restores reminders, memory, identity or revoked grants. |
 | **Check** | Owner-agreed loss window and restore time; consistent live snapshots (SQLite backup API) on a schedule; retained, encrypted off-host copies with keys kept apart from routine runtime authority; a restore drill onto another location within the agreed bounds that keeps identities, revoked grants and notification checkpoints and replays no old work; no secrets in logs. |
 
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
+**Feature steps**
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
@@ -1997,7 +485,7 @@ Implement capability-aware scheduling with independent model endpoint and execut
 
 ---
 
-### F-009
+### <a id="f-009"></a>[✨ F-009](#top)
 
 **Run NERV Agency headless as one local user service**
 
@@ -2013,7 +501,7 @@ Implement capability-aware scheduling with independent model endpoint and execut
 | **Reproduce** | Follow docs/INSTALL.md and the scoped headless implementation checks. |
 | **Check** | Single process serves production UI/API on 4317; config survives init; clean SIGTERM and restart catch-up; private credentials; install/status/start/stop/uninstall on real target OS. |
 
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
+**Feature steps**
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
@@ -2048,7 +536,7 @@ Implement capability-aware scheduling with independent model endpoint and execut
 
 
 
-### F-015
+### <a id="f-015"></a>[✨ F-015](#top)
 
 **Pair native clients without sharing the root credential**
 
@@ -2064,7 +552,7 @@ Implement capability-aware scheduling with independent model endpoint and execut
 | **Reproduce** | Live runs: [pairing and Keychain trial](acceptance/f015-keychain-trial-2026-11-12.md) and [failure, recovery and rotation](acceptance/f015-live-failures-2026-11-12.md); design in docs/decisions/runtime-boundaries.md. |
 | **Check** | Expired/replayed tickets fail; credentials are bound to runtime identity; no tokens in URLs/argv/logs or Brain; revocation/rotation tested; native permissions remain explicit. |
 
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
+**Feature steps**
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
@@ -2101,7 +589,7 @@ Implement capability-aware scheduling with independent model endpoint and execut
 
 ---
 
-### F-011
+### <a id="f-011"></a>[✨ F-011](#top)
 
 **Native macOS menu-bar companion without Electron**
 
@@ -2117,7 +605,7 @@ Implement capability-aware scheduling with independent model endpoint and execut
 | **Reproduce** | Follow docs/INSTALL.md and the scoped headless implementation checks. |
 | **Check** | Build and package on macOS; health/reminders, workspace launch, doctor, notifications, launch-at-login; Quit companion leaves service running; Stop NERV Agency is separate. |
 
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
+**Feature steps**
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
@@ -2152,7 +640,7 @@ Implement capability-aware scheduling with independent model endpoint and execut
 
 ---
 
-### F-023
+### <a id="f-023"></a>[✨ F-023](#top)
 
 **Misato's apartment: approval cards with TTL, delivered by Pen Pen**
 
@@ -2168,7 +656,7 @@ Implement capability-aware scheduling with independent model endpoint and execut
 | **Reproduce** | Create a Blue approval; approve, reject, edit, or leave it to expire; repeat the decision; restart NERV Agency while it is pending. |
 | **Check** | Card shows action, arguments/diff/recipients, Pattern, Sync Ratio and inputs, reason and remaining TTL; expiry stands down (never approves); a decision is applied once and is idempotent on repeat; pending cards survive restart; the decision and its source are written to Central Dogma; Pen Pen delivery reuses the inbox and later Telegram/native notifications. |
 
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
+**Feature steps**
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
@@ -2206,7 +694,7 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 </details>
 
 ---
-### F-004
+### <a id="f-004"></a>[✨ F-004](#top)
 
 **Angular PWA and validated GenUI**
 
@@ -2222,7 +710,7 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 | **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
 | **Check** | Real reminder CRUD and doctor UI; reject arbitrary component/code/action payloads; accessibility and phone install/push acceptance. |
 
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
+**Feature steps**
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
@@ -2277,7 +765,7 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 
 ---
 
-### F-016
+### <a id="f-016"></a>[✨ F-016](#top)
 
 **Relocate the logical coordinator without split brain**
 
@@ -2295,7 +783,7 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 
 
 
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
+**Feature steps**
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
@@ -2358,55 +846,7 @@ Total about 12 focused days (was Large, unestimated). Highest uncertainty of the
 
 ---
 
-### F-064
-
-**Bounded incident circuits instead of a global kill switch**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 3.25 h agent + 0.25 h owner | — | — | — | 🧑 |
-
-🧑 **→** Owner decides which events trip which circuit, its scope, and who may rearm it.
-
-| | |
-|---|---|
-| **Issue** | Preserved proposal 3 of the [architecture reassessment](audits/2026-11-06-architecture-reassessment.md#3-automatic-incident-response-bounded-circuits-before-a-global-kill-switch): Spear revokes unused grants and stands down approvals by hand, but nothing detects an incident, interrupts in-flight work or responds automatically. A global automatic revocation would itself risk an outage. |
-| **Reproduce** | Inject a fault (a tool repeatedly failing, a tainted input reaching an external-effect action): nothing changes until the owner spears the sortie. |
-| **Check** | One circuit first, with a written trigger → response table: stop new work in the affected scope, revoke its unused grants, keep evidence, one deduplicated alert, explicit rearm. Injected faults revoke only the intended authority and keep recovery access; benign input never trips it; model suspicion is a signal for review, never authority to stop every base. |
-
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-064-T01 — Owner picks the first circuit | 0.5 h | 0 h | 0.5 h agent + 0.25 h owner | Planned |
-| 🟡 Medium | F-064-T02 — First bounded circuit | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟢 Small | F-064-T03 — Fault-injection tests | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | **Total** | 3.25 h | 0 h (0 of 3 steps recorded) | 3.25 h agent + 0.25 h owner | 0 of 3 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Step estimates** (dated basis; generated from the task files)
-
-- F-064-T01: 0.5 h agent + 0.25 hours owner (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 0.5 hours agent + 0.25 hours owner; agent proposes the trigger table; the owner picks the circuit. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 0.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 0.5 h → 0.5 h, min 0.5 h; owner hours and baseline kept.
-- F-064-T02: 1.75 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
-- F-064-T03: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
-
-**Next action / closure evidence:** Proposed 2026-11-06; not accepted scope until the owner picks the first circuit. The reassessment also notes that Spear does not stop an already-running external operation or run inverses; interruption and compensation stay explicit, separately authorized work, not part of a first circuit. Related F-023 (approvals) and the closed F-024 ledger. Design input 2026-11-07: the OWASP [Agent Control Standard](https://github.com/GenAI-Security-Project/agent-control-standard) v0.1.0 (a Guardian that allows, denies or modifies each tool call, deterministic layer first, optional model layer without the policy source) mirrors the MAGI gate; its reference Guardian fails open by default and its wire is not yet authenticated, so it is a comparison point for trigger and rearm vocabulary, not a component to adopt. Threat-map row ASI08 (cascading failures) points here (F-065, [PR #179](https://github.com/voidbrain/nerv/pull/179)).
-
-**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 3 open steps total 3.25 h agent + 0.25 h owner (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium for one bounded circuit; large for a cross-base incident coordinator. Set 2026-11-06.
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
-| Opened | 2026-11-06 |
-| Verification | Unit/integration: Pending. |
-| Reviewed | 2026-11-06 |
-
-</details>
-
----
-### F-027
+### <a id="f-027"></a>[✨ F-027](#top)
 
 **Naoko desk provenance and Ireul taint with an egress allowlist**
 
@@ -2422,7 +862,7 @@ Total about 12 focused days (was Large, unestimated). Highest uncertainty of the
 | **Reproduce** | Feed a sortie an email body that asks to send data elsewhere; run the same request from the owner directly. |
 | **Check** | Every intake item records source and trust; taint propagates into the LCL and memory; a tainted context asking for an external effect is Pattern Blue; network egress only to Scrolls-allowed destinations; untrusted code runs in the EVA-03 quarantine class. |
 
-**Feature steps** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)
+**Feature steps**
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
@@ -2458,37 +898,1576 @@ T02 remains blocked on F-049 actual outside-code isolation: application URL chec
 
 ---
 
+### <a id="f-074"></a>[✨ F-074](#top)
+
+**Indexed reusable evaluations, operator campaigns and the first Gemma smoke**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | — | — |
+
+💻 **→** Agent: F-074-T10, identity-bound ledger coverage. F-074-T09 completed on 2026-11-12 ([summary](evaluations/2026-11-12-gauntlet-t09.md)).
+
+| | |
+|---|---|
+| **Issue** | NERV needs discoverable test capabilities and reusable measured evidence without confusing common model results with system acceptance. |
+| **Reproduce** | Generate the combined index, validate evidence reuse/mismatch, then execute the ten-case Gemma pack under explicit bounded settings. |
+| **Check** | Every common pack in the pinned release is consumed or excluded with a reason; a new or changed case raises a backlog item until a run covers it; one root command runs NERV and common packs, reusing only exact-identity evidence. Profile-matched bounded operator role command with saved reports; pinned independent release; generated index current; common reuse exact/fresh and system-source aware; measured cold/warm telemetry with unknown metrics explicit; one authorized Gemma4:12b Q4_K_M 8K serial/default-sampling/thinking-on smoke, output2048/case and explicit time/token limits. No model downloads or live alternative-runtime campaigns. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | F-074-T01 — Adopt indexed and instrumented Gauntlet contracts | — | 0 days | 0 remaining | Completed |
+| — | F-074-T02 — Run and record authorized measured Gemma smoke | — | 0 days | 0 remaining | Completed |
+| — | F-074-T03 — Adopt reusable Gauntlet machine/scenario contracts | — | 0 days | 0 remaining | Completed |
+| 🟢 Small | F-074-T04 — Provide a profile-matched operator role-evaluation bundle | 1 h | 0 h | 1 h | Planned |
+| — | F-074-T05 — Adopt private diagnostics and development job registration | — | 0 days | 0 remaining | Completed |
+| — | F-074-T06 — T06 — Consume every common pack shipped in the pinned Gauntlet release | — | 0 days | 0 remaining | Completed |
+| — | F-074-T07 — T07 — Adopt upstream pending-case detection so new or changed packs raise a run | — | 0 days | 0 remaining | Completed |
+| — | F-074-T08 — T08 — One root command runs NERV and common tests, reusing exact evidence | — | 0 days | 0 remaining | Completed |
+| — | F-074-T09 — T09 — First ledger-covered run of every common pack and the expensive system cases | 0.5 h | 0.75 h (stated) | 0 h | Completed |
+| 🟢 Small | F-074-T10 — T10 — Adopt identity-bound ledger coverage | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟡 Medium | **Total** | 2 h (3 of 10 steps) | 0.75 h (1 of 10 steps recorded) | 1.5 h | 8 of 10 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- F-074-T01: 0 remaining (2026-11-11). Completed before featurePlans adoption; original effort unmeasured.
+- F-074-T02: 0 remaining (2026-11-11). Completed before featurePlans adoption; original effort unmeasured.
+- F-074-T03: 0 remaining (2026-11-11). Completed before featurePlans adoption; original effort unmeasured.
+- F-074-T04: 1 h agent (2026-11-12). Estimate added at featurePlans adoption (2026-11-11): Profile-matched operator role bundle; earlier record estimate Small for T04 alone. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-074-T05: 0 remaining (2026-11-11). Completed before featurePlans adoption; original effort unmeasured.
+- F-074-T06: 0 remaining (2026-11-11). Owner request 2026-11-11: NERV always consumes every common Gauntlet pack plus its own, and a pack added or changed raises a run-new-tests item. Estimate, not a measurement. Closed 2026-11-11 after PR #272 merged with CI 43023793222 green on all five jobs (plan, validate, windows, native-macos, full-suite).
+- F-074-T07: 0 remaining (2026-11-11). Owner decision 2026-11-11: harness and Gauntlet are reused by future projects, so the comparison moves upstream (Gauntlet F-010, about 1.5 days; harness F-052, about 1 day) and NERV only adopts it. Estimate, not a measurement. Closed 2026-11-11 after PR #272 merged with CI 43023793222 green on all five jobs (plan, validate, windows, native-macos, full-suite).
+- F-074-T08: 0 remaining (2026-11-11). Owner request 2026-11-11: NERV always consumes every common Gauntlet pack plus its own, and a pack added or changed raises a run-new-tests item. Estimate, not a measurement. Closed 2026-11-11 after PR #272 merged with CI 43023793222 green on all five jobs (plan, validate, windows, native-macos, full-suite). The identity part of the reuse acceptance moves to F-074-T10.
+- F-074-T09: 0 remaining (2026-11-12). Reassessed 2026-11-11 after the owner run: 41 of 48 model cases and both expensive system cases are recorded; the last 7 cases of general-assistant-expanded were not graded in that run (the ledger records only passed or failed results) and need one more run, plus the evidence summary. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 0.5 hours agent + 0.5 hours owner; agent records the ledger; the owner approves the limits and starts the run (machine time not counted). Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 0.25 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 0.5 h → 0.5 h, min 0.5 h; owner hours and baseline kept. Closed 2026-11-12: the agent ran the last 7 cases with the owner's approval (a 90 s case limit after a 30 s attempt timed out on case 1); summary docs/evaluations/2026-11-12-gauntlet-t09.md. Actual 0.75 h stated, the agent's own account; model time not counted.
+- F-074-T10: 0.5 h agent (2026-11-12). Owner 2026-11-11 asked to plan the F-074-T08 known limit. Adoption mirrors T07 (pin, pass options, join test). Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 0.75 hours agent; pin and adopt after the upstream release; one PR. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 0.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 0.75 h → 0.5 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (0.5 h); the baseline stays for calibration.
+
+**Next action / closure evidence:** T03 consumes released Gauntlet0.3.0 from independent PR7 / CI42607576561: pinned source/artifact, shared machine/scenario CLI/API, report/cache/compare identity and NERV wrapper joins. Generic definitions moved upstream; NERV retains assignments and acceptance. Accepted adoption after PR #235 exactheadb4cd887 / full CI42608578429, mergedmainc5323e5; T03 closed; [independent review](reviews/2026-11-09-gauntlet-environment-adoption.md) found no blocking findings after exact source/package and nine-join checks; no model/load campaign. T02 was separately executed by the owner and reviewed below; dependency adoption itself ran no model.
+
+ T01 closed after PR #225, exact head11c963c, merged main8fab24c. CI42573854325 passed plan, validate, Windows, native-macos and full-suite; eight local integration/index/cache/artifact/cancellation tests and independent report-only recheck passed. Adopted Gauntlet0.2.0: generated index17cases, exact/source-aware private reuse with original timestamps, streaming/sampled telemetry and fixture-tested local-runtime adapters. [Adoption acceptance](acceptance/gauntlet-v02-2026-11-09.md). T02 is closed after the owner-provided first ten-case Gemma run and evidence review; the report below records the actual measured failure. No model download, alternative-runtime installation or qualification occurred. Queue order is regenerated from current record/task/dependency state; consult the generated view rather than this historical selection; F-023-T03 is accepted with live native acceptance pending; combination qualification requirements are tracked under F-006/F-045, not claimed by this smoke.
+
+**Operator handoff and references 2026-11-09:** [Terminal commands](evaluations/gauntlet.md#operator-runs-common-gemma-smoke-and-nerv-system-acceptance) save common Gemma and dedicated scripted-system reports with explicit budgets and environment declarations. Common can run through NERV OR a prepared Gauntlet checkout without duplicating measurement. T04 retains the requested profile-matched NERV role bundle: current native role defaults do not match the common8K/2048 profile or aggregate cap. [external-project assessment](reviews/2026-11-09-external-agent-projects.md) retains optional external runners; generic adapters stay upstream. No model campaign was launched while documenting this.
+
+**First campaign reviewed 2026-11-09:** [common Gemma report review](evaluations/2026-11-09-gemma-common-smoke.md), report19a5b470-e87a-4400-a2e9-920404a797d2. All10 executed,7 passed; change-mind/tool-choice/missing-input failed JSON parsing,4/4 holdouts passed. Duration64.744s,1608 output tokens, exact requested model/profile and moderate-load declaration. The run completed inside budget; candidate acceptance failed. Raw response text and human responsiveness/load observations are unavailable. Preserve failure, do not automatically rerun or weaken grading. T02 closed; T04 is unimplemented and keeps the parent Open.
+
+**Diagnostics/job-rule adoption2026-11-09:** T05 consumes released Gauntlet0.4.1 (PR11 / CI42686856664, main8d99d9f/tagv0.4.1) and harness4.4.1 (PR91 / CI42678501222). New common selected-case capture/inspection and private development job registration are implemented; eleven package/wrapper joins pass, including source-bound failed reply capture with unchanged grading and no public raw reply. Native client counters/loading and the role-profile workflow remain unverified/unimplemented, not qualification. [Adoption evidence](acceptance/gauntlet-private-diagnostics-2026-11-09.md).
+
+**Gauntlet 0.5.0 pin, 2026-11-11 ([PR #259](https://github.com/voidbrain/nerv/pull/259)):** merged d2bb481, CI42974448234 passed all five jobs. Replaces the vendored artifact, lockfile and provenance with released 0.5.0 (tag v0.5.0, source 0d46c4a, upstream PR #29 / CI 42973762775, SHA256 in the vendor manifest) and regenerates the capability index links. Upstream adds the 28-case expanded pack and repeatable candidate comparisons. The expanded pack is not wired in; NERV's model commands keep the ten-case smoke packs. `gauntlet:compare` forwards to upstream, so its behaviour changes: 2–64 reports required and a new output shape (identity, mismatch reasons, per-result rows); no NERV code read the old keys, and a new regression joins the command to two saved reports. No model campaign ran. test/gauntlet.test.mjs (12 tests) and `gauntlet:plan` pass against the new artifact. [Independent fresh-context review](https://github.com/voidbrain/nerv/pull/259) verified artifact provenance against tag v0.5.0, the lockfile scope and tests, and found the first wording understated the compare change; corrected here. T04/T05 status unchanged.
+
+**Structured-output extension2026-11-09:** Owner accepted explicit Ollama schema support and a prepared moderate-load diagnostic command. T05 includes released upstream F-007 adoption: `--format=schema` selects a separate structure-only smoke pack; original unconstrained evidence remains unchanged. Medium-load live acceptance is owner-run and unexecuted; no qualification follows from fixture success.
+
+**Adoption accepted2026-11-10:** T05 closed after PR #242 exacthead03c0721 / CI42687439382 passed all five jobs including full-suite, mergedmainbc7a9c3. Independent harness/source/schema review and eleven joins passed. Prepared moderate-load schema diagnostic remains owner-run and unexecuted; T04 remains planned and the parent stays Open.
+
+**F-074-T06–T08 implemented 2026-11-11 ([PR #272](https://github.com/voidbrain/nerv/pull/272)):** Gauntlet 0.6.0 pinned; every shipped pack consumed (`neutral-smoke`, `neutral-smoke-schema`, `general-assistant-expanded`) plus `nerv-system-flows`, with exclusions only by reasoned config; committed metadata-only run ledger `evals/gauntlet/ledger.json`; `gauntlet:pending` (harness `evaluations` setting, reported at session start), `check:gauntlet-runs` in CI (fails while a pending case has no open record), `gauntlet-runs` impact row; `gauntlet:all` plans and runs only uncovered cases and records them. Model limits scale the day limits per case. The five ordinary system cases ran and passed locally and are in the ledger; 50 cases stay pending, named by F-074-T09. Known limit: ledger coverage ignores runtime identity, machine scenario and NERV source key (see F-074-T08). Review: fresh-context design review (Opus): one blocker (check:gauntlet-runs accepted any mention of a pack id, including record history, so a changed case passed CI unraised) and should-fix items (`--max-age-days` did not reach Gauntlet's cache; `gauntlet:all` exited 0 on failures; F-074-T08 acceptance and fixtures), fixed in #272: only unfinished tasks listing `pack/case` or `pack/*` raise a case, with a failing-path test; age passed through; exit 1 on failure; F-074-T08 acceptance states the unmet part; fixtures for --fresh, max age and another profile. Provenance verified: the tgz matches tag v0.6.0.
+
+**Gauntlet 0.7.1 pinned 2026-11-11 ([PR #275](https://github.com/voidbrain/nerv/pull/275)):** artifact, lockfile and provenance replaced together; NERV records new runs in ledger schema 2. F-074-T10's first acceptance (pin) is done; passing the intended identity remains.
+
+**F-074-T09 completed 2026-11-12 ([PR #316](https://github.com/voidbrain/nerv/pull/316)):** the agent ran the 7 pending expanded cases with the owner's approval. A first attempt at the default 30 s per case stopped on case 1 (7 s model load plus about 24 tokens/s of thinking; not the 840 s pack limit as first thought) and recorded nothing; with a 90 s case limit approved by the owner (`--limits`, 630 s, same 14,336-token cap) all 7 passed in 103 s and 2,195 tokens. The ledger now covers all 48 model and 7 system cases and `gauntlet:pending` is empty. [Summary](evaluations/2026-11-12-gauntlet-t09.md). NERV's default model limits stay at 30 s per case, too short for long thinking replies with this profile: a later fresh run with it needs an owner-approved `--limits`.
+
+**Owner run 2026-11-11 (F-074-T09, partial; [PR #274](https://github.com/voidbrain/nerv/pull/274)):** the ledger now records 41 of the 48 model cases (neutral-smoke 10, neutral-smoke-schema 10, general-assistant-expanded 21; corrected 2026-11-12 from the ledger: 38 passed, neutral-smoke change-mind, missing-input and tool-choice failed) and the expensive system cases `browser` and `stress`, from the owner's run (expanded report finished 13:49:56Z). The last seven expanded cases (prompt-injection-r2, -h1, -h2, combined-r1, -r2, -h1, -h2) were not graded in that report: Gauntlet records only passed or failed results, so an error or not-run result covers nothing and the cases stay pending. The likely cause is the 840 s suite limit for 28 cases being reached before the last ones ran; the report's per-case status confirms it. `gauntlet:all` reruns only those seven. **Gauntlet 0.7.0 published 2026-11-11** (gauntlet-protocol B-002, PRs #37/#38): ledger coverage follows model digest, runtime, scenario and source key; F-074-T10 is no longer blocked.
+
+**Owner answers 2026-11-11 ([PR #273](https://github.com/voidbrain/nerv/pull/273)):** the T09 "budget" is the hard time and output-token limits `gauntlet:all` prints and enforces, now stated in F-074-T09. No default max age for reuse: a run stays valid until its identity changes; an age limit would only cover identity the ledger does not bind. That gap (F-074-T08 known limit) is planned: upstream [gauntlet-protocol PR #36](https://github.com/voidbrain/gauntlet-protocol/pull/36) opens B-002 (ledger records model digest, runtime, scenario and a consumer source key; `pending` names the change), and F-074-T10 adopts it. B-002 is a bug upstream: F-010-T01's acceptance named runtime and machine scenario, and v0.6.0 shipped without them.
+
+**Gap found 2026-11-11:** the 0.5.0 pin (PR #259) shipped the 28-case `general-assistant-expanded@1.0.0` pack, but tools/gauntlet.mjs names `smoke-v1.json` by path, and nothing compares the artifact's packs with the ones NERV uses, so the new pack was never run or indexed. Owner decision the same day: NERV always consumes every common pack plus its own; a pack added or changed raises a run-new-tests item; `gauntlet:all` from the root runs new, changed or stale cases and reuses exact-identity evidence. Tasks T06–T09. Same day, because the harness and Gauntlet are reused by future projects: the generic comparison moves upstream ([gauntlet-protocol PR #33](https://github.com/voidbrain/gauntlet-protocol/pull/33), F-010: run ledger and `gauntlet pending`; [project-harness PR #109](https://github.com/voidbrain/project-harness/pull/109), F-052: declared evaluation dependencies reported by check:freshness, with the backlog rule). T07 only adopts them.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 3 open steps total 2 h agent + 0.5 h owner (steps table; each task basis gives old → new). Figures after this sentence are dated history. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): the 3 open steps in hours total 2.75 h agent + 0.5 h owner (steps table; method in each task basis). Day figures below are dated history. Small remaining effort, reassessed 2026-11-11 after F-074-T06–T08: F-074-T09 (0.5 day including owner time), F-074-T04 (1 focused day) and F-074-T10 (0.5 focused day; pinned 0.7.1) remain. Earlier the same day: Medium, about 3 focused days (T06 0.5, T07 1, T08 1, T09 0.5, plus T04). Reassessed 2026-11-11 after the owner asked that NERV always consume every common pack and that new packs raise a run; previous estimate Small covered T04 only. Estimates, not measurements.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #259](https://github.com/voidbrain/nerv/pull/259) Gauntlet 0.5.0 pin; [PR #243](https://github.com/voidbrain/nerv/pull/243) adoption acceptance;  [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Acceptance reconcile: [PR #236](https://github.com/voidbrain/nerv/pull/236); Environment adoption: [PR #235](https://github.com/voidbrain/nerv/pull/235); Review: fresh-context report, no blocking findings; Test: test/gauntlet.test.mjs shared-context consumer/reuse/admission join;  [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #226](https://github.com/voidbrain/nerv/pull/226) adoption acceptance and explicit owner pause; [PR #225](https://github.com/voidbrain/nerv/pull/225); upstream Gauntlet PR #5 / CI42572655186; Review: independent report-only recheck linked above. |
+| Opened | 2026-11-09 |
+| Verification | 2026-11-10 Unit/integration: PR242 exacthead03c0721 / CI42687439382 passed all five jobs/full-suite; eleven fixture joins and independent harness/source/schema review passed; T05 closed, no live schema campaign. Earlier2026-11-09 Unit/integration: PR235 exactheadb4cd887 / CI42608578429 passed all five jobs including full-suite, mergedmainc5323e5. Nine focused context/reuse/admission/package joins, local468 Node tests (466 passed, two platform skips), typecheck/build/index and committed-source policy90 passed. Review: independent exact package/source/installed-file verification and nine joins, no blocking finding. Real-model2026-11-09: owner-provided common smoke validated and reviewed, complete10cases,7 passed/3 failed,64.744s/1608 tokens; no load/model qualification. T04 implementation pending. |
+| Reviewed | 2026-11-11 |
+
+</details>
+
+---
+### <a id="f-042"></a>[✨ F-042](#top)
+
+**Misato reads the agency: status and "why" from the records**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | [F-056](#f-056) | — | — |
+
+💻 **→** Next: verify and close when [PR #314](https://github.com/voidbrain/nerv/pull/314) merges with green CI.
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-05 ("is this the answer we want? include ballot, experts and consultants?"): Misato can act but cannot read the agency itself, so questions about it are guessed (B-004). |
+| **Reproduce** | Ask Aoba "why was S-… approved?", "what is waiting for me?", "is Tabgha up?". |
+| **Check** | Read-only tools give Misato a sortie's record (decision, ballot with each seat's vote and reason, peer seats, consultant advice, approver and time), what waits for the owner, base health and the bases' status; answers quote the records in the request's language and never invent; these tools run as Green without a card; the consultant is not asked for questions about the agency itself. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | F-042-T01 — Read-only agency tools for Misato | 0.25 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending |
+| 🟢 Small | F-042-T02 — Grounded answers and agency facts as data | 0.25 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.5 h | 0.5 h | 0 h | 0 of 2 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- F-042-T01: 0 hours (implemented; awaiting CI) (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration. Implemented 2026-11-12 (sorties.explain, approvals.list and agency.status read-only Green tools in src/executors.ts, src/ledger.ts, src/store.ts, src/runtime.ts, src/rpc.ts, src/nervous-process.ts; test/why.test.ts, test/consultant.test.ts) in about 0.25 h agent (stated).
+- F-042-T02: 0 hours (implemented; awaiting CI) (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration. Implemented 2026-11-12 (isAgencyQuestion in src/why.ts, consultant skip on agency questions and enrolled bases passed as data to consultant/pilots and Misato in src/runtime.ts, src/brain-process.ts, src/misato.ts; test/why.test.ts, test/consultant.test.ts) in about 0.25 h agent (stated).
+
+**F-042-T01–T02, 2026-11-12 ([PR #314](https://github.com/voidbrain/nerv/pull/314)):**
+- **F-042-T01 (`src/executors.ts`, `src/ledger.ts`, `src/store.ts`, `src/runtime.ts`, `src/rpc.ts`, `src/nervous-process.ts`):** Added three Pattern Green read-only built-in tools (`effect: 'read'`, running inside the scheduler process without an approval card): `sorties.explain` (returns a sortie's record by short ID with decision, ballot and each seat's vote and reason, peer seats including late shadow votes `ballot.shadow`, consultant/pilot advice, approver and decision time, or recent sorties when `ref` is omitted), `approvals.list` (returns pending approval cards with sortie short ID, title, tool, arguments, Pattern, reason, ballot verdicts and expiry, plus open clarification questions waiting for the owner via `Ledger.waitingQuestions`), and `agency.status` (returns this base's health, degraded reasons, model routes, pending reminders and Instrumentality status, plus enrolled NERV bases with `baseId`, `name`, `status`, `self`, `main`, `online`, `lastSeen`, `health` and `channel`, optionally filtered by `base` id or name).
+- **F-042-T02 (`src/why.ts`, `src/misato.ts`, `src/runtime.ts`, `src/brain-process.ts`, `src/rpc.ts`):** Added `isAgencyQuestion(text, bases)` in `src/why.ts` so `Runtime.loop` skips the consultant when the owner asks about sorties, ballots, waiting approvals/questions, or base/agency health and status (while still consulting on action requests such as `"Remind me on Tabgha to stretch"`). Passed enrolled base names (`bases: [{ id, name }]`) as data to the consultant/pilots and to Misato (`B-012`), localized `decided`, `expires`, and `lastSeen` timestamps (`decidedLocal`, `expiresLocal`, `lastSeenLocal`) in `misatoAsk`, and updated Misato's system prompt to call `sorties.explain`, `approvals.list` or `agency.status` and quote the records in the request's language without inventing. Note: host thread-reset APIs and token counters are not exposed in this environment (bounded continuation; `work-usage` coverage `unavailable`).
+
+**Next action / closure evidence:** Verify and close when [PR #314](https://github.com/voidbrain/nerv/pull/314) merges with green CI. Owner test 2026-11-05: the consultant did not know Tabgha is a base (it asked about geofencing): pilots and the consultant should get the agency's facts as data too (base names, B-012). Planned 2026-11-05. B-004 is the first slice (the "why" question).
+
+**Estimates:** 0 h remaining (2 steps implemented 2026-11-12 in 0.5 h agent stated total; awaiting CI). Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 2 open steps total 2.75 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #314](https://github.com/voidbrain/nerv/pull/314) (F-042-T01–T02 implementation and regressions: `test/why.test.ts`, `test/consultant.test.ts`); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner question 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-12: Unit/integration passed (`test/why.test.ts`, `test/consultant.test.ts`, `test/misato.test.ts`, `test/pilots.test.ts`, `test/gate.test.ts`, `test/resume.test.ts`, `test/kaji-seats.test.ts`); CI pending |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+
+### <a id="f-046"></a>[✨ F-046](#top)
+
+**Misato checks what already exists before adding: same thing, a change, or new**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h | — | — | — | — |
+
+💻 **→** Next: a reminders.update tool for Misato and the existing-item check before any add.
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-05, after B-003 (the same dentist request sent four times, two copies approved): before adding something, Misato should look for it among what already exists (reminders, Lilith's facts, later calendar and notes); if it is the same, not add another and say so in the reply; if it changed (another time, a corrected fact), propose changing the existing one instead. Today the store drops only exact copies (B-003 for reminders, `factKey` for facts); a reminder with the same title at another time becomes a second one, and a fact that contradicts an earlier one ("I like tea" after "I don't like tea") is added next to it. Misato has no tool to change a reminder. |
+| **Reproduce** | Ask Aoba to remind you to call the dentist on 3 February at 10, then again at 11: two reminders. Tell it you like tea, then that you don't: two facts. |
+| **Check** | Before proposing reminders.add or memory.remember, Misato is shown the existing items that match (same or similar title, the same subject); the same item is not proposed again and the reply says it already exists (with its time or text); a changed one becomes a proposal to change it (reminders.update for title or time; for a fact, the edit of the existing fact, shown old → new on the card), approved like any change; a really new item is added as today; the reply says which of the three it was and why; works in English and Italian; tests cover same, changed and new for reminders and facts, through the scheduler. Calendar and notes follow the same rule when they exist. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | F-046-T01 — reminders.update as a Misato tool | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-046-T02 — Matching existing items before an add | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-046-T03 — Changed facts proposed as edits | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | **Total** | 3 h | 0 h (0 of 3 steps recorded) | 3 h | 0 of 3 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- F-046-T01: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-046-T02: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-046-T03: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+
+**Next action / closure evidence:** Planned 2026-11-05 from the owner's request. Builds on B-003 (exact copies of a reminder are returned, [PR #103](https://github.com/voidbrain/nerv/pull/103)) and Lilith's exact-text check. Slices: reminders.update as a Misato tool (the dashboard's edit already has it in the scheduler); matching existing items in Misato's context before an add; facts that change or contradict an earlier one proposed as an edit (shares the spelling and split work of F-044).
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 3 open steps total 3 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner request 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
+### <a id="f-045"></a>[✨ F-045](#top)
+
+**Pilots: a roster of permanent agents that grows, specialises and is chosen per request**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟣 Very large | 8.25 h | — | [F-049](#f-049), [F-050](#f-050), [F-054](#f-054) | — | — |
+
+💻 **→** Next: pilots offered by other bases over the Kaji line; other-provider/cloud pilot routing remains planned.
+
+| | |
+|---|---|
+| **Issue** | Owner questions 2026-11-05: NERV needs permanent agents (a coder, the 3D expert on Tabgha, and others as jobs require: a Photoshop expert), a generic one for anything else, specialists that grow from it, and automatic choice. The design already names pilots (F-025: pilots run in the EVA class of their stage, watermelon trust) but has no roster. Consultants (F-041) become pilots asked only for advice (owner, 2026-11-05). |
+| **Reproduce** | Ask Aoba for an image edit or a coding job: there is no pilot to give it to. |
+| **Check** | **Definition as data:** a pilot is a role and domain (topics, keywords), skills, tools, a model, a memory scope, an EVA class and a trust stage (Prototype, Test, Production), with its parent; most share the base's model, a separate model only when its evaluations justify it. **Roster:** a registry like the Kaji one; each base offers its pilots in the heartbeat; the owner adds, renames, retires and pins. **Generic pilot:** one per base, takes any job no specialist covers, in the most restrictive EVA its stage allows. **Two ways of use:** asked for advice (the F-041 consultant rules: at most one per topic by default, the owner's pin, then the main base's own, then the best record, the next as fallback, "ask both" per topic; advice is data, never a vote or an action) or put in charge of the job (acts in its EVA, effects by card). **Choice:** Misato routes by domain and keywords, base, stage allowed for the action and record; unclear goes to the generic pilot or a question; the card shows the pilot, its stage and base, and the owner can change it; routing accuracy is measured. **New specialists found automatically:** unmatched domains, tools the generic pilot lacked and repeated failures are counted per domain; past a threshold (e.g. three unmatched in 30 days, or one missing tool) NERV proposes a pilot (or an extension of an existing one) on a card with the sorties behind it, its skills, tools and installs; created at Prototype. **Split and merge by evidence:** a split when sorties cluster in a subdomain and a narrower set scores better; a merge when two overlap and neither is better; lineage kept. **Learning (owner decision 2026-11-05: the recommendation):** new evaluation cases from failures are added automatically and shown; domain memory is proposed in one review card a week; skills change only by the owner's approval, versioned; prompt, model, tools, permissions and trust stage are always the owner's; nothing learned from a tainted sortie becomes a skill without review; a change to skills or prompt is versioned and re-runs the pilot's evaluations, and a drop moves it back a stage. **Inside a pilot** planning, doing and checking stay one loop; promotion through the golden sortie evaluations. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | F-045-T01 — Pilot definition as data and registry | 1.75 h | 0 h | 1.75 h | Planned |
+| 🟢 Small | F-045-T02 — Owner roster management | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-045-T03 — Advice mode | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | F-045-T04 — Execution mode and automatic choice | 1.75 h | 0 h | 1.75 h | Planned |
+| 🟡 Medium | F-045-T05 — Remote pilots | 1.75 h | 0 h | 1.75 h | Planned |
+| 🟢 Small | F-045-T06 — Evidence-based placement | 1 h | 0 h | 1 h | Planned |
+| 🟣 Very large | **Total** | 8.25 h | 0 h (0 of 6 steps recorded) | 8.25 h | 0 of 6 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- F-045-T01: 1.75 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
+- F-045-T02: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-045-T03: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-045-T04: 1.75 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
+- F-045-T05: 1.75 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
+- F-045-T06: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+
+**Next action / closure evidence:** Owner integration 2026-11-09: pilot selection and promotion must distinguish individual-role evidence from separately measured combination/workflow evidence as specified in [configuration qualification](decisions/configuration-qualification.md). Bind coder, auditor, prompts, skills/tools, handoffs and host/runtime settings; independent hidden acceptance determines success, not auditor agreement. Consume NERV-owned evidence from F-006-T03/T04 before claiming evaluated pair or specialist placement; retain owner promotion and suggest-only defaults. No pair selection or mini PC acceptance is implemented by this documentation.
+
+Owner extension 2026-11-07: show pilot description, proposal rationale and request evidence, consultation/sortie outcomes and evaluation sample sizes. Investigate generic Time Request PROTO proposal quality. Distinguish advice from execution assignment/history; assess tool acquisition/discard, evidence-based specialization, split and merge with versioned lineage and explicit promotion gates. No autonomous capability change is implied by the current roster.  Owner discussion 2026-11-06 (skill marketplaces): **skills found outside NERV are untrusted input**, like intake. A found skill (marketplace, repository, another agent's SKILL.md) is adopted only as a reviewed, **pinned copy**: source, version, content hash and licence recorded, and the licence must allow keeping a copy; it enters at seed. A change at the source is a new version: re-review, re-run evaluations, back to seed. **Never load a skill remotely at run time**: that excludes delivery models that always serve the latest version and forbid saving (e.g. Agensi's MCP delivery, terms §5.2/§8.2). **Bundled scripts are code**: they run in the pilot's EVA and their effects go through the gate; a skill's text never widens the pilot's tools or permissions. This applies F-021's pinning lesson (a description fingerprint is not a code pin) to skills.  Owner refinement 2026-11-06: use an inline Model/select/Apply row without repeating the pilot name; retain identity in the accessible name. Apply stays disabled until an installed choice differs from the saved model, and disables again on revert/save or while applying.  Owner request 2026-11-06: move consultant/model selection out of Models and into each pilot card. Candidate implementation: generic fallback plus an independent specialist selector, installed local Ollama models only; per-specialist API validates owner authorization and discovery, preserves the rest of the roster, and applies to the next request. Drafts survive polling; unavailable saved models remain explicit. Future cloud/other-engine options require provider-aware pilot routing and explicit privacy permission; no placeholder executable choices are added. API/DOM regression and Chrome against the real runtime/config passed, including independent changes, generic-off, draft retention, next-request routing and scoped axe (zero violations). Full suite passed (194 passed, one systemd-only skip), build and process/browser checks passed. The local selector slice is verified in merged PR #160 (run 42241192687: validate, windows and native-macos green).  Owner decision 2026-11-05 on promotion, time and evidence: a pilot (and a skill) becomes eligible for the next stage after a minimum time there and enough clean runs (for example 7 days in Proto and 10 runs without a MAGI reject or an owner edit; skills count uses); its card shows the progress (*eligible in 5 d · 6/10 runs*, then *ready to promote*); when ready, NERV proposes the promotion on a card, never automatic; Prod always needs the owner; a failure or the Spear moves it back a stage. Needs a per-pilot record of runs, rejects and edits (and F-029's evaluations). Owner decision 2026-11-05 on skill stages (option B): skills grow by their own stages, **seed → sprout → ripe** (Eva, Kaji's watermelons) and **create → try → use** (Simple), distinct from the pilots' proto → test → prod; shown on the skills box in [PR #129](https://github.com/voidbrain/nerv/pull/129). Detection slice in [PR #122](https://github.com/voidbrain/nerv/pull/122) (2026-11-05): the generic pilot names the request's domain on its first line (*Domain: image editing*, no extra model call; no generic pilot, no detection); a request no specialist fits records `pilot.unmatched`; after 3 in 30 days the Marduk Institute opens a sortie with an owner-only `pilots.create` card (id, name, domain, keywords; the requests behind it in the card's reason), never twice while one waits, not again for 30 days after a no; approved, the pilot is written at Prototype on the generic pilot's model and the next request in that domain goes to it. Misato can propose `pilots.create` too when asked. Checked: test/pilots.test.ts (the domain line; through every process: two requests no card, the third a card, a fourth no second card, approved then used, a rejected domain not proposed again); full suite and build pass. Not yet: the missing-tool and repeated-failure signals, extension of an existing pilot instead of a new one. Slice 1 in [PR #107](https://github.com/voidbrain/nerv/pull/107) (2026-11-05): the pilot definition (src/pilots.ts: id, name, domain, keywords, local model, stage, parent, pinned, retired; checked on read), a local roster in config.json (`nerv pilots` list, add, set, pin, unpin, retire, restore; a model Ollama lacks is refused), the generic pilot (the F-025 consultant, `roles.consultant`), and advice mode: before Misato plans, the pilot whose keywords the request contains advises on its own model (pinned first, then most keywords, then later stage; retired never), named in its prompt and in the trace (`misato.consult` with the pilot; dashboard Comms and the why answer show it); no match, the generic pilot. Checked: test/pilots.test.ts (roster checks, routing order, through every process: a specialist on its model, the generic one otherwise, a retire applied to the next request), test/model-setup.test.ts (the CLI); full suite 146 pass, build, headless. Remaining slices: offered by other bases; "ask both" and the fallback; detection of unmatched domains and proposals by card; the coder pilot acting in an EVA; split and merge; learning as decided. Owner decision 2026-11-05: pilots learn by the recommendation ("F-045 … the recommendation"). Planned 2026-11-05 from the owner's questions. Supersedes F-041 (consultants are pilots in advice mode; its rules are kept above). First slices: the pilot definition and roster with the generic pilot; advice mode (the F-041 work); the coder pilot in a sandbox EVA (intent, spec and plan approved by card, an independent read-only verifier, results as a PR by card); then detection of new specialists, then split and merge. Candidate pilots discussed: coder, verifier, researcher (EVA-03, no effects), ops (read-only watch), 3D expert (Tabgha), archivist (memory hygiene, F-044); each gets its own record when it is built.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 6 open steps total 8.25 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Reassessed 2026-11-06 for pilot-owned model selectors: the local selector slice passed local and merged CI acceptance; remote pilots, execution and future provider/cloud routing remain, so Large remains valid.  Reassessed 2026-11-06 with B-027: duplicate-proposal matching is repaired; the remaining remote-pilot and execution scope is unchanged, so Large remains valid.  Large remaining effort (roster, advice, detection). Estimated 2026-11-05. Reassessed 2026-11-07: explicit prerequisite outcomes preserve the existing scope and remaining-work estimate; independent slices can proceed. Reassessed 2026-11-07: Large remains valid: proposal evidence and outcomes, tool evolution and split/merge lineage need evaluated lifecycle contracts beyond the current adviser roster.
+
+**Completed prerequisites:** [F-029](archive/backlog-2026.md#f-029) — Golden evaluation evidence for pilot promotion (closed).
+
+| Field | Value |
+|---|---|
+| Depends on | — |
+| PR / evidence | [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #221](https://github.com/voidbrain/nerv/pull/221) schema/reuse assessment; [Gauntlet ownership/reuse proposal](design/gauntlet-protocol-2026-11-08.md), 2026-11-08; the proposal preceded delivered Gauntlet0.1.1 adoption in PR #223 / F-073; automatic routing/qualification remains unimplemented and no consumer work gates upstream releases; [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #161](https://github.com/voidbrain/nerv/pull/161) verification reconciliation;  [PR #160](https://github.com/voidbrain/nerv/pull/160) pilot selectors/map status and owner clarification; Owner questions 2026-11-05; slice 1 [PR #107](https://github.com/voidbrain/nerv/pull/107) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-06 Unit/integration and Browser/accessibility: pilot model API/DOM regressions, full suite, real-runtime Chrome flow, inline-row/Apply states and scoped axe passed; merged PR #160 CI run 42241192687 green. Earlier evidence: 2026-11-05 slice 1: test/pilots.test.ts, test/model-setup.test.ts, full suite (local run) |
+| Reviewed | 2026-11-09 |
+
+</details>
+
+---
+
+### <a id="f-025"></a>[✨ F-025](#top)
+
+**Extra MAGI seats (veto-only), consultants and watermelon trust for pilots**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🔴 Large | 5.5 h | — | [F-049](#f-049) | — | — |
+
+💻 **→** Attach extra seats by action class as veto-only, start new seats in shadow, and promote pilots through Prototype → Test → Production.
+
+| | |
+|---|---|
+| **Issue** | Specialists help, but a new or remote seat must never approve what the core three would refuse, and skills need earned trust. |
+| **Reproduce** | Attach a deterministic test seat and a model expert seat to code-write actions; run them in shadow; promote one; force a failure and a Spear revocation. |
+| **Check** | Extra seats can only reject; shadow seats are logged, not counted; a timed-out seat abstains; consultants advise the planner without a vote and receive only Scrolls-allowed data; pilots run only in the EVA class of their stage; promotion to Production needs the owner's confirmation; failure, override spikes or Spear demote automatically. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | F-025-T01 — Veto-only extra seats with shadow logging | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | F-025-T02 — Free API seat pool | 1.75 h | 0 h | 1.75 h | Planned |
+| 🟢 Small | F-025-T03 — Consultants without a vote | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | F-025-T04 — Watermelon trust stages and demotion | 1.75 h | 0 h | 1.75 h | Planned |
+| 🔴 Large | **Total** | 5.5 h | 0 h (0 of 4 steps recorded) | 5.5 h | 0 of 4 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- F-025-T01: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-025-T02: 1.75 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
+- F-025-T03: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-025-T04: 1.75 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
+
+**Next action / closure evidence:** Owner decisions 2026-11-05 for the free API seats: one seat per provider and model, each with its own key (terminal prompt) and trust stage; attached by action class, veto-only, shadow first, promoted one by one; each action asks one or two seats from the pool in turn to spread free quotas; a seat that hits its limit or times out abstains and is skipped for a while; only actions the Scrolls allow to leave the machine get cloud seats (never local-only or tainted data). **Optional:** `seats` checks each candidate (key, provider reachable, model still listed) and skips the unavailable ones with the reason; with an empty pool actions simply get no cloud seat, shown as information, never as degraded; re-checked periodically. Owner check 2026-11-05 on Neo Tokyo-3: with `models set consultant gemma4:12b`, Comms showed *Consultant (gemma4:12b): …* before Misato's reply. Consultants, local, in [PR #92](https://github.com/voidbrain/nerv/pull/92) (2026-11-05): `roles.consultant` (a local model; `models set consultant MODEL|off`, the dashboard's Models panel, `PUT /api/models`); asked once per request before Misato plans (`consultant.advise` in the brain, never on a resume), its advice (up to 600 characters, "none" is none) goes into Misato's prompt as data on the local route only and is recorded as a `misato.consult` event (Comms; the dashboard's Gevurah node lights up); no vote, no action. Checked: test/consultant.test.ts (advice in Misato's prompt and in the trace, one consultation per request, none on a resume, off and "none" add nothing, never on the cloud route), test/model.test.ts and test/model-setup.test.ts (role validation, local only, set and off), suite 129 pass. Remaining here: consultants offered by other bases, the free API seats, and the watermelon trust stages. Related (2026-11-05): the other bases' Casper is now a veto-only, shadow-first extra seat (F-036, [PR #91](https://github.com/voidbrain/nerv/pull/91)); the same ballot mechanism takes the free API seats this record plans. Seat registry via Marduk and stage tracking on top of F-017/F-024; evaluation evidence from F-029. Absorbs F-018 (closed 2026-11-04).
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 4 open steps total 5.5 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort (peer seats in F-036, local consultants). Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
+| Opened | 2026-11-02 |
+| Verification | Pending |
+| Reviewed | 2026-11-04 |
+
+</details>
+
+---
+### <a id="f-065"></a>[✨ F-065](#top)
+
+**Agentic threat map: each OWASP risk tied to a NERV control and the test that proves it**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h | — | — | — | — |
+
+💻 **→** Write `docs/security/agentic-threats.md` and a check that every row names an existing test.
+
+| | |
+|---|---|
+| **Issue** | The gate, grants, Lilith, the Kaji line and the tools process already answer most published agentic risks, but nothing maps them: a reviewer cannot see which risk a control covers, which risk has no control, or which claim no test backs. The [architecture reassessment](audits/2026-11-06-architecture-reassessment.md#3-automatic-incident-response-bounded-circuits-before-a-global-kill-switch) cites only OWASP's prompt-injection cheat sheet. |
+| **Reproduce** | Ask which NERV test covers OWASP ASI08 (cascading failures) or LLM06:2026 (unbounded consumption): no document answers, and the honest answer today is none. |
+| **Check** | One row per risk from the [OWASP Top 10 for Agentic Applications](https://genai.owasp.org/initiatives/agentic-security-initiative/) (ASI01–ASI10), the [LLM Top 10 2026](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/) (LLM01–LLM10) and the [MCP Top 10](https://owasp.org/www-project-mcp-top-10/) (MCP01–MCP10, beta), each citing version-pinned [AISVS](https://github.com/OWASP/AISVS) requirements (`v1.01-C<chapter>.<section>.<req>`, mainly C5, C8, C9, C10, C12), the NERV control (source path) and a test name, or "gap" with the owning record. A tool run in CI fails when a cited test does not exist or a row is neither tested nor a named gap. Not-applicable rows say why (LLM09: no embeddings, Lilith uses FTS5). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | F-065-T01 — Threat map document | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-065-T02 — CI check for cited tests | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | **Total** | 2 h | 0 h (0 of 2 steps recorded) | 2 h | 0 of 2 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- F-065-T01: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-065-T02: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+
+**Next action / closure evidence:** Proposed 2026-11-07 from an OWASP standards review in the session (Agentic Top 10, LLM Top 10 2026, MCP Top 10, AISVS 1.01, Agent Control Standard). Known gaps to land as rows: ASI08 cascading failures (F-064), LLM06:2026 unbounded consumption (F-063), credential rotation (F-066). Candidate gap to verify first: MCP results flowing into later prompts (LLM08:2026 hidden context exposure, MCP10). Map, not certification: a row says what a test shows, never that the risk is gone.
+
+**Accepted assessment 2026-11-09:** [execution boundaries](reviews/2026-11-09-execution-boundaries.md). Map the deterministic runner/warden controls (F-049), protected grading and artifact-bound promotion (F-006), and existing grant/recovery safeguards to actual tests or named gaps. No new LLM security authority, compliance claim or separate security project follows.
+
+**Retained test references 2026-11-09:** [external-project assessment](reviews/2026-11-09-external-agent-projects.md): AgentDojo hostile tool-output families can inform versioned NERV attack/defense cases. Map observed controls to actual tests or named gaps; a benchmark pass is neither certification nor proof of F-049 confinement.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 2 open steps total 2 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium: the document is a day; the test-name check is small. Set 2026-11-07.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
+| Opened | 2026-11-07 |
+| Verification | Unit/integration: Pending. |
+| Reviewed | 2026-11-09 |
+
+</details>
+
+---
+### <a id="f-070"></a>[✨ F-070](#top)
+
+**Authenticated directory of base communication operators**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.75 h | — | — | — | — |
+
+💻 **→** Next: Define operator alias ownership and signed directory contract before changing routing.
+
+| | |
+|---|---|
+| **Issue** | Resolve tell Aoba on another base through configured operator aliases, without guessing from role labels or changing a destination silently. |
+| **Reproduce** | Address an enrolled base by operator alias; rename it; exercise duplicate and unknown aliases. |
+| **Check** | Explicit per-base configurable names/defaults; authenticated discovery; ambiguity asks for clarification; stale/unknown names fail safely; no private channel IDs exposed. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | F-070-T01 — Operator alias ownership and signed directory contract | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | F-070-T02 — Authenticated discovery and safe resolution | 1.75 h | 0 h | 1.75 h | Planned |
+| 🟡 Medium | **Total** | 2.75 h | 0 h (0 of 2 steps recorded) | 2.75 h | 0 of 2 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- F-070-T01: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-070-T02: 1.75 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
+
+**Next action / closure evidence:** Define operator alias ownership and signed directory contract before changing routing. See [the source assessment](design/operator-flow-review-2026-11-07.md). Preserve observed communication separately from step activity; do not infer delivery or execution from a UI state.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 2 open steps total 2.75 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort. Reassessed 2026-11-07: implementation and integration verification remain; no measured duration available.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; source assessment linked above |
+| Opened | 2026-11-07 |
+| Verification | Pending: regression, integration and relevant browser checks; source inspection is not runtime acceptance. |
+| Reviewed | 2026-11-07 |
+
+</details>
+
+---
+### <a id="f-051"></a>[✨ F-051](#top)
+
+**Dashboard: a sortie shows where it runs and who contributed**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🔴 Large | 5.75 h | — | — | — | — |
+
+💻 **→** Next: define authenticated destination-dashboard navigation; it needs an authenticated cross-base inspection contract, and EVA cage pilot labels await F-049.
+
+| | |
+|---|---|
+| **Issue** | Owner test on Tabgha 2026-11-05: on Tabgha the chat shows *Misato is planning… (local models take 10–30 s per step)* but not that the request went to Neo Tokyo-3, and the previous sortie stays selected; a running sortie card always blinks MAGI whatever its phase; the flow shows only "ok" for the MAGI, so whether shadow or peer seats voted is not visible, and Plan · current action does not say whether a pilot advised; a node the sortie did not need (Misato's Apt when no approval was needed) looks the same as one that is unavailable. |
+| **Reproduce** | Ask something on a base that is not the main one; select a finished sortie with a Green action; look at a running sortie's card. |
+| **Check** | The chat line reads *Misato is planning* (no timing note) and, for a relayed request, *Forwarded to Neo Tokyo-3*; the forwarded request appears on the asking base as a sortie card that says where it runs and links to it, and the main base shows it as a sortie from that base; a new request (or a refresh) selects the running sortie (F-019); the running card names its phase (Misato, MAGI, approval, EVA, a pilot); the MAGI detail lists every seat's vote, shadow and peer seats marked; Plan · current action names the pilot that advised; a node not needed by the sortie is shown as skipped, distinct from unavailable; the Sephirot shows a relay step when the request came from or went to another base. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | F-051-T01 — Chat line and relay visibility | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-051-T02 — Running sortie selection and phase label | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-051-T03 — MAGI and pilot contributors | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-051-T04 — Skipped versus unavailable nodes and relay step | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | F-051-T05 — Authenticated cross-base inspection | 1.75 h | 0 h | 1.75 h | Planned |
+| 🔴 Large | **Total** | 5.75 h | 0 h (0 of 5 steps recorded) | 5.75 h | 0 of 5 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- F-051-T01: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-051-T02: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-051-T03: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-051-T04: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-051-T05: 1.75 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
+
+**Next action / closure evidence:** 2026-11-07 partial visual implementation: MAGI border/background/title use existing violet EVA identity in dark orange; Midori links stay dotted in every API state. Kaji/base/channel topology and consultant arrows remain design work.  Owner extension 2026-11-07: model real Kaji/base request and return I/O in Sephirot; explain Tabgha destination, channel exit and Aoba/Midori identities. Verify detection/intake routing against runtime before removing or adding topology; distinguish consultant request from returned advice. Give MAGI a violet identity in Eva dark orange via palette tokens; communicate busy nodes accessibly, separate from transient edges (B-040). Midori connections should be dotted; blue currently denotes responding API, not a base identity.  Review 2026-11-06: the existing relay cards/flow and contributor labels are implemented, but this record cannot close on F-049 alone. The destination sortie ID existed only in Comms; the detail incorrectly claimed a forwarded request answered without tools locally, and also claimed an active or failed action-free request had answered. [PR #162](https://github.com/voidbrain/nerv/pull/162) carries the recorded destination reference into the live detail, names the answering base, distinguishes waiting/failure/local planning/stopped states, and clears remote metadata when work continues here. A ledger-event → live adapter → DOM regression checks the join and escaping. There is no published authenticated remote dashboard URL: the signed Kaji address is a protocol endpoint, not a dashboard address, and sessions belong to one base. Show the full destination reference with instructions to inspect that base; a direct destination link remains unmet pending an explicit inspection contract. EVA instance/pilot display remains F-049.  Slice 2 in [PR #139](https://github.com/voidbrain/nerv/pull/139) (2026-11-05): a request forwarded to the main base is a sortie on the asking base too, opened when it leaves (`kaji.forwarded`, before the request goes) and closed with the answer (`kaji.answered` with the main base's sortie ID) or as failed when none came; if the main base drops out, this base answers in the same sortie. The flow draws a relay route Detection → Debrief with the steps between skipped and Detection reading *forwarded to Neo Tokyo-3*; on the main base a relayed request reads *from Tabgha* (card and Detection). Checked: test/one-channel.test.ts (forwarded, answered, no answer, drop-out answered here; expectations changed on purpose: the asking base now keeps a sortie), test/dashboard.test.ts. Owner, 2026-11-05: the apartment's count is the header's sub-line (`.sub`), like every other panel, not a red badge ([PR #135](https://github.com/voidbrain/nerv/pull/135)). Slice 1 in [PR #133](https://github.com/voidbrain/nerv/pull/133) (2026-11-05): the chat says *Misato is planning*, or *Forwarded to Neo Tokyo-3 · Misato there is planning* when another online base is the main one; a running card names its real step from the sortie's latest event (Advise, Misato, MAGI, EVA, your card) instead of always MAGI; ADVISE names who advised (*advised by Print Master · gemma4:12b*) and the current action says so too; extra seats show the base's name (*+ Tabgha · shadow, not counted*); a skipped step is dashed and labelled *skipped*, not greyed out; Pattern badges carry their meaning (title and accessible name); stage tabs with counts in both sections (pilots Proto, Test, Prod, Retired; skills Seed, Sprout, Ripe, Dropped, or Create, Try, Use in Simple). Checked: test/dashboard.test.ts, a screenshot of both sections. Remaining: slice 2 (the relay step and the forwarded card on the asking base); EVA cages with the pilot inside (F-049). Owner decision 2026-11-05 on the two sections: they stay separate, each with stage tabs and a count per tab: Marduk Institute · Pilots `Proto | Test | Prod | Retired`, Kaji's watermelons · Skills `Seed | Sprout | Ripe | Dropped` (Simple: `Create | Try | Use | Dropped`); the generic pilot above the pilots' tabs (it has no stage). The Marduk Institute panel shows the real roster in [PR #125](https://github.com/voidbrain/nerv/pull/125) (owner, 2026-11-05: "dont see the 2 manually created"): `GET /api/pilots` (admin) and the live panel list the generic pilot (with the consultant model, or how to turn it on) and each pilot with name, domain, model, stage (PROTO, TEST, PROD) or RETIRED, pinned and keywords; the sub-line reads *proto → test → prod*. Kaji's watermelons is its own box, for the skills (owner, 2026-11-05: pilots are the Marduk Institute, skills are Kaji's watermelons): *Kaji's watermelons · skills* (Eva), *Skills* (Simple), planned until skills exist (F-045); fixed in [PR #126](https://github.com/voidbrain/nerv/pull/126) after #125 had put the watermelons into the pilots box by mistake. Stages change with `nerv pilots set ID --stage`; promoting from the panel is still to come. The panel title is renamed in [PR #123](https://github.com/voidbrain/nerv/pull/123): *Marduk Institute · Pilots* (Eva), *Pilots* (Simple, was "Skill trust stages"); its content (the real roster) is still to come. Owner, 2026-11-05 (S-1EBF): "a node should be idle if not running": a node animates only while its step is actually running; an interrupted, finished or stuck sortie shows every node idle (the card of S-1EBF kept MAGI blinking although nothing ran, B-013). Owner decision 2026-11-05 on names: the Watermelons panel becomes **Marduk Institute · Pilots** (the real roster: domain, model, base, pinned or retired, with Kaji's watermelons as the trust-stage badges), **Pilots** in the Simple theme; the signed registry of bases is **Gehirn** (renamed from "Marduk registry" in the code comments and architecture doc in [PR #117](https://github.com/voidbrain/nerv/pull/117)); the live sortie detail's stale line "pilots are skills" goes (a pilot uses skills; trust belongs to the pilot). Owner question 2026-11-05 ("Aoba · yesterday 13:31 · 1 action G: what's the G?"): the card's one-letter Pattern badges (G Green, O Orange, B Blue, · not voted yet) are not explained and a screen reader reads only the letter; each badge gets its meaning in words (a title and an accessible name, *Pattern Green*), and the legend appears on the card or in the help. Owner, 2026-11-05: also show who contributed, on this base and from others: the Gevurah node names who advised (a pilot, the generic one, or a pilot from another base); the MAGI node shows the extra seats ("+1 shadow · Tabgha") and its detail every seat's vote; the Watermelons panel lists the real pilot roster (stage, model, base, including pilots offered by other bases); the EVA cages show which pilot runs in which instance once EVAs exist (F-049). Today: Gevurah lights without a name, peer seats appear only in the selected sortie's ballot chips (by base ID, dashed when shadow), the Watermelons panel lists only owner and misato, cages show only their class. Planned 2026-11-05 from the owner's test.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 5 open steps total 5.75 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): the 5 open steps in hours total 9 h agent (steps table; method in each task basis). Day figures below are dated history. Medium remaining effort. Reassessed 2026-11-06: local rendering gaps repaired, but authenticated cross-base navigation and F-049 instance data still prevent closure; remaining work still needs browser/CI acceptance. Reassessed 2026-11-07: Raised to Large remaining effort: authenticated remote inspection, truthful directional base/channel topology and contributor/execution joins exceed three focused days; visual color/line tuning alone does not complete them.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #195](https://github.com/voidbrain/nerv/pull/195) project tuning and regressions;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #163](https://github.com/voidbrain/nerv/pull/163) channel telemetry and CI reconciliation;  [PR #162](https://github.com/voidbrain/nerv/pull/162) relay detail and acceptance review; Owner test on Tabgha 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-06 Ledger-to-live-detail regression passed for remote answer/reference, waiting, no answer, local continuation, escaping and local empty states. Chrome: real service/session and ledger fixture showed the answering base and full reference; scoped axe found zero violations and screenshot inspected. Full suite: 196 passed, one platform skip; build, typecheck, conventions and integrations passed. Merged PR #162 CI passed validate, windows and both native-macos runs (ci:status, runs 42247286378/42247282316); cross-base link and EVA labels remain unimplemented. |
+| Reviewed | 2026-11-07 |
+
+</details>
+
+---
+
+### <a id="f-052"></a>[✨ F-052](#top)
+
+**Timings for every step, live in the Sephirot; shadow seats never make you wait**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🔴 Large | 4.75 h | — | — | — | — |
+
+💻 **→** Next: record how long each call takes on the sortie's events.
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-05: how long did the job take, how long Misato, the EVA, is the ghost (shadow) voter slowing it? The ledger stamps only step boundaries: in S-3BFF, Misato's planning, Casper and Tabgha's shadow seat fall in one 95.7 s gap, so nobody can tell who was slow. The gate waited for every seat, also shadow ones whose vote does not count. |
+| **Reproduce** | Read a sortie's events: there is no duration per model call, per seat or per executor. |
+| **Check** | 1. Each call's duration is recorded with the sortie (consultant or pilot, each Misato step, Casper, each other base's seat, the executor). 2. The sortie detail and the why answer show them (*Misato 38 s · Casper 6 s · Tabgha (shadow) 41 s · EVA-02 0.1 s*); 2a. while a sortie runs, the Sephirot shows the elapsed time on the active node and each finished node's time (owner, 2026-11-05). 3. Shadow seats never delay: the gate decides once Casper and the veto seats have voted; a later shadow vote is recorded, never counted. 4. A daily summary (brief or health): median and slowest time per role, so a slow model or base stands out. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | F-052-T01 — Shadow seats never delay | — | 0 days | 0 remaining | Completed |
+| 🟡 Medium | F-052-T02 — Per-call duration recording | 1.75 h | 0 h | 1.75 h | Planned |
+| 🟢 Small | F-052-T03 — Durations in sortie detail and why answer | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-052-T04 — Live elapsed time in the Sephirot | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-052-T05 — Daily timing summary | 1 h | 0 h | 1 h | Planned |
+| 🔴 Large | **Total** | 4.75 h (4 of 5 steps) | 0 h (0 of 5 steps recorded) | 4.75 h | 1 of 5 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- F-052-T01: 0 remaining (2026-11-11). Delivered before featurePlans adoption; see the record.
+- F-052-T02: 1.75 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
+- F-052-T03: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-052-T04: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-052-T05: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+
+**Next action / closure evidence:** Owner extension 2026-11-07: transfer duration and step duration are different. A minimum recent-transfer pulse may improve visibility but must not claim the network is still communicating (B-040).  Item 3 in [PR #116](https://github.com/voidbrain/nerv/pull/116) (2026-11-05): `Runtime.usePeerSeats` (serve and the two-base test share it, instead of a copy in the test) returns each other base's vote as a pending promise; the gate waits for Casper and the veto seats only; a shadow vote already in goes on the card, one that comes later is recorded as `ballot.shadow` on its action (dashboard trace: *MAGI · NERV-02 (shadow, after the decision)*) and never changes the outcome. Checked: test/kaji-seats.test.ts (two runtimes, Tabgha's Casper answering after 1.5 s: in shadow the decision comes in under 1.2 s and the late reject is kept with the action; in veto it is waited for and stops the action; an absent base abstains), fails without the change (changed deliberately: the shadow vote is no longer always on the card); full suite 152 pass, build, headless. Remaining: items 1, 2, 2a and 4.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 4 open steps total 4.75 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort. Estimated 2026-11-05. Reassessed 2026-11-07: Raised to Large remaining effort: explicit call/transfer boundaries, live elapsed display, cross-base seats and summary statistics need instrumentation and end-to-end evidence across several components.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner question 2026-11-05 (ledger timing of S-7663 and S-3BFF); item 3 [PR #116](https://github.com/voidbrain/nerv/pull/116) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05 item 3: test/kaji-seats.test.ts and full suite (local run) |
+| Reviewed | 2026-11-07 |
+
+</details>
+
+---
+
+### <a id="f-048"></a>[✨ F-048](#top)
+
+**Parallel work: a visible queue, limits per model, a lock per item**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.75 h | — | [F-050](#f-050) | — | — |
+
+💻 **→** Next: show what is queued, then the per-item lock.
+
+| | |
+|---|---|
+| **Issue** | Owner questions 2026-11-05 on parallelism. Telegram requests run one at a time in order (a queue nobody sees); dashboard and CLI requests run side by side; within a sortie the pilot advises before Misato plans, and the seats vote in parallel; the real limit is the local model server (Ollama serves one model a few requests at a time and swaps models in and out of memory). Two sorties can act on the same item at once (edit and cancel the same reminder). |
+| **Reproduce** | Send two requests on Telegram quickly; send two from the dashboard; edit a reminder in one while another cancels it. |
+| **Check** | Each channel says when a request waits and behind how many ("queued, 2 ahead"); the dashboard shows queued and running sorties; a limit of concurrent model calls per model (a setting, from what the machine can hold) queues the rest instead of overloading; actions on the same item (a reminder, a fact) never run at the same time: the second waits for the first, then re-reads; tests cover the queue order, the limit and two actions on one item. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | F-048-T01 — Visible bounded request queue | 1.25 h | 0 h | 1.25 h | Ready |
+| 🟡 Medium | F-048-T02 — Per-model resource budgets | 1.25 h | 0 h | 1.25 h | Planned |
+| 🟡 Medium | F-048-T03 — Per-item mutation ownership | 1.25 h | 0 h | 1.25 h | Planned |
+| 🟡 Medium | **Total** | 3.75 h | 0 h (0 of 3 steps recorded) | 3.75 h | 0 of 3 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- F-048-T01: 1.25 h agent (2026-11-12). Estimate added at featurePlans adoption (2026-11-11): Visible bounded request queue with UI and tests; one of three steps of a Large parent. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.25 h); the baseline stays for calibration.
+- F-048-T02: 1.25 h agent (2026-11-12). Estimate added at featurePlans adoption (2026-11-11): Per-model resource budgets with admission and tests. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.25 h); the baseline stays for calibration.
+- F-048-T03: 1.25 h agent (2026-11-12). Estimate added at featurePlans adoption (2026-11-11): Per-item mutation ownership with concurrency tests. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.25 h); the baseline stays for calibration.
+
+**Next action / closure evidence:** Owner extension 2026-11-07: large plans need bounded chunking, separate coder/reviewer consultants, ordered dependencies, multiple review/refinement loops and resumable handoff history; define orchestration before claiming multi-step specialist execution.  Planned 2026-11-05 (owner).
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 3 open steps total 3.75 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Large remaining effort. Original Medium estimate dated 2026-11-05 is superseded by the expanded orchestration scope. Reassessed 2026-11-07: Large remains valid: chunking, multiple consultants and coder/reviewer handoffs need resumable orchestration and integration evidence.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner questions 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-08 |
+
+</details>
+
+---
+
+### <a id="b-042"></a>[🐞 B-042](#top)
+
+**Telegram approval card arrives after dashboard decision**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | — | — | — |
+
+💻 **→** Verify: PR #285's CI passed; 2 of the next ten CI runs are clean so far, with no `remote dashboard decision reconciles the main bot card` failure.
+
+| | |
+|---|---|
+| **Issue** | Reopened after PR #223 Windows test/one-channel.test.ts failed the existing remote dashboard decision reconciles the main bot card assertion; later seen on macOS under load and once on Linux coverage. Cause (2026-11-12): an awaited `deliver()` could return a pass already running whose cleanup had read the card's status before the decision (runtime), and the fixture's wait could pass before Aoba tracked the card (fixture). |
+| **Reproduce** | Any platform: `node --test --test-name-pattern="not a pass that read status" test/telegram-reconcile.test.ts` stalls a periodic pass's status lookup after it read the card as pending, decides on the dashboard, then awaits `deliver()`; before the fix no `editMessageReplyMarkup` is sent. |
+| **Check** | Explain the failure with controlled evidence; preserve exactly-once effects, eventual stale-button removal, retry/restart and signed lookup. A passing retry is not a causal fix. Do not weaken assertions or merely widen timeouts. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | B-042-T01 — Explain and fix the remote card cleanup that an awaited delivery missed | 2 h | 1.5 h (stated) | 0 h | Completed |
+| — | **Total** | 2 h | 1.5 h | 0 h | 1 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- B-042-T01: 0 remaining (2026-11-12). Task added 2026-11-12 when B-042 was taken up. Baseline 2.5 days (baselineDays, history: the record's 2–3 focused days of 2026-11-09), re-estimated 2026-11-12 in agent hours (harness 5.6.0) as 2 h, the session's time box (baselineAgentHours). About 1.25 h spent (stated: CI log search since #277, code-path reading, deterministic regression, fix, fixture precondition, channels regressions, records, fresh-context review and its should-fix item). 0.5 h remains: CI rounds including Windows, merge. Closed 2026-11-12 in the reconcile of PR #288: PR #285 merged at 06:20 UTC after CI 43166751719 passed plan, validate, Windows and native-macos; full-suite was skipped by the scoped selection, which ran the channel regressions on Windows. The whole suite with this fix first passed in #286's CI 43168006619 (head 94e3a0a merges #285; Windows, Linux coverage, full-suite on attempt 2); that run stands in for the full-suite item, stated here rather than assumed. Actual 1.5 h agent (stated): the 1.25 h above plus CI and merge from 06:14 to 06:20 UTC (GitHub timestamps), rounded up to a quarter hour. The parent's ten-run observation is not part of this step.
+
+**Next action / closure evidence:** Verified when PR #285's CI passes (Windows and full suite) and the next ten CI runs show no recurrence; a recurrence returns it to Investigate, first checking whether Aoba's timer pass and the test's awaited pass are still distinct (mechanism 1) and whether the card was tracked before the decision (mechanism 2).
+
+**Reconcile 2026-11-12 ([PR #288](https://github.com/voidbrain/nerv/pull/288)):** [PR #285](https://github.com/voidbrain/nerv/pull/285) merged into main `9aec642` at 06:20 UTC; its CI [43166751719](https://github.com/voidbrain/nerv/actions/runs/43166751719) passed plan, validate, Windows and native-macos, with full-suite skipped: the scoped selection ran test/one-channel.test.ts, test/telegram-reconcile.test.ts and the other channel regressions on Windows, not the whole Node suite. The whole suite with the fix included first ran in #286's CI [43168006619](https://github.com/voidbrain/nerv/actions/runs/43168006619) (head `94e3a0a` merges #285): Windows passed, Linux coverage passed on both attempts (attempt 1 failed only the browser step, [B-050](work/records/B-042.md#b-050)), full-suite passed on attempt 2. Runs since the merge that ran this case: 43168006619 (#286) and 43168381380 (F-005-T12 branch; Windows ran the suite, validate stopped at `check:work` before tests). No failure of this case in either (logs searched 2026-11-12). 2 of 10 so far; it stays Implemented. B-042-T01 closed.
+
+**Cause and fix 2026-11-12 ([PR #285](https://github.com/voidbrain/nerv/pull/285), B-042-T01):** **Recheck first.** Failed-job logs of every CI run since #277's run 43093410846 were searched (43098344555, 43105159883, 43105169242, 43106362909, 43106952492, 43108272198, 43118800708, 43121587426): none failed this assertion (their failures were B-046 and F-014 worker-link cases); every other completed run since then passed, all on attempt 1, including 7 runs after #279 merged and 43164854081 after #282. Too few runs to call the rarer B-042 failure gone, and none of #278/#279/#280/#282 touches the mechanism: they shorten worker-link and nervous-child latency, which only narrows the window below. **Mechanism 1 (runtime, reproduced):** Aoba delivers every 100 ms in the fixture; each pass starts with `reconcile()`, whose remote-card status is a signed lookup across the Kaji link. `deliver()` returned a pass already in progress, so when the test decided the card while a timer pass was between its lookup and its edits, `await aoba.deliver()` resolved with that pass's pre-decision snapshot and sent no edit. A slower lookup (loaded runner, slow child) widens the window: consistent with the load-dependent, cross-platform failures. Committed regression first (`test/telegram-reconcile.test.ts`, the stalled-lookup case above): failed at 95bf226, passes after. Fix: callers of `deliver()` while a pass runs share one follow-up pass that starts after it; passes never overlap; the periodic tick still skips while a pass runs, so a slow pass queues no ticks; `stop()` waits for the follow-up, which starts no pass after stop. **Mechanism 2 (fixture):** the fixture waited until the fake Bot API server recorded the relayed `sendMessage`, which happens before Aoba reads the response and tracks the card (the same gap the fallback step's comment already names); a decision in that gap is caught by `sendMessage`'s own post-send status check, which the awaited delivery does not wait for. The fixture now waits until Aoba tracks the card (read in memory). No timeout widened, no assertion changed. **Ruled out:** cleanup coalescing (`reconcile()` is only called from the serialized `deliverOnce`); the B-046 verdict race (the lookup completes, it is just stale). **Fresh-context review 2026-11-12 (design-reviewer):** no must-fix; verified fail-before/pass-after and no overlap in the microtask gap. Applied: the fixture first polled Aoba's state file, which on Windows could make Aoba's own atomic save fail while the file is open; it now reads the tracked cards in memory. Noted: an awaited `deliver()` can now take up to two passes (each cleanup bounded at 8 s), so the next Telegram update in the serialized queue may wait longer when a remote base is slow; bounded, no starvation. Channels regressions pass locally (63 of 63, macOS); one-channel 3 of 3 runs.
+
+Earlier next action (2026-11-09, done above): inspect event ordering for remote card registration, status snapshot and a concurrent/coalesced deliver pass, then reproduce under controlled scheduling before any fix. These are hypotheses, not proof of a production regression or harmless infrastructure noise. Existing deliver() coalesces an active pass; the fixture expects a new cleanup edit after explicitly awaiting delivery. No Telegram/Kaji executable or assertion changed in PR #223. Retain the [original B-042 closure](archive/backlog-2026.md#b-042) and its regression/browser evidence; this observation does not erase the earlier successful scope.
+
+**Observation 2026-11-11 ([PR #261](https://github.com/voidbrain/nerv/pull/261)):** during an unrelated local full-suite run on macOS (Node 26) the one-channel case failed once and passed 3 of 3 alone, then 16 of 16 in the [timing reassessment](reviews/2026-11-11-timing-reassessment.md) runs, 8 of them under CPU contention. The failure is therefore load-dependent and not Windows-only; cause still unproven. Re-examine after B-046 and B-043, which reduce background churn in the same fixtures.
+
+**Observation 2026-11-11 ([PR #277](https://github.com/voidbrain/nerv/pull/277), run [43093410846](https://github.com/voidbrain/nerv/actions/runs/43093410846)):** Linux `validate` (`npm run test:coverage`) failed this case on `remote dashboard decision reconciles the main bot card`; the same command passed locally on macOS (585 passed, 0 failed) at the same head. #277 changes no runtime code (harness tools, records and docs), so this is another occurrence with no runtime change, and the first seen on Linux. The case crosses the worker link; whether it shares the B-046 cause fixed in [PR #278](https://github.com/voidbrain/nerv/pull/278) (a verdict before frames already received were applied) is unproven: recheck after #278 merges.
+
+**Estimates:** 2026-11-12: B-042-T01 closed at about 1.5 h agent (stated) against 2 h; remaining work is observation of the next eight runs only. Re-estimated 2026-11-12 in agent hours (harness 5.6.0): B-042-T01 had 0.5 h agent remaining (CI, merge); about 1.25 h spent (stated); method in the task basis. Day figures are dated history: 2–3 focused days estimated 2026-11-09.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Reconcile: [PR #288](https://github.com/voidbrain/nerv/pull/288). Fix: [PR #285](https://github.com/voidbrain/nerv/pull/285) (B-042-T01), CI [43166751719](https://github.com/voidbrain/nerv/actions/runs/43166751719) green (full-suite skipped); last occurrence [PR #277 run 43093410846](https://github.com/voidbrain/nerv/actions/runs/43093410846) (Linux coverage). [PR #267 CI 43012116246](https://github.com/voidbrain/nerv/actions/runs/43012116246) (2026-11-11, harness/records-only PR: `.gitignore`, version stamp, CI template clone): Windows failed this one-channel case on `remote dashboard decision reconciles the main bot card` again; another occurrence with no runtime change. [PR #261](https://github.com/voidbrain/nerv/pull/261) timing reassessment; [PR #223](https://github.com/voidbrain/nerv/pull/223); [CI 42535069202 attempt 1](https://github.com/voidbrain/nerv/actions/runs/42535069202/attempts/1) Windows failed card-cleanup assertion, Linux later failed only recap week validation. Test: test/one-channel.test.ts remote dashboard decision reconciles the main bot card. Earlier closure: PR #203 CI 42425786736/42425784575; preserved in archive. |
+| Opened | 2026-11-07 |
+| Verification | 2026-11-09: Windows failure observed. Isolated unchanged Mac Node26 one-channel file passed all five cases; does not establish a causal fix. Final unchanged head737fa53 passed Windows in CI 42535553841; investigation still pending, not a causal fix. 2026-11-12: mechanism reproduced deterministically (test/telegram-reconcile.test.ts fails before the fix, passes after; local macOS). CI on the fix passed (PR #285 CI 43166751719, scoped; full suite with the fix in #286 CI 43168006619). Later runs: 2 of 10 clean (43168006619, 43168381380); eight pending. |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+### <a id="b-050"></a>[🐞 B-050](#top)
+
+**Dashboard browser test reads the banner before the page has loaded**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.5 h | — | — | — | — |
+
+💻 **→** Fix implemented in [PR #294](https://github.com/voidbrain/nerv/pull/294): until retries through navigation evaluation exceptions until condition holds. Next: CI and merge.
+
+| | |
+|---|---|
+| **Issue** | [PR #286](https://github.com/voidbrain/nerv/pull/286) CI [43168006619](https://github.com/voidbrain/nerv/actions/runs/43168006619/attempts/1) attempt 1, job validate (`npm run test:browser`): `test/evaluation.browser.mjs` case golden-v1/dashboard failed with `TypeError: Cannot read properties of null (reading 'textContent')` on the first `until` right after `Page.navigate` (`document.querySelector('.banner')` was null). The fixture's `until` (`test/fixtures/browser.mjs`) throws as soon as the evaluated expression throws instead of retrying, so a page that has not loaded yet fails the test. Attempt 2 (failed jobs rerun, same head `94e3a0a`) passed; local runs passed 3 of 3. Whether #286's service worker plays a part is not established (the test uses a fresh browser profile, per the F-004 agent). |
+| **Reproduce** | `npm run build && node --test test/evaluation.browser.mjs` (case golden-v1/dashboard); intermittent, seen once in CI. Deterministically: evaluate the case's first `until` expression before the dashboard document has its `.banner` (for example against `about:blank`, or with the dashboard response delayed). |
+| **Check** | A committed test fails before the fix: `until` on an expression that throws while the page is still loading fails at once. After the fix the wait retries across navigation, or waits for the document to load, and still fails with a clear timeout when the condition never holds. The case's assertion (`LIVE ·` shown, `SIGNING IN` gone) is unchanged; no timeout widened. Browser CI passes. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | B-050-T01 — Fix browser fixture until abortion on evaluated expression exceptions | 1 h | 0.5 h so far (stated) | 0.5 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 1 h | 0.5 h | 0.5 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- B-050-T01: 0.5 h remaining (2026-11-12). Task added 2026-11-12 when B-050 was taken up. Baseline 1.5 h agent (baselineAgentHours), the estimate recorded when B-050 was opened. Regression test committed first (feb13de), until retry in test/fixtures/browser.mjs, all browser tests passing. 0.5 h remains for review and CI. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 0.5 h → 0.5 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+
+**Fix implemented 2026-11-12 ([PR #294](https://github.com/voidbrain/nerv/pull/294)):** committed failing tests in `test/evaluation.browser.mjs` (commit `feb13de`) reproducing immediate `until` failure on expression exceptions during page loading and timeout error format. In `test/fixtures/browser.mjs`, `until` now catches evaluation exceptions and retries until the condition holds or timeout expires, including last error message on timeout. All browser tests pass. Next: CI and merge.
+
+**Next action / closure evidence:** Write a failing test for the race in the browser fixture, then fix the wait: retry `until` while the expression throws during navigation (keeping the last error for the timeout message), or wait for the navigated document to load before the first `until`. Do not weaken the assertion or widen the 15 s timeout. Check whether other `until` callers right after `Page.navigate` (test/evaluation.browser.mjs, test/pwa.browser.mjs and the other browser tests) share the race, and whether the service worker added in #286 changes page timing in the CI browser. Verified when the fix's CI passes and later browser runs show no recurrence.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 1 open step has 0.5 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Small, about 1.5 h agent (estimated 2026-11-12, not a measurement): a fixture-level failing test, a small change to `until` or the navigation wait, the browser suite locally, review and CI. Uncertain if the service worker turns out to be involved.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: test/evaluation.browser.mjs "B-050: until retries through evaluated expression exceptions and resolves when condition holds" (committed failing in feb13de, passes after fix). Test: test/evaluation.browser.mjs "B-050: until still fails with timeout when throwing condition never holds" (committed failing in feb13de, passes after fix). Recorded in [PR #288](https://github.com/voidbrain/nerv/pull/288). Observed: CI 43168006619 attempt 1, job validate (job 131014457197), `test/evaluation.browser.mjs:62` via `until` in `test/fixtures/browser.mjs`; attempt 2 job validate (131017084799) passed on the same head. Same run, attempt 1: F-004-T01's own browser case passed. |
+| Opened | 2026-11-12 |
+| Verification | Pending. 2026-11-12: one CI failure observed; a rerun on the same head and 3 of 3 local runs (F-004 agent) passed. Not reproduced deterministically yet. |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+### <a id="b-053"></a>[🐞 B-053](#top)
+
+**F-029 descendant-process test failed once in CI with every process already gone**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🟠 Investigate | 🔶 P2 | 🟢 Small | 1 h | — | — | — | — |
+
+💻 **→** Next: find why the second liveness check saw a PID the first one did not, and make the test decide on one observation (B-053-T01).
+
+| | |
+|---|---|
+| **Issue** | PR #316's validate job (run 43286749372, `npm run test:coverage`, Linux) failed `F-029: a timed-out scenario terminates its owned descendant process` with `no executing child survives the group timeout`, actual `[3708]`. The test took 5,030 ms in total: the 5 s run budget plus about 30 ms, so its wait loop (`while (owned.some(alive))`, up to 5 s) ended at once with nothing alive, and the following `owned.filter(alive)` found PID 3708 alive. The PR does not touch the runner or the test. Likely a race between the two separate liveness reads (PID reuse under coverage load, or the zombie check in `/proc/<pid>/stat` reading differently); inferred, not observed. |
+| **Reproduce** | `node --test --test-name-pattern='terminates its owned descendant' test/evaluation-runner.test.mjs` passed 5 of 5 locally on macOS on 2026-11-12; the failure was seen once on Linux CI under coverage. |
+| **Check** | A committed test or measurement shows the two-read race (or names another cause); the test decides on one observation per process and still fails when a descendant really survives; CI passes repeatedly. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | B-053-T01 — Find and remove the liveness race in the F-029 descendant-process test | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- B-053-T01: 1 h (2026-11-12). Estimated 2026-11-12: read the runner's group termination, reproduce under load on Linux, one bounded test change. Not a measurement.
+
+**Next action / closure evidence:** B-053-T01. If the runner really leaves a descendant, that is a runner defect under F-029 and the fix goes there, test unchanged.
+
+**Estimates:** Small, estimated 2026-11-12, not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Seen on [PR #316](https://github.com/voidbrain/nerv/pull/316), CI run 43286749372 job validate. |
+| Opened | 2026-11-12 |
+| Verification | Pending. |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+### <a id="b-055"></a>[🐞 B-055](#top)
+
+**The Windows service launcher runs Node from an fnm per-shell path**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🟠 Investigate | 🔶 P2 | 🟢 Small | 1 h | — | — | — | — |
+
+💻 **→** Next: resolve the Node path at install to a stable target and test it on all three service definitions (B-055-T01).
+
+| | |
+|---|---|
+| **Issue** | 2026-11-12 on Tabgha: `nerv-service.vbs` runs `…\fnm_multishells\<id>\node.exe`, a junction fnm creates for one shell session; `service install` wrote it from `process.execPath` (src/service.ts). Over SSH that path did not run, while the permanent install (`…\fnm\node-versions\v24.22.2\installation\node.exe`) did. If fnm's per-shell junctions are cleaned up, the scheduled task can no longer start NERV. |
+| **Reproduce** | On Windows with Node from fnm, run `service install` from an fnm shell and read the Node path in `%USERPROFILE%\.nerv\nerv-service.vbs`. |
+| **Check** | `service install` records a stable Node path (the junction's target, or refuses with a clear message naming the fix) on Windows, and the same rule holds for the launchd and systemd definitions; a test covers a per-shell path. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | B-055-T01 — Service definitions record a stable Node executable | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- B-055-T01: 1 h (2026-11-12). Estimated 2026-11-12: path resolution plus one test per service definition. Not a measurement.
+
+**Next action / closure evidence:** B-055-T01. A bug fix starts with a committed failing test.
+
+**Estimates:** Small, estimated 2026-11-12, not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Found during the B-008 reproduction, [evidence](acceptance/b008-tabgha-2026-11-12.md); [PR #318](https://github.com/voidbrain/nerv/pull/318). |
+| Opened | 2026-11-12 |
+| Verification | Pending. |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+### <a id="b-049"></a>[🐞 B-049](#top)
+
+**Misato invents a reminder title instead of asking, when an Italian request gives none**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.25 h | — | — | — | — |
+
+💻 **→** Next: classify (prompt, plan validation or model choice) and plan a fix with a failing case first.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-12 in the owner-approved B-021 real-model run (gemma4:12b, local): for `Imposta un promemoria per il primo gennaio 2031 alle 09:00 UTC.` (no title), Misato proposed `reminders.add` with an invented title (`Promemoria`, `Promemoria per il primo gennaio 2031`) instead of asking. The prompt for this case is byte-identical to main before B-021's change. The same case passed on 2026-11-08. Misato's prompt already says never to invent a title. |
+| **Reproduce** | `npm run evals:model -- --role=misato --model=gemma4:12b --limit=4` (case `italian-missing-title` in evals/planner-v1.json), or the probe of the same case; 2 of 5 attempts asked on 2026-11-12. |
+| **Check** | A request without a title gets a question in the request's language, never an invented title; measured on the frozen case over repeated runs with its rate recorded, and any deterministic guard covered by a test. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | B-049-T01 — Classify and fix the invented reminder title | 1.25 h | 0 h | 1.25 h | Planned |
+| 🟡 Medium | **Total** | 1.25 h | 0 h (0 of 1 steps recorded) | 1.25 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- B-049-T01: 1.25 h agent (2026-11-12). Added 2026-11-12 at the harness 6.0.0 reconcile, which gives every record a step: the record's own Small estimate (classification, a guard or prompt change with tests, an owner-approved rerun) in agent hours, judged at the NERV rate of about 1.5 agent hours per former focused day plus review and CI; model time of the rerun not counted. Estimate, not a measurement. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2 h → 1.25 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.25 h); the baseline stays for calibration.
+
+**Owner approval 2026-11-12:** real-model reruns for B-049, at most 12 invocations and 60 minutes of model time, gemma4:12b on loopback Ollama, no cloud route and no paid usage (the same limits as B-021). State the exact cases before running. Not started (owner: finish current work first).
+
+**Next action / closure evidence:** Classify the failure: model competence on gemma4:12b (a prompt or model change), or a deterministic guard (for example, a reminder title that occurs nowhere in the request or earlier exchanges goes back to Misato as invalid). Plan a fix with a failing case first. Real-model reruns need the owner's approval and budget.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 1 open step has 1.25 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Small: classification, a guard or prompt change with tests, and an owner-approved rerun. Estimated 2026-11-12, not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | docs/evaluations/2026-11-12-misato-b021.json (`italian-missing-title` failed: invented title `Promemoria`); development probe of the same case 2026-11-12: 1 of 3 asked, 2 invented a title; docs/evaluations/2026-11-12-misato-v2.json (passed: it asked); docs/evaluations/2026-11-08-misato.json (passed). Found in B-021's run. |
+| Opened | 2026-11-12 |
+| Verification | Pending. |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+### <a id="b-052"></a>[🐞 B-052](#top)
+
+**Owner actions point at procedures the owner has to hunt for**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.5 h | — | — | — | — |
+
+💻 **→** Next: give each listed owner action a linked copy-paste procedure (B-052-T01).
+
+| | |
+|---|---|
+| **Issue** | Owner, 2026-11-12, on F-005: its human action said "run the T13 copy-paste procedure below", but the procedure sat inside the collapsed details, the Reproduce row said only "Follow README commands and the owning milestone in ROADMAP" with no link, and the cue still waited on an already merged PR. "I should not manually search for files and lose myself between pointers of pointers." F-005 fixed here; F-006 and F-016 now link their decisions. Still without a linked procedure: B-008 ("steps in details"), F-004, F-009, F-011, F-015, F-023. |
+| **Reproduce** | Open [the backlog]() and read the human-action line of B-008, F-004, F-009, F-011, F-015 or F-023: none links the exact commands or steps to run and their expected result. |
+| **Check** | Every 🧑 line that asks the owner to run or check something links one page (or a visible section of the record) with copy-paste blocks and the expected result; its Reproduce row links the same; no "below", "in details" or bare path. Harness rule: project-harness F-064. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | B-052-T01 — Linked copy-paste procedures for the remaining owner actions | 2.5 h | 0 h | 2.5 h | Planned |
+| 🟡 Medium | **Total** | 2.5 h | 0 h (0 of 1 steps recorded) | 2.5 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- B-052-T01: 2.5 h (2026-11-12). Estimated 2026-11-12: about 25 minutes per procedure for six, drafted from each record's existing evidence, plus links and checks. Not a measurement.
+
+**Next action / closure evidence:** B-052-T01: write the missing procedures under docs/acceptance/ (macOS Terminal for Neo Tokyo-3, PowerShell for Tabgha) and link them from each human-action line and Reproduce row. Template rule requested upstream as project-harness F-064; this record owns only NERV's records.
+
+**Estimates:** Small: six procedures drafted from the existing evidence in each record. Estimated 2026-11-12, not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #311](https://github.com/voidbrain/nerv/pull/311): F-005 procedure moved to [docs/acceptance/f005-t13-mac-update-procedure.md](acceptance/f005-t13-mac-update-procedure.md). |
+| Opened | 2026-11-12 |
+| Verification | Pending. |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+### <a id="b-054"></a>[🐞 B-054](#top)
+
+**A long chat reply on the main base fails at the 120 s model-call limit**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🟠 Investigate | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | — | — |
+
+💻 **→** Next: measure where the 210 s went (plan steps, tokens, thinking) and decide limit, output cap or streaming (B-054-T01).
+
+| | |
+|---|---|
+| **Issue** | 2026-11-12, B-008 reproduction: a five-paragraph request relayed from Tabgha ran 209.6 s and ended *Could not finish: Local route (S²) timed out.*; Neo Tokyo-3's log: *S² local route down … back after 1 min*. Misato there runs `gemma4:12b` with thinking at about 24 tokens/s on this Mac (Ollama log, F-074-T09), so about 2,900 tokens fit in `MODEL_TIMEOUT_MS` (120 s): an ordinary long answer can exceed it, and the route is then marked down for every request. |
+| **Reproduce** | On the main base with Misato on `gemma4:12b` (thinking on), ask in chat for five detailed paragraphs on any topic; watch the reply and the service log. |
+| **Check** | A long reply within the configured output allowance completes, or fails with a reason that says the answer was too long rather than marking the route down; any new limit is backed by a measured token rate; one slow reply does not take the route down for other requests. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | B-054-T01 — Long replies within the output allowance do not time out the model route | 1.5 h | 0 h | 1.5 h | Planned |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- B-054-T01: 1.5 h (2026-11-12). Estimated 2026-11-12: one measurement on the Mac, one bounded change with a failing test first. Not a measurement.
+
+**Next action / closure evidence:** B-054-T01. A bug fix starts with a committed failing test.
+
+**Estimates:** Small, estimated 2026-11-12, not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Found during the B-008 reproduction, [evidence](acceptance/b008-tabgha-2026-11-12.md); [PR #318](https://github.com/voidbrain/nerv/pull/318). |
+| Opened | 2026-11-12 |
+| Verification | Pending. |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+### <a id="b-057"></a>[🐞 B-057](#top)
+
+**Companion error messages are Italian only and do not say what went wrong**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | — | — |
+
+💻 **→** Next: translate every companion error and name revoked, unreachable and changed-certificate cases apart (B-057-T01).
+
+| | |
+|---|---|
+| **Issue** | 2026-11-12, F-015-T03: with English selected, a revoked credential showed *NERV non disponibile o richiesta rifiutata. Verifica servizio e abbinamento.*: `NativeError` descriptions are Italian strings and `tr()` has no English for them. The same text covers a stopped service, a refused (revoked or expired) credential and any other non-2xx reply, so it does not tell the owner to pair again. After a certificate rotation the pin refusal showed a bare system *cancelled* (the TLS challenge is cancelled), not that the certificate no longer matches the pairing. |
+| **Reproduce** | Select English in the companion; revoke its client with `npm start -- revoke CLIENT_ID` and choose Refresh status; or stop the service; or rotate the native certificate as in native/README.md and refresh. |
+| **Check** | Every companion error text exists in English and Italian; a 401 says the pairing was revoked or expired and to pair again; an unreachable service says so; a certificate that no longer matches says so and that nothing was sent; Swift tests cover each mapping. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | B-057-T01 — Translated, specific companion error messages | 1.5 h | 0 h | 1.5 h | Planned |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- B-057-T01: 1.5 h (2026-11-12). Estimated 2026-11-12: status-code and pin-failure mapping, English texts, Swift tests. Not a measurement.
+
+**Next action / closure evidence:** B-057-T01. A bug fix starts with a committed failing test.
+
+**Estimates:** Small, estimated 2026-11-12, not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Found in F-015-T03, [evidence](acceptance/f015-live-failures-2026-11-12.md); [PR #325](https://github.com/voidbrain/nerv/pull/325). |
+| Opened | 2026-11-12 |
+| Verification | Pending. |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+### <a id="f-056"></a>[✨ F-056](#top)
+
+**Slash commands in Telegram and the dashboard chat, and how much Aoba tells you**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🔴 Large | 5.75 h | [F-021](#f-021), [F-042](#f-042) | — | — | — |
+
+💻 **→** Next: remaining commands, Telegram command menu and /log controls; status/help read router implemented before Misato.
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-05: can commands be used from Telegram and the chat with "/"? At that report only `/start` had a dedicated path; other text went to Misato with a model call. Owner confirmed 2026-11-06 that `/status` gets a working reply from Aoba; at that time source still routed it through store.chat; the status/help slice below now provides deterministic acceptance. The owner also proposed `/log` to set how much is reported (all, conversation, …). |
+| **Reproduce** | Send `/status` to Aoba and compare the returned facts with the records; check that the command router answers without a model and without a new sortie. |
+| **Check** | The same commands in Telegram (registered, so typing "/" shows the list) and the dashboard chat, answered before Misato and without a model: `/help`, `/status` (this base's health, the other bases, cards waiting, the next reminder), `/cards` (with their buttons), `/reminders`, `/why S-…`, `/brief`, `/pilots`, `/bases`, `/spear [S-…]` (with a confirmation button), `/log conversation\|steps\|all` (conversation: replies and cards, the default; steps: also one line per action that ran; all: every trace line, advice, votes with shadow seats, other bases' results); read-only commands open no sortie, `/spear` and `/log` changes are recorded; an unknown command answers with `/help`. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | F-056-T01 — Shared command catalog and deterministic router | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | F-056-T02 — Read-only commands | 1.75 h | 0 h | 1.75 h | Planned |
+| 🟢 Small | F-056-T03 — /spear and /log | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-056-T04 — Telegram menu registration and dashboard slash menu | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-056-T05 — Group and connected-account assessment | 1 h | 0 h | 1 h | Planned |
+| 🔴 Large | **Total** | 5.75 h | 0 h (0 of 5 steps recorded) | 5.75 h | 0 of 5 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- F-056-T01: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-056-T02: 1.75 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
+- F-056-T03: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-056-T04: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-056-T05: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+
+**Next action / closure evidence:** Owner extension 2026-11-07: assess one Telegram group with multiple base bots, welcome/common-action panel and slash menus generated from the shared command catalog. Current private-owner-chat authorization must not be silently widened. Assess official connected-business-bot or separately authorized user-client messaging as a distinct capability; never impersonate the owner through an ambient browser session.  Owner report 2026-11-06: “Ask Tabgha his /status” went to a consultant/model and returned a guessed capability description in Italian despite an English request. Implemented a read-only pre-planning router for /status [base], /help, unknown slash help and that narrow English alias. Status is from local records and each base’s last report, explicitly labelled; no model, dispatch or new sortie. Dashboard displays command replies without selecting a nonexistent sortie. Existing configured bots continue reading owner messages while main handles outgoing delivery; see B-037. Automated REST/runtime and actual Telegram process tests verify no model call/sortie; merged PR #166 passed validate, windows and native-macos (runs 42280638858/42280632455). This fixes the reported status path, not every possible language-following failure in model replies. The full listed command set, menu and /log acceptance remain outstanding.  Owner report 2026-11-06: Telegram `/status` works. This is Human evidence of a successful reply, not of deterministic routing or the full command set. Before the current slice, src/telegram.ts special-cased /start then sent other owner text to store.chat; the new Runtime read-command router handles status/help there. Full slash routing and Telegram menu registration are still incomplete. Still required: automated checks for every listed command in Telegram and the dashboard, model-free read paths/no new sortie, owner authorization and confirmation for changes, recorded /spear and /log changes, and unknown-command /help behavior. Planned 2026-11-05 (owner: after F-021). Builds on B-004 (the why answer), F-042 (Misato reads the agency) and F-028 (the brief).
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 5 open steps total 5.75 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort. Reassessed 2026-11-06: status/help entry points are implemented, while most commands, menu and verbosity controls remain.  Reassessed 2026-11-06: the observed /status reply adds human evidence, but the agreed deterministic router/menu and command checks remain unimplemented. Reassessed 2026-11-07: explicit prerequisite outcomes preserve the existing scope and remaining-work estimate; independent slices can proceed. Reassessed 2026-11-07: Raised to Large remaining effort: the shared command catalog, welcome/common-action UI and group/account-integration assessments exceed the current two-command surface; account messaging remains assessment scope, not an implemented integration.
+
+| Field | Value |
+|---|---|
+| Depends on | [F-021](#f-021) — Owner-selected prerequisite for remaining command work<br />[F-042](#f-042) — Record-reading interface for agency query commands |
+| PR / evidence | [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #167](https://github.com/voidbrain/nerv/pull/167) archive adoption/source review and CI reconciliation;  [PR #166](https://github.com/voidbrain/nerv/pull/166) map/tabs and Midori routing/status;  [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner question 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-06 Human: owner reports Telegram /status works. Source review: deterministic router/menu and full command-set automated checks remain pending. |
+| Reviewed | 2026-11-07 |
+
+</details>
+
+---
+
+### <a id="f-050"></a>[✨ F-050](#top)
+
+**Forwarding a whole job to another base**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.5 h | [F-045](#f-045), [F-048](#f-048) | — | — | — |
+
+💻 **→** Next: the job message and its fallback, for capability first.
+
+| | |
+|---|---|
+| **Issue** | Owner questions 2026-11-05: can a base forward a full job to another, when it is busy or when the other does better; why, when and how. Today a base that is not the main one forwards whole requests to the main base (one channel, F-036), and the main base sends single actions to a base that offers them (slice 3b); the main base never hands a whole job to another base. |
+| **Reproduce** | Ask the main base for a job only another base can do well (Tabgha's 3D expert, its GPU, a device next to it). |
+| **Check** | The main base forwards a whole job when another base has the pilot, model, tool or device it needs (capability), when its own queue or model is busy and the other is idle (load), or when the data or device is there (locality), never a job with local-only or tainted data (the Scrolls decide what may leave); the job goes as one signed Kaji message with a job ID (it never runs twice) and only the context the Scrolls allow; the receiving base runs the whole sortie with its own Misato, pilot and gate, never looser than the main base's Scrolls; cards still reach the owner through Aoba; the result returns as a follow-up and the main ledger records where it ran and why; if the base goes silent, reconcile durable job receipts and resource ownership before any retry or reassignment; silence alone never proves execution stopped; tests across two bases. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | F-050-T01 — Whole-job handoff contract | 1.75 h | 0 h | 1.75 h | Planned |
+| 🟡 Medium | F-050-T02 — Uncertain handoff reconciliation | 1.75 h | 0 h | 1.75 h | Planned |
+| 🟡 Medium | **Total** | 3.5 h | 0 h (0 of 2 steps recorded) | 3.5 h | 0 of 2 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- F-050-T01: 1.75 h agent (2026-11-12). Estimate added at featurePlans adoption (2026-11-11): Whole-job handoff contract and regressions. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
+- F-050-T02: 1.75 h agent (2026-11-12). Estimate added at featurePlans adoption (2026-11-11): Uncertain handoff reconciliation and regressions. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
+
+**Next action / closure evidence:** Planned 2026-11-05 (owner). Builds on F-036, F-045 (pilots offered by other bases) and F-048.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 2 open steps total 3.5 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Reassessed 2026-11-06 with B-028: removing unused speculative types does not remove implemented behavior; concrete tested contracts remain part of this feature, so Large remains valid.  Large remaining effort. Estimated 2026-11-05. Reassessed 2026-11-07: explicit prerequisite outcomes preserve the existing scope and remaining-work estimate; independent slices can proceed.
+
+| Field | Value |
+|---|---|
+| Depends on | [F-045](#f-045) — Remote pilot capability offers for capability-based forwarding<br />[F-048](#f-048) — Queue and concurrency limits for load-based forwarding; capability-first work can proceed |
+| PR / evidence | [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner questions 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-08 |
+
+</details>
+
+---
+
+### <a id="f-049"></a>[✨ F-049](#top)
+
+**EVA instances: an EVA is a class, each job gets a fresh sandbox**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟣 Very large | 13.75 h agent + 0.75 h owner | [F-045](#f-045), [F-025](#f-025) | [F-021](#f-021), [F-027](#f-027) | — | — |
+
+💻 **→** Next: the EVA class definition and one sandboxed instance per job, starting with EVA-03 (owner, 2026-11-05).
+
+| | |
+|---|---|
+| **Issue** | Owner questions 2026-11-05: why one EVA-00, -01, -02 per machine, two copies of a pilot, two EVA-02 with two agents. Today no EVA exists: every action runs inside the scheduler process (the dashboard's "EVA-02 · in-process executor, not sandboxed yet"), and the four cage slots were a drawing, not a rule. |
+| **Reproduce** | Look at the dashboard's EVA cages: three say planned, EVA-02 runs in process. |
+| **Check** | An EVA is a class (what a job may touch: EVA-00 no external effects, EVA-01 bounded, EVA-02 full grant, EVA-03 quarantine for untrusted input); each job runs in a fresh instance of its class, discarded afterwards; several instances run at once within limits per machine (CPU, memory, model slots); a job asks for the least class it needs, capped by its pilot's stage (a Production pilot may run in EVA-01, a Prototype one never in EVA-02); the same pilot can run two jobs at once, each in its own instance; the dashboard shows instances per class. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | F-049-T01 — Define deterministic isolated runner admission and enforcement | 1.75 h | 0 h | 1.75 h | Ready |
+| 🟢 Small | F-049-T02 — EVA class definitions and least-class admission | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | F-049-T03 — Choose the macOS host enforcement mechanism | 1.25 h | 0 h | 1.25 h agent + 0.25 h owner | Planned |
+| 🟡 Medium | F-049-T04 — EVA-03 instance per job | 1.75 h | 0 h | 1.75 h | Planned |
+| 🟡 Medium | F-049-T05 — Escape and recovery join tests | 1.25 h | 0 h | 1.25 h | Planned |
+| 🟡 Medium | F-049-T06 — Concurrent instances within per-machine limits | 1.25 h | 0 h | 1.25 h | Planned |
+| 🟡 Medium | F-049-T07 — EVA-00, EVA-01 and EVA-02 on the runner | 1.75 h | 0 h | 1.75 h | Planned |
+| 🟢 Small | F-049-T08 — Pilot trust stage caps the class | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-049-T09 — Dashboard shows instances per class | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | F-049-T10 — Linux host enforcement for the mini PC | 1.75 h | 0 h | 1.75 h agent + 0.5 h owner | Planned |
+| 🟣 Very large | **Total** | 13.75 h | 0 h (0 of 10 steps recorded) | 13.75 h agent + 0.75 h owner | 0 of 10 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- F-049-T01: 1.75 h agent (2026-11-12). Estimate added at featurePlans adoption (2026-11-11): deterministic isolated runner admission and enforcement contract. Later steps F-049-T02–T10 planned 2026-11-11. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
+- F-049-T02: 1 h agent (2026-11-12). Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-049-T03: 1.25 h agent + 0.25 hours owner (2026-11-12). Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent + 0.25 hours owner; agent evaluates candidates at the usual rate; the owner chooses when more than one passes. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.25 h); the baseline stays for calibration.
+- F-049-T04: 1.75 h agent (2026-11-12). Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
+- F-049-T05: 1.25 h agent (2026-11-12). Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.25 h); the baseline stays for calibration.
+- F-049-T06: 1.25 h agent (2026-11-12). Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.25 h); the baseline stays for calibration.
+- F-049-T07: 1.75 h agent (2026-11-12). Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
+- F-049-T08: 1 h agent (2026-11-12). Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-049-T09: 1 h agent (2026-11-12). Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-049-T10: 1.75 h agent + 0.5 hours owner (2026-11-12). Planned 2026-11-11 from the F-049 Check and the execution-boundaries assessment, after the owner asked why only F-049-T01 was planned. Later steps depend on T01/T03 findings; the owner may revise any split. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent + 0.5 hours owner; agent work at the usual rate; the owner runs the first job on the mini PC. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
+
+**Next action / closure evidence:** Full audit 2026-11-06: the order is EVA-03 first, as the owner chose on 2026-11-05 (the tools process moves into it, so EVA-03 grants can run); the next action said EVA-00. Planned 2026-11-05 (owner). Builds on F-045 pilots and the F-025 stages.
+
+**Accepted assessment 2026-11-09:** [execution boundaries](reviews/2026-11-09-execution-boundaries.md). T01 defines the NERV-owned deterministic runner/warden contract: existing grants remain authority; enforce per-job filesystem/network/credential/resource limits, protected grader separation, cancellation and uncertain-effect reconciliation. Preserve failed-attempt ledger evidence; sandbox discard never claims rollback of external effects. Keep the runner in NERV until extraction has a second consumer or independent lifecycle. EVA-03 remains first; this does not implement confinement or alter queue order.
+
+**Retained alternative 2026-11-09:** [external-project assessment](reviews/2026-11-09-external-agent-projects.md): assess AgentFS as a per-job filesystem/state layer against T01. Verify platform-specific filesystem/network/credential/resource enforcement and default host allows; snapshots cannot roll back central authority or external effects. No confinement is delivered by this reference.
+
+**Plan 2026-11-11 ([PR #273](https://github.com/voidbrain/nerv/pull/273)):** the owner asked why only F-049-T01 was planned when featurePlans was adopted (PR #271). The rule asks for a first plan covering the agreed outcome; T01 alone did not. Steps F-049-T02–T10 now cover the whole Check: class definitions and admission, the macOS enforcement choice (owner decision when more than one mechanism passes), EVA-03 instances, escape and recovery join tests, concurrency limits, the other three classes, the pilot-stage cap (waits on F-045-T01 and F-025-T04), the dashboard and the Linux mini PC host. T03's findings may change the later steps.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 10 open steps total 13.75 h agent + 0.75 h owner (steps table; each task basis gives old → new). Figures after this sentence are dated history. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): the 10 open steps in hours total 23.25 h agent + 0.75 h owner (steps table; method in each task basis). Day figures below are dated history. Large remaining effort, about 16 focused days: T01 2, T02 1, T03 1.5, T04 2, T05 1.5, T06 1.5, T07 2, T08 1, T09 1, T10 2. Planned 2026-11-11; earlier: Large, estimated 2026-11-05. Estimates, not measurements.
+
+| Field | Value |
+|---|---|
+| Depends on | [F-045](#f-045) — Pilot identity and EVA class for per-job execution<br />[F-025](#f-025) — Pilot trust-stage limits for sandbox class admission |
+| PR / evidence | [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner questions 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-09 |
+
+</details>
+
+---
+
+### <a id="f-044"></a>[✨ F-044](#top)
+
+**Memory: one fact per subject, a proposed spelling fix, typo-tolerant recall**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h | — | — | — | — |
+
+💻 **→** Next: split compound memories on one card, with a proposed clean-up.
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-05 about "remember i don't like wine and i play ultimate frisbbe": it is stored as one fact; facts are not linked to each other; recall matches exact words, so "frisbee" will not find "frisbbe" and the typo stays. |
+| **Reproduce** | `nerv chat "remember i don't like wine and i play ultimate frisbbe"`, approve, then ask "what sports do I play?" and look in Lilith. |
+| **Check** | A request with several facts proposes one fact per subject, on one card the owner approves or edits as a whole (each fact also editable or removable before approving); a proposed spelling fix is shown on the card next to the original (never applied silently); recall finds a fact despite a small typo (in the request or in the fact) and still ranks exact matches first; tests cover the split, the shown fix and fuzzy recall. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | F-044-T01 — One fact per subject on one editable card | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-044-T02 — Shown spelling fix | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-044-T03 — Typo-tolerant recall | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | **Total** | 3 h | 0 h (0 of 3 steps recorded) | 3 h | 0 of 3 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- F-044-T01: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-044-T02: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-044-T03: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+
+**Next action / closure evidence:** Planned 2026-11-05 (owner approved the three parts).
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 3 open steps total 3 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner question 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-05 |
+
+</details>
+
+---
+
+### <a id="f-066"></a>[✨ F-066](#top)
+
+**Machine credentials: rotation and telling owner use from automated use**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 1.5 h | — | — | — | — |
+
+💻 **→** Add rotation for the admin token, Telegram token and cloud key, and a test for NHI10.
+
+| | |
+|---|---|
+| **Issue** | Checked against the [OWASP Non-Human Identities Top 10](https://owasp.org/www-project-non-human-identities-top-10/) (2025): grants are short-lived (NHI7), base keys are per base (NHI9) and revocation wins (NHI1), but the admin token, the Telegram token and the cloud key have no rotation path (NHI7, long-lived secrets), and nothing shows whether a ledger entry came from the owner by hand or from an automated client using the same token (NHI10, human use of NHI). |
+| **Reproduce** | Look for a command that replaces the admin token, Telegram token or cloud key while running and invalidates the old one: none. Make one REST decision by hand and one from a script with the admin token: the ledger cannot tell them apart. |
+| **Check** | A rotation command per credential: the new one works at once, the old one is refused, no restart or re-enrolment needed, no secret printed or logged. `doctor` reports each credential's age (never its value). Ledger events record the client kind that acted (dashboard session, CLI, API token, Telegram) and a test proves an API-token decision is distinguishable from a dashboard one. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | F-066-T01 — Credential rotation commands and doctor ages | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-066-T02 — Client kind on ledger events | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 2 steps recorded) | 1.5 h | 0 of 2 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- F-066-T01: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-066-T02: 0.5 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 0.75 hours agent; former 0.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 0.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 0.75 h → 0.5 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (0.5 h); the baseline stays for calibration.
+
+**Next action / closure evidence:** Proposed 2026-11-07 from the OWASP review (see F-065). Check first which client kinds `Store.decide` sources already record (`telegram`, API, CLI, expiry): NHI10 may need only the API-token versus dashboard-session split. Rotation of base keys and the root key belongs to F-036's enrolment and stays out of scope.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 2 open steps total 1.5 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Small. Set 2026-11-07.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
+| Opened | 2026-11-07 |
+| Verification | Unit/integration: Pending. |
+| Reviewed | 2026-11-07 |
+
+</details>
+
+---
+
+### <a id="f-060"></a>[✨ F-060](#top)
+
+**Spike: herdr-core as a coding-agent terminal runtime**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🟠 Investigate | 🔹 P3 | 🟡 Medium | 1.5 h agent + 2 h owner | — | — | — | — |
+
+💻 **→** Next: a time-boxed trial of herdr-core as the development workspace, then a written adopt/adapter/reject outcome.
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-06: is [herdr-core](https://herdr.dev/core/) (`hc`, Apache 2.0, [source](https://github.com/herdrdev/herdr-core)) useful for coding with Claude Code and Codex, and for NERV? It offers persistent terminals, agents that start and direct helper agents, attach/takeover, remote machines over SSH, explicit program status (OSC 7501) and an OpenRPC API. Not evaluated yet. |
+| **Reproduce** | Install `hc` (read the install script first) and run one implementer agent, one reviewer and one test terminal, each in its own git worktree; detach, reattach, restart the viewer, delegate a review and read its report. |
+| **Check** | A dated note in this record answering: (1) does switching, reviewing and recovering sessions get easier than today; (2) can Claude Code / Codex emit OSC 7501 status (hook or wrapper), or do they have none; (3) what `--keep` recovery preserves after a daemon or machine restart; (4) API stability and security model confirmed from the docs; (5) outcome per NERV record (F-012, F-019, F-045, F-048, F-049): adapter candidate, borrow the concept only, or not relevant. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | F-060-T01 — herdr-core trial in the development workspace | 0.5 h | 0 h | 0.5 h agent + 2 h owner | Planned |
+| 🟢 Small | F-060-T02 — Answer the five questions and per-record outcomes | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 2 steps recorded) | 1.5 h agent + 2 h owner | 0 of 2 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- F-060-T01: 0.5 h agent + 2 hours owner (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1 hour agent + 2 hours owner; agent sets up the trial; the owner uses it over a week and keeps notes. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1 h → 0.5 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (0.5 h); the baseline stays for calibration.
+- F-060-T02: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+
+**Next action / closure evidence:** Hypotheses from the 2026-11-06 review (landing page and repository README; the security and API pages were not read): (a) development workspace first, NERV adapter later and optional; (b) F-012: a still-running session could be found by name, status-checked and resumed with one `hc send`, but the README says “Recovery starts a fresh shell, never reruns the task”, so herdr does not cover resumption after reboot or crash; (c) F-019 / F-052: status reported by the program rather than inferred matches the observed-versus-inferred telemetry rule, but “a program that does not report status has none”; (d) F-045 / F-048: parent/child ownership, completion notices and cancel-with-parent as a lifecycle pattern for pilots and parallel work; (e) F-049: herdr runs commands with the user's full access and is not a sandbox; at most it would run inside an EVA, and attach/takeover is a separate capability. Any integration stays behind NERV's grants, action gate, isolation and ledger; `hc send` is a write action. Repository at review: 440 stars, 134 commits, no published releases. Close with the outcome note; adapter work, if chosen, gets its own record.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 2 open steps total 1.5 h agent + 2 h owner (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort (trial over several working days plus the write-up) (landing page and README read, hypotheses recorded). Set 2026-11-06.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #169](https://github.com/voidbrain/nerv/pull/169) spike record; Owner question 2026-11-06 |
+| Opened | 2026-11-06 |
+| Verification | Documentation: Pending. Human: Pending (trial). |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### <a id="f-007"></a>[✨ F-007](#top)
+
+**Voice and evaluated skill improvement**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟣 Very large | 9 h agent + 0.5 h owner | — | — | — | — |
+
+💻 **→** Slices approved 2026-11-11 and recorded as tasks. Next agent work: Step 1a (F-007-T01) voice feasibility, or Step 3a (F-007-T06) skill packages, which does not wait for voice.
+
+| | |
+|---|---|
+| **Issue** | Not implemented; dedicated voice hardware follows measured feasibility. |
+| **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
+| **Check** | Italian/English voice corpus; corrected memory; rejected permission escalation; promoted and rolled-back skill versions. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | F-007-T01 — Step 1a — Feasibility: local speech-to-text and text-to-speech candidates measured on the Mac in Italian and English | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-007-T02 — Step 1b — Voice command corpus in Italian and English with expected intents | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | F-007-T03 — Step 2a — Push-to-talk on the dashboard and companion: speech to text shown for confirmation, no silent physical activation | 1.25 h | 0 h | 1.25 h | Planned |
+| 🟢 Small | F-007-T04 — Step 2b — Spoken replies (text-to-speech) | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-007-T05 — Step 2c — Voice corpus evaluation run and report | 0.5 h | 0 h | 0.5 h agent + 0.5 h owner | Planned |
+| 🟢 Small | F-007-T06 — Step 3a — Skill package format, isolated storage and versions | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | F-007-T07 — Step 3b — Skill evaluation with a baseline run without the skill and held-out cases | 1.25 h | 0 h | 1.25 h | Planned |
+| 🟢 Small | F-007-T08 — Step 3c — Owner promotion, rollback and retirement of skills after a model change | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-007-T09 — Step 3d — Rejected permission escalation and corrected-memory cases | 1 h | 0 h | 1 h | Planned |
+| 🟣 Very large | **Total** | 9 h | 0 h (0 of 9 steps recorded) | 9 h agent + 0.5 h owner | 0 of 9 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- F-007-T01: 1 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 1, slice a. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-007-T02: 1 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 1, slice b. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-007-T03: 1.25 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 2, slice a. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.25 h); the baseline stays for calibration.
+- F-007-T04: 1 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 2, slice b. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-007-T05: 0.5 h agent + 0.5 hours owner (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 2, slice c. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 0.75 hours agent + 0.5 hours owner; agent runs the evaluation and reports; the owner speaks or approves the recorded samples. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 0.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 0.75 h → 0.5 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (0.5 h); the baseline stays for calibration.
+- F-007-T06: 1 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 3, slice a. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-007-T07: 1.25 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 3, slice b. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent; former 1.5-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.25 h); the baseline stays for calibration.
+- F-007-T08: 1 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 3, slice c. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-007-T09: 1 h agent (2026-11-12). Owner-approved slice, 2026-11-11 (PR #264). Step 3, slice d. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+
+**Proposed slices, 2026-11-11 ([PR #264](https://github.com/voidbrain/nerv/pull/264); approved by the owner 2026-11-11 and recorded as task sources):** no steps existed. Proposed steps, each split into slices.
+
+| Step | Slice | Scope | Estimate |
+|---|---|---|---|
+| T01 | a | Feasibility: local STT and TTS candidates measured on the Mac in Italian and English | 1 day |
+| T01 | b | Command corpus in Italian and English with expected intents | 1 day |
+| T02 | a | Push-to-talk on the dashboard and companion: speech to text, shown for confirmation, no silent physical activation | 1.5 days |
+| T02 | b | Spoken replies (TTS) | 1 day |
+| T02 | c | Corpus evaluation run and report | 0.5 day |
+| T03 | a | Skill package format, isolated storage and versions | 1 day |
+| T03 | b | Evaluation with a baseline run without the skill and held-out cases | 1.5 days |
+| T03 | c | Owner promotion, rollback and retirement after a model change | 1 day |
+| T03 | d | Rejected permission escalation and corrected-memory cases | 1 day |
+
+Total about 9.5 focused days (was Large, unestimated). Uncertainty: STT/TTS quality on local hardware (T01a) may change T02. Estimates only, not measurements; owner-run device or campaign time is not counted.
+
+**Priority:** P1 → P3, owner decision 2026-11-12 (no reason given), PR #313.
+
+**Next action / closure evidence:** 2026-11-06 (owner discussion of skill value): a skill is instructions plus optional scripts and references, read and followed by the model, not executed deterministically. **Every skill evaluation includes a baseline run without the skill**; a skill that does not beat the baseline (generic advice the model already follows) is not promoted, and is retired if it stops beating it after a model change. Skills worth forging encode what the model lacks: knowledge NERV gathered about the bases, tools and pilots' domains; tested scripts with checkable results; content that must be kept current. Pilot skills and their stages stay owned by F-045; this record owns the evaluation and rollback mechanism. Remaining effort reassessed: unchanged (Large), the note makes implicit acceptance explicit.  Add push-to-talk STT/TTS and isolated skill proposals with evaluation and rollback. Italian/English voice corpus; corrected memory; rejected permission escalation; promoted and rolled-back skill versions.
+
+**Retained references 2026-11-09:** [external-project assessment](reviews/2026-11-09-external-agent-projects.md): AdalFlow prompt/few-shot optimization and Agent Lightning trace/training concepts inform future evaluated improvement. Baseline/heldout grading, owner-controlled promotion and rollback remain required; no weight-training capability or budget is selected.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 9 open steps total 9 h agent + 0.5 h owner (steps table; each task basis gives old → new). Figures after this sentence are dated history. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): the 9 open steps in hours total 14.25 h agent + 0.5 h owner (steps table; method in each task basis). Day figures below are dated history. Large remaining effort. Bootstrap scope estimate, not verification. Estimated 2026-11-01.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| Opened | 2026-11-01 |
+| Verification | Pending acceptance and remote CI where applicable |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+
+### <a id="f-008"></a>[✨ F-008](#top)
+
+**Integrate the FPV app**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 3.25 h agent + 0.5 h owner | — | — | — | — |
+
+💻 **→** Define an adapter for authoritative battery, crash and maintenance operations owned by the FPV app.
+
+| | |
+|---|---|
+| **Issue** | No FPV application or device connection is provisioned here. |
+| **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
+| **Check** | Record battery 2 charge once; record aircraft-specific motor damage and inspection; distinguish record from charger actuation. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | F-008-T01 — FPV app adapter contract | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | F-008-T02 — Battery and maintenance records through the adapter | 1.75 h | 0 h | 1.75 h | Planned |
+| 🟢 Small | F-008-T03 — Acceptance against the real FPV app | 0.5 h | 0 h | 0.5 h agent + 0.5 h owner | Planned |
+| 🟡 Medium | **Total** | 3.25 h | 0 h (0 of 3 steps recorded) | 3.25 h agent + 0.5 h owner | 0 of 3 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- F-008-T01: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-008-T02: 1.75 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
+- F-008-T03: 0.5 h agent + 0.5 hours owner (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 0.5 hours agent + 0.5 hours owner; agent prepares and records; the owner connects the real FPV app. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 0.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 0.5 h → 0.5 h, min 0.5 h; owner hours and baseline kept.
+
+**Priority:** P1 → P3, owner decision 2026-11-12 (no reason given), PR #313.
+
+**Next action / closure evidence:** Define an adapter for authoritative battery, crash and maintenance operations owned by the FPV app. Record battery 2 charge once; record aircraft-specific motor damage and inspection; distinguish record from charger actuation.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 3 open steps total 3.25 h agent + 0.5 h owner (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort. Bootstrap scope estimate, not verification. Estimated 2026-11-01.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| Opened | 2026-11-01 |
+| Verification | Pending acceptance and remote CI where applicable |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+
+
+### <a id="f-020"></a>[✨ F-020](#top)
+
+**Grounded personas for HITL and explanation (Misato primary)**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h | — | — | — | — |
+
+💻 **→** Optional conversational faces grounded in real job state: Misato as primary HITL/ops voice; Gendo optional for risk/policy explanation; pilots optional as worker identity only.
+
+| | |
+|---|---|
+| **Issue** | Personas Codec Chat exists as UI prototype. Free-form roleplay without grounding is a distraction and safety risk. |
+| **Reproduce** | Request approval, status brief, or “why was this Red?”; confirm answers cite real job/decision data and cannot bypass policy. |
+| **Check** | Misato can surface pending HITL and accept/reject with audit; Gendo (or Command) can explain classification; no persona can grant capabilities the backend policy denies; persona layer can be disabled; responses remain useful in non-Eva skins. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | F-020-T01 — Persona adapter contract | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-020-T02 — Misato HITL surfacing with audit | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-020-T03 — Explanation persona and non-Eva skins | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | **Total** | 3 h | 0 h (0 of 3 steps recorded) | 3 h | 0 of 3 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- F-020-T01: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-020-T02: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+- F-020-T03: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+
+**Next action / closure evidence:** Owner decision 2026-11-04 (F-036): persona names are per base and renamable (Misato, Gendo… by default; e.g. Bob, Fritz, Tim on another base); MAGI seat names stay fixed on every base. Implement thin, state-grounded persona adapters after F-003 messaging and F-017 decisions exist. Prefer Misato for push/HITL. Keep Shinji/pilots as optional labels for workers, not primary chat partners. Safety: persona output never overrides capability tokens or Pattern Red rules.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 3 open steps total 3 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort (prototype UI). Estimated 2026-11-02; priority lowered to P3 on 2026-11-04 (skin, not behaviour); estimate unchanged. Reassessed 2026-11-07: explicit prerequisite outcomes preserve the existing scope and remaining-work estimate; independent slices can proceed.
+
+**Completed prerequisites:** [F-003](archive/backlog-2026.md#f-003) — Messaging path for state-grounded persona replies; [F-017](archive/backlog-2026.md#f-017) — Policy decisions remain authoritative over persona output.
+
+| Field | Value |
+|---|---|
+| Depends on | — |
+| PR / evidence | [PR #219](https://github.com/voidbrain/nerv/pull/219) retired-reference path correction; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [retired dashboard1 personas prototype](../remove/docs/NERV/dashboard1.html) |
+| Opened | 2026-11-02 |
+| Verification | Pending |
+| Reviewed | 2026-11-08 |
+
+</details>
+
+---
+
+### <a id="b-056"></a>[🐞 B-056](#top)
+
+**A renewal the companion refuses on the Mac says it was not confirmed**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | — | — |
+
+💻 **→** Next: show a definite refusal for a renewal rejected before anything is sent (B-056-T01).
+
+| | |
+|---|---|
+| **Issue** | 2026-11-12, F-015 trial: with the companion paired, the owner pasted an invitation for another runtime. `renewalInvitation` refused it on the Mac (identity mismatch), so nothing was sent and the credential was unchanged, but `pair()` shows the same text for every renewal error: *Renewal not confirmed. Inspect clients; use a new invitation to recover the pairing.* That text is for a lost reply, where the server may already have replaced the token; here it sent the owner looking for a problem that did not exist. Also seen 2026-11-12 (F-015-T03): after a failed renewal the private field keeps the previous invitation, shown only as dots, so the next paste is appended to it and fails again with the same message. |
+| **Reproduce** | Pair the companion, open Renew pairing, paste an invitation from a different NERV profile (or an expired one) and choose Renew pairing. |
+| **Check** | A renewal refused before any request (identity mismatch, expired credential, malformed or expired invitation) says what was wrong and that the current pairing is unchanged; only an outcome that is really unknown (no reply, Keychain save failure after the server answered) keeps the unconfirmed message; the field is empty when renewal opens again; a Swift test covers each. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | B-056-T01 — Separate a refused renewal from an unconfirmed one in the companion | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- B-056-T01: 1 h (2026-11-12). Estimated 2026-11-12: split the catch in pair() by phase, two texts, one Swift test. Not a measurement.
+
+**Next action / closure evidence:** B-056-T01. A bug fix starts with a committed failing test.
+
+**Estimates:** Small, estimated 2026-11-12, not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Found in the F-015-T02 trial, [evidence](acceptance/f015-keychain-trial-2026-11-12.md); [PR #322](https://github.com/voidbrain/nerv/pull/322); leftover field text found in F-015-T03 ([evidence](acceptance/f015-live-failures-2026-11-12.md)), [PR #325](https://github.com/voidbrain/nerv/pull/325). |
+| Opened | 2026-11-12 |
+| Verification | Pending. |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+### <a id="f-054"></a>[✨ F-054](#top)
+
+**The base chronicle: a daily log of the agency's milestones, plain and in Eva lore**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h | [F-045](#f-045) | — | — | — |
+
+💻 **→** F-054-T01 (Simple chronicle from recorded facts) and F-054-T04 (record the missing facts) closed; next F-054-T02 (Eva version).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-05: the base should keep a log of what happened ("today we established connection with Tabgha"), in Eva lore or in two versions. The ledger is evidence, not a story; Instrumentality summarises the owner's conversations, not the agency's own milestones. |
+| **Reproduce** | Look for a record of when Tabgha joined, the first relayed request or the first pilot: only scattered events. |
+| **Check** | One entry per day, built only from recorded facts (bases enrolled or online for the first time, a new main base, pilots created or promoted, the first action run on another base, outages and recoveries; bugs closed left out by owner decision 2026-11-12), never invented; two versions by theme: Simple, plain and without a model; Eva, the same facts retold in the lore voice by a *Chronicler* pilot (Fuyutsuki), a writer only, starting at Proto, its text checked to name only the day's facts; shown as a Chronicle tab, with an optional line in the morning brief; each entry links its sources (sortie IDs, registry records). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | F-054-T01 — Daily chronicle facts from records | 1.5 h | 1 h (stated) | 0 h | Completed |
+| 🟡 Medium | F-054-T02 — Eva version by the Chronicler pilot | 1.5 h | 0 h | 1.5 h | Planned |
+| 🟡 Medium | F-054-T03 — Chronicle tab and brief line | 1.5 h | 0 h | 1.5 h | Planned |
+| — | F-054-T04 — Record the milestones not stored today | 1.5 h | 1 h (stated) | 0 h | Completed |
+| 🟡 Medium | **Total** | 6 h | 2 h (2 of 4 steps recorded) | 3 h | 2 of 4 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- F-054-T01: 0 remaining (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Implemented 2026-11-12 (src/chronicle.ts, &#96;chronicle &#91;DAYS&#93;&#96;, test/chronicle.test.ts) in about 1 h agent (stated). Scope by owner decision 2026-11-12: facts already recorded only; the unrecorded ones move to F-054-T04; bugs closed left out.
+- F-054-T02: 1.5 hours agent (2026-11-11). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history.
+- F-054-T03: 1.5 hours agent (2026-11-11). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history.
+- F-054-T04: 0 remaining (2026-11-12). Added 2026-11-12 on the owner's decision to record these facts from now on (F-054-T01 found they are not stored: only last&#95;seen per base, route health in memory, pilot stages edited by hand). A judged 1.5 agent hours like the other F-054 steps; estimate, not a measurement. Implemented 2026-11-12 (src/milestones.ts; hooks in Registry.seen, KajiLink.mark, Runtime.logRoutes and &#96;pilots set&#96;) in about 1 h agent (stated). Closed 2026-11-12 in the reconcile of PR #306: PR #305 merged into main &#96;5700ccf&#96; after CI 43232448595 passed all five jobs (plan, validate, windows, native-macos, full-suite). Actual 1 h agent (stated).
+
+**Owner decisions, 2026-11-12:** (1) F-054 starts now, ahead of the rest of F-021 (F-021-T02 to T05 stay open): F-021 is no longer a prerequisite. (2) Facts the agency does not store today (a base online for the first time: only `last_seen` is kept; outages and recoveries: route and base health live in memory; pilot promotions: a stage change is a hand edit of config.json) are recorded from now on, without backfill: new step F-054-T04. (3) Bugs closed are left out: they live in the git backlog, not in the agency's data, and the running service does not read its development repository.
+
+**F-054-T01, 2026-11-12 ([PR #301](https://github.com/voidbrain/nerv/pull/301)):** `src/chronicle.ts` builds the Simple chronicle without a model: one entry per local day (owner's time zone), only days with something recorded, each line with its source (`registry:<record id>` or a sortie's short ID). Facts: base enrolled, enrolled again, revoked and named main (signed registry records under the pinned root, dated by their signed `issued` time), pilot created (an approved `pilots.create` that ran), and per base the first remote action that ran without an error. `chronicle [DAYS]` prints it (last 30 days by default), in English or Italian. Evidence: `test/chronicle.test.ts` (day grouping across midnight in Rome, no entry for empty days, unreadable times and unknown kinds left out, both languages, and a join test across Store, Ledger and Registry: only the approved pilot, the first remote action that ran (not a failed, a later or a waiting one), registry sources equal to the stored record IDs, then the CLI command). Dashboard tab and brief line are F-054-T03.
+
+**Reconcile 2026-11-12 ([PR #306](https://github.com/voidbrain/nerv/pull/306)):** [PR #305](https://github.com/voidbrain/nerv/pull/305) merged into main `5700ccf`; its CI [43232448595](https://github.com/voidbrain/nerv/actions/runs/43232448595) passed all five jobs. F-054-T04 closed (1 h agent, stated, against 1.5 h). F-054 stays Open: F-054-T02 and F-054-T03 are planned.
+
+**F-054-T04, 2026-11-12 ([PR #305](https://github.com/voidbrain/nerv/pull/305)):** `src/milestones.ts` keeps an append-only `milestones` table (additive, no schema version change; update and delete refused by triggers), recorded from now on with no backfill: a base heard of for the first time (`Registry.seen`, only when no last-seen time was stored for it under any root), another base unreachable after a full online window of missed heartbeats and back on its next answer (`KajiLink.mark` → `milestones.health` in the nervous process), a model route down and back (`Runtime.logRoutes`, once a minute from the brain's route health, so a flap shorter than the poll is not recorded), and a pilot promoted to a later stage by `pilots set ID --stage …` (a demotion or another edit is not). Only a change adds a row, and a report not newer than the last one for that subject is ignored, so repeats and restarts add nothing. The chronicle shows them with source `milestone:<row id>`, in English and Italian. Evidence: `test/milestones.test.ts` (rules, append-only, no backfill, and three joins: Kaji link → runtime → nervous process → chronicle; brain route health → runtime → chronicle; `pilots set` → `chronicle` CLI).
+
+**Next action / closure evidence:** Planned 2026-11-05 (owner: yes, after F-021; superseded 2026-11-12, see above). Builds on the ledger, the Gehirn registry, F-045 (pilots) and F-028 (the brief).
+
+**Estimates:** Medium remaining effort. Estimated 2026-11-05. Reassessed 2026-11-07: explicit prerequisite outcomes preserve the existing scope and remaining-work estimate; independent slices can proceed.
+
+| Field | Value |
+|---|---|
+| Depends on | [F-045](#f-045) — Chronicler pilot for the Eva narrative; plain fact collection can proceed |
+| PR / evidence | [PR #305](https://github.com/voidbrain/nerv/pull/305) F-054-T04 milestones (src/milestones.ts, test/milestones.test.ts); [PR #301](https://github.com/voidbrain/nerv/pull/301) F-054-T01 Simple chronicle (src/chronicle.ts, test/chronicle.test.ts); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner request 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+
+### <a id="f-064"></a>[✨ F-064](#top)
+
+**Bounded incident circuits instead of a global kill switch**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 3.25 h agent + 0.25 h owner | — | — | — | 🧑 |
+
+🧑 **→** Owner decides which events trip which circuit, its scope, and who may rearm it.
+
+| | |
+|---|---|
+| **Issue** | Preserved proposal 3 of the [architecture reassessment](audits/2026-11-06-architecture-reassessment.md#3-automatic-incident-response-bounded-circuits-before-a-global-kill-switch): Spear revokes unused grants and stands down approvals by hand, but nothing detects an incident, interrupts in-flight work or responds automatically. A global automatic revocation would itself risk an outage. |
+| **Reproduce** | Inject a fault (a tool repeatedly failing, a tainted input reaching an external-effect action): nothing changes until the owner spears the sortie. |
+| **Check** | One circuit first, with a written trigger → response table: stop new work in the affected scope, revoke its unused grants, keep evidence, one deduplicated alert, explicit rearm. Injected faults revoke only the intended authority and keep recovery access; benign input never trips it; model suspicion is a signal for review, never authority to stop every base. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | F-064-T01 — Owner picks the first circuit | 0.5 h | 0 h | 0.5 h agent + 0.25 h owner | Planned |
+| 🟡 Medium | F-064-T02 — First bounded circuit | 1.75 h | 0 h | 1.75 h | Planned |
+| 🟢 Small | F-064-T03 — Fault-injection tests | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | **Total** | 3.25 h | 0 h (0 of 3 steps recorded) | 3.25 h agent + 0.25 h owner | 0 of 3 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Step estimates** (dated basis; generated from the task files)
+
+- F-064-T01: 0.5 h agent + 0.25 hours owner (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 0.5 hours agent + 0.25 hours owner; agent proposes the trigger table; the owner picks the circuit. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 0.5 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 0.5 h → 0.5 h, min 0.5 h; owner hours and baseline kept.
+- F-064-T02: 1.75 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.
+- F-064-T03: 1 h agent (2026-11-12). Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from &#96;work-items calibrate&#96; (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.
+
+**Next action / closure evidence:** Proposed 2026-11-06; not accepted scope until the owner picks the first circuit. The reassessment also notes that Spear does not stop an already-running external operation or run inverses; interruption and compensation stay explicit, separately authorized work, not part of a first circuit. Related F-023 (approvals) and the closed F-024 ledger. Design input 2026-11-07: the OWASP [Agent Control Standard](https://github.com/GenAI-Security-Project/agent-control-standard) v0.1.0 (a Guardian that allows, denies or modifies each tool call, deterministic layer first, optional model layer without the policy source) mirrors the MAGI gate; its reference Guardian fails open by default and its wire is not yet authenticated, so it is a comparison point for trigger and rearm vocabulary, not a component to adopt. Threat-map row ASI08 (cascading failures) points here (F-065, [PR #179](https://github.com/voidbrain/nerv/pull/179)).
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 3 open steps total 3.25 h agent + 0.25 h owner (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium for one bounded circuit; large for a cross-base incident coordinator. Set 2026-11-06.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
+| Opened | 2026-11-06 |
+| Verification | Unit/integration: Pending. |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
 
 ## Other changes
 
-**Harness v6.0.0 reconciliation, 2026-11-12.** Template F-059 (owner request): `tools/work-items.mjs`, `tools/check-backlog.mjs` and `tools/backlog-queue.mjs` copied byte-identically from v6.0.0; the Record and evidence requirements, Optional upfront feature plans and Optional work queue paragraphs of BACKLOG-RULES carried from the template diff v5.6.0..v6.0.0; CI clones the template at v6.0.0. Bugs and features are one `Work items` list in queue (priority) order (`{"records": "all"}`); each record's summary table now reads Signal, Priority, Status, Effort, Remaining, Depends on, Unlocks, Human action, replacing the `Depends on · Unlocks` line, and the human-action line keeps its icon and sentence. Every record, bugs included, has a task step: B-049-T01 added (2 agent hours, planned; B-050-T01 came with PR #294). Record sources keep the authored form. The project-owned `tools/backlog-recap.mjs` read only the authored `Human action required: Yes` label and would have counted no human records in the generated ledger; it now also reads the `🧑 Yes` cell (Test: test/backlog-recap.test.mjs "the human cue is read from the generated summary table…", committed failing first). Reconciles merged PR #294 (CI success, every job). [PR #295](https://github.com/voidbrain/nerv/pull/295). Review: fresh-context mechanical review (Haiku), all seven checks pass (copies byte-identical, rules equal the template diff, layout and stamp only as stated, B-049-T01 matches its record, recap test fails without the fix and the recap equals main's). `tools/solution.mjs` is a project copy outside `copied` and inert here (no solution profile); left as it is.
+Earlier reconciliations and assessments (2026-11-08 – 2026-11-11) are archived in [Reconciliation log](archive/reconciliation-2026.md#archived-other-changes-moved-from-backlogmd-on-2026-11-13).
 
-**Harness v5.6.0 reconciliation (5.5.0 included), 2026-11-11 ([PR #277](https://github.com/voidbrain/nerv/pull/277)).** Template F-057 and F-058: `tools/work-items.mjs`, `tools/backlog-queue.mjs`, `tools/backlog-dependencies.mjs` and `tools/check-freshness.mjs` copied byte-identically from v5.6.0; the Linked prerequisites, Optional work queue, Optional upfront feature plans and Estimate calibration paragraphs of BACKLOG-RULES carried verbatim; CI clones the template at v5.6.0. The generated queue and dependency pages are deleted with their `backlog:queue` and `backlog:dependencies` scripts and every live link (README, docs index, roadmap, decisions, work README, ledger header); `check:queue` and `check:dependencies` stay in CI. Records with a prerequisite or a dependent now show a `Depends on · Unlocks` line (14 of 40). 157 open steps re-estimated in agent hours (`agentHours`, `ownerHours` apart, `baselineAgentHours`; `baselineDays` kept as history): agent-only steps at a judged 1.5 h per former focused day (at least 0.75 h for a step that is its own PR), informed by NERV merge history (50 feature and fix PRs, a throughput proxy: median 0.56 h, p75 2.1–2.7 h) and B-046-T02; machine time of real-model and device runs not counted; 37 steps were judged one by one (32 need owner time, the rest are reviews, records or near-done work). Total 275 h agent + 19 h owner (B-046-T02 revised after the Windows failure below). F-005-T06 (0 remaining) stays in days rather than invent an hour baseline. `workItems.estimation.since` is 2026-11-11, so only steps closed from now count for calibration. Estimates, not measurements. Review: fresh-context design review (Opus), no blocker; its should-fix items (stale impact-map page, B-046 estimate sentence and Verification row) and nits (rate stated as a judgement with the measured p75 range, the 0.75 h floor applied to F-005-T30, machine time not counted in F-006-T11 as in F-074-T09, F-005-T06 named in the F-005 total) are fixed.
-
-**Harness v5.4.0 and Gauntlet 0.7.1 reconciliation, 2026-11-11 ([PR #275](https://github.com/voidbrain/nerv/pull/275), closed unmerged 2026-11-11: superseded by [PR #277](https://github.com/voidbrain/nerv/pull/277), which carried these changes to main).** Template F-053–F-056 (owner requests of the same day): copies `tools/work-items.mjs` and `tools/check-freshness.mjs` byte-identically from v5.4.0; the "Optional upfront feature plans" paragraph and the new "Estimate calibration" paragraph of BACKLOG-RULES carried verbatim; CI clones the template at v5.4.0. NERV adopts queue order (`workItems.order: queue`, records listed in work-queue order) and the backlog total right after the weekly recap (the header stays at two lines). The 158 open steps get `days` and `baselineDays` backfilled from their current dated estimates (upper bound of a range, hours at 6 a day, rounded up to a quarter day; each basis says so): baselines are these estimates, not originals. Owner-confirmed re-estimation defaults (5 samples, 1.5x median, 3x outlier). Gauntlet pin 0.6.0 → 0.7.1 (artifact, lockfile and provenance together): ledger schema 2 with run identity. `recordSelected` wrote schema 1 and failed on 0.7 entries (caught by the existing root-command test); it now writes schema 2. The capability index is regenerated for the new tag. Passing NERV's intended identity stays F-074-T10. Review: fresh-context design review (Opus), no blocker; the artifact was reproduced from v0.7.1 and every backfill checked by script; its should-fix items (totals placement wording, no invented baseline for the already-done F-005-T06, a direct schema 2 and identity assertion in test/gauntlet.test.mjs) are fixed in the PR. No behaviour runner is configured.
-
-**Harness v5.2.0 reconciliation, 2026-11-11 ([PR #272](https://github.com/voidbrain/nerv/pull/272)).** Template F-052: a project declares evaluation dependencies in `.harness.json` `evaluations` with a project-owned pending command, and `check:freshness` reports the pending cases at session start. Copies `tools/check-freshness.mjs` byte-identically from v5.2.0 (`check-harness --strict` passes); the Evaluation dependencies paragraph of BACKLOG-RULES and the AGENTS session-start bullet reconciled by hand; CI clones the template at v5.2.0. NERV declares Gauntlet (`node tools/gauntlet.mjs pending`) and also fails CI while a pending case has no open record (`check:gauntlet-runs`), as F-074-T07 decided. No check, never or ask-first rule, or safeguard removed. The timed reconciliation sample covers only the final record step (timer started late). No behaviour runner is configured.
-
-**Upfront feature plans adopted, 2026-11-11 ([PR #271](https://github.com/voidbrain/nerv/pull/271)).** Owner request: turn on the harness setting `workItems.featurePlans` and bring every non-compliant record in line. The backlog now renders each feature's steps from `docs/work/tasks/`. 24 features had no plan (F-004, F-008, F-009, F-011, F-012, F-015, F-020, F-021, F-025, F-042, F-043, F-044, F-045, F-046, F-051, F-052, F-054, F-056, F-060, F-062, F-064, F-065, F-066, F-070): each gets an initial plan of steps of at most 1–2 focused days drawn from its Check and next action, delivered work recorded as closed steps, and owner-gated steps (access, choice, observation) named. 26 existing tasks lacked effort: closed ones read 0 remaining; open ones (B-046-T02, F-027-T02, F-048-T01–T03, F-049-T01, F-050-T01–T02, F-074-T04) get dated estimates. Estimates, not measurements; the owner may revise any split. F-049 has only its first step planned: its later steps must be planned before F-049-T01 is accepted. F-074's hand-written step table is replaced by the generated one.
-
-**Harness v5.1.1 reconciliation, 2026-11-11 ([PR #267](https://github.com/voidbrain/nerv/pull/267)).** The template's `.gitignore` line becomes `node_modules` without the trailing slash, so a worktree's `node_modules` symlink is ignored: the cause of the symlink committed by mistake in PR #264 (template B-016). The version stamp moves to 5.1.1, and CI now checks the copies against template v5.1.1; PR #263 and #266 had left that clone at v5.0.0. No copied file changed (`check-harness --strict` passes). Gauntlet Protocol stays at 0.5.0, its latest release; its own 5.1.1 reconcile (gauntlet-protocol PR #31) changed no package code. A one-line ignore change, a version stamp and a CI pin, with no behaviour change: exempt from independent review as small (BACKLOG-RULES, "Independent review"). No behaviour runner is configured.
-
-**Harness v5.1.0 reconciliation, 2026-11-11 ([PR #266](https://github.com/voidbrain/nerv/pull/266)).** Owner decision of the same day, released in the template first. Copies `.claude/agents/mechanical-reviewer.md` (Haiku) and `.claude/agents/design-reviewer.md` (Opus) and the updated `tools/check-harness.mjs` (new `--strict` flag) byte-identically from tag v5.1.0; `check-harness --strict` passes. The Independent review paragraph of BACKLOG-RULES and its pointer in AGENTS.md are reconciled by hand: a reconcile whose only harness changes are byte-identical copies, their `copied` entries and the version stamp needs no reviewer when `--strict` passes; reviews are matched to the change (mechanical on a smaller model, design, safety, security, migrations and lifecycle on the strongest). No check is dropped and no never or ask-first rule changes. This reconcile edits adapted files, so it still gets a fresh-context review. The timed reconciliation sample covers only the final validation pass (timer started late); one file conflict observed (`.harness.json` stamp on rebase after #264). No behaviour runner is configured.
-
-**Harness v5.0.0 reconciliation, 2026-11-11 ([PR #263](https://github.com/voidbrain/nerv/pull/263)).** Owner decisions of the same day, released in the template first. Copies the 23 changed tools and the new `check-tooling.mjs` from tag v5.0.0. (1) A formatter check and a linter are required for every stack and must run in CI: NERV keeps the Prettier setup of PR #260 and adds ESLint 10.14.0 with typescript-eslint (`npm run lint`, `npm run check:tooling`, CI steps). Of 24 findings, 3 were autofixed and 21 fixed by hand without changing behaviour: unused imports and bindings, initial values that were always overwritten, one `case` block braced, two needless escapes, one ternary statement made an `if`. Scope: backend, tests, NERV's own tools and `web/src`; copied harness tools are excluded because the template lints them. Recorded gaps (F-004): the static dashboard is excluded with four known findings, and `web/src` has TypeScript rules only, not the Angular config the harness names for this stack. An independent review confirmed the copies and every hand edit, and found the first revision also excluded NERV's own tools; corrected. (2) Reconciliation is folded into the next working PR; a reconciliation-only PR is due at 10 merged PRs or one day behind, or at once for a commit that reached main without a PR. Rule sentences in AGENTS.md and BACKLOG-RULES reconciled by hand; CI now checks the copies against template v5.0.0 (was v4.2.1). Lifecycle and root-migration plans made before this change must be regenerated (their handlers hash their own source). No behaviour runner is configured.
-
-**Formatter, 2026-11-11 ([PR #260](https://github.com/voidbrain/nerv/pull/260)).** Owner request after the 2026-11-11 direction review: source lines ran up to 3,009 characters with whole functions on one line and no formatter was configured. Adds Prettier 3.9.10 (120 columns, single quotes, quoted keys preserved, embedded templates untouched) for TypeScript/JavaScript under `src/`, `test/` and `web/src`, `npm run format` / `format:check`, and a CI step. One mechanical reformat of 148 files with no hand edits. Against main every string, template and regular-expression literal is equal, and a trivia-free syntax-tree fingerprint is equal for 147 files; `src/nodes-cli.ts` differs only by Prettier dropping redundant parentheses in `a||(b||c)`. Prettier also normalises numbers such as `.5` to `0.5`. Typecheck and the full suite (576 passed, 2 skipped) pass. An [independent review](https://github.com/voidbrain/nerv/pull/260) reproduced the output byte for byte from main and found that the first revision had reformatted the Angular template inside `web/src/main.ts` (eight text nodes gained spaces) and that the author's own first fingerprint check had not actually run; both corrected before merge. CSS/HTML files, JSON, Markdown, fixtures, generated and copied harness files are excluded. Lifecycle and root-migration plans made before this change must be regenerated (both handlers hash their own source). ESLint follows separately because its findings need code edits.
-
-**Harness reconciliation, 2026-11-11 ([PR #256](https://github.com/voidbrain/nerv/pull/256)).** Adopt published v4.8.0: `tools/work-usage.mjs` and its guide copied byte-identically from the tag (subscription allowance snapshots, private `report --out`, calibration groups). No store migration; no NERV rule, runtime or service changes. Claude status-line capture is an owner client setting outside this repository: a user-level status line already runs `claude-status`, but no Claude allowance snapshot has been observed yet (the status line may not run in the editor extension), so Claude Pro percentages remain unknown until one is captured. Codex allowance collection was not run in this reconcile (the shared store holds earlier Codex snapshots). Allowance percentages stay shared-account metadata, never tokens or cost. No behaviour runner configured. Review: independent fresh-context review of 004dc91 found no blocker; its wording note is applied.
-
-**Harness reconciliation and F-005 plan, 2026-11-10 ([PR #255](https://github.com/voidbrain/nerv/pull/255)).** Adopt published v4.7.0 (harness PR97/98/99) planning/usage tooling, metadata-only Codex/Claude adapters and optional explicit job launcher. Preserve NERV rules, privacy and runtime ownership. F-005 receives the requested initial T06–T11 plan; other existing NERV features are not retroactively replanned and global featurePlans enforcement is not enabled here. Source task files own current status/effort; the F-005 table is explicitly dated initial-plan evidence. This change uses a separate worktree and changes no installation, runtime, engine or service. No host counters/behaviour runner are available; shared plan usage remains feature-only/unassigned to individual steps. Local source/backlog/recap/dependency/queue/roadmap/rules/conventions/integration checks,7 verification-policy/pin fixtures and Angular build pass. Review: independent fresh-context consumer_plans_review found no content blocker; its maintenance finding is resolved by current input-bound evidence. Final full CI owns mapped browser/platform/BOM acceptance; no new UI or runtime claim is made. Related F-009/F-011/F-062 are reconciled against accepted F-005 service/snapshot evidence: old execution-host prohibitions remain dated history, while actual login/native/general-restore checks stay pending.
-
-**CI reliability evidence — B-046, 2026-11-08.** Original worker-cancellation failure retained, isolated diagnostic passed and only failed CI jobs were retried; root cause/fix remain open under B-046. Existing B-043 remains a separate queue-saturation finding.
-
-**Execution-boundary assessment, 2026-11-09.** [Source-based review](reviews/2026-11-09-execution-boundaries.md) retains project separation; useful runner/enforcement, protected grading/promotion and threat-evidence work belongs to F-049/F-006/F-065. Harness4.2.1 and Gauntlet0.2.0 already state the relevant upstream boundaries; no upstream change or new project is justified. No runtime acceptance claimed. PR: #231.
-
-**Harness reconciliation, 2026-11-09 (PR #237).** Adopt published v4.3.0 task-context guide and triggers, preserving every NERV rule. No host thread-reset API or behaviour runner is configured; bounded continuation, no reset/cache/token-saving claim. Copied-file/rule checks passed. Fresh-context review found no harness defect; no behaviour runner is configured. Timed296239ms wall-clock sample includes initial F-027 implementation and waits, excludes final CI; it is not a comparable harness-only performance sample.
-
-**Owner continuation, 2026-11-09.** After F-027-T01 acceptance, continue actionable backlog items using the generated queue and reviewed scoped prerequisites; retain human/device decisions and separately bounded model campaigns.
-
-**External project references, 2026-11-09 (PR #241).** [Nine-project assessment](reviews/2026-11-09-external-agent-projects.md) retains Inspect/Scenario/AgentDojo/AgentFS as the strongest evaluation/isolation candidates; typed ingestion/optimization/browser/training ideas remain conditional references. Existing records retain ownership; no dependencies, campaigns, permission changes or audit coverage follow. Operator commands and the profile-matched role-bundle gap are recorded under F-074.
+**Harness v6.0.0 reconciliation, 2026-11-12.** Template F-059 (owner request): `tools/work-items.mjs`, `tools/check-backlog.mjs` and `tools/backlog-queue.mjs` copied byte-identically from v6.0.0; the Record and evidence requirements, Optional upfront feature plans and Optional work queue paragraphs of BACKLOG-RULES carried from the template diff v5.6.0..v6.0.0; CI clones the template at v6.0.0. Bugs and features are one `Work items` list (`{"records": "all"}`); each record's summary table now reads Status, Priority, Effort, Remaining, Depends on, Unlocks, Procedures, Decision. [PR #295](https://github.com/voidbrain/nerv/pull/295).

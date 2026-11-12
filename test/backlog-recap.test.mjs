@@ -100,3 +100,38 @@ test('Require Human splits each kind into Procedures and Decision (harness 8.0.0
   const none = recap({ active: [records[3]], archived: [] }, '2026-11-12');
   assert.match(none, /\*\*Decisions\*\* \|\n\| — \| — \| — \| — \|\n<!-- recap:end -->/, 'empty columns show —');
 });
+
+test('parseRecords reads icon and back-to-top link headings', () => {
+  const sample = [
+    '### <a id="f-074"></a>[✨ F-074](#top)',
+    '',
+    '**Title**',
+    '',
+    '| Status | Priority | Effort | Remaining | Procedures | Decision |',
+    '|---|---|---|---|---|---|',
+    '| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — |',
+    '',
+    '💻 **→** Next.',
+    '',
+    '---',
+    '### <a id="b-045"></a>[🐞 B-045](#top)',
+    '',
+    '**Bug**',
+    '',
+    '| Status | Priority | Effort | Remaining | Procedures | Decision |',
+    '|---|---|---|---|---|---|',
+    '| 🟣 Blocked | 🔺 P1 | 🟢 Small | 1 h | 🧑 | — |',
+    '',
+    '🧑 **→** Next.',
+    '',
+    '---',
+  ].join('\n');
+  const records = parseRecords(sample);
+  assert.deepEqual(
+    records.map((r) => [r.id, r.kind, r.status, r.procedure]),
+    [
+      ['F-074', 'feature', 'Open', false],
+      ['B-045', 'bug', 'Blocked', true],
+    ],
+  );
+});

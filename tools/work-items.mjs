@@ -489,7 +489,7 @@ function featurePlan(text, id, tasks, repository) {
   const evidence = steps.some((t) => t.prs?.length);
   // Compact table (F-055): one line per step; the dated basis of each estimate goes into the record details.
   const table =
-    `**${id.startsWith('F-') ? 'Feature steps' : 'Steps'}** (effort: size of the remaining agent time, 🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more; estimate: latest whole-step estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)\n\n| Effort | Step | Estimate | Actual | Remaining | Status |${evidence ? ' PRs |' : ''}\n|---|---|---|---|---|---|${evidence ? '---|' : ''}\n` +
+    `**${id.startsWith('F-') ? 'Feature steps' : 'Steps'}**\n\n| Effort | Step | Estimate | Actual | Remaining | Status |${evidence ? ' PRs |' : ''}\n|---|---|---|---|---|---|${evidence ? '---|' : ''}\n` +
     steps
       .map(
         (t) =>
@@ -540,10 +540,16 @@ function dependencyLinks(root, config) {
   const { graph } = createRequire(import.meta.url)('./backlog-dependencies.mjs');
   const all = graph(withArchives(root, renderLedger(root, { ...config, order: 'id' }, false)));
   const link = (r) => `[${r.id}](${r.file === 'docs/BACKLOG.md' ? '' : r.file.slice(5)}#${r.id.toLowerCase()})`;
+  const isClosed = (r) =>
+    r.file !== 'docs/BACKLOG.md' ||
+    /^\| (?:🔴|🟠|🟡|🟢|🟣|🔵) Closed \|/m.test(r.body) ||
+    /^\| [^|]+ \| [^|]+ \| Closed \|/m.test(r.body);
   const links = new Map();
   for (const record of all.values()) {
     if (record.file !== 'docs/BACKLOG.md') continue;
-    const depends = record.dependencies.map((d) => (d.external ? `[${d.id}](${d.url})` : link(all.get(d.id))));
+    const depends = record.dependencies
+      .filter((d) => d.external || !isClosed(all.get(d.id)))
+      .map((d) => (d.external ? `[${d.id}](${d.url})` : link(all.get(d.id))));
     const unlocks = [...all.values()]
       .filter((r) => r.dependencies.some((d) => !d.external && d.id === record.id))
       .sort((a, b) => a.id.localeCompare(b.id))
@@ -640,7 +646,14 @@ function queueRank(root, config) {
     );
   }
   const records = queue(sources, roadmap);
-  const sorted = lanes.flatMap((lane) => records.filter((r) => r.lane === lane));
+  const laneRank = Object.fromEntries(lanes.map((l, i) => [l, i]));
+  const priorityOf = (r) => Number(r.priority.at(-1));
+  const sorted = [...records].sort(
+    (a, b) =>
+      priorityOf(a) - priorityOf(b) ||
+      laneRank[a.lane] - laneRank[b.lane] ||
+      records.indexOf(a) - records.indexOf(b),
+  );
   return new Map(sorted.map((r, i) => [r.id + '.md', i]));
 }
 export function renderLedger(root, config, withPlans = true) {
@@ -709,13 +722,17 @@ export function renderLedger(root, config, withPlans = true) {
           referenceIds,
         );
         const id = file.slice(0, -3);
-        output += stepsOf
+        const rendered = stepsOf
           ? summaryTable(relocated, id, {
               remaining: remainingCell(stepsOf(id)),
               size: recordSize(stepsOf(id)),
               links: links?.get(id) ?? null,
             })
           : relocated;
+        const icon = id.startsWith('F-') ? '✨' : '🐞';
+        output += withPlans
+          ? rendered.replace(`### ${id}\n`, `### <a id="${id.toLowerCase()}"></a>[${icon} ${id}](#top)\n`)
+          : rendered;
       }
     } else throw Error('Invalid layout segment');
   }
@@ -791,7 +808,11 @@ export function overlaps(a, b) {
 }
 export function taskCatalog(root, config) {
   const ledger = renderLedger(root, config, false),
-    parents = new Set([...ledger.matchAll(/^### ([BF]-\d{3})$/gm)].map((m) => m[1]));
+    parents = new Set(
+      [...ledger.matchAll(/^### (?:<a id="[fb]-\d+"><\/a>)?(?:\[(?:✨|🐞) )?([BF]-\d{3})(?:\]\(#top\))?$/gm)].map(
+        (m) => m[1],
+      ),
+    );
   const archive = join(root, 'docs/archive');
   if (existsSync(archive))
     for (const f of readdirSync(archive).filter((f) => /^backlog-.*\.md$/.test(f)))
@@ -931,7 +952,9 @@ export function checkWorkItems(root = process.cwd()) {
     : [];
   return {
     enabled: true,
-    records: (actual.match(/^### [BF]-\d{3}$/gm) || []).length,
+    records: (
+      actual.match(/^### (?:<a id="[fb]-\d+"><\/a>)?(?:\[(?:✨|🐞) )?([BF]-\d{3})(?:\]\(#top\))?$/gm) || []
+    ).length,
     tasks: catalog.tasks.length,
     ...(withoutDays.length ? { withoutDays } : {}),
     ...(staleEstimates.length ? { staleEstimates } : {}),
