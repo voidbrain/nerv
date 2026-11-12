@@ -1,5 +1,7 @@
 # Backlog reconciliation log 2026
 
+- Current work ledger, reviewed 12 November 2026 against main `5700ccf`. PRs #302, #304 and #305 passed CI; F-054-T04 closed. B-043 closed: five full Windows runs after the fix with no queue saturation.
+
 - Current work ledger, reviewed 12 November 2026 against main `5bc2566`. PRs #297–#303 passed CI (F-004-T02–T05 and F-054-T01 closed); F-006-T01 awaits owner agreement; F-004-T05 merged; F-004-T06 awaits owner phone install and push acceptance. Open steps re-estimated at 0.6x from calibration in PR #302 (harness 6.1.0; estimation.since 2026-11-12); F-004 and F-054 left to their running sessions.
 
 - Current work ledger, reviewed 12 November 2026 against main `546f64c`. PRs #295–#296 passed CI; F-006-T01 awaits owner agreement; harness 6.1.0 reconciled in PR #297 (mechanical review: copies and template diff match): estimate calibration reports bugs and features apart.
