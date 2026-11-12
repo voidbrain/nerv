@@ -786,9 +786,9 @@ test(
 // the owner chooses the remedy recorded in B-046; it fails today and does not fail the suite.
 test(
   'B-046: a ping waiting on a slow store on the worker does not end a healthy session',
-  { timeout: 30000, todo: 'B-046 mechanism (3): remedy is an owner decision' },
+  { timeout: 30000 },
   async () => {
-    const f = await fixture(150, 60000);
+    const f = await fixture(undefined, 60000);
     const send = WebSocket.prototype.send;
     let hellos = 0;
     WebSocket.prototype.send = function (this: WebSocket, data: unknown, ...rest: unknown[]) {
