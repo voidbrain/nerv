@@ -103,6 +103,8 @@ export interface DispatchedReply {
   question?: { text: string; expires: string };
   reply?: string;
   error?: string;
+  /** Set by this base, never read from the reply: the main base turned the request away before running anything (B-021). */
+  refused?: true;
   steps: unknown[];
   waiting: { approvalId: string; tool: string; reason: string }[];
   base?: { id: string; name: string };
@@ -597,13 +599,15 @@ export class KajiLink {
     const peer = (await this.port.bases()).find((b) => b.baseId === main && b.status === 'enrolled');
     if (!peer) return undefined;
     try {
-      return (await this.call(
+      const answer = (await this.call(
         peer,
         'POST',
         '/kaji/chat',
         { message, ...(conversation ? { conversation } : {}) },
         timeoutMs,
       )) as DispatchedReply;
+      delete answer.refused;
+      return answer;
     } catch (e) {
       const text = e instanceof Error ? e.message : 'error';
       // Never sent: the connection itself failed. Anything later (a reset, a timeout) may have reached Misato already.
@@ -613,6 +617,15 @@ export class KajiLink {
         ['ECONNREFUSED', 'EHOSTUNREACH', 'ENETUNREACH', 'EADDRNOTAVAIL', 'UND_ERR_CONNECT_TIMEOUT'].includes(code)
       )
         return undefined;
+      // B-021: a 400/401/403/409 is checked before /kaji/chat runs anything there: a definite refusal, not an unknown outcome.
+      if (/refused \((400|401|403|409)\)/.test(text))
+        return {
+          sortieId: '',
+          error: `${main} refused the request (${text}); nothing ran there.`,
+          refused: true,
+          steps: [],
+          waiting: [],
+        };
       return {
         sortieId: '',
         error: `${main} did not answer (${text}); it may still be working on it, so the request was not repeated here.`,
