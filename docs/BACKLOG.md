@@ -234,7 +234,7 @@ Earlier next action (2026-11-09, done above): inspect event ordering for remote 
 |:---:|---|---|---|
 | 🟡 | 🔶 P2 | Implemented | 🟢 Small |
 
-💻 **→ Human action required: No**<br />Fix implemented in test/fixtures/browser.mjs: until retries through navigation evaluation exceptions until condition holds. Next: open PR and CI.
+💻 **→ Human action required: No**<br />Fix implemented in [PR #294](https://github.com/voidbrain/nerv/pull/294): until retries through navigation evaluation exceptions until condition holds. Next: CI and merge.
 
 | | |
 |---|---|
@@ -245,7 +245,7 @@ Earlier next action (2026-11-09, done above): inspect event ordering for remote 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Fix implemented 2026-11-12:** committed failing tests in `test/evaluation.browser.mjs` (commit `feb13de`) reproducing immediate `until` failure on expression exceptions during page loading and timeout error format. In `test/fixtures/browser.mjs`, `until` now catches evaluation exceptions and retries until the condition holds or timeout expires, including last error message on timeout. All browser tests pass. Next: open PR and CI.
+**Fix implemented 2026-11-12 ([PR #294](https://github.com/voidbrain/nerv/pull/294)):** committed failing tests in `test/evaluation.browser.mjs` (commit `feb13de`) reproducing immediate `until` failure on expression exceptions during page loading and timeout error format. In `test/fixtures/browser.mjs`, `until` now catches evaluation exceptions and retries until the condition holds or timeout expires, including last error message on timeout. All browser tests pass. Next: CI and merge.
 
 **Next action / closure evidence:** Write a failing test for the race in the browser fixture, then fix the wait: retry `until` while the expression throws during navigation (keeping the last error for the timeout message), or wait for the navigated document to load before the first `until`. Do not weaken the assertion or widen the 15 s timeout. Check whether other `until` callers right after `Page.navigate` (test/evaluation.browser.mjs, test/pwa.browser.mjs and the other browser tests) share the race, and whether the service worker added in #286 changes page timing in the CI browser. Verified when the fix's CI passes and later browser runs show no recurrence.
 
