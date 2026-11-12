@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-12T23:21:11.019Z",
+  "reviewed": "2026-11-12T23:38:18.680Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
-    "AGENTS.md": "f8e8646a9dfcf43bee1cbb0160e779f198f5db0d7cdeee58284d59a4e5e696a1",
+    "AGENTS.md": "c163d5019752b32128390d3dca8400759e00603e9c5dc5e90df6071d798cb5d8",
     "docs/BACKLOG-RULES.md": "e2e12ec52b76442c2024faeef76143ddfc432cf342d593fda6cf0b715f870002",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
     "docs/agents/areas.md": "0ff9805a7d720ee177505cef670e53169a6d640299762dfa86185be46fa8737c",
@@ -25,7 +25,7 @@
   },
   "measurements": {
     "samples": 1,
-    "latestAt": "2026-11-12T23:21:10.968Z",
+    "latestAt": "2026-11-12T23:38:18.629Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -55,7 +55,7 @@
         "durationMs": {
           "observed": 1,
           "missing": 0,
-          "median": 46
+          "median": 47
         },
         "conflicts": {
           "observed": 0,
@@ -77,10 +77,10 @@
   },
   "outcomes": [
     {
-      "kind": "tool",
+      "kind": "rule",
       "disposition": "implemented",
-      "target": "tools/work-items.mjs",
-      "evidence": "Reconciled project-harness PR #140 backlog ledger UX (icon+top-link headings, priority-first queue order, closed-dep omission, single legend); updated backlog-recap.mjs + test/backlog-recap.test.mjs, layout.json legends, and closed Depends on cleanup."
+      "target": "AGENTS.md",
+      "evidence": "Added pre-push check:fast bundle, worktree:link helper, targeted reviewer diff guidance, and concise effort.basis / record-first reading guidance; condensed 154 repeated boilerplate basis strings in docs/work/tasks/."
     }
   ]
 }
