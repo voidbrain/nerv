@@ -67,6 +67,26 @@ export function makeServer(
   const sessions = new Map<string, number>();
   let cachedUpdate: { at: number; channel: string; value: UpdateAvailability } | undefined;
   const UPDATE_CHECK_TTL_MS = 5 * 60_000;
+  const resolveUpdate = async (
+    channel = parseUpdateChannel(undefined),
+    refresh = false,
+  ): Promise<UpdateAvailability> => {
+    const now = Date.now();
+    if (refresh || !cachedUpdate || cachedUpdate.channel !== channel || now - cachedUpdate.at >= UPDATE_CHECK_TTL_MS) {
+      const value = validateUpdateAvailability(
+        options.updateCheck
+          ? await options.updateCheck({ channel, refresh })
+          : await checkUpdateAvailability({ channel, runningRevision: build.commit }),
+      );
+      cachedUpdate = { at: now, channel, value };
+    }
+    return cachedUpdate.value;
+  };
+  const statusUpdate = async (): Promise<UpdateAvailability> => {
+    if (cachedUpdate && Date.now() - cachedUpdate.at < UPDATE_CHECK_TTL_MS) return cachedUpdate.value;
+    if (options.updateCheck) return resolveUpdate('main', false);
+    return checkUpdateAvailability({ runningRevision: build.commit, offline: true });
+  };
   const sessionTtl = options.sessionTtlMs ?? SESSION_TTL_MS;
   if (token.length < 24) throw new Error('NERV_TOKEN must be at least 24 characters.');
   const listener: RequestListener = async (req, res) => {
@@ -680,6 +700,7 @@ export function makeServer(
           mode: 'local-core',
           ...(options.base ? { base: options.base } : {}),
           ...(await store.health()),
+          update: await statusUpdate(),
           language: options.language ?? 'en',
           timeZone: options.timeZone ?? 'Europe/Rome',
           ...(options.native ? { runtimeId: options.native.auth.runtimeId, home: options.native.auth.home } : {}),
@@ -691,6 +712,7 @@ export function makeServer(
           build,
           ...(options.base ? { base: options.base } : {}),
           ...(await store.doctor()),
+          update: await statusUpdate(),
           remoteWorkers: 'not implemented',
           language: options.language ?? 'en',
           timeZone: options.timeZone ?? 'Europe/Rome',
@@ -699,21 +721,7 @@ export function makeServer(
       else if (req.method === 'GET' && path === '/api/update') {
         const channel = parseUpdateChannel(url.searchParams.get('channel') ?? undefined);
         const refresh = url.searchParams.get('refresh') === '1';
-        const now = Date.now();
-        if (
-          refresh ||
-          !cachedUpdate ||
-          cachedUpdate.channel !== channel ||
-          now - cachedUpdate.at >= UPDATE_CHECK_TTL_MS
-        ) {
-          const value = validateUpdateAvailability(
-            options.updateCheck
-              ? await options.updateCheck({ channel, refresh })
-              : await checkUpdateAvailability({ channel, runningRevision: build.commit }),
-          );
-          cachedUpdate = { at: now, channel, value };
-        }
-        reply(200, cachedUpdate.value);
+        reply(200, await resolveUpdate(channel, refresh));
       } else reply(404, { error: 'Unknown operation.' });
     } catch (e) {
       reply(400, { error: e instanceof Error ? e.message : 'Invalid request.' });
