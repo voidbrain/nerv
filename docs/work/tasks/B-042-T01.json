@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "id": "B-042-T01",
+  "parent": "B-042",
+  "title": "Explain and fix the remote card cleanup that an awaited delivery missed",
+  "goal": "A controlled regression shows why an awaited Telegram delivery after a remote dashboard decision left the relayed buttons, and the fix makes the awaited pass reconcile that decision without widening a timeout or weakening an assertion",
+  "status": "implemented",
+  "acceptance": [
+    "A committed deterministic regression fails before the fix for the stated mechanism and passes after it",
+    "Delivery passes never overlap and the periodic tick still skips while a pass runs",
+    "Exactly-once sends, eventual stale-button removal, retry after restart and the signed status lookup are preserved",
+    "The one-channel fixture waits for the state its assertion depends on, with no timeout widened or assertion weakened",
+    "Windows and full-suite CI pass on the PR"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/telegram.ts",
+    "test/telegram-reconcile.test.ts",
+    "test/one-channel.test.ts",
+    "docs/work/records/B-042.md",
+    "docs/work/tasks/B-042-T01.json",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "delivery-reconciliation",
+    "regression-design",
+    "concurrency-control"
+  ],
+  "privacy": "Neutral repository fixtures only; no model inference, private hosts or device operations",
+  "validation": [
+    "test/telegram-reconcile.test.ts 'a delivery awaited after a dashboard decision is not a pass that read status before it' fails before the fix and passes after it",
+    "Channels group regressions (telegram, telegram-reconcile, one-channel, channel-state, chat-command, dashboard); full deterministic CI including Windows",
+    "Fresh-context design review before the parent is verified"
+  ],
+  "escalation": [
+    "Do not merely widen timeouts or weaken assertions",
+    "Keep the parent open until CI runs on main show no recurrence"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 hour agent",
+    "basis": "Task added 2026-11-12 when B-042 was taken up. Baseline 2.5 days (baselineDays, history: the record's 2–3 focused days of 2026-11-09), re-estimated 2026-11-12 in agent hours (harness 5.6.0) as 2 h, the session's time box (baselineAgentHours). About 1.25 h spent (stated: CI log search since #277, code-path reading, deterministic regression, fix, fixture precondition, channels regressions, records, fresh-context review and its should-fix item). 0.5 h remains: CI rounds including Windows, merge.",
+    "reviewed": "2026-11-12",
+    "baselineDays": 2.5,
+    "agentHours": 0.5,
+    "baselineAgentHours": 2,
+    "actualAgentHours": 1.25,
+    "actualSource": "stated"
+  }
+}
