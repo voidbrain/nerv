@@ -322,7 +322,9 @@ export async function assertServiceStartup(host: ServiceHost, managedStart = fal
   if (
     !snapshot ||
     !plan ||
-    plan.handler !== handler() ||
+    // An update starts the candidate revision, whose lifecycle files may differ from the installed code that made the
+    // plan; the live applying handler (identity below) checked its own handler at apply time and owns this start.
+    (plan.action !== 'update' && plan.handler !== handler()) ||
     (await processIdentity(snapshot.pid)) !== snapshot.identity ||
     !(await host.authorizedStart!(plan))
   )
@@ -641,6 +643,17 @@ export function releaseService(host: ServiceHost, snapshot: unknown, evidence: u
     writable.close();
   }
 }
+/** The CLI release: the selected service must be observed unregistered and stopped first, whatever the evidence says. */
+export async function releaseObservedService(
+  host: ServiceHost,
+  snapshot: unknown,
+  evidence: unknown,
+): Promise<ServiceReceipt> {
+  const current = await host.inspect();
+  if (current.registration !== 'absent' || current.runtime !== 'stopped' || current.pids.length)
+    throw Error('The service is still registered or running; stop it and its descendants before releasing.');
+  return releaseService(host, snapshot, evidence);
+}
 async function waitFor(check: () => Promise<boolean>): Promise<void> {
   for (let i = 0; i < 80; i++) {
     if (await check()) return;
@@ -948,14 +961,19 @@ export function macServiceAdapter(context: ServiceContext, run: typeof command =
       let r: Result;
       if (step === 'register') r = await run('launchctl', ['bootstrap', gui, definition(context)]);
       else if (step === 'unregister') r = await run('launchctl', ['bootout', target]);
-      else if (step === 'fetch')
-        r = await run(
-          'git',
-          ['-C', context.source, 'fetch', '--no-tags', 'origin', p.nextRevision!],
-          undefined,
-          120000,
-        );
-      else if (step === 'checkout')
+      else if (step === 'fetch') {
+        // Admission already read the pinned commit from this checkout, so a present commit needs no network; a fetch
+        // never prompts for credentials.
+        r = await run('git', ['-C', context.source, 'cat-file', '-e', p.nextRevision! + '^{commit}']);
+        if (r.status !== 0)
+          r = await run(
+            'git',
+            ['-C', context.source, 'fetch', '--no-tags', 'origin', p.nextRevision!],
+            undefined,
+            120000,
+            { GIT_TERMINAL_PROMPT: '0' },
+          );
+      } else if (step === 'checkout')
         r = await run('git', ['-C', context.source, 'checkout', '--detach', p.nextRevision!]);
       else
         r = await run(
