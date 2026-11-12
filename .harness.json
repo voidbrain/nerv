@@ -3,7 +3,7 @@
     "path": "../harness-template",
     "repo": "https://github.com/voidbrain/project-harness"
   },
-  "version": "5.6.0",
+  "version": "6.0.0",
   "stacks": [
     "core",
     "angular"
@@ -58,7 +58,11 @@
   "evaluations": [
     {
       "name": "gauntlet",
-      "pending": ["node", "tools/gauntlet.mjs", "pending"],
+      "pending": [
+        "node",
+        "tools/gauntlet.mjs",
+        "pending"
+      ],
       "timeoutMs": 60000
     }
   ],
@@ -469,7 +473,7 @@
       "kept": "test/brief.test.ts asserts sortieRef and live.js short() give the same ID for the same sortie."
     },
     {
-      "value": "Dashboard default colours (Eva \u00b7 Dark \u00b7 Orange)",
+      "value": "Dashboard default colours (Eva · Dark · Orange)",
       "places": [
         {
           "file": "web/public/dashboard/index.html",
@@ -595,7 +599,7 @@
     {
       "what": "GitHub-hosted runner images (macos-15, windows-latest, ubuntu-latest)",
       "affects": "CI jobs: an image GitHub retires fails the job before it runs",
-      "noticed": "The job fails in about a second with \"configuration \u2026 is not supported\" (B-015, macos-14 retired 2026-11-05)"
+      "noticed": "The job fails in about a second with \"configuration … is not supported\" (B-015, macos-14 retired 2026-11-05)"
     },
     {
       "what": "MCP servers the owner adds (`npx -y package` fetches the newest version at each start)",

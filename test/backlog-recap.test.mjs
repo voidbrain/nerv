@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { weekOf, recap } from '../tools/backlog-recap.mjs';
+import { weekOf, recap, parseRecords } from '../tools/backlog-recap.mjs';
 
 const r = (id, status, opened, closed = null) => ({
   id,
@@ -33,4 +33,20 @@ test('opened and closed count the whole current week, not the 7 days before the 
     'Sunday counts, the previous Sunday and the next Monday do not',
   );
   assert.doesNotMatch(block, /Recap as of|Last 7 days/);
+});
+
+test('the human cue is read from the generated summary table as well as the authored line (harness 6.0.0)', () => {
+  const generated = (id, cue) =>
+    `### ${id}\n\n**Title**\n\n| Signal | Priority | Status | Effort | Remaining | Depends on | Unlocks | Human action |\n|:---:|---|---|---|---|---|---|:---:|\n| 🔴 | 🔶 P2 | Open | 🟢 Small | 2 h | — | — | ${cue} |\n\n${cue.split(' ')[0]} **→** Next.\n\n---\n`;
+  const authored =
+    '### F-003\n\n**Title**\n\n| Signal | Priority | Status | Effort |\n|:---:|---|---|---|\n| 🔴 | 🔶 P2 | Open | 🟢 Small |\n\n🧑 **→ Human action required: Yes**<br />Decide.\n\n---\n';
+  const records = parseRecords(generated('F-001', '🧑 Yes') + generated('B-001', '💻 No') + authored);
+  assert.deepEqual(
+    records.map((x) => [x.id, x.human]),
+    [
+      ['F-001', true],
+      ['B-001', false],
+      ['F-003', true],
+    ],
+  );
 });

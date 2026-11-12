@@ -65,7 +65,20 @@ for (let i = 0; i < headings.length; i++) {
   const row = block.split('\n').find((line) => line.startsWith('|') && Object.values(cues).includes(cells(line)[0]));
   assert(row, `${id}: missing summary`);
   const [signal, priority, status, effort] = cells(row);
-  assert.equal(cells(row).length, 4, `${id}: summary needs four columns (remove completion percentages)`);
+  // Authored records have four columns; the generated ledger (F-059) adds Remaining, Depends on / Unlocks when the
+  // dependency helper is adopted, and Human action, which then replaces the label of the human-action line.
+  const lines = block.split('\n');
+  const header = cells(lines[lines.indexOf(row) - 2] ?? '');
+  const generated = header.length > 4;
+  assert(
+    generated
+      ? [
+          'Signal|Priority|Status|Effort|Remaining|Human action',
+          'Signal|Priority|Status|Effort|Remaining|Depends on|Unlocks|Human action',
+        ].includes(header.join('|')) && cells(row).length === header.length
+      : cells(row).length === 4,
+    `${id}: summary needs four columns, or the generated Remaining / Depends on / Unlocks / Human action columns (remove completion percentages)`,
+  );
   assert(/^\*\*[^\n]+\*\*$/m.test(block.slice(0, block.indexOf('|'))), `${id}: missing visible bold title`);
   assert(['🟢 Small', '🟡 Medium', '🔴 Large'].includes(effort), `${id}: effort needs colour and word`);
   assert.equal(signal, cues[status], `${id}: status cue mismatch`);
@@ -78,9 +91,17 @@ for (let i = 0; i < headings.length; i++) {
     1,
     `${id}: next action must occur exactly once`,
   );
-  const human = [...block.matchAll(/^(🧑|💻) \*\*→ Human action required: (Yes|No)\*\*<br \/>.+/gm)];
+  const human = generated
+    ? [...block.matchAll(/^(🧑|💻) \*\*→\*\* .+/gm)].map((m) => Object.assign(m, { 2: cells(row).at(-1) }))
+    : [...block.matchAll(/^(🧑|💻) \*\*→ Human action required: (Yes|No)\*\*<br \/>.+/gm)];
   assert.equal(human.length, 1, `${id}: missing visible human action/cue`);
+  if (generated) {
+    assert(/^(🧑|💻) (Yes|No)$/.test(human[0][2]), `${id}: Human action cell needs 🧑 Yes or 💻 No`);
+    assert.equal(human[0][2].split(' ')[0], human[0][1], `${id}: human-action cue mismatch`);
+    human[0][2] = human[0][2].split(' ')[1];
+  }
   assert.equal(human[0][1], human[0][2] === 'Yes' ? '🧑' : '💻', `${id}: human-action cue mismatch`);
+  const humanAt = block.indexOf(human[0][0]);
   const after = block
     .slice(block.indexOf(human[0][0]) + human[0][0].length)
     .split('\n')
@@ -106,11 +127,8 @@ for (let i = 0; i < headings.length; i++) {
     ['**Issue**', '**Reproduce**', '**Check**'].every((k) => visible.includes(k)),
     `${id}: recap must stay visible`,
   );
-  assert(block.indexOf('**→ Human action') < block.indexOf('<details>'), `${id}: human action hidden in details`);
-  assert(
-    block.indexOf('**→ Human action') < block.indexOf('**Next action'),
-    `${id}: human action must precede next action`,
-  );
+  assert(humanAt < block.indexOf('<details>'), `${id}: human action hidden in details`);
+  assert(humanAt < block.indexOf('**Next action'), `${id}: human action must precede next action`);
   assert(/<\/details>\n\n---\n/.test(block), `${id}: end the record with a --- line after its details`);
   for (const field of ['PR / evidence', 'Opened', 'Verification', 'Reviewed']) {
     const value = detail[1]

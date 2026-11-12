@@ -353,7 +353,8 @@ function ledgerTotals(tasks, active) {
 }
 function featurePlan(text, id, tasks) {
   const steps = tasks.filter((t) => t.parent === id);
-  if (!steps.length) throw Error('Feature needs an upfront task plan: ' + id);
+  // F-059: with feature plans every active record, bugs included, has at least one step (owner, 2026-11-12).
+  if (!steps.length) throw Error(`${id.startsWith('F-') ? 'Feature' : 'Record'} needs an upfront task plan: ${id}`);
   const sizes = { small: '🟢 Small', medium: '🟡 Medium', large: '🔴 Large' },
     states = {
       planned: 'Planned',
@@ -365,7 +366,7 @@ function featurePlan(text, id, tasks) {
   for (const t of steps) validateEffort(t.effort, t.status);
   // Compact table (F-055): one line per step; the dated basis of each estimate goes into the record details.
   const table =
-    '**Feature steps** (baseline: accepted estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)\n\n| Step | Baseline | Actual | Remaining | Status |\n|---|---|---|---|---|\n' +
+    `**${id.startsWith('F-') ? 'Feature steps' : 'Steps'}** (baseline: accepted estimate; actual: effort spent, so far while open; h: agent hours, owner time apart; status is not parent acceptance)\n\n| Step | Baseline | Actual | Remaining | Status |\n|---|---|---|---|---|\n` +
     steps
       .map(
         (t) =>
@@ -407,15 +408,15 @@ function withArchives(root, ledger) {
       sources.push({ file: `docs/archive/${name}`, text: readFileSync(local(root, `docs/archive/${name}`), 'utf8') });
   return sources;
 }
-// Depends on and Unlocks next to each record's summary (F-057), from tools/backlog-dependencies.mjs when the project
-// has it. The authored Depends on row in the details stays the source; Unlocks are its reverse links.
-function dependencyLines(root, config) {
+// Depends on and Unlocks of each record (F-057), from tools/backlog-dependencies.mjs when the project has it. The
+// authored Depends on row in the details stays the source; Unlocks are its reverse links. Null without the helper.
+function dependencyLinks(root, config) {
   const helper = new URL('./backlog-dependencies.mjs', import.meta.url);
   if (!existsSync(helper)) return null;
   const { graph } = createRequire(import.meta.url)('./backlog-dependencies.mjs');
   const all = graph(withArchives(root, renderLedger(root, { ...config, order: 'id' }, false)));
   const link = (r) => `[${r.id}](${r.file === 'docs/BACKLOG.md' ? '' : r.file.slice(5)}#${r.id.toLowerCase()})`;
-  const lines = new Map();
+  const links = new Map();
   for (const record of all.values()) {
     if (record.file !== 'docs/BACKLOG.md') continue;
     const depends = record.dependencies.map((d) => (d.external ? `[${d.id}](${d.url})` : link(all.get(d.id))));
@@ -423,14 +424,31 @@ function dependencyLines(root, config) {
       .filter((r) => r.dependencies.some((d) => !d.external && d.id === record.id))
       .sort((a, b) => a.id.localeCompare(b.id))
       .map(link);
-    if (depends.length || unlocks.length)
-      lines.set(record.id, `**Depends on:** ${depends.join(', ') || '—'} · **Unlocks:** ${unlocks.join(', ') || '—'}`);
+    links.set(record.id, { depends: depends.join(', ') || '—', unlocks: unlocks.join(', ') || '—' });
   }
-  return lines;
+  return links;
 }
-// Places a record's dependency line under its summary table, found by its header cells whatever the spacing. A
-// record with links but no summary table fails the build rather than losing its line.
-function placeDependencyLine(text, line, id) {
+// A record's remaining effort over its task steps, in the units they are estimated in; — without steps (F-059).
+function remainingCell(steps) {
+  if (!steps.length) return '—';
+  const t = effortTotals(steps);
+  const anyDays = steps.some((x) => !inHours(x.effort));
+  if (t.open && t.remainingUnknown === t.open) return `${t.open} unestimated`;
+  return (
+    amount(
+      t.remainingAgentHours,
+      t.remainingOwnerHours,
+      t.remainingDays,
+      t.remainingHoursSteps > 0 || !anyDays,
+      t.remainingDaysSteps > 0,
+    ) + (t.remainingUnknown ? ` + ${t.remainingUnknown} unestimated` : '')
+  );
+}
+// The generated summary table (F-059): the authored Signal | Priority | Status | Effort table gains Remaining, Depends
+// on and Unlocks (when the dependency helper is adopted) and Human action, and the authored human-action line keeps
+// only its icon and sentence. Record sources keep the authored form.
+export const HUMAN_LINE = /^(🧑|💻) \*\*→ Human action required: (Yes|No)\*\*<br \/>(.+)$/m;
+function summaryTable(text, id, { remaining, links }) {
   const lines = text.split('\n');
   const at = lines.findIndex(
     (l, i) =>
@@ -443,9 +461,28 @@ function placeDependencyLine(text, line, id) {
       /^\|[\s:|-]+\|$/.test((lines[i + 1] ?? '').trim()) &&
       (lines[i + 2] ?? '').trim().startsWith('|'),
   );
-  if (at < 0) throw Error(`${id}: no summary table to place its Depends on / Unlocks line under`);
-  lines.splice(at + 3, 0, '', line);
-  return lines.join('\n');
+  // Without a summary table check:backlog reports the record; only dependency links would be lost, so those fail here.
+  if (at < 0) {
+    if (links && (links.depends !== '—' || links.unlocks !== '—'))
+      throw Error(`${id}: no summary table to place its Depends on / Unlocks under`);
+    return text;
+  }
+  const human = HUMAN_LINE.exec(text);
+  const extra = [
+    ['Remaining', remaining],
+    ...(links
+      ? [
+          ['Depends on', links.depends],
+          ['Unlocks', links.unlocks],
+        ]
+      : []),
+    ['Human action', human ? `${human[1]} ${human[2]}` : '—'],
+  ];
+  lines[at] = lines[at].trimEnd() + extra.map(([h]) => ` ${h} |`).join('');
+  lines[at + 1] = lines[at + 1].trimEnd() + extra.map(([h]) => (h === 'Human action' ? ':---:|' : '---|')).join('');
+  lines[at + 2] = lines[at + 2].trimEnd() + extra.map(([, v]) => ` ${v} |`).join('');
+  const out = lines.join('\n');
+  return human ? out.replace(HUMAN_LINE, `${human[1]} **→** ${human[3]}`) : out;
 }
 function queueRank(root, config) {
   const sources = withArchives(root, renderLedger(root, { ...config, order: 'id' }));
@@ -492,7 +529,16 @@ export function renderLedger(root, config, withPlans = true) {
     ? ledgerTotals(plannedTasks ?? taskCatalog(root, config).tasks, new Set(files.map((f) => f.slice(0, -3))))
     : null;
   const rank = withPlans && config.order === 'queue' ? queueRank(root, config) : null;
-  const depLines = withPlans ? dependencyLines(root, config) : null;
+  const links = withPlans ? dependencyLinks(root, config) : null;
+  const stepsOf = withPlans
+    ? (() => {
+        // Steps are read only where the project keeps them; a record without steps shows — as its remaining.
+        const kept = (path) => typeof path === 'string' && existsSync(local(root, path));
+        const all =
+          plannedTasks ?? (kept(config.tasks) && kept(config.profiles) ? taskCatalog(root, config).tasks : []);
+        return (id) => all.filter((t) => t.parent === id);
+      })()
+    : null;
   const ordered = rank
     ? [...files].sort((a, b) => (rank.get(a) ?? Infinity) - (rank.get(b) ?? Infinity) || a.localeCompare(b))
     : files;
@@ -502,10 +548,12 @@ export function renderLedger(root, config, withPlans = true) {
     if (typeof segment.text === 'string') {
       const text = derived ? segment.text.replace(recap, derived) : segment.text;
       output += totals ? text.replace(totalsBlock, totals) : text;
-    } else if (['B', 'F'].includes(segment.records)) {
-      if (seen.has(segment.records)) throw Error('Duplicate record group');
-      seen.add(segment.records);
-      for (const file of ordered.filter((f) => f.startsWith(segment.records + '-'))) {
+    } else if (['B', 'F', 'all'].includes(segment.records)) {
+      // "all" lists bugs and features as one list in the ledger order (F-059); B and F keep separate groups.
+      const groups = segment.records === 'all' ? ['B', 'F'] : [segment.records];
+      if (groups.some((g) => seen.has(g))) throw Error('Duplicate record group');
+      for (const g of groups) seen.add(g);
+      for (const file of ordered.filter((f) => groups.includes(f[0]))) {
         const text = readFileSync(local(root, config.records + '/' + file), 'utf8');
         if (
           !text.startsWith('### ' + file.slice(0, -3) + '\n') ||
@@ -513,13 +561,15 @@ export function renderLedger(root, config, withPlans = true) {
         )
           throw Error('Record identity mismatch: ' + file);
         const relocated = relocateLinks(
-          plannedTasks && file.startsWith('F-') ? featurePlan(text, file.slice(0, -3), plannedTasks) : text,
+          plannedTasks ? featurePlan(text, file.slice(0, -3), plannedTasks) : text,
           local(root, config.records + '/' + file),
           join(root, 'docs/BACKLOG.md'),
           referenceIds,
         );
-        const line = depLines?.get(file.slice(0, -3));
-        output += line ? placeDependencyLine(relocated, line, file.slice(0, -3)) : relocated;
+        const id = file.slice(0, -3);
+        output += stepsOf
+          ? summaryTable(relocated, id, { remaining: remainingCell(stepsOf(id)), links: links?.get(id) ?? null })
+          : relocated;
       }
     } else throw Error('Invalid layout segment');
   }
@@ -567,7 +617,7 @@ export function migrateLedger(root, config) {
   mkdirSync(dirname(local(root, config.layout)), { recursive: true });
   for (const { file, source } of sources) writeFileSync(file, source, { flag: 'wx' });
   writeFileSync(local(root, config.layout), JSON.stringify({ version: 1, segments }, null, 2) + '\n', { flag: 'wx' });
-  if (renderLedger(root, config) !== text)
+  if (renderLedger(root, config, false) !== text)
     throw Error('Migration did not preserve the exact ledger; inspect generated sources before continuing');
   return matches.length;
 }
