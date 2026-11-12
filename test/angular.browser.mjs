@@ -227,6 +227,16 @@ test(
           'graphical cancel control has its localized action and reminder name',
         );
         assert.equal(
+          await evaluate(`document.querySelector('article.reminder .edit-btn').getAttribute('aria-label')`),
+          (lang === 'it' ? 'Modifica' : 'Edit') + ' ' + reminder.title,
+          'graphical edit control has its localized action and reminder name',
+        );
+        assert.equal(
+          await evaluate(`document.querySelector('article.reminder .edit-btn').textContent.trim()`),
+          lang === 'it' ? 'Modifica' : 'Edit',
+          'visible edit button text',
+        );
+        assert.equal(
           await evaluate(`document.querySelector('article.reminder p').textContent`),
           await evaluate(`new Date('${reminder.due}').toLocaleString('${lang === 'it' ? 'it-IT' : 'en-GB'}')`),
         );
@@ -319,6 +329,93 @@ test(
         );
         assert.ok(store.list().find((r) => r.id === added.id).cancelled, 'browser cancellation reaches storage');
         await audit(lang + '-cancelled');
+
+        // F-004-T02: edit reminder flow (inline form, validation, keep-as-is, error handling, successful patch, axe).
+        const editTargetTitle = lang === 'it' ? 'Modificare questa voce' : 'Edit this item';
+        await save(editTargetTitle, '2031-05-01T12:00');
+        await until(
+          `[...document.querySelectorAll('article.reminder strong')].some(e=>e.textContent===${JSON.stringify(editTargetTitle)})`,
+        );
+        const target = store.list().find((r) => r.title === editTargetTitle);
+        assert.ok(target);
+
+        const editBtn = () =>
+          evaluate(
+            `[...document.querySelectorAll('article.reminder')].find(e=>e.querySelector('strong')?.textContent===${JSON.stringify(editTargetTitle)}).querySelector('.edit-btn').click()`,
+          );
+        await editBtn();
+        await until(`document.querySelector('article.reminder.editing')!==null`);
+        assert.equal(
+          await evaluate(`document.querySelector('.rem-edit input[type=text]').value`),
+          editTargetTitle,
+          'prefilled title in edit form',
+        );
+        assert.equal(
+          await evaluate(`document.querySelector('.rem-edit input[type=datetime-local]').value`),
+          '2031-05-01T12:00',
+          'prefilled local time in edit form',
+        );
+        await audit(lang + '-reminder-editing');
+
+        // Cancel edit ("Keep as is") restores normal view and focus
+        await evaluate(`document.querySelector('.rem-edit .keep-btn').click()`);
+        await until(`document.querySelector('article.reminder.editing')===null`);
+        const editLabel = (lang === 'it' ? 'Modifica ' : 'Edit ') + editTargetTitle;
+        await until(`document.activeElement?.getAttribute('aria-label')===${JSON.stringify(editLabel)}`);
+        assert.equal(
+          await evaluate(`document.activeElement?.getAttribute('aria-label')`),
+          editLabel,
+          'focus restored to edit button after keep as is',
+        );
+
+        // Edit with invalid input shows error and does not update store
+        await editBtn();
+        await until(`document.querySelector('article.reminder.editing')!==null`);
+        await evaluate(
+          `{const input=document.querySelector('.rem-edit input[type=text]');input.value='';input.dispatchEvent(new Event('input'));document.querySelector('.rem-edit .save-btn').click();}`,
+        );
+        await until(`document.querySelector('[role=alert]')?.textContent===${JSON.stringify(saveError)}`);
+        assert.equal(store.list().find((r) => r.id === target.id).title, editTargetTitle, 'blank edit title rejected');
+
+        // Failed PATCH (e.g. 500) shows editError
+        await evaluate(
+          `{const original=window.fetch;window.fetch=(input,init)=>init?.method==='PATCH'?Promise.resolve(new Response(JSON.stringify({error:'Server error'}),{status:500,headers:{'Content-Type':'application/json'}})):original(input,init);window.restorePatchFetch=()=>{window.fetch=original;delete window.restorePatchFetch;};}`,
+        );
+        const updatedTitle = editTargetTitle + ' (updated)';
+        await evaluate(
+          `{const input=document.querySelector('.rem-edit input[type=text]');input.value=${JSON.stringify(updatedTitle)};input.dispatchEvent(new Event('input'));document.querySelector('.rem-edit .save-btn').click();}`,
+        );
+        const editError = lang === 'it' ? 'Impossibile aggiornare il promemoria.' : 'Could not update the reminder.';
+        await until(`document.querySelector('[role=alert]')?.textContent===${JSON.stringify(editError)}`);
+        assert.equal(
+          store.list().find((r) => r.id === target.id).title,
+          editTargetTitle,
+          'failed PATCH does not update storage',
+        );
+        await evaluate('window.restorePatchFetch()');
+
+        // Successful edit
+        await evaluate(`document.querySelector('.rem-edit .save-btn').click()`);
+        await until(`document.querySelector('article.reminder.editing')===null`);
+        await until(
+          `[...document.querySelectorAll('article.reminder strong')].some(e=>e.textContent===${JSON.stringify(updatedTitle)})`,
+        );
+        assert.equal(
+          store.list().find((r) => r.id === target.id).title,
+          updatedTitle,
+          'storage reflects updated title',
+        );
+        await audit(lang + '-reminder-edited');
+
+        // Clean up the edited reminder with cancel
+        const cancelEdited = () =>
+          evaluate(
+            `[...document.querySelectorAll('article.reminder')].find(e=>e.querySelector('strong')?.textContent===${JSON.stringify(updatedTitle)}).querySelector('button').click()`,
+          );
+        await cancelEdited();
+        await until(
+          `[...document.querySelectorAll('article.reminder')].some(e=>e.querySelector('strong')?.textContent===${JSON.stringify(updatedTitle)}&&e.querySelector('small')?.textContent===${JSON.stringify(lang === 'it' ? 'Annullato' : 'Cancelled')}&&e.querySelector('button')===null)`,
+        );
       }
       // Cancel the original example too, then advance only the test store clock.
       await evaluate(`document.querySelector('article.reminder button').click()`);

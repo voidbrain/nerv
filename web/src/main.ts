@@ -28,7 +28,7 @@ interface Reminder {
 @if(!connected()){<section class="connect panel"><h2>{{t().connectTitle}}</h2><p>{{t().connectHint}}</p><label>{{t().token}}<input #token type="password" autocomplete="off" placeholder="NERV_TOKEN"></label><button (click)="connect(token.value);token.value=''">{{t().connect}}</button></section>}
 @if(error()){<p role="alert" class="error">{{error()}}</p>}
 @if(connected()){<nerv-status-card [surface]="statusSurface()"></nerv-status-card>
-@if(view()!=='doctor'){<div class="section-heading"><h2>{{view()==='home'?t().horizon:t().reminders}}</h2><span>{{reminders().length}} {{t().recorded}}</span></div><div class="grid"><section class="panel"><h3>{{t().keep}}</h3><label>{{t().what}}<input #title [placeholder]="t().example" maxlength="500"></label><label>{{t().when}} <small>{{t().browserTime}}</small><input #due type="datetime-local"></label><button (click)="add(title.value,due.value,title)">{{t().tie}}</button><p class="hint">{{t().delivery}}</p></section><section class="panel"><h3>{{t().horizon}}</h3>@for(r of reminders();track r.id){<article class="reminder"><div><strong>{{r.title}}</strong><p>{{format(r.due)}}</p><small>{{r.cancelled?t().cancelled:r.delivered?t().delivered:t().scheduled}}</small></div>@if(!r.cancelled&&!r.delivered){<button class="quiet" (click)="cancel(r.id)" [attr.aria-label]="t().cancel+' '+r.title">×</button>}</article>}@empty{<p class="empty">{{t().empty}}</p>}<div role="group" data-history="reminders" [attr.aria-label]="t().reminderPages"><button class="quiet" (click)="pageReminders(false)" [disabled]="reminderBefore().length===1" [attr.aria-disabled]="paging()||reminderBefore().length===1">{{t().previous}}</button><button class="quiet" (click)="pageReminders(true)" [disabled]="reminderNext()===null" [attr.aria-disabled]="paging()||reminderNext()===null">{{t().next}}</button></div></section></div><section class="panel inbox"><h3>{{t().inbox}}</h3>@for(message of inbox();track $index){<p>{{message}}</p>}@empty{<p class="hint">{{t().inboxHint}}</p>}<div role="group" data-history="inbox" [attr.aria-label]="t().inboxPages"><button class="quiet" (click)="pageInbox(false)" [disabled]="inboxBefore().length===1" [attr.aria-disabled]="paging()||inboxBefore().length===1">{{t().previous}}</button><button class="quiet" (click)="pageInbox(true)" [disabled]="inboxNext()===null" [attr.aria-disabled]="paging()||inboxNext()===null">{{t().next}}</button></div><div role="status">{{paging()?t().loading:t().pageReady}}</div></section>}
+@if(view()!=='doctor'){<div class="section-heading"><h2>{{view()==='home'?t().horizon:t().reminders}}</h2><span>{{reminders().length}} {{t().recorded}}</span></div><div class="grid"><section class="panel"><h3>{{t().keep}}</h3><label>{{t().what}}<input #title [placeholder]="t().example" maxlength="500"></label><label>{{t().when}} <small>{{t().browserTime}}</small><input #due type="datetime-local"></label><button (click)="add(title.value,due.value,title,due)">{{t().tie}}</button><p class="hint">{{t().delivery}}</p></section><section class="panel"><h3>{{t().horizon}}</h3>@for(r of reminders();track r.id){@if(editingId()!==r.id){<article class="reminder" [attr.data-reminder-id]="r.id"><div><strong>{{r.title}}</strong><p>{{format(r.due)}}</p><small>{{r.cancelled?t().cancelled:r.delivered?t().delivered:t().scheduled}}</small></div>@if(!r.cancelled&&!r.delivered){<div class="reminder-actions"><button class="quiet cancel-btn" (click)="cancel(r.id)" [attr.aria-label]="t().cancel+' '+r.title">×</button><button class="quiet edit-btn" (click)="startEdit(r)" [attr.aria-label]="t().edit+' '+r.title">{{t().edit}}</button></div>}</article>}@if(editingId()===r.id){<article class="reminder editing" [attr.data-reminder-id]="r.id"><form class="rem-edit" (submit)="saveEdit($event,r.id)" novalidate><label [attr.for]="'rem-edit-title-'+r.id">{{t().what}}</label><input [id]="'rem-edit-title-'+r.id" type="text" [value]="editTitle()" (input)="editTitle.set($any($event.target).value)" maxlength="500"><label [attr.for]="'rem-edit-due-'+r.id">{{t().when}} <small>{{t().browserTime}}</small></label><input [id]="'rem-edit-due-'+r.id" type="datetime-local" [value]="editDue()" (input)="editDue.set($any($event.target).value)"><div class="edit-actions"><button type="submit" class="save-btn">{{t().save}}</button><button type="button" class="quiet keep-btn" (click)="cancelEdit(r.id)">{{t().keepAsIs}}</button></div></form></article>}}@empty{<p class="empty">{{t().empty}}</p>}<div role="group" data-history="reminders" [attr.aria-label]="t().reminderPages"><button class="quiet" (click)="pageReminders(false)" [disabled]="reminderBefore().length===1" [attr.aria-disabled]="paging()||reminderBefore().length===1">{{t().previous}}</button><button class="quiet" (click)="pageReminders(true)" [disabled]="reminderNext()===null" [attr.aria-disabled]="paging()||reminderNext()===null">{{t().next}}</button></div></section></div><section class="panel inbox"><h3>{{t().inbox}}</h3>@for(message of inbox();track $index){<p>{{message}}</p>}@empty{<p class="hint">{{t().inboxHint}}</p>}<div role="group" data-history="inbox" [attr.aria-label]="t().inboxPages"><button class="quiet" (click)="pageInbox(false)" [disabled]="inboxBefore().length===1" [attr.aria-disabled]="paging()||inboxBefore().length===1">{{t().previous}}</button><button class="quiet" (click)="pageInbox(true)" [disabled]="inboxNext()===null" [attr.aria-disabled]="paging()||inboxNext()===null">{{t().next}}</button></div><div role="status">{{paging()?t().loading:t().pageReady}}</div></section>}
 @if(view()==='doctor'){<section class="panel"><h2>{{t().doctor}}</h2><p>{{t().doctorHint}}</p><pre tabindex="0" role="region" [attr.aria-label]="t().doctor">{{doctor()}}</pre></section>}
 <section class="roadmap"><span class="eyebrow">{{t().network}}</span><h2>{{t().room}}</h2><div class="cards"><article><span>01 / MAC</span><h3>{{t().models}}</h3><p>{{t().modelsHint}}</p><small>{{t().planned}}</small></article><article><span>02 / MINI PC</span><h3>{{t().home}}</h3><p>{{t().homeHint}}</p><small>{{t().planned}}</small></article><article><span>03 / RASPBERRY PI</span><h3>{{t().devices}}</h3><p>{{t().devicesHint}}</p><small>{{t().planned}}</small></article></div></section>}
 <footer>NERV Agency <span>{{t().control}}</span></footer></main></div>`,
@@ -59,9 +59,17 @@ class App {
   connected = signal(false);
   error = signal('');
   reminders = signal<Reminder[]>([]);
+  editingId = signal<string | null>(null);
+  editTitle = signal('');
+  editDue = signal('');
   inbox = signal<string[]>([]);
   doctor = signal('');
   private token = '';
+  localInput(iso: string) {
+    const d = new Date(iso);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
   format(d: string) {
     return new Date(d).toLocaleString(this.language() === 'it' ? 'it-IT' : 'en-GB');
   }
@@ -112,6 +120,12 @@ class App {
       ]);
       if (revision !== this.revision) return;
       this.reminders.set((r as Page<Reminder>).items);
+      if (this.editingId()) {
+        const stillOpen = (r as Page<Reminder>).items.some(
+          (x) => x.id === this.editingId() && !x.cancelled && !x.delivered,
+        );
+        if (!stillOpen) this.editingId.set(null);
+      }
       this.reminderNext.set((r as Page<Reminder>).next);
       this.reminderBefore.set([0]);
       this.inbox.set((i as Page<{ message: string }>).items.map((x) => x.message));
@@ -181,24 +195,103 @@ class App {
       }
     }
   }
-  async add(title: string, due: string, input: HTMLInputElement) {
+  startEdit(r: Reminder) {
+    this.error.set('');
+    this.editingId.set(r.id);
+    this.editTitle.set(r.title);
+    this.editDue.set(this.localInput(r.due));
+    requestAnimationFrame(() => {
+      const input = document.getElementById('rem-edit-title-' + r.id) as HTMLInputElement | null;
+      input?.focus();
+    });
+  }
+  cancelEdit(id: string) {
+    this.error.set('');
+    this.editingId.set(null);
+    requestAnimationFrame(() => {
+      const btn = document.querySelector<HTMLButtonElement>('[data-reminder-id="' + id + '"] .edit-btn');
+      btn?.focus();
+    });
+  }
+  async saveEdit(event: Event, id: string) {
+    event.preventDefault();
+    this.error.set('');
+    const title = this.editTitle().trim();
+    const due = this.editDue();
+    if (!title || title.length > 500) {
+      this.error.set(this.t().saveError);
+      return;
+    }
+    if (!due || !Number.isFinite(new Date(due).getTime())) {
+      this.error.set(this.t().saveError);
+      return;
+    }
+    if (new Date(due).getTime() <= Date.now()) {
+      this.error.set(this.t().saveError);
+      return;
+    }
+    const current = this.reminders().find((r) => r.id === id);
+    if (!current) {
+      this.editingId.set(null);
+      return;
+    }
+    const patch: { title?: string; due?: string } = {};
+    if (title !== current.title) patch.title = title;
+    if (new Date(due).toISOString() !== new Date(current.due).toISOString()) {
+      patch.due = new Date(due).toISOString();
+    }
+    if (Object.keys(patch).length === 0) {
+      this.cancelEdit(id);
+      return;
+    }
     try {
-      if (!due) throw new Error(this.t().dateRequired);
+      await this.request('reminders/' + id, {
+        method: 'PATCH',
+        body: JSON.stringify(patch),
+      });
+      this.editingId.set(null);
+      await this.refresh();
+      requestAnimationFrame(() => {
+        const btn = document.querySelector<HTMLButtonElement>('[data-reminder-id="' + id + '"] .edit-btn');
+        btn?.focus();
+      });
+    } catch {
+      this.error.set(this.t().editError);
+    }
+  }
+  async add(title: string, due: string, input: HTMLInputElement, dueInput?: HTMLInputElement) {
+    this.error.set('');
+    const trimmed = title.trim();
+    if (!trimmed || trimmed.length > 500) {
+      this.error.set(this.t().saveError);
+      return;
+    }
+    if (!due || !Number.isFinite(new Date(due).getTime())) {
+      this.error.set(this.t().saveError);
+      return;
+    }
+    if (new Date(due).getTime() <= Date.now()) {
+      this.error.set(this.t().saveError);
+      return;
+    }
+    try {
       await this.request('reminders', {
         method: 'POST',
-        body: JSON.stringify({ title, due: new Date(due).toISOString() }),
+        body: JSON.stringify({ title: trimmed, due: new Date(due).toISOString() }),
       });
       input.value = '';
+      if (dueInput) dueInput.value = '';
       await this.refresh();
-    } catch (e) {
+    } catch {
       this.error.set(this.t().saveError);
     }
   }
   async cancel(id: string) {
     try {
+      if (this.editingId() === id) this.editingId.set(null);
       await this.request('reminders/' + id, { method: 'DELETE' });
       await this.refresh();
-    } catch (e) {
+    } catch {
       this.error.set(this.t().cancelError);
     }
   }
