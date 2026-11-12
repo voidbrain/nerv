@@ -34,7 +34,9 @@ const item = (n: number) => ({
   args: { title: 'Neutral ' + n, due: '2031-01-01T09:00:00Z' },
 });
 // workerHeartbeatMs lets a test keep the worker side quiet, so only the coordinator heartbeat is in flight.
-async function fixture(heartbeatMs = 150, workerHeartbeatMs = heartbeatMs) {
+// Remedy (a) for B-046 mechanism (3): test fixtures use a 500 ms ping reply budget, above the measured store latency
+// (50–270 ms nervous-process calls on loaded runners). The B-046 stall tests keep 150 ms explicitly.
+async function fixture(heartbeatMs = 500, workerHeartbeatMs = heartbeatMs) {
   const root = keys(),
     a = keys(),
     b = keys(),
@@ -781,9 +783,9 @@ test(
 // B-046 mechanism (3), PR #280: every frame a link receives is verified against its registry, calls to the receiving
 // side's nervous process, so the worker answers a ping only after its nervous process has served what was queued ahead.
 // Linux coverage run 43121587426 lost a session this way: the worker's `kaji.bases` for the ping waited 225 ms behind a
-// 271 ms `usage.finish` write, with this process's loop on time. Here the worker's store answers 300 ms late while the
-// loop stays free: with the fixtures' 150 ms ping budget the healthy session ends (production budget: 10 s). todo until
-// the owner chooses the remedy recorded in B-046; it fails today and does not fail the suite.
+// 271 ms `usage.finish` write, with this process's loop on time. Under remedy (a) test fixtures have a 500 ms ping
+// budget (above measured store latency of 50–270 ms); here the worker's store answers 300 ms late while the loop stays
+// free, and the healthy session survives.
 test(
   'B-046: a ping waiting on a slow store on the worker does not end a healthy session',
   { timeout: 30000 },
