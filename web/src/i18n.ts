@@ -82,6 +82,7 @@ export const messages = {
     brainFixHint: 'Controlla il server dei modelli e riavvia con "nerv reload".',
     routeFixHint: 'Verifica la raggiungibilità del server Ollama o la connessione di rete.',
     degradedFixHint: 'Verifica le notifiche di sistema in config.json o con "nerv doctor".',
+    surfaceRejected: 'Carico utile non autorizzato o non conforme allo schema rifiutato.',
   },
   en: {
     previous: 'Previous page',
@@ -166,5 +167,6 @@ export const messages = {
     brainFixHint: 'Check model server and restart with "nerv reload".',
     routeFixHint: 'Check that Ollama is reachable or verify network connection.',
     degradedFixHint: 'Review system notices in config.json or run "nerv doctor".',
+    surfaceRejected: 'Unauthorized or schema-violating surface payload rejected.',
   },
 } as const;

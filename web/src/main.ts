@@ -6,6 +6,7 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { provideServiceWorker } from '@angular/service-worker';
 import { UpdatePrompt } from './update-prompt';
 import { DoctorView } from './doctor-view';
+import { SurfaceRenderer } from './surface-renderer';
 /** F-004-T01: API calls go straight to the service; the service worker never sees or holds them. */
 const SW_BYPASS = { 'ngsw-bypass': '1' };
 interface Page<T> {
@@ -21,25 +22,29 @@ interface Reminder {
 }
 @Component({
   selector: 'nerv-app',
-  imports: [NgOptimizedImage, UpdatePrompt, DoctorView],
+  imports: [NgOptimizedImage, UpdatePrompt, DoctorView, SurfaceRenderer],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
 <div class="shell"><aside><a class="brand" href="/"><img ngSrc="brand.svg" priority width="48" height="36" alt="NERV Agency">NERV<span>{{t().agent}}</span></a><nav [attr.aria-label]="t().workspace"><button (click)="view.set('home')" [class.active]="view()==='home'">◈ &nbsp; {{t().overview}}</button><button (click)="view.set('reminders')" [class.active]="view()==='reminders'">◷ &nbsp; {{t().reminders}}</button><button (click)="view.set('doctor')" [class.active]="view()==='doctor'">+ &nbsp; {{t().doctor}}</button></nav><div class="sidebar-foot"><i></i> Nodo · v0.1<br><small>{{t().foot}}</small></div></aside>
 <main><nerv-update-prompt [t]="t()" /><header><label class="language">Lingua / Language <select #languageSelect [value]="language()" (change)="changeLanguage(languageSelect.value)"><option value="it">Italiano</option><option value="en">English</option></select></label><span>{{t().workspace}}</span><button class="quiet" (click)="refresh()">{{t().refresh}}</button></header><section class="intro"><p class="eyebrow">{{t().tagline}}</p><h1>{{t().world}}<br><em>{{t().together}}</em></h1><p>{{t().intro}}</p></section>
 @if(!connected()){<section class="connect panel"><h2>{{t().connectTitle}}</h2><p>{{t().connectHint}}</p><label>{{t().token}}<input #token type="password" autocomplete="off" placeholder="NERV_TOKEN"></label><button (click)="connect(token.value);token.value=''">{{t().connect}}</button></section>}
 @if(error()){<p role="alert" class="error">{{error()}}</p>}
-@if(connected()){<nerv-status-card [surface]="statusSurface()"></nerv-status-card>
+@if(connected()){<nerv-surface-renderer [surface]="statusSurface()" [t]="t()"></nerv-surface-renderer>
 @if(view()!=='doctor'){<div class="section-heading"><h2>{{view()==='home'?t().horizon:t().reminders}}</h2><span>{{reminders().length}} {{t().recorded}}</span></div><div class="grid"><section class="panel"><h3>{{t().keep}}</h3><label>{{t().what}}<input #title [placeholder]="t().example" maxlength="500"></label><label>{{t().when}} <small>{{t().browserTime}}</small><input #due type="datetime-local"></label><button (click)="add(title.value,due.value,title,due)">{{t().tie}}</button><p class="hint">{{t().delivery}}</p></section><section class="panel"><h3>{{t().horizon}}</h3>@for(r of reminders();track r.id){@if(editingId()!==r.id){<article class="reminder" [attr.data-reminder-id]="r.id"><div><strong>{{r.title}}</strong><p>{{format(r.due)}}</p><small>{{r.cancelled?t().cancelled:r.delivered?t().delivered:t().scheduled}}</small></div>@if(!r.cancelled&&!r.delivered){<div class="reminder-actions"><button class="quiet cancel-btn" (click)="cancel(r.id)" [attr.aria-label]="t().cancel+' '+r.title">×</button><button class="quiet edit-btn" (click)="startEdit(r)" [attr.aria-label]="t().edit+' '+r.title">{{t().edit}}</button></div>}</article>}@if(editingId()===r.id){<article class="reminder editing" [attr.data-reminder-id]="r.id"><form class="rem-edit" (submit)="saveEdit($event,r.id)" novalidate><label [attr.for]="'rem-edit-title-'+r.id">{{t().what}}</label><input [id]="'rem-edit-title-'+r.id" type="text" [value]="editTitle()" (input)="editTitle.set($any($event.target).value)" maxlength="500"><label [attr.for]="'rem-edit-due-'+r.id">{{t().when}} <small>{{t().browserTime}}</small></label><input [id]="'rem-edit-due-'+r.id" type="datetime-local" [value]="editDue()" (input)="editDue.set($any($event.target).value)"><div class="edit-actions"><button type="submit" class="save-btn">{{t().save}}</button><button type="button" class="quiet keep-btn" (click)="cancelEdit(r.id)">{{t().keepAsIs}}</button></div></form></article>}}@empty{<p class="empty">{{t().empty}}</p>}<div role="group" data-history="reminders" [attr.aria-label]="t().reminderPages"><button class="quiet" (click)="pageReminders(false)" [disabled]="reminderBefore().length===1" [attr.aria-disabled]="paging()||reminderBefore().length===1">{{t().previous}}</button><button class="quiet" (click)="pageReminders(true)" [disabled]="reminderNext()===null" [attr.aria-disabled]="paging()||reminderNext()===null">{{t().next}}</button></div></section></div><section class="panel inbox"><h3>{{t().inbox}}</h3>@for(message of inbox();track $index){<p>{{message}}</p>}@empty{<p class="hint">{{t().inboxHint}}</p>}<div role="group" data-history="inbox" [attr.aria-label]="t().inboxPages"><button class="quiet" (click)="pageInbox(false)" [disabled]="inboxBefore().length===1" [attr.aria-disabled]="paging()||inboxBefore().length===1">{{t().previous}}</button><button class="quiet" (click)="pageInbox(true)" [disabled]="inboxNext()===null" [attr.aria-disabled]="paging()||inboxNext()===null">{{t().next}}</button></div><div role="status">{{paging()?t().loading:t().pageReady}}</div></section>}
 @if(view()==='doctor'){<nerv-doctor-view [t]="t()" [raw]="doctorRaw()"></nerv-doctor-view>}
 <section class="roadmap"><span class="eyebrow">{{t().network}}</span><h2>{{t().room}}</h2><div class="cards"><article><span>01 / MAC</span><h3>{{t().models}}</h3><p>{{t().modelsHint}}</p><small>{{t().planned}}</small></article><article><span>02 / MINI PC</span><h3>{{t().home}}</h3><p>{{t().homeHint}}</p><small>{{t().planned}}</small></article><article><span>03 / RASPBERRY PI</span><h3>{{t().devices}}</h3><p>{{t().devicesHint}}</p><small>{{t().planned}}</small></article></div></section>}
 <footer>NERV Agency <span>{{t().control}}</span></footer></main></div>`,
 })
 class App {
-  statusSurface = computed(() => ({
-    version: 1,
-    component: 'nerv-status-card',
-    props: { title: this.t().doctor, detail: this.t().doctorHint, status: this.runtimeState() },
-  }));
+  customSurface = signal<unknown>(null);
+  statusSurface = computed(
+    () =>
+      this.customSurface() ?? {
+        version: 1,
+        component: 'nerv-status-card',
+        props: { title: this.t().doctor, detail: this.t().doctorHint, status: this.runtimeState() },
+      },
+  );
   runtimeState = signal<'ok' | 'waiting' | 'error'>('waiting');
   language = signal<'it' | 'en'>('en');
   t = computed(() => messages[this.language()]);
@@ -90,6 +95,10 @@ class App {
   }
   /** `npm start -- open` lands here with #code=…: drop it from the address and history first, then swap it once for the token. */
   constructor() {
+    if (typeof window !== 'undefined') {
+      (window as unknown as { __nervSetSurface?: (s: unknown) => void }).__nervSetSurface = (s: unknown) =>
+        this.customSurface.set(s);
+    }
     const match = /^#code=([a-f0-9]{32})$/.exec(window.location.hash);
     if (match) {
       window.history.replaceState(null, '', window.location.pathname + window.location.search);

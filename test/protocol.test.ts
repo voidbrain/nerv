@@ -40,15 +40,43 @@ test('surface descriptions reject executable structure and renderable names outs
     component: 'nerv-status-card',
     props: { title: 'Nodo', detail: '<script>alert(1)</script>', status: 'ok' },
   };
-  assert.equal(validateSurface(good).props.detail, good.props.detail); // text, never interpreted as HTML
+  const validatedGood = validateSurface(good);
+  assert.equal(validatedGood.component, 'nerv-status-card');
+  if (validatedGood.component === 'nerv-status-card') {
+    assert.equal(validatedGood.props.detail, good.props.detail); // text, never interpreted as HTML
+  }
+
+  const goodNotice = {
+    version: 1,
+    component: 'nerv-notice-card',
+    props: { topic: 'Backup', message: 'Durable snapshot completed.', tone: 'success' },
+  };
+  const validatedNotice = validateSurface(goodNotice);
+  assert.equal(validatedNotice.component, 'nerv-notice-card');
+  assert.equal((validatedNotice.props as { topic: string }).topic, 'Backup');
+
   for (const value of [
     { ...good, html: '<img onerror=alert(1)>' },
     { ...good, component: 'script' },
+    { ...good, component: 'nerv-arbitrary-component' },
+    { ...good, code: 'console.log("pwned")' },
+    { ...good, script: 'alert(1)' },
+    { ...good, action: 'reboot_host' },
+    { ...good, actions: ['delete_all'] },
+    { ...good, execute: 'rm -rf /' },
     { ...good, props: { ...good.props, onclick: 'run()' } },
+    { ...good, props: { ...good.props, action: 'unauthorized_action' } },
+    { ...good, props: { ...good.props, code: 'process.exit(1)' } },
     { ...good, props: { ...good.props, detail: 'x'.repeat(501) } },
     { ...good, props: { title: 'x', detail: 'x', status: { toString: () => 'ok' } } },
-  ])
+    { version: 2, component: 'nerv-status-card', props: good.props },
+    null,
+    undefined,
+    'not a surface',
+    [],
+  ]) {
     assert.throws(() => validateSurface(value));
+  }
 });
 test('native WebSocket RPC requires bearer auth, denies browser origins, and is read-only', async () => {
   const store = new Store(':memory:');
