@@ -1,12 +1,35 @@
 import SwiftUI
 import AppKit
-struct RuntimeStatus: Decodable { let runtimeId: String; let language: String; let home: String? }
+struct UpdateAvailability: Decodable {
+    let status: String; let channel: String; let installed: String?; let running: String?; let available: String?; let restartRequired: Bool; let lastCheckedAt: String
+    func label(language: String) -> String {
+        let short: (String?) -> String = { v in guard let v, v.count >= 7 else { return "?" }; return String(v.prefix(7)) }
+        if status == "update-available" {
+            return language == "en" ? "Update available: \(short(available)) (\(channel))" : "Aggiornamento disponibile: \(short(available)) (\(channel))"
+        }
+        if restartRequired {
+            return language == "en" ? "Restart required: installed \(short(installed))" : "Riavvio richiesto: installata \(short(installed))"
+        }
+        if status == "up-to-date" {
+            return language == "en" ? "Up to date: \(short(running)) (\(channel))" : "Aggiornato: \(short(running)) (\(channel))"
+        }
+        if status == "ahead" {
+            return language == "en" ? "Ahead of \(channel): \(short(running))" : "Avanti rispetto a \(channel): \(short(running))"
+        }
+        if status == "offline" {
+            return language == "en" ? "Update check offline (\(short(running)))" : "Controllo aggiornamenti offline (\(short(running)))"
+        }
+        return language == "en" ? "Update status unknown" : "Stato aggiornamenti sconosciuto"
+    }
+}
+struct RuntimeStatus: Decodable { let runtimeId: String; let language: String; let home: String?; let update: UpdateAvailability? }
 struct Reminder: Decodable, Identifiable { let id: String; let title: String; let due: String; let delivered: String?; let cancelled: String? }
 struct Claim: Decodable { let clientId: String; let token: String; let expiresAt: Int64; let runtimeId: String; let scopes: [String] }
 @MainActor final class Companion: ObservableObject {
     @Published var language = UserDefaults.standard.string(forKey: "nerv.language") ?? "en" { didSet { UserDefaults.standard.set(language, forKey: "nerv.language") } }
     @Published var invitation = ""
     @Published var status = "NERV non connesso"
+    @Published var updateStatus: UpdateAvailability?
     @Published var reminders: [Reminder] = []
     @Published var approvals: [NativeApproval] = []
     @Published var approvalsLoaded = false
@@ -88,6 +111,11 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
             let doctor = try JSONDecoder().decode(RuntimeStatus.self, from: await connection.request("/api/status", token: credential.token))
             guard doctor.runtimeId == credential.runtimeId else { throw NativeError.identityMismatch }
             serviceMatchesRuntime = service.matches(home: doctor.home)
+            if let liveUpdate = try? JSONDecoder().decode(UpdateAvailability.self, from: await connection.request("/api/update", token: credential.token)) {
+                updateStatus = liveUpdate
+            } else {
+                updateStatus = doctor.update
+            }
             let values = try JSONDecoder().decode([Reminder].self, from: await connection.request("/api/reminders/pending", token: credential.token))
             let cards = try NativeApproval.page(await connection.request("/api/approvals?limit=5", token: credential.token))
             approvals = cards; approvalsLoaded = true
@@ -101,9 +129,9 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
                     if try await notificationEngine.consume(runtime: credential.runtimeId, page: page, sink: notifications, language: language) { notificationStatus = "Cronologia cambiata: controlla la casella" }
                 } catch { notificationStatus = error.localizedDescription }
             }
-        } catch { status = error.localizedDescription; reminders = []; approvals = []; approvalsLoaded = false }
+        } catch { status = error.localizedDescription; updateStatus = nil; reminders = []; approvals = []; approvalsLoaded = false }
     }
-    func forget() { do { try CredentialStore.forget(); credential = nil; paired = false; renewing = false; invitation = ""; reminders = []; approvals = []; approvalsLoaded = false; notificationsEnabled = false; pollTask?.cancel(); pollTask = nil; status = "Abbinamento locale rimosso" } catch { status = error.localizedDescription } }
+    func forget() { do { try CredentialStore.forget(); credential = nil; paired = false; renewing = false; invitation = ""; updateStatus = nil; reminders = []; approvals = []; approvalsLoaded = false; notificationsEnabled = false; pollTask?.cancel(); pollTask = nil; status = "Abbinamento locale rimosso" } catch { status = error.localizedDescription } }
     func openApprovalDashboard() {
         guard let credential, credential.expiresAt > Int64(Date().timeIntervalSince1970 * 1000),
               let url = NativeApproval.dashboardURL(webPort: credential.webPort) else { return }
@@ -123,6 +151,9 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
             Text("NERV Agency").font(.title2)
             Picker("Lingua / Language", selection: $model.language) { Text("Italiano").tag("it"); Text("English").tag("en") }
             Text(model.tr(model.status)).font(.caption).fixedSize(horizontal: false, vertical: true)
+            if model.paired, let updateStatus = model.updateStatus {
+                Text(updateStatus.label(language: model.language)).font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            }
             if !model.paired || model.renewing {
                 Text(model.tr("Genera un invito con npm start -- pair e incollalo qui.")).font(.caption)
                 SecureField(model.tr("Invito privato"), text: $model.invitation)

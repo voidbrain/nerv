@@ -66,7 +66,8 @@
     if (polling || !token) return; polling = true;
     const historySince = state.lastVisit;
     try {
-      const [latest20, cards, doctor, history, facts, episodes, kajiBases, pilots] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("dashboard/history?since=" + encodeURIComponent(new Date(historySince).toISOString())), api("memory"), api("memory/episodes"), api("bases").catch(() => []), api("pilots").catch(() => null)]);
+      const [latest20, cards, doctor, history, facts, episodes, kajiBases, pilots, update] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("dashboard/history?since=" + encodeURIComponent(new Date(historySince).toISOString())), api("memory"), api("memory/episodes"), api("bases").catch(() => []), api("pilots").catch(() => null), api("update").catch(() => null)]);
+      state.update = update || doctor.update || null;
       await loadUsage();
       // The newest sorties, plus older pages the owner loaded and every match of the current search, newest first.
       const byId = new Map(); for (const x of [...latest20, ...older, ...matches]) if (!byId.has(x.id)) byId.set(x.id, x);
@@ -358,6 +359,22 @@
       ["Misato", roles.misato && !/not set/.test(roles.misato) ? "ok" : "warn", roles.misato || "—"], ["Casper", roles.casper && /^local \(/.test(roles.casper) ? "ok" : "warn", roles.casper || "—"],
       ["Central Dogma (SQLite)", d.database && d.database.quick_check === "ok" ? "ok" : "danger", "schema " + ((d.schema || {}).user_version ?? "?") + " · " + ((d.database || {}).quick_check || "?")],
       ["Pending reminders", "ok", String(((d.pending || {}).count) ?? 0)]];
+    const u = state.update || d.update;
+    if (u && typeof u.status === "string") {
+      const short = rev => typeof rev === "string" && rev.length >= 7 ? rev.slice(0, 7) : "?";
+      const label = u.status === "update-available"
+        ? ["warn", "update available · " + short(u.available) + " (" + (u.channel || "main") + ")"]
+        : u.restartRequired
+          ? ["warn", "restart required · installed " + short(u.installed)]
+          : u.status === "up-to-date"
+            ? ["ok", "up to date · " + short(u.running) + " (" + (u.channel || "main") + ")"]
+            : u.status === "ahead"
+              ? ["ok", "ahead · " + short(u.running) + " (" + (u.channel || "main") + ")"]
+              : u.status === "offline"
+                ? ["warn", "offline · " + short(u.running)]
+                : ["warn", "unknown"];
+      rows.push(["Update availability", label[0], label[1]]);
+    }
     const degraded = (d.degraded || []).length ? "<div class='small warn' style='margin-bottom:4px'>DEGRADED · Dummy Plug: reminders and rule-based actions keep running; requests that need a model fail with the reason below until it is back.</div>" : "";
     document.getElementById("health").innerHTML = degraded + rows.map(c => "<div class='row small'><span>" + c[0] + "</span><span class='" + c[1] + "'>" + (c[1] === "ok" ? "✓ " : "✗ ") + esc(c[2]) + "</span></div>").join("") +
       "<div class='row small' style='margin-top:6px'><span class='muted'>Edited config.json? Apply it without a restart.</span><button class='btn sm' id='btn-reload'>Reload models</button></div>";
