@@ -1,5 +1,7 @@
 # Backlog reconciliation log 2026
 
+- Current work ledger, reviewed 12 November 2026 against main `b0cedee`. PRs #276–#280 and #282 passed all five CI jobs; #283 (records only) passed with full-suite skipped. B-046 awaits an owner choice; B-021 fixed in #281.
+
 - Current work ledger, reviewed 12 November 2026 against main `f96b6e6`. PRs #276, #278, #279 (B-046) and #277 (harness 5.6.0; #275 superseded) passed all five CI jobs. B-046 mechanism (3) stays open.
 
 - Current work ledger, reviewed 11 November 2026 against main `c629528`. PR #274 CI 43063434882 passed. Harness 5.4.0 and Gauntlet 0.7.1 reconciled; F-074-T09 has 7 cases pending, F-074-T10 is next.

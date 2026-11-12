@@ -4,7 +4,7 @@
   "parent": "B-021",
   "title": "Misato decides a topic change on the first turn of an answer",
   "goal": "Correct the recorded real-model topic-change failure in NERV's prompting, with deterministic tests for the prompt and control flow and an owner-approved real-model run as competence evidence",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Committed tests fail before the fix: the answer turn names its pending question and original request, and the system prompt ends with the topic decision",
     "Prompts of every turn without clarification stay byte-identical",
@@ -44,12 +44,12 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 hours agent",
-    "basis": "Planned 2026-11-12 at the start of the B-021 session (00:30 CET) at 2.5 h agent: prompt change, deterministic tests, new cases, real-model run, record, review and CI; baseline recorded after the work started, from that plan. Machine time of the model run is not counted. Implemented 2026-11-12 in about 0.75 h (stated: probes, fix, tests, run and records from 00:40 CET). Review (fresh context) and its should-fix (LCL budget) done 2026-11-12 in about 0.5 h more (stated), so about 1.25 h so far. 0.25 h remains for CI and the closing reconcile of the shared PR #281 (counted here only). Estimate, not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Planned 2026-11-12 at the start of the B-021 session (00:30 CET) at 2.5 h agent: prompt change, deterministic tests, new cases, real-model run, record, review and CI; baseline recorded after the work started, from that plan. Machine time of the model run is not counted. Implemented 2026-11-12 in about 0.75 h (stated: probes, fix, tests, run and records from 00:40 CET). Review (fresh context) and its should-fix (LCL budget) done 2026-11-12 in about 0.5 h more (stated), so about 1.25 h so far. 0.25 h remains for CI and the closing reconcile of the shared PR #281 (counted here only). Estimate, not a measurement. Closed 2026-11-12 in the reconcile after #281 merged (06:08 UTC) with CI 43165354765 green on all five jobs (run 06:02–06:07 UTC on head e706c75): actual 1.5 h agent (stated: the 1.25 h above plus about 0.25 h for the final merge of main into the branch, its CI and the merge, from the GitHub timestamps). The closing reconcile itself is not counted (a fresh session; its start is not tied to this step).",
     "reviewed": "2026-11-12",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 2.5,
-    "actualAgentHours": 1.25,
+    "actualAgentHours": 1.5,
     "actualSource": "stated"
   }
 }

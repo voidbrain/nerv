@@ -4,7 +4,7 @@
   "parent": "F-004",
   "title": "Installable PWA shell: manifest, service worker and update prompt",
   "goal": "Installable PWA shell: manifest, service worker and update prompt",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Lighthouse-installable manifest and icons; offline shell; an update shows a prompt, never a silent reload"
   ],
@@ -30,13 +30,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.5 hours agent",
-    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Revised 2026-11-12 (PR #286): implemented with browser acceptance (test/pwa.browser.mjs) and file checks (test/pwa.test.mjs); about 0.25 h spent so far (stated: worktree created 06:09 UTC, PR opened 06:17 UTC; reading the records before that not counted separately). About 0.5 h remains: fresh-context design review, CI on #286, merge. Baseline 1.5 h unchanged.",
+    "estimate": "0 remaining",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: a judged rate of about 1.5 agent hours per former focused day, not a calculation, informed by NERV merge history (50 feature and fix PRs #140–#276, previous merge to merge, a throughput proxy: median about 0.56 h, p75 2.1–2.7 h by quantile method, p90 about 5.1 h) and B-046-T02 (2-day estimate, about 0.75 h stated to implement); a step that is a PR of its own takes at least 0.75 h with review and CI, while an agent part that only prepares or records for an owner step may be less. Machine time of real-model or device runs is not counted. Estimate, not a measurement; baselineDays 1 kept as history. Revised 2026-11-12 (PR #286): implemented with browser acceptance (test/pwa.browser.mjs) and file checks (test/pwa.test.mjs); about 0.25 h spent so far (stated: worktree created 06:09 UTC, PR opened 06:17 UTC; reading the records before that not counted separately). About 0.5 h remains: fresh-context design review, CI on #286, merge. Baseline 1.5 h unchanged. Closed 2026-11-12 in the reconcile of PR #288: PR #286 merged into main f88d4b7 at 06:37 UTC. CI 43168006619 attempt 1 failed validate only on test/evaluation.browser.mjs golden-v1/dashboard (an existing test, recorded as B-050), while F-004-T01's browser acceptance passed; attempt 2 (failed jobs rerun, same head 94e3a0a) passed every job, browser group 3 of 3. Lighthouse itself was not run; the acceptance's installability is Chrome's own installability check (no errors), which is the check Lighthouse reports. Actual 0.5 h agent (stated): worktree 06:09 UTC to merge 06:37 UTC, review and CI included, from Git and GitHub timestamps.",
     "reviewed": "2026-11-12",
     "baselineDays": 1,
-    "agentHours": 0.5,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
-    "actualAgentHours": 0.25,
+    "actualAgentHours": 0.5,
     "actualSource": "stated"
   }
 }

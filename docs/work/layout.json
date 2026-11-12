@@ -2,7 +2,7 @@
   "version": 1,
   "segments": [
     {
-      "text": "# NERV Agency backlog\n\nCurrent work ledger, reviewed 12 November 2026 against main `b0cedee`. PRs #276–#280 and #282 passed all five CI jobs; #283 (records only) passed with full-suite skipped. B-046 awaits an owner choice; B-021 fixed in #281.\nGovernance and naming follow the [architecture vocabulary](architecture/vocabulary.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md) · [Reconciliation log](archive/reconciliation-2026.md).\n\n<!-- recap:start -->\n<!-- recap:end -->\n\n<!-- totals:start -->\n<!-- totals:end -->\n\n## Bugs and reliability\n\nFrom 2026-11-05 a defect (behaviour that breaks something meant to work) gets a B- record here; earlier ones stayed in their F- records (owner decision).\n\n\n\n\n\n\n\n\n\n\n\n"
+      "text": "# NERV Agency backlog\n\nCurrent work ledger, reviewed 12 November 2026 against main `f88d4b7`. PRs #281 and #286 passed all five CI jobs (#286 on attempt 2; attempt 1 hit B-050); #284 and #285 passed with full-suite skipped. B-021 and B-048 closed; B-042 and B-043 in their verification windows.\nGovernance and naming follow the [architecture vocabulary](architecture/vocabulary.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md) · [Reconciliation log](archive/reconciliation-2026.md).\n\n<!-- recap:start -->\n<!-- recap:end -->\n\n<!-- totals:start -->\n<!-- totals:end -->\n\n## Bugs and reliability\n\nFrom 2026-11-05 a defect (behaviour that breaks something meant to work) gets a B- record here; earlier ones stayed in their F- records (owner decision).\n\n\n\n\n\n\n\n\n\n\n\n"
     },
     {
       "records": "B"
