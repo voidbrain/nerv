@@ -19,7 +19,7 @@ import {
   planService,
   applyService,
   serviceReceipt,
-  releaseService,
+  releaseObservedService,
 } from './node-lifecycle-execution.ts';
 import { dataHome } from './config.ts';
 import { rehearseUpgrade } from './upgrade-rehearsal.ts';
@@ -98,7 +98,7 @@ export async function nodesCommand(args: string[], runner: CommandRunner = runNo
       result = await applyService(host, parseNodeInput(file(required('plan'))), required('confirm'));
     else if (command === 'lifecycle-status') result = serviceReceipt(host, required('digest'));
     else
-      result = releaseService(
+      result = await releaseObservedService(
         host,
         parseNodeInput(file(required('receipt'))),
         parseNodeInput(file(required('evidence'))),

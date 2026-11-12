@@ -52,16 +52,19 @@ Every candidate must be a commit (not a tag object) that **descends from the ins
 
 Admission lets the attempt start; it does not vouch for the data. Inside the operation the rehearsal still decides, and it now also refuses a candidate whose reader **moves the schema forward**: after such a migration the installed revision could no longer read the data, and the recovery for that is not built (step 3). So this slice admits upgrades that keep the schema version (`user_version`). That is narrower than "keeps the schema": the Store adds tables and columns without raising the version, and such additive changes pass, by design, because the installed revision still reads them. The refusal looks at the version after the first and second open; a reader that migrated only on a later open, or rebuilt a table without changing the version, would not be caught by it (the row, column and row-id comparison still applies to the first two opens).
 
-The candidate commit must already be in the checkout when the plan is made (`git -C CHECKOUT fetch origin FULL-SHA`), because admission reads its tree.
+The candidate commit must already be in the checkout when the plan is made (`git -C CHECKOUT fetch origin FULL-SHA`), because admission reads its tree. The `fetch` step therefore uses the local commit and contacts `origin` only if the commit is missing; it never prompts for credentials. (Before the [T06e review](../reviews/2026-11-12-update-path.md) it always fetched, so a network failure left an unchanged service `uncertain`.)
+
+The started candidate passes the startup fence through the live applying handler's identity, the plan's fence and nonce and the exact launchd registration, not through the plan's handler identity: an update to a revision that changes the lifecycle code itself would otherwise always be refused at start (T06e review, B1). Install, start, stop and uninstall plans still require the same handler.
 
 Dependencies are installed with `npm ci --engine-strict --ignore-scripts`: an admitted candidate may change the lockfile, and package install scripts are neither reviewed by the rehearsal nor needed by this project's build. `npm run build` and the started service do run candidate code as the owner, with access to the live data home; the pinned revision is what authorises that.
 
 If `dependencies`, `build` or `start` fails after the checkout moved, the operation stays `uncertain` as for any interrupted update. If the failure came before `start`, the candidate never opened the live data. After `start` it may have: the rehearsal covered what the reader does on open, not everything a running service does. Recovery is manual and explicit, in this order:
 
-1. Inspect whether the candidate is registered or running (`launchctl print gui/UID/io.nerv.agent`). If it is, stop it before anything else, and confirm no descendant process remains.
-2. Reconcile and release the operation with that evidence (`nodes lifecycle-release`).
-3. Check out the previous revision by hand, then `npm ci --ignore-scripts && npm run build`. Both are needed: `npm ci` replaced `node_modules`, and the lifecycle only checks that a build exists, not which revision built it.
-4. Apply a fresh `start` plan.
+1. Inspect whether the candidate is registered or running (`launchctl print gui/UID/io.nerv.agent`). If it is, stop it before anything else (`launchctl bootout gui/UID/io.nerv.agent`), and confirm no descendant process remains.
+2. If `dependencies` failed or timed out, `npm ci` may already have removed `node_modules`, and the CLI cannot load without it. Run `npm ci --ignore-scripts` in the checkout as it is (the candidate) first, so the next step can run. Do not run the service from it.
+3. Reconcile and release the operation with that evidence (`nodes lifecycle-release`). Release inspects the service itself and is refused while it is still registered or running, whatever the evidence says.
+4. Check out the previous revision by hand, then `npm ci --ignore-scripts && npm run build`. Both are needed: `npm ci` replaced `node_modules`, and the lifecycle only checks that a build exists, not which revision built it.
+5. Apply a fresh `start` plan.
 
 An `update` plan back to the previous revision is refused as a downgrade by design. If the data was changed in a way the previous revision cannot read, that is a restore from the operation's backup, which stays a separately reviewed step (F-062).
 
@@ -87,5 +90,7 @@ Alternatives considered: allow-listing more paths; rejected earlier, a changed r
 4. Independent review, then a real application upgrade on the owner-selected Mac.
 
 ## Review
+
+[Independent review of the update path, 2026-11-12](../reviews/2026-11-12-update-path.md) (T06e, PRs #257, #258 and #262 as merged): two blockers (the startup fence refused an update that changes lifecycle code; the recovery order could not run after a failed `npm ci`) and five should-fix items, of which release-while-running and the network fetch are fixed with failing regressions first; the rest are recorded there.
 
 [Independent review, 2026-11-11](../reviews/2026-11-11-upgrade-rehearsal.md): one blocker (real lifecycle backups were refused) and nine comparison/safety gaps, each with a committed failing regression before its fix. The second slice (journaled step, `refused` state) has not had an independent review yet; it is due before admission widens (step 4).
