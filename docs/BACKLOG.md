@@ -14,14 +14,14 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 34 | 6 |
-| **Require Human 🧑** | 7 | 1 |
+| **Require Human 🧑** | 7 | 2 |
 
 ### Require Human 🧑
 
 | Features | Bugs |
 |---|---|
 | [F-062](#f-062) | [B-046](#b-046) |
-| [F-009](#f-009) |  |
+| [F-009](#f-009) | [B-008](#b-008) |
 | [F-015](#f-015) |  |
 | [F-011](#f-011) |  |
 | [F-023](#f-023) |  |
@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 275 h + 19 h owner and 0 days across 159 open steps of 33 features and 2 other records. 7 h of actual effort recorded on 2 steps. Generated from the task files.
+**Remaining effort:** 275.75 h + 19.25 h owner and 0 days across 160 open steps of 33 features and 3 other records. 8.5 h of actual effort recorded on 3 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Bugs and reliability
@@ -139,49 +139,6 @@ From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a 
 </details>
 
 ---
-
-
-### B-008
-
-**Tabgha dashboard says CONNECTION LOST while a relayed request is running**
-
-| Signal | Priority | Status | Effort |
-|:---:|---|---|---|
-| 🟠 | 🔶 P2 | Investigate | 🟢 Small |
-
-💻 **→ Human action required: No**<br />Next: reproduce and identify the original timeout using the new endpoint and IPC-method diagnostics.
-
-| | |
-|---|---|
-| **Issue** | Owner test on Tabgha 2026-11-05: during a request relayed to Neo Tokyo-3 (about 80 s), Tabgha's dashboard showed *LIVE · CONNECTION LOST — Request timed out; outcome may be unknown.. Run npm start -- open dashboard again if the service restarted.* The service had been up two minutes and the reply arrived. The message is the scheduler/brain call timeout reaching the browser; one failed poll is shown as a lost connection, with a doubled full stop and a misleading restart hint. |
-| **Reproduce** | On a base that is not the main one, ask something in its dashboard chat while the main base takes over a minute to answer. |
-| **Check** | A slow or failed poll is retried before anything is shown; a real loss says what is unreachable; the call that timed out is found and fixed or given a fitting limit; no doubled punctuation; a test covers a poll that fails once. |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-**Next action / closure evidence:** Partial fix in [PR #153](https://github.com/voidbrain/nerv/pull/153), 2026-11-06: one failed poll preserves the last view and retries on the regular interval; repeated failures probe authenticated status and distinguish REFRESH DELAYED, STATUS UNAVAILABLE (HTTP error) and SERVICE UNREACHABLE (no reply). A successful poll clears the warning. GET reads have a 10 s bound; writes are neither retried nor given the read timeout. API errors name method/path, IPC timeouts name process/method/limit, and the banner removes doubled punctuation and the unsupported restart hint. Regression covers transient failures, recovery, status reachability, session expiry, read bounds, no write replay, and dashboard REST reads during a pending relay. The old report lacks endpoint/method details; the original timeout cause remains unverified, so B-008 stays Investigate until reproduced and fixed or given an evidenced fitting limit.
-
-**Estimates:** Small remaining effort. Reassessed 2026-11-06: misleading connection warning and missing diagnostics repaired; original timeout investigation remains. Reassessed again after #153 CI: Small remains valid; no new evidence identifies the original call.
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #153](https://github.com/voidbrain/nerv/pull/153) partial fix and diagnostics; owner test on Tabgha 2026-11-05 |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-06 Unit/integration: polling and IPC regressions passed; full suite passed (189 passed, one systemd-only skip), including the pending-relay regression. Browser: headless Chrome verified transient failure retention, delayed refresh, HTTP status failure, unreachable service and automatic recovery; screenshot inspected. Build, typecheck, conventions and integration metadata passed. Merged PR #153 CI run 42218258228 passed validate, windows and native-macos; original Tabgha timeout not reproduced. |
-| Reviewed | 2026-11-06 |
-
-</details>
-
----
-
-
-
-
-
-
-
-
 
 
 ### B-048
@@ -309,6 +266,51 @@ Final PR240 revision6acac44 / CI42635119338 passed all five/full-suite checks. I
 </details>
 
 ---
+### B-008
+
+**Tabgha dashboard says CONNECTION LOST while a relayed request is running**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🟠 | 🔶 P2 | Investigate | 🟢 Small |
+
+🧑 **→ Human action required: Yes**<br />Repeat the reproduction on Tabgha with current main and paste the dashboard banner text (steps in details).
+
+| | |
+|---|---|
+| **Issue** | Owner test on Tabgha 2026-11-05: during a request relayed to Neo Tokyo-3 (about 80 s), Tabgha's dashboard showed *LIVE · CONNECTION LOST — Request timed out; outcome may be unknown.. Run npm start -- open dashboard again if the service restarted.* The service had been up two minutes and the reply arrived. The message is the scheduler/brain call timeout reaching the browser; one failed poll is shown as a lost connection, with a doubled full stop and a misleading restart hint. |
+| **Reproduce** | On a base that is not the main one, ask something in its dashboard chat while the main base takes over a minute to answer. |
+| **Check** | A slow or failed poll is retried before anything is shown; a real loss says what is unreachable; the call that timed out is found and fixed or given a fitting limit; no doubled punctuation; a test covers a poll that fails once. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Partial fix in [PR #153](https://github.com/voidbrain/nerv/pull/153), 2026-11-06: one failed poll preserves the last view and retries on the regular interval; repeated failures probe authenticated status and distinguish REFRESH DELAYED, STATUS UNAVAILABLE (HTTP error) and SERVICE UNREACHABLE (no reply). A successful poll clears the warning. GET reads have a 10 s bound; writes are neither retried nor given the read timeout. API errors name method/path, IPC timeouts name process/method/limit, and the banner removes doubled punctuation and the unsupported restart hint. Regression covers transient failures, recovery, status reachability, session expiry, read bounds, no write replay, and dashboard REST reads during a pending relay. The old report lacks endpoint/method details; the original timeout cause remains unverified, so B-008 stays Investigate until reproduced and fixed or given an evidenced fitting limit.
+
+**Parked 2026-11-12 (B-008-T01, time box 2 h agent; this PR):** cause not identified. Findings: the original text *Request timed out; outcome may be unknown.* is the ProcessClient IPC timeout before #153 (git history of src/process-client.ts), so a dashboard read on Tabgha waited on a child process call past its limit. In the poll of that time the uncaught reads (sorties, approvals, doctor, reminders, inbox, memory, memory/episodes, sorties/:id) all reach the nervous process (5 s limit); the doctor's brain calls and the bases and pilots reads were caught, so the timed-out call was very likely a nervous call (inferred, not observed). The relay itself does not use a child process on the forwarding base: `kaji.chat` is an HTTPS call to the main base with its own limit. **Ruled out in a controlled run:** a seeded database (3,000 sorties, 36,000 events, 300 briefs) with a real nervous and brain process and a relayed chat held pending: five full dashboard polls (the current read set plus 8 sortie details and 5 traces) took about 17 ms each; the slowest reads were doctor and bases at about 240 ms in the first poll only; no read failed. The committed pending-relay regression passes on Windows CI (run 43125296727, job windows, 2.6 s including process start-up; Linux coverage 1.0 s). Build info, model key reads and the quick_check in doctor are not slow on a database of this size. **Not ruled out:** Tabgha is a Windows mini PC; the report came two minutes after a service start. Open hypotheses: (a) SQLite lock contention on Windows (another process holding the database, such as a CLI command, which opens the store and writes its header, or antivirus/indexer access): the nervous process waits synchronously up to its `busy_timeout` of 5,000 ms, the same as its IPC limit, so every queued call times out; (b) a coordinator event-loop stall of about 5 s, the B-046 mechanism at production scale (expired timers run before replies already received); (c) start-up work in the nervous process during the first minutes. No code changed: no failing test exists to fix against. **Next experiment (owner, about 15 minutes):** on Tabgha, with the service updated to current main and restarted, open the dashboard (`npm start -- open dashboard`), and within two minutes type in its chat `What is the weather like in a typical spring, in three short paragraphs?` (any request the main base takes over a minute to answer). Watch the banner until the reply arrives. Expected: the banner stays LIVE. If it shows REFRESH DELAYED, STATUS UNAVAILABLE or SERVICE UNREACHABLE, copy its detail text (it names `GET /api/<path>` and, for an IPC timeout, `nervous|brain <method> timed out after <N> ms`) into the record or a message, and say whether any other `npm start -- …` command ran at that moment. With that text the agent writes a regression for the named call and fixes or bounds it (B-008-T01).
+
+**Estimates:** Re-estimated 2026-11-12 in agent hours (harness 5.6.0): B-008-T01 has 0.75 h agent and 0.25 h owner remaining, about 1.5 h agent spent (stated). Day figures below are dated history. Small remaining effort. Reassessed 2026-11-06: misleading connection warning and missing diagnostics repaired; original timeout investigation remains. Reassessed again after #153 CI: Small remains valid; no new evidence identifies the original call.
+
+| Field | Value |
+|---|---|
+| PR / evidence | This PR: park findings and B-008-T01 (records only). Measurement 2026-11-12: seeded dashboard poll during a pending relay, about 17 ms per poll, no failure (scratch script, not committed). Windows CI run 43125296727: pending-relay regression passed in 2.6 s. [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #153](https://github.com/voidbrain/nerv/pull/153) partial fix and diagnostics; owner test on Tabgha 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-06 Unit/integration: polling and IPC regressions passed; full suite passed (189 passed, one systemd-only skip), including the pending-relay regression. Browser: headless Chrome verified transient failure retention, delayed refresh, HTTP status failure, unreachable service and automatic recovery; screenshot inspected. Build, typecheck, conventions and integration metadata passed. Merged PR #153 CI run 42218258228 passed validate, windows and native-macos; original Tabgha timeout not reproduced. 2026-11-12: a seeded relay-pending poll measurement (macOS) and Windows CI run 43125296727 did not reproduce it either. |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+
+
+
+
+
+
+
+
+
+
 ## Features and improvements
 
 
