@@ -337,6 +337,41 @@ export class DoctorView {
       detail: base?.id ? `${base.id} · ${base.name ?? ''}` : 'local node active',
     });
 
+    // 8. Update availability
+    const upd = d['update'] as
+      | {
+          status?: string;
+          channel?: string;
+          installedRevision?: string | null;
+          runningRevision?: string | null;
+          availableRevision?: string | null;
+          restartRequired?: boolean;
+        }
+      | undefined;
+    if (upd && typeof upd.status === 'string') {
+      const short = (rev?: string | null) => (typeof rev === 'string' && rev.length >= 7 ? rev.slice(0, 7) : '?');
+      const ch = upd.channel ?? 'main';
+      const status: 'ok' | 'warn' = upd.restartRequired ? 'warn' : 'ok';
+      const detail =
+        upd.status === 'update-available'
+          ? `update available · ${short(upd.availableRevision)} (${ch})`
+          : upd.restartRequired
+            ? `restart required · installed ${short(upd.installedRevision)} · running ${short(upd.runningRevision)}`
+            : upd.status === 'up-to-date'
+              ? `up to date · ${short(upd.runningRevision)} (${ch})`
+              : upd.status === 'ahead'
+                ? `ahead · ${short(upd.runningRevision)} (${ch})`
+                : upd.status === 'offline'
+                  ? `offline · ${short(upd.runningRevision)} (${ch})`
+                  : 'unknown';
+      result.push({
+        id: 'update',
+        label: t.checkUpdate,
+        status,
+        detail,
+      });
+    }
+
     return result;
   });
 

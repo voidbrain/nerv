@@ -2,6 +2,7 @@
 import { recordPromotion } from './milestones.ts';
 import { assertRootMigrationReady, rootMigrationCommand } from './root-migration.ts';
 import { nodesCommand } from './nodes-cli.ts';
+import { checkUpdateAvailability } from './update-availability.ts';
 import { runtimeBom } from './bom.ts';
 import { spawnSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
@@ -1082,6 +1083,7 @@ try {
               timeZone: config.timeZone,
               hostTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
               ...local().doctor(),
+              update: await checkUpdateAvailability({ offline: true }),
               delivery: 'Durable local inbox; phone notifications not configured.',
               workers: {
                 protocol: 1,

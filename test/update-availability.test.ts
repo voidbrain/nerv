@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
@@ -144,6 +144,21 @@ test('F-005-T07: GET /api/update enforces auth, caches, refreshes and rejects in
       headers: { authorization: `Bearer ${token}` },
     });
     assert.equal(badChannel.status, 400);
+
+    const doctorRes = await fetch(`http://127.0.0.1:${port}/api/doctor`, {
+      headers: { authorization: `Bearer ${token}` },
+    });
+    assert.equal(doctorRes.status, 200);
+    const doctorBody = (await doctorRes.json()) as { update?: unknown };
+    assert.equal(validateUpdateAvailability(doctorBody.update).status, 'update-available');
+
+    const statusRes = await fetch(`http://127.0.0.1:${port}/api/status`, {
+      headers: { authorization: `Bearer ${token}` },
+    });
+    assert.equal(statusRes.status, 200);
+    const statusBody = (await statusRes.json()) as { update?: unknown };
+    assert.equal(validateUpdateAvailability(statusBody.update).status, 'update-available');
+    assert.equal(calls, 2);
   } finally {
     await new Promise<void>((resolve) => server.close(() => resolve()));
     store.close();
@@ -157,4 +172,22 @@ test('F-005-T07: nodes update-check --offline returns a valid contract for the c
   assert.equal(result.channel, 'main');
   assert.match(result.installedRevision ?? '', /^[0-9a-f]{40}$/);
   assert.equal(result.availableRevision, null);
+});
+
+test('F-005-T16: dashboard, companion and doctor surfaces include update availability', () => {
+  const live = readFileSync(join(process.cwd(), 'web/public/dashboard/live.js'), 'utf8');
+  assert.match(live, /api\("update"\)/);
+  assert.match(live, /Update availability/);
+
+  const doctorView = readFileSync(join(process.cwd(), 'web/src/doctor-view.ts'), 'utf8');
+  assert.match(doctorView, /id: 'update'/);
+  assert.match(doctorView, /t\.checkUpdate/);
+
+  const companion = readFileSync(
+    join(process.cwd(), 'native/NervMenuBar/Sources/NervMenuBar/NervMenuBar.swift'),
+    'utf8',
+  );
+  assert.match(companion, /struct UpdateAvailability: Decodable/);
+  assert.match(companion, /\/api\/update/);
+  assert.match(companion, /updateStatus\.label\(language: model\.language\)/);
 });
