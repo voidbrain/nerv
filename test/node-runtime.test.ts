@@ -161,7 +161,7 @@ test('F-005-T19: nodes node-runtime-plan CLI returns ownership and choices', asy
       '--source',
       env.source,
       '--node',
-      process.execPath,
+      realpathSync(process.execPath),
     ])) as { ownership: string; satisfied: boolean; recommendedChoice: string };
     assert.equal(plan.ownership, 'user-managed');
     assert.equal(plan.satisfied, true);

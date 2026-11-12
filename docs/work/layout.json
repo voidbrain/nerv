@@ -2,7 +2,7 @@
   "version": 1,
   "segments": [
     {
-      "text": "# NERV Agency backlog\n\nCurrent work ledger, reviewed 12 November 2026 against main `5a18130`. PRs #317 (F-005-T14), #319 (B-008 closed) and #320 (F-005-T07) passed CI; F-015-T02 Keychain trial done, B-056 opened.\nGovernance and naming follow the [architecture vocabulary](architecture/vocabulary.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md) · [Reconciliation log](archive/reconciliation-2026.md).\n\n<!-- recap:start -->\n<!-- recap:end -->\n\n<!-- totals:start -->\n<!-- totals:end -->\n\n## Work items\n\nBugs (B-) and features (F-) in one list, most urgent first. From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a B- record here; earlier ones stayed in their F- records (owner decision).\n\n"
+      "text": "# NERV Agency backlog\n\nCurrent work ledger, reviewed 12 November 2026 against main `4154b84`. PRs #321 (F-005-T08), #322 (F-015-T02) and #323 (F-005-T16) passed CI; F-015-T03 live failure cases done, F-015 verified, owner decides closure; B-057 opened.\nGovernance and naming follow the [architecture vocabulary](architecture/vocabulary.md). [Rules](BACKLOG-RULES.md) · [Roadmap](ROADMAP.md) · [Archive 2026](archive/backlog-2026.md) · [Reconciliation log](archive/reconciliation-2026.md).\n\n<!-- recap:start -->\n<!-- recap:end -->\n\n<!-- totals:start -->\n<!-- totals:end -->\n\n## Work items\n\nBugs (B-) and features (F-) in one list, most urgent first. From 2026-11-05 a defect (behaviour that breaks something meant to work) gets a B- record here; earlier ones stayed in their F- records (owner decision).\n\n"
     },
     {
       "records": "all"
