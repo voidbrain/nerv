@@ -60,6 +60,8 @@
     "format:check": "prettier --check .",
     "lint": "eslint .",
     "check:tooling": "node tools/check-tooling.mjs",
+    "check:fast": "npm run format:check && npm run lint && npm run typecheck && npm run check:work && npm run check:backlog && npm run check:recap && npm run check:roadmap && npm run check:dependencies && npm run check:queue && npm run check:rules && npm run check:maintenance",
+    "worktree:link": "ln -sfn ../NERV/node_modules node_modules",
     "work:usage": "node tools/work-usage.mjs",
     "work:launch": "node tools/usage-launch.mjs"
   },

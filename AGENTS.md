@@ -110,13 +110,14 @@ npm run check:conventions # stack conventions above and unused exports (when the
 npm run format:check      # Prettier on src/, test/ and web/src TypeScript and JavaScript; `npm run format` fixes it <!-- project -->
 npm run lint              # ESLint with TypeScript rules: backend, tests, NERV's own tools, web/src <!-- project -->
 npm run check:tooling     # a formatter check and a linter exist and run in CI (required for every stack)
+npm run check:fast        # single pre-push bundle: format, lint, typecheck, backlog/roadmap/rules/maintenance <!-- project -->
 ```
 
 - Every project formats and lints its source, in CI too: `check:tooling` fails without both. A project with no source code records `tooling.exempt` with its reason in `.harness.json`.
 - A failing test is evidence until shown otherwise: check it against the intended behaviour. Change its expectation only when the requirement deliberately changed, and say which requirement; otherwise fix the code.
 - Do not leave dead code behind when replacing a feature: its state, helpers and tests go too.
 - A bug fix starts with a committed test that fails without the fix; the fix never edits that test to pass (BACKLOG-RULES, "A bug fix starts with a failing test").
-- A PR that closes a P1 record or changes a harness file gets a review in a fresh context before it merges, with the exemptions listed there; the reviewer reports, never approves or merges (BACKLOG-RULES, "Independent review").
+- A PR that closes a P1 record or changes a harness file gets a review in a fresh context before it merges, with the exemptions listed there; the reviewer reports, never approves or merges (BACKLOG-RULES, "Independent review"). Pass the reviewer `git diff origin/main...HEAD` and the changed file list rather than asking it to rediscover the diff. <!-- project -->
 
 ### Changing a harness file
 
@@ -186,7 +187,7 @@ At a new independent task, follow [task context and handoffs](docs/agents/task-c
 
 CI prints ordinary freshness findings as warnings; the required maintenance evidence check can fail in 3.0. `ci:status` needs a logged-in `gh`; if unavailable, inspect the same runs/jobs through an authenticated connector/API and name that evidence source. If neither is available, record the missing evidence; never claim the CLI ran.
 
-- [docs/BACKLOG.md](docs/BACKLOG.md) is the generated current-status ledger; authoritative per-record sources live in `docs/work/records/` and layout in `docs/work/layout.json` (see [parallel work](docs/agents/parallel-work.md)); [docs/BACKLOG-RULES.md](docs/BACKLOG-RULES.md) is the procedure (statuses, human-action cues, record layout, CI reconciliation, closure and archives, documentation ownership and the consistency check every PR records). Update the affected records in the same PR as the change, and run `npm run check:backlog`.
+- [docs/BACKLOG.md](docs/BACKLOG.md) is the generated current-status ledger; authoritative per-record sources live in `docs/work/records/` and layout in `docs/work/layout.json` (see [parallel work](docs/agents/parallel-work.md)); [docs/BACKLOG-RULES.md](docs/BACKLOG-RULES.md) is the procedure (statuses, human-action cues, record layout, CI reconciliation, closure and archives, documentation ownership and the consistency check every PR records). Update the affected records in the same PR as the change, and run `npm run check:backlog`. Prefer reading `docs/work/records/<ID>.md` and `docs/work/tasks/<ID>-T*.json` over loading `docs/BACKLOG.md`, and keep new `effort.basis` entries to 1–2 sentences. <!-- project -->
 - [docs/ROADMAP.md](docs/ROADMAP.md) places every feature that is not closed in exactly one milestone (its Records column); its status table is generated from the records. A PR that opens, closes or changes a feature's status places it and runs `npm run roadmap:status`; `npm run check:roadmap` enforces both in CI. <!-- project -->
 - Keep a confirmed bug, a candidate fix awaiting review, an unimplemented feature and a completed check distinct. A merge is not verification, and a passing unit test is not a verified visual, pointer or device fix. A green CI run establishes the checks it named, not the absence of bugs. Archives (`docs/archive/`) and audits (`docs/audits/`) are dated evidence, not current status; current audit coverage is reported per area by check:audits; a scoped report never resets the full-audit baseline.
 - A change to a harness file follows "Changing a harness file" above: this project only, every project (the template first), or ask.
