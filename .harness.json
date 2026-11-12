@@ -3,7 +3,7 @@
     "path": "../harness-template",
     "repo": "https://github.com/voidbrain/project-harness"
   },
-  "version": "6.1.0",
+  "version": "6.2.0",
   "stacks": [
     "core",
     "angular"

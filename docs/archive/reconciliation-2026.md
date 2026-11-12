@@ -269,3 +269,7 @@ Authenticated ci:status confirms CI43017157201 passed plan, validate, windows an
 ## 2026-11-11 — PR #271
 
 Authenticated ci:status confirms CI43021907516 passed plan, validate, windows, native-macos and full-suite; merged main aade3c8. Upfront feature plans adopted (featurePlans: true): 24 features got initial plans and 26 tasks estimates. Its first run (CI43020769457) failed Windows on two F-014 worker-link tests with the B-046 stall assertion, recorded on B-046. Previous header: Reviewed 11 November 2026 against main `0c3de0f`. PR #270 CI43017157201 passed plan, validate, windows and native-macos (full-suite skipped, records only). Feature plans adopted: every feature lists its steps (PR #271); B-048 awaits five clean `main` runs.
+
+## 2026-11-12 — PRs #307, #308
+
+Authenticated ci:status confirms #307 CI43240473540 passed plan, native-macos, windows and validate (full-suite skipped by scoped verification) and #308 CI43238639679 passed plan, windows, native-macos, validate and full-suite; merged main e821c11. F-016 names the passing run; B-046 was already closed and archived by #308. Previous header: Current work ledger, reviewed 12 November 2026 against main `33126e6`. PR #306 passed CI (B-043 closed). B-046 closed: 11 CI runs after remedy (a) (#293) passed every worker-link heartbeat test on Windows and Linux coverage.
