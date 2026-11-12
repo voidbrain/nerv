@@ -859,7 +859,7 @@ export async function checkServicePrerequisites(
   try {
     safe(c.node, c.uid);
     const stat = lstatSync(c.node);
-    if (!stat.isFile() || (stat.mode & 0o111) === 0) {
+    if (!stat.isFile() || (process.platform !== 'win32' && (stat.mode & 0o111) === 0)) {
       executableOk = false;
       issues.push('Configured Node binary is not a regular executable file.');
     }
