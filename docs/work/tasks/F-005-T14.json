@@ -29,7 +29,7 @@
   ],
   "validation": [
     "Regressions through the real adapter with a fixture service; independent review; final required CI",
-    "2026-11-12: test/upgrade-health.test.ts (real macServiceAdapter + fixture /api/doctor server); fresh-context independent review (no blockers, 3 should-fix items addressed)"
+    "2026-11-12: test/upgrade-health.test.ts (real macServiceAdapter + fixture /api/doctor server); fresh-context independent review (no blockers, 3 should-fix items addressed); PR #317"
   ],
   "escalation": [
     "Any destructive restore, changed ownership or unresolved physical/worker effects requires explicit reconciliation; general restore remains F-062"
