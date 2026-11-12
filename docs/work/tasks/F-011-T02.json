@@ -34,6 +34,7 @@
     "baselineDays": 1,
     "agentHours": 0.5,
     "ownerHours": 0.5,
-    "baselineAgentHours": 0.5
+    "baselineAgentHours": 0.5,
+    "ownerKind": "procedure"
   }
 }

@@ -43,6 +43,7 @@
     "agentHours": 1,
     "ownerHours": 0.5,
     "baselineAgentHours": 1.5,
-    "estimateAgentHours": 1
+    "estimateAgentHours": 1,
+    "ownerKind": "procedure"
   }
 }

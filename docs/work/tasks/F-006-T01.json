@@ -43,6 +43,7 @@
     "baselineAgentHours": 1.5,
     "actualAgentHours": 0.5,
     "actualSource": "stated",
-    "estimateAgentHours": 0.5
+    "estimateAgentHours": 0.5,
+    "ownerKind": "decision"
   }
 }
