@@ -67,3 +67,5 @@ After that frozen F-014 run, Windows CI exposed contention in the existing peer-
 Suite `nerv-golden-v5` adds F-026 watch admission/runtime, quiet-hour channel delivery and remote-dispatch revalidation to the ledger, conversation, channel and base groups. The matching NERV Gauntlet system pack is version1.2.0; earlier reports keep their original suite IDs and input hashes. Focused local groups passed50,42,20 and51 checks respectively on the candidate tree; these scripted results do not qualify a real model.
 
 [First common Gemma smoke review](2026-11-09-gemma-common-smoke.md): owner-provided Gauntlet0.3 report completed10 cases,7 passed/3 JSON parse failures,4/4 holdouts passed; requested profile/budget retained, no qualification.
+
+[F-074-T09 ledger-covered run, 2026-11-12](2026-11-12-gauntlet-t09.md): all 48 common model cases and 7 system cases covered with gemma4-12b; neutral-smoke change-mind, missing-input and tool-choice fail, all else passes. The last 7 expanded cases needed a 90 s case limit (owner-approved). No qualification.

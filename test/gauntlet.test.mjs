@@ -1,7 +1,16 @@
 import { test } from 'node:test';
 import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
-import { mkdtempSync, realpathSync, writeFileSync, readFileSync, rmSync, existsSync, readdirSync } from 'node:fs';
+import {
+  mkdtempSync,
+  realpathSync,
+  writeFileSync,
+  readFileSync,
+  rmSync,
+  existsSync,
+  readdirSync,
+  mkdirSync,
+} from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { pathToFileURL } from 'node:url';
@@ -748,6 +757,18 @@ test('the root command runs only uncovered cases, records them and reports nothi
   const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-all-'));
   const ledger = join(dir, 'ledger.json');
   process.env.NERV_GAUNTLET_LEDGER = ledger;
+  // An open fixture task names the three common packs, so the test does not depend on the live backlog.
+  const tasks = join(dir, 'tasks');
+  mkdirSync(tasks);
+  writeFileSync(
+    join(tasks, 'X-001-T01.json'),
+    JSON.stringify({
+      id: 'X-001-T01',
+      status: 'planned',
+      acceptance: ['Covers general-assistant-expanded/*, neutral-smoke-schema/* and neutral-smoke/*'],
+    }),
+  );
+  process.env.NERV_GAUNTLET_TASKS = tasks;
   try {
     // NERV's system cases are already covered (by a profile-less run); every common case is new.
     const system = JSON.parse(readFileSync('evals/gauntlet/system-v1.json', 'utf8'));
@@ -770,7 +791,7 @@ test('the root command runs only uncovered cases, records them and reports nothi
     const before = await main(['pending']);
     assert.equal(before.pendingLines.length, 48);
     assert.equal(before.pendingLines.filter((l) => l.startsWith('general-assistant-expanded/')).length, 28);
-    // Named by an unfinished task (F-074-T09 lists the three common packs as pack/*), so the CI check passes.
+    // Named by an unfinished task (the fixture lists the three common packs as pack/*), so the CI check passes.
     assert.deepEqual((await main(['pending', '--check-records'])).pendingLines, []);
     // Max age and another profile make covered cases pending again; --fresh plans every case.
     const old = await main(['all', '--max-age-days=1']);
@@ -886,6 +907,7 @@ test('the root command runs only uncovered cases, records them and reports nothi
     assert.deepEqual(otherPlan.plan.find((p) => p.layer === 'system').run, [], 'system cases need no profile');
   } finally {
     delete process.env.NERV_GAUNTLET_LEDGER;
+    delete process.env.NERV_GAUNTLET_TASKS;
     rmSync(dir, { recursive: true, force: true });
   }
 });

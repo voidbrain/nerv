@@ -285,3 +285,7 @@ Authenticated ci:status confirms #309 CI43255004715 passed plan, native-macos, w
 ## 2026-11-12 — PR #315
 
 Authenticated ci:status confirms #312 CI43276538572 (plan, windows, native-macos, validate, full-suite passed; merged main 5bcf955) and #313 CI43276077765 (plan, native-macos, windows, validate passed, full-suite skipped by plan). #313's F-007/F-008 records and #312's harness reconcile needed no further record change. Previous header: Current work ledger, reviewed 12 November 2026 against main `ed580bc`. PRs #310 (F-043) and #311 (F-005 procedure, B-052) passed CI; harness 6.3.0–7.1.1 reconciled: worktree rule, effort sized from remaining agent hours, Status with its colour, human actions link their procedure. F-007 and F-008 lowered to P3 (owner, PR #313).
+
+## 2026-11-12 — PR #TBD (F-074-T09)
+
+Authenticated ci:status confirms #314 CI43282005793 and #315 CI43280986607 passed; merged main 8c58ee5. #314 updated its own F-042 and F-043 records; #315 is this session's F-005-T13 record. Previous header: Current work ledger, reviewed 12 November 2026 against main `5bcf955`. PRs #310 (F-043 closed), #311 (F-005, B-052), #312 (harness 7.1.1) and #313 (F-007, F-008 P3) passed CI; F-005-T13 done (f8b8116); F-042 agency read tools implemented (PR #314).
