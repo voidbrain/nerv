@@ -25,6 +25,8 @@ export interface RegistryPort {
   lastSeen(): Promise<Record<string, string>>;
   /** The owner's main base, if named (F-036 phase 2). Optional: a registry without one has no main base. */
   main?(): Promise<string | undefined>;
+  /** F-054-T04: a peer answering again or found unreachable, for the chronicle. Optional: tests may leave it out. */
+  reachability?(baseId: string, ok: boolean, at: string): Promise<void>;
 }
 /** host or host:port; the default port is KAJI_PORT. IPv4 and hostnames only for now. */
 export function endpoint(address: string): { host: string; port: number } {
@@ -176,7 +178,11 @@ export class KajiLink {
   private mark(peer: string, ok: boolean, detail = '', every = this.every) {
     if (ok) {
       this.misses.set(peer, 0);
-      if (this.reachable.get(peer) !== true) this.log(`Kaji: ${peer} reachable.`);
+      if (this.reachable.get(peer) !== true) {
+        this.log(`Kaji: ${peer} reachable.`);
+        // After a restart the first answer also closes an outage recorded before it; nothing open, nothing recorded.
+        this.port.reachability?.(peer, true, new Date().toISOString()).catch(() => {});
+      }
       this.reachable.set(peer, true);
       return;
     }
@@ -184,6 +190,7 @@ export class KajiLink {
     this.misses.set(peer, n);
     if (n >= missesToLog(every) && this.reachable.get(peer) !== false) {
       this.log(`Kaji: ${peer} unreachable${detail ? ` (${detail})` : ''}; ${n} heartbeats missed.`);
+      this.port.reachability?.(peer, false, new Date().toISOString()).catch(() => {});
       this.reachable.set(peer, false);
     }
   }

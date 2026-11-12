@@ -2,6 +2,9 @@ import type { DatabaseSync } from 'node:sqlite';
 import { createHash } from 'node:crypto';
 import { Registry, canonical } from './kaji.ts';
 import { sortieRef } from './brief.ts';
+import { recordedMilestones } from './milestones.ts';
+import { ROUTE_NAME } from './route-health.ts';
+import type { RouteName } from './model.ts';
 /**
  * The base chronicle (F-054): one entry per local day, built only from milestones the agency recorded, never from a
  * model, so it cannot invent anything. This is the Simple version; the Eva retelling (F-054-T02) works from the same
@@ -9,11 +12,23 @@ import { sortieRef } from './brief.ts';
  *
  * Recorded today: a base enrolled, re-enrolled or revoked and a new main base (signed registry records, dated by the
  * time the root signed them), a pilot created (an approved `pilots.create` that ran), and the first action that ran on
- * another base (a remote action whose result says it ran without an error). A base online for the first time, outages
- * and recoveries and pilot promotions are not recorded yet (F-054-T04), so the chronicle does not mention them.
+ * another base (a remote action whose result says it ran without an error). Since F-054-T04 also, from that change on and
+ * without backfill (src/milestones.ts): a base online for the first time, a base or model route down and back, and a
+ * pilot promoted to a later stage.
  */
 export type MilestoneKind =
-  'base.enrolled' | 'base.reenrolled' | 'base.revoked' | 'base.main' | 'pilot.created' | 'remote.first';
+  | 'base.enrolled'
+  | 'base.reenrolled'
+  | 'base.revoked'
+  | 'base.main'
+  | 'pilot.created'
+  | 'remote.first'
+  | 'base.online'
+  | 'base.down'
+  | 'base.back'
+  | 'route.down'
+  | 'route.back'
+  | 'pilot.promoted';
 export interface Milestone {
   /** When it happened, ISO 8601. */
   at: string;
@@ -22,7 +37,7 @@ export interface Milestone {
   subject: string;
   /** The base ID, the pilot's domain or the remote tool. */
   detail: string;
-  /** Where it is recorded: `registry:<first 8 hex>` or a sortie's short ID. */
+  /** Where it is recorded: `registry:<first 8 hex>`, a sortie's short ID or `milestone:<row id>`. */
   source: string;
 }
 export interface ChronicleDay {
@@ -37,6 +52,12 @@ const KINDS = new Set<MilestoneKind>([
   'base.main',
   'pilot.created',
   'remote.first',
+  'base.online',
+  'base.down',
+  'base.back',
+  'route.down',
+  'route.back',
+  'pilot.promoted',
 ]);
 /** The owner's local calendar date of an instant. */
 export function localDay(at: string, timeZone: string): string {
@@ -71,6 +92,12 @@ const words = {
       'base.main': (m: Milestone) => `${m.subject} (${m.detail}) became the main base.`,
       'pilot.created': (m: Milestone) => `New pilot: ${m.subject}, for ${m.detail}.`,
       'remote.first': (m: Milestone) => `First action run on ${m.subject}: ${m.detail}.`,
+      'base.online': (m: Milestone) => `${m.subject} (${m.detail}) came online for the first time.`,
+      'base.down': (m: Milestone) => `${m.subject} (${m.detail}) stopped answering on the Kaji line.`,
+      'base.back': (m: Milestone) => `${m.subject} answered again after ${m.detail} min.`,
+      'route.down': (m: Milestone) => `The ${m.subject} went down.`,
+      'route.back': (m: Milestone) => `The ${m.subject} came back after ${m.detail} min.`,
+      'pilot.promoted': (m: Milestone) => `Pilot ${m.subject} promoted: ${m.detail.replace('>', ' to ')}.`,
     },
   },
   it: {
@@ -84,6 +111,12 @@ const words = {
       'base.main': (m: Milestone) => `La base ${m.subject} (${m.detail}) è diventata la base principale.`,
       'pilot.created': (m: Milestone) => `Nuovo pilota: ${m.subject}, per ${m.detail}.`,
       'remote.first': (m: Milestone) => `Prima azione eseguita su ${m.subject}: ${m.detail}.`,
+      'base.online': (m: Milestone) => `La base ${m.subject} (${m.detail}) è online per la prima volta.`,
+      'base.down': (m: Milestone) => `La base ${m.subject} (${m.detail}) non risponde più sulla linea Kaji.`,
+      'base.back': (m: Milestone) => `La base ${m.subject} risponde di nuovo dopo ${m.detail} min.`,
+      'route.down': (m: Milestone) => `La ${m.subject} è caduta.`,
+      'route.back': (m: Milestone) => `La ${m.subject} è tornata dopo ${m.detail} min.`,
+      'pilot.promoted': (m: Milestone) => `Il pilota ${m.subject} è promosso: ${m.detail.replace('>', ' a ')}.`,
     },
   },
 };
@@ -163,5 +196,27 @@ export function gatherMilestones(db: DatabaseSync, root?: string): Milestone[] {
       detail: clip(r.tool, 80),
       source: sortieRef(r.sortie).trim(),
     });
+  // F-054-T04: milestones recorded as they happen, from that change on.
+  for (const r of recordedMilestones(db)) {
+    const source = `milestone:${r.id}`;
+    if (r.kind === 'pilot.promoted')
+      out.push({ at: r.at, kind: r.kind, subject: clip(r.label || r.subject, 40), detail: r.detail, source });
+    else if (r.kind === 'route.down' || r.kind === 'route.back')
+      out.push({
+        at: r.at,
+        kind: r.kind,
+        subject: ROUTE_NAME[r.subject as RouteName] ?? clip(r.subject, 40),
+        detail: r.detail,
+        source,
+      });
+    else
+      out.push({
+        at: r.at,
+        kind: r.kind,
+        subject: clip(names.get(r.subject) ?? r.subject, 40),
+        detail: r.kind === 'base.back' ? r.detail : r.subject,
+        source,
+      });
+  }
   return out;
 }

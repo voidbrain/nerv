@@ -26,7 +26,7 @@ export interface Chosen {
   why: 'pinned' | 'keywords';
 }
 export const GENERIC = 'generic';
-const STAGES: readonly Stage[] = ['prototype', 'test', 'production'];
+export const STAGES: readonly Stage[] = ['prototype', 'test', 'production'];
 const MAX_PILOTS = 30;
 /** Lower case, accents removed, words only: "Perché la stampa 3D?" → "perche la stampa 3d". */
 export function words(text: string): string {

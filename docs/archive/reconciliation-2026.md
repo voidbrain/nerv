@@ -1,5 +1,7 @@
 # Backlog reconciliation log 2026
 
+- Current work ledger, reviewed 12 November 2026 against main `546f64c`. PRs #295–#296 passed CI; F-006-T01 awaits owner agreement; harness 6.1.0 reconciled in PR #297 (mechanical review: copies and template diff match): estimate calibration reports bugs and features apart.
+
 - Current work ledger, reviewed 12 November 2026 against main `b0cedee`. PRs #276–#280 and #282 passed all five CI jobs; #283 (records only) passed with full-suite skipped. B-046 awaits an owner choice; B-021 fixed in #281.
 
 - Current work ledger, reviewed 12 November 2026 against main `f96b6e6`. PRs #276, #278, #279 (B-046) and #277 (harness 5.6.0; #275 superseded) passed all five CI jobs. B-046 mechanism (3) stays open.

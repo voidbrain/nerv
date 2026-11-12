@@ -1584,6 +1584,9 @@ export class Runtime implements StoreApi {
     },
     lastSeen: async () => (await this.nervous.call('kaji.lastSeen')) as Record<string, string>,
     main: async () => ((await this.nervous.call('kaji.main')) as string | null) ?? undefined,
+    reachability: async (baseId, ok, at) => {
+      await this.nervous.call('milestones.health', { scope: 'base', subject: baseId, ok, at });
+    },
   };
   private selfKey?: string;
   /** Marks which entry is this base (by its public key) for the dashboard. */
@@ -1773,6 +1776,33 @@ export class Runtime implements StoreApi {
     if (!run) return null;
     await this.note(run.sortieId, 'misato.request', { text: run.request });
     return this.loop(run.sortieId, run.request, [], [], { consult: false, watch: run });
+  }
+  private routeLogTimer?: NodeJS.Timeout;
+  /**
+   * F-054-T04: the model routes' outages and recoveries for the chronicle. The brain keeps route health in memory; once a
+   * minute its view is read and a route down, or back after being down, is recorded with the time it changed. A flap
+   * shorter than the poll is not recorded.
+   */
+  async logRoutes(): Promise<void> {
+    const { routes } = await this.routes();
+    if (!routes) return;
+    for (const route of ['local', 'cloud'] as const) {
+      const h = routes[route];
+      if ((h.state !== 'down' && h.state !== 'ok') || !h.since) continue;
+      await this.nervous.call('milestones.health', {
+        scope: 'route',
+        subject: route,
+        ok: h.state === 'ok',
+        at: h.since,
+      });
+    }
+  }
+  startRouteLog(everyMs = 60_000) {
+    const tick = () => {
+      void this.logRoutes().catch(() => {});
+    };
+    if (!this.routeLogTimer) this.routeLogTimer = setInterval(tick, everyMs);
+    tick();
   }
   startWatch(everyMs = 60_000) {
     const tick = () => {
@@ -1973,6 +2003,7 @@ export class Runtime implements StoreApi {
   }
   async close() {
     if (this.watchTimer) clearInterval(this.watchTimer);
+    if (this.routeLogTimer) clearInterval(this.routeLogTimer);
     if (this.toolsClient) await this.toolsClient.close();
     if (this.outboxTimer) clearInterval(this.outboxTimer);
     if (this.briefTimer) clearInterval(this.briefTimer);

@@ -583,6 +583,17 @@ export const methodSchemas = {
     properties: { records: { type: 'array', maxItems: 1000, items: { type: 'object' } } },
     additionalProperties: false,
   },
+  'milestones.health': {
+    type: 'object',
+    required: ['scope', 'subject', 'ok', 'at'],
+    properties: {
+      scope: { enum: ['base', 'route'] },
+      subject: { type: 'string', pattern: '^[A-Za-z0-9._-]{1,64}$' },
+      ok: { type: 'boolean' },
+      at: { type: 'string', minLength: 1, maxLength: 40 },
+    },
+    additionalProperties: false,
+  },
   'kaji.seen': {
     type: 'object',
     required: ['updates'],
@@ -963,6 +974,7 @@ export const communicationGraph = [
       'worker.finish',
       'kaji.add',
       'kaji.seen',
+      'milestones.health',
       'memory.lastRequest',
       'memory.list',
       'memory.add',
