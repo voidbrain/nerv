@@ -856,7 +856,7 @@ Earlier next action (2026-11-09, done above): inspect event ordering for remote 
 
 | Field | Value |
 |---|---|
-| PR / evidence | F-005 procedure moved to [docs/acceptance/f005-t13-mac-update-procedure.md](acceptance/f005-t13-mac-update-procedure.md) in this PR. |
+| PR / evidence | [PR #311](https://github.com/voidbrain/nerv/pull/311): F-005 procedure moved to [docs/acceptance/f005-t13-mac-update-procedure.md](acceptance/f005-t13-mac-update-procedure.md) in this PR. |
 | Opened | 2026-11-12 |
 | Verification | Pending. |
 | Reviewed | 2026-11-12 |
