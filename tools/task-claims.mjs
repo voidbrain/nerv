@@ -245,7 +245,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       )
         throw Error('Task is not ready or prerequisites remain');
       const parent = readFileSync(join(root, config.records, task.parent + '.md'), 'utf8');
-      if (/Human action required: Yes|\| (?:Blocked|Closed|Verified) \|/.test(parent))
+      if (/Human action required: (?:Procedure|Decision|Both|Yes)\*\*|\| (?:Blocked|Closed|Verified) \|/.test(parent))
         throw Error('Parent needs human/prerequisite/status review before claiming');
       if (values.profile) {
         const profile = catalog.profiles.find((p) => p.id === values.profile);
