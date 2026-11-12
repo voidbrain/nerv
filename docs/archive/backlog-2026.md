@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 2 | 3 |
+| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 2 | 4 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
 
@@ -3101,6 +3101,44 @@ F-026 acceptance reconciliation carried from superseded [PR #241](https://github
 | PR / evidence | Closure reconcile: [PR #288](https://github.com/voidbrain/nerv/pull/288). Verification: [PR #284](https://github.com/voidbrain/nerv/pull/284). Test: test/root-migration.test.ts "the root-migration check waits for a brief database lock instead of failing" (fails with `database is locked` before the fix). Fix: [PR #265](https://github.com/voidbrain/nerv/pull/265): diagnostic CI 43004476280 (first failure `service status`) and 43004894442 (`database is locked`). Failing runs before: [CI 42986531117](https://github.com/voidbrain/nerv/actions/runs/42986531117/attempts/1), [CI 42988602602](https://github.com/voidbrain/nerv/actions/runs/42988602602/attempts/1), CI 42993629496, CI 42994952185. |
 | Opened | 2026-11-11 |
 | Verification | 2026-11-11: cause reproduced on macOS by the regression test (fails before the fix, passes after). Windows CI passed on PR #265 (CI 43005607280) and on PR #264 after merging main into it (CI 43007427908); five clean runs on `main` pending. 2026-11-12: every completed Windows `npm test` job since #265 merged (2026-11-11 11:01 UTC) through CI run 43118800708: 23 passed, 11 failed, and none of the 11 contains `database is locked` or `EPERM` (logs searched; all were B-046 heartbeat failures). The criterion named five runs on `main`, but `main` gets CI only weekly or by dispatch (`.github/workflows/ci.yml`); pull-request runs test each change merged with `main`, so these 34 jobs stand in for them, stated here rather than assumed. |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+
+### B-051
+
+**Kaji link server looks up the registry for every unsigned request, with no concurrency bound**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-12 in [PR #291](https://github.com/voidbrain/nerv/pull/291): coalesced in-flight bases() lookups and deterministic regression committed first.
+
+| | |
+|---|---|
+| **Issue** | Found in the review of [PR #282](https://github.com/voidbrain/nerv/pull/282) (B-043). `KajiLink.serve` (src/kaji-link.ts) awaits `this.port.bases()`, a call to the nervous child process, for every inbound request before `verifySigned` can check it, and nothing bounds how many such lookups run at once. While the child is slow, anyone who can reach the listen address can send unsigned requests that each take a slot of the shared process queue (`MAX_CHILD_REQUESTS`, 32) and make unrelated callers fail with "Process queue is full". The lookup itself is needed: verification uses the enrolled bases' public keys. |
+| **Reproduce** | Hold the main base's nervous calls (as test/periodic-overlap.test.ts does by intercepting `child.send`), then send more than 32 unsigned POSTs to the Kaji listen address: the queue fills and a legitimate call is refused. |
+| **Check** | A committed test fails before the fix: concurrent unsigned requests while the child is slow fill the process queue. After the fix they share one in-flight `bases()` lookup or are bounded (excess refused before any child call, with a clear status), legitimate signed requests and the periodic heartbeat still pass, revocation still takes effect on the next lookup, and no timeout is widened. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-12 in [PR #291](https://github.com/voidbrain/nerv/pull/291) (merged into main `9497e89`; CI 43200741170 passed plan, windows, native-macos and validate). The recorded Check is met: deterministic regression committed first in `test/periodic-overlap.test.ts` (951c779) fails before the fix (32 held) and passes after it (1 held, legitimate signed requests and immediate revocation verified). Fix in `src/kaji-link.ts` (9b49a9f) coalesces in-flight `bases()` lookups in `KajiLink`, clearing the reference in `finally` to preserve per-lookup revocation freshness. B-051-T01 closed (0.75 h agent against 1.5 h baseline). No action remains.
+
+**Reproduction and fix 2026-11-12 ([PR #291](https://github.com/voidbrain/nerv/pull/291), B-051-T01):** Committed deterministic regression in `test/periodic-overlap.test.ts` (commit 951c779): with nervous child calls held, 37 unsigned requests filled the process queue (`child.held('kaji.bases')` was 32), the test failed before the fix, and an unrelated caller's `kaji.main` was blocked. Fix in `src/kaji-link.ts`: `KajiLink` coalesces in-flight `bases()` lookups so concurrent requests share one in-flight call while the registry is answering, and clears the reference in `finally` so subsequent lookups are fresh and revocation takes effect immediately on the next lookup. After the fix, `child.held('kaji.bases')` is 1, all unverified requests are rejected with 401/403, `kaji.main` gets through, signed heartbeat requests succeed, and revoked peers are rejected on the next lookup.
+
+**Fresh-context review 2026-11-12 (design-reviewer, Pro):** Pass. No blockers or should-fix. Verified that in-flight `bases()` coalescing in `finally` clears on settlement (resolve/reject), propagating errors cleanly and preserving immediate revocation freshness per lookup. Confirmed deterministic regression 951c779 committed before fix, and all internal call sites in `src/kaji-link.ts` unified to `this.bases()`.
+
+**Estimates:** Small at closure, 2026-11-12; no work remains. Step B-051-T01 took 0.75 h agent (stated) against 1.5 h baseline.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Closure: [PR #291](https://github.com/voidbrain/nerv/pull/291) (B-051-T01), Test: test/periodic-overlap.test.ts. Review: fresh-context design/security review (Pro), Pass. Recorded in [PR #289](https://github.com/voidbrain/nerv/pull/289). Found in the B-043 design review of #282; code confirmed on main: `serve` calls `this.port.bases()` before `verifySigned`. |
+| Opened | 2026-11-12 |
+| Verification | Unit/integration: 2026-11-12 test/periodic-overlap.test.ts reproduces queue saturation before fix (32 held) and passes after fix (1 held, legitimate and revocation checks pass). PR #291 CI 43200741170 passed all jobs. Closed 2026-11-12. |
 | Reviewed | 2026-11-12 |
 
 </details>
