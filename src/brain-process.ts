@@ -3,7 +3,9 @@ import type { UsageObservation } from './model-usage.ts';
 const accounting = new AsyncLocalStorage<{ observation: UsageObservation | null }>();
 import { connect } from 'node:net';
 import { dispatchRpc, MAX_FRAME_BYTES, READY, RpcFault } from './rpc.ts';
-import { readConfig, readModelKey } from './config.ts';
+import { readConfig, readModelKey, readScrolls } from './config.ts';
+import { resolvePilotInference, type Stage } from './pilots.ts';
+import { defaultPolicy } from './policy.ts';
 import {
   complete,
   describe,
@@ -13,7 +15,9 @@ import {
   selectRoute,
   type Ask,
   type Models,
+  type Privacy,
   type Reply,
+  type RouteName,
 } from './model.ts';
 import { RouteWatch, describeChange, type RouteChange } from './route-health.ts';
 import { casperAsk, parseCasper, type CasperInput } from './casper.ts';
@@ -206,25 +210,57 @@ process.on('message', (value: unknown) => {
       }
       if (method === 'consultant.advise') {
         // F-025: advice before Misato plans, on the consultant's local model; none when no consultant is set.
-        // F-045: a specialist pilot chosen by the coordinator advises on its own local model; otherwise the generic pilot.
-        const pilot = params.pilot as { name: string; domain: string; model: string } | undefined;
+        // F-045: a specialist pilot chosen by the coordinator advises on its own model; cloud/other-provider only when Scrolls and stage allow.
+        const pilot = params.pilot as
+          | {
+              id?: string;
+              name: string;
+              domain: string;
+              model: string;
+              route?: RouteName;
+              provider?: string;
+              stage?: Stage;
+            }
+          | undefined;
         const pick = models.roles?.consultant;
-        if (configError || !models.local || (!pilot && !pick)) return { advice: null };
-        const on = pilot
-          ? { ...models, local: { ...models.local, model: pilot.model } }
-          : forRole(models, 'consultant');
-        try {
-          const reply = await run(
-            consultantAsk(
-              params.request as string,
-              (params.context as Turn[] | undefined) ?? [],
-              pilot,
-              (params.bases as { id: string; name: string }[] | undefined) ?? [],
-              (params.tools as { name: string; about: string }[] | undefined) ?? [],
-              params.previousAdvice as string | undefined,
-            ),
-            on,
+        if (configError || (!pilot && (!models.local || !pick))) return { advice: null };
+        let on: Models;
+        let askRoute: RouteName = 'local';
+        let askPrivacy: Privacy = 'local-only';
+        if (pilot) {
+          const policy = home ? readScrolls(home).policy : defaultPolicy;
+          const trust = params.tainted ? 'tainted' : 'trusted';
+          const privacy = (params.privacy as Privacy | undefined) ?? 'local-only';
+          const resolved = resolvePilotInference(
+            {
+              id: pilot.id ?? 'specialist',
+              stage: pilot.stage ?? 'prototype',
+              model: pilot.model,
+              ...(pilot.route ? { route: pilot.route } : {}),
+              ...(pilot.provider ? { provider: pilot.provider } : {}),
+            },
+            models,
+            policy,
+            { trust, privacy, hasCloudKey: Boolean(key) },
           );
+          if (!resolved.allowed || !resolved.models)
+            return { advice: null, error: resolved.reason ?? 'Pilot route disallowed.' };
+          on = resolved.models;
+          askRoute = resolved.route;
+          if (askRoute === 'cloud') askPrivacy = 'any';
+        } else {
+          on = forRole(models, 'consultant');
+        }
+        const baseAsk = consultantAsk(
+          params.request as string,
+          (params.context as Turn[] | undefined) ?? [],
+          pilot,
+          (params.bases as { id: string; name: string }[] | undefined) ?? [],
+          (params.tools as { name: string; about: string }[] | undefined) ?? [],
+          params.previousAdvice as string | undefined,
+        );
+        try {
+          const reply = await run({ ...baseAsk, route: askRoute, privacy: askPrivacy }, on);
           if (pilot) {
             const advice = parseAdvice(reply.text);
             return advice ? { advice, model: reply.model } : { advice: null };

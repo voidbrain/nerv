@@ -8,6 +8,8 @@ import { join } from 'node:path';
 import {
   PilotRegistry,
   addPilot,
+  applyPilotToolChange,
+  canPilotLeaveMachine,
   canRunRemotePilot,
   chooseAdvisers,
   chooseExecutionPilot,
@@ -18,16 +20,23 @@ import {
   evaluatePilotPlacement,
   genericPilot,
   hits,
+  mergePilots,
   nextStage,
   overlappingDomains,
   pilotExecutor,
   previousStage,
   promotionEligible,
+  proposePilotMerge,
+  proposePilotSplit,
+  proposePilotToolChange,
   rankPilots,
+  resolvePilotInference,
   sanitizePilotOffers,
+  sanitizeProposedDomain,
   selectRemotePilotRun,
   setPilotFlag,
   shouldDemotePilot,
+  splitPilot,
   stageExecutor,
   toPilotOffers,
   updatePilot,
@@ -35,6 +44,8 @@ import {
   words,
   type Pilot,
 } from '../src/pilots.ts';
+import { defaultPolicy } from '../src/policy.ts';
+import { parseConsult } from '../src/misato.ts';
 import { builtinTools } from '../src/executors.ts';
 import { readConfig } from '../src/config.ts';
 import { Runtime } from '../src/runtime.ts';
@@ -900,6 +911,383 @@ test('F-025-T04: failure, override spikes, and Spear revocation automatically de
     const afterSpike = runtime.pilotRoster().find((p) => p.id === 'coder')!;
     assert.equal(afterSpike.stage, 'prototype');
     assert.equal(afterSpike.evaClass, 'eva-00');
+  } finally {
+    await runtime.close();
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
+test('F-045-T07: cloud and other-provider pilot routing requires Scrolls and trust-stage permission', async () => {
+  const models = {
+    local: { baseUrl: 'http://127.0.0.1:11434', model: 'qwen3:8b' },
+    cloud: { provider: 'anthropic' as const, model: 'claude-sonnet-4-6', enabled: true },
+    engines: [
+      {
+        id: 'openai-remote',
+        provider: 'openai-compatible',
+        locality: 'remote' as const,
+        baseUrl: 'https://api.example.test/v1',
+        model: 'gpt-4o-mini',
+      },
+      {
+        id: 'ollama-alt',
+        provider: 'ollama',
+        locality: 'local' as const,
+        baseUrl: 'http://127.0.0.1:11434',
+        model: 'llama3.2:3b',
+      },
+    ],
+  };
+
+  // Prototype pilot cannot leave the machine.
+  const protoCloud = pilot({ id: 'proto-cloud', stage: 'prototype', route: 'cloud', model: 'claude-sonnet-4-6' });
+  const protoGate = canPilotLeaveMachine(protoCloud, {
+    trust: 'trusted',
+    privacy: 'any',
+    policy: defaultPolicy,
+  });
+  assert.equal(protoGate.allowed, false);
+  assert.match(protoGate.reason!, /Prototype/);
+
+  // Tainted input, local-only/owner-bases privacy, and Scrolls localOnly all block leaving the machine.
+  const prodCloud = pilot({ id: 'prod-cloud', stage: 'production', route: 'cloud', model: 'claude-sonnet-4-6' });
+  assert.equal(
+    resolvePilotInference(prodCloud, models, defaultPolicy, {
+      trust: 'tainted',
+      privacy: 'any',
+      hasCloudKey: true,
+    }).allowed,
+    false,
+  );
+  assert.equal(
+    resolvePilotInference(prodCloud, models, defaultPolicy, {
+      trust: 'trusted',
+      privacy: 'local-only',
+      hasCloudKey: true,
+    }).allowed,
+    false,
+  );
+  assert.equal(
+    resolvePilotInference(
+      prodCloud,
+      models,
+      { ...defaultPolicy, localOnly: ['pilots.cloud'] },
+      {
+        trust: 'trusted',
+        privacy: 'any',
+        hasCloudKey: true,
+      },
+    ).allowed,
+    false,
+  );
+
+  // Permitted at test/production when trusted, privacy=any, key present, and Scrolls allow.
+  const testCloud = pilot({ id: 'test-cloud', stage: 'test', route: 'cloud', model: 'claude-sonnet-4-6' });
+  const allowedCloud = resolvePilotInference(testCloud, models, defaultPolicy, {
+    trust: 'trusted',
+    privacy: 'any',
+    hasCloudKey: true,
+  });
+  assert.equal(allowedCloud.allowed, true);
+  assert.equal(allowedCloud.route, 'cloud');
+  assert.equal(allowedCloud.models?.cloud?.model, 'claude-sonnet-4-6');
+
+  // Remote other-provider engine obeys the same trust-stage & privacy gate; local engine stays local.
+  const remoteEnginePilot = pilot({
+    id: 'ext-engine',
+    stage: 'production',
+    provider: 'openai-remote',
+    model: 'gpt-4o-mini',
+  });
+  assert.equal(
+    resolvePilotInference(remoteEnginePilot, models, defaultPolicy, {
+      trust: 'trusted',
+      privacy: 'owner-bases',
+      hasCloudKey: false,
+    }).allowed,
+    false,
+  );
+  const allowedRemoteEngine = resolvePilotInference(remoteEnginePilot, models, defaultPolicy, {
+    trust: 'trusted',
+    privacy: 'any',
+    hasCloudKey: false,
+  });
+  assert.equal(allowedRemoteEngine.allowed, true);
+  assert.equal(allowedRemoteEngine.provider, 'openai-remote');
+
+  const localEnginePilot = pilot({ id: 'local-alt', stage: 'prototype', provider: 'ollama-alt', model: 'llama3.2:3b' });
+  const allowedLocalEngine = resolvePilotInference(localEnginePilot, models, defaultPolicy, {
+    trust: 'tainted',
+    privacy: 'local-only',
+    hasCloudKey: false,
+  });
+  assert.equal(allowedLocalEngine.allowed, true);
+  assert.equal(allowedLocalEngine.route, 'local');
+
+  // Runtime.selectPilotInference reads Scrolls and model key from home.
+  const home = mkdtempSync(join(tmpdir(), 'nerv-pilot-route-'));
+  writeFileSync(
+    join(home, 'config.json'),
+    JSON.stringify({
+      models: { local: models.local, cloud: models.cloud },
+      pilots: [prodCloud],
+    }),
+  );
+  writeFileSync(join(home, 'scrolls.json'), JSON.stringify({ ...defaultPolicy, localOnly: ['pilots.cloud'] }), {
+    mode: 0o600,
+  });
+  writeFileSync(join(home, 'anthropic-key'), 'sk-ant-test-key-0000000000', { mode: 0o600 });
+  const runtime = new Runtime(join(home, 'nerv.sqlite'), undefined, home);
+  try {
+    await runtime.ready();
+    const blockedByScrolls = runtime.selectPilotInference('prod-cloud', { trust: 'trusted', privacy: 'any' });
+    assert.equal(blockedByScrolls.allowed, false);
+    writeFileSync(join(home, 'scrolls.json'), JSON.stringify(defaultPolicy), { mode: 0o600 });
+    const allowedRuntime = runtime.selectPilotInference('prod-cloud', { trust: 'trusted', privacy: 'any' });
+    assert.equal(allowedRuntime.allowed, true);
+    assert.equal(allowedRuntime.route, 'cloud');
+  } finally {
+    await runtime.close();
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
+test('F-045-T08: evidence-based pilot split and merge with versioned lineage and owner approval', async () => {
+  const coder = pilot({
+    id: 'coder',
+    name: 'Coder',
+    domain: 'software development',
+    keywords: ['code', 'typescript', 'sql'],
+    tools: ['files.read'],
+    stage: 'production',
+    version: 2,
+  });
+  // Below cluster threshold -> no split proposal.
+  assert.equal(
+    proposePilotSplit(coder, [
+      {
+        id: 's1',
+        title: 'SQLite index',
+        subdomain: 'sqlite queries',
+        keywords: ['sqlite', 'index'],
+        parentScore: 0.7,
+        narrowerScore: 0.9,
+      },
+      {
+        id: 's2',
+        title: 'SQLite join',
+        subdomain: 'sqlite queries',
+        keywords: ['sqlite', 'join'],
+        parentScore: 0.7,
+        narrowerScore: 0.9,
+      },
+    ]),
+    undefined,
+  );
+  // 3+ sorties clustered with higher-scoring narrower set -> split proposed with lineage.
+  const splitProp = proposePilotSplit(coder, [
+    {
+      id: 's1',
+      title: 'SQLite index',
+      subdomain: 'sqlite queries',
+      keywords: ['sqlite', 'index'],
+      parentScore: 0.7,
+      narrowerScore: 0.92,
+    },
+    {
+      id: 's2',
+      title: 'SQLite join',
+      subdomain: 'sqlite queries',
+      keywords: ['sqlite', 'join'],
+      parentScore: 0.72,
+      narrowerScore: 0.9,
+    },
+    {
+      id: 's3',
+      title: 'SQLite pragma',
+      subdomain: 'sqlite queries',
+      keywords: ['sqlite', 'pragma'],
+      parentScore: 0.68,
+      narrowerScore: 0.91,
+    },
+  ]);
+  assert.ok(splitProp);
+  assert.equal(splitProp.proposedId, 'sqlite-queries');
+  assert.deepEqual(splitProp.lineage, ['coder@v2']);
+  assert.equal(splitProp.sampleSize, 3);
+
+  const afterSplit = splitPilot([coder], 'coder', {
+    id: splitProp.proposedId,
+    name: splitProp.name,
+    domain: splitProp.domain,
+    keywords: splitProp.keywords,
+  });
+  const splitChild = afterSplit.find((p) => p.id === 'sqlite-queries')!;
+  assert.equal(splitChild.stage, 'prototype');
+  assert.equal(splitChild.parent, 'coder');
+  assert.deepEqual(splitChild.lineage, ['coder@v2']);
+
+  // Overlapping pilots with equivalent evidence -> merge proposed.
+  const pA = pilot({
+    id: 'print-a',
+    domain: '3d printing',
+    keywords: ['3d', 'stl'],
+    tools: ['slice'],
+    stage: 'test',
+    version: 1,
+  });
+  const pB = pilot({
+    id: 'print-b',
+    domain: '3d printing resin',
+    keywords: ['resin', 'stl'],
+    tools: ['cure'],
+    stage: 'test',
+    version: 2,
+  });
+  const records = new Map([
+    ['print-a', { cleanRuns: 5, score: 0.8 }],
+    ['print-b', { cleanRuns: 5, score: 0.82 }],
+  ]);
+  const mergeProp = proposePilotMerge([pA, pB], records);
+  assert.ok(mergeProp);
+  assert.deepEqual(mergeProp.sourceIds, ['print-a', 'print-b']);
+  assert.deepEqual(mergeProp.lineage, ['print-a@v1', 'print-b@v2']);
+  assert.equal(mergeProp.version, 3);
+
+  const afterMerge = mergePilots([pA, pB], mergeProp.sourceIds, {
+    id: mergeProp.proposedId,
+    keywords: mergeProp.keywords,
+  });
+  assert.equal(afterMerge.find((p) => p.id === 'print-b')?.retired, true);
+  assert.deepEqual(afterMerge.find((p) => p.id === 'print-a')?.lineage, ['print-a@v1', 'print-b@v2']);
+  assert.equal(afterMerge.find((p) => p.id === 'print-a')?.version, 3);
+
+  // Owner-approved execution through Runtime + gate.
+  const home = mkdtempSync(join(tmpdir(), 'nerv-pilot-split-merge-'));
+  writeFileSync(
+    join(home, 'config.json'),
+    JSON.stringify({
+      models: { local: { baseUrl: 'http://127.0.0.1:11434', model: 'qwen3:8b' } },
+      pilots: [coder, pA, pB],
+    }),
+  );
+  const runtime = new Runtime(join(home, 'nerv.sqlite'), undefined, home);
+  runtime.setPilots(() => readConfig(home).pilots ?? []);
+  try {
+    await runtime.ready();
+    const proposal = await runtime.proposePilotSplit('coder', [
+      {
+        id: 's1',
+        title: 'SQLite index',
+        subdomain: 'sqlite queries',
+        keywords: ['sqlite'],
+        parentScore: 0.7,
+        narrowerScore: 0.95,
+      },
+      {
+        id: 's2',
+        title: 'SQLite join',
+        subdomain: 'sqlite queries',
+        keywords: ['sqlite'],
+        parentScore: 0.7,
+        narrowerScore: 0.95,
+      },
+      {
+        id: 's3',
+        title: 'SQLite lock',
+        subdomain: 'sqlite queries',
+        keywords: ['sqlite'],
+        parentScore: 0.7,
+        narrowerScore: 0.95,
+      },
+    ]);
+    assert.ok(proposal);
+    const pending = (await runtime.nervous.call('approvals.pending', { limit: 10 })) as {
+      id: string;
+      card: { tool: string };
+    }[];
+    const splitCard = pending.find((a) => a.card.tool === 'pilots.split');
+    assert.ok(splitCard);
+    await runtime.decide(splitCard.id, 'approve', 'cli');
+    const created = runtime.pilotRoster().find((p) => p.id === 'sqlite-queries');
+    assert.ok(created);
+    assert.equal(created.stage, 'prototype');
+    assert.deepEqual(created.lineage, ['coder@v2']);
+  } finally {
+    await runtime.close();
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
+test('F-045-T09: owner-approved tool acquisition/discard and Time Request PROTO generic proposal quality', async () => {
+  // Generic/meta/built-in domain labels like "Time Request" are rejected by sanitizeProposedDomain & parseConsult.
+  assert.equal(sanitizeProposedDomain('Time Request'), undefined);
+  assert.equal(sanitizeProposedDomain('time'), undefined);
+  assert.equal(sanitizeProposedDomain('General'), undefined);
+  assert.equal(sanitizeProposedDomain('none'), undefined);
+  assert.equal(sanitizeProposedDomain('3d printing'), '3d printing');
+
+  const timeConsult = parseConsult('Domain: Time Request\nUse the built-in clock.');
+  assert.equal(timeConsult.domain, undefined);
+  assert.equal(timeConsult.advice, 'Use the built-in clock.');
+
+  // Tool acquisition & discard lifecycle.
+  const specialist = pilot({
+    id: 'cad',
+    name: 'CAD',
+    domain: '3d printing',
+    keywords: ['stl', 'cad'],
+    tools: ['legacy.slice', 'mesh.check'],
+    stage: 'test',
+    version: 1,
+  });
+  const toolProp = proposePilotToolChange(specialist, {
+    missingTools: [
+      { tool: 'mesh.repair', count: 3 },
+      { tool: 'one.off', count: 1 },
+    ],
+    unusedTools: [
+      { tool: 'legacy.slice', daysUnused: 45, uses: 0 },
+      { tool: 'mesh.check', daysUnused: 5, uses: 2 },
+    ],
+  });
+  assert.ok(toolProp);
+  assert.deepEqual(toolProp.add, ['mesh.repair']);
+  assert.deepEqual(toolProp.remove, ['legacy.slice']);
+
+  const applied = applyPilotToolChange([specialist], 'cad', { add: toolProp.add, remove: toolProp.remove });
+  assert.deepEqual(applied.pilot.tools, ['mesh.check', 'mesh.repair']);
+  assert.equal(applied.pilot.version, 2);
+
+  // Runtime: Time Request never creates a pilots.create card; tool change requires owner approval.
+  const home = mkdtempSync(join(tmpdir(), 'nerv-pilot-tools-'));
+  writeFileSync(
+    join(home, 'config.json'),
+    JSON.stringify({
+      models: { local: { baseUrl: 'http://127.0.0.1:11434', model: 'qwen3:8b' } },
+      pilots: [specialist],
+    }),
+  );
+  const runtime = new Runtime(join(home, 'nerv.sqlite'), undefined, home);
+  runtime.setPilots(() => readConfig(home).pilots ?? []);
+  try {
+    await runtime.ready();
+    assert.equal(await runtime.proposePilot('Time Request'), false);
+    const prop = await runtime.proposePilotTools('cad', {
+      missingTools: [{ tool: 'mesh.repair', count: 2 }],
+      unusedTools: [{ tool: 'legacy.slice', daysUnused: 35, uses: 0 }],
+    });
+    assert.ok(prop);
+    const pending = (await runtime.nervous.call('approvals.pending', { limit: 10 })) as {
+      id: string;
+      card: { tool: string };
+    }[];
+    const toolCard = pending.find((a) => a.card.tool === 'pilots.tools');
+    assert.ok(toolCard);
+    await runtime.decide(toolCard.id, 'approve', 'cli');
+    const updated = runtime.pilotRoster().find((p) => p.id === 'cad')!;
+    assert.deepEqual(updated.tools, ['mesh.check', 'mesh.repair']);
+    assert.equal(updated.version, 2);
   } finally {
     await runtime.close();
     rmSync(home, { recursive: true, force: true });
