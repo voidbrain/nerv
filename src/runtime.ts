@@ -85,6 +85,7 @@ import {
   MAX_STEPS,
   doneReply,
   filterConsultantInput,
+  matchExistingReminders,
   type RemoteOffer,
   requestLanguage,
   waitingReply,
@@ -96,7 +97,7 @@ import {
 } from './misato.ts';
 import { builtinTools, toolDocs, type AgencySnapshot } from './executors.ts';
 import type { Digest, Exchange } from './instrumentality.ts';
-import type { Episode, Fact } from './memory.ts';
+import { factKey, type Episode, type Fact } from './memory.ts';
 import type { BaseEntry, SignedRecord } from './kaji.ts';
 import {
   ONLINE_MS,
@@ -953,10 +954,17 @@ export class Runtime implements StoreApi {
   ): Promise<ChatReply> {
     const waiting: ChatReply['waiting'] = [];
     const proactive = followup?.watch;
-    // LCL fill: Lilith's facts that match this request and its recent conversation.
-    const memory = (await this.nervous
-      .call('memory.recall', { text: [message, ...context.map((t) => t.request)].join(' ').slice(0, 8000) })
-      .catch(() => [])) as Recalled[];
+    const queryText = [message, ...context.map((t) => t.request)].join(' ').slice(0, 8000);
+    // LCL fill: Lilith's facts and matching pending reminders for this request and its recent conversation.
+    const memory = (await this.nervous.call('memory.recall', { text: queryText }).catch(() => [])) as Recalled[];
+    const pendingReminders = (await this.reminderPage(0, 50).catch(() => ({ items: [] as Reminder[] }))).items;
+    const matchedReminders = matchExistingReminders(queryText, pendingReminders, 5).map((r) => ({
+      id: r.id,
+      title: r.title,
+      due: r.due,
+      ...(r.kind !== 'at' ? { kind: r.kind } : {}),
+      ...(r.end ? { end: r.end } : {}),
+    }));
     for (const t of context)
       await this.nervous.call('context.intake', {
         sortieId,
@@ -1155,6 +1163,7 @@ export class Runtime implements StoreApi {
           language: lang(),
           ...(context.length ? { context } : {}),
           ...(memory.length ? { memory: memory.slice(0, 10) } : {}),
+          ...(matchedReminders.length ? { reminders: matchedReminders } : {}),
         },
         MODEL_TIMEOUT_MS,
       ).catch(() => ({ error: 'Brain unavailable.' }))) as { plan?: Plan; invalid?: boolean; error?: string };
@@ -1194,14 +1203,15 @@ export class Runtime implements StoreApi {
       }
       if ('reply' in out.plan) return finish('done', out.plan.reply);
       const { tool } = out.plan.action;
-      const cfg = tool === 'reminders.add' && this.home ? readConfig(this.home) : undefined;
-      const args =
-        tool === 'reminders.add'
-          ? reconcileReminderArgs(message, out.plan.action.args, {
-              timeZone: cfg?.timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
-              briefAt: cfg?.brief?.at ?? '08:00',
-            })
-          : out.plan.action.args;
+      const shouldReconcile =
+        tool === 'reminders.add' || (tool === 'reminders.update' && typeof out.plan.action.args.due === 'string');
+      const cfg = shouldReconcile && this.home ? readConfig(this.home) : undefined;
+      let args = shouldReconcile
+        ? reconcileReminderArgs(message, out.plan.action.args, {
+            timeZone: cfg?.timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+            briefAt: cfg?.brief?.at ?? '08:00',
+          })
+        : out.plan.action.args;
       // A tool Misato was not offered (often a misspelling) has no executor: it goes back to Misato, never to the owner as a card.
       // kaji.run (F-036 slice 3b): only to a base online now, for an action it offers; anything else goes back to Misato.
       if (tool === 'kaji.run') {
@@ -1261,6 +1271,64 @@ export class Runtime implements StoreApi {
         )
       )
         return finish('done', doneReply(lang(), ranSteps()));
+      // F-046: guard against exact-duplicate adds and enrich memory.edit with oldText for the approval card.
+      const knownFacts = [
+        ...memory.map((m) => ({ id: m.id, text: m.text })),
+        ...steps.flatMap((s) =>
+          s.tool === 'memory.recall' && Array.isArray(s.result)
+            ? (s.result as { id?: unknown; text?: unknown }[]).flatMap((f) =>
+                typeof f?.id === 'string' && typeof f?.text === 'string' ? [{ id: f.id, text: f.text }] : [],
+              )
+            : [],
+        ),
+      ];
+      if (tool === 'memory.remember' && typeof args.text === 'string') {
+        const dup = knownFacts.find((f) => factKey(f.text) === factKey(args.text as string));
+        if (dup) {
+          await this.record(sortieId, steps, {
+            tool,
+            args,
+            outcome: 'invalid',
+            error: `Already exists in memory (id ${dup.id}: "${dup.text}"). Do not propose memory.remember; reply to the owner that it already exists.`,
+          });
+          continue;
+        }
+      }
+      if (tool === 'memory.edit' && typeof args.id === 'string' && typeof args.text === 'string') {
+        const existing = knownFacts.find((f) => f.id === args.id);
+        if (existing) {
+          if (factKey(existing.text) === factKey(args.text)) {
+            await this.record(sortieId, steps, {
+              tool,
+              args,
+              outcome: 'invalid',
+              error: `Fact ${existing.id} already has that text ("${existing.text}"). Do not propose memory.edit; reply to the owner that it already exists.`,
+            });
+            continue;
+          }
+          if (args.oldText === undefined) args = { ...args, oldText: existing.text };
+        }
+      }
+      if (tool === 'reminders.add' && typeof args.title === 'string' && typeof args.due === 'string') {
+        const normTitle = args.title.trim().replace(/\s+/g, ' ').toLowerCase();
+        const targetKind = typeof args.kind === 'string' ? args.kind : 'at';
+        const targetDueMs = Date.parse(args.due);
+        const dup = pendingReminders.find((r) => {
+          if (r.title.trim().replace(/\s+/g, ' ').toLowerCase() !== normTitle) return false;
+          if (r.kind !== targetKind) return false;
+          if (targetKind === 'all-day') return r.due.slice(0, 10) === (args.due as string).slice(0, 10);
+          return Number.isFinite(targetDueMs) && Math.abs(Date.parse(r.due) - targetDueMs) < 60_000;
+        });
+        if (dup) {
+          await this.record(sortieId, steps, {
+            tool,
+            args,
+            outcome: 'invalid',
+            error: `This reminder already exists (id ${dup.id}: "${dup.title}", due ${dup.due}). Do not propose reminders.add; reply to the owner that it already exists.`,
+          });
+          continue;
+        }
+      }
       // An action the ledger refuses outright (malformed, oversized) never reached a ballot: Misato sees it as invalid.
       let r: ActReply | { outcome: 'invalid'; reason: string } = await this.gate(sortieId, {
         request: message,

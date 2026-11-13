@@ -157,9 +157,13 @@ function peerLine(verdicts: { seat: string; vote: string; shadow?: boolean }[] |
 export function card(a: Approval): { text: string; buttons: Button[][] } {
   const c = a.card;
   const args = JSON.stringify(c.args);
+  const detail =
+    c.tool === 'memory.edit' && typeof c.args.oldText === 'string' && typeof c.args.text === 'string'
+      ? `${c.tool}: “${c.args.oldText}” → “${c.args.text}”`
+      : `${c.tool} ${args.length > 600 ? args.slice(0, 600) + '…' : args}`;
   const text = [
     `Needs you · Pattern ${c.pattern.toUpperCase()}`,
-    `${c.tool} ${args.length > 600 ? args.slice(0, 600) + '…' : args}`,
+    detail,
     `Effect: ${c.effect}. Sync ${c.sync.value}%.`,
     `Why it stopped: ${c.reason}`,
     ...peerLine(c.verdicts),
