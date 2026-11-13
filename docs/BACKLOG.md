@@ -13,7 +13,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 30 | 4 |
+| **Open** | 29 | 4 |
 | **Require Human 🧑** | 12 | 2 |
 
 ### Require Human 🧑
@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 34 h agent + 16.75 h owner across 114 open steps of 28 features and 2 other records. 28.75 h of actual effort recorded on 49 steps. Generated from the task files.
+**Remaining effort:** 32.75 h agent + 16.75 h owner across 110 open steps of 27 features and 2 other records. 29.75 h of actual effort recorded on 53 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -847,49 +847,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #195](https://github.com/voidbrain/nerv/pull/195) project tuning and regressions;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #163](https://github.com/voidbrain/nerv/pull/163) channel telemetry and CI reconciliation;  [PR #162](https://github.com/voidbrain/nerv/pull/162) relay detail and acceptance review; Owner test on Tabgha 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-06 Ledger-to-live-detail regression passed for remote answer/reference, waiting, no answer, local continuation, escaping and local empty states. Chrome: real service/session and ledger fixture showed the answering base and full reference; scoped axe found zero violations and screenshot inspected. Full suite: 196 passed, one platform skip; build, typecheck, conventions and integrations passed. Merged PR #162 CI passed validate, windows and both native-macos runs (ci:status, runs 42247286378/42247282316); cross-base link and EVA labels remain unimplemented. |
-| Reviewed | 2026-11-07 |
-
-</details>
-
----
-
-### <a id="f-052"></a>[✨ F-052](#top)
-
-**Timings for every step, live in the Sephirot; shadow seats never make you wait**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.25 h | — | — | — | — |
-
-💻 **→** Next: record how long each call takes on the sortie's events.
-
-| | |
-|---|---|
-| **Issue** | Owner question 2026-11-05: how long did the job take, how long Misato, the EVA, is the ghost (shadow) voter slowing it? The ledger stamps only step boundaries: in S-3BFF, Misato's planning, Casper and Tabgha's shadow seat fall in one 95.7 s gap, so nobody can tell who was slow. The gate waited for every seat, also shadow ones whose vote does not count. |
-| **Reproduce** | Read a sortie's events: there is no duration per model call, per seat or per executor. |
-| **Check** | 1. Each call's duration is recorded with the sortie (consultant or pilot, each Misato step, Casper, each other base's seat, the executor). 2. The sortie detail and the why answer show them (*Misato 38 s · Casper 6 s · Tabgha (shadow) 41 s · EVA-02 0.1 s*); 2a. while a sortie runs, the Sephirot shows the elapsed time on the active node and each finished node's time (owner, 2026-11-05). 3. Shadow seats never delay: the gate decides once Casper and the veto seats have voted; a later shadow vote is recorded, never counted. 4. A daily summary (brief or health): median and slowest time per role, so a slow model or base stands out. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| — | F-052-T01 — Shadow seats never delay | — | 0 days | 0 remaining | Completed |
-| 🟢 Small | F-052-T02 — Per-call duration recording | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | F-052-T03 — Durations in sortie detail and why answer | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | F-052-T04 — Live elapsed time in the Sephirot | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | F-052-T05 — Daily timing summary | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟡 Medium | **Total** | 1.25 h (4 of 5 steps) | 0 h (0 of 5 steps recorded) | 1.25 h | 1 of 5 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-052.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner question 2026-11-05 (ledger timing of S-7663 and S-3BFF); item 3 [PR #116](https://github.com/voidbrain/nerv/pull/116) |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-05 item 3: test/kaji-seats.test.ts and full suite (local run) |
 | Reviewed | 2026-11-07 |
 
 </details>
@@ -1823,6 +1780,49 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-05 |
 | Verification | 2026-11-13 F-045-T07..T09: `npm run typecheck`, `node --test test/pilots.test.ts` (16/16 passed), and `node --test test/gate.test.ts test/pilot-model.test.ts test/model-setup.test.ts test/misato.test.ts test/protocol.test.ts` (35/35 passed); `canPilotLeaveMachine`, `resolvePilotInference`, `proposePilotSplit`, `proposePilotMerge`, `splitPilot`, `mergePilots`, `proposePilotToolChange`, `applyPilotToolChange`, `sanitizeProposedDomain`, and `pilots.split`/`pilots.merge`/`pilots.tools` owner-only executors implemented. Earlier: 2026-11-13 F-045-T06: `node --test test/pilots.test.ts` (12/12 passed) and `npm run check:conventions && npm run check:fast` passed; `evaluatePilotPlacement`, `chooseQualifiedExecution`, `Runtime.assessPilotPlacement`, and `Runtime.selectQualifiedPilotForExecution` implemented keeping individual, combination, and placement evidence distinct. Earlier: 2026-11-13 F-045-T05: `node --test test/pilots.test.ts test/kaji-run.test.ts test/pilot-model.test.ts` (16/16 passed) and `npm run check:conventions && npm run check:fast` passed; `canRunRemotePilot`, `selectRemotePilotRun`, `RunItem.pilot`, and `runFromPeer` pilot grant enforcement implemented. Earlier: 2026-11-13 F-045-T04: `node --test test/pilots.test.ts test/pilot-model.test.ts test/gate.test.ts` and `npm run check:conventions && npm run check:fast` passed; `chooseExecutionPilot`, `promotionEligible`, and owner-only `pilots.promote` implemented. Earlier: 2026-11-13 F-045-T03: `node --test test/pilots.test.ts test/pilot-model.test.ts` and `npm run check:conventions && npm run check:fast` passed; F-041 consultant ranking (`rankPilots`, `chooseAdvisers`), fallback, and ask-both adviser selection implemented. Earlier: 2026-11-13 F-045-T02: `node --test test/pilots.test.ts test/pilot-model.test.ts test/model-setup.test.ts` and `npm run check:fast` passed; owner roster management (add, rename, pin, retire) via CLI/API/Runtime and generic pilot EVA confinement implemented. Earlier: 2026-11-13 F-045-T01: `node --test test/pilots.test.ts test/kaji-link.test.ts test/model-setup.test.ts` (23/23 passed) and `npm run typecheck` passed; pilot data fields (`role`, `skills`, `tools`, `memoryScope`, `evaClass`), `PilotRegistry`, and Kaji heartbeat pilot offers implemented. Earlier: 2026-11-06 Unit/integration and Browser/accessibility: pilot model API/DOM regressions, full suite, real-runtime Chrome flow, inline-row/Apply states and scoped axe passed; merged PR #160 CI run 42241192687 green; 2026-11-05 slice 1: test/pilots.test.ts, test/model-setup.test.ts, full suite (local run) |
 | Reviewed | 2026-11-13 |
+
+</details>
+
+---
+
+### <a id="f-052"></a>[✨ F-052](#top)
+
+**Timings for every step, live in the Sephirot; shadow seats never make you wait**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔵 Closed | ◻️ P2 | 🔴 Large | 0 days | — | — | — | — |
+
+💻 **→** Per-call timings, sortie detail and `why` durations, live Sephirot node timings, and daily role timing summary.
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-05: how long did the job take, how long Misato, the EVA, is the ghost (shadow) voter slowing it? The ledger stamps only step boundaries: in S-3BFF, Misato's planning, Casper and Tabgha's shadow seat fall in one 95.7 s gap, so nobody can tell who was slow. The gate waited for every seat, also shadow ones whose vote does not count. |
+| **Reproduce** | Read a sortie's events: there is no duration per model call, per seat or per executor. |
+| **Check** | 1. Each call's duration is recorded with the sortie (consultant or pilot, each Misato step, Casper, each other base's seat, the executor). 2. The sortie detail and the why answer show them (*Misato 38 s · Casper 6 s · Tabgha (shadow) 41 s · EVA-02 0.1 s*); 2a. while a sortie runs, the Sephirot shows the elapsed time on the active node and each finished node's time (owner, 2026-11-05). 3. Shadow seats never delay: the gate decides once Casper and the veto seats have voted; a later shadow vote is recorded, never counted. 4. A daily summary (brief or health): median and slowest time per role, so a slow model or base stands out. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | F-052-T01 — Shadow seats never delay | — | 0 days | 0 remaining | Completed |
+| — | F-052-T02 — Per-call duration recording | 0.5 h | 0.25 h (stated) | 0 h | Completed |
+| — | F-052-T03 — Durations in sortie detail and why answer | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | F-052-T04 — Live elapsed time in the Sephirot | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | F-052-T05 — Daily timing summary | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | **Total** | 1.25 h (4 of 5 steps) | 1 h (4 of 5 steps recorded) | 0 days | 5 of 5 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-052.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner question 2026-11-05 (ledger timing of S-7663 and S-3BFF); item 3 [PR #116](https://github.com/voidbrain/nerv/pull/116) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05 item 3: test/kaji-seats.test.ts and full suite (local run) |
+| Reviewed | 2026-11-07 |
 
 </details>
 

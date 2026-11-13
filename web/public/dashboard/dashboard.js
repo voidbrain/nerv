@@ -419,6 +419,15 @@ function humanAction(a) {
 /** Another base's seat by its name (Tabgha), not its ID, when the base is known. */
 function baseName(id) { const b = BASES.find(x => x.id === String(id).toLowerCase()); return b ? b.name.charAt(0) + b.name.slice(1).toLowerCase() : id; }
 function seatName(seat) { const n = L().seats; if (seat.startsWith("extra:")) return baseName(seat.slice(6)); return n[seat] || seat; }
+function formatDurationMs(ms) {
+  const safe = Math.max(0, Math.round(ms));
+  if (safe < 100) return safe + " ms";
+  if (safe < 1000) return (safe / 1000).toFixed(1) + " s";
+  return Math.round(safe / 1000) + " s";
+}
+function formatTimingsLine(timings) {
+  return (timings || []).map(t => t.label + (t.shadow ? " (shadow)" : "") + " " + formatDurationMs(t.durationMs)).join(" · ");
+}
 
 /* ================= RENDER: sorties ================= */
 function sortieBadge(s) {
@@ -474,6 +483,25 @@ function stepState(s, id) {
    Each frame is the sortie with only its first k passed steps done and the next one on. No replay with reduced motion. */
 const REPLAY_MS = 450;
 let replayTimer = null;
+let liveFlowTimer = null;
+function setNodeTime(id, text) {
+  const el = nodeEl(id); if (!el) return;
+  let tag = el.querySelector(".stime[data-stime='" + id + "']");
+  if (!tag) {
+    tag = document.createElement("span");
+    tag.className = "stime";
+    tag.dataset.stime = id;
+    const host = id === "magi" ? el.querySelector(".mtitle") : el.querySelector(".st");
+    if (host) host.appendChild(tag);
+  }
+  tag.textContent = text || "";
+}
+function updateActiveNodeTime() {
+  const s = state.sorties.find(x => x.id === state.selected);
+  if (!s || s.status !== "active" || state.replay) return;
+  const start = s.phaseStartedAt || s.started;
+  if (start && s.phase) setNodeTime(s.phase, formatDurationMs(Math.max(0, Date.now() - start)));
+}
 function replayOrder(s) { return STEP_IDS.filter(id => ["done", "on", "wait"].includes(stepState(s, id))); }
 function replayFrame(s, k) {
   const order = replayOrder(s); const done = {}; order.slice(0, k).forEach(id => { done[id] = true; });
@@ -501,6 +529,20 @@ function renderFlow() {
   { const sd = document.querySelector(".snode[data-n='detect'] .sd"); if (sd) sd.textContent = s && s.forwarded ? "forwarded to " + s.forwarded : s && s.origin ? "from " + s.origin : "Aoba comms · Hyuga watch"; }
   { const sd = document.getElementById("sd-consult"); if (sd) sd.textContent = !s ? "no vote · advice into the LCL" : s.advisor ? "advised by " + s.advisor : s.phase === "consult" && s.status === "active" ? "advising · no vote" : "no advice"; }
   document.querySelectorAll(".snode[data-n]").forEach(el => { el.classList.remove("on", "done", "wait", "skip", "owner"); const st = stepState(s, el.dataset.n); if (st) el.classList.add(st); if (st === "done" && el.dataset.n === "apt") el.classList.add("owner"); });
+  // F-052-T04: live elapsed time on the active node, finished time on completed nodes (B-040).
+  STEP_IDS.forEach(id => {
+    const st = stepState(s, id);
+    if (s && st === "on" && s.status === "active" && !state.replay) {
+      const start = s.phaseStartedAt || s.started;
+      setNodeTime(id, start ? formatDurationMs(Math.max(0, Date.now() - start)) : "");
+    } else if (s && st === "done" && s.nodeTimings && s.nodeTimings[id] != null) {
+      setNodeTime(id, formatDurationMs(s.nodeTimings[id]));
+    } else {
+      setNodeTime(id, "");
+    }
+  });
+  clearInterval(liveFlowTimer); liveFlowTimer = null;
+  if (s && s.status === "active" && !state.replay) liveFlowTimer = setInterval(updateActiveNodeTime, 1000);
   // timeline
   const steps = L().steps; const b = s && s.ballot;
   document.getElementById("timeline").innerHTML = STEP_IDS.map((id, i) => {
@@ -521,7 +563,7 @@ function renderFlow() {
     if (state.theme !== "eva") label = label.replace(/^[^\x00-\x7F]+ /, "");
     el.dataset.v = v; el.querySelector(".mv").textContent = label; el.querySelector("[data-m]").textContent = metric;
   });
-  document.getElementById("magi-extras").innerHTML = b ? b.verdicts.filter(v => v.seat.startsWith("extra:")).map(v => "<span class='vchip " + v.vote + (v.shadow ? " shadow" : "") + "'>+ " + esc(baseName(v.seat.slice(6))) + (v.shadow ? " · shadow, not counted" : " · veto-only") + "</span>").join("") : "";
+  document.getElementById("magi-extras").innerHTML = b ? b.verdicts.filter(v => v.seat.startsWith("extra:")).map(v => "<span class='vchip " + v.vote + (v.shadow ? " shadow" : "") + "'>+ " + esc(baseName(v.seat.slice(6))) + (v.shadow ? " · shadow, not counted" : " · veto-only") + (v.durationMs != null ? " · " + formatDurationMs(v.durationMs) : "") + "</span>").join("") : "";
   document.getElementById("mres-out").textContent = b ? b.outcome.toUpperCase() : "—";
   document.getElementById("mres-out").className = b ? (b.outcome === "grant" ? "ok" : b.outcome === "reject" ? "danger" : "warn") : "";
   document.getElementById("mres-pattern").innerHTML = b ? "<span class='badge b-" + b.pattern + "'>PATTERN " + b.pattern.toUpperCase() + "</span>" : "—";
@@ -606,10 +648,11 @@ function renderDetail(s) {
   if (!s) { box.innerHTML = "<div class='muted'>No sortie selected. Pick one in Sorties, or ask Misato below to start one.</div>"; document.getElementById("detail-sub").textContent = ""; return; }
   document.getElementById("detail-sub").textContent = "pilot " + s.pilot + " · " + pilotStage(s.pilot) + " stage · editable by you";
   const plan = "<div class='plan'><div class='small muted' style='margin-bottom:4px'>PLAN (Misato proposes one action at a time)</div><ol>" + s.actions.map((a, i) =>
-    "<li><span class='ix'>" + (i + 1) + "</span><span><b>" + esc(a.tool) + "</b><br/><span class='tiny muted'>" + esc(JSON.stringify(a.args)) + "</span></span><span>" + actionBadge(a) + "</span></li>").join("") + "</ol>" +
+    "<li><span class='ix'>" + (i + 1) + "</span><span><b>" + esc(a.tool) + "</b><br/><span class='tiny muted'>" + esc(JSON.stringify(a.args)) + "</span></span><span>" + actionBadge(a) + (a.durationMs != null ? " <span class='tiny muted'>· " + formatDurationMs(a.durationMs) + "</span>" : "") + "</span></li>").join("") + "</ol>" +
     "<div class='row' style='margin-top:6px'><button class='btn sm danger' data-spear='" + s.id + "'>Spear this sortie</button><span class='tiny muted'>battery $" + s.spent.toFixed(3) + " / $" + s.battery.toFixed(2) + "</span></div></div>";
   const a = s.actions[Math.min(s.current, s.actions.length - 1)]; const b = a && a.ballot;
   const advice = s.advisor ? "<div class='tiny muted' style='margin-bottom:4px'>Advised by " + esc(s.advisor) + " before Misato planned (advice only, no vote)</div>" : "";
+  const timingsHtml = s.timings && s.timings.length ? "<div class='tiny muted' id='detail-timings' style='margin-bottom:4px'>Timings: " + esc(formatTimingsLine(s.timings)) + "</div>" : "";
   const act = !b ? "<div class='muted small'>Ballot not run yet for the current action.</div>" :
     "<div><div class='small muted' style='margin-bottom:4px'>CURRENT ACTION · BALLOT</div>" +
     "<div class='kv'><span>tool</span><span>" + esc(a.tool) + "</span><span>effect</span><span>" + b.effect + "</span><span>pattern</span><span><span class='badge b-" + b.pattern + "'>" + b.pattern.toUpperCase() + "</span> <span class='tiny muted'>from the effect class, never chosen by you</span></span>" +
@@ -617,8 +660,8 @@ function renderDetail(s) {
     "<div class='small' style='margin-top:6px'>Sync Ratio <b>" + b.sync.value + "%</b> <span class='muted'>(threshold " + SCROLLS.syncThreshold + "%)</span></div>" +
     "<div class='meter " + (b.sync.value >= SCROLLS.syncThreshold ? "" : "warn") + "' style='margin-top:3px'><i style='width:" + b.sync.value + "%'></i><span class='mark' style='left:" + SCROLLS.syncThreshold + "%'></span></div>" +
     "<div class='tiny muted' style='margin-top:2px'>" + esc(syncFormula(b)) + "</div>" +
-    "<div class='verdicts'>" + b.verdicts.map(v => "<span class='vchip " + v.vote + (v.shadow ? " shadow" : "") + "'>" + esc(seatName(v.seat)) + ": " + esc(v.reason) + "</span>").join("") + "</div></div>";
-  box.innerHTML = advice + plan + act;
+    "<div class='verdicts'>" + b.verdicts.map(v => "<span class='vchip " + v.vote + (v.shadow ? " shadow" : "") + "'>" + esc(seatName(v.seat)) + ": " + esc(v.reason) + (v.durationMs != null ? " · " + formatDurationMs(v.durationMs) : "") + "</span>").join("") + "</div></div>";
+  box.innerHTML = advice + timingsHtml + plan + act;
 }
 function actionBadge(a) {
   const m = { planned:"b-muted", proposed:"b-info", waiting:"b-warn", done:"b-ok", rejected:"b-danger", "stood-down":"b-muted", failed:"b-danger" };

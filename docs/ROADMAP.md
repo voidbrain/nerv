@@ -31,7 +31,7 @@ Status per milestone, derived from the records (Delivered: all closed; Awaiting 
 | 2a — Useful, gated assistant | In progress | 11 | 1 | 4 | F-027, F-044, F-046, F-056 |
 | 2b — Governed extensions | In progress | 7 | 0 | 4 | F-021, F-064, F-065, F-066 |
 | 3 — Multi-node foundation | In progress | 1 | 0 | 3 | F-005, F-050, F-070 |
-| 4 — Angular PWA, GenUI and live dashboard | In progress | 4 | 0 | 3 | F-004, F-051, F-052 |
+| 4 — Angular PWA, GenUI and live dashboard | In progress | 5 | 0 | 2 | F-004, F-051 |
 | 5 — Distributed agents/models | Planned | 0 | 0 | 5 | F-006, F-012, F-048, F-049, F-060 |
 | 5b — Coordinator relocation (later) | Planned | 0 | 0 | 1 | F-016 |
 | 6 — Voice and evaluated improvement | Planned | 0 | 0 | 1 | F-007 |

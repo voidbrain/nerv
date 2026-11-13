@@ -196,6 +196,8 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .snode .st { font-size:11px; font-weight:900; letter-spacing:.1em; }
 .snode .sd { font-size:9px; color:var(--muted); }
 .snode .sk { font-size:9px; color:var(--kanji); letter-spacing:.2em; }
+.stime { display:inline-block; font-size:9px; font-variant-numeric:tabular-nums; color:var(--accent); margin-left:4px; font-weight:700; }
+.snode.done .stime, #magi-big.done .stime { color:var(--ok); }
 .snode.on { border-color:var(--accent); background:color-mix(in srgb,var(--accent) 14%,var(--panel2)); box-shadow:0 0 14px var(--glow); }
 .snode.on .st { color:var(--title); }
 .snode.on, #magi-big.on { outline:1px solid var(--glow); outline-offset:2px; animation:node-busy 3.2s ease-in-out infinite; }
