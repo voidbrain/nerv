@@ -14,7 +14,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 30 | 6 |
-| **Require Human 🧑** | 11 | 2 |
+| **Require Human 🧑** | 12 | 2 |
 
 ### Require Human 🧑
 
@@ -22,7 +22,8 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 |---|---|---|---|
 | **Procedures** | **Decisions** | **Procedures** | **Decisions** |
 | [F-005](#f-005) | [F-005](#f-005) | [B-057](#b-057) | — |
-| [F-006](#f-006) | [F-062](#f-062) | [B-056](#b-056) |  |
+| [F-006](#f-006) | [F-049](#f-049) | [B-056](#b-056) |  |
+| [F-049](#f-049) | [F-062](#f-062) |  |  |
 | [F-062](#f-062) | [F-009](#f-009) |  |  |
 | [F-009](#f-009) | [F-011](#f-011) |  |  |
 | [F-011](#f-011) | [F-015](#f-015) |  |  |
@@ -32,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 34.75 h agent + 16.75 h owner across 116 open steps of 28 features and 3 other records. 28.5 h of actual effort recorded on 48 steps. Generated from the task files.
+**Remaining effort:** 34.25 h agent + 16.75 h owner across 115 open steps of 28 features and 3 other records. 28.75 h of actual effort recorded on 49 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -170,7 +171,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.5 h agent + 0.75 h owner | — | [F-021](#f-021), [F-027](#f-027) | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h agent + 0.75 h owner | — | [F-021](#f-021), [F-027](#f-027) | 🧑 | 🧑 |
 
 💻 **→** Next: the EVA class definition and one sandboxed instance per job, starting with EVA-03 (owner, 2026-11-05).
 
@@ -184,9 +185,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | F-049-T01 — Define deterministic isolated runner admission and enforcement | 0.5 h | 0 h | 0.5 h | Ready |
-| 🟢 Small | F-049-T02 — EVA class definitions and least-class admission | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | F-049-T03 — Choose the macOS host enforcement mechanism | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned |
+| — | F-049-T01 — Define deterministic isolated runner admission and enforcement | 0.5 h | 0.25 h (stated) | 0 h | Completed |
+| 🟢 Small | F-049-T02 — EVA class definitions and least-class admission | 0.25 h | 0 h | 0.25 h | Ready |
+| 🟢 Small | F-049-T03 — Choose the macOS host enforcement mechanism | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Ready |
 | 🟢 Small | F-049-T04 — EVA-03 instance per job | 0.5 h | 0 h | 0.5 h | Planned |
 | 🟢 Small | F-049-T05 — Escape and recovery join tests | 0.25 h | 0 h | 0.25 h | Planned |
 | 🟢 Small | F-049-T06 — Concurrent instances within per-machine limits | 0.25 h | 0 h | 0.25 h | Planned |
@@ -194,7 +195,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | F-049-T08 — Pilot trust stage caps the class | 0.25 h | 0 h | 0.25 h | Planned |
 | 🟢 Small | F-049-T09 — Dashboard shows instances per class | 0.25 h | 0 h | 0.25 h | Planned |
 | 🟢 Small | F-049-T10 — Linux host enforcement for the mini PC | 0.5 h | 0 h | 0.5 h agent + 0.5 h owner | Planned |
-| 🟡 Medium | **Total** | 3.5 h | 0 h (0 of 10 steps recorded) | 3.5 h agent + 0.75 h owner | 0 of 10 completed |
+| 🟡 Medium | **Total** | 3.5 h | 0.25 h (1 of 10 steps recorded) | 3 h agent + 0.75 h owner | 1 of 10 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -204,10 +205,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | Depends on | [F-045](#f-045) — Pilot identity and EVA class for per-job execution<br />[F-025](#f-025) — Pilot trust-stage limits for sandbox class admission |
-| PR / evidence | [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner questions 2026-11-05 |
+| PR / evidence | [PR #365](https://github.com/voidbrain/nerv/pull/365) F-049-T01 deterministic EVA runner contract and threat model; [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner questions 2026-11-05 |
 | Opened | 2026-11-05 |
-| Verification | Pending |
-| Reviewed | 2026-11-09 |
+| Verification | 2026-11-13 F-049-T01: `npm run work:build && npm run backlog:recap && npm run roadmap:status` and `npm run check:fast` passed; contract/architecture documentation only, no runtime confinement claimed. |
+| Reviewed | 2026-11-13 |
 
 </details>
 

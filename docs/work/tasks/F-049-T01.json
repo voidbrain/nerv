@@ -4,7 +4,7 @@
   "parent": "F-049",
   "title": "Define deterministic isolated runner admission and enforcement",
   "goal": "Specify the first EVA-03 runner boundary without exposing unconfined execution",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "Define threat model and fixed job admission using existing NERV grants, exact arguments, deadlines and least EVA class; do not add a second approval authority",
     "Specify per-job filesystem mounts, network egress, credentials, process cancellation and CPU/memory/output limits for supported hosts",
@@ -39,12 +39,14 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.75 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "estimate": "0 h agent",
+    "basis": "Specified deterministic EVA runner contract, threat model, least-class admission, host boundaries, protected grading/ledger invariants and T05 test gate in docs/decisions/eva-runner.md.",
     "reviewed": "2026-11-13",
     "baselineDays": 2,
-    "agentHours": 0.5,
+    "agentHours": 0,
     "baselineAgentHours": 3,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated",
     "estimateAgentHours": 0.5
   }
 }
