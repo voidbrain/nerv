@@ -273,7 +273,6 @@ test('F-005-T23: Windows update and recovery (backup, rehearsal, checkout, refus
   if (!addr || typeof addr === 'string') throw new Error('Expected TCP port.');
   const { root, context } = makeFixture(addr.port);
   try {
-    context.node = process.execPath;
     const gitSync = (...args: string[]) =>
       execFileSync('git', ['-C', context.source, ...args], { encoding: 'utf8' }).trim();
     gitSync('init', '-b', 'main');
@@ -314,7 +313,7 @@ try {
       if (program === 'git' || program === 'tar' || program === context.node) {
         if (program === context.node && args.includes('--version')) return { status: 0, out: 'v24.0.0\n', err: '' };
         try {
-          const { stdout, stderr } = await execFile(program, args, {
+          const { stdout, stderr } = await execFile(program === context.node ? process.execPath : program, args, {
             cwd,
             env: { ...process.env, ...extraEnv },
           });
@@ -376,6 +375,7 @@ try {
 
     const host = windowsServiceAdapter(context, run);
     const installPlan = await planService(host, 'install');
+    assert.deepEqual(installPlan.blockers, []);
     await applyService(host, installPlan, installPlan.digest);
     const stopPlan = await planService(host, 'stop');
     await applyService(host, stopPlan, stopPlan.digest);
