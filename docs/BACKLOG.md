@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 147 h agent + 17 h owner across 135 open steps of 31 features and 6 other records. 21.75 h of actual effort recorded on 33 steps. Generated from the task files.
+**Remaining effort:** 146 h agent + 17 h owner across 134 open steps of 31 features and 6 other records. 21.75 h of actual effort recorded on 33 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1577,7 +1577,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟣 Very large | 9 h agent + 0.5 h owner | — | — | — | — |
+| 🔴 Open | 🔹 P3 | 🔴 Large | 8 h agent + 0.5 h owner | — | — | — | — |
 
 💻 **→** Slices approved 2026-11-11 and recorded as tasks. Next agent work: Step 1a (F-007-T01) voice feasibility, or Step 3a (F-007-T06) skill packages, which does not wait for voice.
 
@@ -1596,11 +1596,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟡 Medium | F-007-T03 — Step 2a — Push-to-talk on the dashboard and companion: speech to text shown for confirmation, no silent physical activation | 1.25 h | 0 h | 1.25 h | Planned |
 | 🟢 Small | F-007-T04 — Step 2b — Spoken replies (text-to-speech) | 1 h | 0 h | 1 h | Planned |
 | 🟢 Small | F-007-T05 — Step 2c — Voice corpus evaluation run and report | 0.5 h | 0 h | 0.5 h agent + 0.5 h owner | Planned |
-| 🟢 Small | F-007-T06 — Step 3a — Skill package format, isolated storage and versions | 1 h | 0 h | 1 h | Planned |
+| — | F-007-T06 — Step 3a — Skill package format, isolated storage and versions | 1 h | 0 h | 0 h | Completed |
 | 🟡 Medium | F-007-T07 — Step 3b — Skill evaluation with a baseline run without the skill and held-out cases | 1.25 h | 0 h | 1.25 h | Planned |
 | 🟢 Small | F-007-T08 — Step 3c — Owner promotion, rollback and retirement of skills after a model change | 1 h | 0 h | 1 h | Planned |
 | 🟢 Small | F-007-T09 — Step 3d — Rejected permission escalation and corrected-memory cases | 1 h | 0 h | 1 h | Planned |
-| 🟣 Very large | **Total** | 9 h | 0 h (0 of 9 steps recorded) | 9 h agent + 0.5 h owner | 0 of 9 completed |
+| 🔴 Large | **Total** | 9 h | 0 h (0 of 9 steps recorded) | 8 h agent + 0.5 h owner | 1 of 9 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>

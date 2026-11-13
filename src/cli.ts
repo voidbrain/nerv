@@ -1,5 +1,14 @@
 #!/usr/bin/env -S node --use-system-ca
 import { recordPromotion } from './milestones.ts';
+import {
+  activateSkillVersion,
+  listSkillPackages,
+  loadSkillVersion,
+  retireSkillPackage,
+  rollbackSkillVersion,
+  stageSkillPackage,
+  type SkillPackage,
+} from './skills.ts';
 import { assertRootMigrationReady, rootMigrationCommand } from './root-migration.ts';
 import { nodesCommand } from './nodes-cli.ts';
 import {
@@ -251,6 +260,49 @@ try {
       const outcome = await executeEngineLifecycle(plan, spec);
       console.log(JSON.stringify(outcome, null, 2));
       if (!outcome.ok) process.exitCode = 1;
+    }
+  } else if (command === 'skills') {
+    const sub = args[0] ?? 'list';
+    if (sub === 'list') {
+      console.log(JSON.stringify(listSkillPackages(home), null, 2));
+    } else if (sub === 'inspect') {
+      if (!args[1] || !args[2]) throw new Error('Usage: skills inspect <id> <version>');
+      console.log(JSON.stringify(loadSkillVersion(home, args[1], args[2]), null, 2));
+    } else if (sub === 'stage') {
+      if (!args[1]) throw new Error('Usage: skills stage <package.json>');
+      const pkg = JSON.parse(readFileSync(resolve(args[1]), 'utf8')) as SkillPackage;
+      console.log(JSON.stringify(stageSkillPackage(home, pkg), null, 2));
+    } else if (sub === 'promote') {
+      if (!args[1] || !args[2]) throw new Error('Usage: skills promote <id> <version> --owner-approved');
+      console.log(
+        JSON.stringify(
+          activateSkillVersion(home, args[1], args[2], { ownerApproved: args.includes('--owner-approved') }),
+          null,
+          2,
+        ),
+      );
+    } else if (sub === 'rollback') {
+      if (!args[1]) throw new Error('Usage: skills rollback <id> --owner-approved');
+      console.log(
+        JSON.stringify(
+          rollbackSkillVersion(home, args[1], { ownerApproved: args.includes('--owner-approved') }),
+          null,
+          2,
+        ),
+      );
+    } else if (sub === 'retire') {
+      if (!args[1]) throw new Error('Usage: skills retire <id> --owner-approved');
+      console.log(
+        JSON.stringify(
+          retireSkillPackage(home, args[1], { ownerApproved: args.includes('--owner-approved') }),
+          null,
+          2,
+        ),
+      );
+    } else {
+      throw new Error(
+        'Usage: skills list | inspect <id> <version> | stage <file> | promote <id> <version> --owner-approved | rollback <id> --owner-approved | retire <id> --owner-approved',
+      );
     }
   } else if (command === 'telegram') {
     // telegram link [CHAT_ID]: binds Aoba to the private chat that sent /start to the bot.
