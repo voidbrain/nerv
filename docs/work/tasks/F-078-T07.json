@@ -1,0 +1,48 @@
+{
+ "version": 1,
+ "id": "F-078-T07",
+ "parent": "F-078",
+ "title": "Comparison report and profile status",
+ "goal": "Comparison report and profile status",
+ "status": "planned",
+ "acceptance": [
+  "docs/evaluations report comparing every run by role and base",
+  "Each profile in docs/agents/model-profiles.json moves from candidate to qualified or not-qualified per role, with evidence",
+  "Input handed to F-006-T12 (placement report) without duplicating it"
+ ],
+ "dependsOn": [
+  "F-078-T03",
+  "F-078-T04",
+  "F-078-T05",
+  "F-078-T06"
+ ],
+ "resources": [
+  "evals/**",
+  "docs/evaluations/**",
+  "docs/agents/model-profiles.json",
+  "docs/work/records/**",
+  "generated:backlog-views"
+ ],
+ "capabilities": [
+  "bounded-edit",
+  "structured-tools"
+ ],
+ "privacy": "Reports stay private under artifacts/; only metadata (identity, counts, outcomes) enters Git. No prompts, replies or credentials.",
+ "validation": [
+  "node tools/gauntlet.mjs pending",
+  "npm run check:fast"
+ ],
+ "escalation": [
+  "A model campaign runs only inside the scope and budget the owner approved in F-078-T02",
+  "A model failure that NERV can fix becomes a B- record with a failing test first"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "0.5 h agent",
+  "basis": "Estimated 2026-11-13 at the harness 8.5.0 initial step size; campaign wall time on the host is extra and bounded by the T02 budget. Not a measurement.",
+  "reviewed": "2026-11-13",
+  "agentHours": 0.5,
+  "baselineAgentHours": 0.5,
+  "estimateAgentHours": 0.5
+ }
+}

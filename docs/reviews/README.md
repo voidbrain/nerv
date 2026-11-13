@@ -48,6 +48,7 @@ Every report is retained. Historical rows are evidence of that review, not separ
 | [2026-11-06-full.md](../audits/2026-11-06-full.md) | 2026-11-06 01:50 CET | full: code, logic, tests, documentation, harness, security, delivery, backlog; `df7a75e` | Current area threshold above; affected changes/request |
 | [2026-11-08-architecture-reassessment.md](../audits/2026-11-08-architecture-reassessment.md) | 2026-11-08 20:53 CET | scoped: logic, documentation, backlog; `1869340` | Current area threshold above; affected changes/request |
 | [2026-11-13-full.md](../audits/2026-11-13-full.md) | 2026-11-13 17:30 CET | full: code, logic, tests, documentation, harness, security, delivery, backlog; `ee11385` | Current area threshold above; affected changes/request |
+| [2026-11-13-full-addendum.md](../audits/2026-11-13-full-addendum.md) | 2026-11-13 (correction) | Corrects the full report: proposal 3 (template path from a worktree) is not resolved; no area refresh | Template change resolving `template.path` from the common git dir |
 
 ## Acceptance evidence
 

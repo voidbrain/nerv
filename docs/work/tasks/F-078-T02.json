@@ -1,0 +1,47 @@
+{
+ "version": 1,
+ "id": "F-078-T02",
+ "parent": "F-078",
+ "title": "Agree the evaluation matrix and its budget",
+ "goal": "Agree the evaluation matrix and its budget",
+ "status": "planned",
+ "acceptance": [
+  "A table of model × role (Misato planner, Casper seat, coder pilot) × base, built from T01",
+  "The owner approves the matrix, the packs per row and a time budget per campaign",
+  "Downloads of devstral-small-2:24b and qwen3-coder:30b approved or declined"
+ ],
+ "dependsOn": [
+  "F-078-T01"
+ ],
+ "resources": [
+  "evals/**",
+  "docs/evaluations/**",
+  "docs/agents/model-profiles.json",
+  "docs/work/records/**",
+  "generated:backlog-views"
+ ],
+ "capabilities": [
+  "structured-tools",
+  "privacy-review"
+ ],
+ "privacy": "Reports stay private under artifacts/; only metadata (identity, counts, outcomes) enters Git. No prompts, replies or credentials.",
+ "validation": [
+  "node tools/gauntlet.mjs pending",
+  "npm run check:fast"
+ ],
+ "escalation": [
+  "A model campaign runs only inside the scope and budget the owner approved in F-078-T02",
+  "A model failure that NERV can fix becomes a B- record with a failing test first"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "0.25 h agent + 0.25 h owner",
+  "basis": "Estimated 2026-11-13 at the harness 8.5.0 initial step size; campaign wall time on the host is extra and bounded by the T02 budget. Not a measurement.",
+  "reviewed": "2026-11-13",
+  "agentHours": 0.25,
+  "ownerHours": 0.25,
+  "baselineAgentHours": 0.25,
+  "estimateAgentHours": 0.25,
+  "ownerKind": "decision"
+ }
+}
