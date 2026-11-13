@@ -1,0 +1,41 @@
+{
+ "version": 1,
+ "id": "F-080-T01",
+ "parent": "F-080",
+ "title": "Move the peer handlers to a module with unit tests",
+ "goal": "serve only wires peer handlers; their policy is unit-tested",
+ "status": "planned",
+ "acceptance": [
+  "onRelay, onDecide, onChat and onSortie live in a src/ module with unit tests for refusal and success",
+  "Existing cross-base tests pass unchanged"
+ ],
+ "dependsOn": [],
+ "resources": [
+  "src/cli.ts",
+  "src/**",
+  "test/**",
+  "docs/work/records/**",
+  "generated:backlog-views"
+ ],
+ "capabilities": [
+  "bounded-edit",
+  "regression-design"
+ ],
+ "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+ "validation": [
+  "npm test",
+  "npm run typecheck"
+ ],
+ "escalation": [
+  "A behaviour change on the Kaji line goes to a fresh-context design review"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "0.5 h",
+  "basis": "Estimated 2026-11-13 in the architecture reassessment. Not a measurement.",
+  "reviewed": "2026-11-13",
+  "agentHours": 0.5,
+  "baselineAgentHours": 0.5,
+  "estimateAgentHours": 0.5
+ }
+}

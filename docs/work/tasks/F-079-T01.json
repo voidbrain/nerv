@@ -1,0 +1,41 @@
+{
+ "version": 1,
+ "id": "F-079-T01",
+ "parent": "F-079",
+ "title": "Optional per-case input paths in the system source key",
+ "goal": "A system case that declares its paths is invalidated only by changes inside them",
+ "status": "planned",
+ "acceptance": [
+  "A case may declare input paths in evals/gauntlet/system-v1.json; undeclared cases keep the whole-tree key",
+  "A test shows a change inside a declared path makes the case pending and a change outside does not"
+ ],
+ "dependsOn": [],
+ "resources": [
+  "tools/gauntlet.mjs",
+  "evals/gauntlet/**",
+  "test/**",
+  "docs/work/records/**",
+  "generated:backlog-views"
+ ],
+ "capabilities": [
+  "bounded-edit",
+  "regression-design"
+ ],
+ "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+ "validation": [
+  "npm test",
+  "node tools/gauntlet.mjs pending"
+ ],
+ "escalation": [
+  "A change to what the ledger counts as covered goes to a fresh-context review"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "0.5 h",
+  "basis": "Estimated 2026-11-13 in the architecture reassessment. Not a measurement.",
+  "reviewed": "2026-11-13",
+  "agentHours": 0.5,
+  "baselineAgentHours": 0.5,
+  "estimateAgentHours": 0.5
+ }
+}

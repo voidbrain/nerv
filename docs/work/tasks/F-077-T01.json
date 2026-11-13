@@ -2,12 +2,13 @@
  "version": 1,
  "id": "F-077-T01",
  "parent": "F-077",
- "title": "Choose alerts, code scanning and a Node 26 job",
+ "title": "Turn on Dependabot alerts and CodeQL default setup",
  "goal": "The owner adopts or declines each of the three options",
  "status": "planned",
  "acceptance": [
-  "Each option recorded as adopted or declined in F-077",
-  "Adopted repository settings are on"
+  "Decision recorded 2026-11-13: (a) and (b) adopted, (c) Node 26 CI job declined",
+  "Dependabot alerts on: vulnerability-alerts returns 204",
+  "CodeQL default setup state is configured and its first analysis is read"
  ],
  "dependsOn": [],
  "resources": [
@@ -29,12 +30,12 @@
  "effort": {
   "size": "small",
   "estimate": "0.25 h agent + 0.25 h owner",
-  "basis": "Estimated 2026-11-13: a decision, two settings, one CI job. Not a measurement.",
+  "basis": "Estimated 2026-11-13: two repository settings run by the owner from a copy-paste page. Not a measurement.",
   "reviewed": "2026-11-13",
   "agentHours": 0.25,
   "ownerHours": 0.25,
   "baselineAgentHours": 0.25,
   "estimateAgentHours": 0.25,
-  "ownerKind": "decision"
+  "ownerKind": "procedure"
  }
 }

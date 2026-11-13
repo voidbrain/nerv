@@ -13,6 +13,7 @@ Trust comes from your offline **Key of Nebuchadnezzar**; Tailscale carries signe
 
 - **Live link & health:** bases heartbeat every 30 s (`online` within 90 s, `degraded` with doctor reasons, `offline` after 3 missed beats). On Windows, allow TCP `4320` on the `Tailscale` interface.
 - **Single Telegram channel:** `nerv kaji main NERV-01` routes peer replies/cards through Aoba on main while main is online (peers fall back to their own bots if main is unreachable).
+- **Sortie inspection:** any enrolled base can read any sortie of another enrolled base by ID, with up to 100 of its events, including local-only and tainted ones (the owner's choice, 2026-11-13: every base is the owner's). Unknown and revoked bases are refused by the signed link. Revoke a base you no longer trust.
 - **Remote actions & MAGI voting:** peers opt in with `nerv kaji offer reminders.add reminders.list`; non-Green actions on main also query online peers' Casper in `shadow` (non-blocking) or `veto` (`nerv kaji seat NERV-02 veto`).
 
 ## Enrolled worker operations

@@ -8,7 +8,8 @@
  "acceptance": [
   "A table of model × role (Misato planner, Casper seat, coder pilot) × base, built from T01",
   "The owner approves the matrix, the packs per row and a time budget per campaign",
-  "Downloads of devstral-small-2:24b and qwen3-coder:30b approved or declined"
+  "Downloads of devstral-small-2:24b and qwen3-coder:30b approved or declined",
+  "The owner accepts or declines the Tabgha proposal in docs/evaluations/2026-11-13-model-inventory.md (remote endpoint to Neo Tokyo-3 plus a small local fallback) and the addition of gemma4:26b; an accepted proposal rewrites F-078-T05 in the same change"
  ],
  "dependsOn": [
   "F-078-T01"
