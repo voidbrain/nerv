@@ -499,36 +499,66 @@ function featurePlan(text, id, tasks, repository, ownerHref = (link) => link) {
   // a step waiting on an open step of another record names it in its status.
   const owners = steps.some((t) => t.effort?.ownerKind);
   const finished = new Set(tasks.filter((t) => ['closed', 'verified'].includes(t.status)).map((t) => t.id));
-  const parentOf = new Map(tasks.map((t) => [t.id, t.parent]));
   // F-072 (8.9.0): an owner step whose prerequisites are not all verified or closed is not the owner's turn yet: ⏳
   // in its owner column and the steps it waits on in its status; 🤖 marks a step with agent work.
   const unmet = (t) => (['planned', 'ready'].includes(t.status) ? t.dependsOn.filter((d) => !finished.has(d)) : []);
-  const face = (t, kinds, icon) =>
-    !kinds.includes(t.effort?.ownerKind)
-      ? '—'
-      : unmet(t).length
-        ? WAITING
-        : t.ownerLink
-          ? `[${icon}](${ownerHref(t.ownerLink)})`
-          : icon;
-  const agent = (t) =>
-    !t.effort?.ownerKind || (t.effort?.agentHours ?? 0) > 0 || (t.effort?.baselineAgentHours ?? 0) > 0 ? AGENT : '—';
-  const status = (t) => {
-    const waits = unmet(t).filter((d) => t.effort?.ownerKind || parentOf.get(d) !== id);
-    return states[t.status] + (waits.length ? ` · waits on ${waits.join(', ')}` : '');
+  // F-074 (8.11.0): one Who cell per step, since a step has one actor (8.10.0): 🤖 agent work, 🧑‍🔧 / 🤔 the owner's
+  // procedure or decision linked to its page, ⏳ before the face while the step still waits (agent or owner). A step not yet
+  // split shows each actor it has.
+  const face = (t, icon) =>
+    unmet(t).length ? `${WAITING} ${icon}` : t.ownerLink ? `[${icon}](${ownerHref(t.ownerLink)})` : icon;
+  const who = (t) => {
+    const k = t.effort?.ownerKind;
+    return [
+      !k || (t.effort?.agentHours ?? 0) > 0 || (t.effort?.baselineAgentHours ?? 0) > 0
+        ? unmet(t).length
+          ? `${WAITING} ${AGENT}`
+          : AGENT
+        : null,
+      ['procedure', 'both'].includes(k) ? face(t, PROCEDURE) : null,
+      ['decision', 'both'].includes(k) ? face(t, DECISION) : null,
+    ]
+      .filter(Boolean)
+      .join(' ');
   };
+  // F-074 (8.11.0): every open prerequisite is named and linked to its row.
+  const status = (t) => {
+    const waits = unmet(t);
+    return (
+      states[t.status] +
+      (waits.length
+        ? ` · waits on ${waits.map((d) => `[${d}](${ownerHref('docs/BACKLOG.md')}#${d.toLowerCase()})`).join(', ')}`
+        : '')
+    );
+  };
+  // F-074: rows in the order work can happen: steps that can move now (open, every prerequisite verified or closed),
+  // then waiting steps, each below every prerequisite it has in this record, then verified and closed steps; ties by ID.
+  const done = (t) => ['verified', 'closed'].includes(t.status);
+  const rank = (t) => (done(t) ? 2 : unmet(t).length ? 1 : 0);
+  const here = new Map(steps.map((t) => [t.id, t]));
+  const ordered = [];
+  const left = new Set(steps.map((t) => t.id));
+  while (left.size) {
+    const free = [...left]
+      .map((i) => here.get(i))
+      .filter((t) => t.dependsOn.every((d) => !left.has(d) || done(here.get(d))))
+      .sort((a, b) => rank(a) - rank(b) || a.id.localeCompare(b.id));
+    const next = free[0] ?? here.get([...left].sort()[0]); // a cycle cannot reach here: the catalogue refuses it
+    ordered.push(next);
+    left.delete(next.id);
+  }
   // Compact table (F-055): one line per step; dated basis lives in the per-record / task files.
   const table =
-    `**${id.startsWith('F-') ? 'Feature steps' : 'Steps'}**\n\n| Effort | Step | Estimate | Actual | Remaining | Status |${owners ? ' Agent | Procedure | Decision |' : ''}${evidence ? ' PRs |' : ''}\n|---|---|---|---|---|---|${owners ? ':---:|:---:|:---:|' : ''}${evidence ? '---|' : ''}\n` +
-    steps
+    `**${id.startsWith('F-') ? 'Feature steps' : 'Steps'}**\n\n| Effort | Step | Estimate | Actual | Remaining | Status |${owners ? ' Who |' : ''}${evidence ? ' PRs |' : ''}\n|---|---|---|---|---|---|${owners ? ':---:|' : ''}${evidence ? '---|' : ''}\n` +
+    ordered
       .map(
         (t) =>
-          `| ${stepSize(t)} | ${t.id} — ${cell(t.title)} | ${stepEstimate(t.effort)} | ${stepActual(t)} | ${stepRemaining(t.effort, t.status)} | ${status(t)} |${owners ? ` ${agent(t)} | ${face(t, ['procedure', 'both'], PROCEDURE)} | ${face(t, ['decision', 'both'], DECISION)} |` : ''}${evidence ? ` ${prText(t, repository) || '—'} |` : ''}`,
+          `| ${stepSize(t)} | <a id="${t.id.toLowerCase()}"></a>${t.id} — ${cell(t.title)} | ${stepEstimate(t.effort)} | ${stepActual(t)} | ${stepRemaining(t.effort, t.status)} | ${status(t)} |${owners ? ` ${who(t)} |` : ''}${evidence ? ` ${prText(t, repository) || '—'} |` : ''}`,
       )
       .join('\n') +
     '\n' +
     totalRow(steps) +
-    (owners ? ' | | |' : '') +
+    (owners ? ' |' : '') +
     (evidence ? ' |' : '') +
     '\n\n';
   // The record's own details block is a line holding only <details>; a mention of the tag inside a cell is not.
@@ -575,9 +605,13 @@ function dependencyLinks(root, config, tasks = null) {
     /^\| (?:🔴|🟠|🟡|🟢|🟣|🔵) Closed \|/m.test(r.body) ||
     /^\| [^|]+ \| [^|]+ \| Closed \|/m.test(r.body);
   // F-071: a step that waits on an open step of another record shows that step, linked to its record.
+  // F-074: an active record's step links to its row; a step of an archived record links to that record.
   const stepLink = (stepId, parent) => {
     const r = all.get(parent);
-    return r ? `[${stepId}](${r.file === 'docs/BACKLOG.md' ? '' : r.file.slice(5)}#${parent.toLowerCase()})` : stepId;
+    if (!r) return stepId;
+    return r.file === 'docs/BACKLOG.md'
+      ? `[${stepId}](#${stepId.toLowerCase()})`
+      : `[${stepId}](${r.file.slice(5)}#${parent.toLowerCase()})`;
   };
   const steps = tasks ?? [];
   const byId = new Map(steps.map((t) => [t.id, t]));
