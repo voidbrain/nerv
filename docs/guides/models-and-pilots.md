@@ -53,4 +53,4 @@ Specialists advise Misato when a request matches their keywords (advice only, re
 - `pilots pin ID`, `pilots retire ID`, `pilots restore ID`, `pilots set ID --keywords …`, `pilots set ID --stage prototype|test|production`
 - Priority: pinned pilot → most matched keywords → later stage → generic fallback.
 - When no specialist fits, the generic pilot tags the request field; after three matching requests in 30 days, Marduk proposes a new specialist card (or ask Misato: *"make me a pilot for photo editing"*).
-- The dashboard **Pilots** panel updates each pilot's local Ollama model independently. Cloud/other-provider pilot routing remains planned.
+- The dashboard **Pilots** panel updates each pilot's local Ollama model independently. Only local Ollama models are supported for pilots today; see [the roadmap](../ROADMAP.md) for planned routing work.
