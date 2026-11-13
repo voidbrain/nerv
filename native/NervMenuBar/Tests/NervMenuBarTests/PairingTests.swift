@@ -90,4 +90,42 @@ extension PairingTests {
         let expired = Credential(clientId: credential.clientId, token: credential.token, expiresAt: Int64(now.timeIntervalSince1970 * 1000), runtimeId: runtime, port: 4319, webPort: 4317, fingerprint: fingerprint)
         XCTAssertThrowsError(try expired.renewalInvitation(encoded(invitation()), now: now))
     }
+
+    @MainActor
+    func testNativeErrorsAreTranslatedToEnglish() async throws {
+        let model = Companion()
+        model.language = "en"
+        let certMsg = model.tr(NativeError.certificateMismatch.localizedDescription)
+        XCTAssertTrue(certMsg.contains("TLS") || certMsg.contains("certificate"), "Expected English certificate mismatch message, got: \(certMsg)")
+        XCTAssertFalse(certMsg.contains("Nessuna credenziale inviata"), "Expected English, got Italian: \(certMsg)")
+
+        let invalidMsg = model.tr(NativeError.invalidInvitation.localizedDescription)
+        XCTAssertTrue(invalidMsg.contains("Invalid") || invalidMsg.contains("expired"), "Expected English invalid invitation message, got: \(invalidMsg)")
+
+        let connection = NativeConnection(port: 1, fingerprint: String(repeating: "b", count: 64))
+        do {
+            _ = try await connection.request("/api/status")
+            XCTFail("Expected unreachable error")
+        } catch let nativeError as NativeError {
+            let msg = model.tr(nativeError.localizedDescription)
+            XCTAssertTrue(msg.lowercased().contains("unreachable") || msg.lowercased().contains("running"), "Expected English unreachable message, got: \(msg)")
+        }
+    }
+
+    func testErrorMappingCoversRevokedPinMismatchAndItalian() {
+        XCTAssertEqual(NativeConnection.httpError(statusCode: 401), .pairingRevoked)
+        XCTAssertEqual(NativeConnection.httpError(statusCode: 500), .requestFailed)
+        XCTAssertEqual(NativeConnection.transportError(URLError(.cancelled), pinRejected: true), .certificateMismatch)
+        XCTAssertEqual(NativeConnection.transportError(URLError(.cannotConnectToHost), pinRejected: false), .serviceUnreachable)
+
+        for err in [NativeError.invalidInvitation, .certificateMismatch, .serviceUnreachable, .pairingRevoked, .requestFailed, .identityMismatch, .keychain, .expired] {
+            let en = err.message(language: "en")
+            let it = err.message(language: "it")
+            XCTAssertNotEqual(en, it, "Expected distinct EN and IT texts for \(err)")
+            XCTAssertFalse(en.isEmpty)
+            XCTAssertFalse(it.isEmpty)
+        }
+        XCTAssertTrue(NativeError.pairingRevoked.message(language: "en").lowercased().contains("pair again"))
+        XCTAssertTrue(NativeError.certificateMismatch.message(language: "en").lowercased().contains("nothing was sent"))
+    }
 }
