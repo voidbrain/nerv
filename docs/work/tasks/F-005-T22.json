@@ -13,6 +13,7 @@
   ],
   "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
   "acceptance": [
+    "Owner decision 2026-11-13: the Linux VM on Neo Tokyo-3, set up once (docs/acceptance/linux-vm.md)",
     "Demonstration of prerequisites and optional engine management on an owner-selected target",
     "Check supported Node version, executable and non-interactive service environment before install/start/update; report missing or incompatible prerequisites",
     "Provide explicit supported-platform Node installation/upgrade choices with reviewed ownership, permission and recovery; never silently replace a user-managed runtime",
@@ -52,7 +53,7 @@
     "ownerHours": 0.5,
     "baselineAgentHours": 0.75,
     "estimateAgentHours": 0.25,
-    "ownerKind": "decision"
+    "ownerKind": "procedure"
   },
-  "ownerLink": "docs/acceptance/f005-t22-target-decision.md"
+  "ownerLink": "docs/acceptance/f005-t22-prerequisites.md"
 }

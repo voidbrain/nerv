@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-13T20:06:50.743Z",
+  "reviewed": "2026-11-13T21:27:17.918Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
     "AGENTS.md": "b52b056f97cf118b6bbc5b1bd8f54629ec0cdb0a722640b9e524d1370e105a9e",
-    "docs/BACKLOG-RULES.md": "8c2011d720953379b9429e351172e06c9b12f8ba198e4442427d4f1cf00b68a9",
+    "docs/BACKLOG-RULES.md": "7ace5e9da7acfca58ef176725ed78da6fcdd864cceaa4dbc67436b5da0aa6b94",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
     "docs/agents/areas.md": "19890dcd2fb04557fcb9b9bb1df4dcbd2e584736e53a5989908bb822ef020d1c",
     "docs/agents/audit.md": "bc5de5707f9ec5c523e73602499312c373d6112ffc498d69bf68604522527992",
@@ -20,12 +20,12 @@
     "docs/agents/work-usage.md": "e2f7c484f1c07f4b47fd1133857d8744ccab0ad2a7b85b220946c115a002bebc",
     "tools/task-claims.mjs": "ef755fe7951544e5c05b20de7c64a7b53778b6d039a11a2abeb079e7d42b6fd2",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
-    "tools/work-items.mjs": "4e83887539460dd8b4369029e2a48ebbcc116b62232d534af2d7cba31cfaf4b4",
+    "tools/work-items.mjs": "3a732e35b5240a3f8c3457405e6262786e3ca62005f54b8703f092bb7ec4c8f2",
     "tools/work-usage.mjs": "4329262c0b9e723e046dd8878e15a99cff5f590201cd0918563f3204bbe79219"
   },
   "measurements": {
-    "samples": 2,
-    "latestAt": "2026-11-13T20:06:50.693Z",
+    "samples": 1,
+    "latestAt": "2026-11-13T21:27:17.881Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -51,25 +51,25 @@
         }
       },
       "reconciliation": {
-        "samples": 2,
+        "samples": 1,
         "durationMs": {
-          "observed": 2,
+          "observed": 1,
           "missing": 0,
-          "median": 46
+          "median": 30
         },
         "conflicts": {
           "observed": 0,
-          "missing": 2,
+          "missing": 1,
           "median": null
         },
         "unnecessaryPrompts": {
           "observed": 0,
-          "missing": 2,
+          "missing": 1,
           "median": null
         },
         "repeatedContextLoads": {
           "observed": 0,
-          "missing": 2,
+          "missing": 1,
           "median": null
         }
       }
@@ -80,7 +80,7 @@
       "kind": "rule",
       "disposition": "implemented",
       "target": "docs/BACKLOG-RULES.md",
-      "evidence": "Harness v8.8.0 reconcile: step-level owner faces, ownerLink and step prerequisites; restored the template sentence on passing the reviewer the diff, missing since an earlier reconcile."
+      "evidence": "Harness v8.9.0 reconcile: Agent column and waiting owner steps; one open owner step (F-060-T01, P3) lacks a page."
     }
   ]
 }

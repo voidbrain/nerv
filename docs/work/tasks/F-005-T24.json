@@ -50,7 +50,7 @@
     "ownerHours": 1,
     "baselineAgentHours": 0.75,
     "estimateAgentHours": 0.25,
-    "ownerKind": "both"
+    "ownerKind": "procedure"
   },
   "ownerLink": "docs/acceptance/f005-t24-tabgha-windows.md"
 }

@@ -500,26 +500,35 @@ function featurePlan(text, id, tasks, repository, ownerHref = (link) => link) {
   const owners = steps.some((t) => t.effort?.ownerKind);
   const finished = new Set(tasks.filter((t) => ['closed', 'verified'].includes(t.status)).map((t) => t.id));
   const parentOf = new Map(tasks.map((t) => [t.id, t.parent]));
+  // F-072 (8.9.0): an owner step whose prerequisites are not all verified or closed is not the owner's turn yet: ⏳
+  // in its owner column and the steps it waits on in its status; 🤖 marks a step with agent work.
+  const unmet = (t) => (['planned', 'ready'].includes(t.status) ? t.dependsOn.filter((d) => !finished.has(d)) : []);
   const face = (t, kinds, icon) =>
-    kinds.includes(t.effort?.ownerKind) ? (t.ownerLink ? `[${icon}](${ownerHref(t.ownerLink)})` : icon) : '—';
+    !kinds.includes(t.effort?.ownerKind)
+      ? '—'
+      : unmet(t).length
+        ? WAITING
+        : t.ownerLink
+          ? `[${icon}](${ownerHref(t.ownerLink)})`
+          : icon;
+  const agent = (t) =>
+    !t.effort?.ownerKind || (t.effort?.agentHours ?? 0) > 0 || (t.effort?.baselineAgentHours ?? 0) > 0 ? AGENT : '—';
   const status = (t) => {
-    const waits = ['planned', 'ready'].includes(t.status)
-      ? t.dependsOn.filter((d) => !finished.has(d) && parentOf.get(d) !== id)
-      : [];
+    const waits = unmet(t).filter((d) => t.effort?.ownerKind || parentOf.get(d) !== id);
     return states[t.status] + (waits.length ? ` · waits on ${waits.join(', ')}` : '');
   };
   // Compact table (F-055): one line per step; dated basis lives in the per-record / task files.
   const table =
-    `**${id.startsWith('F-') ? 'Feature steps' : 'Steps'}**\n\n| Effort | Step | Estimate | Actual | Remaining | Status |${owners ? ' Procedure | Decision |' : ''}${evidence ? ' PRs |' : ''}\n|---|---|---|---|---|---|${owners ? ':---:|:---:|' : ''}${evidence ? '---|' : ''}\n` +
+    `**${id.startsWith('F-') ? 'Feature steps' : 'Steps'}**\n\n| Effort | Step | Estimate | Actual | Remaining | Status |${owners ? ' Agent | Procedure | Decision |' : ''}${evidence ? ' PRs |' : ''}\n|---|---|---|---|---|---|${owners ? ':---:|:---:|:---:|' : ''}${evidence ? '---|' : ''}\n` +
     steps
       .map(
         (t) =>
-          `| ${stepSize(t)} | ${t.id} — ${cell(t.title)} | ${stepEstimate(t.effort)} | ${stepActual(t)} | ${stepRemaining(t.effort, t.status)} | ${status(t)} |${owners ? ` ${face(t, ['procedure', 'both'], PROCEDURE)} | ${face(t, ['decision', 'both'], DECISION)} |` : ''}${evidence ? ` ${prText(t, repository) || '—'} |` : ''}`,
+          `| ${stepSize(t)} | ${t.id} — ${cell(t.title)} | ${stepEstimate(t.effort)} | ${stepActual(t)} | ${stepRemaining(t.effort, t.status)} | ${status(t)} |${owners ? ` ${agent(t)} | ${face(t, ['procedure', 'both'], PROCEDURE)} | ${face(t, ['decision', 'both'], DECISION)} |` : ''}${evidence ? ` ${prText(t, repository) || '—'} |` : ''}`,
       )
       .join('\n') +
     '\n' +
     totalRow(steps) +
-    (owners ? ' | |' : '') +
+    (owners ? ' | | |' : '') +
     (evidence ? ' |' : '') +
     '\n\n';
   // The record's own details block is a line holding only <details>; a mention of the tag inside a cell is not.
@@ -628,7 +637,9 @@ export const HUMAN_LINE = /^(🧑|💻) \*\*→ Human action required: (Procedur
 // The two generated cells for a cue kind: Procedures (someone runs or checks something) and Decisions.
 // F-071 (8.8.0): different faces, 🧑‍🔧 for a procedure and 🤔 for a decision; readers still accept 🧑 in either cell.
 export const PROCEDURE = '🧑‍🔧',
-  DECISION = '🤔';
+  DECISION = '🤔',
+  AGENT = '🤖',
+  WAITING = '⏳';
 export const humanCells = (kind) => [
   ['Procedure', 'Both'].includes(kind) ? PROCEDURE : '—',
   ['Decision', 'Both'].includes(kind) ? DECISION : '—',
@@ -1088,8 +1099,17 @@ export function checkWorkItems(root = process.cwd()) {
     }
   }
   // F-071: open owner steps without a page to follow, and authored record-level dependencies that name no step.
+  // F-072: only owner steps that are the owner's turn (every prerequisite verified or closed) need their page now; a
+  // waiting step's page is written by the step that makes it runnable.
+  const settled = new Set(catalog.tasks.filter((t) => ['verified', 'closed'].includes(t.status)).map((t) => t.id));
   const ownerStepsWithoutLink = catalog.tasks
-    .filter((t) => ['planned', 'ready'].includes(t.status) && t.effort?.ownerKind && !t.ownerLink)
+    .filter(
+      (t) =>
+        ['planned', 'ready'].includes(t.status) &&
+        t.effort?.ownerKind &&
+        !t.ownerLink &&
+        t.dependsOn.every((d) => settled.has(d)),
+    )
     .map((t) => t.id);
   const recordsDir = local(root, config.records);
   const active = new Set(existsSync(recordsDir) ? readdirSync(recordsDir).map((f) => f.slice(0, -3)) : []);
