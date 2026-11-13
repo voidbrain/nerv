@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 147 h agent + 17 h owner across 135 open steps of 31 features and 6 other records. 21.75 h of actual effort recorded on 33 steps. Generated from the task files.
+**Remaining effort:** 144.5 h agent + 17 h owner across 134 open steps of 31 features and 5 other records. 21.75 h of actual effort recorded on 33 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -301,12 +301,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|
 | 🟡 Implemented | 🔺 P1 | 🟢 Small | 1 h agent + 0.75 h owner | — | — | 🧑 | 🧑 |
 
-🧑 **→** Complete selected Mac login/logout acceptance and choose a Linux acceptance target.
+🧑 **→** Run the [service and login acceptance procedure](acceptance/f009-service-login-procedure.md): complete selected Mac login/logout acceptance and choose a Linux acceptance target.
 
 | | |
 |---|---|
 | **Issue** | Service commands and definitions implemented. Portable tests validate rendering/process lifecycle; later owner-authorized F-005 Mac default-profile service operations passed. Linux/session acceptance remains incomplete. |
-| **Reproduce** | Follow docs/INSTALL.md and the scoped headless implementation checks. |
+| **Reproduce** | Follow the [service and login acceptance procedure](acceptance/f009-service-login-procedure.md) and [docs/INSTALL.md](INSTALL.md). |
 | **Check** | Single process serves production UI/API on 4317; config survives init; clean SIGTERM and restart catch-up; private credentials; install/status/start/stop/uninstall on real target OS. |
 
 **Feature steps**
@@ -385,12 +385,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|
 | 🟡 Implemented | 🔺 P1 | 🟡 Medium | 2 h agent + 1.75 h owner | — | — | 🧑 | 🧑 |
 
-🧑 **→** Complete remaining companion acceptance and select the signing identity.
+🧑 **→** Run the [companion acceptance procedure](acceptance/f011-companion-acceptance-procedure.md) and select the signing identity.
 
 | | |
 |---|---|
 | **Issue** | SwiftUI pairing, private notification checkpoints, bounded catch-up, opt-in OS notifications, guarded local service controls and login selection now exist. Explicit Developer ID/notarization packaging is implemented; an actual signed release and real permission/menu/login acceptance remain incomplete. |
-| **Reproduce** | Follow docs/INSTALL.md and the scoped headless implementation checks. |
+| **Reproduce** | Follow the [companion acceptance procedure](acceptance/f011-companion-acceptance-procedure.md) and [docs/INSTALL.md](INSTALL.md). |
 | **Check** | Build and package on macOS; health/reminders, workspace launch, doctor, notifications, launch-at-login; Quit companion leaves service running; Stop NERV Agency is separate. |
 
 **Feature steps**
@@ -427,12 +427,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|
 | 🟡 Implemented | 🔺 P1 | 🟢 Small | 0 days | — | — | 🧑 | — |
 
-🧑 **→** T03 delivery is accepted after full CI. Remaining owner acceptance: actual menu/VoiceOver and notification/banner behavior on the paired Mac.
+🧑 **→** T03 delivery is accepted after full CI. Run the [paired Mac approvals procedure](acceptance/f023-native-approvals-procedure.md) for actual menu/VoiceOver and notification/banner behavior.
 
 | | |
 |---|---|
 | **Issue** | Blue actions and low Sync Ratio need the owner. Without full content an approval is a rubber stamp; without a TTL a sleeping owner stalls the sortie. |
-| **Reproduce** | Create a Blue approval; approve, reject, edit, or leave it to expire; repeat the decision; restart NERV Agency while it is pending. |
+| **Reproduce** | Follow the [paired Mac approvals procedure](acceptance/f023-native-approvals-procedure.md) (create a Blue approval; approve, reject, edit, or leave it to expire; repeat the decision; restart NERV Agency while pending). |
 | **Check** | Card shows action, arguments/diff/recipients, Pattern, Sync Ratio and inputs, reason and remaining TTL; expiry stands down (never approves); a decision is applied once and is idempotent on repeat; pending cards survive restart; the decision and its source are written to Central Dogma; Pen Pen delivery reuses the inbox and later Telegram/native notifications. |
 
 **Feature steps**
@@ -467,12 +467,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔺 P1 | 🟢 Small | 0.5 h agent + 0.5 h owner | — | — | 🧑 | — |
 
-🧑 **→** Phone install and push acceptance: owner installs on a phone, receives a reminder push and completes it from the PWA.
+🧑 **→** Run the [phone install and push procedure](acceptance/f004-t06-phone-push-procedure.md): install on a phone, receive a reminder push, and complete it from the PWA.
 
 | | |
 |---|---|
 | **Issue** | Angular source exists with an installable PWA shell (F-004-T01, PR #286: manifest, icons, shell-only service worker, update prompt); no reminder CRUD UI beyond create/cancel, doctor view, generated UI or push configuration yet. |
-| **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
+| **Reproduce** | Follow the [phone install and push procedure](acceptance/f004-t06-phone-push-procedure.md). |
 | **Check** | Real reminder CRUD and doctor UI; reject arbitrary component/code/action payloads; accessibility and phone install/push acceptance. |
 
 **Feature steps**
@@ -1088,6 +1088,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-052"></a>[🐞 B-052](#top)
+
+**Owner actions point at procedures the owner has to hunt for**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🟢 Verified | 🔶 P2 | 🟢 Small | 0 h | — | — | — | — |
+
+💻 **→** Verified: all open procedure records link copy-paste acceptance pages under `docs/acceptance/`.
+
+| | |
+|---|---|
+| **Issue** | Owner, 2026-11-12, on F-005: its human action said "run the T13 copy-paste procedure below", but the procedure sat inside the collapsed details, the Reproduce row said only "Follow README commands and the owning milestone in ROADMAP" with no link, and the cue still waited on an already merged PR. "I should not manually search for files and lose myself between pointers of pointers." F-005 fixed here; F-006 and F-016 now link their decisions. Still without a linked procedure: B-008 ("steps in details"), F-004, F-009, F-011, F-015, F-023. |
+| **Reproduce** | Open [the backlog]() and read the human-action line of B-008, F-004, F-009, F-011, F-015 or F-023: none links the exact commands or steps to run and their expected result. |
+| **Check** | Every 🧑 line that asks the owner to run or check something links one page (or a visible section of the record) with copy-paste blocks and the expected result; its Reproduce row links the same; no "below", "in details" or bare path. Harness rule: project-harness F-064. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | B-052-T01 — Linked copy-paste procedures for the remaining owner actions | 2.5 h | 0 h | 0 h | Completed |
+| — | **Total** | 2.5 h | 0 h (0 of 1 steps recorded) | 0 h | 1 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-052.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #311](https://github.com/voidbrain/nerv/pull/311): F-005 procedure moved to [docs/acceptance/f005-t13-mac-update-procedure.md](acceptance/f005-t13-mac-update-procedure.md). No test: documentation-only procedure links across existing backlog records. |
+| Opened | 2026-11-12 |
+| Verification | Pending. |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
 ### <a id="b-053"></a>[🐞 B-053](#top)
 
 **F-029 descendant-process test failed once in CI with every process already gone**
@@ -1195,44 +1233,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | PR / evidence | docs/evaluations/2026-11-12-misato-b021.json (`italian-missing-title` failed: invented title `Promemoria`); development probe of the same case 2026-11-12: 1 of 3 asked, 2 invented a title; docs/evaluations/2026-11-12-misato-v2.json (passed: it asked); docs/evaluations/2026-11-08-misato.json (passed). Found in B-021's run. |
-| Opened | 2026-11-12 |
-| Verification | Pending. |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
-### <a id="b-052"></a>[🐞 B-052](#top)
-
-**Owner actions point at procedures the owner has to hunt for**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.5 h | — | — | — | — |
-
-💻 **→** Next: give each listed owner action a linked copy-paste procedure (B-052-T01).
-
-| | |
-|---|---|
-| **Issue** | Owner, 2026-11-12, on F-005: its human action said "run the T13 copy-paste procedure below", but the procedure sat inside the collapsed details, the Reproduce row said only "Follow README commands and the owning milestone in ROADMAP" with no link, and the cue still waited on an already merged PR. "I should not manually search for files and lose myself between pointers of pointers." F-005 fixed here; F-006 and F-016 now link their decisions. Still without a linked procedure: B-008 ("steps in details"), F-004, F-009, F-011, F-015, F-023. |
-| **Reproduce** | Open [the backlog]() and read the human-action line of B-008, F-004, F-009, F-011, F-015 or F-023: none links the exact commands or steps to run and their expected result. |
-| **Check** | Every 🧑 line that asks the owner to run or check something links one page (or a visible section of the record) with copy-paste blocks and the expected result; its Reproduce row links the same; no "below", "in details" or bare path. Harness rule: project-harness F-064. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | B-052-T01 — Linked copy-paste procedures for the remaining owner actions | 2.5 h | 0 h | 2.5 h | Planned |
-| 🟡 Medium | **Total** | 2.5 h | 0 h (0 of 1 steps recorded) | 2.5 h | 0 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-052.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #311](https://github.com/voidbrain/nerv/pull/311): F-005 procedure moved to [docs/acceptance/f005-t13-mac-update-procedure.md](acceptance/f005-t13-mac-update-procedure.md). |
 | Opened | 2026-11-12 |
 | Verification | Pending. |
 | Reviewed | 2026-11-12 |
