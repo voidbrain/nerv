@@ -140,7 +140,8 @@ export class Store {
     // F-036 slice 3b, additive: actions queued for other bases, and actions other bases asked of this one (by their id, so a
     // resend after a crash returns the first result instead of running twice).
     this.db.exec(
-      `CREATE TABLE IF NOT EXISTS kaji_outbox(id TEXT PRIMARY KEY, sortie_id TEXT NOT NULL, base TEXT NOT NULL, tool TEXT NOT NULL, args TEXT NOT NULL, request TEXT NOT NULL, created TEXT NOT NULL, done TEXT, result TEXT);`,
+      `CREATE TABLE IF NOT EXISTS kaji_outbox(id TEXT PRIMARY KEY, sortie_id TEXT NOT NULL, base TEXT NOT NULL, tool TEXT NOT NULL, args TEXT NOT NULL, request TEXT NOT NULL, created TEXT NOT NULL, done TEXT, result TEXT);
+      CREATE TABLE IF NOT EXISTS kaji_outbox_pilots(id TEXT PRIMARY KEY, pilot TEXT NOT NULL);`,
     );
     // Schema 5: the inbox holds Hyuga's briefs as well as reminders (F-028). The table is rebuilt once, keeping every
     // row's rowid: inbox cursors (Telegram, the menu-bar app) are rowids, so none of them jumps or repeats.
@@ -696,7 +697,13 @@ export class Store {
       }
     }
   }
-  queueRemote(sortieId: string, base: string, tool: string, args: Record<string, unknown>): { id: string } {
+  queueRemote(
+    sortieId: string,
+    base: string,
+    tool: string,
+    args: Record<string, unknown>,
+    pilot?: string,
+  ): { id: string } {
     const id = randomUUID();
     const title =
       (this.db.prepare('SELECT title FROM sorties WHERE id=?').get(sortieId) as { title: string } | undefined)?.title ??
@@ -704,6 +711,7 @@ export class Store {
     this.db
       .prepare('INSERT INTO kaji_outbox VALUES(?,?,?,?,?,?,?,NULL,NULL)')
       .run(id, sortieId, base, tool, JSON.stringify(args), title.slice(0, 500), new Date().toISOString());
+    if (pilot) this.db.prepare('INSERT INTO kaji_outbox_pilots VALUES(?,?)').run(id, pilot);
     return { id };
   }
   /** Queued actions not settled yet, oldest first: the coordinator sends them (the same id each time). */
@@ -717,11 +725,12 @@ export class Store {
     tool: string;
     args: Record<string, unknown>;
     request: string;
+    pilot?: string;
   }[] {
     return (
       this.db
         .prepare(
-          `SELECT rowid AS sequence,id,sortie_id,base,tool,args,request,created,EXISTS(SELECT 1 FROM worker_outbox_attempts a WHERE a.id=q.id) AS attempted FROM kaji_outbox q WHERE done IS NULL AND NOT EXISTS (SELECT 1 FROM worker_legacy_outbox h WHERE h.id=q.id AND h.state='pending') AND NOT EXISTS (SELECT 1 FROM worker_outbox_cancels c WHERE c.id=q.id) ORDER BY created LIMIT 10`,
+          `SELECT q.rowid AS sequence,q.id,q.sortie_id,q.base,q.tool,q.args,q.request,q.created,p.pilot,EXISTS(SELECT 1 FROM worker_outbox_attempts a WHERE a.id=q.id) AS attempted FROM kaji_outbox q LEFT JOIN kaji_outbox_pilots p ON p.id=q.id WHERE q.done IS NULL AND NOT EXISTS (SELECT 1 FROM worker_legacy_outbox h WHERE h.id=q.id AND h.state='pending') AND NOT EXISTS (SELECT 1 FROM worker_outbox_cancels c WHERE c.id=q.id) ORDER BY q.created LIMIT 10`,
         )
         .all() as {
         sequence: number;
@@ -732,6 +741,7 @@ export class Store {
         args: string;
         request: string;
         created: string;
+        pilot: string | null;
         attempted: number;
       }[]
     ).map((r) => ({
@@ -744,6 +754,7 @@ export class Store {
       tool: r.tool,
       args: JSON.parse(r.args) as Record<string, unknown>,
       request: r.request,
+      ...(r.pilot ? { pilot: r.pilot } : {}),
     }));
   }
   cancelWorker(

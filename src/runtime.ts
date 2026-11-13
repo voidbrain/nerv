@@ -39,12 +39,14 @@ import { askedWhy, explainRecord, isAgencyQuestion } from './why.ts';
 import {
   PilotRegistry,
   addPilot as addPilotEntry,
+  canRunRemotePilot,
   chooseAdvisers,
   chooseExecutionPilot,
   choosePilot,
   genericPilot as buildGenericPilot,
   promotionEligible,
   rankPilots,
+  selectRemotePilotRun,
   setPilotFlag as setPilotEntryFlag,
   updatePilot as updatePilotEntry,
   type Chosen,
@@ -1006,7 +1008,7 @@ export class Runtime implements StoreApi {
       // A tool Misato was not offered (often a misspelling) has no executor: it goes back to Misato, never to the owner as a card.
       // kaji.run (F-036 slice 3b): only to a base online now, for an action it offers; anything else goes back to Misato.
       if (tool === 'kaji.run') {
-        const a = args as { base?: unknown; tool?: unknown };
+        const a = args as { base?: unknown; tool?: unknown; pilot?: unknown };
         const offer = remote.find((r) => r.base === a.base);
         if (!offer || typeof a.tool !== 'string' || !offer.tools.includes(a.tool)) {
           await this.record(sortieId, steps, {
@@ -1018,6 +1020,23 @@ export class Runtime implements StoreApi {
               : `No base by that id is online and offering actions. Online: ${remote.map((r) => r.base).join(', ') || 'none'}.`,
           });
           continue;
+        }
+        if (a.pilot !== undefined) {
+          const remoteBase =
+            typeof a.pilot === 'string' ? (await this.remotePilots()).find((b) => b.base === offer.base) : undefined;
+          const offeredPilot = remoteBase?.pilots.find((p) => p.id === a.pilot);
+          const grant = offeredPilot
+            ? canRunRemotePilot({ id: offeredPilot.id, retired: false, tools: offeredPilot.tools }, offer.tools, a.tool)
+            : { allowed: false, reason: `${offer.name} does not offer pilot "${String(a.pilot)}".` };
+          if (!grant.allowed) {
+            await this.record(sortieId, steps, {
+              tool,
+              args,
+              outcome: 'invalid',
+              error: grant.reason,
+            });
+            continue;
+          }
         }
       } else if (!toolDocs.some((t) => t.name === tool) && !ext.byName.has(tool)) {
         await this.record(sortieId, steps, {
@@ -1403,6 +1422,7 @@ export class Runtime implements StoreApi {
           tool: string;
           args: Record<string, unknown>;
           request: string;
+          pilot?: string;
         }[]) {
           const r =
             q.deadline <= Date.now()
@@ -1425,6 +1445,7 @@ export class Runtime implements StoreApi {
                     request: q.request,
                     tool: q.tool,
                     args: q.args,
+                    ...(q.pilot ? { pilot: q.pilot } : {}),
                   },
                   async () => {
                     await this.nervous.call('kaji.outboxAttempt', { id: q.id });
@@ -1500,11 +1521,28 @@ export class Runtime implements StoreApi {
     if (claim.state === 'busy') return { retry: true, error: 'Worker resource is held by an unfinished request.' };
     if (claim.state !== 'claimed') return claim.result;
     const lease = claim.lease!;
-    const result =
-      !offered.includes(item.tool) || item.tool === 'kaji.run' || !builtinTools.some((t) => t.name === item.tool)
+    let pilotRefusal: string | undefined;
+    if (item.pilot !== undefined) {
+      const targetPilot = this.pilotRoster().find((p) => p.id === item.pilot);
+      if (!targetPilot) pilotRefusal = `this base does not have pilot ${item.pilot}`;
+      else {
+        const grant = canRunRemotePilot(targetPilot, offered, item.tool);
+        if (!grant.allowed) pilotRefusal = grant.reason;
+      }
+    }
+    const result = pilotRefusal
+      ? { refused: pilotRefusal }
+      : !offered.includes(item.tool) || item.tool === 'kaji.run' || !builtinTools.some((t) => t.name === item.tool)
         ? { refused: `this base does not offer ${item.tool} (on it: kaji offer)` }
         : await this.act(
-            { request: `From ${from}: ${item.request || item.tool}`.slice(0, 4000), tool: item.tool, args: item.args },
+            {
+              request: `From ${from}${item.pilot ? ` (pilot ${item.pilot})` : ''}: ${item.request || item.tool}`.slice(
+                0,
+                4000,
+              ),
+              tool: item.tool,
+              args: item.args,
+            },
             lease,
           ).catch(() => ({
             outcome: 'invalid',
@@ -2084,6 +2122,20 @@ export class Runtime implements StoreApi {
     opts?: { suggestOnly?: boolean },
   ): ExecutionChoice {
     return chooseExecutionPilot(request, candidates ?? this.pilotRoster(), this.genericPilot(), opts);
+  }
+  /** F-045-T05: selects across local and online enrolled peer pilots and verifies remote grant rules. */
+  async selectRemotePilotForExecution(
+    request: string,
+    tool?: string,
+    opts?: { suggestOnly?: boolean },
+  ): Promise<{ choice: ExecutionChoice; remote: boolean; allowed: boolean; reason?: string }> {
+    const candidates = await this.registeredPilots();
+    const offers = await this.remoteOffers();
+    const offeredByBase = new Map(offers.map((o) => [o.base, o.tools]));
+    return selectRemotePilotRun(request, candidates, offeredByBase, this.genericPilot(), tool, {
+      ...opts,
+      localBaseId: this.getPilotRegistry().localBaseId,
+    });
   }
   /** F-045-T04: evaluates owner-approved promotion eligibility (never automatic). */
   evaluatePilotPromotion(id: string, record: PilotRecord & { daysInStage?: number }) {

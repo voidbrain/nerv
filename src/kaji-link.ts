@@ -99,6 +99,7 @@ export interface RunItem {
   request: string;
   tool: string;
   args: Record<string, unknown>;
+  pilot?: string;
 }
 /** The main base's answer to a dispatched request: the reply Misato gave there (its sortie and cards live there). */
 export interface DispatchedReply {

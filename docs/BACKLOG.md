@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 133.5 h agent + 16.75 h owner across 124 open steps of 31 features and 3 other records. 24.75 h of actual effort recorded on 39 steps. Generated from the task files.
+**Remaining effort:** 131.75 h agent + 16.75 h owner across 123 open steps of 31 features and 3 other records. 25.25 h of actual effort recorded on 40 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -170,7 +170,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.75 h | — | [F-049](#f-049), [F-050](#f-050), [F-054](#f-054) | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | [F-049](#f-049), [F-050](#f-050), [F-054](#f-054) | — | — |
 
 💻 **→** Next: pilots offered by other bases over the Kaji line; other-provider/cloud pilot routing remains planned.
 
@@ -188,9 +188,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | F-045-T02 — Owner roster management | 0.5 h | 0.5 h (stated) | 0 h | Completed |
 | — | F-045-T03 — Advice mode | 0.5 h | 0.5 h (stated) | 0 h | Completed |
 | — | F-045-T04 — Execution mode and automatic choice | 0.5 h | 0.5 h (stated) | 0 h | Completed |
-| 🟡 Medium | F-045-T05 — Remote pilots | 1.75 h | 0 h | 1.75 h | Planned |
+| — | F-045-T05 — Remote pilots | 0.5 h | 0.5 h (stated) | 0 h | Completed |
 | 🟢 Small | F-045-T06 — Evidence-based placement | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | **Total** | 4.75 h | 2 h (4 of 6 steps recorded) | 2.75 h | 4 of 6 completed |
+| 🟢 Small | **Total** | 3.5 h | 2.5 h (5 of 6 steps recorded) | 1 h | 5 of 6 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -202,7 +202,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Depends on | — |
 | PR / evidence | [PR #355](https://github.com/voidbrain/nerv/pull/355) F-045-T04 execution choice by domain/evidence and owner-only promotion; [PR #354](https://github.com/voidbrain/nerv/pull/354) F-045-T03 F-041 consultant ranking, fallback, and ask-both advice mode; [PR #353](https://github.com/voidbrain/nerv/pull/353) F-045-T02 owner roster management and generic pilot EVA confinement; [PR #352](https://github.com/voidbrain/nerv/pull/352) F-045-T01 pilot data schema, PilotRegistry, and Kaji heartbeat offers; [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #221](https://github.com/voidbrain/nerv/pull/221) schema/reuse assessment; [Gauntlet ownership/reuse proposal](design/gauntlet-protocol-2026-11-08.md), 2026-11-08; the proposal preceded delivered Gauntlet0.1.1 adoption in PR #223 / F-073; automatic routing/qualification remains unimplemented and no consumer work gates upstream releases; [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #161](https://github.com/voidbrain/nerv/pull/161) verification reconciliation;  [PR #160](https://github.com/voidbrain/nerv/pull/160) pilot selectors/map status and owner clarification; Owner questions 2026-11-05; slice 1 [PR #107](https://github.com/voidbrain/nerv/pull/107) |
 | Opened | 2026-11-05 |
-| Verification | 2026-11-13 F-045-T04: `node --test test/pilots.test.ts test/pilot-model.test.ts test/gate.test.ts` and `npm run check:conventions && npm run check:fast` passed; `chooseExecutionPilot`, `promotionEligible`, and owner-only `pilots.promote` implemented. Earlier: 2026-11-13 F-045-T03: `node --test test/pilots.test.ts test/pilot-model.test.ts` and `npm run check:conventions && npm run check:fast` passed; F-041 consultant ranking (`rankPilots`, `chooseAdvisers`), fallback, and ask-both adviser selection implemented. Earlier: 2026-11-13 F-045-T02: `node --test test/pilots.test.ts test/pilot-model.test.ts test/model-setup.test.ts` and `npm run check:fast` passed; owner roster management (add, rename, pin, retire) via CLI/API/Runtime and generic pilot EVA confinement implemented. Earlier: 2026-11-13 F-045-T01: `node --test test/pilots.test.ts test/kaji-link.test.ts test/model-setup.test.ts` (23/23 passed) and `npm run typecheck` passed; pilot data fields (`role`, `skills`, `tools`, `memoryScope`, `evaClass`), `PilotRegistry`, and Kaji heartbeat pilot offers implemented. Earlier: 2026-11-06 Unit/integration and Browser/accessibility: pilot model API/DOM regressions, full suite, real-runtime Chrome flow, inline-row/Apply states and scoped axe passed; merged PR #160 CI run 42241192687 green; 2026-11-05 slice 1: test/pilots.test.ts, test/model-setup.test.ts, full suite (local run) |
+| Verification | 2026-11-13 F-045-T05: `node --test test/pilots.test.ts test/kaji-run.test.ts test/pilot-model.test.ts` (16/16 passed) and `npm run check:conventions && npm run check:fast` passed; `canRunRemotePilot`, `selectRemotePilotRun`, `RunItem.pilot`, and `runFromPeer` pilot grant enforcement implemented. Earlier: 2026-11-13 F-045-T04: `node --test test/pilots.test.ts test/pilot-model.test.ts test/gate.test.ts` and `npm run check:conventions && npm run check:fast` passed; `chooseExecutionPilot`, `promotionEligible`, and owner-only `pilots.promote` implemented. Earlier: 2026-11-13 F-045-T03: `node --test test/pilots.test.ts test/pilot-model.test.ts` and `npm run check:conventions && npm run check:fast` passed; F-041 consultant ranking (`rankPilots`, `chooseAdvisers`), fallback, and ask-both adviser selection implemented. Earlier: 2026-11-13 F-045-T02: `node --test test/pilots.test.ts test/pilot-model.test.ts test/model-setup.test.ts` and `npm run check:fast` passed; owner roster management (add, rename, pin, retire) via CLI/API/Runtime and generic pilot EVA confinement implemented. Earlier: 2026-11-13 F-045-T01: `node --test test/pilots.test.ts test/kaji-link.test.ts test/model-setup.test.ts` (23/23 passed) and `npm run typecheck` passed; pilot data fields (`role`, `skills`, `tools`, `memoryScope`, `evaClass`), `PilotRegistry`, and Kaji heartbeat pilot offers implemented. Earlier: 2026-11-06 Unit/integration and Browser/accessibility: pilot model API/DOM regressions, full suite, real-runtime Chrome flow, inline-row/Apply states and scoped axe passed; merged PR #160 CI run 42241192687 green; 2026-11-05 slice 1: test/pilots.test.ts, test/model-setup.test.ts, full suite (local run) |
 | Reviewed | 2026-11-13 |
 
 </details>

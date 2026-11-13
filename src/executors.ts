@@ -43,7 +43,13 @@ export interface ReminderBackend {
   memory: Memory;
   home?: string;
   /** F-036 slice 3b: queues one action for another base; the coordinator sends it over the Kaji line. */
-  queueRemote?(sortieId: string, base: string, tool: string, args: Record<string, unknown>): { id: string };
+  queueRemote?(
+    sortieId: string,
+    base: string,
+    tool: string,
+    args: Record<string, unknown>,
+    pilot?: string,
+  ): { id: string };
 }
 export const builtinTools: Tool[] = [
   { name: 'reminders.list', effect: 'read' },
@@ -378,9 +384,12 @@ export function execute(
       only(args, ['id']);
       return { forgotten: backend.memory.forget(text(args, 'id'), 'misato') };
     case 'kaji.run': {
-      only(args, ['base', 'tool', 'args']);
+      only(args, ['base', 'tool', 'args', 'pilot']);
       const base = text(args, 'base'),
         tool = text(args, 'tool');
+      const pilot = args.pilot === undefined ? undefined : text(args, 'pilot');
+      if (pilot !== undefined && !/^[a-z0-9-]{1,40}$/.test(pilot))
+        throw new Error('kaji.run pilot must be a valid pilot id (lowercase letters, digits, hyphens).');
       if (
         !/^[A-Z0-9-]{2,16}$/.test(base) ||
         !/^[a-z]+\.[a-z]+$/.test(tool) ||
@@ -392,11 +401,12 @@ export function execute(
         throw new Error("kaji.run needs a base id, one of its actions and that action's arguments.");
       if (!backend.queueRemote || !context.sortieId)
         throw new Error('Running actions on other bases is not available here.');
-      const q = backend.queueRemote(context.sortieId, base, tool, args.args as Record<string, unknown>);
+      const q = backend.queueRemote(context.sortieId, base, tool, args.args as Record<string, unknown>, pilot);
       return {
         queued: true,
         to: base,
         tool,
+        ...(pilot ? { pilot } : {}),
         id: q.id,
         note: 'Sent over the Kaji line; its result follows as a message.',
       };
