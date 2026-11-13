@@ -409,7 +409,13 @@ function ledgerTotals(tasks, active) {
 // newest `## <date> — <branch> `<sha>`` entry of the reconciliation log (docs/archive/reconciliation-<year>.md).
 // Entries are appended (merge=union keeps parallel appends), so the newest is chosen by date, then by git ancestry
 // when two share a day. Older bullet-style lines are history and ignored. The entry's first paragraph is the summary.
-const ENTRY = /^## (\d{4}-\d{2}-\d{2}) — ([A-Za-z0-9._/-]+) `([0-9a-f]{7,40})`\n\n([^\n]+)/gm;
+const ENTRY = /^## (\d{4}-\d{2}-\d{2}) — ([A-Za-z0-9._/-]+) `([0-9a-f]{7,40})`\n\n([^\n]+(?:\n[^\n]+)*)/gm;
+const MONTHS = 'January February March April May June July August September October November December'.split(' ');
+// Fenced code blocks are examples, not entries; CRLF files read as LF.
+const logText = (path) =>
+  readFileSync(path, 'utf8')
+    .replace(/\r\n/g, '\n')
+    .replace(/^(`{3,}|~{3,})[^\n]*\n[\s\S]*?^\1[^\n]*$/gm, '');
 const descends = (root, child, parent) =>
   spawnSync('git', ['merge-base', '--is-ancestor', parent, child], { cwd: root, stdio: 'ignore' }).status === 0;
 export function headerSegment(root, path) {
@@ -420,11 +426,12 @@ export function headerSegment(root, path) {
         .sort()
     : [];
   const entries = files.flatMap((f) =>
-    [...readFileSync(join(dir, f), 'utf8').matchAll(ENTRY)].map((m) => ({
+    [...logText(join(dir, f)).matchAll(ENTRY)].map((m) => ({
       date: m[1],
       branch: m[2],
       sha: m[3],
-      summary: m[4].trim(),
+      // The paragraph may wrap; it reads as one line.
+      summary: m[4].replace(/\s*\n\s*/g, ' ').trim(),
     })),
   );
   if (!entries.length) throw Error(`No reconciliation entry (## <date> — <branch> \`<sha>\`) under ${path}`);
@@ -437,12 +444,8 @@ export function headerSegment(root, path) {
   const newest = entries.reduce((a, b) =>
     b.date > a.date ? b : b.date < a.date ? a : descends(root, b.sha, a.sha) ? b : a,
   );
-  const date = new Date(newest.date + 'T00:00:00Z').toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'UTC',
-  });
+  const [y, mo, d] = newest.date.split('-').map(Number);
+  const date = `${d} ${MONTHS[mo - 1]} ${y}`;
   return `Current work ledger, reviewed ${date} against ${newest.branch} \`${newest.sha}\`. ${newest.summary}\n`;
 }
 // Step evidence (F-066): the PRs and review a task file records, as links when workItems.repository is set.
@@ -486,13 +489,13 @@ function featurePlan(text, id, tasks, repository) {
     const summary = evidenced
       .map(
         (t) =>
-          `${t.id}: ${[prText(t, repository), t.review && `Review: ${cell(t.review)}`].filter(Boolean).join('; ')}`,
+          `${t.id}: ${[prText(t, repository), t.review && `step review: ${cell(t.review)}`].filter(Boolean).join('; ')}`,
       )
       .join(' · ');
     text = text.replace(row, (m) => `${m}Steps: ${summary}. `);
   }
   const evidence = steps.some((t) => t.prs?.length);
-  // Compact table (F-055): one line per step; the dated basis of each estimate goes into the record details.
+  // Compact table (F-055): one line per step; dated basis lives in the per-record / task files.
   const table =
     `**${id.startsWith('F-') ? 'Feature steps' : 'Steps'}**\n\n| Effort | Step | Estimate | Actual | Remaining | Status |${evidence ? ' PRs |' : ''}\n|---|---|---|---|---|---|${evidence ? '---|' : ''}\n` +
     steps
@@ -523,7 +526,8 @@ function compactDetails(text, relRecord) {
   return text.slice(0, m.index) + `${m[1]}\n${body}\n\n</details>` + text.slice(m.index + m[0].length);
 }
 // Work-queue order (F-055): rank each active record by tools/backlog-queue.mjs over the ID-ordered ledger, its
-// archives and the configured roadmap, lanes first (agent candidates, prerequisite review, human action, blocked).
+// archives and the configured roadmap: priority, then lane (agent candidates, prerequisite review, human action,
+// blocked), then an open prerequisite above the first record that waits on it (F-067).
 // Records the queue leaves out (closed) follow, by ID. Content does not depend on order, so the ranking is stable.
 function withArchives(root, ledger) {
   const sources = [{ file: 'docs/BACKLOG.md', text: ledger }];
@@ -667,9 +671,7 @@ function queueRank(root, config) {
   const priorityOf = (r) => Number(r.priority.at(-1));
   const sorted = [...records].sort(
     (a, b) =>
-      priorityOf(a) - priorityOf(b) ||
-      laneRank[a.lane] - laneRank[b.lane] ||
-      records.indexOf(a) - records.indexOf(b),
+      priorityOf(a) - priorityOf(b) || laneRank[a.lane] - laneRank[b.lane] || records.indexOf(a) - records.indexOf(b),
   );
   // F-067: within a layout group, a record is never listed above an active record it waits on. Each open prerequisite
   // of the same group (and its own, first) moves up to just above its first dependent; everything else keeps the
@@ -747,6 +749,8 @@ export function renderLedger(root, config, withPlans = true) {
           /^### [BF]-\d{3}$/m.test(text.slice(text.indexOf('\n') + 1))
         )
           throw Error('Record identity mismatch: ' + file);
+        if (!plannedTasks && withPlans && NEXT_FROM_TASKS.test(text))
+          throw Error(`${file.slice(0, -3)}: "Next: from tasks." needs workItems.featurePlans`);
         const relocated = relocateLinks(
           plannedTasks ? featurePlan(text, file.slice(0, -3), plannedTasks, config.repository) : text,
           local(root, config.records + '/' + file),
@@ -763,7 +767,8 @@ export function renderLedger(root, config, withPlans = true) {
             })
           : relocated;
         const icon = id.startsWith('F-') ? '✨' : '🐞';
-        const relRecord = (config.records.startsWith('docs/') ? config.records.slice(5) : '../' + config.records) + '/' + file;
+        const relRecord =
+          (config.records.startsWith('docs/') ? config.records.slice(5) : '../' + config.records) + '/' + file;
         output += withPlans
           ? compactDetails(
               rendered.replace(`### ${id}\n`, `### <a id="${id.toLowerCase()}"></a>[${icon} ${id}](#top)\n`),
@@ -941,6 +946,15 @@ export function taskCatalog(root, config) {
       throw Error('Invalid prs: ' + file);
     if (t.review !== undefined && (typeof t.review !== 'string' || !t.review.trim() || t.review.length > 2000))
       throw Error('Invalid review: ' + file);
+    // Step evidence never stands in for the record's own: the labels check-backlog reads at record level are refused.
+    if (
+      [...(t.prs ?? []).map((p) => p.note ?? ''), t.review ?? ''].some((v) =>
+        /(?:^|[\s;(])(?:No review|Review|Test):/.test(v),
+      )
+    )
+      throw Error('Step evidence must not carry the record-level labels Review:, No review: or Test: — ' + file);
+    if ((t.prs !== undefined || t.review !== undefined) && !config.featurePlans)
+      throw Error('prs and review need workItems.featurePlans: ' + file);
     t.resources.forEach(resource);
     if (t.suggestedProfile && !profileIds.has(t.suggestedProfile)) throw Error('Unknown suggested profile');
     tasks.push(t);
@@ -989,9 +1003,8 @@ export function checkWorkItems(root = process.cwd()) {
     : [];
   return {
     enabled: true,
-    records: (
-      actual.match(/^### (?:<a id="[fb]-\d+"><\/a>)?(?:\[(?:✨|🐞) )?([BF]-\d{3})(?:\]\(#top\))?$/gm) || []
-    ).length,
+    records: (actual.match(/^### (?:<a id="[fb]-\d+"><\/a>)?(?:\[(?:✨|🐞) )?([BF]-\d{3})(?:\]\(#top\))?$/gm) || [])
+      .length,
     tasks: catalog.tasks.length,
     ...(withoutDays.length ? { withoutDays } : {}),
     ...(staleEstimates.length ? { staleEstimates } : {}),
