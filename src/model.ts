@@ -309,19 +309,108 @@ export function validateModels(value: unknown): Models {
   if (v.remote !== undefined) out.remote = validateRemoteInference(v.remote);
   return out;
 }
+export type InferenceTarget =
+  | { kind: 'local'; baseUrl: string; model: string }
+  | { kind: 'cloud'; model: string }
+  | { kind: 'remote'; endpoint: string; baseId: string; model: string };
+export type WorkerTarget = { kind: 'local'; baseId: string } | { kind: 'remote'; baseId: string; tool?: string };
+export interface EnrolledBaseCandidate {
+  baseId: string;
+  status: string;
+  address: string;
+  online: boolean;
+  offers?: readonly string[];
+}
+export interface OrchestrationRequest {
+  privacy: Privacy;
+  route?: RouteName;
+  endpoint?: string;
+  workerBaseId?: string;
+  tool?: string;
+}
+export interface OrchestrationContext {
+  selfBaseId: string;
+  models: Models;
+  hasCloudKey: boolean;
+  bases: readonly EnrolledBaseCandidate[];
+  localTools?: readonly string[];
+}
+export interface OrchestrationSelection {
+  inference: InferenceTarget;
+  worker: WorkerTarget;
+}
+/**
+ * Picks the inference endpoint without side effects (F-006-T02).
+ * Never substitutes one route/endpoint for another when the selected target is unavailable or disallowed.
+ */
+export function selectInferenceTarget(
+  req: Pick<OrchestrationRequest, 'privacy' | 'route' | 'endpoint'>,
+  ctx: Pick<OrchestrationContext, 'models' | 'hasCloudKey' | 'bases'>,
+): InferenceTarget {
+  if (req.endpoint !== undefined) {
+    if (req.route !== undefined) throw new ModelError('Specify either route or remote endpoint, not both.');
+    if (req.privacy === 'local-only') {
+      throw new ModelError('Local-only input never goes to a remote inference endpoint.');
+    }
+    const ep = ctx.models.remote?.endpoints?.[req.endpoint];
+    if (!ep) throw new ModelError(`Remote inference endpoint "${req.endpoint}" is not configured.`);
+    if (!ctx.models.remote?.allowBases?.includes(ep.baseId)) {
+      throw new ModelError(`Base ${ep.baseId} is not granted for remote inference in models.remote.allowBases.`);
+    }
+    const base = ctx.bases.find((b) => b.baseId === ep.baseId && b.status === 'enrolled');
+    if (!base) throw new ModelError(`Remote inference base ${ep.baseId} is not enrolled.`);
+    if (!isTailscaleAddress(base.address)) {
+      throw new ModelError(`Remote inference base ${ep.baseId} address is not in a Tailscale range.`);
+    }
+    return { kind: 'remote', endpoint: req.endpoint, baseId: ep.baseId, model: ep.model };
+  }
+  const cloudReady = !!ctx.models.cloud?.enabled && ctx.hasCloudKey;
+  const wanted = req.route ?? (ctx.models.local || req.privacy !== 'any' ? 'local' : 'cloud');
+  if (wanted === 'cloud') {
+    if (req.privacy === 'local-only') throw new ModelError('Local-only input never goes to the cloud route.');
+    if (req.privacy === 'owner-bases') throw new ModelError('Owner-bases input never goes to the cloud route.');
+    if (!ctx.models.cloud?.enabled) throw new ModelError('Cloud route (Umbilical) is disabled.');
+    if (!cloudReady) throw new ModelError('Cloud route (Umbilical) has no API key.');
+    return { kind: 'cloud', model: ctx.models.cloud.model };
+  }
+  if (!ctx.models.local) throw new ModelError('Local route (S²) is not configured.');
+  return { kind: 'local', baseUrl: ctx.models.local.baseUrl, model: ctx.models.local.model };
+}
+/**
+ * Picks the execution worker independently of the inference endpoint (F-006-T02).
+ * Never falls back to the local base or another base if the requested worker or capability is unavailable.
+ */
+export function selectExecutionWorker(
+  req: Pick<OrchestrationRequest, 'workerBaseId' | 'tool'>,
+  ctx: Pick<OrchestrationContext, 'selfBaseId' | 'bases' | 'localTools'>,
+): WorkerTarget {
+  if (!req.workerBaseId || req.workerBaseId === ctx.selfBaseId) {
+    if (req.tool && ctx.localTools && !ctx.localTools.includes(req.tool)) {
+      throw new ModelError(`Local base ${ctx.selfBaseId} does not offer capability "${req.tool}".`);
+    }
+    return { kind: 'local', baseId: ctx.selfBaseId };
+  }
+  const base = ctx.bases.find((b) => b.baseId === req.workerBaseId && b.status === 'enrolled');
+  if (!base) throw new ModelError(`Execution worker ${req.workerBaseId} is not enrolled.`);
+  if (req.tool && !base.offers?.includes(req.tool)) {
+    throw new ModelError(`Execution worker ${req.workerBaseId} does not offer capability "${req.tool}".`);
+  }
+  return { kind: 'remote', baseId: base.baseId, ...(req.tool ? { tool: req.tool } : {}) };
+}
+/** Selects inference endpoint and execution worker independently; neither falls back. */
+export function selectOrchestration(req: OrchestrationRequest, ctx: OrchestrationContext): OrchestrationSelection {
+  return {
+    inference: selectInferenceTarget(req, ctx),
+    worker: selectExecutionWorker(req, ctx),
+  };
+}
 /** Picks the route without side effects. Never substitutes one route for another. */
 export function selectRoute(ask: Ask, models: Models, hasKey: boolean): RouteName {
-  const cloudReady = !!models.cloud?.enabled && hasKey;
-  const wanted = ask.route ?? (models.local || ask.privacy !== 'any' ? 'local' : 'cloud');
-  if (wanted === 'cloud') {
-    if (ask.privacy === 'local-only') throw new ModelError('Local-only input never goes to the cloud route.');
-    if (ask.privacy === 'owner-bases') throw new ModelError('Owner-bases input never goes to the cloud route.');
-    if (!models.cloud?.enabled) throw new ModelError('Cloud route (Umbilical) is disabled.');
-    if (!cloudReady) throw new ModelError('Cloud route (Umbilical) has no API key.');
-    return 'cloud';
-  }
-  if (!models.local) throw new ModelError('Local route (S²) is not configured.');
-  return 'local';
+  const picked = selectInferenceTarget(
+    { privacy: ask.privacy, ...(ask.route ? { route: ask.route } : {}) },
+    { models, hasCloudKey: hasKey, bases: [] },
+  );
+  return picked.kind === 'cloud' ? 'cloud' : 'local';
 }
 export interface RouteOptions {
   timeoutMs: number;
