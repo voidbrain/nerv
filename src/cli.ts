@@ -1,5 +1,6 @@
 #!/usr/bin/env -S node --use-system-ca
 import { recordPromotion } from './milestones.ts';
+import { SeatPool } from './seat-pool.ts';
 import {
   activateSkillVersion,
   listSkillPackages,
@@ -42,7 +43,10 @@ import {
   readConfig,
   readModelKey,
   readScrolls,
+  readSeatKey,
   readTelegramToken,
+  seatKeyPath,
+  writeSeatKey,
   readToken,
   setBase,
   setting,
@@ -695,6 +699,31 @@ try {
         planModels(config.models, change, found.reachable ? found.models.map((m) => m.name) : undefined),
       );
       console.log(`Saved. ${await reloadIfRunning(home, config.port)}`);
+    }
+  } else if (command === 'seats') {
+    const config = readConfig(home);
+    const sub = args[0] ?? 'check';
+    if (sub === 'key') {
+      const id = args[1];
+      if (!id) throw new Error('Usage: seats key <seat-id>');
+      const entry = (config.seats ?? []).find((s) => s.id === id);
+      if (!entry) throw new Error(`Unknown seat ${id}: configure it under seats in config.json first.`);
+      const value = (await readSecret(`API key for seat ${id} (not shown): `)).trim();
+      writeSeatKey(home, id, value);
+      console.log(`Saved to ${seatKeyPath(home, id)} (readable only by you).`);
+    } else if (sub === 'check' || sub === 'list') {
+      const seats = config.seats ?? [];
+      if (!seats.length) {
+        console.log('No extra cloud seats configured.');
+      } else {
+        const pool = new SeatPool(seats, (id) => readSeatKey(home, id));
+        const states = await pool.checkAll();
+        for (const s of states) {
+          console.log(`${s.id.padEnd(20)} ${s.provider}/${s.model}  ${s.status}${s.reason ? ` (${s.reason})` : ''}`);
+        }
+      }
+    } else {
+      throw new Error('Usage: seats [check | key <seat-id>]');
     }
   } else if (command === 'reload') {
     // The running brain re-reads config.json and anthropic-key; a broken file keeps the last working settings.
@@ -1393,6 +1422,7 @@ try {
           });
           // Phase 2, on the main base: every online base's Casper votes too, veto-only, shadow unless kaji seat BASE veto.
           if (kaji) runtime.usePeerSeats(kaji, () => live().kaji?.seats ?? {});
+          if (config.seats?.length) runtime.useSeatPool(new SeatPool(config.seats, (id) => readSeatKey(home, id)));
           // Slice 3b, on the main base: actions queued by kaji.run go out over the line, each until it reached its base.
           if (kaji) {
             const link = kaji;
