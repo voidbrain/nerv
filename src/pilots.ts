@@ -411,6 +411,70 @@ export function chooseAdvisers(
 export function choosePilot(request: string, roster: readonly Pilot[]): Chosen | undefined {
   return rankPilots(request, roster)[0];
 }
+export function nextStage(stage: Stage): Stage | undefined {
+  return stage === 'prototype' ? 'test' : stage === 'test' ? 'production' : undefined;
+}
+/** Evaluates whether a pilot is eligible for owner-approved promotion (never automatic). */
+export function promotionEligible(
+  pilot: Pick<Pilot, 'stage'>,
+  record: PilotRecord & { daysInStage?: number },
+  opts?: { minCleanRuns?: number; minDays?: number },
+): { eligible: boolean; current: Stage; next?: Stage; progress: string } {
+  const next = nextStage(pilot.stage);
+  if (!next) return { eligible: false, current: pilot.stage, progress: 'at production' };
+  const minRuns = opts?.minCleanRuns ?? 10;
+  const minDays = opts?.minDays ?? 7;
+  const runs = record.cleanRuns ?? 0;
+  const days = record.daysInStage ?? 0;
+  const clean = (record.rejects ?? 0) === 0 && (record.edits ?? 0) === 0;
+  const eligible = clean && runs >= minRuns && days >= minDays;
+  const daysLeft = Math.max(0, minDays - days);
+  const progress = eligible
+    ? 'ready to promote'
+    : !clean
+      ? 'blocked by rejects or edits'
+      : `eligible in ${daysLeft} d · ${runs}/${minRuns} runs`;
+  return { eligible, current: pilot.stage, next, progress };
+}
+export interface ExecutionChoice {
+  pilot: Pilot | RegisteredPilot;
+  executor: EvaClass;
+  suggestOnly: boolean;
+  why: 'pinned' | 'keywords' | 'generic';
+  baseId?: string;
+}
+/**
+ * Chooses a pilot for execution mode by domain/keywords and evidence; falls back to the base's generic pilot.
+ * Defaults to suggest-only (`suggestOnly: true`); effects still require owner/MAGI approval.
+ */
+export function chooseExecutionPilot(
+  request: string,
+  candidates: readonly (Pilot | RegisteredPilot | PilotCandidate)[],
+  fallbackGeneric: Pilot,
+  opts?: { suggestOnly?: boolean },
+): ExecutionChoice {
+  const suggestOnly = opts?.suggestOnly ?? true;
+  const ranked = rankPilots(request, candidates);
+  const top = ranked[0];
+  if (!top) {
+    return {
+      pilot: fallbackGeneric,
+      executor: pilotExecutor(fallbackGeneric),
+      suggestOnly: true,
+      why: 'generic',
+    };
+  }
+  const matched = candidates
+    .map((c) => ('pilot' in c ? c.pilot : c))
+    .find((p) => p.id === top.id && ('baseId' in p ? p.baseId : undefined) === top.baseId)!;
+  return {
+    pilot: matched,
+    executor: pilotExecutor(matched),
+    suggestOnly,
+    why: top.why,
+    ...(top.baseId !== undefined ? { baseId: top.baseId } : {}),
+  };
+}
 /** The roster as `nerv pilots` prints it, the generic pilot first. */
 export function describePilots(roster: readonly Pilot[], generic: string | null): string {
   const lines = [

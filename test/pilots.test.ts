@@ -8,12 +8,15 @@ import {
   PilotRegistry,
   addPilot,
   chooseAdvisers,
+  chooseExecutionPilot,
   choosePilot,
   describePilots,
   genericPilot,
   hits,
+  nextStage,
   overlappingDomains,
   pilotExecutor,
+  promotionEligible,
   rankPilots,
   sanitizePilotOffers,
   setPilotFlag,
@@ -24,6 +27,7 @@ import {
   words,
   type Pilot,
 } from '../src/pilots.ts';
+import { builtinTools } from '../src/executors.ts';
 const pilot = (over: Partial<Pilot> & { id: string }): Pilot => ({
   name: over.id,
   domain: 'things',
@@ -515,4 +519,46 @@ test('F-045-T03: F-041 consultant ranking (pin, main base, best record), fallbac
     'remote-3d',
     'owner pin beats main base preference',
   );
+});
+
+test('F-045-T04: execution choice by domain and evidence, suggest-only default, and owner-only promotion', () => {
+  const generic = genericPilot('gemma4:12b', 'prototype');
+  const weak = {
+    pilot: pilot({ id: 'coder-a', keywords: ['typescript'], stage: 'test', evaClass: 'eva-01' }),
+    mainBase: true,
+    record: { cleanRuns: 2, rejects: 1, edits: 0 },
+  };
+  const strong = {
+    pilot: pilot({ id: 'coder-b', keywords: ['typescript'], stage: 'test', evaClass: 'eva-01' }),
+    mainBase: true,
+    record: { cleanRuns: 12, rejects: 0, edits: 0 },
+  };
+  const chosen = chooseExecutionPilot('Refactor typescript module', [weak, strong], generic);
+  assert.equal(chosen.pilot.id, 'coder-b');
+  assert.equal(chosen.executor, 'eva-01');
+  assert.equal(chosen.suggestOnly, true, 'suggest-only by default');
+  assert.equal(chosen.why, 'keywords');
+
+  const fallback = chooseExecutionPilot('Unmatched request', [weak, strong], generic);
+  assert.equal(fallback.pilot.id, 'generic');
+  assert.equal(fallback.executor, 'eva-00');
+  assert.equal(fallback.suggestOnly, true);
+  assert.equal(fallback.why, 'generic');
+
+  assert.equal(nextStage('prototype'), 'test');
+  assert.equal(nextStage('test'), 'production');
+  assert.equal(nextStage('production'), undefined);
+  assert.equal(promotionEligible({ stage: 'prototype' }, { cleanRuns: 6, daysInStage: 2 }).eligible, false);
+  assert.equal(
+    promotionEligible({ stage: 'prototype' }, { cleanRuns: 10, daysInStage: 7, rejects: 1 }).eligible,
+    false,
+  );
+  assert.deepEqual(promotionEligible({ stage: 'prototype' }, { cleanRuns: 10, daysInStage: 7 }), {
+    eligible: true,
+    current: 'prototype',
+    next: 'test',
+    progress: 'ready to promote',
+  });
+  const promoteTool = builtinTools.find((t) => t.name === 'pilots.promote');
+  assert.equal(promoteTool?.owner, true, 'promotion always requires owner approval');
 });

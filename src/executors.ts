@@ -4,6 +4,7 @@ import type { Reminder, ReminderInput } from './store.ts';
 import type { ToolDoc } from './misato.ts';
 import type { Memory } from './memory.ts';
 import { readConfig, savePilots, setSchedule } from './config.ts';
+import { STAGES, nextStage, updatePilot, type Stage } from './pilots.ts';
 import { reconcileReminderArgs } from './reminder-time.ts';
 import { explainRecord, type WhyRecord } from './why.ts';
 export interface AgencyBaseSnapshot {
@@ -59,8 +60,9 @@ export const builtinTools: Tool[] = [
   { name: 'agency.status', effect: 'read' },
   // Only the brief and Instrumentality schedules: local, reversible by setting the previous values back.
   { name: 'settings.schedule', effect: 'write-local', inverse: 'settings.schedule' },
-  // F-045: a new pilot only after the owner approves its card.
+  // F-045: a new pilot or stage promotion only after the owner approves its card.
   { name: 'pilots.create', effect: 'write-local', owner: true },
+  { name: 'pilots.promote', effect: 'write-local', owner: true },
   // F-036 slice 3b: one action on another base. Owner-only for now (always a card); that base's own gate reviews it again.
   { name: 'kaji.run', effect: 'write-external', owner: true },
 ];
@@ -154,6 +156,13 @@ export const toolDocs: ToolDoc[] = [
     about:
       'Proposes a new pilot, a permanent specialist that advises you before you plan on requests with its keywords. The owner approves it first; it starts at Prototype.',
     args: '{"id": lower-case letters and dashes, "name": up to 40 characters, "domain": what it knows, "keywords": [1 to 30 words or short phrases], "model": a local model (optional: the generic pilot\'s)}',
+  },
+  {
+    name: 'pilots.promote',
+    effect: 'write-local',
+    about:
+      'Proposes promoting an existing pilot to the next trust stage (prototype -> test -> production). Always requires owner approval.',
+    args: '{"id": pilot id, "stage": "test" or "production"}',
   },
 ];
 /** {id} or {ids: [...]} (1–20 distinct strings): bulk changes stay one reviewed action, bound by the gate's argument hash. */
@@ -348,6 +357,22 @@ export function execute(
         },
       ]);
       return { created: args.id, name: args.name, model, stage: 'prototype' };
+    }
+    case 'pilots.promote': {
+      only(args, ['id', 'stage']);
+      if (!backend.home) throw new Error('Pilots are not available here.');
+      const id = text(args, 'id');
+      const target = text(args, 'stage') as Stage;
+      if (!STAGES.includes(target)) throw new Error('Target stage must be prototype, test or production.');
+      const roster = readConfig(backend.home).pilots ?? [];
+      const pilot = roster.find((p) => p.id === id);
+      if (!pilot) throw new Error(`Unknown specialist pilot: ${id}.`);
+      if (pilot.retired) throw new Error(`Pilot ${id} is retired.`);
+      const expected = nextStage(pilot.stage);
+      if (!expected || target !== expected)
+        throw new Error(`Pilot ${id} at ${pilot.stage} can only be promoted to ${expected ?? 'none'}.`);
+      savePilots(backend.home, updatePilot(roster, id, { stage: target }));
+      return { promoted: id, from: pilot.stage, to: target };
     }
     case 'memory.forget':
       only(args, ['id']);

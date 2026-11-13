@@ -40,15 +40,20 @@ import {
   PilotRegistry,
   addPilot as addPilotEntry,
   chooseAdvisers,
+  chooseExecutionPilot,
   choosePilot,
   genericPilot as buildGenericPilot,
+  promotionEligible,
   rankPilots,
   setPilotFlag as setPilotEntryFlag,
   updatePilot as updatePilotEntry,
   type Chosen,
+  type ExecutionChoice,
   type Pilot,
+  type PilotCandidate,
   type PilotOffer,
   type PilotPatch,
+  type PilotRecord,
   type RegisteredPilot,
 } from './pilots.ts';
 import { toolName, type McpTool } from './mcp.ts';
@@ -2071,6 +2076,20 @@ export class Runtime implements StoreApi {
   genericPilot(): Pilot {
     const model = this.home ? (readConfig(this.home).models.roles?.consultant?.model ?? null) : null;
     return buildGenericPilot(model, 'prototype');
+  }
+  /** F-045-T04: selects a pilot for execution mode by domain and evidence, defaulting to suggest-only. */
+  selectPilotForExecution(
+    request: string,
+    candidates?: readonly (Pilot | RegisteredPilot | PilotCandidate)[],
+    opts?: { suggestOnly?: boolean },
+  ): ExecutionChoice {
+    return chooseExecutionPilot(request, candidates ?? this.pilotRoster(), this.genericPilot(), opts);
+  }
+  /** F-045-T04: evaluates owner-approved promotion eligibility (never automatic). */
+  evaluatePilotPromotion(id: string, record: PilotRecord & { daysInStage?: number }) {
+    const pilot = this.pilotRoster().find((p) => p.id === id);
+    if (!pilot) throw new Error(`Unknown specialist pilot: ${id}.`);
+    return promotionEligible(pilot, record);
   }
   private async requireInstalledModel(model: string): Promise<void> {
     if (!this.home) throw new Error('Pilot setup needs the data home.');
