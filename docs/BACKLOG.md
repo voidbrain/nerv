@@ -241,7 +241,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #2](https://github.com/voidbrain/nerv/pull/2); plan only, no runtime implementation |
+| PR / evidence | [PR #383](https://github.com/voidbrain/nerv/pull/383) [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #2](https://github.com/voidbrain/nerv/pull/2); plan only, no runtime implementation |
 | Opened | 2026-11-01 |
 | Verification | Pending adapter feasibility, regression and live host tests |
 | Reviewed | 2026-11-07 |
@@ -995,7 +995,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #379](https://github.com/voidbrain/nerv/pull/379) and [PR #382](https://github.com/voidbrain/nerv/pull/382) Windows reruns, 2026-11-13. |
+| PR / evidence | [PR #383](https://github.com/voidbrain/nerv/pull/383) [PR #379](https://github.com/voidbrain/nerv/pull/379) and [PR #382](https://github.com/voidbrain/nerv/pull/382) Windows reruns, 2026-11-13. |
 | Opened | 2026-11-13 |
 | Verification | Pending. |
 | Reviewed | 2026-11-13 |
@@ -1121,7 +1121,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #382](https://github.com/voidbrain/nerv/pull/382) [PR #379](https://github.com/voidbrain/nerv/pull/379) [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) |
+| PR / evidence | [PR #383](https://github.com/voidbrain/nerv/pull/383) [PR #382](https://github.com/voidbrain/nerv/pull/382) [PR #379](https://github.com/voidbrain/nerv/pull/379) [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) |
 | Opened | 2026-11-13 |
 | Verification | Pending. |
 | Reviewed | 2026-11-13 |
