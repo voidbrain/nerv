@@ -2,6 +2,7 @@ import type { WatchWork } from './watch.ts';
 import type { SeatPool } from './seat-pool.ts';
 import { WORKER_RESULT_BYTES, type WorkerContext, type WorkerLease, type WorkerClaim } from './worker-jobs.ts';
 import { runFailure, runMessage, type InstrumentalityRun } from './instrumentality-runs.ts';
+import type { KeyObject } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parsePrices, type UsageObservation, type UsageRecord, type Price } from './model-usage.ts';
@@ -89,6 +90,7 @@ import {
   type RemoteOffer,
   requestLanguage,
   waitingReply,
+  validateReminderTitle,
   type Plan,
   type Recalled,
   type Step,
@@ -98,7 +100,15 @@ import {
 import { builtinTools, toolDocs, type AgencySnapshot } from './executors.ts';
 import type { Digest, Exchange } from './instrumentality.ts';
 import { factKey, type Episode, type Fact } from './memory.ts';
-import type { BaseEntry, SignedRecord } from './kaji.ts';
+import { baseKey, type BaseEntry, type SignedRecord } from './kaji.ts';
+import {
+  DEFAULT_OPERATOR_NAME,
+  OperatorDirectory,
+  signOperatorEntry,
+  type OperatorResolution,
+  type PublicOperatorInfo,
+  type SignedOperatorEntry,
+} from './operator-directory.ts';
 import {
   ONLINE_MS,
   sanitizeVerdict,
@@ -279,6 +289,9 @@ export interface StoreApi {
   changeModels?(change: ModelChange): Promise<{ error?: string; kept?: boolean; models: unknown }>;
   /** Kaji bases with their live status (F-036): online when heard from within the last 90 s. */
   bases?(): Promise<(BaseEntry & { lastSeen: string | null; online: boolean; self: boolean })[]>;
+  /** F-070: authenticated public operator directory (no private channel IDs). */
+  operators?(): Promise<PublicOperatorInfo[]>;
+  resolveOperator?(query: string): Promise<OperatorResolution>;
   /** Lilith for the owner (dashboard): admin-only over REST, never on the read-only socket. */
   lilith?: {
     list(): Promise<Fact[]>;
@@ -772,6 +785,27 @@ export class Runtime implements StoreApi {
       return { command: true, sortieId: '', reply, steps: [], waiting: [] };
     }
     const key = conversation ?? 'cli';
+    const addressed =
+      /^(?:tell|ask)\s+([A-Za-z0-9][A-Za-z0-9._-]{0,31})(?:\s+on\s+(another\s+base|[A-Za-z0-9][A-Za-z0-9._-]{0,39}))?\b/i.exec(
+        message.trim(),
+      );
+    if (addressed) {
+      const opQuery = addressed[1]!;
+      const targetBase = addressed[2];
+      const excludeSelf = !!targetBase && /^another\s+base$/i.test(targetBase);
+      if (
+        excludeSelf ||
+        opQuery.toLowerCase() === DEFAULT_OPERATOR_NAME.toLowerCase() ||
+        this.operatorDirectoryState.hasKnownOrRetiredAlias(opQuery)
+      ) {
+        if (!targetBase || excludeSelf) {
+          const resolution = await this.resolveOperator(opQuery, { excludeSelf });
+          if (resolution.status !== 'resolved') {
+            return { sortieId: '', reply: resolution.message, steps: [], waiting: [] };
+          }
+        }
+      }
+    }
     const question = (await this.nervous.call('misato.question', { conversation: key })) as {
       sortieId: string;
       sequence: number;
@@ -1218,13 +1252,19 @@ export class Runtime implements StoreApi {
         const a = args as { base?: unknown; tool?: unknown; pilot?: unknown };
         const offer = remote.find((r) => r.base === a.base);
         if (!offer || typeof a.tool !== 'string' || !offer.tools.includes(a.tool)) {
+          const opHint =
+            !offer && typeof a.base === 'string' && a.base.trim()
+              ? await this.resolveOperator(a.base, { excludeSelf: true }).catch(() => undefined)
+              : undefined;
           await this.record(sortieId, steps, {
             tool,
             args,
             outcome: 'invalid',
             error: offer
               ? `${offer.name} does not offer "${String(a.tool)}". It offers: ${offer.tools.join(', ')}.`
-              : `No base by that id is online and offering actions. Online: ${remote.map((r) => r.base).join(', ') || 'none'}.`,
+              : opHint && (opHint.status === 'ambiguous' || opHint.status === 'stale')
+                ? opHint.message
+                : `No base by that id is online and offering actions. Online: ${remote.map((r) => r.base).join(', ') || 'none'}.`,
           });
           continue;
         }
@@ -1263,6 +1303,14 @@ export class Runtime implements StoreApi {
           error: `${tool} is granted for EVA-03 (quarantine), which needs a sandbox NERV does not have yet (F-049): it does not run.`,
         });
         continue;
+      }
+      // B-049: reject missing, generic, or invented reminder titles back to Misato so she asks the owner instead.
+      if (tool === 'reminders.add' && !proactive) {
+        const titleError = validateReminderTitle(args.title, { request: message, context, memory, steps });
+        if (titleError) {
+          await this.record(sortieId, steps, { tool, args, outcome: 'invalid', error: titleError });
+          continue;
+        }
       }
       // The same action already ran in this sortie: running it again is never the owner's wish (a small model loops here).
       if (
@@ -1568,7 +1616,7 @@ export class Runtime implements StoreApi {
       .flatMap((b) => {
         const o = this.offersHeard.get(b.baseId);
         return o && o.tools.length && Date.now() - o.at < ONLINE_MS
-          ? [{ base: b.baseId, name: b.name, tools: o.tools }]
+          ? [{ base: b.baseId, name: b.name, ...(b.operator ? { operator: b.operator.name } : {}), tools: o.tools }]
           : [];
       });
   }
@@ -2054,9 +2102,57 @@ export class Runtime implements StoreApi {
     },
   };
   private selfKey?: string;
-  /** Marks which entry is this base (by its public key) for the dashboard. */
-  setBaseKey(publicKey: string) {
+  private selfPrivateKey?: KeyObject;
+  private readonly operatorDirectoryState = new OperatorDirectory();
+  private operatorSerial = 0;
+  private operatorConfigSignature = '';
+  private cachedOwnOperator?: SignedOperatorEntry;
+  /** Marks which entry is this base (by its public key) for the dashboard, and optionally holds its signing key. */
+  setBaseKey(publicKey: string, privateKey?: KeyObject) {
     this.selfKey = publicKey;
+    if (privateKey) this.selfPrivateKey = privateKey;
+  }
+  ownOperatorEntry(): SignedOperatorEntry | undefined {
+    const cfg = this.home ? readConfig(this.home) : undefined;
+    const baseId = cfg?.base.id;
+    const key = this.selfPrivateKey ?? (this.home ? baseKey(this.home).privateKey : undefined);
+    if (!baseId || !key) return undefined;
+    const sig = JSON.stringify({ baseId, operator: cfg?.operator ?? null });
+    if (sig !== this.operatorConfigSignature || !this.cachedOwnOperator) {
+      this.operatorConfigSignature = sig;
+      this.operatorSerial += 1;
+      this.cachedOwnOperator = signOperatorEntry(baseId, key, cfg?.operator, this.operatorSerial);
+    }
+    return this.cachedOwnOperator;
+  }
+  notePeerOperator(baseId: string, entry: SignedOperatorEntry, bases?: BaseEntry[]): void {
+    if (bases) {
+      this.operatorDirectoryState.record(entry, bases, baseId);
+      return;
+    }
+    void this.kaji
+      .bases()
+      .then((list) => this.operatorDirectoryState.record(entry, list, baseId))
+      .catch(() => {});
+  }
+  private syncOwnOperator(bases: BaseEntry[]): void {
+    const own = this.ownOperatorEntry();
+    if (own) this.operatorDirectoryState.record(own, bases, own.body.baseId);
+  }
+  async operators(): Promise<PublicOperatorInfo[]> {
+    const [list, seen] = await Promise.all([this.kaji.bases(), this.kaji.lastSeen()]);
+    this.syncOwnOperator(list);
+    const selfBaseId = list.find((b) => b.publicKey === this.selfKey)?.baseId;
+    return this.operatorDirectoryState.list(list, seen, selfBaseId);
+  }
+  async resolveOperator(query: string, options?: { excludeSelf?: boolean }): Promise<OperatorResolution> {
+    const [list, seen] = await Promise.all([this.kaji.bases(), this.kaji.lastSeen()]);
+    this.syncOwnOperator(list);
+    const selfBaseId = list.find((b) => b.publicKey === this.selfKey)?.baseId;
+    return this.operatorDirectoryState.resolve(query, list, seen, {
+      selfBaseId,
+      excludeSelf: options?.excludeSelf,
+    });
   }
   /** Peers' health as each one last reported it over the Kaji line (F-036 phase 2); kept in memory, refilled within a heartbeat. */
   private readonly heard = new Map<string, HeardHealth>();
@@ -2091,6 +2187,9 @@ export class Runtime implements StoreApi {
   }
   async bases() {
     const [list, seen, main] = await Promise.all([this.kaji.bases(), this.kaji.lastSeen(), this.kaji.main?.()]);
+    this.syncOwnOperator(list);
+    const selfBaseId = list.find((b) => b.publicKey === this.selfKey)?.baseId;
+    const directory = new Map(this.operatorDirectoryState.list(list, seen, selfBaseId).map((o) => [o.baseId, o]));
     const now = Date.now();
     const mine = await this.baseHealth().catch((): BaseHealth => ({
       state: 'degraded',
@@ -2114,10 +2213,12 @@ export class Runtime implements StoreApi {
         online &&
         now - Date.parse(channel.receivedAt) < ONLINE_MS &&
         channelIsFresh(channel, now, ONLINE_MS);
+      const op = directory.get(b.baseId);
       return {
         ...b,
         channel,
         channelFresh,
+        operator: op ? { name: op.operatorName, aliases: op.aliases, defaulted: op.defaulted, stale: op.stale } : null,
         lastSeen: seen[b.baseId] ?? null,
         online,
         self,

@@ -11,6 +11,7 @@ import { validateModels, type Models } from './model.ts';
 import { defaultPolicy, validatePolicy, type Policy } from './policy.ts';
 import { validateAutoUpdatePolicy, type AutoUpdatePolicy } from './update-policy.ts';
 import { validateSeatPool, type SeatPoolEntry } from './seat-pool.ts';
+import { validateOperatorConfig, type OperatorConfig } from './operator-directory.ts';
 /** telegram.chatId: the one private chat (the owner's) the Aoba bot answers; set by `telegram link`. */
 export interface Config {
   port: number;
@@ -28,6 +29,7 @@ export interface Config {
   watch?: WatchConfig;
   updatePolicy?: AutoUpdatePolicy;
   seats?: SeatPoolEntry[];
+  operator?: OperatorConfig;
 }
 /** This machine's identity in the NERV mesh: an id (NERV-01) and a name (Neo Tokyo-3), shown in the dashboard, doctor and brief. */
 export interface Base {
@@ -190,6 +192,9 @@ export function readConfig(home: string): Config {
   if ('seats' in raw) {
     const list = validateSeatPool((raw as Record<string, unknown>).seats);
     if (list.length) config.seats = list;
+  }
+  if ('operator' in raw) {
+    config.operator = validateOperatorConfig((raw as Record<string, unknown>).operator);
   }
   if (config.port === (config.nativePort ?? 4319)) throw new Error('Web and native ports must differ.');
   if (!Number.isInteger(config.port) || config.port < 1 || config.port > 65535)

@@ -4,7 +4,7 @@
   "parent": "B-049",
   "title": "Classify and fix the invented reminder title",
   "goal": "Classify the failure (prompt, plan validation or model choice), fix it with a failing case first, and measure the frozen case in an owner-approved rerun",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "A request without a title gets a question in the request's language, never an invented title",
     "A deterministic guard, if chosen, is covered by a failing-first test",
