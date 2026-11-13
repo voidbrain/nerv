@@ -1819,7 +1819,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner question 2026-11-05 (ledger timing of S-7663 and S-3BFF); item 3 [PR #116](https://github.com/voidbrain/nerv/pull/116) |
+| PR / evidence | [PR #373](https://github.com/voidbrain/nerv/pull/373) (`F-052-T02`–`F-052-T05`); [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner question 2026-11-05 (ledger timing of S-7663 and S-3BFF); item 3 [PR #116](https://github.com/voidbrain/nerv/pull/116) |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-05 item 3: test/kaji-seats.test.ts and full suite (local run) |
 | Reviewed | 2026-11-07 |
