@@ -754,6 +754,7 @@ test('every pack the pinned Gauntlet release ships is consumed unless excluded w
 
 test('the root command runs only uncovered cases, records them and reports nothing pending afterwards', async () => {
   const { executeWithEvidence, caseHash } = await import('@voidbrain/gauntlet-protocol');
+  const { systemSourceKey } = await import('../tools/gauntlet.mjs');
   const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-all-'));
   const ledger = join(dir, 'ledger.json');
   process.env.NERV_GAUNTLET_LEDGER = ledger;
@@ -770,7 +771,7 @@ test('the root command runs only uncovered cases, records them and reports nothi
   );
   process.env.NERV_GAUNTLET_TASKS = tasks;
   try {
-    // NERV's system cases are already covered (by a profile-less run); every common case is new.
+    // Schema 1 entries have unknown identity and do NOT silently cover when sourceKey is checked.
     const system = JSON.parse(readFileSync('evals/gauntlet/system-v1.json', 'utf8'));
     writeFileSync(
       ledger,
@@ -785,6 +786,34 @@ test('the root command runs only uncovered cases, records them and reports nothi
           status: 'passed',
           reportHash: 'c'.repeat(64),
           finished: '2026-11-11T00:00:00.000Z',
+        })),
+      }),
+    );
+    const schema1Pending = await main(['pending']);
+    assert.equal(schema1Pending.pendingLines.length, 55);
+    assert.equal(
+      schema1Pending.pendingLines.filter((l) => l.startsWith('nerv-system-flows/') && l.endsWith('(source-changed)'))
+        .length,
+      7,
+    );
+    // Schema 2 entries with the current system sourceKey cover NERV's system cases; every common case is new.
+    writeFileSync(
+      ledger,
+      JSON.stringify({
+        schemaVersion: 2,
+        entries: system.cases.map((c) => ({
+          pack: system.id,
+          packVersion: system.version,
+          case: c.id,
+          caseHash: caseHash(c),
+          profileHash: null,
+          status: 'passed',
+          reportHash: 'c'.repeat(64),
+          finished: '2026-11-11T00:00:00.000Z',
+          modelDigest: null,
+          runtimeHash: 'a'.repeat(64),
+          scenarioHash: null,
+          sourceKey: systemSourceKey(system),
         })),
       }),
     );
@@ -873,17 +902,10 @@ test('the root command runs only uncovered cases, records them and reports nothi
     const written = JSON.parse(readFileSync(ledger, 'utf8'));
     const recorded = written.entries;
     assert.equal(recorded.length, 55);
-    // Gauntlet 0.7: the ledger is written as schema 2; new runs carry their identity, the schema 1 entries it started
-    // with are kept as unknown identity.
+    // Gauntlet 0.7: the ledger is written as schema 2; all entries carry their identity.
     assert.equal(written.schemaVersion, 2);
     const identity = ['modelDigest', 'runtimeHash', 'scenarioHash', 'sourceKey'];
-    const newRuns = recorded.filter((e) => e.pack !== system.id);
-    assert.equal(newRuns.length, 48);
-    assert.ok(newRuns.every((e) => identity.every((k) => k in e)));
-    assert.ok(
-      recorded.filter((e) => e.pack === system.id).every((e) => identity.every((k) => !(k in e))),
-      'schema 1 entries keep unknown identity',
-    );
+    assert.ok(recorded.every((e) => identity.every((k) => k in e)));
     assert.ok(
       recorded.every((e) => !JSON.stringify(e).includes('content')),
       'metadata only',
@@ -939,4 +961,281 @@ test('check:gauntlet-runs fails for a pending case that no unfinished task lists
   assert.deepEqual(unnamedPending([changed], 'covers nerv-system-flows/policy'), []);
   assert.deepEqual(unnamedPending([changed], 'covers nerv-system-flows/*'), []);
   assert.deepEqual(unnamedPending([changed], 'covers neutral-smoke/*'), [changed]);
+});
+
+test('F-074-T10: identity-bound ledger coverage detects source, model, runtime and scenario changes', async () => {
+  const { caseHash, evidenceProfile, hash } = await import('@voidbrain/gauntlet-protocol');
+  const { systemSourceKey } = await import('../tools/gauntlet.mjs');
+  const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-identity-'));
+  const ledger = join(dir, 'ledger.json');
+  process.env.NERV_GAUNTLET_LEDGER = ledger;
+  try {
+    const system = JSON.parse(readFileSync('evals/gauntlet/system-v1.json', 'utf8'));
+    const profilePath = 'node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json';
+    const profile = JSON.parse(readFileSync(profilePath, 'utf8'));
+    const profileHash = hash(evidenceProfile(profile));
+    const currentSourceKey = systemSourceKey(system);
+    const modelDigest = 'd'.repeat(64);
+    const runtimeHash = 'e'.repeat(64);
+    const scenarioHash = 'f'.repeat(64);
+    const packs = ['general-assistant-expanded', 'neutral-smoke', 'neutral-smoke-schema'].map((id) => {
+      const file =
+        id === 'general-assistant-expanded'
+          ? 'general-assistant-expanded-v1.json'
+          : id === 'neutral-smoke-schema'
+            ? 'smoke-schema-v1.json'
+            : 'smoke-v1.json';
+      return JSON.parse(readFileSync(join('node_modules/@voidbrain/gauntlet-protocol/examples', file), 'utf8'));
+    });
+    writeFileSync(
+      ledger,
+      JSON.stringify({
+        schemaVersion: 2,
+        entries: [
+          ...system.cases.map((c) => ({
+            pack: system.id,
+            packVersion: system.version,
+            case: c.id,
+            caseHash: caseHash(c),
+            profileHash: null,
+            status: 'passed',
+            reportHash: '1'.repeat(64),
+            finished: '2020-01-01T00:00:00.000Z',
+            modelDigest: null,
+            runtimeHash,
+            scenarioHash,
+            sourceKey: currentSourceKey,
+          })),
+          ...packs.flatMap((p) =>
+            p.cases.map((c) => ({
+              pack: p.id,
+              packVersion: p.version,
+              case: c.id,
+              caseHash: caseHash(c),
+              profileHash,
+              status: 'passed',
+              reportHash: '2'.repeat(64),
+              finished: '2020-01-01T00:00:00.000Z',
+              modelDigest,
+              runtimeHash,
+              scenarioHash,
+              sourceKey: null,
+            })),
+          ),
+        ],
+      }),
+    );
+    // Exact identity covers everything even from 2020 (no default max age).
+    assert.deepEqual(
+      (
+        await main([
+          'pending',
+          '--profile=' + profilePath,
+          '--model-digest=' + modelDigest,
+          '--runtime-hash=' + runtimeHash,
+          '--scenario-hash=' + scenarioHash,
+        ])
+      ).pendingLines,
+      [],
+    );
+    // Different source key makes only NERV system cases pending with source-changed.
+    const sourceChanged = await main(['all', '--source-key=deadbeef']);
+    assert.ok(sourceChanged.plan.find((p) => p.pack === system.id).run.every((r) => r.reason === 'source-changed'));
+    assert.ok(sourceChanged.plan.filter((p) => p.layer === 'model').every((p) => p.run.length === 0));
+    // Different model digest / runtime / scenario make affected cases pending with the exact reason.
+    const modelChanged = await main(['pending', '--profile=' + profilePath, '--model-digest=' + '9'.repeat(64)]);
+    assert.equal(modelChanged.pendingLines.length, 48);
+    assert.ok(modelChanged.pendingLines.every((l) => l.endsWith('(model-changed)')));
+    const runtimeChanged = await main(['pending', '--profile=' + profilePath, '--runtime-hash=' + '8'.repeat(64)]);
+    assert.equal(runtimeChanged.pendingLines.length, 48);
+    assert.ok(runtimeChanged.pendingLines.every((l) => l.endsWith('(runtime-changed)')));
+    const scenarioChanged = await main(['pending', '--profile=' + profilePath, '--scenario-hash=' + '7'.repeat(64)]);
+    assert.equal(scenarioChanged.pendingLines.length, 55);
+    assert.ok(scenarioChanged.pendingLines.every((l) => l.endsWith('(scenario-changed)')));
+    // Recording a system report via `ledger` binds NERV's systemSourceKey automatically.
+    const reportPath = join(dir, 'sys-report.json');
+    const runnerScript = join(dir, 'runner.mjs');
+    writeFileSync(
+      runnerScript,
+      `import { writeFileSync } from 'node:fs';
+writeFileSync(process.argv[1].slice(6), JSON.stringify({
+  schemaVersion: 1, layer: 'system', sourceStable: true, complete: true,
+  fixtureHash: '${'a'.repeat(64)}', results: [{ id: 'policy', status: 'passed', checks: 1 }]
+}));\n`,
+    );
+    const { run, validateRegistry, validateLimits } = await import('@voidbrain/gauntlet-protocol');
+    const registry = validateRegistry(
+      {
+        schemaVersion: 1,
+        runners: {
+          policy: {
+            command: 'node',
+            args: ['runner.mjs', '--out={report}'],
+            cwd: '.',
+            layers: ['system'],
+            allowModels: false,
+          },
+        },
+      },
+      dir,
+    );
+    const singlePack = { ...system, id: system.id + ':policy', cases: [system.cases[0]] };
+    const sysReport = await run(
+      singlePack,
+      null,
+      validateLimits(JSON.parse(readFileSync('evals/gauntlet/limits.json', 'utf8'))),
+      { execute: true, registry },
+    );
+    writeFileSync(reportPath, JSON.stringify(sysReport));
+    await main(['ledger', '--report=' + reportPath, '--pack=' + system.id]);
+    const updated = JSON.parse(readFileSync(ledger, 'utf8'));
+    const recordedPolicy = updated.entries.find((e) => e.pack === system.id && e.case === 'policy');
+    assert.equal(recordedPolicy.sourceKey, currentSourceKey);
+  } finally {
+    delete process.env.NERV_GAUNTLET_LEDGER;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('F-074-T04: profile-matched role bundle plans, rejects unsupported settings, enforces budgets and saves reports', async () => {
+  const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-role-'));
+  const profilePath = 'node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json';
+  const scenarioPath = 'node_modules/@voidbrain/gauntlet-protocol/examples/scenarios/moderate-load.json';
+  const machinePath = join(dir, 'machine.json');
+  try {
+    const machine = await main(['machine', '--id=mac-local']);
+    writeFileSync(machinePath, JSON.stringify(machine));
+    // Plan validates 8K/2048 profile + 300s/10-case/20480-token day limits without running models.
+    const planned = await main([
+      'role-plan',
+      '--profile=' + profilePath,
+      '--machine-profile=' + machinePath,
+      '--scenario=' + scenarioPath,
+    ]);
+    assert.equal(planned.bundle, 'nerv-role-evaluation');
+    assert.equal(planned.cases.length, 10);
+    assert.equal(planned.profile.context, 8192);
+    assert.equal(planned.profile.maxOutputTokens, 2048);
+    assert.equal(planned.limits.suiteMs, 300000);
+    assert.equal(planned.limits.outputTokens, 20480);
+    assert.equal(planned.reusesCommonSmoke, false);
+    assert.equal(planned.modelCallsAuthorized, false);
+    assert.equal(planned.modelQualification, false);
+
+    // Unsupported settings are rejected rather than silently inheriting defaults.
+    await assert.rejects(main(['role-plan']), /--profile/);
+    const baseProfile = JSON.parse(readFileSync(profilePath, 'utf8'));
+    const badBackend = join(dir, 'bad-backend.json');
+    writeFileSync(badBackend, JSON.stringify({ ...baseProfile, backend: 'llama.cpp' }));
+    await assert.rejects(main(['role-plan', '--profile=' + badBackend]), /Alternative runtime|ollama/);
+    const badParallel = join(dir, 'bad-parallel.json');
+    writeFileSync(badParallel, JSON.stringify({ ...baseProfile, parallel: 2 }));
+    await assert.rejects(main(['role-plan', '--profile=' + badParallel]), /parallel=1/);
+    const badEndpoint = join(dir, 'bad-endpoint.json');
+    writeFileSync(badEndpoint, JSON.stringify({ ...baseProfile, endpoint: 'https://api.example.com' }));
+    await assert.rejects(main(['role-plan', '--profile=' + badEndpoint]), /loopback/);
+    await assert.rejects(main(['role-plan', '--profile=' + profilePath, '--limit=8']), /exceed limits\.maxCases/);
+    await assert.rejects(
+      main([
+        'role-run',
+        '--profile=' + profilePath,
+        '--machine-profile=' + machinePath,
+        '--scenario=' + scenarioPath,
+        '--execute',
+        '--allow-models',
+        '--out=' + join(dir, 'no-confirm.json'),
+      ]),
+      /scenario confirmation/i,
+    );
+
+    // Execution sends exact 8K/2048/seed/think options, tracks telemetry gaps and stops on aggregate token budget.
+    const chatBodies = [];
+    let unloaded = false;
+    const mockFetch = async (url, init = {}) => {
+      const path = new URL(String(url)).pathname;
+      if (path === '/api/version') return new Response(JSON.stringify({ version: '0.12.0' }));
+      if (path === '/api/tags')
+        return new Response(JSON.stringify({ models: [{ name: 'gemma4:12b', digest: 'a'.repeat(64) }] }));
+      if (path === '/api/show')
+        return new Response(JSON.stringify({ details: { quantization_level: 'Q4_K_M' }, capabilities: ['thinking'] }));
+      if (path === '/api/ps') return new Response(JSON.stringify({ models: [] }));
+      if (path === '/api/generate') {
+        unloaded = true;
+        return new Response(JSON.stringify({ done: true }));
+      }
+      if (path === '/api/chat') {
+        chatBodies.push(JSON.parse(init.body));
+        const isFirst = chatBodies.length === 1;
+        return new Response(
+          JSON.stringify({
+            model: 'gemma4:12b',
+            done_reason: 'stop',
+            message: { content: '{"vote":"approve","reason":"ok","confidence":1}' },
+            ...(isFirst ? { eval_count: 50, prompt_eval_count: 20 } : {}),
+          }),
+        );
+      }
+      throw Error('Unexpected endpoint ' + path);
+    };
+    const tightLimits = join(dir, 'tight-limits.json');
+    writeFileSync(
+      tightLimits,
+      JSON.stringify({ caseMs: 30000, suiteMs: 300000, maxCases: 4, repeat: 1, outputTokens: 50, maxBytes: 1048576 }),
+    );
+    const outPath = join(dir, 'role-report.json');
+    const summary = await main(
+      [
+        'role-run',
+        '--role=casper',
+        '--limit=3',
+        '--profile=' + profilePath,
+        '--limits=' + tightLimits,
+        '--machine-profile=' + machinePath,
+        '--scenario=' + scenarioPath,
+        '--confirm-scenario',
+        '--execute',
+        '--allow-models',
+        '--out=' + outPath,
+      ],
+      { fetch: mockFetch },
+    );
+    assert.equal(summary.kind, 'nerv-role-evaluation');
+    assert.equal(summary.reusesCommonSmoke, false);
+    assert.equal(summary.modelQualification, false);
+    assert.equal(chatBodies.length, 1);
+    assert.equal(chatBodies[0].think, true);
+    assert.equal(chatBodies[0].options.num_ctx, 8192);
+    assert.equal(chatBodies[0].options.num_predict, 50);
+    assert.equal(chatBodies[0].options.seed, 42);
+    assert.equal(unloaded, true);
+    const report = JSON.parse(readFileSync(outPath, 'utf8'));
+    assert.equal(report.results.length, 3);
+    assert.equal(report.results[0].status, 'passed');
+    assert.equal(report.results[1].status, 'not-run');
+    assert.match(report.results[1].error, /output token budget/);
+    assert.equal(report.complete, false);
+    assert.equal(report.actual.modelDigest, 'a'.repeat(64));
+
+    // Interruption saves partial report with not-run remaining cases.
+    const abort = new AbortController();
+    abort.abort();
+    const interruptedOut = join(dir, 'interrupted.json');
+    const interrupted = await main(
+      [
+        'role-run',
+        '--role=misato',
+        '--limit=2',
+        '--profile=' + profilePath,
+        '--execute',
+        '--allow-models',
+        '--out=' + interruptedOut,
+      ],
+      { fetch: mockFetch, signal: abort.signal },
+    );
+    assert.equal(interrupted.complete, false);
+    const intReport = JSON.parse(readFileSync(interruptedOut, 'utf8'));
+    assert.ok(intReport.results.every((r) => r.status === 'not-run' && /Interrupted/.test(r.error)));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });

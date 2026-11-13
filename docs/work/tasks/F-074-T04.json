@@ -4,7 +4,7 @@
   "parent": "F-074",
   "title": "Provide a profile-matched operator role-evaluation bundle",
   "goal": "Let the owner launch bounded NERV-specific role checks with explicit common-profile settings and saved reviewable evidence",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "One documented operator command selects explicit model/runtime/context/output/sampling/thinking settings and machine/load scenario for synthetic Casper/Misato cases",
     "Preflight and execution preserve a reviewed aggregate time/call/output budget; reject unsupported settings rather than silently inheriting defaults",
@@ -47,12 +47,14 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "estimate": "0 remaining",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). Closed 2026-11-13: profile-matched 8K/2048 operator role-evaluation bundle implemented and fixture-verified; actual 0.25 h stated.",
     "reviewed": "2026-11-13",
     "baselineDays": 1,
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
-    "estimateAgentHours": 0.25
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
   }
 }

@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 2 | 4 | 11 | 10 |
+| **This week** | 2 | 5 | 11 | 10 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 30 | 6 |
+| **Open** | 29 | 6 |
 | **Require Human 🧑** | 12 | 2 |
 
 ### Require Human 🧑
@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 34.25 h agent + 16.75 h owner across 115 open steps of 28 features and 3 other records. 28.75 h of actual effort recorded on 49 steps. Generated from the task files.
+**Remaining effort:** 33.75 h agent + 16.75 h owner across 113 open steps of 27 features and 3 other records. 29.25 h of actual effort recorded on 51 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -644,53 +644,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
-### <a id="f-074"></a>[✨ F-074](#top)
-
-**Indexed reusable evaluations, operator campaigns and the first Gemma smoke**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h | — | — | — | — |
-
-💻 **→** Agent: F-074-T10, identity-bound ledger coverage. F-074-T09 completed on 2026-11-12 ([summary](evaluations/2026-11-12-gauntlet-t09.md)).
-
-| | |
-|---|---|
-| **Issue** | NERV needs discoverable test capabilities and reusable measured evidence without confusing common model results with system acceptance. |
-| **Reproduce** | Generate the combined index, validate evidence reuse/mismatch, then execute the ten-case Gemma pack under explicit bounded settings. |
-| **Check** | Every common pack in the pinned release is consumed or excluded with a reason; a new or changed case raises a backlog item until a run covers it; one root command runs NERV and common packs, reusing only exact-identity evidence. Profile-matched bounded operator role command with saved reports; pinned independent release; generated index current; common reuse exact/fresh and system-source aware; measured cold/warm telemetry with unknown metrics explicit; one authorized Gemma4:12b Q4_K_M 8K serial/default-sampling/thinking-on smoke, output2048/case and explicit time/token limits. No model downloads or live alternative-runtime campaigns. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| — | F-074-T01 — Adopt indexed and instrumented Gauntlet contracts | — | 0 days | 0 remaining | Completed |
-| — | F-074-T02 — Run and record authorized measured Gemma smoke | — | 0 days | 0 remaining | Completed |
-| — | F-074-T03 — Adopt reusable Gauntlet machine/scenario contracts | — | 0 days | 0 remaining | Completed |
-| 🟢 Small | F-074-T04 — Provide a profile-matched operator role-evaluation bundle | 0.25 h | 0 h | 0.25 h | Planned |
-| — | F-074-T05 — Adopt private diagnostics and development job registration | — | 0 days | 0 remaining | Completed |
-| — | F-074-T06 — T06 — Consume every common pack shipped in the pinned Gauntlet release | — | 0 days | 0 remaining | Completed |
-| — | F-074-T07 — T07 — Adopt upstream pending-case detection so new or changed packs raise a run | — | 0 days | 0 remaining | Completed |
-| — | F-074-T08 — T08 — One root command runs NERV and common tests, reusing exact evidence | — | 0 days | 0 remaining | Completed |
-| — | F-074-T09 — T09 — First ledger-covered run of every common pack and the expensive system cases | 0.5 h | 0.75 h (stated) | 0 h | Completed |
-| 🟢 Small | F-074-T10 — T10 — Adopt identity-bound ledger coverage | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | **Total** | 1 h (3 of 10 steps) | 0.75 h (1 of 10 steps recorded) | 0.5 h | 8 of 10 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-074.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #259](https://github.com/voidbrain/nerv/pull/259) Gauntlet 0.5.0 pin; [PR #243](https://github.com/voidbrain/nerv/pull/243) adoption acceptance;  [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Acceptance reconcile: [PR #236](https://github.com/voidbrain/nerv/pull/236); Environment adoption: [PR #235](https://github.com/voidbrain/nerv/pull/235); Review: fresh-context report, no blocking findings; Test: test/gauntlet.test.mjs shared-context consumer/reuse/admission join;  [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #226](https://github.com/voidbrain/nerv/pull/226) adoption acceptance and explicit owner pause; [PR #225](https://github.com/voidbrain/nerv/pull/225); upstream Gauntlet PR #5 / CI42572655186; Review: independent report-only recheck linked above. |
-| Opened | 2026-11-09 |
-| Verification | 2026-11-10 Unit/integration: PR242 exacthead03c0721 / CI42687439382 passed all five jobs/full-suite; eleven fixture joins and independent harness/source/schema review passed; T05 closed, no live schema campaign. Earlier2026-11-09 Unit/integration: PR235 exactheadb4cd887 / CI42608578429 passed all five jobs including full-suite, mergedmainc5323e5. Nine focused context/reuse/admission/package joins, local468 Node tests (466 passed, two platform skips), typecheck/build/index and committed-source policy90 passed. Review: independent exact package/source/installed-file verification and nine joins, no blocking finding. Real-model2026-11-09: owner-provided common smoke validated and reviewed, complete10cases,7 passed/3 failed,64.744s/1608 tokens; no load/model qualification. T04 implementation pending. |
-| Reviewed | 2026-11-11 |
-
-</details>
-
----
 ### <a id="f-046"></a>[✨ F-046](#top)
 
 **Misato checks what already exists before adding: same thing, a change, or new**
@@ -1828,6 +1781,53 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-074"></a>[✨ F-074](#top)
+
+**Indexed reusable evaluations, operator campaigns and the first Gemma smoke**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔵 Closed | ◻️ P2 | 🟢 Small | 0 days | — | — | — | — |
+
+💻 **→** Closed 2026-11-13: F-074-T10 (identity-bound ledger coverage) and F-074-T04 (profile-matched 8K/2048 operator role-evaluation bundle) completed; all 7 deterministic `nerv-system-flows` cases recorded in schema 2 ledger (`evals/gauntlet/ledger.json`).
+
+| | |
+|---|---|
+| **Issue** | NERV needs discoverable test capabilities and reusable measured evidence without confusing common model results with system acceptance. |
+| **Reproduce** | Generate the combined index, validate evidence reuse/mismatch, then execute the ten-case Gemma pack under explicit bounded settings. |
+| **Check** | Every common pack in the pinned release is consumed or excluded with a reason; a new or changed case raises a backlog item until a run covers it; one root command runs NERV and common packs, reusing only exact-identity evidence. Profile-matched bounded operator role command with saved reports; pinned independent release; generated index current; common reuse exact/fresh and system-source aware; measured cold/warm telemetry with unknown metrics explicit; one authorized Gemma4:12b Q4_K_M 8K serial/default-sampling/thinking-on smoke, output2048/case and explicit time/token limits. No model downloads or live alternative-runtime campaigns. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | F-074-T01 — Adopt indexed and instrumented Gauntlet contracts | — | 0 days | 0 remaining | Completed |
+| — | F-074-T02 — Run and record authorized measured Gemma smoke | — | 0 days | 0 remaining | Completed |
+| — | F-074-T03 — Adopt reusable Gauntlet machine/scenario contracts | — | 0 days | 0 remaining | Completed |
+| — | F-074-T04 — Provide a profile-matched operator role-evaluation bundle | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | F-074-T05 — Adopt private diagnostics and development job registration | — | 0 days | 0 remaining | Completed |
+| — | F-074-T06 — T06 — Consume every common pack shipped in the pinned Gauntlet release | — | 0 days | 0 remaining | Completed |
+| — | F-074-T07 — T07 — Adopt upstream pending-case detection so new or changed packs raise a run | — | 0 days | 0 remaining | Completed |
+| — | F-074-T08 — T08 — One root command runs NERV and common tests, reusing exact evidence | — | 0 days | 0 remaining | Completed |
+| — | F-074-T09 — T09 — First ledger-covered run of every common pack and the expensive system cases | 0.5 h | 0.75 h (stated) | 0 h | Completed |
+| — | F-074-T10 — T10 — Adopt identity-bound ledger coverage | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | **Total** | 1 h (3 of 10 steps) | 1.25 h (3 of 10 steps recorded) | 0 days | 10 of 10 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-074.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #259](https://github.com/voidbrain/nerv/pull/259) Gauntlet 0.5.0 pin; [PR #243](https://github.com/voidbrain/nerv/pull/243) adoption acceptance;  [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Acceptance reconcile: [PR #236](https://github.com/voidbrain/nerv/pull/236); Environment adoption: [PR #235](https://github.com/voidbrain/nerv/pull/235); Review: fresh-context report, no blocking findings; Test: test/gauntlet.test.mjs shared-context consumer/reuse/admission join;  [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #226](https://github.com/voidbrain/nerv/pull/226) adoption acceptance and explicit owner pause; [PR #225](https://github.com/voidbrain/nerv/pull/225); upstream Gauntlet PR #5 / CI42572655186; Review: independent report-only recheck linked above. |
+| Opened | 2026-11-09 |
+| Verification | 2026-11-13 Unit/integration: `test/gauntlet.test.mjs` (18 passed), `test/evaluation-model.test.mjs` (1 passed), `gauntlet:index`, `check:gauntlet-index`, `gauntlet:plan`, `gauntlet:role-plan`, `gauntlet:all --execute --allow-expensive` (7/7 `nerv-system-flows` passed and recorded with schema 2 `sourceKey`), `check:gauntlet-runs` (0 pending), and `check:fast` passed; no live model run executed for T04. Earlier 2026-11-10 Unit/integration: PR242 exacthead03c0721 / CI42687439382 passed all five jobs/full-suite; eleven fixture joins and independent harness/source/schema review passed; T05 closed, no live schema campaign. Earlier2026-11-09 Unit/integration: PR235 exactheadb4cd887 / CI42608578429 passed all five jobs including full-suite, mergedmainc5323e5. Nine focused context/reuse/admission/package joins, local468 Node tests (466 passed, two platform skips), typecheck/build/index and committed-source policy90 passed. Review: independent exact package/source/installed-file verification and nine joins, no blocking finding. Real-model2026-11-09: owner-provided common smoke validated and reviewed, complete10cases,7 passed/3 failed,64.744s/1608 tokens; no load/model qualification. |
+| Reviewed | 2026-11-11 |
+
+</details>
+
+---
 
 ## Other changes
 
