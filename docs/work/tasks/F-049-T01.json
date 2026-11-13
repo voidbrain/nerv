@@ -38,13 +38,13 @@
     "New upstream API work belongs to its owning repository; NERV supplies adapters"
   ],
   "effort": {
-    "size": "medium",
+    "size": "small",
     "estimate": "1.75 h agent",
-    "basis": "Estimate added at featurePlans adoption (2026-11-11): deterministic isolated runner admission and enforcement contract. Later steps F-049-T02–T10 planned 2026-11-11. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: 1.5 h/day judged rate (PR #277). Estimate, not a measurement; baselineDays 2 kept as history. Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 3 h → 1.75 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1.75 h); the baseline stays for calibration.",
-    "reviewed": "2026-11-12",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "reviewed": "2026-11-13",
     "baselineDays": 2,
-    "agentHours": 1.75,
+    "agentHours": 0.5,
     "baselineAgentHours": 3,
-    "estimateAgentHours": 1.75
+    "estimateAgentHours": 0.5
   }
 }

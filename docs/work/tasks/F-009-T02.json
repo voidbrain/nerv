@@ -29,12 +29,13 @@
   "effort": {
     "size": "small",
     "estimate": "0.5 h agent + 0.25 hours owner",
-    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (upper bound of the range, hours at 6 a day, rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 0.5 hours agent + 0.25 hours owner; agent prepares and records; the owner logs out and in on the Mac. Method: 1.5 h/day judged rate (PR #277). Estimate, not a measurement; baselineDays 0.5 kept as history. Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 0.5 h → 0.5 h, min 0.5 h; owner hours and baseline kept.",
-    "reviewed": "2026-11-12",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "reviewed": "2026-11-13",
     "baselineDays": 0.5,
-    "agentHours": 0.5,
+    "agentHours": 0.25,
     "ownerHours": 0.25,
     "baselineAgentHours": 0.5,
-    "ownerKind": "procedure"
+    "ownerKind": "procedure",
+    "estimateAgentHours": 0.25
   }
 }

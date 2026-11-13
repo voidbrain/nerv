@@ -34,6 +34,8 @@ Fast applicable static/security/harness checks and affected regressions still ru
 
 Run the complete deterministic suite for an explicit request, risky or unmapped changes, expired freshness or a gap in confidence. Do not repeat the same successful broad local run at an unchanged revision merely because CI will repeat it. Use a targeted rerun after a narrow fix and let the required CI validate the final revision; record scope honestly. No percent coverage target, deadline or stale evidence can waive a failing check. Coverage enforcement, if enabled, still needs its required comparable metrics; configure that group to run when necessary.
 
+Run local test suites and verification commands with an explicit bounded timeout based on their expected runtime plus a safe margin (for example `--test-timeout=<ms>` on `node --test`) so unclosed event-loop handles or stalled subprocesses fail fast instead of hanging indefinitely.
+
 Repeated stress campaigns, real-model evaluations, costly external/device checks and distribution builds are separate scopes. Run them on request, for a concrete changed risk or when a record explicitly requires them. Their time, model/token budgets and acceptance are separate from deterministic-suite freshness. They do not run merely because the full-suite timer expired. Avoid repeat agent reviews unless the changed scope or a binding review requirement calls for one.
 
 ## CI integration

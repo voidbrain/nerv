@@ -1001,6 +1001,31 @@ export function checkWorkItems(root = process.cwd()) {
         )
         .map((t) => t.id)
     : [];
+  const allStepsClosed = [];
+  if (config.featurePlans) {
+    const byParent = new Map();
+    for (const t of catalog.tasks) {
+      if (!byParent.has(t.parent)) byParent.set(t.parent, []);
+      byParent.get(t.parent).push(t);
+    }
+    for (const [parent, steps] of byParent) {
+      if (!steps.every((t) => t.status === 'closed')) continue;
+      const recFile = join(root, config.records, `${parent}.md`);
+      if (!existsSync(recFile)) continue;
+      const recLines = readFileSync(recFile, 'utf8').split(/\r?\n/);
+      const headerAt = recLines.findIndex((l) =>
+        /^\|\s*Signal\s*\|\s*Priority\s*\|\s*Status\s*\|\s*Effort\s*\|/.test(l),
+      );
+      if (headerAt !== -1 && recLines[headerAt + 2]) {
+        const cols = recLines[headerAt + 2]
+          .trim()
+          .split('|')
+          .slice(1, -1)
+          .map((c) => c.trim());
+        if (cols[2] && cols[2] !== 'Closed') allStepsClosed.push(parent);
+      }
+    }
+  }
   return {
     enabled: true,
     records: (actual.match(/^### (?:<a id="[fb]-\d+"><\/a>)?(?:\[(?:✨|🐞) )?([BF]-\d{3})(?:\]\(#top\))?$/gm) || [])
@@ -1008,6 +1033,7 @@ export function checkWorkItems(root = process.cwd()) {
     tasks: catalog.tasks.length,
     ...(withoutDays.length ? { withoutDays } : {}),
     ...(staleEstimates.length ? { staleEstimates } : {}),
+    ...(allStepsClosed.length ? { allStepsClosed } : {}),
   };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
@@ -1034,6 +1060,10 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       if (result.withoutDays)
         console.warn(
           `! ${result.withoutDays.length} open step(s) have no remaining estimate (effort.agentHours/ownerHours, or days), so totals count them as unknown: ${result.withoutDays.slice(0, 10).join(', ')}${result.withoutDays.length > 10 ? ` and ${result.withoutDays.length - 10} more` : ''}`,
+        );
+      if (result.allStepsClosed)
+        console.warn(
+          `! ${result.allStepsClosed.length} non-closed record(s) have all steps closed; reconcile scope and close or add remaining steps: ${result.allStepsClosed.join(', ')}`,
         );
     }
   } catch (e) {

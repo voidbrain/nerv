@@ -31,12 +31,13 @@
   "effort": {
     "size": "small",
     "estimate": "0.5 hours agent + 0.5 hours owner",
-    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 0.5 hours agent + 0.5 hours owner; agent prepares the checklist and records evidence; the owner installs on a phone and completes a pushed reminder. Method: 1.5 h/day judged rate (PR #277). Estimate, not a measurement; baselineDays 0.5 kept as history.",
-    "reviewed": "2026-11-11",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "reviewed": "2026-11-13",
     "baselineDays": 0.5,
-    "agentHours": 0.5,
+    "agentHours": 0.25,
     "ownerHours": 0.5,
     "baselineAgentHours": 0.5,
-    "ownerKind": "procedure"
+    "ownerKind": "procedure",
+    "estimateAgentHours": 0.25
   }
 }
