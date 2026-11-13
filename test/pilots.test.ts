@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { generateKeyPairSync } from 'node:crypto';
 import { createServer } from 'node:http';
 import { mkdtempSync, rmSync, writeFileSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -7,6 +8,7 @@ import { join } from 'node:path';
 import {
   PilotRegistry,
   addPilot,
+  canRunRemotePilot,
   chooseAdvisers,
   chooseExecutionPilot,
   choosePilot,
@@ -19,6 +21,7 @@ import {
   promotionEligible,
   rankPilots,
   sanitizePilotOffers,
+  selectRemotePilotRun,
   setPilotFlag,
   stageExecutor,
   toPilotOffers,
@@ -28,6 +31,10 @@ import {
   type Pilot,
 } from '../src/pilots.ts';
 import { builtinTools } from '../src/executors.ts';
+import { readConfig } from '../src/config.ts';
+import { Runtime } from '../src/runtime.ts';
+import { Store } from '../src/store.ts';
+import { signRecord } from '../src/kaji.ts';
 const pilot = (over: Partial<Pilot> & { id: string }): Pilot => ({
   name: over.id,
   domain: 'things',
@@ -561,4 +568,151 @@ test('F-045-T04: execution choice by domain and evidence, suggest-only default, 
   });
   const promoteTool = builtinTools.find((t) => t.name === 'pilots.promote');
   assert.equal(promoteTool?.owner, true, 'promotion always requires owner approval');
+});
+
+test('F-045-T05: remote pilots chosen, granted, and run through the authenticated worker line', async () => {
+  const generic = genericPilot('gemma4:12b', 'prototype');
+  const remotePilot = {
+    ...pilot({ id: 'notes-helper', keywords: ['notes', 'summary'], tools: ['notes.search'] }),
+    baseId: 'MAGI-02',
+    local: false,
+  };
+  assert.equal(canRunRemotePilot(remotePilot, ['notes.search'], 'notes.search').allowed, true);
+  assert.equal(canRunRemotePilot({ ...remotePilot, retired: true }, ['notes.search'], 'notes.search').allowed, false);
+  assert.equal(canRunRemotePilot(remotePilot, ['kaji.run'], 'kaji.run').allowed, false);
+  assert.equal(canRunRemotePilot(remotePilot, ['reminders.list'], 'notes.search').allowed, false);
+  assert.equal(canRunRemotePilot(remotePilot, ['notes.search', 'notes.add'], 'notes.add').allowed, false);
+
+  const onlineOffers = new Map<string, readonly string[]>([['MAGI-02', ['notes.search', 'notes.add']]]);
+  const allowedChoice = selectRemotePilotRun('summary of notes', [remotePilot], onlineOffers, generic, 'notes.search', {
+    localBaseId: 'MAGI-01',
+  });
+  assert.equal(allowedChoice.remote, true);
+  assert.equal(allowedChoice.allowed, true);
+  assert.equal(allowedChoice.choice.baseId, 'MAGI-02');
+  assert.equal(allowedChoice.choice.pilot.id, 'notes-helper');
+
+  const deniedChoice = selectRemotePilotRun('summary of notes', [remotePilot], onlineOffers, generic, 'notes.add', {
+    localBaseId: 'MAGI-01',
+  });
+  assert.equal(deniedChoice.remote, true);
+  assert.equal(deniedChoice.allowed, false);
+
+  const offlineChoice = selectRemotePilotRun('summary of notes', [remotePilot], new Map(), generic, 'notes.search', {
+    localBaseId: 'MAGI-01',
+  });
+  assert.equal(offlineChoice.allowed, false);
+
+  const home = mkdtempSync(join(tmpdir(), 'nerv-remote-pilot-'));
+  const dbPath = join(home, 'nerv.sqlite');
+  try {
+    const store = new Store(dbPath);
+    const q = store.queueRemote('sortie-1', 'MAGI-02', 'notes.search', { query: 'hello' }, 'notes-helper');
+    const outbox = store.outbox();
+    assert.equal(outbox.find((item) => item.id === q.id)?.pilot, 'notes-helper');
+    store.close();
+
+    const genKey = () => {
+      const { publicKey, privateKey } = generateKeyPairSync('ed25519');
+      return {
+        publicKey: publicKey.export({ type: 'spki', format: 'der' }).toString('base64'),
+        privateKey,
+      };
+    };
+    const root = genKey();
+    const owner = genKey();
+    const self = genKey();
+    writeFileSync(
+      join(home, 'config.json'),
+      JSON.stringify({
+        base: { id: 'MAGI-02', name: 'Tabgha' },
+        kaji: { root: root.publicKey },
+        models: { local: { baseUrl: 'http://127.0.0.1:1/v1', model: 'm' }, roles: { misato: { route: 'local' } } },
+        pilots: [pilot({ id: 'notes-helper', keywords: ['notes'], tools: ['reminders.list'] })],
+      }),
+    );
+    const rt = new Runtime(dbPath, undefined, home);
+    rt.setPilots(() => readConfig(home).pilots ?? []);
+    const workerKey = self.publicKey;
+    const ownerKey = owner.publicKey;
+    const session = '00000000-0000-4000-8000-000000000001';
+    try {
+      await rt.ready();
+      await rt.nervous.call('kaji.add', {
+        records: [
+          signRecord(root.privateKey, {
+            kind: 'enrol',
+            serial: 1,
+            issued: new Date().toISOString(),
+            baseId: 'MAGI-01',
+            name: 'Main',
+            publicKey: owner.publicKey,
+            address: '127.0.0.1:9001',
+          }),
+          signRecord(root.privateKey, {
+            kind: 'enrol',
+            serial: 2,
+            issued: new Date().toISOString(),
+            baseId: 'MAGI-02',
+            name: 'Tabgha',
+            publicKey: self.publicKey,
+            address: '127.0.0.1:9002',
+          }),
+          signRecord(root.privateKey, {
+            kind: 'main',
+            serial: 3,
+            issued: new Date().toISOString(),
+            baseId: 'MAGI-01',
+          }),
+        ],
+      });
+      await rt.worker.open('MAGI-01', session, workerKey, ownerKey);
+
+      const ungranted = (await rt.runFromPeer(
+        'MAGI-01',
+        {
+          id: '00000000-0000-4000-8000-000000000011',
+          request: 'add reminder',
+          tool: 'reminders.add',
+          args: { title: 't' },
+          pilot: 'notes-helper',
+        },
+        ['reminders.list', 'reminders.add'],
+        { session, epoch: 1, expires: Date.now() + 60_000, ownerKey },
+      )) as { refused?: string };
+      assert.match(ungranted.refused ?? '', /does not grant tool "reminders.add"/);
+
+      const missingPilot = (await rt.runFromPeer(
+        'MAGI-01',
+        {
+          id: '00000000-0000-4000-8000-000000000012',
+          request: 'list reminders',
+          tool: 'reminders.list',
+          args: {},
+          pilot: 'unknown-pilot',
+        },
+        ['reminders.list'],
+        { session, epoch: 1, expires: Date.now() + 60_000, ownerKey },
+      )) as { refused?: string };
+      assert.match(missingPilot.refused ?? '', /does not have pilot unknown-pilot/);
+
+      const allowedRun = (await rt.runFromPeer(
+        'MAGI-01',
+        {
+          id: '00000000-0000-4000-8000-000000000013',
+          request: 'list reminders',
+          tool: 'reminders.list',
+          args: {},
+          pilot: 'notes-helper',
+        },
+        ['reminders.list'],
+        { session, epoch: 1, expires: Date.now() + 60_000, ownerKey },
+      )) as { refused?: string };
+      assert.equal(allowedRun.refused, undefined);
+    } finally {
+      await rt.close();
+    }
+  } finally {
+    rmSync(home, { recursive: true, force: true });
+  }
 });

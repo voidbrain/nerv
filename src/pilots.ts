@@ -475,6 +475,50 @@ export function chooseExecutionPilot(
     ...(top.baseId !== undefined ? { baseId: top.baseId } : {}),
   };
 }
+/** Result of checking whether a remote pilot may run an action through the authenticated line (F-045-T05). */
+export interface RemotePilotGrant {
+  allowed: boolean;
+  reason?: string;
+}
+/** Checks grant rules for a remote pilot: active, non-recursive, offered by its base, and within its tool grants. */
+export function canRunRemotePilot(
+  pilot: Pick<Pilot, 'id' | 'retired' | 'tools'>,
+  offeredTools: readonly string[],
+  tool?: string,
+): RemotePilotGrant {
+  if (pilot.retired) return { allowed: false, reason: `Pilot ${pilot.id} is retired.` };
+  if (tool) {
+    if (tool === 'kaji.run') return { allowed: false, reason: 'Remote pilots cannot chain kaji.run.' };
+    if (!offeredTools.includes(tool)) return { allowed: false, reason: `Base does not offer "${tool}".` };
+    if (pilot.tools && pilot.tools.length > 0 && !pilot.tools.includes(tool))
+      return { allowed: false, reason: `Pilot ${pilot.id} does not grant tool "${tool}".` };
+  }
+  return { allowed: true };
+}
+/** Selects a local or remote pilot for execution and verifies remote base/pilot grants when remote (F-045-T05). */
+export function selectRemotePilotRun(
+  request: string,
+  candidates: readonly (Pilot | RegisteredPilot | PilotCandidate)[],
+  offeredByBase: ReadonlyMap<string, readonly string[]>,
+  fallbackGeneric: Pilot,
+  tool?: string,
+  opts?: { suggestOnly?: boolean; localBaseId?: string },
+): { choice: ExecutionChoice; remote: boolean; allowed: boolean; reason?: string } {
+  const choice = chooseExecutionPilot(request, candidates, fallbackGeneric, opts);
+  if (choice.baseId !== undefined && choice.baseId !== opts?.localBaseId) {
+    const offered = offeredByBase.get(choice.baseId);
+    if (!offered)
+      return {
+        choice,
+        remote: true,
+        allowed: false,
+        reason: `Base ${choice.baseId} is not online or offering actions.`,
+      };
+    const grant = canRunRemotePilot(choice.pilot, offered, tool);
+    return { choice, remote: true, ...grant };
+  }
+  return { choice, remote: false, allowed: true };
+}
 /** The roster as `nerv pilots` prints it, the generic pilot first. */
 export function describePilots(roster: readonly Pilot[], generic: string | null): string {
   const lines = [

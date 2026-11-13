@@ -61,6 +61,7 @@ const workerItem = {
     request: { type: 'string', maxLength: 500 },
     tool: { type: 'string', pattern: '^[a-z]+\\.[a-z]+$' },
     args: { type: 'object', maxProperties: 50 },
+    pilot: { type: 'string', pattern: '^[a-z0-9-]{1,40}$' },
   },
   additionalProperties: false,
 };
