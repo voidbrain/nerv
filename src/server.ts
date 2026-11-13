@@ -6,6 +6,7 @@ import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { realpath, stat, readFile } from 'node:fs/promises';
 import { resolve, sep, extname } from 'node:path';
 import type { StoreApi } from './runtime.ts';
+import type { Pilot, PilotPatch } from './pilots.ts';
 import { attachRpcSocket } from './socket.ts';
 import { buildInfo } from './build.ts';
 import {
@@ -499,7 +500,17 @@ export function makeServer(
         const r = await store.consolidate();
         reply(r.error ? 502 : 200, r);
       } else if (req.method === 'GET' && path === '/api/pilots') {
-        reply(200, { pilots: store.pilotRoster ? await store.pilotRoster() : [] });
+        reply(200, {
+          pilots: store.pilotRoster ? await store.pilotRoster() : [],
+          ...(store.genericPilot ? { generic: await store.genericPilot() } : {}),
+        });
+      } else if (req.method === 'POST' && path === '/api/pilots') {
+        if (!store.addPilot) {
+          reply(503, { error: 'Pilot setup unavailable.' });
+          return;
+        }
+        const b = await body(req);
+        reply(201, { pilots: await store.addPilot(b as unknown as Pilot) });
       } else if (req.method === 'PATCH' && /^\/api\/pilots\/[a-z][a-z0-9-]{1,30}\/model$/.test(path)) {
         if (!store.changePilotModel) {
           reply(503, { error: 'Pilot setup unavailable.' });
@@ -509,6 +520,25 @@ export function makeServer(
         if (Object.keys(b).length !== 1 || typeof b.model !== 'string' || !b.model.trim() || b.model.length > 100)
           throw new Error('A pilot model change needs only an installed local model.');
         reply(200, { pilots: await store.changePilotModel(path.split('/')[3]!, b.model) });
+      } else if (req.method === 'PATCH' && /^\/api\/pilots\/[a-z][a-z0-9-]{1,30}$/.test(path)) {
+        if (!store.updatePilot) {
+          reply(503, { error: 'Pilot setup unavailable.' });
+          return;
+        }
+        const b = await body(req);
+        reply(200, { pilots: await store.updatePilot(path.split('/')[3]!, b as unknown as PilotPatch) });
+      } else if (
+        req.method === 'POST' &&
+        /^\/api\/pilots\/[a-z][a-z0-9-]{1,30}\/(pin|unpin|retire|restore)$/.test(path)
+      ) {
+        if (!store.setPilotFlag) {
+          reply(503, { error: 'Pilot setup unavailable.' });
+          return;
+        }
+        const [, , , id, action] = path.split('/');
+        const flag = action === 'pin' || action === 'unpin' ? 'pinned' : 'retired';
+        const on = action === 'pin' || action === 'retire';
+        reply(200, { pilots: await store.setPilotFlag(id!, flag, on) });
       } else if (req.method === 'GET' && path === '/api/models') {
         if (!store.modelSetup) {
           reply(503, { error: 'Model setup unavailable.' });
