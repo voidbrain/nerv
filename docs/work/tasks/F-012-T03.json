@@ -9,6 +9,7 @@
     "Supported command/API used where available; capability observed, not inferred; adapter or documented infeasibility"
   ],
   "dependsOn": [
+    "F-006-T07",
     "F-012-T02"
   ],
   "resources": [

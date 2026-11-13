@@ -78,7 +78,15 @@ function records(markdown, label, file, archived = false) {
     // cells last since 8.0.0), read in authored order.
     // A component still on a 7.x generated ledger (six or eight cells ending 🧑 Yes / 💻 No) is read too.
     const legacy7 = row && [6, 8].includes(row.length) && /^(?:🧑|💻) (?:Yes|No)$/.test(row.at(-1));
-    const kind = row && { '🧑🧑': 'Both', '🧑—': 'Procedure', '—🧑': 'Decision', '——': 'No' }[row.slice(-2).join('')];
+    // F-071 (8.8.0): 🧑‍🔧 and 🤔 read like 🧑.
+    const kind =
+      row &&
+      { '🧑🧑': 'Both', '🧑—': 'Procedure', '—🧑': 'Decision', '——': 'No' }[
+        row
+          .slice(-2)
+          .map((c, i) => (c === ['🧑‍🔧', '🤔'][i] ? '🧑' : c))
+          .join('')
+      ];
     const generated = row && (([7, 9].includes(row.length) && kind !== undefined) || legacy7);
     if (!row || (![4, 5].includes(row.length) && !generated))
       fail(`${label}:${id}: unsupported summary (run the owning repository's backlog check)`);

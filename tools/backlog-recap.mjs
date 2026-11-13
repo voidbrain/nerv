@@ -32,8 +32,9 @@ export function parseRecords(text,archived=false){
   // Harness 8.0.0: the cue names its kind (Procedure, Decision, Both), and the generated row ends with its Procedures and
   // Decision cells. Older forms (Yes, a single 🧑 Yes cell) still count as waiting on a human, of no named kind.
   const cue=/🧑 \*\*→ Human action required: (Procedure|Decision|Both|Yes)\*\*/.exec(body)?.[1];
-  const cells=/\| Procedures \| Decisions? \|\n[^\n]*\n\|[^\n]*\| (🧑|—) \| (🧑|—) \|$/m.exec(body);
-  const procedure=cells?cells[1]==='🧑':['Procedure','Both'].includes(cue),decision=cells?cells[2]==='🧑':['Decision','Both'].includes(cue);
+  // Harness 8.8.0: 🧑‍🔧 marks a procedure and 🤔 a decision; 🧑 is still read in either cell.
+  const cells=/\| Procedures \| Decisions? \|\n[^\n]*\n\|[^\n]*\| (🧑‍🔧|🧑|—) \| (🤔|🧑|—) \|$/m.exec(body);
+  const procedure=cells?cells[1]!=='—':['Procedure','Both'].includes(cue),decision=cells?cells[2]!=='—':['Decision','Both'].includes(cue);
   const human=procedure||decision||cue==='Yes'||/^\|[^\n]*\| 🧑 Yes \|$/m.test(body);
   out.push({id:`${h[1]}-${h[2]}`,kind:h[1]==='F'?'feature':'bug',status,human,procedure,decision,opened,closed,archived});
   i=j-1;
@@ -65,7 +66,7 @@ export function recap({active,archived},asOf){
   '| | Features | | Bugs | |','|---|---:|---:|---:|---:|','| | **Opened** | **Closed** | **Opened** | **Closed** |',
   `| **This week** | ${k(opened,'feature')} | ${k(closed,'feature')} | ${k(opened,'bug')} | ${k(closed,'bug')} |`,'',
   '| Status | Features | Bugs |','|---|---:|---:|',`| **Open** | ${k(live,'feature')} | ${k(live,'bug')} |`,`| **Require Human 🧑** | ${k(human,'feature')} | ${k(human,'bug')} |`,'',
-  '### Require Human 🧑','','| Features | | Bugs | |','|---|---|---|---|','| **Procedures** | **Decisions** | **Procedures** | **Decisions** |',...rows,END].join('\n');
+  '### Require Human 🧑','','| Features | | Bugs | |','|---|---|---|---|','| **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |',...rows,END].join('\n');
 }
 /** The header between the title and the recap: at most two short lines (latest reconciliation, then links); history goes to
  *  docs/archive/reconciliation-<year>.md. */

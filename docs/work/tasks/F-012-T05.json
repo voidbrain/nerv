@@ -9,6 +9,7 @@
     "Longer limits, logout, closed tab, sleeping worker, changed task and already-resumed job handled without duplicates; one real resume observed"
   ],
   "dependsOn": [
+    "F-005-T24",
     "F-012-T04"
   ],
   "resources": [

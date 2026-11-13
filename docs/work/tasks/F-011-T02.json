@@ -37,5 +37,6 @@
     "baselineAgentHours": 0.5,
     "ownerKind": "procedure",
     "estimateAgentHours": 0.25
-  }
+  },
+  "ownerLink": "docs/acceptance/f011-companion-acceptance-procedure.md#part-1--companion-ui-notifications-and-service-controls-neo-tokyo-3-terminal--ui"
 }
