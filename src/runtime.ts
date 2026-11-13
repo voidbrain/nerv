@@ -1,4 +1,5 @@
 import type { WatchWork } from './watch.ts';
+import type { SeatPool } from './seat-pool.ts';
 import { WORKER_RESULT_BYTES, type WorkerContext, type WorkerLease, type WorkerClaim } from './worker-jobs.ts';
 import { runFailure, runMessage, type InstrumentalityRun } from './instrumentality-runs.ts';
 import { readFileSync } from 'node:fs';
@@ -479,6 +480,11 @@ export class Runtime implements StoreApi {
       this.extraSeatSpecs = this.extraSeatSpecs.filter((s) => s !== spec);
     };
   }
+  /** Free/external API seat pool (F-025-T02): rotates across actions, skips limited/unavailable seats, respects Scrolls. */
+  private seatPool?: { pool: SeatPool; timeoutMs: number };
+  useSeatPool(pool: SeatPool, timeoutMs = MODEL_TIMEOUT_MS): void {
+    this.seatPool = { pool, timeoutMs };
+  }
   /** The other bases' votes on a non-Green action (F-036 phase 2), set by serve on the main base. */
   private peerSeats?: (ask: VerdictAsk) => Promise<PeerSeat[]>;
   /**
@@ -522,10 +528,10 @@ export class Runtime implements StoreApi {
       : null;
   }
   private async gate(sortieId: string, action: OwnerAction, askCasper = true, worker?: WorkerLease): Promise<ActReply> {
-    const { pattern, effect, intent } = (await this.nervous.call('actions.preview', {
+    const { pattern, effect, intent, cloudAllowed } = (await this.nervous.call('actions.preview', {
       sortieId,
       tool: action.tool,
-    })) as { pattern: Pattern; effect: Effect; intent?: boolean };
+    })) as { pattern: Pattern; effect: Effect; intent?: boolean; cloudAllowed?: boolean };
     let casper: Verdict | undefined, casperError: string | undefined;
     let extras: Verdict[] = [];
     let late: PeerSeat[] = [];
@@ -533,9 +539,21 @@ export class Runtime implements StoreApi {
     const matchingExtras = askCasper
       ? this.extraSeatSpecs.filter((s) => matchesExtraSeat(s, { tool: action.tool, effect, pattern, intent }))
       : [];
+    const poolExtras: ExtraSeatSpec[] =
+      askCasper && this.seatPool
+        ? this.seatPool.pool
+            .pick({ tool: action.tool, effect, cloudAllowed: cloudAllowed === true })
+            .picked.map((entry) => ({
+              seat: entry.id,
+              shadow: entry.shadow ?? true,
+              timeoutMs: this.seatPool!.timeoutMs,
+              ask: (ask, signal) => this.seatPool!.pool.ask(entry, ask, signal),
+            }))
+        : [];
+    const allExtras = [...matchingExtras, ...poolExtras];
     // Casper (and the other bases' seats) for anything not Green, and for every removal even when Green (B-009).
-    // Extra seats (F-025-T01) also run on any action matching their attached class.
-    if (askIntent || matchingExtras.length > 0) {
+    // Extra seats (F-025-T01) and cloud seat pool (F-025-T02) run on matching actions.
+    if (askIntent || allExtras.length > 0) {
       // B-012: for an action on another base, Casper is told the bases by id and name.
       const bases = askIntent && action.tool === 'kaji.run' ? await this.baseNames() : [];
       // The other bases' Casper (F-036 phase 2) is asked at the same time: veto-only seats, shadow until the owner trusts them.
@@ -567,7 +585,7 @@ export class Runtime implements StoreApi {
       const verdictAsk: VerdictAsk = { request: action.request, tool: action.tool, args: action.args, effect };
       const peerList =
         askIntent && this.peerSeats ? await this.peerSeats(verdictAsk).catch(() => [] as PeerSeat[]) : [];
-      const extraList = matchingExtras.map((s) => runExtraSeat(s, verdictAsk));
+      const extraList = allExtras.map((s) => runExtraSeat(s, verdictAsk));
       const seats = [...peerList, ...extraList];
       const settled = new Map<string, PeerVerdict>();
       for (const s of seats)

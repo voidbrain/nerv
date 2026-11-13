@@ -10,6 +10,7 @@ import { statSync } from 'node:fs';
 import { validateModels, type Models } from './model.ts';
 import { defaultPolicy, validatePolicy, type Policy } from './policy.ts';
 import { validateAutoUpdatePolicy, type AutoUpdatePolicy } from './update-policy.ts';
+import { validateSeatPool, type SeatPoolEntry } from './seat-pool.ts';
 /** telegram.chatId: the one private chat (the owner's) the Aoba bot answers; set by `telegram link`. */
 export interface Config {
   port: number;
@@ -26,6 +27,7 @@ export interface Config {
   tools?: ToolsConfig;
   watch?: WatchConfig;
   updatePolicy?: AutoUpdatePolicy;
+  seats?: SeatPoolEntry[];
 }
 /** This machine's identity in the NERV mesh: an id (NERV-01) and a name (Neo Tokyo-3), shown in the dashboard, doctor and brief. */
 export interface Base {
@@ -185,6 +187,10 @@ export function readConfig(home: string): Config {
     const list = validatePilots((raw as Record<string, unknown>).pilots);
     if (list.length) config.pilots = list;
   }
+  if ('seats' in raw) {
+    const list = validateSeatPool((raw as Record<string, unknown>).seats);
+    if (list.length) config.seats = list;
+  }
   if (config.port === (config.nativePort ?? 4319)) throw new Error('Web and native ports must differ.');
   if (!Number.isInteger(config.port) || config.port < 1 || config.port > 65535)
     throw new Error('Invalid NERV Agency port.');
@@ -219,6 +225,27 @@ export function readModelKey(home: string): string | undefined {
   const key = readFileSync(file, 'utf8').trim();
   if (key.length < 20 || /[\s]/.test(key)) throw new Error('Invalid anthropic-key file.');
   return key;
+}
+/** Private per-seat API key file under `seat-keys/` (F-025-T02). */
+export function seatKeyPath(home: string, id: string): string {
+  return join(home, 'seat-keys', id.replace(/[^a-zA-Z0-9._-]/g, '_'));
+}
+export function readSeatKey(home: string, id: string): string | undefined {
+  const file = seatKeyPath(home, id);
+  if (!existsSync(file)) return undefined;
+  if (!privateEnough(file, 0o077)) throw new Error(`Seat key ${id} must be private: chmod 600.`);
+  const key = readFileSync(file, 'utf8').trim();
+  if (!key || /[\s]/.test(key)) throw new Error(`Invalid seat key for ${id}.`);
+  return key;
+}
+export function writeSeatKey(home: string, id: string, key: string): void {
+  const clean = key.trim();
+  if (!clean || /[\s]/.test(clean)) throw new Error('Invalid seat key.');
+  const dir = join(home, 'seat-keys');
+  mkdirSync(dir, { recursive: true, mode: 0o700 });
+  const file = seatKeyPath(home, id);
+  writeFileSync(file, clean + '\n', { mode: 0o600 });
+  chmodSync(file, 0o600);
 }
 export interface Scrolls {
   policy: Policy;

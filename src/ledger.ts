@@ -4,6 +4,7 @@ import type { DatabaseSync } from 'node:sqlite';
 import { createHash, randomUUID } from 'node:crypto';
 import {
   ballot,
+  canLeaveMachine,
   defaultPolicy,
   patternOf,
   intentChecked,
@@ -342,14 +343,23 @@ export class Ledger {
     });
   }
   /** The Pattern a proposal would get, without recording anything: the coordinator asks Casper only when it is not Green. */
-  preview(sortieId: string, tool: string): { pattern: Pattern; effect: Ballot['effect']; intent: boolean } {
+  preview(
+    sortieId: string,
+    tool: string,
+  ): { pattern: Pattern; effect: Ballot['effect']; intent: boolean; trust: Trust; cloudAllowed: boolean } {
     const sortie = this.db.prepare('SELECT trust,status FROM sorties WHERE id=?').get(sortieId) as
       { trust: Trust; status: string } | undefined;
     if (!sortie || sortie.status !== 'open') throw new Error('Sortie is not open.');
     const t = this.tools.get(tool) ?? this.external.get(tool);
     const effect = t?.effect ?? 'irreversible';
     const pattern = patternOf(effect, sortie.trust, tool, this.policy, t?.owner === true);
-    return { pattern, effect, intent: intentChecked(pattern, t) };
+    return {
+      pattern,
+      effect,
+      intent: intentChecked(pattern, t),
+      trust: sortie.trust,
+      cloudAllowed: canLeaveMachine({ tool, effect, trust: sortie.trust }, this.policy),
+    };
   }
   /** The reviewed action behind a grant, and whether the grant is still unused. Grant IDs stay inside this process. */
   grantAction(
