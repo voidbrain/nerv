@@ -35,7 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 37 h agent + 19 h owner across 117 open steps of 29 features and 4 other records. 20.75 h of actual effort recorded on 34 steps. Generated from the task files.
+**Remaining effort:** 37.5 h agent + 19 h owner across 118 open steps of 29 features and 5 other records. 20.75 h of actual effort recorded on 34 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -837,6 +837,42 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-12 |
 | Verification | Pending. |
 | Reviewed | 2026-11-12 |
+
+</details>
+
+---
+### <a id="b-058"></a>[🐞 B-058](#top)
+
+**A Finder or ignored file marks every recorded evaluation run stale**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h | — | — | — | — |
+
+| | |
+|---|---|
+| **Issue** | 2026-11-13: `sourceInputs` in `tools/evaluate.mjs` hashes every file under `src`, `test`, `shared`, `web` and `evals`, including files Git ignores. One `web/.DS_Store` written by Finder in the primary checkout changed the Gauntlet system source key, so `gauntlet pending` listed all seven `nerv-system-flows` cases as source-changed although a clean checkout of the same commit has none pending. The full audit of 2026-11-13 read that as stale runs (F-075), and the owner's rerun attempt asked for a full rerun that was not needed. |
+| **Reproduce** | In a clean worktree of main `a4081d5`, `node tools/gauntlet.mjs pending` exits 0; copy any `.DS_Store` into `web/` and it lists seven cases as source-changed. |
+| **Check** | OS metadata files and Git-ignored files do not change `sourceInputs`; untracked files that are not ignored still do (F-029); a committed regression test fails without the fix. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | B-058-T01 — Ignore OS metadata and Git-ignored files in evaluation source identity | 0.5 h | 0 h | 0.5 h | Ready |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-058.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Found while running F-075 on 2026-11-13. |
+| Opened | 2026-11-13 |
+| Verification | Pending. |
+| Reviewed | 2026-11-13 |
 
 </details>
 
