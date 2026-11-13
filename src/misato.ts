@@ -207,11 +207,14 @@ function localize(value: unknown, timeZone: string): unknown {
 export interface RemoteOffer {
   base: string;
   name: string;
+  operator?: string;
   tools: string[];
 }
 /** The kaji.run tool as Misato sees it, listing the bases online now and their actions; absent when none offers anything. */
 export function remoteToolDoc(remote: RemoteOffer[]): ToolDoc {
-  const list = remote.map((r) => `${r.base} (${r.name}): ${r.tools.join(', ')}`).join('; ');
+  const list = remote
+    .map((r) => `${r.base} (${r.name}${r.operator ? `, operator: ${r.operator}` : ''}): ${r.tools.join(', ')}`)
+    .join('; ');
   return {
     name: 'kaji.run',
     effect: 'write-external',

@@ -777,9 +777,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.75 h | — | — | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.75 h | — | — | — | — |
 
-💻 **→** Next: Define operator alias ownership and signed directory contract before changing routing.
+💻 **→** Implemented F-070-T01 and F-070-T02: per-base operator configuration, signed operator directory contract, authenticated Kaji heartbeat discovery, and safe alias resolution (`src/operator-directory.ts`, `src/config.ts`, `src/kaji-link.ts`, `src/runtime.ts`, `src/chat-command.ts`, `src/server.ts`). Next: CI and merge.
 
 | | |
 |---|---|
@@ -791,8 +791,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | F-070-T01 — Operator alias ownership and signed directory contract | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | F-070-T02 — Authenticated discovery and safe resolution | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-070-T01 — Operator alias ownership and signed directory contract | 0.25 h | 0 h | 0.25 h | Implemented; verification pending |
+| 🟢 Small | F-070-T02 — Authenticated discovery and safe resolution | 0.5 h | 0 h | 0.5 h | Implemented; verification pending |
 | 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0.75 h | 0 of 2 completed |
 
 <details>
@@ -804,7 +804,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; source assessment linked above |
 | Opened | 2026-11-07 |
-| Verification | Pending: regression, integration and relevant browser checks; source inspection is not runtime acceptance. |
+| Verification | Passed `node --test test/operator-directory.test.ts` (5/5), `npm test`, `npm run typecheck`, `npm run check:fast`. Pending CI and merge. |
 | Reviewed | 2026-11-07 |
 
 </details>
