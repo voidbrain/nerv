@@ -4,7 +4,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { misatoAsk, parsePlan, MAX_STEPS } from '../src/misato.ts';
+import { misatoAsk, parsePlan, validateReminderTitle, MAX_STEPS } from '../src/misato.ts';
 import { toolDocs } from '../src/executors.ts';
 import { Runtime } from '../src/runtime.ts';
 import { makeServer } from '../src/server.ts';
@@ -654,4 +654,38 @@ test('B-049: Misato cannot add a reminder with a generic or invented title when 
       { blue: ['reminders.add'] },
     );
   }
+});
+
+test('B-049: validateReminderTitle accepts grounded titles and rejects missing, generic, or ungrounded ones', () => {
+  const itNoTitle = 'Imposta un promemoria per il primo gennaio 2031 alle 09:00 UTC.';
+  for (const bad of ['', '   ', undefined, 'Promemoria', 'Promemoria per il primo gennaio 2031', 'Reminder', 'Spesa']) {
+    assert.ok(validateReminderTitle(bad, { request: itNoTitle }), `expected "${String(bad)}" to be rejected`);
+  }
+  assert.equal(
+    validateReminderTitle('Chiamare Alex', {
+      request: 'Ricordami di chiamare Alex il primo gennaio 2031 alle 09:00 UTC.',
+    }),
+    undefined,
+  );
+  assert.equal(
+    validateReminderTitle('Water the plants', {
+      request: 'Am. Yes',
+      context: [{ request: 'Remind me tomorrow at 9 to water the plants', reply: 'Morning or evening?' }],
+    }),
+    undefined,
+  );
+  assert.equal(
+    validateReminderTitle('Dentist', {
+      request: 'Set a reminder for that appointment',
+      memory: [{ id: 'm1', text: 'Dentist appointment on Friday', shareable: true, tainted: false }],
+    }),
+    undefined,
+  );
+  assert.equal(
+    validateReminderTitle('Renew insurance', {
+      request: 'Remind me about the top item tomorrow',
+      steps: [{ tool: 'files.read', outcome: 'grant', result: { text: 'Renew insurance before March' } }],
+    }),
+    undefined,
+  );
 });

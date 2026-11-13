@@ -88,6 +88,7 @@ import {
   type RemoteOffer,
   requestLanguage,
   waitingReply,
+  validateReminderTitle,
   type Plan,
   type Recalled,
   type Step,
@@ -1253,6 +1254,14 @@ export class Runtime implements StoreApi {
           error: `${tool} is granted for EVA-03 (quarantine), which needs a sandbox NERV does not have yet (F-049): it does not run.`,
         });
         continue;
+      }
+      // B-049: reject missing, generic, or invented reminder titles back to Misato so she asks the owner instead.
+      if (tool === 'reminders.add' && !proactive) {
+        const titleError = validateReminderTitle(args.title, { request: message, context, memory, steps });
+        if (titleError) {
+          await this.record(sortieId, steps, { tool, args, outcome: 'invalid', error: titleError });
+          continue;
+        }
       }
       // The same action already ran in this sortie: running it again is never the owner's wish (a small model loops here).
       if (
