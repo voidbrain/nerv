@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-13T21:48:05.919Z",
+  "reviewed": "2026-11-13T22:11:33.480Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
     "AGENTS.md": "b52b056f97cf118b6bbc5b1bd8f54629ec0cdb0a722640b9e524d1370e105a9e",
-    "docs/BACKLOG-RULES.md": "7ace5e9da7acfca58ef176725ed78da6fcdd864cceaa4dbc67436b5da0aa6b94",
+    "docs/BACKLOG-RULES.md": "f1ab6871ab345a7ee13048106ac10c6a7a81ed8087a11adf8215f492bf9de36f",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
     "docs/agents/areas.md": "19890dcd2fb04557fcb9b9bb1df4dcbd2e584736e53a5989908bb822ef020d1c",
     "docs/agents/audit.md": "bc5de5707f9ec5c523e73602499312c373d6112ffc498d69bf68604522527992",
@@ -20,12 +20,12 @@
     "docs/agents/work-usage.md": "e2f7c484f1c07f4b47fd1133857d8744ccab0ad2a7b85b220946c115a002bebc",
     "tools/task-claims.mjs": "ef755fe7951544e5c05b20de7c64a7b53778b6d039a11a2abeb079e7d42b6fd2",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
-    "tools/work-items.mjs": "19c364e3946727f2f3caa750e0542f10f818fb1797aea0cce01d60b6266bb472",
+    "tools/work-items.mjs": "5ea5070984794cd551897d21d04cd79528f652847789619c7ef1e09e058d82e8",
     "tools/work-usage.mjs": "4329262c0b9e723e046dd8878e15a99cff5f590201cd0918563f3204bbe79219"
   },
   "measurements": {
     "samples": 1,
-    "latestAt": "2026-11-13T21:48:05.873Z",
+    "latestAt": "2026-11-13T22:11:33.432Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -77,10 +77,10 @@
   },
   "outcomes": [
     {
-      "kind": "tool",
+      "kind": "rule",
       "disposition": "implemented",
-      "target": "tools/work-items.mjs",
-      "evidence": "Harness v8.9.1 reconcile: queue order counts step-level dependencies; byte copy; NERV order unchanged (F-005, F-006 already above F-012)."
+      "target": "docs/BACKLOG-RULES.md",
+      "evidence": "Harness v8.10.0 reconcile: one actor per step; 26 mixed steps split (20 owner-then-agent, 5 agent-then-owner, 1 decision-then-agent); hours unchanged in total."
     }
   ]
 }

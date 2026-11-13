@@ -23,7 +23,7 @@
     "Reference released Gauntlet machine/scenario definitions and evidence identity; NERV retains assignments and role acceptance, not duplicate generic schemas"
   ],
   "dependsOn": [
-    "F-006-T13"
+    "F-006-T16"
   ],
   "resources": [
     "contract:model-routing",

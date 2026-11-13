@@ -16,7 +16,7 @@
     "Enrolment, revocation, leases, fencing and cancellation across the device matrix"
   ],
   "dependsOn": [
-    "F-005-T11"
+    "F-005-T37"
   ],
   "resources": [
     "src/**",
@@ -37,14 +37,12 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.25 h agent + 1 hour owner",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "estimate": "1 h owner",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
     "reviewed": "2026-11-13",
     "baselineDays": 1.5,
-    "agentHours": 0.25,
     "ownerHours": 1,
-    "baselineAgentHours": 2.25,
-    "estimateAgentHours": 0.25,
+    "agentHours": 0,
     "ownerKind": "procedure"
   }
 }

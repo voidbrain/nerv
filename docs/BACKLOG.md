@@ -14,17 +14,15 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 32 | 6 |
-| **Require Human 🧑** | 10 | 2 |
+| **Require Human 🧑** | 8 | 2 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-005](#f-005) | [F-049](#f-049) | [B-057](#b-057) | — |
-| [F-006](#f-006) | [F-076](#f-076) | [B-056](#b-056) |  |
-| [F-049](#f-049) |  |  |  |
-| [F-009](#f-009) |  |  |  |
+| [F-005](#f-005) | [F-076](#f-076) | [B-057](#b-057) | — |
+| [F-009](#f-009) |  | [B-056](#b-056) |  |
 | [F-011](#f-011) |  |  |  |
 | [F-023](#f-023) |  |  |  |
 | [F-004](#f-004) |  |  |  |
@@ -33,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 38 h agent + 16.75 h owner across 117 open steps of 31 features and 6 other records. 16.75 h of actual effort recorded on 32 steps. Generated from the task files.
+**Remaining effort:** 38 h agent + 16.75 h owner across 143 open steps of 31 features and 6 other records. 16.75 h of actual effort recorded on 32 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -47,9 +45,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Discover, install and operate enrolled remote workers**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.75 h agent + 5.25 h owner | — | [F-012-T05](#f-012) | 🧑‍🔧 | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.75 h agent + 5.25 h owner | — | [F-012-T05](#f-012) | 🤖 | 🧑‍🔧 | — |
 
 💻 **→** Next: F-005-T15 — T06h — Upgrades that raise the schema version (Planned).
 
@@ -73,7 +71,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | F-005-T08 — T08a — Prerequisite check (Node version, executable, non-interactive service environment) joined to install, start and update | 1 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
 | — | F-005-T09 — T09a — Windows lifecycle adapter: install, status, start, stop and uninstall under the same fencing journal | 1.25 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
 | — | F-005-T10 — T10a — Linux user-service adapter (systemd --user), with no implicit linger or system-wide service | 1.25 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
-| 🟢 Small | F-005-T11 — T11a — Agree the device matrix for final acceptance (owner decision) | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned · waits on F-005-T22, F-005-T24, F-005-T26 | 🤖 | ⏳ | ⏳ |
+| 🟢 Small | F-005-T11 — Propose the device matrix for final acceptance | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
 | — | F-005-T12 — T06e — Independent review of the update path | 1.5 h | 1.25 h (stated) | 0 h | Completed | 🤖 | — | — |
 | — | F-005-T13 — T06f — First real lifecycle update on the Mac service | 0.5 h | 0.75 h (stated) | 0 h | Completed | 🤖 | — | — |
 | — | F-005-T14 — T06g — After-start health check in the update receipt | 1 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
@@ -84,16 +82,23 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | F-005-T19 — T08b — Node install or upgrade choices with ownership and recovery; never replaces a user-managed runtime silently | 1.25 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
 | — | F-005-T20 — T08c — Engine/provider contract for several instances and endpoints, local and remote; Ollama becomes one adapter | 1.25 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
 | — | F-005-T21 — T08d — Optional start-at-login or on-demand management of selected owned local engines | 1 h | 0.25 h (stated) | 0 h | Completed | 🤖 | — | — |
-| 🟢 Small | F-005-T22 — T08e — Demonstration of prerequisites and optional engine management on an owner-selected target | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned | 🤖 | [🧑‍🔧](acceptance/f005-t22-prerequisites.md) | — |
+| 🟢 Small | F-005-T22 — T08e — Demonstration of prerequisites and optional engine management on an owner-selected target | — | 0 h | 0 h agent + 0.5 h owner | Planned | — | [🧑‍🔧](acceptance/f005-t22-prerequisites.md) | — |
 | — | F-005-T23 — T09b — Windows update and recovery: backup, rehearsal and checkout | 1 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
-| 🟢 Small | F-005-T24 — T09c — Acceptance on an owner-selected Windows machine | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned | 🤖 | [🧑‍🔧](acceptance/f005-t24-tabgha-windows.md) | — |
+| 🟢 Small | F-005-T24 — T09c — Acceptance on an owner-selected Windows machine | — | 0 h | 0 h agent + 1 h owner | Planned | — | [🧑‍🔧](acceptance/f005-t24-tabgha-windows.md) | — |
 | — | F-005-T25 — T10b — Linux update and recovery | 1 h | 0.25 h (stated) | 0 h | Completed | 🤖 | — | — |
-| 🟢 Small | F-005-T26 — T10c — Acceptance on an owner-selected mini PC, Pi or equivalent | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned | 🤖 | [🧑‍🔧](acceptance/f009-service-login-procedure.md#part-2--linux-target-selection-and-acceptance-selected-linux-host-bash) | — |
-| 🟢 Small | F-005-T27 — T11b — Enrolment, revocation, leases, fencing and cancellation across the device matrix | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned · waits on F-005-T11 | 🤖 | ⏳ | — |
-| 🟢 Small | F-005-T28 — T11c — Reconnect, locks and uncertain physical results across the device matrix | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned · waits on F-005-T27 | 🤖 | ⏳ | — |
-| 🟢 Small | F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned · waits on F-005-T28 | 🤖 | ⏳ | — |
+| 🟢 Small | F-005-T26 — T10c — Acceptance on an owner-selected mini PC, Pi or equivalent | — | 0 h | 0 h agent + 1 h owner | Planned | — | [🧑‍🔧](acceptance/f009-service-login-procedure.md#part-2--linux-target-selection-and-acceptance-selected-linux-host-bash) | — |
+| 🟢 Small | F-005-T27 — T11b — Enrolment, revocation, leases, fencing and cancellation across the device matrix | — | 0 h | 0 h agent + 1 h owner | Planned · waits on F-005-T37 | — | ⏳ | — |
+| 🟢 Small | F-005-T28 — T11c — Reconnect, locks and uncertain physical results across the device matrix | — | 0 h | 0 h agent + 1 h owner | Planned · waits on F-005-T34 | — | ⏳ | — |
+| 🟢 Small | F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on F-005-T35 | — | ⏳ | — |
 | 🟢 Small | F-005-T30 — T11e — Parent acceptance and closure reconciliation | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
-| 🟡 Medium | **Total** | 18.25 h (24 of 30 steps) | 8 h (15 of 30 steps recorded) | 2.75 h agent + 5.25 h owner | 21 of 30 completed | | | |
+| 🟢 Small | F-005-T31 — Record the evidence of F-005-T22 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-005-T32 — Record the evidence of F-005-T24 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-005-T33 — Record the evidence of F-005-T26 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-005-T34 — Record the evidence of F-005-T27 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-005-T35 — Record the evidence of F-005-T28 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-005-T36 — Record the evidence of F-005-T29 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-005-T37 — Agree the device matrix | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on F-005-T11 | — | — | ⏳ |
+| 🟡 Medium | **Total** | 18.25 h (24 of 37 steps) | 8 h (15 of 37 steps recorded) | 2.75 h agent + 5.25 h owner | 21 of 37 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -116,9 +121,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Orchestrate agents and models across nodes**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.75 h agent + 2.5 h owner | — | [F-012-T03](#f-012) | 🧑‍🔧 | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.75 h agent + 2.5 h owner | — | [F-012-T03](#f-012) | 🤖 | — | — |
 
 💻 **→** Next: F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases (Planned).
 
@@ -135,18 +140,22 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | F-006-T01 — T01a — Decision: remote inference endpoint identity, permitted data and behaviour when unavailable | 0.5 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | 🤔 |
 | — | F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback | 0.5 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
 | 🟢 Small | F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
-| 🟢 Small | F-006-T04 — T04a — Placement campaign plan with exact cases, repeats and budgets for owner approval | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned · waits on F-006-T08, F-006-T10 | 🤖 | — | ⏳ |
-| 🟢 Small | F-006-T05 — T05a — Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned | 🤖 | [🧑‍🔧](evaluations/mac-load-scenarios.md#planned-acceptance-not-new-qualification) | — |
+| 🟢 Small | F-006-T04 — Draft the placement campaign plan with exact cases, repeats and budgets | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-006-T05 — Draft the Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
 | — | F-006-T06 — T01b — Configuration validation for remote endpoints; the loopback-only local route stays guaranteed; regressions | 0.5 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
 | 🟢 Small | F-006-T07 — T02b — Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
 | 🟢 Small | F-006-T08 — T02c — Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
 | 🟢 Small | F-006-T09 — T03b — Evidence adapter binding both configurations, handoffs, budgets and hosts | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
 | 🟢 Small | F-006-T10 — T03c — Grader tamper protection; stale or mismatched evidence rejected; authority rechecked | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
-| 🟢 Small | F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned · waits on F-006-T04 | 🤖 | ⏳ | — |
+| 🟢 Small | F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on F-006-T17 | — | ⏳ | — |
 | 🟢 Small | F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
-| 🟢 Small | F-006-T13 — T05b — Three Mac operating-condition runs | 0.25 h | 0 h | 0.25 h agent + 1.5 h owner | Planned · waits on F-006-T05 | 🤖 | ⏳ | — |
+| 🟢 Small | F-006-T13 — T05b — Three Mac operating-condition runs | — | 0 h | 0 h agent + 1.5 h owner | Planned · waits on F-006-T18 | — | ⏳ | — |
 | 🟢 Small | F-006-T14 — T05c — Mac operating-conditions report | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
-| 🟡 Medium | **Total** | 4.25 h | 1.5 h (3 of 14 steps recorded) | 2.75 h agent + 2.5 h owner | 3 of 14 completed | | | |
+| 🟢 Small | F-006-T15 — Record the evidence of F-006-T11 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-006-T16 — Record the evidence of F-006-T13 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-006-T17 — Approve the placement campaign plan and budgets | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on F-006-T04 | — | — | ⏳ |
+| 🟢 Small | F-006-T18 — Approve the Mac operating-conditions plan and budgets | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on F-006-T05 | — | — | ⏳ |
+| 🟡 Medium | **Total** | 4.25 h (14 of 18 steps) | 1.5 h (3 of 18 steps recorded) | 2.75 h agent + 2.5 h owner | 3 of 18 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -169,9 +178,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Backup and restore: agreed loss bounds, off-host snapshots and a restore drill**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 1 h | — | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-062-T02 (nightly consistent snapshots).
 
@@ -211,9 +220,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Resume a specific paused job after its provider limit resets**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 2 h agent + 0.5 h owner | [F-006-T07](#f-006), [F-005-T24](#f-005) | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 2 h agent + 0.5 h owner | [F-006-T07](#f-006), [F-005-T32](#f-005) | — | 🤖 | — | — |
 
 💻 **→** Define durable waiting jobs and implement an authorized browser/editor adapter that rechecks the exact job before resuming once.
 
@@ -231,8 +240,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | F-012-T02 — Readiness check and once-only resume engine | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
 | 🟢 Small | F-012-T03 — Claude Code (VS Code) adapter feasibility and adapter | 0.5 h | 0 h | 0.5 h | Planned · waits on F-006-T07 | 🤖 | — | — |
 | 🟢 Small | F-012-T04 — Web-chat adapter feasibility | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
-| 🟢 Small | F-012-T05 — Edge cases and real-host acceptance | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned · waits on F-005-T24, F-012-T04 | 🤖 | ⏳ | — |
-| 🟡 Medium | **Total** | 2 h | 0 h (0 of 5 steps recorded) | 2 h agent + 0.5 h owner | 0 of 5 completed | | | |
+| 🟢 Small | F-012-T05 — Edge cases and real-host acceptance | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on F-005-T32, F-012-T04 | — | ⏳ | — |
+| 🟢 Small | F-012-T06 — Record the evidence of F-012-T05 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟡 Medium | **Total** | 2 h (5 of 6 steps) | 0 h (0 of 6 steps recorded) | 2 h agent + 0.5 h owner | 0 of 6 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -254,9 +264,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Relocate the logical coordinator without split brain**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.25 h agent + 1.25 h owner | — | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.25 h agent + 1.25 h owner | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-016-T10 (revise the decision after the review); owner agreement only after a clean second review.
 
@@ -280,9 +290,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | F-016-T06 — Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
 | 🟢 Small | F-016-T07 — Step 4a — Owner-initiated relocation with restore; never a context-only takeover | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
 | 🟢 Small | F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
-| 🟢 Small | F-016-T09 — Step 5b — Two-device relocation acceptance | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned · waits on F-016-T08 | 🤖 | ⏳ | — |
+| 🟢 Small | F-016-T09 — Step 5b — Two-device relocation acceptance | — | 0 h | 0 h agent + 1 h owner | Planned · waits on F-016-T08 | — | ⏳ | — |
 | 🟢 Small | F-016-T10 — Revise the relocation decision after review | 0.5 h | 0 h | 0.5 h | Ready | 🤖 | — | — |
-| 🟡 Medium | **Total** | 3 h | 0.5 h (1 of 10 steps recorded) | 2.25 h agent + 1.25 h owner | 1 of 10 completed | | | |
+| 🟢 Small | F-016-T11 — Record the evidence of F-016-T09 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟡 Medium | **Total** | 3 h (10 of 11 steps) | 0.5 h (1 of 11 steps recorded) | 2.25 h agent + 1.25 h owner | 1 of 11 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -304,9 +315,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **EVA instances: an EVA is a class, each job gets a fresh sandbox**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h agent + 0.75 h owner | — | [F-021](#f-021), [F-027](#f-027), [F-051-T06](#f-051) | 🧑‍🔧 | 🤔 |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h agent + 0.75 h owner | — | [F-021](#f-021), [F-027](#f-027), [F-051-T06](#f-051) | 🤖 | — | — |
 
 💻 **→** Next: the EVA class definition and one sandboxed instance per job, starting with EVA-03 (owner, 2026-11-05).
 
@@ -322,15 +333,17 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | — | F-049-T01 — Define deterministic isolated runner admission and enforcement | 0.5 h | 0.25 h (stated) | 0 h | Completed | 🤖 | — | — |
 | 🟢 Small | F-049-T02 — EVA class definitions and least-class admission | 0.25 h | 0 h | 0.25 h | Ready | 🤖 | — | — |
-| 🟢 Small | F-049-T03 — Choose the macOS host enforcement mechanism | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Ready | 🤖 | [🧑‍🔧](decisions/eva-runner.md#per-job-enforcement-boundaries-supported-hosts) | [🤔](decisions/eva-runner.md#per-job-enforcement-boundaries-supported-hosts) |
+| 🟢 Small | F-049-T03 — Measure the macOS enforcement candidates against the threat model | 0.25 h | 0 h | 0.25 h | Ready | 🤖 | — | — |
 | 🟢 Small | F-049-T04 — EVA-03 instance per job | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
 | 🟢 Small | F-049-T05 — Escape and recovery join tests | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
 | 🟢 Small | F-049-T06 — Concurrent instances within per-machine limits | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
 | 🟢 Small | F-049-T07 — EVA-00, EVA-01 and EVA-02 on the runner | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
 | 🟢 Small | F-049-T08 — Pilot trust stage caps the class | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
 | 🟢 Small | F-049-T09 — Dashboard shows instances per class | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
-| 🟢 Small | F-049-T10 — Linux host enforcement for the mini PC | 0.5 h | 0 h | 0.5 h agent + 0.5 h owner | Planned · waits on F-049-T05 | 🤖 | ⏳ | — |
-| 🟡 Medium | **Total** | 3.5 h | 0.25 h (1 of 10 steps recorded) | 3 h agent + 0.75 h owner | 1 of 10 completed | | | |
+| 🟢 Small | F-049-T10 — Linux host enforcement and join tests in CI | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-049-T11 — Choose the macOS host enforcement mechanism | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on F-049-T03 | — | — | ⏳ |
+| 🟢 Small | F-049-T12 — Run the first EVA job on the Linux host | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on F-049-T10 | — | ⏳ | — |
+| 🟡 Medium | **Total** | 3.5 h (10 of 12 steps) | 0.25 h (1 of 12 steps recorded) | 3 h agent + 0.75 h owner | 1 of 12 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -353,9 +366,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **MCP and standardized tool/expert protocol**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 1.5 h | [F-049](#f-049) | [F-056](#f-056) | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 1.5 h | [F-049](#f-049) | [F-056](#f-056) | ⏳ | — | — |
 
 💻 **→** Next: slice 2, writes with approval cards; then the dashboard tools list, tools on other bases, remote (HTTP) servers. Optional owner check below.
 
@@ -397,9 +410,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Run NERV Agency headless as one local user service**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.5 h agent + 0.75 h owner | — | — | 🧑‍🔧 | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.5 h agent + 0.75 h owner | — | — | ⏳ | 🧑‍🔧 | — |
 
 🧑 **→** Run the [service and login acceptance procedure](acceptance/f009-service-login-procedure.md): Mac login/logout, then the Linux user service on a Linux VM on the Mac (owner choice, 2026-11-13).
 
@@ -414,9 +427,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | — | F-009-T01 — Single-process service, config and lifecycle commands | — | 0 days | 0 remaining | Completed | 🤖 | — | — |
-| 🟢 Small | F-009-T02 — Mac login/logout acceptance | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned | 🤖 | [🧑‍🔧](acceptance/f009-service-login-procedure.md#part-1--mac-loginlogout-acceptance-neo-tokyo-3-terminal) | — |
-| 🟢 Small | F-009-T03 — Linux service target acceptance | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned · waits on F-009-T02 | 🤖 | ⏳ | — |
-| 🟢 Small | **Total** | 0.5 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 0.5 h agent + 0.75 h owner | 1 of 3 completed | | | |
+| 🟢 Small | F-009-T02 — Mac login/logout acceptance | — | 0 h | 0 h agent + 0.25 h owner | Planned | — | [🧑‍🔧](acceptance/f009-service-login-procedure.md#part-1--mac-loginlogout-acceptance-neo-tokyo-3-terminal) | — |
+| 🟢 Small | F-009-T03 — Linux service target acceptance | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on F-009-T04 | — | ⏳ | — |
+| 🟢 Small | F-009-T04 — Record the evidence of F-009-T02 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-009-T05 — Record the evidence of F-009-T03 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | **Total** | 0.5 h (2 of 5 steps) | 0 h (0 of 5 steps recorded) | 0.5 h agent + 0.75 h owner | 1 of 5 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -440,9 +455,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Native macOS menu-bar companion without Electron**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.5 h agent + 0.75 h owner | — | — | 🧑‍🔧 | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.5 h agent + 0.75 h owner | — | — | ⏳ | 🧑‍🔧 | — |
 
 🧑 **→** Run the [companion acceptance procedure](acceptance/f011-companion-acceptance-procedure.md) (menu, service buttons, login, notifications); the app stays unsigned (owner choice, 2026-11-13).
 
@@ -457,10 +472,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | — | F-011-T01 — Companion implementation and packaging automation | — | 0 days | 0 remaining | Completed | 🤖 | — | — |
-| 🟢 Small | F-011-T02 — Live menu, service-button and login acceptance on the Mac | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned | 🤖 | [🧑‍🔧](acceptance/f011-companion-acceptance-procedure.md#part-1--companion-ui-notifications-and-service-controls-neo-tokyo-3-terminal--ui) | — |
-| 🟢 Small | F-011-T03 — Live notification permission acceptance | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned · waits on F-011-T02 | 🤖 | ⏳ | — |
+| 🟢 Small | F-011-T02 — Live menu, service-button and login acceptance on the Mac | — | 0 h | 0 h agent + 0.5 h owner | Planned | — | [🧑‍🔧](acceptance/f011-companion-acceptance-procedure.md#part-1--companion-ui-notifications-and-service-controls-neo-tokyo-3-terminal--ui) | — |
+| 🟢 Small | F-011-T03 — Live notification permission acceptance | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on F-011-T05 | — | ⏳ | — |
 | — | F-011-T04 — Signed and notarized release | 0.25 h | 0 h | 0 h | Completed | 🤖 | 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 0.75 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 0.5 h agent + 0.75 h owner | 2 of 4 completed | | | |
+| 🟢 Small | F-011-T05 — Record the evidence of F-011-T02 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-011-T06 — Record the evidence of F-011-T03 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | **Total** | 0.75 h (3 of 6 steps) | 0 h (0 of 6 steps recorded) | 0.5 h agent + 0.75 h owner | 2 of 6 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -482,9 +499,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Misato's apartment: approval cards with TTL, delivered by Pen Pen**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0 days | — | — | 🧑‍🔧 | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0 days | — | — | — | 🧑‍🔧 | — |
 
 🧑 **→** T03 delivery is accepted after full CI. Run the [paired Mac approvals procedure](acceptance/f023-native-approvals-procedure.md) for actual menu/VoiceOver and notification/banner behavior.
 
@@ -522,9 +539,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Angular PWA and validated GenUI**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h agent + 0.5 h owner | — | — | 🧑‍🔧 | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h agent + 0.5 h owner | — | — | ⏳ | 🧑‍🔧 | — |
 
 🧑 **→** Run the [phone install and push procedure](acceptance/f004-t06-phone-push-procedure.md): install on a phone, receive a reminder push, and complete it from the PWA.
 
@@ -543,8 +560,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | F-004-T03 — Doctor view | 1.5 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
 | — | F-004-T04 — Schema-validated registered component renderer (GenUI) | 3 h | 0.75 h (stated) | 0 h | Completed | 🤖 | — | — |
 | — | F-004-T05 — Web push subscription and delivery | 3 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
-| 🟢 Small | F-004-T06 — Phone install and push acceptance | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Ready | 🤖 | [🧑‍🔧](acceptance/f004-t06-phone-push-procedure.md#steps-phone--mac-terminal) | — |
-| 🟢 Small | **Total** | 12.25 h | 3 h (5 of 6 steps recorded) | 0.25 h agent + 0.5 h owner | 5 of 6 completed | | | |
+| 🟢 Small | F-004-T06 — Phone install and push acceptance | — | 0 h | 0 h agent + 0.5 h owner | Ready | — | [🧑‍🔧](acceptance/f004-t06-phone-push-procedure.md#steps-phone--mac-terminal) | — |
+| 🟢 Small | F-004-T07 — Record the evidence of F-004-T06 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | **Total** | 12.25 h (6 of 7 steps) | 3 h (5 of 7 steps recorded) | 0.25 h agent + 0.5 h owner | 5 of 7 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -566,9 +584,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Naoko desk provenance and Ireul taint with an egress allowlist**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟣 Blocked | ◻️ P1 | 🟢 Small | 0.5 h | [F-049](#f-049) | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟣 Blocked | ◻️ P1 | 🟢 Small | 0.5 h | [F-049](#f-049) | — | 🤖 | — | — |
 
 💻 **→** T01 is accepted; T02 awaits F-049 isolation before enforced Scrolls egress can be tested.
 
@@ -607,9 +625,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Agentic threat map: each OWASP risk tied to a NERV control and the test that proves it**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h | — | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
 
 💻 **→** Write `docs/security/agentic-threats.md` and a check that every row names an existing test.
 
@@ -646,9 +664,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Authenticated directory of base communication operators**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.75 h | — | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.75 h | — | — | — | — | — |
 
 💻 **→** Implemented F-070-T01 and F-070-T02: per-base operator configuration, signed operator directory contract, authenticated Kaji heartbeat discovery, and safe alias resolution (`src/operator-directory.ts`, `src/config.ts`, `src/kaji-link.ts`, `src/runtime.ts`, `src/chat-command.ts`, `src/server.ts`). Next: CI and merge.
 
@@ -685,9 +703,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Dashboard: a sortie shows where it runs and who contributed**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | [F-049-T09](#f-049) | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | [F-049-T09](#f-049) | — | ⏳ | — | — |
 
 💻 **→** Next: EVA cage labels (F-051-T06) wait on F-049.
 
@@ -730,9 +748,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Parallel work: a visible queue, limits per model, a lock per item**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.75 h | — | [F-050](#f-050) | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.75 h | — | [F-050](#f-050) | — | — | — |
 
 💻 **→** Next: T01–T03 implemented (visible bounded request queue, per-model concurrency budgets, per-item mutation ownership); remaining scope is the 2026-11-07 owner extension on multi-step specialist orchestration.
 
@@ -771,9 +789,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Model evaluation: the four candidate models by role and base, Mac and mini PC**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h agent + 0.25 h owner | — | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h agent + 0.25 h owner | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-078-T03 (Neo Tokyo-3 smoke campaign) inside the [approved matrix and budget](evaluations/2026-11-13-model-inventory.md#approved-matrix-and-budget-f-078-t02-2026-11-13).
 
@@ -791,11 +809,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | F-078-T02 — Agree the evaluation matrix and its budget | 0.25 h | 0 h | 0 h | Completed | 🤖 | — | 🤔 |
 | 🟢 Small | F-078-T03 — Smoke campaign on Neo Tokyo-3 | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
 | 🟢 Small | F-078-T04 — Role campaign on Neo Tokyo-3 | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
-| 🟢 Small | F-078-T05 — Tabgha campaign: remote endpoint and small local fallback | 0.5 h | 0 h | 0.5 h agent + 0.25 h owner | Planned · waits on F-078-T04 | 🤖 | ⏳ | — |
+| 🟢 Small | F-078-T05 — Prepare Tabgha for the campaign: allow the run and download qwen2.5:3b | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on F-078-T04 | — | ⏳ | — |
 | 🟢 Small | F-078-T06 — Campaign for the larger candidates | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
 | 🟢 Small | F-078-T07 — Comparison report and profile status | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
 | 🟢 Small | F-078-T08 — Adopt the new Gauntlet packs (gauntlet F-012) when released | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
-| 🟡 Medium | **Total** | 3.5 h | 0 h (0 of 8 steps recorded) | 3 h agent + 0.25 h owner | 2 of 8 completed | | | |
+| 🟢 Small | F-078-T09 — Tabgha campaign: remote endpoint and small local fallback | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
+| 🟡 Medium | **Total** | 3.5 h (8 of 9 steps) | 0 h (0 of 9 steps recorded) | 3 h agent + 0.25 h owner | 2 of 9 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -817,9 +836,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Misato invents a reminder title instead of asking, when an Italian request gives none**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h | — | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h | — | — | — | — | — |
 
 💻 **→** Verify: PR #367 (CI pending); deterministic guard + prompt reinforcement implemented; 4/4 `gemma4:12b` invocations of `italian-missing-title` asked in Italian.
 
@@ -855,9 +874,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **A long chat reply on the main base fails at the 120 s model-call limit**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟠 Investigate | 🔶 P2 | 🟢 Small | 0.5 h | — | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟠 Investigate | 🔶 P2 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: measure where the 210 s went (plan steps, tokens, thinking) and decide limit, output cap or streaming (B-054-T01).
 
@@ -893,9 +912,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Timing-sensitive tests fail on the Windows CI runner without a code change**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h | — | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: B-060-T02 (Windows timing tests).
 
@@ -932,9 +951,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Slash commands in Telegram and the dashboard chat, and how much Aoba tells you**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | [F-021](#f-021) | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | [F-021](#f-021) | — | 🤖 | — | — |
 
 💻 **→** Next: remaining commands, Telegram command menu and /log controls; status/help read router implemented before Misato.
 
@@ -976,9 +995,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Forwarding a whole job to another base**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | [F-048](#f-048) | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | [F-048](#f-048) | — | 🤖 | — | — |
 
 💻 **→** Next: the job message and its fallback, for capability first.
 
@@ -1017,9 +1036,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Companion error messages are Italian only and do not say what went wrong**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | 🧑‍🔧 | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | — | 🧑‍🔧 | — |
 
 🧑 **→** Next: Run [parts C and D of the companion live checks](acceptance/companion-live-checks.md#part-c) (revoked, stopped, changed certificate, English and Italian), then close B-057.
 
@@ -1056,9 +1075,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Dependency and code alerts, a Node 26 CI job and a dependency refresh**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-077-T02 (patch and minor dependency updates); the next audit reads the first alerts.
 
@@ -1095,9 +1114,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Experiment: each system evaluation case covers only the source it exercises**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-079-T01.
 
@@ -1134,9 +1153,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Memory: one fact per subject, a proposed spelling fix, typo-tolerant recall**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: split compound memories on one card, with a proposed clean-up.
 
@@ -1175,9 +1194,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Bounded incident circuits instead of a global kill switch**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-064-T02 (the first circuit).
 
@@ -1215,9 +1234,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Machine credentials: rotation and telling owner use from automated use**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
 
 💻 **→** Add rotation for the admin token, Telegram token and cloud key, and a test for NHI10.
 
@@ -1255,9 +1274,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Peer-facing handlers move out of the serve wiring into a tested module**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-080-T01.
 
@@ -1293,9 +1312,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Spike: herdr-core as a coding-agent terminal runtime**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟠 Investigate | 🔹 P3 | 🟢 Small | 0.5 h agent + 2 h owner | — | — | 🧑‍🔧 | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟠 Investigate | 🔹 P3 | 🟢 Small | 0.5 h agent + 2 h owner | — | — | ⏳ | 🧑‍🔧 | — |
 
 💻 **→** Next: a time-boxed trial of herdr-core as the development workspace, then a written adopt/adapter/reject outcome.
 
@@ -1309,9 +1328,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟢 Small | F-060-T01 — herdr-core trial in the development workspace | 0.25 h | 0 h | 0.25 h agent + 2 h owner | Planned | 🤖 | 🧑‍🔧 | — |
+| 🟢 Small | F-060-T01 — herdr-core trial in the development workspace | — | 0 h | 0 h agent + 2 h owner | Planned | — | 🧑‍🔧 | — |
 | 🟢 Small | F-060-T02 — Answer the five questions and per-record outcomes | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
-| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 2 steps recorded) | 0.5 h agent + 2 h owner | 0 of 2 completed | | | |
+| 🟢 Small | F-060-T03 — Record the evidence of F-060-T01 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | **Total** | 0.5 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 0.5 h agent + 2 h owner | 0 of 3 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1333,9 +1353,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Voice and evaluated skill improvement**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 2 h agent + 0.5 h owner | — | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 2 h agent + 0.5 h owner | — | — | 🤖 | — | — |
 
 💻 **→** Slices approved 2026-11-11 and recorded as tasks. Next agent work: Step 1a (F-007-T01) voice feasibility, or Step 3b (F-007-T07) skill evaluation; Step 3a (F-007-T06) closed 2026-11-13.
 
@@ -1353,12 +1373,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | F-007-T02 — Step 1b — Voice command corpus in Italian and English with expected intents | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
 | 🟢 Small | F-007-T03 — Step 2a — Push-to-talk on the dashboard and companion: speech to text shown for confirmation, no silent physical activation | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
 | 🟢 Small | F-007-T04 — Step 2b — Spoken replies (text-to-speech) | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
-| 🟢 Small | F-007-T05 — Step 2c — Voice corpus evaluation run and report | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned · waits on F-007-T04 | 🤖 | ⏳ | — |
+| 🟢 Small | F-007-T05 — Step 2c — Voice corpus evaluation run and report | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on F-007-T04 | — | ⏳ | — |
 | — | F-007-T06 — Step 3a — Skill package format, isolated storage and versions | 1 h | 0 h | 0 h | Completed | 🤖 | — | — |
 | 🟢 Small | F-007-T07 — Step 3b — Skill evaluation with a baseline run without the skill and held-out cases | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
 | 🟢 Small | F-007-T08 — Step 3c — Owner promotion, rollback and retirement of skills after a model change | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
 | 🟢 Small | F-007-T09 — Step 3d — Rejected permission escalation and corrected-memory cases | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
-| 🟡 Medium | **Total** | 3 h | 0 h (0 of 9 steps recorded) | 2 h agent + 0.5 h owner | 1 of 9 completed | | | |
+| 🟢 Small | F-007-T10 — Record the evidence of F-007-T05 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟡 Medium | **Total** | 3 h (9 of 10 steps) | 0 h (0 of 10 steps recorded) | 2 h agent + 0.5 h owner | 1 of 10 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1380,9 +1401,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Integrate the FPV app**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h agent + 0.5 h owner | — | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h agent + 0.5 h owner | — | — | 🤖 | — | — |
 
 💻 **→** Define an adapter for authoritative battery, crash and maintenance operations owned by the FPV app.
 
@@ -1398,8 +1419,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🟢 Small | F-008-T01 — FPV app adapter contract | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
 | 🟢 Small | F-008-T02 — Battery and maintenance records through the adapter | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
-| 🟢 Small | F-008-T03 — Acceptance against the real FPV app | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned · waits on F-008-T02 | 🤖 | ⏳ | — |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 3 steps recorded) | 1 h agent + 0.5 h owner | 0 of 3 completed | | | |
+| 🟢 Small | F-008-T03 — Acceptance against the real FPV app | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on F-008-T02 | — | ⏳ | — |
+| 🟢 Small | F-008-T04 — Record the evidence of F-008-T03 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | **Total** | 1 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 1 h agent + 0.5 h owner | 0 of 4 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1422,9 +1444,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Grounded personas for HITL and explanation (Misato primary)**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
 
 💻 **→** Optional conversational faces grounded in real job state: Misato as primary HITL/ops voice; Gendo optional for risk/policy explanation; pilots optional as worker identity only.
 
@@ -1464,9 +1486,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **The base chronicle: a daily log of the agency's milestones, plain and in Eva lore**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
 
 💻 **→** F-054-T01 (Simple chronicle from recorded facts) and F-054-T04 (record the missing facts) closed; next F-054-T02 (Eva version).
 
@@ -1507,9 +1529,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Without a web build the browser evaluation case is recorded as a failure, not as an unmet requirement**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | — | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: B-059-T01.
 
@@ -1545,9 +1567,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **What reaches main is tested together, not only each PR on its own**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 1.25 h agent + 0.25 h owner | — | — | — | 🤔 |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 1.25 h agent + 0.25 h owner | — | — | 🤖 | — | 🤔 |
 
 🧑 **→** The merge queue needs an organization-owned repository: move `nerv` to a free organization, or choose option 2 (CI on every push to main) or option 1 ([options](audits/2026-11-13-full.md#f076-options)).
 
@@ -1564,8 +1586,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | F-076-T01 — Choose how merged main is verified | 0 h | 0 h | 0 h | Completed | — | — | 🤔 |
 | 🟢 Small | F-076-T02 — CI runs on merge&#95;group | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
 | 🟢 Small | F-076-T03 — Reconcile the queue-aware merge tool | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | 🤖 | — | — |
-| 🟢 Small | F-076-T04 — Turn on the merge queue for main | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned · waits on F-076-T03 | 🤖 | — | ⏳ |
-| 🟡 Medium | **Total** | 1.25 h | 0 h (0 of 4 steps recorded) | 1.25 h agent + 0.25 h owner | 1 of 4 completed | | | |
+| 🟢 Small | F-076-T04 — Turn on the merge queue for main | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on F-076-T03 | — | — | ⏳ |
+| 🟢 Small | F-076-T05 — Put the chosen main verification in place | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟡 Medium | **Total** | 1.25 h (4 of 5 steps) | 0 h (0 of 5 steps recorded) | 1.25 h agent + 0.25 h owner | 1 of 5 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1586,9 +1609,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Native pairing: recovery on the service host with its profile stopped, and the stale client of 2026-11-07**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h agent + 0.5 h owner | — | — | 🧑‍🔧 | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h agent + 0.5 h owner | — | — | ⏳ | 🧑‍🔧 | — |
 
 🧑 **→** Run [parts A and D of the companion live checks](acceptance/companion-live-checks.md#part-a): revoke the stale client, then the stopped-profile recovery.
 
@@ -1602,8 +1625,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟢 Small | F-081-T01 — Revoke the stale client and run stopped-profile recovery on the service host | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Ready | 🤖 | [🧑‍🔧](acceptance/companion-live-checks.md#part-a) | — |
-| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h agent + 0.5 h owner | 0 of 1 completed | | | |
+| 🟢 Small | F-081-T01 — Revoke the stale client and run stopped-profile recovery on the service host | — | 0 h | 0 h agent + 0.5 h owner | Ready | — | [🧑‍🔧](acceptance/companion-live-checks.md#part-a) | — |
+| 🟢 Small | F-081-T02 — Record the evidence of F-081-T01 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | **Total** | 0.25 h (1 of 2 steps) | 0 h (0 of 2 steps recorded) | 0.25 h agent + 0.5 h owner | 0 of 2 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1624,9 +1648,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **A renewal the companion refuses on the Mac says it was not confirmed**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h owner | — | — | 🧑‍🔧 | — |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h owner | — | — | — | 🧑‍🔧 | — |
 
 🧑 **→** Next: Run [part B of the companion live checks](acceptance/companion-live-checks.md#part-b) (refused renewal, English and Italian), then close B-056.
 

@@ -657,7 +657,17 @@ function ownerAsks(steps, all) {
     .map((t) => t.effort.ownerKind);
   return [kinds.some((k) => k !== 'decision'), kinds.some((k) => k !== 'procedure')];
 }
-function summaryTable(text, id, { remaining, size, links, asks = [false, false] }) {
+// F-073 (8.10.0): whether an agent can move the record now: 🤖 a planned or ready step with agent work (no ownerKind, or
+// agent hours on a step not yet split) has every prerequisite verified or closed, ⏳ such steps all wait, — none.
+function agentNow(steps, all) {
+  const done = new Set(all.filter((t) => ['verified', 'closed'].includes(t.status)).map((t) => t.id));
+  const open = steps.filter(
+    (t) => (!t.effort?.ownerKind || (t.effort.agentHours ?? 0) > 0) && ['planned', 'ready'].includes(t.status),
+  );
+  if (!open.length) return '—';
+  return open.some((t) => (t.dependsOn ?? []).every((d) => done.has(d))) ? AGENT : WAITING;
+}
+function summaryTable(text, id, { remaining, size, links, asks = [false, false], agent = null }) {
   const lines = text.split('\n');
   const at = lines.findIndex(
     (l, i) =>
@@ -685,6 +695,7 @@ function summaryTable(text, id, { remaining, size, links, asks = [false, false] 
           ['Unlocks', links.unlocks],
         ]
       : []),
+    ...(agent ? [['Agent', agent]] : []),
     ['Procedures', asks[0] ? PROCEDURE : human ? humanCells(human[2])[0] : '—'],
     ['Decisions', asks[1] ? DECISION : human ? humanCells(human[2])[1] : '—'],
   ];
@@ -695,7 +706,8 @@ function summaryTable(text, id, { remaining, size, links, asks = [false, false] 
     .map((c) => c.trim());
   lines[at] = '| Status | Priority | Effort |' + extra.map(([h]) => ` ${h} |`).join('');
   lines[at + 1] =
-    '|---|---|---|' + extra.map(([h]) => (['Procedures', 'Decisions'].includes(h) ? ':---:|' : '---|')).join('');
+    '|---|---|---|' +
+    extra.map(([h]) => (['Agent', 'Procedures', 'Decisions'].includes(h) ? ':---:|' : '---|')).join('');
   lines[at + 2] =
     `| ${signal} ${status} | ${priority} | ${size ?? effort} |` + extra.map(([, v]) => ` ${v} |`).join('');
   const out = lines.join('\n');
@@ -852,6 +864,7 @@ export function renderLedger(root, config, withPlans = true) {
               size: recordSize(stepsOf(id)),
               links: links?.get(id) ?? null,
               asks: ownerAsks(stepsOf(id), stepsOf.all),
+              agent: plannedTasks ? agentNow(stepsOf(id), stepsOf.all) : null,
             })
           : relocated;
         const icon = id.startsWith('F-') ? '✨' : '🐞';
@@ -1142,6 +1155,16 @@ export function checkWorkItems(root = process.cwd()) {
         t.dependsOn.every((d) => settled.has(d)),
     )
     .map((t) => t.id);
+  // F-073: one actor per step. An open step that asks for owner work and also has agent hours, or asks for both a
+  // procedure and a decision, is reported so it can be split into consecutive steps.
+  const mixedSteps = catalog.tasks
+    .filter(
+      (t) =>
+        !['verified', 'closed'].includes(t.status) &&
+        t.effort?.ownerKind &&
+        (t.effort.ownerKind === 'both' || (t.effort.agentHours ?? 0) > 0),
+    )
+    .map((t) => t.id);
   const recordsDir = local(root, config.records);
   const active = new Set(existsSync(recordsDir) ? readdirSync(recordsDir).map((f) => f.slice(0, -3)) : []);
   const recordLevelDependencies = [...active].sort().flatMap((id) => {
@@ -1161,6 +1184,7 @@ export function checkWorkItems(root = process.cwd()) {
     ...(staleEstimates.length ? { staleEstimates } : {}),
     ...(allStepsClosed.length ? { allStepsClosed } : {}),
     ...(ownerStepsWithoutLink.length ? { ownerStepsWithoutLink } : {}),
+    ...(mixedSteps.length ? { mixedSteps } : {}),
     ...(recordLevelDependencies.length ? { recordLevelDependencies } : {}),
   };
 }
@@ -1192,6 +1216,10 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       if (result.ownerStepsWithoutLink)
         console.warn(
           `! ${result.ownerStepsWithoutLink.length} open owner step(s) have no ownerLink to the procedure or decision page: ${result.ownerStepsWithoutLink.join(', ')}`,
+        );
+      if (result.mixedSteps)
+        console.warn(
+          `! ${result.mixedSteps.length} open step(s) have more than one actor (agent hours on an owner step, or ownerKind both); split each into consecutive steps with one actor: ${result.mixedSteps.join(', ')}`,
         );
       if (result.recordLevelDependencies)
         console.warn(

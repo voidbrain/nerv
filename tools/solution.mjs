@@ -87,7 +87,8 @@ function records(markdown, label, file, archived = false) {
           .map((c, i) => (c === ['🧑‍🔧', '🤔'][i] ? '🧑' : c))
           .join('')
       ];
-    const generated = row && (([7, 9].includes(row.length) && kind !== undefined) || legacy7);
+    // F-073 (8.10.0): eight or ten cells with the Agent cell.
+    const generated = row && (([7, 8, 9, 10].includes(row.length) && kind !== undefined) || legacy7);
     if (!row || (![4, 5].includes(row.length) && !generated))
       fail(`${label}:${id}: unsupported summary (run the owning repository's backlog check)`);
     const legacy = row[1] === id;
