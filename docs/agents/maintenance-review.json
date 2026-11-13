@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-13T00:30:15.789Z",
+  "reviewed": "2026-11-13T00:48:38.707Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
-    "AGENTS.md": "fb68a1cff284b5b089a145f117d4885a8943512c61897212250340cfc9427b96",
+    "AGENTS.md": "b52b056f97cf118b6bbc5b1bd8f54629ec0cdb0a722640b9e524d1370e105a9e",
     "docs/BACKLOG-RULES.md": "e2e12ec52b76442c2024faeef76143ddfc432cf342d593fda6cf0b715f870002",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
-    "docs/agents/areas.md": "0ff9805a7d720ee177505cef670e53169a6d640299762dfa86185be46fa8737c",
+    "docs/agents/areas.md": "19890dcd2fb04557fcb9b9bb1df4dcbd2e584736e53a5989908bb822ef020d1c",
     "docs/agents/audit.md": "bc5de5707f9ec5c523e73602499312c373d6112ffc498d69bf68604522527992",
     "docs/agents/change-impact.md": "dc1c473e274f76bd70a87ff57bbc53fc75dc75a35d121cf67baf163a2fd2e975",
     "docs/agents/coverage-guide.md": "3d539eb8beedfa101a5e47d9973cdf85dce197436fab2ab096f760e12d208106",
@@ -25,7 +25,7 @@
   },
   "measurements": {
     "samples": 1,
-    "latestAt": "2026-11-13T00:30:15.714Z",
+    "latestAt": "2026-11-13T00:47:12.186Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -81,6 +81,12 @@
       "disposition": "implemented",
       "target": "AGENTS.md",
       "evidence": "Added pre-push check:fast bundle, worktree:link helper, targeted reviewer diff guidance, and concise effort.basis / record-first reading guidance; condensed 154 repeated boilerplate basis strings in docs/work/tasks/."
+    },
+    {
+      "kind": "rule",
+      "disposition": "implemented",
+      "target": "docs/agents/areas.md",
+      "evidence": "Trimmed AGENTS.md below 200 lines, centralized doc status pointers to ROADMAP.md/BACKLOG.md, split verbose area notes into docs/agents/areas/{local-core,frontend,distributed}.md, and removed redundant docs/archive/2026-11-13/ copies."
     }
   ]
 }

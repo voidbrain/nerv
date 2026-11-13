@@ -88,7 +88,7 @@ The project is **NERV Agency**. The repository is `https://github.com/voidbrain/
 
 - Keep top-level docs (`README.md`, `docs/README.md`, `docs/INSTALL.md`, `docs/STYLE-GUIDE.md`, and general guides) concise (~150–200 lines max) and clearly structured as entry points.
 - Move feature-specific, platform-specific, or deep technical details into dedicated topic files under `docs/<topic>/` (e.g. `docs/guides/`, `docs/design/`, `docs/architecture/`) and link to them.
-- Keep docs current: replace "pending F-XXX" or stale historical status notes with shipped behavior once a feature closes, and avoid cluttering user/developer guides with closed record IDs unless linking a decision.
+- Keep docs current and free of backlog IDs or "not yet shipped / planned" lists; document shipped behavior and point to `docs/ROADMAP.md` & [docs/BACKLOG.md](docs/BACKLOG.md) where needed.
 
 ### Checks before you finish
 
@@ -164,13 +164,7 @@ All applicable rules must be known and followed from the start; shorter indexes 
 
 ## Area notes
 
-Before changing an area, read its section in [docs/agents/areas.md](docs/agents/areas.md): the rules and lessons there are as binding as this file.
-
-| Area | Covers |
-|---|---|
-| Local core | Persistence, reminders, API, doctor |
-| Frontend | Angular surfaces and branding |
-| Distributed contracts | Nodes, models, jobs and agents |
+Before changing an area, read its section in [docs/agents/areas.md](docs/agents/areas.md) (**Local core**, **Frontend**, **Distributed contracts**): the rules and lessons there are as binding as this file.
 
 ## Privacy
 

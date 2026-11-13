@@ -8,7 +8,7 @@
 - **Models & pilots:** Local S² routes (Ollama/LM Studio), optional Umbilical cloud route (Claude for Misato), Dummy Plug outage detection, specialist pilots, and SQLite token/cost accounting.
 - **Channels & UI:** Bilingual (EN/IT) Angular workspace and live NERV dashboard, Aoba Telegram bot, Hyuga daily briefs and proactive watches, and macOS menu-bar companion preview.
 - **Multi-base & operations:** Signed Kaji line over Tailscale, remote worker execution, `nerv nodes` discovery/inspection/bootstrap, local Mac lifecycle updates with rehearsal, CycloneDX BOM, and versioned evaluations.
-- **Not yet shipped:** WhatsApp, phone delivery, recurring reminders, model-driven GenUI, unattended device enrollment, remote MCP writes/sandboxes (`EVA-03`), and Windows/Linux `nodes` lifecycle adapters.
+- **Planned & open work:** See [the roadmap](docs/ROADMAP.md) and [the backlog](docs/BACKLOG.md) for upcoming milestones, platform adapters, and open features.
 
 ## Quick start
 
