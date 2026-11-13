@@ -1380,6 +1380,8 @@ try {
             // Slice 3b, on the base asked: only actions this base offers, once per id, through this base's own gate.
             offers: () => live().kaji?.offers ?? [],
             onOffers: (id, tools) => runtime.notePeerOffers(id, tools),
+            pilots: () => runtime.offeredPilots(),
+            onPilots: (id, pilots) => runtime.notePeerPilots(id, pilots),
             // Phase 2, on the base asked: this base's Casper votes on the main base's action.
             onVerdict: (_from, ask) => runtime.peerVerdict(ask),
             onChat: async (from, message, conversation) => ({

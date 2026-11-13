@@ -5,10 +5,13 @@ import { mkdtempSync, rmSync, writeFileSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
+  PilotRegistry,
   choosePilot,
   describePilots,
   hits,
   overlappingDomains,
+  sanitizePilotOffers,
+  toPilotOffers,
   validatePilots,
   words,
   type Pilot,
@@ -53,7 +56,12 @@ test('a pilot is data: the roster is checked, the generic pilot is implicit and 
       ],
       /twice/,
     ],
-    [[{ id: 'a1', name: 'A', domain: 'd', keywords: ['x'], model: 'm', tools: ['x'] }], /Invalid pilot:/],
+    [[{ id: 'a1', name: 'A', domain: 'd', keywords: ['x'], model: 'm', bogus: 1 }], /Invalid pilot:/],
+    [[{ id: 'a1', name: 'A', domain: 'd', keywords: ['x'], model: 'm', role: '' }], /role/],
+    [[{ id: 'a1', name: 'A', domain: 'd', keywords: ['x'], model: 'm', memoryScope: 'BAD SCOPE' }], /memoryScope/],
+    [[{ id: 'a1', name: 'A', domain: 'd', keywords: ['x'], model: 'm', evaClass: 'eva-99' }], /evaClass/],
+    [[{ id: 'a1', name: 'A', domain: 'd', keywords: ['x'], model: 'm', skills: [''] }], /skills/],
+    [[{ id: 'a1', name: 'A', domain: 'd', keywords: ['x'], model: 'm', tools: [123] }], /tools/],
   ] as const)
     assert.throws(() => validatePilots(bad), why);
   assert.equal(words('Perché la STAMPA 3D?'), 'perche la stampa 3d');
@@ -339,4 +347,92 @@ test('B-027: domain overlap uses significant whole words, ignoring case and acce
   assert.equal(overlappingDomains('with wood', 'with metal'), false);
   assert.equal(overlappingDomains('file access', 'profile editing'), false);
   assert.equal(overlappingDomains('3D printing', '3d printing'), true);
+});
+
+test('F-045-T01: full pilot data, heartbeat offers, and Kaji-style PilotRegistry', () => {
+  const validated = validatePilots([
+    {
+      id: 'coder',
+      name: 'Code Pilot',
+      role: 'coder',
+      domain: 'TypeScript and Node services',
+      keywords: ['typescript', 'refactor'],
+      skills: ['tdd', 'tdd', 'strict-ts'],
+      tools: ['fs.read', 'git.diff'],
+      model: 'qwen2.5-coder:14b',
+      memoryScope: 'domain',
+      evaClass: 'eva-01',
+      stage: 'test',
+      parent: 'generic',
+      pinned: true,
+    },
+    {
+      id: 'old-ops',
+      name: 'Old Ops',
+      domain: 'Legacy ops',
+      keywords: ['legacy'],
+      model: 'm',
+      retired: true,
+    },
+  ]);
+  assert.deepEqual(validated[0], {
+    id: 'coder',
+    name: 'Code Pilot',
+    role: 'coder',
+    domain: 'TypeScript and Node services',
+    keywords: ['typescript', 'refactor'],
+    skills: ['tdd', 'strict-ts'],
+    tools: ['fs.read', 'git.diff'],
+    model: 'qwen2.5-coder:14b',
+    memoryScope: 'domain',
+    evaClass: 'eva-01',
+    stage: 'test',
+    parent: 'generic',
+    pinned: true,
+  });
+
+  const offers = toPilotOffers(validated);
+  assert.equal(offers.length, 1, 'retired pilots are never offered');
+  assert.equal('pinned' in offers[0]!, false);
+  assert.equal('retired' in offers[0]!, false);
+  assert.deepEqual(sanitizePilotOffers(offers), offers);
+  assert.equal(sanitizePilotOffers([{ ...offers[0], pinned: true }]), undefined, 'local flags rejected in peer offers');
+  assert.equal(sanitizePilotOffers([{ ...offers[0], evaClass: 'eva-99' }]), undefined);
+  assert.equal(sanitizePilotOffers([{ ...offers[0], parent: 'missing' }]), undefined);
+
+  const now = 1_000_000;
+  const reg = new PilotRegistry('NERV-01', () => validated);
+  assert.equal(reg.offered().length, 1);
+  assert.equal(reg.recordPeer('NERV-01', offers, now), undefined, 'ignores self');
+  assert.equal(reg.recordPeer('NERV-02', [{ id: 'bad' }], now), undefined, 'ignores malformed offers');
+  assert.ok(
+    reg.recordPeer(
+      'NERV-02',
+      [
+        {
+          id: 'cad-3d',
+          name: 'Tabgha 3D',
+          role: 'specialist',
+          domain: '3D modeling and slicing',
+          keywords: ['blender', 'stl'],
+          skills: ['mesh-repair'],
+          tools: ['blender.render'],
+          model: 'gemma4:12b',
+          memoryScope: 'cad-3d',
+          evaClass: 'eva-00',
+          stage: 'prototype',
+        },
+      ],
+      now,
+    ),
+  );
+  const listed = reg.list({ now: now + 10_000, onlineBases: new Set(['NERV-02']) });
+  assert.deepEqual(
+    listed.map((p) => `${p.baseId}:${p.id}:${p.local}`),
+    ['NERV-01:coder:true', 'NERV-02:cad-3d:false'],
+  );
+  assert.equal(reg.get('NERV-02', 'cad-3d', { now: now + 10_000 })?.evaClass, 'eva-00');
+  assert.equal(reg.get('NERV-02', 'cad-3d', { now: now + 100_000 }), undefined, 'expired peer offer');
+  reg.clearPeer('NERV-02');
+  assert.equal(reg.forBase('NERV-02', { now }).length, 0);
 });

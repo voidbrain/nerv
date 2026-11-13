@@ -1,21 +1,53 @@
+import type { Executor } from './policy.ts';
+
 /**
  * Pilots (F-045): the owner's permanent agents, as data. Slice 1: a local roster in config.json, the generic pilot (the
  * consultant model of F-025, for anything no specialist covers) and advice mode: before Misato plans, the pilot whose
  * domain fits the request gives short advice. Advice is data in Misato's prompt, never a vote or an action.
  * Explicit proactive watches may bind their local planner model/stage to a named pilot (F-026); ordinary chat remains advice mode.
- * Later slices: pilots offered by other bases, pilots that act in an EVA, new specialists proposed from unmatched jobs.
+ * F-045-T01: full pilot data (role, domain, skills, tools, model, memory scope, EVA class, trust stage, parent),
+ * Kaji-style PilotRegistry, and heartbeat pilot offers.
  */
 export type Stage = 'prototype' | 'test' | 'production';
+export type EvaClass = Executor;
+export const EVA_CLASSES: readonly EvaClass[] = ['eva-00', 'eva-01', 'eva-02', 'eva-03'];
 export interface Pilot {
   id: string;
   name: string;
+  role?: string;
   domain: string;
   keywords: string[];
+  skills?: string[];
+  tools?: string[];
   model: string;
+  memoryScope?: string;
+  evaClass?: EvaClass;
   stage: Stage;
   parent?: string;
   pinned?: boolean;
   retired?: boolean;
+}
+/** Pilot definition offered by a base over the Kaji heartbeat (local roster flags like pinned/retired are omitted). */
+export interface PilotOffer {
+  id: string;
+  name: string;
+  role?: string;
+  domain: string;
+  keywords: string[];
+  skills?: string[];
+  tools?: string[];
+  model: string;
+  memoryScope?: string;
+  evaClass?: EvaClass;
+  stage: Stage;
+  parent?: string;
+}
+export interface RegisteredPilot extends PilotOffer {
+  baseId: string;
+  local: boolean;
+  pinned?: boolean;
+  retired?: boolean;
+  receivedAt?: string;
 }
 /** The pilot chosen for one request: who, on which model, and why it was chosen. */
 export interface Chosen {
@@ -47,62 +79,185 @@ export function overlappingDomains(left: string, right: string): boolean {
   const terms = new Set(significant(a));
   return significant(b).some((w) => terms.has(w));
 }
+const PILOT_KEYS = [
+  'id',
+  'name',
+  'role',
+  'domain',
+  'keywords',
+  'skills',
+  'tools',
+  'model',
+  'memoryScope',
+  'evaClass',
+  'stage',
+  'parent',
+  'pinned',
+  'retired',
+] as const;
+const OFFER_KEYS = PILOT_KEYS.filter((k) => k !== 'pinned' && k !== 'retired');
+const SCOPE_RE = /^[a-z][a-z0-9-]{1,39}$/;
+const ID_RE = /^[a-z][a-z0-9-]{1,30}$/;
+const cleanText = (s: string) => s.replace(/[\u0000-\u001f\u007f]/g, ' ').trim();
+function validateStringList(value: unknown, label: string, pilotId: string, maxLen = 64): string[] {
+  if (
+    !Array.isArray(value) ||
+    value.length > MAX_PILOTS ||
+    value.some((v) => typeof v !== 'string' || !cleanText(v) || v.length > maxLen)
+  )
+    throw new Error(
+      `Pilot ${pilotId}: ${label} is a list of up to ${MAX_PILOTS} items, each up to ${maxLen} characters.`,
+    );
+  return [...new Set((value as string[]).map(cleanText))];
+}
+function parsePilotEntry(raw: unknown, out: readonly Pilot[], allowLocalFlags: boolean): Pilot {
+  const p = raw as Record<string, unknown>;
+  const allowed = allowLocalFlags ? (PILOT_KEYS as readonly string[]) : (OFFER_KEYS as readonly string[]);
+  if (!p || typeof p !== 'object' || Array.isArray(p) || Object.keys(p).some((k) => !allowed.includes(k)))
+    throw new Error(`Invalid pilot: ${allowed.join(', ')}.`);
+  if (typeof p.id !== 'string' || !ID_RE.test(p.id) || p.id === GENERIC)
+    throw new Error(
+      `Invalid pilot id ${JSON.stringify(p.id)}: lower-case letters, digits and dashes, not "${GENERIC}".`,
+    );
+  if (out.some((o) => o.id === p.id)) throw new Error(`Pilot ${p.id} is listed twice.`);
+  if (typeof p.name !== 'string' || !cleanText(p.name) || p.name.length > 40)
+    throw new Error(`Pilot ${p.id}: a name up to 40 characters.`);
+  if (p.role !== undefined && (typeof p.role !== 'string' || !cleanText(p.role) || p.role.length > 40))
+    throw new Error(`Pilot ${p.id}: role up to 40 characters.`);
+  if (typeof p.domain !== 'string' || !cleanText(p.domain) || p.domain.length > 200)
+    throw new Error(`Pilot ${p.id}: a domain up to 200 characters.`);
+  if (
+    !Array.isArray(p.keywords) ||
+    !p.keywords.length ||
+    p.keywords.length > 30 ||
+    p.keywords.some((k) => typeof k !== 'string' || !words(k) || k.length > 40)
+  )
+    throw new Error(`Pilot ${p.id}: 1 to 30 keywords, each up to 40 characters.`);
+  const skills = p.skills !== undefined ? validateStringList(p.skills, 'skills', p.id) : undefined;
+  const tools = p.tools !== undefined ? validateStringList(p.tools, 'tools', p.id) : undefined;
+  if (typeof p.model !== 'string' || !cleanText(p.model) || p.model.length > 100)
+    throw new Error(`Pilot ${p.id}: a local model name.`);
+  if (p.memoryScope !== undefined && (typeof p.memoryScope !== 'string' || !SCOPE_RE.test(p.memoryScope)))
+    throw new Error(`Pilot ${p.id}: memoryScope is lower-case letters, digits and dashes (2-40 chars).`);
+  if (p.evaClass !== undefined && !EVA_CLASSES.includes(p.evaClass as EvaClass))
+    throw new Error(`Pilot ${p.id}: evaClass is ${EVA_CLASSES.join(', ')}.`);
+  if (p.stage !== undefined && !STAGES.includes(p.stage as Stage))
+    throw new Error(`Pilot ${p.id}: stage is prototype, test or production.`);
+  if (p.parent !== undefined && (typeof p.parent !== 'string' || !ID_RE.test(p.parent)))
+    throw new Error(`Pilot ${p.id}: parent is a pilot id or "${GENERIC}".`);
+  if (allowLocalFlags)
+    for (const f of ['pinned', 'retired'] as const)
+      if (p[f] !== undefined && typeof p[f] !== 'boolean') throw new Error(`Pilot ${p.id}: ${f} is true or false.`);
+  return {
+    id: p.id,
+    name: cleanText(p.name),
+    ...(p.role !== undefined ? { role: cleanText(p.role as string) } : {}),
+    domain: cleanText(p.domain),
+    keywords: [...new Set((p.keywords as string[]).map(words))],
+    ...(skills !== undefined ? { skills } : {}),
+    ...(tools !== undefined ? { tools } : {}),
+    model: cleanText(p.model),
+    ...(p.memoryScope !== undefined ? { memoryScope: p.memoryScope as string } : {}),
+    ...(p.evaClass !== undefined ? { evaClass: p.evaClass as EvaClass } : {}),
+    stage: (p.stage as Stage | undefined) ?? 'prototype',
+    ...(p.parent ? { parent: p.parent as string } : {}),
+    ...(allowLocalFlags && p.pinned ? { pinned: true } : {}),
+    ...(allowLocalFlags && p.retired ? { retired: true } : {}),
+  };
+}
 /** Checks the roster from config.json; the generic pilot is implicit (its model is roles.consultant) and never listed. */
 export function validatePilots(value: unknown): Pilot[] {
   if (!Array.isArray(value) || value.length > MAX_PILOTS)
     throw new Error(`Invalid pilots: a list of at most ${MAX_PILOTS}.`);
   const out: Pilot[] = [];
-  for (const raw of value) {
-    const p = raw as Record<string, unknown>;
-    if (
-      !p ||
-      typeof p !== 'object' ||
-      Array.isArray(p) ||
-      Object.keys(p).some(
-        (k) => !['id', 'name', 'domain', 'keywords', 'model', 'stage', 'parent', 'pinned', 'retired'].includes(k),
-      )
-    )
-      throw new Error('Invalid pilot: id, name, domain, keywords, model, stage, parent, pinned, retired.');
-    if (typeof p.id !== 'string' || !/^[a-z][a-z0-9-]{1,30}$/.test(p.id) || p.id === GENERIC)
-      throw new Error(
-        `Invalid pilot id ${JSON.stringify(p.id)}: lower-case letters, digits and dashes, not "${GENERIC}".`,
-      );
-    if (out.some((o) => o.id === p.id)) throw new Error(`Pilot ${p.id} is listed twice.`);
-    if (typeof p.name !== 'string' || !p.name.trim() || p.name.length > 40)
-      throw new Error(`Pilot ${p.id}: a name up to 40 characters.`);
-    if (typeof p.domain !== 'string' || !p.domain.trim() || p.domain.length > 200)
-      throw new Error(`Pilot ${p.id}: a domain up to 200 characters.`);
-    if (
-      !Array.isArray(p.keywords) ||
-      !p.keywords.length ||
-      p.keywords.length > 30 ||
-      p.keywords.some((k) => typeof k !== 'string' || !words(k) || k.length > 40)
-    )
-      throw new Error(`Pilot ${p.id}: 1 to 30 keywords, each up to 40 characters.`);
-    if (typeof p.model !== 'string' || !p.model.trim() || p.model.length > 100)
-      throw new Error(`Pilot ${p.id}: a local model name.`);
-    if (p.stage !== undefined && !STAGES.includes(p.stage as Stage))
-      throw new Error(`Pilot ${p.id}: stage is prototype, test or production.`);
-    if (p.parent !== undefined && (typeof p.parent !== 'string' || !/^[a-z][a-z0-9-]{1,30}$/.test(p.parent)))
-      throw new Error(`Pilot ${p.id}: parent is a pilot id or "${GENERIC}".`);
-    for (const f of ['pinned', 'retired'] as const)
-      if (p[f] !== undefined && typeof p[f] !== 'boolean') throw new Error(`Pilot ${p.id}: ${f} is true or false.`);
-    out.push({
-      id: p.id,
-      name: p.name.trim(),
-      domain: p.domain.trim(),
-      keywords: [...new Set((p.keywords as string[]).map(words))],
-      model: p.model.trim(),
-      stage: (p.stage as Stage | undefined) ?? 'prototype',
-      ...(p.parent ? { parent: p.parent as string } : {}),
-      ...(p.pinned ? { pinned: true } : {}),
-      ...(p.retired ? { retired: true } : {}),
-    });
-  }
+  for (const raw of value) out.push(parsePilotEntry(raw, out, true));
   for (const p of out)
     if (p.parent && p.parent !== GENERIC && !out.some((o) => o.id === p.parent))
       throw new Error(`Pilot ${p.id}: parent ${p.parent} is not in the roster.`);
   return out;
+}
+/** Active local pilots formatted for a Kaji heartbeat offer (retired pilots and local roster flags are excluded). */
+export function toPilotOffers(roster: readonly Pilot[]): PilotOffer[] {
+  return roster
+    .filter((p) => !p.retired)
+    .map(({ pinned: _pinned, retired: _retired, ...offer }) => ({
+      ...offer,
+      keywords: [...offer.keywords],
+      ...(offer.skills ? { skills: [...offer.skills] } : {}),
+      ...(offer.tools ? { tools: [...offer.tools] } : {}),
+    }));
+}
+/** Validates pilot offers heard from another base's heartbeat; returns undefined if malformed. */
+export function sanitizePilotOffers(value: unknown): PilotOffer[] | undefined {
+  if (!Array.isArray(value) || value.length > MAX_PILOTS) return undefined;
+  const out: PilotOffer[] = [];
+  try {
+    for (const raw of value) out.push(parsePilotEntry(raw, out, false));
+    for (const p of out) if (p.parent && p.parent !== GENERIC && !out.some((o) => o.id === p.parent)) return undefined;
+    return out;
+  } catch {
+    return undefined;
+  }
+}
+const DEFAULT_ONLINE_MS = 90_000;
+/**
+ * Kaji-style pilot registry: combines this base's local roster with pilots offered by enrolled peers in heartbeats.
+ * Peer offers expire after maxAgeMs (90s by default) and can be cleared when a base is revoked.
+ */
+export class PilotRegistry {
+  private readonly peers = new Map<string, { pilots: PilotOffer[]; at: number }>();
+  readonly localBaseId: string;
+  private readonly localPilots: () => readonly Pilot[];
+  constructor(localBaseId: string, localPilots: () => readonly Pilot[] = () => []) {
+    this.localBaseId = localBaseId;
+    this.localPilots = localPilots;
+  }
+  offered(): PilotOffer[] {
+    return toPilotOffers(this.localPilots());
+  }
+  recordPeer(baseId: string, offers: unknown, now = Date.now()): PilotOffer[] | undefined {
+    if (!baseId || baseId === this.localBaseId) return undefined;
+    const clean = sanitizePilotOffers(offers);
+    if (!clean) return undefined;
+    this.peers.set(baseId, { pilots: clean, at: now });
+    return clean;
+  }
+  clearPeer(baseId: string): void {
+    this.peers.delete(baseId);
+  }
+  forBase(baseId: string, opts?: { includeRetired?: boolean; maxAgeMs?: number; now?: number }): RegisteredPilot[] {
+    const includeRetired = opts?.includeRetired ?? false;
+    if (baseId === this.localBaseId)
+      return this.localPilots()
+        .filter((p) => includeRetired || !p.retired)
+        .map((p) => ({ ...p, baseId: this.localBaseId, local: true }));
+    const entry = this.peers.get(baseId);
+    const now = opts?.now ?? Date.now();
+    const maxAgeMs = opts?.maxAgeMs ?? DEFAULT_ONLINE_MS;
+    if (!entry || now - entry.at >= maxAgeMs) return [];
+    const receivedAt = new Date(entry.at).toISOString();
+    return entry.pilots.map((p) => ({ ...p, baseId, local: false, receivedAt }));
+  }
+  list(opts?: {
+    includeRetired?: boolean;
+    maxAgeMs?: number;
+    now?: number;
+    onlineBases?: ReadonlySet<string>;
+  }): RegisteredPilot[] {
+    const out = this.forBase(this.localBaseId, opts);
+    for (const baseId of [...this.peers.keys()].sort()) {
+      if (opts?.onlineBases && !opts.onlineBases.has(baseId)) continue;
+      out.push(...this.forBase(baseId, opts));
+    }
+    return out;
+  }
+  get(
+    baseId: string,
+    pilotId: string,
+    opts?: { includeRetired?: boolean; maxAgeMs?: number; now?: number },
+  ): RegisteredPilot | undefined {
+    return this.forBase(baseId, opts).find((p) => p.id === pilotId);
+  }
 }
 /** How many of a pilot's keywords (whole words or phrases) the request contains. */
 export function hits(request: string, pilot: Pick<Pilot, 'keywords'>): number {

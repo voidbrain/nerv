@@ -1,5 +1,6 @@
 import { WorkerLink, type WorkerAdapter } from './worker-link.ts';
 import { sanitizeChannel, type ChannelState, type HeardChannel } from './channel-state.ts';
+import { sanitizePilotOffers, type PilotOffer } from './pilots.ts';
 import type { KeyObject } from 'node:crypto';
 import { KAJI_CLOCK_SKEW_MS, signedHeaders, verifySigned, Nonces, type RootTrust } from './kaji-auth.ts';
 export { signedHeaders, verifySigned, Nonces } from './kaji-auth.ts';
@@ -212,6 +213,8 @@ export class KajiLink {
     onChat?: (from: string, message: string, conversation?: string) => Promise<DispatchedReply>;
     offers?: () => string[];
     onOffers?: (baseId: string, offers: string[]) => void;
+    pilots?: () => PilotOffer[];
+    onPilots?: (baseId: string, pilots: PilotOffer[]) => void;
     onVerdict?: (from: string, ask: VerdictAsk) => Promise<PeerVerdict | null>;
     onPendingApprovals?: (ids: string[]) => Promise<string[]>;
     onDecide?: (approvalId: string, decision: 'approve' | 'reject') => Promise<string>;
@@ -232,6 +235,8 @@ export class KajiLink {
     this.onChat = options.onChat;
     this.offers = options.offers;
     this.onOffers = options.onOffers;
+    this.pilotOffers = options.pilots;
+    this.onPilots = options.onPilots;
     this.onVerdict = options.onVerdict;
     if (options.worker)
       this.workers = new WorkerLink({
@@ -265,6 +270,8 @@ export class KajiLink {
   private readonly onVerdict: ((from: string, ask: VerdictAsk) => Promise<PeerVerdict | null>) | undefined;
   private readonly offers: (() => string[]) | undefined;
   private readonly onOffers: ((baseId: string, offers: string[]) => void) | undefined;
+  private readonly pilotOffers: (() => PilotOffer[]) | undefined;
+  private readonly onPilots: ((baseId: string, pilots: PilotOffer[]) => void) | undefined;
   private readonly onChat:
     ((from: string, message: string, conversation?: string) => Promise<DispatchedReply>) | undefined;
   private readonly onPendingApprovals: ((ids: string[]) => Promise<string[]>) | undefined;
@@ -286,6 +293,12 @@ export class KajiLink {
     if (value === undefined) return;
     const o = sanitizeOffers(value);
     if (o) this.onOffers?.(from, o);
+  }
+  /** Pilots offered by a base in its heartbeat (F-045-T01): first-hand only, validated against PilotOffer schema. */
+  private heardPilots(from: string, value: unknown) {
+    if (value === undefined) return;
+    const p = sanitizePilotOffers(value);
+    if (p) this.onPilots?.(from, p);
   }
   /** Health is first-hand only: taken from the peer's own signed message, never relayed for a third base. */
   private heard(from: string, value: unknown) {
@@ -415,21 +428,25 @@ export class KajiLink {
           seen?: Record<string, string>;
           health?: unknown;
           offers?: unknown;
+          pilots?: unknown;
           channel?: unknown;
         };
         const now = new Date().toISOString();
         await this.port.seen({ ...sanitizeSeen(hb.seen, bases), [from]: now, [this.baseId]: now });
         this.heard(from, hb.health);
         this.heardOffers(from, hb.offers);
+        this.heardPilots(from, hb.pilots);
         this.heardChannel(from, hb.channel);
         const health = await this.own();
         const offers = this.offers?.();
+        const pilots = this.pilotOffers?.();
         const channel = this.ownChannel();
         reply(200, {
           head: head(await this.port.records()),
           seen: await this.port.lastSeen(),
           ...(health ? { health } : {}),
           ...(offers ? { offers } : {}),
+          ...(pilots ? { pilots } : {}),
           ...(channel ? { channel } : {}),
         });
         return;
@@ -739,23 +756,27 @@ export class KajiLink {
     for (const peer of bases.filter((b) => b.status === 'enrolled' && b.publicKey !== this.publicKey)) {
       try {
         const offers = this.offers?.();
+        const pilots = this.pilotOffers?.();
         const channel = this.ownChannel();
         const r = (await this.call(peer, 'POST', '/kaji/heartbeat', {
           seen: await this.port.lastSeen(),
           ...(health ? { health } : {}),
           ...(offers ? { offers } : {}),
+          ...(pilots ? { pilots } : {}),
           ...(channel ? { channel } : {}),
         })) as {
           head: { count: number; serial: number };
           seen?: Record<string, string>;
           health?: unknown;
           offers?: unknown;
+          pilots?: unknown;
           channel?: unknown;
         };
         await this.port.seen({ ...sanitizeSeen(r.seen, bases), [peer.baseId]: new Date().toISOString() });
         this.mark(peer.baseId, true);
         this.heard(peer.baseId, r.health);
         this.heardOffers(peer.baseId, r.offers);
+        this.heardPilots(peer.baseId, r.pilots);
         this.heardChannel(peer.baseId, r.channel);
         const mine = head(await this.port.records());
         if (r.head.count > mine.count || r.head.serial > mine.serial) {
