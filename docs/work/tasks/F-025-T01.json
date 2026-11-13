@@ -31,7 +31,7 @@
   "effort": {
     "size": "small",
     "estimate": "0 h agent",
-    "basis": "Added Runtime.useExtraSeat with action-class matching, shadow-first logging (ballot / ballot.shadow), and timeout-to-abstain handling; relaxed RPC extra seat ID validation; tested in test/extra-seats.test.ts in 0.25 h agent.",
+    "basis": "Added Runtime.useExtraSeat with action-class matching, shadow-first logging (ballot / ballot.shadow), and timeout-to-abstain handling; relaxed RPC extra seat ID validation; tested in test/extra-seats.test.ts in 0.25 h agent (PR #358).",
     "reviewed": "2026-11-13",
     "baselineDays": 1,
     "agentHours": 0,
