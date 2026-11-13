@@ -36,7 +36,7 @@ nerv nodes release --plan bootstrap-preview.json --confirm FULL_PLAN_DIGEST --co
 
 ## Service lifecycle and local Mac updates
 
-- **Review-only contracts:** `nerv nodes lifecycle-plan --input FILE` and `nerv nodes lifecycle-recovery-check --receipt FILE --evidence FILE` validate supplied evidence ([input/recovery contract](../decisions/node-lifecycle.md)). Windows/Linux execution adapters remain open.
+- **Review-only contracts:** `nerv nodes lifecycle-plan --input FILE` and `nerv nodes lifecycle-recovery-check --receipt FILE --evidence FILE` validate supplied evidence ([input/recovery contract](../decisions/node-lifecycle.md)). See [the roadmap](../ROADMAP.md) for platform support and open work.
 - **Local Mac default profile:**
 
 ```bash

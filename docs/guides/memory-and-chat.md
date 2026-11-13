@@ -43,7 +43,7 @@ nerv tools remove files
 ```
 
 - Pin package versions (`package@x.y.z`); NERV pins grants to the tool's description fingerprint and suspends a tool if its description changes.
-- Only non-destructive read tools can be granted as Pattern Green (`EVA-03` remains disabled until sandboxing ships).
+- Only non-destructive read tools can be granted as Pattern Green (`EVA-03` is currently disabled; see [the roadmap](../ROADMAP.md) for planned isolation work).
 
 ## Gate rules (the Scrolls)
 
