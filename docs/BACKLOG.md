@@ -54,7 +54,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | | |
 |---|---|
 | **Issue** | F-014 delivers enrolled outbound worker transport and B-045 repairs burst admission. Selected inventories, read-only local/SSH inspection and review-only manifests are delivered in PR #210. Fresh-profile bootstrap now has explicit digest confirmation, fixed local/SSH code and transactional receipts/resources. Lifecycle contracts and selected Mac execution/acceptance are delivered. Safe application/schema upgrades, update experience, prerequisites and remaining Windows/Linux/device acceptance remain open. |
-| **Reproduce** | Update path as run on the Mac: the [T13 Mac update procedure](acceptance/f005-t13-mac-update-procedure.md) and its [2026-11-12 evidence](acceptance/node-update-2026-11-12.md). Node commands: [node setup](INSTALL.md#discover-inspect-and-bootstrap-node-candidates-f-005); milestone: [ROADMAP](ROADMAP.md), milestone 3. |
+| **Reproduce** | Update path as run on the Mac: the [T13 Mac update procedure](acceptance/f005-t13-mac-update-procedure.md) and its [2026-11-12 evidence](acceptance/node-update-2026-11-12.md). Node commands: [node setup](guides/kaji-and-nodes.md#discover-inspect-and-bootstrap-node-candidates); milestone: [ROADMAP](ROADMAP.md), milestone 3. |
 | **Check** | Mac/mini PC/Pi tests for enrolment, revocation, leases, fencing, cancellation, locks, reconnect and uncertain physical results. |
 
 **Feature steps**
