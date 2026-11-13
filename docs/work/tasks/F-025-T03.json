@@ -33,7 +33,7 @@
   "effort": {
     "size": "small",
     "estimate": "0 h agent",
-    "basis": "Added filterConsultantInput (Scrolls deny/localOnly/taint filtering) and Runtime.useRemoteConsultant in src/misato.ts and src/runtime.ts, verified in test/consultant.test.ts in 0.25 h agent.",
+    "basis": "Added filterConsultantInput (Scrolls deny/localOnly/taint filtering) and Runtime.useRemoteConsultant in src/misato.ts and src/runtime.ts, verified in test/consultant.test.ts in 0.25 h agent (PR #360).",
     "reviewed": "2026-11-13",
     "baselineDays": 1,
     "agentHours": 0,
