@@ -33,7 +33,7 @@
   "effort": {
     "size": "medium",
     "estimate": "0 h agent",
-    "basis": "Added previousStage, shouldDemotePilot, and demotePilot in src/pilots.ts and Runtime.demotePilotOnSignal + automatic Spear demotion in src/runtime.ts, verified in test/pilots.test.ts in 0.25 h agent.",
+    "basis": "PR #361: added previousStage, shouldDemotePilot, and demotePilot in src/pilots.ts and Runtime.demotePilotOnSignal + automatic Spear demotion in src/runtime.ts, verified in test/pilots.test.ts in 0.25 h agent.",
     "reviewed": "2026-11-13",
     "baselineDays": 2,
     "agentHours": 0,
