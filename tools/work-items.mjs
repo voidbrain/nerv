@@ -458,7 +458,7 @@ const prText = (t, repository) =>
     )
     .join('; ');
 const NEXT_FROM_TASKS = /^(💻 \*\*→ Human action required: No\*\*<br \/>)Next: from tasks\.$/m;
-function featurePlan(text, id, tasks, repository) {
+function featurePlan(text, id, tasks, repository, ownerHref = (link) => link) {
   const steps = tasks.filter((t) => t.parent === id);
   // F-059: with feature plans every active record, bugs included, has at least one step (owner, 2026-11-12).
   if (!steps.length) throw Error(`${id.startsWith('F-') ? 'Feature' : 'Record'} needs an upfront task plan: ${id}`);
@@ -495,17 +495,31 @@ function featurePlan(text, id, tasks, repository) {
     text = text.replace(row, (m) => `${m}Steps: ${summary}. `);
   }
   const evidence = steps.some((t) => t.prs?.length);
+  // F-071: Procedure and Decision columns when a step asks for owner work, linked to the step's ownerLink page;
+  // a step waiting on an open step of another record names it in its status.
+  const owners = steps.some((t) => t.effort?.ownerKind);
+  const finished = new Set(tasks.filter((t) => ['closed', 'verified'].includes(t.status)).map((t) => t.id));
+  const parentOf = new Map(tasks.map((t) => [t.id, t.parent]));
+  const face = (t, kinds, icon) =>
+    kinds.includes(t.effort?.ownerKind) ? (t.ownerLink ? `[${icon}](${ownerHref(t.ownerLink)})` : icon) : '—';
+  const status = (t) => {
+    const waits = ['planned', 'ready'].includes(t.status)
+      ? t.dependsOn.filter((d) => !finished.has(d) && parentOf.get(d) !== id)
+      : [];
+    return states[t.status] + (waits.length ? ` · waits on ${waits.join(', ')}` : '');
+  };
   // Compact table (F-055): one line per step; dated basis lives in the per-record / task files.
   const table =
-    `**${id.startsWith('F-') ? 'Feature steps' : 'Steps'}**\n\n| Effort | Step | Estimate | Actual | Remaining | Status |${evidence ? ' PRs |' : ''}\n|---|---|---|---|---|---|${evidence ? '---|' : ''}\n` +
+    `**${id.startsWith('F-') ? 'Feature steps' : 'Steps'}**\n\n| Effort | Step | Estimate | Actual | Remaining | Status |${owners ? ' Procedure | Decision |' : ''}${evidence ? ' PRs |' : ''}\n|---|---|---|---|---|---|${owners ? ':---:|:---:|' : ''}${evidence ? '---|' : ''}\n` +
     steps
       .map(
         (t) =>
-          `| ${stepSize(t)} | ${t.id} — ${cell(t.title)} | ${stepEstimate(t.effort)} | ${stepActual(t)} | ${stepRemaining(t.effort, t.status)} | ${states[t.status]} |${evidence ? ` ${prText(t, repository) || '—'} |` : ''}`,
+          `| ${stepSize(t)} | ${t.id} — ${cell(t.title)} | ${stepEstimate(t.effort)} | ${stepActual(t)} | ${stepRemaining(t.effort, t.status)} | ${status(t)} |${owners ? ` ${face(t, ['procedure', 'both'], PROCEDURE)} | ${face(t, ['decision', 'both'], DECISION)} |` : ''}${evidence ? ` ${prText(t, repository) || '—'} |` : ''}`,
       )
       .join('\n') +
     '\n' +
     totalRow(steps) +
+    (owners ? ' | |' : '') +
     (evidence ? ' |' : '') +
     '\n\n';
   // The record's own details block is a line holding only <details>; a mention of the tag inside a cell is not.
@@ -541,7 +555,7 @@ function withArchives(root, ledger) {
 }
 // Depends on and Unlocks of each record (F-057), from tools/backlog-dependencies.mjs when the project has it. The
 // authored Depends on row in the details stays the source; Unlocks are its reverse links. Null without the helper.
-function dependencyLinks(root, config) {
+function dependencyLinks(root, config, tasks = null) {
   const helper = new URL('./backlog-dependencies.mjs', import.meta.url);
   if (!existsSync(helper)) return null;
   const { graph } = createRequire(import.meta.url)('./backlog-dependencies.mjs');
@@ -551,6 +565,22 @@ function dependencyLinks(root, config) {
     r.file !== 'docs/BACKLOG.md' ||
     /^\| (?:🔴|🟠|🟡|🟢|🟣|🔵) Closed \|/m.test(r.body) ||
     /^\| [^|]+ \| [^|]+ \| Closed \|/m.test(r.body);
+  // F-071: a step that waits on an open step of another record shows that step, linked to its record.
+  const stepLink = (stepId, parent) => {
+    const r = all.get(parent);
+    return r ? `[${stepId}](${r.file === 'docs/BACKLOG.md' ? '' : r.file.slice(5)}#${parent.toLowerCase()})` : stepId;
+  };
+  const steps = tasks ?? [];
+  const byId = new Map(steps.map((t) => [t.id, t]));
+  const open = (t) => t && !['closed', 'verified'].includes(t.status);
+  const crossing = steps.flatMap((t) =>
+    open(t)
+      ? t.dependsOn
+          .map((d) => byId.get(d))
+          .filter((d) => open(d) && d.parent !== t.parent)
+          .map((d) => [t, d])
+      : [],
+  );
   const links = new Map();
   for (const record of all.values()) {
     if (record.file !== 'docs/BACKLOG.md') continue;
@@ -561,7 +591,14 @@ function dependencyLinks(root, config) {
       .filter((r) => r.dependencies.some((d) => !d.external && d.id === record.id))
       .sort((a, b) => a.id.localeCompare(b.id))
       .map(link);
-    links.set(record.id, { depends: depends.join(', ') || '—', unlocks: unlocks.join(', ') || '—' });
+    for (const [t, d] of crossing) {
+      if (t.parent === record.id) depends.push(stepLink(d.id, d.parent));
+      if (d.parent === record.id) unlocks.push(stepLink(t.id, t.parent));
+    }
+    links.set(record.id, {
+      depends: [...new Set(depends)].join(', ') || '—',
+      unlocks: [...new Set(unlocks)].join(', ') || '—',
+    });
   }
   return links;
 }
@@ -589,9 +626,12 @@ function remainingCell(steps) {
 // agent hours when every open step is in hours. Record sources keep the authored form.
 export const HUMAN_LINE = /^(🧑|💻) \*\*→ Human action required: (Procedure|Decision|Both|No)\*\*<br \/>(.+)$/m;
 // The two generated cells for a cue kind: Procedures (someone runs or checks something) and Decisions.
+// F-071 (8.8.0): different faces, 🧑‍🔧 for a procedure and 🤔 for a decision; readers still accept 🧑 in either cell.
+export const PROCEDURE = '🧑‍🔧',
+  DECISION = '🤔';
 export const humanCells = (kind) => [
-  ['Procedure', 'Both'].includes(kind) ? '🧑' : '—',
-  ['Decision', 'Both'].includes(kind) ? '🧑' : '—',
+  ['Procedure', 'Both'].includes(kind) ? PROCEDURE : '—',
+  ['Decision', 'Both'].includes(kind) ? DECISION : '—',
 ];
 // F-068: the kinds asked by a record's ready owner steps: not started (planned or ready; once implemented the owner
 // has acted), effort.ownerKind set, every prerequisite step verified or closed, as task-claims reads a prerequisite
@@ -634,8 +674,8 @@ function summaryTable(text, id, { remaining, size, links, asks = [false, false] 
           ['Unlocks', links.unlocks],
         ]
       : []),
-    ['Procedures', asks[0] ? '🧑' : human ? humanCells(human[2])[0] : '—'],
-    ['Decisions', asks[1] ? '🧑' : human ? humanCells(human[2])[1] : '—'],
+    ['Procedures', asks[0] ? PROCEDURE : human ? humanCells(human[2])[0] : '—'],
+    ['Decisions', asks[1] ? DECISION : human ? humanCells(human[2])[1] : '—'],
   ];
   const [signal, priority, status, effort] = lines[at + 2]
     .trim()
@@ -716,7 +756,7 @@ export function renderLedger(root, config, withPlans = true) {
     ? ledgerTotals(plannedTasks ?? taskCatalog(root, config).tasks, new Set(files.map((f) => f.slice(0, -3))))
     : null;
   const rank = withPlans && config.order === 'queue' ? queueRank(root, config) : null;
-  const links = withPlans ? dependencyLinks(root, config) : null;
+  const links = withPlans ? dependencyLinks(root, config, plannedTasks) : null;
   const stepsOf = withPlans
     ? (() => {
         // Steps are read only where the project keeps them; a record without steps shows — as its remaining.
@@ -752,7 +792,13 @@ export function renderLedger(root, config, withPlans = true) {
         if (!plannedTasks && withPlans && NEXT_FROM_TASKS.test(text))
           throw Error(`${file.slice(0, -3)}: "Next: from tasks." needs workItems.featurePlans`);
         const relocated = relocateLinks(
-          plannedTasks ? featurePlan(text, file.slice(0, -3), plannedTasks, config.repository) : text,
+          plannedTasks
+            ? featurePlan(text, file.slice(0, -3), plannedTasks, config.repository, (link) =>
+                /^https:\/\//.test(link)
+                  ? link
+                  : relative(local(root, config.records), join(root, link)).replaceAll('\\', '/'),
+              )
+            : text,
           local(root, config.records + '/' + file),
           join(root, 'docs/BACKLOG.md'),
           referenceIds,
@@ -904,6 +950,7 @@ export function taskCatalog(root, config) {
       'effort',
       'prs',
       'review',
+      'ownerLink',
     ];
     if (
       Object.keys(t).some((k) => !allowed.includes(k)) ||
@@ -955,6 +1002,20 @@ export function taskCatalog(root, config) {
       throw Error('Step evidence must not carry the record-level labels Review:, No review: or Test: — ' + file);
     if ((t.prs !== undefined || t.review !== undefined) && !config.featurePlans)
       throw Error('prs and review need workItems.featurePlans: ' + file);
+    // F-071: the page a person follows for an owner step: a repository path (optionally with #anchor) that exists, or
+    // an https link; only on a step that asks for owner work.
+    if (t.ownerLink !== undefined) {
+      const path = typeof t.ownerLink === 'string' ? t.ownerLink.split('#')[0] : '';
+      if (
+        !t.effort?.ownerKind ||
+        typeof t.ownerLink !== 'string' ||
+        t.ownerLink.length > 500 ||
+        /[\s()<>|\\]/.test(t.ownerLink) ||
+        (!/^https:\/\/\S+$/.test(t.ownerLink) &&
+          (!path || isAbsolute(path) || path.split('/').includes('..') || !existsSync(join(root, path))))
+      )
+        throw Error('Invalid ownerLink (an existing repository page or https link, on an owner step): ' + file);
+    }
     t.resources.forEach(resource);
     if (t.suggestedProfile && !profileIds.has(t.suggestedProfile)) throw Error('Unknown suggested profile');
     tasks.push(t);
@@ -1026,6 +1087,20 @@ export function checkWorkItems(root = process.cwd()) {
       }
     }
   }
+  // F-071: open owner steps without a page to follow, and authored record-level dependencies that name no step.
+  const ownerStepsWithoutLink = catalog.tasks
+    .filter((t) => ['planned', 'ready'].includes(t.status) && t.effort?.ownerKind && !t.ownerLink)
+    .map((t) => t.id);
+  const recordsDir = local(root, config.records);
+  const active = new Set(existsSync(recordsDir) ? readdirSync(recordsDir).map((f) => f.slice(0, -3)) : []);
+  const recordLevelDependencies = [...active].sort().flatMap((id) => {
+    const row = /^\| *Depends on *\| *(.*?) *\|$/m.exec(readFileSync(join(recordsDir, id + '.md'), 'utf8'));
+    return row
+      ? [...row[1].matchAll(/\[([BF]-\d{3})\]\((?!https?:)/g)]
+          .filter((m) => active.has(m[1]))
+          .map((m) => `${id} → ${m[1]}`)
+      : [];
+  });
   return {
     enabled: true,
     records: (actual.match(/^### (?:<a id="[fb]-\d+"><\/a>)?(?:\[(?:✨|🐞) )?([BF]-\d{3})(?:\]\(#top\))?$/gm) || [])
@@ -1034,6 +1109,8 @@ export function checkWorkItems(root = process.cwd()) {
     ...(withoutDays.length ? { withoutDays } : {}),
     ...(staleEstimates.length ? { staleEstimates } : {}),
     ...(allStepsClosed.length ? { allStepsClosed } : {}),
+    ...(ownerStepsWithoutLink.length ? { ownerStepsWithoutLink } : {}),
+    ...(recordLevelDependencies.length ? { recordLevelDependencies } : {}),
   };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
@@ -1060,6 +1137,14 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       if (result.withoutDays)
         console.warn(
           `! ${result.withoutDays.length} open step(s) have no remaining estimate (effort.agentHours/ownerHours, or days), so totals count them as unknown: ${result.withoutDays.slice(0, 10).join(', ')}${result.withoutDays.length > 10 ? ` and ${result.withoutDays.length - 10} more` : ''}`,
+        );
+      if (result.ownerStepsWithoutLink)
+        console.warn(
+          `! ${result.ownerStepsWithoutLink.length} open owner step(s) have no ownerLink to the procedure or decision page: ${result.ownerStepsWithoutLink.join(', ')}`,
+        );
+      if (result.recordLevelDependencies)
+        console.warn(
+          `! ${result.recordLevelDependencies.length} record-level dependencies name no step; where one step is enough, make the waiting step depend on it (dependsOn) and drop the row: ${result.recordLevelDependencies.join(', ')}`,
         );
       if (result.allStepsClosed)
         console.warn(

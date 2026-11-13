@@ -3,10 +3,13 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 // The cue kind from the generated Procedures and Decisions cells (8.0.0); undefined for any other content.
-const kindOf = ([p, d]) =>
-  ['🧑', '—'].includes(p) && ['🧑', '—'].includes(d)
+// F-071 (8.8.0): 🧑‍🔧 in Procedures and 🤔 in Decisions read like 🧑, so ledgers on either release check.
+const kindOf = (pair) => {
+  const [p, d] = pair.map((c, i) => (c === ['🧑‍🔧', '🤔'][i] ? '🧑' : c));
+  return ['🧑', '—'].includes(p) && ['🧑', '—'].includes(d)
     ? { '🧑🧑': 'Both', '🧑—': 'Procedure', '—🧑': 'Decision', '——': 'No' }[p + d]
     : undefined;
+};
 
 const text = readFileSync(new URL('../docs/BACKLOG.md', import.meta.url), 'utf8');
 const cells = (line) =>
@@ -115,7 +118,7 @@ for (let i = 0; i < headings.length; i++) {
     ? [...block.matchAll(/^(🧑|💻) \*\*→\*\* .+/gm)].map((m) => Object.assign(m, { 2: kindOf(cells(row).slice(-2)) }))
     : [...block.matchAll(/^(🧑|💻) \*\*→ Human action required: (Procedure|Decision|Both|No)\*\*<br \/>.+/gm)];
   assert.equal(human.length, 1, `${id}: missing visible human action/cue`);
-  if (generated) assert(human[0][2], `${id}: Procedures and Decisions cells need 🧑 or —`);
+  if (generated) assert(human[0][2], `${id}: Procedures and Decisions cells need 🧑‍🔧 / 🤔 (or 🧑) or —`);
   // F-068: in the generated ledger a 💻 line may stand under 🧑 cells (a ready owner step beside agent work); a 🧑 line
   // always needs one.
   assert(

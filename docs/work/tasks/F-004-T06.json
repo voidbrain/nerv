@@ -39,5 +39,6 @@
     "baselineAgentHours": 0.5,
     "ownerKind": "procedure",
     "estimateAgentHours": 0.25
-  }
+  },
+  "ownerLink": "docs/acceptance/f004-t06-phone-push-procedure.md#steps-phone--mac-terminal"
 }
