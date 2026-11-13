@@ -33,7 +33,7 @@
   "effort": {
     "size": "medium",
     "estimate": "0 h agent",
-    "basis": "Implemented SeatPool (one seat per provider/model, private per-seat keys, round-robin rotation, cooldown/unavailable skipping with reason, Scrolls localOnly/taint gate via canLeaveMachine) and Runtime.useSeatPool in 0.5 h agent.",
+    "basis": "Implemented SeatPool (one seat per provider/model, private per-seat keys, round-robin rotation, cooldown/unavailable skipping with reason, Scrolls localOnly/taint gate via canLeaveMachine) and Runtime.useSeatPool in 0.5 h agent (PR #359).",
     "reviewed": "2026-11-13",
     "baselineDays": 2,
     "agentHours": 0,
