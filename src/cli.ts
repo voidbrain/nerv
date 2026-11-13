@@ -2,6 +2,15 @@
 import { recordPromotion } from './milestones.ts';
 import { assertRootMigrationReady, rootMigrationCommand } from './root-migration.ts';
 import { nodesCommand } from './nodes-cli.ts';
+import {
+  engineReceiptPath,
+  executeEngineLifecycle,
+  planEngineLifecycle,
+  reconcileEngineState,
+  type EngineLifecycleAction,
+  type EnginePlatform,
+  type ManagedEngineSpec,
+} from './engine-lifecycle.ts';
 import { checkUpdateAvailability } from './update-availability.ts';
 import { runtimeBom } from './bom.ts';
 import { spawnSync } from 'node:child_process';
@@ -219,7 +228,31 @@ try {
       );
     } else console.log(JSON.stringify(value, null, 2));
   } else if (command === 'service') service(args[0] ?? '', home);
-  else if (command === 'telegram') {
+  else if (command === 'engines') {
+    const action = (args[0] ?? 'status') as EngineLifecycleAction | 'reconcile';
+    const specFlag = args.indexOf('--spec');
+    const specPath = specFlag >= 0 ? args[specFlag + 1] : undefined;
+    if (!specPath) throw new Error('Usage: engines <status|start|stop|install|uninstall|reconcile> --spec FILE');
+    const spec = JSON.parse(readFileSync(resolve(specPath), 'utf8')) as ManagedEngineSpec;
+    const platform: EnginePlatform =
+      process.platform === 'win32' ? 'win32' : process.platform === 'darwin' ? 'darwin' : 'linux';
+    const receiptPath = engineReceiptPath(platform, home, spec.id);
+    if (action === 'reconcile') {
+      const updated = reconcileEngineState(receiptPath, args.includes('--observed-stopped'));
+      console.log(JSON.stringify({ ok: true, engineId: spec.id, receipt: updated }, null, 2));
+    } else {
+      const receipt = existsSync(receiptPath) ? JSON.parse(readFileSync(receiptPath, 'utf8')) : null;
+      const plan = planEngineLifecycle(spec, action, platform, home, {
+        receipt,
+        endpointReachable: false,
+        pidAlive: false,
+        serviceInstalled: false,
+      });
+      const outcome = await executeEngineLifecycle(plan, spec);
+      console.log(JSON.stringify(outcome, null, 2));
+      if (!outcome.ok) process.exitCode = 1;
+    }
+  } else if (command === 'telegram') {
     // telegram link [CHAT_ID]: binds Aoba to the private chat that sent /start to the bot.
     // telegram token: asks for the BotFather token without showing it, checks its format and saves it privately.
     if (args[0] === 'token') {
