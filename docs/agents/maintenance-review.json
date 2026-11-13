@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-13T21:27:17.918Z",
+  "reviewed": "2026-11-13T21:48:05.919Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
     "AGENTS.md": "b52b056f97cf118b6bbc5b1bd8f54629ec0cdb0a722640b9e524d1370e105a9e",
@@ -20,12 +20,12 @@
     "docs/agents/work-usage.md": "e2f7c484f1c07f4b47fd1133857d8744ccab0ad2a7b85b220946c115a002bebc",
     "tools/task-claims.mjs": "ef755fe7951544e5c05b20de7c64a7b53778b6d039a11a2abeb079e7d42b6fd2",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
-    "tools/work-items.mjs": "3a732e35b5240a3f8c3457405e6262786e3ca62005f54b8703f092bb7ec4c8f2",
+    "tools/work-items.mjs": "19c364e3946727f2f3caa750e0542f10f818fb1797aea0cce01d60b6266bb472",
     "tools/work-usage.mjs": "4329262c0b9e723e046dd8878e15a99cff5f590201cd0918563f3204bbe79219"
   },
   "measurements": {
     "samples": 1,
-    "latestAt": "2026-11-13T21:27:17.881Z",
+    "latestAt": "2026-11-13T21:48:05.873Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -55,7 +55,7 @@
         "durationMs": {
           "observed": 1,
           "missing": 0,
-          "median": 30
+          "median": 42
         },
         "conflicts": {
           "observed": 0,
@@ -77,10 +77,10 @@
   },
   "outcomes": [
     {
-      "kind": "rule",
+      "kind": "tool",
       "disposition": "implemented",
-      "target": "docs/BACKLOG-RULES.md",
-      "evidence": "Harness v8.9.0 reconcile: Agent column and waiting owner steps; one open owner step (F-060-T01, P3) lacks a page."
+      "target": "tools/work-items.mjs",
+      "evidence": "Harness v8.9.1 reconcile: queue order counts step-level dependencies; byte copy; NERV order unchanged (F-005, F-006 already above F-012)."
     }
   ]
 }
