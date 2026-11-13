@@ -44,7 +44,7 @@
       apt:!!latest && !!latest.ballot && latest.ballot.outcome === "approval", plug:latestIs("done", "failed", "proposed"), eva:latestIs("done", "failed"), debrief:status !== "active" && status !== "waiting" };
     const phase = status === "waiting" ? "apt" : status === "active" ? (phaseOf.get(s.id) || "plan") : "debrief";
     const last = actions[actions.length - 1];
-    return { id:short(s.id), realId:s.id, title:s.title, preset:null, pilot:s.source === "misato" ? "misato" : "owner", source:"aoba", proactive:false, consult:consulted.has(s.id), advisor:advisedBy.get(s.id) || null, forwarded:forwardedTo.get(s.id) || null, origin:originOf.get(s.id) || null, remoteSortie:remoteSorties.get(s.id) || null, // F-025: lit when a consultant advised Misato (its advice is in Comms)
+    return { id:short(s.id), realId:s.id, title:s.title, preset:null, pilot:s.source === "misato" ? "misato" : "owner", source:"aoba", proactive:false, consult:consulted.has(s.id), advisor:advisedBy.get(s.id) || null, forwarded:forwardedTo.get(s.id) || null, forwardedBaseId:(forwardedTo.baseIds && forwardedTo.baseIds.get(s.id)) || null, origin:originOf.get(s.id) || null, remoteSortie:remoteSorties.get(s.id) || null, // F-025: lit when a consultant advised Misato (its advice is in Comms)
      
       why:s.why || "", created:s.created, trust:s.trust, battery:0, spent:0, started:Date.parse(s.created), ended:s.closed ? Date.parse(s.closed) : null, status, phase, done,
       actions, current:Math.max(0, actions.length - 1), ballot:last && last.ballot && last.ballot.verdicts ? last.ballot : null, outcome:known.get(s.id) || null, happened:[], note:"" };
@@ -170,9 +170,10 @@
         : e.kind === "misato.resumed" ? ["Misato: resuming after your decision", "", "misato"] : e.kind === "sortie.done" || e.kind === "sortie.failed" ? ["Debrief: " + e.kind.slice(7), e.kind === "sortie.done" ? "ok" : "danger", "misato"] : null;
       if (e.kind === "misato.reply") known.set(id, p.text);
       if (e.kind === "kaji.forwarded") forwardedTo.set(id, p.base && p.base.name || "the main base");
-      if (e.kind === "kaji.answered" && p.sortieId) remoteSorties.set(id, String(p.sortieId));
+      if (e.kind === "kaji.forwarded" && p.base && p.base.id) (forwardedTo.baseIds || (forwardedTo.baseIds = new Map())).set(id, String(p.base.id));
+      if (e.kind === "kaji.answered") { if (p.base && p.base.id) (forwardedTo.baseIds || (forwardedTo.baseIds = new Map())).set(id, String(p.base.id)); if (p.sortieId) remoteSorties.set(id, String(p.sortieId)); }
       // The main base dropped out and this base answered in the same sortie: local work means it is not shown as forwarded.
-      if (e.kind === "misato.consult" || e.kind === "ballot" || e.kind === "misato.step") { forwardedTo.delete(id); remoteSorties.delete(id); }
+      if (e.kind === "misato.consult" || e.kind === "ballot" || e.kind === "misato.step") { forwardedTo.delete(id); if (forwardedTo.baseIds) forwardedTo.baseIds.delete(id); remoteSorties.delete(id); }
       if (e.kind === "misato.request" && /^kaji:/.test(p.conversation || "")) originOf.set(id, baseName(String(p.conversation).slice(5).split("-").slice(0, 2).join("-")));
       if (e.kind === "misato.consult") { consulted.add(id); advisedBy.set(id, (p.pilot && p.pilot.name ? p.pilot.name : "Generic pilot") + (p.model ? " · " + p.model : "")); }
       // F-051: the step a running sortie is on, from its latest event (not always MAGI).
@@ -425,7 +426,13 @@
     // This base's pulse and its EVA cage follow its real health; peers show what they last reported in their heartbeat.
     BASES[0].status = health;
     LINKS.length = 0; const up = list.filter(b => b.status === "enrolled");
-    for (let i = 0; i < up.length; i++) for (let j = i + 1; j < up.length; j++) LINKS.push([up[i].baseId.toLowerCase(), up[j].baseId.toLowerCase()]);
+    const mainBase = up.find(b => b.main);
+    if (mainBase) {
+      const mainId = mainBase.baseId.toLowerCase();
+      up.forEach(b => { const id = b.baseId.toLowerCase(); if (id !== mainId) LINKS.push([id, mainId]); });
+    } else {
+      for (let i = 0; i < up.length; i++) for (let j = i + 1; j < up.length; j++) LINKS.push([up[i].baseId.toLowerCase(), up[j].baseId.toLowerCase()]);
+    }
     CAGES.forEach(c => { c.base = BASES[0].id; }); document.getElementById("cages").innerHTML = "";
     initMap();
   }
@@ -500,6 +507,30 @@
   // is one, and the Spear only while the sortie is open; no declared action-cost line presented as measured model spend.
   const baseDetail = window.renderDetail;
   window.renderDetail = function (s) {
+    const remoteInspections = window.renderDetail._remote || (window.renderDetail._remote = new Map());
+    const renderRemoteInspection = (sortie) => {
+      if (!sortie.forwarded || !sortie.remoteSortie) return "";
+      if (!sortie.forwardedBaseId) return "<div class='small'>Destination sortie: <code>" + esc(sortie.remoteSortie) + "</code><br />Open the dashboard on " + esc(sortie.forwarded) + " to inspect its actions.</div>";
+      const key = sortie.forwardedBaseId + ":" + sortie.remoteSortie;
+      const entry = remoteInspections.get(key);
+      const btn = "<div class='row' style='margin-top:6px'><span class='small'>Destination sortie: <code>" + esc(sortie.remoteSortie) + "</code></span><button class='btn sm' data-inspect-remote-base='" + esc(sortie.forwardedBaseId) + "' data-inspect-remote-sortie='" + esc(sortie.remoteSortie) + "'" + (entry && entry.loading ? " disabled" : "") + ">" + (entry && entry.loading ? "Inspecting…" : entry && entry.data ? "Refresh from " + esc(sortie.forwarded) : "Inspect on " + esc(sortie.forwarded)) + "</button></div>";
+      if (!entry || entry.loading) return btn;
+      if (entry.error) return btn + "<div class='tiny warn' style='margin-top:4px'>" + esc(entry.error) + "</div>";
+      const remote = entry.data && entry.data.sortie;
+      if (!remote) return btn + "<div class='tiny muted' style='margin-top:4px'>No sortie details returned from " + esc(sortie.forwarded) + ".</div>";
+      const detail = Array.isArray(remote.detail) ? remote.detail : [];
+      const actions = detail.length
+        ? "<ol style='padding-left:18px;margin:4px 0'>" + detail.map(a => {
+            const b = a.ballot;
+            const verdicts = b && Array.isArray(b.verdicts) ? "<div class='verdicts' style='margin-top:2px'>" + b.verdicts.map(v => {
+              const tag = v.seat.startsWith("extra:") ? (v.shadow ? " (peer · shadow)" : " (peer · veto-only)") : (v.shadow ? " (shadow)" : "");
+              return "<span class='vchip " + esc(v.vote) + (v.shadow ? " shadow" : "") + "'>" + esc(seatName(v.seat) + tag) + ": " + esc(v.reason || v.vote) + "</span>";
+            }).join("") + "</div>" : "";
+            return "<li style='margin-bottom:4px'><b>" + esc(a.tool) + "</b>" + (b ? " · <span class='badge b-" + esc(b.pattern) + "'>" + esc(String(b.pattern).toUpperCase()) + "</span> · " + esc(b.outcome) + " (" + esc(b.executor) + ")" : "") + verdicts + "</li>";
+          }).join("") + "</ol>"
+        : "<div class='tiny muted'>No tool actions ran on " + esc(sortie.forwarded) + ".</div>";
+      return btn + "<div class='card' style='margin-top:6px'><div class='small'><b>" + esc((entry.data.base && entry.data.base.name) || sortie.forwarded) + "</b> · " + esc(remote.status) + (remote.why ? " · " + esc(remote.why) : "") + "</div>" + actions + "</div>";
+    };
     const box = document.getElementById("detail"); const sub = document.getElementById("detail-sub");
     if (!s) { box.innerHTML = "<div class='muted'>No sortie selected. Pick one in Sorties, or ask Misato below to start one.</div>"; sub.textContent = ""; return; }
     const who = s.pilot === "misato" ? "Misato, from a chat" : "you, as a direct action";
@@ -511,7 +542,7 @@
         : s.status === "stood-down" ? "The sortie stopped before any action ran."
         : "No actions: Misato answered without using a tool.";
       box.innerHTML = (s.advisor ? "<div class='tiny muted' style='margin-bottom:4px'>Advised by " + esc(s.advisor) + " before Misato planned (advice only, no vote)</div>" : "") + "<div class='muted small'>" + esc(message) + "</div>" +
-        (s.forwarded && s.remoteSortie ? "<div class='small'>Destination sortie: <code>" + esc(s.remoteSortie) + "</code><br />Open the dashboard on " + esc(s.forwarded) + " to inspect its actions.</div>" : "") +
+        renderRemoteInspection(s) +
         (s.outcome ? "<div class='small' style='margin-top:4px'>Reply: " + esc(s.outcome) + "</div>" : "");
       sub.textContent = "started by " + who + " · " + status; return;
     }
@@ -520,6 +551,27 @@
     box.querySelectorAll(".plan .row .tiny.muted").forEach(el => { if (/battery/.test(el.textContent)) el.remove(); });
     if (s.status !== "active" && s.status !== "waiting") box.querySelectorAll("[data-spear]").forEach(el => el.remove());
   };
+  document.addEventListener("click", async e => {
+    const btn = e.target.closest("[data-inspect-remote-base][data-inspect-remote-sortie]");
+    if (!btn) return;
+    e.preventDefault();
+    const remoteInspections = window.renderDetail._remote || (window.renderDetail._remote = new Map());
+    const baseId = btn.dataset.inspectRemoteBase;
+    const sortieId = btn.dataset.inspectRemoteSortie;
+    const key = baseId + ":" + sortieId;
+    remoteInspections.set(key, { loading: true });
+    const cur = state.sorties.find(x => x.id === state.selected);
+    if (cur) window.renderDetail(cur);
+    try {
+      const data = await api("bases/" + encodeURIComponent(baseId) + "/sorties/" + encodeURIComponent(sortieId));
+      remoteInspections.set(key, { data });
+    } catch (err) {
+      if (err && err.status === 401) { token = ""; forgetSession(); signIn(SESSION_ENDED); return; }
+      remoteInspections.set(key, { error: "Could not inspect on destination base: " + (err && err.message ? err.message : "unavailable") });
+    }
+    const after = state.sorties.find(x => x.id === state.selected);
+    if (after) window.renderDetail(after);
+  });
   // Accounting is page-scoped: unknown calls are counted separately and currencies are never combined.
   function usageView(page) {
     const items = page && Array.isArray(page.items) ? page.items : [];

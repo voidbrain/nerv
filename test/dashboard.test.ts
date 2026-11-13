@@ -1077,3 +1077,94 @@ test('F-043: Coming up (when) formats all-day, at, from-to, from and until remin
   assert.equal(when({ due: iso(15, 0), kind: 'from', end: null }), 'from 15:00');
   assert.equal(when({ due: iso(17, 0), kind: 'until', end: iso(18, 0) }), 'until 18:00');
 });
+
+test('F-051: server GET /api/bases/:baseId/sorties/:sortieId requires auth and proxies remote sortie inspection', async () => {
+  const { makeServer } = await import('../src/server.ts');
+  const dir = mkdtempSync(join(tmpdir(), 'nerv-dash-remote-'));
+  const store = new Store(join(dir, 'test.db'));
+  const targetId = '11111111-2222-4333-8444-555555555555';
+  const api = {
+    list: () => store.list(),
+    pendingReminders: () => store.pendingReminders(),
+    reminderPage: (b?: number, l?: number) => store.reminderPage(b, l),
+    inboxHistory: (b?: number, l?: number) => store.inboxHistory(b, l),
+    dashboardHistory: (s: string) => store.dashboardHistory(s),
+    inboxPage: (a?: number, l?: number, id?: string) => store.inboxPage(a, l, id),
+    add: (t: string, d: string) => store.add(t, d),
+    update: (id: string, p: object) => store.update(id, p),
+    cancel: (id: string) => store.cancel(id),
+    inbox: () => store.inbox(),
+    doctor: () => ({ ok: true }),
+    health: () => ({ ok: true }),
+    pendingApprovalIds: (ids: string[]) => ids,
+    approvals: () => [],
+    decide: () => ({ decision: 'approve' }),
+    events: () => [],
+    sorties: () => [],
+    sortie: () => null,
+    remoteSortie: async (baseId: string, sortieId: string) =>
+      baseId === 'NERV-01' && sortieId === targetId
+        ? {
+            base: { id: 'NERV-01', name: 'Neo Tokyo-3' },
+            sortie: {
+              id: targetId,
+              source: 'misato',
+              title: 'Remote check',
+              trust: 'owner',
+              status: 'done',
+              created: '2026-11-13T10:00:00Z',
+              closed: '2026-11-13T10:01:00Z',
+              actions: 1,
+              waiting: 0,
+              patterns: ['green'],
+              why: 'Completed cleanly.',
+              detail: [],
+            },
+            events: [],
+          }
+        : null,
+  };
+  const token = 'test-admin-token-0123456789abcdef';
+  const srv = makeServer(api as never, token);
+  await new Promise<void>((resolve) => srv.listen(0, '127.0.0.1', resolve));
+  const addr = srv.address() as { port: number };
+  const baseUrl = `http://127.0.0.1:${addr.port}`;
+  try {
+    const unauth = await fetch(`${baseUrl}/api/bases/NERV-01/sorties/${targetId}`);
+    assert.equal(unauth.status, 401, 'unauthenticated request is rejected');
+
+    const ok = await fetch(`${baseUrl}/api/bases/NERV-01/sorties/${targetId}`, {
+      headers: { authorization: `Bearer ${token}` },
+    });
+    assert.equal(ok.status, 200);
+    const data = (await ok.json()) as { base: { id: string }; sortie: { id: string; title: string } };
+    assert.equal(data.base.id, 'NERV-01');
+    assert.equal(data.sortie.title, 'Remote check');
+
+    const miss = await fetch(`${baseUrl}/api/bases/NERV-01/sorties/99999999-2222-4333-8444-555555555555`, {
+      headers: { authorization: `Bearer ${token}` },
+    });
+    assert.equal(miss.status, 404);
+  } finally {
+    await new Promise<void>((resolve) => srv.close(() => resolve()));
+    store.close();
+  }
+});
+
+test('F-051: MAGI detail marks shadow/peer seats, Sephirot debrief shows directional relay, and live UI inspects remote sorties', () => {
+  const js = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
+  const live = readFileSync('web/public/dashboard/live.js', 'utf8');
+  const html = readFileSync('web/public/dashboard/index.html', 'utf8');
+
+  assert.match(js, /\(peer · shadow\)/);
+  assert.match(js, /\(peer · veto-only\)/);
+  assert.match(js, /\(shadow\)/);
+  assert.match(html, /id="sd-debrief"/);
+  assert.match(js, /"returned from " \+ s\.forwarded/);
+  assert.match(js, /"reply to " \+ s\.origin/);
+
+  assert.match(live, /forwardedTo\.baseIds/);
+  assert.match(live, /data-inspect-remote-base=/);
+  assert.match(live, /"bases\/" \+ encodeURIComponent\(baseId\) \+ "\/sorties\/" \+ encodeURIComponent\(sortieId\)/);
+  assert.match(live, /const mainBase = up\.find\(b => b\.main\)/, 'hub-and-spoke Kaji links when main base exists');
+});
