@@ -1,0 +1,41 @@
+{
+ "version": 1,
+ "id": "F-076-T02",
+ "parent": "F-076",
+ "title": "Put the chosen main verification in place",
+ "goal": "Merged main is verified as the owner chose",
+ "status": "planned",
+ "acceptance": [
+  "The chosen setting or workflow change is live",
+  "A run on main after the change is green or its failure is recorded"
+ ],
+ "dependsOn": [
+  "F-076-T01"
+ ],
+ "resources": [
+  ".github/workflows/**",
+  "docs/work/records/**",
+  "generated:backlog-views"
+ ],
+ "capabilities": [
+  "bounded-edit"
+ ],
+ "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+ "validation": [
+  "gh run list --branch main",
+  "npm run check:fast"
+ ],
+ "escalation": [
+  "ci.yml is a harness file: decide project-only or template first (AGENTS.md, \"Changing a harness file\")",
+  "Branch protection is changed by the owner"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "0.5 h agent",
+  "basis": "Estimated 2026-11-13: one trigger or required-check change, then one observed run. Not a measurement.",
+  "reviewed": "2026-11-13",
+  "agentHours": 0.5,
+  "baselineAgentHours": 0.5,
+  "estimateAgentHours": 0.5
+ }
+}

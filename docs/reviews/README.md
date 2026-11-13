@@ -10,7 +10,7 @@ NERV evidence snapshot reviewed 8 November 2026 against main `2943aad`. Times be
 
 | Review | Last actual evidence | Next run / trigger | Owner and limits |
 |---|---|---|---|
-| Full deterministic verification | [PR #240 CI42635119338](https://github.com/voidbrain/nerv/actions/runs/42635119338), 2026-11-09; all five jobs passed | By 2026-11-16 or ten first-parent integrations, whichever comes first; sooner for risk, unknown coverage or explicit request | [NERV mapping](../verification.md) / [shared policy](../agents/verification.md); no stress/model/physical acceptance implied |
+| Full deterministic verification | [main run 43461834506](https://github.com/voidbrain/nerv/actions/runs/43461834506) on `ee11385`, dispatched by the 2026-11-13 full audit; all five jobs passed | By 2026-11-20 or ten first-parent integrations, whichever comes first; sooner for risk, unknown coverage or explicit request | [NERV mapping](../verification.md) / [shared policy](../agents/verification.md); no stress/model/physical acceptance implied |
 | Architecture reassessment | [2026-11-08 scoped report](../audits/2026-11-08-architecture-reassessment.md) | Significant boundary/hardware/trust change, recurring design failure or owner request; no calendar appointment | [Procedure](../agents/architecture-review.md), affected backlog owners |
 | Expensive stress / real-model campaigns | Reports below; latest run depends on suite and selection | On request, concrete changed risk or named acceptance, with explicit scope and budget; no periodic rerun date | [Evaluation procedure](../decisions/evaluation-and-improvement.md); no automatic model qualification |
 | Human / real-device acceptance | Per report and current record | When required device, signing identity, service host or human observation is available; not scheduled | F-005/F-009/F-011/F-015 and other owning records |
@@ -21,14 +21,14 @@ The configured interval is 7 days. Due dates below are policy thresholds, not bo
 
 | Area | Latest actual review | Report | Due / earlier condition |
 |---|---|---|
-| code | 2026-11-06 01:50 CET | [2026-11-06-full.md](../audits/2026-11-06-full.md) | 2026-11-13 01:50 CET; changed risk/request earlier |
-| logic | 2026-11-08 20:53 CET | [2026-11-08-architecture-reassessment.md](../audits/2026-11-08-architecture-reassessment.md) | 2026-11-15 20:53 CET; changed risk/request earlier |
-| tests | 2026-11-06 01:50 CET | [2026-11-06-full.md](../audits/2026-11-06-full.md) | 2026-11-13 01:50 CET; changed risk/request earlier |
-| documentation | 2026-11-08 23:22 CET | [2026-11-08-retirement-recheck.md](../audits/2026-11-08-retirement-recheck.md) | 2026-11-15 23:22 CET; changed risk/request earlier |
-| harness | 2026-11-06 01:50 CET | [2026-11-06-full.md](../audits/2026-11-06-full.md) | 2026-11-13 01:50 CET; changed risk/request earlier |
-| security | 2026-11-06 01:50 CET | [2026-11-06-full.md](../audits/2026-11-06-full.md) | 2026-11-13 01:50 CET; changed risk/request earlier |
-| delivery | 2026-11-06 01:50 CET | [2026-11-06-full.md](../audits/2026-11-06-full.md) | 2026-11-13 01:50 CET; changed risk/request earlier |
-| backlog | 2026-11-08 20:53 CET | [2026-11-08-architecture-reassessment.md](../audits/2026-11-08-architecture-reassessment.md) | 2026-11-15 20:53 CET; changed risk/request earlier |
+| code | 2026-11-13 17:30 CET | [2026-11-13-full.md](../audits/2026-11-13-full.md) | 2026-11-20 17:30 CET; changed risk/request earlier |
+| logic | 2026-11-13 17:30 CET | [2026-11-13-full.md](../audits/2026-11-13-full.md) | 2026-11-20 17:30 CET; changed risk/request earlier |
+| tests | 2026-11-13 17:30 CET | [2026-11-13-full.md](../audits/2026-11-13-full.md) | 2026-11-20 17:30 CET; changed risk/request earlier |
+| documentation | 2026-11-13 17:30 CET | [2026-11-13-full.md](../audits/2026-11-13-full.md) | 2026-11-20 17:30 CET; changed risk/request earlier |
+| harness | 2026-11-13 17:30 CET | [2026-11-13-full.md](../audits/2026-11-13-full.md) | 2026-11-20 17:30 CET; changed risk/request earlier |
+| security | 2026-11-13 17:30 CET | [2026-11-13-full.md](../audits/2026-11-13-full.md) | 2026-11-20 17:30 CET; changed risk/request earlier |
+| delivery | 2026-11-13 17:30 CET | [2026-11-13-full.md](../audits/2026-11-13-full.md) | 2026-11-20 17:30 CET; changed risk/request earlier |
+| backlog | 2026-11-13 17:30 CET | [2026-11-13-full.md](../audits/2026-11-13-full.md) | 2026-11-20 17:30 CET; changed risk/request earlier |
 
 ## Audit and architecture reports
 
@@ -47,6 +47,7 @@ Every report is retained. Historical rows are evidence of that review, not separ
 | [2026-11-06-brainstorm-retirement.md](../audits/2026-11-06-brainstorm-retirement.md) | 2026-11-06 21:00 CET | scoped: documentation, backlog; `7c0b619` | Current area threshold above; affected changes/request |
 | [2026-11-06-full.md](../audits/2026-11-06-full.md) | 2026-11-06 01:50 CET | full: code, logic, tests, documentation, harness, security, delivery, backlog; `df7a75e` | Current area threshold above; affected changes/request |
 | [2026-11-08-architecture-reassessment.md](../audits/2026-11-08-architecture-reassessment.md) | 2026-11-08 20:53 CET | scoped: logic, documentation, backlog; `1869340` | Current area threshold above; affected changes/request |
+| [2026-11-13-full.md](../audits/2026-11-13-full.md) | 2026-11-13 17:30 CET | full: code, logic, tests, documentation, harness, security, delivery, backlog; `ee11385` | Current area threshold above; affected changes/request |
 
 ## Acceptance evidence
 

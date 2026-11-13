@@ -1,0 +1,43 @@
+{
+ "version": 1,
+ "id": "F-051-T06",
+ "parent": "F-051",
+ "title": "EVA cage pilot labels from real instance data",
+ "goal": "The Sephirot EVA cage names the pilot and instance that ran each action, from F-049 instance data",
+ "status": "planned",
+ "acceptance": [
+  "The EVA cage shows the pilot and EVA instance of a running or finished action from recorded instance data, never a guess",
+  "An action with no instance data shows none, distinct from unavailable",
+  "A browser test renders both cases"
+ ],
+ "dependsOn": [
+  "F-049-T09"
+ ],
+ "resources": [
+  "web/**",
+  "src/**",
+  "test/**",
+  "docs/work/records/**",
+  "generated:backlog-views"
+ ],
+ "capabilities": [
+  "bounded-edit",
+  "regression-design"
+ ],
+ "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+ "validation": [
+  "Dashboard regression running the real render function; final applicable CI"
+ ],
+ "escalation": [
+  "Material scope growth goes to the owner before adoption"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "1 h agent",
+  "basis": "Estimated 2026-11-13 in the full audit: the remaining F-051 work named in its next action had no step. Labels only; instance data comes from F-049. Not a measurement.",
+  "reviewed": "2026-11-13",
+  "agentHours": 1,
+  "baselineAgentHours": 1,
+  "estimateAgentHours": 1
+ }
+}

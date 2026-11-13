@@ -1,0 +1,45 @@
+{
+ "version": 1,
+ "id": "F-077-T02",
+ "parent": "F-077",
+ "title": "Apply patch and minor dependency updates",
+ "goal": "Dependencies are on their latest patch and minor releases with every check passing",
+ "status": "planned",
+ "acceptance": [
+  "@anthropic-ai/sdk, Angular, ws, tslib and dev tools on the latest patch or minor",
+  "Full suite, build, lint and typecheck pass",
+  "A major upgrade (TypeScript 7) gets its own record"
+ ],
+ "dependsOn": [],
+ "resources": [
+  "package.json",
+  "package-lock.json",
+  "src/**",
+  "web/**",
+  "test/**",
+  "docs/work/records/**",
+  "generated:backlog-views"
+ ],
+ "capabilities": [
+  "bounded-edit",
+  "regression-design"
+ ],
+ "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+ "validation": [
+  "npm test",
+  "npm run build",
+  "npm run check:fast"
+ ],
+ "escalation": [
+  "A behaviour change in a dependency goes to the owner before merging"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "0.5 h agent",
+  "basis": "Estimated 2026-11-13: lockfile refresh and the full suite. Not a measurement.",
+  "reviewed": "2026-11-13",
+  "agentHours": 0.5,
+  "baselineAgentHours": 0.5,
+  "estimateAgentHours": 0.5
+ }
+}

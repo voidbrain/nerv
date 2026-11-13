@@ -1,0 +1,40 @@
+{
+ "version": 1,
+ "id": "F-077-T01",
+ "parent": "F-077",
+ "title": "Choose alerts, code scanning and a Node 26 job",
+ "goal": "The owner adopts or declines each of the three options",
+ "status": "planned",
+ "acceptance": [
+  "Each option recorded as adopted or declined in F-077",
+  "Adopted repository settings are on"
+ ],
+ "dependsOn": [],
+ "resources": [
+  "docs/work/records/**",
+  "generated:backlog-views",
+  ".github/workflows/**"
+ ],
+ "capabilities": [
+  "structured-tools"
+ ],
+ "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+ "validation": [
+  "npm run check:backlog"
+ ],
+ "escalation": [
+  "Repository settings are the owner's",
+  "ci.yml is a harness file: project-only or template first"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "0.25 h agent + 0.25 h owner",
+  "basis": "Estimated 2026-11-13: a decision, two settings, one CI job. Not a measurement.",
+  "reviewed": "2026-11-13",
+  "agentHours": 0.25,
+  "ownerHours": 0.25,
+  "baselineAgentHours": 0.25,
+  "estimateAgentHours": 0.25,
+  "ownerKind": "decision"
+ }
+}

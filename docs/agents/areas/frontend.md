@@ -24,7 +24,8 @@
 
 ## Native notifications and OS actions
 
+- Read the native guide before changing cursor or permission semantics.
 - Enable establishes a current-head baseline; checkpoints contain sequence plus delivery UUID and are private/atomic, never message content or credentials.
-- Validate whole pages before posting; advance only after OS acceptance/reconciliation, never on error. Do not claim exactly-once banners. History restore resets require an explicit visible warning; corrupt local state must not silently replay old reminders. Every notification request is opt-in; tests use fake sinks.
+- Validate whole pages before posting; advance only after OS acceptance/reconciliation, never on error. Do not claim exactly-once banners. History restore resets require an explicit visible warning; corrupt local state must not silently replay old reminders. Every notification request is opt-in; tests use fake sinks and do not prompt CI.
 - Service commands are fixed user `launchctl` actions with timeouts and a separate Stop confirmation. Paired runtime must match local plist `NERV_HOME`. `SMAppService.mainApp` owns companion login only. Do not register or modify actual OS services/login items in repository tests. CI validates pure command plans, simulated notification outcomes, pinning and compilation; live Mac permission/banner/login acceptance remains separate.
 - Native background polling uses `/api/status`, never a recurring full doctor/SQLite integrity scan. Keep an authenticated runtime ping distinct from explicit database diagnostics, and test that polling cannot call `quick_check` indirectly.

@@ -1,0 +1,40 @@
+{
+ "version": 1,
+ "id": "F-075-T01",
+ "parent": "F-075",
+ "title": "Rerun and record the nerv-system-flows cases at current main",
+ "goal": "Every nerv-system-flows case has a covering run at the source on main",
+ "status": "planned",
+ "acceptance": [
+  "7/7 cases pass and are recorded in evals/gauntlet/ledger.json",
+  "node tools/gauntlet.mjs pending exits 0 on the PR head"
+ ],
+ "dependsOn": [],
+ "resources": [
+  "evals/gauntlet/**",
+  "docs/work/records/**",
+  "generated:backlog-views"
+ ],
+ "capabilities": [
+  "structured-tools"
+ ],
+ "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+ "validation": [
+  "node tools/gauntlet.mjs pending",
+  "npm run check:fast"
+ ],
+ "escalation": [
+  "A failing case becomes a B- record before anything else"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "0.25 h agent + 0.25 h owner",
+  "basis": "Estimated 2026-11-13: one run and a ledger commit; the owner runs it or allows the agent to. Not a measurement.",
+  "reviewed": "2026-11-13",
+  "agentHours": 0.25,
+  "ownerHours": 0.25,
+  "baselineAgentHours": 0.25,
+  "estimateAgentHours": 0.25,
+  "ownerKind": "procedure"
+ }
+}

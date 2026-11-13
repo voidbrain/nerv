@@ -1,0 +1,40 @@
+{
+ "version": 1,
+ "id": "B-056-T02",
+ "parent": "B-056",
+ "title": "Owner live check: refused and unconfirmed renewal in the companion",
+ "goal": "The fix behaves as tested on the real companion",
+ "status": "ready",
+ "acceptance": [
+  "A renewal refused on the Mac names the reason and says the pairing is unchanged, in English and Italian",
+  "The invitation field is empty when renewal opens again"
+ ],
+ "dependsOn": [
+  "B-056-T01"
+ ],
+ "resources": [
+  "docs/work/records/**",
+  "generated:backlog-views"
+ ],
+ "capabilities": [
+  "structured-tools"
+ ],
+ "privacy": "No credential, ticket or token in the evidence.",
+ "validation": [
+  "Owner observation in a F-015 companion trial, recorded in the record"
+ ],
+ "escalation": [
+  "A failure reopens the fix with a new failing test"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "0.25 h owner",
+  "basis": "Estimated 2026-11-13 in the full audit: the record waited on this owner check with no step for it. Not a measurement.",
+  "reviewed": "2026-11-13",
+  "agentHours": 0,
+  "ownerHours": 0.25,
+  "baselineAgentHours": 0,
+  "estimateAgentHours": 0,
+  "ownerKind": "procedure"
+ }
+}
