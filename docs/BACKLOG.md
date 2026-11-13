@@ -715,7 +715,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) |
+| PR / evidence | [PR #376](https://github.com/voidbrain/nerv/pull/376) [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) |
 | Opened | 2026-11-13 |
 | Verification | 2026-11-13: 7/7 `nerv-system-flows` cases passed after `npm run build`, recorded in `evals/gauntlet/ledger.json`; `node tools/gauntlet.mjs pending` exits 0. |
 | Reviewed | 2026-11-13 |
@@ -909,7 +909,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Found while running F-075 on 2026-11-13. |
+| PR / evidence | [PR #376](https://github.com/voidbrain/nerv/pull/376) Found while running F-075 on 2026-11-13. |
 | Opened | 2026-11-13 |
 | Verification | 2026-11-13: `node --test test/evaluation-runner.test.mjs` 7 pass; `node tools/gauntlet.mjs pending` exits 0 with and without a `web/.DS_Store`. |
 | Reviewed | 2026-11-13 |
@@ -1496,7 +1496,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Found in F-075, 2026-11-13. |
+| PR / evidence | [PR #376](https://github.com/voidbrain/nerv/pull/376) Found in F-075, 2026-11-13. |
 | Opened | 2026-11-13 |
 | Verification | Pending. |
 | Reviewed | 2026-11-13 |
