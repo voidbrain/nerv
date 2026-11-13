@@ -324,14 +324,14 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| — | F-021-T01 — MCP stdio client, tools process and deny-by-default grants | — | 0 days | 0 remaining | Completed |
-| 🟢 Small | F-021-T02 — Versioned descriptors for NERV's own tools | 0.25 h | 0 h | 0.25 h | Implemented; verification pending |
-| 🟢 Small | F-021-T03 — Per-pilot tool binding | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | F-021-T04 — Remote (other-machine) endpoints | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | F-021-T05 — Dashboard tool listing | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟡 Medium | **Total** | 1.5 h (4 of 5 steps) | 0 h (0 of 5 steps recorded) | 1.5 h | 1 of 5 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| — | F-021-T01 — MCP stdio client, tools process and deny-by-default grants | — | 0 days | 0 remaining | Completed | — |
+| 🟢 Small | F-021-T02 — Versioned descriptors for NERV's own tools | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | [PR #381](https://github.com/voidbrain/nerv/pull/381) versioned NERV and MCP tool registry descriptors |
+| 🟢 Small | F-021-T03 — Per-pilot tool binding | 0.5 h | 0 h | 0.5 h | Planned | — |
+| 🟢 Small | F-021-T04 — Remote (other-machine) endpoints | 0.5 h | 0 h | 0.5 h | Planned | — |
+| 🟢 Small | F-021-T05 — Dashboard tool listing | 0.25 h | 0 h | 0.25 h | Planned | — |
+| 🟡 Medium | **Total** | 1.5 h (4 of 5 steps) | 0 h (0 of 5 steps recorded) | 1.5 h | 1 of 5 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -341,7 +341,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | Depends on | [F-049](#f-049) — EVA-03 isolation before enabling EVA-03 tool grants; other MCP slices can proceed |
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  — |
+| PR / evidence | Steps: F-021-T02: [PR #381](https://github.com/voidbrain/nerv/pull/381) versioned NERV and MCP tool registry descriptors. [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  — |
 | Opened | 2026-11-02 |
 | Verification | Pending |
 | Reviewed | 2026-11-07 |

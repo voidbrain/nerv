@@ -5,6 +5,12 @@
   "title": "Versioned descriptors for NERV's own tools",
   "goal": "Versioned descriptors for NERV's own tools",
   "status": "implemented",
+  "prs": [
+    {
+      "pr": 381,
+      "note": "versioned NERV and MCP tool registry descriptors"
+    }
+  ],
   "acceptance": [
     "NERV tools expose versioned descriptors through the same registry as MCP tools"
   ],
