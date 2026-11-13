@@ -1,3 +1,4 @@
+import { isIP } from 'node:net';
 import type { UsageObservation } from './model-usage.ts';
 import {
   completeAnthropicCompatible,
@@ -10,7 +11,7 @@ import {
  * Umbilical is the Claude cloud route, off until the owner enables it. There is no automatic fallback
  * between routes: local-only text never leaves the machine, and a failed route reports failure.
  */
-export type Privacy = 'local-only' | 'any';
+export type Privacy = 'local-only' | 'owner-bases' | 'any';
 export type RouteName = 'local' | 'cloud';
 export interface LocalRoute {
   baseUrl: string;
@@ -21,9 +22,23 @@ export interface CloudRoute {
   model: string;
   enabled: boolean;
 }
+export interface RemoteInferenceEndpoint {
+  baseId: string;
+  model: string;
+}
+export interface RemoteInferenceServe {
+  enabled: boolean;
+  bases: string[];
+  models: string[];
+}
+export interface RemoteInferenceConfig {
+  endpoints?: Record<string, RemoteInferenceEndpoint>;
+  allowBases?: string[];
+  serve?: RemoteInferenceServe;
+}
 /** Which route and model each role uses. Casper is local only: it sees the action's arguments, which may be private. */
 export interface Roles {
-  misato?: { route: RouteName; model?: string };
+  misato?: { route: RouteName; model?: string; privacy?: Privacy };
   casper?: { model?: string };
   /** F-025 consultants: advice for Misato before it plans, on the local route only; off unless set. */
   consultant?: { model: string };
@@ -33,6 +48,7 @@ export interface Models {
   cloud?: CloudRoute;
   roles?: Roles;
   engines?: EngineInstance[];
+  remote?: RemoteInferenceConfig;
 }
 export interface Ask {
   prompt: string;
@@ -51,7 +67,134 @@ export const MAX_REPLY_BYTES = 16384;
 /** Coordinator wait for a brain model call; the route itself gives up 5 s earlier so the brain can answer. */
 export const MODEL_TIMEOUT_MS = 120000;
 const loopback = new Set(['127.0.0.1', 'localhost', '[::1]']);
+const BASE_ID = /^[A-Z0-9][A-Z0-9-]{1,15}$/;
+const ENDPOINT_NAME = /^[a-z0-9][a-z0-9-]{0,31}$/i;
+const PRIVACY_CLASSES: readonly Privacy[] = ['local-only', 'owner-bases', 'any'];
 export class ModelError extends Error {}
+
+function extractHost(address: string): string {
+  const trimmed = address.trim();
+  if (trimmed.startsWith('[')) {
+    const end = trimmed.indexOf(']');
+    if (end > 1) return trimmed.slice(1, end);
+  }
+  const firstColon = trimmed.indexOf(':');
+  if (firstColon > 0 && trimmed.indexOf(':', firstColon + 1) === -1) {
+    return trimmed.slice(0, firstColon);
+  }
+  return trimmed;
+}
+
+function parseIpv6Hextets(host: string): number[] | null {
+  const bare = host.split('%')[0] ?? host;
+  const halves = bare.split('::');
+  if (halves.length > 2) return null;
+  const left = halves[0] ? halves[0].split(':') : [];
+  const right = halves[1] ? halves[1].split(':') : [];
+  const missing = 8 - (left.length + right.length);
+  if ((halves.length === 1 && missing !== 0) || (halves.length === 2 && missing < 1)) return null;
+  const parts = [...left, ...Array<string>(Math.max(0, missing)).fill('0'), ...right];
+  const nums: number[] = [];
+  for (const p of parts) {
+    if (!/^[0-9a-f]{1,4}$/i.test(p)) return null;
+    nums.push(parseInt(p, 16));
+  }
+  return nums.length === 8 ? nums : null;
+}
+
+/** True only for Tailscale CGNAT IPv4 (100.64.0.0/10) or Tailscale ULA IPv6 (fd7a:115c:a1e0::/48). */
+export function isTailscaleAddress(address: string): boolean {
+  const host = extractHost(address);
+  const ipVersion = isIP(host);
+  if (ipVersion === 4) {
+    const octets = host.split('.').map(Number);
+    return octets[0] === 100 && octets[1]! >= 64 && octets[1]! <= 127;
+  }
+  if (ipVersion === 6) {
+    const hextets = parseIpv6Hextets(host);
+    return hextets !== null && hextets[0] === 0xfd7a && hextets[1] === 0x115c && hextets[2] === 0xa1e0;
+  }
+  return false;
+}
+
+function validateBaseIdList(value: unknown, label: string): string[] {
+  if (!Array.isArray(value) || value.length > 32)
+    throw new Error(`Invalid ${label}: expected up to 32 enrolled base IDs.`);
+  const out: string[] = [];
+  for (const item of value) {
+    if (typeof item !== 'string' || !BASE_ID.test(item))
+      throw new Error(`Invalid ${label}: "${String(item)}" is not a valid base ID.`);
+    if (!out.includes(item)) out.push(item);
+  }
+  return out;
+}
+
+function validateRemoteInference(value: unknown): RemoteInferenceConfig {
+  const r = value as Record<string, unknown>;
+  if (
+    !r ||
+    typeof r !== 'object' ||
+    Array.isArray(r) ||
+    Object.keys(r).length === 0 ||
+    Object.keys(r).some((k) => !['endpoints', 'allowBases', 'serve'].includes(k))
+  )
+    throw new Error('Invalid models.remote: configure endpoints, allowBases and/or serve.');
+  const out: RemoteInferenceConfig = {};
+  if (r.endpoints !== undefined) {
+    const e = r.endpoints as Record<string, unknown>;
+    if (!e || typeof e !== 'object' || Array.isArray(e) || Object.keys(e).length > 20)
+      throw new Error('Invalid models.remote.endpoints: map of endpoint name to { baseId, model }.');
+    const endpoints: Record<string, RemoteInferenceEndpoint> = {};
+    for (const [name, raw] of Object.entries(e)) {
+      if (!ENDPOINT_NAME.test(name))
+        throw new Error(`Invalid models.remote.endpoints.${name}: use letters, digits and dashes.`);
+      const ep = raw as Record<string, unknown>;
+      if (
+        !ep ||
+        typeof ep !== 'object' ||
+        Array.isArray(ep) ||
+        Object.keys(ep).some((k) => !['baseId', 'model'].includes(k)) ||
+        typeof ep.baseId !== 'string' ||
+        !BASE_ID.test(ep.baseId) ||
+        typeof ep.model !== 'string' ||
+        !ep.model ||
+        ep.model.length > 200
+      )
+        throw new Error(
+          `Invalid models.remote.endpoints.${name}: baseId (enrolled base ID, never a URL) and model are required.`,
+        );
+      endpoints[name] = { baseId: ep.baseId, model: ep.model };
+    }
+    out.endpoints = endpoints;
+  }
+  if (r.allowBases !== undefined) {
+    out.allowBases = validateBaseIdList(r.allowBases, 'models.remote.allowBases');
+  }
+  if (r.serve !== undefined) {
+    const s = r.serve as Record<string, unknown>;
+    if (
+      !s ||
+      typeof s !== 'object' ||
+      Array.isArray(s) ||
+      Object.keys(s).some((k) => !['enabled', 'bases', 'models'].includes(k)) ||
+      typeof s.enabled !== 'boolean'
+    )
+      throw new Error('Invalid models.remote.serve: enabled boolean is required.');
+    const bases = s.bases !== undefined ? validateBaseIdList(s.bases, 'models.remote.serve.bases') : [];
+    const models: string[] = [];
+    if (s.models !== undefined) {
+      if (!Array.isArray(s.models) || s.models.length > 32)
+        throw new Error('Invalid models.remote.serve.models: expected up to 32 model names.');
+      for (const m of s.models) {
+        if (typeof m !== 'string' || !m || m.length > 200)
+          throw new Error('Invalid models.remote.serve.models: non-empty model name up to 200 chars.');
+        if (!models.includes(m)) models.push(m);
+      }
+    }
+    out.serve = { enabled: s.enabled, bases, models };
+  }
+  return out;
+}
 export function validateModels(value: unknown): Models {
   if (value === undefined) return {};
   const v = value as Record<string, unknown>;
@@ -59,9 +202,9 @@ export function validateModels(value: unknown): Models {
     !v ||
     typeof v !== 'object' ||
     Array.isArray(v) ||
-    Object.keys(v).some((k) => !['local', 'cloud', 'roles', 'engines'].includes(k))
+    Object.keys(v).some((k) => !['local', 'cloud', 'roles', 'engines', 'remote'].includes(k))
   )
-    throw new Error('Invalid models: use local, cloud, roles and engines.');
+    throw new Error('Invalid models: use local, cloud, roles, engines and remote.');
   const out: Models = {};
   if (v.local !== undefined) {
     const l = v.local as Record<string, unknown>;
@@ -86,8 +229,14 @@ export function validateModels(value: unknown): Models {
       !loopback.has(url.hostname) ||
       url.username ||
       url.password
-    )
+    ) {
+      if (isTailscaleAddress(url.hostname)) {
+        throw new Error(
+          'models.local.baseUrl must be a loopback address on this machine; use models.remote with an enrolled baseId for Tailscale bases.',
+        );
+      }
       throw new Error('models.local.baseUrl must be a loopback address on this machine.');
+    }
     out.local = { baseUrl: url.href.replace(/\/$/, ''), model: l.model };
   }
   if (v.cloud !== undefined) {
@@ -123,12 +272,17 @@ export function validateModels(value: unknown): Models {
       if (
         !m ||
         typeof m !== 'object' ||
-        Object.keys(m).some((k) => !['route', 'model'].includes(k)) ||
+        Object.keys(m).some((k) => !['route', 'model', 'privacy'].includes(k)) ||
         !['local', 'cloud'].includes(m.route as string) ||
-        !model(m.model)
+        !model(m.model) ||
+        (m.privacy !== undefined && !PRIVACY_CLASSES.includes(m.privacy as Privacy))
       )
-        throw new Error('Invalid models.roles.misato: route local or cloud, optional model.');
-      roles.misato = { route: m.route as RouteName, ...(m.model ? { model: m.model as string } : {}) };
+        throw new Error('Invalid models.roles.misato: route local or cloud, optional model and privacy.');
+      roles.misato = {
+        route: m.route as RouteName,
+        ...(m.model ? { model: m.model as string } : {}),
+        ...(m.privacy ? { privacy: m.privacy as Privacy } : {}),
+      };
     }
     if (r.casper !== undefined) {
       const c = r.casper as Record<string, unknown>;
@@ -152,14 +306,16 @@ export function validateModels(value: unknown): Models {
     out.roles = roles;
   }
   if (v.engines !== undefined) out.engines = validateEngineInstances(v.engines);
+  if (v.remote !== undefined) out.remote = validateRemoteInference(v.remote);
   return out;
 }
 /** Picks the route without side effects. Never substitutes one route for another. */
 export function selectRoute(ask: Ask, models: Models, hasKey: boolean): RouteName {
   const cloudReady = !!models.cloud?.enabled && hasKey;
-  const wanted = ask.route ?? (models.local || ask.privacy === 'local-only' ? 'local' : 'cloud');
+  const wanted = ask.route ?? (models.local || ask.privacy !== 'any' ? 'local' : 'cloud');
   if (wanted === 'cloud') {
     if (ask.privacy === 'local-only') throw new ModelError('Local-only input never goes to the cloud route.');
+    if (ask.privacy === 'owner-bases') throw new ModelError('Owner-bases input never goes to the cloud route.');
     if (!models.cloud?.enabled) throw new ModelError('Cloud route (Umbilical) is disabled.');
     if (!cloudReady) throw new ModelError('Cloud route (Umbilical) has no API key.');
     return 'cloud';

@@ -14,24 +14,23 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 33 | 9 |
-| **Require Human 🧑** | 9 | 2 |
+| **Require Human 🧑** | 8 | 2 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures** | **Decisions** | **Procedures** | **Decisions** |
-| [F-009](#f-009) | [F-006](#f-006) | [B-057](#b-057) | — |
-| [F-011](#f-011) | [F-062](#f-062) | [B-056](#b-056) |  |
-| [F-023](#f-023) | [F-009](#f-009) |  |  |
-| [F-004](#f-004) | [F-015](#f-015) |  |  |
-|  | [F-011](#f-011) |  |  |
+| [F-009](#f-009) | [F-062](#f-062) | [B-057](#b-057) | — |
+| [F-011](#f-011) | [F-009](#f-009) | [B-056](#b-056) |  |
+| [F-023](#f-023) | [F-015](#f-015) |  |  |
+| [F-004](#f-004) | [F-011](#f-011) |  |  |
 |  | [F-016](#f-016) |  |  |
 |  | [F-064](#f-064) |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 141 h agent + 17 h owner across 131 open steps of 31 features and 3 other records. 21.75 h of actual effort recorded on 33 steps. Generated from the task files.
+**Remaining effort:** 140 h agent + 16.75 h owner across 129 open steps of 31 features and 3 other records. 22.25 h of actual effort recorded on 34 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -105,6 +104,59 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-01 |
 | Verification | 2026-11-10 Mac service: actual owned launchd startup, stopped descendants, uninstall/reinstall, partial crash/recovery, cached replay/startup fence and forward identical-runtime update passed; private backups/credentials/data checks and root-bound worker reconnection verified. No executable/schema update or real login/logout claim. 2026-11-10 actual two-base root activation and files-only isolated import passed; [dated evidence](acceptance/node-root-activation-2026-11-10.md) distinguishes live checks, retained private snapshots and separately completed capability/service acceptance. Independent source review ee8501f:67 tests passed, no unresolved code blockers in scope. Local Node538 pass/2 skip before relocating unchanged CLI join to post-build suite; final local headless5 pass/1 platform skip. PR252 full CI42823700687 passed at94228b0, mergedc3a550b tree-identical. Windows attempt1 failed an unchanged150ms-heartbeat worker-approval test; attempt2 passed at the identical head with no assertion/code changes; retain that nondeterministic failure as evidence. Owner attests independent encrypted-root backup; no passphrase learned, no private root sent to peer. T05 capability/cancellation/reconnect passed; Mac service actual acceptance passed under PR253/full CI42874665479; parent F-005 stays open. |
 | Reviewed | 2026-11-12 |
+
+</details>
+
+---
+
+### <a id="f-006"></a>[✨ F-006](#top)
+
+**Orchestrate agents and models across nodes**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟣 Very large | 10.75 h agent + 2.5 h owner | — | [F-012](#f-012) | — | — |
+
+💻 **→** Next: F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback (Planned).
+
+| | |
+|---|---|
+| **Issue** | Local planning, model adapters and bounded worker transport exist; independent cross-node inference/execution selection, capability scheduling and budgets remain incomplete. |
+| **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
+| **Check** | Mini PC coder uses Mac inference; policy-approved Claude path; Pi capability route; unavailable Mac waits or expires; bounded budgets and delegation. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | F-006-T01 — T01a — Decision: remote inference endpoint identity, permitted data and behaviour when unavailable | 0.5 h | 0.5 h (stated) | 0 h | Completed |
+| 🟢 Small | F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases | 1.25 h | 0 h | 1.25 h | Planned |
+| 🟢 Small | F-006-T04 — T04a — Placement campaign plan with exact cases, repeats and budgets for owner approval | 0.5 h | 0 h | 0.5 h agent + 0.25 h owner | Planned |
+| 🟢 Small | F-006-T05 — T05a — Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.5 h | 0 h | 0.5 h agent + 0.25 h owner | Planned |
+| — | F-006-T06 — T01b — Configuration validation for remote endpoints; the loopback-only local route stays guaranteed; regressions | 0.5 h | 0.5 h (stated) | 0 h | Completed |
+| 🟡 Medium | F-006-T07 — T02b — Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol | 1.25 h | 0 h | 1.25 h | Planned |
+| 🟢 Small | F-006-T08 — T02c — Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-006-T09 — T03b — Evidence adapter binding both configurations, handoffs, budgets and hosts | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | F-006-T10 — T03c — Grader tamper protection; stale or mismatched evidence rejected; authority rechecked | 1.25 h | 0 h | 1.25 h | Planned |
+| 🟢 Small | F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | 1 h | 0 h | 1 h agent + 0.5 h owner | Planned |
+| 🟢 Small | F-006-T12 — T04c — Placement report and recommendation | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-006-T13 — T05b — Three Mac operating-condition runs | 1 h | 0 h | 1 h agent + 1.5 h owner | Planned |
+| 🟢 Small | F-006-T14 — T05c — Mac operating-conditions report | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟣 Very large | **Total** | 11.75 h | 1 h (2 of 14 steps recorded) | 10.75 h agent + 2.5 h owner | 2 of 14 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-006.md)
+
+| Field | Value |
+|---|---|
+| Queue order | 2 — Owner-selected subsequent NERV work, 2026-11-10; intervening upstream work is tracked in its own repository |
+| PR / evidence | [PR #347](https://github.com/voidbrain/nerv/pull/347) (T01a agreement & T01b remote inference config validation, `src/model.ts`, `test/remote-inference-config.test.ts`); [PR #296](https://github.com/voidbrain/nerv/pull/296) (T01a remote inference decision: docs/decisions/remote-inference.md); [PR #244](https://github.com/voidbrain/nerv/pull/244) owner-selected queue order; [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Ownership correction/adoption: [PR #235](https://github.com/voidbrain/nerv/pull/235);  Host-load plan: [PR #234](https://github.com/voidbrain/nerv/pull/234);  Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #221](https://github.com/voidbrain/nerv/pull/221) schema/reuse assessment; [Gauntlet ownership/reuse proposal](design/gauntlet-protocol-2026-11-08.md), 2026-11-08; the proposal preceded delivered Gauntlet0.1.1 adoption in PR #223 / F-073; automatic routing/qualification remains unimplemented and no consumer work gates upstream releases; [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| Opened | 2026-11-01 |
+| Verification | Pending acceptance and remote CI where applicable |
+| Reviewed | 2026-11-13 |
 
 </details>
 
@@ -284,59 +336,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-02 |
 | Verification | Pending |
 | Reviewed | 2026-11-07 |
-
-</details>
-
----
-
-### <a id="f-006"></a>[✨ F-006](#top)
-
-**Orchestrate agents and models across nodes**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟣 Very large | 11.75 h agent + 2.75 h owner | — | [F-012](#f-012) | — | 🧑 |
-
-🧑 **→** Owner agreement on the [remote inference decision](decisions/remote-inference.md) (PR #296); T01b next.
-
-| | |
-|---|---|
-| **Issue** | Local planning, model adapters and bounded worker transport exist; independent cross-node inference/execution selection, capability scheduling and budgets remain incomplete. |
-| **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
-| **Check** | Mini PC coder uses Mac inference; policy-approved Claude path; Pi capability route; unavailable Mac waits or expires; bounded budgets and delegation. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-006-T01 — T01a — Decision: remote inference endpoint identity, permitted data and behaviour when unavailable | 0.5 h | 0.5 h so far (stated) | 0 h agent + 0.25 h owner | Implemented; verification pending |
-| 🟢 Small | F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟢 Small | F-006-T04 — T04a — Placement campaign plan with exact cases, repeats and budgets for owner approval | 0.5 h | 0 h | 0.5 h agent + 0.25 h owner | Planned |
-| 🟢 Small | F-006-T05 — T05a — Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.5 h | 0 h | 0.5 h agent + 0.25 h owner | Planned |
-| 🟢 Small | F-006-T06 — T01b — Configuration validation for remote endpoints; the loopback-only local route stays guaranteed; regressions | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-006-T07 — T02b — Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟢 Small | F-006-T08 — T02c — Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-006-T09 — T03b — Evidence adapter binding both configurations, handoffs, budgets and hosts | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-006-T10 — T03c — Grader tamper protection; stale or mismatched evidence rejected; authority rechecked | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟢 Small | F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | 1 h | 0 h | 1 h agent + 0.5 h owner | Planned |
-| 🟢 Small | F-006-T12 — T04c — Placement report and recommendation | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | F-006-T13 — T05b — Three Mac operating-condition runs | 1 h | 0 h | 1 h agent + 1.5 h owner | Planned |
-| 🟢 Small | F-006-T14 — T05c — Mac operating-conditions report | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟣 Very large | **Total** | 12.25 h | 0.5 h (1 of 14 steps recorded) | 11.75 h agent + 2.75 h owner | 0 of 14 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-006.md)
-
-| Field | Value |
-|---|---|
-| Queue order | 2 — Owner-selected subsequent NERV work, 2026-11-10; intervening upstream work is tracked in its own repository |
-| PR / evidence | [PR #296](https://github.com/voidbrain/nerv/pull/296) (T01a remote inference decision: docs/decisions/remote-inference.md); [PR #244](https://github.com/voidbrain/nerv/pull/244) owner-selected queue order; [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Ownership correction/adoption: [PR #235](https://github.com/voidbrain/nerv/pull/235);  Host-load plan: [PR #234](https://github.com/voidbrain/nerv/pull/234);  Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #221](https://github.com/voidbrain/nerv/pull/221) schema/reuse assessment; [Gauntlet ownership/reuse proposal](design/gauntlet-protocol-2026-11-08.md), 2026-11-08; the proposal preceded delivered Gauntlet0.1.1 adoption in PR #223 / F-073; automatic routing/qualification remains unimplemented and no consumer work gates upstream releases; [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
-| Opened | 2026-11-01 |
-| Verification | Pending acceptance and remote CI where applicable |
-| Reviewed | 2026-11-12 |
 
 </details>
 

@@ -1,6 +1,6 @@
 # Remote inference endpoints
 
-**Status: proposed, 12 November 2026 (F-006-T01). Owner agreement pending; no code implements it yet.** F-006-T06 (configuration validation), F-006-T02 (selection contract) and F-006-T08 (waiting and expiry) build on it once agreed.
+**Status: agreed, 13 November 2026 (F-006-T01).** F-006-T06 (configuration validation) is implemented; F-006-T02 (selection contract) and F-006-T08 (waiting and expiry) build on it.
 
 ## Problem
 
