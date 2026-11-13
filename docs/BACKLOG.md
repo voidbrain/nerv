@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 2 | 4 | 11 | 10 |
+| **This week** | 2 | 4 | 11 | 12 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 30 | 6 |
+| **Open** | 30 | 4 |
 | **Require Human 🧑** | 12 | 2 |
 
 ### Require Human 🧑
@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 34.25 h agent + 16.75 h owner across 115 open steps of 28 features and 3 other records. 28.75 h of actual effort recorded on 49 steps. Generated from the task files.
+**Remaining effort:** 34 h agent + 16.75 h owner across 114 open steps of 28 features and 2 other records. 28.75 h of actual effort recorded on 49 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -937,44 +937,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
-### <a id="b-042"></a>[🐞 B-042](#top)
-
-**Telegram approval card arrives after dashboard decision**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | — | — | — |
-
-💻 **→** Verify: PR #285's CI passed; 2 of the next ten CI runs are clean so far, with no `remote dashboard decision reconciles the main bot card` failure.
-
-| | |
-|---|---|
-| **Issue** | Reopened after PR #223 Windows test/one-channel.test.ts failed the existing remote dashboard decision reconciles the main bot card assertion; later seen on macOS under load and once on Linux coverage. Cause (2026-11-12): an awaited `deliver()` could return a pass already running whose cleanup had read the card's status before the decision (runtime), and the fixture's wait could pass before Aoba tracked the card (fixture). |
-| **Reproduce** | Any platform: `node --test --test-name-pattern="not a pass that read status" test/telegram-reconcile.test.ts` stalls a periodic pass's status lookup after it read the card as pending, decides on the dashboard, then awaits `deliver()`; before the fix no `editMessageReplyMarkup` is sent. |
-| **Check** | Explain the failure with controlled evidence; preserve exactly-once effects, eventual stale-button removal, retry/restart and signed lookup. A passing retry is not a causal fix. Do not weaken assertions or merely widen timeouts. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| — | B-042-T01 — Explain and fix the remote card cleanup that an awaited delivery missed | 2 h | 1.5 h (stated) | 0 h | Completed |
-| — | **Total** | 2 h | 1.5 h | 0 h | 1 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-042.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Reconcile: [PR #288](https://github.com/voidbrain/nerv/pull/288). Fix: [PR #285](https://github.com/voidbrain/nerv/pull/285) (B-042-T01), CI [43166751719](https://github.com/voidbrain/nerv/actions/runs/43166751719) green (full-suite skipped); last occurrence [PR #277 run 43093410846](https://github.com/voidbrain/nerv/actions/runs/43093410846) (Linux coverage). [PR #267 CI 43012116246](https://github.com/voidbrain/nerv/actions/runs/43012116246) (2026-11-11, harness/records-only PR: `.gitignore`, version stamp, CI template clone): Windows failed this one-channel case on `remote dashboard decision reconciles the main bot card` again; another occurrence with no runtime change. [PR #261](https://github.com/voidbrain/nerv/pull/261) timing reassessment; [PR #223](https://github.com/voidbrain/nerv/pull/223); [CI 42535069202 attempt 1](https://github.com/voidbrain/nerv/actions/runs/42535069202/attempts/1) Windows failed card-cleanup assertion, Linux later failed only recap week validation. Test: test/one-channel.test.ts remote dashboard decision reconciles the main bot card. Earlier closure: PR #203 CI 42425786736/42425784575; preserved in archive. |
-| Opened | 2026-11-07 |
-| Verification | 2026-11-09: Windows failure observed. Isolated unchanged Mac Node26 one-channel file passed all five cases; does not establish a causal fix. Final unchanged head737fa53 passed Windows in CI 42535553841; investigation still pending, not a causal fix. 2026-11-12: mechanism reproduced deterministically (test/telegram-reconcile.test.ts fails before the fix, passes after; local macOS). CI on the fix passed (PR #285 CI 43166751719, scoped; full suite with the fix in #286 CI 43168006619). Later runs: 2 of 10 clean (43168006619, 43168381380); eight pending. |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
 ### <a id="b-049"></a>[🐞 B-049](#top)
 
 **Misato invents a reminder title instead of asking, when an Italian request gives none**
@@ -1008,44 +970,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | docs/evaluations/2026-11-12-misato-b021.json (`italian-missing-title` failed: invented title `Promemoria`); development probe of the same case 2026-11-12: 1 of 3 asked, 2 invented a title; docs/evaluations/2026-11-12-misato-v2.json (passed: it asked); docs/evaluations/2026-11-08-misato.json (passed). Found in B-021's run. |
 | Opened | 2026-11-12 |
 | Verification | Pending. |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
-### <a id="b-050"></a>[🐞 B-050](#top)
-
-**Dashboard browser test reads the banner before the page has loaded**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h | — | — | — | — |
-
-💻 **→** Fix implemented in [PR #294](https://github.com/voidbrain/nerv/pull/294): until retries through navigation evaluation exceptions until condition holds. Next: CI and merge.
-
-| | |
-|---|---|
-| **Issue** | [PR #286](https://github.com/voidbrain/nerv/pull/286) CI [43168006619](https://github.com/voidbrain/nerv/actions/runs/43168006619/attempts/1) attempt 1, job validate (`npm run test:browser`): `test/evaluation.browser.mjs` case golden-v1/dashboard failed with `TypeError: Cannot read properties of null (reading 'textContent')` on the first `until` right after `Page.navigate` (`document.querySelector('.banner')` was null). The fixture's `until` (`test/fixtures/browser.mjs`) throws as soon as the evaluated expression throws instead of retrying, so a page that has not loaded yet fails the test. Attempt 2 (failed jobs rerun, same head `94e3a0a`) passed; local runs passed 3 of 3. Whether #286's service worker plays a part is not established (the test uses a fresh browser profile, per the F-004 agent). |
-| **Reproduce** | `npm run build && node --test test/evaluation.browser.mjs` (case golden-v1/dashboard); intermittent, seen once in CI. Deterministically: evaluate the case's first `until` expression before the dashboard document has its `.banner` (for example against `about:blank`, or with the dashboard response delayed). |
-| **Check** | A committed test fails before the fix: `until` on an expression that throws while the page is still loading fails at once. After the fix the wait retries across navigation, or waits for the document to load, and still fails with a clear timeout when the condition never holds. The case's assertion (`LIVE ·` shown, `SIGNING IN` gone) is unchanged; no timeout widened. Browser CI passes. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | B-050-T01 — Fix browser fixture until abortion on evaluated expression exceptions | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 0.75 h | 0.5 h | 0.25 h | 0 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-050.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Test: test/evaluation.browser.mjs "B-050: until retries through evaluated expression exceptions and resolves when condition holds" (committed failing in feb13de, passes after fix). Test: test/evaluation.browser.mjs "B-050: until still fails with timeout when throwing condition never holds" (committed failing in feb13de, passes after fix). Recorded in [PR #288](https://github.com/voidbrain/nerv/pull/288). Observed: CI 43168006619 attempt 1, job validate (job 131014457197), `test/evaluation.browser.mjs:62` via `until` in `test/fixtures/browser.mjs`; attempt 2 job validate (131017084799) passed on the same head. Same run, attempt 1: F-004-T01's own browser case passed. |
-| Opened | 2026-11-12 |
-| Verification | Pending. 2026-11-12: one CI failure observed; a rerun on the same head and 3 of 3 local runs (F-004 agent) passed. Not reproduced deterministically yet. |
 | Reviewed | 2026-11-12 |
 
 </details>
@@ -1581,6 +1505,82 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-12 |
 | Verification | Pending. |
 | Reviewed | 2026-11-12 |
+
+</details>
+
+---
+### <a id="b-042"></a>[🐞 B-042](#top)
+
+**Telegram approval card arrives after dashboard decision**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔵 Closed | ◻️ P2 | 🟢 Small | 0 h | — | — | — | — |
+
+💻 **→** Closed 2026-11-13: >10 clean CI runs since [PR #285](https://github.com/voidbrain/nerv/pull/285) merged with no `remote dashboard decision reconciles the main bot card` failure.
+
+| | |
+|---|---|
+| **Issue** | Reopened after PR #223 Windows test/one-channel.test.ts failed the existing remote dashboard decision reconciles the main bot card assertion; later seen on macOS under load and once on Linux coverage. Cause (2026-11-12): an awaited `deliver()` could return a pass already running whose cleanup had read the card's status before the decision (runtime), and the fixture's wait could pass before Aoba tracked the card (fixture). |
+| **Reproduce** | Any platform: `node --test --test-name-pattern="not a pass that read status" test/telegram-reconcile.test.ts` stalls a periodic pass's status lookup after it read the card as pending, decides on the dashboard, then awaits `deliver()`; before the fix no `editMessageReplyMarkup` is sent. |
+| **Check** | Explain the failure with controlled evidence; preserve exactly-once effects, eventual stale-button removal, retry/restart and signed lookup. A passing retry is not a causal fix. Do not weaken assertions or merely widen timeouts. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | B-042-T01 — Explain and fix the remote card cleanup that an awaited delivery missed | 2 h | 1.5 h (stated) | 0 h | Completed |
+| — | **Total** | 2 h | 1.5 h | 0 h | 1 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-042.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Closure reconcile: [PR #366](https://github.com/voidbrain/nerv/pull/366). Reconcile: [PR #288](https://github.com/voidbrain/nerv/pull/288). Fix: [PR #285](https://github.com/voidbrain/nerv/pull/285) (B-042-T01), CI [43166751719](https://github.com/voidbrain/nerv/actions/runs/43166751719) green (full-suite skipped); last occurrence [PR #277 run 43093410846](https://github.com/voidbrain/nerv/actions/runs/43093410846) (Linux coverage). [PR #267 CI 43012116246](https://github.com/voidbrain/nerv/actions/runs/43012116246) (2026-11-11, harness/records-only PR: `.gitignore`, version stamp, CI template clone): Windows failed this one-channel case on `remote dashboard decision reconciles the main bot card` again; another occurrence with no runtime change. [PR #261](https://github.com/voidbrain/nerv/pull/261) timing reassessment; [PR #223](https://github.com/voidbrain/nerv/pull/223); [CI 42535069202 attempt 1](https://github.com/voidbrain/nerv/actions/runs/42535069202/attempts/1) Windows failed card-cleanup assertion, Linux later failed only recap week validation. Test: test/one-channel.test.ts remote dashboard decision reconciles the main bot card. Earlier closure: PR #203 CI 42425786736/42425784575; preserved in archive. |
+| Opened | 2026-11-07 |
+| Verification | Closed 2026-11-13: >10 clean CI runs since PR #285 merged (#351–#362 and #364 full-suite, plus #363 and #365 validate/windows; zero failures of `remote dashboard decision reconciles the main bot card`). 2026-11-12: mechanism reproduced deterministically (`test/telegram-reconcile.test.ts` fails before the fix, passes after; local macOS); PR #285 CI 43166751719 passed scoped, #286 CI 43168006619 passed full-suite. |
+| Reviewed | 2026-11-13 |
+
+</details>
+
+---
+### <a id="b-050"></a>[🐞 B-050](#top)
+
+**Dashboard browser test reads the banner before the page has loaded**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔵 Closed | ◻️ P2 | 🟢 Small | 0 h | — | — | — | — |
+
+💻 **→** Closed 2026-11-13: [PR #294](https://github.com/voidbrain/nerv/pull/294) merged with CI [43207764269](https://github.com/voidbrain/nerv/actions/runs/43207764269) green and subsequent browser CI runs show no recurrence of the `until` TypeError.
+
+| | |
+|---|---|
+| **Issue** | [PR #286](https://github.com/voidbrain/nerv/pull/286) CI [43168006619](https://github.com/voidbrain/nerv/actions/runs/43168006619/attempts/1) attempt 1, job validate (`npm run test:browser`): `test/evaluation.browser.mjs` case golden-v1/dashboard failed with `TypeError: Cannot read properties of null (reading 'textContent')` on the first `until` right after `Page.navigate` (`document.querySelector('.banner')` was null). The fixture's `until` (`test/fixtures/browser.mjs`) throws as soon as the evaluated expression throws instead of retrying, so a page that has not loaded yet fails the test. Attempt 2 (failed jobs rerun, same head `94e3a0a`) passed; local runs passed 3 of 3. Whether #286's service worker plays a part is not established (the test uses a fresh browser profile, per the F-004 agent). |
+| **Reproduce** | `npm run build && node --test test/evaluation.browser.mjs` (case golden-v1/dashboard); intermittent, seen once in CI. Deterministically: evaluate the case's first `until` expression before the dashboard document has its `.banner` (for example against `about:blank`, or with the dashboard response delayed). |
+| **Check** | A committed test fails before the fix: `until` on an expression that throws while the page is still loading fails at once. After the fix the wait retries across navigation, or waits for the document to load, and still fails with a clear timeout when the condition never holds. The case's assertion (`LIVE ·` shown, `SIGNING IN` gone) is unchanged; no timeout widened. Browser CI passes. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| — | B-050-T01 — Fix browser fixture until abortion on evaluated expression exceptions | 0.75 h | 0.5 h (stated) | 0 h | Completed | [PR #294](https://github.com/voidbrain/nerv/pull/294) fix |
+| — | **Total** | 0.75 h | 0.5 h | 0 h | 1 of 1 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-050.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-050-T01: [PR #294](https://github.com/voidbrain/nerv/pull/294) fix. Closure reconcile: [PR #366](https://github.com/voidbrain/nerv/pull/366). Fix: [PR #294](https://github.com/voidbrain/nerv/pull/294) (CI [43207764269](https://github.com/voidbrain/nerv/actions/runs/43207764269) all five jobs green). Test: test/evaluation.browser.mjs "B-050: until retries through evaluated expression exceptions and resolves when condition holds" (committed failing in feb13de, passes after fix). Test: test/evaluation.browser.mjs "B-050: until still fails with timeout when throwing condition never holds" (committed failing in feb13de, passes after fix). Recorded in [PR #288](https://github.com/voidbrain/nerv/pull/288). Observed: CI 43168006619 attempt 1, job validate (job 131014457197), `test/evaluation.browser.mjs:62` via `until` in `test/fixtures/browser.mjs`; attempt 2 job validate (131017084799) passed on the same head. Same run, attempt 1: F-004-T01's own browser case passed. |
+| Opened | 2026-11-12 |
+| Verification | Closed 2026-11-13: [PR #294](https://github.com/voidbrain/nerv/pull/294) CI [43207764269](https://github.com/voidbrain/nerv/actions/runs/43207764269) passed all five jobs (`plan`, `validate`, `windows`, `native-macos`, `full-suite`) and subsequent browser CI runs (#351–#365 `validate`) passed with no recurrence of the `until` `TypeError`. 2026-11-12: committed failing tests in `test/evaluation.browser.mjs` (`feb13de`) passed after fix in `test/fixtures/browser.mjs`. |
+| Reviewed | 2026-11-13 |
 
 </details>
 
