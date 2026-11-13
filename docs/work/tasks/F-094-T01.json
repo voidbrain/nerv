@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "id": "F-094-T01",
+  "parent": "F-094",
+  "title": "Decision: scripted first, menus second",
+  "goal": "Which apps are driven by script and which by menu is written down",
+  "status": "ready",
+  "acceptance": [
+    "Scripting or command line per app, menu-by-name fallback through F-093, allowed folders"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/decisions/**",
+    "docs/work/records/F-094.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "architecture-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, screenshots of the owner's screen or personal data in Git.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A change of gate class, data leaving the base, or a material effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}

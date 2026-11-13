@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "F-094-T02",
+  "parent": "F-094",
+  "title": "Open app and file, save as, step by step",
+  "goal": "A planned sequence runs with readback after each step",
+  "status": "planned",
+  "acceptance": [
+    "One approval for the whole plan; readback each step; stops on a step outside the plan",
+    "Save as never overwrites without asking"
+  ],
+  "dependsOn": [
+    "F-094-T01",
+    "F-093-T02"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/work/records/F-094.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, screenshots of the owner's screen or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run typecheck"
+  ],
+  "escalation": [
+    "A change of gate class, data leaving the base, or a material effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}

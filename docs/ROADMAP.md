@@ -11,7 +11,7 @@
 | 2b — Governed extensions | Veto-only extra seats and consultants, watermelon trust stages, pilot roster, MCP tool registration, golden eval suite, measured model usage and cost, bounded incident circuits, OWASP threat map, credential rotation, bill of materials | F-018, F-021, F-025, F-029, F-041, F-045, F-063, F-064, F-065, F-066, F-067, F-075, F-086, F-087 | Extra seats can only reject; Production promotion needs the owner; unregistered effect class is Blue; usage is measured or shown unknown, never zero; a circuit revokes only its scope and needs explicit rearm |
 | 3 — Multi-node foundation | Federated bases over the Kaji line (delivered first), then discovery, inspection, enrolment, SSH bootstrap, optional Tailscale adapter, outbound WebSocket/JSON-RPC workers, forwarding a job to another base | F-005, F-036, F-050, F-070, F-080, F-088 | Mac + mini PC + Pi; identity/auth, heartbeat/wake reconciliation, leases, fencing and locks |
 | 4 — Angular PWA, GenUI and live dashboard | Stable Angular workspace, allowlisted Web Components with validated data, onboarding and doctor; dashboard bound to real stages, timings and contributors | F-004, F-019, F-047, F-051, F-052, F-053, F-057 | Browser/accessibility checks, schema rejection, install/push tests on real phones; no fabricated activity or spend |
-| 5 — Distributed agents/models | Independent role/model/node routing, explicit directional communication graph, schema-defined tools, coding workers, bounded delegation, parallel queue, per-job sandboxes, resuming paused jobs | F-006, F-012, F-048, F-049, F-060, F-078, F-084, F-085, F-089, F-090, F-091, F-092 | Gemma on Mac serves mini PC worker; optional Claude route; Pi capabilities; privacy/budget/cancellation; sandbox escape and resource tests; separately measured coder/auditor workflows and Mac/mini PC role placement (F-006-T03/T04); comparable Mac load conditions and one normal mini PC baseline (F-006-T05/T04) |
+| 5 — Distributed agents/models | Independent role/model/node routing, explicit directional communication graph, schema-defined tools, coding workers, bounded delegation, parallel queue, per-job sandboxes, resuming paused jobs | F-006, F-012, F-048, F-049, F-060, F-078, F-084, F-085, F-089, F-090, F-091, F-092, F-093, F-094 | Gemma on Mac serves mini PC worker; optional Claude route; Pi capabilities; privacy/budget/cancellation; sandbox escape and resource tests; separately measured coder/auditor workflows and Mac/mini PC role placement (F-006-T03/T04); comparable Mac load conditions and one normal mini PC baseline (F-006-T05/T04) |
 | 5b — Coordinator relocation (later) | Durable replicated state, leader lease/epoch, fencing and restore | F-016 | Partition/sleep tests prove no concurrent coordinators or duplicated effects; no automatic context-only takeover |
 | 6 — Voice and evaluated improvement | Push-to-talk, STT/TTS, voice client; evaluated skills and rollback | F-007 | Italian/English command evaluation, no silent physical activation, rejected privilege changes |
 | Independent tracks | FPV app integration, optional grounded personas, the base chronicle; each has its own acceptance and blocks no milestone | F-008, F-020, F-054 | Per record |
@@ -32,7 +32,7 @@ Status per milestone, derived from the records (Delivered: all closed; Awaiting 
 | 2b — Governed extensions | In progress | 8 | 0 | 6 | F-021, F-064, F-065, F-066, F-086, F-087 |
 | 3 — Multi-node foundation | In progress | 1 | 1 | 4 | F-005, F-050, F-080, F-088 |
 | 4 — Angular PWA, GenUI and live dashboard | In progress | 5 | 0 | 2 | F-004, F-051 |
-| 5 — Distributed agents/models | Planned | 0 | 0 | 12 | F-006, F-012, F-048, F-049, F-060, F-078, F-084, F-085, F-089, F-090, F-091, F-092 |
+| 5 — Distributed agents/models | Planned | 0 | 0 | 14 | F-006, F-012, F-048, F-049, F-060, F-078, F-084, F-085, F-089, F-090, F-091, F-092, F-093, F-094 |
 | 5b — Coordinator relocation (later) | Planned | 0 | 0 | 1 | F-016 |
 | 6 — Voice and evaluated improvement | Planned | 0 | 0 | 1 | F-007 |
 | Independent tracks | Planned | 0 | 0 | 3 | F-008, F-020, F-054 |
@@ -54,7 +54,7 @@ Current implementation step (reviewed 2026-11-07): 2a is mostly delivered — th
 
 ## Owner jobs case study (2026-11-14)
 
-Twelve example jobs set the scope features are judged against: lists, saved recipes, coding jobs, checking a project, mail, 3D printing, removable-media copy on a storage base, browser and desktop control. Each maps to an owning record placed above; see the [case study](design/owner-jobs-case-study-2026-11-14.md) for the shared building blocks and the limits every job keeps.
+Fourteen example jobs set the scope features are judged against: lists, saved recipes, coding jobs, checking a project, mail, 3D printing, removable-media copy on a storage base, browser and desktop control, app workflows. Each maps to an owning record placed above; see the [case study](design/owner-jobs-case-study-2026-11-14.md) for the shared building blocks and the limits every job keeps.
 
 ## Waiting and resuming external jobs (F-012)
 
