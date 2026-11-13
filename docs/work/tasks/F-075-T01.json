@@ -4,7 +4,7 @@
  "parent": "F-075",
  "title": "Rerun and record the nerv-system-flows cases at current main",
  "goal": "Every nerv-system-flows case has a covering run at the source on main",
- "status": "planned",
+ "status": "implemented",
  "acceptance": [
   "7/7 cases pass and are recorded in evals/gauntlet/ledger.json",
   "node tools/gauntlet.mjs pending exits 0 on the PR head"

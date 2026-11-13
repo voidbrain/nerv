@@ -4,7 +4,7 @@
  "parent": "B-058",
  "title": "Ignore OS metadata and Git-ignored files in evaluation source identity",
  "goal": "Only files that are part of the source decide whether a recorded evaluation run still covers it",
- "status": "ready",
+ "status": "implemented",
  "acceptance": [
   "A committed test fails before the fix for a .DS_Store, a Thumbs.db and a Git-ignored file",
   "An untracked file that Git does not ignore still changes the source identity",

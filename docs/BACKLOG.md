@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 6 | 9 | 11 | 12 |
+| **This week** | 6 | 9 | 13 | 12 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 31 | 4 |
-| **Require Human 🧑** | 17 | 2 |
+| **Open** | 31 | 6 |
+| **Require Human 🧑** | 16 | 2 |
 
 ### Require Human 🧑
 
@@ -29,13 +29,13 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-011](#f-011) | [F-015](#f-015) |  |  |
 | [F-023](#f-023) | [F-016](#f-016) |  |  |
 | [F-004](#f-004) | [F-076](#f-076) |  |  |
-| [F-075](#f-075) | [F-051](#f-051) |  |  |
-| [F-078](#f-078) | [F-077](#f-077) |  |  |
-| [F-060](#f-060) | [F-064](#f-064) |  |  |
+| [F-078](#f-078) | [F-051](#f-051) |  |  |
+| [F-060](#f-060) | [F-077](#f-077) |  |  |
+|  | [F-064](#f-064) |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 37.5 h agent + 19 h owner across 118 open steps of 29 features and 5 other records. 20.75 h of actual effort recorded on 34 steps. Generated from the task files.
+**Remaining effort:** 38 h agent + 19 h owner across 119 open steps of 29 features and 6 other records. 20.75 h of actual effort recorded on 34 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -685,6 +685,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-075"></a>[✨ F-075](#top)
+
+**The seven nerv-system-flows evaluation cases run again at current main**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h agent + 0.25 h owner | — | — | — | — |
+
+💻 **→** Next: close when the PR merges with green CI.
+
+| | |
+|---|---|
+| **Issue** | F-074 recorded all seven `nerv-system-flows` cases on its branch; merging main into it (#369, #371, #372, #373) changed the source they cover, so `gauntlet pending` lists all seven as source-changed at main `ee11385`. Correction (2026-11-13): a clean checkout of main had none pending; the audit read the primary checkout, where a `web/.DS_Store` changed the source key (B-058). No model is called (`modelCallsAuthorized: false`); stress and browser are only slow. On 2026-11-13 the agent sandbox refused the run, so it waits for the owner. |
+| **Reproduce** | `node tools/gauntlet.mjs pending` at current main; [steps](audits/2026-11-13-full.md#f075-run). |
+| **Check** | `npm run gauntlet:all -- --execute --allow-expensive` passes 7/7 and records them in `evals/gauntlet/ledger.json`; `node tools/gauntlet.mjs pending` exits 0; the ledger change is merged. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | F-075-T01 — Rerun and record the nerv-system-flows cases at current main | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h agent + 0.25 h owner | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-075.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) |
+| Opened | 2026-11-13 |
+| Verification | 2026-11-13: 7/7 `nerv-system-flows` cases passed after `npm run build`, recorded in `evals/gauntlet/ledger.json`; `node tools/gauntlet.mjs pending` exits 0. |
+| Reviewed | 2026-11-13 |
+
+</details>
+
+---
 ### <a id="f-070"></a>[✨ F-070](#top)
 
 **Authenticated directory of base communication operators**
@@ -847,7 +885,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h | — | — | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.5 h | — | — | — | — |
+
+💻 **→** Next: close when the PR merges with green CI.
 
 | | |
 |---|---|
@@ -859,7 +899,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | B-058-T01 — Ignore OS metadata and Git-ignored files in evaluation source identity | 0.5 h | 0 h | 0.5 h | Ready |
+| 🟢 Small | B-058-T01 — Ignore OS metadata and Git-ignored files in evaluation source identity | 0.5 h | 0 h | 0.5 h | Implemented; verification pending |
 | 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed |
 
 <details>
@@ -871,7 +911,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | Found while running F-075 on 2026-11-13. |
 | Opened | 2026-11-13 |
-| Verification | Pending. |
+| Verification | 2026-11-13: `node --test test/evaluation-runner.test.mjs` 7 pass; `node tools/gauntlet.mjs pending` exits 0 with and without a `web/.DS_Store`. |
 | Reviewed | 2026-11-13 |
 
 </details>
@@ -990,44 +1030,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 <summary>Next action, estimates and evidence</summary>
 
 [Full notes & evidence](work/records/F-076.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) |
-| Opened | 2026-11-13 |
-| Verification | Pending. |
-| Reviewed | 2026-11-13 |
-
-</details>
-
----
-### <a id="f-075"></a>[✨ F-075](#top)
-
-**The seven nerv-system-flows evaluation cases run again at current main**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h agent + 0.25 h owner | — | — | 🧑 | — |
-
-🧑 **→** Run the seven deterministic cases, or allow the agent to ([steps](audits/2026-11-13-full.md#f075-run)).
-
-| | |
-|---|---|
-| **Issue** | F-074 recorded all seven `nerv-system-flows` cases on its branch; merging main into it (#369, #371, #372, #373) changed the source they cover, so `gauntlet pending` lists all seven as source-changed at main `ee11385`. No model is called (`modelCallsAuthorized: false`); stress and browser are only slow. On 2026-11-13 the agent sandbox refused the run, so it waits for the owner. |
-| **Reproduce** | `node tools/gauntlet.mjs pending` at current main; [steps](audits/2026-11-13-full.md#f075-run). |
-| **Check** | `npm run gauntlet:all -- --execute --allow-expensive` passes 7/7 and records them in `evals/gauntlet/ledger.json`; `node tools/gauntlet.mjs pending` exits 0; the ledger change is merged. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-075-T01 — Rerun and record the nerv-system-flows cases at current main | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned |
-| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h agent + 0.25 h owner | 0 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-075.md)
 
 | Field | Value |
 |---|---|
@@ -1464,6 +1466,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="b-059"></a>[🐞 B-059](#top)
+
+**Without a web build the browser evaluation case is recorded as a failure, not as an unmet requirement**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | — | — |
+
+💻 **→** Next: B-059-T01.
+
+| | |
+|---|---|
+| **Issue** | 2026-11-13: in a fresh worktree without `dist/`, `node tools/gauntlet.mjs all --execute --allow-expensive` ran the `browser` case, which declares the `built-browser-assets` requirement, and recorded it in the ledger as a failed critical case ("Adapter incomplete, changed source or failing checks"). After `npm run build` it passed. A missing build is a setup gap, not a product failure; recording it as failed hides the real cause and could be read as a regression. |
+| **Reproduce** | Fresh worktree, `npm ci`, no build; run the command above with a new `--out-dir`. |
+| **Check** | When `dist/web/browser` is missing, the wrapper refuses the browser case (or builds first) and says which requirement is unmet; nothing is written to the ledger for it; a regression covers it. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | B-059-T01 — Refuse a system case whose build requirement is missing | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-059.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Found in F-075, 2026-11-13. |
+| Opened | 2026-11-13 |
+| Verification | Pending. |
+| Reviewed | 2026-11-13 |
+
+</details>
+
+---
 ### <a id="f-077"></a>[✨ F-077](#top)
 
 **Dependency and code alerts, a Node 26 CI job and a dependency refresh**

@@ -1,0 +1,41 @@
+{
+ "version": 1,
+ "id": "B-059-T01",
+ "parent": "B-059",
+ "title": "Refuse a system case whose build requirement is missing",
+ "goal": "An unmet built-browser-assets requirement stops the case with its reason instead of a failed ledger entry",
+ "status": "planned",
+ "acceptance": [
+  "A committed test fails before the fix: without dist/web/browser the browser case is recorded as failed",
+  "The wrapper names the unmet requirement and writes no ledger entry for that case",
+  "With a build present the case runs as before"
+ ],
+ "dependsOn": [],
+ "resources": [
+  "tools/gauntlet.mjs",
+  "test/**",
+  "docs/work/records/**",
+  "generated:backlog-views"
+ ],
+ "capabilities": [
+  "regression-design",
+  "bounded-edit"
+ ],
+ "privacy": "Neutral fixtures only.",
+ "validation": [
+  "npm test",
+  "node tools/gauntlet.mjs pending"
+ ],
+ "escalation": [
+  "A change to what the ledger counts as covered goes to a fresh-context review"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "0.5 h",
+  "basis": "Estimated 2026-11-13: one requirement check and one test. Not a measurement.",
+  "reviewed": "2026-11-13",
+  "agentHours": 0.5,
+  "baselineAgentHours": 0.5,
+  "estimateAgentHours": 0.5
+ }
+}
