@@ -652,7 +652,22 @@ function queueRank(root, config) {
       laneRank[a.lane] - laneRank[b.lane] ||
       records.indexOf(a) - records.indexOf(b),
   );
-  return new Map(sorted.map((r, i) => [r.id + '.md', i]));
+  // F-067: within a layout group, a record is never listed above an active record it waits on. Each open prerequisite
+  // of the same group (and its own, first) moves up to just above its first dependent; everything else keeps the
+  // priority order. Bugs and features are one group only under a {"records": "all"} segment.
+  const single = readJSON(local(root, config.layout)).segments.some((s) => s.records === 'all');
+  const group = (r) => (single ? 'all' : r.id[0]);
+  const placed = new Set(),
+    out = [];
+  const place = (r) => {
+    if (placed.has(r.id)) return;
+    placed.add(r.id);
+    for (const p of sorted)
+      if (group(p) === group(r) && r.unresolved.some((d) => !d.external && d.id === p.id)) place(p);
+    out.push(r);
+  };
+  sorted.forEach(place);
+  return new Map(out.map((r, i) => [r.id + '.md', i]));
 }
 export function renderLedger(root, config, withPlans = true) {
   repositorySetting(config);

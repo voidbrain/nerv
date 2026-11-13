@@ -110,6 +110,141 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-045"></a>[✨ F-045](#top)
+
+**Pilots: a roster of permanent agents that grows, specialises and is chosen per request**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟣 Very large | 8.25 h | — | [F-049](#f-049), [F-050](#f-050), [F-054](#f-054) | — | — |
+
+💻 **→** Next: pilots offered by other bases over the Kaji line; other-provider/cloud pilot routing remains planned.
+
+| | |
+|---|---|
+| **Issue** | Owner questions 2026-11-05: NERV needs permanent agents (a coder, the 3D expert on Tabgha, and others as jobs require: a Photoshop expert), a generic one for anything else, specialists that grow from it, and automatic choice. The design already names pilots (F-025: pilots run in the EVA class of their stage, watermelon trust) but has no roster. Consultants (F-041) become pilots asked only for advice (owner, 2026-11-05). |
+| **Reproduce** | Ask Aoba for an image edit or a coding job: there is no pilot to give it to. |
+| **Check** | **Definition as data:** a pilot is a role and domain (topics, keywords), skills, tools, a model, a memory scope, an EVA class and a trust stage (Prototype, Test, Production), with its parent; most share the base's model, a separate model only when its evaluations justify it. **Roster:** a registry like the Kaji one; each base offers its pilots in the heartbeat; the owner adds, renames, retires and pins. **Generic pilot:** one per base, takes any job no specialist covers, in the most restrictive EVA its stage allows. **Two ways of use:** asked for advice (the F-041 consultant rules: at most one per topic by default, the owner's pin, then the main base's own, then the best record, the next as fallback, "ask both" per topic; advice is data, never a vote or an action) or put in charge of the job (acts in its EVA, effects by card). **Choice:** Misato routes by domain and keywords, base, stage allowed for the action and record; unclear goes to the generic pilot or a question; the card shows the pilot, its stage and base, and the owner can change it; routing accuracy is measured. **New specialists found automatically:** unmatched domains, tools the generic pilot lacked and repeated failures are counted per domain; past a threshold (e.g. three unmatched in 30 days, or one missing tool) NERV proposes a pilot (or an extension of an existing one) on a card with the sorties behind it, its skills, tools and installs; created at Prototype. **Split and merge by evidence:** a split when sorties cluster in a subdomain and a narrower set scores better; a merge when two overlap and neither is better; lineage kept. **Learning (owner decision 2026-11-05: the recommendation):** new evaluation cases from failures are added automatically and shown; domain memory is proposed in one review card a week; skills change only by the owner's approval, versioned; prompt, model, tools, permissions and trust stage are always the owner's; nothing learned from a tainted sortie becomes a skill without review; a change to skills or prompt is versioned and re-runs the pilot's evaluations, and a drop moves it back a stage. **Inside a pilot** planning, doing and checking stay one loop; promotion through the golden sortie evaluations. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | F-045-T01 — Pilot definition as data and registry | 1.75 h | 0 h | 1.75 h | Planned |
+| 🟢 Small | F-045-T02 — Owner roster management | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-045-T03 — Advice mode | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | F-045-T04 — Execution mode and automatic choice | 1.75 h | 0 h | 1.75 h | Planned |
+| 🟡 Medium | F-045-T05 — Remote pilots | 1.75 h | 0 h | 1.75 h | Planned |
+| 🟢 Small | F-045-T06 — Evidence-based placement | 1 h | 0 h | 1 h | Planned |
+| 🟣 Very large | **Total** | 8.25 h | 0 h (0 of 6 steps recorded) | 8.25 h | 0 of 6 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-045.md)
+
+| Field | Value |
+|---|---|
+| Depends on | — |
+| PR / evidence | [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #221](https://github.com/voidbrain/nerv/pull/221) schema/reuse assessment; [Gauntlet ownership/reuse proposal](design/gauntlet-protocol-2026-11-08.md), 2026-11-08; the proposal preceded delivered Gauntlet0.1.1 adoption in PR #223 / F-073; automatic routing/qualification remains unimplemented and no consumer work gates upstream releases; [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #161](https://github.com/voidbrain/nerv/pull/161) verification reconciliation;  [PR #160](https://github.com/voidbrain/nerv/pull/160) pilot selectors/map status and owner clarification; Owner questions 2026-11-05; slice 1 [PR #107](https://github.com/voidbrain/nerv/pull/107) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-06 Unit/integration and Browser/accessibility: pilot model API/DOM regressions, full suite, real-runtime Chrome flow, inline-row/Apply states and scoped axe passed; merged PR #160 CI run 42241192687 green. Earlier evidence: 2026-11-05 slice 1: test/pilots.test.ts, test/model-setup.test.ts, full suite (local run) |
+| Reviewed | 2026-11-09 |
+
+</details>
+
+---
+
+### <a id="f-025"></a>[✨ F-025](#top)
+
+**Extra MAGI seats (veto-only), consultants and watermelon trust for pilots**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🔴 Large | 5.5 h | — | [F-049](#f-049) | — | — |
+
+💻 **→** Attach extra seats by action class as veto-only, start new seats in shadow, and promote pilots through Prototype → Test → Production.
+
+| | |
+|---|---|
+| **Issue** | Specialists help, but a new or remote seat must never approve what the core three would refuse, and skills need earned trust. |
+| **Reproduce** | Attach a deterministic test seat and a model expert seat to code-write actions; run them in shadow; promote one; force a failure and a Spear revocation. |
+| **Check** | Extra seats can only reject; shadow seats are logged, not counted; a timed-out seat abstains; consultants advise the planner without a vote and receive only Scrolls-allowed data; pilots run only in the EVA class of their stage; promotion to Production needs the owner's confirmation; failure, override spikes or Spear demote automatically. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | F-025-T01 — Veto-only extra seats with shadow logging | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | F-025-T02 — Free API seat pool | 1.75 h | 0 h | 1.75 h | Planned |
+| 🟢 Small | F-025-T03 — Consultants without a vote | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | F-025-T04 — Watermelon trust stages and demotion | 1.75 h | 0 h | 1.75 h | Planned |
+| 🔴 Large | **Total** | 5.5 h | 0 h (0 of 4 steps recorded) | 5.5 h | 0 of 4 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-025.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
+| Opened | 2026-11-02 |
+| Verification | Pending |
+| Reviewed | 2026-11-04 |
+
+</details>
+
+---
+### <a id="f-049"></a>[✨ F-049](#top)
+
+**EVA instances: an EVA is a class, each job gets a fresh sandbox**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟣 Very large | 13.75 h agent + 0.75 h owner | [F-045](#f-045), [F-025](#f-025) | [F-021](#f-021), [F-027](#f-027) | — | — |
+
+💻 **→** Next: the EVA class definition and one sandboxed instance per job, starting with EVA-03 (owner, 2026-11-05).
+
+| | |
+|---|---|
+| **Issue** | Owner questions 2026-11-05: why one EVA-00, -01, -02 per machine, two copies of a pilot, two EVA-02 with two agents. Today no EVA exists: every action runs inside the scheduler process (the dashboard's "EVA-02 · in-process executor, not sandboxed yet"), and the four cage slots were a drawing, not a rule. |
+| **Reproduce** | Look at the dashboard's EVA cages: three say planned, EVA-02 runs in process. |
+| **Check** | An EVA is a class (what a job may touch: EVA-00 no external effects, EVA-01 bounded, EVA-02 full grant, EVA-03 quarantine for untrusted input); each job runs in a fresh instance of its class, discarded afterwards; several instances run at once within limits per machine (CPU, memory, model slots); a job asks for the least class it needs, capped by its pilot's stage (a Production pilot may run in EVA-01, a Prototype one never in EVA-02); the same pilot can run two jobs at once, each in its own instance; the dashboard shows instances per class. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | F-049-T01 — Define deterministic isolated runner admission and enforcement | 1.75 h | 0 h | 1.75 h | Ready |
+| 🟢 Small | F-049-T02 — EVA class definitions and least-class admission | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | F-049-T03 — Choose the macOS host enforcement mechanism | 1.25 h | 0 h | 1.25 h agent + 0.25 h owner | Planned |
+| 🟡 Medium | F-049-T04 — EVA-03 instance per job | 1.75 h | 0 h | 1.75 h | Planned |
+| 🟡 Medium | F-049-T05 — Escape and recovery join tests | 1.25 h | 0 h | 1.25 h | Planned |
+| 🟡 Medium | F-049-T06 — Concurrent instances within per-machine limits | 1.25 h | 0 h | 1.25 h | Planned |
+| 🟡 Medium | F-049-T07 — EVA-00, EVA-01 and EVA-02 on the runner | 1.75 h | 0 h | 1.75 h | Planned |
+| 🟢 Small | F-049-T08 — Pilot trust stage caps the class | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-049-T09 — Dashboard shows instances per class | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | F-049-T10 — Linux host enforcement for the mini PC | 1.75 h | 0 h | 1.75 h agent + 0.5 h owner | Planned |
+| 🟣 Very large | **Total** | 13.75 h | 0 h (0 of 10 steps recorded) | 13.75 h agent + 0.75 h owner | 0 of 10 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-049.md)
+
+| Field | Value |
+|---|---|
+| Depends on | [F-045](#f-045) — Pilot identity and EVA class for per-job execution<br />[F-025](#f-025) — Pilot trust-stage limits for sandbox class admission |
+| PR / evidence | [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner questions 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-09 |
+
+</details>
+
+---
+
 ### <a id="f-021"></a>[✨ F-021](#top)
 
 **MCP and standardized tool/expert protocol**
@@ -148,50 +283,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  — |
 | Opened | 2026-11-02 |
 | Verification | Pending |
-| Reviewed | 2026-11-07 |
-
-</details>
-
----
-
-### <a id="f-012"></a>[✨ F-012](#top)
-
-**Resume a specific paused job after its provider limit resets**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🔴 Large | 7.25 h agent + 0.5 h owner | [F-005](#f-005), [F-006](#f-006) | — | — | — |
-
-💻 **→** Define durable waiting jobs and implement an authorized browser/editor adapter that rechecks the exact job before resuming once.
-
-| | |
-|---|---|
-| **Issue** | User wants NERV Agency to resume a web-chat job or Claude Code job in VS Code after a three-hour token-limit pause. This capability is not implemented. |
-| **Reproduce** | Ask to resume an identified job after its reported reset time; keep its worker awake and session available. |
-| **Check** | Persist target, permission, reset time, expiry and attempts; verify readiness and unchanged job identity; resume once; notify outcome; survive restart; handle longer limits, logout, closed tabs, sleeping workers, changed tasks and already-resumed jobs without duplicate actions. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-012-T01 — Durable resume intent and policy | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-012-T02 — Readiness check and once-only resume engine | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟡 Medium | F-012-T03 — Claude Code (VS Code) adapter feasibility and adapter | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟡 Medium | F-012-T04 — Web-chat adapter feasibility | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟢 Small | F-012-T05 — Edge cases and real-host acceptance | 1 h | 0 h | 1 h agent + 0.5 h owner | Planned |
-| 🔴 Large | **Total** | 7.25 h | 0 h (0 of 5 steps recorded) | 7.25 h agent + 0.5 h owner | 0 of 5 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-012.md)
-
-| Field | Value |
-|---|---|
-| Depends on | [F-005](#f-005) — Enrolled workers with observed execution capability<br />[F-006](#f-006) — Bounded routing and delegation for the external execution adapter |
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #2](https://github.com/voidbrain/nerv/pull/2); plan only, no runtime implementation |
-| Opened | 2026-11-01 |
-| Verification | Pending adapter feasibility, regression and live host tests |
 | Reviewed | 2026-11-07 |
 
 </details>
@@ -246,6 +337,50 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-12 |
+
+</details>
+
+---
+
+### <a id="f-012"></a>[✨ F-012](#top)
+
+**Resume a specific paused job after its provider limit resets**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🔴 Large | 7.25 h agent + 0.5 h owner | [F-005](#f-005), [F-006](#f-006) | — | — | — |
+
+💻 **→** Define durable waiting jobs and implement an authorized browser/editor adapter that rechecks the exact job before resuming once.
+
+| | |
+|---|---|
+| **Issue** | User wants NERV Agency to resume a web-chat job or Claude Code job in VS Code after a three-hour token-limit pause. This capability is not implemented. |
+| **Reproduce** | Ask to resume an identified job after its reported reset time; keep its worker awake and session available. |
+| **Check** | Persist target, permission, reset time, expiry and attempts; verify readiness and unchanged job identity; resume once; notify outcome; survive restart; handle longer limits, logout, closed tabs, sleeping workers, changed tasks and already-resumed jobs without duplicate actions. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | F-012-T01 — Durable resume intent and policy | 1 h | 0 h | 1 h | Planned |
+| 🟡 Medium | F-012-T02 — Readiness check and once-only resume engine | 1.75 h | 0 h | 1.75 h | Planned |
+| 🟡 Medium | F-012-T03 — Claude Code (VS Code) adapter feasibility and adapter | 1.75 h | 0 h | 1.75 h | Planned |
+| 🟡 Medium | F-012-T04 — Web-chat adapter feasibility | 1.75 h | 0 h | 1.75 h | Planned |
+| 🟢 Small | F-012-T05 — Edge cases and real-host acceptance | 1 h | 0 h | 1 h agent + 0.5 h owner | Planned |
+| 🔴 Large | **Total** | 7.25 h | 0 h (0 of 5 steps recorded) | 7.25 h agent + 0.5 h owner | 0 of 5 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-012.md)
+
+| Field | Value |
+|---|---|
+| Depends on | [F-005](#f-005) — Enrolled workers with observed execution capability<br />[F-006](#f-006) — Bounded routing and delegation for the external execution adapter |
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #2](https://github.com/voidbrain/nerv/pull/2); plan only, no runtime implementation |
+| Opened | 2026-11-01 |
+| Verification | Pending adapter feasibility, regression and live host tests |
+| Reviewed | 2026-11-07 |
 
 </details>
 
@@ -721,92 +856,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
-### <a id="f-045"></a>[✨ F-045](#top)
-
-**Pilots: a roster of permanent agents that grows, specialises and is chosen per request**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟣 Very large | 8.25 h | — | [F-049](#f-049), [F-050](#f-050), [F-054](#f-054) | — | — |
-
-💻 **→** Next: pilots offered by other bases over the Kaji line; other-provider/cloud pilot routing remains planned.
-
-| | |
-|---|---|
-| **Issue** | Owner questions 2026-11-05: NERV needs permanent agents (a coder, the 3D expert on Tabgha, and others as jobs require: a Photoshop expert), a generic one for anything else, specialists that grow from it, and automatic choice. The design already names pilots (F-025: pilots run in the EVA class of their stage, watermelon trust) but has no roster. Consultants (F-041) become pilots asked only for advice (owner, 2026-11-05). |
-| **Reproduce** | Ask Aoba for an image edit or a coding job: there is no pilot to give it to. |
-| **Check** | **Definition as data:** a pilot is a role and domain (topics, keywords), skills, tools, a model, a memory scope, an EVA class and a trust stage (Prototype, Test, Production), with its parent; most share the base's model, a separate model only when its evaluations justify it. **Roster:** a registry like the Kaji one; each base offers its pilots in the heartbeat; the owner adds, renames, retires and pins. **Generic pilot:** one per base, takes any job no specialist covers, in the most restrictive EVA its stage allows. **Two ways of use:** asked for advice (the F-041 consultant rules: at most one per topic by default, the owner's pin, then the main base's own, then the best record, the next as fallback, "ask both" per topic; advice is data, never a vote or an action) or put in charge of the job (acts in its EVA, effects by card). **Choice:** Misato routes by domain and keywords, base, stage allowed for the action and record; unclear goes to the generic pilot or a question; the card shows the pilot, its stage and base, and the owner can change it; routing accuracy is measured. **New specialists found automatically:** unmatched domains, tools the generic pilot lacked and repeated failures are counted per domain; past a threshold (e.g. three unmatched in 30 days, or one missing tool) NERV proposes a pilot (or an extension of an existing one) on a card with the sorties behind it, its skills, tools and installs; created at Prototype. **Split and merge by evidence:** a split when sorties cluster in a subdomain and a narrower set scores better; a merge when two overlap and neither is better; lineage kept. **Learning (owner decision 2026-11-05: the recommendation):** new evaluation cases from failures are added automatically and shown; domain memory is proposed in one review card a week; skills change only by the owner's approval, versioned; prompt, model, tools, permissions and trust stage are always the owner's; nothing learned from a tainted sortie becomes a skill without review; a change to skills or prompt is versioned and re-runs the pilot's evaluations, and a drop moves it back a stage. **Inside a pilot** planning, doing and checking stay one loop; promotion through the golden sortie evaluations. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | F-045-T01 — Pilot definition as data and registry | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟢 Small | F-045-T02 — Owner roster management | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-045-T03 — Advice mode | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-045-T04 — Execution mode and automatic choice | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟡 Medium | F-045-T05 — Remote pilots | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟢 Small | F-045-T06 — Evidence-based placement | 1 h | 0 h | 1 h | Planned |
-| 🟣 Very large | **Total** | 8.25 h | 0 h (0 of 6 steps recorded) | 8.25 h | 0 of 6 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-045.md)
-
-| Field | Value |
-|---|---|
-| Depends on | — |
-| PR / evidence | [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #221](https://github.com/voidbrain/nerv/pull/221) schema/reuse assessment; [Gauntlet ownership/reuse proposal](design/gauntlet-protocol-2026-11-08.md), 2026-11-08; the proposal preceded delivered Gauntlet0.1.1 adoption in PR #223 / F-073; automatic routing/qualification remains unimplemented and no consumer work gates upstream releases; [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #161](https://github.com/voidbrain/nerv/pull/161) verification reconciliation;  [PR #160](https://github.com/voidbrain/nerv/pull/160) pilot selectors/map status and owner clarification; Owner questions 2026-11-05; slice 1 [PR #107](https://github.com/voidbrain/nerv/pull/107) |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-06 Unit/integration and Browser/accessibility: pilot model API/DOM regressions, full suite, real-runtime Chrome flow, inline-row/Apply states and scoped axe passed; merged PR #160 CI run 42241192687 green. Earlier evidence: 2026-11-05 slice 1: test/pilots.test.ts, test/model-setup.test.ts, full suite (local run) |
-| Reviewed | 2026-11-09 |
-
-</details>
-
----
-
-### <a id="f-025"></a>[✨ F-025](#top)
-
-**Extra MAGI seats (veto-only), consultants and watermelon trust for pilots**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 5.5 h | — | [F-049](#f-049) | — | — |
-
-💻 **→** Attach extra seats by action class as veto-only, start new seats in shadow, and promote pilots through Prototype → Test → Production.
-
-| | |
-|---|---|
-| **Issue** | Specialists help, but a new or remote seat must never approve what the core three would refuse, and skills need earned trust. |
-| **Reproduce** | Attach a deterministic test seat and a model expert seat to code-write actions; run them in shadow; promote one; force a failure and a Spear revocation. |
-| **Check** | Extra seats can only reject; shadow seats are logged, not counted; a timed-out seat abstains; consultants advise the planner without a vote and receive only Scrolls-allowed data; pilots run only in the EVA class of their stage; promotion to Production needs the owner's confirmation; failure, override spikes or Spear demote automatically. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-025-T01 — Veto-only extra seats with shadow logging | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-025-T02 — Free API seat pool | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟢 Small | F-025-T03 — Consultants without a vote | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-025-T04 — Watermelon trust stages and demotion | 1.75 h | 0 h | 1.75 h | Planned |
-| 🔴 Large | **Total** | 5.5 h | 0 h (0 of 4 steps recorded) | 5.5 h | 0 of 4 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-025.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
-| Opened | 2026-11-02 |
-| Verification | Pending |
-| Reviewed | 2026-11-04 |
-
-</details>
-
----
 ### <a id="f-065"></a>[✨ F-065](#top)
 
 **Agentic threat map: each OWASP risk tied to a NERV control and the test that proves it**
@@ -1358,55 +1407,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-05 |
 | Verification | Pending |
 | Reviewed | 2026-11-08 |
-
-</details>
-
----
-
-### <a id="f-049"></a>[✨ F-049](#top)
-
-**EVA instances: an EVA is a class, each job gets a fresh sandbox**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟣 Very large | 13.75 h agent + 0.75 h owner | [F-045](#f-045), [F-025](#f-025) | [F-021](#f-021), [F-027](#f-027) | — | — |
-
-💻 **→** Next: the EVA class definition and one sandboxed instance per job, starting with EVA-03 (owner, 2026-11-05).
-
-| | |
-|---|---|
-| **Issue** | Owner questions 2026-11-05: why one EVA-00, -01, -02 per machine, two copies of a pilot, two EVA-02 with two agents. Today no EVA exists: every action runs inside the scheduler process (the dashboard's "EVA-02 · in-process executor, not sandboxed yet"), and the four cage slots were a drawing, not a rule. |
-| **Reproduce** | Look at the dashboard's EVA cages: three say planned, EVA-02 runs in process. |
-| **Check** | An EVA is a class (what a job may touch: EVA-00 no external effects, EVA-01 bounded, EVA-02 full grant, EVA-03 quarantine for untrusted input); each job runs in a fresh instance of its class, discarded afterwards; several instances run at once within limits per machine (CPU, memory, model slots); a job asks for the least class it needs, capped by its pilot's stage (a Production pilot may run in EVA-01, a Prototype one never in EVA-02); the same pilot can run two jobs at once, each in its own instance; the dashboard shows instances per class. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | F-049-T01 — Define deterministic isolated runner admission and enforcement | 1.75 h | 0 h | 1.75 h | Ready |
-| 🟢 Small | F-049-T02 — EVA class definitions and least-class admission | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-049-T03 — Choose the macOS host enforcement mechanism | 1.25 h | 0 h | 1.25 h agent + 0.25 h owner | Planned |
-| 🟡 Medium | F-049-T04 — EVA-03 instance per job | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟡 Medium | F-049-T05 — Escape and recovery join tests | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟡 Medium | F-049-T06 — Concurrent instances within per-machine limits | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟡 Medium | F-049-T07 — EVA-00, EVA-01 and EVA-02 on the runner | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟢 Small | F-049-T08 — Pilot trust stage caps the class | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-049-T09 — Dashboard shows instances per class | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-049-T10 — Linux host enforcement for the mini PC | 1.75 h | 0 h | 1.75 h agent + 0.5 h owner | Planned |
-| 🟣 Very large | **Total** | 13.75 h | 0 h (0 of 10 steps recorded) | 13.75 h agent + 0.75 h owner | 0 of 10 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-049.md)
-
-| Field | Value |
-|---|---|
-| Depends on | [F-045](#f-045) — Pilot identity and EVA class for per-job execution<br />[F-025](#f-025) — Pilot trust-stage limits for sandbox class admission |
-| PR / evidence | [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner questions 2026-11-05 |
-| Opened | 2026-11-05 |
-| Verification | Pending |
-| Reviewed | 2026-11-09 |
 
 </details>
 
