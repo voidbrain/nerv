@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 129.75 h agent + 16.75 h owner across 121 open steps of 30 features and 3 other records. 26 h of actual effort recorded on 42 steps. Generated from the task files.
+**Remaining effort:** 128 h agent + 16.75 h owner across 120 open steps of 30 features and 3 other records. 26.5 h of actual effort recorded on 43 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -215,7 +215,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 4.5 h | — | [F-049](#f-049) | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.75 h | — | [F-049](#f-049) | — | — |
 
 💻 **→** Attach extra seats by action class as veto-only, start new seats in shadow, and promote pilots through Prototype → Test → Production.
 
@@ -230,10 +230,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
 | — | F-025-T01 — Veto-only extra seats with shadow logging | 0.25 h | 0.25 h (stated) | 0 h | Completed |
-| 🟡 Medium | F-025-T02 — Free API seat pool | 1.75 h | 0 h | 1.75 h | Planned |
+| — | F-025-T02 — Free API seat pool | 0.5 h | 0.5 h (stated) | 0 h | Completed |
 | 🟢 Small | F-025-T03 — Consultants without a vote | 1 h | 0 h | 1 h | Planned |
 | 🟡 Medium | F-025-T04 — Watermelon trust stages and demotion | 1.75 h | 0 h | 1.75 h | Planned |
-| 🔴 Large | **Total** | 4.75 h | 0.25 h (1 of 4 steps recorded) | 4.5 h | 1 of 4 completed |
+| 🟡 Medium | **Total** | 3.5 h | 0.75 h (2 of 4 steps recorded) | 2.75 h | 2 of 4 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>

@@ -18,6 +18,7 @@ export interface Tool {
 export interface Policy {
   deny: string[];
   blue: string[];
+  localOnly?: string[];
   syncThreshold: number;
   maxRejects: number;
   budget: number;
@@ -48,8 +49,16 @@ export interface Ballot {
   blocked?: 'isolation' | 'proactive' | 'budget';
 }
 export const effects: readonly Effect[] = ['read', 'write-local', 'write-external', 'irreversible', 'physical'];
-export const defaultPolicy: Policy = { deny: [], blue: [], syncThreshold: 80, maxRejects: 3, budget: 1 };
+export const defaultPolicy: Policy = { deny: [], blue: [], localOnly: [], syncThreshold: 80, maxRejects: 3, budget: 1 };
 const local = (e: Effect) => e === 'read' || e === 'write-local';
+/** True only when the Scrolls and action trust allow sending the action's request/args to a cloud seat (F-025-T02). */
+export function canLeaveMachine(action: { tool: string; effect: Effect; trust: Trust }, policy: Policy): boolean {
+  if (action.trust === 'tainted') return false;
+  if (local(action.effect)) return false;
+  if (policy.deny.includes(action.tool)) return false;
+  if (policy.localOnly?.includes(action.tool)) return false;
+  return true;
+}
 const effectFactor: Record<Effect, number> = {
   'read': 1,
   'write-local': 1,
@@ -68,6 +77,7 @@ export function validatePolicy(value: unknown): Policy {
   if (
     !names(merged.deny) ||
     !names(merged.blue) ||
+    !names(merged.localOnly ?? []) ||
     !Number.isInteger(merged.syncThreshold) ||
     merged.syncThreshold < 0 ||
     merged.syncThreshold > 100 ||
