@@ -6,7 +6,10 @@
 //   node tools/merge-when-green.mjs 12 13 [--every 60]
 //
 // Exit 0: every PR merged (or was already closed). 1: GitHub did not answer ten times in a row. 2: one conflicts with
-// the default branch. 3: a check failed.
+// the default branch. 3: a check failed. 4: a PR left the merge queue without merging.
+// With a merge queue on the base branch (8.7.0) a green PR is queued, without a merge strategy, and counts as merged
+// only when GitHub says so; the queue tests it with whatever is ahead of it. Branch deletion is then the
+// repository's "Automatically delete head branches" setting.
 // Every check counts, not only the required ones: a failing optional check (code scanning, say) still stops it.
 import { execFileSync } from 'node:child_process';
 
@@ -31,12 +34,25 @@ const outcome = (c) => {
 // GitHub can time out for a while: a failed `gh` call waits for the next round; ten in a row give up (exit 1)
 let failures = 0;
 const failedAt = new Map();
+const queued = new Set(),
+  leftQueue = new Set();
+const queueQuery =
+  'query($owner:String!,$repo:String!,$n:Int!){repository(owner:$owner,name:$repo){pullRequest(number:$n){isMergeQueueEnabled isInMergeQueue}}}';
+/** Whether the PR's base branch has a merge queue and whether the PR is in it; throws when GitHub does not answer. */
+const queueOf = (pr) => {
+  const q = JSON.parse(
+    gh('api', 'graphql', '-f', `query=${queueQuery}`, '-F', 'owner={owner}', '-F', 'repo={repo}', '-F', `n=${pr}`),
+  )?.data?.repository?.pullRequest;
+  if (typeof q?.isMergeQueueEnabled !== 'boolean') throw Error('no merge queue answer');
+  return q;
+};
 for (;;) {
   const left = [];
   for (const pr of prs) {
-    let p;
+    let p, q;
     try {
       p = JSON.parse(gh('pr', 'view', pr, '--json', 'state,mergeable,isDraft,headRefOid,statusCheckRollup'));
+      if (p.state === 'OPEN') q = queueOf(pr);
       failures = 0;
     } catch (e) {
       if (++failures >= 10) {
@@ -48,6 +64,18 @@ for (;;) {
     }
     if (p.state !== 'OPEN') {
       console.log(`#${pr}: ${p.state.toLowerCase()}`);
+      continue;
+    }
+    // a PR already in the queue (queued by an earlier run or a person) is only watched, never queued again
+    if (q.isInMergeQueue) queued.add(pr);
+    if (queued.has(pr)) {
+      // outside the queue counts when seen twice in a row: just after queuing, GitHub can still report it outside
+      if (q.isInMergeQueue) leftQueue.delete(pr);
+      else if (leftQueue.has(pr)) {
+        console.log(`#${pr}: left the merge queue without merging (its merge-group checks failed, or it was removed)`);
+        process.exit(4);
+      } else leftQueue.add(pr);
+      left.push(pr);
       continue;
     }
     const checks = p.statusCheckRollup ?? [];
@@ -69,6 +97,13 @@ for (;;) {
     }
     if (!p.isDraft && p.mergeable === 'MERGEABLE' && checks.length && checks.every((c) => outcome(c) === 'pass')) {
       try {
+        if (q.isMergeQueueEnabled) {
+          gh('pr', 'merge', pr, '--match-head-commit', p.headRefOid);
+          queued.add(pr);
+          console.log(`#${pr}: queued`);
+          left.push(pr);
+          continue;
+        }
         gh('pr', 'merge', pr, '--merge', '--delete-branch', '--match-head-commit', p.headRefOid);
         console.log(`#${pr}: merged`);
         continue;
