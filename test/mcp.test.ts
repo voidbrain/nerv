@@ -6,11 +6,20 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { McpClient, fingerprint, grantRefusal, validateTools, type McpServer } from '../src/mcp.ts';
+import { builtinToolDescriptors, builtinTools, toolDocs } from '../src/executors.ts';
 const FAKE = fileURLToPath(new URL('./fixtures/fake-mcp.mjs', import.meta.url));
 const server = (id = 'notes', v2 = false): McpServer => ({
   id,
   command: process.execPath,
   args: [FAKE, ...(v2 ? ['--v2'] : [])],
+});
+test("NERV's own tools expose stable versioned descriptors in the tool registry (F-021)", () => {
+  assert.equal(builtinToolDescriptors.length, builtinTools.length);
+  assert.equal(builtinToolDescriptors.length, toolDocs.length + 1, 'kaji.run has a dynamic planner description');
+  assert.ok(builtinToolDescriptors.every((tool) => tool.source === 'nerv'));
+  assert.ok(builtinToolDescriptors.every((tool) => /^[0-9a-f]{16}$/.test(tool.version)));
+  assert.equal(new Set(builtinToolDescriptors.map((tool) => tool.name)).size, builtinToolDescriptors.length);
+  assert.equal(builtinToolDescriptors.find((tool) => tool.name === 'reminders.add')?.effect, 'write-local');
 });
 test('the tools config: reserved server ids refused, grants only for known servers, reads only for now (F-021)', () => {
   assert.throws(() => validateTools({ mcp: [{ id: 'reminders', command: 'x' }] }), /not one of NERV's own/);
@@ -45,6 +54,16 @@ test('the tools config: reserved server ids refused, grants only for known serve
   assert.equal(grantRefusal({ name: 'r', annotations: { readOnlyHint: true } }, 'read', '00'), undefined);
 });
 test('an MCP server over stdio: tools listed, a call answered, the fingerprint follows the description (F-021)', async () => {
+  assert.equal(
+    fingerprint({
+      name: 'read_note',
+      description: 'Reads one note.',
+      inputSchema: { type: 'object' },
+      annotations: { readOnlyHint: true },
+    }),
+    '63a67c8c6510dd5f',
+    'existing grants keep their descriptor fingerprint across the unified registry change',
+  );
   const c = new McpClient(server());
   const c2 = new McpClient(server('notes', true));
   try {
@@ -200,7 +219,10 @@ test(
       });
     try {
       assert.equal(run('init').status, 0);
-      assert.match(run('tools').stdout, /No MCP servers yet/);
+      const own = run('tools').stdout;
+      assert.match(own, /NERV · \d+ built-in tool\(s\)/);
+      assert.match(own, /reminders\.add · write-local · version [0-9a-f]{16}/);
+      assert.match(own, /No MCP servers yet/);
       assert.equal(run('tools', 'add', 'notes', process.execPath, FAKE).status, 0);
       const list = run('tools').stdout;
       assert.match(list, /notes\.read_note · read-only · not granted/);

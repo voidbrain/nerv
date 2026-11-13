@@ -7,6 +7,7 @@ import { readConfig, savePilots, setSchedule } from './config.ts';
 import { STAGES, applyPilotToolChange, mergePilots, nextStage, splitPilot, updatePilot, type Stage } from './pilots.ts';
 import { reconcileReminderArgs } from './reminder-time.ts';
 import { explainRecord, type WhyRecord } from './why.ts';
+import { descriptorVersion, type ToolDescriptor } from './mcp.ts';
 export interface AgencyBaseSnapshot {
   baseId: string;
   name: string;
@@ -215,6 +216,26 @@ export const toolDocs: ToolDoc[] = [
     args: '{"id": pilot id, "add": [tool names] (optional), "remove": [tool names] (optional)}',
   },
 ];
+/** Versioned descriptors for NERV's own tools, on the same shape used for registered MCP tools (F-021). */
+export const builtinToolDescriptors: ToolDescriptor[] = builtinTools.map((tool) => {
+  const doc = toolDocs.find((candidate) => candidate.name === tool.name);
+  const dynamic =
+    tool.name === 'kaji.run'
+      ? {
+          about:
+            "Runs one gated action on another of the owner's enrolled bases; live offers supply the available tools.",
+          args: '{"base": enrolled base id or name, "tool": offered tool name, "args": object}',
+        }
+      : undefined;
+  if (!doc && !dynamic) throw new Error(`Tool registration has no descriptor: ${tool.name}`);
+  const value = {
+    name: tool.name,
+    effect: tool.effect,
+    description: (doc ?? dynamic)!.about,
+    inputSchema: (doc ?? dynamic)!.args,
+  };
+  return { ...value, source: 'nerv', version: descriptorVersion(value) };
+});
 /** {id} or {ids: [...]} (1–20 distinct strings): bulk changes stay one reviewed action, bound by the gate's argument hash. */
 function ids(args: Record<string, unknown>): string[] {
   only(args, ['id', 'ids']);

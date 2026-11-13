@@ -14,6 +14,14 @@ export interface McpTool {
   inputSchema?: unknown;
   annotations?: { readOnlyHint?: boolean; destructiveHint?: boolean; [k: string]: unknown };
 }
+export interface ToolDescriptor {
+  name: string;
+  version: string;
+  source: 'nerv' | `mcp:${string}`;
+  effect: string;
+  description: string;
+  inputSchema: unknown;
+}
 export interface McpServer {
   id: string;
   command: string;
@@ -47,7 +55,7 @@ const RESERVED = [
 ];
 
 /** A short, stable fingerprint of what a tool says it does and takes: name, description, input schema, annotations. */
-export function fingerprint(t: McpTool): string {
+function stableVersion(value: unknown): string {
   const canon = (v: unknown): unknown =>
     Array.isArray(v)
       ? v.map(canon)
@@ -59,18 +67,20 @@ export function fingerprint(t: McpTool): string {
           )
         : v;
   return createHash('sha256')
-    .update(
-      JSON.stringify(
-        canon({
-          name: t.name,
-          description: t.description ?? '',
-          inputSchema: t.inputSchema ?? null,
-          annotations: t.annotations ?? null,
-        }),
-      ),
-    )
+    .update(JSON.stringify(canon(value)))
     .digest('hex')
     .slice(0, 16);
+}
+export function descriptorVersion(value: Omit<ToolDescriptor, 'version' | 'source'>): string {
+  return stableVersion(value);
+}
+export function fingerprint(t: McpTool): string {
+  return stableVersion({
+    name: t.name,
+    description: t.description ?? '',
+    inputSchema: t.inputSchema ?? null,
+    annotations: t.annotations ?? null,
+  });
 }
 /** The name Misato and the ledger use: server id, a dot, the tool's own name. */
 export const toolName = (server: string, tool: string) => `${server}.${tool}`;

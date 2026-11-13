@@ -4,7 +4,7 @@
  "parent": "B-058",
  "title": "Ignore OS metadata and Git-ignored files in evaluation source identity",
  "goal": "Only files that are part of the source decide whether a recorded evaluation run still covers it",
- "status": "implemented",
+ "status": "closed",
  "acceptance": [
   "A committed test fails before the fix for a .DS_Store, a Thumbs.db and a Git-ignored file",
   "An untracked file that Git does not ignore still changes the source identity",
@@ -31,10 +31,10 @@
  ],
  "effort": {
   "size": "small",
-  "estimate": "0.5 h",
-  "basis": "Estimated 2026-11-13: a filter and one regression test. Not a measurement.",
+  "estimate": "0 remaining",
+  "basis": "Estimated 2026-11-13: a filter and one regression test. Closed after PR #376 merged with green CI. No actual: the closing reconciliation cannot establish the original task's elapsed effort.",
   "reviewed": "2026-11-13",
-  "agentHours": 0.5,
+  "agentHours": 0,
   "baselineAgentHours": 0.5,
   "estimateAgentHours": 0.5
  }

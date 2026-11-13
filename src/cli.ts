@@ -79,7 +79,7 @@ import {
 import { service } from './service.ts';
 import { initializeNativeTLS, loadNativeTLS, nativeAdmin, NativeAuth, type Invitation } from './native-auth.ts';
 import { Runtime, type ChatReply } from './runtime.ts';
-import { builtinTools } from './executors.ts';
+import { builtinToolDescriptors, builtinTools } from './executors.ts';
 import { MODEL_TIMEOUT_MS } from './model.ts';
 import { MAX_STEPS } from './misato.ts';
 import {
@@ -493,6 +493,9 @@ try {
       }
     };
     if (!sub) {
+      console.log(`NERV · ${builtinToolDescriptors.length} built-in tool(s)`);
+      for (const descriptor of builtinToolDescriptors)
+        console.log(`   ${descriptor.name} · ${descriptor.effect} · version ${descriptor.version}`);
       if (!tools.mcp.length) {
         console.log(
           'No MCP servers yet. Add one, for example: nerv tools add files npx -y @modelcontextprotocol/server-filesystem ~/NERV-files',
