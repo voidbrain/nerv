@@ -63,7 +63,7 @@ function summary(record) {
   assert(rows.length === 1, `${record.id}: missing or ambiguous summary`);
   const row = rows[0];
   const legacy = row[1] === record.id;
-  // The generated ledger (F-059) adds Remaining, optional Depends on / Unlocks, and the Procedures and Decision cells
+  // The generated ledger (F-059) adds Remaining, optional Depends on / Unlocks, and the Procedures and Decisions cells
   // last (8.0.0).
   const kind = { '🧑🧑': 'Both', '🧑—': 'Procedure', '—🧑': 'Decision', '——': 'No' }[row.slice(-2).join('')];
   const generated = [7, 9].includes(row.length) && kind !== undefined;
@@ -139,6 +139,8 @@ export function queue(sources, roadmap = '') {
         `${record.id}: missing or ambiguous human cue`,
       );
       const human = humans[0][1];
+      // F-068: generated cells also show a ready owner step; the 💻 line says an agent can still advance the record.
+      const agentNext = Boolean(s.human) && /^💻 \*\*→\*\* /m.test(record.body);
       const explicit = field(record, 'Queue order');
       let order = Infinity,
         orderReason = '';
@@ -156,7 +158,7 @@ export function queue(sources, roadmap = '') {
       const lane =
         s.status === 'Blocked'
           ? 'Blocked'
-          : human !== 'No'
+          : human !== 'No' && !agentNext
             ? 'Human action'
             : unresolved.length
               ? 'Prerequisite review'

@@ -14,19 +14,21 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 33 | 9 |
-| **Require Human 🧑** | 8 | 2 |
+| **Require Human 🧑** | 11 | 2 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures** | **Decisions** | **Procedures** | **Decisions** |
-| [F-009](#f-009) | [F-062](#f-062) | [B-057](#b-057) | — |
-| [F-011](#f-011) | [F-009](#f-009) | [B-056](#b-056) |  |
-| [F-023](#f-023) | [F-015](#f-015) |  |  |
-| [F-004](#f-004) | [F-011](#f-011) |  |  |
-|  | [F-016](#f-016) |  |  |
-|  | [F-064](#f-064) |  |  |
+| [F-005](#f-005) | [F-005](#f-005) | [B-057](#b-057) | — |
+| [F-006](#f-006) | [F-062](#f-062) | [B-056](#b-056) |  |
+| [F-062](#f-062) | [F-009](#f-009) |  |  |
+| [F-009](#f-009) | [F-015](#f-015) |  |  |
+| [F-011](#f-011) | [F-011](#f-011) |  |  |
+| [F-023](#f-023) | [F-016](#f-016) |  |  |
+| [F-004](#f-004) | [F-064](#f-064) |  |  |
+| [F-060](#f-060) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
@@ -44,9 +46,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Discover, install and operate enrolled remote workers**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟣 Very large | 8.5 h agent + 5.25 h owner | — | [F-012](#f-012) | — | — |
+| 🔴 Open | 🔺 P1 | 🟣 Very large | 8.5 h agent + 5.25 h owner | — | [F-012](#f-012) | 🧑 | 🧑 |
 
 💻 **→** Next: F-005-T15 — T06h — Upgrades that raise the schema version (Planned).
 
@@ -113,9 +115,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Orchestrate agents and models across nodes**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟣 Very large | 10.75 h agent + 2.5 h owner | — | [F-012](#f-012) | — | — |
+| 🔴 Open | 🔺 P1 | 🟣 Very large | 10.75 h agent + 2.5 h owner | — | [F-012](#f-012) | 🧑 | — |
 
 💻 **→** Next: F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback (Planned).
 
@@ -166,7 +168,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Pilots: a roster of permanent agents that grows, specialises and is chosen per request**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟣 Very large | 8.25 h | — | [F-049](#f-049), [F-050](#f-050), [F-054](#f-054) | — | — |
 
@@ -211,7 +213,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Extra MAGI seats (veto-only), consultants and watermelon trust for pilots**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🔴 Large | 5.5 h | — | [F-049](#f-049) | — | — |
 
@@ -252,7 +254,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **EVA instances: an EVA is a class, each job gets a fresh sandbox**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟣 Very large | 13.75 h agent + 0.75 h owner | [F-045](#f-045), [F-025](#f-025) | [F-021](#f-021), [F-027](#f-027) | — | — |
 
@@ -301,7 +303,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **MCP and standardized tool/expert protocol**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔺 P1 | 🔴 Large | 5.5 h | [F-049](#f-049) | [F-056](#f-056) | — | — |
 
@@ -345,7 +347,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Resume a specific paused job after its provider limit resets**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔺 P1 | 🔴 Large | 7.25 h agent + 0.5 h owner | [F-005](#f-005), [F-006](#f-006) | — | — | — |
 
@@ -389,9 +391,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Backup and restore: agreed loss bounds, off-host snapshots and a restore drill**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🔴 Large | 4.25 h agent + 0.25 h owner | — | — | — | 🧑 |
+| 🔴 Open | 🔺 P1 | 🔴 Large | 4.25 h agent + 0.25 h owner | — | — | 🧑 | 🧑 |
 
 🧑 **→** Owner decides the acceptable data loss and restore time, and where encrypted off-host copies live.
 
@@ -431,7 +433,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Run NERV Agency headless as one local user service**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🟡 Implemented | 🔺 P1 | 🟢 Small | 1 h agent + 0.75 h owner | — | — | 🧑 | 🧑 |
 
@@ -474,7 +476,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Pair native clients without sharing the root credential**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🟢 Verified | 🔺 P1 | 🟢 Small | 0 days | — | — | — | 🧑 |
 
@@ -515,7 +517,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Native macOS menu-bar companion without Electron**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🟡 Implemented | 🔺 P1 | 🟡 Medium | 2 h agent + 1.75 h owner | — | — | 🧑 | 🧑 |
 
@@ -557,7 +559,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Misato's apartment: approval cards with TTL, delivered by Pen Pen**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🟡 Implemented | 🔺 P1 | 🟢 Small | 0 days | — | — | 🧑 | — |
 
@@ -597,7 +599,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Angular PWA and validated GenUI**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔺 P1 | 🟢 Small | 0.5 h agent + 0.5 h owner | — | — | 🧑 | — |
 
@@ -641,7 +643,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Relocate the logical coordinator without split brain**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔺 P1 | 🟣 Very large | 8.5 h agent + 1.25 h owner | — | — | — | 🧑 |
 
@@ -690,7 +692,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Naoko desk provenance and Ireul taint with an egress allowlist**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🟣 Blocked | ◻️ P1 | 🟡 Medium | 1.75 h | [F-049](#f-049) | — | — | — |
 
@@ -731,7 +733,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Indexed reusable evaluations, operator campaigns and the first Gemma smoke**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | — | — |
 
@@ -778,7 +780,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Misato reads the agency: status and "why" from the records**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | [F-056](#f-056) | — | — |
 
@@ -818,7 +820,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Misato checks what already exists before adding: same thing, a change, or new**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h | — | — | — | — |
 
@@ -859,7 +861,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Agentic threat map: each OWASP risk tied to a NERV control and the test that proves it**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h | — | — | — | — |
 
@@ -898,7 +900,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Authenticated directory of base communication operators**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟡 Medium | 2.75 h | — | — | — | — |
 
@@ -937,7 +939,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Dashboard: a sortie shows where it runs and who contributed**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🔴 Large | 5.75 h | — | — | — | — |
 
@@ -980,7 +982,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Timings for every step, live in the Sephirot; shadow seats never make you wait**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🔴 Large | 4.75 h | — | — | — | — |
 
@@ -1023,7 +1025,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Parallel work: a visible queue, limits per model, a lock per item**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟡 Medium | 3.75 h | — | [F-050](#f-050) | — | — |
 
@@ -1064,7 +1066,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Telegram approval card arrives after dashboard decision**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | — | — | — |
 
@@ -1102,7 +1104,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Dashboard browser test reads the banner before the page has loaded**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.5 h | — | — | — | — |
 
@@ -1140,7 +1142,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Owner actions point at procedures the owner has to hunt for**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🟢 Verified | 🔶 P2 | 🟢 Small | 0 h | — | — | — | — |
 
@@ -1178,7 +1180,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **F-029 descendant-process test failed once in CI with every process already gone**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | — | — | — |
 
@@ -1216,7 +1218,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **The Windows service launcher runs Node from an fnm per-shell path**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | — | — | — |
 
@@ -1254,7 +1256,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Misato invents a reminder title instead of asking, when an Italian request gives none**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟡 Medium | 1.25 h | — | — | — | — |
 
@@ -1292,7 +1294,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **A long chat reply on the main base fails at the 120 s model-call limit**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🟠 Investigate | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | — | — |
 
@@ -1330,7 +1332,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Slash commands in Telegram and the dashboard chat, and how much Aoba tells you**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🔴 Large | 5.75 h | [F-021](#f-021), [F-042](#f-042) | — | — | — |
 
@@ -1374,7 +1376,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Forwarding a whole job to another base**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟡 Medium | 3.5 h | [F-045](#f-045), [F-048](#f-048) | — | — | — |
 
@@ -1415,7 +1417,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Companion error messages are Italian only and do not say what went wrong**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | — | 🧑 | — |
 
@@ -1453,7 +1455,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Memory: one fact per subject, a proposed spelling fix, typo-tolerant recall**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h | — | — | — | — |
 
@@ -1494,7 +1496,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Machine credentials: rotation and telling owner use from automated use**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔹 P3 | 🟡 Medium | 1.5 h | — | — | — | — |
 
@@ -1534,9 +1536,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Spike: herdr-core as a coding-agent terminal runtime**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🟠 Investigate | 🔹 P3 | 🟡 Medium | 1.5 h agent + 2 h owner | — | — | — | — |
+| 🟠 Investigate | 🔹 P3 | 🟡 Medium | 1.5 h agent + 2 h owner | — | — | 🧑 | — |
 
 💻 **→** Next: a time-boxed trial of herdr-core as the development workspace, then a written adopt/adapter/reject outcome.
 
@@ -1574,7 +1576,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Voice and evaluated skill improvement**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔹 P3 | 🔴 Large | 8 h agent + 0.5 h owner | — | — | — | — |
 
@@ -1621,7 +1623,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Integrate the FPV app**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔹 P3 | 🟡 Medium | 3.25 h agent + 0.5 h owner | — | — | — | — |
 
@@ -1663,7 +1665,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Grounded personas for HITL and explanation (Misato primary)**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h | — | — | — | — |
 
@@ -1705,7 +1707,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **The base chronicle: a daily log of the agency's milestones, plain and in Eva lore**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h | [F-045](#f-045) | — | — | — |
 
@@ -1748,7 +1750,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Bounded incident circuits instead of a global kill switch**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔹 P3 | 🟡 Medium | 3.25 h agent + 0.25 h owner | — | — | — | 🧑 |
 
@@ -1788,7 +1790,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **A renewal the companion refuses on the Mac says it was not confirmed**
 
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
 | 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | 🧑 | — |
 

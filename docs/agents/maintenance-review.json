@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-13T07:55:01.576Z",
+  "reviewed": "2026-11-13T08:27:21.217Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
     "AGENTS.md": "b52b056f97cf118b6bbc5b1bd8f54629ec0cdb0a722640b9e524d1370e105a9e",
-    "docs/BACKLOG-RULES.md": "8398970351bc39106f3754b18d6b51bc5eb5bdba720db63d9be93db9415765a2",
+    "docs/BACKLOG-RULES.md": "ba9f4e80645b4d9c954ac8c120c2983e6e2d81672c2810853bed5615e0372888",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
     "docs/agents/areas.md": "19890dcd2fb04557fcb9b9bb1df4dcbd2e584736e53a5989908bb822ef020d1c",
     "docs/agents/audit.md": "bc5de5707f9ec5c523e73602499312c373d6112ffc498d69bf68604522527992",
@@ -20,7 +20,7 @@
     "docs/agents/work-usage.md": "e2f7c484f1c07f4b47fd1133857d8744ccab0ad2a7b85b220946c115a002bebc",
     "tools/task-claims.mjs": "ef755fe7951544e5c05b20de7c64a7b53778b6d039a11a2abeb079e7d42b6fd2",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
-    "tools/work-items.mjs": "90318b75197c4d5417b7bfafaca13155b0c86e1eba8e31cea2726d83be81dd19",
+    "tools/work-items.mjs": "acc404abbfe63269d5ec8f20bf14d2dec0759aef36ffa162eac96303c0b8ff54",
     "tools/work-usage.mjs": "4329262c0b9e723e046dd8878e15a99cff5f590201cd0918563f3204bbe79219"
   },
   "measurements": {
@@ -80,13 +80,13 @@
       "kind": "tool",
       "disposition": "implemented",
       "target": "tools/work-items.mjs",
-      "evidence": "Harness 8.2.0 (template F-067, PR #147, fresh-context review there): queue order lists an open prerequisite above the first record that waits on it; the ordering block is identical to v8.2.0, the rest of the file keeps the unreleased template F-066 code this project already carries."
+      "evidence": "Harness 8.3.0 (template F-068, PR #149, fresh-context review there): a ready owner step (effort.ownerKind, planned or ready, prerequisites verified or closed) marks the Procedures and Decisions cells beside the record cue. check-backlog, backlog-queue and solution are byte copies of v8.3.0; work-items takes the 8.2.0 to 8.3.0 changes and keeps the unreleased template F-066 code this project already carries."
     },
     {
       "kind": "rule",
       "disposition": "implemented",
       "target": "docs/BACKLOG-RULES.md",
-      "evidence": "Optional work queue paragraph carried verbatim from v8.2.0: priority before lane, a blocker above what it blocks. No rule removed."
+      "evidence": "The summary and human-action sentences and the ownerKind clause of v8.3.0 carried into the project's wording. No rule removed."
     }
   ]
 }
