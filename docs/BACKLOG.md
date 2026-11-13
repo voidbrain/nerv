@@ -13,7 +13,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 33 | 9 |
+| **Open** | 32 | 9 |
 | **Require Human 🧑** | 11 | 2 |
 
 ### Require Human 🧑
@@ -24,15 +24,15 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-005](#f-005) | [F-005](#f-005) | [B-057](#b-057) | — |
 | [F-006](#f-006) | [F-062](#f-062) | [B-056](#b-056) |  |
 | [F-062](#f-062) | [F-009](#f-009) |  |  |
-| [F-009](#f-009) | [F-015](#f-015) |  |  |
-| [F-011](#f-011) | [F-011](#f-011) |  |  |
+| [F-009](#f-009) | [F-011](#f-011) |  |  |
+| [F-011](#f-011) | [F-015](#f-015) |  |  |
 | [F-023](#f-023) | [F-016](#f-016) |  |  |
 | [F-004](#f-004) | [F-064](#f-064) |  |  |
 | [F-060](#f-060) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 125.25 h agent + 16.75 h owner across 118 open steps of 29 features and 3 other records. 27 h of actual effort recorded on 45 steps. Generated from the task files.
+**Remaining effort:** 34.75 h agent + 16.75 h owner across 118 open steps of 29 features and 3 other records. 27 h of actual effort recorded on 45 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -48,7 +48,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟣 Very large | 8.5 h agent + 5.25 h owner | — | [F-012](#f-012) | 🧑 | 🧑 |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.75 h agent + 5.25 h owner | — | [F-012](#f-012) | 🧑 | 🧑 |
 
 💻 **→** Next: F-005-T15 — T06h — Upgrades that raise the schema version (Planned).
 
@@ -76,23 +76,23 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | F-005-T12 — T06e — Independent review of the update path | 1.5 h | 1.25 h (stated) | 0 h | Completed |
 | — | F-005-T13 — T06f — First real lifecycle update on the Mac service | 0.5 h | 0.75 h (stated) | 0 h | Completed |
 | — | F-005-T14 — T06g — After-start health check in the update receipt | 1 h | 0.5 h (stated) | 0 h | Completed |
-| 🟡 Medium | F-005-T15 — T06h — Upgrades that raise the schema version | 2.75 h | 0 h | 2.75 h | Planned |
+| 🟢 Small | F-005-T15 — T06h — Upgrades that raise the schema version | 0.75 h | 0 h | 0.75 h | Planned |
 | — | F-005-T16 — T07b — Show update availability on the dashboard, the companion and the status report | 1 h | 0.5 h (stated) | 0 h | Completed |
 | — | F-005-T17 — T07c — Manual update action through the lifecycle update path, with its refusals and recovery shown | 0.5 h | 0.5 h (stated) | 0 h | Completed |
 | — | F-005-T18 — T07d — Opt-in automatic update policy, off by default, for selected channels and targets | 1 h | 0.5 h (stated) | 0 h | Completed |
 | — | F-005-T19 — T08b — Node install or upgrade choices with ownership and recovery; never replaces a user-managed runtime silently | 1.25 h | 0.5 h (stated) | 0 h | Completed |
 | — | F-005-T20 — T08c — Engine/provider contract for several instances and endpoints, local and remote; Ollama becomes one adapter | 1.25 h | 0.5 h (stated) | 0 h | Completed |
 | — | F-005-T21 — T08d — Optional start-at-login or on-demand management of selected owned local engines | 1 h | 0.25 h (stated) | 0 h | Completed |
-| 🟢 Small | F-005-T22 — T08e — Demonstration of prerequisites and optional engine management on an owner-selected target | 0.5 h | 0 h | 0.5 h agent + 0.5 h owner | Planned |
+| 🟢 Small | F-005-T22 — T08e — Demonstration of prerequisites and optional engine management on an owner-selected target | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned |
 | — | F-005-T23 — T09b — Windows update and recovery: backup, rehearsal and checkout | 1 h | 0.5 h (stated) | 0 h | Completed |
-| 🟢 Small | F-005-T24 — T09c — Acceptance on an owner-selected Windows machine | 0.5 h | 0 h | 0.5 h agent + 1 h owner | Planned |
+| 🟢 Small | F-005-T24 — T09c — Acceptance on an owner-selected Windows machine | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned |
 | — | F-005-T25 — T10b — Linux update and recovery | 1 h | 0.25 h (stated) | 0 h | Completed |
-| 🟢 Small | F-005-T26 — T10c — Acceptance on an owner-selected mini PC, Pi or equivalent | 0.5 h | 0 h | 0.5 h agent + 1 h owner | Planned |
-| 🟡 Medium | F-005-T27 — T11b — Enrolment, revocation, leases, fencing and cancellation across the device matrix | 1.25 h | 0 h | 1.25 h agent + 1 h owner | Planned |
-| 🟡 Medium | F-005-T28 — T11c — Reconnect, locks and uncertain physical results across the device matrix | 1.25 h | 0 h | 1.25 h agent + 1 h owner | Planned |
-| 🟢 Small | F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 1 h | 0 h | 1 h agent + 0.5 h owner | Planned |
-| 🟢 Small | F-005-T30 — T11e — Parent acceptance and closure reconciliation | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟣 Very large | **Total** | 24 h (24 of 30 steps) | 8 h (15 of 30 steps recorded) | 8.5 h agent + 5.25 h owner | 21 of 30 completed |
+| 🟢 Small | F-005-T26 — T10c — Acceptance on an owner-selected mini PC, Pi or equivalent | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned |
+| 🟢 Small | F-005-T27 — T11b — Enrolment, revocation, leases, fencing and cancellation across the device matrix | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned |
+| 🟢 Small | F-005-T28 — T11c — Reconnect, locks and uncertain physical results across the device matrix | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned |
+| 🟢 Small | F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned |
+| 🟢 Small | F-005-T30 — T11e — Parent acceptance and closure reconciliation | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟡 Medium | **Total** | 18.25 h (24 of 30 steps) | 8 h (15 of 30 steps recorded) | 2.75 h agent + 5.25 h owner | 21 of 30 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -117,7 +117,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟣 Very large | 9.75 h agent + 2.5 h owner | — | [F-012](#f-012) | 🧑 | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.75 h agent + 2.5 h owner | — | [F-012](#f-012) | 🧑 | — |
 
 💻 **→** Next: F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases (Planned).
 
@@ -133,19 +133,19 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|
 | — | F-006-T01 — T01a — Decision: remote inference endpoint identity, permitted data and behaviour when unavailable | 0.5 h | 0.5 h (stated) | 0 h | Completed |
 | — | F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback | 0.5 h | 0.5 h (stated) | 0 h | Completed |
-| 🟡 Medium | F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟢 Small | F-006-T04 — T04a — Placement campaign plan with exact cases, repeats and budgets for owner approval | 0.5 h | 0 h | 0.5 h agent + 0.25 h owner | Planned |
-| 🟢 Small | F-006-T05 — T05a — Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.5 h | 0 h | 0.5 h agent + 0.25 h owner | Planned |
+| 🟢 Small | F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-006-T04 — T04a — Placement campaign plan with exact cases, repeats and budgets for owner approval | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned |
+| 🟢 Small | F-006-T05 — T05a — Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned |
 | — | F-006-T06 — T01b — Configuration validation for remote endpoints; the loopback-only local route stays guaranteed; regressions | 0.5 h | 0.5 h (stated) | 0 h | Completed |
-| 🟡 Medium | F-006-T07 — T02b — Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟢 Small | F-006-T08 — T02c — Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-006-T09 — T03b — Evidence adapter binding both configurations, handoffs, budgets and hosts | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-006-T10 — T03c — Grader tamper protection; stale or mismatched evidence rejected; authority rechecked | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟢 Small | F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | 1 h | 0 h | 1 h agent + 0.5 h owner | Planned |
-| 🟢 Small | F-006-T12 — T04c — Placement report and recommendation | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | F-006-T13 — T05b — Three Mac operating-condition runs | 1 h | 0 h | 1 h agent + 1.5 h owner | Planned |
-| 🟢 Small | F-006-T14 — T05c — Mac operating-conditions report | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟣 Very large | **Total** | 11.25 h | 1.5 h (3 of 14 steps recorded) | 9.75 h agent + 2.5 h owner | 3 of 14 completed |
+| 🟢 Small | F-006-T07 — T02b — Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-006-T08 — T02c — Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-006-T09 — T03b — Evidence adapter binding both configurations, handoffs, budgets and hosts | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-006-T10 — T03c — Grader tamper protection; stale or mismatched evidence rejected; authority rechecked | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned |
+| 🟢 Small | F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-006-T13 — T05b — Three Mac operating-condition runs | 0.25 h | 0 h | 0.25 h agent + 1.5 h owner | Planned |
+| 🟢 Small | F-006-T14 — T05c — Mac operating-conditions report | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟡 Medium | **Total** | 4.25 h | 1.5 h (3 of 14 steps recorded) | 2.75 h agent + 2.5 h owner | 3 of 14 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -209,54 +209,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
-### <a id="f-025"></a>[✨ F-025](#top)
-
-**Extra MAGI seats (veto-only), consultants and watermelon trust for pilots**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 0 h | — | [F-049](#f-049) | — | — |
-
-💻 **→** Attach extra seats by action class as veto-only, start new seats in shadow, and promote pilots through Prototype → Test → Production.
-
-| | |
-|---|---|
-| **Issue** | Specialists help, but a new or remote seat must never approve what the core three would refuse, and skills need earned trust. |
-| **Reproduce** | Attach a deterministic test seat and a model expert seat to code-write actions; run them in shadow; promote one; force a failure and a Spear revocation. |
-| **Check** | Extra seats can only reject; shadow seats are logged, not counted; a timed-out seat abstains; consultants advise the planner without a vote and receive only Scrolls-allowed data; pilots run only in the EVA class of their stage; promotion to Production needs the owner's confirmation; failure, override spikes or Spear demote automatically. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| — | F-025-T01 — Veto-only extra seats with shadow logging | 0.25 h | 0.25 h (stated) | 0 h | Completed |
-| — | F-025-T02 — Free API seat pool | 0.5 h | 0.5 h (stated) | 0 h | Completed |
-| — | F-025-T03 — Consultants without a vote | 0.25 h | 0.25 h (stated) | 0 h | Completed |
-| — | F-025-T04 — Watermelon trust stages and demotion | 0.25 h | 0.25 h (stated) | 0 h | Completed |
-| — | **Total** | 1.25 h | 1.25 h | 0 h | 4 of 4 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-025.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
-| Opened | 2026-11-02 |
-| Verification | 2026-11-13: T01 `test/extra-seats.test.ts` + `test/gate.test.ts` + `test/kaji-seats.test.ts` (12/12); T02 `test/seat-pool.test.ts` + `test/extra-seats.test.ts` + `test/gate.test.ts` + `test/ledger.test.ts` (32/32); T03 `test/consultant.test.ts` + `test/misato.test.ts` (20/20); T04 `test/pilots.test.ts` (13/13); `check:conventions` and `check:fast` passed. |
-| Reviewed | 2026-11-04 |
-
-</details>
-
----
 ### <a id="f-049"></a>[✨ F-049](#top)
 
 **EVA instances: an EVA is a class, each job gets a fresh sandbox**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟣 Very large | 13.75 h agent + 0.75 h owner | [F-045](#f-045), [F-025](#f-025) | [F-021](#f-021), [F-027](#f-027) | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.5 h agent + 0.75 h owner | [F-045](#f-045) | [F-021](#f-021), [F-027](#f-027) | — | — |
 
 💻 **→** Next: the EVA class definition and one sandboxed instance per job, starting with EVA-03 (owner, 2026-11-05).
 
@@ -270,17 +229,17 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟡 Medium | F-049-T01 — Define deterministic isolated runner admission and enforcement | 1.75 h | 0 h | 1.75 h | Ready |
-| 🟢 Small | F-049-T02 — EVA class definitions and least-class admission | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-049-T03 — Choose the macOS host enforcement mechanism | 1.25 h | 0 h | 1.25 h agent + 0.25 h owner | Planned |
-| 🟡 Medium | F-049-T04 — EVA-03 instance per job | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟡 Medium | F-049-T05 — Escape and recovery join tests | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟡 Medium | F-049-T06 — Concurrent instances within per-machine limits | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟡 Medium | F-049-T07 — EVA-00, EVA-01 and EVA-02 on the runner | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟢 Small | F-049-T08 — Pilot trust stage caps the class | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-049-T09 — Dashboard shows instances per class | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-049-T10 — Linux host enforcement for the mini PC | 1.75 h | 0 h | 1.75 h agent + 0.5 h owner | Planned |
-| 🟣 Very large | **Total** | 13.75 h | 0 h (0 of 10 steps recorded) | 13.75 h agent + 0.75 h owner | 0 of 10 completed |
+| 🟢 Small | F-049-T01 — Define deterministic isolated runner admission and enforcement | 0.5 h | 0 h | 0.5 h | Ready |
+| 🟢 Small | F-049-T02 — EVA class definitions and least-class admission | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-049-T03 — Choose the macOS host enforcement mechanism | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned |
+| 🟢 Small | F-049-T04 — EVA-03 instance per job | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-049-T05 — Escape and recovery join tests | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-049-T06 — Concurrent instances within per-machine limits | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-049-T07 — EVA-00, EVA-01 and EVA-02 on the runner | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-049-T08 — Pilot trust stage caps the class | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-049-T09 — Dashboard shows instances per class | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-049-T10 — Linux host enforcement for the mini PC | 0.5 h | 0 h | 0.5 h agent + 0.5 h owner | Planned |
+| 🟡 Medium | **Total** | 3.5 h | 0 h (0 of 10 steps recorded) | 3.5 h agent + 0.75 h owner | 0 of 10 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -305,7 +264,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🔴 Large | 5.5 h | [F-049](#f-049) | [F-056](#f-056) | — | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 1.5 h | [F-049](#f-049) | [F-056](#f-056) | — | — |
 
 💻 **→** Next: slice 2, writes with approval cards; then the dashboard tools list, tools on other bases, remote (HTTP) servers. Optional owner check below.
 
@@ -320,11 +279,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
 | — | F-021-T01 — MCP stdio client, tools process and deny-by-default grants | — | 0 days | 0 remaining | Completed |
-| 🟢 Small | F-021-T02 — Versioned descriptors for NERV's own tools | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-021-T03 — Per-pilot tool binding | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟡 Medium | F-021-T04 — Remote (other-machine) endpoints | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟢 Small | F-021-T05 — Dashboard tool listing | 1 h | 0 h | 1 h | Planned |
-| 🔴 Large | **Total** | 5.5 h (4 of 5 steps) | 0 h (0 of 5 steps recorded) | 5.5 h | 1 of 5 completed |
+| 🟢 Small | F-021-T02 — Versioned descriptors for NERV's own tools | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-021-T03 — Per-pilot tool binding | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-021-T04 — Remote (other-machine) endpoints | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-021-T05 — Dashboard tool listing | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟡 Medium | **Total** | 1.5 h (4 of 5 steps) | 0 h (0 of 5 steps recorded) | 1.5 h | 1 of 5 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -349,7 +308,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🔴 Large | 7.25 h agent + 0.5 h owner | [F-005](#f-005), [F-006](#f-006) | — | — | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 2 h agent + 0.5 h owner | [F-005](#f-005), [F-006](#f-006) | — | — | — |
 
 💻 **→** Define durable waiting jobs and implement an authorized browser/editor adapter that rechecks the exact job before resuming once.
 
@@ -363,12 +322,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | F-012-T01 — Durable resume intent and policy | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-012-T02 — Readiness check and once-only resume engine | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟡 Medium | F-012-T03 — Claude Code (VS Code) adapter feasibility and adapter | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟡 Medium | F-012-T04 — Web-chat adapter feasibility | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟢 Small | F-012-T05 — Edge cases and real-host acceptance | 1 h | 0 h | 1 h agent + 0.5 h owner | Planned |
-| 🔴 Large | **Total** | 7.25 h | 0 h (0 of 5 steps recorded) | 7.25 h agent + 0.5 h owner | 0 of 5 completed |
+| 🟢 Small | F-012-T01 — Durable resume intent and policy | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-012-T02 — Readiness check and once-only resume engine | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-012-T03 — Claude Code (VS Code) adapter feasibility and adapter | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-012-T04 — Web-chat adapter feasibility | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-012-T05 — Edge cases and real-host acceptance | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned |
+| 🟡 Medium | **Total** | 2 h | 0 h (0 of 5 steps recorded) | 2 h agent + 0.5 h owner | 0 of 5 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -393,7 +352,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🔴 Large | 4.25 h agent + 0.25 h owner | — | — | 🧑 | 🧑 |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 1.25 h agent + 0.25 h owner | — | — | 🧑 | 🧑 |
 
 🧑 **→** Owner decides the acceptable data loss and restore time, and where encrypted off-host copies live.
 
@@ -407,11 +366,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | F-062-T01 — Owner-agreed loss window and restore time | 0.5 h | 0 h | 0.5 h agent + 0.25 h owner | Planned |
-| 🟢 Small | F-062-T02 — Scheduled consistent snapshots | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-062-T03 — Encrypted off-host retention | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟢 Small | F-062-T04 — Restore drill | 1 h | 0 h | 1 h | Planned |
-| 🔴 Large | **Total** | 4.25 h | 0 h (0 of 4 steps recorded) | 4.25 h agent + 0.25 h owner | 0 of 4 completed |
+| 🟢 Small | F-062-T01 — Owner-agreed loss window and restore time | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned |
+| 🟢 Small | F-062-T02 — Scheduled consistent snapshots | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-062-T03 — Encrypted off-host retention | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-062-T04 — Restore drill | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟡 Medium | **Total** | 1.25 h | 0 h (0 of 4 steps recorded) | 1.25 h agent + 0.25 h owner | 0 of 4 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -435,7 +394,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🟡 Implemented | 🔺 P1 | 🟢 Small | 1 h agent + 0.75 h owner | — | — | 🧑 | 🧑 |
+| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.5 h agent + 0.75 h owner | — | — | 🧑 | 🧑 |
 
 🧑 **→** Run the [service and login acceptance procedure](acceptance/f009-service-login-procedure.md): complete selected Mac login/logout acceptance and choose a Linux acceptance target.
 
@@ -450,9 +409,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
 | — | F-009-T01 — Single-process service, config and lifecycle commands | — | 0 days | 0 remaining | Completed |
-| 🟢 Small | F-009-T02 — Mac login/logout acceptance | 0.5 h | 0 h | 0.5 h agent + 0.25 h owner | Planned |
-| 🟢 Small | F-009-T03 — Linux service target acceptance | 0.5 h | 0 h | 0.5 h agent + 0.5 h owner | Planned |
-| 🟢 Small | **Total** | 1 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 1 h agent + 0.75 h owner | 1 of 3 completed |
+| 🟢 Small | F-009-T02 — Mac login/logout acceptance | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned |
+| 🟢 Small | F-009-T03 — Linux service target acceptance | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned |
+| 🟢 Small | **Total** | 0.5 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 0.5 h agent + 0.75 h owner | 1 of 3 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -471,6 +430,48 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 ---
 
 
+
+### <a id="f-011"></a>[✨ F-011](#top)
+
+**Native macOS menu-bar companion without Electron**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.75 h agent + 1.75 h owner | — | — | 🧑 | 🧑 |
+
+🧑 **→** Run the [companion acceptance procedure](acceptance/f011-companion-acceptance-procedure.md) and select the signing identity.
+
+| | |
+|---|---|
+| **Issue** | SwiftUI pairing, private notification checkpoints, bounded catch-up, opt-in OS notifications, guarded local service controls and login selection now exist. Explicit Developer ID/notarization packaging is implemented; an actual signed release and real permission/menu/login acceptance remain incomplete. |
+| **Reproduce** | Follow the [companion acceptance procedure](acceptance/f011-companion-acceptance-procedure.md) and [docs/INSTALL.md](INSTALL.md). |
+| **Check** | Build and package on macOS; health/reminders, workspace launch, doctor, notifications, launch-at-login; Quit companion leaves service running; Stop NERV Agency is separate. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | F-011-T01 — Companion implementation and packaging automation | — | 0 days | 0 remaining | Completed |
+| 🟢 Small | F-011-T02 — Live menu, service-button and login acceptance on the Mac | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned |
+| 🟢 Small | F-011-T03 — Live notification permission acceptance | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned |
+| 🟢 Small | F-011-T04 — Signed and notarized release | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned |
+| 🟢 Small | **Total** | 0.75 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 0.75 h agent + 1.75 h owner | 1 of 4 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-011.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #255](https://github.com/voidbrain/nerv/pull/255) related-state reconciliation; [PR #254](https://github.com/voidbrain/nerv/pull/254) separate F-005 Mac service acceptance; [PR #215](https://github.com/voidbrain/nerv/pull/215) owner-confirmed icon/menu acceptance and deferred scope; [PR #212](https://github.com/voidbrain/nerv/pull/212) explicit distribution packaging and owner acceptance handoff; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #5](https://github.com/voidbrain/nerv/pull/5) merged; Linux and macOS checks green; real OS acceptance remains pending |
+| Opened | 2026-11-01 |
+| Verification | 2026-11-08 Unit/integration: seven isolated release-path contracts pass (no actual signing/upload); signed-only, rejection, warning, timeout/failure and post-staple packaging paths checked. Real-device: temporary macOS release build, ad-hoc signature verification and bundle plist validation passed; that temporary build was not installed/launched. Later UI-only trial: verified/downloaded PR #213 CI app launch completed according to macOS process state; Human 2026-11-08: owner confirms icon appears and menu opens normally; no Accessibility permission granted to this session. PR #212 CI 42489231643 passed targeted native/auth/packaging checks, including actual macOS Swift tests/build/package; full-suite skipped. Actual Developer ID/notarization and native OS acceptance pending. |
+| Reviewed | 2026-11-10 |
+
+</details>
+
+---
 
 ### <a id="f-015"></a>[✨ F-015](#top)
 
@@ -508,48 +509,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-01 |
 | Verification | 2026-11-12 live on the owner's Mac: pairing, replay/expiry refusal and secret checks (T02); revocation, lost renewal reply, Keychain failure and offline rotation with recovery (T03); owner-observed. 2026-11-08 Unit/integration: five Node authentication/renewal contracts and one stopped-profile recovery contract pass; actual HTTPS admission, single-use tickets, old-token invalidation, independent clients, full roster, expired/revoked refusal and retained unrelated data covered. Swift: three pairing tests pass, including real pinned Swift-to-Node HTTPS renewal and identity/pin/port refusal. Typecheck/conventions pass. PR #213 CI 42489975323 passed plan, validate, windows, native-macos and full-suite. Live Keychain/OS/certificate-recovery acceptance pending; fixtures never change real credentials, services or login state. |
 | Reviewed | 2026-11-08 |
-
-</details>
-
----
-
-### <a id="f-011"></a>[✨ F-011](#top)
-
-**Native macOS menu-bar companion without Electron**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟡 Implemented | 🔺 P1 | 🟡 Medium | 2 h agent + 1.75 h owner | — | — | 🧑 | 🧑 |
-
-🧑 **→** Run the [companion acceptance procedure](acceptance/f011-companion-acceptance-procedure.md) and select the signing identity.
-
-| | |
-|---|---|
-| **Issue** | SwiftUI pairing, private notification checkpoints, bounded catch-up, opt-in OS notifications, guarded local service controls and login selection now exist. Explicit Developer ID/notarization packaging is implemented; an actual signed release and real permission/menu/login acceptance remain incomplete. |
-| **Reproduce** | Follow the [companion acceptance procedure](acceptance/f011-companion-acceptance-procedure.md) and [docs/INSTALL.md](INSTALL.md). |
-| **Check** | Build and package on macOS; health/reminders, workspace launch, doctor, notifications, launch-at-login; Quit companion leaves service running; Stop NERV Agency is separate. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| — | F-011-T01 — Companion implementation and packaging automation | — | 0 days | 0 remaining | Completed |
-| 🟢 Small | F-011-T02 — Live menu, service-button and login acceptance on the Mac | 0.5 h | 0 h | 0.5 h agent + 0.5 h owner | Planned |
-| 🟢 Small | F-011-T03 — Live notification permission acceptance | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned |
-| 🟡 Medium | F-011-T04 — Signed and notarized release | 1.25 h | 0 h | 1.25 h agent + 1 h owner | Planned |
-| 🟡 Medium | **Total** | 2 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 2 h agent + 1.75 h owner | 1 of 4 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-011.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #255](https://github.com/voidbrain/nerv/pull/255) related-state reconciliation; [PR #254](https://github.com/voidbrain/nerv/pull/254) separate F-005 Mac service acceptance; [PR #215](https://github.com/voidbrain/nerv/pull/215) owner-confirmed icon/menu acceptance and deferred scope; [PR #212](https://github.com/voidbrain/nerv/pull/212) explicit distribution packaging and owner acceptance handoff; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #5](https://github.com/voidbrain/nerv/pull/5) merged; Linux and macOS checks green; real OS acceptance remains pending |
-| Opened | 2026-11-01 |
-| Verification | 2026-11-08 Unit/integration: seven isolated release-path contracts pass (no actual signing/upload); signed-only, rejection, warning, timeout/failure and post-staple packaging paths checked. Real-device: temporary macOS release build, ad-hoc signature verification and bundle plist validation passed; that temporary build was not installed/launched. Later UI-only trial: verified/downloaded PR #213 CI app launch completed according to macOS process state; Human 2026-11-08: owner confirms icon appears and menu opens normally; no Accessibility permission granted to this session. PR #212 CI 42489231643 passed targeted native/auth/packaging checks, including actual macOS Swift tests/build/package; full-suite skipped. Actual Developer ID/notarization and native OS acceptance pending. |
-| Reviewed | 2026-11-10 |
 
 </details>
 
@@ -601,7 +560,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.5 h agent + 0.5 h owner | — | — | 🧑 | — |
+| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h agent + 0.5 h owner | — | — | 🧑 | — |
 
 🧑 **→** Run the [phone install and push procedure](acceptance/f004-t06-phone-push-procedure.md): install on a phone, receive a reminder push, and complete it from the PWA.
 
@@ -620,8 +579,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | F-004-T03 — Doctor view | 1.5 h | 0.5 h (stated) | 0 h | Completed |
 | — | F-004-T04 — Schema-validated registered component renderer (GenUI) | 3 h | 0.75 h (stated) | 0 h | Completed |
 | — | F-004-T05 — Web push subscription and delivery | 3 h | 0.5 h (stated) | 0 h | Completed |
-| 🟢 Small | F-004-T06 — Phone install and push acceptance | 0.5 h | 0 h | 0.5 h agent + 0.5 h owner | Ready |
-| 🟢 Small | **Total** | 12.5 h | 3 h (5 of 6 steps recorded) | 0.5 h agent + 0.5 h owner | 5 of 6 completed |
+| 🟢 Small | F-004-T06 — Phone install and push acceptance | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Ready |
+| 🟢 Small | **Total** | 12.25 h | 3 h (5 of 6 steps recorded) | 0.25 h agent + 0.5 h owner | 5 of 6 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -645,7 +604,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟣 Very large | 8.5 h agent + 1.25 h owner | — | — | — | 🧑 |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 2 h agent + 1.25 h owner | — | — | — | 🧑 |
 
 🧑 **→** Owner agreement on the [coordinator relocation decision](decisions/coordinator-relocation.md); independent review (F-016-T02) next.
 
@@ -662,15 +621,15 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
 | 🟢 Small | F-016-T01 — Step 1a — Decision: replicated state, leader lease and epoch, fencing tokens and restore | 0.5 h | 0.5 h so far (stated) | 0 h agent + 0.25 h owner | Implemented; verification pending |
-| 🟢 Small | F-016-T02 — Step 1b — Independent review of the coordinator relocation decision | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟡 Medium | F-016-T03 — Step 2a — Signed state snapshot export and import to a read-only standby | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟡 Medium | F-016-T04 — Step 2b — Incremental log shipping to the standby | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟡 Medium | F-016-T05 — Step 3a — Leader epoch in signed registry records; every effect checks the fencing token | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟡 Medium | F-016-T06 — Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟡 Medium | F-016-T07 — Step 4a — Owner-initiated relocation with restore; never a context-only takeover | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟡 Medium | F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟢 Small | F-016-T09 — Step 5b — Two-device relocation acceptance | 0.5 h | 0 h | 0.5 h agent + 1 h owner | Planned |
-| 🟣 Very large | **Total** | 9 h | 0.5 h (1 of 9 steps recorded) | 8.5 h agent + 1.25 h owner | 0 of 9 completed |
+| 🟢 Small | F-016-T02 — Step 1b — Independent review of the coordinator relocation decision | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-016-T03 — Step 2a — Signed state snapshot export and import to a read-only standby | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-016-T04 — Step 2b — Incremental log shipping to the standby | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-016-T05 — Step 3a — Leader epoch in signed registry records; every effect checks the fencing token | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-016-T06 — Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-016-T07 — Step 4a — Owner-initiated relocation with restore; never a context-only takeover | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-016-T09 — Step 5b — Two-device relocation acceptance | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned |
+| 🟡 Medium | **Total** | 2.5 h | 0.5 h (1 of 9 steps recorded) | 2 h agent + 1.25 h owner | 0 of 9 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -694,7 +653,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🟣 Blocked | ◻️ P1 | 🟡 Medium | 1.75 h | [F-049](#f-049) | — | — | — |
+| 🟣 Blocked | ◻️ P1 | 🟢 Small | 0.5 h | [F-049](#f-049) | — | — | — |
 
 💻 **→** T01 is accepted; T02 awaits F-049 isolation before enforced Scrolls egress can be tested.
 
@@ -709,8 +668,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
 | — | F-027-T01 — Carry durable context provenance into the gate and memory | — | 0 days | 0 remaining | Completed |
-| 🟡 Medium | F-027-T02 — Enforce Scrolls egress at the execution boundary | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟡 Medium | **Total** | 1.75 h (1 of 2 steps) | 0 h (0 of 2 steps recorded) | 1.75 h | 1 of 2 completed |
+| 🟢 Small | F-027-T02 — Enforce Scrolls egress at the execution boundary | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | **Total** | 0.5 h (1 of 2 steps) | 0 h (0 of 2 steps recorded) | 0.5 h | 1 of 2 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -735,7 +694,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h | — | — | — | — |
 
 💻 **→** Agent: F-074-T10, identity-bound ledger coverage. F-074-T09 completed on 2026-11-12 ([summary](evaluations/2026-11-12-gauntlet-t09.md)).
 
@@ -752,14 +711,14 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | F-074-T01 — Adopt indexed and instrumented Gauntlet contracts | — | 0 days | 0 remaining | Completed |
 | — | F-074-T02 — Run and record authorized measured Gemma smoke | — | 0 days | 0 remaining | Completed |
 | — | F-074-T03 — Adopt reusable Gauntlet machine/scenario contracts | — | 0 days | 0 remaining | Completed |
-| 🟢 Small | F-074-T04 — Provide a profile-matched operator role-evaluation bundle | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | F-074-T04 — Provide a profile-matched operator role-evaluation bundle | 0.25 h | 0 h | 0.25 h | Planned |
 | — | F-074-T05 — Adopt private diagnostics and development job registration | — | 0 days | 0 remaining | Completed |
 | — | F-074-T06 — T06 — Consume every common pack shipped in the pinned Gauntlet release | — | 0 days | 0 remaining | Completed |
 | — | F-074-T07 — T07 — Adopt upstream pending-case detection so new or changed packs raise a run | — | 0 days | 0 remaining | Completed |
 | — | F-074-T08 — T08 — One root command runs NERV and common tests, reusing exact evidence | — | 0 days | 0 remaining | Completed |
 | — | F-074-T09 — T09 — First ledger-covered run of every common pack and the expensive system cases | 0.5 h | 0.75 h (stated) | 0 h | Completed |
-| 🟢 Small | F-074-T10 — T10 — Adopt identity-bound ledger coverage | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟡 Medium | **Total** | 2 h (3 of 10 steps) | 0.75 h (1 of 10 steps recorded) | 1.5 h | 8 of 10 completed |
+| 🟢 Small | F-074-T10 — T10 — Adopt identity-bound ledger coverage | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | **Total** | 1 h (3 of 10 steps) | 0.75 h (1 of 10 steps recorded) | 0.5 h | 8 of 10 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -822,7 +781,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h | — | — | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.75 h | — | — | — | — |
 
 💻 **→** Next: a reminders.update tool for Misato and the existing-item check before any add.
 
@@ -836,10 +795,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | F-046-T01 — reminders.update as a Misato tool | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-046-T02 — Matching existing items before an add | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-046-T03 — Changed facts proposed as edits | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | **Total** | 3 h | 0 h (0 of 3 steps recorded) | 3 h | 0 of 3 completed |
+| 🟢 Small | F-046-T01 — reminders.update as a Misato tool | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-046-T02 — Matching existing items before an add | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-046-T03 — Changed facts proposed as edits | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 3 steps recorded) | 0.75 h | 0 of 3 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -863,7 +822,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h | — | — | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h | — | — | — | — |
 
 💻 **→** Write `docs/security/agentic-threats.md` and a check that every row names an existing test.
 
@@ -877,9 +836,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | F-065-T01 — Threat map document | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-065-T02 — CI check for cited tests | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | **Total** | 2 h | 0 h (0 of 2 steps recorded) | 2 h | 0 of 2 completed |
+| 🟢 Small | F-065-T01 — Threat map document | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-065-T02 — CI check for cited tests | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 2 steps recorded) | 0.5 h | 0 of 2 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -902,7 +861,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.75 h | — | — | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.75 h | — | — | — | — |
 
 💻 **→** Next: Define operator alias ownership and signed directory contract before changing routing.
 
@@ -916,9 +875,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | F-070-T01 — Operator alias ownership and signed directory contract | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-070-T02 — Authenticated discovery and safe resolution | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟡 Medium | **Total** | 2.75 h | 0 h (0 of 2 steps recorded) | 2.75 h | 0 of 2 completed |
+| 🟢 Small | F-070-T01 — Operator alias ownership and signed directory contract | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-070-T02 — Authenticated discovery and safe resolution | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0.75 h | 0 of 2 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -941,7 +900,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 5.75 h | — | — | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | — | — |
 
 💻 **→** Next: define authenticated destination-dashboard navigation; it needs an authenticated cross-base inspection contract, and EVA cage pilot labels await F-049.
 
@@ -955,12 +914,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | F-051-T01 — Chat line and relay visibility | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-051-T02 — Running sortie selection and phase label | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-051-T03 — MAGI and pilot contributors | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-051-T04 — Skipped versus unavailable nodes and relay step | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-051-T05 — Authenticated cross-base inspection | 1.75 h | 0 h | 1.75 h | Planned |
-| 🔴 Large | **Total** | 5.75 h | 0 h (0 of 5 steps recorded) | 5.75 h | 0 of 5 completed |
+| 🟢 Small | F-051-T01 — Chat line and relay visibility | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-051-T02 — Running sortie selection and phase label | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-051-T03 — MAGI and pilot contributors | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-051-T04 — Skipped versus unavailable nodes and relay step | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-051-T05 — Authenticated cross-base inspection | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 5 steps recorded) | 1.5 h | 0 of 5 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -984,7 +943,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 4.75 h | — | — | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.25 h | — | — | — | — |
 
 💻 **→** Next: record how long each call takes on the sortie's events.
 
@@ -999,11 +958,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
 | — | F-052-T01 — Shadow seats never delay | — | 0 days | 0 remaining | Completed |
-| 🟡 Medium | F-052-T02 — Per-call duration recording | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟢 Small | F-052-T03 — Durations in sortie detail and why answer | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-052-T04 — Live elapsed time in the Sephirot | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-052-T05 — Daily timing summary | 1 h | 0 h | 1 h | Planned |
-| 🔴 Large | **Total** | 4.75 h (4 of 5 steps) | 0 h (0 of 5 steps recorded) | 4.75 h | 1 of 5 completed |
+| 🟢 Small | F-052-T02 — Per-call duration recording | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-052-T03 — Durations in sortie detail and why answer | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-052-T04 — Live elapsed time in the Sephirot | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-052-T05 — Daily timing summary | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟡 Medium | **Total** | 1.25 h (4 of 5 steps) | 0 h (0 of 5 steps recorded) | 1.25 h | 1 of 5 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1027,7 +986,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.75 h | — | [F-050](#f-050) | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.75 h | — | [F-050](#f-050) | — | — |
 
 💻 **→** Next: show what is queued, then the per-item lock.
 
@@ -1041,10 +1000,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟡 Medium | F-048-T01 — Visible bounded request queue | 1.25 h | 0 h | 1.25 h | Ready |
-| 🟡 Medium | F-048-T02 — Per-model resource budgets | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟡 Medium | F-048-T03 — Per-item mutation ownership | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟡 Medium | **Total** | 3.75 h | 0 h (0 of 3 steps recorded) | 3.75 h | 0 of 3 completed |
+| 🟢 Small | F-048-T01 — Visible bounded request queue | 0.25 h | 0 h | 0.25 h | Ready |
+| 🟢 Small | F-048-T02 — Per-model resource budgets | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-048-T03 — Per-item mutation ownership | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 3 steps recorded) | 0.75 h | 0 of 3 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1100,13 +1059,51 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-049"></a>[🐞 B-049](#top)
+
+**Misato invents a reminder title instead of asking, when an Italian request gives none**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h | — | — | — | — |
+
+💻 **→** Next: classify (prompt, plan validation or model choice) and plan a fix with a failing case first.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-12 in the owner-approved B-021 real-model run (gemma4:12b, local): for `Imposta un promemoria per il primo gennaio 2031 alle 09:00 UTC.` (no title), Misato proposed `reminders.add` with an invented title (`Promemoria`, `Promemoria per il primo gennaio 2031`) instead of asking. The prompt for this case is byte-identical to main before B-021's change. The same case passed on 2026-11-08. Misato's prompt already says never to invent a title. |
+| **Reproduce** | `npm run evals:model -- --role=misato --model=gemma4:12b --limit=4` (case `italian-missing-title` in evals/planner-v1.json), or the probe of the same case; 2 of 5 attempts asked on 2026-11-12. |
+| **Check** | A request without a title gets a question in the request's language, never an invented title; measured on the frozen case over repeated runs with its rate recorded, and any deterministic guard covered by a test. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | B-049-T01 — Classify and fix the invented reminder title | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-049.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | docs/evaluations/2026-11-12-misato-b021.json (`italian-missing-title` failed: invented title `Promemoria`); development probe of the same case 2026-11-12: 1 of 3 asked, 2 invented a title; docs/evaluations/2026-11-12-misato-v2.json (passed: it asked); docs/evaluations/2026-11-08-misato.json (passed). Found in B-021's run. |
+| Opened | 2026-11-12 |
+| Verification | Pending. |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
 ### <a id="b-050"></a>[🐞 B-050](#top)
 
 **Dashboard browser test reads the banner before the page has loaded**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.5 h | — | — | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h | — | — | — | — |
 
 💻 **→** Fix implemented in [PR #294](https://github.com/voidbrain/nerv/pull/294): until retries through navigation evaluation exceptions until condition holds. Next: CI and merge.
 
@@ -1120,8 +1117,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | B-050-T01 — Fix browser fixture until abortion on evaluated expression exceptions | 1 h | 0.5 h so far (stated) | 0.5 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 1 h | 0.5 h | 0.5 h | 0 of 1 completed |
+| 🟢 Small | B-050-T01 — Fix browser fixture until abortion on evaluated expression exceptions | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.75 h | 0.5 h | 0.25 h | 0 of 1 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1214,6 +1211,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-054"></a>[🐞 B-054](#top)
+
+**A long chat reply on the main base fails at the 120 s model-call limit**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🟠 Investigate | 🔶 P2 | 🟢 Small | 0.5 h | — | — | — | — |
+
+💻 **→** Next: measure where the 210 s went (plan steps, tokens, thinking) and decide limit, output cap or streaming (B-054-T01).
+
+| | |
+|---|---|
+| **Issue** | 2026-11-12, B-008 reproduction: a five-paragraph request relayed from Tabgha ran 209.6 s and ended *Could not finish: Local route (S²) timed out.*; Neo Tokyo-3's log: *S² local route down … back after 1 min*. Misato there runs `gemma4:12b` with thinking at about 24 tokens/s on this Mac (Ollama log, F-074-T09), so about 2,900 tokens fit in `MODEL_TIMEOUT_MS` (120 s): an ordinary long answer can exceed it, and the route is then marked down for every request. |
+| **Reproduce** | On the main base with Misato on `gemma4:12b` (thinking on), ask in chat for five detailed paragraphs on any topic; watch the reply and the service log. |
+| **Check** | A long reply within the configured output allowance completes, or fails with a reason that says the answer was too long rather than marking the route down; any new limit is backed by a measured token rate; one slow reply does not take the route down for other requests. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | B-054-T01 — Long replies within the output allowance do not time out the model route | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-054.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Found during the B-008 reproduction, [evidence](acceptance/b008-tabgha-2026-11-12.md); [PR #318](https://github.com/voidbrain/nerv/pull/318). |
+| Opened | 2026-11-12 |
+| Verification | Pending. |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
 ### <a id="b-055"></a>[🐞 B-055](#top)
 
 **The Windows service launcher runs Node from an fnm per-shell path**
@@ -1252,89 +1287,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="b-049"></a>[🐞 B-049](#top)
-
-**Misato invents a reminder title instead of asking, when an Italian request gives none**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.25 h | — | — | — | — |
-
-💻 **→** Next: classify (prompt, plan validation or model choice) and plan a fix with a failing case first.
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-12 in the owner-approved B-021 real-model run (gemma4:12b, local): for `Imposta un promemoria per il primo gennaio 2031 alle 09:00 UTC.` (no title), Misato proposed `reminders.add` with an invented title (`Promemoria`, `Promemoria per il primo gennaio 2031`) instead of asking. The prompt for this case is byte-identical to main before B-021's change. The same case passed on 2026-11-08. Misato's prompt already says never to invent a title. |
-| **Reproduce** | `npm run evals:model -- --role=misato --model=gemma4:12b --limit=4` (case `italian-missing-title` in evals/planner-v1.json), or the probe of the same case; 2 of 5 attempts asked on 2026-11-12. |
-| **Check** | A request without a title gets a question in the request's language, never an invented title; measured on the frozen case over repeated runs with its rate recorded, and any deterministic guard covered by a test. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | B-049-T01 — Classify and fix the invented reminder title | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟡 Medium | **Total** | 1.25 h | 0 h (0 of 1 steps recorded) | 1.25 h | 0 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-049.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | docs/evaluations/2026-11-12-misato-b021.json (`italian-missing-title` failed: invented title `Promemoria`); development probe of the same case 2026-11-12: 1 of 3 asked, 2 invented a title; docs/evaluations/2026-11-12-misato-v2.json (passed: it asked); docs/evaluations/2026-11-08-misato.json (passed). Found in B-021's run. |
-| Opened | 2026-11-12 |
-| Verification | Pending. |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
-### <a id="b-054"></a>[🐞 B-054](#top)
-
-**A long chat reply on the main base fails at the 120 s model-call limit**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟠 Investigate | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | — | — |
-
-💻 **→** Next: measure where the 210 s went (plan steps, tokens, thinking) and decide limit, output cap or streaming (B-054-T01).
-
-| | |
-|---|---|
-| **Issue** | 2026-11-12, B-008 reproduction: a five-paragraph request relayed from Tabgha ran 209.6 s and ended *Could not finish: Local route (S²) timed out.*; Neo Tokyo-3's log: *S² local route down … back after 1 min*. Misato there runs `gemma4:12b` with thinking at about 24 tokens/s on this Mac (Ollama log, F-074-T09), so about 2,900 tokens fit in `MODEL_TIMEOUT_MS` (120 s): an ordinary long answer can exceed it, and the route is then marked down for every request. |
-| **Reproduce** | On the main base with Misato on `gemma4:12b` (thinking on), ask in chat for five detailed paragraphs on any topic; watch the reply and the service log. |
-| **Check** | A long reply within the configured output allowance completes, or fails with a reason that says the answer was too long rather than marking the route down; any new limit is backed by a measured token rate; one slow reply does not take the route down for other requests. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | B-054-T01 — Long replies within the output allowance do not time out the model route | 1.5 h | 0 h | 1.5 h | Planned |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-054.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Found during the B-008 reproduction, [evidence](acceptance/b008-tabgha-2026-11-12.md); [PR #318](https://github.com/voidbrain/nerv/pull/318). |
-| Opened | 2026-11-12 |
-| Verification | Pending. |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
 ### <a id="f-056"></a>[✨ F-056](#top)
 
 **Slash commands in Telegram and the dashboard chat, and how much Aoba tells you**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 5.75 h | [F-021](#f-021), [F-042](#f-042) | — | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | [F-021](#f-021), [F-042](#f-042) | — | — | — |
 
 💻 **→** Next: remaining commands, Telegram command menu and /log controls; status/help read router implemented before Misato.
 
@@ -1348,12 +1307,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | F-056-T01 — Shared command catalog and deterministic router | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-056-T02 — Read-only commands | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟢 Small | F-056-T03 — /spear and /log | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-056-T04 — Telegram menu registration and dashboard slash menu | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-056-T05 — Group and connected-account assessment | 1 h | 0 h | 1 h | Planned |
-| 🔴 Large | **Total** | 5.75 h | 0 h (0 of 5 steps recorded) | 5.75 h | 0 of 5 completed |
+| 🟢 Small | F-056-T01 — Shared command catalog and deterministic router | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-056-T02 — Read-only commands | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-056-T03 — /spear and /log | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-056-T04 — Telegram menu registration and dashboard slash menu | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-056-T05 — Group and connected-account assessment | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 5 steps recorded) | 1.5 h | 0 of 5 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1378,7 +1337,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.5 h | [F-045](#f-045), [F-048](#f-048) | — | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | [F-045](#f-045), [F-048](#f-048) | — | — | — |
 
 💻 **→** Next: the job message and its fallback, for capability first.
 
@@ -1392,9 +1351,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟡 Medium | F-050-T01 — Whole-job handoff contract | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟡 Medium | F-050-T02 — Uncertain handoff reconciliation | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟡 Medium | **Total** | 3.5 h | 0 h (0 of 2 steps recorded) | 3.5 h | 0 of 2 completed |
+| 🟢 Small | F-050-T01 — Whole-job handoff contract | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-050-T02 — Uncertain handoff reconciliation | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 2 steps recorded) | 1 h | 0 of 2 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1457,7 +1416,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h | — | — | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | — | — |
 
 💻 **→** Next: split compound memories on one card, with a proposed clean-up.
 
@@ -1471,10 +1430,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | F-044-T01 — One fact per subject on one editable card | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-044-T02 — Shown spelling fix | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-044-T03 — Typo-tolerant recall | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | **Total** | 3 h | 0 h (0 of 3 steps recorded) | 3 h | 0 of 3 completed |
+| 🟢 Small | F-044-T01 — One fact per subject on one editable card | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-044-T02 — Shown spelling fix | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-044-T03 — Typo-tolerant recall | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 3 steps recorded) | 0.75 h | 0 of 3 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1498,7 +1457,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 1.5 h | — | — | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | — | — |
 
 💻 **→** Add rotation for the admin token, Telegram token and cloud key, and a test for NHI10.
 
@@ -1512,9 +1471,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | F-066-T01 — Credential rotation commands and doctor ages | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-066-T02 — Client kind on ledger events | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 2 steps recorded) | 1.5 h | 0 of 2 completed |
+| 🟢 Small | F-066-T01 — Credential rotation commands and doctor ages | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-066-T02 — Client kind on ledger events | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 2 steps recorded) | 0.5 h | 0 of 2 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1538,7 +1497,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🟠 Investigate | 🔹 P3 | 🟡 Medium | 1.5 h agent + 2 h owner | — | — | 🧑 | — |
+| 🟠 Investigate | 🔹 P3 | 🟢 Small | 0.5 h agent + 2 h owner | — | — | 🧑 | — |
 
 💻 **→** Next: a time-boxed trial of herdr-core as the development workspace, then a written adopt/adapter/reject outcome.
 
@@ -1552,9 +1511,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | F-060-T01 — herdr-core trial in the development workspace | 0.5 h | 0 h | 0.5 h agent + 2 h owner | Planned |
-| 🟢 Small | F-060-T02 — Answer the five questions and per-record outcomes | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 2 steps recorded) | 1.5 h agent + 2 h owner | 0 of 2 completed |
+| 🟢 Small | F-060-T01 — herdr-core trial in the development workspace | 0.25 h | 0 h | 0.25 h agent + 2 h owner | Planned |
+| 🟢 Small | F-060-T02 — Answer the five questions and per-record outcomes | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 2 steps recorded) | 0.5 h agent + 2 h owner | 0 of 2 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1578,7 +1537,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🔴 Large | 8 h agent + 0.5 h owner | — | — | — | — |
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 2 h agent + 0.5 h owner | — | — | — | — |
 
 💻 **→** Slices approved 2026-11-11 and recorded as tasks. Next agent work: Step 1a (F-007-T01) voice feasibility, or Step 3a (F-007-T06) skill packages, which does not wait for voice.
 
@@ -1592,16 +1551,16 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | F-007-T01 — Step 1a — Feasibility: local speech-to-text and text-to-speech candidates measured on the Mac in Italian and English | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-007-T02 — Step 1b — Voice command corpus in Italian and English with expected intents | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-007-T03 — Step 2a — Push-to-talk on the dashboard and companion: speech to text shown for confirmation, no silent physical activation | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟢 Small | F-007-T04 — Step 2b — Spoken replies (text-to-speech) | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-007-T05 — Step 2c — Voice corpus evaluation run and report | 0.5 h | 0 h | 0.5 h agent + 0.5 h owner | Planned |
+| 🟢 Small | F-007-T01 — Step 1a — Feasibility: local speech-to-text and text-to-speech candidates measured on the Mac in Italian and English | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-007-T02 — Step 1b — Voice command corpus in Italian and English with expected intents | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-007-T03 — Step 2a — Push-to-talk on the dashboard and companion: speech to text shown for confirmation, no silent physical activation | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-007-T04 — Step 2b — Spoken replies (text-to-speech) | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-007-T05 — Step 2c — Voice corpus evaluation run and report | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned |
 | — | F-007-T06 — Step 3a — Skill package format, isolated storage and versions | 1 h | 0 h | 0 h | Completed |
-| 🟡 Medium | F-007-T07 — Step 3b — Skill evaluation with a baseline run without the skill and held-out cases | 1.25 h | 0 h | 1.25 h | Planned |
-| 🟢 Small | F-007-T08 — Step 3c — Owner promotion, rollback and retirement of skills after a model change | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-007-T09 — Step 3d — Rejected permission escalation and corrected-memory cases | 1 h | 0 h | 1 h | Planned |
-| 🔴 Large | **Total** | 9 h | 0 h (0 of 9 steps recorded) | 8 h agent + 0.5 h owner | 1 of 9 completed |
+| 🟢 Small | F-007-T07 — Step 3b — Skill evaluation with a baseline run without the skill and held-out cases | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-007-T08 — Step 3c — Owner promotion, rollback and retirement of skills after a model change | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-007-T09 — Step 3d — Rejected permission escalation and corrected-memory cases | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟡 Medium | **Total** | 3 h | 0 h (0 of 9 steps recorded) | 2 h agent + 0.5 h owner | 1 of 9 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1625,7 +1584,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 3.25 h agent + 0.5 h owner | — | — | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h agent + 0.5 h owner | — | — | — | — |
 
 💻 **→** Define an adapter for authoritative battery, crash and maintenance operations owned by the FPV app.
 
@@ -1639,10 +1598,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | F-008-T01 — FPV app adapter contract | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | F-008-T02 — Battery and maintenance records through the adapter | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟢 Small | F-008-T03 — Acceptance against the real FPV app | 0.5 h | 0 h | 0.5 h agent + 0.5 h owner | Planned |
-| 🟡 Medium | **Total** | 3.25 h | 0 h (0 of 3 steps recorded) | 3.25 h agent + 0.5 h owner | 0 of 3 completed |
+| 🟢 Small | F-008-T01 — FPV app adapter contract | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-008-T02 — Battery and maintenance records through the adapter | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-008-T03 — Acceptance against the real FPV app | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 3 steps recorded) | 1 h agent + 0.5 h owner | 0 of 3 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1667,7 +1626,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h | — | — | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | — | — |
 
 💻 **→** Optional conversational faces grounded in real job state: Misato as primary HITL/ops voice; Gendo optional for risk/policy explanation; pilots optional as worker identity only.
 
@@ -1681,10 +1640,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | F-020-T01 — Persona adapter contract | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-020-T02 — Misato HITL surfacing with audit | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-020-T03 — Explanation persona and non-Eva skins | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | **Total** | 3 h | 0 h (0 of 3 steps recorded) | 3 h | 0 of 3 completed |
+| 🟢 Small | F-020-T01 — Persona adapter contract | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-020-T02 — Misato HITL surfacing with audit | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-020-T03 — Explanation persona and non-Eva skins | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 3 steps recorded) | 0.75 h | 0 of 3 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1709,7 +1668,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h | [F-045](#f-045) | — | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | [F-045](#f-045) | — | — | — |
 
 💻 **→** F-054-T01 (Simple chronicle from recorded facts) and F-054-T04 (record the missing facts) closed; next F-054-T02 (Eva version).
 
@@ -1724,10 +1683,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
 | — | F-054-T01 — Daily chronicle facts from records | 1.5 h | 1 h (stated) | 0 h | Completed |
-| 🟡 Medium | F-054-T02 — Eva version by the Chronicler pilot | 1.5 h | 0 h | 1.5 h | Planned |
-| 🟡 Medium | F-054-T03 — Chronicle tab and brief line | 1.5 h | 0 h | 1.5 h | Planned |
+| 🟢 Small | F-054-T02 — Eva version by the Chronicler pilot | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-054-T03 — Chronicle tab and brief line | 0.5 h | 0 h | 0.5 h | Planned |
 | — | F-054-T04 — Record the milestones not stored today | 1.5 h | 1 h (stated) | 0 h | Completed |
-| 🟡 Medium | **Total** | 6 h | 2 h (2 of 4 steps recorded) | 3 h | 2 of 4 completed |
+| 🟢 Small | **Total** | 4 h | 2 h (2 of 4 steps recorded) | 1 h | 2 of 4 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1752,7 +1711,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 3.25 h agent + 0.25 h owner | — | — | — | 🧑 |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h agent + 0.25 h owner | — | — | — | 🧑 |
 
 🧑 **→** Owner decides which events trip which circuit, its scope, and who may rearm it.
 
@@ -1766,10 +1725,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | F-064-T01 — Owner picks the first circuit | 0.5 h | 0 h | 0.5 h agent + 0.25 h owner | Planned |
-| 🟡 Medium | F-064-T02 — First bounded circuit | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟢 Small | F-064-T03 — Fault-injection tests | 1 h | 0 h | 1 h | Planned |
-| 🟡 Medium | **Total** | 3.25 h | 0 h (0 of 3 steps recorded) | 3.25 h agent + 0.25 h owner | 0 of 3 completed |
+| 🟢 Small | F-064-T01 — Owner picks the first circuit | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned |
+| 🟢 Small | F-064-T02 — First bounded circuit | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-064-T03 — Fault-injection tests | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 3 steps recorded) | 1 h agent + 0.25 h owner | 0 of 3 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1820,6 +1779,47 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-12 |
 | Verification | Pending. |
 | Reviewed | 2026-11-12 |
+
+</details>
+
+---
+### <a id="f-025"></a>[✨ F-025](#top)
+
+**Extra MAGI seats (veto-only), consultants and watermelon trust for pilots**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔵 Closed | ◻️ P2 | 🟡 Medium | 0 h | — | [F-049](#f-049) | — | — |
+
+💻 **→** Attach extra seats by action class as veto-only, start new seats in shadow, and promote pilots through Prototype → Test → Production.
+
+| | |
+|---|---|
+| **Issue** | Specialists help, but a new or remote seat must never approve what the core three would refuse, and skills need earned trust. |
+| **Reproduce** | Attach a deterministic test seat and a model expert seat to code-write actions; run them in shadow; promote one; force a failure and a Spear revocation. |
+| **Check** | Extra seats can only reject; shadow seats are logged, not counted; a timed-out seat abstains; consultants advise the planner without a vote and receive only Scrolls-allowed data; pilots run only in the EVA class of their stage; promotion to Production needs the owner's confirmation; failure, override spikes or Spear demote automatically. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | F-025-T01 — Veto-only extra seats with shadow logging | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | F-025-T02 — Free API seat pool | 0.5 h | 0.5 h (stated) | 0 h | Completed |
+| — | F-025-T03 — Consultants without a vote | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | F-025-T04 — Watermelon trust stages and demotion | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | **Total** | 1.25 h | 1.25 h | 0 h | 4 of 4 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-025.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
+| Opened | 2026-11-02 |
+| Verification | 2026-11-13: T01 `test/extra-seats.test.ts` + `test/gate.test.ts` + `test/kaji-seats.test.ts` (12/12); T02 `test/seat-pool.test.ts` + `test/extra-seats.test.ts` + `test/gate.test.ts` + `test/ledger.test.ts` (32/32); T03 `test/consultant.test.ts` + `test/misato.test.ts` (20/20); T04 `test/pilots.test.ts` (13/13); `check:conventions` and `check:fast` passed. |
+| Reviewed | 2026-11-04 |
 
 </details>
 

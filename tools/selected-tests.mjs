@@ -14,5 +14,5 @@ export function selectedTests(config,groups,changed,{expand=pattern=>globSync(pa
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  const config=JSON.parse(readFileSync('.harness.json','utf8')),groups=(process.env.NERV_VERIFY_GROUPS||'').split(',').filter(Boolean),changed=JSON.parse(process.env.NERV_VERIFY_PATHS||'[]');
- const tests=selectedTests(config,groups,changed);if(!tests.length)throw Error('No targeted tests selected');console.log('Selected regressions: '+tests.join(', '));execFileSync(process.execPath,['--test',...tests],{stdio:'inherit'});
+ const tests=selectedTests(config,groups,changed);if(!tests.length)throw Error('No targeted tests selected');console.log('Selected regressions: '+tests.join(', '));execFileSync(process.execPath,['--test','--test-timeout=60000',...tests],{stdio:'inherit'});
 }

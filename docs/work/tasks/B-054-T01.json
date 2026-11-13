@@ -33,9 +33,10 @@
   "effort": {
     "size": "small",
     "estimate": "1.5 h",
-    "basis": "Estimated 2026-11-12: one measurement on the Mac, one bounded change with a failing test first. Not a measurement.",
-    "reviewed": "2026-11-12",
-    "agentHours": 1.5,
-    "baselineAgentHours": 1.5
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "reviewed": "2026-11-13",
+    "agentHours": 0.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 0.5
   }
 }

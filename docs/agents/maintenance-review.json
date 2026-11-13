@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-13T09:20:24.732Z",
+  "reviewed": "2026-11-13T13:07:31.793Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
     "AGENTS.md": "b52b056f97cf118b6bbc5b1bd8f54629ec0cdb0a722640b9e524d1370e105a9e",
-    "docs/BACKLOG-RULES.md": "ba9f4e80645b4d9c954ac8c120c2983e6e2d81672c2810853bed5615e0372888",
+    "docs/BACKLOG-RULES.md": "b4a92ce5e2ad72230ccfffebbafec0551efa45c066c756da5338c99d0d3ff4f4",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
     "docs/agents/areas.md": "19890dcd2fb04557fcb9b9bb1df4dcbd2e584736e53a5989908bb822ef020d1c",
     "docs/agents/audit.md": "bc5de5707f9ec5c523e73602499312c373d6112ffc498d69bf68604522527992",
@@ -20,12 +20,12 @@
     "docs/agents/work-usage.md": "e2f7c484f1c07f4b47fd1133857d8744ccab0ad2a7b85b220946c115a002bebc",
     "tools/task-claims.mjs": "ef755fe7951544e5c05b20de7c64a7b53778b6d039a11a2abeb079e7d42b6fd2",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
-    "tools/work-items.mjs": "f98ba7ec43b726fa12c0486f7d6a6d061921a5fa2d5562dda123445c400e2f05",
+    "tools/work-items.mjs": "4980a69ecf53d5a151247fcabda50dc3c2c6803cff3033bb2fb80ca01219068e",
     "tools/work-usage.mjs": "4329262c0b9e723e046dd8878e15a99cff5f590201cd0918563f3204bbe79219"
   },
   "measurements": {
     "samples": 1,
-    "latestAt": "2026-11-13T09:20:24.684Z",
+    "latestAt": "2026-11-13T13:07:31.746Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -55,12 +55,12 @@
         "durationMs": {
           "observed": 1,
           "missing": 0,
-          "median": 37
+          "median": 2710
         },
         "conflicts": {
-          "observed": 1,
-          "missing": 0,
-          "median": 0
+          "observed": 0,
+          "missing": 1,
+          "median": null
         },
         "unnecessaryPrompts": {
           "observed": 0,
@@ -80,7 +80,7 @@
       "kind": "tool",
       "disposition": "implemented",
       "target": "tools/work-items.mjs",
-      "evidence": "Reconciled to project-harness v8.4.0 (PR #151, F-066): clean byte-for-byte copy of core/tools/work-items.mjs; every other copied harness file already matches v8.4.0."
+      "evidence": "Reconciled to project-harness v8.5.0: copied tools/work-items.mjs and docs/agents/verification.md, reconciled docs/BACKLOG-RULES.md (scope-step reconciliation + 0.25-0.5 h initial agent-speed sizing), added --test-timeout to test scripts, closed F-025, and recalibrated 115 open steps at 0.25x."
     }
   ]
 }
