@@ -34,16 +34,27 @@ export function options(args){
  return out;
 }
 const clean=text=>String(text).split(root).join('<repo>').split(root.replaceAll('\\','/')).join('<repo>').split(tmpdir()).join('<tmp>').slice(-24000);
+// B-058: OS metadata (Finder, Explorer) and files Git ignores are not source; untracked files Git does not ignore are
+// (F-029). Tracked files always count. Outside a Git repository only the OS metadata filter applies.
+const osMetadata=/^(\.DS_Store|\._.*|Thumbs\.db|desktop\.ini)$/i;
+function gitIgnored(at,files){
+ if(!files.length)return new Set();
+ const r=spawnSync('git',['check-ignore','-z','--stdin'],{cwd:at,input:files.join('\0'),encoding:'utf8',timeout:10000});
+ return r.status===0?new Set(r.stdout.split('\0').filter(Boolean)):new Set();
+}
 export function sourceInputs(at=root,includeBuild=false){
  const files=new Set(),walk=file=>{
   const path=resolve(at,file);if(!existsSync(path))return;
+  if(osMetadata.test(file.split('/').pop()))return;
   const stat=lstatSync(path);if(stat.isSymbolicLink())throw Error('Symlink source cannot be frozen: '+file);
   if(stat.isDirectory())for(const name of readdirSync(path).sort())walk(file+'/'+name);else if(stat.isFile())files.add(file);
  };
  for(const dir of ['src','test','shared','web','evals'])walk(dir);
- if(includeBuild)walk('dist/web/browser');
  for(const file of ['package.json','package-lock.json','angular.json','tsconfig.json','.harness.json'])walk(file);
  if(existsSync(resolve(at,'tools')))for(const name of readdirSync(resolve(at,'tools')))if(/^evaluate.*\.mjs$/.test(name))walk('tools/'+name);
+ const ignored=gitIgnored(at,[...files]);
+ for(const file of ignored)files.delete(file);
+ if(includeBuild)walk('dist/web/browser');
  return Object.fromEntries([...files].sort().map(file=>[file,createHash('sha256').update(readFileSync(resolve(at,file))).digest('hex')]));
 }
 export function evidenceRevision(includeBuild=false){

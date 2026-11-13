@@ -88,6 +88,27 @@ test('F-029: source identity includes dirty implementations, browser assets and 
     rmSync(temp, { recursive: true, force: true });
   }
 });
+test('B-058: OS metadata and git-ignored files do not change source identity', () => {
+  const temp = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-eval-ignored-'));
+  try {
+    mkdirSync(join(temp, 'src'), { recursive: true });
+    mkdirSync(join(temp, 'web'), { recursive: true });
+    writeFileSync(join(temp, 'src/server.ts'), 'initial');
+    const first = sourceInputs(temp);
+    writeFileSync(join(temp, 'web/.DS_Store'), 'finder');
+    writeFileSync(join(temp, 'src/Thumbs.db'), 'explorer');
+    assert.deepEqual(sourceInputs(temp), first);
+    execFileSync('git', ['init', '-q'], { cwd: temp });
+    writeFileSync(join(temp, '.gitignore'), '*.log\n');
+    writeFileSync(join(temp, 'src/debug.log'), 'noise');
+    writeFileSync(join(temp, 'src/candidate.ts'), 'untracked but not ignored');
+    const inputs = sourceInputs(temp);
+    assert.equal(inputs['src/debug.log'], undefined);
+    assert.ok(inputs['src/candidate.ts']);
+  } finally {
+    rmSync(temp, { recursive: true, force: true });
+  }
+});
 async function waitUntilAllExited(pids, isAlive, timeoutMs, pollMs = 25) {
   const until = Date.now() + timeoutMs;
   let survivors = pids.filter((pid) => isAlive(pid));

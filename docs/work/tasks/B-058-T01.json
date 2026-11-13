@@ -1,0 +1,41 @@
+{
+ "version": 1,
+ "id": "B-058-T01",
+ "parent": "B-058",
+ "title": "Ignore OS metadata and Git-ignored files in evaluation source identity",
+ "goal": "Only files that are part of the source decide whether a recorded evaluation run still covers it",
+ "status": "implemented",
+ "acceptance": [
+  "A committed test fails before the fix for a .DS_Store, a Thumbs.db and a Git-ignored file",
+  "An untracked file that Git does not ignore still changes the source identity",
+  "The built web bundle is still hashed when includeBuild is set"
+ ],
+ "dependsOn": [],
+ "resources": [
+  "tools/evaluate.mjs",
+  "test/evaluation-runner.test.mjs",
+  "docs/work/records/**",
+  "generated:backlog-views"
+ ],
+ "capabilities": [
+  "regression-design",
+  "bounded-edit"
+ ],
+ "privacy": "Neutral fixtures only.",
+ "validation": [
+  "node --test test/evaluation-runner.test.mjs",
+  "node tools/gauntlet.mjs pending"
+ ],
+ "escalation": [
+  "A change to what counts as source for model qualification goes to a fresh-context review"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "0.5 h",
+  "basis": "Estimated 2026-11-13: a filter and one regression test. Not a measurement.",
+  "reviewed": "2026-11-13",
+  "agentHours": 0.5,
+  "baselineAgentHours": 0.5,
+  "estimateAgentHours": 0.5
+ }
+}
