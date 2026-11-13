@@ -2,15 +2,17 @@
  "version": 1,
  "id": "F-078-T05",
  "parent": "F-078",
- "title": "Small-model campaign on Tabgha",
+ "title": "Tabgha campaign: remote endpoint and small local fallback",
  "goal": "Small-model campaign on Tabgha",
  "status": "planned",
  "acceptance": [
-  "The same packs run against qwen2.5-coder:14b (and any smaller approved model) on Tabgha, recorded with base and model identity",
+  "The T03/T04 packs run on Tabgha against the best two Neo Tokyo-3 models over models.remote, with latency and timeouts recorded, including Neo Tokyo-3 asleep",
+  "The same packs run locally against qwen2.5:1.5b and qwen2.5:3b (downloaded on Tabgha in this step), recorded with base and model identity",
   "Timeouts and memory pressure on the mini PC recorded, not hidden"
  ],
  "dependsOn": [
-  "F-078-T02"
+  "F-078-T02",
+  "F-078-T04"
  ],
  "resources": [
   "evals/**",

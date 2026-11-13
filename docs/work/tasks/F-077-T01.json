@@ -4,7 +4,7 @@
  "parent": "F-077",
  "title": "Turn on Dependabot alerts and CodeQL default setup",
  "goal": "The owner adopts or declines each of the three options",
- "status": "planned",
+ "status": "closed",
  "acceptance": [
   "Decision recorded 2026-11-13: (a) and (b) adopted, (c) Node 26 CI job declined",
   "Dependabot alerts on: vulnerability-alerts returns 204",
@@ -32,8 +32,8 @@
   "estimate": "0.25 h agent + 0.25 h owner",
   "basis": "Estimated 2026-11-13: two repository settings run by the owner from a copy-paste page. Not a measurement.",
   "reviewed": "2026-11-13",
-  "agentHours": 0.25,
-  "ownerHours": 0.25,
+  "agentHours": 0,
+  "ownerHours": 0,
   "baselineAgentHours": 0.25,
   "estimateAgentHours": 0.25,
   "ownerKind": "procedure"

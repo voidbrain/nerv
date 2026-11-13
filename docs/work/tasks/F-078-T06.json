@@ -6,7 +6,7 @@
  "goal": "Campaign for the larger candidates",
  "status": "planned",
  "acceptance": [
-  "devstral-small-2:24b and qwen3-coder:30b run on the Mac, if approved in T02; otherwise recorded as declined"
+  "devstral-small-2:24b and qwen3-coder:30b (downloaded 2026-11-13) run the T03 and T04 packs on the Mac within the approved budget"
  ],
  "dependsOn": [
   "F-078-T02"

@@ -1,6 +1,6 @@
 # F-015 live failure, recovery and rotation, 12 November 2026
 
-Evidence for [F-015](../BACKLOG.md#f-015) step F-015-T03: revocation, a lost renewal reply, a Keychain save failure and offline TLS/auth rotation, each exercised live with the menu-bar companion on the owner's Mac, and each recovered with the procedure in [native/README.md](../../native/README.md#inspect-and-revoke-pairing).
+Evidence for [F-015](../archive/backlog-2026.md#f-015) step F-015-T03: revocation, a lost renewal reply, a Keychain save failure and offline TLS/auth rotation, each exercised live with the menu-bar companion on the owner's Mac, and each recovered with the procedure in [native/README.md](../../native/README.md#inspect-and-revoke-pairing).
 
 **Who did what:** the agent prepared an isolated profile and the failure conditions, inspected server and Keychain state and revoked orphans; the owner ran `pair` and the helper scripts, pasted invitations, handled the companion and the macOS prompts and reported what the companion showed. Invitations were never shown to the agent. Owner approval 2026-11-12 for the four cases, the effort and re-pairing to the live service afterwards.
 

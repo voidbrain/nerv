@@ -2,12 +2,12 @@
  "version": 1,
  "id": "F-076-T02",
  "parent": "F-076",
- "title": "Put the chosen main verification in place",
- "goal": "Merged main is verified as the owner chose",
+ "title": "CI runs on merge_group",
+ "goal": "Every queued combination runs the required checks before it reaches main",
  "status": "planned",
  "acceptance": [
-  "The chosen setting or workflow change is live",
-  "A run on main after the change is green or its failure is recorded"
+  "ci.yml has a merge_group trigger and the plan job selects checks against main for it",
+  "Required checks validate and native-macos report on a merge_group run"
  ],
  "dependsOn": [
   "F-076-T01"

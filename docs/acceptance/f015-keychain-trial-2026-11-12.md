@@ -1,6 +1,6 @@
 # F-015 isolated pairing and Keychain trial, 12 November 2026
 
-Evidence for [F-015](../BACKLOG.md#f-015) step F-015-T02: the menu-bar companion paired live on the owner's Mac to an isolated NERV profile, with expired and used invitations refused and no credential in URLs, process arguments or logs.
+Evidence for [F-015](../archive/backlog-2026.md#f-015) step F-015-T02: the menu-bar companion paired live on the owner's Mac to an isolated NERV profile, with expired and used invitations refused and no credential in URLs, process arguments or logs.
 
 **Who did what:** the agent prepared the profile and the build, ran the server-side checks and stopped the profile; the owner ran `pair`, pasted the invitations into the companion, handled the companion menu and reported what it showed (owner approval 2026-11-12, including replacing the companion's pairing and re-pairing it to the live service afterwards). Invitations were never shown to the agent.
 
