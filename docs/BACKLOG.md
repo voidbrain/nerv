@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 9 | 10 | 14 | 12 |
+| **This week** | 10 | 11 | 13 | 13 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 33 | 7 |
+| **Open** | 32 | 6 |
 | **Require Human 🧑** | 10 | 2 |
 
 ### Require Human 🧑
@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 38.75 h agent + 17 h owner across 118 open steps of 32 features and 7 other records. 16.75 h of actual effort recorded on 32 steps. Generated from the task files.
+**Remaining effort:** 38 h agent + 16.75 h owner across 116 open steps of 31 features and 6 other records. 16.75 h of actual effort recorded on 32 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -367,14 +367,14 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| — | F-021-T01 — MCP stdio client, tools process and deny-by-default grants | — | 0 days | 0 remaining | Completed |
-| 🟢 Small | F-021-T02 — Versioned descriptors for NERV's own tools | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | F-021-T03 — Per-pilot tool binding | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | F-021-T04 — Remote (other-machine) endpoints | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | F-021-T05 — Dashboard tool listing | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟡 Medium | **Total** | 1.5 h (4 of 5 steps) | 0 h (0 of 5 steps recorded) | 1.5 h | 1 of 5 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| — | F-021-T01 — MCP stdio client, tools process and deny-by-default grants | — | 0 days | 0 remaining | Completed | — |
+| 🟢 Small | F-021-T02 — Versioned descriptors for NERV's own tools | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | [PR #381](https://github.com/voidbrain/nerv/pull/381) versioned NERV and MCP tool registry descriptors |
+| 🟢 Small | F-021-T03 — Per-pilot tool binding | 0.5 h | 0 h | 0.5 h | Planned | — |
+| 🟢 Small | F-021-T04 — Remote (other-machine) endpoints | 0.5 h | 0 h | 0.5 h | Planned | — |
+| 🟢 Small | F-021-T05 — Dashboard tool listing | 0.25 h | 0 h | 0.25 h | Planned | — |
+| 🟡 Medium | **Total** | 1.5 h (4 of 5 steps) | 0 h (0 of 5 steps recorded) | 1.5 h | 1 of 5 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -384,7 +384,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | Depends on | [F-049](#f-049) — EVA-03 isolation before enabling EVA-03 tool grants; other MCP slices can proceed |
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  — |
+| PR / evidence | Steps: F-021-T02: [PR #381](https://github.com/voidbrain/nerv/pull/381) versioned NERV and MCP tool registry descriptors. [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  — |
 | Opened | 2026-11-02 |
 | Verification | Pending |
 | Reviewed | 2026-11-07 |
@@ -642,44 +642,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-075"></a>[✨ F-075](#top)
-
-**The seven nerv-system-flows evaluation cases run again at current main**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h agent + 0.25 h owner | — | — | — | — |
-
-💻 **→** Next: close when the PR merges with green CI.
-
-| | |
-|---|---|
-| **Issue** | F-074 recorded all seven `nerv-system-flows` cases on its branch; merging main into it (#369, #371, #372, #373) changed the source they cover, so `gauntlet pending` lists all seven as source-changed at main `ee11385`. Correction (2026-11-13): a clean checkout of main had none pending; the audit read the primary checkout, where a `web/.DS_Store` changed the source key (B-058). No model is called (`modelCallsAuthorized: false`); stress and browser are only slow. On 2026-11-13 the agent sandbox refused the run, so it waits for the owner. |
-| **Reproduce** | `node tools/gauntlet.mjs pending` at current main; [steps](audits/2026-11-13-full.md#f075-run). |
-| **Check** | `npm run gauntlet:all -- --execute --allow-expensive` passes 7/7 and records them in `evals/gauntlet/ledger.json`; `node tools/gauntlet.mjs pending` exits 0; the ledger change is merged. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟢 Small | F-075-T01 — Rerun and record the nerv-system-flows cases at current main | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Implemented; verification pending | 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h agent + 0.25 h owner | 0 of 1 completed | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-075.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #376](https://github.com/voidbrain/nerv/pull/376) [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) |
-| Opened | 2026-11-13 |
-| Verification | 2026-11-13: 7/7 `nerv-system-flows` cases passed after `npm run build`, recorded in `evals/gauntlet/ledger.json`; `node tools/gauntlet.mjs pending` exits 0. |
-| Reviewed | 2026-11-13 |
-
-</details>
-
----
 ### <a id="f-070"></a>[✨ F-070](#top)
 
 **Authenticated directory of base communication operators**
@@ -923,44 +885,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-12 |
 | Verification | Pending. |
 | Reviewed | 2026-11-12 |
-
-</details>
-
----
-### <a id="b-058"></a>[🐞 B-058](#top)
-
-**A Finder or ignored file marks every recorded evaluation run stale**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.5 h | — | — | — | — |
-
-💻 **→** Next: close when the PR merges with green CI.
-
-| | |
-|---|---|
-| **Issue** | 2026-11-13: `sourceInputs` in `tools/evaluate.mjs` hashes every file under `src`, `test`, `shared`, `web` and `evals`, including files Git ignores. One `web/.DS_Store` written by Finder in the primary checkout changed the Gauntlet system source key, so `gauntlet pending` listed all seven `nerv-system-flows` cases as source-changed although a clean checkout of the same commit has none pending. The full audit of 2026-11-13 read that as stale runs (F-075), and the owner's rerun attempt asked for a full rerun that was not needed. |
-| **Reproduce** | In a clean worktree of main `a4081d5`, `node tools/gauntlet.mjs pending` exits 0; copy any `.DS_Store` into `web/` and it lists seven cases as source-changed. |
-| **Check** | OS metadata files and Git-ignored files do not change `sourceInputs`; untracked files that are not ignored still do (F-029); a committed regression test fails without the fix. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | B-058-T01 — Ignore OS metadata and Git-ignored files in evaluation source identity | 0.5 h | 0 h | 0.5 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-058.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #376](https://github.com/voidbrain/nerv/pull/376) Found while running F-075 on 2026-11-13. |
-| Opened | 2026-11-13 |
-| Verification | 2026-11-13: `node --test test/evaluation-runner.test.mjs` 7 pass; `node tools/gauntlet.mjs pending` exits 0 with and without a `web/.DS_Store`. |
-| Reviewed | 2026-11-13 |
 
 </details>
 

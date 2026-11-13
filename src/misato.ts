@@ -15,6 +15,8 @@ export interface ToolDoc {
   effect: string;
   args: string;
   about: string;
+  version?: string;
+  source?: 'nerv' | `mcp:${string}`;
 }
 /** One finished step, as Misato sees it on the next turn. */
 export interface Step {

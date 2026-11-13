@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 10 | 12 |
+| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 11 | 13 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
 
@@ -3757,6 +3757,21 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 
 ---
 
+### B-058
+
+**A Finder or ignored file marks every recorded evaluation run stale**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-13: [PR #376](https://github.com/voidbrain/nerv/pull/376) merged with all five CI jobs green; ignored OS metadata no longer changes the evaluation source key.
+
+| | |
+|---|---|
+| **Issue** | 2026-11-13: `sourceInputs` hashed Git-ignored files. One `web/.DS_Store` changed the Gauntlet system source key although a clean checkout of the same commit had none pending. |
+| **Reproduce** | On main `a4081d5`, add a `.DS_Store` under `web/`; the seven cases incorrectly become source-changed. |
+| **Check** | OS metadata and Git-ignored files do not change `sourceInputs`; other untracked files still do; a committed regression fails without the fix. |
 ### F-015
 
 **Pair native clients without sharing the root credential**
@@ -3776,6 +3791,50 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 <details>
 <summary>Next action, estimates and evidence</summary>
 
+**Closure evidence:** B-058-T01 closed. `sourceInputs` skips OS metadata and Git-ignored source files; regression `dfa4861` failed before the fix. PR #376 merged as `07c627c`; CI 43479688340 passed all five jobs.
+
+**Estimates:** Small, estimated 2026-11-13. No actual recorded: the closing reconciliation cannot establish the original task's elapsed effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #376](https://github.com/voidbrain/nerv/pull/376) |
+| Opened | 2026-11-13 |
+| Verification | Closed 2026-11-13: regression and pending checks passed; PR #376 CI passed all five jobs. |
+| Reviewed | 2026-11-13 |
+
+</details>
+
+---
+
+### F-075
+
+**The seven nerv-system-flows evaluation cases run again at current main**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-13: the seven deterministic system cases passed against the F-021 registry source; `gauntlet pending` is empty and no model was called.
+
+| | |
+|---|---|
+| **Issue** | Runtime source changes invalidate the exact source key of every `nerv-system-flows` result. |
+| **Reproduce** | Change registered runtime source and run `node tools/gauntlet.mjs pending`. |
+| **Check** | All seven system cases pass and are recorded; pending exits 0. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Closure evidence:** T01 recorded 7/7 on PR #376. F-021-T02 then changed the runtime source; T02 reran policy, ledger, conversation, channels, bases, stress and browser with built assets. All seven passed, `stillPending` was 0, and `modelQualification` was false.
+
+**Estimates:** No remaining effort. T02 actual 0.25 h agent (stated); T01 actual unavailable from the closing reconciliation.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #376](https://github.com/voidbrain/nerv/pull/376); F-021-T02 working PR |
+| Opened | 2026-11-13 |
+| Verification | Closed 2026-11-13: 7/7 deterministic system cases passed; pending exits 0; no model call. |
+| Reviewed | 2026-11-13 |
 **Closed 2026-11-13 by the owner:** every Check item passed live in T02 and T03 (2026-11-12). Statements below that call live Keychain, OS or recovery acceptance pending are dated history written before those trials; what stayed open moved to F-081.
 
 **F-015-T03 completed 2026-11-12 ([PR #325](https://github.com/voidbrain/nerv/pull/325)):** owner-approved split into four live cases (T03a revocation 0.25 h, T03b lost renewal reply 0.5 h, T03c Keychain failure 0.25 h, T03d offline TLS/auth rotation 0.5 h, evidence 0.5 h; about 20 min owner), replacing the 0.5 h + 0.5 h estimate. All four ran on an isolated profile and recovered with the native README procedure: a revoked credential is refused and its data cleared; a renewal completed on a throttled server while the companion stopped waiting left the old token dead and an orphan replacement, recovered by `clients`, `revoke` and fresh pairing; a cancelled keychain prompt made the save fail after the server renewed, recovered the same way; the stopped-profile rotation gave a new identity and pin, kept the profile's data, and the companion refused the new certificate with its old pin. [Evidence](../../acceptance/f015-live-failures-2026-11-12.md). Every Check item has now passed live (T02 and T03); service-host stopped-profile recovery stays deferred. Found: B-057, and B-056 extended.

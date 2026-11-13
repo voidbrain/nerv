@@ -4,7 +4,13 @@
   "parent": "F-021",
   "title": "Versioned descriptors for NERV's own tools",
   "goal": "Versioned descriptors for NERV's own tools",
-  "status": "planned",
+  "status": "implemented",
+  "prs": [
+    {
+      "pr": 381,
+      "note": "versioned NERV and MCP tool registry descriptors"
+    }
+  ],
   "acceptance": [
     "NERV tools expose versioned descriptors through the same registry as MCP tools"
   ],
@@ -31,7 +37,7 @@
   "effort": {
     "size": "small",
     "estimate": "1 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). Implemented 2026-11-13: built-in and MCP tools share a versioned descriptor shape; `nerv tools` exposes both, with a join regression for every built-in registration.",
     "reviewed": "2026-11-13",
     "baselineDays": 1,
     "agentHours": 0.25,

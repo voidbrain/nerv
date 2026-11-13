@@ -345,3 +345,4 @@ Owner request: F-005 has ready owner steps (a decision, two acceptance runs) but
 41 PRs (#332–#373) passed CI; full audit archived 11 closed records, cited #337, #339, #342–#345, and opened F-075 (evals), F-076 (main CI) and F-077 (alerts).
 
 Full audit of 2026-11-13 ([report](../audits/2026-11-13-full.md)). `npm run ci:status` read all 41 PRs merged since `fbd5458`: every run green (`full-suite` skipped by scoped verification on #341, #342, #343, #345 and others). Archived as Closed 2026-11-13: B-042, B-050, B-052, B-053, B-055, F-025, F-042, F-045, F-046, F-052, F-074. Records that did not cite their PR: B-056 (#342), B-057 (#343), B-052 (#345), F-005 (#337 T23/T25, #339 T21), F-007 (#344 T06, next action moved to T01 or T07). F-051: two steps added (T06 EVA cage labels, T07 peer inspection scope). A full CI run on main was dispatched (run 43461834506).
+
