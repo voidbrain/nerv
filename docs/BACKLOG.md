@@ -777,9 +777,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.75 h | — | — | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.75 h | — | — | — | — |
 
-💻 **→** Next: Define operator alias ownership and signed directory contract before changing routing.
+💻 **→** Implemented F-070-T01 and F-070-T02: per-base operator configuration, signed operator directory contract, authenticated Kaji heartbeat discovery, and safe alias resolution (`src/operator-directory.ts`, `src/config.ts`, `src/kaji-link.ts`, `src/runtime.ts`, `src/chat-command.ts`, `src/server.ts`). Next: CI and merge.
 
 | | |
 |---|---|
@@ -791,8 +791,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | F-070-T01 — Operator alias ownership and signed directory contract | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | F-070-T02 — Authenticated discovery and safe resolution | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-070-T01 — Operator alias ownership and signed directory contract | 0.25 h | 0 h | 0.25 h | Implemented; verification pending |
+| 🟢 Small | F-070-T02 — Authenticated discovery and safe resolution | 0.5 h | 0 h | 0.5 h | Implemented; verification pending |
 | 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0.75 h | 0 of 2 completed |
 
 <details>
@@ -802,9 +802,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; source assessment linked above |
+| PR / evidence | [PR #368](https://github.com/voidbrain/nerv/pull/368) F-070-T01 and F-070-T02 implementation (`src/operator-directory.ts`, `src/config.ts`, `src/kaji-link.ts`, `src/runtime.ts`, `src/chat-command.ts`, `src/server.ts`, `test/operator-directory.test.ts`); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; source assessment linked above |
 | Opened | 2026-11-07 |
-| Verification | Pending: regression, integration and relevant browser checks; source inspection is not runtime acceptance. |
+| Verification | Passed `node --test test/operator-directory.test.ts` (5/5), `npm test`, `npm run typecheck`, `npm run check:fast`. Pending CI and merge. |
 | Reviewed | 2026-11-07 |
 
 </details>
@@ -943,9 +943,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h | — | — | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h | — | — | — | — |
 
-💻 **→** Next: classify (prompt, plan validation or model choice) and plan a fix with a failing case first.
+💻 **→** Verify: PR #367 (CI pending); deterministic guard + prompt reinforcement implemented; 4/4 `gemma4:12b` invocations of `italian-missing-title` asked in Italian.
 
 | | |
 |---|---|
@@ -957,7 +957,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | B-049-T01 — Classify and fix the invented reminder title | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | B-049-T01 — Classify and fix the invented reminder title | 0.25 h | 0 h | 0.25 h | Implemented; verification pending |
 | 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed |
 
 <details>
@@ -967,9 +967,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | docs/evaluations/2026-11-12-misato-b021.json (`italian-missing-title` failed: invented title `Promemoria`); development probe of the same case 2026-11-12: 1 of 3 asked, 2 invented a title; docs/evaluations/2026-11-12-misato-v2.json (passed: it asked); docs/evaluations/2026-11-08-misato.json (passed). Found in B-021's run. |
+| PR / evidence | PR #367: failing-first regression test (`3c48c46`) + fix in `src/misato.ts` (`validateReminderTitle` + explicit no-subject reminder prompt rule) and `src/runtime.ts` (rejects missing, generic/date-only, or ungrounded `reminders.add` titles back to Misato as `invalid`). Owner-approved loopback `gemma4:12b` rerun (2026-11-13, 4/12 invocations): 4 of 4 asked in Italian. Prior evidence: `docs/evaluations/2026-11-12-misato-b021.json`. |
 | Opened | 2026-11-12 |
-| Verification | Pending. |
+| Verification | Deterministic: `test/misato.test.ts`, `test/clarification.test.ts`, `test/consultant.test.ts`, `test/resume.test.ts`, `test/telegram.test.ts`, `test/watch-runtime.test.ts` (62/62 pass), `npm run typecheck`, `npm run check:fast`. Live model: 4/4 `gemma4:12b` on `127.0.0.1:11434` (`italian-missing-title`) asked in Italian. |
 | Reviewed | 2026-11-12 |
 
 </details>

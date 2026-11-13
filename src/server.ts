@@ -506,6 +506,12 @@ export function makeServer(
           if (/Kaji unavailable|not enrolled|revoked|not running/i.test(msg)) reply(503, { error: msg });
           else reply(502, { error: msg });
         }
+      } else if (req.method === 'GET' && path === '/api/operators') {
+        if (!store.operators) {
+          reply(503, { error: 'Operator directory unavailable.' });
+          return;
+        }
+        reply(200, await store.operators());
       } else if (req.method === 'POST' && path === '/api/memory/consolidate') {
         if (!store.consolidate) {
           reply(503, { error: 'Instrumentality unavailable.' });
