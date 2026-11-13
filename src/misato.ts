@@ -276,6 +276,41 @@ export function parseAdvice(text: string): string | undefined {
     .trim();
   return !t || /^none\.?$/i.test(t) ? undefined : t.slice(0, 600);
 }
+/**
+ * Filters what a consultant may receive according to the Scrolls (F-025-T03):
+ * denied tools are never offered; external/remote consultants never receive tainted data or `localOnly` tools.
+ */
+export function filterConsultantInput<T extends { name: string }>(
+  input: {
+    request: string;
+    tainted?: boolean;
+    previousAdvice?: string;
+    context?: Turn[];
+    tools?: T[];
+  },
+  policy: { deny: string[]; localOnly?: string[] },
+  remote = false,
+): {
+  allowed: boolean;
+  request: string;
+  previousAdvice?: string;
+  context: Turn[];
+  tools: T[];
+} {
+  if (remote && input.tainted) return { allowed: false, request: '', context: [], tools: [] };
+  const deny = new Set(policy.deny);
+  const localOnly = new Set(policy.localOnly ?? []);
+  const tools = (input.tools ?? []).filter((t) => !deny.has(t.name) && (!remote || !localOnly.has(t.name)));
+  const context = (input.context ?? []).filter((t) => !remote || !t.tainted);
+  const previousAdvice = remote && input.tainted ? undefined : input.previousAdvice;
+  return {
+    allowed: true,
+    request: input.request,
+    ...(previousAdvice ? { previousAdvice } : {}),
+    context,
+    tools,
+  };
+}
 /** The generic pilot's reply (F-045 detection): its first line names the request's domain, the rest is the advice. */
 export function parseConsult(text: string): { domain?: string; advice?: string } {
   const lines = text.trim().split('\n');

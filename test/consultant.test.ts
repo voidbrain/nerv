@@ -4,7 +4,7 @@ import { createServer } from 'node:http';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { consultantAsk, misatoAsk, parseAdvice } from '../src/misato.ts';
+import { consultantAsk, filterConsultantInput, misatoAsk, parseAdvice } from '../src/misato.ts';
 const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
 /** A fake local model: the consultant gives `advice`, Casper approves, Misato follows its script; every Misato prompt is kept. */
 async function fake(advice: string, script: string[]) {
@@ -301,3 +301,72 @@ test(
     }
   },
 );
+
+test('F-025-T03: filterConsultantInput and Runtime.useRemoteConsultant pass only Scrolls-allowed data and never vote', async () => {
+  const tools = [
+    { name: 'reminders.list', about: 'List reminders' },
+    { name: 'reminders.add', about: 'Add reminder' },
+    { name: 'reminders.cancel', about: 'Cancel reminder' },
+  ];
+  const policy = { deny: ['reminders.cancel'], localOnly: ['reminders.add'] };
+  const localOut = filterConsultantInput(
+    { request: 'Help', tainted: true, context: [{ request: 'a', tainted: true }], tools },
+    policy,
+    false,
+  );
+  assert.equal(localOut.allowed, true);
+  assert.deepEqual(
+    localOut.tools.map((t) => t.name),
+    ['reminders.list', 'reminders.add'],
+  );
+
+  const remoteClean = filterConsultantInput(
+    {
+      request: 'Help',
+      tainted: false,
+      context: [
+        { request: 'clean', tainted: false },
+        { request: 'dirty', tainted: true },
+      ],
+      tools,
+    },
+    policy,
+    true,
+  );
+  assert.equal(remoteClean.allowed, true);
+  assert.deepEqual(
+    remoteClean.tools.map((t) => t.name),
+    ['reminders.list'],
+  );
+  assert.deepEqual(
+    remoteClean.context.map((c) => c.request),
+    ['clean'],
+  );
+
+  const remoteTainted = filterConsultantInput({ request: 'Help', tainted: true, tools }, policy, true);
+  assert.equal(remoteTainted.allowed, false);
+
+  const f = await fake('', [JSON.stringify({ reply: 'Done.' })]);
+  const { r, close } = await runtimeWith(f.url, false, { deny: ['reminders.cancel'], localOnly: ['reminders.add'] });
+  try {
+    const received: { request: string; tools: string[] }[] = [];
+    r.useRemoteConsultant({
+      name: 'peer-consultant',
+      advise: async (input) => {
+        received.push({ request: input.request, tools: (input.tools ?? []).map((t) => t.name) });
+        return { advice: 'Check the due date first.', model: 'peer-model' };
+      },
+    });
+    const reply = await r.chat('Schedule a check');
+    assert.equal(received.length, 1);
+    assert.ok(!received[0]!.tools.includes('reminders.cancel'));
+    assert.ok(!received[0]!.tools.includes('reminders.add'));
+    const consult = (await r.events(reply.sortieId)).find((e) => e.kind === 'misato.consult');
+    assert.ok(consult && consult.kind === 'misato.consult');
+    assert.equal(consult.payload.advice, 'Check the due date first.');
+    assert.match(f.asked.misato[0]!, /Check the due date first\./);
+  } finally {
+    await close();
+    await f.close();
+  }
+});
