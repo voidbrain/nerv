@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 127 h agent + 16.75 h owner across 119 open steps of 30 features and 3 other records. 26.75 h of actual effort recorded on 44 steps. Generated from the task files.
+**Remaining effort:** 125.25 h agent + 16.75 h owner across 118 open steps of 29 features and 3 other records. 27 h of actual effort recorded on 45 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -215,7 +215,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.75 h | — | [F-049](#f-049) | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 0 h | — | [F-049](#f-049) | — | — |
 
 💻 **→** Attach extra seats by action class as veto-only, start new seats in shadow, and promote pilots through Prototype → Test → Production.
 
@@ -232,8 +232,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | F-025-T01 — Veto-only extra seats with shadow logging | 0.25 h | 0.25 h (stated) | 0 h | Completed |
 | — | F-025-T02 — Free API seat pool | 0.5 h | 0.5 h (stated) | 0 h | Completed |
 | — | F-025-T03 — Consultants without a vote | 0.25 h | 0.25 h (stated) | 0 h | Completed |
-| 🟡 Medium | F-025-T04 — Watermelon trust stages and demotion | 1.75 h | 0 h | 1.75 h | Planned |
-| 🟡 Medium | **Total** | 2.75 h | 1 h (3 of 4 steps recorded) | 1.75 h | 3 of 4 completed |
+| — | F-025-T04 — Watermelon trust stages and demotion | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | **Total** | 1.25 h | 1.25 h | 0 h | 4 of 4 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -244,7 +244,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-02 |
-| Verification | Pending |
+| Verification | 2026-11-13: T01 `test/extra-seats.test.ts` + `test/gate.test.ts` + `test/kaji-seats.test.ts` (12/12); T02 `test/seat-pool.test.ts` + `test/extra-seats.test.ts` + `test/gate.test.ts` + `test/ledger.test.ts` (32/32); T03 `test/consultant.test.ts` + `test/misato.test.ts` (20/20); T04 `test/pilots.test.ts` (13/13); `check:conventions` and `check:fast` passed. |
 | Reviewed | 2026-11-04 |
 
 </details>
