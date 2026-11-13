@@ -43,11 +43,8 @@ const consumptionPath = () => resolve(process.env.NERV_GAUNTLET_CONSUMPTION ?? h
 const tasksPath = () => resolve(process.env.NERV_GAUNTLET_TASKS ?? here('docs/work/tasks'));
 const releaseTag = () => readJSON(here('vendor/gauntlet-protocol.json')).releaseTag;
 
-export function systemSourceKey(pack) {
-  const inputs = sourceInputs(
-    root,
-    pack.cases.some((c) => c.id === 'browser'),
-  );
+export function systemSourceKey() {
+  const inputs = sourceInputs(root, false);
   delete inputs[ledgerFile];
   return hash({
     inputs,

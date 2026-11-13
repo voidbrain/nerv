@@ -1025,6 +1025,18 @@ test('F-074-T10: identity-bound ledger coverage detects source, model, runtime a
         ],
       }),
     );
+    // systemSourceKey is independent of gitignored dist/web/browser so clean CI checkouts match built local runs.
+    const { existsSync: hasPath, renameSync: movePath } = await import('node:fs');
+    const builtBrowser = 'dist/web/browser';
+    if (hasPath(builtBrowser)) {
+      const backup = 'dist/web/browser.test-bak';
+      movePath(builtBrowser, backup);
+      try {
+        assert.equal(systemSourceKey(system), currentSourceKey);
+      } finally {
+        movePath(backup, builtBrowser);
+      }
+    }
     // Exact identity covers everything even from 2020 (no default max age).
     assert.deepEqual(
       (
