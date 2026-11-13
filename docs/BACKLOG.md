@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 152 h agent + 17 h owner across 140 open steps of 31 features and 8 other records. 20.25 h of actual effort recorded on 28 steps. Generated from the task files.
+**Remaining effort:** 150 h agent + 17 h owner across 138 open steps of 31 features and 8 other records. 21 h of actual effort recorded on 30 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -47,7 +47,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟣 Very large | 11.5 h agent + 5.25 h owner | — | [F-012](#f-012) | — | — |
+| 🔴 Open | 🔺 P1 | 🟣 Very large | 9.5 h agent + 5.25 h owner | — | [F-012](#f-012) | — | — |
 
 💻 **→** Next: F-005-T15 — T06h — Upgrades that raise the schema version (Planned).
 
@@ -83,15 +83,15 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | F-005-T20 — T08c — Engine/provider contract for several instances and endpoints, local and remote; Ollama becomes one adapter | 1.25 h | 0.5 h (stated) | 0 h | Completed |
 | 🟢 Small | F-005-T21 — T08d — Optional start-at-login or on-demand management of selected owned local engines | 1 h | 0 h | 1 h | Planned |
 | 🟢 Small | F-005-T22 — T08e — Demonstration of prerequisites and optional engine management on an owner-selected target | 0.5 h | 0 h | 0.5 h agent + 0.5 h owner | Planned |
-| 🟢 Small | F-005-T23 — T09b — Windows update and recovery: backup, rehearsal and checkout | 1 h | 0 h | 1 h | Planned |
+| — | F-005-T23 — T09b — Windows update and recovery: backup, rehearsal and checkout | 1 h | 0.5 h (stated) | 0 h | Completed |
 | 🟢 Small | F-005-T24 — T09c — Acceptance on an owner-selected Windows machine | 0.5 h | 0 h | 0.5 h agent + 1 h owner | Planned |
-| 🟢 Small | F-005-T25 — T10b — Linux update and recovery | 1 h | 0 h | 1 h | Planned |
+| — | F-005-T25 — T10b — Linux update and recovery | 1 h | 0.25 h (stated) | 0 h | Completed |
 | 🟢 Small | F-005-T26 — T10c — Acceptance on an owner-selected mini PC, Pi or equivalent | 0.5 h | 0 h | 0.5 h agent + 1 h owner | Planned |
 | 🟡 Medium | F-005-T27 — T11b — Enrolment, revocation, leases, fencing and cancellation across the device matrix | 1.25 h | 0 h | 1.25 h agent + 1 h owner | Planned |
 | 🟡 Medium | F-005-T28 — T11c — Reconnect, locks and uncertain physical results across the device matrix | 1.25 h | 0 h | 1.25 h agent + 1 h owner | Planned |
 | 🟢 Small | F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 1 h | 0 h | 1 h agent + 0.5 h owner | Planned |
 | 🟢 Small | F-005-T30 — T11e — Parent acceptance and closure reconciliation | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟣 Very large | **Total** | 24 h (24 of 30 steps) | 7 h (12 of 30 steps recorded) | 11.5 h agent + 5.25 h owner | 18 of 30 completed |
+| 🟣 Very large | **Total** | 24 h (24 of 30 steps) | 7.75 h (14 of 30 steps recorded) | 9.5 h agent + 5.25 h owner | 20 of 30 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>

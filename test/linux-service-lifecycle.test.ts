@@ -17,10 +17,12 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import {
+  SERVICE_READER_SCHEMA,
   applyService,
   linuxServiceAdapter,
   linuxServiceHost,
   planService,
+  releaseObservedService,
   serviceReceipt,
   type ServiceContext,
 } from '../src/node-lifecycle-execution.ts';
@@ -48,7 +50,6 @@ async function makeLinuxEnv() {
   execFileSync('git', ['-C', source, 'remote', 'add', 'origin', 'https://github.com/voidbrain/nerv.git']);
   execFileSync('git', ['-C', source, 'add', '-A']);
   execFileSync('git', ['-C', source, 'commit', '-m', 'init']);
-  const revision = execFileSync('git', ['-C', source, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 
   const db = new DatabaseSync(join(home, 'nerv.sqlite'));
   db.exec(
@@ -78,7 +79,7 @@ async function makeLinuxEnv() {
     res.end(
       JSON.stringify({
         base: { id: 'LINUX-01' },
-        build: { commit: revision },
+        build: { commit: execFileSync('git', ['-C', source, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim() },
         database: { quick_check: 'ok' },
         processes: { nervous: process.pid, brain: process.pid, brainAlive: true },
         models: {},
@@ -103,6 +104,7 @@ async function makeLinuxEnv() {
   };
 
   let sessionAvailable = true;
+  let failBuild = false;
   const systemctlCalls: string[][] = [];
   const loginctlCalls: string[][] = [];
 
@@ -176,8 +178,26 @@ async function makeLinuxEnv() {
         return { status: 1, out: '', err: e instanceof Error ? e.message : 'git error' };
       }
     }
+    if (program === 'tar') {
+      try {
+        const out = execFileSync('tar', args, { cwd, encoding: 'utf8' });
+        return { status: 0, out, err: '' };
+      } catch (e) {
+        return { status: 1, out: '', err: e instanceof Error ? e.message : 'tar error' };
+      }
+    }
+    if (program === 'npm') {
+      if (failBuild && args.includes('build')) return { status: 1, out: '', err: 'build failed' };
+      return { status: 0, out: '', err: '' };
+    }
     if (program === context.node) {
-      return { status: 0, out: process.version + '\n', err: '' };
+      if (args.includes('--version')) return { status: 0, out: process.version + '\n', err: '' };
+      try {
+        const out = execFileSync(process.execPath, args, { cwd, encoding: 'utf8' });
+        return { status: 0, out, err: '' };
+      } catch (e) {
+        return { status: 1, out: '', err: e instanceof Error ? e.message : 'node error' };
+      }
     }
     return { status: 1, out: '', err: 'unexpected command' };
   };
@@ -192,6 +212,9 @@ async function makeLinuxEnv() {
     loginctlCalls,
     setSession: (ok: boolean) => {
       sessionAvailable = ok;
+    },
+    setFailBuild: (fail: boolean) => {
+      failBuild = fail;
     },
     close: async () => {
       if (serviceProc && !serviceProc.killed) serviceProc.kill('SIGKILL');
@@ -272,5 +295,96 @@ test('F-005-T10: linuxServiceHost refuses non-Linux or additional profiles', () 
     assert.throws(() => linuxServiceHost('/tmp/.nerv'), /Linux/);
   } else {
     assert.throws(() => linuxServiceHost('/tmp/other-profile'), /additional or legacy/);
+  }
+});
+
+test('F-005-T25: Linux update and recovery (backup, rehearsal, checkout, refusal and release)', supported, async () => {
+  const env = await makeLinuxEnv();
+  try {
+    const gitSync = (...args: string[]) =>
+      execFileSync('git', ['-C', env.context.source, ...args], { encoding: 'utf8' }).trim();
+    const readerScript = (raiseSchema: boolean) =>
+      `import { DatabaseSync } from 'node:sqlite';
+const db = new DatabaseSync(process.argv[2]);
+try {
+  ${raiseSchema ? `db.exec('PRAGMA user_version = ${SERVICE_READER_SCHEMA + 1};');` : `db.prepare('SELECT count(*) FROM worker_jobs').get();`}
+} finally { db.close(); }\n`;
+    writeFileSync(join(env.context.source, 'src/upgrade-reader.ts'), readerScript(false));
+    gitSync('add', '-A');
+    gitSync('commit', '-m', 'base with reader');
+    const rev1 = gitSync('rev-parse', 'HEAD');
+
+    writeFileSync(join(env.context.source, 'src/cli.ts'), 'export const v = 2;\n');
+    gitSync('add', 'src/cli.ts');
+    gitSync('commit', '-m', 'v2');
+    const rev2 = gitSync('rev-parse', 'HEAD');
+
+    writeFileSync(join(env.context.source, 'src/upgrade-reader.ts'), readerScript(true));
+    gitSync('add', 'src/upgrade-reader.ts');
+    gitSync('commit', '-m', 'schema raise');
+    const revSchema = gitSync('rev-parse', 'HEAD');
+
+    gitSync('checkout', '-q', rev1);
+
+    const installPlan = await planService(env.host, 'install');
+    await applyService(env.host, installPlan, installPlan.digest);
+    const stopPlan = await planService(env.host, 'stop');
+    await applyService(env.host, stopPlan, stopPlan.digest);
+
+    // 1. Successful update
+    const updatePlan = await planService(env.host, 'update', rev2);
+    assert.deepEqual(updatePlan.blockers, []);
+    const updateReceipt = await applyService(env.host, updatePlan, updatePlan.digest);
+    assert.equal(updateReceipt.state, 'completed');
+    assert.equal(gitSync('rev-parse', 'HEAD'), rev2);
+    assert.ok(
+      existsSync(join(env.context.userHome, '.nerv-lifecycle', 'backups', updatePlan.digest, 'database.sqlite')),
+    );
+    assert.deepEqual(updateReceipt.rehearsal?.blockers, []);
+
+    // 2. Refused update on schema raise
+    const stop2 = await planService(env.host, 'stop');
+    await applyService(env.host, stop2, stop2.digest);
+    const schemaPlan = await planService(env.host, 'update', revSchema);
+    const schemaReceipt = await applyService(env.host, schemaPlan, schemaPlan.digest);
+    assert.equal(schemaReceipt.state, 'refused');
+    assert.equal(gitSync('rev-parse', 'HEAD'), rev2);
+
+    // 3. Failed build leaves uncertain receipt with Linux recovery steps and releaseObservedService clears it
+    gitSync('checkout', '-q', rev1);
+    env.setFailBuild(true);
+    const failPlan = await planService(env.host, 'update', rev2);
+    await assert.rejects(
+      () => applyService(env.host, failPlan, failPlan.digest),
+      /Service build did not confirm completion/,
+    );
+    const failReceipt = serviceReceipt(env.host, failPlan.digest);
+    assert.ok('digest' in failReceipt && failReceipt.state === 'uncertain');
+    assert.ok(failReceipt.recovery?.some((s) => s.includes('systemctl --user status nerv.service')));
+    const jdb = new DatabaseSync(join(env.context.userHome, '.nerv-lifecycle', 'journal.sqlite'));
+    try {
+      const updated = { ...failReceipt, pid: 999999 };
+      jdb.prepare('UPDATE operations SET receipt=? WHERE digest=?').run(JSON.stringify(updated), failReceipt.digest);
+      jdb.prepare('UPDATE resource SET pid=? WHERE id=1').run(999999);
+    } finally {
+      jdb.close();
+    }
+    const released = await releaseObservedService(
+      env.host,
+      { ...failReceipt, pid: 999999 },
+      {
+        digest: failReceipt.digest,
+        resource: failReceipt.resource,
+        fence: failReceipt.fence,
+        nonce: failReceipt.nonce,
+        handlerStopped: true,
+        descendantsStopped: true,
+        operatorConfirmed: true,
+        reason: 'Verified systemd user unit inactive and restored previous checkout',
+      },
+    );
+    assert.equal(released.state, 'released');
+  } finally {
+    await env.close();
   }
 });
