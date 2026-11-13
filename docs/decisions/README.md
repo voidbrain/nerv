@@ -16,5 +16,6 @@ Decisions preserve rationale and alternatives. A date alone does not make them s
 | [Configuration qualification](configuration-qualification.md) | Accepted staged individual, combination and NERV/host qualification; implementation pending F-006/F-045 | Changed role/workflow/host boundary or measured campaign benefit |
 | [Remote inference](remote-inference.md) | Enrolled base endpoint identity, owner-bases privacy class, no silent fallback and bounded expiry; F-006-T01 proposed | Worker protocol changes, Tailscale overlay replaced, non-owner host proposed, or waiting budgets adjusted |
 | [Evaluation and improvement](evaluation-and-improvement.md) | Evidence, browser/channel parity and bounded improvement | New flow branches, repeated failures, new model configuration or changed promotion rules |
+| [EVA runner](eva-runner.md) | Deterministic isolated runner threat model, least-class admission, host boundaries and pre-execution test gate; F-049-T01 | Host enforcement mechanism choice (T03), admission/runtime changes or new supported OS targets |
 
 No decision in this folder was found to be wholly superseded in this reorganization. Their latest review evidence and rerun conditions are in the [review register](../reviews/README.md).

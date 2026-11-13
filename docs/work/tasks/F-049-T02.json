@@ -4,7 +4,7 @@
   "parent": "F-049",
   "title": "EVA class definitions and least-class admission",
   "goal": "EVA-00…03 as data in src/ with what each may touch, and admission that picks the least class a job needs and refuses a job asking above its grant",
-  "status": "planned",
+  "status": "ready",
   "acceptance": [
     "EVA-00 no external effects, EVA-01 bounded, EVA-02 full grant, EVA-03 quarantine for untrusted input, defined as data with filesystem, network, credential and resource fields",
     "Admission uses existing NERV grants and the T01 contract; it never adds an approval authority",
