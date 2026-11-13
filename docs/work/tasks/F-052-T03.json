@@ -4,7 +4,7 @@
   "parent": "F-052",
   "title": "Durations in sortie detail and why answer",
   "goal": "Durations in sortie detail and why answer",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "\"Misato 38 s · Casper 6 s · Tabgha (shadow) 41 s · EVA-02 0.1 s\""
   ],
@@ -33,12 +33,14 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "estimate": "0 h agent",
+    "basis": "Formatted and rendered per-role sortie timings in Ledger.sortie, Ledger.explain, why.ts, and dashboard detail.",
     "reviewed": "2026-11-13",
     "baselineDays": 1,
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated",
     "estimateAgentHours": 0.25
   }
 }

@@ -37,6 +37,8 @@ export interface Verdict {
   reason: string;
   confidence?: number;
   shadow?: boolean;
+  durationMs?: number;
+  transferMs?: number;
 }
 export interface Ballot {
   effect: Effect;

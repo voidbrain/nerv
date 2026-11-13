@@ -3,6 +3,8 @@ import type { StoreApi } from './runtime.ts';
 import { ONLINE_MS } from './kaji-link.ts';
 import type { ChannelState } from './channel-state.ts';
 import type { Approval } from './ledger.ts';
+import { requestLanguage } from './misato.ts';
+import { formatQueuedMessage, formatQueueFullMessage, QueueCancelledError, QueueFullError } from './request-queue.ts';
 /**
  * Aoba, the Telegram channel (F-003), with Pen Pen's deliveries (F-023). Outbound HTTPS only (long polling): no open
  * port, no mesh. It answers exactly one private chat, the owner's; everything else is ignored. Messages go to Misato,
@@ -157,9 +159,13 @@ function peerLine(verdicts: { seat: string; vote: string; shadow?: boolean }[] |
 export function card(a: Approval): { text: string; buttons: Button[][] } {
   const c = a.card;
   const args = JSON.stringify(c.args);
+  const detail =
+    c.tool === 'memory.edit' && typeof c.args.oldText === 'string' && typeof c.args.text === 'string'
+      ? `${c.tool}: “${c.args.oldText}” → “${c.args.text}”`
+      : `${c.tool} ${args.length > 600 ? args.slice(0, 600) + '…' : args}`;
   const text = [
     `Needs you · Pattern ${c.pattern.toUpperCase()}`,
-    `${c.tool} ${args.length > 600 ? args.slice(0, 600) + '…' : args}`,
+    detail,
     `Effect: ${c.effect}. Sync ${c.sync.value}%.`,
     `Why it stopped: ${c.reason}`,
     ...peerLine(c.verdicts),
@@ -438,6 +444,7 @@ export class TelegramChannel {
   private state: State = { cards: [] };
   private stopping = new AbortController();
   private queue: Promise<void> = Promise.resolve();
+  private readonly inflight = new Set<Promise<void>>();
   private timer?: NodeJS.Timeout;
   private delivery?: Promise<void>;
   constructor(options: {
@@ -495,7 +502,22 @@ export class TelegramChannel {
   async stop() {
     this.stopping.abort();
     if (this.timer) clearInterval(this.timer);
-    await Promise.allSettled([this.queue, this.delivery, this.followUp, this.cardQueue, this.markupQueue]);
+    await Promise.allSettled([
+      this.queue,
+      ...this.inflight,
+      this.delivery,
+      this.followUp,
+      this.cardQueue,
+      this.markupQueue,
+    ]);
+  }
+  private track(task: Promise<void>): void {
+    const p = task
+      .catch((e) => this.log(`Telegram: ${e instanceof Error ? e.message : 'handling failed'}.`))
+      .finally(() => {
+        this.inflight.delete(p);
+      });
+    this.inflight.add(p);
   }
   private owner(id: number | undefined) {
     return id === this.chatId;
@@ -514,9 +536,7 @@ export class TelegramChannel {
         for (const u of updates) {
           this.state.offset = u.update_id + 1;
           this.save();
-          this.queue = this.queue
-            .then(() => this.handle(u))
-            .catch((e) => this.log(`Telegram: ${e instanceof Error ? e.message : 'handling failed'}.`));
+          this.track(this.handle(u));
         }
       } catch (e) {
         if (this.stopping.signal.aborted) return;
@@ -598,10 +618,26 @@ export class TelegramChannel {
       void this.api.call('sendChatAction', { chat_id: this.chatId, action: 'typing' }).catch(() => {});
     }, 4000);
     void this.api.call('sendChatAction', { chat_id: this.chatId, action: 'typing' }).catch(() => {});
+    const lang = requestLanguage(text);
     try {
-      const reply = await this.store.chat(text.slice(0, 4000), `telegram:${this.chatId}`);
+      const reply = await this.store.chat(text.slice(0, 4000), `telegram:${this.chatId}`, {
+        signal: this.stopping.signal,
+        onQueued: (ahead) => {
+          void this.sendLocal(formatQueuedMessage(ahead, lang));
+        },
+      });
       await this.sendLocal(reply.reply ?? `I could not finish: ${reply.error ?? 'no reply'}`);
       await this.deliver();
+    } catch (e) {
+      if (e instanceof QueueFullError) {
+        await this.sendLocal(formatQueueFullMessage(e.maxQueued, lang));
+        return;
+      }
+      if (e instanceof QueueCancelledError) {
+        await this.sendLocal(lang === 'it' ? 'Richiesta annullata in coda.' : 'Queued request cancelled.');
+        return;
+      }
+      throw e;
     } finally {
       clearInterval(typing);
     }

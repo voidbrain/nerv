@@ -465,7 +465,14 @@ test(
       assert.deepEqual(kinds.find((k) => k[0] === 'kaji.forwarded')![1], {
         base: { id: 'NERV-01', name: 'Neo Tokyo-3' },
       });
-      assert.deepEqual(kinds.find((k) => k[0] === 'kaji.answered')![1], {
+      const answered = kinds.find((k) => k[0] === 'kaji.answered')![1] as {
+        base: { id: string; name: string };
+        sortieId: string;
+        transferMs?: number;
+      };
+      assert.equal(typeof answered.transferMs, 'number');
+      const { transferMs: _t, ...answeredRest } = answered;
+      assert.deepEqual(answeredRest, {
         base: { id: 'NERV-01', name: 'Neo Tokyo-3' },
         sortieId: 'tokyo-sortie',
       });

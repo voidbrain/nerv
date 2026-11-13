@@ -43,12 +43,17 @@ export interface Roles {
   /** F-025 consultants: advice for Misato before it plans, on the local route only; off unless set. */
   consultant?: { model: string };
 }
+export interface ModelConcurrency {
+  default?: number;
+  perModel?: Record<string, number>;
+}
 export interface Models {
   local?: LocalRoute;
   cloud?: CloudRoute;
   roles?: Roles;
   engines?: EngineInstance[];
   remote?: RemoteInferenceConfig;
+  concurrency?: ModelConcurrency;
 }
 export interface Ask {
   prompt: string;
@@ -202,9 +207,9 @@ export function validateModels(value: unknown): Models {
     !v ||
     typeof v !== 'object' ||
     Array.isArray(v) ||
-    Object.keys(v).some((k) => !['local', 'cloud', 'roles', 'engines', 'remote'].includes(k))
+    Object.keys(v).some((k) => !['local', 'cloud', 'roles', 'engines', 'remote', 'concurrency'].includes(k))
   )
-    throw new Error('Invalid models: use local, cloud, roles, engines and remote.');
+    throw new Error('Invalid models: use local, cloud, roles, engines, remote and concurrency.');
   const out: Models = {};
   if (v.local !== undefined) {
     const l = v.local as Record<string, unknown>;
@@ -307,6 +312,33 @@ export function validateModels(value: unknown): Models {
   }
   if (v.engines !== undefined) out.engines = validateEngineInstances(v.engines);
   if (v.remote !== undefined) out.remote = validateRemoteInference(v.remote);
+  if (v.concurrency !== undefined) {
+    const c = v.concurrency as Record<string, unknown>;
+    const validLimit = (n: unknown): n is number => typeof n === 'number' && Number.isInteger(n) && n >= 1 && n <= 64;
+    if (
+      !c ||
+      typeof c !== 'object' ||
+      Array.isArray(c) ||
+      Object.keys(c).some((k) => !['default', 'perModel'].includes(k)) ||
+      (c.default !== undefined && !validLimit(c.default))
+    )
+      throw new Error('Invalid models.concurrency: default and perModel limits must be integers 1..64.');
+    const concurrency: ModelConcurrency = {};
+    if (c.default !== undefined) concurrency.default = c.default;
+    if (c.perModel !== undefined) {
+      const pm = c.perModel as Record<string, unknown>;
+      if (!pm || typeof pm !== 'object' || Array.isArray(pm))
+        throw new Error('Invalid models.concurrency.perModel: expected an object mapping model name to integer 1..64.');
+      const validated: Record<string, number> = {};
+      for (const [modelName, limit] of Object.entries(pm)) {
+        if (!modelName || modelName.length > 200 || !validLimit(limit))
+          throw new Error('Invalid models.concurrency.perModel: model names <= 200 chars, limits integers 1..64.');
+        validated[modelName] = limit;
+      }
+      concurrency.perModel = validated;
+    }
+    out.concurrency = concurrency;
+  }
   return out;
 }
 export type InferenceTarget =

@@ -30,6 +30,11 @@ export interface AgencySnapshot {
 export interface ReminderBackend {
   pendingReminders(limit?: number): Reminder[];
   add(title: string, due: string, now?: Date, options?: ReminderInput): Reminder & { existing?: true };
+  update(
+    id: string,
+    patch: { title?: string; due?: string; kind?: string; end?: string | null },
+    now?: Date,
+  ): Reminder | undefined;
   cancel(id: string): boolean;
   restore(id: string): boolean;
   rescheduleAllDayReminders?(briefAt?: string, timeZone?: string): void;
@@ -54,11 +59,13 @@ export interface ReminderBackend {
 export const builtinTools: Tool[] = [
   { name: 'reminders.list', effect: 'read' },
   { name: 'reminders.add', effect: 'write-local', inverse: 'reminders.cancel' },
+  { name: 'reminders.update', effect: 'write-local', inverse: 'reminders.update' },
   { name: 'reminders.cancel', effect: 'write-local', inverse: 'reminders.restore', removes: true },
   { name: 'reminders.restore', effect: 'write-local', inverse: 'reminders.cancel' },
   { name: 'memory.recall', effect: 'read' },
   // A new fact is only stored after the owner approves its card: Misato never writes memory on its own.
   { name: 'memory.remember', effect: 'write-local', inverse: 'memory.forget', owner: true },
+  { name: 'memory.edit', effect: 'write-local', owner: true },
   { name: 'memory.forget', effect: 'write-local', removes: true },
   // F-042: read-only agency tools over sorties/ballots, waiting approvals/questions, and base health/status.
   { name: 'sorties.explain', effect: 'read' },
@@ -100,6 +107,13 @@ export const toolDocs: ToolDoc[] = [
     args: '{"title": text up to 500 characters, "due": ISO 8601 date-time in the future with an explicit offset or YYYY-MM-DD for all-day, "kind"?: "all-day" | "at" | "from-to" | "from" | "until", "end"?: ISO 8601 date-time with offset for from-to or until}',
   },
   {
+    name: 'reminders.update',
+    effect: 'write-local',
+    about:
+      "Updates an existing pending reminder's title and/or time by its id. Use this instead of reminders.add when the owner changes an existing reminder.",
+    args: '{"id": reminder id, "title"?: new title up to 500 characters, "due"?: ISO 8601 date-time in the future with an explicit offset or YYYY-MM-DD for all-day, "kind"?: "all-day" | "at" | "from-to" | "from" | "until", "end"?: ISO 8601 date-time with offset or null} (at least one of title, due, kind, end)',
+  },
+  {
     name: 'reminders.cancel',
     effect: 'write-local',
     about:
@@ -124,6 +138,13 @@ export const toolDocs: ToolDoc[] = [
     about:
       'Proposes a lasting fact about the owner (a preference, a person, a routine). It always asks the owner first; store only what they stated, in their words.',
     args: '{"text": one fact, up to 500 characters}',
+  },
+  {
+    name: 'memory.edit',
+    effect: 'write-local',
+    about:
+      'Proposes updating an existing fact in memory (from the memory list or memory.recall) when the owner corrects or changes it. Always asks the owner first.',
+    args: '{"id": existing fact id, "text": updated fact, up to 500 characters}',
   },
   {
     name: 'memory.forget',
@@ -328,6 +349,31 @@ export function execute(
         ...(r.existing ? { existing: true, note: 'This reminder already existed; nothing was added.' } : {}),
       };
     }
+    case 'reminders.update': {
+      only(args, ['id', 'title', 'due', 'kind', 'end']);
+      const id = text(args, 'id');
+      const defaults = backend.reminderDefaults
+        ? backend.reminderDefaults()
+        : { timeZone: 'Europe/Rome', briefAt: '08:00' };
+      const sortieTitle = context.sortieId && backend.sortie ? backend.sortie(context.sortieId)?.title : undefined;
+      const effective =
+        sortieTitle && typeof args.due === 'string' ? reconcileReminderArgs(sortieTitle, args, defaults) : args;
+      const patch: { title?: string; due?: string; kind?: string; end?: string | null } = {};
+      if (effective.title !== undefined && effective.title !== null) patch.title = text(effective, 'title');
+      if (effective.due !== undefined && effective.due !== null) patch.due = text(effective, 'due');
+      if (effective.kind !== undefined && effective.kind !== null) patch.kind = text(effective, 'kind');
+      if (effective.end !== undefined) patch.end = effective.end === null ? null : text(effective, 'end');
+      if (!Object.keys(patch).length) throw new Error('Give a new title or a new due time.');
+      const r = backend.update(id, patch, new Date());
+      if (!r) throw new Error(`No pending reminder with id ${id}.`);
+      return {
+        id: r.id,
+        title: r.title,
+        due: r.due,
+        ...(r.kind !== 'at' ? { kind: r.kind } : {}),
+        ...(r.end ? { end: r.end } : {}),
+      };
+    }
     case 'reminders.cancel': {
       const list = ids(args);
       return { cancelled: list.filter((id) => backend.cancel(id)), ids: list };
@@ -348,6 +394,13 @@ export function execute(
         ...(context.sortieId ? { sortieId: context.sortieId } : {}),
       });
       return { id: f.id, text: f.text };
+    }
+    case 'memory.edit': {
+      only(args, ['id', 'text', 'oldText']);
+      const id = text(args, 'id');
+      const edited = backend.memory.edit(id, text(args, 'text'), 'misato');
+      if (!edited) throw new Error(`No active fact with id ${id}.`);
+      return { id: edited.id, text: edited.text };
     }
     case 'settings.schedule': {
       only(args, ['brief', 'instrumentality']);

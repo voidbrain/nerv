@@ -8,7 +8,7 @@
   const consulted = new Set();
   let older = [], matches = [], shown = [], searchSeq = 0, searchTimer = null; let editing = null;
   let usageBefore = null, usageBack = [], usageBusy = false, usageNext = null, usagePage = null, usageError = false;
-  let token = ""; let polling = false; let pollFailures = 0; let lastRan = null; let firstTrace = true; const detailCache = {}; const known = new Map(); let chatBusy = false; let followNew = null;
+  let token = ""; let polling = false; let pollFailures = 0; let lastRan = null; let firstTrace = true; const detailCache = {}; const known = new Map(); let followNew = null;
   const PLANNED = "<div class='muted small'>Planned · not connected yet.</div>";
   const api = async (path, init = {}) => {
     const method = init.method || "GET";
@@ -33,7 +33,7 @@
   function toSortie(s) {
     const d = detailCache[s.id]; const actions = d ? d.detail.map(a => {
       TOOLS[a.tool] = TOOLS[a.tool] || { effect:a.ballot.effect };
-      return { tool:a.tool, args:a.args, status:a.status, ballot:a.ballot, rejects:0 };
+      return { tool:a.tool, args:a.args, status:a.status, ballot:a.ballot, rejects:0, ...(a.durationMs != null ? { durationMs:a.durationMs } : {}) };
     }) : s.patterns.map(p => ({ tool:"", args:{}, status:"proposed", ballot:{ pattern:p } }));
     const status = mapStatus(s);
     // One pass through the flow is one action: after the plan, only the latest action counts, so a step an earlier
@@ -44,8 +44,18 @@
       apt:!!latest && !!latest.ballot && latest.ballot.outcome === "approval", plug:latestIs("done", "failed", "proposed"), eva:latestIs("done", "failed"), debrief:status !== "active" && status !== "waiting" };
     const phase = status === "waiting" ? "apt" : status === "active" ? (phaseOf.get(s.id) || "plan") : "debrief";
     const last = actions[actions.length - 1];
+    const nt = Object.assign({}, (typeof nodeTimings !== "undefined" && nodeTimings.get(s.id)) || {});
+    if (d && Array.isArray(d.timings)) {
+      for (const t of d.timings) {
+        if (t.role === "consultant" && nt.consult == null) nt.consult = t.durationMs;
+        else if (t.role === "misato" && nt.plan == null) nt.plan = t.durationMs;
+        else if (t.role === "casper" && nt.magi == null) nt.magi = t.durationMs;
+        else if (t.role === "executor" && nt.eva == null) nt.eva = t.durationMs;
+        else if (t.role === "kaji" && nt.detect == null) nt.detect = t.durationMs;
+      }
+    }
     return { id:short(s.id), realId:s.id, title:s.title, preset:null, pilot:s.source === "misato" ? "misato" : "owner", source:"aoba", proactive:false, consult:consulted.has(s.id), advisor:advisedBy.get(s.id) || null, forwarded:forwardedTo.get(s.id) || null, forwardedBaseId:(forwardedTo.baseIds && forwardedTo.baseIds.get(s.id)) || null, origin:originOf.get(s.id) || null, remoteSortie:remoteSorties.get(s.id) || null, // F-025: lit when a consultant advised Misato (its advice is in Comms)
-     
+      timings:d && Array.isArray(d.timings) ? d.timings : null, nodeTimings:nt, phaseStartedAt:(typeof phaseStarted !== "undefined" && phaseStarted.get(s.id)) || Date.parse(s.created),
       why:s.why || "", created:s.created, trust:s.trust, battery:0, spent:0, started:Date.parse(s.created), ended:s.closed ? Date.parse(s.closed) : null, status, phase, done,
       actions, current:Math.max(0, actions.length - 1), ballot:last && last.ballot && last.ballot.verdicts ? last.ballot : null, outcome:known.get(s.id) || null, happened:[], note:"" };
   }
@@ -66,7 +76,7 @@
     if (polling || !token) return; polling = true;
     const historySince = state.lastVisit;
     try {
-      const [latest20, cards, doctor, history, facts, episodes, kajiBases, pilots, update] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("dashboard/history?since=" + encodeURIComponent(new Date(historySince).toISOString())), api("memory"), api("memory/episodes"), api("bases").catch(() => []), api("pilots").catch(() => null), api("update").catch(() => null)]);
+      const [latest20, cards, doctor, history, facts, episodes, kajiBases, pilots, update, queueData] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("dashboard/history?since=" + encodeURIComponent(new Date(historySince).toISOString())), api("memory"), api("memory/episodes"), api("bases").catch(() => []), api("pilots").catch(() => null), api("update").catch(() => null), api("queue").catch(() => null)]);
       state.update = update || doctor.update || null;
       await loadUsage();
       // The newest sorties, plus older pages the owner loaded and every match of the current search, newest first.
@@ -92,7 +102,38 @@
       // renderAll does not redraw Comms: redraw it when new trace lines arrived (not on every poll, so scrolling back stays put).
       // The first refresh always draws Comms, so a base with no sorties yet shows its empty state, never a blank panel.
       if (added || first) renderLog();
-      state.sorties = list.map(toSortie);
+      const queuedSorties = (queueData && Array.isArray(queueData.queued) ? queueData.queued : []).map(q => ({
+        id: "Q-" + q.id.slice(0, 4).toUpperCase(),
+        realId: q.id,
+        title: q.title,
+        preset: null,
+        pilot: "misato",
+        source: q.channel || "aoba",
+        proactive: false,
+        consult: false,
+        advisor: null,
+        forwarded: null,
+        origin: null,
+        remoteSortie: null,
+        why: "",
+        created: q.enqueuedAt,
+        trust: "trusted",
+        battery: 0,
+        spent: 0,
+        started: Date.parse(q.enqueuedAt),
+        ended: null,
+        status: "queued",
+        ahead: q.ahead,
+        phase: "intake",
+        done: { detect: true, intake: true },
+        actions: [],
+        current: 0,
+        ballot: null,
+        outcome: null,
+        happened: [],
+        note: "Queued, " + q.ahead + " ahead",
+      }));
+      state.sorties = [...queuedSorties, ...list.map(toSortie)];
       state.approvals = cards.map(toApproval).filter(ap => state.sorties.some(s => s.id === ap.sortie));
       state.reminders = history.reminders.filter(r => !r.delivered && !r.cancelled && Date.parse(r.due) > Date.now()).sort((a, b) => a.due.localeCompare(b.due));
       state.upcoming = state.reminders.map(r => ({ at:Date.parse(r.due), title:r.title, kind:"reminder", label:when(r) }));
@@ -149,7 +190,8 @@
     button.blur(); renderBudget(); const nextButton = document.querySelector('[data-usage-page="' + direction + '"]:not(:disabled)') || document.querySelector('[data-usage-page]:not(:disabled)'); if (nextButton) nextButton.focus();
   });
   const seen = new Set();
-  const phaseOf = new Map(), advisedBy = new Map(), forwardedTo = new Map(), originOf = new Map(), remoteSorties = new Map();
+  const phaseOf = new Map(), phaseStarted = new Map(), nodeTimings = new Map(), advisedBy = new Map(), forwardedTo = new Map(), originOf = new Map(), remoteSorties = new Map();
+  const addNodeTiming = (id, node, ms) => { if (typeof ms !== "number") return; const nt = nodeTimings.get(id) || {}; nt[node] = (nt[node] || 0) + ms; nodeTimings.set(id, nt); };
   const generic = () => { const r = modelsData && modelsData.models && modelsData.models.roles; return !!(r && r.consultant && r.consultant.model); };
   async function loadEvents(id) {
     let after = 0; const all = []; let added = 0;
@@ -175,10 +217,18 @@
       // The main base dropped out and this base answered in the same sortie: local work means it is not shown as forwarded.
       if (e.kind === "misato.consult" || e.kind === "ballot" || e.kind === "misato.step") { forwardedTo.delete(id); if (forwardedTo.baseIds) forwardedTo.baseIds.delete(id); remoteSorties.delete(id); }
       if (e.kind === "misato.request" && /^kaji:/.test(p.conversation || "")) originOf.set(id, baseName(String(p.conversation).slice(5).split("-").slice(0, 2).join("-")));
-      if (e.kind === "misato.consult") { consulted.add(id); advisedBy.set(id, (p.pilot && p.pilot.name ? p.pilot.name : "Generic pilot") + (p.model ? " · " + p.model : "")); }
+      const noteTiming = (node, ms) => { if (typeof addNodeTiming === "function") addNodeTiming(id, node, ms); };
+      if (e.kind === "misato.consult") { consulted.add(id); advisedBy.set(id, (p.pilot && p.pilot.name ? p.pilot.name : "Generic pilot") + (p.model ? " · " + p.model : "")); noteTiming("consult", p.durationMs); }
+      if (e.kind === "misato.step" || e.kind === "misato.reply" || e.kind === "misato.asked") noteTiming("plan", p.durationMs);
+      if (e.kind === "ballot" && Array.isArray(p.verdicts)) {
+        const magiMs = p.verdicts.filter(v => !v.shadow && typeof v.durationMs === "number").reduce((m, v) => Math.max(m, v.durationMs), 0);
+        if (magiMs > 0 || p.verdicts.some(v => v.seat === "casper" && typeof v.durationMs === "number")) noteTiming("magi", magiMs);
+      }
+      if (e.kind === "action.done" || e.kind === "action.failed") noteTiming("eva", p.durationMs);
+      if (e.kind === "kaji.answered" && typeof p.transferMs === "number") noteTiming("detect", p.transferMs);
       // F-051: the step a running sortie is on, from its latest event (not always MAGI).
       const step = { "misato.request":generic() ? "consult" : "plan", "misato.consult":"plan", "misato.resumed":"plan", "misato.asked":"apt", "misato.answered":"plan", "action.done":"plan", "action.failed":"plan", "approval.requested":"apt", "approval.approve":"plug", "misato.reply":"debrief" }[e.kind] || (e.kind === "ballot" ? (p.outcome === "grant" ? "plug" : p.outcome === "approval" ? "apt" : "plan") : null);
-      if (step) phaseOf.set(id, step);
+      if (step) { phaseOf.set(id, step); if (typeof phaseStarted !== "undefined") phaseStarted.set(id, t); }
       if (line) { state.log.push({ t, msg:line[0], cls:line[1], s:s.id, who:line[2], chat:e.kind.startsWith("misato.") }); added++; }
     }
     state.log.sort((a, b) => a.t - b.t); if (state.log.length > 300) state.log.splice(0, state.log.length - 300);
@@ -321,20 +371,39 @@
   };
   window.chat = async function (text) {
     log(text, "", null, "you"); state.log[state.log.length - 1].chat = true;
-    if (chatBusy) { log("Misato is still working on the previous request.", "warn", null, "misato"); return; }
     // F-051: where the request goes, said before it goes: another online main base gets it over the Kaji line.
     const main = (state.kajiBases || []).find(b => b.main && !b.self && b.online);
     const command = /^\/|^ask .*\/status[.!?]?$/i.test(text.trim());
+    const requestId = (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID() : ("req-" + Date.now() + "-" + Math.random().toString(16).slice(2, 8));
     followNew = command ? null : new Set(state.sorties.map(x => x.realId));
-    chatBusy = true; log(command ? "Checking command…" : main ? "Forwarded to " + main.name + " · Misato there is planning" : "Misato is planning", "", null, "misato");
-    try { const r = await api("chat", { method:"POST", body:JSON.stringify({ message:text, conversation:"dashboard" }) });
+    log(command ? "Checking command…" : main ? "Forwarded to " + main.name + " · Misato there is planning" : "Misato is planning", "", null, "misato");
+    let settled = false;
+    const queueTimer = command ? null : setTimeout(async () => {
+      if (settled) return;
+      try {
+        const q = await api("queue");
+        const entry = (q.queued || []).find(item => item.id === requestId);
+        if (entry && entry.ahead > 0) log("Queued, " + entry.ahead + " ahead.", "warn", null, "misato");
+        poll();
+      } catch { /* ignore queue check errors */ }
+    }, 60);
+    try { const r = await api("chat", { method:"POST", body:JSON.stringify({ message:text, conversation:"dashboard", requestId }) });
       // Dispatched (F-036): the main base answered; its sortie and cards are there, so only the reply is shown here.
       if (r.command) { followNew = null; log(r.reply || r.error || "No command result", r.error ? "danger" : "ok", null, "maya"); }
       else if (r.base) log((r.reply || ("Could not finish: " + (r.error || "no reply"))) + " · answered by " + r.base.name + (r.waiting && r.waiting.length ? "; decide its card on Aoba or on " + r.base.name + "'s dashboard" : ""), r.reply ? "ok" : "danger", null, "misato");
       else state.selected = short(r.sortieId); }
     catch (e) { log("Misato could not answer: " + e.message, "danger", null, "misato"); }
-    finally { chatBusy = false; poll(); }
+    finally { settled = true; if (queueTimer) clearTimeout(queueTimer); poll(); }
   };
+  document.addEventListener("click", async e => {
+    const btn = e.target.closest && e.target.closest("[data-cancel-queue]");
+    if (!btn) return;
+    e.stopPropagation();
+    const id = btn.dataset.cancelQueue;
+    try { await api("queue/" + encodeURIComponent(id), { method:"DELETE" }); log("Queued request cancelled.", "warn", null, "misato"); }
+    catch (err) { log("Cancel queued failed: " + err.message, "danger", null, "misato"); }
+    poll();
+  });
   window.seatMetric = function (seat, s, a) {
     // Owner, 2026-11-05: each seat's role; Casper says whether it was asked. The details are on hover (index.html).
     if (seat === "melchior") return "rules";

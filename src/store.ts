@@ -519,15 +519,22 @@ export class Store {
   }
   /** Undoes a cancellation while the reminder is still in the future and undelivered: the inverse of cancel. */
   restore(id: string): boolean {
-    return (
-      Number(
-        this.db
-          .prepare(
-            'UPDATE reminders SET cancelled=NULL WHERE id=? AND delivered IS NULL AND cancelled IS NOT NULL AND due>?',
-          )
-          .run(id, new Date().toISOString()).changes,
-      ) > 0
-    );
+    this.db.exec('BEGIN IMMEDIATE');
+    try {
+      const ok =
+        Number(
+          this.db
+            .prepare(
+              'UPDATE reminders SET cancelled=NULL WHERE id=? AND delivered IS NULL AND cancelled IS NOT NULL AND due>?',
+            )
+            .run(id, new Date().toISOString()).changes,
+        ) > 0;
+      this.db.exec('COMMIT');
+      return ok;
+    } catch (e) {
+      this.db.exec('ROLLBACK');
+      throw e;
+    }
   }
   /** Changes the title and/or the time of a reminder that has not fired or been cancelled; undefined when there is none. */
   update(
@@ -541,34 +548,44 @@ export class Store {
       (patch.title === undefined && patch.due === undefined && patch.kind === undefined && patch.end === undefined)
     )
       throw new Error('Give a new title or a new due time.');
-    const rawRow = this.db
-      .prepare(
-        'SELECT r.*, COALESCE(rt.kind, \'at\') AS kind, rt."end" AS "end" FROM reminders r LEFT JOIN reminder_times rt ON rt.reminder_id=r.id WHERE r.id=? AND r.delivered IS NULL AND r.cancelled IS NULL',
-      )
-      .get(id) as Reminder | undefined;
-    if (!rawRow) return undefined;
-    const row = this.normalizeRow(rawRow);
-    const nextKind = patch.kind !== undefined ? normalizeReminderKind(patch.kind) : row.kind;
-    const nextDue = patch.due ?? (nextKind === 'until' && patch.end === undefined && row.end ? row.end : row.due);
-    const nextEnd =
-      patch.end !== undefined
-        ? patch.end
-        : nextKind === 'from-to'
-          ? row.end
-          : nextKind === 'until' && patch.due === undefined
+    this.db.exec('BEGIN IMMEDIATE');
+    try {
+      const rawRow = this.db
+        .prepare(
+          'SELECT r.*, COALESCE(rt.kind, \'at\') AS kind, rt."end" AS "end" FROM reminders r LEFT JOIN reminder_times rt ON rt.reminder_id=r.id WHERE r.id=? AND r.delivered IS NULL AND r.cancelled IS NULL',
+        )
+        .get(id) as Reminder | undefined;
+      if (!rawRow) {
+        this.db.exec('COMMIT');
+        return undefined;
+      }
+      const row = this.normalizeRow(rawRow);
+      const nextKind = patch.kind !== undefined ? normalizeReminderKind(patch.kind) : row.kind;
+      const nextDue = patch.due ?? (nextKind === 'until' && patch.end === undefined && row.end ? row.end : row.due);
+      const nextEnd =
+        patch.end !== undefined
+          ? patch.end
+          : nextKind === 'from-to'
             ? row.end
-            : undefined;
-    const checked = this.checkReminder(patch.title ?? row.title, nextDue, now, {
-      kind: nextKind,
-      end: nextEnd,
-    });
-    this.db
-      .prepare('UPDATE reminders SET title=?,due=? WHERE id=? AND delivered IS NULL AND cancelled IS NULL')
-      .run(checked.title, checked.due, id);
-    this.db
-      .prepare('INSERT OR REPLACE INTO reminder_times(reminder_id, kind, "end") VALUES(?,?,?)')
-      .run(id, checked.kind, checked.end);
-    return { ...row, ...checked };
+            : nextKind === 'until' && patch.due === undefined
+              ? row.end
+              : undefined;
+      const checked = this.checkReminder(patch.title ?? row.title, nextDue, now, {
+        kind: nextKind,
+        end: nextEnd,
+      });
+      this.db
+        .prepare('UPDATE reminders SET title=?,due=? WHERE id=? AND delivered IS NULL AND cancelled IS NULL')
+        .run(checked.title, checked.due, id);
+      this.db
+        .prepare('INSERT OR REPLACE INTO reminder_times(reminder_id, kind, "end") VALUES(?,?,?)')
+        .run(id, checked.kind, checked.end);
+      this.db.exec('COMMIT');
+      return { ...row, ...checked };
+    } catch (e) {
+      this.db.exec('ROLLBACK');
+      throw e;
+    }
   }
   rescheduleAllDayReminders(briefAt?: string, timeZone?: string): void {
     const defaults = this.reminderDefaults();
@@ -588,13 +605,20 @@ export class Store {
     }
   }
   cancel(id: string): boolean {
-    return (
-      Number(
-        this.db
-          .prepare('UPDATE reminders SET cancelled=? WHERE id=? AND delivered IS NULL AND cancelled IS NULL')
-          .run(new Date().toISOString(), id).changes,
-      ) > 0
-    );
+    this.db.exec('BEGIN IMMEDIATE');
+    try {
+      const ok =
+        Number(
+          this.db
+            .prepare('UPDATE reminders SET cancelled=? WHERE id=? AND delivered IS NULL AND cancelled IS NULL')
+            .run(new Date().toISOString(), id).changes,
+        ) > 0;
+      this.db.exec('COMMIT');
+      return ok;
+    } catch (e) {
+      this.db.exec('ROLLBACK');
+      throw e;
+    }
   }
   tick(now = new Date()): number {
     const config = this.home ? readConfig(this.home) : undefined;
@@ -1290,6 +1314,7 @@ export class Store {
   ): { result: unknown } | { error: string } {
     this.ledger.authorize(grantId, tool, args);
     let outcome: { result: unknown } | { error: string };
+    const execT0 = performance.now();
     try {
       outcome = {
         result: execute(this, tool, args, {
@@ -1301,6 +1326,7 @@ export class Store {
     } catch (e) {
       outcome = { error: e instanceof Error ? e.message : 'Executor failed.' };
     }
+    const durationMs = Math.max(0, Math.round(performance.now() - execT0));
     if ('result' in outcome && tool === 'memory.recall') {
       const facts = outcome.result as { tainted: boolean }[];
       this.ledger.intake(sortieId, 'tool:' + tool, facts.some((f) => f.tainted) ? 'tainted' : 'trusted');
@@ -1326,7 +1352,7 @@ export class Store {
       );
     }
     if ('result' in outcome && tool === 'agency.status') this.ledger.intake(sortieId, 'tool:' + tool, 'trusted');
-    this.ledger.finished(sortieId, actionId, tool, outcome);
+    this.ledger.finished(sortieId, actionId, tool, outcome, new Date(), durationMs);
     return outcome;
   }
   private settle(sortieId: string, status: 'done' | 'failed') {
@@ -1401,13 +1427,24 @@ export class Store {
   closedSince(since: string) {
     return this.ledger.closedSince(since);
   }
+  timingSummary(since: string) {
+    return this.ledger.timingSummary(since);
+  }
   /** F-021: what an external tool returned, recorded on its action like a built-in tool's result. */
-  finishedExternal(sortieId: string, actionId: string, tool: string, outcome: { text: string } | { error: string }) {
+  finishedExternal(
+    sortieId: string,
+    actionId: string,
+    tool: string,
+    outcome: { text: string } | { error: string },
+    durationMs?: number,
+  ) {
     this.ledger.finished(
       sortieId,
       actionId,
       tool,
       'error' in outcome ? { error: outcome.error } : { result: { text: outcome.text } },
+      new Date(),
+      durationMs,
     );
     return true;
   }

@@ -30,27 +30,52 @@ export interface EventPayloads {
   'approval.edit': { approvalId: string; source: string };
   'approval.expired': { approvalId: string; source: 'ttl' };
   'spear': { reason: string; revoked: number; stoodDown: number; happenedCount: number; happened: Happened[] };
-  'misato.reply': { text: string };
-  'misato.asked': { text: string; conversation: string; expires: string; forwarded?: { id: string; name: string } };
+  'misato.reply': { text: string; durationMs?: number };
+  'misato.asked': {
+    text: string;
+    conversation: string;
+    expires: string;
+    forwarded?: { id: string; name: string };
+    durationMs?: number;
+  };
   'misato.answered': { text: string; questionSequence: number };
   'misato.unanswered': { questionSequence: number };
   'misato.request': { text: string; conversation?: string };
-  'misato.step': { step: Step; actionId?: string };
+  'misato.step': { step: Step; actionId?: string; durationMs?: number };
   'misato.waiting': { approvalIds: string[] };
   /** F-025: a consultant's advice before Misato planned (no vote); kept with the sortie for the trace. */
-  'misato.consult': { advice: string; model: string; pilot?: { id: string; name: string; why: 'pinned' | 'keywords' } };
+  'misato.consult': {
+    advice: string;
+    model: string;
+    pilot?: { id: string; name: string; why: 'pinned' | 'keywords' };
+    durationMs?: number;
+  };
   'misato.resumed': Record<string, never>;
   /** F-051: this request went to the main base over the Kaji line, and what came back. */
   'kaji.forwarded': { base: { id: string; name: string } };
-  'kaji.answered': { base: { id: string; name: string }; sortieId: string };
+  'kaji.answered': { base: { id: string; name: string }; sortieId: string; transferMs?: number };
   /** F-045: no specialist fitted this request; the generic pilot named its domain. Counted to propose a new pilot. */
-  'pilot.unmatched': { domain: string };
+  'pilot.unmatched': { domain: string; durationMs?: number };
   /** B-011: what another base did with an action this sortie sent it (kaji.run), as the owner reads it. */
-  'kaji.result': { base: string; tool: string; outcome: string; text: string };
+  'kaji.result': {
+    base: string;
+    tool: string;
+    outcome: string;
+    text: string;
+    durationMs?: number;
+    transferMs?: number;
+  };
   /** F-052: a shadow seat's vote that arrived after the gate decided; it never changes the outcome. */
-  'ballot.shadow': { seat: string; vote: 'approve' | 'reject' | 'abstain'; reason: string; confidence?: number };
-  'action.done': { tool: string; result: unknown };
-  'action.failed': { tool: string; error: string };
+  'ballot.shadow': {
+    seat: string;
+    vote: 'approve' | 'reject' | 'abstain';
+    reason: string;
+    confidence?: number;
+    durationMs?: number;
+    transferMs?: number;
+  };
+  'action.done': { tool: string; result: unknown; durationMs?: number };
+  'action.failed': { tool: string; error: string; durationMs?: number };
   'sortie.done': Record<string, never>;
   'sortie.failed': Record<string, never>;
 }

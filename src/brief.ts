@@ -1,6 +1,7 @@
 import { runMessage, type InstrumentalityRun } from './instrumentality-runs.ts';
 import { normalizeReminderKind, type ReminderKind } from './reminder-time.ts';
 import type { StoreApi } from './runtime.ts';
+import { formatDurationMs, type RoleTimingStats } from './timing.ts';
 /**
  * Hyuga's brief (F-003): a short daily summary built from facts in the ledger, not by a model, so it is quick and never
  * invents anything. It lists the cards waiting for the owner, reminders due in the next 24 hours, what finished or
@@ -22,6 +23,8 @@ export interface BriefInput {
   closed?: { done: number; failed: number };
   /** Sources the brief could not read: shown as such, never as "nothing" or "all fine" (B-006). */
   unavailable?: Source[];
+  /** F-052-T05: median and slowest duration per role since the last brief. */
+  timings?: RoleTimingStats[];
 }
 export type Source = 'approvals' | 'reminders' | 'sorties' | 'health' | 'expired';
 const words = {
@@ -41,6 +44,7 @@ const words = {
     health: 'Health',
     ok: 'All checks pass.',
     unread: 'could not be read for this brief.',
+    timings: 'Timings (median / slowest)',
   },
   it: {
     title: 'Il brief di Hyuga',
@@ -58,6 +62,7 @@ const words = {
     health: 'Stato',
     ok: 'Tutti i controlli sono a posto.',
     unread: 'non leggibile per questo brief.',
+    timings: 'Tempi (mediana / più lento)',
   },
 };
 /** The sortie's short ID, as the dashboard shows it: the way to its trace. */
@@ -150,6 +155,15 @@ export function composeBrief(b: BriefInput): string {
         ]),
     '',
     `${w.health}: ${off('health') ? w.unread : b.health.length ? b.health.join('; ') : w.ok}`,
+    ...(b.timings?.length
+      ? [
+          '',
+          `${w.timings}:`,
+          ...b.timings
+            .slice(0, 6)
+            .map((t) => `• ${t.role}: ${formatDurationMs(t.medianMs)} / ${formatDurationMs(t.maxMs)} (${t.count})`),
+        ]
+      : []),
   ];
   return lines.join('\n').slice(0, 3500);
 }
@@ -179,12 +193,23 @@ export function briefDue(now: Date, timeZone: string, at: string, lastSent: stri
 /** Reads the brief's facts through the store interface (the running service, or the CLI's local store). Each source is
  read on its own: one that fails is named in `unavailable`, and the brief says so instead of showing it as empty (B-006). */
 export async function gatherBrief(
-  store: Pick<StoreApi, 'approvals' | 'list' | 'sorties' | 'health' | 'expiredApprovals' | 'closedSince'>,
+  store: Pick<
+    StoreApi,
+    'approvals' | 'list' | 'sorties' | 'health' | 'expiredApprovals' | 'closedSince' | 'timingSummary'
+  >,
   since: Date,
 ): Promise<
   Pick<
     BriefInput,
-    'approvals' | 'reminders' | 'sorties' | 'health' | 'expired' | 'closed' | 'unavailable' | 'instrumentality'
+    | 'approvals'
+    | 'reminders'
+    | 'sorties'
+    | 'health'
+    | 'expired'
+    | 'closed'
+    | 'unavailable'
+    | 'instrumentality'
+    | 'timings'
   >
 > {
   const unavailable: Source[] = [];
@@ -196,12 +221,15 @@ export async function gatherBrief(
       return undefined;
     }
   };
-  const [cards, reminders, closed, health, expired] = await Promise.all([
+  const [cards, reminders, closed, health, expired, timings] = await Promise.all([
     read('approvals', () => store.approvals(5)),
     read('reminders', () => store.list()),
     read('sorties', async () => (store.closedSince ? await store.closedSince(since.toISOString()) : undefined)),
     read('health', () => store.health()),
     read('expired', () => store.expiredApprovals?.(since.toISOString()) ?? []),
+    Promise.resolve()
+      .then(() => store.timingSummary?.(since.toISOString()))
+      .catch(() => undefined),
   ]);
   // Without closedSince (an older store), the newest 50 sorties are the best available.
   const recent = closed
@@ -244,5 +272,6 @@ export async function gatherBrief(
         : []),
     ],
     ...(unavailable.length ? { unavailable } : {}),
+    ...(timings?.length ? { timings } : {}),
   };
 }

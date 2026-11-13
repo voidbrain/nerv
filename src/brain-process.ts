@@ -20,6 +20,7 @@ import {
   type RouteName,
 } from './model.ts';
 import { RouteWatch, describeChange, type RouteChange } from './route-health.ts';
+import { ModelBudget } from './model-budget.ts';
 import { casperAsk, parseCasper, type CasperInput } from './casper.ts';
 import {
   consultantAsk,
@@ -28,6 +29,7 @@ import {
   parseAdvice,
   parsePlan,
   remoteToolDoc,
+  type ExistingReminder,
   type RemoteOffer,
   type Recalled,
   type Step,
@@ -45,6 +47,7 @@ let timeZone = 'Europe/Rome';
 let language: 'it' | 'en' = 'en';
 let configError: string | undefined;
 let loaded = false;
+const modelBudget = new ModelBudget();
 /** Reads the model settings and the cloud key. A failed reload keeps the settings that last worked, so a typo never takes the brain down. */
 function load(): { error?: string; kept?: boolean } {
   if (!home) return {};
@@ -52,6 +55,7 @@ function load(): { error?: string; kept?: boolean } {
     const config = readConfig(home);
     const nextKey = readModelKey(home);
     models = config.models;
+    modelBudget.configure(models.concurrency);
     timeZone = config.timeZone;
     language = config.language;
     key = nextKey;
@@ -86,6 +90,8 @@ async function run(ask: Ask, m: Models): Promise<Reply> {
       },
     });
   }
+  const modelName = route === 'local' ? m.local?.model : m.cloud?.model;
+  const lease = modelName ? await modelBudget.acquire(modelName) : undefined;
   try {
     const reply = await complete(ask, m, key, {
       timeoutMs: MODEL_TIMEOUT_MS - 5000,
@@ -99,6 +105,8 @@ async function run(ask: Ask, m: Models): Promise<Reply> {
   } catch (e) {
     if (e instanceof ModelError) note(watch.record(route, false, e.message));
     throw e;
+  } finally {
+    lease?.release();
   }
 }
 /** A cheap reachability check of the local route: a TCP connection opened and closed, no request and no model call.
@@ -190,6 +198,7 @@ process.on('message', (value: unknown) => {
             timeZone,
             ...(params.context ? { context: params.context as Turn[] } : {}),
             ...(params.memory ? { memory: params.memory as Recalled[] } : {}),
+            ...(Array.isArray(params.reminders) ? { reminders: params.reminders as ExistingReminder[] } : {}),
             ...(Array.isArray(params.bases) ? { bases: params.bases as { id: string; name: string }[] } : {}),
             ...(typeof params.advice === 'string' ? { advice: params.advice } : {}),
             ...(params.language === 'it' || params.language === 'en' ? { language: params.language } : {}),

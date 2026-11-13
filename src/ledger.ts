@@ -19,6 +19,7 @@ import {
 } from './policy.ts';
 import type { Step } from './misato.ts';
 import { explainSortie, type WhyRecord } from './why.ts';
+import { computeRoleTimingStats, type RoleTimingStats, type SortieTiming } from './timing.ts';
 import {
   EVENT_SCHEMA_VERSION,
   MAX_SPEAR_HAPPENED,
@@ -89,6 +90,7 @@ export interface ActionDetail {
   ballot: Ballot;
   created: string;
   status: 'proposed' | 'waiting' | 'done' | 'failed' | 'rejected' | 'stood-down';
+  durationMs?: number;
 }
 export interface Proposed {
   actionId: string;
@@ -434,6 +436,7 @@ export class Ledger {
     conversation: string,
     forwarded?: { id: string; name: string },
     now = new Date(),
+    durationMs?: number,
   ): { text: string; expires: string } {
     return this.tx(() => {
       if (this.question(conversation, now)) throw new Error('A clarification already waits in this conversation.');
@@ -445,7 +448,13 @@ export class Ledger {
         sortieId,
         null,
         'misato.asked',
-        { text, conversation, expires, ...(forwarded ? { forwarded } : {}) },
+        {
+          text,
+          conversation,
+          expires,
+          ...(forwarded ? { forwarded } : {}),
+          ...(durationMs !== undefined ? { durationMs } : {}),
+        },
         now,
       );
       return { text, expires };
@@ -726,7 +735,7 @@ export class Ledger {
     return rows.map((r) => this.summarize(r));
   }
   /** One sortie with its actions: tool, arguments, ballot and what became of each. */
-  sortie(id: string): (SortieSummary & { detail: ActionDetail[] }) | undefined {
+  sortie(id: string): (SortieSummary & { detail: ActionDetail[]; timings?: SortieTiming[] }) | undefined {
     if (typeof id !== 'string' || !id || id.length > 100) throw new Error('Invalid sortie.');
     const row = this.db
       .prepare('SELECT id,source,title,trust,status,created,closed FROM sorties WHERE id=?')
@@ -735,7 +744,8 @@ export class Ledger {
     const actions = this.db
       .prepare(
         `SELECT x.id,x.tool,x.args,x.ballot,x.created,a.decision,
-    (SELECT kind FROM events e WHERE e.action_id=x.id AND e.kind IN ('action.done','action.failed') ORDER BY sequence DESC LIMIT 1) AS ran
+    (SELECT kind FROM events e WHERE e.action_id=x.id AND e.kind IN ('action.done','action.failed') ORDER BY sequence DESC LIMIT 1) AS ran,
+    (SELECT payload FROM events e WHERE e.action_id=x.id AND e.kind IN ('action.done','action.failed') ORDER BY sequence DESC LIMIT 1) AS ran_payload
     FROM actions x LEFT JOIN approvals a ON a.action_id=x.id WHERE x.sortie_id=? ORDER BY x.created`,
       )
       .all(id) as {
@@ -746,9 +756,12 @@ export class Ledger {
       created: string;
       decision: string | null;
       ran: string | null;
+      ran_payload: string | null;
     }[];
     const detail = actions.map((x): ActionDetail => {
       const ballot = JSON.parse(x.ballot) as Ballot;
+      const ranPayload = x.ran_payload ? (JSON.parse(x.ran_payload) as { durationMs?: number }) : undefined;
+      const durationMs = typeof ranPayload?.durationMs === 'number' ? ranPayload.durationMs : undefined;
       const status: ActionDetail['status'] =
         x.ran === 'action.done'
           ? 'done'
@@ -768,9 +781,151 @@ export class Ledger {
         ballot,
         created: x.created,
         status,
+        ...(durationMs !== undefined ? { durationMs } : {}),
       };
     });
-    return { ...this.summarize(row), detail };
+    const timings = this.collectTimings(id);
+    return { ...this.summarize(row), detail, ...(timings.length ? { timings } : {}) };
+  }
+  private seatDisplayName(seat: string): string {
+    return seat
+      .replace(/^extra:/i, '')
+      .replace(/(^|[^\p{L}])(\p{L})/gu, (_, b: string, c: string) => b + c.toUpperCase());
+  }
+  private collectTimings(sortieId: string): SortieTiming[] {
+    const rows = this.db
+      .prepare(
+        "SELECT kind,payload FROM events WHERE sortie_id=? AND kind IN ('misato.consult','misato.step','misato.reply','misato.asked','ballot','ballot.shadow','action.done','action.failed','kaji.answered') ORDER BY sequence",
+      )
+      .all(sortieId) as { kind: string; payload: string }[];
+    const timings: SortieTiming[] = [];
+    let misatoMs = 0;
+    let hasMisato = false;
+    let casperMs = 0;
+    let hasCasper = false;
+    const seatOrder: string[] = [];
+    const seatMap = new Map<string, SortieTiming>();
+    let executorLabel = '';
+    let executorMs = 0;
+    let hasExecutor = false;
+    const actionExecutors = new Map<string, string>();
+    const actionRows = this.db.prepare('SELECT id,ballot FROM actions WHERE sortie_id=?').all(sortieId) as {
+      id: string;
+      ballot: string;
+    }[];
+    for (const a of actionRows) {
+      const b = JSON.parse(a.ballot) as { executor?: string };
+      if (b.executor) actionExecutors.set(a.id, b.executor.toUpperCase());
+    }
+    for (const r of rows) {
+      const p = JSON.parse(r.payload) as Record<string, unknown>;
+      if (r.kind === 'misato.consult' && typeof p.durationMs === 'number') {
+        const pilot = p.pilot as { name?: string } | undefined;
+        timings.push({
+          role: 'consultant',
+          label: pilot?.name ? pilot.name : 'Consultant',
+          durationMs: p.durationMs,
+        });
+      } else if (
+        (r.kind === 'misato.step' || r.kind === 'misato.reply' || r.kind === 'misato.asked') &&
+        typeof p.durationMs === 'number'
+      ) {
+        misatoMs += p.durationMs;
+        hasMisato = true;
+      } else if (r.kind === 'ballot') {
+        const verdicts = Array.isArray(p.verdicts) ? (p.verdicts as Verdict[]) : [];
+        if (typeof p.executor === 'string') executorLabel = p.executor.toUpperCase();
+        for (const v of verdicts) {
+          if (typeof v.durationMs !== 'number') continue;
+          if (v.seat === 'casper') {
+            casperMs += v.durationMs;
+            hasCasper = true;
+          } else if (v.seat.startsWith('extra:')) {
+            const label = this.seatDisplayName(v.seat);
+            if (!seatMap.has(label)) seatOrder.push(label);
+            seatMap.set(label, {
+              role: 'seat',
+              label,
+              durationMs: v.durationMs,
+              ...(v.shadow ? { shadow: true } : {}),
+              ...(typeof v.transferMs === 'number' ? { transferMs: v.transferMs } : {}),
+            });
+          }
+        }
+      } else if (r.kind === 'ballot.shadow' && typeof p.durationMs === 'number' && typeof p.seat === 'string') {
+        const label = this.seatDisplayName(p.seat);
+        if (!seatMap.has(label)) seatOrder.push(label);
+        seatMap.set(label, {
+          role: 'seat',
+          label,
+          durationMs: p.durationMs,
+          shadow: true,
+          ...(typeof p.transferMs === 'number' ? { transferMs: p.transferMs } : {}),
+        });
+      } else if ((r.kind === 'action.done' || r.kind === 'action.failed') && typeof p.durationMs === 'number') {
+        executorMs += p.durationMs;
+        hasExecutor = true;
+      } else if (r.kind === 'kaji.answered' && typeof p.transferMs === 'number') {
+        const base = p.base as { name?: string } | undefined;
+        timings.push({
+          role: 'kaji',
+          label: base?.name ? `Kaji (${base.name})` : 'Kaji',
+          durationMs: p.transferMs,
+          transferMs: p.transferMs,
+        });
+      }
+    }
+    if (hasMisato) timings.push({ role: 'misato', label: 'Misato', durationMs: misatoMs });
+    if (hasCasper) timings.push({ role: 'casper', label: 'Casper', durationMs: casperMs });
+    for (const label of seatOrder) timings.push(seatMap.get(label)!);
+    if (hasExecutor)
+      timings.push({
+        role: 'executor',
+        label: executorLabel || [...actionExecutors.values()].at(-1) || 'EVA-02',
+        durationMs: executorMs,
+      });
+    return timings;
+  }
+  /** Daily timing summary (F-052-T05): median and slowest duration per role since `since`. */
+  timingSummary(since: string): RoleTimingStats[] {
+    if (typeof since !== 'string' || !Number.isFinite(Date.parse(since))) throw new Error('Invalid date.');
+    const at = new Date(since).toISOString();
+    const rows = this.db
+      .prepare(
+        "SELECT kind,payload FROM events WHERE created>? AND kind IN ('misato.consult','misato.step','misato.reply','misato.asked','ballot','ballot.shadow','action.done','action.failed','kaji.answered')",
+      )
+      .all(at) as { kind: string; payload: string }[];
+    const samples: { role: string; durationMs: number }[] = [];
+    for (const r of rows) {
+      const p = JSON.parse(r.payload) as Record<string, unknown>;
+      if (r.kind === 'misato.consult' && typeof p.durationMs === 'number') {
+        const model = typeof p.model === 'string' && p.model ? p.model : undefined;
+        const pilot = p.pilot as { name?: string } | undefined;
+        const who = pilot?.name ?? 'Consultant';
+        samples.push({ role: model ? `${who} (${model})` : who, durationMs: p.durationMs });
+      } else if (
+        (r.kind === 'misato.step' || r.kind === 'misato.reply' || r.kind === 'misato.asked') &&
+        typeof p.durationMs === 'number'
+      ) {
+        samples.push({ role: 'Misato', durationMs: p.durationMs });
+      } else if (r.kind === 'ballot') {
+        const verdicts = Array.isArray(p.verdicts) ? (p.verdicts as Verdict[]) : [];
+        for (const v of verdicts) {
+          if (typeof v.durationMs !== 'number') continue;
+          if (v.seat === 'casper') samples.push({ role: 'Casper', durationMs: v.durationMs });
+          else if (v.seat.startsWith('extra:'))
+            samples.push({ role: this.seatDisplayName(v.seat), durationMs: v.durationMs });
+        }
+      } else if (r.kind === 'ballot.shadow' && typeof p.durationMs === 'number' && typeof p.seat === 'string') {
+        samples.push({ role: this.seatDisplayName(p.seat), durationMs: p.durationMs });
+      } else if ((r.kind === 'action.done' || r.kind === 'action.failed') && typeof p.durationMs === 'number') {
+        samples.push({ role: 'Executor', durationMs: p.durationMs });
+      } else if (r.kind === 'kaji.answered' && typeof p.transferMs === 'number') {
+        const base = p.base as { name?: string } | undefined;
+        samples.push({ role: base?.name ? `Kaji (${base.name})` : 'Kaji', durationMs: p.transferMs });
+      }
+    }
+    return computeRoleTimingStats(samples);
   }
   /** Sorties closed after `since`, counted by status, with the latest five failures (for the brief, B-006). */
   closedSince(since: string): {
@@ -855,6 +1010,7 @@ export class Ledger {
         .prepare("SELECT payload FROM events WHERE sortie_id=? AND kind='kaji.result' ORDER BY sequence LIMIT 5")
         .all(s.id) as { payload: string }[]
     ).map((r) => (JSON.parse(r.payload) as { text: string }).text);
+    const timings = this.collectTimings(s.id);
     return {
       found: 'one',
       record: {
@@ -863,6 +1019,7 @@ export class Ledger {
         status: s.status,
         why: s.why,
         ...(remote.length ? { remote } : {}),
+        ...(timings.length ? { timings } : {}),
         ...(advice?.advice
           ? { advice: { text: advice.advice, model: [advice.pilot?.name, advice.model].filter(Boolean).join(' · ') } }
           : {}),
@@ -910,8 +1067,16 @@ export class Ledger {
     return { count: rows.length, sorties: rows.slice(0, 5).map(({ id, title }) => ({ id, title })), proposal };
   }
   /** Misato's reply to the owner, kept with the sortie it answers. */
-  reply(sortieId: string, text: string, now = new Date()): void {
-    this.tx(() => this.event(sortieId, null, 'misato.reply', { text: text.slice(0, 4000) }, now));
+  reply(sortieId: string, text: string, now = new Date(), durationMs?: number): void {
+    this.tx(() =>
+      this.event(
+        sortieId,
+        null,
+        'misato.reply',
+        { text: text.slice(0, 4000), ...(durationMs !== undefined ? { durationMs } : {}) },
+        now,
+      ),
+    );
   }
   /** Records what an executor did after `authorize` let it run. */
   finished(
@@ -920,11 +1085,25 @@ export class Ledger {
     tool: string,
     outcome: { result: unknown } | { error: string },
     now = new Date(),
+    durationMs?: number,
   ): void {
     this.tx(() => {
       if ('error' in outcome)
-        this.event(sortieId, actionId, 'action.failed', { tool, error: outcome.error.slice(0, 500) }, now);
-      else this.event(sortieId, actionId, 'action.done', { tool, result: outcome.result }, now);
+        this.event(
+          sortieId,
+          actionId,
+          'action.failed',
+          { tool, error: outcome.error.slice(0, 500), ...(durationMs !== undefined ? { durationMs } : {}) },
+          now,
+        );
+      else
+        this.event(
+          sortieId,
+          actionId,
+          'action.done',
+          { tool, result: outcome.result, ...(durationMs !== undefined ? { durationMs } : {}) },
+          now,
+        );
     });
   }
   pendingApprovals(now = new Date(), limit = 5): Approval[] {
