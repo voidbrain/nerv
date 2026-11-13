@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "id": "F-005-T37",
+  "status": "planned",
+  "title": "Agree the device matrix",
+  "goal": "Agree the device matrix",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "acceptance": [
+    "Agree the device matrix for final acceptance (owner decision)"
+  ],
+  "dependsOn": [
+    "F-005-T11"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "web/**",
+    "native/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never change an unowned installation, service, engine or uncertain physical effect without explicit reconciliation"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
+    "reviewed": "2026-11-13",
+    "baselineDays": 0.25,
+    "ownerHours": 0.25,
+    "agentHours": 0,
+    "ownerKind": "decision"
+  }
+}

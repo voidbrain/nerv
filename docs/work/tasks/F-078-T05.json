@@ -2,13 +2,12 @@
   "version": 1,
   "id": "F-078-T05",
   "parent": "F-078",
-  "title": "Tabgha campaign: remote endpoint and small local fallback",
-  "goal": "Small-model campaign on Tabgha",
+  "title": "Prepare Tabgha for the campaign: allow the run and download qwen2.5:3b",
+  "goal": "Tabgha is ready for the remote-endpoint and small-model campaign",
   "status": "planned",
   "acceptance": [
-    "The T03/T04 packs run on Tabgha against the best two Neo Tokyo-3 models over models.remote, with latency and timeouts recorded, including Neo Tokyo-3 asleep",
-    "The same packs run locally against qwen2.5:1.5b and qwen2.5:3b (downloaded on Tabgha in this step), recorded with base and model identity",
-    "Timeouts and memory pressure on the mini PC recorded, not hidden"
+    "The owner allows the agent to run the campaign on Tabgha over SSH",
+    "qwen2.5:3b is downloaded on Tabgha"
   ],
   "dependsOn": [
     "F-078-T02",
@@ -36,13 +35,11 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h agent + 0.25 h owner",
-    "basis": "Estimated 2026-11-13 at the harness 8.5.0 initial step size; campaign wall time on the host is extra and bounded by the T02 budget. Not a measurement.",
+    "estimate": "0.25 h owner",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
     "reviewed": "2026-11-13",
-    "agentHours": 0.5,
     "ownerHours": 0.25,
-    "baselineAgentHours": 0.5,
-    "estimateAgentHours": 0.5,
+    "agentHours": 0,
     "ownerKind": "procedure"
   },
   "ownerLink": "docs/evaluations/2026-11-13-model-inventory.md#approved-matrix-and-budget-f-078-t02-2026-11-13"

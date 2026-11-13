@@ -23,7 +23,7 @@
     "Use F-006-T05 Mac operating-condition evidence when relevant; Mac sleep/unavailability remains a dependency/recovery check"
   ],
   "dependsOn": [
-    "F-006-T11"
+    "F-006-T15"
   ],
   "resources": [
     "contract:model-routing",

@@ -72,7 +72,8 @@ function summary(record) {
       .map((c, i) => (c === ['🧑‍🔧', '🤔'][i] ? '🧑' : c))
       .join('')
   ];
-  const generated = [7, 9].includes(row.length) && kind !== undefined;
+  // F-073 (8.10.0): eight or ten cells with the Agent cell.
+  const generated = [7, 8, 9, 10].includes(row.length) && kind !== undefined;
   if (record.file !== 'docs/BACKLOG.md' && ![4, 5].includes(row.length) && !generated)
     return { status: 'Unknown', priority: 'Unknown', effort: 'Unknown' };
   assert([4, 5].includes(row.length) || generated, `${record.id}: unsupported summary`);

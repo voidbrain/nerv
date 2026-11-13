@@ -93,6 +93,9 @@ for (let i = 0; i < headings.length; i++) {
       ? [
           'Status|Priority|Effort|Remaining|Procedures|Decisions',
           'Status|Priority|Effort|Remaining|Depends on|Unlocks|Procedures|Decisions',
+          // F-073 (8.10.0): an Agent cell before the human cells.
+          'Status|Priority|Effort|Remaining|Agent|Procedures|Decisions',
+          'Status|Priority|Effort|Remaining|Depends on|Unlocks|Agent|Procedures|Decisions',
         ].includes(header.join('|').replace(/\|Decision$/, '|Decisions')) &&
           cells(row).length === header.length &&
           cells(row)[0] !== signal

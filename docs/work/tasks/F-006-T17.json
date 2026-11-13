@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "id": "F-006-T17",
+  "status": "planned",
+  "title": "Approve the placement campaign plan and budgets",
+  "goal": "Approve the placement campaign plan and budgets",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
+  "acceptance": [
+    "Placement campaign plan with exact cases, repeats and budgets for owner approval"
+  ],
+  "dependsOn": [
+    "F-006-T04"
+  ],
+  "resources": [
+    "contract:model-routing",
+    "src/model.ts",
+    "docs/decisions/**",
+    "docs/work/tasks/F-006-T01.json",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
+    "reviewed": "2026-11-13",
+    "baselineDays": 0.5,
+    "ownerHours": 0.25,
+    "agentHours": 0,
+    "ownerKind": "decision"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "F-049-T12",
+  "parent": "F-049",
+  "title": "Run the first EVA job on the Linux host",
+  "goal": "Run the first EVA job on the Linux host",
+  "status": "planned",
+  "acceptance": [
+    "Enforcement mechanism chosen for Linux against the T01 threat model",
+    "T05 join tests pass on Linux in CI",
+    "Owner runs the first job on the mini PC"
+  ],
+  "dependsOn": [
+    "F-049-T10"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/architecture/**",
+    "docs/decisions/**",
+    "docs/work/records/F-049.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "privacy-review",
+    "distributed-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "Join tests on Linux CI; owner real-device check"
+  ],
+  "escalation": [
+    "Owner check: first job on the real mini PC"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h owner",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
+    "reviewed": "2026-11-13",
+    "baselineDays": 2,
+    "ownerHours": 0.5,
+    "agentHours": 0,
+    "ownerKind": "procedure"
+  }
+}

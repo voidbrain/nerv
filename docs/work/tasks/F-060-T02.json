@@ -9,7 +9,7 @@
     "Dated note: OSC 7501 support, --keep recovery, API stability and security, outcome for F-012, F-019, F-045, F-048, F-049"
   ],
   "dependsOn": [
-    "F-060-T01"
+    "F-060-T03"
   ],
   "resources": [
     "docs/**",

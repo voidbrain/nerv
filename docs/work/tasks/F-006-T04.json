@@ -3,7 +3,7 @@
   "parent": "F-006",
   "id": "F-006-T04",
   "status": "planned",
-  "title": "T04a — Placement campaign plan with exact cases, repeats and budgets for owner approval",
+  "title": "Draft the placement campaign plan with exact cases, repeats and budgets",
   "goal": "Placement campaign plan with exact cases, repeats and budgets for owner approval.",
   "capabilities": [
     "bounded-edit",
@@ -37,14 +37,11 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h agent + 0.25 hours owner",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "estimate": "0.25 h",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
     "reviewed": "2026-11-13",
-    "baselineDays": 0.5,
     "agentHours": 0.25,
-    "ownerHours": 0.25,
     "baselineAgentHours": 0.75,
-    "estimateAgentHours": 0.25,
-    "ownerKind": "decision"
+    "estimateAgentHours": 0.25
   }
 }
