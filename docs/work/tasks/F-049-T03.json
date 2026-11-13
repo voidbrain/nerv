@@ -47,5 +47,6 @@
     "baselineAgentHours": 2.25,
     "estimateAgentHours": 0.25,
     "ownerKind": "both"
-  }
+  },
+  "ownerLink": "docs/decisions/eva-runner.md#per-job-enforcement-boundaries-supported-hosts"
 }

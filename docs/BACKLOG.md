@@ -84,11 +84,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | F-005-T19 — T08b — Node install or upgrade choices with ownership and recovery; never replaces a user-managed runtime silently | 1.25 h | 0.5 h (stated) | 0 h | Completed | — | — |
 | — | F-005-T20 — T08c — Engine/provider contract for several instances and endpoints, local and remote; Ollama becomes one adapter | 1.25 h | 0.5 h (stated) | 0 h | Completed | — | — |
 | — | F-005-T21 — T08d — Optional start-at-login or on-demand management of selected owned local engines | 1 h | 0.25 h (stated) | 0 h | Completed | — | — |
-| 🟢 Small | F-005-T22 — T08e — Demonstration of prerequisites and optional engine management on an owner-selected target | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned | — | 🤔 |
+| 🟢 Small | F-005-T22 — T08e — Demonstration of prerequisites and optional engine management on an owner-selected target | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned | — | [🤔](acceptance/f005-t22-target-decision.md) |
 | — | F-005-T23 — T09b — Windows update and recovery: backup, rehearsal and checkout | 1 h | 0.5 h (stated) | 0 h | Completed | — | — |
-| 🟢 Small | F-005-T24 — T09c — Acceptance on an owner-selected Windows machine | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned | 🧑‍🔧 | 🤔 |
+| 🟢 Small | F-005-T24 — T09c — Acceptance on an owner-selected Windows machine | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned | [🧑‍🔧](acceptance/f005-t24-tabgha-windows.md) | [🤔](acceptance/f005-t24-tabgha-windows.md) |
 | — | F-005-T25 — T10b — Linux update and recovery | 1 h | 0.25 h (stated) | 0 h | Completed | — | — |
-| 🟢 Small | F-005-T26 — T10c — Acceptance on an owner-selected mini PC, Pi or equivalent | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned | 🧑‍🔧 | 🤔 |
+| 🟢 Small | F-005-T26 — T10c — Acceptance on an owner-selected mini PC, Pi or equivalent | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned | [🧑‍🔧](acceptance/f009-service-login-procedure.md#part-2--linux-target-selection-and-acceptance-selected-linux-host-bash) | [🤔](acceptance/f009-service-login-procedure.md#part-2--linux-target-selection-and-acceptance-selected-linux-host-bash) |
 | 🟢 Small | F-005-T27 — T11b — Enrolment, revocation, leases, fencing and cancellation across the device matrix | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned | 🧑‍🔧 | — |
 | 🟢 Small | F-005-T28 — T11c — Reconnect, locks and uncertain physical results across the device matrix | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned | 🧑‍🔧 | — |
 | 🟢 Small | F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned | 🧑‍🔧 | — |
@@ -136,7 +136,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback | 0.5 h | 0.5 h (stated) | 0 h | Completed | — | — |
 | 🟢 Small | F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases | 0.25 h | 0 h | 0.25 h | Planned | — | — |
 | 🟢 Small | F-006-T04 — T04a — Placement campaign plan with exact cases, repeats and budgets for owner approval | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned | — | 🤔 |
-| 🟢 Small | F-006-T05 — T05a — Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned | 🧑‍🔧 | — |
+| 🟢 Small | F-006-T05 — T05a — Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned | [🧑‍🔧](evaluations/mac-load-scenarios.md#planned-acceptance-not-new-qualification) | — |
 | — | F-006-T06 — T01b — Configuration validation for remote endpoints; the loopback-only local route stays guaranteed; regressions | 0.5 h | 0.5 h (stated) | 0 h | Completed | — | — |
 | 🟢 Small | F-006-T07 — T02b — Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol | 0.25 h | 0 h | 0.25 h | Planned | — | — |
 | 🟢 Small | F-006-T08 — T02c — Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route | 0.25 h | 0 h | 0.25 h | Planned | — | — |
@@ -322,7 +322,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|
 | — | F-049-T01 — Define deterministic isolated runner admission and enforcement | 0.5 h | 0.25 h (stated) | 0 h | Completed | — | — |
 | 🟢 Small | F-049-T02 — EVA class definitions and least-class admission | 0.25 h | 0 h | 0.25 h | Ready | — | — |
-| 🟢 Small | F-049-T03 — Choose the macOS host enforcement mechanism | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Ready | 🧑‍🔧 | 🤔 |
+| 🟢 Small | F-049-T03 — Choose the macOS host enforcement mechanism | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Ready | [🧑‍🔧](decisions/eva-runner.md#per-job-enforcement-boundaries-supported-hosts) | [🤔](decisions/eva-runner.md#per-job-enforcement-boundaries-supported-hosts) |
 | 🟢 Small | F-049-T04 — EVA-03 instance per job | 0.5 h | 0 h | 0.5 h | Planned | — | — |
 | 🟢 Small | F-049-T05 — Escape and recovery join tests | 0.25 h | 0 h | 0.25 h | Planned | — | — |
 | 🟢 Small | F-049-T06 — Concurrent instances within per-machine limits | 0.25 h | 0 h | 0.25 h | Planned | — | — |
@@ -1062,7 +1062,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|
 | 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | 🧑‍🔧 | — |
 
-🧑 **→** Next: verify English/Italian error messages (401 revoked, stopped service, rotated certificate) in a live Mac companion trial, then close B-057.
+🧑 **→** Next: Run [parts C and D of the companion live checks](acceptance/companion-live-checks.md#part-c) (revoked, stopped, changed certificate, English and Italian), then close B-057.
 
 | | |
 |---|---|
@@ -1075,7 +1075,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
 |---|---|---|---|---|---|:---:|:---:|
 | — | B-057-T01 — Translated, specific companion error messages | 1.5 h | 0 h | 0 h | Completed | — | — |
-| 🟢 Small | B-057-T02 — Owner live check: English and Italian companion errors | 0 h | 0 h | 0 h agent + 0.25 h owner | Ready | 🧑‍🔧 | — |
+| 🟢 Small | B-057-T02 — Owner live check: English and Italian companion errors | 0 h | 0 h | 0 h agent + 0.25 h owner | Ready | [🧑‍🔧](acceptance/companion-live-checks.md#part-c) | — |
 | 🟢 Small | **Total** | 1.5 h | 0 h (0 of 2 steps recorded) | 0.25 h owner | 1 of 2 completed | | |
 
 <details>
@@ -1590,7 +1590,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h agent + 0.5 h owner | — | — | 🧑‍🔧 | — |
 
-🧑 **→** Revoke the unused 2026-11-07 native client on the live service (`npm start -- clients`, then `npm start -- revoke CLIENT_ID`), and choose when to run the stopped-profile recovery on the service host.
+🧑 **→** Run [parts A and D of the companion live checks](acceptance/companion-live-checks.md#part-a): revoke the stale client, then the stopped-profile recovery.
 
 | | |
 |---|---|
@@ -1602,7 +1602,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
 |---|---|---|---|---|---|:---:|:---:|
-| 🟢 Small | F-081-T01 — Revoke the stale client and run stopped-profile recovery on the service host | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Ready | 🧑‍🔧 | — |
+| 🟢 Small | F-081-T01 — Revoke the stale client and run stopped-profile recovery on the service host | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Ready | [🧑‍🔧](acceptance/companion-live-checks.md#part-a) | — |
 | 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h agent + 0.5 h owner | 0 of 1 completed | | |
 
 <details>
@@ -1628,7 +1628,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|
 | 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h owner | — | — | 🧑‍🔧 | — |
 
-🧑 **→** Next: confirm refused vs unconfirmed renewal and empty invitation field in a live F-015 companion trial, then close B-056.
+🧑 **→** Next: Run [part B of the companion live checks](acceptance/companion-live-checks.md#part-b) (refused renewal, English and Italian), then close B-056.
 
 | | |
 |---|---|
@@ -1641,7 +1641,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
 |---|---|---|---|---|---|:---:|:---:|
 | — | B-056-T01 — Separate a refused renewal from an unconfirmed one in the companion | 1 h | 0 h | 0 h | Completed | — | — |
-| 🟢 Small | B-056-T02 — Owner live check: refused and unconfirmed renewal in the companion | 0 h | 0 h | 0 h agent + 0.25 h owner | Ready | 🧑‍🔧 | — |
+| 🟢 Small | B-056-T02 — Owner live check: refused and unconfirmed renewal in the companion | 0 h | 0 h | 0 h agent + 0.25 h owner | Ready | [🧑‍🔧](acceptance/companion-live-checks.md#part-b) | — |
 | 🟢 Small | **Total** | 1 h | 0 h (0 of 2 steps recorded) | 0.25 h owner | 1 of 2 completed | | |
 
 <details>

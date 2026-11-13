@@ -10,11 +10,21 @@
     "Stopped-profile rotation on the service host keeps data, changes identity and pin, and the companion recovers by pairing again"
   ],
   "dependsOn": [],
-  "resources": ["docs/acceptance/**", "docs/work/records/**", "generated:backlog-views"],
-  "capabilities": ["privacy-review"],
+  "resources": [
+    "docs/acceptance/**",
+    "docs/work/records/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "privacy-review"
+  ],
   "privacy": "No credential, ticket or token in Git or logs; evidence names client IDs only.",
-  "validation": ["Owner-observed live check recorded in docs/acceptance"],
-  "escalation": ["Anything that would replace the live root credential goes to the owner first"],
+  "validation": [
+    "Owner-observed live check recorded in docs/acceptance"
+  ],
+  "escalation": [
+    "Anything that would replace the live root credential goes to the owner first"
+  ],
   "effort": {
     "size": "small",
     "estimate": "0.25 h agent + 0.5 h owner",
@@ -25,5 +35,6 @@
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25,
     "ownerKind": "procedure"
-  }
+  },
+  "ownerLink": "docs/acceptance/companion-live-checks.md#part-a"
 }
