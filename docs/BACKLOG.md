@@ -904,7 +904,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟢 Small | 0.75 h | — | [F-050](#f-050) | — | — |
 
-💻 **→** Next: show what is queued, then the per-item lock.
+💻 **→** Next: T01–T03 implemented (visible bounded request queue, per-model concurrency budgets, per-item mutation ownership); remaining scope is the 2026-11-07 owner extension on multi-step specialist orchestration.
 
 | | |
 |---|---|
@@ -916,9 +916,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | F-048-T01 — Visible bounded request queue | 0.25 h | 0 h | 0.25 h | Ready |
-| 🟢 Small | F-048-T02 — Per-model resource budgets | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | F-048-T03 — Per-item mutation ownership | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-048-T01 — Visible bounded request queue | 0.25 h | 0 h | 0.25 h | Verified |
+| 🟢 Small | F-048-T02 — Per-model resource budgets | 0.25 h | 0 h | 0.25 h | Verified |
+| 🟢 Small | F-048-T03 — Per-item mutation ownership | 0.25 h | 0 h | 0.25 h | Verified |
 | 🟢 Small | **Total** | 0.75 h | 0 h (0 of 3 steps recorded) | 0.75 h | 0 of 3 completed |
 
 <details>
@@ -928,7 +928,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner questions 2026-11-05 |
+| PR / evidence | [PR #372](https://github.com/voidbrain/nerv/pull/372) F-048-T01..T03 (visible bounded request queue, per-model budgets, per-item locks); [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner questions 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | Pending |
 | Reviewed | 2026-11-08 |

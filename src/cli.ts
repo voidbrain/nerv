@@ -24,7 +24,10 @@ import {
 import { checkUpdateAvailability } from './update-availability.ts';
 import { runtimeBom } from './bom.ts';
 import { spawnSync } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import { join, resolve } from 'node:path';
+import { formatQueuedMessage } from './request-queue.ts';
+import { requestLanguage } from './misato.ts';
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Store } from './store.ts';
@@ -377,13 +380,37 @@ try {
     const message = args.join(' ');
     if (!message) throw new Error('Usage: chat "what you want"');
     const config = readConfig(home);
-    const response = await fetch(`http://127.0.0.1:${config.port}/api/chat`, {
-      method: 'POST',
-      headers: { authorization: `Bearer ${readToken(home)}`, 'content-type': 'application/json' },
-      body: JSON.stringify({ message, conversation: 'cli' }),
-    }).catch(() => {
-      throw new Error('NERV Agency is not running: start it with serve or service start.');
-    });
+    const token = readToken(home);
+    const requestId = randomUUID();
+    const lang = requestLanguage(message, [], config.language);
+    let lastAhead = 0;
+    const queuePoll = setInterval(() => {
+      void fetch(`http://127.0.0.1:${config.port}/api/queue`, {
+        headers: { authorization: `Bearer ${token}` },
+      })
+        .then((r) => (r.ok ? (r.json() as Promise<{ queued?: { id: string; ahead: number }[] }>) : null))
+        .then((q) => {
+          const item = q?.queued?.find((entry) => entry.id === requestId);
+          if (item && item.ahead > 0 && item.ahead !== lastAhead) {
+            lastAhead = item.ahead;
+            console.log(formatQueuedMessage(item.ahead, lang));
+          }
+        })
+        .catch(() => {});
+    }, 200);
+    queuePoll.unref();
+    let response: Response;
+    try {
+      response = await fetch(`http://127.0.0.1:${config.port}/api/chat`, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+        body: JSON.stringify({ message, conversation: 'cli', requestId }),
+      }).catch(() => {
+        throw new Error('NERV Agency is not running: start it with serve or service start.');
+      });
+    } finally {
+      clearInterval(queuePoll);
+    }
     const value = (await response.json()) as {
       reply?: string;
       error?: string;

@@ -4,7 +4,7 @@
   "parent": "F-048",
   "title": "Visible bounded request queue",
   "goal": "Define and implement truthful queued/running request state across channels",
-  "status": "ready",
+  "status": "verified",
   "acceptance": [
     "Waiting position comes from actual scheduler state",
     "Cancellation and restart behavior are explicit"
