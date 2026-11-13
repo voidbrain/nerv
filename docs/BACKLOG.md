@@ -626,7 +626,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|
 | — | F-076-T01 — Choose how merged main is verified | 0 h | 0 h | 0 h | Completed |
 | 🟢 Small | F-076-T02 — CI runs on merge&#95;group | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | F-076-T03 — Reconcile the queue-aware merge tool | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-076-T03 — Reconcile the queue-aware merge tool | 0.5 h | 0 h | 0.5 h | Implemented; verification pending |
 | 🟢 Small | F-076-T04 — Turn on the merge queue for main | 0.25 h | 0 h | 0.25 h | Planned |
 | 🟡 Medium | **Total** | 1.25 h | 0 h (0 of 4 steps recorded) | 1.25 h | 1 of 4 completed |
 
