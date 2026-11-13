@@ -718,3 +718,77 @@ test(
     }
   },
 );
+
+test(
+  'F-051-T05: authenticated cross-base sortie inspection over the signed Kaji link returns sortie + events or null when missing',
+  { timeout: 10_000 },
+  async () => {
+    const A = keys();
+    const B = keys();
+    const portA = await freePort();
+    const portB = await freePort();
+    const sa = new Store(':memory:');
+    const sb = new Store(':memory:');
+    const ra = new Registry(sa.db, root.publicKey);
+    const rb = new Registry(sb.db, root.publicKey);
+    const records = [
+      rec({
+        kind: 'enrol',
+        baseId: 'NERV-01',
+        name: 'Neo Tokyo-3',
+        address: `127.0.0.1:${portA}`,
+        publicKey: A.publicKey,
+      }),
+      rec({
+        kind: 'enrol',
+        baseId: 'NERV-02',
+        name: 'Tabgha',
+        address: `127.0.0.1:${portB}`,
+        publicKey: B.publicKey,
+      }),
+    ];
+    for (const r of records) {
+      ra.add(r);
+      rb.add(r);
+    }
+    const targetId = '11111111-2222-4333-8444-555555555555';
+    const la = new KajiLink({
+      baseId: 'NERV-01',
+      key: A.privateKey,
+      publicKey: A.publicKey,
+      registry: port(ra),
+      log: () => {},
+      onSortie: async (_from, sortieId) =>
+        sortieId === targetId
+          ? {
+              sortie: { id: targetId, title: 'Check status', status: 'done', detail: [] },
+              events: [{ sequence: 1, kind: 'sortie.done', created: '2026-11-13T10:01:00Z', payload: {} }],
+            }
+          : null,
+    });
+    const lb = new KajiLink({
+      baseId: 'NERV-02',
+      key: B.privateKey,
+      publicKey: B.publicKey,
+      registry: port(rb),
+      log: () => {},
+    });
+    await la.start(60_000);
+    try {
+      const found = await lb.inspectSortie('NERV-01', targetId);
+      assert.deepEqual(found, {
+        base: { id: 'NERV-01', name: 'Neo Tokyo-3' },
+        sortie: { id: targetId, title: 'Check status', status: 'done', detail: [] },
+        events: [{ sequence: 1, kind: 'sortie.done', created: '2026-11-13T10:01:00Z', payload: {} }],
+      });
+      const missing = await lb.inspectSortie('NERV-01', '99999999-2222-4333-8444-555555555555');
+      assert.equal(missing, null);
+      await assert.rejects(() => lb.inspectSortie('NERV-01', 'not-a-uuid'), /Invalid sortie ID/);
+      await assert.rejects(() => lb.inspectSortie('NERV-99', targetId), /not enrolled/);
+    } finally {
+      await la.stop();
+      sa.close();
+      sb.close();
+    }
+  },
+);

@@ -6,6 +6,7 @@ import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { realpath, stat, readFile } from 'node:fs/promises';
 import { resolve, sep, extname } from 'node:path';
 import type { StoreApi } from './runtime.ts';
+import { QueueCancelledError, QueueFullError } from './request-queue.ts';
 import type { Pilot, PilotPatch } from './pilots.ts';
 import { attachRpcSocket } from './socket.ts';
 import { buildInfo } from './build.ts';
@@ -274,8 +275,10 @@ export function makeServer(
           '/api/inbox/page',
           '/api/approvals',
           '/api/sorties',
+          '/api/queue',
         ].includes(path) ||
-          /^\/api\/sorties\/[a-f0-9-]+(\/events)?$/.test(path))
+          /^\/api\/sorties\/[a-f0-9-]+(\/events)?$/.test(path) ||
+          /^\/api\/bases\/[A-Za-z0-9-]{2,16}\/sorties\/[a-f0-9-]+$/.test(path))
       )
     ) {
       reply(403, { error: 'Read-only client.' });
@@ -342,6 +345,13 @@ export function makeServer(
         if (Object.keys(b).length !== 1 || !['approve', 'reject', 'edit'].includes(b.decision as string))
           throw new Error('Decision must be approve, reject or edit.');
         reply(200, await store.decide(path.split('/').at(-1)!, b.decision as 'approve' | 'reject' | 'edit', 'api'));
+      } else if (req.method === 'GET' && path === '/api/queue') {
+        if (url.search) throw new Error('Queue status takes no query parameters.');
+        reply(200, store.queueStatus?.() ?? { maxConcurrent: 1, maxQueued: 16, running: [], queued: [] });
+      } else if (req.method === 'DELETE' && /^\/api\/queue\/[a-zA-Z0-9_-]{1,64}$/.test(path)) {
+        const id = path.split('/').at(-1)!;
+        const ok = store.cancelQueued?.(id) ?? false;
+        reply(ok ? 200 : 404, ok ? { cancelled: true } : { error: 'Queued request not found.' });
       } else if (req.method === 'GET' && path === '/api/sorties') {
         if ([...url.searchParams.keys()].some((k) => !['limit', 'before', 'q'].includes(k)))
           throw new Error('Unknown sorties query.');
@@ -490,6 +500,21 @@ export function makeServer(
           return;
         }
         reply(200, await store.bases());
+      } else if (req.method === 'GET' && /^\/api\/bases\/[A-Za-z0-9-]{2,16}\/sorties\/[a-f0-9-]+$/.test(path)) {
+        if (!store.remoteSortie) {
+          reply(503, { error: 'Kaji unavailable.' });
+          return;
+        }
+        const [, , , baseId, , sortieId] = path.split('/');
+        try {
+          const found = await store.remoteSortie(baseId!, sortieId!);
+          if (found) reply(200, found);
+          else reply(404, { error: 'No sortie with that ID on that base.' });
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : 'Remote inspection failed.';
+          if (/Kaji unavailable|not enrolled|revoked|not running/i.test(msg)) reply(503, { error: msg });
+          else reply(502, { error: msg });
+        }
       } else if (req.method === 'GET' && path === '/api/operators') {
         if (!store.operators) {
           reply(503, { error: 'Operator directory unavailable.' });
@@ -609,19 +634,40 @@ export function makeServer(
         }
         const b = await body(req, 20000);
         if (
-          Object.keys(b).some((k) => !['message', 'conversation'].includes(k)) ||
+          Object.keys(b).some((k) => !['message', 'conversation', 'requestId'].includes(k)) ||
           typeof b.message !== 'string' ||
           !b.message.trim() ||
           b.message.length > 4000 ||
           (b.conversation !== undefined &&
-            (typeof b.conversation !== 'string' || !/^[a-z]+$/.test(b.conversation) || b.conversation.length > 20))
+            (typeof b.conversation !== 'string' || !/^[a-z]+$/.test(b.conversation) || b.conversation.length > 20)) ||
+          (b.requestId !== undefined && (typeof b.requestId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(b.requestId)))
         )
           throw new Error('Message is required: up to 4000 characters; conversation is a short lowercase name.');
         // Each step may wait for Misato and Casper.
         const budget = MODEL_TIMEOUT_MS * MAX_STEPS * 2 + 5000;
         req.setTimeout(budget);
         res.once('finish', () => req.socket.setTimeout(15000));
-        reply(200, await store.chat(b.message.trim(), b.conversation as string | undefined));
+        const ac = new AbortController();
+        const onClose = () => {
+          if (!res.writableEnded) ac.abort();
+        };
+        res.once('close', onClose);
+        try {
+          reply(
+            200,
+            await store.chat(b.message.trim(), b.conversation as string | undefined, {
+              ...(typeof b.requestId === 'string' ? { requestId: b.requestId } : {}),
+              signal: ac.signal,
+            }),
+          );
+        } catch (e) {
+          if (e instanceof QueueFullError) reply(429, { error: e.message });
+          else if (e instanceof QueueCancelledError) {
+            if (!res.writableEnded) reply(499, { error: e.message });
+          } else throw e;
+        } finally {
+          res.off('close', onClose);
+        }
       } else if (req.method === 'POST' && path === '/api/actions') {
         // Admin only: one owner action through the per-action gate (F-017). Grant IDs never appear in the reply.
         if (!store.act) {

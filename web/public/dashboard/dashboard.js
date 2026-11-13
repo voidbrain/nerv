@@ -431,6 +431,7 @@ function formatTimingsLine(timings) {
 
 /* ================= RENDER: sorties ================= */
 function sortieBadge(s) {
+  if (s.status === "queued") return "<span class='badge b-warn'>QUEUED" + (s.ahead ? " · " + s.ahead + " AHEAD" : "") + "</span>";
   if (s.status === "waiting") return "<span class='badge b-warn'>NEEDS YOU</span>";
   if (s.status === "waiting-route") return "<span class='badge b-warn'>WAITING ROUTE</span>";
   if (s.status === "active") return "<span class='badge b-info blink'>" + (L().steps[s.phase] || s.phase).toUpperCase() + "</span>";
@@ -446,15 +447,16 @@ function matchesSearch(s, q) {
 const FILTER_NAMES = { active:"active", waiting:"waiting", done:"done", problem:"failed or stopped" };
 function renderSorties() {
   const f = state.filter; const q = (state.search || "").trim();
-  const list = state.sorties.filter(s => f === "all" || (f === "active" && s.status === "active") || (f === "waiting" && /waiting/.test(s.status)) || (f === "done" && s.status === "done") || (f === "problem" && (s.status === "failed" || s.status === "stood-down"))).filter(s => matchesSearch(s, q));
-  const active = state.sorties.filter(s => s.status === "active" || /waiting/.test(s.status)).length;
-  document.getElementById("sorties-sub").textContent = active + " in flight · " + (q ? list.length + " match" + (list.length === 1 ? "" : "es") : state.sorties.length + " shown");
+  const list = state.sorties.filter(s => f === "all" || (f === "active" && (s.status === "active" || s.status === "queued")) || (f === "waiting" && /waiting/.test(s.status)) || (f === "done" && s.status === "done") || (f === "problem" && (s.status === "failed" || s.status === "stood-down"))).filter(s => matchesSearch(s, q));
+  const queuedCount = state.sorties.filter(s => s.status === "queued").length;
+  const active = state.sorties.filter(s => s.status === "active" || s.status === "queued" || /waiting/.test(s.status)).length;
+  document.getElementById("sorties-sub").textContent = active + " in flight" + (queuedCount ? " (" + queuedCount + " queued)" : "") + " · " + (q ? list.length + " match" + (list.length === 1 ? "" : "es") : state.sorties.length + " shown");
   document.getElementById("sortie-list").innerHTML = list.map(s => {
     const meaning = { green:"ran without a card", orange:"asked the MAGI", blue:"needed you" };
     const pats = s.actions.map(a => a.ballot ? "<span class='badge b-" + a.ballot.pattern + "' title='Pattern " + a.ballot.pattern + ": " + (meaning[a.ballot.pattern] || "") + "' aria-label='Pattern " + a.ballot.pattern + "'>" + a.ballot.pattern[0].toUpperCase() + "</span>" : "<span class='badge b-muted' title='not voted yet' aria-label='not voted yet'>·</span>").join(" ");
     return "<div class='card sortie" + (s.id === state.selected ? " sel" : "") + "' tabindex='0' role='button' aria-pressed='" + (s.id === state.selected) + "' data-s='" + s.id + "'>" +
       "<div class='row'><span class='b'>" + esc(s.id) + " · " + highlight(s.title, state.search) + "</span>" + sortieBadge(s) + "</div>" +
-      "<div class='row small muted'><span>" + (s.forwarded ? "→ " + esc(s.forwarded) : s.origin ? "from " + esc(s.origin) : s.source === "hyuga" ? "Hyuga" : "Aoba") + " · " + dayTime(s.started) + " · " + s.actions.length + " action" + (s.actions.length > 1 ? "s" : "") + " " + pats + "</span><span>$" + s.spent.toFixed(3) + "</span></div>" +
+      "<div class='row small muted'><span>" + (s.forwarded ? "→ " + esc(s.forwarded) : s.origin ? "from " + esc(s.origin) : s.source === "hyuga" ? "Hyuga" : "Aoba") + " · " + dayTime(s.started) + " · " + s.actions.length + " action" + (s.actions.length > 1 ? "s" : "") + " " + pats + "</span><span>" + (s.status === "queued" && s.realId ? "<button class='btn sm' data-cancel-queue='" + esc(s.realId) + "' type='button'>Cancel</button>" : "$" + s.spent.toFixed(3)) + "</span></div>" +
       (s.why ? "<div class='tiny whyline'>" + esc(s.why) + "</div>" : "") +
       (s.outcome ? "<div class='tiny muted'>" + esc(s.outcome) + "</div>" : "") + "</div>";
   }).join("") || "<div class='muted small'>" + sortiesEmpty(f, q) + "</div>";
@@ -527,6 +529,7 @@ function renderFlow() {
   // sephirot nodes
   // Misato's apartment passed means the owner decided: it takes the decision colour, like its lines (owner, 2026-11-05).
   { const sd = document.querySelector(".snode[data-n='detect'] .sd"); if (sd) sd.textContent = s && s.forwarded ? "forwarded to " + s.forwarded : s && s.origin ? "from " + s.origin : "Aoba comms · Hyuga watch"; }
+  { const sd = document.getElementById("sd-debrief"); if (sd) sd.textContent = s && s.forwarded ? (s.status === "active" ? "awaiting " + s.forwarded : "returned from " + s.forwarded) : s && s.origin ? "reply to " + s.origin : "Central Dogma · what is now known"; }
   { const sd = document.getElementById("sd-consult"); if (sd) sd.textContent = !s ? "no vote · advice into the LCL" : s.advisor ? "advised by " + s.advisor : s.phase === "consult" && s.status === "active" ? "advising · no vote" : "no advice"; }
   document.querySelectorAll(".snode[data-n]").forEach(el => { el.classList.remove("on", "done", "wait", "skip", "owner"); const st = stepState(s, el.dataset.n); if (st) el.classList.add(st); if (st === "done" && el.dataset.n === "apt") el.classList.add("owner"); });
   // F-052-T04: live elapsed time on the active node, finished time on completed nodes (B-040).
@@ -660,7 +663,7 @@ function renderDetail(s) {
     "<div class='small' style='margin-top:6px'>Sync Ratio <b>" + b.sync.value + "%</b> <span class='muted'>(threshold " + SCROLLS.syncThreshold + "%)</span></div>" +
     "<div class='meter " + (b.sync.value >= SCROLLS.syncThreshold ? "" : "warn") + "' style='margin-top:3px'><i style='width:" + b.sync.value + "%'></i><span class='mark' style='left:" + SCROLLS.syncThreshold + "%'></span></div>" +
     "<div class='tiny muted' style='margin-top:2px'>" + esc(syncFormula(b)) + "</div>" +
-    "<div class='verdicts'>" + b.verdicts.map(v => "<span class='vchip " + v.vote + (v.shadow ? " shadow" : "") + "'>" + esc(seatName(v.seat)) + ": " + esc(v.reason) + (v.durationMs != null ? " · " + formatDurationMs(v.durationMs) : "") + "</span>").join("") + "</div></div>";
+    "<div class='verdicts'>" + b.verdicts.map(v => { const tag = v.seat.startsWith("extra:") ? (v.shadow ? " (peer · shadow)" : " (peer · veto-only)") : (v.shadow ? " (shadow)" : ""); return "<span class='vchip " + v.vote + (v.shadow ? " shadow" : "") + "'>" + esc(seatName(v.seat) + tag) + ": " + esc(v.reason) + (v.durationMs != null ? " · " + formatDurationMs(v.durationMs) : "") + "</span>"; }).join("") + "</div></div>";
   box.innerHTML = advice + timingsHtml + plan + act;
 }
 function actionBadge(a) {

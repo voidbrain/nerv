@@ -11,6 +11,8 @@ import type { HistoryPage } from './history.ts';
 import { readCommand, statusText, type StatusBase } from './chat-command.ts';
 import { channelIsFresh, sanitizeChannel, type ChannelState, type HeardChannel } from './channel-state.ts';
 import { ProcessClient } from './process-client.ts';
+import { RequestQueue, type QueueSnapshot } from './request-queue.ts';
+import { ItemLockManager, itemKeysForTool } from './item-locks.ts';
 import type { Reminder, ReminderInput, InboxEntry, InboxPage, ActResult, PushSubscriptionRecord } from './store.ts';
 import { reconcileReminderArgs } from './reminder-time.ts';
 import { degradedReasons, type RouteHealth } from './route-health.ts';
@@ -286,7 +288,18 @@ export interface StoreApi {
     | { decision: string; result?: unknown; error?: string }
     | Promise<{ decision: string; result?: unknown; error?: string }>;
   act?(action: OwnerAction): Promise<ActReply>;
-  chat?(message: string, conversation?: string): Promise<ChatReply>;
+  chat?(
+    message: string,
+    conversation?: string,
+    options?: {
+      requestId?: string;
+      signal?: AbortSignal;
+      onQueued?: (ahead: number, id: string) => void;
+      onPositionChange?: (ahead: number) => void;
+    },
+  ): Promise<ChatReply>;
+  queueStatus?(): QueueSnapshot;
+  cancelQueued?(id: string): boolean;
   onResumed?(listener: (reply: ChatReply) => void): void;
   reloadModels?(): Promise<{ error?: string; kept?: boolean; models: unknown }>;
   modelSetup?(): Promise<ModelSetup>;
@@ -336,11 +349,21 @@ export interface StoreApi {
   sortie(
     id: string,
   ): (SortieSummary & { detail: ActionDetail[] }) | null | Promise<(SortieSummary & { detail: ActionDetail[] }) | null>;
+  remoteSortie?(
+    baseId: string,
+    sortieId: string,
+  ): Promise<{
+    base: { id: string; name: string };
+    sortie: SortieSummary & { detail: ActionDetail[] };
+    events: SortieEvent[];
+  } | null>;
   ask?(ask: Ask): Promise<Reply>;
 }
 export class Runtime implements StoreApi {
   readonly nervous: ProcessClient;
   readonly brain: ProcessClient;
+  readonly requestQueue = new RequestQueue();
+  private readonly itemLocks = new ItemLockManager();
   private readonly home: string | undefined;
   constructor(database: string, brainEntry = new URL('./brain-process.ts', import.meta.url), home?: string) {
     this.home = home;
@@ -426,10 +449,14 @@ export class Runtime implements StoreApi {
     })) as Reminder & { existing?: true };
   }
   async update(id: string, patch: { title?: string; due?: string; kind?: string; end?: string | null }) {
-    return (await this.nervous.call('reminders.update', { id, ...patch })) as Reminder | null;
+    return this.itemLocks.withLock(`reminder:${id}`, () =>
+      this.nervous.call('reminders.update', { id, ...patch }),
+    ) as Promise<Reminder | null>;
   }
   async cancel(id: string) {
-    return (await this.nervous.call('reminders.cancel', { id })) as boolean;
+    return this.itemLocks.withLock(`reminder:${id}`, () =>
+      this.nervous.call('reminders.cancel', { id }),
+    ) as Promise<boolean>;
   }
   async pushPublicKey() {
     return (await this.nervous.call('push.key')) as string;
@@ -462,7 +489,12 @@ export class Runtime implements StoreApi {
     return (await this.nervous.call('approvals.pending', { limit })) as Approval[];
   }
   async decide(id: string, decision: Decision, source: 'api' | 'cli' | 'telegram' = 'api') {
-    const result = (await this.nervous.call('approvals.decide', { id, decision, source })) as {
+    const pending = await this.approvals(50).catch(() => []);
+    const match = pending.find((a) => a.id === id);
+    const keys = match ? itemKeysForTool(match.card.tool, match.card.args) : [];
+    const result = (await this.itemLocks.withLock(keys, () =>
+      this.nervous.call('approvals.decide', { id, decision, source }),
+    )) as {
       decision: string;
       result?: unknown;
       error?: string;
@@ -718,16 +750,22 @@ export class Runtime implements StoreApi {
             })),
           }))
         : undefined;
-    const result = (await this.nervous.call('actions.act', {
-      ...(worker ? { worker } : {}),
-      sortieId,
-      tool: action.tool,
-      args: action.args,
-      stage: action.stage ?? 'production',
-      ...(casper ? { casper } : {}),
-      ...(extras.length ? { extras } : {}),
-      ...(agency ? { agency } : {}),
-    })) as ActResult;
+    const itemKeys = itemKeysForTool(action.tool, action.args);
+    const result = (await this.itemLocks.withLock(
+      itemKeys,
+      () =>
+        this.nervous.call('actions.act', {
+          ...(worker ? { worker } : {}),
+          sortieId,
+          tool: action.tool,
+          args: action.args,
+          stage: action.stage ?? 'production',
+          ...(casper ? { casper } : {}),
+          ...(extras.length ? { extras } : {}),
+          ...(agency ? { agency } : {}),
+        }),
+      { owner: sortieId },
+    )) as ActResult;
     // A late shadow vote (F-052) is kept with the action when it arrives; it never changes the outcome.
     const lateT0 = performance.now();
     for (const s of late)
@@ -778,20 +816,33 @@ export class Runtime implements StoreApi {
       return [];
     }
   }
-  private readonly conversations = new Map<string, Promise<ChatReply>>();
-  chat(message: string, conversation?: string): Promise<ChatReply> {
+  queueStatus(): QueueSnapshot {
+    return this.requestQueue.snapshot();
+  }
+  cancelQueued(id: string): boolean {
+    return this.requestQueue.cancel(id);
+  }
+  chat(
+    message: string,
+    conversation?: string,
+    options?: {
+      requestId?: string;
+      signal?: AbortSignal;
+      onQueued?: (ahead: number, id: string) => void;
+      onPositionChange?: (ahead: number) => void;
+    },
+  ): Promise<ChatReply> {
+    if (readCommand(message)) return this.chatOnce(message, conversation);
     const key = conversation ?? 'cli';
-    const previous = this.conversations.get(key);
-    const next = (previous ? previous.catch(() => undefined) : Promise.resolve()).then(() =>
-      this.chatOnce(message, conversation),
-    );
-    this.conversations.set(key, next);
-    void next
-      .finally(() => {
-        if (this.conversations.get(key) === next) this.conversations.delete(key);
-      })
-      .catch(() => {});
-    return next;
+    return this.requestQueue.enqueue({
+      ...(options?.requestId ? { id: options.requestId } : {}),
+      conversation: key,
+      title: message.slice(0, 500),
+      ...(options?.signal ? { signal: options.signal } : {}),
+      ...(options?.onQueued ? { onQueued: options.onQueued } : {}),
+      ...(options?.onPositionChange ? { onPositionChange: options.onPositionChange } : {}),
+      run: () => this.chatOnce(message, conversation),
+    });
   }
   private async chatOnce(message: string, conversation?: string): Promise<ChatReply> {
     const command = readCommand(message);
@@ -2264,14 +2315,44 @@ export class Runtime implements StoreApi {
     const b = (await this.bases()).find((x) => x.baseId === main);
     return b ? { baseId: main, self: b.self, online: b.online } : undefined;
   }
+  private remoteSortieLoader?: (
+    baseId: string,
+    sortieId: string,
+  ) => Promise<{
+    base: { id: string; name: string };
+    sortie: SortieSummary & { detail: ActionDetail[] };
+    events: SortieEvent[];
+  } | null>;
+  setRemoteSortie(
+    loader: (
+      baseId: string,
+      sortieId: string,
+    ) => Promise<{
+      base: { id: string; name: string };
+      sortie: SortieSummary & { detail: ActionDetail[] };
+      events: SortieEvent[];
+    } | null>,
+  ): void {
+    this.remoteSortieLoader = loader;
+  }
+  async remoteSortie(baseId: string, sortieId: string) {
+    if (!this.remoteSortieLoader) throw new Error('Kaji unavailable.');
+    return this.remoteSortieLoader(baseId, sortieId);
+  }
   readonly lilith = {
     list: async () => (await this.nervous.call('memory.list', { limit: 200 })) as Fact[],
     episodes: async () => (await this.nervous.call('memory.episodes', { limit: 10 })) as Episode[],
     add: async (text: string) => (await this.nervous.call('memory.add', { text })) as Fact,
-    edit: async (id: string, text: string) => (await this.nervous.call('memory.edit', { id, text })) as Fact | null,
-    forget: async (id: string) => (await this.nervous.call('memory.forget', { id })) as boolean,
+    edit: async (id: string, text: string) =>
+      (await this.itemLocks.withLock(`fact:${id}`, () =>
+        this.nervous.call('memory.edit', { id, text }),
+      )) as Fact | null,
+    forget: async (id: string) =>
+      (await this.itemLocks.withLock(`fact:${id}`, () => this.nervous.call('memory.forget', { id }))) as boolean,
     share: async (id: string, shareable: boolean) =>
-      (await this.nervous.call('memory.share', { id, shareable })) as Fact | null,
+      (await this.itemLocks.withLock(`fact:${id}`, () =>
+        this.nervous.call('memory.share', { id, shareable }),
+      )) as Fact | null,
     history: async (id: string) => (await this.nervous.call('memory.history', { id })) as unknown[],
   };
   private instrumentality?: NodeJS.Timeout;
@@ -2801,6 +2882,7 @@ export class Runtime implements StoreApi {
     return { reachable: found.reachable, url: found.url, models: found.models.map((m) => m.name) };
   }
   async close() {
+    this.requestQueue.close();
     if (this.watchTimer) clearInterval(this.watchTimer);
     if (this.routeLogTimer) clearInterval(this.routeLogTimer);
     if (this.toolsClient) await this.toolsClient.close();
