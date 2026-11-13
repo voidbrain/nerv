@@ -33,7 +33,7 @@
   "effort": {
     "size": "medium",
     "estimate": "0 h agent",
-    "basis": "Implemented execution-mode pilot selection (domain + evidence, suggest-only default) and owner-only pilots.promote in 0.5 h agent.",
+    "basis": "Implemented execution-mode pilot selection (domain + evidence, suggest-only default) and owner-only pilots.promote in 0.5 h agent (PR #355).",
     "reviewed": "2026-11-13",
     "baselineDays": 2,
     "agentHours": 0,
