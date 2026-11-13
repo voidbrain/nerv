@@ -88,6 +88,16 @@ test('F-029: source identity includes dirty implementations, browser assets and 
     rmSync(temp, { recursive: true, force: true });
   }
 });
+async function waitUntilAllExited(pids, isAlive, timeoutMs, pollMs = 25) {
+  const until = Date.now() + timeoutMs;
+  let survivors = pids.filter((pid) => isAlive(pid));
+  while (survivors.length > 0 && Date.now() < until) {
+    await new Promise((done) => setTimeout(done, pollMs));
+    survivors = pids.filter((pid) => isAlive(pid));
+  }
+  return survivors;
+}
+
 test(
   'F-029: a timed-out scenario terminates its owned descendant process',
   { timeout: 15000, skip: process.platform === 'win32' },
@@ -116,9 +126,8 @@ test(
       const result = await runProcess(['-e', script], { timeoutMs: 5000 });
       assert.match(result.error, /time budget/);
       owned = JSON.parse(readFileSync(pids, 'utf8'));
-      const until = Date.now() + 5000;
-      while (owned.some(alive) && Date.now() < until) await new Promise((done) => setTimeout(done, 25));
-      assert.deepEqual(owned.filter(alive), [], 'no executing child survives the group timeout');
+      const survivors = await waitUntilAllExited(owned, alive, 5000);
+      assert.deepEqual(survivors, [], 'no executing child survives the group timeout');
     } finally {
       if (owned.some(alive)) {
         if (process.platform === 'win32')
