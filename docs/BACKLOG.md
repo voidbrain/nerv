@@ -21,9 +21,9 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-005](#f-005) | [F-005](#f-005) | [B-057](#b-057) | — |
-| [F-006](#f-006) | [F-049](#f-049) | [B-056](#b-056) |  |
-| [F-049](#f-049) | [F-076](#f-076) |  |  |
+| [F-005](#f-005) | [F-049](#f-049) | [B-057](#b-057) | — |
+| [F-006](#f-006) | [F-076](#f-076) | [B-056](#b-056) |  |
+| [F-049](#f-049) |  |  |  |
 | [F-009](#f-009) |  |  |  |
 | [F-011](#f-011) |  |  |  |
 | [F-023](#f-023) |  |  |  |
@@ -49,7 +49,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.75 h agent + 5.25 h owner | — | [F-012-T05](#f-012) | 🧑‍🔧 | 🤔 |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.75 h agent + 5.25 h owner | — | [F-012-T05](#f-012) | 🧑‍🔧 | — |
 
 💻 **→** Next: F-005-T15 — T06h — Upgrades that raise the schema version (Planned).
 
@@ -61,39 +61,39 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| — | F-005-T01 — Define service lifecycle ownership and recovery contracts | — | 0 days | 0 remaining | Completed | — | — |
-| — | F-005-T02 — Prepare and verify isolated local profile enrollment | — | 0 days | 0 remaining | Completed | — | — |
-| — | F-005-T03 — Prepare replacement-root generation and existing-base trust migration | — | 0 days | 0 remaining | Completed | — | — |
-| — | F-005-T04 — Implement and accept Mac default-profile service lifecycle | — | 0 days | 0 remaining | Completed | — | — |
-| — | F-005-T05 — Implement and apply history-preserving root activation | — | 0 days | 0 remaining | Completed | — | — |
-| — | F-005-T06 — Safe upgrades, slices T06a–T06d: rehearsal, journaled rehearsal, admission of schema-preserving upgrades, first Mac move | — | 0 h | 0 h | Completed | — | — |
-| — | F-005-T07 — T07a — One backend update-availability contract: installed, running and available revision, channel, last check, offline/unknown | 1 h | 0.5 h (stated) | 0 h | Completed | — | — |
-| — | F-005-T08 — T08a — Prerequisite check (Node version, executable, non-interactive service environment) joined to install, start and update | 1 h | 0.5 h (stated) | 0 h | Completed | — | — |
-| — | F-005-T09 — T09a — Windows lifecycle adapter: install, status, start, stop and uninstall under the same fencing journal | 1.25 h | 0.5 h (stated) | 0 h | Completed | — | — |
-| — | F-005-T10 — T10a — Linux user-service adapter (systemd --user), with no implicit linger or system-wide service | 1.25 h | 0.5 h (stated) | 0 h | Completed | — | — |
-| 🟢 Small | F-005-T11 — T11a — Agree the device matrix for final acceptance (owner decision) | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned | 🧑‍🔧 | 🤔 |
-| — | F-005-T12 — T06e — Independent review of the update path | 1.5 h | 1.25 h (stated) | 0 h | Completed | — | — |
-| — | F-005-T13 — T06f — First real lifecycle update on the Mac service | 0.5 h | 0.75 h (stated) | 0 h | Completed | — | — |
-| — | F-005-T14 — T06g — After-start health check in the update receipt | 1 h | 0.5 h (stated) | 0 h | Completed | — | — |
-| 🟢 Small | F-005-T15 — T06h — Upgrades that raise the schema version | 0.75 h | 0 h | 0.75 h | Planned | — | — |
-| — | F-005-T16 — T07b — Show update availability on the dashboard, the companion and the status report | 1 h | 0.5 h (stated) | 0 h | Completed | — | — |
-| — | F-005-T17 — T07c — Manual update action through the lifecycle update path, with its refusals and recovery shown | 0.5 h | 0.5 h (stated) | 0 h | Completed | — | — |
-| — | F-005-T18 — T07d — Opt-in automatic update policy, off by default, for selected channels and targets | 1 h | 0.5 h (stated) | 0 h | Completed | — | — |
-| — | F-005-T19 — T08b — Node install or upgrade choices with ownership and recovery; never replaces a user-managed runtime silently | 1.25 h | 0.5 h (stated) | 0 h | Completed | — | — |
-| — | F-005-T20 — T08c — Engine/provider contract for several instances and endpoints, local and remote; Ollama becomes one adapter | 1.25 h | 0.5 h (stated) | 0 h | Completed | — | — |
-| — | F-005-T21 — T08d — Optional start-at-login or on-demand management of selected owned local engines | 1 h | 0.25 h (stated) | 0 h | Completed | — | — |
-| 🟢 Small | F-005-T22 — T08e — Demonstration of prerequisites and optional engine management on an owner-selected target | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned | — | [🤔](acceptance/f005-t22-target-decision.md) |
-| — | F-005-T23 — T09b — Windows update and recovery: backup, rehearsal and checkout | 1 h | 0.5 h (stated) | 0 h | Completed | — | — |
-| 🟢 Small | F-005-T24 — T09c — Acceptance on an owner-selected Windows machine | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned | [🧑‍🔧](acceptance/f005-t24-tabgha-windows.md) | [🤔](acceptance/f005-t24-tabgha-windows.md) |
-| — | F-005-T25 — T10b — Linux update and recovery | 1 h | 0.25 h (stated) | 0 h | Completed | — | — |
-| 🟢 Small | F-005-T26 — T10c — Acceptance on an owner-selected mini PC, Pi or equivalent | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned | [🧑‍🔧](acceptance/f009-service-login-procedure.md#part-2--linux-target-selection-and-acceptance-selected-linux-host-bash) | [🤔](acceptance/f009-service-login-procedure.md#part-2--linux-target-selection-and-acceptance-selected-linux-host-bash) |
-| 🟢 Small | F-005-T27 — T11b — Enrolment, revocation, leases, fencing and cancellation across the device matrix | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned | 🧑‍🔧 | — |
-| 🟢 Small | F-005-T28 — T11c — Reconnect, locks and uncertain physical results across the device matrix | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned | 🧑‍🔧 | — |
-| 🟢 Small | F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned | 🧑‍🔧 | — |
-| 🟢 Small | F-005-T30 — T11e — Parent acceptance and closure reconciliation | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟡 Medium | **Total** | 18.25 h (24 of 30 steps) | 8 h (15 of 30 steps recorded) | 2.75 h agent + 5.25 h owner | 21 of 30 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| — | F-005-T01 — Define service lifecycle ownership and recovery contracts | — | 0 days | 0 remaining | Completed | 🤖 | — | — |
+| — | F-005-T02 — Prepare and verify isolated local profile enrollment | — | 0 days | 0 remaining | Completed | 🤖 | — | — |
+| — | F-005-T03 — Prepare replacement-root generation and existing-base trust migration | — | 0 days | 0 remaining | Completed | 🤖 | — | — |
+| — | F-005-T04 — Implement and accept Mac default-profile service lifecycle | — | 0 days | 0 remaining | Completed | 🤖 | — | — |
+| — | F-005-T05 — Implement and apply history-preserving root activation | — | 0 days | 0 remaining | Completed | 🤖 | — | — |
+| — | F-005-T06 — Safe upgrades, slices T06a–T06d: rehearsal, journaled rehearsal, admission of schema-preserving upgrades, first Mac move | — | 0 h | 0 h | Completed | 🤖 | — | — |
+| — | F-005-T07 — T07a — One backend update-availability contract: installed, running and available revision, channel, last check, offline/unknown | 1 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
+| — | F-005-T08 — T08a — Prerequisite check (Node version, executable, non-interactive service environment) joined to install, start and update | 1 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
+| — | F-005-T09 — T09a — Windows lifecycle adapter: install, status, start, stop and uninstall under the same fencing journal | 1.25 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
+| — | F-005-T10 — T10a — Linux user-service adapter (systemd --user), with no implicit linger or system-wide service | 1.25 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
+| 🟢 Small | F-005-T11 — T11a — Agree the device matrix for final acceptance (owner decision) | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned · waits on F-005-T22, F-005-T24, F-005-T26 | 🤖 | ⏳ | ⏳ |
+| — | F-005-T12 — T06e — Independent review of the update path | 1.5 h | 1.25 h (stated) | 0 h | Completed | 🤖 | — | — |
+| — | F-005-T13 — T06f — First real lifecycle update on the Mac service | 0.5 h | 0.75 h (stated) | 0 h | Completed | 🤖 | — | — |
+| — | F-005-T14 — T06g — After-start health check in the update receipt | 1 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
+| 🟢 Small | F-005-T15 — T06h — Upgrades that raise the schema version | 0.75 h | 0 h | 0.75 h | Planned | 🤖 | — | — |
+| — | F-005-T16 — T07b — Show update availability on the dashboard, the companion and the status report | 1 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
+| — | F-005-T17 — T07c — Manual update action through the lifecycle update path, with its refusals and recovery shown | 0.5 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
+| — | F-005-T18 — T07d — Opt-in automatic update policy, off by default, for selected channels and targets | 1 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
+| — | F-005-T19 — T08b — Node install or upgrade choices with ownership and recovery; never replaces a user-managed runtime silently | 1.25 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
+| — | F-005-T20 — T08c — Engine/provider contract for several instances and endpoints, local and remote; Ollama becomes one adapter | 1.25 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
+| — | F-005-T21 — T08d — Optional start-at-login or on-demand management of selected owned local engines | 1 h | 0.25 h (stated) | 0 h | Completed | 🤖 | — | — |
+| 🟢 Small | F-005-T22 — T08e — Demonstration of prerequisites and optional engine management on an owner-selected target | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned | 🤖 | [🧑‍🔧](acceptance/f005-t22-prerequisites.md) | — |
+| — | F-005-T23 — T09b — Windows update and recovery: backup, rehearsal and checkout | 1 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
+| 🟢 Small | F-005-T24 — T09c — Acceptance on an owner-selected Windows machine | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned | 🤖 | [🧑‍🔧](acceptance/f005-t24-tabgha-windows.md) | — |
+| — | F-005-T25 — T10b — Linux update and recovery | 1 h | 0.25 h (stated) | 0 h | Completed | 🤖 | — | — |
+| 🟢 Small | F-005-T26 — T10c — Acceptance on an owner-selected mini PC, Pi or equivalent | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned | 🤖 | [🧑‍🔧](acceptance/f009-service-login-procedure.md#part-2--linux-target-selection-and-acceptance-selected-linux-host-bash) | — |
+| 🟢 Small | F-005-T27 — T11b — Enrolment, revocation, leases, fencing and cancellation across the device matrix | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned · waits on F-005-T11 | 🤖 | ⏳ | — |
+| 🟢 Small | F-005-T28 — T11c — Reconnect, locks and uncertain physical results across the device matrix | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned · waits on F-005-T27 | 🤖 | ⏳ | — |
+| 🟢 Small | F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned · waits on F-005-T28 | 🤖 | ⏳ | — |
+| 🟢 Small | F-005-T30 — T11e — Parent acceptance and closure reconciliation | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟡 Medium | **Total** | 18.25 h (24 of 30 steps) | 8 h (15 of 30 steps recorded) | 2.75 h agent + 5.25 h owner | 21 of 30 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -130,23 +130,23 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| — | F-006-T01 — T01a — Decision: remote inference endpoint identity, permitted data and behaviour when unavailable | 0.5 h | 0.5 h (stated) | 0 h | Completed | — | 🤔 |
-| — | F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback | 0.5 h | 0.5 h (stated) | 0 h | Completed | — | — |
-| 🟢 Small | F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-006-T04 — T04a — Placement campaign plan with exact cases, repeats and budgets for owner approval | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned | — | 🤔 |
-| 🟢 Small | F-006-T05 — T05a — Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned | [🧑‍🔧](evaluations/mac-load-scenarios.md#planned-acceptance-not-new-qualification) | — |
-| — | F-006-T06 — T01b — Configuration validation for remote endpoints; the loopback-only local route stays guaranteed; regressions | 0.5 h | 0.5 h (stated) | 0 h | Completed | — | — |
-| 🟢 Small | F-006-T07 — T02b — Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-006-T08 — T02c — Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-006-T09 — T03b — Evidence adapter binding both configurations, handoffs, budgets and hosts | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-006-T10 — T03c — Grader tamper protection; stale or mismatched evidence rejected; authority rechecked | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned | 🧑‍🔧 | — |
-| 🟢 Small | F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-006-T13 — T05b — Three Mac operating-condition runs | 0.25 h | 0 h | 0.25 h agent + 1.5 h owner | Planned | 🧑‍🔧 | — |
-| 🟢 Small | F-006-T14 — T05c — Mac operating-conditions report | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟡 Medium | **Total** | 4.25 h | 1.5 h (3 of 14 steps recorded) | 2.75 h agent + 2.5 h owner | 3 of 14 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| — | F-006-T01 — T01a — Decision: remote inference endpoint identity, permitted data and behaviour when unavailable | 0.5 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | 🤔 |
+| — | F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback | 0.5 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
+| 🟢 Small | F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-006-T04 — T04a — Placement campaign plan with exact cases, repeats and budgets for owner approval | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned · waits on F-006-T08, F-006-T10 | 🤖 | — | ⏳ |
+| 🟢 Small | F-006-T05 — T05a — Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned | 🤖 | [🧑‍🔧](evaluations/mac-load-scenarios.md#planned-acceptance-not-new-qualification) | — |
+| — | F-006-T06 — T01b — Configuration validation for remote endpoints; the loopback-only local route stays guaranteed; regressions | 0.5 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
+| 🟢 Small | F-006-T07 — T02b — Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-006-T08 — T02c — Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-006-T09 — T03b — Evidence adapter binding both configurations, handoffs, budgets and hosts | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-006-T10 — T03c — Grader tamper protection; stale or mismatched evidence rejected; authority rechecked | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned · waits on F-006-T04 | 🤖 | ⏳ | — |
+| 🟢 Small | F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-006-T13 — T05b — Three Mac operating-condition runs | 0.25 h | 0 h | 0.25 h agent + 1.5 h owner | Planned · waits on F-006-T05 | 🤖 | ⏳ | — |
+| 🟢 Small | F-006-T14 — T05c — Mac operating-conditions report | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟡 Medium | **Total** | 4.25 h | 1.5 h (3 of 14 steps recorded) | 2.75 h agent + 2.5 h owner | 3 of 14 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -183,13 +183,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| — | F-062-T01 — Owner-agreed loss window and restore time | 0.25 h | 0 h | 0 h | Completed | 🧑‍🔧 | 🤔 |
-| 🟢 Small | F-062-T02 — Scheduled consistent snapshots | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-062-T03 — Encrypted off-host retention | 0.5 h | 0 h | 0.5 h | Planned | — | — |
-| 🟢 Small | F-062-T04 — Restore drill | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | **Total** | 1.25 h | 0 h (0 of 4 steps recorded) | 1 h | 1 of 4 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| — | F-062-T01 — Owner-agreed loss window and restore time | 0.25 h | 0 h | 0 h | Completed | 🤖 | 🧑‍🔧 | 🤔 |
+| 🟢 Small | F-062-T02 — Scheduled consistent snapshots | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-062-T03 — Encrypted off-host retention | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-062-T04 — Restore drill | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | **Total** | 1.25 h | 0 h (0 of 4 steps recorded) | 1 h | 1 of 4 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -225,14 +225,14 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟢 Small | F-012-T01 — Durable resume intent and policy | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-012-T02 — Readiness check and once-only resume engine | 0.5 h | 0 h | 0.5 h | Planned | — | — |
-| 🟢 Small | F-012-T03 — Claude Code (VS Code) adapter feasibility and adapter | 0.5 h | 0 h | 0.5 h | Planned · waits on F-006-T07 | — | — |
-| 🟢 Small | F-012-T04 — Web-chat adapter feasibility | 0.5 h | 0 h | 0.5 h | Planned | — | — |
-| 🟢 Small | F-012-T05 — Edge cases and real-host acceptance | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned · waits on F-005-T24 | 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 2 h | 0 h (0 of 5 steps recorded) | 2 h agent + 0.5 h owner | 0 of 5 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟢 Small | F-012-T01 — Durable resume intent and policy | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-012-T02 — Readiness check and once-only resume engine | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-012-T03 — Claude Code (VS Code) adapter feasibility and adapter | 0.5 h | 0 h | 0.5 h | Planned · waits on F-006-T07 | 🤖 | — | — |
+| 🟢 Small | F-012-T04 — Web-chat adapter feasibility | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-012-T05 — Edge cases and real-host acceptance | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned · waits on F-005-T24, F-012-T04 | 🤖 | ⏳ | — |
+| 🟡 Medium | **Total** | 2 h | 0 h (0 of 5 steps recorded) | 2 h agent + 0.5 h owner | 0 of 5 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -270,19 +270,19 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟢 Small | F-016-T01 — Step 1a — Decision: replicated state, leader lease and epoch, fencing tokens and restore | 0.5 h | 0.5 h so far (stated) | 0 h agent + 0.25 h owner | Implemented; verification pending | — | 🤔 |
-| — | F-016-T02 — Step 1b — Independent review of the coordinator relocation decision | 0.25 h | 0 h | 0 h | Completed | — | — |
-| 🟢 Small | F-016-T03 — Step 2a — Signed state snapshot export and import to a read-only standby | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-016-T04 — Step 2b — Incremental log shipping to the standby | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-016-T05 — Step 3a — Leader epoch in signed registry records; every effect checks the fencing token | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-016-T06 — Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-016-T07 — Step 4a — Owner-initiated relocation with restore; never a context-only takeover | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-016-T09 — Step 5b — Two-device relocation acceptance | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned | 🧑‍🔧 | — |
-| 🟢 Small | F-016-T10 — Revise the relocation decision after review | 0.5 h | 0 h | 0.5 h | Ready | — | — |
-| 🟡 Medium | **Total** | 3 h | 0.5 h (1 of 10 steps recorded) | 2.25 h agent + 1.25 h owner | 1 of 10 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟢 Small | F-016-T01 — Step 1a — Decision: replicated state, leader lease and epoch, fencing tokens and restore | 0.5 h | 0.5 h so far (stated) | 0 h agent + 0.25 h owner | Implemented; verification pending | 🤖 | — | 🤔 |
+| — | F-016-T02 — Step 1b — Independent review of the coordinator relocation decision | 0.25 h | 0 h | 0 h | Completed | 🤖 | — | — |
+| 🟢 Small | F-016-T03 — Step 2a — Signed state snapshot export and import to a read-only standby | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-016-T04 — Step 2b — Incremental log shipping to the standby | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-016-T05 — Step 3a — Leader epoch in signed registry records; every effect checks the fencing token | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-016-T06 — Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-016-T07 — Step 4a — Owner-initiated relocation with restore; never a context-only takeover | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-016-T09 — Step 5b — Two-device relocation acceptance | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned · waits on F-016-T08 | 🤖 | ⏳ | — |
+| 🟢 Small | F-016-T10 — Revise the relocation decision after review | 0.5 h | 0 h | 0.5 h | Ready | 🤖 | — | — |
+| 🟡 Medium | **Total** | 3 h | 0.5 h (1 of 10 steps recorded) | 2.25 h agent + 1.25 h owner | 1 of 10 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -318,19 +318,19 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| — | F-049-T01 — Define deterministic isolated runner admission and enforcement | 0.5 h | 0.25 h (stated) | 0 h | Completed | — | — |
-| 🟢 Small | F-049-T02 — EVA class definitions and least-class admission | 0.25 h | 0 h | 0.25 h | Ready | — | — |
-| 🟢 Small | F-049-T03 — Choose the macOS host enforcement mechanism | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Ready | [🧑‍🔧](decisions/eva-runner.md#per-job-enforcement-boundaries-supported-hosts) | [🤔](decisions/eva-runner.md#per-job-enforcement-boundaries-supported-hosts) |
-| 🟢 Small | F-049-T04 — EVA-03 instance per job | 0.5 h | 0 h | 0.5 h | Planned | — | — |
-| 🟢 Small | F-049-T05 — Escape and recovery join tests | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-049-T06 — Concurrent instances within per-machine limits | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-049-T07 — EVA-00, EVA-01 and EVA-02 on the runner | 0.5 h | 0 h | 0.5 h | Planned | — | — |
-| 🟢 Small | F-049-T08 — Pilot trust stage caps the class | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-049-T09 — Dashboard shows instances per class | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-049-T10 — Linux host enforcement for the mini PC | 0.5 h | 0 h | 0.5 h agent + 0.5 h owner | Planned | 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 3.5 h | 0.25 h (1 of 10 steps recorded) | 3 h agent + 0.75 h owner | 1 of 10 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| — | F-049-T01 — Define deterministic isolated runner admission and enforcement | 0.5 h | 0.25 h (stated) | 0 h | Completed | 🤖 | — | — |
+| 🟢 Small | F-049-T02 — EVA class definitions and least-class admission | 0.25 h | 0 h | 0.25 h | Ready | 🤖 | — | — |
+| 🟢 Small | F-049-T03 — Choose the macOS host enforcement mechanism | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Ready | 🤖 | [🧑‍🔧](decisions/eva-runner.md#per-job-enforcement-boundaries-supported-hosts) | [🤔](decisions/eva-runner.md#per-job-enforcement-boundaries-supported-hosts) |
+| 🟢 Small | F-049-T04 — EVA-03 instance per job | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-049-T05 — Escape and recovery join tests | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-049-T06 — Concurrent instances within per-machine limits | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-049-T07 — EVA-00, EVA-01 and EVA-02 on the runner | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-049-T08 — Pilot trust stage caps the class | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-049-T09 — Dashboard shows instances per class | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-049-T10 — Linux host enforcement for the mini PC | 0.5 h | 0 h | 0.5 h agent + 0.5 h owner | Planned · waits on F-049-T05 | 🤖 | ⏳ | — |
+| 🟡 Medium | **Total** | 3.5 h | 0.25 h (1 of 10 steps recorded) | 3 h agent + 0.75 h owner | 1 of 10 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -411,12 +411,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| — | F-009-T01 — Single-process service, config and lifecycle commands | — | 0 days | 0 remaining | Completed | — | — |
-| 🟢 Small | F-009-T02 — Mac login/logout acceptance | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned | [🧑‍🔧](acceptance/f009-service-login-procedure.md#part-1--mac-loginlogout-acceptance-neo-tokyo-3-terminal) | — |
-| 🟢 Small | F-009-T03 — Linux service target acceptance | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned | [🧑‍🔧](acceptance/f009-service-login-procedure.md#part-2--linux-target-selection-and-acceptance-selected-linux-host-bash) | — |
-| 🟢 Small | **Total** | 0.5 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 0.5 h agent + 0.75 h owner | 1 of 3 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| — | F-009-T01 — Single-process service, config and lifecycle commands | — | 0 days | 0 remaining | Completed | 🤖 | — | — |
+| 🟢 Small | F-009-T02 — Mac login/logout acceptance | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned | 🤖 | [🧑‍🔧](acceptance/f009-service-login-procedure.md#part-1--mac-loginlogout-acceptance-neo-tokyo-3-terminal) | — |
+| 🟢 Small | F-009-T03 — Linux service target acceptance | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned · waits on F-009-T02 | 🤖 | ⏳ | — |
+| 🟢 Small | **Total** | 0.5 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 0.5 h agent + 0.75 h owner | 1 of 3 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -454,13 +454,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| — | F-011-T01 — Companion implementation and packaging automation | — | 0 days | 0 remaining | Completed | — | — |
-| 🟢 Small | F-011-T02 — Live menu, service-button and login acceptance on the Mac | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned | [🧑‍🔧](acceptance/f011-companion-acceptance-procedure.md#part-1--companion-ui-notifications-and-service-controls-neo-tokyo-3-terminal--ui) | — |
-| 🟢 Small | F-011-T03 — Live notification permission acceptance | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned | [🧑‍🔧](acceptance/f011-companion-acceptance-procedure.md#part-1--companion-ui-notifications-and-service-controls-neo-tokyo-3-terminal--ui) | — |
-| — | F-011-T04 — Signed and notarized release | 0.25 h | 0 h | 0 h | Completed | 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 0.75 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 0.5 h agent + 0.75 h owner | 2 of 4 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| — | F-011-T01 — Companion implementation and packaging automation | — | 0 days | 0 remaining | Completed | 🤖 | — | — |
+| 🟢 Small | F-011-T02 — Live menu, service-button and login acceptance on the Mac | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned | 🤖 | [🧑‍🔧](acceptance/f011-companion-acceptance-procedure.md#part-1--companion-ui-notifications-and-service-controls-neo-tokyo-3-terminal--ui) | — |
+| 🟢 Small | F-011-T03 — Live notification permission acceptance | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned · waits on F-011-T02 | 🤖 | ⏳ | — |
+| — | F-011-T04 — Signed and notarized release | 0.25 h | 0 h | 0 h | Completed | 🤖 | 🧑‍🔧 | — |
+| 🟢 Small | **Total** | 0.75 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 0.5 h agent + 0.75 h owner | 2 of 4 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -536,15 +536,15 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| — | F-004-T01 — Installable PWA shell: manifest, service worker and update prompt | 1.5 h | 0.5 h (stated) | 0 h | Completed | — | — |
-| — | F-004-T02 — Reminder CRUD in the workspace | 3 h | 0.75 h (stated) | 0 h | Completed | — | — |
-| — | F-004-T03 — Doctor view | 1.5 h | 0.5 h (stated) | 0 h | Completed | — | — |
-| — | F-004-T04 — Schema-validated registered component renderer (GenUI) | 3 h | 0.75 h (stated) | 0 h | Completed | — | — |
-| — | F-004-T05 — Web push subscription and delivery | 3 h | 0.5 h (stated) | 0 h | Completed | — | — |
-| 🟢 Small | F-004-T06 — Phone install and push acceptance | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Ready | [🧑‍🔧](acceptance/f004-t06-phone-push-procedure.md#steps-phone--mac-terminal) | — |
-| 🟢 Small | **Total** | 12.25 h | 3 h (5 of 6 steps recorded) | 0.25 h agent + 0.5 h owner | 5 of 6 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| — | F-004-T01 — Installable PWA shell: manifest, service worker and update prompt | 1.5 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
+| — | F-004-T02 — Reminder CRUD in the workspace | 3 h | 0.75 h (stated) | 0 h | Completed | 🤖 | — | — |
+| — | F-004-T03 — Doctor view | 1.5 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
+| — | F-004-T04 — Schema-validated registered component renderer (GenUI) | 3 h | 0.75 h (stated) | 0 h | Completed | 🤖 | — | — |
+| — | F-004-T05 — Web push subscription and delivery | 3 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
+| 🟢 Small | F-004-T06 — Phone install and push acceptance | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Ready | 🤖 | [🧑‍🔧](acceptance/f004-t06-phone-push-procedure.md#steps-phone--mac-terminal) | — |
+| 🟢 Small | **Total** | 12.25 h | 3 h (5 of 6 steps recorded) | 0.25 h agent + 0.5 h owner | 5 of 6 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -699,16 +699,16 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| — | F-051-T01 — Chat line and relay visibility | 0.25 h | 0.25 h (stated) | 0 h | Completed | — | — |
-| — | F-051-T02 — Running sortie selection and phase label | 0.25 h | 0.25 h (stated) | 0 h | Completed | — | — |
-| — | F-051-T03 — MAGI and pilot contributors | 0.25 h | 0.25 h (stated) | 0 h | Completed | — | — |
-| — | F-051-T04 — Skipped versus unavailable nodes and relay step | 0.25 h | 0.25 h (stated) | 0 h | Completed | — | — |
-| — | F-051-T05 — Authenticated cross-base inspection | 0.5 h | 0.5 h (stated) | 0 h | Completed | — | — |
-| 🟢 Small | F-051-T06 — EVA cage pilot labels from real instance data | 1 h | 0 h | 1 h | Planned · waits on F-049-T09 | — | — |
-| — | F-051-T07 — Decide which sorties a peer base may inspect | 1 h | 0 h | 0 h | Completed | — | 🤔 |
-| 🟢 Small | **Total** | 3.5 h | 1.5 h (5 of 7 steps recorded) | 1 h | 6 of 7 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| — | F-051-T01 — Chat line and relay visibility | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 | — | — |
+| — | F-051-T02 — Running sortie selection and phase label | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 | — | — |
+| — | F-051-T03 — MAGI and pilot contributors | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 | — | — |
+| — | F-051-T04 — Skipped versus unavailable nodes and relay step | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 | — | — |
+| — | F-051-T05 — Authenticated cross-base inspection | 0.5 h | 0.5 h (stated) | 0 h | Completed | 🤖 | — | — |
+| 🟢 Small | F-051-T06 — EVA cage pilot labels from real instance data | 1 h | 0 h | 1 h | Planned · waits on F-049-T09 | 🤖 | — | — |
+| — | F-051-T07 — Decide which sorties a peer base may inspect | 1 h | 0 h | 0 h | Completed | 🤖 | — | 🤔 |
+| 🟢 Small | **Total** | 3.5 h | 1.5 h (5 of 7 steps recorded) | 1 h | 6 of 7 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -785,17 +785,17 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| — | F-078-T01 — Inventory the models and hardware on Neo Tokyo-3 and Tabgha | 0.25 h | 0 h | 0 h | Completed | 🧑‍🔧 | — |
-| — | F-078-T02 — Agree the evaluation matrix and its budget | 0.25 h | 0 h | 0 h | Completed | — | 🤔 |
-| 🟢 Small | F-078-T03 — Smoke campaign on Neo Tokyo-3 | 0.5 h | 0 h | 0.5 h | Planned | — | — |
-| 🟢 Small | F-078-T04 — Role campaign on Neo Tokyo-3 | 0.5 h | 0 h | 0.5 h | Planned | — | — |
-| 🟢 Small | F-078-T05 — Tabgha campaign: remote endpoint and small local fallback | 0.5 h | 0 h | 0.5 h agent + 0.25 h owner | Planned | [🧑‍🔧](evaluations/2026-11-13-model-inventory.md#approved-matrix-and-budget-f-078-t02-2026-11-13) | — |
-| 🟢 Small | F-078-T06 — Campaign for the larger candidates | 0.5 h | 0 h | 0.5 h | Planned | — | — |
-| 🟢 Small | F-078-T07 — Comparison report and profile status | 0.5 h | 0 h | 0.5 h | Planned | — | — |
-| 🟢 Small | F-078-T08 — Adopt the new Gauntlet packs (gauntlet F-012) when released | 0.5 h | 0 h | 0.5 h | Planned | — | — |
-| 🟡 Medium | **Total** | 3.5 h | 0 h (0 of 8 steps recorded) | 3 h agent + 0.25 h owner | 2 of 8 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| — | F-078-T01 — Inventory the models and hardware on Neo Tokyo-3 and Tabgha | 0.25 h | 0 h | 0 h | Completed | 🤖 | 🧑‍🔧 | — |
+| — | F-078-T02 — Agree the evaluation matrix and its budget | 0.25 h | 0 h | 0 h | Completed | 🤖 | — | 🤔 |
+| 🟢 Small | F-078-T03 — Smoke campaign on Neo Tokyo-3 | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-078-T04 — Role campaign on Neo Tokyo-3 | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-078-T05 — Tabgha campaign: remote endpoint and small local fallback | 0.5 h | 0 h | 0.5 h agent + 0.25 h owner | Planned · waits on F-078-T04 | 🤖 | ⏳ | — |
+| 🟢 Small | F-078-T06 — Campaign for the larger candidates | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-078-T07 — Comparison report and profile status | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-078-T08 — Adopt the new Gauntlet packs (gauntlet F-012) when released | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
+| 🟡 Medium | **Total** | 3.5 h | 0 h (0 of 8 steps recorded) | 3 h agent + 0.25 h owner | 2 of 8 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1013,47 +1013,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
-### <a id="f-076"></a>[✨ F-076](#top)
-
-**What reaches main is tested together, not only each PR on its own**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.25 h agent + 0.25 h owner | — | — | — | 🤔 |
-
-🧑 **→** The merge queue needs an organization-owned repository: move `nerv` to a free organization, or choose option 2 (CI on every push to main) or option 1 ([options](audits/2026-11-13-full.md#f076-options)).
-
-| | |
-|---|---|
-| **Issue** | Branch protection requires only `validate` and `native-macos`, with `strict` off; CI runs on pull requests and on Mondays only (no push trigger). On 12–13 November 41 PRs merged, several in parallel and some with `full-suite` skipped by scoped verification, so the combination on main was not run in CI until the audit dispatched one. `windows` and `full-suite` are not required. |
-| **Reproduce** | `gh api repos/voidbrain/nerv/branches/main/protection` and `.github/workflows/ci.yml` `on:`; compare `gh run list --branch main` with the merge times. |
-| **Check** | The chosen option is in place (a repository setting or the CI workflow); a PR whose combination with main breaks a test cannot reach main unnoticed for more than a day; the choice is recorded here. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| — | F-076-T01 — Choose how merged main is verified | 0 h | 0 h | 0 h | Completed | — | 🤔 |
-| 🟢 Small | F-076-T02 — CI runs on merge&#95;group | 0.5 h | 0 h | 0.5 h | Planned | — | — |
-| 🟢 Small | F-076-T03 — Reconcile the queue-aware merge tool | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | — |
-| 🟢 Small | F-076-T04 — Turn on the merge queue for main | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned | — | [🤔](audits/2026-11-13-full.md#f076-options) |
-| 🟡 Medium | **Total** | 1.25 h | 0 h (0 of 4 steps recorded) | 1.25 h agent + 0.25 h owner | 1 of 4 completed | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-076.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #383](https://github.com/voidbrain/nerv/pull/383) [PR #382](https://github.com/voidbrain/nerv/pull/382) [PR #379](https://github.com/voidbrain/nerv/pull/379) [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) |
-| Opened | 2026-11-13 |
-| Verification | Pending. |
-| Reviewed | 2026-11-13 |
-
-</details>
-
----
 ### <a id="b-057"></a>[🐞 B-057](#top)
 
 **Companion error messages are Italian only and do not say what went wrong**
@@ -1072,11 +1031,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| — | B-057-T01 — Translated, specific companion error messages | 1.5 h | 0 h | 0 h | Completed | — | — |
-| 🟢 Small | B-057-T02 — Owner live check: English and Italian companion errors | 0 h | 0 h | 0 h agent + 0.25 h owner | Ready | [🧑‍🔧](acceptance/companion-live-checks.md#part-c) | — |
-| 🟢 Small | **Total** | 1.5 h | 0 h (0 of 2 steps recorded) | 0.25 h owner | 1 of 2 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| — | B-057-T01 — Translated, specific companion error messages | 1.5 h | 0 h | 0 h | Completed | 🤖 | — | — |
+| 🟢 Small | B-057-T02 — Owner live check: English and Italian companion errors | 0 h | 0 h | 0 h agent + 0.25 h owner | Ready | — | [🧑‍🔧](acceptance/companion-live-checks.md#part-c) | — |
+| 🟢 Small | **Total** | 1.5 h | 0 h (0 of 2 steps recorded) | 0.25 h owner | 1 of 2 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1111,11 +1070,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| — | F-077-T01 — Turn on Dependabot alerts and CodeQL default setup | 0.25 h | 0 h | 0 h | Completed | 🧑‍🔧 | — |
-| 🟢 Small | F-077-T02 — Apply patch and minor dependency updates | 0.5 h | 0 h | 0.5 h | Planned | — | — |
-| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0.5 h | 1 of 2 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| — | F-077-T01 — Turn on Dependabot alerts and CodeQL default setup | 0.25 h | 0 h | 0 h | Completed | 🤖 | 🧑‍🔧 | — |
+| 🟢 Small | F-077-T02 — Apply patch and minor dependency updates | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
+| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0.5 h | 1 of 2 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1230,12 +1189,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| — | F-064-T01 — Owner picks the first circuit | 0.25 h | 0 h | 0 h | Completed | — | 🤔 |
-| 🟢 Small | F-064-T02 — First bounded circuit | 0.5 h | 0 h | 0.5 h | Planned | — | — |
-| 🟢 Small | F-064-T03 — Fault-injection tests | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 3 steps recorded) | 0.75 h | 1 of 3 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| — | F-064-T01 — Owner picks the first circuit | 0.25 h | 0 h | 0 h | Completed | 🤖 | — | 🤔 |
+| 🟢 Small | F-064-T02 — First bounded circuit | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-064-T03 — Fault-injection tests | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 3 steps recorded) | 0.75 h | 1 of 3 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1348,11 +1307,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟢 Small | F-060-T01 — herdr-core trial in the development workspace | 0.25 h | 0 h | 0.25 h agent + 2 h owner | Planned | 🧑‍🔧 | — |
-| 🟢 Small | F-060-T02 — Answer the five questions and per-record outcomes | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 2 steps recorded) | 0.5 h agent + 2 h owner | 0 of 2 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟢 Small | F-060-T01 — herdr-core trial in the development workspace | 0.25 h | 0 h | 0.25 h agent + 2 h owner | Planned | 🤖 | 🧑‍🔧 | — |
+| 🟢 Small | F-060-T02 — Answer the five questions and per-record outcomes | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 2 steps recorded) | 0.5 h agent + 2 h owner | 0 of 2 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1388,18 +1347,18 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟢 Small | F-007-T01 — Step 1a — Feasibility: local speech-to-text and text-to-speech candidates measured on the Mac in Italian and English | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-007-T02 — Step 1b — Voice command corpus in Italian and English with expected intents | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-007-T03 — Step 2a — Push-to-talk on the dashboard and companion: speech to text shown for confirmation, no silent physical activation | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-007-T04 — Step 2b — Spoken replies (text-to-speech) | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-007-T05 — Step 2c — Voice corpus evaluation run and report | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned | 🧑‍🔧 | — |
-| — | F-007-T06 — Step 3a — Skill package format, isolated storage and versions | 1 h | 0 h | 0 h | Completed | — | — |
-| 🟢 Small | F-007-T07 — Step 3b — Skill evaluation with a baseline run without the skill and held-out cases | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-007-T08 — Step 3c — Owner promotion, rollback and retirement of skills after a model change | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-007-T09 — Step 3d — Rejected permission escalation and corrected-memory cases | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟡 Medium | **Total** | 3 h | 0 h (0 of 9 steps recorded) | 2 h agent + 0.5 h owner | 1 of 9 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟢 Small | F-007-T01 — Step 1a — Feasibility: local speech-to-text and text-to-speech candidates measured on the Mac in Italian and English | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-007-T02 — Step 1b — Voice command corpus in Italian and English with expected intents | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-007-T03 — Step 2a — Push-to-talk on the dashboard and companion: speech to text shown for confirmation, no silent physical activation | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-007-T04 — Step 2b — Spoken replies (text-to-speech) | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-007-T05 — Step 2c — Voice corpus evaluation run and report | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned · waits on F-007-T04 | 🤖 | ⏳ | — |
+| — | F-007-T06 — Step 3a — Skill package format, isolated storage and versions | 1 h | 0 h | 0 h | Completed | 🤖 | — | — |
+| 🟢 Small | F-007-T07 — Step 3b — Skill evaluation with a baseline run without the skill and held-out cases | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-007-T08 — Step 3c — Owner promotion, rollback and retirement of skills after a model change | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-007-T09 — Step 3d — Rejected permission escalation and corrected-memory cases | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟡 Medium | **Total** | 3 h | 0 h (0 of 9 steps recorded) | 2 h agent + 0.5 h owner | 1 of 9 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1435,12 +1394,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟢 Small | F-008-T01 — FPV app adapter contract | 0.25 h | 0 h | 0.25 h | Planned | — | — |
-| 🟢 Small | F-008-T02 — Battery and maintenance records through the adapter | 0.5 h | 0 h | 0.5 h | Planned | — | — |
-| 🟢 Small | F-008-T03 — Acceptance against the real FPV app | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned | 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 3 steps recorded) | 1 h agent + 0.5 h owner | 0 of 3 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟢 Small | F-008-T01 — FPV app adapter contract | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-008-T02 — Battery and maintenance records through the adapter | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-008-T03 — Acceptance against the real FPV app | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned · waits on F-008-T02 | 🤖 | ⏳ | — |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 3 steps recorded) | 1 h agent + 0.5 h owner | 0 of 3 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1582,6 +1541,47 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-076"></a>[✨ F-076](#top)
+
+**What reaches main is tested together, not only each PR on its own**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 1.25 h agent + 0.25 h owner | — | — | — | 🤔 |
+
+🧑 **→** The merge queue needs an organization-owned repository: move `nerv` to a free organization, or choose option 2 (CI on every push to main) or option 1 ([options](audits/2026-11-13-full.md#f076-options)).
+
+| | |
+|---|---|
+| **Issue** | Branch protection requires only `validate` and `native-macos`, with `strict` off; CI runs on pull requests and on Mondays only (no push trigger). On 12–13 November 41 PRs merged, several in parallel and some with `full-suite` skipped by scoped verification, so the combination on main was not run in CI until the audit dispatched one. `windows` and `full-suite` are not required. |
+| **Reproduce** | `gh api repos/voidbrain/nerv/branches/main/protection` and `.github/workflows/ci.yml` `on:`; compare `gh run list --branch main` with the merge times. |
+| **Check** | The chosen option is in place (a repository setting or the CI workflow); a PR whose combination with main breaks a test cannot reach main unnoticed for more than a day; the choice is recorded here. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| — | F-076-T01 — Choose how merged main is verified | 0 h | 0 h | 0 h | Completed | — | — | 🤔 |
+| 🟢 Small | F-076-T02 — CI runs on merge&#95;group | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — | — |
+| 🟢 Small | F-076-T03 — Reconcile the queue-aware merge tool | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | 🤖 | — | — |
+| 🟢 Small | F-076-T04 — Turn on the merge queue for main | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned · waits on F-076-T03 | 🤖 | — | ⏳ |
+| 🟡 Medium | **Total** | 1.25 h | 0 h (0 of 4 steps recorded) | 1.25 h agent + 0.25 h owner | 1 of 4 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-076.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #383](https://github.com/voidbrain/nerv/pull/383) [PR #382](https://github.com/voidbrain/nerv/pull/382) [PR #379](https://github.com/voidbrain/nerv/pull/379) [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) |
+| Opened | 2026-11-13 |
+| Verification | Pending. |
+| Reviewed | 2026-11-13 |
+
+</details>
+
+---
 ### <a id="f-081"></a>[✨ F-081](#top)
 
 **Native pairing: recovery on the service host with its profile stopped, and the stale client of 2026-11-07**
@@ -1600,10 +1600,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟢 Small | F-081-T01 — Revoke the stale client and run stopped-profile recovery on the service host | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Ready | [🧑‍🔧](acceptance/companion-live-checks.md#part-a) | — |
-| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h agent + 0.5 h owner | 0 of 1 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟢 Small | F-081-T01 — Revoke the stale client and run stopped-profile recovery on the service host | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Ready | 🤖 | [🧑‍🔧](acceptance/companion-live-checks.md#part-a) | — |
+| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h agent + 0.5 h owner | 0 of 1 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1638,11 +1638,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Procedure | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| — | B-056-T01 — Separate a refused renewal from an unconfirmed one in the companion | 1 h | 0 h | 0 h | Completed | — | — |
-| 🟢 Small | B-056-T02 — Owner live check: refused and unconfirmed renewal in the companion | 0 h | 0 h | 0 h agent + 0.25 h owner | Ready | [🧑‍🔧](acceptance/companion-live-checks.md#part-b) | — |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 2 steps recorded) | 0.25 h owner | 1 of 2 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Agent | Procedure | Decision |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| — | B-056-T01 — Separate a refused renewal from an unconfirmed one in the companion | 1 h | 0 h | 0 h | Completed | 🤖 | — | — |
+| 🟢 Small | B-056-T02 — Owner live check: refused and unconfirmed renewal in the companion | 0 h | 0 h | 0 h agent + 0.25 h owner | Ready | — | [🧑‍🔧](acceptance/companion-live-checks.md#part-b) | — |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 2 steps recorded) | 0.25 h owner | 1 of 2 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>

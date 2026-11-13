@@ -18,6 +18,8 @@ Goal: verify that the Mac user service survives login/logout and choose/verify a
 
 ## Part 2 — Linux target selection and acceptance (selected Linux host, bash)
 
+Target chosen 2026-11-13: the Linux VM `nerv-linux` on Neo Tokyo-3 ([set up once](linux-vm.md)); run these steps after `ssh nerv-linux`, in the NERV checkout there.
+
 1. On the chosen Linux host, install and start the user service:
    ```bash
    npm start -- service install
