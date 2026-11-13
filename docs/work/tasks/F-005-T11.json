@@ -13,7 +13,7 @@
   ],
   "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
   "acceptance": [
-    "Agree the device matrix for final acceptance (owner decision)"
+    "A proposed device matrix (machines, platforms, which acceptance runs on each) written for the owner, linked from F-005-T37"
   ],
   "dependsOn": [
     "F-005-T06",

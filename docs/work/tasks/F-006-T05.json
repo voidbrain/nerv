@@ -14,7 +14,7 @@
   ],
   "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
   "acceptance": [
-    "Mac operating-conditions plan (heavy, moderate, idle) with budgets"
+    "A Mac operating-conditions plan (heavy, moderate, idle) with budgets written for the owner, linked from F-006-T18"
   ],
   "dependsOn": [
     "F-074-T02"

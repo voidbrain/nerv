@@ -6,9 +6,8 @@
   "goal": "Measure the candidate mechanisms (macOS sandbox profile, a lightweight VM/container, AgentFS from the 2026-11-09 assessment) against the T01 threat model on the Mac host and record the choice",
   "status": "ready",
   "acceptance": [
-    "Each candidate checked for filesystem, network egress, credential denial, CPU/memory/output limits, cancellation and startup time",
-    "Decision record in docs/decisions with what each candidate cannot enforce",
-    "Owner chooses when more than one candidate passes"
+    "Each candidate (macOS sandbox profile, lightweight VM/container, AgentFS) measured for filesystem, network egress, credential denial, CPU/memory/output limits, cancellation and startup time",
+    "A decision record in docs/decisions states what each candidate cannot enforce, ready for the owner (F-049-T11)"
   ],
   "dependsOn": [
     "F-049-T01"

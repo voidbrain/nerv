@@ -14,7 +14,7 @@
   ],
   "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
   "acceptance": [
-    "Placement campaign plan with exact cases, repeats and budgets for owner approval"
+    "A placement campaign plan with exact cases, repeats and budgets written for the owner, linked from F-006-T17"
   ],
   "dependsOn": [
     "F-006-T08",

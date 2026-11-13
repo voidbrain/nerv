@@ -7,8 +7,7 @@
   "status": "planned",
   "acceptance": [
     "Enforcement mechanism chosen for Linux against the T01 threat model",
-    "T05 join tests pass on Linux in CI",
-    "Owner runs the first job on the mini PC"
+    "T05 join tests pass on Linux in CI"
   ],
   "dependsOn": [
     "F-049-T05"

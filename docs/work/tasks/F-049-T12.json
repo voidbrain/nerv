@@ -6,9 +6,7 @@
   "goal": "Run the first EVA job on the Linux host",
   "status": "planned",
   "acceptance": [
-    "Enforcement mechanism chosen for Linux against the T01 threat model",
-    "T05 join tests pass on Linux in CI",
-    "Owner runs the first job on the mini PC"
+    "The owner runs the first EVA job on the Linux host and the result is recorded"
   ],
   "dependsOn": [
     "F-049-T10"
