@@ -226,7 +226,7 @@ export function lifecycleRecovery(
     c = object(confirmation);
   if (
     typeof v.resource !== 'string' ||
-    !/^user-service:[1-9]\d*:(darwin|linux)$/.test(v.resource) ||
+    !/^user-service:(?:[1-9]\d*:(?:darwin|linux)|\d+:win32)$/.test(v.resource) ||
     !Number.isSafeInteger(v.fence) ||
     Number(v.fence) < 1 ||
     typeof v.nonce !== 'string' ||

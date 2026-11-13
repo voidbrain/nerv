@@ -53,13 +53,13 @@ function fileHash(path: string): string {
     closeSync(fd);
   }
 }
-function privateEntry(path: string, uid: number, directory: boolean): void {
+function privateEntry(path: string, uid: number | undefined, directory: boolean): void {
   const stat = lstatSync(path);
+  const posixPrivate = uid === undefined ? true : stat.uid === uid && !(stat.mode & 0o077);
   if (
     stat.isSymbolicLink() ||
     (directory ? !stat.isDirectory() : !stat.isFile()) ||
-    stat.uid !== uid ||
-    stat.mode & 0o077 ||
+    !posixPrivate ||
     realpathSync(path) !== path
   )
     throw Error('The backup must be a private, symlink-free copy owned by this user.');
@@ -187,7 +187,7 @@ function compare(prior: string, next: string): Comparison {
  */
 export async function rehearseUpgrade(backup: string, reader: UpgradeReader = currentReader): Promise<RehearsalReport> {
   const uid = process.getuid?.();
-  if (uid === undefined || process.platform === 'win32')
+  if (process.platform !== 'win32' && uid === undefined)
     throw Error('Upgrade rehearsal needs POSIX private-file ownership; it is not available on this platform yet.');
   if (!isAbsolute(backup) || resolve(backup) !== backup) throw Error('Name the backup directory by its absolute path.');
   privateEntry(backup, uid, true);
