@@ -18,7 +18,7 @@ Start here for document ownership. This is the NERV-specific map; the [procedure
 | [Gauntlet adoption](evaluations/gauntlet.md) | Independent capability protocol, NERV flow adapters and explicit model comparison commands | Pinned dependency; no automatic qualification or model campaign |
 | [Evaluations](evaluations/README.md) | Versioned scenario/model/stress run reports | Retained by revision and suite; no automatic expensive reruns |
 | `design/` | Scoped proposals/assessments not yet adopted as a decision | Findings map to existing records; no implied implementation |
-| `security/`, [installation](INSTALL.md), [model usage](model-usage.md) | Topic-specific operating guides | Maintained beside their owning subsystem |
+| `security/`, [installation](INSTALL.md), `guides/`, [model usage](model-usage.md) | Entry-point and topic-specific operating guides | Maintained beside their owning subsystem |
 | [Archive](archive/README.md) | Closed records, reconciliation history and original design inputs | Append-only history, not a second active backlog |
 | [remove/](../remove/README.md) | Superseded prototypes, visual references and metadata; no automatic deletion approval | Quarantined references, not runtime assets, instructions or current requirements |
 

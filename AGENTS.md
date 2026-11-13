@@ -84,6 +84,12 @@ The project is **NERV Agency**. The repository is `https://github.com/voidbrain/
 
 - Add backend operations through validated interfaces and regression tests; add UI surfaces through registered Angular components. Update the owning backlog record and documentation.
 
+### Documentation
+
+- Keep top-level docs (`README.md`, `docs/README.md`, `docs/INSTALL.md`, `docs/STYLE-GUIDE.md`, and general guides) concise (~150–200 lines max) and clearly structured as entry points.
+- Move feature-specific, platform-specific, or deep technical details into dedicated topic files under `docs/<topic>/` (e.g. `docs/guides/`, `docs/design/`, `docs/architecture/`) and link to them.
+- Keep docs current: replace "pending F-XXX" or stale historical status notes with shipped behavior once a feature closes, and avoid cluttering user/developer guides with closed record IDs unless linking a decision.
+
 ### Checks before you finish
 
 Open every PR against `main`, never on another PR's branch (merging it would not reach `main`). Once a PR's CI is green the owner may merge it at any moment: push no new work to it, open a new PR. Exception: a green PR that conflicts with `main` cannot merge, so it may get a push that only resolves the conflict; its checks run again before it can merge. For generated backlog conflicts, resolve per-record sources/layout preserving both sides, then regenerate all affected views; use `node tools/merge-backlog.mjs` for a non-adopted ledger. Never keep one side and silently drop the other side's edits.

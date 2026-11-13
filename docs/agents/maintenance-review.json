@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-13T00:02:41.441Z",
+  "reviewed": "2026-11-13T00:30:15.789Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
-    "AGENTS.md": "c163d5019752b32128390d3dca8400759e00603e9c5dc5e90df6071d798cb5d8",
+    "AGENTS.md": "fb68a1cff284b5b089a145f117d4885a8943512c61897212250340cfc9427b96",
     "docs/BACKLOG-RULES.md": "e2e12ec52b76442c2024faeef76143ddfc432cf342d593fda6cf0b715f870002",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
     "docs/agents/areas.md": "0ff9805a7d720ee177505cef670e53169a6d640299762dfa86185be46fa8737c",
@@ -25,7 +25,7 @@
   },
   "measurements": {
     "samples": 1,
-    "latestAt": "2026-11-13T00:02:41.321Z",
+    "latestAt": "2026-11-13T00:30:15.714Z",
     "operations": {
       "adoption": {
         "samples": 0,
