@@ -51,7 +51,7 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
     var credential: Credential?
     init() {
         guard NSClassFromString("XCTestCase") == nil else { return }
-        do { credential = try CredentialStore.load(); paired = credential != nil } catch { status = error.localizedDescription }; loginState = login.state; if notificationsEnabled { notificationStatus = "Notifiche attive: nuovi messaggi e richieste di revisione" }; if paired { startPolling() }
+        do { credential = try CredentialStore.load(); paired = credential != nil } catch { status = errorMessage(error) }; loginState = login.state; if notificationsEnabled { notificationStatus = "Notifiche attive: nuovi messaggi e richieste di revisione" }; if paired { startPolling() }
     }
     deinit { pollTask?.cancel() }
     private func startPolling() {
@@ -89,8 +89,23 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
             notificationsEnabled = true; notificationStatus = "Notifiche attive: nuovi messaggi e richieste di revisione"
         } catch { notificationStatus = error.localizedDescription; notificationsEnabled = false }
     }
+    func errorMessage(_ error: Error) -> String {
+        if let native = error as? NativeError { return native.message(language: language) }
+        return tr(error.localizedDescription)
+    }
     func tr(_ text: String) -> String {
         guard language == "en" else { return text }
+        let nativeMap: [String: String] = [
+            NativeError.invalidInvitation.message(language: "it"): NativeError.invalidInvitation.message(language: "en"),
+            NativeError.certificateMismatch.message(language: "it"): NativeError.certificateMismatch.message(language: "en"),
+            NativeError.serviceUnreachable.message(language: "it"): NativeError.serviceUnreachable.message(language: "en"),
+            NativeError.pairingRevoked.message(language: "it"): NativeError.pairingRevoked.message(language: "en"),
+            NativeError.requestFailed.message(language: "it"): NativeError.requestFailed.message(language: "en"),
+            NativeError.identityMismatch.message(language: "it"): NativeError.identityMismatch.message(language: "en"),
+            NativeError.keychain.message(language: "it"): NativeError.keychain.message(language: "en"),
+            NativeError.expired.message(language: "it"): NativeError.expired.message(language: "en"),
+        ]
+        if let translated = nativeMap[text] { return translated }
         return ["Rinnova abbinamento":"Renew pairing", "Rinnovo non confermato. Controlla i client; usa un nuovo invito per recuperare l’abbinamento.":"Renewal not confirmed. Inspect clients; use a new invitation to recover pairing.", "NERV non connesso":"NERV disconnected", "NERV abbinato":"NERV paired", "NERV connesso":"NERV connected", "Abbinamento locale rimosso":"Local pairing removed", "Genera un invito con npm start -- pair e incollalo qui.":"Generate an invitation with npm start -- pair and paste it here.", "Invito privato":"Private invitation", "Abbina NERV":"Pair NERV", "Apri spazio web":"Open workspace", "Aggiorna stato":"Refresh status", "Rimuovi abbinamento locale":"Forget local pairing", "Chiudere questa app lascia NERV in esecuzione.":"Quitting this app leaves NERV running.", "Esci dal companion":"Quit companion", "Ora locale del Mac":"Mac local time", "Servizio NERV di questo Mac":"NERV service on this Mac", "Il servizio locale non corrisponde al NERV abbinato.":"The local service does not match the paired NERV.", "Notifiche disattivate":"Notifications off", "Notifiche attive: nuovi messaggi e richieste di revisione":"Notifications on: new messages and review requests", "Disattiva notifiche":"Turn notifications off", "Attiva notifiche da ora":"Enable notifications from now", "Cronologia cambiata: controlla la casella":"History changed: check the inbox", "Servizio caricato":"Service loaded", "Servizio non caricato o non accessibile":"Service not loaded or unavailable", "Avvia NERV":"Start NERV", "Ferma NERV…":"Stop NERV…", "Ferma NERV":"Stop NERV", "Annulla":"Cancel", "Avvio al login attivo":"Launch at login enabled", "Avvio al login: approvazione richiesta":"Launch at login requires approval", "Avvio al login non attivo":"Launch at login not enabled", "Disattiva avvio al login":"Disable launch at login", "Avvia companion al login":"Launch companion at login", "Apri impostazioni login":"Open login settings", "Fermare il servizio NERV? I promemoria attendono il riavvio.":"Stop the NERV service? Reminders will wait until it restarts."][text] ?? text
     }
     func pair() async {
