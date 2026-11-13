@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 149 h agent + 17 h owner across 137 open steps of 31 features and 7 other records. 21.25 h of actual effort recorded on 31 steps. Generated from the task files.
+**Remaining effort:** 147 h agent + 17 h owner across 135 open steps of 31 features and 6 other records. 21.75 h of actual effort recorded on 33 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -47,7 +47,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟣 Very large | 9.5 h agent + 5.25 h owner | — | [F-012](#f-012) | — | — |
+| 🔴 Open | 🔺 P1 | 🟣 Very large | 8.5 h agent + 5.25 h owner | — | [F-012](#f-012) | — | — |
 
 💻 **→** Next: F-005-T15 — T06h — Upgrades that raise the schema version (Planned).
 
@@ -81,7 +81,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | F-005-T18 — T07d — Opt-in automatic update policy, off by default, for selected channels and targets | 1 h | 0.5 h (stated) | 0 h | Completed |
 | — | F-005-T19 — T08b — Node install or upgrade choices with ownership and recovery; never replaces a user-managed runtime silently | 1.25 h | 0.5 h (stated) | 0 h | Completed |
 | — | F-005-T20 — T08c — Engine/provider contract for several instances and endpoints, local and remote; Ollama becomes one adapter | 1.25 h | 0.5 h (stated) | 0 h | Completed |
-| 🟢 Small | F-005-T21 — T08d — Optional start-at-login or on-demand management of selected owned local engines | 1 h | 0 h | 1 h | Planned |
+| — | F-005-T21 — T08d — Optional start-at-login or on-demand management of selected owned local engines | 1 h | 0.25 h (stated) | 0 h | Completed |
 | 🟢 Small | F-005-T22 — T08e — Demonstration of prerequisites and optional engine management on an owner-selected target | 0.5 h | 0 h | 0.5 h agent + 0.5 h owner | Planned |
 | — | F-005-T23 — T09b — Windows update and recovery: backup, rehearsal and checkout | 1 h | 0.5 h (stated) | 0 h | Completed |
 | 🟢 Small | F-005-T24 — T09c — Acceptance on an owner-selected Windows machine | 0.5 h | 0 h | 0.5 h agent + 1 h owner | Planned |
@@ -91,7 +91,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟡 Medium | F-005-T28 — T11c — Reconnect, locks and uncertain physical results across the device matrix | 1.25 h | 0 h | 1.25 h agent + 1 h owner | Planned |
 | 🟢 Small | F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 1 h | 0 h | 1 h agent + 0.5 h owner | Planned |
 | 🟢 Small | F-005-T30 — T11e — Parent acceptance and closure reconciliation | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟣 Very large | **Total** | 24 h (24 of 30 steps) | 7.75 h (14 of 30 steps recorded) | 9.5 h agent + 5.25 h owner | 20 of 30 completed |
+| 🟣 Very large | **Total** | 24 h (24 of 30 steps) | 8 h (15 of 30 steps recorded) | 8.5 h agent + 5.25 h owner | 21 of 30 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
