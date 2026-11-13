@@ -319,7 +319,7 @@ export const methodSchemas = {
     properties: {
       sortieId: { type: 'string', minLength: 1, maxLength: 100 },
       actionId: { type: 'string', minLength: 1, maxLength: 100 },
-      seat: { type: 'string', minLength: 1, maxLength: 40 },
+      seat: { type: 'string', pattern: '^[a-zA-Z0-9._:/-]{1,40}$' },
       vote: { enum: ['approve', 'reject', 'abstain'] },
       reason: { type: 'string', maxLength: 500 },
       confidence: { type: 'number', minimum: 0, maximum: 1 },
@@ -817,12 +817,12 @@ export const methodSchemas = {
       },
       extras: {
         type: 'array',
-        maxItems: 6,
+        maxItems: 12,
         items: {
           type: 'object',
           required: ['seat', 'vote', 'reason'],
           properties: {
-            seat: { type: 'string', pattern: '^[A-Z0-9-]{2,16}$' },
+            seat: { type: 'string', pattern: '^[a-zA-Z0-9._:/-]{1,40}$' },
             vote: { enum: ['approve', 'reject', 'abstain'] },
             reason: { type: 'string', maxLength: 500 },
             confidence: { type: 'number', minimum: 0, maximum: 1 },

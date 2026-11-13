@@ -89,6 +89,7 @@ import type { Episode, Fact } from './memory.ts';
 import type { BaseEntry, SignedRecord } from './kaji.ts';
 import {
   ONLINE_MS,
+  sanitizeVerdict,
   type PeerVerdict,
   type RunItem,
   type VerdictAsk,
@@ -142,6 +143,53 @@ export interface PeerSeat {
   seat: string;
   shadow: boolean;
   verdict: Promise<PeerVerdict>;
+}
+/** A veto-only extra MAGI seat attached by action class (F-025-T01); starts in shadow by default. */
+export interface ExtraSeatSpec {
+  seat: string;
+  effects?: Effect[];
+  tools?: string[];
+  patterns?: Pattern[];
+  shadow?: boolean;
+  timeoutMs?: number;
+  ask: (ask: VerdictAsk, signal: AbortSignal) => Promise<PeerVerdict>;
+}
+function matchesExtraSeat(
+  spec: ExtraSeatSpec,
+  action: { tool: string; effect: Effect; pattern: Pattern; intent?: boolean },
+): boolean {
+  const hasFilter = !!(spec.effects?.length || spec.tools?.length || spec.patterns?.length);
+  if (!hasFilter) return action.intent ?? action.pattern !== 'green';
+  if (spec.effects?.length && !spec.effects.includes(action.effect)) return false;
+  if (spec.tools?.length && !spec.tools.includes(action.tool)) return false;
+  if (spec.patterns?.length && !spec.patterns.includes(action.pattern)) return false;
+  return true;
+}
+function runExtraSeat(spec: ExtraSeatSpec, ask: VerdictAsk): PeerSeat {
+  const shadow = spec.shadow ?? true;
+  const timeoutMs = spec.timeoutMs ?? MODEL_TIMEOUT_MS;
+  const controller = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timedOut = new Promise<PeerVerdict>((resolve) => {
+    timer = setTimeout(() => {
+      controller.abort();
+      resolve({ vote: 'abstain', reason: 'timed out' });
+    }, timeoutMs);
+  });
+  const asked = Promise.resolve()
+    .then(() => spec.ask(ask, controller.signal))
+    .then((v) => sanitizeVerdict(v) ?? { vote: 'abstain' as const, reason: 'invalid verdict' })
+    .catch((err: unknown) => ({
+      vote: 'abstain' as const,
+      reason:
+        err instanceof Error && err.message
+          ? err.message.replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, 200)
+          : 'seat unavailable',
+    }))
+    .finally(() => {
+      if (timer) clearTimeout(timer);
+    });
+  return { seat: spec.seat, shadow, verdict: Promise.race([asked, timedOut]) };
 }
 export interface OwnerAction {
   request: string;
@@ -422,6 +470,15 @@ export class Runtime implements StoreApi {
     const sortieId = (await this.nervous.call('sorties.open', { title: action.request.slice(0, 500) })) as string;
     return this.gate(sortieId, action, true, worker);
   }
+  /** Veto-only extra seats attached by action class (F-025-T01); new seats start in shadow unless `shadow: false`. */
+  private extraSeatSpecs: ExtraSeatSpec[] = [];
+  useExtraSeat(spec: ExtraSeatSpec): () => void {
+    this.extraSeatSpecs = this.extraSeatSpecs.filter((s) => s.seat !== spec.seat);
+    this.extraSeatSpecs.push(spec);
+    return () => {
+      this.extraSeatSpecs = this.extraSeatSpecs.filter((s) => s !== spec);
+    };
+  }
   /** The other bases' votes on a non-Green action (F-036 phase 2), set by serve on the main base. */
   private peerSeats?: (ask: VerdictAsk) => Promise<PeerSeat[]>;
   /**
@@ -472,47 +529,56 @@ export class Runtime implements StoreApi {
     let casper: Verdict | undefined, casperError: string | undefined;
     let extras: Verdict[] = [];
     let late: PeerSeat[] = [];
+    const askIntent = (intent ?? pattern !== 'green') && askCasper;
+    const matchingExtras = askCasper
+      ? this.extraSeatSpecs.filter((s) => matchesExtraSeat(s, { tool: action.tool, effect, pattern, intent }))
+      : [];
     // Casper (and the other bases' seats) for anything not Green, and for every removal even when Green (B-009).
-    if ((intent ?? pattern !== 'green') && askCasper) {
+    // Extra seats (F-025-T01) also run on any action matching their attached class.
+    if (askIntent || matchingExtras.length > 0) {
       // B-012: for an action on another base, Casper is told the bases by id and name.
-      const bases = action.tool === 'kaji.run' ? await this.baseNames() : [];
+      const bases = askIntent && action.tool === 'kaji.run' ? await this.baseNames() : [];
       // The other bases' Casper (F-036 phase 2) is asked at the same time: veto-only seats, shadow until the owner trusts them.
       // F-052: the gate waits for Casper and the veto seats only; a shadow vote not in by then is recorded when it comes.
-      const asking = this.modelCall(
-        'casper.verdict',
-        {
-          request: action.request,
-          tool: action.tool,
-          args: action.args,
-          effect,
-          ...(bases.length ? { bases } : {}),
-          ...(action.earlier?.length
-            ? {
-                earlier: action.earlier.slice(-3).map((t) => ({
-                  request: t.request.slice(0, 600),
-                  ...(t.reply ? { reply: t.reply.slice(0, 600) } : {}),
-                })),
-              }
-            : {}),
-        },
-        MODEL_TIMEOUT_MS,
-      ).catch(() => ({ verdict: null, error: 'Brain unavailable.' })) as Promise<{
-        verdict: Verdict | null;
-        error?: string;
-      }>;
-      const seats = this.peerSeats
-        ? await this.peerSeats({ request: action.request, tool: action.tool, args: action.args, effect }).catch(
-            () => [] as PeerSeat[],
-          )
-        : [];
+      const asking = askIntent
+        ? (this.modelCall(
+            'casper.verdict',
+            {
+              request: action.request,
+              tool: action.tool,
+              args: action.args,
+              effect,
+              ...(bases.length ? { bases } : {}),
+              ...(action.earlier?.length
+                ? {
+                    earlier: action.earlier.slice(-3).map((t) => ({
+                      request: t.request.slice(0, 600),
+                      ...(t.reply ? { reply: t.reply.slice(0, 600) } : {}),
+                    })),
+                  }
+                : {}),
+            },
+            MODEL_TIMEOUT_MS,
+          ).catch(() => ({ verdict: null, error: 'Brain unavailable.' })) as Promise<{
+            verdict: Verdict | null;
+            error?: string;
+          }>)
+        : Promise.resolve({ verdict: null } as { verdict: Verdict | null; error?: string });
+      const verdictAsk: VerdictAsk = { request: action.request, tool: action.tool, args: action.args, effect };
+      const peerList =
+        askIntent && this.peerSeats ? await this.peerSeats(verdictAsk).catch(() => [] as PeerSeat[]) : [];
+      const extraList = matchingExtras.map((s) => runExtraSeat(s, verdictAsk));
+      const seats = [...peerList, ...extraList];
       const settled = new Map<string, PeerVerdict>();
       for (const s of seats)
         void s.verdict.then((v) => {
           settled.set(s.seat, v);
         });
       const [reply] = await Promise.all([asking, Promise.all(seats.filter((s) => !s.shadow).map((s) => s.verdict))]);
-      if (reply.verdict) casper = reply.verdict;
-      else casperError = reply.error ?? 'No verdict.';
+      if (askIntent) {
+        if (reply.verdict) casper = reply.verdict;
+        else casperError = reply.error ?? 'No verdict.';
+      }
       extras = seats
         .filter((s) => settled.has(s.seat))
         .map((s) => ({ seat: s.seat, ...settled.get(s.seat)!, shadow: s.shadow }));
