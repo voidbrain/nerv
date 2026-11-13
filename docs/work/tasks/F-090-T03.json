@@ -1,0 +1,38 @@
+{
+ "version": 1,
+ "id": "F-090-T03",
+ "parent": "F-090",
+ "title": "Owner check on a real interrupted session",
+ "goal": "It works after a real limit",
+ "status": "planned",
+ "acceptance": [
+  "Owner lets a session hit its limit and NERV resumes it"
+ ],
+ "dependsOn": [
+  "F-090-T02"
+ ],
+ "resources": [
+  "docs/acceptance/**",
+  "docs/work/records/F-090.md",
+  "generated:backlog-views"
+ ],
+ "capabilities": [
+  "privacy-review"
+ ],
+ "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+ "validation": [
+  "Owner-observed check recorded in docs/acceptance"
+ ],
+ "escalation": [
+  "A change of gate class, data leaving the base, or a material effort increase goes to the owner"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "0.25 h owner",
+  "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
+  "reviewed": "2026-11-14",
+  "ownerHours": 0.25,
+  "agentHours": 0,
+  "ownerKind": "procedure"
+ }
+}

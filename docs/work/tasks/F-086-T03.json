@@ -1,0 +1,41 @@
+{
+ "version": 1,
+ "id": "F-086-T03",
+ "parent": "F-086",
+ "title": "Draft and send behind approval",
+ "goal": "Drafts need approval; sending is Blue",
+ "status": "planned",
+ "acceptance": [
+  "Draft is Orange, send is Blue; expiry never sends; the sent message is read back"
+ ],
+ "dependsOn": [
+  "F-086-T02"
+ ],
+ "resources": [
+  "src/**",
+  "test/**",
+  "docs/work/records/F-086.md",
+  "generated:backlog-views"
+ ],
+ "capabilities": [
+  "bounded-edit",
+  "regression-design"
+ ],
+ "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+ "validation": [
+  "npm test",
+  "npm run typecheck"
+ ],
+ "escalation": [
+  "A change of gate class, data leaving the base, or a material effort increase goes to the owner"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "1 h",
+  "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
+  "reviewed": "2026-11-14",
+  "agentHours": 1,
+  "baselineAgentHours": 1,
+  "estimateAgentHours": 1
+ }
+}

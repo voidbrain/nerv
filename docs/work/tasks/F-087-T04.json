@@ -1,0 +1,38 @@
+{
+ "version": 1,
+ "id": "F-087-T04",
+ "parent": "F-087",
+ "title": "Owner check on the real printer",
+ "goal": "A small print runs end to end",
+ "status": "planned",
+ "acceptance": [
+  "Owner prints a small test model and confirms the reported state"
+ ],
+ "dependsOn": [
+  "F-087-T03"
+ ],
+ "resources": [
+  "docs/acceptance/**",
+  "docs/work/records/F-087.md",
+  "generated:backlog-views"
+ ],
+ "capabilities": [
+  "privacy-review"
+ ],
+ "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+ "validation": [
+  "Owner-observed check recorded in docs/acceptance"
+ ],
+ "escalation": [
+  "A change of gate class, data leaving the base, or a material effort increase goes to the owner"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "0.5 h owner",
+  "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
+  "reviewed": "2026-11-14",
+  "ownerHours": 0.5,
+  "agentHours": 0,
+  "ownerKind": "procedure"
+ }
+}

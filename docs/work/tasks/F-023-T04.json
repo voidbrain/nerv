@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "id": "F-023-T04",
+  "parent": "F-023",
+  "title": "Owner check: paired Mac approvals (menu, VoiceOver, notification banner)",
+  "goal": "The native approval card behaves as accepted on the owner's paired Mac",
+  "status": "ready",
+  "acceptance": [
+    "The paired Mac approvals procedure passes: approve, reject, edit and expiry; repeated decision; restart while pending",
+    "Menu, VoiceOver and notification banner behaviour recorded in docs/acceptance"
+  ],
+  "dependsOn": ["F-023-T03"],
+  "resources": ["docs/acceptance/**", "docs/work/records/F-023.md", "generated:backlog-views"],
+  "capabilities": ["privacy-review"],
+  "privacy": "Evidence names approval IDs only; no credential, ticket or token in Git or logs.",
+  "validation": ["Owner-observed check recorded in docs/acceptance"],
+  "escalation": ["A permission or device finding that widens scope goes to a new step"],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h owner",
+    "basis": "Split out 2026-11-14 in the backlog reconciliation: T01–T03 were closed but the owner session named in the record had no step (harness 8.10.0, one actor per step). Hours from the 2026-11-09 reassessment.",
+    "reviewed": "2026-11-14",
+    "ownerHours": 0.5,
+    "agentHours": 0,
+    "ownerKind": "procedure"
+  },
+  "ownerLink": "docs/acceptance/f023-native-approvals-procedure.md"
+}
