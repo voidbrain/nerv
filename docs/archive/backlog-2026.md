@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 9 | 12 |
+| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 10 | 13 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
 
@@ -3752,6 +3752,74 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 | Opened | 2026-11-09 |
 | Verification | 2026-11-13 Unit/integration: `test/gauntlet.test.mjs` (18 passed), `test/evaluation-model.test.mjs` (1 passed), `gauntlet:index`, `check:gauntlet-index`, `gauntlet:plan`, `gauntlet:role-plan`, `gauntlet:all --execute --allow-expensive` (7/7 `nerv-system-flows` passed and recorded with schema 2 `sourceKey`), `check:gauntlet-runs` (0 pending), and `check:fast` passed; no live model run executed for T04. Earlier 2026-11-10 Unit/integration: PR242 exacthead03c0721 / CI42687439382 passed all five jobs/full-suite; eleven fixture joins and independent harness/source/schema review passed; T05 closed, no live schema campaign. Earlier2026-11-09 Unit/integration: PR235 exactheadb4cd887 / CI42608578429 passed all five jobs including full-suite, mergedmainc5323e5. Nine focused context/reuse/admission/package joins, local468 Node tests (466 passed, two platform skips), typecheck/build/index and committed-source policy90 passed. Review: independent exact package/source/installed-file verification and nine joins, no blocking finding. Real-model2026-11-09: owner-provided common smoke validated and reviewed, complete10cases,7 passed/3 failed,64.744s/1608 tokens; no load/model qualification. |
 | Reviewed | 2026-11-11 |
+
+</details>
+
+---
+
+### B-058
+
+**A Finder or ignored file marks every recorded evaluation run stale**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-13: [PR #376](https://github.com/voidbrain/nerv/pull/376) merged with all five CI jobs green; ignored OS metadata no longer changes the evaluation source key.
+
+| | |
+|---|---|
+| **Issue** | 2026-11-13: `sourceInputs` hashed Git-ignored files. One `web/.DS_Store` changed the Gauntlet system source key although a clean checkout of the same commit had none pending. |
+| **Reproduce** | On main `a4081d5`, add a `.DS_Store` under `web/`; the seven cases incorrectly become source-changed. |
+| **Check** | OS metadata and Git-ignored files do not change `sourceInputs`; other untracked files still do; a committed regression fails without the fix. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Closure evidence:** B-058-T01 closed. `sourceInputs` skips OS metadata and Git-ignored source files; regression `dfa4861` failed before the fix. PR #376 merged as `07c627c`; CI 43479688340 passed all five jobs.
+
+**Estimates:** Small, estimated 2026-11-13. No actual recorded: the closing reconciliation cannot establish the original task's elapsed effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #376](https://github.com/voidbrain/nerv/pull/376) |
+| Opened | 2026-11-13 |
+| Verification | Closed 2026-11-13: regression and pending checks passed; PR #376 CI passed all five jobs. |
+| Reviewed | 2026-11-13 |
+
+</details>
+
+---
+
+### F-075
+
+**The seven nerv-system-flows evaluation cases run again at current main**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-13: the seven deterministic system cases passed against the F-021 registry source; `gauntlet pending` is empty and no model was called.
+
+| | |
+|---|---|
+| **Issue** | Runtime source changes invalidate the exact source key of every `nerv-system-flows` result. |
+| **Reproduce** | Change registered runtime source and run `node tools/gauntlet.mjs pending`. |
+| **Check** | All seven system cases pass and are recorded; pending exits 0. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Closure evidence:** T01 recorded 7/7 on PR #376. F-021-T02 then changed the runtime source; T02 reran policy, ledger, conversation, channels, bases, stress and browser with built assets. All seven passed, `stillPending` was 0, and `modelQualification` was false.
+
+**Estimates:** No remaining effort. T02 actual 0.25 h agent (stated); T01 actual unavailable from the closing reconciliation.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #376](https://github.com/voidbrain/nerv/pull/376); F-021-T02 working PR |
+| Opened | 2026-11-13 |
+| Verification | Closed 2026-11-13: 7/7 deterministic system cases passed; pending exits 0; no model call. |
+| Reviewed | 2026-11-13 |
 
 </details>
 

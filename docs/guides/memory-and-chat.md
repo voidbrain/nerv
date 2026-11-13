@@ -30,7 +30,7 @@ nerv memory history ID
 - **Instrumentality:** configure `"instrumentality": {"at": "03:00"}` or `{"when": "idle"}` in `config.json` (or run `nerv instrumentality`) to summarize conversations (`nerv memory episodes`) and propose 3–10 lasting facts as approval cards. Failed scheduled runs retry once after an hour in the same local-day slot.
 - **LCL context:** each request includes matching facts, up to two matching Instrumentality summaries (local-only), and recent conversation turns within a route-sized token budget.
 
-## Tools (MCP servers)
+## Tools
 
 MCP servers are **deny-by-default** and run in NERV's isolated `tools` process (`PATH`, `HOME`, `LANG` only):
 
@@ -42,6 +42,7 @@ nerv tools revoke files/read_text_file
 nerv tools remove files
 ```
 
+- `nerv tools` lists NERV's built-in tools and configured MCP tools through one registry. Every descriptor has a stable version; changing a name, effect, description or argument schema changes that version.
 - Pin package versions (`package@x.y.z`); NERV pins grants to the tool's description fingerprint and suspends a tool if its description changes.
 - Only non-destructive read tools can be granted as Pattern Green (`EVA-03` is currently disabled; see [the roadmap](../ROADMAP.md) for planned isolation work).
 

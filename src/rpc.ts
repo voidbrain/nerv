@@ -789,12 +789,14 @@ export const methodSchemas = {
         maxItems: 40,
         items: {
           type: 'object',
-          required: ['name', 'effect', 'args', 'about'],
+          required: ['name', 'effect', 'args', 'about', 'version', 'source'],
           properties: {
             name: { type: 'string', maxLength: 100 },
             effect: { type: 'string', maxLength: 20 },
             args: { type: 'string', maxLength: 1500 },
             about: { type: 'string', maxLength: 700 },
+            version: { type: 'string', pattern: '^[0-9a-f]{16}$' },
+            source: { type: 'string', pattern: '^mcp:[a-z][a-z0-9]{1,15}$' },
           },
           additionalProperties: false,
         },
