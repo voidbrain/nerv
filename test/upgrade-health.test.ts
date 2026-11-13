@@ -188,6 +188,40 @@ test('F-005-T14: update records after-start health check in receipt when service
 });
 
 test(
+  'B-060: the fixture service keeps its port even when another socket holds the port it would draw',
+  { ...supported, timeout: 20_000 },
+  async () => {
+    // Another process (an outgoing connection in CI) holds the port the fixture would pick at random.
+    const blocker = createServer();
+    await new Promise<void>((done) => blocker.listen(44500, '127.0.0.1', done));
+    const random = Math.random;
+    Math.random = () => 0.51; // 43990 + 510 = 44500
+    let f: ReturnType<typeof adapterFixture> | undefined;
+    try {
+      f = adapterFixture((revision) => ({
+        status: 200,
+        body: {
+          base: { id: 'BASE-01' },
+          build: { commit: revision },
+          database: { quick_check: 'ok' },
+          processes: { nervous: 9999998, brain: 9999997, brainAlive: true },
+          models: { misato: 'neutral-local' },
+        },
+      }));
+      Math.random = random;
+      const host = (await f).host;
+      const plan = await planService(host, 'update', NEXT);
+      const receipt = await applyService(host, plan, plan.digest);
+      assert.equal(receipt.state, 'completed');
+    } finally {
+      Math.random = random;
+      await (await f)?.close();
+      await new Promise<void>((done) => blocker.close(() => done()));
+    }
+  },
+);
+
+test(
   'F-005-T14: failed brain, database, nervous or identity check leaves update uncertain with ordered recovery',
   supported,
   async () => {
