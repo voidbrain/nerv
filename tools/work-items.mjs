@@ -701,7 +701,7 @@ function summaryTable(text, id, { remaining, size, links, asks = [false, false] 
   const out = lines.join('\n');
   return human ? out.replace(HUMAN_LINE, `${human[1]} **→** ${human[3]}`) : out;
 }
-function queueRank(root, config) {
+function queueRank(root, config, plannedTasks = null) {
   const sources = withArchives(root, renderLedger(root, { ...config, order: 'id' }));
   const roadmap = config.queueRoadmap ? readFileSync(local(root, config.queueRoadmap), 'utf8') : '';
   const lanes = ['Agent candidates', 'Prerequisite review', 'Human action', 'Blocked'];
@@ -718,11 +718,38 @@ function queueRank(root, config) {
     );
   }
   const records = queue(sources, roadmap);
+  // B-019: a step that waits on an open step of another record counts like a record-level dependency for order (the
+  // prerequisite gets credit for what it unblocks and moves up), not for lanes: the rest of the record is free.
+  const stepDeps = new Map(),
+    stepUnlocks = new Map();
+  if (config.featurePlans) {
+    const tasks = plannedTasks ?? taskCatalog(root, config).tasks;
+    const byId = new Map(tasks.map((t) => [t.id, t]));
+    const open = (t) => t && !['closed', 'verified'].includes(t.status);
+    for (const t of tasks)
+      if (open(t))
+        for (const d of t.dependsOn.map((x) => byId.get(x)))
+          if (open(d) && d.parent !== t.parent) {
+            if (!stepDeps.has(t.parent)) stepDeps.set(t.parent, new Set());
+            stepDeps.get(t.parent).add(d.parent);
+            if (!stepUnlocks.has(d.parent)) stepUnlocks.set(d.parent, new Set());
+            stepUnlocks.get(d.parent).add(t.parent);
+          }
+  }
+  const unlocks = (r) => new Set([...r.unlocks, ...(stepUnlocks.get(r.id) ?? [])]).size;
+  const effort = { '🟢 Small': 0, '🟡 Medium': 1, '🔴 Large': 2, '🟣 Very large': 3 };
   const laneRank = Object.fromEntries(lanes.map((l, i) => [l, i]));
   const priorityOf = (r) => Number(r.priority.at(-1));
+  // The queue's own order (explicit Queue order, milestone, what it unblocks, effort, ID) under priority and lane.
   const sorted = [...records].sort(
     (a, b) =>
-      priorityOf(a) - priorityOf(b) || laneRank[a.lane] - laneRank[b.lane] || records.indexOf(a) - records.indexOf(b),
+      priorityOf(a) - priorityOf(b) ||
+      laneRank[a.lane] - laneRank[b.lane] ||
+      a.order - b.order ||
+      (a.milestone?.rank ?? Infinity) - (b.milestone?.rank ?? Infinity) ||
+      unlocks(b) - unlocks(a) ||
+      effort[a.effort] - effort[b.effort] ||
+      a.id.localeCompare(b.id),
   );
   // F-067: within a layout group, a record is never listed above an active record it waits on. Each open prerequisite
   // of the same group (and its own, first) moves up to just above its first dependent; everything else keeps the
@@ -735,7 +762,11 @@ function queueRank(root, config) {
     if (placed.has(r.id)) return;
     placed.add(r.id);
     for (const p of sorted)
-      if (group(p) === group(r) && r.unresolved.some((d) => !d.external && d.id === p.id)) place(p);
+      if (
+        group(p) === group(r) &&
+        (r.unresolved.some((d) => !d.external && d.id === p.id) || stepDeps.get(r.id)?.has(p.id))
+      )
+        place(p);
     out.push(r);
   };
   sorted.forEach(place);
@@ -766,7 +797,7 @@ export function renderLedger(root, config, withPlans = true) {
   const totals = wantsTotals
     ? ledgerTotals(plannedTasks ?? taskCatalog(root, config).tasks, new Set(files.map((f) => f.slice(0, -3))))
     : null;
-  const rank = withPlans && config.order === 'queue' ? queueRank(root, config) : null;
+  const rank = withPlans && config.order === 'queue' ? queueRank(root, config, plannedTasks) : null;
   const links = withPlans ? dependencyLinks(root, config, plannedTasks) : null;
   const stepsOf = withPlans
     ? (() => {
