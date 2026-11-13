@@ -51,7 +51,7 @@ test('F-052-T02: Runtime records per-call duration on consultant, Misato, Casper
           if (sys.startsWith('You are a consultant')) out = 'Use reminders.add.';
           else if (sys.startsWith('You are Casper')) out = '{"vote":"approve","reason":"Matches.","confidence":0.9}';
           else if (r.messages.some((m) => m.content.includes('"outcome":"grant"'))) out = '{"reply":"Done."}';
-          else out = '{"action":{"tool":"reminders.add","args":{"title":"Test timing","due":"2030-01-01T09:00:00Z"}}}';
+          else out = '{"action":{"tool":"reminders.add","args":{"title":"Call Ada","due":"2030-01-01T09:00:00Z"}}}';
           res.setHeader('content-type', 'application/json');
           res.end(JSON.stringify({ model: r.model, choices: [{ message: { content: out }, finish_reason: 'stop' }] }));
         }, 15);
@@ -83,7 +83,7 @@ test('F-052-T02: Runtime records per-call duration on consultant, Misato, Casper
         return { vote: 'approve', reason: 'remote ok', durationMs: 12 };
       },
     });
-    const out = await rt.chat('Please remind me tomorrow', 'cli');
+    const out = await rt.chat('Please remind me tomorrow to Call Ada', 'cli');
     const events = (await rt.events(out.sortieId, 0, 50)) as {
       kind: string;
       payload: Record<string, unknown>;

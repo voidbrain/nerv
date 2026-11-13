@@ -4,7 +4,7 @@
   "parent": "F-070",
   "title": "Authenticated discovery and safe resolution",
   "goal": "Authenticated discovery and safe resolution",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Ambiguity asks for clarification; stale or unknown names fail safely; destination never changed silently"
   ],
