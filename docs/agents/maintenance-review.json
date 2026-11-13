@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-12T23:38:18.680Z",
+  "reviewed": "2026-11-13T00:02:41.441Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
     "AGENTS.md": "c163d5019752b32128390d3dca8400759e00603e9c5dc5e90df6071d798cb5d8",
@@ -20,12 +20,12 @@
     "docs/agents/work-usage.md": "e2f7c484f1c07f4b47fd1133857d8744ccab0ad2a7b85b220946c115a002bebc",
     "tools/task-claims.mjs": "ef755fe7951544e5c05b20de7c64a7b53778b6d039a11a2abeb079e7d42b6fd2",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
-    "tools/work-items.mjs": "96c7db2823536dd8c014409dc4a0da45ebfbd4b709d5baefeb33888b4280e497",
+    "tools/work-items.mjs": "c54cce9befcbdf91044f76a1081a8b7936b78aa832eb21364b68f9cd017aa78a",
     "tools/work-usage.mjs": "4329262c0b9e723e046dd8878e15a99cff5f590201cd0918563f3204bbe79219"
   },
   "measurements": {
     "samples": 1,
-    "latestAt": "2026-11-12T23:38:18.629Z",
+    "latestAt": "2026-11-13T00:02:41.321Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -55,22 +55,22 @@
         "durationMs": {
           "observed": 1,
           "missing": 0,
-          "median": 47
+          "median": 60000
         },
         "conflicts": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 1,
+          "missing": 0,
+          "median": 0
         },
         "unnecessaryPrompts": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 1,
+          "missing": 0,
+          "median": 0
         },
         "repeatedContextLoads": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 1,
+          "missing": 0,
+          "median": 0
         }
       }
     }

@@ -107,11 +107,6 @@ for (let i = 0; i < headings.length; i++) {
   assert(level, `${id}: missing priority`);
   const marker = ['Closed', 'Blocked'].includes(status) ? '◻️' : { 1: '🔺', 2: '🔶', 3: '🔹' }[level];
   assert.equal(priority, `${marker} P${level}`, `${id}: priority cue mismatch`);
-  assert.equal(
-    (block.match(/^\*\*Next action \/ closure evidence:\*\* .+/gm) ?? []).length,
-    1,
-    `${id}: next action must occur exactly once`,
-  );
   // 8.0.0: the cue names the kind of human action (Procedure, Decision or Both) instead of Yes.
   assert(
     !/^🧑 \*\*→ Human action required: Yes\*\*/m.test(block),
@@ -138,19 +133,27 @@ for (let i = 0; i < headings.length; i++) {
   );
   const detail = block.match(/<details>\s*<summary>[^<]+<\/summary>([\s\S]*?)<\/details>/);
   assert(detail, `${id}: missing/broken metadata details`);
-  assert(
-    block.indexOf('**Next action') > block.indexOf('<details>') &&
-      block.indexOf('**Next action') < block.indexOf('</details>'),
-    `${id}: next action must be inside details`,
-  );
-  assert(/\*\*Estimates:\*\* .+/.test(detail[1]), `${id}: explain remaining effort and its rationale in details`);
+  const compact = generated && /\[Full notes & evidence\]\([^)]+\)/.test(detail[1]);
+  if (!compact) {
+    assert.equal(
+      (block.match(/^\*\*Next action \/ closure evidence:\*\* .+/gm) ?? []).length,
+      1,
+      `${id}: next action must occur exactly once`,
+    );
+    assert(
+      block.indexOf('**Next action') > block.indexOf('<details>') &&
+        block.indexOf('**Next action') < block.indexOf('</details>'),
+      `${id}: next action must be inside details`,
+    );
+    assert(/\*\*Estimates:\*\* .+/.test(detail[1]), `${id}: explain remaining effort and its rationale in details`);
+  }
   const visible = block.slice(0, block.indexOf('<details>'));
   assert(
     ['**Issue**', '**Reproduce**', '**Check**'].every((k) => visible.includes(k)),
     `${id}: recap must stay visible`,
   );
   assert(humanAt < block.indexOf('<details>'), `${id}: human action hidden in details`);
-  assert(humanAt < block.indexOf('**Next action'), `${id}: human action must precede next action`);
+  if (!compact) assert(humanAt < block.indexOf('**Next action'), `${id}: human action must precede next action`);
   assert(/<\/details>\n\n---\n/.test(block), `${id}: end the record with a --- line after its details`);
   for (const field of ['PR / evidence', 'Opened', 'Verification', 'Reviewed']) {
     const value = detail[1]
