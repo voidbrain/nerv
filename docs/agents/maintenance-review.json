@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-13T08:27:21.217Z",
+  "reviewed": "2026-11-13T09:20:24.732Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
     "AGENTS.md": "b52b056f97cf118b6bbc5b1bd8f54629ec0cdb0a722640b9e524d1370e105a9e",
@@ -20,12 +20,12 @@
     "docs/agents/work-usage.md": "e2f7c484f1c07f4b47fd1133857d8744ccab0ad2a7b85b220946c115a002bebc",
     "tools/task-claims.mjs": "ef755fe7951544e5c05b20de7c64a7b53778b6d039a11a2abeb079e7d42b6fd2",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
-    "tools/work-items.mjs": "acc404abbfe63269d5ec8f20bf14d2dec0759aef36ffa162eac96303c0b8ff54",
+    "tools/work-items.mjs": "f98ba7ec43b726fa12c0486f7d6a6d061921a5fa2d5562dda123445c400e2f05",
     "tools/work-usage.mjs": "4329262c0b9e723e046dd8878e15a99cff5f590201cd0918563f3204bbe79219"
   },
   "measurements": {
-    "samples": 19,
-    "latestAt": "2026-11-12T21:26:32.719Z",
+    "samples": 1,
+    "latestAt": "2026-11-13T09:20:24.684Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -51,26 +51,26 @@
         }
       },
       "reconciliation": {
-        "samples": 19,
+        "samples": 1,
         "durationMs": {
-          "observed": 19,
+          "observed": 1,
           "missing": 0,
-          "median": 240846
+          "median": 37
         },
         "conflicts": {
-          "observed": 6,
-          "missing": 13,
+          "observed": 1,
+          "missing": 0,
           "median": 0
         },
         "unnecessaryPrompts": {
-          "observed": 2,
-          "missing": 17,
-          "median": 0
+          "observed": 0,
+          "missing": 1,
+          "median": null
         },
         "repeatedContextLoads": {
-          "observed": 2,
-          "missing": 17,
-          "median": 1
+          "observed": 0,
+          "missing": 1,
+          "median": null
         }
       }
     }
@@ -80,13 +80,7 @@
       "kind": "tool",
       "disposition": "implemented",
       "target": "tools/work-items.mjs",
-      "evidence": "Harness 8.3.0 (template F-068, PR #149, fresh-context review there): a ready owner step (effort.ownerKind, planned or ready, prerequisites verified or closed) marks the Procedures and Decisions cells beside the record cue. check-backlog, backlog-queue and solution are byte copies of v8.3.0; work-items takes the 8.2.0 to 8.3.0 changes and keeps the unreleased template F-066 code this project already carries."
-    },
-    {
-      "kind": "rule",
-      "disposition": "implemented",
-      "target": "docs/BACKLOG-RULES.md",
-      "evidence": "The summary and human-action sentences and the ownerKind clause of v8.3.0 carried into the project's wording. No rule removed."
+      "evidence": "Reconciled to project-harness v8.4.0 (PR #151, F-066): clean byte-for-byte copy of core/tools/work-items.mjs; every other copied harness file already matches v8.4.0."
     }
   ]
 }
