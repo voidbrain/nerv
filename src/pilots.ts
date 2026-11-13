@@ -414,6 +414,38 @@ export function choosePilot(request: string, roster: readonly Pilot[]): Chosen |
 export function nextStage(stage: Stage): Stage | undefined {
   return stage === 'prototype' ? 'test' : stage === 'test' ? 'production' : undefined;
 }
+/** Previous watermelon trust stage when demoting (F-025-T04). */
+export function previousStage(stage: Stage): Stage | undefined {
+  return stage === 'production' ? 'test' : stage === 'test' ? 'prototype' : undefined;
+}
+/** Automatic demotion rule (F-025-T04): failure, override spikes, or Spear revocation demote one stage. */
+export function shouldDemotePilot(
+  pilot: Pick<Pilot, 'stage'>,
+  signals: { failure?: boolean; spear?: boolean; overrides?: number; maxOverrides?: number },
+): { demote: boolean; next?: Stage; reason?: string } {
+  const next = previousStage(pilot.stage);
+  if (!next) return { demote: false };
+  if (signals.spear) return { demote: true, next, reason: 'Spear revocation' };
+  if (signals.failure) return { demote: true, next, reason: 'failure' };
+  const maxOverrides = signals.maxOverrides ?? 3;
+  if ((signals.overrides ?? 0) >= maxOverrides) return { demote: true, next, reason: 'override spike' };
+  return { demote: false };
+}
+/** Moves a pilot back one trust stage and tightens its EVA class to match. */
+export function demotePilot(
+  roster: readonly Pilot[],
+  id: string,
+): { roster: Pilot[]; changed: boolean; from?: Stage; to?: Stage } {
+  const idx = roster.findIndex((p) => p.id === id);
+  if (idx < 0) return { roster: [...roster], changed: false };
+  const current = roster[idx]!;
+  const to = previousStage(current.stage);
+  if (!to) return { roster: [...roster], changed: false, from: current.stage };
+  const updated: Pilot = { ...current, stage: to, evaClass: pilotExecutor({ stage: to, evaClass: current.evaClass }) };
+  const next = [...roster];
+  next[idx] = updated;
+  return { roster: next, changed: true, from: current.stage, to };
+}
 /** Evaluates whether a pilot is eligible for owner-approved promotion (never automatic). */
 export function promotionEligible(
   pilot: Pick<Pilot, 'stage'>,

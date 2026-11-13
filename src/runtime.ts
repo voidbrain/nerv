@@ -45,12 +45,14 @@ import {
   chooseExecutionPilot,
   choosePilot,
   chooseQualifiedExecution,
+  demotePilot,
   evaluatePilotPlacement,
   genericPilot as buildGenericPilot,
   promotionEligible,
   rankPilots,
   selectRemotePilotRun,
   setPilotFlag as setPilotEntryFlag,
+  shouldDemotePilot,
   updatePilot as updatePilotEntry,
   type Chosen,
   type ExecutionChoice,
@@ -446,6 +448,13 @@ export class Runtime implements StoreApi {
       happened: { actionId: string; tool: string; inverse: string | null }[];
     };
     if (result.remotePending) void this.cancelRemote?.();
+    const evs = await this.events(id).catch(() => []);
+    for (const e of evs) {
+      if (e.kind === 'misato.consult') {
+        const pid = (e.payload as { pilot?: { id?: string } }).pilot?.id;
+        if (pid) this.demotePilotOnSignal(pid, { spear: true });
+      }
+    }
     return result;
   }
   async closedSince(since: string) {
@@ -2306,6 +2315,21 @@ export class Runtime implements StoreApi {
     const pilot = this.pilotRoster().find((p) => p.id === id);
     if (!pilot) throw new Error(`Unknown specialist pilot: ${id}.`);
     return promotionEligible(pilot, record);
+  }
+  /** F-025-T04: automatic watermelon trust demotion on failure, override spike, or Spear revocation. */
+  demotePilotOnSignal(
+    id: string,
+    signals: { failure?: boolean; spear?: boolean; overrides?: number; maxOverrides?: number },
+  ): { demoted: boolean; from?: Stage; to?: Stage; reason?: string } {
+    const roster = this.pilotRoster();
+    const pilot = roster.find((p) => p.id === id);
+    if (!pilot) return { demoted: false };
+    const check = shouldDemotePilot(pilot, signals);
+    if (!check.demote) return { demoted: false };
+    const next = demotePilot(roster, id);
+    if (!next.changed) return { demoted: false };
+    if (this.home) savePilots(this.home, next.roster);
+    return { demoted: true, from: next.from, to: next.to, reason: check.reason };
   }
   /** F-045-T06: assesses F-006-T03/T04 individual, combination, and placement evidence without auto-promoting. */
   assessPilotPlacement(

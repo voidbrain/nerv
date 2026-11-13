@@ -13,6 +13,7 @@ import {
   chooseExecutionPilot,
   choosePilot,
   chooseQualifiedExecution,
+  demotePilot,
   describePilots,
   evaluatePilotPlacement,
   genericPilot,
@@ -20,11 +21,13 @@ import {
   nextStage,
   overlappingDomains,
   pilotExecutor,
+  previousStage,
   promotionEligible,
   rankPilots,
   sanitizePilotOffers,
   selectRemotePilotRun,
   setPilotFlag,
+  shouldDemotePilot,
   stageExecutor,
   toPilotOffers,
   updatePilot,
@@ -828,4 +831,77 @@ test('F-045-T06: evidence-based placement keeps individual, combination, and pla
   assert.equal(qualified.placement.qualified, true);
   assert.equal(qualified.placement.suggestOnly, true);
   assert.equal(qualified.choice.suggestOnly, true);
+});
+
+test('F-025-T04: failure, override spikes, and Spear revocation automatically demote watermelon trust stages', async () => {
+  assert.equal(previousStage('production'), 'test');
+  assert.equal(previousStage('test'), 'prototype');
+  assert.equal(previousStage('prototype'), undefined);
+
+  assert.deepEqual(shouldDemotePilot({ stage: 'production' }, { failure: true }), {
+    demote: true,
+    next: 'test',
+    reason: 'failure',
+  });
+  assert.deepEqual(shouldDemotePilot({ stage: 'test' }, { overrides: 3 }), {
+    demote: true,
+    next: 'prototype',
+    reason: 'override spike',
+  });
+  assert.deepEqual(shouldDemotePilot({ stage: 'prototype' }, { spear: true }), { demote: false });
+
+  const initial = [
+    {
+      id: 'coder',
+      name: 'Coder',
+      domain: 'code',
+      keywords: ['code'],
+      model: 'm',
+      stage: 'production' as const,
+      evaClass: 'eva-02' as const,
+      parent: 'generic',
+    },
+  ];
+  const once = demotePilot(initial, 'coder');
+  assert.equal(once.changed, true);
+  assert.equal(once.from, 'production');
+  assert.equal(once.to, 'test');
+  assert.equal(once.roster[0]!.evaClass, 'eva-01');
+
+  const home = mkdtempSync(join(tmpdir(), 'nerv-demote-'));
+  writeFileSync(join(home, 'config.json'), JSON.stringify({ pilots: initial }));
+  const { Runtime } = await import('../src/runtime.ts');
+  const { readConfig } = await import('../src/config.ts');
+  const runtime = new Runtime(join(home, 'nerv.sqlite'), undefined, home);
+  runtime.setPilots(() => readConfig(home).pilots ?? []);
+  try {
+    await runtime.ready();
+    const sortieId = (await runtime.nervous.call('sorties.open', {
+      title: 'Coder run',
+      source: 'owner',
+    })) as string;
+    await runtime.nervous.call('misato.note', {
+      sortieId,
+      kind: 'misato.consult',
+      payload: {
+        advice: 'Check tests.',
+        model: 'm',
+        pilot: { id: 'coder', name: 'Coder', why: 'keywords' },
+      },
+    });
+    const speared = await runtime.spear(sortieId, 'owner revoked');
+    assert.ok(speared);
+    const afterSpear = runtime.pilotRoster().find((p) => p.id === 'coder')!;
+    assert.equal(afterSpear.stage, 'test');
+    assert.equal(afterSpear.evaClass, 'eva-01');
+
+    const spike = runtime.demotePilotOnSignal('coder', { overrides: 3 });
+    assert.deepEqual(spike, { demoted: true, from: 'test', to: 'prototype', reason: 'override spike' });
+    const afterSpike = runtime.pilotRoster().find((p) => p.id === 'coder')!;
+    assert.equal(afterSpike.stage, 'prototype');
+    assert.equal(afterSpike.evaClass, 'eva-00');
+  } finally {
+    await runtime.close();
+    rmSync(home, { recursive: true, force: true });
+  }
 });
