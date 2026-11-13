@@ -24,10 +24,15 @@ import {
 import { checkUpdateAvailability } from './update-availability.ts';
 import { runtimeBom } from './bom.ts';
 import { spawnSync } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import { join, resolve } from 'node:path';
+import { formatQueuedMessage } from './request-queue.ts';
+import { requestLanguage } from './misato.ts';
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Store } from './store.ts';
+import type { ActionDetail, SortieSummary } from './ledger.ts';
+import type { SortieEvent } from './events.ts';
 import { makeServer } from './server.ts';
 import {
   savePilots,
@@ -375,13 +380,37 @@ try {
     const message = args.join(' ');
     if (!message) throw new Error('Usage: chat "what you want"');
     const config = readConfig(home);
-    const response = await fetch(`http://127.0.0.1:${config.port}/api/chat`, {
-      method: 'POST',
-      headers: { authorization: `Bearer ${readToken(home)}`, 'content-type': 'application/json' },
-      body: JSON.stringify({ message, conversation: 'cli' }),
-    }).catch(() => {
-      throw new Error('NERV Agency is not running: start it with serve or service start.');
-    });
+    const token = readToken(home);
+    const requestId = randomUUID();
+    const lang = requestLanguage(message, [], config.language);
+    let lastAhead = 0;
+    const queuePoll = setInterval(() => {
+      void fetch(`http://127.0.0.1:${config.port}/api/queue`, {
+        headers: { authorization: `Bearer ${token}` },
+      })
+        .then((r) => (r.ok ? (r.json() as Promise<{ queued?: { id: string; ahead: number }[] }>) : null))
+        .then((q) => {
+          const item = q?.queued?.find((entry) => entry.id === requestId);
+          if (item && item.ahead > 0 && item.ahead !== lastAhead) {
+            lastAhead = item.ahead;
+            console.log(formatQueuedMessage(item.ahead, lang));
+          }
+        })
+        .catch(() => {});
+    }, 200);
+    queuePoll.unref();
+    let response: Response;
+    try {
+      response = await fetch(`http://127.0.0.1:${config.port}/api/chat`, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+        body: JSON.stringify({ message, conversation: 'cli', requestId }),
+      }).catch(() => {
+        throw new Error('NERV Agency is not running: start it with serve or service start.');
+      });
+    } finally {
+      clearInterval(queuePoll);
+    }
     const value = (await response.json()) as {
       reply?: string;
       error?: string;
@@ -1421,7 +1450,24 @@ try {
               ...(await runtime.chat(message, `kaji:${from.toLowerCase()}${conversation ? '-' + conversation : ''}`)),
               base: { id: config.base.id, name: config.base.name },
             }),
+            onSortie: async (_from, sortieId) => {
+              const sortie = await runtime.sortie(sortieId);
+              if (!sortie) return null;
+              const events = await runtime.events(sortieId, 0, 100);
+              return { sortie, events };
+            },
           });
+          if (kaji) {
+            const link = kaji;
+            runtime.setRemoteSortie(
+              (baseId, sortieId) =>
+                link.inspectSortie(baseId, sortieId) as Promise<{
+                  base: { id: string; name: string };
+                  sortie: SortieSummary & { detail: ActionDetail[] };
+                  events: SortieEvent[];
+                } | null>,
+            );
+          }
           // Phase 2, on the main base: every online base's Casper votes too, veto-only, shadow unless kaji seat BASE veto.
           if (kaji) runtime.usePeerSeats(kaji, () => live().kaji?.seats ?? {});
           if (config.seats?.length) runtime.useSeatPool(new SeatPool(config.seats, (id) => readSeatKey(home, id)));
