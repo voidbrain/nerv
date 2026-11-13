@@ -90,4 +90,49 @@ extension PairingTests {
         let expired = Credential(clientId: credential.clientId, token: credential.token, expiresAt: Int64(now.timeIntervalSince1970 * 1000), runtimeId: runtime, port: 4319, webPort: 4317, fingerprint: fingerprint)
         XCTAssertThrowsError(try expired.renewalInvitation(encoded(invitation()), now: now))
     }
+
+    @MainActor
+    func testRefusedRenewalIsDistinctFromUnconfirmedRenewal() async throws {
+        let now = Date()
+        let expiry = Int64(now.timeIntervalSince1970 * 1000) + 120_000
+        let runtime = UUID().uuidString, fingerprint = String(repeating: "b", count: 64)
+        let credential = Credential(clientId: UUID().uuidString, token: String(repeating: "a", count: 64), expiresAt: expiry, runtimeId: runtime, port: 4319, webPort: 4317, fingerprint: fingerprint)
+        let mismatched = Invitation(version: 1, ticket: String(repeating: "c", count: 64), runtimeId: UUID().uuidString, port: 4319, webPort: 4317, fingerprint: fingerprint, expiresAt: expiry)
+
+        let model = Companion()
+        model.language = "it"
+        model.credential = credential
+        model.paired = true
+        model.renewing = true
+        model.invitation = try encoded(mismatched)
+
+        await model.pair()
+
+        XCTAssertTrue(model.paired)
+        XCTAssertEqual(model.credential?.token, credential.token)
+        XCTAssertTrue(model.status.contains("Rinnovo rifiutato"), "Expected pre-request refusal, got: \(model.status)")
+        XCTAssertTrue(model.status.contains("invariato"), "Expected unchanged pairing note, got: \(model.status)")
+        XCTAssertFalse(model.status.contains("Rinnovo non confermato"))
+
+        model.language = "en"
+        model.invitation = try encoded(mismatched)
+        await model.pair()
+        XCTAssertTrue(model.status.contains("Renewal refused"), "Expected English refusal, got: \(model.status)")
+        XCTAssertTrue(model.status.contains("unchanged"), "Expected English unchanged note, got: \(model.status)")
+
+        let unreachable = Invitation(version: 1, ticket: String(repeating: "c", count: 64), runtimeId: runtime, port: 1, webPort: 4317, fingerprint: fingerprint, expiresAt: expiry)
+        let unreachableCredential = Credential(clientId: credential.clientId, token: credential.token, expiresAt: expiry, runtimeId: runtime, port: 1, webPort: 4317, fingerprint: fingerprint)
+        model.credential = unreachableCredential
+        model.language = "it"
+        model.invitation = try encoded(unreachable)
+        await model.pair()
+        XCTAssertTrue(model.status.contains("Rinnovo non confermato"), "Expected Italian unconfirmed message, got: \(model.status)")
+        XCTAssertFalse(model.status.contains("Rinnovo rifiutato"))
+
+        model.language = "en"
+        model.invitation = try encoded(unreachable)
+        await model.pair()
+        XCTAssertTrue(model.status.contains("Renewal not confirmed"), "Expected English unconfirmed message, got: \(model.status)")
+        XCTAssertFalse(model.status.contains("Renewal refused"))
+    }
 }

@@ -48,7 +48,7 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
     private let login: LoginItemControlling = SystemLoginItem()
     private let service = UserServiceController()
     private var pollTask: Task<Void, Never>?
-    private var credential: Credential?
+    var credential: Credential?
     init() { do { credential = try CredentialStore.load(); paired = credential != nil } catch { status = error.localizedDescription }; loginState = login.state; if notificationsEnabled { notificationStatus = "Notifiche attive: nuovi messaggi e richieste di revisione" }; if paired { startPolling() } }
     deinit { pollTask?.cancel() }
     private func startPolling() {
