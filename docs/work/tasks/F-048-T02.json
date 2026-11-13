@@ -4,7 +4,7 @@
   "parent": "F-048",
   "title": "Per-model resource budgets",
   "goal": "Bound simultaneous model work and queued admission",
-  "status": "planned",
+  "status": "verified",
   "acceptance": [
     "Configured concurrency is respected",
     "Unavailable or cancelled work releases only safe resources"

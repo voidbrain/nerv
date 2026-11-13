@@ -422,6 +422,7 @@ function seatName(seat) { const n = L().seats; if (seat.startsWith("extra:")) re
 
 /* ================= RENDER: sorties ================= */
 function sortieBadge(s) {
+  if (s.status === "queued") return "<span class='badge b-warn'>QUEUED" + (s.ahead ? " · " + s.ahead + " AHEAD" : "") + "</span>";
   if (s.status === "waiting") return "<span class='badge b-warn'>NEEDS YOU</span>";
   if (s.status === "waiting-route") return "<span class='badge b-warn'>WAITING ROUTE</span>";
   if (s.status === "active") return "<span class='badge b-info blink'>" + (L().steps[s.phase] || s.phase).toUpperCase() + "</span>";
@@ -437,15 +438,16 @@ function matchesSearch(s, q) {
 const FILTER_NAMES = { active:"active", waiting:"waiting", done:"done", problem:"failed or stopped" };
 function renderSorties() {
   const f = state.filter; const q = (state.search || "").trim();
-  const list = state.sorties.filter(s => f === "all" || (f === "active" && s.status === "active") || (f === "waiting" && /waiting/.test(s.status)) || (f === "done" && s.status === "done") || (f === "problem" && (s.status === "failed" || s.status === "stood-down"))).filter(s => matchesSearch(s, q));
-  const active = state.sorties.filter(s => s.status === "active" || /waiting/.test(s.status)).length;
-  document.getElementById("sorties-sub").textContent = active + " in flight · " + (q ? list.length + " match" + (list.length === 1 ? "" : "es") : state.sorties.length + " shown");
+  const list = state.sorties.filter(s => f === "all" || (f === "active" && (s.status === "active" || s.status === "queued")) || (f === "waiting" && /waiting/.test(s.status)) || (f === "done" && s.status === "done") || (f === "problem" && (s.status === "failed" || s.status === "stood-down"))).filter(s => matchesSearch(s, q));
+  const queuedCount = state.sorties.filter(s => s.status === "queued").length;
+  const active = state.sorties.filter(s => s.status === "active" || s.status === "queued" || /waiting/.test(s.status)).length;
+  document.getElementById("sorties-sub").textContent = active + " in flight" + (queuedCount ? " (" + queuedCount + " queued)" : "") + " · " + (q ? list.length + " match" + (list.length === 1 ? "" : "es") : state.sorties.length + " shown");
   document.getElementById("sortie-list").innerHTML = list.map(s => {
     const meaning = { green:"ran without a card", orange:"asked the MAGI", blue:"needed you" };
     const pats = s.actions.map(a => a.ballot ? "<span class='badge b-" + a.ballot.pattern + "' title='Pattern " + a.ballot.pattern + ": " + (meaning[a.ballot.pattern] || "") + "' aria-label='Pattern " + a.ballot.pattern + "'>" + a.ballot.pattern[0].toUpperCase() + "</span>" : "<span class='badge b-muted' title='not voted yet' aria-label='not voted yet'>·</span>").join(" ");
     return "<div class='card sortie" + (s.id === state.selected ? " sel" : "") + "' tabindex='0' role='button' aria-pressed='" + (s.id === state.selected) + "' data-s='" + s.id + "'>" +
       "<div class='row'><span class='b'>" + esc(s.id) + " · " + highlight(s.title, state.search) + "</span>" + sortieBadge(s) + "</div>" +
-      "<div class='row small muted'><span>" + (s.forwarded ? "→ " + esc(s.forwarded) : s.origin ? "from " + esc(s.origin) : s.source === "hyuga" ? "Hyuga" : "Aoba") + " · " + dayTime(s.started) + " · " + s.actions.length + " action" + (s.actions.length > 1 ? "s" : "") + " " + pats + "</span><span>$" + s.spent.toFixed(3) + "</span></div>" +
+      "<div class='row small muted'><span>" + (s.forwarded ? "→ " + esc(s.forwarded) : s.origin ? "from " + esc(s.origin) : s.source === "hyuga" ? "Hyuga" : "Aoba") + " · " + dayTime(s.started) + " · " + s.actions.length + " action" + (s.actions.length > 1 ? "s" : "") + " " + pats + "</span><span>" + (s.status === "queued" && s.realId ? "<button class='btn sm' data-cancel-queue='" + esc(s.realId) + "' type='button'>Cancel</button>" : "$" + s.spent.toFixed(3)) + "</span></div>" +
       (s.why ? "<div class='tiny whyline'>" + esc(s.why) + "</div>" : "") +
       (s.outcome ? "<div class='tiny muted'>" + esc(s.outcome) + "</div>" : "") + "</div>";
   }).join("") || "<div class='muted small'>" + sortiesEmpty(f, q) + "</div>";
