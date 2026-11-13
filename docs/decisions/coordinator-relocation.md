@@ -1,6 +1,6 @@
 # Coordinator relocation without split brain
 
-**Status: proposed, 12 November 2026 (F-016-T01). Independent review (F-016-T02) and owner agreement pending; no code implements it yet.** F-016-T03 (signed snapshot export/import), F-016-T04 (incremental log shipping), F-016-T05 (leader epoch and fencing tokens), F-016-T06 (lease renewal and wake refusal), F-016-T07 (owner-initiated relocation with restore) and F-016-T08/T09 (partition, sleep, reconnect and two-device acceptance) build on it once reviewed and agreed.
+**Status: proposed, 12 November 2026 (F-016-T01). The independent review of 13 November found blocking issues ([review](../reviews/2026-11-13-f016-relocation-review.md)); revision (F-016-T10), a second review and owner agreement pending; no code implements it yet.** F-016-T03 (signed snapshot export/import), F-016-T04 (incremental log shipping), F-016-T05 (leader epoch and fencing tokens), F-016-T06 (lease renewal and wake refusal), F-016-T07 (owner-initiated relocation with restore) and F-016-T08/T09 (partition, sleep, reconnect and two-device acceptance) build on it once reviewed and agreed.
 
 ## Problem
 

@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "parent": "F-016",
+  "id": "F-016-T10",
+  "status": "ready",
+  "title": "Revise the relocation decision after review",
+  "goal": "The decision record answers every blocking and should-fix finding of the 2026-11-13 review",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "regression-design",
+    "distributed-contracts"
+  ],
+  "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
+  "acceptance": [
+    "Partition: renewal needs the standby acknowledgement, or the owner confirms the old host is down or revoked",
+    "Per-base agency state: merged, shadowed or separate, stated with the tables and files involved (including telegram-state.json and native cursors)",
+    "Correct table inventory and a fencing check on every effect path, including web push, Kaji handlers, Telegram fallback and CLI writes",
+    "Epoch and fence names reconciled with the worker protocol; lost-laptop and root-key steps specified",
+    "A second fresh-context review finds no blocker"
+  ],
+  "dependsOn": [
+    "F-016-T02"
+  ],
+  "resources": [
+    "docs/decisions/**",
+    "docs/reviews/**",
+    "docs/work/records/**",
+    "generated:backlog-views"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never let two coordinators act, or copy context as authority, to make progress"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-13: revise one decision record against a review. Not a measurement.",
+    "reviewed": "2026-11-13",
+    "baselineDays": 0.5,
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}

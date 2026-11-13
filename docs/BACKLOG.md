@@ -14,7 +14,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 33 | 6 |
-| **Require Human 🧑** | 13 | 2 |
+| **Require Human 🧑** | 12 | 2 |
 
 ### Require Human 🧑
 
@@ -23,9 +23,9 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | **Procedures** | **Decisions** | **Procedures** | **Decisions** |
 | [F-005](#f-005) | [F-005](#f-005) | [B-057](#b-057) | — |
 | [F-006](#f-006) | [F-049](#f-049) | [B-056](#b-056) |  |
-| [F-049](#f-049) | [F-016](#f-016) |  |  |
-| [F-009](#f-009) | [F-076](#f-076) |  |  |
-| [F-011](#f-011) | [F-078](#f-078) |  |  |
+| [F-049](#f-049) | [F-076](#f-076) |  |  |
+| [F-009](#f-009) | [F-078](#f-078) |  |  |
+| [F-011](#f-011) |  |  |  |
 | [F-023](#f-023) |  |  |  |
 | [F-004](#f-004) |  |  |  |
 | [F-060](#f-060) |  |  |  |
@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 37.75 h agent + 17.5 h owner across 118 open steps of 32 features and 6 other records. 16.75 h of actual effort recorded on 32 steps. Generated from the task files.
+**Remaining effort:** 38 h agent + 17.5 h owner across 118 open steps of 32 features and 6 other records. 16.75 h of actual effort recorded on 32 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -199,10 +199,60 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #255](https://github.com/voidbrain/nerv/pull/255) distinguishes one-off lifecycle/root snapshots from general recovery acceptance; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
+| PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #255](https://github.com/voidbrain/nerv/pull/255) distinguishes one-off lifecycle/root snapshots from general recovery acceptance; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
 | Opened | 2026-11-06 |
 | Verification | Unit/integration: Pending. Real-device: Pending (restore drill). |
 | Reviewed | 2026-11-10 |
+
+</details>
+
+---
+
+### <a id="f-016"></a>[✨ F-016](#top)
+
+**Relocate the logical coordinator without split brain**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.25 h agent + 1.25 h owner | — | — | — | — |
+
+💻 **→** Next: F-016-T10 (revise the decision after the review); owner agreement only after a clean second review.
+
+| | |
+|---|---|
+| **Issue** | Deferred milestone 5b. No distributed election, replication or automatic failover is implemented. |
+| **Reproduce** | Follow docs/decisions/runtime-boundaries.md and the protocol/isolation test fixtures. |
+| **Check** | Network partitions, asleep old leaders and reconnect cannot create simultaneous authorities or duplicate physical effects. Context copying alone never grants leadership. |
+
+
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | F-016-T01 — Step 1a — Decision: replicated state, leader lease and epoch, fencing tokens and restore | 0.5 h | 0.5 h so far (stated) | 0 h agent + 0.25 h owner | Implemented; verification pending |
+| — | F-016-T02 — Step 1b — Independent review of the coordinator relocation decision | 0.25 h | 0 h | 0 h | Completed |
+| 🟢 Small | F-016-T03 — Step 2a — Signed state snapshot export and import to a read-only standby | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-016-T04 — Step 2b — Incremental log shipping to the standby | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-016-T05 — Step 3a — Leader epoch in signed registry records; every effect checks the fencing token | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-016-T06 — Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-016-T07 — Step 4a — Owner-initiated relocation with restore; never a context-only takeover | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-016-T09 — Step 5b — Two-device relocation acceptance | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned |
+| 🟢 Small | F-016-T10 — Revise the relocation decision after review | 0.5 h | 0 h | 0.5 h | Ready |
+| 🟡 Medium | **Total** | 3 h | 0.5 h (1 of 10 steps recorded) | 2.25 h agent + 1.25 h owner | 1 of 10 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-016.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #307](https://github.com/voidbrain/nerv/pull/307) F-016-T01 decision (`docs/decisions/coordinator-relocation.md`); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #3](https://github.com/voidbrain/nerv/pull/3); local checks and scoped audit pass; [CI 43240473540](https://github.com/voidbrain/nerv/actions/runs/43240473540) passed plan, native-macos, windows and validate (full-suite skipped by scoped verification), merged main `e821c11` |
+| Opened | 2026-11-01 |
+| Verification | Pending named acceptance |
+| Reviewed | 2026-11-12 |
 
 </details>
 
@@ -377,7 +427,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #255](https://github.com/voidbrain/nerv/pull/255) related-state reconciliation; [PR #254](https://github.com/voidbrain/nerv/pull/254) accepted Mac service evidence under F-005; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
+| PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #255](https://github.com/voidbrain/nerv/pull/255) related-state reconciliation; [PR #254](https://github.com/voidbrain/nerv/pull/254) accepted Mac service evidence under F-005; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-10 selected per-user Mac lifecycle operations accepted under F-005-T04; actual session/login and Linux target acceptance remain pending. Earlier2026-11-08: read-only execution-host check confirms no installed/registered launchd service. Existing portable headless checks pass; separate target-host install/status/start/stop/uninstall and login/logout acceptance remain pending. |
 | Reviewed | 2026-11-10 |
@@ -421,7 +471,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #255](https://github.com/voidbrain/nerv/pull/255) related-state reconciliation; [PR #254](https://github.com/voidbrain/nerv/pull/254) separate F-005 Mac service acceptance; [PR #215](https://github.com/voidbrain/nerv/pull/215) owner-confirmed icon/menu acceptance and deferred scope; [PR #212](https://github.com/voidbrain/nerv/pull/212) explicit distribution packaging and owner acceptance handoff; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #5](https://github.com/voidbrain/nerv/pull/5) merged; Linux and macOS checks green; real OS acceptance remains pending |
+| PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #255](https://github.com/voidbrain/nerv/pull/255) related-state reconciliation; [PR #254](https://github.com/voidbrain/nerv/pull/254) separate F-005 Mac service acceptance; [PR #215](https://github.com/voidbrain/nerv/pull/215) owner-confirmed icon/menu acceptance and deferred scope; [PR #212](https://github.com/voidbrain/nerv/pull/212) explicit distribution packaging and owner acceptance handoff; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #5](https://github.com/voidbrain/nerv/pull/5) merged; Linux and macOS checks green; real OS acceptance remains pending |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-08 Unit/integration: seven isolated release-path contracts pass (no actual signing/upload); signed-only, rejection, warning, timeout/failure and post-staple packaging paths checked. Real-device: temporary macOS release build, ad-hoc signature verification and bundle plist validation passed; that temporary build was not installed/launched. Later UI-only trial: verified/downloaded PR #213 CI app launch completed according to macOS process state; Human 2026-11-08: owner confirms icon appears and menu opens normally; no Accessibility permission granted to this session. PR #212 CI 42489231643 passed targeted native/auth/packaging checks, including actual macOS Swift tests/build/package; full-suite skipped. Actual Developer ID/notarization and native OS acceptance pending. |
 | Reviewed | 2026-11-10 |
@@ -508,55 +558,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Reconcile: [PR #304](https://github.com/voidbrain/nerv/pull/304). [PR #303](https://github.com/voidbrain/nerv/pull/303) F-004-T05 web push (test/push.test.ts, test/angular.browser.mjs); [PR #300](https://github.com/voidbrain/nerv/pull/300) F-004-T04 GenUI renderer (test/protocol.test.ts, test/surface-dom.test.mjs, test/angular.browser.mjs); [PR #299](https://github.com/voidbrain/nerv/pull/299) F-004-T03 doctor view (test/angular.browser.mjs); [PR #298](https://github.com/voidbrain/nerv/pull/298) F-004-T02 reminder CRUD (test/angular.browser.mjs); Reconcile: [PR #288](https://github.com/voidbrain/nerv/pull/288). [PR #286](https://github.com/voidbrain/nerv/pull/286) F-004-T01 PWA shell, CI [43168006619](https://github.com/voidbrain/nerv/actions/runs/43168006619) (attempt 1 validate failed on B-050, attempt 2 green) (test/pwa.browser.mjs, test/pwa.test.mjs); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Browser/accessibility 2026-11-12 (F-004-T01, F-004-T02, F-004-T03, F-004-T04, F-004-T05): test/pwa.browser.mjs, test/pwa.test.mjs, test/push.test.ts, and test/angular.browser.mjs passed with AXE checks; GenUI registered component renderer and Web Push subscription/delivery verified in PR #303 CI (run 43226982598). Phone install/push acceptance pending (F-004-T06). |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
-
-### <a id="f-016"></a>[✨ F-016](#top)
-
-**Relocate the logical coordinator without split brain**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 2 h agent + 1.25 h owner | — | — | — | 🧑 |
-
-🧑 **→** Owner agreement on the [coordinator relocation decision](decisions/coordinator-relocation.md); independent review (F-016-T02) next.
-
-| | |
-|---|---|
-| **Issue** | Deferred milestone 5b. No distributed election, replication or automatic failover is implemented. |
-| **Reproduce** | Follow docs/decisions/runtime-boundaries.md and the protocol/isolation test fixtures. |
-| **Check** | Network partitions, asleep old leaders and reconnect cannot create simultaneous authorities or duplicate physical effects. Context copying alone never grants leadership. |
-
-
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-016-T01 — Step 1a — Decision: replicated state, leader lease and epoch, fencing tokens and restore | 0.5 h | 0.5 h so far (stated) | 0 h agent + 0.25 h owner | Implemented; verification pending |
-| 🟢 Small | F-016-T02 — Step 1b — Independent review of the coordinator relocation decision | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | F-016-T03 — Step 2a — Signed state snapshot export and import to a read-only standby | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | F-016-T04 — Step 2b — Incremental log shipping to the standby | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | F-016-T05 — Step 3a — Leader epoch in signed registry records; every effect checks the fencing token | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | F-016-T06 — Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | F-016-T07 — Step 4a — Owner-initiated relocation with restore; never a context-only takeover | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | F-016-T09 — Step 5b — Two-device relocation acceptance | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned |
-| 🟡 Medium | **Total** | 2.5 h | 0.5 h (1 of 9 steps recorded) | 2 h agent + 1.25 h owner | 0 of 9 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-016.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #307](https://github.com/voidbrain/nerv/pull/307) F-016-T01 decision (`docs/decisions/coordinator-relocation.md`); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #3](https://github.com/voidbrain/nerv/pull/3); local checks and scoped audit pass; [CI 43240473540](https://github.com/voidbrain/nerv/actions/runs/43240473540) passed plan, native-macos, windows and validate (full-suite skipped by scoped verification), merged main `e821c11` |
-| Opened | 2026-11-01 |
-| Verification | Pending named acceptance |
 | Reviewed | 2026-11-12 |
 
 </details>
@@ -1241,7 +1242,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
+| PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
 | Opened | 2026-11-06 |
 | Verification | Unit/integration: Pending. |
 | Reviewed | 2026-11-06 |
@@ -1648,7 +1649,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [F-015 live failure evidence](acceptance/f015-live-failures-2026-11-12.md) |
+| PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [F-015 live failure evidence](acceptance/f015-live-failures-2026-11-12.md) |
 | Opened | 2026-11-13 |
 | Verification | Pending. |
 | Reviewed | 2026-11-13 |

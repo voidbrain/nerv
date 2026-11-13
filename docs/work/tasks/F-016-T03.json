@@ -17,7 +17,7 @@
     "Signed state snapshot export and import to a read-only standby"
   ],
   "dependsOn": [
-    "F-016-T02"
+    "F-016-T10"
   ],
   "resources": [
     "src/**",
