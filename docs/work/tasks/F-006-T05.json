@@ -45,5 +45,6 @@
     "baselineAgentHours": 0.75,
     "estimateAgentHours": 0.25,
     "ownerKind": "procedure"
-  }
+  },
+  "ownerLink": "docs/evaluations/mac-load-scenarios.md#planned-acceptance-not-new-qualification"
 }

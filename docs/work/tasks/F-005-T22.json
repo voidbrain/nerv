@@ -53,5 +53,6 @@
     "baselineAgentHours": 0.75,
     "estimateAgentHours": 0.25,
     "ownerKind": "decision"
-  }
+  },
+  "ownerLink": "docs/acceptance/f005-t22-target-decision.md"
 }

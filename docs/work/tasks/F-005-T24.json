@@ -51,5 +51,6 @@
     "baselineAgentHours": 0.75,
     "estimateAgentHours": 0.25,
     "ownerKind": "both"
-  }
+  },
+  "ownerLink": "docs/acceptance/f005-t24-tabgha-windows.md"
 }
