@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 152 h agent + 17 h owner across 140 open steps of 31 features and 8 other records. 20.25 h of actual effort recorded on 28 steps. Generated from the task files.
+**Remaining effort:** 151 h agent + 17 h owner across 139 open steps of 31 features and 7 other records. 20.5 h of actual effort recorded on 29 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1132,9 +1132,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
 |---|---|---|---|---|---|:---:|:---:|
-| 🟠 Investigate | 🔶 P2 | 🟢 Small | 1 h | — | — | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | — | — | — |
 
-💻 **→** Next: resolve the Node path at install to a stable target and test it on all three service definitions (B-055-T01).
+💻 **→** Next: merge PR once CI passes (B-055-T01 closed).
 
 | | |
 |---|---|
@@ -1146,8 +1146,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | B-055-T01 — Service definitions record a stable Node executable | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+| — | B-055-T01 — Service definitions record a stable Node executable | 1 h | 0.25 h (stated) | 0 h | Completed |
+| — | **Total** | 1 h | 0.25 h | 0 h | 1 of 1 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1158,7 +1158,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | Found during the B-008 reproduction, [evidence](acceptance/b008-tabgha-2026-11-12.md); [PR #318](https://github.com/voidbrain/nerv/pull/318). |
 | Opened | 2026-11-12 |
-| Verification | Pending. |
+| Verification | `node --test test/service-node-path.test.ts test/runtime.test.ts`; final required CI. |
 | Reviewed | 2026-11-12 |
 
 </details>
