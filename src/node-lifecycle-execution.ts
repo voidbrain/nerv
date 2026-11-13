@@ -1226,9 +1226,13 @@ export function macServiceAdapter(context: ServiceContext, run: typeof command =
         r = await run('git', ['-C', context.source, 'checkout', '--detach', p.nextRevision!]);
       else
         r = await run(
-          'npm',
+          process.platform === 'win32' ? process.env.ComSpec || 'cmd.exe' : 'npm',
           // No install scripts: an admitted application upgrade may change the lockfile, and package scripts are not rehearsed.
-          step === 'dependencies' ? ['ci', '--engine-strict', '--ignore-scripts'] : ['run', 'build'],
+          process.platform === 'win32'
+            ? ['/d', '/s', '/c', step === 'dependencies' ? 'npm ci --engine-strict --ignore-scripts' : 'npm run build']
+            : step === 'dependencies'
+              ? ['ci', '--engine-strict', '--ignore-scripts']
+              : ['run', 'build'],
           context.source,
           600000,
         );
