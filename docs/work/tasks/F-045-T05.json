@@ -33,7 +33,7 @@
   "effort": {
     "size": "medium",
     "estimate": "0 h agent",
-    "basis": "Implemented remote pilot selection, grant checks, and authenticated worker-line execution in 0.5 h agent.",
+    "basis": "Implemented remote pilot selection, grant checks, and authenticated worker-line execution in 0.5 h agent (PR #356).",
     "reviewed": "2026-11-13",
     "baselineDays": 2,
     "agentHours": 0,
