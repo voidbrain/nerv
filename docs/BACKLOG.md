@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 8 | 9 | 13 | 12 |
+| **This week** | 9 | 10 | 13 | 12 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 33 | 6 |
-| **Require Human 🧑** | 15 | 2 |
+| **Require Human 🧑** | 13 | 2 |
 
 ### Require Human 🧑
 
@@ -23,18 +23,18 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | **Procedures** | **Decisions** | **Procedures** | **Decisions** |
 | [F-005](#f-005) | [F-005](#f-005) | [B-057](#b-057) | — |
 | [F-006](#f-006) | [F-049](#f-049) | [B-056](#b-056) |  |
-| [F-049](#f-049) | [F-062](#f-062) |  |  |
-| [F-062](#f-062) | [F-009](#f-009) |  |  |
-| [F-009](#f-009) | [F-011](#f-011) |  |  |
-| [F-011](#f-011) | [F-015](#f-015) |  |  |
-| [F-023](#f-023) | [F-016](#f-016) |  |  |
-| [F-004](#f-004) | [F-076](#f-076) |  |  |
-| [F-060](#f-060) | [F-078](#f-078) |  |  |
-| [F-077](#f-077) | [F-064](#f-064) |  |  |
+| [F-049](#f-049) | [F-016](#f-016) |  |  |
+| [F-009](#f-009) | [F-076](#f-076) |  |  |
+| [F-011](#f-011) | [F-078](#f-078) |  |  |
+| [F-023](#f-023) |  |  |  |
+| [F-004](#f-004) |  |  |  |
+| [F-060](#f-060) |  |  |  |
+| [F-077](#f-077) |  |  |  |
+| [F-081](#f-081) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 38.25 h agent + 18.5 h owner across 120 open steps of 31 features and 6 other records. 20.75 h of actual effort recorded on 34 steps. Generated from the task files.
+**Remaining effort:** 37.75 h agent + 17.5 h owner across 118 open steps of 32 features and 6 other records. 16.75 h of actual effort recorded on 32 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -161,6 +161,48 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-13 |
+
+</details>
+
+---
+
+### <a id="f-062"></a>[✨ F-062](#top)
+
+**Backup and restore: agreed loss bounds, off-host snapshots and a restore drill**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟢 Small | 1 h | — | — | — | — |
+
+💻 **→** Next: F-062-T02 (nightly consistent snapshots).
+
+| | |
+|---|---|
+| **Issue** | Preserved proposal 1 of the [architecture reassessment](audits/2026-11-06-architecture-reassessment.md#1-backups-and-recovery-highest-reliability-value): reminders, memory, ledger, enrollment and grant state live in one SQLite database per base; losing the disk loses them. Litestream was dropped with Terminal Dogma, and the recovery outcome was dropped with it. No scheduled encrypted off-host backup and accepted general restore drill exists; one-off lifecycle/root snapshots do not satisfy this feature. |
+| **Reproduce** | Remove `~/.nerv` on a disposable base: nothing restores reminders, memory, identity or revoked grants. |
+| **Check** | Owner-agreed loss window and restore time; consistent live snapshots (SQLite backup API) on a schedule; retained, encrypted off-host copies with keys kept apart from routine runtime authority; a restore drill onto another location within the agreed bounds that keeps identities, revoked grants and notification checkpoints and replays no old work; no secrets in logs. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | F-062-T01 — Owner-agreed loss window and restore time | 0.25 h | 0 h | 0 h | Completed |
+| 🟢 Small | F-062-T02 — Scheduled consistent snapshots | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | F-062-T03 — Encrypted off-host retention | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-062-T04 — Restore drill | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | **Total** | 1.25 h | 0 h (0 of 4 steps recorded) | 1 h | 1 of 4 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-062.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #255](https://github.com/voidbrain/nerv/pull/255) distinguishes one-off lifecycle/root snapshots from general recovery acceptance; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
+| Opened | 2026-11-06 |
+| Verification | Unit/integration: Pending. Real-device: Pending (restore drill). |
+| Reviewed | 2026-11-10 |
 
 </details>
 
@@ -303,57 +345,15 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
-### <a id="f-062"></a>[✨ F-062](#top)
-
-**Backup and restore: agreed loss bounds, off-host snapshots and a restore drill**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 1.25 h agent + 0.25 h owner | — | — | 🧑 | 🧑 |
-
-🧑 **→** Owner decides the acceptable data loss and restore time, and where encrypted off-host copies live.
-
-| | |
-|---|---|
-| **Issue** | Preserved proposal 1 of the [architecture reassessment](audits/2026-11-06-architecture-reassessment.md#1-backups-and-recovery-highest-reliability-value): reminders, memory, ledger, enrollment and grant state live in one SQLite database per base; losing the disk loses them. Litestream was dropped with Terminal Dogma, and the recovery outcome was dropped with it. No scheduled encrypted off-host backup and accepted general restore drill exists; one-off lifecycle/root snapshots do not satisfy this feature. |
-| **Reproduce** | Remove `~/.nerv` on a disposable base: nothing restores reminders, memory, identity or revoked grants. |
-| **Check** | Owner-agreed loss window and restore time; consistent live snapshots (SQLite backup API) on a schedule; retained, encrypted off-host copies with keys kept apart from routine runtime authority; a restore drill onto another location within the agreed bounds that keeps identities, revoked grants and notification checkpoints and replays no old work; no secrets in logs. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-062-T01 — Owner-agreed loss window and restore time | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned |
-| 🟢 Small | F-062-T02 — Scheduled consistent snapshots | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | F-062-T03 — Encrypted off-host retention | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | F-062-T04 — Restore drill | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟡 Medium | **Total** | 1.25 h | 0 h (0 of 4 steps recorded) | 1.25 h agent + 0.25 h owner | 0 of 4 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-062.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #255](https://github.com/voidbrain/nerv/pull/255) distinguishes one-off lifecycle/root snapshots from general recovery acceptance; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
-| Opened | 2026-11-06 |
-| Verification | Unit/integration: Pending. Real-device: Pending (restore drill). |
-| Reviewed | 2026-11-10 |
-
-</details>
-
----
-
 ### <a id="f-009"></a>[✨ F-009](#top)
 
 **Run NERV Agency headless as one local user service**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.5 h agent + 0.75 h owner | — | — | 🧑 | 🧑 |
+| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.5 h agent + 0.75 h owner | — | — | 🧑 | — |
 
-🧑 **→** Run the [service and login acceptance procedure](acceptance/f009-service-login-procedure.md): complete selected Mac login/logout acceptance and choose a Linux acceptance target.
+🧑 **→** Run the [service and login acceptance procedure](acceptance/f009-service-login-procedure.md): Mac login/logout, then the Linux user service on a Linux VM on the Mac (owner choice, 2026-11-13).
 
 | | |
 |---|---|
@@ -394,9 +394,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.75 h agent + 1.75 h owner | — | — | 🧑 | 🧑 |
+| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.5 h agent + 0.75 h owner | — | — | 🧑 | — |
 
-🧑 **→** Run the [companion acceptance procedure](acceptance/f011-companion-acceptance-procedure.md) and select the signing identity.
+🧑 **→** Run the [companion acceptance procedure](acceptance/f011-companion-acceptance-procedure.md) (menu, service buttons, login, notifications); the app stays unsigned (owner choice, 2026-11-13).
 
 | | |
 |---|---|
@@ -411,8 +411,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | F-011-T01 — Companion implementation and packaging automation | — | 0 days | 0 remaining | Completed |
 | 🟢 Small | F-011-T02 — Live menu, service-button and login acceptance on the Mac | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Planned |
 | 🟢 Small | F-011-T03 — Live notification permission acceptance | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned |
-| 🟢 Small | F-011-T04 — Signed and notarized release | 0.25 h | 0 h | 0.25 h agent + 1 h owner | Planned |
-| 🟢 Small | **Total** | 0.75 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 0.75 h agent + 1.75 h owner | 1 of 4 completed |
+| — | F-011-T04 — Signed and notarized release | 0.25 h | 0 h | 0 h | Completed |
+| 🟢 Small | **Total** | 0.75 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 0.5 h agent + 0.75 h owner | 2 of 4 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -425,47 +425,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-01 |
 | Verification | 2026-11-08 Unit/integration: seven isolated release-path contracts pass (no actual signing/upload); signed-only, rejection, warning, timeout/failure and post-staple packaging paths checked. Real-device: temporary macOS release build, ad-hoc signature verification and bundle plist validation passed; that temporary build was not installed/launched. Later UI-only trial: verified/downloaded PR #213 CI app launch completed according to macOS process state; Human 2026-11-08: owner confirms icon appears and menu opens normally; no Accessibility permission granted to this session. PR #212 CI 42489231643 passed targeted native/auth/packaging checks, including actual macOS Swift tests/build/package; full-suite skipped. Actual Developer ID/notarization and native OS acceptance pending. |
 | Reviewed | 2026-11-10 |
-
-</details>
-
----
-
-### <a id="f-015"></a>[✨ F-015](#top)
-
-**Pair native clients without sharing the root credential**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟢 Verified | 🔺 P1 | 🟢 Small | 0 days | — | — | — | 🧑 |
-
-🧑 **→** Owner decides: close F-015 now that every check has passed live, with service-host recovery moved to its own record ([evidence](acceptance/f015-live-failures-2026-11-12.md)).
-
-| | |
-|---|---|
-| **Issue** | Backend single-use invitations, pinned TLS transport, separate hashed verifier storage and read-only revocable credentials are implemented; Swift Keychain/pinning source exists with macOS CI checks. Owner-ticket renewal and stopped-profile recovery are implemented/tested; live native Keychain/recovery acceptance remains open. |
-| **Reproduce** | Live runs: [pairing and Keychain trial](acceptance/f015-keychain-trial-2026-11-12.md) and [failure, recovery and rotation](acceptance/f015-live-failures-2026-11-12.md); design in docs/decisions/runtime-boundaries.md. |
-| **Check** | Expired/replayed tickets fail; credentials are bound to runtime identity; no tokens in URLs/argv/logs or Brain; revocation/rotation tested; native permissions remain explicit. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| — | F-015-T01 — Invitations, pinned TLS, verifier storage, renewal and revocation | — | 0 days | 0 remaining | Completed |
-| — | F-015-T02 — Isolated live pairing and Keychain trial | 0.5 h | 1.5 h (stated) | 0 h | Completed |
-| — | F-015-T03 — Live failure, recovery and rotation acceptance | 2 h | 2.5 h (stated) | 0 h | Completed |
-| — | **Total** | 2.5 h (2 of 3 steps) | 4 h (2 of 3 steps recorded) | 0 days | 3 of 3 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-015.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #325](https://github.com/voidbrain/nerv/pull/325) F-015-T03 live failure, recovery and rotation ([evidence](acceptance/f015-live-failures-2026-11-12.md)); [PR #322](https://github.com/voidbrain/nerv/pull/322) F-015-T02 isolated pairing and Keychain trial ([evidence](acceptance/f015-keychain-trial-2026-11-12.md)); [PR #215](https://github.com/voidbrain/nerv/pull/215) native CI and scoped owner acceptance; [PR #213](https://github.com/voidbrain/nerv/pull/213) credential renewal and offline recovery contracts; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #4](https://github.com/voidbrain/nerv/pull/4) merged; Linux and macOS checks green; live Keychain/rotation acceptance remains pending |
-| Opened | 2026-11-01 |
-| Verification | 2026-11-12 live on the owner's Mac: pairing, replay/expiry refusal and secret checks (T02); revocation, lost renewal reply, Keychain failure and offline rotation with recovery (T03); owner-observed. 2026-11-08 Unit/integration: five Node authentication/renewal contracts and one stopped-profile recovery contract pass; actual HTTPS admission, single-use tickets, old-token invalidation, independent clients, full roster, expired/revoked refusal and retained unrelated data covered. Swift: three pairing tests pass, including real pinned Swift-to-Node HTTPS renewal and identity/pin/port refusal. Typecheck/conventions pass. PR #213 CI 42489975323 passed plan, validate, windows, native-macos and full-suite. Live Keychain/OS/certificate-recovery acceptance pending; fixtures never change real credentials, services or login state. |
-| Reviewed | 2026-11-08 |
 
 </details>
 
@@ -1250,6 +1209,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-064"></a>[✨ F-064](#top)
+
+**Bounded incident circuits instead of a global kill switch**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | — | — |
+
+💻 **→** Next: F-064-T02 (the first circuit).
+
+| | |
+|---|---|
+| **Issue** | Preserved proposal 3 of the [architecture reassessment](audits/2026-11-06-architecture-reassessment.md#3-automatic-incident-response-bounded-circuits-before-a-global-kill-switch): Spear revokes unused grants and stands down approvals by hand, but nothing detects an incident, interrupts in-flight work or responds automatically. A global automatic revocation would itself risk an outage. |
+| **Reproduce** | Inject a fault (a tool repeatedly failing, a tainted input reaching an external-effect action): nothing changes until the owner spears the sortie. |
+| **Check** | One circuit first, with a written trigger → response table: stop new work in the affected scope, revoke its unused grants, keep evidence, one deduplicated alert, explicit rearm. Injected faults revoke only the intended authority and keep recovery access; benign input never trips it; model suspicion is a signal for review, never authority to stop every base. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | F-064-T01 — Owner picks the first circuit | 0.25 h | 0 h | 0 h | Completed |
+| 🟢 Small | F-064-T02 — First bounded circuit | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-064-T03 — Fault-injection tests | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 3 steps recorded) | 0.75 h | 1 of 3 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-064.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
+| Opened | 2026-11-06 |
+| Verification | Unit/integration: Pending. |
+| Reviewed | 2026-11-06 |
+
+</details>
+
+---
 ### <a id="f-066"></a>[✨ F-066](#top)
 
 **Machine credentials: rotation and telling owner use from automated use**
@@ -1619,42 +1618,40 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-064"></a>[✨ F-064](#top)
+### <a id="f-081"></a>[✨ F-081](#top)
 
-**Bounded incident circuits instead of a global kill switch**
+**Native pairing: recovery on the service host with its profile stopped, and the stale client of 2026-11-07**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h agent + 0.25 h owner | — | — | — | 🧑 |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h agent + 0.5 h owner | — | — | 🧑 | — |
 
-🧑 **→** Owner decides which events trip which circuit, its scope, and who may rearm it.
+🧑 **→** Revoke the unused 2026-11-07 native client on the live service (`npm start -- clients`, then `npm start -- revoke CLIENT_ID`), and choose when to run the stopped-profile recovery on the service host.
 
 | | |
 |---|---|
-| **Issue** | Preserved proposal 3 of the [architecture reassessment](audits/2026-11-06-architecture-reassessment.md#3-automatic-incident-response-bounded-circuits-before-a-global-kill-switch): Spear revokes unused grants and stands down approvals by hand, but nothing detects an incident, interrupts in-flight work or responds automatically. A global automatic revocation would itself risk an outage. |
-| **Reproduce** | Inject a fault (a tool repeatedly failing, a tainted input reaching an external-effect action): nothing changes until the owner spears the sortie. |
-| **Check** | One circuit first, with a written trigger → response table: stop new work in the affected scope, revoke its unused grants, keep evidence, one deduplicated alert, explicit rearm. Injected faults revoke only the intended authority and keep recovery access; benign input never trips it; model suspicion is a signal for review, never authority to stop every base. |
+| **Issue** | Split from F-015 when it closed on 2026-11-13. F-015's live trials (T02, T03) ran on an isolated profile; stopped-profile recovery on the host that runs the live service was deferred until the owner chooses that host. T02 also left a 2026-11-07 native client unrevoked on the live service. |
+| **Reproduce** | `npm start -- clients` on the live service lists the 2026-11-07 client; the [renewal and recovery guide](../native/README.md#renew-an-unexpired-native-credential) is so far verified only on an isolated profile. |
+| **Check** | The stale client is revoked and the companion still works; on the service host, the stopped-profile rotation in native/README.md keeps the profile's data, gives a new identity and pin, and the companion recovers by pairing again; evidence recorded. |
 
 **Feature steps**
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | F-064-T01 — Owner picks the first circuit | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned |
-| 🟢 Small | F-064-T02 — First bounded circuit | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | F-064-T03 — Fault-injection tests | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 3 steps recorded) | 1 h agent + 0.25 h owner | 0 of 3 completed |
+| 🟢 Small | F-081-T01 — Revoke the stale client and run stopped-profile recovery on the service host | 0.25 h | 0 h | 0.25 h agent + 0.5 h owner | Ready |
+| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h agent + 0.5 h owner | 0 of 1 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-[Full notes & evidence](work/records/F-064.md)
+[Full notes & evidence](work/records/F-081.md)
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
-| Opened | 2026-11-06 |
-| Verification | Unit/integration: Pending. |
-| Reviewed | 2026-11-06 |
+| PR / evidence | [F-015 live failure evidence](acceptance/f015-live-failures-2026-11-12.md) |
+| Opened | 2026-11-13 |
+| Verification | Pending. |
+| Reviewed | 2026-11-13 |
 
 </details>
 

@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "id": "F-081-T01",
+  "parent": "F-081",
+  "title": "Revoke the stale client and run stopped-profile recovery on the service host",
+  "goal": "The live service has no unused native client and its recovery path is verified on the host itself",
+  "status": "ready",
+  "acceptance": [
+    "The 2026-11-07 client is revoked; the current companion still connects",
+    "Stopped-profile rotation on the service host keeps data, changes identity and pin, and the companion recovers by pairing again"
+  ],
+  "dependsOn": [],
+  "resources": ["docs/acceptance/**", "docs/work/records/**", "generated:backlog-views"],
+  "capabilities": ["privacy-review"],
+  "privacy": "No credential, ticket or token in Git or logs; evidence names client IDs only.",
+  "validation": ["Owner-observed live check recorded in docs/acceptance"],
+  "escalation": ["Anything that would replace the live root credential goes to the owner first"],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h agent + 0.5 h owner",
+    "basis": "Estimated 2026-11-13: one revoke and one documented rotation, owner-run. Not a measurement.",
+    "reviewed": "2026-11-13",
+    "agentHours": 0.25,
+    "ownerHours": 0.5,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25,
+    "ownerKind": "procedure"
+  }
+}

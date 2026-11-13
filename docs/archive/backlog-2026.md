@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 9 | 12 |
+| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 10 | 12 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
 
@@ -3752,6 +3752,44 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 | Opened | 2026-11-09 |
 | Verification | 2026-11-13 Unit/integration: `test/gauntlet.test.mjs` (18 passed), `test/evaluation-model.test.mjs` (1 passed), `gauntlet:index`, `check:gauntlet-index`, `gauntlet:plan`, `gauntlet:role-plan`, `gauntlet:all --execute --allow-expensive` (7/7 `nerv-system-flows` passed and recorded with schema 2 `sourceKey`), `check:gauntlet-runs` (0 pending), and `check:fast` passed; no live model run executed for T04. Earlier 2026-11-10 Unit/integration: PR242 exacthead03c0721 / CI42687439382 passed all five jobs/full-suite; eleven fixture joins and independent harness/source/schema review passed; T05 closed, no live schema campaign. Earlier2026-11-09 Unit/integration: PR235 exactheadb4cd887 / CI42608578429 passed all five jobs including full-suite, mergedmainc5323e5. Nine focused context/reuse/admission/package joins, local468 Node tests (466 passed, two platform skips), typecheck/build/index and committed-source policy90 passed. Review: independent exact package/source/installed-file verification and nine joins, no blocking finding. Real-model2026-11-09: owner-provided common smoke validated and reviewed, complete10cases,7 passed/3 failed,64.744s/1608 tokens; no load/model qualification. |
 | Reviewed | 2026-11-11 |
+
+</details>
+
+---
+
+### F-015
+
+**Pair native clients without sharing the root credential**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🟢 | 🔺 P1 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-13 by the owner: every Check item passed live (T02, T03); service-host stopped-profile recovery and the stale 2026-11-07 client moved to F-081.
+
+| | |
+|---|---|
+| **Issue** | Backend single-use invitations, pinned TLS transport, separate hashed verifier storage and read-only revocable credentials are implemented; Swift Keychain/pinning source exists with macOS CI checks. Owner-ticket renewal and stopped-profile recovery are implemented/tested; live native Keychain/recovery acceptance remains open. |
+| **Reproduce** | Live runs: [pairing and Keychain trial](../../acceptance/f015-keychain-trial-2026-11-12.md) and [failure, recovery and rotation](../../acceptance/f015-live-failures-2026-11-12.md); design in docs/decisions/runtime-boundaries.md. |
+| **Check** | Expired/replayed tickets fail; credentials are bound to runtime identity; no tokens in URLs/argv/logs or Brain; revocation/rotation tested; native permissions remain explicit. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**F-015-T03 completed 2026-11-12 ([PR #325](https://github.com/voidbrain/nerv/pull/325)):** owner-approved split into four live cases (T03a revocation 0.25 h, T03b lost renewal reply 0.5 h, T03c Keychain failure 0.25 h, T03d offline TLS/auth rotation 0.5 h, evidence 0.5 h; about 20 min owner), replacing the 0.5 h + 0.5 h estimate. All four ran on an isolated profile and recovered with the native README procedure: a revoked credential is refused and its data cleared; a renewal completed on a throttled server while the companion stopped waiting left the old token dead and an orphan replacement, recovered by `clients`, `revoke` and fresh pairing; a cancelled keychain prompt made the save fail after the server renewed, recovered the same way; the stopped-profile rotation gave a new identity and pin, kept the profile's data, and the companion refused the new certificate with its old pin. [Evidence](../../acceptance/f015-live-failures-2026-11-12.md). Every Check item has now passed live (T02 and T03); service-host stopped-profile recovery stays deferred. Found: B-057, and B-056 extended.
+
+**F-015-T02 completed 2026-11-12 ([PR #322](https://github.com/voidbrain/nerv/pull/322)):** the companion (main `214b7cb`, now in `~/Applications/NERV.app`) paired live to an isolated profile `NERV-T1` on ports 4417/4419; the owner saw that profile's reminder and the service-mismatch guard; a used and an expired invitation were refused (400); no token in the profile log, the companion's log and preferences, process arguments or URLs; the owner then re-paired to the live service. A pasted invitation for another runtime during renewal was refused on the Mac with a misleading message (B-056). [Evidence](../../acceptance/f015-keychain-trial-2026-11-12.md). Left open: F-015-T03, and the unrevoked 2026-11-07 client on the live service.
+
+**Next action / closure evidence:** Owner selected this Mac for companion UI only (shared with F-011); icon/menu visibility is owner-confirmed; next prepare the exact isolated pairing/Keychain trial. No real credential or TLS/auth set has been replaced. Service-host stopped-profile recovery remains deferred until the owner chooses that host. Explicit renewal now requires a fresh owner ticket plus the current valid credential, atomically replaces it and retains read-only scope. Swift validates the existing runtime/pin/ports before sending the old token; lost replies or Keychain failure require inspection/new invitation. The documented offline TLS/auth replacement rotates native identity and invalidates old clients without changing unrelated data. No automatic live certificate rotation is claimed. PR #213 CI 42489975323 passed all five jobs including full-suite; actual OS/Keychain acceptance stays pending. See [renewal and recovery guide](../../../native/README.md#renew-an-unexpired-native-credential).
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 2 open steps total 1 h agent + 1 h owner (steps table; each task basis gives old → new). Figures after this sentence are dated history. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): the 2 open steps in hours total 1.75 h agent + 1 h owner (steps table; method in each task basis). Day figures below are dated history. Medium remaining effort (two to three focused days), reassessed 2026-11-08: implementation/isolated joins are delivered; live Keychain, failure/recovery and target-host acceptance remain uncertain and require owner access.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #325](https://github.com/voidbrain/nerv/pull/325) F-015-T03 live failure, recovery and rotation ([evidence](../../acceptance/f015-live-failures-2026-11-12.md)); [PR #322](https://github.com/voidbrain/nerv/pull/322) F-015-T02 isolated pairing and Keychain trial ([evidence](../../acceptance/f015-keychain-trial-2026-11-12.md)); [PR #215](https://github.com/voidbrain/nerv/pull/215) native CI and scoped owner acceptance; [PR #213](https://github.com/voidbrain/nerv/pull/213) credential renewal and offline recovery contracts; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #4](https://github.com/voidbrain/nerv/pull/4) merged; Linux and macOS checks green; live Keychain/rotation acceptance remains pending |
+| Opened | 2026-11-01 |
+| Verification | 2026-11-12 live on the owner's Mac: pairing, replay/expiry refusal and secret checks (T02); revocation, lost renewal reply, Keychain failure and offline rotation with recovery (T03); owner-observed. 2026-11-08 Unit/integration: five Node authentication/renewal contracts and one stopped-profile recovery contract pass; actual HTTPS admission, single-use tickets, old-token invalidation, independent clients, full roster, expired/revoked refusal and retained unrelated data covered. Swift: three pairing tests pass, including real pinned Swift-to-Node HTTPS renewal and identity/pin/port refusal. Typecheck/conventions pass. PR #213 CI 42489975323 passed plan, validate, windows, native-macos and full-suite. Live Keychain/OS/certificate-recovery acceptance pending; fixtures never change real credentials, services or login state. |
+| Reviewed | 2026-11-13. Review: fresh-context closure review in the closing PR (2026-11-13). |
 
 </details>
 
