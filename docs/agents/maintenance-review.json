@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-13T13:07:31.793Z",
+  "reviewed": "2026-11-13T18:28:48.815Z",
   "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
   "inputs": {
     "AGENTS.md": "b52b056f97cf118b6bbc5b1bd8f54629ec0cdb0a722640b9e524d1370e105a9e",
-    "docs/BACKLOG-RULES.md": "b4a92ce5e2ad72230ccfffebbafec0551efa45c066c756da5338c99d0d3ff4f4",
+    "docs/BACKLOG-RULES.md": "413515f9c0636c889c4f526beae4ac0bc0a803c022bf51be17b71252f28681a8",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
     "docs/agents/areas.md": "19890dcd2fb04557fcb9b9bb1df4dcbd2e584736e53a5989908bb822ef020d1c",
     "docs/agents/audit.md": "bc5de5707f9ec5c523e73602499312c373d6112ffc498d69bf68604522527992",
@@ -25,7 +25,7 @@
   },
   "measurements": {
     "samples": 1,
-    "latestAt": "2026-11-13T13:07:31.746Z",
+    "latestAt": "2026-11-13T18:28:48.761Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -55,7 +55,7 @@
         "durationMs": {
           "observed": 1,
           "missing": 0,
-          "median": 2710
+          "median": 49
         },
         "conflicts": {
           "observed": 0,
@@ -77,10 +77,10 @@
   },
   "outcomes": [
     {
-      "kind": "tool",
+      "kind": "rule",
       "disposition": "implemented",
-      "target": "tools/work-items.mjs",
-      "evidence": "Reconciled to project-harness v8.5.0: copied tools/work-items.mjs and docs/agents/verification.md, reconciled docs/BACKLOG-RULES.md (scope-step reconciliation + 0.25-0.5 h initial agent-speed sizing), added --test-timeout to test scripts, closed F-025, and recalibrated 115 open steps at 0.25x."
+      "target": "docs/BACKLOG-RULES.md",
+      "evidence": "Harness v8.6.0 reconcile: concise ## Other changes rule carried from the template; tools/check-backlog.mjs copied; current Other changes (link plus one entry) passes the new check."
     }
   ]
 }
