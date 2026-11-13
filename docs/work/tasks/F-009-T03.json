@@ -6,7 +6,7 @@
   "goal": "Linux service target acceptance",
   "status": "planned",
   "acceptance": [
-    "On an owner-selected Linux host: install/status/start/stop/uninstall and restart catch-up pass; evidence recorded"
+    "On a Linux VM on the Mac (owner choice 2026-11-13): install/status/start/stop/uninstall and restart catch-up pass; evidence recorded"
   ],
   "dependsOn": [
     "F-009-T02"

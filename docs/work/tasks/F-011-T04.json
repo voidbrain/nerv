@@ -4,9 +4,9 @@
   "parent": "F-011",
   "title": "Signed and notarized release",
   "goal": "Signed and notarized release",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
-    "A Developer ID-signed, notarized build installs and passes Gatekeeper on a clean account"
+    "Declined by the owner 2026-11-13: the companion stays unsigned and local; reopen when it is distributed"
   ],
   "dependsOn": [
     "F-011-T03"
@@ -37,8 +37,8 @@
     "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
     "reviewed": "2026-11-13",
     "baselineDays": 2,
-    "agentHours": 0.25,
-    "ownerHours": 1,
+    "agentHours": 0,
+    "ownerHours": 0,
     "baselineAgentHours": 2,
     "estimateAgentHours": 0.25,
     "ownerKind": "procedure"

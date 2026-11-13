@@ -4,7 +4,7 @@
   "parent": "F-064",
   "title": "Owner picks the first circuit",
   "goal": "Owner picks the first circuit",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Trigger → response table for one scope agreed"
   ],
@@ -32,8 +32,8 @@
     "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
     "reviewed": "2026-11-13",
     "baselineDays": 0.5,
-    "agentHours": 0.25,
-    "ownerHours": 0.25,
+    "agentHours": 0,
+    "ownerHours": 0,
     "baselineAgentHours": 0.5,
     "ownerKind": "decision",
     "estimateAgentHours": 0.25
