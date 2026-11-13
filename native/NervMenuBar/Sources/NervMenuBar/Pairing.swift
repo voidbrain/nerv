@@ -32,15 +32,27 @@ struct Credential: Codable {
     let fingerprint: String
 }
 enum NativeError: LocalizedError {
-    case invalidInvitation, certificateMismatch, requestFailed, identityMismatch, keychain, expired
-    var errorDescription: String? {
+    case invalidInvitation, certificateMismatch, requestFailed, serviceUnreachable, pairingRevoked, identityMismatch, keychain, expired
+    var errorDescription: String? { message(language: "it") }
+    func message(language: String) -> String {
+        let en = language == "en"
         switch self {
-        case .invalidInvitation: return "Invito non valido o scaduto. Genera un nuovo invito con npm start -- pair."
-        case .certificateMismatch: return "Identità TLS di NERV non verificata. Nessuna credenziale inviata."
-        case .requestFailed: return "NERV non disponibile o richiesta rifiutata. Verifica servizio e abbinamento."
-        case .identityMismatch: return "L’identità di NERV è cambiata. Ripeti l’abbinamento."
-        case .keychain: return "Accesso al Portachiavi non riuscito."
-        case .expired: return "Abbinamento scaduto. Genera un nuovo invito."
+        case .invalidInvitation:
+            return en ? "Invalid or expired invitation. Generate a new one with npm start -- pair." : "Invito non valido o scaduto. Genera un nuovo invito con npm start -- pair."
+        case .certificateMismatch:
+            return en ? "NERV's TLS certificate changed or no longer matches the pairing. Nothing was sent." : "Il certificato TLS di NERV è cambiato o non corrisponde all’abbinamento. Nessun dato inviato."
+        case .serviceUnreachable:
+            return en ? "NERV service is unreachable. Check that it is running." : "Servizio NERV non raggiungibile. Verifica che sia avviato."
+        case .pairingRevoked:
+            return en ? "Pairing was revoked or expired. Pair again with a new invitation." : "Abbinamento revocato o scaduto. Ripeti l’abbinamento con un nuovo invito."
+        case .requestFailed:
+            return en ? "Request to NERV failed. Check service and pairing." : "Richiesta a NERV non riuscita. Verifica servizio e abbinamento."
+        case .identityMismatch:
+            return en ? "NERV identity changed. Pair again." : "L’identità di NERV è cambiata. Ripeti l’abbinamento."
+        case .keychain:
+            return en ? "Keychain access failed." : "Accesso al Portachiavi non riuscito."
+        case .expired:
+            return en ? "Pairing expired. Generate a new invitation." : "Abbinamento scaduto. Genera un nuovo invito."
         }
     }
 }
