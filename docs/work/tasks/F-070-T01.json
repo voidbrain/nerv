@@ -4,7 +4,7 @@
   "parent": "F-070",
   "title": "Operator alias ownership and signed directory contract",
   "goal": "Operator alias ownership and signed directory contract",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Per-base configurable names and defaults; signed directory contract; no private channel IDs exposed"
   ],
