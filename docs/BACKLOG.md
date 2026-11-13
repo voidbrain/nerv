@@ -14,14 +14,14 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 33 | 9 |
-| **Require Human 🧑** | 9 | 0 |
+| **Require Human 🧑** | 9 | 1 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures** | **Decisions** | **Procedures** | **Decisions** |
-| [F-009](#f-009) | [F-006](#f-006) | — | — |
+| [F-009](#f-009) | [F-006](#f-006) | [B-057](#b-057) | — |
 | [F-011](#f-011) | [F-062](#f-062) |  |  |
 | [F-023](#f-023) | [F-009](#f-009) |  |  |
 | [F-004](#f-004) | [F-015](#f-015) |  |  |
@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 149 h agent + 17 h owner across 137 open steps of 31 features and 7 other records. 21.25 h of actual effort recorded on 31 steps. Generated from the task files.
+**Remaining effort:** 146.5 h agent + 17 h owner across 135 open steps of 31 features and 5 other records. 21.5 h of actual effort recorded on 32 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1278,44 +1278,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="b-057"></a>[🐞 B-057](#top)
-
-**Companion error messages are Italian only and do not say what went wrong**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | — | — |
-
-💻 **→** Next: translate every companion error and name revoked, unreachable and changed-certificate cases apart (B-057-T01).
-
-| | |
-|---|---|
-| **Issue** | 2026-11-12, F-015-T03: with English selected, a revoked credential showed *NERV non disponibile o richiesta rifiutata. Verifica servizio e abbinamento.*: `NativeError` descriptions are Italian strings and `tr()` has no English for them. The same text covers a stopped service, a refused (revoked or expired) credential and any other non-2xx reply, so it does not tell the owner to pair again. After a certificate rotation the pin refusal showed a bare system *cancelled* (the TLS challenge is cancelled), not that the certificate no longer matches the pairing. |
-| **Reproduce** | Select English in the companion; revoke its client with `npm start -- revoke CLIENT_ID` and choose Refresh status; or stop the service; or rotate the native certificate as in native/README.md and refresh. |
-| **Check** | Every companion error text exists in English and Italian; a 401 says the pairing was revoked or expired and to pair again; an unreachable service says so; a certificate that no longer matches says so and that nothing was sent; Swift tests cover each mapping. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | B-057-T01 — Translated, specific companion error messages | 1.5 h | 0 h | 1.5 h | Planned |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-057.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Found in F-015-T03, [evidence](acceptance/f015-live-failures-2026-11-12.md); [PR #325](https://github.com/voidbrain/nerv/pull/325). |
-| Opened | 2026-11-12 |
-| Verification | Pending. |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
 ### <a id="f-056"></a>[✨ F-056](#top)
 
 **Slash commands in Telegram and the dashboard chat, and how much Aoba tells you**
@@ -1450,6 +1412,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="b-057"></a>[🐞 B-057](#top)
+
+**Companion error messages are Italian only and do not say what went wrong**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | — | 🧑 | — |
+
+🧑 **→** Next: verify English/Italian error messages (401 revoked, stopped service, rotated certificate) in a live Mac companion trial, then close B-057.
+
+| | |
+|---|---|
+| **Issue** | 2026-11-12, F-015-T03: with English selected, a revoked credential showed *NERV non disponibile o richiesta rifiutata. Verifica servizio e abbinamento.*: `NativeError` descriptions are Italian strings and `tr()` has no English for them. The same text covers a stopped service, a refused (revoked or expired) credential and any other non-2xx reply, so it does not tell the owner to pair again. After a certificate rotation the pin refusal showed a bare system *cancelled* (the TLS challenge is cancelled), not that the certificate no longer matches the pairing. |
+| **Reproduce** | Select English in the companion; revoke its client with `npm start -- revoke CLIENT_ID` and choose Refresh status; or stop the service; or rotate the native certificate as in native/README.md and refresh. |
+| **Check** | Every companion error text exists in English and Italian; a 401 says the pairing was revoked or expired and to pair again; an unreachable service says so; a certificate that no longer matches says so and that nothing was sent; Swift tests cover each mapping. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | B-057-T01 — Translated, specific companion error messages | 1.5 h | 0 h | 0 h | Completed |
+| — | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 0 h | 1 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-057.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Found in F-015-T03, [evidence](acceptance/f015-live-failures-2026-11-12.md); [PR #325](https://github.com/voidbrain/nerv/pull/325). |
+| Opened | 2026-11-12 |
+| Verification | Pending. |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
 ### <a id="f-044"></a>[✨ F-044](#top)
 
 **Memory: one fact per subject, a proposed spelling fix, typo-tolerant recall**

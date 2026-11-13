@@ -111,4 +111,21 @@ extension PairingTests {
             XCTAssertTrue(msg.lowercased().contains("unreachable") || msg.lowercased().contains("running"), "Expected English unreachable message, got: \(msg)")
         }
     }
+
+    func testErrorMappingCoversRevokedPinMismatchAndItalian() {
+        XCTAssertEqual(NativeConnection.httpError(statusCode: 401), .pairingRevoked)
+        XCTAssertEqual(NativeConnection.httpError(statusCode: 500), .requestFailed)
+        XCTAssertEqual(NativeConnection.transportError(URLError(.cancelled), pinRejected: true), .certificateMismatch)
+        XCTAssertEqual(NativeConnection.transportError(URLError(.cannotConnectToHost), pinRejected: false), .serviceUnreachable)
+
+        for err in [NativeError.invalidInvitation, .certificateMismatch, .serviceUnreachable, .pairingRevoked, .requestFailed, .identityMismatch, .keychain, .expired] {
+            let en = err.message(language: "en")
+            let it = err.message(language: "it")
+            XCTAssertNotEqual(en, it, "Expected distinct EN and IT texts for \(err)")
+            XCTAssertFalse(en.isEmpty)
+            XCTAssertFalse(it.isEmpty)
+        }
+        XCTAssertTrue(NativeError.pairingRevoked.message(language: "en").lowercased().contains("pair again"))
+        XCTAssertTrue(NativeError.certificateMismatch.message(language: "en").lowercased().contains("nothing was sent"))
+    }
 }
