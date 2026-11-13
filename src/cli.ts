@@ -1260,7 +1260,7 @@ try {
         runtime.startResumer();
         // Kaji line (F-036): this base's own key; the link starts once a root is pinned and listens only on the enrolled address.
         const own = baseKey(home);
-        runtime.setBaseKey(own.publicKey);
+        runtime.setBaseKey(own.publicKey, own.privateKey);
         let kaji: KajiLink | undefined;
         // Schedules are re-read every minute, so the owner can change them by chat or by hand without a restart.
         const live = () => {
@@ -1440,6 +1440,8 @@ try {
             onOffers: (id, tools) => runtime.notePeerOffers(id, tools),
             pilots: () => runtime.offeredPilots(),
             onPilots: (id, pilots) => runtime.notePeerPilots(id, pilots),
+            operator: () => runtime.ownOperatorEntry(),
+            onOperator: (id, entry, bases) => runtime.notePeerOperator(id, entry, bases),
             // Phase 2, on the base asked: this base's Casper votes on the main base's action.
             onVerdict: (_from, ask) => runtime.peerVerdict(ask),
             onChat: async (from, message, conversation) => ({
