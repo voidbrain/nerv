@@ -205,7 +205,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | Depends on | [F-045](#f-045) — Pilot identity and EVA class for per-job execution<br />[F-025](#f-025) — Pilot trust-stage limits for sandbox class admission |
-| PR / evidence | [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner questions 2026-11-05 |
+| PR / evidence | [PR #365](https://github.com/voidbrain/nerv/pull/365) F-049-T01 deterministic EVA runner contract and threat model; [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner questions 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-13 F-049-T01: `npm run work:build && npm run backlog:recap && npm run roadmap:status` and `npm run check:fast` passed; contract/architecture documentation only, no runtime confinement claimed. |
 | Reviewed | 2026-11-13 |
