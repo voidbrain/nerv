@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 140 h agent + 16.75 h owner across 129 open steps of 31 features and 3 other records. 22.25 h of actual effort recorded on 34 steps. Generated from the task files.
+**Remaining effort:** 139 h agent + 16.75 h owner across 128 open steps of 31 features and 3 other records. 22.75 h of actual effort recorded on 35 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -115,9 +115,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟣 Very large | 10.75 h agent + 2.5 h owner | — | [F-012](#f-012) | — | — |
+| 🔴 Open | 🔺 P1 | 🟣 Very large | 9.75 h agent + 2.5 h owner | — | [F-012](#f-012) | — | — |
 
-💻 **→** Next: F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback (Planned).
+💻 **→** Next: F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases (Planned).
 
 | | |
 |---|---|
@@ -130,7 +130,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
 | — | F-006-T01 — T01a — Decision: remote inference endpoint identity, permitted data and behaviour when unavailable | 0.5 h | 0.5 h (stated) | 0 h | Completed |
-| 🟢 Small | F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback | 1 h | 0 h | 1 h | Planned |
+| — | F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback | 0.5 h | 0.5 h (stated) | 0 h | Completed |
 | 🟡 Medium | F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases | 1.25 h | 0 h | 1.25 h | Planned |
 | 🟢 Small | F-006-T04 — T04a — Placement campaign plan with exact cases, repeats and budgets for owner approval | 0.5 h | 0 h | 0.5 h agent + 0.25 h owner | Planned |
 | 🟢 Small | F-006-T05 — T05a — Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.5 h | 0 h | 0.5 h agent + 0.25 h owner | Planned |
@@ -143,7 +143,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | F-006-T12 — T04c — Placement report and recommendation | 0.5 h | 0 h | 0.5 h | Planned |
 | 🟢 Small | F-006-T13 — T05b — Three Mac operating-condition runs | 1 h | 0 h | 1 h agent + 1.5 h owner | Planned |
 | 🟢 Small | F-006-T14 — T05c — Mac operating-conditions report | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟣 Very large | **Total** | 11.75 h | 1 h (2 of 14 steps recorded) | 10.75 h agent + 2.5 h owner | 2 of 14 completed |
+| 🟣 Very large | **Total** | 11.25 h | 1.5 h (3 of 14 steps recorded) | 9.75 h agent + 2.5 h owner | 3 of 14 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>

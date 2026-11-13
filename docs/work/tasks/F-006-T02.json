@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-006",
   "id": "F-006-T02",
-  "status": "planned",
+  "status": "closed",
   "title": "T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback",
   "goal": "Selection contract: model endpoint and execution worker chosen independently; no silent fallback.",
   "capabilities": [
@@ -36,12 +36,14 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h agent",
-    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Slice T02a of the step \"Independent model and execution selection\". Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: 1.5 h/day judged rate (PR #277). Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.",
-    "reviewed": "2026-11-12",
+    "estimate": "0 hours",
+    "basis": "Implemented independent inference-target and execution-worker selection contract (selectInferenceTarget, selectExecutionWorker, selectOrchestration, Runtime.selectExecution) with no-fallback regressions in 0.5 h agent (stated).",
+    "reviewed": "2026-11-13",
     "baselineDays": 1,
-    "agentHours": 1,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
-    "estimateAgentHours": 1
+    "actualAgentHours": 0.5,
+    "actualSource": "stated",
+    "estimateAgentHours": 0.5
   }
 }
