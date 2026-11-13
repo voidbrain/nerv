@@ -500,24 +500,22 @@ function featurePlan(text, id, tasks, repository) {
     totalRow(steps) +
     (evidence ? ' |' : '') +
     '\n\n';
-  const basis =
-    '**Step estimates** (dated basis; generated from the task files)\n\n' +
-    steps
-      .map((t) => `- ${t.id}: ${cell(t.effort.estimate)} (${cell(t.effort.reviewed)}). ${cell(t.effort.basis)}`)
-      .join('\n') +
-    '\n\n';
   // The record's own details block is a line holding only <details>; a mention of the tag inside a cell is not.
-  // The basis list goes after the summary line, with or without a blank line after it.
   const details = /^<details>\n(?:<summary>[^\n]*<\/summary>\n)?/m.exec(text);
   if (!details) throw Error('Feature plan requires record details: ' + id);
-  return (
-    text.slice(0, details.index) +
-    table +
-    details[0] +
-    '\n' +
-    basis +
-    text.slice(details.index + details[0].length).replace(/^\n/, '')
-  );
+  return text.slice(0, details.index) + table + text.slice(details.index);
+}
+function compactDetails(text, relRecord) {
+  const m = /^(<details>\n(?:<summary>[^\n]*<\/summary>\n)?)([\s\S]*?)^<\/details>/m.exec(text);
+  if (!m) return text;
+  const lines = m[2].split('\n');
+  const start = lines.findIndex((line) => /^\| *Field *\| *Value *\|/.test(line));
+  const tableLines = [];
+  if (start >= 0) {
+    for (let i = start; i < lines.length && lines[i].startsWith('|'); i++) tableLines.push(lines[i]);
+  }
+  const body = `[Full notes & evidence](${relRecord})` + (tableLines.length ? '\n\n' + tableLines.join('\n') : '');
+  return text.slice(0, m.index) + `${m[1]}\n${body}\n\n</details>` + text.slice(m.index + m[0].length);
 }
 // Work-queue order (F-055): rank each active record by tools/backlog-queue.mjs over the ID-ordered ledger, its
 // archives and the configured roadmap, lanes first (agent candidates, prerequisite review, human action, blocked).
@@ -730,8 +728,12 @@ export function renderLedger(root, config, withPlans = true) {
             })
           : relocated;
         const icon = id.startsWith('F-') ? '✨' : '🐞';
+        const relRecord = (config.records.startsWith('docs/') ? config.records.slice(5) : '../' + config.records) + '/' + file;
         output += withPlans
-          ? rendered.replace(`### ${id}\n`, `### <a id="${id.toLowerCase()}"></a>[${icon} ${id}](#top)\n`)
+          ? compactDetails(
+              rendered.replace(`### ${id}\n`, `### <a id="${id.toLowerCase()}"></a>[${icon} ${id}](#top)\n`),
+              relRecord,
+            )
           : rendered;
       }
     } else throw Error('Invalid layout segment');
