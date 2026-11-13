@@ -760,7 +760,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) peer inspection scope (F-051-T07) and the missing step for EVA cage labels (F-051-T06); [PR #371](https://github.com/voidbrain/nerv/pull/371) authenticated cross-base inspection and directional contributor topology (T01–T05); [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #195](https://github.com/voidbrain/nerv/pull/195) project tuning and regressions;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #163](https://github.com/voidbrain/nerv/pull/163) channel telemetry and CI reconciliation;  [PR #162](https://github.com/voidbrain/nerv/pull/162) relay detail and acceptance review; Owner test on Tabgha 2026-11-05 |
+| PR / evidence | [PR #377](https://github.com/voidbrain/nerv/pull/377) [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) peer inspection scope (F-051-T07) and the missing step for EVA cage labels (F-051-T06); [PR #371](https://github.com/voidbrain/nerv/pull/371) authenticated cross-base inspection and directional contributor topology (T01–T05); [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #195](https://github.com/voidbrain/nerv/pull/195) project tuning and regressions;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #163](https://github.com/voidbrain/nerv/pull/163) channel telemetry and CI reconciliation;  [PR #162](https://github.com/voidbrain/nerv/pull/162) relay detail and acceptance review; Owner test on Tabgha 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-06 Ledger-to-live-detail regression passed for remote answer/reference, waiting, no answer, local continuation, escaping and local empty states. Chrome: real service/session and ledger fixture showed the answering base and full reference; scoped axe found zero violations and screenshot inspected. Full suite: 196 passed, one platform skip; build, typecheck, conventions and integrations passed. Merged PR #162 CI passed validate, windows and both native-macos runs (ci:status, runs 42247286378/42247282316); cross-base link and EVA labels remain unimplemented. |
 | Reviewed | 2026-11-13 |
@@ -1085,7 +1085,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #375](https://github.com/voidbrain/nerv/pull/375) plan; owner request 2026-11-13; [Gemma smoke 2026-11-09](evaluations/2026-11-09-gemma-common-smoke.md); docs/agents/model-profiles.json |
+| PR / evidence | [PR #377](https://github.com/voidbrain/nerv/pull/377) [PR #375](https://github.com/voidbrain/nerv/pull/375) plan; owner request 2026-11-13; [Gemma smoke 2026-11-09](evaluations/2026-11-09-gemma-common-smoke.md); docs/agents/model-profiles.json |
 | Depends on | — |
 | Opened | 2026-11-13 |
 | Verification | Pending. |
@@ -1164,7 +1164,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [Architecture reassessment 2026-11-13](audits/2026-11-13-architecture-reassessment.md) |
+| PR / evidence | [PR #377](https://github.com/voidbrain/nerv/pull/377) [Architecture reassessment 2026-11-13](audits/2026-11-13-architecture-reassessment.md) |
 | Opened | 2026-11-13 |
 | Verification | Pending. |
 | Reviewed | 2026-11-13 |
@@ -1283,7 +1283,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [Architecture reassessment 2026-11-13](audits/2026-11-13-architecture-reassessment.md) |
+| PR / evidence | [PR #377](https://github.com/voidbrain/nerv/pull/377) [Architecture reassessment 2026-11-13](audits/2026-11-13-architecture-reassessment.md) |
 | Opened | 2026-11-13 |
 | Verification | Pending. |
 | Reviewed | 2026-11-13 |
@@ -1536,7 +1536,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) |
+| PR / evidence | [PR #377](https://github.com/voidbrain/nerv/pull/377) [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) |
 | Opened | 2026-11-13 |
 | Verification | Pending. |
 | Reviewed | 2026-11-13 |
