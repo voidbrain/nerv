@@ -103,7 +103,10 @@ test(
         'The owner wants a reminder; check the date is in the future.',
       );
       const consult = (await t.r.events(chat.sortieId)).find((e) => e.kind === 'misato.consult')!;
-      assert.deepEqual(consult.payload, {
+      assert.ok(consult.kind === 'misato.consult');
+      assert.equal(typeof consult.payload.durationMs, 'number');
+      const { durationMs: _d, ...consultRest } = consult.payload;
+      assert.deepEqual(consultRest, {
         advice: 'The owner wants a reminder; check the date is in the future.',
         model: 'advisor',
       });

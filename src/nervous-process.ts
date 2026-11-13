@@ -224,9 +224,17 @@ process.on('message', (value: unknown) => {
         );
       case 'sorties.finish': {
         const id = params.sortieId as string;
-        if (params.reply) store.ledger.reply(id, params.reply as string);
+        if (params.reply)
+          store.ledger.reply(
+            id,
+            params.reply as string,
+            new Date(),
+            typeof params.durationMs === 'number' ? params.durationMs : undefined,
+          );
         return params.status ? store.ledger.close(id, params.status as 'done' | 'failed') : false;
       }
+      case 'sorties.timings':
+        return store.timingSummary(params.since as string);
       case 'misato.note':
         return store.ledger.note(params.sortieId as string, params.kind as 'misato.step', params.payload as never);
       case 'misato.resumable':
@@ -374,6 +382,8 @@ process.on('message', (value: unknown) => {
           params.text as string,
           params.conversation as string,
           params.forwarded as { id: string; name: string } | undefined,
+          new Date(),
+          typeof params.durationMs === 'number' ? params.durationMs : undefined,
         );
       case 'misato.answer':
         return store.ledger.answer(params.conversation as string, params.sequence as number, params.text as string);
@@ -387,6 +397,7 @@ process.on('message', (value: unknown) => {
           params.actionId as string,
           params.tool as string,
           typeof params.error === 'string' ? { error: params.error } : { text: String(params.text ?? '') },
+          typeof params.durationMs === 'number' ? params.durationMs : undefined,
         );
       case 'actions.preview':
         store.watchContext(params.sortieId as string);

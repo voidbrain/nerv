@@ -215,7 +215,10 @@ test(
       assert.match(f.asked[0]!.system, /pilot for 3D printing/);
       assert.equal(JSON.parse(f.misato[0]!).advice, 'Advice from Print Master.');
       const consult = (await r.events(one.sortieId)).find((e) => e.kind === 'misato.consult')!;
-      assert.deepEqual(consult.payload, {
+      assert.ok(consult.kind === 'misato.consult');
+      assert.equal(typeof consult.payload.durationMs, 'number');
+      const { durationMs: _d, ...consultRest } = consult.payload;
+      assert.deepEqual(consultRest, {
         advice: 'Advice from Print Master.',
         model: 'printer-model',
         pilot: { id: 'printer', name: 'Print Master', why: 'keywords' },

@@ -1314,6 +1314,7 @@ export class Store {
   ): { result: unknown } | { error: string } {
     this.ledger.authorize(grantId, tool, args);
     let outcome: { result: unknown } | { error: string };
+    const execT0 = performance.now();
     try {
       outcome = {
         result: execute(this, tool, args, {
@@ -1325,6 +1326,7 @@ export class Store {
     } catch (e) {
       outcome = { error: e instanceof Error ? e.message : 'Executor failed.' };
     }
+    const durationMs = Math.max(0, Math.round(performance.now() - execT0));
     if ('result' in outcome && tool === 'memory.recall') {
       const facts = outcome.result as { tainted: boolean }[];
       this.ledger.intake(sortieId, 'tool:' + tool, facts.some((f) => f.tainted) ? 'tainted' : 'trusted');
@@ -1350,7 +1352,7 @@ export class Store {
       );
     }
     if ('result' in outcome && tool === 'agency.status') this.ledger.intake(sortieId, 'tool:' + tool, 'trusted');
-    this.ledger.finished(sortieId, actionId, tool, outcome);
+    this.ledger.finished(sortieId, actionId, tool, outcome, new Date(), durationMs);
     return outcome;
   }
   private settle(sortieId: string, status: 'done' | 'failed') {
@@ -1425,13 +1427,24 @@ export class Store {
   closedSince(since: string) {
     return this.ledger.closedSince(since);
   }
+  timingSummary(since: string) {
+    return this.ledger.timingSummary(since);
+  }
   /** F-021: what an external tool returned, recorded on its action like a built-in tool's result. */
-  finishedExternal(sortieId: string, actionId: string, tool: string, outcome: { text: string } | { error: string }) {
+  finishedExternal(
+    sortieId: string,
+    actionId: string,
+    tool: string,
+    outcome: { text: string } | { error: string },
+    durationMs?: number,
+  ) {
     this.ledger.finished(
       sortieId,
       actionId,
       tool,
       'error' in outcome ? { error: outcome.error } : { result: { text: outcome.text } },
+      new Date(),
+      durationMs,
     );
     return true;
   }

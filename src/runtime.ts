@@ -40,6 +40,7 @@ import {
 } from './model.ts';
 import { defaultPolicy, type Effect, type Pattern, type Stage, type Verdict } from './policy.ts';
 import { askedWhy, explainRecord, isAgencyQuestion } from './why.ts';
+import type { RoleTimingStats, SortieTiming } from './timing.ts';
 import {
   PilotRegistry,
   addPilot as addPilotEntry,
@@ -192,22 +193,33 @@ function runExtraSeat(spec: ExtraSeatSpec, ask: VerdictAsk): PeerSeat {
   const shadow = spec.shadow ?? true;
   const timeoutMs = spec.timeoutMs ?? MODEL_TIMEOUT_MS;
   const controller = new AbortController();
+  const t0 = performance.now();
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timedOut = new Promise<PeerVerdict>((resolve) => {
     timer = setTimeout(() => {
       controller.abort();
-      resolve({ vote: 'abstain', reason: 'timed out' });
+      resolve({ vote: 'abstain', reason: 'timed out', durationMs: Math.max(0, Math.round(performance.now() - t0)) });
     }, timeoutMs);
   });
   const asked = Promise.resolve()
     .then(() => spec.ask(ask, controller.signal))
-    .then((v) => sanitizeVerdict(v) ?? { vote: 'abstain' as const, reason: 'invalid verdict' })
-    .catch((err: unknown) => ({
-      vote: 'abstain' as const,
+    .then(
+      (v) =>
+        sanitizeVerdict(v) ?? {
+          vote: 'abstain' as const,
+          reason: 'invalid verdict',
+        },
+    )
+    .catch((err: unknown): PeerVerdict => ({
+      vote: 'abstain',
       reason:
         err instanceof Error && err.message
           ? err.message.replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, 200)
           : 'seat unavailable',
+    }))
+    .then((v) => ({
+      ...v,
+      durationMs: v.durationMs ?? Math.max(0, Math.round(performance.now() - t0)),
     }))
     .finally(() => {
       if (timer) clearTimeout(timer);
@@ -333,6 +345,7 @@ export interface StoreApi {
   ):
     | { done: number; failed: number; failures: { id: string; title: string; closed: string }[] }
     | Promise<{ done: number; failed: number; failures: { id: string; title: string; closed: string }[] }>;
+  timingSummary?(since: string): RoleTimingStats[] | Promise<RoleTimingStats[]>;
   sortie(
     id: string,
   ): (SortieSummary & { detail: ActionDetail[] }) | null | Promise<(SortieSummary & { detail: ActionDetail[] }) | null>;
@@ -515,6 +528,9 @@ export class Runtime implements StoreApi {
       failures: { id: string; title: string; closed: string }[];
     };
   }
+  async timingSummary(since: string) {
+    return (await this.nervous.call('sorties.timings', { since })) as RoleTimingStats[];
+  }
   async sorties(limit = 20, before?: string, q?: string) {
     return (await this.nervous.call('sorties.list', {
       limit,
@@ -523,7 +539,8 @@ export class Runtime implements StoreApi {
     })) as SortieSummary[];
   }
   async sortie(id: string) {
-    return (await this.nervous.call('sorties.get', { id })) as (SortieSummary & { detail: ActionDetail[] }) | null;
+    return (await this.nervous.call('sorties.get', { id })) as
+      (SortieSummary & { detail: ActionDetail[]; timings?: SortieTiming[] }) | null;
   }
   async events(sortieId: string, after = 0, limit = 50) {
     return (await this.nervous.call('events.page', { sortieId, after, limit })) as SortieEvent[];
@@ -590,27 +607,41 @@ export class Runtime implements StoreApi {
       const peers = (await this.bases()).filter(
         (b) => !b.self && b.online && b.status === 'enrolled' && seats[b.baseId] !== 'off',
       );
-      return peers.map((b) => ({
-        seat: b.baseId,
-        shadow: seats[b.baseId] !== 'veto',
-        verdict: link
-          .verdict(b.baseId, ask, timeoutMs)
-          .catch((): PeerVerdict => ({ vote: 'abstain', reason: 'could not be reached' })),
-      }));
+      return peers.map((b) => {
+        const t0 = performance.now();
+        return {
+          seat: b.baseId,
+          shadow: seats[b.baseId] !== 'veto',
+          verdict: link.verdict(b.baseId, ask, timeoutMs).then(
+            (v): PeerVerdict => {
+              const transferMs = Math.max(0, Math.round(performance.now() - t0));
+              return { ...v, transferMs, durationMs: v.durationMs ?? transferMs };
+            },
+            (): PeerVerdict => ({
+              vote: 'abstain',
+              reason: 'could not be reached',
+              transferMs: Math.max(0, Math.round(performance.now() - t0)),
+            }),
+          ),
+        };
+      });
     };
   }
   /** On the base asked: this base's Casper votes on the main base's action; no local model means no verdict (abstain). */
   async peerVerdict(ask: VerdictAsk): Promise<PeerVerdict | null> {
+    const t0 = performance.now();
     const reply = (await this.modelCall(
       'casper.verdict',
       { request: ask.request, tool: ask.tool, args: ask.args, effect: ask.effect },
       MODEL_TIMEOUT_MS,
     ).catch(() => ({ verdict: null }))) as { verdict: Verdict | null };
+    const durationMs = Math.max(0, Math.round(performance.now() - t0));
     return reply.verdict
       ? {
           vote: reply.verdict.vote,
           reason: reply.verdict.reason,
           ...(typeof reply.verdict.confidence === 'number' ? { confidence: reply.verdict.confidence } : {}),
+          durationMs,
         }
       : null;
   }
@@ -645,6 +676,7 @@ export class Runtime implements StoreApi {
       const bases = askIntent && action.tool === 'kaji.run' ? await this.baseNames() : [];
       // The other bases' Casper (F-036 phase 2) is asked at the same time: veto-only seats, shadow until the owner trusts them.
       // F-052: the gate waits for Casper and the veto seats only; a shadow vote not in by then is recorded when it comes.
+      const casperT0 = performance.now();
       const asking = askIntent
         ? (this.modelCall(
             'casper.verdict',
@@ -670,6 +702,7 @@ export class Runtime implements StoreApi {
           }>)
         : Promise.resolve({ verdict: null } as { verdict: Verdict | null; error?: string });
       const verdictAsk: VerdictAsk = { request: action.request, tool: action.tool, args: action.args, effect };
+      const seatT0 = performance.now();
       const peerList =
         askIntent && this.peerSeats ? await this.peerSeats(verdictAsk).catch(() => [] as PeerSeat[]) : [];
       const extraList = allExtras.map((s) => runExtraSeat(s, verdictAsk));
@@ -677,11 +710,15 @@ export class Runtime implements StoreApi {
       const settled = new Map<string, PeerVerdict>();
       for (const s of seats)
         void s.verdict.then((v) => {
-          settled.set(s.seat, v);
+          settled.set(s.seat, {
+            ...v,
+            durationMs: v.durationMs ?? Math.max(0, Math.round(performance.now() - seatT0)),
+          });
         });
       const [reply] = await Promise.all([asking, Promise.all(seats.filter((s) => !s.shadow).map((s) => s.verdict))]);
+      const casperDurationMs = Math.max(0, Math.round(performance.now() - casperT0));
       if (askIntent) {
-        if (reply.verdict) casper = reply.verdict;
+        if (reply.verdict) casper = { ...reply.verdict, durationMs: casperDurationMs };
         else casperError = reply.error ?? 'No verdict.';
       }
       extras = seats
@@ -730,6 +767,7 @@ export class Runtime implements StoreApi {
       { owner: sortieId },
     )) as ActResult;
     // A late shadow vote (F-052) is kept with the action when it arrives; it never changes the outcome.
+    const lateT0 = performance.now();
     for (const s of late)
       void s.verdict
         .then((v) =>
@@ -740,6 +778,8 @@ export class Runtime implements StoreApi {
             vote: v.vote,
             reason: v.reason.slice(0, 500),
             ...(typeof v.confidence === 'number' ? { confidence: v.confidence } : {}),
+            durationMs: v.durationMs ?? Math.max(0, Math.round(performance.now() - lateT0)),
+            ...(typeof v.transferMs === 'number' ? { transferMs: v.transferMs } : {}),
           }),
         )
         .catch(() => {
@@ -898,8 +938,10 @@ export class Runtime implements StoreApi {
       : [];
     // F-051: a request going to the main base is a sortie here too: opened when it leaves, closed with the answer.
     let forwarded: string | undefined;
+    let forwardedAt = 0;
     const far = this.dispatch
       ? await this.dispatch(message, conversation, async (base) => {
+          forwardedAt = performance.now();
           forwarded =
             question?.sortieId ??
             ((await this.nervous.call('sorties.open', { title: message.slice(0, 500), source: 'misato' })) as string);
@@ -910,7 +952,12 @@ export class Runtime implements StoreApi {
       : undefined;
     if (far) {
       if (!forwarded) return far;
-      await this.note(forwarded, 'kaji.answered', { base: far.base ?? { id: '', name: '' }, sortieId: far.sortieId });
+      const transferMs = forwardedAt ? Math.max(0, Math.round(performance.now() - forwardedAt)) : undefined;
+      await this.note(forwarded, 'kaji.answered', {
+        base: far.base ?? { id: '', name: '' },
+        sortieId: far.sortieId,
+        ...(transferMs !== undefined ? { transferMs } : {}),
+      });
       // B-021: an answer the main base turned away outright never reached its Misato: the question still waits here.
       if (question && far.refused) return { ...far, sortieId: forwarded };
       // B-021: once sent, the answer is the main base's. A late or failed reply (it may have taken the answer and moved
@@ -1013,10 +1060,14 @@ export class Runtime implements StoreApi {
     return this.nervous.call('misato.note', { sortieId, kind, payload });
   }
   /** Records a step, cutting an oversized result so the event stays within its bound. */
-  private async record(sortieId: string, steps: Step[], step: Step, actionId?: string) {
+  private async record(sortieId: string, steps: Step[], step: Step, actionId?: string, durationMs?: number) {
     const fitted = JSON.stringify(step).length > 12000 ? { ...step, result: { truncated: true } } : step;
     steps.push(fitted);
-    await this.note(sortieId, 'misato.step', { step: fitted, ...(actionId ? { actionId } : {}) });
+    await this.note(sortieId, 'misato.step', {
+      step: fitted,
+      ...(actionId ? { actionId } : {}),
+      ...(durationMs !== undefined ? { durationMs } : {}),
+    });
   }
   /**
    * Misato's loop: plan one action, gate it, show Misato the outcome, repeat until Misato replies or the step limit is
@@ -1054,7 +1105,12 @@ export class Runtime implements StoreApi {
         source: ('memory:' + m.id).slice(0, 100),
         trust: m.tainted ? 'tainted' : 'trusted',
       });
-    const finish = async (status: 'done' | 'failed', reply?: string, error?: string): Promise<ChatReply> => {
+    const finish = async (
+      status: 'done' | 'failed',
+      reply?: string,
+      error?: string,
+      durationMs?: number,
+    ): Promise<ChatReply> => {
       if (waiting.length && reply) {
         // Not finished: the reply is recorded, the sortie waits for the owner's decisions and then resumes.
         await this.nervous.call('sorties.finish', { sortieId, reply });
@@ -1070,7 +1126,13 @@ export class Runtime implements StoreApi {
           .catch(() => false);
         if (!recorded)
           return { proactive: true, sortieId, error: 'Watch state changed; inspect its trace.', steps, waiting };
-      } else await this.nervous.call('sorties.finish', { sortieId, status, ...(reply ? { reply } : {}) });
+      } else
+        await this.nervous.call('sorties.finish', {
+          sortieId,
+          status,
+          ...(reply ? { reply } : {}),
+          ...(durationMs !== undefined ? { durationMs } : {}),
+        });
       return {
         ...(proactive ? { proactive: true as const } : {}),
         sortieId,
@@ -1134,6 +1196,7 @@ export class Runtime implements StoreApi {
     const sortieTainted = context.some((t) => t.tainted) || memory.some((m) => m.tainted);
     const askAdviser = async (pilot: Chosen | undefined): Promise<string | undefined> => {
       const fullPilot = pilot ? (this.pilots?.() ?? []).find((p) => p.id === pilot.id) : undefined;
+      const t0 = performance.now();
       return this.modelCall(
         'consultant.advise',
         {
@@ -1166,15 +1229,17 @@ export class Runtime implements StoreApi {
           (): { advice: string | null; model?: string; domain?: string } => ({ advice: null }),
         )
         .then(async (r) => {
+          const durationMs = Math.max(0, Math.round(performance.now() - t0));
           if (!pilot && r.domain) {
             unmatched = r.domain;
-            await this.note(sortieId, 'pilot.unmatched', { domain: r.domain });
+            await this.note(sortieId, 'pilot.unmatched', { domain: r.domain, durationMs });
           }
           if (!r.advice) return undefined;
           await this.note(sortieId, 'misato.consult', {
             advice: r.advice,
             model: r.model ?? '',
             ...(pilot ? { pilot: { id: pilot.id, name: pilot.name, why: pilot.why } } : {}),
+            durationMs,
           });
           return r.advice;
         });
@@ -1197,6 +1262,7 @@ export class Runtime implements StoreApi {
         true,
       );
       if (remoteIn.allowed) {
+        const t0 = performance.now();
         const remoteReply = await this.remoteConsultant
           .advise({
             request: remoteIn.request,
@@ -1205,12 +1271,14 @@ export class Runtime implements StoreApi {
             ...(remoteIn.tools.length ? { tools: remoteIn.tools } : {}),
           })
           .catch((): { advice: string | null; model?: string } => ({ advice: null }));
+        const durationMs = Math.max(0, Math.round(performance.now() - t0));
         const clean = parseAdvice(remoteReply.advice ?? '');
         if (clean) {
           advice = clean;
           await this.note(sortieId, 'misato.consult', {
             advice: clean,
             model: remoteReply.model ?? this.remoteConsultant.name,
+            durationMs,
           });
         }
       }
@@ -1224,6 +1292,7 @@ export class Runtime implements StoreApi {
       if (proactive && !(await this.nervous.call('watch.plan', { sortieId }).catch(() => false))) break;
       const remote = proactive?.readOnly ? [] : await this.remoteOffers();
       const ext = proactive?.readOnly ? { docs: [], byName: new Map(), suspended: [] } : await this.externalTools();
+      const stepT0 = performance.now();
       const out = (await this.modelCall(
         'misato.step',
         {
@@ -1243,20 +1312,33 @@ export class Runtime implements StoreApi {
         },
         MODEL_TIMEOUT_MS,
       ).catch(() => ({ error: 'Brain unavailable.' }))) as { plan?: Plan; invalid?: boolean; error?: string };
-      if (out.error) return finish('failed', undefined, out.error);
+      const stepDurationMs = Math.max(0, Math.round(performance.now() - stepT0));
+      if (out.error) return finish('failed', undefined, out.error, stepDurationMs);
       if (!out.plan) {
-        await this.record(sortieId, steps, {
-          outcome: 'invalid',
-          error: 'Reply was not one JSON action, question or reply.',
-        });
+        await this.record(
+          sortieId,
+          steps,
+          {
+            outcome: 'invalid',
+            error: 'Reply was not one JSON action, question or reply.',
+          },
+          undefined,
+          stepDurationMs,
+        );
         continue;
       }
       if ('newRequest' in out.plan) {
         if (!followup?.answering || turn !== 0) {
-          await this.record(sortieId, steps, {
-            outcome: 'invalid',
-            error: 'Topic changes are allowed only for the first response to a pending question.',
-          });
+          await this.record(
+            sortieId,
+            steps,
+            {
+              outcome: 'invalid',
+              error: 'Topic changes are allowed only for the first response to a pending question.',
+            },
+            undefined,
+            stepDurationMs,
+          );
           continue;
         }
         await this.spear(sortieId, 'Owner changed topic; the pending clarification is cancelled.');
@@ -1267,17 +1349,23 @@ export class Runtime implements StoreApi {
           lang() === 'it'
             ? 'Il controllo automatico richiede altri dettagli. Aggiorna la richiesta: '
             : 'This automatic check needs more detail. Update its request: ';
-        return finish('failed', prefix + out.plan.ask.slice(0, MAX_REPLY_CHARS - prefix.length));
+        return finish(
+          'failed',
+          prefix + out.plan.ask.slice(0, MAX_REPLY_CHARS - prefix.length),
+          undefined,
+          stepDurationMs,
+        );
       }
       if ('ask' in out.plan) {
         const question = (await this.nervous.call('misato.ask', {
           sortieId,
           text: out.plan.ask,
           conversation: followup?.conversation ?? 'cli',
+          durationMs: stepDurationMs,
         })) as { text: string; expires: string };
         return { sortieId, reply: question.text, question, steps, waiting };
       }
-      if ('reply' in out.plan) return finish('done', out.plan.reply);
+      if ('reply' in out.plan) return finish('done', out.plan.reply, undefined, stepDurationMs);
       const { tool } = out.plan.action;
       const cfg = tool === 'reminders.add' && this.home ? readConfig(this.home) : undefined;
       const args =
@@ -1349,7 +1437,13 @@ export class Runtime implements StoreApi {
       if (tool === 'reminders.add' && !proactive) {
         const titleError = validateReminderTitle(args.title, { request: message, context, memory, steps });
         if (titleError) {
-          await this.record(sortieId, steps, { tool, args, outcome: 'invalid', error: titleError });
+          await this.record(
+            sortieId,
+            steps,
+            { tool, args, outcome: 'invalid', error: titleError },
+            undefined,
+            stepDurationMs,
+          );
           continue;
         }
       }
@@ -1373,6 +1467,7 @@ export class Runtime implements StoreApi {
       // F-021: granted and gated: the tools process makes the call; the result is recorded on the action like any other.
       const granted = ext.byName.get(tool);
       if (granted && 'external' in r && r.external) {
+        const extT0 = performance.now();
         const out = (await this.toolsProcess()
           .call(
             'tools.call',
@@ -1383,10 +1478,12 @@ export class Runtime implements StoreApi {
           text?: string;
           error?: string;
         };
+        const extDurationMs = Math.max(0, Math.round(performance.now() - extT0));
         await this.nervous.call('actions.finished', {
           sortieId,
           actionId: r.actionId,
           tool,
+          durationMs: extDurationMs,
           ...(out.error ? { error: out.error.slice(0, 1000) } : { text: (out.text ?? '').slice(0, 8000) }),
         });
         r = out.error ? { ...r, error: out.error } : { ...r, result: { text: out.text ?? '' } };
@@ -1409,6 +1506,7 @@ export class Runtime implements StoreApi {
           ...('error' in r && r.error ? { error: r.error } : {}),
         },
         'actionId' in r ? r.actionId : undefined,
+        stepDurationMs,
       );
       // A card ends the turn: the reply is the service's, and Misato carries on after the owner decides (F-033 resume),
       // so the model is never asked to describe an action that is only waiting.
