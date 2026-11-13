@@ -1,0 +1,43 @@
+{
+ "version": 1,
+ "id": "F-051-T07",
+ "parent": "F-051",
+ "title": "Decide and enforce which sorties a peer base may inspect",
+ "goal": "A peer base reads only the sorties the owner chose to share over the Kaji line",
+ "status": "planned",
+ "acceptance": [
+  "The owner picks one option from the full audit of 2026-11-13 (all sorties; only sorties the asking base took part in; those, minus local-only or tainted ones)",
+  "The peer-side handler enforces the choice using the authenticated asking base",
+  "A cross-base regression covers an allowed and a refused sortie"
+ ],
+ "dependsOn": [],
+ "resources": [
+  "src/**",
+  "test/**",
+  "docs/work/records/**",
+  "generated:backlog-views"
+ ],
+ "capabilities": [
+  "bounded-edit",
+  "regression-design",
+  "privacy-review"
+ ],
+ "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+ "validation": [
+  "Cross-base regression through the signed Kaji call; final applicable CI"
+ ],
+ "escalation": [
+  "A change to what crosses the Kaji line goes to a fresh-context design review"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "1 h agent + 0.25 h owner",
+  "basis": "Estimated 2026-11-13 in the full audit: one filter in the peer handler plus a regression. Not a measurement.",
+  "reviewed": "2026-11-13",
+  "agentHours": 1,
+  "ownerHours": 0.25,
+  "baselineAgentHours": 1,
+  "estimateAgentHours": 1,
+  "ownerKind": "decision"
+ }
+}

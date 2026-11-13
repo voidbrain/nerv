@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 3 | 7 |
+| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 9 | 12 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
 
@@ -3321,6 +3321,437 @@ Final PR240 revision6acac44 / CI42635119338 passed all five/full-suite checks. I
 | Opened | 2026-11-05 |
 | Verification | Closed 2026-11-12: not reproduced on Tabgha at 8c58ee5 (two relays, banner live, no failed or slow read); owner decided to close. 2026-11-06 Unit/integration: polling and IPC regressions passed; full suite passed (189 passed, one systemd-only skip), including the pending-relay regression. Browser: headless Chrome verified transient failure retention, delayed refresh, HTTP status failure, unreachable service and automatic recovery; screenshot inspected. Build, typecheck, conventions and integration metadata passed. Merged PR #153 CI run 42218258228 passed validate, windows and native-macos; original Tabgha timeout not reproduced. 2026-11-12: a seeded relay-pending poll measurement (macOS) and Windows CI run 43125296727 did not reproduce it either. |
 | Reviewed | 2026-11-12 |
+
+</details>
+
+---
+
+## Closed 2026-11-13
+
+### B-042
+
+**Telegram approval card arrives after dashboard decision**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-13: >10 clean CI runs since [PR #285](https://github.com/voidbrain/nerv/pull/285) merged with no `remote dashboard decision reconciles the main bot card` failure.
+
+| | |
+|---|---|
+| **Issue** | Reopened after PR #223 Windows test/one-channel.test.ts failed the existing remote dashboard decision reconciles the main bot card assertion; later seen on macOS under load and once on Linux coverage. Cause (2026-11-12): an awaited `deliver()` could return a pass already running whose cleanup had read the card's status before the decision (runtime), and the fixture's wait could pass before Aoba tracked the card (fixture). |
+| **Reproduce** | Any platform: `node --test --test-name-pattern="not a pass that read status" test/telegram-reconcile.test.ts` stalls a periodic pass's status lookup after it read the card as pending, decides on the dashboard, then awaits `deliver()`; before the fix no `editMessageReplyMarkup` is sent. |
+| **Check** | Explain the failure with controlled evidence; preserve exactly-once effects, eventual stale-button removal, retry/restart and signed lookup. A passing retry is not a causal fix. Do not weaken assertions or merely widen timeouts. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Closure 2026-11-13 ([PR #366](https://github.com/voidbrain/nerv/pull/366)):** Verified and closed. Since [PR #285](https://github.com/voidbrain/nerv/pull/285) merged, >10 clean CI runs passed `validate` (coverage) and `windows` (`npm test`) with zero `remote dashboard decision reconciles the main bot card` failures, including 13 consecutive full-suite runs on PRs #351–#362 and #364 (`43400556615`, `43403424239`, `43407258975`, `43408524345`, `43410089251`, `43413688550`, `43415096808`, `43417130191`, `43419687659`, `43423770834`, `43425810207`, `43431026103`, `43436719798`), plus #363 (`43433680581`) and #365 (`43439870639`) passing `validate` and `windows`.
+
+**Next action / closure evidence:** Verified when PR #285's CI passes (Windows and full suite) and the next ten CI runs show no recurrence; a recurrence returns it to Investigate, first checking whether Aoba's timer pass and the test's awaited pass are still distinct (mechanism 1) and whether the card was tracked before the decision (mechanism 2).
+
+**Reconcile 2026-11-12 ([PR #288](https://github.com/voidbrain/nerv/pull/288)):** [PR #285](https://github.com/voidbrain/nerv/pull/285) merged into main `9aec642` at 06:20 UTC; its CI [43166751719](https://github.com/voidbrain/nerv/actions/runs/43166751719) passed plan, validate, Windows and native-macos, with full-suite skipped: the scoped selection ran test/one-channel.test.ts, test/telegram-reconcile.test.ts and the other channel regressions on Windows, not the whole Node suite. The whole suite with the fix included first ran in #286's CI [43168006619](https://github.com/voidbrain/nerv/actions/runs/43168006619) (head `94e3a0a` merges #285): Windows passed, Linux coverage passed on both attempts (attempt 1 failed only the browser step, [B-050](#b-050)), full-suite passed on attempt 2. Runs since the merge that ran this case: 43168006619 (#286) and 43168381380 (F-005-T12 branch; Windows ran the suite, validate stopped at `check:work` before tests). No failure of this case in either (logs searched 2026-11-12). 2 of 10 so far; it stays Implemented. B-042-T01 closed.
+
+**Cause and fix 2026-11-12 ([PR #285](https://github.com/voidbrain/nerv/pull/285), B-042-T01):** **Recheck first.** Failed-job logs of every CI run since #277's run 43093410846 were searched (43098344555, 43105159883, 43105169242, 43106362909, 43106952492, 43108272198, 43118800708, 43121587426): none failed this assertion (their failures were B-046 and F-014 worker-link cases); every other completed run since then passed, all on attempt 1, including 7 runs after #279 merged and 43164854081 after #282. Too few runs to call the rarer B-042 failure gone, and none of #278/#279/#280/#282 touches the mechanism: they shorten worker-link and nervous-child latency, which only narrows the window below. **Mechanism 1 (runtime, reproduced):** Aoba delivers every 100 ms in the fixture; each pass starts with `reconcile()`, whose remote-card status is a signed lookup across the Kaji link. `deliver()` returned a pass already in progress, so when the test decided the card while a timer pass was between its lookup and its edits, `await aoba.deliver()` resolved with that pass's pre-decision snapshot and sent no edit. A slower lookup (loaded runner, slow child) widens the window: consistent with the load-dependent, cross-platform failures. Committed regression first (`test/telegram-reconcile.test.ts`, the stalled-lookup case above): failed at 95bf226, passes after. Fix: callers of `deliver()` while a pass runs share one follow-up pass that starts after it; passes never overlap; the periodic tick still skips while a pass runs, so a slow pass queues no ticks; `stop()` waits for the follow-up, which starts no pass after stop. **Mechanism 2 (fixture):** the fixture waited until the fake Bot API server recorded the relayed `sendMessage`, which happens before Aoba reads the response and tracks the card (the same gap the fallback step's comment already names); a decision in that gap is caught by `sendMessage`'s own post-send status check, which the awaited delivery does not wait for. The fixture now waits until Aoba tracks the card (read in memory). No timeout widened, no assertion changed. **Ruled out:** cleanup coalescing (`reconcile()` is only called from the serialized `deliverOnce`); the B-046 verdict race (the lookup completes, it is just stale). **Fresh-context review 2026-11-12 (design-reviewer):** no must-fix; verified fail-before/pass-after and no overlap in the microtask gap. Applied: the fixture first polled Aoba's state file, which on Windows could make Aoba's own atomic save fail while the file is open; it now reads the tracked cards in memory. Noted: an awaited `deliver()` can now take up to two passes (each cleanup bounded at 8 s), so the next Telegram update in the serialized queue may wait longer when a remote base is slow; bounded, no starvation. Channels regressions pass locally (63 of 63, macOS); one-channel 3 of 3 runs.
+
+Earlier next action (2026-11-09, done above): inspect event ordering for remote card registration, status snapshot and a concurrent/coalesced deliver pass, then reproduce under controlled scheduling before any fix. These are hypotheses, not proof of a production regression or harmless infrastructure noise. Existing deliver() coalesces an active pass; the fixture expects a new cleanup edit after explicitly awaiting delivery. No Telegram/Kaji executable or assertion changed in PR #223. Retain the [original B-042 closure](../../archive/backlog-2026.md#b-042) and its regression/browser evidence; this observation does not erase the earlier successful scope.
+
+**Observation 2026-11-11 ([PR #261](https://github.com/voidbrain/nerv/pull/261)):** during an unrelated local full-suite run on macOS (Node 26) the one-channel case failed once and passed 3 of 3 alone, then 16 of 16 in the [timing reassessment](../../reviews/2026-11-11-timing-reassessment.md) runs, 8 of them under CPU contention. The failure is therefore load-dependent and not Windows-only; cause still unproven. Re-examine after B-046 and B-043, which reduce background churn in the same fixtures.
+
+**Observation 2026-11-11 ([PR #277](https://github.com/voidbrain/nerv/pull/277), run [43093410846](https://github.com/voidbrain/nerv/actions/runs/43093410846)):** Linux `validate` (`npm run test:coverage`) failed this case on `remote dashboard decision reconciles the main bot card`; the same command passed locally on macOS (585 passed, 0 failed) at the same head. #277 changes no runtime code (harness tools, records and docs), so this is another occurrence with no runtime change, and the first seen on Linux. The case crosses the worker link; whether it shares the B-046 cause fixed in [PR #278](https://github.com/voidbrain/nerv/pull/278) (a verdict before frames already received were applied) is unproven: recheck after #278 merges.
+
+**Estimates:** 2026-11-12: B-042-T01 closed at about 1.5 h agent (stated) against 2 h; remaining work is observation of the next eight runs only. Re-estimated 2026-11-12 in agent hours (harness 5.6.0): B-042-T01 had 0.5 h agent remaining (CI, merge); about 1.25 h spent (stated); method in the task basis. Day figures are dated history: 2–3 focused days estimated 2026-11-09.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Closure reconcile: [PR #366](https://github.com/voidbrain/nerv/pull/366). Reconcile: [PR #288](https://github.com/voidbrain/nerv/pull/288). Fix: [PR #285](https://github.com/voidbrain/nerv/pull/285) (B-042-T01), CI [43166751719](https://github.com/voidbrain/nerv/actions/runs/43166751719) green (full-suite skipped); last occurrence [PR #277 run 43093410846](https://github.com/voidbrain/nerv/actions/runs/43093410846) (Linux coverage). [PR #267 CI 43012116246](https://github.com/voidbrain/nerv/actions/runs/43012116246) (2026-11-11, harness/records-only PR: `.gitignore`, version stamp, CI template clone): Windows failed this one-channel case on `remote dashboard decision reconciles the main bot card` again; another occurrence with no runtime change. [PR #261](https://github.com/voidbrain/nerv/pull/261) timing reassessment; [PR #223](https://github.com/voidbrain/nerv/pull/223); [CI 42535069202 attempt 1](https://github.com/voidbrain/nerv/actions/runs/42535069202/attempts/1) Windows failed card-cleanup assertion, Linux later failed only recap week validation. Test: test/one-channel.test.ts remote dashboard decision reconciles the main bot card. Earlier closure: PR #203 CI 42425786736/42425784575; preserved in archive. |
+| Opened | 2026-11-07 |
+| Verification | Closed 2026-11-13: >10 clean CI runs since PR #285 merged (#351–#362 and #364 full-suite, plus #363 and #365 validate/windows; zero failures of `remote dashboard decision reconciles the main bot card`). 2026-11-12: mechanism reproduced deterministically (`test/telegram-reconcile.test.ts` fails before the fix, passes after; local macOS); PR #285 CI 43166751719 passed scoped, #286 CI 43168006619 passed full-suite. |
+| Reviewed | 2026-11-13 |
+
+</details>
+
+---
+
+### B-050
+
+**Dashboard browser test reads the banner before the page has loaded**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-13: [PR #294](https://github.com/voidbrain/nerv/pull/294) merged with CI [43207764269](https://github.com/voidbrain/nerv/actions/runs/43207764269) green and subsequent browser CI runs show no recurrence of the `until` TypeError.
+
+| | |
+|---|---|
+| **Issue** | [PR #286](https://github.com/voidbrain/nerv/pull/286) CI [43168006619](https://github.com/voidbrain/nerv/actions/runs/43168006619/attempts/1) attempt 1, job validate (`npm run test:browser`): `test/evaluation.browser.mjs` case golden-v1/dashboard failed with `TypeError: Cannot read properties of null (reading 'textContent')` on the first `until` right after `Page.navigate` (`document.querySelector('.banner')` was null). The fixture's `until` (`test/fixtures/browser.mjs`) throws as soon as the evaluated expression throws instead of retrying, so a page that has not loaded yet fails the test. Attempt 2 (failed jobs rerun, same head `94e3a0a`) passed; local runs passed 3 of 3. Whether #286's service worker plays a part is not established (the test uses a fresh browser profile, per the F-004 agent). |
+| **Reproduce** | `npm run build && node --test test/evaluation.browser.mjs` (case golden-v1/dashboard); intermittent, seen once in CI. Deterministically: evaluate the case's first `until` expression before the dashboard document has its `.banner` (for example against `about:blank`, or with the dashboard response delayed). |
+| **Check** | A committed test fails before the fix: `until` on an expression that throws while the page is still loading fails at once. After the fix the wait retries across navigation, or waits for the document to load, and still fails with a clear timeout when the condition never holds. The case's assertion (`LIVE ·` shown, `SIGNING IN` gone) is unchanged; no timeout widened. Browser CI passes. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Closure 2026-11-13 ([PR #366](https://github.com/voidbrain/nerv/pull/366)):** Verified and closed. [PR #294](https://github.com/voidbrain/nerv/pull/294) merged into `main` (`d987a3a`) on 2026-11-12T11:25:57Z after CI [43207764269](https://github.com/voidbrain/nerv/actions/runs/43207764269) passed all five jobs (`plan`, `validate`, `windows`, `native-macos`, `full-suite`). Subsequent browser CI runs (including #351–#365 `validate` / Angular bilingual browser acceptance) passed with no recurrence of the `until` `TypeError`. `B-050-T01` closed.
+
+**Fix implemented 2026-11-12 ([PR #294](https://github.com/voidbrain/nerv/pull/294)):** committed failing tests in `test/evaluation.browser.mjs` (commit `feb13de`) reproducing immediate `until` failure on expression exceptions during page loading and timeout error format. In `test/fixtures/browser.mjs`, `until` now catches evaluation exceptions and retries until the condition holds or timeout expires, including last error message on timeout. All browser tests pass.
+
+**Next action / closure evidence:** Write a failing test for the race in the browser fixture, then fix the wait: retry `until` while the expression throws during navigation (keeping the last error for the timeout message), or wait for the navigated document to load before the first `until`. Do not weaken the assertion or widen the 15 s timeout. Check whether other `until` callers right after `Page.navigate` (test/evaluation.browser.mjs, test/pwa.browser.mjs and the other browser tests) share the race, and whether the service worker added in #286 changes page timing in the CI browser. Verified when the fix's CI passes and later browser runs show no recurrence.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 1 open step has 0.5 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Small, about 1.5 h agent (estimated 2026-11-12, not a measurement): a fixture-level failing test, a small change to `until` or the navigation wait, the browser suite locally, review and CI. Uncertain if the service worker turns out to be involved.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Closure reconcile: [PR #366](https://github.com/voidbrain/nerv/pull/366). Fix: [PR #294](https://github.com/voidbrain/nerv/pull/294) (CI [43207764269](https://github.com/voidbrain/nerv/actions/runs/43207764269) all five jobs green). Test: test/evaluation.browser.mjs "B-050: until retries through evaluated expression exceptions and resolves when condition holds" (committed failing in feb13de, passes after fix). Test: test/evaluation.browser.mjs "B-050: until still fails with timeout when throwing condition never holds" (committed failing in feb13de, passes after fix). Recorded in [PR #288](https://github.com/voidbrain/nerv/pull/288). Observed: CI 43168006619 attempt 1, job validate (job 131014457197), `test/evaluation.browser.mjs:62` via `until` in `test/fixtures/browser.mjs`; attempt 2 job validate (131017084799) passed on the same head. Same run, attempt 1: F-004-T01's own browser case passed. |
+| Opened | 2026-11-12 |
+| Verification | Closed 2026-11-13: [PR #294](https://github.com/voidbrain/nerv/pull/294) CI [43207764269](https://github.com/voidbrain/nerv/actions/runs/43207764269) passed all five jobs (`plan`, `validate`, `windows`, `native-macos`, `full-suite`) and subsequent browser CI runs (#351–#365 `validate`) passed with no recurrence of the `until` `TypeError`. 2026-11-12: committed failing tests in `test/evaluation.browser.mjs` (`feb13de`) passed after fix in `test/fixtures/browser.mjs`. |
+| Reviewed | 2026-11-13 |
+
+</details>
+
+---
+
+### B-052
+
+**Owner actions point at procedures the owner has to hunt for**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-13: all open procedure records link copy-paste acceptance pages under `docs/acceptance/`.
+
+| | |
+|---|---|
+| **Issue** | Owner, 2026-11-12, on F-005: its human action said "run the T13 copy-paste procedure below", but the procedure sat inside the collapsed details, the Reproduce row said only "Follow README commands and the owning milestone in ROADMAP" with no link, and the cue still waited on an already merged PR. "I should not manually search for files and lose myself between pointers of pointers." F-005 fixed here; F-006 and F-016 now link their decisions. Still without a linked procedure: B-008 ("steps in details"), F-004, F-009, F-011, F-015, F-023. |
+| **Reproduce** | Open [the backlog](../../BACKLOG.md) and read the human-action line of B-008, F-004, F-009, F-011, F-015 or F-023: none links the exact commands or steps to run and their expected result. |
+| **Check** | Every 🧑 line that asks the owner to run or check something links one page (or a visible section of the record) with copy-paste blocks and the expected result; its Reproduce row links the same; no "below", "in details" or bare path. Harness rule: project-harness F-064. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** B-052-T01: write the missing procedures under docs/acceptance/ (macOS Terminal for Neo Tokyo-3, PowerShell for Tabgha) and link them from each human-action line and Reproduce row. Template rule requested upstream as project-harness F-064; this record owns only NERV's records.
+
+**Estimates:** Small: six procedures drafted from the existing evidence in each record. Estimated 2026-11-12, not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #345](https://github.com/voidbrain/nerv/pull/345) B-052-T01: linked copy-paste procedures under docs/acceptance/ for F-004, F-009, F-011 and F-023 (head e27317c, merged 3de720a; CI43344301717 passed plan, validate, windows and native-macos, full-suite skipped by scoped verification; PR cited in the full audit of 2026-11-13); [PR #311](https://github.com/voidbrain/nerv/pull/311): F-005 procedure moved to [docs/acceptance/f005-t13-mac-update-procedure.md](../../acceptance/f005-t13-mac-update-procedure.md). No test: documentation-only procedure links across existing backlog records. |
+| Opened | 2026-11-12 |
+| Verification | 2026-11-13: Documentation/CI verified ([PR #311](https://github.com/voidbrain/nerv/pull/311) CI run `43272309918` green; `check:backlog` passed). |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+
+### B-053
+
+**F-029 descendant-process test failed once in CI with every process already gone**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-13: single-observation descendant liveness fix merged in [PR #341](https://github.com/voidbrain/nerv/pull/341) with green CI.
+
+| | |
+|---|---|
+| **Issue** | PR #316's validate job (run 43286749372, `npm run test:coverage`, Linux) failed `F-029: a timed-out scenario terminates its owned descendant process` with `no executing child survives the group timeout`, actual `[3708]`. The test took 5,030 ms in total: the 5 s run budget plus about 30 ms, so its wait loop (`while (owned.some(alive))`, up to 5 s) ended at once with nothing alive, and the following `owned.filter(alive)` found PID 3708 alive. The PR does not touch the runner or the test. Likely a race between the two separate liveness reads (PID reuse under coverage load, or the zombie check in `/proc/<pid>/stat` reading differently); inferred, not observed. |
+| **Reproduce** | `node --test --test-name-pattern='terminates its owned descendant' test/evaluation-runner.test.mjs` passed 5 of 5 locally on macOS on 2026-11-12; the failure was seen once on Linux CI under coverage. |
+| **Check** | A committed test or measurement shows the two-read race (or names another cause); the test decides on one observation per process and still fails when a descendant really survives; CI passes repeatedly. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** B-053-T01. If the runner really leaves a descendant, that is a runner defect under F-029 and the fix goes there, test unchanged.
+
+**Estimates:** Small, estimated 2026-11-12, not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #341](https://github.com/voidbrain/nerv/pull/341) (fix + failing-first test `Test: test/evaluation-runner.test.mjs`); seen on [PR #316](https://github.com/voidbrain/nerv/pull/316), CI run 43286749372 job validate. |
+| Opened | 2026-11-12 |
+| Verification | 2026-11-13: Unit/integration & CI passed ([PR #341](https://github.com/voidbrain/nerv/pull/341) CI run `43342141161`: `plan`, `validate`, `windows`, `native-macos` green). |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+
+### B-055
+
+**The Windows service launcher runs Node from an fnm per-shell path**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-13: stable Node path resolution merged in [PR #340](https://github.com/voidbrain/nerv/pull/340) with green CI.
+
+| | |
+|---|---|
+| **Issue** | 2026-11-12 on Tabgha: `nerv-service.vbs` runs `…\fnm_multishells\<id>\node.exe`, a junction fnm creates for one shell session; `service install` wrote it from `process.execPath` (src/service.ts). Over SSH that path did not run, while the permanent install (`…\fnm\node-versions\v24.22.2\installation\node.exe`) did. If fnm's per-shell junctions are cleaned up, the scheduled task can no longer start NERV. |
+| **Reproduce** | On Windows with Node from fnm, run `service install` from an fnm shell and read the Node path in `%USERPROFILE%\.nerv\nerv-service.vbs`. |
+| **Check** | `service install` records a stable Node path (the junction's target, or refuses with a clear message naming the fix) on Windows, and the same rule holds for the launchd and systemd definitions; a test covers a per-shell path. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** B-055-T01. A bug fix starts with a committed failing test.
+
+**Estimates:** Small, estimated 2026-11-12, not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #340](https://github.com/voidbrain/nerv/pull/340) (`Test: test/service-node-path.test.ts`); found during B-008 reproduction, [evidence](../../acceptance/b008-tabgha-2026-11-12.md); [PR #318](https://github.com/voidbrain/nerv/pull/318). |
+| Opened | 2026-11-12 |
+| Verification | 2026-11-13: Unit/integration & CI passed ([PR #340](https://github.com/voidbrain/nerv/pull/340) CI run `43342248715`: `plan`, `validate`, `windows`, `native-macos` green). |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+
+### F-025
+
+**Extra MAGI seats (veto-only), consultants and watermelon trust for pilots**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟡 Medium |
+
+💻 **→ Human action required: No**<br />Attach extra seats by action class as veto-only, start new seats in shadow, and promote pilots through Prototype → Test → Production.
+
+| | |
+|---|---|
+| **Issue** | Specialists help, but a new or remote seat must never approve what the core three would refuse, and skills need earned trust. |
+| **Reproduce** | Attach a deterministic test seat and a model expert seat to code-write actions; run them in shadow; promote one; force a failure and a Spear revocation. |
+| **Check** | Extra seats can only reject; shadow seats are logged, not counted; a timed-out seat abstains; consultants advise the planner without a vote and receive only Scrolls-allowed data; pilots run only in the EVA class of their stage; promotion to Production needs the owner's confirmation; failure, override spikes or Spear demote automatically. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-13 after all four steps (`F-025-T01`–`F-025-T04`, PRs [#358](https://github.com/voidbrain/nerv/pull/358)–[#361](https://github.com/voidbrain/nerv/pull/361)) merged and passed verification. F-025-T04 ([PR #361](https://github.com/voidbrain/nerv/pull/361), 2026-11-13): `previousStage`, `shouldDemotePilot`, `demotePilot` (`src/pilots.ts`) and `Runtime.demotePilotOnSignal` + automatic Spear demotion (`src/runtime.ts`, `test/pilots.test.ts`) automatically demote watermelon trust stages on failure, override spikes, or Spear revocation while keeping owner-only promotion to Production (`promotionEligible`, `pilots.promote`). F-025-T03 ([PR #360](https://github.com/voidbrain/nerv/pull/360), 2026-11-13): `filterConsultantInput` (`src/misato.ts`) and `Runtime.useRemoteConsultant` (`src/runtime.ts`, `test/consultant.test.ts`) filter `deny`, `localOnly`, and tainted data so consultants advise without a vote using only Scrolls-allowed data. F-025-T02 ([PR #359](https://github.com/voidbrain/nerv/pull/359), 2026-11-13): `SeatPool` (`src/seat-pool.ts`), private per-seat keys (`readSeatKey`/`writeSeatKey` in `src/config.ts`), `canLeaveMachine` / `scrolls.localOnly` (`src/policy.ts`, `Ledger.preview`), and `Runtime.useSeatPool` (`test/seat-pool.test.ts`). F-025-T01 ([PR #358](https://github.com/voidbrain/nerv/pull/358), 2026-11-13): `Runtime.useExtraSeat` attaches veto-only extra seats by action class (`effects`, `tools`, `patterns`), starts new seats in shadow (`ballot` / `ballot.shadow` logging without counting), promotes to veto (`shadow: false`), and abstains on timeout (`AbortController`, `test/extra-seats.test.ts` + `test/gate.test.ts` + `test/kaji-seats.test.ts`). Owner decisions 2026-11-05 for the free API seats: one seat per provider and model, each with its own key (terminal prompt) and trust stage; attached by action class, veto-only, shadow first, promoted one by one; each action asks one or two seats from the pool in turn to spread free quotas; a seat that hits its limit or times out abstains and is skipped for a while; only actions the Scrolls allow to leave the machine get cloud seats (never local-only or tainted data). **Optional:** `seats` checks each candidate (key, provider reachable, model still listed) and skips the unavailable ones with the reason; with an empty pool actions simply get no cloud seat, shown as information, never as degraded; re-checked periodically. Owner check 2026-11-05 on Neo Tokyo-3: with `models set consultant gemma4:12b`, Comms showed *Consultant (gemma4:12b): …* before Misato's reply. Consultants, local, in [PR #92](https://github.com/voidbrain/nerv/pull/92) (2026-11-05): `roles.consultant` (a local model; `models set consultant MODEL|off`, the dashboard's Models panel, `PUT /api/models`); asked once per request before Misato plans (`consultant.advise` in the brain, never on a resume), its advice (up to 600 characters, "none" is none) goes into Misato's prompt as data on the local route only and is recorded as a `misato.consult` event (Comms; the dashboard's Gevurah node lights up); no vote, no action. Checked: test/consultant.test.ts (advice in Misato's prompt and in the trace, one consultation per request, none on a resume, off and "none" add nothing, never on the cloud route), test/model.test.ts and test/model-setup.test.ts (role validation, local only, set and off), suite 129 pass. Related (2026-11-05): the other bases' Casper is now a veto-only, shadow-first extra seat (F-036, [PR #91](https://github.com/voidbrain/nerv/pull/91)); the same ballot mechanism takes the free API seats this record plans. Seat registry via Marduk and stage tracking on top of F-017/F-024; evaluation evidence from F-029. Absorbs F-018 (closed 2026-11-04).
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 4 open steps total 5.5 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort (peer seats in F-036, local consultants). Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
+| Opened | 2026-11-02 |
+| Verification | 2026-11-13: T01 `test/extra-seats.test.ts` + `test/gate.test.ts` + `test/kaji-seats.test.ts` (12/12); T02 `test/seat-pool.test.ts` + `test/extra-seats.test.ts` + `test/gate.test.ts` + `test/ledger.test.ts` (32/32); T03 `test/consultant.test.ts` + `test/misato.test.ts` (20/20); T04 `test/pilots.test.ts` (13/13); `check:conventions` and `check:fast` passed. |
+| Reviewed | 2026-11-04 |
+
+</details>
+
+---
+
+### F-042
+
+**Misato reads the agency: status and "why" from the records**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-13: [PR #314](https://github.com/voidbrain/nerv/pull/314) merged with green full-suite CI (`43282005793`).
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-05 ("is this the answer we want? include ballot, experts and consultants?"): Misato can act but cannot read the agency itself, so questions about it are guessed (B-004). |
+| **Reproduce** | Ask Aoba "why was S-… approved?", "what is waiting for me?", "is Tabgha up?". |
+| **Check** | Read-only tools give Misato a sortie's record (decision, ballot with each seat's vote and reason, peer seats, consultant advice, approver and time), what waits for the owner, base health and the bases' status; answers quote the records in the request's language and never invent; these tools run as Green without a card; the consultant is not asked for questions about the agency itself. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**F-042-T01–T02, 2026-11-12 ([PR #314](https://github.com/voidbrain/nerv/pull/314)):**
+- **F-042-T01 (`src/executors.ts`, `src/ledger.ts`, `src/store.ts`, `src/runtime.ts`, `src/rpc.ts`, `src/nervous-process.ts`):** Added three Pattern Green read-only built-in tools (`effect: 'read'`, running inside the scheduler process without an approval card): `sorties.explain` (returns a sortie's record by short ID with decision, ballot and each seat's vote and reason, peer seats including late shadow votes `ballot.shadow`, consultant/pilot advice, approver and decision time, or recent sorties when `ref` is omitted), `approvals.list` (returns pending approval cards with sortie short ID, title, tool, arguments, Pattern, reason, ballot verdicts and expiry, plus open clarification questions waiting for the owner via `Ledger.waitingQuestions`), and `agency.status` (returns this base's health, degraded reasons, model routes, pending reminders and Instrumentality status, plus enrolled NERV bases with `baseId`, `name`, `status`, `self`, `main`, `online`, `lastSeen`, `health` and `channel`, optionally filtered by `base` id or name).
+- **F-042-T02 (`src/why.ts`, `src/misato.ts`, `src/runtime.ts`, `src/brain-process.ts`, `src/rpc.ts`):** Added `isAgencyQuestion(text, bases)` in `src/why.ts` so `Runtime.loop` skips the consultant when the owner asks about sorties, ballots, waiting approvals/questions, or base/agency health and status (while still consulting on action requests such as `"Remind me on Tabgha to stretch"`). Passed enrolled base names (`bases: [{ id, name }]`) as data to the consultant/pilots and to Misato (`B-012`), localized `decided`, `expires`, and `lastSeen` timestamps (`decidedLocal`, `expiresLocal`, `lastSeenLocal`) in `misatoAsk`, and updated Misato's system prompt to call `sorties.explain`, `approvals.list` or `agency.status` and quote the records in the request's language without inventing. Note: host thread-reset APIs and token counters are not exposed in this environment (bounded continuation; `work-usage` coverage `unavailable`).
+
+**Next action / closure evidence:** Verify and close when [PR #314](https://github.com/voidbrain/nerv/pull/314) merges with green CI. Owner test 2026-11-05: the consultant did not know Tabgha is a base (it asked about geofencing): pilots and the consultant should get the agency's facts as data too (base names, B-012). Planned 2026-11-05. B-004 is the first slice (the "why" question).
+
+**Estimates:** 0 h remaining (2 steps implemented 2026-11-12 in 0.5 h agent stated total; awaiting CI). Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 2 open steps total 2.75 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #314](https://github.com/voidbrain/nerv/pull/314) (F-042-T01–T02 implementation and regressions: `test/why.test.ts`, `test/consultant.test.ts`); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner question 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-13: Unit/integration & full-suite CI passed ([PR #314](https://github.com/voidbrain/nerv/pull/314) CI run `43282005793` green across `plan`, `windows`, `native-macos`, `validate`, `full-suite`). |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+
+
+### F-045
+
+**Pilots: a roster of permanent agents that grows, specialises and is chosen per request**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🔴 Large |
+
+💻 **→ Human action required: No**<br />Next: from tasks.
+
+| | |
+|---|---|
+| **Issue** | Owner questions 2026-11-05: NERV needs permanent agents (a coder, the 3D expert on Tabgha, and others as jobs require: a Photoshop expert), a generic one for anything else, specialists that grow from it, and automatic choice. The design already names pilots (F-025: pilots run in the EVA class of their stage, watermelon trust) but has no roster. Consultants (F-041) become pilots asked only for advice (owner, 2026-11-05). |
+| **Reproduce** | Ask Aoba for an image edit or a coding job: there is no pilot to give it to. |
+| **Check** | **Definition as data:** a pilot is a role and domain (topics, keywords), skills, tools, a model, a memory scope, an EVA class and a trust stage (Prototype, Test, Production), with its parent; most share the base's model, a separate model only when its evaluations justify it. **Roster:** a registry like the Kaji one; each base offers its pilots in the heartbeat; the owner adds, renames, retires and pins. **Generic pilot:** one per base, takes any job no specialist covers, in the most restrictive EVA its stage allows. **Two ways of use:** asked for advice (the F-041 consultant rules: at most one per topic by default, the owner's pin, then the main base's own, then the best record, the next as fallback, "ask both" per topic; advice is data, never a vote or an action) or put in charge of the job (acts in its EVA, effects by card). **Choice:** Misato routes by domain and keywords, base, stage allowed for the action and record; unclear goes to the generic pilot or a question; the card shows the pilot, its stage and base, and the owner can change it; routing accuracy is measured. **New specialists found automatically:** unmatched domains, tools the generic pilot lacked and repeated failures are counted per domain; past a threshold (e.g. three unmatched in 30 days, or one missing tool) NERV proposes a pilot (or an extension of an existing one) on a card with the sorties behind it, its skills, tools and installs; created at Prototype. **Split and merge by evidence:** a split when sorties cluster in a subdomain and a narrower set scores better; a merge when two overlap and neither is better; lineage kept. **Learning (owner decision 2026-11-05: the recommendation):** new evaluation cases from failures are added automatically and shown; domain memory is proposed in one review card a week; skills change only by the owner's approval, versioned; prompt, model, tools, permissions and trust stage are always the owner's; nothing learned from a tainted sortie becomes a skill without review; a change to skills or prompt is versioned and re-runs the pilot's evaluations, and a drop moves it back a stage. **Inside a pilot** planning, doing and checking stay one loop; promotion through the golden sortie evaluations. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-13 after all nine steps (`F-045-T01`–`F-045-T09`) completed and passed verification (`F-045-T07`–`F-045-T09` in [PR #364](https://github.com/voidbrain/nerv/pull/364)). Owner integration 2026-11-09: pilot selection and promotion must distinguish individual-role evidence from separately measured combination/workflow evidence as specified in [configuration qualification](../../decisions/configuration-qualification.md). Bind coder, auditor, prompts, skills/tools, handoffs and host/runtime settings; independent hidden acceptance determines success, not auditor agreement. Consume NERV-owned evidence from F-006-T03/T04 before claiming evaluated pair or specialist placement; retain owner promotion and suggest-only defaults. No pair selection or mini PC acceptance is implemented by this documentation.
+
+Owner extension 2026-11-07: show pilot description, proposal rationale and request evidence, consultation/sortie outcomes and evaluation sample sizes. Investigate generic Time Request PROTO proposal quality. Distinguish advice from execution assignment/history; assess tool acquisition/discard, evidence-based specialization, split and merge with versioned lineage and explicit promotion gates. No autonomous capability change is implied by the current roster.  Owner discussion 2026-11-06 (skill marketplaces): **skills found outside NERV are untrusted input**, like intake. A found skill (marketplace, repository, another agent's SKILL.md) is adopted only as a reviewed, **pinned copy**: source, version, content hash and licence recorded, and the licence must allow keeping a copy; it enters at seed. A change at the source is a new version: re-review, re-run evaluations, back to seed. **Never load a skill remotely at run time**: that excludes delivery models that always serve the latest version and forbid saving (e.g. Agensi's MCP delivery, terms §5.2/§8.2). **Bundled scripts are code**: they run in the pilot's EVA and their effects go through the gate; a skill's text never widens the pilot's tools or permissions. This applies F-021's pinning lesson (a description fingerprint is not a code pin) to skills.  Owner refinement 2026-11-06: use an inline Model/select/Apply row without repeating the pilot name; retain identity in the accessible name. Apply stays disabled until an installed choice differs from the saved model, and disables again on revert/save or while applying.  Owner request 2026-11-06: move consultant/model selection out of Models and into each pilot card. Candidate implementation: generic fallback plus an independent specialist selector, installed local Ollama models only; per-specialist API validates owner authorization and discovery, preserves the rest of the roster, and applies to the next request. Drafts survive polling; unavailable saved models remain explicit. Future cloud/other-engine options require provider-aware pilot routing and explicit privacy permission; no placeholder executable choices are added. API/DOM regression and Chrome against the real runtime/config passed, including independent changes, generic-off, draft retention, next-request routing and scoped axe (zero violations). Full suite passed (194 passed, one systemd-only skip), build and process/browser checks passed. The local selector slice is verified in merged PR #160 (run 42241192687: validate, windows and native-macos green).  Owner decision 2026-11-05 on promotion, time and evidence: a pilot (and a skill) becomes eligible for the next stage after a minimum time there and enough clean runs (for example 7 days in Proto and 10 runs without a MAGI reject or an owner edit; skills count uses); its card shows the progress (*eligible in 5 d · 6/10 runs*, then *ready to promote*); when ready, NERV proposes the promotion on a card, never automatic; Prod always needs the owner; a failure or the Spear moves it back a stage. Needs a per-pilot record of runs, rejects and edits (and F-029's evaluations). Owner decision 2026-11-05 on skill stages (option B): skills grow by their own stages, **seed → sprout → ripe** (Eva, Kaji's watermelons) and **create → try → use** (Simple), distinct from the pilots' proto → test → prod; shown on the skills box in [PR #129](https://github.com/voidbrain/nerv/pull/129). Detection slice in [PR #122](https://github.com/voidbrain/nerv/pull/122) (2026-11-05): the generic pilot names the request's domain on its first line (*Domain: image editing*, no extra model call; no generic pilot, no detection); a request no specialist fits records `pilot.unmatched`; after 3 in 30 days the Marduk Institute opens a sortie with an owner-only `pilots.create` card (id, name, domain, keywords; the requests behind it in the card's reason), never twice while one waits, not again for 30 days after a no; approved, the pilot is written at Prototype on the generic pilot's model and the next request in that domain goes to it. Misato can propose `pilots.create` too when asked. Checked: test/pilots.test.ts (the domain line; through every process: two requests no card, the third a card, a fourth no second card, approved then used, a rejected domain not proposed again); full suite and build pass. Not yet: the missing-tool and repeated-failure signals, extension of an existing pilot instead of a new one. Slice 1 in [PR #107](https://github.com/voidbrain/nerv/pull/107) (2026-11-05): the pilot definition (src/pilots.ts: id, name, domain, keywords, local model, stage, parent, pinned, retired; checked on read), a local roster in config.json (`nerv pilots` list, add, set, pin, unpin, retire, restore; a model Ollama lacks is refused), the generic pilot (the F-025 consultant, `roles.consultant`), and advice mode: before Misato plans, the pilot whose keywords the request contains advises on its own model (pinned first, then most keywords, then later stage; retired never), named in its prompt and in the trace (`misato.consult` with the pilot; dashboard Comms and the why answer show it); no match, the generic pilot. Checked: test/pilots.test.ts (roster checks, routing order, through every process: a specialist on its model, the generic one otherwise, a retire applied to the next request), test/model-setup.test.ts (the CLI); full suite 146 pass, build, headless. Remaining slices: offered by other bases; "ask both" and the fallback; detection of unmatched domains and proposals by card; the coder pilot acting in an EVA; split and merge; learning as decided. Owner decision 2026-11-05: pilots learn by the recommendation ("F-045 … the recommendation"). Planned 2026-11-05 from the owner's questions. Supersedes F-041 (consultants are pilots in advice mode; its rules are kept above). First slices: the pilot definition and roster with the generic pilot; advice mode (the F-041 work); the coder pilot in a sandbox EVA (intent, spec and plan approved by card, an independent read-only verifier, results as a PR by card); then detection of new specialists, then split and merge. Candidate pilots discussed: coder, verifier, researcher (EVA-03, no effects), ops (read-only watch), 3D expert (Tabgha), archivist (memory hygiene, F-044); each gets its own record when it is built.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 6 open steps total 8.25 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Reassessed 2026-11-06 for pilot-owned model selectors: the local selector slice passed local and merged CI acceptance; remote pilots, execution and future provider/cloud routing remain, so Large remains valid.  Reassessed 2026-11-06 with B-027: duplicate-proposal matching is repaired; the remaining remote-pilot and execution scope is unchanged, so Large remains valid.  Large remaining effort (roster, advice, detection). Estimated 2026-11-05. Reassessed 2026-11-07: explicit prerequisite outcomes preserve the existing scope and remaining-work estimate; independent slices can proceed. Reassessed 2026-11-07: Large remains valid: proposal evidence and outcomes, tool evolution and split/merge lineage need evaluated lifecycle contracts beyond the current adviser roster.
+
+**Completed prerequisites:** [F-029](../../archive/backlog-2026.md#f-029) — Golden evaluation evidence for pilot promotion (closed).
+
+| Field | Value |
+|---|---|
+| Depends on | — |
+| PR / evidence | [PR #364](https://github.com/voidbrain/nerv/pull/364) F-045-T07..T09 cloud/other-provider pilot routing, split/merge with lineage, tool acquisition/discard, and Time Request PROTO proposal quality; [PR #357](https://github.com/voidbrain/nerv/pull/357) F-045-T06 evidence-based placement keeping individual, combination, and placement scopes distinct; [PR #356](https://github.com/voidbrain/nerv/pull/356) F-045-T05 remote pilots chosen and run through the authenticated worker line with grant checks; [PR #355](https://github.com/voidbrain/nerv/pull/355) F-045-T04 execution choice by domain/evidence and owner-only promotion; [PR #354](https://github.com/voidbrain/nerv/pull/354) F-045-T03 F-041 consultant ranking, fallback, and ask-both advice mode; [PR #353](https://github.com/voidbrain/nerv/pull/353) F-045-T02 owner roster management and generic pilot EVA confinement; [PR #352](https://github.com/voidbrain/nerv/pull/352) F-045-T01 pilot data schema, PilotRegistry, and Kaji heartbeat offers; [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #221](https://github.com/voidbrain/nerv/pull/221) schema/reuse assessment; [Gauntlet ownership/reuse proposal](../../design/gauntlet-protocol-2026-11-08.md), 2026-11-08; the proposal preceded delivered Gauntlet0.1.1 adoption in PR #223 / F-073; automatic routing/qualification remains unimplemented and no consumer work gates upstream releases; [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #161](https://github.com/voidbrain/nerv/pull/161) verification reconciliation;  [PR #160](https://github.com/voidbrain/nerv/pull/160) pilot selectors/map status and owner clarification; Owner questions 2026-11-05; slice 1 [PR #107](https://github.com/voidbrain/nerv/pull/107) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-13 F-045-T07..T09: `npm run typecheck`, `node --test test/pilots.test.ts` (16/16 passed), and `node --test test/gate.test.ts test/pilot-model.test.ts test/model-setup.test.ts test/misato.test.ts test/protocol.test.ts` (35/35 passed); `canPilotLeaveMachine`, `resolvePilotInference`, `proposePilotSplit`, `proposePilotMerge`, `splitPilot`, `mergePilots`, `proposePilotToolChange`, `applyPilotToolChange`, `sanitizeProposedDomain`, and `pilots.split`/`pilots.merge`/`pilots.tools` owner-only executors implemented. Earlier: 2026-11-13 F-045-T06: `node --test test/pilots.test.ts` (12/12 passed) and `npm run check:conventions && npm run check:fast` passed; `evaluatePilotPlacement`, `chooseQualifiedExecution`, `Runtime.assessPilotPlacement`, and `Runtime.selectQualifiedPilotForExecution` implemented keeping individual, combination, and placement evidence distinct. Earlier: 2026-11-13 F-045-T05: `node --test test/pilots.test.ts test/kaji-run.test.ts test/pilot-model.test.ts` (16/16 passed) and `npm run check:conventions && npm run check:fast` passed; `canRunRemotePilot`, `selectRemotePilotRun`, `RunItem.pilot`, and `runFromPeer` pilot grant enforcement implemented. Earlier: 2026-11-13 F-045-T04: `node --test test/pilots.test.ts test/pilot-model.test.ts test/gate.test.ts` and `npm run check:conventions && npm run check:fast` passed; `chooseExecutionPilot`, `promotionEligible`, and owner-only `pilots.promote` implemented. Earlier: 2026-11-13 F-045-T03: `node --test test/pilots.test.ts test/pilot-model.test.ts` and `npm run check:conventions && npm run check:fast` passed; F-041 consultant ranking (`rankPilots`, `chooseAdvisers`), fallback, and ask-both adviser selection implemented. Earlier: 2026-11-13 F-045-T02: `node --test test/pilots.test.ts test/pilot-model.test.ts test/model-setup.test.ts` and `npm run check:fast` passed; owner roster management (add, rename, pin, retire) via CLI/API/Runtime and generic pilot EVA confinement implemented. Earlier: 2026-11-13 F-045-T01: `node --test test/pilots.test.ts test/kaji-link.test.ts test/model-setup.test.ts` (23/23 passed) and `npm run typecheck` passed; pilot data fields (`role`, `skills`, `tools`, `memoryScope`, `evaClass`), `PilotRegistry`, and Kaji heartbeat pilot offers implemented. Earlier: 2026-11-06 Unit/integration and Browser/accessibility: pilot model API/DOM regressions, full suite, real-runtime Chrome flow, inline-row/Apply states and scoped axe passed; merged PR #160 CI run 42241192687 green; 2026-11-05 slice 1: test/pilots.test.ts, test/model-setup.test.ts, full suite (local run) |
+| Reviewed | 2026-11-13 |
+
+</details>
+
+---
+
+
+### F-046
+
+**Misato checks what already exists before adding: same thing, a change, or new**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟡 Medium |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-13: `reminders.update` and `memory.edit` tools added, matching pending reminders and Lilith facts shown to Misato with the three-way check (same, changed, new) in EN/IT, and `old → new` fact edit approval cards.
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-05, after B-003 (the same dentist request sent four times, two copies approved): before adding something, Misato should look for it among what already exists (reminders, Lilith's facts, later calendar and notes); if it is the same, not add another and say so in the reply; if it changed (another time, a corrected fact), propose changing the existing one instead. Today the store drops only exact copies (B-003 for reminders, `factKey` for facts); a reminder with the same title at another time becomes a second one, and a fact that contradicts an earlier one ("I like tea" after "I don't like tea") is added next to it. Misato has no tool to change a reminder. |
+| **Reproduce** | Ask Aoba to remind you to call the dentist on 3 February at 10, then again at 11: two reminders. Tell it you like tea, then that you don't: two facts. |
+| **Check** | Before proposing reminders.add or memory.remember, Misato is shown the existing items that match (same or similar title, the same subject); the same item is not proposed again and the reply says it already exists (with its time or text); a changed one becomes a proposal to change it (reminders.update for title or time; for a fact, the edit of the existing fact, shown old → new on the card), approved like any change; a really new item is added as today; the reply says which of the three it was and why; works in English and Italian; tests cover same, changed and new for reminders and facts, through the scheduler. Calendar and notes follow the same rule when they exist. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Planned 2026-11-05 from the owner's request. Builds on B-003 (exact copies of a reminder are returned, [PR #103](https://github.com/voidbrain/nerv/pull/103)) and Lilith's exact-text check. Slices: reminders.update as a Misato tool (the dashboard's edit already has it in the scheduler); matching existing items in Misato's context before an add; facts that change or contradict an earlier one proposed as an edit (shares the spelling and split work of F-044).
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 3 open steps total 3 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #369](https://github.com/voidbrain/nerv/pull/369); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration; Owner request 2026-11-05; `test/f046-existing-check.test.ts` |
+| Opened | 2026-11-05 |
+| Verification | Passed (`npm run typecheck`, `npm run build`, `npm test`, `npm run check:fast`) |
+| Reviewed | 2026-11-13 |
+
+</details>
+
+---
+
+
+### F-052
+
+**Timings for every step, live in the Sephirot; shadow seats never make you wait**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🔴 Large |
+
+💻 **→ Human action required: No**<br />Per-call timings, sortie detail and `why` durations, live Sephirot node timings, and daily role timing summary.
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-05: how long did the job take, how long Misato, the EVA, is the ghost (shadow) voter slowing it? The ledger stamps only step boundaries: in S-3BFF, Misato's planning, Casper and Tabgha's shadow seat fall in one 95.7 s gap, so nobody can tell who was slow. The gate waited for every seat, also shadow ones whose vote does not count. |
+| **Reproduce** | Read a sortie's events: there is no duration per model call, per seat or per executor. |
+| **Check** | 1. Each call's duration is recorded with the sortie (consultant or pilot, each Misato step, Casper, each other base's seat, the executor). 2. The sortie detail and the why answer show them (*Misato 38 s · Casper 6 s · Tabgha (shadow) 41 s · EVA-02 0.1 s*); 2a. while a sortie runs, the Sephirot shows the elapsed time on the active node and each finished node's time (owner, 2026-11-05). 3. Shadow seats never delay: the gate decides once Casper and the veto seats have voted; a later shadow vote is recorded, never counted. 4. A daily summary (brief or health): median and slowest time per role, so a slow model or base stands out. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-13 after all steps (`F-052-T01`–`F-052-T05`) implemented and verified. `F-052-T02`: `src/runtime.ts`, `src/store.ts`, `src/ledger.ts`, `src/events.ts`, `src/policy.ts`, `src/kaji-link.ts`, `src/rpc.ts`, and `src/nervous-process.ts` record per-call `durationMs` on consultant/pilot (`misato.consult`, `pilot.unmatched`), each Misato step (`misato.step`, `misato.reply`, `misato.asked`), Casper and extra/peer seats (`ballot.verdicts`, `ballot.shadow`), and executors (`action.done`, `action.failed`), keeping network `transferMs` (`kaji.answered`, peer seats) distinct from step duration. `F-052-T03`: `src/timing.ts`, `Ledger.sortie`, `Ledger.explain`, `src/why.ts`, and `web/public/dashboard/dashboard.js` (`renderDetail`) format and display per-role timings (e.g. `Misato 38 s · Casper 6 s · Tabgha (shadow) 41 s · EVA-02 0.1 s`) in EN/IT. `F-052-T04`: `web/public/dashboard/index.html`, `dashboard.js`, and `live.js` show live elapsed time on the active Sephirot node and finished node times on completed nodes without false communicating claims (B-040). `F-052-T05`: `Ledger.timingSummary`, `src/brief.ts` (`gatherBrief`, `composeBrief`) report median and slowest duration per role in the daily brief. Checked: `test/f052-timings.test.ts`, full `npm test`, `npm run build`, `npm run typecheck`, `npm run check:fast`. Owner extension 2026-11-07: transfer duration and step duration are different. A minimum recent-transfer pulse may improve visibility but must not claim the network is still communicating (B-040).  Item 3 in [PR #116](https://github.com/voidbrain/nerv/pull/116) (2026-11-05): `Runtime.usePeerSeats` (serve and the two-base test share it, instead of a copy in the test) returns each other base's vote as a pending promise; the gate waits for Casper and the veto seats only; a shadow vote already in goes on the card, one that comes later is recorded as `ballot.shadow` on its action (dashboard trace: *MAGI · NERV-02 (shadow, after the decision)*) and never changes the outcome. Checked: test/kaji-seats.test.ts (two runtimes, Tabgha's Casper answering after 1.5 s: in shadow the decision comes in under 1.2 s and the late reject is kept with the action; in veto it is waited for and stops the action; an absent base abstains), fails without the change (changed deliberately: the shadow vote is no longer always on the card); full suite 152 pass, build, headless.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 4 open steps total 4.75 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort. Estimated 2026-11-05. Reassessed 2026-11-07: Raised to Large remaining effort: explicit call/transfer boundaries, live elapsed display, cross-base seats and summary statistics need instrumentation and end-to-end evidence across several components.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #373](https://github.com/voidbrain/nerv/pull/373) (`F-052-T02`–`F-052-T05`); [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner question 2026-11-05 (ledger timing of S-7663 and S-3BFF); item 3 [PR #116](https://github.com/voidbrain/nerv/pull/116) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05 item 3: test/kaji-seats.test.ts and full suite (local run) |
+| Reviewed | 2026-11-07 |
+
+</details>
+
+---
+
+
+### F-074
+
+**Indexed reusable evaluations, operator campaigns and the first Gemma smoke**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-13 ([PR #370](https://github.com/voidbrain/nerv/pull/370)): F-074-T10 (identity-bound ledger coverage) and F-074-T04 (profile-matched 8K/2048 operator role-evaluation bundle) completed; all 7 deterministic `nerv-system-flows` cases recorded in schema 2 ledger (`evals/gauntlet/ledger.json`).
+
+| | |
+|---|---|
+| **Issue** | NERV needs discoverable test capabilities and reusable measured evidence without confusing common model results with system acceptance. |
+| **Reproduce** | Generate the combined index, validate evidence reuse/mismatch, then execute the ten-case Gemma pack under explicit bounded settings. |
+| **Check** | Every common pack in the pinned release is consumed or excluded with a reason; a new or changed case raises a backlog item until a run covers it; one root command runs NERV and common packs, reusing only exact-identity evidence. Profile-matched bounded operator role command with saved reports; pinned independent release; generated index current; common reuse exact/fresh and system-source aware; measured cold/warm telemetry with unknown metrics explicit; one authorized Gemma4:12b Q4_K_M 8K serial/default-sampling/thinking-on smoke, output2048/case and explicit time/token limits. No model downloads or live alternative-runtime campaigns. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** T03 consumes released Gauntlet0.3.0 from independent PR7 / CI42607576561: pinned source/artifact, shared machine/scenario CLI/API, report/cache/compare identity and NERV wrapper joins. Generic definitions moved upstream; NERV retains assignments and acceptance. Accepted adoption after PR #235 exactheadb4cd887 / full CI42608578429, mergedmainc5323e5; T03 closed; [independent review](../../reviews/2026-11-09-gauntlet-environment-adoption.md) found no blocking findings after exact source/package and nine-join checks; no model/load campaign. T02 was separately executed by the owner and reviewed below; dependency adoption itself ran no model.
+
+ T01 closed after PR #225, exact head11c963c, merged main8fab24c. CI42573854325 passed plan, validate, Windows, native-macos and full-suite; eight local integration/index/cache/artifact/cancellation tests and independent report-only recheck passed. Adopted Gauntlet0.2.0: generated index17cases, exact/source-aware private reuse with original timestamps, streaming/sampled telemetry and fixture-tested local-runtime adapters. [Adoption acceptance](../../acceptance/gauntlet-v02-2026-11-09.md). T02 is closed after the owner-provided first ten-case Gemma run and evidence review; the report below records the actual measured failure. No model download, alternative-runtime installation or qualification occurred. Queue order is regenerated from current record/task/dependency state; consult the generated view rather than this historical selection; F-023-T03 is accepted with live native acceptance pending; combination qualification requirements are tracked under F-006/F-045, not claimed by this smoke.
+
+**Operator handoff and references 2026-11-09:** [Terminal commands](../../evaluations/gauntlet.md#operator-runs-common-gemma-smoke-and-nerv-system-acceptance) save common Gemma and dedicated scripted-system reports with explicit budgets and environment declarations. Common can run through NERV OR a prepared Gauntlet checkout without duplicating measurement. T04 retains the requested profile-matched NERV role bundle: current native role defaults do not match the common8K/2048 profile or aggregate cap. [external-project assessment](../../reviews/2026-11-09-external-agent-projects.md) retains optional external runners; generic adapters stay upstream. No model campaign was launched while documenting this.
+
+**First campaign reviewed 2026-11-09:** [common Gemma report review](../../evaluations/2026-11-09-gemma-common-smoke.md), report19a5b470-e87a-4400-a2e9-920404a797d2. All10 executed,7 passed; change-mind/tool-choice/missing-input failed JSON parsing,4/4 holdouts passed. Duration64.744s,1608 output tokens, exact requested model/profile and moderate-load declaration. The run completed inside budget; candidate acceptance failed. Raw response text and human responsiveness/load observations are unavailable. Preserve failure, do not automatically rerun or weaken grading. T02 closed; T04 is unimplemented and keeps the parent Open.
+
+**Diagnostics/job-rule adoption2026-11-09:** T05 consumes released Gauntlet0.4.1 (PR11 / CI42686856664, main8d99d9f/tagv0.4.1) and harness4.4.1 (PR91 / CI42678501222). New common selected-case capture/inspection and private development job registration are implemented; eleven package/wrapper joins pass, including source-bound failed reply capture with unchanged grading and no public raw reply. Native client counters/loading and the role-profile workflow remain unverified/unimplemented, not qualification. [Adoption evidence](../../acceptance/gauntlet-private-diagnostics-2026-11-09.md).
+
+**Gauntlet 0.5.0 pin, 2026-11-11 ([PR #259](https://github.com/voidbrain/nerv/pull/259)):** merged d2bb481, CI42974448234 passed all five jobs. Replaces the vendored artifact, lockfile and provenance with released 0.5.0 (tag v0.5.0, source 0d46c4a, upstream PR #29 / CI 42973762775, SHA256 in the vendor manifest) and regenerates the capability index links. Upstream adds the 28-case expanded pack and repeatable candidate comparisons. The expanded pack is not wired in; NERV's model commands keep the ten-case smoke packs. `gauntlet:compare` forwards to upstream, so its behaviour changes: 2–64 reports required and a new output shape (identity, mismatch reasons, per-result rows); no NERV code read the old keys, and a new regression joins the command to two saved reports. No model campaign ran. test/gauntlet.test.mjs (12 tests) and `gauntlet:plan` pass against the new artifact. [Independent fresh-context review](https://github.com/voidbrain/nerv/pull/259) verified artifact provenance against tag v0.5.0, the lockfile scope and tests, and found the first wording understated the compare change; corrected here. T04/T05 status unchanged.
+
+**Structured-output extension2026-11-09:** Owner accepted explicit Ollama schema support and a prepared moderate-load diagnostic command. T05 includes released upstream F-007 adoption: `--format=schema` selects a separate structure-only smoke pack; original unconstrained evidence remains unchanged. Medium-load live acceptance is owner-run and unexecuted; no qualification follows from fixture success.
+
+**Adoption accepted2026-11-10:** T05 closed after PR #242 exacthead03c0721 / CI42687439382 passed all five jobs including full-suite, mergedmainbc7a9c3. Independent harness/source/schema review and eleven joins passed. Prepared moderate-load schema diagnostic remains owner-run and unexecuted; T04 remains planned and the parent stays Open.
+
+**F-074-T06–T08 implemented 2026-11-11 ([PR #272](https://github.com/voidbrain/nerv/pull/272)):** Gauntlet 0.6.0 pinned; every shipped pack consumed (`neutral-smoke`, `neutral-smoke-schema`, `general-assistant-expanded`) plus `nerv-system-flows`, with exclusions only by reasoned config; committed metadata-only run ledger `evals/gauntlet/ledger.json`; `gauntlet:pending` (harness `evaluations` setting, reported at session start), `check:gauntlet-runs` in CI (fails while a pending case has no open record), `gauntlet-runs` impact row; `gauntlet:all` plans and runs only uncovered cases and records them. Model limits scale the day limits per case. The five ordinary system cases ran and passed locally and are in the ledger; 50 cases stay pending, named by F-074-T09. Known limit: ledger coverage ignores runtime identity, machine scenario and NERV source key (see F-074-T08). Review: fresh-context design review (Opus): one blocker (check:gauntlet-runs accepted any mention of a pack id, including record history, so a changed case passed CI unraised) and should-fix items (`--max-age-days` did not reach Gauntlet's cache; `gauntlet:all` exited 0 on failures; F-074-T08 acceptance and fixtures), fixed in #272: only unfinished tasks listing `pack/case` or `pack/*` raise a case, with a failing-path test; age passed through; exit 1 on failure; F-074-T08 acceptance states the unmet part; fixtures for --fresh, max age and another profile. Provenance verified: the tgz matches tag v0.6.0.
+
+**Gauntlet 0.7.1 pinned 2026-11-11 ([PR #275](https://github.com/voidbrain/nerv/pull/275)):** artifact, lockfile and provenance replaced together; NERV records new runs in ledger schema 2. F-074-T10's first acceptance (pin) is done; passing the intended identity remains.
+
+**F-074-T09 completed 2026-11-12 ([PR #316](https://github.com/voidbrain/nerv/pull/316)):** the agent ran the 7 pending expanded cases with the owner's approval. A first attempt at the default 30 s per case stopped on case 1 (7 s model load plus about 24 tokens/s of thinking; not the 840 s pack limit as first thought) and recorded nothing; with a 90 s case limit approved by the owner (`--limits`, 630 s, same 14,336-token cap) all 7 passed in 103 s and 2,195 tokens. The ledger now covers all 48 model and 7 system cases and `gauntlet:pending` is empty. [Summary](../../evaluations/2026-11-12-gauntlet-t09.md). NERV's default model limits stay at 30 s per case, too short for long thinking replies with this profile: a later fresh run with it needs an owner-approved `--limits`.
+
+**Owner run 2026-11-11 (F-074-T09, partial; [PR #274](https://github.com/voidbrain/nerv/pull/274)):** the ledger now records 41 of the 48 model cases (neutral-smoke 10, neutral-smoke-schema 10, general-assistant-expanded 21; corrected 2026-11-12 from the ledger: 38 passed, neutral-smoke change-mind, missing-input and tool-choice failed) and the expensive system cases `browser` and `stress`, from the owner's run (expanded report finished 13:49:56Z). The last seven expanded cases (prompt-injection-r2, -h1, -h2, combined-r1, -r2, -h1, -h2) were not graded in that report: Gauntlet records only passed or failed results, so an error or not-run result covers nothing and the cases stay pending. The likely cause is the 840 s suite limit for 28 cases being reached before the last ones ran; the report's per-case status confirms it. `gauntlet:all` reruns only those seven. **Gauntlet 0.7.0 published 2026-11-11** (gauntlet-protocol B-002, PRs #37/#38): ledger coverage follows model digest, runtime, scenario and source key; F-074-T10 is no longer blocked.
+
+**Owner answers 2026-11-11 ([PR #273](https://github.com/voidbrain/nerv/pull/273)):** the T09 "budget" is the hard time and output-token limits `gauntlet:all` prints and enforces, now stated in F-074-T09. No default max age for reuse: a run stays valid until its identity changes; an age limit would only cover identity the ledger does not bind. That gap (F-074-T08 known limit) is planned: upstream [gauntlet-protocol PR #36](https://github.com/voidbrain/gauntlet-protocol/pull/36) opens B-002 (ledger records model digest, runtime, scenario and a consumer source key; `pending` names the change), and F-074-T10 adopts it. B-002 is a bug upstream: F-010-T01's acceptance named runtime and machine scenario, and v0.6.0 shipped without them.
+
+**Gap found 2026-11-11:** the 0.5.0 pin (PR #259) shipped the 28-case `general-assistant-expanded@1.0.0` pack, but tools/gauntlet.mjs names `smoke-v1.json` by path, and nothing compares the artifact's packs with the ones NERV uses, so the new pack was never run or indexed. Owner decision the same day: NERV always consumes every common pack plus its own; a pack added or changed raises a run-new-tests item; `gauntlet:all` from the root runs new, changed or stale cases and reuses exact-identity evidence. Tasks T06–T09. Same day, because the harness and Gauntlet are reused by future projects: the generic comparison moves upstream ([gauntlet-protocol PR #33](https://github.com/voidbrain/gauntlet-protocol/pull/33), F-010: run ledger and `gauntlet pending`; [project-harness PR #109](https://github.com/voidbrain/project-harness/pull/109), F-052: declared evaluation dependencies reported by check:freshness, with the backlog rule). T07 only adopts them.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 3 open steps total 2 h agent + 0.5 h owner (steps table; each task basis gives old → new). Figures after this sentence are dated history. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): the 3 open steps in hours total 2.75 h agent + 0.5 h owner (steps table; method in each task basis). Day figures below are dated history. Small remaining effort, reassessed 2026-11-11 after F-074-T06–T08: F-074-T09 (0.5 day including owner time), F-074-T04 (1 focused day) and F-074-T10 (0.5 focused day; pinned 0.7.1) remain. Earlier the same day: Medium, about 3 focused days (T06 0.5, T07 1, T08 1, T09 0.5, plus T04). Reassessed 2026-11-11 after the owner asked that NERV always consume every common pack and that new packs raise a run; previous estimate Small covered T04 only. Estimates, not measurements.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #370](https://github.com/voidbrain/nerv/pull/370) F-074-T10/T04 & closure; [PR #259](https://github.com/voidbrain/nerv/pull/259) Gauntlet 0.5.0 pin; [PR #243](https://github.com/voidbrain/nerv/pull/243) adoption acceptance;  [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Acceptance reconcile: [PR #236](https://github.com/voidbrain/nerv/pull/236); Environment adoption: [PR #235](https://github.com/voidbrain/nerv/pull/235); Review: fresh-context report, no blocking findings; Test: test/gauntlet.test.mjs shared-context consumer/reuse/admission join;  [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #226](https://github.com/voidbrain/nerv/pull/226) adoption acceptance and explicit owner pause; [PR #225](https://github.com/voidbrain/nerv/pull/225); upstream Gauntlet PR #5 / CI42572655186; Review: independent report-only recheck linked above. |
+| Opened | 2026-11-09 |
+| Verification | 2026-11-13 Unit/integration: `test/gauntlet.test.mjs` (18 passed), `test/evaluation-model.test.mjs` (1 passed), `gauntlet:index`, `check:gauntlet-index`, `gauntlet:plan`, `gauntlet:role-plan`, `gauntlet:all --execute --allow-expensive` (7/7 `nerv-system-flows` passed and recorded with schema 2 `sourceKey`), `check:gauntlet-runs` (0 pending), and `check:fast` passed; no live model run executed for T04. Earlier 2026-11-10 Unit/integration: PR242 exacthead03c0721 / CI42687439382 passed all five jobs/full-suite; eleven fixture joins and independent harness/source/schema review passed; T05 closed, no live schema campaign. Earlier2026-11-09 Unit/integration: PR235 exactheadb4cd887 / CI42608578429 passed all five jobs including full-suite, mergedmainc5323e5. Nine focused context/reuse/admission/package joins, local468 Node tests (466 passed, two platform skips), typecheck/build/index and committed-source policy90 passed. Review: independent exact package/source/installed-file verification and nine joins, no blocking finding. Real-model2026-11-09: owner-provided common smoke validated and reviewed, complete10cases,7 passed/3 failed,64.744s/1608 tokens; no load/model qualification. |
+| Reviewed | 2026-11-11 |
 
 </details>
 

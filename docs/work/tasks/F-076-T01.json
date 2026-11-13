@@ -1,0 +1,37 @@
+{
+ "version": 1,
+ "id": "F-076-T01",
+ "parent": "F-076",
+ "title": "Choose how merged main is verified",
+ "goal": "The owner picks one option from the full audit of 2026-11-13",
+ "status": "planned",
+ "acceptance": [
+  "One option chosen and recorded in F-076"
+ ],
+ "dependsOn": [],
+ "resources": [
+  "docs/work/records/**",
+  "generated:backlog-views"
+ ],
+ "capabilities": [
+  "structured-tools"
+ ],
+ "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+ "validation": [
+  "npm run check:backlog"
+ ],
+ "escalation": [
+  "Repository settings are the owner's"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "0.25 h owner",
+  "basis": "Estimated 2026-11-13: reading four options. Not a measurement.",
+  "reviewed": "2026-11-13",
+  "agentHours": 0,
+  "ownerHours": 0.25,
+  "baselineAgentHours": 0,
+  "estimateAgentHours": 0,
+  "ownerKind": "decision"
+ }
+}
