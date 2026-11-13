@@ -920,7 +920,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #383](https://github.com/voidbrain/nerv/pull/383) [PR #379](https://github.com/voidbrain/nerv/pull/379) and [PR #382](https://github.com/voidbrain/nerv/pull/382) Windows reruns, 2026-11-13. |
+| PR / evidence | [PR #384](https://github.com/voidbrain/nerv/pull/384) [PR #383](https://github.com/voidbrain/nerv/pull/383) [PR #379](https://github.com/voidbrain/nerv/pull/379) and [PR #382](https://github.com/voidbrain/nerv/pull/382) Windows reruns, 2026-11-13. |
 | Opened | 2026-11-13 |
 | Verification | Pending. |
 | Reviewed | 2026-11-13 |
