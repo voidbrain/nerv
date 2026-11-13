@@ -48,7 +48,7 @@ import {
   setting,
   type Base,
 } from './config.ts';
-import { STAGES, describePilots, type Stage } from './pilots.ts';
+import { STAGES, addPilot, describePilots, setPilotFlag, updatePilot, type EvaClass, type Stage } from './pilots.ts';
 import { McpClient, fingerprint as toolFingerprint, grantRefusal, toolName, type Eva, type McpTool } from './mcp.ts';
 import { TelegramApi, TelegramChannel, decisionText, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
 import { chronicleDays, composeChronicle, gatherMilestones } from './chronicle.ts';
@@ -555,7 +555,7 @@ try {
         throw new Error(`Ollama has no model ${model}: ollama pull ${model} first, or pick one from nerv models.`);
     };
     const usage =
-      'Usage: pilots | pilots generic MODEL|off | pilots add ID --name NAME --domain "WHAT IT KNOWS" --keywords a,b,c --model MODEL [--stage prototype|test|production] [--parent ID] | pilots set ID [--name …] [--domain …] [--keywords …] [--model …] [--stage …] | pilots pin|unpin|retire|restore ID';
+      'Usage: pilots | pilots generic MODEL|off | pilots add ID --name NAME --domain "WHAT IT KNOWS" --keywords a,b,c --model MODEL [--role ROLE] [--skills a,b] [--tools a,b] [--memory-scope SCOPE] [--eva-class eva-00|eva-01|eva-02|eva-03] [--stage prototype|test|production] [--parent ID] | pilots set ID [--name …] [--role …] [--domain …] [--keywords …] [--skills …] [--tools …] [--model …] [--memory-scope …] [--eva-class …] [--stage …] | pilots rename ID NAME | pilots pin|unpin|retire|restore ID';
     const list = (v: string | undefined) =>
       v === undefined
         ? undefined
@@ -581,37 +581,48 @@ try {
     } else if (sub === 'add') {
       if (!id || !opt('name') || !opt('domain') || !opt('keywords') || !opt('model')) throw new Error(usage);
       await checkModel(opt('model')!);
-      savePilots(home, [
-        ...roster,
-        {
+      savePilots(
+        home,
+        addPilot(roster, {
           id,
           name: opt('name')!,
+          ...(opt('role') !== undefined ? { role: opt('role')! } : {}),
           domain: opt('domain')!,
           keywords: list(opt('keywords'))!,
+          ...(opt('skills') !== undefined ? { skills: list(opt('skills'))! } : {}),
+          ...(opt('tools') !== undefined ? { tools: list(opt('tools'))! } : {}),
           model: opt('model')!,
+          ...(opt('memory-scope') !== undefined ? { memoryScope: opt('memory-scope')! } : {}),
+          ...(opt('eva-class') !== undefined ? { evaClass: opt('eva-class') as EvaClass } : {}),
           stage: (opt('stage') ?? 'prototype') as Stage,
           parent: opt('parent') ?? 'generic',
-        },
-      ]);
+        }),
+      );
       console.log(`Pilot ${id} added (prototype unless set). It advises Misato on requests with its keywords.`);
+    } else if (sub === 'rename') {
+      const p = find();
+      const newName = rest[0];
+      if (!newName || newName.startsWith('--')) throw new Error('Usage: pilots rename ID NAME');
+      savePilots(home, updatePilot(roster, p.id, { name: newName }));
+      console.log(`Pilot ${p.id} renamed to ${newName.trim()}.`);
     } else if (sub === 'set') {
       const p = find();
       const model = opt('model');
       if (model) await checkModel(model);
       savePilots(
         home,
-        roster.map((x) =>
-          x.id !== p.id
-            ? x
-            : {
-                ...x,
-                ...(opt('name') ? { name: opt('name')! } : {}),
-                ...(opt('domain') ? { domain: opt('domain')! } : {}),
-                ...(opt('keywords') ? { keywords: list(opt('keywords'))! } : {}),
-                ...(model ? { model } : {}),
-                ...(opt('stage') ? { stage: opt('stage') as Stage } : {}),
-              },
-        ),
+        updatePilot(roster, p.id, {
+          ...(opt('name') ? { name: opt('name')! } : {}),
+          ...(opt('role') !== undefined ? { role: opt('role')! } : {}),
+          ...(opt('domain') ? { domain: opt('domain')! } : {}),
+          ...(opt('keywords') ? { keywords: list(opt('keywords'))! } : {}),
+          ...(opt('skills') !== undefined ? { skills: list(opt('skills'))! } : {}),
+          ...(opt('tools') !== undefined ? { tools: list(opt('tools'))! } : {}),
+          ...(model ? { model } : {}),
+          ...(opt('memory-scope') !== undefined ? { memoryScope: opt('memory-scope')! } : {}),
+          ...(opt('eva-class') !== undefined ? { evaClass: opt('eva-class') as EvaClass } : {}),
+          ...(opt('stage') ? { stage: opt('stage') as Stage } : {}),
+        }),
       );
       // F-054-T04: a move to a later stage is a promotion, kept for the chronicle (append-only; the config edit stays).
       const stage = opt('stage');
@@ -634,16 +645,7 @@ try {
       const p = find();
       const on = sub === 'pin' || sub === 'retire';
       const field = sub === 'pin' || sub === 'unpin' ? 'pinned' : 'retired';
-      savePilots(
-        home,
-        roster.map((x) => {
-          if (x.id !== p.id) return x;
-          const next = { ...x };
-          if (on) next[field] = true;
-          else delete next[field];
-          return next;
-        }),
-      );
+      savePilots(home, setPilotFlag(roster, p.id, field, on));
       console.log(
         `Pilot ${p.id} ${sub === 'pin' ? 'pinned: chosen first when its keywords match' : sub === 'unpin' ? 'unpinned' : sub === 'retire' ? 'retired: never chosen, kept in the roster' : 'restored'}.`,
       );

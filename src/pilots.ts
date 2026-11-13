@@ -1,4 +1,4 @@
-import type { Executor } from './policy.ts';
+import { stricter, type Executor } from './policy.ts';
 
 /**
  * Pilots (F-045): the owner's permanent agents, as data. Slice 1: a local roster in config.json, the generic pilot (the
@@ -60,6 +60,81 @@ export interface Chosen {
 export const GENERIC = 'generic';
 export const STAGES: readonly Stage[] = ['prototype', 'test', 'production'];
 const MAX_PILOTS = 30;
+/** Most restrictive EVA class a pilot stage allows: prototype -> eva-00, test -> eva-01, production -> eva-02. */
+export function stageExecutor(stage: Stage): EvaClass {
+  return stage === 'prototype' ? 'eva-00' : stage === 'test' ? 'eva-01' : 'eva-02';
+}
+/** Effective EVA class for a pilot: never less confined than its stage or its declared evaClass. */
+export function pilotExecutor(pilot: Pick<Pilot, 'stage' | 'evaClass'>): EvaClass {
+  return stricter(stageExecutor(pilot.stage), pilot.evaClass);
+}
+/** Implicit generic pilot for a base, always in the most restrictive EVA its stage allows (F-045-T02). */
+export function genericPilot(model: string | null, stage: Stage = 'prototype'): Pilot {
+  return {
+    id: GENERIC,
+    name: 'Generic pilot',
+    role: 'generic',
+    domain: 'anything no specialist covers',
+    keywords: [],
+    model: model ?? '',
+    stage,
+    evaClass: pilotExecutor({ stage }),
+  };
+}
+export type PilotPatch = Partial<
+  Pick<
+    Pilot,
+    | 'name'
+    | 'role'
+    | 'domain'
+    | 'keywords'
+    | 'skills'
+    | 'tools'
+    | 'model'
+    | 'memoryScope'
+    | 'evaClass'
+    | 'stage'
+    | 'pinned'
+    | 'retired'
+  >
+>;
+/** Adds a pilot to a roster and validates the result. */
+export function addPilot(roster: readonly Pilot[], entry: Pilot): Pilot[] {
+  return validatePilots([...roster, entry]);
+}
+/** Updates (including renaming) an existing pilot in a roster and validates the result. */
+export function updatePilot(roster: readonly Pilot[], id: string, patch: PilotPatch): Pilot[] {
+  const idx = roster.findIndex((p) => p.id === id);
+  if (idx < 0) throw new Error(`Unknown specialist pilot: ${id}.`);
+  const next = roster.map((p) => {
+    if (p.id !== id) return p;
+    const updated: Pilot = { ...p };
+    if (patch.name !== undefined) updated.name = patch.name;
+    if (patch.role !== undefined) updated.role = patch.role;
+    if (patch.domain !== undefined) updated.domain = patch.domain;
+    if (patch.keywords !== undefined) updated.keywords = patch.keywords;
+    if (patch.skills !== undefined) updated.skills = patch.skills;
+    if (patch.tools !== undefined) updated.tools = patch.tools;
+    if (patch.model !== undefined) updated.model = patch.model;
+    if (patch.memoryScope !== undefined) updated.memoryScope = patch.memoryScope;
+    if (patch.evaClass !== undefined) updated.evaClass = patch.evaClass;
+    if (patch.stage !== undefined) updated.stage = patch.stage;
+    if (patch.pinned !== undefined) {
+      if (patch.pinned) updated.pinned = true;
+      else delete updated.pinned;
+    }
+    if (patch.retired !== undefined) {
+      if (patch.retired) updated.retired = true;
+      else delete updated.retired;
+    }
+    return updated;
+  });
+  return validatePilots(next);
+}
+/** Pins/unpins or retires/restores an existing pilot and validates the result. */
+export function setPilotFlag(roster: readonly Pilot[], id: string, flag: 'pinned' | 'retired', on: boolean): Pilot[] {
+  return updatePilot(roster, id, { [flag]: on });
+}
 /** Lower case, accents removed, words only: "Perché la stampa 3D?" → "perche la stampa 3d". */
 export function words(text: string): string {
   return text

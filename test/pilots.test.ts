@@ -6,12 +6,18 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   PilotRegistry,
+  addPilot,
   choosePilot,
   describePilots,
+  genericPilot,
   hits,
   overlappingDomains,
+  pilotExecutor,
   sanitizePilotOffers,
+  setPilotFlag,
+  stageExecutor,
   toPilotOffers,
+  updatePilot,
   validatePilots,
   words,
   type Pilot,
@@ -435,4 +441,40 @@ test('F-045-T01: full pilot data, heartbeat offers, and Kaji-style PilotRegistry
   assert.equal(reg.get('NERV-02', 'cad-3d', { now: now + 100_000 }), undefined, 'expired peer offer');
   reg.clearPeer('NERV-02');
   assert.equal(reg.forBase('NERV-02', { now }).length, 0);
+});
+
+test('F-045-T02: add, rename, pin, retire pilots and generic pilot in most restrictive EVA for its stage', () => {
+  assert.equal(stageExecutor('prototype'), 'eva-00');
+  assert.equal(stageExecutor('test'), 'eva-01');
+  assert.equal(stageExecutor('production'), 'eva-02');
+  assert.equal(pilotExecutor({ stage: 'production', evaClass: 'eva-00' }), 'eva-00');
+  assert.equal(pilotExecutor({ stage: 'prototype', evaClass: 'eva-02' }), 'eva-00');
+  assert.equal(pilotExecutor({ stage: 'production', evaClass: 'eva-03' }), 'eva-03');
+
+  const gProto = genericPilot('gemma4:12b');
+  assert.equal(gProto.id, 'generic');
+  assert.equal(gProto.stage, 'prototype');
+  assert.equal(gProto.evaClass, 'eva-00');
+  assert.equal(genericPilot('gemma4:12b', 'test').evaClass, 'eva-01');
+  assert.equal(genericPilot('gemma4:12b', 'production').evaClass, 'eva-02');
+
+  let roster = addPilot([], {
+    id: 'printer',
+    name: 'Printer',
+    domain: '3D printing',
+    keywords: ['filament'],
+    model: 'm',
+    stage: 'prototype',
+  });
+  assert.equal(roster[0]?.name, 'Printer');
+  roster = updatePilot(roster, 'printer', { name: 'Print Master' });
+  assert.equal(roster[0]?.name, 'Print Master');
+  roster = setPilotFlag(roster, 'printer', 'pinned', true);
+  assert.equal(roster[0]?.pinned, true);
+  roster = setPilotFlag(roster, 'printer', 'pinned', false);
+  assert.equal(roster[0]?.pinned, undefined);
+  roster = setPilotFlag(roster, 'printer', 'retired', true);
+  assert.equal(roster[0]?.retired, true);
+  roster = setPilotFlag(roster, 'printer', 'retired', false);
+  assert.equal(roster[0]?.retired, undefined);
 });

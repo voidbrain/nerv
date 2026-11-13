@@ -36,7 +36,18 @@ import {
 } from './model.ts';
 import type { Effect, Pattern, Stage, Verdict } from './policy.ts';
 import { askedWhy, explainRecord, isAgencyQuestion } from './why.ts';
-import { PilotRegistry, choosePilot, type Pilot, type PilotOffer, type RegisteredPilot } from './pilots.ts';
+import {
+  PilotRegistry,
+  addPilot as addPilotEntry,
+  choosePilot,
+  genericPilot as buildGenericPilot,
+  setPilotFlag as setPilotEntryFlag,
+  updatePilot as updatePilotEntry,
+  type Pilot,
+  type PilotOffer,
+  type PilotPatch,
+  type RegisteredPilot,
+} from './pilots.ts';
 import { toolName, type McpTool } from './mcp.ts';
 /** Granted MCP tools as Misato sees them, and those suspended (F-021). */
 export interface ExternalTools {
@@ -186,7 +197,11 @@ export interface StoreApi {
   modelSetup?(): Promise<ModelSetup>;
   /** F-045/F-051: the pilot roster for the dashboard (config.json pilots, read now). */
   pilotRoster?(): Pilot[] | Promise<Pilot[]>;
+  genericPilot?(): Pilot | Promise<Pilot>;
   changePilotModel?(id: string, model: string): Promise<Pilot[]>;
+  addPilot?(entry: Pilot): Promise<Pilot[]>;
+  updatePilot?(id: string, patch: PilotPatch): Promise<Pilot[]>;
+  setPilotFlag?(id: string, flag: 'pinned' | 'retired', on: boolean): Promise<Pilot[]>;
   changeModels?(change: ModelChange): Promise<{ error?: string; kept?: boolean; models: unknown }>;
   /** Kaji bases with their live status (F-036): online when heard from within the last 90 s. */
   bases?(): Promise<(BaseEntry & { lastSeen: string | null; online: boolean; self: boolean })[]>;
@@ -2036,17 +2051,50 @@ export class Runtime implements StoreApi {
     return { models, cloudKey, ollama: await detectOllama(ollamaUrlOf(models)) };
   }
   /** Applies a change (validated, checked against Ollama's models), writes config.json and reloads the brain in place. */
-  /** F-045: change one specialist's local model; re-read the roster after discovery so concurrent changes survive. */
-  async changePilotModel(id: string, model: string): Promise<Pilot[]> {
+  /** The base's generic pilot in the most restrictive EVA its stage allows (F-045-T02). */
+  genericPilot(): Pilot {
+    const model = this.home ? (readConfig(this.home).models.roles?.consultant?.model ?? null) : null;
+    return buildGenericPilot(model, 'prototype');
+  }
+  private async requireInstalledModel(model: string): Promise<void> {
     if (!this.home) throw new Error('Pilot setup needs the data home.');
     if (typeof model !== 'string' || !model.trim() || model.length > 100)
       throw new Error('Pick a local model up to 100 characters.');
     const found = await detectOllama(ollamaUrlOf(readConfig(this.home).models));
     if (!found.reachable) throw new Error('Ollama is unavailable; pilot settings were not changed.');
     if (!found.models.some((m) => m.name === model)) throw new Error('Pick an installed Ollama model.');
-    const roster = readConfig(this.home).pilots ?? [];
+  }
+  /** F-045: change one specialist's local model; re-read the roster after discovery so concurrent changes survive. */
+  async changePilotModel(id: string, model: string): Promise<Pilot[]> {
+    await this.requireInstalledModel(model);
+    const roster = readConfig(this.home!).pilots ?? [];
     if (!roster.some((p) => p.id === id)) throw new Error('Unknown specialist pilot.');
-    const next = roster.map((p) => (p.id === id ? { ...p, model } : p));
+    const next = updatePilotEntry(roster, id, { model });
+    savePilots(this.home!, next);
+    return next;
+  }
+  /** F-045-T02: add a specialist pilot to the local roster. */
+  async addPilot(entry: Pilot): Promise<Pilot[]> {
+    await this.requireInstalledModel(entry.model);
+    const roster = readConfig(this.home!).pilots ?? [];
+    const next = addPilotEntry(roster, entry);
+    savePilots(this.home!, next);
+    return next;
+  }
+  /** F-045-T02: rename or update a specialist pilot in the local roster. */
+  async updatePilot(id: string, patch: PilotPatch): Promise<Pilot[]> {
+    if (!this.home) throw new Error('Pilot setup needs the data home.');
+    if (patch.model !== undefined) await this.requireInstalledModel(patch.model);
+    const roster = readConfig(this.home).pilots ?? [];
+    const next = updatePilotEntry(roster, id, patch);
+    savePilots(this.home, next);
+    return next;
+  }
+  /** F-045-T02: pin/unpin or retire/restore a specialist pilot in the local roster. */
+  async setPilotFlag(id: string, flag: 'pinned' | 'retired', on: boolean): Promise<Pilot[]> {
+    if (!this.home) throw new Error('Pilot setup needs the data home.');
+    const roster = readConfig(this.home).pilots ?? [];
+    const next = setPilotEntryFlag(roster, id, flag, on);
     savePilots(this.home, next);
     return next;
   }

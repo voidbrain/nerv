@@ -107,6 +107,46 @@ test(
         ],
         'concurrent updates retain each other',
       );
+      const list = (await (await fetch(base + '/api/pilots', { headers })).json()) as {
+        pilots: { id: string }[];
+        generic: { id: string; evaClass: string; stage: string };
+      };
+      assert.equal(list.generic.id, 'generic');
+      assert.equal(list.generic.stage, 'prototype');
+      assert.equal(list.generic.evaClass, 'eva-00');
+      const created = await fetch(base + '/api/pilots', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          id: 'artist',
+          name: 'Artist',
+          domain: 'image editing',
+          keywords: ['image'],
+          model: 'first',
+          stage: 'prototype',
+        }),
+      });
+      assert.equal(created.status, 201);
+      const renamed = await fetch(base + '/api/pilots/artist', {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ name: 'Image Master' }),
+      });
+      assert.equal(renamed.status, 200);
+      assert.equal(readConfig(home).pilots!.find((p) => p.id === 'artist')?.name, 'Image Master');
+      for (const [action, field, val] of [
+        ['pin', 'pinned', true],
+        ['unpin', 'pinned', undefined],
+        ['retire', 'retired', true],
+        ['restore', 'retired', undefined],
+      ] as const) {
+        const res = await fetch(`${base}/api/pilots/artist/${action}`, {
+          method: 'POST',
+          headers,
+        });
+        assert.equal(res.status, 200);
+        assert.equal(readConfig(home).pilots!.find((p) => p.id === 'artist')?.[field], val);
+      }
     } finally {
       await new Promise<void>((d) => {
         server.close(() => d());
