@@ -36,7 +36,7 @@ import {
 } from './model.ts';
 import type { Effect, Pattern, Stage, Verdict } from './policy.ts';
 import { askedWhy, explainRecord, isAgencyQuestion } from './why.ts';
-import { choosePilot, type Pilot } from './pilots.ts';
+import { PilotRegistry, choosePilot, type Pilot, type PilotOffer, type RegisteredPilot } from './pilots.ts';
 import { toolName, type McpTool } from './mcp.ts';
 /** Granted MCP tools as Misato sees them, and those suspended (F-021). */
 export interface ExternalTools {
@@ -1092,6 +1092,22 @@ export class Runtime implements StoreApi {
   notePeerOffers(baseId: string, tools: string[]) {
     this.offersHeard.set(baseId, { tools, at: Date.now() });
   }
+  private pilotReg?: PilotRegistry;
+  private getPilotRegistry(): PilotRegistry {
+    if (!this.pilotReg) {
+      const baseId = this.home ? (readConfig(this.home).base.id ?? 'LOCAL') : 'LOCAL';
+      this.pilotReg = new PilotRegistry(baseId, () => this.pilots?.() ?? []);
+    }
+    return this.pilotReg;
+  }
+  /** Active local pilots offered to peers in Kaji heartbeats (F-045-T01). */
+  offeredPilots(): PilotOffer[] {
+    return this.getPilotRegistry().offered();
+  }
+  /** Records pilots offered by an enrolled peer in its Kaji heartbeat (F-045-T01). */
+  notePeerPilots(baseId: string, pilots: PilotOffer[], now = Date.now()): void {
+    this.getPilotRegistry().recordPeer(baseId, pilots, now);
+  }
   /** Bases online now with something on offer: what Misato may send with kaji.run. */
   /**
    * F-045 detection: after PILOT_THRESHOLD requests in one domain within 30 days that no pilot fitted, NERV proposes a
@@ -1231,6 +1247,33 @@ export class Runtime implements StoreApi {
         const o = this.offersHeard.get(b.baseId);
         return o && o.tools.length && Date.now() - o.at < ONLINE_MS
           ? [{ base: b.baseId, name: b.name, tools: o.tools }]
+          : [];
+      });
+  }
+  /** Pilots registered across this base and online enrolled peer bases (F-045-T01). */
+  async registeredPilots(now = Date.now()): Promise<RegisteredPilot[]> {
+    const bases = await this.bases().catch(() => []);
+    const onlineBases = new Set(
+      bases.filter((b) => !b.self && b.online && b.status === 'enrolled').map((b) => b.baseId),
+    );
+    return this.getPilotRegistry().list({ now, maxAgeMs: ONLINE_MS, onlineBases });
+  }
+  /** Pilots offered by online enrolled peer bases (F-045-T01). */
+  async remotePilots(now = Date.now()): Promise<{ base: string; name: string; pilots: PilotOffer[] }[]> {
+    const bases = await this.bases().catch(() => []);
+    const reg = this.getPilotRegistry();
+    return bases
+      .filter((b) => !b.self && b.online && b.status === 'enrolled')
+      .flatMap((b) => {
+        const pilots = reg.forBase(b.baseId, { now, maxAgeMs: ONLINE_MS });
+        return pilots.length
+          ? [
+              {
+                base: b.baseId,
+                name: b.name,
+                pilots: pilots.map(({ baseId: _b, local: _l, receivedAt: _r, ...p }) => p),
+              },
+            ]
           : [];
       });
   }

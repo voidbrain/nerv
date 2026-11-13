@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import { generateKeyPairSync, type KeyObject } from 'node:crypto';
 import { createServer } from 'node:net';
 import { Store } from '../src/store.ts';
+import type { PilotOffer } from '../src/pilots.ts';
 import {
   Registry,
   createRootKey,
@@ -648,4 +649,95 @@ test('F-014: authenticated replay admission is bounded and old entries expire wi
   assert.equal(cache.fresh('three', 1001), false);
   assert.equal(cache.fresh('one', 1002), false);
   assert.equal(cache.fresh('three', 602000), true);
+});
+
+test('F-045-T01: Kaji heartbeat exchanges offered pilots between enrolled bases', async () => {
+  const a = keys(),
+    b = keys();
+  const portA = await freePort(),
+    portB = await freePort();
+  const dirA = mkdtempSync(join(tmpdir(), 'nerv-kaji-pilots-a-')),
+    dirB = mkdtempSync(join(tmpdir(), 'nerv-kaji-pilots-b-'));
+  const storeA = new Store(join(dirA, 'a.db')),
+    storeB = new Store(join(dirB, 'b.db'));
+  const regA = new Registry(storeA.db, root.publicKey),
+    regB = new Registry(storeB.db, root.publicKey);
+  const r1 = rec({
+    kind: 'enrol',
+    baseId: 'NERV-01',
+    name: 'Tokyo',
+    publicKey: a.publicKey,
+    address: `127.0.0.1:${portA}`,
+  });
+  const r2 = rec({
+    kind: 'enrol',
+    baseId: 'NERV-02',
+    name: 'Tabgha',
+    publicKey: b.publicKey,
+    address: `127.0.0.1:${portB}`,
+  });
+  for (const r of [r1, r2]) {
+    regA.add(r);
+    regB.add(r);
+  }
+  const heardOnA = new Map<string, PilotOffer[]>();
+  const heardOnB = new Map<string, PilotOffer[]>();
+  const offerA: PilotOffer[] = [
+    {
+      id: 'coder',
+      name: 'Coder',
+      role: 'coder',
+      domain: 'TypeScript',
+      keywords: ['typescript'],
+      skills: ['tdd'],
+      tools: ['fs.read'],
+      model: 'qwen2.5-coder:14b',
+      memoryScope: 'domain',
+      evaClass: 'eva-01',
+      stage: 'test',
+    },
+  ];
+  const offerB: PilotOffer[] = [
+    {
+      id: 'cad-3d',
+      name: 'Tabgha 3D',
+      role: 'specialist',
+      domain: '3D modeling',
+      keywords: ['blender'],
+      model: 'gemma4:12b',
+      memoryScope: 'cad-3d',
+      evaClass: 'eva-00',
+      stage: 'prototype',
+    },
+  ];
+  const linkA = new KajiLink({
+    baseId: 'NERV-01',
+    key: a.privateKey,
+    publicKey: a.publicKey,
+    registry: port(regA),
+    pilots: () => offerA,
+    onPilots: (id, p) => heardOnA.set(id, p),
+  });
+  const linkB = new KajiLink({
+    baseId: 'NERV-02',
+    key: b.privateKey,
+    publicKey: b.publicKey,
+    registry: port(regB),
+    pilots: () => offerB,
+    onPilots: (id, p) => heardOnB.set(id, p),
+  });
+  try {
+    await linkA.start(60_000);
+    await linkB.start(60_000);
+    await until(() => heardOnA.has('NERV-02') && heardOnB.has('NERV-01'));
+    assert.deepEqual(heardOnA.get('NERV-02'), offerB);
+    assert.deepEqual(heardOnB.get('NERV-01'), offerA);
+  } finally {
+    await linkA.stop();
+    await linkB.stop();
+    storeA.close();
+    storeB.close();
+    rmSync(dirA, { recursive: true, force: true });
+    rmSync(dirB, { recursive: true, force: true });
+  }
 });
