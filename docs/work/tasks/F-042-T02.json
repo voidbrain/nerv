@@ -4,7 +4,7 @@
   "parent": "F-042",
   "title": "Grounded answers and agency facts as data",
   "goal": "Grounded answers and agency facts as data",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Answers quote records in the request's language and never invent; consultant not asked about the agency; pilots and consultant get base names as data (B-012)"
   ],
