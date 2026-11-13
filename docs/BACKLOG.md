@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 140 h agent + 16.75 h owner across 129 open steps of 31 features and 3 other records. 22.25 h of actual effort recorded on 34 steps. Generated from the task files.
+**Remaining effort:** 139 h agent + 16.75 h owner across 128 open steps of 31 features and 3 other records. 22.75 h of actual effort recorded on 35 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -115,9 +115,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟣 Very large | 10.75 h agent + 2.5 h owner | — | [F-012](#f-012) | — | — |
+| 🔴 Open | 🔺 P1 | 🟣 Very large | 9.75 h agent + 2.5 h owner | — | [F-012](#f-012) | — | — |
 
-💻 **→** Next: F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback (Planned).
+💻 **→** Next: F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases (Planned).
 
 | | |
 |---|---|
@@ -130,7 +130,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
 | — | F-006-T01 — T01a — Decision: remote inference endpoint identity, permitted data and behaviour when unavailable | 0.5 h | 0.5 h (stated) | 0 h | Completed |
-| 🟢 Small | F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback | 1 h | 0 h | 1 h | Planned |
+| — | F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback | 0.5 h | 0.5 h (stated) | 0 h | Completed |
 | 🟡 Medium | F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases | 1.25 h | 0 h | 1.25 h | Planned |
 | 🟢 Small | F-006-T04 — T04a — Placement campaign plan with exact cases, repeats and budgets for owner approval | 0.5 h | 0 h | 0.5 h agent + 0.25 h owner | Planned |
 | 🟢 Small | F-006-T05 — T05a — Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.5 h | 0 h | 0.5 h agent + 0.25 h owner | Planned |
@@ -143,7 +143,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | F-006-T12 — T04c — Placement report and recommendation | 0.5 h | 0 h | 0.5 h | Planned |
 | 🟢 Small | F-006-T13 — T05b — Three Mac operating-condition runs | 1 h | 0 h | 1 h agent + 1.5 h owner | Planned |
 | 🟢 Small | F-006-T14 — T05c — Mac operating-conditions report | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟣 Very large | **Total** | 11.75 h | 1 h (2 of 14 steps recorded) | 10.75 h agent + 2.5 h owner | 2 of 14 completed |
+| 🟣 Very large | **Total** | 11.25 h | 1.5 h (3 of 14 steps recorded) | 9.75 h agent + 2.5 h owner | 3 of 14 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -153,7 +153,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | Queue order | 2 — Owner-selected subsequent NERV work, 2026-11-10; intervening upstream work is tracked in its own repository |
-| PR / evidence | [PR #347](https://github.com/voidbrain/nerv/pull/347) (T01a agreement & T01b remote inference config validation, `src/model.ts`, `test/remote-inference-config.test.ts`); [PR #296](https://github.com/voidbrain/nerv/pull/296) (T01a remote inference decision: docs/decisions/remote-inference.md); [PR #244](https://github.com/voidbrain/nerv/pull/244) owner-selected queue order; [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Ownership correction/adoption: [PR #235](https://github.com/voidbrain/nerv/pull/235);  Host-load plan: [PR #234](https://github.com/voidbrain/nerv/pull/234);  Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #221](https://github.com/voidbrain/nerv/pull/221) schema/reuse assessment; [Gauntlet ownership/reuse proposal](design/gauntlet-protocol-2026-11-08.md), 2026-11-08; the proposal preceded delivered Gauntlet0.1.1 adoption in PR #223 / F-073; automatic routing/qualification remains unimplemented and no consumer work gates upstream releases; [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| PR / evidence | [PR #348](https://github.com/voidbrain/nerv/pull/348) (T02a independent model/worker selection contract, `src/model.ts`, `src/runtime.ts`, `test/orchestration-selection.test.ts`); [PR #347](https://github.com/voidbrain/nerv/pull/347) (T01a agreement & T01b remote inference config validation, `src/model.ts`, `test/remote-inference-config.test.ts`); [PR #296](https://github.com/voidbrain/nerv/pull/296) (T01a remote inference decision: docs/decisions/remote-inference.md); [PR #244](https://github.com/voidbrain/nerv/pull/244) owner-selected queue order; [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Ownership correction/adoption: [PR #235](https://github.com/voidbrain/nerv/pull/235);  Host-load plan: [PR #234](https://github.com/voidbrain/nerv/pull/234);  Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #221](https://github.com/voidbrain/nerv/pull/221) schema/reuse assessment; [Gauntlet ownership/reuse proposal](design/gauntlet-protocol-2026-11-08.md), 2026-11-08; the proposal preceded delivered Gauntlet0.1.1 adoption in PR #223 / F-073; automatic routing/qualification remains unimplemented and no consumer work gates upstream releases; [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-13 |

@@ -24,7 +24,16 @@ import { readConfig, readModelKey, savePilots } from './config.ts';
 import type { ActionDetail, Approval, Decision, SortieSummary } from './ledger.ts';
 import { argsHash } from './ledger.ts';
 import type { SortieEvent } from './events.ts';
-import { MODEL_TIMEOUT_MS, type Ask, type Reply, type RouteName } from './model.ts';
+import {
+  MODEL_TIMEOUT_MS,
+  selectOrchestration,
+  type Ask,
+  type EnrolledBaseCandidate,
+  type OrchestrationRequest,
+  type OrchestrationSelection,
+  type Reply,
+  type RouteName,
+} from './model.ts';
 import type { Effect, Pattern, Stage, Verdict } from './policy.ts';
 import { askedWhy, explainRecord, isAgencyQuestion } from './why.ts';
 import { choosePilot, type Pilot } from './pilots.ts';
@@ -1186,6 +1195,32 @@ export class Runtime implements StoreApi {
     } catch {
       return [];
     }
+  }
+  /** Independent inference endpoint and execution worker selection (F-006-T02). */
+  async selectExecution(
+    req: OrchestrationRequest,
+    basesOverride?: readonly EnrolledBaseCandidate[],
+  ): Promise<OrchestrationSelection> {
+    const cfg = this.home ? readConfig(this.home) : undefined;
+    const hasCloudKey = this.home ? !!readModelKey(this.home) : false;
+    const bases: readonly EnrolledBaseCandidate[] =
+      basesOverride ??
+      (await this.bases().catch(() => [])).map((b) => {
+        const heard = this.offersHeard.get(b.baseId);
+        return {
+          baseId: b.baseId,
+          status: (b as { status?: string }).status ?? 'enrolled',
+          address: (b as { address?: string }).address ?? '',
+          online: b.online,
+          ...(heard && Date.now() - heard.at < ONLINE_MS ? { offers: heard.tools } : {}),
+        };
+      });
+    return selectOrchestration(req, {
+      selfBaseId: cfg?.base.id ?? 'LOCAL',
+      models: cfg?.models ?? {},
+      hasCloudKey,
+      bases,
+    });
   }
   async remoteOffers(): Promise<RemoteOffer[]> {
     if (!this.offersHeard.size) return [];
