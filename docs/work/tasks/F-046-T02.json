@@ -4,7 +4,7 @@
   "parent": "F-046",
   "title": "Matching existing items before an add",
   "goal": "Matching existing items before an add",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Matching reminders and facts shown to Misato; same item not re-proposed and the reply says it exists"
   ],
@@ -32,12 +32,14 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "estimate": "0 h agent",
+    "basis": "Added matching existing reminders and facts to Misato's context with three-way outcome rules and duplicate guards in 0.25 h agent.",
     "reviewed": "2026-11-13",
     "baselineDays": 1,
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated",
     "estimateAgentHours": 0.25
   }
 }

@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 2 | 4 | 11 | 12 |
+| **This week** | 2 | 5 | 11 | 12 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 29 | 4 |
+| **Open** | 28 | 4 |
 | **Require Human 🧑** | 12 | 2 |
 
 ### Require Human 🧑
@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 31.25 h agent + 16.75 h owner across 105 open steps of 26 features and 2 other records. 31.25 h of actual effort recorded on 58 steps. Generated from the task files.
+**Remaining effort:** 30.5 h agent + 16.75 h owner across 102 open steps of 25 features and 2 other records. 32 h of actual effort recorded on 61 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -691,47 +691,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-046"></a>[✨ F-046](#top)
-
-**Misato checks what already exists before adding: same thing, a change, or new**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.75 h | — | — | — | — |
-
-💻 **→** Next: a reminders.update tool for Misato and the existing-item check before any add.
-
-| | |
-|---|---|
-| **Issue** | Owner request 2026-11-05, after B-003 (the same dentist request sent four times, two copies approved): before adding something, Misato should look for it among what already exists (reminders, Lilith's facts, later calendar and notes); if it is the same, not add another and say so in the reply; if it changed (another time, a corrected fact), propose changing the existing one instead. Today the store drops only exact copies (B-003 for reminders, `factKey` for facts); a reminder with the same title at another time becomes a second one, and a fact that contradicts an earlier one ("I like tea" after "I don't like tea") is added next to it. Misato has no tool to change a reminder. |
-| **Reproduce** | Ask Aoba to remind you to call the dentist on 3 February at 10, then again at 11: two reminders. Tell it you like tea, then that you don't: two facts. |
-| **Check** | Before proposing reminders.add or memory.remember, Misato is shown the existing items that match (same or similar title, the same subject); the same item is not proposed again and the reply says it already exists (with its time or text); a changed one becomes a proposal to change it (reminders.update for title or time; for a fact, the edit of the existing fact, shown old → new on the card), approved like any change; a really new item is added as today; the reply says which of the three it was and why; works in English and Italian; tests cover same, changed and new for reminders and facts, through the scheduler. Calendar and notes follow the same rule when they exist. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-046-T01 — reminders.update as a Misato tool | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | F-046-T02 — Matching existing items before an add | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | F-046-T03 — Changed facts proposed as edits | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 3 steps recorded) | 0.75 h | 0 of 3 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-046.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner request 2026-11-05 |
-| Opened | 2026-11-05 |
-| Verification | Pending |
-| Reviewed | 2026-11-05 |
-
-</details>
-
----
-
 ### <a id="f-065"></a>[✨ F-065](#top)
 
 **Agentic threat map: each OWASP risk tied to a NERV control and the test that proves it**
@@ -1779,6 +1738,47 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | [PR #364](https://github.com/voidbrain/nerv/pull/364) F-045-T07..T09 cloud/other-provider pilot routing, split/merge with lineage, tool acquisition/discard, and Time Request PROTO proposal quality; [PR #357](https://github.com/voidbrain/nerv/pull/357) F-045-T06 evidence-based placement keeping individual, combination, and placement scopes distinct; [PR #356](https://github.com/voidbrain/nerv/pull/356) F-045-T05 remote pilots chosen and run through the authenticated worker line with grant checks; [PR #355](https://github.com/voidbrain/nerv/pull/355) F-045-T04 execution choice by domain/evidence and owner-only promotion; [PR #354](https://github.com/voidbrain/nerv/pull/354) F-045-T03 F-041 consultant ranking, fallback, and ask-both advice mode; [PR #353](https://github.com/voidbrain/nerv/pull/353) F-045-T02 owner roster management and generic pilot EVA confinement; [PR #352](https://github.com/voidbrain/nerv/pull/352) F-045-T01 pilot data schema, PilotRegistry, and Kaji heartbeat offers; [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #221](https://github.com/voidbrain/nerv/pull/221) schema/reuse assessment; [Gauntlet ownership/reuse proposal](design/gauntlet-protocol-2026-11-08.md), 2026-11-08; the proposal preceded delivered Gauntlet0.1.1 adoption in PR #223 / F-073; automatic routing/qualification remains unimplemented and no consumer work gates upstream releases; [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #161](https://github.com/voidbrain/nerv/pull/161) verification reconciliation;  [PR #160](https://github.com/voidbrain/nerv/pull/160) pilot selectors/map status and owner clarification; Owner questions 2026-11-05; slice 1 [PR #107](https://github.com/voidbrain/nerv/pull/107) |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-13 F-045-T07..T09: `npm run typecheck`, `node --test test/pilots.test.ts` (16/16 passed), and `node --test test/gate.test.ts test/pilot-model.test.ts test/model-setup.test.ts test/misato.test.ts test/protocol.test.ts` (35/35 passed); `canPilotLeaveMachine`, `resolvePilotInference`, `proposePilotSplit`, `proposePilotMerge`, `splitPilot`, `mergePilots`, `proposePilotToolChange`, `applyPilotToolChange`, `sanitizeProposedDomain`, and `pilots.split`/`pilots.merge`/`pilots.tools` owner-only executors implemented. Earlier: 2026-11-13 F-045-T06: `node --test test/pilots.test.ts` (12/12 passed) and `npm run check:conventions && npm run check:fast` passed; `evaluatePilotPlacement`, `chooseQualifiedExecution`, `Runtime.assessPilotPlacement`, and `Runtime.selectQualifiedPilotForExecution` implemented keeping individual, combination, and placement evidence distinct. Earlier: 2026-11-13 F-045-T05: `node --test test/pilots.test.ts test/kaji-run.test.ts test/pilot-model.test.ts` (16/16 passed) and `npm run check:conventions && npm run check:fast` passed; `canRunRemotePilot`, `selectRemotePilotRun`, `RunItem.pilot`, and `runFromPeer` pilot grant enforcement implemented. Earlier: 2026-11-13 F-045-T04: `node --test test/pilots.test.ts test/pilot-model.test.ts test/gate.test.ts` and `npm run check:conventions && npm run check:fast` passed; `chooseExecutionPilot`, `promotionEligible`, and owner-only `pilots.promote` implemented. Earlier: 2026-11-13 F-045-T03: `node --test test/pilots.test.ts test/pilot-model.test.ts` and `npm run check:conventions && npm run check:fast` passed; F-041 consultant ranking (`rankPilots`, `chooseAdvisers`), fallback, and ask-both adviser selection implemented. Earlier: 2026-11-13 F-045-T02: `node --test test/pilots.test.ts test/pilot-model.test.ts test/model-setup.test.ts` and `npm run check:fast` passed; owner roster management (add, rename, pin, retire) via CLI/API/Runtime and generic pilot EVA confinement implemented. Earlier: 2026-11-13 F-045-T01: `node --test test/pilots.test.ts test/kaji-link.test.ts test/model-setup.test.ts` (23/23 passed) and `npm run typecheck` passed; pilot data fields (`role`, `skills`, `tools`, `memoryScope`, `evaClass`), `PilotRegistry`, and Kaji heartbeat pilot offers implemented. Earlier: 2026-11-06 Unit/integration and Browser/accessibility: pilot model API/DOM regressions, full suite, real-runtime Chrome flow, inline-row/Apply states and scoped axe passed; merged PR #160 CI run 42241192687 green; 2026-11-05 slice 1: test/pilots.test.ts, test/model-setup.test.ts, full suite (local run) |
+| Reviewed | 2026-11-13 |
+
+</details>
+
+---
+
+### <a id="f-046"></a>[✨ F-046](#top)
+
+**Misato checks what already exists before adding: same thing, a change, or new**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔵 Closed | ◻️ P2 | 🟡 Medium | 0 h | — | — | — | — |
+
+💻 **→** Closed 2026-11-13: `reminders.update` and `memory.edit` tools added, matching pending reminders and Lilith facts shown to Misato with the three-way check (same, changed, new) in EN/IT, and `old → new` fact edit approval cards.
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-05, after B-003 (the same dentist request sent four times, two copies approved): before adding something, Misato should look for it among what already exists (reminders, Lilith's facts, later calendar and notes); if it is the same, not add another and say so in the reply; if it changed (another time, a corrected fact), propose changing the existing one instead. Today the store drops only exact copies (B-003 for reminders, `factKey` for facts); a reminder with the same title at another time becomes a second one, and a fact that contradicts an earlier one ("I like tea" after "I don't like tea") is added next to it. Misato has no tool to change a reminder. |
+| **Reproduce** | Ask Aoba to remind you to call the dentist on 3 February at 10, then again at 11: two reminders. Tell it you like tea, then that you don't: two facts. |
+| **Check** | Before proposing reminders.add or memory.remember, Misato is shown the existing items that match (same or similar title, the same subject); the same item is not proposed again and the reply says it already exists (with its time or text); a changed one becomes a proposal to change it (reminders.update for title or time; for a fact, the edit of the existing fact, shown old → new on the card), approved like any change; a really new item is added as today; the reply says which of the three it was and why; works in English and Italian; tests cover same, changed and new for reminders and facts, through the scheduler. Calendar and notes follow the same rule when they exist. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | F-046-T01 — reminders.update as a Misato tool | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | F-046-T02 — Matching existing items before an add | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | F-046-T03 — Changed facts proposed as edits | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | **Total** | 0.75 h | 0.75 h | 0 h | 3 of 3 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-046.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #369](https://github.com/voidbrain/nerv/pull/369); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration; Owner request 2026-11-05; `test/f046-existing-check.test.ts` |
+| Opened | 2026-11-05 |
+| Verification | Passed (`npm run typecheck`, `npm run build`, `npm test`, `npm run check:fast`) |
 | Reviewed | 2026-11-13 |
 
 </details>

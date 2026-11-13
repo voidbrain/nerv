@@ -769,6 +769,7 @@ export const methodSchemas = {
       history: { type: 'array', maxItems: 12, items: { type: 'object' } },
       context: { type: 'array', maxItems: 3, items: { type: 'object' } },
       memory: { type: 'array', maxItems: 10, items: { type: 'object' } },
+      reminders: { type: 'array', maxItems: 10, items: { type: 'object' } },
       remote: { type: 'array', maxItems: 10, items: { type: 'object' } },
       bases: {
         type: 'array',
