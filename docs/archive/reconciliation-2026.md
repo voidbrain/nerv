@@ -346,10 +346,3 @@ Owner request: F-005 has ready owner steps (a decision, two acceptance runs) but
 
 Full audit of 2026-11-13 ([report](../audits/2026-11-13-full.md)). `npm run ci:status` read all 41 PRs merged since `fbd5458`: every run green (`full-suite` skipped by scoped verification on #341, #342, #343, #345 and others). Archived as Closed 2026-11-13: B-042, B-050, B-052, B-053, B-055, F-025, F-042, F-045, F-046, F-052, F-074. Records that did not cite their PR: B-056 (#342), B-057 (#343), B-052 (#345), F-005 (#337 T23/T25, #339 T21), F-007 (#344 T06, next action moved to T01 or T07). F-051: two steps added (T06 EVA cage labels, T07 peer inspection scope). A full CI run on main was dispatched (run 43461834506).
 
-## 2026-11-13 — main `605f5ca`
-
-PRs #374–#379 passed CI. Their own changes reconciled the full audit, F-075, B-058/B-059, F-077/F-078 and harness 8.5.1–8.6.0 records; no further status or archive change was supported by that evidence.
-
-## 2026-11-13 — main `6d2f328`
-
-PR #380 passed CI (plan, validate, native-macos and windows; full-suite scoped out). It closed and archived F-015, opened F-081, and updated its other owner-decision records; no further status change was supported.
