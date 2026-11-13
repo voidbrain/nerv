@@ -13,6 +13,7 @@
   ],
   "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
   "acceptance": [
+    "Owner-selected target 2026-11-13: a Linux VM on the Mac, the same as F-009-T03",
     "Acceptance on an owner-selected mini PC, Pi or equivalent",
     "Implement validated install/status/start/stop/update/uninstall/recovery for supported Linux user services with explicit account/login policy",
     "Preserve profile/source/root ownership, fencing, backups, interruption and uncertain workers; do not enable system-wide or linger behavior implicitly",

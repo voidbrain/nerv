@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-016",
   "id": "F-016-T02",
-  "status": "planned",
+  "status": "closed",
   "title": "Step 1b — Independent review of the coordinator relocation decision",
   "goal": "Independent review of the coordinator relocation decision.",
   "capabilities": [
@@ -14,7 +14,7 @@
   ],
   "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
   "acceptance": [
-    "Independent review of the coordinator relocation decision"
+    "Independent review of the coordinator relocation decision: done 2026-11-13, not ready (docs/reviews/2026-11-13-f016-relocation-review.md)"
   ],
   "dependsOn": [
     "F-016-T01"
@@ -40,7 +40,7 @@
     "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
     "reviewed": "2026-11-13",
     "baselineDays": 0.5,
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.75,
     "estimateAgentHours": 0.25
   }

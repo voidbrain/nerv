@@ -349,3 +349,7 @@ Full audit of 2026-11-13 ([report](../audits/2026-11-13-full.md)). `npm run ci:s
 ## 2026-11-13 — main `605f5ca`
 
 PRs #374–#379 passed CI. Their own changes reconciled the full audit, F-075, B-058/B-059, F-077/F-078 and harness 8.5.1–8.6.0 records; no further status or archive change was supported by that evidence.
+
+## 2026-11-13 — main `6d2f328`
+
+PR #380 passed CI (plan, validate, native-macos and windows; full-suite scoped out). It closed and archived F-015, opened F-081, and updated its other owner-decision records; no further status change was supported.
