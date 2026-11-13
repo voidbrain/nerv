@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 38 h agent + 16.75 h owner across 116 open steps of 31 features and 6 other records. 16.75 h of actual effort recorded on 32 steps. Generated from the task files.
+**Remaining effort:** 38 h agent + 16.75 h owner across 117 open steps of 31 features and 6 other records. 16.75 h of actual effort recorded on 32 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -897,11 +897,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h | — | — | — | — |
 
-💻 **→** Next: B-060-T01.
+💻 **→** Next: B-060-T02 (Windows timing tests).
 
 | | |
 |---|---|
-| **Issue** | 2026-11-13: three PRs that changed no product code failed `windows` on three different timing tests, and each passed on rerun. #379: `test/instrumentality.test.ts:216` (F-003 failed night, 15 s timeout) and `test/kaji-link.test.ts:376` (degraded base, 20 s timeout). #382: `test/worker-link.test.ts:1116` (B-046 event-loop stall: "a reply that arrived during the stall must not end the session"). The same day `validate` on #379 failed once with "Chrome startup timed out". Reruns hide the failures, and each one costs a full CI round. |
+| **Issue** | 2026-11-13: three PRs that changed no product code failed `windows` on three different timing tests, and each passed on rerun. #379: `test/instrumentality.test.ts:216` (F-003 failed night, 15 s timeout) and `test/kaji-link.test.ts:376` (degraded base, 20 s timeout). #382: `test/worker-link.test.ts:1116` (B-046 event-loop stall: "a reply that arrived during the stall must not end the session"). The same day `validate` on #379 failed once with "Chrome startup timed out". On #383 `validate` failed in `test/upgrade-health.test.ts` (F-005-T14) with `listen EADDRINUSE 127.0.0.1:44784`: the fixture draws a random port in 43990–44989, inside Linux's ephemeral range, and opens it again at every simulated service start, so any outgoing socket holding that port fails the test. Reruns hide the failures, and each one costs a full CI round. |
 | **Reproduce** | `gh run view 43486093786 --log-failed` and the #382 Windows job of 2026-11-13; run the three tests on a loaded Windows host. |
 | **Check** | Each test waits on the condition it checks instead of wall-clock budgets the runner can miss (or has a Windows-specific budget with a stated reason); a loop of 20 Windows runs of the three tests passes; the Chrome start timeout has headroom on the CI runner. |
 
@@ -909,8 +909,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | B-060-T01 — Make the three Windows timing tests wait on their condition | 0.5 h | 0 h | 0.5 h | Ready |
-| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed |
+| 🟢 Small | B-060-T01 — The update-health fixture holds its port | 0.5 h | 0 h | 0 h | Implemented; verification pending |
+| 🟢 Small | B-060-T02 — Make the Windows timing tests wait on their condition | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 2 steps recorded) | 0.5 h | 0 of 2 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -919,7 +920,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #383](https://github.com/voidbrain/nerv/pull/383) [PR #379](https://github.com/voidbrain/nerv/pull/379) and [PR #382](https://github.com/voidbrain/nerv/pull/382) Windows reruns, 2026-11-13. |
+| PR / evidence | [PR #384](https://github.com/voidbrain/nerv/pull/384) [PR #383](https://github.com/voidbrain/nerv/pull/383) [PR #379](https://github.com/voidbrain/nerv/pull/379) and [PR #382](https://github.com/voidbrain/nerv/pull/382) Windows reruns, 2026-11-13. |
 | Opened | 2026-11-13 |
 | Verification | Pending. |
 | Reviewed | 2026-11-13 |

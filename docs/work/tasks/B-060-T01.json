@@ -2,26 +2,37 @@
   "version": 1,
   "id": "B-060-T01",
   "parent": "B-060",
-  "title": "Make the three Windows timing tests wait on their condition",
+  "title": "The update-health fixture holds its port",
   "goal": "The Windows job fails only when behaviour is wrong, not when the runner is slow",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
-    "Each of the three tests waits on its condition, or carries a Windows budget with a reason",
-    "20 consecutive Windows CI runs of the three tests pass",
-    "The browser start timeout has headroom on the CI runner"
+    "A committed test fails without the fix: another socket on the drawn port gives EADDRINUSE",
+    "The fixture listens once on a kernel-chosen port and keeps it for the whole test"
   ],
   "dependsOn": [],
-  "resources": ["test/**", "docs/work/records/**", "generated:backlog-views"],
-  "capabilities": ["regression-design", "bounded-edit"],
+  "resources": [
+    "test/upgrade-health.test.ts",
+    "docs/work/records/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "regression-design",
+    "bounded-edit"
+  ],
   "privacy": "Neutral fixtures only.",
-  "validation": ["npm test", "Windows CI job"],
-  "escalation": ["A change to the behaviour a test checks goes to a fresh-context review"],
+  "validation": [
+    "npm test",
+    "Windows CI job"
+  ],
+  "escalation": [
+    "A change to the behaviour a test checks goes to a fresh-context review"
+  ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h",
+    "estimate": "0.25 h",
     "basis": "Estimated 2026-11-13: three test waits and one timeout. Not a measurement.",
     "reviewed": "2026-11-13",
-    "agentHours": 0.5,
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
   }
