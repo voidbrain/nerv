@@ -1,0 +1,46 @@
+{
+ "version": 1,
+ "id": "F-078-T05",
+ "parent": "F-078",
+ "title": "Small-model campaign on Tabgha",
+ "goal": "Small-model campaign on Tabgha",
+ "status": "planned",
+ "acceptance": [
+  "The same packs run against qwen2.5-coder:14b (and any smaller approved model) on Tabgha, recorded with base and model identity",
+  "Timeouts and memory pressure on the mini PC recorded, not hidden"
+ ],
+ "dependsOn": [
+  "F-078-T02"
+ ],
+ "resources": [
+  "evals/**",
+  "docs/evaluations/**",
+  "docs/agents/model-profiles.json",
+  "docs/work/records/**",
+  "generated:backlog-views"
+ ],
+ "capabilities": [
+  "structured-tools",
+  "privacy-review"
+ ],
+ "privacy": "Reports stay private under artifacts/; only metadata (identity, counts, outcomes) enters Git. No prompts, replies or credentials.",
+ "validation": [
+  "node tools/gauntlet.mjs pending",
+  "npm run check:fast"
+ ],
+ "escalation": [
+  "A model campaign runs only inside the scope and budget the owner approved in F-078-T02",
+  "A model failure that NERV can fix becomes a B- record with a failing test first"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "0.5 h agent + 0.25 h owner",
+  "basis": "Estimated 2026-11-13 at the harness 8.5.0 initial step size; campaign wall time on the host is extra and bounded by the T02 budget. Not a measurement.",
+  "reviewed": "2026-11-13",
+  "agentHours": 0.5,
+  "ownerHours": 0.25,
+  "baselineAgentHours": 0.5,
+  "estimateAgentHours": 0.5,
+  "ownerKind": "procedure"
+ }
+}

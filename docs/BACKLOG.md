@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 5 | 9 | 11 | 12 |
+| **This week** | 6 | 9 | 11 | 12 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 30 | 4 |
-| **Require Human 🧑** | 16 | 2 |
+| **Open** | 31 | 4 |
+| **Require Human 🧑** | 17 | 2 |
 
 ### Require Human 🧑
 
@@ -30,12 +30,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-023](#f-023) | [F-016](#f-016) |  |  |
 | [F-004](#f-004) | [F-076](#f-076) |  |  |
 | [F-075](#f-075) | [F-051](#f-051) |  |  |
-| [F-060](#f-060) | [F-077](#f-077) |  |  |
-|  | [F-064](#f-064) |  |  |
+| [F-078](#f-078) | [F-077](#f-077) |  |  |
+| [F-060](#f-060) | [F-064](#f-064) |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 33.5 h agent + 18.25 h owner across 109 open steps of 28 features and 4 other records. 20.75 h of actual effort recorded on 34 steps. Generated from the task files.
+**Remaining effort:** 37 h agent + 19 h owner across 117 open steps of 29 features and 4 other records. 20.75 h of actual effort recorded on 34 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1048,6 +1048,52 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-078"></a>[✨ F-078](#top)
+
+**Model evaluation: the four candidate models by role and base, Mac and mini PC**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.5 h agent + 0.75 h owner | — | — | 🧑 | — |
+
+🧑 **→** Run or allow the read-only model inventory on both bases ([steps](acceptance/f078-model-inventory.md)); then approve the matrix (F-078-T02).
+
+| | |
+|---|---|
+| **Issue** | The four candidate profiles in docs/agents/model-profiles.json (gemma4:12b, qwen2.5-coder:14b, devstral-small-2:24b, qwen3-coder:30b) are all unmeasured candidates. The Gauntlet ledger holds 55 runs, none with a model; the only real-model evidence is the gemma4:12b smoke of 2026-11-09 (7/10, three invalid structured outputs) and the B-021/B-049 Misato runs. Nothing measures the mini PC (Tabgha, NERV-02), which the owner reports runs qwen2.5-coder:14b. |
+| **Reproduce** | [Inventory steps](acceptance/f078-model-inventory.md); `node -e "console.log(require('./evals/gauntlet/ledger.json').runs.filter(r=>r.model).length)"`; docs/agents/model-profiles.json; [evaluation guide](evaluations/README.md). |
+| **Check** | Each approved model × role × base cell has a recorded run with model and base identity; each profile is qualified or not per role with evidence; the 2026-11-09 smoke failures are explained; F-006-T12 receives the comparison; new Gauntlet packs are adopted when released. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | F-078-T01 — Inventory the models and hardware on Neo Tokyo-3 and Tabgha | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Ready |
+| 🟢 Small | F-078-T02 — Agree the evaluation matrix and its budget | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned |
+| 🟢 Small | F-078-T03 — Smoke campaign on Neo Tokyo-3 | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-078-T04 — Role campaign on Neo Tokyo-3 | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-078-T05 — Small-model campaign on Tabgha | 0.5 h | 0 h | 0.5 h agent + 0.25 h owner | Planned |
+| 🟢 Small | F-078-T06 — Campaign for the larger candidates | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-078-T07 — Comparison report and profile status | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-078-T08 — Adopt the new Gauntlet packs (gauntlet F-012) when released | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟡 Medium | **Total** | 3.5 h | 0 h (0 of 8 steps recorded) | 3.5 h agent + 0.75 h owner | 0 of 8 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-078.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #375](https://github.com/voidbrain/nerv/pull/375) plan; owner request 2026-11-13; [Gemma smoke 2026-11-09](evaluations/2026-11-09-gemma-common-smoke.md); docs/agents/model-profiles.json |
+| Depends on | — |
+| Opened | 2026-11-13 |
+| Verification | Pending. |
+| Reviewed | 2026-11-13 |
+
+</details>
+
+---
 ### <a id="b-057"></a>[🐞 B-057](#top)
 
 **Companion error messages are Italian only and do not say what went wrong**
