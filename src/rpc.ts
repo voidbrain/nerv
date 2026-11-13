@@ -494,12 +494,18 @@ export const methodSchemas = {
         type: 'object',
         required: ['name', 'domain', 'model'],
         properties: {
+          id: { type: 'string', minLength: 1, maxLength: 40 },
           name: { type: 'string', minLength: 1, maxLength: 40 },
           domain: { type: 'string', minLength: 1, maxLength: 200 },
           model: { type: 'string', minLength: 1, maxLength: 100 },
+          route: { type: 'string', enum: ['local', 'cloud'] },
+          provider: { type: 'string', minLength: 1, maxLength: 40 },
+          stage: { type: 'string', enum: ['prototype', 'test', 'production'] },
         },
         additionalProperties: false,
       },
+      privacy: { type: 'string', enum: ['local-only', 'owner-bases', 'any'] },
+      tainted: { type: 'boolean' },
       bases: {
         type: 'array',
         maxItems: 20,

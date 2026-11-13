@@ -4,7 +4,7 @@ import type { Reminder, ReminderInput } from './store.ts';
 import type { ToolDoc } from './misato.ts';
 import type { Memory } from './memory.ts';
 import { readConfig, savePilots, setSchedule } from './config.ts';
-import { STAGES, nextStage, updatePilot, type Stage } from './pilots.ts';
+import { STAGES, applyPilotToolChange, mergePilots, nextStage, splitPilot, updatePilot, type Stage } from './pilots.ts';
 import { reconcileReminderArgs } from './reminder-time.ts';
 import { explainRecord, type WhyRecord } from './why.ts';
 export interface AgencyBaseSnapshot {
@@ -66,9 +66,12 @@ export const builtinTools: Tool[] = [
   { name: 'agency.status', effect: 'read' },
   // Only the brief and Instrumentality schedules: local, reversible by setting the previous values back.
   { name: 'settings.schedule', effect: 'write-local', inverse: 'settings.schedule' },
-  // F-045: a new pilot or stage promotion only after the owner approves its card.
+  // F-045: a new pilot, stage promotion, split/merge, or tool change only after the owner approves its card.
   { name: 'pilots.create', effect: 'write-local', owner: true },
   { name: 'pilots.promote', effect: 'write-local', owner: true },
+  { name: 'pilots.split', effect: 'write-local', owner: true },
+  { name: 'pilots.merge', effect: 'write-local', owner: true },
+  { name: 'pilots.tools', effect: 'write-local', owner: true },
   // F-036 slice 3b: one action on another base. Owner-only for now (always a card); that base's own gate reviews it again.
   { name: 'kaji.run', effect: 'write-external', owner: true },
 ];
@@ -169,6 +172,26 @@ export const toolDocs: ToolDoc[] = [
     about:
       'Proposes promoting an existing pilot to the next trust stage (prototype -> test -> production). Always requires owner approval.',
     args: '{"id": pilot id, "stage": "test" or "production"}',
+  },
+  {
+    name: 'pilots.split',
+    effect: 'write-local',
+    about:
+      'Proposes splitting a narrower specialist pilot from an existing pilot with versioned lineage. Always requires owner approval.',
+    args: '{"parentId": existing pilot id, "id": new pilot id, "name": up to 40 chars, "domain": narrower domain, "keywords": [1 to 30 words]}',
+  },
+  {
+    name: 'pilots.merge',
+    effect: 'write-local',
+    about:
+      'Proposes merging two overlapping pilots while preserving versioned lineage. Always requires owner approval.',
+    args: '{"sourceIds": [leftId, rightId], "id": target pilot id, "name": optional name, "domain": optional domain, "keywords": optional array}',
+  },
+  {
+    name: 'pilots.tools',
+    effect: 'write-local',
+    about: 'Proposes adding or discarding tools for an existing pilot. Always requires owner approval.',
+    args: '{"id": pilot id, "add": [tool names] (optional), "remove": [tool names] (optional)}',
   },
 ];
 /** {id} or {ids: [...]} (1–20 distinct strings): bulk changes stay one reviewed action, bound by the gate's argument hash. */
@@ -379,6 +402,52 @@ export function execute(
         throw new Error(`Pilot ${id} at ${pilot.stage} can only be promoted to ${expected ?? 'none'}.`);
       savePilots(backend.home, updatePilot(roster, id, { stage: target }));
       return { promoted: id, from: pilot.stage, to: target };
+    }
+    case 'pilots.split': {
+      only(args, ['parentId', 'id', 'name', 'domain', 'keywords', 'model', 'skills', 'tools']);
+      if (!backend.home) throw new Error('Pilots are not available here.');
+      const roster = readConfig(backend.home).pilots ?? [];
+      const next = splitPilot(roster, text(args, 'parentId'), {
+        id: text(args, 'id'),
+        name: text(args, 'name'),
+        domain: text(args, 'domain'),
+        keywords: args.keywords as string[],
+        ...(typeof args.model === 'string' ? { model: args.model } : {}),
+        ...(Array.isArray(args.skills) ? { skills: args.skills as string[] } : {}),
+        ...(Array.isArray(args.tools) ? { tools: args.tools as string[] } : {}),
+      });
+      savePilots(backend.home, next);
+      const created = next.find((p) => p.id === args.id)!;
+      return { split: created.id, from: created.parent, stage: created.stage, lineage: created.lineage };
+    }
+    case 'pilots.merge': {
+      only(args, ['sourceIds', 'id', 'name', 'domain', 'keywords']);
+      if (!backend.home) throw new Error('Pilots are not available here.');
+      if (!Array.isArray(args.sourceIds) || args.sourceIds.length !== 2)
+        throw new Error('sourceIds must be [leftId, rightId].');
+      const roster = readConfig(backend.home).pilots ?? [];
+      const next = mergePilots(roster, [String(args.sourceIds[0]), String(args.sourceIds[1])], {
+        id: text(args, 'id'),
+        ...(typeof args.name === 'string' ? { name: args.name } : {}),
+        ...(typeof args.domain === 'string' ? { domain: args.domain } : {}),
+        ...(Array.isArray(args.keywords) ? { keywords: args.keywords as string[] } : {}),
+      });
+      savePilots(backend.home, next);
+      const merged = next.find((p) => p.id === args.id)!;
+      return { merged: merged.id, version: merged.version, lineage: merged.lineage };
+    }
+    case 'pilots.tools': {
+      only(args, ['id', 'add', 'remove']);
+      if (!backend.home) throw new Error('Pilots are not available here.');
+      const id = text(args, 'id');
+      const add = args.add === undefined ? undefined : (args.add as string[]);
+      const remove = args.remove === undefined ? undefined : (args.remove as string[]);
+      if (add !== undefined && !Array.isArray(add)) throw new Error('add must be an array of tool names.');
+      if (remove !== undefined && !Array.isArray(remove)) throw new Error('remove must be an array of tool names.');
+      const roster = readConfig(backend.home).pilots ?? [];
+      const res = applyPilotToolChange(roster, id, { add, remove });
+      savePilots(backend.home, res.roster);
+      return { id, added: res.added, removed: res.removed, tools: res.pilot.tools ?? [], version: res.pilot.version };
     }
     case 'memory.forget':
       only(args, ['id']);

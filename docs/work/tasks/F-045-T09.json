@@ -4,7 +4,7 @@
   "parent": "F-045",
   "title": "Tool acquisition/discard and generic proposal quality",
   "goal": "Tool acquisition/discard and generic proposal quality",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Owner-approved tool acquisition/discard lifecycle for pilots and Time Request PROTO generic proposal quality investigation resolved with regressions"
   ],
@@ -32,11 +32,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h agent",
-    "basis": "Added 2026-11-13 to match remaining F-045 scope; baseline 0.5 h agent per v8.5.0 agent-speed sizing.",
+    "estimate": "0 h agent",
+    "basis": "Implemented owner-approved pilot tool acquisition/discard and Time Request PROTO generic proposal quality filtering in 0.5 h agent.",
     "reviewed": "2026-11-13",
-    "agentHours": 0.5,
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated",
     "estimateAgentHours": 0.5
   }
 }

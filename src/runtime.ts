@@ -49,7 +49,12 @@ import {
   evaluatePilotPlacement,
   genericPilot as buildGenericPilot,
   promotionEligible,
+  proposePilotMerge,
+  proposePilotSplit,
+  proposePilotToolChange,
   rankPilots,
+  resolvePilotInference,
+  sanitizeProposedDomain,
   selectRemotePilotRun,
   setPilotFlag as setPilotEntryFlag,
   shouldDemotePilot,
@@ -63,6 +68,7 @@ import {
   type PilotRecord,
   type PlacementAssessment,
   type QualificationEvidence,
+  type SubdomainSortie,
   type RegisteredPilot,
 } from './pilots.ts';
 import { toolName, type McpTool } from './mcp.ts';
@@ -1040,14 +1046,31 @@ export class Runtime implements StoreApi {
     );
     const offered = localFiltered.tools;
     let unmatched: string | undefined;
-    const askAdviser = async (pilot: Chosen | undefined): Promise<string | undefined> =>
-      this.modelCall(
+    const sortieTainted = context.some((t) => t.tainted) || memory.some((m) => m.tainted);
+    const askAdviser = async (pilot: Chosen | undefined): Promise<string | undefined> => {
+      const fullPilot = pilot ? (this.pilots?.() ?? []).find((p) => p.id === pilot.id) : undefined;
+      return this.modelCall(
         'consultant.advise',
         {
           request: localFiltered.request,
           ...(localFiltered.previousAdvice ? { previousAdvice: localFiltered.previousAdvice } : {}),
           ...(localFiltered.context.length ? { context: localFiltered.context } : {}),
-          ...(pilot ? { pilot: { name: pilot.name, domain: pilot.domain, model: pilot.model } } : {}),
+          ...(pilot
+            ? {
+                pilot: {
+                  id: pilot.id,
+                  name: pilot.name,
+                  domain: pilot.domain,
+                  model: pilot.model,
+                  ...(fullPilot?.route ? { route: fullPilot.route } : {}),
+                  ...(fullPilot?.provider ? { provider: fullPilot.provider } : {}),
+                  ...(fullPilot?.stage ? { stage: fullPilot.stage } : {}),
+                },
+                ...(fullPilot?.route === 'cloud' || fullPilot?.provider
+                  ? { tainted: sortieTainted, privacy: sortieTainted ? 'local-only' : 'any' }
+                  : {}),
+              }
+            : {}),
           ...(named.length ? { bases: named } : {}),
           ...(offered.length ? { tools: offered } : {}),
         },
@@ -1070,6 +1093,7 @@ export class Runtime implements StoreApi {
           });
           return r.advice;
         });
+    };
     let advice = !consult
       ? followup?.advice
       : followup?.askBoth && advisers.length > 1
@@ -1348,28 +1372,30 @@ export class Runtime implements StoreApi {
     return next;
   }
   private async proposePilotOnce(domain: string, now: Date): Promise<boolean> {
-    if (choosePilot(domain, this.pilots?.() ?? [])) return false;
+    const cleanDomain = sanitizeProposedDomain(domain);
+    if (!cleanDomain) return false;
+    if (choosePilot(cleanDomain, this.pilots?.() ?? [])) return false;
     const since = new Date(now.getTime() - 30 * 86_400_000).toISOString();
-    const seen = (await this.nervous.call('pilots.unmatched', { domain, since })) as {
+    const seen = (await this.nervous.call('pilots.unmatched', { domain: cleanDomain, since })) as {
       count: number;
       sorties: { id: string; title: string }[];
       proposal: string | null;
     };
     if (seen.count < PILOT_THRESHOLD || seen.proposal) return false;
-    const id = (/^[a-z]/.test(domain) ? '' : 'p-') + domain.replace(/ /g, '-').slice(0, 28);
-    const name = domain.replace(/\b\p{L}/gu, (c) => c.toUpperCase()).slice(0, 40);
-    const keywords = [...new Set([domain, ...domain.split(' ').filter((w) => w.length >= 4)])].slice(0, 10);
+    const id = (/^[a-z]/.test(cleanDomain) ? '' : 'p-') + cleanDomain.replace(/ /g, '-').slice(0, 28);
+    const name = cleanDomain.replace(/\b\p{L}/gu, (c) => c.toUpperCase()).slice(0, 40);
+    const keywords = [...new Set([cleanDomain, ...cleanDomain.split(' ').filter((w) => w.length >= 4)])].slice(0, 10);
     const sortieId = (await this.nervous.call('sorties.open', {
-      title: `Marduk Institute: a pilot for ${domain}?`,
+      title: `Marduk Institute: a pilot for ${cleanDomain}?`,
       source: 'marduk',
     })) as string;
-    const why = `${seen.count} requests about ${domain} in 30 days had no specialist: ${seen.sorties.map((s) => `S-${s.id.slice(0, 4).toUpperCase()} “${s.title.slice(0, 60)}”`).join(', ')}.`;
+    const why = `${seen.count} requests about ${cleanDomain} in 30 days (sample size ${seen.count}) had no specialist: ${seen.sorties.map((s) => `S-${s.id.slice(0, 4).toUpperCase()} “${s.title.slice(0, 60)}”`).join(', ')}.`;
     await this.gate(
       sortieId,
       {
-        request: `Marduk Institute proposes a pilot for ${domain}. ${why}`,
+        request: `Marduk Institute proposes a pilot for ${cleanDomain} at Prototype. ${why}`,
         tool: 'pilots.create',
-        args: { id, name, domain, keywords },
+        args: { id, name, domain: cleanDomain, keywords },
       },
       false,
     );
@@ -2357,6 +2383,106 @@ export class Runtime implements StoreApi {
       baseId: this.getPilotRegistry().localBaseId,
       partnerPilotIds: opts?.partnerPilotIds,
     });
+  }
+  /** F-045-T07: resolves a pilot's cloud/other-provider route against configured Models, Scrolls, and trust stage. */
+  selectPilotInference(
+    id: string,
+    input: {
+      trust: 'trusted' | 'tainted';
+      privacy: 'local-only' | 'owner-bases' | 'any';
+      tool?: string;
+      effect?: Effect;
+    },
+  ) {
+    if (!this.home) throw new Error('Pilot routing needs the data home.');
+    const config = readConfig(this.home);
+    const pilot = (config.pilots ?? []).find((p) => p.id === id);
+    if (!pilot) throw new Error(`Unknown specialist pilot: ${id}.`);
+    const hasCloudKey = Boolean(readModelKey(this.home));
+    return resolvePilotInference(pilot, config.models, readScrolls(this.home).policy, { ...input, hasCloudKey });
+  }
+  /** F-045-T08: proposes an owner-approved pilot split when sorties cluster in a higher-scoring subdomain. */
+  async proposePilotSplit(parentId: string, sorties: readonly SubdomainSortie[]) {
+    const parent = this.pilotRoster().find((p) => p.id === parentId);
+    if (!parent) throw new Error(`Unknown specialist pilot: ${parentId}.`);
+    const proposal = proposePilotSplit(parent, sorties);
+    if (!proposal) return undefined;
+    const sortieId = (await this.nervous.call('sorties.open', {
+      title: `Marduk Institute: split ${proposal.proposedId} from ${parent.id}?`,
+      source: 'marduk',
+    })) as string;
+    await this.gate(
+      sortieId,
+      {
+        request: `Marduk Institute proposes splitting ${proposal.proposedId} from ${parent.id}. ${proposal.rationale}`,
+        tool: 'pilots.split',
+        args: {
+          parentId: parent.id,
+          id: proposal.proposedId,
+          name: proposal.name,
+          domain: proposal.domain,
+          keywords: proposal.keywords,
+        },
+      },
+      false,
+    );
+    return proposal;
+  }
+  /** F-045-T08: proposes an owner-approved pilot merge when two active pilots overlap with equivalent evidence. */
+  async proposePilotMerge(records?: ReadonlyMap<string, PilotRecord & { score?: number }>) {
+    const proposal = proposePilotMerge(this.pilotRoster(), records);
+    if (!proposal) return undefined;
+    const sortieId = (await this.nervous.call('sorties.open', {
+      title: `Marduk Institute: merge ${proposal.sourceIds.join(' + ')}?`,
+      source: 'marduk',
+    })) as string;
+    await this.gate(
+      sortieId,
+      {
+        request: `Marduk Institute proposes merging ${proposal.sourceIds.join(' and ')} into ${proposal.proposedId}. ${proposal.rationale}`,
+        tool: 'pilots.merge',
+        args: {
+          sourceIds: proposal.sourceIds,
+          id: proposal.proposedId,
+          name: proposal.name,
+          domain: proposal.domain,
+          keywords: proposal.keywords,
+        },
+      },
+      false,
+    );
+    return proposal;
+  }
+  /** F-045-T09: proposes owner-approved tool acquisition or discard for a pilot from missing/unused tool evidence. */
+  async proposePilotTools(
+    pilotId: string,
+    evidence: {
+      missingTools?: readonly { tool: string; count: number }[];
+      unusedTools?: readonly { tool: string; daysUnused: number; uses?: number }[];
+    },
+  ) {
+    const pilot = this.pilotRoster().find((p) => p.id === pilotId);
+    if (!pilot) throw new Error(`Unknown specialist pilot: ${pilotId}.`);
+    const proposal = proposePilotToolChange(pilot, evidence);
+    if (!proposal) return undefined;
+    const sortieId = (await this.nervous.call('sorties.open', {
+      title: `Marduk Institute: update tools for ${pilot.id}?`,
+      source: 'marduk',
+    })) as string;
+    await this.gate(
+      sortieId,
+      {
+        request: `Marduk Institute proposes updating tools for ${pilot.id}. ${proposal.rationale}`,
+        tool: 'pilots.tools',
+        args: {
+          id: pilot.id,
+          ...(proposal.add.length ? { add: proposal.add } : {}),
+          ...(proposal.remove.length ? { remove: proposal.remove } : {}),
+        },
+      },
+      false,
+    );
+    return proposal;
   }
   private async requireInstalledModel(model: string): Promise<void> {
     if (!this.home) throw new Error('Pilot setup needs the data home.');

@@ -13,7 +13,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 31 | 6 |
+| **Open** | 30 | 6 |
 | **Require Human 🧑** | 11 | 2 |
 
 ### Require Human 🧑
@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 36.25 h agent + 16.75 h owner across 119 open steps of 29 features and 3 other records. 27 h of actual effort recorded on 45 steps. Generated from the task files.
+**Remaining effort:** 34.75 h agent + 16.75 h owner across 116 open steps of 28 features and 3 other records. 28.5 h of actual effort recorded on 48 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -164,61 +164,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
-### <a id="f-045"></a>[✨ F-045](#top)
-
-**Pilots: a roster of permanent agents that grows, specialises and is chosen per request**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | [F-049](#f-049), [F-050](#f-050), [F-054](#f-054) | — | — |
-
-💻 **→** Next: F-045-T07 — Other-provider and cloud pilot routing (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner questions 2026-11-05: NERV needs permanent agents (a coder, the 3D expert on Tabgha, and others as jobs require: a Photoshop expert), a generic one for anything else, specialists that grow from it, and automatic choice. The design already names pilots (F-025: pilots run in the EVA class of their stage, watermelon trust) but has no roster. Consultants (F-041) become pilots asked only for advice (owner, 2026-11-05). |
-| **Reproduce** | Ask Aoba for an image edit or a coding job: there is no pilot to give it to. |
-| **Check** | **Definition as data:** a pilot is a role and domain (topics, keywords), skills, tools, a model, a memory scope, an EVA class and a trust stage (Prototype, Test, Production), with its parent; most share the base's model, a separate model only when its evaluations justify it. **Roster:** a registry like the Kaji one; each base offers its pilots in the heartbeat; the owner adds, renames, retires and pins. **Generic pilot:** one per base, takes any job no specialist covers, in the most restrictive EVA its stage allows. **Two ways of use:** asked for advice (the F-041 consultant rules: at most one per topic by default, the owner's pin, then the main base's own, then the best record, the next as fallback, "ask both" per topic; advice is data, never a vote or an action) or put in charge of the job (acts in its EVA, effects by card). **Choice:** Misato routes by domain and keywords, base, stage allowed for the action and record; unclear goes to the generic pilot or a question; the card shows the pilot, its stage and base, and the owner can change it; routing accuracy is measured. **New specialists found automatically:** unmatched domains, tools the generic pilot lacked and repeated failures are counted per domain; past a threshold (e.g. three unmatched in 30 days, or one missing tool) NERV proposes a pilot (or an extension of an existing one) on a card with the sorties behind it, its skills, tools and installs; created at Prototype. **Split and merge by evidence:** a split when sorties cluster in a subdomain and a narrower set scores better; a merge when two overlap and neither is better; lineage kept. **Learning (owner decision 2026-11-05: the recommendation):** new evaluation cases from failures are added automatically and shown; domain memory is proposed in one review card a week; skills change only by the owner's approval, versioned; prompt, model, tools, permissions and trust stage are always the owner's; nothing learned from a tainted sortie becomes a skill without review; a change to skills or prompt is versioned and re-runs the pilot's evaluations, and a drop moves it back a stage. **Inside a pilot** planning, doing and checking stay one loop; promotion through the golden sortie evaluations. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| — | F-045-T01 — Pilot definition as data and registry | 0.5 h | 0.5 h (stated) | 0 h | Completed |
-| — | F-045-T02 — Owner roster management | 0.5 h | 0.5 h (stated) | 0 h | Completed |
-| — | F-045-T03 — Advice mode | 0.5 h | 0.5 h (stated) | 0 h | Completed |
-| — | F-045-T04 — Execution mode and automatic choice | 0.5 h | 0.5 h (stated) | 0 h | Completed |
-| — | F-045-T05 — Remote pilots | 0.5 h | 0.5 h (stated) | 0 h | Completed |
-| — | F-045-T06 — Evidence-based placement | 0.5 h | 0.5 h (stated) | 0 h | Completed |
-| 🟢 Small | F-045-T07 — Other-provider and cloud pilot routing | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | F-045-T08 — Evidence-based pilot split and merge with lineage | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | F-045-T09 — Tool acquisition/discard and generic proposal quality | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟡 Medium | **Total** | 4.5 h | 3 h (6 of 9 steps recorded) | 1.5 h | 6 of 9 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-045.md)
-
-| Field | Value |
-|---|---|
-| Depends on | — |
-| PR / evidence | [PR #357](https://github.com/voidbrain/nerv/pull/357) F-045-T06 evidence-based placement keeping individual, combination, and placement scopes distinct; [PR #356](https://github.com/voidbrain/nerv/pull/356) F-045-T05 remote pilots chosen and run through the authenticated worker line with grant checks; [PR #355](https://github.com/voidbrain/nerv/pull/355) F-045-T04 execution choice by domain/evidence and owner-only promotion; [PR #354](https://github.com/voidbrain/nerv/pull/354) F-045-T03 F-041 consultant ranking, fallback, and ask-both advice mode; [PR #353](https://github.com/voidbrain/nerv/pull/353) F-045-T02 owner roster management and generic pilot EVA confinement; [PR #352](https://github.com/voidbrain/nerv/pull/352) F-045-T01 pilot data schema, PilotRegistry, and Kaji heartbeat offers; [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #221](https://github.com/voidbrain/nerv/pull/221) schema/reuse assessment; [Gauntlet ownership/reuse proposal](design/gauntlet-protocol-2026-11-08.md), 2026-11-08; the proposal preceded delivered Gauntlet0.1.1 adoption in PR #223 / F-073; automatic routing/qualification remains unimplemented and no consumer work gates upstream releases; [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #161](https://github.com/voidbrain/nerv/pull/161) verification reconciliation;  [PR #160](https://github.com/voidbrain/nerv/pull/160) pilot selectors/map status and owner clarification; Owner questions 2026-11-05; slice 1 [PR #107](https://github.com/voidbrain/nerv/pull/107) |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-13 F-045-T06: `node --test test/pilots.test.ts` (12/12 passed) and `npm run check:conventions && npm run check:fast` passed; `evaluatePilotPlacement`, `chooseQualifiedExecution`, `Runtime.assessPilotPlacement`, and `Runtime.selectQualifiedPilotForExecution` implemented keeping individual, combination, and placement evidence distinct. Earlier: 2026-11-13 F-045-T05: `node --test test/pilots.test.ts test/kaji-run.test.ts test/pilot-model.test.ts` (16/16 passed) and `npm run check:conventions && npm run check:fast` passed; `canRunRemotePilot`, `selectRemotePilotRun`, `RunItem.pilot`, and `runFromPeer` pilot grant enforcement implemented. Earlier: 2026-11-13 F-045-T04: `node --test test/pilots.test.ts test/pilot-model.test.ts test/gate.test.ts` and `npm run check:conventions && npm run check:fast` passed; `chooseExecutionPilot`, `promotionEligible`, and owner-only `pilots.promote` implemented. Earlier: 2026-11-13 F-045-T03: `node --test test/pilots.test.ts test/pilot-model.test.ts` and `npm run check:conventions && npm run check:fast` passed; F-041 consultant ranking (`rankPilots`, `chooseAdvisers`), fallback, and ask-both adviser selection implemented. Earlier: 2026-11-13 F-045-T02: `node --test test/pilots.test.ts test/pilot-model.test.ts test/model-setup.test.ts` and `npm run check:fast` passed; owner roster management (add, rename, pin, retire) via CLI/API/Runtime and generic pilot EVA confinement implemented. Earlier: 2026-11-13 F-045-T01: `node --test test/pilots.test.ts test/kaji-link.test.ts test/model-setup.test.ts` (23/23 passed) and `npm run typecheck` passed; pilot data fields (`role`, `skills`, `tools`, `memoryScope`, `evaClass`), `PilotRegistry`, and Kaji heartbeat pilot offers implemented. Earlier: 2026-11-06 Unit/integration and Browser/accessibility: pilot model API/DOM regressions, full suite, real-runtime Chrome flow, inline-row/Apply states and scoped axe passed; merged PR #160 CI run 42241192687 green; 2026-11-05 slice 1: test/pilots.test.ts, test/model-setup.test.ts, full suite (local run) |
-| Reviewed | 2026-11-13 |
-
-</details>
-
----
-
 ### <a id="f-049"></a>[✨ F-049](#top)
 
 **EVA instances: an EVA is a class, each job gets a fresh sandbox**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.5 h agent + 0.75 h owner | [F-045](#f-045) | [F-021](#f-021), [F-027](#f-027) | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.5 h agent + 0.75 h owner | — | [F-021](#f-021), [F-027](#f-027) | — | — |
 
 💻 **→** Next: the EVA class definition and one sandboxed instance per job, starting with EVA-03 (owner, 2026-11-05).
 
@@ -1186,7 +1138,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | [F-045](#f-045), [F-048](#f-048) | — | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | [F-048](#f-048) | — | — | — |
 
 💻 **→** Next: the job message and its fallback, for capability first.
 
@@ -1517,7 +1469,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | [F-045](#f-045) | — | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | — | — |
 
 💻 **→** F-054-T01 (Simple chronicle from recorded facts) and F-054-T04 (record the missing facts) closed; next F-054-T02 (Eva version).
 
@@ -1822,6 +1774,54 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-05 |
 | Verification | 2026-11-13: Unit/integration & full-suite CI passed ([PR #314](https://github.com/voidbrain/nerv/pull/314) CI run `43282005793` green across `plan`, `windows`, `native-macos`, `validate`, `full-suite`). |
 | Reviewed | 2026-11-12 |
+
+</details>
+
+---
+
+### <a id="f-045"></a>[✨ F-045](#top)
+
+**Pilots: a roster of permanent agents that grows, specialises and is chosen per request**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔵 Closed | ◻️ P2 | 🔴 Large | 0 h | — | [F-049](#f-049), [F-050](#f-050), [F-054](#f-054) | — | — |
+
+💻 **→** Next: all steps closed; verify and close the record.
+
+| | |
+|---|---|
+| **Issue** | Owner questions 2026-11-05: NERV needs permanent agents (a coder, the 3D expert on Tabgha, and others as jobs require: a Photoshop expert), a generic one for anything else, specialists that grow from it, and automatic choice. The design already names pilots (F-025: pilots run in the EVA class of their stage, watermelon trust) but has no roster. Consultants (F-041) become pilots asked only for advice (owner, 2026-11-05). |
+| **Reproduce** | Ask Aoba for an image edit or a coding job: there is no pilot to give it to. |
+| **Check** | **Definition as data:** a pilot is a role and domain (topics, keywords), skills, tools, a model, a memory scope, an EVA class and a trust stage (Prototype, Test, Production), with its parent; most share the base's model, a separate model only when its evaluations justify it. **Roster:** a registry like the Kaji one; each base offers its pilots in the heartbeat; the owner adds, renames, retires and pins. **Generic pilot:** one per base, takes any job no specialist covers, in the most restrictive EVA its stage allows. **Two ways of use:** asked for advice (the F-041 consultant rules: at most one per topic by default, the owner's pin, then the main base's own, then the best record, the next as fallback, "ask both" per topic; advice is data, never a vote or an action) or put in charge of the job (acts in its EVA, effects by card). **Choice:** Misato routes by domain and keywords, base, stage allowed for the action and record; unclear goes to the generic pilot or a question; the card shows the pilot, its stage and base, and the owner can change it; routing accuracy is measured. **New specialists found automatically:** unmatched domains, tools the generic pilot lacked and repeated failures are counted per domain; past a threshold (e.g. three unmatched in 30 days, or one missing tool) NERV proposes a pilot (or an extension of an existing one) on a card with the sorties behind it, its skills, tools and installs; created at Prototype. **Split and merge by evidence:** a split when sorties cluster in a subdomain and a narrower set scores better; a merge when two overlap and neither is better; lineage kept. **Learning (owner decision 2026-11-05: the recommendation):** new evaluation cases from failures are added automatically and shown; domain memory is proposed in one review card a week; skills change only by the owner's approval, versioned; prompt, model, tools, permissions and trust stage are always the owner's; nothing learned from a tainted sortie becomes a skill without review; a change to skills or prompt is versioned and re-runs the pilot's evaluations, and a drop moves it back a stage. **Inside a pilot** planning, doing and checking stay one loop; promotion through the golden sortie evaluations. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | F-045-T01 — Pilot definition as data and registry | 0.5 h | 0.5 h (stated) | 0 h | Completed |
+| — | F-045-T02 — Owner roster management | 0.5 h | 0.5 h (stated) | 0 h | Completed |
+| — | F-045-T03 — Advice mode | 0.5 h | 0.5 h (stated) | 0 h | Completed |
+| — | F-045-T04 — Execution mode and automatic choice | 0.5 h | 0.5 h (stated) | 0 h | Completed |
+| — | F-045-T05 — Remote pilots | 0.5 h | 0.5 h (stated) | 0 h | Completed |
+| — | F-045-T06 — Evidence-based placement | 0.5 h | 0.5 h (stated) | 0 h | Completed |
+| — | F-045-T07 — Other-provider and cloud pilot routing | 0.5 h | 0.5 h (stated) | 0 h | Completed |
+| — | F-045-T08 — Evidence-based pilot split and merge with lineage | 0.5 h | 0.5 h (stated) | 0 h | Completed |
+| — | F-045-T09 — Tool acquisition/discard and generic proposal quality | 0.5 h | 0.5 h (stated) | 0 h | Completed |
+| — | **Total** | 4.5 h | 4.5 h | 0 h | 9 of 9 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-045.md)
+
+| Field | Value |
+|---|---|
+| Depends on | — |
+| PR / evidence | [PR #364](https://github.com/voidbrain/nerv/pull/364) F-045-T07..T09 cloud/other-provider pilot routing, split/merge with lineage, tool acquisition/discard, and Time Request PROTO proposal quality; [PR #357](https://github.com/voidbrain/nerv/pull/357) F-045-T06 evidence-based placement keeping individual, combination, and placement scopes distinct; [PR #356](https://github.com/voidbrain/nerv/pull/356) F-045-T05 remote pilots chosen and run through the authenticated worker line with grant checks; [PR #355](https://github.com/voidbrain/nerv/pull/355) F-045-T04 execution choice by domain/evidence and owner-only promotion; [PR #354](https://github.com/voidbrain/nerv/pull/354) F-045-T03 F-041 consultant ranking, fallback, and ask-both advice mode; [PR #353](https://github.com/voidbrain/nerv/pull/353) F-045-T02 owner roster management and generic pilot EVA confinement; [PR #352](https://github.com/voidbrain/nerv/pull/352) F-045-T01 pilot data schema, PilotRegistry, and Kaji heartbeat offers; [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #221](https://github.com/voidbrain/nerv/pull/221) schema/reuse assessment; [Gauntlet ownership/reuse proposal](design/gauntlet-protocol-2026-11-08.md), 2026-11-08; the proposal preceded delivered Gauntlet0.1.1 adoption in PR #223 / F-073; automatic routing/qualification remains unimplemented and no consumer work gates upstream releases; [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #161](https://github.com/voidbrain/nerv/pull/161) verification reconciliation;  [PR #160](https://github.com/voidbrain/nerv/pull/160) pilot selectors/map status and owner clarification; Owner questions 2026-11-05; slice 1 [PR #107](https://github.com/voidbrain/nerv/pull/107) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-13 F-045-T07..T09: `npm run typecheck`, `node --test test/pilots.test.ts` (16/16 passed), and `node --test test/gate.test.ts test/pilot-model.test.ts test/model-setup.test.ts test/misato.test.ts test/protocol.test.ts` (35/35 passed); `canPilotLeaveMachine`, `resolvePilotInference`, `proposePilotSplit`, `proposePilotMerge`, `splitPilot`, `mergePilots`, `proposePilotToolChange`, `applyPilotToolChange`, `sanitizeProposedDomain`, and `pilots.split`/`pilots.merge`/`pilots.tools` owner-only executors implemented. Earlier: 2026-11-13 F-045-T06: `node --test test/pilots.test.ts` (12/12 passed) and `npm run check:conventions && npm run check:fast` passed; `evaluatePilotPlacement`, `chooseQualifiedExecution`, `Runtime.assessPilotPlacement`, and `Runtime.selectQualifiedPilotForExecution` implemented keeping individual, combination, and placement evidence distinct. Earlier: 2026-11-13 F-045-T05: `node --test test/pilots.test.ts test/kaji-run.test.ts test/pilot-model.test.ts` (16/16 passed) and `npm run check:conventions && npm run check:fast` passed; `canRunRemotePilot`, `selectRemotePilotRun`, `RunItem.pilot`, and `runFromPeer` pilot grant enforcement implemented. Earlier: 2026-11-13 F-045-T04: `node --test test/pilots.test.ts test/pilot-model.test.ts test/gate.test.ts` and `npm run check:conventions && npm run check:fast` passed; `chooseExecutionPilot`, `promotionEligible`, and owner-only `pilots.promote` implemented. Earlier: 2026-11-13 F-045-T03: `node --test test/pilots.test.ts test/pilot-model.test.ts` and `npm run check:conventions && npm run check:fast` passed; F-041 consultant ranking (`rankPilots`, `chooseAdvisers`), fallback, and ask-both adviser selection implemented. Earlier: 2026-11-13 F-045-T02: `node --test test/pilots.test.ts test/pilot-model.test.ts test/model-setup.test.ts` and `npm run check:fast` passed; owner roster management (add, rename, pin, retire) via CLI/API/Runtime and generic pilot EVA confinement implemented. Earlier: 2026-11-13 F-045-T01: `node --test test/pilots.test.ts test/kaji-link.test.ts test/model-setup.test.ts` (23/23 passed) and `npm run typecheck` passed; pilot data fields (`role`, `skills`, `tools`, `memoryScope`, `evaClass`), `PilotRegistry`, and Kaji heartbeat pilot offers implemented. Earlier: 2026-11-06 Unit/integration and Browser/accessibility: pilot model API/DOM regressions, full suite, real-runtime Chrome flow, inline-row/Apply states and scoped axe passed; merged PR #160 CI run 42241192687 green; 2026-11-05 slice 1: test/pilots.test.ts, test/model-setup.test.ts, full suite (local run) |
+| Reviewed | 2026-11-13 |
 
 </details>
 
