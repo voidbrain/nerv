@@ -23,7 +23,10 @@ test('B-055: renderService and windowsLauncher resolve per-shell fnm symlinks to
 
     const unit = renderService('linux', '/tmp/nerv-home', '/tmp/nerv-root', shellNode);
     assert.ok(!unit.includes('fnm_multishells'), 'systemd unit must not record fnm_multishells');
-    assert.ok(unit.includes(stableNode), 'systemd unit should record resolved stable Node path');
+    assert.ok(
+      unit.includes(stableNode.replaceAll('\\', '\\\\')),
+      'systemd unit should record resolved stable Node path',
+    );
 
     const vbs = windowsLauncher('C:\\Users\\alice\\.nerv', 'C:\\Users\\alice\\nerv', shellNode);
     assert.ok(!vbs.includes('fnm_multishells'), 'Windows launcher must not record fnm_multishells');
