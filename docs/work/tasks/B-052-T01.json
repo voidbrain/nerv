@@ -4,7 +4,7 @@
   "parent": "B-052",
   "title": "Linked copy-paste procedures for the remaining owner actions",
   "goal": "B-008, F-004, F-009, F-011, F-015 and F-023 each link one copy-paste procedure from their human-action line and Reproduce row",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "One procedure page per owner action under docs/acceptance/, with the right shell per machine and the expected result per block",
     "Each human-action line and Reproduce row links it; no 'below', 'in details' or bare path remains"
@@ -20,7 +20,7 @@
     "estimate": "2.5 h",
     "basis": "Estimated 2026-11-12: about 25 minutes per procedure for six, drafted from each record's existing evidence, plus links and checks. Not a measurement.",
     "reviewed": "2026-11-12",
-    "agentHours": 2.5,
+    "agentHours": 0,
     "baselineAgentHours": 2.5
   }
 }
