@@ -78,7 +78,7 @@ export function genericPilot(model: string | null, stage: Stage = 'prototype'): 
     keywords: [],
     model: model ?? '',
     stage,
-    evaClass: stageExecutor(stage),
+    evaClass: pilotExecutor({ stage }),
   };
 }
 export type PilotPatch = Partial<
