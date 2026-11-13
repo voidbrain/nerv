@@ -802,7 +802,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; source assessment linked above |
+| PR / evidence | [PR #368](https://github.com/voidbrain/nerv/pull/368) F-070-T01 and F-070-T02 implementation (`src/operator-directory.ts`, `src/config.ts`, `src/kaji-link.ts`, `src/runtime.ts`, `src/chat-command.ts`, `src/server.ts`, `test/operator-directory.test.ts`); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; source assessment linked above |
 | Opened | 2026-11-07 |
 | Verification | Passed `node --test test/operator-directory.test.ts` (5/5), `npm test`, `npm run typecheck`, `npm run check:fast`. Pending CI and merge. |
 | Reviewed | 2026-11-07 |
