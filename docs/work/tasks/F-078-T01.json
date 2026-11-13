@@ -4,7 +4,7 @@
  "parent": "F-078",
  "title": "Inventory the models and hardware on Neo Tokyo-3 and Tabgha",
  "goal": "Inventory the models and hardware on Neo Tokyo-3 and Tabgha",
- "status": "ready",
+ "status": "closed",
  "acceptance": [
   "`ollama list`, memory and accelerator recorded for both bases, read-only",
   "Which of the four candidate profiles (gemma4:12b, qwen2.5-coder:14b, devstral-small-2:24b, qwen3-coder:30b) and which Gemma 4 sizes are installed, and which fit each host",
@@ -36,8 +36,8 @@
   "estimate": "0.25 h agent + 0.25 h owner",
   "basis": "Estimated 2026-11-13 at the harness 8.5.0 initial step size; campaign wall time on the host is extra and bounded by the T02 budget. Not a measurement.",
   "reviewed": "2026-11-13",
-  "agentHours": 0.25,
-  "ownerHours": 0.25,
+  "agentHours": 0,
+  "ownerHours": 0,
   "baselineAgentHours": 0.25,
   "estimateAgentHours": 0.25,
   "ownerKind": "procedure"

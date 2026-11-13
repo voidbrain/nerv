@@ -2,14 +2,14 @@
 
 | Milestone | Scope | Records | Acceptance |
 |---|---|---|---|
-| 0 — Harness and contracts | v4.0.0 core + Angular adoption; project Node conventions; protocol and privacy boundaries; ledger tooling (recaps, archives, coverage) | F-001, F-031, F-032, F-055, F-058, F-059, F-061, F-068, F-069, F-071, F-072, F-073, F-074, F-076, F-077 | Harness checks, current review evidence, explicit upstream Node gap F-001; pinned Gauntlet evidence adapter with no automatic qualification |
+| 0 — Harness and contracts | v4.0.0 core + Angular adoption; project Node conventions; protocol and privacy boundaries; ledger tooling (recaps, archives, coverage) | F-001, F-031, F-032, F-055, F-058, F-059, F-061, F-068, F-069, F-071, F-072, F-073, F-074, F-076, F-077, F-079 | Harness checks, current review evidence, explicit upstream Node gap F-001; pinned Gauntlet evidence adapter with no automatic qualification |
 | 1 — Reliable local core | CLI, SQLite reminders, local inbox, cancellation, doctor, restart recovery; reminder time ranges; backup and restore | F-002, F-043, F-062 | Restart and duplicate regression tests; authenticated API; F-002 tracks remaining hardening; recovery bounds and a restore drill in F-062 once accepted |
 | 1a — Headless and bilingual workspace | Single process on 4317, dev 4318, private configuration, Italian/English UI, launchd/systemd user services, base identity, Windows bases, browser sessions | F-009, F-010, F-034, F-035, F-037, F-039 | Local process/restart and configuration tests; actual OS service acceptance F-009; localization F-010: [scoped browser acceptance](acceptance/angular-2026-11-06.md) |
 | 1a.1 — Isolated runtime foundation | A scheduler/SQLite child, B execution boundary, C API/static supervisor, validated local IPC and versioned JSON-RPC | F-013, F-014 | Brain CPU stall/crash does not stop reminders; A death triggers supervisor recovery; version/frame/backpressure limits |
 | 1b — Native macOS companion | SwiftUI MenuBarExtra and native bridge; no Electron; Keychain client pairing, scoped credentials, independent lifecycle, health, notifications and OS controls | F-011, F-015 | Pairing replay/revocation/runtime-identity tests; build/sign/package on macOS; Quit companion leaves service running |
 | 2a — Useful, gated assistant | Per-action MAGI gate from tool effect classes (Pattern Green/Orange/Blue), Central Dogma sortie ledger, Misato's apartment approvals with TTL, Dummy Plug degraded mode, model routes, Telegram, Lilith memory, Hyuga triggers, Naoko provenance and taint, debrief digest, Misato reading the records, slash commands | F-003, F-017, F-022, F-023, F-024, F-026, F-027, F-028, F-030, F-033, F-038, F-040, F-042, F-044, F-046, F-056 | Every action passes the gate at the executor; Blue always reaches the owner; expiry never approves; local-only never leaves machine; model outage does not stop reminders; phone delivery reconciles retries |
 | 2b — Governed extensions | Veto-only extra seats and consultants, watermelon trust stages, pilot roster, MCP tool registration, golden eval suite, measured model usage and cost, bounded incident circuits, OWASP threat map, credential rotation, bill of materials | F-018, F-021, F-025, F-029, F-041, F-045, F-063, F-064, F-065, F-066, F-067, F-075 | Extra seats can only reject; Production promotion needs the owner; unregistered effect class is Blue; usage is measured or shown unknown, never zero; a circuit revokes only its scope and needs explicit rearm |
-| 3 — Multi-node foundation | Federated bases over the Kaji line (delivered first), then discovery, inspection, enrolment, SSH bootstrap, optional Tailscale adapter, outbound WebSocket/JSON-RPC workers, forwarding a job to another base | F-005, F-036, F-050, F-070 | Mac + mini PC + Pi; identity/auth, heartbeat/wake reconciliation, leases, fencing and locks |
+| 3 — Multi-node foundation | Federated bases over the Kaji line (delivered first), then discovery, inspection, enrolment, SSH bootstrap, optional Tailscale adapter, outbound WebSocket/JSON-RPC workers, forwarding a job to another base | F-005, F-036, F-050, F-070, F-080 | Mac + mini PC + Pi; identity/auth, heartbeat/wake reconciliation, leases, fencing and locks |
 | 4 — Angular PWA, GenUI and live dashboard | Stable Angular workspace, allowlisted Web Components with validated data, onboarding and doctor; dashboard bound to real stages, timings and contributors | F-004, F-019, F-047, F-051, F-052, F-053, F-057 | Browser/accessibility checks, schema rejection, install/push tests on real phones; no fabricated activity or spend |
 | 5 — Distributed agents/models | Independent role/model/node routing, explicit directional communication graph, schema-defined tools, coding workers, bounded delegation, parallel queue, per-job sandboxes, resuming paused jobs | F-006, F-012, F-048, F-049, F-060, F-078 | Gemma on Mac serves mini PC worker; optional Claude route; Pi capabilities; privacy/budget/cancellation; sandbox escape and resource tests; separately measured coder/auditor workflows and Mac/mini PC role placement (F-006-T03/T04); comparable Mac load conditions and one normal mini PC baseline (F-006-T05/T04) |
 | 5b — Coordinator relocation (later) | Durable replicated state, leader lease/epoch, fencing and restore | F-016 | Partition/sleep tests prove no concurrent coordinators or duplicated effects; no automatic context-only takeover |
@@ -23,14 +23,14 @@ Status per milestone, derived from the records (Delivered: all closed; Awaiting 
 <!-- roadmap-status:start · generated by tools/roadmap-status.mjs from the backlog records; do not edit by hand -->
 | Milestone | Status | Closed | Implemented / verified | Open | Still open |
 |---|---|---:|---:|---:|---|
-| 0 — Harness and contracts | In progress | 13 | 0 | 2 | F-076, F-077 |
+| 0 — Harness and contracts | In progress | 13 | 0 | 3 | F-076, F-077, F-079 |
 | 1 — Reliable local core | In progress | 2 | 0 | 1 | F-062 |
 | 1a — Headless and bilingual workspace | Awaiting verification | 5 | 1 | 0 | — |
 | 1a.1 — Isolated runtime foundation | Delivered | 2 | 0 | 0 | — |
 | 1b — Native macOS companion | Awaiting verification | 0 | 2 | 0 | — |
 | 2a — Useful, gated assistant | In progress | 12 | 1 | 3 | F-027, F-044, F-056 |
 | 2b — Governed extensions | In progress | 7 | 0 | 5 | F-021, F-064, F-065, F-066, F-075 |
-| 3 — Multi-node foundation | In progress | 1 | 1 | 2 | F-005, F-050 |
+| 3 — Multi-node foundation | In progress | 1 | 1 | 3 | F-005, F-050, F-080 |
 | 4 — Angular PWA, GenUI and live dashboard | In progress | 5 | 0 | 2 | F-004, F-051 |
 | 5 — Distributed agents/models | Planned | 0 | 0 | 6 | F-006, F-012, F-048, F-049, F-060, F-078 |
 | 5b — Coordinator relocation (later) | Planned | 0 | 0 | 1 | F-016 |

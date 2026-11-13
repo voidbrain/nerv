@@ -1,9 +1,26 @@
 // Read-only reconciliation plan. No fetch, checkout, merge, configuration or project writes.
 import { readFileSync, existsSync, realpathSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { resolve, relative, isAbsolute } from 'node:path';
+import { resolve, relative, isAbsolute, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
+// B-018: a relative template.path is relative to the main checkout, so every worktree (a sibling directory or
+// .claude/worktrees/<name>) finds the same template; outside Git it is relative to the project root.
+const mainCheckout = (at) => {
+  try {
+    const common = execFileSync('git', ['-C', at, 'rev-parse', '--path-format=absolute', '--git-common-dir'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+    return basename(common) === '.git' ? dirname(common) : at;
+  } catch {
+    return at;
+  }
+};
+const stampTemplate = (at, path) => {
+  const expanded = path.replace(/^~(?=\/|$)/, homedir());
+  return isAbsolute(expanded) ? expanded : resolve(mainCheckout(at), expanded);
+};
 export function preview(root, template, to) {
   root = realpathSync(root);
   template = realpathSync(template);
@@ -101,10 +118,12 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     }
     const root = fileURLToPath(new URL('..', import.meta.url));
     const stamp = JSON.parse(readFileSync(resolve(root, '.harness.json'), 'utf8'));
-    const template = String(values.template ?? process.env.HARNESS_HOME ?? stamp.template?.path ?? '').replace(
-      /^~(?=\/|$)/,
-      homedir(),
-    );
+    const given = values.template ?? process.env.HARNESS_HOME;
+    const template = given
+      ? String(given).replace(/^~(?=\/|$)/, homedir())
+      : stamp.template?.path
+        ? stampTemplate(root, stamp.template.path)
+        : '';
     if (!template) throw Error('Provide --template=PATH or HARNESS_HOME');
     const result = preview(root, template, values.to);
     if (values.json) console.log(JSON.stringify(result, null, 2));

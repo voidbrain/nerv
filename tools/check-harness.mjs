@@ -7,7 +7,7 @@
 import { existsSync, mkdtempSync, readFileSync, realpathSync, lstatSync, rmSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { homedir, tmpdir } from 'node:os';
-import { join, resolve, relative, isAbsolute, dirname } from 'node:path';
+import { join, resolve, relative, isAbsolute, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const github = process.argv.includes('--github');
@@ -92,10 +92,26 @@ if (stamp.copied?.['tools/guard.mjs'] && !process.env.CI && existsSync(join(root
     warn(`The push guard (tools/guard.mjs) could not be checked: ${e.message}`);
   }
 }
-const home = (process.env.HARNESS_HOME ?? stamp.template?.path ?? '~/Projects/project-harness').replace(
-  /^~(?=\/|$)/,
-  homedir(),
-);
+// B-018: a relative template.path is relative to the main checkout, so every worktree (a sibling directory or
+// .claude/worktrees/<name>) finds the same template; outside Git it is relative to the project root.
+const mainCheckout = (at) => {
+  try {
+    const common = execFileSync('git', ['-C', at, 'rev-parse', '--path-format=absolute', '--git-common-dir'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+    return basename(common) === '.git' ? dirname(common) : at;
+  } catch {
+    return at;
+  }
+};
+const stampTemplate = (at, path) => {
+  const expanded = path.replace(/^~(?=\/|$)/, homedir());
+  return isAbsolute(expanded) ? expanded : resolve(mainCheckout(at), expanded);
+};
+const home = process.env.HARNESS_HOME
+  ? process.env.HARNESS_HOME.replace(/^~(?=\/|$)/, homedir())
+  : stampTemplate(root, stamp.template?.path ?? '~/Projects/project-harness');
 if (!existsSync(join(home, 'VERSION'))) {
   // a CI run without a clone (no clone step, or the clone failed) skips quietly; locally a missing clone is something to fix
   const text = `Harness template not found at ${home}${stamp.template?.repo ? `: clone it (git clone ${stamp.template.repo} ${home})` : ''}; template check skipped.`;

@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 6 | 9 | 11 | 12 |
+| **This week** | 8 | 9 | 11 | 12 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 31 | 4 |
-| **Require Human 🧑** | 17 | 2 |
+| **Open** | 33 | 4 |
+| **Require Human 🧑** | 16 | 2 |
 
 ### Require Human 🧑
 
@@ -29,13 +29,13 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-011](#f-011) | [F-015](#f-015) |  |  |
 | [F-023](#f-023) | [F-016](#f-016) |  |  |
 | [F-004](#f-004) | [F-076](#f-076) |  |  |
-| [F-075](#f-075) | [F-051](#f-051) |  |  |
-| [F-078](#f-078) | [F-077](#f-077) |  |  |
+| [F-075](#f-075) | [F-078](#f-078) |  |  |
 | [F-060](#f-060) | [F-064](#f-064) |  |  |
+| [F-077](#f-077) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 37 h agent + 19 h owner across 117 open steps of 29 features and 4 other records. 20.75 h of actual effort recorded on 34 steps. Generated from the task files.
+**Remaining effort:** 37.25 h agent + 18.5 h owner across 118 open steps of 31 features and 4 other records. 20.75 h of actual effort recorded on 34 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -724,6 +724,51 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-051"></a>[✨ F-051](#top)
+
+**Dashboard: a sortie shows where it runs and who contributed**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — | — | — |
+
+💻 **→** Next: EVA cage labels (F-051-T06) wait on F-049.
+
+| | |
+|---|---|
+| **Issue** | Owner test on Tabgha 2026-11-05: on Tabgha the chat shows *Misato is planning… (local models take 10–30 s per step)* but not that the request went to Neo Tokyo-3, and the previous sortie stays selected; a running sortie card always blinks MAGI whatever its phase; the flow shows only "ok" for the MAGI, so whether shadow or peer seats voted is not visible, and Plan · current action does not say whether a pilot advised; a node the sortie did not need (Misato's Apt when no approval was needed) looks the same as one that is unavailable. |
+| **Reproduce** | Ask something on a base that is not the main one; select a finished sortie with a Green action; look at a running sortie's card. |
+| **Check** | The chat line reads *Misato is planning* (no timing note) and, for a relayed request, *Forwarded to Neo Tokyo-3*; the forwarded request appears on the asking base as a sortie card that says where it runs and links to it, and the main base shows it as a sortie from that base; a new request (or a refresh) selects the running sortie (F-019); the running card names its phase (Misato, MAGI, approval, EVA, a pilot); the MAGI detail lists every seat's vote, shadow and peer seats marked; Plan · current action names the pilot that advised; a node not needed by the sortie is shown as skipped, distinct from unavailable; the Sephirot shows a relay step when the request came from or went to another base. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | F-051-T01 — Chat line and relay visibility | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | F-051-T02 — Running sortie selection and phase label | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | F-051-T03 — MAGI and pilot contributors | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | F-051-T04 — Skipped versus unavailable nodes and relay step | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | F-051-T05 — Authenticated cross-base inspection | 0.5 h | 0.5 h (stated) | 0 h | Completed |
+| 🟢 Small | F-051-T06 — EVA cage pilot labels from real instance data | 1 h | 0 h | 1 h | Planned |
+| — | F-051-T07 — Decide which sorties a peer base may inspect | 1 h | 0 h | 0 h | Completed |
+| 🟢 Small | **Total** | 3.5 h | 1.5 h (5 of 7 steps recorded) | 1 h | 6 of 7 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-051.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) peer inspection scope (F-051-T07) and the missing step for EVA cage labels (F-051-T06); [PR #371](https://github.com/voidbrain/nerv/pull/371) authenticated cross-base inspection and directional contributor topology (T01–T05); [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #195](https://github.com/voidbrain/nerv/pull/195) project tuning and regressions;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #163](https://github.com/voidbrain/nerv/pull/163) channel telemetry and CI reconciliation;  [PR #162](https://github.com/voidbrain/nerv/pull/162) relay detail and acceptance review; Owner test on Tabgha 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-06 Ledger-to-live-detail regression passed for remote answer/reference, waiting, no answer, local continuation, escaping and local empty states. Chrome: real service/session and ledger fixture showed the answering base and full reference; scoped axe found zero violations and screenshot inspected. Full suite: 196 passed, one platform skip; build, typecheck, conventions and integrations passed. Merged PR #162 CI passed validate, windows and both native-macos runs (ci:status, runs 42247286378/42247282316); cross-base link and EVA labels remain unimplemented. |
+| Reviewed | 2026-11-13 |
+
+</details>
+
+---
+
 ### <a id="f-048"></a>[✨ F-048](#top)
 
 **Parallel work: a visible queue, limits per model, a lock per item**
@@ -1003,64 +1048,19 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-051"></a>[✨ F-051](#top)
-
-**Dashboard: a sortie shows where it runs and who contributed**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h agent + 0.25 h owner | — | — | — | 🧑 |
-
-🧑 **→** Choose which sorties a peer base may inspect ([options](audits/2026-11-13-full.md#f051-scope), F-051-T07); EVA cage labels (F-051-T06) wait on F-049.
-
-| | |
-|---|---|
-| **Issue** | Owner test on Tabgha 2026-11-05: on Tabgha the chat shows *Misato is planning… (local models take 10–30 s per step)* but not that the request went to Neo Tokyo-3, and the previous sortie stays selected; a running sortie card always blinks MAGI whatever its phase; the flow shows only "ok" for the MAGI, so whether shadow or peer seats voted is not visible, and Plan · current action does not say whether a pilot advised; a node the sortie did not need (Misato's Apt when no approval was needed) looks the same as one that is unavailable. |
-| **Reproduce** | Ask something on a base that is not the main one; select a finished sortie with a Green action; look at a running sortie's card. |
-| **Check** | The chat line reads *Misato is planning* (no timing note) and, for a relayed request, *Forwarded to Neo Tokyo-3*; the forwarded request appears on the asking base as a sortie card that says where it runs and links to it, and the main base shows it as a sortie from that base; a new request (or a refresh) selects the running sortie (F-019); the running card names its phase (Misato, MAGI, approval, EVA, a pilot); the MAGI detail lists every seat's vote, shadow and peer seats marked; Plan · current action names the pilot that advised; a node not needed by the sortie is shown as skipped, distinct from unavailable; the Sephirot shows a relay step when the request came from or went to another base. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| — | F-051-T01 — Chat line and relay visibility | 0.25 h | 0.25 h (stated) | 0 h | Completed |
-| — | F-051-T02 — Running sortie selection and phase label | 0.25 h | 0.25 h (stated) | 0 h | Completed |
-| — | F-051-T03 — MAGI and pilot contributors | 0.25 h | 0.25 h (stated) | 0 h | Completed |
-| — | F-051-T04 — Skipped versus unavailable nodes and relay step | 0.25 h | 0.25 h (stated) | 0 h | Completed |
-| — | F-051-T05 — Authenticated cross-base inspection | 0.5 h | 0.5 h (stated) | 0 h | Completed |
-| 🟢 Small | F-051-T06 — EVA cage pilot labels from real instance data | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | F-051-T07 — Decide and enforce which sorties a peer base may inspect | 1 h | 0 h | 1 h agent + 0.25 h owner | Planned |
-| 🟡 Medium | **Total** | 3.5 h | 1.5 h (5 of 7 steps recorded) | 2 h agent + 0.25 h owner | 5 of 7 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-051.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) peer inspection scope (F-051-T07) and the missing step for EVA cage labels (F-051-T06); [PR #371](https://github.com/voidbrain/nerv/pull/371) authenticated cross-base inspection and directional contributor topology (T01–T05); [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #195](https://github.com/voidbrain/nerv/pull/195) project tuning and regressions;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #163](https://github.com/voidbrain/nerv/pull/163) channel telemetry and CI reconciliation;  [PR #162](https://github.com/voidbrain/nerv/pull/162) relay detail and acceptance review; Owner test on Tabgha 2026-11-05 |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-06 Ledger-to-live-detail regression passed for remote answer/reference, waiting, no answer, local continuation, escaping and local empty states. Chrome: real service/session and ledger fixture showed the answering base and full reference; scoped axe found zero violations and screenshot inspected. Full suite: 196 passed, one platform skip; build, typecheck, conventions and integrations passed. Merged PR #162 CI passed validate, windows and both native-macos runs (ci:status, runs 42247286378/42247282316); cross-base link and EVA labels remain unimplemented. |
-| Reviewed | 2026-11-13 |
-
-</details>
-
----
-
 ### <a id="f-078"></a>[✨ F-078](#top)
 
 **Model evaluation: the four candidate models by role and base, Mac and mini PC**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.5 h agent + 0.75 h owner | — | — | 🧑 | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.25 h agent + 0.5 h owner | — | — | — | 🧑 |
 
-🧑 **→** Run or allow the read-only model inventory on both bases ([steps](acceptance/f078-model-inventory.md)); then approve the matrix (F-078-T02).
+🧑 **→** Approve the matrix and budget (F-078-T02), including the Tabgha proposal in the [inventory](evaluations/2026-11-13-model-inventory.md).
 
 | | |
 |---|---|
-| **Issue** | The four candidate profiles in docs/agents/model-profiles.json (gemma4:12b, qwen2.5-coder:14b, devstral-small-2:24b, qwen3-coder:30b) are all unmeasured candidates. The Gauntlet ledger holds 55 runs, none with a model; the only real-model evidence is the gemma4:12b smoke of 2026-11-09 (7/10, three invalid structured outputs) and the B-021/B-049 Misato runs. Nothing measures the mini PC (Tabgha, NERV-02), which the owner reports runs qwen2.5-coder:14b. |
+| **Issue** | The four candidate profiles in docs/agents/model-profiles.json (gemma4:12b, qwen2.5-coder:14b, devstral-small-2:24b, qwen3-coder:30b) are all unmeasured candidates. The Gauntlet ledger holds 55 runs, none with a model; the only real-model evidence is the gemma4:12b smoke of 2026-11-09 (7/10, three invalid structured outputs) and the B-021/B-049 Misato runs. Nothing measures the mini PC (Tabgha, NERV-02). The inventory of 2026-11-13 found `qwen2.5-coder:14b` on Neo Tokyo-3, not on Tabgha: Tabgha (Intel N97, 12 GB, no usable GPU) has only `qwen2.5:1.5b`, and none of the four candidates fits it. |
 | **Reproduce** | [Inventory steps](acceptance/f078-model-inventory.md); `node -e "console.log(require('./evals/gauntlet/ledger.json').runs.filter(r=>r.model).length)"`; docs/agents/model-profiles.json; [evaluation guide](evaluations/README.md). |
 | **Check** | Each approved model × role × base cell has a recorded run with model and base identity; each profile is qualified or not per role with evidence; the 2026-11-09 smoke failures are explained; F-006-T12 receives the comparison; new Gauntlet packs are adopted when released. |
 
@@ -1068,7 +1068,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | F-078-T01 — Inventory the models and hardware on Neo Tokyo-3 and Tabgha | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Ready |
+| — | F-078-T01 — Inventory the models and hardware on Neo Tokyo-3 and Tabgha | 0.25 h | 0 h | 0 h | Completed |
 | 🟢 Small | F-078-T02 — Agree the evaluation matrix and its budget | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned |
 | 🟢 Small | F-078-T03 — Smoke campaign on Neo Tokyo-3 | 0.5 h | 0 h | 0.5 h | Planned |
 | 🟢 Small | F-078-T04 — Role campaign on Neo Tokyo-3 | 0.5 h | 0 h | 0.5 h | Planned |
@@ -1076,7 +1076,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | F-078-T06 — Campaign for the larger candidates | 0.5 h | 0 h | 0.5 h | Planned |
 | 🟢 Small | F-078-T07 — Comparison report and profile status | 0.5 h | 0 h | 0.5 h | Planned |
 | 🟢 Small | F-078-T08 — Adopt the new Gauntlet packs (gauntlet F-012) when released | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟡 Medium | **Total** | 3.5 h | 0 h (0 of 8 steps recorded) | 3.5 h agent + 0.75 h owner | 0 of 8 completed |
+| 🟡 Medium | **Total** | 3.5 h | 0 h (0 of 8 steps recorded) | 3.25 h agent + 0.5 h owner | 1 of 8 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1128,6 +1128,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | [PR #343](https://github.com/voidbrain/nerv/pull/343) fix and Swift regressions (CI43343629031); found in F-015-T03, [evidence](acceptance/f015-live-failures-2026-11-12.md); [PR #325](https://github.com/voidbrain/nerv/pull/325). |
 | Opened | 2026-11-12 |
 | Verification | 2026-11-13 CI: Swift tests passed on native-macos (CI43343629031). Live companion check pending. |
+| Reviewed | 2026-11-13 |
+
+</details>
+
+---
+### <a id="f-079"></a>[✨ F-079](#top)
+
+**Experiment: each system evaluation case covers only the source it exercises**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | — | — |
+
+💻 **→** Next: F-079-T01.
+
+| | |
+|---|---|
+| **Issue** | The Gauntlet system source key is one hash over `src`, `test`, `shared`, `web`, `evals` and the evaluation tools. 100 of the 155 merges between 2026-11-08 and 2026-11-13 changed it, and each one made all seven `nerv-system-flows` cases (stress and browser included) pending again, so the ledger is stale almost all the time ([architecture reassessment](audits/2026-11-13-architecture-reassessment.md), finding 4). |
+| **Reproduce** | Count merges since `1869340` whose diff touches the inputs of `systemSourceKey` in `tools/gauntlet.mjs`. |
+| **Check** | A case may declare the paths it exercises; its key hashes only those plus the runner, adapter and dependency pin; a case without a declaration keeps the whole-tree key. A measured comparison over recent merges shows how many reruns are saved, and a seeded change inside a declared path makes its case pending. If a scoped case misses a real regression, that case returns to the whole-tree key. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | F-079-T01 — Optional per-case input paths in the system source key | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-079-T02 — Measure the saving and declare paths where it holds | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 2 steps recorded) | 1 h | 0 of 2 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-079.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [Architecture reassessment 2026-11-13](audits/2026-11-13-architecture-reassessment.md) |
+| Opened | 2026-11-13 |
+| Verification | Pending. |
 | Reviewed | 2026-11-13 |
 
 </details>
@@ -1214,6 +1253,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-080"></a>[✨ F-080](#top)
+
+**Peer-facing handlers move out of the serve wiring into a tested module**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | — | — |
+
+💻 **→** Next: F-080-T01.
+
+| | |
+|---|---|
+| **Issue** | `onRelay`, `onDecide`, `onChat` and `onSortie`, which decide what another base may read or do, are defined inline in the `serve` command of `src/cli.ts` (lines 1431–1458). That makes the composition root hold peer policy, testable only through a cross-base run; the F-051 sortie-scope question sat there ([architecture reassessment](audits/2026-11-13-architecture-reassessment.md), finding 5). |
+| **Reproduce** | Read `src/cli.ts` `serve`. |
+| **Check** | The handlers live in a module under `src/` with unit tests for each refusal and success path; `serve` only wires them; behaviour does not change (the existing cross-base tests pass unchanged). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | F-080-T01 — Move the peer handlers to a module with unit tests | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-080.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [Architecture reassessment 2026-11-13](audits/2026-11-13-architecture-reassessment.md) |
+| Opened | 2026-11-13 |
+| Verification | Pending. |
+| Reviewed | 2026-11-13 |
+
+</details>
+
+---
 ### <a id="f-060"></a>[✨ F-060](#top)
 
 **Spike: herdr-core as a coding-agent terminal runtime**
@@ -1434,9 +1511,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h agent + 0.25 h owner | — | — | — | 🧑 |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h agent + 0.25 h owner | — | — | 🧑 | — |
 
-🧑 **→** Choose which of the three supply-chain options to adopt ([options](audits/2026-11-13-full.md#f077-options)).
+🧑 **→** Turn on Dependabot alerts and CodeQL default setup ([steps](acceptance/f077-security-settings.md)).
 
 | | |
 |---|---|
@@ -1448,7 +1525,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | F-077-T01 — Choose alerts, code scanning and a Node 26 job | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned |
+| 🟢 Small | F-077-T01 — Turn on Dependabot alerts and CodeQL default setup | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned |
 | 🟢 Small | F-077-T02 — Apply patch and minor dependency updates | 0.5 h | 0 h | 0.5 h | Planned |
 | 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0.75 h agent + 0.25 h owner | 0 of 2 completed |
 
