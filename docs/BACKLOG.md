@@ -14,7 +14,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 33 | 6 |
-| **Require Human 🧑** | 15 | 2 |
+| **Require Human 🧑** | 12 | 2 |
 
 ### Require Human 🧑
 
@@ -28,13 +28,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-009](#f-009) | [F-011](#f-011) |  |  |
 | [F-011](#f-011) | [F-015](#f-015) |  |  |
 | [F-023](#f-023) | [F-016](#f-016) |  |  |
-| [F-004](#f-004) | [F-076](#f-076) |  |  |
-| [F-060](#f-060) | [F-078](#f-078) |  |  |
-| [F-077](#f-077) | [F-064](#f-064) |  |  |
+| [F-004](#f-004) | [F-064](#f-064) |  |  |
+| [F-060](#f-060) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 38.25 h agent + 18.5 h owner across 120 open steps of 31 features and 6 other records. 20.75 h of actual effort recorded on 34 steps. Generated from the task files.
+**Remaining effort:** 38.5 h agent + 17.75 h owner across 119 open steps of 31 features and 6 other records. 20.75 h of actual effort recorded on 34 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -645,6 +644,47 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-076"></a>[✨ F-076](#top)
+
+**What reaches main is tested together, not only each PR on its own**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.25 h | — | — | — | — |
+
+💻 **→** Next: F-076-T02 (CI runs on `merge_group`), then the queue-aware merge tool in the harness template and the merge queue rule.
+
+| | |
+|---|---|
+| **Issue** | Branch protection requires only `validate` and `native-macos`, with `strict` off; CI runs on pull requests and on Mondays only (no push trigger). On 12–13 November 41 PRs merged, several in parallel and some with `full-suite` skipped by scoped verification, so the combination on main was not run in CI until the audit dispatched one. `windows` and `full-suite` are not required. |
+| **Reproduce** | `gh api repos/voidbrain/nerv/branches/main/protection` and `.github/workflows/ci.yml` `on:`; compare `gh run list --branch main` with the merge times. |
+| **Check** | The chosen option is in place (a repository setting or the CI workflow); a PR whose combination with main breaks a test cannot reach main unnoticed for more than a day; the choice is recorded here. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | F-076-T01 — Choose how merged main is verified | 0 h | 0 h | 0 h | Completed |
+| 🟢 Small | F-076-T02 — CI runs on merge&#95;group | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-076-T03 — Reconcile the queue-aware merge tool | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-076-T04 — Turn on the merge queue for main | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟡 Medium | **Total** | 1.25 h | 0 h (0 of 4 steps recorded) | 1.25 h | 1 of 4 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-076.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) |
+| Opened | 2026-11-13 |
+| Verification | Pending. |
+| Reviewed | 2026-11-13 |
+
+</details>
+
+---
 ### <a id="f-065"></a>[✨ F-065](#top)
 
 **Agentic threat map: each OWASP risk tied to a NERV control and the test that proves it**
@@ -847,6 +887,52 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-078"></a>[✨ F-078](#top)
+
+**Model evaluation: the four candidate models by role and base, Mac and mini PC**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h agent + 0.25 h owner | — | — | — | — |
+
+💻 **→** Next: F-078-T03 (Neo Tokyo-3 smoke campaign) inside the [approved matrix and budget](evaluations/2026-11-13-model-inventory.md#approved-matrix-and-budget-f-078-t02-2026-11-13).
+
+| | |
+|---|---|
+| **Issue** | The four candidate profiles in docs/agents/model-profiles.json (gemma4:12b, qwen2.5-coder:14b, devstral-small-2:24b, qwen3-coder:30b) are all unmeasured candidates. The Gauntlet ledger holds 55 runs, none with a model; the only real-model evidence is the gemma4:12b smoke of 2026-11-09 (7/10, three invalid structured outputs) and the B-021/B-049 Misato runs. Nothing measures the mini PC (Tabgha, NERV-02). The inventory of 2026-11-13 found `qwen2.5-coder:14b` on Neo Tokyo-3, not on Tabgha: Tabgha (Intel N97, 12 GB, no usable GPU) has only `qwen2.5:1.5b`, and none of the four candidates fits it. |
+| **Reproduce** | [Inventory steps](acceptance/f078-model-inventory.md); `node -e "console.log(require('./evals/gauntlet/ledger.json').runs.filter(r=>r.model).length)"`; docs/agents/model-profiles.json; [evaluation guide](evaluations/README.md). |
+| **Check** | Each approved model × role × base cell has a recorded run with model and base identity; each profile is qualified or not per role with evidence; the 2026-11-09 smoke failures are explained; F-006-T12 receives the comparison; new Gauntlet packs are adopted when released. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | F-078-T01 — Inventory the models and hardware on Neo Tokyo-3 and Tabgha | 0.25 h | 0 h | 0 h | Completed |
+| — | F-078-T02 — Agree the evaluation matrix and its budget | 0.25 h | 0 h | 0 h | Completed |
+| 🟢 Small | F-078-T03 — Smoke campaign on Neo Tokyo-3 | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-078-T04 — Role campaign on Neo Tokyo-3 | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-078-T05 — Tabgha campaign: remote endpoint and small local fallback | 0.5 h | 0 h | 0.5 h agent + 0.25 h owner | Planned |
+| 🟢 Small | F-078-T06 — Campaign for the larger candidates | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-078-T07 — Comparison report and profile status | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-078-T08 — Adopt the new Gauntlet packs (gauntlet F-012) when released | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟡 Medium | **Total** | 3.5 h | 0 h (0 of 8 steps recorded) | 3 h agent + 0.25 h owner | 2 of 8 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-078.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #377](https://github.com/voidbrain/nerv/pull/377) [PR #375](https://github.com/voidbrain/nerv/pull/375) plan; owner request 2026-11-13; [Gemma smoke 2026-11-09](evaluations/2026-11-09-gemma-common-smoke.md); docs/agents/model-profiles.json |
+| Depends on | — |
+| Opened | 2026-11-13 |
+| Verification | Pending. |
+| Reviewed | 2026-11-13 |
+
+</details>
+
+---
 ### <a id="b-049"></a>[🐞 B-049](#top)
 
 **Misato invents a reminder title instead of asking, when an Italian request gives none**
@@ -1046,91 +1132,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
-### <a id="f-076"></a>[✨ F-076](#top)
-
-**What reaches main is tested together, not only each PR on its own**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h agent + 0.25 h owner | — | — | — | 🧑 |
-
-🧑 **→** Choose how merged main is verified ([options](audits/2026-11-13-full.md#f076-options)).
-
-| | |
-|---|---|
-| **Issue** | Branch protection requires only `validate` and `native-macos`, with `strict` off; CI runs on pull requests and on Mondays only (no push trigger). On 12–13 November 41 PRs merged, several in parallel and some with `full-suite` skipped by scoped verification, so the combination on main was not run in CI until the audit dispatched one. `windows` and `full-suite` are not required. |
-| **Reproduce** | `gh api repos/voidbrain/nerv/branches/main/protection` and `.github/workflows/ci.yml` `on:`; compare `gh run list --branch main` with the merge times. |
-| **Check** | The chosen option is in place (a repository setting or the CI workflow); a PR whose combination with main breaks a test cannot reach main unnoticed for more than a day; the choice is recorded here. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-076-T01 — Choose how merged main is verified | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned |
-| 🟢 Small | F-076-T02 — Put the chosen main verification in place | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 2 steps recorded) | 0.5 h agent + 0.25 h owner | 0 of 2 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-076.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) |
-| Opened | 2026-11-13 |
-| Verification | Pending. |
-| Reviewed | 2026-11-13 |
-
-</details>
-
----
-### <a id="f-078"></a>[✨ F-078](#top)
-
-**Model evaluation: the four candidate models by role and base, Mac and mini PC**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.25 h agent + 0.5 h owner | — | — | — | 🧑 |
-
-🧑 **→** Approve the matrix and budget (F-078-T02), including the Tabgha proposal in the [inventory](evaluations/2026-11-13-model-inventory.md).
-
-| | |
-|---|---|
-| **Issue** | The four candidate profiles in docs/agents/model-profiles.json (gemma4:12b, qwen2.5-coder:14b, devstral-small-2:24b, qwen3-coder:30b) are all unmeasured candidates. The Gauntlet ledger holds 55 runs, none with a model; the only real-model evidence is the gemma4:12b smoke of 2026-11-09 (7/10, three invalid structured outputs) and the B-021/B-049 Misato runs. Nothing measures the mini PC (Tabgha, NERV-02). The inventory of 2026-11-13 found `qwen2.5-coder:14b` on Neo Tokyo-3, not on Tabgha: Tabgha (Intel N97, 12 GB, no usable GPU) has only `qwen2.5:1.5b`, and none of the four candidates fits it. |
-| **Reproduce** | [Inventory steps](acceptance/f078-model-inventory.md); `node -e "console.log(require('./evals/gauntlet/ledger.json').runs.filter(r=>r.model).length)"`; docs/agents/model-profiles.json; [evaluation guide](evaluations/README.md). |
-| **Check** | Each approved model × role × base cell has a recorded run with model and base identity; each profile is qualified or not per role with evidence; the 2026-11-09 smoke failures are explained; F-006-T12 receives the comparison; new Gauntlet packs are adopted when released. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| — | F-078-T01 — Inventory the models and hardware on Neo Tokyo-3 and Tabgha | 0.25 h | 0 h | 0 h | Completed |
-| 🟢 Small | F-078-T02 — Agree the evaluation matrix and its budget | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned |
-| 🟢 Small | F-078-T03 — Smoke campaign on Neo Tokyo-3 | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | F-078-T04 — Role campaign on Neo Tokyo-3 | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | F-078-T05 — Small-model campaign on Tabgha | 0.5 h | 0 h | 0.5 h agent + 0.25 h owner | Planned |
-| 🟢 Small | F-078-T06 — Campaign for the larger candidates | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | F-078-T07 — Comparison report and profile status | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | F-078-T08 — Adopt the new Gauntlet packs (gauntlet F-012) when released | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟡 Medium | **Total** | 3.5 h | 0 h (0 of 8 steps recorded) | 3.25 h agent + 0.5 h owner | 1 of 8 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-078.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #377](https://github.com/voidbrain/nerv/pull/377) [PR #375](https://github.com/voidbrain/nerv/pull/375) plan; owner request 2026-11-13; [Gemma smoke 2026-11-09](evaluations/2026-11-09-gemma-common-smoke.md); docs/agents/model-profiles.json |
-| Depends on | — |
-| Opened | 2026-11-13 |
-| Verification | Pending. |
-| Reviewed | 2026-11-13 |
-
-</details>
-
----
 ### <a id="b-057"></a>[🐞 B-057](#top)
 
 **Companion error messages are Italian only and do not say what went wrong**
@@ -1165,6 +1166,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | [PR #343](https://github.com/voidbrain/nerv/pull/343) fix and Swift regressions (CI43343629031); found in F-015-T03, [evidence](acceptance/f015-live-failures-2026-11-12.md); [PR #325](https://github.com/voidbrain/nerv/pull/325). |
 | Opened | 2026-11-12 |
 | Verification | 2026-11-13 CI: Swift tests passed on native-macos (CI43343629031). Live companion check pending. |
+| Reviewed | 2026-11-13 |
+
+</details>
+
+---
+### <a id="f-077"></a>[✨ F-077](#top)
+
+**Dependency and code alerts, a Node 26 CI job and a dependency refresh**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | — | — |
+
+💻 **→** Next: F-077-T02 (patch and minor dependency updates); the next audit reads the first alerts.
+
+| | |
+|---|---|
+| **Issue** | Proposed by the full audit of 2026-11-06 and never decided or tracked: Dependabot alerts are disabled and no code-scanning analysis exists; CI tests Node 24 while the bases run Node 26. On 2026-11-13 `npm outdated` lists `@anthropic-ai/sdk` 1.1.0 (1.8.0 out), Angular 22.2.4 (22.2.6) and TypeScript 6.0.3 (7.0.2, a major). |
+| **Reproduce** | `gh api repos/voidbrain/nerv/dependabot/alerts` (403 disabled), `gh api repos/voidbrain/nerv/code-scanning/alerts` (404 no analysis), `npm outdated`, `node-version` in `.github/workflows/ci.yml`. |
+| **Check** | Each chosen option is in place: alerts on and read in the next audit; a Node 26 job green in CI; patch and minor updates applied with the full suite and build passing. Options not chosen are recorded as declined. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | F-077-T01 — Turn on Dependabot alerts and CodeQL default setup | 0.25 h | 0 h | 0 h | Completed |
+| 🟢 Small | F-077-T02 — Apply patch and minor dependency updates | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0.5 h | 1 of 2 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-077.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #377](https://github.com/voidbrain/nerv/pull/377) [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) |
+| Opened | 2026-11-13 |
+| Verification | Pending. |
 | Reviewed | 2026-11-13 |
 
 </details>
@@ -1573,45 +1613,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | PR / evidence | [PR #376](https://github.com/voidbrain/nerv/pull/376) Found in F-075, 2026-11-13. |
-| Opened | 2026-11-13 |
-| Verification | Pending. |
-| Reviewed | 2026-11-13 |
-
-</details>
-
----
-### <a id="f-077"></a>[✨ F-077](#top)
-
-**Dependency and code alerts, a Node 26 CI job and a dependency refresh**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h agent + 0.25 h owner | — | — | 🧑 | — |
-
-🧑 **→** Turn on Dependabot alerts and CodeQL default setup ([steps](acceptance/f077-security-settings.md)).
-
-| | |
-|---|---|
-| **Issue** | Proposed by the full audit of 2026-11-06 and never decided or tracked: Dependabot alerts are disabled and no code-scanning analysis exists; CI tests Node 24 while the bases run Node 26. On 2026-11-13 `npm outdated` lists `@anthropic-ai/sdk` 1.1.0 (1.8.0 out), Angular 22.2.4 (22.2.6) and TypeScript 6.0.3 (7.0.2, a major). |
-| **Reproduce** | `gh api repos/voidbrain/nerv/dependabot/alerts` (403 disabled), `gh api repos/voidbrain/nerv/code-scanning/alerts` (404 no analysis), `npm outdated`, `node-version` in `.github/workflows/ci.yml`. |
-| **Check** | Each chosen option is in place: alerts on and read in the next audit; a Node 26 job green in CI; patch and minor updates applied with the full suite and build passing. Options not chosen are recorded as declined. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-077-T01 — Turn on Dependabot alerts and CodeQL default setup | 0.25 h | 0 h | 0.25 h agent + 0.25 h owner | Planned |
-| 🟢 Small | F-077-T02 — Apply patch and minor dependency updates | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0.75 h agent + 0.25 h owner | 0 of 2 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-077.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #377](https://github.com/voidbrain/nerv/pull/377) [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) |
 | Opened | 2026-11-13 |
 | Verification | Pending. |
 | Reviewed | 2026-11-13 |

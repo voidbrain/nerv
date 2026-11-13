@@ -4,7 +4,7 @@
  "parent": "F-078",
  "title": "Agree the evaluation matrix and its budget",
  "goal": "Agree the evaluation matrix and its budget",
- "status": "planned",
+ "status": "closed",
  "acceptance": [
   "A table of model × role (Misato planner, Casper seat, coder pilot) × base, built from T01",
   "The owner approves the matrix, the packs per row and a time budget per campaign",
@@ -39,8 +39,8 @@
   "estimate": "0.25 h agent + 0.25 h owner",
   "basis": "Estimated 2026-11-13 at the harness 8.5.0 initial step size; campaign wall time on the host is extra and bounded by the T02 budget. Not a measurement.",
   "reviewed": "2026-11-13",
-  "agentHours": 0.25,
-  "ownerHours": 0.25,
+  "agentHours": 0,
+  "ownerHours": 0,
   "baselineAgentHours": 0.25,
   "estimateAgentHours": 0.25,
   "ownerKind": "decision"
