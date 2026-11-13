@@ -80,6 +80,8 @@ export interface PeerVerdict {
   vote: 'approve' | 'reject' | 'abstain';
   reason: string;
   confidence?: number;
+  durationMs?: number;
+  transferMs?: number;
 }
 /** A peer's vote, kept only when well-formed; its reason is short display text. */
 export function sanitizeVerdict(value: unknown): PeerVerdict | undefined {
@@ -90,6 +92,9 @@ export function sanitizeVerdict(value: unknown): PeerVerdict | undefined {
     vote: v.vote as PeerVerdict['vote'],
     reason: v.reason.replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, 300),
     ...(typeof v.confidence === 'number' && v.confidence >= 0 && v.confidence <= 1 ? { confidence: v.confidence } : {}),
+    ...(typeof v.durationMs === 'number' && Number.isFinite(v.durationMs) && v.durationMs >= 0
+      ? { durationMs: Math.round(v.durationMs) }
+      : {}),
   };
 }
 /** One action the main base asks another base to run, by an id that base remembers (a resend returns the first result). */

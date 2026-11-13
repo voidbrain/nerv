@@ -147,10 +147,11 @@ test('Runtime.useExtraSeat attaches by action class, starts in shadow, promotes 
     assert.equal(timedOut.outcome, 'grant', 'timed-out veto seat abstains');
     const timeoutBallot = (await runtime.events(timedOut.sortieId)).find((e) => e.kind === 'ballot');
     assert.ok(timeoutBallot && timeoutBallot.kind === 'ballot');
-    assert.deepEqual(
-      timeoutBallot.payload.verdicts.find((v) => v.seat === 'extra:slow-veto'),
-      { seat: 'extra:slow-veto', vote: 'abstain', reason: 'timed out', shadow: false },
-    );
+    const slowVerdict = timeoutBallot.payload.verdicts.find((v) => v.seat === 'extra:slow-veto');
+    assert.ok(slowVerdict);
+    assert.equal(typeof slowVerdict.durationMs, 'number');
+    const { durationMs: _d, ...slowRest } = slowVerdict;
+    assert.deepEqual(slowRest, { seat: 'extra:slow-veto', vote: 'abstain', reason: 'timed out', shadow: false });
   } finally {
     await runtime.close();
     rmSync(home, { recursive: true, force: true });

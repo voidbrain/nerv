@@ -13,7 +13,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 29 | 4 |
+| **Open** | 28 | 4 |
 | **Require Human 🧑** | 12 | 2 |
 
 ### Require Human 🧑
@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 31.75 h agent + 16.75 h owner across 106 open steps of 26 features and 2 other records. 31 h of actual effort recorded on 57 steps. Generated from the task files.
+**Remaining effort:** 30.5 h agent + 16.75 h owner across 102 open steps of 25 features and 2 other records. 32 h of actual effort recorded on 61 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -769,49 +769,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-052"></a>[✨ F-052](#top)
-
-**Timings for every step, live in the Sephirot; shadow seats never make you wait**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.25 h | — | — | — | — |
-
-💻 **→** Next: record how long each call takes on the sortie's events.
-
-| | |
-|---|---|
-| **Issue** | Owner question 2026-11-05: how long did the job take, how long Misato, the EVA, is the ghost (shadow) voter slowing it? The ledger stamps only step boundaries: in S-3BFF, Misato's planning, Casper and Tabgha's shadow seat fall in one 95.7 s gap, so nobody can tell who was slow. The gate waited for every seat, also shadow ones whose vote does not count. |
-| **Reproduce** | Read a sortie's events: there is no duration per model call, per seat or per executor. |
-| **Check** | 1. Each call's duration is recorded with the sortie (consultant or pilot, each Misato step, Casper, each other base's seat, the executor). 2. The sortie detail and the why answer show them (*Misato 38 s · Casper 6 s · Tabgha (shadow) 41 s · EVA-02 0.1 s*); 2a. while a sortie runs, the Sephirot shows the elapsed time on the active node and each finished node's time (owner, 2026-11-05). 3. Shadow seats never delay: the gate decides once Casper and the veto seats have voted; a later shadow vote is recorded, never counted. 4. A daily summary (brief or health): median and slowest time per role, so a slow model or base stands out. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| — | F-052-T01 — Shadow seats never delay | — | 0 days | 0 remaining | Completed |
-| 🟢 Small | F-052-T02 — Per-call duration recording | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | F-052-T03 — Durations in sortie detail and why answer | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | F-052-T04 — Live elapsed time in the Sephirot | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | F-052-T05 — Daily timing summary | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟡 Medium | **Total** | 1.25 h (4 of 5 steps) | 0 h (0 of 5 steps recorded) | 1.25 h | 1 of 5 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-052.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner question 2026-11-05 (ledger timing of S-7663 and S-3BFF); item 3 [PR #116](https://github.com/voidbrain/nerv/pull/116) |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-05 item 3: test/kaji-seats.test.ts and full suite (local run) |
-| Reviewed | 2026-11-07 |
-
-</details>
-
----
-
 ### <a id="f-051"></a>[✨ F-051](#top)
 
 **Dashboard: a sortie shows where it runs and who contributed**
@@ -1823,6 +1780,49 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-05 |
 | Verification | Passed (`npm run typecheck`, `npm run build`, `npm test`, `npm run check:fast`) |
 | Reviewed | 2026-11-13 |
+
+</details>
+
+---
+
+### <a id="f-052"></a>[✨ F-052](#top)
+
+**Timings for every step, live in the Sephirot; shadow seats never make you wait**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔵 Closed | ◻️ P2 | 🔴 Large | 0 days | — | — | — | — |
+
+💻 **→** Per-call timings, sortie detail and `why` durations, live Sephirot node timings, and daily role timing summary.
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-05: how long did the job take, how long Misato, the EVA, is the ghost (shadow) voter slowing it? The ledger stamps only step boundaries: in S-3BFF, Misato's planning, Casper and Tabgha's shadow seat fall in one 95.7 s gap, so nobody can tell who was slow. The gate waited for every seat, also shadow ones whose vote does not count. |
+| **Reproduce** | Read a sortie's events: there is no duration per model call, per seat or per executor. |
+| **Check** | 1. Each call's duration is recorded with the sortie (consultant or pilot, each Misato step, Casper, each other base's seat, the executor). 2. The sortie detail and the why answer show them (*Misato 38 s · Casper 6 s · Tabgha (shadow) 41 s · EVA-02 0.1 s*); 2a. while a sortie runs, the Sephirot shows the elapsed time on the active node and each finished node's time (owner, 2026-11-05). 3. Shadow seats never delay: the gate decides once Casper and the veto seats have voted; a later shadow vote is recorded, never counted. 4. A daily summary (brief or health): median and slowest time per role, so a slow model or base stands out. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | F-052-T01 — Shadow seats never delay | — | 0 days | 0 remaining | Completed |
+| — | F-052-T02 — Per-call duration recording | 0.5 h | 0.25 h (stated) | 0 h | Completed |
+| — | F-052-T03 — Durations in sortie detail and why answer | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | F-052-T04 — Live elapsed time in the Sephirot | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | F-052-T05 — Daily timing summary | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | **Total** | 1.25 h (4 of 5 steps) | 1 h (4 of 5 steps recorded) | 0 days | 5 of 5 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-052.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #373](https://github.com/voidbrain/nerv/pull/373) (`F-052-T02`–`F-052-T05`); [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner question 2026-11-05 (ledger timing of S-7663 and S-3BFF); item 3 [PR #116](https://github.com/voidbrain/nerv/pull/116) |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-05 item 3: test/kaji-seats.test.ts and full suite (local run) |
+| Reviewed | 2026-11-07 |
 
 </details>
 

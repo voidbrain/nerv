@@ -4,7 +4,7 @@
   "parent": "F-052",
   "title": "Per-call duration recording",
   "goal": "Per-call duration recording",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Each consultant/pilot, Misato step, Casper, other bases' seats and executor call has a recorded duration; transfer and step durations distinct"
   ],
@@ -30,12 +30,14 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.75 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "estimate": "0 h agent",
+    "basis": "Recorded per-call durationMs on consultant/pilot, Misato steps, Casper, peer/extra seats, and executors, keeping transferMs distinct.",
     "reviewed": "2026-11-13",
     "baselineDays": 2,
-    "agentHours": 0.5,
+    "agentHours": 0,
     "baselineAgentHours": 3,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated",
     "estimateAgentHours": 0.5
   }
 }

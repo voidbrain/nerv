@@ -147,10 +147,16 @@ test('through every process: REST act, Casper on the local model, the owner appr
     });
     const ballot = (await runtime.events(reply.sortieId)).find((e) => e.kind === 'ballot');
     assert.ok(ballot && ballot.kind === 'ballot');
-    assert.deepEqual(
-      ballot.payload.verdicts.find((v) => v.seat === 'casper'),
-      { seat: 'casper', vote: 'approve', reason: 'Adds the reminder the owner asked for.', confidence: 0.93 },
-    );
+    const casperVerdict = ballot.payload.verdicts.find((v) => v.seat === 'casper');
+    assert.ok(casperVerdict);
+    assert.equal(typeof casperVerdict.durationMs, 'number');
+    const { durationMs: _d, ...casperRest } = casperVerdict;
+    assert.deepEqual(casperRest, {
+      seat: 'casper',
+      vote: 'approve',
+      reason: 'Adds the reminder the owner asked for.',
+      confidence: 0.93,
+    });
     assert.equal((await runtime.list()).length, 0, 'nothing runs before the owner decides');
     const decided = (await (
       await fetch(base + '/api/approvals/' + reply.approvalId, {

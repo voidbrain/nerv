@@ -1,3 +1,4 @@
+import { formatSortieTimings, type SortieTiming } from './timing.ts';
 /**
  * One sentence of "why" per sortie (F-019): where it stands and the reason, from the ledger's facts only (no model), so
  * the dashboard can say it without opening the sortie. It speaks about the latest action, which decides what happens next.
@@ -121,6 +122,8 @@ export interface WhyRecord {
   advice?: { text: string; model: string } | undefined;
   /** B-011: what other bases did with actions this sortie sent them. */
   remote?: string[] | undefined;
+  /** F-052: per-role/step durations recorded on this sortie. */
+  timings?: SortieTiming[] | undefined;
   actions: {
     tool: string;
     pattern: string;
@@ -158,6 +161,7 @@ const WORDS = {
     advice: 'Consultant',
     noActions: 'No action was proposed.',
     status: 'Status',
+    timings: 'Timings',
     source: { telegram: 'Telegram', api: 'the dashboard', cli: 'the terminal', ttl: 'expiry' } as Record<
       string,
       string
@@ -186,6 +190,7 @@ const WORDS = {
     advice: 'Consulente',
     noActions: 'Nessuna azione proposta.',
     status: 'Stato',
+    timings: 'Tempi',
     source: { telegram: 'Telegram', api: 'la dashboard', cli: 'il terminale', ttl: 'scadenza' } as Record<
       string,
       string
@@ -249,5 +254,6 @@ export function explainRecord(
     else if (a.ran === 'failed') lines.push(stop(clip(`${w.failed}: ${a.error ?? '—'}`)));
   }
   for (const t of r.remote ?? []) lines.push('', `Kaji: ${clip(t, 300)}`);
+  if (r.timings?.length) lines.push('', `${w.timings}: ${formatSortieTimings(r.timings, lang)}.`);
   return lines.join('\n').slice(0, 3500);
 }
