@@ -1201,7 +1201,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #377](https://github.com/voidbrain/nerv/pull/377) [Architecture reassessment 2026-11-13](audits/2026-11-13-architecture-reassessment.md) |
+| PR / evidence | [PR #377](https://github.com/voidbrain/nerv/pull/377) (its `.harness.json` bump alone made all seven cases pending again; rerun 7/7 on the branch) [Architecture reassessment 2026-11-13](audits/2026-11-13-architecture-reassessment.md) |
 | Opened | 2026-11-13 |
 | Verification | Pending. |
 | Reviewed | 2026-11-13 |
