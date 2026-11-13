@@ -114,6 +114,9 @@ const effortKeys = ['size', 'estimate', 'basis', 'reviewed'],
   // F-063: estimateAgentHours, the latest whole-step estimate (set with agentHours at each re-estimation; the baseline
   // until then). The steps table shows it; calibration keeps comparing actual with baseline.
   hourKeys = ['agentHours', 'ownerHours', 'baselineAgentHours', 'estimateAgentHours', 'actualAgentHours'];
+// F-068: what an owner step asks of the owner (run or check something, decide, or both). A ready one (not started,
+// every prerequisite step verified or closed) marks its record's Procedures and Decisions cells.
+const ownerKinds = ['procedure', 'decision', 'both'];
 const actualDays = (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 100;
 const quarterHours = (v) =>
   typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 200 && Number.isInteger(v * 4);
@@ -128,8 +131,10 @@ function validateEffort(e, status) {
     typeof e !== 'object' ||
     Array.isArray(e) ||
     !effortKeys.every((k) => k in e) ||
-    Object.keys(e).some((k) => ![...effortKeys, ...numericEffortKeys, ...actualKeys, ...hourKeys, 'ownerKind'].includes(k)) ||
-    ('ownerKind' in e && !['procedure', 'decision', 'both'].includes(e.ownerKind)) ||
+    Object.keys(e).some(
+      (k) => ![...effortKeys, ...numericEffortKeys, ...actualKeys, ...hourKeys, 'ownerKind'].includes(k),
+    ) ||
+    ('ownerKind' in e && !ownerKinds.includes(e.ownerKind)) ||
     hourKeys.some((k) => k in e && !quarterHours(e[k])) ||
     ('actualDays' in e && inHours(e)) ||
     'actualSource' in e !== ('actualDays' in e || 'actualAgentHours' in e) ||
@@ -573,17 +578,31 @@ function remainingCell(steps) {
   );
 }
 // The generated summary table (F-059): the authored Signal | Priority | Status | Effort table gains Remaining, Depends
-// on and Unlocks (when the dependency helper is adopted) and the human-action kind as Procedures and Decision cells
-// (8.0.0: 🧑 where the cue is Procedure, Decision or Both, — otherwise), and the authored human-action line keeps
-// only its icon and sentence. F-063: Signal merges into Status ("🔴 Open"), and Effort is read from the remaining
+// on and Unlocks (when the dependency helper is adopted) and the human-action kind as Procedures and Decisions cells
+// (8.0.0: 🧑 where the cue is Procedure, Decision or Both, — otherwise; F-068: also where a ready owner step asks for
+// that kind, so a record an agent can advance still shows what waits on the owner), and the authored human-action
+// line keeps only its icon and sentence. F-063: Signal merges into Status ("🔴 Open"), and Effort is read from the remaining
 // agent hours when every open step is in hours. Record sources keep the authored form.
 export const HUMAN_LINE = /^(🧑|💻) \*\*→ Human action required: (Procedure|Decision|Both|No)\*\*<br \/>(.+)$/m;
-// The two generated cells for a cue kind: Procedures (someone runs or checks something) and Decision.
+// The two generated cells for a cue kind: Procedures (someone runs or checks something) and Decisions.
 export const humanCells = (kind) => [
   ['Procedure', 'Both'].includes(kind) ? '🧑' : '—',
   ['Decision', 'Both'].includes(kind) ? '🧑' : '—',
 ];
-function summaryTable(text, id, { remaining, size, links }) {
+// F-068: the kinds asked by a record's ready owner steps: not started (planned or ready; once implemented the owner
+// has acted), effort.ownerKind set, every prerequisite step verified or closed, as task-claims reads a prerequisite
+// (one the catalogue does not hold counts as open).
+function ownerAsks(steps, all) {
+  const done = new Set(all.filter((t) => ['verified', 'closed'].includes(t.status)).map((t) => t.id));
+  const kinds = steps
+    .filter(
+      (t) =>
+        ['planned', 'ready'].includes(t.status) && t.effort?.ownerKind && (t.dependsOn ?? []).every((d) => done.has(d)),
+    )
+    .map((t) => t.effort.ownerKind);
+  return [kinds.some((k) => k !== 'decision'), kinds.some((k) => k !== 'procedure')];
+}
+function summaryTable(text, id, { remaining, size, links, asks = [false, false] }) {
   const lines = text.split('\n');
   const at = lines.findIndex(
     (l, i) =>
@@ -611,8 +630,8 @@ function summaryTable(text, id, { remaining, size, links }) {
           ['Unlocks', links.unlocks],
         ]
       : []),
-    ['Procedures', human ? humanCells(human[2])[0] : '—'],
-    ['Decision', human ? humanCells(human[2])[1] : '—'],
+    ['Procedures', asks[0] ? '🧑' : human ? humanCells(human[2])[0] : '—'],
+    ['Decisions', asks[1] ? '🧑' : human ? humanCells(human[2])[1] : '—'],
   ];
   const [signal, priority, status, effort] = lines[at + 2]
     .trim()
@@ -621,7 +640,7 @@ function summaryTable(text, id, { remaining, size, links }) {
     .map((c) => c.trim());
   lines[at] = '| Status | Priority | Effort |' + extra.map(([h]) => ` ${h} |`).join('');
   lines[at + 1] =
-    '|---|---|---|' + extra.map(([h]) => (['Procedures', 'Decision'].includes(h) ? ':---:|' : '---|')).join('');
+    '|---|---|---|' + extra.map(([h]) => (['Procedures', 'Decisions'].includes(h) ? ':---:|' : '---|')).join('');
   lines[at + 2] =
     `| ${signal} ${status} | ${priority} | ${size ?? effort} |` + extra.map(([, v]) => ` ${v} |`).join('');
   const out = lines.join('\n');
@@ -702,7 +721,7 @@ export function renderLedger(root, config, withPlans = true) {
         const kept = (path) => typeof path === 'string' && existsSync(local(root, path));
         const all =
           plannedTasks ?? (kept(config.tasks) && kept(config.profiles) ? taskCatalog(root, config).tasks : []);
-        return (id) => all.filter((t) => t.parent === id);
+        return Object.assign((id) => all.filter((t) => t.parent === id), { all });
       })()
     : null;
   const ordered = rank
@@ -740,6 +759,7 @@ export function renderLedger(root, config, withPlans = true) {
               remaining: remainingCell(stepsOf(id)),
               size: recordSize(stepsOf(id)),
               links: links?.get(id) ?? null,
+              asks: ownerAsks(stepsOf(id), stepsOf.all),
             })
           : relocated;
         const icon = id.startsWith('F-') ? '✨' : '🐞';

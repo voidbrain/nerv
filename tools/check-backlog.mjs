@@ -2,7 +2,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
-// The cue kind from the generated Procedures and Decision cells (8.0.0); undefined for any other content.
+// The cue kind from the generated Procedures and Decisions cells (8.0.0); undefined for any other content.
 const kindOf = ([p, d]) =>
   ['🧑', '—'].includes(p) && ['🧑', '—'].includes(d)
     ? { '🧑🧑': 'Both', '🧑—': 'Procedure', '—🧑': 'Decision', '——': 'No' }[p + d]
@@ -80,22 +80,21 @@ for (let i = 0; i < headings.length; i++) {
   assert(row, `${id}: missing summary`);
   const [signal, priority, status, effort] = unmerge(cells(row));
   // Authored records have four columns; the generated ledger (F-059) adds Remaining, Depends on / Unlocks when the
-  // dependency helper is adopted, and the Procedures and Decision cells (8.0.0), which then replace the label of the
-  // human-action line; F-063
-  // merges its Signal into Status.
+  // dependency helper is adopted, and the Procedures and Decisions cells (8.0.0; headed Decision until 8.3.0, still
+  // read), which then replace the label of the human-action line; F-063 merges its Signal into Status.
   const lines = block.split('\n');
   const header = cells(lines[lines.indexOf(row) - 2] ?? '');
   const generated = header.length > 4;
   assert(
     generated
       ? [
-          'Status|Priority|Effort|Remaining|Procedures|Decision',
-          'Status|Priority|Effort|Remaining|Depends on|Unlocks|Procedures|Decision',
-        ].includes(header.join('|')) &&
+          'Status|Priority|Effort|Remaining|Procedures|Decisions',
+          'Status|Priority|Effort|Remaining|Depends on|Unlocks|Procedures|Decisions',
+        ].includes(header.join('|').replace(/\|Decision$/, '|Decisions')) &&
           cells(row).length === header.length &&
           cells(row)[0] !== signal
       : cells(row).length === 4,
-    `${id}: summary needs four columns, or the generated Status / Priority / Effort / Remaining / Depends on / Unlocks / Procedures / Decision columns (an older generated ledger: run work-items build; remove completion percentages)`,
+    `${id}: summary needs four columns, or the generated Status / Priority / Effort / Remaining / Depends on / Unlocks / Procedures / Decisions columns (an older generated ledger: run work-items build; remove completion percentages)`,
   );
   assert(/^\*\*[^\n]+\*\*$/m.test(block.slice(0, block.indexOf('|'))), `${id}: missing visible bold title`);
   assert(
@@ -116,8 +115,13 @@ for (let i = 0; i < headings.length; i++) {
     ? [...block.matchAll(/^(🧑|💻) \*\*→\*\* .+/gm)].map((m) => Object.assign(m, { 2: kindOf(cells(row).slice(-2)) }))
     : [...block.matchAll(/^(🧑|💻) \*\*→ Human action required: (Procedure|Decision|Both|No)\*\*<br \/>.+/gm)];
   assert.equal(human.length, 1, `${id}: missing visible human action/cue`);
-  if (generated) assert(human[0][2], `${id}: Procedures and Decision cells need 🧑 or —`);
-  assert.equal(human[0][1], human[0][2] === 'No' ? '💻' : '🧑', `${id}: human-action cue mismatch`);
+  if (generated) assert(human[0][2], `${id}: Procedures and Decisions cells need 🧑 or —`);
+  // F-068: in the generated ledger a 💻 line may stand under 🧑 cells (a ready owner step beside agent work); a 🧑 line
+  // always needs one.
+  assert(
+    generated && human[0][1] === '💻' ? true : human[0][1] === (human[0][2] === 'No' ? '💻' : '🧑'),
+    `${id}: human-action cue mismatch`,
+  );
   const humanAt = block.indexOf(human[0][0]);
   const after = block
     .slice(block.indexOf(human[0][0]) + human[0][0].length)
