@@ -267,6 +267,14 @@ if (prNumber) {
     `docs/BACKLOG.md: ${added.length} line(s) this branch adds say "this PR": write #${prNumber} instead (BACKLOG-RULES, Review procedure 7). First: "${added[0]?.slice(0, 100)}"`,
   );
 }
+// Keep "## Other changes" concise (BACKLOG-RULES, "When to update and review"): at most 2 paragraphs and 1000 chars
+// (a link to docs/archive/reconciliation-<year>.md and at most the latest entry); move older entries to the log.
+const otherSection = text.match(/^## Other changes[ \t]*\n([\s\S]*?)(?=\n## |(?![\s\S]))/m)?.[1]?.trim() ?? '';
+const otherParagraphs = otherSection ? otherSection.split(/\n{2,}/).filter((p) => p.trim()) : [];
+assert(
+  otherParagraphs.length <= 2 && otherSection.length <= 1000,
+  `docs/BACKLOG.md: ## Other changes has ${otherParagraphs.length} paragraph(s) (${otherSection.length} chars); keep at most 2 paragraphs and 1000 chars and move older entries to docs/archive/reconciliation-<year>.md (BACKLOG-RULES, "When to update and review")`,
+);
 // a workflow command's message escapes %, CR and LF
 const annotate = (text) => text.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A');
 for (const w of warnings)
