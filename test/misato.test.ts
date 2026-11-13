@@ -4,7 +4,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { misatoAsk, parsePlan, MAX_STEPS } from '../src/misato.ts';
+import { misatoAsk, parsePlan, validateReminderTitle, MAX_STEPS } from '../src/misato.ts';
 import { toolDocs } from '../src/executors.ts';
 import { Runtime } from '../src/runtime.ts';
 import { makeServer } from '../src/server.ts';
@@ -627,5 +627,65 @@ test('F-043: EN and IT reminder time kinds parse cleanly, and "remind me to rene
       assert.equal(items[0]!.title, 'Renew the car insurance');
       assert.equal(items[0]!.kind, 'all-day');
     },
+  );
+});
+
+test('B-049: Misato cannot add a reminder with a generic or invented title when the request gives none, and asks instead', async () => {
+  for (const inventedTitle of ['Promemoria', 'Promemoria per il primo gennaio 2031', 'Appuntamento']) {
+    await agent(
+      [
+        JSON.stringify({
+          action: { tool: 'reminders.add', args: { title: inventedTitle, due: '2031-01-01T09:00:00Z' } },
+        }),
+        '{"ask":"Di cosa ti devo ricordare?"}',
+      ],
+      async (runtime) => {
+        const chat = await runtime.chat('Imposta un promemoria per il primo gennaio 2031 alle 09:00 UTC.');
+        assert.deepEqual(
+          chat.steps.map((s) => s.outcome),
+          ['invalid'],
+          `invented title "${inventedTitle}" must be rejected back to Misato`,
+        );
+        assert.equal(chat.question?.text, 'Di cosa ti devo ricordare?');
+        assert.equal(chat.reply, 'Di cosa ti devo ricordare?');
+        assert.equal((await runtime.list()).length, 0, 'no reminder should be added');
+        assert.equal((await runtime.approvals()).length, 0, 'no approval card should be created');
+      },
+      { blue: ['reminders.add'] },
+    );
+  }
+});
+
+test('B-049: validateReminderTitle accepts grounded titles and rejects missing, generic, or ungrounded ones', () => {
+  const itNoTitle = 'Imposta un promemoria per il primo gennaio 2031 alle 09:00 UTC.';
+  for (const bad of ['', '   ', undefined, 'Promemoria', 'Promemoria per il primo gennaio 2031', 'Reminder', 'Spesa']) {
+    assert.ok(validateReminderTitle(bad, { request: itNoTitle }), `expected "${String(bad)}" to be rejected`);
+  }
+  assert.equal(
+    validateReminderTitle('Chiamare Alex', {
+      request: 'Ricordami di chiamare Alex il primo gennaio 2031 alle 09:00 UTC.',
+    }),
+    undefined,
+  );
+  assert.equal(
+    validateReminderTitle('Water the plants', {
+      request: 'Am. Yes',
+      context: [{ request: 'Remind me tomorrow at 9 to water the plants', reply: 'Morning or evening?' }],
+    }),
+    undefined,
+  );
+  assert.equal(
+    validateReminderTitle('Dentist', {
+      request: 'Set a reminder for that appointment',
+      memory: [{ id: 'm1', text: 'Dentist appointment on Friday', shareable: true, tainted: false }],
+    }),
+    undefined,
+  );
+  assert.equal(
+    validateReminderTitle('Renew insurance', {
+      request: 'Remind me about the top item tomorrow',
+      steps: [{ tool: 'files.read', outcome: 'grant', result: { text: 'Renew insurance before March' } }],
+    }),
+    undefined,
   );
 });
