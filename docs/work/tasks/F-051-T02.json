@@ -4,7 +4,7 @@
   "parent": "F-051",
   "title": "Running sortie selection and phase label",
   "goal": "Running sortie selection and phase label",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "A new request or refresh selects the running sortie; the card names its phase"
   ],
@@ -32,12 +32,15 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "estimate": "0 remaining",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). Closed 2026-11-13: verified running sortie selection and phase label.",
     "reviewed": "2026-11-13",
     "baselineDays": 1,
-    "agentHours": 0.25,
+    "agentHours": 0,
+    "ownerHours": 0,
     "baselineAgentHours": 1.5,
-    "estimateAgentHours": 0.25
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
   }
 }

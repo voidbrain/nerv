@@ -222,6 +222,7 @@ export class KajiLink {
     onVerdict?: (from: string, ask: VerdictAsk) => Promise<PeerVerdict | null>;
     onPendingApprovals?: (ids: string[]) => Promise<string[]>;
     onDecide?: (approvalId: string, decision: 'approve' | 'reject') => Promise<string>;
+    onSortie?: (from: string, sortieId: string) => Promise<{ sortie: unknown; events: unknown[] } | null>;
   }) {
     this.trust = options.trust;
     this.baseId = options.baseId;
@@ -236,6 +237,7 @@ export class KajiLink {
     this.onRelay = options.onRelay;
     this.onDecide = options.onDecide;
     this.onPendingApprovals = options.onPendingApprovals;
+    this.onSortie = options.onSortie;
     this.onChat = options.onChat;
     this.offers = options.offers;
     this.onOffers = options.onOffers;
@@ -290,6 +292,8 @@ export class KajiLink {
   private readonly onPendingApprovals: ((ids: string[]) => Promise<string[]>) | undefined;
   private readonly onRelay: ((from: string, relay: Relay) => Promise<boolean>) | undefined;
   private readonly onDecide: ((approvalId: string, decision: 'approve' | 'reject') => Promise<string>) | undefined;
+  private readonly onSortie:
+    ((from: string, sortieId: string) => Promise<{ sortie: unknown; events: unknown[] } | null>) | undefined;
   private readonly health: (() => Promise<BaseHealth>) | undefined;
   private readonly onHealth: ((baseId: string, health: HeardHealth) => void) | undefined;
   /** This base's health for a heartbeat; a check that fails is itself a degraded reason. Omitted when no check is wired. */
@@ -578,6 +582,24 @@ export class KajiLink {
         reply(200, { outcome: await this.onDecide(d.approvalId, d.decision) });
         return;
       }
+      if (req.method === 'POST' && req.url === '/kaji/sortie') {
+        const s = JSON.parse(body) as { sortieId?: unknown };
+        if (typeof s.sortieId !== 'string' || !UUID.test(s.sortieId)) {
+          reply(400, { error: 'invalid sortie ID' });
+          return;
+        }
+        if (!this.onSortie) {
+          reply(503, { error: 'sortie inspection unavailable' });
+          return;
+        }
+        const found = await this.onSortie(from, s.sortieId);
+        if (!found) {
+          reply(404, { error: 'No sortie with that ID.' });
+          return;
+        }
+        reply(200, found);
+        return;
+      }
       reply(404, { error: 'unknown' });
     } catch (e) {
       this.log(`Kaji: refused a request (${e instanceof Error ? e.message : 'invalid'}).`);
@@ -762,6 +784,28 @@ export class KajiLink {
       ((await this.call(peer, 'POST', '/kaji/decide', { approvalId, decision })) as { outcome?: string }).outcome ??
       'No outcome.'
     );
+  }
+  /** Inspects a sortie on an enrolled peer base over the signed Kaji link (F-051). */
+  async inspectSortie(
+    baseId: string,
+    sortieId: string,
+  ): Promise<{ base: { id: string; name: string }; sortie: unknown; events: unknown[] } | null> {
+    if (!UUID.test(sortieId)) throw new Error('Invalid sortie ID.');
+    const peer = (await this.bases()).find(
+      (b) => b.baseId.toLowerCase() === baseId.toLowerCase() && b.status === 'enrolled',
+    );
+    if (!peer) throw new Error(`Base ${baseId} is not enrolled.`);
+    if (peer.baseId === this.baseId) throw new Error('Use the local sortie endpoint for this base.');
+    try {
+      const data = (await this.call(peer, 'POST', '/kaji/sortie', { sortieId }, 5000)) as {
+        sortie: unknown;
+        events: unknown[];
+      };
+      return { base: { id: peer.baseId, name: peer.name }, sortie: data.sortie, events: data.events };
+    } catch (e) {
+      if (e instanceof Error && /refused \(404\)/.test(e.message)) return null;
+      throw e;
+    }
   }
   /** One round: greet every other enrolled base, merge what they have seen, catch up on the registry if behind. */
   async heartbeat(): Promise<void> {

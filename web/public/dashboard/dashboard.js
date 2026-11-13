@@ -499,6 +499,7 @@ function renderFlow() {
   // sephirot nodes
   // Misato's apartment passed means the owner decided: it takes the decision colour, like its lines (owner, 2026-11-05).
   { const sd = document.querySelector(".snode[data-n='detect'] .sd"); if (sd) sd.textContent = s && s.forwarded ? "forwarded to " + s.forwarded : s && s.origin ? "from " + s.origin : "Aoba comms · Hyuga watch"; }
+  { const sd = document.getElementById("sd-debrief"); if (sd) sd.textContent = s && s.forwarded ? (s.status === "active" ? "awaiting " + s.forwarded : "returned from " + s.forwarded) : s && s.origin ? "reply to " + s.origin : "Central Dogma · what is now known"; }
   { const sd = document.getElementById("sd-consult"); if (sd) sd.textContent = !s ? "no vote · advice into the LCL" : s.advisor ? "advised by " + s.advisor : s.phase === "consult" && s.status === "active" ? "advising · no vote" : "no advice"; }
   document.querySelectorAll(".snode[data-n]").forEach(el => { el.classList.remove("on", "done", "wait", "skip", "owner"); const st = stepState(s, el.dataset.n); if (st) el.classList.add(st); if (st === "done" && el.dataset.n === "apt") el.classList.add("owner"); });
   // timeline
@@ -617,7 +618,7 @@ function renderDetail(s) {
     "<div class='small' style='margin-top:6px'>Sync Ratio <b>" + b.sync.value + "%</b> <span class='muted'>(threshold " + SCROLLS.syncThreshold + "%)</span></div>" +
     "<div class='meter " + (b.sync.value >= SCROLLS.syncThreshold ? "" : "warn") + "' style='margin-top:3px'><i style='width:" + b.sync.value + "%'></i><span class='mark' style='left:" + SCROLLS.syncThreshold + "%'></span></div>" +
     "<div class='tiny muted' style='margin-top:2px'>" + esc(syncFormula(b)) + "</div>" +
-    "<div class='verdicts'>" + b.verdicts.map(v => "<span class='vchip " + v.vote + (v.shadow ? " shadow" : "") + "'>" + esc(seatName(v.seat)) + ": " + esc(v.reason) + "</span>").join("") + "</div></div>";
+    "<div class='verdicts'>" + b.verdicts.map(v => { const tag = v.seat.startsWith("extra:") ? (v.shadow ? " (peer · shadow)" : " (peer · veto-only)") : (v.shadow ? " (shadow)" : ""); return "<span class='vchip " + v.vote + (v.shadow ? " shadow" : "") + "'>" + esc(seatName(v.seat) + tag) + ": " + esc(v.reason) + "</span>"; }).join("") + "</div></div>";
   box.innerHTML = advice + plan + act;
 }
 function actionBadge(a) {
