@@ -33,7 +33,7 @@
   "effort": {
     "size": "small",
     "estimate": "0 h agent",
-    "basis": "Implemented F-041 consultant ranking (owner pin, main base, best record), fallback, and ask-both adviser selection in 0.5 h agent.",
+    "basis": "Implemented F-041 consultant ranking (owner pin, main base, best record), fallback, and ask-both adviser selection in 0.5 h agent (PR #354).",
     "reviewed": "2026-11-13",
     "baselineDays": 1,
     "agentHours": 0,
