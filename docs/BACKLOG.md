@@ -14,7 +14,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 33 | 9 |
-| **Require Human 🧑** | 9 | 1 |
+| **Require Human 🧑** | 9 | 2 |
 
 ### Require Human 🧑
 
@@ -22,7 +22,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 |---|---|---|---|
 | **Procedures** | **Decisions** | **Procedures** | **Decisions** |
 | [F-009](#f-009) | [F-006](#f-006) | [B-057](#b-057) | — |
-| [F-011](#f-011) | [F-062](#f-062) |  |  |
+| [F-011](#f-011) | [F-062](#f-062) | [B-056](#b-056) |  |
 | [F-023](#f-023) | [F-009](#f-009) |  |  |
 | [F-004](#f-004) | [F-015](#f-015) |  |  |
 |  | [F-011](#f-011) |  |  |
@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 142 h agent + 17 h owner across 132 open steps of 31 features and 4 other records. 21.75 h of actual effort recorded on 33 steps. Generated from the task files.
+**Remaining effort:** 141 h agent + 17 h owner across 131 open steps of 31 features and 3 other records. 21.75 h of actual effort recorded on 33 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1702,44 +1702,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
-### <a id="b-056"></a>[🐞 B-056](#top)
-
-**A renewal the companion refuses on the Mac says it was not confirmed**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | — | — |
-
-💻 **→** Next: show a definite refusal for a renewal rejected before anything is sent (B-056-T01).
-
-| | |
-|---|---|
-| **Issue** | 2026-11-12, F-015 trial: with the companion paired, the owner pasted an invitation for another runtime. `renewalInvitation` refused it on the Mac (identity mismatch), so nothing was sent and the credential was unchanged, but `pair()` shows the same text for every renewal error: *Renewal not confirmed. Inspect clients; use a new invitation to recover the pairing.* That text is for a lost reply, where the server may already have replaced the token; here it sent the owner looking for a problem that did not exist. Also seen 2026-11-12 (F-015-T03): after a failed renewal the private field keeps the previous invitation, shown only as dots, so the next paste is appended to it and fails again with the same message. |
-| **Reproduce** | Pair the companion, open Renew pairing, paste an invitation from a different NERV profile (or an expired one) and choose Renew pairing. |
-| **Check** | A renewal refused before any request (identity mismatch, expired credential, malformed or expired invitation) says what was wrong and that the current pairing is unchanged; only an outcome that is really unknown (no reply, Keychain save failure after the server answered) keeps the unconfirmed message; the field is empty when renewal opens again; a Swift test covers each. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | B-056-T01 — Separate a refused renewal from an unconfirmed one in the companion | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-056.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Found in the F-015-T02 trial, [evidence](acceptance/f015-keychain-trial-2026-11-12.md); [PR #322](https://github.com/voidbrain/nerv/pull/322); leftover field text found in F-015-T03 ([evidence](acceptance/f015-live-failures-2026-11-12.md)), [PR #325](https://github.com/voidbrain/nerv/pull/325). |
-| Opened | 2026-11-12 |
-| Verification | Pending. |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
 ### <a id="f-054"></a>[✨ F-054](#top)
 
 **The base chronicle: a daily log of the agency's milestones, plain and in Eva lore**
@@ -1819,6 +1781,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-06 |
 | Verification | Unit/integration: Pending. |
 | Reviewed | 2026-11-06 |
+
+</details>
+
+---
+### <a id="b-056"></a>[🐞 B-056](#top)
+
+**A renewal the companion refuses on the Mac says it was not confirmed**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
+|---|---|---|---|---|---|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | 🧑 | — |
+
+🧑 **→** Next: confirm refused vs unconfirmed renewal and empty invitation field in a live F-015 companion trial, then close B-056.
+
+| | |
+|---|---|
+| **Issue** | 2026-11-12, F-015 trial: with the companion paired, the owner pasted an invitation for another runtime. `renewalInvitation` refused it on the Mac (identity mismatch), so nothing was sent and the credential was unchanged, but `pair()` shows the same text for every renewal error: *Renewal not confirmed. Inspect clients; use a new invitation to recover the pairing.* That text is for a lost reply, where the server may already have replaced the token; here it sent the owner looking for a problem that did not exist. Also seen 2026-11-12 (F-015-T03): after a failed renewal the private field keeps the previous invitation, shown only as dots, so the next paste is appended to it and fails again with the same message. |
+| **Reproduce** | Pair the companion, open Renew pairing, paste an invitation from a different NERV profile (or an expired one) and choose Renew pairing. |
+| **Check** | A renewal refused before any request (identity mismatch, expired credential, malformed or expired invitation) says what was wrong and that the current pairing is unchanged; only an outcome that is really unknown (no reply, Keychain save failure after the server answered) keeps the unconfirmed message; the field is empty when renewal opens again; a Swift test covers each. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | B-056-T01 — Separate a refused renewal from an unconfirmed one in the companion | 1 h | 0 h | 0 h | Completed |
+| — | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 0 h | 1 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-056.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Found in the F-015-T02 trial, [evidence](acceptance/f015-keychain-trial-2026-11-12.md); [PR #322](https://github.com/voidbrain/nerv/pull/322); leftover field text found in F-015-T03 ([evidence](acceptance/f015-live-failures-2026-11-12.md)), [PR #325](https://github.com/voidbrain/nerv/pull/325). |
+| Opened | 2026-11-12 |
+| Verification | Pending. |
+| Reviewed | 2026-11-12 |
 
 </details>
 

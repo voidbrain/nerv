@@ -48,7 +48,7 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
     private let login: LoginItemControlling = SystemLoginItem()
     private let service = UserServiceController()
     private var pollTask: Task<Void, Never>?
-    private var credential: Credential?
+    var credential: Credential?
     init() {
         guard NSClassFromString("XCTestCase") == nil else { return }
         do { credential = try CredentialStore.load(); paired = credential != nil } catch { status = errorMessage(error) }; loginState = login.state; if notificationsEnabled { notificationStatus = "Notifiche attive: nuovi messaggi e richieste di revisione" }; if paired { startPolling() }
@@ -110,16 +110,27 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
     }
     func pair() async {
         guard !busy else { return }; busy = true; defer { busy = false }
+        var renewalRequestStarted = false
         do {
             let value: Invitation
             if renewing { guard let credential else { throw NativeError.identityMismatch }; value = try credential.renewalInvitation(invitation) }
             else { value = try Invitation.decode(invitation) }
             let connection = NativeConnection(port: value.port, fingerprint: value.fingerprint)
+            renewalRequestStarted = renewing
             let claim = try JSONDecoder().decode(Claim.self, from: await connection.request(renewing ? "/api/pairing/renew" : "/api/pairing/claim", token: renewing ? credential?.token : nil, body: ["ticket": value.ticket]))
             guard claim.runtimeId == value.runtimeId, UUID(uuidString: claim.clientId) != nil, claim.expiresAt > Int64(Date().timeIntervalSince1970 * 1000), claim.scopes == ["read"], claim.token.range(of: "^[a-f0-9]{64}$", options: .regularExpression) != nil else { throw NativeError.identityMismatch }
             let next = Credential(clientId: claim.clientId, token: claim.token, expiresAt: claim.expiresAt, runtimeId: claim.runtimeId, port: value.port, webPort: value.webPort, fingerprint: value.fingerprint)
             try CredentialStore.save(next); credential = next; paired = true; renewing = false; invitation = ""; status = "NERV abbinato"; startPolling()
-        } catch { status = renewing ? "Rinnovo non confermato. Controlla i client; usa un nuovo invito per recuperare l’abbinamento." : error.localizedDescription }
+        } catch {
+            if renewing { invitation = "" }
+            if renewing && !renewalRequestStarted {
+                status = language == "en"
+                    ? "Renewal refused: \(error.localizedDescription) Existing pairing unchanged."
+                    : "Rinnovo rifiutato: \(error.localizedDescription) L’abbinamento attuale resta invariato."
+            } else {
+                status = renewing ? tr("Rinnovo non confermato. Controlla i client; usa un nuovo invito per recuperare l’abbinamento.") : error.localizedDescription
+            }
+        }
     }
     func refresh() async {
         guard !busy, !renewing, let credential else { return }; busy = true; defer { busy = false }
@@ -199,7 +210,7 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
                 ForEach(model.reminders) { item in VStack(alignment: .leading) { Text(item.title); Text(Self.date(item.due, language: model.language)).font(.caption).foregroundStyle(.secondary) } }
                 Button(model.tr(model.notificationsEnabled ? "Disattiva notifiche" : "Attiva notifiche da ora")) { Task { await model.toggleNotifications() } }.disabled(model.busy)
                 Text(model.tr(model.notificationStatus)).font(.caption)
-                Button(model.tr("Rinnova abbinamento")) { model.renewing = true }.disabled(model.busy)
+                Button(model.tr("Rinnova abbinamento")) { model.invitation = ""; model.renewing = true }.disabled(model.busy)
                 Button(model.tr("Rimuovi abbinamento locale")) { model.forget() }.disabled(model.busy)
             }
             Divider()
