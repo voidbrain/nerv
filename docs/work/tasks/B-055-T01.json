@@ -4,7 +4,7 @@
   "parent": "B-055",
   "title": "Service definitions record a stable Node executable",
   "goal": "Resolve the Node path at install to a stable target, tested on all three service definitions",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "A committed test with a per-shell (fnm-style) path fails before the fix",
     "Install writes the resolved stable path or refuses with a clear message",
@@ -32,10 +32,12 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h",
+    "estimate": "0",
     "basis": "Estimated 2026-11-12: path resolution plus one test per service definition. Not a measurement.",
-    "reviewed": "2026-11-12",
-    "agentHours": 1,
+    "reviewed": "2026-11-13",
+    "agentHours": 0,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated",
     "baselineAgentHours": 1
   }
 }

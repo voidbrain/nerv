@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 149 h agent + 17 h owner across 137 open steps of 31 features and 8 other records. 21.25 h of actual effort recorded on 31 steps. Generated from the task files.
+**Remaining effort:** 147 h agent + 17 h owner across 135 open steps of 31 features and 6 other records. 21.75 h of actual effort recorded on 33 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1094,9 +1094,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
 |---|---|---|---|---|---|:---:|:---:|
-| 🟠 Investigate | 🔶 P2 | 🟢 Small | 1 h | — | — | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | — | — | — |
 
-💻 **→** Next: find why the second liveness check saw a PID the first one did not, and make the test decide on one observation (B-053-T01).
+💻 **→** Next: merge PR once Linux CI passes (B-053-T01 closed).
 
 | | |
 |---|---|
@@ -1108,8 +1108,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | B-053-T01 — Find and remove the liveness race in the F-029 descendant-process test | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+| — | B-053-T01 — Find and remove the liveness race in the F-029 descendant-process test | 1 h | 0.25 h (stated) | 0 h | Completed |
+| — | **Total** | 1 h | 0.25 h | 0 h | 1 of 1 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1120,7 +1120,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | Seen on [PR #316](https://github.com/voidbrain/nerv/pull/316), CI run 43286749372 job validate. |
 | Opened | 2026-11-12 |
-| Verification | Pending. |
+| Verification | `node --test test/evaluation-runner.test.mjs`; Linux CI validation pending. |
 | Reviewed | 2026-11-12 |
 
 </details>
@@ -1132,9 +1132,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decision |
 |---|---|---|---|---|---|:---:|:---:|
-| 🟠 Investigate | 🔶 P2 | 🟢 Small | 1 h | — | — | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | — | — | — |
 
-💻 **→** Next: resolve the Node path at install to a stable target and test it on all three service definitions (B-055-T01).
+💻 **→** Next: merge PR once CI passes (B-055-T01 closed).
 
 | | |
 |---|---|
@@ -1146,8 +1146,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | B-055-T01 — Service definitions record a stable Node executable | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+| — | B-055-T01 — Service definitions record a stable Node executable | 1 h | 0.25 h (stated) | 0 h | Completed |
+| — | **Total** | 1 h | 0.25 h | 0 h | 1 of 1 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1158,7 +1158,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | Found during the B-008 reproduction, [evidence](acceptance/b008-tabgha-2026-11-12.md); [PR #318](https://github.com/voidbrain/nerv/pull/318). |
 | Opened | 2026-11-12 |
-| Verification | Pending. |
+| Verification | `node --test test/service-node-path.test.ts test/runtime.test.ts`; final required CI. |
 | Reviewed | 2026-11-12 |
 
 </details>

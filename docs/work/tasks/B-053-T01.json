@@ -4,7 +4,7 @@
   "parent": "B-053",
   "title": "Find and remove the liveness race in the F-029 descendant-process test",
   "goal": "The test decides on one observation per process and fails only when a descendant really survives the group timeout",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "A committed test or measurement shows the cause of the CI failure of run 43286749372 before any change to the test",
     "A real surviving descendant still fails the test; no assertion is weakened",
@@ -18,10 +18,12 @@
   "escalation": ["A real descendant leak in the runner is reported under F-029 before the test is touched"],
   "effort": {
     "size": "small",
-    "estimate": "1 h",
+    "estimate": "0",
     "basis": "Estimated 2026-11-12: read the runner's group termination, reproduce under load on Linux, one bounded test change. Not a measurement.",
-    "reviewed": "2026-11-12",
-    "agentHours": 1,
+    "reviewed": "2026-11-13",
+    "agentHours": 0,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated",
     "baselineAgentHours": 1
   }
 }
