@@ -310,6 +310,14 @@ export interface StoreApi {
   sortie(
     id: string,
   ): (SortieSummary & { detail: ActionDetail[] }) | null | Promise<(SortieSummary & { detail: ActionDetail[] }) | null>;
+  remoteSortie?(
+    baseId: string,
+    sortieId: string,
+  ): Promise<{
+    base: { id: string; name: string };
+    sortie: SortieSummary & { detail: ActionDetail[] };
+    events: SortieEvent[];
+  } | null>;
   ask?(ask: Ask): Promise<Reply>;
 }
 export class Runtime implements StoreApi {
@@ -2064,6 +2072,30 @@ export class Runtime implements StoreApi {
     if (!main) return undefined;
     const b = (await this.bases()).find((x) => x.baseId === main);
     return b ? { baseId: main, self: b.self, online: b.online } : undefined;
+  }
+  private remoteSortieLoader?: (
+    baseId: string,
+    sortieId: string,
+  ) => Promise<{
+    base: { id: string; name: string };
+    sortie: SortieSummary & { detail: ActionDetail[] };
+    events: SortieEvent[];
+  } | null>;
+  setRemoteSortie(
+    loader: (
+      baseId: string,
+      sortieId: string,
+    ) => Promise<{
+      base: { id: string; name: string };
+      sortie: SortieSummary & { detail: ActionDetail[] };
+      events: SortieEvent[];
+    } | null>,
+  ): void {
+    this.remoteSortieLoader = loader;
+  }
+  async remoteSortie(baseId: string, sortieId: string) {
+    if (!this.remoteSortieLoader) throw new Error('Kaji unavailable.');
+    return this.remoteSortieLoader(baseId, sortieId);
   }
   readonly lilith = {
     list: async () => (await this.nervous.call('memory.list', { limit: 200 })) as Fact[],

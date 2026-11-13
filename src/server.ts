@@ -275,7 +275,8 @@ export function makeServer(
           '/api/approvals',
           '/api/sorties',
         ].includes(path) ||
-          /^\/api\/sorties\/[a-f0-9-]+(\/events)?$/.test(path))
+          /^\/api\/sorties\/[a-f0-9-]+(\/events)?$/.test(path) ||
+          /^\/api\/bases\/[A-Za-z0-9-]{2,16}\/sorties\/[a-f0-9-]+$/.test(path))
       )
     ) {
       reply(403, { error: 'Read-only client.' });
@@ -490,6 +491,21 @@ export function makeServer(
           return;
         }
         reply(200, await store.bases());
+      } else if (req.method === 'GET' && /^\/api\/bases\/[A-Za-z0-9-]{2,16}\/sorties\/[a-f0-9-]+$/.test(path)) {
+        if (!store.remoteSortie) {
+          reply(503, { error: 'Kaji unavailable.' });
+          return;
+        }
+        const [, , , baseId, , sortieId] = path.split('/');
+        try {
+          const found = await store.remoteSortie(baseId!, sortieId!);
+          if (found) reply(200, found);
+          else reply(404, { error: 'No sortie with that ID on that base.' });
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : 'Remote inspection failed.';
+          if (/Kaji unavailable|not enrolled|revoked|not running/i.test(msg)) reply(503, { error: msg });
+          else reply(502, { error: msg });
+        }
       } else if (req.method === 'POST' && path === '/api/memory/consolidate') {
         if (!store.consolidate) {
           reply(503, { error: 'Instrumentality unavailable.' });

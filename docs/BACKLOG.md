@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 34 h agent + 16.75 h owner across 114 open steps of 28 features and 2 other records. 28.75 h of actual effort recorded on 49 steps. Generated from the task files.
+**Remaining effort:** 32.5 h agent + 16.75 h owner across 109 open steps of 27 features and 2 other records. 30.25 h of actual effort recorded on 54 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -810,49 +810,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-051"></a>[✨ F-051](#top)
-
-**Dashboard: a sortie shows where it runs and who contributed**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | — | — |
-
-💻 **→** Next: define authenticated destination-dashboard navigation; it needs an authenticated cross-base inspection contract, and EVA cage pilot labels await F-049.
-
-| | |
-|---|---|
-| **Issue** | Owner test on Tabgha 2026-11-05: on Tabgha the chat shows *Misato is planning… (local models take 10–30 s per step)* but not that the request went to Neo Tokyo-3, and the previous sortie stays selected; a running sortie card always blinks MAGI whatever its phase; the flow shows only "ok" for the MAGI, so whether shadow or peer seats voted is not visible, and Plan · current action does not say whether a pilot advised; a node the sortie did not need (Misato's Apt when no approval was needed) looks the same as one that is unavailable. |
-| **Reproduce** | Ask something on a base that is not the main one; select a finished sortie with a Green action; look at a running sortie's card. |
-| **Check** | The chat line reads *Misato is planning* (no timing note) and, for a relayed request, *Forwarded to Neo Tokyo-3*; the forwarded request appears on the asking base as a sortie card that says where it runs and links to it, and the main base shows it as a sortie from that base; a new request (or a refresh) selects the running sortie (F-019); the running card names its phase (Misato, MAGI, approval, EVA, a pilot); the MAGI detail lists every seat's vote, shadow and peer seats marked; Plan · current action names the pilot that advised; a node not needed by the sortie is shown as skipped, distinct from unavailable; the Sephirot shows a relay step when the request came from or went to another base. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-051-T01 — Chat line and relay visibility | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | F-051-T02 — Running sortie selection and phase label | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | F-051-T03 — MAGI and pilot contributors | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | F-051-T04 — Skipped versus unavailable nodes and relay step | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | F-051-T05 — Authenticated cross-base inspection | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 5 steps recorded) | 1.5 h | 0 of 5 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-051.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #195](https://github.com/voidbrain/nerv/pull/195) project tuning and regressions;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #163](https://github.com/voidbrain/nerv/pull/163) channel telemetry and CI reconciliation;  [PR #162](https://github.com/voidbrain/nerv/pull/162) relay detail and acceptance review; Owner test on Tabgha 2026-11-05 |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-06 Ledger-to-live-detail regression passed for remote answer/reference, waiting, no answer, local continuation, escaping and local empty states. Chrome: real service/session and ledger fixture showed the answering base and full reference; scoped axe found zero violations and screenshot inspected. Full suite: 196 passed, one platform skip; build, typecheck, conventions and integrations passed. Merged PR #162 CI passed validate, windows and both native-macos runs (ci:status, runs 42247286378/42247282316); cross-base link and EVA labels remain unimplemented. |
-| Reviewed | 2026-11-07 |
-
-</details>
-
----
-
 ### <a id="f-052"></a>[✨ F-052](#top)
 
 **Timings for every step, live in the Sephirot; shadow seats never make you wait**
@@ -890,6 +847,49 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner question 2026-11-05 (ledger timing of S-7663 and S-3BFF); item 3 [PR #116](https://github.com/voidbrain/nerv/pull/116) |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-05 item 3: test/kaji-seats.test.ts and full suite (local run) |
+| Reviewed | 2026-11-07 |
+
+</details>
+
+---
+
+### <a id="f-051"></a>[✨ F-051](#top)
+
+**Dashboard: a sortie shows where it runs and who contributed**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🔴 Large | 0 h | — | — | — | — |
+
+💻 **→** Next: EVA cage pilot labels await F-049 runtime isolation; T01–T05 (chat/relay visibility, running sortie selection/phase, MAGI/pilot contributors, skipped/unavailable + relay Sephirot, and authenticated cross-base sortie inspection) are implemented.
+
+| | |
+|---|---|
+| **Issue** | Owner test on Tabgha 2026-11-05: on Tabgha the chat shows *Misato is planning… (local models take 10–30 s per step)* but not that the request went to Neo Tokyo-3, and the previous sortie stays selected; a running sortie card always blinks MAGI whatever its phase; the flow shows only "ok" for the MAGI, so whether shadow or peer seats voted is not visible, and Plan · current action does not say whether a pilot advised; a node the sortie did not need (Misato's Apt when no approval was needed) looks the same as one that is unavailable. |
+| **Reproduce** | Ask something on a base that is not the main one; select a finished sortie with a Green action; look at a running sortie's card. |
+| **Check** | The chat line reads *Misato is planning* (no timing note) and, for a relayed request, *Forwarded to Neo Tokyo-3*; the forwarded request appears on the asking base as a sortie card that says where it runs and links to it, and the main base shows it as a sortie from that base; a new request (or a refresh) selects the running sortie (F-019); the running card names its phase (Misato, MAGI, approval, EVA, a pilot); the MAGI detail lists every seat's vote, shadow and peer seats marked; Plan · current action names the pilot that advised; a node not needed by the sortie is shown as skipped, distinct from unavailable; the Sephirot shows a relay step when the request came from or went to another base. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | F-051-T01 — Chat line and relay visibility | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | F-051-T02 — Running sortie selection and phase label | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | F-051-T03 — MAGI and pilot contributors | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | F-051-T04 — Skipped versus unavailable nodes and relay step | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | F-051-T05 — Authenticated cross-base inspection | 0.5 h | 0.5 h (stated) | 0 h | Completed |
+| — | **Total** | 1.5 h | 1.5 h | 0 h | 5 of 5 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-051.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #195](https://github.com/voidbrain/nerv/pull/195) project tuning and regressions;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #163](https://github.com/voidbrain/nerv/pull/163) channel telemetry and CI reconciliation;  [PR #162](https://github.com/voidbrain/nerv/pull/162) relay detail and acceptance review; Owner test on Tabgha 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-06 Ledger-to-live-detail regression passed for remote answer/reference, waiting, no answer, local continuation, escaping and local empty states. Chrome: real service/session and ledger fixture showed the answering base and full reference; scoped axe found zero violations and screenshot inspected. Full suite: 196 passed, one platform skip; build, typecheck, conventions and integrations passed. Merged PR #162 CI passed validate, windows and both native-macos runs (ci:status, runs 42247286378/42247282316); cross-base link and EVA labels remain unimplemented. |
 | Reviewed | 2026-11-07 |
 
 </details>

@@ -28,6 +28,8 @@ import { join, resolve } from 'node:path';
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Store } from './store.ts';
+import type { ActionDetail, SortieSummary } from './ledger.ts';
+import type { SortieEvent } from './events.ts';
 import { makeServer } from './server.ts';
 import {
   savePilots,
@@ -1419,7 +1421,24 @@ try {
               ...(await runtime.chat(message, `kaji:${from.toLowerCase()}${conversation ? '-' + conversation : ''}`)),
               base: { id: config.base.id, name: config.base.name },
             }),
+            onSortie: async (_from, sortieId) => {
+              const sortie = await runtime.sortie(sortieId);
+              if (!sortie) return null;
+              const events = await runtime.events(sortieId, 0, 100);
+              return { sortie, events };
+            },
           });
+          if (kaji) {
+            const link = kaji;
+            runtime.setRemoteSortie(
+              (baseId, sortieId) =>
+                link.inspectSortie(baseId, sortieId) as Promise<{
+                  base: { id: string; name: string };
+                  sortie: SortieSummary & { detail: ActionDetail[] };
+                  events: SortieEvent[];
+                } | null>,
+            );
+          }
           // Phase 2, on the main base: every online base's Casper votes too, veto-only, shadow unless kaji seat BASE veto.
           if (kaji) runtime.usePeerSeats(kaji, () => live().kaji?.seats ?? {});
           if (config.seats?.length) runtime.useSeatPool(new SeatPool(config.seats, (id) => readSeatKey(home, id)));
