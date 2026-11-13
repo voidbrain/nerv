@@ -4,7 +4,7 @@
   "parent": "F-045",
   "title": "Evidence-based placement",
   "goal": "Evidence-based placement",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Consume F-006-T03/T04 evidence; individual-role and combination evidence kept distinct; no placement claim without it"
   ],
@@ -32,12 +32,14 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h agent",
-    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: 1.5 h/day judged rate (PR #277). Estimate, not a measurement; baselineDays 1 kept as history. Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 1.5 h → 1 h, min 0.5 h; owner hours and baseline kept. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (1 h); the baseline stays for calibration.",
-    "reviewed": "2026-11-12",
+    "estimate": "0 h agent",
+    "basis": "Implemented F-006-T03/T04 evidence consumption, individual/combination/placement separation, and suggest-only placement checks in 0.5 h agent.",
+    "reviewed": "2026-11-13",
     "baselineDays": 1,
-    "agentHours": 1,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
-    "estimateAgentHours": 1
+    "actualAgentHours": 0.5,
+    "actualSource": "stated",
+    "estimateAgentHours": 0.5
   }
 }

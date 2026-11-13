@@ -519,6 +519,129 @@ export function selectRemotePilotRun(
   }
   return { choice, remote: false, allowed: true };
 }
+/** Qualification evidence scopes kept distinct per docs/decisions/configuration-qualification.md (F-045-T06). */
+export type QualificationScope = 'individual' | 'combination' | 'placement';
+export interface IndividualRoleEvidence {
+  scope: 'individual';
+  id: string;
+  pilotId: string;
+  role: NonNullable<Pilot['role']>;
+  model: string;
+  passed: number;
+  total: number;
+  recordedAt: string;
+}
+export interface CombinationEvidence {
+  scope: 'combination';
+  id: string;
+  roles: readonly string[];
+  componentEvidenceIds: readonly string[];
+  passed: number;
+  total: number;
+  escapedDefects: number;
+  falseRejections: number;
+  independentGrader: boolean;
+  recordedAt: string;
+}
+export interface HostPlacementEvidence {
+  scope: 'placement';
+  id: string;
+  pilotId: string;
+  baseId: string;
+  inferenceHost: string;
+  executionHost: string;
+  passed: number;
+  total: number;
+  recordedAt: string;
+}
+export type QualificationEvidence = IndividualRoleEvidence | CombinationEvidence | HostPlacementEvidence;
+export interface PlacementAssessment {
+  qualified: boolean;
+  suggestOnly: true;
+  individualQualified: boolean;
+  combinationQualified: boolean;
+  placementQualified: boolean;
+  missing: QualificationScope[];
+  reason: string;
+}
+/**
+ * Evaluates F-006-T03/T04 qualification evidence for pilot placement (F-045-T06).
+ * Individual-role, combination, and host-placement evidence remain strictly distinct;
+ * no placement claim is made without required passing evidence, and suggestOnly stays true.
+ */
+export function evaluatePilotPlacement(input: {
+  pilotId: string;
+  role?: NonNullable<Pilot['role']>;
+  baseId: string;
+  partnerPilotIds?: readonly string[];
+  evidence: readonly QualificationEvidence[];
+}): PlacementAssessment {
+  const individuals = input.evidence.filter((e): e is IndividualRoleEvidence => e.scope === 'individual');
+  const combinations = input.evidence.filter((e): e is CombinationEvidence => e.scope === 'combination');
+  const placements = input.evidence.filter((e): e is HostPlacementEvidence => e.scope === 'placement');
+
+  const passingIndividuals = individuals.filter((e) => e.total > 0 && e.passed === e.total);
+  const passingIndividualIds = new Set(passingIndividuals.map((e) => e.id));
+  const individualQualified = passingIndividuals.some(
+    (e) => e.pilotId === input.pilotId && (!input.role || e.role === input.role),
+  );
+
+  const partners = input.partnerPilotIds ?? [];
+  const needsCombination = partners.length > 0;
+  const combinationQualified = !needsCombination
+    ? true
+    : combinations.some(
+        (e) =>
+          e.independentGrader &&
+          e.total > 0 &&
+          e.passed === e.total &&
+          e.escapedDefects === 0 &&
+          e.roles.includes(input.pilotId) &&
+          partners.every((p) => e.roles.includes(p)) &&
+          e.componentEvidenceIds.length > 0 &&
+          e.componentEvidenceIds.every((id) => passingIndividualIds.has(id)),
+      );
+
+  const placementQualified = placements.some(
+    (e) => e.pilotId === input.pilotId && e.baseId === input.baseId && e.total > 0 && e.passed === e.total,
+  );
+
+  const missing: QualificationScope[] = [];
+  if (!individualQualified) missing.push('individual');
+  if (needsCombination && !combinationQualified) missing.push('combination');
+  if (!placementQualified) missing.push('placement');
+
+  const qualified = missing.length === 0;
+  return {
+    qualified,
+    suggestOnly: true,
+    individualQualified,
+    combinationQualified,
+    placementQualified,
+    missing,
+    reason: qualified
+      ? `Qualified by individual${needsCombination ? ', combination,' : ''} and placement evidence (suggest-only retained).`
+      : `No placement claim without ${missing.join(', ')} evidence.`,
+  };
+}
+/** Chooses an execution pilot and attaches its F-006-T03/T04 placement assessment (F-045-T06). */
+export function chooseQualifiedExecution(
+  request: string,
+  candidates: readonly (Pilot | RegisteredPilot | PilotCandidate)[],
+  fallbackGeneric: Pilot,
+  evidence: readonly QualificationEvidence[],
+  opts?: { baseId?: string; partnerPilotIds?: readonly string[]; suggestOnly?: boolean },
+): { choice: ExecutionChoice; placement: PlacementAssessment } {
+  const choice = chooseExecutionPilot(request, candidates, fallbackGeneric, { suggestOnly: true });
+  const placement = evaluatePilotPlacement({
+    pilotId: choice.pilot.id,
+    role: choice.pilot.role,
+    baseId: choice.baseId ?? opts?.baseId ?? 'LOCAL',
+    partnerPilotIds: opts?.partnerPilotIds,
+    evidence,
+  });
+  return { choice: { ...choice, suggestOnly: true }, placement };
+}
 /** The roster as `nerv pilots` prints it, the generic pilot first. */
 export function describePilots(roster: readonly Pilot[], generic: string | null): string {
   const lines = [

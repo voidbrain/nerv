@@ -12,7 +12,9 @@ import {
   chooseAdvisers,
   chooseExecutionPilot,
   choosePilot,
+  chooseQualifiedExecution,
   describePilots,
+  evaluatePilotPlacement,
   genericPilot,
   hits,
   nextStage,
@@ -715,4 +717,115 @@ test('F-045-T05: remote pilots chosen, granted, and run through the authenticate
   } finally {
     rmSync(home, { recursive: true, force: true });
   }
+});
+
+test('F-045-T06: evidence-based placement keeps individual, combination, and placement evidence distinct', () => {
+  const generic = genericPilot('gemma4:12b', 'prototype');
+  const coder = pilot({ id: 'coder', role: 'coder', keywords: ['typescript', 'refactor'], stage: 'test' });
+
+  const noEvidence = evaluatePilotPlacement({ pilotId: 'coder', role: 'coder', baseId: 'MAGI-02', evidence: [] });
+  assert.equal(noEvidence.qualified, false);
+  assert.equal(noEvidence.suggestOnly, true);
+  assert.deepEqual(noEvidence.missing, ['individual', 'placement']);
+  assert.match(noEvidence.reason, /No placement claim without/);
+
+  const indCoder = {
+    scope: 'individual' as const,
+    id: 'ev-ind-coder',
+    pilotId: 'coder',
+    role: 'coder' as const,
+    model: 'm',
+    passed: 5,
+    total: 5,
+    recordedAt: '2026-11-13T00:00:00Z',
+  };
+  const indAuditor = {
+    scope: 'individual' as const,
+    id: 'ev-ind-auditor',
+    pilotId: 'auditor',
+    role: 'auditor' as const,
+    model: 'm',
+    passed: 5,
+    total: 5,
+    recordedAt: '2026-11-13T00:00:00Z',
+  };
+  const placement = {
+    scope: 'placement' as const,
+    id: 'ev-place',
+    pilotId: 'coder',
+    baseId: 'MAGI-02',
+    inferenceHost: 'mac-main',
+    executionHost: 'mini-pc',
+    passed: 3,
+    total: 3,
+    recordedAt: '2026-11-13T00:00:00Z',
+  };
+
+  // Two individual passes never imply a combination pass.
+  const twoIndividualsOnly = evaluatePilotPlacement({
+    pilotId: 'coder',
+    role: 'coder',
+    baseId: 'MAGI-02',
+    partnerPilotIds: ['auditor'],
+    evidence: [indCoder, indAuditor, placement],
+  });
+  assert.equal(twoIndividualsOnly.individualQualified, true);
+  assert.equal(twoIndividualsOnly.combinationQualified, false);
+  assert.equal(twoIndividualsOnly.qualified, false);
+  assert.deepEqual(twoIndividualsOnly.missing, ['combination']);
+
+  // Combination without independent grader or with escaped defects is rejected.
+  const flawedCombo = evaluatePilotPlacement({
+    pilotId: 'coder',
+    role: 'coder',
+    baseId: 'MAGI-02',
+    partnerPilotIds: ['auditor'],
+    evidence: [
+      indCoder,
+      indAuditor,
+      placement,
+      {
+        scope: 'combination',
+        id: 'ev-combo-bad',
+        roles: ['coder', 'auditor'],
+        componentEvidenceIds: ['ev-ind-coder', 'ev-ind-auditor'],
+        passed: 4,
+        total: 4,
+        escapedDefects: 1,
+        falseRejections: 0,
+        independentGrader: true,
+        recordedAt: '2026-11-13T00:00:00Z',
+      },
+    ],
+  });
+  assert.equal(flawedCombo.combinationQualified, false);
+  assert.equal(flawedCombo.qualified, false);
+
+  // Separate passing individual, combination, and placement evidence qualifies while retaining suggestOnly.
+  const qualified = chooseQualifiedExecution(
+    'Refactor typescript module',
+    [coder],
+    generic,
+    [
+      indCoder,
+      indAuditor,
+      placement,
+      {
+        scope: 'combination',
+        id: 'ev-combo-ok',
+        roles: ['coder', 'auditor'],
+        componentEvidenceIds: ['ev-ind-coder', 'ev-ind-auditor'],
+        passed: 4,
+        total: 4,
+        escapedDefects: 0,
+        falseRejections: 0,
+        independentGrader: true,
+        recordedAt: '2026-11-13T00:00:00Z',
+      },
+    ],
+    { baseId: 'MAGI-02', partnerPilotIds: ['auditor'], suggestOnly: false },
+  );
+  assert.equal(qualified.placement.qualified, true);
+  assert.equal(qualified.placement.suggestOnly, true);
+  assert.equal(qualified.choice.suggestOnly, true);
 });

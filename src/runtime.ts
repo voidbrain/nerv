@@ -43,6 +43,8 @@ import {
   chooseAdvisers,
   chooseExecutionPilot,
   choosePilot,
+  chooseQualifiedExecution,
+  evaluatePilotPlacement,
   genericPilot as buildGenericPilot,
   promotionEligible,
   rankPilots,
@@ -56,6 +58,8 @@ import {
   type PilotOffer,
   type PilotPatch,
   type PilotRecord,
+  type PlacementAssessment,
+  type QualificationEvidence,
   type RegisteredPilot,
 } from './pilots.ts';
 import { toolName, type McpTool } from './mcp.ts';
@@ -2142,6 +2146,33 @@ export class Runtime implements StoreApi {
     const pilot = this.pilotRoster().find((p) => p.id === id);
     if (!pilot) throw new Error(`Unknown specialist pilot: ${id}.`);
     return promotionEligible(pilot, record);
+  }
+  /** F-045-T06: assesses F-006-T03/T04 individual, combination, and placement evidence without auto-promoting. */
+  assessPilotPlacement(
+    id: string,
+    evidence: readonly QualificationEvidence[],
+    opts?: { baseId?: string; partnerPilotIds?: readonly string[] },
+  ): PlacementAssessment {
+    const pilot = this.pilotRoster().find((p) => p.id === id);
+    if (!pilot) throw new Error(`Unknown specialist pilot: ${id}.`);
+    return evaluatePilotPlacement({
+      pilotId: pilot.id,
+      role: pilot.role,
+      baseId: opts?.baseId ?? this.getPilotRegistry().localBaseId,
+      partnerPilotIds: opts?.partnerPilotIds,
+      evidence,
+    });
+  }
+  /** F-045-T06: selects an execution pilot together with its qualification placement assessment (suggest-only). */
+  selectQualifiedPilotForExecution(
+    request: string,
+    evidence: readonly QualificationEvidence[],
+    opts?: { partnerPilotIds?: readonly string[]; candidates?: readonly (Pilot | RegisteredPilot | PilotCandidate)[] },
+  ) {
+    return chooseQualifiedExecution(request, opts?.candidates ?? this.pilotRoster(), this.genericPilot(), evidence, {
+      baseId: this.getPilotRegistry().localBaseId,
+      partnerPilotIds: opts?.partnerPilotIds,
+    });
   }
   private async requireInstalledModel(model: string): Promise<void> {
     if (!this.home) throw new Error('Pilot setup needs the data home.');
