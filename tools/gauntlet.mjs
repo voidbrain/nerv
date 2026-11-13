@@ -26,8 +26,10 @@ import {
   recordRun,
   pendingCases,
   validateLedger,
+  scenarioHash as gauntletScenarioHash,
 } from '@voidbrain/gauntlet-protocol';
 import { sourceInputs } from './evaluate.mjs';
+import { validateRoleBundleConfig, runRoleBundle } from './evaluate-model.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const here = (path) => resolve(root, path);
@@ -41,12 +43,11 @@ const consumptionPath = () => resolve(process.env.NERV_GAUNTLET_CONSUMPTION ?? h
 const tasksPath = () => resolve(process.env.NERV_GAUNTLET_TASKS ?? here('docs/work/tasks'));
 const releaseTag = () => readJSON(here('vendor/gauntlet-protocol.json')).releaseTag;
 
-export function systemSourceKey(pack) {
+export function systemSourceKey() {
+  const inputs = sourceInputs(root, false);
+  delete inputs[ledgerFile];
   return hash({
-    inputs: sourceInputs(
-      root,
-      pack.cases.some((c) => c.id === 'browser'),
-    ),
+    inputs,
     adapter: hash(readFileSync(here('tools/gauntlet-adapter.mjs'), 'utf8')),
     wrapper: hash(readFileSync(here('tools/gauntlet.mjs'), 'utf8')),
     dependency: hash(readFileSync(here('vendor/gauntlet-protocol.json'), 'utf8')),
@@ -124,9 +125,9 @@ function writeLedger(ledger) {
 const entryKey = (e) => JSON.stringify([e.pack, e.case, e.profileHash]);
 // A selected run (one system case, or a model pack's pending cases) ran the same case definitions as the full pack:
 // Gauntlet checks the report against the selected pack it actually ran, and the entries are kept under the full pack.
-export function recordSelected(ledger, report, full, selected) {
+export function recordSelected(ledger, report, full, selected, sourceKey = null) {
   const entries = new Map(ledger.entries.map((e) => [entryKey(e), e]));
-  for (const e of recordRun(emptyLedger(), report, selected).entries) {
+  for (const e of recordRun(emptyLedger(), report, selected, { sourceKey }).entries) {
     const entry = { ...e, pack: full.id, packVersion: full.version };
     const old = entries.get(entryKey(entry));
     if (
@@ -166,13 +167,19 @@ export function unnamedPending(list, text) {
   const names = new Set(text.match(/[a-z0-9][a-z0-9.-]*\/(?:\*|[a-z0-9][a-z0-9.-]*)/gi) ?? []);
   return list.filter((p) => !names.has(`${p.pack}/${p.case}`) && !names.has(`${p.pack}/*`));
 }
-export function pending({ maxAgeDays, profile } = {}) {
+export function pending({ maxAgeDays, profile, modelDigest, runtimeHash, scenarioHash, sourceKey } = {}) {
+  const defaultSourceKey = systemPacks()[0]?.pack ? systemSourceKey(systemPacks()[0].pack) : undefined;
+  const effectiveSourceKey = sourceKey !== undefined ? sourceKey : defaultSourceKey;
   return pendingCases(
     allPacks().map((p) => p.pack),
     readLedger(),
     {
       ...(profile ? { profile } : {}),
       ...(maxAgeDays !== undefined ? { maxAgeMs: maxAgeDays * 86400000 } : {}),
+      ...(modelDigest !== undefined ? { modelDigest } : {}),
+      ...(runtimeHash !== undefined ? { runtimeHash } : {}),
+      ...(scenarioHash !== undefined ? { scenarioHash } : {}),
+      ...(effectiveSourceKey !== undefined ? { sourceKey: effectiveSourceKey } : {}),
     },
   );
 }
@@ -186,8 +193,18 @@ export async function main(args = process.argv.slice(2), services = { execute: e
     machine: ['id', 'version'],
     index: ['check', 'reports'],
     packs: [],
-    pending: ['check-records', 'max-age-days', 'profile'],
-    ledger: ['report', 'pack'],
+    pending: [
+      'check-records',
+      'max-age-days',
+      'profile',
+      'model-digest',
+      'runtime-hash',
+      'scenario-hash',
+      'source-key',
+      'machine-profile',
+      'scenario',
+    ],
+    ledger: ['report', 'pack', 'source-key'],
     plan: ['only', 'profile', 'allow-expensive', 'machine-profile', 'scenario'],
     run: [
       'only',
@@ -233,13 +250,31 @@ export async function main(args = process.argv.slice(2), services = { execute: e
       'machine-profile',
       'scenario',
       'confirm-scenario',
+      'model-digest',
+      'runtime-hash',
+      'scenario-hash',
+      'source-key',
+    ],
+    'role-plan': ['role', 'limit', 'profile', 'limits', 'machine-profile', 'scenario'],
+    'role-run': [
+      'role',
+      'limit',
+      'profile',
+      'limits',
+      'out',
+      'execute',
+      'allow-models',
+      'fresh',
+      'machine-profile',
+      'scenario',
+      'confirm-scenario',
     ],
     compare: ['reports'],
     qualify: ['report', 'review', 'requirements', 'out'],
   };
   if (!Object.hasOwn(allowed, command))
     throw Error(
-      'Use index, packs, plan, run, model-plan, model-run, all, pending, ledger, inspect-failures, compare or qualify',
+      'Use index, packs, plan, run, model-plan, model-run, role-plan, role-run, all, pending, ledger, inspect-failures, compare or qualify',
     );
   for (const arg of rest) {
     const m = /^--([a-z-]+)(?:=(.+))?$/.exec(arg);
@@ -298,10 +333,45 @@ export async function main(args = process.argv.slice(2), services = { execute: e
     writeFileSync(out, rendered);
     return { index: 'docs/test-capability-index.md', cases: allPacks().reduce((n, p) => n + p.pack.cases.length, 0) };
   }
+  const intendedIdentity = (env) => {
+    if (options['scenario-hash'] !== undefined && env)
+      throw Error('Use --scenario-hash or --machine-profile/--scenario, not both');
+    const scenarioHash = env
+      ? gauntletScenarioHash(env)
+      : options['scenario-hash'] !== undefined
+        ? options['scenario-hash'] === 'none'
+          ? null
+          : options['scenario-hash']
+        : undefined;
+    const sourceKey =
+      options['source-key'] !== undefined
+        ? options['source-key'] === 'none'
+          ? null
+          : options['source-key']
+        : systemPacks()[0]?.pack
+          ? systemSourceKey(systemPacks()[0].pack)
+          : undefined;
+    return {
+      ...(options['model-digest'] !== undefined
+        ? { modelDigest: options['model-digest'] === 'none' ? null : options['model-digest'] }
+        : {}),
+      ...(options['runtime-hash'] !== undefined
+        ? { runtimeHash: options['runtime-hash'] === 'none' ? null : options['runtime-hash'] }
+        : {}),
+      ...(scenarioHash !== undefined ? { scenarioHash } : {}),
+      ...(sourceKey !== undefined ? { sourceKey } : {}),
+    };
+  };
   if (command === 'pending') {
+    if (!!options['machine-profile'] !== !!options.scenario)
+      throw Error('Machine profile and scenario must be supplied together');
+    const env = options.scenario
+      ? validateExecutionEnvironment({ machine: load('machine-profile'), scenario: load('scenario') })
+      : undefined;
     const list = pending({
       maxAgeDays: days(),
       profile: options.profile ? validateProfile(load('profile')) : undefined,
+      ...intendedIdentity(env),
     });
     if (!options['check-records']) return { pendingLines: list.map((p) => `${p.pack}/${p.case} (${p.reason})`) };
     const unnamed = unnamedPending(list, openTaskText());
@@ -319,7 +389,15 @@ export async function main(args = process.argv.slice(2), services = { execute: e
     if (!full) throw Error('Unknown pack ' + options.pack);
     const report = readEvidence(resolve(options.report));
     const ids = [...new Set(report.results.map((r) => r.id))];
-    const next = recordSelected(readLedger(), report, full, selectedPack(full, ids, isModelPack(full)));
+    const sourceKey =
+      options['source-key'] !== undefined
+        ? options['source-key'] === 'none'
+          ? null
+          : options['source-key']
+        : isModelPack(full)
+          ? null
+          : systemSourceKey(full);
+    const next = recordSelected(readLedger(), report, full, selectedPack(full, ids, isModelPack(full)), sourceKey);
     writeLedger(next);
     return { ledger: ledgerFile, entries: next.entries.length };
   }
@@ -371,7 +449,60 @@ export async function main(args = process.argv.slice(2), services = { execute: e
   if (command === 'all') {
     const profile = options.profile ? validateProfile(load('profile')) : null;
     if (options.execute) confirmScenario();
-    return all(options, { profile, execute, limitsFor, maxAgeDays: days() });
+    return all(options, { profile, execute, limitsFor, maxAgeDays: days(), intended: intendedIdentity(environment) });
+  }
+  if (command === 'role-plan' || command === 'role-run') {
+    const profile = options.profile ? validateProfile(load('profile')) : null;
+    if (!profile) throw Error('Role plan/run needs --profile=path');
+    const limits = validateLimits(
+      options.limits ? load('limits') : readJSON(join(examples, 'limits-day.json')),
+    );
+    const limit =
+      options.limit !== undefined
+        ? /^\d+$/.test(options.limit)
+          ? Number(options.limit)
+          : (() => {
+              throw Error('Invalid --limit');
+            })()
+        : undefined;
+    const role = options.role ?? 'both';
+    const selection = validateRoleBundleConfig({ role, limit, profile, limits });
+    if (command === 'role-plan') {
+      return {
+        bundle: 'nerv-role-evaluation',
+        role: selection.role,
+        limit: selection.limit,
+        cases: selection.cases.map((c) => ({ role: c.role, suiteId: c.suiteId, id: c.case.id, split: c.case.split, family: c.case.family })),
+        profile,
+        limits: (({ caseMs, suiteMs, maxCases, repeat, outputTokens, maxBytes }) => ({
+          caseMs,
+          suiteMs,
+          maxCases,
+          repeat,
+          outputTokens,
+          maxBytes,
+        }))(limits),
+        environment: environment ?? null,
+        reusesCommonSmoke: false,
+        modelCallsAuthorized: false,
+        modelQualification: false,
+      };
+    }
+    confirmScenario();
+    if (!options.execute || !options['allow-models'] || !options.out)
+      throw Error('Role execution requires --execute --allow-models --out=new.json');
+    return runRoleBundle(
+      {
+        role: selection.role,
+        limit: selection.limit,
+        profile,
+        limits,
+        environment: environment ?? null,
+        out: options.out,
+        sourceKey: systemPacks()[0]?.pack ? systemSourceKey(systemPacks()[0].pack) : null,
+      },
+      { fetch: services.fetch, signal: services.signal },
+    );
   }
 
   const model = command.startsWith('model-');
@@ -418,12 +549,17 @@ export async function main(args = process.argv.slice(2), services = { execute: e
 // ledger does not cover (new, changed, other-profile, or stale with --max-age-days), or every case with --fresh, and
 // records the reports in the ledger. System cases need no model; expensive ones need --allow-expensive. Model cases
 // need --allow-models and --profile: a real-model run is an owner-approved campaign.
-async function all(options, { profile, execute, limitsFor, maxAgeDays }) {
+async function all(options, { profile, execute, limitsFor, maxAgeDays, intended = {} }) {
   const ledger = readLedger();
+  const pendingOptions = {
+    ...(maxAgeDays !== undefined ? { maxAgeMs: maxAgeDays * 86400000 } : {}),
+    ...(profile ? { profile } : {}),
+    ...intended,
+  };
   const open = pendingCases(
     allPacks().map((p) => p.pack),
     ledger,
-    { ...(maxAgeDays !== undefined ? { maxAgeMs: maxAgeDays * 86400000 } : {}), ...(profile ? { profile } : {}) },
+    pendingOptions,
   );
   const packs = allPacks().map(({ pack }) => {
     const model = isModelPack(pack);
@@ -483,10 +619,12 @@ async function all(options, { profile, execute, limitsFor, maxAgeDays }) {
     for (const batch of batches) {
       const selected = selectedPack(pack, batch, model);
       const out = join(outDir, `${pack.id}${model ? '' : '-' + batch[0]}.json`);
+      const sourceKey = model ? null : systemSourceKey(pack);
       const result = await execute(selected, model, model ? profile : null, out, {
         ...(maxAgeDays !== undefined ? { maxAgeMs: maxAgeDays * 86400000 } : {}),
+        ...(sourceKey ? { sourceKey } : {}),
       });
-      next = recordSelected(next, result.report, pack, selected);
+      next = recordSelected(next, result.report, pack, selected, sourceKey);
       results.push({
         pack: pack.id,
         cases: batch,
@@ -506,6 +644,7 @@ async function all(options, { profile, execute, limitsFor, maxAgeDays }) {
     stillPending: pendingCases(
       allPacks().map((p) => p.pack),
       next,
+      pendingOptions,
     ).length,
     modelQualification: false,
   };

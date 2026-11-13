@@ -47,6 +47,8 @@
     "gauntlet:run": "node tools/gauntlet.mjs run",
     "gauntlet:model-plan": "node tools/gauntlet.mjs model-plan",
     "gauntlet:model-run": "node tools/gauntlet.mjs model-run",
+    "gauntlet:role-plan": "node tools/gauntlet.mjs role-plan",
+    "gauntlet:role-run": "node tools/gauntlet.mjs role-run",
     "gauntlet:compare": "node tools/gauntlet.mjs compare",
     "gauntlet:qualify": "node tools/gauntlet.mjs qualify",
     "gauntlet:index": "node tools/gauntlet.mjs index",

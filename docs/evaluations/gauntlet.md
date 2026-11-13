@@ -4,7 +4,7 @@
 
 The development dependency is a versioned, source-included npm artifact in `vendor/`, with SHA256 and source provenance in [the manifest](../../vendor/gauntlet-protocol.json). It needs no private GitHub token at installation. Update the independent project first, then replace the pinned artifact, lockfile and provenance together; do not edit extracted copies or vendor a fork silently.
 
-Pinned release: **0.7.1** (tag `v0.7.1`, 2026-11-11; upstream B-002 PRs #37/#38, release PR #40 / CI 43072438199). 0.7.0 makes ledger coverage follow run identity: ledger schema 2 records each run's model digest, runtime hash, scenario hash and an optional source key, and `pending` can be told the identity it intends to run under (upstream `docs/LEDGER.md`, shipped in the artifact). 0.7.1 changes only Gauntlet's development harness. Packs, grading and protocol 0.4 evidence are unchanged; the engine hash changed in 0.7.0, so Gauntlet's cache reuses only evidence produced by 0.7.x. NERV records new runs in schema 2 (`recordSelected`); entries recorded under 0.6.0 stay valid as unknown identity, and they cover every query that sets no identity field, which is what NERV asks today. Passing NERV's intended identity is F-074-T10.
+Pinned release: **0.7.1** (tag `v0.7.1`, 2026-11-11; upstream B-002 PRs #37/#38, release PR #40 / CI 43072438199). 0.7.0 makes ledger coverage follow run identity: ledger schema 2 records each run's model digest, runtime hash, scenario hash and an optional source key, and `pending` can be told the identity it intends to run under (upstream `docs/LEDGER.md`, shipped in the artifact). 0.7.1 changes only Gauntlet's development harness. Packs, grading and protocol 0.4 evidence are unchanged; the engine hash changed in 0.7.0, so Gauntlet's cache reuses only evidence produced by 0.7.x. NERV records new runs in schema 2 (`recordSelected`), binding `systemSourceKey` for system cases; `pending`, `all` and `check:gauntlet-runs` pass NERV's `sourceKey` and accept `--model-digest`, `--runtime-hash`, `--scenario-hash` (or paired `--machine-profile` / `--scenario`) and `--source-key`. Entries recorded under 0.6.0 stay valid as unknown identity and become pending when an identity field is checked.
 
 Earlier pin, 0.6.0: It adds the run ledger and `pending`. The engine hash changed, so the cache reused only evidence produced by 0.6.0.
 
@@ -26,7 +26,7 @@ npm run gauntlet:all -- --profile=node_modules/@voidbrain/gauntlet-protocol/exam
 npm run gauntlet:ledger -- --report=/private/report.json --pack=neutral-smoke   # record a saved report
 ```
 
-`gauntlet:all` runs only the cases the ledger does not cover, or every case with `--fresh`, and records each report in the ledger; `--max-age-days=N` also reruns cases whose last run is older and passes the same age to Gauntlet's cache (which caps it at 30 days), so an older cached report is not reused (no default age, owner decision 2026-11-11: a run stays valid until its identity changes; today the ledger binds case definition and profile only, and F-074-T10 adds model digest, runtime, scenario and NERV source once gauntlet-protocol B-002 is released). `gauntlet:all` exits 1 when any executed case fails. NERV system cases need no model and run one per report; `stress` and `browser` need `--allow-expensive`. Model cases need `--allow-models` and `--profile`, and remain an owner-approved campaign. Session start reports pending cases through the harness setting `evaluations` (`.harness.json`, harness 5.2.0), and the `gauntlet-runs` impact row tells the agent to raise or update the backlog item in the PR that bumps the pin.
+`gauntlet:all` runs only the cases the ledger does not cover, or every case with `--fresh`, and records each report in the ledger; `--max-age-days=N` also reruns cases whose last run is older and passes the same age to Gauntlet's cache (which caps it at 30 days), so an older cached report is not reused (no default age, owner decision 2026-11-11: a run stays valid until its identity changes; ledger schema 2 binds model digest, runtime, scenario and NERV's system source key, and schema 1 entries are treated as unknown identity when those fields are checked). `gauntlet:all` exits 1 when any executed case fails. NERV system cases need no model and run one per report; `stress` and `browser` need `--allow-expensive`. Model cases need `--allow-models` and `--profile`, and remain an owner-approved campaign. Session start reports pending cases through the harness setting `evaluations` (`.harness.json`, harness 5.2.0), and the `gauntlet-runs` impact row tells the agent to raise or update the backlog item in the PR that bumps the pin.
 
 Ledger state at adoption (2026-11-11): the five ordinary system cases ran and passed locally with this branch; `stress`, `browser` and all 48 common model cases are pending and listed by F-074-T09 (`pack/*` or `pack/case`; a pending case counts as raised only when an unfinished task lists it). The 2026-11-09 Gemma smoke predates the ledger; its report is not in the repository.
 
@@ -167,11 +167,37 @@ For the dedicated NERV **system** pack, run the next block from NERV. It builds 
 
 A failed/interrupted campaign may still leave useful private evidence in its new directory; inspect it before repeating. Never edit a report into a pass. Give the reviewing agent the report/directory path, actual competing apps/load, interruptions and desktop responsiveness observations. The reviewer checks hashes, actual identity/settings, failures/not-run cases, telemetry gaps and cache status before reconciling F-074/F-006. A passing common report is not NERV role qualification or full integration acceptance.
 
-The separate `evals:model` Casper/Misato commands above currently use production-shaped defaults (up to4096 output tokens, inherited context/sampling/thinking,115s/case, at most eight cases per role), with no shared300s aggregate cap. They are not an equivalent8K/2048 profile campaign. A profile-matched, bounded operator role bundle remains tracked under F-074-T04; do not treat the two commands above as that missing role evaluation. No model campaign was executed while documenting these commands.
+The separate `evals:model` Casper/Misato commands above currently use production-shaped defaults (up to 4096 output tokens, inherited context/sampling/thinking, 115s/case, at most eight cases per role), with no shared 300s aggregate cap. They remain separate production-shaped evidence and are not an equivalent 8K/2048 profile campaign.
+
+### Profile-matched operator role bundle (Casper and Misato)
+
+To run NERV's synthetic Casper and Misato role checks under the same explicit 8K/2048 profile and bounded 300s/10-case/20,480-token aggregate cap as the common smoke (5 Casper + 5 Misato cases by default, or `--role=casper|misato --limit=1..8`), plan first without model calls and then execute into a new private directory:
+
+```sh
+npm run gauntlet:role-plan -- --profile=node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json
+(
+  set -eu
+  umask 077
+  gauntlet_root="$HOME/.local/state/gauntlet"
+  mkdir -p "$gauntlet_root"
+  gauntlet_run_dir=$(mktemp -d "$gauntlet_root/role-$(date +%Y%m%d-%H%M%S)-XXXXXX")
+  node tools/gauntlet.mjs machine --id=mac-local > "$gauntlet_run_dir/machine.json"
+  npm run gauntlet:role-run -- \
+    --profile=node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json \
+    --limits=node_modules/@voidbrain/gauntlet-protocol/examples/limits-day.json \
+    --machine-profile="$gauntlet_run_dir/machine.json" \
+    --scenario=node_modules/@voidbrain/gauntlet-protocol/examples/scenarios/moderate-load.json \
+    --confirm-scenario --execute --allow-models \
+    --out="$gauntlet_run_dir/role-bundle.json"
+  printf 'Results: %s\n' "$gauntlet_run_dir"
+)
+```
+
+`gauntlet:role-plan` and `gauntlet:role-run` reject unsupported settings (non-Ollama backend, `parallel != 1`, non-loopback endpoint, or case counts exceeding `limits.maxCases`) instead of silently inheriting defaults. No proposed tool executes; private reports (`0600`) record requested/actual configuration, source/case identities, partial/failure outcomes and explicit telemetry gaps. Common smoke reuse remains distinct (`reusesCommonSmoke: false`), and no qualification follows.
 
 ## First measured common smoke
 
-The [owner-provided first report](2026-11-09-gemma-common-smoke.md) completed all ten cases under the recorded moderate-load declaration:7 passed,3 JSON parse failures,64.744s and1608 output tokens. The campaign completed inside budget; candidate acceptance failed. Its engine/pack/profile/fixture identities matched the0.3 release pinned when the report was originally reviewed; they are not relabelled as the current0.4 engine. Preserve this failed report; no automatic rerun, promotion or qualification follows. F-074-T02 is closed as a completed campaign/review, while the role workflow under T04 remains unimplemented.
+The [owner-provided first report](2026-11-09-gemma-common-smoke.md) completed all ten cases under the recorded moderate-load declaration:7 passed,3 JSON parse failures,64.744s and1608 output tokens. The campaign completed inside budget; candidate acceptance failed. Its engine/pack/profile/fixture identities matched the0.3 release pinned when the report was originally reviewed; they are not relabelled as the current0.4 engine. Preserve this failed report; no automatic rerun, promotion or qualification follows. F-074-T02 is closed as a completed campaign/review.
 
 ## Private failure diagnostics (Gauntlet0.4)
 
@@ -229,7 +255,7 @@ Public0.4 reports contain only the diagnostic-enabled marker, not raw replies or
 
 NERV adopts [harness4.4.1 job usage](../agents/work-usage.md), enabled in this repository's `.harness.json`. AGENTS owns the startup/phase/completion rule; CLAUDE/GEMINI/QWEN/Copilot entry files point to it. The owner need not select the agent in advance unless task suitability requires it. A job records the actual client/model when observable, its task and activity; imports accept only canonical measured counter metadata. Missing usage remains unknown, and shared work stays unallocated. No exporter, transcript scraping or native client adapter is installed. These files do not prove actual loading in every client.
 
-The optional ledger is private and outside Git. This development session exposes no measured provider counters to the agent; metadata registration is not a token measurement. Native client source validation remains upstream project-harness F-048-T02. Gauntlet run usage and NERV runtime usage remain separately owned and must not be imported twice. The profile-matched NERV Casper/Misato operator bundle remains F-074-T04; adopting these common diagnostics does not implement or qualify it.
+The optional ledger is private and outside Git. This development session exposes no measured provider counters to the agent; metadata registration is not a token measurement. Native client source validation remains upstream project-harness F-048-T02. Gauntlet run usage and NERV runtime usage remain separately owned and must not be imported twice. Adopting these common diagnostics does not qualify any role or model profile.
 
 Observed adoption-review limitation: a report-only agent omitted the available registration step. This was not a capability outage. No counts/phases were backfilled; reliable automatic startup needs verified host/launcher hooks under harness F-048-T02. The shared rule alone is not evidence that every agent follows it.
 

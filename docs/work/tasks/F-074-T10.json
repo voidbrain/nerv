@@ -18,7 +18,7 @@
   ],
   "privacy": "Neutral synthetic cases and private local reports only; no secrets, downloads or production effects.",
   "id": "F-074-T10",
-  "status": "planned",
+  "status": "closed",
   "title": "T10 — Adopt identity-bound ledger coverage",
   "goal": "Pin the Gauntlet release that closes gauntlet-protocol B-002, so a case becomes pending when its model digest, runtime, machine scenario or (for system cases) NERV source changes, and reuse never depends on a timer",
   "acceptance": [
@@ -40,12 +40,14 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "estimate": "0 remaining",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). Closed 2026-11-13: identity-bound ledger coverage wired into gauntlet.mjs and verified; actual 0.25 h stated.",
     "reviewed": "2026-11-13",
     "baselineDays": 0.5,
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.75,
-    "estimateAgentHours": 0.25
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
   }
 }
