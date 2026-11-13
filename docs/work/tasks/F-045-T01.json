@@ -31,7 +31,7 @@
   "effort": {
     "size": "medium",
     "estimate": "0 h agent",
-    "basis": "Implemented pilot data fields (role, skills, tools, memoryScope, evaClass), Kaji-style PilotRegistry, and Kaji heartbeat pilot offers in 0.5 h agent.",
+    "basis": "Implemented pilot data fields (role, skills, tools, memoryScope, evaClass), Kaji-style PilotRegistry, and Kaji heartbeat pilot offers in 0.5 h agent (PR #352).",
     "reviewed": "2026-11-13",
     "baselineDays": 2,
     "agentHours": 0,
