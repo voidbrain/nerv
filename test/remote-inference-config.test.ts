@@ -4,16 +4,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { readConfig } from '../src/config.ts';
-import {
-  isTailscaleAddress,
-  MAX_REMOTE_INFERENCE_PROMPT_BYTES,
-  MAX_REMOTE_INFERENCE_REPLY_BYTES,
-  MAX_REMOTE_INFERENCE_SYSTEM_BYTES,
-  MAX_REPLY_BYTES,
-  ModelError,
-  selectRoute,
-  validateModels,
-} from '../src/model.ts';
+import { isTailscaleAddress, MAX_REPLY_BYTES, ModelError, selectRoute, validateModels } from '../src/model.ts';
 import { MAX_FRAME_BYTES } from '../src/rpc.ts';
 
 test('models.local retains loopback-only guarantee and refuses Tailscale or remote URLs', () => {
@@ -125,11 +116,11 @@ test('isTailscaleAddress accepts only 100.64.0.0/10 and fd7a:115c:a1e0::/48', ()
   }
 });
 
-test('remote inference worker bounds fit within MAX_FRAME_BYTES and align with MAX_REPLY_BYTES', () => {
-  assert.equal(MAX_REMOTE_INFERENCE_REPLY_BYTES, MAX_REPLY_BYTES);
-  assert.ok(MAX_REMOTE_INFERENCE_PROMPT_BYTES > 8192);
-  assert.ok(MAX_REMOTE_INFERENCE_PROMPT_BYTES + MAX_REMOTE_INFERENCE_SYSTEM_BYTES < MAX_FRAME_BYTES);
-  assert.ok(MAX_REMOTE_INFERENCE_REPLY_BYTES < MAX_FRAME_BYTES);
+test('remote inference bounds fit within MAX_FRAME_BYTES and align with MAX_REPLY_BYTES', () => {
+  assert.equal(MAX_REPLY_BYTES, 16384);
+  assert.equal(MAX_FRAME_BYTES, 65536);
+  assert.ok(32768 + 8192 < MAX_FRAME_BYTES);
+  assert.ok(MAX_REPLY_BYTES < MAX_FRAME_BYTES);
 });
 
 test('readConfig validates remote inference configuration end-to-end', () => {

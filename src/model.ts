@@ -64,10 +64,6 @@ export interface Reply {
   truncated: boolean;
 }
 export const MAX_REPLY_BYTES = 16384;
-/** Remote inference worker-method bounds (F-006-T06): sized against MAX_REPLY_BYTES (16 KiB) and MAX_FRAME_BYTES (64 KiB). */
-export const MAX_REMOTE_INFERENCE_REPLY_BYTES = MAX_REPLY_BYTES;
-export const MAX_REMOTE_INFERENCE_PROMPT_BYTES = 32768;
-export const MAX_REMOTE_INFERENCE_SYSTEM_BYTES = 8192;
 /** Coordinator wait for a brain model call; the route itself gives up 5 s earlier so the brain can answer. */
 export const MODEL_TIMEOUT_MS = 120000;
 const loopback = new Set(['127.0.0.1', 'localhost', '[::1]']);
@@ -233,8 +229,14 @@ export function validateModels(value: unknown): Models {
       !loopback.has(url.hostname) ||
       url.username ||
       url.password
-    )
+    ) {
+      if (isTailscaleAddress(url.hostname)) {
+        throw new Error(
+          'models.local.baseUrl must be a loopback address on this machine; use models.remote with an enrolled baseId for Tailscale bases.',
+        );
+      }
       throw new Error('models.local.baseUrl must be a loopback address on this machine.');
+    }
     out.local = { baseUrl: url.href.replace(/\/$/, ''), model: l.model };
   }
   if (v.cloud !== undefined) {
