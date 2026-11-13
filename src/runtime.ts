@@ -39,10 +39,13 @@ import { askedWhy, explainRecord, isAgencyQuestion } from './why.ts';
 import {
   PilotRegistry,
   addPilot as addPilotEntry,
+  chooseAdvisers,
   choosePilot,
   genericPilot as buildGenericPilot,
+  rankPilots,
   setPilotFlag as setPilotEntryFlag,
   updatePilot as updatePilotEntry,
+  type Chosen,
   type Pilot,
   type PilotOffer,
   type PilotPatch,
@@ -802,7 +805,14 @@ export class Runtime implements StoreApi {
     message: string,
     steps: Step[],
     context: Turn[] = [],
-    followup?: { consult: boolean; advice?: string; conversation?: string; answering?: boolean; watch?: WatchWork },
+    followup?: {
+      consult: boolean;
+      advice?: string;
+      conversation?: string;
+      answering?: boolean;
+      watch?: WatchWork;
+      askBoth?: boolean;
+    },
   ): Promise<ChatReply> {
     const waiting: ChatReply['waiting'] = [];
     const proactive = followup?.watch;
@@ -862,15 +872,17 @@ export class Runtime implements StoreApi {
     // F-045: the specialist pilot whose keywords fit the request advises; none fits, the generic pilot (roles.consultant).
     const named = await this.baseNames();
     const consult = (followup?.consult ?? steps.length === 0) && !isAgencyQuestion(message, named);
-    const pilot = !consult
-      ? undefined
+    const roster = consult ? (this.pilots?.() ?? []) : [];
+    const ranked = !consult
+      ? []
       : (() => {
           try {
-            return choosePilot(message, this.pilots?.() ?? []);
+            return rankPilots(message, roster);
           } catch {
-            return undefined;
+            return [];
           }
         })();
+    const advisers = !consult ? [] : chooseAdvisers(message, roster, { askBoth: followup?.askBoth });
     // B-024: the consultant is told what Misato can do, so it never advises against a tool she has.
     const offered = !consult
       ? []
@@ -879,37 +891,41 @@ export class Runtime implements StoreApi {
           about: t.about.slice(0, 200),
         }));
     let unmatched: string | undefined;
+    const askAdviser = async (pilot: Chosen | undefined): Promise<string | undefined> =>
+      this.modelCall(
+        'consultant.advise',
+        {
+          request: message.slice(0, 4000),
+          ...(followup?.advice ? { previousAdvice: followup.advice } : {}),
+          ...(context.length ? { context: context.slice(-3) } : {}),
+          ...(pilot ? { pilot: { name: pilot.name, domain: pilot.domain, model: pilot.model } } : {}),
+          ...(named.length ? { bases: named } : {}),
+          ...(offered.length ? { tools: offered } : {}),
+        },
+        MODEL_TIMEOUT_MS,
+      )
+        .then(
+          (r) => r as { advice: string | null; model?: string; domain?: string },
+          (): { advice: string | null; model?: string; domain?: string } => ({ advice: null }),
+        )
+        .then(async (r) => {
+          if (!pilot && r.domain) {
+            unmatched = r.domain;
+            await this.note(sortieId, 'pilot.unmatched', { domain: r.domain });
+          }
+          if (!r.advice) return undefined;
+          await this.note(sortieId, 'misato.consult', {
+            advice: r.advice,
+            model: r.model ?? '',
+            ...(pilot ? { pilot: { id: pilot.id, name: pilot.name, why: pilot.why } } : {}),
+          });
+          return r.advice;
+        });
     const advice = !consult
       ? followup?.advice
-      : await this.modelCall(
-          'consultant.advise',
-          {
-            request: message.slice(0, 4000),
-            ...(followup?.advice ? { previousAdvice: followup.advice } : {}),
-            ...(context.length ? { context: context.slice(-3) } : {}),
-            ...(pilot ? { pilot: { name: pilot.name, domain: pilot.domain, model: pilot.model } } : {}),
-            ...(named.length ? { bases: named } : {}),
-            ...(offered.length ? { tools: offered } : {}),
-          },
-          MODEL_TIMEOUT_MS,
-        )
-          .then(
-            (r) => r as { advice: string | null; model?: string; domain?: string },
-            (): { advice: string | null; model?: string; domain?: string } => ({ advice: null }),
-          )
-          .then(async (r) => {
-            if (!pilot && r.domain) {
-              unmatched = r.domain;
-              await this.note(sortieId, 'pilot.unmatched', { domain: r.domain });
-            }
-            if (!r.advice) return undefined;
-            await this.note(sortieId, 'misato.consult', {
-              advice: r.advice,
-              model: r.model ?? '',
-              ...(pilot ? { pilot: { id: pilot.id, name: pilot.name, why: pilot.why } } : {}),
-            });
-            return r.advice;
-          });
+      : followup?.askBoth && advisers.length > 1
+        ? (await Promise.all(advisers.map((p) => askAdviser(p)))).filter(Boolean).join('\n\n') || undefined
+        : ((await askAdviser(advisers[0])) ?? (ranked[1] ? await askAdviser(ranked[1]) : undefined));
     // F-045: enough requests in one domain without a specialist → a pilot is proposed (a card), in the background.
     if (unmatched)
       void this.proposePilot(unmatched).catch(() => {

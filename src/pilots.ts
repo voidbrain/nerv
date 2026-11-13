@@ -56,6 +56,17 @@ export interface Chosen {
   domain: string;
   model: string;
   why: 'pinned' | 'keywords';
+  baseId?: string;
+}
+export interface PilotRecord {
+  cleanRuns?: number;
+  rejects?: number;
+  edits?: number;
+}
+export interface PilotCandidate {
+  pilot: Pilot | RegisteredPilot;
+  mainBase?: boolean;
+  record?: PilotRecord;
 }
 export const GENERIC = 'generic';
 export const STAGES: readonly Stage[] = ['prototype', 'test', 'production'];
@@ -339,31 +350,66 @@ export function hits(request: string, pilot: Pick<Pilot, 'keywords'>): number {
   const text = ` ${words(request)} `;
   return pilot.keywords.filter((k) => text.includes(` ${k} `)).length;
 }
+const recordScore = (r: PilotRecord | undefined) => (r ? (r.cleanRuns ?? 0) - (r.rejects ?? 0) - (r.edits ?? 0) : 0);
 /**
- * The specialist for a request, if any: among active pilots whose keywords it contains, a pinned one first, then the
- * most keywords matched, then the later trust stage, then the id. Undefined means the generic pilot (or none) advises.
+ * Ranks active pilots matching the request by F-041 consultant rules:
+ * owner's pin -> most keyword matches -> main base's own -> best record -> later trust stage -> id.
  */
-export function choosePilot(request: string, roster: readonly Pilot[]): Chosen | undefined {
-  const scored = roster
-    .filter((p) => !p.retired)
-    .map((p) => ({ p, n: hits(request, p) }))
+export function rankPilots(
+  request: string,
+  candidates: readonly (Pilot | RegisteredPilot | PilotCandidate)[],
+): Chosen[] {
+  const normalized = candidates.map((c) => {
+    if ('pilot' in c) return c;
+    const reg = c as Partial<RegisteredPilot>;
+    return {
+      pilot: c,
+      mainBase: reg.local ?? true,
+      record: undefined,
+    };
+  });
+  const scored = normalized
+    .filter((c) => !('retired' in c.pilot && c.pilot.retired))
+    .map((c) => ({ ...c, n: hits(request, c.pilot) }))
     .filter((x) => x.n > 0);
   scored.sort(
     (a, b) =>
-      Number(!!b.p.pinned) - Number(!!a.p.pinned) ||
+      Number(!!('pinned' in b.pilot && b.pilot.pinned)) - Number(!!('pinned' in a.pilot && a.pilot.pinned)) ||
       b.n - a.n ||
-      STAGES.indexOf(b.p.stage) - STAGES.indexOf(a.p.stage) ||
-      a.p.id.localeCompare(b.p.id),
+      Number(!!b.mainBase) - Number(!!a.mainBase) ||
+      recordScore(b.record) - recordScore(a.record) ||
+      (b.record?.cleanRuns ?? 0) - (a.record?.cleanRuns ?? 0) ||
+      STAGES.indexOf(b.pilot.stage) - STAGES.indexOf(a.pilot.stage) ||
+      a.pilot.id.localeCompare(b.pilot.id),
   );
-  const best = scored[0];
-  if (!best) return undefined;
-  return {
-    id: best.p.id,
-    name: best.p.name,
-    domain: best.p.domain,
-    model: best.p.model,
-    why: best.p.pinned ? 'pinned' : 'keywords',
-  };
+  return scored.map(({ pilot: p }) => {
+    const baseId = 'baseId' in p ? p.baseId : undefined;
+    return {
+      id: p.id,
+      name: p.name,
+      domain: p.domain,
+      model: p.model,
+      why: 'pinned' in p && p.pinned ? 'pinned' : 'keywords',
+      ...(baseId !== undefined ? { baseId } : {}),
+    };
+  });
+}
+/**
+ * Advisers for one topic/request (F-045-T03 / F-041): at most one per topic by default, or up to two for "ask both".
+ */
+export function chooseAdvisers(
+  request: string,
+  candidates: readonly (Pilot | RegisteredPilot | PilotCandidate)[],
+  opts?: { askBoth?: boolean },
+): Chosen[] {
+  return rankPilots(request, candidates).slice(0, opts?.askBoth ? 2 : 1);
+}
+/**
+ * The specialist for a request, if any: among active pilots whose keywords it contains, a pinned one first, then the
+ * most keywords matched, then main base's own, best record, later trust stage, then id.
+ */
+export function choosePilot(request: string, roster: readonly Pilot[]): Chosen | undefined {
+  return rankPilots(request, roster)[0];
 }
 /** The roster as `nerv pilots` prints it, the generic pilot first. */
 export function describePilots(roster: readonly Pilot[], generic: string | null): string {

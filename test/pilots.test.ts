@@ -7,12 +7,14 @@ import { join } from 'node:path';
 import {
   PilotRegistry,
   addPilot,
+  chooseAdvisers,
   choosePilot,
   describePilots,
   genericPilot,
   hits,
   overlappingDomains,
   pilotExecutor,
+  rankPilots,
   sanitizePilotOffers,
   setPilotFlag,
   stageExecutor,
@@ -477,4 +479,40 @@ test('F-045-T02: add, rename, pin, retire pilots and generic pilot in most restr
   assert.equal(roster[0]?.retired, true);
   roster = setPilotFlag(roster, 'printer', 'retired', false);
   assert.equal(roster[0]?.retired, undefined);
+});
+
+test('F-045-T03: F-041 consultant ranking (pin, main base, best record), fallback, and ask-both', () => {
+  const remoteBest = {
+    pilot: pilot({ id: 'remote-3d', keywords: ['filament'], stage: 'production', model: 'm-remote' }),
+    mainBase: false,
+    record: { cleanRuns: 20, rejects: 0, edits: 0 },
+  };
+  const localGood = {
+    pilot: pilot({ id: 'local-3d', keywords: ['filament'], stage: 'test', model: 'm-local' }),
+    mainBase: true,
+    record: { cleanRuns: 5, rejects: 0, edits: 0 },
+  };
+  const localBetter = {
+    pilot: pilot({ id: 'local-better', keywords: ['filament'], stage: 'prototype', model: 'm-better' }),
+    mainBase: true,
+    record: { cleanRuns: 10, rejects: 1, edits: 0 },
+  };
+  const ranked = rankPilots('Check filament', [remoteBest, localGood, localBetter]);
+  assert.deepEqual(
+    ranked.map((r) => r.id),
+    ['local-better', 'local-3d', 'remote-3d'],
+    'main base comes before remote; better record beats later stage on same base',
+  );
+  assert.equal(chooseAdvisers('Check filament', [remoteBest, localGood, localBetter]).length, 1);
+  assert.deepEqual(
+    chooseAdvisers('Check filament', [remoteBest, localGood, localBetter], { askBoth: true }).map((c) => c.id),
+    ['local-better', 'local-3d'],
+    'askBoth returns at most two advisers',
+  );
+  const pinnedRemote = { ...remoteBest, pilot: { ...remoteBest.pilot, pinned: true } };
+  assert.equal(
+    chooseAdvisers('Check filament', [pinnedRemote, localGood, localBetter])[0]?.id,
+    'remote-3d',
+    'owner pin beats main base preference',
+  );
 });
