@@ -142,3 +142,18 @@ test(
     await assert.rejects(runProcess(['-e', 'process.exit(0)'], { timeoutMs: 1000 }), /Windows Job Object/);
   },
 );
+
+test('B-053: descendant liveness check decides on one observation per process and still fails on real survivors', async () => {
+  let calls = 0;
+  const reusedAfterExit = () => {
+    calls += 1;
+    // First observation sees the process gone; a second read would see a reused PID.
+    return calls > 1;
+  };
+  const noneAlive = await waitUntilAllExited([4242], reusedAfterExit, 200, 5);
+  assert.deepEqual(noneAlive, []);
+  assert.equal(calls, 1, 'must not perform a second liveness read after observing exit');
+
+  const realSurvivor = await waitUntilAllExited([4242], () => true, 30, 5);
+  assert.deepEqual(realSurvivor, [4242]);
+});
