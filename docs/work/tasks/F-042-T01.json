@@ -4,7 +4,7 @@
   "parent": "F-042",
   "title": "Read-only agency tools for Misato",
   "goal": "Read-only agency tools for Misato",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Sortie record, ballot with each seat's vote and reason, peer seats, consultant advice, approver and time; what waits; base health and status; Green without a card"
   ],

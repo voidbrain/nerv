@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "F-045-T08",
+  "parent": "F-045",
+  "title": "Evidence-based pilot split and merge with lineage",
+  "goal": "Evidence-based pilot split and merge with lineage",
+  "status": "planned",
+  "acceptance": [
+    "Split proposed when sorties cluster in a subdomain with higher-scoring narrower set; merge proposed when two overlap; versioned lineage preserved and owner-approved"
+  ],
+  "dependsOn": [
+    "F-045-T06"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h agent",
+    "basis": "Added 2026-11-13 to match remaining F-045 scope; baseline 0.5 h agent per v8.5.0 agent-speed sizing.",
+    "reviewed": "2026-11-13",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}

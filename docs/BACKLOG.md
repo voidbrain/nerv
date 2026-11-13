@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 2 | 3 | 11 | 7 |
+| **This week** | 2 | 4 | 11 | 10 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 32 | 9 |
+| **Open** | 31 | 6 |
 | **Require Human 🧑** | 11 | 2 |
 
 ### Require Human 🧑
@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 34.75 h agent + 16.75 h owner across 118 open steps of 29 features and 3 other records. 27 h of actual effort recorded on 45 steps. Generated from the task files.
+**Remaining effort:** 36.25 h agent + 16.75 h owner across 119 open steps of 29 features and 3 other records. 27 h of actual effort recorded on 45 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -170,9 +170,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 0 h | — | [F-049](#f-049), [F-050](#f-050), [F-054](#f-054) | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | [F-049](#f-049), [F-050](#f-050), [F-054](#f-054) | — | — |
 
-💻 **→** Next: pilots offered by other bases over the Kaji line; other-provider/cloud pilot routing remains planned.
+💻 **→** Next: F-045-T07 — Other-provider and cloud pilot routing (Planned).
 
 | | |
 |---|---|
@@ -190,7 +190,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | F-045-T04 — Execution mode and automatic choice | 0.5 h | 0.5 h (stated) | 0 h | Completed |
 | — | F-045-T05 — Remote pilots | 0.5 h | 0.5 h (stated) | 0 h | Completed |
 | — | F-045-T06 — Evidence-based placement | 0.5 h | 0.5 h (stated) | 0 h | Completed |
-| — | **Total** | 3 h | 3 h | 0 h | 6 of 6 completed |
+| 🟢 Small | F-045-T07 — Other-provider and cloud pilot routing | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-045-T08 — Evidence-based pilot split and merge with lineage | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | F-045-T09 — Tool acquisition/discard and generic proposal quality | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟡 Medium | **Total** | 4.5 h | 3 h (6 of 9 steps recorded) | 1.5 h | 6 of 9 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -735,46 +738,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-042"></a>[✨ F-042](#top)
-
-**Misato reads the agency: status and "why" from the records**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | [F-056](#f-056) | — | — |
-
-💻 **→** Next: verify and close when [PR #314](https://github.com/voidbrain/nerv/pull/314) merges with green CI.
-
-| | |
-|---|---|
-| **Issue** | Owner question 2026-11-05 ("is this the answer we want? include ballot, experts and consultants?"): Misato can act but cannot read the agency itself, so questions about it are guessed (B-004). |
-| **Reproduce** | Ask Aoba "why was S-… approved?", "what is waiting for me?", "is Tabgha up?". |
-| **Check** | Read-only tools give Misato a sortie's record (decision, ballot with each seat's vote and reason, peer seats, consultant advice, approver and time), what waits for the owner, base health and the bases' status; answers quote the records in the request's language and never invent; these tools run as Green without a card; the consultant is not asked for questions about the agency itself. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | F-042-T01 — Read-only agency tools for Misato | 0.25 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending |
-| 🟢 Small | F-042-T02 — Grounded answers and agency facts as data | 0.25 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 0.5 h | 0.5 h | 0 h | 0 of 2 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-042.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #314](https://github.com/voidbrain/nerv/pull/314) (F-042-T01–T02 implementation and regressions: `test/why.test.ts`, `test/consultant.test.ts`); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner question 2026-11-05 |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-12: Unit/integration passed (`test/why.test.ts`, `test/consultant.test.ts`, `test/misato.test.ts`, `test/pilots.test.ts`, `test/gate.test.ts`, `test/resume.test.ts`, `test/kaji-seats.test.ts`); CI pending |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
-
 ### <a id="f-046"></a>[✨ F-046](#top)
 
 **Misato checks what already exists before adding: same thing, a change, or new**
@@ -1135,82 +1098,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="b-052"></a>[🐞 B-052](#top)
-
-**Owner actions point at procedures the owner has to hunt for**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟢 Verified | 🔶 P2 | 🟢 Small | 0 h | — | — | — | — |
-
-💻 **→** Verified: all open procedure records link copy-paste acceptance pages under `docs/acceptance/`.
-
-| | |
-|---|---|
-| **Issue** | Owner, 2026-11-12, on F-005: its human action said "run the T13 copy-paste procedure below", but the procedure sat inside the collapsed details, the Reproduce row said only "Follow README commands and the owning milestone in ROADMAP" with no link, and the cue still waited on an already merged PR. "I should not manually search for files and lose myself between pointers of pointers." F-005 fixed here; F-006 and F-016 now link their decisions. Still without a linked procedure: B-008 ("steps in details"), F-004, F-009, F-011, F-015, F-023. |
-| **Reproduce** | Open [the backlog]() and read the human-action line of B-008, F-004, F-009, F-011, F-015 or F-023: none links the exact commands or steps to run and their expected result. |
-| **Check** | Every 🧑 line that asks the owner to run or check something links one page (or a visible section of the record) with copy-paste blocks and the expected result; its Reproduce row links the same; no "below", "in details" or bare path. Harness rule: project-harness F-064. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| — | B-052-T01 — Linked copy-paste procedures for the remaining owner actions | 2.5 h | 0 h | 0 h | Completed |
-| — | **Total** | 2.5 h | 0 h (0 of 1 steps recorded) | 0 h | 1 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-052.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #311](https://github.com/voidbrain/nerv/pull/311): F-005 procedure moved to [docs/acceptance/f005-t13-mac-update-procedure.md](acceptance/f005-t13-mac-update-procedure.md). No test: documentation-only procedure links across existing backlog records. |
-| Opened | 2026-11-12 |
-| Verification | Pending. |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
-### <a id="b-053"></a>[🐞 B-053](#top)
-
-**F-029 descendant-process test failed once in CI with every process already gone**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | — | — | — |
-
-💻 **→** Next: merge PR once Linux CI passes (B-053-T01 closed).
-
-| | |
-|---|---|
-| **Issue** | PR #316's validate job (run 43286749372, `npm run test:coverage`, Linux) failed `F-029: a timed-out scenario terminates its owned descendant process` with `no executing child survives the group timeout`, actual `[3708]`. The test took 5,030 ms in total: the 5 s run budget plus about 30 ms, so its wait loop (`while (owned.some(alive))`, up to 5 s) ended at once with nothing alive, and the following `owned.filter(alive)` found PID 3708 alive. The PR does not touch the runner or the test. Likely a race between the two separate liveness reads (PID reuse under coverage load, or the zombie check in `/proc/<pid>/stat` reading differently); inferred, not observed. |
-| **Reproduce** | `node --test --test-name-pattern='terminates its owned descendant' test/evaluation-runner.test.mjs` passed 5 of 5 locally on macOS on 2026-11-12; the failure was seen once on Linux CI under coverage. |
-| **Check** | A committed test or measurement shows the two-read race (or names another cause); the test decides on one observation per process and still fails when a descendant really survives; CI passes repeatedly. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| — | B-053-T01 — Find and remove the liveness race in the F-029 descendant-process test | 1 h | 0.25 h (stated) | 0 h | Completed |
-| — | **Total** | 1 h | 0.25 h | 0 h | 1 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-053.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Seen on [PR #316](https://github.com/voidbrain/nerv/pull/316), CI run 43286749372 job validate. |
-| Opened | 2026-11-12 |
-| Verification | `node --test test/evaluation-runner.test.mjs`; Linux CI validation pending. |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
 ### <a id="b-054"></a>[🐞 B-054](#top)
 
 **A long chat reply on the main base fails at the 120 s model-call limit**
@@ -1249,51 +1136,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="b-055"></a>[🐞 B-055](#top)
-
-**The Windows service launcher runs Node from an fnm per-shell path**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | — | — | — |
-
-💻 **→** Next: merge PR once CI passes (B-055-T01 closed).
-
-| | |
-|---|---|
-| **Issue** | 2026-11-12 on Tabgha: `nerv-service.vbs` runs `…\fnm_multishells\<id>\node.exe`, a junction fnm creates for one shell session; `service install` wrote it from `process.execPath` (src/service.ts). Over SSH that path did not run, while the permanent install (`…\fnm\node-versions\v24.22.2\installation\node.exe`) did. If fnm's per-shell junctions are cleaned up, the scheduled task can no longer start NERV. |
-| **Reproduce** | On Windows with Node from fnm, run `service install` from an fnm shell and read the Node path in `%USERPROFILE%\.nerv\nerv-service.vbs`. |
-| **Check** | `service install` records a stable Node path (the junction's target, or refuses with a clear message naming the fix) on Windows, and the same rule holds for the launchd and systemd definitions; a test covers a per-shell path. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| — | B-055-T01 — Service definitions record a stable Node executable | 1 h | 0.25 h (stated) | 0 h | Completed |
-| — | **Total** | 1 h | 0.25 h | 0 h | 1 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-055.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Found during the B-008 reproduction, [evidence](acceptance/b008-tabgha-2026-11-12.md); [PR #318](https://github.com/voidbrain/nerv/pull/318). |
-| Opened | 2026-11-12 |
-| Verification | `node --test test/service-node-path.test.ts test/runtime.test.ts`; final required CI. |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
 ### <a id="f-056"></a>[✨ F-056](#top)
 
 **Slash commands in Telegram and the dashboard chat, and how much Aoba tells you**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | [F-021](#f-021), [F-042](#f-042) | — | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | [F-021](#f-021) | — | — | — |
 
 💻 **→** Next: remaining commands, Telegram command menu and /log controls; status/help read router implemented before Misato.
 
@@ -1783,6 +1632,120 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-052"></a>[🐞 B-052](#top)
+
+**Owner actions point at procedures the owner has to hunt for**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔵 Closed | ◻️ P2 | 🟢 Small | 0 h | — | — | — | — |
+
+💻 **→** Closed 2026-11-13: all open procedure records link copy-paste acceptance pages under `docs/acceptance/`.
+
+| | |
+|---|---|
+| **Issue** | Owner, 2026-11-12, on F-005: its human action said "run the T13 copy-paste procedure below", but the procedure sat inside the collapsed details, the Reproduce row said only "Follow README commands and the owning milestone in ROADMAP" with no link, and the cue still waited on an already merged PR. "I should not manually search for files and lose myself between pointers of pointers." F-005 fixed here; F-006 and F-016 now link their decisions. Still without a linked procedure: B-008 ("steps in details"), F-004, F-009, F-011, F-015, F-023. |
+| **Reproduce** | Open [the backlog]() and read the human-action line of B-008, F-004, F-009, F-011, F-015 or F-023: none links the exact commands or steps to run and their expected result. |
+| **Check** | Every 🧑 line that asks the owner to run or check something links one page (or a visible section of the record) with copy-paste blocks and the expected result; its Reproduce row links the same; no "below", "in details" or bare path. Harness rule: project-harness F-064. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | B-052-T01 — Linked copy-paste procedures for the remaining owner actions | 2.5 h | 0 h | 0 h | Completed |
+| — | **Total** | 2.5 h | 0 h (0 of 1 steps recorded) | 0 h | 1 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-052.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #311](https://github.com/voidbrain/nerv/pull/311): F-005 procedure moved to [docs/acceptance/f005-t13-mac-update-procedure.md](acceptance/f005-t13-mac-update-procedure.md). No test: documentation-only procedure links across existing backlog records. |
+| Opened | 2026-11-12 |
+| Verification | 2026-11-13: Documentation/CI verified ([PR #311](https://github.com/voidbrain/nerv/pull/311) CI run `43272309918` green; `check:backlog` passed). |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+### <a id="b-053"></a>[🐞 B-053](#top)
+
+**F-029 descendant-process test failed once in CI with every process already gone**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔵 Closed | ◻️ P2 | 🟢 Small | 0 h | — | — | — | — |
+
+💻 **→** Closed 2026-11-13: single-observation descendant liveness fix merged in [PR #341](https://github.com/voidbrain/nerv/pull/341) with green CI.
+
+| | |
+|---|---|
+| **Issue** | PR #316's validate job (run 43286749372, `npm run test:coverage`, Linux) failed `F-029: a timed-out scenario terminates its owned descendant process` with `no executing child survives the group timeout`, actual `[3708]`. The test took 5,030 ms in total: the 5 s run budget plus about 30 ms, so its wait loop (`while (owned.some(alive))`, up to 5 s) ended at once with nothing alive, and the following `owned.filter(alive)` found PID 3708 alive. The PR does not touch the runner or the test. Likely a race between the two separate liveness reads (PID reuse under coverage load, or the zombie check in `/proc/<pid>/stat` reading differently); inferred, not observed. |
+| **Reproduce** | `node --test --test-name-pattern='terminates its owned descendant' test/evaluation-runner.test.mjs` passed 5 of 5 locally on macOS on 2026-11-12; the failure was seen once on Linux CI under coverage. |
+| **Check** | A committed test or measurement shows the two-read race (or names another cause); the test decides on one observation per process and still fails when a descendant really survives; CI passes repeatedly. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | B-053-T01 — Find and remove the liveness race in the F-029 descendant-process test | 1 h | 0.25 h (stated) | 0 h | Completed |
+| — | **Total** | 1 h | 0.25 h | 0 h | 1 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-053.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #341](https://github.com/voidbrain/nerv/pull/341) (fix + failing-first test `Test: test/evaluation-runner.test.mjs`); seen on [PR #316](https://github.com/voidbrain/nerv/pull/316), CI run 43286749372 job validate. |
+| Opened | 2026-11-12 |
+| Verification | 2026-11-13: Unit/integration & CI passed ([PR #341](https://github.com/voidbrain/nerv/pull/341) CI run `43342141161`: `plan`, `validate`, `windows`, `native-macos` green). |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+### <a id="b-055"></a>[🐞 B-055](#top)
+
+**The Windows service launcher runs Node from an fnm per-shell path**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔵 Closed | ◻️ P2 | 🟢 Small | 0 h | — | — | — | — |
+
+💻 **→** Closed 2026-11-13: stable Node path resolution merged in [PR #340](https://github.com/voidbrain/nerv/pull/340) with green CI.
+
+| | |
+|---|---|
+| **Issue** | 2026-11-12 on Tabgha: `nerv-service.vbs` runs `…\fnm_multishells\<id>\node.exe`, a junction fnm creates for one shell session; `service install` wrote it from `process.execPath` (src/service.ts). Over SSH that path did not run, while the permanent install (`…\fnm\node-versions\v24.22.2\installation\node.exe`) did. If fnm's per-shell junctions are cleaned up, the scheduled task can no longer start NERV. |
+| **Reproduce** | On Windows with Node from fnm, run `service install` from an fnm shell and read the Node path in `%USERPROFILE%\.nerv\nerv-service.vbs`. |
+| **Check** | `service install` records a stable Node path (the junction's target, or refuses with a clear message naming the fix) on Windows, and the same rule holds for the launchd and systemd definitions; a test covers a per-shell path. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | B-055-T01 — Service definitions record a stable Node executable | 1 h | 0.25 h (stated) | 0 h | Completed |
+| — | **Total** | 1 h | 0.25 h | 0 h | 1 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-055.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #340](https://github.com/voidbrain/nerv/pull/340) (`Test: test/service-node-path.test.ts`); found during B-008 reproduction, [evidence](acceptance/b008-tabgha-2026-11-12.md); [PR #318](https://github.com/voidbrain/nerv/pull/318). |
+| Opened | 2026-11-12 |
+| Verification | 2026-11-13: Unit/integration & CI passed ([PR #340](https://github.com/voidbrain/nerv/pull/340) CI run `43342248715`: `plan`, `validate`, `windows`, `native-macos` green). |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
 ### <a id="f-025"></a>[✨ F-025](#top)
 
 **Extra MAGI seats (veto-only), consultants and watermelon trust for pilots**
@@ -1824,6 +1787,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-042"></a>[✨ F-042](#top)
+
+**Misato reads the agency: status and "why" from the records**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|
+| 🔵 Closed | ◻️ P2 | 🟢 Small | 0 h | — | [F-056](#f-056) | — | — |
+
+💻 **→** Closed 2026-11-13: [PR #314](https://github.com/voidbrain/nerv/pull/314) merged with green full-suite CI (`43282005793`).
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-05 ("is this the answer we want? include ballot, experts and consultants?"): Misato can act but cannot read the agency itself, so questions about it are guessed (B-004). |
+| **Reproduce** | Ask Aoba "why was S-… approved?", "what is waiting for me?", "is Tabgha up?". |
+| **Check** | Read-only tools give Misato a sortie's record (decision, ballot with each seat's vote and reason, peer seats, consultant advice, approver and time), what waits for the owner, base health and the bases' status; answers quote the records in the request's language and never invent; these tools run as Green without a card; the consultant is not asked for questions about the agency itself. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | F-042-T01 — Read-only agency tools for Misato | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | F-042-T02 — Grounded answers and agency facts as data | 0.25 h | 0.25 h (stated) | 0 h | Completed |
+| — | **Total** | 0.5 h | 0.5 h | 0 h | 2 of 2 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-042.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #314](https://github.com/voidbrain/nerv/pull/314) (F-042-T01–T02 implementation and regressions: `test/why.test.ts`, `test/consultant.test.ts`); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner question 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-13: Unit/integration & full-suite CI passed ([PR #314](https://github.com/voidbrain/nerv/pull/314) CI run `43282005793` green across `plan`, `windows`, `native-macos`, `validate`, `full-suite`). |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+
 
 ## Other changes
 
