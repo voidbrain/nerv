@@ -629,3 +629,29 @@ test('F-043: EN and IT reminder time kinds parse cleanly, and "remind me to rene
     },
   );
 });
+
+test('B-049: Misato cannot add a reminder with a generic or invented title when the request gives none, and asks instead', async () => {
+  for (const inventedTitle of ['Promemoria', 'Promemoria per il primo gennaio 2031', 'Appuntamento']) {
+    await agent(
+      [
+        JSON.stringify({
+          action: { tool: 'reminders.add', args: { title: inventedTitle, due: '2031-01-01T09:00:00Z' } },
+        }),
+        '{"ask":"Di cosa ti devo ricordare?"}',
+      ],
+      async (runtime) => {
+        const chat = await runtime.chat('Imposta un promemoria per il primo gennaio 2031 alle 09:00 UTC.');
+        assert.deepEqual(
+          chat.steps.map((s) => s.outcome),
+          ['invalid'],
+          `invented title "${inventedTitle}" must be rejected back to Misato`,
+        );
+        assert.equal(chat.question?.text, 'Di cosa ti devo ricordare?');
+        assert.equal(chat.reply, 'Di cosa ti devo ricordare?');
+        assert.equal((await runtime.list()).length, 0, 'no reminder should be added');
+        assert.equal((await runtime.approvals()).length, 0, 'no approval card should be created');
+      },
+      { blue: ['reminders.add'] },
+    );
+  }
+});
