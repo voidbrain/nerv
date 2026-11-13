@@ -4,7 +4,13 @@
   "parent": "B-050",
   "title": "Fix browser fixture until abortion on evaluated expression exceptions",
   "goal": "A committed deterministic test shows until aborts immediately on expression exceptions during navigation; after the fix until catches evaluation errors, retries until timeout, and includes error detail on failure",
-  "status": "implemented",
+  "status": "closed",
+  "prs": [
+    {
+      "pr": 294,
+      "note": "fix"
+    }
+  ],
   "acceptance": [
     "A committed deterministic test fails before the fix: until aborts immediately when an expression throws during page loading",
     "After the fix until catches expression exceptions and retries until the condition holds or timeout expires",
@@ -37,10 +43,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h remaining",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "estimate": "0 remaining",
+    "basis": "Closed 2026-11-13 after PR #294 merged (d987a3a, CI 43207764269 all five jobs green) and subsequent browser CI runs (#351–#365) showed no recurrence. Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
     "reviewed": "2026-11-13",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "actualAgentHours": 0.5,
     "actualSource": "stated",
