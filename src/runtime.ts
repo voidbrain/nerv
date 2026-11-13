@@ -21,7 +21,7 @@ import {
   type ModelChange,
   type ModelSetup,
 } from './model-setup.ts';
-import { readConfig, readModelKey, savePilots } from './config.ts';
+import { readConfig, readModelKey, readScrolls, savePilots } from './config.ts';
 import type { ActionDetail, Approval, Decision, SortieSummary } from './ledger.ts';
 import { argsHash } from './ledger.ts';
 import type { SortieEvent } from './events.ts';
@@ -35,7 +35,7 @@ import {
   type Reply,
   type RouteName,
 } from './model.ts';
-import type { Effect, Pattern, Stage, Verdict } from './policy.ts';
+import { defaultPolicy, type Effect, type Pattern, type Stage, type Verdict } from './policy.ts';
 import { askedWhy, explainRecord, isAgencyQuestion } from './why.ts';
 import {
   PilotRegistry,
@@ -76,6 +76,7 @@ import {
   MAX_REPLY_CHARS,
   MAX_STEPS,
   doneReply,
+  filterConsultantInput,
   type RemoteOffer,
   requestLanguage,
   waitingReply,
@@ -83,6 +84,7 @@ import {
   type Recalled,
   type Step,
   type Turn,
+  parseAdvice,
 } from './misato.ts';
 import { builtinTools, toolDocs, type AgencySnapshot } from './executors.ts';
 import type { Digest, Exchange } from './instrumentality.ts';
@@ -479,6 +481,31 @@ export class Runtime implements StoreApi {
     return () => {
       this.extraSeatSpecs = this.extraSeatSpecs.filter((s) => s !== spec);
     };
+  }
+  /** External/remote consultant without a vote (F-025-T03): receives only Scrolls-allowed data. */
+  private remoteConsultant?: {
+    name: string;
+    advise: (input: {
+      request: string;
+      context?: Turn[];
+      bases?: { id: string; name: string }[];
+      tools?: { name: string; about: string }[];
+    }) => Promise<{ advice: string | null; model?: string }>;
+  };
+  useRemoteConsultant(
+    consultant:
+      | {
+          name: string;
+          advise: (input: {
+            request: string;
+            context?: Turn[];
+            bases?: { id: string; name: string }[];
+            tools?: { name: string; about: string }[];
+          }) => Promise<{ advice: string | null; model?: string }>;
+        }
+      | undefined,
+  ): void {
+    this.remoteConsultant = consultant;
   }
   /** Free/external API seat pool (F-025-T02): rotates across actions, skips limited/unavailable seats, respects Scrolls. */
   private seatPool?: { pool: SeatPool; timeoutMs: number };
@@ -979,20 +1006,38 @@ export class Runtime implements StoreApi {
         })();
     const advisers = !consult ? [] : chooseAdvisers(message, roster, { askBoth: followup?.askBoth });
     // B-024: the consultant is told what Misato can do, so it never advises against a tool she has.
-    const offered = !consult
+    const scrolls = (() => {
+      try {
+        return this.home ? readScrolls(this.home).policy : defaultPolicy;
+      } catch {
+        return defaultPolicy;
+      }
+    })();
+    const rawOffered = !consult
       ? []
       : [...toolDocs, ...(await this.externalTools()).docs].map((t) => ({
           name: t.name,
           about: t.about.slice(0, 200),
         }));
+    const localFiltered = filterConsultantInput(
+      {
+        request: message.slice(0, 4000),
+        previousAdvice: followup?.advice,
+        context: context.slice(-3),
+        tools: rawOffered,
+      },
+      scrolls,
+      false,
+    );
+    const offered = localFiltered.tools;
     let unmatched: string | undefined;
     const askAdviser = async (pilot: Chosen | undefined): Promise<string | undefined> =>
       this.modelCall(
         'consultant.advise',
         {
-          request: message.slice(0, 4000),
-          ...(followup?.advice ? { previousAdvice: followup.advice } : {}),
-          ...(context.length ? { context: context.slice(-3) } : {}),
+          request: localFiltered.request,
+          ...(localFiltered.previousAdvice ? { previousAdvice: localFiltered.previousAdvice } : {}),
+          ...(localFiltered.context.length ? { context: localFiltered.context } : {}),
           ...(pilot ? { pilot: { name: pilot.name, domain: pilot.domain, model: pilot.model } } : {}),
           ...(named.length ? { bases: named } : {}),
           ...(offered.length ? { tools: offered } : {}),
@@ -1016,11 +1061,42 @@ export class Runtime implements StoreApi {
           });
           return r.advice;
         });
-    const advice = !consult
+    let advice = !consult
       ? followup?.advice
       : followup?.askBoth && advisers.length > 1
         ? (await Promise.all(advisers.map((p) => askAdviser(p)))).filter(Boolean).join('\n\n') || undefined
         : ((await askAdviser(advisers[0])) ?? (ranked[1] ? await askAdviser(ranked[1]) : undefined));
+    if (consult && !advice && this.remoteConsultant) {
+      const sortieTainted = context.some((t) => t.tainted) || memory.some((m) => m.tainted);
+      const remoteIn = filterConsultantInput(
+        {
+          request: message.slice(0, 4000),
+          tainted: sortieTainted,
+          context: context.slice(-3),
+          tools: rawOffered,
+        },
+        scrolls,
+        true,
+      );
+      if (remoteIn.allowed) {
+        const remoteReply = await this.remoteConsultant
+          .advise({
+            request: remoteIn.request,
+            ...(remoteIn.context.length ? { context: remoteIn.context } : {}),
+            ...(named.length ? { bases: named } : {}),
+            ...(remoteIn.tools.length ? { tools: remoteIn.tools } : {}),
+          })
+          .catch((): { advice: string | null; model?: string } => ({ advice: null }));
+        const clean = parseAdvice(remoteReply.advice ?? '');
+        if (clean) {
+          advice = clean;
+          await this.note(sortieId, 'misato.consult', {
+            advice: clean,
+            model: remoteReply.model ?? this.remoteConsultant.name,
+          });
+        }
+      }
+    }
     // F-045: enough requests in one domain without a specialist → a pilot is proposed (a card), in the background.
     if (unmatched)
       void this.proposePilot(unmatched).catch(() => {
