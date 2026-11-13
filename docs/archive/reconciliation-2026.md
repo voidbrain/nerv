@@ -316,6 +316,10 @@ PRs #328 (F-005-T18), #331 (F-005-T20, CI43314523726) and #330 (F-005-T09, CI433
 
 Previous authored header, now retired: Current work ledger, reviewed 12 November 2026 against main `4e55eb5`. PRs #324 (F-005-T19), #326 (F-005-T17) and #327 (F-005-T10) passed CI; harness 8.0.0 reconciled: human cues name Procedure, Decision or Both, and the Require Human table shows both kinds per column.
 
+## 2026-11-13 — PR #346 (harness 8.2.0 queue order)
+
+Owner request: the ledger listed F-021 right after F-005 although it waits on F-049. Template release v8.2.0 (project-harness PR #147, F-067) lists an open prerequisite, with its own first, just above the first record that waits on it and keeps the priority order otherwise. `tools/work-items.mjs` takes that ordering block, identical to v8.2.0; the Optional work queue paragraph of BACKLOG-RULES is carried verbatim; the ledger is rebuilt (F-005, F-045, F-025, F-049, F-021, F-006, F-012, …), no source record or priority changed. Left open: `tools/work-items.mjs` still carries the unreleased template F-066 code (project-harness PR #139) and `.harness.json` names 8.1.0, which has no tag; both wait on that PR's release.
+
 ## Archived Other changes (moved from BACKLOG.md on 2026-11-13)
 
 **Harness v5.6.0 reconciliation (5.5.0 included), 2026-11-11 ([PR #277](https://github.com/voidbrain/nerv/pull/277)).** Template F-057 and F-058: `tools/work-items.mjs`, `tools/backlog-queue.mjs`, `tools/backlog-dependencies.mjs` and `tools/check-freshness.mjs` copied byte-identically from v5.6.0; the Linked prerequisites, Optional work queue, Optional upfront feature plans and Estimate calibration paragraphs of BACKLOG-RULES carried verbatim; CI clones the template at v5.6.0.
