@@ -31,3 +31,21 @@ Intel N97 (4 cores), 12 GB memory, Intel UHD Graphics (2 GB shared). Ollama does
 - The F-078 plan assumed Tabgha runs `qwen2.5-coder:14b` (F-078-T05). It does not, and could not do so usefully.
 - NERV already lets a base use another base's model over the Kaji line (`models.remote`, endpoints named by enrolled base ID). Tabgha can use Neo Tokyo-3's models for its roles while Neo Tokyo-3 is online, and keep a small local model for when it is not.
 - Proposed for the owner's decision in F-078-T02: on Tabgha, measure (1) the remote endpoint path to Neo Tokyo-3 (latency, timeouts, behaviour when Neo Tokyo-3 sleeps) and (2) `qwen2.5:1.5b` and at most one 3–4B model locally as a degraded fallback. On Neo Tokyo-3, add `gemma4:26b` to the matrix beside the four candidates.
+
+## Approved matrix and budget (F-078-T02, 2026-11-13)
+
+The owner approved the proposals above and both downloads ("approve all", 2026-11-13). Only local models are run, and no cloud model.
+
+| Base | Model | Smoke packs (T03) | Misato and Casper roles (T04) | Notes |
+|---|---|---|---|---|
+| Neo Tokyo-3 | `gemma4:12b` | yes, plus the three failures of 2026-11-09 | yes | |
+| Neo Tokyo-3 | `gemma4:26b` | yes | yes | added by this decision |
+| Neo Tokyo-3 | `qwen2.5-coder:14b` | yes | yes | |
+| Neo Tokyo-3 | `devstral-small-2:24b` | in T06 | in T06 | downloaded 2026-11-13 |
+| Neo Tokyo-3 | `qwen3-coder:30b` | in T06 | in T06 | downloaded 2026-11-13 |
+| Tabgha | best two Neo Tokyo-3 models over `models.remote` | yes | yes | latency, timeouts, Neo Tokyo-3 asleep |
+| Tabgha | `qwen2.5:1.5b` and `qwen2.5:3b`, local | yes | yes | fallback when Neo Tokyo-3 is offline; `qwen2.5:3b` (about 2 GB) is downloaded on Tabgha in T05 |
+
+Left out: `gemma4-128k` (only if a role needs the long context) and `gemma4:e2b` (no base needs it: too large for Tabgha's fallback, smaller than the Mac's candidates).
+
+**Budget:** at most 2 h of host wall time each for T03, T05 and T06, and 3 h for T04. A campaign that would exceed its budget stops and asks. Runs start only when the agent has said which campaign it is starting.
