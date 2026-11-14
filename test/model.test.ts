@@ -128,7 +128,7 @@ test('S² sends an OpenAI-compatible request and bounds, times out and reports f
       { role: 'user', content: 'Saluta' },
     ]);
     assert.equal(p.seen[0]!.body.model, 'gemma');
-    assert.equal(p.seen[0]!.body.stream, false);
+    assert.equal(p.seen[0]!.body.stream, true, 'B-054 changed the requirement: replies are streamed');
     mode = 'big';
     const big = await complete({ prompt: 'x', privacy: 'local-only' }, models, undefined, { timeoutMs: 2000 });
     assert.equal(big.truncated, true);

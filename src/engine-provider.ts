@@ -98,7 +98,87 @@ export function validateEngineUrl(rawUrl: string, locality: EngineLocality, allo
   return url.href.replace(/\/$/, '');
 }
 
-/** Shared OpenAI-compatible `/chat/completions` caller used by Ollama, generic OpenAI-compatible adapters and `completeLocal`. */
+/** What one OpenAI-compatible reply carried, whether it came whole or as a stream of server-sent events. */
+interface OpenAIReplyParts {
+  model: unknown;
+  text: string | null;
+  finish: unknown;
+  usage: { prompt_tokens?: unknown; completion_tokens?: unknown; prompt_tokens_details?: { cached_tokens?: unknown } };
+}
+
+const MAX_RAW_REPLY_BYTES = 1048576;
+
+/**
+ * Reads a streamed `/chat/completions` reply (B-054). `onData` fires on every event, so the caller can tell a route that
+ * never answered from one still writing a long reply when the time limit comes.
+ */
+async function readEventStream(response: Response, label: string, onData: () => void): Promise<OpenAIReplyParts> {
+  const parts: OpenAIReplyParts = { model: undefined, text: null, finish: undefined, usage: {} };
+  if (!response.body) return parts;
+  const decoder = new TextDecoder();
+  let buffered = '';
+  let bytes = 0;
+  const take = (line: string) => {
+    if (!line.startsWith('data:')) return;
+    const data = line.slice(5).trim();
+    if (!data || data === '[DONE]') return;
+    let event: {
+      model?: unknown;
+      usage?: OpenAIReplyParts['usage'] | null;
+      choices?: { delta?: { content?: unknown }; finish_reason?: unknown }[];
+    };
+    try {
+      event = JSON.parse(data);
+    } catch {
+      throw new ModelError(`${label} returned invalid JSON.`);
+    }
+    onData();
+    if (typeof event.model === 'string') parts.model = event.model;
+    if (event.usage) parts.usage = event.usage;
+    const choice = event.choices?.[0];
+    if (typeof choice?.delta?.content === 'string') parts.text = (parts.text ?? '') + choice.delta.content;
+    if (typeof choice?.finish_reason === 'string') parts.finish = choice.finish_reason;
+  };
+  for await (const chunk of response.body as unknown as AsyncIterable<Uint8Array>) {
+    bytes += chunk.byteLength;
+    if (bytes > MAX_RAW_REPLY_BYTES) throw new ModelError(`${label} response too large.`);
+    buffered += decoder.decode(chunk, { stream: true });
+    const lines = buffered.split(/\r?\n/);
+    buffered = lines.pop() ?? '';
+    lines.forEach(take);
+  }
+  take(buffered + decoder.decode());
+  return parts;
+}
+
+/** Reads a whole (non-streamed) `/chat/completions` reply: a server that ignores `stream` still answers this way. */
+async function readWholeReply(response: Response, label: string): Promise<OpenAIReplyParts> {
+  const raw = await response.text();
+  if (Buffer.byteLength(raw) > MAX_RAW_REPLY_BYTES) throw new ModelError(`${label} response too large.`);
+  let body: {
+    model?: unknown;
+    usage?: OpenAIReplyParts['usage'];
+    choices?: { message?: { content?: unknown }; finish_reason?: unknown }[];
+  };
+  try {
+    body = JSON.parse(raw);
+  } catch {
+    throw new ModelError(`${label} returned invalid JSON.`);
+  }
+  const choice = body.choices?.[0];
+  return {
+    model: body.model,
+    text: typeof choice?.message?.content === 'string' ? choice.message.content : null,
+    finish: choice?.finish_reason,
+    usage: body.usage ?? {},
+  };
+}
+
+/**
+ * Shared OpenAI-compatible `/chat/completions` caller used by Ollama, generic OpenAI-compatible adapters and
+ * `completeLocal`. The reply is streamed (B-054): at the time limit, a route that never answered has timed out (an
+ * outage), while one still writing has given a reply too long for the limit, which says nothing about the route.
+ */
 export async function completeOpenAICompatible(
   ask: Ask,
   endpoint: { baseUrl: string; model: string; apiKey?: string },
@@ -114,57 +194,70 @@ export async function completeOpenAICompatible(
   const key = options.apiKey ?? endpoint.apiKey;
   if (key) headers.authorization = `Bearer ${key}`;
 
-  let response: Response;
-  try {
-    response = await (options.fetch ?? fetch)(endpoint.baseUrl.replace(/\/$/, '') + '/chat/completions', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ model: endpoint.model, messages, max_tokens: MAX_TOKENS, stream: false }),
-      signal: AbortSignal.timeout(options.timeoutMs),
-      redirect: 'error',
-    });
-  } catch (e) {
-    throw new ModelError(
-      e instanceof Error && e.name === 'TimeoutError' ? `${label} timed out.` : `${label} unreachable.`,
+  const limit = new AbortController();
+  const timer = setTimeout(() => limit.abort(), options.timeoutMs);
+  let answering = false;
+  const cutOff = () =>
+    new ModelError(
+      answering
+        ? `${label} reply too long: still being written at the ${Math.round(options.timeoutMs / 1000)} s limit; ask for a shorter answer.`
+        : `${label} timed out.`,
     );
-  }
-  const raw = await response.text().catch(() => '');
-  if (Buffer.byteLength(raw) > 1048576) throw new ModelError(`${label} response too large.`);
-  if (!response.ok) throw new ModelError(`${label} failed with HTTP ${response.status}.`);
-  let body: {
-    model?: unknown;
-    usage?: {
-      prompt_tokens?: unknown;
-      completion_tokens?: unknown;
-      prompt_tokens_details?: { cached_tokens?: unknown };
-    };
-    choices?: { message?: { content?: unknown }; finish_reason?: unknown }[];
-  };
+  let parts: OpenAIReplyParts;
   try {
-    body = JSON.parse(raw);
-  } catch {
-    throw new ModelError(`${label} returned invalid JSON.`);
+    let response: Response;
+    try {
+      response = await (options.fetch ?? fetch)(endpoint.baseUrl.replace(/\/$/, '') + '/chat/completions', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          model: endpoint.model,
+          messages,
+          max_tokens: MAX_TOKENS,
+          stream: true,
+          stream_options: { include_usage: true },
+        }),
+        signal: limit.signal,
+        redirect: 'error',
+      });
+    } catch {
+      throw limit.signal.aborted ? cutOff() : new ModelError(`${label} unreachable.`);
+    }
+    if (!response.ok) {
+      await response.body?.cancel().catch(() => undefined);
+      throw new ModelError(`${label} failed with HTTP ${response.status}.`);
+    }
+    try {
+      parts = /text\/event-stream/i.test(response.headers.get('content-type') ?? '')
+        ? await readEventStream(response, label, () => {
+            answering = true;
+          })
+        : await readWholeReply(response, label);
+    } catch (e) {
+      if (e instanceof ModelError) throw e;
+      throw limit.signal.aborted ? cutOff() : new ModelError(`${label} unreachable.`);
+    }
+  } finally {
+    clearTimeout(timer);
   }
-  const choice = body.choices?.[0];
-  const returnedModel = typeof body.model === 'string' && body.model.length <= 200 ? body.model : null;
-  const cached = body.usage?.prompt_tokens_details?.cached_tokens;
+  const returnedModel = typeof parts.model === 'string' && parts.model.length <= 200 ? parts.model : null;
   options.observe?.({
     route,
     requestedModel: endpoint.model,
     returnedModel,
-    inputTokens: tokenCount(body.usage?.prompt_tokens),
-    outputTokens: tokenCount(body.usage?.completion_tokens),
-    cacheReadTokens: tokenCount(cached),
+    inputTokens: tokenCount(parts.usage.prompt_tokens),
+    outputTokens: tokenCount(parts.usage.completion_tokens),
+    cacheReadTokens: tokenCount(parts.usage.prompt_tokens_details?.cached_tokens),
     cacheWriteTokens: 0,
     durationMs: 0,
-    outcome: typeof choice?.message?.content === 'string' ? 'success' : 'error',
+    outcome: parts.text !== null ? 'success' : 'error',
   });
-  if (typeof choice?.message?.content !== 'string') throw new ModelError(`${label} returned no text.`);
+  if (parts.text === null) throw new ModelError(`${label} returned no text.`);
   return {
-    ...boundText(choice.message.content),
+    ...boundText(parts.text),
     route,
     model: returnedModel ?? endpoint.model,
-    stop: typeof choice.finish_reason === 'string' ? choice.finish_reason : 'unknown',
+    stop: typeof parts.finish === 'string' ? parts.finish : 'unknown',
   };
 }
 
