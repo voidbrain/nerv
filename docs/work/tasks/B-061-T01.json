@@ -4,7 +4,7 @@
   "parent": "B-061",
   "title": "Unambiguous sortie short IDs",
   "goal": "A short ID names one sortie, or the lookup says it is ambiguous",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A committed test with two colliding sorties fails before the fix",
     "The F-042 test no longer depends on random UUID prefixes"
@@ -31,11 +31,16 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h",
-    "basis": "Estimated 2026-11-13: a collision check and one regression. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Closed 2026-11-14 after PR #412 (CI 43622417765: plan, native-macos, validate, windows, full-suite green) merged to main.",
     "reviewed": "2026-11-14",
     "agentHours": 0,
+    "ownerHours": 0,
     "baselineAgentHours": 0.5,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated",
     "estimateAgentHours": 0.5
-  }
+  },
+  "prs": [{ "pr": 412, "note": "retry colliding 4-char sortie prefixes and list distinguishing candidates on explain" }],
+  "review": "CI run 43622417765 passed all 5 jobs before merge."
 }

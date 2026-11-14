@@ -4,7 +4,7 @@
   "parent": "B-060",
   "title": "Make the Windows timing tests wait on their condition",
   "goal": "The Windows job fails only when behaviour is wrong, not when the runner is slow",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Each Windows-flaky test of 2026-11-13 (instrumentality F-003 failed night, kaji-link degraded base, worker-link B-046 stall, Telegram language join, windowsServiceAdapter, F-005-T23 update) waits on its condition or carries a Windows budget with a reason",
     "20 consecutive Windows CI runs of those tests pass",
@@ -36,11 +36,16 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h",
-    "basis": "Estimated 2026-11-13: six test waits and one browser timeout, then repeated Windows runs. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Closed 2026-11-14 per owner instruction after PR #411 (CI 43622889287: plan, windows, validate, native-macos, full-suite green) merged to main; root-cause decoupling from nervous IPC opened in B-066.",
     "reviewed": "2026-11-14",
     "agentHours": 0,
+    "ownerHours": 0,
     "baselineAgentHours": 0.5,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated",
     "estimateAgentHours": 0.5
-  }
+  },
+  "prs": [{ "pr": 411, "note": "Windows timing headroom and Chrome startup timeout" }],
+  "review": "CI run 43622889287 passed all 5 jobs; follow-up root-cause fix moved to B-066."
 }

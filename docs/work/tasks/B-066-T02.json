@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "B-066-T02",
+  "parent": "B-066",
+  "title": "Decouple worker-link frame verification from per-frame nervous IPC",
+  "goal": "Implement the Option chosen in B-066-T01 so slow SQLite IPC never causes false heartbeat session loss",
+  "status": "planned",
+  "acceptance": [
+    "Worker-link heartbeats survive slow registry IPC without dropping live sessions",
+    "A regression with a delayed RegistryPort / IPC stub fails before the fix and passes after it, with strict heartbeat timing restored in test/worker-link.test.ts"
+  ],
+  "dependsOn": [
+    "B-066-T01"
+  ],
+  "resources": [
+    "src/worker-link.ts",
+    "src/kaji-link.ts",
+    "src/runtime.ts",
+    "test/worker-link.test.ts",
+    "docs/work/records/B-066.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design",
+    "distributed-contracts"
+  ],
+  "privacy": "Neutral fixtures only; no real host names, keys or tokens in Git.",
+  "validation": [
+    "A committed regression fails before the fix",
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "Material scope growth or changes to revocation fencing semantics go to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h agent",
+    "basis": "Estimated 2026-11-14 at agent speed (harness 8.14.3: small fix 0.5 h). Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}
