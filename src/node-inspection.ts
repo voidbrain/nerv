@@ -72,12 +72,20 @@ export const runNodeCommand: CommandRunner = (request) =>
           Error(
             request.mayWrite
               ? 'Bootstrap command failed; inspect its target receipt before retrying.'
-              : 'Read-only command failed. Check the selected client and target prerequisites; no installation was requested.',
+              : readOnlyFailure(code),
           ),
         );
     });
     child.stdin.end(request.input);
   });
+/** B-062: ssh exits 255 for its own errors and passes a remote "command not found" (127) through. */
+function readOnlyFailure(code: number | null): string {
+  if (code === 255)
+    return 'The target could not be reached over SSH. Check its host name, key and known host entry; no installation was requested.';
+  if (code === 127)
+    return "Node.js was not found on the target's non-interactive PATH. Install a supported Node.js there; no installation was requested.";
+  return 'Read-only command failed. Check the selected client and target prerequisites; no installation was requested.';
+}
 /** Fixed read-only probe. Never read credentials, open SQLite, enroll a base or ask a model. */
 export const NODE_PROBE = String.raw`const os=require('node:os'),fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process');
 function version(command){try{const r=cp.spawnSync(command,{shell:true,encoding:'utf8',timeout:3000,maxBuffer:4096,windowsHide:true});const text=(r.stdout||'').trim();return r.status===0&&/^(?:git version )?\d+\.\d+[^\r\n]{0,80}$/.test(text)?text:null;}catch{return null;}}
