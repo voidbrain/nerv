@@ -4,14 +4,15 @@
   "parent": "B-064",
   "title": "Name the missing data home or unsupported platform instead of a raw ENOENT",
   "goal": "`nodes lifecycle-inspect` on a machine without a NERV data home, or off the Mac, says what is missing and what to run",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "A regression through nodesCommand: with no data home the command fails naming it (and that nothing was changed) instead of ENOENT; off macOS it says the lifecycle supports only the Mac profile and points to the Linux adapter step"
   ],
   "dependsOn": [],
   "resources": [
-    "src/**",
-    "test/**",
+    "src/nodes-cli.ts",
+    "src/node-lifecycle-execution.ts",
+    "test/node-lifecycle.test.ts",
     "docs/acceptance/f005-t22-prerequisites.md",
     "docs/work/records/B-064.md",
     "generated:backlog-views"
@@ -32,7 +33,7 @@
     "estimate": "0.5 h agent",
     "basis": "Estimated 2026-11-14: one guard, one message and one regression. Not a measurement.",
     "reviewed": "2026-11-14",
-    "agentHours": 0.5,
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
   }
