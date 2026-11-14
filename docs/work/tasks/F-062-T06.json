@@ -28,7 +28,8 @@
   "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
   "validation": [
     "A test across sender and receiver over the Kaji line; final applicable CI",
-    "2026-11-14: test/offhost-kaji.test.ts — two enrolled bases on loopback: the nightly copy reaches the accepting base encrypted and only the owner key restores it; a base that does not accept refuses (403), logged once, not asked again; an unreachable peer is reported once and not retried every minute; the receiver checks sender, date and copy shape and keeps the newest."
+    "2026-11-14: test/offhost-kaji.test.ts — two enrolled bases on loopback: the nightly copy reaches the accepting base encrypted and only the owner key restores it; a base that does not accept refuses (403), logged once, not asked again; an unreachable peer is reported once and not retried every minute; the receiver checks sender, date and copy shape and keeps the newest.",
+    "2026-11-14: nerv-system-flows/browser failed once (status only, no failing check named) right after the full npm test and build; npm run test:browser and a rerun of all seven cases then passed. Recorded as an unexplained one-off, not a confirmed defect."
   ],
   "escalation": [
     "Owner agreed 2026-11-14 to a new Kaji message type carrying encrypted backup copies (option A over a mounted share); any further change to the Kaji contract goes back to the owner"
