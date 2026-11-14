@@ -1115,3 +1115,89 @@ export function describePilots(roster: readonly Pilot[], generic: string | null)
     );
   return lines.join('\n');
 }
+
+export interface CombinationEvidenceRef {
+  configurationId: string;
+  candidateArtifactDigest: string;
+  finished: string;
+  complete: boolean;
+  passed: boolean;
+  grader: {
+    graderHash: string;
+    hiddenAcceptanceHash: string;
+    tamperDetected: boolean;
+  };
+  promotionAuthority?: {
+    grantsProductionPermission: boolean;
+  };
+}
+
+export interface PromotionAuthorityInput {
+  pilot: Pilot & { suspended?: boolean };
+  evidence: CombinationEvidenceRef;
+  expectedConfigurationId: string;
+  expectedArtifactDigest: string;
+  expectedGraderHash: string;
+  expectedHiddenAcceptanceHash: string;
+  ownerApproved: boolean;
+  policy?: Pick<Policy, 'deny' | 'localOnly'>;
+  maxAgeMs?: number;
+  nowMs?: number;
+}
+
+/**
+ * Rechecks exact candidate artifact identity, protected grader identity, freshness, and current NERV authority before
+ * any promotion or production grant (F-006-T10). A passing or signed evaluation report alone grants nothing.
+ */
+export function verifyPromotionAuthority(input: PromotionAuthorityInput): { allowed: boolean; reason?: string } {
+  const {
+    pilot,
+    evidence,
+    expectedConfigurationId,
+    expectedArtifactDigest,
+    expectedGraderHash,
+    expectedHiddenAcceptanceHash,
+    ownerApproved,
+    policy,
+  } = input;
+  if (!ownerApproved) {
+    return { allowed: false, reason: 'Owner approval is required; evaluation evidence alone grants no authority.' };
+  }
+  if (pilot.retired) {
+    return { allowed: false, reason: `Pilot ${pilot.id} is retired.` };
+  }
+  if (pilot.suspended) {
+    return { allowed: false, reason: `Pilot ${pilot.id} is suspended.` };
+  }
+  if (evidence.promotionAuthority && evidence.promotionAuthority.grantsProductionPermission !== false) {
+    return { allowed: false, reason: 'Evaluation evidence illegally claims direct production permission.' };
+  }
+  if (evidence.grader.tamperDetected) {
+    return { allowed: false, reason: 'Grader tamper was detected in qualification evidence.' };
+  }
+  if (evidence.grader.graderHash !== expectedGraderHash) {
+    return { allowed: false, reason: 'Grader hash does not match current protected grader.' };
+  }
+  if (evidence.grader.hiddenAcceptanceHash !== expectedHiddenAcceptanceHash) {
+    return { allowed: false, reason: 'Hidden acceptance hash does not match current case pack.' };
+  }
+  if (!evidence.complete || !evidence.passed) {
+    return { allowed: false, reason: 'Qualification evidence is incomplete or did not pass.' };
+  }
+  if (evidence.candidateArtifactDigest !== expectedArtifactDigest) {
+    return { allowed: false, reason: 'Candidate artifact digest does not match current artifact.' };
+  }
+  if (evidence.configurationId !== expectedConfigurationId) {
+    return { allowed: false, reason: 'Configuration identity does not match current coder/reviewer configuration.' };
+  }
+  const maxAgeMs = input.maxAgeMs ?? 30 * 86_400_000;
+  const nowMs = input.nowMs ?? Date.now();
+  const finishedMs = Date.parse(evidence.finished);
+  if (!Number.isFinite(finishedMs) || nowMs - finishedMs > maxAgeMs || finishedMs > nowMs + 60_000) {
+    return { allowed: false, reason: 'Qualification evidence is stale or has an invalid timestamp.' };
+  }
+  if (policy?.deny && (pilot.tools ?? []).some((t) => policy.deny.includes(t))) {
+    return { allowed: false, reason: `Current policy denies one or more tools configured on pilot ${pilot.id}.` };
+  }
+  return { allowed: true };
+}

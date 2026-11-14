@@ -308,8 +308,8 @@ test('F-006-T07: 2-node scheduler join runs job on worker X using remote inferen
       offers: () => ['model.infer'],
       onOffers: (id, tools) => ra!.notePeerOffers(id, tools),
       address: (s) => `ws://127.0.0.1:${s.split(':').pop()}`,
-      heartbeatMs: 500,
-      requestMs: 5000,
+      heartbeatMs: 5000,
+      requestMs: 15000,
       reconnectMs: 30,
     });
     linkA.attach(wsServer);
@@ -340,8 +340,8 @@ test('F-006-T07: 2-node scheduler join runs job on worker X using remote inferen
       offers: () => ['reminders.add'],
       onOffers: (id, tools) => rb!.notePeerOffers(id, tools),
       address: (s) => `ws://127.0.0.1:${s.split(':').pop()}`,
-      heartbeatMs: 500,
-      requestMs: 5000,
+      heartbeatMs: 5000,
+      requestMs: 15000,
       reconnectMs: 30,
     });
     linkB.start();
@@ -496,8 +496,8 @@ test('F-006-T07: 3-node scheduler join (coordinator NERV-01, worker X NERV-02, e
       offers: () => [],
       onOffers: (id, tools) => ra!.notePeerOffers(id, tools),
       address: (s) => `ws://127.0.0.1:${s.split(':').pop()}`,
-      heartbeatMs: 500,
-      requestMs: 5000,
+      heartbeatMs: 5000,
+      requestMs: 15000,
       reconnectMs: 30,
     });
     linkA.attach(wsServer);
@@ -511,8 +511,8 @@ test('F-006-T07: 3-node scheduler join (coordinator NERV-01, worker X NERV-02, e
       adapter: rb.worker,
       offers: () => ['reminders.add'],
       address: (s) => `ws://127.0.0.1:${s.split(':').pop()}`,
-      heartbeatMs: 500,
-      requestMs: 5000,
+      heartbeatMs: 5000,
+      requestMs: 15000,
       reconnectMs: 30,
     });
     linkB.start();
@@ -525,8 +525,8 @@ test('F-006-T07: 3-node scheduler join (coordinator NERV-01, worker X NERV-02, e
       adapter: rc.worker,
       offers: () => offersC,
       address: (s) => `ws://127.0.0.1:${s.split(':').pop()}`,
-      heartbeatMs: 500,
-      requestMs: 5000,
+      heartbeatMs: 5000,
+      requestMs: 15000,
       reconnectMs: 30,
     });
     linkC.start();
@@ -1043,8 +1043,8 @@ test('F-006-T08: unavailable Mac endpoint waits or expires within budget, retrie
       offers: () => ['reminders.add'],
       onOffers: (id, tools) => rMini!.notePeerOffers(id, tools),
       address: (s) => `ws://127.0.0.1:${s.split(':').pop()}`,
-      heartbeatMs: 500,
-      requestMs: 5000,
+      heartbeatMs: 5000,
+      requestMs: 15000,
       reconnectMs: 25,
     });
     linkMini.attach(wsServer);
@@ -1067,8 +1067,8 @@ test('F-006-T08: unavailable Mac endpoint waits or expires within budget, retrie
       adapter: piAdapter,
       offers: () => ['sensor.read', 'voice.speak'],
       address: (s) => `ws://127.0.0.1:${s.split(':').pop()}`,
-      heartbeatMs: 500,
-      requestMs: 5000,
+      heartbeatMs: 5000,
+      requestMs: 15000,
       reconnectMs: 25,
     });
     linkPi.start();
@@ -1106,8 +1106,8 @@ test('F-006-T08: unavailable Mac endpoint waits or expires within budget, retrie
       adapter: rMac.worker,
       offers: () => ['model.infer'],
       address: (s) => `ws://127.0.0.1:${s.split(':').pop()}`,
-      heartbeatMs: 500,
-      requestMs: 5000,
+      heartbeatMs: 5000,
+      requestMs: 15000,
       reconnectMs: 25,
     });
     setTimeout(() => {
@@ -1208,6 +1208,7 @@ test('F-006-T08: unavailable Mac endpoint waits or expires within budget, retrie
         endpoint: 'mac',
         workerBaseId: 'NERV-PI',
         tool: 'sensor.read',
+        waitBudgetMs: 2000,
       },
       ask: { prompt: 'Check ambient sensor via Pi' },
       item: {

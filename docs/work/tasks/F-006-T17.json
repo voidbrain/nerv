@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-006",
   "id": "F-006-T17",
-  "status": "planned",
+  "status": "ready",
   "title": "Approve the placement campaign plan and budgets",
   "goal": "Approve the placement campaign plan and budgets",
   "capabilities": [
@@ -43,5 +43,6 @@
     "ownerHours": 0.25,
     "agentHours": 0,
     "ownerKind": "decision"
-  }
+  },
+  "ownerLink": "docs/decisions/placement-campaign.md"
 }
