@@ -2377,7 +2377,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner report 2026-11-14; [PR #409](https://github.com/voidbrain/nerv/pull/409) |
+| PR / evidence | Owner report 2026-11-14; [PR #409](https://github.com/voidbrain/nerv/pull/409); [PR #415](https://github.com/voidbrain/nerv/pull/415) |
 | Opened | 2026-11-14 |
 | Verification | Pending. |
 | Reviewed | 2026-11-14 |
