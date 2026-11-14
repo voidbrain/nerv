@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 76 h agent + 21.25 h owner across 199 open steps of 47 features and 9 other records. 18.25 h of actual effort recorded on 36 steps. Generated from the task files.
+**Remaining effort:** 76.25 h agent + 21.25 h owner across 199 open steps of 47 features and 9 other records. 18.5 h of actual effort recorded on 37 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -180,9 +180,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 1.25 h | — | — | ⏳ | — | — |
 
-💻 **→** Next: F-062-T02 (nightly consistent snapshots).
+💻 **→** Next: F-062-T03 (encrypted off-host retention); F-062-T02 implemented, awaiting merge.
 
 | | |
 |---|---|
@@ -194,11 +194,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-062-t02"></a>F-062-T02 — Scheduled consistent snapshots | 0.25 h | 0 h | 0.25 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-062-t02"></a>F-062-T02 — Scheduled consistent snapshots | 0.25 h | 0 h | 0.5 h | Implemented; verification pending | 🤖 |
 | 🟢 Small | <a id="f-062-t03"></a>F-062-T03 — Encrypted off-host retention | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-062-T02](#f-062-t02) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-062-t04"></a>F-062-T04 — Restore drill | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-062-T03](#f-062-t03) | ⏳ 🤖 |
 | — | <a id="f-062-t01"></a>F-062-T01 — Owner-agreed loss window and restore time | 0.25 h | 0 h | 0 h | Completed | 🤖 🧑‍🔧 🤔 |
-| 🟢 Small | **Total** | 1.25 h | 0 h (0 of 4 steps recorded) | 1 h | 1 of 4 completed | |
+| — | <a id="f-062-t05"></a>F-062-T05 — Rerun the two expensive system cases at the snapshot source | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 🧑‍🔧 |
+| 🟡 Medium | **Total** | 1.5 h | 0.25 h (1 of 5 steps recorded) | 1.25 h | 2 of 5 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -207,10 +208,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #255](https://github.com/voidbrain/nerv/pull/255) distinguishes one-off lifecycle/root snapshots from general recovery acceptance; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
+| PR / evidence | [PR #395](https://github.com/voidbrain/nerv/pull/395) F-062-T02 nightly verified snapshots (`src/snapshots.ts`), Test: test/snapshots.test.ts; [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #255](https://github.com/voidbrain/nerv/pull/255) distinguishes one-off lifecycle/root snapshots from general recovery acceptance; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
 | Opened | 2026-11-06 |
-| Verification | Unit/integration: Pending. Real-device: Pending (restore drill). |
-| Reviewed | 2026-11-10 |
+| Verification | Unit/integration: snapshots covered by test/snapshots.test.ts; off-host retention pending. Real-device: Pending (restore drill). |
+| Reviewed | 2026-11-14 |
 
 </details>
 
