@@ -4,7 +4,8 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { readConfig } from '../src/config.ts';
-import { defaultPersonas, personaReply, validatePersonas } from '../src/persona.ts';
+import { defaultPersonas, validatePersonas } from '../src/persona.ts';
+import { misatoAsk } from '../src/misato.ts';
 
 test('F-020: persona names are configured independently on each base and default by role', () => {
   const first = validatePersonas({ enabled: true, names: { misato: 'Bob', gendo: 'Fritz' } });
@@ -14,26 +15,14 @@ test('F-020: persona names are configured independently on each base and default
   assert.deepEqual(defaultPersonas.names, { misato: 'Misato', gendo: 'Gendo' });
 });
 
-test('F-020: the persona adapter can be disabled and exposes presentation, never authority', () => {
-  assert.equal(
-    personaReply(validatePersonas({ enabled: false }), 'misato', {
-      text: 'Waiting for your decision.',
-      sources: ['A-1'],
-    }),
-    undefined,
-  );
-  const reply = personaReply(validatePersonas({ enabled: true }), 'gendo', {
-    text: 'Pattern Red requires the owner.',
-    sources: ['decision:D-1'],
-  });
-  assert.deepEqual(reply, {
-    role: 'gendo',
-    name: 'Gendo',
-    text: 'Pattern Red requires the owner.',
-    sources: ['decision:D-1'],
-  });
-  assert.deepEqual(Object.keys(reply!).sort(), ['name', 'role', 'sources', 'text']);
-  assert.throws(() => personaReply(defaultPersonas, 'misato', { text: 'Trust me.', sources: [] }), /record source/);
+test('F-020: the planner persona is presentation-only and can be disabled', () => {
+  const input = { request: 'status', history: [], tools: [], now: '2030-01-01T00:00:00Z', timeZone: 'UTC' };
+  const named = misatoAsk({ ...input, personaName: 'Operator' }, 'local').system!;
+  assert.match(named, /configured display name is "Operator"/);
+  assert.match(named, /never grant a capability, change a Pattern, or override the gate/);
+  const disabled = misatoAsk({ ...input, personaName: null }, 'local').system!;
+  assert.doesNotMatch(disabled, /Misato|Operator|configured display name/);
+  assert.match(disabled, /You are the planner/);
 });
 
 test('F-020: config.json validates per-base persona settings', () => {

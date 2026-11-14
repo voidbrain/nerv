@@ -5,13 +5,6 @@ export interface PersonaConfig {
   names: Record<PersonaRole, string>;
 }
 
-export interface PersonaReply {
-  role: PersonaRole;
-  name: string;
-  text: string;
-  sources: readonly string[];
-}
-
 export const defaultPersonas: PersonaConfig = {
   enabled: true,
   names: { misato: 'Misato', gendo: 'Gendo' },
@@ -43,20 +36,4 @@ export function validatePersonas(value: unknown): PersonaConfig {
       gendo: validName(names?.gendo) ? names.gendo.trim() : defaultPersonas.names.gendo,
     },
   };
-}
-
-/**
- * Adds a conversational face to an already-authoritative, record-grounded answer.
- * The result contains no decision, pattern, capability or tool fields: callers must obtain those from the gate and
- * ledger, and must never feed a PersonaReply back into authorization.
- */
-export function personaReply(
-  config: PersonaConfig,
-  role: PersonaRole,
-  grounded: { text: string; sources: readonly string[] },
-): PersonaReply | undefined {
-  if (!config.enabled) return undefined;
-  if (!grounded.text.trim() || grounded.sources.length === 0 || grounded.sources.some((source) => !source.trim()))
-    throw new Error('Persona replies require text grounded in at least one record source.');
-  return { role, name: config.names[role], text: grounded.text, sources: [...grounded.sources] };
 }

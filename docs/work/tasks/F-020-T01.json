@@ -23,7 +23,8 @@
   ],
   "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
   "validation": [
-    "Regression or fixture for each acceptance item; final applicable CI"
+    "Regression or fixture for each acceptance item; final applicable CI",
+    "2026-11-14: Codex stopped mid-fix (owner-confirmed); Claude finished it: the unused personaReply export (check:conventions failure on PR #398) is replaced by the configured name in the planner prompt with a presentation-only line, and personas.enabled=false removes the name; test/persona.test.ts covers both. npm test 752 passed; all seven nerv-system-flows cases reran and passed."
   ],
   "escalation": [
     "Material scope growth or effort increase goes to the owner before adoption"
@@ -38,6 +39,11 @@
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 0.25
   },
-  "prs": [{ "pr": 398, "note": "grounded, presentation-only persona adapter contract" }],
+  "prs": [
+    {
+      "pr": 398,
+      "note": "grounded, presentation-only persona adapter contract"
+    }
+  ],
   "review": "Local full suite, typecheck and fast checks passed; all seven deterministic Gauntlet system flows were refreshed after the source change; required CI pending."
 }
