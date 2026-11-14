@@ -293,3 +293,46 @@ test('F-042: sorties.explain, approvals.list and agency.status run as Pattern Gr
     store.close();
   }
 });
+
+test('B-061: colliding sortie short IDs list distinguishing candidates on explain', async () => {
+  const { Store } = await import('../src/store.ts');
+  const store = new Store(':memory:');
+  try {
+    const db = (store as unknown as { db: { prepare: (sql: string) => { run: (...args: unknown[]) => void } } }).db;
+    const insert = db.prepare('INSERT INTO sorties(id,source,title,trust,status,created) VALUES(?,?,?,?,?,?)');
+    insert.run(
+      'abcd0001-0000-4000-8000-000000000001',
+      'misato',
+      'First colliding sortie',
+      'trusted',
+      'open',
+      '2030-05-01T09:00:00Z',
+    );
+    insert.run(
+      'abcd0002-0000-4000-8000-000000000002',
+      'misato',
+      'Second colliding sortie',
+      'trusted',
+      'done',
+      '2030-05-01T09:01:00Z',
+    );
+    const probe = store.ledger.openSortie('misato', 'Explain probe', 'trusted');
+    const out = store.runAction(probe, { tool: 'sorties.explain', args: { ref: 'S-ABCD' }, stage: 'production' });
+    assert.equal(out.outcome, 'grant');
+    const res = out.result as {
+      found: string;
+      count?: number;
+      candidates?: { shortId: string; title: string; status: string }[];
+      summary: string;
+    };
+    assert.equal(res.found, 'many');
+    assert.equal(res.count, 2);
+    assert.equal(res.candidates?.length, 2);
+    assert.ok(res.candidates?.some((c) => c.shortId === 'S-ABCD0002' && c.title === 'Second colliding sortie'));
+    assert.ok(res.candidates?.some((c) => c.shortId === 'S-ABCD0001' && c.title === 'First colliding sortie'));
+    assert.match(res.summary, /S-ABCD0001/);
+    assert.match(res.summary, /S-ABCD0002/);
+  } finally {
+    store.close();
+  }
+});
