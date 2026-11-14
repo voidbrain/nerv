@@ -1,4 +1,5 @@
 #!/usr/bin/env -S node --use-system-ca
+import { startSnapshots } from './snapshots.ts';
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
 import {
@@ -1295,6 +1296,12 @@ try {
         }, sentBefore);
         runtime.startWatch();
         runtime.startRouteLog();
+        // F-062-T02: one consistent, verified snapshot of the database each night (owner's time zone).
+        startSnapshots(
+          home,
+          () => databasePath(home),
+          () => live().timeZone,
+        );
         runtime.startInstrumentality(() => {
           const c = live();
           return { ...(c.instrumentality ? { mode: c.instrumentality } : {}), timeZone: c.timeZone };

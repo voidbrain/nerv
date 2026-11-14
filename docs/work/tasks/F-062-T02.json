@@ -4,7 +4,7 @@
   "parent": "F-062",
   "title": "Scheduled consistent snapshots",
   "goal": "Scheduled consistent snapshots",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "SQLite backup API on a schedule; integrity verified; no secrets in logs"
   ],
@@ -12,9 +12,12 @@
     "F-062-T01"
   ],
   "resources": [
-    "src/**",
-    "test/**",
-    "docs/**",
+    "src/snapshots.ts",
+    "src/cli.ts",
+    "test/snapshots.test.ts",
+    "docs/architecture/runtime.md",
+    "docs/work/records/F-062.md",
+    "docs/work/tasks/F-062-T02.json",
     "generated:backlog-views"
   ],
   "capabilities": [
@@ -25,7 +28,8 @@
   ],
   "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
   "validation": [
-    "Regression or fixture for each acceptance item; final applicable CI"
+    "Regression or fixture for each acceptance item; final applicable CI",
+    "2026-11-14: src/snapshots.ts (node:sqlite backup, WAL folded, integrity_check, keep 7, 03:30 local), wired in serve; test/snapshots.test.ts covers WAL-only rows, retention, damaged source, due time and a path-free failure log. The first run caught WAL side files left by the copy; fixed before commit."
   ],
   "escalation": [
     "Material scope growth or effort increase goes to the owner before adoption"
@@ -33,10 +37,10 @@
   "effort": {
     "size": "small",
     "estimate": "1 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). Implemented 2026-11-14 in about 0.5 h (stated).",
     "reviewed": "2026-11-13",
     "baselineDays": 1,
-    "agentHours": 0.25,
+    "agentHours": 0.5,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 0.25
   }

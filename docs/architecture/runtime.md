@@ -44,6 +44,10 @@ The FPV app owns batteries, aircraft damage and maintenance state. NERV Agency i
 
 The OS supervisor owns starting/restarting the Node process; Angular is not responsible for keeping reminders alive. launchd is a per-user GUI agent; systemd uses the current user session. Sleep and logout limits must be visible. The planned native macOS companion uses SwiftUI MenuBarExtra, with independent app/service lifecycles and authenticated API access. Electron is not a dependency.
 
+## Nightly snapshots
+
+The running service takes one consistent snapshot of the base database each night at 03:30 in the owner's time zone (`src/snapshots.ts`). SQLite's online backup copies the database while the service keeps writing; the copy becomes one self-contained file, passes `PRAGMA integrity_check`, and only then replaces the partial file as `<data home>/snapshots/nerv-<date>.sqlite` (folder 0700, file 0600). The newest 7 are kept. The files are the checkpoint, so a restart neither repeats nor skips a night. A failure is logged once with its reason only, and retried the next night. Up to 24 hours of data can be lost. Encrypted off-host copies and the restore drill are on the [roadmap](../ROADMAP.md).
+
 ## Native pairing implementation
 
 Optional native HTTPS on loopback 4319 is enabled by native-init. The existing web/API remains on 4317. The gateway loads a private localhost TLS key/certificate and a separate bounded native credential database. Reminder SQLite/ticks remain in A; Brain receives neither TLS keys nor master/native credentials. The credential database contains only verifier hashes, metadata and a persistent runtime UUID. Small administrative operations occur in C and do not share A's reminder transaction queue.
