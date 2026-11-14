@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-096-T01",
+  "parent": "F-096",
+  "title": "Quiet test output and npm notices",
+  "goal": "npm test prints dots, failures and totals; the full report goes to an ignored file",
+  "status": "ready",
+  "acceptance": [
+    "Dots, every failure in full and the totals on screen; complete spec report in an ignored file",
+    "A test proves a failing test and a test's log are not lost",
+    ".npmrc loglevel=warn; characters before and after recorded"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "contract:backlog-ids",
+    "package.json",
+    ".npmrc",
+    ".gitignore",
+    "tools/**",
+    "test/**",
+    "docs/work/records/F-096.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "Quieting an output must never hide a failure"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-14 at agent speed. Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}

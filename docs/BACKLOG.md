@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 24 | 11 | 14 | 13 |
+| **This week** | 25 | 11 | 14 | 13 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 46 | 7 |
+| **Open** | 47 | 7 |
 | **Require Human 🧑** | 8 | 2 |
 
 ### Require Human 🧑
@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 74.75 h agent + 21.25 h owner across 196 open steps of 46 features and 7 other records. 17 h of actual effort recorded on 33 steps. Generated from the task files.
+**Remaining effort:** 75.75 h agent + 21.25 h owner across 198 open steps of 47 features and 7 other records. 17 h of actual effort recorded on 33 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -622,6 +622,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-096"></a>[✨ F-096](#top)
+
+**Fewer tokens per run: quiet test output and short records**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-096-T01 — Quiet test output and npm notices (Ready).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-14: prefer fewer tokens to less time. A passing `npm test` prints 103k characters (about 26k tokens) for 744 tests; Node's dot reporter prints 786 but alone drops the totals, test names and what tests log. npm adds `npm notice run …` lines to each script. F-005 holds 28 KB of dated evidence and F-051 13 KB, re-read whenever the record is touched. |
+| **Reproduce** | `npm test 2>&1 \| wc -c`; `wc -c docs/work/records/*.md \| sort -n \| tail`. |
+| **Check** | `npm test` prints dots, every failure in full and the totals, and writes the complete spec report to an ignored file (a test proves a failure and a test's log are kept); `.npmrc` sets `loglevel=warn`; F-005 and F-051 keep their current state and recent evidence, and older dated evidence moves to the archive with a link back, every line preserved; characters before and after recorded. Uses the harness quiet reporter (project-harness F-077-T02) when released; until then a local reporter with the same behaviour. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-096-t01"></a>F-096-T01 — Quiet test output and npm notices | 0.5 h | 0 h | 0.5 h | Ready |
+| 🟢 Small | <a id="f-096-t02"></a>F-096-T02 — Move old evidence out of F-005 and F-051 | 0.5 h | 0 h | 0.5 h | Ready |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 2 steps recorded) | 1 h | 0 of 2 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-096.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | — |
+| Opened | 2026-11-14 |
+| Verification | Pending. |
+| Reviewed | 2026-11-14 |
+
+</details>
+
+---
 ### <a id="f-095"></a>[✨ F-095](#top)
 
 **Source files small enough for an agent to read whole: split runtime.ts first, warn at 600 lines**
