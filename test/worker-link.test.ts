@@ -1119,6 +1119,7 @@ test(
   async () => {
     // Each ping/pong verifies through the nervous process; on Windows CI 150 ms is tighter than IPC under load.
     const hb = process.platform === 'win32' ? 400 : 150;
+    const stallMs = Math.ceil(hb * 1.5);
     const f = await fixture(hb);
     const send = WebSocket.prototype.send;
     let pings = 0,
@@ -1136,7 +1137,7 @@ test(
       if (armed && String(data).includes('worker.ping')) {
         pings++;
         armed = false;
-        setImmediate(() => stall(hb + 50));
+        setImmediate(() => stall(stallMs));
       }
       return sent;
     } as typeof send;
@@ -1147,7 +1148,7 @@ test(
         const before = pings;
         armed = true;
         await until(() => pings > before);
-        await wait(hb + 110);
+        await wait(stallMs + 60);
       }
       assert.equal(hellos - negotiated, 0, 'a reply that arrived during the stall must not end the session');
     } finally {
