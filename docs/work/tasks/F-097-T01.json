@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "F-097-T01",
+  "parent": "F-097",
+  "title": "Owner reruns the seven system cases at the 8.14.1 source",
+  "goal": "The seven nerv-system-flows cases have a run at the merged harness 8.14.1 source",
+  "status": "ready",
+  "acceptance": [
+    "Pending cases this task covers (listed for check:gauntlet-runs): nerv-system-flows/*",
+    "Copy and paste: cd <a worktree of this branch or of main after merge> && npm run build && npm run gauntlet:all -- --allow-expensive --execute --out-dir=/private/tmp/nerv-system-8141 && npm run gauntlet:pending — expected: seven passing system cases, gauntlet:pending prints nothing",
+    "The ledger change is committed in a PR naming F-097"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "evals/gauntlet/ledger.json",
+    "docs/work/records/F-097.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Local system cases only; no model calls, no personal data.",
+  "validation": [
+    "npm run gauntlet:pending",
+    "npm run check:evals"
+  ],
+  "escalation": [
+    "A failing system case is a defect: open a B- record instead of rerunning until it passes"
+  ],
+  "ownerLink": "docs/evaluations/gauntlet.md",
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-14: one command, about 15 minutes of running. Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  }
+}

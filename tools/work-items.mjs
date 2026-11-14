@@ -4,7 +4,6 @@ import { resolve, join, relative, isAbsolute, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { spawnSync } from 'node:child_process';
-export const RECORD = /^[BF]-\d{3}$/;
 export const TASK = /^[BF]-\d{3}-T\d{2}$/;
 const recap = /<!-- recap:start[^>]*-->[\s\S]*?<!-- recap:end[^>]*-->/;
 // Generated effort totals (F-053): the layout places the markers, renderLedger fills them from task files.
@@ -441,9 +440,22 @@ export function headerSegment(root, path) {
     if (e.summary.length > 300)
       throw Error(`Reconciliation entry ${e.date} ${e.sha}: keep the first paragraph under 300 characters`);
   }
-  const newest = entries.reduce((a, b) =>
-    b.date > a.date ? b : b.date < a.date ? a : descends(root, b.sha, a.sha) ? b : a,
-  );
+  const latest = entries.reduce((a, b) => (b.date > a.date ? b : a)).date;
+  const tied = entries.filter((e) => e.date === latest);
+  // B-022: ancestry needs both commits; a single-commit CI checkout has neither. Then the header already committed in
+  // docs/BACKLOG.md chooses among the tied entries, so the result does not change with clone depth.
+  const known = (sha) =>
+    spawnSync('git', ['cat-file', '-e', `${sha}^{commit}`], { cwd: root, stdio: 'ignore' }).status === 0;
+  const committed = existsSync(join(root, 'docs/BACKLOG.md'))
+    ? readFileSync(join(root, 'docs/BACKLOG.md'), 'utf8').match(
+        /^Current work ledger, reviewed [^\n]*? against [^\s`]+ `([0-9a-f]{7,40})`/m,
+      )?.[1]
+    : undefined;
+  const chosen =
+    tied.length > 1 && !tied.every((e) => known(e.sha)) && committed
+      ? tied.find((e) => e.sha.startsWith(committed) || committed.startsWith(e.sha))
+      : undefined;
+  const newest = chosen ?? tied.reduce((a, b) => (descends(root, b.sha, a.sha) ? b : a));
   const [y, mo, d] = newest.date.split('-').map(Number);
   const date = `${d} ${MONTHS[mo - 1]} ${y}`;
   return `Current work ledger, reviewed ${date} against ${newest.branch} \`${newest.sha}\`. ${newest.summary}\n`;
@@ -1126,6 +1138,29 @@ export function taskCatalog(root, config) {
   for (const t of tasks) visit(t.id);
   return { version: 1, tasks, profiles: profiles.profiles };
 }
+// F-077-T04: the steps that can move now, one line each, in ledger order: planned or ready, every prerequisite
+// verified or closed. Who acts comes from effort.ownerKind (owner) or its absence (agent).
+export function nextSteps(root, config, limit = 10) {
+  const order = [
+    ...renderLedger(root, config, false).matchAll(/^### (?:<a id="[fb]-\d+"><\/a>)?(?:\[(?:✨|🐞) )?([BF]-\d{3})/gm),
+  ].map((m) => m[1]);
+  const tasks = taskCatalog(root, config).tasks;
+  const done = new Set(tasks.filter((t) => ['verified', 'closed'].includes(t.status)).map((t) => t.id));
+  const rank = (t) => (order.includes(t.parent) ? order.indexOf(t.parent) : order.length);
+  const ready = tasks
+    .filter((t) => ['planned', 'ready'].includes(t.status) && (t.dependsOn ?? []).every((d) => done.has(d)))
+    .sort((a, b) => rank(a) - rank(b) || a.id.localeCompare(b.id, 'en', { numeric: true }));
+  const who = (t) => (t.effort?.ownerKind ? `owner (${t.effort.ownerKind})` : 'agent');
+  const effort = (t) => t.effort?.estimate ?? (t.effort?.agentHours !== undefined ? `${t.effort.agentHours} h` : '?');
+  const lines = ready.slice(0, limit).map((t) => `${t.id}  ${who(t)}  ${effort(t)}  ${t.title}`);
+  lines.push(
+    ready.length
+      ? `${ready.length} step(s) can move now${ready.length > limit ? `; ${limit} shown (--limit=N for more)` : ''}.`
+      : 'No step can move now: every open step waits on a prerequisite.',
+  );
+  return lines;
+}
+
 export function checkWorkItems(root = process.cwd()) {
   const config = settings(root);
   if (!config) return { enabled: false };
@@ -1225,14 +1260,19 @@ export function checkWorkItems(root = process.cwd()) {
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const [command, ...extra] = process.argv.slice(2);
-    if (extra.length || !['migrate', 'build', 'check', 'tasks', 'calibrate'].includes(command))
-      throw Error('Use work-items.mjs migrate|build|check|tasks|calibrate');
+    const limit = command === 'next' && extra.length === 1 ? /^--limit=([1-9]\d{0,3})$/.exec(extra[0])?.[1] : undefined;
+    if (
+      (extra.length && limit === undefined) ||
+      !['migrate', 'build', 'check', 'tasks', 'calibrate', 'next'].includes(command)
+    )
+      throw Error('Use work-items.mjs migrate|build|check|tasks|calibrate|next [--limit=N]');
     const root = process.cwd(),
       config = settings(root);
     if (!config) {
       console.log('Work items not adopted');
     } else if (command === 'migrate')
       console.log('Migrated ' + migrateLedger(root, config) + ' records without changing the ledger');
+    else if (command === 'next') console.log(nextSteps(root, config, limit ? Number(limit) : undefined).join('\n'));
     else if (command === 'build') writeFileSync(join(root, 'docs/BACKLOG.md'), renderLedger(root, config));
     else if (command === 'calibrate')
       console.log(JSON.stringify(calibrate(taskCatalog(root, config).tasks, config.estimation), null, 2));

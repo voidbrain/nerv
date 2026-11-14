@@ -1,34 +1,14 @@
 # Development job usage
 
-Optional metadata accounting, enabled by `workUsage.enabled` in `.harness.json`. The shared rule is in AGENTS. It applies to any agent that has actually loaded repository instructions and can run local tools. It does not configure a client, expose hidden counters or replace execution permissions. API/model identity, task owner and client name are separate fields; owner assignment before launch is optional unless task suitability requires it.
+Optional metadata accounting, enabled by `workUsage.enabled` in `.harness.json`. The shared rule is "In short" below; AGENTS routes here. It applies to any agent that has actually loaded repository instructions and can run local tools. It does not configure a client, expose hidden counters or replace execution permissions. API/model identity, task owner and client name are separate fields; owner assignment before launch is optional unless task suitability requires it.
 
-## Subscription allowance snapshots
+Moved to [usage sources](work-usage-sources.md): "Subscription allowance snapshots", "Save a private report", "Selected native metadata adapters", "Import actual counters".
 
-Subscription allowance is a separate account-level signal from tokens and currency. Codex collection makes one read-only `account/rateLimits/read` request through the installed CLI app server; it does not invoke a model, change login/account state or expose credentials:
+Moved to [effectiveness observations](work-usage-effectiveness.md): "Effectiveness observations (optional)".
 
-```bash
-node tools/work-usage.mjs collect-codex --job=JOB_UUID
-```
+## In short
 
-Omit `--job` for an unassigned account observation. The collector stores only documented percentages, window lengths and reset times. A linked job permits a qualified before/after comparison, but account activity may include other clients or people, so the report labels the change as shared-account metadata rather than exact task usage.
-
-Claude Code exposes Pro/Max allowance percentages in its documented status-line JSON after the first API response. Configure the status-line command deliberately in the relevant Claude settings, composing it with any existing status line instead of overwriting one:
-
-```json
-{"statusLine":{"type":"command","command":"node /absolute/path/to/tools/work-usage.mjs claude-status --store=/absolute/private/store --source=claude-statusline"}}
-```
-
-The command reads the JSON payload on stdin, persists only `rate_limits.five_hour` and `rate_limits.seven_day`, and prints a short percentage line. Session ID, transcript path, cost fields and all other input are discarded. Before rate-limit fields exist it prints `Claude allowance unavailable`. Use `--job=JOB_UUID` when the status-line process inherits a known active job. Identical observations within five minutes for the same job/source are coalesced to avoid status refresh spam; changed counters and later boundary samples remain immutable.
-
-For reviewed fixtures or another authorized adapter, `allowance --format=normalized|codex-rate-limits --file=/private/metadata.json [--job=JOB_UUID]` imports a bounded file. Normalized records require a stable event ID, provider, observation time and explicit buckets. Do not point any allowance command at transcripts, credential stores or arbitrary logs.
-
-`report` includes allowance history and conservative changes only when provider/bucket/reset identity is stable and the percentage does not decrease. A reset/decrease is a boundary, not negative consumption. It never converts subscription percentage into tokens, API price, a fixed subscription charge or an automatic backlog estimate.
-
-## Save a private report
-
-`report` still prints JSON. Add `--out=/absolute/private/report.json` to also save exactly that JSON as a new mode-0600 file. The parent directory must be private and outside every checkout; symlinks and overwrite are refused. A report snapshot is output, not an import format, so saving it cannot double-count ledger events.
-
-The `calibration.completedWork` groups successfully completed (`done`) jobs by repository/task and reports sample size, elapsed range and complete token samples when available; failed and interrupted attempts remain in effectiveness reporting, not this comparison pool. `calibration.allowanceSamples` requires stable provider, source, bucket, window length and reset identity, and names jobs whose lifetimes overlap the observation interval. Compare scope, model/client configuration, overlap and source coverage manually; the tool does not recommend or rewrite estimates.
+When `.harness.json` enables `workUsage.enabled`, follow this guide at each job start, phase change and completion. Record actual client/model and backlog/task identity, import authorized metadata counters when exposed, and retain unknown coverage otherwise. Keep token metadata private and separate from prompts, credentials and conversation text. A model/client assignment need not be declared by the owner before launch unless task suitability requires it; instruction loading and measured usage availability still require verification.
 
 ## Start, label and finish
 
@@ -50,18 +30,6 @@ The default store is outside the checkout at `~/.local/state/project-harness/wor
 
 If the host/tool is unavailable, keep the source coverage unknown and state that limitation in the owning work record. Do not block unrelated authorized work or manufacture a count. End the job with complete, partial or unavailable coverage and done, failed or interrupted outcome. A complete declaration is an attestation about source coverage, not an independently verified audit. Empty or unknown measurements do not become a zero total.
 
-## Import actual counters
-
-Import one bounded JSON metadata delta per provider request. Only the listed fields are accepted; transcript, prompt, credentials and arbitrary extra fields are rejected. The source must supply stable IDs. Cumulative snapshots require an authorized source adapter to compute deltas; importing them as individual calls would double count and is unsupported.
-
-```json
-{"version":1,"kind":"delta","source":"runner-fixture","eventId":"request-1","activity":"coding","provider":null,"model":null,"inputTokens":100,"outputTokens":20,"cacheReadTokens":70,"cacheWriteTokens":10,"reasoningTokens":5}
-```
-
-Canonical input includes cache-read and cache-write tokens; canonical output includes reasoning. These are subsets, not extra spend. A provider with different definitions needs explicit normalization with retained source provenance; otherwise use null for unavailable metrics. Reports show known subtotals, missing metrics, declared job coverage and activity/model splits. They do not infer currency cost, subscription credits, remaining complexity or queue priority. Source/event identity is unique across jobs in the selected store; duplicate identical imports are idempotent, changed or differently assigned duplicates are rejected. Keep sources in one store to obtain this deduplication boundary.
-
-The importer validates canonical metadata and the selected metadata-only Codex/Claude formats below. It does not read native transcript/log files. Gemini, Copilot and Qwen require separately reviewed adapters; no exporter is installed. No universal token stream exists merely because every client reads the same instructions. Preserve raw source metadata privately; commit only deliberately reviewed neutral aggregates, without session identity, prompts, secrets or personal data.
-
 ## Client instruction entry points
 
 AGENTS owns the rule. Claude's existing CLAUDE bridge imports it. Optional GEMINI.md, QWEN.md and `.github/copilot-instructions.md` bridges point to the same authority; merge them into existing client instructions when useful, preserving local rules. Verify the actual client's instruction loading and telemetry access in a neutral job; a filename is not proof that it loaded. ChatGPT/Codex tools with repository access can follow AGENTS; a chat-only session without repository/usage access needs an explicitly supplied task/metadata export and reports missing coverage.
@@ -74,36 +42,8 @@ Use the stable child task ID for attributable jobs. `report --task=F-048-T02` fi
 
 Keep work-session, verification and review evidence linked from its task validation/parent evidence. This ledger stores permitted usage metadata only; it does not collect operational service logs, test transcripts or review conversation text. Link relevant acceptance evidence under existing privacy rules. Missing native adapters, usage counters or source coverage remain explicit, not zero.
 
-## Selected native metadata adapters
-
-`import --format=codex-turn --job=JOB_UUID --file=/private/metadata.json` accepts a strict envelope: `version:1`, stable `source`, stable `eventId`, `activity`, `provider`, nullable `model`, and `event:{type:"turn.completed",usage:{input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens}}`. Usage fields may be absent/null; missing values remain unknown. Input already includes cached input; cache-write is unavailable. The host exporter owns stable turn IDs and must not reuse cumulative thread totals as deltas.
-
-`import --format=claude-message` accepts `version:1`, stable `source`, `activity`, `provider`, `complete:true`, and `event:{type:"assistant",message:{id,model,usage:{input_tokens,output_tokens,cache_read_input_tokens,cache_creation_input_tokens}}}`. Native message ID is the event ID, so repeated assistant/tool blocks count once. Canonical input is the sum of the three disjoint input categories only when all are known; reasoning remains unknown. A complete final per-request usage export is required. Cumulative result/session totals and partial messages are refused. Models supplied by exports are observed labels, not authentication.
-
-Both formats refuse content/prompt/extra fields. Supply only an authorized metadata export; do not pass a transcript or raw mixed event stream. Replay is idempotent only for an identical event assigned to the same job; a changed/reassigned event is refused. Preserve failed request/retry identities even when only partial counters are available. Sources without safe deltas remain unsupported/unknown rather than silently estimated.
-
 ## Explicit prelaunch registration
 
 Optionally adopt `tools/usage-launch.mjs` and `work:launch`. Invoke `node tools/usage-launch.mjs --repository=project-harness --item=F-048 --task=F-048-T02 --agent=CLIENT -- executable arguments`. It registers before starting the exact supplied command, inherits normal permissions and stdio, and passes `HARNESS_USAGE_JOB` and `HARNESS_USAGE_STORE`. It never stores command text or captures a transcript. The caller must already be authorized to run that command; this helper is not a model-run grant, sandbox or background hook.
 
 `start` and the launcher accept optional `--parent=JOB_UUID` for an open same-repository parent. Read the child's stored parent identity for handoff; do not reuse a parent's event IDs/counters. Finish retains command failure/interruption and declares coverage unavailable because process success alone cannot prove telemetry coverage. Registration failure prevents launch. External host/client integration owns metadata extraction, actual instruction loading and signal/process supervision. An already running agent cannot retrospectively obtain prelaunch coverage from this helper; ordinary available job registration remains required.
-
-## Effectiveness observations (optional)
-
-`node tools/work-usage.mjs observe --job=JOB_UUID --file=/private/observation.json` appends explicit metadata, including to a finished job. Every observation has `version:1`, stable `source`, stable `eventId` and `kind`. It shares the usage event identity boundary: identical same-job replay is idempotent; changed/reassigned identities are refused. Extra fields, transcripts and arbitrary event kinds are refused. No record is overwritten. Source labels and timestamps are supplied metadata, not authenticated proof.
-
-| Kind | Additional fields | Meaning |
-|---|---|---|
-| `estimate` | `at` ISO timestamp, `measure` (`elapsedMs`, `activeMs`, `inputTokens`, `outputTokens`), nonnegative integer `lower`/`upper`, positive `revision`, short `basis` | Immutable source estimate and assumptions; retain every revision. |
-| `interval` | `category` (`execution`, `wait`, `active`), ISO `start`/`end` | Explicitly measured interval within job boundaries. |
-| `attempt` | `result` (`succeeded`, `failed`, `interrupted`), `failureKind` (`code`, `infrastructure`, `unknown`, or null) | Observed attempts/retries with distinct IDs; successful attempts require null failure kind. |
-| `finding` | `classification` (`review`, `confirmed-regression`, `unverified-suspicion`) | Keep different evidence classes separate. |
-| `intervention` | `category` (`scope`, `clarification`, `approval`, `recovery`), nullable nonnegative integer `durationMs` | Explicit human intervention; never infer it from conversation text. |
-| `state` | `value` (`reopened`, `reworked`) | Retain observed rework history without changing backlog status. |
-| `price` | `usageSource`, `usageEventId`, `currency`, ISO `at`, public HTTPS `rateSource`, `rates:{input,cacheRead,cacheWrite,output}` | Supplied per-million-token rates for one existing same-job event; nullable rates retain unknown coverage. |
-
-Supported currency labels: USD, EUR, GBP, JPY, CAD, AUD, CHF. They remain separate; there is no exchange-rate conversion. A price source cannot contain credentials/query/fragment. Rates are bounded finite nonnegative numbers, not a billing claim. One immutable rate observation per usage-event/currency is allowed; a conflicting concurrent price is detected at report time and requires reconciliation rather than double counting. Missing input/cache/output counts or rates leave that event's estimate unknown. Cache and reasoning are never charged twice; actual subscription cost/quota is not inferred. This is not a billing system and imports no live price table.
-
-Feature and step reports add `effectiveness`, retaining observation provenance and source coverage. Closed-job elapsed wall time is the union of its intervals, so parallel jobs do not double wall-clock time. Open jobs are censored and listed separately. Measured execution, wait and active intervals have their own unions; measured worker active effort sums each job’s active union and is labelled separately. Partial active intervals cannot establish full active effort or a complete estimate comparison. Missing intervals/classifications/durations/rates mean unknown, never zero. Counts describe the explicit sample only, not the absence of other failures or interventions.
-
-Estimate comparisons require matching units and a source timestamp no later than that job's start. Later revisions stay visible but are excluded from the pre-work baseline. Closed elapsed or complete-source token totals can be compared; incomplete sources and active-effort subtotals stay unavailable for full comparison. A timestamp supplied after the fact is an attestation, not proof of pre-work capture. Compare task scope/configuration and retain sample sizes before drawing conclusions. Reports provide cautious batch guidance alongside existing priority/prerequisites/human decisions; observed spend never determines remaining complexity, automatic ranking, blame or execution authority.

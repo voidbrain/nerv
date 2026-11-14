@@ -7,6 +7,8 @@ import { fileURLToPath } from 'node:url';
 import { couplingsTouched, describe, plan } from './impact-map.mjs';
 
 const github = process.argv.includes('--github');
+// Quiet by default: findings, then one line for the maintenance evidence; --verbose prints its full JSON.
+const verbose = process.argv.includes('--verbose');
 const git = (...args) => {
   try {
     return execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
@@ -268,6 +270,8 @@ for (const i of infos) console.log(i);
 if (!notes.length && !infos.length)
   console.log(`Fresh: backlog reconciled against current ${branch}; last audit ${last} (${days} day(s) ago).`);
 for (const n of notes) console.log(github ? `::warning title=Backlog freshness::${n}` : `! ${n}`);
+if (notes.length && !verbose)
+  console.log(`Freshness: ${notes.length} finding(s) above; act on each (--verbose also prints the maintenance JSON).`);
 
 // 5. the harness template this project was applied from (tools/check-harness.mjs; skipped without a local template)
 const harness = fileURLToPath(new URL('./check-harness.mjs', import.meta.url));
@@ -282,8 +286,25 @@ if (stamp.maintenance?.enabled || Number(String(stamp.version ?? '0').split('.')
     process.exitCode = 1;
   } else
     try {
-      execFileSync(process.execPath, [maintenance, 'check'], { stdio: 'inherit' });
+      if (verbose) execFileSync(process.execPath, [maintenance, 'check'], { stdio: 'inherit' });
+      else {
+        const r = JSON.parse(
+          execFileSync(process.execPath, [maintenance, 'check'], {
+            encoding: 'utf8',
+            stdio: ['ignore', 'pipe', 'inherit'],
+          }),
+        );
+        console.log(
+          r.enabled === false
+            ? 'Maintenance evidence: not enabled.'
+            : `Maintenance evidence: current, reviewed ${String(r.reviewed).slice(0, 10)}; ${r.outcomes?.length ?? 0} outcome(s), ${r.candidates?.length ?? 0} candidate(s).`,
+        );
+        // a candidate asks for action, so each is named in full (F-077: quiet never hides what needs doing)
+        for (const c of r.candidates ?? [])
+          console.log(`! Maintenance candidate (${c.operation}, ${c.kind}): ${c.reason}`);
+      }
     } catch (e) {
+      if (e.stdout) process.stdout.write(e.stdout);
       console.error('Required maintenance review failed; resolve its evidence before proceeding.');
       process.exitCode = e.status || 1;
     }

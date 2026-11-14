@@ -1,4 +1,4 @@
-// The AGENTS.md conventions a script can check, and exports nothing uses. A rule nobody checks drifts.
+// The stack conventions (docs/agents/angular.md) a script can check, and exports nothing uses. A rule nobody checks drifts.
 // Heuristic: the rules are text patterns and the unused-export count is a word count, not type analysis, so a match in a
 // string, an alias or a same-named identifier can mislead it. ESLint owns what it can check; a false result here is
 // fixed in this script (a release), never silenced in the code.
@@ -125,8 +125,8 @@ for (const file of app.filter((f) => f.endsWith('.ts'))) {
 if (problems.length) {
   console.error(problems.join('\n'));
   console.error(
-    `${problems.length} convention problem(s) found by text patterns; see AGENTS.md. A false one is a defect of this check: report it to the harness.`,
+    `${problems.length} convention problem(s) found by text patterns; see the stack conventions (docs/agents/angular.md). A false one is a defect of this check: report it to the harness.`,
   );
   process.exit(1);
 }
-console.log(`${app.length} files follow the checked AGENTS.md conventions; no unused exports.`);
+console.log(`${app.length} files follow the checked stack conventions; no unused exports.`);

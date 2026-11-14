@@ -281,6 +281,22 @@ assert(
   otherParagraphs.length <= 2 && otherSection.length <= 1000,
   `docs/BACKLOG.md: ## Other changes has ${otherParagraphs.length} paragraph(s) (${otherSection.length} chars); keep at most 2 paragraphs and 1000 chars and move older entries to docs/archive/reconciliation-<year>.md (BACKLOG-RULES, "When to update and review")`,
 );
+// F-077-T05: a record over its size budget (rules.budgets.record, tokens as characters ÷ 4) is a warning: its older
+// evidence belongs in docs/archive/evidence-<year>.md (BACKLOG-RULES, "Record and evidence requirements"). The authored
+// source is measured when the project keeps one (docs/work/records/<ID>.md), else the record's block in the ledger.
+const recordBudget = stamp.rules?.budgets?.record ?? 1500;
+for (let i = 0; i < headings.length; i++) {
+  const id = headings[i][1];
+  const source = new URL(`../docs/work/records/${id}.md`, import.meta.url);
+  const body = existsSync(source)
+    ? readFileSync(source, 'utf8')
+    : text.slice(headings[i].index, headings[i + 1]?.index ?? text.length);
+  const tokens = Math.ceil(body.length / 4);
+  if (tokens > recordBudget)
+    warnings.push(
+      `${id}: about ${tokens.toLocaleString('en')} tokens, over the ${recordBudget.toLocaleString('en')}-token record budget (rules.budgets.record): move evidence older than the last reconciliation to docs/archive/evidence-<year>.md and link it (BACKLOG-RULES, "Record and evidence requirements")`,
+    );
+}
 // a workflow command's message escapes %, CR and LF
 const annotate = (text) => text.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A');
 for (const w of warnings)

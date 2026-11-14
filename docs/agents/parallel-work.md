@@ -2,6 +2,8 @@
 
 This optional workflow is adopted with `workItems.enabled` in `.harness.json`. Existing projects need no record migration until they opt in. It coordinates cooperating authorized agents; it is not a sandbox, identity provider, permission grant or guarantee of conflict-free merges. Read all applicable project rules before starting.
 
+Moved to [shared claims](claims.md): "Shared claims".
+
 ## Records, tasks and source ownership
 
 Keep one stable B-/F- outcome per defect or feature. Split large work into explicit tasks named `F-001-T01` (or `B-001-T01`), each with one goal, acceptance, dependencies, affected resources, validation, privacy and escalation conditions. A bug's reproduction, fix and acceptance tasks retain the original bug identity; its committed failing regression and independent-review requirements still apply. Completing tasks does not close their parent without the parent's full acceptance.
@@ -12,27 +14,6 @@ After adoption, `docs/work/records/ID.md` owns each active record; `docs/work/la
 
 Store one JSON file per task in the configured tasks directory. Fields: `version: 1`, `id`, `parent`, `title`, `goal`, `status` (`planned`, `ready`, `implemented`, `verified`, `closed`), string arrays `acceptance`, `dependsOn`, `resources`, `capabilities`, `validation`, `escalation`, and a `privacy` string. Optional `suggestedProfile` names an existing model profile. Validation strings describe reviewed checks; the tool does not execute them. A task becomes ready only after its scope, prerequisites and parent/human cues have been reviewed. Known source paths and `directory/**` scopes are resources; `contract:name` and `generated:name` identify shared boundaries/outputs. Unknown scope is a reason to serialize work, not assume independence.
 
-## Shared claims
-
-Give every branch its own clean `git worktree` from current main; the primary checkout stays on `main` with no edits of its own (AGENTS, "On its own"). A branch switched, or a change made, in the primary checkout does not satisfy this. One task gets one owner and one reviewable PR; independent tasks may proceed concurrently. Agree shared interfaces first. Include transitive/shared resources in each task; two files can conflict semantically without sharing a path. Resource declarations are reviewed input, not automatic impact analysis.
-
-The optional `task-claims.mjs` uses the repository's normal authenticated Git remote and a dedicated **metadata** `refs/heads/harness/claims-v1` branch. The branch retains its original main snapshot and updates only reserved `.harness-claims.json`, preserving archive guards without an exception; its old code snapshot is not an execution/deployment source. It changes no worktree/index/FETCH_HEAD and never merges that branch to main. Normal fast-forward pushes atomically select a single update; no force push, shared database disk, extra server or model call is used. Registry writers are trusted repository writers; owner/lease labels are coordination data, not authentication. Preserve registry history; never silently reinitialize missing or rolled-back fencing state. A network failure is unknown ownership until reconciled.
-
-```bash
-# One-time setup after reviewing that no earlier ownership/registry must be recovered:
-node tools/task-claims.mjs initialize --confirm-new-registry
-node tools/task-claims.mjs acquire --task F-001-T01 --owner agent-a --minutes 30
-node tools/task-claims.mjs status
-# Copy the actual fence/lease UUID from the successful acquisition:
-node tools/task-claims.mjs verify --task F-001-T01 --owner agent-a --fence 1 --lease LEASE_UUID
-node tools/task-claims.mjs renew --task F-001-T01 --owner agent-a --fence 1 --lease LEASE_UUID --minutes 30
-node tools/task-claims.mjs release --task F-001-T01 --owner agent-a --fence 1 --lease LEASE_UUID --confirmed-stopped
-```
-
-Verify ownership before mutating owned/shared resources, before pushing a result and at integration. Stop if verification fails or the lease expires; a stale owner cannot renew/release a newer claim. Do not infer that expiry/disconnection stopped another agent. Recovery requires inspecting its work/host and recording actual stopped-work evidence, then `recover --task ID --fence N --confirmed-stopped --reason 'observed evidence'`. Never supply that assertion merely because time passed. Recovery does not undo code, authorize deletion, or establish that physical/external effects stopped. Clocks must be synchronized; uncertain timing requires reconciliation. The tool caps leases at 120 minutes and current registry entries at 256; review retention instead of resetting counters or deleting history when limits are reached.
-
-Integrate one result at a time against current main, checking claim, base compatibility and declared acceptance. Regenerate shared views from all accepted sources rather than choosing one side of a conflict. For generated backlog conflicts, resolve the per-record sources/layout, then regenerate; ordinary non-adopted ledger conflicts still use the record-aware merge helper. Passing separate branch tests does not establish the joined result. Preserve required green checks, independent review, human decisions, source/privacy restrictions and the rule against adding work to a green PR. Claims reduce contention; they cannot guarantee zero textual or semantic conflicts.
-
 ## Model suitability and delegation
 
 A model, pilot, host and execution permission are separate choices. Required capabilities and evaluation evidence are more useful than parameter-count minimums or permanent provider rankings. Every model follows the same task, privacy, test and review requirements. Never grant a local/cheap model broader permissions to compensate for weak tool use.
@@ -41,8 +22,4 @@ The configured profiles JSON has `version: 1` and a `profiles` array. Each profi
 
 `acquire --profile PROFILE` rejects unqualified profiles or missing task capabilities. Omitting the option claims work without assigning a model; it does not choose one automatically. A suggested profile is advisory, never a measured pass or execution request. Model/host adapters and command runners remain project-owned; this tool runs none. Keep task context bounded, inspect the diff and run meaningful acceptance. Escalate ambiguity, repeated failures, tool misuse, context loss or higher-risk changes to an appropriate reviewer/model within existing privacy authorization. A larger model is not automatically a better reviewer, and a fallback never silently sends local-only content to a cloud service.
 
-## Upfront feature plans (optional)
-
-Set `workItems.featurePlans: true` to require at least one task for each active feature and derive a visible step/remaining-effort/status table in the ledger. Keep the table out of record sources: `build` owns it. Existing non-adopters render unchanged; archives are never rewritten. All tasks belonging to an active feature, including completed steps, need an `effort` object with exactly `size` (`small`, `medium`, `large`), `estimate` (remaining range/text), `basis` (assumptions/uncertainty) and `reviewed` (valid ISO calendar date). Use zero remaining for completed work and state when its original estimate is unknown. Tasks of archived parents need no retrospective estimates. A planned task can name pending discovery/acceptance without pretending it is ready.
-
-Before implementation, author a plan for the full anticipated outcome; prefer doing this at registration. [Backlog rules](../BACKLOG-RULES.md#optional-upfront-feature-plans) own owner agreement for material expansion/splitting. Routine refinement preserves the accepted outcome and existing authority. Steps do not replace parent acceptance or grant execution permission.
+Upfront feature plans (optional): [parallel-work-plans.md](parallel-work-plans.md).

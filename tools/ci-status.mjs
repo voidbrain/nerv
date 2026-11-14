@@ -19,17 +19,27 @@ const DEFAULT_BRANCH =
   JSON.parse(existsSync(stamp) ? readFileSync(stamp, 'utf8') : '{}').defaultBranch ??
   json('repo', 'view', '--json', 'defaultBranchRef').defaultBranchRef.name;
 
+// Quiet by default: a PR whose every run and job succeeded, with nothing to flag, prints one line; --verbose prints all.
+const verbose = process.argv.includes('--verbose');
 let numbers = process.argv.slice(2).map(Number).filter(Boolean);
 if (!numbers.length)
   numbers = json('pr', 'list', '--state', 'all', '--limit', '8', '--json', 'number').map((p) => p.number);
 
+let green = 0;
 for (const n of numbers) {
   const pr = json('pr', 'view', String(n), '--json', 'number,title,state,baseRefName,headRefOid,mergedAt,url');
-  console.log(
+  const out = [];
+  let clean = true;
+  const say = (line, ok = false) => {
+    out.push(line);
+    if (!ok) clean = false;
+  };
+  say(
     `\n#${pr.number} ${pr.title}\n  ${pr.state.toLowerCase()} into ${pr.baseRefName}${pr.mergedAt ? ` at ${pr.mergedAt}` : ''} · ${pr.url}`,
+    true,
   );
   if (pr.baseRefName !== DEFAULT_BRANCH)
-    console.log(`  ! based on ${pr.baseRefName}, not ${DEFAULT_BRANCH}: merging it does not reach the default branch`);
+    say(`  ! based on ${pr.baseRefName}, not ${DEFAULT_BRANCH}: merging it does not reach the default branch`);
   const runs = json(
     'run',
     'list',
@@ -41,14 +51,15 @@ for (const n of numbers) {
     'databaseId,status,conclusion,url',
   );
   if (!runs.length) {
-    console.log('  no CI run for its head commit');
+    say('  no CI run for its head commit');
+    console.log(out.join('\n'));
     continue;
   }
   for (const run of runs) {
-    console.log(`  CI ${run.status === 'completed' ? run.conclusion : run.status} · ${run.url}`);
+    say(`  CI ${run.status === 'completed' ? run.conclusion : run.status} · ${run.url}`, run.conclusion === 'success');
     for (const job of json('run', 'view', String(run.databaseId), '--json', 'jobs').jobs) {
       const state = job.status === 'completed' ? job.conclusion : job.status;
-      console.log(`    ${state.padEnd(10)} ${job.name}`);
+      say(`    ${state.padEnd(10)} ${job.name}`, state === 'success');
       if (job.status !== 'completed' || !BROWSER_JOB.test(job.name)) continue;
       // Playwright's list reporter: ✘ failed, retries, flaky summary
       let log;
@@ -57,14 +68,22 @@ for (const n of numbers) {
           .split('\n')
           .map((l) => l.replace(/^.*?Z /, ''));
       } catch {
-        console.log('               (test details once the whole run has finished)');
+        say('               (test details once the whole run has finished)');
         continue;
       } // GitHub serves logs per run
 
       const tests = log.filter((l) => /^\s+✘ |\(retry #\d\)|^\s+\d+ (flaky|failed)/.test(l)).map((l) => l.trim());
-      for (const t of [...new Set(tests)]) console.log(`               ${t}`);
-      for (const note of log.filter((l) => LOG_NOTES.some((p) => p.test(l))))
-        console.log(`               ${note.trim()}`);
+      for (const t of [...new Set(tests)]) say(`               ${t}`);
+      for (const note of log.filter((l) => LOG_NOTES.some((p) => p.test(l)))) say(`               ${note.trim()}`);
     }
   }
+  if (clean) green++;
+  console.log(
+    clean && !verbose
+      ? `#${pr.number} ${pr.state.toLowerCase()}, CI success: ${pr.title}`
+      : out.join('\n').replace(/^\n/, verbose ? '\n' : ''),
+  );
 }
+console.log(
+  `${numbers.length} PR(s): ${green} green, ${numbers.length - green} to look at${verbose ? '' : ' (--verbose for every job)'}.`,
+);

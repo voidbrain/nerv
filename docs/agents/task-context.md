@@ -2,6 +2,10 @@
 
 Optional workflow for keeping agent context relevant across independent tasks. It is an agent instruction, not a thread-control daemon, a cache service or permission to install an adapter. Adopt the AGENTS trigger and this guide together. Existing projects can retain their current workflow without a new CI or data requirement.
 
+## In short
+
+At a new independent task, follow this guide: persist the current scope and use a fresh thread through an available authorized host capability; keep the same task's debugging/review/CI together. Compaction is for a continuing task, and provider caching is a separate capability. Preserve work, claims, approvals, uncertain effects and all governing/privacy/permission limits across transitions. If thread/compaction tools are unavailable, report that limit briefly and continue with bounded relevant context rather than claiming a reset or blocking otherwise authorized work.
+
 ## Choose at a real task boundary
 
 | Situation | Context choice |
@@ -33,13 +37,7 @@ If no such capability is exposed, the harness cannot clear or replace the active
 
 The new task reloads current repository state and revalidates the handoff's claims, approvals, privacy boundaries and next action. If the old task still has unfinished accepted work, it remains tracked with an owner/blocker rather than disappearing because the chat changed. An independent reviewer can use a separate fresh context without copying the implementer's reasoning, retaining the review target and acceptance sources.
 
-## Prompt caching and actual cost
-
-Keep stable governing instructions in authoritative files and load only applicable task context. Where an authorized host adapter controls prompt construction, reuse stable instruction prefixes and keep dynamic task data separate. This guide does not configure a provider cache, promise cache hits, store private prompts externally or remove applicable rules to shorten input.
-
-Prompt caching and compaction are different operations. Cached input can still be processed/billed, compaction has work of its own, and a fresh thread must reload essential instructions. Fewer visible messages or a shorter summary is not proof of lower total spend. Measure provider-reported input/output/cached usage, context preparation and repeated reads when available; missing usage remains unknown. Keep actual totals separate from savings estimates and compare similar tasks/configurations. Useful context continuity can cost less than repeatedly reconstructing an unfinished task.
-
-For a host exposing them, official OpenAI documentation describes [fresh threads and compaction](https://learn.chatgpt.com/docs/app-server) and [provider prompt caching](https://developers.openai.com/api/docs/guides/prompt-caching). These are capability examples, not a required provider, installation or a guarantee that those APIs are available in the current session.
+Prompt caching and actual cost: [prompt caching](prompt-caching.md).
 
 ## Evidence and adoption
 

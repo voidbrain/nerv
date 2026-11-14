@@ -381,3 +381,10 @@ PR #400 passed CI (F-062-T03 closed); F-062-T06 (encrypted copies to Tabgha over
 - CI read with `npm run ci:status`: every run green, including #374 (full audit), #380 (owner decisions), #384 (B-060-T01) and #390 (B-059).
 - F-023: T01–T03 closed with the record still awaiting the owner's paired-Mac procedure; that session is now its own step.
 - [Owner jobs case study](../design/owner-jobs-case-study-2026-11-14.md): fourteen jobs mapped to owning records; thirteen new records F-082–F-094, placed on the roadmap.
+
+## 2026-11-14 — main `1ec80b2`
+
+#403 (F-078-T03 closed) merged; CI green, jobs skipped by scoped verification. Harness 8.14.2 reconciled from 8.11.0: rules load by trigger, quiet outputs, reconcile:draft, work:next, code:map.
+
+- AGENTS.md keeps the always-on rules and project lines; Angular rules moved verbatim to `docs/agents/angular.md`; BACKLOG-RULES is an index over `docs/backlog/` (project text carried into documentation.md and review.md). All 9 AGENTS project lines and the BACKLOG-RULES project line kept.
+- Copied tools and guides refreshed from v8.14.1 (18), new ones adopted (14); `.npmrc`, `.test-report.txt`, a CI rule-load step, and the quiet reporter on `npm test`. This reconcile is [#404](https://github.com/voidbrain/nerv/pull/404).

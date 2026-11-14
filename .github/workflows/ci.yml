@@ -116,6 +116,8 @@ jobs:
       - run: npm run check:conventions
       - run: npm run check:integrations
       - run: npm run check:rules
+      - name: Rule load budgets (warnings only)
+        run: npm run check:rule-load
       - run: npm run check:maintenance
       - run: npm run check:audits
       - run: git clone --branch v7.1.1 --depth 1 https://github.com/voidbrain/project-harness "$RUNNER_TEMP/project-harness"
