@@ -14,6 +14,7 @@ import {
 import { assertRootMigrationReady, rootMigrationCommand } from './root-migration.ts';
 import { nodesCommand } from './nodes-cli.ts';
 import { backupCommand } from './backup-cli.ts';
+import { storeReceived } from './offhost.ts';
 import {
   engineReceiptPath,
   executeEngineLifecycle,
@@ -1320,7 +1321,7 @@ try {
         }, sentBefore);
         runtime.startWatch();
         runtime.startRouteLog();
-        // F-062-T02/T03: one consistent, verified snapshot each night (owner's time zone), then encrypted off-host copies.
+        // F-062-T02/T03/T06: one verified snapshot each night (owner's time zone), then encrypted copies to folders and peers.
         startSnapshots(
           home,
           () => databasePath(home),
@@ -1328,6 +1329,11 @@ try {
           undefined,
           undefined,
           () => live().backup,
+          // F-062-T06: copies to peers go over the Kaji line once it is up; before that they wait.
+          (peer, date, copy) =>
+            kaji
+              ? kaji.sendBackup(peer, date, copy)
+              : Promise.reject(Object.assign(new Error('Kaji line not started'), { code: 'EUNREACHABLE' })),
         );
         runtime.startInstrumentality(() => {
           const c = live();
@@ -1465,6 +1471,15 @@ try {
             onHealth: (id, h) => runtime.notePeerHealth(id, h),
             channel: () => runtime.channelState(),
             onChannel: (id, c) => runtime.notePeerChannel(id, c),
+            onBackup: async (from, date, copy) => {
+              try {
+                return storeReceived(home, live().backup, from, date, copy);
+              } catch (e) {
+                const code = e && typeof e === 'object' && 'code' in e ? String(e.code) : 'unexpected error';
+                console.error(`Backup copy from ${from} for ${date} was not stored (${code}).`);
+                return 'refused';
+              }
+            },
             onRelay: async (from, relay) => {
               if (!aoba) return false;
               const name = (await runtime.bases()).find((b) => b.baseId === from)?.name ?? from;

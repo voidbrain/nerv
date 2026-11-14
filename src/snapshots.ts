@@ -7,13 +7,14 @@ import {
   mkdirSync,
   openSync,
   readdirSync,
+  readFileSync,
   renameSync,
   rmSync,
   statSync,
 } from 'node:fs';
 import { join } from 'node:path';
 import { briefDue } from './brief.ts';
-import { copyDates, writeCopy, COPY_KEEP, type BackupConfig } from './offhost.ts';
+import { copyDates, encryptBackup, writeCopy, COPY_KEEP, type BackupConfig } from './offhost.ts';
 
 /**
  * F-062-T02: nightly consistent snapshots of the base database. The owner chose one snapshot a night (up to 24 h of
@@ -109,13 +110,15 @@ export function startSnapshots(
   log: (line: string) => void = (l) => console.error(l),
   everyMs = 60_000,
   backup: () => BackupConfig | undefined = () => undefined,
+  send?: SendCopy,
 ): () => Promise<void> {
   const dir = snapshotDir(home);
   let attempted: string | undefined,
     busy = false,
     running: Promise<void> = Promise.resolve();
   const copied = new Map<string, string>(),
-    reported = new Map<string, string>();
+    reported = new Map<string, string>(),
+    retryAt = new Map<string, number>();
   const tick = async () => {
     if (busy) return;
     busy = true;
@@ -130,7 +133,9 @@ export function startSnapshots(
           log(`Nightly snapshot for ${date} failed (${reason(e)}); next attempt tomorrow.`);
         }
       }
-      copyOffHost(dir, backup(), copied, reported, log);
+      const config = backup();
+      copyOffHost(dir, config, copied, reported, log);
+      if (send) await sendToPeers(dir, config, send, copied, reported, retryAt, log, everyMs);
     } finally {
       busy = false;
     }
@@ -156,11 +161,12 @@ function copyOffHost(
   log: (line: string) => void,
 ) {
   const newest = snapshotDates(dir)[0];
-  if (!config || !newest) return;
+  if (!config?.publicKey || !newest) return;
+  const publicKey = config.publicKey;
   config.copies.forEach((target, i) => {
     if (copied.get(target) === newest || copyDates(target)[0] === newest) return;
     try {
-      writeCopy(join(dir, `nerv-${newest}.sqlite`), newest, target, config.publicKey, config.keep ?? COPY_KEEP);
+      writeCopy(join(dir, `nerv-${newest}.sqlite`), newest, target, publicKey, config.keep ?? COPY_KEEP);
       copied.set(target, newest);
     } catch (e) {
       const unavailable = !!e && typeof e === 'object' && 'code' in e && e.code === 'ENOENT';
@@ -174,6 +180,57 @@ function copyOffHost(
       );
     }
   });
+}
+
+/** Sends one encrypted copy to an enrolled peer over the Kaji line; rejects with code EREFUSED or EUNREACHABLE. */
+export type SendCopy = (peer: string, date: string, copy: Buffer) => Promise<void>;
+
+/** A peer that cannot be reached is tried again after this long; a refusal waits for the next night's snapshot. */
+export const PEER_RETRY_MS = 10 * 60_000;
+
+/**
+ * F-062-T06: sends the newest snapshot, encrypted, to each peer in `backup.peers`. The copy is encrypted once per tick
+ * for all peers. An unreachable peer is retried every PEER_RETRY_MS (and logged once a night); a refusal is logged
+ * and waits for the next snapshot, so a peer that does not accept copies is not asked in a loop.
+ */
+async function sendToPeers(
+  dir: string,
+  config: BackupConfig | undefined,
+  send: SendCopy,
+  copied: Map<string, string>,
+  reported: Map<string, string>,
+  retryAt: Map<string, number>,
+  log: (line: string) => void,
+  everyMs: number,
+) {
+  const newest = snapshotDates(dir)[0];
+  if (!config?.publicKey || !config.peers || !newest) return;
+  const due = config.peers.filter((p) => copied.get('kaji:' + p) !== newest && (retryAt.get(p) ?? 0) <= Date.now());
+  if (!due.length) return;
+  const copy = encryptBackup(readFileSync(join(dir, `nerv-${newest}.sqlite`)), config.publicKey);
+  for (const peer of due) {
+    const key = 'kaji:' + peer;
+    try {
+      await send(peer, newest, copy);
+      copied.set(key, newest);
+      retryAt.delete(peer);
+    } catch (e) {
+      const unreachable = !!e && typeof e === 'object' && 'code' in e && e.code === 'EUNREACHABLE';
+      if (unreachable) retryAt.set(peer, Date.now() + Math.max(PEER_RETRY_MS, everyMs));
+      else copied.set(key, newest);
+      if (reported.get(key) === newest) continue;
+      reported.set(key, newest);
+      log(
+        unreachable
+          ? `Copy for ${newest} to ${peer} waits: the base cannot be reached over the Kaji line; trying again later.`
+          : `Copy for ${newest} to ${peer} was refused (${refusal(e)}); next attempt tomorrow.`,
+      );
+    }
+  }
+}
+
+function refusal(e: unknown): string {
+  return e && typeof e === 'object' && 'status' in e && typeof e.status === 'number' ? String(e.status) : reason(e);
 }
 
 function reason(e: unknown): string {

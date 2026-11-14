@@ -18,6 +18,9 @@ export const KAJI_PORT = 4320;
 export const ONLINE_MS = 90_000;
 const MAX_BODY = 256 * 1024,
   HEARTBEAT_MS = 30_000;
+/** F-062-T06: an encrypted backup copy (base64 in JSON) may be larger than any other Kaji message. */
+export const MAX_BACKUP_BODY = 64 * 1024 * 1024;
+const BACKUP_TIMEOUT_MS = 120_000;
 /** What the link needs from the registry, implemented by the scheduler process (or directly in tests). */
 export interface RegistryPort {
   bases(): Promise<BaseEntry[]>;
@@ -228,6 +231,8 @@ export class KajiLink {
     onPendingApprovals?: (ids: string[]) => Promise<string[]>;
     onDecide?: (approvalId: string, decision: 'approve' | 'reject') => Promise<string>;
     onSortie?: (from: string, sortieId: string) => Promise<{ sortie: unknown; events: unknown[] } | null>;
+    /** F-062-T06: stores an encrypted backup copy from an enrolled base, if this base accepts copies from it. */
+    onBackup?: (from: string, date: string, copy: Buffer) => Promise<'stored' | 'refused'>;
   }) {
     this.trust = options.trust;
     this.baseId = options.baseId;
@@ -240,6 +245,7 @@ export class KajiLink {
     this.health = options.health;
     this.onHealth = options.onHealth;
     this.onRelay = options.onRelay;
+    this.onBackup = options.onBackup;
     this.onDecide = options.onDecide;
     this.onPendingApprovals = options.onPendingApprovals;
     this.onSortie = options.onSortie;
@@ -296,6 +302,7 @@ export class KajiLink {
     ((from: string, message: string, conversation?: string) => Promise<DispatchedReply>) | undefined;
   private readonly onPendingApprovals: ((ids: string[]) => Promise<string[]>) | undefined;
   private readonly onRelay: ((from: string, relay: Relay) => Promise<boolean>) | undefined;
+  private readonly onBackup: ((from: string, date: string, copy: Buffer) => Promise<'stored' | 'refused'>) | undefined;
   private readonly onDecide: ((approvalId: string, decision: 'approve' | 'reject') => Promise<string>) | undefined;
   private readonly onSortie:
     ((from: string, sortieId: string) => Promise<{ sortie: unknown; events: unknown[] } | null>) | undefined;
@@ -429,9 +436,10 @@ export class KajiLink {
     };
     try {
       let body = '';
+      const limit = req.method === 'POST' && req.url === '/kaji/backup' ? MAX_BACKUP_BODY : MAX_BODY;
       for await (const chunk of req) {
         body += chunk;
-        if (body.length > MAX_BODY) throw new Error('too large');
+        if (body.length > limit) throw new Error('too large');
       }
       const bases = await this.bases();
       const from = verifySigned(
@@ -482,6 +490,17 @@ export class KajiLink {
         return;
       }
       // F-036 phase 2. Only the main base shows what the others relay; only a decision from the main base is applied here.
+      // F-062-T06: an encrypted backup copy from an enrolled base. Stored only when this base accepts that sender.
+      if (req.method === 'POST' && req.url === '/kaji/backup') {
+        const b = JSON.parse(body) as { date?: unknown; copy?: unknown };
+        if (typeof b.date !== 'string' || typeof b.copy !== 'string' || !/^[A-Za-z0-9+/]*={0,2}$/.test(b.copy)) {
+          reply(400, { error: 'invalid backup copy' });
+          return;
+        }
+        const outcome = this.onBackup ? await this.onBackup(from, b.date, Buffer.from(b.copy, 'base64')) : 'refused';
+        reply(outcome === 'stored' ? 200 : 403, outcome === 'stored' ? { stored: true } : { error: 'not accepted' });
+        return;
+      }
       if (req.method === 'POST' && req.url === '/kaji/relay') {
         const relay = sanitizeRelay(JSON.parse(body));
         if (!relay) {
@@ -658,6 +677,31 @@ export class KajiLink {
     if (from !== peer.baseId) throw new Error(`${peer.baseId} answered as ${from}`);
     if (!res.ok) throw new Error(`${peer.baseId} refused (${res.status})`);
     return JSON.parse(text);
+  }
+  /**
+   * F-062-T06: sends an encrypted backup copy to an enrolled peer. Rejects with code EREFUSED (and the HTTP status) when
+   * the peer answered no, or EUNREACHABLE when it could not be reached or did not answer.
+   */
+  async sendBackup(peerId: string, date: string, copy: Buffer): Promise<void> {
+    const peer = (await this.bases()).find((b) => b.baseId === peerId && b.status === 'enrolled');
+    if (!peer) throw Object.assign(new Error(`${peerId} is not an enrolled base`), { code: 'EREFUSED', status: 404 });
+    try {
+      const r = (await this.call(
+        peer,
+        'POST',
+        '/kaji/backup',
+        { date, copy: copy.toString('base64') },
+        BACKUP_TIMEOUT_MS,
+      )) as { stored?: unknown };
+      if (r.stored !== true) throw Object.assign(new Error('not stored'), { code: 'EREFUSED', status: 200 });
+    } catch (e) {
+      if (e && typeof e === 'object' && 'code' in e && e.code === 'EREFUSED') throw e;
+      const status = e instanceof Error ? /refused \((\d+)\)$/.exec(e.message)?.[1] : undefined;
+      throw Object.assign(new Error('backup copy not delivered'), {
+        code: status ? 'EREFUSED' : 'EUNREACHABLE',
+        ...(status ? { status: Number(status) } : {}),
+      });
+    }
   }
   /** Sends a relay to the main base (F-036 phase 2); false when there is none, it is this base, or it cannot be reached. */
   async relay(relay: Relay): Promise<boolean> {

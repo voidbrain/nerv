@@ -4,6 +4,7 @@ NERV keeps reminders, memory, the ledger, enrolment and grants in one SQLite dat
 
 - **Nightly snapshot (local):** at 03:30 in your time zone the service takes a consistent copy with SQLite's backup API, checks it, and keeps the newest 7 in `<data home>/snapshots/`. Up to 24 h of changes can be lost.
 - **Encrypted off-host copies:** after each snapshot, the service encrypts the newest one and writes it to every folder you list, for example on an external disk. It keeps the newest 7 there too (`keep` changes that).
+- **Copies to another base:** the same encrypted copy can go over the Kaji line to an enrolled base, such as Tabgha. That base stores it but cannot open it.
 
 The service only holds the backup **public** key. It can write copies but cannot read them. Only the private key file and its passphrase can open a copy, so keep both away from the machine.
 
@@ -32,6 +33,24 @@ The service only holds the backup **public** key. It can write copies but cannot
    ```
 
    Each folder shows `available`, its newest copy and `current: true` once it holds the newest snapshot.
+
+## Send copies to another base (Kaji line)
+
+On the base that sends (for example the Mac), add the receiving base's ID to `peers`:
+
+```json
+"backup": { "publicKey": "MCowBQYDK2VuAyEA…", "copies": ["/Volumes/Backup/nerv-backups"], "peers": ["NERV-02"] }
+```
+
+On the base that receives (for example Tabgha), accept the sender. It needs no key:
+
+```json
+"backup": { "accept": ["NERV-01"] }
+```
+
+The receiver keeps the newest 7 copies per sender in `<data home>/kaji-backups/NERV-01/`. `nerv backup status` shows them there under `received`. If the receiver is offline, the sender logs one line and tries again every 10 minutes. If the receiver does not accept copies, the sender logs it once and waits for the next night.
+
+To restore from a received copy, copy the `.nbk` file to a machine with your backup key and use `nerv backup decrypt` as below.
 
 ## When the disk is not connected
 
