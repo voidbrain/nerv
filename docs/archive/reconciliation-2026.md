@@ -402,3 +402,9 @@ Re-estimated 33 open feature implementation steps from their current estimates t
 
 - Evidence: since 2026-11-13 eleven steps closed at a median of 1.0x their current estimate; feature implementation (F-066-T01, F-066-T02, F-062-T03, F-044-T01) took 0.75–1 h where the 0.25x pass had set 0.25–1 h, while bug, evidence and small UI steps took 0.25–0.5 h. The freshness reminder (F-062-T03 at 0.33x) compared with the original baseline; against its re-estimate that step took 1.0x.
 - Method (harness 8.14.3): start from each step's current estimate and revise only the steps that resemble the misses; never one ratio for all ([#406](https://github.com/voidbrain/nerv/pull/406)). Unchanged: owner, decision, plan, feasibility, campaign, report, evidence-closing, documentation and refactor steps, bug steps, and steps already at 0.75 h or more.
+
+## 2026-11-14 — main `4a70cc2`
+
+Record-level dependencies moved to steps (owner decision): F-021-T03 and F-027-T02 wait on F-049-T04 (EVA-03 isolation); F-056-T01 waits on F-021-T05 (all of F-021).
+
+- F-050's row on F-048 dropped: F-048-T01–T03 are verified and no F-050 step does load-based forwarding. Rows on closed records (F-045, F-042) stay. [#407](https://github.com/voidbrain/nerv/pull/407)
