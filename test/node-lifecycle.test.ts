@@ -304,3 +304,44 @@ test('F-005: Unix lifecycle ownership bytes remain portable under Windows contro
   );
   assert.equal(result.status, 0, result.stderr);
 });
+
+test('B-064: nodes lifecycle-inspect names a missing data home and unsupported platform instead of raw ENOENT', async () => {
+  const { nodesCommand } = await import('../src/nodes-cli.ts');
+  const dir = mkdtempSync(join(tmpdir(), 'nerv-b064-'));
+  const prevHome = process.env.HOME;
+  const prevProfile = process.env.USERPROFILE;
+  const prevNervHome = process.env.NERV_HOME;
+  const expectedHome = join(dir, '.nerv');
+  process.env.HOME = dir;
+  process.env.USERPROFILE = dir;
+  delete process.env.NERV_HOME;
+  try {
+    await assert.rejects(nodesCommand(['lifecycle-inspect', '--action', 'install']), (err: unknown) => {
+      assert.ok(err instanceof Error);
+      assert.ok(!err.message.includes('ENOENT'), `unexpected raw ENOENT: ${err.message}`);
+      assert.ok(err.message.includes(expectedHome), `missing data home path in: ${err.message}`);
+      assert.match(err.message, /nothing was changed/i);
+      return true;
+    });
+
+    const originalPlatform = Object.getOwnPropertyDescriptor(process, 'platform')!;
+    Object.defineProperty(process, 'platform', { value: 'freebsd', configurable: true });
+    try {
+      await assert.rejects(nodesCommand(['lifecycle-inspect', '--action', 'install']), (err: unknown) => {
+        assert.ok(err instanceof Error);
+        assert.match(err.message, /macOS, Linux, and Windows/i);
+        assert.match(err.message, /nothing was changed/i);
+        return true;
+      });
+    } finally {
+      Object.defineProperty(process, 'platform', originalPlatform);
+    }
+  } finally {
+    if (prevHome === undefined) delete process.env.HOME;
+    else process.env.HOME = prevHome;
+    if (prevProfile === undefined) delete process.env.USERPROFILE;
+    else process.env.USERPROFILE = prevProfile;
+    if (prevNervHome !== undefined) process.env.NERV_HOME = prevNervHome;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
