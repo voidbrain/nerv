@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 75.5 h agent + 21.25 h owner across 197 open steps of 47 features and 7 other records. 17.75 h of actual effort recorded on 34 steps. Generated from the task files.
+**Remaining effort:** 75.25 h agent + 21.25 h owner across 196 open steps of 47 features and 7 other records. 18.5 h of actual effort recorded on 35 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1846,7 +1846,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | ⏳ | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: record the acting client kind on ledger decisions (F-066-T02).
 
@@ -1858,11 +1858,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-066-t01"></a>F-066-T01 — Credential rotation commands and doctor ages | 0.25 h | 0 h | 0.25 h | Implemented; verification pending |
-| 🟢 Small | <a id="f-066-t02"></a>F-066-T02 — Client kind on ledger events | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-066-T01](#f-066-t01) |
-| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 2 steps recorded) | 0.5 h | 0 of 2 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-066-t02"></a>F-066-T02 — Client kind on ledger events | 0.25 h | 0 h | 0.25 h | Planned | — |
+| — | <a id="f-066-t01"></a>F-066-T01 — Credential rotation commands and doctor ages | 0.25 h | 0.75 h (stated) | 0 h | Completed | [PR #394](https://github.com/voidbrain/nerv/pull/394) live credential rotation and age-only diagnostics |
+| 🟢 Small | **Total** | 0.5 h | 0.75 h (1 of 2 steps recorded) | 0.25 h | 1 of 2 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1871,7 +1871,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
+| PR / evidence | Steps: F-066-T01: [PR #394](https://github.com/voidbrain/nerv/pull/394) live credential rotation and age-only diagnostics; step review: Complete deterministic CI passed on Linux validation, Windows and native macOS before merge.. [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
 | Opened | 2026-11-07 |
 | Verification | Unit/integration: Pending. |
 | Reviewed | 2026-11-07 |
@@ -2056,7 +2056,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | ⏳ | — | — |
 
 💻 **→** Optional conversational faces grounded in real job state: Misato as primary HITL/ops voice; Gendo optional for risk/policy explanation; pilots optional as worker identity only.
 
@@ -2070,7 +2070,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="f-020-t01"></a>F-020-T01 — Persona adapter contract | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | <a id="f-020-t01"></a>F-020-T01 — Persona adapter contract | 0.25 h | 0 h | 0.25 h | Implemented; verification pending |
 | 🟢 Small | <a id="f-020-t02"></a>F-020-T02 — Misato HITL surfacing with audit | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-020-T01](#f-020-t01) |
 | 🟢 Small | <a id="f-020-t03"></a>F-020-T03 — Explanation persona and non-Eva skins | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-020-T02](#f-020-t02) |
 | 🟢 Small | **Total** | 0.75 h | 0 h (0 of 3 steps recorded) | 0.75 h | 0 of 3 completed |

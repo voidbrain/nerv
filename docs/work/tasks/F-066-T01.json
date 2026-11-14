@@ -4,7 +4,7 @@
   "parent": "F-066",
   "title": "Credential rotation commands and doctor ages",
   "goal": "Credential rotation commands and doctor ages",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Rotate admin, Telegram and cloud credentials: new works at once, old refused, no restart, nothing printed; doctor shows age only"
   ],
@@ -31,11 +31,15 @@
   "effort": {
     "size": "small",
     "estimate": "1 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
-    "reviewed": "2026-11-13",
+    "basis": "Closed 2026-11-14 after PR #394 passed its complete deterministic CI suite and merged to main.",
+    "reviewed": "2026-11-14",
     "baselineDays": 1,
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
+    "actualAgentHours": 0.75,
+    "actualSource": "stated",
     "estimateAgentHours": 0.25
-  }
+  },
+  "prs": [{ "pr": 394, "note": "live credential rotation and age-only diagnostics" }],
+  "review": "Complete deterministic CI passed on Linux validation, Windows and native macOS before merge."
 }
