@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "F-084-T01",
+  "parent": "F-084",
+  "title": "Decision: the coding-job contract",
+  "goal": "The job inputs, outputs and limits are written down",
+  "status": "ready",
+  "acceptance": [
+    "A decision in docs/decisions names the repository allowlist, worktree location, sandbox class, coding agent, budget, and what reaches the owner before a push",
+    "The decision measures the instruction load (AGENTS.md, CLAUDE.md, procedures read at start) in tokens with the model's own counter, and refuses a model route whose context cannot hold the rules plus the task with room to work"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/decisions/**",
+    "docs/work/records/F-084.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "architecture-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A change of gate class, data leaving the base, or a material effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}

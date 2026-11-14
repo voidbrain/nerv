@@ -1,0 +1,43 @@
+{
+ "version": 1,
+ "id": "F-082-T03",
+ "parent": "F-082",
+ "title": "Checklist in Telegram",
+ "goal": "Aoba sends the list with one toggle button per item and edits the message on tick",
+ "status": "planned",
+ "acceptance": [
+  "Inline buttons toggle items; the message is edited, not resent",
+  "A stale button (item removed) answers that the list changed"
+ ],
+ "dependsOn": [
+  "F-082-T01"
+ ],
+ "resources": [
+  "src/telegram.ts",
+  "src/**",
+  "test/**",
+  "docs/work/records/F-082.md",
+  "generated:backlog-views"
+ ],
+ "capabilities": [
+  "bounded-edit",
+  "regression-design"
+ ],
+ "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+ "validation": [
+  "npm test",
+  "npm run typecheck"
+ ],
+ "escalation": [
+  "A change of gate class, data leaving the base, or a material effort increase goes to the owner"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "1 h",
+  "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
+  "reviewed": "2026-11-14",
+  "agentHours": 1,
+  "baselineAgentHours": 1,
+  "estimateAgentHours": 1
+ }
+}

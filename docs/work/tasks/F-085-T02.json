@@ -1,0 +1,41 @@
+{
+ "version": 1,
+ "id": "F-085-T02",
+ "parent": "F-085",
+ "title": "Project report",
+ "goal": "The owner gets a sourced summary",
+ "status": "planned",
+ "acceptance": [
+  "What it is, activity, licence, build and test, visible risks; each claim cites the file or page"
+ ],
+ "dependsOn": [
+  "F-085-T01"
+ ],
+ "resources": [
+  "src/**",
+  "test/**",
+  "docs/work/records/F-085.md",
+  "generated:backlog-views"
+ ],
+ "capabilities": [
+  "bounded-edit",
+  "regression-design"
+ ],
+ "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+ "validation": [
+  "npm test",
+  "npm run typecheck"
+ ],
+ "escalation": [
+  "A change of gate class, data leaving the base, or a material effort increase goes to the owner"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "1 h",
+  "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
+  "reviewed": "2026-11-14",
+  "agentHours": 1,
+  "baselineAgentHours": 1,
+  "estimateAgentHours": 1
+ }
+}

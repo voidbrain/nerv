@@ -1,0 +1,41 @@
+{
+ "version": 1,
+ "id": "F-082-T01",
+ "parent": "F-082",
+ "title": "List store and list tools",
+ "goal": "Lists and items persist in SQLite and are reachable as gated tools",
+ "status": "ready",
+ "acceptance": [
+  "lists.add_items, lists.show, lists.set_done and lists.remove_item exist as tools with gate classes (Green for the owner's own lists)",
+  "Several items in one request become separate items; a duplicate is reported, not added twice",
+  "Survives restart; unit tests with invented items"
+ ],
+ "dependsOn": [],
+ "resources": [
+  "src/**",
+  "test/**",
+  "docs/work/records/F-082.md",
+  "generated:backlog-views"
+ ],
+ "capabilities": [
+  "bounded-edit",
+  "regression-design"
+ ],
+ "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+ "validation": [
+  "npm test",
+  "npm run typecheck"
+ ],
+ "escalation": [
+  "A change of gate class, data leaving the base, or a material effort increase goes to the owner"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "1 h",
+  "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
+  "reviewed": "2026-11-14",
+  "agentHours": 1,
+  "baselineAgentHours": 1,
+  "estimateAgentHours": 1
+ }
+}

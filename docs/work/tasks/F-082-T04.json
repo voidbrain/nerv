@@ -1,0 +1,39 @@
+{
+ "version": 1,
+ "id": "F-082-T04",
+ "parent": "F-082",
+ "title": "Owner check: add by Telegram, tick on the dashboard",
+ "goal": "The owner sees the job work end to end",
+ "status": "planned",
+ "acceptance": [
+  "Owner adds three items by Telegram, opens the list on the dashboard, ticks one, and Telegram shows it ticked"
+ ],
+ "dependsOn": [
+  "F-082-T02",
+  "F-082-T03"
+ ],
+ "resources": [
+  "docs/acceptance/**",
+  "docs/work/records/F-082.md",
+  "generated:backlog-views"
+ ],
+ "capabilities": [
+  "privacy-review"
+ ],
+ "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+ "validation": [
+  "Owner-observed check recorded in docs/acceptance"
+ ],
+ "escalation": [
+  "A change of gate class, data leaving the base, or a material effort increase goes to the owner"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "0.25 h owner",
+  "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
+  "reviewed": "2026-11-14",
+  "ownerHours": 0.25,
+  "agentHours": 0,
+  "ownerKind": "procedure"
+ }
+}
