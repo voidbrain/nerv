@@ -16,7 +16,7 @@ nerv chat "What reminders do I have?"
 
 ## Memory (Lilith)
 
-Misato proposes lasting facts as approval cards (*"remember that my dentist is Dr. Rossi"*); nothing is saved until you approve.
+Misato proposes lasting facts as approval cards (*"remember that my dentist is Dr. Rossi"*); nothing is saved until you approve. If one request contains facts about several subjects, they appear together on one card: edit or remove any fact, then approve the remaining facts together.
 
 ```bash
 nerv memory list

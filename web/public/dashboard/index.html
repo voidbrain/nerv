@@ -131,6 +131,9 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .apcard .what { font-size:12px; font-weight:700; color:var(--title); }
 .apcard .why { font-size:10px; margin-top:4px; }
 .apcard .acts { display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; }
+.fact-list { display:grid; gap:6px; margin:8px 0; padding:0; list-style:none; }
+.fact-list li { display:flex; align-items:center; justify-content:space-between; gap:8px; border-top:1px solid var(--border); padding-top:6px; }
+.fact-list .acts { flex:0 0 auto; margin-top:0; }
 .verdicts { display:flex; gap:4px; flex-wrap:wrap; margin-top:4px; }
 .vchip { font-size:9px; border:1px solid var(--border); padding:1px 5px; }
 .vchip.approve { border-color:var(--ok); color:var(--ok); } .vchip.reject { border-color:var(--danger); color:var(--danger); }

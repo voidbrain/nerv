@@ -107,6 +107,16 @@ test('the shipped dashboard loads no remote script or font and has no inline scr
   );
   assert.doesNotMatch(readFileSync('web/public/dashboard/dashboard.js', 'utf8'), /\bd3\./);
 });
+test('the dashboard groups memory facts into one card with per-fact and whole-card decisions', () => {
+  const dashboard = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
+  const live = readFileSync('web/public/dashboard/live.js', 'utf8');
+  assert.match(dashboard, /function renderMemoryCard/);
+  assert.match(dashboard, /data-bundle-decision='approve'/);
+  assert.match(dashboard, /aria-label='Edit fact:/);
+  assert.match(dashboard, /aria-label='Remove fact:/);
+  assert.match(live, /window\.decideMany/);
+  assert.doesNotMatch(live, /data-d=edit\]\{display:none/);
+});
 test('the dashboard Spear (admin, through the scheduler process) stands down a waiting card, closes the sortie and stops a resume', async () => {
   const { Runtime } = await import('../src/runtime.ts');
   const dir = mkdtempSync(join(tmpdir(), 'nerv-spear-'));

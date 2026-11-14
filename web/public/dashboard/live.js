@@ -25,7 +25,7 @@
   const banner = document.querySelector(".banner.shadow");
   const setBanner = (html, kind) => { banner.classList.toggle("shadow", kind !== "live"); banner.querySelector("div").innerHTML = html; };
   // Simulation-only controls have no live meaning.
-  document.head.insertAdjacentHTML("beforeend", "<style>[data-toggle],[data-promote],[data-demote],[data-d=edit]{display:none}</style>");
+  document.head.insertAdjacentHTML("beforeend", "<style>[data-toggle],[data-promote],[data-demote]{display:none}</style>");
   ["btn-dummy", "btn-reset", "btn-spear"].forEach(id => { const el = document.getElementById(id); if (el) el.hidden = true; });
   BASES[0] = Object.assign(BASES[0], { name:"TOKYO-3", role:"HQ · this machine", status:"online", cpu:null, ram:null, gpu:null, rtt:0, models:"—" });
 
@@ -367,6 +367,13 @@
   window.decide = async function (apId, decision) {
     try { const r = await api("approvals/" + apId, { method:"POST", body:JSON.stringify({ decision }) }); log("Owner " + decision + " · " + r.decision + (r.error ? " · " + r.error : ""), decision === "approve" ? "ok" : "danger", null, "you"); }
     catch (e) { log("Decision failed: " + e.message, "danger"); }
+    poll();
+  };
+  window.decideMany = async function (ids, decision) {
+    try {
+      const results = await Promise.all(ids.map(id => api("approvals/" + id, { method:"POST", body:JSON.stringify({ decision }) })));
+      log("Owner " + decision + " · " + results.length + " facts", decision === "approve" ? "ok" : "danger", null, "you");
+    } catch (e) { log("Decision failed: " + e.message, "danger"); }
     poll();
   };
   window.chat = async function (text) {

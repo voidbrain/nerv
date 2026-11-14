@@ -138,7 +138,7 @@ export const toolDocs: ToolDoc[] = [
     effect: 'write-local',
     about:
       'Proposes a lasting fact about the owner (a preference, a person, a routine). It always asks the owner first; store only what they stated, in their words.',
-    args: '{"text": one fact, up to 500 characters}',
+    args: '{"text": one fact, up to 500 characters} or {"texts": [2 to 10 facts, one subject per fact]}',
   },
   {
     name: 'memory.edit',

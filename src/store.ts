@@ -73,6 +73,8 @@ export interface ActResult {
   reason: string;
   sync: Ballot['sync'];
   approvalId?: string;
+  /** Every card created by one proposal; `approvalId` remains the first card for compatibility. */
+  approvalIds?: string[];
   result?: unknown;
   error?: string;
 }
@@ -1276,6 +1278,42 @@ export class Store {
     approvalUntil?: number,
     agency?: AgencySnapshot,
   ): ActResult {
+    if (proposal.tool === 'memory.remember' && Array.isArray(proposal.args.texts)) {
+      const texts = proposal.args.texts;
+      if (
+        texts.length < 2 ||
+        texts.length > 10 ||
+        texts.some((text) => typeof text !== 'string' || !text.trim() || text.length > 500)
+      )
+        throw new Error('texts must contain 2 to 10 facts of up to 500 characters each.');
+      const unique = new Set(texts.map((text) => text.trim()));
+      if (unique.size !== texts.length) throw new Error('Each proposed fact must be distinct.');
+      const proposed = transaction(this.db, () =>
+        texts.map((text) => {
+          const item = this.ledger.propose(
+            sortieId,
+            { ...proposal, args: { text: text.trim() } },
+            new Date(),
+            approvalUntil,
+          );
+          if (!item.approvalId) throw new Error('Every memory fact must reach owner approval.');
+          this.deliverApproval(item.approvalId);
+          return item;
+        }),
+      );
+      const first = proposed[0]!;
+      const approvalIds = proposed.map((item) => item.approvalId!);
+      return {
+        sortieId,
+        actionId: first.actionId,
+        outcome: first.ballot.outcome,
+        pattern: first.ballot.pattern,
+        reason: first.ballot.reason,
+        sync: first.ballot.sync,
+        approvalId: approvalIds[0],
+        approvalIds,
+      };
+    }
     const p = transaction(this.db, () => {
       const proposed = this.ledger.propose(sortieId, proposal, new Date(), approvalUntil);
       if (proposed.approvalId) this.deliverApproval(proposed.approvalId);
