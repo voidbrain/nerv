@@ -17,7 +17,7 @@ const chrome =
 
 test(
   'F-002/F-010: reliable bilingual reminder flows, local dates and responsive accessible controls',
-  { timeout: 120000 },
+  { timeout: 145000 },
   async (t) => {
     assert.equal(
       JSON.parse(readFileSync('angular.json', 'utf8')).projects.nerv.architect.serve.options.port,

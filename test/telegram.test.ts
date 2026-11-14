@@ -13,7 +13,7 @@ import type { StoreApi } from '../src/runtime.ts';
 const OWNER = 1111,
   STRANGER = 2222;
 const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
-async function until(check: () => boolean, ms = 8000) {
+async function until(check: () => boolean, ms = process.platform === 'win32' ? 15000 : 8000) {
   const end = Date.now() + ms;
   while (!check()) {
     if (Date.now() > end) throw new Error('timed out');
@@ -590,9 +590,10 @@ test(
     }
   },
 );
+// Windows CI needs extra headroom to spawn Runtime child processes and complete two model turns.
 test(
   'F-003: owner Italian then English messages keep their language through the real Telegram and model-process join',
-  { timeout: 15000 },
+  { timeout: process.platform === 'win32' ? 45000 : 15000 },
   async () => {
     const token = '123456:' + 'b'.repeat(35),
       tg = await fakeTelegram(token),

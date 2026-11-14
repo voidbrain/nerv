@@ -31,7 +31,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
-async function until(check: () => Promise<boolean> | boolean, ms = 6000) {
+async function until(check: () => Promise<boolean> | boolean, ms = process.platform === 'win32' ? 15000 : 6000) {
   const end = Date.now() + ms;
   while (!(await check())) {
     if (Date.now() > end) throw new Error('timed out');
@@ -373,9 +373,10 @@ test("heartbeats carry each base's own health, both ways; a malformed report fro
     sb.close();
   }
 });
+// Two full Runtimes (six Node child processes) need extra process-spawn headroom on Windows CI.
 test(
   "through two runtimes wired as serve does: a base whose model route is down shows as degraded, with its reason, in the other base's /api/bases",
-  { timeout: 20000 },
+  { timeout: process.platform === 'win32' ? 45000 : 20000 },
   async () => {
     const { Runtime } = await import('../src/runtime.ts');
     const A = keys(),

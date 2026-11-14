@@ -1702,9 +1702,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | — | — | — | — |
 
-💻 **→** Next: B-060-T02 (Windows timing tests).
+💻 **→** Next: verify on Windows CI (including 20 consecutive runs of the six tests), then close B-060.
 
 | | |
 |---|---|
@@ -1717,8 +1717,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
 | 🟢 Small | <a id="b-060-t01"></a>B-060-T01 — The update-health fixture holds its port | 0.5 h | 0 h | 0 h | Implemented; verification pending |
-| 🟢 Small | <a id="b-060-t02"></a>B-060-T02 — Make the Windows timing tests wait on their condition | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 2 steps recorded) | 0.5 h | 0 of 2 completed |
+| 🟢 Small | <a id="b-060-t02"></a>B-060-T02 — Make the Windows timing tests wait on their condition | 0.5 h | 0 h | 0 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 2 steps recorded) | 0 h | 0 of 2 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1727,10 +1727,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #384](https://github.com/voidbrain/nerv/pull/384) [PR #383](https://github.com/voidbrain/nerv/pull/383) [PR #379](https://github.com/voidbrain/nerv/pull/379) and [PR #382](https://github.com/voidbrain/nerv/pull/382) Windows reruns, 2026-11-13. |
+| PR / evidence | [PR #411](https://github.com/voidbrain/nerv/pull/411) (B-060-T02); [PR #384](https://github.com/voidbrain/nerv/pull/384) [PR #383](https://github.com/voidbrain/nerv/pull/383) [PR #379](https://github.com/voidbrain/nerv/pull/379) and [PR #382](https://github.com/voidbrain/nerv/pull/382) Windows reruns, 2026-11-13. |
 | Opened | 2026-11-13 |
-| Verification | Pending. |
-| Reviewed | 2026-11-13 |
+| Verification | 2026-11-14: 63/63 tests in the five Node test files pass locally on macOS; Windows CI and 20-run verification pending. |
+| Reviewed | 2026-11-14 |
 
 </details>
 

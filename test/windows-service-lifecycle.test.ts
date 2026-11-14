@@ -242,196 +242,201 @@ test('windowsServiceAdapter executes install, status, start, stop and uninstall 
     assert.ok(calls.some((c) => c.startsWith('schtasks /Delete /TN NERV Agency')));
   } finally {
     await new Promise<void>((resolve) => doctorServer.close(() => resolve()));
-    rmSync(root, { recursive: true, force: true });
+    rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 });
   }
 });
 
-test('F-005-T23: Windows update and recovery (backup, rehearsal, checkout, refusal and release)', async () => {
-  let registered = false;
-  let running = false;
-  let failBuild = false;
-  let doctorCommit = '';
+// Spawns git and Node schema-check subprocesses across three update cycles; allow extra time on Windows CI.
+test(
+  'F-005-T23: Windows update and recovery (backup, rehearsal, checkout, refusal and release)',
+  { timeout: process.platform === 'win32' ? 90000 : 60000 },
+  async () => {
+    let registered = false;
+    let running = false;
+    let failBuild = false;
+    let doctorCommit = '';
 
-  const doctorServer = createServer((req, res) => {
-    if (!running || req.url !== '/api/doctor') {
-      req.socket.destroy();
-      return;
-    }
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(
-      JSON.stringify({
-        base: defaultBase,
-        build: { commit: doctorCommit },
-        database: { quick_check: 'ok' },
-        processes: { nervous: 1, brain: 2, brainAlive: true },
-        models: {},
-      }),
-    );
-  });
-  await new Promise<void>((resolve) => doctorServer.listen(0, '127.0.0.1', () => resolve()));
-  const addr = doctorServer.address();
-  if (!addr || typeof addr === 'string') throw new Error('Expected TCP port.');
-  const { root, context } = makeFixture(addr.port);
-  try {
-    const gitSync = (...args: string[]) =>
-      execFileSync('git', ['-C', context.source, ...args], { encoding: 'utf8' }).trim();
-    gitSync('init', '-b', 'main');
-    gitSync('config', 'user.name', 'Test');
-    gitSync('config', 'user.email', 'test@example.com');
-    gitSync('remote', 'add', 'origin', 'https://github.com/voidbrain/nerv.git');
-    const readerScript = (raiseSchema: boolean) =>
-      `import { DatabaseSync } from 'node:sqlite';
+    const doctorServer = createServer((req, res) => {
+      if (!running || req.url !== '/api/doctor') {
+        req.socket.destroy();
+        return;
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(
+        JSON.stringify({
+          base: defaultBase,
+          build: { commit: doctorCommit },
+          database: { quick_check: 'ok' },
+          processes: { nervous: 1, brain: 2, brainAlive: true },
+          models: {},
+        }),
+      );
+    });
+    await new Promise<void>((resolve) => doctorServer.listen(0, '127.0.0.1', () => resolve()));
+    const addr = doctorServer.address();
+    if (!addr || typeof addr === 'string') throw new Error('Expected TCP port.');
+    const { root, context } = makeFixture(addr.port);
+    try {
+      const gitSync = (...args: string[]) =>
+        execFileSync('git', ['-C', context.source, ...args], { encoding: 'utf8' }).trim();
+      gitSync('init', '-b', 'main');
+      gitSync('config', 'user.name', 'Test');
+      gitSync('config', 'user.email', 'test@example.com');
+      gitSync('remote', 'add', 'origin', 'https://github.com/voidbrain/nerv.git');
+      const readerScript = (raiseSchema: boolean) =>
+        `import { DatabaseSync } from 'node:sqlite';
 const db = new DatabaseSync(process.argv[2]);
 try {
   ${raiseSchema ? `db.exec('PRAGMA user_version = ${SERVICE_READER_SCHEMA + 1};');` : `db.prepare('SELECT count(*) FROM worker_jobs').get();`}
 } finally { db.close(); }\n`;
-    writeFileSync(join(context.source, 'src/upgrade-reader.ts'), readerScript(false));
-    gitSync('add', '-A');
-    gitSync('commit', '-m', 'base');
-    const rev1 = gitSync('rev-parse', 'HEAD');
-    doctorCommit = rev1;
+      writeFileSync(join(context.source, 'src/upgrade-reader.ts'), readerScript(false));
+      gitSync('add', '-A');
+      gitSync('commit', '-m', 'base');
+      const rev1 = gitSync('rev-parse', 'HEAD');
+      doctorCommit = rev1;
 
-    writeFileSync(join(context.source, 'src/cli.ts'), '// v2\n');
-    gitSync('add', 'src/cli.ts');
-    gitSync('commit', '-m', 'v2');
-    const rev2 = gitSync('rev-parse', 'HEAD');
+      writeFileSync(join(context.source, 'src/cli.ts'), '// v2\n');
+      gitSync('add', 'src/cli.ts');
+      gitSync('commit', '-m', 'v2');
+      const rev2 = gitSync('rev-parse', 'HEAD');
 
-    writeFileSync(join(context.source, 'src/upgrade-reader.ts'), readerScript(true));
-    gitSync('add', 'src/upgrade-reader.ts');
-    gitSync('commit', '-m', 'schema raise');
-    const revSchema = gitSync('rev-parse', 'HEAD');
+      writeFileSync(join(context.source, 'src/upgrade-reader.ts'), readerScript(true));
+      gitSync('add', 'src/upgrade-reader.ts');
+      gitSync('commit', '-m', 'schema raise');
+      const revSchema = gitSync('rev-parse', 'HEAD');
 
-    gitSync('checkout', '-q', rev1);
+      gitSync('checkout', '-q', rev1);
 
-    const run = async (
-      program: string,
-      args: string[],
-      cwd?: string,
-      _timeout?: number,
-      extraEnv?: Record<string, string>,
-    ) => {
-      if (program === 'git' || program === 'tar' || program === context.node) {
-        if (program === context.node && args.includes('--version')) return { status: 0, out: 'v24.0.0\n', err: '' };
-        try {
-          const { stdout, stderr } = await execFile(program === context.node ? process.execPath : program, args, {
-            cwd,
-            env: { ...process.env, ...extraEnv },
-          });
-          if (program === 'git' && args.includes('checkout')) {
-            doctorCommit = gitSync('rev-parse', 'HEAD');
+      const run = async (
+        program: string,
+        args: string[],
+        cwd?: string,
+        _timeout?: number,
+        extraEnv?: Record<string, string>,
+      ) => {
+        if (program === 'git' || program === 'tar' || program === context.node) {
+          if (program === context.node && args.includes('--version')) return { status: 0, out: 'v24.0.0\n', err: '' };
+          try {
+            const { stdout, stderr } = await execFile(program === context.node ? process.execPath : program, args, {
+              cwd,
+              env: { ...process.env, ...extraEnv },
+            });
+            if (program === 'git' && args.includes('checkout')) {
+              doctorCommit = gitSync('rev-parse', 'HEAD');
+            }
+            return { status: 0, out: stdout, err: stderr };
+          } catch (e: unknown) {
+            const err = e as { code?: number; stdout?: string; stderr?: string };
+            return { status: err.code ?? 1, out: err.stdout ?? '', err: err.stderr ?? '' };
           }
-          return { status: 0, out: stdout, err: stderr };
-        } catch (e: unknown) {
-          const err = e as { code?: number; stdout?: string; stderr?: string };
-          return { status: err.code ?? 1, out: err.stdout ?? '', err: err.stderr ?? '' };
         }
-      }
-      if (program === 'npm' || program.toLowerCase().endsWith('cmd.exe')) {
-        if (failBuild && args.join(' ').includes('build')) return { status: 1, out: '', err: 'build failed' };
-        return { status: 0, out: '', err: '' };
-      }
-      if (program === 'schtasks') {
-        const op = args[0];
-        if (op === '/Query') {
-          if (!registered) return { status: 1, out: '', err: 'The system cannot find the file specified.' };
-          const taskToRun = `wscript.exe //B //Nologo "${join(context.home, 'nerv-service.vbs')}"`;
+        if (program === 'npm' || program.toLowerCase().endsWith('cmd.exe')) {
+          if (failBuild && args.join(' ').includes('build')) return { status: 1, out: '', err: 'build failed' };
+          return { status: 0, out: '', err: '' };
+        }
+        if (program === 'schtasks') {
+          const op = args[0];
+          if (op === '/Query') {
+            if (!registered) return { status: 1, out: '', err: 'The system cannot find the file specified.' };
+            const taskToRun = `wscript.exe //B //Nologo "${join(context.home, 'nerv-service.vbs')}"`;
+            return {
+              status: 0,
+              out: `TaskName: \\NERV Agency\r\nStatus: ${running ? 'Running' : 'Ready'}\r\nTask To Run: ${taskToRun}\r\n`,
+              err: '',
+            };
+          }
+          if (op === '/Create') {
+            registered = true;
+            return { status: 0, out: 'SUCCESS', err: '' };
+          }
+          if (op === '/Run') {
+            running = true;
+            return { status: 0, out: 'SUCCESS', err: '' };
+          }
+          if (op === '/End') {
+            running = false;
+            return { status: 0, out: 'SUCCESS', err: '' };
+          }
+          if (op === '/Delete') {
+            registered = false;
+            running = false;
+            return { status: 0, out: 'SUCCESS', err: '' };
+          }
+        }
+        if (program === 'powershell') {
           return {
             status: 0,
-            out: `TaskName: \\NERV Agency\r\nStatus: ${running ? 'Running' : 'Ready'}\r\nTask To Run: ${taskToRun}\r\n`,
+            out: running ? `99999|1|node.exe|"${context.node}" ${join(context.source, 'src', 'cli.ts')} serve\r\n` : '',
             err: '',
           };
         }
-        if (op === '/Create') {
-          registered = true;
-          return { status: 0, out: 'SUCCESS', err: '' };
-        }
-        if (op === '/Run') {
-          running = true;
-          return { status: 0, out: 'SUCCESS', err: '' };
-        }
-        if (op === '/End') {
+        if (program === 'taskkill') {
           running = false;
           return { status: 0, out: 'SUCCESS', err: '' };
         }
-        if (op === '/Delete') {
-          registered = false;
-          running = false;
-          return { status: 0, out: 'SUCCESS', err: '' };
-        }
+        return { status: 1, out: '', err: `unexpected ${program}` };
+      };
+
+      const host = windowsServiceAdapter(context, run);
+      const installPlan = await planService(host, 'install');
+      assert.deepEqual(installPlan.blockers, []);
+      await applyService(host, installPlan, installPlan.digest);
+      const stopPlan = await planService(host, 'stop');
+      await applyService(host, stopPlan, stopPlan.digest);
+
+      // 1. Successful update: backup + rehearsal + checkout + build + register + health
+      const updatePlan = await planService(host, 'update', rev2);
+      assert.deepEqual(updatePlan.blockers, []);
+      const updateReceipt = await applyService(host, updatePlan, updatePlan.digest);
+      assert.equal(updateReceipt.state, 'completed');
+      assert.equal(gitSync('rev-parse', 'HEAD'), rev2);
+      assert.ok(existsSync(join(context.userHome, '.nerv-lifecycle', 'backups', updatePlan.digest, 'database.sqlite')));
+      assert.deepEqual(updateReceipt.rehearsal?.blockers, []);
+
+      // 2. Refused update when candidate reader raises schema version
+      const stop2 = await planService(host, 'stop');
+      await applyService(host, stop2, stop2.digest);
+      const schemaPlan = await planService(host, 'update', revSchema);
+      const schemaReceipt = await applyService(host, schemaPlan, schemaPlan.digest);
+      assert.equal(schemaReceipt.state, 'refused');
+      assert.equal(gitSync('rev-parse', 'HEAD'), rev2);
+
+      // 3. Failed build leaves uncertain receipt with Windows recovery steps; releaseService clears it once stopped
+      gitSync('checkout', '-q', rev1);
+      doctorCommit = rev1;
+      failBuild = true;
+      const failPlan = await planService(host, 'update', rev2);
+      await assert.rejects(
+        () => applyService(host, failPlan, failPlan.digest),
+        /Service build did not confirm completion/,
+      );
+      const failReceipt = serviceReceipt(host, failPlan.digest);
+      assert.ok('digest' in failReceipt && failReceipt.state === 'uncertain');
+      assert.ok(failReceipt.recovery?.some((s) => s.includes('schtasks /Query')));
+      const evidence = {
+        digest: failReceipt.digest,
+        resource: failReceipt.resource,
+        fence: failReceipt.fence,
+        nonce: failReceipt.nonce,
+        handlerStopped: true,
+        descendantsStopped: true,
+        operatorConfirmed: true,
+        reason: 'Verified Windows task absent and restored previous checkout',
+      };
+      // Simulate handler process exited; releaseObservedService succeeds once task is unregistered/stopped.
+      const jdb = new DatabaseSync(join(context.userHome, '.nerv-lifecycle', 'journal.sqlite'));
+      try {
+        const updated = { ...failReceipt, pid: 999999 };
+        jdb.prepare('UPDATE operations SET receipt=? WHERE digest=?').run(JSON.stringify(updated), failReceipt.digest);
+        jdb.prepare('UPDATE resource SET pid=? WHERE id=1').run(999999);
+      } finally {
+        jdb.close();
       }
-      if (program === 'powershell') {
-        return {
-          status: 0,
-          out: running ? `99999|1|node.exe|"${context.node}" ${join(context.source, 'src', 'cli.ts')} serve\r\n` : '',
-          err: '',
-        };
-      }
-      if (program === 'taskkill') {
-        running = false;
-        return { status: 0, out: 'SUCCESS', err: '' };
-      }
-      return { status: 1, out: '', err: `unexpected ${program}` };
-    };
-
-    const host = windowsServiceAdapter(context, run);
-    const installPlan = await planService(host, 'install');
-    assert.deepEqual(installPlan.blockers, []);
-    await applyService(host, installPlan, installPlan.digest);
-    const stopPlan = await planService(host, 'stop');
-    await applyService(host, stopPlan, stopPlan.digest);
-
-    // 1. Successful update: backup + rehearsal + checkout + build + register + health
-    const updatePlan = await planService(host, 'update', rev2);
-    assert.deepEqual(updatePlan.blockers, []);
-    const updateReceipt = await applyService(host, updatePlan, updatePlan.digest);
-    assert.equal(updateReceipt.state, 'completed');
-    assert.equal(gitSync('rev-parse', 'HEAD'), rev2);
-    assert.ok(existsSync(join(context.userHome, '.nerv-lifecycle', 'backups', updatePlan.digest, 'database.sqlite')));
-    assert.deepEqual(updateReceipt.rehearsal?.blockers, []);
-
-    // 2. Refused update when candidate reader raises schema version
-    const stop2 = await planService(host, 'stop');
-    await applyService(host, stop2, stop2.digest);
-    const schemaPlan = await planService(host, 'update', revSchema);
-    const schemaReceipt = await applyService(host, schemaPlan, schemaPlan.digest);
-    assert.equal(schemaReceipt.state, 'refused');
-    assert.equal(gitSync('rev-parse', 'HEAD'), rev2);
-
-    // 3. Failed build leaves uncertain receipt with Windows recovery steps; releaseService clears it once stopped
-    gitSync('checkout', '-q', rev1);
-    doctorCommit = rev1;
-    failBuild = true;
-    const failPlan = await planService(host, 'update', rev2);
-    await assert.rejects(
-      () => applyService(host, failPlan, failPlan.digest),
-      /Service build did not confirm completion/,
-    );
-    const failReceipt = serviceReceipt(host, failPlan.digest);
-    assert.ok('digest' in failReceipt && failReceipt.state === 'uncertain');
-    assert.ok(failReceipt.recovery?.some((s) => s.includes('schtasks /Query')));
-    const evidence = {
-      digest: failReceipt.digest,
-      resource: failReceipt.resource,
-      fence: failReceipt.fence,
-      nonce: failReceipt.nonce,
-      handlerStopped: true,
-      descendantsStopped: true,
-      operatorConfirmed: true,
-      reason: 'Verified Windows task absent and restored previous checkout',
-    };
-    // Simulate handler process exited; releaseObservedService succeeds once task is unregistered/stopped.
-    const jdb = new DatabaseSync(join(context.userHome, '.nerv-lifecycle', 'journal.sqlite'));
-    try {
-      const updated = { ...failReceipt, pid: 999999 };
-      jdb.prepare('UPDATE operations SET receipt=? WHERE digest=?').run(JSON.stringify(updated), failReceipt.digest);
-      jdb.prepare('UPDATE resource SET pid=? WHERE id=1').run(999999);
+      const released = await releaseObservedService(host, { ...failReceipt, pid: 999999 }, evidence);
+      assert.equal(released.state, 'released');
     } finally {
-      jdb.close();
+      await new Promise<void>((resolve) => doctorServer.close(() => resolve()));
+      rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 });
     }
-    const released = await releaseObservedService(host, { ...failReceipt, pid: 999999 }, evidence);
-    assert.equal(released.state, 'released');
-  } finally {
-    await new Promise<void>((resolve) => doctorServer.close(() => resolve()));
-    rmSync(root, { recursive: true, force: true });
-  }
-});
+  },
+);

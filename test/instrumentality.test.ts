@@ -213,16 +213,17 @@ test('idle mode: consolidates after an hour without requests, at most once in 20
     await t.close();
   }
 });
+// Windows CI spawns multiple Node child processes per Runtime; give it a Windows budget.
 test(
   'F-003: failed night is durable in health and brief, retries once after an hour across restart and clears after recovery',
-  { timeout: 15000 },
+  { timeout: process.platform === 'win32' ? 45000 : 15000 },
   async () => {
     const t = await setup([], 'not json');
     let runtime = t.runtime;
     let now = new Date('2030-01-02T12:00:00.000Z');
     const schedule = () => ({ mode: { at: '03:00' }, timeZone: 'Europe/Rome' });
     const until = async (check: () => Promise<boolean>) => {
-      const end = Date.now() + 5000;
+      const end = Date.now() + (process.platform === 'win32' ? 15000 : 5000);
       while (!(await check())) {
         assert.ok(Date.now() < end, 'scheduled outcome timed out');
         await wait(20);

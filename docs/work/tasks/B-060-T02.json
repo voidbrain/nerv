@@ -4,7 +4,7 @@
   "parent": "B-060",
   "title": "Make the Windows timing tests wait on their condition",
   "goal": "The Windows job fails only when behaviour is wrong, not when the runner is slow",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Each Windows-flaky test of 2026-11-13 (instrumentality F-003 failed night, kaji-link degraded base, worker-link B-046 stall, Telegram language join, windowsServiceAdapter, F-005-T23 update) waits on its condition or carries a Windows budget with a reason",
     "20 consecutive Windows CI runs of those tests pass",
@@ -12,8 +12,14 @@
   ],
   "dependsOn": [],
   "resources": [
-    "test/**",
-    "docs/work/records/**",
+    "test/instrumentality.test.ts",
+    "test/kaji-link.test.ts",
+    "test/worker-link.test.ts",
+    "test/telegram.test.ts",
+    "test/windows-service-lifecycle.test.ts",
+    "test/angular.browser.mjs",
+    "test/fixtures/browser.mjs",
+    "docs/work/records/B-060.md",
     "generated:backlog-views"
   ],
   "capabilities": [
@@ -32,8 +38,8 @@
     "size": "small",
     "estimate": "0.5 h",
     "basis": "Estimated 2026-11-13: six test waits and one browser timeout, then repeated Windows runs. Not a measurement.",
-    "reviewed": "2026-11-13",
-    "agentHours": 0.5,
+    "reviewed": "2026-11-14",
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
   }
