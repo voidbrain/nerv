@@ -1543,10 +1543,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-059-t01"></a>B-059-T01 — Refuse a system case whose build requirement is missing | 0.5 h | 0 h | 0.5 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-059-t01"></a>B-059-T01 — Refuse a system case whose build requirement is missing | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | [PR #390](https://github.com/voidbrain/nerv/pull/390) refuse unmet build requirements before execution or ledger writes |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1555,7 +1555,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #376](https://github.com/voidbrain/nerv/pull/376) Found in F-075, 2026-11-13. Implementation PR pending. Test: `B-059: browser case refuses a missing build without writing failed evidence`; committed failing in `4139150`, then passed without editing that regression. A separate build-present regression preserves the prior execution path. |
+| PR / evidence | Steps: B-059-T01: [PR #390](https://github.com/voidbrain/nerv/pull/390) refuse unmet build requirements before execution or ledger writes. [PR #390](https://github.com/voidbrain/nerv/pull/390) implementation; [PR #376](https://github.com/voidbrain/nerv/pull/376) found in F-075, 2026-11-13. Test: `B-059: browser case refuses a missing build without writing failed evidence`; committed failing in `4139150`, then passed without editing that regression. A separate build-present regression preserves the prior execution path. |
 | Opened | 2026-11-13 |
 | Verification | Unit/integration 2026-11-13: the focused missing-build and build-present regressions pass; full suite and CI pending. |
 | Reviewed | 2026-11-13 |
