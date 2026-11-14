@@ -407,4 +407,4 @@ Re-estimated 33 open feature implementation steps from their current estimates t
 
 Record-level dependencies moved to steps (owner decision): F-021-T03 and F-027-T02 wait on F-049-T04 (EVA-03 isolation); F-056-T01 waits on F-021-T05 (all of F-021).
 
-- F-050's row on F-048 dropped: F-048-T01–T03 are verified and no F-050 step does load-based forwarding. Rows on closed records (F-045, F-042) stay.
+- F-050's row on F-048 dropped: F-048-T01–T03 are verified and no F-050 step does load-based forwarding. Rows on closed records (F-045, F-042) stay. [#407](https://github.com/voidbrain/nerv/pull/407)
