@@ -4,7 +4,7 @@
  "parent": "F-078",
  "title": "Smoke campaign on Neo Tokyo-3",
  "goal": "Smoke campaign on Neo Tokyo-3",
- "status": "planned",
+ "status": "implemented",
  "acceptance": [
   "smoke, smoke-schema and general-assistant-expanded run for gemma4:12b, gemma4:26b and qwen2.5-coder:14b on the Mac, recorded with model identity in evals/gauntlet/ledger.json",
   "The three gemma4:12b smoke failures of 2026-11-09 (change-mind, tool-choice, missing-input: invalid structured output) rerun; whether a format setting fixes them is recorded"
@@ -35,8 +35,8 @@
  "effort": {
   "size": "small",
   "estimate": "0.5 h agent",
-  "basis": "Estimated 2026-11-13 at the harness 8.5.0 initial step size; campaign wall time on the host is extra and bounded by the T02 budget. Not a measurement.",
-  "reviewed": "2026-11-13",
+  "basis": "Estimated 2026-11-13 at the harness 8.5.0 initial step size; completed 2026-11-14 in about 0.5 agent hours, with the model campaign inside the approved two-hour host-wall-time budget.",
+  "reviewed": "2026-11-14",
   "agentHours": 0.5,
   "baselineAgentHours": 0.5,
   "estimateAgentHours": 0.5
