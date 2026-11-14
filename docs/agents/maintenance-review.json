@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-14T13:24:52.014Z",
+  "reviewed": "2026-11-14T13:37:11.870Z",
   "policy": "7d15ab5f3e1a37d15075876ce3efd53d93600045088f48b41a3ef0dd6ab89e7d",
   "inputs": {
-    "AGENTS.md": "80becf559efb5caad019beb9d52f4617d9df882d7e0bd98a1b92475b16635bf5",
+    "AGENTS.md": "1a2a355a60f4ab2a8fa2ec4437fc00906e3c3e647f21d579d52fcd945bcca193",
     "docs/BACKLOG-RULES.md": "15425b47072204bdf62d272334819f4b04658779672125f90cce1264afdfd8c6",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
     "docs/agents/areas.md": "19890dcd2fb04557fcb9b9bb1df4dcbd2e584736e53a5989908bb822ef020d1c",
@@ -30,7 +30,7 @@
     "docs/backlog/outcomes.md": "c6f1d8e4ac3afd85e6d90ac7cef8ae39fba765b13c821522fb005edd2b5b88e4",
     "docs/backlog/ownership.md": "d2d39a4e2a56fb7a18c5cce2fe5490282a9c89c947574746bacd71f1040c457f",
     "docs/backlog/records.md": "55ed78706d82419d64d33a82fe55f1179fd65fc35825fd081f3ac2e24079d058",
-    "docs/backlog/review.md": "1f012728ea66807eebef0686cbe315afaefb598b1b8aed16e72a9f75d7e9972b",
+    "docs/backlog/review.md": "96eaf598116e553aee2de08f35f4af0199f5731ba0f4cea9d4202f4748281051",
     "docs/backlog/steps.md": "c9b771c2c4e70da766dd4706cf9aa7722c116e1a9499cec3f0ef4b25b853a2b5",
     "tools/task-claims.mjs": "ef755fe7951544e5c05b20de7c64a7b53778b6d039a11a2abeb079e7d42b6fd2",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",

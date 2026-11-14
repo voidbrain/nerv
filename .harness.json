@@ -670,10 +670,7 @@
     }
   ],
   "adapted": {
-    "AGENTS.md": [
-      "core/AGENTS.md",
-      "angular/AGENTS.angular.md"
-    ],
+    "AGENTS.md": "core/AGENTS.md",
     "CLAUDE.md": "core/CLAUDE.md",
     "README.md": "core/README.md",
     "docs/BACKLOG.md": "core/docs/BACKLOG.md",
