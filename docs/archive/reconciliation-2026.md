@@ -395,3 +395,10 @@ Harness 8.14.3 reconciled; rule load within every budget (owner decision): five 
 
 - Moved: scoped verification and the review brief (AGENTS → `docs/agents/pull-requests.md`); the ledger and roadmap lines (AGENTS) and the 400-character header rule (`docs/backlog/review.md`) → `docs/BACKLOG-RULES.md`. Link targets adjusted for the new folders only.
 - 8.14.3: `reconcile-draft` and `rule-load` (generated pages have no file budget); the re-estimation sentence in `docs/backlog/estimates.md`. This change is [#405](https://github.com/voidbrain/nerv/pull/405).
+
+## 2026-11-14 — main `3a0e15c`
+
+Re-estimated 33 open feature implementation steps from their current estimates to 0.75 h each (open agent work 71.25 → 85 h); `estimation.since` 2026-11-14.
+
+- Evidence: since 2026-11-13 eleven steps closed at a median of 1.0x their current estimate; feature implementation (F-066-T01, F-066-T02, F-062-T03, F-044-T01) took 0.75–1 h where the 0.25x pass had set 0.25–1 h, while bug, evidence and small UI steps took 0.25–0.5 h. The freshness reminder (F-062-T03 at 0.33x) compared with the original baseline; against its re-estimate that step took 1.0x.
+- Method (harness 8.14.3): start from each step's current estimate and revise only the steps that resemble the misses; never one ratio for all. Unchanged: owner, decision, plan, feasibility, campaign, report, evidence-closing, documentation and refactor steps, bug steps, and steps already at 0.75 h or more.
