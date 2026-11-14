@@ -388,3 +388,10 @@ PR #400 passed CI (F-062-T03 closed); F-062-T06 (encrypted copies to Tabgha over
 
 - AGENTS.md keeps the always-on rules and project lines; Angular rules moved verbatim to `docs/agents/angular.md`; BACKLOG-RULES is an index over `docs/backlog/` (project text carried into documentation.md and review.md). All 9 AGENTS project lines and the BACKLOG-RULES project line kept.
 - Copied tools and guides refreshed from v8.14.1 (18), new ones adopted (14); `.npmrc`, `.test-report.txt`, a CI rule-load step, and the quiet reporter on `npm test`. This reconcile is [#404](https://github.com/voidbrain/nerv/pull/404).
+
+## 2026-11-14 — main `cfa31a9`
+
+Harness 8.14.3 reconciled; rule load within every budget (owner decision): five NERV project lines moved verbatim to pull-requests.md and the BACKLOG-RULES index; always loaded 3,558 → 3,064.
+
+- Moved: scoped verification and the review brief (AGENTS → `docs/agents/pull-requests.md`); the ledger and roadmap lines (AGENTS) and the 400-character header rule (`docs/backlog/review.md`) → `docs/BACKLOG-RULES.md`. Link targets adjusted for the new folders only.
+- 8.14.3: `reconcile-draft` and `rule-load` (generated pages have no file budget); the re-estimation sentence in `docs/backlog/estimates.md`. This change is [#405](https://github.com/voidbrain/nerv/pull/405).

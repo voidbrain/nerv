@@ -68,6 +68,8 @@ function namers(sources, number) {
   return [...ids].sort();
 }
 
+// B-024: the heading is the F-066 entry format, so a log-built header reads a pasted draft.
+const scoped = stamp.verification?.enabled === true;
 // The CI verdict from gh's statusCheckRollup: failed beats pending beats skipped beats green; none is "no CI". A
 // skipped check is flagged, as ci:status does, since a required job can be skipped by a condition.
 function verdict(rollup) {
@@ -78,7 +80,8 @@ function verdict(rollup) {
   )
     return 'failed';
   if (states.some((s) => !['SUCCESS', 'SKIPPED', 'NEUTRAL'].includes(s))) return 'pending';
-  if (states.includes('SKIPPED')) return 'green with skipped checks';
+  // B-024: with scoped verification a skipped job is the design; otherwise it is flagged, as ci:status does
+  if (states.includes('SKIPPED') && !scoped) return 'green with skipped checks';
   return 'green';
 }
 
@@ -136,7 +139,7 @@ if (!prs.length && !flags.length) {
 const green = prs.filter((p) => p.ci === 'green').length;
 const range = prs.length ? `PRs ${prs.map((p) => `#${p.number}`).join(', ')}` : 'No PR';
 console.log(`${flags.length ? '\n' : ''}Draft entry (edit before use):\n
-## ${new Date().toISOString().slice(0, 10)} (${branch} \`${head}\`)
+## ${new Date().toISOString().slice(0, 10)} — ${branch} \`${head}\`
 
 ${range} merged${prs.length === green ? ' on green CI' : `; ${green} of ${prs.length} on green CI`}. ${prs
   .map((p) => `#${p.number}: ${p.ids.join(', ') || 'no record'}`)
