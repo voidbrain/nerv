@@ -15,6 +15,7 @@ npm start -- launch # starts service and opens the signed-in dashboard
 
 - `serve` supervises three processes on loopback (`127.0.0.1:4317`): the API/UI gateway, an isolated SQLite/scheduler process, and an execution boundary. Stop the foreground process (`Ctrl-C`) before installing a background service.
 - User data defaults to `~/.nerv` (`%USERPROFILE%\.nerv` on Windows; override with an absolute `NERV_HOME`). Private credentials (`token`, `anthropic-key`, `telegram-token`, `scrolls.json`) stay local and are never pasted into chat or the repo.
+- Rotate a live credential with `nerv credentials rotate admin|telegram|cloud`. Secret input is hidden, old file-backed credentials stop authenticating immediately, and `doctor` reports credential ages without values.
 - Defaults: port `4317`, language `en`, `timeZone` `Europe/Rome`. Edit `config.json` and restart to change them.
 
 ## User services (no open terminal)

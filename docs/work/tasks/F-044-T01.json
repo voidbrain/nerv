@@ -4,7 +4,7 @@
   "parent": "F-044",
   "title": "One fact per subject on one editable card",
   "goal": "One fact per subject on one editable card",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A multi-fact request proposes one fact per subject; each editable or removable before approving the card"
   ],
@@ -31,12 +31,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
-    "reviewed": "2026-11-13",
+    "estimate": "0 remaining",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). Closed 2026-11-14 after PR #392 merged; actual 0.75 h agent (stated from the implementation, verification and CI window).",
+    "reviewed": "2026-11-14",
     "baselineDays": 1,
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
-    "estimateAgentHours": 0.25
+    "actualAgentHours": 0.75,
+    "actualSource": "stated"
   }
 }
