@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 76 h agent + 21.25 h owner across 199 open steps of 47 features and 9 other records. 19.25 h of actual effort recorded on 38 steps. Generated from the task files.
+**Remaining effort:** 75.75 h agent + 21.25 h owner across 198 open steps of 47 features and 9 other records. 20 h of actual effort recorded on 39 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1925,7 +1925,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | — | — | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0 h | — | — | — | — | — |
 
 💻 **→** Next: F-066-T02 implemented in PR #399, awaiting merge; then close F-066.
 
@@ -1937,11 +1937,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-066-t01"></a>F-066-T01 — Credential rotation commands and doctor ages | 0.25 h | 0 h | 0.25 h | Implemented; verification pending |
-| 🟢 Small | <a id="f-066-t02"></a>F-066-T02 — Client kind on ledger events | 0.25 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 0.5 h | 0.75 h (1 of 2 steps recorded) | 0.25 h | 0 of 2 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-066-t02"></a>F-066-T02 — Client kind on ledger events | 0.25 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | — |
+| — | <a id="f-066-t01"></a>F-066-T01 — Credential rotation commands and doctor ages | 0.25 h | 0.75 h (stated) | 0 h | Completed | [PR #394](https://github.com/voidbrain/nerv/pull/394) live credential rotation and age-only diagnostics |
+| 🟢 Small | **Total** | 0.5 h | 1.5 h | 0 h | 1 of 2 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1950,7 +1950,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
+| PR / evidence | Steps: F-066-T01: [PR #394](https://github.com/voidbrain/nerv/pull/394) live credential rotation and age-only diagnostics; step review: Complete deterministic CI passed on Linux validation, Windows and native macOS before merge.. [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
 | Opened | 2026-11-07 |
 | Verification | Unit/integration: Pending. |
 | Reviewed | 2026-11-07 |
@@ -2135,7 +2135,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | ⏳ | — | — |
 
 💻 **→** Optional conversational faces grounded in real job state: Misato as primary HITL/ops voice; Gendo optional for risk/policy explanation; pilots optional as worker identity only.
 
@@ -2147,12 +2147,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-020-t01"></a>F-020-T01 — Persona adapter contract | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | <a id="f-020-t02"></a>F-020-T02 — Misato HITL surfacing with audit | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-020-T01](#f-020-t01) |
-| 🟢 Small | <a id="f-020-t03"></a>F-020-T03 — Explanation persona and non-Eva skins | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-020-T02](#f-020-t02) |
-| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 3 steps recorded) | 0.75 h | 0 of 3 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-020-t01"></a>F-020-T01 — Persona adapter contract | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | [PR #398](https://github.com/voidbrain/nerv/pull/398) grounded, presentation-only persona adapter contract |
+| 🟢 Small | <a id="f-020-t02"></a>F-020-T02 — Misato HITL surfacing with audit | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-020-T01](#f-020-t01) | — |
+| 🟢 Small | <a id="f-020-t03"></a>F-020-T03 — Explanation persona and non-Eva skins | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-020-T02](#f-020-t02) | — |
+| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 3 steps recorded) | 0.75 h | 0 of 3 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2162,7 +2162,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | Depends on | — |
-| PR / evidence | [PR #219](https://github.com/voidbrain/nerv/pull/219) retired-reference path correction; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [retired dashboard1 personas prototype](../remove/docs/NERV/dashboard1.html) |
+| PR / evidence | Steps: F-020-T01: [PR #398](https://github.com/voidbrain/nerv/pull/398) grounded, presentation-only persona adapter contract; step review: Local full suite, typecheck and fast checks passed; all seven deterministic Gauntlet system flows were refreshed after the source change; required CI pending.. [PR #219](https://github.com/voidbrain/nerv/pull/219) retired-reference path correction; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [retired dashboard1 personas prototype](../remove/docs/NERV/dashboard1.html) |
 | Opened | 2026-11-02 |
 | Verification | Pending |
 | Reviewed | 2026-11-08 |
