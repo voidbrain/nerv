@@ -351,6 +351,10 @@ PRs #374–#382 merged with required CI green; scoped full-suite jobs skipped on
 Full audit of 2026-11-13 ([report](../audits/2026-11-13-full.md)). `npm run ci:status` read all 41 PRs merged since `fbd5458`: every run green (`full-suite` skipped by scoped verification on #341, #342, #343, #345 and others). Archived as Closed 2026-11-13: B-042, B-050, B-052, B-053, B-055, F-025, F-042, F-045, F-046, F-052, F-074. Records that did not cite their PR: B-056 (#342), B-057 (#343), B-052 (#345), F-005 (#337 T23/T25, #339 T21), F-007 (#344 T06, next action moved to T01 or T07). F-051: two steps added (T06 EVA cage labels, T07 peer inspection scope). A full CI run on main was dispatched (run 43461834506).
 
 
+## 2026-11-14 — main `a18ebb2`
+
+PR #402 passed all required CI jobs and merged F-078-T03's 144-case Neo Tokyo-3 smoke campaign; the first Windows attempt had one transient temp-directory cleanup failure and its rerun passed unchanged.
+
 ## 2026-11-14 — main `dcab6b4`
 
 PR #401 passed all five CI jobs and merged F-062-T06; its record and ledger updates were already included in that PR. This session advances F-078-T03 with the approved Neo Tokyo-3 smoke campaign.
