@@ -418,3 +418,11 @@ Owner plan for FPV and cooking: F-008 rescoped to batteries inside NERV (T05–T
 ## 2026-11-14 — main `4bf3d35`
 
 Owner follow-ups: B-065 (a revoked base drawn on the map as offline), F-102 (scheduled automatic updates with advance notice), F-083-T10 (recipe photos), F-008 unparked to P2.
+
+
+## 2026-11-14 — main `dfb0b84`
+
+PRs #410–#413 passed CI (B-054, B-060, B-061, B-064 closed & archived); B-066 opened for owner decision on worker-link IPC decoupling ([#414](https://github.com/voidbrain/nerv/pull/414)).
+
+- `npm run ci:status` read PRs #408–#413: #408 (CI 43619602075) and #409 (CI 43620729177) already reconciled above; #410 (CI 43622463226, B-054), #411 (CI 43622889287, B-060-T02), #412 (CI 43622417765, B-061) and #413 (CI 43622666273, B-064) passed plan, validate, native-macos, windows and full-suite.
+- B-060 closed per owner instruction with root-cause decoupling of `src/worker-link.ts` frame verification from per-frame `nervous` SQLite IPC opened as B-066 (`B-066-T01` decision in `docs/decisions/worker-heartbeat-liveness.md`, `B-066-T02` implementation).

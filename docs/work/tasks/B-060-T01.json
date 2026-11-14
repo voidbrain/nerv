@@ -4,7 +4,7 @@
   "parent": "B-060",
   "title": "The update-health fixture holds its port",
   "goal": "The Windows job fails only when behaviour is wrong, not when the runner is slow",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A committed test fails without the fix: another socket on the drawn port gives EADDRINUSE",
     "The fixture listens once on a kernel-chosen port and keeps it for the whole test"
@@ -29,11 +29,16 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h",
-    "basis": "Estimated 2026-11-13: three test waits and one timeout. Not a measurement.",
-    "reviewed": "2026-11-13",
+    "estimate": "0 remaining",
+    "basis": "Closed 2026-11-14 with B-060 after PR #384 merged and PR #411 (CI 43622889287) passed all 5 jobs.",
+    "reviewed": "2026-11-14",
     "agentHours": 0,
+    "ownerHours": 0,
     "baselineAgentHours": 0.5,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated",
     "estimateAgentHours": 0.5
-  }
+  },
+  "prs": [{ "pr": 384, "note": "update-health fixture keeps kernel-chosen port" }],
+  "review": "Verified in PR #384 and PR #411 full CI."
 }

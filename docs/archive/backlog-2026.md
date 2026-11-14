@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 12 | 15 |
+| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 12 | 19 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
 
@@ -3954,6 +3954,143 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 | PR / evidence | [PR #397](https://github.com/voidbrain/nerv/pull/397); found while preparing the F-005-T22 owner run, 2026-11-14. |
 | Opened | 2026-11-14 |
 | Verification | Unit: test/node-inspection-version.test.ts through nodesCommand. VM run 2026-11-14: passed (F-005-T22 step 2). |
+| Reviewed | 2026-11-14 |
+
+</details>
+
+---
+
+
+### B-054
+
+**A long chat reply on the main base fails at the 120 s model-call limit**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />None: [PR #410](https://github.com/voidbrain/nerv/pull/410) passed all five CI jobs and merged.
+
+| | |
+|---|---|
+| **Issue** | 2026-11-12, B-008 reproduction: a five-paragraph request relayed from Tabgha ran 209.6 s and ended *Could not finish: Local route (S²) timed out.*; Neo Tokyo-3's log: *S² local route down … back after 1 min*. Misato there runs `gemma4:12b` with thinking at about 24 tokens/s on this Mac (Ollama log, F-074-T09), so about 2,900 tokens fit in `MODEL_TIMEOUT_MS` (120 s): an ordinary long answer can exceed it, and the route is then marked down for every request. |
+| **Reproduce** | On the main base with Misato on `gemma4:12b` (thinking on), ask in chat for five detailed paragraphs on any topic; watch the reply and the service log. |
+| **Check** | A long reply within the configured output allowance completes, or fails with a reason that says the answer was too long rather than marking the route down; any new limit is backed by a measured token rate; one slow reply does not take the route down for other requests. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Closed 2026-11-14:** [PR #410](https://github.com/voidbrain/nerv/pull/410) passed CI run 43622463226 (plan, windows, native-macos, validate, full-suite) and merged to main. **Next action / closure evidence:** B-054-T01 implemented 2026-11-14. Measured from the main base's `model_usage` rows for the 19:21 UTC run: consultant advice 33.2 s (744 in / 511 out tokens), Misato's first step 61.0 s (1,976 in / 829 out), the second step cut at the provider's 115 s limit (`MODEL_TIMEOUT_MS` − 5 s) with no usage: 209.2 s of the 209.6 s relay. Fix: S² calls (`completeOpenAICompatible`) stream the reply (`stream: true`); at the limit a route that sent nothing still fails with *timed out* (outage), while one still writing fails with *reply too long … ask for a shorter answer*, which is not an outage and leaves the route up. Test: `B-054: a long S² reply still being written at the time limit fails as too long and leaves the route up` in `test/model.test.ts` (committed first, `86461c5`), plus `B-054: a streamed S² reply within the limit is joined, with its usage`. Existing S² test updated to expect `stream: true`.
+
+**Estimates:** Small, estimated 2026-11-12, not a measurement; B-054-T01 actual 0.25 h agent (stated).
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #410](https://github.com/voidbrain/nerv/pull/410) (fix, CI 43622463226); found during the B-008 reproduction, [evidence](../acceptance/b008-tabgha-2026-11-12.md); [PR #318](https://github.com/voidbrain/nerv/pull/318). |
+| Opened | 2026-11-12 |
+| Verification | Unit/integration: `test/model.test.ts` and `test/engine-provider.test.ts` pass; CI 43622463226 green across all 5 jobs on PR #410 before merge. |
+| Reviewed | 2026-11-14 |
+
+</details>
+
+---
+
+### B-060
+
+**Timing-sensitive tests fail on the Windows CI runner without a code change**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />None: closed per owner instruction after [PR #411](https://github.com/voidbrain/nerv/pull/411) passed CI; root-cause IPC decoupling tracked in B-066.
+
+| | |
+|---|---|
+| **Issue** | 2026-11-13: three PRs that changed no product code failed `windows` on three different timing tests, and each passed on rerun. #379: `test/instrumentality.test.ts:216` (F-003 failed night, 15 s timeout) and `test/kaji-link.test.ts:376` (degraded base, 20 s timeout). #382: `test/worker-link.test.ts:1116` (B-046 event-loop stall: "a reply that arrived during the stall must not end the session"). The same day `validate` on #379 failed once with "Chrome startup timed out". On #383 `validate` failed in `test/upgrade-health.test.ts` (F-005-T14) with `listen EADDRINUSE 127.0.0.1:44784`: the fixture draws a random port in 43990–44989, inside Linux's ephemeral range, and opens it again at every simulated service start, so any outgoing socket holding that port fails the test. |
+| **Reproduce** | `gh run view 43486093786 --log-failed` and the #382 Windows job of 2026-11-13; run the three tests on a loaded Windows host. |
+| **Check** | Each test waits on the condition it checks instead of wall-clock budgets the runner can miss (or has a Windows-specific budget with a stated reason); a loop of 20 Windows runs of the three tests passes; the Chrome start timeout has headroom on the CI runner. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Closed 2026-11-14:** Closed at owner instruction after [PR #384](https://github.com/voidbrain/nerv/pull/384) and [PR #411](https://github.com/voidbrain/nerv/pull/411) (CI 43622889287: plan, windows, validate, native-macos, full-suite green) merged; the underlying `worker-link.ts` heartbeat / `nervous` SQLite IPC coupling identified during B-060-T02 is tracked separately for an architectural fix in B-066 (`docs/decisions/worker-heartbeat-liveness.md`) rather than running an extra 20-loop Windows CI cycle on the timing workaround. **Next action / closure evidence:** B-060-T01 implemented 2026-11-13 (`PR #384`): update-health fixture keeps its kernel-chosen port; Test: `B-060: the fixture service keeps its port…` in `test/upgrade-health.test.ts` (committed first, `a02697c`). B-060-T02 implemented 2026-11-14 (`PR #411`): Windows-specific budgets with reasons in `test/instrumentality.test.ts`, `test/kaji-link.test.ts`, `test/worker-link.test.ts` (`hb = 400`, `stallMs = Math.ceil(hb * 1.5)` = 600 ms so `late > Math.max(25, timeoutMs / 4)` holds), `test/telegram.test.ts`, and `test/windows-service-lifecycle.test.ts`; Chrome startup timeout raised from 20 s to 45 s in `test/angular.browser.mjs` and `test/fixtures/browser.mjs`.
+
+**Estimates:** Small, estimated 2026-11-13; T01 and T02 closed at 0.25 h agent each (stated).
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #411](https://github.com/voidbrain/nerv/pull/411) (B-060-T02, CI 43622889287); [PR #384](https://github.com/voidbrain/nerv/pull/384) (B-060-T01); [PR #383](https://github.com/voidbrain/nerv/pull/383), [PR #379](https://github.com/voidbrain/nerv/pull/379), [PR #382](https://github.com/voidbrain/nerv/pull/382); follow-up root cause: B-066. |
+| Opened | 2026-11-13 |
+| Verification | Unit/integration & Windows CI: 63/63 local macOS tests + PR #411 CI 43622889287 passed all 5 jobs (`windows`, `validate`, `native-macos`, `full-suite`, `plan`); 20-run loop waived in favour of B-066 root-cause fix per owner instruction. |
+| Reviewed | 2026-11-14 |
+
+</details>
+
+---
+
+### B-061
+
+**Four-character sortie short IDs can collide, so a lookup by short ID can return many**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />None: [PR #412](https://github.com/voidbrain/nerv/pull/412) passed all five CI jobs and merged.
+
+| | |
+|---|---|
+| **Issue** | 2026-11-13: `test/why.test.ts` (F-042, "sorties.explain …") failed once with `'many' !== 'one'` and passed on three reruns. A sortie's short ID is `S-` plus the first four hex characters of its UUID. Two sorties created in the same test can share them, and then `sorties.explain` by short ID finds several. The same collision can happen to the owner, since four hex characters give 65,536 values. |
+| **Reproduce** | Create two sorties whose UUIDs share their first four characters, then explain one by its short ID. |
+| **Check** | A regression with two colliding sorties: either the short ID grows until it is unique among open or recent sorties, or explain says the short ID is ambiguous and lists the candidates; the F-042 test no longer depends on random UUIDs. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Closed 2026-11-14:** [PR #412](https://github.com/voidbrain/nerv/pull/412) passed CI run 43622417765 (plan, native-macos, validate, windows, full-suite) and merged to main. **Next action / closure evidence:** B-061-T01 implemented 2026-11-14: `Ledger.openSortie` retries `randomUUID()` (up to 16 attempts) when the 4-character prefix collides with an existing sortie; `Ledger.explain`, `explainRecord`, and `sorties.explain` return distinguishing candidate short IDs (`S-` + 8–12 hex chars), titles, and statuses when multiple sorties match a prefix; `test/why.test.ts` F-042 uses an 8-character prefix for `sorties.explain`. Test: `B-061: colliding sortie short IDs list distinguishing candidates on explain` in `test/why.test.ts` (committed first, `970b969`; failed before the fix).
+
+**Estimates:** Small, estimated 2026-11-13: 0.5 h agent; actual 0.25 h agent (stated). Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #412](https://github.com/voidbrain/nerv/pull/412) (fix, CI 43622417765); [PR #389](https://github.com/voidbrain/nerv/pull/389); found while reconciling harness 8.11.0, 2026-11-13. |
+| Opened | 2026-11-13 |
+| Verification | Unit/integration: 7/7 tests in `test/why.test.ts` pass; PR #412 CI 43622417765 green across all 5 jobs before merge. |
+| Reviewed | 2026-11-14 |
+
+</details>
+
+---
+
+### B-064
+
+**`nodes lifecycle-inspect` on a fresh Linux machine fails with a raw ENOENT**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />None: [PR #413](https://github.com/voidbrain/nerv/pull/413) passed all five CI jobs and merged.
+
+| | |
+|---|---|
+| **Issue** | 2026-11-14, F-005-T22 step 3 on the Linux VM: `nodes lifecycle-inspect --action install` in a fresh clone printed `ENOENT: no such file or directory, lstat '<home>/.nerv'`. The lifecycle commands support only the local Mac profile, and the data home does not exist yet, but neither is said, so the procedure's expected prerequisite plan never appears. |
+| **Reproduce** | On Linux with no `~/.nerv`: `npm start -- nodes lifecycle-inspect --action install --out install-plan.json`. |
+| **Check** | A regression through `nodesCommand`: no data home gives a message naming it and saying nothing changed; off macOS the message says the lifecycle supports only the Mac profile (Linux is F-005-T25); the Mac behaviour is unchanged. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Closed 2026-11-14:** [PR #413](https://github.com/voidbrain/nerv/pull/413) passed CI run 43622666273 (plan, validate, native-macos, windows, full-suite) and merged to main. **Next action / closure evidence:** B-064-T01 implemented 2026-11-14: `requireServiceHome` in `src/node-lifecycle-execution.ts` checks that the data home exists before `inspect()` and throws a message naming the missing path and stating nothing was changed; `src/nodes-cli.ts` rejects unsupported platforms with a message naming macOS, Linux, and Windows and stating nothing was changed; `docs/acceptance/f005-t22-prerequisites.md` notes the missing-home message. Test: `B-064: nodes lifecycle-inspect names a missing data home and unsupported platform instead of raw ENOENT` in `test/node-lifecycle.test.ts` (committed first, `2e70e8a`).
+
+**Estimates:** Small, estimated 2026-11-14: 0.5 h agent; actual 0.25 h agent (stated). Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #413](https://github.com/voidbrain/nerv/pull/413) (fix, CI 43622666273); [PR #400](https://github.com/voidbrain/nerv/pull/400) records it; found in the F-005-T22 VM run, 2026-11-14. |
+| Opened | 2026-11-14 |
+| Verification | Unit/integration: 7/7 tests in `test/node-lifecycle.test.ts` pass; PR #413 CI 43622666273 green across all 5 jobs before merge. |
 | Reviewed | 2026-11-14 |
 
 </details>
