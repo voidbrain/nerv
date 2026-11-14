@@ -25,7 +25,13 @@ const fixture = () => {
   return { root, home, disk, database, db, done: () => (db.close(), rmSync(root, { recursive: true, force: true })) };
 };
 
-const tick = () => new Promise((r) => setTimeout(r, 60));
+// Waits for the loop to reach a state rather than a fixed time: Windows runners take longer to snapshot.
+const until = async (done: () => boolean, ms = 10_000) => {
+  for (const end = Date.now() + ms; !done();) {
+    if (Date.now() > end) throw Error('timed out');
+    await new Promise((r) => setTimeout(r, 20));
+  }
+};
 
 test('a copy opens only with the private key and passphrase, and any change to it fails', () => {
   const plain = Buffer.from('reminders and memory');
@@ -83,8 +89,8 @@ test('the nightly loop writes an encrypted copy that restores the database throu
       5,
       () => readConfig(f.home).backup,
     );
-    await tick();
-    stop();
+    await until(() => copyDates(f.disk).length > 0);
+    await stop();
     assert.deepEqual(lines, []);
     const [date] = snapshotDates(snapshotDir(f.home));
     assert.deepEqual(copyDates(f.disk), [date]);
@@ -129,15 +135,15 @@ test('an unplugged disk is reported once, never created, and catches up when it 
       5,
       () => config,
     );
-    await tick();
+    await until(() => lines.length > 0);
     assert.equal(lines.length, 1);
     assert.match(lines[0]!, /^Off-host copy 1 for \d{4}-\d{2}-\d{2} waits: its folder is not available/);
     assert.ok(!lines[0]!.includes(f.root));
     assert.ok(!readdirSync(f.root).includes('disk'));
 
     mkdirSync(f.disk); // plugged in
-    await tick();
-    stop();
+    await until(() => copyDates(f.disk).length > 0);
+    await stop();
     assert.equal(copyDates(f.disk).length, 1);
     assert.equal(lines.length, 1);
   } finally {
@@ -159,8 +165,8 @@ test('only the newest copies are kept in each folder', async () => {
       5,
       () => ({ publicKey: key.publicKey, copies: [f.disk], keep: 2 }),
     );
-    await tick();
-    stop();
+    await until(() => copyDates(f.disk).length === 2 && !copyDates(f.disk).includes('2020-01-11'));
+    await stop();
     const [today] = snapshotDates(snapshotDir(f.home));
     assert.deepEqual(copyDates(f.disk), [today, '2020-01-12']);
     assert.ok(readdirSync(f.disk).includes('unrelated.txt'));

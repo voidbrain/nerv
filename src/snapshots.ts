@@ -109,10 +109,11 @@ export function startSnapshots(
   log: (line: string) => void = (l) => console.error(l),
   everyMs = 60_000,
   backup: () => BackupConfig | undefined = () => undefined,
-): () => void {
+): () => Promise<void> {
   const dir = snapshotDir(home);
   let attempted: string | undefined,
-    busy = false;
+    busy = false,
+    running: Promise<void> = Promise.resolve();
   const copied = new Map<string, string>(),
     reported = new Map<string, string>();
   const tick = async () => {
@@ -134,10 +135,17 @@ export function startSnapshots(
       busy = false;
     }
   };
-  const timer = setInterval(() => void tick(), everyMs);
+  const run = () => {
+    if (!busy) running = tick();
+  };
+  const timer = setInterval(run, everyMs);
   timer.unref();
-  void tick();
-  return () => clearInterval(timer);
+  run();
+  // Stops the schedule; the promise settles once a tick already under way has finished.
+  return () => {
+    clearInterval(timer);
+    return running;
+  };
 }
 
 function copyOffHost(
