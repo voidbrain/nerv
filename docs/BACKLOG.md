@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 75.75 h agent + 21.25 h owner across 199 open steps of 47 features and 8 other records. 17.75 h of actual effort recorded on 34 steps. Generated from the task files.
+**Remaining effort:** 75.75 h agent + 21.25 h owner across 198 open steps of 47 features and 8 other records. 18 h of actual effort recorded on 35 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1565,7 +1565,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h | — | — | — | — | — |
 
-💻 **→** Next: B-063-T02 (owner allows the expensive stress and browser cases); B-063-T01 implemented.
+💻 **→** Next: B-063-T01 implemented, awaiting merge; then the owner reruns F-005-T22 step 2.
 
 | | |
 |---|---|
@@ -1578,8 +1578,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
 | 🟢 Small | <a id="b-063-t01"></a>B-063-T01 — Report a Node.js below engines.node | 0.5 h | 0 h | 0.25 h | Implemented; verification pending | 🤖 |
-| 🟢 Small | <a id="b-063-t02"></a>B-063-T02 — Rerun the two expensive system cases at this source | 0.25 h | 0 h | 0 h | Planned · waits on [B-063-T01](#b-063-t01) | ⏳ 🤖 ⏳ 🧑‍🔧 |
-| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0.25 h | 0 of 2 completed | |
+| — | <a id="b-063-t02"></a>B-063-T02 — Rerun the two expensive system cases at this source | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 🧑‍🔧 |
+| 🟢 Small | **Total** | 0.75 h | 0.25 h (1 of 2 steps recorded) | 0.25 h | 1 of 2 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>

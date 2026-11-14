@@ -4,13 +4,42 @@
   "parent": "B-063",
   "title": "Rerun the two expensive system cases at this source",
   "goal": "nerv-system-flows/stress and nerv-system-flows/browser have a covering run at the B-063 source",
-  "status": "planned",
-  "acceptance": ["npm run gauntlet:all -- --execute --allow-expensive records passing runs for nerv-system-flows/stress and nerv-system-flows/browser", "node tools/gauntlet.mjs pending exits 0"],
-  "dependsOn": ["B-063-T01"],
-  "resources": ["evals/gauntlet/**", "docs/work/records/B-063.md", "docs/work/tasks/B-063-T02.json", "generated:backlog-views"],
-  "capabilities": ["structured-tools"],
+  "status": "closed",
+  "acceptance": [
+    "npm run gauntlet:all -- --execute --allow-expensive records passing runs for nerv-system-flows/stress and nerv-system-flows/browser",
+    "node tools/gauntlet.mjs pending exits 0"
+  ],
+  "dependsOn": [
+    "B-063-T01"
+  ],
+  "resources": [
+    "evals/gauntlet/**",
+    "docs/work/records/B-063.md",
+    "docs/work/tasks/B-063-T02.json",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "structured-tools"
+  ],
   "privacy": "Metadata-only ledger; no prompts or outputs in Git.",
-  "validation": ["node tools/gauntlet.mjs pending"],
-  "escalation": ["The run is expensive (time, no model): the owner starts it or allows it; a failing case becomes a B- record"],
-  "effort": {"size": "small", "estimate": "0.25 h agent + 0.25 hours owner", "basis": "Estimated 2026-11-14: one deterministic run of two cases; the other five ran with B-063-T01. Not a measurement.", "reviewed": "2026-11-14", "agentHours": 0, "ownerHours": 0, "baselineAgentHours": 0.25, "ownerKind": "procedure", "estimateAgentHours": 0.25}
+  "validation": [
+    "node tools/gauntlet.mjs pending",
+    "2026-11-14: owner asked the agent to run it; after npm run build, npm run gauntlet:all -- --execute --allow-expensive recorded passing stress and browser runs; node tools/gauntlet.mjs pending exits 0."
+  ],
+  "escalation": [
+    "The run is expensive (time, no model): the owner starts it or allows it; a failing case becomes a B- record"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h agent + 0.25 hours owner",
+    "basis": "Estimated 2026-11-14: one deterministic run of two cases; the other five ran with B-063-T01. Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 0,
+    "ownerHours": 0,
+    "baselineAgentHours": 0.25,
+    "ownerKind": "procedure",
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
+  }
 }
