@@ -1687,7 +1687,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Fix: PR pending. Found during the B-008 reproduction, [evidence](acceptance/b008-tabgha-2026-11-12.md); [PR #318](https://github.com/voidbrain/nerv/pull/318). |
+| PR / evidence | [PR #410](https://github.com/voidbrain/nerv/pull/410) (fix). Found during the B-008 reproduction, [evidence](acceptance/b008-tabgha-2026-11-12.md); [PR #318](https://github.com/voidbrain/nerv/pull/318). |
 | Opened | 2026-11-12 |
 | Verification | 2026-11-14: test/model.test.ts and test/engine-provider.test.ts pass locally; CI pending. |
 | Reviewed | 2026-11-14 |
