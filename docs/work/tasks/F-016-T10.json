@@ -2,8 +2,14 @@
   "version": 1,
   "parent": "F-016",
   "id": "F-016-T10",
-  "status": "ready",
+  "status": "implemented",
   "title": "Revise the relocation decision after review",
+  "prs": [
+    {
+      "pr": 417,
+      "note": "revised relocation decision and clean second review"
+    }
+  ],
   "goal": "The decision record answers every blocking and should-fix finding of the 2026-11-13 review",
   "capabilities": [
     "bounded-edit",
@@ -42,8 +48,10 @@
     "basis": "Estimated 2026-11-13: revise one decision record against a review. Not a measurement.",
     "reviewed": "2026-11-13",
     "baselineDays": 0.5,
-    "agentHours": 0.5,
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
-    "estimateAgentHours": 0.5
+    "estimateAgentHours": 0.5,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
   }
 }
