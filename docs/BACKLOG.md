@@ -2214,7 +2214,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #](https://github.com/voidbrain/nerv/pull/) |
+| PR / evidence | Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
 | Opened | 2026-11-14 |
 | Verification | Pending. |
 | Reviewed | 2026-11-14 |
@@ -2255,7 +2255,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #](https://github.com/voidbrain/nerv/pull/) |
+| PR / evidence | Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
 | Opened | 2026-11-14 |
 | Verification | Pending. |
 | Reviewed | 2026-11-14 |
@@ -2295,7 +2295,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #](https://github.com/voidbrain/nerv/pull/) |
+| PR / evidence | Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
 | Opened | 2026-11-14 |
 | Verification | Pending. |
 | Reviewed | 2026-11-14 |
@@ -2335,7 +2335,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #](https://github.com/voidbrain/nerv/pull/) |
+| PR / evidence | Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
 | Opened | 2026-11-14 |
 | Verification | Pending. |
 | Reviewed | 2026-11-14 |
