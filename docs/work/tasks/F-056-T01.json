@@ -8,7 +8,9 @@
   "acceptance": [
     "Commands answered before Misato and without a model; read-only commands open no sortie"
   ],
-  "dependsOn": [],
+  "dependsOn": [
+    "F-021-T05"
+  ],
   "resources": [
     "src/**",
     "test/**",

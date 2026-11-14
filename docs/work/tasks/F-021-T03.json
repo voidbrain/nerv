@@ -9,7 +9,8 @@
     "A pilot lists the tools it may use (F-045); binding is deny-by-default; escalation impossible without a grant"
   ],
   "dependsOn": [
-    "F-021-T02"
+    "F-021-T02",
+    "F-049-T04"
   ],
   "resources": [
     "src/**",

@@ -4,7 +4,8 @@
   "status": "planned",
   "dependsOn": [
     "F-027-T01",
-    "F-049-T01"
+    "F-049-T01",
+    "F-049-T04"
   ],
   "resources": [
     "contract:egress-enforcement",
