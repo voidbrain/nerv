@@ -4,7 +4,7 @@
   "parent": "F-066",
   "title": "Client kind on ledger events",
   "goal": "Client kind on ledger events",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "Events record dashboard session, CLI, API token or Telegram; a test distinguishes API-token from dashboard decisions"
   ],
@@ -28,7 +28,8 @@
   ],
   "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
   "validation": [
-    "Regression or fixture for each acceptance item; final applicable CI"
+    "Regression or fixture for each acceptance item; final applicable CI",
+    "2026-11-14: test/decision-client.test.ts through the real server (dashboard session vs admin token) and the nervous-process RPC schema; both committed failing before the fix. The RPC case was found while checking the join: the schema rejected any source but api, cli and telegram."
   ],
   "escalation": [
     "Material scope growth or effort increase goes to the owner before adoption"
@@ -39,8 +40,10 @@
     "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
     "reviewed": "2026-11-13",
     "baselineDays": 0.5,
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.75,
-    "estimateAgentHours": 0.25
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 0.75,
+    "actualSource": "stated"
   }
 }
