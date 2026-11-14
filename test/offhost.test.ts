@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { backupCommand } from '../src/backup-cli.ts';
 import { readConfig } from '../src/config.ts';
@@ -47,10 +47,10 @@ test('a copy opens only with the private key and passphrase, and any change to i
 });
 
 test('config holds only the public key; copy folders are absolute and outside the data home', () => {
-  const home = '/data/nerv';
+  const home = resolve('/data/nerv');
   assert.deepEqual(validateBackup({ publicKey: key.publicKey, copies: ['/Volumes/Disk/nerv'] }, home), {
     publicKey: key.publicKey,
-    copies: ['/Volumes/Disk/nerv'],
+    copies: [resolve('/Volumes/Disk/nerv')], // Windows adds the current drive
   });
   for (const bad of [
     { publicKey: key.publicKey, copies: ['relative/dir'] },

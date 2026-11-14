@@ -359,7 +359,7 @@ Full audit of 2026-11-13 ([report](../audits/2026-11-13-full.md)). `npm run ci:s
 - F-023: T01–T03 closed with the record still awaiting the owner's paired-Mac procedure; that session is now its own step.
 - [Owner jobs case study](../design/owner-jobs-case-study-2026-11-14.md): fourteen jobs mapped to owning records; thirteen new records F-082–F-094, placed on the roadmap.
 
-## 2026-11-14 — main `0131dbc`
+## 2026-11-14 — main `eca644e`
 
 8 PRs (#391–#397, #399) passed CI; F-066 and B-062 closed and archived, F-062-T02 and B-063-T01 closed, F-062-T03 implemented in #400, F-005-T22 step 1 run on the VM (step 2 blocked: no outbound network).
 
