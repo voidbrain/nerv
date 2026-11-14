@@ -5,6 +5,10 @@
  "title": "Smoke campaign on Neo Tokyo-3",
  "goal": "Smoke campaign on Neo Tokyo-3",
  "status": "closed",
+ "prs": [
+  {"pr": 402, "note": "Recorded the approved 144-case Neo Tokyo-3 smoke campaign"},
+  {"pr": 403, "note": "Closed T03 after required CI passed"}
+ ],
  "acceptance": [
   "smoke, smoke-schema and general-assistant-expanded run for gemma4:12b, gemma4:26b and qwen2.5-coder:14b on the Mac, recorded with model identity in evals/gauntlet/ledger.json",
   "The three gemma4:12b smoke failures of 2026-11-09 (change-mind, tool-choice, missing-input: invalid structured output) rerun; whether a format setting fixes them is recorded"

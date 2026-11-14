@@ -1251,18 +1251,18 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-078-t04"></a>F-078-T04 — Role campaign on Neo Tokyo-3 | 0.5 h | 0 h | 0.5 h | Planned | 🤖 |
-| 🟢 Small | <a id="f-078-t06"></a>F-078-T06 — Campaign for the larger candidates | 0.5 h | 0 h | 0.5 h | Planned | 🤖 |
-| 🟢 Small | <a id="f-078-t05"></a>F-078-T05 — Prepare Tabgha for the campaign: allow the run and download qwen2.5:3b | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-078-T04](#f-078-t04) | ⏳ 🧑‍🔧 |
-| 🟢 Small | <a id="f-078-t09"></a>F-078-T09 — Tabgha campaign: remote endpoint and small local fallback | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-078-T05](#f-078-t05) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-078-t07"></a>F-078-T07 — Comparison report and profile status | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-078-T04](#f-078-t04), [F-078-T09](#f-078-t09), [F-078-T06](#f-078-t06) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-078-t08"></a>F-078-T08 — Adopt the new Gauntlet packs (gauntlet F-012) when released | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-078-T07](#f-078-t07) | ⏳ 🤖 |
-| — | <a id="f-078-t01"></a>F-078-T01 — Inventory the models and hardware on Neo Tokyo-3 and Tabgha | 0.25 h | 0 h | 0 h | Completed | 🤖 🧑‍🔧 |
-| — | <a id="f-078-t02"></a>F-078-T02 — Agree the evaluation matrix and its budget | 0.25 h | 0 h | 0 h | Completed | 🤖 🤔 |
-| — | <a id="f-078-t03"></a>F-078-T03 — Smoke campaign on Neo Tokyo-3 | 0.5 h | 0.5 h (stated) | 0 h | Completed | 🤖 |
-| 🟡 Medium | **Total** | 3.5 h (8 of 9 steps) | 0.5 h (1 of 9 steps recorded) | 2.5 h agent + 0.25 h owner | 3 of 9 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-078-t04"></a>F-078-T04 — Role campaign on Neo Tokyo-3 | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — |
+| 🟢 Small | <a id="f-078-t06"></a>F-078-T06 — Campaign for the larger candidates | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — |
+| 🟢 Small | <a id="f-078-t05"></a>F-078-T05 — Prepare Tabgha for the campaign: allow the run and download qwen2.5:3b | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-078-T04](#f-078-t04) | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | <a id="f-078-t09"></a>F-078-T09 — Tabgha campaign: remote endpoint and small local fallback | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-078-T05](#f-078-t05) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-078-t07"></a>F-078-T07 — Comparison report and profile status | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-078-T04](#f-078-t04), [F-078-T09](#f-078-t09), [F-078-T06](#f-078-t06) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-078-t08"></a>F-078-T08 — Adopt the new Gauntlet packs (gauntlet F-012) when released | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-078-T07](#f-078-t07) | ⏳ 🤖 | — |
+| — | <a id="f-078-t01"></a>F-078-T01 — Inventory the models and hardware on Neo Tokyo-3 and Tabgha | 0.25 h | 0 h | 0 h | Completed | 🤖 🧑‍🔧 | — |
+| — | <a id="f-078-t02"></a>F-078-T02 — Agree the evaluation matrix and its budget | 0.25 h | 0 h | 0 h | Completed | 🤖 🤔 | — |
+| — | <a id="f-078-t03"></a>F-078-T03 — Smoke campaign on Neo Tokyo-3 | 0.5 h | 0.5 h (stated) | 0 h | Completed | 🤖 | [PR #402](https://github.com/voidbrain/nerv/pull/402) Recorded the approved 144-case Neo Tokyo-3 smoke campaign; [PR #403](https://github.com/voidbrain/nerv/pull/403) Closed T03 after required CI passed |
+| 🟡 Medium | **Total** | 3.5 h (8 of 9 steps) | 0.5 h (1 of 9 steps recorded) | 2.5 h agent + 0.25 h owner | 3 of 9 completed | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1271,7 +1271,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #402](https://github.com/voidbrain/nerv/pull/402) T03; [PR #379](https://github.com/voidbrain/nerv/pull/379) [PR #377](https://github.com/voidbrain/nerv/pull/377) [PR #375](https://github.com/voidbrain/nerv/pull/375) plan; owner request 2026-11-13; [Gemma smoke 2026-11-09](evaluations/2026-11-09-gemma-common-smoke.md); docs/agents/model-profiles.json |
+| PR / evidence | Steps: F-078-T03: [PR #402](https://github.com/voidbrain/nerv/pull/402) Recorded the approved 144-case Neo Tokyo-3 smoke campaign; [PR #403](https://github.com/voidbrain/nerv/pull/403) Closed T03 after required CI passed. [PR #403](https://github.com/voidbrain/nerv/pull/403) T03 close; [PR #402](https://github.com/voidbrain/nerv/pull/402) T03; [PR #379](https://github.com/voidbrain/nerv/pull/379) [PR #377](https://github.com/voidbrain/nerv/pull/377) [PR #375](https://github.com/voidbrain/nerv/pull/375) plan; owner request 2026-11-13; [Gemma smoke 2026-11-09](evaluations/2026-11-09-gemma-common-smoke.md); docs/agents/model-profiles.json |
 | Depends on | — |
 | Opened | 2026-11-13 |
 | Verification | 2026-11-14: T03 recorded 144/144 graded outcomes across the three approved models and three packs; `node tools/gauntlet.mjs pending` exits 0; PR #402 CI run 43595307489 passed plan, validate, Windows, native-macos and full-suite on rerun after one transient Windows temp-directory cleanup failure. |
