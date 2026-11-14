@@ -9,7 +9,7 @@
     "Declined by the owner 2026-11-13: the companion stays unsigned and local; reopen when it is distributed"
   ],
   "dependsOn": [
-    "F-011-T03"
+    "F-011-T06"
   ],
   "resources": [
     "native/**",

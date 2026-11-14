@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer, type Server } from 'node:http';
+import type { AddressInfo } from 'node:net';
 import { generateKeyPairSync } from 'node:crypto';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -20,7 +21,7 @@ const supported = { skip: process.platform === 'win32' || process.getuid?.() ===
 const PREV = 'a'.repeat(40);
 const NEXT = 'b'.repeat(40);
 
-function adapterFixture(doctorFor: (revision: string, callCount: number) => { status: number; body: unknown }) {
+async function adapterFixture(doctorFor: (revision: string, callCount: number) => { status: number; body: unknown }) {
   const f = serviceFixture();
   const c: ServiceContext = { ...f.host.context, node: join(f.directory, 'neutral-node') };
   writeFileSync(c.node, 'Neutral command-adapter executable metadata', { mode: 0o700 });
@@ -30,8 +31,24 @@ function adapterFixture(doctorFor: (revision: string, callCount: number) => { st
   let revision = PREV;
   let registered = false;
   let doctorCalls = 0;
-  let server: Server | undefined;
-  const port = 43990 + Math.floor(Math.random() * 1000);
+  // B-060: one server on a port the kernel chose, held for the whole test; a stopped service drops connections
+  // instead of closing the port, so no other socket can take it between a stop and the next start.
+  const server: Server = createServer((req, res) => {
+    if (!registered) {
+      req.socket.destroy();
+      return;
+    }
+    doctorCalls++;
+    const reply = doctorFor(revision, doctorCalls);
+    res.statusCode = reply.status;
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify(reply.body));
+  });
+  await new Promise<void>((done, fail) => {
+    server.once('error', fail);
+    server.listen(0, '127.0.0.1', done);
+  });
+  const port = (server.address() as AddressInfo).port;
   const keys = generateKeyPairSync('ed25519');
   const pubBase64 = keys.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
   writeFileSync(
@@ -125,20 +142,10 @@ function adapterFixture(doctorFor: (revision: string, callCount: number) => { st
     }
     if (args[0] === 'bootstrap') {
       registered = true;
-      server = createServer((_req, res) => {
-        doctorCalls++;
-        const reply = doctorFor(revision, doctorCalls);
-        res.statusCode = reply.status;
-        res.setHeader('content-type', 'application/json');
-        res.end(JSON.stringify(reply.body));
-      });
-      await new Promise<void>((done) => server!.listen(port, '127.0.0.1', done));
       return { status: 0, err: '', out: '' };
     }
     registered = false;
-    server?.closeIdleConnections();
-    if (server) await new Promise<void>((done) => server!.close(() => done()));
-    server = undefined;
+    server.closeAllConnections();
     return { status: 0, err: '', out: '' };
   };
   const host = macServiceAdapter(c, run);
@@ -148,15 +155,15 @@ function adapterFixture(doctorFor: (revision: string, callCount: number) => { st
   return {
     host,
     close: async () => {
-      server?.closeIdleConnections();
-      if (server) await new Promise<void>((done) => server!.close(() => done()));
+      server.closeAllConnections();
+      await new Promise<void>((done) => server.close(() => done()));
       f.close();
     },
   };
 }
 
 test('F-005-T14: update records after-start health check in receipt when service is healthy', supported, async () => {
-  const f = adapterFixture((revision) => ({
+  const f = await adapterFixture((revision) => ({
     status: 200,
     body: {
       base: { id: 'BASE-01' },
@@ -186,6 +193,40 @@ test('F-005-T14: update records after-start health check in receipt when service
     await f.close();
   }
 });
+
+test(
+  'B-060: the fixture service keeps its port even when another socket holds the port it would draw',
+  { ...supported, timeout: 20_000 },
+  async () => {
+    // Another process (an outgoing connection in CI) holds the port the fixture would pick at random.
+    const blocker = createServer();
+    await new Promise<void>((done) => blocker.listen(44500, '127.0.0.1', done));
+    const random = Math.random;
+    Math.random = () => 0.51; // 43990 + 510 = 44500
+    let f: ReturnType<typeof adapterFixture> | undefined;
+    try {
+      f = adapterFixture((revision) => ({
+        status: 200,
+        body: {
+          base: { id: 'BASE-01' },
+          build: { commit: revision },
+          database: { quick_check: 'ok' },
+          processes: { nervous: 9999998, brain: 9999997, brainAlive: true },
+          models: { misato: 'neutral-local' },
+        },
+      }));
+      Math.random = random;
+      const host = (await f).host;
+      const plan = await planService(host, 'update', NEXT);
+      const receipt = await applyService(host, plan, plan.digest);
+      assert.equal(receipt.state, 'completed');
+    } finally {
+      Math.random = random;
+      await (await f)?.close();
+      await new Promise<void>((done) => blocker.close(() => done()));
+    }
+  },
+);
 
 test(
   'F-005-T14: failed brain, database, nervous or identity check leaves update uncertain with ordered recovery',
@@ -290,7 +331,7 @@ test(
     ];
 
     for (const c of cases) {
-      const f = adapterFixture(c.doctor);
+      const f = await adapterFixture(c.doctor);
       try {
         const plan = await planService(f.host, 'update', NEXT);
         await assert.rejects(applyService(f.host, plan, plan.digest), c.expectFailure);

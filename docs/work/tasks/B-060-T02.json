@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "B-060-T02",
+  "parent": "B-060",
+  "title": "Make the Windows timing tests wait on their condition",
+  "goal": "The Windows job fails only when behaviour is wrong, not when the runner is slow",
+  "status": "planned",
+  "acceptance": [
+    "Each Windows-flaky test of 2026-11-13 (instrumentality F-003 failed night, kaji-link degraded base, worker-link B-046 stall, Telegram language join, windowsServiceAdapter, F-005-T23 update) waits on its condition or carries a Windows budget with a reason",
+    "20 consecutive Windows CI runs of those tests pass",
+    "The browser start timeout has headroom on the CI runner"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "test/**",
+    "docs/work/records/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "regression-design",
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures only.",
+  "validation": [
+    "npm test",
+    "Windows CI job"
+  ],
+  "escalation": [
+    "A change to the behaviour a test checks goes to a fresh-context review"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-13: six test waits and one browser timeout, then repeated Windows runs. Not a measurement.",
+    "reviewed": "2026-11-13",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}

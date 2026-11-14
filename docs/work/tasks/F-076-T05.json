@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-076-T05",
+  "parent": "F-076",
+  "title": "Put the chosen main verification in place",
+  "goal": "Put the chosen main verification in place",
+  "status": "planned",
+  "acceptance": [
+    "The mechanism the owner chose is in place and a PR shows the run it implies"
+  ],
+  "dependsOn": [
+    "F-076-T04"
+  ],
+  "resources": [
+    "docs/work/records/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "gh run list --branch main",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "ci.yml is a harness file: decide project-only or template first (AGENTS.md, \"Changing a harness file\")",
+    "Branch protection is changed by the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
+    "reviewed": "2026-11-13",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25
+  }
+}

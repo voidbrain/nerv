@@ -2,13 +2,12 @@
   "version": 1,
   "id": "F-049-T03",
   "parent": "F-049",
-  "title": "Choose the macOS host enforcement mechanism",
+  "title": "Measure the macOS enforcement candidates against the threat model",
   "goal": "Measure the candidate mechanisms (macOS sandbox profile, a lightweight VM/container, AgentFS from the 2026-11-09 assessment) against the T01 threat model on the Mac host and record the choice",
   "status": "ready",
   "acceptance": [
-    "Each candidate checked for filesystem, network egress, credential denial, CPU/memory/output limits, cancellation and startup time",
-    "Decision record in docs/decisions with what each candidate cannot enforce",
-    "Owner chooses when more than one candidate passes"
+    "Each candidate (macOS sandbox profile, lightweight VM/container, AgentFS) measured for filesystem, network egress, credential denial, CPU/memory/output limits, cancellation and startup time",
+    "A decision record in docs/decisions states what each candidate cannot enforce, ready for the owner (F-049-T11)"
   ],
   "dependsOn": [
     "F-049-T01"
@@ -38,14 +37,11 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.25 h agent + 0.25 hours owner",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "estimate": "0.25 h",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
     "reviewed": "2026-11-13",
-    "baselineDays": 1.5,
     "agentHours": 0.25,
-    "ownerHours": 0.25,
     "baselineAgentHours": 2.25,
-    "estimateAgentHours": 0.25,
-    "ownerKind": "both"
+    "estimateAgentHours": 0.25
   }
 }

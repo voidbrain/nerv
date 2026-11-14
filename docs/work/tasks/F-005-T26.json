@@ -13,6 +13,7 @@
   ],
   "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
   "acceptance": [
+    "Target: the Linux VM nerv-linux (docs/acceptance/linux-vm.md)",
     "Owner-selected target 2026-11-13: a Linux VM on the Mac, the same as F-009-T03",
     "Acceptance on an owner-selected mini PC, Pi or equivalent",
     "Implement validated install/status/start/stop/update/uninstall/recovery for supported Linux user services with explicit account/login policy",
@@ -42,14 +43,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h agent + 1 hour owner",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "estimate": "1 h owner",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
     "reviewed": "2026-11-13",
     "baselineDays": 0.5,
-    "agentHours": 0.25,
     "ownerHours": 1,
-    "baselineAgentHours": 0.75,
-    "estimateAgentHours": 0.25,
-    "ownerKind": "both"
-  }
+    "agentHours": 0,
+    "ownerKind": "procedure"
+  },
+  "ownerLink": "docs/acceptance/f009-service-login-procedure.md#part-2--linux-target-selection-and-acceptance-selected-linux-host-bash"
 }

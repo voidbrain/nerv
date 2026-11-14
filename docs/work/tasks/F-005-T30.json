@@ -19,7 +19,7 @@
     "Retain failure/retry and unknown-device evidence; close the parent only after every agreed acceptance outcome passes or an owner-approved scope change is recorded"
   ],
   "dependsOn": [
-    "F-005-T29"
+    "F-005-T36"
   ],
   "resources": [
     "src/**",

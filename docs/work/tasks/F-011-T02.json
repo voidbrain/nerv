@@ -28,14 +28,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h agent + 0.5 hours owner",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "estimate": "0.5 h owner",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
     "reviewed": "2026-11-13",
     "baselineDays": 1,
-    "agentHours": 0.25,
     "ownerHours": 0.5,
-    "baselineAgentHours": 0.5,
-    "ownerKind": "procedure",
-    "estimateAgentHours": 0.25
-  }
+    "agentHours": 0,
+    "ownerKind": "procedure"
+  },
+  "ownerLink": "docs/acceptance/f011-companion-acceptance-procedure.md#part-1--companion-ui-notifications-and-service-controls-neo-tokyo-3-terminal--ui"
 }

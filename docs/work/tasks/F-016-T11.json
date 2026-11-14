@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "parent": "F-016",
+  "id": "F-016-T11",
+  "status": "planned",
+  "title": "Record the evidence of F-016-T09 and close it",
+  "goal": "The result of F-016-T09 is recorded in its record with the evidence the owner reported",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "regression-design",
+    "distributed-contracts"
+  ],
+  "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
+  "acceptance": [
+    "Evidence of F-016-T09 recorded in the record; failures become B- records"
+  ],
+  "dependsOn": [
+    "F-016-T09"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:coordinator-authority"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never let two coordinators act, or copy context as authority, to make progress"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
+    "reviewed": "2026-11-13",
+    "agentHours": 0.25,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 0.25
+  }
+}

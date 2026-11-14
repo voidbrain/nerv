@@ -65,8 +65,15 @@ function summary(record) {
   const legacy = row[1] === record.id;
   // The generated ledger (F-059) adds Remaining, optional Depends on / Unlocks, and the Procedures and Decisions cells
   // last (8.0.0).
-  const kind = { '🧑🧑': 'Both', '🧑—': 'Procedure', '—🧑': 'Decision', '——': 'No' }[row.slice(-2).join('')];
-  const generated = [7, 9].includes(row.length) && kind !== undefined;
+  // F-071 (8.8.0): 🧑‍🔧 and 🤔 read like 🧑.
+  const kind = { '🧑🧑': 'Both', '🧑—': 'Procedure', '—🧑': 'Decision', '——': 'No' }[
+    row
+      .slice(-2)
+      .map((c, i) => (c === ['🧑‍🔧', '🤔'][i] ? '🧑' : c))
+      .join('')
+  ];
+  // F-073 (8.10.0): eight or ten cells with the Agent cell.
+  const generated = [7, 8, 9, 10].includes(row.length) && kind !== undefined;
   if (record.file !== 'docs/BACKLOG.md' && ![4, 5].includes(row.length) && !generated)
     return { status: 'Unknown', priority: 'Unknown', effort: 'Unknown' };
   assert([4, 5].includes(row.length) || generated, `${record.id}: unsupported summary`);

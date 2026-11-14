@@ -1,40 +1,41 @@
 {
- "version": 1,
- "id": "F-076-T04",
- "parent": "F-076",
- "title": "Turn on the merge queue for main",
- "goal": "A PR reaches main only after its combination with the queue passes",
- "status": "planned",
- "acceptance": [
-  "A ruleset on main requires the merge queue and the checks validate and native-macos",
-  "A PR merged through the queue shows a merge_group run that passed"
- ],
- "dependsOn": [
-  "F-076-T03"
- ],
- "resources": [
-  "docs/work/records/**",
-  "generated:backlog-views"
- ],
- "capabilities": [
-  "bounded-edit"
- ],
- "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
- "validation": [
-  "gh run list --branch main",
-  "npm run check:fast"
- ],
- "escalation": [
-  "ci.yml is a harness file: decide project-only or template first (AGENTS.md, \"Changing a harness file\")",
-  "Branch protection is changed by the owner"
- ],
- "effort": {
-  "size": "small",
-  "estimate": "0.25 h",
-  "basis": "Estimated 2026-11-13 after the owner chose the merge queue. Not a measurement.",
-  "reviewed": "2026-11-13",
-  "agentHours": 0.25,
-  "baselineAgentHours": 0.25,
-  "estimateAgentHours": 0.25
- }
+  "version": 1,
+  "id": "F-076-T04",
+  "parent": "F-076",
+  "title": "Turn on the merge queue for main",
+  "goal": "A PR reaches main only after its combination with the queue passes",
+  "status": "planned",
+  "acceptance": [
+    "The owner chooses: move the repository to an organization and turn on the queue, or option 2 (push trigger on main), or option 1 (strict)",
+    "The chosen mechanism is in place and a PR shows the run it implies"
+  ],
+  "dependsOn": [
+    "F-076-T03"
+  ],
+  "resources": [
+    "docs/work/records/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "gh run list --branch main",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "ci.yml is a harness file: decide project-only or template first (AGENTS.md, \"Changing a harness file\")",
+    "Branch protection is changed by the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
+    "reviewed": "2026-11-13",
+    "ownerHours": 0.25,
+    "agentHours": 0,
+    "ownerKind": "decision"
+  },
+  "ownerLink": "docs/audits/2026-11-13-full.md#f076-options"
 }
