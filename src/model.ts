@@ -344,6 +344,13 @@ export function validateModels(value: unknown): Models {
   }
   return out;
 }
+export const PI_CAPABILITY_PREFIXES = ['peripheral.', 'voice.', 'sensor.', 'gpio.', 'audio.', 'camera.'] as const;
+
+/** True when a tool is a peripheral, voice, or sensor capability offered by a capability worker (such as a Pi). */
+export function isPiCapability(tool: string): boolean {
+  return PI_CAPABILITY_PREFIXES.some((prefix) => tool.startsWith(prefix));
+}
+
 export type InferenceTarget =
   | { kind: 'local'; baseUrl: string; model: string }
   | { kind: 'cloud'; model: string }
@@ -362,6 +369,14 @@ export interface OrchestrationRequest {
   endpoint?: string;
   workerBaseId?: string;
   tool?: string;
+  trust?: 'trusted' | 'tainted';
+  effect?: 'read' | 'write' | 'external' | 'system';
+  waitBudgetMs?: number;
+  maxAttempts?: number;
+  maxOutputTokens?: number;
+  maxTotalTokens?: number;
+  delegationDepth?: number;
+  maxDelegations?: number;
 }
 export interface OrchestrationContext {
   selfBaseId: string;
@@ -369,23 +384,131 @@ export interface OrchestrationContext {
   hasCloudKey: boolean;
   bases: readonly EnrolledBaseCandidate[];
   localTools?: readonly string[];
+  policy?: {
+    localOnly?: readonly string[];
+    deny?: readonly string[];
+  };
 }
 export interface OrchestrationSelection {
   inference: InferenceTarget;
   worker: WorkerTarget;
 }
+
+function validateOrchestrationBudgets(
+  req: Pick<
+    OrchestrationRequest,
+    'waitBudgetMs' | 'maxAttempts' | 'maxOutputTokens' | 'maxTotalTokens' | 'delegationDepth' | 'maxDelegations'
+  >,
+): void {
+  if (req.waitBudgetMs !== undefined) {
+    if (
+      typeof req.waitBudgetMs !== 'number' ||
+      !Number.isSafeInteger(req.waitBudgetMs) ||
+      req.waitBudgetMs < 0 ||
+      req.waitBudgetMs > MODEL_TIMEOUT_MS
+    ) {
+      throw new ModelError(`Orchestration waitBudgetMs must be an integer between 0 and ${MODEL_TIMEOUT_MS}.`);
+    }
+  }
+  if (req.maxAttempts !== undefined) {
+    if (
+      typeof req.maxAttempts !== 'number' ||
+      !Number.isSafeInteger(req.maxAttempts) ||
+      req.maxAttempts < 1 ||
+      req.maxAttempts > 3
+    ) {
+      throw new ModelError('Orchestration maxAttempts must be an integer between 1 and 3.');
+    }
+  }
+  if (req.maxOutputTokens !== undefined) {
+    if (
+      typeof req.maxOutputTokens !== 'number' ||
+      !Number.isSafeInteger(req.maxOutputTokens) ||
+      req.maxOutputTokens < 1 ||
+      req.maxOutputTokens > 16384
+    ) {
+      throw new ModelError('Orchestration maxOutputTokens must be an integer between 1 and 16384.');
+    }
+  }
+  if (req.maxTotalTokens !== undefined) {
+    if (
+      typeof req.maxTotalTokens !== 'number' ||
+      !Number.isSafeInteger(req.maxTotalTokens) ||
+      req.maxTotalTokens < 1 ||
+      req.maxTotalTokens > 65536
+    ) {
+      throw new ModelError('Orchestration maxTotalTokens must be an integer between 1 and 65536.');
+    }
+    if (req.maxOutputTokens !== undefined && req.maxOutputTokens > req.maxTotalTokens) {
+      throw new ModelError('Orchestration maxOutputTokens cannot exceed maxTotalTokens.');
+    }
+  }
+  if (req.maxDelegations !== undefined) {
+    if (
+      typeof req.maxDelegations !== 'number' ||
+      !Number.isSafeInteger(req.maxDelegations) ||
+      req.maxDelegations < 0 ||
+      req.maxDelegations > 4
+    ) {
+      throw new ModelError('Orchestration maxDelegations must be an integer between 0 and 4.');
+    }
+  }
+  if (req.delegationDepth !== undefined) {
+    const limit = req.maxDelegations ?? 1;
+    if (
+      typeof req.delegationDepth !== 'number' ||
+      !Number.isSafeInteger(req.delegationDepth) ||
+      req.delegationDepth < 0
+    ) {
+      throw new ModelError('Orchestration delegationDepth must be a non-negative integer.');
+    }
+    if (req.delegationDepth > limit) {
+      throw new ModelError(`Orchestration delegation depth ${req.delegationDepth} exceeds limit ${limit}.`);
+    }
+  }
+}
+
 /**
- * Picks the inference endpoint without side effects (F-006-T02).
+ * Picks the inference endpoint without side effects (F-006-T02, F-006-T08).
  * Never substitutes one route/endpoint for another when the selected target is unavailable or disallowed.
  */
 export function selectInferenceTarget(
-  req: Pick<OrchestrationRequest, 'privacy' | 'route' | 'endpoint'>,
-  ctx: Pick<OrchestrationContext, 'models' | 'hasCloudKey' | 'bases'>,
+  req: Pick<
+    OrchestrationRequest,
+    | 'privacy'
+    | 'route'
+    | 'endpoint'
+    | 'tool'
+    | 'trust'
+    | 'effect'
+    | 'waitBudgetMs'
+    | 'maxAttempts'
+    | 'maxOutputTokens'
+    | 'maxTotalTokens'
+  >,
+  ctx: Pick<OrchestrationContext, 'models' | 'hasCloudKey' | 'bases' | 'policy'>,
 ): InferenceTarget {
+  validateOrchestrationBudgets(req);
+  if (req.tool && ctx.policy?.deny?.includes(req.tool)) {
+    throw new ModelError(`Policy denies tool "${req.tool}".`);
+  }
   if (req.endpoint !== undefined) {
     if (req.route !== undefined) throw new ModelError('Specify either route or remote endpoint, not both.');
     if (req.privacy === 'local-only') {
       throw new ModelError('Local-only input never goes to a remote inference endpoint.');
+    }
+    if (req.trust === 'tainted') {
+      throw new ModelError('Tainted input never leaves this machine for a remote inference endpoint.');
+    }
+    if (
+      ctx.policy?.localOnly?.some(
+        (entry) =>
+          entry === '*' ||
+          (req.tool !== undefined && entry === req.tool) ||
+          (req.effect !== undefined && entry === req.effect),
+      )
+    ) {
+      throw new ModelError('Policy localOnly forbids leaving this machine for a remote inference endpoint.');
     }
     const ep = ctx.models.remote?.endpoints?.[req.endpoint];
     if (!ep) throw new ModelError(`Remote inference endpoint "${req.endpoint}" is not configured.`);
@@ -404,6 +527,19 @@ export function selectInferenceTarget(
   if (wanted === 'cloud') {
     if (req.privacy === 'local-only') throw new ModelError('Local-only input never goes to the cloud route.');
     if (req.privacy === 'owner-bases') throw new ModelError('Owner-bases input never goes to the cloud route.');
+    if (req.trust === 'tainted') throw new ModelError('Tainted input never goes to the cloud route.');
+    if (
+      ctx.policy?.localOnly?.some(
+        (entry) =>
+          entry === '*' ||
+          entry === 'cloud' ||
+          entry === 'umbilical' ||
+          (req.tool !== undefined && entry === req.tool) ||
+          (req.effect !== undefined && entry === req.effect),
+      )
+    ) {
+      throw new ModelError('Policy localOnly forbids leaving the machine on the cloud route.');
+    }
     if (!ctx.models.cloud?.enabled) throw new ModelError('Cloud route (Umbilical) is disabled.');
     if (!cloudReady) throw new ModelError('Cloud route (Umbilical) has no API key.');
     return { kind: 'cloud', model: ctx.models.cloud.model };
@@ -412,18 +548,35 @@ export function selectInferenceTarget(
   return { kind: 'local', baseUrl: ctx.models.local.baseUrl, model: ctx.models.local.model };
 }
 /**
- * Picks the execution worker independently of the inference endpoint (F-006-T02).
+ * Picks the execution worker independently of the inference endpoint (F-006-T02, F-006-T08).
  * Never falls back to the local base or another base if the requested worker or capability is unavailable.
  */
 export function selectExecutionWorker(
-  req: Pick<OrchestrationRequest, 'workerBaseId' | 'tool'>,
-  ctx: Pick<OrchestrationContext, 'selfBaseId' | 'bases' | 'localTools'>,
+  req: Pick<OrchestrationRequest, 'workerBaseId' | 'tool' | 'delegationDepth' | 'maxDelegations'>,
+  ctx: Pick<OrchestrationContext, 'selfBaseId' | 'bases' | 'localTools' | 'policy'>,
 ): WorkerTarget {
+  validateOrchestrationBudgets(req);
+  if (req.tool === 'kaji.run') {
+    throw new ModelError('Recursive kaji.run delegation is not allowed.');
+  }
+  if (req.tool && ctx.policy?.deny?.includes(req.tool)) {
+    throw new ModelError(`Policy denies tool "${req.tool}".`);
+  }
   if (!req.workerBaseId || req.workerBaseId === ctx.selfBaseId) {
     if (req.tool && ctx.localTools && !ctx.localTools.includes(req.tool)) {
       throw new ModelError(`Local base ${ctx.selfBaseId} does not offer capability "${req.tool}".`);
     }
+    if (req.tool && isPiCapability(req.tool) && !ctx.localTools?.includes(req.tool)) {
+      throw new ModelError(
+        `Local base ${ctx.selfBaseId} does not offer peripheral/voice/sensor capability "${req.tool}".`,
+      );
+    }
     return { kind: 'local', baseId: ctx.selfBaseId };
+  }
+  const depth = req.delegationDepth ?? 1;
+  const maxDelegations = req.maxDelegations ?? 1;
+  if (depth > maxDelegations) {
+    throw new ModelError(`Orchestration delegation depth ${depth} exceeds limit ${maxDelegations}.`);
   }
   const base = ctx.bases.find((b) => b.baseId === req.workerBaseId && b.status === 'enrolled');
   if (!base) throw new ModelError(`Execution worker ${req.workerBaseId} is not enrolled.`);
@@ -461,6 +614,8 @@ export interface OrchestratedProvenance {
   inferenceModel: string;
   endpoint?: string;
   privacy: Privacy;
+  attempts?: number;
+  waitedMs?: number;
 }
 export interface RemoteInferenceAuthorizeContext {
   selfBaseId: string;

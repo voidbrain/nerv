@@ -763,3 +763,495 @@ test('validateWorkerInferRequest and verifyRemoteInferenceReply enforce size bou
     ModelError,
   );
 });
+
+test('F-006-T08: policy-approved cloud path, Pi capability route, and delegation/budget guardrails', () => {
+  const piAndMiniBases: EnrolledBaseCandidate[] = [
+    ...enrolledBases,
+    {
+      baseId: 'NERV-PI',
+      status: 'enrolled',
+      address: '100.64.0.4',
+      online: true,
+      offers: ['sensor.read', 'voice.speak', 'peripheral.display'],
+    },
+  ];
+
+  // Policy-approved cloud inference (Claude) paired with mini PC worker (NERV-02)
+  const cloudApproved = selectOrchestration(
+    {
+      privacy: 'any',
+      route: 'cloud',
+      trust: 'trusted',
+      effect: 'write',
+      workerBaseId: 'NERV-02',
+      tool: 'code.run',
+      maxOutputTokens: 1024,
+      maxTotalTokens: 4096,
+      maxAttempts: 2,
+      waitBudgetMs: 5000,
+    },
+    {
+      selfBaseId: 'NERV-01',
+      models: baseModels,
+      hasCloudKey: true,
+      bases: piAndMiniBases,
+      policy: { localOnly: ['secrets.read'], deny: ['shell.raw'] },
+    },
+  );
+  assert.deepEqual(cloudApproved, {
+    inference: { kind: 'cloud', model: 'claude-opus-5-5' },
+    worker: { kind: 'remote', baseId: 'NERV-02', tool: 'code.run' },
+  });
+
+  // Tainted input refuses cloud route and remote endpoint without fallback
+  assert.throws(
+    () =>
+      selectOrchestration(
+        { privacy: 'any', route: 'cloud', trust: 'tainted', workerBaseId: 'NERV-02', tool: 'code.run' },
+        { selfBaseId: 'NERV-01', models: baseModels, hasCloudKey: true, bases: piAndMiniBases },
+      ),
+    /Tainted input never goes to the cloud route/,
+  );
+  assert.throws(
+    () =>
+      selectOrchestration(
+        { privacy: 'owner-bases', endpoint: 'mac', trust: 'tainted', workerBaseId: 'NERV-02', tool: 'code.run' },
+        { selfBaseId: 'NERV-01', models: baseModels, hasCloudKey: true, bases: piAndMiniBases },
+      ),
+    /Tainted input never leaves this machine/,
+  );
+
+  // Policy localOnly and deny rules refuse cloud or denied tools without fallback
+  assert.throws(
+    () =>
+      selectOrchestration(
+        { privacy: 'any', route: 'cloud', trust: 'trusted', tool: 'code.run', effect: 'write' },
+        {
+          selfBaseId: 'NERV-01',
+          models: baseModels,
+          hasCloudKey: true,
+          bases: piAndMiniBases,
+          policy: { localOnly: ['code.run'] },
+        },
+      ),
+    /Policy localOnly forbids leaving the machine/,
+  );
+  assert.throws(
+    () =>
+      selectOrchestration(
+        { privacy: 'local-only', route: 'local', tool: 'shell.raw' },
+        {
+          selfBaseId: 'NERV-01',
+          models: baseModels,
+          hasCloudKey: true,
+          bases: piAndMiniBases,
+          policy: { deny: ['shell.raw'] },
+        },
+      ),
+    /Policy denies tool "shell\.raw"/,
+  );
+
+  // Pi capability route executes only offered peripheral/voice/sensor capabilities
+  const piSensor = selectOrchestration(
+    {
+      privacy: 'owner-bases',
+      endpoint: 'mac',
+      workerBaseId: 'NERV-PI',
+      tool: 'sensor.read',
+    },
+    { selfBaseId: 'NERV-02', models: baseModels, hasCloudKey: false, bases: piAndMiniBases },
+  );
+  assert.deepEqual(piSensor, {
+    inference: { kind: 'remote', endpoint: 'mac', baseId: 'NERV-01', model: 'qwen2.5:14b' },
+    worker: { kind: 'remote', baseId: 'NERV-PI', tool: 'sensor.read' },
+  });
+
+  // Pi refuses unoffered coder/reminder capabilities without falling back to NERV-02 or local
+  assert.throws(
+    () =>
+      selectOrchestration(
+        { privacy: 'owner-bases', endpoint: 'mac', workerBaseId: 'NERV-PI', tool: 'code.run' },
+        { selfBaseId: 'NERV-02', models: baseModels, hasCloudKey: false, bases: piAndMiniBases },
+      ),
+    /Execution worker NERV-PI does not offer capability "code\.run"/,
+  );
+  assert.throws(
+    () =>
+      selectOrchestration(
+        { privacy: 'local-only', route: 'local', tool: 'sensor.read' },
+        {
+          selfBaseId: 'NERV-02',
+          models: baseModels,
+          hasCloudKey: false,
+          bases: piAndMiniBases,
+          localTools: ['code.run'],
+        },
+      ),
+    /Local base NERV-02 does not offer capability "sensor\.read"/,
+  );
+
+  // Non-recursive delegation and budget bounds
+  assert.throws(
+    () =>
+      selectExecutionWorker(
+        { workerBaseId: 'NERV-02', tool: 'kaji.run' },
+        { selfBaseId: 'NERV-01', bases: piAndMiniBases },
+      ),
+    /Recursive kaji\.run delegation is not allowed/,
+  );
+  assert.throws(
+    () =>
+      selectExecutionWorker(
+        { workerBaseId: 'NERV-02', tool: 'code.run', delegationDepth: 2, maxDelegations: 1 },
+        { selfBaseId: 'NERV-01', bases: piAndMiniBases },
+      ),
+    /delegation depth 2 exceeds limit 1/,
+  );
+  assert.throws(
+    () =>
+      selectInferenceTarget(
+        { privacy: 'owner-bases', endpoint: 'mac', maxOutputTokens: 2048, maxTotalTokens: 1024 },
+        { models: baseModels, hasCloudKey: false, bases: piAndMiniBases },
+      ),
+    /maxOutputTokens cannot exceed maxTotalTokens/,
+  );
+});
+
+test('F-006-T08: unavailable Mac endpoint waits or expires within budget, retries same endpoint, and enforces token/concurrency limits', async () => {
+  const root = genKeys();
+  const keyMac = genKeys();
+  const keyMini = genKeys();
+  const keyPi = genKeys();
+  const homeMac = mkdtempSync(join(tmpdir(), 'nerv-t08-mac-'));
+  const homeMini = mkdtempSync(join(tmpdir(), 'nerv-t08-mini-'));
+  const homePi = mkdtempSync(join(tmpdir(), 'nerv-t08-pi-'));
+
+  let failNextS2 = false;
+  const s2State: MockS2State = { calls: 0, replyText: 'Mac inference ready' };
+  const s2Server = createServer((req, res) => {
+    if (req.method !== 'POST' || req.url !== '/v1/chat/completions') {
+      res.writeHead(404);
+      res.end();
+      return;
+    }
+    const chunks: Buffer[] = [];
+    req.on('data', (c: Buffer) => chunks.push(c));
+    req.on('end', () => {
+      s2State.calls += 1;
+      if (failNextS2) {
+        failNextS2 = false;
+        res.writeHead(503, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ error: { message: 'Temporary S2 overload' } }));
+        return;
+      }
+      const parsed = JSON.parse(Buffer.concat(chunks).toString('utf8')) as { model?: string };
+      s2State.lastModel = parsed.model;
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(
+        JSON.stringify({
+          model: parsed.model ?? 'qwen2.5:14b',
+          choices: [{ message: { content: s2State.replyText }, finish_reason: 'stop' }],
+          usage: { prompt_tokens: 18, completion_tokens: 12 },
+        }),
+      );
+    });
+  });
+  await new Promise<void>((done) => s2Server.listen(0, '127.0.0.1', done));
+  const s2Port = (s2Server.address() as { port: number }).port;
+  const s2Url = `http://127.0.0.1:${s2Port}/v1`;
+
+  const wsServer = createServer((_req, res) => {
+    res.writeHead(404);
+    res.end();
+  });
+  await new Promise<void>((done) => wsServer.listen(0, '127.0.0.1', done));
+  const wsPort = (wsServer.address() as { port: number }).port;
+  const addrMini = `100.64.0.2:${wsPort}`;
+  const addrMac = '100.64.0.1:1';
+  const addrPi = '100.64.0.4:1';
+
+  let rMac: Runtime | undefined;
+  let rMini: Runtime | undefined;
+  let rPi: Runtime | undefined;
+  let linkMac: WorkerLink | undefined;
+  let linkMini: WorkerLink | undefined;
+  let linkPi: WorkerLink | undefined;
+
+  try {
+    writeFileSync(
+      join(homeMac, 'config.json'),
+      JSON.stringify({
+        base: { id: 'NERV-01', name: 'Mac Inference Host' },
+        kaji: { root: root.publicKey, offers: ['model.infer'] },
+        models: {
+          local: { baseUrl: s2Url, model: 'qwen2.5:14b' },
+          remote: {
+            serve: { enabled: true, bases: ['NERV-02', 'NERV-PI'], models: ['qwen2.5:14b'] },
+          },
+        },
+      }),
+    );
+    writeFileSync(
+      join(homeMini, 'config.json'),
+      JSON.stringify({
+        base: { id: 'NERV-02', name: 'Mini PC Worker' },
+        kaji: { root: root.publicKey, offers: ['reminders.add'] },
+        models: {
+          local: { baseUrl: 'http://127.0.0.1:9/v1', model: 'gemma4:e2b-it-q4_K_M' },
+          cloud: { provider: 'anthropic', model: 'claude-opus-5-5', enabled: true },
+          remote: {
+            endpoints: { mac: { baseId: 'NERV-01', model: 'qwen2.5:14b' } },
+            allowBases: ['NERV-01'],
+          },
+          concurrency: { default: 1, perModel: { 'qwen2.5:14b': 1 } },
+        },
+      }),
+    );
+    writeFileSync(join(homeMini, 'anthropic-key'), 'sk-ant-test-neutral-key-value\n', { mode: 0o600 });
+    writeFileSync(
+      join(homePi, 'config.json'),
+      JSON.stringify({
+        base: { id: 'NERV-PI', name: 'Pi Capability Worker' },
+        kaji: { root: root.publicKey, offers: ['reminders.add'] },
+        models: {
+          local: { baseUrl: 'http://127.0.0.1:9/v1', model: 'gemma4:e2b-it-q4_K_M' },
+        },
+      }),
+    );
+
+    rMac = new Runtime(join(homeMac, 'nerv.sqlite'), undefined, homeMac);
+    rMini = new Runtime(join(homeMini, 'nerv.sqlite'), undefined, homeMini);
+    rPi = new Runtime(join(homePi, 'nerv.sqlite'), undefined, homePi);
+    await Promise.all([rMac.ready(), rMini.ready(), rPi.ready()]);
+
+    let serial = 0;
+    const rec = (body: Omit<RegistryBody, 'serial' | 'issued'>) =>
+      signRecord(root.privateKey, { ...body, serial: ++serial, issued: new Date().toISOString() } as RegistryBody);
+    const records = [
+      rec({ kind: 'enrol', baseId: 'NERV-02', name: 'Mini', publicKey: keyMini.publicKey, address: addrMini }),
+      rec({ kind: 'enrol', baseId: 'NERV-01', name: 'Mac', publicKey: keyMac.publicKey, address: addrMac }),
+      rec({ kind: 'enrol', baseId: 'NERV-PI', name: 'Pi', publicKey: keyPi.publicKey, address: addrPi }),
+      rec({ kind: 'main', baseId: 'NERV-02' }),
+    ];
+    await Promise.all([rMac.kaji.add(records), rMini.kaji.add(records), rPi.kaji.add(records)]);
+
+    linkMini = new WorkerLink({
+      id: 'NERV-02',
+      key: keyMini.privateKey,
+      registry: rMini.kaji,
+      adapter: rMini.worker,
+      offers: () => ['reminders.add'],
+      onOffers: (id, tools) => rMini!.notePeerOffers(id, tools),
+      address: (s) => `ws://127.0.0.1:${s.split(':').pop()}`,
+      heartbeatMs: 500,
+      requestMs: 5000,
+      reconnectMs: 25,
+    });
+    linkMini.attach(wsServer);
+    linkMini.start();
+    rMini.useWorkerLink(linkMini);
+
+    const piAdapter: WorkerAdapter = {
+      ...rPi.worker,
+      run: async (owner, item, context) => {
+        if (item.tool === 'sensor.read') {
+          return { outcome: 'grant', actionId: 'act-pi-sensor', result: { celsius: 21.5, promptEcho: item.request } };
+        }
+        return rPi!.worker.run(owner, item, context);
+      },
+    };
+    linkPi = new WorkerLink({
+      id: 'NERV-PI',
+      key: keyPi.privateKey,
+      registry: rPi.kaji,
+      adapter: piAdapter,
+      offers: () => ['sensor.read', 'voice.speak'],
+      address: (s) => `ws://127.0.0.1:${s.split(':').pop()}`,
+      heartbeatMs: 500,
+      requestMs: 5000,
+      reconnectMs: 25,
+    });
+    linkPi.start();
+    rPi.useWorkerLink(linkPi);
+
+    await until(() => linkMini!.connected('NERV-PI'));
+
+    // 1. Mac is offline: waiting within short budget (80 ms) expires with explicit endpoint unavailable and zero fallback
+    await assert.rejects(
+      () =>
+        rMini!.runOrchestratedJob({
+          orchestration: {
+            privacy: 'owner-bases',
+            endpoint: 'mac',
+            workerBaseId: 'NERV-02',
+            tool: 'reminders.add',
+            waitBudgetMs: 80,
+          },
+          ask: { prompt: 'Should expire while Mac is offline' },
+        }),
+      /expired after waiting 80 ms: endpoint unavailable/,
+    );
+    assert.equal(s2State.calls, 0);
+    const degradedWhileOffline = await rMini.health();
+    assert.ok(
+      degradedWhileOffline.degraded.some((d) => d.includes('NERV-01') && d.includes('unavailable')),
+      `Expected degraded reason mentioning NERV-01 unavailable, got: ${JSON.stringify(degradedWhileOffline.degraded)}`,
+    );
+
+    // 2. Mac comes online within waitBudgetMs: request waits and succeeds
+    linkMac = new WorkerLink({
+      id: 'NERV-01',
+      key: keyMac.privateKey,
+      registry: rMac.kaji,
+      adapter: rMac.worker,
+      offers: () => ['model.infer'],
+      address: (s) => `ws://127.0.0.1:${s.split(':').pop()}`,
+      heartbeatMs: 500,
+      requestMs: 5000,
+      reconnectMs: 25,
+    });
+    setTimeout(() => {
+      linkMac?.start();
+      rMac?.useWorkerLink(linkMac!);
+    }, 40);
+
+    const waitedJob = await rMini.runOrchestratedJob({
+      orchestration: {
+        privacy: 'owner-bases',
+        endpoint: 'mac',
+        workerBaseId: 'NERV-02',
+        tool: 'reminders.add',
+        waitBudgetMs: 2000,
+      },
+      ask: { prompt: 'Wait for Mac to come online' },
+    });
+    assert.equal(waitedJob.inference.text, 'Mac inference ready');
+    assert.ok((waitedJob.provenance.waitedMs ?? 0) > 0);
+    assert.equal(s2State.calls, 1);
+
+    // 3. Transient failure before reply retries the SAME endpoint within maxAttempts and records attempts
+    failNextS2 = true;
+    s2State.replyText = 'Recovered on attempt 2';
+    const retriedJob = await rMini.runOrchestratedJob({
+      orchestration: {
+        privacy: 'owner-bases',
+        endpoint: 'mac',
+        workerBaseId: 'NERV-02',
+        tool: 'reminders.add',
+        maxAttempts: 2,
+        maxOutputTokens: 64,
+        maxTotalTokens: 128,
+      },
+      ask: { prompt: 'Retry transient failure on same Mac endpoint' },
+    });
+    assert.equal(retriedJob.inference.text, 'Recovered on attempt 2');
+    assert.equal(retriedJob.provenance.attempts, 2);
+    assert.equal(s2State.calls, 3);
+
+    // 4. Token budget exhaustion refuses without fallback
+    await assert.rejects(
+      () =>
+        rMini!.runOrchestratedJob({
+          orchestration: {
+            privacy: 'owner-bases',
+            endpoint: 'mac',
+            workerBaseId: 'NERV-02',
+            tool: 'reminders.add',
+            maxTotalTokens: 10,
+          },
+          ask: { prompt: 'Exceeds 10 total tokens (18 + 12 = 30)' },
+        }),
+      /Orchestrated token budget exhausted/,
+    );
+
+    // 5. Policy-approved cloud path uses Claude and executes on mini PC
+    let cloudCalls = 0;
+    const cloudJob = await rMini.runOrchestratedJob({
+      orchestration: {
+        privacy: 'any',
+        route: 'cloud',
+        trust: 'trusted',
+        workerBaseId: 'NERV-02',
+        tool: 'reminders.add',
+        maxOutputTokens: 128,
+      },
+      ask: { prompt: 'Cloud-approved architecture review' },
+      cloudTransport: async (req) => {
+        cloudCalls += 1;
+        assert.equal(req.model, 'claude-opus-5-5');
+        return {
+          model: req.model,
+          text: 'Claude cloud summary',
+          stop: 'end_turn',
+          truncated: false,
+          usage: { inputTokens: 15, outputTokens: 9 },
+          durationMs: 12,
+        };
+      },
+      item: {
+        id: '00000000-0000-4000-8000-000000000801',
+        sequence: 1,
+        tool: 'reminders.add',
+        args: { title: 'Placeholder', due: '2031-02-01T09:00:00Z' },
+      },
+    });
+    assert.equal(cloudCalls, 1);
+    assert.equal(cloudJob.provenance.inferenceKind, 'cloud');
+    assert.equal(cloudJob.provenance.inferenceModel, 'claude-opus-5-5');
+    assert.equal(cloudJob.provenance.executionBaseId, 'NERV-02');
+
+    // 6. Pi capability route executes offered sensor.read using Mac remote inference, and refuses unoffered tools
+    s2State.replyText = 'Read ambient sensor on Pi';
+    const piJob = await rMini.runOrchestratedJob({
+      orchestration: {
+        privacy: 'owner-bases',
+        endpoint: 'mac',
+        workerBaseId: 'NERV-PI',
+        tool: 'sensor.read',
+      },
+      ask: { prompt: 'Check ambient sensor via Pi' },
+      item: {
+        id: '00000000-0000-4000-8000-000000000802',
+        sequence: 1,
+        tool: 'sensor.read',
+        args: { channel: 'ambient' },
+      },
+    });
+    assert.equal(piJob.provenance.inferenceBaseId, 'NERV-01');
+    assert.equal(piJob.provenance.executionBaseId, 'NERV-PI');
+    const piExec = piJob.execution as { outcome?: string; result?: { celsius?: number; promptEcho?: string } };
+    assert.equal(piExec.outcome, 'grant');
+    assert.equal(piExec.result?.celsius, 21.5);
+    assert.equal(piExec.result?.promptEcho, 'Read ambient sensor on Pi');
+
+    await assert.rejects(
+      () =>
+        rMini!.runOrchestratedJob({
+          orchestration: {
+            privacy: 'owner-bases',
+            endpoint: 'mac',
+            workerBaseId: 'NERV-PI',
+            tool: 'reminders.add',
+          },
+          ask: { prompt: 'Pi does not offer reminders.add over WorkerLink' },
+        }),
+      /Execution worker NERV-PI does not offer capability "reminders\.add"/,
+    );
+  } finally {
+    await linkPi?.stop();
+    await linkMac?.stop();
+    await linkMini?.stop();
+    await new Promise<void>((done) => {
+      wsServer.close(() => done());
+      wsServer.closeAllConnections();
+    });
+    await new Promise<void>((done) => {
+      s2Server.close(() => done());
+      s2Server.closeAllConnections();
+    });
+    await Promise.allSettled([rPi?.close(), rMini?.close(), rMac?.close()]);
+    rmSync(homeMac, { recursive: true, force: true });
+    rmSync(homeMini, { recursive: true, force: true });
+    rmSync(homePi, { recursive: true, force: true });
+  }
+});
