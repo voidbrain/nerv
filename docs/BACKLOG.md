@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 25 | 11 | 14 | 13 |
+| **This week** | 25 | 11 | 16 | 13 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 47 | 7 |
+| **Open** | 47 | 9 |
 | **Require Human 🧑** | 8 | 2 |
 
 ### Require Human 🧑
@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 75.25 h agent + 21.25 h owner across 197 open steps of 47 features and 7 other records. 18.5 h of actual effort recorded on 35 steps. Generated from the task files.
+**Remaining effort:** 76 h agent + 21.25 h owner across 199 open steps of 47 features and 9 other records. 19.25 h of actual effort recorded on 38 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -180,9 +180,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 1.25 h | — | — | ⏳ | — | — |
 
-💻 **→** Next: F-062-T02 (nightly consistent snapshots).
+💻 **→** Next: F-062-T03 (encrypted off-host retention); F-062-T02 implemented, awaiting merge.
 
 | | |
 |---|---|
@@ -194,11 +194,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-062-t02"></a>F-062-T02 — Scheduled consistent snapshots | 0.25 h | 0 h | 0.25 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-062-t02"></a>F-062-T02 — Scheduled consistent snapshots | 0.25 h | 0 h | 0.5 h | Implemented; verification pending | 🤖 |
 | 🟢 Small | <a id="f-062-t03"></a>F-062-T03 — Encrypted off-host retention | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-062-T02](#f-062-t02) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-062-t04"></a>F-062-T04 — Restore drill | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-062-T03](#f-062-t03) | ⏳ 🤖 |
 | — | <a id="f-062-t01"></a>F-062-T01 — Owner-agreed loss window and restore time | 0.25 h | 0 h | 0 h | Completed | 🤖 🧑‍🔧 🤔 |
-| 🟢 Small | **Total** | 1.25 h | 0 h (0 of 4 steps recorded) | 1 h | 1 of 4 completed | |
+| — | <a id="f-062-t05"></a>F-062-T05 — Rerun the two expensive system cases at the snapshot source | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 🧑‍🔧 |
+| 🟡 Medium | **Total** | 1.5 h | 0.25 h (1 of 5 steps recorded) | 1.25 h | 2 of 5 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -207,10 +208,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #255](https://github.com/voidbrain/nerv/pull/255) distinguishes one-off lifecycle/root snapshots from general recovery acceptance; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
+| PR / evidence | [PR #395](https://github.com/voidbrain/nerv/pull/395) F-062-T02 nightly verified snapshots (`src/snapshots.ts`), Test: test/snapshots.test.ts; [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #255](https://github.com/voidbrain/nerv/pull/255) distinguishes one-off lifecycle/root snapshots from general recovery acceptance; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
 | Opened | 2026-11-06 |
-| Verification | Unit/integration: Pending. Real-device: Pending (restore drill). |
-| Reviewed | 2026-11-10 |
+| Verification | Unit/integration: snapshots covered by test/snapshots.test.ts; off-host retention pending. Real-device: Pending (restore drill). |
+| Reviewed | 2026-11-14 |
 
 </details>
 
@@ -1553,6 +1554,84 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-13 |
 | Verification | Pending. |
 | Reviewed | 2026-11-13 |
+
+</details>
+
+---
+### <a id="b-062"></a>[🐞 B-062](#top)
+
+**`nodes inspect` gives one vague message for an unreachable host and for a target without Node.js**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h | — | — | — | — | — |
+
+💻 **→** Next: B-062-T01 implemented, awaiting merge; then the owner reruns F-005-T22.
+
+| | |
+|---|---|
+| **Issue** | 2026-11-14, F-005-T22 owner run: `nodes inspect --ssh nerv-linux` printed "Read-only command failed. Check the selected client and target prerequisites". Here SSH could not resolve the host, but the same text appears when the target has no Node.js, which is the prerequisite T22 must report. The owner cannot tell which one to fix. |
+| **Reproduce** | `nodes inspect --ssh <unknown host>`, and `nodes inspect --ssh <host without node>`: both print the same line. |
+| **Check** | A regression through the real command runner: SSH exit 255 says the target could not be reached over SSH (name, key or known host); exit 127 says Node.js is missing on the target's non-interactive PATH; other failures keep the generic text; all still say no installation was requested. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="b-062-t01"></a>B-062-T01 — Name the failed inspection prerequisite | 0.5 h | 0 h | 0.25 h | Implemented; verification pending | 🤖 |
+| — | <a id="b-062-t02"></a>B-062-T02 — Rerun the two expensive system cases at this source | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 🧑‍🔧 |
+| 🟢 Small | **Total** | 0.75 h | 0.25 h (1 of 2 steps recorded) | 0.25 h | 1 of 2 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-062.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #396](https://github.com/voidbrain/nerv/pull/396); found in the F-005-T22 owner run, 2026-11-14. |
+| Opened | 2026-11-14 |
+| Verification | Unit: test/node-inspection-errors.test.ts through the real runner. Owner rerun on the VM pending (F-005-T22). |
+| Reviewed | 2026-11-14 |
+
+</details>
+
+---
+### <a id="b-063"></a>[🐞 B-063](#top)
+
+**`nodes inspect` accepts a Node.js older than NERV requires without saying so**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h | — | — | — | — | — |
+
+💻 **→** Next: B-063-T01 implemented, awaiting merge; then the owner reruns F-005-T22 step 2.
+
+| | |
+|---|---|
+| **Issue** | 2026-11-14, preparing step 2 of the F-005-T22 procedure (docs/acceptance/f005-t22-prerequisites.md): `nodes inspect` records the target's Node.js version but never compares it with `package.json` `engines.node` (≥ 24), so Ubuntu's Node 18 passes silently and the expected "below the version NERV requires" never appears. |
+| **Reproduce** | Inspect a target whose `node --version` is 18.x: the command succeeds. |
+| **Check** | A regression through `nodesCommand`: an older Node.js fails the command naming the found and required versions, after the unchanged inspection file is saved as evidence; a supported one passes as before; nothing is installed. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="b-063-t01"></a>B-063-T01 — Report a Node.js below engines.node | 0.5 h | 0 h | 0.25 h | Implemented; verification pending | 🤖 |
+| — | <a id="b-063-t02"></a>B-063-T02 — Rerun the two expensive system cases at this source | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 🧑‍🔧 |
+| 🟢 Small | **Total** | 0.75 h | 0.25 h (1 of 2 steps recorded) | 0.25 h | 1 of 2 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-063.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #397](https://github.com/voidbrain/nerv/pull/397); found while preparing the F-005-T22 owner run, 2026-11-14. |
+| Opened | 2026-11-14 |
+| Verification | Unit: test/node-inspection-version.test.ts through nodesCommand. Owner run on the VM pending (F-005-T22 step 2). |
+| Reviewed | 2026-11-14 |
 
 </details>
 

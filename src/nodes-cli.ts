@@ -11,7 +11,13 @@ import {
   NODE_INVENTORY_BYTES,
   type NodeCandidate,
 } from './node-discovery.ts';
-import { inspectLocalNode, inspectNode, runNodeCommand, type CommandRunner } from './node-inspection.ts';
+import {
+  inspectLocalNode,
+  inspectNode,
+  nodeBelowRequirement,
+  runNodeCommand,
+  type CommandRunner,
+} from './node-inspection.ts';
 import { fileURLToPath } from 'node:url';
 import { bootstrapOperation } from './node-bootstrap-execution.ts';
 import { lifecyclePlan, lifecycleRecovery } from './node-lifecycle.ts';
@@ -283,8 +289,11 @@ export async function nodesCommand(args: string[], runner: CommandRunner = runNo
       },
       runner,
     );
+  // B-063: an inspection with a Node.js older than engines.node is saved as evidence, then the command fails.
+  const tooOld = command === 'inspect' ? nodeBelowRequirement((result as { node: string }).node) : undefined;
   if (values.has('out')) {
     writeFileSync(required('out'), JSON.stringify(result, null, 2) + '\n', { mode: 0o600, flag: 'wx' });
+    if (tooOld) throw Error(`${tooOld} The inspection was saved to ${required('out')}; no installation was requested.`);
     return {
       saved: required('out'),
       execution:
@@ -297,5 +306,6 @@ export async function nodesCommand(args: string[], runner: CommandRunner = runNo
               : 'none',
     };
   }
+  if (tooOld) throw Error(`${tooOld} No installation was requested.`);
   return result;
 }
