@@ -1,7 +1,7 @@
 import { chmodSync, existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import { readConfig } from './config.ts';
-import { copyDates, createBackupKey, decryptBackup } from './offhost.ts';
+import { copyDates, createBackupKey, decryptBackup, receivedDir } from './offhost.ts';
 import { snapshotDates, snapshotDir } from './snapshots.ts';
 
 interface Io {
@@ -44,6 +44,15 @@ export async function backupCommand(home: string, args: string[], io: Io): Promi
       JSON.stringify(
         {
           snapshots: { newest: local[0] ?? null, count: local.length },
+          ...(config?.peers ? { peers: config.peers } : {}),
+          ...(config?.accept
+            ? {
+                received: config.accept.map((from) => {
+                  const dates = copyDates(receivedDir(home, from));
+                  return { from, newest: dates[0] ?? null, count: dates.length };
+                }),
+              }
+            : {}),
           copies: config
             ? config.copies.map((folder) => {
                 const dates = copyDates(folder);

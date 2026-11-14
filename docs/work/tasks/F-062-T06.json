@@ -4,7 +4,7 @@
   "parent": "F-062",
   "title": "Encrypted copies to Tabgha over the Kaji line",
   "goal": "The nightly encrypted copy also reaches Tabgha over the Kaji line, as the owner chose in F-062-T01",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Tabgha keeps the newest encrypted copies it receives over the Kaji line; it cannot decrypt them; a missing or refused transfer is reported, never retried in a loop"
   ],
@@ -27,7 +27,8 @@
   ],
   "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
   "validation": [
-    "A test across sender and receiver over the Kaji line; final applicable CI"
+    "A test across sender and receiver over the Kaji line; final applicable CI",
+    "2026-11-14: test/offhost-kaji.test.ts — two enrolled bases on loopback: the nightly copy reaches the accepting base encrypted and only the owner key restores it; a base that does not accept refuses (403), logged once, not asked again; an unreachable peer is reported once and not retried every minute; the receiver checks sender, date and copy shape and keeps the newest."
   ],
   "escalation": [
     "Owner agreed 2026-11-14 to a new Kaji message type carrying encrypted backup copies (option A over a mounted share); any further change to the Kaji contract goes back to the owner"
@@ -35,10 +36,12 @@
   "effort": {
     "size": "small",
     "estimate": "1.5 h agent",
-    "basis": "Estimated 2026-11-14 when split from F-062-T03: one Kaji message type, a receiver store and a test across both. Not a measurement.",
+    "basis": "Estimated 2026-11-14 when split from F-062-T03: one Kaji message type, a receiver store and a test across both. Not a measurement. Implemented 2026-11-14 in about 1 h (stated).",
     "reviewed": "2026-11-14",
-    "agentHours": 1.5,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
-    "estimateAgentHours": 1.5
+    "estimateAgentHours": 1.5,
+    "actualAgentHours": 1,
+    "actualSource": "stated"
   }
 }

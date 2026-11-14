@@ -14,6 +14,7 @@ import {
   closeSync,
   existsSync,
   fsyncSync,
+  mkdirSync,
   openSync,
   readdirSync,
   readFileSync,
@@ -31,8 +32,13 @@ import { isAbsolute, join, relative, resolve } from 'node:path';
  * or truncated file fails to decrypt instead of restoring wrong data.
  */
 export interface BackupConfig {
-  publicKey: string;
+  /** Needed to write copies (folders or peers); a base that only receives copies has none. */
+  publicKey?: string;
   copies: string[];
+  /** F-062-T06: enrolled bases that receive each copy over the Kaji line. */
+  peers?: string[];
+  /** F-062-T06: enrolled bases whose copies this base stores (it cannot read them). */
+  accept?: string[];
   keep?: number;
 }
 
@@ -122,31 +128,53 @@ export function decryptBackup(data: Buffer, privatePem: string, passphrase: stri
   }
 }
 
-/** Validates the `backup` section of config.json. Copy folders must be absolute and outside the data home. */
+const BASE_ID = /^[A-Z0-9][A-Z0-9-]{1,15}$/;
+
+function baseIds(value: unknown, what: string): string[] | undefined {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value) || value.length > 8 || value.some((v) => typeof v !== 'string' || !BASE_ID.test(v)))
+    throw new Error(`Invalid backup: ${what} is a list of up to 8 base IDs such as "NERV-02".`);
+  if (new Set(value).size !== value.length) throw new Error(`Invalid backup: each base in ${what} once.`);
+  return value.length ? (value as string[]) : undefined;
+}
+
+/**
+ * Validates the `backup` section of config.json. Copy folders must be absolute and outside the data home. Writing
+ * copies (to folders or peers) needs the public key; a base that only accepts copies from others does not.
+ */
 export function validateBackup(value: unknown, home: string): BackupConfig {
-  const usage = 'Invalid backup: {"publicKey": "<from backup keygen>", "copies": ["/absolute/folder", …], "keep": 7}.';
+  const usage =
+    'Invalid backup: {"publicKey": "<from backup keygen>", "copies": ["/absolute/folder"], "peers": ["NERV-02"], "accept": ["NERV-01"], "keep": 7}.';
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(usage);
   const v = value as Record<string, unknown>;
-  if (Object.keys(v).some((k) => !['publicKey', 'copies', 'keep'].includes(k))) throw new Error(usage);
-  if (typeof v.publicKey !== 'string') throw new Error(usage);
-  publicKeyObject(v.publicKey);
-  if (
-    !Array.isArray(v.copies) ||
-    v.copies.length < 1 ||
-    v.copies.length > 4 ||
-    v.copies.some((c) => typeof c !== 'string' || !isAbsolute(c))
-  )
+  if (Object.keys(v).some((k) => !['publicKey', 'copies', 'peers', 'accept', 'keep'].includes(k)))
     throw new Error(usage);
-  const copies = (v.copies as string[]).map((c) => resolve(c));
+  const raw = v.copies ?? [];
+  if (!Array.isArray(raw) || raw.length > 4 || raw.some((c) => typeof c !== 'string' || !isAbsolute(c)))
+    throw new Error(usage);
+  const copies = (raw as string[]).map((c) => resolve(c));
   if (new Set(copies).size !== copies.length) throw new Error('Invalid backup: each copy folder once.');
   for (const c of copies) {
     const r = relative(resolve(home), c);
     if (r === '' || (!r.startsWith('..') && !isAbsolute(r)))
       throw new Error('Invalid backup: a copy folder inside the NERV data home is not off host.');
   }
+  const peers = baseIds(v.peers, 'peers'),
+    accept = baseIds(v.accept, 'accept');
+  if (!copies.length && !peers && !accept) throw new Error(usage);
+  if (copies.length || peers) {
+    if (typeof v.publicKey !== 'string') throw new Error(usage);
+    publicKeyObject(v.publicKey);
+  } else if (v.publicKey !== undefined) throw new Error(usage);
   if (v.keep !== undefined && (!Number.isInteger(v.keep) || (v.keep as number) < 1 || (v.keep as number) > 365))
     throw new Error('Invalid backup: keep is a whole number of copies from 1 to 365.');
-  return { publicKey: v.publicKey, copies, ...(v.keep !== undefined ? { keep: v.keep as number } : {}) };
+  return {
+    ...(typeof v.publicKey === 'string' ? { publicKey: v.publicKey } : {}),
+    copies,
+    ...(peers ? { peers } : {}),
+    ...(accept ? { accept } : {}),
+    ...(v.keep !== undefined ? { keep: v.keep as number } : {}),
+  };
 }
 
 /** Copy dates in a folder, newest first. */
@@ -184,4 +212,47 @@ export function writeCopy(snapshot: string, date: string, dir: string, publicKey
   }
   for (const old of copyDates(dir).slice(Math.max(1, keep))) rmSync(join(dir, copyName(old)), { force: true });
   return name;
+}
+
+/** Where this base keeps the copies `from` sent it over the Kaji line. */
+export const receivedDir = (home: string, from: string) => join(home, 'kaji-backups', from);
+
+/** Whether `data` is shaped like a copy. A receiver cannot decrypt it; this only refuses something else. */
+export const looksLikeCopy = (data: Buffer) =>
+  data.length > MAGIC.length + 2 && data.subarray(0, MAGIC.length).equals(MAGIC);
+
+/**
+ * F-062-T06: stores a copy another base sent over the Kaji line, when this base accepts copies from it. The copy stays
+ * encrypted: the receiver never holds the backup key. Newest `keep` per sender are kept.
+ */
+export function storeReceived(
+  home: string,
+  config: BackupConfig | undefined,
+  from: string,
+  date: string,
+  data: Buffer,
+): 'stored' | 'refused' {
+  if (!config?.accept?.includes(from) || !BASE_ID.test(from)) return 'refused';
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !looksLikeCopy(data)) return 'refused';
+  const dir = receivedDir(home, from);
+  mkdirSync(dir, { recursive: true, mode: 0o700 });
+  if (process.platform !== 'win32') chmodSync(dir, 0o700);
+  const name = copyName(date),
+    partial = join(dir, name + '.partial');
+  try {
+    writeFileSync(partial, data, { mode: 0o600 });
+    const fd = openSync(partial, 'r+');
+    try {
+      fsyncSync(fd);
+    } finally {
+      closeSync(fd);
+    }
+    renameSync(partial, join(dir, name));
+  } catch (e) {
+    rmSync(partial, { force: true });
+    throw e;
+  }
+  for (const old of copyDates(dir).slice(Math.max(1, config.keep ?? COPY_KEEP)))
+    rmSync(join(dir, copyName(old)), { force: true });
+  return 'stored';
 }
