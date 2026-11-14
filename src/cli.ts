@@ -25,7 +25,7 @@ import {
 import { checkUpdateAvailability } from './update-availability.ts';
 import { runtimeBom } from './bom.ts';
 import { spawnSync } from 'node:child_process';
-import { randomUUID } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { join, resolve } from 'node:path';
 import { formatQueuedMessage } from './request-queue.ts';
 import { requestLanguage } from './misato.ts';
@@ -54,6 +54,7 @@ import {
   seatKeyPath,
   writeSeatKey,
   readToken,
+  rotateCredential,
   setBase,
   setting,
   type Base,
@@ -313,6 +314,26 @@ try {
       throw new Error(
         'Usage: skills list | inspect <id> <version> | stage <file> | promote <id> <version> --owner-approved | rollback <id> --owner-approved | retire <id> --owner-approved',
       );
+    }
+  } else if (command === 'credentials') {
+    if (args[0] !== 'rotate' || !['admin', 'telegram', 'cloud'].includes(args[1] ?? ''))
+      throw new Error('Usage: credentials rotate admin|telegram|cloud');
+    const kind = args[1] as 'admin' | 'telegram' | 'cloud';
+    if (kind === 'admin') {
+      if (setting('TOKEN')) throw new Error('Unset NERV_TOKEN before rotating the file-backed admin credential.');
+      rotateCredential(home, kind, randomBytes(32).toString('hex'));
+      console.log('Admin credential rotated; the running service uses it now.');
+    } else {
+      const value = (
+        await readSecret(`${kind === 'telegram' ? 'New BotFather token' : 'New cloud API key'} (not shown): `)
+      ).trim();
+      if (kind === 'telegram' ? !isTelegramToken(value) : value.length < 20 || /\s/.test(value))
+        throw new Error(
+          `That does not look like a ${kind === 'telegram' ? 'BotFather token' : 'cloud API key'}: nothing was saved.`,
+        );
+      rotateCredential(home, kind, value);
+      console.log(`${kind === 'telegram' ? 'Telegram' : 'Cloud'} credential rotated; no secret was printed.`);
+      if (kind === 'cloud') console.log(await reloadIfRunning(home, readConfig(home).port));
     }
   } else if (command === 'telegram') {
     // telegram link [CHAT_ID]: binds Aoba to the private chat that sent /start to the bot.
@@ -826,7 +847,7 @@ try {
     console.log(value.text + (value.truncated ? '\n[reply truncated]' : '') + `\n— ${value.route} · ${value.model}`);
   } else if (!command || command === 'help')
     console.log(
-      'NERV Agency\nCommands: root-migration plan|apply|status | init [--base ID --name "Name"] [--no-model-setup] [--fresh] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | nodes discover|inspect|plan|apply|status|release | workers pending|history|held|result|cancel|cancel-outbox|release|retry-outbox|abandon-outbox | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | bom | models [set misato| pilots [generic|add|set|pin|unpin|retire|restore] | tools [add|remove|grant|revoke] |casper MODEL | cloud on|off | key] | ask [--cloud] "text" | open [dashboard] | sessions revoke | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | chronicle [DAYS] | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall',
+      'NERV Agency\nCommands: root-migration plan|apply|status | init [--base ID --name "Name"] [--no-model-setup] [--fresh] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | nodes discover|inspect|plan|apply|status|release | workers pending|history|held|result|cancel|cancel-outbox|release|retry-outbox|abandon-outbox | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | bom | credentials rotate admin|telegram|cloud | models [set misato| pilots [generic|add|set|pin|unpin|retire|restore] | tools [add|remove|grant|revoke] |casper MODEL | cloud on|off | key] | ask [--cloud] "text" | open [dashboard] | sessions revoke | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | chronicle [DAYS] | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall',
     );
   else {
     const config = readConfig(home);
@@ -1250,7 +1271,7 @@ try {
       case 'launch': {
         const webRoot = resolve(fileURLToPath(new URL('../dist/web/browser', import.meta.url)));
         if (!existsSync(join(webRoot, 'index.html'))) throw new Error('Frontend missing: run npm run build.');
-        const token = readToken(home);
+        readToken(home);
         const nativeTLS = loadNativeTLS(home);
         const botToken = readTelegramToken(home);
         const nativeAuth = nativeTLS ? new NativeAuth(home) : undefined;
@@ -1310,10 +1331,10 @@ try {
         let native: ReturnType<typeof makeServer> | undefined;
         let close: () => void = () => {};
         try {
-          server = makeServer(runtime, token, { webRoot, ...config, onStop: () => close() });
+          server = makeServer(runtime, () => readToken(home), { webRoot, ...config, onStop: () => close() });
           native =
             nativeTLS && nativeAuth
-              ? makeServer(runtime, token, {
+              ? makeServer(runtime, () => readToken(home), {
                   ...config,
                   tls: nativeTLS,
                   native: {
@@ -1387,7 +1408,7 @@ try {
         // Aoba starts only when both the private bot token and the linked owner chat exist.
         if (botToken && config.telegram) {
           aoba = new TelegramChannel({
-            api: new TelegramApi(botToken, telegramBase()),
+            api: new TelegramApi(() => readTelegramToken(home) ?? '', telegramBase()),
             store: runtime,
             chatId: config.telegram.chatId,
             statePath: join(home, 'telegram-state.json'),

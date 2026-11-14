@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "B-062-T01",
+  "parent": "B-062",
+  "title": "Name the failed inspection prerequisite",
+  "goal": "`nodes inspect` says whether SSH could not reach the target or Node.js is missing there",
+  "status": "implemented",
+  "acceptance": [
+    "A committed test through runNodeCommand fails before the fix",
+    "Exit 255 names SSH reachability, exit 127 names missing Node.js, others stay generic; none installs anything"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/node-inspection.ts",
+    "test/node-inspection-errors.test.ts",
+    "docs/work/records/B-062.md",
+    "docs/work/tasks/B-062-T01.json",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "regression-design",
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures only; no real host names.",
+  "validation": [
+    "npm test",
+    "2026-11-14: test/node-inspection-errors.test.ts failed before the fix (2 of 3) and passes after; runNodeCommand names SSH exit 255 and remote 127."
+  ],
+  "escalation": [
+    "Any write to a target goes to the owner first"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-14: two exit-code messages and one regression. Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}
