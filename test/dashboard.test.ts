@@ -1178,3 +1178,122 @@ test('F-051: MAGI detail marks shadow/peer seats, Sephirot debrief shows directi
   assert.match(live, /"bases\/" \+ encodeURIComponent\(baseId\) \+ "\/sorties\/" \+ encodeURIComponent\(sortieId\)/);
   assert.match(live, /const mainBase = up\.find\(b => b\.main\)/, 'hub-and-spoke Kaji links when main base exists');
 });
+
+test('B-065: revoked bases are excluded from BASES on the map and listed apart from live bases in renderBases', () => {
+  const src = readFileSync('web/public/dashboard/live.js', 'utf8');
+  const start = src.indexOf('let basesKey = "";');
+  const end = src.indexOf('  // Lilith:');
+  assert.ok(start > 0 && end > start, 'extract Kaji base rendering block from live.js');
+  const block = src.slice(start, end);
+
+  const elements: Record<string, { textContent: string; innerHTML: string }> = {
+    'bases-sub': { textContent: '', innerHTML: '' },
+    bases: { textContent: '', innerHTML: '' },
+    cages: { textContent: '', innerHTML: '' },
+  };
+  const state: { kajiBases: unknown[]; doctor: Record<string, unknown> } = {
+    kajiBases: [],
+    doctor: { models: { roles: { misato: 'local (gemma4)', casper: 'local (gemma4)' } } },
+  };
+  const BASES: { id: string; name: string; status: string }[] = [{ id: 'nerv-01', name: 'TOKYO-3', status: 'online' }];
+  const LINKS: [string, string][] = [];
+  const CAGES: { id: string; base: string }[] = [{ id: 'EVA-02', base: 'nerv-01' }];
+  const win: { renderBases?: () => void } = {};
+  let initMapCalls = 0;
+  const observed: unknown[] = [];
+
+  const api = new Function(
+    'state',
+    'BASES',
+    'LINKS',
+    'CAGES',
+    'document',
+    'window',
+    'esc',
+    'initMap',
+    'observeTelegram',
+    'telegramApiState',
+    'baseName',
+    'sendPacket',
+    `${block}\nreturn { applyBases, renderBases: window.renderBases };`,
+  )(
+    state,
+    BASES,
+    LINKS,
+    CAGES,
+    { getElementById: (id: string) => elements[id] },
+    win,
+    (value: unknown) =>
+      String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;'),
+    () => {
+      initMapCalls += 1;
+    },
+    (list: unknown[]) => {
+      observed.push(list);
+    },
+    () => 'responding',
+    (id: string) => id,
+    () => {},
+  ) as {
+    applyBases: (list: unknown[], health: string) => void;
+    renderBases: () => void;
+  };
+
+  const list = [
+    {
+      baseId: 'NERV-01',
+      name: 'Neo Tokyo-3',
+      address: '100.64.0.1:4320',
+      fingerprint: '111122223333',
+      status: 'enrolled',
+      self: true,
+      main: true,
+      online: true,
+    },
+    {
+      baseId: 'NERV-02',
+      name: 'Tabgha',
+      address: '100.64.0.2:4320',
+      fingerprint: '444455556666',
+      status: 'enrolled',
+      self: false,
+      main: false,
+      online: true,
+    },
+    {
+      baseId: 'MAC-ACCEPTANCE',
+      name: 'Local acceptance',
+      address: '127.0.0.1:4320',
+      fingerprint: '777788889999',
+      status: 'revoked',
+      self: false,
+      main: false,
+      online: false,
+    },
+  ];
+
+  api.applyBases(list, 'online');
+  api.renderBases();
+
+  assert.deepEqual(
+    BASES.map((b) => b.id),
+    ['nerv-01', 'nerv-02'],
+    'revoked bases must never populate BASES for the map or offline health alerts',
+  );
+  assert.deepEqual(LINKS, [['nerv-02', 'nerv-01']]);
+  assert.equal(initMapCalls, 1);
+  assert.match(elements['bases-sub']!.innerHTML, /^2\/2 online/, 'only enrolled bases count in online ratio');
+
+  const html = elements.bases!.innerHTML;
+  const revokedHeading = html.indexOf('>Revoked<');
+  assert.ok(revokedHeading > 0, 'revoked bases render under a separate Revoked section');
+  const activeHtml = html.slice(0, revokedHeading);
+  const revokedHtml = html.slice(revokedHeading);
+  assert.doesNotMatch(activeHtml, /MAC-ACCEPTANCE/, 'revoked base does not appear in the live base list');
+  assert.match(revokedHtml, /MAC-ACCEPTANCE/);
+  assert.match(revokedHtml, /REVOKED/);
+  assert.doesNotMatch(revokedHtml, /Telegram ·/, 'revoked cards omit live channel/heartbeat lines');
+});
