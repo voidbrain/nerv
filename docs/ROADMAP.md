@@ -29,7 +29,7 @@ Status per milestone, derived from the records (Delivered: all closed; Awaiting 
 | 1a.1 — Isolated runtime foundation | Delivered | 2 | 0 | 0 | — |
 | 1b — Native macOS companion | In progress | 0 | 1 | 1 | F-081 |
 | 2a — Useful, gated assistant | In progress | 12 | 1 | 5 | F-027, F-044, F-056, F-082, F-083 |
-| 2b — Governed extensions | In progress | 8 | 0 | 6 | F-021, F-064, F-065, F-066, F-086, F-087 |
+| 2b — Governed extensions | In progress | 9 | 0 | 5 | F-021, F-064, F-065, F-086, F-087 |
 | 3 — Multi-node foundation | In progress | 1 | 1 | 4 | F-005, F-050, F-080, F-088 |
 | 4 — Angular PWA, GenUI and live dashboard | In progress | 5 | 0 | 2 | F-004, F-051 |
 | 5 — Distributed agents/models | Planned | 0 | 0 | 14 | F-006, F-012, F-048, F-049, F-060, F-078, F-084, F-085, F-089, F-090, F-091, F-092, F-093, F-094 |

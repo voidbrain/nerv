@@ -4,7 +4,7 @@
   "parent": "B-062",
   "title": "Name the failed inspection prerequisite",
   "goal": "`nodes inspect` says whether SSH could not reach the target or Node.js is missing there",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A committed test through runNodeCommand fails before the fix",
     "Exit 255 names SSH reachability, exit 127 names missing Node.js, others stay generic; none installs anything"
@@ -31,11 +31,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h",
-    "basis": "Estimated 2026-11-14: two exit-code messages and one regression. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-14: two exit-code messages and one regression. Not a measurement. Closed 2026-11-14 after PR #396 merged (CI 43572379622 green).",
     "reviewed": "2026-11-14",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
-    "estimateAgentHours": 0.5
+    "estimateAgentHours": 0.5,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
   }
 }

@@ -37,7 +37,8 @@
   ],
   "validation": [
     "Meaningful cross-boundary regressions and required final CI",
-    "Explicit selected-target acceptance where service, install or real device behavior is required; static/unit passes do not substitute"
+    "Explicit selected-target acceptance where service, install or real device behavior is required; static/unit passes do not substitute",
+    "2026-11-14: the agent ran the procedure at the owner's request from a worktree at main 0131dbc. Step 1 passed: `nodes inspect --ssh nerv-linux` reported \"Node.js was not found on the target's non-interactive PATH … no installation was requested\" and nothing changed on the VM. Step 2 blocked: the VM resolves names but has no outbound TCP (apt and curl cannot connect; the Mac runs Tailscale, a likely cause), so Ubuntu's nodejs could not be installed. Steps 2–3 wait for the VM to reach the internet."
   ],
   "escalation": [
     "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",

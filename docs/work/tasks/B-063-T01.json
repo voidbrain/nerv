@@ -4,7 +4,7 @@
   "parent": "B-063",
   "title": "Report a Node.js below engines.node",
   "goal": "`nodes inspect` fails with the found and required versions when the target's Node.js is too old",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A committed test through nodesCommand fails before the fix",
     "The required version is read from package.json engines.node, not repeated in code",
@@ -34,11 +34,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h",
-    "basis": "Estimated 2026-11-14: one version comparison and one regression. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-14: one version comparison and one regression. Not a measurement. Closed 2026-11-14 after PR #397 merged (CI 43569512021 green).",
     "reviewed": "2026-11-14",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
-    "estimateAgentHours": 0.5
+    "estimateAgentHours": 0.5,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
   }
 }

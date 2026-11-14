@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "F-062-T06",
+  "parent": "F-062",
+  "title": "Encrypted copies to Tabgha over the Kaji line",
+  "goal": "The nightly encrypted copy also reaches Tabgha over the Kaji line, as the owner chose in F-062-T01",
+  "status": "planned",
+  "acceptance": [
+    "Tabgha keeps the newest encrypted copies it receives over the Kaji line; it cannot decrypt them; a missing or refused transfer is reported, never retried in a loop"
+  ],
+  "dependsOn": [
+    "F-062-T03"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "contract:kaji",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "A test across sender and receiver over the Kaji line; final applicable CI"
+  ],
+  "escalation": [
+    "A new Kaji message type changes the distributed contract: it needs the owner's agreement before it is adopted"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h agent",
+    "basis": "Estimated 2026-11-14 when split from F-062-T03: one Kaji message type, a receiver store and a test across both. Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}

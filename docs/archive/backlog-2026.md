@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 11 | 13 |
+| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 12 | 14 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
 
@@ -3851,6 +3851,76 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 | Opened | 2026-11-01 |
 | Verification | 2026-11-12 live on the owner's Mac: pairing, replay/expiry refusal and secret checks (T02); revocation, lost renewal reply, Keychain failure and offline rotation with recovery (T03); owner-observed. 2026-11-08 Unit/integration: five Node authentication/renewal contracts and one stopped-profile recovery contract pass; actual HTTPS admission, single-use tickets, old-token invalidation, independent clients, full roster, expired/revoked refusal and retained unrelated data covered. Swift: three pairing tests pass, including real pinned Swift-to-Node HTTPS renewal and identity/pin/port refusal. Typecheck/conventions pass. PR #213 CI 42489975323 passed plan, validate, windows, native-macos and full-suite. Live Keychain/OS/certificate-recovery acceptance pending; fixtures never change real credentials, services or login state. |
 | Reviewed | 2026-11-13. Review: [fresh-context closure review](https://github.com/voidbrain/nerv/pull/380#issuecomment-6862313031), no blockers. |
+
+</details>
+
+---
+
+## Closed 2026-11-14
+
+### B-062
+
+**`nodes inspect` gives one vague message for an unreachable host and for a target without Node.js**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />None: the fix passed CI and the VM run.
+
+| | |
+|---|---|
+| **Issue** | 2026-11-14, F-005-T22 owner run: `nodes inspect --ssh nerv-linux` printed "Read-only command failed. Check the selected client and target prerequisites". Here SSH could not resolve the host, but the same text appears when the target has no Node.js, which is the prerequisite T22 must report. The owner cannot tell which one to fix. |
+| **Reproduce** | `nodes inspect --ssh <unknown host>`, and `nodes inspect --ssh <host without node>`: both print the same line. |
+| **Check** | A regression through the real command runner: SSH exit 255 says the target could not be reached over SSH (name, key or known host); exit 127 says Node.js is missing on the target's non-interactive PATH; other failures keep the generic text; all still say no installation was requested. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Closed 2026-11-14:** PR #396 merged (CI 43572379622 green). On the VM without Node.js (F-005-T22 step 1, run by the agent at the owner's request), `nodes inspect --ssh nerv-linux` now says Node.js was not found on the target's non-interactive PATH. **Next action / closure evidence:** B-062-T01 implemented. All seven nerv-system-flows cases reran and passed at this source (ledger updated; stress and browser in B-062-T02).
+
+**Estimates:** Small, estimated 2026-11-14: 0.5 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #396](https://github.com/voidbrain/nerv/pull/396); found in the F-005-T22 owner run, 2026-11-14. |
+| Opened | 2026-11-14 |
+| Verification | Unit: test/node-inspection-errors.test.ts through the real runner. VM run 2026-11-14 (F-005-T22 step 1): the missing-Node message appears. |
+| Reviewed | 2026-11-14 |
+
+</details>
+
+---
+
+### F-066
+
+**Machine credentials: rotation and telling owner use from automated use**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />None: every check is automated and passed in CI.
+
+| | |
+|---|---|
+| **Issue** | Checked against the [OWASP Non-Human Identities Top 10](https://owasp.org/www-project-non-human-identities-top-10/) (2025): grants are short-lived (NHI7), base keys are per base (NHI9) and revocation wins (NHI1), but the admin token, the Telegram token and the cloud key have no rotation path (NHI7, long-lived secrets), and nothing shows whether a ledger entry came from the owner by hand or from an automated client using the same token (NHI10, human use of NHI). |
+| **Reproduce** | Look for a command that replaces the admin token, Telegram token or cloud key while running and invalidates the old one: none. Make one REST decision by hand and one from a script with the admin token: the ledger cannot tell them apart. |
+| **Check** | A rotation command per credential: the new one works at once, the old one is refused, no restart or re-enrolment needed, no secret printed or logged. `doctor` reports each credential's age (never its value). Ledger events record the client kind that acted (dashboard session, CLI, API token, Telegram) and a test proves an API-token decision is distinguishable from a dashboard one. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Closed 2026-11-14:** F-066-T01 ([PR #394](https://github.com/voidbrain/nerv/pull/394), CI 43567022613) and F-066-T02 ([PR #399](https://github.com/voidbrain/nerv/pull/399), CI 43576040188) merged with every check green. **Next action / closure evidence:** F-066-T01 implemented 2026-11-14 in [PR #394](https://github.com/voidbrain/nerv/pull/394): `credentials rotate admin|telegram|cloud` atomically replaces private files; live HTTP, WebSocket, Telegram and cloud routes read the replacement without a service restart; doctor exposes age in seconds only. Targeted authentication, privacy and CLI regressions pass locally. Next F-066-T02. Rotation of base keys and the root key belongs to F-036's enrolment and stays out of scope.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 2 open steps total 1.5 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Small. Set 2026-11-07.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
+| Opened | 2026-11-07 |
+| Verification | Unit/integration: rotation, doctor age and client-kind regressions, CI green on PR #394 and PR #399. |
+| Reviewed | 2026-11-14 |
 
 </details>
 

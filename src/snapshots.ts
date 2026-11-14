@@ -13,11 +13,13 @@ import {
 } from 'node:fs';
 import { join } from 'node:path';
 import { briefDue } from './brief.ts';
+import { copyDates, writeCopy, COPY_KEEP, type BackupConfig } from './offhost.ts';
 
 /**
  * F-062-T02: nightly consistent snapshots of the base database. The owner chose one snapshot a night (up to 24 h of
  * data may be lost) in F-062-T01. SQLite's online backup copies a consistent state while the service keeps writing;
- * each copy passes an integrity check before it replaces the partial file. Off-host retention is F-062-T03.
+ * each copy passes an integrity check before it replaces the partial file. Encrypted off-host copies (F-062-T03) are
+ * written from the newest snapshot to each configured folder.
  */
 export const SNAPSHOT_AT = '03:30';
 export const SNAPSHOT_KEEP = 7;
@@ -97,6 +99,8 @@ export function snapshotDue(now: Date, timeZone: string, latest: string | undefi
 /**
  * Checks every minute and takes the night's snapshot when due. One attempt per local date: a failure is logged once
  * (the reason only, never a path or database content) and retried the next night, so a broken disk cannot loop.
+ * Then each configured off-host folder gets an encrypted copy of the newest snapshot: an unavailable folder (a disk not
+ * plugged in) is retried every minute and logged once a night; any other failure is retried the next night.
  */
 export function startSnapshots(
   home: string,
@@ -104,23 +108,28 @@ export function startSnapshots(
   timeZone: () => string,
   log: (line: string) => void = (l) => console.error(l),
   everyMs = 60_000,
+  backup: () => BackupConfig | undefined = () => undefined,
 ): () => void {
   const dir = snapshotDir(home);
   let attempted: string | undefined,
     busy = false;
+  const copied = new Map<string, string>(),
+    reported = new Map<string, string>();
   const tick = async () => {
     if (busy) return;
     busy = true;
     try {
       const zone = timeZone(),
         date = snapshotDue(new Date(), zone, snapshotDates(dir)[0]);
-      if (!date || attempted === date) return;
-      attempted = date;
-      try {
-        await takeSnapshot(database(), dir, date);
-      } catch (e) {
-        log(`Nightly snapshot for ${date} failed (${reason(e)}); next attempt tomorrow.`);
+      if (date && attempted !== date) {
+        attempted = date;
+        try {
+          await takeSnapshot(database(), dir, date);
+        } catch (e) {
+          log(`Nightly snapshot for ${date} failed (${reason(e)}); next attempt tomorrow.`);
+        }
       }
+      copyOffHost(dir, backup(), copied, reported, log);
     } finally {
       busy = false;
     }
@@ -129,6 +138,34 @@ export function startSnapshots(
   timer.unref();
   void tick();
   return () => clearInterval(timer);
+}
+
+function copyOffHost(
+  dir: string,
+  config: BackupConfig | undefined,
+  copied: Map<string, string>,
+  reported: Map<string, string>,
+  log: (line: string) => void,
+) {
+  const newest = snapshotDates(dir)[0];
+  if (!config || !newest) return;
+  config.copies.forEach((target, i) => {
+    if (copied.get(target) === newest || copyDates(target)[0] === newest) return;
+    try {
+      writeCopy(join(dir, `nerv-${newest}.sqlite`), newest, target, config.publicKey, config.keep ?? COPY_KEEP);
+      copied.set(target, newest);
+    } catch (e) {
+      const unavailable = !!e && typeof e === 'object' && 'code' in e && e.code === 'ENOENT';
+      if (!unavailable) copied.set(target, newest);
+      if (reported.get(target) === newest) return;
+      reported.set(target, newest);
+      log(
+        unavailable
+          ? `Off-host copy ${i + 1} for ${newest} waits: its folder is not available (disk not connected?).`
+          : `Off-host copy ${i + 1} for ${newest} failed (${reason(e)}); next attempt tomorrow.`,
+      );
+    }
+  });
 }
 
 function reason(e: unknown): string {
