@@ -161,6 +161,9 @@ export class KajiLink {
   readonly port: RegistryPort;
   readonly log: (line: string) => void;
   private readonly workers?: WorkerLink;
+  get workerLink(): WorkerLink | undefined {
+    return this.workers;
+  }
   private server?: Server;
   private timer?: NodeJS.Timeout;
   private nonces = new Nonces();

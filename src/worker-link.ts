@@ -6,8 +6,19 @@ import { KAJI_CLOCK_SKEW_MS, signedHeaders, verifySigned, Nonces, type RootTrust
 import type { RegistryPort } from './kaji-link.ts';
 import { validateParams, MAX_FRAME_BYTES, MAX_RPC_CONNECTIONS, MAX_RPC_INFLIGHT } from './rpc.ts';
 import { WORKER_LEASE_MS, WORKER_RESULT_BYTES, type WorkerItem, type WorkerContext } from './worker-jobs.ts';
+import {
+  isTailscaleAddress,
+  ModelError,
+  validateWorkerInferRequest,
+  verifyRemoteInferenceReply,
+  WORKER_MAX_INFER_PROMPT_BYTES,
+  WORKER_MAX_INFER_SYSTEM_BYTES,
+  type WorkerInferReply,
+  type WorkerInferRequest,
+} from './model.ts';
 export const WORKER_PROTOCOL_VERSION = 1;
 const PATH = '/kaji/worker';
+const MAX_WORKER_BODY_BYTES = WORKER_MAX_INFER_PROMPT_BYTES + WORKER_MAX_INFER_SYSTEM_BYTES + 4096;
 // Four requests and their four responses may arrive in one WebSocket read.
 const MAX_QUEUED_FRAMES = MAX_RPC_INFLIGHT * 2;
 const uuid = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
@@ -18,6 +29,7 @@ export interface WorkerAdapter {
   close(owner: string, session: string): Promise<void>;
   cancel(owner: string, id: string, reason: string, ownerKey: string): Promise<{ status: string; result?: unknown }>;
   run(owner: string, item: WorkerItem, context: WorkerContext): Promise<unknown>;
+  infer?(owner: string, req: WorkerInferRequest): Promise<WorkerInferReply>;
 }
 interface Settings {
   trust?: RootTrust;
@@ -107,7 +119,7 @@ class Peer {
       typeof envelope.session !== 'string' ||
       !uuid.test(envelope.session) ||
       typeof envelope.body !== 'string' ||
-      Buffer.byteLength(envelope.body) > WORKER_RESULT_BYTES + 4096 ||
+      Buffer.byteLength(envelope.body) > MAX_WORKER_BODY_BYTES ||
       !object(envelope.headers)
     )
       throw Error('Invalid worker envelope.');
@@ -153,8 +165,13 @@ class Peer {
       if (!pending) throw Error('Unknown worker response.');
       this.pending.delete(rpc.id);
       clearTimeout(pending.timer);
-      if ('error' in rpc) pending.reject(Error('Worker RPC refused.'));
-      else pending.resolve(rpc.result);
+      if ('error' in rpc) {
+        const message =
+          object(rpc.error) && typeof rpc.error.message === 'string' && rpc.error.message.trim()
+            ? rpc.error.message
+            : 'Worker RPC refused.';
+        pending.reject(Error(message));
+      } else pending.resolve(rpc.result);
       return;
     }
     if (!keys(rpc, ['jsonrpc', 'id', 'method', 'params']) || !object(rpc.params))
@@ -176,7 +193,8 @@ class Peer {
             this.startHeartbeat();
           }
         },
-        () => this.reply(rpc.id as string, undefined, true),
+        (err: unknown) =>
+          this.reply(rpc.id as string, undefined, true, err instanceof ModelError ? err.message : undefined),
       )
       .finally(() => {
         if (ping) this.pingActive = false;
@@ -199,13 +217,20 @@ class Peer {
       this.epoch = Number(params.epoch);
       this.cursor = Number(params.cursor);
       this.ready = true;
-      return { version: WORKER_PROTOCOL_VERSION, session: this.session, epoch: this.epoch, cursor: this.cursor };
+      return {
+        version: WORKER_PROTOCOL_VERSION,
+        session: this.session,
+        epoch: this.epoch,
+        cursor: this.cursor,
+        offers: this.link.settings.offers?.() ?? [],
+      };
     }
     if (!this.ready) throw Error('Worker negotiation required.');
     if (method === 'worker.ping') {
       if (this.role === 'coordinator') {
         if (!keys(params, ['offers'])) throw Error('Invalid worker heartbeat.');
         await this.link.observe(this.remote, params.offers);
+        return { version: WORKER_PROTOCOL_VERSION, offers: this.link.settings.offers?.() ?? [] };
       } else if (Object.keys(params).length) throw Error('Invalid coordinator heartbeat.');
       return { version: WORKER_PROTOCOL_VERSION };
     }
@@ -249,12 +274,43 @@ class Peer {
         throw Error('Invalid worker result.');
       return result;
     }
+    if (method === 'worker.infer') return this.handleInfer(params);
     throw Error('Worker communication edge denied.');
+  }
+  private async handleInfer(params: Record<string, unknown>): Promise<WorkerInferReply> {
+    const validated = validateWorkerInferRequest(params);
+    if (this.role === 'coordinator') {
+      if (validated.callerBaseId !== this.remote) {
+        throw new ModelError('Remote inference caller identity mismatch.');
+      }
+      if (validated.targetBaseId === this.link.settings.id) {
+        return this.serveLocalInfer(validated.callerBaseId, validated);
+      }
+      return this.link.forwardInfer(validated);
+    }
+    if (validated.targetBaseId !== this.link.settings.id) {
+      throw new ModelError(
+        `Remote inference target mismatch: ${validated.targetBaseId} is not ${this.link.settings.id}.`,
+      );
+    }
+    if (validated.callerBaseId !== this.remote) {
+      const main = await this.link.settings.registry.main?.();
+      if (main !== this.remote) throw new ModelError('Remote inference caller identity mismatch.');
+    }
+    return this.serveLocalInfer(validated.callerBaseId, validated);
+  }
+  private async serveLocalInfer(callerBaseId: string, validated: WorkerInferRequest): Promise<WorkerInferReply> {
+    const offered = this.link.settings.offers?.() ?? [];
+    if (!offered.includes('model.infer') || !this.link.settings.adapter.infer) {
+      throw new ModelError(`Base ${this.link.settings.id} does not offer 'model.infer'.`);
+    }
+    const reply = await this.link.settings.adapter.infer(callerBaseId, validated);
+    return verifyRemoteInferenceReply(validated.model, reply);
   }
   private write(rpc: Record<string, unknown>, request: boolean): void {
     if (this.ended || this.ws.readyState !== WebSocket.OPEN) throw Error('Worker connection closed.');
     const body = JSON.stringify({ sequence: this.sent + 1, rpc });
-    if (Buffer.byteLength(body) > WORKER_RESULT_BYTES + 4096) throw Error('Worker message exceeds its bound.');
+    if (Buffer.byteLength(body) > MAX_WORKER_BODY_BYTES) throw Error('Worker message exceeds its bound.');
     const encoded = JSON.stringify({
       session: this.session,
       body,
@@ -281,13 +337,15 @@ class Peer {
       if (e) this.end();
     });
   }
-  private reply(id: string, result?: unknown, failed = false) {
+  private reply(id: string, result?: unknown, failed = false, errorMessage?: string) {
     if (this.ended) return;
     this.write(
       {
         jsonrpc: '2.0',
         id,
-        ...(failed ? { error: { code: -32003, message: 'Worker request refused.' } } : { result: result ?? null }),
+        ...(failed
+          ? { error: { code: -32003, message: errorMessage ?? 'Worker request refused.' } }
+          : { result: result ?? null }),
       },
       false,
     );
@@ -386,6 +444,7 @@ class Peer {
       reply.cursor !== cursor
     )
       throw Error('Worker negotiation failed.');
+    if (reply.offers !== undefined) await this.link.observe(this.remote, reply.offers);
     this.ready = true;
     clearTimeout(this.helloTimer);
     this.startHeartbeat();
@@ -401,8 +460,11 @@ class Peer {
         Math.min(this.link.heartbeatMs, this.link.requestMs),
         true,
       ).then(
-        () => {
+        (res) => {
           this.pingOutstanding = false;
+          if (this.role === 'worker' && object(res) && res.offers !== undefined) {
+            void this.link.observe(this.remote, res.offers).catch(() => {});
+          }
         },
         (e: unknown) => this.end(e),
       );
@@ -503,6 +565,11 @@ export class WorkerLink {
     }
   }
   private upgradeNonces = new Nonces(4096);
+  private peerOffers = new Map<string, string[]>();
+  offersOf(base: string): string[] | undefined {
+    const offers = this.peerOffers.get(base);
+    return offers ? [...offers] : undefined;
+  }
   async observe(remote: string, offers: unknown) {
     if (
       !Array.isArray(offers) ||
@@ -510,7 +577,9 @@ export class WorkerLink {
       offers.some((v) => typeof v !== 'string' || !/^[a-z]+\.[a-z]+$/.test(v) || v === 'kaji.run')
     )
       throw Error('Invalid worker capabilities.');
-    this.settings.onOffers?.(remote, [...new Set(offers as string[])]);
+    const unique = [...new Set(offers as string[])];
+    this.peerOffers.set(remote, unique);
+    this.settings.onOffers?.(remote, unique);
     await this.settings.registry.seen({ [remote]: new Date().toISOString() });
   }
   accept(peer: Peer) {
@@ -525,6 +594,9 @@ export class WorkerLink {
       this.client = undefined;
       this.defer();
     }
+    if (!this.peers.has(peer.remote) && this.client?.remote !== peer.remote) {
+      this.peerOffers.delete(peer.remote);
+    }
     if (peer.role === 'worker') {
       const cleanup = this.settings.adapter.close(peer.remote, peer.session).catch(() => {
         this.settings.log?.('Worker session cleanup unavailable.');
@@ -535,6 +607,85 @@ export class WorkerLink {
   }
   connected(base: string): boolean {
     return this.peers.get(base)?.ready ?? false;
+  }
+  async infer(
+    targetBaseId: string,
+    req: Omit<WorkerInferRequest, 'callerBaseId' | 'targetBaseId'> & { callerBaseId?: string; targetBaseId?: string },
+    timeoutMs = this.requestMs,
+  ): Promise<WorkerInferReply> {
+    const validated = validateWorkerInferRequest({
+      ...req,
+      callerBaseId: req.callerBaseId ?? this.settings.id,
+      targetBaseId,
+    });
+    if (validated.callerBaseId !== this.settings.id) {
+      throw new ModelError('Remote inference callerBaseId must match this base.');
+    }
+    if (validated.targetBaseId === this.settings.id) {
+      throw new ModelError('Remote inference targetBaseId must name another enrolled base.');
+    }
+    const bases = await this.settings.registry.bases();
+    const self = bases.find((b) => b.baseId === this.settings.id && b.status === 'enrolled');
+    const target = bases.find((b) => b.baseId === targetBaseId && b.status === 'enrolled');
+    if (!self || !isTailscaleAddress(self.address) || !target || !isTailscaleAddress(target.address)) {
+      throw new ModelError(
+        `Remote inference requires mutual Tailscale enrolment for ${this.settings.id} and ${targetBaseId}.`,
+      );
+    }
+    const direct = this.peers.get(targetBaseId);
+    const peer = direct?.ready ? direct : this.client?.ready ? this.client : undefined;
+    if (!peer) {
+      throw new ModelError(`No negotiated worker session to reach ${targetBaseId}.`);
+    }
+    const knownOffers = this.offersOf(targetBaseId);
+    if (peer.remote === targetBaseId) {
+      if (!knownOffers?.includes('model.infer')) {
+        throw new ModelError(`Base ${targetBaseId} does not offer 'model.infer'.`);
+      }
+    } else {
+      const relay = bases.find((b) => b.baseId === peer.remote && b.status === 'enrolled');
+      if (!relay || !isTailscaleAddress(relay.address)) {
+        throw new ModelError(`Coordinator ${peer.remote} is not an enrolled Tailscale relay.`);
+      }
+      if (knownOffers && !knownOffers.includes('model.infer')) {
+        throw new ModelError(`Base ${targetBaseId} does not offer 'model.infer'.`);
+      }
+    }
+    try {
+      const raw = await peer.request('worker.infer', validated as unknown as Record<string, unknown>, timeoutMs);
+      return verifyRemoteInferenceReply(validated.model, raw);
+    } catch (err) {
+      if (err instanceof ModelError) throw err;
+      throw new ModelError(err instanceof Error ? err.message : 'Remote inference request failed.');
+    }
+  }
+  async forwardInfer(validated: WorkerInferRequest): Promise<WorkerInferReply> {
+    const bases = await this.settings.registry.bases();
+    const caller = bases.find((b) => b.baseId === validated.callerBaseId && b.status === 'enrolled');
+    const target = bases.find((b) => b.baseId === validated.targetBaseId && b.status === 'enrolled');
+    if (!caller || !isTailscaleAddress(caller.address) || !target || !isTailscaleAddress(target.address)) {
+      throw new ModelError(
+        `Remote inference forwarding requires mutual Tailscale enrolment for ${validated.callerBaseId} and ${validated.targetBaseId}.`,
+      );
+    }
+    if (!this.offersOf(validated.targetBaseId)?.includes('model.infer')) {
+      throw new ModelError(`Base ${validated.targetBaseId} does not offer 'model.infer'.`);
+    }
+    const peer = this.peers.get(validated.targetBaseId);
+    if (!peer?.ready) {
+      throw new ModelError(`Inference endpoint ${validated.targetBaseId} is not connected.`);
+    }
+    try {
+      const raw = await peer.request(
+        'worker.infer',
+        validated as unknown as Record<string, unknown>,
+        validated.timeoutMs ?? this.requestMs,
+      );
+      return verifyRemoteInferenceReply(validated.model, raw);
+    } catch (err) {
+      if (err instanceof ModelError) throw err;
+      throw new ModelError(err instanceof Error ? err.message : 'Forwarded remote inference failed.');
+    }
   }
   async run(base: string, item: WorkerItem, timeoutMs: number): Promise<unknown> {
     const peer = this.peers.get(base);
@@ -641,6 +792,9 @@ export class WorkerLink {
     for (const socket of this.upgradeSockets) socket.destroy();
     for (const ws of this.server.clients) ws.terminate();
     for (const peer of this.peers.values()) peer.end();
+    for (const base of this.peers.keys()) {
+      if (this.client?.remote !== base) this.peerOffers.delete(base);
+    }
     this.peers.clear();
   }
   async stop() {

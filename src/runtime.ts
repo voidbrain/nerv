@@ -28,15 +28,26 @@ import { readConfig, readModelKey, readScrolls, savePilots } from './config.ts';
 import type { ActionDetail, Approval, Decision, SortieSummary } from './ledger.ts';
 import { argsHash } from './ledger.ts';
 import type { SortieEvent } from './events.ts';
+import type { WorkerLink } from './worker-link.ts';
 import {
+  authorizeRemoteInferenceRequest,
+  complete,
   MODEL_TIMEOUT_MS,
+  ModelError,
   selectOrchestration,
+  validateModels,
+  validateWorkerInferRequest,
+  verifyRemoteInferenceReply,
   type Ask,
   type EnrolledBaseCandidate,
+  type Models,
+  type OrchestratedProvenance,
   type OrchestrationRequest,
   type OrchestrationSelection,
   type Reply,
   type RouteName,
+  type WorkerInferReply,
+  type WorkerInferRequest,
 } from './model.ts';
 import { defaultPolicy, type Effect, type Pattern, type Stage, type Verdict } from './policy.ts';
 import { askedWhy, explainRecord, isAgencyQuestion } from './why.ts';
@@ -1734,6 +1745,11 @@ export class Runtime implements StoreApi {
       return [];
     }
   }
+  private workerLink?: WorkerLink;
+  /** Attaches the negotiated WorkerLink so selection sees peer offers and orchestrated jobs can invoke worker.infer/run. */
+  useWorkerLink(link: WorkerLink): void {
+    this.workerLink = link;
+  }
   /** Independent inference endpoint and execution worker selection (F-006-T02). */
   async selectExecution(
     req: OrchestrationRequest,
@@ -1745,12 +1761,14 @@ export class Runtime implements StoreApi {
       basesOverride ??
       (await this.bases().catch(() => [])).map((b) => {
         const heard = this.offersHeard.get(b.baseId);
+        const wsOffers = this.workerLink?.offersOf(b.baseId);
+        const offers = wsOffers ?? (heard && Date.now() - heard.at < ONLINE_MS ? heard.tools : undefined);
         return {
           baseId: b.baseId,
           status: (b as { status?: string }).status ?? 'enrolled',
           address: (b as { address?: string }).address ?? '',
-          online: b.online,
-          ...(heard && Date.now() - heard.at < ONLINE_MS ? { offers: heard.tools } : {}),
+          online: b.status === 'enrolled' && (b.online || !!wsOffers),
+          ...(offers ? { offers } : {}),
         };
       });
     return selectOrchestration(req, {
@@ -1759,6 +1777,190 @@ export class Runtime implements StoreApi {
       hasCloudKey,
       bases,
     });
+  }
+  private async runLoopbackModel(
+    baseUrl: string,
+    model: string,
+    ask: { prompt: string; system?: string },
+    timeoutMs: number,
+  ): Promise<WorkerInferReply> {
+    let localModels: Models;
+    try {
+      localModels = validateModels({ local: { baseUrl, model } });
+    } catch (err) {
+      throw new ModelError(err instanceof Error ? err.message : 'Local loopback S² configuration is invalid.');
+    }
+    const started = Date.now();
+    let obs: UsageObservation | undefined;
+    const reply = await complete(
+      {
+        prompt: ask.prompt,
+        ...(ask.system !== undefined ? { system: ask.system } : {}),
+        privacy: 'local-only',
+        route: 'local',
+      },
+      localModels,
+      undefined,
+      {
+        timeoutMs: Math.max(1000, Math.min(MODEL_TIMEOUT_MS, timeoutMs)),
+        observe: (o) => {
+          obs = o;
+        },
+      },
+    );
+    const candidate = {
+      model: obs?.returnedModel ?? '',
+      text: reply.text,
+      stop: reply.stop,
+      truncated: reply.truncated,
+      usage: { inputTokens: obs?.inputTokens ?? null, outputTokens: obs?.outputTokens ?? null },
+      durationMs: obs?.durationMs ?? Math.max(0, Date.now() - started),
+    };
+    return verifyRemoteInferenceReply(model, candidate);
+  }
+  /** Serves a signed worker.infer request through this base's own loopback S² server after strict authorization. */
+  async serveRemoteInference(callerBaseId: string, req: WorkerInferRequest): Promise<WorkerInferReply> {
+    if (!this.home) throw new ModelError('Remote inference requires configured runtime home.');
+    const cfg = readConfig(this.home);
+    const validated = validateWorkerInferRequest({ ...req, callerBaseId });
+    if (!cfg.models?.local) {
+      throw new ModelError(`Local inference server is not configured on ${cfg.base.id}.`);
+    }
+    const bases = await this.kaji.bases();
+    authorizeRemoteInferenceRequest(validated, {
+      selfBaseId: cfg.base.id,
+      remote: cfg.models.remote,
+      offers: cfg.kaji?.offers ?? [],
+      bases: bases.map((b) => ({
+        baseId: b.baseId,
+        status: b.status,
+        address: b.address,
+        online: true,
+      })),
+    });
+    return this.runLoopbackModel(
+      cfg.models.local.baseUrl,
+      validated.model,
+      {
+        prompt: validated.prompt,
+        ...(validated.system !== undefined ? { system: validated.system } : {}),
+      },
+      validated.timeoutMs ?? MODEL_TIMEOUT_MS,
+    );
+  }
+  /** Calls an enrolled Tailscale remote inference endpoint over WorkerLink with no silent fallback. */
+  async inferRemote(
+    targetBaseId: string,
+    req: Omit<WorkerInferRequest, 'callerBaseId' | 'targetBaseId'>,
+    timeoutMs = MODEL_TIMEOUT_MS,
+  ): Promise<WorkerInferReply> {
+    if (!this.workerLink) throw new ModelError('Remote inference requires an active WorkerLink.');
+    return this.workerLink.infer(targetBaseId, req, req.timeoutMs ?? timeoutMs);
+  }
+  /** Joins independent inference and worker selection at execution time with structured provenance and zero fallback. */
+  async runOrchestratedJob(input: {
+    orchestration: OrchestrationRequest;
+    ask: { prompt: string; system?: string; maxTokens?: number; temperature?: number };
+    execute?: (
+      inference: WorkerInferReply,
+      selection: OrchestrationSelection,
+      provenance: OrchestratedProvenance,
+    ) => Promise<unknown>;
+    item?: Omit<RunItem, 'request'> & { request?: string };
+    timeoutMs?: number;
+    basesOverride?: readonly EnrolledBaseCandidate[];
+  }): Promise<{
+    selection: OrchestrationSelection;
+    inference: WorkerInferReply;
+    execution?: unknown;
+    provenance: OrchestratedProvenance;
+  }> {
+    const selection = await this.selectExecution(input.orchestration, input.basesOverride);
+    const cfg = this.home ? readConfig(this.home) : undefined;
+    const selfBaseId = cfg?.base.id ?? 'LOCAL';
+    const timeoutMs = input.timeoutMs ?? MODEL_TIMEOUT_MS;
+    let inference: WorkerInferReply;
+    if (selection.inference.kind === 'remote') {
+      if (selection.inference.baseId === selfBaseId) {
+        if (!cfg?.models?.local) {
+          throw new ModelError(`Local inference server is not configured on ${selfBaseId}.`);
+        }
+        inference = await this.runLoopbackModel(
+          cfg.models.local.baseUrl,
+          selection.inference.model,
+          { prompt: input.ask.prompt, ...(input.ask.system !== undefined ? { system: input.ask.system } : {}) },
+          timeoutMs,
+        );
+      } else {
+        if (input.orchestration.privacy === 'local-only') {
+          throw new ModelError("Remote inference refuses 'local-only' privacy.");
+        }
+        inference = await this.inferRemote(
+          selection.inference.baseId,
+          {
+            endpoint: selection.inference.endpoint,
+            model: selection.inference.model,
+            privacy: input.orchestration.privacy,
+            prompt: input.ask.prompt,
+            ...(input.ask.system !== undefined ? { system: input.ask.system } : {}),
+            ...(input.ask.maxTokens !== undefined ? { maxTokens: input.ask.maxTokens } : {}),
+            ...(input.ask.temperature !== undefined ? { temperature: input.ask.temperature } : {}),
+            ...(input.timeoutMs !== undefined ? { timeoutMs: input.timeoutMs } : {}),
+          },
+          timeoutMs,
+        );
+      }
+    } else {
+      const started = Date.now();
+      const reply = await this.ask({
+        prompt: input.ask.prompt,
+        ...(input.ask.system !== undefined ? { system: input.ask.system } : {}),
+        privacy: input.orchestration.privacy,
+        route: selection.inference.kind,
+      });
+      inference = {
+        model: reply.model,
+        text: reply.text,
+        stop: reply.stop,
+        truncated: reply.truncated,
+        usage: { inputTokens: null, outputTokens: null },
+        durationMs: Math.max(0, Date.now() - started),
+      };
+    }
+    const provenance: OrchestratedProvenance = {
+      executionBaseId: selection.worker.baseId,
+      executionKind: selection.worker.kind,
+      inferenceBaseId:
+        selection.inference.kind === 'remote'
+          ? selection.inference.baseId
+          : selection.inference.kind === 'local'
+            ? selfBaseId
+            : 'cloud',
+      inferenceKind: selection.inference.kind,
+      inferenceModel: inference.model,
+      ...(selection.inference.kind === 'remote' ? { endpoint: selection.inference.endpoint } : {}),
+      privacy: input.orchestration.privacy,
+    };
+    let execution: unknown;
+    if (input.execute) {
+      execution = await input.execute(inference, selection, provenance);
+    } else if (input.item) {
+      const fullItem: RunItem = {
+        ...input.item,
+        request: input.item.request ?? inference.text,
+      };
+      if (selection.worker.kind === 'remote') {
+        if (!this.workerLink) throw new ModelError('Remote execution requires an active WorkerLink.');
+        execution = await this.workerLink.run(selection.worker.baseId, fullItem, timeoutMs);
+      } else {
+        execution = await this.act({
+          request: fullItem.request,
+          tool: fullItem.tool,
+          args: fullItem.args,
+        });
+      }
+    }
+    return { selection, inference, ...(execution !== undefined ? { execution } : {}), provenance };
   }
   async remoteOffers(): Promise<RemoteOffer[]> {
     if (!this.offersHeard.size) return [];
@@ -1973,6 +2175,7 @@ export class Runtime implements StoreApi {
     },
     run: (owner: string, item: RunItem, context: WorkerContext) =>
       this.runFromPeer(owner, item, this.home ? (readConfig(this.home).kaji?.offers ?? []) : [], context),
+    infer: (owner: string, req: WorkerInferRequest) => this.serveRemoteInference(owner, req),
   };
   async runFromPeer(from: string, item: RunItem, offered: string[], context: WorkerContext): Promise<unknown> {
     if (!context.ownerKey) throw new Error('Negotiated worker authority required.');

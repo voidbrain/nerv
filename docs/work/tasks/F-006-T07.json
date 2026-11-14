@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-006",
   "id": "F-006-T07",
-  "status": "planned",
+  "status": "implemented",
   "title": "T02b — Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol",
   "goal": "Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol.",
   "capabilities": [
@@ -22,6 +22,9 @@
   "resources": [
     "contract:model-routing",
     "src/model.ts",
+    "src/worker-link.ts",
+    "src/runtime.ts",
+    "test/orchestration-selection.test.ts",
     "docs/decisions/**",
     "docs/work/tasks/F-006-T01.json",
     "docs/work/records/F-006.md",
@@ -36,11 +39,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.75 h agent",
-    "basis": "Re-estimated 2026-11-14 from 0.25 h to 0.75 h: feature implementation steps closed since 2026-11-13 took 0.75–1 h (F-066-T01, F-066-T02, F-062-T03, F-044-T01) where the 0.25x pass had set 0.25–1 h; started from this step's estimate, not a ratio.",
+    "estimate": "0 hours",
+    "basis": "Implemented F-006-T07 scheduler join across WorkerLink (worker.infer signed RPC + coordinator forwarding), Runtime (serveRemoteInference/inferRemote/runOrchestratedJob), and model protocol validation/verification with multi-node WebSocket and no-fallback regressions in 0.75 h agent (stated; PR #418).",
     "reviewed": "2026-11-14",
     "baselineDays": 1.5,
-    "agentHours": 0.75,
+    "agentHours": 0,
+    "actualAgentHours": 0.75,
+    "actualSource": "stated",
     "baselineAgentHours": 2.25,
     "estimateAgentHours": 0.75
   }

@@ -69,6 +69,9 @@ export interface Reply {
   truncated: boolean;
 }
 export const MAX_REPLY_BYTES = 16384;
+export const WORKER_MAX_INFER_PROMPT_BYTES = 32768;
+export const WORKER_MAX_INFER_SYSTEM_BYTES = 8192;
+export const WORKER_MAX_INFER_REPLY_BYTES = MAX_REPLY_BYTES;
 /** Coordinator wait for a brain model call; the route itself gives up 5 s earlier so the brain can answer. */
 export const MODEL_TIMEOUT_MS = 120000;
 const loopback = new Set(['127.0.0.1', 'localhost', '[::1]']);
@@ -429,6 +432,219 @@ export function selectExecutionWorker(
   }
   return { kind: 'remote', baseId: base.baseId, ...(req.tool ? { tool: req.tool } : {}) };
 }
+export interface WorkerInferRequest {
+  requestId?: string;
+  callerBaseId: string;
+  targetBaseId: string;
+  endpoint?: string;
+  model: string;
+  privacy: 'owner-bases' | 'any';
+  prompt: string;
+  system?: string;
+  maxTokens?: number;
+  temperature?: number;
+  timeoutMs?: number;
+}
+export interface WorkerInferReply {
+  model: string;
+  text: string;
+  stop: string;
+  truncated: boolean;
+  usage: { inputTokens: number | null; outputTokens: number | null };
+  durationMs: number;
+}
+export interface OrchestratedProvenance {
+  executionBaseId: string;
+  executionKind: 'local' | 'remote';
+  inferenceBaseId: string;
+  inferenceKind: 'local' | 'remote' | 'cloud';
+  inferenceModel: string;
+  endpoint?: string;
+  privacy: Privacy;
+}
+export interface RemoteInferenceAuthorizeContext {
+  selfBaseId: string;
+  remote?: RemoteInferenceConfig;
+  offers?: readonly string[];
+  bases: readonly EnrolledBaseCandidate[];
+}
+
+const INFER_REQUEST_KEYS = [
+  'requestId',
+  'callerBaseId',
+  'targetBaseId',
+  'endpoint',
+  'model',
+  'privacy',
+  'prompt',
+  'system',
+  'maxTokens',
+  'temperature',
+  'timeoutMs',
+];
+const INFER_REPLY_KEYS = ['model', 'text', 'stop', 'truncated', 'usage', 'durationMs'];
+
+function asPlainRecord(value: unknown, label: string): Record<string, unknown> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new ModelError(`${label} must be an object.`);
+  return value as Record<string, unknown>;
+}
+
+/** Validates and normalizes a worker.infer payload before wire dispatch or serving execution. */
+export function validateWorkerInferRequest(value: unknown): WorkerInferRequest {
+  const obj = asPlainRecord(value, 'Remote inference request');
+  if (!Object.keys(obj).every((k) => INFER_REQUEST_KEYS.includes(k))) {
+    throw new ModelError('Remote inference request contains unknown properties.');
+  }
+  if (typeof obj.callerBaseId !== 'string' || !BASE_ID.test(obj.callerBaseId)) {
+    throw new ModelError('Remote inference request requires a valid callerBaseId.');
+  }
+  if (typeof obj.targetBaseId !== 'string' || !BASE_ID.test(obj.targetBaseId)) {
+    throw new ModelError('Remote inference request requires a valid targetBaseId.');
+  }
+  if (obj.endpoint !== undefined && (typeof obj.endpoint !== 'string' || !ENDPOINT_NAME.test(obj.endpoint))) {
+    throw new ModelError('Remote inference request endpoint name is invalid.');
+  }
+  if (obj.requestId !== undefined) {
+    if (typeof obj.requestId !== 'string' || !obj.requestId.trim() || obj.requestId.trim().length > 128) {
+      throw new ModelError('Remote inference requestId must be a non-empty string up to 128 characters.');
+    }
+  }
+  if (typeof obj.model !== 'string' || !obj.model.trim() || obj.model.trim().length > 120) {
+    throw new ModelError('Remote inference request requires a valid model name.');
+  }
+  if (obj.privacy !== 'owner-bases' && obj.privacy !== 'any') {
+    throw new ModelError("Remote inference refuses 'local-only' or unknown privacy classes.");
+  }
+  if (typeof obj.prompt !== 'string' || !obj.prompt.trim()) {
+    throw new ModelError('Remote inference request requires a non-empty prompt.');
+  }
+  if (Buffer.byteLength(obj.prompt, 'utf8') > WORKER_MAX_INFER_PROMPT_BYTES) {
+    throw new ModelError(`Remote inference prompt exceeds ${WORKER_MAX_INFER_PROMPT_BYTES} bytes.`);
+  }
+  if (obj.system !== undefined) {
+    if (typeof obj.system !== 'string') throw new ModelError('Remote inference system prompt must be a string.');
+    if (Buffer.byteLength(obj.system, 'utf8') > WORKER_MAX_INFER_SYSTEM_BYTES) {
+      throw new ModelError(`Remote inference system prompt exceeds ${WORKER_MAX_INFER_SYSTEM_BYTES} bytes.`);
+    }
+  }
+  if (obj.maxTokens !== undefined) {
+    if (
+      typeof obj.maxTokens !== 'number' ||
+      !Number.isSafeInteger(obj.maxTokens) ||
+      obj.maxTokens < 1 ||
+      obj.maxTokens > 16384
+    ) {
+      throw new ModelError('Remote inference maxTokens must be an integer between 1 and 16384.');
+    }
+  }
+  if (obj.temperature !== undefined) {
+    if (
+      typeof obj.temperature !== 'number' ||
+      !Number.isFinite(obj.temperature) ||
+      obj.temperature < 0 ||
+      obj.temperature > 2
+    ) {
+      throw new ModelError('Remote inference temperature must be between 0 and 2.');
+    }
+  }
+  if (obj.timeoutMs !== undefined) {
+    if (
+      typeof obj.timeoutMs !== 'number' ||
+      !Number.isSafeInteger(obj.timeoutMs) ||
+      obj.timeoutMs < 1000 ||
+      obj.timeoutMs > MODEL_TIMEOUT_MS * 2
+    ) {
+      throw new ModelError(`Remote inference timeoutMs must be an integer between 1000 and ${MODEL_TIMEOUT_MS * 2}.`);
+    }
+  }
+  return {
+    ...(obj.requestId !== undefined ? { requestId: obj.requestId.trim() } : {}),
+    callerBaseId: obj.callerBaseId,
+    targetBaseId: obj.targetBaseId,
+    ...(obj.endpoint !== undefined ? { endpoint: obj.endpoint } : {}),
+    model: obj.model.trim(),
+    privacy: obj.privacy,
+    prompt: obj.prompt,
+    ...(obj.system !== undefined ? { system: obj.system } : {}),
+    ...(obj.maxTokens !== undefined ? { maxTokens: obj.maxTokens } : {}),
+    ...(obj.temperature !== undefined ? { temperature: obj.temperature } : {}),
+    ...(obj.timeoutMs !== undefined ? { timeoutMs: obj.timeoutMs } : {}),
+  };
+}
+
+/** Verifies serving capability, mutual Tailscale enrolment, caller grant, and offered model; fails closed. */
+export function authorizeRemoteInferenceRequest(req: WorkerInferRequest, ctx: RemoteInferenceAuthorizeContext): void {
+  if (req.targetBaseId !== ctx.selfBaseId) {
+    throw new ModelError(`Remote inference target mismatch: expected ${ctx.selfBaseId}, got ${req.targetBaseId}.`);
+  }
+  if (req.callerBaseId === ctx.selfBaseId) {
+    throw new ModelError('Remote inference caller base cannot equal serving base.');
+  }
+  if (ctx.offers !== undefined && !ctx.offers.includes('model.infer')) {
+    throw new ModelError(`Base ${ctx.selfBaseId} does not offer 'model.infer'.`);
+  }
+  if (!ctx.remote?.serve?.enabled) {
+    throw new ModelError(`Remote inference serving is disabled on ${ctx.selfBaseId}.`);
+  }
+  if (!ctx.remote.serve.bases.includes(req.callerBaseId)) {
+    throw new ModelError(`Caller ${req.callerBaseId} is not allowed to use remote inference on ${ctx.selfBaseId}.`);
+  }
+  if (!ctx.remote.serve.models.includes(req.model)) {
+    throw new ModelError(`Model ${req.model} is not offered for remote inference on ${ctx.selfBaseId}.`);
+  }
+  const caller = ctx.bases.find((b) => b.baseId === req.callerBaseId && b.status === 'enrolled');
+  if (!caller || !isTailscaleAddress(caller.address)) {
+    throw new ModelError(`Caller ${req.callerBaseId} is not an enrolled Tailscale base.`);
+  }
+  const target = ctx.bases.find((b) => b.baseId === ctx.selfBaseId && b.status === 'enrolled');
+  if (!target || !isTailscaleAddress(target.address)) {
+    throw new ModelError(`Serving base ${ctx.selfBaseId} is not an enrolled Tailscale base.`);
+  }
+}
+
+/** Verifies exact returned model match, bounded reply size, and structured metadata with zero fallback. */
+export function verifyRemoteInferenceReply(expectedModel: string, value: unknown): WorkerInferReply {
+  const obj = asPlainRecord(value, 'Remote inference reply');
+  if (!Object.keys(obj).every((k) => INFER_REPLY_KEYS.includes(k))) {
+    throw new ModelError('Remote inference reply contains unknown properties.');
+  }
+  if (typeof obj.model !== 'string' || obj.model !== expectedModel) {
+    throw new ModelError(`Remote inference model mismatch: expected ${expectedModel}, got ${String(obj.model)}.`);
+  }
+  if (typeof obj.text !== 'string') {
+    throw new ModelError('Remote inference reply requires text.');
+  }
+  if (obj.truncated === true || Buffer.byteLength(obj.text, 'utf8') > WORKER_MAX_INFER_REPLY_BYTES) {
+    throw new ModelError(`Remote inference reply exceeds ${WORKER_MAX_INFER_REPLY_BYTES} bytes.`);
+  }
+  if (typeof obj.stop !== 'string') {
+    throw new ModelError('Remote inference reply requires stop reason.');
+  }
+  if (typeof obj.truncated !== 'boolean') {
+    throw new ModelError('Remote inference reply requires truncated boolean.');
+  }
+  const usage = asPlainRecord(obj.usage, 'Remote inference usage');
+  if (!Object.keys(usage).every((k) => k === 'inputTokens' || k === 'outputTokens')) {
+    throw new ModelError('Remote inference usage contains unknown properties.');
+  }
+  const validCount = (v: unknown): v is number | null =>
+    v === null || (typeof v === 'number' && Number.isFinite(v) && v >= 0);
+  if (!validCount(usage.inputTokens) || !validCount(usage.outputTokens)) {
+    throw new ModelError('Remote inference usage counts must be non-negative numbers or null.');
+  }
+  if (typeof obj.durationMs !== 'number' || !Number.isFinite(obj.durationMs) || obj.durationMs < 0) {
+    throw new ModelError('Remote inference durationMs must be a non-negative number.');
+  }
+  return {
+    model: obj.model,
+    text: obj.text,
+    stop: obj.stop,
+    truncated: obj.truncated,
+    usage: { inputTokens: usage.inputTokens, outputTokens: usage.outputTokens },
+    durationMs: obj.durationMs,
+  };
+}
+
 /** Selects inference endpoint and execution worker independently; neither falls back. */
 export function selectOrchestration(req: OrchestrationRequest, ctx: OrchestrationContext): OrchestrationSelection {
   return {
