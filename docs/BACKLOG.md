@@ -14,17 +14,17 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 52 | 5 |
-| **Require Human 🧑** | 11 | 3 |
+| **Require Human 🧑** | 12 | 3 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-005](#f-005) | [F-102](#f-102) | [B-057](#b-057) | [B-066](#b-066) |
-| [F-009](#f-009) | [F-008](#f-008) | [B-056](#b-056) |  |
-| [F-011](#f-011) | [F-076](#f-076) |  |  |
-| [F-023](#f-023) |  |  |  |
+| [F-005](#f-005) | [F-016](#f-016) | [B-057](#b-057) | [B-066](#b-066) |
+| [F-009](#f-009) | [F-102](#f-102) | [B-056](#b-056) |  |
+| [F-011](#f-011) | [F-008](#f-008) |  |  |
+| [F-023](#f-023) | [F-076](#f-076) |  |  |
 | [F-004](#f-004) |  |  |  |
 | [F-097](#f-097) |  |  |  |
 | [F-060](#f-060) |  |  |  |
@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 100.5 h agent + 23.5 h owner across 217 open steps of 52 features and 5 other records. 20.75 h of actual effort recorded on 39 steps. Generated from the task files.
+**Remaining effort:** 100 h agent + 23.5 h owner across 217 open steps of 52 features and 5 other records. 21.25 h of actual effort recorded on 40 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -357,57 +357,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
-### <a id="f-016"></a>[✨ F-016](#top)
-
-**Relocate the logical coordinator without split brain**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🔴 Large | 5.25 h agent + 1.25 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-016-T10 (revise the decision after the review); owner agreement only after a clean second review.
-
-| | |
-|---|---|
-| **Issue** | Deferred milestone 5b. No distributed election, replication or automatic failover is implemented. |
-| **Reproduce** | Follow docs/decisions/runtime-boundaries.md and the protocol/isolation test fixtures. |
-| **Check** | Network partitions, asleep old leaders and reconnect cannot create simultaneous authorities or duplicate physical effects. Context copying alone never grants leadership. |
-
-
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-016-t01"></a>F-016-T01 — Step 1a — Decision: replicated state, leader lease and epoch, fencing tokens and restore | 0.5 h | 0.5 h so far (stated) | 0 h agent + 0.25 h owner | Implemented; verification pending | 🤖 🤔 |
-| 🟢 Small | <a id="f-016-t10"></a>F-016-T10 — Revise the relocation decision after review | 0.5 h | 0 h | 0.5 h | Ready | 🤖 |
-| 🟢 Small | <a id="f-016-t03"></a>F-016-T03 — Step 2a — Signed state snapshot export and import to a read-only standby | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T10](#f-016-t10) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-016-t04"></a>F-016-T04 — Step 2b — Incremental log shipping to the standby | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T03](#f-016-t03) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-016-t05"></a>F-016-T05 — Step 3a — Leader epoch in signed registry records; every effect checks the fencing token | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T04](#f-016-t04) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-016-t06"></a>F-016-T06 — Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T05](#f-016-t05) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-016-t07"></a>F-016-T07 — Step 4a — Owner-initiated relocation with restore; never a context-only takeover | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T06](#f-016-t06) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-016-t08"></a>F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T07](#f-016-t07) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-016-t09"></a>F-016-T09 — Step 5b — Two-device relocation acceptance | — | 0 h | 0 h agent + 1 h owner | Planned · waits on [F-016-T08](#f-016-t08) | ⏳ 🧑‍🔧 |
-| 🟢 Small | <a id="f-016-t11"></a>F-016-T11 — Record the evidence of F-016-T09 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-016-T09](#f-016-t09) | ⏳ 🤖 |
-| — | <a id="f-016-t02"></a>F-016-T02 — Step 1b — Independent review of the coordinator relocation decision | 0.25 h | 0 h | 0 h | Completed | 🤖 |
-| 🔴 Large | **Total** | 6 h (10 of 11 steps) | 0.5 h (1 of 11 steps recorded) | 5.25 h agent + 1.25 h owner | 1 of 11 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-016.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #307](https://github.com/voidbrain/nerv/pull/307) F-016-T01 decision (`docs/decisions/coordinator-relocation.md`); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #3](https://github.com/voidbrain/nerv/pull/3); local checks and scoped audit pass; [CI 43240473540](https://github.com/voidbrain/nerv/actions/runs/43240473540) passed plan, native-macos, windows and validate (full-suite skipped by scoped verification), merged main `e821c11` |
-| Opened | 2026-11-01 |
-| Verification | Pending named acceptance |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
-
 ### <a id="f-009"></a>[✨ F-009](#top)
 
 **Run NERV Agency headless as one local user service**
@@ -577,6 +526,57 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Reconcile: [PR #304](https://github.com/voidbrain/nerv/pull/304). [PR #303](https://github.com/voidbrain/nerv/pull/303) F-004-T05 web push (test/push.test.ts, test/angular.browser.mjs); [PR #300](https://github.com/voidbrain/nerv/pull/300) F-004-T04 GenUI renderer (test/protocol.test.ts, test/surface-dom.test.mjs, test/angular.browser.mjs); [PR #299](https://github.com/voidbrain/nerv/pull/299) F-004-T03 doctor view (test/angular.browser.mjs); [PR #298](https://github.com/voidbrain/nerv/pull/298) F-004-T02 reminder CRUD (test/angular.browser.mjs); Reconcile: [PR #288](https://github.com/voidbrain/nerv/pull/288). [PR #286](https://github.com/voidbrain/nerv/pull/286) F-004-T01 PWA shell, CI [43168006619](https://github.com/voidbrain/nerv/actions/runs/43168006619) (attempt 1 validate failed on B-050, attempt 2 green) (test/pwa.browser.mjs, test/pwa.test.mjs); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Browser/accessibility 2026-11-12 (F-004-T01, F-004-T02, F-004-T03, F-004-T04, F-004-T05): test/pwa.browser.mjs, test/pwa.test.mjs, test/push.test.ts, and test/angular.browser.mjs passed with AXE checks; GenUI registered component renderer and Web Push subscription/delivery verified in PR #303 CI (run 43226982598). Phone install/push acceptance pending (F-004-T06). |
+| Reviewed | 2026-11-12 |
+
+</details>
+
+---
+
+### <a id="f-016"></a>[✨ F-016](#top)
+
+**Relocate the logical coordinator without split brain**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🔴 Large | 4.75 h agent + 1.25 h owner | — | — | ⏳ | — | 🤔 |
+
+🧑 **→** Next: Owner agreement on the revised relocation decision ([decision](decisions/coordinator-relocation.md), [second review](reviews/2026-11-14-f016-relocation-review-2.md)) after F-016-T10 cleanly resolved the first review's findings before F-016-T03 implementation starts.
+
+| | |
+|---|---|
+| **Issue** | Deferred milestone 5b. No distributed election, replication or automatic failover is implemented. |
+| **Reproduce** | Follow docs/decisions/runtime-boundaries.md and the protocol/isolation test fixtures. |
+| **Check** | Network partitions, asleep old leaders and reconnect cannot create simultaneous authorities or duplicate physical effects. Context copying alone never grants leadership. |
+
+
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-016-t01"></a>F-016-T01 — Step 1a — Decision: replicated state, leader lease and epoch, fencing tokens and restore | 0.5 h | 0.5 h so far (stated) | 0 h agent + 0.25 h owner | Implemented; verification pending | 🤖 🤔 |
+| 🟢 Small | <a id="f-016-t10"></a>F-016-T10 — Revise the relocation decision after review | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | 🤖 |
+| 🟢 Small | <a id="f-016-t03"></a>F-016-T03 — Step 2a — Signed state snapshot export and import to a read-only standby | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T10](#f-016-t10) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-016-t04"></a>F-016-T04 — Step 2b — Incremental log shipping to the standby | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T03](#f-016-t03) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-016-t05"></a>F-016-T05 — Step 3a — Leader epoch in signed registry records; every effect checks the fencing token | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T04](#f-016-t04) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-016-t06"></a>F-016-T06 — Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T05](#f-016-t05) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-016-t07"></a>F-016-T07 — Step 4a — Owner-initiated relocation with restore; never a context-only takeover | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T06](#f-016-t06) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-016-t08"></a>F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T07](#f-016-t07) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-016-t09"></a>F-016-T09 — Step 5b — Two-device relocation acceptance | — | 0 h | 0 h agent + 1 h owner | Planned · waits on [F-016-T08](#f-016-t08) | ⏳ 🧑‍🔧 |
+| 🟢 Small | <a id="f-016-t11"></a>F-016-T11 — Record the evidence of F-016-T09 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-016-T09](#f-016-t09) | ⏳ 🤖 |
+| — | <a id="f-016-t02"></a>F-016-T02 — Step 1b — Independent review of the coordinator relocation decision | 0.25 h | 0 h | 0 h | Completed | 🤖 |
+| 🔴 Large | **Total** | 6 h (10 of 11 steps) | 1 h (2 of 11 steps recorded) | 4.75 h agent + 1.25 h owner | 1 of 11 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-016.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #307](https://github.com/voidbrain/nerv/pull/307) F-016-T01 decision (`docs/decisions/coordinator-relocation.md`); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #3](https://github.com/voidbrain/nerv/pull/3); local checks and scoped audit pass; [CI 43240473540](https://github.com/voidbrain/nerv/actions/runs/43240473540) passed plan, native-macos, windows and validate (full-suite skipped by scoped verification), merged main `e821c11` |
+| Opened | 2026-11-01 |
+| Verification | Pending named acceptance |
 | Reviewed | 2026-11-12 |
 
 </details>
