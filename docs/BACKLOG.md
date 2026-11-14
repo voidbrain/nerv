@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 101.25 h agent + 23.5 h owner across 218 open steps of 52 features and 6 other records. 20.5 h of actual effort recorded on 38 steps. Generated from the task files.
+**Remaining effort:** 100.75 h agent + 23.5 h owner across 218 open steps of 52 features and 6 other records. 20.75 h of actual effort recorded on 39 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2353,9 +2353,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | — | — | — |
 
-💻 **→** Next: B-065-T01.
+💻 **→** Next: once the PR's CI is green and merged, verify and close from that run (B-065-T01 implemented).
 
 | | |
 |---|---|
@@ -2367,8 +2367,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="b-065-t01"></a>B-065-T01 — Hide revoked bases from the map | 0.5 h | 0 h | 0.5 h | Ready |
-| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed |
+| 🟢 Small | <a id="b-065-t01"></a>B-065-T01 — Hide revoked bases from the map | 0.5 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.5 h | 0.25 h | 0 h | 0 of 1 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>

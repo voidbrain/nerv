@@ -489,19 +489,21 @@
     }
   }
   function applyBases(list, health) {
-    state.kajiBases = list; observeTelegram(list);
-    if (!list.length) { BASES[0].status = health; return; }
-    pulseHeartbeats(list);
+    state.kajiBases = list;
+    const enrolled = list.filter(b => b.status !== "revoked");
+    observeTelegram(enrolled);
     const key = list.map(b => b.baseId + ":" + b.status + ":" + b.online + ":" + (b.health ? b.health.state : "")).join("|") + "|" + health; if (key === basesKey) return; basesKey = key;
-    const self = list.find(b => b.self) || list[0]; const others = list.filter(b => b !== self);
+    if (!enrolled.length) { BASES.splice(1); BASES[0].status = health; LINKS.length = 0; CAGES.forEach(c => { c.base = BASES[0].id; }); document.getElementById("cages").innerHTML = ""; initMap(); return; }
+    pulseHeartbeats(enrolled);
+    const self = enrolled.find(b => b.self) || enrolled[0]; const others = enrolled.filter(b => b !== self);
     // Each other base gets a spot from its ID (owner, 2026-11-05: a column looked dull): scattered, but the same on every reload.
     const seed = id => { let h = 2166136261; for (const c of id) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h; };
     const place = (b, i) => { if (b === self) return [35.236, 138.985]; const h = seed(b.baseId); const a = 2 * Math.PI * ((h % 3600) / 3600 + i / Math.max(3, others.length)); const r = 0.6 + ((h >>> 12) % 400) / 1000; return [35.236 + 0.09 * r * Math.sin(a), 138.985 + 0.2 * r * Math.cos(a)]; };
-    const toBase = (b, i) => { const [lat, lon] = place(b, i); return { id:b.baseId.toLowerCase(), name:b.name.toUpperCase(), role:b.baseId + (b.self ? " · this machine" : " · " + b.address), lat, lon, main:!!b.main, self:!!b.self, status:b.status === "revoked" ? "offline" : !b.online ? "offline" : b.health && b.health.state === "degraded" ? "standby" : "online", cpu:null, ram:null, gpu:null, rtt:null, models:"—" }; };
+    const toBase = (b, i) => { const [lat, lon] = place(b, i); return { id:b.baseId.toLowerCase(), name:b.name.toUpperCase(), role:b.baseId + (b.self ? " · this machine" : " · " + b.address), lat, lon, main:!!b.main, self:!!b.self, status:!b.online ? "offline" : b.health && b.health.state === "degraded" ? "standby" : "online", cpu:null, ram:null, gpu:null, rtt:null, models:"—" }; };
     BASES.splice(0, BASES.length, toBase(self, 0), ...others.map((b, i) => toBase(b, i)));
     // This base's pulse and its EVA cage follow its real health; peers show what they last reported in their heartbeat.
     BASES[0].status = health;
-    LINKS.length = 0; const up = list.filter(b => b.status === "enrolled");
+    LINKS.length = 0; const up = enrolled;
     const mainBase = up.find(b => b.main);
     if (mainBase) {
       const mainId = mainBase.baseId.toLowerCase();
@@ -532,20 +534,22 @@
   }
   window.renderBases = function () {
     const list = state.kajiBases || []; const roles = ((state.doctor || {}).models || {}).roles || {};
-    if (!list.length) {
+    const enrolled = list.filter(b => b.status !== "revoked"), revoked = list.filter(b => b.status === "revoked");
+    const revokedHtml = revoked.length ? "<div class='tiny muted' style='margin:6px 0 3px'>Revoked</div>" + revoked.map(b => "<div class='card'><div class='row'><span class='b'>" + esc(b.baseId) + " · " + esc(b.name) + "</span><span class='badge b-muted'>REVOKED</span></div><div class='tiny muted'>" + esc(b.address) + " · key " + esc(b.fingerprint.slice(0, 9)) + "</div></div>").join("") : "";
+    if (!enrolled.length) {
       const base = (state.doctor || {}).base || { id:"NERV-01", name:"Neo Tokyo-3" };
       document.getElementById("bases-sub").textContent = BASES[0].status === "online" ? "1/1 online" : "1/1 " + (BASES[0].status === "standby" ? "degraded" : "down");
       document.getElementById("bases").innerHTML = "<div class='card'><div class='row'><span class='b'>" + esc(base.id) + " · " + esc(base.name) + "</span>" + (BASES[0].status === "standby" ? "<span class='badge b-warn'>DEGRADED</span>" : BASES[0].status === "offline" ? "<span class='badge b-danger'>DOWN</span>" : "<span class='badge b-ok'>ONLINE</span>") + "</div><div class='tiny muted'>this machine · coordinator, scheduler, brain</div><div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div>" + channelLine({online:BASES[0].status !== "offline",channel:(state.doctor || {}).channel,channelFresh:(state.doctor || {}).channelFresh}) + "</div>" +
-        "<div class='muted small' style='margin-top:4px'>No Kaji line yet: enrol your bases (INSTALL, Kaji line) to see them here.</div>";
+        (revokedHtml || "<div class='muted small' style='margin-top:4px'>No Kaji line yet: enrol your bases (INSTALL, Kaji line) to see them here.</div>");
       return;
     }
-    const midori = list.some(b => telegramApiState(b) === "responding") ? "API live" : list.some(b => telegramApiState(b) === "failed") ? "API failed" : "API unchecked";
-    document.getElementById("bases-sub").innerHTML = list.filter(b => b.online).length + "/" + list.filter(b => b.status === "enrolled").length + " online · <span class='" + (midori === "API live" ? "ok" : midori === "API failed" ? "warn" : "muted") + "'>● Midori " + midori + "</span>";
-    document.getElementById("bases").innerHTML = list.map(b => "<div class='card'><div class='row'><span class='b'>" + esc(b.baseId) + " · " + esc(b.name) + (b.main ? " <span class='badge b-info' title='Main base selected in the signed registry'>MAIN</span>" : "") + "</span><span class='badge " + (b.status === "revoked" ? "b-muted'>REVOKED" : b.self && BASES[0].status === "standby" ? "b-warn'>DEGRADED" : b.self && BASES[0].status === "offline" ? "b-danger'>DOWN" : !b.online ? "b-warn'>OFFLINE" : b.health && b.health.state === "degraded" ? "b-warn'>DEGRADED" : "b-ok'>ONLINE") + "</span></div>" +
+    const midori = enrolled.some(b => telegramApiState(b) === "responding") ? "API live" : enrolled.some(b => telegramApiState(b) === "failed") ? "API failed" : "API unchecked";
+    document.getElementById("bases-sub").innerHTML = enrolled.filter(b => b.online).length + "/" + enrolled.length + " online · <span class='" + (midori === "API live" ? "ok" : midori === "API failed" ? "warn" : "muted") + "'>● Midori " + midori + "</span>";
+    document.getElementById("bases").innerHTML = enrolled.map(b => "<div class='card'><div class='row'><span class='b'>" + esc(b.baseId) + " · " + esc(b.name) + (b.main ? " <span class='badge b-info' title='Main base selected in the signed registry'>MAIN</span>" : "") + "</span><span class='badge " + (b.self && BASES[0].status === "standby" ? "b-warn'>DEGRADED" : b.self && BASES[0].status === "offline" ? "b-danger'>DOWN" : !b.online ? "b-warn'>OFFLINE" : b.health && b.health.state === "degraded" ? "b-warn'>DEGRADED" : "b-ok'>ONLINE") + "</span></div>" +
       "<div class='tiny muted'>" + (b.self ? "this machine" : esc(b.address)) + " · key " + esc(b.fingerprint.slice(0, 9)) + " · " + (b.self ? "local" : esc(sinceText(b.lastSeen))) + "</div>" +
       (b.self ? "<div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div>" : "") +
       (!b.self && b.online && b.health && b.health.reasons.length ? b.health.reasons.map(r => "<div class='tiny warn'>▲ " + esc(r) + "</div>").join("") : "") +
-      (!b.self && b.online && !b.health ? "<div class='tiny muted'>health not reported (that base runs an older version)</div>" : "") + channelLine(b) + "</div>").join("");
+      (!b.self && b.online && !b.health ? "<div class='tiny muted'>health not reported (that base runs an older version)</div>" : "") + channelLine(b) + "</div>").join("") + revokedHtml;
   };
   // Lilith: the owner's facts, editable here; every change is the owner's and stays in the fact's history.
   window.renderLilith = function () {
