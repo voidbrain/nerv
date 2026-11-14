@@ -22,12 +22,14 @@ import {
   compatibleServiceRevision,
   macServiceAdapter,
   planService,
+  recoverServiceUpdate,
+  releaseObservedService,
   serviceReceipt,
   type ServicePlan,
   type ServiceReceipt,
 } from '../src/node-lifecycle-execution.ts';
 import { lifecycleRecovery } from '../src/node-lifecycle.ts';
-import { READER_ENTRY, rehearseUpgrade } from '../src/upgrade-rehearsal.ts';
+import { CONTRACT_ENTRY, READER_ENTRY, rehearseUpgrade } from '../src/upgrade-rehearsal.ts';
 import { NODE_FLAGS } from '../src/process-client.ts';
 import { Store } from '../src/store.ts';
 
@@ -228,10 +230,12 @@ test(
             ],
             { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
           ).trim();
-      const commit = (reader: string | undefined, label: string) => {
+      const commit = (reader: string | undefined, label: string, contract?: string) => {
         mkdirSync(join(source, 'src'), { recursive: true });
         if (reader === undefined) rmSync(join(source, READER_ENTRY), { force: true });
         else writeFileSync(join(source, READER_ENTRY), reader);
+        if (contract !== undefined) writeFileSync(join(source, CONTRACT_ENTRY), contract);
+        else rmSync(join(source, CONTRACT_ENTRY), { force: true });
         writeFileSync(join(source, 'LABEL'), label);
         git(['add', '-A']);
         git(['commit', '-m', label]);
@@ -242,6 +246,11 @@ test(
         adds = commit(
           READER('CREATE TABLE IF NOT EXISTS neutral_added(id TEXT PRIMARY KEY)'),
           'Neutral additive reader',
+        ),
+        raisesSchema = commit(
+          READER('CREATE TABLE IF NOT EXISTS neutral_v7(id TEXT PRIMARY KEY);PRAGMA user_version=7'),
+          'Neutral forward-schema reader',
+          'export const UPGRADE_CONTRACT = { version: 1, readerSchema: 7, minimumServiceSchema: 5 } as const;\n',
         ),
         loses = commit(READER('DELETE FROM reminders'), 'Neutral lossy reader'),
         absent = commit(undefined, 'Neutral tree without a reader entry');
@@ -259,6 +268,11 @@ test(
       const clean = await run(adds);
       assert.deepEqual(clean.blockers, []);
       assert.equal(clean.result!.tables, 1);
+      const forward = await run(raisesSchema);
+      assert.deepEqual(forward.blockers, []);
+      assert.equal(forward.result!.forwardOnly, true);
+      assert.equal(forward.result!.schema, 7);
+      assert.deepEqual(forward.contract, { readerSchema: 7, minimumServiceSchema: 5 });
       assert.match((await run(loses)).blockers.join(' '), /reminders lost or renumbered 1/);
       assert.match(
         (await run(absent)).blockers.join(' '),
@@ -406,36 +420,248 @@ test(
   },
 );
 
-test('a candidate that migrates the schema forward is refused before the checkout changes', supported, async () => {
-  const f = serviceFixture();
-  try {
-    await stopped(f);
-    const before = f.calls.length;
-    f.setReader((database) => {
-      const db = new DatabaseSync(database);
-      try {
-        db.exec('PRAGMA user_version=6');
-      } finally {
-        db.close();
-      }
-    });
-    const plan = await planService(f.host, 'update', NEXT),
-      receipt = await applyService(f.host, plan, plan.digest);
-    assert.equal(receipt.state, 'refused');
-    assert.match(
-      receipt.rehearsal!.blockers.join(' '),
-      /migrates the data from schema 5 to 6; forward migrations are not admitted/,
-    );
-    assert.equal(receipt.rehearsal!.result!.forwardOnly, true);
-    assert.deepEqual(f.calls.slice(before), ['fetch']);
-    assert.equal(readFileSync(f.revision, 'utf8'), 'a'.repeat(40));
-    const live = new DatabaseSync(f.data, { readOnly: true });
+test(
+  'a candidate that migrates the schema forward within its contract is admitted and updates live data',
+  supported,
+  async () => {
+    const f = serviceFixture();
     try {
-      assert.equal(live.prepare('PRAGMA user_version').get()!.user_version, 5, 'live data is not migrated');
+      await stopped(f);
+      const before = f.calls.length;
+      const migrateTo7 = (database: string) => {
+        const db = new DatabaseSync(database);
+        try {
+          db.exec('CREATE TABLE IF NOT EXISTS forward_items(id TEXT PRIMARY KEY);PRAGMA user_version=7');
+        } finally {
+          db.close();
+        }
+      };
+      f.setReader(migrateTo7, { minimumServiceSchema: 4, readerSchema: 7 });
+      f.setBeforeCommand((step) => {
+        if (step === 'register') migrateTo7(f.data);
+      });
+      const plan = await planService(f.host, 'update', NEXT),
+        receipt = await applyService(f.host, plan, plan.digest);
+      assert.equal(receipt.state, 'completed');
+      assert.deepEqual(receipt.rehearsal!.blockers, []);
+      assert.equal(receipt.rehearsal!.result!.forwardOnly, true);
+      assert.equal(receipt.rehearsal!.result!.schema, 7);
+      assert.deepEqual(f.calls.slice(before), ['fetch', 'checkout', 'dependencies', 'build', 'register']);
+      assert.equal(readFileSync(f.revision, 'utf8'), NEXT);
+      const live = new DatabaseSync(f.data, { readOnly: true });
+      try {
+        assert.equal(live.prepare('PRAGMA user_version').get()!.user_version, 7, 'live data is migrated to schema 7');
+      } finally {
+        live.close();
+      }
     } finally {
-      live.close();
+      f.close();
     }
-  } finally {
-    f.close();
-  }
-});
+  },
+);
+
+test(
+  'a failed forward-migrating update never recovers automatically, blocks starting the previous revision on migrated data, and restores backup + previous revision only on explicit owner recovery',
+  supported,
+  async () => {
+    const f = serviceFixture();
+    try {
+      await stopped(f);
+      const migrateTo7 = (database: string) => {
+        const db = new DatabaseSync(database);
+        try {
+          db.exec(
+            "CREATE TABLE IF NOT EXISTS migrated_notes(id TEXT PRIMARY KEY,body TEXT);INSERT OR IGNORE INTO migrated_notes VALUES('n1','migrated');PRAGMA user_version=7",
+          );
+        } finally {
+          db.close();
+        }
+      };
+      f.setReader(migrateTo7, { minimumServiceSchema: 4, readerSchema: 7 });
+      f.setBeforeCommand((step, p) => {
+        if (step === 'register' && p.action === 'update') migrateTo7(f.data);
+      });
+      f.setHealth(() => ({
+        ok: false,
+        checkedAt: new Date().toISOString(),
+        commit: NEXT,
+        baseId: 'BASE-01',
+        database: 'ok',
+        nervous: true,
+        brain: false,
+        failures: ['brain process did not answer ping'],
+      }));
+      const plan = await planService(f.host, 'update', NEXT);
+      await assert.rejects(() => applyService(f.host, plan, plan.digest), /failed post-start health check/);
+      const failed = serviceReceipt(f.host, plan.digest) as ServiceReceipt;
+      assert.equal(failed.state, 'uncertain');
+      assert.equal(failed.rehearsal?.result?.forwardOnly, true);
+      assert.equal(failed.rehearsal?.result?.schema, 7);
+      assert.ok(failed.recovery?.some((s) => s.includes('Never start the previous revision on forward-migrated data')));
+      assert.ok(
+        failed.recovery?.some((s) =>
+          s.includes(`nodes lifecycle-recover --receipt FILE --evidence FILE --confirm-backup-restore ${plan.digest}`),
+        ),
+      );
+
+      // Live database is still at schema 7 because recovery never runs automatically.
+      const checkSchema = () => {
+        const db = new DatabaseSync(f.data, { readOnly: true });
+        try {
+          return Number(db.prepare('PRAGMA user_version').get()!.user_version);
+        } finally {
+          db.close();
+        }
+      };
+      assert.equal(checkSchema(), 7, 'recovery never ran automatically');
+
+      // Mark the handler process dead in journal so recovery/release can proceed past the handler liveness check.
+      const jdb = new DatabaseSync(join(f.directory, '.nerv-lifecycle/journal.sqlite'));
+      let deadSnapshot: ServiceReceipt;
+      try {
+        const stored = JSON.parse(
+          (jdb.prepare('SELECT receipt FROM operations WHERE digest=?').get(plan.digest) as { receipt: string })
+            .receipt,
+        ) as ServiceReceipt;
+        deadSnapshot = { ...stored, pid: 2 ** 22 + 7 };
+        jdb.prepare('UPDATE operations SET receipt=? WHERE digest=?').run(JSON.stringify(deadSnapshot), plan.digest);
+        jdb.prepare('UPDATE resource SET pid=? WHERE id=1').run(deadSnapshot.pid);
+      } finally {
+        jdb.close();
+      }
+
+      const evidence = {
+        ...deadSnapshot,
+        handlerStopped: true,
+        descendantsStopped: true,
+        operatorConfirmed: true,
+        reason: 'Stopped failed candidate service and verified no descendants remain',
+      };
+
+      // Refused while the candidate service is still registered/running.
+      await assert.rejects(
+        () => recoverServiceUpdate(f.host, deadSnapshot, evidence, plan.digest),
+        /still registered or running/,
+      );
+
+      // Owner stops the failed candidate service.
+      f.setManager(false);
+
+      // Plain lifecycle-release is refused because the candidate update migrates the schema forward.
+      await assert.rejects(
+        () => releaseObservedService(f.host, deadSnapshot, evidence),
+        /Candidate update migrates the database schema forward; never release without restoring the operation backup/,
+      );
+
+      // Planning a start of the previous revision on the migrated database (schema 7) is also blocked.
+      writeFileSync(f.revision, 'a'.repeat(40));
+      const blockedStart = await planService(f.host, 'start');
+      assert.ok(blockedStart.blockers.includes('The selected database schema is unsupported.'));
+      assert.ok(blockedStart.blockers.includes('A lifecycle operation owns this user service.'));
+
+      // Recovery refuses if the checkout is still at the candidate revision instead of the previous revision.
+      writeFileSync(f.revision, NEXT);
+      await assert.rejects(
+        () => recoverServiceUpdate(f.host, deadSnapshot, evidence, plan.digest),
+        /Check out the previous revision/,
+      );
+
+      // Owner checks out the previous revision; recovery refuses while pending work or unbuilt state exists.
+      writeFileSync(f.revision, 'a'.repeat(40));
+      f.controls.pending = true;
+      await assert.rejects(
+        () => recoverServiceUpdate(f.host, deadSnapshot, evidence, plan.digest),
+        /Unresolved worker jobs or outbox effects exist/,
+      );
+      f.controls.pending = false;
+      f.controls.built = false;
+      await assert.rejects(
+        () => recoverServiceUpdate(f.host, deadSnapshot, evidence, plan.digest),
+        /Build the previous revision before restoring/,
+      );
+      f.controls.built = true;
+
+      await assert.rejects(
+        () => recoverServiceUpdate(f.host, deadSnapshot, evidence, 'wrong-digest'),
+        /Confirm the exact operation digest/,
+      );
+      const recovered = await recoverServiceUpdate(f.host, deadSnapshot, evidence, plan.digest);
+      assert.equal(recovered.state, 'released');
+      assert.deepEqual(recovered.restoredBackup, {
+        digest: failed.rehearsal!.source.digest,
+        schema: 5,
+        revision: 'a'.repeat(40),
+      });
+      assert.equal(checkSchema(), 5, 'operation backup restored live database to schema 5');
+      assert.deepEqual(titles(f.data), [{ id: 'original', title: 'Neutral existing reminder' }]);
+
+      // Now the previous revision can plan and apply a clean start on the restored schema-5 database.
+      f.setHealth(undefined);
+      const startPlan = await planService(f.host, 'start');
+      assert.deepEqual(startPlan.blockers, []);
+      const started = await applyService(f.host, startPlan, startPlan.digest);
+      assert.equal(started.state, 'completed');
+    } finally {
+      f.close();
+    }
+  },
+);
+
+test(
+  'a candidate that migrates beyond its own declared contract or lacks a verified backup manifest is refused before checkout',
+  supported,
+  async () => {
+    const f = serviceFixture();
+    try {
+      await stopped(f);
+      const before = f.calls.length;
+      f.setReader(
+        (database) => {
+          const db = new DatabaseSync(database);
+          try {
+            db.exec('PRAGMA user_version=8');
+          } finally {
+            db.close();
+          }
+        },
+        { minimumServiceSchema: 4, readerSchema: 7 },
+      );
+      const plan = await planService(f.host, 'update', NEXT),
+        receipt = await applyService(f.host, plan, plan.digest);
+      assert.equal(receipt.state, 'refused');
+      assert.match(receipt.rehearsal!.blockers.join(' '), /wrote schema 8, beyond its own contract/);
+      assert.deepEqual(f.calls.slice(before), ['fetch']);
+      assert.equal(readFileSync(f.revision, 'utf8'), 'a'.repeat(40));
+
+      // A forward migration within contract bounds is also refused before checkout if the operation backup lacks a verified manifest.
+      const origBackup = f.host.backup;
+      f.host.backup = async (dest) => {
+        await origBackup(dest);
+        rmSync(join(dest, 'manifest.json'), { force: true });
+      };
+      f.setReader(
+        (database) => {
+          const db = new DatabaseSync(database);
+          try {
+            db.exec('PRAGMA user_version=7');
+          } finally {
+            db.close();
+          }
+        },
+        { minimumServiceSchema: 4, readerSchema: 7 },
+      );
+      const beforeNoManifest = f.calls.length;
+      const planNoManifest = await planService(f.host, 'update', NEXT),
+        refusedNoManifest = await applyService(f.host, planNoManifest, planNoManifest.digest);
+      assert.equal(refusedNoManifest.state, 'refused');
+      assert.match(
+        refusedNoManifest.rehearsal!.blockers.join(' '),
+        /Forward migration requires a verified operation backup for explicit recovery/,
+      );
+      assert.deepEqual(f.calls.slice(beforeNoManifest), ['fetch']);
+      assert.equal(readFileSync(f.revision, 'utf8'), 'a'.repeat(40));
+    } finally {
+      f.close();
+    }
+  },
+);

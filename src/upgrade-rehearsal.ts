@@ -26,16 +26,37 @@ import { UPGRADE_CONTRACT } from './upgrade-contract.ts';
  * data home, the checkout nor any service is changed. A clean report is evidence for a review, never an admission.
  */
 export type UpgradeReader = (database: string, home: string) => void | Promise<void>;
+export interface UpgradeContractBounds {
+  readonly readerSchema: number;
+  readonly minimumServiceSchema: number;
+}
 /** Where a candidate tree keeps the reader an installed revision runs: `node READER_ENTRY DATABASE HOME`. */
 export const READER_ENTRY = 'src/upgrade-reader.ts';
+/** Where a candidate tree declares its reader schema contract (`readerSchema` and `minimumServiceSchema`). */
+export const CONTRACT_ENTRY = 'src/upgrade-contract.ts';
 export interface RehearsalReport {
   version: 1;
   execution: 'rehearsal-only';
-  contract: typeof UPGRADE_CONTRACT;
+  contract: UpgradeContractBounds;
   source: { digest: string; schema: number };
   result?: { schema: number; forwardOnly: boolean; tables: number; rows: number; rowsAfter: number };
   blockers: string[];
   note: string;
+}
+export function parseUpgradeContract(source: string): UpgradeContractBounds | undefined {
+  const readerMatch = /\breaderSchema\s*:\s*(\d+)\b/.exec(source);
+  const minMatch = /\bminimumServiceSchema\s*:\s*(\d+)\b/.exec(source);
+  if (!readerMatch || !minMatch) return undefined;
+  const readerSchema = Number(readerMatch[1]);
+  const minimumServiceSchema = Number(minMatch[1]);
+  if (
+    !Number.isSafeInteger(readerSchema) ||
+    !Number.isSafeInteger(minimumServiceSchema) ||
+    minimumServiceSchema <= 0 ||
+    readerSchema < minimumServiceSchema
+  )
+    return undefined;
+  return { readerSchema, minimumServiceSchema };
 }
 const NOTE =
   'Rehearsal on a private copy only. It admits no upgrade, and a schema that moves forward can be undone only by a separately reviewed restore.';
@@ -185,7 +206,11 @@ function compare(prior: string, next: string): Comparison {
  * Rehearses `reader` on a copy of BACKUP (the layout a lifecycle update backup has: database.sqlite, optional
  * config.json and manifest.json). The actual input schema is checked against the contract before the reader runs.
  */
-export async function rehearseUpgrade(backup: string, reader: UpgradeReader = currentReader): Promise<RehearsalReport> {
+export async function rehearseUpgrade(
+  backup: string,
+  reader: UpgradeReader = currentReader,
+  contract: UpgradeContractBounds = UPGRADE_CONTRACT,
+): Promise<RehearsalReport> {
   const uid = process.getuid?.();
   if (process.platform !== 'win32' && uid === undefined)
     throw Error('Upgrade rehearsal needs POSIX private-file ownership; it is not available on this platform yet.');
@@ -243,21 +268,21 @@ export async function rehearseUpgrade(backup: string, reader: UpgradeReader = cu
     const report = (result?: RehearsalReport['result']): RehearsalReport => ({
       version: 1,
       execution: 'rehearsal-only',
-      contract: UPGRADE_CONTRACT,
+      contract,
       source: { digest, schema },
       ...(result ? { result } : {}),
       blockers,
       note: NOTE,
     });
     if (!sound) blockers.push('The backup fails its integrity check.');
-    else if (schema < UPGRADE_CONTRACT.minimumServiceSchema || schema > UPGRADE_CONTRACT.readerSchema)
+    else if (schema < contract.minimumServiceSchema || schema > contract.readerSchema)
       blockers.push(
         'Schema ' +
           schema +
           ' is outside what the service lifecycle accepts for this reader (' +
-          UPGRADE_CONTRACT.minimumServiceSchema +
+          contract.minimumServiceSchema +
           ' to ' +
-          UPGRADE_CONTRACT.readerSchema +
+          contract.readerSchema +
           ').',
       );
     if (blockers.length) return report();
@@ -286,7 +311,7 @@ export async function rehearseUpgrade(backup: string, reader: UpgradeReader = cu
       blockers.push(...seen.blockers);
       if (seen.schema < schema)
         blockers.push('The reader lowered the schema from ' + schema + ' to ' + seen.schema + '.');
-      if (seen.schema > UPGRADE_CONTRACT.readerSchema)
+      if (seen.schema > contract.readerSchema)
         blockers.push('The reader wrote schema ' + seen.schema + ', beyond its own contract.');
       if (first) {
         if (seen.schema !== first.schema) blockers.push('Opening the data again changed its schema.');
