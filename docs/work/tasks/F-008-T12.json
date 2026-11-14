@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "F-008-T12",
+  "parent": "F-008",
+  "title": "Owner check with real batteries",
+  "goal": "The owner registers two packs and uses the chat commands",
+  "status": "planned",
+  "acceptance": [
+    "Copy and paste: `nerv chat \"registra la batteria 7 blu LiPo 6S 1300 mAh, resistenze 3, 3.4, 4.1, 3.2, 3.3, 3.1\"` then `nerv chat \"carica le batterie 7 blu\"`; expected: battery 7 blue shown charged, a storage reminder scheduled for the evening"
+  ],
+  "dependsOn": [
+    "F-008-T09",
+    "F-008-T11"
+  ],
+  "resources": [
+    "docs/work/records/F-008.md"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Owner fleet and kitchen data stay local-only; tests use invented batteries, drones and recipes.",
+  "validation": [
+    "npm run check:work"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "ownerLink": "docs/design/fpv-and-cooking-plan-2026-11-14.md",
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  }
+}

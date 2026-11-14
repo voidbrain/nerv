@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "F-098-T02",
+  "parent": "F-098",
+  "title": "Crash log and questions by chat",
+  "goal": "Crashes recorded and queried in Italian and English",
+  "status": "planned",
+  "acceptance": [
+    "\"ho crashato Smoke, motore sinistro inferiore rotto\" records the crash; a spare used is counted",
+    "Answers: last time this part broke, spares left new/used",
+    "A battery damage note goes on the battery record"
+  ],
+  "dependsOn": [
+    "F-098-T01",
+    "F-008-T06"
+  ],
+  "resources": [
+    "src/**",
+    "test/**"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Owner fleet and kitchen data stay local-only; tests use invented batteries, drones and recipes.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h agent",
+    "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  }
+}

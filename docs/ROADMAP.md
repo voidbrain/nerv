@@ -14,7 +14,7 @@
 | 5 — Distributed agents/models | Independent role/model/node routing, explicit directional communication graph, schema-defined tools, coding workers, bounded delegation, parallel queue, per-job sandboxes, resuming paused jobs | F-006, F-012, F-048, F-049, F-060, F-078, F-084, F-085, F-089, F-090, F-091, F-092, F-093, F-094 | Gemma on Mac serves mini PC worker; optional Claude route; Pi capabilities; privacy/budget/cancellation; sandbox escape and resource tests; separately measured coder/auditor workflows and Mac/mini PC role placement (F-006-T03/T04); comparable Mac load conditions and one normal mini PC baseline (F-006-T05/T04) |
 | 5b — Coordinator relocation (later) | Durable replicated state, leader lease/epoch, fencing and restore | F-016 | Partition/sleep tests prove no concurrent coordinators or duplicated effects; no automatic context-only takeover |
 | 6 — Voice and evaluated improvement | Push-to-talk, STT/TTS, voice client; evaluated skills and rollback | F-007 | Italian/English command evaluation, no silent physical activation, rejected privilege changes |
-| Independent tracks | FPV app integration, optional grounded personas, the base chronicle; each has its own acceptance and blocks no milestone | F-008, F-020, F-054 | Per record |
+| Independent tracks | FPV batteries, fleet diary, build knowledge, blackbox analysis and sharing, optional grounded personas, the base chronicle; each has its own acceptance and blocks no milestone | F-008, F-098, F-099, F-100, F-101, F-020, F-054 | Per record |
 
 Status per milestone, derived from the records (Delivered: all closed; Awaiting verification: closed or implemented; In progress: some delivered, some open; Planned: none delivered):
 
@@ -35,7 +35,7 @@ Status per milestone, derived from the records (Delivered: all closed; Awaiting 
 | 5 — Distributed agents/models | Planned | 0 | 0 | 14 | F-006, F-012, F-048, F-049, F-060, F-078, F-084, F-085, F-089, F-090, F-091, F-092, F-093, F-094 |
 | 5b — Coordinator relocation (later) | Planned | 0 | 0 | 1 | F-016 |
 | 6 — Voice and evaluated improvement | Planned | 0 | 0 | 1 | F-007 |
-| Independent tracks | Planned | 0 | 0 | 3 | F-008, F-020, F-054 |
+| Independent tracks | Planned | 0 | 0 | 7 | F-008, F-098, F-099, F-100, F-101, F-020, F-054 |
 <!-- roadmap-status:end -->
 
 ## NERV naming and governance (2026-11-04)

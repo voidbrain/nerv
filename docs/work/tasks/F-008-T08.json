@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-008-T08",
+  "parent": "F-008",
+  "title": "Resistance records and due checks",
+  "goal": "A first record is required at registration; later checks fall due by the decided interval",
+  "status": "planned",
+  "acceptance": [
+    "One value per cell in order (e.g. 3, 3.4, 4.1 mΩ), cell count checked against the type",
+    "A check is due by days or cycles as decided, and NERV asks for it"
+  ],
+  "dependsOn": [
+    "F-008-T06",
+    "F-008-T05"
+  ],
+  "resources": [
+    "src/**",
+    "test/**"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Owner fleet and kitchen data stay local-only; tests use invented batteries, drones and recipes.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h agent",
+    "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  }
+}

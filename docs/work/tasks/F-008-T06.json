@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-008-T06",
+  "parent": "F-008",
+  "title": "Battery registry and import",
+  "goal": "Batteries with number, colour series and type, importable from one-more-battery",
+  "status": "ready",
+  "acceptance": [
+    "Battery: number, optional series (colour), type (LiPo 6S, LiHV 3S), brand, mAh, purchase date",
+    "Import of the old app's batteries, usage and resistance records from its export",
+    "Invented tests"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/**",
+    "test/**"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Owner fleet and kitchen data stay local-only; tests use invented batteries, drones and recipes.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h agent",
+    "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  }
+}

@@ -4,7 +4,7 @@
   "parent": "F-008",
   "title": "Acceptance against the real FPV app",
   "goal": "Acceptance against the real FPV app",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Owner connects the FPV app; the three Check records round-trip; evidence recorded"
   ],
@@ -31,10 +31,10 @@
   "effort": {
     "size": "small",
     "estimate": "0.5 h owner",
-    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
-    "reviewed": "2026-11-13",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total. Superseded 2026-11-14 by the owner's decision to manage batteries and the fleet inside NERV instead of adapting to a separate FPV app (F-008-T05 onward); no work done, no actual.",
+    "reviewed": "2026-11-14",
     "baselineDays": 0.5,
-    "ownerHours": 0.5,
+    "ownerHours": 0,
     "agentHours": 0,
     "ownerKind": "procedure"
   }

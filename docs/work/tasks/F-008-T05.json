@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "id": "F-008-T05",
+  "parent": "F-008",
+  "title": "Owner decides thresholds and reminder times",
+  "goal": "The resistance interval, storage reminder times and health limits are confirmed",
+  "status": "ready",
+  "acceptance": [
+    "Proposed defaults in the design note confirmed or changed: resistance interval, first and later storage reminders, cell growth alert, retirement value per pack type"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/design/fpv-and-cooking-plan-2026-11-14.md",
+    "docs/work/records/F-008.md"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Owner fleet and kitchen data stay local-only; tests use invented batteries, drones and recipes.",
+  "validation": [
+    "npm run check:work"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "ownerLink": "docs/design/fpv-and-cooking-plan-2026-11-14.md",
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "decision"
+  }
+}

@@ -4,7 +4,7 @@
   "parent": "F-008",
   "title": "Battery and maintenance records through the adapter",
   "goal": "Battery and maintenance records through the adapter",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Record battery 2 charge once (idempotent); record aircraft-specific motor damage and inspection; no charger actuation"
   ],
@@ -33,10 +33,10 @@
   "effort": {
     "size": "small",
     "estimate": "1.75 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
-    "reviewed": "2026-11-13",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). Superseded 2026-11-14 by the owner's decision to manage batteries and the fleet inside NERV instead of adapting to a separate FPV app (F-008-T05 onward); no work done, no actual.",
+    "reviewed": "2026-11-14",
     "baselineDays": 2,
-    "agentHours": 0.5,
+    "agentHours": 0,
     "baselineAgentHours": 3,
     "estimateAgentHours": 0.5
   }
