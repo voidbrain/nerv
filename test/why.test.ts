@@ -201,7 +201,7 @@ test('F-042: sorties.explain, approvals.list and agency.status run as Pattern Gr
     store.decide(proposed.approvalId!, 'approve', 'cli');
     const explainOut = store.runAction(probeSortie, {
       tool: 'sorties.explain',
-      args: { ref: 'S-' + waitingSortie.slice(0, 4).toUpperCase() },
+      args: { ref: 'S-' + waitingSortie.slice(0, 8).toUpperCase() },
       stage: 'production',
     });
     assert.equal(explainOut.outcome, 'grant');

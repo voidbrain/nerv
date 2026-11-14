@@ -217,14 +217,22 @@ const when = (iso: string, timeZone: string, lang: 'it' | 'en') => {
 /** The answer, in the request's language: the sortie, then each action with its Pattern, every seat's vote and reason
  (shadow seats marked as not counted), the outcome, the owner's decision with when and where, and what ran. */
 export function explainRecord(
-  found: { found: 'none' | 'many'; count?: number } | { found: 'one'; record: WhyRecord },
+  found:
+    | { found: 'none' }
+    | { found: 'many'; count?: number; candidates?: { shortId: string; title: string; status: string }[] }
+    | { found: 'one'; record: WhyRecord },
   ref: string,
   lang: 'it' | 'en',
   timeZone: string,
 ): string {
   const w = WORDS[lang];
   const short = ref.slice(0, 4).toUpperCase();
-  if (found.found !== 'one') return found.found === 'none' ? w.none(short) : w.many(short, found.count ?? 2);
+  if (found.found === 'none') return w.none(short);
+  if (found.found === 'many') {
+    const head = w.many(short, found.count ?? 2);
+    if (!found.candidates?.length) return head;
+    return [head, ...found.candidates.map((c) => `- ${c.shortId} · “${clip(c.title, 80)}” (${c.status})`)].join('\n');
+  }
   const r = found.record;
   const lines = [`S-${r.id.slice(0, 4).toUpperCase()} · “${clip(r.title, 120)}” · ${w.status}: ${r.status}.`];
   if (r.advice) lines.push(`${w.advice}${r.advice.model ? ` (${r.advice.model})` : ''}: ${clip(r.advice.text, 300)}`);

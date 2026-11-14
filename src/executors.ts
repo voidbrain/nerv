@@ -41,7 +41,11 @@ export interface ReminderBackend {
   rescheduleAllDayReminders?(briefAt?: string, timeZone?: string): void;
   sortie?(id: string): { title: string } | null | undefined;
   sorties?(limit?: number, before?: string, q?: string): SortieSummary[];
-  explain?(ref: string): { found: 'none' | 'many'; count?: number } | { found: 'one'; record: WhyRecord };
+  explain?(
+    ref: string,
+  ):
+    | { found: 'none' | 'many'; count?: number; candidates?: { shortId: string; title: string; status: string }[] }
+    | { found: 'one'; record: WhyRecord };
   approvals?(limit?: number): Approval[];
   waitingQuestions?(): { sortieId: string; title: string; text: string; expires: string }[];
   agencyStatus?(target?: string, live?: AgencySnapshot): unknown;
@@ -276,7 +280,8 @@ export function execute(
           return {
             found: found.found,
             ref: 'S-' + clean.slice(0, 4).toUpperCase(),
-            ...(found.count ? { count: found.count } : {}),
+            ...(found.found === 'many' && found.count ? { count: found.count } : {}),
+            ...(found.found === 'many' && found.candidates ? { candidates: found.candidates } : {}),
             summary,
           };
         return {

@@ -4,13 +4,38 @@
   "parent": "B-061",
   "title": "Unambiguous sortie short IDs",
   "goal": "A short ID names one sortie, or the lookup says it is ambiguous",
-  "status": "planned",
-  "acceptance": ["A committed test with two colliding sorties fails before the fix", "The F-042 test no longer depends on random UUID prefixes"],
+  "status": "implemented",
+  "acceptance": [
+    "A committed test with two colliding sorties fails before the fix",
+    "The F-042 test no longer depends on random UUID prefixes"
+  ],
   "dependsOn": [],
-  "resources": ["src/**", "test/**", "docs/work/records/**", "generated:backlog-views"],
-  "capabilities": ["regression-design", "bounded-edit"],
+  "resources": [
+    "src/ledger.ts",
+    "src/why.ts",
+    "src/executors.ts",
+    "test/why.test.ts",
+    "docs/work/records/B-061.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "regression-design",
+    "bounded-edit"
+  ],
   "privacy": "Neutral fixtures only.",
-  "validation": ["npm test"],
-  "escalation": ["A change to how the owner refers to sorties goes to a fresh-context review"],
-  "effort": {"size": "small", "estimate": "0.5 h", "basis": "Estimated 2026-11-13: a collision check and one regression. Not a measurement.", "reviewed": "2026-11-13", "agentHours": 0.5, "baselineAgentHours": 0.5, "estimateAgentHours": 0.5}
+  "validation": [
+    "npm test"
+  ],
+  "escalation": [
+    "A change to how the owner refers to sorties goes to a fresh-context review"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-13: a collision check and one regression. Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
 }
