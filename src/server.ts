@@ -345,7 +345,15 @@ export function makeServer(
         const b = await body(req);
         if (Object.keys(b).length !== 1 || !['approve', 'reject', 'edit'].includes(b.decision as string))
           throw new Error('Decision must be approve, reject or edit.');
-        reply(200, await store.decide(path.split('/').at(-1)!, b.decision as 'approve' | 'reject' | 'edit', 'api'));
+        // F-066-T02: the admin token is the API client; a dashboard session is the dashboard.
+        reply(
+          200,
+          await store.decide(
+            path.split('/').at(-1)!,
+            b.decision as 'approve' | 'reject' | 'edit',
+            root ? 'api' : 'dashboard',
+          ),
+        );
       } else if (req.method === 'GET' && path === '/api/queue') {
         if (url.search) throw new Error('Queue status takes no query parameters.');
         reply(200, store.queueStatus?.() ?? { maxConcurrent: 1, maxQueued: 16, running: [], queued: [] });

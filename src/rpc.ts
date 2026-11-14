@@ -273,7 +273,7 @@ export const methodSchemas = {
     properties: {
       id: { type: 'string', minLength: 1, maxLength: 100 },
       decision: { enum: ['approve', 'reject', 'edit'] },
-      source: { enum: ['api', 'cli', 'telegram'] },
+      source: { enum: ['api', 'dashboard', 'cli', 'telegram'] },
     },
     additionalProperties: false,
   },
