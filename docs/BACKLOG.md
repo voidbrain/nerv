@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 25 | 11 | 15 | 13 |
+| **This week** | 25 | 11 | 16 | 13 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 47 | 8 |
+| **Open** | 47 | 9 |
 | **Require Human 🧑** | 8 | 2 |
 
 ### Require Human 🧑
@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 75.75 h agent + 21.25 h owner across 198 open steps of 47 features and 8 other records. 18 h of actual effort recorded on 35 steps. Generated from the task files.
+**Remaining effort:** 76 h agent + 21.25 h owner across 199 open steps of 47 features and 9 other records. 18.25 h of actual effort recorded on 36 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1553,6 +1553,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-13 |
 | Verification | Pending. |
 | Reviewed | 2026-11-13 |
+
+</details>
+
+---
+### <a id="b-062"></a>[🐞 B-062](#top)
+
+**`nodes inspect` gives one vague message for an unreachable host and for a target without Node.js**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h | — | — | — | — | — |
+
+💻 **→** Next: B-062-T01 implemented, awaiting merge; then the owner reruns F-005-T22.
+
+| | |
+|---|---|
+| **Issue** | 2026-11-14, F-005-T22 owner run: `nodes inspect --ssh nerv-linux` printed "Read-only command failed. Check the selected client and target prerequisites". Here SSH could not resolve the host, but the same text appears when the target has no Node.js, which is the prerequisite T22 must report. The owner cannot tell which one to fix. |
+| **Reproduce** | `nodes inspect --ssh <unknown host>`, and `nodes inspect --ssh <host without node>`: both print the same line. |
+| **Check** | A regression through the real command runner: SSH exit 255 says the target could not be reached over SSH (name, key or known host); exit 127 says Node.js is missing on the target's non-interactive PATH; other failures keep the generic text; all still say no installation was requested. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="b-062-t01"></a>B-062-T01 — Name the failed inspection prerequisite | 0.5 h | 0 h | 0.25 h | Implemented; verification pending | 🤖 |
+| — | <a id="b-062-t02"></a>B-062-T02 — Rerun the two expensive system cases at this source | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 🧑‍🔧 |
+| 🟢 Small | **Total** | 0.75 h | 0.25 h (1 of 2 steps recorded) | 0.25 h | 1 of 2 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-062.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #396](https://github.com/voidbrain/nerv/pull/396); found in the F-005-T22 owner run, 2026-11-14. |
+| Opened | 2026-11-14 |
+| Verification | Unit: test/node-inspection-errors.test.ts through the real runner. Owner rerun on the VM pending (F-005-T22). |
+| Reviewed | 2026-11-14 |
 
 </details>
 

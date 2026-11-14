@@ -73,12 +73,20 @@ export const runNodeCommand: CommandRunner = (request) =>
           Error(
             request.mayWrite
               ? 'Bootstrap command failed; inspect its target receipt before retrying.'
-              : 'Read-only command failed. Check the selected client and target prerequisites; no installation was requested.',
+              : readOnlyFailure(code),
           ),
         );
     });
     child.stdin.end(request.input);
   });
+/** B-062: ssh exits 255 for its own errors and passes a remote "command not found" (127) through. */
+function readOnlyFailure(code: number | null): string {
+  if (code === 255)
+    return 'The target could not be reached over SSH. Check its host name, key and known host entry; no installation was requested.';
+  if (code === 127)
+    return "Node.js was not found on the target's non-interactive PATH. Install a supported Node.js there; no installation was requested.";
+  return 'Read-only command failed. Check the selected client and target prerequisites; no installation was requested.';
+}
 /** B-063: the Node.js range NERV requires, read from package.json `engines.node` (">=X.Y.Z"). */
 export function requiredNode(): string {
   const range = (
