@@ -10,6 +10,7 @@ import {
   existsSync,
   readdirSync,
   mkdirSync,
+  renameSync,
 } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -748,6 +749,138 @@ test('every pack the pinned Gauntlet release ships is consumed unless excluded w
     await assert.rejects(main(['model-plan', profile, '--pack=unknown']), /Unknown common pack/);
     await assert.rejects(main(['model-plan', profile, '--pack=neutral-smoke', '--format=schema']), /not both/);
   } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('B-059: browser case refuses a missing build without writing failed evidence', async () => {
+  const { caseHash } = await import('@voidbrain/gauntlet-protocol');
+  const { systemSourceKey } = await import('../tools/gauntlet.mjs');
+  const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-b059-'));
+  const ledger = join(dir, 'ledger.json');
+  const previousLedger = process.env.NERV_GAUNTLET_LEDGER;
+  process.env.NERV_GAUNTLET_LEDGER = ledger;
+  const browserBuild = resolve('dist/web/browser');
+  const hadBuild = existsSync(browserBuild);
+  const backup = resolve('dist/web/browser.b059-backup');
+  try {
+    if (hadBuild) renameSync(browserBuild, backup);
+    const system = JSON.parse(readFileSync('evals/gauntlet/system-v1.json', 'utf8'));
+    const sourceKey = systemSourceKey(system);
+    writeFileSync(
+      ledger,
+      JSON.stringify({
+        schemaVersion: 2,
+        entries: system.cases
+          .filter((candidate) => candidate.id !== 'browser')
+          .map((candidate) => ({
+            pack: system.id,
+            packVersion: system.version,
+            case: candidate.id,
+            caseHash: caseHash(candidate),
+            profileHash: null,
+            status: 'passed',
+            reportHash: 'c'.repeat(64),
+            finished: '2026-11-11T00:00:00.000Z',
+            modelDigest: null,
+            runtimeHash: 'a'.repeat(64),
+            scenarioHash: null,
+            sourceKey,
+          })),
+      }),
+    );
+    const executed = [];
+    const services = {
+      execute: async (pack) => {
+        const id = pack.cases[0].id;
+        executed.push(id);
+        return {
+          kind: 'fresh',
+          performanceMeasuredNow: false,
+          reason: 'fresh',
+          report: {
+            schemaVersion: 1,
+            id: 'neutral-b059-failure',
+            pack: pack.id,
+            packVersion: pack.version,
+            layer: 'system',
+            finished: '2026-11-13T18:00:00.000Z',
+            passed: false,
+            complete: false,
+            results: [
+              {
+                id,
+                status: 'failed',
+                durationMs: 1,
+                checks: 1,
+                passed: 0,
+                failed: 1,
+                skipped: 0,
+                adapterHash: 'd'.repeat(64),
+              },
+            ],
+          },
+        };
+      },
+    };
+
+    await assert.rejects(
+      main(['run', '--only=browser', '--allow-expensive', '--execute', '--out=' + join(dir, 'run.json')], services),
+      /built-browser-assets/,
+    );
+    const result = await main(['all', '--execute', '--allow-expensive', '--out-dir=' + join(dir, 'out')], services);
+    assert.deepEqual(executed, []);
+    const systemPlan = result.plan.find((candidate) => candidate.pack === system.id);
+    assert.ok(systemPlan?.blocked?.cases.includes('browser'));
+    assert.match(JSON.stringify(systemPlan.blocked), /built-browser-assets/);
+    const updatedLedger = JSON.parse(readFileSync(ledger, 'utf8'));
+    assert.equal(
+      updatedLedger.entries.some((entry) => entry.case === 'browser'),
+      false,
+    );
+  } finally {
+    if (hadBuild && existsSync(backup) && !existsSync(browserBuild)) renameSync(backup, browserBuild);
+    if (previousLedger === undefined) delete process.env.NERV_GAUNTLET_LEDGER;
+    else process.env.NERV_GAUNTLET_LEDGER = previousLedger;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('B-059: browser case still executes when the required build exists', async () => {
+  const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-b059-built-'));
+  const browserBuild = resolve('dist/web/browser');
+  const hadBuild = existsSync(browserBuild);
+  let executed = false;
+  try {
+    mkdirSync(browserBuild, { recursive: true });
+    const result = await main(
+      ['run', '--only=browser', '--allow-expensive', '--execute', '--out=' + join(dir, 'run.json')],
+      {
+        execute: async (pack) => {
+          executed = true;
+          return {
+            kind: 'fresh',
+            performanceMeasuredNow: false,
+            reason: 'fresh',
+            report: {
+              schemaVersion: 1,
+              id: 'neutral-b059-pass',
+              pack: pack.id,
+              packVersion: pack.version,
+              layer: 'system',
+              finished: '2026-11-13T18:00:00.000Z',
+              passed: true,
+              complete: true,
+              results: [],
+            },
+          };
+        },
+      },
+    );
+    assert.equal(executed, true);
+    assert.equal(result.passed, true);
+  } finally {
+    if (!hadBuild) rmSync(browserBuild, { recursive: true, force: true });
     rmSync(dir, { recursive: true, force: true });
   }
 });

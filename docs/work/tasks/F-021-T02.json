@@ -4,7 +4,7 @@
   "parent": "F-021",
   "title": "Versioned descriptors for NERV's own tools",
   "goal": "Versioned descriptors for NERV's own tools",
-  "status": "implemented",
+  "status": "closed",
   "prs": [
     {
       "pr": 381,
@@ -29,7 +29,8 @@
   ],
   "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
   "validation": [
-    "Regression or fixture for each acceptance item; final applicable CI"
+    "Regression joins every built-in registration to a stable versioned descriptor",
+    "PR #381 CI 43496658350 passed validate, native-macos, windows, plan and full-suite"
   ],
   "escalation": [
     "Material scope growth or effort increase goes to the owner before adoption"
@@ -40,8 +41,9 @@
     "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). Implemented 2026-11-13: built-in and MCP tools share a versioned descriptor shape; `nerv tools` exposes both, with a join regression for every built-in registration.",
     "reviewed": "2026-11-13",
     "baselineDays": 1,
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
-    "estimateAgentHours": 0.25
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
   }
 }
