@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-006",
   "id": "F-006-T05",
-  "status": "planned",
+  "status": "implemented",
   "title": "Draft the Mac operating-conditions plan (heavy, moderate, idle) with budgets",
   "goal": "Mac operating-conditions plan (heavy, moderate, idle) with budgets.",
   "capabilities": [
@@ -39,7 +39,9 @@
     "estimate": "0.25 h",
     "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
     "reviewed": "2026-11-13",
-    "agentHours": 0.25,
+    "agentHours": 0,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated",
     "baselineAgentHours": 0.75,
     "estimateAgentHours": 0.25
   }
