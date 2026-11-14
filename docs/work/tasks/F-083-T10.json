@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-083-T10",
+  "parent": "F-083",
+  "title": "Recipe photos",
+  "goal": "Photos attached to a saved recipe and shown with it",
+  "status": "planned",
+  "acceptance": [
+    "A photo sent in Telegram or the dashboard attaches to a recipe (or one of its steps); local, size and type checked",
+    "Shown on the recipe card and during the cooking session"
+  ],
+  "dependsOn": [
+    "F-083-T03"
+  ],
+  "resources": [
+    "src/**",
+    "web/**",
+    "test/**"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Local only; tests use invented bases, revisions and recipes.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h agent",
+    "basis": "Estimated 2026-11-14 at agent speed (harness 8.14.3: implementation steps 0.75 h, small fixes 0.5 h). Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  }
+}

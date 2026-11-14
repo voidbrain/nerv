@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-102-T04",
+  "parent": "F-102",
+  "title": "Owner check: one automatic update",
+  "goal": "The owner sees a notice, lets it apply and reads the report",
+  "status": "planned",
+  "acceptance": [
+    "Enable the automatic policy with the command or dashboard switch added in F-102-T02 (its exact command is written into this step when T02 lands), then wait for the scheduled check; expected: a Telegram notice with the revision and time, then the update report with the after-start health check"
+  ],
+  "dependsOn": [
+    "F-102-T03"
+  ],
+  "resources": [
+    "docs/work/records/F-102.md"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Local only; tests use invented bases, revisions and recipes.",
+  "validation": [
+    "npm run check:work"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "ownerLink": "docs/work/records/F-102.md",
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-14 at agent speed (harness 8.14.3: implementation steps 0.75 h, small fixes 0.5 h). Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  }
+}

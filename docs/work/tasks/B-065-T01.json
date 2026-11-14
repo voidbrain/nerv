@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "id": "B-065-T01",
+  "parent": "B-065",
+  "title": "Hide revoked bases from the map",
+  "goal": "The map and the online count show only enrolled bases",
+  "status": "ready",
+  "acceptance": [
+    "A committed test fails first, unchanged by the fix",
+    "Revoked bases not drawn and not counted; listed apart as revoked or not at all"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "web/public/dashboard/**",
+    "test/**"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Local only; tests use invented bases, revisions and recipes.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h agent",
+    "basis": "Estimated 2026-11-14 at agent speed (harness 8.14.3: implementation steps 0.75 h, small fixes 0.5 h). Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}

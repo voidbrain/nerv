@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "F-102-T02",
+  "parent": "F-102",
+  "title": "Policy control, scheduled check and notice",
+  "goal": "The owner can switch the automatic policy on and off, and a scheduled check announces an update with its apply time",
+  "status": "planned",
+  "acceptance": [
+    "A `nerv` command and a dashboard switch enable or disable the automatic policy (today it can only be set through POST /api/update/policy)",
+    "Scheduler calls the existing evaluation; notice in Telegram and inbox with revision and time",
+    "\"aspetta\" / \"wait\" postpones to the next window; nothing runs unless the policy is enabled"
+  ],
+  "dependsOn": [
+    "F-102-T01"
+  ],
+  "resources": [
+    "src/**",
+    "web/public/dashboard/**",
+    "test/**"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Local only; tests use invented bases, revisions and recipes.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h agent",
+    "basis": "Estimated 2026-11-14 at agent speed (harness 8.14.3: implementation steps 0.75 h, small fixes 0.5 h). Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  }
+}
