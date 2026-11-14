@@ -2068,12 +2068,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-020-t01"></a>F-020-T01 — Persona adapter contract | 0.25 h | 0 h | 0.25 h | Implemented; verification pending |
-| 🟢 Small | <a id="f-020-t02"></a>F-020-T02 — Misato HITL surfacing with audit | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-020-T01](#f-020-t01) |
-| 🟢 Small | <a id="f-020-t03"></a>F-020-T03 — Explanation persona and non-Eva skins | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-020-T02](#f-020-t02) |
-| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 3 steps recorded) | 0.75 h | 0 of 3 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-020-t01"></a>F-020-T01 — Persona adapter contract | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | [PR #398](https://github.com/voidbrain/nerv/pull/398) grounded, presentation-only persona adapter contract |
+| 🟢 Small | <a id="f-020-t02"></a>F-020-T02 — Misato HITL surfacing with audit | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-020-T01](#f-020-t01) | — |
+| 🟢 Small | <a id="f-020-t03"></a>F-020-T03 — Explanation persona and non-Eva skins | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-020-T02](#f-020-t02) | — |
+| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 3 steps recorded) | 0.75 h | 0 of 3 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2083,7 +2083,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | Depends on | — |
-| PR / evidence | [PR #219](https://github.com/voidbrain/nerv/pull/219) retired-reference path correction; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [retired dashboard1 personas prototype](../remove/docs/NERV/dashboard1.html) |
+| PR / evidence | Steps: F-020-T01: [PR #398](https://github.com/voidbrain/nerv/pull/398) grounded, presentation-only persona adapter contract; step review: Local full suite, typecheck and fast checks passed; required CI pending.. [PR #219](https://github.com/voidbrain/nerv/pull/219) retired-reference path correction; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [retired dashboard1 personas prototype](../remove/docs/NERV/dashboard1.html) |
 | Opened | 2026-11-02 |
 | Verification | Pending |
 | Reviewed | 2026-11-08 |
