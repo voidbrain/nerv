@@ -43,5 +43,6 @@
     "ownerHours": 0.5,
     "agentHours": 0,
     "ownerKind": "procedure"
-  }
+  },
+  "ownerLink": "docs/decisions/placement-campaign.md"
 }

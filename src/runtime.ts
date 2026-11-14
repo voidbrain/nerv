@@ -75,7 +75,9 @@ import {
   setPilotFlag as setPilotEntryFlag,
   shouldDemotePilot,
   updatePilot as updatePilotEntry,
+  verifyPromotionAuthority,
   type Chosen,
+  type CombinationEvidenceRef,
   type ExecutionChoice,
   type Pilot,
   type PilotCandidate,
@@ -83,6 +85,7 @@ import {
   type PilotPatch,
   type PilotRecord,
   type PlacementAssessment,
+  type PromotionAuthorityInput,
   type QualificationEvidence,
   type SubdomainSortie,
   type RegisteredPilot,
@@ -3090,6 +3093,27 @@ export class Runtime implements StoreApi {
     const pilot = this.pilotRoster().find((p) => p.id === id);
     if (!pilot) throw new Error(`Unknown specialist pilot: ${id}.`);
     return promotionEligible(pilot, record);
+  }
+  /** F-006-T10: rechecks candidate artifact identity, protected grader hash, and current NERV authority before promotion. */
+  verifyPilotPromotionAuthority(
+    id: string,
+    input: Omit<PromotionAuthorityInput, 'pilot' | 'policy'> & {
+      evidence: CombinationEvidenceRef;
+      policy?: PromotionAuthorityInput['policy'];
+    },
+  ) {
+    const pilot = this.pilotRoster().find((p) => p.id === id);
+    if (!pilot) throw new Error(`Unknown specialist pilot: ${id}.`);
+    const policy =
+      input.policy ??
+      (() => {
+        try {
+          return this.home ? readScrolls(this.home).policy : defaultPolicy;
+        } catch {
+          return defaultPolicy;
+        }
+      })();
+    return verifyPromotionAuthority({ ...input, pilot, policy });
   }
   /** F-025-T04: automatic watermelon trust demotion on failure, override spike, or Spear revocation. */
   demotePilotOnSignal(

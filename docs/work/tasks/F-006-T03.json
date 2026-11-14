@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-006",
   "id": "F-006-T03",
-  "status": "planned",
+  "status": "closed",
   "title": "T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases",
   "goal": "Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases.",
   "capabilities": [
@@ -36,11 +36,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.25 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
-    "reviewed": "2026-11-13",
+    "estimate": "0 hours",
+    "basis": "Implemented F-006-T03 (T03a) combination case pack (evals/combination-v1.json) with hidden acceptance, deliberately flawed patches, false-rejection, and shared blind-spot cases in 0.25 h agent (stated).",
+    "reviewed": "2026-11-14",
     "baselineDays": 1.5,
-    "agentHours": 0.25,
+    "agentHours": 0,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated",
     "baselineAgentHours": 2.25,
     "estimateAgentHours": 0.25
   }
