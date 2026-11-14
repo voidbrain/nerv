@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-096-T02",
+  "parent": "F-096",
+  "title": "Move old evidence out of F-005 and F-051",
+  "goal": "Long records keep current state and recent evidence; older evidence is archived with a link",
+  "status": "ready",
+  "acceptance": [
+    "Every moved line is in the archive; the record links to it",
+    "check:backlog and check:work pass; sizes before and after recorded"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/work/records/F-005.md",
+    "docs/work/records/F-051.md",
+    "docs/archive/**",
+    "docs/work/records/F-096.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "Quieting an output must never hide a failure"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-14 at agent speed. Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}
