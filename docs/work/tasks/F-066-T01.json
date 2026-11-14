@@ -4,7 +4,7 @@
   "parent": "F-066",
   "title": "Credential rotation commands and doctor ages",
   "goal": "Credential rotation commands and doctor ages",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Rotate admin, Telegram and cloud credentials: new works at once, old refused, no restart, nothing printed; doctor shows age only"
   ],

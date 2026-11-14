@@ -6,13 +6,13 @@ import { handleFrame, authorize, MAX_FRAME_BYTES, MAX_RPC_CONNECTIONS, MAX_RPC_I
 export function attachRpcSocket(
   server: Server,
   store: StoreApi,
-  token: string,
+  token: string | (() => string),
   options: { language?: string; timeZone?: string },
 ) {
   const ws = new WebSocketServer({ noServer: true, maxPayload: MAX_FRAME_BYTES, perMessageDeflate: false });
   server.on('upgrade', (request, socket, head) => {
     const value = Buffer.from(request.headers.authorization ?? ''),
-      expected = Buffer.from('Bearer ' + token);
+      expected = Buffer.from('Bearer ' + (typeof token === 'function' ? token() : token));
     // Native clients use Authorization headers. Browser ticket pairing is deliberately not implemented yet.
     if (
       request.url !== '/rpc' ||

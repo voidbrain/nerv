@@ -2,7 +2,16 @@ import { keyIdentity } from './kaji.ts';
 import { validateWatch, type WatchConfig } from './watch.ts';
 import { validatePilots, type Pilot } from './pilots.ts';
 import { validateTools, type ToolsConfig } from './mcp.ts';
-import { existsSync, readdirSync, mkdirSync, readFileSync, writeFileSync, chmodSync } from 'node:fs';
+import {
+  existsSync,
+  readdirSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+  chmodSync,
+  renameSync,
+  rmSync,
+} from 'node:fs';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { randomBytes } from 'node:crypto';
@@ -214,6 +223,31 @@ export function readToken(home: string): string {
   if (token.length < 24 || /[\r\n]/.test(token))
     throw new Error('Run init first, or set NERV_TOKEN to at least 24 characters.');
   return token;
+}
+export type CredentialKind = 'admin' | 'telegram' | 'cloud';
+const credentialFile = (home: string, kind: CredentialKind) =>
+  join(home, kind === 'admin' ? 'token' : kind === 'telegram' ? 'telegram-token' : 'anthropic-key');
+/** Atomically replaces one private credential. The value is never returned or logged. */
+export function rotateCredential(home: string, kind: CredentialKind, value: string): void {
+  mkdirSync(home, { recursive: true, mode: 0o700 });
+  const target = credentialFile(home, kind);
+  const temporary = join(home, `.credential-${kind}-${randomBytes(8).toString('hex')}`);
+  try {
+    writeFileSync(temporary, value + '\n', { flag: 'wx', mode: 0o600 });
+    renameSync(temporary, target);
+    chmodSync(target, 0o600);
+  } finally {
+    rmSync(temporary, { force: true });
+  }
+}
+/** Credential health is age only: never a value, prefix, hash or identifier. */
+export function credentialAges(home: string, now = Date.now()): Record<CredentialKind, { ageSeconds: number } | null> {
+  const age = (kind: CredentialKind) => {
+    const file = credentialFile(home, kind);
+    if (!existsSync(file)) return null;
+    return { ageSeconds: Math.max(0, Math.floor((now - statSync(file).mtimeMs) / 1000)) };
+  };
+  return { admin: age('admin'), telegram: age('telegram'), cloud: age('cloud') };
 }
 /**
  * A secret or rule file is private enough when no group/other permission bits in `mask` are set. Windows has no such
