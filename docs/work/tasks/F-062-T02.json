@@ -29,7 +29,8 @@
   "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
   "validation": [
     "Regression or fixture for each acceptance item; final applicable CI",
-    "2026-11-14: src/snapshots.ts (node:sqlite backup, WAL folded, integrity_check, keep 7, 03:30 local), wired in serve; test/snapshots.test.ts covers WAL-only rows, retention, damaged source, due time and a path-free failure log. The first run caught WAL side files left by the copy; fixed before commit. PR #395."
+    "2026-11-14: src/snapshots.ts (node:sqlite backup, WAL folded, integrity_check, keep 7, 03:30 local), wired in serve; test/snapshots.test.ts covers WAL-only rows, retention, damaged source, due time and a path-free failure log. The first run caught WAL side files left by the copy; fixed before commit. PR #395.",
+    "2026-11-14: Windows CI (PR #395) failed with EPERM on the directory fsync after rename; the directory sync is skipped on win32 as in node-lifecycle-execution and root-migration, and the POSIX mode assertions run only off Windows."
   ],
   "escalation": [
     "Material scope growth or effort increase goes to the owner before adoption"

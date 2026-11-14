@@ -24,8 +24,11 @@ test('a snapshot is a consistent, verified, private copy taken while the service
       { file, bytes } = await takeSnapshot(f.database, dir, '2030-01-15');
     assert.equal(file, 'nerv-2030-01-15.sqlite');
     assert.ok(bytes > 0);
-    assert.equal(statSync(join(dir, file)).mode & 0o777, 0o600);
-    assert.equal(statSync(dir).mode & 0o777, 0o700);
+    if (process.platform !== 'win32') {
+      // POSIX permissions; Windows has no mode bits and relies on the profile ACL.
+      assert.equal(statSync(join(dir, file)).mode & 0o777, 0o600);
+      assert.equal(statSync(dir).mode & 0o777, 0o700);
+    }
     assert.deepEqual(readdirSync(dir), [file]); // one self-contained file: no partial, -wal or -shm left behind
     const copy = new DatabaseSync(join(dir, file), { readOnly: true });
     try {

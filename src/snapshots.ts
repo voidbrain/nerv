@@ -78,7 +78,8 @@ export async function takeSnapshot(
     chmodSync(partial, 0o600);
     syncPath(partial, 'r+');
     renameSync(partial, join(dir, file));
-    syncPath(dir, 'r');
+    // Windows cannot open a directory for fsync (EPERM); NTFS commits the rename itself.
+    if (process.platform !== 'win32') syncPath(dir, 'r');
   } catch (e) {
     for (const p of [partial, partial + '-wal', partial + '-shm']) rmSync(p, { force: true });
     throw e;
