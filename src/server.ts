@@ -49,7 +49,7 @@ export const SESSION_TTL_MS = 12 * 60 * 60_000;
 const MAX_SESSIONS = 20;
 export function makeServer(
   store: StoreApi,
-  token: string,
+  token: string | (() => string),
   options: {
     webRoot?: string;
     language?: string;
@@ -117,7 +117,8 @@ export function makeServer(
     return checkUpdateAvailability({ runningRevision: build.commit, offline: true });
   };
   const sessionTtl = options.sessionTtlMs ?? SESSION_TTL_MS;
-  if (token.length < 24) throw new Error('NERV_TOKEN must be at least 24 characters.');
+  const currentToken = () => (typeof token === 'function' ? token() : token);
+  if (currentToken().length < 24) throw new Error('NERV_TOKEN must be at least 24 characters.');
   const listener: RequestListener = async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Cache-Control', 'no-store');
@@ -241,7 +242,7 @@ export function makeServer(
       return;
     }
     const supplied = Buffer.from(req.headers.authorization ?? '');
-    const expected = Buffer.from(`Bearer ${token}`);
+    const expected = Buffer.from(`Bearer ${currentToken()}`);
     const root = supplied.length === expected.length && timingSafeEqual(supplied, expected);
     const bearer = req.headers.authorization?.startsWith('Bearer ') ? req.headers.authorization.slice(7) : '';
     if (!options.native && !root && bearer) dropExpired();

@@ -39,14 +39,15 @@ interface Button {
   callback_data: string;
 }
 export class TelegramApi {
-  readonly token: string;
+  private readonly token: string | (() => string);
   readonly base: string;
-  constructor(token: string, base = TELEGRAM_API) {
+  constructor(token: string | (() => string), base = TELEGRAM_API) {
     this.token = token;
     this.base = base;
   }
   async call<T>(method: string, body: object, signal?: AbortSignal): Promise<T> {
-    const response = await fetch(`${this.base}/bot${this.token}/${method}`, {
+    const token = typeof this.token === 'function' ? this.token() : this.token;
+    const response = await fetch(`${this.base}/bot${token}/${method}`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),

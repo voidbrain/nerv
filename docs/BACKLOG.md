@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 75.75 h agent + 21.25 h owner across 198 open steps of 47 features and 7 other records. 17 h of actual effort recorded on 33 steps. Generated from the task files.
+**Remaining effort:** 75.5 h agent + 21.25 h owner across 197 open steps of 47 features and 7 other records. 17.75 h of actual effort recorded on 34 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1765,7 +1765,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | ⏳ | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: show a proposed spelling clean-up beside the original fact (F-044-T02).
 
@@ -1779,10 +1779,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="f-044-t01"></a>F-044-T01 — One fact per subject on one editable card | 0.25 h | 0 h | 0.25 h | Implemented; verification pending |
-| 🟢 Small | <a id="f-044-t02"></a>F-044-T02 — Shown spelling fix | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-044-T01](#f-044-t01) |
+| 🟢 Small | <a id="f-044-t02"></a>F-044-T02 — Shown spelling fix | 0.25 h | 0 h | 0.25 h | Planned |
 | 🟢 Small | <a id="f-044-t03"></a>F-044-T03 — Typo-tolerant recall | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-044-T02](#f-044-t02) |
-| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 3 steps recorded) | 0.75 h | 0 of 3 completed |
+| — | <a id="f-044-t01"></a>F-044-T01 — One fact per subject on one editable card | 1.5 h | 0.75 h (stated) | 0 h | Completed |
+| 🟢 Small | **Total** | 2 h | 0.75 h (1 of 3 steps recorded) | 0.5 h | 1 of 3 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1846,9 +1846,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | ⏳ | — | — |
 
-💻 **→** Add rotation for the admin token, Telegram token and cloud key, and a test for NHI10.
+💻 **→** Next: record the acting client kind on ledger decisions (F-066-T02).
 
 | | |
 |---|---|
@@ -1860,7 +1860,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="f-066-t01"></a>F-066-T01 — Credential rotation commands and doctor ages | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | <a id="f-066-t01"></a>F-066-T01 — Credential rotation commands and doctor ages | 0.25 h | 0 h | 0.25 h | Implemented; verification pending |
 | 🟢 Small | <a id="f-066-t02"></a>F-066-T02 — Client kind on ledger events | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-066-T01](#f-066-t01) |
 | 🟢 Small | **Total** | 0.5 h | 0 h (0 of 2 steps recorded) | 0.5 h | 0 of 2 completed |
 

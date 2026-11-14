@@ -1,7 +1,7 @@
 import { Watch, watchQuiet, type WatchWork } from './watch.ts';
 import { transaction } from './sqlite-transaction.ts';
 import type { WorkerLease } from './worker-jobs.ts';
-import { readConfig } from './config.ts';
+import { credentialAges, readConfig } from './config.ts';
 import { UPGRADE_CONTRACT } from './upgrade-contract.ts';
 import { WorkerJobs, WORKER_RESULT_BYTES, WORKER_LEASE_MS } from './worker-jobs.ts';
 import { InstrumentalityRuns } from './instrumentality-runs.ts';
@@ -1527,6 +1527,7 @@ export class Store {
   }
   doctor() {
     return {
+      ...(this.home ? { credentials: credentialAges(this.home) } : {}),
       instrumentality: this.instrumentality.latest(),
       database: this.db.prepare('PRAGMA quick_check').get(),
       schema: this.db.prepare('PRAGMA user_version').get(),
