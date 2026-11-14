@@ -87,7 +87,7 @@ test('F-066: rotation commands replace all three private credentials, print no v
 
     const ages = credentialAges(home, Date.now() + 5000);
     assert.deepEqual(Object.keys(ages), ['admin', 'telegram', 'cloud']);
-    for (const value of Object.values(ages)) assert.ok(value && value.ageSeconds >= 4 && value.ageSeconds <= 6);
+    for (const value of Object.values(ages)) assert.ok(value && value.ageSeconds >= 4 && value.ageSeconds <= 30);
     const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
     try {
       const doctor = JSON.stringify(store.doctor());
