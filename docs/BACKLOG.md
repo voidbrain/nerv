@@ -1848,7 +1848,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | — | — | — | — |
 
-💻 **→** Next: F-066-T02 implemented, awaiting merge; then close F-066.
+💻 **→** Next: F-066-T02 implemented in PR #399, awaiting merge; then close F-066.
 
 | | |
 |---|---|
