@@ -1117,7 +1117,9 @@ test(
   'B-046: a healthy session survives an event-loop stall longer than the heartbeat budget',
   { timeout: 30000 },
   async () => {
-    const f = await fixture(150);
+    // Each ping/pong verifies through the nervous process; on Windows CI 150 ms is tighter than IPC under load.
+    const hb = process.platform === 'win32' ? 400 : 150;
+    const f = await fixture(hb);
     const send = WebSocket.prototype.send;
     let pings = 0,
       hellos = 0,
@@ -1134,7 +1136,7 @@ test(
       if (armed && String(data).includes('worker.ping')) {
         pings++;
         armed = false;
-        setImmediate(() => stall(200));
+        setImmediate(() => stall(hb + 50));
       }
       return sent;
     } as typeof send;
@@ -1145,7 +1147,7 @@ test(
         const before = pings;
         armed = true;
         await until(() => pings > before);
-        await wait(260);
+        await wait(hb + 110);
       }
       assert.equal(hellos - negotiated, 0, 'a reply that arrived during the stall must not end the session');
     } finally {
