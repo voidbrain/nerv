@@ -4,7 +4,7 @@
  "parent": "B-059",
  "title": "Refuse a system case whose build requirement is missing",
  "goal": "An unmet built-browser-assets requirement stops the case with its reason instead of a failed ledger entry",
- "status": "ready",
+ "status": "implemented",
  "acceptance": [
   "A committed test fails before the fix: without dist/web/browser the browser case is recorded as failed",
   "The wrapper names the unmet requirement and writes no ledger entry for that case",
@@ -23,6 +23,8 @@
  ],
  "privacy": "Neutral fixtures only.",
  "validation": [
+  "Committed failing regression: B-059 browser case refuses a missing build without writing failed evidence",
+  "Targeted missing-build and build-present regressions pass",
   "npm test",
   "node tools/gauntlet.mjs pending"
  ],

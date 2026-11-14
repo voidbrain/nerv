@@ -1512,9 +1512,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | — | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.5 h | — | — | — | — |
 
-💻 **→** Next: B-059-T01.
+💻 **→** Next: run the full regression suite and required CI on the implementation PR.
 
 | | |
 |---|---|
@@ -1526,7 +1526,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | B-059-T01 — Refuse a system case whose build requirement is missing | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | B-059-T01 — Refuse a system case whose build requirement is missing | 0.5 h | 0 h | 0.5 h | Implemented; verification pending |
 | 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed |
 
 <details>
@@ -1536,9 +1536,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #376](https://github.com/voidbrain/nerv/pull/376) Found in F-075, 2026-11-13. |
+| PR / evidence | [PR #376](https://github.com/voidbrain/nerv/pull/376) Found in F-075, 2026-11-13. Implementation PR pending. Test: `B-059: browser case refuses a missing build without writing failed evidence`; committed failing in `4139150`, then passed without editing that regression. A separate build-present regression preserves the prior execution path. |
 | Opened | 2026-11-13 |
-| Verification | Pending. |
+| Verification | Unit/integration 2026-11-13: the focused missing-build and build-present regressions pass; full suite and CI pending. |
 | Reviewed | 2026-11-13 |
 
 </details>

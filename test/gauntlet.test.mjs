@@ -828,10 +828,7 @@ test('B-059: browser case refuses a missing build without writing failed evidenc
       main(['run', '--only=browser', '--allow-expensive', '--execute', '--out=' + join(dir, 'run.json')], services),
       /built-browser-assets/,
     );
-    const result = await main(
-      ['all', '--execute', '--allow-expensive', '--out-dir=' + join(dir, 'out')],
-      services,
-    );
+    const result = await main(['all', '--execute', '--allow-expensive', '--out-dir=' + join(dir, 'out')], services);
     assert.deepEqual(executed, []);
     const systemPlan = result.plan.find((candidate) => candidate.pack === system.id);
     assert.ok(systemPlan?.blocked?.cases.includes('browser'));
@@ -845,6 +842,45 @@ test('B-059: browser case refuses a missing build without writing failed evidenc
     if (hadBuild && existsSync(backup) && !existsSync(browserBuild)) renameSync(backup, browserBuild);
     if (previousLedger === undefined) delete process.env.NERV_GAUNTLET_LEDGER;
     else process.env.NERV_GAUNTLET_LEDGER = previousLedger;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('B-059: browser case still executes when the required build exists', async () => {
+  const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-b059-built-'));
+  const browserBuild = resolve('dist/web/browser');
+  const hadBuild = existsSync(browserBuild);
+  let executed = false;
+  try {
+    mkdirSync(browserBuild, { recursive: true });
+    const result = await main(
+      ['run', '--only=browser', '--allow-expensive', '--execute', '--out=' + join(dir, 'run.json')],
+      {
+        execute: async (pack) => {
+          executed = true;
+          return {
+            kind: 'fresh',
+            performanceMeasuredNow: false,
+            reason: 'fresh',
+            report: {
+              schemaVersion: 1,
+              id: 'neutral-b059-pass',
+              pack: pack.id,
+              packVersion: pack.version,
+              layer: 'system',
+              finished: '2026-11-13T18:00:00.000Z',
+              passed: true,
+              complete: true,
+              results: [],
+            },
+          };
+        },
+      },
+    );
+    assert.equal(executed, true);
+    assert.equal(result.passed, true);
+  } finally {
+    if (!hadBuild) rmSync(browserBuild, { recursive: true, force: true });
     rmSync(dir, { recursive: true, force: true });
   }
 });

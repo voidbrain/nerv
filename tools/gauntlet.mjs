@@ -95,6 +95,14 @@ export function modelLimits(pack) {
   };
 }
 const isModelPack = (pack) => pack.cases.some((c) => c.layer !== 'system');
+const unmetRequirements = (testCase) =>
+  (testCase.requirements ?? []).filter(
+    (requirement) => requirement === 'built-browser-assets' && !existsSync(here('dist/web/browser')),
+  );
+const assertRequirements = (pack) => {
+  const unmet = pack.cases.flatMap((testCase) => unmetRequirements(testCase));
+  if (unmet.length) throw Error('Unmet case requirement: ' + [...new Set(unmet)].join(', '));
+};
 
 export function testIndex(reports = []) {
   const packs = allPacks();
@@ -527,6 +535,7 @@ export async function main(args = process.argv.slice(2), services = { execute: e
   if (command.endsWith('plan')) return plan(pack, profile, limitsFor(model, pack), flags);
   confirmScenario();
   if (!options.execute || !options.out) throw Error('Execution requires --execute --out=new.json');
+  assertRequirements(pack);
   const result = await execute(pack, model, profile, options.out, {
     maxAgeMs: options['max-age-hours'] ? Number(options['max-age-hours']) * 3600000 : undefined,
     captureFailures: options['capture-failures'],
@@ -574,33 +583,44 @@ async function all(options, { profile, execute, limitsFor, maxAgeDays, intended 
           .sort((a, b) => Date.parse(b.finished) - Date.parse(a.finished))[0];
         return { case: c.id, status: e.status, finished: e.finished, reportHash: e.reportHash };
       });
-    const blocked = run
-      .filter((r) =>
-        model
-          ? !options['allow-models'] || !profile
-          : pack.cases.find((c) => c.id === r.case).expensive && !options['allow-expensive'],
-      )
-      .map((r) => r.case);
-    return { pack, model, run, reuse, blocked };
+    const blockedReasons = new Map();
+    for (const pendingCase of run) {
+      const testCase = pack.cases.find((candidate) => candidate.id === pendingCase.case);
+      const requirements = unmetRequirements(testCase);
+      if (requirements.length) blockedReasons.set(pendingCase.case, requirements.join(', '));
+      else if (model ? !options['allow-models'] || !profile : testCase.expensive && !options['allow-expensive'])
+        blockedReasons.set(
+          pendingCase.case,
+          model ? '--allow-models and --profile (owner-approved budget)' : '--allow-expensive',
+        );
+    }
+    return { pack, model, run, reuse, blockedReasons };
   });
-  const summary = packs.map(({ pack, model, run, reuse, blocked }) => ({
+  const summary = packs.map(({ pack, model, run, reuse, blockedReasons }) => ({
     pack: pack.id,
     version: pack.version,
     layer: model ? 'model' : 'system',
     run,
     reuse,
-    ...(blocked.length
+    ...(blockedReasons.size
       ? {
           blocked: {
-            cases: blocked,
-            needs: model ? '--allow-models and --profile (owner-approved budget)' : '--allow-expensive',
+            cases: [...blockedReasons.keys()],
+            needs: Object.fromEntries(blockedReasons),
           },
         }
       : {}),
-    ...(run.length > blocked.length
+    ...(run.length > blockedReasons.size
       ? {
           budget: (({ caseMs, suiteMs, outputTokens }) => ({ caseMs, suiteMs, outputTokens }))(
-            limitsFor(model, selectedPack(pack, run.filter((r) => !blocked.includes(r.case)).map((r) => r.case), model)),
+            limitsFor(
+              model,
+              selectedPack(
+                pack,
+                run.filter((r) => !blockedReasons.has(r.case)).map((r) => r.case),
+                model,
+              ),
+            ),
           ),
         }
       : {}),
@@ -612,8 +632,8 @@ async function all(options, { profile, execute, limitsFor, maxAgeDays, intended 
   mkdirSync(outDir, { recursive: true, mode: 0o700 });
   const results = [];
   let next = ledger;
-  for (const { pack, model, run, blocked } of packs) {
-    const ids = run.map((r) => r.case).filter((id) => !blocked.includes(id));
+  for (const { pack, model, run, blockedReasons } of packs) {
+    const ids = run.map((r) => r.case).filter((id) => !blockedReasons.has(id));
     // A system runner takes one selected case per run; a model run takes every selected case at once.
     const batches = model ? (ids.length ? [ids] : []) : ids.map((id) => [id]);
     for (const batch of batches) {
