@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 76 h agent + 21.25 h owner across 198 open steps of 47 features and 7 other records. 17 h of actual effort recorded on 33 steps. Generated from the task files.
+**Remaining effort:** 76 h agent + 21.25 h owner across 199 open steps of 47 features and 7 other records. 17 h of actual effort recorded on 33 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -197,8 +197,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-062-t02"></a>F-062-T02 — Scheduled consistent snapshots | 0.25 h | 0 h | 0.5 h | Implemented; verification pending | 🤖 |
 | 🟢 Small | <a id="f-062-t03"></a>F-062-T03 — Encrypted off-host retention | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-062-T02](#f-062-t02) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-062-t04"></a>F-062-T04 — Restore drill | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-062-T03](#f-062-t03) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-062-t05"></a>F-062-T05 — Rerun the two expensive system cases at the snapshot source | 0.25 h | 0 h | 0 h | Planned · waits on [F-062-T02](#f-062-t02) | ⏳ 🤖 ⏳ 🧑‍🔧 |
 | — | <a id="f-062-t01"></a>F-062-T01 — Owner-agreed loss window and restore time | 0.25 h | 0 h | 0 h | Completed | 🤖 🧑‍🔧 🤔 |
-| 🟡 Medium | **Total** | 1.25 h | 0 h (0 of 4 steps recorded) | 1.25 h | 1 of 4 completed | |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 5 steps recorded) | 1.25 h | 1 of 5 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>

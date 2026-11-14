@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "id": "F-062-T05",
+  "parent": "F-062",
+  "title": "Rerun the two expensive system cases at the snapshot source",
+  "goal": "nerv-system-flows/stress and nerv-system-flows/browser have a covering run at the F-062-T02 source",
+  "status": "planned",
+  "acceptance": ["npm run gauntlet:all -- --execute --allow-expensive records passing runs for nerv-system-flows/stress and nerv-system-flows/browser", "node tools/gauntlet.mjs pending exits 0"],
+  "dependsOn": ["F-062-T02"],
+  "resources": ["evals/gauntlet/**", "docs/work/records/F-062.md", "docs/work/tasks/F-062-T05.json", "generated:backlog-views"],
+  "capabilities": ["structured-tools"],
+  "privacy": "Metadata-only ledger; no prompts or outputs in Git.",
+  "validation": ["node tools/gauntlet.mjs pending"],
+  "escalation": ["The run is expensive (time, no model): the owner starts it or allows it; a failing case becomes a B- record"],
+  "effort": {"size": "small", "estimate": "0.25 h agent + 0.25 hours owner", "basis": "Estimated 2026-11-14: one deterministic run of two cases; the other five ran in PR #395. Not a measurement.", "reviewed": "2026-11-14", "agentHours": 0, "ownerHours": 0, "baselineAgentHours": 0.25, "ownerKind": "procedure", "estimateAgentHours": 0.25}
+}
