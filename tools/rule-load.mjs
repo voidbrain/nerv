@@ -38,8 +38,9 @@ const glob = (root, pattern) => {
     re = new RegExp(
       `^${pattern
         .slice(dir.length + 1)
-        .replace(/[.]/g, '\\.')
-        .replace(/\*/g, '[^/]*')}$`,
+        .split('*')
+        .map((part) => part.replace(/[\\^$.|?+()[\]{}]/g, '\\$&'))
+        .join('[^/]*')}$`,
     );
   return existsSync(join(root, dir))
     ? readdirSync(join(root, dir))
@@ -49,11 +50,17 @@ const glob = (root, pattern) => {
     : [];
 };
 
+// B-025: tags are removed until none is left (nested input such as "<<b>b>" leaves no fragment), then any stray bracket.
+const untag = (text) => {
+  let previous;
+  do {
+    previous = text;
+    text = text.replace(/<[^<>]*>/g, '');
+  } while (text !== previous);
+  return text.replace(/[<>]/g, '');
+};
 export const slug = (heading) =>
-  heading
-    .trim()
-    .toLowerCase()
-    .replace(/<[^>]*>/g, '')
+  untag(heading.trim().toLowerCase())
     .replace(/[^\p{L}\p{N}\s_-]/gu, '')
     .replace(/\s/g, '-');
 
