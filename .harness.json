@@ -987,7 +987,7 @@
     "featurePlans": true,
     "order": "queue",
     "estimation": {
-      "since": "2026-11-13"
+      "since": "2026-11-14"
     },
     "repository": "voidbrain/nerv"
   },
