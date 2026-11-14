@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Store } from '../src/store.ts';
 import { makeServer } from '../src/server.ts';
+import { validateParams } from '../src/rpc.ts';
 
 // F-066-T02: a decision records which client made it, so an API-token decision is told apart from a dashboard one.
 const proposal = {
@@ -52,4 +53,10 @@ test('F-066: ledger events tell an API-token decision from a dashboard-session o
     await new Promise<void>((done) => server.close(() => done()));
     store.close();
   }
+});
+
+test('F-066: the nervous-process RPC accepts every decision source the server and channels send', () => {
+  for (const source of ['api', 'dashboard', 'cli', 'telegram'])
+    assert.doesNotThrow(() => validateParams('approvals.decide', { id: 'A-1', decision: 'approve', source }), source);
+  assert.throws(() => validateParams('approvals.decide', { id: 'A-1', decision: 'approve', source: 'browser' }));
 });
