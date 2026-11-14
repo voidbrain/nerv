@@ -1,4 +1,5 @@
 import { spawn } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { posix, win32 } from 'node:path';
 import { nodeTarget, type NodeTarget } from './node-discovery.ts';
@@ -78,6 +79,31 @@ export const runNodeCommand: CommandRunner = (request) =>
     });
     child.stdin.end(request.input);
   });
+/** B-063: the Node.js range NERV requires, read from package.json `engines.node` (">=X.Y.Z"). */
+export function requiredNode(): string {
+  const range = (
+    JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as {
+      engines?: { node?: string };
+    }
+  ).engines?.node;
+  if (!range || !/^>=\d+\.\d+\.\d+$/.test(range)) throw Error('package.json engines.node must be ">=X.Y.Z".');
+  return range;
+}
+/** A sentence naming the found and required versions when `found` is below the range, else undefined. */
+export function nodeBelowRequirement(found: string, range = requiredNode()): string | undefined {
+  const parts = (v: string) =>
+    v
+      .replace(/^v|^>=/g, '')
+      .split('.')
+      .map((n) => Number.parseInt(n, 10) || 0);
+  const [a, b] = [parts(found), parts(range)];
+  for (let i = 0; i < 3; i++)
+    if (a[i]! !== b[i]!)
+      return a[i]! < b[i]!
+        ? `Node.js ${found} on the target is below the version NERV requires (${range}).`
+        : undefined;
+  return undefined;
+}
 /** Fixed read-only probe. Never read credentials, open SQLite, enroll a base or ask a model. */
 export const NODE_PROBE = String.raw`const os=require('node:os'),fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process');
 function version(command){try{const r=cp.spawnSync(command,{shell:true,encoding:'utf8',timeout:3000,maxBuffer:4096,windowsHide:true});const text=(r.stdout||'').trim();return r.status===0&&/^(?:git version )?\d+\.\d+[^\r\n]{0,80}$/.test(text)?text:null;}catch{return null;}}
