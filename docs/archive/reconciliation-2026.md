@@ -394,4 +394,4 @@ PR #400 passed CI (F-062-T03 closed); F-062-T06 (encrypted copies to Tabgha over
 Harness 8.14.3 reconciled; rule load within every budget (owner decision): five NERV project lines moved verbatim to pull-requests.md and the BACKLOG-RULES index; always loaded 3,558 → 3,064.
 
 - Moved: scoped verification and the review brief (AGENTS → `docs/agents/pull-requests.md`); the ledger and roadmap lines (AGENTS) and the 400-character header rule (`docs/backlog/review.md`) → `docs/BACKLOG-RULES.md`. Link targets adjusted for the new folders only.
-- 8.14.3: `reconcile-draft` and `rule-load` (generated pages have no file budget); the re-estimation sentence in `docs/backlog/estimates.md`.
+- 8.14.3: `reconcile-draft` and `rule-load` (generated pages have no file budget); the re-estimation sentence in `docs/backlog/estimates.md`. This change is [#405](https://github.com/voidbrain/nerv/pull/405).
