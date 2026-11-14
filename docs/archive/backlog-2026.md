@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 12 | 14 |
+| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 12 | 15 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
 
@@ -3920,6 +3920,40 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 | PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
 | Opened | 2026-11-07 |
 | Verification | Unit/integration: rotation, doctor age and client-kind regressions, CI green on PR #394 and PR #399. |
+| Reviewed | 2026-11-14 |
+
+</details>
+
+---
+
+### B-063
+
+**`nodes inspect` accepts a Node.js older than NERV requires without saying so**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />None: the fix passed CI and the VM run.
+
+| | |
+|---|---|
+| **Issue** | 2026-11-14, preparing step 2 of the F-005-T22 procedure (docs/acceptance/f005-t22-prerequisites.md): `nodes inspect` records the target's Node.js version but never compares it with `package.json` `engines.node` (≥ 24), so Ubuntu's Node 18 passes silently and the expected "below the version NERV requires" never appears. |
+| **Reproduce** | Inspect a target whose `node --version` is 18.x: the command succeeds. |
+| **Check** | A regression through `nodesCommand`: an older Node.js fails the command naming the found and required versions, after the unchanged inspection file is saved as evidence; a supported one passes as before; nothing is installed. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Closed 2026-11-14:** PR #397 merged (CI 43569512021 green) and the VM run passed. **Next action / closure evidence:** B-063-T01 closed 2026-11-14 after PR #397 merged (CI 43569512021 green). B-063-T03 closed 2026-11-14: on the VM with Node 18.19.1 the command failed naming 18.19.1 below >=24.0.0. B-063-T01: `nodes inspect` saves the unchanged inspection, then fails naming the found and required Node.js versions. All seven nerv-system-flows cases reran and passed at this source (stress and browser in B-063-T02).
+
+**Estimates:** Small, estimated 2026-11-14: 0.5 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #397](https://github.com/voidbrain/nerv/pull/397); found while preparing the F-005-T22 owner run, 2026-11-14. |
+| Opened | 2026-11-14 |
+| Verification | Unit: test/node-inspection-version.test.ts through nodesCommand. VM run 2026-11-14: passed (F-005-T22 step 2). |
 | Reviewed | 2026-11-14 |
 
 </details>

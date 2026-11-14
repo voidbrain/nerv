@@ -4,7 +4,7 @@
   "parent": "B-063",
   "title": "Rerun the old-Node check on the VM",
   "goal": "`nodes inspect --ssh nerv-linux` against Ubuntu's Node 18 fails naming the found and required versions",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "On the VM with Ubuntu's packaged Node.js, `nodes inspect` saves the inspection and fails naming the found 18.x and the required version"
   ],
@@ -21,18 +21,21 @@
   ],
   "privacy": "Neutral fixtures only; no real host names.",
   "validation": [
-    "F-005-T22 step 2 output"
+    "F-005-T22 step 2 output",
+    "2026-11-14: on the VM with Ubuntu's Node 18.19.1, `nodes inspect --ssh nerv-linux` saved the inspection and failed: \"Node.js 18.19.1 on the target is below the version NERV requires (>=24.0.0)\"."
   ],
   "escalation": [
-    "The VM has no outbound connection (2026-11-14): installing Node there waits for the owner to restore its network"
+    "None left: the VM reached the internet through a temporary proxy on the Mac"
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h agent",
-    "basis": "Estimated 2026-11-14: one install and one inspection on the VM. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-14: one install and one inspection on the VM. Not a measurement. Closed 2026-11-14 after the VM run.",
     "reviewed": "2026-11-14",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.25,
-    "estimateAgentHours": 0.25
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
   }
 }

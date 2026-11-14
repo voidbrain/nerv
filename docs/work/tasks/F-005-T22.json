@@ -23,6 +23,7 @@
     "Join prerequisite checks to service bootstrap/update and demonstrate configured optional engine startup on an explicitly selected target"
   ],
   "dependsOn": [
+    "B-064-T01",
     "F-005-T21"
   ],
   "resources": [
@@ -38,7 +39,7 @@
   "validation": [
     "Meaningful cross-boundary regressions and required final CI",
     "Explicit selected-target acceptance where service, install or real device behavior is required; static/unit passes do not substitute",
-    "2026-11-14: the agent ran the procedure at the owner's request from a worktree at main 0131dbc. Step 1 passed: `nodes inspect --ssh nerv-linux` reported \"Node.js was not found on the target's non-interactive PATH … no installation was requested\" and nothing changed on the VM. Step 2 blocked: the VM resolves names but has no outbound TCP (apt and curl cannot connect; the Mac runs Tailscale, a likely cause), so Ubuntu's nodejs could not be installed. Steps 2–3 wait for the VM to reach the internet."
+    "2026-11-14: the agent ran the procedure at the owner's request from a worktree at main eca644e; the VM has no outbound TCP of its own, so with the owner's approval its downloads went through a temporary proxy on the Mac over SSH (closed afterwards). Step 1 passed: `nodes inspect --ssh nerv-linux` reported Node.js missing on the non-interactive PATH, nothing installed. Step 2 passed: with Ubuntu's Node 18.19.1 it saved the inspection and failed naming 18.19.1 below >=24.0.0. Step 3: NodeSource Node 24.22.3 is accepted by `nodes inspect`, and `systemd --user` is running (linger off); `nodes lifecycle-inspect --action install` in a fresh clone failed with a raw ENOENT on ~/.nerv (B-064), so no prerequisite plan was shown."
   ],
   "escalation": [
     "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",

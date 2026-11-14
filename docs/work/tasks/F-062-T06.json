@@ -30,7 +30,7 @@
     "A test across sender and receiver over the Kaji line; final applicable CI"
   ],
   "escalation": [
-    "A new Kaji message type changes the distributed contract: it needs the owner's agreement before it is adopted"
+    "Owner agreed 2026-11-14 to a new Kaji message type carrying encrypted backup copies (option A over a mounted share); any further change to the Kaji contract goes back to the owner"
   ],
   "effort": {
     "size": "small",
