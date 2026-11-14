@@ -192,7 +192,10 @@ export class Ledger {
       (trust !== 'trusted' && trust !== 'tainted')
     )
       throw new Error('Invalid sortie.');
-    const id = randomUUID();
+    // Avoid four-character short-ID collisions with existing sorties when possible (B-061).
+    let id = randomUUID();
+    const exists = this.db.prepare('SELECT 1 FROM sorties WHERE id LIKE ? LIMIT 1');
+    for (let i = 0; i < 16 && exists.get(id.slice(0, 4) + '%'); i++) id = randomUUID();
     return this.tx(() => {
       this.db
         .prepare('INSERT INTO sorties(id,source,title,trust,status,created) VALUES(?,?,?,?,?,?)')
@@ -947,16 +950,32 @@ export class Ledger {
     return { done: n('done'), failed: n('failed'), failures };
   }
   /** A sortie by the short ID shown to the owner (a hex prefix of its ID), with what a "why" answer needs (B-004). */
-  explain(ref: string): { found: 'none' | 'many'; count?: number } | { found: 'one'; record: WhyRecord } {
+  explain(
+    ref: string,
+  ):
+    | { found: 'none' }
+    | { found: 'many'; count: number; candidates: { shortId: string; title: string; status: string }[] }
+    | { found: 'one'; record: WhyRecord } {
     if (typeof ref !== 'string' || !/^[0-9a-f]{4,36}$/.test(ref)) throw new Error('Invalid sortie reference.');
-    const ids = (
-      this.db.prepare('SELECT id FROM sorties WHERE id LIKE ? ORDER BY created DESC LIMIT 6').all(ref + '%') as {
-        id: string;
-      }[]
-    ).map((r) => r.id);
-    if (!ids.length) return { found: 'none' };
-    if (ids.length > 1) return { found: 'many', count: ids.length };
-    const s = this.sortie(ids[0]!)!;
+    const rows = this.db
+      .prepare('SELECT id,title,status FROM sorties WHERE id LIKE ? ORDER BY created DESC LIMIT 6')
+      .all(ref + '%') as { id: string; title: string; status: string }[];
+    if (!rows.length) return { found: 'none' };
+    if (rows.length > 1) {
+      const hexes = rows.map((r) => r.id.replace(/-/g, ''));
+      let len = Math.max(8, ref.replace(/-/g, '').length + 1);
+      while (len < 12 && new Set(hexes.map((h) => h.slice(0, len))).size < hexes.length) len++;
+      return {
+        found: 'many',
+        count: rows.length,
+        candidates: rows.map((r, i) => ({
+          shortId: 'S-' + hexes[i]!.slice(0, len).toUpperCase(),
+          title: r.title,
+          status: r.status,
+        })),
+      };
+    }
+    const s = this.sortie(rows[0]!.id)!;
     const consult = this.db
       .prepare("SELECT payload FROM events WHERE sortie_id=? AND kind='misato.consult' ORDER BY sequence LIMIT 1")
       .get(s.id) as { payload: string } | undefined;

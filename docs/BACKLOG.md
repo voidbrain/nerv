@@ -2429,9 +2429,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | — | — | — |
 
-💻 **→** Next: B-061-T01.
+💻 **→** Next: once the PR's CI is green and merged, verify and close from that run (B-061-T01 implemented).
 
 | | |
 |---|---|
@@ -2443,8 +2443,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="b-061-t01"></a>B-061-T01 — Unambiguous sortie short IDs | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed |
+| 🟢 Small | <a id="b-061-t01"></a>B-061-T01 — Unambiguous sortie short IDs | 0.5 h | 0 h | 0 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0 h | 0 of 1 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2453,10 +2453,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #389](https://github.com/voidbrain/nerv/pull/389); found while reconciling harness 8.11.0, 2026-11-13. |
+| PR / evidence | [PR #412](https://github.com/voidbrain/nerv/pull/412) (fix); [PR #389](https://github.com/voidbrain/nerv/pull/389); found while reconciling harness 8.11.0, 2026-11-13. |
 | Opened | 2026-11-13 |
-| Verification | Pending. |
-| Reviewed | 2026-11-13 |
+| Verification | 2026-11-14: 7/7 tests in test/why.test.ts pass locally; CI pending. |
+| Reviewed | 2026-11-14 |
 
 </details>
 
