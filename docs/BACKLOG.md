@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 25 | 11 | 14 | 13 |
+| **This week** | 25 | 11 | 15 | 13 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 47 | 7 |
+| **Open** | 47 | 8 |
 | **Require Human 🧑** | 8 | 2 |
 
 ### Require Human 🧑
@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 75.5 h agent + 21.25 h owner across 197 open steps of 47 features and 7 other records. 17.75 h of actual effort recorded on 34 steps. Generated from the task files.
+**Remaining effort:** 75.5 h agent + 21.25 h owner across 198 open steps of 47 features and 8 other records. 17.75 h of actual effort recorded on 34 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1553,6 +1553,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-13 |
 | Verification | Pending. |
 | Reviewed | 2026-11-13 |
+
+</details>
+
+---
+### <a id="b-063"></a>[🐞 B-063](#top)
+
+**`nodes inspect` accepts a Node.js older than NERV requires without saying so**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-063-T01.
+
+| | |
+|---|---|
+| **Issue** | 2026-11-14, preparing step 2 of the F-005-T22 procedure (docs/acceptance/f005-t22-prerequisites.md): `nodes inspect` records the target's Node.js version but never compares it with `package.json` `engines.node` (≥ 24), so Ubuntu's Node 18 passes silently and the expected "below the version NERV requires" never appears. |
+| **Reproduce** | Inspect a target whose `node --version` is 18.x: the command succeeds. |
+| **Check** | A regression through `nodesCommand`: an older Node.js fails the command naming the found and required versions, after the unchanged inspection file is saved as evidence; a supported one passes as before; nothing is installed. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-063-t01"></a>B-063-T01 — Report a Node.js below engines.node | 0.5 h | 0 h | 0 h | Ready |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-063.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Found while preparing the F-005-T22 owner run, 2026-11-14. |
+| Opened | 2026-11-14 |
+| Verification | Pending. |
+| Reviewed | 2026-11-14 |
 
 </details>
 

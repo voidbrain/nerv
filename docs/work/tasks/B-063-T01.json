@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "id": "B-063-T01",
+  "parent": "B-063",
+  "title": "Report a Node.js below engines.node",
+  "goal": "`nodes inspect` fails with the found and required versions when the target's Node.js is too old",
+  "status": "ready",
+  "acceptance": ["A committed test through nodesCommand fails before the fix", "The required version is read from package.json engines.node, not repeated in code", "The saved inspection format is unchanged"],
+  "dependsOn": [],
+  "resources": ["src/nodes-cli.ts", "src/node-inspection.ts", "test/node-inspection-version.test.ts", "docs/work/records/B-063.md", "docs/work/tasks/B-063-T01.json", "generated:backlog-views", "evals/gauntlet/**"],
+  "capabilities": ["regression-design", "bounded-edit"],
+  "privacy": "Neutral fixtures only; no real host names.",
+  "validation": ["npm test"],
+  "escalation": ["Any write to a target goes to the owner first"],
+  "effort": {"size": "small", "estimate": "0.5 h", "basis": "Estimated 2026-11-14: one version comparison and one regression. Not a measurement.", "reviewed": "2026-11-14", "agentHours": 0, "baselineAgentHours": 0.5, "estimateAgentHours": 0.5}
+}
