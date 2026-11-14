@@ -220,8 +220,10 @@ export async function completeOpenAICompatible(
         signal: limit.signal,
         redirect: 'error',
       });
-    } catch {
-      throw limit.signal.aborted ? cutOff() : new ModelError(`${label} unreachable.`);
+    } catch (e) {
+      throw limit.signal.aborted || (e instanceof Error && e.name === 'TimeoutError')
+        ? cutOff()
+        : new ModelError(`${label} unreachable.`);
     }
     if (!response.ok) {
       await response.body?.cancel().catch(() => undefined);
@@ -235,7 +237,9 @@ export async function completeOpenAICompatible(
         : await readWholeReply(response, label);
     } catch (e) {
       if (e instanceof ModelError) throw e;
-      throw limit.signal.aborted ? cutOff() : new ModelError(`${label} unreachable.`);
+      throw limit.signal.aborted || (e instanceof Error && e.name === 'TimeoutError')
+        ? cutOff()
+        : new ModelError(`${label} unreachable.`);
     }
   } finally {
     clearTimeout(timer);
