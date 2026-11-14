@@ -4,7 +4,7 @@
   "parent": "F-062",
   "title": "Encrypted off-host retention",
   "goal": "Encrypted off-host retention",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Retained encrypted copies off host; keys apart from routine runtime authority"
   ],
@@ -25,7 +25,8 @@
   ],
   "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
   "validation": [
-    "Regression or fixture for each acceptance item; final applicable CI"
+    "Regression or fixture for each acceptance item; final applicable CI",
+    "2026-11-14: test/offhost.test.ts — encryption with the public key only, tamper and wrong-key refusal, config validation, the nightly loop writing a copy that `backup decrypt` restores, an unplugged disk reported once and caught up, retention."
   ],
   "escalation": [
     "Material scope growth or effort increase goes to the owner before adoption"
@@ -33,11 +34,13 @@
   "effort": {
     "size": "small",
     "estimate": "1.75 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
-    "reviewed": "2026-11-13",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). Implemented 2026-11-14 in about 1 h (stated); copies over the Kaji line to Tabgha split to F-062-T06.",
+    "reviewed": "2026-11-14",
     "baselineDays": 2,
-    "agentHours": 0.5,
+    "agentHours": 0,
     "baselineAgentHours": 3,
-    "estimateAgentHours": 0.5
+    "estimateAgentHours": 1,
+    "actualAgentHours": 1,
+    "actualSource": "stated"
   }
 }

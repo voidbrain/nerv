@@ -4,7 +4,7 @@
   "parent": "F-066",
   "title": "Client kind on ledger events",
   "goal": "Client kind on ledger events",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Events record dashboard session, CLI, API token or Telegram; a test distinguishes API-token from dashboard decisions"
   ],
@@ -36,9 +36,9 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
-    "reviewed": "2026-11-13",
+    "estimate": "0 remaining",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). Closed 2026-11-14 after PR #399 merged (CI 43576040188 green).",
+    "reviewed": "2026-11-14",
     "baselineDays": 0.5,
     "agentHours": 0,
     "baselineAgentHours": 0.75,

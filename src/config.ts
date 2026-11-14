@@ -21,6 +21,7 @@ import { defaultPolicy, validatePolicy, type Policy } from './policy.ts';
 import { validateAutoUpdatePolicy, type AutoUpdatePolicy } from './update-policy.ts';
 import { validateSeatPool, type SeatPoolEntry } from './seat-pool.ts';
 import { validateOperatorConfig, type OperatorConfig } from './operator-directory.ts';
+import { validateBackup, type BackupConfig } from './offhost.ts';
 import { validatePersonas, type PersonaConfig } from './persona.ts';
 /** telegram.chatId: the one private chat (the owner's) the Aoba bot answers; set by `telegram link`. */
 export interface Config {
@@ -40,6 +41,7 @@ export interface Config {
   updatePolicy?: AutoUpdatePolicy;
   seats?: SeatPoolEntry[];
   operator?: OperatorConfig;
+  backup?: BackupConfig;
   personas?: PersonaConfig;
 }
 /** This machine's identity in the NERV mesh: an id (NERV-01) and a name (Neo Tokyo-3), shown in the dashboard, doctor and brief. */
@@ -190,6 +192,7 @@ export function readConfig(home: string): Config {
       throw new Error('Invalid brief: {"at": "HH:MM"} in your time zone.');
     config.brief = { at: b.at };
   }
+  if ('backup' in raw) config.backup = validateBackup((raw as Record<string, unknown>).backup, home);
   if ('tools' in raw) {
     const t = validateTools((raw as Record<string, unknown>).tools);
     if (t.mcp.length || t.grants.length) config.tools = t;

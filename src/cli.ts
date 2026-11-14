@@ -13,6 +13,7 @@ import {
 } from './skills.ts';
 import { assertRootMigrationReady, rootMigrationCommand } from './root-migration.ts';
 import { nodesCommand } from './nodes-cli.ts';
+import { backupCommand } from './backup-cli.ts';
 import {
   engineReceiptPath,
   executeEngineLifecycle,
@@ -194,13 +195,15 @@ try {
   const home = dataHome();
   if (!['root-migration', 'nodes', 'help'].includes(command ?? 'help')) assertRootMigrationReady(home);
   if (
-    !['nodes', 'help'].includes(command ?? 'help') &&
+    !['nodes', 'help', 'backup'].includes(command ?? 'help') &&
     !(command === 'root-migration' && args[0] !== 'apply') &&
     !(command === 'service' && args[0] === 'status')
   )
     await guardLocalService(home, command === 'serve' || command === 'launch');
   if (command === 'root-migration') {
     console.log(JSON.stringify(await rootMigrationCommand(home, args), null, 2));
+  } else if (command === 'backup') {
+    await backupCommand(home, args, { readSecret, flag });
   } else if (command === 'nodes') {
     const result = await nodesCommand(args);
     console.log(JSON.stringify(result, null, 2));
@@ -847,7 +850,7 @@ try {
     console.log(value.text + (value.truncated ? '\n[reply truncated]' : '') + `\n— ${value.route} · ${value.model}`);
   } else if (!command || command === 'help')
     console.log(
-      'NERV Agency\nCommands: root-migration plan|apply|status | init [--base ID --name "Name"] [--no-model-setup] [--fresh] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | nodes discover|inspect|plan|apply|status|release | workers pending|history|held|result|cancel|cancel-outbox|release|retry-outbox|abandon-outbox | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | bom | credentials rotate admin|telegram|cloud | models [set misato| pilots [generic|add|set|pin|unpin|retire|restore] | tools [add|remove|grant|revoke] |casper MODEL | cloud on|off | key] | ask [--cloud] "text" | open [dashboard] | sessions revoke | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | chronicle [DAYS] | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall',
+      'NERV Agency\nCommands: root-migration plan|apply|status | init [--base ID --name "Name"] [--no-model-setup] [--fresh] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | nodes discover|inspect|plan|apply|status|release | workers pending|history|held|result|cancel|cancel-outbox|release|retry-outbox|abandon-outbox | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | bom | backup keygen|status|decrypt | credentials rotate admin|telegram|cloud | models [set misato| pilots [generic|add|set|pin|unpin|retire|restore] | tools [add|remove|grant|revoke] |casper MODEL | cloud on|off | key] | ask [--cloud] "text" | open [dashboard] | sessions revoke | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | chronicle [DAYS] | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall',
     );
   else {
     const config = readConfig(home);
@@ -1317,11 +1320,14 @@ try {
         }, sentBefore);
         runtime.startWatch();
         runtime.startRouteLog();
-        // F-062-T02: one consistent, verified snapshot of the database each night (owner's time zone).
+        // F-062-T02/T03: one consistent, verified snapshot each night (owner's time zone), then encrypted off-host copies.
         startSnapshots(
           home,
           () => databasePath(home),
           () => live().timeZone,
+          undefined,
+          undefined,
+          () => live().backup,
         );
         runtime.startInstrumentality(() => {
           const c = live();

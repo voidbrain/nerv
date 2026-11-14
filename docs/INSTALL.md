@@ -49,3 +49,4 @@ nerv service uninstall # remove service definition (keeps data)
 | [Memory, Chat, Tools, and Gate Rules](guides/memory-and-chat.md) | Misato chat, Lilith memory & Instrumentality, MCP tools, Scrolls gate rules, CycloneDX BOM |
 | [Channels, Dashboard, and Proactive Watches](guides/channels-and-watches.md) | Dashboard shortcuts & Battery, Telegram (Aoba), daily briefs, chronicle, Hyuga watches |
 | [Kaji Line, Remote Workers, and Node Setup](guides/kaji-and-nodes.md) | Base enrollment, Tailscale live link, remote actions, `nerv nodes` bootstrap, lifecycle & root migration |
+| [Backups](guides/backups.md) | Nightly snapshots, encrypted off-host copies, `nerv backup keygen\|status\|decrypt` |

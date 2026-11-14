@@ -4,7 +4,7 @@
   "parent": "F-062",
   "title": "Scheduled consistent snapshots",
   "goal": "Scheduled consistent snapshots",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "SQLite backup API on a schedule; integrity verified; no secrets in logs"
   ],
@@ -37,11 +37,11 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). Implemented 2026-11-14 in about 0.5 h (stated).",
-    "reviewed": "2026-11-13",
+    "estimate": "0 remaining",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). Implemented 2026-11-14 in about 0.5 h (stated). Closed 2026-11-14 after PR #395 merged (CI 43574532457 green).",
+    "reviewed": "2026-11-14",
     "baselineDays": 1,
-    "agentHours": 0.5,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 0.25
   }

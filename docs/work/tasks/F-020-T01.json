@@ -4,7 +4,7 @@
   "parent": "F-020",
   "title": "Persona adapter contract",
   "goal": "Persona adapter contract",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Per-base renamable persona names; persona output never grants capabilities or overrides Pattern Red; can be disabled"
   ],
@@ -32,10 +32,10 @@
   "effort": {
     "size": "small",
     "estimate": "1 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). Closed 2026-11-14 after PR #398 merged (CI 43578020008 green).",
     "reviewed": "2026-11-14",
     "baselineDays": 1,
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 0.25
   },
