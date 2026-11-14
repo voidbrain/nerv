@@ -1,4 +1,7 @@
 import assert from 'node:assert/strict';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
 import { lifecyclePlan, lifecycleRecovery } from '../src/node-lifecycle.ts';

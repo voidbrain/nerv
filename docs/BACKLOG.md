@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 102.75 h agent + 23.25 h owner across 221 open steps of 52 features and 9 other records. 20.5 h of actual effort recorded on 38 steps. Generated from the task files.
+**Remaining effort:** 102.25 h agent + 23.25 h owner across 221 open steps of 52 features and 9 other records. 20.5 h of actual effort recorded on 38 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -48,9 +48,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h | — | [F-005-T22](#f-005-t22) | 🤖 | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | [F-005-T22](#f-005-t22) | — | — | — |
 
-💻 **→** Next: B-064-T01 — Name the missing data home or unsupported platform instead of a raw ENOENT (Planned).
+💻 **→** Next: once the PR's CI is green and merged, verify and close from that run (B-064-T01 implemented).
 
 | | |
 |---|---|
@@ -62,8 +62,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="b-064-t01"></a>B-064-T01 — Name the missing data home or unsupported platform instead of a raw ENOENT | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed |
+| 🟢 Small | <a id="b-064-t01"></a>B-064-T01 — Name the missing data home or unsupported platform instead of a raw ENOENT | 0.5 h | 0 h | 0 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0 h | 0 of 1 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -74,7 +74,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | [PR #400](https://github.com/voidbrain/nerv/pull/400) records it; found in the F-005-T22 VM run, 2026-11-14. |
 | Opened | 2026-11-14 |
-| Verification | Pending. |
+| Verification | 2026-11-14: 7/7 tests in test/node-lifecycle.test.ts pass locally; CI pending. |
 | Reviewed | 2026-11-14 |
 
 </details>

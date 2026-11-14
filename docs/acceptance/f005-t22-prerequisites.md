@@ -26,7 +26,7 @@ ssh nerv-linux 'curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash 
 ssh nerv-linux 'git clone https://github.com/voidbrain/nerv.git && cd nerv && npm ci && npm start -- nodes lifecycle-inspect --action install --out install-plan.json'
 ```
 
-Read the NodeSource script before running it if you prefer (`curl -fsSL https://deb.nodesource.com/setup_24.x | less`). Expected: Node 24.x; `lifecycle-inspect` prints a plan whose prerequisite checks (Node version, executable, non-interactive `systemd --user` session) all pass, or names the one that does not. Nothing is installed until a plan is applied (that is F-005-T26).
+Read the NodeSource script before running it if you prefer (`curl -fsSL https://deb.nodesource.com/setup_24.x | less`). Expected: Node 24.x; `lifecycle-inspect` prints a plan whose prerequisite checks (Node version, executable, non-interactive `systemd --user` session) all pass, or names the one that does not. Nothing is installed until a plan is applied (that is F-005-T26). If `~/.nerv` does not exist yet, `lifecycle-inspect` stops without changing anything and names the missing data home (initialize it first with `nerv setup` or `nerv doctor`).
 
 ## Report
 

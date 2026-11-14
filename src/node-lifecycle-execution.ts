@@ -993,6 +993,13 @@ export function macRegistrationMatches(output: string, c: ServiceContext): boole
   );
 }
 /** The only production adapter: current unprivileged GUI user, current checkout and existing default data home. */
+function requireServiceHome(home: string): void {
+  if (!present(home)) {
+    throw Error(
+      `NERV data home ${home} does not exist yet; nothing was changed. Initialize it first (for example: nerv setup or nerv doctor).`,
+    );
+  }
+}
 export function macServiceHost(home: string): ServiceHost {
   if (process.platform !== 'darwin' || !process.getuid?.())
     throw Error('Durable local lifecycle currently requires an unprivileged macOS GUI user.');
@@ -1005,6 +1012,7 @@ export function macServiceHost(home: string): ServiceHost {
   };
   if (context.home !== join(context.userHome, '.nerv'))
     throw Error('An additional or legacy profile cannot manage this OS service.');
+  requireServiceHome(context.home);
   return macServiceAdapter(context);
 }
 export function macServiceAdapter(context: ServiceContext, run: typeof command = command): ServiceHost {
@@ -1356,6 +1364,7 @@ export function linuxServiceHost(home: string): ServiceHost {
   };
   if (context.home !== join(context.userHome, '.nerv'))
     throw Error('An additional or legacy profile cannot manage this OS service.');
+  requireServiceHome(context.home);
   return linuxServiceAdapter(context);
 }
 
@@ -1560,6 +1569,7 @@ export function windowsServiceHost(home: string): ServiceHost {
   if (context.home !== join(context.userHome, '.nerv')) {
     throw Error('An additional or legacy profile cannot manage this OS service.');
   }
+  requireServiceHome(context.home);
   return windowsServiceAdapter(context);
 }
 

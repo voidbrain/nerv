@@ -105,12 +105,16 @@ export async function nodesCommand(args: string[], runner: CommandRunner = runNo
     throw Error('EEXIST: choose a new output file; nothing was inspected.');
   let result: unknown;
   if (['lifecycle-inspect', 'lifecycle-apply', 'lifecycle-status', 'lifecycle-release'].includes(command)) {
+    if (!['darwin', 'linux', 'win32'].includes(process.platform)) {
+      throw Error('Durable local lifecycle supports macOS, Linux, and Windows only; nothing was changed.');
+    }
+    const home = dataHome();
     const host =
       process.platform === 'win32'
-        ? windowsServiceHost(dataHome())
+        ? windowsServiceHost(home)
         : process.platform === 'linux'
-          ? linuxServiceHost(dataHome())
-          : macServiceHost(dataHome());
+          ? linuxServiceHost(home)
+          : macServiceHost(home);
     if (command === 'lifecycle-inspect')
       result = await planService(
         host,
