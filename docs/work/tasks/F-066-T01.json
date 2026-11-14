@@ -30,14 +30,16 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0 remaining",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). Closed 2026-11-14 after PR #394 merged (CI 43567022613 green).",
+    "estimate": "1 h agent",
+    "basis": "Closed 2026-11-14 after PR #394 passed its complete deterministic CI suite and merged to main.",
     "reviewed": "2026-11-14",
     "baselineDays": 1,
     "agentHours": 0,
     "baselineAgentHours": 1.5,
-    "estimateAgentHours": 0.25,
-    "actualAgentHours": 0.5,
-    "actualSource": "stated"
-  }
+    "actualAgentHours": 0.75,
+    "actualSource": "stated",
+    "estimateAgentHours": 0.25
+  },
+  "prs": [{ "pr": 394, "note": "live credential rotation and age-only diagnostics" }],
+  "review": "Complete deterministic CI passed on Linux validation, Windows and native macOS before merge."
 }

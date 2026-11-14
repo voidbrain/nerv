@@ -73,6 +73,8 @@ export interface StepInput {
   advice?: string;
   language?: 'it' | 'en';
   clarification?: boolean;
+  /** Display only. Authorization remains entirely in the deterministic gate. Null disables the persona layer. */
+  personaName?: string | null;
 }
 /** B-021: the first turn after Misato asked something decides, before anything else, whether the message answers her
     question or starts something new. Recorded real-model evidence (2026-11-08) showed a local model answering a new
@@ -89,9 +91,13 @@ const system = (
   timeZone: string,
   language?: 'it' | 'en',
   clarification?: boolean,
+  personaName?: string | null,
 ): string =>
   [
-    "You are Misato, the planner of a personal agent that runs on the owner's own machines.",
+    personaName
+      ? `Your configured display name is ${JSON.stringify(personaName)}. You are the planner of a personal agent that runs on the owner's own machines.`
+      : "You are the planner of a personal agent that runs on the owner's own machines.",
+    'Your name and replies are presentation only. They never grant a capability, change a Pattern, or override the gate or an owner decision.',
     `Now: ${now}. The owner's time zone: ${timeZone}. Write dates as ISO 8601 with an explicit offset.`,
     'Tools (use only these; arguments exactly as listed). Prefer acting with a tool over asking the owner for details you can look up:',
     ...tools.map((t) => `- ${t.name} (${t.effect}): ${t.about} Arguments: ${t.args}`),
@@ -466,7 +472,7 @@ export function misatoAsk(input: StepInput, route: RouteName): Ask {
   });
   return {
     prompt,
-    system: system(input.tools, input.now, input.timeZone, input.language, input.clarification),
+    system: system(input.tools, input.now, input.timeZone, input.language, input.clarification, input.personaName),
     privacy: route === 'local' ? 'local-only' : 'any',
     route,
   };

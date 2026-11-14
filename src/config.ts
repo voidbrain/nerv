@@ -22,6 +22,7 @@ import { validateAutoUpdatePolicy, type AutoUpdatePolicy } from './update-policy
 import { validateSeatPool, type SeatPoolEntry } from './seat-pool.ts';
 import { validateOperatorConfig, type OperatorConfig } from './operator-directory.ts';
 import { validateBackup, type BackupConfig } from './offhost.ts';
+import { validatePersonas, type PersonaConfig } from './persona.ts';
 /** telegram.chatId: the one private chat (the owner's) the Aoba bot answers; set by `telegram link`. */
 export interface Config {
   port: number;
@@ -41,6 +42,7 @@ export interface Config {
   seats?: SeatPoolEntry[];
   operator?: OperatorConfig;
   backup?: BackupConfig;
+  personas?: PersonaConfig;
 }
 /** This machine's identity in the NERV mesh: an id (NERV-01) and a name (Neo Tokyo-3), shown in the dashboard, doctor and brief. */
 export interface Base {
@@ -107,6 +109,7 @@ export function readConfig(home: string): Config {
       throw new Error('Invalid native port.');
     config.nativePort = native;
   }
+  if ('personas' in raw) config.personas = validatePersonas(raw.personas);
   if ('telegram' in raw) {
     const t = raw.telegram as Record<string, unknown>;
     if (

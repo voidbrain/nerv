@@ -4,6 +4,7 @@ const accounting = new AsyncLocalStorage<{ observation: UsageObservation | null 
 import { connect } from 'node:net';
 import { dispatchRpc, MAX_FRAME_BYTES, READY, RpcFault } from './rpc.ts';
 import { readConfig, readModelKey, readScrolls } from './config.ts';
+import { defaultPersonas, type PersonaConfig } from './persona.ts';
 import { resolvePilotInference, type Stage } from './pilots.ts';
 import { defaultPolicy } from './policy.ts';
 import {
@@ -45,6 +46,7 @@ let models: Models = {};
 let key: string | undefined;
 let timeZone = 'Europe/Rome';
 let language: 'it' | 'en' = 'en';
+let personas: PersonaConfig = defaultPersonas;
 let configError: string | undefined;
 let loaded = false;
 const modelBudget = new ModelBudget();
@@ -58,6 +60,7 @@ function load(): { error?: string; kept?: boolean } {
     modelBudget.configure(models.concurrency);
     timeZone = config.timeZone;
     language = config.language;
+    personas = config.personas ?? defaultPersonas;
     key = nextKey;
     configError = undefined;
     loaded = true;
@@ -202,6 +205,7 @@ process.on('message', (value: unknown) => {
             ...(Array.isArray(params.bases) ? { bases: params.bases as { id: string; name: string }[] } : {}),
             ...(typeof params.advice === 'string' ? { advice: params.advice } : {}),
             ...(params.language === 'it' || params.language === 'en' ? { language: params.language } : {}),
+            personaName: personas.enabled ? personas.names.misato : null,
           },
           route,
         );
