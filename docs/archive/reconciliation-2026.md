@@ -353,7 +353,7 @@ Full audit of 2026-11-13 ([report](../audits/2026-11-13-full.md)). `npm run ci:s
 
 ## 2026-11-14 — main `ed203d4`
 
-PR #400 passed CI (F-062-T03 closed); F-062-T06 (encrypted copies to Tabgha over the Kaji line) implemented in this PR.
+PR #400 passed CI (F-062-T03 closed); F-062-T06 (encrypted copies to Tabgha over the Kaji line) implemented in #401.
 
 - CI read with `npm run ci:status -- 400`: plan, validate, windows, native-macos and full-suite green.
 - Placed first among the 2026-11-14 entries, as CI's single-commit checkout keeps the first of a same-day tie until harness v8.14.0.
