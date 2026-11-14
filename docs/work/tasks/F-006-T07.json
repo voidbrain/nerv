@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-006",
   "id": "F-006-T07",
-  "status": "implemented",
+  "status": "closed",
   "title": "T02b — Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol",
   "goal": "Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol.",
   "capabilities": [

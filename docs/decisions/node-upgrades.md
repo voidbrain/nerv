@@ -50,7 +50,7 @@ Every candidate must be a commit (not a tag object) that **descends from the ins
    - the candidate tree carries the reader entry `src/upgrade-reader.ts`, so there is something to rehearse;
    - the candidate's `package.json` declares a Node range in the plain `>=X.Y.Z` form and the service's own Node meets it. Another form, or none, is refused rather than guessed.
 
-Admission lets the attempt start; it does not vouch for the data. Inside the operation the rehearsal still decides, and it now also refuses a candidate whose reader **moves the schema forward**: after such a migration the installed revision could no longer read the data, and the recovery for that is not built (step 3). So this slice admits upgrades that keep the schema version (`user_version`). That is narrower than "keeps the schema": the Store adds tables and columns without raising the version, and such additive changes pass, by design, because the installed revision still reads them. The refusal looks at the version after the first and second open; a reader that migrated only on a later open, or rebuilt a table without changing the version, would not be caught by it (the row, column and row-id comparison still applies to the first two opens).
+Admission lets the attempt start; it does not vouch for the data. Inside the operation the rehearsal still decides. In the fourth slice (**T06h / F-005-T15**), when the exported candidate tree carries `src/upgrade-contract.ts`, rehearsal evaluates the candidate reader against the candidate's declared `readerSchema` and `minimumServiceSchema` bounds (refusing any candidate that writes a schema beyond its own declared contract or lowers the schema). When a candidate's reader moves `PRAGMA user_version` forward (`forwardOnly: true`) without losing tables, columns, rows, row ids, or sequence counters, `rehearse` verifies that this operation's backup (`~/.nerv-lifecycle/backups/<digest>/database.sqlite`, `manifest.json`, and backed-up home files) is present, private, and matches the rehearsed source digest and schema before `checkout` is allowed.
 
 The candidate commit must already be in the checkout when the plan is made (`git -C CHECKOUT fetch origin FULL-SHA`), because admission reads its tree. The `fetch` step therefore uses the local commit and contacts `origin` only if the commit is missing; it never prompts for credentials. (Before the [T06e review](../reviews/2026-11-12-update-path.md) it always fetched, so a network failure left an unchanged service `uncertain`.)
 
@@ -58,15 +58,26 @@ The started candidate passes the startup fence through the live applying handler
 
 Dependencies are installed with `npm ci --engine-strict --ignore-scripts`: an admitted candidate may change the lockfile, and package install scripts are neither reviewed by the rehearsal nor needed by this project's build. `npm run build` and the started service do run candidate code as the owner, with access to the live data home; the pinned revision is what authorises that.
 
-If `dependencies`, `build` or `start` fails after the checkout moved, the operation stays `uncertain` as for any interrupted update. If the failure came before `start`, the candidate never opened the live data. After `start` it may have: the rehearsal covered what the reader does on open, not everything a running service does. Recovery is manual and explicit, in this order:
+If `dependencies`, `build`, `start`, or post-start `verify` fails after the checkout moved, the operation stays `uncertain` as for any interrupted update. Recovery **never runs automatically**, and the previous revision is **never started on forward-migrated data**:
 
-1. Inspect whether the candidate is registered or running (`launchctl print gui/UID/io.nerv.agent`). If it is, stop it before anything else (`launchctl bootout gui/UID/io.nerv.agent`), and confirm no descendant process remains.
-2. If `dependencies` failed or timed out, `npm ci` may already have removed `node_modules`, and the CLI cannot load without it. Run `npm ci --ignore-scripts` in the checkout as it is (the candidate) first, so the next step can run. Do not run the service from it.
-3. Reconcile and release the operation with that evidence (`nodes lifecycle-release`). Release inspects the service itself and is refused while it is still registered or running, whatever the evidence says.
-4. Check out the previous revision by hand, then `npm ci --ignore-scripts && npm run build`. Both are needed: `npm ci` replaced `node_modules`, and the lifecycle only checks that a build exists, not which revision built it.
-5. Apply a fresh `start` plan.
+- **Same-schema updates (`forwardOnly: false` and live schema unchanged):**
+  1. Inspect whether the candidate is registered or running (`launchctl print gui/UID/io.nerv.agent`). If it is, stop it before anything else (`launchctl bootout gui/UID/io.nerv.agent`), and confirm no descendant process remains.
+  2. If `dependencies` failed or timed out, `npm ci` may already have removed `node_modules`, and the CLI cannot load without it. Run `npm ci --ignore-scripts` in the checkout as it is (the candidate) first, so the next step can run. Do not run the service from it.
+  3. Reconcile and release the operation with that evidence (`nodes lifecycle-release`). Release inspects the service itself and is refused while it is still registered or running, or if the update was `forwardOnly` or changed the live database schema.
+  4. Check out the previous revision by hand, then `npm ci --ignore-scripts && npm run build`. Both are needed: `npm ci` replaced `node_modules`, and the lifecycle only checks that a build exists, not which revision built it.
+  5. Apply a fresh `start` plan.
 
-An `update` plan back to the previous revision is refused as a downgrade by design. If the data was changed in a way the previous revision cannot read, that is a restore from the operation's backup, which stays a separately reviewed step (F-062).
+- **Forward-migrating updates (`forwardOnly: true` or live schema changed, F-005-T15):**
+  1. Inspect and stop the service and all descendants before anything else.
+  2. Never start the previous revision on forward-migrated data; `nodes lifecycle-release` is refused whenever `forwardOnly: true` or the live schema changed, and `nodes lifecycle-inspect --action start` blocks while the schema exceeds the previous revision's `readerSchema` or the operation lock is held.
+  3. If `node_modules` is missing, run `npm ci --ignore-scripts` so the CLI can load; do not start the service.
+  4. Check out the previous revision (`before.revision`) by hand with a clean working tree and run `npm ci --ignore-scripts && npm run build`.
+  5. Run explicit owner-invoked recovery:
+     `nodes lifecycle-recover --receipt FILE --evidence FILE --confirm-backup-restore DIGEST`
+     This verifies that the service and descendants are stopped, the applying handler PID is dead, service ownership (`definition === 'owned'`, `!legacy`) has not drifted, no unresolved worker/outbox effects (`!pending`) exist in the live database, the previous revision is checked out cleanly and built, and the operation backup (`~/.nerv-lifecycle/backups/<digest>/`) matches its `manifest.json` digests and `PRAGMA quick_check === 'ok'` at `before.schema`. It stages the backup files into the data home, atomically replaces `nerv.sqlite` and backed-up config/credential files, removes stale `-wal`/`-shm`/`-journal` sidecars, verifies the restored database, records `restoredBackup` in the released receipt, and releases the lifecycle lock.
+  6. Apply a fresh `start` plan on the restored previous revision and schema.
+
+An `update` plan back to the previous revision is refused as a downgrade by design. General snapshot/archive restore outside an uncertain update's operation backup remains a separately reviewed step (F-062).
 
 Alternatives considered: allow-listing more paths; rejected earlier, a changed reader cannot be judged by its paths. Reading the candidate's contract values from its source; rejected as a marker, the rehearsal shows what the reader does. A full semver range evaluator; rejected for now, one plain form covers this project and anything else fails closed.
 
@@ -85,9 +96,10 @@ Alternatives considered: allow-listing more paths; rejected earlier, a changed r
 ## Remaining T06 work
 
 1. Done (second slice, above): journaled `rehearse` step between `fetch` and `checkout`.
-2. Done (third slice, above) for upgrades that keep the schema: descendant-only, reader entry and engine range; forward migrations are refused until step 3.
-89. Post-start acceptance (T06g / F-005-T14): `verify` queries `/api/doctor` and records `receipt.health` (build commit, base identity, `database.quick_check === 'ok'`, nervous `runtime.doctor`, and brain `runtime.ping`); any failed check leaves the operation `uncertain` with `receipt.recovery` carrying the ordered manual recovery steps. Forward recovery when build or start fails after a forward-only migration remains T06h (F-005-T15).
-4. Independent review, then a real application upgrade on the owner-selected Mac.
+2. Done (third slice, above) for upgrades that keep the schema: descendant-only, reader entry and engine range.
+3. Done (T06g / F-005-T14): post-start acceptance (`verify` queries `/api/doctor` and records `receipt.health`).
+4. Done (T06h / F-005-T15): forward-migration admission with candidate `src/upgrade-contract.ts` bounds, verified operation backup gate before `checkout`, refusal to release or start the previous revision on migrated data, and explicit owner-invoked recovery (`nodes lifecycle-recover --confirm-backup-restore DIGEST`).
+5. One owner-selected target trial on the Mac host (`F-005-T15` owner acceptance).
 
 ## Review
 

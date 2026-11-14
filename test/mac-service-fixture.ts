@@ -20,7 +20,7 @@ import type {
   ServiceObservation,
   ServicePlan,
 } from '../src/node-lifecycle-execution.ts';
-import { rehearseUpgrade, type UpgradeReader } from '../src/upgrade-rehearsal.ts';
+import { rehearseUpgrade, type UpgradeContractBounds, type UpgradeReader } from '../src/upgrade-rehearsal.ts';
 export function serviceFixture(directory = realpathSync(mkdtempSync(join(tmpdir(), 'nerv-service-')))) {
   const context = {
     userHome: directory,
@@ -56,6 +56,7 @@ export function serviceFixture(directory = realpathSync(mkdtempSync(join(tmpdir(
     controls = { clean: true, session: true, pending: false, legacy: false, built: true, compatible: true };
   let beforeCommand: ((step: string, plan: ServicePlan) => Promise<void> | void) | undefined;
   let reader: UpgradeReader = () => {};
+  let readerContract: UpgradeContractBounds | undefined;
   let healthOverride: ((plan: ServicePlan) => Promise<ServiceHealthCheck> | ServiceHealthCheck) | undefined;
   const host: ServiceHost = {
     context,
@@ -74,9 +75,16 @@ export function serviceFixture(directory = realpathSync(mkdtempSync(join(tmpdir(
         if (!(e instanceof Error) || !('code' in e) || e.code !== 'ENOENT') throw e;
       }
       const running = JSON.parse(readFileSync(manager, 'utf8')) as boolean;
+      const db = new DatabaseSync(data, { readOnly: true });
+      let schema: number;
+      try {
+        schema = Number(db.prepare('PRAGMA user_version').get()!.user_version);
+      } finally {
+        db.close();
+      }
       return {
         revision: readFileSync(revision, 'utf8'),
-        schema: 5,
+        schema,
         profile: createHash('sha256')
           .update(readFileSync(join(context.home, 'config.json')))
           .digest('hex'),
@@ -107,7 +115,7 @@ export function serviceFixture(directory = realpathSync(mkdtempSync(join(tmpdir(
       if (step === 'unregister') writeFileSync(manager, JSON.stringify(false));
       if (step === 'checkout') writeFileSync(revision, plan.nextRevision!);
     },
-    rehearse: (_plan, backup) => rehearseUpgrade(backup, reader),
+    rehearse: (_plan, backup) => rehearseUpgrade(backup, reader, readerContract),
     health: async (plan) =>
       healthOverride
         ? healthOverride(plan)
@@ -122,13 +130,32 @@ export function serviceFixture(directory = realpathSync(mkdtempSync(join(tmpdir(
             failures: [],
           },
     backup: async (dest) => {
+      const file = join(dest, 'database.sqlite');
       const db = new DatabaseSync(data);
       try {
-        db.prepare('VACUUM INTO ?').run(join(dest, 'database.sqlite'));
+        db.prepare('VACUUM INTO ?').run(file);
       } finally {
         db.close();
       }
-      chmodSync(join(dest, 'database.sqlite'), 0o600);
+      chmodSync(file, 0o600);
+      const sums: Record<string, string> = {};
+      for (const name of ['config.json', 'token', 'base-key', 'base.pub']) {
+        const src = join(context.home, name);
+        if (existsSync(src)) {
+          const bytes = readFileSync(src);
+          writeFileSync(join(dest, name), bytes, { mode: 0o600, flag: 'wx' });
+          sums[name] = createHash('sha256').update(bytes).digest('hex');
+        }
+      }
+      writeFileSync(
+        join(dest, 'manifest.json'),
+        JSON.stringify({
+          files: sums,
+          database: createHash('sha256').update(readFileSync(file)).digest('hex'),
+          restore: 'separately reviewed; never automatic',
+        }),
+        { mode: 0o600, flag: 'wx' },
+      );
     },
   };
   return {
@@ -142,8 +169,9 @@ export function serviceFixture(directory = realpathSync(mkdtempSync(join(tmpdir(
     setBeforeCommand: (f: typeof beforeCommand) => {
       beforeCommand = f;
     },
-    setReader: (f: UpgradeReader) => {
+    setReader: (f: UpgradeReader, contract?: UpgradeContractBounds) => {
       reader = f;
+      readerContract = contract;
     },
     setHealth: (f: typeof healthOverride) => {
       healthOverride = f;

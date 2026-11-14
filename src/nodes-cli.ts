@@ -29,6 +29,7 @@ import {
   applyService,
   serviceReceipt,
   releaseObservedService,
+  recoverServiceUpdate,
 } from './node-lifecycle-execution.ts';
 import { dataHome, readConfig, readToken } from './config.ts';
 import { rehearseUpgrade } from './upgrade-rehearsal.ts';
@@ -36,7 +37,7 @@ import { bootstrapPlan } from './node-bootstrap.ts';
 import { checkUpdateAvailability } from './update-availability.ts';
 import { activateManagedNodeRuntime, planNodeRuntime, recoverManagedNodeRuntime } from './node-runtime.ts';
 const NODES_HELP =
-  'nodes update-check [--channel main] [--offline] [--out FILE]; nodes lifecycle-inspect --action install|start|stop|update|uninstall [--revision FULL-SHA] [--out FILE]; nodes lifecycle-apply --plan FILE --confirm DIGEST; nodes lifecycle-status --digest DIGEST; nodes lifecycle-release --receipt FILE --evidence FILE (local Mac default profile only); nodes upgrade-rehearse --backup ABS-DIR [--out FILE] (the reader of this checkout on a private copy of a backup; review only, admits no upgrade); nodes lifecycle-plan --input FILE [--out FILE]; nodes lifecycle-recovery-check --receipt FILE --evidence FILE [--out FILE] (review only; no service or journal changes); nodes discover --inventory FILE | --ssh-config FILE | --tailscale FILE | --tailscale-live | --registry FILE --root-key PUBKEY; nodes inspect --local | --ssh HOST [--user USER] [--port PORT] [--out FILE]; nodes plan --inspection FILE --revision FULL-SHA --checkout ABS --home ABS --base ID --name NAME [--service | --additional-profile] [--out FILE]; nodes apply --plan FILE --confirm DIGEST; nodes status --plan FILE; nodes release --plan FILE --confirm DIGEST --confirmed-stopped --reason EVIDENCE';
+  'nodes update-check [--channel main] [--offline] [--out FILE]; nodes lifecycle-inspect --action install|start|stop|update|uninstall [--revision FULL-SHA] [--out FILE]; nodes lifecycle-apply --plan FILE --confirm DIGEST; nodes lifecycle-status --digest DIGEST; nodes lifecycle-release --receipt FILE --evidence FILE (local Mac default profile only); nodes lifecycle-recover --receipt FILE --evidence FILE --confirm-backup-restore DIGEST (explicit restore of verified operation backup for uncertain update); nodes upgrade-rehearse --backup ABS-DIR [--out FILE] (the reader of this checkout on a private copy of a backup; review only, admits no upgrade); nodes lifecycle-plan --input FILE [--out FILE]; nodes lifecycle-recovery-check --receipt FILE --evidence FILE [--out FILE] (review only; no service or journal changes); nodes discover --inventory FILE | --ssh-config FILE | --tailscale FILE | --tailscale-live | --registry FILE --root-key PUBKEY; nodes inspect --local | --ssh HOST [--user USER] [--port PORT] [--out FILE]; nodes plan --inspection FILE --revision FULL-SHA --checkout ABS --home ABS --base ID --name NAME [--service | --additional-profile] [--out FILE]; nodes apply --plan FILE --confirm DIGEST; nodes status --plan FILE; nodes release --plan FILE --confirm DIGEST --confirmed-stopped --reason EVIDENCE';
 function file(path: string): string {
   const fd = openSync(path, 'r');
   try {
@@ -69,6 +70,7 @@ export async function nodesCommand(args: string[], runner: CommandRunner = runNo
     'lifecycle-apply': { values: ['plan', 'confirm', 'out'], switches: [] },
     'lifecycle-status': { values: ['digest', 'out'], switches: [] },
     'lifecycle-release': { values: ['receipt', 'evidence', 'out'], switches: [] },
+    'lifecycle-recover': { values: ['receipt', 'evidence', 'confirm-backup-restore', 'out'], switches: [] },
     'lifecycle-plan': { values: ['input', 'out'], switches: [] },
     'upgrade-rehearse': { values: ['backup', 'out'], switches: [] },
     'lifecycle-recovery-check': { values: ['receipt', 'evidence', 'out'], switches: [] },
@@ -104,7 +106,11 @@ export async function nodesCommand(args: string[], runner: CommandRunner = runNo
   if (values.has('out') && existsSync(values.get('out')!))
     throw Error('EEXIST: choose a new output file; nothing was inspected.');
   let result: unknown;
-  if (['lifecycle-inspect', 'lifecycle-apply', 'lifecycle-status', 'lifecycle-release'].includes(command)) {
+  if (
+    ['lifecycle-inspect', 'lifecycle-apply', 'lifecycle-status', 'lifecycle-release', 'lifecycle-recover'].includes(
+      command,
+    )
+  ) {
     if (!['darwin', 'linux', 'win32'].includes(process.platform)) {
       throw Error('Durable local lifecycle supports macOS, Linux, and Windows only; nothing was changed.');
     }
@@ -124,6 +130,13 @@ export async function nodesCommand(args: string[], runner: CommandRunner = runNo
     else if (command === 'lifecycle-apply')
       result = await applyService(host, parseNodeInput(file(required('plan'))), required('confirm'));
     else if (command === 'lifecycle-status') result = serviceReceipt(host, required('digest'));
+    else if (command === 'lifecycle-recover')
+      result = await recoverServiceUpdate(
+        host,
+        parseNodeInput(file(required('receipt'))),
+        parseNodeInput(file(required('evidence'))),
+        required('confirm-backup-restore'),
+      );
     else
       result = await releaseObservedService(
         host,
@@ -303,7 +316,7 @@ export async function nodesCommand(args: string[], runner: CommandRunner = runNo
       execution:
         command === 'lifecycle-apply'
           ? 'performed-or-cached'
-          : command === 'lifecycle-release'
+          : command === 'lifecycle-release' || command === 'lifecycle-recover'
             ? 'journal-reconciliation'
             : command === 'upgrade-rehearse'
               ? 'rehearsal-only'

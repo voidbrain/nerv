@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 99.25 h agent + 23.5 h owner across 217 open steps of 52 features and 5 other records. 22 h of actual effort recorded on 41 steps. Generated from the task files.
+**Remaining effort:** 98.5 h agent + 24 h owner across 216 open steps of 52 features and 5 other records. 22.75 h of actual effort recorded on 42 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -48,9 +48,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.75 h agent + 5.25 h owner | — | [F-012-T05](#f-012-t05) | 🤖 | 🧑‍🔧 | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 2 h agent + 5.75 h owner | — | [F-012-T05](#f-012-t05) | ⏳ | 🧑‍🔧 | — |
 
-💻 **→** Next: F-005-T15 — T06h — Upgrades that raise the schema version (Planned).
+💻 **→** Next: F-005-T15 — T06h — Upgrades that raise the schema version (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -62,7 +62,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-005-t15"></a>F-005-T15 — T06h — Upgrades that raise the schema version | 0.75 h | 0 h | 0.75 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-005-t15"></a>F-005-T15 — T06h — Upgrades that raise the schema version | 0.75 h | 0.75 h so far (stated) | 0 h agent + 0.5 h owner | Implemented; verification pending | 🤖 |
 | 🟢 Small | <a id="f-005-t22"></a>F-005-T22 — T08e — Demonstration of prerequisites and optional engine management on an owner-selected target | — | 0 h | 0 h agent + 0.5 h owner | Planned | [🧑‍🔧](acceptance/f005-t22-prerequisites.md) |
 | 🟢 Small | <a id="f-005-t24"></a>F-005-T24 — T09c — Acceptance on an owner-selected Windows machine | — | 0 h | 0 h agent + 1 h owner | Planned | [🧑‍🔧](acceptance/f005-t24-tabgha-windows.md) |
 | 🟢 Small | <a id="f-005-t26"></a>F-005-T26 — T10c — Acceptance on an owner-selected mini PC, Pi or equivalent | — | 0 h | 0 h agent + 1 h owner | Planned | [🧑‍🔧](acceptance/f009-service-login-procedure.md#part-2--linux-target-selection-and-acceptance-selected-linux-host-bash) |
@@ -99,7 +99,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-005-t21"></a>F-005-T21 — T08d — Optional start-at-login or on-demand management of selected owned local engines | 1 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
 | — | <a id="f-005-t23"></a>F-005-T23 — T09b — Windows update and recovery: backup, rehearsal and checkout | 1 h | 0.5 h (stated) | 0 h | Completed | 🤖 |
 | — | <a id="f-005-t25"></a>F-005-T25 — T10b — Linux update and recovery | 1 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
-| 🟡 Medium | **Total** | 18.25 h (24 of 37 steps) | 8 h (15 of 37 steps recorded) | 2.75 h agent + 5.25 h owner | 21 of 37 completed | |
+| 🟡 Medium | **Total** | 18.25 h (24 of 37 steps) | 8.75 h (16 of 37 steps recorded) | 2 h agent + 5.75 h owner | 21 of 37 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -124,7 +124,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 3.75 h agent + 2.5 h owner | — | [F-012-T03](#f-012-t03) | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 3.75 h agent + 2.5 h owner | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases (Planned).
 
@@ -140,8 +140,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|
 | 🟢 Small | <a id="f-006-t03"></a>F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases | 0.25 h | 0 h | 0.25 h | Planned | 🤖 |
 | 🟢 Small | <a id="f-006-t05"></a>F-006-T05 — Draft the Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.25 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending | 🤖 |
-| 🟢 Small | <a id="f-006-t07"></a>F-006-T07 — T02b — Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol | 0.75 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | 🤖 |
-| 🟢 Small | <a id="f-006-t08"></a>F-006-T08 — T02c — Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-006-T07](#f-006-t07) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-006-t08"></a>F-006-T08 — T02c — Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route | 0.75 h | 0 h | 0.75 h | Planned | 🤖 |
 | 🟢 Small | <a id="f-006-t09"></a>F-006-T09 — T03b — Evidence adapter binding both configurations, handoffs, budgets and hosts | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-006-T03](#f-006-t03) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-006-t10"></a>F-006-T10 — T03c — Grader tamper protection; stale or mismatched evidence rejected; authority rechecked | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-006-T09](#f-006-t09) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-006-t04"></a>F-006-T04 — Draft the placement campaign plan with exact cases, repeats and budgets | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T08](#f-006-t08), [F-006-T10](#f-006-t10) | ⏳ 🤖 |
@@ -156,7 +155,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-006-t01"></a>F-006-T01 — T01a — Decision: remote inference endpoint identity, permitted data and behaviour when unavailable | 0.5 h | 0.5 h (stated) | 0 h | Completed | 🤖 🤔 |
 | — | <a id="f-006-t02"></a>F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback | 0.5 h | 0.5 h (stated) | 0 h | Completed | 🤖 |
 | — | <a id="f-006-t06"></a>F-006-T06 — T01b — Configuration validation for remote endpoints; the loopback-only local route stays guaranteed; regressions | 0.5 h | 0.5 h (stated) | 0 h | Completed | 🤖 |
-| 🟡 Medium | **Total** | 6.25 h (14 of 18 steps) | 2.5 h (5 of 18 steps recorded) | 3.75 h agent + 2.5 h owner | 3 of 18 completed | |
+| — | <a id="f-006-t07"></a>F-006-T07 — T02b — Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol | 0.75 h | 0.75 h (stated) | 0 h | Completed | 🤖 |
+| 🟡 Medium | **Total** | 6.25 h (14 of 18 steps) | 2.5 h (5 of 18 steps recorded) | 3.75 h agent + 2.5 h owner | 4 of 18 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -319,7 +319,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.75 h agent + 0.5 h owner | [F-006-T07](#f-006-t07), [F-005-T32](#f-005-t32) | [F-090-T02](#f-090-t02) | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.75 h agent + 0.5 h owner | [F-005-T32](#f-005-t32) | [F-090-T02](#f-090-t02) | 🤖 | — | — |
 
 💻 **→** Define durable waiting jobs and implement an authorized browser/editor adapter that rechecks the exact job before resuming once.
 
@@ -335,7 +335,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|
 | 🟢 Small | <a id="f-012-t01"></a>F-012-T01 — Durable resume intent and policy | 0.75 h | 0 h | 0.75 h | Planned | 🤖 |
 | 🟢 Small | <a id="f-012-t02"></a>F-012-T02 — Readiness check and once-only resume engine | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-012-T01](#f-012-t01) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-012-t03"></a>F-012-T03 — Claude Code (VS Code) adapter feasibility and adapter | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-006-T07](#f-006-t07), [F-012-T02](#f-012-t02) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-012-t03"></a>F-012-T03 — Claude Code (VS Code) adapter feasibility and adapter | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-012-T02](#f-012-t02) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-012-t04"></a>F-012-T04 — Web-chat adapter feasibility | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-012-T03](#f-012-t03) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-012-t05"></a>F-012-T05 — Edge cases and real-host acceptance | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-005-T32](#f-005-t32), [F-012-T04](#f-012-t04) | ⏳ 🧑‍🔧 |
 | 🟢 Small | <a id="f-012-t06"></a>F-012-T06 — Record the evidence of F-012-T05 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-012-T05](#f-012-t05) | ⏳ 🤖 |

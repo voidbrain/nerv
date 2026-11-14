@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-005",
   "id": "F-005-T15",
-  "status": "planned",
+  "status": "implemented",
   "title": "T06h — Upgrades that raise the schema version",
   "goal": "Admit candidates whose reader migrates the schema forward, with an explicit recovery to the operation backup",
   "capabilities": [
@@ -35,11 +35,14 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "2.75 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
-    "reviewed": "2026-11-13",
+    "estimate": "0 hours (+ 0.5 h owner)",
+    "basis": "Implemented F-005-T15 forward-migration admission via candidate src/upgrade-contract.ts, verified operation backup gate before checkout, refusal of lifecycle-release and previous-revision startup on forward-migrated data, and explicit owner-invoked recoverServiceUpdate (nodes lifecycle-recover --confirm-backup-restore DIGEST) with independent fresh-context review (docs/reviews/2026-11-14-f005-t15-forward-upgrade-review.md) in 0.75 h agent (stated; PR #419); 0.5 h owner remains for one owner-selected target trial.",
+    "reviewed": "2026-11-14",
     "baselineDays": 3,
-    "agentHours": 0.75,
+    "agentHours": 0,
+    "actualAgentHours": 0.75,
+    "actualSource": "stated",
+    "ownerHours": 0.5,
     "baselineAgentHours": 4.5,
     "estimateAgentHours": 0.75
   }

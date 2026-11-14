@@ -2,6 +2,8 @@ import { createHash, randomBytes, createPrivateKey, createPublicKey } from 'node
 import {
   chmodSync,
   closeSync,
+  constants,
+  copyFileSync,
   existsSync,
   fsyncSync,
   lstatSync,
@@ -10,6 +12,7 @@ import {
   readFileSync,
   readSync,
   realpathSync,
+  renameSync,
   rmSync,
   unlinkSync,
   writeFileSync,
@@ -27,7 +30,14 @@ import { assertRootMigrationReady } from './root-migration.ts';
 import { lifecycleRecovery } from './node-lifecycle.ts';
 import { transaction } from './sqlite-transaction.ts';
 import { UPGRADE_CONTRACT } from './upgrade-contract.ts';
-import { rehearseUpgrade, READER_ENTRY, type RehearsalReport } from './upgrade-rehearsal.ts';
+import {
+  rehearseUpgrade,
+  parseUpgradeContract,
+  READER_ENTRY,
+  CONTRACT_ENTRY,
+  type RehearsalReport,
+  type UpgradeContractBounds,
+} from './upgrade-rehearsal.ts';
 
 export const SERVICE_LIFECYCLE_PROTOCOL = 1;
 export const SERVICE_READER_SCHEMA = UPGRADE_CONTRACT.readerSchema;
@@ -99,6 +109,7 @@ export interface ServiceReceipt {
   rehearsal?: Pick<RehearsalReport, 'source' | 'result' | 'blockers'>;
   health?: ServiceHealthCheck;
   recovery?: string[];
+  restoredBackup?: { digest: string; schema: number; revision: string };
 }
 /** Trusted adapter injection is for tests; no manifest or CLI input can select an adapter or command text. */
 export interface ServiceHost {
@@ -423,20 +434,93 @@ const inspectHint = (p: ServicePlan): string =>
     : p.kind === 'linux-service'
       ? 'Inspect and stop the user service before anything else (systemctl --user status nerv.service; systemctl --user disable --now nerv.service), and confirm no descendant process remains.'
       : `Inspect and stop the service before anything else (launchctl print gui/${p.context.uid}/io.nerv.agent; launchctl bootout gui/${p.context.uid}/io.nerv.agent), and confirm no descendant process remains.`;
-const manualRecoverySteps = (p: ServicePlan): string[] =>
+const manualRecoverySteps = (p: ServicePlan, forwardOnly = false): string[] =>
   p.action === 'update'
-    ? [
-        inspectHint(p),
-        'If dependencies failed or node_modules is missing, run npm ci --ignore-scripts in the checkout as it is so the CLI can load; do not start the service from it.',
-        'Release the held operation with nodes lifecycle-release --receipt FILE --evidence FILE (refused while the service or any descendant remains).',
-        `Check out the previous revision (${p.before.revision}) by hand and run npm ci --ignore-scripts && npm run build.`,
-        'Inspect and apply a fresh start plan (nodes lifecycle-inspect --action start, then nodes lifecycle-apply).',
-      ]
+    ? forwardOnly
+      ? [
+          inspectHint(p),
+          'Never start the previous revision on forward-migrated data; recovery never runs automatically.',
+          'If dependencies failed or node_modules is missing, run npm ci --ignore-scripts in the checkout as it is so the CLI can load; do not start the service from it.',
+          `Check out the previous revision (${p.before.revision}) by hand and run npm ci --ignore-scripts && npm run build (do not start the service yet).`,
+          `Restore the verified operation backup and release the held operation with nodes lifecycle-recover --receipt FILE --evidence FILE --confirm-backup-restore ${p.digest} (refused while the service or any descendant remains).`,
+          'Inspect and apply a fresh start plan (nodes lifecycle-inspect --action start, then nodes lifecycle-apply).',
+        ]
+      : [
+          inspectHint(p),
+          'If dependencies failed or node_modules is missing, run npm ci --ignore-scripts in the checkout as it is so the CLI can load; do not start the service from it.',
+          'Release the held operation with nodes lifecycle-release --receipt FILE --evidence FILE (refused while the service or any descendant remains).',
+          `Check out the previous revision (${p.before.revision}) by hand and run npm ci --ignore-scripts && npm run build.`,
+          'Inspect and apply a fresh start plan (nodes lifecycle-inspect --action start, then nodes lifecycle-apply).',
+        ]
     : [
         inspectHint(p),
         'Release the held operation with nodes lifecycle-release --receipt FILE --evidence FILE (refused while the service or any descendant remains).',
         'Inspect and apply a fresh plan after resolving the reported failure.',
       ];
+
+const BACKUP_EXTRA_FILES = [
+  'config.json',
+  'token',
+  'base-key',
+  'base.pub',
+  ROOT_KEY_FILE,
+  'anthropic-key',
+  'telegram-token',
+] as const;
+
+function verifyUpdateBackup(
+  c: ServiceContext,
+  digest: string,
+  expectedSchema: number,
+  expectedDigest?: string,
+): { dir: string; databaseFile: string; databaseDigest: string; files: Record<string, string> } {
+  const dir = join(area(c), 'backups', digest),
+    manifestPath = join(dir, 'manifest.json'),
+    databaseFile = join(dir, 'database.sqlite');
+  if (!present(dir) || !present(manifestPath) || !present(databaseFile))
+    throw Error('Operation backup for forward-migration recovery is missing.');
+  safe(dir, c.uid, true);
+  safe(manifestPath, c.uid, true);
+  safe(databaseFile, c.uid, true);
+  let manifest: { files?: unknown; database?: unknown; restore?: unknown };
+  try {
+    manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as {
+      files?: unknown;
+      database?: unknown;
+      restore?: unknown;
+    };
+  } catch {
+    throw Error('Operation backup manifest could not be parsed.');
+  }
+  const databaseDigest = fileHash(databaseFile);
+  if (
+    typeof manifest.database !== 'string' ||
+    manifest.database !== databaseDigest ||
+    (expectedDigest !== undefined && databaseDigest !== expectedDigest) ||
+    !object(manifest.files)
+  )
+    throw Error('Operation backup database does not match its verified manifest.');
+  const files: Record<string, string> = {};
+  for (const [name, expectedHash] of Object.entries(manifest.files)) {
+    if (!BACKUP_EXTRA_FILES.includes(name as (typeof BACKUP_EXTRA_FILES)[number]) || typeof expectedHash !== 'string')
+      throw Error('Operation backup manifest contains an invalid file entry.');
+    const filePath = join(dir, name);
+    if (!present(filePath)) throw Error(`Operation backup file ${name} is missing.`);
+    safe(filePath, c.uid, name !== 'base.pub');
+    if (fileHash(filePath) !== expectedHash) throw Error(`Operation backup file ${name} differs from its manifest.`);
+    files[name] = expectedHash;
+  }
+  const check = new DatabaseSync(databaseFile, { readOnly: true });
+  try {
+    const schema = Number(check.prepare('PRAGMA user_version').get()!.user_version);
+    const quick = check.prepare('PRAGMA quick_check').get() as { quick_check?: string } | undefined;
+    if (quick?.quick_check !== 'ok' || schema !== expectedSchema)
+      throw Error('Operation backup database failed integrity or schema verification.');
+  } finally {
+    check.close();
+  }
+  return { dir, databaseFile, databaseDigest, files };
+}
 export async function applyService(
   host: ServiceHost,
   raw: unknown,
@@ -607,20 +691,21 @@ export async function applyService(
       let refused = false;
       await step('rehearse', async () => {
         await settled(p.before.revision);
-        const report = await host.rehearse(p, join(area(host.context), 'backups', p.digest));
+        const backupDir = join(area(host.context), 'backups', p.digest);
+        const report = await host.rehearse(p, backupDir);
         await settled(p.before.revision);
-        // A reader that moves the schema forward cannot be undone by checking out the old revision; that recovery is
-        // not built yet, so such an upgrade ends here.
-        const blockers = report.result?.forwardOnly
-          ? [
-              ...report.blockers,
-              'The candidate migrates the data from schema ' +
-                report.source.schema +
-                ' to ' +
-                report.result.schema +
-                '; forward migrations are not admitted until their recovery exists.',
-            ]
-          : report.blockers;
+        const blockers = [...report.blockers];
+        if (!blockers.length && report.result?.forwardOnly) {
+          try {
+            verifyUpdateBackup(host.context, p.digest, p.before.schema, report.source.digest);
+          } catch (error) {
+            blockers.push(
+              'Forward migration requires a verified operation backup for explicit recovery (' +
+                (error instanceof Error ? error.message : 'backup verification failed') +
+                ').',
+            );
+          }
+        }
         receipt!.rehearsal = { source: report.source, ...(report.result ? { result: report.result } : {}), blockers };
         refused = blockers.length > 0;
       });
@@ -639,6 +724,8 @@ export async function applyService(
     if (['install', 'start', 'update'].includes(p.action))
       await step('start', async () => {
         const current = await inspectOwned(false);
+        const expectedSchema =
+          p.action === 'update' ? (receipt!.rehearsal?.result?.schema ?? p.before.schema) : p.before.schema;
         if (
           current.runtime !== 'stopped' ||
           current.pids.length ||
@@ -653,7 +740,8 @@ export async function applyService(
             next.registration === 'owned' &&
             next.runtime === 'owned' &&
             next.profile === p.before.profile &&
-            next.revision === (p.nextRevision ?? p.before.revision)
+            next.revision === (p.nextRevision ?? p.before.revision) &&
+            next.schema === expectedSchema
           );
         });
       });
@@ -696,7 +784,8 @@ export async function applyService(
         transaction(db, () => {
           owns();
           receipt!.state = 'uncertain';
-          if (['install', 'start', 'update'].includes(p.action)) receipt!.recovery = manualRecoverySteps(p);
+          if (['install', 'start', 'update'].includes(p.action))
+            receipt!.recovery = manualRecoverySteps(p, receipt!.rehearsal?.result?.forwardOnly === true);
           save();
         });
       } catch {}
@@ -737,6 +826,46 @@ export function releaseService(host: ServiceHost, snapshot: unknown, evidence: u
       const r = writable.prepare('SELECT * FROM resource WHERE id=1').get();
       if (r?.digest !== old.digest || r.fence !== old.fence || r.nonce !== old.nonce || r.pid !== old.pid)
         throw Error('Lifecycle resource changed.');
+      const planRow = writable.prepare('SELECT plan FROM operations WHERE digest=?').get(old.digest) as
+        { plan: string } | undefined;
+      if (planRow) {
+        const storedPlan = JSON.parse(planRow.plan) as ServicePlan;
+        if (storedPlan.action === 'update') {
+          if (old.rehearsal?.result?.forwardOnly)
+            throw Error(
+              'Candidate update migrates the database schema forward; never release without restoring the operation backup — use nodes lifecycle-recover.',
+            );
+          const liveDbPath = databasePath(host.context.home);
+          if (!present(liveDbPath))
+            throw Error(
+              'Live database is missing after an uncertain update; use nodes lifecycle-recover to restore the operation backup.',
+            );
+          safe(liveDbPath, host.context.uid);
+          const liveDb = new DatabaseSync(liveDbPath, { readOnly: true });
+          let liveSchema: number;
+          try {
+            liveSchema = Number(liveDb.prepare('PRAGMA user_version').get()!.user_version);
+          } finally {
+            liveDb.close();
+          }
+          if (liveSchema > storedPlan.before.schema)
+            throw Error(
+              'Live database was migrated forward from schema ' +
+                storedPlan.before.schema +
+                ' to ' +
+                liveSchema +
+                '; never start the previous revision on migrated data — use nodes lifecycle-recover to restore the operation backup.',
+            );
+          if (liveSchema !== storedPlan.before.schema)
+            throw Error(
+              'Live database schema changed during uncertain update (' +
+                storedPlan.before.schema +
+                ' -> ' +
+                liveSchema +
+                '); use nodes lifecycle-recover to restore the operation backup.',
+            );
+        }
+      }
       const released = { ...old, state: 'released' as const };
       writable.prepare('UPDATE operations SET receipt=? WHERE digest=?').run(JSON.stringify(released), old.digest);
       writable
@@ -759,6 +888,164 @@ export async function releaseObservedService(
   if (current.registration !== 'absent' || current.runtime !== 'stopped' || current.pids.length)
     throw Error('The service is still registered or running; stop it and its descendants before releasing.');
   return releaseService(host, snapshot, evidence);
+}
+function restoreVerifiedUpdateBackup(
+  c: ServiceContext,
+  digest: string,
+  expectedSchema: number,
+  expectedDigest?: string,
+): { digest: string; schema: number } {
+  safe(c.home, c.uid, true);
+  const verified = verifyUpdateBackup(c, digest, expectedSchema, expectedDigest);
+  const liveDbPath = databasePath(c.home);
+  const tag = randomBytes(8).toString('hex');
+  const candidateDb = join(c.home, '.restore-db-' + tag + '.sqlite');
+  const stagedFiles: { staged: string; dest: string }[] = [];
+  try {
+    copyFileSync(verified.databaseFile, candidateDb, constants.COPYFILE_EXCL);
+    chmodSync(candidateDb, 0o600);
+    const fd = openSync(candidateDb, 'r+');
+    try {
+      fsyncSync(fd);
+    } finally {
+      closeSync(fd);
+    }
+    if (fileHash(candidateDb) !== verified.databaseDigest)
+      throw Error('Operation backup changed while staging restore.');
+    for (const [name, expectedHash] of Object.entries(verified.files)) {
+      const src = join(verified.dir, name);
+      const dest = join(c.home, name);
+      const staged = join(c.home, '.restore-' + name + '-' + tag);
+      stagedFiles.push({ staged, dest });
+      copyFileSync(src, staged, constants.COPYFILE_EXCL);
+      chmodSync(staged, name === 'base.pub' ? 0o644 : 0o600);
+      const fileFd = openSync(staged, 'r+');
+      try {
+        fsyncSync(fileFd);
+      } finally {
+        closeSync(fileFd);
+      }
+      if (fileHash(staged) !== expectedHash)
+        throw Error(`Operation backup file ${name} changed while staging restore.`);
+    }
+    renameSync(candidateDb, liveDbPath);
+    for (const suffix of ['-wal', '-shm', '-journal']) {
+      const sidecar = liveDbPath + suffix;
+      if (present(sidecar)) unlinkSync(sidecar);
+    }
+    for (const { staged, dest } of stagedFiles) {
+      renameSync(staged, dest);
+    }
+    syncDirectory(c.home);
+  } finally {
+    if (present(candidateDb)) rmSync(candidateDb, { force: true });
+    for (const { staged } of stagedFiles) {
+      if (present(staged)) rmSync(staged, { force: true });
+    }
+  }
+  const check = new DatabaseSync(liveDbPath, { readOnly: true });
+  try {
+    const schema = Number(check.prepare('PRAGMA user_version').get()!.user_version);
+    const quick = check.prepare('PRAGMA quick_check').get() as { quick_check?: string } | undefined;
+    if (quick?.quick_check !== 'ok' || schema !== expectedSchema || fileHash(liveDbPath) !== verified.databaseDigest)
+      throw Error('Restored live database failed post-restore verification.');
+    return { digest: verified.databaseDigest, schema };
+  } finally {
+    check.close();
+  }
+}
+/**
+ * Explicit owner-invoked recovery for an uncertain update (F-005-T15). Never runs automatically: requires stopped
+ * service/descendants, dead applying handler, clean checkout at the previous revision, and explicit confirmation of
+ * the operation digest to restore the verified operation backup before releasing the lifecycle claim.
+ */
+export async function recoverServiceUpdate(
+  host: ServiceHost,
+  snapshot: unknown,
+  evidence: unknown,
+  confirmBackupRestore: string,
+): Promise<ServiceReceipt> {
+  const decision = lifecycleRecovery(snapshot, evidence);
+  if (decision.action === 'retain') throw Error('Explicit stopped-handler/descendant evidence is required.');
+  if (confirmBackupRestore !== decision.snapshot.digest)
+    throw Error('Confirm the exact operation digest to restore its backup.');
+  const current = await host.inspect();
+  if (current.registration !== 'absent' || current.runtime !== 'stopped' || current.pids.length)
+    throw Error('The service is still registered or running; stop it and its descendants before recovering.');
+  if (current.definition !== 'owned' || current.legacy)
+    throw Error('Service definition or legacy ownership changed; reconcile ownership before restoring the backup.');
+  if (current.pending)
+    throw Error(
+      'Unresolved worker jobs or outbox effects exist in the live database; reconcile them before restoring the backup.',
+    );
+  if (!current.built) throw Error('Build the previous revision before restoring the operation backup.');
+  const db = journal(host.context);
+  if (!db) throw Error('No lifecycle receipt.');
+  db.close();
+  const writable = journal(host.context, true)!;
+  try {
+    return transaction(writable, () => {
+      const old = stored(writable, decision.snapshot.digest);
+      if (!old) throw Error('No lifecycle receipt.');
+      if (decision.action === 'return-receipt') {
+        if (!old.restoredBackup) throw Error('Stored receipt was not recovered from an operation backup.');
+        return old;
+      }
+      if (
+        canonical({
+          digest: old.digest,
+          resource: old.resource,
+          fence: old.fence,
+          nonce: old.nonce,
+          state: old.state,
+        }) !== canonical(decision.snapshot)
+      )
+        throw Error('Lifecycle receipt changed.');
+      try {
+        process.kill(old.pid, 0);
+        throw Error('Lifecycle handler remains live.');
+      } catch (e) {
+        if (!(e instanceof Error) || !('code' in e) || e.code !== 'ESRCH')
+          throw Error('Lifecycle handler must be confirmed stopped.');
+      }
+      const r = writable.prepare('SELECT * FROM resource WHERE id=1').get();
+      if (r?.digest !== old.digest || r.fence !== old.fence || r.nonce !== old.nonce || r.pid !== old.pid)
+        throw Error('Lifecycle resource changed.');
+      const planRow = writable.prepare('SELECT plan FROM operations WHERE digest=?').get(old.digest) as
+        { plan: string } | undefined;
+      if (!planRow) throw Error('Stored update plan is missing.');
+      const storedPlan = planOf(JSON.parse(planRow.plan), host);
+      if (storedPlan.action !== 'update')
+        throw Error('Backup restore recovery applies only to uncertain update operations.');
+      if (!current.clean || current.revision !== storedPlan.before.revision)
+        throw Error(
+          `Check out the previous revision (${storedPlan.before.revision}) with a clean working tree before restoring the operation backup.`,
+        );
+      const restored = restoreVerifiedUpdateBackup(
+        host.context,
+        old.digest,
+        storedPlan.before.schema,
+        old.rehearsal?.source.digest,
+      );
+      const released: ServiceReceipt = {
+        ...old,
+        state: 'released',
+        restoredBackup: {
+          digest: restored.digest,
+          schema: restored.schema,
+          revision: storedPlan.before.revision,
+        },
+      };
+      writable.prepare('UPDATE operations SET receipt=? WHERE digest=?').run(JSON.stringify(released), old.digest);
+      writable
+        .prepare('INSERT INTO releases(digest,reason,created) VALUES(?,?,?)')
+        .run(old.digest, decision.reason!, new Date().toISOString());
+      writable.prepare('DELETE FROM resource WHERE id=1 AND fence=? AND nonce=?').run(old.fence, old.nonce);
+      return released;
+    });
+  } finally {
+    writable.close();
+  }
 }
 async function waitFor(check: () => Promise<boolean>): Promise<void> {
   for (let i = 0; i < 80; i++) {
@@ -1267,12 +1554,24 @@ export function macServiceAdapter(context: ServiceContext, run: typeof command =
           (await run('tar', ['-xf', archive, '-C', tree], undefined, 120000)).status !== 0
         )
           throw Error('The pinned revision could not be exported for rehearsal.');
-        return await rehearseUpgrade(backup, async (database, home) => {
-          const r = await run(context.node, [...NODE_FLAGS, join(tree, READER_ENTRY), database, home], tree, 120000, {
-            NERV_HOME: home,
-          });
-          if (r.status !== 0) throw Error('The candidate reader exited with a failure.');
-        });
+        let candidateContract: UpgradeContractBounds = UPGRADE_CONTRACT;
+        const contractPath = join(tree, CONTRACT_ENTRY);
+        if (present(contractPath)) {
+          safe(contractPath, context.uid);
+          const parsed = parseUpgradeContract(readFileSync(contractPath, 'utf8'));
+          if (!parsed) throw Error('The candidate upgrade contract could not be parsed.');
+          candidateContract = parsed;
+        }
+        return await rehearseUpgrade(
+          backup,
+          async (database, home) => {
+            const r = await run(context.node, [...NODE_FLAGS, join(tree, READER_ENTRY), database, home], tree, 120000, {
+              NERV_HOME: home,
+            });
+            if (r.status !== 0) throw Error('The candidate reader exited with a failure.');
+          },
+          candidateContract,
+        );
       } finally {
         rmSync(tree, { recursive: true, force: true });
         rmSync(archive, { force: true });
