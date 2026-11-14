@@ -4,7 +4,7 @@
   "parent": "F-066",
   "title": "Client kind on ledger events",
   "goal": "Client kind on ledger events",
-  "status": "planned",
+  "status": "ready",
   "acceptance": [
     "Events record dashboard session, CLI, API token or Telegram; a test distinguishes API-token from dashboard decisions"
   ],
@@ -12,10 +12,13 @@
     "F-066-T01"
   ],
   "resources": [
-    "src/**",
-    "test/**",
-    "docs/**",
-    "generated:backlog-views"
+    "src/server.ts",
+    "src/runtime.ts",
+    "test/decision-client.test.ts",
+    "docs/work/records/F-066.md",
+    "docs/work/tasks/F-066-T02.json",
+    "generated:backlog-views",
+    "evals/gauntlet/**"
   ],
   "capabilities": [
     "bounded-edit",

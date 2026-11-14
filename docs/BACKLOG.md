@@ -1861,7 +1861,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
 | 🟢 Small | <a id="f-066-t01"></a>F-066-T01 — Credential rotation commands and doctor ages | 0.25 h | 0 h | 0.25 h | Implemented; verification pending |
-| 🟢 Small | <a id="f-066-t02"></a>F-066-T02 — Client kind on ledger events | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-066-T01](#f-066-t01) |
+| 🟢 Small | <a id="f-066-t02"></a>F-066-T02 — Client kind on ledger events | 0.25 h | 0 h | 0.25 h | Ready · waits on [F-066-T01](#f-066-t01) |
 | 🟢 Small | **Total** | 0.5 h | 0 h (0 of 2 steps recorded) | 0.5 h | 0 of 2 completed |
 
 <details>
