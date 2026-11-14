@@ -2083,7 +2083,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | Depends on | — |
-| PR / evidence | Steps: F-020-T01: [PR #398](https://github.com/voidbrain/nerv/pull/398) grounded, presentation-only persona adapter contract; step review: Local full suite, typecheck and fast checks passed; required CI pending.. [PR #219](https://github.com/voidbrain/nerv/pull/219) retired-reference path correction; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [retired dashboard1 personas prototype](../remove/docs/NERV/dashboard1.html) |
+| PR / evidence | Steps: F-020-T01: [PR #398](https://github.com/voidbrain/nerv/pull/398) grounded, presentation-only persona adapter contract; step review: Local full suite, typecheck and fast checks passed; all seven deterministic Gauntlet system flows were refreshed after the source change; required CI pending.. [PR #219](https://github.com/voidbrain/nerv/pull/219) retired-reference path correction; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [retired dashboard1 personas prototype](../remove/docs/NERV/dashboard1.html) |
 | Opened | 2026-11-02 |
 | Verification | Pending |
 | Reviewed | 2026-11-08 |

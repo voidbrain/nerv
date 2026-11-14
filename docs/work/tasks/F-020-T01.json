@@ -39,5 +39,5 @@
     "estimateAgentHours": 0.25
   },
   "prs": [{ "pr": 398, "note": "grounded, presentation-only persona adapter contract" }],
-  "review": "Local full suite, typecheck and fast checks passed; required CI pending."
+  "review": "Local full suite, typecheck and fast checks passed; all seven deterministic Gauntlet system flows were refreshed after the source change; required CI pending."
 }
