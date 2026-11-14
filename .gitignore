@@ -18,3 +18,6 @@ coverage/
 
 # Neutral evaluation run artifacts (selected evidence is reviewed before committing)
 artifacts/evaluations/
+
+# The complete test report the quiet reporter pairs with (tools/quiet-reporter.mjs).
+.test-report.txt

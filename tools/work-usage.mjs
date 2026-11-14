@@ -741,20 +741,18 @@ function recordAllowance(allowances, jobs, job, snapshot) {
     return { imported: false, event: key, provider: snapshot.provider, buckets: snapshot.buckets.length, statusLine };
   }
 }
+// B-021: a child stopped by a signal has signalCode set and exitCode null; both mean it has exited. SIGKILL cannot be
+// caught, so after it the exit itself is awaited (bounded, so a stuck kernel never hangs the caller).
+const exited = (child) => child.exitCode !== null || child.signalCode !== null;
 async function stopChild(child, graceMs) {
-  if (!child || child.exitCode !== null) return;
+  if (!child || exited(child)) return;
+  const exit = new Promise((resolve) => child.once('exit', resolve));
   child.stdin.end();
   child.kill('SIGTERM');
-  await Promise.race([
-    new Promise((resolve) => child.once('exit', resolve)),
-    new Promise((resolve) => setTimeout(resolve, graceMs)),
-  ]);
-  if (child.exitCode === null) {
+  await Promise.race([exit, new Promise((resolve) => setTimeout(resolve, graceMs))]);
+  if (!exited(child)) {
     child.kill('SIGKILL');
-    await Promise.race([
-      new Promise((resolve) => child.once('exit', resolve)),
-      new Promise((resolve) => setTimeout(resolve, graceMs)),
-    ]);
+    await Promise.race([exit, new Promise((resolve) => setTimeout(resolve, Math.max(graceMs, 5000)))]);
   }
 }
 export async function collectCodexRateLimits(args = process.argv.slice(2), cwd = process.cwd(), settings = {}) {

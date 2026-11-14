@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "node --use-system-ca src/cli.ts",
-    "test": "node --test --test-timeout=60000 test/*.test.ts test/*.test.mjs",
+    "test": "node --test --test-reporter=./tools/quiet-reporter.mjs --test-reporter-destination=stdout --test-reporter=spec --test-reporter-destination=.test-report.txt --test-timeout=60000 test/*.test.ts test/*.test.mjs",
     "typecheck": "tsc --noEmit",
     "build": "ng build",
     "dev": "ng serve --proxy-config proxy.conf.json",
@@ -20,6 +20,8 @@
     "check:integrations": "node tools/mcp.mjs check",
     "check:conventions": "node tools/check-conventions.mjs",
     "ci:status": "node tools/ci-status.mjs",
+    "reconcile:draft": "node tools/reconcile-draft.mjs",
+    "code:map": "node tools/code-map.mjs",
     "test:headless": "node --test --test-timeout=120000 test/*.integration.ts",
     "backlog:recap": "node tools/backlog-recap.mjs",
     "check:recap": "node tools/backlog-recap.mjs --check",
@@ -42,6 +44,7 @@
     "work:build": "node tools/work-items.mjs build",
     "check:work": "node tools/work-items.mjs check",
     "work:tasks": "node tools/work-items.mjs tasks",
+    "work:next": "node tools/work-items.mjs next",
     "work:claims": "node tools/task-claims.mjs",
     "gauntlet:plan": "node tools/gauntlet.mjs plan",
     "gauntlet:run": "node tools/gauntlet.mjs run",
@@ -65,7 +68,9 @@
     "check:fast": "npm run format:check && npm run lint && npm run typecheck && npm run check:work && npm run check:backlog && npm run check:recap && npm run check:roadmap && npm run check:dependencies && npm run check:queue && npm run check:rules && npm run check:maintenance",
     "worktree:link": "ln -sfn ../NERV/node_modules node_modules",
     "work:usage": "node tools/work-usage.mjs",
-    "work:launch": "node tools/usage-launch.mjs"
+    "work:launch": "node tools/usage-launch.mjs",
+    "rule-load": "node tools/rule-load.mjs",
+    "check:rule-load": "node tools/rule-load.mjs --check"
   },
   "dependencies": {
     "@angular/common": "22.2.4",

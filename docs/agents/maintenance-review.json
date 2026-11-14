@@ -1,31 +1,45 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-13T22:39:32.556Z",
-  "policy": "49a0af6008ba96a27c0212dec04e355f83707eb97196121ca33a96f8f3ccc037",
+  "reviewed": "2026-11-14T13:24:52.014Z",
+  "policy": "7d15ab5f3e1a37d15075876ce3efd53d93600045088f48b41a3ef0dd6ab89e7d",
   "inputs": {
-    "AGENTS.md": "b52b056f97cf118b6bbc5b1bd8f54629ec0cdb0a722640b9e524d1370e105a9e",
-    "docs/BACKLOG-RULES.md": "b62a494efaef03eb6860b35b2e1beb400bb87aa2104fa1dec7aa1866f44d68a3",
+    "AGENTS.md": "80becf559efb5caad019beb9d52f4617d9df882d7e0bd98a1b92475b16635bf5",
+    "docs/BACKLOG-RULES.md": "15425b47072204bdf62d272334819f4b04658779672125f90cce1264afdfd8c6",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
     "docs/agents/areas.md": "19890dcd2fb04557fcb9b9bb1df4dcbd2e584736e53a5989908bb822ef020d1c",
-    "docs/agents/audit.md": "bc5de5707f9ec5c523e73602499312c373d6112ffc498d69bf68604522527992",
+    "docs/agents/audit.md": "e58480c21e8afe9a825df4726fa93b8a7f841557f4267f1fc2c61ac3dac8f642",
     "docs/agents/change-impact.md": "dc1c473e274f76bd70a87ff57bbc53fc75dc75a35d121cf67baf163a2fd2e975",
     "docs/agents/coverage-guide.md": "3d539eb8beedfa101a5e47d9973cdf85dce197436fab2ab096f760e12d208106",
-    "docs/agents/maintenance.md": "5219a64e6e85ced3fa9d437fc0adb2674bfa2d566d86fe95cca1ef321d3b8b27",
-    "docs/agents/mcp.md": "d813daeb38628e3f0613131ccb4e09fa1b98f82a1ad5cc647e9b27c26821a524",
-    "docs/agents/parallel-work.md": "30c647889e206abbd97d36d7b8fe3a86bf1ffd1ffd4d737ad951650a8f18c1db",
-    "docs/agents/procedures.md": "649de48ddc9e3ae627d0752f44f4a8d2cf25b837dc32350a597f6d4bf80e514f",
+    "docs/agents/maintenance.md": "cf1fe2a1c06500c33096542f2385dfce1087bcc4c383d32e06ac907b816cf72e",
+    "docs/agents/mcp.md": "06efbb58a50f9236506ca0afa9a79bb1d42c12ca380a29ed0254bf0a537f860d",
+    "docs/agents/parallel-work-plans.md": "d171d89ec5431668ff770e5fcb0098ad518da6289a0d12a56aafdae60930d567",
+    "docs/agents/parallel-work.md": "28608637b73e16f1e1664af8a16047849eea464a14cdaada4d54d7a4094d83ef",
+    "docs/agents/procedures.md": "d53486efdf0fdb64f4285941b8701e3bec5722671208e17e502b59bfeafc3b17",
+    "docs/agents/prompt-caching.md": "3b8962bd4f2f713d5730e999e65338ebdd90347ee09dffbd9c8da98e2405a21e",
+    "docs/agents/rule-review.md": "dfdf327bff669622fdf0f0e01f9d4b7dd29be87b4b6dbfea98e60b582d8f413f",
     "docs/agents/skills.md": "5d60223eccfaad88c7153f57316da5ca10bfdd9d58d3a8cebc1eef25b9f0d5f5",
-    "docs/agents/solution-profile.md": "857fc0e5f5c36d1d139d2507f1f97460edfdcde4d5cd5d590a922d88c4459862",
-    "docs/agents/task-context.md": "c38395d5989a3fd7cfbf319bce53b24c17a1740822398f4376ecc2c3e95d531f",
-    "docs/agents/work-usage.md": "e2f7c484f1c07f4b47fd1133857d8744ccab0ad2a7b85b220946c115a002bebc",
+    "docs/agents/solution-profile.md": "685d55612f55d157bf124e23115f95bd16fe4d4f8834a4e0e152a191e3cd45f8",
+    "docs/agents/task-context.md": "c689f02b9571ff747a4866d71690bb01afd7e6654dea640a1ce1c66e7c0fa204",
+    "docs/agents/work-usage.md": "c79d6864f53100c691e30e411c203c00b20bf5bd7bc55bbcee5687e859edb543",
+    "docs/backlog/closure.md": "21fcc14351588107943d9aab70991399e07af7026d48327619f215e62ecb3319",
+    "docs/backlog/documentation.md": "6328e3eccb3a222af1a9f4682dcef9e763464d0842cf94b28713bbc5f61e04b1",
+    "docs/backlog/estimates.md": "d5fb7d63a0b934836d3db4dfedbe93260cffd26469d5b4fe0eb5bd8e3f875bfc",
+    "docs/backlog/evaluations.md": "7540bf69b6b5d40dc09dc9ce82138218525733c5f602945bdaa58d5c3a743f37",
+    "docs/backlog/feature-plans.md": "c0c57eed2ba36a7e969512f1455b2af8bfff27c7ff60e1c171ba6e2ba2ee5dcf",
+    "docs/backlog/ordering.md": "f36fe3410fe4d838877fe35c61c491608116b0255b864906f91eea23915d81dd",
+    "docs/backlog/outcomes.md": "c6f1d8e4ac3afd85e6d90ac7cef8ae39fba765b13c821522fb005edd2b5b88e4",
+    "docs/backlog/ownership.md": "d2d39a4e2a56fb7a18c5cce2fe5490282a9c89c947574746bacd71f1040c457f",
+    "docs/backlog/records.md": "55ed78706d82419d64d33a82fe55f1179fd65fc35825fd081f3ac2e24079d058",
+    "docs/backlog/review.md": "1f012728ea66807eebef0686cbe315afaefb598b1b8aed16e72a9f75d7e9972b",
+    "docs/backlog/steps.md": "c9b771c2c4e70da766dd4706cf9aa7722c116e1a9499cec3f0ef4b25b853a2b5",
     "tools/task-claims.mjs": "ef755fe7951544e5c05b20de7c64a7b53778b6d039a11a2abeb079e7d42b6fd2",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
-    "tools/work-items.mjs": "ce7fa2b1e08b916d4ddc1169e419a4cafa849df2d55047fb819efc980faf99df",
-    "tools/work-usage.mjs": "4329262c0b9e723e046dd8878e15a99cff5f590201cd0918563f3204bbe79219"
+    "tools/work-items.mjs": "4c343b171323754dca54f4d44c626e5e2d6f21d742cecd49a2ac7f144007c396",
+    "tools/work-usage.mjs": "828c8e64e20623a6dac5969bb46cb77f4f51972cfc142dad63d2f58f61b57e59"
   },
   "measurements": {
-    "samples": 1,
-    "latestAt": "2026-11-13T22:39:32.520Z",
+    "samples": 19,
+    "latestAt": "2026-11-12T21:26:32.719Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -51,26 +65,26 @@
         }
       },
       "reconciliation": {
-        "samples": 1,
+        "samples": 19,
         "durationMs": {
-          "observed": 1,
+          "observed": 19,
           "missing": 0,
-          "median": 31
+          "median": 240846
         },
         "conflicts": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 6,
+          "missing": 13,
+          "median": 0
         },
         "unnecessaryPrompts": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 2,
+          "missing": 17,
+          "median": 0
         },
         "repeatedContextLoads": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 2,
+          "missing": 17,
+          "median": 1
         }
       }
     }
@@ -81,6 +95,12 @@
       "disposition": "implemented",
       "target": "docs/BACKLOG-RULES.md",
       "evidence": "Harness v8.11.0 reconcile: steps in the order work can happen, anchors, linked prerequisites, one Who cell."
+    },
+    {
+      "kind": "rule",
+      "disposition": "implemented",
+      "target": "AGENTS.md",
+      "evidence": "Harness 8.14.1 reconciled from 8.11.0: rules by trigger (AGENTS slimmed, angular.md, BACKLOG-RULES index over docs/backlog/), all project lines kept; copied tools and guides from v8.14.1."
     }
   ]
 }

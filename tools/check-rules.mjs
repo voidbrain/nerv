@@ -9,7 +9,8 @@
 //     procedure: a rule about what the agent may do without asking is written with the labels, in AGENTS;
 //   - a link from AGENTS.md to a local document does not resolve (a trigger pointing nowhere loads nothing).
 // It warns when AGENTS.md is longer than rules.maxLines (default 200): move procedure detail out, never a rule.
-// Settings: .harness.json "rules": { agents?: "AGENTS.md", procedures?: ["docs/BACKLOG-RULES.md", "docs/agents/*.md"],
+// Settings: .harness.json "rules": { agents?: "AGENTS.md", procedures?: ["docs/BACKLOG-RULES.md", "docs/backlog/*.md",
+// "docs/agents/*.md"],
 // maxLines?: 200 }.
 import { existsSync, readFileSync, readdirSync, realpathSync } from 'node:fs';
 import { dirname, join, normalize } from 'node:path';
@@ -97,7 +98,11 @@ export function checkRules(root) {
   );
   const cites = (text) => /\(AGENTS\b|\bAGENTS(?:\.md)?,\s*["“]/.test(text);
   const procedures = [
-    ...new Set((cfg.procedures ?? ['docs/BACKLOG-RULES.md', 'docs/agents/*.md']).flatMap((p) => glob(root, p))),
+    ...new Set(
+      (cfg.procedures ?? ['docs/BACKLOG-RULES.md', 'docs/backlog/*.md', 'docs/agents/*.md']).flatMap((p) =>
+        glob(root, p),
+      ),
+    ),
   ].filter((p) => p !== agentsPath);
   for (const file of procedures) {
     for (const s of sentences(readFileSync(join(root, file), 'utf8'))) {

@@ -1,6 +1,7 @@
 // Is this project behind the harness template it was applied from? Compares .harness.json with the template's release
 // tags and says, per file, what to reconcile. Never fails, except with --strict, which exits 1 when the template is
-// missing or a copied file differs from the latest tag (the evidence an exempt reconcile cites). Run by check-freshness at session start; --github prints
+// missing or a copied file differs from the latest tag (the evidence an exempt reconcile cites); inside the template
+// itself, copies that match their own unreleased source pass (B-020). Run by check-freshness at session start; --github prints
 // GitHub warnings. The template is a local clone (HARNESS_HOME, else template.path in .harness.json; the Angular CI
 // workflow clones it); without one the check is skipped. --merge three-way merges every forked file the template
 // changed since its base, writes the result (with conflict markers if any) and moves the base of the clean ones forward.
@@ -20,7 +21,9 @@ let copyDiffers = false;
 const root = fileURLToPath(new URL('..', import.meta.url));
 const notes = [];
 const warn = (text) => notes.push(text);
+const infos = [];
 const done = (ok) => {
+  for (const i of infos) console.log(i);
   if (!notes.length && ok) console.log(ok);
   for (const n of notes) console.log(github ? `::warning title=Harness template::${n}` : `! ${n}`);
   if (strict && !copiesMatch)
@@ -174,12 +177,31 @@ const list = (value) => (Array.isArray(value) ? value : [value]);
 const diff = (path) => `git -C ${home} diff v${base} v${latest} -- ${path}`;
 const behind = tags.indexOf(base) > 0;
 
+// B-020: run inside the template itself (CI's workspace, or a worktree of the clone), a copy that matches its own
+// source is unreleased work, named once; one that does not match its source is a copy to refresh, not project drift.
+const real = (path) => {
+  try {
+    return realpathSync(path);
+  } catch {
+    return path;
+  }
+};
+const self = [root, mainCheckout(root)].some((dir) => real(dir) === real(home));
+const unreleased = [];
 // Copied files are byte-identical to the template; project settings live in .harness.json, not in the files.
 for (const [path, source] of Object.entries(stamp.copied ?? {})) {
   const was = at(base, source),
     now = at(latest, source),
     here = mine(path);
   if (here === now) continue;
+  if (self) {
+    if (here !== null && here === mine(source)) unreleased.push(path);
+    else {
+      copyDiffers = true;
+      warn(`${path} differs from its source ${source}: copy it (cp ${source} ${path}).`);
+    }
+    continue;
+  }
   copyDiffers = true;
   if (here === null) warn(`${path} is missing: copy ${source} from template v${latest}.`);
   else if (here === was)
@@ -191,6 +213,8 @@ for (const [path, source] of Object.entries(stamp.copied ?? {})) {
   else warn(`${path}: CONFLICT, changed here and in the template since v${base}; merge by hand (${diff(source)}).`);
 }
 copiesMatch = !copyDiffers && base === latest;
+if (unreleased.length)
+  infos.push(`Unreleased since v${latest} (ships with the next release): ${unreleased.join(', ')}.`);
 
 // Forked files are copied files the project changed on purpose. The template's file at the fork's base is the common
 // ancestor: a template change since then is merged three-way, so both sides' edits survive and only overlaps conflict.

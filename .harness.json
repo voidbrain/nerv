@@ -3,7 +3,7 @@
     "path": "../harness-template",
     "repo": "https://github.com/voidbrain/project-harness"
   },
-  "version": "8.11.0",
+  "version": "8.14.1",
   "stacks": [
     "core",
     "angular"
@@ -50,7 +50,21 @@
     "docs/agents/task-context.md": "core/docs/agents/task-context.md",
     "tools/work-usage.mjs": "core/tools/work-usage.mjs",
     "docs/agents/work-usage.md": "core/docs/agents/work-usage.md",
-    "tools/usage-launch.mjs": "core/tools/usage-launch.mjs"
+    "tools/usage-launch.mjs": "core/tools/usage-launch.mjs",
+    "tools/code-map.mjs": "core/tools/code-map.mjs",
+    "tools/reconcile-draft.mjs": "core/tools/reconcile-draft.mjs",
+    "tools/quiet-reporter.mjs": "core/tools/quiet-reporter.mjs",
+    "docs/agents/parallel-work-plans.md": "core/docs/agents/parallel-work-plans.md",
+    "docs/agents/prompt-caching.md": "core/docs/agents/prompt-caching.md",
+    "docs/agents/session-start.md": "core/docs/agents/session-start.md",
+    "tools/rule-load.mjs": "core/tools/rule-load.mjs",
+    "docs/agents/claims.md": "core/docs/agents/claims.md",
+    "docs/agents/rule-review.md": "core/docs/agents/rule-review.md",
+    "docs/agents/mcp-commands.md": "core/docs/agents/mcp-commands.md",
+    "docs/agents/solution-refresh.md": "core/docs/agents/solution-refresh.md",
+    "docs/agents/audit-findings.md": "core/docs/agents/audit-findings.md",
+    "docs/agents/work-usage-sources.md": "core/docs/agents/work-usage-sources.md",
+    "docs/agents/work-usage-effectiveness.md": "core/docs/agents/work-usage-effectiveness.md"
   },
   "forked": {},
   "freshness": {
@@ -673,7 +687,21 @@
     "package.json": "angular/package-scripts.json",
     "GEMINI.md": "core/GEMINI.md",
     "QWEN.md": "core/QWEN.md",
-    ".github/copilot-instructions.md": "core/.github/copilot-instructions.md"
+    ".github/copilot-instructions.md": "core/.github/copilot-instructions.md",
+    ".npmrc": "core/npmrc.txt",
+    "docs/backlog/closure.md": "core/docs/backlog/closure.md",
+    "docs/backlog/documentation.md": "core/docs/backlog/documentation.md",
+    "docs/backlog/estimates.md": "core/docs/backlog/estimates.md",
+    "docs/backlog/evaluations.md": "core/docs/backlog/evaluations.md",
+    "docs/backlog/ordering.md": "core/docs/backlog/ordering.md",
+    "docs/backlog/ownership.md": "core/docs/backlog/ownership.md",
+    "docs/backlog/records.md": "core/docs/backlog/records.md",
+    "docs/backlog/review.md": "core/docs/backlog/review.md",
+    "docs/backlog/steps.md": "core/docs/backlog/steps.md",
+    "docs/backlog/feature-plans.md": "core/docs/backlog/feature-plans.md",
+    "docs/backlog/outcomes.md": "core/docs/backlog/outcomes.md",
+    "docs/agents/pull-requests.md": "core/docs/agents/pull-requests.md",
+    "docs/agents/angular.md": "angular/docs/agents/angular.md"
   },
   "ciStatus": {
     "workflow": "CI",
@@ -703,7 +731,21 @@
       "docs/agents/task-context.md",
       "tools/work-usage.mjs",
       "docs/agents/work-usage.md",
-      "tools/usage-launch.mjs"
+      "tools/usage-launch.mjs",
+      "docs/backlog/closure.md",
+      "docs/backlog/documentation.md",
+      "docs/backlog/estimates.md",
+      "docs/backlog/evaluations.md",
+      "docs/backlog/ordering.md",
+      "docs/backlog/ownership.md",
+      "docs/backlog/records.md",
+      "docs/backlog/review.md",
+      "docs/backlog/steps.md",
+      "docs/backlog/feature-plans.md",
+      "docs/backlog/outcomes.md",
+      "docs/agents/rule-review.md",
+      "docs/agents/parallel-work-plans.md",
+      "docs/agents/prompt-caching.md"
     ]
   },
   "audit": {
@@ -725,9 +767,15 @@
     "agents": "AGENTS.md",
     "procedures": [
       "docs/BACKLOG-RULES.md",
-      "docs/agents/*.md"
+      "docs/agents/*.md",
+      "docs/backlog/*.md"
     ],
-    "maxLines": 200
+    "maxLines": 200,
+    "budgets": {
+      "always": 3500,
+      "procedure": 2000,
+      "trigger": 5000
+    }
   },
   "ciActionPins": {
     "actions/checkout": {
