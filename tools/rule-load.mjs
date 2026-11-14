@@ -197,6 +197,8 @@ export function ruleLoad(root, { count = estimate, withSections = false } = {}) 
     return {
       path,
       tokens: tokens(text),
+      // B-026: a page a tool writes says so on its first line; it is looked up, not read by a route
+      ...(/^<!-- (Written|Generated) by /i.test(text) ? { generated: true } : {}),
       ...(withSections
         ? {
             sections: sections(text)
@@ -227,7 +229,7 @@ export function overBudget(report) {
       `always-loaded rules are ${n(report.always.tokens)} tokens, over the ${n(b.always)} budget: move procedure detail out of AGENTS.md, never a rule`,
     );
   for (const p of report.procedures.files)
-    if (p.tokens > b.procedure)
+    if (p.tokens > b.procedure && !p.generated)
       out.push(
         `${p.path} is ${n(p.tokens)} tokens, over the ${n(b.procedure)} budget for one procedure file: split it by trigger`,
       );

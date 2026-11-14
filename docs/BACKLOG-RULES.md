@@ -20,3 +20,11 @@ The rules are split by trigger so an agent reads only what its task needs (F-076
 | add a prerequisite or reorder the queue | [ordering](backlog/ordering.md) | Linked prerequisites (optional), Optional work queue |
 | pin or run an evaluation dependency | [evaluations](backlog/evaluations.md) | Evaluation dependencies |
 | merge a PR that closes a P1 record or changes a harness file | [pull requests](agents/pull-requests.md) | Independent review |
+
+## NERV
+
+Moved from AGENTS.md and docs/backlog/review.md (owner decision 2026-11-14, rule-load budgets).
+
+- [docs/BACKLOG.md](BACKLOG.md) is the generated current-status ledger; authoritative per-record sources live in `docs/work/records/` and layout in `docs/work/layout.json` (see [parallel work](agents/parallel-work.md)); [docs/BACKLOG-RULES.md](BACKLOG-RULES.md) is the procedure (statuses, human-action cues, record layout, CI reconciliation, closure and archives, documentation ownership and the consistency check every PR records). Update the affected records in the same PR as the change, and run `npm run check:backlog`. Prefer reading `docs/work/records/<ID>.md` and `docs/work/tasks/<ID>-T*.json` over loading `docs/BACKLOG.md`, and keep new `effort.basis` entries to 1–2 sentences. <!-- project -->
+- [docs/ROADMAP.md](ROADMAP.md) places every feature that is not closed in exactly one milestone (its Records column); its status table is generated from the records. A PR that opens, closes or changes a feature's status places it and runs `npm run roadmap:status`; `npm run check:roadmap` enforces both in CI. <!-- project -->
+- The header under the title is at most two lines of at most 400 characters: the latest reconciliation (main commit, PRs and their CI), generated from the newest entry of the reconciliation log since harness 8.1.0, then the links. When it moves to a newer `main`, the sentence it replaces goes to the top of [docs/archive/reconciliation-<year>.md](archive/reconciliation-2026.md); `npm run check:recap` enforces the limit. <!-- project -->

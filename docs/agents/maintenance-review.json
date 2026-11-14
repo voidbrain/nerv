@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-14T13:37:11.870Z",
+  "reviewed": "2026-11-14T14:21:13.956Z",
   "policy": "7d15ab5f3e1a37d15075876ce3efd53d93600045088f48b41a3ef0dd6ab89e7d",
   "inputs": {
-    "AGENTS.md": "1a2a355a60f4ab2a8fa2ec4437fc00906e3c3e647f21d579d52fcd945bcca193",
-    "docs/BACKLOG-RULES.md": "15425b47072204bdf62d272334819f4b04658779672125f90cce1264afdfd8c6",
+    "AGENTS.md": "d5c0da9a6960509d129db16add394550b9daae036b2cde345598d981e08a3838",
+    "docs/BACKLOG-RULES.md": "91ea3b199cd49385549ac2869304e1cca2de94cad5bcb4f119502b594f00e621",
     "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
     "docs/agents/areas.md": "19890dcd2fb04557fcb9b9bb1df4dcbd2e584736e53a5989908bb822ef020d1c",
     "docs/agents/audit.md": "e58480c21e8afe9a825df4726fa93b8a7f841557f4267f1fc2c61ac3dac8f642",
@@ -23,14 +23,14 @@
     "docs/agents/work-usage.md": "c79d6864f53100c691e30e411c203c00b20bf5bd7bc55bbcee5687e859edb543",
     "docs/backlog/closure.md": "21fcc14351588107943d9aab70991399e07af7026d48327619f215e62ecb3319",
     "docs/backlog/documentation.md": "6328e3eccb3a222af1a9f4682dcef9e763464d0842cf94b28713bbc5f61e04b1",
-    "docs/backlog/estimates.md": "d5fb7d63a0b934836d3db4dfedbe93260cffd26469d5b4fe0eb5bd8e3f875bfc",
+    "docs/backlog/estimates.md": "015bbbf9d83fc7cc610ea53eb1cb7b6d8b77ac3b1bd3dd07b1a6a8808e260745",
     "docs/backlog/evaluations.md": "7540bf69b6b5d40dc09dc9ce82138218525733c5f602945bdaa58d5c3a743f37",
     "docs/backlog/feature-plans.md": "c0c57eed2ba36a7e969512f1455b2af8bfff27c7ff60e1c171ba6e2ba2ee5dcf",
     "docs/backlog/ordering.md": "f36fe3410fe4d838877fe35c61c491608116b0255b864906f91eea23915d81dd",
     "docs/backlog/outcomes.md": "c6f1d8e4ac3afd85e6d90ac7cef8ae39fba765b13c821522fb005edd2b5b88e4",
     "docs/backlog/ownership.md": "d2d39a4e2a56fb7a18c5cce2fe5490282a9c89c947574746bacd71f1040c457f",
     "docs/backlog/records.md": "55ed78706d82419d64d33a82fe55f1179fd65fc35825fd081f3ac2e24079d058",
-    "docs/backlog/review.md": "96eaf598116e553aee2de08f35f4af0199f5731ba0f4cea9d4202f4748281051",
+    "docs/backlog/review.md": "553177fc99074b2bc3ac2c9b430f4d22eaac46247a41b5966b6a97734cfb73df",
     "docs/backlog/steps.md": "c9b771c2c4e70da766dd4706cf9aa7722c116e1a9499cec3f0ef4b25b853a2b5",
     "tools/task-claims.mjs": "ef755fe7951544e5c05b20de7c64a7b53778b6d039a11a2abeb079e7d42b6fd2",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
@@ -101,6 +101,12 @@
       "disposition": "implemented",
       "target": "AGENTS.md",
       "evidence": "Harness 8.14.1 reconciled from 8.11.0: rules by trigger (AGENTS slimmed, angular.md, BACKLOG-RULES index over docs/backlog/), all project lines kept; copied tools and guides from v8.14.1."
+    },
+    {
+      "kind": "rule",
+      "disposition": "implemented",
+      "target": "AGENTS.md",
+      "evidence": "Owner decision 2026-11-14: five project lines moved verbatim out of always-loaded AGENTS.md to the procedures that apply; harness 8.14.3; rule-load within every budget."
     }
   ]
 }
