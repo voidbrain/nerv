@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "F-095-T03",
+  "parent": "F-095",
+  "title": "Split runtime.ts",
+  "goal": "runtime.ts becomes modules by responsibility with no behaviour change",
+  "status": "planned",
+  "acceptance": [
+    "Each new module under 600 lines where the boundary allows; existing tests pass unchanged; imports updated",
+    "Fresh-context review of the move"
+  ],
+  "dependsOn": [
+    "F-095-T01"
+  ],
+  "resources": [
+    "src/runtime.ts",
+    "src/**",
+    "test/**",
+    "docs/work/records/F-095.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run typecheck",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A move that would change behaviour or a public export goes to a fresh-context design review"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-14 at agent speed: mechanical moves with unchanged tests. Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  }
+}

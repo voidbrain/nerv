@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "F-095-T04",
+  "parent": "F-095",
+  "title": "Split store.ts per table group",
+  "goal": "store.ts becomes modules per table group with no behaviour change",
+  "status": "planned",
+  "acceptance": [
+    "Existing tests pass unchanged; one transaction helper shared"
+  ],
+  "dependsOn": [
+    "F-095-T01"
+  ],
+  "resources": [
+    "src/store.ts",
+    "src/**",
+    "test/**",
+    "docs/work/records/F-095.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run typecheck",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A move that would change behaviour or a public export goes to a fresh-context design review"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-14 at agent speed: mechanical moves with unchanged tests. Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}

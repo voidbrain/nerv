@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "F-095-T05",
+  "parent": "F-095",
+  "title": "Split the other files over 1,000 lines",
+  "goal": "node-lifecycle-execution, ledger, pilots and rpc fall under 1,000 lines",
+  "status": "planned",
+  "acceptance": [
+    "Existing tests pass unchanged; cli.ts is left to F-080"
+  ],
+  "dependsOn": [
+    "F-095-T03",
+    "F-095-T04"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/work/records/F-095.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run typecheck",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A move that would change behaviour or a public export goes to a fresh-context design review"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-14 at agent speed: mechanical moves with unchanged tests. Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}

@@ -353,7 +353,7 @@ Full audit of 2026-11-13 ([report](../audits/2026-11-13-full.md)). `npm run ci:s
 
 ## 2026-11-14 — main `1e12191`
 
-16 PRs (#374–#389) passed CI; their records were updated in each PR. F-023 gets owner step F-023-T04 (paired Mac check, which had no step). Owner jobs case study: F-082–F-094 opened at P2.
+16 PRs (#374–#389) passed CI; their records were updated in each PR. F-023 gets owner step F-023-T04 (paired Mac check, which had no step). Owner jobs case study: F-082–F-094 opened at P2; F-095 (long source files) opened.
 
 - CI read with `npm run ci:status`: every run green, including #374 (full audit), #380 (owner decisions) and #384 (B-060-T01).
 - F-023: T01–T03 closed with the record still awaiting the owner's paired-Mac procedure; that session is now its own step.

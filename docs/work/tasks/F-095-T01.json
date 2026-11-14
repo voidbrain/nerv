@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-095-T01",
+  "parent": "F-095",
+  "title": "Revisit the runtime.ts deferral and name the modules",
+  "goal": "The reassessment records the context-cost evidence and the module boundaries",
+  "status": "ready",
+  "acceptance": [
+    "A dated addendum to the 2026-11-13 reassessment: the evidence, the decision, and the target modules for runtime.ts and store.ts"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/audits/**",
+    "docs/architecture/**",
+    "docs/work/records/F-095.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "architecture-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run typecheck",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A move that would change behaviour or a public export goes to a fresh-context design review"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-14 at agent speed: mechanical moves with unchanged tests. Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}
