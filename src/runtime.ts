@@ -284,7 +284,7 @@ export interface StoreApi {
   decide(
     id: string,
     decision: Decision,
-    source?: 'api' | 'cli' | 'telegram',
+    source?: 'api' | 'dashboard' | 'cli' | 'telegram',
   ):
     | { decision: string; result?: unknown; error?: string }
     | Promise<{ decision: string; result?: unknown; error?: string }>;
@@ -489,7 +489,7 @@ export class Runtime implements StoreApi {
   async approvals(limit = 5) {
     return (await this.nervous.call('approvals.pending', { limit })) as Approval[];
   }
-  async decide(id: string, decision: Decision, source: 'api' | 'cli' | 'telegram' = 'api') {
+  async decide(id: string, decision: Decision, source: 'api' | 'dashboard' | 'cli' | 'telegram' = 'api') {
     const pending = await this.approvals(50).catch(() => []);
     const match = pending.find((a) => a.id === id);
     const keys = match ? itemKeysForTool(match.card.tool, match.card.args) : [];

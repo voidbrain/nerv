@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 76.25 h agent + 21.25 h owner across 199 open steps of 47 features and 9 other records. 18.5 h of actual effort recorded on 37 steps. Generated from the task files.
+**Remaining effort:** 76 h agent + 21.25 h owner across 199 open steps of 47 features and 9 other records. 19.25 h of actual effort recorded on 38 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1925,9 +1925,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | ⏳ | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | — | — | — | — |
 
-💻 **→** Next: record the acting client kind on ledger decisions (F-066-T02).
+💻 **→** Next: F-066-T02 implemented in PR #399, awaiting merge; then close F-066.
 
 | | |
 |---|---|
@@ -1940,8 +1940,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
 | 🟢 Small | <a id="f-066-t01"></a>F-066-T01 — Credential rotation commands and doctor ages | 0.25 h | 0 h | 0.25 h | Implemented; verification pending |
-| 🟢 Small | <a id="f-066-t02"></a>F-066-T02 — Client kind on ledger events | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-066-T01](#f-066-t01) |
-| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 2 steps recorded) | 0.5 h | 0 of 2 completed |
+| 🟢 Small | <a id="f-066-t02"></a>F-066-T02 — Client kind on ledger events | 0.25 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.5 h | 0.75 h (1 of 2 steps recorded) | 0.25 h | 0 of 2 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
