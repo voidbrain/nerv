@@ -4,7 +4,7 @@
   "parent": "B-054",
   "title": "Long replies within the output allowance do not time out the model route",
   "goal": "Measure where the 210 s went and fix it with a failing test first",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "The cause of the 2026-11-12 timeout is measured (calls, tokens, durations per step)",
     "A committed test fails before the fix",
@@ -12,10 +12,9 @@
   ],
   "dependsOn": [],
   "resources": [
-    "src/model.ts",
-    "src/**",
-    "test/**",
-    "docs/work/records/**",
+    "src/engine-provider.ts",
+    "test/model.test.ts",
+    "docs/work/records/B-054.md",
     "generated:backlog-views"
   ],
   "capabilities": [
@@ -34,8 +33,8 @@
     "size": "small",
     "estimate": "1.5 h",
     "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
-    "reviewed": "2026-11-13",
-    "agentHours": 0.5,
+    "reviewed": "2026-11-14",
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 0.5
   }
