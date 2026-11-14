@@ -250,6 +250,7 @@ function decide(apId, decision) {
   } else { ap.action.status = "stood-down"; s.status = "stood-down"; s.outcome = decision === "expired" ? "approval expired" : "rejected by you"; finish(s); ap.resolve(decision); }
   renderAll();
 }
+function decideMany(ids, decision) { ids.forEach(id => decide(id, decision)); }
 async function continueAfterEdit(s) { await runFrom(s); }
 async function runFrom(s) { // resume the loop at the current action after an edit
   const saved = s.current; s.actions[saved].status = "planned";
@@ -390,7 +391,15 @@ function renderNeeds() {
   document.getElementById("needs-count").textContent = state.approvals.length;
   if (!state.approvals.length) { box.innerHTML = "<div class='muted small'>Nothing needs you. When an action needs your yes, its card appears here with the exact action, why it stopped and when it expires: answer here, with the keys a and r, or on Telegram.</div>"; return; }
   if (armed && !state.approvals.some(ap => ap.id === armed.id)) armed = null;
-  box.innerHTML = state.approvals.map(ap => {
+  const grouped = []; const memoryBySortie = new Map();
+  state.approvals.forEach(ap => {
+    if (ap.action.tool !== "memory.remember") { grouped.push([ap]); return; }
+    const existing = memoryBySortie.get(ap.sortie);
+    if (existing) existing.push(ap); else { const group = [ap]; memoryBySortie.set(ap.sortie, group); grouped.push(group); }
+  });
+  box.innerHTML = grouped.map(group => {
+    if (group.length > 1) return renderMemoryCard(group);
+    const ap = group[0];
     const a = ap.action, b = ap.ballot, s = state.sorties.find(x => x.id === ap.sortie);
     const left = Math.max(0, ap.expires - Date.now()); const mm = Math.floor(left / MIN), ss = Math.floor(left % MIN / 1000);
     return "<article class='apcard " + b.pattern + (armed && armed.id === ap.id ? " armed" : "") + "' data-card='" + ap.id + "'>" +
@@ -406,6 +415,16 @@ function renderNeeds() {
       "<div class='acts'><button class='btn primary' data-ap='" + ap.id + "' data-d='approve' aria-keyshortcuts='a'>Approve once</button><button class='btn' data-ap='" + ap.id + "' data-d='edit'>Edit → Misato</button><button class='btn danger' data-ap='" + ap.id + "' data-d='reject' aria-keyshortcuts='r'>Reject</button></div>" +
       "</article>";
   }).join("") + "<div class='tiny muted keyhint'>Keys: <kbd>a</kbd> approve · <kbd>r</kbd> reject (press twice to confirm; the focused card, else the first) · <kbd>/</kbd> search sorties</div>";
+}
+function renderMemoryCard(group) {
+  const first = group[0], s = state.sorties.find(x => x.id === first.sortie);
+  const ids = group.map(ap => ap.id).join(",");
+  const facts = group.map(ap => "<li><span>" + esc(ap.action.args.text) + "</span><span class='acts'><button class='btn sm' data-ap='" + ap.id + "' data-d='edit' aria-label='Edit fact: " + esc(ap.action.args.text) + "'>Edit</button><button class='btn sm danger' data-ap='" + ap.id + "' data-d='reject' aria-label='Remove fact: " + esc(ap.action.args.text) + "'>Remove</button></span></li>").join("");
+  return "<article class='apcard " + first.ballot.pattern + "' data-card='" + first.id + "' data-bundle='" + ids + "'>" +
+    "<div class='row'><span class='what'>Remember these facts?</span><span class='badge b-" + first.ballot.pattern + "'>PATTERN " + first.ballot.pattern.toUpperCase() + "</span></div>" +
+    "<div class='small muted'>" + esc(s.id) + " · " + esc(s.title) + "</div><ul class='fact-list'>" + facts + "</ul>" +
+    "<div class='why'><b>Why it stopped:</b> " + esc(first.reason) + "</div>" +
+    "<div class='acts'><button class='btn primary' data-bundle-decision='approve' data-ids='" + ids + "' aria-keyshortcuts='a'>Approve all</button><button class='btn danger' data-bundle-decision='reject' data-ids='" + ids + "' aria-keyshortcuts='r'>Remove all</button></div></article>";
 }
 function humanAction(a) {
   const x = a.args;
@@ -1008,6 +1027,7 @@ setInterval(() => { if (LIVE) return; BASES.forEach(b => { if (b.status === "onl
 
 document.addEventListener("click", e => {
   const t = e.target.closest("button,[data-s],a"); if (!t) return;
+  if (t.dataset.bundleDecision) { decideMany(t.dataset.ids.split(","), t.dataset.bundleDecision); return; }
   if (t.dataset.ap) { decide(t.dataset.ap, t.dataset.d); return; }
   if (t.dataset.s) {
     e.preventDefault();

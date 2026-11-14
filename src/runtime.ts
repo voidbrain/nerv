@@ -1579,7 +1579,8 @@ export class Runtime implements StoreApi {
       // A card ends the turn: the reply is the service's, and Misato carries on after the owner decides (F-033 resume),
       // so the model is never asked to describe an action that is only waiting.
       if ('approvalId' in r && r.approvalId) {
-        waiting.push({ approvalId: r.approvalId, tool, reason: r.reason });
+        const approvalIds = 'approvalIds' in r && Array.isArray(r.approvalIds) ? r.approvalIds : [r.approvalId];
+        waiting.push(...approvalIds.map((approvalId) => ({ approvalId, tool, reason: r.reason })));
         return finish(
           'done',
           waitingReply(

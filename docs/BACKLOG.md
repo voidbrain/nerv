@@ -1726,9 +1726,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | ⏳ | — | — |
 
-💻 **→** Next: split compound memories on one card, with a proposed clean-up.
+💻 **→** Next: show a proposed spelling clean-up beside the original fact (F-044-T02).
 
 | | |
 |---|---|
@@ -1740,7 +1740,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="f-044-t01"></a>F-044-T01 — One fact per subject on one editable card | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | <a id="f-044-t01"></a>F-044-T01 — One fact per subject on one editable card | 0.25 h | 0 h | 0.25 h | Implemented; verification pending |
 | 🟢 Small | <a id="f-044-t02"></a>F-044-T02 — Shown spelling fix | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-044-T01](#f-044-t01) |
 | 🟢 Small | <a id="f-044-t03"></a>F-044-T03 — Typo-tolerant recall | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-044-T02](#f-044-t02) |
 | 🟢 Small | **Total** | 0.75 h | 0 h (0 of 3 steps recorded) | 0.75 h | 0 of 3 completed |

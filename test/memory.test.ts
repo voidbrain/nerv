@@ -83,6 +83,31 @@ test('memory.remember always reaches the owner, even with no Scrolls; recall is 
     store.close();
   }
 });
+test('one multi-fact proposal creates one independently editable approval per subject', () => {
+  const store = new Store(':memory:');
+  try {
+    const sortie = store.ledger.openSortie(OWNER_SOURCE, 'Remember these', 'trusted');
+    const result = store.runAction(sortie, {
+      tool: 'memory.remember',
+      args: { texts: ['I do not like wine', 'I play ultimate frisbee'] },
+      stage: 'production',
+    });
+    assert.equal(result.outcome, 'approval');
+    assert.equal(result.approvalIds?.length, 2);
+    assert.deepEqual(
+      store.ledger.pendingApprovals().map((approval) => approval.card.args),
+      [{ text: 'I do not like wine' }, { text: 'I play ultimate frisbee' }],
+    );
+    store.decide(result.approvalIds![0]!, 'reject', 'api');
+    store.decide(result.approvalIds![1]!, 'approve', 'api');
+    assert.deepEqual(
+      store.memory.list().map((fact) => fact.text),
+      ['I play ultimate frisbee'],
+    );
+  } finally {
+    store.close();
+  }
+});
 test('local-only facts never reach the cloud route; tainted facts keep their mark', () => {
   const memory = [
     { id: 'a', text: 'Private: my PIN hint', shareable: false, tainted: false },

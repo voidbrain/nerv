@@ -4,7 +4,7 @@
   "parent": "F-044",
   "title": "One fact per subject on one editable card",
   "goal": "One fact per subject on one editable card",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "A multi-fact request proposes one fact per subject; each editable or removable before approving the card"
   ],
