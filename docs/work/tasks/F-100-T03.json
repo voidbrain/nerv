@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "F-100-T03",
+  "parent": "F-100",
+  "title": "Vibration report from a blackbox log",
+  "goal": "A report with candidate causes and evidence",
+  "status": "planned",
+  "acceptance": [
+    "Per-axis and per-motor spectrum summary; candidate causes ranked with the evidence; limits stated",
+    "Invented or owner-supplied test logs"
+  ],
+  "dependsOn": [
+    "F-100-T02"
+  ],
+  "resources": [
+    "src/**",
+    "test/**"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Owner fleet and kitchen data stay local-only; tests use invented batteries, drones and recipes.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h agent",
+    "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  }
+}

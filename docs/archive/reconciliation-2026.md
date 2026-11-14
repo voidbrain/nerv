@@ -408,3 +408,9 @@ Re-estimated 33 open feature implementation steps from their current estimates t
 Record-level dependencies moved to steps (owner decision): F-021-T03 and F-027-T02 wait on F-049-T04 (EVA-03 isolation); F-056-T01 waits on F-021-T05 (all of F-021).
 
 - F-050's row on F-048 dropped: F-048-T01–T03 are verified and no F-050 step does load-based forwarding. Rows on closed records (F-045, F-042) stay. [#407](https://github.com/voidbrain/nerv/pull/407)
+
+## 2026-11-14 — main `f83b6a1`
+
+Owner plan for FPV and cooking: F-008 rescoped to batteries inside NERV (T05–T12; the app-adapter steps T01–T04 superseded); new F-098 fleet diary, F-099 build knowledge, F-100 blackbox, F-101 sharing; F-083 gains T05–T09.
+
+- Requirements, proposed defaults for the owner's decisions and the sharing options: [design note](../design/fpv-and-cooking-plan-2026-11-14.md). Implementation steps at 0.75 h (harness 8.14.3); feasibility first for F-099 and F-100.
