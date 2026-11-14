@@ -1526,6 +1526,7 @@ try {
           // Slice 3b, on the main base: actions queued by kaji.run go out over the line, each until it reached its base.
           if (kaji) {
             const link = kaji;
+            if (link.workerLink) runtime.useWorkerLink(link.workerLink);
             runtime.startOutbox(
               (base, item, dispatching) => link.run(base, item, MODEL_TIMEOUT_MS * 2, dispatching),
               3000,
