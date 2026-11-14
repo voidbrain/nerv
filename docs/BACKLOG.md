@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 25 | 11 | 15 | 13 |
+| **This week** | 25 | 11 | 16 | 13 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 47 | 8 |
+| **Open** | 47 | 9 |
 | **Require Human 🧑** | 8 | 2 |
 
 ### Require Human 🧑
@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 75.75 h agent + 21.25 h owner across 198 open steps of 47 features and 8 other records. 18 h of actual effort recorded on 35 steps. Generated from the task files.
+**Remaining effort:** 76 h agent + 21.25 h owner across 199 open steps of 47 features and 9 other records. 18.25 h of actual effort recorded on 36 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1591,6 +1591,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | [PR #396](https://github.com/voidbrain/nerv/pull/396); found in the F-005-T22 owner run, 2026-11-14. |
 | Opened | 2026-11-14 |
 | Verification | Unit: test/node-inspection-errors.test.ts through the real runner. Owner rerun on the VM pending (F-005-T22). |
+| Reviewed | 2026-11-14 |
+
+</details>
+
+---
+### <a id="b-063"></a>[🐞 B-063](#top)
+
+**`nodes inspect` accepts a Node.js older than NERV requires without saying so**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h | — | — | — | — | — |
+
+💻 **→** Next: B-063-T01 implemented, awaiting merge; then the owner reruns F-005-T22 step 2.
+
+| | |
+|---|---|
+| **Issue** | 2026-11-14, preparing step 2 of the F-005-T22 procedure (docs/acceptance/f005-t22-prerequisites.md): `nodes inspect` records the target's Node.js version but never compares it with `package.json` `engines.node` (≥ 24), so Ubuntu's Node 18 passes silently and the expected "below the version NERV requires" never appears. |
+| **Reproduce** | Inspect a target whose `node --version` is 18.x: the command succeeds. |
+| **Check** | A regression through `nodesCommand`: an older Node.js fails the command naming the found and required versions, after the unchanged inspection file is saved as evidence; a supported one passes as before; nothing is installed. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="b-063-t01"></a>B-063-T01 — Report a Node.js below engines.node | 0.5 h | 0 h | 0.25 h | Implemented; verification pending | 🤖 |
+| — | <a id="b-063-t02"></a>B-063-T02 — Rerun the two expensive system cases at this source | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 🧑‍🔧 |
+| 🟢 Small | **Total** | 0.75 h | 0.25 h (1 of 2 steps recorded) | 0.25 h | 1 of 2 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-063.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #397](https://github.com/voidbrain/nerv/pull/397); found while preparing the F-005-T22 owner run, 2026-11-14. |
+| Opened | 2026-11-14 |
+| Verification | Unit: test/node-inspection-version.test.ts through nodesCommand. Owner run on the VM pending (F-005-T22 step 2). |
 | Reviewed | 2026-11-14 |
 
 </details>
