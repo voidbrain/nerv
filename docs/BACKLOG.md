@@ -1587,7 +1587,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Found in the F-005-T22 owner run, 2026-11-14. |
+| PR / evidence | [PR #396](https://github.com/voidbrain/nerv/pull/396); found in the F-005-T22 owner run, 2026-11-14. |
 | Opened | 2026-11-14 |
 | Verification | Unit: test/node-inspection-errors.test.ts through the real runner. Owner rerun on the VM pending (F-005-T22). |
 | Reviewed | 2026-11-14 |
