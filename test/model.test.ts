@@ -16,6 +16,8 @@ import {
   type Models,
 } from '../src/model.ts';
 import { authorize } from '../src/rpc.ts';
+import { isOutage, RouteWatch } from '../src/route-health.ts';
+import type { UsageObservation } from '../src/model-usage.ts';
 import { makeServer } from '../src/server.ts';
 const KEY = 'sk-test-' + 'k'.repeat(32);
 interface Seen {
@@ -358,4 +360,77 @@ test('roles pick a route and model per role; Casper stays on the local route', (
     { casper: { model: '' } },
   ])
     assert.throws(() => validateModels({ roles }), /roles/, JSON.stringify(roles));
+});
+
+/** Invented stand-in for a slow local engine such as Ollama: a reply of `chunks` pieces, one every `everyMs`. Streamed
+ * as server-sent events when the request asks for a stream; otherwise held until the whole reply is ready. */
+function slowEngine(chunks: number, everyMs: number) {
+  return (s: Seen, res: ServerResponse) => {
+    const pieces = Array.from({ length: chunks }, (_, i) => `w${i} `);
+    if (s.body.stream !== true) {
+      const timer = setTimeout(() => json(res, 200, openai(pieces.join(''))), chunks * everyMs);
+      res.on('close', () => clearTimeout(timer));
+      return;
+    }
+    res.writeHead(200, { 'content-type': 'text/event-stream' });
+    let i = 0;
+    const timer = setInterval(() => {
+      if (i < chunks) {
+        res.write(`data: ${JSON.stringify({ model: 'gemma', choices: [{ delta: { content: pieces[i++] } }] })}\n\n`);
+        return;
+      }
+      clearInterval(timer);
+      res.write(`data: ${JSON.stringify({ model: 'gemma', choices: [{ delta: {}, finish_reason: 'stop' }] })}\n\n`);
+      res.write(
+        `data: ${JSON.stringify({ model: 'gemma', choices: [], usage: { prompt_tokens: 7, completion_tokens: chunks } })}\n\n`,
+      );
+      res.end('data: [DONE]\n\n');
+    }, everyMs);
+    res.on('close', () => clearInterval(timer));
+  };
+}
+
+test('B-054: a long S² reply still being written at the time limit fails as too long and leaves the route up', async () => {
+  // 2026-11-12 on the main base: consultant 33.2 s, Misato's first step 61.0 s (829 tokens), the second step cut at the
+  // 115 s limit while gemma4:12b was still answering; the route was then marked down for every request.
+  const p = await fake(slowEngine(20, 40));
+  const models: Models = { local: { baseUrl: p.url + '/v1', model: 'gemma' } };
+  try {
+    const error = await complete({ prompt: 'Five paragraphs', privacy: 'local-only' }, models, undefined, {
+      timeoutMs: 300,
+    }).catch((e: unknown) => e);
+    assert.ok(error instanceof ModelError);
+    assert.match(error.message, /too long/);
+    assert.equal(isOutage(error.message), false, 'a reply still arriving is not an outage');
+    const watch = new RouteWatch();
+    watch.record('local', true);
+    watch.record('local', false, error.message);
+    assert.equal(watch.snapshot().local.state, 'ok', 'one long reply does not take the route down');
+  } finally {
+    await p.close();
+  }
+});
+
+test('B-054: a streamed S² reply within the limit is joined, with its usage', async () => {
+  const p = await fake(slowEngine(5, 20));
+  const models: Models = { local: { baseUrl: p.url + '/v1', model: 'gemma' } };
+  const seen: UsageObservation[] = [];
+  try {
+    const reply = await complete({ prompt: 'Short', privacy: 'local-only' }, models, undefined, {
+      timeoutMs: 2000,
+      observe: (o) => seen.push(o),
+    });
+    assert.deepEqual(reply, {
+      text: 'w0 w1 w2 w3 w4 ',
+      truncated: false,
+      route: 'local',
+      model: 'gemma',
+      stop: 'stop',
+    });
+    assert.equal(seen[0]?.outputTokens, 5);
+    assert.equal(seen[0]?.inputTokens, 7);
+    assert.equal(seen[0]?.outcome, 'success');
+  } finally {
+    await p.close();
+  }
 });
