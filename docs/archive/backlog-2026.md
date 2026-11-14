@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 12 | 19 |
+| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 12 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
 
@@ -4091,6 +4091,40 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 | PR / evidence | [PR #413](https://github.com/voidbrain/nerv/pull/413) (fix, CI 43622666273); [PR #400](https://github.com/voidbrain/nerv/pull/400) records it; found in the F-005-T22 VM run, 2026-11-14. |
 | Opened | 2026-11-14 |
 | Verification | Unit/integration: 7/7 tests in `test/node-lifecycle.test.ts` pass; PR #413 CI 43622666273 green across all 5 jobs before merge. |
+| Reviewed | 2026-11-14 |
+
+</details>
+
+---
+
+### B-065
+
+**A revoked base is drawn on the map and listed as offline**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | 🔹 P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />None: [PR #415](https://github.com/voidbrain/nerv/pull/415) passed CI (`plan`, `validate`, `windows`, `native-macos`) and merged to `main` (`27bccf0`).
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-14: the dashboard map still shows "Local acceptance" (`MAC-ACCEPTANCE`), revoked on 2026-11-11 (registry serial 5). The registry marks it `revoked` (`src/kaji.ts`), but the live dashboard maps a revoked base to `offline` (`web/public/dashboard/live.js:500`) and draws it on the map and in the base list like any unreachable base. |
+| **Reproduce** | With a revoked base in the registry, open the dashboard: it appears on the Kaji line map and in the base list as offline. |
+| **Check** | A committed test fails first; a revoked base is not drawn on the map and not counted in "n/m online"; if listed at all it is labelled revoked, apart from live bases; the registry keeps its record (append-only). |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Closed 2026-11-14:** [PR #415](https://github.com/voidbrain/nerv/pull/415) passed CI run `43630406751` (`plan`, `validate`, `windows`, `native-macos`; `full-suite` skipped by scoped verification) and CodeQL run `43630403237`, and merged to `main` at `27bccf0`. **Next action / closure evidence:** B-065-T01 implemented 2026-11-14: `applyBases` and `window.renderBases` in `web/public/dashboard/live.js` exclude `status === "revoked"` entries from `BASES`, `LINKS`, `observeTelegram`, `pulseHeartbeats`, and the `n/m online` header count, and list revoked bases in a separate `Revoked` subsection without live channel lines. Test: `B-065: revoked bases are excluded from BASES on the map and listed apart from live bases in renderBases` in `test/dashboard.test.ts` (committed first, `7e70720`; failed before the fix, unchanged by the fix).
+
+**Estimates:** Small, estimated 2026-11-14: 0.5 h agent; actual 0.25 h agent (stated). Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner report 2026-11-14; [PR #409](https://github.com/voidbrain/nerv/pull/409); [PR #415](https://github.com/voidbrain/nerv/pull/415) (`27bccf0`, CI `43630406751`) |
+| Opened | 2026-11-14 |
+| Verification | Unit/regression: 42/42 tests pass across `test/dashboard.test.ts`, `test/channel-display.test.mjs`, and `test/dashboard-poll.test.ts`; `npm run check:fast` passed; PR #415 CI `43630406751` green (`plan`, `validate`, `windows`, `native-macos`). |
 | Reviewed | 2026-11-14 |
 
 </details>

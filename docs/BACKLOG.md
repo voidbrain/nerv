@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 31 | 12 | 19 | 19 |
+| **This week** | 31 | 12 | 19 | 20 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 52 | 6 |
+| **Open** | 52 | 5 |
 | **Require Human 🧑** | 11 | 3 |
 
 ### Require Human 🧑
@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 100.75 h agent + 23.5 h owner across 218 open steps of 52 features and 6 other records. 20.75 h of actual effort recorded on 39 steps. Generated from the task files.
+**Remaining effort:** 100.5 h agent + 23.5 h owner across 217 open steps of 52 features and 5 other records. 20.75 h of actual effort recorded on 39 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -124,7 +124,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🔴 Large | 4.75 h agent + 2.5 h owner | — | [F-012-T03](#f-012-t03) | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🔴 Large | 4.5 h agent + 2.5 h owner | — | [F-012-T03](#f-012-t03) | 🤖 | — | — |
 
 💻 **→** Next: F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases (Planned).
 
@@ -139,7 +139,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
 | 🟢 Small | <a id="f-006-t03"></a>F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases | 0.25 h | 0 h | 0.25 h | Planned | 🤖 |
-| 🟢 Small | <a id="f-006-t05"></a>F-006-T05 — Draft the Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.25 h | 0 h | 0.25 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-006-t05"></a>F-006-T05 — Draft the Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.25 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending | 🤖 |
 | 🟢 Small | <a id="f-006-t07"></a>F-006-T07 — T02b — Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol | 0.75 h | 0 h | 0.75 h | Planned | 🤖 |
 | 🟢 Small | <a id="f-006-t08"></a>F-006-T08 — T02c — Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-006-T07](#f-006-t07) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-006-t09"></a>F-006-T09 — T03b — Evidence adapter binding both configurations, handoffs, budgets and hosts | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-006-T03](#f-006-t03) | ⏳ 🤖 |
@@ -149,14 +149,14 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-006-t11"></a>F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-006-T17](#f-006-t17) | ⏳ 🧑‍🔧 |
 | 🟢 Small | <a id="f-006-t15"></a>F-006-T15 — Record the evidence of F-006-T11 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T11](#f-006-t11) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T15](#f-006-t15) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-006-t18"></a>F-006-T18 — Approve the Mac operating-conditions plan and budgets | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-006-T05](#f-006-t05) | ⏳ 🤔 |
+| 🟢 Small | <a id="f-006-t18"></a>F-006-T18 — Approve the Mac operating-conditions plan and budgets | — | 0 h | 0 h agent + 0.25 h owner | Ready · waits on [F-006-T05](#f-006-t05) | ⏳ 🤔 |
 | 🟢 Small | <a id="f-006-t13"></a>F-006-T13 — T05b — Three Mac operating-condition runs | — | 0 h | 0 h agent + 1.5 h owner | Planned · waits on [F-006-T18](#f-006-t18) | ⏳ 🧑‍🔧 |
 | 🟢 Small | <a id="f-006-t16"></a>F-006-T16 — Record the evidence of F-006-T13 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T13](#f-006-t13) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-006-t14"></a>F-006-T14 — T05c — Mac operating-conditions report | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T16](#f-006-t16) | ⏳ 🤖 |
 | — | <a id="f-006-t01"></a>F-006-T01 — T01a — Decision: remote inference endpoint identity, permitted data and behaviour when unavailable | 0.5 h | 0.5 h (stated) | 0 h | Completed | 🤖 🤔 |
 | — | <a id="f-006-t02"></a>F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback | 0.5 h | 0.5 h (stated) | 0 h | Completed | 🤖 |
 | — | <a id="f-006-t06"></a>F-006-T06 — T01b — Configuration validation for remote endpoints; the loopback-only local route stays guaranteed; regressions | 0.5 h | 0.5 h (stated) | 0 h | Completed | 🤖 |
-| 🔴 Large | **Total** | 6.25 h (14 of 18 steps) | 1.5 h (3 of 18 steps recorded) | 4.75 h agent + 2.5 h owner | 3 of 18 completed | |
+| 🔴 Large | **Total** | 6.25 h (14 of 18 steps) | 1.75 h (4 of 18 steps recorded) | 4.5 h agent + 2.5 h owner | 3 of 18 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -166,7 +166,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | Queue order | 2 — Owner-selected subsequent NERV work, 2026-11-10; intervening upstream work is tracked in its own repository |
-| PR / evidence | [PR #348](https://github.com/voidbrain/nerv/pull/348) (T02a independent model/worker selection contract, `src/model.ts`, `src/runtime.ts`, `test/orchestration-selection.test.ts`); [PR #347](https://github.com/voidbrain/nerv/pull/347) (T01a agreement & T01b remote inference config validation, `src/model.ts`, `test/remote-inference-config.test.ts`); [PR #296](https://github.com/voidbrain/nerv/pull/296) (T01a remote inference decision: docs/decisions/remote-inference.md); [PR #244](https://github.com/voidbrain/nerv/pull/244) owner-selected queue order; [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Ownership correction/adoption: [PR #235](https://github.com/voidbrain/nerv/pull/235);  Host-load plan: [PR #234](https://github.com/voidbrain/nerv/pull/234);  Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #221](https://github.com/voidbrain/nerv/pull/221) schema/reuse assessment; [Gauntlet ownership/reuse proposal](design/gauntlet-protocol-2026-11-08.md), 2026-11-08; the proposal preceded delivered Gauntlet0.1.1 adoption in PR #223 / F-073; automatic routing/qualification remains unimplemented and no consumer work gates upstream releases; [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| PR / evidence | [PR #416](https://github.com/voidbrain/nerv/pull/416) (T05a Mac operating-conditions plan and budgets, `docs/decisions/mac-operating-conditions.md`); [PR #348](https://github.com/voidbrain/nerv/pull/348) (T02a independent model/worker selection contract, `src/model.ts`, `src/runtime.ts`, `test/orchestration-selection.test.ts`); [PR #347](https://github.com/voidbrain/nerv/pull/347) (T01a agreement & T01b remote inference config validation, `src/model.ts`, `test/remote-inference-config.test.ts`); [PR #296](https://github.com/voidbrain/nerv/pull/296) (T01a remote inference decision: docs/decisions/remote-inference.md); [PR #244](https://github.com/voidbrain/nerv/pull/244) owner-selected queue order; [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Ownership correction/adoption: [PR #235](https://github.com/voidbrain/nerv/pull/235);  Host-load plan: [PR #234](https://github.com/voidbrain/nerv/pull/234);  Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #221](https://github.com/voidbrain/nerv/pull/221) schema/reuse assessment; [Gauntlet ownership/reuse proposal](design/gauntlet-protocol-2026-11-08.md), 2026-11-08; the proposal preceded delivered Gauntlet0.1.1 adoption in PR #223 / F-073; automatic routing/qualification remains unimplemented and no consumer work gates upstream releases; [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Pending acceptance and remote CI where applicable |
 | Reviewed | 2026-11-13 |
@@ -2343,44 +2343,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-13 |
 | Verification | Unit/integration 2026-11-13: the focused missing-build and build-present regressions pass; full suite and CI pending. |
 | Reviewed | 2026-11-13 |
-
-</details>
-
----
-### <a id="b-065"></a>[🐞 B-065](#top)
-
-**A revoked base is drawn on the map and listed as offline**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | — | — | — |
-
-💻 **→** Next: once the PR's CI is green and merged, verify and close from that run (B-065-T01 implemented).
-
-| | |
-|---|---|
-| **Issue** | Owner report 2026-11-14: the dashboard map still shows "Local acceptance" (`MAC-ACCEPTANCE`), revoked on 2026-11-11 (registry serial 5). The registry marks it `revoked` (`src/kaji.ts`), but the live dashboard maps a revoked base to `offline` (`web/public/dashboard/live.js:500`) and draws it on the map and in the base list like any unreachable base. |
-| **Reproduce** | With a revoked base in the registry, open the dashboard: it appears on the Kaji line map and in the base list as offline. |
-| **Check** | A committed test fails first; a revoked base is not drawn on the map and not counted in "n/m online"; if listed at all it is labelled revoked, apart from live bases; the registry keeps its record (append-only). |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-065-t01"></a>B-065-T01 — Hide revoked bases from the map | 0.5 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 0.5 h | 0.25 h | 0 h | 0 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-065.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Owner report 2026-11-14; [PR #409](https://github.com/voidbrain/nerv/pull/409); [PR #415](https://github.com/voidbrain/nerv/pull/415) |
-| Opened | 2026-11-14 |
-| Verification | Pending. |
-| Reviewed | 2026-11-14 |
 
 </details>
 

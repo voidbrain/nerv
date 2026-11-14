@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-006",
   "id": "F-006-T18",
-  "status": "planned",
+  "status": "ready",
   "title": "Approve the Mac operating-conditions plan and budgets",
   "goal": "Approve the Mac operating-conditions plan and budgets",
   "capabilities": [
@@ -44,5 +44,5 @@
     "agentHours": 0,
     "ownerKind": "decision"
   },
-  "ownerLink": "docs/evaluations/mac-load-scenarios.md#planned-acceptance-not-new-qualification"
+  "ownerLink": "docs/decisions/mac-operating-conditions.md"
 }
