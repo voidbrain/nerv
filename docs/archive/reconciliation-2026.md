@@ -414,3 +414,7 @@ Record-level dependencies moved to steps (owner decision): F-021-T03 and F-027-T
 Owner plan for FPV and cooking: F-008 rescoped to batteries inside NERV (T05–T12; the app-adapter steps T01–T04 superseded); new F-098 fleet diary, F-099 build knowledge, F-100 blackbox, F-101 sharing; F-083 gains T05–T09.
 
 - Requirements, proposed defaults for the owner's decisions and the sharing options: [design note](../design/fpv-and-cooking-plan-2026-11-14.md). Implementation steps at 0.75 h (harness 8.14.3); feasibility first for F-099 and F-100.
+
+## 2026-11-14 — main `4bf3d35`
+
+Owner follow-ups: B-065 (a revoked base drawn on the map as offline), F-102 (scheduled automatic updates with advance notice), F-083-T10 (recipe photos), F-008 unparked to P2.

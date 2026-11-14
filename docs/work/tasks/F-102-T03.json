@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "F-102-T03",
+  "parent": "F-102",
+  "title": "Apply at the announced time and report",
+  "goal": "At the time, the update runs through the safe lifecycle path and the result is reported",
+  "status": "planned",
+  "acceptance": [
+    "Uses the existing automatic policy and lifecycle update; reports applied, refused (with reason and next try) or failed (with recovery)",
+    "Restart and after-start health check in the report"
+  ],
+  "dependsOn": [
+    "F-102-T02"
+  ],
+  "resources": [
+    "src/**",
+    "test/**"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Local only; tests use invented bases, revisions and recipes.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h agent",
+    "basis": "Estimated 2026-11-14 at agent speed (harness 8.14.3: implementation steps 0.75 h, small fixes 0.5 h). Not a measurement.",
+    "reviewed": "2026-11-14",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  }
+}
