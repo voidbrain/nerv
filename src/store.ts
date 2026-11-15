@@ -16,6 +16,7 @@ import { builtinTools, execute, hasExecutor, type AgencyBaseSnapshot, type Agenc
 import { MEMORY_SCHEMA, Memory, suggestSpellingFix, type Episode } from './memory.ts';
 import { BATTERY_SCHEMA, BatteryRegistry } from './batteries.ts';
 import { LISTS_SCHEMA, ListStore } from './lists.ts';
+import { DOCUMENTS_SCHEMA, DocumentStore } from './documents.ts';
 import { Registry, REGISTRY_SCHEMA } from './kaji.ts';
 import { MILESTONE_SCHEMA } from './milestones.ts';
 import { RESUME_INTENT_SCHEMA, ResumeIntentStore } from './resume-intent.ts';
@@ -96,6 +97,7 @@ export class Store {
   readonly batteries: BatteryRegistry;
   readonly resumeIntents: ResumeIntentStore;
   readonly lists: ListStore;
+  readonly documents: DocumentStore;
   readonly policySource: string;
   pushFetch: typeof fetch = fetch;
   /** The data home, when known: the schedule tool writes config.json there. */
@@ -141,6 +143,7 @@ export class Store {
       this.db.exec('ALTER TABLE events ADD COLUMN v INTEGER NOT NULL DEFAULT 1');
     // Schema 4: Lilith's facts, their append-only history and the FTS5 index (F-022).
     this.db.exec(MEMORY_SCHEMA);
+    this.db.exec(DOCUMENTS_SCHEMA);
     // The Gehirn registry of bases for the Kaji line (F-036): signed, append-only records; an additive table, no version change.
     this.db.exec(REGISTRY_SCHEMA);
     // F-054-T04, additive: milestones recorded from now on (first online, outages and recoveries, promotions).
@@ -193,6 +196,8 @@ export class Store {
     this.batteries = new BatteryRegistry(this.db);
     this.resumeIntents = new ResumeIntentStore(this.db);
     this.lists = new ListStore(this.db);
+    this.db.exec(DOCUMENTS_SCHEMA);
+    this.documents = new DocumentStore(this.db);
     this.watch = new Watch(this.db, this.ledger);
     this.policySource = scrolls.source;
     this.db.exec(
