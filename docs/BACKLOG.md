@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 85.25 h agent + 24 h owner across 193 open steps of 51 features and 5 other records. 32 h of actual effort recorded on 66 steps. Generated from the task files.
+**Remaining effort:** 84.75 h agent + 24 h owner across 192 open steps of 51 features and 5 other records. 32.25 h of actual effort recorded on 67 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1177,9 +1177,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h agent + 0.25 h owner | — | [F-091-T01](#f-091-t01) | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.5 h agent + 0.25 h owner | — | [F-091-T01](#f-091-t01) | 🤖 | — | — |
 
-💻 **→** Next: F-084-T01 — Decision: the coding-job contract (Ready).
+💻 **→** Next: F-084-T02 — Run the change in a fresh worktree (Planned).
 
 | | |
 |---|---|
@@ -1191,11 +1191,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-084-t01"></a>F-084-T01 — Decision: the coding-job contract | 0.5 h | 0 h | 0.5 h | Ready | 🤖 |
-| 🟡 Medium | <a id="f-084-t02"></a>F-084-T02 — Run the change in a fresh worktree | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-084-T01](#f-084-t01) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-084-t02"></a>F-084-T02 — Run the change in a fresh worktree | 1.5 h | 0 h | 1.5 h | Planned | 🤖 |
 | 🟢 Small | <a id="f-084-t03"></a>F-084-T03 — Push and open the PR behind approval | 1 h | 0 h | 1 h | Planned · waits on [F-084-T02](#f-084-t02) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-084-t04"></a>F-084-T04 — Owner check on a scratch repository | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-084-T03](#f-084-t03) | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 3 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 3 h agent + 0.25 h owner | 0 of 4 completed | |
+| — | <a id="f-084-t01"></a>F-084-T01 — Decision: the coding-job contract | 0.5 h | 0.25 h (measured) | 0 h | Completed | 🤖 |
+| 🟡 Medium | **Total** | 3 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 2.5 h agent + 0.25 h owner | 1 of 4 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1206,7 +1206,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
-| Verification | Pending. |
+| Verification | `F-084-T01` decision written in [coding-job-contract.md](decisions/coding-job-contract.md); verified with `npm run check:fast`. |
 | Reviewed | 2026-11-14 |
 
 </details>
