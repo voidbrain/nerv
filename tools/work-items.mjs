@@ -509,7 +509,9 @@ function featurePlan(text, id, tasks, repository, ownerHref = (link) => link) {
   const evidence = steps.some((t) => t.prs?.length);
   // F-071: Procedure and Decision columns when a step asks for owner work, linked to the step's ownerLink page;
   // a step waiting on an open step of another record names it in its status.
-  const owners = steps.some((t) => t.effort?.ownerKind);
+  const owners = steps.some(
+    (t) => t.effort?.ownerKind || (t.status === 'implemented' && (t.effort?.ownerHours ?? 0) > 0),
+  );
   const finished = new Set(tasks.filter((t) => ['closed', 'verified'].includes(t.status)).map((t) => t.id));
   // F-072 (8.9.0): an owner step whose prerequisites are not all verified or closed is not the owner's turn yet: ⏳
   // in its owner column and the steps it waits on in its status; 🤖 marks a step with agent work.
@@ -519,16 +521,22 @@ function featurePlan(text, id, tasks, repository, ownerHref = (link) => link) {
   // split shows each actor it has.
   const face = (t, icon) =>
     unmet(t).length ? `${WAITING} ${icon}` : t.ownerLink ? `[${icon}](${ownerHref(t.ownerLink)})` : icon;
+  // 8.16.0: once implemented, the cell names who the remaining work waits on: the owner while owner hours remain
+  // (🧑 when the step names no ownerKind), 🤖 while agent hours remain or nobody else is named (the agent reconciles
+  // the evidence); the baseline no longer marks agent work then. Verified and closed steps move to the done table.
   const who = (t) => {
-    const k = t.effort?.ownerKind;
+    const e = t.effort ?? {};
+    const k = e.ownerKind;
+    const built = t.status === 'implemented';
+    const owed = (e.ownerHours ?? 0) > 0;
+    const agent = built
+      ? (e.agentHours ?? 0) > 0 || !owed
+      : !k || (e.agentHours ?? 0) > 0 || (e.baselineAgentHours ?? 0) > 0;
     return [
-      !k || (t.effort?.agentHours ?? 0) > 0 || (t.effort?.baselineAgentHours ?? 0) > 0
-        ? unmet(t).length
-          ? `${WAITING} ${AGENT}`
-          : AGENT
-        : null,
-      ['procedure', 'both'].includes(k) ? face(t, PROCEDURE) : null,
-      ['decision', 'both'].includes(k) ? face(t, DECISION) : null,
+      agent ? (unmet(t).length ? `${WAITING} ${AGENT}` : AGENT) : null,
+      ['procedure', 'both'].includes(k) && (!built || owed) ? face(t, PROCEDURE) : null,
+      ['decision', 'both'].includes(k) && (!built || owed) ? face(t, DECISION) : null,
+      built && !k && owed ? face(t, OWNER) : null,
     ]
       .filter(Boolean)
       .join(' ');
@@ -560,9 +568,23 @@ function featurePlan(text, id, tasks, repository, ownerHref = (link) => link) {
     left.delete(next.id);
   }
   // Compact table (F-055): one line per step; dated basis lives in the per-record / task files.
+  // 8.16.0: verified and closed steps leave the main table for a collapsed done table below it; the total row
+  // still counts every step.
+  const finishedRows = ordered.filter(done);
+  const doneTable = finishedRows.length
+    ? `<details><summary>Done steps (${finishedRows.length})</summary>\n\n| Effort | Step | Estimate | Actual | Status |${evidence ? ' PRs |' : ''}\n|---|---|---|---|---|${evidence ? '---|' : ''}\n` +
+      finishedRows
+        .map(
+          (t) =>
+            `| ${stepSize(t)} | <a id="${t.id.toLowerCase()}"></a>${t.id} — ${cell(t.title)} | ${stepEstimate(t.effort)} | ${stepActual(t)} | ${states[t.status]} |${evidence ? ` ${prText(t, repository) || '—'} |` : ''}`,
+        )
+        .join('\n') +
+      '\n\n</details>\n\n'
+    : '';
   const table =
     `**${id.startsWith('F-') ? 'Feature steps' : 'Steps'}**\n\n| Effort | Step | Estimate | Actual | Remaining | Status |${owners ? ' Who |' : ''}${evidence ? ' PRs |' : ''}\n|---|---|---|---|---|---|${owners ? ':---:|' : ''}${evidence ? '---|' : ''}\n` +
     ordered
+      .filter((t) => !done(t))
       .map(
         (t) =>
           `| ${stepSize(t)} | <a id="${t.id.toLowerCase()}"></a>${t.id} — ${cell(t.title)} | ${stepEstimate(t.effort)} | ${stepActual(t)} | ${stepRemaining(t.effort, t.status)} | ${status(t)} |${owners ? ` ${who(t)} |` : ''}${evidence ? ` ${prText(t, repository) || '—'} |` : ''}`,
@@ -572,7 +594,8 @@ function featurePlan(text, id, tasks, repository, ownerHref = (link) => link) {
     totalRow(steps) +
     (owners ? ' |' : '') +
     (evidence ? ' |' : '') +
-    '\n\n';
+    '\n\n' +
+    doneTable;
   // The record's own details block is a line holding only <details>; a mention of the tag inside a cell is not.
   const details = /^<details>\n(?:<summary>[^\n]*<\/summary>\n)?/m.exec(text);
   if (!details) throw Error('Feature plan requires record details: ' + id);
@@ -685,7 +708,9 @@ export const HUMAN_LINE = /^(🧑|💻) \*\*→ Human action required: (Procedur
 export const PROCEDURE = '🧑‍🔧',
   DECISION = '🤔',
   AGENT = '🤖',
-  WAITING = '⏳';
+  WAITING = '⏳',
+  // 8.16.0: owner work whose step names no ownerKind (procedure or decision unknown).
+  OWNER = '🧑';
 export const humanCells = (kind) => [
   ['Procedure', 'Both'].includes(kind) ? PROCEDURE : '—',
   ['Decision', 'Both'].includes(kind) ? DECISION : '—',

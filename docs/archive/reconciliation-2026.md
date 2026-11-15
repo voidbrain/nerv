@@ -430,3 +430,9 @@ PRs #410–#413 passed CI (B-054, B-060, B-061, B-064 closed & archived); B-066 
 ## 2026-11-15 — main `49a9d88`
 
 PRs #414–#426 merged on green CI and their owning records are current. Harness 8.15.0 and Gauntlet 0.9.0 reconciled; the new focused packs remain pending under F-078-T08, and F-097 retains the seven source-changed system reruns. This update is PR #427.
+
+## 2026-11-15 — main `fe91bc4`
+
+PRs #427–#450 reconciled on green CI: nine records closed and archived, F-095 and F-048 get new steps. Harness 8.16.0 reconciled; 16 steps re-estimated; F-103 and F-104 opened. F-097 retains the seven system reruns. This update is PR #TBD.
+
+Closed: F-020, F-044, F-050, F-054, F-064, F-065, F-077, F-080, F-096 (six PRs skipped only the optional full suite). F-095-T06: cli.ts, runtime.ts and server.ts still over 1,000 lines. F-048-T04: the owner extension had no step. 8.16.0: Who cell of implemented steps and the done steps table; F-005-T15 names its owner procedure. Re-estimation (owner-approved): 16 product steps to 0.5 h from the calibration. F-103: service health and link load between bases; F-104: architecture and token cost compared with outside systems.

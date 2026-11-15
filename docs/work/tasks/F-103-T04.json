@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "F-103-T04",
+  "parent": "F-103",
+  "title": "24-hour baseline with both bases",
+  "goal": "The owner runs both bases for a day and reads the baseline",
+  "status": "planned",
+  "acceptance": [
+    "Baseline numbers recorded in the record"
+  ],
+  "dependsOn": [
+    "F-103-T03"
+  ],
+  "resources": [
+    "docs/work/records/F-103.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run typecheck",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-15 at agent speed after the calibration of 2026-11-15. Not a measurement.",
+    "reviewed": "2026-11-15",
+    "agentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  }
+}

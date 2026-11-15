@@ -12,6 +12,8 @@ const kindOf = (pair) => {
 };
 
 const text = readFileSync(new URL('../docs/BACKLOG.md', import.meta.url), 'utf8');
+// 8.16.0 (F-081): the generated Done steps table is a <details> block of its own; record checks read the ledger without it.
+const records = text.replace(/^<details><summary>Done steps \(\d+\)<\/summary>\n[\s\S]*?^<\/details>\n\n/gm, '');
 const cells = (line) =>
   line
     .split(/(?<!\\)\|/)
@@ -49,7 +51,7 @@ const branch =
 const mainText = git('show', `origin/${branch}:docs/BACKLOG.md`) ?? '';
 // docs/BACKLOG-RULES.md is the procedure this enforces; an empty ledger is valid.
 const HEADING_RE = /^### (?:<a id="[fb]-\d+"><\/a>)?(?:\[(?:✨|🐞) )?([BF]-\d+)(?:\]\(#top\))?$/;
-const headings = [...text.matchAll(new RegExp(HEADING_RE.source, 'gm'))];
+const headings = [...records.matchAll(new RegExp(HEADING_RE.source, 'gm'))];
 const ids = new Set();
 // Evidence the rules ask for once a record is done (BACKLOG-RULES, Record and evidence requirements): warnings, not
 // failures, and only for a record this branch makes done (Verified or Closed here, not on the default branch), so records
@@ -76,7 +78,7 @@ for (let i = 0; i < headings.length; i++) {
   const id = headings[i][1];
   assert(!ids.has(id), `Duplicate ${id}`);
   ids.add(id);
-  const block = text.slice(headings[i].index, headings[i + 1]?.index ?? text.length);
+  const block = records.slice(headings[i].index, headings[i + 1]?.index ?? records.length);
   const row = block
     .split('\n')
     .find((line) => line.startsWith('|') && Object.values(cues).includes(unmerge(cells(line))[0]));
@@ -192,8 +194,8 @@ for (let i = 0; i < headings.length; i++) {
       );
   }
 }
-assert.equal((text.match(/<details>/g) ?? []).length, headings.length, 'Metadata details count');
-assert.equal((text.match(/<\/details>/g) ?? []).length, headings.length, 'Unbalanced metadata details');
+assert.equal((records.match(/<details>/g) ?? []).length, headings.length, 'Metadata details count');
+assert.equal((records.match(/<\/details>/g) ?? []).length, headings.length, 'Unbalanced metadata details');
 // Archives only grow: every line the archives have on the published default branch is still in one of them, unchanged,
 // so a rewrite that drops or edits history fails here instead of on review. A record may move from one archive file to
 // another (a file's own title and section headings may go with it); a correction is a dated note added, never an edit.
@@ -290,7 +292,7 @@ for (let i = 0; i < headings.length; i++) {
   const source = new URL(`../docs/work/records/${id}.md`, import.meta.url);
   const body = existsSync(source)
     ? readFileSync(source, 'utf8')
-    : text.slice(headings[i].index, headings[i + 1]?.index ?? text.length);
+    : records.slice(headings[i].index, headings[i + 1]?.index ?? records.length);
   const tokens = Math.ceil(body.length / 4);
   if (tokens > recordBudget)
     warnings.push(

@@ -14,6 +14,8 @@ Moved to [upfront feature plans](feature-plans.md): "Optional upfront feature pl
 - The record summary gains an Agent cell before Procedures and Decisions: 🤖 a planned or ready step with agent work can start now, ⏳ such steps all wait, — none (shown with feature plans only).
 - Steps are listed in the order work can happen (8.11.0): those that can move now, then waiting steps, each below every prerequisite it has in the record, then verified and closed steps; each row has an anchor, and `waits on` and the Depends on / Unlocks cells link to the step's row.
 - The Who cell marks steps with agent work (🤖, ⏳ 🤖 while the step waits): every step without `ownerKind`, and an owner step with agent hours too (set `effort.agentHours`, or it shows only its owner face).
+- Once a step is implemented, its Who cell names who the remaining work waits on (8.16.0): the owner's face while `ownerHours` remain (🧑 when the step names no `ownerKind`; prefer setting it; planned and ready steps keep their faces), 🤖 while agent hours remain or nobody else is owed. The baseline no longer marks agent work then.
+- Verified and closed steps leave the steps table for a collapsed `Done steps (n)` table below it (8.16.0); the total row still counts every step.
 - An owner step whose prerequisites are not all verified or closed is not the owner's turn yet: it shows ⏳ before its face in the Who cell and `waits on <step>` in its status (every open prerequisite, in the record or another, linked to its row), and gets its face once it is (8.9.0).
 - Every owner step whose turn it is has a page; `check:work` lists those without.
 - A waiting step's page is written by the step that makes it runnable, never ahead of the code.
