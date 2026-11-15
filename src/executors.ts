@@ -3,6 +3,7 @@ import type { Approval, SortieSummary } from './ledger.ts';
 import type { Reminder, ReminderInput } from './store.ts';
 import type { ToolDoc } from './misato.ts';
 import type { Memory } from './memory.ts';
+import type { ListStore } from './lists.ts';
 import { readConfig, savePilots, setSchedule } from './config.ts';
 import { STAGES, applyPilotToolChange, mergePilots, nextStage, splitPilot, updatePilot, type Stage } from './pilots.ts';
 import { reconcileReminderArgs } from './reminder-time.ts';
@@ -52,6 +53,7 @@ export interface ReminderBackend {
   reminderDefaults?(): { timeZone: string; briefAt: string; language: 'en' | 'it' };
   memory: Memory;
   batteries?: import('./batteries.ts').BatteryRegistry;
+  lists?: ListStore;
   home?: string;
   /** F-036 slice 3b: queues one action for another base; the coordinator sends it over the Kaji line. */
   queueRemote?(
@@ -85,6 +87,11 @@ export const builtinTools: Tool[] = [
   { name: 'pilots.split', effect: 'write-local', owner: true },
   { name: 'pilots.merge', effect: 'write-local', owner: true },
   { name: 'pilots.tools', effect: 'write-local', owner: true },
+  // F-082: owner's local lists are Green for the owner's own lists.
+  { name: 'lists.add_items', effect: 'write-local', inverse: 'lists.remove_item' },
+  { name: 'lists.show', effect: 'read' },
+  { name: 'lists.set_done', effect: 'write-local', inverse: 'lists.set_done' },
+  { name: 'lists.remove_item', effect: 'write-local', inverse: 'lists.add_items' },
   // F-036 slice 3b: one action on another base. Owner-only for now (always a card); that base's own gate reviews it again.
   { name: 'kaji.run', effect: 'write-external', owner: true },
   // F-008-T07: FPV battery state & cycles via chat.
@@ -160,6 +167,30 @@ export const toolDocs: ToolDoc[] = [
     effect: 'write-local',
     about: 'Forgets a fact by its id from memory.recall or the memory list.',
     args: '{"id": fact id}',
+  },
+  {
+    name: 'lists.add_items',
+    effect: 'write-local',
+    about: 'Adds one or more items to a named local checklist, creating it on first use and reporting duplicates.',
+    args: '{"list": list name, "items": [non-empty strings]}',
+  },
+  {
+    name: 'lists.show',
+    effect: 'read',
+    about: 'Shows all items of a named list, or lists all local checklists when no name is given.',
+    args: '{"list"?: list name}',
+  },
+  {
+    name: 'lists.set_done',
+    effect: 'write-local',
+    about: 'Marks an item done or undone in a named list by item text or id.',
+    args: '{"list": list name, "item": item text or id, "done": boolean}',
+  },
+  {
+    name: 'lists.remove_item',
+    effect: 'write-local',
+    about: 'Removes an item from a named list by item text or id.',
+    args: '{"list": list name, "item": item text or id}',
   },
   {
     name: 'sorties.explain',
@@ -584,6 +615,32 @@ export function execute(
         id: q.id,
         note: 'Sent over the Kaji line; its result follows as a message.',
       };
+    }
+    case 'lists.add_items': {
+      only(args, ['list', 'items']);
+      if (!backend.lists) throw new Error('Lists store is not available.');
+      const list = text(args, 'list');
+      if (!Array.isArray(args.items) || args.items.some((x) => typeof x !== 'string')) {
+        throw new Error('items must be an array of strings.');
+      }
+      return backend.lists.addItems(list, args.items as string[]);
+    }
+    case 'lists.show': {
+      only(args, ['list']);
+      if (!backend.lists) throw new Error('Lists store is not available.');
+      if (args.list === undefined) return { lists: backend.lists.listAll() };
+      return backend.lists.show(text(args, 'list')) ?? { list: null, items: [] };
+    }
+    case 'lists.set_done': {
+      only(args, ['list', 'item', 'done']);
+      if (!backend.lists) throw new Error('Lists store is not available.');
+      if (typeof args.done !== 'boolean') throw new Error('done must be a boolean.');
+      return backend.lists.setDone(text(args, 'list'), text(args, 'item'), args.done);
+    }
+    case 'lists.remove_item': {
+      only(args, ['list', 'item']);
+      if (!backend.lists) throw new Error('Lists store is not available.');
+      return backend.lists.removeItem(text(args, 'list'), text(args, 'item'));
     }
     default:
       throw new Error('No executor for this tool.');

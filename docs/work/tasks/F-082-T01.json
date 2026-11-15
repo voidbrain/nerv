@@ -4,7 +4,7 @@
  "parent": "F-082",
  "title": "List store and list tools",
  "goal": "Lists and items persist in SQLite and are reachable as gated tools",
- "status": "ready",
+ "status": "closed",
  "acceptance": [
   "lists.add_items, lists.show, lists.set_done and lists.remove_item exist as tools with gate classes (Green for the owner's own lists)",
   "Several items in one request become separate items; a duplicate is reported, not added twice",
@@ -31,10 +31,12 @@
  ],
  "effort": {
   "size": "small",
-  "estimate": "1 h",
+  "estimate": "0 hours",
   "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
   "reviewed": "2026-11-14",
-  "agentHours": 1,
+  "agentHours": 0,
+  "actualAgentHours": 0.5,
+  "actualSource": "stated",
   "baselineAgentHours": 1,
   "estimateAgentHours": 1
  }

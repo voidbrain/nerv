@@ -15,6 +15,7 @@ import { LEDGER_SCHEMA, Ledger, type Decision, type Proposal } from './ledger.ts
 import { builtinTools, execute, hasExecutor, type AgencyBaseSnapshot, type AgencySnapshot } from './executors.ts';
 import { MEMORY_SCHEMA, Memory, suggestSpellingFix, type Episode } from './memory.ts';
 import { BATTERY_SCHEMA, BatteryRegistry } from './batteries.ts';
+import { LISTS_SCHEMA, ListStore } from './lists.ts';
 import { Registry, REGISTRY_SCHEMA } from './kaji.ts';
 import { MILESTONE_SCHEMA } from './milestones.ts';
 import { RESUME_INTENT_SCHEMA, ResumeIntentStore } from './resume-intent.ts';
@@ -94,6 +95,7 @@ export class Store {
   readonly memory: Memory;
   readonly batteries: BatteryRegistry;
   readonly resumeIntents: ResumeIntentStore;
+  readonly lists: ListStore;
   readonly policySource: string;
   pushFetch: typeof fetch = fetch;
   /** The data home, when known: the schedule tool writes config.json there. */
@@ -184,11 +186,13 @@ export class Store {
        CREATE TABLE IF NOT EXISTS push_vapid(id TEXT PRIMARY KEY, public_key TEXT NOT NULL, private_key TEXT NOT NULL, created TEXT NOT NULL);`,
     );
     this.db.exec(RESUME_INTENT_SCHEMA);
+    this.db.exec(LISTS_SCHEMA);
     this.ledger = new Ledger(this.db, { policy: scrolls.policy, tools: builtinTools });
     this.memory = new Memory(this.db);
     this.db.exec(BATTERY_SCHEMA);
     this.batteries = new BatteryRegistry(this.db);
     this.resumeIntents = new ResumeIntentStore(this.db);
+    this.lists = new ListStore(this.db);
     this.watch = new Watch(this.db, this.ledger);
     this.policySource = scrolls.source;
     this.db.exec(
