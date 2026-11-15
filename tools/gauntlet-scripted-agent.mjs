@@ -20,6 +20,7 @@ export function scriptedEvidence(configuration, budget, current) {
     caseHash: hash(current),
     fixtureHash: hash({ case: current.id, sequence, stepLimit: 4 }),
     configurationHash: hash(configuration),
+    modelDigest: hash('nerv-scripted-agent-v1'),
     runtimeIdentity: 'nerv-scripted-agent-v1',
     sourceStable: true,
     complete: true,
