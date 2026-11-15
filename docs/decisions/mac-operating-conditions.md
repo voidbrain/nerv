@@ -1,6 +1,6 @@
 # Mac operating-conditions plan and budgets (F-006-T05)
 
-**Status: approved by the owner on 15 November 2026 (F-006-T18) with 3 runs per case and gemma4:12b as the constant model; F-006-T20 restates the budgets below for that; proposed 14 November 2026 (F-006-T05); and three-condition execution in F-006-T08.** References [NERV host assignments and load acceptance](../evaluations/mac-load-scenarios.md) and the released Gauntlet scenario definitions under `node_modules/@voidbrain/gauntlet-protocol/examples/scenarios/`.
+**Status: approved by the owner on 15 November 2026 (F-006-T18) with `repeat: 3` (3 runs per case) and `gemma4:12b` as the constant model; F-006-T20 restated the budgets, stop rules, and dry-run/execution plans below; proposed 14 November 2026 (F-006-T05); three-condition execution in F-006-T08.** References [NERV host assignments and load acceptance](../evaluations/mac-load-scenarios.md) and the released Gauntlet scenario definitions under `node_modules/@voidbrain/gauntlet-protocol/examples/scenarios/`.
 
 ## 1. Three comparable Mac operating conditions
 
@@ -19,30 +19,30 @@ Each condition uses the matching released Gauntlet 0.3 scenario JSON as its load
 To isolate host-load impact rather than comparing different models or prompts, hold every variable below identical across `heavy-load`, `moderate-load`, and `minimal-load`:
 
 1. **Private machine profile (`--machine-profile`)**: Generated once on the evaluation Mac outside git (`node tools/gauntlet.mjs machine --id=mac-local > "$HOME/.nerv-private/mac-local.json"`) and reused unchanged across all three conditions.
-2. **Model profile (`--profile`)**: One identical private profile JSON on local loopback S² (`http://127.0.0.1:11434`, Ollama), with fixed model tag (for example `gemma4:e2b-it-q4_K_M` or the owner-selected `gemma4:12b` profile), `parallel: 1`, context window, output token cap, `seed`, thinking setting, and temperature (`0`).
-3. **Runtime & model digest**: Same installed Ollama version and model digest across all three conditions (verified in each report).
-4. **Cases & deterministic grader (`--fresh`)**:
-   - **Common smoke pack**: `neutral-smoke` (`model-run --pack=neutral-smoke`, 10 cases) using `--limits=node_modules/@voidbrain/gauntlet-protocol/examples/limits-day.json` (`repeat: 1`).
-   - **NERV role bundle**: `role-run --role=both` (5 Casper + 5 Misato cases = 10 cases) using the same `limits-day.json` (`maxCases: 10`, `repeat: 1`).
+2. **Model profile (`--profile`)**: One identical private profile JSON on local loopback S² (`http://127.0.0.1:11434`, Ollama) fixed to **`gemma4:12b`**, `parallel: 1`, context window, output token cap, `seed`, thinking setting, and temperature (`0`).
+3. **Runtime & model digest**: Same installed Ollama version and `gemma4:12b` model digest across all three conditions (verified in each report).
+4. **Cases & deterministic grader (`--fresh`, `repeat: 3`)**:
+   - **Common smoke pack**: `neutral-smoke` (`model-run --pack=neutral-smoke`, 10 cases × 3 repeats = 30 runs) using `$HOME/.nerv-private/limits-repeat3.json` (`repeat: 3`).
+   - **NERV role bundle**: `role-run --role=both` (5 Casper + 5 Misato cases = 10 cases × 3 repeats = 30 runs) using the same `limits-repeat3.json` (`maxCases: 10`, `repeat: 3`).
    - Pass `--fresh` on each run so cached results from an earlier condition are never reused across scenarios.
 5. **Power state**: Keep the Mac on **AC power** for all three runs so battery-saver CPU/GPU throttling does not confound load comparison. (Battery behaviour, if ever needed, is a separate run.)
 6. **Telemetry sampling**: Pass `--sample-ms=1000` on `model-run` so memory/GPU/daemon samples use the same 1 s cadence across all three conditions (noting the sampling overhead disclosure from [the 9 Nov smoke review](../evaluations/2026-11-09-gemma-common-smoke.md)).
 
 ## 3. Explicit budgets and stop rules
 
-| Budget dimension | Per-condition limit (common smoke) | Per-condition limit (role bundle) | Aggregate ceiling (all 3 conditions) |
+| Budget dimension | Per-condition limit (common smoke, `repeat: 3`) | Per-condition limit (role bundle, `repeat: 3`) | Aggregate ceiling (all 3 conditions) |
 |---|---|---|---|
-| **Cases (`repeat: 1`)** | 10 cases | 10 cases (5 Casper + 5 Misato) | 60 model cases total (20 × 3 conditions) |
-| **Per-case timeout (`caseMs`)** | 30 s (`30000` ms) | 30 s (`30000` ms) | 30 s/case hard cap (`limits-day.json`) |
-| **Suite wall-clock cap (`suiteMs`)** | 5 min (`300000` ms) | 5 min (`300000` ms) | **30 min active evaluation time** across all 3 runs |
-| **Output token cap (`outputTokens`)** | 20,480 tokens | 20,480 tokens | 122,880 tokens max (expected < 15,000 total based on 1,608/10 cases in the 9 Nov smoke) |
-| **Artifact size (`maxBytes`)** | 1 MiB (`1048576` B) | 1 MiB (`1048576` B) | 1 MiB/report (`limits-day.json`) |
+| **Cases (`repeat: 3`)** | 10 cases × 3 = 30 runs | 10 cases × 3 = 30 runs (5 Casper + 5 Misato) | **180 model case runs total** (20 × 3 repeats × 3 conditions) |
+| **Per-case timeout (`caseMs`)** | 30 s (`30000` ms) | 30 s (`30000` ms) | 30 s/run hard cap (`limits-repeat3.json`) |
+| **Suite wall-clock cap (`suiteMs`)** | 15 min (`900000` ms) | 15 min (`900000` ms) | **~1.5 h (90 min) active evaluation time** across all 3 runs (**135 min / 2 h 15 min** wall-clock cap) |
+| **Output token cap (`outputTokens`)** | 61,440 tokens | 61,440 tokens | 368,640 tokens max (expected < 45,000 total based on 1,608/10 cases in the 9 Nov smoke) |
+| **Artifact size (`maxBytes`)** | 1 MiB (`1048576` B) | 1 MiB (`1048576` B) | 1 MiB/report (`limits-repeat3.json`) |
 
 - **Monetary budget**: Local loopback Ollama only (`models.cloud` stays off); no paid cloud API tokens are authorized.
 - **Stop rules (abort immediately without retrying)**:
   1. Owner desktop responsiveness degrades unacceptably during `heavy-load` or `moderate-load` (for example audio/video call stutters or editor input lags).
   2. macOS thermal state reaches critical or sustained swap thrashing locks up the UI.
-  3. Any run stalls on 3 consecutive case timeouts (`caseMs`), or total elapsed campaign time reaches **45 min** wall clock including cooldown between conditions.
+  3. Any run stalls on 3 consecutive case timeouts (`caseMs`), or total elapsed campaign time reaches **135 min (2 h 15 min)** wall clock including cooldown between conditions.
 
 ## 4. Owner execution workflow (after F-006-T18 approval)
 
@@ -55,20 +55,31 @@ mkdir -p "$HOME/.nerv-private/reports"
 node tools/gauntlet.mjs machine --id=mac-local > "$HOME/.nerv-private/mac-local.json"
 ```
 
-### Step B — Plan first (zero model calls) to verify profile, scenario, and budget
+### Step B — Plan first (`repeat: 3`, zero model calls) to verify `gemma4:12b` profile, scenario, and budget
 
 ```bash
+cat > "$HOME/.nerv-private/limits-repeat3.json" <<'EOF'
+{
+  "caseMs": 30000,
+  "suiteMs": 900000,
+  "maxCases": 10,
+  "repeat": 3,
+  "outputTokens": 61440,
+  "maxBytes": 1048576
+}
+EOF
+
 for cond in heavy-load moderate-load minimal-load; do
   node tools/gauntlet.mjs model-plan \
     --pack=neutral-smoke \
-    --profile="$HOME/.nerv-private/profile.json" \
-    --limits=node_modules/@voidbrain/gauntlet-protocol/examples/limits-day.json \
+    --profile="$HOME/.nerv-private/profile-gemma4-12b.json" \
+    --limits="$HOME/.nerv-private/limits-repeat3.json" \
     --machine-profile="$HOME/.nerv-private/mac-local.json" \
     --scenario="node_modules/@voidbrain/gauntlet-protocol/examples/scenarios/${cond}.json"
   node tools/gauntlet.mjs role-plan \
     --role=both \
-    --profile="$HOME/.nerv-private/profile.json" \
-    --limits=node_modules/@voidbrain/gauntlet-protocol/examples/limits-day.json \
+    --profile="$HOME/.nerv-private/profile-gemma4-12b.json" \
+    --limits="$HOME/.nerv-private/limits-repeat3.json" \
     --machine-profile="$HOME/.nerv-private/mac-local.json" \
     --scenario="node_modules/@voidbrain/gauntlet-protocol/examples/scenarios/${cond}.json"
 done
@@ -82,8 +93,8 @@ Run one condition at a time when the Mac is actually in that state (`heavy-load`
 COND=heavy-load # repeat with: moderate-load, minimal-load
 node tools/gauntlet.mjs model-run \
   --pack=neutral-smoke \
-  --profile="$HOME/.nerv-private/profile.json" \
-  --limits=node_modules/@voidbrain/gauntlet-protocol/examples/limits-day.json \
+  --profile="$HOME/.nerv-private/profile-gemma4-12b.json" \
+  --limits="$HOME/.nerv-private/limits-repeat3.json" \
   --machine-profile="$HOME/.nerv-private/mac-local.json" \
   --scenario="node_modules/@voidbrain/gauntlet-protocol/examples/scenarios/${COND}.json" \
   --confirm-scenario --execute --allow-models --fresh --sample-ms=1000 \
@@ -91,8 +102,8 @@ node tools/gauntlet.mjs model-run \
 
 node tools/gauntlet.mjs role-run \
   --role=both \
-  --profile="$HOME/.nerv-private/profile.json" \
-  --limits=node_modules/@voidbrain/gauntlet-protocol/examples/limits-day.json \
+  --profile="$HOME/.nerv-private/profile-gemma4-12b.json" \
+  --limits="$HOME/.nerv-private/limits-repeat3.json" \
   --machine-profile="$HOME/.nerv-private/mac-local.json" \
   --scenario="node_modules/@voidbrain/gauntlet-protocol/examples/scenarios/${COND}.json" \
   --confirm-scenario --execute --allow-models --fresh \
