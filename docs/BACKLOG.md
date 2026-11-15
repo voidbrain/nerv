@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 33 | 21 | 19 | 20 |
+| **This week** | 33 | 21 | 20 | 20 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 45 | 5 |
+| **Open** | 45 | 6 |
 | **Require Human 🧑** | 16 | 3 |
 
 ### Require Human 🧑
@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 70.5 h agent + 24.75 h owner across 170 open steps of 45 features and 5 other records. 34.75 h of actual effort recorded on 79 steps. Generated from the task files.
+**Remaining effort:** 71.25 h agent + 24.75 h owner across 171 open steps of 45 features and 6 other records. 34.75 h of actual effort recorded on 79 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2256,6 +2256,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-13 |
 | Verification | Unit/integration 2026-11-13: the focused missing-build and build-present regressions pass; full suite and CI pending. |
 | Reviewed | 2026-11-13 |
+
+</details>
+
+---
+### <a id="b-067"></a>[🐞 B-067](#top)
+
+**Snapshot schedule test fails on Windows with EPERM removing its data folder**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-067-T01 — Snapshot schedule stops cleanly before cleanup on Windows (Planned).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-15 on [PR #451](https://github.com/voidbrain/nerv/pull/451) (CI 43748182800, Windows job, first attempt): `test/snapshots.test.ts` "the schedule takes the snapshot once and logs a failure by reason only, without paths" failed with `EPERM, Permission denied` on its fixture folder `nerv-snap-*`; the rerun passed and `main` passed with the same code, so it is intermittent. Likely cause, unconfirmed: cleanup removes the folder while a snapshot started by the schedule still holds a file open (Windows refuses), as in the earlier `nerv-winsvc-*` case in the archive. |
+| **Reproduce** | Run `test/snapshots.test.ts` repeatedly on the Windows CI job; it fails now and then on the first attempt. |
+| **Check** | A committed test fails first (for example by holding the snapshot in flight at `stop()`); `stop()` of the snapshot schedule waits for an in-flight snapshot, or the test awaits it before cleanup; 10 consecutive Windows runs of the file pass. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-067-t01"></a>B-067-T01 — Snapshot schedule stops cleanly before cleanup on Windows | 0.75 h | 0 h | 0.75 h | Planned |
+| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 1 steps recorded) | 0.75 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-067.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #451](https://github.com/voidbrain/nerv/pull/451) CI 43748182800 (Windows, first attempt) |
+| Opened | 2026-11-15 |
+| Verification | Pending. |
+| Reviewed | 2026-11-15 |
 
 </details>
 
