@@ -730,11 +730,18 @@ function ownerAsks(steps, all) {
 }
 // F-073 (8.10.0): whether an agent can move the record now: 🤖 a planned or ready step with agent work (no ownerKind, or
 // agent hours on a step not yet split) has every prerequisite verified or closed, ⏳ such steps all wait, — none.
+// 8.16.1 (B-028): an implemented step the agent still verifies (agent hours left, or no owner hours owed) is agent
+// work it can do now, as its Who cell says (8.16.0). Prerequisites are not checked: an implemented step is past them,
+// and who() never marks one as waiting either.
 function agentNow(steps, all) {
   const done = new Set(all.filter((t) => ['verified', 'closed'].includes(t.status)).map((t) => t.id));
+  const verify = steps.some(
+    (t) => t.status === 'implemented' && ((t.effort?.agentHours ?? 0) > 0 || !((t.effort?.ownerHours ?? 0) > 0)),
+  );
   const open = steps.filter(
     (t) => (!t.effort?.ownerKind || (t.effort.agentHours ?? 0) > 0) && ['planned', 'ready'].includes(t.status),
   );
+  if (verify) return AGENT;
   if (!open.length) return '—';
   return open.some((t) => (t.dependsOn ?? []).every((d) => done.has(d))) ? AGENT : WAITING;
 }

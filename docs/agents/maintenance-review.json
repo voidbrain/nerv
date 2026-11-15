@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-15T18:40:51.241Z",
+  "reviewed": "2026-11-15T19:31:33.345Z",
   "policy": "7d15ab5f3e1a37d15075876ce3efd53d93600045088f48b41a3ef0dd6ab89e7d",
   "inputs": {
     "AGENTS.md": "d5c0da9a6960509d129db16add394550b9daae036b2cde345598d981e08a3838",
@@ -31,10 +31,10 @@
     "docs/backlog/ownership.md": "d2d39a4e2a56fb7a18c5cce2fe5490282a9c89c947574746bacd71f1040c457f",
     "docs/backlog/records.md": "55ed78706d82419d64d33a82fe55f1179fd65fc35825fd081f3ac2e24079d058",
     "docs/backlog/review.md": "553177fc99074b2bc3ac2c9b430f4d22eaac46247a41b5966b6a97734cfb73df",
-    "docs/backlog/steps.md": "32fd9a590c96174af8754853df505415a86eaa96abdee628ca2d03ef49fbca73",
+    "docs/backlog/steps.md": "d78a9304ecc5bbd9f3ffca8c499c51343e0eb0946206c850c53e03254e52fee7",
     "tools/task-claims.mjs": "ef755fe7951544e5c05b20de7c64a7b53778b6d039a11a2abeb079e7d42b6fd2",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
-    "tools/work-items.mjs": "3a4bc95ec80454a4144958febc4fa7c4ed6699aa6a118194907fb654e7f5e687",
+    "tools/work-items.mjs": "850ec6674088a9bb155680fffbb05d9585b5606409448e1806f0045c970a43ef",
     "tools/work-usage.mjs": "65961d804edf9adc3f93a6b6ccfa04dfe9cf16275751f50247056ec3edf6589e"
   },
   "measurements": {
@@ -125,6 +125,12 @@
       "disposition": "implemented",
       "target": "docs/backlog/steps.md",
       "evidence": "Harness 8.16.0 reconciled (copied work-items.mjs, check-backlog.mjs, steps.md): implemented steps name who their remaining work waits on; done steps in a collapsed table. F-005-T15 gets ownerKind procedure. Template PR #203 with fresh-context review."
+    },
+    {
+      "kind": "rule",
+      "disposition": "implemented",
+      "target": "docs/backlog/steps.md",
+      "evidence": "Harness 8.16.1 reconciled (B-028): the Agent cell counts an implemented step the agent still verifies. Template PR #205 with fresh-context review."
     }
   ]
 }
