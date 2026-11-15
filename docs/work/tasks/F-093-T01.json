@@ -4,7 +4,7 @@
   "parent": "F-093",
   "title": "Decision: desktop adapter and permissions",
   "goal": "How NERV acts on another app is written down",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "Accessibility interface per OS (macOS AX, Windows UI Automation), screenshot fallback, the permission the owner grants, what is always refused"
   ],
@@ -26,11 +26,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h",
+    "estimate": "0 hours",
     "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
     "reviewed": "2026-11-14",
-    "agentHours": 0.5,
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
-    "estimateAgentHours": 0.5
+    "estimateAgentHours": 0.5,
+    "actualAgentHours": 0.25,
+    "actualSource": "measured"
   }
 }
