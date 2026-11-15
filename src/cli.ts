@@ -3,6 +3,13 @@ import { startSnapshots } from './snapshots.ts';
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
 import {
+  detectVoiceLanguage,
+  evaluateVoiceCorpus,
+  parseVoiceCommandIntent,
+  type VoiceCorpus,
+  type VoiceLanguage,
+} from './voice.ts';
+import {
   activateSkillVersion,
   checkSkillPermissionEscalation,
   evaluateSkillVersion,
@@ -355,6 +362,19 @@ try {
       throw new Error(
         'Usage: skills list | inspect <id> <version> | stage <file> | evaluate <id> <version> <suite> <model> | promote <id> <version> --owner-approved | reconcile-model <model> <suites> --owner-approved | rollback <id> --owner-approved | retire <id> --owner-approved',
       );
+    }
+  } else if (command === 'voice') {
+    const sub = args[0];
+    if (sub === 'parse' && args[1]) {
+      const lang = args[2] === 'it' || args[2] === 'en' ? (args[2] as VoiceLanguage) : detectVoiceLanguage(args[1]);
+      console.log(JSON.stringify(parseVoiceCommandIntent(args[1], lang), null, 2));
+    } else if (sub === 'eval' && args[1]) {
+      const corpus = JSON.parse(readFileSync(resolve(args[1]), 'utf8')) as VoiceCorpus;
+      const report = evaluateVoiceCorpus(corpus);
+      console.log(JSON.stringify(report, null, 2));
+      if (report.failures.length > 0) process.exitCode = 1;
+    } else {
+      throw new Error('Usage: voice parse <transcript> [it|en] | voice eval <corpus.json>');
     }
   } else if (command === 'credentials') {
     if (args[0] !== 'rotate' || !['admin', 'telegram', 'cloud'].includes(args[1] ?? ''))
