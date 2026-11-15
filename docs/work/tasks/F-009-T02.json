@@ -4,7 +4,7 @@
   "parent": "F-009",
   "title": "Mac login/logout acceptance",
   "goal": "Mac login/logout acceptance",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Service survives logout/login of the selected Mac user as documented; evidence recorded"
   ],
@@ -29,10 +29,10 @@
   "effort": {
     "size": "small",
     "estimate": "0.25 h owner",
-    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
-    "reviewed": "2026-11-13",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total. Owner ran it 2026-11-15: after logout and login, launchd restarted io.nerv.agent unaided (state = running, new pid, HTTP 200 on 127.0.0.1:4317). No actual: owner time not measured.",
+    "reviewed": "2026-11-15",
     "baselineDays": 0.5,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "agentHours": 0,
     "ownerKind": "procedure"
   },

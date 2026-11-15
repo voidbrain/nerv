@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "parent": "B-068",
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "B-068-T02",
+  "title": "Owner check: Stop then Start from the companion",
+  "goal": "The owner stops and restarts NERV from the companion",
+  "status": "planned",
+  "acceptance": [
+    "After rebuilding the companion, the owner reruns F-011-T02 steps 3-4: Stop, then Start becomes enabled and the service answers 200"
+  ],
+  "dependsOn": [
+    "B-068-T01"
+  ],
+  "resources": [
+    "docs/work/records/B-068.md"
+  ],
+  "validation": [
+    "Owner-observed result recorded in the parent record"
+  ],
+  "ownerLink": "docs/acceptance/f011-companion-acceptance-procedure.md#part-1--companion-ui-notifications-and-service-controls-neo-tokyo-3-terminal--ui",
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-15. Not a measurement.",
+    "reviewed": "2026-11-15",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  }
+}
