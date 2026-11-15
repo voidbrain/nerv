@@ -1,6 +1,6 @@
-import { chmodSync, existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
-import { readConfig } from './config.ts';
+import { databasePath, readConfig } from './config.ts';
 import { copyDates, createBackupKey, decryptBackup, receivedDir } from './offhost.ts';
 import { snapshotDates, snapshotDir } from './snapshots.ts';
 
@@ -10,7 +10,53 @@ interface Io {
   print?: (line: string) => void;
 }
 
-const USAGE = 'Usage: backup keygen --out PATH | backup status | backup decrypt COPY --key PATH --out PATH';
+const USAGE =
+  'Usage: backup keygen --out PATH | backup status | backup decrypt COPY --key PATH --out PATH | backup restore COPY --key PATH --target DIR';
+
+export interface RestoreResult {
+  targetHome: string;
+  dbPath: string;
+  bytes: number;
+  elapsedMs: number;
+}
+
+/**
+ * F-062-T04: restores an encrypted off-host backup copy into a new base directory (`targetHome`) without touching
+ * any existing live `nerv.db`, verifying SQLite integrity before returning.
+ */
+export function restoreBackupCopy(opts: {
+  copyPath: string;
+  keyPath: string;
+  passphrase: string;
+  targetHome: string;
+}): RestoreResult {
+  const started = Date.now();
+  const dbPath = databasePath(opts.targetHome);
+  if (existsSync(dbPath)) {
+    throw new Error(`A database already exists at ${dbPath}; restore refuses to overwrite a live base.`);
+  }
+  const plain = decryptBackup(readFileSync(opts.copyPath), readFileSync(opts.keyPath, 'utf8'), opts.passphrase);
+  mkdirSync(opts.targetHome, { recursive: true, mode: 0o700 });
+  if (process.platform !== 'win32') chmodSync(opts.targetHome, 0o700);
+  writeFileSync(dbPath, plain, { mode: 0o600 });
+  const db = new DatabaseSync(dbPath, { readOnly: true });
+  let ok: boolean;
+  try {
+    ok = db.prepare('PRAGMA integrity_check').get()?.integrity_check === 'ok';
+  } finally {
+    db.close();
+  }
+  if (!ok) {
+    rmSync(dbPath, { force: true });
+    throw new Error('The restored copy failed its integrity check; nothing was kept.');
+  }
+  return {
+    targetHome: opts.targetHome,
+    dbPath,
+    bytes: plain.length,
+    elapsedMs: Date.now() - started,
+  };
+}
 
 /**
  * F-062-T03: `backup keygen` makes the owner's backup key (the service only ever gets its public half), `backup status`
@@ -96,6 +142,20 @@ export async function backupCommand(home: string, args: string[], io: Io): Promi
       throw new Error('The decrypted copy failed its integrity check; nothing was kept.');
     }
     print(`Decrypted and verified: ${out}\nIt is a copy; the live database is unchanged.`);
+    return;
+  }
+  if (sub === 'restore') {
+    const copy = args[1],
+      keyFile = io.flag('--key'),
+      target = io.flag('--target');
+    if (!copy || copy.startsWith('--') || !keyFile || !target) throw new Error(USAGE);
+    const result = restoreBackupCopy({
+      copyPath: copy,
+      keyPath: keyFile,
+      passphrase: await io.readSecret('Backup key passphrase: '),
+      targetHome: target,
+    });
+    print(`Restored and verified in ${result.elapsedMs}ms: ${result.dbPath}`);
     return;
   }
   throw new Error(USAGE);
