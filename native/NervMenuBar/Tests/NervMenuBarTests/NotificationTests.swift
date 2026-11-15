@@ -95,6 +95,30 @@ final class NotificationTests: XCTestCase {
         XCTAssertThrowsError(try LaunchAgentCommand.make(.stop, uid: 501, home: "/Users/test", label: "io.evil.agent"))
         XCTAssertThrowsError(try LaunchAgentCommand.make(.start, uid: 501, home: "relative"))
     }
+    func testStopWaitsBoundedForLaunchctlUnloadAndPollRefreshesServiceState() async throws {
+        final class DelayedUnloadRunner: ServiceCommandRunning, @unchecked Sendable {
+            var bootoutCalled = false
+            var statusCallsAfterBootout = 0
+            func run(_ command: LaunchAgentCommand) async throws -> Int32 {
+                if command.arguments.first == "bootout" {
+                    bootoutCalled = true
+                    return 0
+                }
+                if command.arguments.first == "print" {
+                    if !bootoutCalled { return 0 }
+                    statusCallsAfterBootout += 1
+                    return statusCallsAfterBootout <= 2 ? 0 : 1
+                }
+                return 0
+            }
+        }
+        let runner = DelayedUnloadRunner()
+        let controller = UserServiceController(runner: runner, uid: 501, home: "/Users/test")
+        try await controller.stop()
+        let stillLoaded = try await controller.loaded()
+        XCTAssertFalse(stillLoaded, "stop() must wait until launchctl reports service unloaded")
+        XCTAssertGreaterThanOrEqual(runner.statusCallsAfterBootout, 3)
+    }
 }
 
 
