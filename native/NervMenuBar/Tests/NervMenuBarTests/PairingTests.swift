@@ -173,4 +173,33 @@ extension PairingTests {
         XCTAssertTrue(NativeError.pairingRevoked.message(language: "en").lowercased().contains("pair again"))
         XCTAssertTrue(NativeError.certificateMismatch.message(language: "en").lowercased().contains("nothing was sent"))
     }
+
+    @MainActor
+    func testRotatedCertificateShowsMismatchNotCancelledAndNoFalseServiceMismatchBeforeIdentityCheck() async throws {
+        let model = Companion()
+        model.language = "en"
+        model.credential = Credential(
+            clientId: UUID().uuidString,
+            token: String(repeating: "a", count: 64),
+            expiresAt: Int64(Date().timeIntervalSince1970 * 1000) + 120_000,
+            runtimeId: UUID().uuidString,
+            port: 1,
+            webPort: 2,
+            fingerprint: String(repeating: "b", count: 64)
+        )
+        model.paired = true
+        XCTAssertNotEqual(model.serviceMatchesRuntime as Bool?, false, "Must not report service mismatch before identity check completes")
+
+        for err in [
+            URLError(.cancelled) as Error,
+            NSError(domain: NSURLErrorDomain, code: NSURLErrorCancelled),
+            URLError(.serverCertificateUntrusted),
+        ] {
+            let mapped = NativeConnection.transportError(err, pinRejected: false)
+            XCTAssertEqual(mapped, .certificateMismatch)
+            XCTAssertFalse(mapped.message(language: "en").lowercased().contains("cancelled"))
+            XCTAssertTrue(mapped.message(language: "en").contains("TLS certificate changed"))
+            XCTAssertTrue(mapped.message(language: "it").contains("certificato TLS"))
+        }
+    }
 }

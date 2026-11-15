@@ -40,7 +40,7 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
     @Published var notificationStatus = "Notifiche disattivate"
     @Published var loginState: LoginState = .disabled
     @Published var serviceLoaded = false
-    @Published var serviceMatchesRuntime = false
+    @Published var serviceMatchesRuntime: Bool? = nil
     @Published var serviceBusy = false
     @Published var controlStatus = ""
     private lazy var notifications = SystemNotifications()
@@ -72,7 +72,7 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
         loginState = login.state
     }
     func controlService(start: Bool) async {
-        guard !serviceBusy else { return }; guard !paired || serviceMatchesRuntime else { controlStatus = "Il servizio locale non corrisponde al NERV abbinato."; return }; serviceBusy = true; defer { serviceBusy = false }
+        guard !serviceBusy else { return }; guard !paired || serviceMatchesRuntime != false else { controlStatus = "Il servizio locale non corrisponde al NERV abbinato."; return }; serviceBusy = true; defer { serviceBusy = false }
         do { if start { try await service.start() } else { try await service.stop() }; await refreshOSState(); await refresh() } catch { controlStatus = error.localizedDescription }
     }
     func toggleNotifications() async {
@@ -160,7 +160,7 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
             }
         } catch { status = error.localizedDescription; updateStatus = nil; reminders = []; approvals = []; approvalsLoaded = false }
     }
-    func forget() { do { try CredentialStore.forget(); credential = nil; paired = false; renewing = false; invitation = ""; updateStatus = nil; reminders = []; approvals = []; approvalsLoaded = false; notificationsEnabled = false; pollTask?.cancel(); pollTask = nil; status = "Abbinamento locale rimosso" } catch { status = error.localizedDescription } }
+    func forget() { do { try CredentialStore.forget(); credential = nil; paired = false; renewing = false; invitation = ""; serviceMatchesRuntime = nil; updateStatus = nil; reminders = []; approvals = []; approvalsLoaded = false; notificationsEnabled = false; pollTask?.cancel(); pollTask = nil; status = "Abbinamento locale rimosso" } catch { status = error.localizedDescription } }
     func openApprovalDashboard() {
         guard let credential, credential.expiresAt > Int64(Date().timeIntervalSince1970 * 1000),
               let url = NativeApproval.dashboardURL(webPort: credential.webPort) else { return }
@@ -216,9 +216,9 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
             Divider()
             Text(model.tr("Servizio NERV di questo Mac")).font(.caption)
             Text(model.tr(model.controlStatus)).font(.caption)
-            if model.paired && !model.serviceMatchesRuntime { Text(model.tr("Il servizio locale non corrisponde al NERV abbinato.")).font(.caption) }
-            Button(model.tr("Avvia NERV")) { Task { await model.controlService(start: true) } }.disabled(model.serviceBusy || model.serviceLoaded || (model.paired && !model.serviceMatchesRuntime))
-            Button(model.tr("Ferma NERV…")) { confirmStop = true }.disabled(model.serviceBusy || !model.serviceLoaded || (model.paired && !model.serviceMatchesRuntime))
+            if model.paired && model.serviceMatchesRuntime == false { Text(model.tr("Il servizio locale non corrisponde al NERV abbinato.")).font(.caption) }
+            Button(model.tr("Avvia NERV")) { Task { await model.controlService(start: true) } }.disabled(model.serviceBusy || model.serviceLoaded || (model.paired && model.serviceMatchesRuntime == false))
+            Button(model.tr("Ferma NERV…")) { confirmStop = true }.disabled(model.serviceBusy || !model.serviceLoaded || (model.paired && model.serviceMatchesRuntime == false))
             Text(model.tr(model.loginState == .enabled ? "Avvio al login attivo" : model.loginState == .requiresApproval ? "Avvio al login: approvazione richiesta" : "Avvio al login non attivo")).font(.caption)
             Button(model.tr(model.loginState == .enabled || model.loginState == .requiresApproval ? "Disattiva avvio al login" : "Avvia companion al login")) { model.setLoginEnabled(!(model.loginState == .enabled || model.loginState == .requiresApproval)) }
             if model.loginState == .requiresApproval { Button(model.tr("Apri impostazioni login")) { SystemLoginItem.openSettings() } }
