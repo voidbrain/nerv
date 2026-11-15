@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 95.75 h agent + 24 h owner across 212 open steps of 52 features and 5 other records. 25.5 h of actual effort recorded on 47 steps. Generated from the task files.
+**Remaining effort:** 95 h agent + 24 h owner across 209 open steps of 52 features and 5 other records. 26.25 h of actual effort recorded on 50 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -795,9 +795,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h agent + 0.5 h owner | — | [F-083-T08](#f-083-t08) | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 2.25 h agent + 0.5 h owner | — | [F-083-T08](#f-083-t08) | 🤖 | — | — |
 
-💻 **→** Slices approved 2026-11-11 and recorded as tasks. Next agent work: Step 1a (F-007-T01) voice feasibility, or Step 3b (F-007-T07) skill evaluation; Step 3a (F-007-T06) closed 2026-11-13.
+💻 **→** Slices approved 2026-11-11 and recorded as tasks. Next agent work: Step 1a (F-007-T01) voice feasibility; Step 3a (F-007-T06) closed 2026-11-13, Step 3b–3d (F-007-T07..T09) closed 2026-11-15.
 
 | | |
 |---|---|
@@ -810,16 +810,16 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
 | 🟢 Small | <a id="f-007-t01"></a>F-007-T01 — Step 1a — Feasibility: local speech-to-text and text-to-speech candidates measured on the Mac in Italian and English | 0.25 h | 0 h | 0.25 h | Planned | 🤖 |
-| 🟢 Small | <a id="f-007-t07"></a>F-007-T07 — Step 3b — Skill evaluation with a baseline run without the skill and held-out cases | 0.25 h | 0 h | 0.25 h | Planned | 🤖 |
 | 🟢 Small | <a id="f-007-t02"></a>F-007-T02 — Step 1b — Voice command corpus in Italian and English with expected intents | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-007-T01](#f-007-t01) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-007-t03"></a>F-007-T03 — Step 2a — Push-to-talk on the dashboard and companion: speech to text shown for confirmation, no silent physical activation | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-007-T02](#f-007-t02) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-007-t04"></a>F-007-T04 — Step 2b — Spoken replies (text-to-speech) | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-007-T03](#f-007-t03) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-007-t05"></a>F-007-T05 — Step 2c — Voice corpus evaluation run and report | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-007-T04](#f-007-t04) | ⏳ 🧑‍🔧 |
-| 🟢 Small | <a id="f-007-t08"></a>F-007-T08 — Step 3c — Owner promotion, rollback and retirement of skills after a model change | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-007-T07](#f-007-t07) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-007-t09"></a>F-007-T09 — Step 3d — Rejected permission escalation and corrected-memory cases | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-007-T08](#f-007-t08) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-007-t10"></a>F-007-T10 — Record the evidence of F-007-T05 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-007-T05](#f-007-t05) | ⏳ 🤖 |
 | — | <a id="f-007-t06"></a>F-007-T06 — Step 3a — Skill package format, isolated storage and versions | 1 h | 0 h | 0 h | Completed | 🤖 |
-| 🟡 Medium | **Total** | 4 h (9 of 10 steps) | 0 h (0 of 10 steps recorded) | 3 h agent + 0.5 h owner | 1 of 10 completed | |
+| — | <a id="f-007-t07"></a>F-007-T07 — Step 3b — Skill evaluation with a baseline run without the skill and held-out cases | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
+| — | <a id="f-007-t08"></a>F-007-T08 — Step 3c — Owner promotion, rollback and retirement of skills after a model change | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
+| — | <a id="f-007-t09"></a>F-007-T09 — Step 3d — Rejected permission escalation and corrected-memory cases | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
+| 🟡 Medium | **Total** | 4 h (9 of 10 steps) | 0.75 h (3 of 10 steps recorded) | 2.25 h agent + 0.5 h owner | 4 of 10 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -828,10 +828,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #344](https://github.com/voidbrain/nerv/pull/344) F-007-T06 skill package format, private isolated storage under `<home>/skills/packages/<id>/<version>/`, immutable versions with owner-approved promote, rollback and retire, `skills` CLI commands (head 14e4a29, merged ae8c7f8; CI43345241513 passed all five jobs; cited in the full audit of 2026-11-13, PR #374); [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| PR / evidence | F-007-T07..T09 baseline/holdout skill evaluation (`evals/skill-evaluation-v1.json`), model-change reconciliation (`reconcileSkillsAfterModelChange`), and permission-escalation/corrected-memory rejection (`checkSkillPermissionEscalation`) implemented in `src/skills.ts` and `src/cli.ts`, verified in `test/skills.test.ts` (2026-11-15); [PR #344](https://github.com/voidbrain/nerv/pull/344) F-007-T06 skill package format, private isolated storage under `<home>/skills/packages/<id>/<version>/`, immutable versions with owner-approved promote, rollback and retire, `skills` CLI commands (head 14e4a29, merged ae8c7f8; CI43345241513 passed all five jobs; cited in the full audit of 2026-11-13, PR #374); [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
-| Verification | Pending acceptance and remote CI where applicable |
-| Reviewed | 2026-11-13 |
+| Verification | `npx tsc --noEmit`, `npm run check:conventions`, `node --test test/skills.test.ts`, and `npm run check:fast` passed 2026-11-15; remote CI pending PR |
+| Reviewed | 2026-11-15 |
 
 </details>
 

@@ -4,11 +4,15 @@ import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
 import {
   activateSkillVersion,
+  checkSkillPermissionEscalation,
+  evaluateSkillVersion,
   listSkillPackages,
   loadSkillVersion,
+  reconcileSkillsAfterModelChange,
   retireSkillPackage,
   rollbackSkillVersion,
   stageSkillPackage,
+  type SkillEvaluationSuite,
   type SkillPackage,
 } from './skills.ts';
 import { assertRootMigrationReady, rootMigrationCommand } from './root-migration.ts';
@@ -288,10 +292,43 @@ try {
       const pkg = JSON.parse(readFileSync(resolve(args[1]), 'utf8')) as SkillPackage;
       console.log(JSON.stringify(stageSkillPackage(home, pkg), null, 2));
     } else if (sub === 'promote') {
-      if (!args[1] || !args[2]) throw new Error('Usage: skills promote <id> <version> --owner-approved');
+      if (!args[1] || !args[2])
+        throw new Error('Usage: skills promote <id> <version> --owner-approved [--model <model>]');
+      const modelIdx = args.indexOf('--model');
+      const model = modelIdx >= 0 ? args[modelIdx + 1] : undefined;
       console.log(
         JSON.stringify(
-          activateSkillVersion(home, args[1], args[2], { ownerApproved: args.includes('--owner-approved') }),
+          activateSkillVersion(home, args[1], args[2], {
+            ownerApproved: args.includes('--owner-approved'),
+            ...(model ? { model, requireEvaluation: true } : {}),
+          }),
+          null,
+          2,
+        ),
+      );
+    } else if (sub === 'evaluate') {
+      if (!args[1] || !args[2] || !args[3] || !args[4]) {
+        throw new Error('Usage: skills evaluate <id> <version> <suite.json> <model>');
+      }
+      const suite = JSON.parse(readFileSync(resolve(args[3]), 'utf8')) as SkillEvaluationSuite;
+      const pkg = loadSkillVersion(home, args[1], args[2]);
+      const escalation = checkSkillPermissionEscalation(pkg, suite.allowedCapabilities);
+      const report = evaluateSkillVersion(home, args[1], args[2], suite, { model: args[4] });
+      console.log(JSON.stringify({ ...report, escalation }, null, 2));
+      if (!report.eligibleForPromotion) process.exitCode = 1;
+    } else if (sub === 'reconcile-model') {
+      if (!args[1] || !args[2]) {
+        throw new Error('Usage: skills reconcile-model <new-model> <suites.json> --owner-approved');
+      }
+      const suites = JSON.parse(readFileSync(resolve(args[2]), 'utf8')) as Record<
+        string,
+        { suite: SkillEvaluationSuite }
+      >;
+      console.log(
+        JSON.stringify(
+          reconcileSkillsAfterModelChange(home, args[1], suites, {
+            ownerApproved: args.includes('--owner-approved'),
+          }),
           null,
           2,
         ),
@@ -316,7 +353,7 @@ try {
       );
     } else {
       throw new Error(
-        'Usage: skills list | inspect <id> <version> | stage <file> | promote <id> <version> --owner-approved | rollback <id> --owner-approved | retire <id> --owner-approved',
+        'Usage: skills list | inspect <id> <version> | stage <file> | evaluate <id> <version> <suite> <model> | promote <id> <version> --owner-approved | reconcile-model <model> <suites> --owner-approved | rollback <id> --owner-approved | retire <id> --owner-approved',
       );
     }
   } else if (command === 'credentials') {

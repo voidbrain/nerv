@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-007",
   "id": "F-007-T08",
-  "status": "planned",
+  "status": "closed",
   "title": "Step 3c — Owner promotion, rollback and retirement of skills after a model change",
   "goal": "Owner promotion, rollback and retirement of skills after a model change.",
   "capabilities": [
@@ -37,12 +37,14 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h agent",
+    "estimate": "0 hours",
     "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
     "reviewed": "2026-11-13",
     "baselineDays": 1,
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
-    "estimateAgentHours": 0.25
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
   }
 }
