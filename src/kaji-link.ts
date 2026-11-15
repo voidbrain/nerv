@@ -32,6 +32,8 @@ export interface RegistryPort {
   main?(): Promise<string | undefined>;
   /** F-054-T04: a peer answering again or found unreachable, for the chronicle. Optional: tests may leave it out. */
   reachability?(baseId: string, ok: boolean, at: string): Promise<void>;
+  /** Subscribe to registry mutations (add/revoke/main) so links can refresh in-memory authority snapshots. */
+  onChange?(listener: () => void | Promise<void>): () => void;
 }
 /** host or host:port; the default port is KAJI_PORT. IPv4 and hostnames only for now. */
 export function endpoint(address: string): { host: string; port: number } {
