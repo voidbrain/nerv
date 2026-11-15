@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 92 h agent + 24 h owner across 203 open steps of 52 features and 5 other records. 28.75 h of actual effort recorded on 56 steps. Generated from the task files.
+**Remaining effort:** 91.25 h agent + 24 h owner across 202 open steps of 52 features and 5 other records. 29.25 h of actual effort recorded on 57 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -225,7 +225,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 5.75 h agent + 0.75 h owner | — | [F-021-T03](#f-021-t03), [F-027-T02](#f-027-t02), [F-051-T06](#f-051-t06) | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🔴 Large | 5 h agent + 0.75 h owner | — | [F-021-T03](#f-021-t03), [F-027-T02](#f-027-t02), [F-051-T06](#f-051-t06) | 🤖 | — | — |
 
 💻 **→** Next: the EVA class definition and one sandboxed instance per job, starting with EVA-03 (owner, 2026-11-05).
 
@@ -239,10 +239,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-049-t02"></a>F-049-T02 — EVA class definitions and least-class admission | 0.75 h | 0 h | 0.75 h | Ready | 🤖 |
 | 🟢 Small | <a id="f-049-t03"></a>F-049-T03 — Measure the macOS enforcement candidates against the threat model | 0.25 h | 0 h | 0.25 h | Ready | 🤖 |
 | 🟢 Small | <a id="f-049-t11"></a>F-049-T11 — Choose the macOS host enforcement mechanism | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-049-T03](#f-049-t03) | ⏳ 🤔 |
-| 🟢 Small | <a id="f-049-t04"></a>F-049-T04 — EVA-03 instance per job | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-049-T02](#f-049-t02), [F-049-T11](#f-049-t11) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-049-t04"></a>F-049-T04 — EVA-03 instance per job | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-049-T11](#f-049-t11) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-049-t05"></a>F-049-T05 — Escape and recovery join tests | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-049-T04](#f-049-t04) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-049-t06"></a>F-049-T06 — Concurrent instances within per-machine limits | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-049-T04](#f-049-t04) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-049-t07"></a>F-049-T07 — EVA-00, EVA-01 and EVA-02 on the runner | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-049-T05](#f-049-t05), [F-049-T06](#f-049-t06) | ⏳ 🤖 |
@@ -251,7 +250,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-049-t10"></a>F-049-T10 — Linux host enforcement and join tests in CI | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-049-T05](#f-049-t05) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-049-t12"></a>F-049-T12 — Run the first EVA job on the Linux host | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-049-T10](#f-049-t10) | ⏳ 🧑‍🔧 |
 | — | <a id="f-049-t01"></a>F-049-T01 — Define deterministic isolated runner admission and enforcement | 0.5 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
-| 🔴 Large | **Total** | 6.25 h (10 of 12 steps) | 0.25 h (1 of 12 steps recorded) | 5.75 h agent + 0.75 h owner | 1 of 12 completed | |
+| — | <a id="f-049-t02"></a>F-049-T02 — EVA class definitions and least-class admission | 0.75 h | 0.5 h (stated) | 0 h | Completed | 🤖 |
+| 🔴 Large | **Total** | 6.25 h (10 of 12 steps) | 0.75 h (2 of 12 steps recorded) | 5 h agent + 0.75 h owner | 2 of 12 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
