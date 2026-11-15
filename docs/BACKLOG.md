@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 87.5 h agent + 24 h owner across 196 open steps of 51 features and 5 other records. 30.75 h of actual effort recorded on 63 steps. Generated from the task files.
+**Remaining effort:** 87.25 h agent + 24 h owner across 195 open steps of 51 features and 5 other records. 31 h of actual effort recorded on 64 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -890,7 +890,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
 
 💻 **→** Write `docs/security/agentic-threats.md` and a check that every row names an existing test.
 
@@ -904,9 +904,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="f-065-t01"></a>F-065-T01 — Threat map document | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | <a id="f-065-t02"></a>F-065-T02 — CI check for cited tests | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-065-T01](#f-065-t01) |
-| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 2 steps recorded) | 0.5 h | 0 of 2 completed |
+| 🟢 Small | <a id="f-065-t02"></a>F-065-T02 — CI check for cited tests | 0.25 h | 0 h | 0.25 h | Planned |
+| — | <a id="f-065-t01"></a>F-065-T01 — Threat map document | 0.25 h | 0.25 h (measured) | 0 h | Completed |
+| 🟢 Small | **Total** | 0.5 h | 0.25 h (1 of 2 steps recorded) | 0.25 h | 1 of 2 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -917,7 +917,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
 | Opened | 2026-11-07 |
-| Verification | Unit/integration: Pending. |
+| Verification | `F-065-T01` threat map written in [agentic-threats.md](security/agentic-threats.md) covering ASI01–10, LLM01–10 (2026), and MCP01–10 with pinned AISVS v1.01 IDs, source paths, and test/gap refs; verified with `npm run check:fast`. |
 | Reviewed | 2026-11-09 |
 
 </details>
