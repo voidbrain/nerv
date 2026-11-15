@@ -327,6 +327,63 @@ if (existsSync(auditHelper)) {
     );
 }
 
+// 4b. periodic reviews (F-083: stamp.reviews.<name>.days; non-blocking warning)
+if (stamp.reviews !== undefined) {
+  if (!stamp.reviews || typeof stamp.reviews !== 'object' || Array.isArray(stamp.reviews)) {
+    warn('"reviews" in .harness.json must be an object mapping review names to { days, dir? }; ignored.');
+  } else {
+    const today = new Date(process.env.FRESHNESS_TODAY ?? Date.now());
+    for (const [name, cfg] of Object.entries(stamp.reviews)) {
+      if (
+        !cfg ||
+        typeof cfg !== 'object' ||
+        typeof cfg.days !== 'number' ||
+        !Number.isFinite(cfg.days) ||
+        cfg.days <= 0
+      ) {
+        warn(`Review "${name}" in .harness.json must set a positive "days" number; ignored.`);
+        continue;
+      }
+      const relDir = String(cfg.dir ?? 'docs/reviews').replace(/\/+$/, '') || 'docs/reviews';
+      const baseDir = new URL(`../${relDir}/`, import.meta.url);
+      const subDir = new URL(`../${relDir}/${name}/`, import.meta.url);
+      const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const flatRe = new RegExp(`^(\\d{4}-\\d{2}-\\d{2})[-_.]${escaped}(?:\\b|\\.|[-_])`, 'i');
+      const candidates = [];
+      if (existsSync(subDir)) {
+        for (const entry of readdirSync(subDir, { withFileTypes: true })) {
+          if (!entry.isFile()) continue;
+          const m = entry.name.match(/^(\d{4}-\d{2}-\d{2})/);
+          if (m) candidates.push({ date: m[1], path: `${relDir}/${name}/${entry.name}` });
+        }
+      }
+      if (existsSync(baseDir)) {
+        for (const entry of readdirSync(baseDir, { withFileTypes: true })) {
+          if (!entry.isFile()) continue;
+          const m = entry.name.match(flatRe);
+          if (m) candidates.push({ date: m[1], path: `${relDir}/${entry.name}` });
+        }
+      }
+      candidates.sort((a, b) => a.date.localeCompare(b.date) || a.path.localeCompare(b.path));
+      const latest = candidates.at(-1);
+      const age = latest ? Math.floor((today - new Date(`${latest.date}T00:00:00Z`)) / 86400000) : Infinity;
+      if (!Number.isFinite(age) || age > cfg.days) {
+        const docHint =
+          cfg.doc ??
+          (name === 'token'
+            ? 'docs/agents/rule-review.md'
+            : name === 'architecture'
+              ? 'docs/agents/architecture-review.md'
+              : 'docs/agents/maintenance.md');
+        const status = !latest ? 'missing' : Number.isFinite(age) ? `${age} days old` : 'invalid date';
+        warn(
+          `Review "${name}" (${latest?.path ?? 'none'}) is ${status} (limit ${cfg.days}, reviews.${name}.days in .harness.json): follow ${docHint} and write ${relDir}/${name}/<date>.md.`,
+        );
+      }
+    }
+  }
+}
+
 for (const i of infos) console.log(i);
 if (!notes.length && !infos.length)
   console.log(`Fresh: backlog reconciled against current ${branch}; last audit ${last} (${days} day(s) ago).`);

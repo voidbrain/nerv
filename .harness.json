@@ -3,7 +3,7 @@
     "path": "../harness-template",
     "repo": "https://github.com/voidbrain/project-harness"
   },
-  "version": "8.17.0",
+  "version": "8.18.0",
   "stacks": [
     "core",
     "angular"
@@ -994,5 +994,13 @@
   "workUsage": {
     "enabled": true,
     "pauseGapMinutes": 15
+  },
+  "reviews": {
+    "token": {
+      "days": 30
+    },
+    "architecture": {
+      "days": 30
+    }
   }
 }

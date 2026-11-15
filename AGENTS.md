@@ -92,7 +92,7 @@ All applicable rules must be known and followed from the start; shorter indexes 
 | add or use a shared skill | [skill guidance](docs/agents/skills.md) |
 | adopt or reconcile the harness or review maintenance evidence (`node tools/maintenance.mjs check` runs at session start and in CI) | [maintenance guidance](docs/agents/maintenance.md) |
 | change AGENTS.md, CLAUDE.md, BACKLOG-RULES or `docs/backlog/` (rerun the agent-behaviour checks when a runner is configured) | [rule review](docs/agents/rule-review.md), "Agent-behaviour checks" |
-| measure friction or consolidate rules | [rule review](docs/agents/rule-review.md) |
+| friction or consolidate rules | [rule review](docs/agents/rule-review.md), "Measure actual friction", "Periodic rule consolidation" |
 | run an audit (`check:freshness` says when) | [audit procedure](docs/agents/audit.md) |
 | record audit findings or improvement proposals | [audit findings](docs/agents/audit-findings.md) |
 | update or close a backlog record | [backlog rules](docs/BACKLOG-RULES.md): its table names the one file the change needs |
