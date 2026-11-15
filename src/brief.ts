@@ -25,6 +25,8 @@ export interface BriefInput {
   unavailable?: Source[];
   /** F-052-T05: median and slowest duration per role since the last brief. */
   timings?: RoleTimingStats[];
+  /** F-054-T03: optional one-line agency chronicle highlight. */
+  chronicleLine?: string;
 }
 export type Source = 'approvals' | 'reminders' | 'sorties' | 'health' | 'expired';
 const words = {
@@ -45,6 +47,7 @@ const words = {
     ok: 'All checks pass.',
     unread: 'could not be read for this brief.',
     timings: 'Timings (median / slowest)',
+    chronicle: 'Chronicle',
   },
   it: {
     title: 'Il brief di Hyuga',
@@ -63,6 +66,7 @@ const words = {
     ok: 'Tutti i controlli sono a posto.',
     unread: 'non leggibile per questo brief.',
     timings: 'Tempi (mediana / più lento)',
+    chronicle: 'Cronaca',
   },
 };
 /** The sortie's short ID, as the dashboard shows it: the way to its trace. */
@@ -164,6 +168,7 @@ export function composeBrief(b: BriefInput): string {
             .map((t) => `• ${t.role}: ${formatDurationMs(t.medianMs)} / ${formatDurationMs(t.maxMs)} (${t.count})`),
         ]
       : []),
+    ...(b.chronicleLine?.trim() ? ['', `${w.chronicle}: ${b.chronicleLine.trim()}`] : []),
   ];
   return lines.join('\n').slice(0, 3500);
 }

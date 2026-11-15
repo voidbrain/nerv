@@ -797,7 +797,16 @@ function renderModels() {
   const box = document.getElementById("models"); if (!box) return;
   box.innerHTML = "<div class='small'>Misato · qwen2.5-coder:14b (local)</div><div class='small'>Casper · gemma4:12b (local)</div><div class='tiny muted' style='margin-top:4px'>Simulation: live, pick each role's model from what Ollama has.</div>";
 }
-function renderAll() { renderSkills(); fillAvatars(); renderQuestions(); renderNeeds(); renderSorties(); renderFlow(); renderAway(); renderNext(); renderHealth(); renderBudget(); renderMelons(); renderBases(); renderCages(); renderLilith(); renderModels(); }
+function renderChronicle() {
+  const box = document.getElementById("chronicle"); if (!box) return;
+  const sub = document.getElementById("chronicle-sub");
+  const days = Array.isArray(state.chronicle) ? state.chronicle : [];
+  if (sub) sub.textContent = days.length ? days.length + " day(s) recorded" : "No milestones recorded yet.";
+  box.innerHTML = days.length
+    ? days.map(d => "<div class='row small'><div><strong>" + esc(d.day) + "</strong>" + (d.version ? " <span class='tiny muted'>" + esc(d.version) + "</span>" : "") + "<div>" + esc(d.text) + "</div>" + (Array.isArray(d.sources) && d.sources.length ? "<div class='tiny muted'>" + d.sources.map(esc).join(" · ") + "</div>" : "") + "</div></div>").join("")
+    : "<div class='tiny muted'>Entries appear here from recorded registry, pilot, and route milestones.</div>";
+}
+function renderAll() { renderSkills(); fillAvatars(); renderQuestions(); renderNeeds(); renderSorties(); renderFlow(); renderAway(); renderNext(); renderHealth(); renderBudget(); renderMelons(); renderBases(); renderChronicle(); renderCages(); renderLilith(); renderModels(); }
 
 /* ================= MAP: zoomed regional topography (procedural hills and valleys) ================= */
 const map = { ready:false, w:540, h:250, proj:null, contours:[], base:null, linkPaths:{} };
@@ -940,6 +949,18 @@ document.addEventListener("keydown", e => {
   const tab = e.target.closest && e.target.closest("[data-resource-tab]"); if (!tab || !["ArrowLeft","ArrowRight","Home","End"].includes(e.key)) return;
   e.preventDefault(); selectResourceTab(e.key === "Home" ? "models" : e.key === "End" ? "battery" : tab.dataset.resourceTab === "models" ? "battery" : "models", true);
 });
+function selectBaseTab(name, focus = false) {
+  document.querySelectorAll("[data-base-tab]").forEach(tab => {
+    const selected = tab.dataset.baseTab === name;
+    tab.setAttribute("aria-selected", String(selected)); tab.tabIndex = selected ? 0 : -1; tab.classList.toggle("sel", selected);
+    document.getElementById(tab.getAttribute("aria-controls")).hidden = !selected;
+    if (selected && focus) tab.focus();
+  });
+}
+document.addEventListener("keydown", e => {
+  const tab = e.target.closest && e.target.closest("[data-base-tab]"); if (!tab || !["ArrowLeft","ArrowRight","Home","End"].includes(e.key)) return;
+  e.preventDefault(); selectBaseTab(e.key === "Home" ? "bases" : e.key === "End" ? "chronicle" : tab.dataset.baseTab === "bases" ? "chronicle" : "bases", true);
+});
 const telegramObserved = new Map(); const telegramPulses = []; let telegramBases = [];
 function telegramRoutes(bases) {
   return bases.filter(b => b.channelFresh && b.online && b.status === "enrolled" && b.channel && ["local","local-fallback","via-main"].includes(b.channel.mode));
@@ -1049,6 +1070,7 @@ document.addEventListener("click", e => {
   if (t.dataset.f) { state.filter = t.dataset.f; document.querySelectorAll("#p-sorties .filters .btn").forEach(b => { b.classList.toggle("on", b.dataset.f === state.filter); b.setAttribute("aria-pressed", String(b.dataset.f === state.filter)); }); renderSorties(); return; }
   if (t.id === "sorties-more" && LIVE) { window.liveOlder(); return; }
   if (t.dataset.resourceTab) { selectResourceTab(t.dataset.resourceTab); return; }
+  if (t.dataset.baseTab) { selectBaseTab(t.dataset.baseTab); return; }
   if (t.dataset.go) { if (t.dataset.go === "p-budget") selectResourceTab("battery"); document.getElementById(t.dataset.go).scrollIntoView({ behavior:"smooth", block:"start" }); return; }
   if (t.dataset.spear && LIVE) { window.liveSpear(t.dataset.spear); return; }
   if (t.dataset.spear) { const s = state.sorties.find(x => x.id === t.dataset.spear); state.approvals.filter(a => a.sortie === s.id).forEach(a => decide(a.id, "reject")); if (s.status === "active") { s.status = "stood-down"; s.outcome = "Spear"; finish(s); } log("Spear " + s.id + ": grants revoked · happened: " + (s.happened.map(h => h.tool).join(", ") || "none"), "danger", s); renderAll(); return; }

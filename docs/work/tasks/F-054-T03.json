@@ -4,7 +4,7 @@
   "parent": "F-054",
   "title": "Chronicle tab and brief line",
   "goal": "Chronicle tab and brief line",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Chronicle tab in the dashboard; optional line in the morning brief; axe passes"
   ],
@@ -32,11 +32,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.5 hours agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
-    "reviewed": "2026-11-13",
+    "estimate": "0 hours",
+    "basis": "Closed 2026-11-15: added Chronicle tab (#tab-chronicle, #p-chronicle, renderChronicle, selectBaseTab) in web/public/dashboard/index.html and web/public/dashboard/dashboard.js, optional chronicleLine in composeBrief (src/brief.ts), unit test in test/chronicle.test.ts, and browser + axe check in test/angular.browser.mjs in 0.25 h agent (stated).",
+    "reviewed": "2026-11-15",
     "baselineDays": 1,
-    "agentHours": 0.5,
+    "agentHours": 0,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated",
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 0.5
   }
