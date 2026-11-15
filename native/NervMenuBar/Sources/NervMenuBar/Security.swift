@@ -37,7 +37,17 @@ final class NativeConnection {
     }
     deinit { session.invalidateAndCancel() }
     static func transportError(_ error: Error, pinRejected: Bool) -> NativeError {
-        if pinRejected || (error as? URLError)?.code == .cancelled { return .certificateMismatch }
+        let ns = error as NSError
+        let tlsPinCodes: [URLError.Code] = [
+            .cancelled, .serverCertificateUntrusted, .serverCertificateHasUnknownRoot,
+            .serverCertificateHasBadDate, .serverCertificateNotYetValid, .clientCertificateRejected, .secureConnectionFailed,
+        ]
+        if pinRejected
+            || (error as? URLError).map({ tlsPinCodes.contains($0.code) }) == true
+            || (ns.domain == NSURLErrorDomain && ns.code == NSURLErrorCancelled)
+        {
+            return .certificateMismatch
+        }
         if let urlError = error as? URLError, [.cannotConnectToHost, .cannotFindHost, .networkConnectionLost, .timedOut, .notConnectedToInternet].contains(urlError.code) {
             return .serviceUnreachable
         }
