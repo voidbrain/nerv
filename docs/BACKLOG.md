@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 90.25 h agent + 24 h owner across 200 open steps of 52 features and 5 other records. 29.75 h of actual effort recorded on 59 steps. Generated from the task files.
+**Remaining effort:** 89.75 h agent + 24 h owner across 199 open steps of 51 features and 5 other records. 30 h of actual effort recorded on 60 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1991,7 +1991,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0 h | — | — | — | — | — |
 
 💻 **→** Next: F-080-T01.
 
@@ -2005,8 +2005,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="f-080-t01"></a>F-080-T01 — Move the peer handlers to a module with unit tests | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed |
+| — | <a id="f-080-t01"></a>F-080-T01 — Move the peer handlers to a module with unit tests | 0.5 h | 0.25 h (stated) | 0 h | Completed |
+| — | **Total** | 0.5 h | 0.25 h | 0 h | 1 of 1 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>

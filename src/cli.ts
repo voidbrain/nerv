@@ -3,6 +3,7 @@ import { startSnapshots } from './snapshots.ts';
 import type { CreateResumeIntentInput, ResumeIntentStatus } from './resume-intent.ts';
 import { decideHitlThroughPersona, formatMisatoPendingHitl } from './persona.ts';
 import { EVA_CLASS_SPECS, admitEvaJob, type EvaAdmissionRequest } from './eva-classes.ts';
+import { createPeerHandlers } from './peer-handlers.ts';
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
 import type { OneMoreBatteryExport } from './batteries.ts';
@@ -78,7 +79,7 @@ import {
 } from './config.ts';
 import { STAGES, addPilot, describePilots, setPilotFlag, updatePilot, type EvaClass, type Stage } from './pilots.ts';
 import { McpClient, fingerprint as toolFingerprint, grantRefusal, toolName, type Eva, type McpTool } from './mcp.ts';
-import { TelegramApi, TelegramChannel, decisionText, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
+import { TelegramApi, TelegramChannel, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
 import { chronicleDays, composeChronicle, gatherMilestones } from './chronicle.ts';
 import { composeBrief, gatherBrief } from './brief.ts';
 import { KajiLink } from './kaji-link.ts';
@@ -1601,14 +1602,16 @@ try {
                 return 'refused';
               }
             },
-            onRelay: async (from, relay) => {
-              if (!aoba) return false;
-              const name = (await runtime.bases()).find((b) => b.baseId === from)?.name ?? from;
-              return aoba.relayed(from, name, relay);
-            },
+            ...createPeerHandlers({
+              base: config.base,
+              getAoba: () => aoba,
+              bases: () => runtime.bases(),
+              decide: (approvalId, decision, source) => runtime.decide(approvalId, decision, source),
+              chat: (message, conversation) => runtime.chat(message, conversation),
+              sortie: (sortieId) => runtime.sortie(sortieId),
+              events: (sortieId, after, limit) => runtime.events(sortieId, after, limit),
+            }),
             onPendingApprovals: (ids) => runtime.pendingApprovalIds(ids),
-            onDecide: async (approvalId, decision) =>
-              decisionText(await runtime.decide(approvalId, decision, 'telegram')),
             // Dispatch, on the main base: a request asked on another base, with its own conversation per base and channel.
             // Slice 3b, on the base asked: only actions this base offers, once per id, through this base's own gate.
             offers: () => live().kaji?.offers ?? [],
@@ -1619,16 +1622,6 @@ try {
             onOperator: (id, entry, bases) => runtime.notePeerOperator(id, entry, bases),
             // Phase 2, on the base asked: this base's Casper votes on the main base's action.
             onVerdict: (_from, ask) => runtime.peerVerdict(ask),
-            onChat: async (from, message, conversation) => ({
-              ...(await runtime.chat(message, `kaji:${from.toLowerCase()}${conversation ? '-' + conversation : ''}`)),
-              base: { id: config.base.id, name: config.base.name },
-            }),
-            onSortie: async (_from, sortieId) => {
-              const sortie = await runtime.sortie(sortieId);
-              if (!sortie) return null;
-              const events = await runtime.events(sortieId, 0, 100);
-              return { sortie, events };
-            },
           });
           if (kaji) {
             const link = kaji;
