@@ -9,7 +9,8 @@
     "A revoked credential (401), a stopped service and a rotated certificate each show their own message in English and Italian"
   ],
   "dependsOn": [
-    "B-057-T01"
+    "B-057-T01",
+    "B-057-T03"
   ],
   "resources": [
     "docs/work/records/**",

@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "B-057-T03",
+  "parent": "B-057",
+  "title": "Rotated certificate shows the TLS message, not \"cancelled\"",
+  "goal": "After a certificate rotation the companion names the changed certificate and no false service mismatch",
+  "status": "ready",
+  "acceptance": [
+    "A committed Swift test fails first, unchanged by the fix: a pinned request rejected after a rotation yields the raw URLError \"cancelled\" in the status line",
+    "The status line shows the certificate-changed message in English and Italian",
+    "The service section does not claim a service mismatch before a successful identity check"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "native/NervMenuBar/**",
+    "docs/work/records/B-057.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "swift test (native/NervMenuBar)",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h",
+    "basis": "Estimated 2026-11-15: find where the raw URLError bypasses NativeConnection.transportError, map it, gate the mismatch line; a test. Not a measurement.",
+    "reviewed": "2026-11-15",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  }
+}
