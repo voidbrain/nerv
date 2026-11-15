@@ -1,6 +1,7 @@
 #!/usr/bin/env -S node --use-system-ca
 import { startSnapshots } from './snapshots.ts';
 import type { CreateResumeIntentInput, ResumeIntentStatus } from './resume-intent.ts';
+import { decideHitlThroughPersona, formatMisatoPendingHitl } from './persona.ts';
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
 import type { OneMoreBatteryExport } from './batteries.ts';
@@ -407,6 +408,23 @@ try {
         console.log(JSON.stringify(store.resumeIntents.cancel(args[1], args[2]), null, 2));
       } else {
         throw new Error('Usage: resume-intent list [status] | create <intent.json> | cancel <id> [reason]');
+      }
+    } finally {
+      store.close();
+    }
+  } else if (command === 'persona') {
+    const sub = args[0];
+    const action = args[1];
+    const store = new Store(databasePath(home), readScrolls(home), { home });
+    const persona = readConfig(home).personas;
+    try {
+      if (sub === 'hitl' && action === 'list') {
+        console.log(formatMisatoPendingHitl(store.approvals(20), persona));
+      } else if (sub === 'hitl' && action === 'decide' && args[2] && (args[3] === 'approve' || args[3] === 'reject')) {
+        const res = await decideHitlThroughPersona(store, args[2], args[3], { persona, source: 'cli' });
+        console.log(JSON.stringify(res, null, 2));
+      } else {
+        throw new Error('Usage: persona hitl list | persona hitl decide <approvalId> approve|reject');
       }
     } finally {
       store.close();
