@@ -7,7 +7,16 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Store } from '../src/store.ts';
 import { Registry, canonical, createRootKey, signRecord, unlockRootKey, type RegistryBody } from '../src/kaji.ts';
-import { chronicleDays, composeChronicle, gatherMilestones, type Milestone } from '../src/chronicle.ts';
+import {
+  CHRONICLER_PILOT,
+  chronicleDays,
+  composeChronicle,
+  composeEvaChronicle,
+  gatherMilestones,
+  retellChronicleDayWithPilot,
+  verifyChronicleMentionsOnlyDayFacts,
+  type Milestone,
+} from '../src/chronicle.ts';
 const pub = () => generateKeyPairSync('ed25519').publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
 const m = (at: string, kind: Milestone['kind'], subject: string, detail: string, source: string): Milestone => ({
   at,
@@ -188,4 +197,39 @@ test('across the store, the ledger and the registry: only recorded milestones, e
   } finally {
     rmSync(home, { recursive: true, force: true });
   }
+});
+
+test('F-054-T02: Chronicler pilot is writer-only Proto and its Eva retelling is rejected when it invents off-day facts', async () => {
+  assert.equal(CHRONICLER_PILOT.stage, 'prototype');
+  assert.deepEqual(CHRONICLER_PILOT.tools, []);
+
+  const day = {
+    day: '2030-01-02',
+    milestones: [m('2030-01-02T09:00:00Z', 'base.enrolled', 'Tabgha', 'NERV-02', 'registry:a1b2c3d4')],
+  };
+
+  const grounded = await retellChronicleDayWithPilot(
+    day,
+    async () => '2030-01-02 — From Terminal Dogma: Tabgha (NERV-02) answered the agency call. [registry:a1b2c3d4]',
+    'en',
+  );
+  assert.equal(grounded.grounded, true);
+  assert.equal(grounded.fallback, false);
+  assert.match(grounded.text, /NERV-02/);
+
+  const badCheck = verifyChronicleMentionsOnlyDayFacts(
+    '2030-01-02 — Tabgha (NERV-02) and Golgotha (NERV-99) joined. [registry:a1b2c3d4]',
+    day,
+  );
+  assert.equal(badCheck.ok, false);
+  assert.match(badCheck.reason ?? '', /NERV-99/);
+
+  const rejected = await retellChronicleDayWithPilot(
+    day,
+    async () => '2030-01-02 — Tabgha (NERV-02) and invented NERV-99 joined [registry:a1b2c3d4].',
+    'en',
+  );
+  assert.equal(rejected.grounded, true);
+  assert.equal(rejected.fallback, true);
+  assert.equal(rejected.text, composeEvaChronicle([day], 'en'));
 });

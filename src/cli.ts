@@ -80,8 +80,19 @@ import {
 } from './config.ts';
 import { STAGES, addPilot, describePilots, setPilotFlag, updatePilot, type EvaClass, type Stage } from './pilots.ts';
 import { McpClient, fingerprint as toolFingerprint, grantRefusal, toolName, type Eva, type McpTool } from './mcp.ts';
+<<<<<<< HEAD
 import { TelegramApi, TelegramChannel, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
 import { chronicleDays, composeChronicle, gatherMilestones } from './chronicle.ts';
+=======
+import { TelegramApi, TelegramChannel, decisionText, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
+import {
+  chronicleDays,
+  composeChronicle,
+  composeEvaChronicle,
+  gatherMilestones,
+  retellChronicleDayWithPilot,
+} from './chronicle.ts';
+>>>>>>> eefdea47 (feat(f-054): add writer-only Proto Chronicler Eva retelling with day-fact grounding (F-054-T02))
 import { composeBrief, gatherBrief } from './brief.ts';
 import { KajiLink } from './kaji-link.ts';
 import { guardLocalService } from './node-lifecycle-execution.ts';
@@ -1355,19 +1366,28 @@ try {
         );
         break;
       case 'chronicle': {
-        // F-054: the Simple chronicle, from recorded milestones only; DAYS limits it to the last N days (default 30).
-        const days = args[0] === undefined ? 30 : Number(args[0]);
-        if (!Number.isSafeInteger(days) || days < 1 || days > 3660) throw new Error('Usage: chronicle [DAYS] (1–3660)');
-        console.log(
-          composeChronicle(
-            chronicleDays(
-              gatherMilestones(local().db, config.kaji?.root),
-              config.timeZone,
-              new Date(Date.now() - days * 86_400_000),
-            ),
-            config.language,
-          ),
+        // F-054: the Simple or Eva chronicle, from recorded milestones only; DAYS limits it to the last N days (default 30).
+        const eva = args.includes('--eva');
+        const pilotRetell = args.includes('--pilot');
+        const dayArg = args.find((a) => a !== '--eva' && a !== '--pilot');
+        const days = dayArg === undefined ? 30 : Number(dayArg);
+        if (!Number.isSafeInteger(days) || days < 1 || days > 3660)
+          throw new Error('Usage: chronicle [DAYS] [--eva] (1–3660)');
+        const grouped = chronicleDays(
+          gatherMilestones(local().db, config.kaji?.root),
+          config.timeZone,
+          new Date(Date.now() - days * 86_400_000),
         );
+        if (eva && pilotRetell && grouped.length) {
+          const retold = await Promise.all(
+            grouped.map((d) =>
+              retellChronicleDayWithPilot(d, async () => composeEvaChronicle([d], config.language), config.language),
+            ),
+          );
+          console.log(retold.map((r) => r.text).join('\n\n'));
+        } else {
+          console.log((eva ? composeEvaChronicle : composeChronicle)(grouped, config.language));
+        }
         break;
       }
       case 'tick':
