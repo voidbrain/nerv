@@ -4,7 +4,7 @@
   "parent": "F-099",
   "title": "Feasibility: reading the build and its sources",
   "goal": "What NERV can read from the diyfpv build or its PNG, and which sources a wiring answer can cite",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "Tried on the owner's build link and a PNG export; what each yields",
     "Manufacturer documents for the two named components located or not",
@@ -31,8 +31,10 @@
     "estimate": "0.75 h agent",
     "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement.",
     "reviewed": "2026-11-14",
-    "agentHours": 0.75,
+    "agentHours": 0,
     "baselineAgentHours": 0.75,
-    "estimateAgentHours": 0.75
+    "estimateAgentHours": 0.75,
+    "actualAgentHours": 0.25,
+    "actualSource": "measured"
   }
 }
