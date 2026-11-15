@@ -4,7 +4,7 @@
   "parent": "F-012",
   "title": "Durable resume intent and policy",
   "goal": "Durable resume intent and policy",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Target, permission scope, reset time, expiry and attempts persisted; survives restart; cancellation"
   ],
@@ -30,11 +30,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.75 h agent",
+    "estimate": "0 hours",
     "basis": "Re-estimated 2026-11-14 from 0.25 h to 0.75 h: feature implementation steps closed since 2026-11-13 took 0.75–1 h (F-066-T01, F-066-T02, F-062-T03, F-044-T01) where the 0.25x pass had set 0.25–1 h; started from this step's estimate, not a ratio.",
     "reviewed": "2026-11-14",
     "baselineDays": 1,
-    "agentHours": 0.75,
+    "agentHours": 0,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated",
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 0.75
   }

@@ -1,5 +1,6 @@
 #!/usr/bin/env -S node --use-system-ca
 import { startSnapshots } from './snapshots.ts';
+import type { CreateResumeIntentInput, ResumeIntentStatus } from './resume-intent.ts';
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
 import type { OneMoreBatteryExport } from './batteries.ts';
@@ -388,6 +389,24 @@ try {
         console.log(JSON.stringify(store.batteries.importOneMoreBattery(payload), null, 2));
       } else {
         throw new Error('Usage: batteries list | batteries import <export.json>');
+      }
+    } finally {
+      store.close();
+    }
+  } else if (command === 'resume-intent') {
+    const sub = args[0] ?? 'list';
+    const store = new Store(databasePath(home), readScrolls(home), { home });
+    try {
+      if (sub === 'list') {
+        const status = args[1] as ResumeIntentStatus | undefined;
+        console.log(JSON.stringify(store.resumeIntents.list(status), null, 2));
+      } else if (sub === 'create' && args[1]) {
+        const input = JSON.parse(readFileSync(resolve(args[1]), 'utf8')) as CreateResumeIntentInput;
+        console.log(JSON.stringify(store.resumeIntents.create(input), null, 2));
+      } else if (sub === 'cancel' && args[1]) {
+        console.log(JSON.stringify(store.resumeIntents.cancel(args[1], args[2]), null, 2));
+      } else {
+        throw new Error('Usage: resume-intent list [status] | create <intent.json> | cancel <id> [reason]');
       }
     } finally {
       store.close();

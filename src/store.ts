@@ -17,6 +17,7 @@ import { MEMORY_SCHEMA, Memory, type Episode } from './memory.ts';
 import { BATTERY_SCHEMA, BatteryRegistry } from './batteries.ts';
 import { Registry, REGISTRY_SCHEMA } from './kaji.ts';
 import { MILESTONE_SCHEMA } from './milestones.ts';
+import { RESUME_INTENT_SCHEMA, ResumeIntentStore } from './resume-intent.ts';
 import { defaultPolicy, type Ballot, type Policy } from './policy.ts';
 import { generateVapidKeys, sendWebPush, formatReminderPushPayload, type PushSubscriptionRecord } from './push.ts';
 import {
@@ -92,6 +93,7 @@ export class Store {
   readonly watch: Watch;
   readonly memory: Memory;
   readonly batteries: BatteryRegistry;
+  readonly resumeIntents: ResumeIntentStore;
   readonly policySource: string;
   pushFetch: typeof fetch = fetch;
   /** The data home, when known: the schedule tool writes config.json there. */
@@ -181,10 +183,12 @@ export class Store {
       `CREATE TABLE IF NOT EXISTS push_subscriptions(endpoint TEXT PRIMARY KEY, p256dh TEXT NOT NULL, auth TEXT NOT NULL, created TEXT NOT NULL, user_agent TEXT);
        CREATE TABLE IF NOT EXISTS push_vapid(id TEXT PRIMARY KEY, public_key TEXT NOT NULL, private_key TEXT NOT NULL, created TEXT NOT NULL);`,
     );
+    this.db.exec(RESUME_INTENT_SCHEMA);
     this.ledger = new Ledger(this.db, { policy: scrolls.policy, tools: builtinTools });
     this.memory = new Memory(this.db);
     this.db.exec(BATTERY_SCHEMA);
     this.batteries = new BatteryRegistry(this.db);
+    this.resumeIntents = new ResumeIntentStore(this.db);
     this.watch = new Watch(this.db, this.ledger);
     this.policySource = scrolls.source;
     this.db.exec(
