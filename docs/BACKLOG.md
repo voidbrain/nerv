@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 70 h agent + 24 h owner across 166 open steps of 44 features and 5 other records. 39.5 h of actual effort recorded on 93 steps. Generated from the task files.
+**Remaining effort:** 69.5 h agent + 24 h owner across 165 open steps of 43 features and 5 other records. 39.75 h of actual effort recorded on 94 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1785,9 +1785,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0 h | — | — | — | — | — |
 
-💻 **→** Next: F-077-T02 (patch and minor dependency updates); the next audit reads the first alerts.
+💻 **→** F-077-T01 and F-077-T02 complete; the next audit reads the first alerts, and major upgrades (TypeScript 7, `@types/node` 26) stay separate.
 
 | | |
 |---|---|
@@ -1799,9 +1799,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-077-t02"></a>F-077-T02 — Apply patch and minor dependency updates | 0.5 h | 0 h | 0.5 h | Planned | 🤖 |
 | — | <a id="f-077-t01"></a>F-077-T01 — Turn on Dependabot alerts and CodeQL default setup | 0.25 h | 0 h | 0 h | Completed | 🤖 🧑‍🔧 |
-| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0.5 h | 1 of 2 completed | |
+| — | <a id="f-077-t02"></a>F-077-T02 — Apply patch and minor dependency updates | 0.5 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
+| — | **Total** | 0.75 h | 0.25 h (1 of 2 steps recorded) | 0 h | 2 of 2 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1812,7 +1812,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | [PR #379](https://github.com/voidbrain/nerv/pull/379) [PR #377](https://github.com/voidbrain/nerv/pull/377) [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) |
 | Opened | 2026-11-13 |
-| Verification | Pending. |
+| Verification | `F-077-T02` updated `@angular/*` (22.2.6 / `build` & `cli` 22.2.7), `@anthropic-ai/sdk` (1.8.0), `ws` (8.23.0), `@types/ws` (8.18.2), `tslib` (2.9.1), `eslint` (10.15.0), `linkedom` (0.18.15), and `prettier` (3.10.1); major upgrades (`typescript` 7.0.2, `@types/node` 26.6.6) remain unapplied for their own record. Verified with `npm run build`, `npm test`, and `npm run check:fast`. |
 | Reviewed | 2026-11-13 |
 
 </details>
