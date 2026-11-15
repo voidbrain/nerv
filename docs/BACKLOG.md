@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 94.5 h agent + 24 h owner across 207 open steps of 52 features and 5 other records. 26.75 h of actual effort recorded on 52 steps. Generated from the task files.
+**Remaining effort:** 93.75 h agent + 24 h owner across 206 open steps of 52 features and 5 other records. 27.25 h of actual effort recorded on 53 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1705,7 +1705,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 4.5 h agent + 0.5 h owner | — | [F-098-T02](#f-098-t02), [F-101-T01](#f-101-t01) | 🤖 | — | 🤔 |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.75 h agent + 0.5 h owner | — | [F-101-T01](#f-101-t01) | 🤖 | — | 🤔 |
 
 🧑 **→** Confirm or change the proposed thresholds and reminder times (F-008-T05).
 
@@ -1720,9 +1720,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
 | 🟢 Small | <a id="f-008-t05"></a>F-008-T05 — Owner decides thresholds and reminder times | 0 h | 0 h | 0 h agent + 0.25 h owner | Ready | [🤔](design/fpv-and-cooking-plan-2026-11-14.md) |
-| 🟢 Small | <a id="f-008-t06"></a>F-008-T06 — Battery registry and import | 0.75 h | 0 h | 0.75 h | Ready | 🤖 |
-| 🟢 Small | <a id="f-008-t07"></a>F-008-T07 — Charge state and cycles by chat | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-008-T06](#f-008-t06) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-008-t08"></a>F-008-T08 — Resistance records and due checks | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-008-T06](#f-008-t06), [F-008-T05](#f-008-t05) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-008-t07"></a>F-008-T07 — Charge state and cycles by chat | 0.75 h | 0 h | 0.75 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-008-t08"></a>F-008-T08 — Resistance records and due checks | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-008-T05](#f-008-t05) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-008-t09"></a>F-008-T09 — Storage reminders | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-008-T07](#f-008-t07), [F-008-T05](#f-008-t05) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-008-t10"></a>F-008-T10 — Health advice from resistance trends | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-008-T08](#f-008-t08) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-008-t11"></a>F-008-T11 — Battery cards on the dashboard | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-008-T10](#f-008-t10) | ⏳ 🤖 |
@@ -1731,7 +1730,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-008-t02"></a>F-008-T02 — Battery and maintenance records through the adapter | 0.5 h | 0 h | 0 h | Completed | 🤖 |
 | — | <a id="f-008-t03"></a>F-008-T03 — Acceptance against the real FPV app | — | 0 h | 0 h | Completed | 🧑‍🔧 |
 | — | <a id="f-008-t04"></a>F-008-T04 — Record the evidence of F-008-T03 and close it | 0.25 h | 0 h | 0 h | Completed | 🤖 |
-| 🔴 Large | **Total** | 5.5 h (11 of 12 steps) | 0 h (0 of 12 steps recorded) | 4.5 h agent + 0.5 h owner | 4 of 12 completed | |
+| — | <a id="f-008-t06"></a>F-008-T06 — Battery registry and import | 0.75 h | 0.5 h (stated) | 0 h | Completed | 🤖 |
+| 🟡 Medium | **Total** | 5.5 h (11 of 12 steps) | 0.5 h (1 of 12 steps recorded) | 3.75 h agent + 0.5 h owner | 5 of 12 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1740,10 +1740,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Rescoped by the owner 2026-11-14 ([plan](design/fpv-and-cooking-plan-2026-11-14.md), [PR #408](https://github.com/voidbrain/nerv/pull/408)); earlier: [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment, PR #313 priority |
+| PR / evidence | F-008-T06 battery registry and `one-more-battery` importer (`src/batteries.ts`, `Store.batteries` in `src/store.ts`, `batteries` CLI in `src/cli.ts`, verified in `test/batteries.test.ts`, 2026-11-15); Rescoped by the owner 2026-11-14 ([plan](design/fpv-and-cooking-plan-2026-11-14.md), [PR #408](https://github.com/voidbrain/nerv/pull/408)); earlier: [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment, PR #313 priority |
 | Opened | 2026-11-01 |
-| Verification | Pending. |
-| Reviewed | 2026-11-14 |
+| Verification | `npx tsc --noEmit`, `npm run check:conventions`, `node --test test/batteries.test.ts`, and `npm run check:fast` passed 2026-11-15; remote CI pending PR |
+| Reviewed | 2026-11-15 |
 
 </details>
 
@@ -2194,7 +2194,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 2.25 h agent + 0.25 h owner | [F-008-T06](#f-008-t06) | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 2.25 h agent + 0.25 h owner | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-098-T01.
 
@@ -2209,7 +2209,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
 | 🟢 Small | <a id="f-098-t01"></a>F-098-T01 — Fleet and spares model | 0.75 h | 0 h | 0.75 h | Ready | 🤖 |
-| 🟢 Small | <a id="f-098-t02"></a>F-098-T02 — Crash log and questions by chat | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-098-T01](#f-098-t01), [F-008-T06](#f-008-t06) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-098-t02"></a>F-098-T02 — Crash log and questions by chat | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-098-T01](#f-098-t01) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-098-t03"></a>F-098-T03 — Photos on crashes, parts and batteries | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-098-T02](#f-098-t02) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-098-t04"></a>F-098-T04 — Owner check with a real crash | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-098-T03](#f-098-t03) | ⏳ 🧑‍🔧 |
 | 🟡 Medium | **Total** | 2.25 h | 0 h (0 of 4 steps recorded) | 2.25 h agent + 0.25 h owner | 0 of 4 completed | |

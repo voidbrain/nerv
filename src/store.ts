@@ -14,6 +14,7 @@ import { dirname } from 'node:path';
 import { LEDGER_SCHEMA, Ledger, type Decision, type Proposal } from './ledger.ts';
 import { builtinTools, execute, hasExecutor, type AgencyBaseSnapshot, type AgencySnapshot } from './executors.ts';
 import { MEMORY_SCHEMA, Memory, type Episode } from './memory.ts';
+import { BATTERY_SCHEMA, BatteryRegistry } from './batteries.ts';
 import { Registry, REGISTRY_SCHEMA } from './kaji.ts';
 import { MILESTONE_SCHEMA } from './milestones.ts';
 import { defaultPolicy, type Ballot, type Policy } from './policy.ts';
@@ -90,6 +91,7 @@ export class Store {
   readonly ledger: Ledger;
   readonly watch: Watch;
   readonly memory: Memory;
+  readonly batteries: BatteryRegistry;
   readonly policySource: string;
   pushFetch: typeof fetch = fetch;
   /** The data home, when known: the schedule tool writes config.json there. */
@@ -181,6 +183,8 @@ export class Store {
     );
     this.ledger = new Ledger(this.db, { policy: scrolls.policy, tools: builtinTools });
     this.memory = new Memory(this.db);
+    this.db.exec(BATTERY_SCHEMA);
+    this.batteries = new BatteryRegistry(this.db);
     this.watch = new Watch(this.db, this.ledger);
     this.policySource = scrolls.source;
     this.db.exec(
