@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 93.75 h agent + 24 h owner across 206 open steps of 52 features and 5 other records. 27.25 h of actual effort recorded on 53 steps. Generated from the task files.
+**Remaining effort:** 93 h agent + 24 h owner across 205 open steps of 52 features and 5 other records. 27.75 h of actual effort recorded on 54 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -319,7 +319,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.75 h agent + 0.5 h owner | [F-005-T32](#f-005-t32) | [F-090-T02](#f-090-t02) | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 2 h agent + 0.5 h owner | [F-005-T32](#f-005-t32) | [F-090-T02](#f-090-t02) | 🤖 | — | — |
 
 💻 **→** Define durable waiting jobs and implement an authorized browser/editor adapter that rechecks the exact job before resuming once.
 
@@ -333,13 +333,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-012-t01"></a>F-012-T01 — Durable resume intent and policy | 0.75 h | 0 h | 0.75 h | Planned | 🤖 |
-| 🟢 Small | <a id="f-012-t02"></a>F-012-T02 — Readiness check and once-only resume engine | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-012-T01](#f-012-t01) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-012-t02"></a>F-012-T02 — Readiness check and once-only resume engine | 0.75 h | 0 h | 0.75 h | Planned | 🤖 |
 | 🟢 Small | <a id="f-012-t03"></a>F-012-T03 — Claude Code (VS Code) adapter feasibility and adapter | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-012-T02](#f-012-t02) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-012-t04"></a>F-012-T04 — Web-chat adapter feasibility | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-012-T03](#f-012-t03) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-012-t05"></a>F-012-T05 — Edge cases and real-host acceptance | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-005-T32](#f-005-t32), [F-012-T04](#f-012-t04) | ⏳ 🧑‍🔧 |
 | 🟢 Small | <a id="f-012-t06"></a>F-012-T06 — Record the evidence of F-012-T05 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-012-T05](#f-012-t05) | ⏳ 🤖 |
-| 🟡 Medium | **Total** | 2.75 h (5 of 6 steps) | 0 h (0 of 6 steps recorded) | 2.75 h agent + 0.5 h owner | 0 of 6 completed | |
+| — | <a id="f-012-t01"></a>F-012-T01 — Durable resume intent and policy | 0.75 h | 0.5 h (stated) | 0 h | Completed | 🤖 |
+| 🟡 Medium | **Total** | 2.75 h (5 of 6 steps) | 0.5 h (1 of 6 steps recorded) | 2 h agent + 0.5 h owner | 1 of 6 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
