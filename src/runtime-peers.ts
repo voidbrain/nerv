@@ -1,0 +1,288 @@
+import { builtinTools } from './executors.ts';
+import { ONLINE_MS, type RunItem } from './kaji-link.ts';
+import type { RemoteOffer } from './misato.ts';
+import { canRunRemotePilot, type Pilot, type PilotOffer, type PilotRegistry, type RegisteredPilot } from './pilots.ts';
+import type { ProcessClient } from './process-client.ts';
+import { remoteOutcomeText, type ActReply, type ChatReply, type OwnerAction } from './runtime-api.ts';
+import { WORKER_RESULT_BYTES, type WorkerClaim, type WorkerContext, type WorkerLease } from './worker-jobs.ts';
+
+export interface RuntimePeersHost {
+  readonly nervous: ProcessClient;
+  readonly offersHeard: Map<string, { tools: string[]; at: number }>;
+  readonly resumeListeners: ((reply: ChatReply) => void)[];
+  getSelfKey(): string | undefined;
+  bases(): Promise<
+    Array<{ baseId: string; name: string; online: boolean; status?: string; operator?: { name: string } | null }>
+  >;
+  getPilotRegistry(): PilotRegistry;
+  pilotRoster(): Pilot[];
+  act(action: OwnerAction, worker?: WorkerLease): Promise<ActReply>;
+}
+
+/**
+ * Peer offers/pilots discovery, Kaji outbox dispatch/cancellation, and incoming peer worker execution
+ * extracted from Runtime (F-095-T03).
+ */
+export class RuntimePeers {
+  private readonly host: RuntimePeersHost;
+  private outboxTimer?: NodeJS.Timeout;
+  private cancelRemote?: () => Promise<void>;
+
+  constructor(host: RuntimePeersHost) {
+    this.host = host;
+  }
+
+  stopTimers(): void {
+    if (this.outboxTimer) clearInterval(this.outboxTimer);
+  }
+
+  triggerCancelRemote(): void {
+    void this.cancelRemote?.();
+  }
+
+  async remoteOffers(): Promise<RemoteOffer[]> {
+    if (!this.host.offersHeard.size) return [];
+    const bases = await this.host.bases().catch(() => []);
+    return bases
+      .filter((b) => !(b as { self?: boolean }).self && b.online && b.status === 'enrolled')
+      .flatMap((b) => {
+        const o = this.host.offersHeard.get(b.baseId);
+        return o && o.tools.length && Date.now() - o.at < ONLINE_MS
+          ? [{ base: b.baseId, name: b.name, ...(b.operator ? { operator: b.operator.name } : {}), tools: o.tools }]
+          : [];
+      });
+  }
+
+  async registeredPilots(now = Date.now()): Promise<RegisteredPilot[]> {
+    const bases = await this.host.bases().catch(() => []);
+    const onlineBases = new Set(
+      bases.filter((b) => !(b as { self?: boolean }).self && b.online && b.status === 'enrolled').map((b) => b.baseId),
+    );
+    return this.host.getPilotRegistry().list({ now, maxAgeMs: ONLINE_MS, onlineBases });
+  }
+
+  async remotePilots(now = Date.now()): Promise<{ base: string; name: string; pilots: PilotOffer[] }[]> {
+    const bases = await this.host.bases().catch(() => []);
+    const reg = this.host.getPilotRegistry();
+    return bases
+      .filter((b) => !(b as { self?: boolean }).self && b.online && b.status === 'enrolled')
+      .flatMap((b) => {
+        const pilots = reg.forBase(b.baseId, { now, maxAgeMs: ONLINE_MS });
+        return pilots.length
+          ? [
+              {
+                base: b.baseId,
+                name: b.name,
+                pilots: pilots.map(({ baseId: _b, local: _l, receivedAt: _r, ...p }) => p),
+              },
+            ]
+          : [];
+      });
+  }
+
+  startOutbox(
+    send: (
+      base: string,
+      item: RunItem,
+      dispatching: () => Promise<void>,
+    ) => Promise<{ reached: boolean; result?: unknown; refused?: string }>,
+    everyMs = 3000,
+    cancel?: (base: string, id: string, reason: string) => Promise<{ status: string; result?: unknown }>,
+  ) {
+    let cancelling = false;
+    const cancelTick = async () => {
+      if (cancelling) return;
+      cancelling = true;
+      try {
+        for (const q of (await this.host.nervous.call('kaji.outboxCancels')) as {
+          sortieId: string;
+          id: string;
+          base: string;
+          tool: string;
+          reason: string;
+          attempted: boolean;
+          legacy: boolean;
+        }[]) {
+          let result: Record<string, unknown>;
+          if (!q.attempted && !q.legacy)
+            result = { outcome: 'reject', reason: 'Cancelled before dispatch; nothing was sent.' };
+          else {
+            let reply: { status: string; result?: unknown } | undefined;
+            try {
+              if (cancel && !q.legacy) reply = await cancel(q.base, q.id, q.reason);
+            } catch {
+              /* Unknown remote cancellation remains explicit. */
+            }
+            result =
+              reply &&
+              (reply.status === 'completed' || reply.status === 'cancelled') &&
+              reply.result &&
+              typeof reply.result === 'object'
+                ? (reply.result as Record<string, unknown>)
+                : {
+                    outcome: 'uncertain',
+                    error:
+                      'Cancellation requested; remote work may have started. Inspect its receipt before releasing or repeating it.',
+                  };
+          }
+          const text = remoteOutcomeText(q.base, q.tool, result);
+          const changed = await this.host.nervous.call('kaji.outboxDone', {
+            id: q.id,
+            result,
+            said: { base: q.base, text },
+          });
+          if (changed && !(await this.host.nervous.call('watch.get', { sortieId: q.sortieId }).catch(() => true)))
+            for (const listener of this.host.resumeListeners)
+              listener({ sortieId: q.sortieId, reply: text, steps: [], waiting: [] });
+        }
+      } catch {
+        /* Durable cancellation markers remain for the next tick. */
+      } finally {
+        cancelling = false;
+      }
+    };
+    this.cancelRemote = cancelTick;
+    let busy = false,
+      checkedUpgrade = false;
+    const tick = async () => {
+      if (busy) return;
+      busy = true;
+      try {
+        if (!checkedUpgrade) {
+          const held = (await this.host.nervous.call('kaji.outboxHeld')) as unknown[];
+          checkedUpgrade = true;
+          if (held.length)
+            console.error(
+              'Worker upgrade: legacy requests are held for reconciliation (workers held); no automatic replay.',
+            );
+        }
+        for (const q of (await this.host.nervous.call('kaji.outbox')) as {
+          attempted: boolean;
+          deadline: number;
+          sequence: number;
+          id: string;
+          sortieId: string;
+          base: string;
+          tool: string;
+          args: Record<string, unknown>;
+          request: string;
+          pilot?: string;
+        }[]) {
+          const r =
+            q.deadline <= Date.now()
+              ? {
+                  reached: true,
+                  result: q.attempted
+                    ? {
+                        outcome: 'uncertain',
+                        error:
+                          'Worker request expired after a dispatch attempt; inspect its destination receipt before any new request.',
+                      }
+                    : { outcome: 'reject', reason: 'Queued worker request expired before dispatch; nothing was sent.' },
+                }
+              : await send(
+                  q.base,
+                  {
+                    id: q.id,
+                    sequence: q.sequence,
+                    deadline: q.deadline,
+                    request: q.request,
+                    tool: q.tool,
+                    args: q.args,
+                    ...(q.pilot ? { pilot: q.pilot } : {}),
+                  },
+                  async () => {
+                    await this.host.nervous.call('kaji.outboxAttempt', { id: q.id });
+                  },
+                );
+          if (!r.reached) continue;
+          let result = (r.refused ? { refused: r.refused } : (r.result ?? {})) as Record<string, unknown>;
+          if (Buffer.byteLength(JSON.stringify(result)) > WORKER_RESULT_BYTES)
+            result = {
+              outcome: 'uncertain',
+              error: 'Remote result exceeded its bound; inspect the destination trace.',
+            };
+          const name = (await this.host.bases().catch(() => [])).find((b) => b.baseId === q.base)?.name ?? q.base;
+          const reply = remoteOutcomeText(name, q.tool, result, q.args);
+          const changed = await this.host.nervous.call(
+            result.outcome === 'approval' ? 'kaji.outboxProgress' : 'kaji.outboxDone',
+            { id: q.id, result, said: { base: name, text: reply } },
+          );
+          if (!changed) continue;
+          if (!(await this.host.nervous.call('watch.get', { sortieId: q.sortieId }).catch(() => true)))
+            for (const l of this.host.resumeListeners) l({ sortieId: q.sortieId, reply, steps: [], waiting: [] });
+        }
+      } catch {
+        /* the next tick tries again */
+      } finally {
+        busy = false;
+      }
+    };
+    if (!this.outboxTimer)
+      this.outboxTimer = setInterval(() => {
+        void cancelTick();
+        void tick();
+      }, everyMs);
+    void cancelTick();
+    void tick();
+  }
+
+  async runFromPeer(from: string, item: RunItem, offered: string[], context: WorkerContext): Promise<unknown> {
+    if (!context.ownerKey) throw new Error('Negotiated worker authority required.');
+    const ownerKey = context.ownerKey;
+    const wireContext = { session: context.session, epoch: context.epoch, expires: context.expires };
+    const claim = (await this.host.nervous.call('worker.claim', {
+      owner: from,
+      ownerKey,
+      key: this.host.getSelfKey(),
+      item,
+      ...(wireContext ? { context: wireContext } : {}),
+    })) as WorkerClaim;
+    if (claim.state === 'busy') return { retry: true, error: 'Worker resource is held by an unfinished request.' };
+    if (claim.state !== 'claimed') return claim.result;
+    const lease = claim.lease!;
+    let pilotRefusal: string | undefined;
+    if (item.pilot !== undefined) {
+      const targetPilot = this.host.pilotRoster().find((p) => p.id === item.pilot);
+      if (!targetPilot) pilotRefusal = `this base does not have pilot ${item.pilot}`;
+      else {
+        const grant = canRunRemotePilot(targetPilot, offered, item.tool);
+        if (!grant.allowed) pilotRefusal = grant.reason;
+      }
+    }
+    const result = pilotRefusal
+      ? { refused: pilotRefusal }
+      : !offered.includes(item.tool) || item.tool === 'kaji.run' || !builtinTools.some((t) => t.name === item.tool)
+        ? { refused: `this base does not offer ${item.tool} (on it: kaji offer)` }
+        : await this.host
+            .act(
+              {
+                request:
+                  `From ${from}${item.pilot ? ` (pilot ${item.pilot})` : ''}: ${item.request || item.tool}`.slice(
+                    0,
+                    4000,
+                  ),
+                tool: item.tool,
+                args: item.args,
+              },
+              lease,
+            )
+            .catch(() => ({
+              outcome: 'invalid',
+              error: 'Worker action failed or its lease/authority changed; inspect the local trace.',
+            }));
+    if ('approvalId' in result && result.approvalId) return result;
+    try {
+      await this.host.nervous.call('worker.finish', { lease, result: result as Record<string, unknown> });
+    } catch {
+      const uncertain = {
+        outcome: 'uncertain',
+        error:
+          'The action returned but its result could not be recorded within the response bound; inspect the local trace.',
+      };
+      await this.host.nervous.call('worker.finish', { lease, result: uncertain });
+      return uncertain;
+    }
+    return result;
+  }
+}
