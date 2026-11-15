@@ -1,6 +1,6 @@
 # Placement campaign plan and budgets (F-006-T04)
 
-**Status: approved by the owner on 15 November 2026 (F-006-T17) with 3 runs per case; F-006-T19 restates the budgets below for that; proposed 14 November 2026 (F-006-T04); and enrolled Mac + mini PC execution in F-006-T11.** References [Remote inference](remote-inference.md), [Configuration qualification](configuration-qualification.md), [Mac operating-conditions plan](mac-operating-conditions.md), and [NERV host assignments and load acceptance](../evaluations/mac-load-scenarios.md).
+**Status: approved by the owner on 15 November 2026 (F-006-T17) with `repeat: 3` (3 runs per case); F-006-T19 restated all budgets, stop rules, and dry-run plans for `repeat: 3`; proposed 14 November 2026 (F-006-T04); enrolled Mac + mini PC execution in F-006-T11.** References [Remote inference](remote-inference.md), [Configuration qualification](configuration-qualification.md), [Mac operating-conditions plan](mac-operating-conditions.md), and [NERV host assignments and load acceptance](../evaluations/mac-load-scenarios.md).
 
 ## 1. Campaign scope and placement questions
 
@@ -18,28 +18,28 @@ The placement campaign compares candidate configurations across the enrolled Mac
 
 ## 2. Exact case packs, repeats, and equal-budget controls
 
-Every placement candidate runs the same deterministic case packs with `repeat: 1` (`--fresh`, temperature `0`, fixed `seed: 42`):
+Every placement candidate runs the same deterministic case packs with `repeat: 3` (`--fresh`, temperature `0`, fixed `seed: 42`):
 
-1. **Common smoke pack (`neutral-smoke`)**: 10 cases (`model-run --pack=neutral-smoke`, `repeat: 1`).
-2. **NERV role bundle (`role-run --role=both`)**: 10 cases (`5` Casper from `evals/casper-v1.json` + `5` Misato from `evals/planner-v1.json`, `repeat: 1`), including `2` holdout cases per full corpus when expanded (`--limit=8`).
-3. **Combination qualification pack (`evals/combination-v1.json`)**: 8 cases (`6` regression + `2` holdout across `hidden-acceptance`, `deliberately-flawed-patch`, `false-rejection`, and `shared-blind-spot`), comparing `coder-alone` vs `coder-reviewer` under the **exact same `totalBudget`** (`outputTokens: 2048`, `suiteMs: 120000`, `caseMs: 30000`, `repeat: 1`) and protected grader hash (`createProtectedGrader`).
-4. **Dependency recovery check (P4)**: 2 bounded orchestration probes on the mini PC (`waitBudgetMs: 5000` expiry while Mac `WorkerLink` is stopped; `waitBudgetMs: 15000` recovery when Mac reconnects within budget), verifying zero fallback and clean degraded-reason reporting.
+1. **Common smoke pack (`neutral-smoke`)**: 10 cases × 3 repeats = 30 runs (`model-run --pack=neutral-smoke`, `repeat: 3`).
+2. **NERV role bundle (`role-run --role=both`)**: 10 cases × 3 repeats = 30 runs (`5` Casper from `evals/casper-v1.json` + `5` Misato from `evals/planner-v1.json`, `repeat: 3`), including `2` holdout cases per full corpus when expanded (`--limit=8`).
+3. **Combination qualification pack (`evals/combination-v1.json`)**: 8 cases × 3 repeats = 24 runs per mode (`6` regression + `2` holdout across `hidden-acceptance`, `deliberately-flawed-patch`, `false-rejection`, and `shared-blind-spot`), comparing `coder-alone` vs `coder-reviewer` under the **exact same `totalBudget`** (`outputTokens: 6144`, `suiteMs: 360000`, `caseMs: 30000`, `repeat: 3`) and protected grader hash (`createProtectedGrader`).
+4. **Dependency recovery check (P4)**: 2 bounded orchestration probes × 3 repeats = 6 probe runs on the mini PC (`waitBudgetMs: 5000` expiry while Mac `WorkerLink` is stopped; `waitBudgetMs: 15000` recovery when Mac reconnects within budget), verifying zero fallback and clean degraded-reason reporting.
 
 ## 3. Explicit budgets and stop rules
 
-| Budget dimension | Per-pack limit (`limits-day.json`) | Combination pack limit (`combination-v1`) | Aggregate campaign ceiling (P1–P4) |
+| Budget dimension | Per-pack limit (`limits-repeat3.json`) | Combination pack limit (`combination-v1`) | Aggregate campaign ceiling (P1–P4) |
 |---|---|---|---|
-| **Cases (`repeat: 1`)** | 10 cases (`neutral-smoke`), 10 cases (`role-run`) | 8 cases × 2 modes (`coder-alone`, `coder-reviewer`) | **86 cases/probes total** across Mac and mini PC |
-| **Per-case timeout (`caseMs`)** | 30 s (`30000` ms) | 30 s (`30000` ms) | 30 s/case hard cap |
-| **Suite wall-clock cap (`suiteMs`)** | 5 min (`300000` ms) | 2 min (`120000` ms) | **40 min active evaluation time** (60 min wall clock max) |
-| **Output token cap (`outputTokens`)** | 20,480 tokens/suite | 2,048 tokens/mode | **131,072 tokens ceiling** (expected < 20,000 total) |
+| **Cases (`repeat: 3`)** | 10 cases × 3 = 30 runs (`neutral-smoke`), 10 cases × 3 = 30 runs (`role-run`) | 8 cases × 3 × 2 modes (`coder-alone`, `coder-reviewer`) = 48 runs | **258 case/probe runs total** (86 cases/probes × 3 repeats) across Mac and mini PC |
+| **Per-case timeout (`caseMs`)** | 30 s (`30000` ms) | 30 s (`30000` ms) | 30 s/run hard cap |
+| **Suite wall-clock cap (`suiteMs`)** | 15 min (`900000` ms) | 6 min (`360000` ms) per mode | **~2 h (120 min) active evaluation time** (**180 min / 3 h** wall-clock max) |
+| **Output token cap (`outputTokens`)** | 61,440 tokens/suite | 6,144 tokens/mode | **393,216 tokens ceiling** (expected < 60,000 total) |
 | **Handoff & retry bounds** | `maxAttempts: 1` | `maxRounds: 2` (`structured-patch-review-v1`) | Non-recursive delegation (`maxDelegations: 1`) |
 | **Monetary cost** | `0` (local/Tailscale only) | `0` (local/Tailscale only) | **0 paid API tokens** |
 
 - **Stop rules (abort immediately without fallback or retry)**:
   1. Any unexpected route substitution, non-Tailscale remote address, or ungranted `worker.infer` call.
   2. Grader tamper detection (`tamperDetected: true`) or source/artifact digest mismatch during the run.
-  3. 3 consecutive case timeouts (`caseMs`), thermal throttling on either host, or total wall-clock time exceeding **60 min**.
+  3. 3 consecutive case timeouts (`caseMs`), thermal throttling on either host, or total wall-clock time exceeding **180 min (3 h)**.
 
 ## 4. Owner execution workflow (after F-006-T17 approval)
 
@@ -57,21 +57,33 @@ mkdir -p "$HOME/.nerv-private/placement"
 node tools/gauntlet.mjs machine --id=mini-local > "$HOME/.nerv-private/placement/mini-machine.json"
 ```
 
-### Step B — Verify dry-run plans (zero model calls)
+### Step B — Verify dry-run plans (`repeat: 3`, zero model calls)
 
 ```bash
+# Write repeat: 3 limits matching Section 3 budgets
+cat > "$HOME/.nerv-private/placement/limits-repeat3.json" <<'EOF'
+{
+  "caseMs": 30000,
+  "suiteMs": 900000,
+  "maxCases": 10,
+  "repeat": 3,
+  "outputTokens": 61440,
+  "maxBytes": 1048576
+}
+EOF
+
 # Mac baseline plan (P1)
 node tools/gauntlet.mjs model-plan \
   --pack=neutral-smoke \
   --profile="$HOME/.nerv-private/placement/mac-profile.json" \
-  --limits=node_modules/@voidbrain/gauntlet-protocol/examples/limits-day.json \
+  --limits="$HOME/.nerv-private/placement/limits-repeat3.json" \
   --machine-profile="$HOME/.nerv-private/placement/mac-machine.json" \
   --scenario=node_modules/@voidbrain/gauntlet-protocol/examples/scenarios/moderate-load.json
 
 node tools/gauntlet.mjs role-plan \
   --role=both \
   --profile="$HOME/.nerv-private/placement/mac-profile.json" \
-  --limits=node_modules/@voidbrain/gauntlet-protocol/examples/limits-day.json \
+  --limits="$HOME/.nerv-private/placement/limits-repeat3.json" \
   --machine-profile="$HOME/.nerv-private/placement/mac-machine.json" \
   --scenario=node_modules/@voidbrain/gauntlet-protocol/examples/scenarios/moderate-load.json
 
@@ -79,7 +91,7 @@ node tools/gauntlet.mjs role-plan \
 node tools/gauntlet.mjs role-plan \
   --role=both \
   --profile="$HOME/.nerv-private/placement/mini-profile.json" \
-  --limits=node_modules/@voidbrain/gauntlet-protocol/examples/limits-day.json \
+  --limits="$HOME/.nerv-private/placement/limits-repeat3.json" \
   --machine-profile="$HOME/.nerv-private/placement/mini-machine.json" \
   --scenario=node_modules/@voidbrain/gauntlet-protocol/examples/scenarios/baseline-load.json
 ```
@@ -87,21 +99,21 @@ node tools/gauntlet.mjs role-plan \
 ### Step C — Execute P1, P2, P3, and P4 after owner approval (`F-006-T11`)
 
 ```bash
-# P1 on Mac (moderate-load)
+# P1 on Mac (moderate-load, repeat: 3)
 node tools/gauntlet.mjs role-run \
   --role=both \
   --profile="$HOME/.nerv-private/placement/mac-profile.json" \
-  --limits=node_modules/@voidbrain/gauntlet-protocol/examples/limits-day.json \
+  --limits="$HOME/.nerv-private/placement/limits-repeat3.json" \
   --machine-profile="$HOME/.nerv-private/placement/mac-machine.json" \
   --scenario=node_modules/@voidbrain/gauntlet-protocol/examples/scenarios/moderate-load.json \
   --confirm-scenario --execute --allow-models --fresh \
   --out="$HOME/.nerv-private/placement/p1-mac-roles.json"
 
-# P2 on mini PC (baseline-load)
+# P2 on mini PC (baseline-load, repeat: 3)
 node tools/gauntlet.mjs role-run \
   --role=both \
   --profile="$HOME/.nerv-private/placement/mini-profile.json" \
-  --limits=node_modules/@voidbrain/gauntlet-protocol/examples/limits-day.json \
+  --limits="$HOME/.nerv-private/placement/limits-repeat3.json" \
   --machine-profile="$HOME/.nerv-private/placement/mini-machine.json" \
   --scenario=node_modules/@voidbrain/gauntlet-protocol/examples/scenarios/baseline-load.json \
   --confirm-scenario --execute --allow-models --fresh \
