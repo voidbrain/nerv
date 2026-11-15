@@ -300,6 +300,7 @@ export interface StoreApi {
     id: string,
     decision: Decision,
     source?: 'api' | 'dashboard' | 'cli' | 'telegram',
+    options?: { useSuggestedFix?: boolean },
   ):
     | { decision: string; result?: unknown; error?: string }
     | Promise<{ decision: string; result?: unknown; error?: string }>;
@@ -504,12 +505,22 @@ export class Runtime implements StoreApi {
   async approvals(limit = 5) {
     return (await this.nervous.call('approvals.pending', { limit })) as Approval[];
   }
-  async decide(id: string, decision: Decision, source: 'api' | 'dashboard' | 'cli' | 'telegram' = 'api') {
+  async decide(
+    id: string,
+    decision: Decision,
+    source: 'api' | 'dashboard' | 'cli' | 'telegram' = 'api',
+    options?: { useSuggestedFix?: boolean },
+  ) {
     const pending = await this.approvals(50).catch(() => []);
     const match = pending.find((a) => a.id === id);
     const keys = match ? itemKeysForTool(match.card.tool, match.card.args) : [];
     const result = (await this.itemLocks.withLock(keys, () =>
-      this.nervous.call('approvals.decide', { id, decision, source }),
+      this.nervous.call('approvals.decide', {
+        id,
+        decision,
+        source,
+        ...(options?.useSuggestedFix ? { useSuggestedFix: true } : {}),
+      }),
     )) as {
       decision: string;
       result?: unknown;

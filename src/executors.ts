@@ -414,7 +414,7 @@ export function execute(
         .recall(text(args, 'query'))
         .map((f) => ({ id: f.id, text: f.text, source: f.source, tainted: f.tainted }));
     case 'memory.remember': {
-      only(args, ['text']);
+      only(args, ['text', 'suggestedText', 'originalText']);
       const f = backend.memory.add(text(args, 'text'), 'misato', {
         tainted: context.tainted,
         ...(context.sortieId ? { sortieId: context.sortieId } : {}),

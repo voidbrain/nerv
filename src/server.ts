@@ -343,7 +343,12 @@ export function makeServer(
         reply(200, await store.approvals(Number(url.searchParams.get('limit') ?? 5)));
       } else if (req.method === 'POST' && /^\/api\/approvals\/[a-f0-9-]+$/.test(path)) {
         const b = await body(req);
-        if (Object.keys(b).length !== 1 || !['approve', 'reject', 'edit'].includes(b.decision as string))
+        const keys = Object.keys(b);
+        if (
+          !['approve', 'reject', 'edit'].includes(b.decision as string) ||
+          keys.some((k) => k !== 'decision' && k !== 'useSuggestedFix') ||
+          ('useSuggestedFix' in b && typeof b.useSuggestedFix !== 'boolean')
+        )
           throw new Error('Decision must be approve, reject or edit.');
         // F-066-T02: the admin token is the API client; a dashboard session is the dashboard.
         reply(
@@ -352,6 +357,7 @@ export function makeServer(
             path.split('/').at(-1)!,
             b.decision as 'approve' | 'reject' | 'edit',
             root ? 'api' : 'dashboard',
+            b.useSuggestedFix === true ? { useSuggestedFix: true } : undefined,
           ),
         );
       } else if (req.method === 'GET' && path === '/api/queue') {

@@ -162,6 +162,7 @@ process.on('message', (value: unknown) => {
           params.id as string,
           params.decision as 'approve' | 'reject' | 'edit',
           params.source as string,
+          params.useSuggestedFix === true ? { useSuggestedFix: true } : undefined,
         );
       case 'events.page':
         return store.events(

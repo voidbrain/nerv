@@ -186,8 +186,13 @@ export function card(a: Approval): { text: string; buttons: Button[][] } {
     with a ✅/❌ row; a tap decides that fact only. */
 export function bundle(cards: Approval[]): { text: string; buttons: Button[][] } {
   const fact = (a: Approval) => {
-    const t = (a.card.args as { text?: unknown }).text;
-    return typeof t === 'string' ? t : JSON.stringify(a.card.args);
+    const args = a.card.args as { text?: unknown; suggestedText?: unknown };
+    const t = typeof args.text === 'string' ? args.text : JSON.stringify(a.card.args);
+    const fix =
+      typeof args.suggestedText === 'string' && args.suggestedText !== t
+        ? ` (proposed fix: "${args.suggestedText}")`
+        : '';
+    return `${t}${fix}`;
   };
   const text = [
     `Needs you · ${cards.length} facts to remember (memory.remember, Pattern ${cards[0]!.card.pattern.toUpperCase()})`,
