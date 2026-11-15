@@ -4,7 +4,7 @@
   "parent": "F-096",
   "title": "Move old evidence out of F-005 and F-051",
   "goal": "Long records keep current state and recent evidence; older evidence is archived with a link",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "Every moved line is in the archive; the record links to it",
     "check:backlog and check:work pass; sizes before and after recorded"
@@ -31,10 +31,12 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h",
+    "estimate": "0 hours",
     "basis": "Estimated 2026-11-14 at agent speed. Not a measurement.",
     "reviewed": "2026-11-14",
-    "agentHours": 0.5,
+    "agentHours": 0,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated",
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
   }
