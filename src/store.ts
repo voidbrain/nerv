@@ -31,6 +31,7 @@ import { StorePush } from './store-push.ts';
 import { StoreKajiOutbox } from './store-kaji-outbox.ts';
 import { StoreInbox } from './store-inbox.ts';
 import { StoreSorties } from './store-sorties.ts';
+import { BatteryStorageReminders } from './battery-storage-reminders.ts';
 export { REMINDER_KINDS, normalizeReminderKind, type ReminderKind } from './reminder-time.ts';
 export type { PushSubscriptionRecord } from './push.ts';
 export type Reminder = {
@@ -321,10 +322,15 @@ export class Store {
   cancel(id: string): boolean {
     return this.remindersController.cancel(id);
   }
+  private _batteryStorageReminders?: BatteryStorageReminders;
+  get batteryStorageReminders(): BatteryStorageReminders {
+    return (this._batteryStorageReminders ??= new BatteryStorageReminders(this.db, this.remindersController));
+  }
   tick(now = new Date()): number {
     const count = this.remindersController.tick(now);
     const lang = this.remindersController.reminderDefaults().language;
     this.batteries.deliverDueResistancePrompts(now, lang);
+    this.batteryStorageReminders.syncAll(this.batteries.list(), now);
     return count;
   }
   private _pushController?: StorePush;
