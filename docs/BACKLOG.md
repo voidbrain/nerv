@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 89.75 h agent + 24 h owner across 199 open steps of 51 features and 5 other records. 30 h of actual effort recorded on 60 steps. Generated from the task files.
+**Remaining effort:** 89 h agent + 24 h owner across 198 open steps of 51 features and 5 other records. 30.25 h of actual effort recorded on 61 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -319,7 +319,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 2 h agent + 0.5 h owner | [F-005-T32](#f-005-t32) | [F-090-T02](#f-090-t02) | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 1.25 h agent + 0.5 h owner | [F-005-T32](#f-005-t32) | — | 🤖 | — | — |
 
 💻 **→** Define durable waiting jobs and implement an authorized browser/editor adapter that rechecks the exact job before resuming once.
 
@@ -333,13 +333,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-012-t02"></a>F-012-T02 — Readiness check and once-only resume engine | 0.75 h | 0 h | 0.75 h | Planned | 🤖 |
-| 🟢 Small | <a id="f-012-t03"></a>F-012-T03 — Claude Code (VS Code) adapter feasibility and adapter | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-012-T02](#f-012-t02) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-012-t03"></a>F-012-T03 — Claude Code (VS Code) adapter feasibility and adapter | 0.5 h | 0 h | 0.5 h | Planned | 🤖 |
 | 🟢 Small | <a id="f-012-t04"></a>F-012-T04 — Web-chat adapter feasibility | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-012-T03](#f-012-t03) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-012-t05"></a>F-012-T05 — Edge cases and real-host acceptance | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-005-T32](#f-005-t32), [F-012-T04](#f-012-t04) | ⏳ 🧑‍🔧 |
 | 🟢 Small | <a id="f-012-t06"></a>F-012-T06 — Record the evidence of F-012-T05 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-012-T05](#f-012-t05) | ⏳ 🤖 |
 | — | <a id="f-012-t01"></a>F-012-T01 — Durable resume intent and policy | 0.75 h | 0.5 h (stated) | 0 h | Completed | 🤖 |
-| 🟡 Medium | **Total** | 2.75 h (5 of 6 steps) | 0.5 h (1 of 6 steps recorded) | 2 h agent + 0.5 h owner | 1 of 6 completed | |
+| — | <a id="f-012-t02"></a>F-012-T02 — Readiness check and once-only resume engine | 0.75 h | 0.25 h (measured) | 0 h | Completed | 🤖 |
+| 🟡 Medium | **Total** | 2.75 h (5 of 6 steps) | 0.75 h (2 of 6 steps recorded) | 1.25 h agent + 0.5 h owner | 2 of 6 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1466,7 +1466,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h agent + 0.25 h owner | [F-012-T02](#f-012-t02) | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-090-T01 — Feasibility: headless resume (Ready).
 
@@ -1481,7 +1481,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
 | 🟢 Small | <a id="f-090-t01"></a>F-090-T01 — Feasibility: headless resume | 0.5 h | 0 h | 0.5 h | Ready | 🤖 |
-| 🟢 Small | <a id="f-090-t02"></a>F-090-T02 — Headless resume adapter | 1 h | 0 h | 1 h | Planned · waits on [F-090-T01](#f-090-t01), [F-012-T02](#f-012-t02) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-090-t02"></a>F-090-T02 — Headless resume adapter | 1 h | 0 h | 1 h | Planned · waits on [F-090-T01](#f-090-t01) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-090-t03"></a>F-090-T03 — Owner check on a real interrupted session | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-090-T02](#f-090-t02) | ⏳ 🧑‍🔧 |
 | 🟡 Medium | **Total** | 1.5 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 1.5 h agent + 0.25 h owner | 0 of 3 completed | |
 

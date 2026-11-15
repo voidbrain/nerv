@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { describe, it } from 'node:test';
 import { readScrolls } from '../src/config.ts';
 import { Store } from '../src/store.ts';
+import { runResumeEngineTick } from '../src/resume-intent.ts';
 
 function openTempStore(dir: string): Store {
   return new Store(join(dir, 'nerv.db'), readScrolls(dir), { home: dir });
@@ -191,6 +192,104 @@ describe('F-012-T01: durable resume intent and policy', () => {
       });
       assert.equal(store.resumeIntents.expireStale(base + 20_000), 1);
       assert.equal(store.resumeIntents.get(toExpire.id)?.status, 'expired');
+      store.close();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('F-012-T02: inspects availability, rechecks identity, resumes once under lease, and notifies outcome', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'nerv-resume-engine-'));
+    try {
+      const store = new Store(join(dir, 'nerv.sqlite'));
+      const base = 1_800_000_000_000;
+      const scope = (targetId: string) => ({
+        allowedAction: 'resume-named-job' as const,
+        targetId,
+        allowSecurityPrompts: false as const,
+        allowLimitBypass: false as const,
+        modelOverrideBlocked: true as const,
+        grantedBy: 'owner' as const,
+      });
+
+      const deferredIntent = store.resumeIntents.create({
+        id: 'ri-defer',
+        targetKind: 'cli-job',
+        targetId: 'job-defer',
+        targetFingerprint: 'fp-defer',
+        permissionScope: scope('job-defer'),
+        resetAt: base + 1_000,
+        expiresAt: base + 100_000,
+        backoffMs: 5_000,
+        now: base,
+      });
+
+      const mismatchIntent = store.resumeIntents.create({
+        id: 'ri-mismatch',
+        targetKind: 'web-chat',
+        targetId: 'chat-mismatch',
+        targetFingerprint: 'fp-expected',
+        permissionScope: scope('chat-mismatch'),
+        resetAt: base + 1_000,
+        expiresAt: base + 100_000,
+        now: base,
+      });
+
+      const okIntent = store.resumeIntents.create({
+        id: 'ri-ok',
+        targetKind: 'vscode-claude',
+        targetId: 'claude-42',
+        targetFingerprint: 'fp-42',
+        permissionScope: scope('claude-42'),
+        resetAt: base + 1_000,
+        expiresAt: base + 100_000,
+        now: base,
+      });
+
+      const executed: string[] = [];
+      const notices: string[] = [];
+      const result = await runResumeEngineTick(store.resumeIntents, {
+        owner: 'worker-1',
+        now: base + 2_000,
+        checkAvailability: (intent) =>
+          intent.id === deferredIntent.id
+            ? { available: false, reason: 'Provider still rate-limited' }
+            : { available: true },
+        verifyIdentity: (intent) =>
+          intent.id === mismatchIntent.id
+            ? { targetId: 'chat-mismatch', targetFingerprint: 'fp-changed', stillActive: true }
+            : { targetId: intent.targetId, targetFingerprint: intent.targetFingerprint, stillActive: true },
+        executeResume: (intent) => {
+          executed.push(intent.id);
+          return { kind: 'resumed', detail: { resumedBy: 'worker-1' } };
+        },
+        notifyOutcome: (_intent, message) => {
+          notices.push(message);
+        },
+      });
+
+      assert.equal(result.processed.length, 3);
+      assert.deepEqual(executed, [okIntent.id]);
+      assert.equal(store.resumeIntents.get(deferredIntent.id)?.status, 'pending');
+      assert.equal(store.resumeIntents.get(mismatchIntent.id)?.status, 'failed');
+      assert.equal(store.resumeIntents.get(okIntent.id)?.status, 'resumed');
+      assert.equal(notices.length, 3);
+      assert.match(notices[2]!, /Resumed vscode-claude claude-42/);
+
+      // Second tick at the same deadline must not re-run okIntent (once-only under lease/status).
+      const second = await runResumeEngineTick(store.resumeIntents, {
+        owner: 'worker-2',
+        now: base + 2_500,
+        checkAvailability: () => ({ available: true }),
+        verifyIdentity: (intent) => ({ targetId: intent.targetId, targetFingerprint: intent.targetFingerprint }),
+        executeResume: (intent) => {
+          executed.push(intent.id);
+          return { kind: 'resumed' };
+        },
+      });
+      assert.equal(second.processed.length, 0);
+      assert.deepEqual(executed, [okIntent.id]);
+
       store.close();
     } finally {
       rmSync(dir, { recursive: true, force: true });
