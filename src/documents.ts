@@ -305,4 +305,295 @@ export class DocumentStore {
       created: r.created,
     }));
   }
+
+  compute(idOrTitle: string, request: DocumentComputeRequest, category?: string): DocumentComputeResult {
+    const doc = this.get(idOrTitle, category);
+    if (!doc) {
+      return {
+        ok: false,
+        status: 'missing',
+        citedDocument: null,
+        missing: [`document:${idOrTitle}`],
+        question: `I could not find a saved document matching "${idOrTitle}". Which saved document should I use?`,
+        results: [],
+        working: [],
+        answer: '',
+      };
+    }
+    return computeFromSavedDocument(doc, request);
+  }
+}
+
+export interface DocumentComputeRequest {
+  baseIngredient?: string;
+  targetQuantity?: number;
+  targetUnit?: string;
+  ingredient?: string;
+  setting?: string;
+}
+
+export interface ComputedQuantity {
+  name: string;
+  savedQuantity: number;
+  savedUnit: string;
+  scaledQuantity: number;
+  unit: string;
+  arithmetic: string;
+}
+
+export interface DocumentComputeResult {
+  ok: boolean;
+  status: 'computed' | 'missing';
+  citedDocument: { id: string; title: string; category: string } | null;
+  missing: string[];
+  question: string | null;
+  results: ComputedQuantity[];
+  working: string[];
+  answer: string;
+}
+
+interface ParsedQuantityLine {
+  name: string;
+  quantity: number;
+  unit: string;
+}
+
+interface ParsedSettingLine {
+  key: string;
+  value: string;
+  raw: string;
+}
+
+const QTY_FIRST_RE = /^(?:[-*•]|\d+[.)])?\s*(\d+(?:\.\d+)?)\s*([a-zA-Z%]+)?\s+([a-zA-Z0-9][a-zA-Z0-9\s-]{0,60})$/;
+const NAME_FIRST_RE = /^(?:[-*•]|\d+[.)])?\s*([a-zA-Z0-9][a-zA-Z0-9\s-]{0,60}?)\s*:\s*(\d+(?:\.\d+)?)\s*([a-zA-Z%]+)?$/;
+const SETTING_RE = /^(?:[-*•]|\d+[.)])?\s*([a-zA-Z0-9][a-zA-Z0-9\s-]{0,60}?)\s*:\s*(.+)$/;
+const SETTING_UNITS = new Set([
+  'c',
+  'f',
+  'min',
+  'mins',
+  'minute',
+  'minutes',
+  'h',
+  'hr',
+  'hrs',
+  'hour',
+  'hours',
+  's',
+  'sec',
+  'secs',
+]);
+const SETTING_KEYS = new Set([
+  'oven',
+  'bake',
+  'temp',
+  'temperature',
+  'time',
+  'timer',
+  'preheat',
+  'speed',
+  'power',
+  'setting',
+]);
+
+const normalizeKey = (value: string): string => value.trim().toLowerCase().replace(/\s+/g, ' ');
+const roundClean = (value: number): number => Math.round(value * 1000) / 1000;
+
+function parseDocumentQuantities(body: string): {
+  quantities: ParsedQuantityLine[];
+  settings: ParsedSettingLine[];
+} {
+  const quantities: ParsedQuantityLine[] = [];
+  const settings: ParsedSettingLine[] = [];
+
+  for (const rawLine of body.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line) continue;
+
+    const nameFirst = NAME_FIRST_RE.exec(line);
+    if (nameFirst) {
+      const name = nameFirst[1].trim();
+      const unit = (nameFirst[3] ?? '').trim();
+      if (SETTING_UNITS.has(unit.toLowerCase()) || SETTING_KEYS.has(normalizeKey(name))) {
+        settings.push({
+          key: name,
+          value: `${nameFirst[2]}${unit ? ` ${unit}` : ''}`,
+          raw: line,
+        });
+      } else {
+        quantities.push({
+          name,
+          quantity: Number(nameFirst[2]),
+          unit,
+        });
+      }
+      continue;
+    }
+
+    const qtyFirst = QTY_FIRST_RE.exec(line);
+    if (qtyFirst) {
+      quantities.push({
+        name: qtyFirst[3].trim(),
+        quantity: Number(qtyFirst[1]),
+        unit: (qtyFirst[2] ?? '').trim(),
+      });
+      continue;
+    }
+
+    const settingMatch = SETTING_RE.exec(line);
+    if (settingMatch) {
+      settings.push({
+        key: settingMatch[1].trim(),
+        value: settingMatch[2].trim(),
+        raw: line,
+      });
+    }
+  }
+
+  return { quantities, settings };
+}
+
+function findMatchingItem<T extends { name: string }>(items: T[], query: string): T | undefined {
+  const needle = normalizeKey(query);
+  return (
+    items.find((item) => normalizeKey(item.name) === needle) ??
+    items.find((item) => normalizeKey(item.name).includes(needle))
+  );
+}
+
+/**
+ * Computes scaled quantities or setting lookups strictly from a saved document's body (F-083-T02).
+ * Cites saved values and arithmetic; asks instead of guessing when any required ratio or setting is missing.
+ */
+export function computeFromSavedDocument(doc: SavedDocument, request: DocumentComputeRequest): DocumentComputeResult {
+  const citedDocument = { id: doc.id, title: doc.title, category: doc.category };
+  const { quantities, settings } = parseDocumentQuantities(doc.body);
+
+  if (request.setting !== undefined) {
+    const needle = normalizeKey(request.setting);
+    const matched = settings.find((s) => normalizeKey(s.key) === needle || normalizeKey(s.key).includes(needle));
+    if (!matched) {
+      return {
+        ok: false,
+        status: 'missing',
+        citedDocument,
+        missing: [`setting:${request.setting}`],
+        question: `Saved document "${doc.title}" (${doc.category}) does not specify "${request.setting}". What value should I use?`,
+        results: [],
+        working: [],
+        answer: '',
+      };
+    }
+    const working = [`From "${doc.title}" (${doc.category}): ${matched.raw}`];
+    return {
+      ok: true,
+      status: 'computed',
+      citedDocument,
+      missing: [],
+      question: null,
+      results: [],
+      working,
+      answer: `${doc.title} (${doc.category}): ${matched.key} = ${matched.value}`,
+    };
+  }
+
+  if (
+    !request.baseIngredient ||
+    typeof request.targetQuantity !== 'number' ||
+    !Number.isFinite(request.targetQuantity) ||
+    request.targetQuantity <= 0
+  ) {
+    return {
+      ok: false,
+      status: 'missing',
+      citedDocument,
+      missing: ['baseIngredient/targetQuantity'],
+      question: `Which base ingredient and positive target quantity should I scale "${doc.title}" (${doc.category}) by?`,
+      results: [],
+      working: [],
+      answer: '',
+    };
+  }
+
+  const base = findMatchingItem(quantities, request.baseIngredient);
+  if (!base || base.quantity <= 0) {
+    return {
+      ok: false,
+      status: 'missing',
+      citedDocument,
+      missing: [`base:${request.baseIngredient}`],
+      question: `Saved document "${doc.title}" (${doc.category}) has no saved quantity for "${request.baseIngredient}". What saved ratio should I use?`,
+      results: [],
+      working: [],
+      answer: '',
+    };
+  }
+
+  if (request.targetUnit !== undefined && base.unit && normalizeKey(request.targetUnit) !== normalizeKey(base.unit)) {
+    return {
+      ok: false,
+      status: 'missing',
+      citedDocument,
+      missing: [`unit:${request.targetUnit}->${base.unit}`],
+      question: `Saved document "${doc.title}" gives ${base.name} in "${base.unit}", not "${request.targetUnit}". What conversion or quantity in ${base.unit} should I use?`,
+      results: [],
+      working: [],
+      answer: '',
+    };
+  }
+
+  const targets =
+    request.ingredient !== undefined
+      ? (() => {
+          const found = findMatchingItem(quantities, request.ingredient);
+          return found ? [found] : null;
+        })()
+      : quantities.filter((q) => normalizeKey(q.name) !== normalizeKey(base.name));
+
+  if (targets === null || targets.length === 0) {
+    const missingName = request.ingredient ?? 'ingredients';
+    return {
+      ok: false,
+      status: 'missing',
+      citedDocument,
+      missing: [`ingredient:${missingName}`],
+      question: `Saved document "${doc.title}" (${doc.category}) has no saved quantity for "${missingName}". What saved value should I use?`,
+      results: [],
+      working: [],
+      answer: '',
+    };
+  }
+
+  const scale = request.targetQuantity / base.quantity;
+  const baseUnitLabel = base.unit ? ` ${base.unit}` : '';
+  const results: ComputedQuantity[] = targets.map((item) => {
+    const scaled = roundClean(item.quantity * scale);
+    const itemUnitLabel = item.unit ? ` ${item.unit}` : '';
+    const arithmetic = `${item.name}: ${item.quantity}${itemUnitLabel} × (${request.targetQuantity}${baseUnitLabel} / ${base.quantity}${baseUnitLabel}) = ${scaled}${itemUnitLabel}`;
+    return {
+      name: item.name,
+      savedQuantity: item.quantity,
+      savedUnit: item.unit,
+      scaledQuantity: scaled,
+      unit: item.unit,
+      arithmetic,
+    };
+  });
+
+  const working = [
+    `Saved "${doc.title}" (${doc.category}): ${base.name} = ${base.quantity}${baseUnitLabel}`,
+    ...results.map((r) => r.arithmetic),
+  ];
+  const answer = working.join('\n');
+
+  return {
+    ok: true,
+    status: 'computed',
+    citedDocument,
+    missing: [],
+    question: null,
+    results,
+    working,
+    answer,
+  };
 }
