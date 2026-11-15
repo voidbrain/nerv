@@ -1,3 +1,5 @@
+import type { Approval, Decision } from './ledger.ts';
+
 export type PersonaRole = 'misato' | 'gendo';
 
 export interface PersonaConfig {
@@ -35,5 +37,69 @@ export function validatePersonas(value: unknown): PersonaConfig {
       misato: validName(names?.misato) ? names.misato.trim() : defaultPersonas.names.misato,
       gendo: validName(names?.gendo) ? names.gendo.trim() : defaultPersonas.names.gendo,
     },
+  };
+}
+
+export interface HitlDecisionBackend {
+  approvals(limit?: number): Approval[] | Promise<Approval[]>;
+  decide(
+    id: string,
+    decision: Decision,
+    source?: 'api' | 'dashboard' | 'cli' | 'telegram',
+  ):
+    | { decision: string; result?: unknown; error?: string }
+    | Promise<{ decision: string; result?: unknown; error?: string }>;
+}
+
+export interface PersonaHitlDecisionResult {
+  readonly speaker: string | null;
+  readonly approvalId: string;
+  readonly tool: string;
+  readonly pattern: string;
+  readonly decision: string;
+  readonly result?: unknown;
+  readonly error?: string;
+  readonly summary: string;
+}
+
+/** Formats pending HITL approvals grounded strictly in ledger state; neutral when personas are disabled. */
+export function formatMisatoPendingHitl(approvals: Approval[], config: PersonaConfig = defaultPersonas): string {
+  const speaker = config.enabled ? config.names.misato : null;
+  const header = speaker ? `${speaker}: ` : '';
+  if (approvals.length === 0) {
+    return `${header}No pending approvals.`;
+  }
+  const lines = approvals.map(
+    (a) =>
+      `- ${a.id}: ${a.card.tool} (Pattern ${a.card.pattern.toUpperCase()}) — ${a.card.reason} [expires ${a.card.expires}]`,
+  );
+  return [`${header}${approvals.length} pending approval${approvals.length === 1 ? '' : 's'}:`, ...lines].join('\n');
+}
+
+/** Routes a Misato-surfaced HITL approve/reject strictly through the existing backend decision path with audit. */
+export async function decideHitlThroughPersona(
+  backend: HitlDecisionBackend,
+  approvalId: string,
+  decision: 'approve' | 'reject',
+  options: { persona?: PersonaConfig; source?: 'api' | 'dashboard' | 'cli' | 'telegram' } = {},
+): Promise<PersonaHitlDecisionResult> {
+  const pending = await backend.approvals(20);
+  const match = pending.find((a) => a.id === approvalId);
+  if (!match) {
+    throw new Error(`No pending HITL approval ${approvalId}.`);
+  }
+  const outcome = await backend.decide(approvalId, decision, options.source ?? 'api');
+  const config = options.persona ?? defaultPersonas;
+  const speaker = config.enabled ? config.names.misato : null;
+  const prefix = speaker ? `${speaker}: ` : '';
+  return {
+    speaker,
+    approvalId,
+    tool: match.card.tool,
+    pattern: match.card.pattern,
+    decision: outcome.decision,
+    ...(outcome.result !== undefined ? { result: outcome.result } : {}),
+    ...(outcome.error !== undefined ? { error: outcome.error } : {}),
+    summary: `${prefix}${match.card.tool} (${approvalId}) -> ${outcome.decision}`,
   };
 }

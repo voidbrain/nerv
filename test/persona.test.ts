@@ -3,8 +3,14 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { readConfig } from '../src/config.ts';
-import { defaultPersonas, validatePersonas } from '../src/persona.ts';
+import { readConfig, readScrolls } from '../src/config.ts';
+import {
+  decideHitlThroughPersona,
+  defaultPersonas,
+  formatMisatoPendingHitl,
+  validatePersonas,
+} from '../src/persona.ts';
+import { Store } from '../src/store.ts';
 import { misatoAsk } from '../src/misato.ts';
 
 test('F-020: persona names are configured independently on each base and default by role', () => {
@@ -38,6 +44,63 @@ test('F-020: config.json validates per-base persona settings', () => {
     });
     writeFileSync(join(home, 'config.json'), JSON.stringify({ personas: { enabled: true, names: { magi: 'Bob' } } }));
     assert.throws(() => readConfig(home), /Invalid persona names/);
+  } finally {
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
+test('F-020-T02: Misato surfaces pending HITL and accepts/rejects through the existing decision path with audit', async () => {
+  const home = mkdtempSync(join(tmpdir(), 'nerv-persona-hitl-'));
+  try {
+    const store = new Store(join(home, 'nerv.db'), readScrolls(home), { home });
+    const sortieId = store.ledger.openSortie('owner', 'remember two facts', 'trusted');
+    const act = store.runAction(sortieId, {
+      tool: 'memory.remember',
+      args: { texts: ['Fact alpha', 'Fact beta'] },
+      stage: 'production',
+    });
+    assert.equal(act.approvalIds?.length, 2);
+
+    const pending = store.approvals(10);
+    const misatoView = formatMisatoPendingHitl(pending, {
+      enabled: true,
+      names: { misato: 'Misato', gendo: 'Gendo' },
+    });
+    assert.match(misatoView, /^Misato: 2 pending approvals:/);
+    assert.match(misatoView, new RegExp(act.approvalIds![0]!));
+    assert.match(misatoView, /memory\.remember/);
+
+    const neutralView = formatMisatoPendingHitl(pending, {
+      enabled: false,
+      names: { misato: 'Misato', gendo: 'Gendo' },
+    });
+    assert.doesNotMatch(neutralView, /Misato/);
+    assert.match(neutralView, /^2 pending approvals:/);
+
+    const approved = await decideHitlThroughPersona(store, act.approvalIds![0]!, 'approve', {
+      source: 'cli',
+      persona: defaultPersonas,
+    });
+    assert.equal(approved.decision, 'approve');
+    assert.equal(approved.tool, 'memory.remember');
+    assert.ok(store.memory.list().some((f) => f.text === 'Fact alpha'));
+
+    const rejected = await decideHitlThroughPersona(store, act.approvalIds![1]!, 'reject', {
+      source: 'cli',
+      persona: defaultPersonas,
+    });
+    assert.equal(rejected.decision, 'reject');
+    assert.ok(!store.memory.list().some((f) => f.text === 'Fact beta'));
+
+    const events = store.events(sortieId);
+    assert.ok(events.some((e) => e.kind === 'approval.approve'));
+    assert.ok(events.some((e) => e.kind === 'approval.reject'));
+
+    await assert.rejects(
+      () => decideHitlThroughPersona(store, 'missing-approval-id', 'approve'),
+      /No pending HITL approval missing-approval-id/,
+    );
+    store.close();
   } finally {
     rmSync(home, { recursive: true, force: true });
   }

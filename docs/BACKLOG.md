@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 92.75 h agent + 24 h owner across 204 open steps of 52 features and 5 other records. 28.25 h of actual effort recorded on 55 steps. Generated from the task files.
+**Remaining effort:** 92 h agent + 24 h owner across 203 open steps of 52 features and 5 other records. 28.75 h of actual effort recorded on 56 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2070,7 +2070,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
 
 💻 **→** Optional conversational faces grounded in real job state: Misato as primary HITL/ops voice; Gendo optional for risk/policy explanation; pilots optional as worker identity only.
 
@@ -2084,10 +2084,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-020-t02"></a>F-020-T02 — Misato HITL surfacing with audit | 0.75 h | 0 h | 0.75 h | Planned | — |
-| 🟢 Small | <a id="f-020-t03"></a>F-020-T03 — Explanation persona and non-Eva skins | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-020-T02](#f-020-t02) | — |
+| 🟢 Small | <a id="f-020-t03"></a>F-020-T03 — Explanation persona and non-Eva skins | 0.25 h | 0 h | 0.25 h | Planned | — |
 | — | <a id="f-020-t01"></a>F-020-T01 — Persona adapter contract | 0.25 h | 0 h | 0 h | Completed | [PR #398](https://github.com/voidbrain/nerv/pull/398) grounded, presentation-only persona adapter contract |
-| 🟢 Small | **Total** | 1.25 h | 0 h (0 of 3 steps recorded) | 1 h | 1 of 3 completed | |
+| — | <a id="f-020-t02"></a>F-020-T02 — Misato HITL surfacing with audit | 0.75 h | 0.5 h (stated) | 0 h | Completed | — |
+| 🟢 Small | **Total** | 1.25 h | 0.5 h (1 of 3 steps recorded) | 0.25 h | 2 of 3 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
