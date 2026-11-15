@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-016",
   "id": "F-016-T01",
-  "status": "implemented",
+  "status": "closed",
   "title": "Step 1a — Decision: replicated state, leader lease and epoch, fencing tokens and restore",
   "goal": "Decision: replicated state, leader lease and epoch, fencing tokens and restore.",
   "capabilities": [
@@ -35,11 +35,11 @@
   "effort": {
     "size": "medium",
     "estimate": "0.25 hours owner",
-    "basis": "Owner-approved slice, 2026-11-11 (PR #264). Step 1, slice a. Estimate, not a measurement. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 2.25 hours agent + 0.25 hours owner; agent writes the decision at the usual rate; the owner agrees it. Method: 1.5 h/day judged rate (PR #277). Estimate, not a measurement; baselineDays 1.5 kept as history. Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (median 0.55x over 6 closed steps; bug steps 0.6x over 5): 2.25 h → 1.25 h, min 0.5 h; owner hours and baseline kept. Authoring decision record docs/decisions/coordinator-relocation.md completed 2026-11-12 in 0.5 h agent (stated); 0.25 h owner remains for agreement. Estimate column backfilled 2026-11-12 at harness 7.0.0: estimateAgentHours = remaining plus actual so far (0.5 h); the baseline stays for calibration.",
-    "reviewed": "2026-11-12",
+    "basis": "Owner decision 2026-11-15: agreed to the revised relocation decision (second review: ready to agree), with one change: a non-main base keeps answering chat locally, without coordinator effects, while main is offline (F-016-T12 revises the decision before F-016-T03). No actual: owner time not measured.",
+    "reviewed": "2026-11-15",
     "baselineDays": 1.5,
     "agentHours": 0,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "baselineAgentHours": 2.25,
     "actualAgentHours": 0.5,
     "actualSource": "stated",

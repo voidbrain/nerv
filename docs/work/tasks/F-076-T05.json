@@ -2,11 +2,12 @@
   "version": 1,
   "id": "F-076-T05",
   "parent": "F-076",
-  "title": "Put the chosen main verification in place",
-  "goal": "Put the chosen main verification in place",
+  "title": "Push-to-main CI trigger from the template",
+  "goal": "Every merge to main runs CI, through a harness template release",
   "status": "planned",
   "acceptance": [
-    "The mechanism the owner chose is in place and a PR shows the run it implies"
+    "The harness template releases a push: branches: [main] trigger in ci.yml (template record and tag)",
+    "NERV reconciles that release and a merge to main shows its CI run"
   ],
   "dependsOn": [
     "F-076-T04"

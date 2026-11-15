@@ -4,7 +4,7 @@
   "parent": "F-076",
   "title": "Turn on the merge queue for main",
   "goal": "A PR reaches main only after its combination with the queue passes",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "The owner chooses: move the repository to an organization and turn on the queue, or option 2 (push trigger on main), or option 1 (strict)",
     "The chosen mechanism is in place and a PR shows the run it implies"
@@ -31,9 +31,9 @@
   "effort": {
     "size": "small",
     "estimate": "0.25 h owner",
-    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
-    "reviewed": "2026-11-13",
-    "ownerHours": 0.25,
+    "basis": "Owner decision 2026-11-15: option 2, CI on every push to main, instead of the merge queue (GitHub refuses merge_queue on a user-owned repository). ci.yml is a harness file and the owner wants it for every project: the template first, then reconcile here (F-076-T05). No actual: owner time not measured.",
+    "reviewed": "2026-11-15",
+    "ownerHours": 0,
     "agentHours": 0,
     "ownerKind": "decision"
   },

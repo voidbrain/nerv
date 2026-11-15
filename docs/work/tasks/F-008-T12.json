@@ -6,7 +6,8 @@
   "goal": "The owner registers two packs and uses the chat commands",
   "status": "planned",
   "acceptance": [
-    "Copy and paste: `nerv chat \"registra la batteria 7 blu LiPo 6S 1300 mAh, resistenze 3, 3.4, 4.1, 3.2, 3.3, 3.1\"` then `nerv chat \"carica le batterie 7 blu\"`; expected: battery 7 blue shown charged, a storage reminder scheduled for the evening"
+    "Copy and paste: `nerv chat \"registra la batteria 7 blu LiPo 6S 1300 mAh, resistenze 3, 3.4, 4.1, 3.2, 3.3, 3.1\"` then `nerv chat \"carica le batterie 7 blu\"`; expected: battery 7 blue shown charged, a storage reminder scheduled for the evening",
+    "The Tattu R-Line V6 6S band (aging 4.5, strong 7, retire 8 mOhm) is confirmed or adjusted from the owner charger readings on new packs"
   ],
   "dependsOn": [
     "F-008-T09",
