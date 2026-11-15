@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 87.25 h agent + 24 h owner across 195 open steps of 51 features and 5 other records. 31 h of actual effort recorded on 64 steps. Generated from the task files.
+**Remaining effort:** 86.25 h agent + 24 h owner across 194 open steps of 51 features and 5 other records. 31.5 h of actual effort recorded on 65 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -754,9 +754,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h agent + 0.25 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-082-T01 — List store and list tools (Ready).
+💻 **→** Next: F-082-T02 — Checklist card in the dashboard chat (Planned).
 
 | | |
 |---|---|
@@ -768,11 +768,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-082-t01"></a>F-082-T01 — List store and list tools | 1 h | 0 h | 1 h | Ready | 🤖 |
-| 🟢 Small | <a id="f-082-t02"></a>F-082-T02 — Checklist card in the dashboard chat | 1 h | 0 h | 1 h | Planned · waits on [F-082-T01](#f-082-t01) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-082-t03"></a>F-082-T03 — Checklist in Telegram | 1 h | 0 h | 1 h | Planned · waits on [F-082-T01](#f-082-t01) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-082-t02"></a>F-082-T02 — Checklist card in the dashboard chat | 1 h | 0 h | 1 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-082-t03"></a>F-082-T03 — Checklist in Telegram | 1 h | 0 h | 1 h | Planned | 🤖 |
 | 🟢 Small | <a id="f-082-t04"></a>F-082-T04 — Owner check: add by Telegram, tick on the dashboard | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-082-T02](#f-082-t02), [F-082-T03](#f-082-t03) | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 3 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 3 h agent + 0.25 h owner | 0 of 4 completed | |
+| — | <a id="f-082-t01"></a>F-082-T01 — List store and list tools | 1 h | 0.5 h (stated) | 0 h | Completed | 🤖 |
+| 🟡 Medium | **Total** | 3 h (3 of 4 steps) | 0.5 h (1 of 4 steps recorded) | 2 h agent + 0.25 h owner | 1 of 4 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
