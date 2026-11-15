@@ -14,23 +14,22 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 45 | 7 |
-| **Require Human 🧑** | 7 | 2 |
+| **Require Human 🧑** | 6 | 1 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-005](#f-005) | [F-006](#f-006) | [B-057](#b-057) | — |
-| [F-004](#f-004) |  | [B-056](#b-056) |  |
+| [F-005](#f-005) | [F-006](#f-006) | [B-056](#b-056) | — |
+| [F-004](#f-004) |  |  |  |
 | [F-097](#f-097) |  |  |  |
 | [F-060](#f-060) |  |  |  |
 | [F-007](#f-007) |  |  |  |
-| [F-081](#f-081) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 73.25 h agent + 22.75 h owner across 167 open steps of 45 features and 7 other records. 34.75 h of actual effort recorded on 79 steps. Generated from the task files.
+**Remaining effort:** 73.75 h agent + 22.25 h owner across 168 open steps of 45 features and 7 other records. 34.75 h of actual effort recorded on 79 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1875,6 +1874,53 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-057"></a>[🐞 B-057](#top)
+
+**Companion error messages are Italian only and do not say what went wrong**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.75 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-057-T03, the rotated-certificate message; then the owner reruns part D step 1 (B-057-T02).
+
+| | |
+|---|---|
+| **Issue** | 2026-11-12, F-015-T03: with English selected, a revoked credential showed *NERV non disponibile o richiesta rifiutata. Verifica servizio e abbinamento.*: `NativeError` descriptions are Italian strings and `tr()` has no English for them. The same text covers a stopped service, a refused (revoked or expired) credential and any other non-2xx reply, so it does not tell the owner to pair again. After a certificate rotation the pin refusal showed a bare system *cancelled* (the TLS challenge is cancelled), not that the certificate no longer matches the pairing. |
+| **Reproduce** | Select English in the companion; revoke its client with `npm start -- revoke CLIENT_ID` and choose Refresh status; or stop the service; or rotate the native certificate as in native/README.md and refresh. |
+| **Check** | Every companion error text exists in English and Italian; a 401 says the pairing was revoked or expired and to pair again; an unreachable service says so; a certificate that no longer matches says so and that nothing was sent; Swift tests cover each mapping. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="b-057-t03"></a>B-057-T03 — Rotated certificate shows the TLS message, not "cancelled" | 0.75 h | 0 h | 0.75 h | Ready | 🤖 |
+| 🟢 Small | <a id="b-057-t02"></a>B-057-T02 — Owner live check: English and Italian companion errors | 0 h | 0 h | 0 h agent + 0.25 h owner | Ready · waits on [B-057-T03](#b-057-t03) | ⏳ 🧑‍🔧 |
+| 🟢 Small | **Total** | 2.25 h | 0 h (0 of 3 steps recorded) | 0.75 h agent + 0.25 h owner | 1 of 3 completed | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status |
+|---|---|---|---|---|
+| — | <a id="b-057-t01"></a>B-057-T01 — Translated, specific companion error messages | 1.5 h | 0 h | Completed |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-057.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #343](https://github.com/voidbrain/nerv/pull/343) fix and Swift regressions (CI43343629031); found in F-015-T03, [evidence](acceptance/f015-live-failures-2026-11-12.md); [PR #325](https://github.com/voidbrain/nerv/pull/325). |
+| Opened | 2026-11-12 |
+| Verification | 2026-11-13 CI: Swift tests passed on native-macos (CI43343629031). Live companion check pending. |
+| Reviewed | 2026-11-13 |
+
+</details>
+
+---
 ### <a id="b-066"></a>[🐞 B-066](#top)
 
 **Worker-link heartbeat verification awaits nervous SQLite IPC on every frame**
@@ -1955,52 +2001,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | Pending. |
 | Reviewed | 2026-11-15 |
-
-</details>
-
----
-### <a id="b-057"></a>[🐞 B-057](#top)
-
-**Companion error messages are Italian only and do not say what went wrong**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | — | 🧑‍🔧 | — |
-
-🧑 **→** Next: Run [parts C and D of the companion live checks](acceptance/companion-live-checks.md#part-c) (revoked, stopped, changed certificate, English and Italian), then close B-057.
-
-| | |
-|---|---|
-| **Issue** | 2026-11-12, F-015-T03: with English selected, a revoked credential showed *NERV non disponibile o richiesta rifiutata. Verifica servizio e abbinamento.*: `NativeError` descriptions are Italian strings and `tr()` has no English for them. The same text covers a stopped service, a refused (revoked or expired) credential and any other non-2xx reply, so it does not tell the owner to pair again. After a certificate rotation the pin refusal showed a bare system *cancelled* (the TLS challenge is cancelled), not that the certificate no longer matches the pairing. |
-| **Reproduce** | Select English in the companion; revoke its client with `npm start -- revoke CLIENT_ID` and choose Refresh status; or stop the service; or rotate the native certificate as in native/README.md and refresh. |
-| **Check** | Every companion error text exists in English and Italian; a 401 says the pairing was revoked or expired and to pair again; an unreachable service says so; a certificate that no longer matches says so and that nothing was sent; Swift tests cover each mapping. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="b-057-t02"></a>B-057-T02 — Owner live check: English and Italian companion errors | 0 h | 0 h | 0 h agent + 0.25 h owner | Ready | [🧑‍🔧](acceptance/companion-live-checks.md#part-c) |
-| 🟢 Small | **Total** | 1.5 h | 0 h (0 of 2 steps recorded) | 0.25 h owner | 1 of 2 completed | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="b-057-t01"></a>B-057-T01 — Translated, specific companion error messages | 1.5 h | 0 h | Completed |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-057.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #343](https://github.com/voidbrain/nerv/pull/343) fix and Swift regressions (CI43343629031); found in F-015-T03, [evidence](acceptance/f015-live-failures-2026-11-12.md); [PR #325](https://github.com/voidbrain/nerv/pull/325). |
-| Opened | 2026-11-12 |
-| Verification | 2026-11-13 CI: Swift tests passed on native-macos (CI43343629031). Live companion check pending. |
-| Reviewed | 2026-11-13 |
 
 </details>
 
@@ -2086,6 +2086,53 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | PR / evidence | [PR #386](https://github.com/voidbrain/nerv/pull/386) [PR #383](https://github.com/voidbrain/nerv/pull/383) [PR #382](https://github.com/voidbrain/nerv/pull/382) [PR #379](https://github.com/voidbrain/nerv/pull/379) [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) |
+| Opened | 2026-11-13 |
+| Verification | Pending. |
+| Reviewed | 2026-11-13 |
+
+</details>
+
+---
+### <a id="f-081"></a>[✨ F-081](#top)
+
+**Native pairing: recovery on the service host with its profile stopped, and the stale client of 2026-11-07**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟢 Verified | 🔹 P3 | 🟢 Small | 0 h | — | — | — | — | — |
+
+💻 **→** Verified 2026-11-15; archive at the next reconciliation.
+
+| | |
+|---|---|
+| **Issue** | Split from F-015 when it closed on 2026-11-13. F-015's live trials (T02, T03) ran on an isolated profile; stopped-profile recovery on the host that runs the live service was deferred until the owner chooses that host. T02 also left a 2026-11-07 native client unrevoked on the live service. |
+| **Reproduce** | `npm start -- clients` on the live service lists the 2026-11-07 client; the [renewal and recovery guide](../native/README.md#renew-an-unexpired-native-credential) is so far verified only on an isolated profile. |
+| **Check** | The stale client is revoked and the companion still works; on the service host, the stopped-profile rotation in native/README.md keeps the profile's data, gives a new identity and pin, and the companion recovers by pairing again; evidence recorded. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+
+| 🟢 Small | **Total** | 0.25 h (1 of 2 steps) | 0 h (0 of 2 steps recorded) | 0 h | 0 of 2 completed | |
+
+<details><summary>Done steps (2)</summary>
+
+| Effort | Step | Estimate | Actual | Status |
+|---|---|---|---|---|
+| 🟢 Small | <a id="f-081-t01"></a>F-081-T01 — Revoke the stale client and run stopped-profile recovery on the service host | — | 0 h | Verified |
+| 🟢 Small | <a id="f-081-t02"></a>F-081-T02 — Record the evidence of F-081-T01 and close it | 0.25 h | 0 h | Verified |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-081.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [F-015 live failure evidence](acceptance/f015-live-failures-2026-11-12.md) |
 | Opened | 2026-11-13 |
 | Verification | Pending. |
 | Reviewed | 2026-11-13 |
@@ -2444,45 +2491,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-15 |
 | Verification | Pending. |
 | Reviewed | 2026-11-15 |
-
-</details>
-
----
-### <a id="f-081"></a>[✨ F-081](#top)
-
-**Native pairing: recovery on the service host with its profile stopped, and the stale client of 2026-11-07**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h agent + 0.5 h owner | — | — | ⏳ | 🧑‍🔧 | — |
-
-🧑 **→** Run [parts A and D of the companion live checks](acceptance/companion-live-checks.md#part-a): revoke the stale client, then the stopped-profile recovery.
-
-| | |
-|---|---|
-| **Issue** | Split from F-015 when it closed on 2026-11-13. F-015's live trials (T02, T03) ran on an isolated profile; stopped-profile recovery on the host that runs the live service was deferred until the owner chooses that host. T02 also left a 2026-11-07 native client unrevoked on the live service. |
-| **Reproduce** | `npm start -- clients` on the live service lists the 2026-11-07 client; the [renewal and recovery guide](../native/README.md#renew-an-unexpired-native-credential) is so far verified only on an isolated profile. |
-| **Check** | The stale client is revoked and the companion still works; on the service host, the stopped-profile rotation in native/README.md keeps the profile's data, gives a new identity and pin, and the companion recovers by pairing again; evidence recorded. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-081-t01"></a>F-081-T01 — Revoke the stale client and run stopped-profile recovery on the service host | — | 0 h | 0 h agent + 0.5 h owner | Ready | [🧑‍🔧](acceptance/companion-live-checks.md#part-a) |
-| 🟢 Small | <a id="f-081-t02"></a>F-081-T02 — Record the evidence of F-081-T01 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-081-T01](#f-081-t01) | ⏳ 🤖 |
-| 🟢 Small | **Total** | 0.25 h (1 of 2 steps) | 0 h (0 of 2 steps recorded) | 0.25 h agent + 0.5 h owner | 0 of 2 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-081.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [F-015 live failure evidence](acceptance/f015-live-failures-2026-11-12.md) |
-| Opened | 2026-11-13 |
-| Verification | Pending. |
-| Reviewed | 2026-11-13 |
 
 </details>
 
