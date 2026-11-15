@@ -4,7 +4,7 @@
   "parent": "F-050",
   "title": "Uncertain handoff reconciliation",
   "goal": "Implement receipt-bound reconciliation before retry or reassignment",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Lost reply, restart and sleeping base cannot duplicate effects",
     "Load-based forwarding also requires F-048 acceptance"
@@ -39,11 +39,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.75 h agent",
-    "basis": "Re-estimated 2026-11-14 from 0.5 h to 0.75 h: feature implementation steps closed since 2026-11-13 took 0.75–1 h (F-066-T01, F-066-T02, F-062-T03, F-044-T01) where the 0.25x pass had set 0.25–1 h; started from this step's estimate, not a ratio.",
-    "reviewed": "2026-11-14",
+    "estimate": "0 hours",
+    "basis": "Closed 2026-11-15: implemented WholeJobHandoffStore in src/whole-job-handoff.ts wired into Store.wholeJobHandoffs (src/store.ts), enforcing Scroll privacy/floor, F-048 load-forwarding gate, durable uncertain state and resource locks across lost reply/restart/sleeping base, and receipt-bound reconciliation before retry/reassignment in test/whole-job-handoff.test.ts in 0.25 h agent (stated).",
+    "reviewed": "2026-11-15",
     "baselineDays": 2,
-    "agentHours": 0.75,
+    "agentHours": 0,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated",
     "baselineAgentHours": 3,
     "estimateAgentHours": 0.75
   }
