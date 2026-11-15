@@ -73,10 +73,9 @@ export function maintenance(root, args) {
       if (row.disposition === 'backlog') {
         if (
           !/^[BF]-\d{3}$/.test(row.target ?? '') ||
-          !new RegExp(
-            `^### (?:<a id="[fb]-\\\\d+"><\\/a>)?(?:\\[(?:✨|🐞) )?${row.target}(?:\\]\\(#top\\))?$`,
-            'm',
-          ).test(readFileSync(resolve(root, 'docs/BACKLOG.md'), 'utf8'))
+          !new RegExp(`^### (?:<a id="[fb]-\\d+"><\\/a>)?(?:\\[(?:✨|🐞) )?${row.target}(?:\\]\\(#top\\))?$`, 'm').test(
+            readFileSync(resolve(root, 'docs/BACKLOG.md'), 'utf8'),
+          )
         )
           throw Error('Outcome must link an owning active backlog record');
       } else if (row.disposition === 'implemented') {

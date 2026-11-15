@@ -40,10 +40,10 @@
   "effort": {
     "size": "small",
     "estimate": "1.25 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). No actual: verified in an earlier session before v9.0.0 remaining-effort cleanup.",
     "reviewed": "2026-11-13",
     "baselineDays": 1.5,
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 2.25,
     "estimateAgentHours": 0.25
   }

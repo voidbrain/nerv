@@ -348,26 +348,39 @@ if (stamp.reviews !== undefined) {
       const baseDir = new URL(`../${relDir}/`, import.meta.url);
       const subDir = new URL(`../${relDir}/${name}/`, import.meta.url);
       const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const flatRe = new RegExp(`^(\\d{4}-\\d{2}-\\d{2})[-_.]${escaped}(?:\\b|\\.|[-_])`, 'i');
+      const subRe = /^(\d{4}-\d{2}-\d{2})\.md$/i;
+      const flatRe = new RegExp(`^(\\d{4}-\\d{2}-\\d{2})-${escaped}\\.md$`, 'i');
       const candidates = [];
+      const inspectReport = (dateStr, path) => {
+        const parsed = new Date(`${dateStr}T00:00:00Z`);
+        if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== dateStr) {
+          warn(`Review "${name}" (${path}) has an invalid date (${dateStr}); ignored.`);
+          return;
+        }
+        const age = Math.floor((today - parsed) / 86400000);
+        if (age < 0) {
+          warn(`Review "${name}" (${path}) has a future date (${dateStr}); ignored.`);
+          return;
+        }
+        candidates.push({ date: dateStr, path, age });
+      };
       if (existsSync(subDir)) {
         for (const entry of readdirSync(subDir, { withFileTypes: true })) {
           if (!entry.isFile()) continue;
-          const m = entry.name.match(/^(\d{4}-\d{2}-\d{2})/);
-          if (m) candidates.push({ date: m[1], path: `${relDir}/${name}/${entry.name}` });
+          const m = entry.name.match(subRe);
+          if (m) inspectReport(m[1], `${relDir}/${name}/${entry.name}`);
         }
       }
       if (existsSync(baseDir)) {
         for (const entry of readdirSync(baseDir, { withFileTypes: true })) {
           if (!entry.isFile()) continue;
           const m = entry.name.match(flatRe);
-          if (m) candidates.push({ date: m[1], path: `${relDir}/${entry.name}` });
+          if (m) inspectReport(m[1], `${relDir}/${entry.name}`);
         }
       }
       candidates.sort((a, b) => a.date.localeCompare(b.date) || a.path.localeCompare(b.path));
       const latest = candidates.at(-1);
-      const age = latest ? Math.floor((today - new Date(`${latest.date}T00:00:00Z`)) / 86400000) : Infinity;
-      if (!Number.isFinite(age) || age > cfg.days) {
+      if (!latest || latest.age > cfg.days) {
         const docHint =
           cfg.doc ??
           (name === 'token'
@@ -375,7 +388,7 @@ if (stamp.reviews !== undefined) {
             : name === 'architecture'
               ? 'docs/agents/architecture-review.md'
               : 'docs/agents/maintenance.md');
-        const status = !latest ? 'missing' : Number.isFinite(age) ? `${age} days old` : 'invalid date';
+        const status = !latest ? 'missing' : `${latest.age} days old`;
         warn(
           `Review "${name}" (${latest?.path ?? 'none'}) is ${status} (limit ${cfg.days}, reviews.${name}.days in .harness.json): follow ${docHint} and write ${relDir}/${name}/<date>.md.`,
         );
