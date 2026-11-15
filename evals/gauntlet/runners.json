@@ -1,6 +1,21 @@
 {
   "schemaVersion": 1,
   "runners": {
+    "scripted-agent": {
+      "command": "node",
+      "args": [
+        "tools/gauntlet-scripted-agent.mjs",
+        "{report}",
+        "{configuration}",
+        "{budget}",
+        "{case}"
+      ],
+      "cwd": "../..",
+      "layers": [
+        "end-to-end"
+      ],
+      "allowModels": false
+    },
     "policy": {
       "command": "node",
       "args": [

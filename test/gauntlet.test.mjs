@@ -64,8 +64,10 @@ test('NERV owns seven group adapters and keeps costly groups explicit', async ()
   );
   for (const c of pack.cases) {
     assert.equal(c.layer, 'system');
-    assert.equal(registry.runners[c.runner].allowModels, false);
+    assert.equal(registry.runners[c.runner].allowModels, c.layer !== 'system');
   }
+  assert.deepEqual(registry.runners['scripted-agent'].layers, ['end-to-end']);
+  assert.equal(registry.runners['scripted-agent'].allowModels, false);
   const plan = await main(['plan']);
   assert.equal(plan.modelCallsAuthorized, false);
   assert.equal(plan.cases.find((c) => c.id === 'stress').eligible, false);
@@ -899,7 +901,9 @@ test('the root command runs only uncovered cases, records them and reports nothi
     JSON.stringify({
       id: 'X-001-T01',
       status: 'planned',
-      acceptance: ['Covers general-assistant-expanded/*, neutral-smoke-schema/* and neutral-smoke/*'],
+      acceptance: [
+        'Covers bilingual-it-en/*, general-assistant-expanded/*, long-context/*, multi-step-agent/*, neutral-smoke-schema/*, neutral-smoke/*, refusal-permission/*, structured-output-robustness/* and tool-use/*',
+      ],
     }),
   );
   process.env.NERV_GAUNTLET_TASKS = tasks;
@@ -923,7 +927,7 @@ test('the root command runs only uncovered cases, records them and reports nothi
       }),
     );
     const schema1Pending = await main(['pending']);
-    assert.equal(schema1Pending.pendingLines.length, 55);
+    assert.equal(schema1Pending.pendingLines.length, 83);
     assert.equal(
       schema1Pending.pendingLines.filter((l) => l.startsWith('nerv-system-flows/') && l.endsWith('(source-changed)'))
         .length,
@@ -951,9 +955,9 @@ test('the root command runs only uncovered cases, records them and reports nothi
       }),
     );
     const before = await main(['pending']);
-    assert.equal(before.pendingLines.length, 48);
+    assert.equal(before.pendingLines.length, 76);
     assert.equal(before.pendingLines.filter((l) => l.startsWith('general-assistant-expanded/')).length, 28);
-    // Named by an unfinished task (the fixture lists the three common packs as pack/*), so the CI check passes.
+    // Named by an unfinished task (the fixture lists the common packs as pack/*), so the CI check passes.
     assert.deepEqual((await main(['pending', '--check-records'])).pendingLines, []);
     // Max age and another profile make covered cases pending again; --fresh plans every case.
     const old = await main(['all', '--max-age-days=1']);
@@ -966,9 +970,15 @@ test('the root command runs only uncovered cases, records them and reports nothi
     assert.deepEqual(
       plan.plan.map((p) => [p.pack, p.run.length, p.reuse.length, p.blocked?.cases.length ?? 0]),
       [
+        ['bilingual-it-en', 4, 0, 4],
         ['general-assistant-expanded', 28, 0, 28],
+        ['long-context', 4, 0, 4],
+        ['multi-step-agent', 4, 0, 4],
+        ['refusal-permission', 4, 0, 4],
         ['neutral-smoke-schema', 10, 0, 10],
         ['neutral-smoke', 10, 0, 10],
+        ['structured-output-robustness', 6, 0, 6],
+        ['tool-use', 6, 0, 6],
         ['nerv-system-flows', 0, 7, 0],
       ],
     );
@@ -999,7 +1009,7 @@ test('the root command runs only uncovered cases, records them and reports nothi
     };
     const systemRuns = [];
     const services = {
-      execute: (pack, profile, limits, options) => {
+      execute: async (pack, profile, limits, options) => {
         if (!profile) systemRuns.push(pack.id);
         return executeWithEvidence(pack, profile, limits, {
           ...options,
@@ -1020,22 +1030,39 @@ test('the root command runs only uncovered cases, records them and reports nothi
       services,
     );
     assert.deepEqual(systemRuns, []);
-    assert.equal(chats, 48);
+    assert.equal(chats, 72);
     assert.deepEqual(
       run.results.map((r) => [r.pack, r.cases.length]),
       [
+        ['bilingual-it-en', 4],
         ['general-assistant-expanded', 28],
+        ['long-context', 4],
+        ['multi-step-agent', 4],
+        ['refusal-permission', 4],
         ['neutral-smoke-schema', 10],
         ['neutral-smoke', 10],
+        ['structured-output-robustness', 6],
+        ['tool-use', 6],
       ],
     );
-    assert.equal(run.stillPending, 0);
+    // External runner supervision requires POSIX process groups, so multi-step-agent errors on win32 and stays pending.
+    const win32 = process.platform === 'win32';
+    assert.equal(run.stillPending, win32 ? 4 : 0);
     assert.equal(typeof run.passed, 'boolean');
-    assert.deepEqual((await main(['pending'])).pendingLines, []);
+    const pendingAfter = (await main(['pending'])).pendingLines;
+    if (win32) {
+      assert.equal(pendingAfter.length, 4);
+      assert.ok(pendingAfter.every((l) => l.startsWith('multi-step-agent/') && l.endsWith('(new)')));
+    } else {
+      assert.deepEqual(pendingAfter, []);
+    }
     const written = JSON.parse(readFileSync(ledger, 'utf8'));
     const recorded = written.entries;
-    assert.equal(recorded.length, 55);
-    // Gauntlet 0.7: the ledger is written as schema 2; all entries carry their identity.
+    assert.equal(recorded.length, win32 ? 79 : 83);
+    const scriptedEntries = recorded.filter((entry) => entry.pack === 'multi-step-agent');
+    assert.equal(scriptedEntries.length, win32 ? 0 : 4);
+    assert.ok(scriptedEntries.every((entry) => entry.status === 'passed' && entry.modelDigest === null));
+    // The ledger is written as schema 2; all entries carry their identity.
     assert.equal(written.schemaVersion, 2);
     const identity = ['modelDigest', 'runtimeHash', 'scenarioHash', 'sourceKey'];
     assert.ok(recorded.every((e) => identity.every((k) => k in e)));
@@ -1045,7 +1072,7 @@ test('the root command runs only uncovered cases, records them and reports nothi
     );
     // A second run finds nothing to do; another profile has run nothing yet.
     const again = await main(['all']);
-    assert.ok(again.plan.every((p) => p.run.length === 0));
+    assert.ok(again.plan.filter((p) => !win32 || p.pack !== 'multi-step-agent').every((p) => p.run.length === 0));
     const other = join(dir, 'other-profile.json');
     const base = JSON.parse(
       readFileSync('node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json', 'utf8'),
@@ -1055,8 +1082,10 @@ test('the root command runs only uncovered cases, records them and reports nothi
     assert.ok(
       otherPlan.plan
         .filter((p) => p.layer === 'model')
-        .every(
-          (p) => p.run.length === p.reuse.length + p.run.length && p.run.every((r) => r.reason === 'other-profile'),
+        .every((p) =>
+          win32 && p.pack === 'multi-step-agent'
+            ? p.run.every((r) => r.reason === 'new')
+            : p.run.length === p.reuse.length + p.run.length && p.run.every((r) => r.reason === 'other-profile'),
         ),
     );
     assert.deepEqual(otherPlan.plan.find((p) => p.layer === 'system').run, [], 'system cases need no profile');
@@ -1077,7 +1106,7 @@ test('pending and ledger keep the harness contract: lines and exit 1 when pendin
     });
   const listed = cli(['pending']);
   assert.equal(listed.status, 1);
-  assert.equal(listed.stdout.trim().split('\n').length, 55);
+  assert.equal(listed.stdout.trim().split('\n').length, 83);
   assert.match(listed.stdout, /^nerv-system-flows\/policy \(new\)$/m);
   assert.equal(cli(['pending', '--max-age-days=x']).status, 2);
   writeFileSync(join(dir, 'bad.json'), '{"schemaVersion":1,"entries":[{"x":1}]}');
@@ -1098,7 +1127,7 @@ test('check:gauntlet-runs fails for a pending case that no unfinished task lists
 
 test('F-074-T10: identity-bound ledger coverage detects source, model, runtime and scenario changes', async () => {
   const { caseHash, evidenceProfile, hash } = await import('@voidbrain/gauntlet-protocol');
-  const { systemSourceKey } = await import('../tools/gauntlet.mjs');
+  const { commonPacks, systemSourceKey } = await import('../tools/gauntlet.mjs');
   const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-identity-'));
   const ledger = join(dir, 'ledger.json');
   process.env.NERV_GAUNTLET_LEDGER = ledger;
@@ -1111,15 +1140,7 @@ test('F-074-T10: identity-bound ledger coverage detects source, model, runtime a
     const modelDigest = 'd'.repeat(64);
     const runtimeHash = 'e'.repeat(64);
     const scenarioHash = 'f'.repeat(64);
-    const packs = ['general-assistant-expanded', 'neutral-smoke', 'neutral-smoke-schema'].map((id) => {
-      const file =
-        id === 'general-assistant-expanded'
-          ? 'general-assistant-expanded-v1.json'
-          : id === 'neutral-smoke-schema'
-            ? 'smoke-schema-v1.json'
-            : 'smoke-v1.json';
-      return JSON.parse(readFileSync(join('node_modules/@voidbrain/gauntlet-protocol/examples', file), 'utf8'));
-    });
+    const packs = commonPacks().map((p) => p.pack);
     writeFileSync(
       ledger,
       JSON.stringify({
@@ -1152,7 +1173,7 @@ test('F-074-T10: identity-bound ledger coverage detects source, model, runtime a
               modelDigest,
               runtimeHash,
               scenarioHash,
-              sourceKey: null,
+              sourceKey: c.runner ? currentSourceKey : null,
             })),
           ),
         ],
@@ -1183,19 +1204,22 @@ test('F-074-T10: identity-bound ledger coverage detects source, model, runtime a
       ).pendingLines,
       [],
     );
-    // Different source key makes only NERV system cases pending with source-changed.
+    // Different source key makes only runner-backed packs (NERV system cases + multi-step-agent) pending with source-changed.
     const sourceChanged = await main(['all', '--source-key=deadbeef']);
     assert.ok(sourceChanged.plan.find((p) => p.pack === system.id).run.every((r) => r.reason === 'source-changed'));
-    assert.ok(sourceChanged.plan.filter((p) => p.layer === 'model').every((p) => p.run.length === 0));
+    assert.deepEqual(
+      sourceChanged.plan.filter((p) => p.run.length > 0).map((p) => p.pack),
+      ['multi-step-agent', system.id],
+    );
     // Different model digest / runtime / scenario make affected cases pending with the exact reason.
     const modelChanged = await main(['pending', '--profile=' + profilePath, '--model-digest=' + '9'.repeat(64)]);
-    assert.equal(modelChanged.pendingLines.length, 48);
+    assert.equal(modelChanged.pendingLines.length, 72);
     assert.ok(modelChanged.pendingLines.every((l) => l.endsWith('(model-changed)')));
     const runtimeChanged = await main(['pending', '--profile=' + profilePath, '--runtime-hash=' + '8'.repeat(64)]);
-    assert.equal(runtimeChanged.pendingLines.length, 48);
+    assert.equal(runtimeChanged.pendingLines.length, 72);
     assert.ok(runtimeChanged.pendingLines.every((l) => l.endsWith('(runtime-changed)')));
     const scenarioChanged = await main(['pending', '--profile=' + profilePath, '--scenario-hash=' + '7'.repeat(64)]);
-    assert.equal(scenarioChanged.pendingLines.length, 55);
+    assert.equal(scenarioChanged.pendingLines.length, 79);
     assert.ok(scenarioChanged.pendingLines.every((l) => l.endsWith('(scenario-changed)')));
     // Recording a system report via `ledger` binds NERV's systemSourceKey automatically.
     const reportPath = join(dir, 'sys-report.json');

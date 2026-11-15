@@ -314,7 +314,10 @@ export function validateObservation(v) {
     throw Error('Invalid estimate snapshot');
   if (
     v.kind === 'interval' &&
-    (!['execution', 'wait', 'active'].includes(v.category) || !stamp(v.start) || !stamp(v.end) || v.end < v.start)
+    (!['execution', 'wait', 'active', 'paused'].includes(v.category) ||
+      !stamp(v.start) ||
+      !stamp(v.end) ||
+      v.end < v.start)
   )
     throw Error('Invalid measured interval');
   if (
@@ -365,6 +368,26 @@ const sumKnown = (values) =>
     if (!Number.isSafeInteger(n + v)) throw Error('Measured sum exceeds safe integer');
     return n + v;
   }, 0);
+// F-080: a closed job's working segments are its span minus its own recorded pauses. Wall time counts as worked
+// while any job is working, so a pause on one job never removes time a parallel job spent working.
+function workingSegments(job, rows) {
+  const finished = Date.parse(job.finished),
+    pauses = rows
+      .filter((r) => r.job === job.job && r.kind === 'interval' && r.category === 'paused')
+      .map((r) => [Date.parse(r.start), Date.parse(r.end)])
+      .sort((a, b) => a[0] - b[0]),
+    out = [];
+  let cursor = Date.parse(job.started);
+  for (const [a, b] of pauses) {
+    if (a > cursor) out.push([cursor, Math.min(a, finished)]);
+    cursor = Math.max(cursor, b);
+  }
+  if (finished > cursor) out.push([cursor, finished]);
+  return out;
+}
+const iso = (ms) => new Date(ms).toISOString();
+const effectiveElapsed = (closedJobs, rows) =>
+  union(closedJobs.flatMap((j) => workingSegments(j, rows)).map(([a, b]) => [iso(a), iso(b)])) ?? 0;
 function union(intervals) {
   if (!intervals.length) return null;
   const ordered = intervals.map(([a, b]) => [Date.parse(a), Date.parse(b)]).sort((a, b) => a[0] - b[0]);
@@ -384,7 +407,10 @@ export function effectiveness(jobs, observations, usageRows) {
   const intervals = (category) =>
     rows.filter((r) => r.kind === 'interval' && r.category === category).map((r) => [r.start, r.end]);
   const closed = jobs.filter((j) => j.finished),
-    elapsed = union(closed.map((j) => [j.started, j.finished]));
+    elapsed = union(closed.map((j) => [j.started, j.finished])),
+    closedIds = new Set(closed.map((j) => j.job)),
+    anyPause = rows.some((r) => r.kind === 'interval' && r.category === 'paused' && closedIds.has(r.job)),
+    effective = elapsed === null ? null : effectiveElapsed(closed, rows);
   const attempts = rows.filter((r) => r.kind === 'attempt'),
     findings = rows.filter((r) => r.kind === 'finding'),
     interventions = rows.filter((r) => r.kind === 'intervention');
@@ -450,7 +476,7 @@ export function effectiveness(jobs, observations, usageRows) {
       const j = jobs.find((j) => j.job === e.job),
         preWork = !!j && e.at <= j.started;
       let observed = null;
-      if (e.measure === 'elapsedMs' && j?.finished) observed = Date.parse(j.finished) - Date.parse(j.started);
+      if (e.measure === 'elapsedMs' && j?.finished) observed = effectiveElapsed([j], rows);
       // Partial active intervals are a measured subtotal, not a complete effort comparison.
       if (e.measure.endsWith('Tokens')) {
         const rs = usageRows.filter((r) => r.job === e.job);
@@ -479,12 +505,14 @@ export function effectiveness(jobs, observations, usageRows) {
       openJobs: jobs.length - closed.length,
       elapsedUnionMs: elapsed,
       elapsedComplete: closed.length === jobs.length && jobs.length > 0,
+      pausedUnionMs: anyPause ? elapsed - effective : null,
+      effectiveElapsedMs: effective,
       executionUnionMs: union(intervals('execution')),
       waitUnionMs: union(intervals('wait')),
       activeUnionMs: union(intervals('active')),
       measuredWorkerActiveMs: knownActive.some((n) => n !== null) ? sumKnown(knownActive.map((v) => v ?? 0)) : null,
       jobsWithoutActiveMeasurement: knownActive.filter((n) => n === null).length,
-      note: 'Closed-job elapsed intervals use their union; open jobs are censored. Measured active/execute/wait intervals retain their separate meanings; missing intervals do not mean zero.',
+      note: 'Closed-job elapsed intervals use their union; open jobs are censored. Effective elapsed counts wall time while any closed job was working outside its recorded paused intervals (usage limit, owner away); unrecorded pauses stay counted. Measured active/execute/wait intervals retain their separate meanings; missing intervals do not mean zero.',
     },
     attempts: attempts.length
       ? {
@@ -594,7 +622,7 @@ function allowanceReport(rows) {
     note: 'Percentage changes are shared-account observations, not tokens, money or exact job usage. Resets, decreases and missing snapshots break change attribution.',
   };
 }
-function calibration(allowanceRows, jobs, usageRows, allJobs = jobs) {
+function calibration(allowanceRows, jobs, usageRows, allJobs = jobs, observationRows = []) {
   const allowanceSamples = [];
   for (const row of allowanceRows) {
     if (!row.job) continue;
@@ -648,12 +676,14 @@ function calibration(allowanceRows, jobs, usageRows, allJobs = jobs) {
         task: job.task,
         sampleSize: 0,
         elapsedMs: [],
+        effectiveElapsedMs: [],
         inputTokens: [],
         outputTokens: [],
         jobsWithCompleteTokens: 0,
       });
     entry.sampleSize++;
     entry.elapsedMs.push(Date.parse(job.finished) - Date.parse(job.started));
+    entry.effectiveElapsedMs.push(effectiveElapsed([job], observationRows));
     const rows = usageRows.filter((r) => r.job === job.job);
     if (
       job.coverage === 'complete' &&
@@ -676,9 +706,11 @@ function calibration(allowanceRows, jobs, usageRows, allJobs = jobs) {
       : null;
   for (const entry of Object.values(groups)) {
     entry.elapsed = summarize(entry.elapsedMs);
+    entry.effectiveElapsed = summarize(entry.effectiveElapsedMs);
     entry.input = summarize(entry.inputTokens);
     entry.output = summarize(entry.outputTokens);
     delete entry.elapsedMs;
+    delete entry.effectiveElapsedMs;
     delete entry.inputTokens;
     delete entry.outputTokens;
   }
@@ -842,13 +874,14 @@ export function main(args = process.argv.slice(2), cwd = process.cwd(), stdin = 
       phase: ['store', 'job', 'activity'],
       import: ['store', 'job', 'file', 'format'],
       observe: ['store', 'job', 'file'],
+      pause: ['store', 'job', 'from', 'to'],
       allowance: ['store', 'job', 'file', 'format'],
       ['claude-status']: ['store', 'job', 'source'],
       finish: ['store', 'job', 'coverage', 'outcome'],
       report: ['store', 'item', 'repository', 'task', 'out'],
     };
   if (!Object.hasOwn(allowed, command))
-    throw Error('Use start, phase, import, observe, allowance, claude-status, finish or report');
+    throw Error('Use start, phase, import, observe, pause, allowance, claude-status, finish or report');
   const opts = {};
   for (const a of rest) {
     const m = /^--([a-z]+)=(.+)$/.exec(a);
@@ -1028,7 +1061,13 @@ export function main(args = process.argv.slice(2), cwd = process.cwd(), stdin = 
         byTask,
         effectiveness: effectiveness(coverage, observations, rows),
         allowance: allowanceReport(allowanceRows),
-        calibration: calibration(allowanceRows, coverage, rows, allCoverage),
+        calibration: calibration(
+          allowanceRows,
+          coverage,
+          rows,
+          allCoverage,
+          observations.map((r) => ({ ...r.observation, job: r.job })),
+        ),
         byActivity: Object.fromEntries(phases.map((p) => [p, aggregate(rows.filter((e) => e.usage.activity === p))])),
         byModel: Object.fromEntries(
           [...new Set(rows.map((e) => JSON.stringify([e.usage.provider, e.usage.model])))].map((k) => [
@@ -1046,8 +1085,27 @@ export function main(args = process.argv.slice(2), cwd = process.cwd(), stdin = 
   if (!uuid(opts.job)) throw Error('Invalid job');
   const job = read(join(jobs, opts.job + '.json'));
   if (job.id !== opts.job) throw Error('Job identity mismatch');
-  if (command === 'observe') {
-    const observation = validateObservation(read(resolve(opts.file))),
+  if (command === 'observe' || command === 'pause') {
+    // A pause takes an explicit UTC or offset time, so a local clock never shifts it.
+    const instant = (v) => {
+      if (!/(Z|[+-]\d\d:\d\d)$/.test(v ?? '') || !Number.isFinite(Date.parse(v)))
+        throw Error('Pause needs --from and --to as ISO times with Z or an offset');
+      return new Date(Date.parse(v)).toISOString();
+    };
+    if (command === 'pause') [opts.from, opts.to] = [instant(opts.from), instant(opts.to)];
+    const observation = validateObservation(
+        command === 'pause'
+          ? {
+              version: 1,
+              source: 'pause',
+              eventId: 'pause-' + job.id + '-' + opts.from + '-' + opts.to,
+              kind: 'interval',
+              category: 'paused',
+              start: opts.from,
+              end: opts.to,
+            }
+          : read(resolve(opts.file)),
+      ),
       key = hash([observation.source, observation.eventId]),
       path = join(events, key + '.json');
     try {

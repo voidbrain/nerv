@@ -6,6 +6,7 @@
  "goal": "Adopt the new Gauntlet packs (gauntlet F-012) when released",
  "status": "planned",
  "acceptance": [
+  "Pending cases this task covers: bilingual-it-en/*, long-context/*, multi-step-agent/*, refusal-permission/*, structured-output-robustness/*, tool-use/*",
   "Pin bumped to the release; its new cases appear as pending",
   "The approved matrix runs the new packs; pending exits 0"
  ],
@@ -31,14 +32,14 @@
   "npm run check:fast"
  ],
  "escalation": [
-  "A model campaign runs only inside the scope and budget the owner approved in F-078-T02",
+  "Owner authorized this campaign on 2026-11-15; it runs only inside the scope and budget approved in F-078-T02",
   "A model failure that NERV can fix becomes a B- record with a failing test first"
  ],
  "effort": {
   "size": "small",
   "estimate": "0.5 h agent",
-  "basis": "Estimated 2026-11-13 at the harness 8.5.0 initial step size; campaign wall time on the host is extra and bounded by the T02 budget. Not a measurement.",
-  "reviewed": "2026-11-13",
+  "basis": "Estimated 2026-11-13 at the harness 8.5.0 initial step size; campaign wall time on the host is extra and bounded by the T02 budget. Owner authorized the campaign 2026-11-15; not a measurement.",
+  "reviewed": "2026-11-15",
   "agentHours": 0.5,
   "baselineAgentHours": 0.5,
   "estimateAgentHours": 0.5

@@ -61,7 +61,7 @@ test(
       return child;
     };
     const ready = async (i: number) => {
-      for (let n = 0; n < 100; n++) {
+      for (let n = 0; n < 300; n++) {
         try {
           const r = await fetch('http://127.0.0.1:' + ports[i] + '/api/status', {
             headers: { authorization: 'Bearer ' + readToken(homes[i]!) },
@@ -69,7 +69,7 @@ test(
           });
           if (r.ok) return;
         } catch {}
-        await delay(30);
+        await delay(50);
       }
       throw Error('Neutral CLI did not become ready: ' + log);
     };

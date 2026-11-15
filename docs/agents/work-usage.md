@@ -18,13 +18,14 @@ Start one job at an independently attributable task boundary, before its model w
 node tools/work-usage.mjs start --repository=project-harness --item=F-048 --task=F-048-T01 --agent=codex --activity=coding
 # Copy the actual job UUID returned above, then use that UUID:
 node tools/work-usage.mjs phase --job=JOB_UUID --activity=review
+node tools/work-usage.mjs pause --job=JOB_UUID --from=2026-01-01T10:00:00Z --to=2026-01-01T13:00:00Z
 node tools/work-usage.mjs import --job=JOB_UUID --file=/private/path/usage-metadata.json
 node tools/work-usage.mjs finish --job=JOB_UUID --coverage=partial --outcome=done
 node tools/work-usage.mjs report --repository=project-harness --item=F-048
 node tools/work-usage.mjs report --repository=project-harness --item=F-048 --task=F-048-T02
 ```
 
-Activities: planning, coding, tests, review, documentation, backlog, harness and unallocated. Test execution itself is not model-token spend: import only model work used to prepare, run or interpret it. Count failed/retried model calls with their distinct source event IDs. Waiting time and tool calls do not establish token counts. Register a shared job with `--item=unallocated` when ownership cannot be attributed without guessing.
+Activities: planning, coding, tests, review, documentation, backlog, harness and unallocated. Test execution itself is not model-token spend: import only model work used to prepare, run or interpret it. Count failed/retried model calls with their distinct source event IDs. Waiting time and tool calls do not establish token counts. When the agent could not run (a usage or allowance limit, the owner away), record the pause on resuming with `pause`, from the last work before the stop to the resume, in UTC or with an offset; it may be added to a finished job; a stop that hit several running jobs is recorded on each. Reports subtract recorded pauses from the effective elapsed time; reviews and CI waits stay counted. Register a shared job with `--item=unallocated` when ownership cannot be attributed without guessing.
 
 The default store is outside the checkout at `~/.local/state/project-harness/work-usage`; `--store` selects another private local directory. POSIX directories/files use0700/0600 and exclusive creation; linked stores and stores inside the current checkout are rejected. Windows private-ACL verification is not implemented: record measurement as unavailable and continue authorized work. This is local storage, not a same-user security sandbox. No export, network collection, host startup hook or model call occurs. Identity and event labels are owner-supplied metadata, not authenticated provider proof.
 

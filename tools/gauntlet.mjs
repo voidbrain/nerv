@@ -49,6 +49,7 @@ export function systemSourceKey() {
   return hash({
     inputs,
     adapter: hash(readFileSync(here('tools/gauntlet-adapter.mjs'), 'utf8')),
+    scriptedAgent: hash(readFileSync(here('tools/gauntlet-scripted-agent.mjs'), 'utf8')),
     wrapper: hash(readFileSync(here('tools/gauntlet.mjs'), 'utf8')),
     dependency: hash(readFileSync(here('vendor/gauntlet-protocol.json'), 'utf8')),
   });
@@ -95,6 +96,19 @@ export function modelLimits(pack) {
   };
 }
 const isModelPack = (pack) => pack.cases.some((c) => c.layer !== 'system');
+const hasRunner = (pack) => pack.cases.some((c) => !!c.runner);
+const pendingByPack = (packs, ledger, options) =>
+  packs.flatMap((pack) => {
+    const identity = { ...options };
+    // A runner-only contract pack exercises NERV's adapter, not the selected model binary.
+    // Its profile and NERV source identity remain bound, but model digest changes do not invalidate it.
+    if (isModelPack(pack) && pack.cases.every((c) => !!c.runner)) {
+      delete identity.modelDigest;
+      delete identity.runtimeHash;
+      delete identity.scenarioHash;
+    }
+    return pendingCases([pack], ledger, identity);
+  });
 const unmetRequirements = (testCase) =>
   (testCase.requirements ?? []).filter(
     (requirement) => requirement === 'built-browser-assets' && !existsSync(here('dist/web/browser')),
@@ -137,6 +151,11 @@ export function recordSelected(ledger, report, full, selected, sourceKey = null)
   const entries = new Map(ledger.entries.map((e) => [entryKey(e), e]));
   for (const e of recordRun(emptyLedger(), report, selected, { sourceKey }).entries) {
     const entry = { ...e, pack: full.id, packVersion: full.version };
+    if (isModelPack(full) && full.cases.every((c) => !!c.runner)) {
+      entry.modelDigest = null;
+      entry.runtimeHash = null;
+      entry.scenarioHash = null;
+    }
     const old = entries.get(entryKey(entry));
     if (
       !old ||
@@ -178,7 +197,7 @@ export function unnamedPending(list, text) {
 export function pending({ maxAgeDays, profile, modelDigest, runtimeHash, scenarioHash, sourceKey } = {}) {
   const defaultSourceKey = systemPacks()[0]?.pack ? systemSourceKey(systemPacks()[0].pack) : undefined;
   const effectiveSourceKey = sourceKey !== undefined ? sourceKey : defaultSourceKey;
-  return pendingCases(
+  return pendingByPack(
     allPacks().map((p) => p.pack),
     readLedger(),
     {
@@ -402,9 +421,9 @@ export async function main(args = process.argv.slice(2), services = { execute: e
         ? options['source-key'] === 'none'
           ? null
           : options['source-key']
-        : isModelPack(full)
-          ? null
-          : systemSourceKey(full);
+        : hasRunner(full)
+          ? systemSourceKey(full)
+          : null;
     const next = recordSelected(readLedger(), report, full, selectedPack(full, ids, isModelPack(full)), sourceKey);
     writeLedger(next);
     return { ledger: ledgerFile, entries: next.entries.length };
@@ -439,13 +458,11 @@ export async function main(args = process.argv.slice(2), services = { execute: e
       execute: true,
       ...flags,
       scenarioConfirmed: options['confirm-scenario'] === true,
-      registry: model
-        ? undefined
-        : validateRegistry(readJSON(here('evals/gauntlet/runners.json')), here('evals/gauntlet')),
+      registry: validateRegistry(readJSON(here('evals/gauntlet/runners.json')), here('evals/gauntlet')),
       output: out,
       cacheDirectory: options['cache-dir'] ?? defaultEvidenceDirectory(),
       forceFresh: options.fresh === true,
-      sourceKey: model ? undefined : systemSourceKey(pack),
+      sourceKey: hasRunner(pack) ? systemSourceKey(pack) : undefined,
       telemetry: model,
       ...extra,
     });
@@ -565,7 +582,7 @@ async function all(options, { profile, execute, limitsFor, maxAgeDays, intended 
     ...(profile ? { profile } : {}),
     ...intended,
   };
-  const open = pendingCases(
+  const open = pendingByPack(
     allPacks().map((p) => p.pack),
     ledger,
     pendingOptions,
@@ -639,7 +656,7 @@ async function all(options, { profile, execute, limitsFor, maxAgeDays, intended 
     for (const batch of batches) {
       const selected = selectedPack(pack, batch, model);
       const out = join(outDir, `${pack.id}${model ? '' : '-' + batch[0]}.json`);
-      const sourceKey = model ? null : systemSourceKey(pack);
+      const sourceKey = hasRunner(pack) ? systemSourceKey(pack) : null;
       const result = await execute(selected, model, model ? profile : null, out, {
         ...(maxAgeDays !== undefined ? { maxAgeMs: maxAgeDays * 86400000 } : {}),
         ...(sourceKey ? { sourceKey } : {}),
@@ -656,16 +673,17 @@ async function all(options, { profile, execute, limitsFor, maxAgeDays, intended 
       writeLedger(next);
     }
   }
+  const stillPending = pendingByPack(
+    allPacks().map((p) => p.pack),
+    next,
+    pendingOptions,
+  );
   return {
     plan: summary,
     results,
     passed: results.every((r) => r.passed),
     ledger: ledgerFile,
-    stillPending: pendingCases(
-      allPacks().map((p) => p.pack),
-      next,
-      pendingOptions,
-    ).length,
+    stillPending: stillPending.length,
     modelQualification: false,
   };
 }

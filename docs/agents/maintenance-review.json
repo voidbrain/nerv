@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-14T14:21:13.956Z",
+  "reviewed": "2026-11-15T08:26:32.892Z",
   "policy": "7d15ab5f3e1a37d15075876ce3efd53d93600045088f48b41a3ef0dd6ab89e7d",
   "inputs": {
     "AGENTS.md": "d5c0da9a6960509d129db16add394550b9daae036b2cde345598d981e08a3838",
@@ -20,10 +20,10 @@
     "docs/agents/skills.md": "5d60223eccfaad88c7153f57316da5ca10bfdd9d58d3a8cebc1eef25b9f0d5f5",
     "docs/agents/solution-profile.md": "685d55612f55d157bf124e23115f95bd16fe4d4f8834a4e0e152a191e3cd45f8",
     "docs/agents/task-context.md": "c689f02b9571ff747a4866d71690bb01afd7e6654dea640a1ce1c66e7c0fa204",
-    "docs/agents/work-usage.md": "c79d6864f53100c691e30e411c203c00b20bf5bd7bc55bbcee5687e859edb543",
+    "docs/agents/work-usage.md": "5b10c5e8e9860fdd116b5cc789c2164e0678df96a475bf7b11ad5f9f99b1453e",
     "docs/backlog/closure.md": "21fcc14351588107943d9aab70991399e07af7026d48327619f215e62ecb3319",
     "docs/backlog/documentation.md": "6328e3eccb3a222af1a9f4682dcef9e763464d0842cf94b28713bbc5f61e04b1",
-    "docs/backlog/estimates.md": "015bbbf9d83fc7cc610ea53eb1cb7b6d8b77ac3b1bd3dd07b1a6a8808e260745",
+    "docs/backlog/estimates.md": "22d0bf4ab87f093aae35834d8a75e9e66d0ef199d2af60802412744f7a81b7a9",
     "docs/backlog/evaluations.md": "7540bf69b6b5d40dc09dc9ce82138218525733c5f602945bdaa58d5c3a743f37",
     "docs/backlog/feature-plans.md": "c0c57eed2ba36a7e969512f1455b2af8bfff27c7ff60e1c171ba6e2ba2ee5dcf",
     "docs/backlog/ordering.md": "f36fe3410fe4d838877fe35c61c491608116b0255b864906f91eea23915d81dd",
@@ -35,7 +35,7 @@
     "tools/task-claims.mjs": "ef755fe7951544e5c05b20de7c64a7b53778b6d039a11a2abeb079e7d42b6fd2",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
     "tools/work-items.mjs": "4c343b171323754dca54f4d44c626e5e2d6f21d742cecd49a2ac7f144007c396",
-    "tools/work-usage.mjs": "828c8e64e20623a6dac5969bb46cb77f4f51972cfc142dad63d2f58f61b57e59"
+    "tools/work-usage.mjs": "65961d804edf9adc3f93a6b6ccfa04dfe9cf16275751f50247056ec3edf6589e"
   },
   "measurements": {
     "samples": 19,
@@ -107,6 +107,18 @@
       "disposition": "implemented",
       "target": "AGENTS.md",
       "evidence": "Owner decision 2026-11-14: five project lines moved verbatim out of always-loaded AGENTS.md to the procedures that apply; harness 8.14.3; rule-load within every budget."
+    },
+    {
+      "kind": "tool",
+      "disposition": "implemented",
+      "target": "tools/work-usage.mjs",
+      "evidence": "Harness 8.15.0 paused-time accounting copied byte-identically; the adapted estimate rule retains every requirement and adds effective elapsed time."
+    },
+    {
+      "kind": "none",
+      "disposition": "no-change",
+      "target": "docs/agents/session-start.md",
+      "evidence": "Assessed the repeated-load candidate: reconcile:draft, work:next and code:map already provide bounded indexing/workflow help. One observed repeated load does not justify another skill or removing applicable rule reads."
     }
   ]
 }
