@@ -4,7 +4,7 @@
   "parent": "F-100",
   "title": "Feasibility: decoding blackbox logs and reading vibration",
   "goal": "Whether NERV can decode a Betaflight log locally and what the spectrum can distinguish",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "Decoder candidates tried on a sample log (local, no upload)",
     "What frame, motor, prop and ESC problems look like in the data, with sources",
@@ -28,11 +28,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.75 h agent",
+    "estimate": "0 hours",
     "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement.",
     "reviewed": "2026-11-14",
-    "agentHours": 0.75,
+    "agentHours": 0,
     "baselineAgentHours": 0.75,
-    "estimateAgentHours": 0.75
+    "estimateAgentHours": 0.75,
+    "actualAgentHours": 0.25,
+    "actualSource": "measured"
   }
 }
