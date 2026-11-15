@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 91 h agent + 24 h owner across 201 open steps of 52 features and 5 other records. 29.5 h of actual effort recorded on 58 steps. Generated from the task files.
+**Remaining effort:** 90.25 h agent + 24 h owner across 200 open steps of 52 features and 5 other records. 29.75 h of actual effort recorded on 59 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1005,6 +1005,47 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-050"></a>[✨ F-050](#top)
+
+**Forwarding a whole job to another base**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: the job message and its fallback, for capability first.
+
+| | |
+|---|---|
+| **Issue** | Owner questions 2026-11-05: can a base forward a full job to another, when it is busy or when the other does better; why, when and how. Today a base that is not the main one forwards whole requests to the main base (one channel, F-036), and the main base sends single actions to a base that offers them (slice 3b); the main base never hands a whole job to another base. |
+| **Reproduce** | Ask the main base for a job only another base can do well (Tabgha's 3D expert, its GPU, a device next to it). |
+| **Check** | The main base forwards a whole job when another base has the pilot, model, tool or device it needs (capability), when its own queue or model is busy and the other is idle (load), or when the data or device is there (locality), never a job with local-only or tainted data (the Scrolls decide what may leave); the job goes as one signed Kaji message with a job ID (it never runs twice) and only the context the Scrolls allow; the receiving base runs the whole sortie with its own Misato, pilot and gate, never looser than the main base's Scrolls; cards still reach the owner through Aoba; the result returns as a follow-up and the main ledger records where it ran and why; if the base goes silent, reconcile durable job receipts and resource ownership before any retry or reassignment; silence alone never proves execution stopped; tests across two bases. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-050-t02"></a>F-050-T02 — Uncertain handoff reconciliation | 0.75 h | 0 h | 0.75 h | Planned |
+| — | <a id="f-050-t01"></a>F-050-T01 — Whole-job handoff contract | 0.75 h | 0.25 h (stated) | 0 h | Completed |
+| 🟢 Small | **Total** | 1.5 h | 0.25 h (1 of 2 steps recorded) | 0.75 h | 1 of 2 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-050.md)
+
+| Field | Value |
+|---|---|
+| Depends on | [F-045](archive/backlog-2026.md#f-045) — Remote pilot capability offers for capability-based forwarding |
+| PR / evidence | [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner questions 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | Pending |
+| Reviewed | 2026-11-08 |
+
+</details>
+
+---
+
 ### <a id="f-070"></a>[✨ F-070](#top)
 
 **Authenticated directory of base communication operators**
@@ -1044,47 +1085,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-050"></a>[✨ F-050](#top)
-
-**Forwarding a whole job to another base**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: the job message and its fallback, for capability first.
-
-| | |
-|---|---|
-| **Issue** | Owner questions 2026-11-05: can a base forward a full job to another, when it is busy or when the other does better; why, when and how. Today a base that is not the main one forwards whole requests to the main base (one channel, F-036), and the main base sends single actions to a base that offers them (slice 3b); the main base never hands a whole job to another base. |
-| **Reproduce** | Ask the main base for a job only another base can do well (Tabgha's 3D expert, its GPU, a device next to it). |
-| **Check** | The main base forwards a whole job when another base has the pilot, model, tool or device it needs (capability), when its own queue or model is busy and the other is idle (load), or when the data or device is there (locality), never a job with local-only or tainted data (the Scrolls decide what may leave); the job goes as one signed Kaji message with a job ID (it never runs twice) and only the context the Scrolls allow; the receiving base runs the whole sortie with its own Misato, pilot and gate, never looser than the main base's Scrolls; cards still reach the owner through Aoba; the result returns as a follow-up and the main ledger records where it ran and why; if the base goes silent, reconcile durable job receipts and resource ownership before any retry or reassignment; silence alone never proves execution stopped; tests across two bases. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-050-t01"></a>F-050-T01 — Whole-job handoff contract | 0.75 h | 0 h | 0.75 h | Planned |
-| 🟢 Small | <a id="f-050-t02"></a>F-050-T02 — Uncertain handoff reconciliation | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-050-T01](#f-050-t01) |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 2 steps recorded) | 1.5 h | 0 of 2 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-050.md)
-
-| Field | Value |
-|---|---|
-| Depends on | [F-045](archive/backlog-2026.md#f-045) — Remote pilot capability offers for capability-based forwarding |
-| PR / evidence | [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner questions 2026-11-05 |
-| Opened | 2026-11-05 |
-| Verification | Pending |
-| Reviewed | 2026-11-08 |
-
-</details>
-
----
-
 ### <a id="f-088"></a>[✨ F-088](#top)
 
 **Storage base: copy files from a known removable card when it is inserted**
