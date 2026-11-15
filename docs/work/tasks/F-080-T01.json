@@ -4,7 +4,7 @@
  "parent": "F-080",
  "title": "Move the peer handlers to a module with unit tests",
  "goal": "serve only wires peer handlers; their policy is unit-tested",
- "status": "planned",
+ "status": "closed",
  "acceptance": [
   "onRelay, onDecide, onChat and onSortie live in a src/ module with unit tests for refusal and success",
   "Existing cross-base tests pass unchanged"
@@ -31,10 +31,12 @@
  ],
  "effort": {
   "size": "small",
-  "estimate": "0.5 h",
+  "estimate": "0 hours",
   "basis": "Estimated 2026-11-13 in the architecture reassessment. Not a measurement.",
   "reviewed": "2026-11-13",
-  "agentHours": 0.5,
+  "agentHours": 0,
+  "actualAgentHours": 0.25,
+  "actualSource": "stated",
   "baselineAgentHours": 0.5,
   "estimateAgentHours": 0.5
  }
