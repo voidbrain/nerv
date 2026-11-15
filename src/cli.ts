@@ -1,7 +1,7 @@
 #!/usr/bin/env -S node --use-system-ca
 import { startSnapshots } from './snapshots.ts';
 import { runResumeEngineTick, type CreateResumeIntentInput, type ResumeIntentStatus } from './resume-intent.ts';
-import { decideHitlThroughPersona, formatMisatoPendingHitl } from './persona.ts';
+import { decideHitlThroughPersona, explainClassificationThroughPersona, formatMisatoPendingHitl } from './persona.ts';
 import { EVA_CLASS_SPECS, admitEvaJob, type EvaAdmissionRequest } from './eva-classes.ts';
 import { createPeerHandlers } from './peer-handlers.ts';
 import { fetchIntoQuarantine } from './quarantine.ts';
@@ -441,8 +441,13 @@ try {
       } else if (sub === 'hitl' && action === 'decide' && args[2] && (args[3] === 'approve' || args[3] === 'reject')) {
         const res = await decideHitlThroughPersona(store, args[2], args[3], { persona, source: 'cli' });
         console.log(JSON.stringify(res, null, 2));
+      } else if (sub === 'explain' && action) {
+        const res = explainClassificationThroughPersona(store, action, persona);
+        console.log(res.summary);
       } else {
-        throw new Error('Usage: persona hitl list | persona hitl decide <approvalId> approve|reject');
+        throw new Error(
+          'Usage: persona hitl list | persona hitl decide <approvalId> approve|reject | persona explain <ref>',
+        );
       }
     } finally {
       store.close();
