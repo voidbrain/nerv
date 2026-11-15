@@ -258,3 +258,40 @@ export function confirmPushToTalkDraft(
   }
   return { accepted: true, refused: false, reason: 'Confirmed by operator.', draft };
 }
+
+export interface SpokenReplyPlan {
+  text: string;
+  language: VoiceLanguage;
+  locale: 'it-IT' | 'en-US';
+  rate: number;
+  truncated: boolean;
+}
+
+const MAX_SPOKEN_REPLY_CHARS = 500;
+
+/**
+ * Prepares a bounded, plain-prose reply for text-to-speech playback (F-007-T04).
+ * Strips markdown formatting, detects Italian/English locale when omitted, and caps length.
+ */
+export function prepareSpokenReply(text: string, language?: VoiceLanguage): SpokenReplyPlan {
+  const plain = text
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/`([^`]*)`/g, '$1')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/[*_~>#]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!plain) {
+    throw new Error('Spoken reply text is required.');
+  }
+  const truncated = plain.length > MAX_SPOKEN_REPLY_CHARS;
+  const bounded = truncated ? `${plain.slice(0, MAX_SPOKEN_REPLY_CHARS - 1).trimEnd()}…` : plain;
+  const lang = language ?? detectVoiceLanguage(bounded);
+  return {
+    text: bounded,
+    language: lang,
+    locale: lang === 'it' ? 'it-IT' : 'en-US',
+    rate: 1,
+    truncated,
+  };
+}

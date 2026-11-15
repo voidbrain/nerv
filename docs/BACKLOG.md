@@ -14,7 +14,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 52 | 5 |
-| **Require Human 🧑** | 15 | 3 |
+| **Require Human 🧑** | 16 | 3 |
 
 ### Require Human 🧑
 
@@ -28,11 +28,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-004](#f-004) | [F-100](#f-100) |  |  |
 | [F-097](#f-097) | [F-076](#f-076) |  |  |
 | [F-060](#f-060) | [F-099](#f-099) |  |  |
+| [F-007](#f-007) |  |  |  |
 | [F-081](#f-081) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 72.5 h agent + 24 h owner across 171 open steps of 48 features and 5 other records. 38.25 h of actual effort recorded on 88 steps. Generated from the task files.
+**Remaining effort:** 71.75 h agent + 24 h owner across 170 open steps of 48 features and 5 other records. 38.5 h of actual effort recorded on 89 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -789,61 +790,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-007"></a>[✨ F-007](#top)
-
-**Voice and evaluated skill improvement**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h agent + 0.5 h owner | — | [F-083-T08](#f-083-t08) | 🤖 | — | — |
-
-💻 **→** Slices approved 2026-11-11 and recorded as tasks. F-007-T01..T03 and T06..T09 closed; next agent work: Step 2b (F-007-T04) spoken replies (TTS).
-
-| | |
-|---|---|
-| **Issue** | Not implemented; dedicated voice hardware follows measured feasibility. |
-| **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
-| **Check** | Italian/English voice corpus; corrected memory; rejected permission escalation; promoted and rolled-back skill versions. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-007-t04"></a>F-007-T04 — Step 2b — Spoken replies (text-to-speech) | 0.75 h | 0 h | 0.75 h | Planned | 🤖 |
-| 🟢 Small | <a id="f-007-t05"></a>F-007-T05 — Step 2c — Voice corpus evaluation run and report | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-007-T04](#f-007-t04) | ⏳ 🧑‍🔧 |
-| 🟢 Small | <a id="f-007-t10"></a>F-007-T10 — Record the evidence of F-007-T05 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-007-T05](#f-007-t05) | ⏳ 🤖 |
-| — | <a id="f-007-t01"></a>F-007-T01 — Step 1a — Feasibility: local speech-to-text and text-to-speech candidates measured on the Mac in Italian and English | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
-| — | <a id="f-007-t02"></a>F-007-T02 — Step 1b — Voice command corpus in Italian and English with expected intents | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
-| — | <a id="f-007-t03"></a>F-007-T03 — Step 2a — Push-to-talk on the dashboard and companion: speech to text shown for confirmation, no silent physical activation | 0.75 h | 0.25 h (measured) | 0 h | Completed | 🤖 |
-| — | <a id="f-007-t06"></a>F-007-T06 — Step 3a — Skill package format, isolated storage and versions | 1 h | 0 h | 0 h | Completed | 🤖 |
-| — | <a id="f-007-t07"></a>F-007-T07 — Step 3b — Skill evaluation with a baseline run without the skill and held-out cases | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
-| — | <a id="f-007-t08"></a>F-007-T08 — Step 3c — Owner promotion, rollback and retirement of skills after a model change | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
-| — | <a id="f-007-t09"></a>F-007-T09 — Step 3d — Rejected permission escalation and corrected-memory cases | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
-| 🟢 Small | **Total** | 4 h (9 of 10 steps) | 1.5 h (6 of 10 steps recorded) | 1 h agent + 0.5 h owner | 7 of 10 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-007.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | F-007-T03 push-to-talk confirmation flow (`preparePushToTalkDraft`, `confirmPushToTalkDraft` in `src/voice.ts`, `/api/voice/draft` & `/api/voice/confirm` in `src/server.ts`, dashboard/companion UI in `web/src/main.ts` & `web/src/i18n.ts`), verified in `test/voice.test.ts` (2026-11-15); F-007-T07..T09 baseline/holdout skill evaluation (`evals/skill-evaluation-v1.json`), model-change reconciliation (`reconcileSkillsAfterModelChange`), and permission-escalation/corrected-memory rejection (`checkSkillPermissionEscalation`) implemented in `src/skills.ts` and `src/cli.ts`, verified in `test/skills.test.ts` (2026-11-15); [PR #344](https://github.com/voidbrain/nerv/pull/344) F-007-T06 skill package format, private isolated storage under `<home>/skills/packages/<id>/<version>/`, immutable versions with owner-approved promote, rollback and retire, `skills` CLI commands (head 14e4a29, merged ae8c7f8; CI43345241513 passed all five jobs; cited in the full audit of 2026-11-13, PR #374); [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
-| Opened | 2026-11-01 |
-| Verification | `npx tsc --noEmit`, `npm run check:conventions`, `node --test test/skills.test.ts`, and `npm run check:fast` passed 2026-11-15; remote CI pending PR |
-| Reviewed | 2026-11-15 |
-
-</details>
-
----
-
 ### <a id="f-083"></a>[✨ F-083](#top)
 
 **Saved recipes: keep them by category, recall them, compute only from saved values**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 5 h agent + 0.5 h owner | [F-007-T04](#f-007-t04) | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🔴 Large | 5 h agent + 0.5 h owner | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-083-T02 — Compute from saved values only (Planned).
 
@@ -863,7 +816,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-083-t04"></a>F-083-T04 — Owner check with a real saved recipe | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-083-T02](#f-083-t02), [F-083-T03](#f-083-t03) | ⏳ 🧑‍🔧 |
 | 🟢 Small | <a id="f-083-t06"></a>F-083-T06 — Cooking session: ingredients and steps | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-083-T03](#f-083-t03) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-083-t07"></a>F-083-T07 — Timers in a cooking session | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-083-T06](#f-083-t06) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-083-t08"></a>F-083-T08 — Hands-free cooking by voice | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-083-T07](#f-083-t07), [F-007-T04](#f-007-t04) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-083-t08"></a>F-083-T08 — Hands-free cooking by voice | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-083-T07](#f-083-t07) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-083-t09"></a>F-083-T09 — Owner check: a recipe cooked hands-free | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-083-T07](#f-083-t07) | ⏳ 🧑‍🔧 |
 | 🟢 Small | <a id="f-083-t10"></a>F-083-T10 — Recipe photos | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-083-T03](#f-083-t03) | ⏳ 🤖 |
 | — | <a id="f-083-t01"></a>F-083-T01 — Saved documents with categories | 1 h | 0.5 h (measured) | 0 h | Completed | 🤖 |
@@ -2059,6 +2012,54 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-06 |
 | Verification | Documentation: Pending. Human: Pending (trial). |
 | Reviewed | 2026-11-06 |
+
+</details>
+
+---
+
+### <a id="f-007"></a>[✨ F-007](#top)
+
+**Voice and evaluated skill improvement**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h agent + 0.5 h owner | — | — | ⏳ | 🧑‍🔧 | — |
+
+💻 **→** Slices approved 2026-11-11 and recorded as tasks. F-007-T01..T04 and T06..T09 closed; next agent work: Step 2c (F-007-T05) corpus evaluation run and report.
+
+| | |
+|---|---|
+| **Issue** | Not implemented; dedicated voice hardware follows measured feasibility. |
+| **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
+| **Check** | Italian/English voice corpus; corrected memory; rejected permission escalation; promoted and rolled-back skill versions. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-007-t05"></a>F-007-T05 — Step 2c — Voice corpus evaluation run and report | — | 0 h | 0 h agent + 0.5 h owner | Planned | 🧑‍🔧 |
+| 🟢 Small | <a id="f-007-t10"></a>F-007-T10 — Record the evidence of F-007-T05 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-007-T05](#f-007-t05) | ⏳ 🤖 |
+| — | <a id="f-007-t01"></a>F-007-T01 — Step 1a — Feasibility: local speech-to-text and text-to-speech candidates measured on the Mac in Italian and English | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
+| — | <a id="f-007-t02"></a>F-007-T02 — Step 1b — Voice command corpus in Italian and English with expected intents | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
+| — | <a id="f-007-t03"></a>F-007-T03 — Step 2a — Push-to-talk on the dashboard and companion: speech to text shown for confirmation, no silent physical activation | 0.75 h | 0.25 h (measured) | 0 h | Completed | 🤖 |
+| — | <a id="f-007-t04"></a>F-007-T04 — Step 2b — Spoken replies (text-to-speech) | 0.75 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
+| — | <a id="f-007-t06"></a>F-007-T06 — Step 3a — Skill package format, isolated storage and versions | 1 h | 0 h | 0 h | Completed | 🤖 |
+| — | <a id="f-007-t07"></a>F-007-T07 — Step 3b — Skill evaluation with a baseline run without the skill and held-out cases | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
+| — | <a id="f-007-t08"></a>F-007-T08 — Step 3c — Owner promotion, rollback and retirement of skills after a model change | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
+| — | <a id="f-007-t09"></a>F-007-T09 — Step 3d — Rejected permission escalation and corrected-memory cases | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
+| 🟢 Small | **Total** | 4 h (9 of 10 steps) | 1.75 h (7 of 10 steps recorded) | 0.25 h agent + 0.5 h owner | 8 of 10 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-007.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | F-007-T04 spoken replies (`prepareSpokenReply` in `src/voice.ts`, `POST /api/voice/speak` in `src/server.ts`, opt-in `spokenReplies` TTS toggle & playback in `web/src/main.ts` & `web/src/i18n.ts`), verified in `test/voice.test.ts` (2026-11-15); F-007-T03 push-to-talk confirmation flow (`preparePushToTalkDraft`, `confirmPushToTalkDraft` in `src/voice.ts`, `/api/voice/draft` & `/api/voice/confirm` in `src/server.ts`, dashboard/companion UI in `web/src/main.ts` & `web/src/i18n.ts`), verified in `test/voice.test.ts` (2026-11-15); F-007-T07..T09 baseline/holdout skill evaluation (`evals/skill-evaluation-v1.json`), model-change reconciliation (`reconcileSkillsAfterModelChange`), and permission-escalation/corrected-memory rejection (`checkSkillPermissionEscalation`) implemented in `src/skills.ts` and `src/cli.ts`, verified in `test/skills.test.ts` (2026-11-15); [PR #344](https://github.com/voidbrain/nerv/pull/344) F-007-T06 skill package format, private isolated storage under `<home>/skills/packages/<id>/<version>/`, immutable versions with owner-approved promote, rollback and retire, `skills` CLI commands (head 14e4a29, merged ae8c7f8; CI43345241513 passed all five jobs; cited in the full audit of 2026-11-13, PR #374); [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| Opened | 2026-11-01 |
+| Verification | `npx tsc --noEmit`, `npm run check:conventions`, `node --test test/skills.test.ts`, and `npm run check:fast` passed 2026-11-15; remote CI pending PR |
+| Reviewed | 2026-11-15 |
 
 </details>
 
