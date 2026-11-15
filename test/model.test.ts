@@ -170,7 +170,7 @@ test('Umbilical calls the Messages API with the key, fallback and model, and map
       stop: 'end_turn',
     });
     const s = c.seen[0]!;
-    assert.equal(s.path, '/v1/messages?beta=true');
+    assert.equal(s.path, '/v1/messages');
     assert.ok(
       s.headers['x-api-key'] === KEY || s.headers.authorization === `Bearer ${KEY}`,
       'key sent to the provider only',
