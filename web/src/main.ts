@@ -35,6 +35,7 @@ interface Reminder {
 @if(connected()){<nerv-surface-renderer [surface]="statusSurface()" [t]="t()"></nerv-surface-renderer>
 @if(view()!=='doctor'){<div class="section-heading"><h2>{{view()==='home'?t().horizon:t().reminders}}</h2><span>{{reminders().length}} {{t().recorded}}</span></div><div class="grid"><section class="panel"><h3>{{t().keep}}</h3><label>{{t().what}}<input #title [placeholder]="t().example" maxlength="500"></label><label>{{t().when}} <small>{{t().browserTime}}</small><input #due type="datetime-local"></label><button (click)="add(title.value,due.value,title,due)">{{t().tie}}</button><p class="hint">{{t().delivery}}</p></section><section class="panel"><h3>{{t().horizon}}</h3>@for(r of reminders();track r.id){@if(editingId()!==r.id){<article class="reminder" [attr.data-reminder-id]="r.id"><div><strong>{{r.title}}</strong><p>{{formatReminder(r)}}</p><small>{{r.cancelled?t().cancelled:r.delivered?t().delivered:t().scheduled}}</small></div>@if(!r.cancelled&&!r.delivered){<div class="reminder-actions"><button class="quiet cancel-btn" (click)="cancel(r.id)" [attr.aria-label]="t().cancel+' '+r.title">×</button><button class="quiet edit-btn" (click)="startEdit(r)" [attr.aria-label]="t().edit+' '+r.title">{{t().edit}}</button></div>}</article>}@if(editingId()===r.id){<article class="reminder editing" [attr.data-reminder-id]="r.id"><form class="rem-edit" (submit)="saveEdit($event,r.id)" novalidate><label [attr.for]="'rem-edit-title-'+r.id">{{t().what}}</label><input [id]="'rem-edit-title-'+r.id" type="text" [value]="editTitle()" (input)="editTitle.set($any($event.target).value)" maxlength="500"><label [attr.for]="'rem-edit-due-'+r.id">{{t().when}} <small>{{t().browserTime}}</small></label><input [id]="'rem-edit-due-'+r.id" type="datetime-local" [value]="editDue()" (input)="editDue.set($any($event.target).value)"><div class="edit-actions"><button type="submit" class="save-btn">{{t().save}}</button><button type="button" class="quiet keep-btn" (click)="cancelEdit(r.id)">{{t().keepAsIs}}</button></div></form></article>}}@empty{<p class="empty">{{t().empty}}</p>}<div role="group" data-history="reminders" [attr.aria-label]="t().reminderPages"><button class="quiet" (click)="pageReminders(false)" [disabled]="reminderBefore().length===1" [attr.aria-disabled]="paging()||reminderBefore().length===1">{{t().previous}}</button><button class="quiet" (click)="pageReminders(true)" [disabled]="reminderNext()===null" [attr.aria-disabled]="paging()||reminderNext()===null">{{t().next}}</button></div></section></div><section class="panel inbox"><h3>{{t().inbox}}</h3>@for(message of inbox();track $index){<p>{{message}}</p>}@empty{<p class="hint">{{t().inboxHint}}</p>}<div role="group" data-history="inbox" [attr.aria-label]="t().inboxPages"><button class="quiet" (click)="pageInbox(false)" [disabled]="inboxBefore().length===1" [attr.aria-disabled]="paging()||inboxBefore().length===1">{{t().previous}}</button><button class="quiet" (click)="pageInbox(true)" [disabled]="inboxNext()===null" [attr.aria-disabled]="paging()||inboxNext()===null">{{t().next}}</button></div><div role="status">{{paging()?t().loading:t().pageReady}}</div></section>}
 @if(view()==='doctor'){<nerv-doctor-view [t]="t()" [raw]="doctorRaw()"></nerv-doctor-view>}
+<section class="panel ptt" aria-label="Push to talk"><h3>{{t().pttTitle}}</h3><div class="ptt-controls"><button type="button" class="quiet ptt-btn" (click)="startPushToTalk()">{{pttListening()?t().pttListening:t().pttHold}}</button><input type="text" class="ptt-input" [value]="pttTranscript()" (input)="pttTranscript.set($any($event.target).value)" [placeholder]="t().pttPlaceholder" maxlength="4000"><button type="button" class="quiet" (click)="preparePttDraft()" [disabled]="!pttTranscript().trim()">{{t().pttReview}}</button></div>@if(pttDraft(); as d){<div class="ptt-confirm" role="region" aria-live="polite"><p><strong>{{d.intent}}</strong> ({{d.language}}) — {{d.reason}}</p><div class="ptt-actions"><button type="button" class="ptt-confirm-btn" [disabled]="d.refused" (click)="confirmPttDraft()">{{t().pttConfirm}}</button><button type="button" class="quiet" (click)="cancelPttDraft()">{{t().pttCancel}}</button></div></div>}</section>
 <section class="roadmap"><span class="eyebrow">{{t().network}}</span><h2>{{t().room}}</h2><div class="cards"><article><span>01 / MAC</span><h3>{{t().models}}</h3><p>{{t().modelsHint}}</p><small>{{t().planned}}</small></article><article><span>02 / MINI PC</span><h3>{{t().home}}</h3><p>{{t().homeHint}}</p><small>{{t().planned}}</small></article><article><span>03 / RASPBERRY PI</span><h3>{{t().devices}}</h3><p>{{t().devicesHint}}</p><small>{{t().planned}}</small></article></div></section>}
 <footer>NERV Agency <span>{{t().control}}</span></footer></main></div>`,
 })
@@ -77,11 +78,77 @@ class App {
   inbox = signal<string[]>([]);
   doctor = signal('');
   doctorRaw = signal<unknown>({});
+  pttListening = signal(false);
+  pttTranscript = signal('');
+  pttDraft = signal<{ transcript: string; language: string; intent: string; refused: boolean; reason: string } | null>(
+    null,
+  );
   private token = '';
   localInput(iso: string) {
     const d = new Date(iso);
     const pad = (n: number) => String(n).padStart(2, '0');
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+  startPushToTalk() {
+    const w = window as unknown as {
+      SpeechRecognition?: new () => {
+        lang: string;
+        interimResults: boolean;
+        onresult: ((ev: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+        onerror: (() => void) | null;
+        onend: (() => void) | null;
+        start: () => void;
+      };
+      webkitSpeechRecognition?: new () => {
+        lang: string;
+        interimResults: boolean;
+        onresult: ((ev: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+        onerror: (() => void) | null;
+        onend: (() => void) | null;
+        start: () => void;
+      };
+    };
+    const Rec = w.SpeechRecognition ?? w.webkitSpeechRecognition;
+    if (!Rec) {
+      void this.preparePttDraft();
+      return;
+    }
+    const rec = new Rec();
+    rec.lang = this.language() === 'it' ? 'it-IT' : 'en-US';
+    rec.interimResults = false;
+    this.pttListening.set(true);
+    rec.onresult = (ev) => {
+      const text = ev.results?.[0]?.[0]?.transcript ?? '';
+      this.pttTranscript.set(text);
+      void this.preparePttDraft();
+    };
+    rec.onerror = () => this.pttListening.set(false);
+    rec.onend = () => this.pttListening.set(false);
+    rec.start();
+  }
+  async preparePttDraft() {
+    const transcript = this.pttTranscript().trim();
+    if (!transcript) return;
+    const res = (await this.request('voice/draft', {
+      method: 'POST',
+      body: JSON.stringify({ transcript, language: this.language() }),
+    })) as {
+      draft?: { transcript: string; language: string; intent: string; refused: boolean; reason: string };
+    };
+    if (res?.draft) this.pttDraft.set(res.draft);
+  }
+  async confirmPttDraft() {
+    const d = this.pttDraft();
+    if (!d || d.refused) return;
+    await this.request('voice/confirm', {
+      method: 'POST',
+      body: JSON.stringify({ transcript: d.transcript, confirmed: true, language: d.language }),
+    });
+    this.pttDraft.set(null);
+    this.pttTranscript.set('');
+  }
+  cancelPttDraft() {
+    this.pttDraft.set(null);
   }
   format(d: string) {
     return new Date(d).toLocaleString(this.language() === 'it' ? 'it-IT' : 'en-GB');

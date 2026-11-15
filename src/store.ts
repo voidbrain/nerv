@@ -14,9 +14,11 @@ import { dirname } from 'node:path';
 import { LEDGER_SCHEMA, Ledger, type Decision, type Proposal } from './ledger.ts';
 import { builtinTools, execute, hasExecutor, type AgencyBaseSnapshot, type AgencySnapshot } from './executors.ts';
 import { MEMORY_SCHEMA, Memory, suggestSpellingFix, type Episode } from './memory.ts';
+import { INCIDENT_CIRCUITS_SCHEMA, IncidentCircuitStore } from './incident-circuits.ts';
 import { BATTERY_SCHEMA, BatteryRegistry } from './batteries.ts';
 import { LISTS_SCHEMA, ListStore } from './lists.ts';
 import { DOCUMENTS_SCHEMA, DocumentStore } from './documents.ts';
+import { FLEET_SCHEMA, FleetStore } from './fleet.ts';
 import { Registry, REGISTRY_SCHEMA } from './kaji.ts';
 import { MILESTONE_SCHEMA } from './milestones.ts';
 import { RESUME_INTENT_SCHEMA, ResumeIntentStore } from './resume-intent.ts';
@@ -94,7 +96,9 @@ export class Store {
   readonly ledger: Ledger;
   readonly watch: Watch;
   readonly memory: Memory;
+  readonly circuits: IncidentCircuitStore;
   readonly batteries: BatteryRegistry;
+  readonly fleet: FleetStore;
   readonly resumeIntents: ResumeIntentStore;
   readonly lists: ListStore;
   readonly documents: DocumentStore;
@@ -144,6 +148,7 @@ export class Store {
     // Schema 4: Lilith's facts, their append-only history and the FTS5 index (F-022).
     this.db.exec(MEMORY_SCHEMA);
     this.db.exec(DOCUMENTS_SCHEMA);
+    this.db.exec(INCIDENT_CIRCUITS_SCHEMA);
     // The Gehirn registry of bases for the Kaji line (F-036): signed, append-only records; an additive table, no version change.
     this.db.exec(REGISTRY_SCHEMA);
     // F-054-T04, additive: milestones recorded from now on (first online, outages and recoveries, promotions).
@@ -192,8 +197,11 @@ export class Store {
     this.db.exec(LISTS_SCHEMA);
     this.ledger = new Ledger(this.db, { policy: scrolls.policy, tools: builtinTools });
     this.memory = new Memory(this.db);
+    this.circuits = new IncidentCircuitStore(this.db, this.ledger);
     this.db.exec(BATTERY_SCHEMA);
     this.batteries = new BatteryRegistry(this.db);
+    this.db.exec(FLEET_SCHEMA);
+    this.fleet = new FleetStore(this.db);
     this.resumeIntents = new ResumeIntentStore(this.db);
     this.lists = new ListStore(this.db);
     this.db.exec(DOCUMENTS_SCHEMA);

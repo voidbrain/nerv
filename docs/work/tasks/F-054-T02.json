@@ -4,7 +4,7 @@
   "parent": "F-054",
   "title": "Eva version by the Chronicler pilot",
   "goal": "Eva version by the Chronicler pilot",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Lore retelling by a writer-only Proto pilot; text checked to name only the day's facts"
   ],
@@ -36,8 +36,10 @@
     "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
     "reviewed": "2026-11-13",
     "baselineDays": 1,
-    "agentHours": 0.5,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
-    "estimateAgentHours": 0.5
+    "estimateAgentHours": 0.5,
+    "actualAgentHours": 0.5,
+    "actualSource": "measured"
   }
 }

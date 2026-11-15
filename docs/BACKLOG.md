@@ -14,7 +14,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 52 | 5 |
-| **Require Human 🧑** | 13 | 3 |
+| **Require Human 🧑** | 15 | 3 |
 
 ### Require Human 🧑
 
@@ -25,14 +25,14 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-009](#f-009) | [F-016](#f-016) | [B-056](#b-056) |  |
 | [F-011](#f-011) | [F-102](#f-102) |  |  |
 | [F-023](#f-023) | [F-008](#f-008) |  |  |
-| [F-004](#f-004) | [F-076](#f-076) |  |  |
-| [F-097](#f-097) |  |  |  |
-| [F-060](#f-060) |  |  |  |
+| [F-004](#f-004) | [F-100](#f-100) |  |  |
+| [F-097](#f-097) | [F-076](#f-076) |  |  |
+| [F-060](#f-060) | [F-099](#f-099) |  |  |
 | [F-081](#f-081) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 84.75 h agent + 24 h owner across 192 open steps of 51 features and 5 other records. 32.25 h of actual effort recorded on 67 steps. Generated from the task files.
+**Remaining effort:** 72.5 h agent + 24 h owner across 171 open steps of 48 features and 5 other records. 38.25 h of actual effort recorded on 88 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -109,9 +109,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | Queue order | 1 — Owner-selected next NERV work, 2026-11-10 |
-| PR / evidence | [PR #339](https://github.com/voidbrain/nerv/pull/339) F-005-T21 (T08d) optional start-at-login and on-demand engine lifecycle, `src/engine-lifecycle.ts`, test/engine-lifecycle.test.ts (head 2ceb2ab, merged 23af8cf; CI43342617908 passed all five jobs); [PR #337](https://github.com/voidbrain/nerv/pull/337) F-005-T23 (T09b) Windows and F-005-T25 (T10b) Linux update and recovery, test/windows-service-lifecycle.test.ts and test/linux-service-lifecycle.test.ts (head e226321, merged 8da425a; CI43340798309 passed all five jobs); these PRs cited in the full audit of 2026-11-13, PR #374; [PR #330](https://github.com/voidbrain/nerv/pull/330) F-005-T09 (T09a) Windows service lifecycle adapter (`src/node-lifecycle-execution.ts`, `src/nodes-cli.ts`), Test: test/windows-service-lifecycle.test.ts; [PR #331](https://github.com/voidbrain/nerv/pull/331) F-005-T20 (T08c) engine/provider contract for multiple local and remote instances with Ollama as one adapter (`src/engine-provider.ts`, `src/model-setup.ts`, `src/model.ts`), Test: test/engine-provider.test.ts; [PR #328](https://github.com/voidbrain/nerv/pull/328) F-005-T18 (T07d) opt-in automatic update policy (`src/update-policy.ts`, `src/config.ts`, `GET/POST /api/update/policy`, `POST /api/update/auto`), Test: test/update-policy.test.ts; [PR #327](https://github.com/voidbrain/nerv/pull/327) F-005-T10 (T10a) Linux `systemd --user` service adapter (`src/node-lifecycle-execution.ts`, `src/nodes-cli.ts`), Test: test/linux-service-lifecycle.test.ts; [PR #324](https://github.com/voidbrain/nerv/pull/324) F-005-T19 (T08b) Node install/upgrade choices with ownership classification and recovery (`src/node-runtime.ts`, `nodes node-runtime-plan/activate/recover`), Test: test/node-runtime.test.ts; [PR #326](https://github.com/voidbrain/nerv/pull/326) F-005-T17 (T07c) manual update action through lifecycle update path (`src/manual-update.ts`, `POST /api/update/apply`, dashboard `live.js`), Test: test/manual-update.test.ts; [PR #323](https://github.com/voidbrain/nerv/pull/323) F-005-T16 (T07b) update availability on `/api/doctor`, `/api/status`, `nerv doctor`, dashboard (`web/public/dashboard/live.js`), Angular doctor view (`web/src/doctor-view.ts`) and macOS companion (`native/NervMenuBar`), Test: test/update-availability.test.ts; [PR #321](https://github.com/voidbrain/nerv/pull/321) F-005-T08 (T08a) prerequisite check (`checkServicePrerequisites` for Node version, executable and non-interactive service environment joined to `install`, `start` and `update`), Test: test/node-lifecycle-execution.test.ts; [PR #320](https://github.com/voidbrain/nerv/pull/320) F-005-T07 (T07a) backend update-availability contract (`src/update-availability.ts`, `GET /api/update`, `nodes update-check`), Test: test/update-availability.test.ts; closes F-005-T06 and F-005-T12; [PR #317](https://github.com/voidbrain/nerv/pull/317) F-005-T14 (T06g) after-start health check in `receipt.health` and ordered `receipt.recovery` on uncertain outcomes; Test: test/upgrade-health.test.ts; fresh-context independent review (no blockers, 3 should-fix items addressed); [PR #315](https://github.com/voidbrain/nerv/pull/315) T13 first lifecycle update on the Mac, [evidence](acceptance/node-update-2026-11-12.md); [PR #287](https://github.com/voidbrain/nerv/pull/287) T06e independent review of the update path, fixes and T13 owner procedure; Test: test/update-path-review.test.ts (failing regressions 93b89cc before the fixes); Review: [fresh-context design-reviewer report](reviews/2026-11-12-update-path.md), two blockers and two should-fix items fixed, three recorded; [PR #264](https://github.com/voidbrain/nerv/pull/264) lettered slices for T06 (approved) and proposed for T07–T11, T06d manual Mac move; [PR #262](https://github.com/voidbrain/nerv/pull/262) T06 third slice: admission of schema-preserving application upgrades; [PR #258](https://github.com/voidbrain/nerv/pull/258) T06 second slice: journaled rehearsal step and refused outcome; [PR #257](https://github.com/voidbrain/nerv/pull/257) T06 first slice: reader contract and review-only upgrade rehearsal; [PR #255](https://github.com/voidbrain/nerv/pull/255) initial remaining delivery plan and harness4.7.0 reconciliation; [PR #254](https://github.com/voidbrain/nerv/pull/254) records actual Mac service acceptance and T04 closure; [PR #253](https://github.com/voidbrain/nerv/pull/253) delivers the reviewed Mac execution slice; [PR #252](https://github.com/voidbrain/nerv/pull/252) implements root activation/recovery under F-005-T05; [PR #251](https://github.com/voidbrain/nerv/pull/251) was closed unmerged after independent review found historical-revocation and mixed-root authentication blockers despite green CI. Committed regressions b1e1e92/80665cc precede unchanged-test fixes fbccae6/ee8501f;  [PR #250](https://github.com/voidbrain/nerv/pull/250) records staged-root/SSH/public-trust verification and the Mac default-profile service target;  [PR #249](https://github.com/voidbrain/nerv/pull/249) prepares owner-authorized replacement-root generation under F-005-T03;  [PR #248](https://github.com/voidbrain/nerv/pull/248) records owner-confirmed unavailable root access and the scoped enrollment blocker;  [PR #247](https://github.com/voidbrain/nerv/pull/247) records rejected root unlock and read-only reconciliation;  [PR #246](https://github.com/voidbrain/nerv/pull/246) reconciles PR245 and prepares owner-selected isolated enrollment;  [PR #245](https://github.com/voidbrain/nerv/pull/245) implements F-005-T01 review-only contracts; committed failing controller-path regression 069d9b2 precedes the renderer fix (test unchanged); Test: test/node-lifecycle.test.ts;  [PR #244](https://github.com/voidbrain/nerv/pull/244) owner-selected queue order; [PR #211](https://github.com/voidbrain/nerv/pull/211) actual local Mac acceptance evidence; [PR #210](https://github.com/voidbrain/nerv/pull/210) bootstrap implementation; [Mac acceptance](acceptance/node-bootstrap-2026-11-08.md); [PR #209](https://github.com/voidbrain/nerv/pull/209) scope reconciliation;  [PR #208](https://github.com/voidbrain/nerv/pull/208) delivered transport repair; [F-014](archive/backlog-2026.md#f-014) transport foundation;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| PR / evidence | [PR #339](https://github.com/voidbrain/nerv/pull/339) F-005-T21 (T08d) optional start-at-login and on-demand engine lifecycle, `src/engine-lifecycle.ts`, test/engine-lifecycle.test.ts (head 2ceb2ab, merged 23af8cf; CI43342617908 passed all five jobs); [PR #337](https://github.com/voidbrain/nerv/pull/337) F-005-T23 (T09b) Windows and F-005-T25 (T10b) Linux update and recovery, test/windows-service-lifecycle.test.ts and test/linux-service-lifecycle.test.ts (head e226321, merged 8da425a; CI43340798309 passed all five jobs); these PRs cited in the full audit of 2026-11-13, PR #374; [PR #330](https://github.com/voidbrain/nerv/pull/330) F-005-T09 (T09a) Windows service lifecycle adapter (`src/node-lifecycle-execution.ts`, `src/nodes-cli.ts`), Test: test/windows-service-lifecycle.test.ts; [PR #331](https://github.com/voidbrain/nerv/pull/331) F-005-T20 (T08c) engine/provider contract for multiple local and remote instances with Ollama as one adapter (`src/engine-provider.ts`, `src/model-setup.ts`, `src/model.ts`), Test: test/engine-provider.test.ts; [PR #328](https://github.com/voidbrain/nerv/pull/328) F-005-T18 (T07d) opt-in automatic update policy (`src/update-policy.ts`, `src/config.ts`, `GET/POST /api/update/policy`, `POST /api/update/auto`), Test: test/update-policy.test.ts; [PR #327](https://github.com/voidbrain/nerv/pull/327) F-005-T10 (T10a) Linux `systemd --user` service adapter (`src/node-lifecycle-execution.ts`, `src/nodes-cli.ts`), Test: test/linux-service-lifecycle.test.ts; [PR #324](https://github.com/voidbrain/nerv/pull/324) F-005-T19 (T08b) Node install/upgrade choices with ownership classification and recovery (`src/node-runtime.ts`, `nodes node-runtime-plan/activate/recover`), Test: test/node-runtime.test.ts; [PR #326](https://github.com/voidbrain/nerv/pull/326) F-005-T17 (T07c) manual update action through lifecycle update path (`src/manual-update.ts`, `POST /api/update/apply`, dashboard `live.js`), Test: test/manual-update.test.ts; [PR #323](https://github.com/voidbrain/nerv/pull/323) F-005-T16 (T07b) update availability on `/api/doctor`, `/api/status`, `nerv doctor`, dashboard (`web/public/dashboard/live.js`), Angular doctor view (`web/src/doctor-view.ts`) and macOS companion (`native/NervMenuBar`), Test: test/update-availability.test.ts; [PR #321](https://github.com/voidbrain/nerv/pull/321) F-005-T08 (T08a) prerequisite check (`checkServicePrerequisites` for Node version, executable and non-interactive service environment joined to `install`, `start` and `update`), Test: test/node-lifecycle-execution.test.ts; [PR #320](https://github.com/voidbrain/nerv/pull/320) F-005-T07 (T07a) backend update-availability contract (`src/update-availability.ts`, `GET /api/update`, `nodes update-check`), Test: test/update-availability.test.ts; closes F-005-T06 and F-005-T12; [PR #317](https://github.com/voidbrain/nerv/pull/317) F-005-T14 (T06g) after-start health check in `receipt.health` and ordered `receipt.recovery` on uncertain outcomes; Test: test/upgrade-health.test.ts; fresh-context independent review (no blockers, 3 should-fix items addressed); earlier PRs in [2026 evidence archive](archive/evidence-2026.md#f-005) |
 | Opened | 2026-11-01 |
-| Verification | 2026-11-10 Mac service: actual owned launchd startup, stopped descendants, uninstall/reinstall, partial crash/recovery, cached replay/startup fence and forward identical-runtime update passed; private backups/credentials/data checks and root-bound worker reconnection verified. No executable/schema update or real login/logout claim. 2026-11-10 actual two-base root activation and files-only isolated import passed; [dated evidence](acceptance/node-root-activation-2026-11-10.md) distinguishes live checks, retained private snapshots and separately completed capability/service acceptance. Independent source review ee8501f:67 tests passed, no unresolved code blockers in scope. Local Node538 pass/2 skip before relocating unchanged CLI join to post-build suite; final local headless5 pass/1 platform skip. PR252 full CI42823700687 passed at94228b0, mergedc3a550b tree-identical. Windows attempt1 failed an unchanged150ms-heartbeat worker-approval test; attempt2 passed at the identical head with no assertion/code changes; retain that nondeterministic failure as evidence. Owner attests independent encrypted-root backup; no passphrase learned, no private root sent to peer. T05 capability/cancellation/reconnect passed; Mac service actual acceptance passed under PR253/full CI42874665479; parent F-005 stays open. |
+| Verification | Recent 2026-11-12/13 update & lifecycle checks on `main`; 2026-11-08–2026-11-10 Mac/Windows acceptance details in [2026 evidence archive](archive/evidence-2026.md#f-005) |
 | Reviewed | 2026-11-13 |
 
 </details>
@@ -629,9 +629,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0 h | — | — | — | — | — |
 
-💻 **→** Next: F-096-T01 — Quiet test output and npm notices (Ready).
+💻 **→** Next: all steps closed; verify and close the record.
 
 | | |
 |---|---|
@@ -643,9 +643,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="f-096-t01"></a>F-096-T01 — Quiet test output and npm notices | 0.5 h | 0 h | 0.5 h | Ready |
-| 🟢 Small | <a id="f-096-t02"></a>F-096-T02 — Move old evidence out of F-005 and F-051 | 0.5 h | 0 h | 0.5 h | Ready |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 2 steps recorded) | 1 h | 0 of 2 completed |
+| — | <a id="f-096-t01"></a>F-096-T01 — Quiet test output and npm notices | 0.5 h | 0.25 h (measured) | 0 h | Completed |
+| — | <a id="f-096-t02"></a>F-096-T02 — Move old evidence out of F-005 and F-051 | 0.5 h | 0.25 h (stated) | 0 h | Completed |
+| — | **Total** | 1 h | 0.5 h | 0 h | 2 of 2 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -656,7 +656,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | [PR #393](https://github.com/voidbrain/nerv/pull/393) (opened) |
 | Opened | 2026-11-14 |
-| Verification | Pending. |
+| Verification | `F-096-T01` verified via `test/quiet-reporter.test.mjs` (`tools/quiet-reporter.mjs` keeps full failures, logs, and totals on stdout while writing spec output to `.test-report.txt`; `.npmrc` sets `loglevel=warn`; `npm test` stdout reduced from ~103k chars to ~100-char summary line on pass) and `check:fast`. |
 | Reviewed | 2026-11-14 |
 
 </details>
@@ -668,9 +668,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 5.5 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🔴 Large | 4.5 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-095-T01 — Revisit the runtime.ts deferral and name the modules (Ready).
+💻 **→** Next: F-095-T03 — Split runtime.ts (Planned).
 
 | | |
 |---|---|
@@ -682,12 +682,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="f-095-t01"></a>F-095-T01 — Revisit the runtime.ts deferral and name the modules | 0.5 h | 0 h | 0.5 h | Ready |
-| 🟢 Small | <a id="f-095-t02"></a>F-095-T02 — Warn on source files over 600 lines | 0.5 h | 0 h | 0.5 h | Ready |
-| 🟡 Medium | <a id="f-095-t03"></a>F-095-T03 — Split runtime.ts | 2 h | 0 h | 2 h | Planned · waits on [F-095-T01](#f-095-t01) |
-| 🟢 Small | <a id="f-095-t04"></a>F-095-T04 — Split store.ts per table group | 1 h | 0 h | 1 h | Planned · waits on [F-095-T01](#f-095-t01) |
+| 🟡 Medium | <a id="f-095-t03"></a>F-095-T03 — Split runtime.ts | 2 h | 0 h | 2 h | Planned |
+| 🟢 Small | <a id="f-095-t04"></a>F-095-T04 — Split store.ts per table group | 1 h | 0 h | 1 h | Planned |
 | 🟡 Medium | <a id="f-095-t05"></a>F-095-T05 — Split the other files over 1,000 lines | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-095-T03](#f-095-t03), [F-095-T04](#f-095-t04) |
-| 🔴 Large | **Total** | 5.5 h | 0 h (0 of 5 steps recorded) | 5.5 h | 0 of 5 completed |
+| — | <a id="f-095-t01"></a>F-095-T01 — Revisit the runtime.ts deferral and name the modules | 0.5 h | 0.25 h (measured) | 0 h | Completed |
+| — | <a id="f-095-t02"></a>F-095-T02 — Warn on source files over 600 lines | 0.5 h | 0.25 h (measured) | 0 h | Completed |
+| 🔴 Large | **Total** | 5.5 h | 0.5 h (2 of 5 steps recorded) | 4.5 h | 2 of 5 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -698,7 +698,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); — |
 | Opened | 2026-11-14 |
-| Verification | Pending. |
+| Verification | `F-095-T02` verified via `tools/check-source-sizes.mjs`, `test/source-sizes.test.ts`, `tsc`, and `check:fast`. |
 | Reviewed | 2026-11-14 |
 
 </details>
@@ -795,9 +795,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 1.75 h agent + 0.5 h owner | — | [F-083-T08](#f-083-t08) | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h agent + 0.5 h owner | — | [F-083-T08](#f-083-t08) | 🤖 | — | — |
 
-💻 **→** Slices approved 2026-11-11 and recorded as tasks. Next agent work: Step 1a (F-007-T01) voice feasibility; Step 3a (F-007-T06) closed 2026-11-13, Step 3b–3d (F-007-T07..T09) closed 2026-11-15.
+💻 **→** Slices approved 2026-11-11 and recorded as tasks. F-007-T01..T03 and T06..T09 closed; next agent work: Step 2b (F-007-T04) spoken replies (TTS).
 
 | | |
 |---|---|
@@ -809,17 +809,17 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-007-t03"></a>F-007-T03 — Step 2a — Push-to-talk on the dashboard and companion: speech to text shown for confirmation, no silent physical activation | 0.75 h | 0 h | 0.75 h | Planned | 🤖 |
-| 🟢 Small | <a id="f-007-t04"></a>F-007-T04 — Step 2b — Spoken replies (text-to-speech) | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-007-T03](#f-007-t03) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-007-t04"></a>F-007-T04 — Step 2b — Spoken replies (text-to-speech) | 0.75 h | 0 h | 0.75 h | Planned | 🤖 |
 | 🟢 Small | <a id="f-007-t05"></a>F-007-T05 — Step 2c — Voice corpus evaluation run and report | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-007-T04](#f-007-t04) | ⏳ 🧑‍🔧 |
 | 🟢 Small | <a id="f-007-t10"></a>F-007-T10 — Record the evidence of F-007-T05 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-007-T05](#f-007-t05) | ⏳ 🤖 |
 | — | <a id="f-007-t01"></a>F-007-T01 — Step 1a — Feasibility: local speech-to-text and text-to-speech candidates measured on the Mac in Italian and English | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
 | — | <a id="f-007-t02"></a>F-007-T02 — Step 1b — Voice command corpus in Italian and English with expected intents | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
+| — | <a id="f-007-t03"></a>F-007-T03 — Step 2a — Push-to-talk on the dashboard and companion: speech to text shown for confirmation, no silent physical activation | 0.75 h | 0.25 h (measured) | 0 h | Completed | 🤖 |
 | — | <a id="f-007-t06"></a>F-007-T06 — Step 3a — Skill package format, isolated storage and versions | 1 h | 0 h | 0 h | Completed | 🤖 |
 | — | <a id="f-007-t07"></a>F-007-T07 — Step 3b — Skill evaluation with a baseline run without the skill and held-out cases | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
 | — | <a id="f-007-t08"></a>F-007-T08 — Step 3c — Owner promotion, rollback and retirement of skills after a model change | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
 | — | <a id="f-007-t09"></a>F-007-T09 — Step 3d — Rejected permission escalation and corrected-memory cases | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
-| 🟡 Medium | **Total** | 4 h (9 of 10 steps) | 1.25 h (5 of 10 steps recorded) | 1.75 h agent + 0.5 h owner | 6 of 10 completed | |
+| 🟢 Small | **Total** | 4 h (9 of 10 steps) | 1.5 h (6 of 10 steps recorded) | 1 h agent + 0.5 h owner | 7 of 10 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -828,7 +828,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | F-007-T07..T09 baseline/holdout skill evaluation (`evals/skill-evaluation-v1.json`), model-change reconciliation (`reconcileSkillsAfterModelChange`), and permission-escalation/corrected-memory rejection (`checkSkillPermissionEscalation`) implemented in `src/skills.ts` and `src/cli.ts`, verified in `test/skills.test.ts` (2026-11-15); [PR #344](https://github.com/voidbrain/nerv/pull/344) F-007-T06 skill package format, private isolated storage under `<home>/skills/packages/<id>/<version>/`, immutable versions with owner-approved promote, rollback and retire, `skills` CLI commands (head 14e4a29, merged ae8c7f8; CI43345241513 passed all five jobs; cited in the full audit of 2026-11-13, PR #374); [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| PR / evidence | F-007-T03 push-to-talk confirmation flow (`preparePushToTalkDraft`, `confirmPushToTalkDraft` in `src/voice.ts`, `/api/voice/draft` & `/api/voice/confirm` in `src/server.ts`, dashboard/companion UI in `web/src/main.ts` & `web/src/i18n.ts`), verified in `test/voice.test.ts` (2026-11-15); F-007-T07..T09 baseline/holdout skill evaluation (`evals/skill-evaluation-v1.json`), model-change reconciliation (`reconcileSkillsAfterModelChange`), and permission-escalation/corrected-memory rejection (`checkSkillPermissionEscalation`) implemented in `src/skills.ts` and `src/cli.ts`, verified in `test/skills.test.ts` (2026-11-15); [PR #344](https://github.com/voidbrain/nerv/pull/344) F-007-T06 skill package format, private isolated storage under `<home>/skills/packages/<id>/<version>/`, immutable versions with owner-approved promote, rollback and retire, `skills` CLI commands (head 14e4a29, merged ae8c7f8; CI43345241513 passed all five jobs; cited in the full audit of 2026-11-13, PR #374); [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | `npx tsc --noEmit`, `npm run check:conventions`, `node --test test/skills.test.ts`, and `npm run check:fast` passed 2026-11-15; remote CI pending PR |
 | Reviewed | 2026-11-15 |
@@ -843,7 +843,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 5 h agent + 0.5 h owner | [F-007-T03](#f-007-t03), [F-007-T04](#f-007-t04) | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🔴 Large | 5 h agent + 0.5 h owner | [F-007-T04](#f-007-t04) | — | 🤖 | — | — |
 
 💻 **→** Next: F-083-T02 — Compute from saved values only (Planned).
 
@@ -863,7 +863,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-083-t04"></a>F-083-T04 — Owner check with a real saved recipe | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-083-T02](#f-083-t02), [F-083-T03](#f-083-t03) | ⏳ 🧑‍🔧 |
 | 🟢 Small | <a id="f-083-t06"></a>F-083-T06 — Cooking session: ingredients and steps | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-083-T03](#f-083-t03) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-083-t07"></a>F-083-T07 — Timers in a cooking session | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-083-T06](#f-083-t06) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-083-t08"></a>F-083-T08 — Hands-free cooking by voice | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-083-T07](#f-083-t07), [F-007-T03](#f-007-t03), [F-007-T04](#f-007-t04) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-083-t08"></a>F-083-T08 — Hands-free cooking by voice | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-083-T07](#f-083-t07), [F-007-T04](#f-007-t04) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-083-t09"></a>F-083-T09 — Owner check: a recipe cooked hands-free | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-083-T07](#f-083-t07) | ⏳ 🧑‍🔧 |
 | 🟢 Small | <a id="f-083-t10"></a>F-083-T10 — Recipe photos | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-083-T03](#f-083-t03) | ⏳ 🤖 |
 | — | <a id="f-083-t01"></a>F-083-T01 — Saved documents with categories | 1 h | 0.5 h (measured) | 0 h | Completed | 🤖 |
@@ -929,9 +929,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.5 h agent + 0.5 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h agent + 0.5 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-086-T01 — Decision: connector, scopes and credentials (Ready).
+💻 **→** Next: F-086-T02 — Search and read as Green tools (Planned).
 
 | | |
 |---|---|
@@ -943,11 +943,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-086-t01"></a>F-086-T01 — Decision: connector, scopes and credentials | 0.5 h | 0 h | 0.5 h | Ready | 🤖 |
-| 🟢 Small | <a id="f-086-t02"></a>F-086-T02 — Search and read as Green tools | 1 h | 0 h | 1 h | Planned · waits on [F-086-T01](#f-086-t01) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-086-t02"></a>F-086-T02 — Search and read as Green tools | 1 h | 0 h | 1 h | Planned | 🤖 |
 | 🟢 Small | <a id="f-086-t03"></a>F-086-T03 — Draft and send behind approval | 1 h | 0 h | 1 h | Planned · waits on [F-086-T02](#f-086-t02) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-086-t04"></a>F-086-T04 — Owner check with the owner's account | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-086-T03](#f-086-t03) | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 2.5 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 2.5 h agent + 0.5 h owner | 0 of 4 completed | |
+| — | <a id="f-086-t01"></a>F-086-T01 — Decision: connector, scopes and credentials | 0.5 h | 0.25 h (measured) | 0 h | Completed | 🤖 |
+| 🟡 Medium | **Total** | 2.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 2 h agent + 0.5 h owner | 1 of 4 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -958,7 +958,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
-| Verification | Pending. |
+| Verification | `F-086-T01` decision written in [gmail-connector.md](decisions/gmail-connector.md); verified with `npm run check:fast`. |
 | Reviewed | 2026-11-14 |
 
 </details>
@@ -970,9 +970,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.5 h agent + 0.5 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h agent + 0.5 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-087-T01 — Decision: slicer, Bambu Connect hand-off and base (Ready).
+💻 **→** Next: F-087-T02 — Slice with a material profile (Planned).
 
 | | |
 |---|---|
@@ -984,11 +984,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-087-t01"></a>F-087-T01 — Decision: slicer, Bambu Connect hand-off and base | 0.5 h | 0 h | 0.5 h | Ready | 🤖 |
-| 🟢 Small | <a id="f-087-t02"></a>F-087-T02 — Slice with a material profile | 1 h | 0 h | 1 h | Planned · waits on [F-087-T01](#f-087-t01) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-087-t02"></a>F-087-T02 — Slice with a material profile | 1 h | 0 h | 1 h | Planned | 🤖 |
 | 🟢 Small | <a id="f-087-t03"></a>F-087-T03 — Hand off to Bambu Connect with the owner checklist | 1 h | 0 h | 1 h | Planned · waits on [F-087-T02](#f-087-t02) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-087-t04"></a>F-087-T04 — Owner check on the real printer | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-087-T03](#f-087-t03) | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 2.5 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 2.5 h agent + 0.5 h owner | 0 of 4 completed | |
+| — | <a id="f-087-t01"></a>F-087-T01 — Decision: slicer, Bambu Connect hand-off and base | 0.5 h | 0.25 h (measured) | 0 h | Completed | 🤖 |
+| 🟡 Medium | **Total** | 2.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 2 h agent + 0.5 h owner | 1 of 4 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -999,7 +999,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
-| Verification | Pending. |
+| Verification | `F-087-T01` decision written in [bambu-print-handoff.md](decisions/bambu-print-handoff.md); verified with `npm run check:fast`. |
 | Reviewed | 2026-11-14 |
 
 </details>
@@ -1091,9 +1091,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.5 h agent + 0.5 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h agent + 0.5 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-088-T01 — Decision: storage base and insert events (Ready).
+💻 **→** Next: F-088-T02 — Copy rule (Planned).
 
 | | |
 |---|---|
@@ -1105,11 +1105,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-088-t01"></a>F-088-T01 — Decision: storage base and insert events | 0.5 h | 0 h | 0.5 h | Ready | 🤖 |
-| 🟡 Medium | <a id="f-088-t02"></a>F-088-T02 — Copy rule | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-088-T01](#f-088-t01) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-088-t02"></a>F-088-T02 — Copy rule | 1.5 h | 0 h | 1.5 h | Planned | 🤖 |
 | 🟢 Small | <a id="f-088-t03"></a>F-088-T03 — Report and conflicts | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-088-T02](#f-088-t02) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-088-t04"></a>F-088-T04 — Owner check on the storage base | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-088-T03](#f-088-t03) | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 2.5 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 2.5 h agent + 0.5 h owner | 0 of 4 completed | |
+| — | <a id="f-088-t01"></a>F-088-T01 — Decision: storage base and insert events | 0.5 h | 0.25 h (measured) | 0 h | Completed | 🤖 |
+| 🟡 Medium | **Total** | 2.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 2 h agent + 0.5 h owner | 1 of 4 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1120,7 +1120,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
-| Verification | Pending. |
+| Verification | `F-088-T01` decision written in [storage-base-insert-events.md](decisions/storage-base-insert-events.md); verified with `npm run check:fast`. |
 | Reviewed | 2026-11-14 |
 
 </details>
@@ -1218,9 +1218,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h agent + 0.25 h owner | — | [F-094-T02](#f-094-t02) | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.5 h agent + 0.25 h owner | — | [F-094-T02](#f-094-t02) | 🤖 | — | — |
 
-💻 **→** Next: F-093-T01 — Decision: desktop adapter and permissions (Ready).
+💻 **→** Next: F-093-T02 — Find and click a control by name (Planned).
 
 | | |
 |---|---|
@@ -1232,11 +1232,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-093-t01"></a>F-093-T01 — Decision: desktop adapter and permissions | 0.5 h | 0 h | 0.5 h | Ready | 🤖 |
-| 🟡 Medium | <a id="f-093-t02"></a>F-093-T02 — Find and click a control by name | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-093-T01](#f-093-t01) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-093-t02"></a>F-093-T02 — Find and click a control by name | 1.5 h | 0 h | 1.5 h | Planned | 🤖 |
 | 🟢 Small | <a id="f-093-t03"></a>F-093-T03 — Shared adapter for F-012 and F-092 | 1 h | 0 h | 1 h | Planned · waits on [F-093-T02](#f-093-t02) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-093-t04"></a>F-093-T04 — Owner check on the Mac | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-093-T02](#f-093-t02) | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 3 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 3 h agent + 0.25 h owner | 0 of 4 completed | |
+| — | <a id="f-093-t01"></a>F-093-T01 — Decision: desktop adapter and permissions | 0.5 h | 0.25 h (measured) | 0 h | Completed | 🤖 |
+| 🟡 Medium | **Total** | 3 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 2.5 h agent + 0.25 h owner | 1 of 4 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1245,9 +1245,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | [Desktop control adapter decision](decisions/desktop-control-adapter.md) (`F-093-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
-| Verification | Pending. |
+| Verification | `F-093-T01`: `npm run check:fast` passed. |
 | Reviewed | 2026-11-14 |
 
 </details>
@@ -1294,6 +1294,86 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-085"></a>[✨ F-085](#top)
+
+**Check an outside project from a URL or a GitHub repository**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-085-T02 — Project report (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: "check that project" for a web URL or a GitHub repository. NERV cannot fetch and assess outside content, and anything it reads there is untrusted. |
+| **Reproduce** | Ask Misato to check a public repository URL. |
+| **Check** | NERV fetches the page or clones the repository read-only into a quarantine class (EVA-03, F-049) and marks the content tainted (F-027); it runs none of the project's code by default; the report says what the project is, its activity, licence, how it is built and tested, and visible risks, each with its source; text in the project never changes NERV's instructions (a test plants such text). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-085-t02"></a>F-085-T02 — Project report | 1 h | 0 h | 1 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-085-t03"></a>F-085-T03 — Owner check on two real projects | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-085-T02](#f-085-t02) | ⏳ 🧑‍🔧 |
+| — | <a id="f-085-t01"></a>F-085-T01 — Read-only fetch into quarantine | 1 h | 0.5 h (measured) | 0 h | Completed | 🤖 |
+| 🟢 Small | **Total** | 2 h (2 of 3 steps) | 0.5 h (1 of 3 steps recorded) | 1 h agent + 0.25 h owner | 1 of 3 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-085.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| Opened | 2026-11-14 |
+| Verification | `F-085-T01` verified via `test/quarantine.test.ts` (read-only shallow clone + page fetch into discarded per-job dir, `tainted: true`, no code executed, planted instruction isolation), `tsc`, `check:conventions`, and `check:fast`. |
+| Reviewed | 2026-11-14 |
+
+</details>
+
+---
+### <a id="f-090"></a>[✨ F-090](#top)
+
+**Resume interrupted coding work without the editor**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-090-T02 — Headless resume adapter (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: continue a coding agent's interrupted work directly, without VS Code. F-012 covers resuming in the editor (F-012-T03); a headless resume through the coding agent's own command line is a separate adapter. |
+| **Reproduce** | Interrupt a coding-agent session at its limit, then ask NERV to continue it after the reset. |
+| **Check** | NERV identifies the exact session (repository, branch, session ID) and resumes it once through the agent's supported command line after the reset, using the F-012 resume engine; a changed branch, a missing session or an already-resumed job produces needs-attention, not a second run; output and cost come back to the channel. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-090-t02"></a>F-090-T02 — Headless resume adapter | 1 h | 0 h | 1 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-090-t03"></a>F-090-T03 — Owner check on a real interrupted session | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-090-T02](#f-090-t02) | ⏳ 🧑‍🔧 |
+| — | <a id="f-090-t01"></a>F-090-T01 — Feasibility: headless resume | 0.5 h | 0.25 h (measured) | 0 h | Completed | 🤖 |
+| 🟢 Small | **Total** | 1.5 h (2 of 3 steps) | 0.25 h (1 of 3 steps recorded) | 1 h agent + 0.25 h owner | 1 of 3 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-090.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| Opened | 2026-11-14 |
+| Verification | `F-090-T01` feasibility report written in [headless-resume.md](decisions/headless-resume.md) from live CLI probe; verified with `npm run check:fast`. |
+| Reviewed | 2026-11-14 |
+
+</details>
+
+---
 ### <a id="f-091"></a>[✨ F-091](#top)
 
 **Apply the project harness to a repository as a coding job**
@@ -1380,55 +1460,15 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-085"></a>[✨ F-085](#top)
-
-**Check an outside project from a URL or a GitHub repository**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h agent + 0.25 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-085-T01 — Read-only fetch into quarantine (Ready).
-
-| | |
-|---|---|
-| **Issue** | Owner job 2026-11-14: "check that project" for a web URL or a GitHub repository. NERV cannot fetch and assess outside content, and anything it reads there is untrusted. |
-| **Reproduce** | Ask Misato to check a public repository URL. |
-| **Check** | NERV fetches the page or clones the repository read-only into a quarantine class (EVA-03, F-049) and marks the content tainted (F-027); it runs none of the project's code by default; the report says what the project is, its activity, licence, how it is built and tested, and visible risks, each with its source; text in the project never changes NERV's instructions (a test plants such text). |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-085-t01"></a>F-085-T01 — Read-only fetch into quarantine | 1 h | 0 h | 1 h | Ready | 🤖 |
-| 🟢 Small | <a id="f-085-t02"></a>F-085-T02 — Project report | 1 h | 0 h | 1 h | Planned · waits on [F-085-T01](#f-085-t01) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-085-t03"></a>F-085-T03 — Owner check on two real projects | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-085-T02](#f-085-t02) | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 2 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 2 h agent + 0.25 h owner | 0 of 3 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-085.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
-| Opened | 2026-11-14 |
-| Verification | Pending. |
-| Reviewed | 2026-11-14 |
-
-</details>
-
----
 ### <a id="f-089"></a>[✨ F-089](#top)
 
 **Browser control: act on a named control in an open page**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-089-T01 — Decision: browser adapter (Ready).
+💻 **→** Next: F-089-T02 — Find and click a named control (Planned).
 
 | | |
 |---|---|
@@ -1440,10 +1480,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-089-t01"></a>F-089-T01 — Decision: browser adapter | 0.5 h | 0 h | 0.5 h | Ready | 🤖 |
-| 🟡 Medium | <a id="f-089-t02"></a>F-089-T02 — Find and click a named control | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-089-T01](#f-089-t01) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-089-t02"></a>F-089-T02 — Find and click a named control | 1.5 h | 0 h | 1.5 h | Planned | 🤖 |
 | 🟢 Small | <a id="f-089-t03"></a>F-089-T03 — Owner check on a real page | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-089-T02](#f-089-t02) | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 2 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 2 h agent + 0.25 h owner | 0 of 3 completed | |
+| — | <a id="f-089-t01"></a>F-089-T01 — Decision: browser adapter | 0.5 h | 0.25 h (measured) | 0 h | Completed | 🤖 |
+| 🟡 Medium | **Total** | 2 h (2 of 3 steps) | 0.25 h (1 of 3 steps recorded) | 1.5 h agent + 0.25 h owner | 1 of 3 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1454,47 +1494,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
-| Verification | Pending. |
-| Reviewed | 2026-11-14 |
-
-</details>
-
----
-### <a id="f-090"></a>[✨ F-090](#top)
-
-**Resume interrupted coding work without the editor**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-090-T01 — Feasibility: headless resume (Ready).
-
-| | |
-|---|---|
-| **Issue** | Owner job 2026-11-14: continue a coding agent's interrupted work directly, without VS Code. F-012 covers resuming in the editor (F-012-T03); a headless resume through the coding agent's own command line is a separate adapter. |
-| **Reproduce** | Interrupt a coding-agent session at its limit, then ask NERV to continue it after the reset. |
-| **Check** | NERV identifies the exact session (repository, branch, session ID) and resumes it once through the agent's supported command line after the reset, using the F-012 resume engine; a changed branch, a missing session or an already-resumed job produces needs-attention, not a second run; output and cost come back to the channel. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-090-t01"></a>F-090-T01 — Feasibility: headless resume | 0.5 h | 0 h | 0.5 h | Ready | 🤖 |
-| 🟢 Small | <a id="f-090-t02"></a>F-090-T02 — Headless resume adapter | 1 h | 0 h | 1 h | Planned · waits on [F-090-T01](#f-090-t01) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-090-t03"></a>F-090-T03 — Owner check on a real interrupted session | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-090-T02](#f-090-t02) | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 1.5 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 1.5 h agent + 0.25 h owner | 0 of 3 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-090.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
-| Opened | 2026-11-14 |
-| Verification | Pending. |
+| Verification | `F-089-T01` decision written in [browser-adapter.md](decisions/browser-adapter.md); verified with `npm run check:fast`. |
 | Reviewed | 2026-11-14 |
 
 </details>
@@ -1506,9 +1506,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h agent + 0.25 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-092-T01 — Feasibility: recording, permissions and privacy (Ready).
+💻 **→** Next: F-092-T02 — Bounded local recording (Planned).
 
 | | |
 |---|---|
@@ -1520,11 +1520,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-092-t01"></a>F-092-T01 — Feasibility: recording, permissions and privacy | 0.5 h | 0 h | 0.5 h | Ready | 🤖 |
-| 🟡 Medium | <a id="f-092-t02"></a>F-092-T02 — Bounded local recording | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-092-T01](#f-092-t01) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-092-t02"></a>F-092-T02 — Bounded local recording | 1.5 h | 0 h | 1.5 h | Planned | 🤖 |
 | 🟡 Medium | <a id="f-092-t03"></a>F-092-T03 — Replay as a Blue action with preconditions | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-092-T02](#f-092-t02) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-092-t04"></a>F-092-T04 — Owner check on the Mac | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-092-T03](#f-092-t03) | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 3.5 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 3.5 h agent + 0.25 h owner | 0 of 4 completed | |
+| — | <a id="f-092-t01"></a>F-092-T01 — Feasibility: recording, permissions and privacy | 0.5 h | 0.25 h (measured) | 0 h | Completed | 🤖 |
+| 🟡 Medium | **Total** | 3.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 3 h agent + 0.25 h owner | 1 of 4 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1533,9 +1533,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | [Desktop input recording feasibility](decisions/desktop-input-recording.md) (`F-092-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
-| Verification | Pending. |
+| Verification | `F-092-T01`: `npm run check:fast` passed. |
 | Reviewed | 2026-11-14 |
 
 </details>
@@ -1547,9 +1547,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.5 h agent + 0.25 h owner | [F-093-T02](#f-093-t02) | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h agent + 0.25 h owner | [F-093-T02](#f-093-t02) | — | ⏳ | — | — |
 
-💻 **→** Next: F-094-T01 — Decision: scripted first, menus second (Ready).
+💻 **→** Next: F-094-T02 — Open app and file, save as, step by step (Planned).
 
 | | |
 |---|---|
@@ -1561,11 +1561,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-094-t01"></a>F-094-T01 — Decision: scripted first, menus second | 0.5 h | 0 h | 0.5 h | Ready | 🤖 |
-| 🟡 Medium | <a id="f-094-t02"></a>F-094-T02 — Open app and file, save as, step by step | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-094-T01](#f-094-t01), [F-093-T02](#f-093-t02) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-094-t02"></a>F-094-T02 — Open app and file, save as, step by step | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-093-T02](#f-093-t02) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-094-t03"></a>F-094-T03 — Report and recovery | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-094-T02](#f-094-t02) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-094-t04"></a>F-094-T04 — Owner check on the Mac | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-094-T03](#f-094-t03) | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 2.5 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 2.5 h agent + 0.25 h owner | 0 of 4 completed | |
+| — | <a id="f-094-t01"></a>F-094-T01 — Decision: scripted first, menus second | 0.5 h | 0.25 h (measured) | 0 h | Completed | 🤖 |
+| 🟡 Medium | **Total** | 2.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 2 h agent + 0.25 h owner | 1 of 4 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1574,9 +1574,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | [App workflows scripted-first decision](decisions/app-workflows-scripted-first.md) (`F-094-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
-| Verification | Pending. |
+| Verification | `F-094-T01`: `npm run check:fast` passed. |
 | Reviewed | 2026-11-14 |
 
 </details>
@@ -1910,9 +1910,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 0 h | — | — | — | — | — |
 
-💻 **→** Next: show a proposed spelling clean-up beside the original fact (F-044-T02).
+💻 **→** All three slices (F-044-T01..T03) implemented.
 
 | | |
 |---|---|
@@ -1924,10 +1924,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="f-044-t03"></a>F-044-T03 — Typo-tolerant recall | 0.75 h | 0 h | 0.75 h | Planned |
 | — | <a id="f-044-t01"></a>F-044-T01 — One fact per subject on one editable card | 1.5 h | 0.75 h (stated) | 0 h | Completed |
 | — | <a id="f-044-t02"></a>F-044-T02 — Shown spelling fix | 0.25 h | 0.5 h (stated) | 0 h | Completed |
-| 🟢 Small | **Total** | 2.5 h | 1.25 h (2 of 3 steps recorded) | 0.75 h | 2 of 3 completed |
+| — | <a id="f-044-t03"></a>F-044-T03 — Typo-tolerant recall | 0.75 h | 0.25 h (measured) | 0 h | Completed |
+| — | **Total** | 2.5 h | 1.5 h | 0 h | 3 of 3 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1951,7 +1951,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-064-T02 (the first circuit).
 
@@ -1965,10 +1965,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-064-t02"></a>F-064-T02 — First bounded circuit | 0.75 h | 0 h | 0.75 h | Planned | 🤖 |
-| 🟢 Small | <a id="f-064-t03"></a>F-064-T03 — Fault-injection tests | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-064-T02](#f-064-t02) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-064-t03"></a>F-064-T03 — Fault-injection tests | 0.25 h | 0 h | 0.25 h | Planned | 🤖 |
 | — | <a id="f-064-t01"></a>F-064-T01 — Owner picks the first circuit | 0.25 h | 0 h | 0 h | Completed | 🤖 🤔 |
-| 🟢 Small | **Total** | 1.25 h | 0 h (0 of 3 steps recorded) | 1 h | 1 of 3 completed | |
+| — | <a id="f-064-t02"></a>F-064-T02 — First bounded circuit | 0.75 h | 0.5 h (measured) | 0 h | Completed | 🤖 |
+| 🟢 Small | **Total** | 1.25 h | 0.5 h (1 of 3 steps recorded) | 0.25 h | 2 of 3 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1979,7 +1979,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
 | Opened | 2026-11-06 |
-| Verification | Unit/integration: Pending. |
+| Verification | `F-064-T02` verified via `src/incident-circuits.ts` and `test/incident-circuits.test.ts` (scoped channel trip, Spear on channel sorties, deduplicated alert, owner-only rearm), `tsc`, `check:conventions`, and `check:fast`. |
 | Reviewed | 2026-11-06 |
 
 </details>
@@ -2064,55 +2064,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
-### <a id="f-020"></a>[✨ F-020](#top)
-
-**Grounded personas for HITL and explanation (Misato primary)**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
-
-💻 **→** Optional conversational faces grounded in real job state: Misato as primary HITL/ops voice; Gendo optional for risk/policy explanation; pilots optional as worker identity only.
-
-| | |
-|---|---|
-| **Issue** | Personas Codec Chat exists as UI prototype. Free-form roleplay without grounding is a distraction and safety risk. |
-| **Reproduce** | Request approval, status brief, or “why was this Red?”; confirm answers cite real job/decision data and cannot bypass policy. |
-| **Check** | Misato can surface pending HITL and accept/reject with audit; Gendo (or Command) can explain classification; no persona can grant capabilities the backend policy denies; persona layer can be disabled; responses remain useful in non-Eva skins. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-020-t03"></a>F-020-T03 — Explanation persona and non-Eva skins | 0.25 h | 0 h | 0.25 h | Planned | — |
-| — | <a id="f-020-t01"></a>F-020-T01 — Persona adapter contract | 0.25 h | 0 h | 0 h | Completed | [PR #398](https://github.com/voidbrain/nerv/pull/398) grounded, presentation-only persona adapter contract |
-| — | <a id="f-020-t02"></a>F-020-T02 — Misato HITL surfacing with audit | 0.75 h | 0.5 h (stated) | 0 h | Completed | — |
-| 🟢 Small | **Total** | 1.25 h | 0.5 h (1 of 3 steps recorded) | 0.25 h | 2 of 3 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-020.md)
-
-| Field | Value |
-|---|---|
-| Depends on | — |
-| PR / evidence | Steps: F-020-T01: [PR #398](https://github.com/voidbrain/nerv/pull/398) grounded, presentation-only persona adapter contract; step review: Local full suite, typecheck and fast checks passed; all seven deterministic Gauntlet system flows were refreshed after the source change; required CI pending.. [PR #219](https://github.com/voidbrain/nerv/pull/219) retired-reference path correction; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [retired dashboard1 personas prototype](../remove/docs/NERV/dashboard1.html) |
-| Opened | 2026-11-02 |
-| Verification | Pending |
-| Reviewed | 2026-11-08 |
-
-</details>
-
----
-
 ### <a id="f-054"></a>[✨ F-054](#top)
 
 **The base chronicle: a daily log of the agency's milestones, plain and in Eva lore**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
 
 💻 **→** F-054-T01 (Simple chronicle from recorded facts) and F-054-T04 (record the missing facts) closed; next F-054-T02 (Eva version).
 
@@ -2126,11 +2084,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="f-054-t02"></a>F-054-T02 — Eva version by the Chronicler pilot | 0.5 h | 0 h | 0.5 h | Planned |
-| 🟢 Small | <a id="f-054-t03"></a>F-054-T03 — Chronicle tab and brief line | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-054-T02](#f-054-t02) |
+| 🟢 Small | <a id="f-054-t03"></a>F-054-T03 — Chronicle tab and brief line | 0.5 h | 0 h | 0.5 h | Planned |
 | — | <a id="f-054-t01"></a>F-054-T01 — Daily chronicle facts from records | 1.5 h | 1 h (stated) | 0 h | Completed |
+| — | <a id="f-054-t02"></a>F-054-T02 — Eva version by the Chronicler pilot | 0.5 h | 0.5 h (measured) | 0 h | Completed |
 | — | <a id="f-054-t04"></a>F-054-T04 — Record the milestones not stored today | 1.5 h | 1 h (stated) | 0 h | Completed |
-| 🟢 Small | **Total** | 4 h | 2 h (2 of 4 steps recorded) | 1 h | 2 of 4 completed |
+| 🟢 Small | **Total** | 4 h | 2.5 h (3 of 4 steps recorded) | 0.5 h | 3 of 4 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2142,13 +2100,53 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Depends on | [F-045](archive/backlog-2026.md#f-045) — Chronicler pilot for the Eva narrative; plain fact collection can proceed |
 | PR / evidence | [PR #305](https://github.com/voidbrain/nerv/pull/305) F-054-T04 milestones (src/milestones.ts, test/milestones.test.ts); [PR #301](https://github.com/voidbrain/nerv/pull/301) F-054-T01 Simple chronicle (src/chronicle.ts, test/chronicle.test.ts); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner request 2026-11-05 |
 | Opened | 2026-11-05 |
-| Verification | Pending |
+| Verification | `F-054-T02` verified via `src/chronicle.ts` (`CHRONICLER_PILOT`, `composeEvaChronicle`, `retellChronicleDayWithPilot`, `verifyChronicleMentionsOnlyDayFacts`), `test/chronicle.test.ts`, `tsc`, `check:conventions`, and `check:fast`. |
 | Reviewed | 2026-11-12 |
 
 </details>
 
 ---
 
+### <a id="f-100"></a>[✨ F-100](#top)
+
+**FPV blackbox analysis for vibration**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h agent + 0.25 h owner | — | — | ⏳ | — | 🤔 |
+
+💻 **→** Next: F-100-T01 (feasibility).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-14: "Smoke vibrates and shakes; props changed, the problem stays; the frame seems fine: frame, motors or ESC? Analyse the blackbox." NERV cannot read Betaflight blackbox logs. |
+| **Reproduce** | Send a blackbox log of the shaking flight and ask what causes the vibration. |
+| **Check** | Feasibility first: decode the log locally and read the gyro spectrum per axis and motor; then a report that names candidate causes with the evidence for each (motor-specific peaks, frame resonance, prop or ESC signs) and says what the log cannot tell. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-100-t02"></a>F-100-T02 — Owner decides the analysis scope | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [🤔](design/fpv-and-cooking-plan-2026-11-14.md) |
+| 🟢 Small | <a id="f-100-t03"></a>F-100-T03 — Vibration report from a blackbox log | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-100-T02](#f-100-t02) | ⏳ 🤖 |
+| — | <a id="f-100-t01"></a>F-100-T01 — Feasibility: decoding blackbox logs and reading vibration | 0.75 h | 0.25 h (measured) | 0 h | Completed | 🤖 |
+| 🟢 Small | **Total** | 1.5 h | 0.25 h (1 of 3 steps recorded) | 0.75 h agent + 0.25 h owner | 1 of 3 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-100.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [FPV blackbox feasibility](design/fpv-blackbox-feasibility.md) (`F-100-T01`); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
+| Opened | 2026-11-14 |
+| Verification | `F-100-T01`: `npm run check:fast` passed. |
+| Reviewed | 2026-11-14 |
+
+</details>
+
+---
 ### <a id="f-101"></a>[✨ F-101](#top)
 
 **Share the FPV battery manager outside NERV**
@@ -2188,15 +2186,57 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-020"></a>[✨ F-020](#top)
+
+**Grounded personas for HITL and explanation (Misato primary)**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 0 h | — | — | — | — | — |
+
+💻 **→** Optional conversational faces grounded in real job state: Misato as primary HITL/ops voice; Gendo optional for risk/policy explanation; pilots optional as worker identity only.
+
+| | |
+|---|---|
+| **Issue** | Personas Codec Chat exists as UI prototype. Free-form roleplay without grounding is a distraction and safety risk. |
+| **Reproduce** | Request approval, status brief, or “why was this Red?”; confirm answers cite real job/decision data and cannot bypass policy. |
+| **Check** | Misato can surface pending HITL and accept/reject with audit; Gendo (or Command) can explain classification; no persona can grant capabilities the backend policy denies; persona layer can be disabled; responses remain useful in non-Eva skins. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| — | <a id="f-020-t01"></a>F-020-T01 — Persona adapter contract | 0.25 h | 0 h | 0 h | Completed | [PR #398](https://github.com/voidbrain/nerv/pull/398) grounded, presentation-only persona adapter contract |
+| — | <a id="f-020-t02"></a>F-020-T02 — Misato HITL surfacing with audit | 0.75 h | 0.5 h (stated) | 0 h | Completed | — |
+| — | <a id="f-020-t03"></a>F-020-T03 — Explanation persona and non-Eva skins | 0.25 h | 0.25 h (measured) | 0 h | Completed | — |
+| — | **Total** | 1.25 h | 0.75 h (2 of 3 steps recorded) | 0 h | 3 of 3 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-020.md)
+
+| Field | Value |
+|---|---|
+| Depends on | — |
+| PR / evidence | Steps: F-020-T01: [PR #398](https://github.com/voidbrain/nerv/pull/398) grounded, presentation-only persona adapter contract; step review: Local full suite, typecheck and fast checks passed; all seven deterministic Gauntlet system flows were refreshed after the source change; required CI pending.. [PR #219](https://github.com/voidbrain/nerv/pull/219) retired-reference path correction; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [retired dashboard1 personas prototype](../remove/docs/NERV/dashboard1.html) |
+| Opened | 2026-11-02 |
+| Verification | Passed (`F-020-T03`: `formatGendoClassificationExplanation`, `explainClassificationThroughPersona`, `persona explain`, `test/persona.test.ts`, `check:fast`) |
+| Reviewed | 2026-11-08 |
+
+</details>
+
+---
+
 ### <a id="f-098"></a>[✨ F-098](#top)
 
 **FPV fleet diary: crashes, parts, spares and photos**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 2.25 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 1.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-098-T01.
+💻 **→** Next: F-098-T02 (crash diary & chat lookup).
 
 | | |
 |---|---|
@@ -2208,96 +2248,16 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-098-t01"></a>F-098-T01 — Fleet and spares model | 0.75 h | 0 h | 0.75 h | Ready | 🤖 |
-| 🟢 Small | <a id="f-098-t02"></a>F-098-T02 — Crash log and questions by chat | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-098-T01](#f-098-t01) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-098-t02"></a>F-098-T02 — Crash log and questions by chat | 0.75 h | 0 h | 0.75 h | Planned | 🤖 |
 | 🟢 Small | <a id="f-098-t03"></a>F-098-T03 — Photos on crashes, parts and batteries | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-098-T02](#f-098-t02) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-098-t04"></a>F-098-T04 — Owner check with a real crash | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-098-T03](#f-098-t03) | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 2.25 h | 0 h (0 of 4 steps recorded) | 2.25 h agent + 0.25 h owner | 0 of 4 completed | |
+| — | <a id="f-098-t01"></a>F-098-T01 — Fleet and spares model | 0.75 h | 0.25 h (measured) | 0 h | Completed | 🤖 |
+| 🟡 Medium | **Total** | 2.25 h | 0.25 h (1 of 4 steps recorded) | 1.5 h agent + 0.25 h owner | 1 of 4 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
 [Full notes & evidence](work/records/F-098.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
-| Opened | 2026-11-14 |
-| Verification | Pending. |
-| Reviewed | 2026-11-14 |
-
-</details>
-
----
-### <a id="f-099"></a>[✨ F-099](#top)
-
-**FPV build knowledge: components and wiring from cited sources**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 1.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-099-T01 (feasibility).
-
-| | |
-|---|---|
-| **Issue** | Owner request 2026-11-14: "Smoke FC is iFlight BLITZ Mini F7 V1.2 and the ELRS receiver is BetaFPV SuperD: what is the wiring?" The owner keeps a component library and wiring in a diyfpv.com build and can export it as a PNG. NERV cannot read the build, and a wiring answer must come from the owner's build or the manufacturer's documents, never be invented. |
-| **Reproduce** | Ask the wiring question with the two components named. |
-| **Check** | Feasibility first: what NERV can read (the build link, the PNG export, a component list) and which sources it cites; then wiring answers that cite the build or a manufacturer document and say when they do not know. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-099-t01"></a>F-099-T01 — Feasibility: reading the build and its sources | 0.75 h | 0 h | 0.75 h | Ready | 🤖 |
-| 🟢 Small | <a id="f-099-t02"></a>F-099-T02 — Owner decides the source and scope | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-099-T01](#f-099-t01) | ⏳ 🤔 |
-| 🟢 Small | <a id="f-099-t03"></a>F-099-T03 — Build import and cited wiring answers | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-099-T02](#f-099-t02) | ⏳ 🤖 |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 3 steps recorded) | 1.5 h agent + 0.25 h owner | 0 of 3 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-099.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
-| Opened | 2026-11-14 |
-| Verification | Pending. |
-| Reviewed | 2026-11-14 |
-
-</details>
-
----
-### <a id="f-100"></a>[✨ F-100](#top)
-
-**FPV blackbox analysis for vibration**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 1.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-100-T01 (feasibility).
-
-| | |
-|---|---|
-| **Issue** | Owner request 2026-11-14: "Smoke vibrates and shakes; props changed, the problem stays; the frame seems fine: frame, motors or ESC? Analyse the blackbox." NERV cannot read Betaflight blackbox logs. |
-| **Reproduce** | Send a blackbox log of the shaking flight and ask what causes the vibration. |
-| **Check** | Feasibility first: decode the log locally and read the gyro spectrum per axis and motor; then a report that names candidate causes with the evidence for each (motor-specific peaks, frame resonance, prop or ESC signs) and says what the log cannot tell. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-100-t01"></a>F-100-T01 — Feasibility: decoding blackbox logs and reading vibration | 0.75 h | 0 h | 0.75 h | Ready | 🤖 |
-| 🟢 Small | <a id="f-100-t02"></a>F-100-T02 — Owner decides the analysis scope | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-100-T01](#f-100-t01) | ⏳ 🤔 |
-| 🟢 Small | <a id="f-100-t03"></a>F-100-T03 — Vibration report from a blackbox log | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-100-T02](#f-100-t02) | ⏳ 🤖 |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 3 steps recorded) | 1.5 h agent + 0.25 h owner | 0 of 3 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-100.md)
 
 | Field | Value |
 |---|---|
@@ -2424,6 +2384,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-13 |
 | Verification | Pending. |
 | Reviewed | 2026-11-13 |
+
+</details>
+
+---
+### <a id="f-099"></a>[✨ F-099](#top)
+
+**FPV build knowledge: components and wiring from cited sources**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h agent + 0.25 h owner | — | — | ⏳ | — | 🤔 |
+
+🧑 **→** Next: F-099-T02 (owner decides build/source policy from [feasibility note](design/fpv-build-knowledge-feasibility.md)).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-14: "Smoke FC is iFlight BLITZ Mini F7 V1.2 and the ELRS receiver is BetaFPV SuperD: what is the wiring?" The owner keeps a component library and wiring in a diyfpv.com build and can export it as a PNG. NERV cannot read the build, and a wiring answer must come from the owner's build or the manufacturer's documents, never be invented. |
+| **Reproduce** | Ask the wiring question with the two components named. |
+| **Check** | Feasibility first: what NERV can read (the build link, the PNG export, a component list) and which sources it cites; then wiring answers that cite the build or a manufacturer document and say when they do not know. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-099-t02"></a>F-099-T02 — Owner decides the source and scope | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [🤔](design/fpv-and-cooking-plan-2026-11-14.md) |
+| 🟢 Small | <a id="f-099-t03"></a>F-099-T03 — Build import and cited wiring answers | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-099-T02](#f-099-t02) | ⏳ 🤖 |
+| — | <a id="f-099-t01"></a>F-099-T01 — Feasibility: reading the build and its sources | 0.75 h | 0.25 h (measured) | 0 h | Completed | 🤖 |
+| 🟢 Small | **Total** | 1.5 h | 0.25 h (1 of 3 steps recorded) | 0.75 h agent + 0.25 h owner | 1 of 3 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-099.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
+| Opened | 2026-11-14 |
+| Verification | Pending. |
+| Reviewed | 2026-11-14 |
 
 </details>
 

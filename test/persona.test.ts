@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import { readConfig, readScrolls } from '../src/config.ts';
 import {
   decideHitlThroughPersona,
+  explainClassificationThroughPersona,
   defaultPersonas,
   formatMisatoPendingHitl,
   validatePersonas,
@@ -104,4 +105,63 @@ test('F-020-T02: Misato surfaces pending HITL and accepts/rejects through the ex
   } finally {
     rmSync(home, { recursive: true, force: true });
   }
+});
+
+test('Gendo classification explanation and non-Eva skins neutralize jargon while preserving grounded details', () => {
+  const record = {
+    id: 'sortie-42',
+    title: 'Inspect deployment config',
+    status: 'stopped',
+    why: 'The MAGI flagged shell.exec; Stopped with the Spear after Misato escalated.',
+    actions: [
+      {
+        tool: 'shell.exec',
+        pattern: 'rm -rf /tmp/demo',
+        outcome: 'reject' as const,
+        reason: 'The MAGI blocked destructive path',
+        decision: 'reject',
+      },
+    ],
+  };
+
+  const gendoOut = explainClassificationThroughPersona(
+    { explain: (ref) => ({ found: 'one', record: { ...record, id: ref } }) },
+    'sortie-42',
+  );
+  assert.equal(gendoOut.speaker, 'Gendo');
+  assert.match(
+    gendoOut.summary,
+    /^Gendo: sortie-42 \(stopped\) — The MAGI flagged shell\.exec; Stopped with the Spear after Misato escalated\./,
+  );
+  assert.match(
+    gendoOut.summary,
+    /shell\.exec \(rm -rf \/tmp\/demo\) -> reject \[reject\]: The MAGI blocked destructive path/,
+  );
+
+  const customSkin = {
+    enabled: true,
+    names: { gendo: 'Command', misato: 'Ops', ritsuko: 'Analyst', penpen: 'Notifier' },
+  };
+  const customOut = explainClassificationThroughPersona(
+    { explain: () => ({ found: 'one', record }) },
+    'sortie-42',
+    customSkin,
+  );
+  assert.equal(customOut.speaker, 'Command');
+  assert.match(
+    customOut.summary,
+    /^Command: sortie-42 \(stopped\) — Policy review flagged shell\.exec; Stopped after Planner escalated\./,
+  );
+  assert.doesNotMatch(customOut.summary, /MAGI|Spear|Misato/);
+
+  const neutralOut = explainClassificationThroughPersona({ explain: () => ({ found: 'one', record }) }, 'sortie-42', {
+    enabled: false,
+    names: customSkin.names,
+  });
+  assert.equal(neutralOut.speaker, null);
+  assert.match(
+    neutralOut.summary,
+    /^sortie-42 \(stopped\) — Policy review flagged shell\.exec; Stopped after Planner escalated\./,
+  );
+  assert.doesNotMatch(neutralOut.summary, /Gendo:|Command:|MAGI|Spear|Misato/);
 });

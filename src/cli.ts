@@ -1,9 +1,10 @@
 #!/usr/bin/env -S node --use-system-ca
 import { startSnapshots } from './snapshots.ts';
 import { runResumeEngineTick, type CreateResumeIntentInput, type ResumeIntentStatus } from './resume-intent.ts';
-import { decideHitlThroughPersona, formatMisatoPendingHitl } from './persona.ts';
+import { decideHitlThroughPersona, explainClassificationThroughPersona, formatMisatoPendingHitl } from './persona.ts';
 import { EVA_CLASS_SPECS, admitEvaJob, type EvaAdmissionRequest } from './eva-classes.ts';
 import { createPeerHandlers } from './peer-handlers.ts';
+import { fetchIntoQuarantine } from './quarantine.ts';
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
 import { formatBatteryStateLines, type OneMoreBatteryExport } from './batteries.ts';
@@ -80,7 +81,13 @@ import {
 import { STAGES, addPilot, describePilots, setPilotFlag, updatePilot, type EvaClass, type Stage } from './pilots.ts';
 import { McpClient, fingerprint as toolFingerprint, grantRefusal, toolName, type Eva, type McpTool } from './mcp.ts';
 import { TelegramApi, TelegramChannel, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
-import { chronicleDays, composeChronicle, gatherMilestones } from './chronicle.ts';
+import {
+  chronicleDays,
+  composeChronicle,
+  composeEvaChronicle,
+  gatherMilestones,
+  retellChronicleDayWithPilot,
+} from './chronicle.ts';
 import { composeBrief, gatherBrief } from './brief.ts';
 import { KajiLink } from './kaji-link.ts';
 import { guardLocalService } from './node-lifecycle-execution.ts';
@@ -403,6 +410,22 @@ try {
     } finally {
       store.close();
     }
+  } else if (command === 'fleet') {
+    const sub = args[0] ?? 'drones';
+    const store = new Store(databasePath(home), readScrolls(home), { home });
+    try {
+      if (sub === 'drones') {
+        console.log(JSON.stringify(store.fleet.listDrones(), null, 2));
+      } else if (sub === 'parts' && args[1]) {
+        console.log(JSON.stringify(store.fleet.listParts(args[1]), null, 2));
+      } else if (sub === 'spares') {
+        console.log(JSON.stringify(store.fleet.listSpares(args[1]), null, 2));
+      } else {
+        throw new Error('Usage: fleet drones | fleet parts <drone> | fleet spares [category]');
+      }
+    } finally {
+      store.close();
+    }
   } else if (command === 'resume-intent') {
     const sub = args[0] ?? 'list';
     const store = new Store(databasePath(home), readScrolls(home), { home });
@@ -440,8 +463,13 @@ try {
       } else if (sub === 'hitl' && action === 'decide' && args[2] && (args[3] === 'approve' || args[3] === 'reject')) {
         const res = await decideHitlThroughPersona(store, args[2], args[3], { persona, source: 'cli' });
         console.log(JSON.stringify(res, null, 2));
+      } else if (sub === 'explain' && action) {
+        const res = explainClassificationThroughPersona(store, action, persona);
+        console.log(res.summary);
       } else {
-        throw new Error('Usage: persona hitl list | persona hitl decide <approvalId> approve|reject');
+        throw new Error(
+          'Usage: persona hitl list | persona hitl decide <approvalId> approve|reject | persona explain <ref>',
+        );
       }
     } finally {
       store.close();
@@ -1349,19 +1377,28 @@ try {
         );
         break;
       case 'chronicle': {
-        // F-054: the Simple chronicle, from recorded milestones only; DAYS limits it to the last N days (default 30).
-        const days = args[0] === undefined ? 30 : Number(args[0]);
-        if (!Number.isSafeInteger(days) || days < 1 || days > 3660) throw new Error('Usage: chronicle [DAYS] (1–3660)');
-        console.log(
-          composeChronicle(
-            chronicleDays(
-              gatherMilestones(local().db, config.kaji?.root),
-              config.timeZone,
-              new Date(Date.now() - days * 86_400_000),
-            ),
-            config.language,
-          ),
+        // F-054: the Simple or Eva chronicle, from recorded milestones only; DAYS limits it to the last N days (default 30).
+        const eva = args.includes('--eva');
+        const pilotRetell = args.includes('--pilot');
+        const dayArg = args.find((a) => a !== '--eva' && a !== '--pilot');
+        const days = dayArg === undefined ? 30 : Number(dayArg);
+        if (!Number.isSafeInteger(days) || days < 1 || days > 3660)
+          throw new Error('Usage: chronicle [DAYS] [--eva] (1–3660)');
+        const grouped = chronicleDays(
+          gatherMilestones(local().db, config.kaji?.root),
+          config.timeZone,
+          new Date(Date.now() - days * 86_400_000),
         );
+        if (eva && pilotRetell && grouped.length) {
+          const retold = await Promise.all(
+            grouped.map((d) =>
+              retellChronicleDayWithPilot(d, async () => composeEvaChronicle([d], config.language), config.language),
+            ),
+          );
+          console.log(retold.map((r) => r.text).join('\n\n'));
+        } else {
+          console.log((eva ? composeEvaChronicle : composeChronicle)(grouped, config.language));
+        }
         break;
       }
       case 'tick':
@@ -1680,6 +1717,42 @@ try {
         }
         process.once('SIGINT', close);
         process.once('SIGTERM', close);
+        break;
+      }
+      case 'quarantine': {
+        const sub = args[0];
+        if (sub !== 'fetch' || !args[1]) throw new Error('Usage: nerv quarantine fetch <url> [--kind repo|page]');
+        const kindIdx = args.indexOf('--kind');
+        const kind = kindIdx >= 0 ? (args[kindIdx + 1] as 'repo' | 'page' | undefined) : undefined;
+        const result = await fetchIntoQuarantine(args[1], kind ? { kind } : {});
+        console.log(
+          JSON.stringify(
+            {
+              target: result.target,
+              kind: result.kind,
+              tainted: result.tainted,
+              files: result.files.map((f) => f.path),
+            },
+            null,
+            2,
+          ),
+        );
+        break;
+      }
+      case 'circuits': {
+        const sub = args[0] ?? 'list';
+        const store = new Store(databasePath(home), readScrolls(home), { home });
+        try {
+          if (sub === 'list') {
+            console.log(JSON.stringify(store.circuits.list(), null, 2));
+          } else if (sub === 'rearm' && args[1]) {
+            console.log(JSON.stringify(store.circuits.rearm(args[1], 'owner'), null, 2));
+          } else {
+            throw new Error('Usage: nerv circuits list | nerv circuits rearm <channel>');
+          }
+        } finally {
+          store.close();
+        }
         break;
       }
       default:

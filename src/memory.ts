@@ -230,17 +230,53 @@ export class Memory {
         .all(Math.min(Math.max(1, limit), 200)) as Row[]
     ).map(toFact);
   }
-  /** Best matches first (BM25); an empty or wordless query finds nothing rather than everything. */
+  /** Best matches first (BM25); falls back to bounded typo-tolerant matching while ranking exact matches first (F-044-T03). */
   recall(text: string, limit = 5): Fact[] {
+    const capped = Math.min(Math.max(1, limit), 20);
     const q = ftsQuery(text);
     if (!q) return [];
-    return (
+    const exact = (
       this.db
         .prepare(
           "SELECT f.* FROM facts_fts JOIN facts f ON f.id=facts_fts.fact_id WHERE facts_fts MATCH ? AND f.status='active' ORDER BY bm25(facts_fts) LIMIT ?",
         )
-        .all(q, Math.min(Math.max(1, limit), 20)) as Row[]
+        .all(q, capped) as Row[]
     ).map(toFact);
+    if (exact.length >= capped) return exact;
+
+    const queryTokens = tokenizeWords(text).filter((w) => w.length >= 4);
+    if (queryTokens.length === 0) return exact;
+
+    const seen = new Set(exact.map((f) => f.id));
+    const candidates = (
+      this.db.prepare("SELECT * FROM facts WHERE status='active' ORDER BY updated DESC LIMIT 200").all() as Row[]
+    )
+      .map(toFact)
+      .filter((f) => !seen.has(f.id));
+
+    const scored: Array<{ fact: Fact; hits: number; distance: number }> = [];
+    for (const fact of candidates) {
+      const factTokens = tokenizeWords(fact.text).filter((w) => w.length >= 4);
+      if (factTokens.length === 0) continue;
+      let hits = 0;
+      let totalDist = 0;
+      for (const qt of queryTokens) {
+        const maxDist = qt.length >= 7 ? 2 : 1;
+        let best = Infinity;
+        for (const ft of factTokens) {
+          if (Math.abs(qt.length - ft.length) > maxDist) continue;
+          const d = levenshtein(qt, ft);
+          if (d <= maxDist && d < best) best = d;
+        }
+        if (best <= maxDist) {
+          hits += 1;
+          totalDist += best;
+        }
+      }
+      if (hits > 0) scored.push({ fact, hits, distance: totalDist });
+    }
+    scored.sort((a, b) => b.hits - a.hits || a.distance - b.distance);
+    return [...exact, ...scored.slice(0, capped - exact.length).map((s) => s.fact)];
   }
   /** Instrumentality's summaries that match a request, best first (F-022): what was said and done on earlier days. */
   recallEpisodes(text: string, limit = 2): Episode[] {
@@ -289,4 +325,24 @@ export class Memory {
       .prepare('SELECT kind,text,source,created FROM fact_history WHERE fact_id=? ORDER BY sequence')
       .all(id) as { kind: string; text: string; source: string; created: string }[];
   }
+}
+
+function tokenizeWords(text: string): string[] {
+  return text.toLowerCase().match(/[\p{L}\p{N}]{2,}/gu) ?? [];
+}
+
+function levenshtein(a: string, b: string): number {
+  const m = a.length;
+  const n = b.length;
+  const prev = Array.from({ length: n + 1 }, (_, j) => j);
+  const curr = new Array<number>(n + 1).fill(0);
+  for (let i = 1; i <= m; i++) {
+    curr[0] = i;
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      curr[j] = Math.min(prev[j]! + 1, curr[j - 1]! + 1, prev[j - 1]! + cost);
+    }
+    for (let j = 0; j <= n; j++) prev[j] = curr[j]!;
+  }
+  return prev[n]!;
 }

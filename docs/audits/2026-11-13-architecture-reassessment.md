@@ -52,3 +52,36 @@ The weak point is step 3: the fallback planner is unmeasured. This is why the Ta
 ## Limits
 
 Source reading establishes structure, not runtime behaviour on real hosts. The proposals are not migrations: F-079 is an experiment with a fallback, F-080 is a move without behaviour change, and F-078-T02 and F-076 wait on the owner. Earlier reports are not rewritten.
+
+## Addendum (2026-11-15) — Context-Cost Reassessment for `runtime.ts` and `store.ts` (F-095-T01)
+
+### Evidence
+Measured on 2026-11-15 (`wc -lc`), seven files in `src/` exceed 1,000 lines and impose a high single-file context cost on coding agents:
+- `src/runtime.ts`: 3,399 lines / 144,980 bytes (~36k tokens at 4 chars/token)
+- `src/node-lifecycle-execution.ts`: 2,075 lines / 87,616 bytes (~22k tokens)
+- `src/cli.ts`: 1,657 lines / 78,697 bytes (~20k tokens)
+- `src/store.ts`: 1,598 lines / 70,179 bytes (~18k tokens)
+- `src/ledger.ts`: 1,400 lines / 62,170 bytes (~16k tokens)
+- `src/pilots.ts`: 1,203 lines / 49,402 bytes (~12k tokens)
+- `src/rpc.ts`: 1,113 lines / 36,582 bytes (~9k tokens)
+
+### Decision
+Reverse the 2026-11-13 deferral on `src/runtime.ts` and `src/store.ts`. Split both files mechanically along existing responsibility and table-group boundaries so every module stays below the 600-line warning threshold (`tools/check-source-sizes.mjs`, F-095-T02), while keeping `src/runtime.ts` (`Runtime`, `StoreApi`) and `src/store.ts` (`Store`) as thin facades preserving all public exports and existing test behaviour unchanged.
+
+### Target Modules
+
+**`src/runtime.ts` split:**
+- `src/runtime-api.ts` — `StoreApi`, `ChatReply`, `PeerSeat`, `ExtraSeatSpec`, `OwnerAction`, `ActReply`, `ExternalTools` types and IPC client contracts.
+- `src/runtime-planning.ts` — request admission, context/memory assembly, Misato planning loop, and step validation.
+- `src/runtime-approvals.ts` — approval cards, `decide()` handling, resume hooks, and Casper/gate coordination.
+- `src/runtime-dispatch.ts` — worker/Kaji dispatch, extra-seat routing, and remote outcome formatting (`remoteOutcomeText`).
+- `src/runtime-routes.ts` — route health tracking, outage/recovery chronicle hooks, and model-budget checks.
+- `src/runtime-instrumentality.ts` — daily consolidation/brief scheduling, watch ticks, and periodic maintenance.
+
+**`src/store.ts` split (per SQLite table group):**
+- `src/store-reminders.ts` — `reminders` and `reminder_times` CRUD, `rescheduleAllDayReminders`, `add`, `update`, `cancel`, `restore`.
+- `src/store-inbox.ts` — `deliveries`, `daily_briefs`, `approval_deliveries`, pagination (`inboxPage`, `inboxHistory`, `dashboardHistory`), and `tick()`.
+- `src/store-watch.ts` — `watch_runs`, `watch_steps`, `watch_notices`, `watch_cursors` wrappers (`watchContext`, `watchClaim`, `watchFinish`, `watchPoll`).
+- `src/store-kaji-outbox.ts` — `kaji_outbox` and `kaji_outbox_pilots` queueing and completion.
+- `src/store-push.ts` — `push_subscriptions` and `push_vapid` key/subscription storage.
+- `src/store-sorties.ts` — `Store` sortie/approval/action facade (`runAction`, `decide`, `sorties`, `explain`, `approvals`) delegating to `Ledger`.

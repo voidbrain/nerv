@@ -4,7 +4,7 @@
   "parent": "F-098",
   "title": "Fleet and spares model",
   "goal": "Drones, parts by position and spares (new/used)",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "Drone by name (Smoke…), parts by position (e.g. motor rear-left), component model",
     "Spares inventory with new and used counts"
@@ -31,8 +31,10 @@
     "estimate": "0.75 h agent",
     "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement.",
     "reviewed": "2026-11-14",
-    "agentHours": 0.75,
+    "agentHours": 0,
     "baselineAgentHours": 0.75,
-    "estimateAgentHours": 0.75
+    "estimateAgentHours": 0.75,
+    "actualAgentHours": 0.25,
+    "actualSource": "measured"
   }
 }

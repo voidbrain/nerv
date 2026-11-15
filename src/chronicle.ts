@@ -129,6 +129,80 @@ export function composeChronicle(days: ChronicleDay[], language: 'it' | 'en'): s
     ...days.map((d) => [d.day, ...d.milestones.map((m) => `• ${w.line[m.kind](m)} [${m.source}]`)].join('\n')),
   ].join('\n\n');
 }
+
+/** F-054-T02: Writer-only Proto Chronicler pilot (Fuyutsuki). */
+export const CHRONICLER_PILOT = {
+  id: 'chronicler',
+  name: 'Fuyutsuki',
+  domain: 'chronicle',
+  stage: 'prototype' as const,
+  tools: [] as string[],
+};
+
+const SOURCE_TOKEN_RE = /\b(?:registry:[0-9a-f]{6,16}|milestone:[0-9]+|S-[0-9A-Za-z-]+)\b/g;
+const BASE_ID_RE = /\b[A-Z]{2,10}-[0-9]{2,4}\b/g;
+
+/**
+ * Verifies an Eva lore retelling names only facts recorded on `day`:
+ * every recorded source on `day` must appear, and no unrecorded source or base ID may be invented.
+ */
+export function verifyChronicleMentionsOnlyDayFacts(text: string, day: ChronicleDay): { ok: boolean; reason?: string } {
+  const trimmed = text.trim();
+  if (!trimmed) return { ok: false, reason: 'Empty retelling.' };
+  const allowedSources = new Set(day.milestones.map((m) => m.source));
+  for (const src of allowedSources) {
+    if (!trimmed.includes(src)) return { ok: false, reason: `Missing recorded source ${src}.` };
+  }
+  for (const cited of trimmed.match(SOURCE_TOKEN_RE) ?? []) {
+    if (!allowedSources.has(cited)) return { ok: false, reason: `Invented or off-day source ${cited}.` };
+  }
+  const allowedTokens = new Set(
+    day.milestones.flatMap((m) => [m.subject, m.detail, m.source].join(' ').match(BASE_ID_RE) ?? []),
+  );
+  for (const id of trimmed.match(BASE_ID_RE) ?? []) {
+    if (!allowedTokens.has(id)) return { ok: false, reason: `Invented or off-day base/sortie ID ${id}.` };
+  }
+  return { ok: true };
+}
+
+/** Deterministic Eva lore chronicle in Fuyutsuki's voice, strictly grounded to each day's milestones. */
+export function composeEvaChronicle(days: ChronicleDay[], language: 'it' | 'en'): string {
+  const w = words[language];
+  const header = language === 'it' ? 'Registro di Comando — Fuyutsuki' : 'Command Log — Fuyutsuki';
+  if (!days.length) return `${header}\n${w.empty}`;
+  const opener =
+    language === 'it'
+      ? (day: string) => `${day} — Dai registri di Terminal Dogma:`
+      : (day: string) => `${day} — From the Terminal Dogma logs:`;
+  return [
+    header,
+    ...days.map((d) => [opener(d.day), ...d.milestones.map((m) => `• ${w.line[m.kind](m)} [${m.source}]`)].join('\n')),
+  ].join('\n\n');
+}
+
+/**
+ * Retells one day's milestones using the writer-only Proto Chronicler pilot,
+ * checking that the output names only the day's facts and falling back to the grounded entry otherwise.
+ */
+export async function retellChronicleDayWithPilot(
+  day: ChronicleDay,
+  askModel: (prompt: string) => Promise<string>,
+  language: 'it' | 'en' = 'en',
+): Promise<{ text: string; grounded: boolean; fallback: boolean }> {
+  const prompt = [
+    `You are ${CHRONICLER_PILOT.name} (${CHRONICLER_PILOT.id}, stage=${CHRONICLER_PILOT.stage}, writer-only, tools=none).`,
+    `Retell ONLY these recorded facts for ${day.day} in ${language === 'it' ? 'Italian' : 'English'} without inventing any fact, base, pilot, or source:`,
+    JSON.stringify(day.milestones),
+  ].join('\n');
+  try {
+    const reply = await askModel(prompt);
+    const check = verifyChronicleMentionsOnlyDayFacts(reply, day);
+    if (check.ok) return { text: reply.trim(), grounded: true, fallback: false };
+  } catch {
+    // Fall back to deterministic grounded Eva entry on model error.
+  }
+  return { text: composeEvaChronicle([day], language), grounded: true, fallback: true };
+}
 const clip = (text: string, max: number) => (text.length > max ? text.slice(0, max - 1) + '…' : text);
 /**
  * Reads the recorded milestones from the agency's database: the registry under the pinned root (each record's

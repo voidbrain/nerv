@@ -4,7 +4,7 @@
   "parent": "F-094",
   "title": "Decision: scripted first, menus second",
   "goal": "Which apps are driven by script and which by menu is written down",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "Scripting or command line per app, menu-by-name fallback through F-093, allowed folders"
   ],
@@ -26,11 +26,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h",
+    "estimate": "0 hours",
     "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
     "reviewed": "2026-11-14",
-    "agentHours": 0.5,
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
-    "estimateAgentHours": 0.5
+    "estimateAgentHours": 0.5,
+    "actualAgentHours": 0.25,
+    "actualSource": "measured"
   }
 }

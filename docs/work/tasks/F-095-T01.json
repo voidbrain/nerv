@@ -4,7 +4,7 @@
   "parent": "F-095",
   "title": "Revisit the runtime.ts deferral and name the modules",
   "goal": "The reassessment records the context-cost evidence and the module boundaries",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "A dated addendum to the 2026-11-13 reassessment: the evidence, the decision, and the target modules for runtime.ts and store.ts"
   ],
@@ -32,8 +32,10 @@
     "estimate": "0.5 h",
     "basis": "Estimated 2026-11-14 at agent speed: mechanical moves with unchanged tests. Not a measurement.",
     "reviewed": "2026-11-14",
-    "agentHours": 0.5,
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
-    "estimateAgentHours": 0.5
+    "estimateAgentHours": 0.5,
+    "actualAgentHours": 0.25,
+    "actualSource": "measured"
   }
 }

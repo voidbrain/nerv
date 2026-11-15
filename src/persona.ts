@@ -103,3 +103,70 @@ export async function decideHitlThroughPersona(
     summary: `${prefix}${match.card.tool} (${approvalId}) -> ${outcome.decision}`,
   };
 }
+
+export interface ExplainableAction {
+  tool: string;
+  pattern: string;
+  outcome: 'grant' | 'approval' | 'reject';
+  reason: string;
+  decision: string | null;
+}
+
+export interface ExplainableRecord {
+  id: string;
+  title: string;
+  status: string;
+  why: string;
+  actions: ExplainableAction[];
+}
+
+function formatExplanationText(text: string, neutralizeEvaTerms: boolean): string {
+  if (!neutralizeEvaTerms) return text;
+  return text
+    .replace(/\bThe MAGI\b/g, 'Policy review')
+    .replace(/\bStopped with the Spear\b/g, 'Stopped')
+    .replace(/\bMisato\b/g, 'Planner');
+}
+
+export function formatGendoClassificationExplanation(record: ExplainableRecord, persona?: PersonaConfig): string {
+  const config = persona ?? defaultPersonas;
+  const speaker = config.enabled ? config.names.gendo : null;
+  const prefix = speaker ? `${speaker}: ` : '';
+  const neutralizeEvaTerms = !config.enabled || config.names.gendo.toLowerCase() !== 'gendo';
+  const lines = [`${prefix}${record.id} (${record.status}) — ${formatExplanationText(record.why, neutralizeEvaTerms)}`];
+  for (const action of record.actions) {
+    const decisionTag = action.decision ? ` [${action.decision}]` : '';
+    lines.push(
+      `  - ${action.tool} (${action.pattern}) -> ${action.outcome}${decisionTag}: ${formatExplanationText(action.reason, neutralizeEvaTerms)}`,
+    );
+  }
+  return lines.join('\n');
+}
+
+export function explainClassificationThroughPersona(
+  backend: {
+    explain(ref: string): { found: 'none' | 'many' } | { found: 'one'; record: ExplainableRecord };
+  },
+  ref: string,
+  persona?: PersonaConfig,
+): {
+  speaker: string | null;
+  ref: string;
+  status: string;
+  why: string;
+  summary: string;
+} {
+  const res = backend.explain(ref);
+  if (res.found !== 'one') {
+    throw new Error(`Sortie ${ref} not found (${res.found})`);
+  }
+  const config = persona ?? defaultPersonas;
+  const speaker = config.enabled ? config.names.gendo : null;
+  return {
+    speaker,
+    ref: res.record.id,
+    status: res.record.status,
+    why: res.record.why,
+    summary: formatGendoClassificationExplanation(res.record, config),
+  };
+}

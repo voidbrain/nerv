@@ -4,7 +4,7 @@
  "parent": "F-085",
  "title": "Read-only fetch into quarantine",
  "goal": "A page or repository is fetched read-only and marked untrusted",
- "status": "ready",
+ "status": "closed",
  "acceptance": [
   "Shallow clone or page fetch into a per-job directory, discarded afterwards",
   "Content is tainted; no project code runs",
@@ -34,8 +34,10 @@
   "estimate": "1 h",
   "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
   "reviewed": "2026-11-14",
-  "agentHours": 1,
+  "agentHours": 0,
   "baselineAgentHours": 1,
-  "estimateAgentHours": 1
+  "estimateAgentHours": 1,
+  "actualAgentHours": 0.5,
+  "actualSource": "measured"
  }
 }
