@@ -115,12 +115,13 @@ export function startSnapshots(
   const dir = snapshotDir(home);
   let attempted: string | undefined,
     busy = false,
+    stopped = false,
     running: Promise<void> = Promise.resolve();
   const copied = new Map<string, string>(),
     reported = new Map<string, string>(),
     retryAt = new Map<string, number>();
   const tick = async () => {
-    if (busy) return;
+    if (busy || stopped) return;
     busy = true;
     try {
       const zone = timeZone(),
@@ -133,21 +134,23 @@ export function startSnapshots(
           log(`Nightly snapshot for ${date} failed (${reason(e)}); next attempt tomorrow.`);
         }
       }
+      if (stopped) return;
       const config = backup();
       copyOffHost(dir, config, copied, reported, log);
-      if (send) await sendToPeers(dir, config, send, copied, reported, retryAt, log, everyMs);
+      if (send && !stopped) await sendToPeers(dir, config, send, copied, reported, retryAt, log, everyMs);
     } finally {
       busy = false;
     }
   };
   const run = () => {
-    if (!busy) running = tick();
+    if (!busy && !stopped) running = tick();
   };
   const timer = setInterval(run, everyMs);
   timer.unref();
   run();
   // Stops the schedule; the promise settles once a tick already under way has finished.
   return () => {
+    stopped = true;
     clearInterval(timer);
     return running;
   };

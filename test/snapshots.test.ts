@@ -84,7 +84,7 @@ test('the schedule takes the snapshot once and logs a failure by reason only, wi
       5,
     );
     await new Promise((r) => setTimeout(r, 100));
-    stop();
+    await stop();
     assert.equal(snapshotDates(snapshotDir(f.home)).length, 1);
 
     const lines: string[] = [],
@@ -98,10 +98,41 @@ test('the schedule takes the snapshot once and logs a failure by reason only, wi
       5,
     );
     await new Promise((r) => setTimeout(r, 100));
-    stop2();
+    await stop2();
     assert.equal(lines.length, 1); // one attempt per night, not a retry loop
     assert.match(lines[0]!, /failed \(database not found\)/);
     assert.ok(!lines[0]!.includes(f.home));
+  } finally {
+    f.done();
+  }
+});
+
+test('B-067-T01: stop waits for an in-flight snapshot tick and skips new work after stop', async () => {
+  const f = fixture();
+  try {
+    let onDbRead!: () => void;
+    const dbRead = new Promise<void>((r) => (onDbRead = r));
+    let backupCalledAfterStop = false;
+    let stopped = false;
+    const stop = startSnapshots(
+      f.home,
+      () => {
+        onDbRead();
+        return f.database;
+      },
+      () => 'UTC',
+      () => {},
+      5,
+      () => {
+        if (stopped) backupCalledAfterStop = true;
+        return undefined;
+      },
+    );
+    await dbRead;
+    stopped = true;
+    await stop();
+    assert.equal(snapshotDates(snapshotDir(f.home)).length, 1, 'in-flight snapshot must finish before stop() resolves');
+    assert.equal(backupCalledAfterStop, false, 'stopped schedule must not run backup/copy after stop()');
   } finally {
     f.done();
   }
