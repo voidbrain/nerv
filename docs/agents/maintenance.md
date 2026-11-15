@@ -36,3 +36,7 @@ Review the plan and record unresolved conflicts on the owning outcome before edi
 Coverage measures executed code, not assertion quality, security, readability or maintainability. Unit coverage excludes browser execution unless explicitly instrumented; do not interpret UI unit coverage as total UI validation. Require tests for changed behavior and regression fixes, preserve clean static/security checks, and prioritize high-risk untested branches/integration joins. Do not require every PR (including docs/refactors) to increase a global percentage or add mirror tests to game a target.
 
 Projects may adopt `coverage.enforce: true` with a justified `coverage.drop` tolerance. `coverage-table --check` then fails for missing summary/main baseline/comparable metrics or regression beyond tolerance against the baseline on `origin/main` (or configured default branch); the PR's lowered baseline or removed display-folder row cannot approve itself; baseline folders remain checked. Default false retains warning-only behavior. Baseline/policy changes are explicit reviewed decisions, not automatic lowering. This is aggregate non-regression, not changed-line coverage; branch-level and browser/visual checks remain distinct.
+
+## Periodic reviews
+
+Set `reviews.<name>.days` in `.harness.json` so `check:freshness` warns when a dated report (`docs/reviews/<name>/<YYYY-MM-DD>.md` or `docs/reviews/<YYYY-MM-DD>-<name>.md`) is missing or stale.

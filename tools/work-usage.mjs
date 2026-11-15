@@ -386,8 +386,69 @@ function workingSegments(job, rows) {
   return out;
 }
 const iso = (ms) => new Date(ms).toISOString();
+const subtractIntervals = (start, end, pauses) => {
+  const out = [];
+  let cursor = start;
+  for (const [a, b] of pauses) {
+    if (a > cursor && cursor < end) out.push([cursor, Math.min(a, end)]);
+    cursor = Math.max(cursor, b);
+  }
+  if (end > cursor) out.push([cursor, end]);
+  return out;
+};
 const effectiveElapsed = (closedJobs, rows) =>
   union(closedJobs.flatMap((j) => workingSegments(j, rows)).map(([a, b]) => [iso(a), iso(b)])) ?? 0;
+function suggestedPausesForJob(job, jobPhases, jobObservations, jobAllowances, pauseGapMinutes) {
+  const jobStart = Date.parse(job.started),
+    jobEnd = job.finished ? Date.parse(job.finished) : Date.now();
+  if (!(jobEnd > jobStart)) return [];
+  const pauses = jobObservations
+      .filter((r) => r.observation.kind === 'interval' && r.observation.category === 'paused')
+      .map((r) => [Date.parse(r.observation.start), Date.parse(r.observation.end)])
+      .sort((a, b) => a[0] - b[0]),
+    points = [jobStart, jobEnd];
+  for (const p of jobPhases) points.push(Date.parse(p.at));
+  for (const r of jobObservations) {
+    const o = r.observation;
+    if (o.kind === 'interval') points.push(Date.parse(o.start), Date.parse(o.end));
+    else if (o.kind === 'estimate' || o.kind === 'price') points.push(Date.parse(o.at));
+    else if (r.recorded) points.push(Date.parse(r.recorded));
+  }
+  for (const r of jobAllowances) points.push(Date.parse(r.snapshot.observedAt));
+  const activities = [...new Set(points.filter((t) => Number.isFinite(t) && t >= jobStart && t <= jobEnd))].sort(
+      (a, b) => a - b,
+    ),
+    out = [],
+    thresholdMs = pauseGapMinutes * 60 * 1000;
+  for (const r of [...jobAllowances].sort((a, b) => a.snapshot.observedAt.localeCompare(b.snapshot.observedAt))) {
+    const obsMs = Date.parse(r.snapshot.observedAt);
+    if (obsMs < jobStart || obsMs >= jobEnd) continue;
+    const nextAct = activities.find((t) => t > obsMs) ?? jobEnd;
+    for (const b of r.snapshot.buckets) {
+      if (b.usedPercent < 100) continue;
+      const resetMs = b.resetsAt ? Date.parse(b.resetsAt) : Infinity,
+        toMs = Math.min(resetMs, nextAct, jobEnd);
+      if (toMs > obsMs)
+        for (const [a, c] of subtractIntervals(obsMs, toMs, pauses))
+          if (c > a)
+            out.push({
+              source: 'allowance-limit',
+              provider: r.snapshot.provider,
+              bucket: b.bucket,
+              from: iso(a),
+              to: iso(c),
+              durationMs: c - a,
+            });
+    }
+  }
+  for (let i = 0; i < activities.length - 1; i++) {
+    const [t1, t2] = [activities[i], activities[i + 1]];
+    if (t2 - t1 > thresholdMs)
+      for (const [a, c] of subtractIntervals(t1, t2, pauses))
+        if (c - a > thresholdMs) out.push({ source: 'activity-gap', from: iso(a), to: iso(c), durationMs: c - a });
+  }
+  return out.sort((a, b) => a.from.localeCompare(b.from) || a.source.localeCompare(b.source));
+}
 function union(intervals) {
   if (!intervals.length) return null;
   const ordered = intervals.map(([a, b]) => [Date.parse(a), Date.parse(b)]).sort((a, b) => a[0] - b[0]);
@@ -954,7 +1015,9 @@ export function main(args = process.argv.slice(2), cwd = process.cwd(), stdin = 
     if (opts.item && !/^(?:[BF]-\d{3}|unallocated)$/.test(opts.item)) throw Error('Invalid item');
     if (opts.task && (!/^[BF]-\d{3}-T\d{2}$/.test(opts.task) || (opts.item && opts.task.slice(0, 5) !== opts.item)))
       throw Error('Invalid task filter');
-    const files = readdirSync(jobs).filter((f) => /^[a-f0-9-]{36}\.json$/.test(f)),
+    const jobDirFiles = readdirSync(jobs),
+      files = jobDirFiles.filter((f) => /^[a-f0-9-]{36}\.json$/.test(f)),
+      phaseFiles = jobDirFiles.filter((f) => /^[a-f0-9-]{36}\.phase\.[a-f0-9-]{36}\.json$/.test(f)),
       eventFiles = readdirSync(events),
       allowanceFiles = readdirSync(allowances);
     if (files.length > 10000 || eventFiles.length > 100000 || allowanceFiles.length > 100000)
@@ -1051,6 +1114,32 @@ export function main(args = process.argv.slice(2), cwd = process.cwd(), stdin = 
       .filter((f) => /^[a-f0-9]{64}\.json$/.test(f))
       .map((f) => read(join(allowances, f)))
       .filter((r) => (!opts.item && !opts.repository && !opts.task) || (r.job && selected.has(r.job)));
+    let pauseGapMinutes = 15;
+    try {
+      const cfg = JSON.parse(readFileSync(join(cwd, '.harness.json'), 'utf8'));
+      if (cfg?.workUsage?.pauseGapMinutes !== undefined) {
+        const v = cfg.workUsage.pauseGapMinutes;
+        if (typeof v !== 'number' || !Number.isFinite(v) || v <= 0) throw Error('Invalid workUsage.pauseGapMinutes');
+        pauseGapMinutes = v;
+      }
+    } catch (e) {
+      if (e.code !== 'ENOENT') throw e;
+    }
+    const phasesByJob = new Map();
+    for (const pf of phaseFiles) {
+      const jobId = pf.slice(0, 36);
+      if (!selected.has(jobId)) continue;
+      if (!phasesByJob.has(jobId)) phasesByJob.set(jobId, []);
+      phasesByJob.get(jobId).push(read(join(jobs, pf)));
+    }
+    for (const j of coverage)
+      j.suggestedPauses = suggestedPausesForJob(
+        j,
+        phasesByJob.get(j.job) ?? [],
+        observations.filter((e) => e.job === j.job),
+        allowanceRows.filter((r) => r.job === j.job),
+        pauseGapMinutes,
+      );
     const sum = aggregate(rows),
       report = {
         version: 1,

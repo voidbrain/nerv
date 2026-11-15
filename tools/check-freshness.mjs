@@ -231,6 +231,67 @@ if (
   }
 }
 
+// 3d. empty backlog and roadmap (F-082)
+function hasOpenBacklogRecord(markdown) {
+  const sections = markdown.split(/^### /m).slice(1);
+  for (const section of sections) {
+    const firstLine = section.split('\n', 1)[0] ?? '';
+    if (!/(?<![A-Za-z0-9_/:.-])[BF]-\d{3,}\b/.test(firstLine)) continue;
+    const statusMatch = section.match(
+      /^\|\s*(?:(?:[🔴🟠🟡🟢🟣🔵⚪]\s*)?(Closed|Open|Investigate|Implemented|Verified|Blocked)|[^|]+\|\s*[^|]+\|\s*(Closed|Open|Investigate|Implemented|Verified|Blocked))\s*\|/imu,
+    );
+    const status = (statusMatch?.[1] ?? statusMatch?.[2] ?? '').toLowerCase();
+    if (status !== 'closed') return true;
+  }
+  return false;
+}
+
+function hasOpenRoadmapMilestone(markdown) {
+  let fence = null,
+    columns = null;
+  for (const line of markdown.split('\n')) {
+    const f = /^\s{0,3}(`{3,}|~{3,})/.exec(line);
+    if (f) {
+      if (!fence) fence = f[1];
+      else if (f[1][0] === fence[0] && f[1].length >= fence.length) fence = null;
+      columns = null;
+      continue;
+    }
+    if (fence) continue;
+    if (!line.startsWith('|')) {
+      columns = null;
+      continue;
+    }
+    const row = line
+      .split('|')
+      .slice(1, -1)
+      .map((c) => c.trim());
+    if (row.includes('Records') && (row.includes('Milestone') || row.includes('Scope') || row.includes('Acceptance'))) {
+      columns = { status: row.indexOf('Status') };
+      continue;
+    }
+    if (!columns || row.every((c) => /^:?-+:?$/.test(c))) continue;
+    if (row.every((c) => !c)) continue;
+    if (columns.status >= 0 && /\b(done|closed|completed|shipped)\b/i.test(row[columns.status] ?? '')) continue;
+    return true;
+  }
+  return false;
+}
+
+{
+  const backlogText = existsSync(backlog) ? readFileSync(backlog, 'utf8') : '';
+  const roadmapRel =
+    typeof stamp.workQueue?.roadmap === 'string' && stamp.workQueue.roadmap
+      ? stamp.workQueue.roadmap
+      : 'docs/ROADMAP.md';
+  const roadmapUrl = new URL(`../${roadmapRel}`, import.meta.url);
+  const roadmapText = existsSync(roadmapUrl) ? readFileSync(roadmapUrl, 'utf8') : '';
+  if (!hasOpenBacklogRecord(backlogText) && !hasOpenRoadmapMilestone(roadmapText))
+    warn(
+      `🤔 Owner decision: no backlog record and no roadmap milestone is open (or ${roadmapRel} is missing); agree on the next milestone with the owner before creating planned records (docs/backlog/feature-plans.md).`,
+    );
+}
+
 // 4. audit coverage per declared area (legacy date-only fallback)
 const auditHelper = new URL('./check-audits.mjs', import.meta.url);
 let last, days;
@@ -264,6 +325,63 @@ if (existsSync(auditHelper)) {
     warn(
       `The last audit (docs/audits/${last ?? 'none'}) is ${Number.isFinite(days) ? `${days} days` : 'missing'} old (limit ${MAX_AUDIT_DAYS}, freshness.auditDays in .harness.json): audit what changed since (docs, tests, style guide, accessibility, privacy) and write docs/audits/<date>.md.`,
     );
+}
+
+// 4b. periodic reviews (F-083: stamp.reviews.<name>.days; non-blocking warning)
+if (stamp.reviews !== undefined) {
+  if (!stamp.reviews || typeof stamp.reviews !== 'object' || Array.isArray(stamp.reviews)) {
+    warn('"reviews" in .harness.json must be an object mapping review names to { days, dir? }; ignored.');
+  } else {
+    const today = new Date(process.env.FRESHNESS_TODAY ?? Date.now());
+    for (const [name, cfg] of Object.entries(stamp.reviews)) {
+      if (
+        !cfg ||
+        typeof cfg !== 'object' ||
+        typeof cfg.days !== 'number' ||
+        !Number.isFinite(cfg.days) ||
+        cfg.days <= 0
+      ) {
+        warn(`Review "${name}" in .harness.json must set a positive "days" number; ignored.`);
+        continue;
+      }
+      const relDir = String(cfg.dir ?? 'docs/reviews').replace(/\/+$/, '') || 'docs/reviews';
+      const baseDir = new URL(`../${relDir}/`, import.meta.url);
+      const subDir = new URL(`../${relDir}/${name}/`, import.meta.url);
+      const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const flatRe = new RegExp(`^(\\d{4}-\\d{2}-\\d{2})[-_.]${escaped}(?:\\b|\\.|[-_])`, 'i');
+      const candidates = [];
+      if (existsSync(subDir)) {
+        for (const entry of readdirSync(subDir, { withFileTypes: true })) {
+          if (!entry.isFile()) continue;
+          const m = entry.name.match(/^(\d{4}-\d{2}-\d{2})/);
+          if (m) candidates.push({ date: m[1], path: `${relDir}/${name}/${entry.name}` });
+        }
+      }
+      if (existsSync(baseDir)) {
+        for (const entry of readdirSync(baseDir, { withFileTypes: true })) {
+          if (!entry.isFile()) continue;
+          const m = entry.name.match(flatRe);
+          if (m) candidates.push({ date: m[1], path: `${relDir}/${entry.name}` });
+        }
+      }
+      candidates.sort((a, b) => a.date.localeCompare(b.date) || a.path.localeCompare(b.path));
+      const latest = candidates.at(-1);
+      const age = latest ? Math.floor((today - new Date(`${latest.date}T00:00:00Z`)) / 86400000) : Infinity;
+      if (!Number.isFinite(age) || age > cfg.days) {
+        const docHint =
+          cfg.doc ??
+          (name === 'token'
+            ? 'docs/agents/rule-review.md'
+            : name === 'architecture'
+              ? 'docs/agents/architecture-review.md'
+              : 'docs/agents/maintenance.md');
+        const status = !latest ? 'missing' : Number.isFinite(age) ? `${age} days old` : 'invalid date';
+        warn(
+          `Review "${name}" (${latest?.path ?? 'none'}) is ${status} (limit ${cfg.days}, reviews.${name}.days in .harness.json): follow ${docHint} and write ${relDir}/${name}/<date>.md.`,
+        );
+      }
+    }
+  }
 }
 
 for (const i of infos) console.log(i);

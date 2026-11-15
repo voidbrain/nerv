@@ -1,31 +1,31 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-15T19:31:33.345Z",
+  "reviewed": "2026-11-15T21:23:44.593Z",
   "policy": "7d15ab5f3e1a37d15075876ce3efd53d93600045088f48b41a3ef0dd6ab89e7d",
   "inputs": {
-    "AGENTS.md": "d5c0da9a6960509d129db16add394550b9daae036b2cde345598d981e08a3838",
+    "AGENTS.md": "dbac13324f48d606267fd2601bab7a0aa1becb05c4d539d4fcc332f4ecfb1a10",
     "docs/BACKLOG-RULES.md": "91ea3b199cd49385549ac2869304e1cca2de94cad5bcb4f119502b594f00e621",
-    "docs/agents/architecture-review.md": "6a85ce0493f103f56cd75dbcfeb08836dc2b71515dde0da10277fd8422a75177",
+    "docs/agents/architecture-review.md": "c77b1d5736bf1d64231dab90241f5c583bca89ed756ede5bdfb84756f2d60e42",
     "docs/agents/areas.md": "19890dcd2fb04557fcb9b9bb1df4dcbd2e584736e53a5989908bb822ef020d1c",
     "docs/agents/audit.md": "e58480c21e8afe9a825df4726fa93b8a7f841557f4267f1fc2c61ac3dac8f642",
     "docs/agents/change-impact.md": "dc1c473e274f76bd70a87ff57bbc53fc75dc75a35d121cf67baf163a2fd2e975",
     "docs/agents/coverage-guide.md": "3d539eb8beedfa101a5e47d9973cdf85dce197436fab2ab096f760e12d208106",
-    "docs/agents/maintenance.md": "cf1fe2a1c06500c33096542f2385dfce1087bcc4c383d32e06ac907b816cf72e",
+    "docs/agents/maintenance.md": "d8a4427571fd395293b5892203bdd46db3930da62cccf7d1bfccafd577ef7a24",
     "docs/agents/mcp.md": "06efbb58a50f9236506ca0afa9a79bb1d42c12ca380a29ed0254bf0a537f860d",
     "docs/agents/parallel-work-plans.md": "d171d89ec5431668ff770e5fcb0098ad518da6289a0d12a56aafdae60930d567",
     "docs/agents/parallel-work.md": "28608637b73e16f1e1664af8a16047849eea464a14cdaada4d54d7a4094d83ef",
     "docs/agents/procedures.md": "d53486efdf0fdb64f4285941b8701e3bec5722671208e17e502b59bfeafc3b17",
     "docs/agents/prompt-caching.md": "3b8962bd4f2f713d5730e999e65338ebdd90347ee09dffbd9c8da98e2405a21e",
-    "docs/agents/rule-review.md": "dfdf327bff669622fdf0f0e01f9d4b7dd29be87b4b6dbfea98e60b582d8f413f",
+    "docs/agents/rule-review.md": "f7dc769532168bf99622a5813a9fc27c080872930a7a0bd37371d58faf64e3e1",
     "docs/agents/skills.md": "5d60223eccfaad88c7153f57316da5ca10bfdd9d58d3a8cebc1eef25b9f0d5f5",
     "docs/agents/solution-profile.md": "685d55612f55d157bf124e23115f95bd16fe4d4f8834a4e0e152a191e3cd45f8",
     "docs/agents/task-context.md": "c689f02b9571ff747a4866d71690bb01afd7e6654dea640a1ce1c66e7c0fa204",
-    "docs/agents/work-usage.md": "5b10c5e8e9860fdd116b5cc789c2164e0678df96a475bf7b11ad5f9f99b1453e",
+    "docs/agents/work-usage.md": "40e6b0b17fcc08bedb0ddbf405e232e2bebbca80e36e585334ecb9a2628631a7",
     "docs/backlog/closure.md": "21fcc14351588107943d9aab70991399e07af7026d48327619f215e62ecb3319",
     "docs/backlog/documentation.md": "6328e3eccb3a222af1a9f4682dcef9e763464d0842cf94b28713bbc5f61e04b1",
     "docs/backlog/estimates.md": "22d0bf4ab87f093aae35834d8a75e9e66d0ef199d2af60802412744f7a81b7a9",
     "docs/backlog/evaluations.md": "7540bf69b6b5d40dc09dc9ce82138218525733c5f602945bdaa58d5c3a743f37",
-    "docs/backlog/feature-plans.md": "c0c57eed2ba36a7e969512f1455b2af8bfff27c7ff60e1c171ba6e2ba2ee5dcf",
+    "docs/backlog/feature-plans.md": "c59318638d12531e6e2341b9af1dbbace0f6e54405b13b4ec10d3fd525e35ad4",
     "docs/backlog/ordering.md": "f36fe3410fe4d838877fe35c61c491608116b0255b864906f91eea23915d81dd",
     "docs/backlog/outcomes.md": "c6f1d8e4ac3afd85e6d90ac7cef8ae39fba765b13c821522fb005edd2b5b88e4",
     "docs/backlog/ownership.md": "d2d39a4e2a56fb7a18c5cce2fe5490282a9c89c947574746bacd71f1040c457f",
@@ -35,7 +35,7 @@
     "tools/task-claims.mjs": "ef755fe7951544e5c05b20de7c64a7b53778b6d039a11a2abeb079e7d42b6fd2",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
     "tools/work-items.mjs": "850ec6674088a9bb155680fffbb05d9585b5606409448e1806f0045c970a43ef",
-    "tools/work-usage.mjs": "65961d804edf9adc3f93a6b6ccfa04dfe9cf16275751f50247056ec3edf6589e"
+    "tools/work-usage.mjs": "09569f9b56bd6e403d4c235f980ba5fb03b2aff8fe56a28878cc298fe8a4b2af"
   },
   "measurements": {
     "samples": 19,
@@ -131,6 +131,18 @@
       "disposition": "implemented",
       "target": "docs/backlog/steps.md",
       "evidence": "Harness 8.16.1 reconciled (B-028): the Agent cell counts an implemented step the agent still verifies. Template PR #205 with fresh-context review."
+    },
+    {
+      "kind": "rule",
+      "disposition": "implemented",
+      "target": ".harness.json",
+      "evidence": "Reconciled harness 8.17.0 (suggestedPauses in work-usage, empty backlog/roadmap check in check:freshness, feature-plans.md); set workUsage.pauseGapMinutes to 15."
+    },
+    {
+      "kind": "rule",
+      "disposition": "implemented",
+      "target": "tools/check-freshness.mjs",
+      "evidence": "Reconciled with project-harness v8.18.0: periodic review cadences (reviews.token.days=30, reviews.architecture.days=30), token review in rule-review.md, outside-landscape comparison in architecture-review.md"
     }
   ]
 }
