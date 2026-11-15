@@ -2,8 +2,6 @@ import { createHash, randomBytes, createPrivateKey, createPublicKey } from 'node
 import {
   chmodSync,
   closeSync,
-  constants,
-  copyFileSync,
   existsSync,
   fsyncSync,
   lstatSync,
@@ -12,9 +10,6 @@ import {
   readFileSync,
   readSync,
   realpathSync,
-  renameSync,
-  rmSync,
-  unlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
@@ -23,26 +18,19 @@ import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
 import { spawn } from 'node:child_process';
 import { databasePath, readConfig, readToken } from './config.ts';
-import { canonical, keyIdentity, ROOT_KEY_FILE } from './kaji.ts';
-import { WINDOWS_TASK, renderService, windowsLauncher } from './service.ts';
+import { canonical, keyIdentity } from './kaji.ts';
+import { renderService } from './service.ts';
 import { NODE_FLAGS } from './process-client.ts';
-import { assertRootMigrationReady } from './root-migration.ts';
-import { lifecycleRecovery } from './node-lifecycle.ts';
-import { transaction } from './sqlite-transaction.ts';
 import { UPGRADE_CONTRACT } from './upgrade-contract.ts';
-import {
-  rehearseUpgrade,
-  parseUpgradeContract,
-  READER_ENTRY,
-  CONTRACT_ENTRY,
-  type RehearsalReport,
-  type UpgradeContractBounds,
-} from './upgrade-rehearsal.ts';
+import { READER_ENTRY, type RehearsalReport } from './upgrade-rehearsal.ts';
+import { macServiceHost } from './node-lifecycle-mac.ts';
+import { linuxServiceHost } from './node-lifecycle-linux.ts';
+import { windowsServiceHost } from './node-lifecycle-windows.ts';
 
 export const SERVICE_LIFECYCLE_PROTOCOL = 1;
 export const SERVICE_READER_SCHEMA = UPGRADE_CONTRACT.readerSchema;
-type Action = 'install' | 'start' | 'stop' | 'update' | 'uninstall';
-type State = 'running' | 'completed' | 'uncertain' | 'released' | 'refused';
+export type Action = 'install' | 'start' | 'stop' | 'update' | 'uninstall';
+export type State = 'running' | 'completed' | 'uncertain' | 'released' | 'refused';
 export type ServiceKind = 'mac-service' | 'linux-service' | 'windows-service';
 export interface ServiceContext {
   userHome: string;
@@ -127,9 +115,9 @@ export interface ServiceHost {
   health?(plan: ServicePlan): Promise<ServiceHealthCheck>;
   authorizedStart?(plan: ServicePlan): Promise<boolean>;
 }
-const hash = (value: string | Buffer) => createHash('sha256').update(value).digest('hex');
+export const hash = (value: string | Buffer) => createHash('sha256').update(value).digest('hex');
 /** The handler identity covers this file, the rehearsal comparison it gates updates on and the reader contract, so a plan made under other code or bounds is refused. */
-const handler = () =>
+export const handler = () =>
   hash(
     Buffer.concat([
       readFileSync(fileURLToPath(import.meta.url)),
@@ -137,26 +125,26 @@ const handler = () =>
       Buffer.from(canonical(UPGRADE_CONTRACT)),
     ]),
   );
-const object = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
-const hostKind = (host: ServiceHost): ServiceKind => host.kind ?? 'mac-service';
+export const object = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
+export const hostKind = (host: ServiceHost): ServiceKind => host.kind ?? 'mac-service';
 const platformOf = (kind: ServiceKind): 'darwin' | 'linux' | 'win32' =>
   kind === 'windows-service' ? 'win32' : kind === 'linux-service' ? 'linux' : 'darwin';
-const definition = (c: ServiceContext, kind: ServiceKind = 'mac-service', overridePath?: string) =>
+export const definition = (c: ServiceContext, kind: ServiceKind = 'mac-service', overridePath?: string) =>
   overridePath ??
   (kind === 'windows-service'
     ? join(c.home, 'nerv-task.xml')
     : kind === 'linux-service'
       ? join(process.env.XDG_CONFIG_HOME || join(c.userHome, '.config'), 'systemd/user/nerv.service')
       : join(c.userHome, 'Library/LaunchAgents/io.nerv.agent.plist'));
-const windowsLauncherPath = (c: ServiceContext) => join(c.home, 'nerv-service.vbs');
-const expectedDefinition = (c: ServiceContext, kind: ServiceKind = 'mac-service'): string | Buffer =>
+export const windowsLauncherPath = (c: ServiceContext) => join(c.home, 'nerv-service.vbs');
+export const expectedDefinition = (c: ServiceContext, kind: ServiceKind = 'mac-service'): string | Buffer =>
   kind === 'windows-service'
     ? Buffer.from('\ufeff' + renderService('win32', c.home, c.source, c.node), 'utf16le')
     : renderService(platformOf(kind), c.home, c.source, c.node);
-const area = (c: ServiceContext) => join(c.userHome, '.nerv-lifecycle');
-const resource = (c: ServiceContext, kind: ServiceKind = 'mac-service') =>
+export const area = (c: ServiceContext) => join(c.userHome, '.nerv-lifecycle');
+export const resource = (c: ServiceContext, kind: ServiceKind = 'mac-service') =>
   'user-service:' + c.uid + ':' + platformOf(kind);
-function safe(path: string, uid: number, privateMode = false): void {
+export function safe(path: string, uid: number, privateMode = false): void {
   const stat = lstatSync(path);
   if (
     stat.isSymbolicLink() ||
@@ -169,7 +157,7 @@ function safe(path: string, uid: number, privateMode = false): void {
   const actual = realpathSync(path);
   if (actual !== resolve(path)) throw Error('Service paths must be canonical and symlink-free.');
 }
-function present(path: string): boolean {
+export function present(path: string): boolean {
   try {
     lstatSync(path);
     return true;
@@ -178,7 +166,7 @@ function present(path: string): boolean {
     throw e;
   }
 }
-function syncDirectory(path: string): void {
+export function syncDirectory(path: string): void {
   if (process.platform === 'win32') return;
   const fd = openSync(path, 'r');
   try {
@@ -187,7 +175,7 @@ function syncDirectory(path: string): void {
     closeSync(fd);
   }
 }
-function fileHash(path: string): string {
+export function fileHash(path: string): string {
   const fd = openSync(path, 'r'),
     digest = createHash('sha256'),
     bytes = Buffer.alloc(65536);
@@ -199,7 +187,7 @@ function fileHash(path: string): string {
     closeSync(fd);
   }
 }
-function exclusive(path: string, bytes: string | Buffer): void {
+export function exclusive(path: string, bytes: string | Buffer): void {
   const fd = openSync(path, 'wx', 0o600);
   try {
     writeFileSync(fd, bytes);
@@ -209,7 +197,7 @@ function exclusive(path: string, bytes: string | Buffer): void {
   }
   syncDirectory(dirname(path));
 }
-function journal(c: ServiceContext, write = false): DatabaseSync | undefined {
+export function journal(c: ServiceContext, write = false): DatabaseSync | undefined {
   const root = area(c),
     marker = join(root, 'owner.json'),
     file = join(root, 'journal.sqlite'),
@@ -250,19 +238,19 @@ function journal(c: ServiceContext, write = false): DatabaseSync | undefined {
   }
   return db;
 }
-function stored(db: DatabaseSync | undefined, digest: string): ServiceReceipt | undefined {
+export function stored(db: DatabaseSync | undefined, digest: string): ServiceReceipt | undefined {
   if (!db || !db.prepare("SELECT 1 FROM sqlite_master WHERE name='operations'").get()) return;
   const row = db.prepare('SELECT receipt FROM operations WHERE digest=?').get(digest) as
     { receipt: string } | undefined;
   return row ? (JSON.parse(row.receipt) as ServiceReceipt) : undefined;
 }
-function held(db: DatabaseSync | undefined): boolean {
+export function held(db: DatabaseSync | undefined): boolean {
   return (
     !!db?.prepare("SELECT 1 FROM sqlite_master WHERE name='resource'").get() &&
     !!db.prepare('SELECT 1 FROM resource').get()
   );
 }
-function blockers(action: Action, o: ServiceObservation, next?: string): string[] {
+export function blockers(action: Action, o: ServiceObservation, next?: string): string[] {
   const out: string[] = [];
   if (o.schema < UPGRADE_CONTRACT.minimumServiceSchema || o.schema > SERVICE_READER_SCHEMA)
     out.push('The selected database schema is unsupported.');
@@ -324,7 +312,7 @@ export async function planService(host: ServiceHost, action: Action, nextRevisio
   };
   return { ...body, digest: hash(canonical(body)) };
 }
-function planOf(raw: unknown, host: ServiceHost): ServicePlan {
+export function planOf(raw: unknown, host: ServiceHost): ServicePlan {
   if (
     !object(raw) ||
     raw.version !== SERVICE_LIFECYCLE_PROTOCOL ||
@@ -349,7 +337,7 @@ export function serviceReceipt(host: ServiceHost, digest: string): ServiceReceip
     db?.close();
   }
 }
-async function processIdentity(pid: number): Promise<string | undefined> {
+export async function processIdentity(pid: number): Promise<string | undefined> {
   if (!Number.isInteger(pid) || pid <= 0) return undefined;
   if (process.platform === 'win32') {
     const r = await command('powershell', [
@@ -428,626 +416,7 @@ export async function guardLocalService(home: string, managedStart = false): Pro
         : macServiceHost(join(homedir(), '.nerv'));
   await assertServiceStartup(host, managedStart && resolve(home) === host.context.home);
 }
-const inspectHint = (p: ServicePlan): string =>
-  p.kind === 'windows-service'
-    ? `Inspect and stop the Windows Task Scheduler task before anything else (schtasks /Query /TN "${WINDOWS_TASK}" /V /FO LIST; schtasks /End /TN "${WINDOWS_TASK}"), and confirm no descendant process remains.`
-    : p.kind === 'linux-service'
-      ? 'Inspect and stop the user service before anything else (systemctl --user status nerv.service; systemctl --user disable --now nerv.service), and confirm no descendant process remains.'
-      : `Inspect and stop the service before anything else (launchctl print gui/${p.context.uid}/io.nerv.agent; launchctl bootout gui/${p.context.uid}/io.nerv.agent), and confirm no descendant process remains.`;
-const manualRecoverySteps = (p: ServicePlan, forwardOnly = false): string[] =>
-  p.action === 'update'
-    ? forwardOnly
-      ? [
-          inspectHint(p),
-          'Never start the previous revision on forward-migrated data; recovery never runs automatically.',
-          'If dependencies failed or node_modules is missing, run npm ci --ignore-scripts in the checkout as it is so the CLI can load; do not start the service from it.',
-          `Check out the previous revision (${p.before.revision}) by hand and run npm ci --ignore-scripts && npm run build (do not start the service yet).`,
-          `Restore the verified operation backup and release the held operation with nodes lifecycle-recover --receipt FILE --evidence FILE --confirm-backup-restore ${p.digest} (refused while the service or any descendant remains).`,
-          'Inspect and apply a fresh start plan (nodes lifecycle-inspect --action start, then nodes lifecycle-apply).',
-        ]
-      : [
-          inspectHint(p),
-          'If dependencies failed or node_modules is missing, run npm ci --ignore-scripts in the checkout as it is so the CLI can load; do not start the service from it.',
-          'Release the held operation with nodes lifecycle-release --receipt FILE --evidence FILE (refused while the service or any descendant remains).',
-          `Check out the previous revision (${p.before.revision}) by hand and run npm ci --ignore-scripts && npm run build.`,
-          'Inspect and apply a fresh start plan (nodes lifecycle-inspect --action start, then nodes lifecycle-apply).',
-        ]
-    : [
-        inspectHint(p),
-        'Release the held operation with nodes lifecycle-release --receipt FILE --evidence FILE (refused while the service or any descendant remains).',
-        'Inspect and apply a fresh plan after resolving the reported failure.',
-      ];
-
-const BACKUP_EXTRA_FILES = [
-  'config.json',
-  'token',
-  'base-key',
-  'base.pub',
-  ROOT_KEY_FILE,
-  'anthropic-key',
-  'telegram-token',
-] as const;
-
-function verifyUpdateBackup(
-  c: ServiceContext,
-  digest: string,
-  expectedSchema: number,
-  expectedDigest?: string,
-): { dir: string; databaseFile: string; databaseDigest: string; files: Record<string, string> } {
-  const dir = join(area(c), 'backups', digest),
-    manifestPath = join(dir, 'manifest.json'),
-    databaseFile = join(dir, 'database.sqlite');
-  if (!present(dir) || !present(manifestPath) || !present(databaseFile))
-    throw Error('Operation backup for forward-migration recovery is missing.');
-  safe(dir, c.uid, true);
-  safe(manifestPath, c.uid, true);
-  safe(databaseFile, c.uid, true);
-  let manifest: { files?: unknown; database?: unknown; restore?: unknown };
-  try {
-    manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as {
-      files?: unknown;
-      database?: unknown;
-      restore?: unknown;
-    };
-  } catch {
-    throw Error('Operation backup manifest could not be parsed.');
-  }
-  const databaseDigest = fileHash(databaseFile);
-  if (
-    typeof manifest.database !== 'string' ||
-    manifest.database !== databaseDigest ||
-    (expectedDigest !== undefined && databaseDigest !== expectedDigest) ||
-    !object(manifest.files)
-  )
-    throw Error('Operation backup database does not match its verified manifest.');
-  const files: Record<string, string> = {};
-  for (const [name, expectedHash] of Object.entries(manifest.files)) {
-    if (!BACKUP_EXTRA_FILES.includes(name as (typeof BACKUP_EXTRA_FILES)[number]) || typeof expectedHash !== 'string')
-      throw Error('Operation backup manifest contains an invalid file entry.');
-    const filePath = join(dir, name);
-    if (!present(filePath)) throw Error(`Operation backup file ${name} is missing.`);
-    safe(filePath, c.uid, name !== 'base.pub');
-    if (fileHash(filePath) !== expectedHash) throw Error(`Operation backup file ${name} differs from its manifest.`);
-    files[name] = expectedHash;
-  }
-  const check = new DatabaseSync(databaseFile, { readOnly: true });
-  try {
-    const schema = Number(check.prepare('PRAGMA user_version').get()!.user_version);
-    const quick = check.prepare('PRAGMA quick_check').get() as { quick_check?: string } | undefined;
-    if (quick?.quick_check !== 'ok' || schema !== expectedSchema)
-      throw Error('Operation backup database failed integrity or schema verification.');
-  } finally {
-    check.close();
-  }
-  return { dir, databaseFile, databaseDigest, files };
-}
-export async function applyService(
-  host: ServiceHost,
-  raw: unknown,
-  confirm: string,
-  onStep?: (step: string) => void,
-): Promise<ServiceReceipt> {
-  const p = planOf(raw, host);
-  if (confirm !== p.digest) throw Error('Confirm the exact service plan digest.');
-  let db = journal(host.context);
-  try {
-    const old = stored(db, p.digest);
-    if (old) return old;
-  } finally {
-    db?.close();
-  }
-  if (
-    p.handler !== handler() ||
-    !Number.isFinite(Date.parse(p.created)) ||
-    Math.abs(Date.now() - Date.parse(p.created)) > 86400000 ||
-    p.blockers.length
-  )
-    throw Error('Service plan is blocked, stale or uses another handler.');
-  const observed = await host.inspect();
-  if (
-    canonical(observed) !== canonical(p.before) ||
-    blockers(p.action, observed, p.nextRevision).length ||
-    (p.action === 'update' && !(await host.compatible(p.nextRevision!)))
-  )
-    throw Error('Service evidence changed; make a fresh plan.');
-  const identity = await processIdentity(process.pid);
-  if (!identity) throw Error('Lifecycle handler identity could not be recorded.');
-  db = journal(host.context, true)!;
-  let receipt: ServiceReceipt | undefined;
-  const owns = () => {
-    const r = db!.prepare('SELECT * FROM resource WHERE id=1').get();
-    if (
-      !receipt ||
-      r?.digest !== receipt.digest ||
-      r.fence !== receipt.fence ||
-      r.nonce !== receipt.nonce ||
-      r.pid !== receipt.pid
-    )
-      throw Error('Lifecycle ownership changed.');
-  };
-  const save = () =>
-    db!.prepare('UPDATE operations SET receipt=? WHERE digest=?').run(JSON.stringify(receipt), p.digest);
-  const step = async (name: string, effect: () => Promise<void> | void) => {
-    transaction(db!, () => {
-      owns();
-      receipt!.steps.push(name + ':started');
-      save();
-    });
-    onStep?.(name + ':started');
-    await effect();
-    transaction(db!, () => {
-      owns();
-      receipt!.steps[receipt!.steps.length - 1] = name + ':completed';
-      save();
-    });
-    onStep?.(name + ':completed');
-  };
-  const inspectOwned = async (registered: boolean) => {
-    owns();
-    const current = await host.inspect();
-    if (
-      current.definition !== 'owned' ||
-      current.profile !== p.before.profile ||
-      current.schema !== p.before.schema ||
-      current.legacy ||
-      !current.session ||
-      current.registration !== (registered ? 'owned' : 'absent')
-    )
-      throw Error('Selected service ownership changed.');
-    return current;
-  };
-  try {
-    const cached = transaction(db, () => {
-      const previous = stored(db, p.digest);
-      if (previous) return previous;
-      if (held(db)) throw Error('Another lifecycle operation holds the user service.');
-      db!.prepare('UPDATE clock SET value=value+1 WHERE id=1').run();
-      const fence = Number(db!.prepare('SELECT value FROM clock').get()!.value);
-      receipt = {
-        digest: p.digest,
-        resource: resource(host.context, hostKind(host)),
-        fence,
-        nonce: randomBytes(16).toString('hex'),
-        pid: process.pid,
-        identity,
-        state: 'running',
-        steps: [],
-      };
-      db!.prepare('INSERT INTO resource VALUES(1,?,?,?,?)').run(p.digest, fence, receipt.nonce, process.pid);
-      db!.prepare('INSERT INTO operations VALUES(?,?,?)').run(p.digest, canonical(p), JSON.stringify(receipt));
-      return undefined;
-    });
-    if (cached) return cached;
-    onStep?.('accepted');
-    if (p.action === 'install')
-      await step('definition', async () => {
-        const fresh = await host.inspect();
-        if (canonical(fresh) !== canonical(p.before)) throw Error('Installation evidence changed.');
-        const defPath = definition(host.context, hostKind(host), host.definitionPath);
-        const dir = dirname(defPath);
-        if (!existsSync(dir)) mkdirSync(dir, { recursive: true, mode: 0o700 });
-        safe(dir, host.context.uid);
-        if (hostKind(host) === 'windows-service') {
-          exclusive(
-            windowsLauncherPath(host.context),
-            windowsLauncher(host.context.home, host.context.source, host.context.node),
-          );
-        }
-        exclusive(defPath, expectedDefinition(host.context, hostKind(host)));
-      });
-    if (p.action === 'stop')
-      await step('stop', async () => {
-        const current = await inspectOwned(p.before.registration === 'owned');
-        if (current.registration === 'owned') await host.command('unregister', p);
-        await waitFor(async () => {
-          const next = await host.inspect();
-          return next.registration === 'absent' && next.runtime === 'stopped' && !next.pids.length;
-        });
-        for (const pid of p.before.pids) {
-          try {
-            process.kill(pid, 0);
-            throw Error('A selected descendant remains alive.');
-          } catch (e) {
-            if (!(e instanceof Error) || !('code' in e) || e.code !== 'ESRCH') throw e;
-          }
-        }
-      });
-    if (p.action === 'uninstall')
-      await step('remove-definition', async () => {
-        const current = await inspectOwned(false);
-        if (current.runtime !== 'stopped' || current.pids.length) throw Error('Runtime descendants remain.');
-        const defPath = definition(host.context, hostKind(host), host.definitionPath);
-        safe(defPath, host.context.uid, true);
-        if (hash(readFileSync(defPath)) !== hash(expectedDefinition(host.context, hostKind(host))))
-          throw Error('Definition changed before removal.');
-        unlinkSync(defPath);
-        if (hostKind(host) === 'windows-service' && present(windowsLauncherPath(host.context))) {
-          unlinkSync(windowsLauncherPath(host.context));
-        }
-        syncDirectory(dirname(defPath));
-      });
-    if (p.action === 'update') {
-      await step('backup', async () => {
-        await inspectOwned(false);
-        const root = join(area(host.context), 'backups');
-        if (!existsSync(root)) mkdirSync(root, { mode: 0o700 });
-        safe(root, host.context.uid, true);
-        const dest = join(root, p.digest);
-        mkdirSync(dest, { mode: 0o700 });
-        await host.backup(dest);
-      });
-      const settled = async (revision: string) => {
-        const current = await inspectOwned(false);
-        if (current.runtime !== 'stopped' || current.pids.length || !current.clean || current.revision !== revision)
-          throw Error('Runtime or source changed during update.');
-      };
-      const source = (command: 'fetch' | 'checkout' | 'dependencies' | 'build') =>
-        step(command, async () => {
-          await settled(['dependencies', 'build'].includes(command) ? p.nextRevision! : p.before.revision);
-          await host.command(command, p);
-        });
-      await source('fetch');
-      // The candidate's reader runs on this operation's own backup before the checkout changes; the installed code compares.
-      let refused = false;
-      await step('rehearse', async () => {
-        await settled(p.before.revision);
-        const backupDir = join(area(host.context), 'backups', p.digest);
-        const report = await host.rehearse(p, backupDir);
-        await settled(p.before.revision);
-        const blockers = [...report.blockers];
-        if (!blockers.length && report.result?.forwardOnly) {
-          try {
-            verifyUpdateBackup(host.context, p.digest, p.before.schema, report.source.digest);
-          } catch (error) {
-            blockers.push(
-              'Forward migration requires a verified operation backup for explicit recovery (' +
-                (error instanceof Error ? error.message : 'backup verification failed') +
-                ').',
-            );
-          }
-        }
-        receipt!.rehearsal = { source: report.source, ...(report.result ? { result: report.result } : {}), blockers };
-        refused = blockers.length > 0;
-      });
-      // A reported blocker is a determinate end: source, data and service are as planned, so the claim is released without uncertainty.
-      if (refused) {
-        transaction(db, () => {
-          owns();
-          receipt!.state = 'refused';
-          save();
-          db!.prepare('DELETE FROM resource WHERE id=1 AND fence=? AND nonce=?').run(receipt!.fence, receipt!.nonce);
-        });
-        return receipt!;
-      }
-      for (const command of ['checkout', 'dependencies', 'build'] as const) await source(command);
-    }
-    if (['install', 'start', 'update'].includes(p.action))
-      await step('start', async () => {
-        const current = await inspectOwned(false);
-        const expectedSchema =
-          p.action === 'update' ? (receipt!.rehearsal?.result?.schema ?? p.before.schema) : p.before.schema;
-        if (
-          current.runtime !== 'stopped' ||
-          current.pids.length ||
-          !current.clean ||
-          current.revision !== (p.nextRevision ?? p.before.revision)
-        )
-          throw Error('Selected runtime/source changed before start.');
-        await host.command('register', p);
-        await waitFor(async () => {
-          const next = await host.inspect();
-          return (
-            next.registration === 'owned' &&
-            next.runtime === 'owned' &&
-            next.profile === p.before.profile &&
-            next.revision === (p.nextRevision ?? p.before.revision) &&
-            next.schema === expectedSchema
-          );
-        });
-      });
-    await step('verify', async () => {
-      const current = await host.inspect();
-      if (['install', 'start', 'update'].includes(p.action) && (host.health || p.action === 'update')) {
-        if (!host.health) throw Error('Post-start health check is required for updates.');
-        const health = await host.health(p);
-        transaction(db!, () => {
-          owns();
-          receipt!.health = health;
-          save();
-        });
-        if (!health.ok)
-          throw Error(
-            'Started service failed post-start health check (' +
-              health.failures.join('; ') +
-              '); effects remain uncertain — follow ordered manual recovery.',
-          );
-      }
-      if (
-        p.action === 'uninstall'
-          ? current.definition !== 'absent' || current.registration !== 'absent' || current.runtime !== 'stopped'
-          : p.action === 'stop'
-            ? current.definition !== 'owned' || current.registration !== 'absent' || current.runtime !== 'stopped'
-            : current.definition !== 'owned' || current.registration !== 'owned' || current.runtime !== 'owned'
-      )
-        throw Error('Final service state did not match the operation.');
-    });
-    transaction(db, () => {
-      owns();
-      receipt!.state = 'completed';
-      save();
-      db!.prepare('DELETE FROM resource WHERE id=1 AND fence=? AND nonce=?').run(receipt!.fence, receipt!.nonce);
-    });
-    return receipt!;
-  } catch (error) {
-    if (receipt)
-      try {
-        transaction(db, () => {
-          owns();
-          receipt!.state = 'uncertain';
-          if (['install', 'start', 'update'].includes(p.action))
-            receipt!.recovery = manualRecoverySteps(p, receipt!.rehearsal?.result?.forwardOnly === true);
-          save();
-        });
-      } catch {}
-    throw error;
-  } finally {
-    db.close();
-  }
-}
-export function releaseService(host: ServiceHost, snapshot: unknown, evidence: unknown): ServiceReceipt {
-  const decision = lifecycleRecovery(snapshot, evidence);
-  if (decision.action === 'retain') throw Error('Explicit stopped-handler/descendant evidence is required.');
-  const db = journal(host.context);
-  if (!db) throw Error('No lifecycle receipt.');
-  db.close();
-  const writable = journal(host.context, true)!;
-  try {
-    return transaction(writable, () => {
-      const old = stored(writable, decision.snapshot.digest);
-      if (!old) throw Error('No lifecycle receipt.');
-      if (decision.action === 'return-receipt') return old;
-      if (
-        canonical({
-          digest: old.digest,
-          resource: old.resource,
-          fence: old.fence,
-          nonce: old.nonce,
-          state: old.state,
-        }) !== canonical(decision.snapshot)
-      )
-        throw Error('Lifecycle receipt changed.');
-      try {
-        process.kill(old.pid, 0);
-        throw Error('Lifecycle handler remains live.');
-      } catch (e) {
-        if (!(e instanceof Error) || !('code' in e) || e.code !== 'ESRCH')
-          throw Error('Lifecycle handler must be confirmed stopped.');
-      }
-      const r = writable.prepare('SELECT * FROM resource WHERE id=1').get();
-      if (r?.digest !== old.digest || r.fence !== old.fence || r.nonce !== old.nonce || r.pid !== old.pid)
-        throw Error('Lifecycle resource changed.');
-      const planRow = writable.prepare('SELECT plan FROM operations WHERE digest=?').get(old.digest) as
-        { plan: string } | undefined;
-      if (planRow) {
-        const storedPlan = JSON.parse(planRow.plan) as ServicePlan;
-        if (storedPlan.action === 'update') {
-          if (old.rehearsal?.result?.forwardOnly)
-            throw Error(
-              'Candidate update migrates the database schema forward; never release without restoring the operation backup — use nodes lifecycle-recover.',
-            );
-          const liveDbPath = databasePath(host.context.home);
-          if (!present(liveDbPath))
-            throw Error(
-              'Live database is missing after an uncertain update; use nodes lifecycle-recover to restore the operation backup.',
-            );
-          safe(liveDbPath, host.context.uid);
-          const liveDb = new DatabaseSync(liveDbPath, { readOnly: true });
-          let liveSchema: number;
-          try {
-            liveSchema = Number(liveDb.prepare('PRAGMA user_version').get()!.user_version);
-          } finally {
-            liveDb.close();
-          }
-          if (liveSchema > storedPlan.before.schema)
-            throw Error(
-              'Live database was migrated forward from schema ' +
-                storedPlan.before.schema +
-                ' to ' +
-                liveSchema +
-                '; never start the previous revision on migrated data — use nodes lifecycle-recover to restore the operation backup.',
-            );
-          if (liveSchema !== storedPlan.before.schema)
-            throw Error(
-              'Live database schema changed during uncertain update (' +
-                storedPlan.before.schema +
-                ' -> ' +
-                liveSchema +
-                '); use nodes lifecycle-recover to restore the operation backup.',
-            );
-        }
-      }
-      const released = { ...old, state: 'released' as const };
-      writable.prepare('UPDATE operations SET receipt=? WHERE digest=?').run(JSON.stringify(released), old.digest);
-      writable
-        .prepare('INSERT INTO releases(digest,reason,created) VALUES(?,?,?)')
-        .run(old.digest, decision.reason!, new Date().toISOString());
-      writable.prepare('DELETE FROM resource WHERE id=1 AND fence=? AND nonce=?').run(old.fence, old.nonce);
-      return released;
-    });
-  } finally {
-    writable.close();
-  }
-}
-/** The CLI release: the selected service must be observed unregistered and stopped first, whatever the evidence says. */
-export async function releaseObservedService(
-  host: ServiceHost,
-  snapshot: unknown,
-  evidence: unknown,
-): Promise<ServiceReceipt> {
-  const current = await host.inspect();
-  if (current.registration !== 'absent' || current.runtime !== 'stopped' || current.pids.length)
-    throw Error('The service is still registered or running; stop it and its descendants before releasing.');
-  return releaseService(host, snapshot, evidence);
-}
-function restoreVerifiedUpdateBackup(
-  c: ServiceContext,
-  digest: string,
-  expectedSchema: number,
-  expectedDigest?: string,
-): { digest: string; schema: number } {
-  safe(c.home, c.uid, true);
-  const verified = verifyUpdateBackup(c, digest, expectedSchema, expectedDigest);
-  const liveDbPath = databasePath(c.home);
-  const tag = randomBytes(8).toString('hex');
-  const candidateDb = join(c.home, '.restore-db-' + tag + '.sqlite');
-  const stagedFiles: { staged: string; dest: string }[] = [];
-  try {
-    copyFileSync(verified.databaseFile, candidateDb, constants.COPYFILE_EXCL);
-    chmodSync(candidateDb, 0o600);
-    const fd = openSync(candidateDb, 'r+');
-    try {
-      fsyncSync(fd);
-    } finally {
-      closeSync(fd);
-    }
-    if (fileHash(candidateDb) !== verified.databaseDigest)
-      throw Error('Operation backup changed while staging restore.');
-    for (const [name, expectedHash] of Object.entries(verified.files)) {
-      const src = join(verified.dir, name);
-      const dest = join(c.home, name);
-      const staged = join(c.home, '.restore-' + name + '-' + tag);
-      stagedFiles.push({ staged, dest });
-      copyFileSync(src, staged, constants.COPYFILE_EXCL);
-      chmodSync(staged, name === 'base.pub' ? 0o644 : 0o600);
-      const fileFd = openSync(staged, 'r+');
-      try {
-        fsyncSync(fileFd);
-      } finally {
-        closeSync(fileFd);
-      }
-      if (fileHash(staged) !== expectedHash)
-        throw Error(`Operation backup file ${name} changed while staging restore.`);
-    }
-    renameSync(candidateDb, liveDbPath);
-    for (const suffix of ['-wal', '-shm', '-journal']) {
-      const sidecar = liveDbPath + suffix;
-      if (present(sidecar)) unlinkSync(sidecar);
-    }
-    for (const { staged, dest } of stagedFiles) {
-      renameSync(staged, dest);
-    }
-    syncDirectory(c.home);
-  } finally {
-    if (present(candidateDb)) rmSync(candidateDb, { force: true });
-    for (const { staged } of stagedFiles) {
-      if (present(staged)) rmSync(staged, { force: true });
-    }
-  }
-  const check = new DatabaseSync(liveDbPath, { readOnly: true });
-  try {
-    const schema = Number(check.prepare('PRAGMA user_version').get()!.user_version);
-    const quick = check.prepare('PRAGMA quick_check').get() as { quick_check?: string } | undefined;
-    if (quick?.quick_check !== 'ok' || schema !== expectedSchema || fileHash(liveDbPath) !== verified.databaseDigest)
-      throw Error('Restored live database failed post-restore verification.');
-    return { digest: verified.databaseDigest, schema };
-  } finally {
-    check.close();
-  }
-}
-/**
- * Explicit owner-invoked recovery for an uncertain update (F-005-T15). Never runs automatically: requires stopped
- * service/descendants, dead applying handler, clean checkout at the previous revision, and explicit confirmation of
- * the operation digest to restore the verified operation backup before releasing the lifecycle claim.
- */
-export async function recoverServiceUpdate(
-  host: ServiceHost,
-  snapshot: unknown,
-  evidence: unknown,
-  confirmBackupRestore: string,
-): Promise<ServiceReceipt> {
-  const decision = lifecycleRecovery(snapshot, evidence);
-  if (decision.action === 'retain') throw Error('Explicit stopped-handler/descendant evidence is required.');
-  if (confirmBackupRestore !== decision.snapshot.digest)
-    throw Error('Confirm the exact operation digest to restore its backup.');
-  const current = await host.inspect();
-  if (current.registration !== 'absent' || current.runtime !== 'stopped' || current.pids.length)
-    throw Error('The service is still registered or running; stop it and its descendants before recovering.');
-  if (current.definition !== 'owned' || current.legacy)
-    throw Error('Service definition or legacy ownership changed; reconcile ownership before restoring the backup.');
-  if (current.pending)
-    throw Error(
-      'Unresolved worker jobs or outbox effects exist in the live database; reconcile them before restoring the backup.',
-    );
-  if (!current.built) throw Error('Build the previous revision before restoring the operation backup.');
-  const db = journal(host.context);
-  if (!db) throw Error('No lifecycle receipt.');
-  db.close();
-  const writable = journal(host.context, true)!;
-  try {
-    return transaction(writable, () => {
-      const old = stored(writable, decision.snapshot.digest);
-      if (!old) throw Error('No lifecycle receipt.');
-      if (decision.action === 'return-receipt') {
-        if (!old.restoredBackup) throw Error('Stored receipt was not recovered from an operation backup.');
-        return old;
-      }
-      if (
-        canonical({
-          digest: old.digest,
-          resource: old.resource,
-          fence: old.fence,
-          nonce: old.nonce,
-          state: old.state,
-        }) !== canonical(decision.snapshot)
-      )
-        throw Error('Lifecycle receipt changed.');
-      try {
-        process.kill(old.pid, 0);
-        throw Error('Lifecycle handler remains live.');
-      } catch (e) {
-        if (!(e instanceof Error) || !('code' in e) || e.code !== 'ESRCH')
-          throw Error('Lifecycle handler must be confirmed stopped.');
-      }
-      const r = writable.prepare('SELECT * FROM resource WHERE id=1').get();
-      if (r?.digest !== old.digest || r.fence !== old.fence || r.nonce !== old.nonce || r.pid !== old.pid)
-        throw Error('Lifecycle resource changed.');
-      const planRow = writable.prepare('SELECT plan FROM operations WHERE digest=?').get(old.digest) as
-        { plan: string } | undefined;
-      if (!planRow) throw Error('Stored update plan is missing.');
-      const storedPlan = planOf(JSON.parse(planRow.plan), host);
-      if (storedPlan.action !== 'update')
-        throw Error('Backup restore recovery applies only to uncertain update operations.');
-      if (!current.clean || current.revision !== storedPlan.before.revision)
-        throw Error(
-          `Check out the previous revision (${storedPlan.before.revision}) with a clean working tree before restoring the operation backup.`,
-        );
-      const restored = restoreVerifiedUpdateBackup(
-        host.context,
-        old.digest,
-        storedPlan.before.schema,
-        old.rehearsal?.source.digest,
-      );
-      const released: ServiceReceipt = {
-        ...old,
-        state: 'released',
-        restoredBackup: {
-          digest: restored.digest,
-          schema: restored.schema,
-          revision: storedPlan.before.revision,
-        },
-      };
-      writable.prepare('UPDATE operations SET receipt=? WHERE digest=?').run(JSON.stringify(released), old.digest);
-      writable
-        .prepare('INSERT INTO releases(digest,reason,created) VALUES(?,?,?)')
-        .run(old.digest, decision.reason!, new Date().toISOString());
-      writable.prepare('DELETE FROM resource WHERE id=1 AND fence=? AND nonce=?').run(old.fence, old.nonce);
-      return released;
-    });
-  } finally {
-    writable.close();
-  }
-}
-async function waitFor(check: () => Promise<boolean>): Promise<void> {
+export async function waitFor(check: () => Promise<boolean>): Promise<void> {
   for (let i = 0; i < 80; i++) {
     if (await check()) return;
     await new Promise((done) => setTimeout(done, 250));
@@ -1055,12 +424,12 @@ async function waitFor(check: () => Promise<boolean>): Promise<void> {
   throw Error('Service outcome is unconfirmed; inspect the retained receipt.');
 }
 
-interface Result {
+export interface Result {
   status: number | null;
   out: string;
   err: string;
 }
-async function command(
+export async function command(
   program: string,
   args: string[],
   cwd?: string,
@@ -1262,814 +631,16 @@ export async function compatibleServiceRevision(
     return false;
   }
 }
-export function macRegistrationMatches(output: string, c: ServiceContext): boolean {
-  const field = (name: string) => output.match(new RegExp('^\\s*' + name + ' = (.+)$', 'm'))?.[1]?.trim();
-  const args = output
-    .match(/arguments = \{([\s\S]*?)\n\s*\}/)?.[1]
-    ?.split('\n')
-    .map((s) => s.trim().replace(/^\d+\s*=\s*/, ''))
-    .filter(Boolean);
-  const homes = [...output.matchAll(/^\s*NERV_HOME => (.+)$/gm)].map((m) => m[1]!.trim());
-  return (
-    field('path') === definition(c) &&
-    field('program') === c.node &&
-    field('working directory') === c.source &&
-    canonical(args) === canonical([c.node, ...NODE_FLAGS, join(c.source, 'src/cli.ts'), 'serve']) &&
-    homes.length === 1 &&
-    homes[0] === c.home
-  );
-}
-/** The only production adapter: current unprivileged GUI user, current checkout and existing default data home. */
-function requireServiceHome(home: string): void {
+
+export function requireServiceHome(home: string): void {
   if (!present(home)) {
     throw Error(
       `NERV data home ${home} does not exist yet; nothing was changed. Initialize it first (for example: nerv setup or nerv doctor).`,
     );
   }
 }
-export function macServiceHost(home: string): ServiceHost {
-  if (process.platform !== 'darwin' || !process.getuid?.())
-    throw Error('Durable local lifecycle currently requires an unprivileged macOS GUI user.');
-  const context: ServiceContext = {
-    userHome: homedir(),
-    home: resolve(home),
-    source: realpathSync(fileURLToPath(new URL('..', import.meta.url))),
-    node: realpathSync(process.execPath),
-    uid: process.getuid(),
-  };
-  if (context.home !== join(context.userHome, '.nerv'))
-    throw Error('An additional or legacy profile cannot manage this OS service.');
-  requireServiceHome(context.home);
-  return macServiceAdapter(context);
-}
-export function macServiceAdapter(context: ServiceContext, run: typeof command = command): ServiceHost {
-  const gui = 'gui/' + context.uid,
-    target = gui + '/io.nerv.agent',
-    expected = renderService('darwin', context.home, context.source, context.node);
-  const git = async (args: string[]) => {
-    const r = await run('git', ['-C', context.source, ...args]);
-    if (r.status !== 0) throw Error('Selected source could not be verified.');
-    return r.out.trim();
-  };
-  const registration = async (label: string): Promise<Result | undefined> => {
-    const r = await run('launchctl', ['print', gui + '/' + label]);
-    if (r.status === 0) return r;
-    if (/Could not find service|service could not be found/i.test(r.err)) return;
-    throw Error('The service manager result is unknown.');
-  };
-  const host: ServiceHost = {
-    context,
-    inspect: async () => {
-      safe(context.userHome, context.uid);
-      safe(context.home, context.uid, true);
-      safe(context.source, context.uid);
-      assertRootMigrationReady(context.home);
-      const config = readConfig(context.home),
-        token = readToken(context.home);
-      const profile = serviceProfileIdentity(context);
-      const revision = await git(['rev-parse', 'HEAD']);
-      if (
-        !/^[a-f0-9]{40}$/.test(revision) ||
-        (await git(['remote', 'get-url', 'origin'])) !== 'https://github.com/voidbrain/nerv.git'
-      )
-        throw Error('Use the canonical reviewed NERV checkout.');
-      const session = (await run('launchctl', ['print', gui])).status === 0;
-      const prerequisites = await checkServicePrerequisites(context, run, { session });
-      const current = definition(context),
-        currentKind = !present(current)
-          ? 'absent'
-          : (() => {
-              try {
-                safe(current, context.uid, true);
-                return hash(readFileSync(current)) === hash(expected) ? 'owned' : 'foreign';
-              } catch {
-                return 'foreign';
-              }
-            })();
-      const manager = await registration('io.nerv.agent'),
-        legacyManager = await registration('io.nodo.agent');
-      let registered: 'absent' | 'owned' | 'foreign' = 'absent';
-      let managerPid = 0;
-      if (manager) {
-        registered = macRegistrationMatches(manager.out, context) ? 'owned' : 'foreign';
-        managerPid = Number(manager.out.match(/^\s*pid = (\d+)$/m)?.[1]) || 0;
-      }
-      const ps = await run('ps', ['-axo', 'pid=,ppid=,comm=,args=']);
-      if (ps.status !== 0) throw Error('Process ownership could not be inspected.');
-      const rows = ps.out.split('\n').flatMap((line) => {
-        const m = /^\s*(\d+)\s+(\d+)\s+(\S+)\s+(.*)$/.exec(line);
-        return m ? [{ pid: Number(m[1]), parent: Number(m[2]), comm: m[3]!, args: m[4]! }] : [];
-      });
-      const roots = rows.filter(
-        (r) => (r.comm === 'node' || r.comm.endsWith('/node')) && /src\/cli\.ts\s+(serve|launch)(\s|$)/.test(r.args),
-      );
-      const ids = new Set(roots.map((r) => r.pid));
-      if (managerPid) ids.add(managerPid);
-      let changed = true;
-      while (changed) {
-        changed = false;
-        for (const r of rows)
-          if (ids.has(r.parent) && !ids.has(r.pid)) {
-            ids.add(r.pid);
-            changed = true;
-          }
-      }
-      const pids = [...ids].sort((a, b) => a - b);
-      let runtime: ServiceObservation['runtime'] = pids.length ? 'unknown' : 'stopped';
-      try {
-        const r = await fetch('http://127.0.0.1:' + config.port + '/api/doctor', {
-          headers: { authorization: 'Bearer ' + token },
-          signal: AbortSignal.timeout(1500),
-        });
-        if (r.ok) {
-          const body = (await r.json()) as { base?: { id: string }; build?: { commit: string } };
-          runtime =
-            body.base?.id === config.base.id &&
-            body.build?.commit === revision &&
-            registered === 'owned' &&
-            pids.includes(managerPid)
-              ? 'owned'
-              : 'unknown';
-        } else runtime = 'unknown';
-      } catch {}
-      safe(databasePath(context.home), context.uid);
-      const db = new DatabaseSync(databasePath(context.home), { readOnly: true });
-      let pending: boolean, schema: number;
-      try {
-        schema = Number(db.prepare('PRAGMA user_version').get()!.user_version);
-        pending =
-          !!db
-            .prepare("SELECT 1 FROM worker_jobs WHERE state NOT IN ('completed','cancelled','released') LIMIT 1")
-            .get() ||
-          !!db.prepare('SELECT 1 FROM kaji_outbox WHERE done IS NULL LIMIT 1').get() ||
-          !!db.prepare("SELECT 1 FROM worker_legacy_outbox WHERE state='pending' LIMIT 1").get();
-      } finally {
-        db.close();
-      }
-      return {
-        revision,
-        schema,
-        profile,
-        definition: currentKind,
-        registration: registered,
-        runtime,
-        pids,
-        session,
-        clean: (await git(['status', '--porcelain'])) === '',
-        legacy: present(join(dirname(current), 'io.nodo.agent.plist')) || !!legacyManager,
-        pending,
-        built: existsSync(join(context.source, 'dist/web/browser/index.html')),
-        prerequisites,
-      };
-    },
-    health: async (p) => {
-      const expectedRevision = p.nextRevision ?? p.before.revision;
-      const checkedAt = new Date().toISOString();
-      const failures: string[] = [];
-      let commit: string | null = null;
-      let baseId: string | null = null;
-      let database: string | null = null;
-      let nervous = false;
-      let brain = false;
-      try {
-        const config = readConfig(context.home);
-        const token = readToken(context.home);
-        const r = await fetch('http://127.0.0.1:' + config.port + '/api/doctor', {
-          headers: { authorization: 'Bearer ' + token },
-          signal: AbortSignal.timeout(5000),
-        });
-        if (!r.ok) {
-          failures.push(`doctor returned HTTP ${r.status}`);
-        } else {
-          const body = (await r.json()) as Record<string, unknown>;
-          const build = object(body.build) ? body.build : undefined;
-          const base = object(body.base) ? body.base : undefined;
-          const dbInfo = object(body.database) ? body.database : undefined;
-          const processes = object(body.processes) ? body.processes : undefined;
-          commit = typeof build?.commit === 'string' ? build.commit : null;
-          baseId = typeof base?.id === 'string' ? base.id : null;
-          database = typeof dbInfo?.quick_check === 'string' ? dbInfo.quick_check : null;
-          nervous =
-            typeof processes?.nervous === 'number' &&
-            Number.isSafeInteger(processes.nervous) &&
-            processes.nervous > 0 &&
-            dbInfo !== undefined;
-          brain =
-            typeof processes?.brain === 'number' &&
-            Number.isSafeInteger(processes.brain) &&
-            processes.brain > 0 &&
-            processes.brainAlive === true &&
-            object(body.models);
-          if (commit !== expectedRevision)
-            failures.push(`build commit ${commit ?? 'missing'} did not match ${expectedRevision}`);
-          if (baseId !== config.base.id)
-            failures.push(`base identity ${baseId ?? 'missing'} did not match ${config.base.id}`);
-          if (database !== 'ok') failures.push(`database quick_check ${database ?? 'missing'} is not ok`);
-          if (!nervous) failures.push('nervous process did not answer doctor');
-          if (!brain) failures.push('brain process did not answer ping');
-        }
-      } catch (e) {
-        failures.push(e instanceof Error ? e.message : 'doctor request failed');
-      }
-      return {
-        ok: failures.length === 0,
-        checkedAt,
-        commit,
-        baseId,
-        database,
-        nervous,
-        brain,
-        failures,
-      };
-    },
-    compatible: (revision) => compatibleServiceRevision(context, revision, run),
-    authorizedStart: async (p) => {
-      if (
-        process.ppid !== 1 ||
-        (await git(['status', '--porcelain'])) !== '' ||
-        serviceProfileIdentity(context) !== p.before.profile ||
-        (await git(['rev-parse', 'HEAD'])) !== (p.nextRevision ?? p.before.revision)
-      )
-        return false;
-      const manager = await registration('io.nerv.agent');
-      return (
-        !!manager &&
-        macRegistrationMatches(manager.out, context) &&
-        Number(manager.out.match(/^\s*pid = (\d+)$/m)?.[1]) === process.pid &&
-        hash(readFileSync(definition(context))) === hash(expected) &&
-        manager.out.includes('NERV_HOME => ' + context.home) &&
-        manager.out.includes('program = ' + context.node)
-      );
-    },
-    command: async (step, p) => {
-      let r: Result;
-      if (step === 'register') r = await run('launchctl', ['bootstrap', gui, definition(context)]);
-      else if (step === 'unregister') r = await run('launchctl', ['bootout', target]);
-      else if (step === 'fetch') {
-        // Admission already read the pinned commit from this checkout, so a present commit needs no network; a fetch
-        // never prompts for credentials.
-        r = await run('git', ['-C', context.source, 'cat-file', '-e', p.nextRevision! + '^{commit}']);
-        if (r.status !== 0)
-          r = await run(
-            'git',
-            ['-C', context.source, 'fetch', '--no-tags', 'origin', p.nextRevision!],
-            undefined,
-            120000,
-            { GIT_TERMINAL_PROMPT: '0' },
-          );
-      } else if (step === 'checkout')
-        r = await run('git', ['-C', context.source, 'checkout', '--detach', p.nextRevision!]);
-      else
-        r = await run(
-          process.platform === 'win32' ? process.env.ComSpec || 'cmd.exe' : 'npm',
-          // No install scripts: an admitted application upgrade may change the lockfile, and package scripts are not rehearsed.
-          process.platform === 'win32'
-            ? ['/d', '/s', '/c', step === 'dependencies' ? 'npm ci --engine-strict --ignore-scripts' : 'npm run build']
-            : step === 'dependencies'
-              ? ['ci', '--engine-strict', '--ignore-scripts']
-              : ['run', 'build'],
-          context.source,
-          600000,
-        );
-      if (r.status !== 0) throw Error('Service ' + step + ' did not confirm completion; retain uncertainty.');
-    },
-    rehearse: async (p, backup) => {
-      const root = join(area(context), 'staging');
-      if (!present(root)) mkdirSync(root, { mode: 0o700 });
-      safe(root, context.uid, true);
-      const tree = join(root, p.digest),
-        archive = tree + '.tar';
-      mkdirSync(tree, { mode: 0o700 });
-      try {
-        // The pinned tree is exported, never checked out: the installed checkout and its dependencies stay as they are.
-        if (
-          (
-            await run(
-              'git',
-              ['-C', context.source, 'archive', '--format=tar', '-o', archive, p.nextRevision!],
-              undefined,
-              120000,
-            )
-          ).status !== 0 ||
-          (await run('tar', ['-xf', archive, '-C', tree], undefined, 120000)).status !== 0
-        )
-          throw Error('The pinned revision could not be exported for rehearsal.');
-        let candidateContract: UpgradeContractBounds = UPGRADE_CONTRACT;
-        const contractPath = join(tree, CONTRACT_ENTRY);
-        if (present(contractPath)) {
-          safe(contractPath, context.uid);
-          const parsed = parseUpgradeContract(readFileSync(contractPath, 'utf8'));
-          if (!parsed) throw Error('The candidate upgrade contract could not be parsed.');
-          candidateContract = parsed;
-        }
-        return await rehearseUpgrade(
-          backup,
-          async (database, home) => {
-            const r = await run(context.node, [...NODE_FLAGS, join(tree, READER_ENTRY), database, home], tree, 120000, {
-              NERV_HOME: home,
-            });
-            if (r.status !== 0) throw Error('The candidate reader exited with a failure.');
-          },
-          candidateContract,
-        );
-      } finally {
-        rmSync(tree, { recursive: true, force: true });
-        rmSync(archive, { force: true });
-      }
-    },
-    backup: async (path) => {
-      safe(databasePath(context.home), context.uid);
-      const file = join(path, 'database.sqlite'),
-        db = new DatabaseSync(databasePath(context.home));
-      try {
-        db.prepare('VACUUM INTO ?').run(file);
-      } finally {
-        db.close();
-      }
-      chmodSync(file, 0o600);
-      const fd = openSync(file, 'r+');
-      try {
-        fsyncSync(fd);
-      } finally {
-        closeSync(fd);
-      }
-      const check = new DatabaseSync(file, { readOnly: true });
-      try {
-        if (check.prepare('PRAGMA quick_check').get()!.quick_check !== 'ok')
-          throw Error('Consistent update backup failed integrity check.');
-      } finally {
-        check.close();
-      }
-      const sums: Record<string, string> = {};
-      for (const name of [
-        'config.json',
-        'token',
-        'base-key',
-        'base.pub',
-        ROOT_KEY_FILE,
-        'anthropic-key',
-        'telegram-token',
-      ]) {
-        const src = join(context.home, name);
-        if (existsSync(src)) {
-          safe(src, context.uid, name !== 'base.pub');
-          const bytes = readFileSync(src);
-          exclusive(join(path, name), bytes);
-          sums[name] = hash(bytes);
-        }
-      }
-      exclusive(
-        join(path, 'manifest.json'),
-        JSON.stringify({ files: sums, database: fileHash(file), restore: 'separately reviewed; never automatic' }),
-      );
-    },
-  };
-  return host;
-}
 
-function systemdField(output: string, key: string): string {
-  const match = output.match(new RegExp(`^${key}=(.*)$`, 'm'));
-  return match ? match[1]!.trim() : '';
-}
-
-function linuxRegistrationMatches(output: string, c: ServiceContext): boolean {
-  const execStart = systemdField(output, 'ExecStart');
-  const workDir = systemdField(output, 'WorkingDirectory');
-  const env = systemdField(output, 'Environment');
-  const expectedCli = join(c.source, 'src/cli.ts');
-  return (
-    systemdField(output, 'LoadState') === 'loaded' &&
-    workDir === c.source &&
-    env.includes(`NERV_HOME=${c.home}`) &&
-    execStart.includes(c.node) &&
-    execStart.includes(expectedCli) &&
-    execStart.includes('serve')
-  );
-}
-
-/**
- * Production Linux user-service adapter (`systemd --user`, F-005-T10): requires an unprivileged user session,
- * default `~/.nerv` profile, canonical checkout, and never enables lingering or touches system-wide services.
- */
-export function linuxServiceHost(home: string): ServiceHost {
-  if (process.platform !== 'linux' || !process.getuid?.())
-    throw Error('Durable Linux lifecycle currently requires an unprivileged user.');
-  const context: ServiceContext = {
-    userHome: homedir(),
-    home: resolve(home),
-    source: realpathSync(fileURLToPath(new URL('..', import.meta.url))),
-    node: realpathSync(process.execPath),
-    uid: process.getuid(),
-  };
-  if (context.home !== join(context.userHome, '.nerv'))
-    throw Error('An additional or legacy profile cannot manage this OS service.');
-  requireServiceHome(context.home);
-  return linuxServiceAdapter(context);
-}
-
-export function linuxServiceAdapter(
-  context: ServiceContext,
-  run: typeof command = command,
-  unitPath = definition(context, 'linux-service'),
-): ServiceHost {
-  const expected = renderService('linux', context.home, context.source, context.node);
-  const macShared = macServiceAdapter(context, run);
-  const git = async (args: string[]) => {
-    const r = await run('git', ['-C', context.source, ...args]);
-    if (r.status !== 0) throw Error('Selected source could not be verified.');
-    return r.out.trim();
-  };
-  const showUnit = async (unitName: string): Promise<Result | undefined> => {
-    const r = await run('systemctl', [
-      '--user',
-      'show',
-      '--no-pager',
-      '--property=LoadState,ActiveState,SubState,MainPID,ExecStart,WorkingDirectory,Environment',
-      unitName,
-    ]);
-    if (r.status !== 0) return undefined;
-    if (systemdField(r.out, 'LoadState') === 'not-found') return undefined;
-    return r;
-  };
-  return {
-    kind: 'linux-service',
-    definitionPath: unitPath,
-    context,
-    inspect: async () => {
-      safe(context.userHome, context.uid);
-      safe(context.home, context.uid, true);
-      safe(context.source, context.uid);
-      assertRootMigrationReady(context.home);
-      const config = readConfig(context.home);
-      const token = readToken(context.home);
-      const profile = serviceProfileIdentity(context);
-      const revision = await git(['rev-parse', 'HEAD']);
-      if (
-        !/^[a-f0-9]{40}$/.test(revision) ||
-        (await git(['remote', 'get-url', 'origin'])) !== 'https://github.com/voidbrain/nerv.git'
-      )
-        throw Error('Use the canonical reviewed NERV checkout.');
-      const session = (await run('systemctl', ['--user', 'show-environment'])).status === 0;
-      const prerequisites = await checkServicePrerequisites(context, run, { session });
-      const currentKind: ServiceObservation['definition'] = !present(unitPath)
-        ? 'absent'
-        : (() => {
-            try {
-              safe(unitPath, context.uid, true);
-              return hash(readFileSync(unitPath)) === hash(expected) ? 'owned' : 'foreign';
-            } catch {
-              return 'foreign';
-            }
-          })();
-      const manager = await showUnit('nerv.service');
-      const legacyManager = await showUnit('nodo.service');
-      let registered: ServiceObservation['registration'] = 'absent';
-      let managerPid = 0;
-      if (manager) {
-        registered = linuxRegistrationMatches(manager.out, context) ? 'owned' : 'foreign';
-        const rawPid = Number(systemdField(manager.out, 'MainPID'));
-        managerPid = Number.isSafeInteger(rawPid) && rawPid > 0 ? rawPid : 0;
-      }
-      const ps = await run('ps', ['-axo', 'pid=,ppid=,comm=,args=']);
-      if (ps.status !== 0) throw Error('Process ownership could not be inspected.');
-      const rows = ps.out.split('\n').flatMap((line) => {
-        const m = /^\s*(\d+)\s+(\d+)\s+(\S+)\s+(.*)$/.exec(line);
-        return m ? [{ pid: Number(m[1]), parent: Number(m[2]), comm: m[3]!, args: m[4]! }] : [];
-      });
-      const roots = rows.filter(
-        (r) => (r.comm === 'node' || r.comm.endsWith('/node')) && /src\/cli\.ts\s+(serve|launch)(\s|$)/.test(r.args),
-      );
-      const ids = new Set(roots.map((r) => r.pid));
-      if (managerPid) ids.add(managerPid);
-      let changed = true;
-      while (changed) {
-        changed = false;
-        for (const r of rows)
-          if (ids.has(r.parent) && !ids.has(r.pid)) {
-            ids.add(r.pid);
-            changed = true;
-          }
-      }
-      const pids = [...ids].sort((a, b) => a - b);
-      let runtime: ServiceObservation['runtime'] = pids.length ? 'unknown' : 'stopped';
-      try {
-        const r = await fetch('http://127.0.0.1:' + config.port + '/api/doctor', {
-          headers: { authorization: 'Bearer ' + token },
-          signal: AbortSignal.timeout(1500),
-        });
-        if (r.ok) {
-          const body = (await r.json()) as { base?: { id: string }; build?: { commit: string } };
-          runtime =
-            body.base?.id === config.base.id &&
-            body.build?.commit === revision &&
-            registered === 'owned' &&
-            systemdField(manager?.out ?? '', 'ActiveState') === 'active' &&
-            pids.includes(managerPid)
-              ? 'owned'
-              : 'unknown';
-        } else runtime = 'unknown';
-      } catch {}
-      safe(databasePath(context.home), context.uid);
-      const db = new DatabaseSync(databasePath(context.home), { readOnly: true });
-      let pending: boolean;
-      let schema: number;
-      try {
-        schema = Number(db.prepare('PRAGMA user_version').get()!.user_version);
-        pending =
-          !!db
-            .prepare("SELECT 1 FROM worker_jobs WHERE state NOT IN ('completed','cancelled','released') LIMIT 1")
-            .get() ||
-          !!db.prepare('SELECT 1 FROM kaji_outbox WHERE done IS NULL LIMIT 1').get() ||
-          !!db.prepare("SELECT 1 FROM worker_legacy_outbox WHERE state='pending' LIMIT 1").get();
-      } finally {
-        db.close();
-      }
-      return {
-        revision,
-        schema,
-        profile,
-        definition: currentKind,
-        registration: registered,
-        runtime,
-        pids,
-        session,
-        clean: (await git(['status', '--porcelain'])) === '',
-        legacy: present(join(dirname(unitPath), 'nodo.service')) || !!legacyManager,
-        pending,
-        built: existsSync(join(context.source, 'dist/web/browser/index.html')),
-        prerequisites,
-      };
-    },
-    health: macShared.health,
-    compatible: macShared.compatible,
-    rehearse: macShared.rehearse,
-    backup: macShared.backup,
-    authorizedStart: async (p) => {
-      if (
-        (await git(['status', '--porcelain'])) !== '' ||
-        serviceProfileIdentity(context) !== p.before.profile ||
-        (await git(['rev-parse', 'HEAD'])) !== (p.nextRevision ?? p.before.revision)
-      )
-        return false;
-      const manager = await showUnit('nerv.service');
-      return (
-        !!manager &&
-        linuxRegistrationMatches(manager.out, context) &&
-        systemdField(manager.out, 'ActiveState') === 'active' &&
-        Number(systemdField(manager.out, 'MainPID')) === process.pid &&
-        hash(readFileSync(unitPath)) === hash(expected)
-      );
-    },
-    command: async (step, p) => {
-      if (step === 'register') {
-        const reload = await run('systemctl', ['--user', 'daemon-reload']);
-        if (reload.status !== 0) throw Error('Service register did not confirm completion; retain uncertainty.');
-        const enable = await run('systemctl', ['--user', 'enable', '--now', 'nerv.service']);
-        if (enable.status !== 0) throw Error('Service register did not confirm completion; retain uncertainty.');
-        return;
-      }
-      if (step === 'unregister') {
-        const disable = await run('systemctl', ['--user', 'disable', '--now', 'nerv.service']);
-        if (disable.status !== 0) throw Error('Service unregister did not confirm completion; retain uncertainty.');
-        const reload = await run('systemctl', ['--user', 'daemon-reload']);
-        if (reload.status !== 0) throw Error('Service unregister did not confirm completion; retain uncertainty.');
-        return;
-      }
-      await macShared.command(step, p);
-    },
-  };
-}
-
-/**
- * Windows Task Scheduler registration check: verifies the scheduled task runs `wscript.exe`
- * with our hidden launcher `nerv-service.vbs` inside `context.home` and `context.source`.
- */
-export function windowsRegistrationMatches(output: string, c: ServiceContext): boolean {
-  const launcher = windowsLauncherPath(c).replace(/\\/g, '/').toLowerCase();
-  const normalized = output.replace(/\\/g, '/').toLowerCase();
-  const hasWscript = normalized.includes('wscript.exe') || normalized.includes('wscript');
-  const hasLauncher = normalized.includes(launcher);
-  const hasTaskName = normalized.includes(WINDOWS_TASK.toLowerCase());
-  return hasTaskName && hasWscript && hasLauncher;
-}
-
-/** Production Windows adapter: current unprivileged Windows user, current checkout and default `.nerv` data home. */
-export function windowsServiceHost(home: string): ServiceHost {
-  if (process.platform !== 'win32') {
-    throw Error('Durable Windows local lifecycle requires Windows.');
-  }
-  const context: ServiceContext = {
-    userHome: homedir(),
-    home: resolve(home),
-    source: realpathSync(fileURLToPath(new URL('..', import.meta.url))),
-    node: realpathSync(process.execPath),
-    uid: 0,
-  };
-  if (context.home !== join(context.userHome, '.nerv')) {
-    throw Error('An additional or legacy profile cannot manage this OS service.');
-  }
-  requireServiceHome(context.home);
-  return windowsServiceAdapter(context);
-}
-
-/** Windows Task Scheduler lifecycle adapter (`windows-service`) under the shared fencing journal. */
-export function windowsServiceAdapter(context: ServiceContext, run: typeof command = command): ServiceHost {
-  const expectedTask = expectedDefinition(context, 'windows-service');
-  const expectedVbs = windowsLauncher(context.home, context.source, context.node);
-  const mac = macServiceAdapter(context, run);
-  const git = async (args: string[]) => {
-    const r = await run('git', ['-C', context.source, ...args]);
-    if (r.status !== 0) throw Error('Selected source could not be verified.');
-    return r.out.trim();
-  };
-  const queryTask = async (): Promise<Result | undefined> => {
-    const r = await run('schtasks', ['/Query', '/TN', WINDOWS_TASK, '/V', '/FO', 'LIST']);
-    if (r.status === 0) return r;
-    if (/cannot find|does not exist|the system cannot find/i.test(r.err + '\n' + r.out)) return undefined;
-    throw Error('The Windows Task Scheduler result is unknown.');
-  };
-  const queryProcesses = async (): Promise<number[]> => {
-    const ps = await run('powershell', [
-      '-NoProfile',
-      '-Command',
-      "Get-CimInstance Win32_Process | Where-Object { $_.Name -eq 'node.exe' -or $_.Name -eq 'wscript.exe' } | ForEach-Object { \"$($_.ProcessId)|$($_.ParentProcessId)|$($_.Name)|$($_.CommandLine)\" }",
-    ]);
-    if (ps.status !== 0) throw Error('Windows process ownership could not be inspected.');
-    const rows = ps.out.split(/\r?\n/).flatMap((line) => {
-      const parts = line.split('|');
-      if (parts.length < 4) return [];
-      const pid = Number(parts[0]);
-      const parent = Number(parts[1]);
-      if (!Number.isInteger(pid) || pid <= 0) return [];
-      return [{ pid, parent, name: parts[2]!.toLowerCase(), args: parts.slice(3).join('|') }];
-    });
-    const launcher = windowsLauncherPath(context).toLowerCase();
-    const roots = rows.filter(
-      (r) =>
-        (r.name === 'node.exe' && /src[\\/]cli\.ts\s+(serve|launch)(\s|$)/i.test(r.args)) ||
-        (r.name === 'wscript.exe' && r.args.toLowerCase().includes(launcher)),
-    );
-    const ids = new Set(roots.map((r) => r.pid));
-    let changed = true;
-    while (changed) {
-      changed = false;
-      for (const r of rows) {
-        if (ids.has(r.parent) && !ids.has(r.pid)) {
-          ids.add(r.pid);
-          changed = true;
-        }
-      }
-    }
-    return [...ids].sort((a, b) => a - b);
-  };
-
-  return {
-    kind: 'windows-service',
-    context,
-    inspect: async () => {
-      safe(context.userHome, context.uid);
-      safe(context.home, context.uid, true);
-      safe(context.source, context.uid);
-      assertRootMigrationReady(context.home);
-      const config = readConfig(context.home);
-      const token = readToken(context.home);
-      const profile = serviceProfileIdentity(context);
-      const revision = await git(['rev-parse', 'HEAD']);
-      if (
-        !/^[a-f0-9]{40}$/.test(revision) ||
-        (await git(['remote', 'get-url', 'origin'])) !== 'https://github.com/voidbrain/nerv.git'
-      ) {
-        throw Error('Use the canonical reviewed NERV checkout.');
-      }
-      const prerequisites = await checkServicePrerequisites(context, run, { session: true });
-      const taskPath = definition(context, 'windows-service');
-      const vbsPath = windowsLauncherPath(context);
-      const defKind: ServiceObservation['definition'] = !present(taskPath)
-        ? 'absent'
-        : (() => {
-            try {
-              safe(taskPath, context.uid, true);
-              const taskMatches = hash(readFileSync(taskPath)) === hash(expectedTask);
-              const vbsMatches =
-                present(vbsPath) &&
-                (() => {
-                  safe(vbsPath, context.uid, true);
-                  return hash(readFileSync(vbsPath)) === hash(expectedVbs);
-                })();
-              return taskMatches && vbsMatches ? 'owned' : 'foreign';
-            } catch {
-              return 'foreign';
-            }
-          })();
-
-      const task = await queryTask();
-      const registered: ServiceObservation['registration'] = !task
-        ? 'absent'
-        : windowsRegistrationMatches(task.out, context)
-          ? 'owned'
-          : 'foreign';
-      const pids = await queryProcesses();
-      let runtime: ServiceObservation['runtime'] = pids.length ? 'unknown' : 'stopped';
-      try {
-        const r = await fetch('http://127.0.0.1:' + config.port + '/api/doctor', {
-          headers: { authorization: 'Bearer ' + token },
-          signal: AbortSignal.timeout(1500),
-        });
-        if (r.ok) {
-          const body = (await r.json()) as { base?: { id: string }; build?: { commit: string } };
-          runtime =
-            body.base?.id === config.base.id &&
-            body.build?.commit === revision &&
-            registered === 'owned' &&
-            pids.length > 0
-              ? 'owned'
-              : 'unknown';
-        } else {
-          runtime = 'unknown';
-        }
-      } catch {}
-
-      safe(databasePath(context.home), context.uid);
-      const db = new DatabaseSync(databasePath(context.home), { readOnly: true });
-      let pending: boolean;
-      let schema: number;
-      try {
-        schema = Number(db.prepare('PRAGMA user_version').get()!.user_version);
-        pending =
-          !!db
-            .prepare("SELECT 1 FROM worker_jobs WHERE state NOT IN ('completed','cancelled','released') LIMIT 1")
-            .get() ||
-          !!db.prepare('SELECT 1 FROM kaji_outbox WHERE done IS NULL LIMIT 1').get() ||
-          !!db.prepare("SELECT 1 FROM worker_legacy_outbox WHERE state='pending' LIMIT 1").get();
-      } finally {
-        db.close();
-      }
-
-      return {
-        revision,
-        schema,
-        profile,
-        definition: defKind,
-        registration: registered,
-        runtime,
-        pids,
-        session: true,
-        clean: (await git(['status', '--porcelain'])) === '',
-        legacy: false,
-        pending,
-        built: existsSync(join(context.source, 'dist/web/browser/index.html')),
-        prerequisites,
-      };
-    },
-    health: mac.health!,
-    compatible: mac.compatible,
-    rehearse: mac.rehearse,
-    backup: mac.backup,
-    authorizedStart: async (p) => {
-      if (
-        (await git(['status', '--porcelain'])) !== '' ||
-        serviceProfileIdentity(context) !== p.before.profile ||
-        (await git(['rev-parse', 'HEAD'])) !== (p.nextRevision ?? p.before.revision)
-      ) {
-        return false;
-      }
-      const task = await queryTask();
-      const taskPath = definition(context, 'windows-service');
-      const vbsPath = windowsLauncherPath(context);
-      return (
-        !!task &&
-        windowsRegistrationMatches(task.out, context) &&
-        present(taskPath) &&
-        present(vbsPath) &&
-        hash(readFileSync(taskPath)) === hash(expectedTask) &&
-        hash(readFileSync(vbsPath)) === hash(expectedVbs)
-      );
-    },
-    command: async (step, p) => {
-      if (step === 'register') {
-        const created = await run('schtasks', [
-          '/Create',
-          '/TN',
-          WINDOWS_TASK,
-          '/XML',
-          definition(context, 'windows-service'),
-        ]);
-        if (created.status !== 0) throw Error('Service register did not confirm completion; retain uncertainty.');
-        const started = await run('schtasks', ['/Run', '/TN', WINDOWS_TASK]);
-        if (started.status !== 0) throw Error('Service register did not confirm start; retain uncertainty.');
-        return;
-      }
-      if (step === 'unregister') {
-        await run('schtasks', ['/End', '/TN', WINDOWS_TASK]);
-        const pids = await queryProcesses();
-        for (const pid of pids) {
-          await run('taskkill', ['/PID', String(pid), '/T', '/F']);
-        }
-        const deleted = await run('schtasks', ['/Delete', '/TN', WINDOWS_TASK, '/F']);
-        if (deleted.status !== 0) throw Error('Service unregister did not confirm completion; retain uncertainty.');
-        return;
-      }
-      await mac.command(step, p);
-    },
-  };
-}
+export { applyService, releaseService, releaseObservedService, recoverServiceUpdate } from './node-lifecycle-apply.ts';
+export { macRegistrationMatches, macServiceHost, macServiceAdapter } from './node-lifecycle-mac.ts';
+export { linuxServiceHost, linuxServiceAdapter } from './node-lifecycle-linux.ts';
+export { windowsRegistrationMatches, windowsServiceHost, windowsServiceAdapter } from './node-lifecycle-windows.ts';

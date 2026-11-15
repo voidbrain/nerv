@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 65.5 h agent + 24 h owner across 162 open steps of 43 features and 5 other records. 42 h of actual effort recorded on 97 steps. Generated from the task files.
+**Remaining effort:** 64 h agent + 24 h owner across 161 open steps of 42 features and 5 other records. 42.5 h of actual effort recorded on 98 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -669,9 +669,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🔴 Large | 0 h | — | — | — | — | — |
 
-💻 **→** Next: F-095-T05 — Split the other files over 1,000 lines (Planned).
+💻 **→** Next: all steps closed; verify and close the record.
 
 | | |
 |---|---|
@@ -683,12 +683,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟡 Medium | <a id="f-095-t05"></a>F-095-T05 — Split the other files over 1,000 lines | 1.5 h | 0 h | 1.5 h | Planned |
 | — | <a id="f-095-t01"></a>F-095-T01 — Revisit the runtime.ts deferral and name the modules | 0.5 h | 0.25 h (measured) | 0 h | Completed |
 | — | <a id="f-095-t02"></a>F-095-T02 — Warn on source files over 600 lines | 0.5 h | 0.25 h (measured) | 0 h | Completed |
 | — | <a id="f-095-t03"></a>F-095-T03 — Split runtime.ts | 2 h | 1.5 h (stated) | 0 h | Completed |
 | — | <a id="f-095-t04"></a>F-095-T04 — Split store.ts per table group | 1 h | 0.5 h (stated) | 0 h | Completed |
-| 🟡 Medium | **Total** | 5.5 h | 2.5 h (4 of 5 steps recorded) | 1.5 h | 4 of 5 completed |
+| — | <a id="f-095-t05"></a>F-095-T05 — Split the other files over 1,000 lines | 1.5 h | 0.5 h (stated) | 0 h | Completed |
+| — | **Total** | 5.5 h | 3 h | 0 h | 5 of 5 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -699,7 +699,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); — |
 | Opened | 2026-11-14 |
-| Verification | `F-095-T02` verified via `tools/check-source-sizes.mjs`, `test/source-sizes.test.ts`, `tsc`, and `check:fast`. `F-095-T03` split `src/runtime.ts` (3,399 -> 1,015 lines) into 10 modules all under 600 lines (`runtime-api.ts`, `runtime-approvals.ts`, `runtime-bases.ts`, `runtime-chat.ts`, `runtime-dispatch.ts`, `runtime-instrumentality.ts`, `runtime-peers.ts`, `runtime-pilots.ts`, `runtime-planning.ts`, `runtime-routes.ts`), verified with `npm run typecheck`, `npm run check:fast`, `npm test`, and fresh-context review. `F-095-T04` split `src/store.ts` (1,619 -> 570 lines) into 6 table-group modules all under 600 lines (`store-watch.ts`, `store-reminders.ts`, `store-push.ts`, `store-kaji-outbox.ts`, `store-inbox.ts`, `store-sorties.ts`) sharing `sqlite-transaction.ts`, verified with `npm run typecheck`, `npm run check:fast`, and `npm test`. |
+| Verification | `F-095-T02` verified via `tools/check-source-sizes.mjs`, `test/source-sizes.test.ts`, `tsc`, and `check:fast`. `F-095-T03` split `src/runtime.ts` (3,399 -> 1,015 lines) into 10 modules all under 600 lines (`runtime-api.ts`, `runtime-approvals.ts`, `runtime-bases.ts`, `runtime-chat.ts`, `runtime-dispatch.ts`, `runtime-instrumentality.ts`, `runtime-peers.ts`, `runtime-pilots.ts`, `runtime-planning.ts`, `runtime-routes.ts`), verified with `npm run typecheck`, `npm run check:fast`, `npm test`, and fresh-context review. `F-095-T04` split `src/store.ts` (1,619 -> 570 lines) into 6 table-group modules all under 600 lines (`store-watch.ts`, `store-reminders.ts`, `store-push.ts`, `store-kaji-outbox.ts`, `store-inbox.ts`, `store-sorties.ts`) sharing `sqlite-transaction.ts`, verified with `npm run typecheck`, `npm run check:fast`, and `npm test`. `F-095-T05` split `src/node-lifecycle-execution.ts` (2,076 -> 662 lines into `node-lifecycle-apply.ts`, `node-lifecycle-mac.ts`, `node-lifecycle-linux.ts`, `node-lifecycle-windows.ts`), `src/ledger.ts` (1,401 -> 821 lines into `ledger-queries.ts`, `ledger-approvals.ts`), `src/pilots.ts` (1,204 -> 587 lines into `pilots-qualification.ts`), and `src/rpc.ts` (1,114 -> 227 lines into `rpc-schemas.ts`), leaving `src/cli.ts` to `F-080`, verified with `npm run typecheck`, `npm run check:fast`, and `npm test`. |
 | Reviewed | 2026-11-14 |
 
 </details>

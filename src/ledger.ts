@@ -1,3 +1,5 @@
+import { LedgerQueries } from './ledger-queries.ts';
+import { LedgerApprovals } from './ledger-approvals.ts';
 import { transaction } from './sqlite-transaction.ts';
 import { overlappingDomains } from './pilots.ts';
 import type { DatabaseSync } from 'node:sqlite';
@@ -18,16 +20,13 @@ import {
   type Verdict,
 } from './policy.ts';
 import type { Step } from './misato.ts';
-import { explainSortie, type WhyRecord } from './why.ts';
-import { computeRoleTimingStats, type RoleTimingStats, type SortieTiming } from './timing.ts';
+import { type RoleTimingStats, type SortieTiming } from './timing.ts';
 import {
   EVENT_SCHEMA_VERSION,
-  MAX_SPEAR_HAPPENED,
   encodePayload,
   readPayload,
   type EventKind,
   type EventPayloads,
-  type Happened,
   type SortieEvent,
 } from './events.ts';
 /** Central Dogma (F-024): sorties, actions, grants (A.T. Fields), approvals (Misato's apartment) and append-only events. */
@@ -640,411 +639,27 @@ export class Ledger {
       return { request, steps: read('misato.step') as { step: Step; actionId?: string }[], decisions };
     });
   }
-  private summarize(r: {
-    id: string;
-    source: string;
-    title: string;
-    trust: string;
-    status: string;
-    created: string;
-    closed: string | null;
-  }): SortieSummary {
-    const actions = this.db
-      .prepare('SELECT id,tool,ballot FROM actions WHERE sortie_id=? ORDER BY created, rowid')
-      .all(r.id) as { id: string; tool: string; ballot: string }[];
-    const waiting = (
-      this.db
-        .prepare(
-          'SELECT count(*) AS n FROM approvals a JOIN actions x ON x.id=a.action_id WHERE x.sortie_id=? AND a.decision IS NULL',
-        )
-        .get(r.id) as { n: number }
-    ).n;
-    const ballots = actions.map((a) => JSON.parse(a.ballot) as Ballot);
-    const q = this.db
-      .prepare(
-        "SELECT payload FROM events WHERE sortie_id=? AND kind='misato.asked' AND sequence>coalesce((SELECT max(sequence) FROM events WHERE sortie_id=? AND kind='misato.answered'),0) ORDER BY sequence DESC LIMIT 1",
-      )
-      .get(r.id, r.id) as { payload: string } | undefined;
-    const question =
-      r.status === 'open' && q ? (JSON.parse(q.payload) as { text: string; expires: string }) : undefined;
-    return {
-      ...r,
-      ...(question ? { question: { text: question.text, expires: question.expires } } : {}),
-      actions: actions.length,
-      waiting,
-      patterns: ballots.map((b) => b.pattern),
-      why: question
-        ? 'Waiting for your answer: ' + question.text
-        : this.why(r, actions.length, actions.at(-1), ballots.at(-1)),
-    };
+  private _queries?: LedgerQueries;
+  private get queries(): LedgerQueries {
+    return (this._queries ??= new LedgerQueries({
+      db: this.db,
+      events: (sortieId, after, limit) => this.events(sortieId, after, limit),
+    }));
   }
-  /** The facts explainSortie needs: the latest action's ballot, the owner's decision and what became of it. */
-  private why(
-    r: { id: string; status: string },
-    count: number,
-    last: { id: string; tool: string } | undefined,
-    ballot: Ballot | undefined,
-  ): string {
-    const one = (sql: string, ...args: string[]) =>
-      this.db.prepare(sql).get(...args) as { kind?: string; payload?: string; decision?: string | null } | undefined;
-    const ran = last
-      ? one(
-          "SELECT kind,payload FROM events WHERE action_id=? AND kind IN ('action.done','action.failed') ORDER BY sequence DESC LIMIT 1",
-          last.id,
-        )
-      : undefined;
-    const spear =
-      r.status === 'revoked'
-        ? one("SELECT payload FROM events WHERE sortie_id=? AND kind='spear' ORDER BY sequence DESC LIMIT 1", r.id)
-        : undefined;
-    const replied = !!one("SELECT 1 AS kind FROM events WHERE sortie_id=? AND kind='misato.reply' LIMIT 1", r.id);
-    const error = ran?.kind === 'action.failed' ? (JSON.parse(ran.payload!) as { error?: string }).error : undefined;
-    return explainSortie({
-      status: r.status,
-      actions: count,
-      replied,
-      spearReason: spear ? (JSON.parse(spear.payload!) as { reason?: string }).reason : undefined,
-      last:
-        last && ballot
-          ? {
-              tool: last.tool,
-              outcome: ballot.outcome,
-              reason: ballot.reason,
-              decision: one('SELECT decision FROM approvals WHERE action_id=?', last.id)?.decision ?? null,
-              ran: ran?.kind === 'action.done' ? 'done' : ran?.kind === 'action.failed' ? 'failed' : null,
-              error,
-            }
-          : undefined,
-    });
-  }
-  /** Newest sorties first, for the dashboard (F-019): status, counts, each action's Pattern and one sentence of why, never
-  grant IDs. `before` pages back through history; `q` keeps sorties whose title contains it (case-insensitive, literal). */
   sorties(limit = 20, before?: string, q?: string): SortieSummary[] {
-    if (
-      !Number.isInteger(limit) ||
-      limit < 1 ||
-      limit > 50 ||
-      (before !== undefined && (typeof before !== 'string' || !Number.isFinite(Date.parse(before)))) ||
-      (q !== undefined && (typeof q !== 'string' || !q.trim() || q.length > 200))
-    )
-      throw new Error('Invalid sortie page.');
-    const where = [...(before ? ['created<?'] : []), ...(q ? ["title LIKE ? ESCAPE '\\'"] : [])];
-    const like = q ? '%' + q.trim().replace(/[\\%_]/g, (c) => '\\' + c) + '%' : undefined;
-    const rows = this.db
-      .prepare(
-        `SELECT id,source,title,trust,status,created,closed FROM sorties ${where.length ? 'WHERE ' + where.join(' AND ') : ''} ORDER BY created DESC LIMIT ?`,
-      )
-      .all(...(before ? [before] : []), ...(like ? [like] : []), limit) as Parameters<Ledger['summarize']>[0][];
-    return rows.map((r) => this.summarize(r));
+    return this.queries.sorties(limit, before, q);
   }
-  /** One sortie with its actions: tool, arguments, ballot and what became of each. */
   sortie(id: string): (SortieSummary & { detail: ActionDetail[]; timings?: SortieTiming[] }) | undefined {
-    if (typeof id !== 'string' || !id || id.length > 100) throw new Error('Invalid sortie.');
-    const row = this.db
-      .prepare('SELECT id,source,title,trust,status,created,closed FROM sorties WHERE id=?')
-      .get(id) as Parameters<Ledger['summarize']>[0] | undefined;
-    if (!row) return undefined;
-    const actions = this.db
-      .prepare(
-        `SELECT x.id,x.tool,x.args,x.ballot,x.created,a.decision,
-    (SELECT kind FROM events e WHERE e.action_id=x.id AND e.kind IN ('action.done','action.failed') ORDER BY sequence DESC LIMIT 1) AS ran,
-    (SELECT payload FROM events e WHERE e.action_id=x.id AND e.kind IN ('action.done','action.failed') ORDER BY sequence DESC LIMIT 1) AS ran_payload
-    FROM actions x LEFT JOIN approvals a ON a.action_id=x.id WHERE x.sortie_id=? ORDER BY x.created`,
-      )
-      .all(id) as {
-      id: string;
-      tool: string;
-      args: string;
-      ballot: string;
-      created: string;
-      decision: string | null;
-      ran: string | null;
-      ran_payload: string | null;
-    }[];
-    const detail = actions.map((x): ActionDetail => {
-      const ballot = JSON.parse(x.ballot) as Ballot;
-      const ranPayload = x.ran_payload ? (JSON.parse(x.ran_payload) as { durationMs?: number }) : undefined;
-      const durationMs = typeof ranPayload?.durationMs === 'number' ? ranPayload.durationMs : undefined;
-      const status: ActionDetail['status'] =
-        x.ran === 'action.done'
-          ? 'done'
-          : x.ran === 'action.failed'
-            ? 'failed'
-            : ballot.outcome === 'reject'
-              ? 'rejected'
-              : ballot.outcome === 'approval' && x.decision === null
-                ? 'waiting'
-                : ballot.outcome === 'approval' && x.decision !== 'approve'
-                  ? 'stood-down'
-                  : 'proposed';
-      return {
-        id: x.id,
-        tool: x.tool,
-        args: JSON.parse(x.args) as Record<string, unknown>,
-        ballot,
-        created: x.created,
-        status,
-        ...(durationMs !== undefined ? { durationMs } : {}),
-      };
-    });
-    const timings = this.collectTimings(id);
-    return { ...this.summarize(row), detail, ...(timings.length ? { timings } : {}) };
+    return this.queries.sortie(id);
   }
-  private seatDisplayName(seat: string): string {
-    return seat
-      .replace(/^extra:/i, '')
-      .replace(/(^|[^\p{L}])(\p{L})/gu, (_, b: string, c: string) => b + c.toUpperCase());
-  }
-  private collectTimings(sortieId: string): SortieTiming[] {
-    const rows = this.db
-      .prepare(
-        "SELECT kind,payload FROM events WHERE sortie_id=? AND kind IN ('misato.consult','misato.step','misato.reply','misato.asked','ballot','ballot.shadow','action.done','action.failed','kaji.answered') ORDER BY sequence",
-      )
-      .all(sortieId) as { kind: string; payload: string }[];
-    const timings: SortieTiming[] = [];
-    let misatoMs = 0;
-    let hasMisato = false;
-    let casperMs = 0;
-    let hasCasper = false;
-    const seatOrder: string[] = [];
-    const seatMap = new Map<string, SortieTiming>();
-    let executorLabel = '';
-    let executorMs = 0;
-    let hasExecutor = false;
-    const actionExecutors = new Map<string, string>();
-    const actionRows = this.db.prepare('SELECT id,ballot FROM actions WHERE sortie_id=?').all(sortieId) as {
-      id: string;
-      ballot: string;
-    }[];
-    for (const a of actionRows) {
-      const b = JSON.parse(a.ballot) as { executor?: string };
-      if (b.executor) actionExecutors.set(a.id, b.executor.toUpperCase());
-    }
-    for (const r of rows) {
-      const p = JSON.parse(r.payload) as Record<string, unknown>;
-      if (r.kind === 'misato.consult' && typeof p.durationMs === 'number') {
-        const pilot = p.pilot as { name?: string } | undefined;
-        timings.push({
-          role: 'consultant',
-          label: pilot?.name ? pilot.name : 'Consultant',
-          durationMs: p.durationMs,
-        });
-      } else if (
-        (r.kind === 'misato.step' || r.kind === 'misato.reply' || r.kind === 'misato.asked') &&
-        typeof p.durationMs === 'number'
-      ) {
-        misatoMs += p.durationMs;
-        hasMisato = true;
-      } else if (r.kind === 'ballot') {
-        const verdicts = Array.isArray(p.verdicts) ? (p.verdicts as Verdict[]) : [];
-        if (typeof p.executor === 'string') executorLabel = p.executor.toUpperCase();
-        for (const v of verdicts) {
-          if (typeof v.durationMs !== 'number') continue;
-          if (v.seat === 'casper') {
-            casperMs += v.durationMs;
-            hasCasper = true;
-          } else if (v.seat.startsWith('extra:')) {
-            const label = this.seatDisplayName(v.seat);
-            if (!seatMap.has(label)) seatOrder.push(label);
-            seatMap.set(label, {
-              role: 'seat',
-              label,
-              durationMs: v.durationMs,
-              ...(v.shadow ? { shadow: true } : {}),
-              ...(typeof v.transferMs === 'number' ? { transferMs: v.transferMs } : {}),
-            });
-          }
-        }
-      } else if (r.kind === 'ballot.shadow' && typeof p.durationMs === 'number' && typeof p.seat === 'string') {
-        const label = this.seatDisplayName(p.seat);
-        if (!seatMap.has(label)) seatOrder.push(label);
-        seatMap.set(label, {
-          role: 'seat',
-          label,
-          durationMs: p.durationMs,
-          shadow: true,
-          ...(typeof p.transferMs === 'number' ? { transferMs: p.transferMs } : {}),
-        });
-      } else if ((r.kind === 'action.done' || r.kind === 'action.failed') && typeof p.durationMs === 'number') {
-        executorMs += p.durationMs;
-        hasExecutor = true;
-      } else if (r.kind === 'kaji.answered' && typeof p.transferMs === 'number') {
-        const base = p.base as { name?: string } | undefined;
-        timings.push({
-          role: 'kaji',
-          label: base?.name ? `Kaji (${base.name})` : 'Kaji',
-          durationMs: p.transferMs,
-          transferMs: p.transferMs,
-        });
-      }
-    }
-    if (hasMisato) timings.push({ role: 'misato', label: 'Misato', durationMs: misatoMs });
-    if (hasCasper) timings.push({ role: 'casper', label: 'Casper', durationMs: casperMs });
-    for (const label of seatOrder) timings.push(seatMap.get(label)!);
-    if (hasExecutor)
-      timings.push({
-        role: 'executor',
-        label: executorLabel || [...actionExecutors.values()].at(-1) || 'EVA-02',
-        durationMs: executorMs,
-      });
-    return timings;
-  }
-  /** Daily timing summary (F-052-T05): median and slowest duration per role since `since`. */
   timingSummary(since: string): RoleTimingStats[] {
-    if (typeof since !== 'string' || !Number.isFinite(Date.parse(since))) throw new Error('Invalid date.');
-    const at = new Date(since).toISOString();
-    const rows = this.db
-      .prepare(
-        "SELECT kind,payload FROM events WHERE created>? AND kind IN ('misato.consult','misato.step','misato.reply','misato.asked','ballot','ballot.shadow','action.done','action.failed','kaji.answered')",
-      )
-      .all(at) as { kind: string; payload: string }[];
-    const samples: { role: string; durationMs: number }[] = [];
-    for (const r of rows) {
-      const p = JSON.parse(r.payload) as Record<string, unknown>;
-      if (r.kind === 'misato.consult' && typeof p.durationMs === 'number') {
-        const model = typeof p.model === 'string' && p.model ? p.model : undefined;
-        const pilot = p.pilot as { name?: string } | undefined;
-        const who = pilot?.name ?? 'Consultant';
-        samples.push({ role: model ? `${who} (${model})` : who, durationMs: p.durationMs });
-      } else if (
-        (r.kind === 'misato.step' || r.kind === 'misato.reply' || r.kind === 'misato.asked') &&
-        typeof p.durationMs === 'number'
-      ) {
-        samples.push({ role: 'Misato', durationMs: p.durationMs });
-      } else if (r.kind === 'ballot') {
-        const verdicts = Array.isArray(p.verdicts) ? (p.verdicts as Verdict[]) : [];
-        for (const v of verdicts) {
-          if (typeof v.durationMs !== 'number') continue;
-          if (v.seat === 'casper') samples.push({ role: 'Casper', durationMs: v.durationMs });
-          else if (v.seat.startsWith('extra:'))
-            samples.push({ role: this.seatDisplayName(v.seat), durationMs: v.durationMs });
-        }
-      } else if (r.kind === 'ballot.shadow' && typeof p.durationMs === 'number' && typeof p.seat === 'string') {
-        samples.push({ role: this.seatDisplayName(p.seat), durationMs: p.durationMs });
-      } else if ((r.kind === 'action.done' || r.kind === 'action.failed') && typeof p.durationMs === 'number') {
-        samples.push({ role: 'Executor', durationMs: p.durationMs });
-      } else if (r.kind === 'kaji.answered' && typeof p.transferMs === 'number') {
-        const base = p.base as { name?: string } | undefined;
-        samples.push({ role: base?.name ? `Kaji (${base.name})` : 'Kaji', durationMs: p.transferMs });
-      }
-    }
-    return computeRoleTimingStats(samples);
+    return this.queries.timingSummary(since);
   }
-  /** Sorties closed after `since`, counted by status, with the latest five failures (for the brief, B-006). */
-  closedSince(since: string): {
-    done: number;
-    failed: number;
-    failures: { id: string; title: string; closed: string }[];
-  } {
-    if (typeof since !== 'string' || !Number.isFinite(Date.parse(since))) throw new Error('Invalid date.');
-    const at = new Date(since).toISOString();
-    const n = (status: string) =>
-      (
-        this.db.prepare('SELECT count(*) AS n FROM sorties WHERE closed>? AND status=?').get(at, status) as {
-          n: number;
-        }
-      ).n;
-    const failures = this.db
-      .prepare("SELECT id,title,closed FROM sorties WHERE closed>? AND status='failed' ORDER BY closed DESC LIMIT 5")
-      .all(at) as { id: string; title: string; closed: string }[];
-    return { done: n('done'), failed: n('failed'), failures };
+  closedSince(since: string) {
+    return this.queries.closedSince(since);
   }
-  /** A sortie by the short ID shown to the owner (a hex prefix of its ID), with what a "why" answer needs (B-004). */
-  explain(
-    ref: string,
-  ):
-    | { found: 'none' }
-    | { found: 'many'; count: number; candidates: { shortId: string; title: string; status: string }[] }
-    | { found: 'one'; record: WhyRecord } {
-    if (typeof ref !== 'string' || !/^[0-9a-f]{4,36}$/.test(ref)) throw new Error('Invalid sortie reference.');
-    const rows = this.db
-      .prepare('SELECT id,title,status FROM sorties WHERE id LIKE ? ORDER BY created DESC LIMIT 6')
-      .all(ref + '%') as { id: string; title: string; status: string }[];
-    if (!rows.length) return { found: 'none' };
-    if (rows.length > 1) {
-      const hexes = rows.map((r) => r.id.replace(/-/g, ''));
-      let len = Math.max(8, ref.replace(/-/g, '').length + 1);
-      while (len < 12 && new Set(hexes.map((h) => h.slice(0, len))).size < hexes.length) len++;
-      return {
-        found: 'many',
-        count: rows.length,
-        candidates: rows.map((r, i) => ({
-          shortId: 'S-' + hexes[i]!.slice(0, len).toUpperCase(),
-          title: r.title,
-          status: r.status,
-        })),
-      };
-    }
-    const s = this.sortie(rows[0]!.id)!;
-    const consult = this.db
-      .prepare("SELECT payload FROM events WHERE sortie_id=? AND kind='misato.consult' ORDER BY sequence LIMIT 1")
-      .get(s.id) as { payload: string } | undefined;
-    const advice = consult
-      ? (JSON.parse(consult.payload) as { advice?: string; model?: string; pilot?: { name?: string } })
-      : undefined;
-    const actions = s.detail.map((d) => {
-      const ap = this.db.prepare('SELECT decision,decided,source FROM approvals WHERE action_id=?').get(d.id) as
-        { decision: string | null; decided: string | null; source: string | null } | undefined;
-      const done = this.db
-        .prepare(
-          "SELECT kind,payload FROM events WHERE action_id=? AND kind IN ('action.done','action.failed') ORDER BY sequence DESC LIMIT 1",
-        )
-        .get(d.id) as { kind: string; payload: string } | undefined;
-      const late = (
-        this.db
-          .prepare("SELECT payload FROM events WHERE action_id=? AND kind='ballot.shadow' ORDER BY sequence")
-          .all(d.id) as { payload: string }[]
-      ).map((r) => {
-        const p = JSON.parse(r.payload) as { seat: string; vote: string; reason: string };
-        return { seat: 'extra:' + p.seat, vote: p.vote, reason: p.reason, shadow: true };
-      });
-      return {
-        tool: d.tool,
-        pattern: d.ballot.pattern,
-        outcome: d.ballot.outcome,
-        reason: d.ballot.reason,
-        verdicts: [
-          ...d.ballot.verdicts.map((v) => ({
-            seat: v.seat,
-            vote: v.vote,
-            reason: v.reason,
-            ...(v.shadow ? { shadow: true } : {}),
-          })),
-          ...late,
-        ],
-        decision: ap?.decision ?? null,
-        decided: ap?.decided ?? null,
-        source: ap?.source ?? null,
-        ran:
-          done?.kind === 'action.done'
-            ? ('done' as const)
-            : done?.kind === 'action.failed'
-              ? ('failed' as const)
-              : null,
-        ...(done?.kind === 'action.failed' ? { error: (JSON.parse(done.payload) as { error?: string }).error } : {}),
-      };
-    });
-    const remote = (
-      this.db
-        .prepare("SELECT payload FROM events WHERE sortie_id=? AND kind='kaji.result' ORDER BY sequence LIMIT 5")
-        .all(s.id) as { payload: string }[]
-    ).map((r) => (JSON.parse(r.payload) as { text: string }).text);
-    const timings = this.collectTimings(s.id);
-    return {
-      found: 'one',
-      record: {
-        id: s.id,
-        title: s.title,
-        status: s.status,
-        why: s.why,
-        ...(remote.length ? { remote } : {}),
-        ...(timings.length ? { timings } : {}),
-        ...(advice?.advice
-          ? { advice: { text: advice.advice, model: [advice.pilot?.name, advice.model].filter(Boolean).join(' · ') } }
-          : {}),
-        actions,
-      },
-    };
+  explain(query: string) {
+    return this.queries.explain(query);
   }
   /** F-052: a shadow seat's late vote, kept with its action; the action must belong to the sortie. */
   shadowVote(sortieId: string, actionId: string, payload: EventPayloads['ballot.shadow'], now = new Date()): void {
@@ -1125,238 +740,40 @@ export class Ledger {
         );
     });
   }
+  private _approvals?: LedgerApprovals;
+  private get approvals(): LedgerApprovals {
+    return (this._approvals ??= new LedgerApprovals({
+      db: this.db,
+      tools: this.tools,
+      grantTtlMs: this.grantTtlMs,
+      tx: (fn) => this.tx(fn),
+      event: (sortieId, actionId, kind, payload, now) => this.event(sortieId, actionId, kind, payload, now),
+      issue: (actionId, tool, args, sortieId, now) => this.issue(actionId, tool, args, sortieId, now),
+    }));
+  }
   pendingApprovals(now = new Date(), limit = 5): Approval[] {
-    // Up to 20: one Instrumentality night can propose 10 facts, sent to the owner as one bundled card (F-022).
-    if (!Number.isInteger(limit) || limit < 1 || limit > 20) throw new Error('Invalid approval page.');
-    return (
-      this.db
-        .prepare(
-          'SELECT id,card,expires,decision FROM approvals WHERE decision IS NULL AND expires>? ORDER BY expires LIMIT ?',
-        )
-        .all(iso(now), limit) as { id: string; card: string; expires: string; decision: null }[]
-    ).map((r) => ({ ...r, card: JSON.parse(r.card) as Card }));
+    return this.approvals.pendingApprovals(now, limit);
   }
-  /** F-042: open clarification questions currently waiting for the owner's answer. */
   waitingQuestions(now = new Date(), limit = 10): { sortieId: string; title: string; text: string; expires: string }[] {
-    const rows = this.db
-      .prepare(
-        `SELECT s.id AS sortie_id,s.title,q.payload FROM sorties s JOIN events q ON q.sortie_id=s.id
-         WHERE s.status='open' AND q.kind='misato.asked'
-         AND q.sequence=(SELECT max(sequence) FROM events e WHERE e.sortie_id=s.id AND e.kind='misato.asked')
-         AND q.sequence>coalesce((SELECT max(sequence) FROM events a WHERE a.sortie_id=s.id AND a.kind='misato.answered'),0)
-         ORDER BY q.sequence DESC LIMIT ?`,
-      )
-      .all(limit) as { sortie_id: string; title: string; payload: string }[];
-    const at = iso(now);
-    return rows.flatMap((r) => {
-      const p = JSON.parse(r.payload) as { text: string; expires: string };
-      return p.expires > at ? [{ sortieId: r.sortie_id, title: r.title, text: p.text, expires: p.expires }] : [];
-    });
+    return this.approvals.waitingQuestions(now, limit);
   }
-  /** Authoritative point lookup: absence from a limited pending page is not a decision. */
   pendingApprovalIds(ids: string[], now = new Date()): string[] {
-    if (
-      !Array.isArray(ids) ||
-      ids.length > 200 ||
-      new Set(ids).size !== ids.length ||
-      ids.some((id) => typeof id !== 'string' || !/^[a-f0-9-]{36}$/.test(id))
-    )
-      throw new Error('Invalid approval IDs.');
-    if (!ids.length) return [];
-    return (
-      this.db
-        .prepare(
-          `SELECT id FROM approvals WHERE id IN (${ids.map(() => '?').join(',')}) AND decision IS NULL AND expires>?`,
-        )
-        .all(...ids, iso(now)) as { id: string }[]
-    ).map((r) => r.id);
+    return this.approvals.pendingApprovalIds(ids, now);
   }
-  /** Applied once: repeating a decision returns the first outcome. Expiry never approves. */
-  decide(
-    approvalId: string,
-    decision: Decision,
-    source: string,
-    now = new Date(),
-  ): { decision: string; grantId?: string } {
-    if (
-      !['approve', 'reject', 'edit'].includes(decision) ||
-      typeof source !== 'string' ||
-      !source ||
-      source.length > 100
-    )
-      throw new Error('Invalid decision.');
-    return this.tx(() => {
-      const row = this.db
-        .prepare(
-          'SELECT a.*,x.sortie_id,x.tool,x.args FROM approvals a JOIN actions x ON x.id=a.action_id WHERE a.id=?',
-        )
-        .get(approvalId) as
-        | { action_id: string; expires: string; decision: string | null; sortie_id: string; tool: string; args: string }
-        | undefined;
-      if (!row) throw new Error('No approval with that ID.');
-      if (row.decision) {
-        const grant = this.db.prepare('SELECT id FROM grants WHERE action_id=?').get(row.action_id) as
-          { id: string } | undefined;
-        return { decision: row.decision, ...(grant ? { grantId: grant.id } : {}) };
-      }
-      const final = row.expires <= iso(now) ? 'expired' : decision;
-      this.db
-        .prepare('UPDATE approvals SET decision=?,decided=?,source=? WHERE id=?')
-        .run(final, iso(now), final === 'expired' ? 'ttl' : source, approvalId);
-      if (final === 'expired')
-        this.event(row.sortie_id, row.action_id, 'approval.expired', { approvalId, source: 'ttl' }, now);
-      else this.event(row.sortie_id, row.action_id, `approval.${final}`, { approvalId, source }, now);
-      return final === 'approve'
-        ? {
-            decision: final,
-            grantId: this.issue(
-              row.action_id,
-              row.tool,
-              JSON.parse(row.args) as Record<string, unknown>,
-              row.sortie_id,
-              now,
-            ),
-          }
-        : { decision: final };
-    });
+  decide(approvalId: string, decision: Decision, source: string, now = new Date()) {
+    return this.approvals.decide(approvalId, decision, source, now);
   }
-  /** Approvals that expired without the owner deciding, since a time (F-028): what the brief reports as not done. */
   expiredSince(since: string, limit = 20): { tool: string; sortieId: string; title: string; expired: string }[] {
-    if (typeof since !== 'string' || !Number.isFinite(Date.parse(since))) throw new Error('Invalid time.');
-    return this.db
-      .prepare(
-        `SELECT x.tool,x.sortie_id AS sortieId,s.title,a.decided AS expired FROM approvals a JOIN actions x ON x.id=a.action_id JOIN sorties s ON s.id=x.sortie_id
-    WHERE a.decision='expired' AND a.decided>? ORDER BY a.decided LIMIT ?`,
-      )
-      .all(new Date(Date.parse(since)).toISOString(), Math.min(Math.max(1, limit), 50)) as {
-      tool: string;
-      sortieId: string;
-      title: string;
-      expired: string;
-    }[];
+    return this.approvals.expiredSince(since, limit);
   }
-  /** Run on scheduler ticks: stand down approvals whose TTL passed. */
   expire(now = new Date()): number {
-    return this.tx(() => {
-      const due = this.db
-        .prepare(
-          'SELECT a.id,a.action_id,x.sortie_id FROM approvals a JOIN actions x ON x.id=a.action_id WHERE a.decision IS NULL AND a.expires<=?',
-        )
-        .all(iso(now)) as { id: string; action_id: string; sortie_id: string }[];
-      for (const r of due) {
-        this.db
-          .prepare('UPDATE approvals SET decision=?,decided=?,source=? WHERE id=?')
-          .run('expired', iso(now), 'ttl', r.id);
-        this.event(r.sortie_id, r.action_id, 'approval.expired', { approvalId: r.id, source: 'ttl' }, now);
-      }
-      const questions = this.db
-        .prepare(
-          `SELECT e.sortie_id,e.sequence FROM events e JOIN sorties s ON s.id=e.sortie_id
-    WHERE s.status='open' AND e.kind='misato.asked' AND json_extract(e.payload,'$.expires')<=?
-    AND NOT EXISTS (SELECT 1 FROM events a WHERE a.sortie_id=e.sortie_id AND a.sequence>e.sequence AND a.kind IN ('misato.answered','misato.asked'))`,
-        )
-        .all(iso(now)) as { sortie_id: string; sequence: number }[];
-      for (const q of questions) {
-        this.db.prepare("UPDATE sorties SET status='failed',closed=? WHERE id=?").run(iso(now), q.sortie_id);
-        this.event(q.sortie_id, null, 'misato.unanswered', { questionSequence: q.sequence }, now);
-        this.event(
-          q.sortie_id,
-          null,
-          'misato.reply',
-          { text: 'No answer within 24 hours; this request is closed. Nothing was resumed.' },
-          now,
-        );
-        this.event(q.sortie_id, null, 'sortie.failed', {}, now);
-      }
-      return due.length + questions.length;
-    });
+    return this.approvals.expire(now);
   }
-  /** The executor's check, on every call: exact tool and arguments, unexpired, unrevoked, single use. */
   authorize(grantId: string, tool: string, args: Record<string, unknown>, now = new Date()): void {
-    // The denial is committed as an event before the caller sees the error.
-    const reason = this.tx(() => {
-      const g = this.db
-        .prepare('SELECT g.*,x.sortie_id FROM grants g JOIN actions x ON x.id=g.action_id WHERE g.id=?')
-        .get(grantId) as
-        | {
-            action_id: string;
-            tool: string;
-            args_hash: string;
-            expires: string;
-            used: string | null;
-            revoked: string | null;
-            sortie_id: string;
-          }
-        | undefined;
-      if (!g) return 'unknown grant';
-      const denied = g.revoked
-        ? 'revoked'
-        : g.used
-          ? 'already used'
-          : g.expires <= iso(now)
-            ? 'expired'
-            : g.tool !== tool || g.args_hash !== argsHash(args)
-              ? 'action differs from the reviewed one'
-              : undefined;
-      if (denied) {
-        this.event(g.sortie_id, g.action_id, 'grant.denied', { reason: denied }, now);
-        return denied;
-      }
-      this.db.prepare('UPDATE grants SET used=? WHERE id=?').run(iso(now), grantId);
-      this.event(g.sortie_id, g.action_id, 'grant.used', {}, now);
-      return undefined;
-    });
-    if (reason) throw new Error(`A.T. Field denied: ${reason}.`);
+    return this.approvals.authorize(grantId, tool, args, now);
   }
-  /** Spear of Longinus: revoke grants, stand down approvals, close the sortie. Effects already executed are reported, never assumed undone. */
-  spear(
-    sortieId: string,
-    reason: string,
-    now = new Date(),
-  ): { revoked: number; stoodDown: number; happened: Happened[] } {
-    return this.tx(() => {
-      const sortie = this.db.prepare('SELECT status FROM sorties WHERE id=?').get(sortieId) as
-        { status: string } | undefined;
-      if (!sortie) throw new Error('No sortie with that ID.');
-      const revoked = Number(
-        this.db
-          .prepare(
-            'UPDATE grants SET revoked=? WHERE revoked IS NULL AND used IS NULL AND action_id IN (SELECT id FROM actions WHERE sortie_id=?)',
-          )
-          .run(iso(now), sortieId).changes,
-      );
-      const stoodDown = Number(
-        this.db
-          .prepare(
-            "UPDATE approvals SET decision='revoked',decided=?,source='spear' WHERE decision IS NULL AND action_id IN (SELECT id FROM actions WHERE sortie_id=?)",
-          )
-          .run(iso(now), sortieId).changes,
-      );
-      const happened = (
-        this.db
-          .prepare(
-            'SELECT x.id AS actionId,x.tool FROM grants g JOIN actions x ON x.id=g.action_id WHERE x.sortie_id=? AND g.used IS NOT NULL ORDER BY g.used',
-          )
-          .all(sortieId) as { actionId: string; tool: string }[]
-      ).map((h) => ({ ...h, inverse: this.tools.get(h.tool)?.inverse ?? null }));
-      this.db
-        .prepare("UPDATE sorties SET status='revoked',closed=? WHERE id=? AND status='open'")
-        .run(iso(now), sortieId);
-      this.event(
-        sortieId,
-        null,
-        'spear',
-        {
-          reason: String(reason).slice(0, 500),
-          revoked,
-          stoodDown,
-          happenedCount: happened.length,
-          happened: happened.slice(0, MAX_SPEAR_HAPPENED),
-        },
-        now,
-      );
-      return { revoked, stoodDown, happened };
-    });
+  spear(sortieId: string, reason: string, now = new Date()) {
+    return this.approvals.spear(sortieId, reason, now);
   }
   close(sortieId: string, status: 'done' | 'failed', now = new Date()): boolean {
     return this.tx(() => {
