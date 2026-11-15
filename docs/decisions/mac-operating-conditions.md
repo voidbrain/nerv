@@ -1,6 +1,6 @@
 # Mac operating-conditions plan and budgets (F-006-T05)
 
-**Status: proposed, 14 November 2026 (F-006-T05); owner approval pending in F-006-T18, and three-condition execution in F-006-T08.** References [NERV host assignments and load acceptance](../evaluations/mac-load-scenarios.md) and the released Gauntlet scenario definitions under `node_modules/@voidbrain/gauntlet-protocol/examples/scenarios/`.
+**Status: approved by the owner on 15 November 2026 (F-006-T18) with 3 runs per case and gemma4:12b as the constant model; F-006-T20 restates the budgets below for that; proposed 14 November 2026 (F-006-T05); and three-condition execution in F-006-T08.** References [NERV host assignments and load acceptance](../evaluations/mac-load-scenarios.md) and the released Gauntlet scenario definitions under `node_modules/@voidbrain/gauntlet-protocol/examples/scenarios/`.
 
 ## 1. Three comparable Mac operating conditions
 
