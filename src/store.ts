@@ -13,7 +13,7 @@ import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { LEDGER_SCHEMA, Ledger, type Decision, type Proposal } from './ledger.ts';
 import { builtinTools, execute, hasExecutor, type AgencyBaseSnapshot, type AgencySnapshot } from './executors.ts';
-import { MEMORY_SCHEMA, Memory, type Episode } from './memory.ts';
+import { MEMORY_SCHEMA, Memory, suggestSpellingFix, type Episode } from './memory.ts';
 import { BATTERY_SCHEMA, BatteryRegistry } from './batteries.ts';
 import { Registry, REGISTRY_SCHEMA } from './kaji.ts';
 import { MILESTONE_SCHEMA } from './milestones.ts';
@@ -1219,13 +1219,18 @@ export class Store {
     this.assertWorkerAuthority(lease.owner, lease.key, lease.ownerKey);
     this.workerJobs.assertLease(lease);
   }
-  decide(id: string, decision: Decision, source = 'api'): { decision: string; result?: unknown; error?: string } {
+  decide(
+    id: string,
+    decision: Decision,
+    source = 'api',
+    options?: { useSuggestedFix?: boolean },
+  ): { decision: string; result?: unknown; error?: string } {
     const lease = this.workerJobs.approval(id);
-    if (!lease) return this.decideCore(id, decision, source);
+    if (!lease) return this.decideCore(id, decision, source, options);
     return transaction(this.db, () => {
       const row = this.db.prepare('SELECT decision FROM approvals WHERE id=?').get(id) as
         { decision: string | null } | undefined;
-      if (row?.decision) return this.decideCore(id, decision, source);
+      if (row?.decision) return this.decideCore(id, decision, source, options);
       if (decision === 'approve')
         try {
           this.assertWorker(lease);
@@ -1237,7 +1242,7 @@ export class Store {
           });
           return { ...rejected, error: 'Worker lease or authority changed; nothing ran.' };
         }
-      const result = this.decideCore(id, decision, source);
+      const result = this.decideCore(id, decision, source, options);
       this.workerJobs.finish(lease, {
         outcome: result.decision === 'approve' && !result.error ? 'grant' : 'reject',
         ...result,
@@ -1249,6 +1254,7 @@ export class Store {
     id: string,
     decision: Decision,
     source = 'api',
+    options?: { useSuggestedFix?: boolean },
   ): { decision: string; result?: unknown; error?: string } {
     const proactive = this.db
       .prepare(
@@ -1256,6 +1262,25 @@ export class Store {
       )
       .get(id) as { id: string } | undefined;
     if (proactive) this.syncWatch();
+    if (decision === 'approve' && options?.useSuggestedFix) {
+      const row = this.db
+        .prepare(
+          'SELECT a.decision, x.id AS action_id, x.tool, x.args FROM approvals a JOIN actions x ON x.id=a.action_id WHERE a.id=?',
+        )
+        .get(id) as { decision: string | null; action_id: string; tool: string; args: string } | undefined;
+      if (row && !row.decision && row.tool === 'memory.remember') {
+        const parsed = JSON.parse(row.args) as { text?: unknown; suggestedText?: unknown };
+        if (
+          typeof parsed.suggestedText === 'string' &&
+          parsed.suggestedText.trim() &&
+          parsed.suggestedText !== parsed.text
+        ) {
+          this.db
+            .prepare('UPDATE actions SET args=? WHERE id=?')
+            .run(JSON.stringify({ text: parsed.suggestedText.trim(), originalText: parsed.text }), row.action_id);
+        }
+      }
+    }
     const applied = this.ledger.decide(id, decision, source);
     const action = applied.grantId ? this.ledger.grantAction(applied.grantId) : undefined;
     if (applied.grantId && action && !action.used && hasExecutor(action.tool)) {
@@ -1288,6 +1313,7 @@ export class Store {
   ): ActResult {
     if (proposal.tool === 'memory.remember' && Array.isArray(proposal.args.texts)) {
       const texts = proposal.args.texts;
+      const suggestedTexts = Array.isArray(proposal.args.suggestedTexts) ? proposal.args.suggestedTexts : [];
       if (
         texts.length < 2 ||
         texts.length > 10 ||
@@ -1297,10 +1323,19 @@ export class Store {
       const unique = new Set(texts.map((text) => text.trim()));
       if (unique.size !== texts.length) throw new Error('Each proposed fact must be distinct.');
       const proposed = transaction(this.db, () =>
-        texts.map((text) => {
+        texts.map((text, index) => {
+          const cleanText = text.trim();
+          const explicitFix = typeof suggestedTexts[index] === 'string' ? suggestedTexts[index].trim() : null;
+          const suggested = explicitFix && explicitFix !== cleanText ? explicitFix : suggestSpellingFix(cleanText);
           const item = this.ledger.propose(
             sortieId,
-            { ...proposal, args: { text: text.trim() } },
+            {
+              ...proposal,
+              args: {
+                text: cleanText,
+                ...(suggested && suggested !== cleanText ? { suggestedText: suggested } : {}),
+              },
+            },
             new Date(),
             approvalUntil,
           );
@@ -1322,8 +1357,20 @@ export class Store {
         approvalIds,
       };
     }
+    const normalizedProposal =
+      proposal.tool === 'memory.remember' && typeof proposal.args.text === 'string'
+        ? (() => {
+            const cleanText = proposal.args.text.trim();
+            const explicitFix =
+              typeof proposal.args.suggestedText === 'string' ? proposal.args.suggestedText.trim() : null;
+            const suggested = explicitFix && explicitFix !== cleanText ? explicitFix : suggestSpellingFix(cleanText);
+            return suggested && suggested !== cleanText
+              ? { ...proposal, args: { ...proposal.args, text: cleanText, suggestedText: suggested } }
+              : proposal;
+          })()
+        : proposal;
     const p = transaction(this.db, () => {
-      const proposed = this.ledger.propose(sortieId, proposal, new Date(), approvalUntil);
+      const proposed = this.ledger.propose(sortieId, normalizedProposal, new Date(), approvalUntil);
       if (proposed.approvalId) this.deliverApproval(proposed.approvalId);
       return proposed;
     });

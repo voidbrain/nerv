@@ -274,6 +274,7 @@ export const methodSchemas = {
       id: { type: 'string', minLength: 1, maxLength: 100 },
       decision: { enum: ['approve', 'reject', 'edit'] },
       source: { enum: ['api', 'dashboard', 'cli', 'telegram'] },
+      useSuggestedFix: { type: 'boolean' },
     },
     additionalProperties: false,
   },

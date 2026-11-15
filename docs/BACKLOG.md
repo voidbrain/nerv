@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 93 h agent + 24 h owner across 205 open steps of 52 features and 5 other records. 27.75 h of actual effort recorded on 54 steps. Generated from the task files.
+**Remaining effort:** 92.75 h agent + 24 h owner across 204 open steps of 52 features and 5 other records. 28.25 h of actual effort recorded on 55 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1910,7 +1910,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: show a proposed spelling clean-up beside the original fact (F-044-T02).
 
@@ -1924,10 +1924,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="f-044-t02"></a>F-044-T02 — Shown spelling fix | 0.25 h | 0 h | 0.25 h | Planned |
-| 🟢 Small | <a id="f-044-t03"></a>F-044-T03 — Typo-tolerant recall | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-044-T02](#f-044-t02) |
+| 🟢 Small | <a id="f-044-t03"></a>F-044-T03 — Typo-tolerant recall | 0.75 h | 0 h | 0.75 h | Planned |
 | — | <a id="f-044-t01"></a>F-044-T01 — One fact per subject on one editable card | 1.5 h | 0.75 h (stated) | 0 h | Completed |
-| 🟢 Small | **Total** | 2.5 h | 0.75 h (1 of 3 steps recorded) | 1 h | 1 of 3 completed |
+| — | <a id="f-044-t02"></a>F-044-T02 — Shown spelling fix | 0.25 h | 0.5 h (stated) | 0 h | Completed |
+| 🟢 Small | **Total** | 2.5 h | 1.25 h (2 of 3 steps recorded) | 0.75 h | 2 of 3 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>

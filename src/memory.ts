@@ -6,6 +6,50 @@ import { randomUUID } from 'node:crypto';
  * Every change is appended to fact_history, so an edit or a forget never loses where a fact came from. Recall is SQLite
  * FTS5 over active facts. Facts are local-only unless marked shareable, so they never reach a cloud model by default.
  */
+const SPELLING_FIXES: Record<string, string> = {
+  becuase: 'because',
+  calender: 'calendar',
+  choclate: 'chocolate',
+  coffe: 'coffee',
+  cookng: 'cooking',
+  definately: 'definitely',
+  excersize: 'exercise',
+  favortie: 'favorite',
+  favroite: 'favorite',
+  frisbbe: 'frisbee',
+  langauge: 'language',
+  occured: 'occurred',
+  progamming: 'programming',
+  recieve: 'receive',
+  restaraunt: 'restaurant',
+  runing: 'running',
+  seperate: 'separate',
+  swiming: 'swimming',
+  teh: 'the',
+  tommorow: 'tomorrow',
+  untill: 'until',
+  wich: 'which',
+};
+
+/**
+ * Proposes a conservative spelling clean-up for a fact without ever modifying the caller's text.
+ * Returns null when no known typo is found or the text is unchanged.
+ */
+export function suggestSpellingFix(text: string): string | null {
+  const trimmed = text.trim();
+  if (!trimmed) return null;
+  let changed = false;
+  const fixed = trimmed.replace(/\b([A-Za-z]+)\b/g, (word) => {
+    const replacement = SPELLING_FIXES[word.toLowerCase()];
+    if (!replacement) return word;
+    changed = true;
+    if (word === word.toUpperCase()) return replacement.toUpperCase();
+    if (word[0] === word[0]!.toUpperCase()) return replacement[0]!.toUpperCase() + replacement.slice(1);
+    return replacement;
+  });
+  return changed && fixed !== trimmed ? fixed : null;
+}
+
 export const MEMORY_SCHEMA = `
  CREATE TABLE IF NOT EXISTS facts(id TEXT PRIMARY KEY, text TEXT NOT NULL, status TEXT NOT NULL, source TEXT NOT NULL, sortie_id TEXT, tainted INTEGER NOT NULL DEFAULT 0, shareable INTEGER NOT NULL DEFAULT 0, created TEXT NOT NULL, updated TEXT NOT NULL);
  CREATE TABLE IF NOT EXISTS fact_history(sequence INTEGER PRIMARY KEY AUTOINCREMENT, fact_id TEXT NOT NULL, kind TEXT NOT NULL, text TEXT NOT NULL, source TEXT NOT NULL, created TEXT NOT NULL);

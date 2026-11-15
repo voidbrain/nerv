@@ -365,7 +365,9 @@
   document.addEventListener("click", e => { const t = e.target.closest("#m-cloud"); if (!t) return; e.preventDefault(); applyModels({ cloud:{ enabled:t.dataset.on === "true" } }, t.dataset.on === "true" ? "Cloud route on" : "Cloud route off"); });
   // Real actions instead of simulated ones.
   window.decide = async function (apId, decision) {
-    try { const r = await api("approvals/" + apId, { method:"POST", body:JSON.stringify({ decision }) }); log("Owner " + decision + " · " + r.decision + (r.error ? " · " + r.error : ""), decision === "approve" ? "ok" : "danger", null, "you"); }
+    const payload = decision === "use-fix" ? { decision: "approve", useSuggestedFix: true } : { decision };
+    const effective = decision === "use-fix" ? "approve" : decision;
+    try { const r = await api("approvals/" + apId, { method:"POST", body:JSON.stringify(payload) }); log("Owner " + effective + " · " + r.decision + (r.error ? " · " + r.error : ""), effective === "approve" ? "ok" : "danger", null, "you"); }
     catch (e) { log("Decision failed: " + e.message, "danger"); }
     poll();
   };

@@ -238,6 +238,10 @@ function askOwner(s, a, b, reason) {
 }
 function decide(apId, decision) {
   const ap = state.approvals.find(x => x.id === apId); if (!ap) return;
+  if (decision === "use-fix" && ap.action.args && ap.action.args.suggestedText) {
+    ap.action.args.text = ap.action.args.suggestedText;
+    decision = "approve";
+  }
   state.approvals = state.approvals.filter(x => x.id !== apId);
   const s = state.sorties.find(x => x.id === ap.sortie);
   log("Owner " + decision + " " + ap.id + " (" + ap.action.tool + ")", decision === "approve" ? "ok" : "danger", s);
@@ -406,6 +410,7 @@ function renderNeeds() {
       "<div class='row'><span class='what'>" + esc(humanAction(a)) + "</span><span class='badge b-" + b.pattern + "'>PATTERN " + b.pattern.toUpperCase() + "</span></div>" +
       "<div class='small muted'>" + esc(s.id) + " · " + esc(s.title) + (LIVE ? "" : " · pilot " + esc(s.pilot) + " (" + pilotStage(s.pilot) + ")") + "</div>" +
       "<code style='margin-top:4px'>" + esc(a.tool) + " " + esc(JSON.stringify(a.args, null, 1)) + "</code>" +
+      spellingFixHtml(ap) +
       "<div class='kv' style='margin-top:4px'><span>effect</span><span>" + b.effect + (TOOLS[a.tool].inverse ? " · undo: " + TOOLS[a.tool].inverse : " · <span class='danger'>no undo</span>") + "</span>" +
       "<span>executor</span><span>" + b.executor + "</span>" +
       "<span>sync</span><span><b class='" + (b.sync.value >= SCROLLS.syncThreshold ? "ok" : "warn") + "'>" + b.sync.value + "%</b> = " + esc(syncFormula(b)) + "</span></div>" +
@@ -416,10 +421,15 @@ function renderNeeds() {
       "</article>";
   }).join("") + "<div class='tiny muted keyhint'>Keys: <kbd>a</kbd> approve · <kbd>r</kbd> reject (press twice to confirm; the focused card, else the first) · <kbd>/</kbd> search sorties</div>";
 }
+function spellingFixHtml(ap) {
+  const args = ap.action && ap.action.args;
+  if (ap.action.tool !== "memory.remember" || !args || !args.suggestedText || args.suggestedText === args.text) return "";
+  return "<div class='spelling-fix small'>Proposed spelling fix: <strong>" + esc(args.suggestedText) + "</strong> <button class='btn sm' data-ap='" + ap.id + "' data-d='use-fix'>Use fix</button></div>";
+}
 function renderMemoryCard(group) {
   const first = group[0], s = state.sorties.find(x => x.id === first.sortie);
   const ids = group.map(ap => ap.id).join(",");
-  const facts = group.map(ap => "<li><span>" + esc(ap.action.args.text) + "</span><span class='acts'><button class='btn sm' data-ap='" + ap.id + "' data-d='edit' aria-label='Edit fact: " + esc(ap.action.args.text) + "'>Edit</button><button class='btn sm danger' data-ap='" + ap.id + "' data-d='reject' aria-label='Remove fact: " + esc(ap.action.args.text) + "'>Remove</button></span></li>").join("");
+  const facts = group.map(ap => "<li><span>" + esc(ap.action.args.text) + spellingFixHtml(ap) + "</span><span class='acts'><button class='btn sm' data-ap='" + ap.id + "' data-d='edit' aria-label='Edit fact: " + esc(ap.action.args.text) + "'>Edit</button><button class='btn sm danger' data-ap='" + ap.id + "' data-d='reject' aria-label='Remove fact: " + esc(ap.action.args.text) + "'>Remove</button></span></li>").join("");
   return "<article class='apcard " + first.ballot.pattern + "' data-card='" + first.id + "' data-bundle='" + ids + "'>" +
     "<div class='row'><span class='what'>Remember these facts?</span><span class='badge b-" + first.ballot.pattern + "'>PATTERN " + first.ballot.pattern.toUpperCase() + "</span></div>" +
     "<div class='small muted'>" + esc(s.id) + " · " + esc(s.title) + "</div><ul class='fact-list'>" + facts + "</ul>" +

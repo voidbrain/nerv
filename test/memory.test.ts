@@ -6,6 +6,7 @@ import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Store, OWNER_SOURCE } from '../src/store.ts';
+import { readScrolls } from '../src/config.ts';
 import { ftsQuery } from '../src/memory.ts';
 import { misatoAsk } from '../src/misato.ts';
 import { toolDocs } from '../src/executors.ts';
@@ -205,5 +206,46 @@ test('nerv memory: add, list, edit, history and forget from the CLI', () => {
     assert.match(run('forget', 'zzzz').stderr, /No active fact/);
   } finally {
     rmSync(home, { recursive: true, force: true });
+  }
+});
+
+test('F-044-T02: proposed spelling fix appears next to original on the card and is never applied silently', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'nerv-f044-t02-'));
+  try {
+    const store = new Store(join(dir, 'nerv.db'), readScrolls(dir), { home: dir });
+    const sortieId = store.ledger.openSortie('owner', 'remember facts', 'trusted');
+    const act = store.runAction(sortieId, {
+      tool: 'memory.remember',
+      args: { texts: ['I do not like wine', 'I play ultimate frisbbe'] },
+      stage: 'production',
+    });
+    assert.equal(act.approvalIds?.length, 2);
+    const pending = store.approvals(10);
+    const frisbeeCard = pending.find((a) => (a.card.args as { text?: string }).text === 'I play ultimate frisbbe');
+    assert.ok(frisbeeCard);
+    assert.equal((frisbeeCard.card.args as { suggestedText?: string }).suggestedText, 'I play ultimate frisbee');
+
+    // Approving normally must keep the original text (never applied silently).
+    store.decide(act.approvalIds![0]!, 'approve', 'test');
+    store.decide(frisbeeCard.id, 'approve', 'test');
+    const stored = store.memory.list().map((f) => f.text);
+    assert.ok(stored.includes('I play ultimate frisbbe'));
+    assert.ok(!stored.includes('I play ultimate frisbee'));
+
+    // Explicit useSuggestedFix applies the proposed fix only when requested.
+    const sortie2Id = store.ledger.openSortie('owner', 'remember another fact', 'trusted');
+    const act2 = store.runAction(sortie2Id, {
+      tool: 'memory.remember',
+      args: { text: 'I drink coffe at 8' },
+      stage: 'production',
+    });
+    assert.ok(act2.approvalId);
+    const card2 = store.approvals(10).find((a) => a.id === act2.approvalId);
+    assert.equal((card2?.card.args as { suggestedText?: string }).suggestedText, 'I drink coffee at 8');
+    store.decide(act2.approvalId, 'approve', 'test', { useSuggestedFix: true });
+    assert.ok(store.memory.list().some((f) => f.text === 'I drink coffee at 8'));
+    store.close();
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
   }
 });
