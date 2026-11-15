@@ -4,6 +4,7 @@ import { runResumeEngineTick, type CreateResumeIntentInput, type ResumeIntentSta
 import { decideHitlThroughPersona, formatMisatoPendingHitl } from './persona.ts';
 import { EVA_CLASS_SPECS, admitEvaJob, type EvaAdmissionRequest } from './eva-classes.ts';
 import { createPeerHandlers } from './peer-handlers.ts';
+import { fetchIntoQuarantine } from './quarantine.ts';
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
 import { formatBatteryStateLines, type OneMoreBatteryExport } from './batteries.ts';
@@ -1680,6 +1681,26 @@ try {
         }
         process.once('SIGINT', close);
         process.once('SIGTERM', close);
+        break;
+      }
+      case 'quarantine': {
+        const sub = args[0];
+        if (sub !== 'fetch' || !args[1]) throw new Error('Usage: nerv quarantine fetch <url> [--kind repo|page]');
+        const kindIdx = args.indexOf('--kind');
+        const kind = kindIdx >= 0 ? (args[kindIdx + 1] as 'repo' | 'page' | undefined) : undefined;
+        const result = await fetchIntoQuarantine(args[1], kind ? { kind } : {});
+        console.log(
+          JSON.stringify(
+            {
+              target: result.target,
+              kind: result.kind,
+              tainted: result.tainted,
+              files: result.files.map((f) => f.path),
+            },
+            null,
+            2,
+          ),
+        );
         break;
       }
       default:
