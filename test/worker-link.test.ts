@@ -34,9 +34,8 @@ const item = (n: number) => ({
   args: { title: 'Neutral ' + n, due: '2031-01-01T09:00:00Z' },
 });
 // workerHeartbeatMs lets a test keep the worker side quiet, so only the coordinator heartbeat is in flight.
-// Remedy (a) for B-046 mechanism (3): test fixtures use a 500 ms ping reply budget, above the measured store latency
-// (50–270 ms nervous-process calls on loaded runners). The B-046 stall tests keep 150 ms explicitly.
-async function fixture(heartbeatMs = 500, workerHeartbeatMs = heartbeatMs) {
+// B-066-T02: strict 150 ms heartbeat timing restored; frame verification uses an in-memory registry snapshot.
+async function fixture(heartbeatMs = 150, workerHeartbeatMs = heartbeatMs) {
   const root = keys(),
     a = keys(),
     b = keys(),
@@ -813,6 +812,39 @@ test(
         await wait(10);
       }
       assert.equal(hellos - negotiated, 0, 'a slow store on the worker is not a lost peer');
+    } finally {
+      WebSocket.prototype.send = send;
+      await f.close();
+    }
+  },
+);
+test(
+  'B-066-T02: worker-link heartbeats survive slow registry IPC without dropping live sessions',
+  { timeout: 30000 },
+  async () => {
+    const f = await fixture(120, 120);
+    const send = WebSocket.prototype.send;
+    let hellos = 0;
+    WebSocket.prototype.send = function (this: WebSocket, data: unknown, ...rest: unknown[]) {
+      if (String(data).includes('worker.hello')) hellos++;
+      return (send as (...args: unknown[]) => void).call(this, data, ...rest);
+    } as typeof send;
+    try {
+      await f.start();
+      const negotiated = hellos;
+      for (const rt of [f.ra, f.rb]) {
+        const call = rt.nervous.call.bind(rt.nervous);
+        rt.nervous.call = async (method, params = {}, timeout) => {
+          if (method === 'kaji.bases' || method === 'kaji.main') await wait(300);
+          return call(method, params, timeout);
+        };
+      }
+      for (let i = 0; i < 40; i++) {
+        assert.ok(f.main.connected('NERV-02'), 'live session must not drop while registry IPC is slow');
+        await wait(12);
+      }
+      assert.equal(hellos - negotiated, 0, 'session must not reconnect while registry IPC is slow');
+      assert.equal(((await f.main.run('NERV-02', item(200), 2000)) as { outcome: string }).outcome, 'grant');
     } finally {
       WebSocket.prototype.send = send;
       await f.close();
