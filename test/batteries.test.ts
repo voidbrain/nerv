@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { Store } from '../src/store.ts';
-import type { OneMoreBatteryExport } from '../src/batteries.ts';
+import { formatDueResistancePrompt, type OneMoreBatteryExport } from '../src/batteries.ts';
 
 describe('F-008-T06: battery registry and one-more-battery import', () => {
   it('registers batteries with number, optional colour series, type, brand, mAh, purchase date, and required initial resistance', () => {
@@ -228,6 +228,72 @@ describe('F-008-T06: battery registry and one-more-battery import', () => {
       assert.equal(stored.state, 'stored');
       assert.equal(store.batteries.get(b7blu.id)?.cycles, 1);
       assert.match(stored.message, /#8 \(Blu\): stored · 1 ciclo/);
+    } finally {
+      store.close();
+    }
+  });
+
+  it('F-008-T08: validates ordered per-cell resistance against cell count and asks when due by 90 days or 30 cycles', () => {
+    const store = new Store(':memory:');
+    try {
+      const lipo = store.batteries.register({
+        packNumber: 1,
+        series: 'Alpha',
+        brand: 'Tattu',
+        batteryType: 'LiPo 6S',
+        cellCount: 6,
+        capacityMah: 1480,
+        purchaseDate: '2026-08-01',
+        initialResistanceMohm: [2.1, 2.2, 2.0, 2.3, 2.1, 2.2],
+        recordedAt: '2026-08-01T10:00:00Z',
+      });
+      const lihv = store.batteries.register({
+        packNumber: 2,
+        series: 'Beta',
+        brand: 'GNB',
+        batteryType: 'LiHV 3S',
+        cellCount: 3,
+        capacityMah: 550,
+        purchaseDate: '2026-11-01',
+        initialResistanceMohm: [3, 3.4, 4.1],
+        recordedAt: '2026-11-01T10:00:00Z',
+      });
+
+      // Cell count checked against type when recording new values in order.
+      assert.throws(() => store.batteries.recordResistance(lihv.id, '3.1, 3.5'), /exactly 3 per-cell value/);
+      const recorded = store.batteries.recordResistance(lihv.id, '3.1, 3.5, 4.2 mΩ', '2026-11-02T10:00:00Z');
+      assert.deepEqual(recorded.valuesMohm, [3.1, 3.5, 4.2]);
+
+      // Simulate 30 cycles on lihv -> due by cycles.
+      for (let i = 0; i < 30; i += 1) {
+        store.batteries.recordState(lihv.id, 'charged', `2026-11-03T10:${String(i).padStart(2, '0')}:00Z`);
+        store.batteries.recordState(lihv.id, 'discharged', `2026-11-03T11:${String(i).padStart(2, '0')}:00Z`);
+      }
+
+      // Check at 2026-11-05: lipo is >= 90 days old (96 days), lihv has >= 30 cycles.
+      const due = store.batteries.dueResistanceChecks(new Date('2026-11-05T12:00:00Z'));
+      assert.equal(due.length, 2);
+      assert.deepEqual(due[0]!.reasons, ['days']);
+      assert.deepEqual(due[1]!.reasons, ['cycles']);
+
+      const prompt = formatDueResistancePrompt(due, 'en');
+      assert.match(prompt, /#1 \(Alpha\).*6 per-cell values in mΩ in order/);
+      assert.match(prompt, /#2 \(Beta\).*3 per-cell values in mΩ in order/);
+
+      // Store.tick delivers inbox ask once per due record, and clears after recording.
+      store.tick(new Date('2026-11-05T12:00:00Z'));
+      const inbox1 = store.inbox() as Array<{ kind: string; message: string }>;
+      assert.equal(inbox1.filter((d) => d.kind === 'battery_resistance').length, 2);
+
+      // Second tick does not spam duplicate asks for the same record.
+      store.tick(new Date('2026-11-05T12:05:00Z'));
+      const inbox2 = store.inbox() as Array<{ kind: string; message: string }>;
+      assert.equal(inbox2.filter((d) => d.kind === 'battery_resistance').length, 2);
+
+      // Recording new values clears due status until another 90 days or 30 cycles.
+      store.batteries.recordResistance(lipo.id, [2.2, 2.3, 2.1, 2.4, 2.2, 2.3], '2026-11-05T12:10:00Z');
+      store.batteries.recordResistance(lihv.id, [3.2, 3.6, 4.3], '2026-11-05T12:10:00Z');
+      assert.equal(store.batteries.dueResistanceChecks(new Date('2026-11-05T12:15:00Z')).length, 0);
     } finally {
       store.close();
     }
