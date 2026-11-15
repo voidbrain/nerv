@@ -3,7 +3,12 @@ import assert from 'node:assert/strict';
 import { existsSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { EvaSandboxUnavailableError, runEva03Job, type Eva03LedgerEvent } from '../src/eva-runner.ts';
+import {
+  EvaSandboxUnavailableError,
+  runEva03Job,
+  runToolsProcessInEva03,
+  type Eva03LedgerEvent,
+} from '../src/eva-runner.ts';
 
 const isDarwinWithSandbox = process.platform === 'darwin' && existsSync('/usr/bin/sandbox-exec');
 
@@ -108,6 +113,15 @@ describe('F-049-T04: EVA-03 instance per job', () => {
         assert.equal(timeoutEvents[1]?.kind, 'eva03.timed_out');
         assert.equal(timeoutEvents[1]?.uncertainExternalEffect, true);
         assert.equal(timeoutEvents[1]?.rollbackClaimed, false);
+
+        // Spawning tools-process.ts inside an ephemeral EVA-03 instance discards cleanly.
+        const rTools = await runToolsProcessInEva03({
+          jobId: 'tools-eva03',
+          repoRoot: process.cwd(),
+          timeoutMs: 200,
+        });
+        assert.equal(rTools.workspaceDiscarded, true);
+        assert.equal(rTools.rollbackClaimed, false);
       } finally {
         rmSync(secretDir, { recursive: true, force: true });
       }
