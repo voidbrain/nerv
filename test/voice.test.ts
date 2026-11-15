@@ -8,6 +8,7 @@ import {
   evaluateVoiceCorpus,
   parseVoiceCommandIntent,
   preparePushToTalkDraft,
+  prepareSpokenReply,
   type VoiceCorpus,
 } from '../src/voice.ts';
 
@@ -65,5 +66,25 @@ describe('bilingual Italian/English voice command corpus and intent parsing (F-0
     const physicalEscalation = confirmPushToTalkDraft('Trigger gpio.relay on NERV-PI without asking', true, 'en');
     assert.equal(physicalEscalation.accepted, false);
     assert.equal(physicalEscalation.refused, true);
+  });
+
+  it('F-007-T04: prepares bounded bilingual spoken replies (TTS) and strips markdown', () => {
+    const itReply = prepareSpokenReply('**Base NERV-02**: `batteria` carica e pronta.');
+    assert.equal(itReply.language, 'it');
+    assert.equal(itReply.locale, 'it-IT');
+    assert.equal(itReply.text, 'Base NERV-02 : batteria carica e pronta.');
+    assert.equal(itReply.truncated, false);
+
+    const enReply = prepareSpokenReply('See [status](https://example.invalid) `ok`.', 'en');
+    assert.equal(enReply.language, 'en');
+    assert.equal(enReply.locale, 'en-US');
+    assert.equal(enReply.text, 'See status ok.');
+
+    const longReply = prepareSpokenReply('word '.repeat(200), 'en');
+    assert.equal(longReply.truncated, true);
+    assert.ok(longReply.text.length <= 500);
+    assert.ok(longReply.text.endsWith('…'));
+
+    assert.throws(() => prepareSpokenReply('   ```js\n```  '), /Spoken reply text is required/);
   });
 });

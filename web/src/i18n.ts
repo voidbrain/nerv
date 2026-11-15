@@ -100,6 +100,8 @@ export const messages = {
     pttConfirm: 'Conferma ed esegui',
     pttCancel: 'Scarta',
     pttPlaceholder: 'Trascrizione vocale…',
+    ttsToggle: 'Risposte vocali (TTS)',
+    ttsStop: 'Ferma voce',
   },
   en: {
     previous: 'Previous page',
@@ -202,5 +204,7 @@ export const messages = {
     pttConfirm: 'Confirm and run',
     pttCancel: 'Discard',
     pttPlaceholder: 'Speech-to-text transcript…',
+    ttsToggle: 'Spoken replies (TTS)',
+    ttsStop: 'Stop speaking',
   },
 } as const;

@@ -28,7 +28,7 @@ import {
 } from './update-policy.ts';
 import type { ServiceHost } from './node-lifecycle-execution.ts';
 import { RpcFault } from './rpc.ts';
-import { confirmPushToTalkDraft, preparePushToTalkDraft, type VoiceLanguage } from './voice.ts';
+import { confirmPushToTalkDraft, preparePushToTalkDraft, prepareSpokenReply, type VoiceLanguage } from './voice.ts';
 import type { ModelChange } from './model-setup.ts';
 import { MODEL_TIMEOUT_MS } from './model.ts';
 import { MAX_STEPS } from './misato.ts';
@@ -728,6 +728,18 @@ export function makeServer(
           ...(typeof b.requestId === 'string' ? { requestId: b.requestId } : {}),
         });
         reply(200, { accepted: true, queued: true, draft: check.draft, result });
+      } else if (req.method === 'POST' && path === '/api/voice/speak') {
+        const b = await body(req, 20000);
+        if (
+          Object.keys(b).some((k) => !['text', 'language'].includes(k)) ||
+          typeof b.text !== 'string' ||
+          (b.language !== undefined && b.language !== 'it' && b.language !== 'en')
+        ) {
+          throw new Error('text is required; language must be it or en.');
+        }
+        reply(200, {
+          speech: prepareSpokenReply(b.text, b.language as VoiceLanguage | undefined),
+        });
       } else if (req.method === 'POST' && path === '/api/actions') {
         // Admin only: one owner action through the per-action gate (F-017). Grant IDs never appear in the reply.
         if (!store.act) {
