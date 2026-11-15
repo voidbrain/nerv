@@ -17,7 +17,7 @@ Moved to [upfront feature plans](feature-plans.md): "Optional upfront feature pl
 - Once a step is implemented, its Who cell names who the remaining work waits on (8.16.0): the owner's face while `ownerHours` remain (🧑 when the step names no `ownerKind`; prefer setting it; planned and ready steps keep their faces), 🤖 while agent hours remain or nobody else is owed. The baseline no longer marks agent work then.
 - Verified and closed steps leave the steps table for a collapsed `Done steps (n)` table below it (8.16.0); the total row still counts every step.
 - An owner step whose prerequisites are not all verified or closed is not the owner's turn yet: it shows ⏳ before its face in the Who cell and `waits on <step>` in its status (every open prerequisite, in the record or another, linked to its row), and gets its face once it is (8.9.0).
-- Every owner step whose turn it is has a page; `check:work` lists those without.
+- Every owner step whose turn it is has a page; `check:work` lists those without, and lists open steps whose turn it is with `ownerHours > 0` and no `ownerKind` so they are classified or split.
 - A waiting step's page is written by the step that makes it runnable, never ahead of the code.
 
 ## Optional explicit tasks and source-owned records

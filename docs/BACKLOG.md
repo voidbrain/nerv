@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 74.75 h agent + 21.75 h owner across 168 open steps of 45 features and 7 other records. 34.75 h of actual effort recorded on 79 steps. Generated from the task files.
+**Remaining effort:** 74 h agent + 21.75 h owner across 168 open steps of 45 features and 7 other records. 34.75 h of actual effort recorded on 79 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -150,7 +150,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T15](#f-006-t15) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-006-t16"></a>F-006-T16 — Record the evidence of F-006-T13 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T13](#f-006-t13) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-006-t14"></a>F-006-T14 — T05c — Mac operating-conditions report | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T16](#f-006-t16) | ⏳ 🤖 |
-| 🟡 Medium | **Total** | 7.25 h (16 of 20 steps) | 5.25 h (10 of 20 steps recorded) | 2 h agent + 2 h owner | 10 of 20 completed | |
+| 🟡 Medium | **Total** | 7.25 h (16 of 20 steps) | 5.25 h (10 of 20 steps recorded) | 2 h agent + 2 h owner | 12 of 20 completed | |
 
 <details><summary>Done steps (12)</summary>
 
@@ -159,8 +159,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-006-t01"></a>F-006-T01 — T01a — Decision: remote inference endpoint identity, permitted data and behaviour when unavailable | 0.5 h | 0.5 h (stated) | Completed |
 | — | <a id="f-006-t02"></a>F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback | 0.5 h | 0.5 h (stated) | Completed |
 | — | <a id="f-006-t03"></a>F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases | 0.25 h | 0.25 h (stated) | Completed |
-| 🟢 Small | <a id="f-006-t04"></a>F-006-T04 — Draft the placement campaign plan with exact cases, repeats and budgets | 0.25 h | 0.25 h so far (stated) | Verified |
-| 🟢 Small | <a id="f-006-t05"></a>F-006-T05 — Draft the Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.25 h | 0.25 h so far (stated) | Verified |
+| 🟢 Small | <a id="f-006-t04"></a>F-006-T04 — Draft the placement campaign plan with exact cases, repeats and budgets | 0.25 h | 0.25 h (stated) | Verified |
+| 🟢 Small | <a id="f-006-t05"></a>F-006-T05 — Draft the Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.25 h | 0.25 h (stated) | Verified |
 | — | <a id="f-006-t06"></a>F-006-T06 — T01b — Configuration validation for remote endpoints; the loopback-only local route stays guaranteed; regressions | 0.5 h | 0.5 h (stated) | Completed |
 | — | <a id="f-006-t07"></a>F-006-T07 — T02b — Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol | 0.75 h | 0.75 h (stated) | Completed |
 | — | <a id="f-006-t08"></a>F-006-T08 — T02c — Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route | 0.75 h | 0.75 h (stated) | Completed |
@@ -401,8 +401,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-
-| 🟢 Small | **Total** | — | 0 h (0 of 4 steps recorded) | 0 h | 3 of 4 completed | |
+| 🟢 Small | **Total** | — | 0 h (0 of 4 steps recorded) | 0 h | 4 of 4 completed | |
 
 <details><summary>Done steps (4)</summary>
 
@@ -1589,7 +1588,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.25 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: T01–T03 implemented (visible bounded request queue, per-model concurrency budgets, per-item mutation ownership); remaining scope is the 2026-11-07 owner extension on multi-step specialist orchestration.
 
@@ -1604,7 +1603,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
 | 🟡 Medium | <a id="f-048-t04"></a>F-048-T04 — Define bounded multi-step specialist orchestration | 1.5 h | 0 h | 1.5 h | Planned |
-| 🟡 Medium | **Total** | 2.25 h | 0 h (0 of 4 steps recorded) | 2.25 h | 0 of 4 completed |
+| 🟡 Medium | **Total** | 2.25 h | 0 h (0 of 4 steps recorded) | 1.5 h | 3 of 4 completed |
 
 <details><summary>Done steps (3)</summary>
 
@@ -2115,8 +2114,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-
-| 🟢 Small | **Total** | 0.25 h (1 of 2 steps) | 0 h (0 of 2 steps recorded) | 0 h | 0 of 2 completed | |
+| 🟢 Small | **Total** | 0.25 h (1 of 2 steps) | 0 h (0 of 2 steps recorded) | 0 h | 2 of 2 completed | |
 
 <details><summary>Done steps (2)</summary>
 

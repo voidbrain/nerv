@@ -33,4 +33,4 @@ Run it on demand and when the rule files it copies change (AGENTS.md, CLAUDE.md,
 
 ## Periodic token review
 
-Run when `reviews.token.days` triggers in `check:freshness` (or on demand) and write a dated report at `docs/reviews/token/<YYYY-MM-DD>.md`. Inputs: recent `work-usage` reports (including `suggestedPauses` and cost/token breakdown) and `rule-load` measurements. Scan current outside practice via web search (prompt caching, context budgets, rule loading, harness patterns) and record an `adopt` / `adapt` / `reject` table with concrete reasons and cited sources. Never change rules unattended: any proposed rule change must still go through rule review and maintenance/backlog evidence before editing.
+Run when `reviews.token.days` triggers (or on demand) and write `docs/reviews/token/<YYYY-MM-DD>.md`. Inputs: recent `work-usage` reports and `rule-load` measurements. Scan outside practice via generic web-search queries (no project names, data, code or usage figures) and record an `adopt` / `adapt` / `reject` table with reasons and sources. Rule changes still go through rule review; never edit rules unattended.

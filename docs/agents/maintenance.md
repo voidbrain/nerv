@@ -39,4 +39,4 @@ Projects may adopt `coverage.enforce: true` with a justified `coverage.drop` tol
 
 ## Periodic reviews
 
-Set `reviews.<name>.days` in `.harness.json` so `check:freshness` warns when a dated report (`docs/reviews/<name>/<YYYY-MM-DD>.md` or `docs/reviews/<YYYY-MM-DD>-<name>.md`) is missing or stale.
+Opt in via `reviews.<name>.days` in `.harness.json` (plus optional `dir` and `doc`) so `check:freshness` warns when `<YYYY-MM-DD>.md` in `docs/reviews/<name>/` (or `docs/reviews/<YYYY-MM-DD>-<name>.md`) is missing or stale.
