@@ -129,7 +129,10 @@ class App {
   async preparePttDraft() {
     const transcript = this.pttTranscript().trim();
     if (!transcript) return;
-    const res = (await this.request('voice/draft', { transcript, language: this.language() })) as {
+    const res = (await this.request('voice/draft', {
+      method: 'POST',
+      body: JSON.stringify({ transcript, language: this.language() }),
+    })) as {
       draft?: { transcript: string; language: string; intent: string; refused: boolean; reason: string };
     };
     if (res?.draft) this.pttDraft.set(res.draft);
@@ -137,7 +140,10 @@ class App {
   async confirmPttDraft() {
     const d = this.pttDraft();
     if (!d || d.refused) return;
-    await this.request('voice/confirm', { transcript: d.transcript, confirmed: true, language: d.language });
+    await this.request('voice/confirm', {
+      method: 'POST',
+      body: JSON.stringify({ transcript: d.transcript, confirmed: true, language: d.language }),
+    });
     this.pttDraft.set(null);
     this.pttTranscript.set('');
   }
