@@ -737,11 +737,16 @@ export class Runtime implements StoreApi {
   ): Promise<{ summary?: string; exchanges: number; proposed: number; skipped: number; error?: string }> {
     return this.instrumentalityController.consolidate(now, runId);
   }
+  private readonly kajiListeners = new Set<() => void | Promise<void>>();
   /** The scheduler-process side of the Kaji link's registry. */
   readonly kaji: RegistryPort = {
     bases: async () => (await this.nervous.call('kaji.bases')) as BaseEntry[],
     records: async () => (await this.nervous.call('kaji.records')) as SignedRecord[],
-    add: async (records) => (await this.nervous.call('kaji.add', { records })) as number,
+    add: async (records) => {
+      const added = (await this.nervous.call('kaji.add', { records })) as number;
+      if (added > 0) await Promise.all([...this.kajiListeners].map((fn) => fn()));
+      return added;
+    },
     seen: async (updates) => {
       await this.nervous.call('kaji.seen', { updates });
     },
@@ -749,6 +754,12 @@ export class Runtime implements StoreApi {
     main: async () => ((await this.nervous.call('kaji.main')) as string | null) ?? undefined,
     reachability: async (baseId, ok, at) => {
       await this.nervous.call('milestones.health', { scope: 'base', subject: baseId, ok, at });
+    },
+    onChange: (listener) => {
+      this.kajiListeners.add(listener);
+      return () => {
+        this.kajiListeners.delete(listener);
+      };
     },
   };
   private selfKey?: string;

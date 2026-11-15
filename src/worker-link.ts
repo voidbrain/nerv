@@ -3,6 +3,7 @@ import type { Server, IncomingMessage } from 'node:http';
 import type { Duplex } from 'node:stream';
 import { WebSocket, WebSocketServer } from 'ws';
 import { KAJI_CLOCK_SKEW_MS, signedHeaders, verifySigned, Nonces, type RootTrust } from './kaji-auth.ts';
+import type { BaseEntry } from './kaji.ts';
 import type { RegistryPort } from './kaji-link.ts';
 import { validateParams, MAX_FRAME_BYTES, MAX_RPC_CONNECTIONS, MAX_RPC_INFLIGHT } from './rpc.ts';
 import { WORKER_LEASE_MS, WORKER_RESULT_BYTES, type WorkerItem, type WorkerContext } from './worker-jobs.ts';
@@ -135,8 +136,9 @@ class Peer {
     const rpc = payload.rpc;
     if (rpc.jsonrpc !== '2.0' || typeof rpc.id !== 'string' || !uuid.test(rpc.id)) throw Error('Invalid worker RPC.');
     const request = typeof rpc.method === 'string';
-    const bases = await this.link.settings.registry.bases(),
-      main = await this.link.settings.registry.main?.();
+    const snapshot = this.link.currentAuthority();
+    if (!snapshot) throw Error('Worker authority unavailable.');
+    const { bases, main } = snapshot;
     if (
       main !== (this.role === 'worker' ? this.remote : this.link.settings.id) ||
       !bases.some((b) => b.baseId === this.link.settings.id && b.status === 'enrolled')
@@ -444,10 +446,10 @@ class Peer {
       reply.cursor !== cursor
     )
       throw Error('Worker negotiation failed.');
-    if (reply.offers !== undefined) await this.link.observe(this.remote, reply.offers);
     this.ready = true;
     clearTimeout(this.helloTimer);
     this.startHeartbeat();
+    if (reply.offers !== undefined) await this.link.observe(this.remote, reply.offers);
   }
   private startHeartbeat() {
     this.heartbeat = setInterval(() => {
@@ -504,11 +506,43 @@ export class WorkerLink {
   private nextAttempt = 0;
   private failures = 0;
   private cleanup = new Set<Promise<void>>();
+  private authority?: { bases: BaseEntry[]; main?: string };
+  private authorityInFlight?: Promise<{ bases: BaseEntry[]; main?: string }>;
+  private authorityDirty = false;
+  private authorityTimer?: NodeJS.Timeout;
+  private unwatchRegistry?: () => void;
   constructor(settings: Settings) {
     this.settings = settings;
     this.heartbeatMs = settings.heartbeatMs ?? 30000;
     this.requestMs = settings.requestMs ?? 10000;
     this.reconnectMs = settings.reconnectMs ?? 1000;
+    this.unwatchRegistry = settings.registry.onChange?.(() => this.refreshAuthority(true).then(() => undefined));
+  }
+  currentAuthority() {
+    return this.authority;
+  }
+  async refreshAuthority(force = false): Promise<{ bases: BaseEntry[]; main?: string }> {
+    if (force) this.authorityDirty = true;
+    while (this.authorityInFlight) {
+      const current = await this.authorityInFlight;
+      if (!this.authorityDirty) return current;
+    }
+    this.authorityInFlight = (async () => {
+      try {
+        do {
+          this.authorityDirty = false;
+          const [bases, main] = await Promise.all([
+            this.settings.registry.bases(),
+            this.settings.registry.main?.() ?? Promise.resolve(undefined),
+          ]);
+          this.authority = { bases, main };
+        } while (this.authorityDirty);
+        return this.authority;
+      } finally {
+        this.authorityInFlight = undefined;
+      }
+    })();
+    return this.authorityInFlight;
   }
   attach(server: Server) {
     server.on('upgrade', (request, socket, head) => {
@@ -537,8 +571,8 @@ export class WorkerLink {
     this.upgradeSockets.add(socket);
     const deadline = setTimeout(() => socket.destroy(), 5000);
     try {
-      if ((await this.settings.registry.main?.()) !== this.settings.id) throw Error('Not coordinator.');
-      const bases = await this.settings.registry.bases();
+      const { bases, main } = await this.refreshAuthority();
+      if (main !== this.settings.id) throw Error('Not coordinator.');
       const from = verifySigned(
         request.headers as Record<string, string>,
         'req',
@@ -712,9 +746,17 @@ export class WorkerLink {
   start() {
     if (!this.stopped) return;
     this.stopped = false;
+    this.unwatchRegistry ??= this.settings.registry.onChange?.(() => this.refreshAuthority(true).then(() => undefined));
     this.timer = setInterval(() => {
       void this.connect();
     }, this.reconnectMs);
+    this.authorityTimer = setInterval(
+      () => {
+        void this.refreshAuthority().catch(() => {});
+      },
+      Math.max(this.heartbeatMs * 4, 2000),
+    );
+    void this.refreshAuthority().catch(() => {});
     void this.connect();
   }
   private defer() {
@@ -733,10 +775,9 @@ export class WorkerLink {
     return this.connecting;
   }
   private async connectOnce() {
-    const owner = await this.settings.registry.main?.();
+    const { bases, main: owner } = await this.refreshAuthority();
     if (!owner || owner === this.settings.id) return;
-    const bases = await this.settings.registry.bases(),
-      target = bases.find((b) => b.baseId === owner && b.status === 'enrolled');
+    const target = bases.find((b) => b.baseId === owner && b.status === 'enrolled');
     if (!target || !bases.some((b) => b.baseId === this.settings.id && b.status === 'enrolled')) return;
     const session = randomUUID(),
       state = await this.settings.adapter.open(
@@ -800,6 +841,9 @@ export class WorkerLink {
   async stop() {
     this.stopped = true;
     if (this.timer) clearInterval(this.timer);
+    if (this.authorityTimer) clearInterval(this.authorityTimer);
+    this.unwatchRegistry?.();
+    this.unwatchRegistry = undefined;
     this.connectingSocket?.terminate();
     this.client?.end();
     this.dropIncoming();

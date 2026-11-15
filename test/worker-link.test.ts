@@ -806,6 +806,7 @@ test(
         if (method === 'kaji.bases' && !slowed++) await wait(300);
         return call(method, params, timeout);
       };
+      void f.rb.kaji.bases();
       await until(() => slowed > 0);
       for (let i = 0; i < 60; i++) {
         assert.ok(f.main.connected('NERV-02'), 'a slow store on the worker is not a lost peer');
