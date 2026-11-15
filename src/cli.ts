@@ -1708,6 +1708,7 @@ try {
         process.once('SIGTERM', close);
         break;
       }
+<<<<<<< HEAD
       case 'quarantine': {
         const sub = args[0];
         if (sub !== 'fetch' || !args[1]) throw new Error('Usage: nerv quarantine fetch <url> [--kind repo|page]');
@@ -1726,6 +1727,22 @@ try {
             2,
           ),
         );
+=======
+      case 'circuits': {
+        const sub = args[0] ?? 'list';
+        const store = new Store(databasePath(home), readScrolls(home), { home });
+        try {
+          if (sub === 'list') {
+            console.log(JSON.stringify(store.circuits.list(), null, 2));
+          } else if (sub === 'rearm' && args[1]) {
+            console.log(JSON.stringify(store.circuits.rearm(args[1], 'owner'), null, 2));
+          } else {
+            throw new Error('Usage: nerv circuits list | nerv circuits rearm <channel>');
+          }
+        } finally {
+          store.close();
+        }
+>>>>>>> 33febf88 (feat(f-064): add first bounded channel incident circuit with Spear and owner rearm (F-064-T02))
         break;
       }
       default:
