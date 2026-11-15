@@ -161,4 +161,75 @@ describe('F-008-T06: battery registry and one-more-battery import', () => {
       store.close();
     }
   });
+
+  it('F-008-T07: sets charge state and counts cycles by Italian/English chat, asking on ambiguity', () => {
+    const store = new Store(':memory:');
+    try {
+      const b7blu = store.batteries.register({
+        packNumber: 7,
+        series: 'Blu',
+        seriesColor: 'blu',
+        brand: 'GNB',
+        batteryType: 'LiPo 6S',
+        cellCount: 6,
+        capacityMah: 1300,
+        purchaseDate: '2026-10-01',
+        initialResistanceMohm: [5.0, 5.1, 5.0, 5.2, 5.1, 5.0],
+      });
+      const b8blu = store.batteries.register({
+        packNumber: 8,
+        series: 'Blu',
+        seriesColor: 'blu',
+        brand: 'GNB',
+        batteryType: 'LiPo 6S',
+        cellCount: 6,
+        capacityMah: 1300,
+        purchaseDate: '2026-10-01',
+        initialResistanceMohm: [5.0, 5.1, 5.0, 5.2, 5.1, 5.0],
+      });
+      const b7red = store.batteries.register({
+        packNumber: 7,
+        series: 'Red',
+        seriesColor: 'red',
+        brand: 'Tattu',
+        batteryType: 'LiPo 6S',
+        cellCount: 6,
+        capacityMah: 1300,
+        purchaseDate: '2026-10-01',
+        initialResistanceMohm: [4.8, 4.9, 4.8, 4.9, 5.0, 4.8],
+      });
+
+      // Ambiguous: pack 7 exists in both Blu and Red series; must ask, never guess.
+      const ambiguous = store.batteries.applyChatPhrase('carica la batteria 7');
+      assert.equal(ambiguous.status, 'ambiguous');
+      assert.equal(ambiguous.matches?.length, 2);
+      assert.equal(store.batteries.get(b7blu.id)?.currentState, 'stored');
+      assert.equal(store.batteries.get(b7red.id)?.currentState, 'stored');
+
+      // Italian phrase sets charged for multiple batteries in series blu.
+      const charged = store.batteries.applyChatPhrase('carica le batterie 7 e 8 blu', '2026-11-15T10:00:00Z');
+      assert.equal(charged.status, 'updated');
+      assert.equal(charged.state, 'charged');
+      assert.equal(store.batteries.get(b7blu.id)?.currentState, 'charged');
+      assert.equal(store.batteries.get(b8blu.id)?.currentState, 'charged');
+      assert.equal(store.batteries.get(b7blu.id)?.cycles, 0);
+
+      // English phrase marks used/discharged and increments cycles on charged -> discharged.
+      const used = store.batteries.applyChatPhrase('batteries 7 and 8 blue used', '2026-11-15T12:00:00Z');
+      assert.equal(used.status, 'updated');
+      assert.equal(used.state, 'discharged');
+      assert.equal(store.batteries.get(b7blu.id)?.cycles, 1);
+      assert.equal(store.batteries.get(b8blu.id)?.cycles, 1);
+      assert.match(used.message, /#7 \(Blu\): discharged · 1 cycle/);
+
+      // Stored phrase sets stored without extra cycle.
+      const stored = store.batteries.applyChatPhrase('metti in storage le batterie 7 e 8 blu', '2026-11-15T14:00:00Z');
+      assert.equal(stored.status, 'updated');
+      assert.equal(stored.state, 'stored');
+      assert.equal(store.batteries.get(b7blu.id)?.cycles, 1);
+      assert.match(stored.message, /#8 \(Blu\): stored · 1 ciclo/);
+    } finally {
+      store.close();
+    }
+  });
 });

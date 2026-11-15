@@ -6,7 +6,7 @@ import { EVA_CLASS_SPECS, admitEvaJob, type EvaAdmissionRequest } from './eva-cl
 import { createPeerHandlers } from './peer-handlers.ts';
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
-import type { OneMoreBatteryExport } from './batteries.ts';
+import { formatBatteryStateLines, type OneMoreBatteryExport } from './batteries.ts';
 import {
   detectVoiceLanguage,
   evaluateVoiceCorpus,
@@ -387,11 +387,18 @@ try {
     try {
       if (sub === 'list') {
         console.log(JSON.stringify(store.batteries.list(), null, 2));
+      } else if (sub === 'status') {
+        const lang = flag('--lang') === 'it' ? 'it' : 'en';
+        console.log(formatBatteryStateLines(store.batteries.list(), lang));
+      } else if (sub === 'chat' && args[1]) {
+        console.log(JSON.stringify(store.batteries.applyChatPhrase(args.slice(1).join(' ')), null, 2));
       } else if (sub === 'import' && args[1]) {
         const payload = JSON.parse(readFileSync(resolve(args[1]), 'utf8')) as OneMoreBatteryExport;
         console.log(JSON.stringify(store.batteries.importOneMoreBattery(payload), null, 2));
       } else {
-        throw new Error('Usage: batteries list | batteries import <export.json>');
+        throw new Error(
+          'Usage: batteries list | batteries status [--lang it|en] | batteries chat <phrase> | batteries import <export.json>',
+        );
       }
     } finally {
       store.close();
