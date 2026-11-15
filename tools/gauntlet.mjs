@@ -41,11 +41,41 @@ const consumptionFile = 'evals/gauntlet/consumption.json';
 const ledgerPath = () => resolve(process.env.NERV_GAUNTLET_LEDGER ?? here(ledgerFile));
 const consumptionPath = () => resolve(process.env.NERV_GAUNTLET_CONSUMPTION ?? here(consumptionFile));
 const tasksPath = () => resolve(process.env.NERV_GAUNTLET_TASKS ?? here('docs/work/tasks'));
+const systemPath = () => resolve(process.env.NERV_GAUNTLET_SYSTEM ?? here(systemFile));
 const releaseTag = () => readJSON(here('vendor/gauntlet-protocol.json')).releaseTag;
 
-export function systemSourceKey() {
-  const inputs = sourceInputs(root, false);
-  delete inputs[ledgerFile];
+function readSystemPackWithInputs() {
+  const raw = readJSON(systemPath());
+  const caseInputs = new Map();
+  const cases = Array.isArray(raw?.cases)
+    ? raw.cases.map((c) => {
+        if (c && typeof c === 'object' && 'inputs' in c && c.inputs !== undefined) {
+          if (!Array.isArray(c.inputs) || !c.inputs.length || c.inputs.some((p) => typeof p !== 'string' || !p.trim())) {
+            throw Error(`Invalid inputs for system case ${c.id}`);
+          }
+          caseInputs.set(c.id, [...c.inputs]);
+          const { inputs: _inputs, ...rest } = c;
+          return rest;
+        }
+        return c;
+      })
+    : raw?.cases;
+  return { pack: validatePack({ ...raw, cases }), caseInputs };
+}
+
+function filterInputs(allInputs, declaredPaths) {
+  return Object.fromEntries(
+    Object.entries(allInputs).filter(([file]) =>
+      declaredPaths.some((p) => file === p || file.startsWith(p.endsWith('/') ? p : p + '/')),
+    ),
+  );
+}
+
+export function systemSourceKey(_pack, caseId, overrideInputs) {
+  const allInputs = overrideInputs ? { ...overrideInputs } : sourceInputs(root, false);
+  delete allInputs[ledgerFile];
+  const declared = caseId ? readSystemPackWithInputs().caseInputs.get(caseId) : undefined;
+  const inputs = declared ? filterInputs(allInputs, declared) : allInputs;
   return hash({
     inputs,
     adapter: hash(readFileSync(here('tools/gauntlet-adapter.mjs'), 'utf8')),
@@ -78,7 +108,7 @@ export function commonPacks() {
   return shipped.filter((p) => !Object.hasOwn(exclude, p.pack.id));
 }
 export function systemPacks() {
-  return [{ file: systemFile, pack: validatePack(readJSON(here(systemFile))) }];
+  return [{ file: systemFile, pack: readSystemPackWithInputs().pack }];
 }
 const allPacks = () => [...commonPacks(), ...systemPacks()];
 // Model limits scale Gauntlet's day limits per case, so a 10-case pack gets exactly the day limits (cache reuse keeps
@@ -106,6 +136,15 @@ const pendingByPack = (packs, ledger, options) =>
       delete identity.modelDigest;
       delete identity.runtimeHash;
       delete identity.scenarioHash;
+    }
+    if (typeof identity.sourceKey === 'function') {
+      const resolveKey = identity.sourceKey;
+      return pack.cases.flatMap((c) =>
+        pendingCases([{ ...pack, cases: [c] }], ledger, {
+          ...identity,
+          sourceKey: c.runner !== undefined ? resolveKey(pack, c.id) : null,
+        }),
+      );
     }
     return pendingCases([pack], ledger, identity);
   });
@@ -149,7 +188,15 @@ const entryKey = (e) => JSON.stringify([e.pack, e.case, e.profileHash]);
 // Gauntlet checks the report against the selected pack it actually ran, and the entries are kept under the full pack.
 export function recordSelected(ledger, report, full, selected, sourceKey = null) {
   const entries = new Map(ledger.entries.map((e) => [entryKey(e), e]));
-  for (const e of recordRun(emptyLedger(), report, selected, { sourceKey }).entries) {
+  const rawEntries =
+    typeof sourceKey === 'function'
+      ? selected.cases.flatMap((c) => {
+          const single = { ...selected, cases: [c] };
+          const filtered = { ...report, results: report.results.filter((r) => r.id === c.id) };
+          return recordRun(emptyLedger(), filtered, single, { sourceKey: sourceKey(c.id) }).entries;
+        })
+      : recordRun(emptyLedger(), report, selected, { sourceKey }).entries;
+  for (const e of rawEntries) {
     const entry = { ...e, pack: full.id, packVersion: full.version };
     if (isModelPack(full) && full.cases.every((c) => !!c.runner)) {
       entry.modelDigest = null;
@@ -195,8 +242,8 @@ export function unnamedPending(list, text) {
   return list.filter((p) => !names.has(`${p.pack}/${p.case}`) && !names.has(`${p.pack}/*`));
 }
 export function pending({ maxAgeDays, profile, modelDigest, runtimeHash, scenarioHash, sourceKey } = {}) {
-  const defaultSourceKey = systemPacks()[0]?.pack ? systemSourceKey(systemPacks()[0].pack) : undefined;
-  const effectiveSourceKey = sourceKey !== undefined ? sourceKey : defaultSourceKey;
+  const effectiveSourceKey =
+    sourceKey !== undefined ? sourceKey : (pack, caseId) => systemSourceKey(pack, caseId);
   return pendingByPack(
     allPacks().map((p) => p.pack),
     readLedger(),
@@ -375,9 +422,7 @@ export async function main(args = process.argv.slice(2), services = { execute: e
         ? options['source-key'] === 'none'
           ? null
           : options['source-key']
-        : systemPacks()[0]?.pack
-          ? systemSourceKey(systemPacks()[0].pack)
-          : undefined;
+        : undefined;
     return {
       ...(options['model-digest'] !== undefined
         ? { modelDigest: options['model-digest'] === 'none' ? null : options['model-digest'] }
@@ -422,7 +467,7 @@ export async function main(args = process.argv.slice(2), services = { execute: e
           ? null
           : options['source-key']
         : hasRunner(full)
-          ? systemSourceKey(full)
+          ? (caseId) => systemSourceKey(full, caseId)
           : null;
     const next = recordSelected(readLedger(), report, full, selectedPack(full, ids, isModelPack(full)), sourceKey);
     writeLedger(next);
@@ -462,7 +507,7 @@ export async function main(args = process.argv.slice(2), services = { execute: e
       output: out,
       cacheDirectory: options['cache-dir'] ?? defaultEvidenceDirectory(),
       forceFresh: options.fresh === true,
-      sourceKey: hasRunner(pack) ? systemSourceKey(pack) : undefined,
+      sourceKey: hasRunner(pack) ? systemSourceKey(pack, pack.cases.length === 1 ? pack.cases[0].id : undefined) : undefined,
       telemetry: model,
       ...extra,
     });
@@ -656,7 +701,7 @@ async function all(options, { profile, execute, limitsFor, maxAgeDays, intended 
     for (const batch of batches) {
       const selected = selectedPack(pack, batch, model);
       const out = join(outDir, `${pack.id}${model ? '' : '-' + batch[0]}.json`);
-      const sourceKey = hasRunner(pack) ? systemSourceKey(pack) : null;
+      const sourceKey = hasRunner(pack) ? systemSourceKey(pack, batch.length === 1 ? batch[0] : undefined) : null;
       const result = await execute(selected, model, model ? profile : null, out, {
         ...(maxAgeDays !== undefined ? { maxAgeMs: maxAgeDays * 86400000 } : {}),
         ...(sourceKey ? { sourceKey } : {}),

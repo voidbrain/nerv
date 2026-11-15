@@ -27,7 +27,7 @@ import {
   hash,
 } from '@voidbrain/gauntlet-protocol';
 import { normalize } from '../tools/gauntlet-adapter.mjs';
-import { main } from '../tools/gauntlet.mjs';
+import { main, systemSourceKey, systemPacks, pending } from '../tools/gauntlet.mjs';
 import { readSuite } from '../tools/evaluate.mjs';
 const suite = readSuite();
 function native(overrides = {}) {
@@ -1405,6 +1405,94 @@ test('F-074-T04: profile-matched role bundle plans, rejects unsupported settings
     const intReport = JSON.parse(readFileSync(interruptedOut, 'utf8'));
     assert.ok(intReport.results.every((r) => r.status === 'not-run' && /Interrupted/.test(r.error)));
   } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('F-079-T01: per-case input paths invalidate only on changes inside declared paths', () => {
+  const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-inputs-'));
+  const sysPath = join(dir, 'system.json');
+  const ledger = join(dir, 'ledger.json');
+  try {
+    const baseSystem = JSON.parse(readFileSync('evals/gauntlet/system-v1.json', 'utf8'));
+    const scoped = {
+      ...baseSystem,
+      cases: [{ ...baseSystem.cases[0], inputs: ['src/snapshots.ts'] }, ...baseSystem.cases.slice(1)],
+    };
+    writeFileSync(sysPath, JSON.stringify(scoped));
+    process.env.NERV_GAUNTLET_SYSTEM = sysPath;
+    process.env.NERV_GAUNTLET_LEDGER = ledger;
+
+    const treeA = { 'src/snapshots.ts': 'a1', 'src/cli.ts': 'b1' };
+    const treeOutsideChanged = { 'src/snapshots.ts': 'a1', 'src/cli.ts': 'b2' };
+    const treeInsideChanged = { 'src/snapshots.ts': 'a2', 'src/cli.ts': 'b1' };
+
+    const scopedKeyA = systemSourceKey(scoped, baseSystem.cases[0].id, treeA);
+    const scopedKeyOutside = systemSourceKey(scoped, baseSystem.cases[0].id, treeOutsideChanged);
+    const scopedKeyInside = systemSourceKey(scoped, baseSystem.cases[0].id, treeInsideChanged);
+    assert.equal(scopedKeyOutside, scopedKeyA, 'change outside declared inputs must not invalidate case');
+    assert.notEqual(scopedKeyInside, scopedKeyA, 'change inside declared inputs must invalidate case');
+
+    const wholeKeyA = systemSourceKey(scoped, baseSystem.cases[1].id, treeA);
+    const wholeKeyOutside = systemSourceKey(scoped, baseSystem.cases[1].id, treeOutsideChanged);
+    assert.notEqual(wholeKeyOutside, wholeKeyA, 'undeclared case keeps whole-tree key');
+
+    // Verify pending() uses per-case keys so only declared case stays non-pending when outside sourceKey matches.
+    const pack = systemPacks()[0].pack;
+    const realKey0 = systemSourceKey(pack, pack.cases[0].id);
+    const realKey1 = systemSourceKey(pack, pack.cases[1].id);
+    assert.notEqual(realKey0, realKey1, 'declared case key differs from undeclared whole-tree key');
+    const now = new Date().toISOString();
+    writeFileSync(
+      ledger,
+      JSON.stringify({
+        schemaVersion: 2,
+        entries: [
+          {
+            pack: pack.id,
+            packVersion: pack.version,
+            case: pack.cases[0].id,
+            caseHash: hash(pack.cases[0]),
+            profileHash: null,
+            status: 'passed',
+            finished: now,
+            reportHash: '0'.repeat(64),
+            modelDigest: null,
+            runtimeHash: null,
+            scenarioHash: null,
+            sourceKey: realKey0,
+          },
+          {
+            pack: pack.id,
+            packVersion: pack.version,
+            case: pack.cases[1].id,
+            caseHash: hash(pack.cases[1]),
+            profileHash: null,
+            status: 'passed',
+            finished: now,
+            reportHash: '1'.repeat(64),
+            modelDigest: null,
+            runtimeHash: null,
+            scenarioHash: null,
+            sourceKey: 'f'.repeat(64),
+          },
+        ],
+      }),
+    );
+    const list = pending({ maxAgeDays: 7 });
+    assert.equal(
+      list.some((p) => p.pack === pack.id && p.case === pack.cases[0].id),
+      false,
+      'case covered by its own scoped sourceKey is not pending',
+    );
+    assert.equal(
+      list.find((p) => p.pack === pack.id && p.case === pack.cases[1].id)?.reason,
+      'source-changed',
+      'case with stale whole-tree key is pending with source-changed',
+    );
+  } finally {
+    delete process.env.NERV_GAUNTLET_SYSTEM;
+    delete process.env.NERV_GAUNTLET_LEDGER;
     rmSync(dir, { recursive: true, force: true });
   }
 });
