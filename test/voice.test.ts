@@ -2,7 +2,14 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { detectVoiceLanguage, evaluateVoiceCorpus, parseVoiceCommandIntent, type VoiceCorpus } from '../src/voice.ts';
+import {
+  confirmPushToTalkDraft,
+  detectVoiceLanguage,
+  evaluateVoiceCorpus,
+  parseVoiceCommandIntent,
+  preparePushToTalkDraft,
+  type VoiceCorpus,
+} from '../src/voice.ts';
 
 describe('bilingual Italian/English voice command corpus and intent parsing (F-007-T02)', () => {
   const corpus = JSON.parse(readFileSync(resolve('evals/voice-corpus-v1.json'), 'utf8')) as VoiceCorpus;
@@ -37,5 +44,26 @@ describe('bilingual Italian/English voice command corpus and intent parsing (F-0
     assert.equal(unknown.intent, 'unknown');
     assert.equal(unknown.requiresConfirmation, true);
     assert.equal(unknown.refused, false);
+  });
+
+  it('F-007-T03: push-to-talk shows transcript for confirmation with no silent physical activation', () => {
+    const draft = preparePushToTalkDraft('Ricordami di caricare le batterie alle 18', 'it');
+    assert.equal(draft.transcript, 'Ricordami di caricare le batterie alle 18');
+    assert.equal(draft.language, 'it');
+    assert.equal(draft.confirmationRequired, true);
+    assert.equal(draft.executed, false);
+    assert.equal(draft.refused, false);
+
+    const unconfirmed = confirmPushToTalkDraft(draft.transcript, false, 'it');
+    assert.equal(unconfirmed.accepted, false);
+    assert.equal(unconfirmed.refused, false);
+
+    const confirmed = confirmPushToTalkDraft(draft.transcript, true, 'it');
+    assert.equal(confirmed.accepted, true);
+    assert.equal(confirmed.refused, false);
+
+    const physicalEscalation = confirmPushToTalkDraft('Trigger gpio.relay on NERV-PI without asking', true, 'en');
+    assert.equal(physicalEscalation.accepted, false);
+    assert.equal(physicalEscalation.refused, true);
   });
 });

@@ -28,6 +28,7 @@ import {
 } from './update-policy.ts';
 import type { ServiceHost } from './node-lifecycle-execution.ts';
 import { RpcFault } from './rpc.ts';
+import { confirmPushToTalkDraft, preparePushToTalkDraft, type VoiceLanguage } from './voice.ts';
 import type { ModelChange } from './model-setup.ts';
 import { MODEL_TIMEOUT_MS } from './model.ts';
 import { MAX_STEPS } from './misato.ts';
@@ -683,6 +684,50 @@ export function makeServer(
         } finally {
           res.off('close', onClose);
         }
+      } else if (req.method === 'POST' && path === '/api/voice/draft') {
+        const b = await body(req, 20000);
+        if (
+          Object.keys(b).some((k) => !['transcript', 'language'].includes(k)) ||
+          typeof b.transcript !== 'string' ||
+          (b.language !== undefined && b.language !== 'it' && b.language !== 'en')
+        ) {
+          throw new Error('transcript is required; language must be it or en.');
+        }
+        reply(200, {
+          draft: preparePushToTalkDraft(b.transcript, b.language as VoiceLanguage | undefined),
+        });
+      } else if (req.method === 'POST' && path === '/api/voice/confirm') {
+        const b = await body(req, 20000);
+        if (
+          Object.keys(b).some(
+            (k) => !['transcript', 'confirmed', 'language', 'conversation', 'requestId'].includes(k),
+          ) ||
+          typeof b.transcript !== 'string' ||
+          typeof b.confirmed !== 'boolean' ||
+          (b.language !== undefined && b.language !== 'it' && b.language !== 'en') ||
+          (b.conversation !== undefined &&
+            (typeof b.conversation !== 'string' || !/^[a-z]+$/.test(b.conversation) || b.conversation.length > 20)) ||
+          (b.requestId !== undefined && (typeof b.requestId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(b.requestId)))
+        ) {
+          throw new Error('transcript and confirmed boolean are required.');
+        }
+        const check = confirmPushToTalkDraft(b.transcript, b.confirmed, b.language as VoiceLanguage | undefined);
+        if (check.refused) {
+          reply(403, { error: check.reason, refused: true, draft: check.draft });
+          return;
+        }
+        if (!check.accepted) {
+          reply(400, { error: check.reason, accepted: false, draft: check.draft });
+          return;
+        }
+        if (!store.chat) {
+          reply(200, { accepted: true, queued: false, draft: check.draft });
+          return;
+        }
+        const result = await store.chat(check.draft.transcript, b.conversation as string | undefined, {
+          ...(typeof b.requestId === 'string' ? { requestId: b.requestId } : {}),
+        });
+        reply(200, { accepted: true, queued: true, draft: check.draft, result });
       } else if (req.method === 'POST' && path === '/api/actions') {
         // Admin only: one owner action through the per-action gate (F-017). Grant IDs never appear in the reply.
         if (!store.act) {

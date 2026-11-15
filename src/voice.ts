@@ -204,3 +204,57 @@ export function evaluateVoiceCorpus(corpus: VoiceCorpus): VoiceCorpusReport {
     failures,
   };
 }
+
+export interface PushToTalkDraft extends VoiceIntentMatch {
+  transcript: string;
+  /** Speech-to-text is always shown for owner confirmation before any execution (F-007-T03). */
+  confirmationRequired: true;
+  /** Draft preparation never triggers silent physical or state-changing activation. */
+  executed: false;
+}
+
+export interface PushToTalkConfirmation {
+  accepted: boolean;
+  refused: boolean;
+  reason: string;
+  draft: PushToTalkDraft;
+}
+
+/**
+ * Prepares a push-to-talk speech-to-text transcript for confirmation on the dashboard or companion (F-007-T03).
+ * Never executes any action or physical activation on transcription alone.
+ */
+export function preparePushToTalkDraft(transcript: string, language?: VoiceLanguage): PushToTalkDraft {
+  const clean = transcript.trim();
+  if (!clean || clean.length > 4000) {
+    throw new Error('Voice transcript is required (1–4000 characters).');
+  }
+  const match = parseVoiceCommandIntent(clean, language);
+  return {
+    transcript: clean,
+    ...match,
+    confirmationRequired: true,
+    executed: false,
+  };
+}
+
+/** Validates explicit owner confirmation of a push-to-talk draft before dispatch (F-007-T03). */
+export function confirmPushToTalkDraft(
+  transcript: string,
+  confirmed: boolean,
+  language?: VoiceLanguage,
+): PushToTalkConfirmation {
+  const draft = preparePushToTalkDraft(transcript, language);
+  if (draft.refused) {
+    return { accepted: false, refused: true, reason: draft.reason, draft };
+  }
+  if (!confirmed) {
+    return {
+      accepted: false,
+      refused: false,
+      reason: 'Explicit confirmation is required before executing a voice transcript.',
+      draft,
+    };
+  }
+  return { accepted: true, refused: false, reason: 'Confirmed by operator.', draft };
+}
