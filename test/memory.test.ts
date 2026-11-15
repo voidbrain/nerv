@@ -249,3 +249,28 @@ test('F-044-T02: proposed spelling fix appears next to original on the card and 
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test('F-044-T03: typo-tolerant recall finds facts despite small typos and ranks exact matches first', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'nerv-mem-fuzzy-'));
+  try {
+    const store = new Store(join(dir, 'nerv.sqlite'));
+    const exactFact = store.memory.add('I play frisbee on Sundays', 'owner');
+    const typoFact = store.memory.add('My brother plays ultimate frisbbe', 'owner');
+    store.memory.add('I drink espresso at 8', 'owner');
+
+    // Query with exact spelling finds both exact and typo fact, ranking exact first.
+    const hits = store.memory.recall('frisbee', 5);
+    assert.equal(hits.length, 2);
+    assert.equal(hits[0]?.id, exactFact.id);
+    assert.equal(hits[1]?.id, typoFact.id);
+
+    // Query with a typo in the request still finds the exact stored fact.
+    const typoQueryHits = store.memory.recall('espreso', 5);
+    assert.equal(typoQueryHits.length, 1);
+    assert.match(typoQueryHits[0]!.text, /espresso/);
+
+    store.close();
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
