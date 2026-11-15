@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 89 h agent + 24 h owner across 198 open steps of 51 features and 5 other records. 30.25 h of actual effort recorded on 61 steps. Generated from the task files.
+**Remaining effort:** 88.25 h agent + 24 h owner across 197 open steps of 51 features and 5 other records. 30.5 h of actual effort recorded on 62 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -181,9 +181,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟢 Small | 0 h | — | — | — | — | — |
 
-💻 **→** Next: F-062-T06 implemented in PR #401, awaiting merge; then F-062-T04 (restore drill).
+💻 **→** Next: F-062-T04 implemented (restore drill via `backup restore` in `src/backup-cli.ts`, verified in `test/restore-drill.test.ts`); remaining F-062-T05 (scheduled stress/browser backup flow).
 
 | | |
 |---|---|
@@ -195,13 +195,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-062-t04"></a>F-062-T04 — Restore drill | 0.75 h | 0 h | 0.75 h | Planned | 🤖 |
 | 🟢 Small | <a id="f-062-t06"></a>F-062-T06 — Encrypted copies to Tabgha over the Kaji line | 1.5 h | 1 h so far (stated) | 0 h | Implemented; verification pending | 🤖 |
 | — | <a id="f-062-t01"></a>F-062-T01 — Owner-agreed loss window and restore time | 0.25 h | 0 h | 0 h | Completed | 🤖 🧑‍🔧 🤔 |
 | — | <a id="f-062-t02"></a>F-062-T02 — Scheduled consistent snapshots | 0.25 h | 0 h | 0 h | Completed | 🤖 |
 | — | <a id="f-062-t03"></a>F-062-T03 — Encrypted off-host retention | 1 h | 1 h (stated) | 0 h | Completed | 🤖 |
+| — | <a id="f-062-t04"></a>F-062-T04 — Restore drill | 0.75 h | 0.25 h (measured) | 0 h | Completed | 🤖 |
 | — | <a id="f-062-t05"></a>F-062-T05 — Rerun the two expensive system cases at the snapshot source | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 🧑‍🔧 |
-| 🟢 Small | **Total** | 4 h | 2.25 h (3 of 6 steps recorded) | 0.75 h | 4 of 6 completed | |
+| 🟢 Small | **Total** | 4 h | 2.5 h (4 of 6 steps recorded) | 0 h | 5 of 6 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
