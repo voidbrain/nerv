@@ -4,7 +4,7 @@
   "parent": "F-084",
   "title": "Decision: the coding-job contract",
   "goal": "The job inputs, outputs and limits are written down",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "A decision in docs/decisions names the repository allowlist, worktree location, sandbox class, coding agent, budget, and what reaches the owner before a push",
     "The decision measures the instruction load (AGENTS.md, CLAUDE.md, procedures read at start) in tokens with the model's own counter, and refuses a model route whose context cannot hold the rules plus the task with room to work"
@@ -30,8 +30,10 @@
     "estimate": "0.5 h",
     "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
     "reviewed": "2026-11-14",
-    "agentHours": 0.5,
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
-    "estimateAgentHours": 0.5
+    "estimateAgentHours": 0.5,
+    "actualAgentHours": 0.25,
+    "actualSource": "measured"
   }
 }
