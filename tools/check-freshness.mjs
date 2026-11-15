@@ -231,6 +231,67 @@ if (
   }
 }
 
+// 3d. empty backlog and roadmap (F-082)
+function hasOpenBacklogRecord(markdown) {
+  const sections = markdown.split(/^### /m).slice(1);
+  for (const section of sections) {
+    const firstLine = section.split('\n', 1)[0] ?? '';
+    if (!/(?<![A-Za-z0-9_/:.-])[BF]-\d{3,}\b/.test(firstLine)) continue;
+    const statusMatch = section.match(
+      /^\|\s*(?:(?:[🔴🟠🟡🟢🟣🔵⚪]\s*)?(Closed|Open|Investigate|Implemented|Verified|Blocked)|[^|]+\|\s*[^|]+\|\s*(Closed|Open|Investigate|Implemented|Verified|Blocked))\s*\|/imu,
+    );
+    const status = (statusMatch?.[1] ?? statusMatch?.[2] ?? '').toLowerCase();
+    if (status !== 'closed') return true;
+  }
+  return false;
+}
+
+function hasOpenRoadmapMilestone(markdown) {
+  let fence = null,
+    columns = null;
+  for (const line of markdown.split('\n')) {
+    const f = /^\s{0,3}(`{3,}|~{3,})/.exec(line);
+    if (f) {
+      if (!fence) fence = f[1];
+      else if (f[1][0] === fence[0] && f[1].length >= fence.length) fence = null;
+      columns = null;
+      continue;
+    }
+    if (fence) continue;
+    if (!line.startsWith('|')) {
+      columns = null;
+      continue;
+    }
+    const row = line
+      .split('|')
+      .slice(1, -1)
+      .map((c) => c.trim());
+    if (row.includes('Records') && (row.includes('Milestone') || row.includes('Scope') || row.includes('Acceptance'))) {
+      columns = { status: row.indexOf('Status') };
+      continue;
+    }
+    if (!columns || row.every((c) => /^:?-+:?$/.test(c))) continue;
+    if (row.every((c) => !c)) continue;
+    if (columns.status >= 0 && /\b(done|closed|completed|shipped)\b/i.test(row[columns.status] ?? '')) continue;
+    return true;
+  }
+  return false;
+}
+
+{
+  const backlogText = existsSync(backlog) ? readFileSync(backlog, 'utf8') : '';
+  const roadmapRel =
+    typeof stamp.workQueue?.roadmap === 'string' && stamp.workQueue.roadmap
+      ? stamp.workQueue.roadmap
+      : 'docs/ROADMAP.md';
+  const roadmapUrl = new URL(`../${roadmapRel}`, import.meta.url);
+  const roadmapText = existsSync(roadmapUrl) ? readFileSync(roadmapUrl, 'utf8') : '';
+  if (!hasOpenBacklogRecord(backlogText) && !hasOpenRoadmapMilestone(roadmapText))
+    warn(
+      `🤔 Owner decision: no backlog record and no roadmap milestone is open (or ${roadmapRel} is missing); agree on the next milestone with the owner before creating planned records (docs/backlog/feature-plans.md).`,
+    );
+}
+
 // 4. audit coverage per declared area (legacy date-only fallback)
 const auditHelper = new URL('./check-audits.mjs', import.meta.url);
 let last, days;

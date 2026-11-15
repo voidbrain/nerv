@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-15T19:31:33.345Z",
+  "reviewed": "2026-11-15T21:09:15.540Z",
   "policy": "7d15ab5f3e1a37d15075876ce3efd53d93600045088f48b41a3ef0dd6ab89e7d",
   "inputs": {
     "AGENTS.md": "d5c0da9a6960509d129db16add394550b9daae036b2cde345598d981e08a3838",
@@ -20,12 +20,12 @@
     "docs/agents/skills.md": "5d60223eccfaad88c7153f57316da5ca10bfdd9d58d3a8cebc1eef25b9f0d5f5",
     "docs/agents/solution-profile.md": "685d55612f55d157bf124e23115f95bd16fe4d4f8834a4e0e152a191e3cd45f8",
     "docs/agents/task-context.md": "c689f02b9571ff747a4866d71690bb01afd7e6654dea640a1ce1c66e7c0fa204",
-    "docs/agents/work-usage.md": "5b10c5e8e9860fdd116b5cc789c2164e0678df96a475bf7b11ad5f9f99b1453e",
+    "docs/agents/work-usage.md": "40e6b0b17fcc08bedb0ddbf405e232e2bebbca80e36e585334ecb9a2628631a7",
     "docs/backlog/closure.md": "21fcc14351588107943d9aab70991399e07af7026d48327619f215e62ecb3319",
     "docs/backlog/documentation.md": "6328e3eccb3a222af1a9f4682dcef9e763464d0842cf94b28713bbc5f61e04b1",
     "docs/backlog/estimates.md": "22d0bf4ab87f093aae35834d8a75e9e66d0ef199d2af60802412744f7a81b7a9",
     "docs/backlog/evaluations.md": "7540bf69b6b5d40dc09dc9ce82138218525733c5f602945bdaa58d5c3a743f37",
-    "docs/backlog/feature-plans.md": "c0c57eed2ba36a7e969512f1455b2af8bfff27c7ff60e1c171ba6e2ba2ee5dcf",
+    "docs/backlog/feature-plans.md": "c59318638d12531e6e2341b9af1dbbace0f6e54405b13b4ec10d3fd525e35ad4",
     "docs/backlog/ordering.md": "f36fe3410fe4d838877fe35c61c491608116b0255b864906f91eea23915d81dd",
     "docs/backlog/outcomes.md": "c6f1d8e4ac3afd85e6d90ac7cef8ae39fba765b13c821522fb005edd2b5b88e4",
     "docs/backlog/ownership.md": "d2d39a4e2a56fb7a18c5cce2fe5490282a9c89c947574746bacd71f1040c457f",
@@ -35,7 +35,7 @@
     "tools/task-claims.mjs": "ef755fe7951544e5c05b20de7c64a7b53778b6d039a11a2abeb079e7d42b6fd2",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
     "tools/work-items.mjs": "850ec6674088a9bb155680fffbb05d9585b5606409448e1806f0045c970a43ef",
-    "tools/work-usage.mjs": "65961d804edf9adc3f93a6b6ccfa04dfe9cf16275751f50247056ec3edf6589e"
+    "tools/work-usage.mjs": "09569f9b56bd6e403d4c235f980ba5fb03b2aff8fe56a28878cc298fe8a4b2af"
   },
   "measurements": {
     "samples": 19,
@@ -131,6 +131,12 @@
       "disposition": "implemented",
       "target": "docs/backlog/steps.md",
       "evidence": "Harness 8.16.1 reconciled (B-028): the Agent cell counts an implemented step the agent still verifies. Template PR #205 with fresh-context review."
+    },
+    {
+      "kind": "rule",
+      "disposition": "implemented",
+      "target": ".harness.json",
+      "evidence": "Reconciled harness 8.17.0 (suggestedPauses in work-usage, empty backlog/roadmap check in check:freshness, feature-plans.md); set workUsage.pauseGapMinutes to 15."
     }
   ]
 }
