@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 73.75 h agent + 22.25 h owner across 168 open steps of 45 features and 7 other records. 34.75 h of actual effort recorded on 79 steps. Generated from the task files.
+**Remaining effort:** 74.25 h agent + 22 h owner across 168 open steps of 45 features and 7 other records. 34.75 h of actual effort recorded on 79 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -128,9 +128,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 1 h agent + 2.5 h owner | — | — | ⏳ | — | 🤔 |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 1.5 h agent + 2.25 h owner | — | — | 🤖 | — | 🤔 |
 
-💻 **→** Next: F-006-T17 — Approve the placement campaign plan and budgets (Ready).
+💻 **→** Next: F-006-T18 — Approve the Mac operating-conditions plan and budgets (Ready).
 
 | | |
 |---|---|
@@ -142,17 +142,17 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-006-t17"></a>F-006-T17 — Approve the placement campaign plan and budgets | — | 0 h | 0 h agent + 0.25 h owner | Ready | [🤔](decisions/placement-campaign.md) |
 | 🟢 Small | <a id="f-006-t18"></a>F-006-T18 — Approve the Mac operating-conditions plan and budgets | — | 0 h | 0 h agent + 0.25 h owner | Ready | [🤔](decisions/mac-operating-conditions.md) |
-| 🟢 Small | <a id="f-006-t11"></a>F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-006-T17](#f-006-t17) | ⏳ 🧑‍🔧 |
+| 🟢 Small | <a id="f-006-t19"></a>F-006-T19 — Revise the placement campaign for 3 runs per case | 0.5 h | 0 h | 0.5 h | Ready | 🤖 |
+| 🟢 Small | <a id="f-006-t11"></a>F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-006-T19](#f-006-t19) | ⏳ 🧑‍🔧 |
 | 🟢 Small | <a id="f-006-t13"></a>F-006-T13 — T05b — Three Mac operating-condition runs | — | 0 h | 0 h agent + 1.5 h owner | Planned · waits on [F-006-T18](#f-006-t18) | ⏳ 🧑‍🔧 |
 | 🟢 Small | <a id="f-006-t15"></a>F-006-T15 — Record the evidence of F-006-T11 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T11](#f-006-t11) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T15](#f-006-t15) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-006-t16"></a>F-006-T16 — Record the evidence of F-006-T13 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T13](#f-006-t13) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-006-t14"></a>F-006-T14 — T05c — Mac operating-conditions report | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T16](#f-006-t16) | ⏳ 🤖 |
-| 🟢 Small | **Total** | 6.25 h (14 of 18 steps) | 5.25 h (10 of 18 steps recorded) | 1 h agent + 2.5 h owner | 8 of 18 completed | |
+| 🟡 Medium | **Total** | 6.75 h (15 of 19 steps) | 5.25 h (10 of 19 steps recorded) | 1.5 h agent + 2.25 h owner | 9 of 19 completed | |
 
-<details><summary>Done steps (10)</summary>
+<details><summary>Done steps (11)</summary>
 
 | Effort | Step | Estimate | Actual | Status |
 |---|---|---|---|---|
@@ -166,6 +166,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-006-t08"></a>F-006-T08 — T02c — Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route | 0.75 h | 0.75 h (stated) | Completed |
 | — | <a id="f-006-t09"></a>F-006-T09 — T03b — Evidence adapter binding both configurations, handoffs, budgets and hosts | 0.75 h | 0.75 h (stated) | Completed |
 | — | <a id="f-006-t10"></a>F-006-T10 — T03c — Grader tamper protection; stale or mismatched evidence rejected; authority rechecked | 0.75 h | 0.75 h (stated) | Completed |
+| — | <a id="f-006-t17"></a>F-006-T17 — Approve the placement campaign plan and budgets | — | 0 h | Completed |
 
 </details>
 

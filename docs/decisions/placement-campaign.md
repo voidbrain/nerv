@@ -1,6 +1,6 @@
 # Placement campaign plan and budgets (F-006-T04)
 
-**Status: proposed, 14 November 2026 (F-006-T04); owner approval pending in F-006-T17, and enrolled Mac + mini PC execution in F-006-T11.** References [Remote inference](remote-inference.md), [Configuration qualification](configuration-qualification.md), [Mac operating-conditions plan](mac-operating-conditions.md), and [NERV host assignments and load acceptance](../evaluations/mac-load-scenarios.md).
+**Status: approved by the owner on 15 November 2026 (F-006-T17) with 3 runs per case; F-006-T19 restates the budgets below for that; proposed 14 November 2026 (F-006-T04); and enrolled Mac + mini PC execution in F-006-T11.** References [Remote inference](remote-inference.md), [Configuration qualification](configuration-qualification.md), [Mac operating-conditions plan](mac-operating-conditions.md), and [NERV host assignments and load acceptance](../evaluations/mac-load-scenarios.md).
 
 ## 1. Campaign scope and placement questions
 
