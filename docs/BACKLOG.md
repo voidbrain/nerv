@@ -14,7 +14,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 45 | 7 |
-| **Require Human 🧑** | 8 | 2 |
+| **Require Human 🧑** | 7 | 2 |
 
 ### Require Human 🧑
 
@@ -22,8 +22,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
 | [F-005](#f-005) | [F-006](#f-006) | [B-057](#b-057) | — |
-| [F-023](#f-023) |  | [B-056](#b-056) |  |
-| [F-004](#f-004) |  |  |  |
+| [F-004](#f-004) |  | [B-056](#b-056) |  |
 | [F-097](#f-097) |  |  |  |
 | [F-060](#f-060) |  |  |  |
 | [F-007](#f-007) |  |  |  |
@@ -31,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 73.25 h agent + 23.25 h owner across 167 open steps of 45 features and 7 other records. 34.75 h of actual effort recorded on 79 steps. Generated from the task files.
+**Remaining effort:** 73.25 h agent + 22.75 h owner across 167 open steps of 45 features and 7 other records. 34.75 h of actual effort recorded on 79 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -381,6 +380,55 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-023"></a>[✨ F-023](#top)
+
+**Misato's apartment: approval cards with TTL, delivered by Pen Pen**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟢 Verified | 🔺 P1 | 🟢 Small | 0 h | — | — | — | — | — |
+
+💻 **→** Verified 2026-11-15 by the owner on the paired Mac; archive at the next reconciliation.
+
+| | |
+|---|---|
+| **Issue** | Blue actions and low Sync Ratio need the owner. Without full content an approval is a rubber stamp; without a TTL a sleeping owner stalls the sortie. |
+| **Reproduce** | Follow the [paired Mac approvals procedure](acceptance/f023-native-approvals-procedure.md) (create a Blue approval; approve, reject, edit, or leave it to expire; repeat the decision; restart NERV Agency while pending). |
+| **Check** | Card shows action, arguments/diff/recipients, Pattern, Sync Ratio and inputs, reason and remaining TTL; expiry stands down (never approves); a decision is applied once and is idempotent on repeat; pending cards survive restart; the decision and its source are written to Central Dogma; Pen Pen delivery reuses the inbox and later Telegram/native notifications. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+
+| 🟢 Small | **Total** | — | 0 h (0 of 4 steps recorded) | 0 h | 3 of 4 completed | |
+
+<details><summary>Done steps (4)</summary>
+
+| Effort | Step | Estimate | Actual | Status |
+|---|---|---|---|---|
+| — | <a id="f-023-t01"></a>F-023-T01 — Native approval authority contract | — | 0 days | Completed |
+| — | <a id="f-023-t02"></a>F-023-T02 — Bounded full approval cards | — | 0 days | Completed |
+| — | <a id="f-023-t03"></a>F-023-T03 — Native approval delivery and reconciliation | — | 0 days | Completed |
+| 🟢 Small | <a id="f-023-t04"></a>F-023-T04 — Owner check: paired Mac approvals (menu, VoiceOver, notification banner) | — | 0 h | Verified |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-023.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Acceptance reconcile: [PR #233](https://github.com/voidbrain/nerv/pull/233); T03: [PR #232](https://github.com/voidbrain/nerv/pull/232); Review: [fresh-context report](reviews/2026-11-09-native-approval-delivery.md), no blocking findings, stale documentation corrected; Test: test/approval-delivery.test.ts (committed failing contract 1a878ac), native TLS/notification and Telegram joins;  [PR #230](https://github.com/voidbrain/nerv/pull/230) T02 full-CI acceptance, T03 ready; [PR #229](https://github.com/voidbrain/nerv/pull/229) T02 bounded native cards and HTTPS authority join; [PR #228](https://github.com/voidbrain/nerv/pull/228) T01 native authority contract; [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nerv/pull/8) (gate, ledger, approvals); [PR #9](https://github.com/voidbrain/nerv/pull/9) (approvals API) |
+| Opened | 2026-11-02 |
+| Verification | 2026-11-09 Unit/integration: PR232 exact head1b23c68, CI42588026092 passed plan, validate, Windows, native-macos and full-suite, merged maincdb4f6. Linux Node467: 466 passed, one platform skip; headless three passed, one Windows skip. Native TLS/Swift and packaging passed in CI; local final Swift/TLS20/20 passed. Browser/accessibility passed in full CI. Human/real-device: actual menu/VoiceOver/banner/sleep acceptance pending. Review: fresh-context report found no blocking issue; stale documentation corrected. |
+| Reviewed | 2026-11-09 |
+
+</details>
+
+---
 ### <a id="f-049"></a>[✨ F-049](#top)
 
 **EVA instances: an EVA is a class, each job gets a fresh sandbox**
@@ -599,54 +647,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
-### <a id="f-023"></a>[✨ F-023](#top)
-
-**Misato's apartment: approval cards with TTL, delivered by Pen Pen**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.5 h owner | — | — | — | 🧑‍🔧 | — |
-
-🧑 **→** T03 delivery is accepted after full CI. Run the [paired Mac approvals procedure](acceptance/f023-native-approvals-procedure.md) for actual menu/VoiceOver and notification/banner behavior.
-
-| | |
-|---|---|
-| **Issue** | Blue actions and low Sync Ratio need the owner. Without full content an approval is a rubber stamp; without a TTL a sleeping owner stalls the sortie. |
-| **Reproduce** | Follow the [paired Mac approvals procedure](acceptance/f023-native-approvals-procedure.md) (create a Blue approval; approve, reject, edit, or leave it to expire; repeat the decision; restart NERV Agency while pending). |
-| **Check** | Card shows action, arguments/diff/recipients, Pattern, Sync Ratio and inputs, reason and remaining TTL; expiry stands down (never approves); a decision is applied once and is idempotent on repeat; pending cards survive restart; the decision and its source are written to Central Dogma; Pen Pen delivery reuses the inbox and later Telegram/native notifications. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-023-t04"></a>F-023-T04 — Owner check: paired Mac approvals (menu, VoiceOver, notification banner) | — | 0 h | 0 h agent + 0.5 h owner | Ready | [🧑‍🔧](acceptance/f023-native-approvals-procedure.md) |
-| 🟢 Small | **Total** | — | 0 h (0 of 4 steps recorded) | 0.5 h owner | 3 of 4 completed | |
-
-<details><summary>Done steps (3)</summary>
-
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="f-023-t01"></a>F-023-T01 — Native approval authority contract | — | 0 days | Completed |
-| — | <a id="f-023-t02"></a>F-023-T02 — Bounded full approval cards | — | 0 days | Completed |
-| — | <a id="f-023-t03"></a>F-023-T03 — Native approval delivery and reconciliation | — | 0 days | Completed |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-023.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Acceptance reconcile: [PR #233](https://github.com/voidbrain/nerv/pull/233); T03: [PR #232](https://github.com/voidbrain/nerv/pull/232); Review: [fresh-context report](reviews/2026-11-09-native-approval-delivery.md), no blocking findings, stale documentation corrected; Test: test/approval-delivery.test.ts (committed failing contract 1a878ac), native TLS/notification and Telegram joins;  [PR #230](https://github.com/voidbrain/nerv/pull/230) T02 full-CI acceptance, T03 ready; [PR #229](https://github.com/voidbrain/nerv/pull/229) T02 bounded native cards and HTTPS authority join; [PR #228](https://github.com/voidbrain/nerv/pull/228) T01 native authority contract; [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nerv/pull/8) (gate, ledger, approvals); [PR #9](https://github.com/voidbrain/nerv/pull/9) (approvals API) |
-| Opened | 2026-11-02 |
-| Verification | 2026-11-09 Unit/integration: PR232 exact head1b23c68, CI42588026092 passed plan, validate, Windows, native-macos and full-suite, merged maincdb4f6. Linux Node467: 466 passed, one platform skip; headless three passed, one Windows skip. Native TLS/Swift and packaging passed in CI; local final Swift/TLS20/20 passed. Browser/accessibility passed in full CI. Human/real-device: actual menu/VoiceOver/banner/sleep acceptance pending. Review: fresh-context report found no blocking issue; stale documentation corrected. |
-| Reviewed | 2026-11-09 |
-
-</details>
-
----
 ### <a id="f-004"></a>[✨ F-004](#top)
 
 **Angular PWA and validated GenUI**
