@@ -1045,14 +1045,22 @@ test('the root command runs only uncovered cases, records them and reports nothi
         ['tool-use', 6],
       ],
     );
-    assert.equal(run.stillPending, 0);
+    // External runner supervision requires POSIX process groups, so multi-step-agent errors on win32 and stays pending.
+    const win32 = process.platform === 'win32';
+    assert.equal(run.stillPending, win32 ? 4 : 0);
     assert.equal(typeof run.passed, 'boolean');
-    assert.deepEqual((await main(['pending'])).pendingLines, []);
+    const pendingAfter = (await main(['pending'])).pendingLines;
+    if (win32) {
+      assert.equal(pendingAfter.length, 4);
+      assert.ok(pendingAfter.every((l) => l.startsWith('multi-step-agent/') && l.endsWith('(new)')));
+    } else {
+      assert.deepEqual(pendingAfter, []);
+    }
     const written = JSON.parse(readFileSync(ledger, 'utf8'));
     const recorded = written.entries;
-    assert.equal(recorded.length, 83);
+    assert.equal(recorded.length, win32 ? 79 : 83);
     const scriptedEntries = recorded.filter((entry) => entry.pack === 'multi-step-agent');
-    assert.equal(scriptedEntries.length, 4);
+    assert.equal(scriptedEntries.length, win32 ? 0 : 4);
     assert.ok(scriptedEntries.every((entry) => entry.status === 'passed' && entry.modelDigest === null));
     // The ledger is written as schema 2; all entries carry their identity.
     assert.equal(written.schemaVersion, 2);
@@ -1064,7 +1072,7 @@ test('the root command runs only uncovered cases, records them and reports nothi
     );
     // A second run finds nothing to do; another profile has run nothing yet.
     const again = await main(['all']);
-    assert.ok(again.plan.every((p) => p.run.length === 0));
+    assert.ok(again.plan.filter((p) => !win32 || p.pack !== 'multi-step-agent').every((p) => p.run.length === 0));
     const other = join(dir, 'other-profile.json');
     const base = JSON.parse(
       readFileSync('node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json', 'utf8'),
@@ -1074,8 +1082,10 @@ test('the root command runs only uncovered cases, records them and reports nothi
     assert.ok(
       otherPlan.plan
         .filter((p) => p.layer === 'model')
-        .every(
-          (p) => p.run.length === p.reuse.length + p.run.length && p.run.every((r) => r.reason === 'other-profile'),
+        .every((p) =>
+          win32 && p.pack === 'multi-step-agent'
+            ? p.run.every((r) => r.reason === 'new')
+            : p.run.length === p.reuse.length + p.run.length && p.run.every((r) => r.reason === 'other-profile'),
         ),
     );
     assert.deepEqual(otherPlan.plan.find((p) => p.layer === 'system').run, [], 'system cases need no profile');
