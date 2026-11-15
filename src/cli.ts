@@ -2,6 +2,7 @@
 import { startSnapshots } from './snapshots.ts';
 import type { CreateResumeIntentInput, ResumeIntentStatus } from './resume-intent.ts';
 import { decideHitlThroughPersona, formatMisatoPendingHitl } from './persona.ts';
+import { EVA_CLASS_SPECS, admitEvaJob, type EvaAdmissionRequest } from './eva-classes.ts';
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
 import type { OneMoreBatteryExport } from './batteries.ts';
@@ -428,6 +429,16 @@ try {
       }
     } finally {
       store.close();
+    }
+  } else if (command === 'eva') {
+    const sub = args[0] ?? 'classes';
+    if (sub === 'classes') {
+      console.log(JSON.stringify(EVA_CLASS_SPECS, null, 2));
+    } else if (sub === 'admit' && args[1]) {
+      const req = JSON.parse(readFileSync(resolve(args[1]), 'utf8')) as EvaAdmissionRequest;
+      console.log(JSON.stringify(admitEvaJob(req), null, 2));
+    } else {
+      throw new Error('Usage: eva classes | eva admit <request.json>');
     }
   } else if (command === 'credentials') {
     if (args[0] !== 'rotate' || !['admin', 'telegram', 'cloud'].includes(args[1] ?? ''))
