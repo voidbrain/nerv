@@ -4,7 +4,7 @@
   "parent": "F-099",
   "title": "Owner decides the source and scope",
   "goal": "The owner picks how builds come in and what questions are in scope",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Decision recorded in F-099"
   ],
@@ -29,12 +29,12 @@
   "effort": {
     "size": "small",
     "estimate": "0.25 h owner",
-    "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement.",
-    "reviewed": "2026-11-14",
+    "basis": "Owner decision 2026-11-15: a saved local build note per drone (parts and chosen UARTs) plus cited manufacturer pinouts are the source of truth; a diyfpv.com PNG export is a visual check that refuses when labels are unreadable; reading the diyfpv.com build link directly is also wanted, through the F-089 browser adapter (F-099-T04). No actual: owner time not measured.",
+    "reviewed": "2026-11-15",
     "agentHours": 0,
     "baselineAgentHours": 0,
     "estimateAgentHours": 0,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "ownerKind": "decision"
   }
 }

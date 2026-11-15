@@ -14,26 +14,26 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 45 | 6 |
-| **Require Human 🧑** | 17 | 3 |
+| **Require Human 🧑** | 10 | 2 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-005](#f-005) | [F-006](#f-006) | [B-057](#b-057) | [B-066](#b-066) |
-| [F-009](#f-009) | [F-049](#f-049) | [B-056](#b-056) |  |
-| [F-011](#f-011) | [F-016](#f-016) |  |  |
-| [F-023](#f-023) | [F-102](#f-102) |  |  |
-| [F-004](#f-004) | [F-008](#f-008) |  |  |
-| [F-097](#f-097) | [F-100](#f-100) |  |  |
-| [F-060](#f-060) | [F-076](#f-076) |  |  |
-| [F-007](#f-007) | [F-099](#f-099) |  |  |
+| [F-005](#f-005) | [F-006](#f-006) | [B-057](#b-057) | — |
+| [F-009](#f-009) |  | [B-056](#b-056) |  |
+| [F-011](#f-011) |  |  |  |
+| [F-023](#f-023) |  |  |  |
+| [F-004](#f-004) |  |  |  |
+| [F-097](#f-097) |  |  |  |
+| [F-060](#f-060) |  |  |  |
+| [F-007](#f-007) |  |  |  |
 | [F-081](#f-081) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 71.25 h agent + 24.75 h owner across 171 open steps of 45 features and 6 other records. 34.75 h of actual effort recorded on 79 steps. Generated from the task files.
+**Remaining effort:** 72.5 h agent + 23.25 h owner across 166 open steps of 45 features and 6 other records. 34.75 h of actual effort recorded on 79 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -247,9 +247,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 4.75 h agent + 0.75 h owner | — | [F-021-T03](#f-021-t03), [F-027-T02](#f-027-t02), [F-051-T06](#f-051-t06) | ⏳ | — | 🤔 |
+| 🔴 Open | 🔶 P2 | 🔴 Large | 4.75 h agent + 0.5 h owner | — | [F-021-T03](#f-021-t03), [F-027-T02](#f-027-t02), [F-051-T06](#f-051-t06) | 🤖 | — | — |
 
-💻 **→** Next: the EVA class definition and one sandboxed instance per job, starting with EVA-03 (owner, 2026-11-05).
+💻 **→** Next: F-049-T04, an EVA-03 instance per job confined by sandbox-exec.
 
 | | |
 |---|---|
@@ -261,8 +261,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-049-t11"></a>F-049-T11 — Choose the macOS host enforcement mechanism | — | 0 h | 0 h agent + 0.25 h owner | Planned | [🤔](decisions/eva-runner.md#per-job-enforcement-boundaries-supported-hosts) |
-| 🟢 Small | <a id="f-049-t04"></a>F-049-T04 — EVA-03 instance per job | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-049-T11](#f-049-t11) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-049-t04"></a>F-049-T04 — EVA-03 instance per job | 0.75 h | 0 h | 0.75 h | Planned | 🤖 |
 | 🟢 Small | <a id="f-049-t05"></a>F-049-T05 — Escape and recovery join tests | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-049-T04](#f-049-t04) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-049-t06"></a>F-049-T06 — Concurrent instances within per-machine limits | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-049-T04](#f-049-t04) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-049-t07"></a>F-049-T07 — EVA-00, EVA-01 and EVA-02 on the runner | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-049-T05](#f-049-t05), [F-049-T06](#f-049-t06) | ⏳ 🤖 |
@@ -270,15 +269,16 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-049-t09"></a>F-049-T09 — Dashboard shows instances per class | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-049-T07](#f-049-t07) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-049-t10"></a>F-049-T10 — Linux host enforcement and join tests in CI | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-049-T05](#f-049-t05) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-049-t12"></a>F-049-T12 — Run the first EVA job on the Linux host | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-049-T10](#f-049-t10) | ⏳ 🧑‍🔧 |
-| 🔴 Large | **Total** | 6.25 h (10 of 12 steps) | 1 h (3 of 12 steps recorded) | 4.75 h agent + 0.75 h owner | 3 of 12 completed | |
+| 🔴 Large | **Total** | 6.25 h (10 of 12 steps) | 1 h (3 of 12 steps recorded) | 4.75 h agent + 0.5 h owner | 4 of 12 completed | |
 
-<details><summary>Done steps (3)</summary>
+<details><summary>Done steps (4)</summary>
 
 | Effort | Step | Estimate | Actual | Status |
 |---|---|---|---|---|
 | — | <a id="f-049-t01"></a>F-049-T01 — Define deterministic isolated runner admission and enforcement | 0.5 h | 0.25 h (stated) | Completed |
 | — | <a id="f-049-t02"></a>F-049-T02 — EVA class definitions and least-class admission | 0.75 h | 0.5 h (stated) | Completed |
 | — | <a id="f-049-t03"></a>F-049-T03 — Measure the macOS enforcement candidates against the threat model | 0.25 h | 0.25 h (stated) | Completed |
+| — | <a id="f-049-t11"></a>F-049-T11 — Choose the macOS host enforcement mechanism | — | 0 h | Completed |
 
 </details>
 
@@ -395,6 +395,65 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-01 |
 | Verification | Pending adapter feasibility, regression and live host tests |
 | Reviewed | 2026-11-07 |
+
+</details>
+
+---
+
+### <a id="f-016"></a>[✨ F-016](#top)
+
+**Relocate the logical coordinator without split brain**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🔴 Large | 5.25 h agent + 1 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-016-T12, revise the decision so a non-main base keeps a local chat fallback, then F-016-T03.
+
+| | |
+|---|---|
+| **Issue** | Deferred milestone 5b. No distributed election, replication or automatic failover is implemented. |
+| **Reproduce** | Follow docs/decisions/runtime-boundaries.md and the protocol/isolation test fixtures. |
+| **Check** | Network partitions, asleep old leaders and reconnect cannot create simultaneous authorities or duplicate physical effects. Context copying alone never grants leadership. |
+
+
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-016-t10"></a>F-016-T10 — Revise the relocation decision after review | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | 🤖 | [PR #417](https://github.com/voidbrain/nerv/pull/417) revised relocation decision and clean second review |
+| 🟢 Small | <a id="f-016-t12"></a>F-016-T12 — Revise the decision: local chat fallback on a non-main base | 0.5 h | 0 h | 0.5 h | Ready | 🤖 | — |
+| 🟢 Small | <a id="f-016-t03"></a>F-016-T03 — Step 2a — Signed state snapshot export and import to a read-only standby | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T12](#f-016-t12) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-016-t04"></a>F-016-T04 — Step 2b — Incremental log shipping to the standby | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T03](#f-016-t03) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-016-t05"></a>F-016-T05 — Step 3a — Leader epoch in signed registry records; every effect checks the fencing token | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T04](#f-016-t04) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-016-t06"></a>F-016-T06 — Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T05](#f-016-t05) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-016-t07"></a>F-016-T07 — Step 4a — Owner-initiated relocation with restore; never a context-only takeover | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T06](#f-016-t06) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-016-t08"></a>F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T07](#f-016-t07) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-016-t09"></a>F-016-T09 — Step 5b — Two-device relocation acceptance | — | 0 h | 0 h agent + 1 h owner | Planned · waits on [F-016-T08](#f-016-t08) | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | <a id="f-016-t11"></a>F-016-T11 — Record the evidence of F-016-T09 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-016-T09](#f-016-t09) | ⏳ 🤖 | — |
+| 🔴 Large | **Total** | 6.5 h (11 of 12 steps) | 1 h (2 of 12 steps recorded) | 5.25 h agent + 1 h owner | 2 of 12 completed | | |
+
+<details><summary>Done steps (2)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-016-t01"></a>F-016-T01 — Step 1a — Decision: replicated state, leader lease and epoch, fencing tokens and restore | 0.5 h | 0.5 h (stated) | Completed | — |
+| — | <a id="f-016-t02"></a>F-016-T02 — Step 1b — Independent review of the coordinator relocation decision | 0.25 h | 0 h | Completed | — |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-016.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-016-T10: [PR #417](https://github.com/voidbrain/nerv/pull/417) revised relocation decision and clean second review. [PR #417](https://github.com/voidbrain/nerv/pull/417) F-016-T10 revised decision and clean second review (`docs/decisions/coordinator-relocation.md`, `docs/reviews/2026-11-14-f016-relocation-review-2.md`); [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #307](https://github.com/voidbrain/nerv/pull/307) F-016-T01 decision (`docs/decisions/coordinator-relocation.md`); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #3](https://github.com/voidbrain/nerv/pull/3); local checks and scoped audit pass; [CI 43240473540](https://github.com/voidbrain/nerv/actions/runs/43240473540) passed plan, native-macos, windows and validate (full-suite skipped by scoped verification), merged main `e821c11` |
+| Opened | 2026-11-01 |
+| Verification | Pending named acceptance |
+| Reviewed | 2026-11-12 |
 
 </details>
 
@@ -597,64 +656,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Reconcile: [PR #304](https://github.com/voidbrain/nerv/pull/304). [PR #303](https://github.com/voidbrain/nerv/pull/303) F-004-T05 web push (test/push.test.ts, test/angular.browser.mjs); [PR #300](https://github.com/voidbrain/nerv/pull/300) F-004-T04 GenUI renderer (test/protocol.test.ts, test/surface-dom.test.mjs, test/angular.browser.mjs); [PR #299](https://github.com/voidbrain/nerv/pull/299) F-004-T03 doctor view (test/angular.browser.mjs); [PR #298](https://github.com/voidbrain/nerv/pull/298) F-004-T02 reminder CRUD (test/angular.browser.mjs); Reconcile: [PR #288](https://github.com/voidbrain/nerv/pull/288). [PR #286](https://github.com/voidbrain/nerv/pull/286) F-004-T01 PWA shell, CI [43168006619](https://github.com/voidbrain/nerv/actions/runs/43168006619) (attempt 1 validate failed on B-050, attempt 2 green) (test/pwa.browser.mjs, test/pwa.test.mjs); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Browser/accessibility 2026-11-12 (F-004-T01, F-004-T02, F-004-T03, F-004-T04, F-004-T05): test/pwa.browser.mjs, test/pwa.test.mjs, test/push.test.ts, and test/angular.browser.mjs passed with AXE checks; GenUI registered component renderer and Web Push subscription/delivery verified in PR #303 CI (run 43226982598). Phone install/push acceptance pending (F-004-T06). |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
-
-### <a id="f-016"></a>[✨ F-016](#top)
-
-**Relocate the logical coordinator without split brain**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🔴 Large | 4.75 h agent + 1.25 h owner | — | — | 🤖 | — | 🤔 |
-
-🧑 **→** Next: Owner agreement on the revised relocation decision ([decision](decisions/coordinator-relocation.md), [second review](reviews/2026-11-14-f016-relocation-review-2.md)) after F-016-T10 cleanly resolved the first review's findings before F-016-T03 implementation starts.
-
-| | |
-|---|---|
-| **Issue** | Deferred milestone 5b. No distributed election, replication or automatic failover is implemented. |
-| **Reproduce** | Follow docs/decisions/runtime-boundaries.md and the protocol/isolation test fixtures. |
-| **Check** | Network partitions, asleep old leaders and reconnect cannot create simultaneous authorities or duplicate physical effects. Context copying alone never grants leadership. |
-
-
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-016-t01"></a>F-016-T01 — Step 1a — Decision: replicated state, leader lease and epoch, fencing tokens and restore | 0.5 h | 0.5 h so far (stated) | 0 h agent + 0.25 h owner | Implemented; verification pending | 🤔 | — |
-| 🟢 Small | <a id="f-016-t10"></a>F-016-T10 — Revise the relocation decision after review | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | 🤖 | [PR #417](https://github.com/voidbrain/nerv/pull/417) revised relocation decision and clean second review |
-| 🟢 Small | <a id="f-016-t03"></a>F-016-T03 — Step 2a — Signed state snapshot export and import to a read-only standby | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T10](#f-016-t10) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-016-t04"></a>F-016-T04 — Step 2b — Incremental log shipping to the standby | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T03](#f-016-t03) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-016-t05"></a>F-016-T05 — Step 3a — Leader epoch in signed registry records; every effect checks the fencing token | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T04](#f-016-t04) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-016-t06"></a>F-016-T06 — Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T05](#f-016-t05) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-016-t07"></a>F-016-T07 — Step 4a — Owner-initiated relocation with restore; never a context-only takeover | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T06](#f-016-t06) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-016-t08"></a>F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T07](#f-016-t07) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-016-t09"></a>F-016-T09 — Step 5b — Two-device relocation acceptance | — | 0 h | 0 h agent + 1 h owner | Planned · waits on [F-016-T08](#f-016-t08) | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | <a id="f-016-t11"></a>F-016-T11 — Record the evidence of F-016-T09 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-016-T09](#f-016-t09) | ⏳ 🤖 | — |
-| 🔴 Large | **Total** | 6 h (10 of 11 steps) | 1 h (2 of 11 steps recorded) | 4.75 h agent + 1.25 h owner | 1 of 11 completed | | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-016-t02"></a>F-016-T02 — Step 1b — Independent review of the coordinator relocation decision | 0.25 h | 0 h | Completed | — |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-016.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-016-T10: [PR #417](https://github.com/voidbrain/nerv/pull/417) revised relocation decision and clean second review. [PR #417](https://github.com/voidbrain/nerv/pull/417) F-016-T10 revised decision and clean second review (`docs/decisions/coordinator-relocation.md`, `docs/reviews/2026-11-14-f016-relocation-review-2.md`); [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #307](https://github.com/voidbrain/nerv/pull/307) F-016-T01 decision (`docs/decisions/coordinator-relocation.md`); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #3](https://github.com/voidbrain/nerv/pull/3); local checks and scoped audit pass; [CI 43240473540](https://github.com/voidbrain/nerv/actions/runs/43240473540) passed plan, native-macos, windows and validate (full-suite skipped by scoped verification), merged main `e821c11` |
-| Opened | 2026-11-01 |
-| Verification | Pending named acceptance |
 | Reviewed | 2026-11-12 |
 
 </details>
@@ -1127,6 +1128,54 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-102"></a>[✨ F-102](#top)
+
+**Scheduled automatic updates with advance notice**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-102-T02, the policy control, the 20:00 check and the notice.
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-14: will NERV discover an update from git, apply it and restart, and warn first? Today it discovers (update availability on the dashboard, companion and status report, F-005-T07/T16) and applies on request through the safe lifecycle update path (backup, rehearsal, install, build, verify, restart with a health check; F-005-T17), and an opt-in automatic policy exists (F-005-T18, off by default, refusing while runs or approvals are pending). But nothing triggers that policy on a schedule (only `POST /api/update/auto`), the policy has no command or dashboard control (only `POST /api/update/policy`), and no notice is given before an update. |
+| **Reproduce** | Enable the automatic policy and wait: no update is applied and no notice arrives. |
+| **Check** | With the policy enabled, a scheduled check finds a newer revision and announces it in Telegram and the local inbox ("update X available, applying at HH:MM unless you say wait"); "aspetta" postpones it; at the time it applies through the existing safe path and restarts, and reports the result and the health check; refusals (active runs, pending approvals, schema) are reported with the next try; off by default; invented tests. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-102-t02"></a>F-102-T02 — Policy control, scheduled check and notice | 0.75 h | 0 h | 0.75 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-102-t03"></a>F-102-T03 — Apply at the announced time and report | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-102-T02](#f-102-t02) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-102-t04"></a>F-102-T04 — Owner check: one automatic update | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-102-T03](#f-102-t03) | ⏳ 🧑‍🔧 |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 4 steps recorded) | 1.5 h agent + 0.25 h owner | 1 of 4 completed | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status |
+|---|---|---|---|---|
+| — | <a id="f-102-t01"></a>F-102-T01 — Owner decides schedule, notice and quiet hours | 0 h | 0 h | Completed |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-102.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner report 2026-11-14; [PR #409](https://github.com/voidbrain/nerv/pull/409) |
+| Opened | 2026-11-14 |
+| Verification | Pending. |
+| Reviewed | 2026-11-14 |
+
+</details>
+
+---
 ### <a id="f-103"></a>[✨ F-103](#top)
 
 **Service health and link load between bases, measured**
@@ -1263,6 +1312,53 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
 | Verification | `F-084-T01` decision written in [coding-job-contract.md](decisions/coding-job-contract.md); verified with `npm run check:fast`. |
+| Reviewed | 2026-11-14 |
+
+</details>
+
+---
+### <a id="f-089"></a>[✨ F-089](#top)
+
+**Browser control: act on a named control in an open page**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h agent + 0.25 h owner | — | [F-099-T04](#f-099-t04) | 🤖 | — | — |
+
+💻 **→** Next: F-089-T02 — Find and click a named control (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: "click the skip button" on a page open in the browser. NERV has no browser adapter; F-012 needs one for web-chat jobs too. |
+| **Reproduce** | Ask NERV to click a named button on an open tab. |
+| **Check** | A narrow adapter acts only in a browser profile the owner allowed; it finds the control by its accessible name and clicks it as an Orange action; it reports what changed on the page; it never enters credentials, approves dialogs or acts on another tab; page text never becomes an instruction. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟡 Medium | <a id="f-089-t02"></a>F-089-T02 — Find and click a named control | 1.5 h | 0 h | 1.5 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-089-t03"></a>F-089-T03 — Owner check on a real page | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-089-T02](#f-089-t02) | ⏳ 🧑‍🔧 |
+| 🟡 Medium | **Total** | 2 h (2 of 3 steps) | 0.25 h (1 of 3 steps recorded) | 1.5 h agent + 0.25 h owner | 1 of 3 completed | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status |
+|---|---|---|---|---|
+| — | <a id="f-089-t01"></a>F-089-T01 — Decision: browser adapter | 0.5 h | 0.25 h (measured) | Completed |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-089.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| Opened | 2026-11-14 |
+| Verification | `F-089-T01` decision written in [browser-adapter.md](decisions/browser-adapter.md); verified with `npm run check:fast`. |
 | Reviewed | 2026-11-14 |
 
 </details>
@@ -1552,53 +1648,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-089"></a>[✨ F-089](#top)
-
-**Browser control: act on a named control in an open page**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-089-T02 — Find and click a named control (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner job 2026-11-14: "click the skip button" on a page open in the browser. NERV has no browser adapter; F-012 needs one for web-chat jobs too. |
-| **Reproduce** | Ask NERV to click a named button on an open tab. |
-| **Check** | A narrow adapter acts only in a browser profile the owner allowed; it finds the control by its accessible name and clicks it as an Orange action; it reports what changed on the page; it never enters credentials, approves dialogs or acts on another tab; page text never becomes an instruction. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟡 Medium | <a id="f-089-t02"></a>F-089-T02 — Find and click a named control | 1.5 h | 0 h | 1.5 h | Planned | 🤖 |
-| 🟢 Small | <a id="f-089-t03"></a>F-089-T03 — Owner check on a real page | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-089-T02](#f-089-t02) | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 2 h (2 of 3 steps) | 0.25 h (1 of 3 steps recorded) | 1.5 h agent + 0.25 h owner | 1 of 3 completed | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="f-089-t01"></a>F-089-T01 — Decision: browser adapter | 0.5 h | 0.25 h (measured) | Completed |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-089.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
-| Opened | 2026-11-14 |
-| Verification | `F-089-T01` decision written in [browser-adapter.md](decisions/browser-adapter.md); verified with `npm run check:fast`. |
-| Reviewed | 2026-11-14 |
-
-</details>
-
----
 ### <a id="f-092"></a>[✨ F-092](#top)
 
 **Record desktop input and replay it**
@@ -1695,6 +1744,62 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-008"></a>[✨ F-008](#top)
+
+**FPV batteries: registry, charge state, resistance checks and storage reminders**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-008-T08, resistance records and due checks with the decided limits.
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-14: integrate FPV battery management in NERV rather than a separate app (supersedes "Integrate the FPV app"). Batteries are numbered with an optional colour series (red, yellow, blue…), LiPo 6S or LiHV 3S today; the owner wants charge state set by chat ("carica le batterie 7 e 8 blu"), cycle counts, per-cell resistance checks when new and periodically, storage reminders, and advice when a cell degrades. The old standalone app `~/Projects/one-more-battery` holds the starting data model. |
+| **Reproduce** | `nerv chat "carica le batterie 7 e 8 blu"`, then ask which batteries are charged and when each needs a resistance check. |
+| **Check** | Batteries registered with number, series, type, brand, mAh and date, with a required first resistance record (one value per cell, in order); charged / discharged / stored set by chat in Italian and English, asking when a battery is ambiguous; cycles counted; a battery left charged or discharged gets the evening reminder and the follow-ups until stored; a resistance check falls due by the decided interval; advice when a cell grows past the decided limits or reaches the retirement value; invented test data. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-008-t08"></a>F-008-T08 — Resistance records and due checks | 0.5 h | 0 h | 0.5 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-008-t09"></a>F-008-T09 — Storage reminders | 0.5 h | 0 h | 0.5 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-008-t10"></a>F-008-T10 — Health advice from resistance trends | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-008-T08](#f-008-t08) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-008-t11"></a>F-008-T11 — Battery cards on the dashboard | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-008-T10](#f-008-t10) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-008-t12"></a>F-008-T12 — Owner check with real batteries | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-008-T09](#f-008-t09), [F-008-T11](#f-008-t11) | ⏳ 🧑‍🔧 |
+| 🟡 Medium | **Total** | 4.5 h (11 of 12 steps) | 0.75 h (2 of 12 steps recorded) | 2 h agent + 0.25 h owner | 7 of 12 completed | |
+
+<details><summary>Done steps (7)</summary>
+
+| Effort | Step | Estimate | Actual | Status |
+|---|---|---|---|---|
+| — | <a id="f-008-t01"></a>F-008-T01 — FPV app adapter contract | 0.25 h | 0 h | Completed |
+| — | <a id="f-008-t02"></a>F-008-T02 — Battery and maintenance records through the adapter | 0.5 h | 0 h | Completed |
+| — | <a id="f-008-t03"></a>F-008-T03 — Acceptance against the real FPV app | — | 0 h | Completed |
+| — | <a id="f-008-t04"></a>F-008-T04 — Record the evidence of F-008-T03 and close it | 0.25 h | 0 h | Completed |
+| — | <a id="f-008-t05"></a>F-008-T05 — Owner decides thresholds and reminder times | 0 h | 0 h | Completed |
+| — | <a id="f-008-t06"></a>F-008-T06 — Battery registry and import | 0.75 h | 0.5 h (stated) | Completed |
+| — | <a id="f-008-t07"></a>F-008-T07 — Charge state and cycles by chat | 0.75 h | 0.25 h (measured) | Completed |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-008.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | F-008-T07 Italian/English battery charge-state & cycle chat (`applyChatPhrase`, `parseBatteryChatCommand`, `formatBatteryStateLines` in `src/batteries.ts`, `batteries.list`/`batteries.chat` in `src/executors.ts`, `batteries status` and `batteries chat` in `src/cli.ts`, verified in `test/batteries.test.ts`, 2026-11-15); F-008-T06 battery registry and `one-more-battery` importer (`src/batteries.ts`, `Store.batteries` in `src/store.ts`, `batteries` CLI in `src/cli.ts`, verified in `test/batteries.test.ts`, 2026-11-15); Rescoped by the owner 2026-11-14 ([plan](design/fpv-and-cooking-plan-2026-11-14.md), [PR #408](https://github.com/voidbrain/nerv/pull/408)); earlier: [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment, PR #313 priority |
+| Opened | 2026-11-01 |
+| Verification | `npx tsc --noEmit`, `npm run check:conventions`, `node --test test/batteries.test.ts`, and `npm run check:fast` passed 2026-11-15; remote CI pending PR |
+| Reviewed | 2026-11-15 |
+
+</details>
+
+---
 ### <a id="b-049"></a>[🐞 B-049](#top)
 
 **Misato invents a reminder title instead of asking, when an Italian request gives none**
@@ -1733,6 +1838,52 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-066"></a>[🐞 B-066](#top)
+
+**Worker-link heartbeat verification awaits nervous SQLite IPC on every frame**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-066-T02, an in-memory registry snapshot in WorkerLink.
+
+| | |
+|---|---|
+| **Issue** | `Peer.receive` in `src/worker-link.ts` awaits `registry.bases()` and `registry.main()` on the serial `this.incoming` chain for every frame, making four `nervous` SQLite IPC calls per `worker.ping` round-trip in `serve` (`src/runtime.ts`) while `expire()` caps its wait on `this.incoming` at one `timeoutMs`. Under SQLite or IPC contention, an already-received pong stalls behind `nervous` IPC and drops the session, driving repeated timing workarounds in B-046 (PR #293, PR #361) and B-060-T02 ([PR #411](https://github.com/voidbrain/nerv/pull/411)). |
+| **Reproduce** | Compare the options in [worker heartbeat liveness](decisions/worker-heartbeat-liveness.md), or run `test/worker-link.test.ts` (`B-046`) with a 150 ms heartbeat budget when `nervous` IPC latency exceeds `timeoutMs / 2`. |
+| **Check** | Owner chooses Option A (in-memory registry snapshot inside `WorkerLink`, invalidated on registry changes) or Option B (decouple socket arrival liveness from the async `nervous` IPC queue); B-066-T02 implements the chosen design and adds a slow-registry regression in `test/worker-link.test.ts` (restoring a tight budget there). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="b-066-t02"></a>B-066-T02 — Decouple worker-link frame verification from per-frame nervous IPC | 0.5 h | 0 h | 0.5 h | Planned | 🤖 |
+| 🟢 Small | **Total** | 0.5 h (1 of 2 steps) | 0 h (0 of 2 steps recorded) | 0.5 h | 1 of 2 completed | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status |
+|---|---|---|---|---|
+| — | <a id="b-066-t01"></a>B-066-T01 — Choose how worker-link heartbeats decouple from nervous SQLite IPC | — | 0 h | Completed |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-066.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #414](https://github.com/voidbrain/nerv/pull/414) (opened record & decision doc); prior context: [PR #411](https://github.com/voidbrain/nerv/pull/411) (B-060-T02), [PR #293](https://github.com/voidbrain/nerv/pull/293) and [PR #361](https://github.com/voidbrain/nerv/pull/361) (B-046). |
+| Opened | 2026-11-14 |
+| Verification | Pending decision (B-066-T01) and fix (B-066-T02). |
+| Reviewed | 2026-11-14 |
+
+</details>
+
+---
 ### <a id="f-097"></a>[✨ F-097](#top)
 
 **Rerun the seven NERV system cases at the harness 8.14.1 source**
@@ -1766,103 +1917,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Opened in [PR #404](https://github.com/voidbrain/nerv/pull/404) |
 | Opened | 2026-11-14 |
 | Verification | Pending. |
-| Reviewed | 2026-11-15 |
-
-</details>
-
----
-### <a id="f-102"></a>[✨ F-102](#top)
-
-**Scheduled automatic updates with advance notice**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h agent + 0.5 h owner | — | — | ⏳ | — | 🤔 |
-
-🧑 **→** Choose the check schedule, the notice lead time and the quiet hours (F-102-T01).
-
-| | |
-|---|---|
-| **Issue** | Owner question 2026-11-14: will NERV discover an update from git, apply it and restart, and warn first? Today it discovers (update availability on the dashboard, companion and status report, F-005-T07/T16) and applies on request through the safe lifecycle update path (backup, rehearsal, install, build, verify, restart with a health check; F-005-T17), and an opt-in automatic policy exists (F-005-T18, off by default, refusing while runs or approvals are pending). But nothing triggers that policy on a schedule (only `POST /api/update/auto`), the policy has no command or dashboard control (only `POST /api/update/policy`), and no notice is given before an update. |
-| **Reproduce** | Enable the automatic policy and wait: no update is applied and no notice arrives. |
-| **Check** | With the policy enabled, a scheduled check finds a newer revision and announces it in Telegram and the local inbox ("update X available, applying at HH:MM unless you say wait"); "aspetta" postpones it; at the time it applies through the existing safe path and restarts, and reports the result and the health check; refusals (active runs, pending approvals, schema) are reported with the next try; off by default; invented tests. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-102-t01"></a>F-102-T01 — Owner decides schedule, notice and quiet hours | 0 h | 0 h | 0 h agent + 0.25 h owner | Ready | [🤔](work/records/F-102.md) |
-| 🟢 Small | <a id="f-102-t02"></a>F-102-T02 — Policy control, scheduled check and notice | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-102-T01](#f-102-t01) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-102-t03"></a>F-102-T03 — Apply at the announced time and report | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-102-T02](#f-102-t02) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-102-t04"></a>F-102-T04 — Owner check: one automatic update | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-102-T03](#f-102-t03) | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 4 steps recorded) | 1.5 h agent + 0.5 h owner | 0 of 4 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-102.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Owner report 2026-11-14; [PR #409](https://github.com/voidbrain/nerv/pull/409) |
-| Opened | 2026-11-14 |
-| Verification | Pending. |
-| Reviewed | 2026-11-14 |
-
-</details>
-
----
-### <a id="f-008"></a>[✨ F-008](#top)
-
-**FPV batteries: registry, charge state, resistance checks and storage reminders**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h agent + 0.5 h owner | — | — | ⏳ | — | 🤔 |
-
-🧑 **→** Confirm or change the proposed thresholds and reminder times (F-008-T05).
-
-| | |
-|---|---|
-| **Issue** | Owner request 2026-11-14: integrate FPV battery management in NERV rather than a separate app (supersedes "Integrate the FPV app"). Batteries are numbered with an optional colour series (red, yellow, blue…), LiPo 6S or LiHV 3S today; the owner wants charge state set by chat ("carica le batterie 7 e 8 blu"), cycle counts, per-cell resistance checks when new and periodically, storage reminders, and advice when a cell degrades. The old standalone app `~/Projects/one-more-battery` holds the starting data model. |
-| **Reproduce** | `nerv chat "carica le batterie 7 e 8 blu"`, then ask which batteries are charged and when each needs a resistance check. |
-| **Check** | Batteries registered with number, series, type, brand, mAh and date, with a required first resistance record (one value per cell, in order); charged / discharged / stored set by chat in Italian and English, asking when a battery is ambiguous; cycles counted; a battery left charged or discharged gets the evening reminder and the follow-ups until stored; a resistance check falls due by the decided interval; advice when a cell grows past the decided limits or reaches the retirement value; invented test data. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-008-t05"></a>F-008-T05 — Owner decides thresholds and reminder times | 0 h | 0 h | 0 h agent + 0.25 h owner | Ready | [🤔](design/fpv-and-cooking-plan-2026-11-14.md) |
-| 🟢 Small | <a id="f-008-t08"></a>F-008-T08 — Resistance records and due checks | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-008-T05](#f-008-t05) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-008-t09"></a>F-008-T09 — Storage reminders | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-008-T05](#f-008-t05) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-008-t10"></a>F-008-T10 — Health advice from resistance trends | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-008-T08](#f-008-t08) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-008-t11"></a>F-008-T11 — Battery cards on the dashboard | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-008-T10](#f-008-t10) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-008-t12"></a>F-008-T12 — Owner check with real batteries | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-008-T09](#f-008-t09), [F-008-T11](#f-008-t11) | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 4.5 h (11 of 12 steps) | 0.75 h (2 of 12 steps recorded) | 2 h agent + 0.5 h owner | 6 of 12 completed | |
-
-<details><summary>Done steps (6)</summary>
-
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="f-008-t01"></a>F-008-T01 — FPV app adapter contract | 0.25 h | 0 h | Completed |
-| — | <a id="f-008-t02"></a>F-008-T02 — Battery and maintenance records through the adapter | 0.5 h | 0 h | Completed |
-| — | <a id="f-008-t03"></a>F-008-T03 — Acceptance against the real FPV app | — | 0 h | Completed |
-| — | <a id="f-008-t04"></a>F-008-T04 — Record the evidence of F-008-T03 and close it | 0.25 h | 0 h | Completed |
-| — | <a id="f-008-t06"></a>F-008-T06 — Battery registry and import | 0.75 h | 0.5 h (stated) | Completed |
-| — | <a id="f-008-t07"></a>F-008-T07 — Charge state and cycles by chat | 0.75 h | 0.25 h (measured) | Completed |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-008.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | F-008-T07 Italian/English battery charge-state & cycle chat (`applyChatPhrase`, `parseBatteryChatCommand`, `formatBatteryStateLines` in `src/batteries.ts`, `batteries.list`/`batteries.chat` in `src/executors.ts`, `batteries status` and `batteries chat` in `src/cli.ts`, verified in `test/batteries.test.ts`, 2026-11-15); F-008-T06 battery registry and `one-more-battery` importer (`src/batteries.ts`, `Store.batteries` in `src/store.ts`, `batteries` CLI in `src/cli.ts`, verified in `test/batteries.test.ts`, 2026-11-15); Rescoped by the owner 2026-11-14 ([plan](design/fpv-and-cooking-plan-2026-11-14.md), [PR #408](https://github.com/voidbrain/nerv/pull/408)); earlier: [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment, PR #313 priority |
-| Opened | 2026-11-01 |
-| Verification | `npx tsc --noEmit`, `npm run check:conventions`, `node --test test/batteries.test.ts`, and `npm run check:fast` passed 2026-11-15; remote CI pending PR |
 | Reviewed | 2026-11-15 |
 
 </details>
@@ -1914,45 +1968,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="b-066"></a>[🐞 B-066](#top)
-
-**Worker-link heartbeat verification awaits nervous SQLite IPC on every frame**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h agent + 0.25 h owner | — | — | ⏳ | — | 🤔 |
-
-🧑 **→** Choose [how worker-link heartbeats avoid blocking on nervous SQLite IPC](decisions/worker-heartbeat-liveness.md) (B-066-T01).
-
-| | |
-|---|---|
-| **Issue** | `Peer.receive` in `src/worker-link.ts` awaits `registry.bases()` and `registry.main()` on the serial `this.incoming` chain for every frame, making four `nervous` SQLite IPC calls per `worker.ping` round-trip in `serve` (`src/runtime.ts`) while `expire()` caps its wait on `this.incoming` at one `timeoutMs`. Under SQLite or IPC contention, an already-received pong stalls behind `nervous` IPC and drops the session, driving repeated timing workarounds in B-046 (PR #293, PR #361) and B-060-T02 ([PR #411](https://github.com/voidbrain/nerv/pull/411)). |
-| **Reproduce** | Compare the options in [worker heartbeat liveness](decisions/worker-heartbeat-liveness.md), or run `test/worker-link.test.ts` (`B-046`) with a 150 ms heartbeat budget when `nervous` IPC latency exceeds `timeoutMs / 2`. |
-| **Check** | Owner chooses Option A (in-memory registry snapshot inside `WorkerLink`, invalidated on registry changes) or Option B (decouple socket arrival liveness from the async `nervous` IPC queue); B-066-T02 implements the chosen design and adds a slow-registry regression in `test/worker-link.test.ts` (restoring a tight budget there). |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="b-066-t01"></a>B-066-T01 — Choose how worker-link heartbeats decouple from nervous SQLite IPC | — | 0 h | 0 h agent + 0.25 h owner | Ready | [🤔](decisions/worker-heartbeat-liveness.md) |
-| 🟢 Small | <a id="b-066-t02"></a>B-066-T02 — Decouple worker-link frame verification from per-frame nervous IPC | 0.5 h | 0 h | 0.5 h | Planned · waits on [B-066-T01](#b-066-t01) | ⏳ 🤖 |
-| 🟢 Small | **Total** | 0.5 h (1 of 2 steps) | 0 h (0 of 2 steps recorded) | 0.5 h agent + 0.25 h owner | 0 of 2 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-066.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #414](https://github.com/voidbrain/nerv/pull/414) (opened record & decision doc); prior context: [PR #411](https://github.com/voidbrain/nerv/pull/411) (B-060-T02), [PR #293](https://github.com/voidbrain/nerv/pull/293) and [PR #361](https://github.com/voidbrain/nerv/pull/361) (B-046). |
-| Opened | 2026-11-14 |
-| Verification | Pending decision (B-066-T01) and fix (B-066-T02). |
-| Reviewed | 2026-11-14 |
-
-</details>
-
----
 ### <a id="f-079"></a>[✨ F-079](#top)
 
 **Experiment: each system evaluation case covers only the source it exercises**
@@ -1985,6 +2000,55 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | PR / evidence | [PR #377](https://github.com/voidbrain/nerv/pull/377) (its `.harness.json` bump alone made all seven cases pending again; rerun 7/7 on the branch) [Architecture reassessment 2026-11-13](audits/2026-11-13-architecture-reassessment.md) |
+| Opened | 2026-11-13 |
+| Verification | Pending. |
+| Reviewed | 2026-11-13 |
+
+</details>
+
+---
+### <a id="f-076"></a>[✨ F-076](#top)
+
+**What reaches main is tested together, not only each PR on its own**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 1.25 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-076-T05, a push-to-main CI trigger in the harness template, then reconcile here.
+
+| | |
+|---|---|
+| **Issue** | Branch protection requires only `validate` and `native-macos`, with `strict` off; CI runs on pull requests and on Mondays only (no push trigger). On 12–13 November 41 PRs merged, several in parallel and some with `full-suite` skipped by scoped verification, so the combination on main was not run in CI until the audit dispatched one. `windows` and `full-suite` are not required. |
+| **Reproduce** | `gh api repos/voidbrain/nerv/branches/main/protection` and `.github/workflows/ci.yml` `on:`; compare `gh run list --branch main` with the merge times. |
+| **Check** | The chosen option is in place (a repository setting or the CI workflow); a PR whose combination with main breaks a test cannot reach main unnoticed for more than a day; the choice is recorded here. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-076-t02"></a>F-076-T02 — CI runs on merge&#95;group | 0.5 h | 0 h | 0.5 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-076-t03"></a>F-076-T03 — Reconcile the queue-aware merge tool | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | 🤖 |
+| 🟢 Small | <a id="f-076-t05"></a>F-076-T05 — Push-to-main CI trigger from the template | 0.25 h | 0 h | 0.25 h | Planned | 🤖 |
+| 🟡 Medium | **Total** | 1.25 h (4 of 5 steps) | 0 h (0 of 5 steps recorded) | 1.25 h | 2 of 5 completed | |
+
+<details><summary>Done steps (2)</summary>
+
+| Effort | Step | Estimate | Actual | Status |
+|---|---|---|---|---|
+| — | <a id="f-076-t01"></a>F-076-T01 — Choose how merged main is verified | 0 h | 0 h | Completed |
+| — | <a id="f-076-t04"></a>F-076-T04 — Turn on the merge queue for main | — | 0 h | Completed |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-076.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #386](https://github.com/voidbrain/nerv/pull/386) [PR #383](https://github.com/voidbrain/nerv/pull/383) [PR #382](https://github.com/voidbrain/nerv/pull/382) [PR #379](https://github.com/voidbrain/nerv/pull/379) [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) |
 | Opened | 2026-11-13 |
 | Verification | Pending. |
 | Reviewed | 2026-11-13 |
@@ -2142,9 +2206,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h agent + 0.25 h owner | — | — | ⏳ | — | 🤔 |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h agent + 0.5 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-100-T01 (feasibility).
+💻 **→** Next: F-100-T03, the vibration report decoded locally with the WASM blackbox-log parser.
 
 | | |
 |---|---|
@@ -2156,15 +2220,16 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-100-t02"></a>F-100-T02 — Owner decides the analysis scope | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [🤔](design/fpv-and-cooking-plan-2026-11-14.md) |
-| 🟢 Small | <a id="f-100-t03"></a>F-100-T03 — Vibration report from a blackbox log | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-100-T02](#f-100-t02) | ⏳ 🤖 |
-| 🟢 Small | **Total** | 1.5 h | 0.25 h (1 of 3 steps recorded) | 0.75 h agent + 0.25 h owner | 1 of 3 completed | |
+| 🟢 Small | <a id="f-100-t03"></a>F-100-T03 — Vibration report from a blackbox log | 0.75 h | 0 h | 0.75 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-100-t04"></a>F-100-T04 — Owner check: real Smoke log with GYRO&#95;SCALED and eRPM | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-100-T03](#f-100-t03) | ⏳ 🧑‍🔧 |
+| 🟢 Small | **Total** | 1.5 h | 0.25 h (1 of 4 steps recorded) | 0.75 h agent + 0.5 h owner | 2 of 4 completed | |
 
-<details><summary>Done steps (1)</summary>
+<details><summary>Done steps (2)</summary>
 
 | Effort | Step | Estimate | Actual | Status |
 |---|---|---|---|---|
 | — | <a id="f-100-t01"></a>F-100-T01 — Feasibility: decoding blackbox logs and reading vibration | 0.75 h | 0.25 h (measured) | Completed |
+| — | <a id="f-100-t02"></a>F-100-T02 — Owner decides the analysis scope | 0 h | 0 h | Completed |
 
 </details>
 
@@ -2211,6 +2276,54 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 <summary>Next action, estimates and evidence</summary>
 
 [Full notes & evidence](work/records/F-101.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
+| Opened | 2026-11-14 |
+| Verification | Pending. |
+| Reviewed | 2026-11-14 |
+
+</details>
+
+---
+### <a id="f-099"></a>[✨ F-099](#top)
+
+**FPV build knowledge: components and wiring from cited sources**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 1.5 h | [F-089-T02](#f-089-t02) | — | 🤖 | — | — |
+
+💻 **→** Next: F-099-T03, the saved build note and cited wiring answers.
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-14: "Smoke FC is iFlight BLITZ Mini F7 V1.2 and the ELRS receiver is BetaFPV SuperD: what is the wiring?" The owner keeps a component library and wiring in a diyfpv.com build and can export it as a PNG. NERV cannot read the build, and a wiring answer must come from the owner's build or the manufacturer's documents, never be invented. |
+| **Reproduce** | Ask the wiring question with the two components named. |
+| **Check** | Feasibility first: what NERV can read (the build link, the PNG export, a component list) and which sources it cites; then wiring answers that cite the build or a manufacturer document and say when they do not know. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-099-t03"></a>F-099-T03 — Build import and cited wiring answers | 0.75 h | 0 h | 0.75 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-099-t04"></a>F-099-T04 — Read a diyfpv.com build through the browser adapter | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-099-T03](#f-099-t03), [F-089-T02](#f-089-t02) | ⏳ 🤖 |
+| 🟡 Medium | **Total** | 2.25 h | 0.25 h (1 of 4 steps recorded) | 1.5 h | 2 of 4 completed | |
+
+<details><summary>Done steps (2)</summary>
+
+| Effort | Step | Estimate | Actual | Status |
+|---|---|---|---|---|
+| — | <a id="f-099-t01"></a>F-099-T01 — Feasibility: reading the build and its sources | 0.75 h | 0.25 h (measured) | Completed |
+| — | <a id="f-099-t02"></a>F-099-T02 — Owner decides the source and scope | 0 h | 0 h | Completed |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-099.md)
 
 | Field | Value |
 |---|---|
@@ -2298,55 +2411,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-076"></a>[✨ F-076](#top)
-
-**What reaches main is tested together, not only each PR on its own**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 1.25 h agent + 0.25 h owner | — | — | 🤖 | — | 🤔 |
-
-🧑 **→** The merge queue needs an organization-owned repository: move `nerv` to a free organization, or choose option 2 (CI on every push to main) or option 1 ([options](audits/2026-11-13-full.md#f076-options)).
-
-| | |
-|---|---|
-| **Issue** | Branch protection requires only `validate` and `native-macos`, with `strict` off; CI runs on pull requests and on Mondays only (no push trigger). On 12–13 November 41 PRs merged, several in parallel and some with `full-suite` skipped by scoped verification, so the combination on main was not run in CI until the audit dispatched one. `windows` and `full-suite` are not required. |
-| **Reproduce** | `gh api repos/voidbrain/nerv/branches/main/protection` and `.github/workflows/ci.yml` `on:`; compare `gh run list --branch main` with the merge times. |
-| **Check** | The chosen option is in place (a repository setting or the CI workflow); a PR whose combination with main breaks a test cannot reach main unnoticed for more than a day; the choice is recorded here. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-076-t02"></a>F-076-T02 — CI runs on merge&#95;group | 0.5 h | 0 h | 0.5 h | Planned | 🤖 |
-| 🟢 Small | <a id="f-076-t03"></a>F-076-T03 — Reconcile the queue-aware merge tool | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | 🤖 |
-| 🟢 Small | <a id="f-076-t04"></a>F-076-T04 — Turn on the merge queue for main | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-076-T03](#f-076-t03) | ⏳ 🤔 |
-| 🟢 Small | <a id="f-076-t05"></a>F-076-T05 — Put the chosen main verification in place | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-076-T04](#f-076-t04) | ⏳ 🤖 |
-| 🟡 Medium | **Total** | 1.25 h (4 of 5 steps) | 0 h (0 of 5 steps recorded) | 1.25 h agent + 0.25 h owner | 1 of 5 completed | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="f-076-t01"></a>F-076-T01 — Choose how merged main is verified | 0 h | 0 h | Completed |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-076.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #386](https://github.com/voidbrain/nerv/pull/386) [PR #383](https://github.com/voidbrain/nerv/pull/383) [PR #382](https://github.com/voidbrain/nerv/pull/382) [PR #379](https://github.com/voidbrain/nerv/pull/379) [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) |
-| Opened | 2026-11-13 |
-| Verification | Pending. |
-| Reviewed | 2026-11-13 |
-
-</details>
-
----
 ### <a id="f-081"></a>[✨ F-081](#top)
 
 **Native pairing: recovery on the service host with its profile stopped, and the stale client of 2026-11-07**
@@ -2382,53 +2446,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-13 |
 | Verification | Pending. |
 | Reviewed | 2026-11-13 |
-
-</details>
-
----
-### <a id="f-099"></a>[✨ F-099](#top)
-
-**FPV build knowledge: components and wiring from cited sources**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h agent + 0.25 h owner | — | — | ⏳ | — | 🤔 |
-
-🧑 **→** Next: F-099-T02 (owner decides build/source policy from [feasibility note](design/fpv-build-knowledge-feasibility.md)).
-
-| | |
-|---|---|
-| **Issue** | Owner request 2026-11-14: "Smoke FC is iFlight BLITZ Mini F7 V1.2 and the ELRS receiver is BetaFPV SuperD: what is the wiring?" The owner keeps a component library and wiring in a diyfpv.com build and can export it as a PNG. NERV cannot read the build, and a wiring answer must come from the owner's build or the manufacturer's documents, never be invented. |
-| **Reproduce** | Ask the wiring question with the two components named. |
-| **Check** | Feasibility first: what NERV can read (the build link, the PNG export, a component list) and which sources it cites; then wiring answers that cite the build or a manufacturer document and say when they do not know. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-099-t02"></a>F-099-T02 — Owner decides the source and scope | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [🤔](design/fpv-and-cooking-plan-2026-11-14.md) |
-| 🟢 Small | <a id="f-099-t03"></a>F-099-T03 — Build import and cited wiring answers | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-099-T02](#f-099-t02) | ⏳ 🤖 |
-| 🟢 Small | **Total** | 1.5 h | 0.25 h (1 of 3 steps recorded) | 0.75 h agent + 0.25 h owner | 1 of 3 completed | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="f-099-t01"></a>F-099-T01 — Feasibility: reading the build and its sources | 0.75 h | 0.25 h (measured) | Completed |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-099.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
-| Opened | 2026-11-14 |
-| Verification | Pending. |
-| Reviewed | 2026-11-14 |
 
 </details>
 

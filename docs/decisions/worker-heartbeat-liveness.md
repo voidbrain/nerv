@@ -1,6 +1,6 @@
 # Worker-link heartbeat liveness without blocking on nervous IPC
 
-**Status: proposed, 14 November 2026 (B-066-T01).** Follows B-046 ([PR #293](https://github.com/voidbrain/nerv/pull/293), [PR #361](https://github.com/voidbrain/nerv/pull/361)) and B-060-T02 ([PR #411](https://github.com/voidbrain/nerv/pull/411)), where increasing test headroom stopped CI flakes without removing the underlying IPC dependency on the heartbeat path.
+**Status: accepted, 15 November 2026: the owner chose Option A (B-066-T01); proposed 14 November 2026.** Follows B-046 ([PR #293](https://github.com/voidbrain/nerv/pull/293), [PR #361](https://github.com/voidbrain/nerv/pull/361)) and B-060-T02 ([PR #411](https://github.com/voidbrain/nerv/pull/411)), where increasing test headroom stopped CI flakes without removing the underlying IPC dependency on the heartbeat path.
 
 ## Problem
 

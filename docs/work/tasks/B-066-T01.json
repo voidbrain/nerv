@@ -4,7 +4,7 @@
   "parent": "B-066",
   "title": "Choose how worker-link heartbeats decouple from nervous SQLite IPC",
   "goal": "Select Option A (in-memory registry snapshot) or Option B (socket arrival liveness) for B-066",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "Owner chooses Option A or Option B in docs/decisions/worker-heartbeat-liveness.md"
   ],
@@ -29,10 +29,10 @@
   "effort": {
     "size": "small",
     "estimate": "0.25 h owner",
-    "basis": "Estimated 2026-11-14: two documented options in docs/decisions/worker-heartbeat-liveness.md. Not a measurement.",
-    "reviewed": "2026-11-14",
+    "basis": "Owner decision 2026-11-15: Option A, an in-memory registry snapshot in WorkerLink (docs/decisions/worker-heartbeat-liveness.md): no nervous IPC per frame, every frame still signature-checked, revocation and main changes refresh the snapshot immediately, with a periodic reconcile. No actual: owner time not measured.",
+    "reviewed": "2026-11-15",
     "agentHours": 0,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "ownerKind": "decision"
   }
 }

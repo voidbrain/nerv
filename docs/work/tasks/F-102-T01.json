@@ -4,7 +4,7 @@
   "parent": "F-102",
   "title": "Owner decides schedule, notice and quiet hours",
   "goal": "When NERV checks, how long before applying it warns, and when it never applies",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "Check schedule (e.g. daily 03:00), notice lead time (e.g. 2 h), quiet hours, channels (Telegram and inbox) recorded in F-102"
   ],
@@ -26,12 +26,12 @@
   "effort": {
     "size": "small",
     "estimate": "0.25 h owner",
-    "basis": "Estimated 2026-11-14 at agent speed (harness 8.14.3: implementation steps 0.75 h, small fixes 0.5 h). Not a measurement.",
-    "reviewed": "2026-11-14",
+    "basis": "Owner decision 2026-11-15: check daily at 20:00; notice at check time; apply at 03:00 unless the owner says wait (\"aspetta\"); never apply 08:00-23:00 (quiet hours); notice and result go to Telegram, the local inbox and web push. No actual: owner time not measured.",
+    "reviewed": "2026-11-15",
     "agentHours": 0,
     "baselineAgentHours": 0,
     "estimateAgentHours": 0,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "ownerKind": "decision"
   }
 }

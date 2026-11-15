@@ -1,6 +1,6 @@
 # macOS EVA Enforcement Benchmark & Decision Input (`F-049-T03`)
 
-Measured 15 November 2026 on the Mac host against the `F-049-T01` EVA runner contract (`docs/decisions/eva-runner.md`). Ready for owner selection in `F-049-T11`.
+Measured 15 November 2026 on the Mac host against the `F-049-T01` EVA runner contract (`docs/decisions/eva-runner.md`). Owner selected `sandbox-exec` on 15 November 2026 (`F-049-T11`).
 
 ## Host inventory & measurements
 
