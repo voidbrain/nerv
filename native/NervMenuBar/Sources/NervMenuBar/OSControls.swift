@@ -75,7 +75,13 @@ struct UserServiceController {
         guard FileManager.default.fileExists(atPath: LaunchAgentCommand.plist(label, home: home)) else { throw OSControlError.notInstalled }
         guard try await runner.run(LaunchAgentCommand.make(.start, uid: uid, home: home, label: label)) == 0 else { throw OSControlError.failed }
     }
-    func stop() async throws { guard try await runner.run(LaunchAgentCommand.make(.stop, uid: uid, home: home, label: label)) == 0 else { throw OSControlError.failed } }
+    func stop() async throws {
+        guard try await runner.run(LaunchAgentCommand.make(.stop, uid: uid, home: home, label: label)) == 0 else { throw OSControlError.failed }
+        for _ in 0..<25 {
+            if (try? await loaded()) == false { return }
+            try? await Task.sleep(for: .milliseconds(50))
+        }
+    }
 }
 enum LoginState: Equatable { case enabled, requiresApproval, disabled, unavailable }
 protocol LoginItemControlling { var state: LoginState { get }; func setEnabled(_ enabled: Bool) throws }

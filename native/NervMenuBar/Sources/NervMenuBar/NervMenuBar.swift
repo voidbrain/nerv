@@ -46,7 +46,7 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
     private lazy var notifications = SystemNotifications()
     private let notificationEngine = NotificationEngine(storage: CheckpointFile())
     private let login: LoginItemControlling = SystemLoginItem()
-    private let service = UserServiceController()
+    var service = UserServiceController()
     private var pollTask: Task<Void, Never>?
     var credential: Credential?
     init() {
@@ -54,11 +54,15 @@ struct Claim: Decodable { let clientId: String; let token: String; let expiresAt
         do { credential = try CredentialStore.load(); paired = credential != nil } catch { status = errorMessage(error) }; loginState = login.state; if notificationsEnabled { notificationStatus = "Notifiche attive: nuovi messaggi e richieste di revisione" }; if paired { startPolling() }
     }
     deinit { pollTask?.cancel() }
+    func pollOnce() async {
+        await refreshOSState()
+        await refresh()
+    }
     private func startPolling() {
         guard pollTask == nil else { return }
         pollTask = Task { [weak self] in
             while !Task.isCancelled {
-                await self?.refresh()
+                await self?.pollOnce()
                 do { try await Task.sleep(for: .seconds(15)) } catch { return }
             }
         }

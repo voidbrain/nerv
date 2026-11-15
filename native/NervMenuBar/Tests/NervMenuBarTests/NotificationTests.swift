@@ -118,6 +118,15 @@ final class NotificationTests: XCTestCase {
         let stillLoaded = try await controller.loaded()
         XCTAssertFalse(stillLoaded, "stop() must wait until launchctl reports service unloaded")
         XCTAssertGreaterThanOrEqual(runner.statusCallsAfterBootout, 3)
+
+        let model = await MainActor.run { Companion() }
+        await MainActor.run {
+            model.service = controller
+            model.serviceLoaded = true
+        }
+        await model.pollOnce()
+        let reloaded = await MainActor.run { model.serviceLoaded }
+        XCTAssertFalse(reloaded, "periodic poll must re-read serviceLoaded so Start becomes enabled")
     }
 }
 
