@@ -1,6 +1,6 @@
 #!/usr/bin/env -S node --use-system-ca
 import { startSnapshots } from './snapshots.ts';
-import type { CreateResumeIntentInput, ResumeIntentStatus } from './resume-intent.ts';
+import { runResumeEngineTick, type CreateResumeIntentInput, type ResumeIntentStatus } from './resume-intent.ts';
 import { decideHitlThroughPersona, formatMisatoPendingHitl } from './persona.ts';
 import { EVA_CLASS_SPECS, admitEvaJob, type EvaAdmissionRequest } from './eva-classes.ts';
 import { createPeerHandlers } from './peer-handlers.ts';
@@ -408,8 +408,16 @@ try {
         console.log(JSON.stringify(store.resumeIntents.create(input), null, 2));
       } else if (sub === 'cancel' && args[1]) {
         console.log(JSON.stringify(store.resumeIntents.cancel(args[1], args[2]), null, 2));
+      } else if (sub === 'tick') {
+        const res = await runResumeEngineTick(store.resumeIntents, {
+          owner: flag('--owner') ?? 'cli',
+          checkAvailability: () => ({ available: false, reason: 'Live adapter readiness probe required.' }),
+          verifyIdentity: () => null,
+          executeResume: () => ({ kind: 'failed', reason: 'No live adapter bound in CLI tick.' }),
+        });
+        console.log(JSON.stringify(res, null, 2));
       } else {
-        throw new Error('Usage: resume-intent list [status] | create <intent.json> | cancel <id> [reason]');
+        throw new Error('Usage: resume-intent list [status] | create <intent.json> | cancel <id> [reason] | tick');
       }
     } finally {
       store.close();

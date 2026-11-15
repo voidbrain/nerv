@@ -364,3 +364,102 @@ export class ResumeIntentStore {
     return this.get(id)!;
   }
 }
+
+export interface ResumeAvailabilityCheck {
+  readonly available: boolean;
+  readonly reason?: string;
+  readonly nextResetAt?: number;
+}
+
+export interface ResumeJobIdentity {
+  readonly targetId: string;
+  readonly targetFingerprint: string;
+  readonly stillActive?: boolean;
+}
+
+export interface ResumeEngineDeps {
+  readonly owner: string;
+  readonly leaseMs?: number;
+  readonly now?: number;
+  readonly checkAvailability: (intent: ResumeIntent) => Promise<ResumeAvailabilityCheck> | ResumeAvailabilityCheck;
+  readonly verifyIdentity: (intent: ResumeIntent) => Promise<ResumeJobIdentity | null> | ResumeJobIdentity | null;
+  readonly executeResume: (intent: ResumeIntent) => Promise<ResumeAttemptOutcome> | ResumeAttemptOutcome;
+  readonly notifyOutcome?: (intent: ResumeIntent, message: string) => Promise<void> | void;
+}
+
+export interface ResumeEngineTickResult {
+  readonly expired: number;
+  readonly processed: ResumeIntent[];
+}
+
+/**
+ * F-012-T02: Readiness check and once-only resume engine.
+ * At the deadline, inspects live availability (never assumed), rechecks job identity and fingerprint,
+ * executes at most once under a lease, and notifies the outcome.
+ */
+export async function runResumeEngineTick(
+  store: ResumeIntentStore,
+  deps: ResumeEngineDeps,
+): Promise<ResumeEngineTickResult> {
+  const now = deps.now ?? Date.now();
+  const leaseMs = deps.leaseMs ?? 60_000;
+  const expired = store.expireStale(now);
+  const due = store.due(now);
+  const processed: ResumeIntent[] = [];
+
+  for (const intent of due) {
+    const leased = store.claimLease(intent.id, deps.owner, leaseMs, now);
+    if (!leased) continue;
+
+    const availability = await deps.checkAvailability(leased);
+    if (!availability.available) {
+      const updated = store.recordAttemptOutcome(
+        leased.id,
+        {
+          kind: 'deferred',
+          reason: availability.reason ?? 'Quota or capacity unavailable at deadline.',
+          nextResetAt: availability.nextResetAt,
+        },
+        now,
+      );
+      await deps.notifyOutcome?.(
+        updated,
+        `Resume ${updated.id} (${updated.targetId}) ${updated.status}: ${updated.lastError ?? 'deferred'}`,
+      );
+      processed.push(updated);
+      continue;
+    }
+
+    const identity = await deps.verifyIdentity(leased);
+    if (
+      !identity ||
+      identity.targetId !== leased.targetId ||
+      identity.targetFingerprint !== leased.targetFingerprint ||
+      identity.stillActive === false
+    ) {
+      const updated = store.recordAttemptOutcome(
+        leased.id,
+        {
+          kind: 'failed',
+          reason: 'Job identity or fingerprint mismatch; refusing to resume wrong target.',
+          retryable: false,
+        },
+        now,
+      );
+      await deps.notifyOutcome?.(updated, `Resume ${updated.id} (${updated.targetId}) failed: ${updated.lastError}`);
+      processed.push(updated);
+      continue;
+    }
+
+    const outcome = await deps.executeResume(leased);
+    const updated = store.recordAttemptOutcome(leased.id, outcome, now);
+    const summary =
+      updated.status === 'resumed'
+        ? `Resumed ${updated.targetKind} ${updated.targetId} (intent ${updated.id}).`
+        : `Resume ${updated.id} (${updated.targetId}) ${updated.status}: ${updated.lastError ?? 'no detail'}`;
+    await deps.notifyOutcome?.(updated, summary);
+    processed.push(updated);
+  }
+
+  return { expired, processed };
+}
