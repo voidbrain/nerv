@@ -14,25 +14,25 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 52 | 5 |
-| **Require Human 🧑** | 12 | 3 |
+| **Require Human 🧑** | 13 | 3 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-005](#f-005) | [F-016](#f-016) | [B-057](#b-057) | [B-066](#b-066) |
-| [F-009](#f-009) | [F-102](#f-102) | [B-056](#b-056) |  |
-| [F-011](#f-011) | [F-008](#f-008) |  |  |
-| [F-023](#f-023) | [F-076](#f-076) |  |  |
-| [F-004](#f-004) |  |  |  |
+| [F-005](#f-005) | [F-049](#f-049) | [B-057](#b-057) | [B-066](#b-066) |
+| [F-009](#f-009) | [F-016](#f-016) | [B-056](#b-056) |  |
+| [F-011](#f-011) | [F-102](#f-102) |  |  |
+| [F-023](#f-023) | [F-008](#f-008) |  |  |
+| [F-004](#f-004) | [F-076](#f-076) |  |  |
 | [F-097](#f-097) |  |  |  |
 | [F-060](#f-060) |  |  |  |
 | [F-081](#f-081) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 91.25 h agent + 24 h owner across 202 open steps of 52 features and 5 other records. 29.25 h of actual effort recorded on 57 steps. Generated from the task files.
+**Remaining effort:** 91 h agent + 24 h owner across 201 open steps of 52 features and 5 other records. 29.5 h of actual effort recorded on 58 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -225,7 +225,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 5 h agent + 0.75 h owner | — | [F-021-T03](#f-021-t03), [F-027-T02](#f-027-t02), [F-051-T06](#f-051-t06) | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🔴 Large | 4.75 h agent + 0.75 h owner | — | [F-021-T03](#f-021-t03), [F-027-T02](#f-027-t02), [F-051-T06](#f-051-t06) | ⏳ | — | 🤔 |
 
 💻 **→** Next: the EVA class definition and one sandboxed instance per job, starting with EVA-03 (owner, 2026-11-05).
 
@@ -239,8 +239,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-049-t03"></a>F-049-T03 — Measure the macOS enforcement candidates against the threat model | 0.25 h | 0 h | 0.25 h | Ready | 🤖 |
-| 🟢 Small | <a id="f-049-t11"></a>F-049-T11 — Choose the macOS host enforcement mechanism | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-049-T03](#f-049-t03) | ⏳ 🤔 |
+| 🟢 Small | <a id="f-049-t11"></a>F-049-T11 — Choose the macOS host enforcement mechanism | — | 0 h | 0 h agent + 0.25 h owner | Planned | [🤔](decisions/eva-runner.md#per-job-enforcement-boundaries-supported-hosts) |
 | 🟢 Small | <a id="f-049-t04"></a>F-049-T04 — EVA-03 instance per job | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-049-T11](#f-049-t11) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-049-t05"></a>F-049-T05 — Escape and recovery join tests | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-049-T04](#f-049-t04) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-049-t06"></a>F-049-T06 — Concurrent instances within per-machine limits | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-049-T04](#f-049-t04) | ⏳ 🤖 |
@@ -251,7 +250,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-049-t12"></a>F-049-T12 — Run the first EVA job on the Linux host | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-049-T10](#f-049-t10) | ⏳ 🧑‍🔧 |
 | — | <a id="f-049-t01"></a>F-049-T01 — Define deterministic isolated runner admission and enforcement | 0.5 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
 | — | <a id="f-049-t02"></a>F-049-T02 — EVA class definitions and least-class admission | 0.75 h | 0.5 h (stated) | 0 h | Completed | 🤖 |
-| 🔴 Large | **Total** | 6.25 h (10 of 12 steps) | 0.75 h (2 of 12 steps recorded) | 5 h agent + 0.75 h owner | 2 of 12 completed | |
+| — | <a id="f-049-t03"></a>F-049-T03 — Measure the macOS enforcement candidates against the threat model | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
+| 🔴 Large | **Total** | 6.25 h (10 of 12 steps) | 1 h (3 of 12 steps recorded) | 4.75 h agent + 0.75 h owner | 3 of 12 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
