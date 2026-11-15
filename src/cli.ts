@@ -80,11 +80,7 @@ import {
 } from './config.ts';
 import { STAGES, addPilot, describePilots, setPilotFlag, updatePilot, type EvaClass, type Stage } from './pilots.ts';
 import { McpClient, fingerprint as toolFingerprint, grantRefusal, toolName, type Eva, type McpTool } from './mcp.ts';
-<<<<<<< HEAD
 import { TelegramApi, TelegramChannel, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
-import { chronicleDays, composeChronicle, gatherMilestones } from './chronicle.ts';
-=======
-import { TelegramApi, TelegramChannel, decisionText, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
 import {
   chronicleDays,
   composeChronicle,
@@ -92,7 +88,6 @@ import {
   gatherMilestones,
   retellChronicleDayWithPilot,
 } from './chronicle.ts';
->>>>>>> eefdea47 (feat(f-054): add writer-only Proto Chronicler Eva retelling with day-fact grounding (F-054-T02))
 import { composeBrief, gatherBrief } from './brief.ts';
 import { KajiLink } from './kaji-link.ts';
 import { guardLocalService } from './node-lifecycle-execution.ts';
@@ -1724,7 +1719,6 @@ try {
         process.once('SIGTERM', close);
         break;
       }
-<<<<<<< HEAD
       case 'quarantine': {
         const sub = args[0];
         if (sub !== 'fetch' || !args[1]) throw new Error('Usage: nerv quarantine fetch <url> [--kind repo|page]');
@@ -1743,7 +1737,8 @@ try {
             2,
           ),
         );
-=======
+        break;
+      }
       case 'circuits': {
         const sub = args[0] ?? 'list';
         const store = new Store(databasePath(home), readScrolls(home), { home });
@@ -1758,7 +1753,6 @@ try {
         } finally {
           store.close();
         }
->>>>>>> 33febf88 (feat(f-064): add first bounded channel incident circuit with Spear and owner rearm (F-064-T02))
         break;
       }
       default:
