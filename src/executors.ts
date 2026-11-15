@@ -4,6 +4,7 @@ import type { Reminder, ReminderInput } from './store.ts';
 import type { ToolDoc } from './misato.ts';
 import type { Memory } from './memory.ts';
 import type { ListStore } from './lists.ts';
+import type { DocumentStore } from './documents.ts';
 import { readConfig, savePilots, setSchedule } from './config.ts';
 import { STAGES, applyPilotToolChange, mergePilots, nextStage, splitPilot, updatePilot, type Stage } from './pilots.ts';
 import { reconcileReminderArgs } from './reminder-time.ts';
@@ -54,6 +55,7 @@ export interface ReminderBackend {
   memory: Memory;
   batteries?: import('./batteries.ts').BatteryRegistry;
   lists?: ListStore;
+  documents?: DocumentStore;
   home?: string;
   /** F-036 slice 3b: queues one action for another base; the coordinator sends it over the Kaji line. */
   queueRemote?(
@@ -75,6 +77,11 @@ export const builtinTools: Tool[] = [
   { name: 'memory.remember', effect: 'write-local', inverse: 'memory.forget', owner: true },
   { name: 'memory.edit', effect: 'write-local', owner: true },
   { name: 'memory.forget', effect: 'write-local', removes: true },
+  { name: 'docs.list', effect: 'read' },
+  { name: 'docs.show', effect: 'read' },
+  { name: 'docs.save', effect: 'write-local', inverse: 'docs.forget', owner: true },
+  { name: 'docs.edit', effect: 'write-local', owner: true },
+  { name: 'docs.forget', effect: 'write-local', removes: true },
   // F-042: read-only agency tools over sorties/ballots, waiting approvals/questions, and base health/status.
   { name: 'sorties.explain', effect: 'read' },
   { name: 'approvals.list', effect: 'read' },
@@ -191,6 +198,37 @@ export const toolDocs: ToolDoc[] = [
     effect: 'write-local',
     about: 'Removes an item from a named list by item text or id.',
     args: '{"list": list name, "item": item text or id}',
+  },
+  {
+    name: 'docs.list',
+    effect: 'read',
+    about: 'Lists saved documents (recipes, notes) by optional category.',
+    args: '{"category"?: category name}',
+  },
+  {
+    name: 'docs.show',
+    effect: 'read',
+    about: 'Shows a saved document verbatim by its id or title (and optional category).',
+    args: '{"id"?: document id, "title"?: document title, "category"?: category name}',
+  },
+  {
+    name: 'docs.save',
+    effect: 'write-local',
+    about:
+      'Proposes saving a recipe or other document in a category (local-only by default). Always asks the owner first on an approval card.',
+    args: '{"title": document title, "category": category name, "body": verbatim document text}',
+  },
+  {
+    name: 'docs.edit',
+    effect: 'write-local',
+    about: 'Proposes updating an existing saved document (title, category, or body). Always asks the owner first.',
+    args: '{"id": document id, "title"?: new title, "category"?: new category, "body"?: new verbatim body}',
+  },
+  {
+    name: 'docs.forget',
+    effect: 'write-local',
+    about: 'Forgets a saved document by its id.',
+    args: '{"id": document id}',
   },
   {
     name: 'sorties.explain',
@@ -588,6 +626,68 @@ export function execute(
       only(args, ['phrase']);
       if (!backend.batteries) throw new Error('Battery registry is not available here.');
       return backend.batteries.applyChatPhrase(text(args, 'phrase'));
+    case 'docs.list': {
+      only(args, ['category']);
+      if (!backend.documents) throw new Error('Saved documents are not available here.');
+      const category = args.category === undefined ? undefined : text(args, 'category');
+      return {
+        documents: backend.documents.list(category).map((d) => ({
+          id: d.id,
+          title: d.title,
+          category: d.category,
+          shareable: d.shareable,
+          updated: d.updated,
+        })),
+        categories: backend.documents.categories(),
+      };
+    }
+    case 'docs.show': {
+      only(args, ['id', 'title', 'category']);
+      if (!backend.documents) throw new Error('Saved documents are not available here.');
+      const key = args.id !== undefined ? text(args, 'id') : args.title !== undefined ? text(args, 'title') : undefined;
+      if (!key) throw new Error('Give id or title.');
+      const category = args.category === undefined ? undefined : text(args, 'category');
+      const doc = backend.documents.get(key, category);
+      if (!doc) throw new Error(`No saved document matching "${key}".`);
+      return doc;
+    }
+    case 'docs.save': {
+      only(args, ['title', 'category', 'body']);
+      if (!backend.documents) throw new Error('Saved documents are not available here.');
+      const doc = backend.documents.save({
+        title: text(args, 'title'),
+        category: text(args, 'category'),
+        body: text(args, 'body'),
+        source: 'misato',
+        tainted: context.tainted,
+        ...(context.sortieId ? { sortieId: context.sortieId } : {}),
+      });
+      return { id: doc.id, title: doc.title, category: doc.category, shareable: doc.shareable };
+    }
+    case 'docs.edit': {
+      only(args, ['id', 'title', 'category', 'body']);
+      if (!backend.documents) throw new Error('Saved documents are not available here.');
+      const id = text(args, 'id');
+      if (args.title === undefined && args.category === undefined && args.body === undefined) {
+        throw new Error('Give title, category, and/or body to update.');
+      }
+      const edited = backend.documents.edit(
+        id,
+        {
+          ...(args.title !== undefined ? { title: text(args, 'title') } : {}),
+          ...(args.category !== undefined ? { category: text(args, 'category') } : {}),
+          ...(args.body !== undefined ? { body: text(args, 'body') } : {}),
+        },
+        'misato',
+      );
+      if (!edited) throw new Error(`No active saved document with id ${id}.`);
+      return { id: edited.id, title: edited.title, category: edited.category, body: edited.body };
+    }
+    case 'docs.forget': {
+      only(args, ['id']);
+      if (!backend.documents) throw new Error('Saved documents are not available here.');
+      return { forgotten: backend.documents.forget(text(args, 'id'), 'misato') };
+    }
     case 'kaji.run': {
       only(args, ['base', 'tool', 'args', 'pilot']);
       const base = text(args, 'base'),

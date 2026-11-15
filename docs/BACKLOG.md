@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 86.25 h agent + 24 h owner across 194 open steps of 51 features and 5 other records. 31.5 h of actual effort recorded on 65 steps. Generated from the task files.
+**Remaining effort:** 85.25 h agent + 24 h owner across 193 open steps of 51 features and 5 other records. 32 h of actual effort recorded on 66 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -843,9 +843,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 6 h agent + 0.5 h owner | [F-007-T03](#f-007-t03), [F-007-T04](#f-007-t04) | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🔴 Large | 5 h agent + 0.5 h owner | [F-007-T03](#f-007-t03), [F-007-T04](#f-007-t04) | — | 🤖 | — | — |
 
-💻 **→** Next: F-083-T01 — Saved documents with categories (Ready).
+💻 **→** Next: F-083-T02 — Compute from saved values only (Planned).
 
 | | |
 |---|---|
@@ -857,17 +857,17 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-083-t01"></a>F-083-T01 — Saved documents with categories | 1 h | 0 h | 1 h | Ready | 🤖 |
-| 🟢 Small | <a id="f-083-t02"></a>F-083-T02 — Compute from saved values only | 1 h | 0 h | 1 h | Planned · waits on [F-083-T01](#f-083-t01) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-083-t03"></a>F-083-T03 — Recipe card | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-083-T01](#f-083-t01) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-083-t02"></a>F-083-T02 — Compute from saved values only | 1 h | 0 h | 1 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-083-t03"></a>F-083-T03 — Recipe card | 0.5 h | 0 h | 0.5 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-083-t05"></a>F-083-T05 — Purchases and shelf life | 0.75 h | 0 h | 0.75 h | Planned | 🤖 |
 | 🟢 Small | <a id="f-083-t04"></a>F-083-T04 — Owner check with a real saved recipe | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-083-T02](#f-083-t02), [F-083-T03](#f-083-t03) | ⏳ 🧑‍🔧 |
-| 🟢 Small | <a id="f-083-t05"></a>F-083-T05 — Purchases and shelf life | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-083-T01](#f-083-t01) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-083-t06"></a>F-083-T06 — Cooking session: ingredients and steps | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-083-T03](#f-083-t03) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-083-t07"></a>F-083-T07 — Timers in a cooking session | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-083-T06](#f-083-t06) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-083-t08"></a>F-083-T08 — Hands-free cooking by voice | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-083-T07](#f-083-t07), [F-007-T03](#f-007-t03), [F-007-T04](#f-007-t04) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-083-t09"></a>F-083-T09 — Owner check: a recipe cooked hands-free | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-083-T07](#f-083-t07) | ⏳ 🧑‍🔧 |
 | 🟢 Small | <a id="f-083-t10"></a>F-083-T10 — Recipe photos | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-083-T03](#f-083-t03) | ⏳ 🤖 |
-| 🔴 Large | **Total** | 6 h (9 of 10 steps) | 0 h (0 of 10 steps recorded) | 6 h agent + 0.5 h owner | 0 of 10 completed | |
+| — | <a id="f-083-t01"></a>F-083-T01 — Saved documents with categories | 1 h | 0.5 h (measured) | 0 h | Completed | 🤖 |
+| 🔴 Large | **Total** | 6 h (9 of 10 steps) | 0.5 h (1 of 10 steps recorded) | 5 h agent + 0.5 h owner | 1 of 10 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -878,7 +878,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
-| Verification | Pending. |
+| Verification | `F-083-T01` verified via `test/documents.test.ts` (`docs.save` approval gate, category listing, verbatim `docs.show`, `docs.edit`, `docs.forget`, append-only history), `tsc`, `check:conventions`, and `check:fast`. |
 | Reviewed | 2026-11-14 |
 
 </details>
