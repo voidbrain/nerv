@@ -14,21 +14,21 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 45 | 6 |
-| **Require Human 🧑** | 16 | 3 |
+| **Require Human 🧑** | 17 | 3 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-005](#f-005) | [F-049](#f-049) | [B-057](#b-057) | [B-066](#b-066) |
-| [F-009](#f-009) | [F-016](#f-016) | [B-056](#b-056) |  |
-| [F-011](#f-011) | [F-102](#f-102) |  |  |
-| [F-023](#f-023) | [F-008](#f-008) |  |  |
-| [F-004](#f-004) | [F-100](#f-100) |  |  |
-| [F-097](#f-097) | [F-076](#f-076) |  |  |
-| [F-060](#f-060) | [F-099](#f-099) |  |  |
-| [F-007](#f-007) |  |  |  |
+| [F-005](#f-005) | [F-006](#f-006) | [B-057](#b-057) | [B-066](#b-066) |
+| [F-009](#f-009) | [F-049](#f-049) | [B-056](#b-056) |  |
+| [F-011](#f-011) | [F-016](#f-016) |  |  |
+| [F-023](#f-023) | [F-102](#f-102) |  |  |
+| [F-004](#f-004) | [F-008](#f-008) |  |  |
+| [F-097](#f-097) | [F-100](#f-100) |  |  |
+| [F-060](#f-060) | [F-076](#f-076) |  |  |
+| [F-007](#f-007) | [F-099](#f-099) |  |  |
 | [F-081](#f-081) |  |  |  |
 <!-- recap:end -->
 
@@ -132,9 +132,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 1 h agent + 2.5 h owner | — | — | ⏳ | — | — |
+| 🔴 Open | 🔺 P1 | 🟢 Small | 1 h agent + 2.5 h owner | — | — | ⏳ | — | 🤔 |
 
-💻 **→** Next: F-006-T04 — Draft the placement campaign plan with exact cases, repeats and budgets (Implemented; verification pending).
+💻 **→** Next: F-006-T17 — Approve the placement campaign plan and budgets (Ready).
 
 | | |
 |---|---|
@@ -146,25 +146,25 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-006-t04"></a>F-006-T04 — Draft the placement campaign plan with exact cases, repeats and budgets | 0.25 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending | 🤖 |
-| 🟢 Small | <a id="f-006-t05"></a>F-006-T05 — Draft the Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.25 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending | 🤖 |
-| 🟢 Small | <a id="f-006-t17"></a>F-006-T17 — Approve the placement campaign plan and budgets | — | 0 h | 0 h agent + 0.25 h owner | Ready · waits on [F-006-T04](#f-006-t04) | ⏳ 🤔 |
+| 🟢 Small | <a id="f-006-t17"></a>F-006-T17 — Approve the placement campaign plan and budgets | — | 0 h | 0 h agent + 0.25 h owner | Ready | [🤔](decisions/placement-campaign.md) |
+| 🟢 Small | <a id="f-006-t18"></a>F-006-T18 — Approve the Mac operating-conditions plan and budgets | — | 0 h | 0 h agent + 0.25 h owner | Ready | [🤔](decisions/mac-operating-conditions.md) |
 | 🟢 Small | <a id="f-006-t11"></a>F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-006-T17](#f-006-t17) | ⏳ 🧑‍🔧 |
+| 🟢 Small | <a id="f-006-t13"></a>F-006-T13 — T05b — Three Mac operating-condition runs | — | 0 h | 0 h agent + 1.5 h owner | Planned · waits on [F-006-T18](#f-006-t18) | ⏳ 🧑‍🔧 |
 | 🟢 Small | <a id="f-006-t15"></a>F-006-T15 — Record the evidence of F-006-T11 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T11](#f-006-t11) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T15](#f-006-t15) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-006-t18"></a>F-006-T18 — Approve the Mac operating-conditions plan and budgets | — | 0 h | 0 h agent + 0.25 h owner | Ready · waits on [F-006-T05](#f-006-t05) | ⏳ 🤔 |
-| 🟢 Small | <a id="f-006-t13"></a>F-006-T13 — T05b — Three Mac operating-condition runs | — | 0 h | 0 h agent + 1.5 h owner | Planned · waits on [F-006-T18](#f-006-t18) | ⏳ 🧑‍🔧 |
 | 🟢 Small | <a id="f-006-t16"></a>F-006-T16 — Record the evidence of F-006-T13 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T13](#f-006-t13) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-006-t14"></a>F-006-T14 — T05c — Mac operating-conditions report | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T16](#f-006-t16) | ⏳ 🤖 |
 | 🟢 Small | **Total** | 6.25 h (14 of 18 steps) | 5.25 h (10 of 18 steps recorded) | 1 h agent + 2.5 h owner | 8 of 18 completed | |
 
-<details><summary>Done steps (8)</summary>
+<details><summary>Done steps (10)</summary>
 
 | Effort | Step | Estimate | Actual | Status |
 |---|---|---|---|---|
 | — | <a id="f-006-t01"></a>F-006-T01 — T01a — Decision: remote inference endpoint identity, permitted data and behaviour when unavailable | 0.5 h | 0.5 h (stated) | Completed |
 | — | <a id="f-006-t02"></a>F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback | 0.5 h | 0.5 h (stated) | Completed |
 | — | <a id="f-006-t03"></a>F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases | 0.25 h | 0.25 h (stated) | Completed |
+| 🟢 Small | <a id="f-006-t04"></a>F-006-T04 — Draft the placement campaign plan with exact cases, repeats and budgets | 0.25 h | 0.25 h so far (stated) | Verified |
+| 🟢 Small | <a id="f-006-t05"></a>F-006-T05 — Draft the Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.25 h | 0.25 h so far (stated) | Verified |
 | — | <a id="f-006-t06"></a>F-006-T06 — T01b — Configuration validation for remote endpoints; the loopback-only local route stays guaranteed; regressions | 0.5 h | 0.5 h (stated) | Completed |
 | — | <a id="f-006-t07"></a>F-006-T07 — T02b — Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol | 0.75 h | 0.75 h (stated) | Completed |
 | — | <a id="f-006-t08"></a>F-006-T08 — T02c — Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route | 0.75 h | 0.75 h (stated) | Completed |
@@ -196,7 +196,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0 h | — | — | — | — | — |
+| 🔴 Open | 🔺 P1 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-062-T04 implemented (restore drill via `backup restore` in `src/backup-cli.ts`, verified in `test/restore-drill.test.ts`); remaining F-062-T05 (scheduled stress/browser backup flow).
 
@@ -609,7 +609,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🔴 Large | 4.75 h agent + 1.25 h owner | — | — | ⏳ | — | 🤔 |
+| 🔴 Open | 🔺 P1 | 🔴 Large | 4.75 h agent + 1.25 h owner | — | — | 🤖 | — | 🤔 |
 
 🧑 **→** Next: Owner agreement on the revised relocation decision ([decision](decisions/coordinator-relocation.md), [second review](reviews/2026-11-14-f016-relocation-review-2.md)) after F-016-T10 cleanly resolved the first review's findings before F-016-T03 implementation starts.
 
@@ -1046,7 +1046,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.75 h | — | — | — | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
 
 💻 **→** Implemented F-070-T01 and F-070-T02: per-base operator configuration, signed operator directory contract, authenticated Kaji heartbeat discovery, and safe alias resolution (`src/operator-directory.ts`, `src/config.ts`, `src/kaji-link.ts`, `src/runtime.ts`, `src/chat-command.ts`, `src/server.ts`). Next: CI and merge.
 
@@ -1701,7 +1701,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h | — | — | — | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
 
 💻 **→** Verify: PR #367 (CI pending); deterministic guard + prompt reinforcement implemented; 4/4 `gemma4:12b` invocations of `italian-missing-title` asked in Italian.
 
@@ -2228,7 +2228,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.5 h | — | — | — | — | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: run the full regression suite and required CI on the implementation PR.
 

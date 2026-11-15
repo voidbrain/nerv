@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-006",
   "id": "F-006-T04",
-  "status": "implemented",
+  "status": "verified",
   "title": "Draft the placement campaign plan with exact cases, repeats and budgets",
   "goal": "Placement campaign plan with exact cases, repeats and budgets for owner approval.",
   "capabilities": [
@@ -39,7 +39,7 @@
     "size": "small",
     "estimate": "0.25 h",
     "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
-    "reviewed": "2026-11-13",
+    "reviewed": "2026-11-15",
     "agentHours": 0,
     "actualAgentHours": 0.25,
     "actualSource": "stated",
