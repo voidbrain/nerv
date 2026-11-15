@@ -51,6 +51,7 @@ export interface ReminderBackend {
   agencyStatus?(target?: string, live?: AgencySnapshot): unknown;
   reminderDefaults?(): { timeZone: string; briefAt: string; language: 'en' | 'it' };
   memory: Memory;
+  batteries?: import('./batteries.ts').BatteryRegistry;
   home?: string;
   /** F-036 slice 3b: queues one action for another base; the coordinator sends it over the Kaji line. */
   queueRemote?(
@@ -86,6 +87,9 @@ export const builtinTools: Tool[] = [
   { name: 'pilots.tools', effect: 'write-local', owner: true },
   // F-036 slice 3b: one action on another base. Owner-only for now (always a card); that base's own gate reviews it again.
   { name: 'kaji.run', effect: 'write-external', owner: true },
+  // F-008-T07: FPV battery state & cycles via chat.
+  { name: 'batteries.list', effect: 'read' },
+  { name: 'batteries.chat', effect: 'write-local' },
 ];
 const text = (args: Record<string, unknown>, key: string) => {
   const v = args[key];
@@ -218,6 +222,20 @@ export const toolDocs: ToolDoc[] = [
     effect: 'write-local',
     about: 'Proposes adding or discarding tools for an existing pilot. Always requires owner approval.',
     args: '{"id": pilot id, "add": [tool names] (optional), "remove": [tool names] (optional)}',
+  },
+  {
+    name: 'batteries.list',
+    effect: 'read',
+    about:
+      'Lists registered FPV batteries with their current charge state (charged, discharged, stored) and cycle count.',
+    args: 'none, {}',
+  },
+  {
+    name: 'batteries.chat',
+    effect: 'write-local',
+    about:
+      'Sets battery charge state (charged, discharged, stored) from an Italian or English phrase; asks when a battery number is ambiguous across series.',
+    args: '{"phrase": Italian or English battery phrase}',
   },
 ];
 /** Versioned descriptors for NERV's own tools, on the same shape used for registered MCP tools (F-021). */
@@ -531,6 +549,14 @@ export function execute(
     case 'memory.forget':
       only(args, ['id']);
       return { forgotten: backend.memory.forget(text(args, 'id'), 'misato') };
+    case 'batteries.list':
+      only(args, []);
+      if (!backend.batteries) throw new Error('Battery registry is not available here.');
+      return backend.batteries.list();
+    case 'batteries.chat':
+      only(args, ['phrase']);
+      if (!backend.batteries) throw new Error('Battery registry is not available here.');
+      return backend.batteries.applyChatPhrase(text(args, 'phrase'));
     case 'kaji.run': {
       only(args, ['base', 'tool', 'args', 'pilot']);
       const base = text(args, 'base'),

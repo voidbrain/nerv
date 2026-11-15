@@ -403,4 +403,174 @@ export class BatteryRegistry {
       createdAt: String(row.created_at),
     };
   }
+
+  /**
+   * Parses and applies an Italian or English chat phrase (`F-008-T07`) to set `charged`, `discharged`, or `stored`
+   * for one or more batteries. Refuses to guess when a pack number matches multiple series.
+   */
+  applyChatPhrase(text: string, recordedAt = new Date().toISOString()): BatteryChatResult {
+    const parsed = parseBatteryChatCommand(text);
+    if (!parsed) {
+      return {
+        status: 'unrecognized',
+        language: detectBatteryLanguage(text),
+        message: 'Could not recognize a battery charge-state command.',
+      };
+    }
+
+    const active = this.list().filter((b) => !b.retiredAt);
+    const resolved: BatteryRecord[] = [];
+    for (const num of parsed.packNumbers) {
+      let candidates = active.filter((b) => b.packNumber === num);
+      if (parsed.seriesQuery) {
+        const want = normalizeColorToken(parsed.seriesQuery);
+        candidates = candidates.filter(
+          (b) =>
+            (b.series && normalizeColorToken(b.series) === want) ||
+            (b.seriesColor && normalizeColorToken(b.seriesColor) === want),
+        );
+      }
+      if (candidates.length === 0) {
+        return {
+          status: 'not_found',
+          language: parsed.language,
+          message:
+            parsed.language === 'it'
+              ? `Batteria ${num}${parsed.seriesQuery ? ` (${parsed.seriesQuery})` : ''} non trovata.`
+              : `Battery ${num}${parsed.seriesQuery ? ` (${parsed.seriesQuery})` : ''} not found.`,
+        };
+      }
+      if (candidates.length > 1) {
+        const seriesList = candidates.map((c) => c.series ?? c.seriesColor ?? c.label).join(', ');
+        return {
+          status: 'ambiguous',
+          language: parsed.language,
+          matches: candidates,
+          message:
+            parsed.language === 'it'
+              ? `La batteria ${num} è ambigua (${seriesList}). Quale serie intendi?`
+              : `Battery ${num} is ambiguous (${seriesList}). Which series do you mean?`,
+        };
+      }
+      resolved.push(candidates[0]!);
+    }
+
+    const updated = resolved.map((b) => this.recordState(b.id, parsed.state, recordedAt));
+    return {
+      status: 'updated',
+      language: parsed.language,
+      state: parsed.state,
+      updated,
+      message: formatBatteryStateLines(updated, parsed.language),
+    };
+  }
+}
+
+export interface ParsedBatteryChatCommand {
+  state: BatteryChargeState;
+  packNumbers: number[];
+  seriesQuery?: string;
+  language: 'it' | 'en';
+}
+
+export interface BatteryChatResult {
+  status: 'updated' | 'ambiguous' | 'not_found' | 'unrecognized';
+  language: 'it' | 'en';
+  state?: BatteryChargeState;
+  updated?: BatteryRecord[];
+  matches?: BatteryRecord[];
+  message: string;
+}
+
+const COLOR_ALIASES: Record<string, string> = {
+  blu: 'blue',
+  blue: 'blue',
+  rosso: 'red',
+  rossa: 'red',
+  rossi: 'red',
+  rosse: 'red',
+  red: 'red',
+  giallo: 'yellow',
+  gialla: 'yellow',
+  gialli: 'yellow',
+  gialle: 'yellow',
+  yellow: 'yellow',
+  verde: 'green',
+  verdi: 'green',
+  green: 'green',
+  nero: 'black',
+  nera: 'black',
+  neri: 'black',
+  nere: 'black',
+  black: 'black',
+  bianco: 'white',
+  bianca: 'white',
+  bianchi: 'white',
+  bianche: 'white',
+  white: 'white',
+};
+
+function normalizeColorToken(token: string): string {
+  const lower = token.trim().toLowerCase();
+  return COLOR_ALIASES[lower] ?? lower;
+}
+
+function detectBatteryLanguage(text: string): 'it' | 'en' {
+  return /\b(carica(?:re|to|te|ti)?|scarica(?:re|to|te|ti)?|batteri[ae]|usat[aeio]|ripon[ei]|ripost[aeio]|conserva(?:re|to|te|ti)?|blu|ross[aeio]|giall[aeio]|verd[ei]|ner[aeio]|bianc[aeioh]+)\b/i.test(
+    text,
+  )
+    ? 'it'
+    : 'en';
+}
+
+export function parseBatteryChatCommand(text: string): ParsedBatteryChatCommand | undefined {
+  const lower = text.trim().toLowerCase();
+  let state: BatteryChargeState | undefined;
+  if (
+    /\b(storage|stor(?:e|ed)|ripon[ei]|ripost[aeio]|conserva(?:re|to|te|ti)?|immagazzina(?:re|to|te|ti)?)\b/.test(lower)
+  ) {
+    state = 'stored';
+  } else if (/\b(scarica(?:re|to|te|ti)?|usat[aeio]|discharged?|used)\b/.test(lower)) {
+    state = 'discharged';
+  } else if (/\b(carica(?:re|to|te|ti)?|charged?)\b/.test(lower)) {
+    state = 'charged';
+  }
+  if (!state) return undefined;
+
+  const packNumbers = Array.from(lower.matchAll(/\b(\d{1,4})\b/g), (m) => Number(m[1]));
+  if (packNumbers.length === 0) return undefined;
+
+  let seriesQuery: string | undefined;
+  const seriesExplicit = /\b(?:serie|series)\s+([a-z0-9_-]+)/i.exec(lower);
+  if (seriesExplicit) {
+    seriesQuery = seriesExplicit[1];
+  } else {
+    for (const token of lower.split(/[^a-z0-9_-]+/)) {
+      if (token in COLOR_ALIASES) {
+        seriesQuery = token;
+        break;
+      }
+    }
+  }
+
+  return {
+    state,
+    packNumbers: [...new Set(packNumbers)],
+    ...(seriesQuery ? { seriesQuery } : {}),
+    language: detectBatteryLanguage(text),
+  };
+}
+
+/** Formats battery charge states and cycle counts for Telegram and dashboard summaries (F-008-T07). */
+export function formatBatteryStateLines(batteries: readonly BatteryRecord[], language: 'it' | 'en' = 'en'): string {
+  if (batteries.length === 0) {
+    return language === 'it' ? 'Nessuna batteria registrata.' : 'No batteries registered.';
+  }
+  return batteries
+    .map((b) => {
+      const series = b.series ? ` (${b.series})` : b.seriesColor ? ` (${b.seriesColor})` : '';
+      const cycleWord = language === 'it' ? (b.cycles === 1 ? 'ciclo' : 'cicli') : b.cycles === 1 ? 'cycle' : 'cycles';
+      return `#${b.packNumber}${series}: ${b.currentState} · ${b.cycles} ${cycleWord}`;
+    })
+    .join('\n');
 }
