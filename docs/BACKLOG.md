@@ -322,7 +322,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner observation 2026-11-15 (F-011-T02 step 3) |
+| PR / evidence | Owner observation 2026-11-15 (F-011-T02 step 3); opened in [PR #455](https://github.com/voidbrain/nerv/pull/455) |
 | Opened | 2026-11-15 |
 | Verification | Pending. |
 | Reviewed | 2026-11-15 |
