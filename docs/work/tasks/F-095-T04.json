@@ -4,7 +4,7 @@
   "parent": "F-095",
   "title": "Split store.ts per table group",
   "goal": "store.ts becomes modules per table group with no behaviour change",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Existing tests pass unchanged; one transaction helper shared"
   ],
@@ -36,8 +36,10 @@
     "estimate": "1 h",
     "basis": "Estimated 2026-11-14 at agent speed: mechanical moves with unchanged tests. Not a measurement.",
     "reviewed": "2026-11-14",
-    "agentHours": 1,
+    "agentHours": 0,
     "baselineAgentHours": 1,
-    "estimateAgentHours": 1
+    "estimateAgentHours": 1,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
   }
 }
