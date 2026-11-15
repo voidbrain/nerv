@@ -6,6 +6,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Store } from '../src/store.ts';
+import { composeBrief } from '../src/brief.ts';
 import { Registry, canonical, createRootKey, signRecord, unlockRootKey, type RegistryBody } from '../src/kaji.ts';
 import {
   CHRONICLER_PILOT,
@@ -232,4 +233,27 @@ test('F-054-T02: Chronicler pilot is writer-only Proto and its Eva retelling is 
   assert.equal(rejected.grounded, true);
   assert.equal(rejected.fallback, true);
   assert.equal(rejected.text, composeEvaChronicle([day], 'en'));
+});
+
+test('F-054-T03: morning brief includes optional chronicle line in en/it and omits it when absent', () => {
+  const base = {
+    now: new Date('2030-01-02T07:00:00Z'),
+    timeZone: 'Europe/Rome',
+    approvals: [],
+    reminders: [],
+    sorties: [],
+    health: [],
+  };
+  const plain = composeBrief({ ...base, language: 'en' });
+  assert.doesNotMatch(plain, /Chronicle:/);
+
+  const en = composeBrief({ ...base, language: 'en', chronicleLine: 'Tabgha (NERV-02) joined. [registry:a1b2c3d4]' });
+  assert.match(en, /Chronicle: Tabgha \(NERV-02\) joined\. \[registry:a1b2c3d4\]/);
+
+  const it = composeBrief({
+    ...base,
+    language: 'it',
+    chronicleLine: 'Tabgha (NERV-02) registrata. [registry:a1b2c3d4]',
+  });
+  assert.match(it, /Cronaca: Tabgha \(NERV-02\) registrata\. \[registry:a1b2c3d4\]/);
 });

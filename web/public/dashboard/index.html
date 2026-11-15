@@ -465,11 +465,23 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
 
       <section class="panel" id="p-bases">
         <div class="hdr"><span data-l="bases">NERV bases · Kaji line</span><span class="sub" id="bases-sub"></span></div>
-        <div class="maprow">
-          <div class="mapwrap"><canvas id="topo" width="540" height="250" aria-label="Map of NERV bases and links"></canvas></div>
-          <div class="maplegend" aria-label="Map key"><b class="legend-heading">■ Bases</b><span><i class="sq" style="background:var(--ok)"></i>online</span><span><i class="sq" style="background:var(--warn)"></i>standby</span><span><i class="sq" style="background:var(--muted)"></i>offline</span><b class="legend-heading">- Kaji line</b><span><i class="sq" style="background:var(--accent)"></i>plug</span><span><i class="sq" style="background:var(--ok)"></i>result</span><span><i class="sq" style="background:var(--info)"></i>sync</span><span>○ Midori</span></div>
+        <div class="pad">
+          <div class="tabs" role="tablist" aria-label="Bases and Chronicle">
+            <button class="btn sm sel" id="tab-bases" role="tab" aria-selected="true" aria-controls="bases-tabpanel" tabindex="0" data-base-tab="bases">Bases</button>
+            <button class="btn sm" id="tab-chronicle" role="tab" aria-selected="false" aria-controls="p-chronicle" tabindex="-1" data-base-tab="chronicle">Chronicle</button>
+          </div>
+          <div id="bases-tabpanel" role="tabpanel" aria-labelledby="tab-bases" tabindex="0">
+            <div class="maprow">
+              <div class="mapwrap"><canvas id="topo" width="540" height="250" aria-label="Map of NERV bases and links"></canvas></div>
+              <div class="maplegend" aria-label="Map key"><b class="legend-heading">■ Bases</b><span><i class="sq" style="background:var(--ok)"></i>online</span><span><i class="sq" style="background:var(--warn)"></i>standby</span><span><i class="sq" style="background:var(--muted)"></i>offline</span><b class="legend-heading">- Kaji line</b><span><i class="sq" style="background:var(--accent)"></i>plug</span><span><i class="sq" style="background:var(--ok)"></i>result</span><span><i class="sq" style="background:var(--info)"></i>sync</span><span>○ Midori</span></div>
+            </div>
+            <div class="list" id="bases"></div>
+          </div>
+          <div id="p-chronicle" role="tabpanel" aria-labelledby="tab-chronicle" tabindex="0" hidden>
+            <div class="tiny muted" id="chronicle-sub">Recorded agency milestones</div>
+            <div class="list" id="chronicle"></div>
+          </div>
         </div>
-        <div class="pad list" id="bases"></div>
       </section>
 
       <section class="panel">

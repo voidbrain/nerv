@@ -914,6 +914,24 @@ test(
         );
         await screenshot('dashboard-accounting-' + width);
       }
+      // F-054-T03: Chronicle tab in #p-bases renders recorded milestones and passes axe.
+      await evaluate(
+        `{state.chronicle=[{day:'2030-01-02',version:'Simple',text:'Tabgha (NERV-02) enrolled.',sources:['registry:a1b2c3d4']}];renderChronicle();document.querySelector('#tab-chronicle').click()}`,
+      );
+      await until(`document.querySelector('#p-chronicle')?.hidden===false`);
+      assert.match(
+        await evaluate(`document.querySelector('#chronicle')?.textContent||''`),
+        /Tabgha \(NERV-02\) enrolled\./,
+      );
+      assert.match(await evaluate(`document.querySelector('#chronicle')?.textContent||''`), /registry:a1b2c3d4/);
+      for (const width of [1440, 390]) {
+        await viewport(width, 1000);
+        const violations = await evaluate(
+          `axe.run(document.querySelector('#p-chronicle')).then(r=>r.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)})))`,
+        );
+        assert.deepEqual(violations, [], 'Chronicle axe ' + width);
+      }
+      await evaluate(`document.querySelector('#tab-bases').click()`);
       await evaluate(
         `{state.log.push({t:Date.now(),msg:'accounting-lilith trace',who:'maya',s:null,cls:''});const search=document.querySelector('#sortie-q');search.value='accounting-lilith';search.dispatchEvent(new Event('input',{bubbles:true}))}`,
       );

@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 71 h agent + 24 h owner across 169 open steps of 47 features and 5 other records. 38.75 h of actual effort recorded on 90 steps. Generated from the task files.
+**Remaining effort:** 70.5 h agent + 24 h owner across 168 open steps of 46 features and 5 other records. 39 h of actual effort recorded on 91 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2065,49 +2065,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
-### <a id="f-054"></a>[✨ F-054](#top)
-
-**The base chronicle: a daily log of the agency's milestones, plain and in Eva lore**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
-
-💻 **→** F-054-T01 (Simple chronicle from recorded facts) and F-054-T04 (record the missing facts) closed; next F-054-T02 (Eva version).
-
-| | |
-|---|---|
-| **Issue** | Owner request 2026-11-05: the base should keep a log of what happened ("today we established connection with Tabgha"), in Eva lore or in two versions. The ledger is evidence, not a story; Instrumentality summarises the owner's conversations, not the agency's own milestones. |
-| **Reproduce** | Look for a record of when Tabgha joined, the first relayed request or the first pilot: only scattered events. |
-| **Check** | One entry per day, built only from recorded facts (bases enrolled or online for the first time, a new main base, pilots created or promoted, the first action run on another base, outages and recoveries; bugs closed left out by owner decision 2026-11-12), never invented; two versions by theme: Simple, plain and without a model; Eva, the same facts retold in the lore voice by a *Chronicler* pilot (Fuyutsuki), a writer only, starting at Proto, its text checked to name only the day's facts; shown as a Chronicle tab, with an optional line in the morning brief; each entry links its sources (sortie IDs, registry records). |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-054-t03"></a>F-054-T03 — Chronicle tab and brief line | 0.5 h | 0 h | 0.5 h | Planned |
-| — | <a id="f-054-t01"></a>F-054-T01 — Daily chronicle facts from records | 1.5 h | 1 h (stated) | 0 h | Completed |
-| — | <a id="f-054-t02"></a>F-054-T02 — Eva version by the Chronicler pilot | 0.5 h | 0.5 h (measured) | 0 h | Completed |
-| — | <a id="f-054-t04"></a>F-054-T04 — Record the milestones not stored today | 1.5 h | 1 h (stated) | 0 h | Completed |
-| 🟢 Small | **Total** | 4 h | 2.5 h (3 of 4 steps recorded) | 0.5 h | 3 of 4 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-054.md)
-
-| Field | Value |
-|---|---|
-| Depends on | [F-045](archive/backlog-2026.md#f-045) — Chronicler pilot for the Eva narrative; plain fact collection can proceed |
-| PR / evidence | [PR #305](https://github.com/voidbrain/nerv/pull/305) F-054-T04 milestones (src/milestones.ts, test/milestones.test.ts); [PR #301](https://github.com/voidbrain/nerv/pull/301) F-054-T01 Simple chronicle (src/chronicle.ts, test/chronicle.test.ts); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner request 2026-11-05 |
-| Opened | 2026-11-05 |
-| Verification | `F-054-T02` verified via `src/chronicle.ts` (`CHRONICLER_PILOT`, `composeEvaChronicle`, `retellChronicleDayWithPilot`, `verifyChronicleMentionsOnlyDayFacts`), `test/chronicle.test.ts`, `tsc`, `check:conventions`, and `check:fast`. |
-| Reviewed | 2026-11-12 |
-
-</details>
-
----
-
 ### <a id="f-100"></a>[✨ F-100](#top)
 
 **FPV blackbox analysis for vibration**
@@ -2224,6 +2181,49 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-02 |
 | Verification | Passed (`F-020-T03`: `formatGendoClassificationExplanation`, `explainClassificationThroughPersona`, `persona explain`, `test/persona.test.ts`, `check:fast`) |
 | Reviewed | 2026-11-08 |
+
+</details>
+
+---
+
+### <a id="f-054"></a>[✨ F-054](#top)
+
+**The base chronicle: a daily log of the agency's milestones, plain and in Eva lore**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 0 h | — | — | — | — | — |
+
+💻 **→** All steps closed (F-054-T01 Simple chronicle, F-054-T02 Eva retelling, F-054-T03 Chronicle tab & brief line, F-054-T04 recorded milestones).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-05: the base should keep a log of what happened ("today we established connection with Tabgha"), in Eva lore or in two versions. The ledger is evidence, not a story; Instrumentality summarises the owner's conversations, not the agency's own milestones. |
+| **Reproduce** | Look for a record of when Tabgha joined, the first relayed request or the first pilot: only scattered events. |
+| **Check** | One entry per day, built only from recorded facts (bases enrolled or online for the first time, a new main base, pilots created or promoted, the first action run on another base, outages and recoveries; bugs closed left out by owner decision 2026-11-12), never invented; two versions by theme: Simple, plain and without a model; Eva, the same facts retold in the lore voice by a *Chronicler* pilot (Fuyutsuki), a writer only, starting at Proto, its text checked to name only the day's facts; shown as a Chronicle tab, with an optional line in the morning brief; each entry links its sources (sortie IDs, registry records). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | <a id="f-054-t01"></a>F-054-T01 — Daily chronicle facts from records | 1.5 h | 1 h (stated) | 0 h | Completed |
+| — | <a id="f-054-t02"></a>F-054-T02 — Eva version by the Chronicler pilot | 0.5 h | 0.5 h (measured) | 0 h | Completed |
+| — | <a id="f-054-t03"></a>F-054-T03 — Chronicle tab and brief line | 0.5 h | 0.25 h (stated) | 0 h | Completed |
+| — | <a id="f-054-t04"></a>F-054-T04 — Record the milestones not stored today | 1.5 h | 1 h (stated) | 0 h | Completed |
+| — | **Total** | 4 h | 2.75 h | 0 h | 4 of 4 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-054.md)
+
+| Field | Value |
+|---|---|
+| Depends on | [F-045](archive/backlog-2026.md#f-045) — Chronicler pilot for the Eva narrative; plain fact collection can proceed |
+| PR / evidence | [PR #305](https://github.com/voidbrain/nerv/pull/305) F-054-T04 milestones (src/milestones.ts, test/milestones.test.ts); [PR #301](https://github.com/voidbrain/nerv/pull/301) F-054-T01 Simple chronicle (src/chronicle.ts, test/chronicle.test.ts); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner request 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | `F-054-T03` verified via `web/public/dashboard/index.html` & `dashboard.js` (`#tab-chronicle`, `#p-chronicle`, `renderChronicle`), `src/brief.ts` (`chronicleLine`), `test/chronicle.test.ts`, `test/angular.browser.mjs` (axe), `tsc`, `check:conventions`, and `check:fast`; `F-054-T02` verified via `src/chronicle.ts` (`CHRONICLER_PILOT`, `composeEvaChronicle`, `retellChronicleDayWithPilot`, `verifyChronicleMentionsOnlyDayFacts`), `test/chronicle.test.ts`, `tsc`, `check:conventions`, and `check:fast`. |
+| Reviewed | 2026-11-12 |
 
 </details>
 
