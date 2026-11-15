@@ -7,7 +7,7 @@ import { createPeerHandlers } from './peer-handlers.ts';
 import { fetchIntoQuarantine } from './quarantine.ts';
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
-import { formatBatteryStateLines, type OneMoreBatteryExport } from './batteries.ts';
+import { formatBatteryStateLines, formatDueResistancePrompt, type OneMoreBatteryExport } from './batteries.ts';
 import {
   detectVoiceLanguage,
   evaluateVoiceCorpus,
@@ -397,6 +397,11 @@ try {
       } else if (sub === 'status') {
         const lang = flag('--lang') === 'it' ? 'it' : 'en';
         console.log(formatBatteryStateLines(store.batteries.list(), lang));
+      } else if (sub === 'due') {
+        const lang = flag('--lang') === 'it' ? 'it' : 'en';
+        console.log(formatDueResistancePrompt(store.batteries.dueResistanceChecks(), lang));
+      } else if (sub === 'resistance' && args[1] && args[2]) {
+        console.log(JSON.stringify(store.batteries.recordResistance(args[1], args.slice(2).join(' ')), null, 2));
       } else if (sub === 'chat' && args[1]) {
         console.log(JSON.stringify(store.batteries.applyChatPhrase(args.slice(1).join(' ')), null, 2));
       } else if (sub === 'import' && args[1]) {
@@ -404,7 +409,7 @@ try {
         console.log(JSON.stringify(store.batteries.importOneMoreBattery(payload), null, 2));
       } else {
         throw new Error(
-          'Usage: batteries list | batteries status [--lang it|en] | batteries chat <phrase> | batteries import <export.json>',
+          'Usage: batteries list | batteries status [--lang it|en] | batteries due [--lang it|en] | batteries resistance <id> <v1,v2,...> | batteries chat <phrase> | batteries import <export.json>',
         );
       }
     } finally {

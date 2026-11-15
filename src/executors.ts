@@ -102,9 +102,11 @@ export const builtinTools: Tool[] = [
   { name: 'lists.remove_item', effect: 'write-local', inverse: 'lists.add_items' },
   // F-036 slice 3b: one action on another base. Owner-only for now (always a card); that base's own gate reviews it again.
   { name: 'kaji.run', effect: 'write-external', owner: true },
-  // F-008-T07: FPV battery state & cycles via chat.
+  // F-008-T07 & F-008-T08: FPV battery state, cycles, and resistance checks.
   { name: 'batteries.list', effect: 'read' },
   { name: 'batteries.chat', effect: 'write-local' },
+  { name: 'batteries.due', effect: 'read' },
+  { name: 'batteries.resistance', effect: 'write-local' },
 ];
 const text = (args: Record<string, unknown>, key: string) => {
   const v = args[key];
@@ -313,6 +315,18 @@ export const toolDocs: ToolDoc[] = [
     about:
       'Sets battery charge state (charged, discharged, stored) from an Italian or English phrase; asks when a battery number is ambiguous across series.',
     args: '{"phrase": Italian or English battery phrase}',
+  },
+  {
+    name: 'batteries.due',
+    effect: 'read',
+    about: 'Lists FPV batteries due for a per-cell resistance check (90 days or 30 cycles) and asks for cell readings.',
+    args: 'none, {}',
+  },
+  {
+    name: 'batteries.resistance',
+    effect: 'write-local',
+    about: 'Records ordered per-cell resistance values (mΩ) for a battery, checking cell count against its type.',
+    args: '{"batteryId": battery id, "values": [number, ...] or "3.1, 3.2, ..."}',
   },
 ];
 /** Versioned descriptors for NERV's own tools, on the same shape used for registered MCP tools (F-021). */
@@ -634,6 +648,19 @@ export function execute(
       only(args, ['phrase']);
       if (!backend.batteries) throw new Error('Battery registry is not available here.');
       return backend.batteries.applyChatPhrase(text(args, 'phrase'));
+    case 'batteries.due':
+      only(args, []);
+      if (!backend.batteries) throw new Error('Battery registry is not available here.');
+      return backend.batteries.dueResistanceChecks();
+    case 'batteries.resistance': {
+      only(args, ['batteryId', 'values']);
+      if (!backend.batteries) throw new Error('Battery registry is not available here.');
+      const values = args.values;
+      if (typeof values !== 'string' && !Array.isArray(values)) {
+        throw new Error('Argument values must be an array of numbers or comma-separated mΩ string.');
+      }
+      return backend.batteries.recordResistance(text(args, 'batteryId'), values as string | number[]);
+    }
     case 'docs.list': {
       only(args, ['category']);
       if (!backend.documents) throw new Error('Saved documents are not available here.');

@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS batteries(
   current_state TEXT NOT NULL DEFAULT 'stored',
   cycles INTEGER NOT NULL DEFAULT 0,
   retired_at TEXT,
+  resistance_prompted_record_id TEXT,
   created_at TEXT NOT NULL
 );
 CREATE UNIQUE INDEX IF NOT EXISTS batteries_number_series_idx
@@ -33,6 +34,7 @@ CREATE TABLE IF NOT EXISTS battery_resistance_records(
   id TEXT PRIMARY KEY,
   battery_id TEXT NOT NULL REFERENCES batteries(id) ON DELETE CASCADE,
   values_mohm_json TEXT NOT NULL,
+  cycles_at_record INTEGER NOT NULL DEFAULT 0,
   recorded_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS battery_resistance_battery_idx ON battery_resistance_records(battery_id, recorded_at);
@@ -66,7 +68,21 @@ export interface BatteryResistanceEntry {
   id: string;
   batteryId: string;
   valuesMohm: number[];
+  cyclesAtRecord: number;
   recordedAt: string;
+}
+
+export const RESISTANCE_CHECK_INTERVAL_DAYS = 90;
+export const RESISTANCE_CHECK_INTERVAL_CYCLES = 30;
+
+export interface DueResistanceCheck {
+  battery: BatteryRecord;
+  latestRecordId: string;
+  lastRecordedAt: string;
+  cyclesAtLastRecord: number;
+  daysSinceLastCheck: number;
+  cyclesSinceLastCheck: number;
+  reasons: Array<'days' | 'cycles'>;
 }
 
 export interface RegisterBatteryInput {
@@ -143,6 +159,25 @@ function validateResistanceValues(values: readonly number[], cellCount: number):
   });
 }
 
+export function parseResistanceValues(input: string | readonly number[], expectedCells?: number): number[] {
+  const values =
+    typeof input === 'string'
+      ? input
+          .replace(/m[oωΩ]/gi, ' ')
+          .split(/[\s,;]+/)
+          .map((t) => t.trim())
+          .filter(Boolean)
+          .map((t) => Number(t))
+      : [...input];
+  if (expectedCells !== undefined) {
+    return validateResistanceValues(values, expectedCells);
+  }
+  if (values.length === 0) {
+    throw new Error('At least one per-cell resistance value (mΩ) is required.');
+  }
+  return validateResistanceValues(values, values.length);
+}
+
 function parseChargeState(status: 1 | 2 | 3): BatteryChargeState {
   if (status === 1) return 'charged';
   if (status === 2) return 'stored';
@@ -164,6 +199,18 @@ export class BatteryRegistry {
 
   constructor(db: DatabaseSync) {
     this.db = db;
+    this.ensureSchemaColumns();
+  }
+
+  private ensureSchemaColumns(): void {
+    const batCols = this.db.prepare('PRAGMA table_info(batteries)').all() as Array<{ name: string }>;
+    if (batCols.length > 0 && !batCols.some((c) => c.name === 'resistance_prompted_record_id')) {
+      this.db.exec('ALTER TABLE batteries ADD COLUMN resistance_prompted_record_id TEXT');
+    }
+    const resCols = this.db.prepare('PRAGMA table_info(battery_resistance_records)').all() as Array<{ name: string }>;
+    if (resCols.length > 0 && !resCols.some((c) => c.name === 'cycles_at_record')) {
+      this.db.exec('ALTER TABLE battery_resistance_records ADD COLUMN cycles_at_record INTEGER NOT NULL DEFAULT 0');
+    }
   }
 
   register(input: RegisterBatteryInput): BatteryRecord {
@@ -212,7 +259,7 @@ export class BatteryRegistry {
 
     this.db
       .prepare(
-        'INSERT INTO battery_resistance_records(id, battery_id, values_mohm_json, recorded_at) VALUES (?, ?, ?, ?)',
+        'INSERT INTO battery_resistance_records(id, battery_id, values_mohm_json, cycles_at_record, recorded_at) VALUES (?, ?, ?, 0, ?)',
       )
       .run(`res-${randomUUID()}`, id, JSON.stringify(resistance), createdAt);
 
@@ -268,19 +315,81 @@ export class BatteryRegistry {
 
   recordResistance(
     batteryId: string,
-    valuesMohm: readonly number[],
+    valuesMohm: string | readonly number[],
     recordedAt = new Date().toISOString(),
   ): BatteryResistanceEntry {
     const existing = this.get(batteryId);
     if (!existing) throw new Error(`Battery not found: ${batteryId}`);
-    const validated = validateResistanceValues(valuesMohm, existing.cellCount);
+    const validated = parseResistanceValues(valuesMohm, existing.cellCount);
     const id = `res-${randomUUID()}`;
     this.db
       .prepare(
-        'INSERT INTO battery_resistance_records(id, battery_id, values_mohm_json, recorded_at) VALUES (?, ?, ?, ?)',
+        'INSERT INTO battery_resistance_records(id, battery_id, values_mohm_json, cycles_at_record, recorded_at) VALUES (?, ?, ?, ?, ?)',
       )
-      .run(id, batteryId, JSON.stringify(validated), recordedAt);
-    return { id, batteryId, valuesMohm: validated, recordedAt };
+      .run(id, batteryId, JSON.stringify(validated), existing.cycles, recordedAt);
+    this.db.prepare('UPDATE batteries SET resistance_prompted_record_id = NULL WHERE id = ?').run(batteryId);
+    return { id, batteryId, valuesMohm: validated, cyclesAtRecord: existing.cycles, recordedAt };
+  }
+
+  dueResistanceChecks(now = new Date()): DueResistanceCheck[] {
+    const due: DueResistanceCheck[] = [];
+    const nowMs = now.getTime();
+    for (const battery of this.list()) {
+      if (battery.retiredAt) continue;
+      const latest = this.db
+        .prepare(
+          `SELECT id, values_mohm_json, cycles_at_record, recorded_at
+           FROM battery_resistance_records
+           WHERE battery_id = ?
+           ORDER BY recorded_at DESC, rowid DESC
+           LIMIT 1`,
+        )
+        .get(battery.id) as
+        { id: string; values_mohm_json: string; cycles_at_record: number; recorded_at: string } | undefined;
+      if (!latest) continue;
+      const lastMs = Date.parse(latest.recorded_at);
+      const daysSinceLastCheck = Number.isFinite(lastMs) ? Math.max(0, Math.floor((nowMs - lastMs) / 86_400_000)) : 0;
+      const cyclesSinceLastCheck = Math.max(0, battery.cycles - latest.cycles_at_record);
+      const reasons: Array<'days' | 'cycles'> = [];
+      if (daysSinceLastCheck >= RESISTANCE_CHECK_INTERVAL_DAYS) reasons.push('days');
+      if (cyclesSinceLastCheck >= RESISTANCE_CHECK_INTERVAL_CYCLES) reasons.push('cycles');
+      if (reasons.length > 0) {
+        due.push({
+          battery,
+          latestRecordId: latest.id,
+          lastRecordedAt: latest.recorded_at,
+          cyclesAtLastRecord: latest.cycles_at_record,
+          daysSinceLastCheck,
+          cyclesSinceLastCheck,
+          reasons,
+        });
+      }
+    }
+    return due;
+  }
+
+  deliverDueResistancePrompts(now = new Date(), language: 'it' | 'en' = 'en'): number {
+    const due = this.dueResistanceChecks(now);
+    if (due.length === 0) return 0;
+    let delivered = 0;
+    const nowIso = now.toISOString();
+    for (const check of due) {
+      const row = this.db
+        .prepare('SELECT resistance_prompted_record_id FROM batteries WHERE id = ?')
+        .get(check.battery.id) as { resistance_prompted_record_id: string | null } | undefined;
+      if (row?.resistance_prompted_record_id === check.latestRecordId) continue;
+      const message = formatDueResistancePrompt([check], language);
+      this.db
+        .prepare(
+          "INSERT INTO deliveries(id, reminder_id, kind, message, created, read_at) VALUES (?, NULL, 'battery_resistance', ?, ?, NULL)",
+        )
+        .run(randomUUID(), message, nowIso);
+      this.db
+        .prepare('UPDATE batteries SET resistance_prompted_record_id = ? WHERE id = ?')
+        .run(check.latestRecordId, check.battery.id);
+      delivered += 1;
+    }
+    return delivered;
   }
 
   usageHistory(batteryId: string): BatteryUsageEntry[] {
@@ -300,13 +409,20 @@ export class BatteryRegistry {
   resistanceHistory(batteryId: string): BatteryResistanceEntry[] {
     const rows = this.db
       .prepare(
-        'SELECT id, battery_id, values_mohm_json, recorded_at FROM battery_resistance_records WHERE battery_id = ? ORDER BY recorded_at ASC',
+        'SELECT id, battery_id, values_mohm_json, cycles_at_record, recorded_at FROM battery_resistance_records WHERE battery_id = ? ORDER BY recorded_at ASC',
       )
-      .all(batteryId) as Array<{ id: string; battery_id: string; values_mohm_json: string; recorded_at: string }>;
+      .all(batteryId) as Array<{
+      id: string;
+      battery_id: string;
+      values_mohm_json: string;
+      cycles_at_record: number;
+      recorded_at: string;
+    }>;
     return rows.map((r) => ({
       id: r.id,
       batteryId: r.battery_id,
       valuesMohm: JSON.parse(r.values_mohm_json) as number[],
+      cyclesAtRecord: r.cycles_at_record,
       recordedAt: r.recorded_at,
     }));
   }
@@ -571,6 +687,39 @@ export function formatBatteryStateLines(batteries: readonly BatteryRecord[], lan
       const series = b.series ? ` (${b.series})` : b.seriesColor ? ` (${b.seriesColor})` : '';
       const cycleWord = language === 'it' ? (b.cycles === 1 ? 'ciclo' : 'cicli') : b.cycles === 1 ? 'cycle' : 'cycles';
       return `#${b.packNumber}${series}: ${b.currentState} · ${b.cycles} ${cycleWord}`;
+    })
+    .join('\n');
+}
+
+/** Formats due per-cell resistance check prompts asking for ordered cell values in mΩ (F-008-T08). */
+export function formatDueResistancePrompt(checks: readonly DueResistanceCheck[], language: 'it' | 'en' = 'en'): string {
+  if (checks.length === 0) {
+    return language === 'it' ? 'Nessun controllo resistenza dovuto.' : 'No battery resistance checks due.';
+  }
+  return checks
+    .map((c) => {
+      const series = c.battery.series
+        ? ` (${c.battery.series})`
+        : c.battery.seriesColor
+          ? ` (${c.battery.seriesColor})`
+          : '';
+      const why =
+        language === 'it'
+          ? [
+              c.reasons.includes('days') ? `${c.daysSinceLastCheck} giorni` : null,
+              c.reasons.includes('cycles') ? `${c.cyclesSinceLastCheck} cicli` : null,
+            ]
+              .filter(Boolean)
+              .join(' / ')
+          : [
+              c.reasons.includes('days') ? `${c.daysSinceLastCheck} days` : null,
+              c.reasons.includes('cycles') ? `${c.cyclesSinceLastCheck} cycles` : null,
+            ]
+              .filter(Boolean)
+              .join(' / ');
+      return language === 'it'
+        ? `Controllo resistenza dovuto per #${c.battery.packNumber}${series} (${c.battery.batteryType}, ${c.battery.cellCount} celle; ${why} dall'ultimo controllo). Inserisci ${c.battery.cellCount} valori in mΩ in ordine (es. 3.1, 3.2, ...).`
+        : `Resistance check due for #${c.battery.packNumber}${series} (${c.battery.batteryType}, ${c.battery.cellCount} cells; ${why} since last check). Please enter ${c.battery.cellCount} per-cell values in mΩ in order (e.g. 3.1, 3.2, ...).`;
     })
     .join('\n');
 }

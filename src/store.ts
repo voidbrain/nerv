@@ -322,7 +322,10 @@ export class Store {
     return this.remindersController.cancel(id);
   }
   tick(now = new Date()): number {
-    return this.remindersController.tick(now);
+    const count = this.remindersController.tick(now);
+    const lang = this.remindersController.reminderDefaults().language;
+    this.batteries.deliverDueResistancePrompts(now, lang);
+    return count;
   }
   private _pushController?: StorePush;
   private get pushController(): StorePush {
