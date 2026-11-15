@@ -84,7 +84,7 @@ test('the schedule takes the snapshot once and logs a failure by reason only, wi
       5,
     );
     await new Promise((r) => setTimeout(r, 100));
-    stop();
+    await stop();
     assert.equal(snapshotDates(snapshotDir(f.home)).length, 1);
 
     const lines: string[] = [],
@@ -98,7 +98,7 @@ test('the schedule takes the snapshot once and logs a failure by reason only, wi
       5,
     );
     await new Promise((r) => setTimeout(r, 100));
-    stop2();
+    await stop2();
     assert.equal(lines.length, 1); // one attempt per night, not a retry loop
     assert.match(lines[0]!, /failed \(database not found\)/);
     assert.ok(!lines[0]!.includes(f.home));
