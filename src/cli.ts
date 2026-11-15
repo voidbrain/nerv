@@ -2,6 +2,7 @@
 import { startSnapshots } from './snapshots.ts';
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
+import type { OneMoreBatteryExport } from './batteries.ts';
 import {
   detectVoiceLanguage,
   evaluateVoiceCorpus,
@@ -375,6 +376,21 @@ try {
       if (report.failures.length > 0) process.exitCode = 1;
     } else {
       throw new Error('Usage: voice parse <transcript> [it|en] | voice eval <corpus.json>');
+    }
+  } else if (command === 'batteries') {
+    const sub = args[0] ?? 'list';
+    const store = new Store(databasePath(home), readScrolls(home), { home });
+    try {
+      if (sub === 'list') {
+        console.log(JSON.stringify(store.batteries.list(), null, 2));
+      } else if (sub === 'import' && args[1]) {
+        const payload = JSON.parse(readFileSync(resolve(args[1]), 'utf8')) as OneMoreBatteryExport;
+        console.log(JSON.stringify(store.batteries.importOneMoreBattery(payload), null, 2));
+      } else {
+        throw new Error('Usage: batteries list | batteries import <export.json>');
+      }
+    } finally {
+      store.close();
     }
   } else if (command === 'credentials') {
     if (args[0] !== 'rotate' || !['admin', 'telegram', 'cloud'].includes(args[1] ?? ''))
