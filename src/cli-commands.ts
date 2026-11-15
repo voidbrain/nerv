@@ -1,0 +1,847 @@
+import { runResumeEngineTick, type CreateResumeIntentInput, type ResumeIntentStatus } from './resume-intent.ts';
+import { ClaudeCodeResumeAdapter } from './claude-resume-adapter.ts';
+import { decideHitlThroughPersona, explainClassificationThroughPersona, formatMisatoPendingHitl } from './persona.ts';
+import { EVA_CLASS_SPECS, admitEvaJob, type EvaAdmissionRequest } from './eva-classes.ts';
+
+import { recordPromotion } from './milestones.ts';
+import { SeatPool } from './seat-pool.ts';
+import { formatBatteryStateLines, formatDueResistancePrompt, type OneMoreBatteryExport } from './batteries.ts';
+import {
+  detectVoiceLanguage,
+  evaluateVoiceCorpus,
+  parseVoiceCommandIntent,
+  type VoiceCorpus,
+  type VoiceLanguage,
+} from './voice.ts';
+import {
+  activateSkillVersion,
+  checkSkillPermissionEscalation,
+  evaluateSkillVersion,
+  listSkillPackages,
+  loadSkillVersion,
+  reconcileSkillsAfterModelChange,
+  retireSkillPackage,
+  rollbackSkillVersion,
+  stageSkillPackage,
+  type SkillEvaluationSuite,
+  type SkillPackage,
+} from './skills.ts';
+
+import {
+  engineReceiptPath,
+  executeEngineLifecycle,
+  planEngineLifecycle,
+  reconcileEngineState,
+  type EngineLifecycleAction,
+  type EnginePlatform,
+  type ManagedEngineSpec,
+} from './engine-lifecycle.ts';
+
+import { runtimeBom } from './bom.ts';
+
+import { randomBytes, randomUUID } from 'node:crypto';
+import { join, resolve } from 'node:path';
+import { formatQueuedMessage } from './request-queue.ts';
+import { requestLanguage } from './misato.ts';
+import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+
+import { Store } from './store.ts';
+
+import {
+  savePilots,
+  saveTools,
+  databasePath,
+  isTelegramToken,
+  telegramTokenPath,
+  readConfig,
+  readModelKey,
+  readScrolls,
+  readSeatKey,
+  readTelegramToken,
+  seatKeyPath,
+  writeSeatKey,
+  readToken,
+  rotateCredential,
+  setBase,
+  setting,
+} from './config.ts';
+import { STAGES, addPilot, describePilots, setPilotFlag, updatePilot, type EvaClass, type Stage } from './pilots.ts';
+import { McpClient, fingerprint as toolFingerprint, grantRefusal, toolName, type Eva, type McpTool } from './mcp.ts';
+import { TelegramApi, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
+
+import { baseKey, fingerprint } from './kaji.ts';
+
+import { builtinToolDescriptors } from './executors.ts';
+
+import { detectOllama, modelsReport, ollamaUrlOf, planModels, writeModels, type ModelChange } from './model-setup.ts';
+
+export interface CliCommandContext {
+  readSecret: (prompt: string) => Promise<string>;
+  openPage: (home: string, page: '/' | '/dashboard/', print: boolean) => Promise<void>;
+  reloadIfRunning: (homeDir: string, port: number) => Promise<string>;
+  flag: (name: string) => string | undefined;
+}
+
+export async function tryRunCliCommand(
+  command: string | undefined,
+  args: string[],
+  home: string,
+  ctx: CliCommandContext,
+): Promise<boolean> {
+  if (command === 'engines') {
+    const action = (args[0] ?? 'status') as EngineLifecycleAction | 'reconcile';
+    const specFlag = args.indexOf('--spec');
+    const specPath = specFlag >= 0 ? args[specFlag + 1] : undefined;
+    if (!specPath) throw new Error('Usage: engines <status|start|stop|install|uninstall|reconcile> --spec FILE');
+    const spec = JSON.parse(readFileSync(resolve(specPath), 'utf8')) as ManagedEngineSpec;
+    const platform: EnginePlatform =
+      process.platform === 'win32' ? 'win32' : process.platform === 'darwin' ? 'darwin' : 'linux';
+    const receiptPath = engineReceiptPath(platform, home, spec.id);
+    if (action === 'reconcile') {
+      const updated = reconcileEngineState(receiptPath, args.includes('--observed-stopped'));
+      console.log(JSON.stringify({ ok: true, engineId: spec.id, receipt: updated }, null, 2));
+    } else {
+      const receipt = existsSync(receiptPath) ? JSON.parse(readFileSync(receiptPath, 'utf8')) : null;
+      const plan = planEngineLifecycle(spec, action, platform, home, {
+        receipt,
+        endpointReachable: false,
+        pidAlive: false,
+        serviceInstalled: false,
+      });
+      const outcome = await executeEngineLifecycle(plan, spec);
+      console.log(JSON.stringify(outcome, null, 2));
+      if (!outcome.ok) process.exitCode = 1;
+    }
+  } else if (command === 'skills') {
+    const sub = args[0] ?? 'list';
+    if (sub === 'list') {
+      console.log(JSON.stringify(listSkillPackages(home), null, 2));
+    } else if (sub === 'inspect') {
+      if (!args[1] || !args[2]) throw new Error('Usage: skills inspect <id> <version>');
+      console.log(JSON.stringify(loadSkillVersion(home, args[1], args[2]), null, 2));
+    } else if (sub === 'stage') {
+      if (!args[1]) throw new Error('Usage: skills stage <package.json>');
+      const pkg = JSON.parse(readFileSync(resolve(args[1]), 'utf8')) as SkillPackage;
+      console.log(JSON.stringify(stageSkillPackage(home, pkg), null, 2));
+    } else if (sub === 'promote') {
+      if (!args[1] || !args[2])
+        throw new Error('Usage: skills promote <id> <version> --owner-approved [--model <model>]');
+      const modelIdx = args.indexOf('--model');
+      const model = modelIdx >= 0 ? args[modelIdx + 1] : undefined;
+      console.log(
+        JSON.stringify(
+          activateSkillVersion(home, args[1], args[2], {
+            ownerApproved: args.includes('--owner-approved'),
+            ...(model ? { model, requireEvaluation: true } : {}),
+          }),
+          null,
+          2,
+        ),
+      );
+    } else if (sub === 'evaluate') {
+      if (!args[1] || !args[2] || !args[3] || !args[4]) {
+        throw new Error('Usage: skills evaluate <id> <version> <suite.json> <model>');
+      }
+      const suite = JSON.parse(readFileSync(resolve(args[3]), 'utf8')) as SkillEvaluationSuite;
+      const pkg = loadSkillVersion(home, args[1], args[2]);
+      const escalation = checkSkillPermissionEscalation(pkg, suite.allowedCapabilities);
+      const report = evaluateSkillVersion(home, args[1], args[2], suite, { model: args[4] });
+      console.log(JSON.stringify({ ...report, escalation }, null, 2));
+      if (!report.eligibleForPromotion) process.exitCode = 1;
+    } else if (sub === 'reconcile-model') {
+      if (!args[1] || !args[2]) {
+        throw new Error('Usage: skills reconcile-model <new-model> <suites.json> --owner-approved');
+      }
+      const suites = JSON.parse(readFileSync(resolve(args[2]), 'utf8')) as Record<
+        string,
+        { suite: SkillEvaluationSuite }
+      >;
+      console.log(
+        JSON.stringify(
+          reconcileSkillsAfterModelChange(home, args[1], suites, {
+            ownerApproved: args.includes('--owner-approved'),
+          }),
+          null,
+          2,
+        ),
+      );
+    } else if (sub === 'rollback') {
+      if (!args[1]) throw new Error('Usage: skills rollback <id> --owner-approved');
+      console.log(
+        JSON.stringify(
+          rollbackSkillVersion(home, args[1], { ownerApproved: args.includes('--owner-approved') }),
+          null,
+          2,
+        ),
+      );
+    } else if (sub === 'retire') {
+      if (!args[1]) throw new Error('Usage: skills retire <id> --owner-approved');
+      console.log(
+        JSON.stringify(
+          retireSkillPackage(home, args[1], { ownerApproved: args.includes('--owner-approved') }),
+          null,
+          2,
+        ),
+      );
+    } else {
+      throw new Error(
+        'Usage: skills list | inspect <id> <version> | stage <file> | evaluate <id> <version> <suite> <model> | promote <id> <version> --owner-approved | reconcile-model <model> <suites> --owner-approved | rollback <id> --owner-approved | retire <id> --owner-approved',
+      );
+    }
+  } else if (command === 'voice') {
+    const sub = args[0];
+    if (sub === 'parse' && args[1]) {
+      const lang = args[2] === 'it' || args[2] === 'en' ? (args[2] as VoiceLanguage) : detectVoiceLanguage(args[1]);
+      console.log(JSON.stringify(parseVoiceCommandIntent(args[1], lang), null, 2));
+    } else if (sub === 'eval' && args[1]) {
+      const corpus = JSON.parse(readFileSync(resolve(args[1]), 'utf8')) as VoiceCorpus;
+      const report = evaluateVoiceCorpus(corpus);
+      console.log(JSON.stringify(report, null, 2));
+      if (report.failures.length > 0) process.exitCode = 1;
+    } else {
+      throw new Error('Usage: voice parse <transcript> [it|en] | voice eval <corpus.json>');
+    }
+  } else if (command === 'batteries') {
+    const sub = args[0] ?? 'list';
+    const store = new Store(databasePath(home), readScrolls(home), { home });
+    try {
+      if (sub === 'list') {
+        console.log(JSON.stringify(store.batteries.list(), null, 2));
+      } else if (sub === 'status') {
+        const lang = ctx.flag('--lang') === 'it' ? 'it' : 'en';
+        console.log(formatBatteryStateLines(store.batteries.list(), lang));
+      } else if (sub === 'due') {
+        const lang = ctx.flag('--lang') === 'it' ? 'it' : 'en';
+        console.log(formatDueResistancePrompt(store.batteries.dueResistanceChecks(), lang));
+      } else if (sub === 'resistance' && args[1] && args[2]) {
+        console.log(JSON.stringify(store.batteries.recordResistance(args[1], args.slice(2).join(' ')), null, 2));
+      } else if (sub === 'chat' && args[1]) {
+        console.log(JSON.stringify(store.batteries.applyChatPhrase(args.slice(1).join(' ')), null, 2));
+      } else if (sub === 'import' && args[1]) {
+        const payload = JSON.parse(readFileSync(resolve(args[1]), 'utf8')) as OneMoreBatteryExport;
+        console.log(JSON.stringify(store.batteries.importOneMoreBattery(payload), null, 2));
+      } else {
+        throw new Error(
+          'Usage: batteries list | batteries status [--lang it|en] | batteries due [--lang it|en] | batteries resistance <id> <v1,v2,...> | batteries chat <phrase> | batteries import <export.json>',
+        );
+      }
+    } finally {
+      store.close();
+    }
+  } else if (command === 'fleet') {
+    const sub = args[0] ?? 'drones';
+    const store = new Store(databasePath(home), readScrolls(home), { home });
+    try {
+      if (sub === 'drones') {
+        console.log(JSON.stringify(store.fleet.listDrones(), null, 2));
+      } else if (sub === 'parts' && args[1]) {
+        console.log(JSON.stringify(store.fleet.listParts(args[1]), null, 2));
+      } else if (sub === 'spares') {
+        console.log(JSON.stringify(store.fleet.listSpares(args[1]), null, 2));
+      } else {
+        throw new Error('Usage: fleet drones | fleet parts <drone> | fleet spares [category]');
+      }
+    } finally {
+      store.close();
+    }
+  } else if (command === 'resume-intent') {
+    const sub = args[0] ?? 'list';
+    const store = new Store(databasePath(home), readScrolls(home), { home });
+    try {
+      if (sub === 'list') {
+        const status = args[1] as ResumeIntentStatus | undefined;
+        console.log(JSON.stringify(store.resumeIntents.list(status), null, 2));
+      } else if (sub === 'create' && args[1]) {
+        const input = JSON.parse(readFileSync(resolve(args[1]), 'utf8')) as CreateResumeIntentInput;
+        console.log(JSON.stringify(store.resumeIntents.create(input), null, 2));
+      } else if (sub === 'cancel' && args[1]) {
+        console.log(JSON.stringify(store.resumeIntents.cancel(args[1], args[2]), null, 2));
+      } else if (sub === 'tick') {
+        const owner = ctx.flag('--owner') ?? 'cli';
+        const deps = args.includes('--claude-code')
+          ? new ClaudeCodeResumeAdapter().toEngineDeps(owner)
+          : {
+              owner,
+              checkAvailability: () => ({ available: false, reason: 'Live adapter readiness probe required.' }),
+              verifyIdentity: () => null,
+              executeResume: () => ({ kind: 'failed' as const, reason: 'No live adapter bound in CLI tick.' }),
+            };
+        const res = await runResumeEngineTick(store.resumeIntents, deps);
+        console.log(JSON.stringify(res, null, 2));
+      } else {
+        throw new Error('Usage: resume-intent list [status] | create <intent.json> | cancel <id> [reason] | tick');
+      }
+    } finally {
+      store.close();
+    }
+  } else if (command === 'persona') {
+    const sub = args[0];
+    const action = args[1];
+    const store = new Store(databasePath(home), readScrolls(home), { home });
+    const persona = readConfig(home).personas;
+    try {
+      if (sub === 'hitl' && action === 'list') {
+        console.log(formatMisatoPendingHitl(store.approvals(20), persona));
+      } else if (sub === 'hitl' && action === 'decide' && args[2] && (args[3] === 'approve' || args[3] === 'reject')) {
+        const res = await decideHitlThroughPersona(store, args[2], args[3], { persona, source: 'cli' });
+        console.log(JSON.stringify(res, null, 2));
+      } else if (sub === 'explain' && action) {
+        const res = explainClassificationThroughPersona(store, action, persona);
+        console.log(res.summary);
+      } else {
+        throw new Error(
+          'Usage: persona hitl list | persona hitl decide <approvalId> approve|reject | persona explain <ref>',
+        );
+      }
+    } finally {
+      store.close();
+    }
+  } else if (command === 'eva') {
+    const sub = args[0] ?? 'classes';
+    if (sub === 'classes') {
+      console.log(JSON.stringify(EVA_CLASS_SPECS, null, 2));
+    } else if (sub === 'admit' && args[1]) {
+      const req = JSON.parse(readFileSync(resolve(args[1]), 'utf8')) as EvaAdmissionRequest;
+      console.log(JSON.stringify(admitEvaJob(req), null, 2));
+    } else {
+      throw new Error('Usage: eva classes | eva admit <request.json>');
+    }
+  } else if (command === 'credentials') {
+    if (args[0] !== 'rotate' || !['admin', 'telegram', 'cloud'].includes(args[1] ?? ''))
+      throw new Error('Usage: credentials rotate admin|telegram|cloud');
+    const kind = args[1] as 'admin' | 'telegram' | 'cloud';
+    if (kind === 'admin') {
+      if (setting('TOKEN')) throw new Error('Unset NERV_TOKEN before rotating the file-backed admin credential.');
+      rotateCredential(home, kind, randomBytes(32).toString('hex'));
+      console.log('Admin credential rotated; the running service uses it now.');
+    } else {
+      const value = (
+        await ctx.readSecret(`${kind === 'telegram' ? 'New BotFather token' : 'New cloud API key'} (not shown): `)
+      ).trim();
+      if (kind === 'telegram' ? !isTelegramToken(value) : value.length < 20 || /\s/.test(value))
+        throw new Error(
+          `That does not look like a ${kind === 'telegram' ? 'BotFather token' : 'cloud API key'}: nothing was saved.`,
+        );
+      rotateCredential(home, kind, value);
+      console.log(`${kind === 'telegram' ? 'Telegram' : 'Cloud'} credential rotated; no secret was printed.`);
+      if (kind === 'cloud') console.log(await ctx.reloadIfRunning(home, readConfig(home).port));
+    }
+  } else if (command === 'telegram') {
+    // telegram link [CHAT_ID]: binds Aoba to the private chat that sent /start to the bot.
+    // telegram token: asks for the BotFather token without showing it, checks its format and saves it privately.
+    if (args[0] === 'token') {
+      const path = telegramTokenPath(home);
+      const token = (
+        await ctx.readSecret('Paste the bot token from @BotFather (it is not shown), then Enter: ')
+      ).trim();
+      if (!isTelegramToken(token))
+        throw new Error(
+          'That does not look like a BotFather token (digits, a colon, then letters and digits). Nothing was saved.',
+        );
+      mkdirSync(home, { recursive: true, mode: 0o700 });
+      writeFileSync(path, token + '\n', { mode: 0o600 });
+      chmodSync(path, 0o600);
+      console.log(`Saved to ${path}. Now send /start to your bot in Telegram, then run: nerv telegram link`);
+    } else {
+      if (args[0] !== 'link') throw new Error('Usage: telegram token | telegram link [CHAT_ID]');
+      const botToken = readTelegramToken(home);
+      if (!botToken)
+        throw new Error(
+          `No Telegram bot token at ${telegramTokenPath(home)}. Run: nerv telegram token (it asks for the token from @BotFather and saves it there).`,
+        );
+      if (readConfig(home).telegram && !args.includes('--relink')) {
+        console.log(
+          `Already linked to chat ${readConfig(home).telegram!.chatId}: nothing to do. To link another chat, run: nerv telegram link --relink`,
+        );
+      } else {
+        const api = new TelegramApi(botToken, telegramBase());
+        const chats = await startChats(api);
+        const wanted = args[1] && /^\d+$/.test(args[1]) ? Number(args[1]) : undefined;
+        const pick =
+          wanted !== undefined ? chats.find((c) => c.chatId === wanted) : chats.length === 1 ? chats[0] : undefined;
+        if (!pick) {
+          if (!chats.length) throw new Error(`No /start found. ${await diagnoseNoStart(api)}`);
+          throw new Error(
+            `Several chats sent /start; choose one: ${chats.map((c) => `telegram link ${c.chatId} (${c.name})`).join(' | ')}`,
+          );
+        }
+        const path = join(home, 'config.json');
+        const current = existsSync(path) ? (JSON.parse(readFileSync(path, 'utf8')) as Record<string, unknown>) : {};
+        writeFileSync(path, JSON.stringify({ ...current, telegram: { chatId: pick.chatId } }, null, 2) + '\n', {
+          mode: 0o600,
+        });
+        chmodSync(path, 0o600);
+        readConfig(home);
+        console.log(`Aoba linked to ${pick.name} (chat ${pick.chatId}). Restart the service to start it.`);
+      }
+    }
+  } else if (command === 'open') {
+    // open dashboard: the same sign-in, landing on the live dashboard instead of the workspace.
+    await ctx.openPage(home, args.includes('dashboard') ? '/dashboard/' : '/', args.includes('--print'));
+  } else if (command === 'base') {
+    // base: show this machine's identity; base ID "Name": change it (restart the service to show it everywhere).
+    if (args[0] === 'pubkey') {
+      const k = baseKey(home);
+      console.log(`${k.publicKey}\nFingerprint: ${fingerprint(k.publicKey)}`);
+    } else if (args.length) {
+      const b = setBase(home, { id: (args[0] ?? '').toUpperCase(), name: args.slice(1).join(' ') });
+      console.log(`Base set: ${b.id} · ${b.name}. Restart the service to apply it.`);
+    } else if (args.length === 0) {
+      const b = readConfig(home).base;
+      console.log(`${b.id} · ${b.name}`);
+    }
+  } else if (command === 'chat') {
+    // A request to Misato through the running service. It plans, the gate reviews each action, and the reply comes back.
+    const message = args.join(' ');
+    if (!message) throw new Error('Usage: chat "what you want"');
+    const config = readConfig(home);
+    const token = readToken(home);
+    const requestId = randomUUID();
+    const lang = requestLanguage(message, [], config.language);
+    let lastAhead = 0;
+    const queuePoll = setInterval(() => {
+      void fetch(`http://127.0.0.1:${config.port}/api/queue`, {
+        headers: { authorization: `Bearer ${token}` },
+      })
+        .then((r) => (r.ok ? (r.json() as Promise<{ queued?: { id: string; ahead: number }[] }>) : null))
+        .then((q) => {
+          const item = q?.queued?.find((entry) => entry.id === requestId);
+          if (item && item.ahead > 0 && item.ahead !== lastAhead) {
+            lastAhead = item.ahead;
+            console.log(formatQueuedMessage(item.ahead, lang));
+          }
+        })
+        .catch(() => {});
+    }, 200);
+    queuePoll.unref();
+    let response: Response;
+    try {
+      response = await fetch(`http://127.0.0.1:${config.port}/api/chat`, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+        body: JSON.stringify({ message, conversation: 'cli', requestId }),
+      }).catch(() => {
+        throw new Error('NERV Agency is not running: start it with serve or service start.');
+      });
+    } finally {
+      clearInterval(queuePoll);
+    }
+    const value = (await response.json()) as {
+      reply?: string;
+      error?: string;
+      sortieId?: string;
+      steps?: { tool?: string; outcome: string; reason?: string; error?: string }[];
+      waiting?: { approvalId: string; tool: string }[];
+      base?: { id: string; name: string };
+    };
+    if (!response.ok) throw new Error(value.error ?? 'Chat failed.');
+    for (const s of value.steps ?? [])
+      console.log(
+        `· ${s.tool ?? '(invalid reply)'} → ${s.outcome}${s.error ? ` · ${s.error}` : s.reason ? ` · ${s.reason}` : ''}`,
+      );
+    // Dispatched (F-036): the main base's Misato answered; its cards are decided there (Aoba or its dashboard).
+    for (const w of value.waiting ?? [])
+      console.log(
+        value.base
+          ? `⏸ ${w.tool} waits for you on ${value.base.name}: decide it on Aoba or on ${value.base.name}'s dashboard`
+          : `⏸ ${w.tool} waits for you: approve ${w.approvalId} | reject ${w.approvalId}`,
+      );
+    console.log(value.reply ?? `[no reply: ${value.error}]`);
+    console.log(
+      value.base
+        ? `— answered by ${value.base.name} (${value.base.id}), sortie ${value.sortieId} there`
+        : `— sortie ${value.sortieId}`,
+    );
+    if (!value.reply) process.exitCode = 1;
+  } else if (command === 'instrumentality') {
+    // Runs tonight's consolidation now, through the running service (it needs the brain's model).
+    const config = readConfig(home);
+    const response = await fetch(`http://127.0.0.1:${config.port}/api/memory/consolidate`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${readToken(home)}` },
+    }).catch(() => {
+      throw new Error('NERV Agency is not running: start it with serve, launch or service start.');
+    });
+    const value = (await response.json()) as {
+      summary?: string;
+      exchanges?: number;
+      proposed?: number;
+      skipped?: number;
+      error?: string;
+    };
+    if (!response.ok || value.error) throw new Error(value.error ?? 'Consolidation failed.');
+    console.log(
+      `${value.exchanges} exchange(s) consolidated · ${value.proposed} fact(s) proposed as cards · ${value.skipped} already known${value.summary ? `\n${value.summary}` : ''}`,
+    );
+  } else if (command === 'sessions') {
+    // Ends every dashboard session (F-039): each open dashboard asks to sign in again; the admin token is unchanged.
+    if (args[0] !== 'revoke') throw new Error('Usage: sessions revoke');
+    const config = readConfig(home);
+    const response = await fetch(`http://127.0.0.1:${config.port}/api/session/revoke`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${readToken(home)}` },
+    }).catch(() => {
+      throw new Error('NERV Agency is not running: start it with serve, launch or service start.');
+    });
+    const value = (await response.json()) as { revoked?: number; error?: string };
+    if (!response.ok) throw new Error(value.error ?? 'Revoke failed.');
+    console.log(`${value.revoked ?? 0} dashboard session(s) ended. Open the dashboard again with: open dashboard`);
+  } else if (command === 'tools') {
+    // F-021: MCP servers and their tools; deny by default: a tool is offered to Misato only once granted here.
+    const [sub, target, ...rest] = args;
+    const config = readConfig(home);
+    const tools = config.tools ?? { mcp: [], grants: [] };
+    const opt = (name: string, d: string) => {
+      const i = rest.indexOf('--' + name);
+      return i >= 0 ? (rest[i + 1] ?? d) : d;
+    };
+    const usage =
+      'Usage: tools | tools add ID COMMAND [ARGS…] | tools remove ID | tools grant SERVER/TOOL [--effect read] [--eva 00|01|02|03] | tools revoke SERVER/TOOL';
+    const listOf = async (id: string) => {
+      const s = tools.mcp.find((x) => x.id === id);
+      if (!s) throw new Error(`No MCP server ${id}: nerv tools add ${id} COMMAND …`);
+      const c = new McpClient(s);
+      try {
+        return await c.listTools();
+      } finally {
+        c.close();
+      }
+    };
+    if (!sub) {
+      console.log(`NERV · ${builtinToolDescriptors.length} built-in tool(s)`);
+      for (const descriptor of builtinToolDescriptors)
+        console.log(`   ${descriptor.name} · ${descriptor.effect} · version ${descriptor.version}`);
+      if (!tools.mcp.length) {
+        console.log(
+          'No MCP servers yet. Add one, for example: nerv tools add files npx -y @modelcontextprotocol/server-filesystem ~/NERV-files',
+        );
+      }
+      for (const s of tools.mcp) {
+        let list: McpTool[];
+        try {
+          list = await listOf(s.id);
+        } catch (e) {
+          console.log(
+            `${s.id} · ${s.command} ${s.args.join(' ')}\n   could not list its tools: ${e instanceof Error ? e.message : 'unknown error'}`,
+          );
+          continue;
+        }
+        console.log(`${s.id} · ${s.command} ${s.args.join(' ')} · ${list.length} tool(s)`);
+        for (const t of list) {
+          const g = tools.grants.find((x) => x.server === s.id && x.tool === t.name);
+          const fp = toolFingerprint(t);
+          const state = !g
+            ? 'not granted'
+            : g.fingerprint !== fp
+              ? 'SUSPENDED: changed since granted, grant it again'
+              : `granted ${g.effect} · EVA-${g.eva}`;
+          const hint =
+            t.annotations?.destructiveHint === true
+              ? ' · destructive'
+              : t.annotations?.readOnlyHint === true
+                ? ' · read-only'
+                : '';
+          console.log(
+            `   ${toolName(s.id, t.name)}${hint} · ${state}\n      ${(t.description ?? '').split('\n')[0]!.slice(0, 140)}`,
+          );
+        }
+      }
+    } else if (sub === 'add') {
+      const command = rest[0];
+      if (!target || !command) throw new Error(usage);
+      saveTools(home, {
+        ...tools,
+        mcp: [...tools.mcp.filter((x) => x.id !== target), { id: target, command, args: rest.slice(1) }],
+      });
+      console.log(`MCP server ${target} added. Its tools are not offered to Misato until you grant them: nerv tools`);
+    } else if (sub === 'remove') {
+      if (!target || !tools.mcp.some((x) => x.id === target)) throw new Error(usage);
+      saveTools(home, {
+        mcp: tools.mcp.filter((x) => x.id !== target),
+        grants: tools.grants.filter((g) => g.server !== target),
+      });
+      console.log(`MCP server ${target} removed, with its grants.`);
+    } else if (sub === 'grant' || sub === 'revoke') {
+      const [server, tool] = (target ?? '').split('/');
+      if (!server || !tool) throw new Error(usage);
+      if (sub === 'revoke') {
+        saveTools(home, { ...tools, grants: tools.grants.filter((g) => !(g.server === server && g.tool === tool)) });
+        console.log(`${toolName(server, tool)} revoked: Misato no longer sees it.`);
+      } else {
+        const t = (await listOf(server)).find((x) => x.name === tool);
+        if (!t) throw new Error(`${server} has no tool ${tool}: nerv tools lists them.`);
+        const effect = opt('effect', 'read'),
+          eva = opt('eva', '00');
+        const no = grantRefusal(t, effect, eva);
+        if (no) throw new Error(`${toolName(server, tool)} not granted: ${no}.`);
+        saveTools(home, {
+          ...tools,
+          grants: [
+            ...tools.grants.filter((g) => !(g.server === server && g.tool === tool)),
+            { server, tool, effect: 'read', eva: eva as Eva, fingerprint: toolFingerprint(t) },
+          ],
+        });
+        console.log(
+          `${toolName(server, tool)} granted as a read (Pattern Green), EVA-${eva}${eva === '03' ? ': it will not run until EVAs exist (F-049)' : ''}. Pinned to its current description: if the server changes it, the grant is suspended.`,
+        );
+      }
+    } else throw new Error(usage);
+  } else if (command === 'pilots') {
+    // F-045: the owner's permanent agents. Slice 1: they advise Misato before it plans, by domain keywords.
+    const [sub, id, ...rest] = args;
+    const config = readConfig(home);
+    const roster = config.pilots ?? [];
+    const opt = (name: string) => {
+      const i = rest.indexOf('--' + name);
+      return i >= 0 ? rest[i + 1] : undefined;
+    };
+    const find = () => {
+      const p = roster.find((x) => x.id === id);
+      if (!p) throw new Error(`No pilot ${id ?? ''}: nerv pilots lists them.`);
+      return p;
+    };
+    const checkModel = async (model: string) => {
+      const found = await detectOllama(setting('OLLAMA') ?? ollamaUrlOf(config.models));
+      if (found.reachable && !found.models.some((m) => m.name === model))
+        throw new Error(`Ollama has no model ${model}: ollama pull ${model} first, or pick one from nerv models.`);
+    };
+    const usage =
+      'Usage: pilots | pilots generic MODEL|off | pilots add ID --name NAME --domain "WHAT IT KNOWS" --keywords a,b,c --model MODEL [--role ROLE] [--skills a,b] [--tools a,b] [--memory-scope SCOPE] [--eva-class eva-00|eva-01|eva-02|eva-03] [--stage prototype|test|production] [--parent ID] | pilots set ID [--name …] [--role …] [--domain …] [--keywords …] [--skills …] [--tools …] [--model …] [--memory-scope …] [--eva-class …] [--stage …] | pilots rename ID NAME | pilots pin|unpin|retire|restore ID';
+    const list = (v: string | undefined) =>
+      v === undefined
+        ? undefined
+        : v
+            .split(',')
+            .map((x) => x.trim())
+            .filter(Boolean);
+    if (!sub) {
+      console.log(describePilots(roster, config.models.roles?.consultant?.model ?? null));
+    } else if (sub === 'generic') {
+      // The generic pilot is the consultant role (F-025): `pilots generic MODEL|off` is `models set consultant MODEL|off`.
+      if (!id) throw new Error('Usage: pilots generic MODEL | pilots generic off');
+      const found = await detectOllama(setting('OLLAMA') ?? ollamaUrlOf(config.models));
+      writeModels(
+        home,
+        planModels(
+          config.models,
+          { consultant: id === 'off' ? null : { model: id } },
+          found.reachable ? found.models.map((m) => m.name) : undefined,
+        ),
+      );
+      console.log(
+        `Generic pilot ${id === 'off' ? 'off' : `on ${id}`}. ${await ctx.reloadIfRunning(home, config.port)}`,
+      );
+    } else if (sub === 'add') {
+      if (!id || !opt('name') || !opt('domain') || !opt('keywords') || !opt('model')) throw new Error(usage);
+      await checkModel(opt('model')!);
+      savePilots(
+        home,
+        addPilot(roster, {
+          id,
+          name: opt('name')!,
+          ...(opt('role') !== undefined ? { role: opt('role')! } : {}),
+          domain: opt('domain')!,
+          keywords: list(opt('keywords'))!,
+          ...(opt('skills') !== undefined ? { skills: list(opt('skills'))! } : {}),
+          ...(opt('tools') !== undefined ? { tools: list(opt('tools'))! } : {}),
+          model: opt('model')!,
+          ...(opt('memory-scope') !== undefined ? { memoryScope: opt('memory-scope')! } : {}),
+          ...(opt('eva-class') !== undefined ? { evaClass: opt('eva-class') as EvaClass } : {}),
+          stage: (opt('stage') ?? 'prototype') as Stage,
+          parent: opt('parent') ?? 'generic',
+        }),
+      );
+      console.log(`Pilot ${id} added (prototype unless set). It advises Misato on requests with its keywords.`);
+    } else if (sub === 'rename') {
+      const p = find();
+      const newName = rest[0];
+      if (!newName || newName.startsWith('--')) throw new Error('Usage: pilots rename ID NAME');
+      savePilots(home, updatePilot(roster, p.id, { name: newName }));
+      console.log(`Pilot ${p.id} renamed to ${newName.trim()}.`);
+    } else if (sub === 'set') {
+      const p = find();
+      const model = opt('model');
+      if (model) await checkModel(model);
+      savePilots(
+        home,
+        updatePilot(roster, p.id, {
+          ...(opt('name') ? { name: opt('name')! } : {}),
+          ...(opt('role') !== undefined ? { role: opt('role')! } : {}),
+          ...(opt('domain') ? { domain: opt('domain')! } : {}),
+          ...(opt('keywords') ? { keywords: list(opt('keywords'))! } : {}),
+          ...(opt('skills') !== undefined ? { skills: list(opt('skills'))! } : {}),
+          ...(opt('tools') !== undefined ? { tools: list(opt('tools'))! } : {}),
+          ...(model ? { model } : {}),
+          ...(opt('memory-scope') !== undefined ? { memoryScope: opt('memory-scope')! } : {}),
+          ...(opt('eva-class') !== undefined ? { evaClass: opt('eva-class') as EvaClass } : {}),
+          ...(opt('stage') ? { stage: opt('stage') as Stage } : {}),
+        }),
+      );
+      // F-054-T04: a move to a later stage is a promotion, kept for the chronicle (append-only; the config edit stays).
+      const stage = opt('stage');
+      let promoted = '';
+      if (stage && STAGES.indexOf(stage as Stage) > STAGES.indexOf(p.stage)) {
+        try {
+          const s = new Store(databasePath(home), readScrolls(home), { home });
+          try {
+            recordPromotion(s.db, p, p.stage, stage, new Date().toISOString());
+            promoted = ` Promoted from ${p.stage} to ${stage}: in the chronicle.`;
+          } finally {
+            s.db.close();
+          }
+        } catch {
+          promoted = ' The promotion could not be recorded in the chronicle.';
+        }
+      }
+      console.log(`Pilot ${p.id} changed.${promoted}`);
+    } else if (['pin', 'unpin', 'retire', 'restore'].includes(sub)) {
+      const p = find();
+      const on = sub === 'pin' || sub === 'retire';
+      const field = sub === 'pin' || sub === 'unpin' ? 'pinned' : 'retired';
+      savePilots(home, setPilotFlag(roster, p.id, field, on));
+      console.log(
+        `Pilot ${p.id} ${sub === 'pin' ? 'pinned: chosen first when its keywords match' : sub === 'unpin' ? 'unpinned' : sub === 'retire' ? 'retired: never chosen, kept in the roster' : 'restored'}.`,
+      );
+    } else throw new Error(usage);
+  } else if (command === 'models') {
+    // F-038: see the routes and what Ollama has; pick Misato's and Casper's model; the cloud route on or off; its key.
+    const [sub, a1, a2] = args;
+    const config = readConfig(home);
+    if (!sub) {
+      const found = await detectOllama(setting('OLLAMA') ?? ollamaUrlOf(config.models));
+      let key: boolean;
+      try {
+        key = !!readModelKey(home);
+      } catch {
+        key = false;
+      }
+      console.log(modelsReport(config.models, key, found));
+    } else if (sub === 'key') {
+      const value = (await ctx.readSecret('Claude API key (not shown): ')).trim();
+      if (value.length < 20 || /\s/.test(value))
+        throw new Error('That does not look like an API key: nothing was saved.');
+      const file = join(home, 'anthropic-key');
+      writeFileSync(file, value + '\n', { mode: 0o600 });
+      chmodSync(file, 0o600);
+      console.log(`Saved to ${file} (readable only by you). Turn the route on with: models cloud on`);
+      console.log(await ctx.reloadIfRunning(home, config.port));
+    } else {
+      const change: ModelChange =
+        sub === 'set' && a1 === 'misato' && a2 === 'cloud'
+          ? { misato: { route: 'cloud', ...(args[3] ? { model: args[3] } : {}) } }
+          : sub === 'set' && a1 === 'misato' && a2
+            ? { misato: { route: 'local', model: a2 } }
+            : sub === 'set' && a1 === 'casper' && a2
+              ? { casper: { model: a2 } }
+              : sub === 'set' && a1 === 'consultant' && a2
+                ? { consultant: a2 === 'off' ? null : { model: a2 } }
+                : sub === 'cloud' && (a1 === 'on' || a1 === 'off')
+                  ? { cloud: { enabled: a1 === 'on', ...(a2 ? { model: a2 } : {}) } }
+                  : (() => {
+                      throw new Error(
+                        'Usage: models | models set misato MODEL | models set misato cloud [MODEL] | models set casper MODEL | models set consultant MODEL|off | models cloud on|off [MODEL] | models key',
+                      );
+                    })();
+      const found = await detectOllama(setting('OLLAMA') ?? ollamaUrlOf(config.models));
+      writeModels(
+        home,
+        planModels(config.models, change, found.reachable ? found.models.map((m) => m.name) : undefined),
+      );
+      console.log(`Saved. ${await ctx.reloadIfRunning(home, config.port)}`);
+    }
+  } else if (command === 'seats') {
+    const config = readConfig(home);
+    const sub = args[0] ?? 'check';
+    if (sub === 'key') {
+      const id = args[1];
+      if (!id) throw new Error('Usage: seats key <seat-id>');
+      const entry = (config.seats ?? []).find((s) => s.id === id);
+      if (!entry) throw new Error(`Unknown seat ${id}: configure it under seats in config.json first.`);
+      const value = (await ctx.readSecret(`API key for seat ${id} (not shown): `)).trim();
+      writeSeatKey(home, id, value);
+      console.log(`Saved to ${seatKeyPath(home, id)} (readable only by you).`);
+    } else if (sub === 'check' || sub === 'list') {
+      const seats = config.seats ?? [];
+      if (!seats.length) {
+        console.log('No extra cloud seats configured.');
+      } else {
+        const pool = new SeatPool(seats, (id) => readSeatKey(home, id));
+        const states = await pool.checkAll();
+        for (const s of states) {
+          console.log(`${s.id.padEnd(20)} ${s.provider}/${s.model}  ${s.status}${s.reason ? ` (${s.reason})` : ''}`);
+        }
+      }
+    } else {
+      throw new Error('Usage: seats [check | key <seat-id>]');
+    }
+  } else if (command === 'reload') {
+    // The running brain re-reads config.json and anthropic-key; a broken file keeps the last working settings.
+    const config = readConfig(home);
+    const response = await fetch(`http://127.0.0.1:${config.port}/api/models/reload`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${readToken(home)}` },
+    }).catch(() => {
+      throw new Error('NERV Agency is not running: start it with serve or service start.');
+    });
+    const value = (await response.json()) as { error?: string; kept?: boolean; models?: unknown };
+    if (!response.ok)
+      throw new Error(
+        `${value.error ?? 'Reload failed.'}${value.kept ? ' The previous model settings stay in use.' : ''}`,
+      );
+    console.log(JSON.stringify(value.models, null, 2));
+  } else if (command === 'act') {
+    // Through the running service, like ask: the gate, Casper and the executors live there.
+    const [request, tool, json] = args;
+    if (!request || !tool) throw new Error('Usage: act "what you want" TOOL [\'{"arg":"value"}\']');
+    let toolArgs: unknown;
+    try {
+      toolArgs = JSON.parse(json ?? '{}');
+    } catch {
+      throw new Error('Tool arguments must be a JSON object.');
+    }
+    const config = readConfig(home);
+    const response = await fetch(`http://127.0.0.1:${config.port}/api/actions`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${readToken(home)}`, 'content-type': 'application/json' },
+      body: JSON.stringify({ request, tool, args: toolArgs }),
+    }).catch(() => {
+      throw new Error('NERV Agency is not running: start it with serve or service start.');
+    });
+    const value = (await response.json()) as { error?: string };
+    if (!response.ok) throw new Error(value.error ?? 'Action failed.');
+    console.log(JSON.stringify(value, null, 2));
+  } else if (command === 'bom') {
+    if (args.length) throw new Error('Usage: bom');
+    const config = readConfig(home);
+    const found = config.models.local
+      ? await detectOllama(ollamaUrlOf(config.models))
+      : { reachable: false, models: [] };
+    const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as { version: string };
+    console.log(JSON.stringify(runtimeBom(config, found, pkg.version), null, 2));
+  } else if (command === 'ask') {
+    // Goes through the running service so only one brain and one scheduler exist. Local-only unless --cloud.
+    const cloud = args[0] === '--cloud';
+    const prompt = (cloud ? args.slice(1) : args).join(' ');
+    if (!prompt) throw new Error('Usage: ask [--cloud] "text"');
+    const config = readConfig(home);
+    const response = await fetch(`http://127.0.0.1:${config.port}/api/ask`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${readToken(home)}`, 'content-type': 'application/json' },
+      body: JSON.stringify(cloud ? { prompt, privacy: 'any', route: 'cloud' } : { prompt, privacy: 'local-only' }),
+    }).catch(() => {
+      throw new Error('NERV Agency is not running: start it with serve or service start.');
+    });
+    const value = (await response.json()) as {
+      text?: string;
+      route?: string;
+      model?: string;
+      truncated?: boolean;
+      error?: string;
+    };
+    if (!response.ok) throw new Error(value.error ?? 'Ask failed.');
+    console.log(value.text + (value.truncated ? '\n[reply truncated]' : '') + `\n— ${value.route} · ${value.model}`);
+  } else {
+    return false;
+  }
+  return true;
+}
