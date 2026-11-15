@@ -1,4 +1,12 @@
-import { generateKeyPairSync, createSign, createECDH, hkdfSync, randomBytes, createCipheriv } from 'node:crypto';
+import {
+  generateKeyPairSync,
+  createPrivateKey,
+  sign,
+  createECDH,
+  hkdfSync,
+  randomBytes,
+  createCipheriv,
+} from 'node:crypto';
 
 export interface PushSubscriptionRecord {
   endpoint: string;
@@ -36,9 +44,10 @@ export function buildVapidHeader(
   );
   const unsignedToken = `${header}.${claims}`;
 
-  const signer = createSign('SHA256');
-  signer.update(unsignedToken);
-  const signature = signer.sign({ key: vapidPrivateKey, dsaEncoding: 'ieee-p1363' }).toString('base64url');
+  const signature = sign('sha256', Buffer.from(unsignedToken), {
+    key: createPrivateKey(vapidPrivateKey),
+    dsaEncoding: 'ieee-p1363',
+  }).toString('base64url');
 
   return `vapid t=${unsignedToken}.${signature}, k=${vapidPublicKey}`;
 }
