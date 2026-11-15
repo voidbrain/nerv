@@ -113,4 +113,75 @@ describe('F-083-T01 saved documents with categories', () => {
       store.close();
     }
   });
+
+  it('computes scaled quantities strictly from saved values with working shown, and asks when a ratio or setting is missing', () => {
+    const store = makeStore();
+    try {
+      const recipe = store.documents.save({
+        title: 'Country Loaf',
+        category: 'bread',
+        body: ['500 g flour', '350 ml water', '10 g salt', 'oven: 230 C'].join('\n'),
+      });
+
+      // Scale from saved values (100 g flour -> 70 ml water, 2 g salt)
+      const scaled = store.documents.compute(recipe.id, {
+        baseIngredient: 'flour',
+        targetQuantity: 100,
+        targetUnit: 'g',
+      });
+      assert.equal(scaled.ok, true);
+      assert.equal(scaled.status, 'computed');
+      assert.deepEqual(scaled.citedDocument, { id: recipe.id, title: 'Country Loaf', category: 'bread' });
+      assert.equal(scaled.results.length, 2);
+      assert.equal(scaled.results[0].name, 'water');
+      assert.equal(scaled.results[0].scaledQuantity, 70);
+      assert.equal(scaled.results[0].unit, 'ml');
+      assert.match(scaled.answer, /500 g/);
+      assert.match(scaled.answer, /350 ml × \(100 g \/ 500 g\) = 70 ml/);
+      assert.match(scaled.answer, /10 g × \(100 g \/ 500 g\) = 2 g/);
+      // No unrequested quantities or advice
+      assert.doesNotMatch(scaled.answer, /yeast|sugar|230/);
+
+      // Setting lookup cites the saved setting verbatim
+      const setting = store.documents.compute('Country Loaf', { setting: 'oven' }, 'bread');
+      assert.equal(setting.ok, true);
+      assert.match(setting.answer, /oven = 230 C/);
+
+      // Missing ingredient / ratio / setting / unit mismatch makes NERV ask, never guess
+      const missingIngredient = store.documents.compute(recipe.id, {
+        baseIngredient: 'flour',
+        targetQuantity: 100,
+        ingredient: 'butter',
+      });
+      assert.equal(missingIngredient.ok, false);
+      assert.equal(missingIngredient.status, 'missing');
+      assert.deepEqual(missingIngredient.results, []);
+      assert.match(missingIngredient.question ?? '', /butter/);
+
+      const missingSetting = store.documents.compute(recipe.id, { setting: 'steam' });
+      assert.equal(missingSetting.ok, false);
+      assert.equal(missingSetting.status, 'missing');
+      assert.match(missingSetting.question ?? '', /steam/);
+
+      const unitMismatch = store.documents.compute(recipe.id, {
+        baseIngredient: 'flour',
+        targetQuantity: 1,
+        targetUnit: 'cups',
+      });
+      assert.equal(unitMismatch.ok, false);
+      assert.equal(unitMismatch.status, 'missing');
+      assert.match(unitMismatch.question ?? '', /cups/);
+
+      // Wired as a read-only Green tool (`docs.compute`)
+      const sortie = store.ledger.openSortie(OWNER_SOURCE, 'Compute water for 250 g flour', 'trusted');
+      const action = store.runAction(sortie, {
+        tool: 'docs.compute',
+        args: { id: recipe.id, baseIngredient: 'flour', targetQuantity: 250, targetUnit: 'g', ingredient: 'water' },
+        stage: 'production',
+      });
+      assert.equal(action.outcome, 'grant');
+    } finally {
+      store.close();
+    }
+  });
 });

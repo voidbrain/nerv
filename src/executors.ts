@@ -79,6 +79,7 @@ export const builtinTools: Tool[] = [
   { name: 'memory.forget', effect: 'write-local', removes: true },
   { name: 'docs.list', effect: 'read' },
   { name: 'docs.show', effect: 'read' },
+  { name: 'docs.compute', effect: 'read' },
   { name: 'docs.save', effect: 'write-local', inverse: 'docs.forget', owner: true },
   { name: 'docs.edit', effect: 'write-local', owner: true },
   { name: 'docs.forget', effect: 'write-local', removes: true },
@@ -210,6 +211,13 @@ export const toolDocs: ToolDoc[] = [
     effect: 'read',
     about: 'Shows a saved document verbatim by its id or title (and optional category).',
     args: '{"id"?: document id, "title"?: document title, "category"?: category name}',
+  },
+  {
+    name: 'docs.compute',
+    effect: 'read',
+    about:
+      'Computes scaled quantities or looks up settings strictly from a saved document, citing saved values and arithmetic; asks instead of guessing when a value is missing.',
+    args: '{"id"?: document id, "title"?: document title, "category"?: category name, "baseIngredient"?: base ingredient, "targetQuantity"?: positive number, "targetUnit"?: unit, "ingredient"?: specific ingredient, "setting"?: setting name}',
   },
   {
     name: 'docs.save',
@@ -650,6 +658,33 @@ export function execute(
       const doc = backend.documents.get(key, category);
       if (!doc) throw new Error(`No saved document matching "${key}".`);
       return doc;
+    }
+    case 'docs.compute': {
+      only(args, [
+        'id',
+        'title',
+        'category',
+        'baseIngredient',
+        'targetQuantity',
+        'targetUnit',
+        'ingredient',
+        'setting',
+      ]);
+      if (!backend.documents) throw new Error('Saved documents are not available here.');
+      const key = args.id !== undefined ? text(args, 'id') : args.title !== undefined ? text(args, 'title') : undefined;
+      if (!key) throw new Error('Give id or title.');
+      const category = args.category === undefined ? undefined : text(args, 'category');
+      return backend.documents.compute(
+        key,
+        {
+          ...(args.baseIngredient !== undefined ? { baseIngredient: text(args, 'baseIngredient') } : {}),
+          ...(typeof args.targetQuantity === 'number' ? { targetQuantity: args.targetQuantity } : {}),
+          ...(args.targetUnit !== undefined ? { targetUnit: text(args, 'targetUnit') } : {}),
+          ...(args.ingredient !== undefined ? { ingredient: text(args, 'ingredient') } : {}),
+          ...(args.setting !== undefined ? { setting: text(args, 'setting') } : {}),
+        },
+        category,
+      );
     }
     case 'docs.save': {
       only(args, ['title', 'category', 'body']);
