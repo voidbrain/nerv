@@ -8,7 +8,9 @@
   "acceptance": [
     "Health, reminders, workspace launch, doctor and launch-at-login checked live; Quit leaves the service running; Stop is separate"
   ],
-  "dependsOn": [],
+  "dependsOn": [
+    "B-068-T01"
+  ],
   "resources": [
     "docs/**",
     "generated:backlog-views"

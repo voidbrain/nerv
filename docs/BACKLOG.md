@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 33 | 21 | 20 | 20 |
+| **This week** | 33 | 21 | 21 | 20 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 45 | 6 |
-| **Require Human 🧑** | 10 | 2 |
+| **Open** | 45 | 7 |
+| **Require Human 🧑** | 8 | 2 |
 
 ### Require Human 🧑
 
@@ -22,9 +22,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
 | [F-005](#f-005) | [F-006](#f-006) | [B-057](#b-057) | — |
-| [F-009](#f-009) |  | [B-056](#b-056) |  |
-| [F-011](#f-011) |  |  |  |
-| [F-023](#f-023) |  |  |  |
+| [F-023](#f-023) |  | [B-056](#b-056) |  |
 | [F-004](#f-004) |  |  |  |
 | [F-097](#f-097) |  |  |  |
 | [F-060](#f-060) |  |  |  |
@@ -33,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 72.5 h agent + 23.25 h owner across 166 open steps of 45 features and 6 other records. 34.75 h of actual effort recorded on 79 steps. Generated from the task files.
+**Remaining effort:** 73.25 h agent + 23.25 h owner across 167 open steps of 45 features and 7 other records. 34.75 h of actual effort recorded on 79 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -236,6 +234,148 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-06 |
 | Verification | Unit/integration: snapshots (test/snapshots.test.ts), encrypted off-host copies (test/offhost.test.ts) and copies over the Kaji line (test/offhost-kaji.test.ts). Real-device: Pending (restore drill). |
 | Reviewed | 2026-11-14 |
+
+</details>
+
+---
+
+### <a id="f-009"></a>[✨ F-009](#top)
+
+**Run NERV Agency headless as one local user service**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.5 h agent + 0.5 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-009-T04, then the Linux service acceptance on a Linux VM on the Mac (F-009-T03).
+
+| | |
+|---|---|
+| **Issue** | Service commands and definitions implemented. Portable tests validate rendering/process lifecycle; later owner-authorized F-005 Mac default-profile service operations passed. Linux/session acceptance remains incomplete. |
+| **Reproduce** | Follow the [service and login acceptance procedure](acceptance/f009-service-login-procedure.md) and [docs/INSTALL.md](INSTALL.md). |
+| **Check** | Single process serves production UI/API on 4317; config survives init; clean SIGTERM and restart catch-up; private credentials; install/status/start/stop/uninstall on real target OS. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-009-t04"></a>F-009-T04 — Record the evidence of F-009-T02 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-009-t03"></a>F-009-T03 — Linux service target acceptance | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-009-T04](#f-009-t04) | ⏳ 🧑‍🔧 |
+| 🟢 Small | <a id="f-009-t05"></a>F-009-T05 — Record the evidence of F-009-T03 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-009-T03](#f-009-t03) | ⏳ 🤖 |
+| 🟢 Small | **Total** | 0.5 h (2 of 5 steps) | 0 h (0 of 5 steps recorded) | 0.5 h agent + 0.5 h owner | 2 of 5 completed | |
+
+<details><summary>Done steps (2)</summary>
+
+| Effort | Step | Estimate | Actual | Status |
+|---|---|---|---|---|
+| — | <a id="f-009-t01"></a>F-009-T01 — Single-process service, config and lifecycle commands | — | 0 days | Completed |
+| — | <a id="f-009-t02"></a>F-009-T02 — Mac login/logout acceptance | — | 0 h | Completed |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-009.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #255](https://github.com/voidbrain/nerv/pull/255) related-state reconciliation; [PR #254](https://github.com/voidbrain/nerv/pull/254) accepted Mac service evidence under F-005; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
+| Opened | 2026-11-01 |
+| Verification | 2026-11-10 selected per-user Mac lifecycle operations accepted under F-005-T04; actual session/login and Linux target acceptance remain pending. Earlier2026-11-08: read-only execution-host check confirms no installed/registered launchd service. Existing portable headless checks pass; separate target-host install/status/start/stop/uninstall and login/logout acceptance remain pending. |
+| Reviewed | 2026-11-10 |
+
+</details>
+
+---
+
+
+
+### <a id="b-068"></a>[🐞 B-068](#top)
+
+**Companion keeps Start NERV disabled after Stop NERV**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.75 h agent + 0.25 h owner | — | [F-011-T02](#f-011-t02) | 🤖 | — | — |
+
+💻 **→** Next: B-068-T01, a failing test, then the fix.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-15 by the owner in F-011-T02 step 3: after **Ferma NERV** (Stop NERV) the service stopped (the panel showed "could not connect") but **Avvia NERV** (Start NERV) stayed greyed out, so the companion could not start the service it had stopped; the owner restarted it by hand. Likely cause, unconfirmed: `controlService` calls `refreshOSState()` right after `launchctl bootout`, which returns before the unload completes, so `launchctl print` still succeeds and `serviceLoaded` stays true; the 15-second poll calls only `refresh()`, never `refreshOSState()`, so the stale value never clears (`native/NervMenuBar/Sources/NervMenuBar/NervMenuBar.swift`). |
+| **Reproduce** | With the service running and the companion paired, choose Ferma NERV and confirm; wait 30 s: Avvia NERV stays disabled until Aggiorna stato. |
+| **Check** | A committed Swift test fails first: a fake launchctl that still reports the service loaded just after `bootout` leaves Start disabled; after the fix the companion re-reads the service state (bounded wait after Stop and on every poll) and Start becomes enabled; the owner reruns F-011-T02 steps 3–4. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="b-068-t01"></a>B-068-T01 — Companion re-reads the service state after Stop and on each poll | 0.75 h | 0 h | 0.75 h | Ready | 🤖 |
+| 🟢 Small | <a id="b-068-t02"></a>B-068-T02 — Owner check: Stop then Start from the companion | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [B-068-T01](#b-068-t01) | ⏳ 🧑‍🔧 |
+| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0.75 h agent + 0.25 h owner | 0 of 2 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-068.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner observation 2026-11-15 (F-011-T02 step 3); opened in [PR #455](https://github.com/voidbrain/nerv/pull/455) |
+| Opened | 2026-11-15 |
+| Verification | Pending. |
+| Reviewed | 2026-11-15 |
+
+</details>
+
+---
+### <a id="f-011"></a>[✨ F-011](#top)
+
+**Native macOS menu-bar companion without Electron**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.5 h agent + 0.75 h owner | [B-068-T01](#b-068-t01) | — | ⏳ | — | — |
+
+💻 **→** Next: [B-068](work/records/F-011.md#b-068) fixes Start NERV staying disabled after Stop; then the owner reruns F-011-T02 steps 3–5.
+
+| | |
+|---|---|
+| **Issue** | SwiftUI pairing, private notification checkpoints, bounded catch-up, opt-in OS notifications, guarded local service controls and login selection now exist. Explicit Developer ID/notarization packaging is implemented; an actual signed release and real permission/menu/login acceptance remain incomplete. |
+| **Reproduce** | Follow the [companion acceptance procedure](acceptance/f011-companion-acceptance-procedure.md) and [docs/INSTALL.md](INSTALL.md). |
+| **Check** | Build and package on macOS; health/reminders, workspace launch, doctor, notifications, launch-at-login; Quit companion leaves service running; Stop NERV Agency is separate. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-011-t02"></a>F-011-T02 — Live menu, service-button and login acceptance on the Mac | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [B-068-T01](#b-068-t01) | ⏳ 🧑‍🔧 |
+| 🟢 Small | <a id="f-011-t05"></a>F-011-T05 — Record the evidence of F-011-T02 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-011-T02](#f-011-t02) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-011-t03"></a>F-011-T03 — Live notification permission acceptance | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-011-T05](#f-011-t05) | ⏳ 🧑‍🔧 |
+| 🟢 Small | <a id="f-011-t06"></a>F-011-T06 — Record the evidence of F-011-T03 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-011-T03](#f-011-t03) | ⏳ 🤖 |
+| 🟢 Small | **Total** | 0.75 h (3 of 6 steps) | 0 h (0 of 6 steps recorded) | 0.5 h agent + 0.75 h owner | 2 of 6 completed | |
+
+<details><summary>Done steps (2)</summary>
+
+| Effort | Step | Estimate | Actual | Status |
+|---|---|---|---|---|
+| — | <a id="f-011-t01"></a>F-011-T01 — Companion implementation and packaging automation | — | 0 days | Completed |
+| — | <a id="f-011-t04"></a>F-011-T04 — Signed and notarized release | 0.25 h | 0 h | Completed |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-011.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #255](https://github.com/voidbrain/nerv/pull/255) related-state reconciliation; [PR #254](https://github.com/voidbrain/nerv/pull/254) separate F-005 Mac service acceptance; [PR #215](https://github.com/voidbrain/nerv/pull/215) owner-confirmed icon/menu acceptance and deferred scope; [PR #212](https://github.com/voidbrain/nerv/pull/212) explicit distribution packaging and owner acceptance handoff; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #5](https://github.com/voidbrain/nerv/pull/5) merged; Linux and macOS checks green; real OS acceptance remains pending |
+| Opened | 2026-11-01 |
+| Verification | 2026-11-08 Unit/integration: seven isolated release-path contracts pass (no actual signing/upload); signed-only, rejection, warning, timeout/failure and post-staple packaging paths checked. Real-device: temporary macOS release build, ad-hoc signature verification and bundle plist validation passed; that temporary build was not installed/launched. Later UI-only trial: verified/downloaded PR #213 CI app launch completed according to macOS process state; Human 2026-11-08: owner confirms icon appears and menu opens normally; no Accessibility permission granted to this session. PR #212 CI 42489231643 passed targeted native/auth/packaging checks, including actual macOS Swift tests/build/package; full-suite skipped. Actual Developer ID/notarization and native OS acceptance pending. |
+| Reviewed | 2026-11-10 |
 
 </details>
 
@@ -454,109 +594,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-01 |
 | Verification | Pending named acceptance |
 | Reviewed | 2026-11-12 |
-
-</details>
-
----
-
-### <a id="f-009"></a>[✨ F-009](#top)
-
-**Run NERV Agency headless as one local user service**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.5 h agent + 0.75 h owner | — | — | ⏳ | 🧑‍🔧 | — |
-
-🧑 **→** Run the [service and login acceptance procedure](acceptance/f009-service-login-procedure.md): Mac login/logout, then the Linux user service on a Linux VM on the Mac (owner choice, 2026-11-13).
-
-| | |
-|---|---|
-| **Issue** | Service commands and definitions implemented. Portable tests validate rendering/process lifecycle; later owner-authorized F-005 Mac default-profile service operations passed. Linux/session acceptance remains incomplete. |
-| **Reproduce** | Follow the [service and login acceptance procedure](acceptance/f009-service-login-procedure.md) and [docs/INSTALL.md](INSTALL.md). |
-| **Check** | Single process serves production UI/API on 4317; config survives init; clean SIGTERM and restart catch-up; private credentials; install/status/start/stop/uninstall on real target OS. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-009-t02"></a>F-009-T02 — Mac login/logout acceptance | — | 0 h | 0 h agent + 0.25 h owner | Planned | [🧑‍🔧](acceptance/f009-service-login-procedure.md#part-1--mac-loginlogout-acceptance-neo-tokyo-3-terminal) |
-| 🟢 Small | <a id="f-009-t04"></a>F-009-T04 — Record the evidence of F-009-T02 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-009-T02](#f-009-t02) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-009-t03"></a>F-009-T03 — Linux service target acceptance | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-009-T04](#f-009-t04) | ⏳ 🧑‍🔧 |
-| 🟢 Small | <a id="f-009-t05"></a>F-009-T05 — Record the evidence of F-009-T03 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-009-T03](#f-009-t03) | ⏳ 🤖 |
-| 🟢 Small | **Total** | 0.5 h (2 of 5 steps) | 0 h (0 of 5 steps recorded) | 0.5 h agent + 0.75 h owner | 1 of 5 completed | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="f-009-t01"></a>F-009-T01 — Single-process service, config and lifecycle commands | — | 0 days | Completed |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-009.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #255](https://github.com/voidbrain/nerv/pull/255) related-state reconciliation; [PR #254](https://github.com/voidbrain/nerv/pull/254) accepted Mac service evidence under F-005; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
-| Opened | 2026-11-01 |
-| Verification | 2026-11-10 selected per-user Mac lifecycle operations accepted under F-005-T04; actual session/login and Linux target acceptance remain pending. Earlier2026-11-08: read-only execution-host check confirms no installed/registered launchd service. Existing portable headless checks pass; separate target-host install/status/start/stop/uninstall and login/logout acceptance remain pending. |
-| Reviewed | 2026-11-10 |
-
-</details>
-
----
-
-
-
-### <a id="f-011"></a>[✨ F-011](#top)
-
-**Native macOS menu-bar companion without Electron**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.5 h agent + 0.75 h owner | — | — | ⏳ | 🧑‍🔧 | — |
-
-🧑 **→** Run the [companion acceptance procedure](acceptance/f011-companion-acceptance-procedure.md) (menu, service buttons, login, notifications); the app stays unsigned (owner choice, 2026-11-13).
-
-| | |
-|---|---|
-| **Issue** | SwiftUI pairing, private notification checkpoints, bounded catch-up, opt-in OS notifications, guarded local service controls and login selection now exist. Explicit Developer ID/notarization packaging is implemented; an actual signed release and real permission/menu/login acceptance remain incomplete. |
-| **Reproduce** | Follow the [companion acceptance procedure](acceptance/f011-companion-acceptance-procedure.md) and [docs/INSTALL.md](INSTALL.md). |
-| **Check** | Build and package on macOS; health/reminders, workspace launch, doctor, notifications, launch-at-login; Quit companion leaves service running; Stop NERV Agency is separate. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-011-t02"></a>F-011-T02 — Live menu, service-button and login acceptance on the Mac | — | 0 h | 0 h agent + 0.5 h owner | Planned | [🧑‍🔧](acceptance/f011-companion-acceptance-procedure.md#part-1--companion-ui-notifications-and-service-controls-neo-tokyo-3-terminal--ui) |
-| 🟢 Small | <a id="f-011-t05"></a>F-011-T05 — Record the evidence of F-011-T02 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-011-T02](#f-011-t02) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-011-t03"></a>F-011-T03 — Live notification permission acceptance | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-011-T05](#f-011-t05) | ⏳ 🧑‍🔧 |
-| 🟢 Small | <a id="f-011-t06"></a>F-011-T06 — Record the evidence of F-011-T03 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-011-T03](#f-011-t03) | ⏳ 🤖 |
-| 🟢 Small | **Total** | 0.75 h (3 of 6 steps) | 0 h (0 of 6 steps recorded) | 0.5 h agent + 0.75 h owner | 2 of 6 completed | |
-
-<details><summary>Done steps (2)</summary>
-
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="f-011-t01"></a>F-011-T01 — Companion implementation and packaging automation | — | 0 days | Completed |
-| — | <a id="f-011-t04"></a>F-011-T04 — Signed and notarized release | 0.25 h | 0 h | Completed |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-011.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #255](https://github.com/voidbrain/nerv/pull/255) related-state reconciliation; [PR #254](https://github.com/voidbrain/nerv/pull/254) separate F-005 Mac service acceptance; [PR #215](https://github.com/voidbrain/nerv/pull/215) owner-confirmed icon/menu acceptance and deferred scope; [PR #212](https://github.com/voidbrain/nerv/pull/212) explicit distribution packaging and owner acceptance handoff; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #5](https://github.com/voidbrain/nerv/pull/5) merged; Linux and macOS checks green; real OS acceptance remains pending |
-| Opened | 2026-11-01 |
-| Verification | 2026-11-08 Unit/integration: seven isolated release-path contracts pass (no actual signing/upload); signed-only, rejection, warning, timeout/failure and post-staple packaging paths checked. Real-device: temporary macOS release build, ad-hoc signature verification and bundle plist validation passed; that temporary build was not installed/launched. Later UI-only trial: verified/downloaded PR #213 CI app launch completed according to macOS process state; Human 2026-11-08: owner confirms icon appears and menu opens normally; no Accessibility permission granted to this session. PR #212 CI 42489231643 passed targeted native/auth/packaging checks, including actual macOS Swift tests/build/package; full-suite skipped. Actual Developer ID/notarization and native OS acceptance pending. |
-| Reviewed | 2026-11-10 |
 
 </details>
 
