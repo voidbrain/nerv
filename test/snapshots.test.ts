@@ -131,6 +131,7 @@ test('B-067-T01: stop waits for an in-flight snapshot tick and skips new work af
     await dbRead;
     stopped = true;
     await stop();
+    assert.equal(snapshotDates(snapshotDir(f.home)).length, 1, 'in-flight snapshot must finish before stop() resolves');
     assert.equal(backupCalledAfterStop, false, 'stopped schedule must not run backup/copy after stop()');
   } finally {
     f.done();
