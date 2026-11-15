@@ -415,6 +415,22 @@ try {
     } finally {
       store.close();
     }
+  } else if (command === 'fleet') {
+    const sub = args[0] ?? 'drones';
+    const store = new Store(databasePath(home), readScrolls(home), { home });
+    try {
+      if (sub === 'drones') {
+        console.log(JSON.stringify(store.fleet.listDrones(), null, 2));
+      } else if (sub === 'parts' && args[1]) {
+        console.log(JSON.stringify(store.fleet.listParts(args[1]), null, 2));
+      } else if (sub === 'spares') {
+        console.log(JSON.stringify(store.fleet.listSpares(args[1]), null, 2));
+      } else {
+        throw new Error('Usage: fleet drones | fleet parts <drone> | fleet spares [category]');
+      }
+    } finally {
+      store.close();
+    }
   } else if (command === 'resume-intent') {
     const sub = args[0] ?? 'list';
     const store = new Store(databasePath(home), readScrolls(home), { home });

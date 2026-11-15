@@ -20,8 +20,12 @@ import { MEMORY_SCHEMA, Memory, type Episode } from './memory.ts';
 import { INCIDENT_CIRCUITS_SCHEMA, IncidentCircuitStore } from './incident-circuits.ts';
 >>>>>>> 33febf88 (feat(f-064): add first bounded channel incident circuit with Spear and owner rearm (F-064-T02))
 import { BATTERY_SCHEMA, BatteryRegistry } from './batteries.ts';
+<<<<<<< HEAD
 import { LISTS_SCHEMA, ListStore } from './lists.ts';
 import { DOCUMENTS_SCHEMA, DocumentStore } from './documents.ts';
+=======
+import { FLEET_SCHEMA, FleetStore } from './fleet.ts';
+>>>>>>> d389c89b (feat(f-098): add FPV fleet and spares model (F-098-T01))
 import { Registry, REGISTRY_SCHEMA } from './kaji.ts';
 import { MILESTONE_SCHEMA } from './milestones.ts';
 import { RESUME_INTENT_SCHEMA, ResumeIntentStore } from './resume-intent.ts';
@@ -101,6 +105,7 @@ export class Store {
   readonly memory: Memory;
   readonly circuits: IncidentCircuitStore;
   readonly batteries: BatteryRegistry;
+  readonly fleet: FleetStore;
   readonly resumeIntents: ResumeIntentStore;
   readonly lists: ListStore;
   readonly documents: DocumentStore;
@@ -205,6 +210,8 @@ export class Store {
     this.circuits = new IncidentCircuitStore(this.db, this.ledger);
     this.db.exec(BATTERY_SCHEMA);
     this.batteries = new BatteryRegistry(this.db);
+    this.db.exec(FLEET_SCHEMA);
+    this.fleet = new FleetStore(this.db);
     this.resumeIntents = new ResumeIntentStore(this.db);
     this.lists = new ListStore(this.db);
     this.db.exec(DOCUMENTS_SCHEMA);
