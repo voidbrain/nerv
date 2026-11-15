@@ -4,6 +4,7 @@ import type { WorkerLease } from './worker-jobs.ts';
 import { credentialAges, readConfig } from './config.ts';
 import { UPGRADE_CONTRACT } from './upgrade-contract.ts';
 import { WorkerJobs, WORKER_RESULT_BYTES, WORKER_LEASE_MS } from './worker-jobs.ts';
+import { WholeJobHandoffStore } from './whole-job-handoff.ts';
 import { InstrumentalityRuns } from './instrumentality-runs.ts';
 import { UsageStore } from './model-usage.ts';
 import { checkHistory, historyPage, type HistoryPage } from './history.ts';
@@ -91,6 +92,7 @@ export const MISATO_SOURCE = 'misato';
 export class Store {
   readonly db: DatabaseSync;
   readonly workerJobs: WorkerJobs;
+  readonly wholeJobHandoffs: WholeJobHandoffStore;
   readonly usage: UsageStore;
   readonly instrumentality: InstrumentalityRuns;
   readonly ledger: Ledger;
@@ -223,6 +225,7 @@ export class Store {
             .run(new Date().toISOString());
         return jobs;
       });
+      this.wholeJobHandoffs = new WholeJobHandoffStore(this.db);
     } catch (error) {
       this.db.close();
       throw error;

@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 71.75 h agent + 24 h owner across 170 open steps of 48 features and 5 other records. 38.5 h of actual effort recorded on 89 steps. Generated from the task files.
+**Remaining effort:** 71 h agent + 24 h owner across 169 open steps of 47 features and 5 other records. 38.75 h of actual effort recorded on 90 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -964,9 +964,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0 h | — | — | — | — | — |
 
-💻 **→** Next: the job message and its fallback, for capability first.
+💻 **→** All steps closed (F-050-T01 contract, F-050-T02 receipt-bound reconciliation).
 
 | | |
 |---|---|
@@ -978,9 +978,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="f-050-t02"></a>F-050-T02 — Uncertain handoff reconciliation | 0.75 h | 0 h | 0.75 h | Planned |
 | — | <a id="f-050-t01"></a>F-050-T01 — Whole-job handoff contract | 0.75 h | 0.25 h (stated) | 0 h | Completed |
-| 🟢 Small | **Total** | 1.5 h | 0.25 h (1 of 2 steps recorded) | 0.75 h | 1 of 2 completed |
+| — | <a id="f-050-t02"></a>F-050-T02 — Uncertain handoff reconciliation | 0.75 h | 0.25 h (stated) | 0 h | Completed |
+| — | **Total** | 1.5 h | 0.5 h | 0 h | 2 of 2 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -992,7 +992,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Depends on | [F-045](archive/backlog-2026.md#f-045) — Remote pilot capability offers for capability-based forwarding |
 | PR / evidence | [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner questions 2026-11-05 |
 | Opened | 2026-11-05 |
-| Verification | Pending |
+| Verification | `npx tsc --noEmit`, `npm run check:conventions`, `node --test test/whole-job-handoff.test.ts`, and `npm run check:fast` passed 2026-11-15; remote CI pending PR |
 | Reviewed | 2026-11-08 |
 
 </details>
