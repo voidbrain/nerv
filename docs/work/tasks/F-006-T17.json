@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-006",
   "id": "F-006-T17",
-  "status": "ready",
+  "status": "closed",
   "title": "Approve the placement campaign plan and budgets",
   "goal": "Approve the placement campaign plan and budgets",
   "capabilities": [
@@ -37,10 +37,10 @@
   "effort": {
     "size": "small",
     "estimate": "0.25 h owner",
-    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
-    "reviewed": "2026-11-13",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total. Owner decision 2026-11-15: approved the placement campaign (P1-P4, local and Tailscale only, 0 paid tokens) with 3 runs per case instead of 1, so one flaky case cannot flip a recommendation; F-006-T19 revises the budgets before F-006-T11. No actual: owner time not measured.",
+    "reviewed": "2026-11-15",
     "baselineDays": 0.5,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "agentHours": 0,
     "ownerKind": "decision"
   },

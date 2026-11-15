@@ -17,7 +17,7 @@
     "Run the placement campaign on the enrolled Mac and mini PC"
   ],
   "dependsOn": [
-    "F-006-T17"
+    "F-006-T19"
   ],
   "resources": [
     "contract:model-routing",
