@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 70.25 h agent + 24 h owner across 167 open steps of 45 features and 5 other records. 39.25 h of actual effort recorded on 92 steps. Generated from the task files.
+**Remaining effort:** 70 h agent + 24 h owner across 166 open steps of 44 features and 5 other records. 39.5 h of actual effort recorded on 93 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1904,9 +1904,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0 h | — | — | — | — | — |
 
-💻 **→** Next: F-064-T02 (the first circuit).
+💻 **→** `F-064-T02` (first circuit) and `F-064-T03` (fault-injection tests) complete.
 
 | | |
 |---|---|
@@ -1918,10 +1918,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-064-t03"></a>F-064-T03 — Fault-injection tests | 0.25 h | 0 h | 0.25 h | Planned | 🤖 |
 | — | <a id="f-064-t01"></a>F-064-T01 — Owner picks the first circuit | 0.25 h | 0 h | 0 h | Completed | 🤖 🤔 |
 | — | <a id="f-064-t02"></a>F-064-T02 — First bounded circuit | 0.75 h | 0.5 h (measured) | 0 h | Completed | 🤖 |
-| 🟢 Small | **Total** | 1.25 h | 0.5 h (1 of 3 steps recorded) | 0.25 h | 2 of 3 completed | |
+| — | <a id="f-064-t03"></a>F-064-T03 — Fault-injection tests | 0.25 h | 0.25 h (stated) | 0 h | Completed | 🤖 |
+| — | **Total** | 1.25 h | 0.75 h (2 of 3 steps recorded) | 0 h | 3 of 3 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1932,7 +1932,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
 | Opened | 2026-11-06 |
-| Verification | `F-064-T02` verified via `src/incident-circuits.ts` and `test/incident-circuits.test.ts` (scoped channel trip, Spear on channel sorties, deduplicated alert, owner-only rearm), `tsc`, `check:conventions`, and `check:fast`. |
+| Verification | `F-064-T02` verified via `src/incident-circuits.ts` and `test/incident-circuits.test.ts` (scoped channel trip, Spear on channel sorties, deduplicated alert, owner-only rearm). `F-064-T03` added fault-injection tests in `test/incident-circuits.test.ts` (benign input never trips, fault revokes only affected channel authority, healthy channel & owner recovery access preserved); verified with `node --test test/incident-circuits.test.ts` and `npm run check:fast`. |
 | Reviewed | 2026-11-06 |
 
 </details>
