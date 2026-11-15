@@ -4,7 +4,7 @@
   "parent": "F-095",
   "title": "Split runtime.ts",
   "goal": "runtime.ts becomes modules by responsibility with no behaviour change",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Each new module under 600 lines where the boundary allows; existing tests pass unchanged; imports updated",
     "Fresh-context review of the move"
@@ -37,8 +37,10 @@
     "estimate": "2 h",
     "basis": "Estimated 2026-11-14 at agent speed: mechanical moves with unchanged tests. Not a measurement.",
     "reviewed": "2026-11-14",
-    "agentHours": 2,
+    "agentHours": 0,
     "baselineAgentHours": 2,
-    "estimateAgentHours": 2
+    "estimateAgentHours": 2,
+    "actualAgentHours": 1.5,
+    "actualSource": "stated"
   }
 }
