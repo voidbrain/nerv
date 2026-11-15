@@ -106,3 +106,33 @@ test('the schedule takes the snapshot once and logs a failure by reason only, wi
     f.done();
   }
 });
+
+test('B-067-T01: stop waits for an in-flight snapshot tick and skips new work after stop', async () => {
+  const f = fixture();
+  try {
+    let onDbRead!: () => void;
+    const dbRead = new Promise<void>((r) => (onDbRead = r));
+    let backupCalledAfterStop = false;
+    let stopped = false;
+    const stop = startSnapshots(
+      f.home,
+      () => {
+        onDbRead();
+        return f.database;
+      },
+      () => 'UTC',
+      () => {},
+      5,
+      () => {
+        if (stopped) backupCalledAfterStop = true;
+        return undefined;
+      },
+    );
+    await dbRead;
+    stopped = true;
+    await stop();
+    assert.equal(backupCalledAfterStop, false, 'stopped schedule must not run backup/copy after stop()');
+  } finally {
+    f.done();
+  }
+});
