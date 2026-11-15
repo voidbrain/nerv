@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-104-T03",
+  "parent": "F-104",
+  "title": "Owner review of the proposals",
+  "goal": "The owner accepts or declines each adopt/adapt proposal",
+  "status": "planned",
+  "acceptance": [
+    "Each proposal marked accepted or declined with the owner's reason"
+  ],
+  "dependsOn": [
+    "F-104-T01",
+    "F-104-T02"
+  ],
+  "resources": [
+    "docs/work/records/F-104.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run typecheck",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h owner",
+    "basis": "Estimated 2026-11-15 at agent speed after the calibration of 2026-11-15. Not a measurement.",
+    "reviewed": "2026-11-15",
+    "agentHours": 0,
+    "ownerHours": 0.5,
+    "ownerKind": "decision"
+  }
+}

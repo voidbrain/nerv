@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "F-095-T06",
+  "parent": "F-095",
+  "title": "Split cli.ts, runtime.ts and server.ts under 1,000 lines",
+  "goal": "cli.ts (1,767), runtime.ts (1,017) and server.ts (1,013) fall under 1,000 lines",
+  "status": "planned",
+  "acceptance": [
+    "Existing tests pass unchanged",
+    "No public export changes"
+  ],
+  "dependsOn": [
+    "F-095-T05"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/work/records/F-095.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run typecheck",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-15 at agent speed after the calibration of 2026-11-15. Not a measurement.",
+    "reviewed": "2026-11-15",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}

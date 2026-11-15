@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 12 | 20 |
+| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 21 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
 
@@ -4130,3 +4130,329 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 </details>
 
 ---
+
+## Closed 2026-11-15
+
+### F-020
+
+**Grounded personas for HITL and explanation (Misato primary)**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | 🔹 P3 | Closed | 🟡 Medium |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-15: every step closed and the Check met.
+
+| | |
+|---|---|
+| **Issue** | Personas Codec Chat exists as UI prototype. Free-form roleplay without grounding is a distraction and safety risk. |
+| **Reproduce** | Request approval, status brief, or “why was this Red?”; confirm answers cite real job/decision data and cannot bypass policy. |
+| **Check** | Misato can surface pending HITL and accept/reject with audit; Gendo (or Command) can explain classification; no persona can grant capabilities the backend policy denies; persona layer can be disabled; responses remain useful in non-Eva skins. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-15 in the backlog reconciliation: every step closed on green CI ([PR #427](https://github.com/voidbrain/nerv/pull/427)). 2026-11-15: F-020-T02 closed with `formatMisatoPendingHitl` and `decideHitlThroughPersona` in `src/persona.ts`, `persona hitl list|decide` in `src/cli.ts`, and regression test in `test/persona.test.ts` verifying grounded pending-approval surfacing, neutral fallback when disabled, and audited approve/reject routing through `Store.decide`. Owner decision 2026-11-04 (F-036): persona names are per base and renamable (Misato, Gendo… by default; e.g. Bob, Fritz, Tim on another base); MAGI seat names stay fixed on every base. Implement thin, state-grounded persona adapters after F-003 messaging and F-017 decisions exist. Prefer Misato for push/HITL. Keep Shinji/pilots as optional labels for workers, not primary chat partners. Safety: persona output never overrides capability tokens or Pattern Red rules.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 3 open steps total 3 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort (prototype UI). Estimated 2026-11-02; priority lowered to P3 on 2026-11-04 (skin, not behaviour); estimate unchanged. Reassessed 2026-11-07: explicit prerequisite outcomes preserve the existing scope and remaining-work estimate; independent slices can proceed.
+
+**Completed prerequisites:** [F-003](#f-003) — Messaging path for state-grounded persona replies; [F-017](#f-017) — Policy decisions remain authoritative over persona output.
+
+| Field | Value |
+|---|---|
+| Depends on | — |
+| PR / evidence | [PR #219](https://github.com/voidbrain/nerv/pull/219) retired-reference path correction; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [retired dashboard1 personas prototype](../../remove/docs/NERV/dashboard1.html) |
+| Opened | 2026-11-02 |
+| Verification | 2026-11-15, Script: merged PR CI green (#427); every step closed. |
+| Reviewed | 2026-11-15 |
+
+</details>
+
+---
+
+### F-044
+
+**Memory: one fact per subject, a proposed spelling fix, typo-tolerant recall**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | 🔹 P3 | Closed | 🟡 Medium |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-15: every step closed and the Check met.
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-05 about "remember i don't like wine and i play ultimate frisbbe": it is stored as one fact; facts are not linked to each other; recall matches exact words, so "frisbee" will not find "frisbbe" and the typo stays. |
+| **Reproduce** | `nerv chat "remember i don't like wine and i play ultimate frisbbe"`, approve, then ask "what sports do I play?" and look in Lilith. |
+| **Check** | A request with several facts proposes one fact per subject, on one card the owner approves or edits as a whole (each fact also editable or removable before approving); a proposed spelling fix is shown on the card next to the original (never applied silently); recall finds a fact despite a small typo (in the request or in the fact) and still ranks exact matches first; tests cover the split, the shown fix and fuzzy recall. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-15 in the backlog reconciliation: every step closed on green CI ([PR #439](https://github.com/voidbrain/nerv/pull/439)). 2026-11-15: F-044-T03 closed with bounded Levenshtein fallback in `Memory.recall` (`src/memory.ts`), finding facts despite small typos in either the query or stored fact while ranking exact FTS5 matches first (`test/memory.test.ts`). F-044-T02 closed with `suggestSpellingFix` in `src/memory.ts`, `suggestedText` & explicit `{ useSuggestedFix: true }` opt-in in `src/store.ts` and `src/server.ts`, Telegram & dashboard card rendering (`web/public/dashboard/dashboard.js`, `web/public/dashboard/live.js`) showing proposed fixes next to the original without silent mutation, and regression test in `test/memory.test.ts`. F-044-T01 closed 2026-11-14 after [PR #392](https://github.com/voidbrain/nerv/pull/392) merged with all CI jobs green: a multi-subject request creates one independently auditable approval per fact and presents them on one card with per-fact Edit/Remove and card-level approval. Next F-044-T03. Planned 2026-11-05 (owner approved the three parts).
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 3 open steps total 3 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort. Estimated 2026-11-05.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner question 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-15, Script: merged PR CI green (#439); every step closed. |
+| Reviewed | 2026-11-15 |
+
+</details>
+
+---
+
+### F-050
+
+**Forwarding a whole job to another base**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | 🔶 P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-15: every step closed and the Check met.
+
+| | |
+|---|---|
+| **Issue** | Owner questions 2026-11-05: can a base forward a full job to another, when it is busy or when the other does better; why, when and how. Today a base that is not the main one forwards whole requests to the main base (one channel, F-036), and the main base sends single actions to a base that offers them (slice 3b); the main base never hands a whole job to another base. |
+| **Reproduce** | Ask the main base for a job only another base can do well (Tabgha's 3D expert, its GPU, a device next to it). |
+| **Check** | The main base forwards a whole job when another base has the pilot, model, tool or device it needs (capability), when its own queue or model is busy and the other is idle (load), or when the data or device is there (locality), never a job with local-only or tainted data (the Scrolls decide what may leave); the job goes as one signed Kaji message with a job ID (it never runs twice) and only the context the Scrolls allow; the receiving base runs the whole sortie with its own Misato, pilot and gate, never looser than the main base's Scrolls; cards still reach the owner through Aoba; the result returns as a follow-up and the main ledger records where it ran and why; if the base goes silent, reconcile durable job receipts and resource ownership before any retry or reassignment; silence alone never proves execution stopped; tests across two bases. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-15 in the backlog reconciliation: every step closed on green CI ([PR #430](https://github.com/voidbrain/nerv/pull/430), [PR #442](https://github.com/voidbrain/nerv/pull/442)). 2026-11-15: F-050-T02 closed with `WholeJobHandoffStore` in `src/whole-job-handoff.ts` (wired into `Store.wholeJobHandoffs` in `src/store.ts`) and `test/whole-job-handoff.test.ts` verifying receipt-bound reconciliation before retry or reassignment across lost reply, restart, and sleeping base, plus Scroll floor and F-048 load-forwarding enforcement. F-050-T01 closed with [whole-job handoff contract](../decisions/whole-job-handoff.md) distinguishing bounded worker actions (`WorkerJobs`) from delegated whole sorties, inspecting the `F-045` remote capability prerequisite (`src/pilots.ts`, `src/kaji.ts`, `src/worker-jobs.ts`), and requiring unknown outcomes to remain held (`uncertain`) until reconciled; no runtime delegation is authorized by this contract. Planned 2026-11-05 (owner). Builds on F-036, F-045 (pilots offered by other bases) and F-048.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 2 open steps total 3.5 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Reassessed 2026-11-06 with B-028: removing unused speculative types does not remove implemented behavior; concrete tested contracts remain part of this feature, so Large remains valid.  Large remaining effort. Estimated 2026-11-05. Reassessed 2026-11-07: explicit prerequisite outcomes preserve the existing scope and remaining-work estimate; independent slices can proceed.
+
+| Field | Value |
+|---|---|
+| Depends on | [F-045](#f-045) — Remote pilot capability offers for capability-based forwarding |
+| PR / evidence | [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](../work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](../audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner questions 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-15, Script: merged PR CI green (#430, #442); every step closed. |
+| Reviewed | 2026-11-15 |
+
+</details>
+
+---
+
+### F-054
+
+**The base chronicle: a daily log of the agency's milestones, plain and in Eva lore**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | 🔹 P3 | Closed | 🟡 Medium |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-15: every step closed and the Check met.
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-05: the base should keep a log of what happened ("today we established connection with Tabgha"), in Eva lore or in two versions. The ledger is evidence, not a story; Instrumentality summarises the owner's conversations, not the agency's own milestones. |
+| **Reproduce** | Look for a record of when Tabgha joined, the first relayed request or the first pilot: only scattered events. |
+| **Check** | One entry per day, built only from recorded facts (bases enrolled or online for the first time, a new main base, pilots created or promoted, the first action run on another base, outages and recoveries; bugs closed left out by owner decision 2026-11-12), never invented; two versions by theme: Simple, plain and without a model; Eva, the same facts retold in the lore voice by a *Chronicler* pilot (Fuyutsuki), a writer only, starting at Proto, its text checked to name only the day's facts; shown as a Chronicle tab, with an optional line in the morning brief; each entry links its sources (sortie IDs, registry records). |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Owner decisions, 2026-11-12:** (1) F-054 starts now, ahead of the rest of F-021 (F-021-T02 to T05 stay open): F-021 is no longer a prerequisite. (2) Facts the agency does not store today (a base online for the first time: only `last_seen` is kept; outages and recoveries: route and base health live in memory; pilot promotions: a stage change is a hand edit of config.json) are recorded from now on, without backfill: new step F-054-T04. (3) Bugs closed are left out: they live in the git backlog, not in the agency's data, and the running service does not read its development repository.
+
+**F-054-T01, 2026-11-12 ([PR #301](https://github.com/voidbrain/nerv/pull/301)):** `src/chronicle.ts` builds the Simple chronicle without a model: one entry per local day (owner's time zone), only days with something recorded, each line with its source (`registry:<record id>` or a sortie's short ID). Facts: base enrolled, enrolled again, revoked and named main (signed registry records under the pinned root, dated by their signed `issued` time), pilot created (an approved `pilots.create` that ran), and per base the first remote action that ran without an error. `chronicle [DAYS]` prints it (last 30 days by default), in English or Italian. Evidence: `test/chronicle.test.ts` (day grouping across midnight in Rome, no entry for empty days, unreadable times and unknown kinds left out, both languages, and a join test across Store, Ledger and Registry: only the approved pilot, the first remote action that ran (not a failed, a later or a waiting one), registry sources equal to the stored record IDs, then the CLI command). Dashboard tab and brief line are F-054-T03.
+
+**Reconcile 2026-11-12 ([PR #306](https://github.com/voidbrain/nerv/pull/306)):** [PR #305](https://github.com/voidbrain/nerv/pull/305) merged into main `5700ccf`; its CI [43232448595](https://github.com/voidbrain/nerv/actions/runs/43232448595) passed all five jobs. F-054-T04 closed (1 h agent, stated, against 1.5 h). F-054 stays Open: F-054-T02 and F-054-T03 are planned.
+
+**F-054-T04, 2026-11-12 ([PR #305](https://github.com/voidbrain/nerv/pull/305)):** `src/milestones.ts` keeps an append-only `milestones` table (additive, no schema version change; update and delete refused by triggers), recorded from now on with no backfill: a base heard of for the first time (`Registry.seen`, only when no last-seen time was stored for it under any root), another base unreachable after a full online window of missed heartbeats and back on its next answer (`KajiLink.mark` → `milestones.health` in the nervous process), a model route down and back (`Runtime.logRoutes`, once a minute from the brain's route health, so a flap shorter than the poll is not recorded), and a pilot promoted to a later stage by `pilots set ID --stage …` (a demotion or another edit is not). Only a change adds a row, and a report not newer than the last one for that subject is ignored, so repeats and restarts add nothing. The chronicle shows them with source `milestone:<row id>`, in English and Italian. Evidence: `test/milestones.test.ts` (rules, append-only, no backfill, and three joins: Kaji link → runtime → nervous process → chronicle; brain route health → runtime → chronicle; `pilots set` → `chronicle` CLI).
+
+**Next action / closure evidence:** Closed 2026-11-15 in the backlog reconciliation: every step closed on green CI ([PR #443](https://github.com/voidbrain/nerv/pull/443)). Planned 2026-11-05 (owner: yes, after F-021; superseded 2026-11-12, see above). Builds on the ledger, the Gehirn registry, F-045 (pilots) and F-028 (the brief).
+
+**Estimates:** Medium remaining effort. Estimated 2026-11-05. Reassessed 2026-11-07: explicit prerequisite outcomes preserve the existing scope and remaining-work estimate; independent slices can proceed.
+
+| Field | Value |
+|---|---|
+| Depends on | [F-045](#f-045) — Chronicler pilot for the Eva narrative; plain fact collection can proceed |
+| PR / evidence | [PR #305](https://github.com/voidbrain/nerv/pull/305) F-054-T04 milestones (src/milestones.ts, test/milestones.test.ts); [PR #301](https://github.com/voidbrain/nerv/pull/301) F-054-T01 Simple chronicle (src/chronicle.ts, test/chronicle.test.ts); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner request 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-15, Script: merged PR CI green (#443); every step closed. |
+| Reviewed | 2026-11-15 |
+
+</details>
+
+---
+
+### F-064
+
+**Bounded incident circuits instead of a global kill switch**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | 🔹 P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-15: every step closed and the Check met.
+
+| | |
+|---|---|
+| **Issue** | Preserved proposal 3 of the [architecture reassessment](../audits/2026-11-06-architecture-reassessment.md#3-automatic-incident-response-bounded-circuits-before-a-global-kill-switch): Spear revokes unused grants and stands down approvals by hand, but nothing detects an incident, interrupts in-flight work or responds automatically. A global automatic revocation would itself risk an outage. |
+| **Reproduce** | Inject a fault (a tool repeatedly failing, a tainted input reaching an external-effect action): nothing changes until the owner spears the sortie. |
+| **Check** | One circuit first, with a written trigger → response table: stop new work in the affected scope, revoke its unused grants, keep evidence, one deduplicated alert, explicit rearm. Injected faults revoke only the intended authority and keep recovery access; benign input never trips it; model suspicion is a signal for review, never authority to stop every base. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-15 in the backlog reconciliation: every step closed on green CI ([PR #445](https://github.com/voidbrain/nerv/pull/445)). F-064-T01 closed 2026-11-13: the owner accepted the first circuit: on one channel, repeated Blue action attempts from tainted input trip it; its response reuses the Spear of Longinus on every open sortie of that channel (revoke unused grants, stand down pending approvals, close the sortie) and adds what the Spear lacks: it stops new work on the channel, keeps the evidence, sends one deduplicated alert, and only the owner rearms it. Like the Spear, it cannot undo effects that already ran; it reports them. A global kill switch and model-only shutdown stay rejected. Proposed 2026-11-06; not accepted scope until the owner picks the first circuit. The reassessment also notes that Spear does not stop an already-running external operation or run inverses; interruption and compensation stay explicit, separately authorized work, not part of a first circuit. Related F-023 (approvals) and the closed F-024 ledger. Design input 2026-11-07: the OWASP [Agent Control Standard](https://github.com/GenAI-Security-Project/agent-control-standard) v0.1.0 (a Guardian that allows, denies or modifies each tool call, deterministic layer first, optional model layer without the policy source) mirrors the MAGI gate; its reference Guardian fails open by default and its wire is not yet authenticated, so it is a comparison point for trigger and rearm vocabulary, not a component to adopt. Threat-map row ASI08 (cascading failures) points here (F-065, [PR #179](https://github.com/voidbrain/nerv/pull/179)).
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 3 open steps total 3.25 h agent + 0.25 h owner (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium for one bounded circuit; large for a cross-base incident coordinator. Set 2026-11-06.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](../audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-15, Script: merged PR CI green (#445); every step closed. |
+| Reviewed | 2026-11-15 |
+
+</details>
+
+---
+
+### F-065
+
+**Agentic threat map: each OWASP risk tied to a NERV control and the test that proves it**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | 🔶 P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-15: every step closed and the Check met.
+
+| | |
+|---|---|
+| **Issue** | The gate, grants, Lilith, the Kaji line and the tools process already answer most published agentic risks, but nothing maps them: a reviewer cannot see which risk a control covers, which risk has no control, or which claim no test backs. The [architecture reassessment](../audits/2026-11-06-architecture-reassessment.md#3-automatic-incident-response-bounded-circuits-before-a-global-kill-switch) cites only OWASP's prompt-injection cheat sheet. |
+| **Reproduce** | Ask which NERV test covers OWASP ASI08 (cascading failures) or LLM06:2026 (unbounded consumption): no document answers, and the honest answer today is none. |
+| **Check** | One row per risk from the [OWASP Top 10 for Agentic Applications](https://genai.owasp.org/initiatives/agentic-security-initiative/) (ASI01–ASI10), the [LLM Top 10 2026](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/) (LLM01–LLM10) and the [MCP Top 10](https://owasp.org/www-project-mcp-top-10/) (MCP01–MCP10, beta), each citing version-pinned [AISVS](https://github.com/OWASP/AISVS) requirements (`v1.01-C<chapter>.<section>.<req>`, mainly C5, C8, C9, C10, C12), the NERV control (source path) and a test name, or "gap" with the owning record. A tool run in CI fails when a cited test does not exist or a row is neither tested nor a named gap. Not-applicable rows say why (LLM09: no embeddings, Lilith uses FTS5). |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-15 in the backlog reconciliation: every step closed on green CI ([PR #435](https://github.com/voidbrain/nerv/pull/435), [PR #444](https://github.com/voidbrain/nerv/pull/444)). Proposed 2026-11-07 from an OWASP standards review in the session (Agentic Top 10, LLM Top 10 2026, MCP Top 10, AISVS 1.01, Agent Control Standard). Known gaps to land as rows: ASI08 cascading failures (F-064), LLM06:2026 unbounded consumption (F-063), credential rotation (F-066). Candidate gap to verify first: MCP results flowing into later prompts (LLM08:2026 hidden context exposure, MCP10). Map, not certification: a row says what a test shows, never that the risk is gone.
+
+**Accepted assessment 2026-11-09:** [execution boundaries](../reviews/2026-11-09-execution-boundaries.md). Map the deterministic runner/warden controls (F-049), protected grading and artifact-bound promotion (F-006), and existing grant/recovery safeguards to actual tests or named gaps. No new LLM security authority, compliance claim or separate security project follows.
+
+**Retained test references 2026-11-09:** [external-project assessment](../reviews/2026-11-09-external-agent-projects.md): AgentDojo hostile tool-output families can inform versioned NERV attack/defense cases. Map observed controls to actual tests or named gaps; a benchmark pass is neither certification nor proof of F-049 confinement.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 2 open steps total 2 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium: the document is a day; the test-name check is small. Set 2026-11-07.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #179](https://github.com/voidbrain/nerv/pull/179) record and roadmap placement |
+| Opened | 2026-11-07 |
+| Verification | 2026-11-15, Script: merged PR CI green (#435, #444); every step closed. |
+| Reviewed | 2026-11-15 |
+
+</details>
+
+---
+
+### F-077
+
+**Dependency and code alerts, a Node 26 CI job and a dependency refresh**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | 🔹 P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-15: every step closed and the Check met.
+
+| | |
+|---|---|
+| **Issue** | Proposed by the full audit of 2026-11-06 and never decided or tracked: Dependabot alerts are disabled and no code-scanning analysis exists; CI tests Node 24 while the bases run Node 26. On 2026-11-13 `npm outdated` lists `@anthropic-ai/sdk` 1.1.0 (1.8.0 out), Angular 22.2.4 (22.2.6) and TypeScript 6.0.3 (7.0.2, a major). |
+| **Reproduce** | `gh api repos/voidbrain/nerv/dependabot/alerts` (403 disabled), `gh api repos/voidbrain/nerv/code-scanning/alerts` (404 no analysis), `npm outdated`, `node-version` in `.github/workflows/ci.yml`. |
+| **Check** | Each chosen option is in place: alerts on and read in the next audit; a Node 26 job green in CI; patch and minor updates applied with the full suite and build passing. Options not chosen are recorded as declined. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-15 in the backlog reconciliation: every step closed on green CI ([PR #446](https://github.com/voidbrain/nerv/pull/446)). F-077-T01: on 2026-11-13 the owner adopted (a) Dependabot alerts and (b) code scanning, and declined (c) the Node 26 CI job. The agent's attempt to turn both settings on was refused by its sandbox, so the owner was given the [steps](../acceptance/f077-security-settings.md). F-077-T01 closed 2026-11-13: after the owner's explicit approval the agent turned both on (vulnerability-alerts 204; CodeQL default setup started run 43485629624). F-077-T02 can go ahead without it.
+
+**Estimates:** Small, estimated 2026-11-13. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #379](https://github.com/voidbrain/nerv/pull/379) [PR #377](https://github.com/voidbrain/nerv/pull/377) [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](../audits/2026-11-13-full.md) |
+| Opened | 2026-11-13 |
+| Verification | 2026-11-15, Script: merged PR CI green (#446); every step closed. |
+| Reviewed | 2026-11-15 |
+
+</details>
+
+---
+
+### F-080
+
+**Peer-facing handlers move out of the serve wiring into a tested module**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | 🔹 P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-15: every step closed and the Check met.
+
+| | |
+|---|---|
+| **Issue** | `onRelay`, `onDecide`, `onChat` and `onSortie`, which decide what another base may read or do, are defined inline in the `serve` command of `src/cli.ts` (lines 1431–1458). That makes the composition root hold peer policy, testable only through a cross-base run; the F-051 sortie-scope question sat there ([architecture reassessment](../audits/2026-11-13-architecture-reassessment.md), finding 5). |
+| **Reproduce** | Read `src/cli.ts` `serve`. |
+| **Check** | The handlers live in a module under `src/` with unit tests for each refusal and success path; `serve` only wires them; behaviour does not change (the existing cross-base tests pass unchanged). |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-15 in the backlog reconciliation: every step closed on green CI ([PR #431](https://github.com/voidbrain/nerv/pull/431)). 2026-11-15: F-080-T01 closed with `createPeerHandlers` in `src/peer-handlers.ts`, `serve` wiring in `src/cli.ts`, and unit/cross-base tests (`test/peer-handlers.test.ts`, `test/kaji-link.test.ts`, `test/one-channel.test.ts`) passing. Proposed by the [architecture reassessment of 2026-11-13](../audits/2026-11-13-architecture-reassessment.md); a split of `src/runtime.ts` is deferred there.
+
+**Estimates:** Small, estimated 2026-11-13: 0.5 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #377](https://github.com/voidbrain/nerv/pull/377) [Architecture reassessment 2026-11-13](../audits/2026-11-13-architecture-reassessment.md) |
+| Opened | 2026-11-13 |
+| Verification | 2026-11-15, Script: merged PR CI green (#431); every step closed. |
+| Reviewed | 2026-11-15 |
+
+</details>
+
+---
+
+### F-096
+
+**Fewer tokens per run: quiet test output and short records**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | 🔶 P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-15: every step closed and the Check met.
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-14: prefer fewer tokens to less time. A passing `npm test` prints 103k characters (about 26k tokens) for 744 tests; Node's dot reporter prints 786 but alone drops the totals, test names and what tests log. npm adds `npm notice run …` lines to each script. F-005 holds 28 KB of dated evidence and F-051 13 KB, re-read whenever the record is touched. |
+| **Reproduce** | `npm test 2>&1 \| wc -c`; `wc -c docs/work/records/*.md \| sort -n \| tail`. |
+| **Check** | `npm test` prints dots, every failure in full and the totals, and writes the complete spec report to an ignored file (a test proves a failure and a test's log are kept); `.npmrc` sets `loglevel=warn`; F-005 and F-051 keep their current state and recent evidence, and older dated evidence moves to the archive with a link back, every line preserved; characters before and after recorded. Uses the harness quiet reporter (project-harness F-077-T02) when released; until then a local reporter with the same behaviour. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-15 in the backlog reconciliation: every step closed on green CI ([PR #439](https://github.com/voidbrain/nerv/pull/439)). 2026-11-15: F-096-T02 closed with older evidence moved verbatim to [2026 evidence archive](../archive/evidence-2026.md) (`docs/work/records/F-005.md`: 27,936 bytes / 113 lines -> 7,943 bytes / 50 lines; `docs/work/records/F-051.md`: 12,793 bytes / 36 lines -> 5,840 bytes / 36 lines). Opened 2026-11-14 at the owner's request; pairs with project-harness F-077 (token-lean outputs) and F-076 (rule load).
+
+**Estimates:** Small, estimated 2026-11-14: 1 h agent over two steps. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #393](https://github.com/voidbrain/nerv/pull/393) (opened) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-15, Script: merged PR CI green (#439); every step closed. |
+| Reviewed | 2026-11-15 |
+
+</details>
+
+---
+

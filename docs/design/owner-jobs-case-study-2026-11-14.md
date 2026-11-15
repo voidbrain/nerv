@@ -28,7 +28,7 @@ This is an assessment, not a decision: each job maps to the record that owns it.
 - **Chat and channels:** CLI, dashboard chat and Telegram reach Misato, who plans one step at a time; every action passes the gate. Approval cards exist on the dashboard, in Telegram and in the companion ([memory and chat](../guides/memory-and-chat.md)).
 - **Memory:** Lilith keeps one-line facts the owner approved. It is not a store for lists or documents, so jobs 1 and 2 need a new store.
 - **Tools:** MCP servers, deny-by-default, read tools grantable as Green ([F-021](../work/records/F-021.md)); writes behind approval cards are F-021's next slice.
-- **Bases and workers:** several bases over the Kaji line and enrolled workers ([F-005](../work/records/F-005.md)); whole-job forwarding to the base that has the device is [F-050](../work/records/F-050.md).
+- **Bases and workers:** several bases over the Kaji line and enrolled workers ([F-005](../work/records/F-005.md)); whole-job forwarding to the base that has the device is [F-050](../archive/backlog-2026.md#f-050).
 - **Not yet:** a sandbox per job ([F-049](../work/records/F-049.md)), coding workers ([F-006](../work/records/F-006.md)), provenance and taint ([F-027](../work/records/F-027.md)), voice ([F-007](../work/records/F-007.md)), and any browser or desktop control ([F-012](../work/records/F-012.md)).
 
 ## Building blocks the jobs share
