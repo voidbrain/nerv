@@ -29,6 +29,7 @@ nerv doctor
 nerv remind "Renew car insurance" "2030-01-15T09:00:00+01:00"
 nerv chat "What reminders do I have?"
 nerv service install   # macOS launchd, Linux systemd --user, Windows Task Scheduler
+nerv update-policy on  # scheduled automatic update: checked 20:00, applied 03:00 unless you say "aspetta"
 ```
 
 Verification: `npm test`, `npm run typecheck`, `npm run test:headless`, `npm run test:browser` (Chrome/Chromium after build).

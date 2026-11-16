@@ -35,6 +35,8 @@ export interface RuntimeChatHost {
   bases(): Promise<StatusBase[]>;
   baseHealth(): Promise<BaseHealth>;
   channelState(): ChannelState;
+  /** F-102-T02: "aspetta"/"wait" postpones an announced automatic update; undefined when nothing is scheduled. */
+  updatePostpone?(text: string): { postponed: boolean; reply?: string } | undefined;
   resolveOperator(query: string, opts: { excludeSelf?: boolean }): Promise<OperatorResolution>;
   loop(
     sortieId: string,
@@ -80,6 +82,10 @@ export class RuntimeChat {
   }
 
   async chatOnce(message: string, conversation?: string): Promise<ChatReply> {
+    // The owner's "aspetta"/"wait" for an announced update is answered here; with nothing scheduled it is ordinary chat.
+    const postponed = this.host.updatePostpone?.(message);
+    if (postponed?.postponed && postponed.reply)
+      return { command: true, sortieId: '', reply: postponed.reply, steps: [], waiting: [] };
     const command = readCommand(message);
     if (command) {
       const it = requestLanguage(message) === 'it';

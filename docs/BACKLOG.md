@@ -1123,7 +1123,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-102-T02, the policy control, the 20:00 check and the notice.
+💻 **→** Next: F-102-T03, apply at the announced time through the lifecycle host and report.
 
 | | |
 |---|---|
@@ -1135,7 +1135,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-102-t02"></a>F-102-T02 — Policy control, scheduled check and notice | 0.75 h | 0 h | 0.75 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-102-t02"></a>F-102-T02 — Policy control, scheduled check and notice | 0.75 h | 0 h | 0.75 h | Implemented; verification pending | 🤖 |
 | 🟢 Small | <a id="f-102-t03"></a>F-102-T03 — Apply at the announced time and report | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-102-T02](#f-102-t02) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-102-t04"></a>F-102-T04 — Owner check: one automatic update | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-102-T03](#f-102-t03) | ⏳ 🧑‍🔧 |
 | 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 4 steps recorded) | 1.5 h agent + 0.25 h owner | 1 of 4 completed | |

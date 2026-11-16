@@ -76,8 +76,9 @@
     if (polling || !token) return; polling = true;
     const historySince = state.lastVisit;
     try {
-      const [latest20, cards, doctor, history, facts, episodes, kajiBases, pilots, update, queueData] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("dashboard/history?since=" + encodeURIComponent(new Date(historySince).toISOString())), api("memory"), api("memory/episodes"), api("bases").catch(() => []), api("pilots").catch(() => null), api("update").catch(() => null), api("queue").catch(() => null)]);
+      const [latest20, cards, doctor, history, facts, episodes, kajiBases, pilots, update, queueData, updatePolicy] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("dashboard/history?since=" + encodeURIComponent(new Date(historySince).toISOString())), api("memory"), api("memory/episodes"), api("bases").catch(() => []), api("pilots").catch(() => null), api("update").catch(() => null), api("queue").catch(() => null), api("update/policy").catch(() => null)]);
       state.update = update || doctor.update || null;
+      state.updatePolicy = updatePolicy || null;
       await loadUsage();
       // The newest sorties, plus older pages the owner loaded and every match of the current search, newest first.
       const byId = new Map(); for (const x of [...latest20, ...older, ...matches]) if (!byId.has(x.id)) byId.set(x.id, x);
@@ -466,8 +467,16 @@
         ((mu.recovery || []).length ? "<div class='muted' style='margin-top:4px'>Recovery:<ol style='margin:2px 0 0 16px;padding:0'>" + mu.recovery.map(s => "<li>" + esc(s) + "</li>").join("") + "</ol></div>" : "") +
         "</div>"
       : "";
+    // F-102-T02: the automatic update switch (20:00 check, notice, 03:00 apply unless the owner says wait).
+    const up = state.updatePolicy && state.updatePolicy.policy;
+    const la = state.updatePolicy && state.updatePolicy.lastAttempt;
+    const policyHtml = up
+      ? "<div class='row small' style='margin-top:6px'><label for='chk-auto-update' class='muted'>Automatic updates · checked 20:00, applied 03:00 unless you say wait</label><input type='checkbox' id='chk-auto-update'" + (up.enabled ? " checked" : "") + (state.updatePolicyBusy ? " disabled" : "") + "></div>" +
+        (la ? "<div class='small " + (la.outcome === "completed" ? "ok" : la.outcome === "refused" ? "warn" : "muted") + "'>Last automatic attempt: " + esc(la.outcome) + (la.revision ? " · " + esc(la.revision.slice(0, 7)) : "") + ((la.reasons || []).length ? " · " + esc(la.reasons.join("; ")) : "") + "</div>" : "")
+      : "";
     document.getElementById("health").innerHTML = degraded + rows.map(c => "<div class='row small'><span>" + c[0] + "</span><span class='" + c[1] + "'>" + (c[1] === "ok" ? "✓ " : "✗ ") + esc(c[2]) + "</span></div>").join("") +
       updateActionHtml +
+      policyHtml +
       updateResultHtml +
       "<div class='row small' style='margin-top:6px'><span class='muted'>Edited config.json? Apply it without a restart.</span><button class='btn sm' id='btn-reload'>Reload models</button></div>";
   };
@@ -775,6 +784,28 @@
     if (!t) return;
     e.preventDefault();
     void window.liveApplyUpdate();
+  });
+  // F-102-T02: the switch posts the policy; an empty selection means this base on main (the server fills it in).
+  window.liveSetAutoUpdate = async function (enabled) {
+    if (state.updatePolicyBusy) return;
+    const current = (state.updatePolicy && state.updatePolicy.policy) || { channels: [], targets: [] };
+    state.updatePolicyBusy = true;
+    renderHealth();
+    try {
+      const r = await api("update/policy", { method:"POST", body:JSON.stringify({ enabled: !!enabled, channels: current.channels || [], targets: current.targets || [] }) });
+      state.updatePolicy = Object.assign({}, state.updatePolicy, { policy: r.policy });
+      log(enabled ? "Automatic updates on: checked at 20:00, applied at 03:00 unless you say wait." : "Automatic updates off; nothing is scheduled.", "ok", null, "maya");
+    } catch (e) {
+      log("Update policy error: " + e.message, "danger", null, "maya");
+    } finally {
+      state.updatePolicyBusy = false;
+      renderHealth();
+    }
+  };
+  document.addEventListener("change", e => {
+    const t = e.target && e.target.closest && e.target.closest("#chk-auto-update");
+    if (!t) return;
+    void window.liveSetAutoUpdate(t.checked);
   });
   window.liveSpear = async function (shortId) {
     const s = state.sorties.find(x => x.id === shortId); if (!s) return;

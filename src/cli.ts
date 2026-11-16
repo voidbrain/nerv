@@ -11,6 +11,9 @@ import { runCardCopyRule, type CopyRule } from './storage-copy.ts';
 import { sliceModelWithProfile, type SlicerProfile } from './slicer.ts';
 import { runCodingJobInWorktree, type AllowedCodingRepo } from './coding-job.ts';
 import { DesktopRecordingSession, type DesktopRecordingHeader } from './desktop-recording.ts';
+import { defaultAutoUpdatePolicy } from './update-policy.ts';
+import { startAutoUpdateScheduler } from './update-scheduler.ts';
+import type { UpdateControl } from './server-update.ts';
 import { clickNamedControl, type BrowserAdapterDriver } from './browser-control.ts';
 import { clickDesktopControl, type DesktopAccessibilityDriver } from './desktop-control.ts';
 
@@ -45,6 +48,7 @@ import {
   readToken,
   setting,
   type Base,
+  setUpdatePolicy,
 } from './config.ts';
 
 import { TelegramApi, TelegramChannel, telegramBase } from './telegram.ts';
@@ -530,8 +534,18 @@ try {
         let server: ReturnType<typeof makeServer>;
         let native: ReturnType<typeof makeServer> | undefined;
         let close: () => void = () => {};
+        let updateControl: UpdateControl | undefined;
         try {
-          server = makeServer(runtime, () => readToken(home), { webRoot, ...config, onStop: () => close() });
+          server = makeServer(runtime, () => readToken(home), {
+            webRoot,
+            ...config,
+            onStop: () => close(),
+            readUpdatePolicy: () => readConfig(home).updatePolicy ?? defaultAutoUpdatePolicy(),
+            saveUpdatePolicy: (policy) => setUpdatePolicy(home, policy),
+            exposeUpdateControl: (control) => {
+              updateControl = control;
+            },
+          });
           native =
             nativeTLS && nativeAuth
               ? makeServer(runtime, () => readToken(home), {
@@ -556,9 +570,28 @@ try {
         runtime.setChannelState(() =>
           aoba ? aoba.channelState() : { mode: 'unavailable', checkedAt: new Date().toISOString() },
         );
+        // F-102-T02: the scheduled automatic update (20:00 check, notice, 03:00 apply unless "aspetta"); the policy is
+        // re-read every minute, so `nerv update-policy` and the dashboard switch apply without a restart.
+        const control = updateControl;
+        const updates = control
+          ? startAutoUpdateScheduler({
+              readPolicy: () => control.readPolicy(),
+              check: (channel) => control.check(channel),
+              evaluate: (input) => control.evaluate(input),
+              notify: (message) => runtime.notice(message),
+              settings: () => {
+                const live = readConfig(home);
+                return { timeZone: live.timeZone, language: live.language, target: live.base.id };
+              },
+              onError: (error) =>
+                console.error(`Update scheduler: ${error instanceof Error ? error.message : String(error)}`),
+            })
+          : undefined;
+        runtime.setUpdatePostpone((text) => updates?.scheduler.postpone(text));
         close = () => {
           if (stopped) return;
           stopped = true;
+          updates?.stop();
           void aoba?.stop();
           void kaji?.stop();
           void Promise.all(

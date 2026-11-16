@@ -14,7 +14,7 @@ import { buildInfo } from './build.ts';
 import type { UpdateAvailability } from './update-availability.ts';
 import type { ManualUpdateResult } from './manual-update.ts';
 import type { AutoUpdatePolicy, AutoUpdateSchemaCheck } from './update-policy.ts';
-import { createUpdateHandlers } from './server-update.ts';
+import { createUpdateHandlers, type UpdateControl } from './server-update.ts';
 import type { ServiceHost } from './node-lifecycle-execution.ts';
 import { HealthSampleStore, startLocalHealthSampler } from './health-samples.ts';
 import { RpcFault } from './rpc.ts';
@@ -57,6 +57,8 @@ export function makeServer(
     updatePolicy?: AutoUpdatePolicy;
     saveUpdatePolicy?: (policy: AutoUpdatePolicy) => AutoUpdatePolicy | Promise<AutoUpdatePolicy>;
     checkSchemaSafety?: (revision?: string) => Promise<AutoUpdateSchemaCheck> | AutoUpdateSchemaCheck;
+    readUpdatePolicy?: () => AutoUpdatePolicy;
+    exposeUpdateControl?: (control: UpdateControl) => void;
   } = {},
 ) {
   if (options.native && !options.tls) throw new Error('Native pairing requires TLS.');
