@@ -336,6 +336,12 @@ export class Store {
   toggleListItem(itemId: string) {
     return this.lists.toggleItemById(itemId);
   }
+  listsShow(name: string) {
+    return this.lists.show(name);
+  }
+  listsToggle(itemId: string, done?: boolean, now = new Date()) {
+    return this.lists.setDoneById(itemId, done, now);
+  }
   tick(now = new Date()): number {
     const count = this.remindersController.tick(now);
     const lang = this.remindersController.reminderDefaults().language;

@@ -41,6 +41,30 @@ test('registered Web Component displays hostile text without creating executable
 
   noticeEl.surface = { component: 'nerv-status-card', props: { title: 't', detail: 'd', status: 'ok' } };
   assert.match(noticeEl.shadowRoot.querySelector('p').textContent, /Invalid surface/);
+
+  // 3. F-082-T02: Checklist card renders safely without HTML injection and emits toggle events
+  const checklistEl = window.document.createElement('nerv-checklist-card');
+  checklistEl.surface = {
+    version: 1,
+    component: 'nerv-checklist-card',
+    props: {
+      listId: 'lst_1',
+      name: '<img src=x onerror=alert(1)>',
+      items: [{ id: 'li_1', text: '<script>evil()</script>', done: false }],
+    },
+  };
+  assert.equal(checklistEl.shadowRoot.querySelector('img'), null);
+  assert.equal(checklistEl.shadowRoot.querySelector('script'), null);
+  assert.match(checklistEl.shadowRoot.querySelector('h2').textContent, /<img src=x/);
+
+  const events = [];
+  checklistEl.addEventListener('nerv-checklist-toggle', (ev) => events.push(ev.detail));
+  const cb = checklistEl.shadowRoot.querySelector('input[type="checkbox"]');
+  assert.equal(cb.checked, false);
+  assert.equal(cb.getAttribute('aria-label'), '<script>evil()</script>');
+  cb.checked = true;
+  cb.dispatchEvent(new window.Event('change'));
+  assert.deepEqual(events, [{ listId: 'lst_1', itemId: 'li_1', done: true }]);
 });
 
 test('GenUI surface renderer rejects and logs arbitrary component, code or action payloads', async () => {
@@ -97,4 +121,32 @@ test('GenUI surface renderer rejects and logs arbitrary component, code or actio
   };
   const validResult = validateSurfaceResult(validPayload);
   assert.equal(validResult.ok, true);
+
+  // Test valid checklist payload and item-level rejection
+  const validChecklist = {
+    version: 1,
+    component: 'nerv-checklist-card',
+    props: {
+      listId: 'lst_1',
+      name: 'Shopping',
+      items: [
+        { id: 'li_1', text: 'Milk', done: false },
+        { id: 'li_2', text: 'Pasta', done: true },
+      ],
+    },
+  };
+  assert.equal(validateSurfaceResult(validChecklist).ok, true);
+
+  const badChecklistItem = {
+    version: 1,
+    component: 'nerv-checklist-card',
+    props: {
+      listId: 'lst_1',
+      name: 'Shopping',
+      items: [{ id: 'li_1', text: 'Milk', done: false, onclick: 'alert(1)' }],
+    },
+  };
+  const badChecklistRes = validateSurfaceResult(badChecklistItem);
+  assert.equal(badChecklistRes.ok, false);
+  assert.match(badChecklistRes.reason, /Forbidden item key/);
 });

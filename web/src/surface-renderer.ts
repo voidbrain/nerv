@@ -1,4 +1,4 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, computed, effect, input } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, computed, effect, input, output } from '@angular/core';
 import {
   validateSurfaceResult,
   logSurfaceRejection,
@@ -27,6 +27,12 @@ type Messages = { [K in keyof (typeof messages)['en']]: string };
         }
         @case ('nerv-notice-card') {
           <nerv-notice-card [surface]="asSurface(validation())"></nerv-notice-card>
+        }
+        @case ('nerv-checklist-card') {
+          <nerv-checklist-card
+            [surface]="asSurface(validation())"
+            (nerv-checklist-toggle)="checklistToggle.emit($any($event).detail)"
+          ></nerv-checklist-card>
         }
       }
     } @else {
@@ -68,6 +74,7 @@ type Messages = { [K in keyof (typeof messages)['en']]: string };
 export class SurfaceRenderer {
   readonly surface = input<unknown>();
   readonly t = input<Messages>();
+  readonly checklistToggle = output<{ listId: string; itemId: string; done: boolean }>();
 
   readonly validation = computed<SurfaceValidationResult>(() => {
     return validateSurfaceResult(this.surface());

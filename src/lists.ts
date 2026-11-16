@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { DatabaseSync } from 'node:sqlite';
+import type { ChecklistSurface } from '../shared/surface.ts';
 import { transaction } from './sqlite-transaction.ts';
 
 export const LISTS_SCHEMA = `
@@ -275,6 +276,29 @@ export class ListStore {
       item: { ...mapItem(row), done: nextDone, updated: nowIso },
     };
   }
+
+  setDoneById(
+    itemId: string,
+    done?: boolean,
+    now = new Date(),
+  ): { list: OwnerList; item: ListItem; view: ListView } | null {
+    const row = this.db
+      .prepare('SELECT id, list_id, text, done, position, created, updated FROM list_items WHERE id = ?')
+      .get(itemId.trim()) as ItemRow | undefined;
+    if (!row) return null;
+    const listRow = this.db.prepare('SELECT id, name, created, updated FROM lists WHERE id = ?').get(row.list_id) as
+      ListRow | undefined;
+    if (!listRow) return null;
+    const nextDone = done ?? row.done !== 1;
+    const nowIso = now.toISOString();
+    transaction(this.db, () => {
+      this.db.prepare('UPDATE list_items SET done = ?, updated = ? WHERE id = ?').run(nextDone ? 1 : 0, nowIso, row.id);
+      this.db.prepare('UPDATE lists SET updated = ? WHERE id = ?').run(nowIso, listRow.id);
+    });
+    const list = this.findList(listRow.name) ?? mapList(listRow);
+    const item = { ...mapItem(row), done: nextDone, updated: nowIso };
+    return { list, item, view: { list, items: this.itemsForList(list.id) } };
+  }
 }
 
 export function formatTelegramChecklist(view: ListView): {
@@ -290,5 +314,17 @@ export function formatTelegramChecklist(view: ListView): {
         callback_data: `lt:${item.id}`,
       },
     ]),
+  };
+}
+
+export function toChecklistSurface(view: ListView): ChecklistSurface {
+  return {
+    version: 1,
+    component: 'nerv-checklist-card',
+    props: {
+      listId: view.list.id,
+      name: view.list.name,
+      items: view.items.map((item) => ({ id: item.id, text: item.text, done: item.done })),
+    },
   };
 }

@@ -58,6 +58,6 @@ test('every API call of the workspace and the dashboard bypasses the service wor
   const main = read('web/src/main.ts');
   assert.match(main, /const SW_BYPASS = \{ 'ngsw-bypass': '1' \};/);
   const fetches = [...main.matchAll(/await fetch\('\/api\/[\s\S]*?\}\);/g)].map((m) => m[0]);
-  assert.equal(fetches.length, 2, 'main.ts API calls');
+  assert.equal(fetches.length, 3, 'main.ts API calls');
   for (const call of fetches) assert.match(call, /\.\.\.SW_BYPASS/, call);
 });

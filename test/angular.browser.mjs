@@ -633,6 +633,24 @@ test(
       // 6. Accessible rejection alert passes AXE
       await audit('genui-rejected-surface');
 
+      // 6b. F-082-T02: Checklist card renders, toggles item, updates UI, and passes AXE
+      await evaluate(
+        `window.__nervSetSurface({ version: 1, component: 'nerv-checklist-card', props: { listId: 'lst_demo', name: 'Shopping', items: [{ id: 'li_1', text: 'Milk', done: false }, { id: 'li_2', text: 'Pasta', done: true }] } })`,
+      );
+      await until(`document.querySelector('nerv-surface-renderer nerv-checklist-card')!==null`);
+      assert.equal(
+        await evaluate(`document.querySelector('nerv-checklist-card').shadowRoot.querySelector('h2').textContent`),
+        'Shopping',
+      );
+      await evaluate(`(() => {
+        const cb = document.querySelector('nerv-checklist-card').shadowRoot.querySelector('input[type="checkbox"]');
+        cb.click();
+      })()`);
+      await until(
+        `document.querySelector('nerv-checklist-card').shadowRoot.querySelector('span[role="status"]').textContent === '2/2'`,
+      );
+      await audit('genui-checklist-card');
+
       // 7. Reset back to valid surface
       await evaluate(`window.__nervSetSurface(null)`);
       await until(`document.querySelector('nerv-surface-renderer nerv-status-card')!==null`);

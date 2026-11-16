@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { describe, it } from 'node:test';
 import { readScrolls } from '../src/config.ts';
 import { builtinTools } from '../src/executors.ts';
+import { toChecklistSurface } from '../src/lists.ts';
 import { Store } from '../src/store.ts';
 
 describe('F-082-T01: list store and list tools', () => {
@@ -80,6 +81,26 @@ describe('F-082-T01: list store and list tools', () => {
         ],
       );
       store2.close();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('F-082-T02: sets done by item id and produces a validated checklist surface', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'nerv-lists-'));
+    try {
+      const store = new Store(join(dir, 'nerv.sqlite'));
+      const added = store.lists.addItems('shopping', ['milk', 'pasta']);
+      const milk = added.items[0]!;
+      const toggled = store.listsToggle(milk.id, true);
+      assert.ok(toggled);
+      assert.equal(toggled.item.done, true);
+      const surface = toChecklistSurface(toggled.view);
+      assert.equal(surface.component, 'nerv-checklist-card');
+      assert.equal(surface.props.name, 'shopping');
+      assert.equal(surface.props.items[0]!.done, true);
+      assert.equal(surface.props.items[1]!.done, false);
+      store.close();
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

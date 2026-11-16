@@ -176,6 +176,14 @@ export interface StoreApi {
     | { list: OwnerList; items: ListItem[]; item: ListItem }
     | null
     | Promise<{ list: OwnerList; items: ListItem[]; item: ListItem } | null>;
+  listsShow?(name: string): ListView | null | Promise<ListView | null>;
+  listsToggle?(
+    itemId: string,
+    done?: boolean,
+  ):
+    | { list: OwnerList; item: ListItem; view: ListView }
+    | null
+    | Promise<{ list: OwnerList; item: ListItem; view: ListView } | null>;
   pushPublicKey?(): Promise<string> | string;
   savePushSubscription?(sub: {
     endpoint: string;
@@ -216,6 +224,14 @@ export interface StoreApi {
     },
   ): Promise<ChatReply>;
   queueStatus?(): QueueSnapshot;
+  listsShow?(name: string): Promise<ListView | null> | ListView | null;
+  listsToggle?(
+    itemId: string,
+    done?: boolean,
+  ):
+    | Promise<{ list: OwnerList; item: ListItem; view: ListView } | null>
+    | { list: OwnerList; item: ListItem; view: ListView }
+    | null;
   cancelQueued?(id: string): boolean;
   onResumed?(listener: (reply: ChatReply) => void): void;
   reloadModels?(): Promise<{ error?: string; kept?: boolean; models: unknown }>;
