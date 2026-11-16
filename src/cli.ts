@@ -11,6 +11,7 @@ import { createHeadlessResumeDeps, type HeadlessResumeTarget } from './headless-
 import { runCardCopyRule, type CopyRule } from './storage-copy.ts';
 import { sliceModelWithProfile, type SlicerProfile } from './slicer.ts';
 import { runCodingJobInWorktree, type AllowedCodingRepo } from './coding-job.ts';
+import { DesktopRecordingSession, type DesktopRecordingHeader } from './desktop-recording.ts';
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
 import { formatBatteryStateLines, formatDueResistancePrompt, type OneMoreBatteryExport } from './batteries.ts';
@@ -1837,6 +1838,17 @@ try {
           }),
         );
         console.log(JSON.stringify(res, null, 2));
+        break;
+      }
+      case 'desktop-record': {
+        if (!args[0] || !args[1]) throw new Error('Usage: nerv desktop-record <id> <header.json>');
+        const header = JSON.parse(readFileSync(resolve(args[1]), 'utf8')) as DesktopRecordingHeader;
+        const session = new DesktopRecordingSession({
+          id: args[0],
+          permissions: { accessibilityGranted: false, inputMonitoringGranted: false },
+          header,
+        });
+        console.log(JSON.stringify(session.stop(), null, 2));
         break;
       }
       default:
