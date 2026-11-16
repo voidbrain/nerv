@@ -2256,7 +2256,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-098-t02"></a>F-098-T02 — Crash log and questions by chat | 0.5 h | 0 h | 0.5 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-098-t02"></a>F-098-T02 — Crash log and questions by chat | 0.5 h | 0 h | 0.5 h | Ready | 🤖 |
 | 🟢 Small | <a id="f-098-t03"></a>F-098-T03 — Photos on crashes, parts and batteries | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-098-T02](#f-098-t02) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-098-t04"></a>F-098-T04 — Owner check with a real crash | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-098-T03](#f-098-t03) | ⏳ 🧑‍🔧 |
 | 🟢 Small | **Total** | 1.75 h | 0.25 h (1 of 4 steps recorded) | 1 h agent + 0.25 h owner | 1 of 4 completed | |

@@ -4,7 +4,7 @@
   "parent": "F-098",
   "title": "Crash log and questions by chat",
   "goal": "Crashes recorded and queried in Italian and English",
-  "status": "planned",
+  "status": "ready",
   "acceptance": [
     "\"ho crashato Smoke, motore sinistro inferiore rotto\" records the crash; a spare used is counted",
     "Answers: last time this part broke, spares left new/used",
@@ -15,8 +15,14 @@
     "F-008-T06"
   ],
   "resources": [
-    "src/**",
-    "test/**"
+    "src/fleet.ts",
+    "src/batteries.ts",
+    "src/executors.ts",
+    "test/fleet.test.ts",
+    "test/misato.test.ts",
+    "docs/work/tasks/F-098-T02.json",
+    "docs/work/records/F-098.md",
+    "generated:backlog-views"
   ],
   "capabilities": [
     "bounded-edit",
