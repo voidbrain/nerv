@@ -8,6 +8,7 @@ import { runToolsProcessInEva03 } from './eva-runner.ts';
 import { createPeerHandlers } from './peer-handlers.ts';
 import { buildProjectReport, fetchIntoQuarantine } from './quarantine.ts';
 import { createHeadlessResumeDeps, type HeadlessResumeTarget } from './headless-resume.ts';
+import { runCardCopyRule, type CopyRule } from './storage-copy.ts';
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
 import { formatBatteryStateLines, formatDueResistancePrompt, type OneMoreBatteryExport } from './batteries.ts';
@@ -1794,6 +1795,14 @@ try {
         } finally {
           store.close();
         }
+        break;
+      }
+      case 'card-copy': {
+        if (!args[0] || !args[1] || !args[2]) {
+          throw new Error('Usage: nerv card-copy <mountRoot> <label> <rules.json>');
+        }
+        const rules = JSON.parse(readFileSync(resolve(args[2]), 'utf8')) as CopyRule[];
+        console.log(JSON.stringify(runCardCopyRule(args[0], args[1], rules), null, 2));
         break;
       }
       default:
