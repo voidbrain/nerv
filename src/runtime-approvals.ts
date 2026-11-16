@@ -4,7 +4,7 @@ import type { Verdict } from './policy.ts';
 import type { ProcessClient } from './process-client.ts';
 import type { Effect, Pattern } from './policy.ts';
 import { MODEL_TIMEOUT_MS, type RouteName } from './model.ts';
-import { requestLanguage, type Step, type Turn } from './misato.ts';
+import { OWNER_EXPIRED_REASON, ownerRejectedReason, requestLanguage, type Step, type Turn } from './misato.ts';
 import type { RouteHealth } from './route-health.ts';
 import type { Method } from './rpc.ts';
 import {
@@ -438,10 +438,7 @@ export class RuntimeApprovals {
               tool: d.tool,
               args: d.args,
               outcome: 'reject',
-              reason:
-                d.decision === 'expired'
-                  ? 'The approval expired before the owner decided; nothing ran.'
-                  : `The owner did not approve it (${d.decision}); nothing ran.`,
+              reason: d.decision === 'expired' ? OWNER_EXPIRED_REASON : ownerRejectedReason(d.decision),
             };
       await this.host.record(sortieId, steps, step, d.actionId);
     }

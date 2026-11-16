@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "parent": "B-070",
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "B-070-T01",
+  "title": "SBOM test stable on a fresh install",
+  "goal": "The dependency SBOM validates whatever the installed tree or Node version",
+  "status": "ready",
+  "acceptance": [
+    "The cause of the duplicate dependencies entries is named in the record",
+    "A committed test fails first: an npm sbom output with a duplicated dependencies entry; the export deduplicates before validation, or the test pins its condition",
+    "npm test passes on a fresh npm ci under Node 24 and the local Node"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/bom.ts",
+    "test/bom.test.ts",
+    "docs/work/records/B-070.md",
+    "generated:backlog-views"
+  ],
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h",
+    "basis": "Estimated 2026-11-16: compare npm sbom outputs, dedupe or pin, one test. Not a measurement.",
+    "reviewed": "2026-11-16",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  }
+}

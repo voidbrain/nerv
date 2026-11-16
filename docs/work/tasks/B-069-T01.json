@@ -10,13 +10,12 @@
     "A material scope or effort increase goes to the owner"
   ],
   "id": "B-069-T01",
-  "title": "An expired or rejected approval ends the step; cards respect quiet hours",
-  "goal": "One card per approval-needing step, never at night",
-  "status": "ready",
+  "title": "An expired or rejected approval ends the step",
+  "goal": "One card per approval-needing step: a declined or expired tool is never proposed again in the sortie",
+  "status": "implemented",
   "acceptance": [
-    "A committed test fails first, unchanged by the fix: an expired or rejected memory.remember approval produces a second approval on the same sortie",
-    "After the fix the sortie ends (or waits for the owner) with one inbox line; no second approval is created",
-    "Approval cards honour the configured quiet hours like watch notices; a card due at night goes out at the end of the quiet window"
+    "A committed test fails first, unchanged by the fix: after an expired (and, separately, a rejected) approval, the same action proposed again produced a second card",
+    "After the fix the sortie closes with a reply naming the tool and why; no second approval exists; owner-initiated cards are not deferred (no global quiet hours; proactive cards already bundle overnight)"
   ],
   "dependsOn": [],
   "resources": [
