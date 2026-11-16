@@ -4,11 +4,12 @@
   "parent": "F-098",
   "title": "Crash log and questions by chat",
   "goal": "Crashes recorded and queried in Italian and English",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
-    "\"ho crashato Smoke, motore sinistro inferiore rotto\" records the crash; a spare used is counted",
+    "\"ho crashato Smoke, motore sinistro inferiore rotto\" records the crash; spare counts change only when the phrase explicitly says whether a new or used spare was used",
     "Answers: last time this part broke, spares left new/used",
-    "A battery damage note goes on the battery record"
+    "A battery damage note goes on the battery record",
+    "A fleet.chat result in follow-up Misato planning remains local-only; cloud inference is never used for chat-derived history"
   ],
   "dependsOn": [
     "F-098-T01",
@@ -18,6 +19,7 @@
     "src/fleet.ts",
     "src/batteries.ts",
     "src/executors.ts",
+    "src/misato.ts",
     "test/fleet.test.ts",
     "test/misato.test.ts",
     "docs/work/tasks/F-098-T02.json",
@@ -28,7 +30,7 @@
     "bounded-edit",
     "regression-design"
   ],
-  "privacy": "Owner fleet and kitchen data stay local-only; tests use invented batteries, drones and recipes.",
+  "privacy": "Owner fleet and kitchen data, including fleet.chat results in follow-up planning, stay local-only; tests use invented batteries, drones and recipes.",
   "validation": [
     "npm test",
     "npm run check:fast"

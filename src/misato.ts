@@ -432,7 +432,8 @@ export function matchExistingReminders<T extends { title: string; due: string }>
   scored.sort((a, b) => b.score - a.score || a.item.due.localeCompare(b.item.due));
   return scored.slice(0, limit).map((s) => s.item);
 }
-export function misatoAsk(input: StepInput, route: RouteName): Ask {
+export function misatoAsk(input: StepInput, preferredRoute: RouteName): Ask {
+  const route = input.history.some((step) => step.tool === 'fleet.chat') ? 'local' : preferredRoute;
   // Keep the newest steps when the history is long: the planner needs the latest outcome most.
   let steps = input.history.map((s) =>
     s.result === undefined ? s : { ...s, result: localize(s.result, input.timeZone) },

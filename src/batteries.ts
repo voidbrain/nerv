@@ -38,6 +38,13 @@ CREATE TABLE IF NOT EXISTS battery_resistance_records(
   recorded_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS battery_resistance_battery_idx ON battery_resistance_records(battery_id, recorded_at);
+CREATE TABLE IF NOT EXISTS battery_notes(
+  id TEXT PRIMARY KEY,
+  battery_id TEXT NOT NULL REFERENCES batteries(id) ON DELETE CASCADE,
+  note TEXT NOT NULL,
+  recorded_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS battery_notes_battery_idx ON battery_notes(battery_id, recorded_at);
 `;
 
 export interface BatteryRecord {
@@ -295,6 +302,37 @@ export class BatteryRegistry {
       if (!q) return true;
       return b.series?.toLowerCase() === q || b.seriesColor?.toLowerCase() === q;
     });
+  }
+
+  addNote(
+    batteryId: string,
+    note: string,
+    recordedAt = new Date().toISOString(),
+  ): { id: string; batteryId: string; note: string; recordedAt: string } {
+    const trimmed = note.trim();
+    if (!trimmed || trimmed.length > 500) throw new Error('Battery note must contain 1–500 characters.');
+    if (!Number.isFinite(Date.parse(recordedAt))) throw new Error('recordedAt must be a valid timestamp.');
+    if (!this.get(batteryId)) throw new Error(`Battery not found: ${batteryId}`);
+    const id = `bnote-${randomUUID()}`;
+    this.db
+      .prepare('INSERT INTO battery_notes(id, battery_id, note, recorded_at) VALUES (?, ?, ?, ?)')
+      .run(id, batteryId, trimmed, recordedAt);
+    return { id, batteryId, note: trimmed, recordedAt };
+  }
+
+  notes(batteryId: string): Array<{ id: string; batteryId: string; note: string; recordedAt: string }> {
+    if (!this.get(batteryId)) throw new Error(`Battery not found: ${batteryId}`);
+    const rows = this.db
+      .prepare(
+        'SELECT id, battery_id, note, recorded_at FROM battery_notes WHERE battery_id = ? ORDER BY recorded_at ASC, rowid ASC',
+      )
+      .all(batteryId) as Array<{ id: string; battery_id: string; note: string; recorded_at: string }>;
+    return rows.map((row) => ({
+      id: row.id,
+      batteryId: row.battery_id,
+      note: row.note,
+      recordedAt: row.recorded_at,
+    }));
   }
 
   recordState(batteryId: string, state: BatteryChargeState, recordedAt = new Date().toISOString()): BatteryRecord {

@@ -1,5 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { DatabaseSync } from 'node:sqlite';
+import type { BatteryRegistry } from './batteries.ts';
+import { transaction } from './sqlite-transaction.ts';
 
 export const FLEET_SCHEMA = `
 CREATE TABLE IF NOT EXISTS drones(
@@ -29,6 +31,18 @@ CREATE TABLE IF NOT EXISTS spares(
   notes TEXT,
   updated_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS drone_crashes(
+  id TEXT PRIMARY KEY,
+  drone_id TEXT NOT NULL REFERENCES drones(id) ON DELETE CASCADE,
+  part_id TEXT REFERENCES drone_parts(id) ON DELETE SET NULL,
+  category TEXT NOT NULL,
+  position TEXT NOT NULL,
+  component_model TEXT,
+  damage TEXT NOT NULL,
+  spare_used TEXT CHECK (spare_used IN ('new', 'used') OR spare_used IS NULL),
+  crashed_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS drone_crashes_time_idx ON drone_crashes(crashed_at DESC);
 `;
 
 export type PartStatus = 'installed' | 'damaged' | 'removed';
@@ -59,6 +73,18 @@ export interface SpareRecord {
   usedCount: number;
   notes?: string;
   updatedAt: string;
+}
+
+export interface CrashRecord {
+  id: string;
+  droneId: string;
+  partId?: string;
+  category: string;
+  position: string;
+  componentModel?: string;
+  damage: string;
+  spareUsed?: 'new' | 'used';
+  crashedAt: string;
 }
 
 /**
@@ -226,6 +252,207 @@ export class FleetStore {
     ) as Array<Record<string, unknown>>;
     return rows.map(mapSpare);
   }
+
+  recordCrash(input: {
+    droneName: string;
+    category: string;
+    position: string;
+    damage: string;
+    spareUsed?: 'new' | 'used';
+    crashedAt?: string;
+  }): CrashRecord {
+    const drone = this.getDroneByName(input.droneName);
+    if (!drone) throw new Error(`Drone not found: ${input.droneName}`);
+    const category = normalizePartCategory(input.category);
+    const position = normalizePosition(input.position);
+    const damage = input.damage.trim();
+    const crashedAt = input.crashedAt ?? new Date().toISOString();
+    if (!category || !position || !damage || damage.length > 500) {
+      throw new Error('Crash category, position, and damage (up to 500 characters) are required.');
+    }
+    if (!Number.isFinite(Date.parse(crashedAt))) throw new Error('crashedAt must be a valid timestamp.');
+    if (input.spareUsed !== undefined && input.spareUsed !== 'new' && input.spareUsed !== 'used') {
+      throw new Error('spareUsed must be "new" or "used".');
+    }
+
+    const part = this.listParts(drone.id).find(
+      (candidate) => candidate.category === category && candidate.position === position,
+    );
+    if (input.spareUsed !== undefined) {
+      if (!part) throw new Error(`Part not found for ${drone.name}: ${category} (${position}); no spare was counted.`);
+      if (!this.getSpare(part.componentModel)) {
+        throw new Error(`Spare not found for ${part.componentModel}; no crash was recorded.`);
+      }
+    }
+
+    const id = `crash-${randomUUID()}`;
+    return transaction(this.db, () => {
+      if (part) this.db.prepare('UPDATE drone_parts SET status = ? WHERE id = ?').run('damaged', part.id);
+      if (part && input.spareUsed) {
+        this.adjustSpare(
+          part.componentModel,
+          input.spareUsed === 'new' ? { newDelta: -1 } : { usedDelta: -1 },
+          crashedAt,
+        );
+      }
+      this.db
+        .prepare(
+          `INSERT INTO drone_crashes(
+            id, drone_id, part_id, category, position, component_model, damage, spare_used, crashed_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        )
+        .run(
+          id,
+          drone.id,
+          part?.id ?? null,
+          category,
+          position,
+          part?.componentModel ?? null,
+          damage,
+          input.spareUsed ?? null,
+          crashedAt,
+        );
+      const row = this.db.prepare('SELECT * FROM drone_crashes WHERE id = ?').get(id) as
+        Record<string, unknown> | undefined;
+      if (!row) throw new Error('Crash record was not persisted.');
+      return mapCrash(row);
+    });
+  }
+
+  listCrashes(filter: { droneName?: string; category?: string; position?: string } = {}): CrashRecord[] {
+    const clauses: string[] = [];
+    const params: string[] = [];
+    if (filter.droneName) {
+      const drone = this.getDroneByName(filter.droneName);
+      if (!drone) return [];
+      clauses.push('drone_id = ?');
+      params.push(drone.id);
+    }
+    if (filter.category) {
+      clauses.push('lower(category) = lower(?)');
+      params.push(normalizePartCategory(filter.category));
+    }
+    if (filter.position) {
+      clauses.push('lower(position) = lower(?)');
+      params.push(normalizePosition(filter.position));
+    }
+    const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
+    const rows = this.db
+      .prepare(`SELECT * FROM drone_crashes ${where} ORDER BY crashed_at DESC, rowid DESC`)
+      .all(...params) as Array<Record<string, unknown>>;
+    return rows.map(mapCrash);
+  }
+
+  lastCrashForPart(category?: string, position?: string, droneName?: string): CrashRecord | undefined {
+    return this.listCrashes({ category, position, droneName })[0];
+  }
+}
+
+function mapCrash(row: Record<string, unknown>): CrashRecord {
+  return {
+    id: String(row.id),
+    droneId: String(row.drone_id),
+    ...(row.part_id !== null && row.part_id !== undefined ? { partId: String(row.part_id) } : {}),
+    category: String(row.category),
+    position: String(row.position),
+    ...(row.component_model !== null && row.component_model !== undefined
+      ? { componentModel: String(row.component_model) }
+      : {}),
+    damage: String(row.damage),
+    ...(row.spare_used !== null && row.spare_used !== undefined
+      ? { spareUsed: String(row.spare_used) as 'new' | 'used' }
+      : {}),
+    crashedAt: String(row.crashed_at),
+  };
+}
+
+function normalizePartCategory(raw: string): string {
+  const token = raw.trim().toLowerCase();
+  if (token === 'motore' || token === 'motor') return 'motor';
+  if (token === 'braccio' || token === 'arm') return 'arm';
+  if (token === 'elica' || token === 'prop' || token === 'propeller') return 'prop';
+  return token;
+}
+
+function normalizePosition(raw: string): string {
+  const value = raw.trim().toLowerCase().replace(/\s+/g, ' ');
+  if (/sinistr[oa]\s+inferiore|posteriore\s+sinistr[oa]|rear[- ]?left|bottom[- ]?left/.test(value)) return 'rear-left';
+  if (/destr[oa]\s+inferiore|posteriore\s+destr[oa]|rear[- ]?right|bottom[- ]?right/.test(value)) return 'rear-right';
+  if (/sinistr[oa]\s+superiore|anteriore\s+sinistr[oa]|front[- ]?left|top[- ]?left/.test(value)) return 'front-left';
+  if (/destr[oa]\s+superiore|anteriore\s+destr[oa]|front[- ]?right|top[- ]?right/.test(value)) return 'front-right';
+  return value;
+}
+
+export function handleFleetChat(
+  fleet: FleetStore,
+  batteries: BatteryRegistry,
+  phrase: string,
+  now = new Date().toISOString(),
+): { handled: boolean; reply?: string } {
+  const trimmed = phrase.trim();
+  if (!trimmed || trimmed.length > 500) throw new Error('Fleet chat phrase must contain 1–500 characters.');
+
+  const crashMatch =
+    trimmed.match(
+      /^(?:ho\s+crashato|crashed)\s+([a-zA-Z0-9_-]+)\s*[,:-]\s*(motore|motor|braccio|arm|elica|prop|fc|esc|vtx|camera)\s+(.+?)\s+(rotto|rotta|broken|damaged)(?:[,\s]*\(?\s*(?:scorta|spare)\s+(nuova|usata|new|used)\)?)?[.!?]*$/i,
+    ) ??
+    trimmed.match(
+      /^(?:ho\s+crashato|crashed)\s+([a-zA-Z0-9_-]+)\s*[,:-]\s*(rear[- ]?left|rear[- ]?right|front[- ]?left|front[- ]?right|bottom[- ]?left|bottom[- ]?right|top[- ]?left|top[- ]?right)\s+(motore|motor|braccio|arm|elica|prop|fc|esc|vtx|camera)\s+(rotto|rotta|broken|damaged)(?:[,\s]*\(?\s*(?:scorta|spare)\s+(nuova|usata|new|used)\)?)?[.!?]*$/i,
+    );
+  if (crashMatch) {
+    const positionFirst = /^(rear|front|bottom|top)/i.test(crashMatch[2]!);
+    const droneName = crashMatch[1]!;
+    const category = normalizePartCategory(positionFirst ? crashMatch[3]! : crashMatch[2]!);
+    const position = normalizePosition(positionFirst ? crashMatch[2]! : crashMatch[3]!);
+    const damage = crashMatch[4]!.toLowerCase();
+    const rawSpare = crashMatch[5]?.toLowerCase();
+    const spareUsed = rawSpare === 'nuova' || rawSpare === 'new' ? 'new' : rawSpare ? 'used' : undefined;
+    const crash = fleet.recordCrash({ droneName, category, position, damage, spareUsed, crashedAt: now });
+    return {
+      handled: true,
+      reply: `Recorded crash for ${droneName}: ${crash.category} (${crash.position}) ${crash.damage}${crash.componentModel ? ` [${crash.componentModel}]` : ''}${spareUsed ? `, used ${spareUsed} spare` : ''}.`,
+    };
+  }
+
+  if (/(ultima\s+volta|last\s+time).*(rotto|rotta|broke|broken)|quale\s+avevo\s+rotto/i.test(trimmed)) {
+    const last = fleet.lastCrashForPart();
+    if (!last) return { handled: true, reply: 'No previous crashes recorded.' };
+    const drone = fleet.getDrone(last.droneId)?.name ?? last.droneId;
+    return {
+      handled: true,
+      reply: `Last crash: ${drone} ${last.category} (${last.position})${last.componentModel ? ` [${last.componentModel}]` : ''} on ${last.crashedAt}.`,
+    };
+  }
+
+  if (/(scorta|scorte|spares?\s+left|rimasti|remaining\s+spares)/i.test(trimmed)) {
+    const spares = fleet.listSpares();
+    if (spares.length === 0) return { handled: true, reply: 'No spares recorded.' };
+    const lines = spares.map(
+      (spare) => `${spare.componentModel} (${spare.category}): ${spare.newCount} new, ${spare.usedCount} used`,
+    );
+    return { handled: true, reply: `Spares left: ${lines.join('; ')}.` };
+  }
+
+  const batteryMatch = trimmed.match(
+    /^(?:la\s+)?(?:batteria|battery)\s+(\d+)(?:\s+([\p{L}-]+))?\s+(?:presenta\s+danni|ha\s+danni|has\s+damage|damaged)(.*)$/iu,
+  );
+  if (batteryMatch) {
+    const packNumber = Number(batteryMatch[1]);
+    const series = batteryMatch[2];
+    const matches = batteries.findByNumberAndSeries(packNumber, series);
+    if (matches.length === 0) {
+      return { handled: true, reply: `Battery #${packNumber}${series ? ` (${series})` : ''} not found.` };
+    }
+    if (matches.length > 1) {
+      return { handled: true, reply: `Battery #${packNumber} is ambiguous; specify its series or colour.` };
+    }
+    const battery = matches[0];
+    if (!battery) throw new Error('Battery lookup returned no result.');
+    const saved = batteries.addNote(battery.id, trimmed, now);
+    return { handled: true, reply: `Recorded damage note on ${battery.label}: "${saved.note}".` };
+  }
+
+  return { handled: false };
 }
 
 function mapDrone(row: Record<string, unknown>): DroneRecord {
