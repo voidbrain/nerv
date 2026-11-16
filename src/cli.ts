@@ -6,7 +6,7 @@ import { decideHitlThroughPersona, explainClassificationThroughPersona, formatMi
 import { EVA_CLASS_SPECS, admitEvaJob, type EvaAdmissionRequest } from './eva-classes.ts';
 import { runToolsProcessInEva03 } from './eva-runner.ts';
 import { createPeerHandlers } from './peer-handlers.ts';
-import { fetchIntoQuarantine } from './quarantine.ts';
+import { buildProjectReport, fetchIntoQuarantine } from './quarantine.ts';
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
 import { formatBatteryStateLines, formatDueResistancePrompt, type OneMoreBatteryExport } from './batteries.ts';
@@ -1740,10 +1740,16 @@ try {
       }
       case 'quarantine': {
         const sub = args[0];
-        if (sub !== 'fetch' || !args[1]) throw new Error('Usage: nerv quarantine fetch <url> [--kind repo|page]');
+        if ((sub !== 'fetch' && sub !== 'report') || !args[1]) {
+          throw new Error('Usage: nerv quarantine <fetch|report> <url> [--kind repo|page]');
+        }
         const kindIdx = args.indexOf('--kind');
         const kind = kindIdx >= 0 ? (args[kindIdx + 1] as 'repo' | 'page' | undefined) : undefined;
         const result = await fetchIntoQuarantine(args[1], kind ? { kind } : {});
+        if (sub === 'report') {
+          console.log(JSON.stringify(buildProjectReport(result), null, 2));
+          break;
+        }
         console.log(
           JSON.stringify(
             {

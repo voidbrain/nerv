@@ -19,6 +19,23 @@ export interface QuarantinedFetchResult {
   /** Non-executable static files or page text extracted read-only. */
   files: QuarantinedFile[];
   text: string;
+  /** Latest commit metadata captured read-only from git log, when available. */
+  activity?: string;
+}
+
+export interface CitedClaim {
+  summary: string;
+  source: string;
+}
+
+export interface ProjectReport {
+  target: string;
+  tainted: true;
+  whatItIs: CitedClaim;
+  activity: CitedClaim;
+  licence: CitedClaim;
+  buildAndTest: CitedClaim;
+  visibleRisks: CitedClaim[];
 }
 
 export interface QuarantineFetchOptions {
@@ -106,6 +123,17 @@ export async function fetchIntoQuarantine(
         { stdio: 'pipe', timeout: timeoutMs },
       );
       const files = collectStaticRepoFiles(repoDir, maxBytes);
+      let activity: string | undefined;
+      try {
+        const logOut = execFileSync('git', ['-C', repoDir, 'log', '-1', '--format=%cI %s'], {
+          stdio: ['ignore', 'pipe', 'ignore'],
+          timeout: timeoutMs,
+          encoding: 'utf8',
+        }).trim();
+        if (logOut) activity = logOut;
+      } catch {
+        // Empty repo or no commits: leave activity undefined.
+      }
       const text = files.map((f) => `--- ${f.path} ---\n${f.content}`).join('\n\n');
       return {
         target,
@@ -116,6 +144,7 @@ export async function fetchIntoQuarantine(
         discarded: true,
         files,
         text,
+        ...(activity ? { activity } : {}),
       };
     }
 
@@ -146,4 +175,162 @@ export async function fetchIntoQuarantine(
   } finally {
     rmSync(jobDir, { recursive: true, force: true });
   }
+}
+
+function findFile(files: QuarantinedFile[], pattern: RegExp): QuarantinedFile | undefined {
+  return files.find((f) => pattern.test(f.path));
+}
+
+function parsePackageJson(
+  files: QuarantinedFile[],
+): { file: QuarantinedFile; data: Record<string, unknown> } | undefined {
+  const file = findFile(files, /^package\.json$/i);
+  if (!file) return undefined;
+  try {
+    const parsed = JSON.parse(file.content);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return { file, data: parsed as Record<string, unknown> };
+    }
+  } catch {
+    // Ignore malformed JSON in untrusted project; static text checks still apply.
+  }
+  return undefined;
+}
+
+function extractFirstSummaryLine(content: string): string | undefined {
+  const stripped = content.replace(/<[^>]+>/g, ' ');
+  for (const rawLine of stripped.split(/\r?\n/)) {
+    const line = rawLine.replace(/^#+\s*/, '').trim();
+    if (line.length > 0) return line.slice(0, 200);
+  }
+  return undefined;
+}
+
+function extractTomlField(content: string, key: string): string | undefined {
+  const match = content.match(new RegExp(`^\\s*${key}\\s*=\\s*["']([^"']+)["']`, 'm'));
+  return match?.[1]?.trim();
+}
+
+/**
+ * Builds a sourced summary (what it is, activity, licence, build & test, visible risks)
+ * strictly from static quarantined content without executing any project code (F-085-T02).
+ */
+export function buildProjectReport(fetched: QuarantinedFetchResult): ProjectReport {
+  const pkg = parsePackageJson(fetched.files);
+  const readme = findFile(fetched.files, /^readme(\.[a-z0-9]+)?$/i);
+  const licenseFile = findFile(fetched.files, /^license(\.[a-z0-9]+)?$/i);
+  const pyproject = findFile(fetched.files, /^pyproject\.toml$/i);
+  const cargo = findFile(fetched.files, /^cargo\.toml$/i);
+  const goMod = findFile(fetched.files, /^go\.mod$/i);
+
+  let whatItIs: CitedClaim;
+  const pkgDesc = typeof pkg?.data.description === 'string' ? pkg.data.description.trim() : '';
+  const pkgName = typeof pkg?.data.name === 'string' ? pkg.data.name.trim() : '';
+  if (pkg && (pkgDesc || pkgName)) {
+    whatItIs = { summary: pkgDesc ? `${pkgName || 'Project'}: ${pkgDesc}` : pkgName, source: pkg.file.path };
+  } else if (readme) {
+    whatItIs = {
+      summary: extractFirstSummaryLine(readme.content) ?? 'README present (no summary line extracted)',
+      source: readme.path,
+    };
+  } else if (pyproject) {
+    whatItIs = {
+      summary:
+        extractTomlField(pyproject.content, 'description') ??
+        extractTomlField(pyproject.content, 'name') ??
+        'Python project',
+      source: pyproject.path,
+    };
+  } else if (cargo) {
+    whatItIs = {
+      summary:
+        extractTomlField(cargo.content, 'description') ?? extractTomlField(cargo.content, 'name') ?? 'Rust project',
+      source: cargo.path,
+    };
+  } else {
+    whatItIs = {
+      summary: extractFirstSummaryLine(fetched.text) ?? 'No summary found in static snapshot',
+      source: fetched.target,
+    };
+  }
+
+  const activity: CitedClaim = fetched.activity
+    ? { summary: `Latest commit: ${fetched.activity}`, source: 'git log' }
+    : { summary: 'No commit history available in static snapshot', source: fetched.target };
+
+  let licence: CitedClaim;
+  const pkgLicense = typeof pkg?.data.license === 'string' ? pkg.data.license.trim() : '';
+  if (licenseFile) {
+    licence = {
+      summary: extractFirstSummaryLine(licenseFile.content) ?? 'License file present',
+      source: licenseFile.path,
+    };
+  } else if (pkg && pkgLicense) {
+    licence = { summary: pkgLicense, source: pkg.file.path };
+  } else if (pyproject && extractTomlField(pyproject.content, 'license')) {
+    licence = { summary: extractTomlField(pyproject.content, 'license')!, source: pyproject.path };
+  } else if (cargo && extractTomlField(cargo.content, 'license')) {
+    licence = { summary: extractTomlField(cargo.content, 'license')!, source: cargo.path };
+  } else {
+    licence = { summary: 'No licence file or manifest field found', source: fetched.target };
+  }
+
+  let buildAndTest: CitedClaim;
+  const scripts =
+    pkg?.data.scripts && typeof pkg.data.scripts === 'object' && !Array.isArray(pkg.data.scripts)
+      ? (pkg.data.scripts as Record<string, unknown>)
+      : undefined;
+  if (pkg && scripts && (typeof scripts.build === 'string' || typeof scripts.test === 'string')) {
+    const parts: string[] = [];
+    if (typeof scripts.build === 'string') parts.push(`build: ${scripts.build}`);
+    if (typeof scripts.test === 'string') parts.push(`test: ${scripts.test}`);
+    buildAndTest = { summary: parts.join('; '), source: pkg.file.path };
+  } else if (pyproject) {
+    buildAndTest = { summary: 'Python manifest present (pyproject.toml)', source: pyproject.path };
+  } else if (cargo) {
+    buildAndTest = { summary: 'Rust Cargo manifest present (cargo build / cargo test)', source: cargo.path };
+  } else if (goMod) {
+    buildAndTest = { summary: 'Go module present (go build / go test)', source: goMod.path };
+  } else if (readme) {
+    buildAndTest = { summary: 'No build/test manifest scripts found; check README', source: readme.path };
+  } else {
+    buildAndTest = { summary: 'No build or test configuration found in static snapshot', source: fetched.target };
+  }
+
+  const visibleRisks: CitedClaim[] = [];
+  if (licence.summary.startsWith('No licence')) {
+    visibleRisks.push({ summary: 'Missing licence increases reuse and compliance risk', source: licence.source });
+  }
+  if (pkg && scripts) {
+    for (const hook of ['preinstall', 'install', 'postinstall', 'prepare']) {
+      if (typeof scripts[hook] === 'string' && scripts[hook].trim()) {
+        visibleRisks.push({
+          summary: `Package lifecycle script declared (${hook}): ${scripts[hook]}`,
+          source: pkg.file.path,
+        });
+      }
+    }
+  }
+  const promptInjectionPattern = /(ignore\s+(all\s+)?previous\s+instructions|disregard\s+previous|system\s+prompt)/i;
+  for (const file of fetched.files) {
+    if (promptInjectionPattern.test(file.content)) {
+      visibleRisks.push({
+        summary: 'Untrusted content contains instruction-override phrasing (treated as tainted data only)',
+        source: file.path === 'page.txt' ? fetched.target : file.path,
+      });
+    }
+  }
+  if (visibleRisks.length === 0) {
+    visibleRisks.push({ summary: 'No obvious static risks found in inspected metadata', source: fetched.target });
+  }
+
+  return {
+    target: fetched.target,
+    tainted: true,
+    whatItIs,
+    activity,
+    licence,
+    buildAndTest,
+    visibleRisks,
+  };
 }
