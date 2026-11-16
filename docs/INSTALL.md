@@ -17,6 +17,7 @@ npm start -- launch # starts service and opens the signed-in dashboard
 - User data defaults to `~/.nerv` (`%USERPROFILE%\.nerv` on Windows; override with an absolute `NERV_HOME`). Private credentials (`token`, `anthropic-key`, `telegram-token`, `scrolls.json`) stay local and are never pasted into chat or the repo.
 - Rotate a live credential with `nerv credentials rotate admin|telegram|cloud`. Secret input is hidden, old file-backed credentials stop authenticating immediately, and `doctor` reports credential ages without values.
 - Defaults: port `4317`, language `en`, `timeZone` `Europe/Rome`. Edit `config.json` and restart to change them.
+- Automatic updates are off by default. `nerv update-policy on|off|status` (or the dashboard switch) opts this base in: a check every day at 20:00 announces an available revision in Telegram and the inbox with its apply time, it is applied at 03:00 through the safe update path unless you answer "aspetta" / "wait" (postponed one night), never between 08:00 and 23:00, and the result is reported the same way.
 
 ## User services (no open terminal)
 

@@ -4,7 +4,7 @@
   "parent": "F-102",
   "title": "Policy control, scheduled check and notice",
   "goal": "The owner can switch the automatic policy on and off, and a scheduled check announces an update with its apply time",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "A `nerv` command and a dashboard switch enable or disable the automatic policy (today it can only be set through POST /api/update/policy)",
     "Scheduler calls the existing evaluation; notice in Telegram and inbox with revision and time",

@@ -55,6 +55,7 @@ import {
   isTelegramToken,
   telegramTokenPath,
   readConfig,
+  setUpdatePolicy,
   readModelKey,
   readScrolls,
   readSeatKey,
@@ -67,6 +68,8 @@ import {
   setting,
 } from './config.ts';
 import { STAGES, addPilot, describePilots, setPilotFlag, updatePilot, type EvaClass, type Stage } from './pilots.ts';
+import { defaultAutoUpdatePolicy } from './update-policy.ts';
+import { UPDATE_APPLY_HOUR, UPDATE_CHECK_HOUR } from './update-scheduler.ts';
 import { McpClient, fingerprint as toolFingerprint, grantRefusal, toolName, type Eva, type McpTool } from './mcp.ts';
 import { TelegramApi, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
 
@@ -849,6 +852,32 @@ export async function tryRunCliCommand(
     };
     if (!response.ok) throw new Error(value.error ?? 'Ask failed.');
     console.log(value.text + (value.truncated ? '\n[reply truncated]' : '') + `\n— ${value.route} · ${value.model}`);
+  } else if (command === 'update-policy') {
+    // F-102-T02: the owner's switch for the scheduled automatic update (F-102-T01: 20:00 check, 03:00 apply unless
+    // "aspetta"). Saved in config.json; a running `serve` reads it within a minute.
+    const mode = args[0] ?? 'status';
+    const config = readConfig(home);
+    const current = config.updatePolicy ?? defaultAutoUpdatePolicy();
+    if (mode === 'status') {
+      console.log(JSON.stringify(current, null, 2));
+    } else if (mode === 'on' || mode === 'off') {
+      const channel = ctx.flag('--channel') ?? current.channels[0] ?? 'main';
+      const target = ctx.flag('--target') ?? current.targets[0] ?? config.base.id;
+      const next = setUpdatePolicy(home, {
+        enabled: mode === 'on',
+        channels: mode === 'on' ? [channel] : current.channels,
+        targets: mode === 'on' ? [target] : current.targets,
+        ...(mode === 'on' ? { acceptedAt: current.acceptedAt ?? new Date().toISOString() } : {}),
+      });
+      console.log(JSON.stringify(next, null, 2));
+      console.log(
+        mode === 'on'
+          ? `Automatic updates on for ${target} (${channel}): checked at ${UPDATE_CHECK_HOUR}:00, applied at 0${UPDATE_APPLY_HOUR}:00 unless you say "aspetta"; never between 08:00 and 23:00.`
+          : 'Automatic updates off; nothing is scheduled.',
+      );
+    } else {
+      throw new Error('Usage: update-policy <on|off|status> [--channel main] [--target BASE-ID]');
+    }
   } else {
     return false;
   }

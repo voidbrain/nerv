@@ -364,6 +364,7 @@ export class Runtime implements StoreApi {
       bases: () => this.bases(),
       baseHealth: () => this.baseHealth(),
       channelState: () => this.channelState(),
+      updatePostpone: (text) => this.updatePostpone?.(text),
       resolveOperator: (query, opts) => this.resolveOperator(query, opts),
       loop: (sortieId, request, steps, context, opts) => this.loop(sortieId, request, steps, context, opts),
     }));
@@ -750,6 +751,15 @@ export class Runtime implements StoreApi {
   }
   setChannelState(read: () => ChannelState) {
     this.basesController.setChannelState(read);
+  }
+  private updatePostpone?: (text: string) => { postponed: boolean; reply?: string } | undefined;
+  /** F-102-T02: "aspetta"/"wait" in chat postpones an announced automatic update, answered before planning. */
+  setUpdatePostpone(fn: (text: string) => { postponed: boolean; reply?: string } | undefined) {
+    this.updatePostpone = fn;
+  }
+  /** An owner notice into the inbox: every channel (Telegram, web push, dashboard) delivers it from there, once. */
+  async notice(message: string): Promise<void> {
+    await this.nervous.call('inbox.brief', { message });
   }
   channelState(): ChannelState {
     return this.basesController.channelState();

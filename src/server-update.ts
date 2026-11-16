@@ -26,6 +26,17 @@ export interface ServerUpdateOptions {
   updatePolicy?: AutoUpdatePolicy;
   saveUpdatePolicy?: (policy: AutoUpdatePolicy) => AutoUpdatePolicy | Promise<AutoUpdatePolicy>;
   checkSchemaSafety?: (revision?: string) => Promise<AutoUpdateSchemaCheck> | AutoUpdateSchemaCheck;
+  /** Re-read the saved policy on every use, so `nerv update-policy`, the dashboard and the scheduler agree. */
+  readUpdatePolicy?: () => AutoUpdatePolicy;
+  /** F-102-T02: hands the scheduler the same cache and in-flight guard the routes use. */
+  exposeUpdateControl?: (control: UpdateControl) => void;
+}
+
+/** What the scheduled automatic update (F-102-T02) may do, sharing the routes' state. */
+export interface UpdateControl {
+  readPolicy(): AutoUpdatePolicy;
+  check(channel: string): Promise<UpdateAvailability>;
+  evaluate(input: { target: string; channel?: string; revision?: string }): Promise<AutoUpdateEvaluation>;
 }
 
 export function createUpdateHandlers(params: {
@@ -39,6 +50,7 @@ export function createUpdateHandlers(params: {
   let configuredPolicy = options.updatePolicy ? validateAutoUpdatePolicy(options.updatePolicy) : undefined;
   let lastAutoUpdate: AutoUpdateEvaluation | undefined;
   const readPolicy = (): AutoUpdatePolicy => {
+    if (options.readUpdatePolicy) return options.readUpdatePolicy();
     if (configuredPolicy) return configuredPolicy;
     try {
       return readConfig(dataHome()).updatePolicy ?? defaultAutoUpdatePolicy();
@@ -68,6 +80,41 @@ export function createUpdateHandlers(params: {
     if (options.updateCheck) return resolveUpdate('main', false);
     return checkUpdateAvailability({ runningRevision: commit, offline: true });
   };
+  /** One automatic evaluation at a time, for the route and the scheduler alike. */
+  const runAutoUpdate = async (input: {
+    target: string;
+    channel?: string;
+    revision?: string;
+  }): Promise<AutoUpdateEvaluation> => {
+    if (updateInFlight) throw new Error('An update is already in progress.');
+    updateInFlight = true;
+    try {
+      const evaluation = await evaluateAutoUpdate(
+        {
+          resolveUpdate,
+          ...(options.lifecycleHost ? { lifecycleHost: options.lifecycleHost } : {}),
+          ...(options.checkSchemaSafety ? { checkSchemaSafety: options.checkSchemaSafety } : {}),
+          countActiveRuns: async () => (await store.sorties(50)).filter((s) => s.closed === null).length,
+          countPendingApprovals: async () => (await store.approvals(20)).filter((a) => a.decision === null).length,
+        },
+        {
+          policy: readPolicy(),
+          target: input.target,
+          ...(input.channel !== undefined ? { channel: input.channel } : {}),
+          ...(input.revision !== undefined ? { revision: input.revision } : {}),
+        },
+      );
+      lastAutoUpdate = evaluation;
+      return evaluation;
+    } finally {
+      updateInFlight = false;
+    }
+  };
+  options.exposeUpdateControl?.({
+    readPolicy,
+    check: (channel) => resolveUpdate(parseUpdateChannel(channel), true),
+    evaluate: runAutoUpdate,
+  });
 
   const handleUpdateRoute = async (
     req: IncomingMessage,
@@ -87,6 +134,11 @@ export function createUpdateHandlers(params: {
     }
     if (req.method === 'POST' && path === '/api/update/policy') {
       const value = await readBody(req);
+      // An empty selection when enabling means this base on the main channel (the dashboard switch, F-102-T02).
+      if (value.enabled === true && Array.isArray(value.channels) && value.channels.length === 0)
+        value.channels = ['main'];
+      if (value.enabled === true && Array.isArray(value.targets) && value.targets.length === 0)
+        value.targets = [options.base?.id ?? 'local'];
       const validated = validateAutoUpdatePolicy(value);
       const nextPolicy: AutoUpdatePolicy =
         validated.enabled && !validated.acceptedAt ? { ...validated, acceptedAt: new Date().toISOString() } : validated;
@@ -115,28 +167,14 @@ export function createUpdateHandlers(params: {
       if (value.revision !== undefined && typeof value.revision !== 'string')
         throw new Error('Invalid update revision.');
       const target = value.target ?? options.base?.id ?? 'local';
-      updateInFlight = true;
-      try {
-        const evaluation = await evaluateAutoUpdate(
-          {
-            resolveUpdate,
-            ...(options.lifecycleHost ? { lifecycleHost: options.lifecycleHost } : {}),
-            ...(options.checkSchemaSafety ? { checkSchemaSafety: options.checkSchemaSafety } : {}),
-            countActiveRuns: async () => (await store.sorties(50)).filter((s) => s.closed === null).length,
-            countPendingApprovals: async () => (await store.approvals(50)).filter((a) => a.decision === null).length,
-          },
-          {
-            policy: readPolicy(),
-            target,
-            ...(value.channel !== undefined ? { channel: value.channel } : {}),
-            ...(value.revision !== undefined ? { revision: value.revision } : {}),
-          },
-        );
-        lastAutoUpdate = evaluation;
-        reply(200, evaluation);
-      } finally {
-        updateInFlight = false;
-      }
+      reply(
+        200,
+        await runAutoUpdate({
+          target,
+          ...(value.channel !== undefined ? { channel: value.channel } : {}),
+          ...(value.revision !== undefined ? { revision: value.revision } : {}),
+        }),
+      );
       return true;
     }
     if (req.method === 'POST' && path === '/api/update/apply') {
