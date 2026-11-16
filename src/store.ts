@@ -18,6 +18,7 @@ import { INCIDENT_CIRCUITS_SCHEMA, IncidentCircuitStore } from './incident-circu
 import { BATTERY_SCHEMA, BatteryRegistry } from './batteries.ts';
 import { LISTS_SCHEMA, ListStore } from './lists.ts';
 import { DOCUMENTS_SCHEMA, DocumentStore } from './documents.ts';
+import { PANTRY_SCHEMA, PantryStore } from './pantry.ts';
 import { FLEET_SCHEMA, FleetStore } from './fleet.ts';
 import { REGISTRY_SCHEMA } from './kaji.ts';
 import { MILESTONE_SCHEMA } from './milestones.ts';
@@ -102,6 +103,7 @@ export class Store {
   readonly resumeIntents: ResumeIntentStore;
   readonly lists: ListStore;
   readonly documents: DocumentStore;
+  readonly pantry: PantryStore;
   readonly policySource: string;
   pushFetch: typeof fetch = fetch;
   /** The data home, when known: the schedule tool writes config.json there. */
@@ -206,6 +208,8 @@ export class Store {
     this.lists = new ListStore(this.db);
     this.db.exec(DOCUMENTS_SCHEMA);
     this.documents = new DocumentStore(this.db);
+    this.db.exec(PANTRY_SCHEMA);
+    this.pantry = new PantryStore(this.db);
     this.watch = new Watch(this.db, this.ledger);
     this.policySource = scrolls.source;
     this.db.exec(

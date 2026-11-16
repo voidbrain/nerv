@@ -5,6 +5,7 @@ import type { ToolDoc } from './misato.ts';
 import type { Memory } from './memory.ts';
 import type { ListStore } from './lists.ts';
 import type { DocumentStore } from './documents.ts';
+import type { PantryStore } from './pantry.ts';
 import { readConfig, savePilots, setSchedule } from './config.ts';
 import { STAGES, applyPilotToolChange, mergePilots, nextStage, splitPilot, updatePilot, type Stage } from './pilots.ts';
 import { reconcileReminderArgs } from './reminder-time.ts';
@@ -56,6 +57,7 @@ export interface ReminderBackend {
   batteries?: import('./batteries.ts').BatteryRegistry;
   lists?: ListStore;
   documents?: DocumentStore;
+  pantry?: PantryStore;
   home?: string;
   /** F-036 slice 3b: queues one action for another base; the coordinator sends it over the Kaji line. */
   queueRemote?(
@@ -107,6 +109,10 @@ export const builtinTools: Tool[] = [
   { name: 'batteries.chat', effect: 'write-local' },
   { name: 'batteries.due', effect: 'read' },
   { name: 'batteries.resistance', effect: 'write-local' },
+  // F-083-T05: pantry purchase logging, owner-confirmed shelf life, and expiry recall checks.
+  { name: 'pantry.purchase', effect: 'write-local' },
+  { name: 'pantry.shelf_life', effect: 'write-local' },
+  { name: 'pantry.check', effect: 'read' },
 ];
 const text = (args: Record<string, unknown>, key: string) => {
   const v = args[key];
@@ -327,6 +333,24 @@ export const toolDocs: ToolDoc[] = [
     effect: 'write-local',
     about: 'Records ordered per-cell resistance values (mΩ) for a battery, checking cell count against its type.',
     args: '{"batteryId": battery id, "values": [number, ...] or "3.1, 3.2, ..."}',
+  },
+  {
+    name: 'pantry.purchase',
+    effect: 'write-local',
+    about: 'Logs an ingredient purchase from chat (e.g. "ho comprato la farina") or item name with its purchase date.',
+    args: '{"phrase"?: string, "item"?: string, "purchasedAt"?: ISO timestamp}',
+  },
+  {
+    name: 'pantry.shelf_life',
+    effect: 'write-local',
+    about: 'Records owner-confirmed shelf life in days for a pantry ingredient.',
+    args: '{"item": string, "days": integer 1..3650}',
+  },
+  {
+    name: 'pantry.check',
+    effect: 'read',
+    about: 'Checks whether an ingredient or saved recipe has ingredients that might be expired.',
+    args: '{"item"?: string, "documentId"?: string}',
   },
 ];
 /** Versioned descriptors for NERV's own tools, on the same shape used for registered MCP tools (F-021). */
@@ -803,6 +827,34 @@ export function execute(
       only(args, ['list', 'item']);
       if (!backend.lists) throw new Error('Lists store is not available.');
       return backend.lists.removeItem(text(args, 'list'), text(args, 'item'));
+    }
+    case 'pantry.purchase': {
+      only(args, ['phrase', 'item', 'purchasedAt']);
+      if (!backend.pantry) throw new Error('Pantry store is not available.');
+      const when = args.purchasedAt === undefined ? new Date() : new Date(text(args, 'purchasedAt'));
+      if (Number.isNaN(when.getTime())) throw new Error('Invalid purchasedAt timestamp.');
+      if (args.phrase !== undefined) {
+        const res = backend.pantry.applyChatPhrase(text(args, 'phrase'), when);
+        if (!res.matched) throw new Error('Could not parse purchase phrase.');
+        return res.purchase;
+      }
+      return backend.pantry.logPurchase(text(args, 'item'), when, 'tool');
+    }
+    case 'pantry.shelf_life': {
+      only(args, ['item', 'days']);
+      if (!backend.pantry) throw new Error('Pantry store is not available.');
+      return backend.pantry.confirmShelfLife(text(args, 'item'), Number(args.days));
+    }
+    case 'pantry.check': {
+      only(args, ['item', 'documentId']);
+      if (!backend.pantry) throw new Error('Pantry store is not available.');
+      if (args.documentId !== undefined) {
+        if (!backend.documents) throw new Error('Saved documents are not available here.');
+        const doc = backend.documents.get(text(args, 'documentId'));
+        if (!doc) return { found: false, warnings: [] };
+        return { found: true, document: doc, warnings: backend.pantry.recallDocumentWarnings(doc) };
+      }
+      return backend.pantry.checkIngredient(text(args, 'item'));
     }
     default:
       throw new Error('No executor for this tool.');
