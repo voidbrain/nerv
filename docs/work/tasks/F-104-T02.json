@@ -4,7 +4,7 @@
   "parent": "F-104",
   "title": "Token cost compared with outside practice",
   "goal": "Measured usage against current outside techniques, with adopt/adapt/reject",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Uses work-usage reports and rule-load numbers",
     "Proposals become records, not rule changes"
@@ -33,8 +33,14 @@
     "estimate": "1.5 h",
     "basis": "Estimated 2026-11-15 at agent speed after the calibration of 2026-11-15. Not a measurement.",
     "reviewed": "2026-11-15",
-    "agentHours": 1.5,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 488,
+      "note": "token-cost comparison report"
+    }
+  ]
 }
