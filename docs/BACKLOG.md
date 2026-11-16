@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 0 | 0 | 1 | 0 |
+| **This week** | 2 | 1 | 1 | 0 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 44 | 8 |
+| **Open** | 45 | 8 |
 | **Require Human 🧑** | 6 | 1 |
 
 ### Require Human 🧑
@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 71.5 h agent + 21.75 h owner across 164 open steps of 44 features and 8 other records. 34.75 h of actual effort recorded on 79 steps. Generated from the task files.
+**Remaining effort:** 72.5 h agent + 21.25 h owner across 165 open steps of 45 features and 8 other records. 34.75 h of actual effort recorded on 79 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -746,42 +746,40 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
-### <a id="f-104"></a>[✨ F-104](#top)
+### <a id="f-105"></a>[✨ F-105](#top)
 
-**Architecture and token cost compared with outside systems**
+**A pull request names itself in a record, or CI fails**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.5 h agent + 0.5 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-104-T01 — Architecture compared with outside systems (Planned).
+💻 **→** Next: F-105-T01 — CI fails when the PR names no record (Ready).
 
 | | |
 |---|---|
-| **Issue** | Owner request 2026-11-15: compare NERV's architecture, structure and functions with frontier and similar agent systems (concepts to keep, integrate or reject, at what level, why and why not), and look outside for better token-cost techniques. The procedure exists (`docs/agents/architecture-review.md`) but has not been run with an outside comparison; the harness cadence for it is the template's work. |
-| **Reproduce** | Read `docs/audits/`: the 2026-11-13 reassessment has no outside comparison. |
-| **Check** | A dated report under `docs/audits/` with a web-sourced comparison table (concept, source, adopt / adapt / reject / watch, level, why) and a token-cost section from measured usage; each adopt or adapt becomes a backlog record and each decision a decision record; nothing changes architecture without its own record. |
+| **Issue** | Found 2026-11-16: 36 of the 40 PRs merged overnight (#457–#498) named no record, so the ledger fell 40 PRs behind `main`; `work:next` kept offering steps already delivered and 21 duplicate branches were started for closed tasks. The rule exists (name the PR by its number in the records it touches, and push that before the checks finish) but nothing enforces it, so the catch-up reconciliation ([PR #499](https://github.com/voidbrain/nerv/pull/499)) was the only thing keeping the ledger honest. |
+| **Reproduce** | Open a PR that changes `src/` without touching `docs/work/`: every check passes. |
+| **Check** | On a `pull_request` run a NERV-owned check (`tools/check-pr-record.mjs`, run from `ci.yml`; `tools/check-backlog.mjs` is a copied harness file and stays untouched) fails unless the PR's number appears in a record, a task file (`prs`) or the reconciliation log on the branch; a PR that touches no product record names itself in the reconciliation log entry instead; the message says which to edit; a committed test covers both outcomes; proposed to the harness template once it has run here. |
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟡 Medium | <a id="f-104-t01"></a>F-104-T01 — Architecture compared with outside systems | 2 h | 0 h | 2 h | Planned | 🤖 |
-| 🟡 Medium | <a id="f-104-t02"></a>F-104-T02 — Token cost compared with outside practice | 1.5 h | 0 h | 1.5 h | Planned | 🤖 |
-| 🟢 Small | <a id="f-104-t03"></a>F-104-T03 — Owner review of the proposals | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-104-T01](#f-104-t01), [F-104-T02](#f-104-t02) | ⏳ 🤔 |
-| 🟡 Medium | **Total** | 3.5 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 3.5 h agent + 0.5 h owner | 0 of 3 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-105-t01"></a>F-105-T01 — CI fails when the PR names no record | 1 h | 0 h | 1 h | Ready |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-[Full notes & evidence](work/records/F-104.md)
+[Full notes & evidence](work/records/F-105.md)
 
 | Field | Value |
 |---|---|
-| PR / evidence | — |
-| Opened | 2026-11-15 |
+| PR / evidence | Owner decision 2026-11-16; [PR #499](https://github.com/voidbrain/nerv/pull/499) the catch-up it prevents; opened in [PR #502](https://github.com/voidbrain/nerv/pull/502) |
+| Opened | 2026-11-16 |
 | Verification | Pending. |
-| Reviewed | 2026-11-15 |
+| Reviewed | 2026-11-16 |
 
 </details>
 
@@ -1731,6 +1729,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-106"></a>[✨ F-106](#top)
+
+**Per-turn prompt size on the local route, then deferred domain tool loading**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-106-T01 — Prompt size per Misato turn, measured (Ready).
+
+| | |
+|---|---|
+| **Issue** | Owner decision 2026-11-16 on the [token-cost review](audits/2026-11-16-token-cost-comparison.md) (F-104-T03): `src/executors.ts` sends 30+ tool schemas (`toolDocs`) to Misato on every turn and every domain adds more (`fleet.chat` in [PR #500](https://github.com/voidbrain/nerv/pull/500)); on the local route's 4–16K context that is real pressure, but no number measures it: the review asserts the cost without a prompt-size measurement and `work-usage` token attribution is unknown. A byte-stable prefix (system text and tool schemas before the per-turn inbox, memory and clock) is also assumed, not checked; it decides cloud prompt caching and Ollama prefix reuse. |
+| **Reproduce** | Count the entries of `toolDocs` in `src/executors.ts`; nothing logs the prompt size of a Misato turn. |
+| **Check** | A bounded local sample of prompt size per Misato turn (route, estimated tokens, tool-schema share; no request text stored) with a report; a committed test that the prompt prefix is identical across two turns up to the per-turn context; domain tool schemas (`fpv.*`, `pantry.*`, `gmail.*`, `batteries.*`, `fleet.*`) offered by intent or category rather than all at once, with the measured prompt size before and after cited here; Misato still reaches every tool it needs (regressions in `test/misato.test.ts`). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-106-t01"></a>F-106-T01 — Prompt size per Misato turn, measured | 1 h | 0 h | 1 h | Ready |
+| 🟢 Small | <a id="f-106-t02"></a>F-106-T02 — Prompt prefix stable across turns | 0.5 h | 0 h | 0.5 h | Ready |
+| 🟡 Medium | <a id="f-106-t03"></a>F-106-T03 — Domain tool schemas offered by intent | 2 h | 0 h | 2 h | Planned · waits on [F-106-T01](#f-106-t01), [F-106-T02](#f-106-t02) |
+| 🟡 Medium | **Total** | 3.5 h | 0 h (0 of 3 steps recorded) | 3.5 h | 0 of 3 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-106.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner decision 2026-11-16 (F-104-T03); [token-cost review](audits/2026-11-16-token-cost-comparison.md); opened in [PR #502](https://github.com/voidbrain/nerv/pull/502) |
+| Opened | 2026-11-16 |
+| Verification | Pending. |
+| Reviewed | 2026-11-16 |
+
+</details>
+
+---
 ### <a id="f-008"></a>[✨ F-008](#top)
 
 **FPV batteries: registry, charge state, resistance checks and storage reminders**
@@ -2581,6 +2619,53 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | [PR #478](https://github.com/voidbrain/nerv/pull/478) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); — |
 | Opened | 2026-11-14 |
 | Verification | `F-095-T02` verified via `tools/check-source-sizes.mjs`, `test/source-sizes.test.ts`, `tsc`, and `check:fast`. `F-095-T03` split `src/runtime.ts` (3,399 -> 1,015 lines) into 10 modules all under 600 lines (`runtime-api.ts`, `runtime-approvals.ts`, `runtime-bases.ts`, `runtime-chat.ts`, `runtime-dispatch.ts`, `runtime-instrumentality.ts`, `runtime-peers.ts`, `runtime-pilots.ts`, `runtime-planning.ts`, `runtime-routes.ts`), verified with `npm run typecheck`, `npm run check:fast`, `npm test`, and fresh-context review. `F-095-T04` split `src/store.ts` (1,619 -> 570 lines) into 6 table-group modules all under 600 lines (`store-watch.ts`, `store-reminders.ts`, `store-push.ts`, `store-kaji-outbox.ts`, `store-inbox.ts`, `store-sorties.ts`) sharing `sqlite-transaction.ts`, verified with `npm run typecheck`, `npm run check:fast`, and `npm test`. `F-095-T05` split `src/node-lifecycle-execution.ts` (2,076 -> 662 lines into `node-lifecycle-apply.ts`, `node-lifecycle-mac.ts`, `node-lifecycle-linux.ts`, `node-lifecycle-windows.ts`), `src/ledger.ts` (1,401 -> 821 lines into `ledger-queries.ts`, `ledger-approvals.ts`), `src/pilots.ts` (1,204 -> 587 lines into `pilots-qualification.ts`), and `src/rpc.ts` (1,114 -> 227 lines into `rpc-schemas.ts`), leaving `src/cli.ts` to `F-080`, verified with `npm run typecheck`, `npm run check:fast`, and `npm test`. `F-095-T06` verified in PR #478: `cli.ts` 893, `runtime.ts` 985, `server.ts` 923 lines; existing tests passed unchanged, no public exports changed, full CI passed. |
+| Reviewed | 2026-11-16 |
+
+</details>
+
+---
+### <a id="f-104"></a>[✨ F-104](#top)
+
+**Architecture and token cost compared with outside systems**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔵 Closed | ◻️ P2 | 🟡 Medium | 0 h | — | — | — | — | — |
+
+💻 **→** Closed 2026-11-16; all three steps complete.
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-15: compare NERV's architecture, structure and functions with frontier and similar agent systems (concepts to keep, integrate or reject, at what level, why and why not), and look outside for better token-cost techniques. The procedure exists (`docs/agents/architecture-review.md`) but has not been run with an outside comparison; the harness cadence for it is the template's work. |
+| **Reproduce** | Read `docs/audits/`: the 2026-11-13 reassessment has no outside comparison. |
+| **Check** | A dated report under `docs/audits/` with a web-sourced comparison table (concept, source, adopt / adapt / reject / watch, level, why) and a token-cost section from measured usage; each adopt or adapt becomes a backlog record and each decision a decision record; nothing changes architecture without its own record. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| — | **Total** | 3.5 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 0 h | 3 of 3 completed | | |
+
+<details><summary>Done steps (3)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-104-t01"></a>F-104-T01 — Architecture compared with outside systems | 2 h | 0 h | Completed | [PR #487](https://github.com/voidbrain/nerv/pull/487) architecture comparison report |
+| — | <a id="f-104-t02"></a>F-104-T02 — Token cost compared with outside practice | 1.5 h | 0 h | Completed | [PR #488](https://github.com/voidbrain/nerv/pull/488) token-cost comparison report |
+| — | <a id="f-104-t03"></a>F-104-T03 — Owner review of the proposals | — | 0 h | Completed | — |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-104.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-104-T01: [PR #487](https://github.com/voidbrain/nerv/pull/487) architecture comparison report · F-104-T02: [PR #488](https://github.com/voidbrain/nerv/pull/488) token-cost comparison report. [PR #487](https://github.com/voidbrain/nerv/pull/487) F-104-T01; [PR #488](https://github.com/voidbrain/nerv/pull/488) F-104-T02 (both merged; CI green); owner review 2026-11-16 in [PR #502](https://github.com/voidbrain/nerv/pull/502) |
+| Opened | 2026-11-15 |
+| Verification | 2026-11-16: both reports merged on green CI (#487, #488); the owner's decisions recorded above. Closed 2026-11-16. |
 | Reviewed | 2026-11-16 |
 
 </details>

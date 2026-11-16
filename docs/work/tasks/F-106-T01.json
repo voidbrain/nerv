@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "F-106-T01",
+  "parent": "F-106",
+  "title": "Prompt size per Misato turn, measured",
+  "goal": "A bounded local sample says how large a local-route turn is and how much of it is tool schemas",
+  "status": "ready",
+  "acceptance": [
+    "Each Misato call records route, estimated prompt tokens and the tool-schema share into a bounded SQLite sample (rate and retention bounded, no request text); a committed test",
+    "`nerv doctor` or a report command prints the last day's median and maximum per route"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/work/records/F-106.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git; the sample stores sizes, never text.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-16: a sample table like the F-103 health samples, one hook in the Misato call, a report line. Not a measurement.",
+    "reviewed": "2026-11-16",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}
