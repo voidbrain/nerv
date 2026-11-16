@@ -2207,13 +2207,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | **Issue** | Owner request 2026-11-14: "ho crashato Smoke, motore sinistro inferiore rotto. Quale avevo rotto l'ultima volta? Quanti ne sono rimasti di scorta (nuovi/usati)? La batteria 7 blu presenta danni ma sembra ancora buona." NERV has no record of drones, their parts, crashes or spares, and cannot keep photos with them. |
 | **Reproduce** | `nerv chat "ho crashato Smoke, motore sinistro inferiore rotto"` then `nerv chat "quale avevo rotto l'ultima volta?"`. |
-| **Check** | Drones by name with parts by position; a crash entry from chat (drone, part, damage, date); answers to "last time this part broke" and "spares left, new and used"; a battery damage note goes on the battery (F-008); photos from Telegram or the dashboard attach to a crash, a part or a battery and stay local; invented tests. |
+| **Check** | Drones by name with parts by position; a crash entry from chat (drone, part, damage, date); answers to "last time this part broke" and "spares left, new and used"; change spare counts only when the chat phrase explicitly says a new or used spare was used; a battery damage note goes on the battery (F-008); photos from Telegram or the dashboard attach to a crash, a part or a battery and stay local; follow-up planning after fleet.chat remains local-only; invented tests. |
 
 **Feature steps**
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-098-t02"></a>F-098-T02 — Crash log and questions by chat | 0.5 h | 0 h | 0.5 h | Ready | 🤖 |
+| 🟢 Small | <a id="f-098-t02"></a>F-098-T02 — Crash log and questions by chat | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | 🤖 |
 | 🟢 Small | <a id="f-098-t03"></a>F-098-T03 — Photos on crashes, parts and batteries | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-098-T02](#f-098-t02) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-098-t04"></a>F-098-T04 — Owner check with a real crash | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-098-T03](#f-098-t03) | ⏳ 🧑‍🔧 |
 | 🟢 Small | **Total** | 1.75 h | 0.25 h (1 of 4 steps recorded) | 1 h agent + 0.25 h owner | 1 of 4 completed | |
@@ -2236,7 +2236,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
 | Opened | 2026-11-14 |
 | Verification | Pending. |
-| Reviewed | 2026-11-14 |
+| Reviewed | 2026-11-16 |
 
 </details>
 
