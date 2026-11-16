@@ -4,7 +4,7 @@
   "parent": "F-048",
   "title": "Define bounded multi-step specialist orchestration",
   "goal": "A written contract for the 2026-11-07 owner extension: chunking, coder/reviewer consultants, ordered dependencies, review loops, resumable handoff history",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Contract doc with states, limits and failure paths, linked from the record",
     "No execution claim before the contract exists"

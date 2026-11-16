@@ -4,7 +4,7 @@
   "parent": "F-101",
   "title": "Compare ways to share the battery manager",
   "goal": "A recommendation on the shape that reaches other pilots",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Skill, standalone package and MCP compared: reach (incl. Claude on the phone), data home, cost",
     "Pairs with project-harness F-075"

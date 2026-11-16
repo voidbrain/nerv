@@ -4,7 +4,7 @@
  "parent": "F-079",
  "title": "Optional per-case input paths in the system source key",
  "goal": "A system case that declares its paths is invalidated only by changes inside them",
- "status": "planned",
+ "status": "closed",
  "acceptance": [
   "A case may declare input paths in evals/gauntlet/system-v1.json; undeclared cases keep the whole-tree key",
   "A test shows a change inside a declared path makes the case pending and a change outside does not"
@@ -34,7 +34,7 @@
   "estimate": "0.5 h",
   "basis": "Estimated 2026-11-13 in the architecture reassessment. Not a measurement.",
   "reviewed": "2026-11-13",
-  "agentHours": 0.5,
+  "agentHours": 0,
   "baselineAgentHours": 0.5,
   "estimateAgentHours": 0.5
  }

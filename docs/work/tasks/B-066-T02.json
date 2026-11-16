@@ -4,7 +4,7 @@
   "parent": "B-066",
   "title": "Decouple worker-link frame verification from per-frame nervous IPC",
   "goal": "Implement the Option chosen in B-066-T01 so slow SQLite IPC never causes false heartbeat session loss",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Worker-link heartbeats survive slow registry IPC without dropping live sessions",
     "A regression with a delayed RegistryPort / IPC stub fails before the fix and passes after it, with strict heartbeat timing restored in test/worker-link.test.ts"

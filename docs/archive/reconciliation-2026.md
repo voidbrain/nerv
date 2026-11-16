@@ -1,5 +1,10 @@
 # Backlog reconciliation log 2026
 
+## 2026-11-16 — main `7a48fb8`
+
+Merged PRs #457–#498 except audit-only #487–#488; all 40 CI green. Added 34 PR references; #457 (harness maintenance) and #482 (test stability) have no product record. Reconciled in PR #499.
+
+Per-PR mapping: #457: no record; #458: F-023; #459: B-057, F-081; #460: F-006; #461: F-006; #462: F-048, F-083, F-084; #463: B-067; #465: B-057; #464: B-066; #466: F-006; #467: B-068; #469: F-079; #471: F-048; #470: F-016; #468: F-006; #472: F-008; #477: F-078; #475: F-078; #484: F-101; #482: no record; #473: F-012; #474: F-049; #476: F-008; #479: F-082; #481: F-083; #490: F-085; #480: F-086; #483: F-082; #493: F-012, F-090; #486: F-100; #492: F-088; #489: F-083; #491: F-087; #494: F-084; #485: F-099; #496: F-092; #498: F-103; #497: F-093; #478: F-095; #495: F-089.
 - Current work ledger, reviewed 12 November 2026 against main `ed580bc`. PRs #310 (F-043) and #311 (F-005 procedure, B-052) passed CI; harness 6.3.0–7.1.1 reconciled: worktree rule, effort sized from remaining agent hours, Status with its colour, human actions link their procedure. F-007 and F-008 lowered to P3 (owner, PR #313).
 
 - Current work ledger, reviewed 12 November 2026 against main `1f714bc`. PR #309 (harness v6.2.0) passed CI; F-043 reminder time kinds implemented (PR #310); B-052 opened: owner actions link their procedure (F-005 T13 procedure now a page).

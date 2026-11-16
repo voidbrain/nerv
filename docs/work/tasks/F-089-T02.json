@@ -4,7 +4,7 @@
  "parent": "F-089",
  "title": "Find and click a named control",
  "goal": "A named control is clicked once and the result read back",
- "status": "planned",
+ "status": "implemented",
  "acceptance": [
   "Found by accessible name; one click; readback of the page change; refuses credential fields and dialogs"
  ],

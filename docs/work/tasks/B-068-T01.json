@@ -12,7 +12,7 @@
   "id": "B-068-T01",
   "title": "Companion re-reads the service state after Stop and on each poll",
   "goal": "Start NERV becomes enabled once the stopped service has unloaded",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "A committed Swift test fails first, unchanged by the fix: a fake launchctl still reports the service loaded just after bootout",
     "After Stop the companion waits, bounded, until launchctl no longer finds the service, and the periodic poll re-reads the service state; Start becomes enabled"

@@ -4,7 +4,7 @@
   "parent": "F-093",
   "title": "Find and click a control by name",
   "goal": "A named control in a named app is clicked once and the result read back",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Found by app, window, role and name; ambiguous matches ask; one click; readback",
     "Refuses password fields, permission dialogs and payment buttons (tests with a fixture app tree)"

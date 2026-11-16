@@ -4,7 +4,7 @@
  "parent": "F-086",
  "title": "Search and read as Green tools",
  "goal": "The owner can ask about mail",
- "status": "planned",
+ "status": "implemented",
  "acceptance": [
   "Search and read tools granted Green; content tainted; a planted instruction in a mail is ignored (test with invented mail)"
  ],
