@@ -65,6 +65,26 @@ test('registered Web Component displays hostile text without creating executable
   cb.checked = true;
   cb.dispatchEvent(new window.Event('change'));
   assert.deepEqual(events, [{ listId: 'lst_1', itemId: 'li_1', done: true }]);
+
+  // 4. F-083-T03: Recipe card renders verbatim body and optional working safely
+  const recipeEl = window.document.createElement('nerv-recipe-card');
+  recipeEl.surface = {
+    version: 1,
+    component: 'nerv-recipe-card',
+    props: {
+      title: '<b>Oat Cake</b>',
+      category: 'recipes',
+      body: '200 g oats\n<script>alert(1)</script>',
+      working: '100 g oats -> 50 ml water',
+    },
+  };
+  assert.equal(recipeEl.shadowRoot.querySelector('b'), null);
+  assert.equal(recipeEl.shadowRoot.querySelector('script'), null);
+  assert.match(recipeEl.shadowRoot.querySelector('pre').textContent, /<script>alert\(1\)<\/script>/);
+  assert.match(recipeEl.shadowRoot.querySelector('p').textContent, /50 ml water/);
+
+  recipeEl.surface = { component: 'nerv-status-card', props: { title: 't', detail: 'd', status: 'ok' } };
+  assert.match(recipeEl.shadowRoot.querySelector('pre').textContent, /Invalid surface/);
 });
 
 test('GenUI surface renderer rejects and logs arbitrary component, code or action payloads', async () => {
@@ -149,4 +169,18 @@ test('GenUI surface renderer rejects and logs arbitrary component, code or actio
   const badChecklistRes = validateSurfaceResult(badChecklistItem);
   assert.equal(badChecklistRes.ok, false);
   assert.match(badChecklistRes.reason, /Forbidden item key/);
+
+  const validRecipe = validateSurfaceResult({
+    version: 1,
+    component: 'nerv-recipe-card',
+    props: { title: 'Soup', category: 'soups', body: '1. Simmer' },
+  });
+  assert.equal(validRecipe.ok, true);
+
+  const invalidRecipe = validateSurfaceResult({
+    version: 1,
+    component: 'nerv-recipe-card',
+    props: { title: 'Soup', category: 'soups', body: 42 },
+  });
+  assert.equal(invalidRecipe.ok, false);
 });
