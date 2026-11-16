@@ -4,7 +4,7 @@
   "parent": "F-012",
   "title": "Claude Code (VS Code) adapter feasibility and adapter",
   "goal": "Claude Code (VS Code) adapter feasibility and adapter",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Supported command/API used where available; capability observed, not inferred; adapter or documented infeasibility"
   ],

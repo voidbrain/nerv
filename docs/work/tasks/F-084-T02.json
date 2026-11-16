@@ -4,7 +4,7 @@
  "parent": "F-084",
  "title": "Run the change in a fresh worktree",
  "goal": "A coding agent makes the change and runs the tests in a worktree",
- "status": "planned",
+ "status": "implemented",
  "acceptance": [
   "Fresh worktree from origin/default; the primary checkout is untouched",
   "Diff summary, test result and spend reported to the channel",

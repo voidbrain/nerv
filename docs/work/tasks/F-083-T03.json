@@ -4,7 +4,7 @@
  "parent": "F-083",
  "title": "Recipe card",
  "goal": "Recall renders ingredients and steps as a validated card on the dashboard and as text in Telegram",
- "status": "planned",
+ "status": "implemented",
  "acceptance": [
   "Registered component with validated data; AXE passes"
  ],

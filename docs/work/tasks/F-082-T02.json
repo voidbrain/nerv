@@ -4,7 +4,7 @@
   "parent": "F-082",
   "title": "Checklist card in the dashboard chat",
   "goal": "Showing a list renders a validated checklist card whose ticks update the store",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "The card is a registered component with validated data, not generated HTML",
     "Ticking updates the store and other open cards; keyboard and screen-reader accessible (AXE passes)"

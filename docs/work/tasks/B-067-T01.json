@@ -4,7 +4,7 @@
   "parent": "B-067",
   "title": "Snapshot schedule stops cleanly before cleanup on Windows",
   "goal": "No snapshot holds a file in the fixture folder when the test removes it",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "A committed test fails first, unchanged by the fix",
     "10 consecutive Windows runs of test/snapshots.test.ts pass"

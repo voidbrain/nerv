@@ -4,7 +4,7 @@
  "parent": "F-087",
  "title": "Slice with a material profile",
  "goal": "A sliced file with time and material is produced",
- "status": "planned",
+ "status": "implemented",
  "acceptance": [
   "Named profile applied; estimate reported; unknown profile refused"
  ],

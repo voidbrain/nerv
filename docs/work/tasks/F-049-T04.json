@@ -4,7 +4,7 @@
   "parent": "F-049",
   "title": "EVA-03 instance per job",
   "goal": "A fresh EVA-03 instance per job with the chosen mechanism, discarded afterwards; the tools process moves into it so EVA-03 grants can run",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Create, run and discard per job; no state carried between jobs",
     "Mounts, network, credentials, deadline and cancellation as T01 specifies",

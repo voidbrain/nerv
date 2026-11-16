@@ -4,7 +4,7 @@
  "parent": "F-092",
  "title": "Bounded local recording",
  "goal": "A recording is made, stored locally and summarised",
- "status": "planned",
+ "status": "implemented",
  "acceptance": [
   "Start and stop by command; time limit; no password-field text; local-only"
  ],
