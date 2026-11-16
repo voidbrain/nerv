@@ -575,3 +575,26 @@ export function validateReminderTitle(
   }
   return undefined;
 }
+
+/** B-069: the reason recorded on resume when the owner let an approval card expire; matched in code, never by the model. */
+export const OWNER_EXPIRED_REASON = 'The approval expired before the owner decided; nothing ran.';
+/** B-069: the reason recorded on resume when the owner decided against an action. */
+export function ownerRejectedReason(decision: string): string {
+  return `The owner did not approve it (${decision}); nothing ran.`;
+}
+/** Whether a recorded step is an owner refusal or an expired card: such a tool is never proposed again in the sortie. */
+export function ownerDeclined(step: Step): 'expired' | 'rejected' | undefined {
+  if (step.outcome !== 'reject' || !step.reason) return undefined;
+  if (step.reason === OWNER_EXPIRED_REASON) return 'expired';
+  return /^The owner did not approve it \(/.test(step.reason) ? 'rejected' : undefined;
+}
+/** The closing reply when Misato proposes a declined or expired tool again (B-069), in the request's language. */
+export function declinedReply(it: boolean, tool: string, how: 'expired' | 'rejected'): string {
+  if (it)
+    return how === 'expired'
+      ? `Richiesta chiusa: l'approvazione per ${tool} è scaduta senza risposta e non la ripropongo. Se la vuoi, chiedimela di nuovo.`
+      : `Richiesta chiusa: hai rifiutato ${tool} e non lo ripropongo. Se cambi idea, chiedimelo di nuovo.`;
+  return how === 'expired'
+    ? `Request closed: the approval for ${tool} expired unanswered; I will not ask again. Ask me again if you want it.`
+    : `Request closed: you rejected ${tool}; I will not ask again. Ask me again if you change your mind.`;
+}

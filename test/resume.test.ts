@@ -253,3 +253,42 @@ test('a sortie a restart cut off is closed as interrupted with a reply saying wh
     await t.close();
   }
 });
+test('B-069: after an approval expires, the same action proposed again gets no second card; the sortie closes with a reply', async () => {
+  const t = await setup([ADD, ADD, '{"reply":"never reached"}']);
+  try {
+    const { r, follow } = await t.start();
+    const first = await r.chat('Remind me to call Ada');
+    assert.equal(first.waiting.length, 1);
+    const cli = new Store(t.db);
+    try {
+      const expires = cli.approvals()[0]!.expires;
+      assert.equal(cli.expire(new Date(Date.parse(expires) + 1)), 1);
+    } finally {
+      cli.close();
+    }
+    await until(() => follow.length === 1);
+    assert.match(t.prompts.at(-1)!.steps.at(-1)!.reason!, /expired before the owner decided; nothing ran/);
+    assert.equal(follow[0]!.waiting.length, 0);
+    assert.match(follow[0]!.reply ?? '', /expired unanswered; I will not ask again/);
+    assert.equal((await r.approvals()).length, 0);
+    assert.notEqual((await r.sorties())[0]!.closed, null);
+    assert.equal((await r.list()).length, 0);
+  } finally {
+    await t.close();
+  }
+});
+test('B-069: after the owner rejects, the same action proposed again gets no second card either', async () => {
+  const t = await setup([ADD, ADD, '{"reply":"never reached"}']);
+  try {
+    const { r, follow } = await t.start();
+    const first = await r.chat('Remind me to call Ada');
+    await r.decide(first.waiting[0]!.approvalId, 'reject', 'api');
+    await until(() => follow.length === 1);
+    assert.equal(follow[0]!.waiting.length, 0);
+    assert.match(follow[0]!.reply ?? '', /you rejected reminders\.add; I will not ask again/);
+    assert.equal((await r.approvals()).length, 0);
+    assert.notEqual((await r.sorties())[0]!.closed, null);
+  } finally {
+    await t.close();
+  }
+});

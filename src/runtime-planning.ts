@@ -7,6 +7,8 @@ import {
   doneReply,
   filterConsultantInput,
   matchExistingReminders,
+  ownerDeclined,
+  declinedReply,
   parseAdvice,
   requestLanguage,
   waitingReply,
@@ -467,6 +469,10 @@ export class RuntimePlanning {
         )
       )
         return finish('done', doneReply(lang(), ranSteps()));
+      // B-069: the owner already declined this tool in this request, or let its card expire: it is never asked again.
+      // The sortie closes with a reply instead of a new card after every expiry (a card every hour, all night).
+      const declined = steps.find((s) => s.tool === tool && ownerDeclined(s));
+      if (declined) return finish('done', declinedReply(lang() === 'it', tool, ownerDeclined(declined)!));
       const dupGuard = guardActionDuplicates(tool, args, memory, steps, pendingReminders);
       if ('error' in dupGuard) {
         await this.host.record(sortieId, steps, {

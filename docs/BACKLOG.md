@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 2 | 1 | 1 | 0 |
+| **This week** | 2 | 1 | 2 | 0 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 45 | 8 |
+| **Open** | 45 | 9 |
 | **Require Human 🧑** | 6 | 1 |
 
 ### Require Human 🧑
@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 72.5 h agent + 21.25 h owner across 165 open steps of 45 features and 8 other records. 34.75 h of actual effort recorded on 79 steps. Generated from the task files.
+**Remaining effort:** 73.25 h agent + 21.25 h owner across 166 open steps of 45 features and 9 other records. 34.75 h of actual effort recorded on 79 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1741,7 +1741,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | | |
 |---|---|
-| **Issue** | Owner decision 2026-11-16 on the [token-cost review](audits/2026-11-16-token-cost-comparison.md) (F-104-T03): `src/executors.ts` sends 30+ tool schemas (`toolDocs`) to Misato on every turn and every domain adds more (`fleet.chat` in [PR #500](https://github.com/voidbrain/nerv/pull/500)); on the local route's 4–16K context that is real pressure, but no number measures it: the review asserts the cost without a prompt-size measurement and `work-usage` token attribution is unknown. A byte-stable prefix (system text and tool schemas before the per-turn inbox, memory and clock) is also assumed, not checked; it decides cloud prompt caching and Ollama prefix reuse. |
+| **Issue** | Owner decision 2026-11-16 on the [token-cost review](reviews/token/2026-11-16.md) (F-104-T03): `src/executors.ts` sends 30+ tool schemas (`toolDocs`) to Misato on every turn and every domain adds more (`fleet.chat` in [PR #500](https://github.com/voidbrain/nerv/pull/500)); on the local route's 4–16K context that is real pressure, but no number measures it: the review asserts the cost without a prompt-size measurement and `work-usage` token attribution is unknown. A byte-stable prefix (system text and tool schemas before the per-turn inbox, memory and clock) is also assumed, not checked; it decides cloud prompt caching and Ollama prefix reuse. |
 | **Reproduce** | Count the entries of `toolDocs` in `src/executors.ts`; nothing logs the prompt size of a Misato turn. |
 | **Check** | A bounded local sample of prompt size per Misato turn (route, estimated tokens, tool-schema share; no request text stored) with a report; a committed test that the prompt prefix is identical across two turns up to the per-turn context; domain tool schemas (`fpv.*`, `pantry.*`, `gmail.*`, `batteries.*`, `fleet.*`) offered by intent or category rather than all at once, with the measured prompt size before and after cited here; Misato still reaches every tool it needs (regressions in `test/misato.test.ts`). |
 
@@ -1761,7 +1761,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner decision 2026-11-16 (F-104-T03); [token-cost review](audits/2026-11-16-token-cost-comparison.md); opened in [PR #502](https://github.com/voidbrain/nerv/pull/502) |
+| PR / evidence | Owner decision 2026-11-16 (F-104-T03); [token-cost review](reviews/token/2026-11-16.md); opened in [PR #502](https://github.com/voidbrain/nerv/pull/502) |
 | Opened | 2026-11-16 |
 | Verification | Pending. |
 | Reviewed | 2026-11-16 |
@@ -1970,13 +1970,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | **Issue** | Found 2026-11-16 by the owner: the Blue test card of 2026-11-15 22:32 ("Ricorda questo fatto di prova…", `memory.remember`, sortie `2683cff6`) came back on Telegram every hour through the night (23:42, 00:43, 01:44 … 09:12). The live store shows each card is a new approval on the same open sortie: every earlier one is `expired` (1 h TTL, source `ttl`) or `reject` (22:37, 22:39, 06:07), and the sortie never closes. The service did not restart (started 22:45, one run), so the overnight merges are unrelated. Likely cause, unconfirmed: after `approval.expired` or `approval.reject` the sortie stays open and the planner proposes the same step again with a fresh approval (`src/store-sorties.ts`, `src/ledger-approvals.ts` around line 103); and `deliverApproval` honours the quiet hours only for watch sorties (`src/store-sorties.ts` line 42), so ordinary cards go out at any hour. |
 | **Reproduce** | `nerv chat "Ricorda questo fatto di prova: il drone di test si chiama Prova"`; leave the Telegram card unanswered: after 1 h a new card arrives; ❌ Reject gives a new card within two minutes. |
-| **Check** | A committed test fails first: an expired or rejected approval does not produce a second approval for the same step; the sortie ends, or waits for the owner, with one inbox line saying so; approval cards respect the configured quiet hours like watch notices; the owner repeats the reproduction and gets exactly one card. |
+| **Check** | A committed test fails first: an expired or rejected approval does not produce a second approval for the same step; the sortie closes with a reply saying so; owner-initiated cards keep going out at any hour (there is no global quiet-hours setting, and the owner who just asked is awake; proactive cards already bundle overnight), so no quiet-hours change: the loop was the night problem; the owner repeats the reproduction and gets exactly one card. |
 
 **Steps**
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="b-069-t01"></a>B-069-T01 — An expired or rejected approval ends the step; cards respect quiet hours | 1 h | 0 h | 1 h | Ready |
+| 🟢 Small | <a id="b-069-t01"></a>B-069-T01 — An expired or rejected approval ends the step | 1 h | 0 h | 1 h | Implemented; verification pending |
 | 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
 
 <details>
@@ -2522,6 +2522,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | [PR #463](https://github.com/voidbrain/nerv/pull/463) (merged; CI green); [PR #451](https://github.com/voidbrain/nerv/pull/451) CI 43748182800 (Windows, first attempt) |
 | Opened | 2026-11-15 |
+| Verification | Pending. |
+| Reviewed | 2026-11-16 |
+
+</details>
+
+---
+### <a id="b-070"></a>[🐞 B-070](#top)
+
+**SBOM test fails locally on a fresh install: duplicate dependency entries from npm sbom**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-070-T01, find what makes the output differ, then a fix.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-16 while verifying B-069: `test/bom.test.ts` ("F-067: npm lock-only dependency SBOM validates…") fails on unmodified `main` in a worktree freshly installed with `npm ci` (Node 26.12, npm 10.8.2): `npm sbom --package-lock-only --sbom-format cyclonedx` returns 13 duplicate `dependencies` entries (e.g. `@inquirer/type@4.2.1` ×10, `ansi-styles@6.2.3` ×3), so the CycloneDX `uniqueItems` validation fails. The same lockfile in a checkout with an older `node_modules` gives no duplicates, and CI (Node 24) passes; removing `node_modules/.package-lock.json` does not change it. Cause unconfirmed: npm's SBOM output may depend on the installed tree or the Node version. |
+| **Reproduce** | `git worktree add ../x origin/main && cd ../x && npm ci && node --test test/bom.test.ts`. |
+| **Check** | The cause is named; either the SBOM export deduplicates `dependencies` before validation (a committed test with a duplicated entry), or the test pins the condition it needs; `npm test` passes on a fresh install under Node 24 and the local Node. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-070-t01"></a>B-070-T01 — SBOM test stable on a fresh install | 0.75 h | 0 h | 0.75 h | Ready |
+| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 1 steps recorded) | 0.75 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-070.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Local run 2026-11-16 in a fresh worktree; CI on #502 passed the same test |
+| Opened | 2026-11-16 |
 | Verification | Pending. |
 | Reviewed | 2026-11-16 |
 
