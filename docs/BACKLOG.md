@@ -776,7 +776,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner decision 2026-11-16; [PR #499](https://github.com/voidbrain/nerv/pull/499) the catch-up it prevents; opened in this PR |
+| PR / evidence | Owner decision 2026-11-16; [PR #499](https://github.com/voidbrain/nerv/pull/499) the catch-up it prevents; opened in [PR #502](https://github.com/voidbrain/nerv/pull/502) |
 | Opened | 2026-11-16 |
 | Verification | Pending. |
 | Reviewed | 2026-11-16 |
@@ -1761,7 +1761,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner decision 2026-11-16 (F-104-T03); [token-cost review](audits/2026-11-16-token-cost-comparison.md); opened in this PR |
+| PR / evidence | Owner decision 2026-11-16 (F-104-T03); [token-cost review](audits/2026-11-16-token-cost-comparison.md); opened in [PR #502](https://github.com/voidbrain/nerv/pull/502) |
 | Opened | 2026-11-16 |
 | Verification | Pending. |
 | Reviewed | 2026-11-16 |
@@ -2663,7 +2663,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-104-T01: [PR #487](https://github.com/voidbrain/nerv/pull/487) architecture comparison report · F-104-T02: [PR #488](https://github.com/voidbrain/nerv/pull/488) token-cost comparison report. [PR #487](https://github.com/voidbrain/nerv/pull/487) F-104-T01; [PR #488](https://github.com/voidbrain/nerv/pull/488) F-104-T02 (both merged; CI green); owner review 2026-11-16 in this PR |
+| PR / evidence | Steps: F-104-T01: [PR #487](https://github.com/voidbrain/nerv/pull/487) architecture comparison report · F-104-T02: [PR #488](https://github.com/voidbrain/nerv/pull/488) token-cost comparison report. [PR #487](https://github.com/voidbrain/nerv/pull/487) F-104-T01; [PR #488](https://github.com/voidbrain/nerv/pull/488) F-104-T02 (both merged; CI green); owner review 2026-11-16 in [PR #502](https://github.com/voidbrain/nerv/pull/502) |
 | Opened | 2026-11-15 |
 | Verification | 2026-11-16: both reports merged on green CI (#487, #488); the owner's decisions recorded above. Closed 2026-11-16. |
 | Reviewed | 2026-11-16 |
