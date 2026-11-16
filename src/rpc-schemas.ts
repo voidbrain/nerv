@@ -168,6 +168,18 @@ export const methodSchemas = {
     additionalProperties: false,
   },
   'reminders.pending': empty,
+  'lists.show': {
+    type: 'object',
+    required: ['list'],
+    properties: { list: { type: 'string', minLength: 1, maxLength: 120 } },
+    additionalProperties: false,
+  },
+  'lists.toggle': {
+    type: 'object',
+    required: ['itemId'],
+    properties: { itemId: { type: 'string', minLength: 1, maxLength: 80 } },
+    additionalProperties: false,
+  },
   'reminders.add': {
     type: 'object',
     required: ['title', 'due'],

@@ -9,12 +9,14 @@ import type { StoreApi } from './runtime.ts';
 import { QueueCancelledError, QueueFullError } from './request-queue.ts';
 import type { Pilot, PilotPatch } from './pilots.ts';
 import { attachRpcSocket } from './socket.ts';
+import { toChecklistSurface } from './lists.ts';
 import { buildInfo } from './build.ts';
 import type { UpdateAvailability } from './update-availability.ts';
 import type { ManualUpdateResult } from './manual-update.ts';
 import type { AutoUpdatePolicy, AutoUpdateSchemaCheck } from './update-policy.ts';
 import { createUpdateHandlers } from './server-update.ts';
 import type { ServiceHost } from './node-lifecycle-execution.ts';
+import { HealthSampleStore, startLocalHealthSampler } from './health-samples.ts';
 import { RpcFault } from './rpc.ts';
 import { confirmPushToTalkDraft, preparePushToTalkDraft, prepareSpokenReply, type VoiceLanguage } from './voice.ts';
 import type { ModelChange } from './model-setup.ts';
@@ -72,6 +74,7 @@ export function makeServer(
   // so a session can never renew itself.
   const feed = store.dashboardRevision ? new DashboardFeed(() => store.dashboardRevision!()) : undefined;
   const sessions = new Map<string, number>();
+  let statusPollCount = 0;
   const { statusUpdate, handleUpdateRoute } = createUpdateHandlers({
     store,
     commit: build.commit,
@@ -239,6 +242,7 @@ export function makeServer(
           '/api/approvals',
           '/api/sorties',
           '/api/queue',
+          '/api/lists/show',
         ].includes(path) ||
           /^\/api\/sorties\/[a-f0-9-]+(\/events)?$/.test(path) ||
           /^\/api\/bases\/[A-Za-z0-9-]{2,16}\/sorties\/[a-f0-9-]+$/.test(path))
@@ -370,6 +374,33 @@ export function makeServer(
             Number(url.searchParams.get('limit') ?? 50),
           ),
         );
+      } else if (req.method === 'GET' && path === '/api/lists/show') {
+        if (!store.listsShow) {
+          reply(404, { error: 'Lists unavailable.' });
+          return;
+        }
+        const name = url.searchParams.get('name')?.trim() ?? '';
+        if (!name) throw new Error('List name is required.');
+        const view = await store.listsShow(name);
+        if (!view) {
+          reply(404, { error: 'List not found.' });
+          return;
+        }
+        reply(200, { ...view, surface: toChecklistSurface(view) });
+      } else if (req.method === 'POST' && path === '/api/lists/toggle') {
+        if (!store.listsToggle) {
+          reply(404, { error: 'Lists unavailable.' });
+          return;
+        }
+        const b = await body(req, 4096);
+        if (typeof b.itemId !== 'string' || !b.itemId.trim()) throw new Error('itemId is required.');
+        if (b.done !== undefined && typeof b.done !== 'boolean') throw new Error('done must be boolean.');
+        const updated = await store.listsToggle(b.itemId, b.done as boolean | undefined);
+        if (!updated) {
+          reply(404, { error: 'List item not found.' });
+          return;
+        }
+        reply(200, { ...updated, surface: toChecklistSurface(updated.view) });
       } else if (req.method === 'POST' && path === '/api/ask') {
         // Admin only (read-only clients stop above). Privacy is explicit: local-only unless the caller says any.
         if (!store.ask) {
@@ -837,7 +868,8 @@ export function makeServer(
           return;
         }
         reply(200, await store.modelUsage(before, limit));
-      } else if (req.method === 'GET' && path === '/api/status')
+      } else if (req.method === 'GET' && path === '/api/status') {
+        statusPollCount += 1;
         reply(200, {
           name: 'NERV Agency',
           mode: 'local-core',
@@ -848,7 +880,7 @@ export function makeServer(
           timeZone: options.timeZone ?? 'Europe/Rome',
           ...(options.native ? { runtimeId: options.native.auth.runtimeId, home: options.native.auth.home } : {}),
         });
-      else if (req.method === 'GET' && path === '/api/doctor')
+      } else if (req.method === 'GET' && path === '/api/doctor')
         reply(200, {
           name: 'NERV Agency',
           mode: 'local-core',
@@ -872,8 +904,13 @@ export function makeServer(
     ? createHttpsServer({ ...options.tls, minVersion: 'TLSv1.3' }, listener)
     : createServer(listener);
   const sockets = attachRpcSocket(server, store, token, options);
+  const storeWithDb = store as StoreApi & { db?: import('node:sqlite').DatabaseSync };
+  const healthSampler = storeWithDb.db
+    ? startLocalHealthSampler(new HealthSampleStore(storeWithDb.db), () => statusPollCount)
+    : undefined;
   const close = server.close.bind(server);
   server.close = (callback) => {
+    healthSampler?.stop();
     feed?.close();
     for (const client of sockets.clients) client.terminate();
     sockets.close();

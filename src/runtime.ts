@@ -156,6 +156,16 @@ export class Runtime implements StoreApi {
       this.nervous.call('reminders.cancel', { id }),
     ) as Promise<boolean>;
   }
+  async showList(name: string) {
+    return (await this.nervous.call('lists.show', { list: name })) as ReturnType<
+      import('./lists.ts').ListStore['show']
+    >;
+  }
+  async toggleListItem(itemId: string) {
+    return (await this.nervous.call('lists.toggle', { itemId })) as ReturnType<
+      import('./lists.ts').ListStore['toggleItemById']
+    >;
+  }
   async pushPublicKey() {
     return (await this.nervous.call('push.key')) as string;
   }

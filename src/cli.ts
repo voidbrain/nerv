@@ -4,7 +4,14 @@ import { runKajiCommand } from './cli-kaji.ts';
 import { startSnapshots } from './snapshots.ts';
 
 import { createPeerHandlers } from './peer-handlers.ts';
-import { fetchIntoQuarantine } from './quarantine.ts';
+import { buildProjectReport, fetchIntoQuarantine } from './quarantine.ts';
+import { runResumeEngineTick } from './resume-intent.ts';
+import { createHeadlessResumeDeps, type HeadlessResumeTarget } from './headless-resume.ts';
+import { runCardCopyRule, type CopyRule } from './storage-copy.ts';
+import { sliceModelWithProfile, type SlicerProfile } from './slicer.ts';
+import { runCodingJobInWorktree, type AllowedCodingRepo } from './coding-job.ts';
+import { DesktopRecordingSession, type DesktopRecordingHeader } from './desktop-recording.ts';
+import { clickDesktopControl, type DesktopAccessibilityDriver } from './desktop-control.ts';
 
 import { SeatPool } from './seat-pool.ts';
 
@@ -727,10 +734,16 @@ try {
       }
       case 'quarantine': {
         const sub = args[0];
-        if (sub !== 'fetch' || !args[1]) throw new Error('Usage: nerv quarantine fetch <url> [--kind repo|page]');
+        if ((sub !== 'fetch' && sub !== 'report') || !args[1]) {
+          throw new Error('Usage: nerv quarantine <fetch|report> <url> [--kind repo|page]');
+        }
         const kindIdx = args.indexOf('--kind');
         const kind = kindIdx >= 0 ? (args[kindIdx + 1] as 'repo' | 'page' | undefined) : undefined;
         const result = await fetchIntoQuarantine(args[1], kind ? { kind } : {});
+        if (sub === 'report') {
+          console.log(JSON.stringify(buildProjectReport(result), null, 2));
+          break;
+        }
         console.log(
           JSON.stringify(
             {
@@ -743,6 +756,93 @@ try {
             2,
           ),
         );
+        break;
+      }
+      case 'headless-resume': {
+        if (!args[0]) throw new Error('Usage: nerv headless-resume <targets.json>');
+        const entries = JSON.parse(readFileSync(resolve(args[0]), 'utf8')) as Array<[string, HeadlessResumeTarget]>;
+        const store = new Store(databasePath(home), readScrolls(home), { home });
+        try {
+          const res = await runResumeEngineTick(
+            store.resumeIntents,
+            createHeadlessResumeDeps(new Map(entries), { owner: 'cli' }),
+          );
+          console.log(JSON.stringify(res, null, 2));
+        } finally {
+          store.close();
+        }
+        break;
+      }
+      case 'card-copy': {
+        if (!args[0] || !args[1] || !args[2]) {
+          throw new Error('Usage: nerv card-copy <mountRoot> <label> <rules.json>');
+        }
+        const rules = JSON.parse(readFileSync(resolve(args[2]), 'utf8')) as CopyRule[];
+        console.log(JSON.stringify(runCardCopyRule(args[0], args[1], rules), null, 2));
+        break;
+      }
+      case 'slice': {
+        if (!args[0] || !args[1] || !args[2] || !args[3]) {
+          throw new Error('Usage: nerv slice <input> <output.gcode.3mf> <profileName> <allowlist.json>');
+        }
+        const allowlist = JSON.parse(readFileSync(resolve(args[3]), 'utf8')) as SlicerProfile[];
+        console.log(
+          JSON.stringify(
+            sliceModelWithProfile({ inputPath: args[0], outputPath: args[1], profileName: args[2] }, allowlist),
+            null,
+            2,
+          ),
+        );
+        break;
+      }
+      case 'coding-job': {
+        if (!args[0] || !args[1] || !args[2]) {
+          throw new Error('Usage: nerv coding-job <repoId> <jobId> <allowlist.json>');
+        }
+        const allowlist = JSON.parse(readFileSync(resolve(args[2]), 'utf8')) as AllowedCodingRepo[];
+        const res = await runCodingJobInWorktree(
+          { repoId: args[0], jobId: args[1], prompt: args[3] ?? '' },
+          allowlist,
+          async () => ({
+            testPassed: false,
+            testSummary: 'No live coding-agent runner bound in CLI.',
+            tokens: 0,
+            costUsd: 0,
+          }),
+        );
+        console.log(JSON.stringify(res, null, 2));
+        break;
+      }
+      case 'desktop-record': {
+        if (!args[0] || !args[1]) throw new Error('Usage: nerv desktop-record <id> <header.json>');
+        const header = JSON.parse(readFileSync(resolve(args[1]), 'utf8')) as DesktopRecordingHeader;
+        const session = new DesktopRecordingSession({
+          id: args[0],
+          permissions: { accessibilityGranted: false, inputMonitoringGranted: false },
+          header,
+        });
+        console.log(JSON.stringify(session.stop(), null, 2));
+        break;
+      }
+      case 'desktop-click': {
+        if (!args[0] || !args[1]) {
+          throw new Error('Usage: nerv desktop-click <app-name> <control-name>');
+        }
+        const driver: DesktopAccessibilityDriver = {
+          checkAccessibilityPermission: () => false,
+          getWindow: async () => {
+            throw new Error('No live desktop accessibility driver bound in CLI.');
+          },
+          pressControl: async () => {
+            throw new Error('No live desktop accessibility driver bound in CLI.');
+          },
+        };
+        const res = await clickDesktopControl(driver, {
+          appName: args[0],
+          controlName: args[1],
+          approved: args.includes('--approved'),
+        });
+        console.log(JSON.stringify(res, null, 2));
         break;
       }
       case 'circuits': {

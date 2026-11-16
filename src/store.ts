@@ -17,7 +17,9 @@ import { MEMORY_SCHEMA, Memory, type Episode } from './memory.ts';
 import { INCIDENT_CIRCUITS_SCHEMA, IncidentCircuitStore } from './incident-circuits.ts';
 import { BATTERY_SCHEMA, BatteryRegistry } from './batteries.ts';
 import { LISTS_SCHEMA, ListStore } from './lists.ts';
+import { FPV_BUILDS_SCHEMA, FpvBuildStore } from './fpv-builds.ts';
 import { DOCUMENTS_SCHEMA, DocumentStore } from './documents.ts';
+import { PANTRY_SCHEMA, PantryStore } from './pantry.ts';
 import { FLEET_SCHEMA, FleetStore } from './fleet.ts';
 import { REGISTRY_SCHEMA } from './kaji.ts';
 import { MILESTONE_SCHEMA } from './milestones.ts';
@@ -31,6 +33,7 @@ import { StorePush } from './store-push.ts';
 import { StoreKajiOutbox } from './store-kaji-outbox.ts';
 import { StoreInbox } from './store-inbox.ts';
 import { StoreSorties } from './store-sorties.ts';
+import { BatteryStorageReminders } from './battery-storage-reminders.ts';
 export { REMINDER_KINDS, normalizeReminderKind, type ReminderKind } from './reminder-time.ts';
 export type { PushSubscriptionRecord } from './push.ts';
 export type Reminder = {
@@ -100,7 +103,9 @@ export class Store {
   readonly fleet: FleetStore;
   readonly resumeIntents: ResumeIntentStore;
   readonly lists: ListStore;
+  readonly fpvBuilds: FpvBuildStore;
   readonly documents: DocumentStore;
+  readonly pantry: PantryStore;
   readonly policySource: string;
   pushFetch: typeof fetch = fetch;
   /** The data home, when known: the schedule tool writes config.json there. */
@@ -194,6 +199,7 @@ export class Store {
     );
     this.db.exec(RESUME_INTENT_SCHEMA);
     this.db.exec(LISTS_SCHEMA);
+    this.db.exec(FPV_BUILDS_SCHEMA);
     this.ledger = new Ledger(this.db, { policy: scrolls.policy, tools: builtinTools });
     this.memory = new Memory(this.db);
     this.circuits = new IncidentCircuitStore(this.db, this.ledger);
@@ -203,8 +209,11 @@ export class Store {
     this.fleet = new FleetStore(this.db);
     this.resumeIntents = new ResumeIntentStore(this.db);
     this.lists = new ListStore(this.db);
+    this.fpvBuilds = new FpvBuildStore(this.db);
     this.db.exec(DOCUMENTS_SCHEMA);
     this.documents = new DocumentStore(this.db);
+    this.db.exec(PANTRY_SCHEMA);
+    this.pantry = new PantryStore(this.db);
     this.watch = new Watch(this.db, this.ledger);
     this.policySource = scrolls.source;
     this.db.exec(
@@ -321,10 +330,27 @@ export class Store {
   cancel(id: string): boolean {
     return this.remindersController.cancel(id);
   }
+  private _batteryStorageReminders?: BatteryStorageReminders;
+  get batteryStorageReminders(): BatteryStorageReminders {
+    return (this._batteryStorageReminders ??= new BatteryStorageReminders(this.db, this.remindersController));
+  }
+  showList(name: string) {
+    return this.lists.show(name);
+  }
+  toggleListItem(itemId: string) {
+    return this.lists.toggleItemById(itemId);
+  }
+  listsShow(name: string) {
+    return this.lists.show(name);
+  }
+  listsToggle(itemId: string, done?: boolean, now = new Date()) {
+    return this.lists.setDoneById(itemId, done, now);
+  }
   tick(now = new Date()): number {
     const count = this.remindersController.tick(now);
     const lang = this.remindersController.reminderDefaults().language;
     this.batteries.deliverDueResistancePrompts(now, lang);
+    this.batteryStorageReminders.syncAll(this.batteries.list(), now);
     return count;
   }
   private _pushController?: StorePush;
