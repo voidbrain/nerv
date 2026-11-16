@@ -76,12 +76,16 @@ test('due once per local night, at or after 03:30 in the owner time zone', () =>
 test('the schedule takes the snapshot once and logs a failure by reason only, without paths', async () => {
   const f = fixture();
   try {
+    const fixedNow = () => new Date('2030-01-15T12:00:00Z');
     const stop = startSnapshots(
       f.home,
       () => f.database,
       () => 'UTC',
       () => assert.fail('no failure expected'),
       5,
+      undefined,
+      undefined,
+      fixedNow,
     );
     await new Promise((r) => setTimeout(r, 100));
     await stop();
@@ -96,6 +100,9 @@ test('the schedule takes the snapshot once and logs a failure by reason only, wi
       () => 'UTC',
       (l) => lines.push(l),
       5,
+      undefined,
+      undefined,
+      fixedNow,
     );
     await new Promise((r) => setTimeout(r, 100));
     await stop2();
@@ -127,6 +134,8 @@ test('B-067-T01: stop waits for an in-flight snapshot tick and skips new work af
         if (stopped) backupCalledAfterStop = true;
         return undefined;
       },
+      undefined,
+      () => new Date('2030-01-15T12:00:00Z'),
     );
     await dbRead;
     stopped = true;

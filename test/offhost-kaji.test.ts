@@ -134,6 +134,7 @@ test('the nightly copy reaches Tabgha over the Kaji line encrypted, and only the
       5,
       () => macConfig,
       (peer, date, copy) => b.la.sendBackup(peer, date, copy),
+      () => new Date('2030-01-15T12:00:00Z'),
     );
     const received = receivedDir(b.tabgha, 'NERV-01');
     await until(() => copyDates(received).length > 0);
@@ -175,6 +176,7 @@ test('a base that does not accept copies refuses them; the sender logs it once a
       5,
       () => macConfig,
       (peer, date, copy) => (sends++, b.la.sendBackup(peer, date, copy)),
+      () => new Date('2030-01-15T12:00:00Z'),
     );
     await until(() => lines.length > 0);
     await new Promise((r) => setTimeout(r, 100));
@@ -204,6 +206,7 @@ test('an unreachable peer is reported as waiting, once, and is not retried every
       5,
       () => macConfig,
       (peer, date, copy) => (sends++, b.la.sendBackup(peer, date, copy)),
+      () => new Date('2030-01-15T12:00:00Z'),
     );
     await until(() => lines.length > 0);
     await new Promise((r) => setTimeout(r, 100));
