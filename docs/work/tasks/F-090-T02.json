@@ -4,7 +4,7 @@
  "parent": "F-090",
  "title": "Headless resume adapter",
  "goal": "The F-012 engine resumes a named session once without the editor",
- "status": "planned",
+ "status": "implemented",
  "acceptance": [
   "Identity rechecked; once only; needs-attention on change"
  ],

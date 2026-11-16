@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-016",
   "id": "F-016-T12",
-  "status": "ready",
+  "status": "closed",
   "title": "Revise the decision: local chat fallback on a non-main base",
   "goal": "A non-main base answers chat locally, with no coordinator effects, while main is offline",
   "capabilities": [
@@ -32,7 +32,7 @@
     "reviewed": "2026-11-15",
     "basis": "Estimated 2026-11-15 at agent speed (harness 8.14.3: implementation steps 0.75 h, decision revisions 0.5 h). Not a measurement.",
     "estimate": "0.5 h",
-    "agentHours": 0.5,
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5,
     "ownerHours": 0

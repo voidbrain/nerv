@@ -4,7 +4,7 @@
   "parent": "F-099",
   "title": "Build import and cited wiring answers",
   "goal": "Wiring questions answered from the owner's build or a manufacturer document",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Every answer cites its source; unknown says so",
     "Invented tests"

@@ -4,7 +4,7 @@
  "parent": "F-085",
  "title": "Project report",
  "goal": "The owner gets a sourced summary",
- "status": "planned",
+ "status": "implemented",
  "acceptance": [
   "What it is, activity, licence, build and test, visible risks; each claim cites the file or page"
  ],

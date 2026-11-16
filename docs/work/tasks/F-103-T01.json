@@ -4,7 +4,7 @@
   "parent": "F-103",
   "title": "Local health sample",
   "goal": "serve records memory, CPU, event-loop delay and poll counts at a bounded rate",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "A committed test: samples are bounded in rate and retention",
     "No sample leaves the base"

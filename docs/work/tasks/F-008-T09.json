@@ -4,7 +4,7 @@
   "parent": "F-008",
   "title": "Storage reminders",
   "goal": "A battery left charged or discharged is reminded until stored",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "First reminder at the decided evening time, then the decided follow-ups; stopped when stored",
     "Uses the existing reminder engine; local inbox and Telegram"
