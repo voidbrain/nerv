@@ -17,6 +17,7 @@ import { MEMORY_SCHEMA, Memory, type Episode } from './memory.ts';
 import { INCIDENT_CIRCUITS_SCHEMA, IncidentCircuitStore } from './incident-circuits.ts';
 import { BATTERY_SCHEMA, BatteryRegistry } from './batteries.ts';
 import { LISTS_SCHEMA, ListStore } from './lists.ts';
+import { FPV_BUILDS_SCHEMA, FpvBuildStore } from './fpv-builds.ts';
 import { DOCUMENTS_SCHEMA, DocumentStore } from './documents.ts';
 import { PANTRY_SCHEMA, PantryStore } from './pantry.ts';
 import { FLEET_SCHEMA, FleetStore } from './fleet.ts';
@@ -102,6 +103,7 @@ export class Store {
   readonly fleet: FleetStore;
   readonly resumeIntents: ResumeIntentStore;
   readonly lists: ListStore;
+  readonly fpvBuilds: FpvBuildStore;
   readonly documents: DocumentStore;
   readonly pantry: PantryStore;
   readonly policySource: string;
@@ -197,6 +199,7 @@ export class Store {
     );
     this.db.exec(RESUME_INTENT_SCHEMA);
     this.db.exec(LISTS_SCHEMA);
+    this.db.exec(FPV_BUILDS_SCHEMA);
     this.ledger = new Ledger(this.db, { policy: scrolls.policy, tools: builtinTools });
     this.memory = new Memory(this.db);
     this.circuits = new IncidentCircuitStore(this.db, this.ledger);
@@ -206,6 +209,7 @@ export class Store {
     this.fleet = new FleetStore(this.db);
     this.resumeIntents = new ResumeIntentStore(this.db);
     this.lists = new ListStore(this.db);
+    this.fpvBuilds = new FpvBuildStore(this.db);
     this.db.exec(DOCUMENTS_SCHEMA);
     this.documents = new DocumentStore(this.db);
     this.db.exec(PANTRY_SCHEMA);
