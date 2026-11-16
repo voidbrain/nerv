@@ -9,6 +9,7 @@ import { analyzeBlackboxVibration } from './blackbox.ts';
 import type { FpvBuildStore, BuildComponentInput, BuildWiringInput, PinoutEntry } from './fpv-builds.ts';
 import { toRecipeSurface, type DocumentStore } from './documents.ts';
 import type { PantryStore } from './pantry.ts';
+import { handleFleetChat, type FleetStore } from './fleet.ts';
 import { readConfig, savePilots, setSchedule } from './config.ts';
 import { STAGES, applyPilotToolChange, mergePilots, nextStage, splitPilot, updatePilot, type Stage } from './pilots.ts';
 import { reconcileReminderArgs } from './reminder-time.ts';
@@ -58,6 +59,7 @@ export interface ReminderBackend {
   reminderDefaults?(): { timeZone: string; briefAt: string; language: 'en' | 'it' };
   memory: Memory;
   batteries?: import('./batteries.ts').BatteryRegistry;
+  fleet?: FleetStore;
   lists?: ListStore;
   gmail?: GmailClient;
   fpvBuilds?: FpvBuildStore;
@@ -115,6 +117,7 @@ export const builtinTools: Tool[] = [
   // F-008-T07 & F-008-T08: FPV battery state, cycles, and resistance checks.
   { name: 'batteries.list', effect: 'read' },
   { name: 'batteries.chat', effect: 'write-local' },
+  { name: 'fleet.chat', effect: 'write-local' },
   { name: 'batteries.due', effect: 'read' },
   { name: 'batteries.resistance', effect: 'write-local' },
   // F-083-T05: pantry purchase logging, owner-confirmed shelf life, and expiry recall checks.
@@ -375,6 +378,13 @@ export const toolDocs: ToolDoc[] = [
     about:
       'Sets battery charge state (charged, discharged, stored) from an Italian or English phrase; asks when a battery number is ambiguous across series.',
     args: '{"phrase": Italian or English battery phrase}',
+  },
+  {
+    name: 'fleet.chat',
+    effect: 'write-local',
+    about:
+      'Records FPV drone crashes, answers last-crash and spare-count questions, or records a battery damage note from an Italian or English phrase. Uses local fleet and battery data only.',
+    args: '{"phrase": Italian or English fleet or battery damage phrase}',
   },
   {
     name: 'batteries.due',
@@ -726,6 +736,10 @@ export function execute(
       only(args, ['phrase']);
       if (!backend.batteries) throw new Error('Battery registry is not available here.');
       return backend.batteries.applyChatPhrase(text(args, 'phrase'));
+    case 'fleet.chat':
+      only(args, ['phrase']);
+      if (!backend.fleet || !backend.batteries) throw new Error('Fleet and battery registries are not available here.');
+      return handleFleetChat(backend.fleet, backend.batteries, text(args, 'phrase'));
     case 'batteries.due':
       only(args, []);
       if (!backend.batteries) throw new Error('Battery registry is not available here.');

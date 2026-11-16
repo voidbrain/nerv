@@ -8,6 +8,7 @@ import { misatoAsk, parsePlan, validateReminderTitle, MAX_STEPS } from '../src/m
 import { toolDocs } from '../src/executors.ts';
 import { Runtime } from '../src/runtime.ts';
 import { makeServer } from '../src/server.ts';
+import { Store } from '../src/store.ts';
 test('Misato is asked for one JSON step with the tools, the time and the latest steps; its reply is read strictly', () => {
   const ask = misatoAsk(
     {
@@ -81,6 +82,28 @@ test('Misato is asked for one JSON step with the tools, the time and the latest 
   ])
     assert.equal(parsePlan(bad), undefined, bad);
 });
+test('fleet chat results are kept on the local model route even when Misato is configured for cloud', () => {
+  const ask = misatoAsk(
+    {
+      request: 'How many spare motors remain?',
+      history: [
+        {
+          tool: 'fleet.chat',
+          args: { phrase: 'How many spare motors remain?' },
+          outcome: 'grant',
+          result: 'There are 2 spare motors.',
+        },
+      ],
+      tools: toolDocs,
+      now: '2030-01-01T08:00:00.000Z',
+      timeZone: 'Europe/Rome',
+    },
+    'cloud',
+  );
+  assert.equal(ask.privacy, 'local-only');
+  assert.equal(ask.route, 'local');
+  assert.match(ask.prompt, /There are 2 spare motors/);
+});
 /** A loopback model: Casper answers from one script, Misato from another; every request is recorded. */
 async function models(
   misato: string[],
@@ -129,9 +152,11 @@ async function agent(
     m: Awaited<ReturnType<typeof models>>,
     base: string,
     headers: Record<string, string>,
+    home: string,
   ) => Promise<void>,
   scrolls?: object,
   casper?: string | ((prompt: string) => string),
+  setup?: (home: string) => void,
 ) {
   const m = await models(script, casper);
   const home = mkdtempSync(join(tmpdir(), 'nerv-misato-'));
@@ -145,16 +170,23 @@ async function agent(
     }),
   );
   if (scrolls) writeFileSync(join(home, 'scrolls.json'), JSON.stringify(scrolls), { mode: 0o600 });
+  setup?.(home);
   const runtime = new Runtime(join(home, 'nerv.sqlite'), undefined, home);
   const token = 'c'.repeat(32);
   const server = makeServer(runtime, token);
   try {
     await runtime.ready();
     await new Promise<void>((done) => server.listen(0, '127.0.0.1', done));
-    await work(runtime, m, `http://127.0.0.1:${(server.address() as { port: number }).port}`, {
-      authorization: 'Bearer ' + token,
-      'content-type': 'application/json',
-    });
+    await work(
+      runtime,
+      m,
+      `http://127.0.0.1:${(server.address() as { port: number }).port}`,
+      {
+        authorization: 'Bearer ' + token,
+        'content-type': 'application/json',
+      },
+      home,
+    );
   } finally {
     await new Promise<void>((done) => server.close(() => done()));
     await runtime.close();
@@ -222,6 +254,136 @@ test('through every process: an Italian request is planned by Misato, gated, exe
       );
       assert.equal((await fetch(base + '/api/chat', { method: 'POST', body: '{}' })).status, 401);
     },
+  );
+});
+test('fleet chat records crashes, answers inventory questions, and stores battery notes through the gated chat path', async () => {
+  const setup = (home: string) => {
+    const store = new Store(join(home, 'nerv.sqlite'));
+    store.fleet.addDrone({ name: 'TestQuad' });
+    store.fleet.setPart({
+      droneIdOrName: 'TestQuad',
+      category: 'motor',
+      position: 'rear-left',
+      componentModel: 'Fictional 2207 1750KV',
+    });
+    store.fleet.upsertSpare({
+      componentModel: 'Fictional 2207 1750KV',
+      category: 'motor',
+      newCount: 2,
+      usedCount: 1,
+    });
+    store.batteries.register({
+      packNumber: 42,
+      series: 'blu',
+      brand: 'Invented',
+      batteryType: 'LiPo',
+      cellCount: 2,
+      capacityMah: 450,
+      purchaseDate: '2026-01-01',
+      initialResistanceMohm: [4.1, 4.2],
+    });
+    store.close();
+  };
+  await agent(
+    [
+      '{"action":{"tool":"fleet.chat","args":{"phrase":"ho crashato TestQuad, motore sinistro inferiore rotto (scorta nuova)"}}}',
+      '{"action":{"tool":"fleet.chat","args":{"phrase":"quale avevo rotto l\'ultima volta?"}}}',
+      '{"action":{"tool":"fleet.chat","args":{"phrase":"quanti ne sono rimasti di scorta?"}}}',
+      '{"reply":"Crash registrato; danno e scorte verificati."}',
+      '{"action":{"tool":"fleet.chat","args":{"phrase":"La batteria 42 blu presenta danni ma sembra ancora buona"}}}',
+      '{"reply":"Nota danni registrata."}',
+      '{"action":{"tool":"fleet.chat","args":{"phrase":"crashed TestQuad, rear-left motor broken"}}}',
+      '{"reply":"The crash was recorded."}',
+    ],
+    async (runtime, m, _base, _headers, home) => {
+      const crash = await runtime.chat(
+        'ho crashato TestQuad, motore sinistro inferiore rotto. Quale avevo rotto l’ultima volta? Quanti ne restano di scorta?',
+      );
+      assert.deepEqual(
+        crash.steps.map((step) => [step.tool, step.outcome]),
+        [
+          ['fleet.chat', 'grant'],
+          ['fleet.chat', 'grant'],
+          ['fleet.chat', 'grant'],
+        ],
+      );
+      assert.match(JSON.stringify(crash.steps), /Recorded crash for TestQuad/);
+      assert.match(JSON.stringify(crash.steps), /TestQuad motor \(rear-left\)/);
+      assert.match(JSON.stringify(crash.steps), /1 new, 1 used/);
+      assert.equal((await runtime.events(crash.sortieId)).filter((event) => event.kind === 'grant.used').length, 3);
+
+      const battery = await runtime.chat('La batteria 42 blu presenta danni ma sembra ancora buona.');
+      assert.deepEqual(
+        battery.steps.map((step) => [step.tool, step.outcome]),
+        [['fleet.chat', 'grant']],
+      );
+      assert.match(JSON.stringify(battery.steps), /Recorded damage note/);
+
+      const english = await runtime.chat('crashed TestQuad, rear-left motor broken');
+      assert.deepEqual(
+        english.steps.map((step) => [step.tool, step.outcome]),
+        [['fleet.chat', 'grant']],
+      );
+      assert.match(JSON.stringify(english.steps), /Recorded crash for TestQuad/);
+      assert.ok(
+        m.asked.every((request) => request.who === 'misato'),
+        'Green writes never ask Casper',
+      );
+
+      const persisted = new Store(join(home, 'nerv.sqlite'));
+      try {
+        assert.equal(persisted.fleet.listCrashes({ droneName: 'TestQuad' }).length, 2);
+        const spare = persisted.fleet.getSpare('Fictional 2207 1750KV');
+        assert.ok(spare);
+        assert.equal(spare.newCount, 1);
+        assert.equal(spare.usedCount, 1);
+        const [pack] = persisted.batteries.findByNumberAndSeries(42, 'blu');
+        assert.ok(pack);
+        const [note] = persisted.batteries.notes(pack.id);
+        assert.ok(note);
+        assert.match(note.note, /La batteria 42 blu presenta danni/);
+      } finally {
+        persisted.close();
+      }
+    },
+    undefined,
+    undefined,
+    setup,
+  );
+});
+test('Scrolls can deny fleet chat before it mutates local records', async () => {
+  const setup = (home: string) => {
+    const store = new Store(join(home, 'nerv.sqlite'));
+    store.fleet.addDrone({ name: 'TestQuad' });
+    store.fleet.setPart({
+      droneIdOrName: 'TestQuad',
+      category: 'motor',
+      position: 'rear-left',
+      componentModel: 'Fictional 2207 1750KV',
+    });
+    store.close();
+  };
+  await agent(
+    [
+      '{"action":{"tool":"fleet.chat","args":{"phrase":"ho crashato TestQuad, motore sinistro inferiore rotto"}}}',
+      '{"reply":"La registrazione è stata rifiutata dalle regole."}',
+    ],
+    async (runtime, _m, _base, _headers, home) => {
+      const result = await runtime.chat('ho crashato TestQuad, motore sinistro inferiore rotto');
+      assert.deepEqual(
+        result.steps.map((step) => [step.tool, step.outcome]),
+        [['fleet.chat', 'reject']],
+      );
+      const persisted = new Store(join(home, 'nerv.sqlite'));
+      try {
+        assert.equal(persisted.fleet.listCrashes().length, 0);
+      } finally {
+        persisted.close();
+      }
+    },
+    { deny: ['fleet.chat'] },
+    undefined,
+    setup,
   );
 });
 test("an unreadable plan is shown back to Misato; a Blue action asks Casper, and its card ends the turn with the service's own waiting reply", async () => {

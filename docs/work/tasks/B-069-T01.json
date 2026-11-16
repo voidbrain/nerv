@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "parent": "B-069",
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "B-069-T01",
+  "title": "An expired or rejected approval ends the step; cards respect quiet hours",
+  "goal": "One card per approval-needing step, never at night",
+  "status": "ready",
+  "acceptance": [
+    "A committed test fails first, unchanged by the fix: an expired or rejected memory.remember approval produces a second approval on the same sortie",
+    "After the fix the sortie ends (or waits for the owner) with one inbox line; no second approval is created",
+    "Approval cards honour the configured quiet hours like watch notices; a card due at night goes out at the end of the quiet window"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/store-sorties.ts",
+    "src/ledger-approvals.ts",
+    "src/runtime-approvals.ts",
+    "test/**",
+    "docs/work/records/B-069.md",
+    "generated:backlog-views"
+  ],
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-16: one regression across ledger and sorties, a stop after expiry/reject, quiet-hours check in deliverApproval. Not a measurement.",
+    "reviewed": "2026-11-16",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}

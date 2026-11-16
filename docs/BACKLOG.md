@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 0 | 0 | 0 | 0 |
+| **This week** | 0 | 0 | 1 | 0 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 44 | 7 |
+| **Open** | 44 | 8 |
 | **Require Human 🧑** | 6 | 1 |
 
 ### Require Human 🧑
@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 70.5 h agent + 21.75 h owner across 163 open steps of 44 features and 7 other records. 34.75 h of actual effort recorded on 79 steps. Generated from the task files.
+**Remaining effort:** 71.5 h agent + 21.75 h owner across 164 open steps of 44 features and 8 other records. 34.75 h of actual effort recorded on 79 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1918,6 +1918,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-069"></a>[🐞 B-069](#top)
+
+**Open sortie re-asks an expired or rejected approval every hour, at night too**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-069-T01, a failing test, then the fix.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-16 by the owner: the Blue test card of 2026-11-15 22:32 ("Ricorda questo fatto di prova…", `memory.remember`, sortie `2683cff6`) came back on Telegram every hour through the night (23:42, 00:43, 01:44 … 09:12). The live store shows each card is a new approval on the same open sortie: every earlier one is `expired` (1 h TTL, source `ttl`) or `reject` (22:37, 22:39, 06:07), and the sortie never closes. The service did not restart (started 22:45, one run), so the overnight merges are unrelated. Likely cause, unconfirmed: after `approval.expired` or `approval.reject` the sortie stays open and the planner proposes the same step again with a fresh approval (`src/store-sorties.ts`, `src/ledger-approvals.ts` around line 103); and `deliverApproval` honours the quiet hours only for watch sorties (`src/store-sorties.ts` line 42), so ordinary cards go out at any hour. |
+| **Reproduce** | `nerv chat "Ricorda questo fatto di prova: il drone di test si chiama Prova"`; leave the Telegram card unanswered: after 1 h a new card arrives; ❌ Reject gives a new card within two minutes. |
+| **Check** | A committed test fails first: an expired or rejected approval does not produce a second approval for the same step; the sortie ends, or waits for the owner, with one inbox line saying so; approval cards respect the configured quiet hours like watch notices; the owner repeats the reproduction and gets exactly one card. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-069-t01"></a>B-069-T01 — An expired or rejected approval ends the step; cards respect quiet hours | 1 h | 0 h | 1 h | Ready |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-069.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner report 2026-11-16; live store evidence 2026-11-16 (11 approvals on one sortie, all `ttl` or `reject`); opened in [PR #500](https://github.com/voidbrain/nerv/pull/500) |
+| Opened | 2026-11-16 |
+| Verification | Pending. |
+| Reviewed | 2026-11-16 |
+
+</details>
+
+---
 ### <a id="f-097"></a>[✨ F-097](#top)
 
 **Rerun the seven NERV system cases at the harness 8.14.1 source**
@@ -2207,13 +2245,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | **Issue** | Owner request 2026-11-14: "ho crashato Smoke, motore sinistro inferiore rotto. Quale avevo rotto l'ultima volta? Quanti ne sono rimasti di scorta (nuovi/usati)? La batteria 7 blu presenta danni ma sembra ancora buona." NERV has no record of drones, their parts, crashes or spares, and cannot keep photos with them. |
 | **Reproduce** | `nerv chat "ho crashato Smoke, motore sinistro inferiore rotto"` then `nerv chat "quale avevo rotto l'ultima volta?"`. |
-| **Check** | Drones by name with parts by position; a crash entry from chat (drone, part, damage, date); answers to "last time this part broke" and "spares left, new and used"; a battery damage note goes on the battery (F-008); photos from Telegram or the dashboard attach to a crash, a part or a battery and stay local; invented tests. |
+| **Check** | Drones by name with parts by position; a crash entry from chat (drone, part, damage, date); answers to "last time this part broke" and "spares left, new and used"; change spare counts only when the chat phrase explicitly says a new or used spare was used; a battery damage note goes on the battery (F-008); photos from Telegram or the dashboard attach to a crash, a part or a battery and stay local; follow-up planning after fleet.chat remains local-only; invented tests. |
 
 **Feature steps**
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-098-t02"></a>F-098-T02 — Crash log and questions by chat | 0.5 h | 0 h | 0.5 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-098-t02"></a>F-098-T02 — Crash log and questions by chat | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | 🤖 |
 | 🟢 Small | <a id="f-098-t03"></a>F-098-T03 — Photos on crashes, parts and batteries | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-098-T02](#f-098-t02) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-098-t04"></a>F-098-T04 — Owner check with a real crash | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-098-T03](#f-098-t03) | ⏳ 🧑‍🔧 |
 | 🟢 Small | **Total** | 1.75 h | 0.25 h (1 of 4 steps recorded) | 1 h agent + 0.25 h owner | 1 of 4 completed | |
@@ -2236,7 +2274,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
 | Opened | 2026-11-14 |
 | Verification | Pending. |
-| Reviewed | 2026-11-14 |
+| Reviewed | 2026-11-16 |
 
 </details>
 
