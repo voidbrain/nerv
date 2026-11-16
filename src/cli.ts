@@ -12,6 +12,7 @@ import { runCardCopyRule, type CopyRule } from './storage-copy.ts';
 import { sliceModelWithProfile, type SlicerProfile } from './slicer.ts';
 import { runCodingJobInWorktree, type AllowedCodingRepo } from './coding-job.ts';
 import { DesktopRecordingSession, type DesktopRecordingHeader } from './desktop-recording.ts';
+import { clickNamedControl, type BrowserAdapterDriver } from './browser-control.ts';
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
 import { formatBatteryStateLines, formatDueResistancePrompt, type OneMoreBatteryExport } from './batteries.ts';
@@ -1849,6 +1850,25 @@ try {
           header,
         });
         console.log(JSON.stringify(session.stop(), null, 2));
+        break;
+      }
+      case 'browser-click': {
+        if (!args[0]) throw new Error('Usage: nerv browser-click <controlName>');
+        const noDriver: BrowserAdapterDriver = {
+          async getActiveTab() {
+            throw new Error('No live browser driver attached.');
+          },
+          async clickControl() {
+            throw new Error('No live browser driver attached.');
+          },
+        };
+        console.log(
+          JSON.stringify(
+            await clickNamedControl(noDriver, { controlName: args[0], allowedOrigins: [], approved: false }),
+            null,
+            2,
+          ),
+        );
         break;
       }
       default:
