@@ -101,6 +101,10 @@ process.on('message', (value: unknown) => {
         return store.dashboardHistory(params.since as string);
       case 'reminders.pending':
         return store.pendingReminders();
+      case 'lists.show':
+        return store.showList(params.list as string);
+      case 'lists.toggle':
+        return store.toggleListItem(params.itemId as string);
       case 'reminders.add':
         try {
           return store.add(params.title as string, params.due as string, new Date(), {

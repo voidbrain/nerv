@@ -12,6 +12,7 @@ import type { OperatorResolution, PublicOperatorInfo } from './operator-director
 import type { Pilot, PilotPatch } from './pilots.ts';
 import type { Effect, Pattern, Stage } from './policy.ts';
 import type { QueueSnapshot } from './request-queue.ts';
+import type { ListItem, ListView, OwnerList } from './lists.ts';
 import type { ActResult, InboxEntry, InboxPage, PushSubscriptionRecord, Reminder, ReminderInput } from './store.ts';
 import type { RoleTimingStats } from './timing.ts';
 
@@ -168,6 +169,13 @@ export interface StoreApi {
     patch: { title?: string; due?: string; kind?: string; end?: string | null },
   ): Reminder | undefined | null | Promise<Reminder | undefined | null>;
   cancel(id: string): boolean | Promise<boolean>;
+  showList?(name: string): ListView | null | Promise<ListView | null>;
+  toggleListItem?(
+    itemId: string,
+  ):
+    | { list: OwnerList; items: ListItem[]; item: ListItem }
+    | null
+    | Promise<{ list: OwnerList; items: ListItem[]; item: ListItem } | null>;
   pushPublicKey?(): Promise<string> | string;
   savePushSubscription?(sub: {
     endpoint: string;

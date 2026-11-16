@@ -326,6 +326,12 @@ export class Store {
   get batteryStorageReminders(): BatteryStorageReminders {
     return (this._batteryStorageReminders ??= new BatteryStorageReminders(this.db, this.remindersController));
   }
+  showList(name: string) {
+    return this.lists.show(name);
+  }
+  toggleListItem(itemId: string) {
+    return this.lists.toggleItemById(itemId);
+  }
   tick(now = new Date()): number {
     const count = this.remindersController.tick(now);
     const lang = this.remindersController.reminderDefaults().language;
