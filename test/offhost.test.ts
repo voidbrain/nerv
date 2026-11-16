@@ -88,6 +88,8 @@ test('the nightly loop writes an encrypted copy that restores the database throu
       (l) => lines.push(l),
       5,
       () => readConfig(f.home).backup,
+      undefined,
+      () => new Date('2030-01-15T12:00:00Z'),
     );
     await until(() => copyDates(f.disk).length > 0);
     await stop();
@@ -134,6 +136,8 @@ test('an unplugged disk is reported once, never created, and catches up when it 
       (l) => lines.push(l),
       5,
       () => config,
+      undefined,
+      () => new Date('2030-01-15T12:00:00Z'),
     );
     await until(() => lines.length > 0);
     assert.equal(lines.length, 1);
@@ -164,6 +168,8 @@ test('only the newest copies are kept in each folder', async () => {
       () => assert.fail('no failure expected'),
       5,
       () => ({ publicKey: key.publicKey, copies: [f.disk], keep: 2 }),
+      undefined,
+      () => new Date('2030-01-15T12:00:00Z'),
     );
     await until(() => copyDates(f.disk).length === 2 && !copyDates(f.disk).includes('2020-01-11'));
     await stop();

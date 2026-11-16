@@ -111,6 +111,7 @@ export function startSnapshots(
   everyMs = 60_000,
   backup: () => BackupConfig | undefined = () => undefined,
   send?: SendCopy,
+  now: () => Date = () => new Date(),
 ): () => Promise<void> {
   const dir = snapshotDir(home);
   let attempted: string | undefined,
@@ -125,7 +126,7 @@ export function startSnapshots(
     busy = true;
     try {
       const zone = timeZone(),
-        date = snapshotDue(new Date(), zone, snapshotDates(dir)[0]);
+        date = snapshotDue(now(), zone, snapshotDates(dir)[0]);
       if (date && attempted !== date) {
         attempted = date;
         try {
