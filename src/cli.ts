@@ -7,6 +7,7 @@ import { EVA_CLASS_SPECS, admitEvaJob, type EvaAdmissionRequest } from './eva-cl
 import { runToolsProcessInEva03 } from './eva-runner.ts';
 import { createPeerHandlers } from './peer-handlers.ts';
 import { buildProjectReport, fetchIntoQuarantine } from './quarantine.ts';
+import { createHeadlessResumeDeps, type HeadlessResumeTarget } from './headless-resume.ts';
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
 import { formatBatteryStateLines, formatDueResistancePrompt, type OneMoreBatteryExport } from './batteries.ts';
@@ -1775,6 +1776,21 @@ try {
           } else {
             throw new Error('Usage: nerv circuits list | nerv circuits rearm <channel>');
           }
+        } finally {
+          store.close();
+        }
+        break;
+      }
+      case 'headless-resume': {
+        if (!args[0]) throw new Error('Usage: nerv headless-resume <targets.json>');
+        const entries = JSON.parse(readFileSync(resolve(args[0]), 'utf8')) as Array<[string, HeadlessResumeTarget]>;
+        const store = new Store(databasePath(home), readScrolls(home), { home });
+        try {
+          const res = await runResumeEngineTick(
+            store.resumeIntents,
+            createHeadlessResumeDeps(new Map(entries), { owner: 'cli' }),
+          );
+          console.log(JSON.stringify(res, null, 2));
         } finally {
           store.close();
         }
