@@ -28,6 +28,7 @@ import {
   type AutoUpdateSchemaCheck,
 } from './update-policy.ts';
 import type { ServiceHost } from './node-lifecycle-execution.ts';
+import { HealthSampleStore, startLocalHealthSampler } from './health-samples.ts';
 import { RpcFault } from './rpc.ts';
 import { confirmPushToTalkDraft, preparePushToTalkDraft, prepareSpokenReply, type VoiceLanguage } from './voice.ts';
 import type { ModelChange } from './model-setup.ts';
@@ -86,6 +87,7 @@ export function makeServer(
   const feed = store.dashboardRevision ? new DashboardFeed(() => store.dashboardRevision!()) : undefined;
   const sessions = new Map<string, number>();
   let updateInFlight = false;
+  let statusPollCount = 0;
   let configuredPolicy = options.updatePolicy ? validateAutoUpdatePolicy(options.updatePolicy) : undefined;
   let lastAutoUpdate: AutoUpdateEvaluation | undefined;
   const readPolicy = (): AutoUpdatePolicy => {
@@ -905,7 +907,8 @@ export function makeServer(
           return;
         }
         reply(200, await store.modelUsage(before, limit));
-      } else if (req.method === 'GET' && path === '/api/status')
+      } else if (req.method === 'GET' && path === '/api/status') {
+        statusPollCount += 1;
         reply(200, {
           name: 'NERV Agency',
           mode: 'local-core',
@@ -916,7 +919,7 @@ export function makeServer(
           timeZone: options.timeZone ?? 'Europe/Rome',
           ...(options.native ? { runtimeId: options.native.auth.runtimeId, home: options.native.auth.home } : {}),
         });
-      else if (req.method === 'GET' && path === '/api/doctor')
+      } else if (req.method === 'GET' && path === '/api/doctor')
         reply(200, {
           name: 'NERV Agency',
           mode: 'local-core',
@@ -1028,8 +1031,13 @@ export function makeServer(
     ? createHttpsServer({ ...options.tls, minVersion: 'TLSv1.3' }, listener)
     : createServer(listener);
   const sockets = attachRpcSocket(server, store, token, options);
+  const storeWithDb = store as StoreApi & { db?: import('node:sqlite').DatabaseSync };
+  const healthSampler = storeWithDb.db
+    ? startLocalHealthSampler(new HealthSampleStore(storeWithDb.db), () => statusPollCount)
+    : undefined;
   const close = server.close.bind(server);
   server.close = (callback) => {
+    healthSampler?.stop();
     feed?.close();
     for (const client of sockets.clients) client.terminate();
     sockets.close();
