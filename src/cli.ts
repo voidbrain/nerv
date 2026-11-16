@@ -12,6 +12,7 @@ import { runCardCopyRule, type CopyRule } from './storage-copy.ts';
 import { sliceModelWithProfile, type SlicerProfile } from './slicer.ts';
 import { runCodingJobInWorktree, type AllowedCodingRepo } from './coding-job.ts';
 import { DesktopRecordingSession, type DesktopRecordingHeader } from './desktop-recording.ts';
+import { defaultAutoUpdatePolicy } from './update-policy.ts';
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
 import { formatBatteryStateLines, formatDueResistancePrompt, type OneMoreBatteryExport } from './batteries.ts';
@@ -82,6 +83,7 @@ import {
   readToken,
   rotateCredential,
   setBase,
+  setUpdatePolicy,
   setting,
   type Base,
 } from './config.ts';
@@ -1849,6 +1851,32 @@ try {
           header,
         });
         console.log(JSON.stringify(session.stop(), null, 2));
+        break;
+      }
+      case 'update-policy': {
+        const mode = args[0] ?? 'status';
+        const current = readConfig(home).updatePolicy ?? defaultAutoUpdatePolicy();
+        if (mode === 'status') {
+          console.log(JSON.stringify(current, null, 2));
+          break;
+        }
+        if (mode !== 'on' && mode !== 'off') {
+          throw new Error('Usage: nerv update-policy <on|off|status> [--channel <name>] [--target <id>]');
+        }
+        const channelIdx = args.indexOf('--channel');
+        const targetIdx = args.indexOf('--target');
+        const channel = channelIdx >= 0 && args[channelIdx + 1] ? args[channelIdx + 1] : (current.channels[0] ?? 'main');
+        const target =
+          targetIdx >= 0 && args[targetIdx + 1]
+            ? args[targetIdx + 1]
+            : (current.targets[0] ?? readConfig(home).base?.id ?? 'local');
+        const next = setUpdatePolicy(home, {
+          enabled: mode === 'on',
+          channels: mode === 'on' ? [channel] : current.channels,
+          targets: mode === 'on' ? [target] : current.targets,
+          ...(mode === 'on' ? { acceptedAt: new Date().toISOString() } : {}),
+        });
+        console.log(JSON.stringify(next, null, 2));
         break;
       }
       default:
