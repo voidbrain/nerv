@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 0 | 0 | 0 | 0 |
+| **This week** | 0 | 0 | 1 | 0 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 44 | 7 |
+| **Open** | 44 | 8 |
 | **Require Human 🧑** | 6 | 1 |
 
 ### Require Human 🧑
@@ -1948,7 +1948,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner report 2026-11-16; live store evidence 2026-11-16 (11 approvals on one sortie, all `ttl` or `reject`); opened in [PR #](https://github.com/voidbrain/nerv/pull/) |
+| PR / evidence | Owner report 2026-11-16; live store evidence 2026-11-16 (11 approvals on one sortie, all `ttl` or `reject`); opened in [PR #500](https://github.com/voidbrain/nerv/pull/500) |
 | Opened | 2026-11-16 |
 | Verification | Pending. |
 | Reviewed | 2026-11-16 |
