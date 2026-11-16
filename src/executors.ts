@@ -6,6 +6,7 @@ import type { Memory } from './memory.ts';
 import type { ListStore } from './lists.ts';
 import type { GmailClient } from './gmail.ts';
 import { analyzeBlackboxVibration } from './blackbox.ts';
+import type { FpvBuildStore, BuildComponentInput, BuildWiringInput, PinoutEntry } from './fpv-builds.ts';
 import { toRecipeSurface, type DocumentStore } from './documents.ts';
 import type { PantryStore } from './pantry.ts';
 import { readConfig, savePilots, setSchedule } from './config.ts';
@@ -59,6 +60,7 @@ export interface ReminderBackend {
   batteries?: import('./batteries.ts').BatteryRegistry;
   lists?: ListStore;
   gmail?: GmailClient;
+  fpvBuilds?: FpvBuildStore;
   documents?: DocumentStore;
   pantry?: PantryStore;
   home?: string;
@@ -121,6 +123,10 @@ export const builtinTools: Tool[] = [
   { name: 'pantry.check', effect: 'read' },
   // F-100-T03: local FPV blackbox vibration report.
   { name: 'fpv.blackbox_report', effect: 'read' },
+  // F-099-T03: FPV build notes and cited wiring answers.
+  { name: 'fpv.import_build', effect: 'write-local' },
+  { name: 'fpv.add_doc', effect: 'write-local' },
+  { name: 'fpv.wiring_answer', effect: 'read' },
 ];
 const text = (args: Record<string, unknown>, key: string) => {
   const v = args[key];
@@ -236,6 +242,25 @@ export const toolDocs: ToolDoc[] = [
     about:
       'Analyzes a decoded Betaflight blackbox CSV locally and returns per-axis spectrum, per-motor stats, ranked causes, and limits.',
     args: '{"csv": decoded Betaflight CSV text}',
+  },
+  {
+    name: 'fpv.import_build',
+    effect: 'write-local',
+    about: 'Saves a local FPV drone build note with components and cited wiring.',
+    args: '{"name": build name, "sourceRef": citation, "components": [{"role": string, "model": string}], "wiring"?: [...], "notes"?: string}',
+  },
+  {
+    name: 'fpv.add_doc',
+    effect: 'write-local',
+    about: 'Registers a cited manufacturer pinout document for an FPV component.',
+    args: '{"model": model name, "title": doc title, "sourceRef": citation, "pinouts": [{"pad": string, "signal": string, "uart"?: string}]}',
+  },
+  {
+    name: 'fpv.wiring_answer',
+    effect: 'read',
+    about:
+      'Answers a wiring question between two FPV components from cited build notes or manufacturer docs, refusing to guess when unknown.',
+    args: '{"buildName"?: string, "fromModel": string, "toModel": string}',
   },
   {
     name: 'docs.list',
@@ -902,6 +927,36 @@ export function execute(
     case 'fpv.blackbox_report': {
       only(args, ['csv']);
       return analyzeBlackboxVibration(text(args, 'csv'));
+    }
+    case 'fpv.import_build': {
+      only(args, ['name', 'sourceRef', 'components', 'wiring', 'notes']);
+      if (!backend.fpvBuilds) throw new Error('FPV builds store is not available.');
+      return backend.fpvBuilds.importBuild({
+        name: text(args, 'name'),
+        sourceRef: text(args, 'sourceRef'),
+        components: (args.components as BuildComponentInput[]) ?? [],
+        wiring: args.wiring as BuildWiringInput[] | undefined,
+        notes: args.notes !== undefined ? text(args, 'notes') : undefined,
+      });
+    }
+    case 'fpv.add_doc': {
+      only(args, ['model', 'title', 'sourceRef', 'pinouts']);
+      if (!backend.fpvBuilds) throw new Error('FPV builds store is not available.');
+      return backend.fpvBuilds.registerManufacturerDoc({
+        model: text(args, 'model'),
+        title: text(args, 'title'),
+        sourceRef: text(args, 'sourceRef'),
+        pinouts: (args.pinouts as PinoutEntry[]) ?? [],
+      });
+    }
+    case 'fpv.wiring_answer': {
+      only(args, ['buildName', 'fromModel', 'toModel']);
+      if (!backend.fpvBuilds) throw new Error('FPV builds store is not available.');
+      return backend.fpvBuilds.answerWiring({
+        buildName: args.buildName !== undefined ? text(args, 'buildName') : undefined,
+        fromModel: text(args, 'fromModel'),
+        toModel: text(args, 'toModel'),
+      });
     }
     default:
       throw new Error('No executor for this tool.');
