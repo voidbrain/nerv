@@ -9,6 +9,7 @@ import { createPeerHandlers } from './peer-handlers.ts';
 import { buildProjectReport, fetchIntoQuarantine } from './quarantine.ts';
 import { createHeadlessResumeDeps, type HeadlessResumeTarget } from './headless-resume.ts';
 import { runCardCopyRule, type CopyRule } from './storage-copy.ts';
+import { sliceModelWithProfile, type SlicerProfile } from './slicer.ts';
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
 import { formatBatteryStateLines, formatDueResistancePrompt, type OneMoreBatteryExport } from './batteries.ts';
@@ -1803,6 +1804,20 @@ try {
         }
         const rules = JSON.parse(readFileSync(resolve(args[2]), 'utf8')) as CopyRule[];
         console.log(JSON.stringify(runCardCopyRule(args[0], args[1], rules), null, 2));
+        break;
+      }
+      case 'slice': {
+        if (!args[0] || !args[1] || !args[2] || !args[3]) {
+          throw new Error('Usage: nerv slice <input> <output.gcode.3mf> <profileName> <allowlist.json>');
+        }
+        const allowlist = JSON.parse(readFileSync(resolve(args[3]), 'utf8')) as SlicerProfile[];
+        console.log(
+          JSON.stringify(
+            sliceModelWithProfile({ inputPath: args[0], outputPath: args[1], profileName: args[2] }, allowlist),
+            null,
+            2,
+          ),
+        );
         break;
       }
       default:
