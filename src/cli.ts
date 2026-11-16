@@ -12,6 +12,7 @@ import { runCardCopyRule, type CopyRule } from './storage-copy.ts';
 import { sliceModelWithProfile, type SlicerProfile } from './slicer.ts';
 import { runCodingJobInWorktree, type AllowedCodingRepo } from './coding-job.ts';
 import { DesktopRecordingSession, type DesktopRecordingHeader } from './desktop-recording.ts';
+import { clickDesktopControl, type DesktopAccessibilityDriver } from './desktop-control.ts';
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
 import { formatBatteryStateLines, formatDueResistancePrompt, type OneMoreBatteryExport } from './batteries.ts';
@@ -1849,6 +1850,27 @@ try {
           header,
         });
         console.log(JSON.stringify(session.stop(), null, 2));
+        break;
+      }
+      case 'desktop-click': {
+        if (!args[0] || !args[1]) {
+          throw new Error('Usage: nerv desktop-click <app-name> <control-name>');
+        }
+        const driver: DesktopAccessibilityDriver = {
+          checkAccessibilityPermission: () => false,
+          getWindow: async () => {
+            throw new Error('No live desktop accessibility driver bound in CLI.');
+          },
+          pressControl: async () => {
+            throw new Error('No live desktop accessibility driver bound in CLI.');
+          },
+        };
+        const res = await clickDesktopControl(driver, {
+          appName: args[0],
+          controlName: args[1],
+          approved: args.includes('--approved'),
+        });
+        console.log(JSON.stringify(res, null, 2));
         break;
       }
       default:
