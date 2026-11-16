@@ -10,6 +10,7 @@ import { buildProjectReport, fetchIntoQuarantine } from './quarantine.ts';
 import { createHeadlessResumeDeps, type HeadlessResumeTarget } from './headless-resume.ts';
 import { runCardCopyRule, type CopyRule } from './storage-copy.ts';
 import { sliceModelWithProfile, type SlicerProfile } from './slicer.ts';
+import { runCodingJobInWorktree, type AllowedCodingRepo } from './coding-job.ts';
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
 import { formatBatteryStateLines, formatDueResistancePrompt, type OneMoreBatteryExport } from './batteries.ts';
@@ -1818,6 +1819,24 @@ try {
             2,
           ),
         );
+        break;
+      }
+      case 'coding-job': {
+        if (!args[0] || !args[1] || !args[2]) {
+          throw new Error('Usage: nerv coding-job <repoId> <jobId> <allowlist.json>');
+        }
+        const allowlist = JSON.parse(readFileSync(resolve(args[2]), 'utf8')) as AllowedCodingRepo[];
+        const res = await runCodingJobInWorktree(
+          { repoId: args[0], jobId: args[1], prompt: args[3] ?? '' },
+          allowlist,
+          async () => ({
+            testPassed: false,
+            testSummary: 'No live coding-agent runner bound in CLI.',
+            tokens: 0,
+            costUsd: 0,
+          }),
+        );
+        console.log(JSON.stringify(res, null, 2));
         break;
       }
       default:
