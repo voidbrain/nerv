@@ -11,23 +11,12 @@ import type { Pilot, PilotPatch } from './pilots.ts';
 import { attachRpcSocket } from './socket.ts';
 import { toChecklistSurface } from './lists.ts';
 import { buildInfo } from './build.ts';
-import {
-  checkUpdateAvailability,
-  parseUpdateChannel,
-  validateUpdateAvailability,
-  type UpdateAvailability,
-} from './update-availability.ts';
-import { executeManualUpdate, type ManualUpdateResult } from './manual-update.ts';
-import { dataHome, readConfig, setUpdatePolicy } from './config.ts';
-import {
-  defaultAutoUpdatePolicy,
-  evaluateAutoUpdate,
-  validateAutoUpdatePolicy,
-  type AutoUpdateEvaluation,
-  type AutoUpdatePolicy,
-  type AutoUpdateSchemaCheck,
-} from './update-policy.ts';
+import type { UpdateAvailability } from './update-availability.ts';
+import type { ManualUpdateResult } from './manual-update.ts';
+import type { AutoUpdatePolicy, AutoUpdateSchemaCheck } from './update-policy.ts';
+import { createUpdateHandlers } from './server-update.ts';
 import type { ServiceHost } from './node-lifecycle-execution.ts';
+import { HealthSampleStore, startLocalHealthSampler } from './health-samples.ts';
 import { RpcFault } from './rpc.ts';
 import { confirmPushToTalkDraft, preparePushToTalkDraft, prepareSpokenReply, type VoiceLanguage } from './voice.ts';
 import type { ModelChange } from './model-setup.ts';
@@ -85,39 +74,13 @@ export function makeServer(
   // so a session can never renew itself.
   const feed = store.dashboardRevision ? new DashboardFeed(() => store.dashboardRevision!()) : undefined;
   const sessions = new Map<string, number>();
-  let updateInFlight = false;
-  let configuredPolicy = options.updatePolicy ? validateAutoUpdatePolicy(options.updatePolicy) : undefined;
-  let lastAutoUpdate: AutoUpdateEvaluation | undefined;
-  const readPolicy = (): AutoUpdatePolicy => {
-    if (configuredPolicy) return configuredPolicy;
-    try {
-      return readConfig(dataHome()).updatePolicy ?? defaultAutoUpdatePolicy();
-    } catch {
-      return defaultAutoUpdatePolicy();
-    }
-  };
-  let cachedUpdate: { at: number; channel: string; value: UpdateAvailability } | undefined;
-  const UPDATE_CHECK_TTL_MS = 5 * 60_000;
-  const resolveUpdate = async (
-    channel = parseUpdateChannel(undefined),
-    refresh = false,
-  ): Promise<UpdateAvailability> => {
-    const now = Date.now();
-    if (refresh || !cachedUpdate || cachedUpdate.channel !== channel || now - cachedUpdate.at >= UPDATE_CHECK_TTL_MS) {
-      const value = validateUpdateAvailability(
-        options.updateCheck
-          ? await options.updateCheck({ channel, refresh })
-          : await checkUpdateAvailability({ channel, runningRevision: build.commit }),
-      );
-      cachedUpdate = { at: now, channel, value };
-    }
-    return cachedUpdate.value;
-  };
-  const statusUpdate = async (): Promise<UpdateAvailability> => {
-    if (cachedUpdate && Date.now() - cachedUpdate.at < UPDATE_CHECK_TTL_MS) return cachedUpdate.value;
-    if (options.updateCheck) return resolveUpdate('main', false);
-    return checkUpdateAvailability({ runningRevision: build.commit, offline: true });
-  };
+  let statusPollCount = 0;
+  const { statusUpdate, handleUpdateRoute } = createUpdateHandlers({
+    store,
+    commit: build.commit,
+    options,
+    readBody: body,
+  });
   const sessionTtl = options.sessionTtlMs ?? SESSION_TTL_MS;
   const currentToken = () => (typeof token === 'function' ? token() : token);
   if (currentToken().length < 24) throw new Error('NERV_TOKEN must be at least 24 characters.');
@@ -905,7 +868,8 @@ export function makeServer(
           return;
         }
         reply(200, await store.modelUsage(before, limit));
-      } else if (req.method === 'GET' && path === '/api/status')
+      } else if (req.method === 'GET' && path === '/api/status') {
+        statusPollCount += 1;
         reply(200, {
           name: 'NERV Agency',
           mode: 'local-core',
@@ -916,7 +880,7 @@ export function makeServer(
           timeZone: options.timeZone ?? 'Europe/Rome',
           ...(options.native ? { runtimeId: options.native.auth.runtimeId, home: options.native.auth.home } : {}),
         });
-      else if (req.method === 'GET' && path === '/api/doctor')
+      } else if (req.method === 'GET' && path === '/api/doctor')
         reply(200, {
           name: 'NERV Agency',
           mode: 'local-core',
@@ -929,96 +893,8 @@ export function makeServer(
           timeZone: options.timeZone ?? 'Europe/Rome',
           ...(options.native ? { runtimeId: options.native.auth.runtimeId, home: options.native.auth.home } : {}),
         });
-      else if (req.method === 'GET' && path === '/api/update') {
-        const channel = parseUpdateChannel(url.searchParams.get('channel') ?? undefined);
-        const refresh = url.searchParams.get('refresh') === '1';
-        reply(200, await resolveUpdate(channel, refresh));
-      } else if (req.method === 'GET' && path === '/api/update/policy') {
-        reply(200, { policy: readPolicy(), ...(lastAutoUpdate ? { lastAttempt: lastAutoUpdate } : {}) });
-      } else if (req.method === 'POST' && path === '/api/update/policy') {
-        const value = await body(req);
-        const validated = validateAutoUpdatePolicy(value);
-        const nextPolicy: AutoUpdatePolicy =
-          validated.enabled && !validated.acceptedAt
-            ? { ...validated, acceptedAt: new Date().toISOString() }
-            : validated;
-        if (options.saveUpdatePolicy) {
-          configuredPolicy = await options.saveUpdatePolicy(nextPolicy);
-        } else if (options.updatePolicy) {
-          configuredPolicy = nextPolicy;
-        } else {
-          configuredPolicy = setUpdatePolicy(dataHome(), nextPolicy);
-        }
-        reply(200, { policy: configuredPolicy });
-      } else if (req.method === 'POST' && path === '/api/update/auto') {
-        if (updateInFlight) {
-          reply(409, { error: 'An update is already in progress.' });
-          return;
-        }
-        const value = await body(req);
-        for (const k of Object.keys(value))
-          if (k !== 'target' && k !== 'channel' && k !== 'revision')
-            throw new Error(`Unsupported automatic update parameter: ${k}`);
-        if (value.target !== undefined && typeof value.target !== 'string')
-          throw new Error('Invalid automatic update target.');
-        if (value.channel !== undefined && typeof value.channel !== 'string')
-          throw new Error('Invalid update channel.');
-        if (value.revision !== undefined && typeof value.revision !== 'string')
-          throw new Error('Invalid update revision.');
-        const target = value.target ?? options.base?.id ?? 'local';
-        updateInFlight = true;
-        try {
-          const evaluation = await evaluateAutoUpdate(
-            {
-              resolveUpdate,
-              ...(options.lifecycleHost ? { lifecycleHost: options.lifecycleHost } : {}),
-              ...(options.checkSchemaSafety ? { checkSchemaSafety: options.checkSchemaSafety } : {}),
-              countActiveRuns: async () => (await store.sorties(50)).filter((s) => s.closed === null).length,
-              countPendingApprovals: async () => (await store.approvals(50)).filter((a) => a.decision === null).length,
-            },
-            {
-              policy: readPolicy(),
-              target,
-              ...(value.channel !== undefined ? { channel: value.channel } : {}),
-              ...(value.revision !== undefined ? { revision: value.revision } : {}),
-            },
-          );
-          lastAutoUpdate = evaluation;
-          reply(200, evaluation);
-        } finally {
-          updateInFlight = false;
-        }
-      } else if (req.method === 'POST' && path === '/api/update/apply') {
-        if (updateInFlight) {
-          reply(409, { error: 'A manual update is already in progress.' });
-          return;
-        }
-        const value = await body(req);
-        for (const k of Object.keys(value))
-          if (k !== 'channel' && k !== 'revision') throw new Error(`Unsupported update parameter: ${k}`);
-        if (value.channel !== undefined && typeof value.channel !== 'string')
-          throw new Error('Invalid update channel.');
-        if (value.revision !== undefined && typeof value.revision !== 'string')
-          throw new Error('Invalid update revision.');
-        const input = {
-          ...(value.channel !== undefined ? { channel: value.channel } : {}),
-          ...(value.revision !== undefined ? { revision: value.revision } : {}),
-        };
-        updateInFlight = true;
-        try {
-          const result = options.manualUpdate
-            ? await options.manualUpdate(input)
-            : await executeManualUpdate(
-                {
-                  resolveUpdate,
-                  ...(options.lifecycleHost ? { lifecycleHost: options.lifecycleHost } : {}),
-                },
-                input,
-              );
-          reply(200, result);
-        } finally {
-          updateInFlight = false;
-        }
+      else if (await handleUpdateRoute(req, path, url, reply)) {
+        // Handled by server-update.ts
       } else reply(404, { error: 'Unknown operation.' });
     } catch (e) {
       reply(400, { error: e instanceof Error ? e.message : 'Invalid request.' });
@@ -1028,8 +904,13 @@ export function makeServer(
     ? createHttpsServer({ ...options.tls, minVersion: 'TLSv1.3' }, listener)
     : createServer(listener);
   const sockets = attachRpcSocket(server, store, token, options);
+  const storeWithDb = store as StoreApi & { db?: import('node:sqlite').DatabaseSync };
+  const healthSampler = storeWithDb.db
+    ? startLocalHealthSampler(new HealthSampleStore(storeWithDb.db), () => statusPollCount)
+    : undefined;
   const close = server.close.bind(server);
   server.close = (callback) => {
+    healthSampler?.stop();
     feed?.close();
     for (const client of sockets.clients) client.terminate();
     sockets.close();
