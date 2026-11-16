@@ -4,7 +4,7 @@
  "parent": "F-088",
  "title": "Copy rule",
  "goal": "An approved rule copies new files, verified, idempotent, source untouched",
- "status": "planned",
+ "status": "implemented",
  "acceptance": [
   "Approval once; checksum per file; rerun copies nothing new; the source is read-only to the job",
   "Tests with an invented card image"

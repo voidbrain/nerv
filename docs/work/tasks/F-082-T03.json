@@ -4,7 +4,7 @@
   "parent": "F-082",
   "title": "Checklist in Telegram",
   "goal": "Aoba sends the list with one toggle button per item and edits the message on tick",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Inline buttons toggle items; the message is edited, not resent",
     "A stale button (item removed) answers that the list changed"

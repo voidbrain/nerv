@@ -4,7 +4,7 @@
   "parent": "F-008",
   "title": "Resistance records and due checks",
   "goal": "A first record is required at registration; later checks fall due by the decided interval",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "One value per cell in order (e.g. 3, 3.4, 4.1 mΩ), cell count checked against the type",
     "A check is due by days or cycles as decided, and NERV asks for it"

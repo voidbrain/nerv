@@ -4,7 +4,7 @@
   "id": "F-006-T20",
   "title": "Revise the Mac operating-conditions plan for 3 runs and gemma4:12b",
   "goal": "The approved Mac plan runs each case 3 times on gemma4:12b within restated budgets",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "docs/decisions/mac-operating-conditions.md fixes the model profile to gemma4:12b, sets repeat: 3, and restates the per-condition and aggregate budgets (180 cases, about 1.5 h active, a wall-clock cap) and the stop rules",
     "Status line records the owner approval of 2026-11-15"

@@ -4,7 +4,7 @@
   "parent": "F-100",
   "title": "Vibration report from a blackbox log",
   "goal": "A report with candidate causes and evidence",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Per-axis and per-motor spectrum summary; candidate causes ranked with the evidence; limits stated",
     "Invented or owner-supplied test logs"
