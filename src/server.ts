@@ -9,6 +9,7 @@ import type { StoreApi } from './runtime.ts';
 import { QueueCancelledError, QueueFullError } from './request-queue.ts';
 import type { Pilot, PilotPatch } from './pilots.ts';
 import { attachRpcSocket } from './socket.ts';
+import { toChecklistSurface } from './lists.ts';
 import { buildInfo } from './build.ts';
 import {
   checkUpdateAvailability,
@@ -278,6 +279,7 @@ export function makeServer(
           '/api/approvals',
           '/api/sorties',
           '/api/queue',
+          '/api/lists/show',
         ].includes(path) ||
           /^\/api\/sorties\/[a-f0-9-]+(\/events)?$/.test(path) ||
           /^\/api\/bases\/[A-Za-z0-9-]{2,16}\/sorties\/[a-f0-9-]+$/.test(path))
@@ -409,6 +411,33 @@ export function makeServer(
             Number(url.searchParams.get('limit') ?? 50),
           ),
         );
+      } else if (req.method === 'GET' && path === '/api/lists/show') {
+        if (!store.listsShow) {
+          reply(404, { error: 'Lists unavailable.' });
+          return;
+        }
+        const name = url.searchParams.get('name')?.trim() ?? '';
+        if (!name) throw new Error('List name is required.');
+        const view = await store.listsShow(name);
+        if (!view) {
+          reply(404, { error: 'List not found.' });
+          return;
+        }
+        reply(200, { ...view, surface: toChecklistSurface(view) });
+      } else if (req.method === 'POST' && path === '/api/lists/toggle') {
+        if (!store.listsToggle) {
+          reply(404, { error: 'Lists unavailable.' });
+          return;
+        }
+        const b = await body(req, 4096);
+        if (typeof b.itemId !== 'string' || !b.itemId.trim()) throw new Error('itemId is required.');
+        if (b.done !== undefined && typeof b.done !== 'boolean') throw new Error('done must be boolean.');
+        const updated = await store.listsToggle(b.itemId, b.done as boolean | undefined);
+        if (!updated) {
+          reply(404, { error: 'List item not found.' });
+          return;
+        }
+        reply(200, { ...updated, surface: toChecklistSurface(updated.view) });
       } else if (req.method === 'POST' && path === '/api/ask') {
         // Admin only (read-only clients stop above). Privacy is explicit: local-only unless the caller says any.
         if (!store.ask) {
