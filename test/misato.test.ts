@@ -82,6 +82,28 @@ test('Misato is asked for one JSON step with the tools, the time and the latest 
   ])
     assert.equal(parsePlan(bad), undefined, bad);
 });
+test('fleet chat results are kept on the local model route even when Misato is configured for cloud', () => {
+  const ask = misatoAsk(
+    {
+      request: 'How many spare motors remain?',
+      history: [
+        {
+          tool: 'fleet.chat',
+          args: { phrase: 'How many spare motors remain?' },
+          outcome: 'grant',
+          result: 'There are 2 spare motors.',
+        },
+      ],
+      tools: toolDocs,
+      now: '2030-01-01T08:00:00.000Z',
+      timeZone: 'Europe/Rome',
+    },
+    'cloud',
+  );
+  assert.equal(ask.privacy, 'local-only');
+  assert.equal(ask.route, 'local');
+  assert.match(ask.prompt, /There are 2 spare motors/);
+});
 /** A loopback model: Casper answers from one script, Misato from another; every request is recorded. */
 async function models(
   misato: string[],
@@ -303,7 +325,10 @@ test('fleet chat records crashes, answers inventory questions, and stores batter
         [['fleet.chat', 'grant']],
       );
       assert.match(JSON.stringify(english.steps), /Recorded crash for TestQuad/);
-      assert.ok(m.asked.every((request) => request.who === 'misato'), 'Green writes never ask Casper');
+      assert.ok(
+        m.asked.every((request) => request.who === 'misato'),
+        'Green writes never ask Casper',
+      );
 
       const persisted = new Store(join(home, 'nerv.sqlite'));
       try {
@@ -314,7 +339,9 @@ test('fleet chat records crashes, answers inventory questions, and stores batter
         assert.equal(spare.usedCount, 1);
         const [pack] = persisted.batteries.findByNumberAndSeries(42, 'blu');
         assert.ok(pack);
-        assert.equal(persisted.batteries.notes(pack.id).length, 1);
+        const [note] = persisted.batteries.notes(pack.id);
+        assert.ok(note);
+        assert.match(note.note, /La batteria 42 blu presenta danni/);
       } finally {
         persisted.close();
       }
@@ -343,7 +370,10 @@ test('Scrolls can deny fleet chat before it mutates local records', async () => 
     ],
     async (runtime, _m, _base, _headers, home) => {
       const result = await runtime.chat('ho crashato TestQuad, motore sinistro inferiore rotto');
-      assert.deepEqual(result.steps.map((step) => [step.tool, step.outcome]), [['fleet.chat', 'reject']]);
+      assert.deepEqual(
+        result.steps.map((step) => [step.tool, step.outcome]),
+        [['fleet.chat', 'reject']],
+      );
       const persisted = new Store(join(home, 'nerv.sqlite'));
       try {
         assert.equal(persisted.fleet.listCrashes().length, 0);
