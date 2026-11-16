@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { DatabaseSync } from 'node:sqlite';
 import { ftsQuery } from './memory.ts';
+import type { RecipeSurface } from '../shared/surface.ts';
 import { transaction } from './sqlite-transaction.ts';
 
 /**
@@ -48,6 +49,19 @@ export interface SavedDocument {
   shareable: boolean;
   created: string;
   updated: string;
+}
+
+export function toRecipeSurface(doc: SavedDocument, working?: string): RecipeSurface {
+  return {
+    version: 1,
+    component: 'nerv-recipe-card',
+    props: {
+      title: doc.title,
+      category: doc.category,
+      body: doc.body,
+      ...(working ? { working } : {}),
+    },
+  };
 }
 
 export interface DocumentHistoryEntry {

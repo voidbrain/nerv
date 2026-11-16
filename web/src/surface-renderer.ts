@@ -34,6 +34,9 @@ type Messages = { [K in keyof (typeof messages)['en']]: string };
             (nerv-checklist-toggle)="checklistToggle.emit($any($event).detail)"
           ></nerv-checklist-card>
         }
+        @case ('nerv-recipe-card') {
+          <nerv-recipe-card [surface]="asSurface(validation())"></nerv-recipe-card>
+        }
       }
     } @else {
       <div class="surface-rejection" role="alert">

@@ -3,6 +3,7 @@ import {
   type StatusSurface,
   type NoticeSurface,
   type ChecklistSurface,
+  type RecipeSurface,
 } from '../../shared/surface.ts';
 
 /** Registered executable code is shipped by NERV Agency. Model/server output supplies data only. */
@@ -176,6 +177,63 @@ export class NervChecklistCard extends HTMLElement {
   }
 }
 
+export class NervRecipeCard extends HTMLElement {
+  private panelNode: HTMLElement;
+  private categoryNode: HTMLElement;
+  private titleNode: HTMLElement;
+  private bodyNode: HTMLElement;
+  private workingNode: HTMLElement;
+
+  constructor() {
+    super();
+    const root = this.attachShadow({ mode: 'open' });
+    this.panelNode = document.createElement('section');
+    this.panelNode.setAttribute('role', 'region');
+    this.panelNode.setAttribute('aria-label', 'Recipe');
+    this.panelNode.style.cssText =
+      'border:1px solid var(--line);border-radius:8px;padding:20px;margin-bottom:20px;background:var(--panel);color:var(--text)';
+    this.categoryNode = document.createElement('span');
+    this.categoryNode.style.cssText =
+      'display:inline-block;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:bold;letter-spacing:0.5px;background:var(--accent);color:var(--ink);margin-bottom:8px';
+    this.titleNode = document.createElement('h2');
+    this.titleNode.style.cssText = 'margin:0 0 10px;font-size:18px;color:var(--text)';
+    this.bodyNode = document.createElement('pre');
+    this.bodyNode.style.cssText =
+      'margin:0;font-family:inherit;white-space:pre-wrap;line-height:1.5;font-size:14px;color:var(--text)';
+    this.workingNode = document.createElement('p');
+    this.workingNode.style.cssText =
+      'margin:12px 0 0;padding-top:10px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)';
+    this.workingNode.hidden = true;
+    this.panelNode.append(this.categoryNode, this.titleNode, this.bodyNode, this.workingNode);
+    root.append(this.panelNode);
+  }
+
+  set surface(value: unknown) {
+    try {
+      const s = validateSurface(value);
+      if (s.component !== 'nerv-recipe-card') throw new Error('Expected nerv-recipe-card component');
+      const p = s.props as RecipeSurface['props'];
+      this.panelNode.setAttribute('aria-label', p.title);
+      this.categoryNode.textContent = p.category;
+      this.titleNode.textContent = p.title;
+      this.bodyNode.textContent = p.body;
+      if (p.working) {
+        this.workingNode.textContent = p.working;
+        this.workingNode.hidden = false;
+      } else {
+        this.workingNode.textContent = '';
+        this.workingNode.hidden = true;
+      }
+    } catch {
+      this.panelNode.setAttribute('aria-label', 'Recipe');
+      this.categoryNode.textContent = 'ERROR';
+      this.titleNode.textContent = 'Recipe';
+      this.bodyNode.textContent = 'Invalid surface';
+      this.workingNode.hidden = true;
+    }
+  }
+}
+
 export function registerSurfaces() {
   if (!customElements.get('nerv-status-card')) {
     customElements.define('nerv-status-card', NervStatusCard);
@@ -185,5 +243,8 @@ export function registerSurfaces() {
   }
   if (!customElements.get('nerv-checklist-card')) {
     customElements.define('nerv-checklist-card', NervChecklistCard);
+  }
+  if (!customElements.get('nerv-recipe-card')) {
+    customElements.define('nerv-recipe-card', NervRecipeCard);
   }
 }

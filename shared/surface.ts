@@ -1,5 +1,10 @@
 /** Declarative contract only: no HTML, scripts, attributes, styles or URLs accepted. */
-export const REGISTERED_COMPONENTS = ['nerv-status-card', 'nerv-notice-card', 'nerv-checklist-card'] as const;
+export const REGISTERED_COMPONENTS = [
+  'nerv-status-card',
+  'nerv-notice-card',
+  'nerv-checklist-card',
+  'nerv-recipe-card',
+] as const;
 export type RegisteredComponent = (typeof REGISTERED_COMPONENTS)[number];
 
 export interface StatusSurface {
@@ -26,7 +31,13 @@ export interface ChecklistSurface {
   props: { listId: string; name: string; items: ChecklistSurfaceItem[] };
 }
 
-export type Surface = StatusSurface | NoticeSurface | ChecklistSurface;
+export interface RecipeSurface {
+  version: 1;
+  component: 'nerv-recipe-card';
+  props: { title: string; category: string; body: string; working?: string };
+}
+
+export type Surface = StatusSurface | NoticeSurface | ChecklistSurface | RecipeSurface;
 
 export const statusSurfaceSchema = {
   type: 'object',
@@ -281,6 +292,48 @@ export function validateSurfaceResult(value: unknown): SurfaceValidationResult {
           listId: p['listId'],
           name: p['name'],
           items,
+        },
+      },
+    };
+  }
+
+  if (comp === 'nerv-recipe-card') {
+    const allowedKeys = ['title', 'category', 'body', 'working'];
+    if (
+      propKeys.length < 3 ||
+      propKeys.length > 4 ||
+      propKeys.some((k) => !allowedKeys.includes(k)) ||
+      !('title' in p) ||
+      !('category' in p) ||
+      !('body' in p)
+    ) {
+      return {
+        ok: false,
+        reason: 'Invalid surface props: recipe card requires [title, category, body] and optional [working].',
+      };
+    }
+    if (typeof p['title'] !== 'string' || p['title'].length === 0 || p['title'].length > 160) {
+      return { ok: false, reason: 'Invalid surface props: title must be a non-empty string up to 160 characters.' };
+    }
+    if (typeof p['category'] !== 'string' || p['category'].length === 0 || p['category'].length > 60) {
+      return { ok: false, reason: 'Invalid surface props: category must be a non-empty string up to 60 characters.' };
+    }
+    if (typeof p['body'] !== 'string' || p['body'].length === 0 || p['body'].length > 16_000) {
+      return { ok: false, reason: 'Invalid surface props: body must be a non-empty string up to 16000 characters.' };
+    }
+    if ('working' in p && (typeof p['working'] !== 'string' || p['working'].length > 4000)) {
+      return { ok: false, reason: 'Invalid surface props: working must be a string up to 4000 characters.' };
+    }
+    return {
+      ok: true,
+      surface: {
+        version: 1,
+        component: 'nerv-recipe-card',
+        props: {
+          title: p['title'],
+          category: p['category'],
+          body: p['body'],
+          ...(typeof p['working'] === 'string' && p['working'].length > 0 ? { working: p['working'] } : {}),
         },
       },
     };

@@ -184,4 +184,35 @@ describe('F-083-T01 saved documents with categories', () => {
       store.close();
     }
   });
+
+  it('builds a verbatim nerv-recipe-card surface on docs.show', () => {
+    const store = makeStore();
+    try {
+      const body = 'Ingredients:\n- 500 g flour\n- 350 ml water\n\nSteps:\n1. Mix.\n2. Bake.';
+      store.documents.save({ title: 'Hearth Bread', category: 'bread', body });
+
+      const showSortie = store.ledger.openSortie(OWNER_SOURCE, 'Show Hearth Bread', 'trusted');
+      const shown = store.runAction(showSortie, {
+        tool: 'docs.show',
+        args: { title: 'Hearth Bread', category: 'bread' },
+        stage: 'production',
+      });
+      assert.equal(shown.outcome, 'grant');
+      const result = shown.result as {
+        body: string;
+        surface: {
+          version: number;
+          component: string;
+          props: { title: string; category: string; body: string };
+        };
+      };
+      assert.equal(result.surface.version, 1);
+      assert.equal(result.surface.component, 'nerv-recipe-card');
+      assert.equal(result.surface.props.title, 'Hearth Bread');
+      assert.equal(result.surface.props.category, 'bread');
+      assert.equal(result.surface.props.body, body);
+    } finally {
+      store.close();
+    }
+  });
 });

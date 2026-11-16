@@ -6,7 +6,7 @@ import type { Memory } from './memory.ts';
 import type { ListStore } from './lists.ts';
 import type { GmailClient } from './gmail.ts';
 import { analyzeBlackboxVibration } from './blackbox.ts';
-import type { DocumentStore } from './documents.ts';
+import { toRecipeSurface, type DocumentStore } from './documents.ts';
 import type { PantryStore } from './pantry.ts';
 import { readConfig, savePilots, setSchedule } from './config.ts';
 import { STAGES, applyPilotToolChange, mergePilots, nextStage, splitPilot, updatePilot, type Stage } from './pilots.ts';
@@ -737,7 +737,7 @@ export function execute(
       const category = args.category === undefined ? undefined : text(args, 'category');
       const doc = backend.documents.get(key, category);
       if (!doc) throw new Error(`No saved document matching "${key}".`);
-      return doc;
+      return { ...doc, surface: toRecipeSurface(doc) };
     }
     case 'docs.compute': {
       only(args, [
