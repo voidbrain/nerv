@@ -718,3 +718,53 @@ test(
     }
   },
 );
+
+test('F-082-T03: Telegram checklist toggles items by editing in place and answers stale buttons', async () => {
+  const token = '123456:' + 'x'.repeat(35);
+  const tg = await fakeTelegram(token);
+  const home = mkdtempSync(join(tmpdir(), 'nerv-tg-list-'));
+  const store = new Store(join(home, 'nerv.sqlite'));
+  const channel = new TelegramChannel({
+    api: new TelegramApi(token, tg.base),
+    store,
+    chatId: OWNER,
+    statePath: join(home, 'telegram-state.json'),
+    log: () => {},
+  });
+  try {
+    const added = store.lists.addItems('Grocery', ['milk', 'bread']);
+    const milk = added.items.find((i) => i.text === 'milk')!;
+    const bread = added.items.find((i) => i.text === 'bread')!;
+    await channel.start(50);
+    tg.text(OWNER, '/list Grocery');
+    await until(() => tg.sent().some((m) => m.text.startsWith('Grocery\n')));
+    const sendCountBefore = tg.calls.filter((c) => c.method === 'sendMessage').length;
+    const msg = tg.sent().find((m) => m.text.startsWith('Grocery\n'))!;
+    assert.deepEqual(
+      msg.reply_markup?.inline_keyboard?.flat().map((b) => b.callback_data),
+      [`lt:${milk.id}`, `lt:${bread.id}`],
+    );
+    tg.tap(OWNER, `lt:${milk.id}`);
+    await until(() => tg.calls.some((c) => c.method === 'editMessageText'));
+    assert.equal(
+      tg.calls.filter((c) => c.method === 'sendMessage').length,
+      sendCountBefore,
+      'toggling must edit the existing message, not resend it',
+    );
+    const edit = tg.calls.find((c) => c.method === 'editMessageText')!;
+    assert.match(String(edit.body.text), /☑ milk/);
+    assert.equal(store.lists.show('Grocery')?.items.find((i) => i.id === milk.id)?.done, true);
+
+    store.lists.removeItem('Grocery', 'bread');
+    const answersBefore = tg.calls.filter((c) => c.method === 'answerCallbackQuery').length;
+    tg.tap(OWNER, `lt:${bread.id}`);
+    await until(() => tg.calls.filter((c) => c.method === 'answerCallbackQuery').length > answersBefore);
+    const staleAnswer = tg.calls.filter((c) => c.method === 'answerCallbackQuery').at(-1)!;
+    assert.equal(staleAnswer.body.text, 'The list changed.');
+  } finally {
+    await channel.stop();
+    store.close();
+    await tg.close();
+    rmSync(home, { recursive: true, force: true });
+  }
+});

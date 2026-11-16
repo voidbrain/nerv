@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import type { StoreApi } from './runtime.ts';
+import { formatTelegramChecklist } from './lists.ts';
 import { ONLINE_MS } from './kaji-link.ts';
 import type { ChannelState } from './channel-state.ts';
 import type { Approval } from './ledger.ts';
@@ -394,6 +395,14 @@ export class TelegramChannel {
 
   private cardQueue: Promise<void> = Promise.resolve();
   private cardWaiters = 0;
+  async sendChecklist(listName: string): Promise<boolean> {
+    const view = await this.store.showList?.(listName);
+    if (!view) return false;
+    const { text, buttons } = formatTelegramChecklist(view);
+    await this.api.send(this.chatId, text, buttons.length ? buttons : undefined);
+    this.delivered('local', 'accepted', false);
+    return true;
+  }
   private sendLocal(text: string, buttons?: Button[][], fallback = false, baseId?: string): Promise<void> {
     if (!buttons) return this.sendMessage(text, undefined, fallback, baseId);
     if (this.cardWaiters >= 16) return Promise.reject(new Error('Telegram card queue is full; delivery deferred.'));
@@ -560,6 +569,33 @@ export class TelegramChannel {
         return;
       }
       this.routeState = { ...this.routeState, lastReceived: new Date().toISOString() };
+      const listToggle = /^lt:([A-Za-z0-9_-]{4,60})$/.exec(q.data ?? '');
+      if (listToggle) {
+        const toggled = await this.store.toggleListItem?.(listToggle[1]!);
+        if (!toggled) {
+          await this.api.call('answerCallbackQuery', {
+            callback_query_id: q.id,
+            text: 'The list changed.',
+          });
+          return;
+        }
+        const { text, buttons } = formatTelegramChecklist({ list: toggled.list, items: toggled.items });
+        await this.api.call('answerCallbackQuery', {
+          callback_query_id: q.id,
+          text: toggled.item.done ? 'Checked.' : 'Unchecked.',
+        });
+        if (q.message) {
+          await this.api
+            .call('editMessageText', {
+              chat_id: this.chatId,
+              message_id: q.message.message_id,
+              text,
+              reply_markup: { inline_keyboard: buttons },
+            })
+            .catch(() => {});
+        }
+        return;
+      }
       const far = /^k:([A-Z0-9-]{1,16}):([ar]):([a-f0-9-]{36})$/.exec(q.data ?? '');
       if (far && this.remote) {
         const outcome = await this.remote
@@ -614,6 +650,13 @@ export class TelegramChannel {
     const text = m.text.trim();
     if (text === '/start') {
       await this.sendLocal('Aoba here. Write what you need; actions that need you arrive with buttons.');
+      return;
+    }
+    if (text.startsWith('/list ')) {
+      const name = text.slice(6).trim();
+      if (!name || !(await this.sendChecklist(name))) {
+        await this.sendLocal(`List "${name}" not found.`);
+      }
       return;
     }
     if (!this.store.chat) {

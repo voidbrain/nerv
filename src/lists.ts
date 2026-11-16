@@ -253,4 +253,42 @@ export class ListStore {
       removed: item,
     };
   }
+
+  toggleItemById(itemId: string, now = new Date()): { list: OwnerList; items: ListItem[]; item: ListItem } | null {
+    const row = this.db
+      .prepare('SELECT id, list_id, text, done, position, created, updated FROM list_items WHERE id = ?')
+      .get(itemId.trim()) as ItemRow | undefined;
+    if (!row) return null;
+    const listRow = this.db.prepare('SELECT id, name, created, updated FROM lists WHERE id = ?').get(row.list_id) as
+      ListRow | undefined;
+    if (!listRow) return null;
+    const nextDone = row.done !== 1;
+    const nowIso = now.toISOString();
+    transaction(this.db, () => {
+      this.db.prepare('UPDATE list_items SET done = ?, updated = ? WHERE id = ?').run(nextDone ? 1 : 0, nowIso, row.id);
+      this.db.prepare('UPDATE lists SET updated = ? WHERE id = ?').run(nowIso, listRow.id);
+    });
+    const list = { ...mapList(listRow), updated: nowIso };
+    return {
+      list,
+      items: this.itemsForList(list.id),
+      item: { ...mapItem(row), done: nextDone, updated: nowIso },
+    };
+  }
+}
+
+export function formatTelegramChecklist(view: ListView): {
+  text: string;
+  buttons: { text: string; callback_data: string }[][];
+} {
+  const lines = view.items.length ? view.items.map((item) => `${item.done ? '☑' : '☐'} ${item.text}`) : ['(empty)'];
+  return {
+    text: `${view.list.name}\n${lines.join('\n')}`,
+    buttons: view.items.map((item) => [
+      {
+        text: `${item.done ? '☑' : '☐'} ${item.text}`.slice(0, 64),
+        callback_data: `lt:${item.id}`,
+      },
+    ]),
+  };
 }
