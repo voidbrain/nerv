@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 70.5 h agent + 21.75 h owner across 163 open steps of 44 features and 7 other records. 34.75 h of actual effort recorded on 79 steps. Generated from the task files.
+**Remaining effort:** 71.5 h agent + 21.75 h owner across 164 open steps of 44 features and 8 other records. 34.75 h of actual effort recorded on 79 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1914,6 +1914,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | Pending decision (B-066-T01) and fix (B-066-T02). |
 | Reviewed | 2026-11-14 |
+
+</details>
+
+---
+### <a id="b-069"></a>[🐞 B-069](#top)
+
+**Open sortie re-asks an expired or rejected approval every hour, at night too**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-069-T01, a failing test, then the fix.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-16 by the owner: the Blue test card of 2026-11-15 22:32 ("Ricorda questo fatto di prova…", `memory.remember`, sortie `2683cff6`) came back on Telegram every hour through the night (23:42, 00:43, 01:44 … 09:12). The live store shows each card is a new approval on the same open sortie: every earlier one is `expired` (1 h TTL, source `ttl`) or `reject` (22:37, 22:39, 06:07), and the sortie never closes. The service did not restart (started 22:45, one run), so the overnight merges are unrelated. Likely cause, unconfirmed: after `approval.expired` or `approval.reject` the sortie stays open and the planner proposes the same step again with a fresh approval (`src/store-sorties.ts`, `src/ledger-approvals.ts` around line 103); and `deliverApproval` honours the quiet hours only for watch sorties (`src/store-sorties.ts` line 42), so ordinary cards go out at any hour. |
+| **Reproduce** | `nerv chat "Ricorda questo fatto di prova: il drone di test si chiama Prova"`; leave the Telegram card unanswered: after 1 h a new card arrives; ❌ Reject gives a new card within two minutes. |
+| **Check** | A committed test fails first: an expired or rejected approval does not produce a second approval for the same step; the sortie ends, or waits for the owner, with one inbox line saying so; approval cards respect the configured quiet hours like watch notices; the owner repeats the reproduction and gets exactly one card. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-069-t01"></a>B-069-T01 — An expired or rejected approval ends the step; cards respect quiet hours | 1 h | 0 h | 1 h | Ready |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-069.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner report 2026-11-16; live store evidence 2026-11-16 (11 approvals on one sortie, all `ttl` or `reject`); opened in [PR #](https://github.com/voidbrain/nerv/pull/) |
+| Opened | 2026-11-16 |
+| Verification | Pending. |
+| Reviewed | 2026-11-16 |
 
 </details>
 
