@@ -14,29 +14,23 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 41 | 11 |
-| **Require Human 🧑** | 13 | 5 |
+| **Require Human 🧑** | 7 | 3 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-005](#f-005) | [F-101](#f-101) | [B-057](#b-057) | — |
-| [F-006](#f-006) |  | [B-068](#b-068) |  |
-| [F-009](#f-009) |  | [B-069](#b-069) |  |
-| [F-011](#f-011) |  | [B-056](#b-056) |  |
-| [F-004](#f-004) |  | [B-070](#b-070) |  |
-| [F-083](#f-083) |  |  |  |
-| [F-097](#f-097) |  |  |  |
-| [F-085](#f-085) |  |  |  |
-| [F-078](#f-078) |  |  |  |
+| [F-006](#f-006) | [F-101](#f-101) | [B-057](#b-057) | — |
+| [F-011](#f-011) |  | [B-068](#b-068) |  |
+| [F-004](#f-004) |  | [B-056](#b-056) |  |
 | [F-060](#f-060) |  |  |  |
 | [F-007](#f-007) |  |  |  |
 | [F-100](#f-100) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 58.25 h agent + 21.75 h owner across 137 open steps of 40 features and 11 other records. 34.75 h of actual effort recorded on 80 steps. Generated from the task files.
+**Remaining effort:** 68.25 h agent + 11.75 h owner across 137 open steps of 40 features and 11 other records. 34.75 h of actual effort recorded on 80 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -45,6 +39,155 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 - **Status:** 🔴 Open · 🟠 Investigate · 🟡 Implemented · 🟢 Verified · 🟣 Blocked · 🔵 Closed
 - **Steps:** `effort` = remaining agent time (🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more); `estimate` = latest whole-step estimate; `actual` = effort spent so far; `h` = agent hours (owner time apart); step status is not parent acceptance.
+
+### <a id="f-005"></a>[✨ F-005](#top)
+
+**Discover, install and operate enrolled remote workers**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🔴 Large | 7.5 h agent + 0.25 h owner | — | [F-012-T05](#f-012-t05) | 🤖 | — | — |
+
+💻 **→** Next: F-005-T15 — T06h — Upgrades that raise the schema version (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | F-014 delivers enrolled outbound worker transport and B-045 repairs burst admission. Selected inventories, read-only local/SSH inspection and review-only manifests are delivered in PR #210. Fresh-profile bootstrap now has explicit digest confirmation, fixed local/SSH code and transactional receipts/resources. Lifecycle contracts and selected Mac execution/acceptance are delivered. Safe application/schema upgrades, update experience, prerequisites and remaining Windows/Linux/device acceptance remain open. |
+| **Reproduce** | Update path as run on the Mac: the [T13 Mac update procedure](acceptance/f005-t13-mac-update-procedure.md) and its [2026-11-12 evidence](acceptance/node-update-2026-11-12.md). Node commands: [node setup](guides/kaji-and-nodes.md#discover-inspect-and-bootstrap-node-candidates); milestone: [ROADMAP](ROADMAP.md), milestone 3. |
+| **Check** | Mac/mini PC/Pi tests for enrolment, revocation, leases, fencing, cancellation, locks, reconnect and uncertain physical results. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-005-t15"></a>F-005-T15 — T06h — Upgrades that raise the schema version | 0.75 h | 0.75 h so far (stated) | 0.5 h | Implemented; verification pending | 🤖 |
+| 🟢 Small | <a id="f-005-t22"></a>F-005-T22 — T08e — Demonstration of prerequisites and optional engine management on an owner-selected target | 0.5 h | 0 h | 0.5 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-005-t24"></a>F-005-T24 — T09c — Acceptance on an owner-selected Windows machine | 1 h | 0 h | 1 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-005-t26"></a>F-005-T26 — T10c — Acceptance on an owner-selected mini PC, Pi or equivalent | 1 h | 0 h | 1 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-005-t31"></a>F-005-T31 — Record the evidence of F-005-T22 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T22](#f-005-t22) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-005-t32"></a>F-005-T32 — Record the evidence of F-005-T24 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T24](#f-005-t24) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-005-t33"></a>F-005-T33 — Record the evidence of F-005-T26 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T26](#f-005-t26) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-005-t11"></a>F-005-T11 — Propose the device matrix for final acceptance | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T31](#f-005-t31), [F-005-T32](#f-005-t32), [F-005-T33](#f-005-t33) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-005-t37"></a>F-005-T37 — Agree the device matrix | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-005-T11](#f-005-t11) | ⏳ 🤔 |
+| 🟢 Small | <a id="f-005-t27"></a>F-005-T27 — T11b — Enrolment, revocation, leases, fencing and cancellation across the device matrix | 1 h | 0 h | 1 h | Planned · waits on [F-005-T37](#f-005-t37) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-005-t34"></a>F-005-T34 — Record the evidence of F-005-T27 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T27](#f-005-t27) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-005-t28"></a>F-005-T28 — T11c — Reconnect, locks and uncertain physical results across the device matrix | 1 h | 0 h | 1 h | Planned · waits on [F-005-T34](#f-005-t34) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-005-t35"></a>F-005-T35 — Record the evidence of F-005-T28 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T28](#f-005-t28) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-005-t29"></a>F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-005-T35](#f-005-t35) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-005-t36"></a>F-005-T36 — Record the evidence of F-005-T29 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T29](#f-005-t29) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-005-t30"></a>F-005-T30 — T11e — Parent acceptance and closure reconciliation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T36](#f-005-t36) | ⏳ 🤖 |
+| 🔴 Large | **Total** | 23.25 h (30 of 37 steps) | 8.75 h (16 of 37 steps recorded) | 7.5 h agent + 0.25 h owner | 21 of 37 completed | |
+
+<details><summary>Done steps (21)</summary>
+
+| Effort | Step | Estimate | Actual | Status |
+|---|---|---|---|---|
+| — | <a id="f-005-t01"></a>F-005-T01 — Define service lifecycle ownership and recovery contracts | — | 0 days | Completed |
+| — | <a id="f-005-t02"></a>F-005-T02 — Prepare and verify isolated local profile enrollment | — | 0 days | Completed |
+| — | <a id="f-005-t03"></a>F-005-T03 — Prepare replacement-root generation and existing-base trust migration | — | 0 days | Completed |
+| — | <a id="f-005-t04"></a>F-005-T04 — Implement and accept Mac default-profile service lifecycle | — | 0 days | Completed |
+| — | <a id="f-005-t05"></a>F-005-T05 — Implement and apply history-preserving root activation | — | 0 days | Completed |
+| — | <a id="f-005-t06"></a>F-005-T06 — Safe upgrades, slices T06a–T06d: rehearsal, journaled rehearsal, admission of schema-preserving upgrades, first Mac move | — | 0 h | Completed |
+| — | <a id="f-005-t07"></a>F-005-T07 — T07a — One backend update-availability contract: installed, running and available revision, channel, last check, offline/unknown | 1 h | 0.5 h (stated) | Completed |
+| — | <a id="f-005-t08"></a>F-005-T08 — T08a — Prerequisite check (Node version, executable, non-interactive service environment) joined to install, start and update | 1 h | 0.5 h (stated) | Completed |
+| — | <a id="f-005-t09"></a>F-005-T09 — T09a — Windows lifecycle adapter: install, status, start, stop and uninstall under the same fencing journal | 1.25 h | 0.5 h (stated) | Completed |
+| — | <a id="f-005-t10"></a>F-005-T10 — T10a — Linux user-service adapter (systemd --user), with no implicit linger or system-wide service | 1.25 h | 0.5 h (stated) | Completed |
+| — | <a id="f-005-t12"></a>F-005-T12 — T06e — Independent review of the update path | 1.5 h | 1.25 h (stated) | Completed |
+| — | <a id="f-005-t13"></a>F-005-T13 — T06f — First real lifecycle update on the Mac service | 0.5 h | 0.75 h (stated) | Completed |
+| — | <a id="f-005-t14"></a>F-005-T14 — T06g — After-start health check in the update receipt | 1 h | 0.5 h (stated) | Completed |
+| — | <a id="f-005-t16"></a>F-005-T16 — T07b — Show update availability on the dashboard, the companion and the status report | 1 h | 0.5 h (stated) | Completed |
+| — | <a id="f-005-t17"></a>F-005-T17 — T07c — Manual update action through the lifecycle update path, with its refusals and recovery shown | 0.5 h | 0.5 h (stated) | Completed |
+| — | <a id="f-005-t18"></a>F-005-T18 — T07d — Opt-in automatic update policy, off by default, for selected channels and targets | 1 h | 0.5 h (stated) | Completed |
+| — | <a id="f-005-t19"></a>F-005-T19 — T08b — Node install or upgrade choices with ownership and recovery; never replaces a user-managed runtime silently | 1.25 h | 0.5 h (stated) | Completed |
+| — | <a id="f-005-t20"></a>F-005-T20 — T08c — Engine/provider contract for several instances and endpoints, local and remote; Ollama becomes one adapter | 1.25 h | 0.5 h (stated) | Completed |
+| — | <a id="f-005-t21"></a>F-005-T21 — T08d — Optional start-at-login or on-demand management of selected owned local engines | 1 h | 0.25 h (stated) | Completed |
+| — | <a id="f-005-t23"></a>F-005-T23 — T09b — Windows update and recovery: backup, rehearsal and checkout | 1 h | 0.5 h (stated) | Completed |
+| — | <a id="f-005-t25"></a>F-005-T25 — T10b — Linux update and recovery | 1 h | 0.25 h (stated) | Completed |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-005.md)
+
+| Field | Value |
+|---|---|
+| Queue order | 1 — Owner-selected next NERV work, 2026-11-10 |
+| PR / evidence | [PR #339](https://github.com/voidbrain/nerv/pull/339) F-005-T21 (T08d) optional start-at-login and on-demand engine lifecycle, `src/engine-lifecycle.ts`, test/engine-lifecycle.test.ts (head 2ceb2ab, merged 23af8cf; CI43342617908 passed all five jobs); [PR #337](https://github.com/voidbrain/nerv/pull/337) F-005-T23 (T09b) Windows and F-005-T25 (T10b) Linux update and recovery, test/windows-service-lifecycle.test.ts and test/linux-service-lifecycle.test.ts (head e226321, merged 8da425a; CI43340798309 passed all five jobs); these PRs cited in the full audit of 2026-11-13, PR #374; [PR #330](https://github.com/voidbrain/nerv/pull/330) F-005-T09 (T09a) Windows service lifecycle adapter (`src/node-lifecycle-execution.ts`, `src/nodes-cli.ts`), Test: test/windows-service-lifecycle.test.ts; [PR #331](https://github.com/voidbrain/nerv/pull/331) F-005-T20 (T08c) engine/provider contract for multiple local and remote instances with Ollama as one adapter (`src/engine-provider.ts`, `src/model-setup.ts`, `src/model.ts`), Test: test/engine-provider.test.ts; [PR #328](https://github.com/voidbrain/nerv/pull/328) F-005-T18 (T07d) opt-in automatic update policy (`src/update-policy.ts`, `src/config.ts`, `GET/POST /api/update/policy`, `POST /api/update/auto`), Test: test/update-policy.test.ts; [PR #327](https://github.com/voidbrain/nerv/pull/327) F-005-T10 (T10a) Linux `systemd --user` service adapter (`src/node-lifecycle-execution.ts`, `src/nodes-cli.ts`), Test: test/linux-service-lifecycle.test.ts; [PR #324](https://github.com/voidbrain/nerv/pull/324) F-005-T19 (T08b) Node install/upgrade choices with ownership classification and recovery (`src/node-runtime.ts`, `nodes node-runtime-plan/activate/recover`), Test: test/node-runtime.test.ts; [PR #326](https://github.com/voidbrain/nerv/pull/326) F-005-T17 (T07c) manual update action through lifecycle update path (`src/manual-update.ts`, `POST /api/update/apply`, dashboard `live.js`), Test: test/manual-update.test.ts; [PR #323](https://github.com/voidbrain/nerv/pull/323) F-005-T16 (T07b) update availability on `/api/doctor`, `/api/status`, `nerv doctor`, dashboard (`web/public/dashboard/live.js`), Angular doctor view (`web/src/doctor-view.ts`) and macOS companion (`native/NervMenuBar`), Test: test/update-availability.test.ts; [PR #321](https://github.com/voidbrain/nerv/pull/321) F-005-T08 (T08a) prerequisite check (`checkServicePrerequisites` for Node version, executable and non-interactive service environment joined to `install`, `start` and `update`), Test: test/node-lifecycle-execution.test.ts; [PR #320](https://github.com/voidbrain/nerv/pull/320) F-005-T07 (T07a) backend update-availability contract (`src/update-availability.ts`, `GET /api/update`, `nodes update-check`), Test: test/update-availability.test.ts; closes F-005-T06 and F-005-T12; [PR #317](https://github.com/voidbrain/nerv/pull/317) F-005-T14 (T06g) after-start health check in `receipt.health` and ordered `receipt.recovery` on uncertain outcomes; Test: test/upgrade-health.test.ts; fresh-context independent review (no blockers, 3 should-fix items addressed); earlier PRs in [2026 evidence archive](archive/evidence-2026.md#f-005) |
+| Opened | 2026-11-01 |
+| Verification | Recent 2026-11-12/13 update & lifecycle checks on `main`; 2026-11-08–2026-11-10 Mac/Windows acceptance details in [2026 evidence archive](archive/evidence-2026.md#f-005) |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### <a id="f-006"></a>[✨ F-006](#top)
+
+**Orchestrate agents and models across nodes**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 1.5 h agent + 1.5 h owner | — | — | 🤖 | 🧑‍🔧 | — |
+
+💻 **→** Next: F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC (Planned).
+
+| | |
+|---|---|
+| **Issue** | Local planning, model adapters and bounded worker transport exist; independent cross-node inference/execution selection, capability scheduling and budgets remain incomplete. |
+| **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
+| **Check** | Mini PC coder uses Mac inference; policy-approved Claude path; Pi capability route; unavailable Mac waits or expires; bounded budgets and delegation. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-006-t11"></a>F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — |
+| 🟢 Small | <a id="f-006-t13"></a>F-006-T13 — T05b — Three Mac operating-condition runs | — | 0 h | 0 h agent + 1.5 h owner | Planned | [🧑‍🔧](decisions/mac-operating-conditions.md) | — |
+| 🟢 Small | <a id="f-006-t15"></a>F-006-T15 — Record the evidence of F-006-T11 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T11](#f-006-t11) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T15](#f-006-t15) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-006-t16"></a>F-006-T16 — Record the evidence of F-006-T13 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T13](#f-006-t13) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-006-t14"></a>F-006-T14 — T05c — Mac operating-conditions report | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T16](#f-006-t16) | ⏳ 🤖 | — |
+| 🟡 Medium | **Total** | 7.75 h (17 of 20 steps) | 5.25 h (10 of 20 steps recorded) | 1.5 h agent + 1.5 h owner | 14 of 20 completed | | |
+
+<details><summary>Done steps (14)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-006-t01"></a>F-006-T01 — T01a — Decision: remote inference endpoint identity, permitted data and behaviour when unavailable | 0.5 h | 0.5 h (stated) | Completed | — |
+| — | <a id="f-006-t02"></a>F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback | 0.5 h | 0.5 h (stated) | Completed | — |
+| — | <a id="f-006-t03"></a>F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases | 0.25 h | 0.25 h (stated) | Completed | — |
+| — | <a id="f-006-t04"></a>F-006-T04 — Draft the placement campaign plan with exact cases, repeats and budgets | 0.25 h | 0.25 h (stated) | Completed | — |
+| — | <a id="f-006-t05"></a>F-006-T05 — Draft the Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.25 h | 0.25 h (stated) | Completed | — |
+| — | <a id="f-006-t06"></a>F-006-T06 — T01b — Configuration validation for remote endpoints; the loopback-only local route stays guaranteed; regressions | 0.5 h | 0.5 h (stated) | Completed | — |
+| — | <a id="f-006-t07"></a>F-006-T07 — T02b — Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol | 0.75 h | 0.75 h (stated) | Completed | — |
+| — | <a id="f-006-t08"></a>F-006-T08 — T02c — Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route | 0.75 h | 0.75 h (stated) | Completed | — |
+| — | <a id="f-006-t09"></a>F-006-T09 — T03b — Evidence adapter binding both configurations, handoffs, budgets and hosts | 0.75 h | 0.75 h (stated) | Completed | — |
+| — | <a id="f-006-t10"></a>F-006-T10 — T03c — Grader tamper protection; stale or mismatched evidence rejected; authority rechecked | 0.75 h | 0.75 h (stated) | Completed | — |
+| — | <a id="f-006-t17"></a>F-006-T17 — Approve the placement campaign plan and budgets | — | 0 h | Completed | — |
+| — | <a id="f-006-t18"></a>F-006-T18 — Approve the Mac operating-conditions plan and budgets | — | 0 h | Completed | — |
+| — | <a id="f-006-t19"></a>F-006-T19 — Revise the placement campaign for 3 runs per case | 0.5 h | 0 h | Completed | [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation |
+| — | <a id="f-006-t20"></a>F-006-T20 — Revise the Mac operating-conditions plan for 3 runs and gemma4:12b | 0.5 h | 0 h | Completed | [PR #468](https://github.com/voidbrain/nerv/pull/468) implementation |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-006.md)
+
+| Field | Value |
+|---|---|
+| Queue order | 2 — Owner-selected subsequent NERV work, 2026-11-10; intervening upstream work is tracked in its own repository |
+| PR / evidence | Steps: F-006-T19: [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation · F-006-T20: [PR #468](https://github.com/voidbrain/nerv/pull/468) implementation. [PR #466](https://github.com/voidbrain/nerv/pull/466); [PR #468](https://github.com/voidbrain/nerv/pull/468) (merged; CI green); [PR #421](https://github.com/voidbrain/nerv/pull/421) (T03a–T03c combination qualification pack, protected grader, evidence adapter & T04a placement campaign plan, `evals/combination-v1.json`, `tools/evaluate-model.mjs`, `src/pilots.ts`, `test/evaluation-model.test.mjs`, `docs/decisions/placement-campaign.md`); [PR #420](https://github.com/voidbrain/nerv/pull/420) (T02c orchestration wait/retry/token budgets, cloud policy path, and Pi capability route, `src/model.ts`, `src/runtime.ts`, `test/orchestration-selection.test.ts`); [PR #418](https://github.com/voidbrain/nerv/pull/418) (T02b scheduler join over signed WorkerLink, `src/model.ts`, `src/worker-link.ts`, `src/runtime.ts`, `test/orchestration-selection.test.ts`); [PR #416](https://github.com/voidbrain/nerv/pull/416) (T05a Mac operating-conditions plan and budgets, `docs/decisions/mac-operating-conditions.md`); [PR #348](https://github.com/voidbrain/nerv/pull/348) (T02a independent model/worker selection contract, `src/model.ts`, `src/runtime.ts`, `test/orchestration-selection.test.ts`); [PR #347](https://github.com/voidbrain/nerv/pull/347) (T01a agreement & T01b remote inference config validation, `src/model.ts`, `test/remote-inference-config.test.ts`); [PR #296](https://github.com/voidbrain/nerv/pull/296) (T01a remote inference decision: docs/decisions/remote-inference.md); [PR #244](https://github.com/voidbrain/nerv/pull/244) owner-selected queue order; [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Ownership correction/adoption: [PR #235](https://github.com/voidbrain/nerv/pull/235);  Host-load plan: [PR #234](https://github.com/voidbrain/nerv/pull/234);  Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #221](https://github.com/voidbrain/nerv/pull/221) schema/reuse assessment; [Gauntlet ownership/reuse proposal](design/gauntlet-protocol-2026-11-08.md), 2026-11-08; the proposal preceded delivered Gauntlet0.1.1 adoption in PR #223 / F-073; automatic routing/qualification remains unimplemented and no consumer work gates upstream releases; [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| Opened | 2026-11-01 |
+| Verification | 2026-11-18: F-006-T04 and F-006-T05 closed (were Verified). 2026-11-18: F-006-T19 verified: [PR #466](https://github.com/voidbrain/nerv/pull/466) merged on green CI; F-006-T20 verified: [PR #468](https://github.com/voidbrain/nerv/pull/468) merged on green CI. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
 
 ### <a id="f-062"></a>[✨ F-062](#top)
 
@@ -97,6 +240,58 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-009"></a>[✨ F-009](#top)
+
+**Run NERV Agency headless as one local user service**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-009-T03 — Linux service target acceptance (Planned).
+
+| | |
+|---|---|
+| **Issue** | Service commands and definitions implemented. Portable tests validate rendering/process lifecycle; later owner-authorized F-005 Mac default-profile service operations passed. Linux/session acceptance remains incomplete. |
+| **Reproduce** | Follow the [service and login acceptance procedure](acceptance/f009-service-login-procedure.md) and [docs/INSTALL.md](INSTALL.md). |
+| **Check** | Single process serves production UI/API on 4317; config survives init; clean SIGTERM and restart catch-up; private credentials; install/status/start/stop/uninstall on real target OS. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-009-t03"></a>F-009-T03 — Linux service target acceptance | 0.5 h | 0 h | 0.5 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-009-t05"></a>F-009-T05 — Record the evidence of F-009-T03 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-009-T03](#f-009-t03) | ⏳ 🤖 |
+| 🟢 Small | **Total** | 1 h (3 of 5 steps) | 0 h (0 of 5 steps recorded) | 0.75 h | 3 of 5 completed | |
+
+<details><summary>Done steps (3)</summary>
+
+| Effort | Step | Estimate | Actual | Status |
+|---|---|---|---|---|
+| — | <a id="f-009-t01"></a>F-009-T01 — Single-process service, config and lifecycle commands | — | 0 days | Completed |
+| — | <a id="f-009-t02"></a>F-009-T02 — Mac login/logout acceptance | — | 0 h | Completed |
+| — | <a id="f-009-t04"></a>F-009-T04 — Record the evidence of F-009-T02 and close it | 0.25 h | 0 h | Completed |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-009.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #255](https://github.com/voidbrain/nerv/pull/255) related-state reconciliation; [PR #254](https://github.com/voidbrain/nerv/pull/254) accepted Mac service evidence under F-005; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
+| Opened | 2026-11-01 |
+| Verification | 2026-11-10 selected per-user Mac lifecycle operations accepted under F-005-T04; actual session/login and Linux target acceptance remain pending. Earlier2026-11-08: read-only execution-host check confirms no installed/registered launchd service. Existing portable headless checks pass; separate target-host install/status/start/stop/uninstall and login/logout acceptance remain pending. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+
+
 ### <a id="f-021"></a>[✨ F-021](#top)
 
 **MCP and standardized tool/expert protocol**
@@ -141,89 +336,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: F-021-T02: [PR #381](https://github.com/voidbrain/nerv/pull/381) versioned NERV and MCP tool registry descriptors. [PR #381](https://github.com/voidbrain/nerv/pull/381) versioned NERV and MCP tool descriptors; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links. |
 | Opened | 2026-11-02 |
 | Verification | Unit/integration and CI 2026-11-13: every built-in registration has a stable versioned descriptor; MCP fingerprints remain compatible; PR #381 CI 43496658350 passed validate, native-macos, windows, plan and full-suite. Remaining parent acceptance is pending. |
-| Reviewed | 2026-11-13 |
-
-</details>
-
----
-
-### <a id="f-005"></a>[✨ F-005](#top)
-
-**Discover, install and operate enrolled remote workers**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 2 h agent + 5.75 h owner | — | [F-012-T05](#f-012-t05) | ⏳ | 🧑‍🔧 | — |
-
-🧑 **→** Next: [🧑‍🔧](acceptance/f005-t15-forward-upgrade-trial.md) F-005-T15 — T06h — Upgrades that raise the schema version (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | F-014 delivers enrolled outbound worker transport and B-045 repairs burst admission. Selected inventories, read-only local/SSH inspection and review-only manifests are delivered in PR #210. Fresh-profile bootstrap now has explicit digest confirmation, fixed local/SSH code and transactional receipts/resources. Lifecycle contracts and selected Mac execution/acceptance are delivered. Safe application/schema upgrades, update experience, prerequisites and remaining Windows/Linux/device acceptance remain open. |
-| **Reproduce** | Update path as run on the Mac: the [T13 Mac update procedure](acceptance/f005-t13-mac-update-procedure.md) and its [2026-11-12 evidence](acceptance/node-update-2026-11-12.md). Node commands: [node setup](guides/kaji-and-nodes.md#discover-inspect-and-bootstrap-node-candidates); milestone: [ROADMAP](ROADMAP.md), milestone 3. |
-| **Check** | Mac/mini PC/Pi tests for enrolment, revocation, leases, fencing, cancellation, locks, reconnect and uncertain physical results. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-005-t15"></a>F-005-T15 — T06h — Upgrades that raise the schema version | 0.75 h | 0.75 h so far (stated) | 0 h agent + 0.5 h owner | Implemented; verification pending | [🧑‍🔧](acceptance/f005-t15-forward-upgrade-trial.md) |
-| 🟢 Small | <a id="f-005-t22"></a>F-005-T22 — T08e — Demonstration of prerequisites and optional engine management on an owner-selected target | — | 0 h | 0 h agent + 0.5 h owner | Planned | [🧑‍🔧](acceptance/f005-t22-prerequisites.md) |
-| 🟢 Small | <a id="f-005-t24"></a>F-005-T24 — T09c — Acceptance on an owner-selected Windows machine | — | 0 h | 0 h agent + 1 h owner | Planned | [🧑‍🔧](acceptance/f005-t24-tabgha-windows.md) |
-| 🟢 Small | <a id="f-005-t26"></a>F-005-T26 — T10c — Acceptance on an owner-selected mini PC, Pi or equivalent | — | 0 h | 0 h agent + 1 h owner | Planned | [🧑‍🔧](acceptance/f009-service-login-procedure.md#part-2--linux-target-selection-and-acceptance-selected-linux-host-bash) |
-| 🟢 Small | <a id="f-005-t31"></a>F-005-T31 — Record the evidence of F-005-T22 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T22](#f-005-t22) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-005-t32"></a>F-005-T32 — Record the evidence of F-005-T24 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T24](#f-005-t24) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-005-t33"></a>F-005-T33 — Record the evidence of F-005-T26 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T26](#f-005-t26) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-005-t11"></a>F-005-T11 — Propose the device matrix for final acceptance | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T31](#f-005-t31), [F-005-T32](#f-005-t32), [F-005-T33](#f-005-t33) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-005-t37"></a>F-005-T37 — Agree the device matrix | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-005-T11](#f-005-t11) | ⏳ 🤔 |
-| 🟢 Small | <a id="f-005-t27"></a>F-005-T27 — T11b — Enrolment, revocation, leases, fencing and cancellation across the device matrix | — | 0 h | 0 h agent + 1 h owner | Planned · waits on [F-005-T37](#f-005-t37) | ⏳ 🧑‍🔧 |
-| 🟢 Small | <a id="f-005-t34"></a>F-005-T34 — Record the evidence of F-005-T27 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T27](#f-005-t27) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-005-t28"></a>F-005-T28 — T11c — Reconnect, locks and uncertain physical results across the device matrix | — | 0 h | 0 h agent + 1 h owner | Planned · waits on [F-005-T34](#f-005-t34) | ⏳ 🧑‍🔧 |
-| 🟢 Small | <a id="f-005-t35"></a>F-005-T35 — Record the evidence of F-005-T28 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T28](#f-005-t28) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-005-t29"></a>F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-005-T35](#f-005-t35) | ⏳ 🧑‍🔧 |
-| 🟢 Small | <a id="f-005-t36"></a>F-005-T36 — Record the evidence of F-005-T29 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T29](#f-005-t29) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-005-t30"></a>F-005-T30 — T11e — Parent acceptance and closure reconciliation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T36](#f-005-t36) | ⏳ 🤖 |
-| 🟡 Medium | **Total** | 18.25 h (24 of 37 steps) | 8.75 h (16 of 37 steps recorded) | 2 h agent + 5.75 h owner | 21 of 37 completed | |
-
-<details><summary>Done steps (21)</summary>
-
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="f-005-t01"></a>F-005-T01 — Define service lifecycle ownership and recovery contracts | — | 0 days | Completed |
-| — | <a id="f-005-t02"></a>F-005-T02 — Prepare and verify isolated local profile enrollment | — | 0 days | Completed |
-| — | <a id="f-005-t03"></a>F-005-T03 — Prepare replacement-root generation and existing-base trust migration | — | 0 days | Completed |
-| — | <a id="f-005-t04"></a>F-005-T04 — Implement and accept Mac default-profile service lifecycle | — | 0 days | Completed |
-| — | <a id="f-005-t05"></a>F-005-T05 — Implement and apply history-preserving root activation | — | 0 days | Completed |
-| — | <a id="f-005-t06"></a>F-005-T06 — Safe upgrades, slices T06a–T06d: rehearsal, journaled rehearsal, admission of schema-preserving upgrades, first Mac move | — | 0 h | Completed |
-| — | <a id="f-005-t07"></a>F-005-T07 — T07a — One backend update-availability contract: installed, running and available revision, channel, last check, offline/unknown | 1 h | 0.5 h (stated) | Completed |
-| — | <a id="f-005-t08"></a>F-005-T08 — T08a — Prerequisite check (Node version, executable, non-interactive service environment) joined to install, start and update | 1 h | 0.5 h (stated) | Completed |
-| — | <a id="f-005-t09"></a>F-005-T09 — T09a — Windows lifecycle adapter: install, status, start, stop and uninstall under the same fencing journal | 1.25 h | 0.5 h (stated) | Completed |
-| — | <a id="f-005-t10"></a>F-005-T10 — T10a — Linux user-service adapter (systemd --user), with no implicit linger or system-wide service | 1.25 h | 0.5 h (stated) | Completed |
-| — | <a id="f-005-t12"></a>F-005-T12 — T06e — Independent review of the update path | 1.5 h | 1.25 h (stated) | Completed |
-| — | <a id="f-005-t13"></a>F-005-T13 — T06f — First real lifecycle update on the Mac service | 0.5 h | 0.75 h (stated) | Completed |
-| — | <a id="f-005-t14"></a>F-005-T14 — T06g — After-start health check in the update receipt | 1 h | 0.5 h (stated) | Completed |
-| — | <a id="f-005-t16"></a>F-005-T16 — T07b — Show update availability on the dashboard, the companion and the status report | 1 h | 0.5 h (stated) | Completed |
-| — | <a id="f-005-t17"></a>F-005-T17 — T07c — Manual update action through the lifecycle update path, with its refusals and recovery shown | 0.5 h | 0.5 h (stated) | Completed |
-| — | <a id="f-005-t18"></a>F-005-T18 — T07d — Opt-in automatic update policy, off by default, for selected channels and targets | 1 h | 0.5 h (stated) | Completed |
-| — | <a id="f-005-t19"></a>F-005-T19 — T08b — Node install or upgrade choices with ownership and recovery; never replaces a user-managed runtime silently | 1.25 h | 0.5 h (stated) | Completed |
-| — | <a id="f-005-t20"></a>F-005-T20 — T08c — Engine/provider contract for several instances and endpoints, local and remote; Ollama becomes one adapter | 1.25 h | 0.5 h (stated) | Completed |
-| — | <a id="f-005-t21"></a>F-005-T21 — T08d — Optional start-at-login or on-demand management of selected owned local engines | 1 h | 0.25 h (stated) | Completed |
-| — | <a id="f-005-t23"></a>F-005-T23 — T09b — Windows update and recovery: backup, rehearsal and checkout | 1 h | 0.5 h (stated) | Completed |
-| — | <a id="f-005-t25"></a>F-005-T25 — T10b — Linux update and recovery | 1 h | 0.25 h (stated) | Completed |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-005.md)
-
-| Field | Value |
-|---|---|
-| Queue order | 1 — Owner-selected next NERV work, 2026-11-10 |
-| PR / evidence | [PR #339](https://github.com/voidbrain/nerv/pull/339) F-005-T21 (T08d) optional start-at-login and on-demand engine lifecycle, `src/engine-lifecycle.ts`, test/engine-lifecycle.test.ts (head 2ceb2ab, merged 23af8cf; CI43342617908 passed all five jobs); [PR #337](https://github.com/voidbrain/nerv/pull/337) F-005-T23 (T09b) Windows and F-005-T25 (T10b) Linux update and recovery, test/windows-service-lifecycle.test.ts and test/linux-service-lifecycle.test.ts (head e226321, merged 8da425a; CI43340798309 passed all five jobs); these PRs cited in the full audit of 2026-11-13, PR #374; [PR #330](https://github.com/voidbrain/nerv/pull/330) F-005-T09 (T09a) Windows service lifecycle adapter (`src/node-lifecycle-execution.ts`, `src/nodes-cli.ts`), Test: test/windows-service-lifecycle.test.ts; [PR #331](https://github.com/voidbrain/nerv/pull/331) F-005-T20 (T08c) engine/provider contract for multiple local and remote instances with Ollama as one adapter (`src/engine-provider.ts`, `src/model-setup.ts`, `src/model.ts`), Test: test/engine-provider.test.ts; [PR #328](https://github.com/voidbrain/nerv/pull/328) F-005-T18 (T07d) opt-in automatic update policy (`src/update-policy.ts`, `src/config.ts`, `GET/POST /api/update/policy`, `POST /api/update/auto`), Test: test/update-policy.test.ts; [PR #327](https://github.com/voidbrain/nerv/pull/327) F-005-T10 (T10a) Linux `systemd --user` service adapter (`src/node-lifecycle-execution.ts`, `src/nodes-cli.ts`), Test: test/linux-service-lifecycle.test.ts; [PR #324](https://github.com/voidbrain/nerv/pull/324) F-005-T19 (T08b) Node install/upgrade choices with ownership classification and recovery (`src/node-runtime.ts`, `nodes node-runtime-plan/activate/recover`), Test: test/node-runtime.test.ts; [PR #326](https://github.com/voidbrain/nerv/pull/326) F-005-T17 (T07c) manual update action through lifecycle update path (`src/manual-update.ts`, `POST /api/update/apply`, dashboard `live.js`), Test: test/manual-update.test.ts; [PR #323](https://github.com/voidbrain/nerv/pull/323) F-005-T16 (T07b) update availability on `/api/doctor`, `/api/status`, `nerv doctor`, dashboard (`web/public/dashboard/live.js`), Angular doctor view (`web/src/doctor-view.ts`) and macOS companion (`native/NervMenuBar`), Test: test/update-availability.test.ts; [PR #321](https://github.com/voidbrain/nerv/pull/321) F-005-T08 (T08a) prerequisite check (`checkServicePrerequisites` for Node version, executable and non-interactive service environment joined to `install`, `start` and `update`), Test: test/node-lifecycle-execution.test.ts; [PR #320](https://github.com/voidbrain/nerv/pull/320) F-005-T07 (T07a) backend update-availability contract (`src/update-availability.ts`, `GET /api/update`, `nodes update-check`), Test: test/update-availability.test.ts; closes F-005-T06 and F-005-T12; [PR #317](https://github.com/voidbrain/nerv/pull/317) F-005-T14 (T06g) after-start health check in `receipt.health` and ordered `receipt.recovery` on uncertain outcomes; Test: test/upgrade-health.test.ts; fresh-context independent review (no blockers, 3 should-fix items addressed); earlier PRs in [2026 evidence archive](archive/evidence-2026.md#f-005) |
-| Opened | 2026-11-01 |
-| Verification | Recent 2026-11-12/13 update & lifecycle checks on `main`; 2026-11-08–2026-11-10 Mac/Windows acceptance details in [2026 evidence archive](archive/evidence-2026.md#f-005) |
 | Reviewed | 2026-11-13 |
 
 </details>
@@ -342,124 +454,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-006"></a>[✨ F-006](#top)
-
-**Orchestrate agents and models across nodes**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 1 h agent + 2 h owner | — | — | ⏳ | 🧑‍🔧 | — |
-
-🧑 **→** Next: [🧑‍🔧](decisions/placement-campaign.md) F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC (Planned).
-
-| | |
-|---|---|
-| **Issue** | Local planning, model adapters and bounded worker transport exist; independent cross-node inference/execution selection, capability scheduling and budgets remain incomplete. |
-| **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
-| **Check** | Mini PC coder uses Mac inference; policy-approved Claude path; Pi capability route; unavailable Mac waits or expires; bounded budgets and delegation. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-006-t11"></a>F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | — | 0 h | 0 h agent + 0.5 h owner | Planned | [🧑‍🔧](decisions/placement-campaign.md) | — |
-| 🟢 Small | <a id="f-006-t13"></a>F-006-T13 — T05b — Three Mac operating-condition runs | — | 0 h | 0 h agent + 1.5 h owner | Planned | [🧑‍🔧](decisions/mac-operating-conditions.md) | — |
-| 🟢 Small | <a id="f-006-t15"></a>F-006-T15 — Record the evidence of F-006-T11 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T11](#f-006-t11) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T15](#f-006-t15) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-006-t16"></a>F-006-T16 — Record the evidence of F-006-T13 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T13](#f-006-t13) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-006-t14"></a>F-006-T14 — T05c — Mac operating-conditions report | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T16](#f-006-t16) | ⏳ 🤖 | — |
-| 🟢 Small | **Total** | 7.25 h (16 of 20 steps) | 5.25 h (10 of 20 steps recorded) | 1 h agent + 2 h owner | 14 of 20 completed | | |
-
-<details><summary>Done steps (14)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-006-t01"></a>F-006-T01 — T01a — Decision: remote inference endpoint identity, permitted data and behaviour when unavailable | 0.5 h | 0.5 h (stated) | Completed | — |
-| — | <a id="f-006-t02"></a>F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback | 0.5 h | 0.5 h (stated) | Completed | — |
-| — | <a id="f-006-t03"></a>F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases | 0.25 h | 0.25 h (stated) | Completed | — |
-| — | <a id="f-006-t04"></a>F-006-T04 — Draft the placement campaign plan with exact cases, repeats and budgets | 0.25 h | 0.25 h (stated) | Completed | — |
-| — | <a id="f-006-t05"></a>F-006-T05 — Draft the Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.25 h | 0.25 h (stated) | Completed | — |
-| — | <a id="f-006-t06"></a>F-006-T06 — T01b — Configuration validation for remote endpoints; the loopback-only local route stays guaranteed; regressions | 0.5 h | 0.5 h (stated) | Completed | — |
-| — | <a id="f-006-t07"></a>F-006-T07 — T02b — Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol | 0.75 h | 0.75 h (stated) | Completed | — |
-| — | <a id="f-006-t08"></a>F-006-T08 — T02c — Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route | 0.75 h | 0.75 h (stated) | Completed | — |
-| — | <a id="f-006-t09"></a>F-006-T09 — T03b — Evidence adapter binding both configurations, handoffs, budgets and hosts | 0.75 h | 0.75 h (stated) | Completed | — |
-| — | <a id="f-006-t10"></a>F-006-T10 — T03c — Grader tamper protection; stale or mismatched evidence rejected; authority rechecked | 0.75 h | 0.75 h (stated) | Completed | — |
-| — | <a id="f-006-t17"></a>F-006-T17 — Approve the placement campaign plan and budgets | — | 0 h | Completed | — |
-| — | <a id="f-006-t18"></a>F-006-T18 — Approve the Mac operating-conditions plan and budgets | — | 0 h | Completed | — |
-| — | <a id="f-006-t19"></a>F-006-T19 — Revise the placement campaign for 3 runs per case | 0.5 h | 0 h | Completed | [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation |
-| — | <a id="f-006-t20"></a>F-006-T20 — Revise the Mac operating-conditions plan for 3 runs and gemma4:12b | 0.5 h | 0 h | Completed | [PR #468](https://github.com/voidbrain/nerv/pull/468) implementation |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-006.md)
-
-| Field | Value |
-|---|---|
-| Queue order | 2 — Owner-selected subsequent NERV work, 2026-11-10; intervening upstream work is tracked in its own repository |
-| PR / evidence | Steps: F-006-T19: [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation · F-006-T20: [PR #468](https://github.com/voidbrain/nerv/pull/468) implementation. [PR #466](https://github.com/voidbrain/nerv/pull/466); [PR #468](https://github.com/voidbrain/nerv/pull/468) (merged; CI green); [PR #421](https://github.com/voidbrain/nerv/pull/421) (T03a–T03c combination qualification pack, protected grader, evidence adapter & T04a placement campaign plan, `evals/combination-v1.json`, `tools/evaluate-model.mjs`, `src/pilots.ts`, `test/evaluation-model.test.mjs`, `docs/decisions/placement-campaign.md`); [PR #420](https://github.com/voidbrain/nerv/pull/420) (T02c orchestration wait/retry/token budgets, cloud policy path, and Pi capability route, `src/model.ts`, `src/runtime.ts`, `test/orchestration-selection.test.ts`); [PR #418](https://github.com/voidbrain/nerv/pull/418) (T02b scheduler join over signed WorkerLink, `src/model.ts`, `src/worker-link.ts`, `src/runtime.ts`, `test/orchestration-selection.test.ts`); [PR #416](https://github.com/voidbrain/nerv/pull/416) (T05a Mac operating-conditions plan and budgets, `docs/decisions/mac-operating-conditions.md`); [PR #348](https://github.com/voidbrain/nerv/pull/348) (T02a independent model/worker selection contract, `src/model.ts`, `src/runtime.ts`, `test/orchestration-selection.test.ts`); [PR #347](https://github.com/voidbrain/nerv/pull/347) (T01a agreement & T01b remote inference config validation, `src/model.ts`, `test/remote-inference-config.test.ts`); [PR #296](https://github.com/voidbrain/nerv/pull/296) (T01a remote inference decision: docs/decisions/remote-inference.md); [PR #244](https://github.com/voidbrain/nerv/pull/244) owner-selected queue order; [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Ownership correction/adoption: [PR #235](https://github.com/voidbrain/nerv/pull/235);  Host-load plan: [PR #234](https://github.com/voidbrain/nerv/pull/234);  Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #221](https://github.com/voidbrain/nerv/pull/221) schema/reuse assessment; [Gauntlet ownership/reuse proposal](design/gauntlet-protocol-2026-11-08.md), 2026-11-08; the proposal preceded delivered Gauntlet0.1.1 adoption in PR #223 / F-073; automatic routing/qualification remains unimplemented and no consumer work gates upstream releases; [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
-| Opened | 2026-11-01 |
-| Verification | 2026-11-18: F-006-T04 and F-006-T05 closed (were Verified). 2026-11-18: F-006-T19 verified: [PR #466](https://github.com/voidbrain/nerv/pull/466) merged on green CI; F-006-T20 verified: [PR #468](https://github.com/voidbrain/nerv/pull/468) merged on green CI. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
-
-### <a id="f-009"></a>[✨ F-009](#top)
-
-**Run NERV Agency headless as one local user service**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.25 h agent + 0.5 h owner | — | — | ⏳ | 🧑‍🔧 | — |
-
-🧑 **→** Next: [🧑‍🔧](acceptance/f009-service-login-procedure.md#part-2--linux-target-selection-and-acceptance-selected-linux-host-bash) F-009-T03 — Linux service target acceptance (Planned).
-
-| | |
-|---|---|
-| **Issue** | Service commands and definitions implemented. Portable tests validate rendering/process lifecycle; later owner-authorized F-005 Mac default-profile service operations passed. Linux/session acceptance remains incomplete. |
-| **Reproduce** | Follow the [service and login acceptance procedure](acceptance/f009-service-login-procedure.md) and [docs/INSTALL.md](INSTALL.md). |
-| **Check** | Single process serves production UI/API on 4317; config survives init; clean SIGTERM and restart catch-up; private credentials; install/status/start/stop/uninstall on real target OS. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-009-t03"></a>F-009-T03 — Linux service target acceptance | — | 0 h | 0 h agent + 0.5 h owner | Planned | [🧑‍🔧](acceptance/f009-service-login-procedure.md#part-2--linux-target-selection-and-acceptance-selected-linux-host-bash) |
-| 🟢 Small | <a id="f-009-t05"></a>F-009-T05 — Record the evidence of F-009-T03 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-009-T03](#f-009-t03) | ⏳ 🤖 |
-| 🟢 Small | **Total** | 0.5 h (2 of 5 steps) | 0 h (0 of 5 steps recorded) | 0.25 h agent + 0.5 h owner | 3 of 5 completed | |
-
-<details><summary>Done steps (3)</summary>
-
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="f-009-t01"></a>F-009-T01 — Single-process service, config and lifecycle commands | — | 0 days | Completed |
-| — | <a id="f-009-t02"></a>F-009-T02 — Mac login/logout acceptance | — | 0 h | Completed |
-| — | <a id="f-009-t04"></a>F-009-T04 — Record the evidence of F-009-T02 and close it | 0.25 h | 0 h | Completed |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-009.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #255](https://github.com/voidbrain/nerv/pull/255) related-state reconciliation; [PR #254](https://github.com/voidbrain/nerv/pull/254) accepted Mac service evidence under F-005; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
-| Opened | 2026-11-01 |
-| Verification | 2026-11-10 selected per-user Mac lifecycle operations accepted under F-005-T04; actual session/login and Linux target acceptance remain pending. Earlier2026-11-08: read-only execution-host check confirms no installed/registered launchd service. Existing portable headless checks pass; separate target-host install/status/start/stop/uninstall and login/logout acceptance remain pending. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
-
-
-
 ### <a id="f-011"></a>[✨ F-011](#top)
 
 **Native macOS menu-bar companion without Electron**
@@ -610,6 +604,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-097"></a>[✨ F-097](#top)
+
+**Rerun the seven NERV system cases at the harness 8.14.1 source**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-097-T01 — Agent reruns the seven system cases at the 8.14.1 source (Ready).
+
+| | |
+|---|---|
+| **Issue** | The harness 8.14.1 reconcile ([PR #404](https://github.com/voidbrain/nerv/pull/404)) changed evaluation-source inputs, so the seven `nerv-system-flows` cases became pending (`source-changed`). Harness 8.15.0 and the Gauntlet 0.9.0 pin keep them pending under this record until the system-only rerun is recorded. The agent's earlier rerun was refused by that session's permission classifier on 2026-11-14. |
+| **Reproduce** | `npm run gauntlet:pending` on the reconcile branch lists policy, ledger, conversation, channels, bases, stress and browser as source-changed. |
+| **Check** | `npm run gauntlet:pending` prints nothing; `evals/gauntlet/ledger.json` records the seven runs at the merged source; `npm run check:evals` passes without this step. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-097-t01"></a>F-097-T01 — Agent reruns the seven system cases at the 8.14.1 source | 0.25 h | 0 h | 0.25 h | Ready |
+| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-097.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in [PR #404](https://github.com/voidbrain/nerv/pull/404) |
+| Opened | 2026-11-14 |
+| Verification | Pending. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
 ### <a id="f-105"></a>[✨ F-105](#top)
 
 **A pull request names itself in a record, or CI fails**
@@ -747,9 +779,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h agent + 0.5 h owner | — | — | 🤖 | 🧑‍🔧 | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.25 h agent + 0.25 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-083-T06 — Cooking session: ingredients and steps (Planned).
+💻 **→** Next: F-083-T04 — Live check with a real saved recipe (Planned).
 
 | | |
 |---|---|
@@ -761,13 +793,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-083-t04"></a>F-083-T04 — Owner check with a real saved recipe | — | 0 h | 0 h agent + 0.25 h owner | Planned | [🧑‍🔧](acceptance/f083-t04-saved-recipe.md) | — |
+| 🟢 Small | <a id="f-083-t04"></a>F-083-T04 — Live check with a real saved recipe | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
 | 🟢 Small | <a id="f-083-t06"></a>F-083-T06 — Cooking session: ingredients and steps | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — |
 | 🟢 Small | <a id="f-083-t10"></a>F-083-T10 — Recipe photos | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — |
 | 🟢 Small | <a id="f-083-t07"></a>F-083-T07 — Timers in a cooking session | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-083-T06](#f-083-t06) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-083-t08"></a>F-083-T08 — Hands-free cooking by voice | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-083-T07](#f-083-t07) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-083-t09"></a>F-083-T09 — Owner check: a recipe cooked hands-free | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-083-T07](#f-083-t07) | ⏳ 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 5 h (9 of 10 steps) | 0.75 h (2 of 10 steps recorded) | 2 h agent + 0.5 h owner | 4 of 10 completed | | |
+| 🟡 Medium | **Total** | 5.25 h | 0.75 h (2 of 10 steps recorded) | 2.25 h agent + 0.25 h owner | 4 of 10 completed | | |
 
 <details><summary>Done steps (4)</summary>
 
@@ -945,7 +977,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.75 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-102-T03 — Apply at the announced time and report (Planned).
 
@@ -960,8 +992,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-102-t03"></a>F-102-T03 — Apply at the announced time and report | 0.75 h | 0 h | 0.75 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-102-t04"></a>F-102-T04 — Owner check: one automatic update | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-102-T03](#f-102-t03) | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 1.5 h | 0 h (0 of 4 steps recorded) | 0.75 h agent + 0.25 h owner | 2 of 4 completed | | |
+| 🟢 Small | <a id="f-102-t04"></a>F-102-T04 — Live check: one automatic update | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-102-T03](#f-102-t03) | ⏳ 🤖 | — |
+| 🟢 Small | **Total** | 1.75 h | 0 h (0 of 4 steps recorded) | 1 h | 2 of 4 completed | | |
 
 <details><summary>Done steps (2)</summary>
 
@@ -993,7 +1025,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.25 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-103-T02 — Per-link load between bases (Planned).
 
@@ -1005,12 +1037,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-103-t02"></a>F-103-T02 — Per-link load between bases | 1.5 h | 0 h | 1.5 h | Planned | 🤖 | — |
-| 🟡 Medium | <a id="f-103-t03"></a>F-103-T03 — Health view and warnings | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-103-T02](#f-103-t02) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-103-t04"></a>F-103-T04 — 24-hour baseline with both bases | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-103-T03](#f-103-t03) | ⏳ 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 4.5 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 3 h agent + 0.25 h owner | 1 of 4 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="f-103-t02"></a>F-103-T02 — Per-link load between bases | 1.5 h | 0 h | 1.5 h | Planned | — |
+| 🟡 Medium | <a id="f-103-t03"></a>F-103-T03 — Health view and warnings | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-103-T02](#f-103-t02) | — |
+| 🟢 Small | <a id="f-103-t04"></a>F-103-T04 — 24-hour baseline with both bases | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-103-T03](#f-103-t03) | — |
+| 🟡 Medium | **Total** | 4.75 h | 0 h (0 of 4 steps recorded) | 3.25 h | 1 of 4 completed | |
 
 <details><summary>Done steps (1)</summary>
 
@@ -1041,7 +1073,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 4 h agent + 0.5 h owner | — | [F-051-T06](#f-051-t06) | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🔴 Large | 4.5 h | — | [F-051-T06](#f-051-t06) | 🤖 | — | — |
 
 💻 **→** Next: F-049-T05 — Escape and recovery join tests (Planned).
 
@@ -1061,8 +1093,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-049-t08"></a>F-049-T08 — Pilot trust stage caps the class | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-049-T07](#f-049-t07) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-049-t09"></a>F-049-T09 — Dashboard shows instances per class | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-049-T07](#f-049-t07) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-049-t10"></a>F-049-T10 — Linux host enforcement and join tests in CI | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-049-T05](#f-049-t05) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-049-t12"></a>F-049-T12 — Run the first EVA job on the Linux host | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-049-T10](#f-049-t10) | ⏳ 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 6.25 h (10 of 12 steps) | 1 h (3 of 12 steps recorded) | 4 h agent + 0.5 h owner | 5 of 12 completed | | |
+| 🟢 Small | <a id="f-049-t12"></a>F-049-T12 — Run the first EVA job on the Linux host | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-049-T10](#f-049-t10) | ⏳ 🤖 | — |
+| 🔴 Large | **Total** | 6.75 h (11 of 12 steps) | 1 h (3 of 12 steps recorded) | 4.5 h | 5 of 12 completed | | |
 
 <details><summary>Done steps (5)</summary>
 
@@ -1151,7 +1183,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h agent + 0.25 h owner | — | [F-091-T01](#f-091-t01) | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.25 h | — | [F-091-T01](#f-091-t01) | 🤖 | — | — |
 
 💻 **→** Next: F-084-T03 — Push and open the PR behind approval (Planned).
 
@@ -1163,11 +1195,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-084-t03"></a>F-084-T03 — Push and open the PR behind approval | 1 h | 0 h | 1 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-084-t04"></a>F-084-T04 — Owner check on a scratch repository | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-084-T03](#f-084-t03) | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 3 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 1 h agent + 0.25 h owner | 2 of 4 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-084-t03"></a>F-084-T03 — Push and open the PR behind approval | 1 h | 0 h | 1 h | Planned | — |
+| 🟢 Small | <a id="f-084-t04"></a>F-084-T04 — Live check on a scratch repository | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-084-T03](#f-084-t03) | — |
+| 🟡 Medium | **Total** | 3.25 h | 0.25 h (1 of 4 steps recorded) | 1.25 h | 2 of 4 completed | |
 
 <details><summary>Done steps (2)</summary>
 
@@ -1290,13 +1322,60 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-085"></a>[✨ F-085](#top)
+
+**Check an outside project from a URL or a GitHub repository**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-085-T03 — Live check on two real projects (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: "check that project" for a web URL or a GitHub repository. NERV cannot fetch and assess outside content, and anything it reads there is untrusted. |
+| **Reproduce** | Ask Misato to check a public repository URL. |
+| **Check** | NERV fetches the page or clones the repository read-only into a quarantine class (EVA-03, F-049) and marks the content tainted (F-027); it runs none of the project's code by default; the report says what the project is, its activity, licence, how it is built and tested, and visible risks, each with its source; text in the project never changes NERV's instructions (a test plants such text). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-085-t03"></a>F-085-T03 — Live check on two real projects | 0.25 h | 0 h | 0.25 h | Planned | — |
+| 🟢 Small | **Total** | 2.25 h | 0.5 h (1 of 3 steps recorded) | 0.25 h | 2 of 3 completed | |
+
+<details><summary>Done steps (2)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-085-t01"></a>F-085-T01 — Read-only fetch into quarantine | 1 h | 0.5 h (measured) | Completed | — |
+| — | <a id="f-085-t02"></a>F-085-T02 — Project report | 1 h | 0 h | Completed | [PR #490](https://github.com/voidbrain/nerv/pull/490) implementation |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-085.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-085-T02: [PR #490](https://github.com/voidbrain/nerv/pull/490) implementation. [PR #490](https://github.com/voidbrain/nerv/pull/490) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-085-T02 verified: [PR #490](https://github.com/voidbrain/nerv/pull/490) merged on green CI. `F-085-T01` verified via `test/quarantine.test.ts` (read-only shallow clone + page fetch into discarded per-job dir, `tainted: true`, no code executed, planted instruction isolation), `tsc`, `check:conventions`, and `check:fast`. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
 ### <a id="f-091"></a>[✨ F-091](#top)
 
 **Apply the project harness to a repository as a coding job**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h agent + 0.25 h owner | [F-084-T03](#f-084-t03) | — | ⏳ | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.75 h | [F-084-T03](#f-084-t03) | — | ⏳ | — | — |
 
 💻 **→** Next: F-091-T01 — Harness job template (Planned).
 
@@ -1308,11 +1387,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-091-t01"></a>F-091-T01 — Harness job template | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-084-T03](#f-084-t03) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-091-t02"></a>F-091-T02 — Owner check on a scratch repository | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-091-T01](#f-091-t01) | ⏳ 🧑‍🔧 |
-| 🟢 Small | **Total** | 0.5 h (1 of 2 steps) | 0 h (0 of 2 steps recorded) | 0.5 h agent + 0.25 h owner | 0 of 2 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-091-t01"></a>F-091-T01 — Harness job template | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-084-T03](#f-084-t03) |
+| 🟢 Small | <a id="f-091-t02"></a>F-091-T02 — Live check on a scratch repository | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-091-T01](#f-091-t01) |
+| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0.75 h | 0 of 2 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1324,7 +1403,61 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
 | Verification | Pending. |
-| Reviewed | 2026-11-14 |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="f-078"></a>[✨ F-078](#top)
+
+**Model evaluation: the four candidate models by role and base, Mac and mini PC**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.75 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-078-T05 — Prepare Tabgha for the campaign: download qwen2.5:3b (Planned).
+
+| | |
+|---|---|
+| **Issue** | The four candidate profiles in docs/agents/model-profiles.json (gemma4:12b, qwen2.5-coder:14b, devstral-small-2:24b, qwen3-coder:30b) are all unmeasured candidates. The Gauntlet ledger holds 55 runs, none with a model; the only real-model evidence is the gemma4:12b smoke of 2026-11-09 (7/10, three invalid structured outputs) and the B-021/B-049 Misato runs. Nothing measures the mini PC (Tabgha, NERV-02). The inventory of 2026-11-13 found `qwen2.5-coder:14b` on Neo Tokyo-3, not on Tabgha: Tabgha (Intel N97, 12 GB, no usable GPU) has only `qwen2.5:1.5b`, and none of the four candidates fits it. |
+| **Reproduce** | [Inventory steps](acceptance/f078-model-inventory.md); `node -e "console.log(require('./evals/gauntlet/ledger.json').runs.filter(r=>r.model).length)"`; docs/agents/model-profiles.json; [evaluation guide](evaluations/README.md). |
+| **Check** | Each approved model × role × base cell has a recorded run with model and base identity; each profile is qualified or not per role with evidence; the 2026-11-09 smoke failures are explained; F-006-T12 receives the comparison; new Gauntlet packs are adopted when released. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-078-t05"></a>F-078-T05 — Prepare Tabgha for the campaign: download qwen2.5:3b | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
+| 🟢 Small | <a id="f-078-t09"></a>F-078-T09 — Tabgha campaign: remote endpoint and small local fallback | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-078-T05](#f-078-t05) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-078-t07"></a>F-078-T07 — Comparison report and profile status | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-078-T09](#f-078-t09) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-078-t08"></a>F-078-T08 — Adopt the new Gauntlet packs (gauntlet F-012) when released | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-078-T07](#f-078-t07) | ⏳ 🤖 | — |
+| 🟡 Medium | **Total** | 3.75 h | 0.5 h (1 of 9 steps recorded) | 1.75 h | 5 of 9 completed | | |
+
+<details><summary>Done steps (5)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-078-t01"></a>F-078-T01 — Inventory the models and hardware on Neo Tokyo-3 and Tabgha | 0.25 h | 0 h | Completed | — |
+| — | <a id="f-078-t02"></a>F-078-T02 — Agree the evaluation matrix and its budget | 0.25 h | 0 h | Completed | — |
+| — | <a id="f-078-t03"></a>F-078-T03 — Smoke campaign on Neo Tokyo-3 | 0.5 h | 0.5 h (stated) | Completed | [PR #402](https://github.com/voidbrain/nerv/pull/402) Recorded the approved 144-case Neo Tokyo-3 smoke campaign; [PR #403](https://github.com/voidbrain/nerv/pull/403) Closed T03 after required CI passed |
+| — | <a id="f-078-t04"></a>F-078-T04 — Role campaign on Neo Tokyo-3 | 0.5 h | 0 h | Completed | — |
+| — | <a id="f-078-t06"></a>F-078-T06 — Campaign for the larger candidates | 0.5 h | 0 h | Completed | — |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-078.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-078-T03: [PR #402](https://github.com/voidbrain/nerv/pull/402) Recorded the approved 144-case Neo Tokyo-3 smoke campaign; [PR #403](https://github.com/voidbrain/nerv/pull/403) Closed T03 after required CI passed. [PR #475](https://github.com/voidbrain/nerv/pull/475); [PR #477](https://github.com/voidbrain/nerv/pull/477) (merged; CI green); Gauntlet 0.9.0 pin and harness 8.15.0 reconciliation prepared for PR #427; [PR #403](https://github.com/voidbrain/nerv/pull/403) T03 close; [PR #402](https://github.com/voidbrain/nerv/pull/402) T03; [PR #379](https://github.com/voidbrain/nerv/pull/379) [PR #377](https://github.com/voidbrain/nerv/pull/377) [PR #375](https://github.com/voidbrain/nerv/pull/375) plan; owner request 2026-11-13; [Gemma smoke 2026-11-09](evaluations/2026-11-09-gemma-common-smoke.md); docs/agents/model-profiles.json |
+| Depends on | — |
+| Opened | 2026-11-13 |
+| Verification | 2026-11-16: T04/T06 report per-role model outcomes and aggregate metadata; PRs #475/#477 plan, validate, Windows and native-macos passed, full-suite skipped. 35 cases remain pending: 28 under F-078-T08 and seven system-flow cases under F-079. 2026-11-14: T03 recorded 144/144 graded outcomes across the three approved models and three packs; `node tools/gauntlet.mjs pending` exits 0; PR #402 CI run 43595307489 passed plan, validate, Windows, native-macos and full-suite on rerun after one transient Windows temp-directory cleanup failure. |
+| Reviewed | 2026-11-18 |
 
 </details>
 
@@ -1519,7 +1652,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.25 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-008-T10 — Health advice from resistance trends (Planned).
 
@@ -1535,8 +1668,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-008-t10"></a>F-008-T10 — Health advice from resistance trends | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — |
 | 🟢 Small | <a id="f-008-t11"></a>F-008-T11 — Battery cards on the dashboard | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-008-T10](#f-008-t10) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-008-t12"></a>F-008-T12 — Owner check with real batteries | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-008-T11](#f-008-t11) | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 4.5 h (11 of 12 steps) | 0.75 h (2 of 12 steps recorded) | 1 h agent + 0.25 h owner | 9 of 12 completed | | |
+| 🟢 Small | <a id="f-008-t12"></a>F-008-T12 — Live check with real batteries | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-008-T11](#f-008-t11) | ⏳ 🤖 | — |
+| 🟡 Medium | **Total** | 4.75 h (11 of 12 steps) | 0.75 h (2 of 12 steps recorded) | 1.25 h | 9 of 12 completed | | |
 
 <details><summary>Done steps (9)</summary>
 
@@ -1616,141 +1749,48 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-097"></a>[✨ F-097](#top)
+### <a id="b-069"></a>[🐞 B-069](#top)
 
-**Rerun the seven NERV system cases at the harness 8.14.1 source**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | — | 🧑‍🔧 | — |
-
-🧑 **→** Next: [🧑‍🔧](evaluations/gauntlet.md) F-097-T01 — Owner reruns the seven system cases at the 8.14.1 source (Ready).
-
-| | |
-|---|---|
-| **Issue** | The harness 8.14.1 reconcile ([PR #404](https://github.com/voidbrain/nerv/pull/404)) changed evaluation-source inputs, so the seven `nerv-system-flows` cases became pending (`source-changed`). Harness 8.15.0 and the Gauntlet 0.9.0 pin keep them pending under this record until the system-only rerun is recorded. The agent's earlier rerun was refused by that session's permission classifier on 2026-11-14. |
-| **Reproduce** | `npm run gauntlet:pending` on the reconcile branch lists policy, ledger, conversation, channels, bases, stress and browser as source-changed. |
-| **Check** | `npm run gauntlet:pending` prints nothing; `evals/gauntlet/ledger.json` records the seven runs at the merged source; `npm run check:evals` passes without this step. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-097-t01"></a>F-097-T01 — Owner reruns the seven system cases at the 8.14.1 source | 0 h | 0 h | 0 h agent + 0.25 h owner | Ready | [🧑‍🔧](evaluations/gauntlet.md) |
-| 🟢 Small | **Total** | 0 h | 0 h (0 of 1 steps recorded) | 0.25 h owner | 0 of 1 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-097.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Opened in [PR #404](https://github.com/voidbrain/nerv/pull/404) |
-| Opened | 2026-11-14 |
-| Verification | Pending. |
-| Reviewed | 2026-11-15 |
-
-</details>
-
----
-### <a id="f-085"></a>[✨ F-085](#top)
-
-**Check an outside project from a URL or a GitHub repository**
+**Open sortie re-asks an expired or rejected approval every hour, at night too**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | — | 🧑‍🔧 | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
 
-🧑 **→** Next: [🧑‍🔧](acceptance/f085-t03-project-report.md) F-085-T03 — Owner check on two real projects (Planned).
+💻 **→** Next: B-069-T02 — Agent repeats the reproduction and gets exactly one card (Planned).
 
 | | |
 |---|---|
-| **Issue** | Owner job 2026-11-14: "check that project" for a web URL or a GitHub repository. NERV cannot fetch and assess outside content, and anything it reads there is untrusted. |
-| **Reproduce** | Ask Misato to check a public repository URL. |
-| **Check** | NERV fetches the page or clones the repository read-only into a quarantine class (EVA-03, F-049) and marks the content tainted (F-027); it runs none of the project's code by default; the report says what the project is, its activity, licence, how it is built and tested, and visible risks, each with its source; text in the project never changes NERV's instructions (a test plants such text). |
+| **Issue** | Found 2026-11-16 by the owner: the Blue test card of 2026-11-15 22:32 ("Ricorda questo fatto di prova…", `memory.remember`, sortie `2683cff6`) came back on Telegram every hour through the night (23:42, 00:43, 01:44 … 09:12). The live store shows each card is a new approval on the same open sortie: every earlier one is `expired` (1 h TTL, source `ttl`) or `reject` (22:37, 22:39, 06:07), and the sortie never closes. The service did not restart (started 22:45, one run), so the overnight merges are unrelated. Likely cause, unconfirmed: after `approval.expired` or `approval.reject` the sortie stays open and the planner proposes the same step again with a fresh approval (`src/store-sorties.ts`, `src/ledger-approvals.ts` around line 103); and `deliverApproval` honours the quiet hours only for watch sorties (`src/store-sorties.ts` line 42), so ordinary cards go out at any hour. |
+| **Reproduce** | `nerv chat "Ricorda questo fatto di prova: il drone di test si chiama Prova"`; leave the Telegram card unanswered: after 1 h a new card arrives; ❌ Reject gives a new card within two minutes. |
+| **Check** | A committed test fails first: an expired or rejected approval does not produce a second approval for the same step; the sortie closes with a reply saying so; owner-initiated cards keep going out at any hour (there is no global quiet-hours setting, and the owner who just asked is awake; proactive cards already bundle overnight), so no quiet-hours change: the loop was the night problem; the owner repeats the reproduction and gets exactly one card. |
 
-**Feature steps**
+**Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-085-t03"></a>F-085-T03 — Owner check on two real projects | — | 0 h | 0 h agent + 0.25 h owner | Planned | [🧑‍🔧](acceptance/f085-t03-project-report.md) | — |
-| 🟢 Small | **Total** | 2 h (2 of 3 steps) | 0.5 h (1 of 3 steps recorded) | 0.25 h owner | 2 of 3 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-069-t02"></a>B-069-T02 — Agent repeats the reproduction and gets exactly one card | 0.25 h | 0 h | 0.25 h | Planned | [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep |
+| 🟢 Small | **Total** | 1.25 h | 0 h (0 of 2 steps recorded) | 0.25 h | 1 of 2 completed | |
 
-<details><summary>Done steps (2)</summary>
+<details><summary>Done steps (1)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
-| — | <a id="f-085-t01"></a>F-085-T01 — Read-only fetch into quarantine | 1 h | 0.5 h (measured) | Completed | — |
-| — | <a id="f-085-t02"></a>F-085-T02 — Project report | 1 h | 0 h | Completed | [PR #490](https://github.com/voidbrain/nerv/pull/490) implementation |
+| — | <a id="b-069-t01"></a>B-069-T01 — An expired or rejected approval ends the step | 1 h | 0 h | Completed | [PR #503](https://github.com/voidbrain/nerv/pull/503) implementation |
 
 </details>
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-[Full notes & evidence](work/records/F-085.md)
+[Full notes & evidence](work/records/B-069.md)
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-085-T02: [PR #490](https://github.com/voidbrain/nerv/pull/490) implementation. [PR #490](https://github.com/voidbrain/nerv/pull/490) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-085-T02 verified: [PR #490](https://github.com/voidbrain/nerv/pull/490) merged on green CI. `F-085-T01` verified via `test/quarantine.test.ts` (read-only shallow clone + page fetch into discarded per-job dir, `tainted: true`, no code executed, planted instruction isolation), `tsc`, `check:conventions`, and `check:fast`. |
+| PR / evidence | Steps: B-069-T01: [PR #503](https://github.com/voidbrain/nerv/pull/503) implementation · B-069-T02: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep. Owner report 2026-11-16; live store evidence 2026-11-16 (11 approvals on one sortie, all `ttl` or `reject`); opened in [PR #500](https://github.com/voidbrain/nerv/pull/500) |
+| Opened | 2026-11-16 |
+| Verification | 2026-11-18: B-069-T01 verified: [PR #503](https://github.com/voidbrain/nerv/pull/503) merged on green CI. |
 | Reviewed | 2026-11-18 |
-
-</details>
-
----
-### <a id="f-078"></a>[✨ F-078](#top)
-
-**Model evaluation: the four candidate models by role and base, Mac and mini PC**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h agent + 0.25 h owner | — | — | ⏳ | 🧑‍🔧 | — |
-
-🧑 **→** Next: [🧑‍🔧](evaluations/2026-11-13-model-inventory.md#approved-matrix-and-budget-f-078-t02-2026-11-13) F-078-T05 — Prepare Tabgha for the campaign: allow the run and download qwen2.5:3b (Planned).
-
-| | |
-|---|---|
-| **Issue** | The four candidate profiles in docs/agents/model-profiles.json (gemma4:12b, qwen2.5-coder:14b, devstral-small-2:24b, qwen3-coder:30b) are all unmeasured candidates. The Gauntlet ledger holds 55 runs, none with a model; the only real-model evidence is the gemma4:12b smoke of 2026-11-09 (7/10, three invalid structured outputs) and the B-021/B-049 Misato runs. Nothing measures the mini PC (Tabgha, NERV-02). The inventory of 2026-11-13 found `qwen2.5-coder:14b` on Neo Tokyo-3, not on Tabgha: Tabgha (Intel N97, 12 GB, no usable GPU) has only `qwen2.5:1.5b`, and none of the four candidates fits it. |
-| **Reproduce** | [Inventory steps](acceptance/f078-model-inventory.md); `node -e "console.log(require('./evals/gauntlet/ledger.json').runs.filter(r=>r.model).length)"`; docs/agents/model-profiles.json; [evaluation guide](evaluations/README.md). |
-| **Check** | Each approved model × role × base cell has a recorded run with model and base identity; each profile is qualified or not per role with evidence; the 2026-11-09 smoke failures are explained; F-006-T12 receives the comparison; new Gauntlet packs are adopted when released. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-078-t05"></a>F-078-T05 — Prepare Tabgha for the campaign: allow the run and download qwen2.5:3b | — | 0 h | 0 h agent + 0.25 h owner | Planned | [🧑‍🔧](evaluations/2026-11-13-model-inventory.md#approved-matrix-and-budget-f-078-t02-2026-11-13) | — |
-| 🟢 Small | <a id="f-078-t09"></a>F-078-T09 — Tabgha campaign: remote endpoint and small local fallback | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-078-T05](#f-078-t05) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-078-t07"></a>F-078-T07 — Comparison report and profile status | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-078-T09](#f-078-t09) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-078-t08"></a>F-078-T08 — Adopt the new Gauntlet packs (gauntlet F-012) when released | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-078-T07](#f-078-t07) | ⏳ 🤖 | — |
-| 🟡 Medium | **Total** | 3.5 h (8 of 9 steps) | 0.5 h (1 of 9 steps recorded) | 1.5 h agent + 0.25 h owner | 5 of 9 completed | | |
-
-<details><summary>Done steps (5)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-078-t01"></a>F-078-T01 — Inventory the models and hardware on Neo Tokyo-3 and Tabgha | 0.25 h | 0 h | Completed | — |
-| — | <a id="f-078-t02"></a>F-078-T02 — Agree the evaluation matrix and its budget | 0.25 h | 0 h | Completed | — |
-| — | <a id="f-078-t03"></a>F-078-T03 — Smoke campaign on Neo Tokyo-3 | 0.5 h | 0.5 h (stated) | Completed | [PR #402](https://github.com/voidbrain/nerv/pull/402) Recorded the approved 144-case Neo Tokyo-3 smoke campaign; [PR #403](https://github.com/voidbrain/nerv/pull/403) Closed T03 after required CI passed |
-| — | <a id="f-078-t04"></a>F-078-T04 — Role campaign on Neo Tokyo-3 | 0.5 h | 0 h | Completed | — |
-| — | <a id="f-078-t06"></a>F-078-T06 — Campaign for the larger candidates | 0.5 h | 0 h | Completed | — |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-078.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-078-T03: [PR #402](https://github.com/voidbrain/nerv/pull/402) Recorded the approved 144-case Neo Tokyo-3 smoke campaign; [PR #403](https://github.com/voidbrain/nerv/pull/403) Closed T03 after required CI passed. [PR #475](https://github.com/voidbrain/nerv/pull/475); [PR #477](https://github.com/voidbrain/nerv/pull/477) (merged; CI green); Gauntlet 0.9.0 pin and harness 8.15.0 reconciliation prepared for PR #427; [PR #403](https://github.com/voidbrain/nerv/pull/403) T03 close; [PR #402](https://github.com/voidbrain/nerv/pull/402) T03; [PR #379](https://github.com/voidbrain/nerv/pull/379) [PR #377](https://github.com/voidbrain/nerv/pull/377) [PR #375](https://github.com/voidbrain/nerv/pull/375) plan; owner request 2026-11-13; [Gemma smoke 2026-11-09](evaluations/2026-11-09-gemma-common-smoke.md); docs/agents/model-profiles.json |
-| Depends on | — |
-| Opened | 2026-11-13 |
-| Verification | 2026-11-16: T04/T06 report per-role model outcomes and aggregate metadata; PRs #475/#477 plan, validate, Windows and native-macos passed, full-suite skipped. 35 cases remain pending: 28 under F-078-T08 and seven system-flow cases under F-079. 2026-11-14: T03 recorded 144/144 graded outcomes across the three approved models and three packs; `node tools/gauntlet.mjs pending` exits 0; PR #402 CI run 43595307489 passed plan, validate, Windows, native-macos and full-suite on rerun after one transient Windows temp-directory cleanup failure. |
-| Reviewed | 2026-11-16 |
 
 </details>
 
@@ -1843,52 +1883,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-068-T01: [PR #467](https://github.com/voidbrain/nerv/pull/467) implementation. [PR #467](https://github.com/voidbrain/nerv/pull/467) (merged; CI green); Owner observation 2026-11-15 (F-011-T02 step 3); opened in [PR #455](https://github.com/voidbrain/nerv/pull/455) |
 | Opened | 2026-11-15 |
 | Verification | 2026-11-18: B-068-T01 verified: [PR #467](https://github.com/voidbrain/nerv/pull/467) merged on green CI (Swift test in native-macos). |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
-### <a id="b-069"></a>[🐞 B-069](#top)
-
-**Open sortie re-asks an expired or rejected approval every hour, at night too**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | — | 🧑‍🔧 | — |
-
-🧑 **→** Next: [🧑‍🔧](acceptance/b069-one-card.md) B-069-T02 — Owner repeats the reproduction and gets exactly one card (Planned).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-16 by the owner: the Blue test card of 2026-11-15 22:32 ("Ricorda questo fatto di prova…", `memory.remember`, sortie `2683cff6`) came back on Telegram every hour through the night (23:42, 00:43, 01:44 … 09:12). The live store shows each card is a new approval on the same open sortie: every earlier one is `expired` (1 h TTL, source `ttl`) or `reject` (22:37, 22:39, 06:07), and the sortie never closes. The service did not restart (started 22:45, one run), so the overnight merges are unrelated. Likely cause, unconfirmed: after `approval.expired` or `approval.reject` the sortie stays open and the planner proposes the same step again with a fresh approval (`src/store-sorties.ts`, `src/ledger-approvals.ts` around line 103); and `deliverApproval` honours the quiet hours only for watch sorties (`src/store-sorties.ts` line 42), so ordinary cards go out at any hour. |
-| **Reproduce** | `nerv chat "Ricorda questo fatto di prova: il drone di test si chiama Prova"`; leave the Telegram card unanswered: after 1 h a new card arrives; ❌ Reject gives a new card within two minutes. |
-| **Check** | A committed test fails first: an expired or rejected approval does not produce a second approval for the same step; the sortie closes with a reply saying so; owner-initiated cards keep going out at any hour (there is no global quiet-hours setting, and the owner who just asked is awake; proactive cards already bundle overnight), so no quiet-hours change: the loop was the night problem; the owner repeats the reproduction and gets exactly one card. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="b-069-t02"></a>B-069-T02 — Owner repeats the reproduction and gets exactly one card | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [🧑‍🔧](acceptance/b069-one-card.md) | [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 2 steps recorded) | 0.25 h owner | 1 of 2 completed | | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="b-069-t01"></a>B-069-T01 — An expired or rejected approval ends the step | 1 h | 0 h | Completed | [PR #503](https://github.com/voidbrain/nerv/pull/503) implementation |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-069.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-069-T01: [PR #503](https://github.com/voidbrain/nerv/pull/503) implementation · B-069-T02: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep. Owner report 2026-11-16; live store evidence 2026-11-16 (11 approvals on one sortie, all `ttl` or `reject`); opened in [PR #500](https://github.com/voidbrain/nerv/pull/500) |
-| Opened | 2026-11-16 |
-| Verification | 2026-11-18: B-069-T01 verified: [PR #503](https://github.com/voidbrain/nerv/pull/503) merged on green CI. |
 | Reviewed | 2026-11-18 |
 
 </details>
@@ -1995,7 +1989,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-098-T03 — Photos on crashes, parts and batteries (Planned).
 
@@ -2007,11 +2001,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-098-t03"></a>F-098-T03 — Photos on crashes, parts and batteries | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-098-t04"></a>F-098-T04 — Owner check with a real crash | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-098-T03](#f-098-t03) | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 1.75 h | 0.25 h (1 of 4 steps recorded) | 0.5 h agent + 0.25 h owner | 2 of 4 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-098-t03"></a>F-098-T03 — Photos on crashes, parts and batteries | 0.5 h | 0 h | 0.5 h | Planned | — |
+| 🟢 Small | <a id="f-098-t04"></a>F-098-T04 — Live check with a real crash | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-098-T03](#f-098-t03) | — |
+| 🟢 Small | **Total** | 2 h | 0.25 h (1 of 4 steps recorded) | 0.75 h | 2 of 4 completed | |
 
 <details><summary>Done steps (2)</summary>
 
@@ -2080,6 +2074,52 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: F-099-T03: [PR #485](https://github.com/voidbrain/nerv/pull/485) implementation. [PR #485](https://github.com/voidbrain/nerv/pull/485) (merged; CI green); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-099-T03 verified: [PR #485](https://github.com/voidbrain/nerv/pull/485) merged on green CI. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="b-070"></a>[🐞 B-070](#top)
+
+**SBOM test fails locally on a fresh install: duplicate dependency entries from npm sbom**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-070-T02 — Agent repairs npm under Node 26.12 (npm 11) (Planned).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-16 while verifying B-069: `test/bom.test.ts` ("F-067: npm lock-only dependency SBOM validates…") fails on unmodified `main` in a worktree freshly installed with `npm ci` (Node 26.12, npm 10.8.2): `npm sbom --package-lock-only --sbom-format cyclonedx` returns 13 duplicate `dependencies` entries (e.g. `@inquirer/type@4.2.1` ×10, `ansi-styles@6.2.3` ×3), so the CycloneDX `uniqueItems` validation fails. The same lockfile in a checkout with an older `node_modules` gives no duplicates, and CI (Node 24) passes; removing `node_modules/.package-lock.json` does not change it. Cause unconfirmed: npm's SBOM output may depend on the installed tree or the Node version. **Cause (2026-11-18):** the nvm Node 26.12 install has a broken bundled npm (`npm-cli.js` missing), so `npm` is the old `/usr/local/bin/npm` 10.8.2, which lists packages reached through several paths more than once; the old checkout gives the same 13 duplicates with it, and npm 11 (Node 24.19, as in CI) gives none. |
+| **Reproduce** | `git worktree add ../x origin/main && cd ../x && npm ci && node --test test/bom.test.ts`. |
+| **Check** | The cause is named; either the SBOM export deduplicates `dependencies` before validation (a committed test with a duplicated entry), or the test pins the condition it needs; `npm test` passes on a fresh install under Node 24 and the local Node. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-070-t02"></a>B-070-T02 — Agent repairs npm under Node 26.12 (npm 11) | 0.25 h | 0 h | 0.25 h | Planned | — |
+| 🟢 Small | **Total** | 1 h | 0.5 h (1 of 2 steps recorded) | 0.25 h | 1 of 2 completed | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="b-070-t01"></a>B-070-T01 — SBOM test names the npm it needs | 0.75 h | 0.5 h (stated) | Completed | [PR #506](https://github.com/voidbrain/nerv/pull/506) |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-070.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-070-T01: [PR #506](https://github.com/voidbrain/nerv/pull/506). [PR #506](https://github.com/voidbrain/nerv/pull/506) (merged; CI green: B-070-T01); local run 2026-11-16 in a fresh worktree; CI on #502 passed the same test |
+| Opened | 2026-11-16 |
+| Verification | 2026-11-18: B-070-T01 verified: [PR #506](https://github.com/voidbrain/nerv/pull/506) merged on green CI (CI npm 11). |
 | Reviewed | 2026-11-18 |
 
 </details>
@@ -2509,52 +2549,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-12 |
 | Verification | 2026-11-13 CI: Swift tests passed on native-macos (CI43344562738). Live companion check pending. |
 | Reviewed | 2026-11-13 |
-
-</details>
-
----
-### <a id="b-070"></a>[🐞 B-070](#top)
-
-**SBOM test fails locally on a fresh install: duplicate dependency entries from npm sbom**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h owner | — | — | — | 🧑‍🔧 | — |
-
-🧑 **→** Next: [🧑‍🔧](acceptance/b070-npm-repair.md) B-070-T02 — Owner repairs npm under Node 26.12 (npm 11) (Planned).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-16 while verifying B-069: `test/bom.test.ts` ("F-067: npm lock-only dependency SBOM validates…") fails on unmodified `main` in a worktree freshly installed with `npm ci` (Node 26.12, npm 10.8.2): `npm sbom --package-lock-only --sbom-format cyclonedx` returns 13 duplicate `dependencies` entries (e.g. `@inquirer/type@4.2.1` ×10, `ansi-styles@6.2.3` ×3), so the CycloneDX `uniqueItems` validation fails. The same lockfile in a checkout with an older `node_modules` gives no duplicates, and CI (Node 24) passes; removing `node_modules/.package-lock.json` does not change it. Cause unconfirmed: npm's SBOM output may depend on the installed tree or the Node version. **Cause (2026-11-18):** the nvm Node 26.12 install has a broken bundled npm (`npm-cli.js` missing), so `npm` is the old `/usr/local/bin/npm` 10.8.2, which lists packages reached through several paths more than once; the old checkout gives the same 13 duplicates with it, and npm 11 (Node 24.19, as in CI) gives none. |
-| **Reproduce** | `git worktree add ../x origin/main && cd ../x && npm ci && node --test test/bom.test.ts`. |
-| **Check** | The cause is named; either the SBOM export deduplicates `dependencies` before validation (a committed test with a duplicated entry), or the test pins the condition it needs; `npm test` passes on a fresh install under Node 24 and the local Node. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="b-070-t02"></a>B-070-T02 — Owner repairs npm under Node 26.12 (npm 11) | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [🧑‍🔧](acceptance/b070-npm-repair.md) | — |
-| 🟢 Small | **Total** | 0.75 h | 0.5 h (1 of 2 steps recorded) | 0.25 h owner | 1 of 2 completed | | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="b-070-t01"></a>B-070-T01 — SBOM test names the npm it needs | 0.75 h | 0.5 h (stated) | Completed | [PR #506](https://github.com/voidbrain/nerv/pull/506) |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-070.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-070-T01: [PR #506](https://github.com/voidbrain/nerv/pull/506). [PR #506](https://github.com/voidbrain/nerv/pull/506) (merged; CI green: B-070-T01); local run 2026-11-16 in a fresh worktree; CI on #502 passed the same test |
-| Opened | 2026-11-16 |
-| Verification | 2026-11-18: B-070-T01 verified: [PR #506](https://github.com/voidbrain/nerv/pull/506) merged on green CI (CI npm 11). |
-| Reviewed | 2026-11-18 |
 
 </details>
 

@@ -25,24 +25,26 @@
     "docs/decisions/**",
     "docs/work/tasks/F-006-T01.json",
     "docs/work/records/F-006.md",
-    "generated:backlog-views"
+    "generated:backlog-views",
+    "docs/decisions/placement-campaign.md"
   ],
   "validation": [
     "Directed regressions or recorded evidence for this slice; final required CI"
   ],
   "escalation": [
     "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
-    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
+    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback",
+    "Anything that needs a human sense, account or device goes back to the owner as its own step"
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h owner",
-    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
-    "reviewed": "2026-11-13",
+    "estimate": "0.5 h",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total. Moved to the agent 2026-11-18 (0.5 h owner → agent).",
+    "reviewed": "2026-11-18",
     "baselineDays": 1,
-    "ownerHours": 0.5,
-    "agentHours": 0,
-    "ownerKind": "procedure"
-  },
-  "ownerLink": "docs/decisions/placement-campaign.md"
+    "ownerHours": 0,
+    "agentHours": 0.5,
+    "estimateAgentHours": 0.5,
+    "baselineAgentHours": 0.5
+  }
 }

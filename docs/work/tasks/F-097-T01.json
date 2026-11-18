@@ -2,7 +2,7 @@
   "version": 1,
   "id": "F-097-T01",
   "parent": "F-097",
-  "title": "Owner reruns the seven system cases at the 8.14.1 source",
+  "title": "Agent reruns the seven system cases at the 8.14.1 source",
   "goal": "The seven nerv-system-flows cases have a run at the merged harness 8.14.1 source",
   "status": "ready",
   "acceptance": [
@@ -14,7 +14,8 @@
   "resources": [
     "evals/gauntlet/ledger.json",
     "docs/work/records/F-097.md",
-    "generated:backlog-views"
+    "generated:backlog-views",
+    "docs/evaluations/gauntlet.md"
   ],
   "capabilities": [
     "bounded-edit"
@@ -25,18 +26,17 @@
     "npm run check:evals"
   ],
   "escalation": [
-    "A failing system case is a defect: open a B- record instead of rerunning until it passes"
+    "A failing system case is a defect: open a B- record instead of rerunning until it passes",
+    "Anything that needs a human sense, account or device goes back to the owner as its own step"
   ],
-  "ownerLink": "docs/evaluations/gauntlet.md",
   "effort": {
     "size": "small",
-    "estimate": "0.25 h owner",
-    "basis": "Estimated 2026-11-14: one command, about 15 minutes of running. Not a measurement.",
-    "reviewed": "2026-11-14",
-    "agentHours": 0,
-    "baselineAgentHours": 0,
-    "estimateAgentHours": 0,
-    "ownerHours": 0.25,
-    "ownerKind": "procedure"
+    "estimate": "0.25 h",
+    "basis": "Estimated 2026-11-14: one command, about 15 minutes of running. Not a measurement. Moved to the agent 2026-11-18 (0.25 h owner → agent).",
+    "reviewed": "2026-11-18",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25,
+    "ownerHours": 0
   }
 }

@@ -2,11 +2,11 @@
   "version": 1,
   "id": "F-078-T05",
   "parent": "F-078",
-  "title": "Prepare Tabgha for the campaign: allow the run and download qwen2.5:3b",
+  "title": "Prepare Tabgha for the campaign: download qwen2.5:3b",
   "goal": "Tabgha is ready for the remote-endpoint and small-model campaign",
   "status": "planned",
   "acceptance": [
-    "The owner allows the agent to run the campaign on Tabgha over SSH",
+    "The owner allowed the agent to run the campaign on Tabgha over SSH (2026-11-18)",
     "qwen2.5:3b is downloaded on Tabgha"
   ],
   "dependsOn": [
@@ -18,7 +18,8 @@
     "docs/evaluations/**",
     "docs/agents/model-profiles.json",
     "docs/work/records/**",
-    "generated:backlog-views"
+    "generated:backlog-views",
+    "docs/evaluations/2026-11-13-model-inventory.md"
   ],
   "capabilities": [
     "structured-tools",
@@ -31,16 +32,17 @@
   ],
   "escalation": [
     "A model campaign runs only inside the scope and budget the owner approved in F-078-T02",
-    "A model failure that NERV can fix becomes a B- record with a failing test first"
+    "A model failure that NERV can fix becomes a B- record with a failing test first",
+    "Anything that needs a human sense, account or device goes back to the owner as its own step"
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h owner",
-    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
-    "reviewed": "2026-11-13",
-    "ownerHours": 0.25,
-    "agentHours": 0,
-    "ownerKind": "procedure"
-  },
-  "ownerLink": "docs/evaluations/2026-11-13-model-inventory.md#approved-matrix-and-budget-f-078-t02-2026-11-13"
+    "estimate": "0.25 h",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total. Moved to the agent 2026-11-18 (0.25 h owner → agent).",
+    "reviewed": "2026-11-18",
+    "ownerHours": 0,
+    "agentHours": 0.25,
+    "estimateAgentHours": 0.25,
+    "baselineAgentHours": 0.25
+  }
 }
