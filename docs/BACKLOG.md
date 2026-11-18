@@ -9,27 +9,27 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 3 | 9 | 26 | 16 |
+| **This week** | 6 | 9 | 27 | 16 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 38 | 17 |
-| **Require Human 🧑** | 6 | 3 |
+| **Open** | 41 | 18 |
+| **Require Human 🧑** | 8 | 3 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-011](#f-011) | [F-101](#f-101) | [B-057](#b-057) | — |
-| [F-004](#f-004) |  | [B-068](#b-068) |  |
-| [F-060](#f-060) |  | [B-056](#b-056) |  |
+| [F-011](#f-011) | [F-109](#f-109) | [B-057](#b-057) | — |
+| [F-004](#f-004) | [F-110](#f-110) | [B-068](#b-068) |  |
+| [F-060](#f-060) | [F-101](#f-101) | [B-056](#b-056) |  |
 | [F-007](#f-007) |  |  |  |
 | [F-100](#f-100) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 69.25 h agent + 10 h owner across 127 open steps of 37 features and 17 other records. 47.75 h of actual effort recorded on 91 steps. Generated from the task files.
+**Remaining effort:** 78.5 h agent + 10.5 h owner across 137 open steps of 40 features and 18 other records. 47.75 h of actual effort recorded on 91 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2044,6 +2044,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-108"></a>[✨ F-108](#top)
+
+**Dashboard: flow header shows the sortie code; EVA cage status on its own line**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-108-T01 — Flow header shows only the sortie code; cage status on its own line (Ready).
+
+| | |
+|---|---|
+| **Issue** | Owner requests 2026-11-18: the *Sephirot · sortie flow* header shows the sortie code only (for example S-6E26), not code and title; in the EVA cages, the status (IDLE and the others) sits on its own line under the EVA name so every cage has the same layout. |
+| **Reproduce** | Dashboard: select a sortie; look at the EVA cages panel. |
+| **Check** | Tests on the rendered header and cage markup; the owner confirms on the live dashboard. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-108-t01"></a>F-108-T01 — Flow header shows only the sortie code; cage status on its own line | 0.5 h | 0 h | 0.5 h | Ready |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-108.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | — |
+| Opened | 2026-11-18 |
+| Verification | Pending. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
 ### <a id="f-098"></a>[✨ F-098](#top)
 
 **FPV fleet diary: crashes, parts, spares and photos**
@@ -2409,6 +2447,126 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | PR / evidence | Opened in PR #530 |
+| Opened | 2026-11-18 |
+| Verification | Pending. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="b-096"></a>[🐞 B-096](#top)
+
+**Sephirot flow: a sortie that stops at Misato's apartment has no route to Debrief**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-096-T01 — Draw the apartment → Debrief route for a sortie that ends at the owner's decision (Ready).
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-18 on S-5E73: the flow marks Misato's apartment and then Debrief, with Entry Plug and EVA cages not passed and no line joining apartment and Debrief. The flow has no apartment → Debrief edge; the plan → Debrief *answer* edge is drawn only for a sortie with no action. A sortie whose action was refused or expired at the apartment, or that ended on a question, therefore reaches Debrief with no drawn route. Sync Ratio → Entry Plug is correct: a granted action goes straight to the plug and passes the apartment only when the owner must decide. |
+| **Reproduce** | Dashboard, Sephirot flow, a sortie whose approval card was refused or expired (S-5E73 on the live base). |
+| **Check** | Test committed failing first: such a sortie draws an apartment → Debrief alternative route (owner decision colour), parallel to plan → Debrief; Entry Plug and EVA cages show skipped; a granted action still goes Sync Ratio → Entry Plug. The owner confirms on the live dashboard. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-096-t01"></a>B-096-T01 — Draw the apartment → Debrief route for a sortie that ends at the owner's decision | 0.75 h | 0 h | 0.75 h | Ready |
+| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 1 steps recorded) | 0.75 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-096.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | — |
+| Opened | 2026-11-18 |
+| Verification | Pending. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="f-109"></a>[✨ F-109](#top)
+
+**Pilots as persona cards with editable names and one Apply**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h agent + 0.25 h owner | — | — | ⏳ | — | 🤔 |
+
+🧑 **→** Choose the persona card's fields and whether it shows a silhouette.
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-18: each pilot in the Pilots panel reads like a persona card: a call name (editable) and a second, real name (editable), the model, and one Apply button for every change on the card instead of one per field; possibly a silhouette image. |
+| **Reproduce** | Dashboard, Pilots panel. |
+| **Check** | Names are stored through a validated backend interface with a regression test; one Apply saves every changed field of a card; the owner confirms on the live dashboard. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-109-t01"></a>F-109-T01 — Owner decides the persona card's fields and the silhouette | — | 0 h | 0 h agent + 0.25 h owner | Ready | [🤔](decisions/pilot-persona-cards.md) |
+| 🟢 Small | <a id="f-109-t02"></a>F-109-T02 — Store a pilot's call name and second name through a validated interface | 1 h | 0 h | 1 h | Planned · waits on [F-109-T01](#f-109-t01) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-109-t03"></a>F-109-T03 — Persona card layout with one Apply for every change | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-109-T02](#f-109-t02) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-109-t04"></a>F-109-T04 — Silhouette image on the persona card, if chosen | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-109-T03](#f-109-t03) | ⏳ 🤖 |
+| 🟡 Medium | **Total** | 3 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 3 h agent + 0.25 h owner | 0 of 4 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-109.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | — |
+| Opened | 2026-11-18 |
+| Verification | Pending. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="f-110"></a>[✨ F-110](#top)
+
+**Owner settings in the dashboard for values that are fixed today**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🔴 Large | 5 h agent + 0.25 h owner | — | — | ⏳ | — | 🤔 |
+
+🧑 **→** Choose which fixed values become dashboard settings.
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-18: which settings are fixed in code. Today: automatic updates have an on/off switch in the dashboard, but the check (20:00), the apply time (03:00), the no-apply window (08:00–23:00) and the mode (apply after notice; no notify-only mode) are constants in `src/update-scheduler.ts`; the morning brief time and time zone come from `config.json` (`brief.at`, default 08:00); a watch's quiet hours are set per watch when it is created; MAGI's Sync Ratio threshold (80 %) and the Telegram freshness window (90 s) are code defaults. |
+| **Reproduce** | Dashboard: only the automatic-update switch is editable; `src/update-scheduler.ts` constants. |
+| **Check** | Each chosen setting is saved through a validated backend interface with a regression test, shown and editable in the dashboard, and used by the running service without a restart; the owner confirms one change live. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-110-t01"></a>F-110-T01 — Owner decides which fixed values become settings | — | 0 h | 0 h agent + 0.25 h owner | Ready | [🤔](decisions/dashboard-settings.md) |
+| 🟡 Medium | <a id="f-110-t02"></a>F-110-T02 — Update schedule settings: mode (apply or notify only), check and apply times, no-apply window | 2 h | 0 h | 2 h | Planned · waits on [F-110-T01](#f-110-t01) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-110-t03"></a>F-110-T03 — Dashboard settings panel for the chosen settings | 2 h | 0 h | 2 h | Planned · waits on [F-110-T02](#f-110-t02) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-110-t04"></a>F-110-T04 — Other chosen settings (brief time, Sync Ratio threshold, …) through the same interface | 1 h | 0 h | 1 h | Planned · waits on [F-110-T03](#f-110-t03) | ⏳ 🤖 |
+| 🔴 Large | **Total** | 5 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 5 h agent + 0.25 h owner | 0 of 4 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-110.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | — |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |

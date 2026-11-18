@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "F-110-T03",
+  "parent": "F-110",
+  "title": "Dashboard settings panel for the chosen settings",
+  "goal": "The owner reads and edits each setting, with one Apply",
+  "status": "planned",
+  "acceptance": [
+    "Test on the panel and its save",
+    "Owner confirms one change on the live dashboard"
+  ],
+  "dependsOn": [
+    "F-110-T02"
+  ],
+  "resources": [
+    "web/public/dashboard/dashboard.js",
+    "web/public/dashboard/live.js",
+    "web/public/dashboard/index.html",
+    "test/**",
+    "docs/design/dashboard-and-native-ui.md",
+    "docs/STYLE-GUIDE.md",
+    "docs/work/records/F-110.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-18. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  }
+}

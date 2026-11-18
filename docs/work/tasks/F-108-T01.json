@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "F-108-T01",
+  "parent": "F-108",
+  "title": "Flow header shows only the sortie code; cage status on its own line",
+  "goal": "Header shows the code; every cage shows its status on a second line",
+  "status": "ready",
+  "acceptance": [
+    "Tests on header and cage markup",
+    "Owner confirms on the live dashboard"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "web/public/dashboard/dashboard.js",
+    "web/public/dashboard/live.js",
+    "web/public/dashboard/index.html",
+    "test/**",
+    "docs/design/dashboard-and-native-ui.md",
+    "docs/work/records/F-108.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-18. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}
