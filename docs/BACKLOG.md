@@ -758,10 +758,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-105-t01"></a>F-105-T01 — CI fails when the PR names no record | 1 h | 0 h | 0.25 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-105-t01"></a>F-105-T01 — CI fails when the PR names no record | 1 h | 0 h | 0.25 h | Implemented; verification pending | [PR #511](https://github.com/voidbrain/nerv/pull/511) check and CI step |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -770,7 +770,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner decision 2026-11-16; [PR #499](https://github.com/voidbrain/nerv/pull/499) the catch-up it prevents; opened in [PR #502](https://github.com/voidbrain/nerv/pull/502) |
+| PR / evidence | Steps: F-105-T01: [PR #511](https://github.com/voidbrain/nerv/pull/511) check and CI step. Owner decision 2026-11-16; [PR #499](https://github.com/voidbrain/nerv/pull/499) the catch-up it prevents; opened in [PR #502](https://github.com/voidbrain/nerv/pull/502) |
 | Opened | 2026-11-16 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |
