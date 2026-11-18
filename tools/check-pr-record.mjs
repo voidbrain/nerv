@@ -2,7 +2,7 @@
 // Reads the PR number from the GitHub event (or --pr N) and looks for it in the record sources, the task files'
 // `prs` entries and the reconciliation log on the branch. Skips runs with no PR and bot-authored PRs.
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 /** Where a PR may name itself: a record, a task's `prs` entry, or a reconciliation log entry. */
@@ -24,7 +24,7 @@ export function findPrReferences(root, pr) {
     ...files(join(root, 'docs/work/records'), /\.md$/),
     ...files(join(root, 'docs/archive'), /^reconciliation-\d{4}\.md$/),
   ])
-    if (inText.test(readFileSync(path, 'utf8'))) found.push(path.slice(root.length + 1));
+    if (inText.test(readFileSync(path, 'utf8'))) found.push(shown(root, path));
   for (const path of files(join(root, 'docs/work/tasks'), /\.json$/)) {
     let task;
     try {
@@ -32,10 +32,13 @@ export function findPrReferences(root, pr) {
     } catch {
       continue;
     }
-    if (Array.isArray(task.prs) && task.prs.some((entry) => entry?.pr === pr)) found.push(path.slice(root.length + 1));
+    if (Array.isArray(task.prs) && task.prs.some((entry) => entry?.pr === pr)) found.push(shown(root, path));
   }
   return found;
 }
+
+/** A path relative to the root with `/` separators, the same on Windows (F-105, Windows CI 2026-11-18). */
+const shown = (root, path) => relative(root, path).split(sep).join('/');
 
 /** The PR this run checks, or why it is skipped. */
 export function prFromEvent(event) {
