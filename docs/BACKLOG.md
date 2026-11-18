@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 80.75 h agent + 10.25 h owner across 137 open steps of 40 features and 18 other records. 49.75 h of actual effort recorded on 95 steps. Generated from the task files.
+**Remaining effort:** 81 h agent + 10.25 h owner across 138 open steps of 40 features and 18 other records. 49.75 h of actual effort recorded on 95 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2502,7 +2502,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔹 P3 | 🟡 Medium | 1.75 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: B-094-T02 — Revoked is not offline (Implemented; verification pending).
 
@@ -2517,8 +2517,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
 | 🟢 Small | <a id="b-094-t02"></a>B-094-T02 — Revoked is not offline | 1 h | 1 h so far (stated) | 0 h | Implemented; verification pending | — |
+| 🟢 Small | <a id="b-094-t04"></a>B-094-T04 — Rerun the two expensive system cases at this source | 0.25 h | 0 h | 0.25 h | Ready | — |
 | 🟡 Medium | <a id="b-094-t03"></a>B-094-T03 — A remote result that arrived before Misato's reply is in that reply | 1.5 h | 0 h | 1.5 h | Ready · waits on [B-094-T02](#b-094-t02) | — |
-| 🟡 Medium | **Total** | 3 h | 1.25 h (2 of 3 steps recorded) | 1.5 h | 1 of 3 completed | |
+| 🟡 Medium | **Total** | 3.25 h | 1.25 h (2 of 4 steps recorded) | 1.75 h | 1 of 4 completed | |
 
 <details><summary>Done steps (1)</summary>
 
