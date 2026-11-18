@@ -4,7 +4,7 @@
   "id": "B-069-T02",
   "title": "Agent repeats the reproduction and gets exactly one card",
   "goal": "A rejected approval on the live service ends the step with one card and a reply",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "After ❌ Reject, no second card within three minutes; one inbox reply names the tool and the rejection"
   ],
@@ -30,10 +30,12 @@
     "estimate": "0.25 h",
     "basis": "Estimated 2026-11-18: the owner check the record's Check names, which had no step. Not a measurement. Moved to the agent 2026-11-18 (0.25 h owner → agent).",
     "reviewed": "2026-11-18",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "ownerHours": 0,
     "baselineAgentHours": 0.25,
-    "estimateAgentHours": 0.25
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
   },
   "prs": [
     {

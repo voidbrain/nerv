@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 2 | 5 | 17 | 5 |
+| **This week** | 2 | 5 | 17 | 7 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 41 | 19 |
+| **Open** | 41 | 17 |
 | **Require Human 🧑** | 6 | 3 |
 
 ### Require Human 🧑
@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 71 h agent + 11.75 h owner across 142 open steps of 38 features and 19 other records. 40.75 h of actual effort recorded on 91 steps. Generated from the task files.
+**Remaining effort:** 70.25 h agent + 11.75 h owner across 139 open steps of 38 features and 17 other records. 40.25 h of actual effort recorded on 90 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -45,7 +45,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🔴 Large | 7 h agent + 0.25 h owner | — | [F-012-T05](#f-012-t05) | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🔴 Large | 6.75 h agent + 0.25 h owner | — | [F-012-T05](#f-012-t05) | 🤖 | — | — |
 
 💻 **→** Next: F-005-T15 — T06h — Upgrades that raise the schema version (Implemented; verification pending).
 
@@ -62,10 +62,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-005-t15"></a>F-005-T15 — T06h — Upgrades that raise the schema version | 0.75 h | 0.75 h so far (stated) | 0.5 h | Implemented; verification pending | 🤖 | — |
 | 🟢 Small | <a id="f-005-t24"></a>F-005-T24 — T09c — Acceptance on an owner-selected Windows machine | 1 h | 0 h | 1 h | Planned | 🤖 | — |
 | 🟢 Small | <a id="f-005-t26"></a>F-005-T26 — T10c — Acceptance on an owner-selected mini PC, Pi or equivalent | 1 h | 0 h | 1 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-005-t31"></a>F-005-T31 — Record the evidence of F-005-T22 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
 | 🟢 Small | <a id="f-005-t32"></a>F-005-T32 — Record the evidence of F-005-T24 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T24](#f-005-t24) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t33"></a>F-005-T33 — Record the evidence of F-005-T26 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T26](#f-005-t26) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-005-t11"></a>F-005-T11 — Propose the device matrix for final acceptance | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T31](#f-005-t31), [F-005-T32](#f-005-t32), [F-005-T33](#f-005-t33) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-005-t11"></a>F-005-T11 — Propose the device matrix for final acceptance | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T32](#f-005-t32), [F-005-T33](#f-005-t33) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t37"></a>F-005-T37 — Agree the device matrix | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-005-T11](#f-005-t11) | ⏳ 🤔 | — |
 | 🟢 Small | <a id="f-005-t27"></a>F-005-T27 — T11b — Enrolment, revocation, leases, fencing and cancellation across the device matrix | 1 h | 0 h | 1 h | Planned · waits on [F-005-T37](#f-005-t37) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t34"></a>F-005-T34 — Record the evidence of F-005-T27 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T27](#f-005-t27) | ⏳ 🤖 | — |
@@ -74,9 +73,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-005-t29"></a>F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-005-T35](#f-005-t35) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t36"></a>F-005-T36 — Record the evidence of F-005-T29 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T29](#f-005-t29) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t30"></a>F-005-T30 — T11e — Parent acceptance and closure reconciliation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T36](#f-005-t36) | ⏳ 🤖 | — |
-| 🔴 Large | **Total** | 23.25 h (30 of 37 steps) | 10.25 h (17 of 37 steps recorded) | 7 h agent + 0.25 h owner | 22 of 37 completed | | |
+| 🔴 Large | **Total** | 23.25 h (30 of 37 steps) | 10.25 h (17 of 37 steps recorded) | 6.75 h agent + 0.25 h owner | 23 of 37 completed | | |
 
-<details><summary>Done steps (22)</summary>
+<details><summary>Done steps (23)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
@@ -102,6 +101,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-005-t22"></a>F-005-T22 — T08e — Demonstration of prerequisites and optional engine management on an owner-selected target | 0.5 h | 1.5 h (stated) | Completed | [PR #517](https://github.com/voidbrain/nerv/pull/517) this change |
 | — | <a id="f-005-t23"></a>F-005-T23 — T09b — Windows update and recovery: backup, rehearsal and checkout | 1 h | 0.5 h (stated) | Completed | — |
 | — | <a id="f-005-t25"></a>F-005-T25 — T10b — Linux update and recovery | 1 h | 0.25 h (stated) | Completed | — |
+| — | <a id="f-005-t31"></a>F-005-T31 — Record the evidence of F-005-T22 and close it | 0.25 h | 0 h | Completed | — |
 
 </details>
 
@@ -1908,52 +1908,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="b-069"></a>[🐞 B-069](#top)
-
-**Open sortie re-asks an expired or rejected approval every hour, at night too**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-069-T02 — Agent repeats the reproduction and gets exactly one card (Planned).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-16 by the owner: the Blue test card of 2026-11-15 22:32 ("Ricorda questo fatto di prova…", `memory.remember`, sortie `2683cff6`) came back on Telegram every hour through the night (23:42, 00:43, 01:44 … 09:12). The live store shows each card is a new approval on the same open sortie: every earlier one is `expired` (1 h TTL, source `ttl`) or `reject` (22:37, 22:39, 06:07), and the sortie never closes. The service did not restart (started 22:45, one run), so the overnight merges are unrelated. Likely cause, unconfirmed: after `approval.expired` or `approval.reject` the sortie stays open and the planner proposes the same step again with a fresh approval (`src/store-sorties.ts`, `src/ledger-approvals.ts` around line 103); and `deliverApproval` honours the quiet hours only for watch sorties (`src/store-sorties.ts` line 42), so ordinary cards go out at any hour. |
-| **Reproduce** | `nerv chat "Ricorda questo fatto di prova: il drone di test si chiama Prova"`; leave the Telegram card unanswered: after 1 h a new card arrives; ❌ Reject gives a new card within two minutes. |
-| **Check** | A committed test fails first: an expired or rejected approval does not produce a second approval for the same step; the sortie closes with a reply saying so; owner-initiated cards keep going out at any hour (there is no global quiet-hours setting, and the owner who just asked is awake; proactive cards already bundle overnight), so no quiet-hours change: the loop was the night problem; the owner repeats the reproduction and gets exactly one card. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-069-t02"></a>B-069-T02 — Agent repeats the reproduction and gets exactly one card | 0.25 h | 0 h | 0.25 h | Planned | [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep |
-| 🟢 Small | **Total** | 1.25 h | 0 h (0 of 2 steps recorded) | 0.25 h | 1 of 2 completed | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="b-069-t01"></a>B-069-T01 — An expired or rejected approval ends the step | 1 h | 0 h | Completed | [PR #503](https://github.com/voidbrain/nerv/pull/503) implementation |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-069.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-069-T01: [PR #503](https://github.com/voidbrain/nerv/pull/503) implementation · B-069-T02: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep. Owner report 2026-11-16; live store evidence 2026-11-16 (11 approvals on one sortie, all `ttl` or `reject`); opened in [PR #500](https://github.com/voidbrain/nerv/pull/500) |
-| Opened | 2026-11-16 |
-| Verification | 2026-11-18: B-069-T01 verified: [PR #503](https://github.com/voidbrain/nerv/pull/503) merged on green CI. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
 ### <a id="b-079"></a>[🐞 B-079](#top)
 
 **`gauntlet:all` reused system results recorded at another source, and reported them as passed**
@@ -2271,52 +2225,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: F-099-T03: [PR #485](https://github.com/voidbrain/nerv/pull/485) implementation. [PR #485](https://github.com/voidbrain/nerv/pull/485) (merged; CI green); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-099-T03 verified: [PR #485](https://github.com/voidbrain/nerv/pull/485) merged on green CI. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
-### <a id="b-070"></a>[🐞 B-070](#top)
-
-**SBOM test fails locally on a fresh install: duplicate dependency entries from npm sbom**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-070-T02 — Agent repairs npm under Node 26.12 (npm 11) (Planned).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-16 while verifying B-069: `test/bom.test.ts` ("F-067: npm lock-only dependency SBOM validates…") fails on unmodified `main` in a worktree freshly installed with `npm ci` (Node 26.12, npm 10.8.2): `npm sbom --package-lock-only --sbom-format cyclonedx` returns 13 duplicate `dependencies` entries (e.g. `@inquirer/type@4.2.1` ×10, `ansi-styles@6.2.3` ×3), so the CycloneDX `uniqueItems` validation fails. The same lockfile in a checkout with an older `node_modules` gives no duplicates, and CI (Node 24) passes; removing `node_modules/.package-lock.json` does not change it. Cause unconfirmed: npm's SBOM output may depend on the installed tree or the Node version. **Cause (2026-11-18):** the nvm Node 26.12 install has a broken bundled npm (`npm-cli.js` missing), so `npm` is the old `/usr/local/bin/npm` 10.8.2, which lists packages reached through several paths more than once; the old checkout gives the same 13 duplicates with it, and npm 11 (Node 24.19, as in CI) gives none. |
-| **Reproduce** | `git worktree add ../x origin/main && cd ../x && npm ci && node --test test/bom.test.ts`. |
-| **Check** | The cause is named; either the SBOM export deduplicates `dependencies` before validation (a committed test with a duplicated entry), or the test pins the condition it needs; `npm test` passes on a fresh install under Node 24 and the local Node. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-070-t02"></a>B-070-T02 — Agent repairs npm under Node 26.12 (npm 11) | 0.25 h | 0 h | 0.25 h | Planned | — |
-| 🟢 Small | **Total** | 1 h | 0.5 h (1 of 2 steps recorded) | 0.25 h | 1 of 2 completed | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="b-070-t01"></a>B-070-T01 — SBOM test names the npm it needs | 0.75 h | 0.5 h (stated) | Completed | [PR #506](https://github.com/voidbrain/nerv/pull/506) |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-070.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-070-T01: [PR #506](https://github.com/voidbrain/nerv/pull/506). [PR #506](https://github.com/voidbrain/nerv/pull/506) (merged; CI green: B-070-T01); local run 2026-11-16 in a fresh worktree; CI on #502 passed the same test |
-| Opened | 2026-11-16 |
-| Verification | 2026-11-18: B-070-T01 verified: [PR #506](https://github.com/voidbrain/nerv/pull/506) merged on green CI (CI npm 11). |
 | Reviewed | 2026-11-18 |
 
 </details>
