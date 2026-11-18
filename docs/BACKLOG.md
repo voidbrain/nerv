@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 73.5 h agent + 21.25 h owner across 164 open steps of 43 features and 11 other records. 33 h of actual effort recorded on 75 steps. Generated from the task files.
+**Remaining effort:** 73 h agent + 21.25 h owner across 164 open steps of 43 features and 11 other records. 33.5 h of actual effort recorded on 76 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2421,9 +2421,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-072-T01 — Native TLS key generation: timeout told apart from missing openssl, no flaky Windows CI (Ready).
+💻 **→** Next: B-072-T01 — Native TLS key generation: timeout told apart from missing openssl, no flaky Windows CI (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2435,8 +2435,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="b-072-t01"></a>B-072-T01 — Native TLS key generation: timeout told apart from missing openssl, no flaky Windows CI | 0.75 h | 0 h | 0.75 h | Ready |
-| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 1 steps recorded) | 0.75 h | 0 of 1 completed |
+| 🟢 Small | <a id="b-072-t01"></a>B-072-T01 — Native TLS key generation: timeout told apart from missing openssl, no flaky Windows CI | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.75 h | 0.5 h | 0.25 h | 0 of 1 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>

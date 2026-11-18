@@ -1,6 +1,6 @@
 import { DatabaseSync } from 'node:sqlite';
 import { randomBytes, randomUUID, createHash, X509Certificate } from 'node:crypto';
-import { mkdirSync, existsSync, writeFileSync, readFileSync, chmodSync } from 'node:fs';
+import { mkdirSync, existsSync, writeFileSync, readFileSync, chmodSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { request } from 'node:https';
@@ -98,7 +98,12 @@ export class NativeAuth {
     this.db.close();
   }
 }
-export function initializeNativeTLS(home: string) {
+/**
+ * B-072: `openssl` and the key-generation bound are injectable for tests; a timeout, a missing openssl and a failed
+ * openssl are reported apart, and a failed run removes the files it created so a retry is not blocked.
+ */
+export function initializeNativeTLS(home: string, options: { openssl?: string; timeoutMs?: number } = {}) {
+  const timeoutMs = options.timeoutMs ?? 60000;
   mkdirSync(home, { recursive: true, mode: 0o700 });
   const key = join(home, 'native-key.pem'),
     cert = join(home, 'native-cert.pem');
@@ -112,7 +117,7 @@ export function initializeNativeTLS(home: string) {
       { mode: 0o600 },
     );
     const result = spawnSync(
-      'openssl',
+      options.openssl ?? 'openssl',
       [
         'req',
         '-x509',
@@ -129,10 +134,20 @@ export function initializeNativeTLS(home: string) {
         '-out',
         cert,
       ],
-      { stdio: 'ignore', timeout: 15000 },
+      { stdio: 'ignore', timeout: timeoutMs },
     );
-    if (result.error || result.status !== 0)
-      throw new Error('Native TLS setup failed. Install openssl and inspect private native TLS files before retrying.');
+    if (result.error || result.status !== 0) {
+      rmSync(key, { force: true });
+      rmSync(cert, { force: true });
+      const code = (result.error as NodeJS.ErrnoException | undefined)?.code;
+      if (code === 'ENOENT')
+        throw new Error('Native TLS setup failed: openssl was not found. Install openssl and retry.');
+      if (code === 'ETIMEDOUT' || result.signal)
+        throw new Error(`Native TLS setup failed: openssl timed out after ${timeoutMs / 1000} s. Retry.`);
+      throw new Error(
+        `Native TLS setup failed: openssl exited with status ${result.status}. Inspect the native TLS config.`,
+      );
+    }
   }
   chmodSync(key, 0o600);
   chmodSync(cert, 0o600);
