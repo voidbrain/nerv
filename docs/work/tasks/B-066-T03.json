@@ -44,6 +44,10 @@
     {
       "pr": 510,
       "note": "verification sweep"
+    },
+    {
+      "pr": 512,
+      "note": "fixture budget"
     }
   ]
 }
