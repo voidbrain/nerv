@@ -784,3 +784,21 @@ test('B-080: lifecycle commands put Node first on PATH with the platform separat
   assert.equal(lifecycle.childPath('/opt/node/bin', '/usr/bin:/bin', 'darwin'), '/opt/node/bin:/usr/bin:/bin');
   assert.equal(lifecycle.childPath('/opt/node/bin', undefined, 'linux'), '/opt/node/bin');
 });
+
+test('B-085: lifecycle commands keep the user session bus, so systemctl --user can connect', () => {
+  const env = lifecycle.childEnv(
+    {
+      PATH: '/usr/bin',
+      HOME: '/home/tester',
+      XDG_RUNTIME_DIR: '/run/user/1000',
+      DBUS_SESSION_BUS_ADDRESS: 'unix:path=/run/user/1000/bus',
+      UNRELATED_SECRET: 'x',
+    },
+    '/opt/node/bin',
+    'linux',
+  );
+  assert.equal(env.XDG_RUNTIME_DIR, '/run/user/1000');
+  assert.equal(env.DBUS_SESSION_BUS_ADDRESS, 'unix:path=/run/user/1000/bus');
+  assert.equal(env.PATH, '/opt/node/bin:/usr/bin');
+  assert.equal(env.UNRELATED_SECRET, undefined, 'only the named variables pass');
+});

@@ -455,6 +455,21 @@ export function childPath(
   const separator = platform === 'win32' ? ';' : ':';
   return path ? nodeDir + separator + path : nodeDir;
 }
+/** The environment a lifecycle command gets: a short allowlist, plus the user session bus that `systemctl --user` needs
+ * (without XDG_RUNTIME_DIR and DBUS_SESSION_BUS_ADDRESS it found no bus on a real Linux host, B-085), Node first on PATH. */
+export function childEnv(
+  source: Record<string, string | undefined>,
+  nodeDir: string,
+  platform: NodeJS.Platform = process.platform,
+): Record<string, string | undefined> {
+  const env: Record<string, string | undefined> = Object.fromEntries(
+    ['PATH', 'HOME', 'USER', 'TMPDIR', 'LANG', 'LC_ALL', 'XDG_RUNTIME_DIR', 'DBUS_SESSION_BUS_ADDRESS']
+      .filter((k) => source[k] !== undefined)
+      .map((k) => [k, source[k]]),
+  );
+  env.PATH = childPath(nodeDir, env.PATH, platform);
+  return env;
+}
 export interface Result {
   status: number | null;
   out: string;
@@ -468,14 +483,9 @@ export async function command(
   extra: Record<string, string> = {},
 ): Promise<Result> {
   const env: Record<string, string | undefined> = {
-    ...Object.fromEntries(
-      ['PATH', 'HOME', 'USER', 'TMPDIR', 'LANG', 'LC_ALL']
-        .filter((k) => process.env[k] !== undefined)
-        .map((k) => [k, process.env[k]]),
-    ),
+    ...childEnv(process.env, dirname(process.execPath)),
     ...extra,
   };
-  env.PATH = childPath(dirname(process.execPath), env.PATH);
   return new Promise((done, fail) => {
     const child = spawn(program, args, { cwd, env, stdio: ['ignore', 'pipe', 'pipe'] });
     let out = '',
