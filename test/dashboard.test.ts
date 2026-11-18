@@ -1381,4 +1381,15 @@ test('a sortie whose action the owner declined draws its route from Misato apart
   assert.equal(api.edgeShown(ran, declined), false, 'not drawn when the action ran through the plug');
   const plain = { status: 'done', phase: 'debrief', done, actions: [] };
   assert.equal(api.edgeShown(plain, declined), false, 'not drawn for an answer with no action');
+test('the flow header names the sortie by its code only; every EVA cage shows its status on its own line (F-108)', async () => {
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
+  const line = src.split('\n').find((l) => l.includes('getElementById("flow-sub").textContent'))!;
+  const el = { textContent: '' };
+  new Function('document', 's', line)({ getElementById: () => el }, { id: 'S-6E26', title: 'Remind me at 9' });
+  assert.equal(el.textContent, 'S-6E26');
+  const html = readFileSync('web/public/dashboard/index.html', 'utf8');
+  const rule = /\.cage \.ch \{([^}]*)\}/.exec(html)![1]!;
+  assert.match(rule, /flex-direction:\s*column/, 'name and status stack in every cage');
+  assert.doesNotMatch(rule, /flex-wrap:\s*wrap/, 'no width-dependent wrapping');
 });
