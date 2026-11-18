@@ -187,6 +187,10 @@ test('windowsServiceAdapter executes install, status, start, stop and uninstall 
           return { status: 0, out: 'SUCCESS', err: '' };
         }
       }
+      // B-073: the handler's identity query goes through this runner, never a real PowerShell.
+      if (program === 'powershell' && args.join(' ').includes('GetProcessById')) {
+        return { status: 0, out: `133000000000000000|${context.node}\r\n`, err: '' };
+      }
       if (program === 'powershell') {
         return {
           status: 0,
@@ -380,6 +384,10 @@ try {
             running = false;
             return { status: 0, out: 'SUCCESS', err: '' };
           }
+        }
+        // B-073: the handler's identity query goes through this runner, never a real PowerShell.
+        if (program === 'powershell' && args.join(' ').includes('GetProcessById')) {
+          return { status: 0, out: `133000000000000000|${context.node}\r\n`, err: '' };
         }
         if (program === 'powershell') {
           return {

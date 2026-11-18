@@ -171,7 +171,7 @@ export async function applyService(
     (p.action === 'update' && !(await host.compatible(p.nextRevision!)))
   )
     throw Error('Service evidence changed; make a fresh plan.');
-  const identity = await handlerIdentity();
+  const identity = host.identity ? await host.identity(process.pid) : await handlerIdentity();
   if (!identity) throw Error('Lifecycle handler identity could not be recorded.');
   db = journal(host.context, true)!;
   let receipt: ServiceReceipt | undefined;

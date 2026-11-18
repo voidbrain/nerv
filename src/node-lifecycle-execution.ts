@@ -114,6 +114,8 @@ export interface ServiceHost {
   rehearse(plan: ServicePlan, backup: string): Promise<RehearsalReport>;
   health?(plan: ServicePlan): Promise<ServiceHealthCheck>;
   authorizedStart?(plan: ServicePlan): Promise<boolean>;
+  /** The identity of a process, asked through the adapter's own runner (B-073); without it the handler asks directly. */
+  identity?(pid: number): Promise<string | undefined>;
 }
 export const hash = (value: string | Buffer) => createHash('sha256').update(value).digest('hex');
 /** The handler identity covers this file, the rehearsal comparison it gates updates on and the reader contract, so a plan made under other code or bounds is refused. */
@@ -337,18 +339,30 @@ export function serviceReceipt(host: ServiceHost, digest: string): ServiceReceip
     db?.close();
   }
 }
-export async function processIdentity(pid: number): Promise<string | undefined> {
+/** A cold PowerShell start on a loaded Windows machine took longer than the 15 s command bound (B-073, CI 2026-11-18);
+ * the query only reads, so a longer bound costs nothing when it is fast. */
+export const WINDOWS_IDENTITY_TIMEOUT_MS = 60000;
+export async function processIdentity(
+  pid: number,
+  run: typeof command = command,
+  platform: NodeJS.Platform = process.platform,
+): Promise<string | undefined> {
   if (!Number.isInteger(pid) || pid <= 0) return undefined;
-  if (process.platform === 'win32') {
-    const r = await command('powershell', [
-      '-NoProfile',
-      '-NonInteractive',
-      '-Command',
-      `try { $p = [Diagnostics.Process]::GetProcessById(${pid}); "$($p.StartTime.ToFileTimeUtc())|$($p.MainModule.FileName)" } catch { exit 1 }`,
-    ]);
+  if (platform === 'win32') {
+    const r = await run(
+      'powershell',
+      [
+        '-NoProfile',
+        '-NonInteractive',
+        '-Command',
+        `try { $p = [Diagnostics.Process]::GetProcessById(${pid}); "$($p.StartTime.ToFileTimeUtc())|$($p.MainModule.FileName)" } catch { exit 1 }`,
+      ],
+      undefined,
+      WINDOWS_IDENTITY_TIMEOUT_MS,
+    );
     return r.status === 0 && r.out.trim() ? hash(r.out.trim()) : undefined;
   }
-  const r = await command('ps', ['-p', String(pid), '-o', 'lstart=', '-o', 'args=']);
+  const r = await run('ps', ['-p', String(pid), '-o', 'lstart=', '-o', 'args=']);
   return r.status === 0 && r.out.trim() ? hash(r.out.trim()) : undefined;
 }
 /** The running handler's identity never changes, so it is queried once per process (a cold PowerShell start on Windows
@@ -387,7 +401,7 @@ export async function assertServiceStartup(host: ServiceHost, managedStart = fal
     // An update starts the candidate revision, whose lifecycle files may differ from the installed code that made the
     // plan; the live applying handler (identity below) checked its own handler at apply time and owns this start.
     (plan.action !== 'update' && plan.handler !== handler()) ||
-    (await processIdentity(snapshot.pid)) !== snapshot.identity ||
+    (await (host.identity ?? processIdentity)(snapshot.pid)) !== snapshot.identity ||
     !(await host.authorizedStart!(plan))
   )
     throw Error('Lifecycle startup is not authorized by the live selected operation.');

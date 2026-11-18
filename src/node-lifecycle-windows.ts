@@ -10,6 +10,7 @@ import { assertRootMigrationReady } from './root-migration.ts';
 import {
   checkServicePrerequisites,
   command,
+  processIdentity,
   definition,
   expectedDefinition,
   hash,
@@ -206,6 +207,7 @@ export function windowsServiceAdapter(context: ServiceContext, run: typeof comma
     compatible: mac.compatible,
     rehearse: mac.rehearse,
     backup: mac.backup,
+    identity: (pid) => processIdentity(pid, run, 'win32'),
     authorizedStart: async (p) => {
       if (
         (await git(['status', '--porcelain'])) !== '' ||
