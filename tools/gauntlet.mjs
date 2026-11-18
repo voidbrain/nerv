@@ -625,6 +625,8 @@ async function all(options, { profile, execute, limitsFor, maxAgeDays, intended 
   const pendingOptions = {
     ...(maxAgeDays !== undefined ? { maxAgeMs: maxAgeDays * 86400000 } : {}),
     ...(profile ? { profile } : {}),
+    // B-079: the same per-case source key as `pending`, so a result recorded at another source is rerun, not reused.
+    sourceKey: (pack, caseId) => systemSourceKey(pack, caseId),
     ...intended,
   };
   const open = pendingByPack(

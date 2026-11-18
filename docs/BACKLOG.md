@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 2 | 5 | 10 | 4 |
+| **This week** | 2 | 5 | 12 | 4 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 41 | 13 |
+| **Open** | 41 | 15 |
 | **Require Human 🧑** | 6 | 3 |
 
 ### Require Human 🧑
@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 70.75 h agent + 11.75 h owner across 140 open steps of 40 features and 13 other records. 36 h of actual effort recorded on 82 steps. Generated from the task files.
+**Remaining effort:** 71.25 h agent + 11.75 h owner across 139 open steps of 38 features and 15 other records. 37.5 h of actual effort recorded on 86 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -686,9 +686,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0 h | — | — | — | — | — |
 
-💻 **→** Next: F-097-T01 — Agent reruns the seven system cases at the 8.14.1 source (Ready).
+💻 **→** Next: all steps closed; verify and close the record.
 
 | | |
 |---|---|
@@ -698,10 +698,17 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| — | **Total** | 0.25 h | 0.5 h | 0 h | 1 of 1 completed | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="f-097-t01"></a>F-097-T01 — Agent reruns the seven system cases at the 8.14.1 source | 0.25 h | 0 h | 0.25 h | Ready |
-| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed |
+| — | <a id="f-097-t01"></a>F-097-T01 — Agent reruns the seven system cases at the 8.14.1 source | 0.25 h | 0.5 h (stated) | Completed | [PR #515](https://github.com/voidbrain/nerv/pull/515) system rerun |
+
+</details>
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -710,7 +717,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in [PR #404](https://github.com/voidbrain/nerv/pull/404) |
+| PR / evidence | Steps: F-097-T01: [PR #515](https://github.com/voidbrain/nerv/pull/515) system rerun. Opened in [PR #404](https://github.com/voidbrain/nerv/pull/404) |
 | Opened | 2026-11-14 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |
@@ -1398,53 +1405,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-085"></a>[✨ F-085](#top)
-
-**Check an outside project from a URL or a GitHub repository**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-085-T03 — Live check on two real projects (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner job 2026-11-14: "check that project" for a web URL or a GitHub repository. NERV cannot fetch and assess outside content, and anything it reads there is untrusted. |
-| **Reproduce** | Ask Misato to check a public repository URL. |
-| **Check** | NERV fetches the page or clones the repository read-only into a quarantine class (EVA-03, F-049) and marks the content tainted (F-027); it runs none of the project's code by default; the report says what the project is, its activity, licence, how it is built and tested, and visible risks, each with its source; text in the project never changes NERV's instructions (a test plants such text). |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-085-t03"></a>F-085-T03 — Live check on two real projects | 0.25 h | 0 h | 0.25 h | Planned | — |
-| 🟢 Small | **Total** | 2.25 h | 0.5 h (1 of 3 steps recorded) | 0.25 h | 2 of 3 completed | |
-
-<details><summary>Done steps (2)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-085-t01"></a>F-085-T01 — Read-only fetch into quarantine | 1 h | 0.5 h (measured) | Completed | — |
-| — | <a id="f-085-t02"></a>F-085-T02 — Project report | 1 h | 0 h | Completed | [PR #490](https://github.com/voidbrain/nerv/pull/490) implementation |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-085.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-085-T02: [PR #490](https://github.com/voidbrain/nerv/pull/490) implementation. [PR #490](https://github.com/voidbrain/nerv/pull/490) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-085-T02 verified: [PR #490](https://github.com/voidbrain/nerv/pull/490) merged on green CI. `F-085-T01` verified via `test/quarantine.test.ts` (read-only shallow clone + page fetch into discarded per-job dir, `tainted: true`, no code executed, planted instruction isolation), `tsc`, `check:conventions`, and `check:fast`. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
 ### <a id="f-091"></a>[✨ F-091](#top)
 
 **Apply the project harness to a repository as a coding job**
@@ -1490,9 +1450,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.75 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-078-T05 — Prepare Tabgha for the campaign: download qwen2.5:3b (Planned).
+💻 **→** Next: F-078-T09 — Tabgha campaign: remote endpoint and small local fallback (Planned).
 
 | | |
 |---|---|
@@ -1504,13 +1464,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-078-t05"></a>F-078-T05 — Prepare Tabgha for the campaign: download qwen2.5:3b | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-078-t09"></a>F-078-T09 — Tabgha campaign: remote endpoint and small local fallback | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-078-T05](#f-078-t05) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-078-t09"></a>F-078-T09 — Tabgha campaign: remote endpoint and small local fallback | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — |
 | 🟢 Small | <a id="f-078-t07"></a>F-078-T07 — Comparison report and profile status | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-078-T09](#f-078-t09) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-078-t08"></a>F-078-T08 — Adopt the new Gauntlet packs (gauntlet F-012) when released | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-078-T07](#f-078-t07) | ⏳ 🤖 | — |
-| 🟡 Medium | **Total** | 3.75 h | 0.5 h (1 of 9 steps recorded) | 1.75 h | 5 of 9 completed | | |
+| 🟡 Medium | **Total** | 3.75 h | 0.75 h (2 of 9 steps recorded) | 1.5 h | 6 of 9 completed | | |
 
-<details><summary>Done steps (5)</summary>
+<details><summary>Done steps (6)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
@@ -1518,6 +1477,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-078-t02"></a>F-078-T02 — Agree the evaluation matrix and its budget | 0.25 h | 0 h | Completed | — |
 | — | <a id="f-078-t03"></a>F-078-T03 — Smoke campaign on Neo Tokyo-3 | 0.5 h | 0.5 h (stated) | Completed | [PR #402](https://github.com/voidbrain/nerv/pull/402) Recorded the approved 144-case Neo Tokyo-3 smoke campaign; [PR #403](https://github.com/voidbrain/nerv/pull/403) Closed T03 after required CI passed |
 | — | <a id="f-078-t04"></a>F-078-T04 — Role campaign on Neo Tokyo-3 | 0.5 h | 0 h | Completed | — |
+| — | <a id="f-078-t05"></a>F-078-T05 — Prepare Tabgha for the campaign: download qwen2.5:3b | 0.25 h | 0.25 h (stated) | Completed | [PR #515](https://github.com/voidbrain/nerv/pull/515) evidence |
 | — | <a id="f-078-t06"></a>F-078-T06 — Campaign for the larger candidates | 0.5 h | 0 h | Completed | — |
 
 </details>
@@ -1529,7 +1489,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-078-T03: [PR #402](https://github.com/voidbrain/nerv/pull/402) Recorded the approved 144-case Neo Tokyo-3 smoke campaign; [PR #403](https://github.com/voidbrain/nerv/pull/403) Closed T03 after required CI passed. [PR #475](https://github.com/voidbrain/nerv/pull/475); [PR #477](https://github.com/voidbrain/nerv/pull/477) (merged; CI green); Gauntlet 0.9.0 pin and harness 8.15.0 reconciliation prepared for PR #427; [PR #403](https://github.com/voidbrain/nerv/pull/403) T03 close; [PR #402](https://github.com/voidbrain/nerv/pull/402) T03; [PR #379](https://github.com/voidbrain/nerv/pull/379) [PR #377](https://github.com/voidbrain/nerv/pull/377) [PR #375](https://github.com/voidbrain/nerv/pull/375) plan; owner request 2026-11-13; [Gemma smoke 2026-11-09](evaluations/2026-11-09-gemma-common-smoke.md); docs/agents/model-profiles.json |
+| PR / evidence | Steps: F-078-T03: [PR #402](https://github.com/voidbrain/nerv/pull/402) Recorded the approved 144-case Neo Tokyo-3 smoke campaign; [PR #403](https://github.com/voidbrain/nerv/pull/403) Closed T03 after required CI passed · F-078-T05: [PR #515](https://github.com/voidbrain/nerv/pull/515) evidence. [PR #475](https://github.com/voidbrain/nerv/pull/475); [PR #477](https://github.com/voidbrain/nerv/pull/477) (merged; CI green); Gauntlet 0.9.0 pin and harness 8.15.0 reconciliation prepared for PR #427; [PR #403](https://github.com/voidbrain/nerv/pull/403) T03 close; [PR #402](https://github.com/voidbrain/nerv/pull/402) T03; [PR #379](https://github.com/voidbrain/nerv/pull/379) [PR #377](https://github.com/voidbrain/nerv/pull/377) [PR #375](https://github.com/voidbrain/nerv/pull/375) plan; owner request 2026-11-13; [Gemma smoke 2026-11-09](evaluations/2026-11-09-gemma-common-smoke.md); docs/agents/model-profiles.json |
 | Depends on | — |
 | Opened | 2026-11-13 |
 | Verification | 2026-11-16: T04/T06 report per-role model outcomes and aggregate metadata; PRs #475/#477 plan, validate, Windows and native-macos passed, full-suite skipped. 35 cases remain pending: 28 under F-078-T08 and seven system-flow cases under F-079. 2026-11-14: T03 recorded 144/144 graded outcomes across the three approved models and three packs; `node tools/gauntlet.mjs pending` exits 0; PR #402 CI run 43595307489 passed plan, validate, Windows, native-macos and full-suite on rerun after one transient Windows temp-directory cleanup failure. |
@@ -1722,6 +1682,53 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-085"></a>[✨ F-085](#top)
+
+**Check an outside project from a URL or a GitHub repository**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟣 Very large | 0 h | — | — | — | — | — |
+
+💻 **→** Next: all steps closed; verify and close the record.
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: "check that project" for a web URL or a GitHub repository. NERV cannot fetch and assess outside content, and anything it reads there is untrusted. |
+| **Reproduce** | Ask Misato to check a public repository URL. |
+| **Check** | NERV fetches the page or clones the repository read-only into a quarantine class (EVA-03, F-049) and marks the content tainted (F-027); it runs none of the project's code by default; the report says what the project is, its activity, licence, how it is built and tested, and visible risks, each with its source; text in the project never changes NERV's instructions (a test plants such text). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| — | **Total** | 2.25 h | 0.75 h (2 of 3 steps recorded) | 0 h | 3 of 3 completed | |
+
+<details><summary>Done steps (3)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-085-t01"></a>F-085-T01 — Read-only fetch into quarantine | 1 h | 0.5 h (measured) | Completed | — |
+| — | <a id="f-085-t02"></a>F-085-T02 — Project report | 1 h | 0 h | Completed | [PR #490](https://github.com/voidbrain/nerv/pull/490) implementation |
+| — | <a id="f-085-t03"></a>F-085-T03 — Live check on two real projects | 0.25 h | 0.25 h (stated) | Completed | [PR #515](https://github.com/voidbrain/nerv/pull/515) evidence |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-085.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-085-T02: [PR #490](https://github.com/voidbrain/nerv/pull/490) implementation · F-085-T03: [PR #515](https://github.com/voidbrain/nerv/pull/515) evidence. [PR #490](https://github.com/voidbrain/nerv/pull/490) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-085-T02 verified: [PR #490](https://github.com/voidbrain/nerv/pull/490) merged on green CI. `F-085-T01` verified via `test/quarantine.test.ts` (read-only shallow clone + page fetch into discarded per-job dir, `tainted: true`, no code executed, planted instruction isolation), `tsc`, `check:conventions`, and `check:fast`. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
 ### <a id="f-008"></a>[✨ F-008](#top)
 
 **FPV batteries: registry, charge state, resistance checks and storage reminders**
@@ -1866,6 +1873,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-069-T01: [PR #503](https://github.com/voidbrain/nerv/pull/503) implementation · B-069-T02: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep. Owner report 2026-11-16; live store evidence 2026-11-16 (11 approvals on one sortie, all `ttl` or `reject`); opened in [PR #500](https://github.com/voidbrain/nerv/pull/500) |
 | Opened | 2026-11-16 |
 | Verification | 2026-11-18: B-069-T01 verified: [PR #503](https://github.com/voidbrain/nerv/pull/503) merged on green CI. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="b-079"></a>[🐞 B-079](#top)
+
+**`gauntlet:all` reused system results recorded at another source, and reported them as passed**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-079-T01 — gauntlet all uses the per-case system source key, as pending does (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 running F-097-T01: `npm run gauntlet:all -- --allow-expensive --execute` ran nothing and reported `passed: true`, reusing the seven `nerv-system-flows` results of 2026-11-14 (browser among them as failed), while `npm run gauntlet:pending` listed all seven as `source-changed`. `all()` in `tools/gauntlet.mjs` built its pending options without the per-case system source key that `pending` uses, so unless `--source-key` was given a source change never made a system case pending. The documented F-097 rerun could not rerun anything. |
+| **Reproduce** | On main before the fix, with the ledger behind the source: `npm run gauntlet:pending` lists the system cases; `npm run gauntlet:all` plans them as reuse. |
+| **Check** | Test committed failing first: with a ledger at a stale source key, `all` plans the seven system cases with reason `source-changed` and reuses none, as `pending` lists them; the existing test that reuses cases at the current source still passes; F-097-T01's real run executes the seven cases. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-079-t01"></a>B-079-T01 — gauntlet all uses the per-case system source key, as pending does | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #515](https://github.com/voidbrain/nerv/pull/515) fix |
+| 🟢 Small | **Total** | 0.75 h | 0.5 h | 0.25 h | 0 of 1 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-079.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-079-T01: [PR #515](https://github.com/voidbrain/nerv/pull/515) fix. Test: `test/gauntlet.test.mjs` B-079 (06e47fc9) |
+| Opened | 2026-11-18 |
+| Verification | Pending: CI and the F-097-T01 run. |
 | Reviewed | 2026-11-18 |
 
 </details>
@@ -2386,6 +2431,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | PR / evidence | Steps: B-076-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound; [PR #513](https://github.com/voidbrain/nerv/pull/513) watch bound. [PR #510](https://github.com/voidbrain/nerv/pull/510); run 44259214063 attempt 2 |
+| Opened | 2026-11-18 |
+| Verification | Pending. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="b-078"></a>[🐞 B-078](#top)
+
+**Project report on a web page: script text in the summary and repository-only gaps listed as risks**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-078-T01 — Page reports: no script text in the summary; repository fields marked not applicable (Ready).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 in F-085-T03: `nerv quarantine report https://nodejs.org/en/about --kind page` put the page's inline `<script>` text after its title in `whatItIs.summary`, and reported licence, build/test and commit history as missing for a web page, listing "Missing licence increases reuse and compliance risk" under `visibleRisks`. The repository report on the same run was correct. |
+| **Reproduce** | `nerv quarantine report https://nodejs.org/en/about --kind page` |
+| **Check** | A committed test fails first with an invented page fixture holding an inline script: the summary is the title (and description) without script or style text; a `page` report says which fields do not apply instead of listing them as missing, and adds no licence risk. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-078-t01"></a>B-078-T01 — Page reports: no script text in the summary; repository fields marked not applicable | 1 h | 0 h | 1 h | Ready | [PR #515](https://github.com/voidbrain/nerv/pull/515) opened |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-078.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-078-T01: [PR #515](https://github.com/voidbrain/nerv/pull/515) opened. F-085-T03 run 2026-11-18 |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |

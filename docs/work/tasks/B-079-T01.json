@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "parent": "B-079",
+  "id": "B-079-T01",
+  "title": "gauntlet all uses the per-case system source key, as pending does",
+  "goal": "A system result recorded at another source is rerun, not reused",
+  "status": "implemented",
+  "acceptance": [
+    "Test committed failing first: stale source key → all plans the seven system cases as source-changed",
+    "Existing reuse at the current source unchanged"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "tools/gauntlet.mjs",
+    "test/gauntlet.test.mjs",
+    "docs/work/records/B-079.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h",
+    "basis": "Estimated 2026-11-18: one default and one test. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 515,
+      "note": "fix"
+    }
+  ]
+}
