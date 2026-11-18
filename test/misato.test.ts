@@ -851,3 +851,28 @@ test('B-049: validateReminderTitle accepts grounded titles and rejects missing, 
     undefined,
   );
 });
+
+test('F-106: the system text and tool schemas are a byte-identical prefix across turns; the clock comes after them', () => {
+  const turn = (now: string) =>
+    misatoAsk(
+      {
+        request: 'Ricordami di chiamare Ada',
+        history: [],
+        tools: toolDocs,
+        now,
+        timeZone: 'Europe/Rome',
+        language: 'it',
+      },
+      'local',
+    );
+  const a = { system: turn('2030-01-01T08:00:00.000Z').system ?? '' };
+  const b = { system: turn('2030-01-01T08:01:00.000Z').system ?? '' };
+  let same = 0;
+  while (same < a.system.length && a.system[same] === b.system[same]) same++;
+  assert.ok(same < a.system.length, 'the clock is in the system text');
+  const prefix = a.system.slice(0, same);
+  for (const t of toolDocs)
+    assert.ok(prefix.includes(`- ${t.name} (${t.effect}):`), `${t.name} schema in the stable prefix`);
+  assert.ok(prefix.includes('Never invent an action or its details'), 'the fixed rules are in the stable prefix');
+  assert.equal(a.system.slice(same).split('\n').length <= 4, true, 'only the clock, language and topic lines follow');
+});

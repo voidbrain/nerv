@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 73.25 h agent + 21.5 h owner across 166 open steps of 43 features and 12 other records. 34 h of actual effort recorded on 77 steps. Generated from the task files.
+**Remaining effort:** 72.75 h agent + 21.5 h owner across 166 open steps of 43 features and 12 other records. 34.25 h of actual effort recorded on 78 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1672,7 +1672,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.5 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-106-T01 — Prompt size per Misato turn, measured (Ready).
 
@@ -1687,9 +1687,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
 | 🟢 Small | <a id="f-106-t01"></a>F-106-T01 — Prompt size per Misato turn, measured | 1 h | 0 h | 1 h | Ready |
-| 🟢 Small | <a id="f-106-t02"></a>F-106-T02 — Prompt prefix stable across turns | 0.5 h | 0 h | 0.5 h | Ready |
+| 🟢 Small | <a id="f-106-t02"></a>F-106-T02 — Prompt prefix stable across turns | 0.5 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending |
 | 🟡 Medium | <a id="f-106-t03"></a>F-106-T03 — Domain tool schemas offered by intent | 2 h | 0 h | 2 h | Planned · waits on [F-106-T01](#f-106-t01), [F-106-T02](#f-106-t02) |
-| 🟡 Medium | **Total** | 3.5 h | 0 h (0 of 3 steps recorded) | 3.5 h | 0 of 3 completed |
+| 🟡 Medium | **Total** | 3.5 h | 0.25 h (1 of 3 steps recorded) | 3 h | 0 of 3 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1701,7 +1701,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Owner decision 2026-11-16 (F-104-T03); [token-cost review](reviews/token/2026-11-16.md); opened in [PR #502](https://github.com/voidbrain/nerv/pull/502) |
 | Opened | 2026-11-16 |
 | Verification | Pending. |
-| Reviewed | 2026-11-16 |
+| Reviewed | 2026-11-18 |
 
 </details>
 
