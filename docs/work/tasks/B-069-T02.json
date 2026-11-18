@@ -41,6 +41,10 @@
     {
       "pr": 510,
       "note": "verification sweep"
+    },
+    {
+      "pr": 523,
+      "note": "this change"
     }
   ]
 }
