@@ -74,6 +74,10 @@ async function fixture() {
 }
 const options = (confirm: string) => ({ confirm, confirmedStopped: true, backupConfirmed: true });
 
+// B-074: a CLI start takes 0.2-0.3 s here, but the Windows suite runs 5-6x slower (374-480 s vs 66-77 s) under load, and a
+// 5 s bound killed the import child there (status null). Spawned CLIs get 30 s.
+const CLI_TIMEOUT_MS = 30000;
+
 test('root activation scopes trusted records/last-seen by root and preserves immutable old history, business data and keys', async () => {
   const f = await fixture();
   try {
@@ -471,7 +475,7 @@ test('migration enables root binding, guards downgrade and ordinary root-init/re
         env: { ...process.env, NERV_HOME: f.home },
         input: pass,
         encoding: 'utf8',
-        timeout: 5000,
+        timeout: CLI_TIMEOUT_MS,
       });
     assert.notEqual(child.status, 0);
     assert.equal(existsSync(attempted), false);
@@ -605,7 +609,7 @@ test('real CLI export/import propagates migrated root binding to a new profile w
     const exported = spawnSync(process.execPath, ['src/cli.ts', 'kaji', 'export', bundle], {
       env,
       encoding: 'utf8',
-      timeout: 5000,
+      timeout: CLI_TIMEOUT_MS,
     });
     assert.equal(exported.status, 0, exported.stderr);
     const data = JSON.parse(readFileSync(bundle, 'utf8'));
@@ -618,7 +622,7 @@ test('real CLI export/import propagates migrated root binding to a new profile w
     const imported = spawnSync(
       process.execPath,
       ['src/cli.ts', 'kaji', 'import', bundle, '--root', fingerprint(f.next.publicKey)],
-      { env: { ...process.env, NERV_HOME: home }, encoding: 'utf8', timeout: 5000 },
+      { env: { ...process.env, NERV_HOME: home }, encoding: 'utf8', timeout: CLI_TIMEOUT_MS },
     );
     assert.equal(imported.status, 0, imported.stderr);
     assert.equal(readConfig(home).kaji?.rootBinding, true);

@@ -41,6 +41,10 @@
     {
       "pr": 510,
       "note": "opened"
+    },
+    {
+      "pr": 508,
+      "note": "headless bound"
     }
   ]
 }

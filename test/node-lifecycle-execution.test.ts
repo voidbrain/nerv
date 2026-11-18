@@ -760,3 +760,18 @@ test(
     }
   },
 );
+
+test('the handler identity of the running process is queried once, and a failed query is retried (B-073)', async () => {
+  const pids: number[] = [];
+  let answer: string | undefined;
+  const own = lifecycle.ownIdentity(async (pid) => {
+    pids.push(pid);
+    return answer;
+  });
+  assert.equal(await own(), undefined);
+  answer = 'identity-a';
+  assert.equal(await own(), 'identity-a');
+  answer = 'identity-b';
+  assert.equal(await own(), 'identity-a');
+  assert.deepEqual(pids, [process.pid, process.pid]);
+});

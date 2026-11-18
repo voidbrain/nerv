@@ -9,7 +9,8 @@ import { createServer } from 'node:net';
 import { readToken } from '../src/config.ts';
 test(
   'one headless process serves UI and reminders, exits cleanly, and recovers after restart',
-  { timeout: 15000 },
+  // B-076: CI took 10.3-10.9 s, once 14.95 s (PR #503), and passed 15 s twice on 2026-11-18 (PR #508): 30 s keeps 2x margin.
+  { timeout: 30000 },
   async () => {
     const home = mkdtempSync(join(tmpdir(), 'nerv-process-'));
     let child: ChildProcess | undefined;

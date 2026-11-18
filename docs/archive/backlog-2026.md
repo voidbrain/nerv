@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 5 | 3 |
+| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 5 | 4 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
@@ -4604,6 +4604,21 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 
 ---
 
+### B-071
+
+**Owner steps shown under 💻 and without their procedure link (F-005-T15, F-007-T05, F-060-T01, F-078-T05)**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18; verified by the green CI of PR #504.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 by the owner, the third or fourth time: F-005 said "💻 Next: F-005-T15 … (Implemented; verification pending)" while only the owner's trial remained, and its 🧑‍🔧 had no link. Causes: the harness `work-items.mjs` kept the authored 💻 whatever the next step's actor; its missing-`ownerLink` report skipped implemented steps and was only a warning (F-007-T05 and F-060-T01 had been warned about, unlinked); and 33 open records carried hand-written Next sentences that drifted as steps changed (F-060 and F-078 said 💻 for an owner step; F-078's source said 💻 with "Procedure"). |
+| **Reproduce** | On `main` before the fix: `npm run work:build` and read F-005, F-060 and F-078; `npm run check:work` exits 0. |
+| **Check** | Harness 10.0.0 (B-047 in the template, test committed failing first): the Next line is 🧑 with the step's linked page when the next step is the owner's and no agent step can start; `check:work` fails on an owner-turn step without `ownerLink`. Every open record here uses `Next: from tasks.`; the four owner steps link a copy-paste page. |
 ### B-049
 
 **Misato invents a reminder title instead of asking, when an Italian request gives none**
@@ -4623,6 +4638,15 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 <details>
 <summary>Next action, estimates and evidence</summary>
 
+**Next action / closure evidence:** Closed 2026-11-18: every acceptance check is automated and passed in the CI of [PR #504](https://github.com/voidbrain/nerv/pull/504) (run green: plan, validate, windows, native-macos). Review: fresh-context review of the template change in project-harness PR #217, cited in #504; the project side was records and owner pages. Test: template `tools/test-work-items.mjs` "Next line: when the next step is the owner's…", committed failing first in project-harness PR #217 (commit 619fe5a). Opened 2026-11-18. New owner pages: [F-005-T15](../../acceptance/f005-t15-forward-upgrade-trial.md) (runs only once a revision raises `readerSchema` above the live schema; both are 6 on 2026-11-18), [F-007-T05](../../acceptance/f007-t05-voice-corpus-procedure.md), [F-060-T01](../../acceptance/f060-t01-herdr-trial.md). Steps still waiting on agent work and without a page get it in the PR that finishes their last prerequisite; `check:work` now fails otherwise.
+
+**Estimates:** Small, estimated 2026-11-18: 1.5 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #504](https://github.com/voidbrain/nerv/pull/504); [project-harness PR #217](https://github.com/voidbrain/project-harness/pull/217) |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-18: CI on #504 green (`check:work`, `check:backlog`, `check:harness`). Closed 2026-11-18. |
 **Owner approval 2026-11-12:** real-model reruns for B-049, at most 12 invocations and 60 minutes of model time, gemma4:12b on loopback Ollama, no cloud route and no paid usage (the same limits as B-021). State the exact cases before running. Not started (owner: finish current work first).
 
 **Next action / closure evidence:** Classify the failure: model competence on gemma4:12b (a prompt or model change), or a deterministic guard (for example, a reminder title that occurs nowhere in the request or earlier exchanges goes back to Misato as invalid). Plan a fix with a failing case first. Real-model reruns need the owner's approval and budget.
