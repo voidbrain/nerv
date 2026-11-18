@@ -1331,3 +1331,47 @@ test('B-065: revoked bases are excluded from BASES on the map and listed apart f
   assert.match(revokedHtml, /REVOKED/);
   assert.doesNotMatch(revokedHtml, /Telegram ·/, 'revoked cards omit live channel/heartbeat lines');
 });
+test('a sortie whose action the owner declined draws its route from Misato apartment to Debrief (B-096)', async () => {
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
+  const fn = (name: string) => {
+    const i = src.indexOf('function ' + name + '(');
+    return src.slice(i, src.indexOf('\n}\n', i) + 2);
+  };
+  const edgesSrc = src.slice(src.indexOf('const EDGES = ['), src.indexOf('];', src.indexOf('const EDGES = [')) + 2);
+  const api = new Function(
+    `${edgesSrc}\n${fn('stepState')}\n${fn('passedEdge')}\n${fn('edgeShown')}\nreturn { EDGES, passedEdge, edgeShown };`,
+  )() as {
+    EDGES: [string, string, string?][];
+    passedEdge: (s: unknown, e: unknown) => string;
+    edgeShown: (s: unknown, e: unknown) => boolean;
+  };
+  const declined = api.EDGES.find((e) => e[0] === 'apt' && e[1] === 'debrief');
+  assert.ok(declined, 'an apartment → Debrief route exists');
+  const done = {
+    detect: true,
+    intake: true,
+    route: true,
+    plan: true,
+    magi: true,
+    sync: true,
+    apt: true,
+    debrief: true,
+  };
+  const rejected = {
+    status: 'done',
+    phase: 'debrief',
+    done,
+    actions: [{ status: 'rejected', ballot: { outcome: 'approval' } }],
+  };
+  assert.equal(api.edgeShown(rejected, declined), true, 'drawn when no action ran');
+  assert.equal(api.passedEdge(rejected, declined), 'passed owner', 'in the owner decision colour');
+  const ran = {
+    ...rejected,
+    done: { ...done, plug: true, eva: true },
+    actions: [{ status: 'done', ballot: { outcome: 'approval' } }],
+  };
+  assert.equal(api.edgeShown(ran, declined), false, 'not drawn when the action ran through the plug');
+  const plain = { status: 'done', phase: 'debrief', done, actions: [] };
+  assert.equal(api.edgeShown(plain, declined), false, 'not drawn for an answer with no action');
+});
