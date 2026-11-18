@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 78 h agent + 10.5 h owner across 137 open steps of 40 features and 18 other records. 48.25 h of actual effort recorded on 92 steps. Generated from the task files.
+**Remaining effort:** 78.25 h agent + 10.5 h owner across 138 open steps of 40 features and 18 other records. 48.25 h of actual effort recorded on 92 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2422,7 +2422,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: B-095-T01 — Midori keeps its blue node; only its status dot and label change colour (Implemented; verification pending).
 
@@ -2437,7 +2437,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
 | 🟢 Small | <a id="b-095-t01"></a>B-095-T01 — Midori keeps its blue node; only its status dot and label change colour | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 0.5 h | 0.5 h | 0 h | 0 of 1 completed |
+| 🟢 Small | <a id="b-095-t02"></a>B-095-T02 — Rerun the two expensive system cases at this source | 0.25 h | 0 h | 0.25 h | Ready |
+| 🟢 Small | **Total** | 0.75 h | 0.5 h (1 of 2 steps recorded) | 0.25 h | 0 of 2 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
