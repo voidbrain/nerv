@@ -1684,12 +1684,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-106-t01"></a>F-106-T01 — Prompt size per Misato turn, measured | 1 h | 0 h | 1 h | Ready |
-| 🟢 Small | <a id="f-106-t02"></a>F-106-T02 — Prompt prefix stable across turns | 0.5 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending |
-| 🟡 Medium | <a id="f-106-t03"></a>F-106-T03 — Domain tool schemas offered by intent | 2 h | 0 h | 2 h | Planned · waits on [F-106-T01](#f-106-t01), [F-106-T02](#f-106-t02) |
-| 🟡 Medium | **Total** | 3.5 h | 0.25 h (1 of 3 steps recorded) | 3 h | 0 of 3 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-106-t01"></a>F-106-T01 — Prompt size per Misato turn, measured | 1 h | 0 h | 1 h | Ready | — |
+| 🟢 Small | <a id="f-106-t02"></a>F-106-T02 — Prompt prefix stable across turns | 0.5 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending | [PR #509](https://github.com/voidbrain/nerv/pull/509) stable prefix |
+| 🟡 Medium | <a id="f-106-t03"></a>F-106-T03 — Domain tool schemas offered by intent | 2 h | 0 h | 2 h | Planned · waits on [F-106-T01](#f-106-t01), [F-106-T02](#f-106-t02) | — |
+| 🟡 Medium | **Total** | 3.5 h | 0.25 h (1 of 3 steps recorded) | 3 h | 0 of 3 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1698,7 +1698,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner decision 2026-11-16 (F-104-T03); [token-cost review](reviews/token/2026-11-16.md); opened in [PR #502](https://github.com/voidbrain/nerv/pull/502) |
+| PR / evidence | Steps: F-106-T02: [PR #509](https://github.com/voidbrain/nerv/pull/509) stable prefix. Owner decision 2026-11-16 (F-104-T03); [token-cost review](reviews/token/2026-11-16.md); opened in [PR #502](https://github.com/voidbrain/nerv/pull/502) |
 | Opened | 2026-11-16 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |
