@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 70.25 h agent + 11.75 h owner across 139 open steps of 38 features and 17 other records. 40.25 h of actual effort recorded on 90 steps. Generated from the task files.
+**Remaining effort:** 69.5 h agent + 11.75 h owner across 139 open steps of 38 features and 17 other records. 41 h of actual effort recorded on 91 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2428,9 +2428,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-078-T01 — Page reports: no script text in the summary; repository fields marked not applicable (Ready).
+💻 **→** Next: B-078-T01 — Page reports: no script text in the summary; repository fields marked not applicable (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2442,8 +2442,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-078-t01"></a>B-078-T01 — Page reports: no script text in the summary; repository fields marked not applicable | 1 h | 0 h | 1 h | Ready | [PR #515](https://github.com/voidbrain/nerv/pull/515) opened |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed | |
+| 🟢 Small | <a id="b-078-t01"></a>B-078-T01 — Page reports: no script text in the summary; repository fields marked not applicable | 1 h | 0.75 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #515](https://github.com/voidbrain/nerv/pull/515) opened |
+| 🟢 Small | **Total** | 1 h | 0.75 h | 0.25 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2452,7 +2452,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-078-T01: [PR #515](https://github.com/voidbrain/nerv/pull/515) opened. F-085-T03 run 2026-11-18 |
+| PR / evidence | Steps: B-078-T01: [PR #515](https://github.com/voidbrain/nerv/pull/515) opened. Test: `test/quarantine.test.ts` B-078; F-085-T03 run 2026-11-18 |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |
