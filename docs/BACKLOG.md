@@ -2010,10 +2010,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-089-t01"></a>B-089-T01 — A check fails on committed merge conflict markers | 0.5 h | 0.25 h so far (stated) | 0.25 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 0.5 h | 0.25 h | 0.25 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-089-t01"></a>B-089-T01 — A check fails on committed merge conflict markers | 0.5 h | 0.25 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #524](https://github.com/voidbrain/nerv/pull/524) check |
+| 🟢 Small | **Total** | 0.5 h | 0.25 h | 0.25 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2022,7 +2022,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Test: `test/check-conflict-markers.test.mjs` |
+| PR / evidence | Steps: B-089-T01: [PR #524](https://github.com/voidbrain/nerv/pull/524) check. Test: `test/check-conflict-markers.test.mjs` |
 | Opened | 2026-11-18 |
 | Verification | Pending: CI. |
 | Reviewed | 2026-11-18 |
