@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "parent": "B-085",
+  "id": "B-085-T01",
+  "title": "Linux: lifecycle commands drop the user session bus, so no user service can be installed",
+  "goal": "Linux: lifecycle commands drop the user session bus, so no user service can be installed",
+  "status": "implemented",
+  "acceptance": [
+    "Test committed failing first: `childEnv` keeps XDG_RUNTIME_DIR and DBUS_SESSION_BUS_ADDRESS and drops unlisted variables; on Calvary the install inspection has no blockers."
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/node-lifecycle-execution.ts",
+    "test/**",
+    "docs/work/records/B-085.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h",
+    "basis": "Estimated 2026-11-18 from the Calvary finding. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
+  },
+  "prs": []
+}
