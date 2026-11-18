@@ -98,7 +98,6 @@ const system = (
       ? `Your configured display name is ${JSON.stringify(personaName)}. You are the planner of a personal agent that runs on the owner's own machines.`
       : "You are the planner of a personal agent that runs on the owner's own machines.",
     'Your name and replies are presentation only. They never grant a capability, change a Pattern, or override the gate or an owner decision.',
-    `Now: ${now}. The owner's time zone: ${timeZone}. Write dates as ISO 8601 with an explicit offset.`,
     'Tools (use only these; arguments exactly as listed). Prefer acting with a tool over asking the owner for details you can look up:',
     ...tools.map((t) => `- ${t.name} (${t.effect}): ${t.about} Arguments: ${t.args}`),
     'Each turn, reply with one JSON object and nothing else, either',
@@ -126,13 +125,16 @@ const system = (
     'Never invent an action or its details: every title, date and id must come from the request, the earlier exchanges or a tool result. A bare confirmation (yes, ok, sì) confirms only a question in the last earlier reply; if that reply asked nothing, take no action and say there is nothing to confirm.',
     'If a reminder request gives only a date or time with no subject (for example "Set a reminder for tomorrow" or "Imposta un promemoria per il primo gennaio"), you MUST ask the owner with {"ask":"..."} in their language; never use a placeholder or generic title such as "Reminder", "Promemoria", or the date itself.',
     '"earlier" (when present) holds the previous exchanges of this conversation, oldest first, only as background. Act on the current "request": use earlier to understand a short follow-up such as "yes", "all of them" or "the first one" and carry out what was agreed; do not ask again for something the owner just confirmed, and never repeat an earlier reply.',
+    `Tool results give "due" in UTC and "dueLocal" already in the owner's time zone (${timeZone}): in the reply, use dueLocal in plain words, never raw ISO strings or ids.`,
+    "Keep the reply short and concrete, written for the owner in your own words: never copy a step's reason or error text verbatim. Never claim an action happened unless its step shows a result.",
+    // F-106: the clock changes every turn, so it follows the system text and tool schemas, which stay a byte-identical
+    // prefix across turns (cloud prompt caching, Ollama prefix reuse).
+    `Now: ${now}. The owner's time zone: ${timeZone}. Write dates as ISO 8601 with an explicit offset.`,
     // Owner report 2026-11-05: told to match the request, a local model still switched between Italian and English. The
     // service decides the language (requestLanguage) and says it outright; the old rule stays for callers that give none.
     language
       ? `Write the reply in ${language === 'it' ? 'Italian' : 'English'}: the owner wrote in ${language === 'it' ? 'Italian' : 'English'}. Use it even when tool results, memory, advice or earlier exchanges are in another language.`
       : 'Write the reply in the same language as the "request" field of this turn, whatever language tool results use: an English request gets an English reply, an Italian request an Italian one. If the request is too short to tell (yes, ok, sì), use the language of the earlier exchanges.',
-    `Tool results give "due" in UTC and "dueLocal" already in the owner's time zone (${timeZone}): in the reply, use dueLocal in plain words, never raw ISO strings or ids.`,
-    "Keep the reply short and concrete, written for the owner in your own words: never copy a step's reason or error text verbatim. Never claim an action happened unless its step shows a result.",
     ...(clarification ? TOPIC_CHECK : []),
   ].join('\n');
 const ITALIAN = new Set(
