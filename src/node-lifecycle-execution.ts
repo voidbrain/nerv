@@ -351,6 +351,13 @@ export async function processIdentity(pid: number): Promise<string | undefined> 
   const r = await command('ps', ['-p', String(pid), '-o', 'lstart=', '-o', 'args=']);
   return r.status === 0 && r.out.trim() ? hash(r.out.trim()) : undefined;
 }
+/** The running handler's identity never changes, so it is queried once per process (a cold PowerShell start on Windows
+ * can approach the command bound; B-073). A failed query is not kept, so the next operation asks again. */
+export function ownIdentity(query: (pid: number) => Promise<string | undefined> = processIdentity) {
+  let known: string | undefined;
+  return async () => (known ??= await query(process.pid));
+}
+export const handlerIdentity = ownIdentity();
 /** A retained resource fences ordinary startup. Only the exact manager-owned start already recorded by its live handler can pass. */
 export async function assertServiceStartup(host: ServiceHost, managedStart = false): Promise<void> {
   const db = journal(host.context);

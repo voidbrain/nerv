@@ -36,7 +36,7 @@ import {
   object,
   planOf,
   present,
-  processIdentity,
+  handlerIdentity,
   resource,
   safe,
   stored,
@@ -171,7 +171,7 @@ export async function applyService(
     (p.action === 'update' && !(await host.compatible(p.nextRevision!)))
   )
     throw Error('Service evidence changed; make a fresh plan.');
-  const identity = await processIdentity(process.pid);
+  const identity = await handlerIdentity();
   if (!identity) throw Error('Lifecycle handler identity could not be recorded.');
   db = journal(host.context, true)!;
   let receipt: ServiceReceipt | undefined;
