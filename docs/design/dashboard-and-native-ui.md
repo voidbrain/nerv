@@ -14,7 +14,7 @@ Detailed component, visual, and interaction rules for the NERV dashboard (`web/p
 - **Brightness dips & bands:** 4–8% dips over 31 s with eased zero-velocity band passes (4.5–10 s move, 4.5–14 s rest).
 - **Signal noise:** 1 px specks in text token color (12–40% alpha, ≤0.045% pixels capped at 1,800, ≤90 ms refresh).
 - **Accessibility & cancellation:** animations and canvas noise stop and clear when CRT is off, *Simple* theme is active, document is hidden, or `prefers-reduced-motion` is set (reduced motion keeps static scanlines/vignette only). CRT MAGI headings use a 70% identity / 30% text mix for AA contrast.
-- **Sephirot paths:** reflect recorded route history; busy nodes pulse gently (disabled on reduced motion).
+- **Sephirot paths:** reflect recorded route history; busy nodes pulse gently (disabled on reduced motion). A sortie whose action the owner declined at Misato's apartment (or that expired there) draws its own route from the apartment to Debrief in the decision colour; Entry Plug and the EVA cages stay unmarked, since nothing ran.
 
 ## Panels and controls
 

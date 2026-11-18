@@ -593,11 +593,18 @@ test('an answer without an action: Misato passed, a green route straight to Debr
     'B-021 (changed on purpose): a pending question also means Misato planned',
   );
   assert.match(js, /\["plan","debrief","answer"\]/);
-  assert.match(
-    js,
-    /const edges = EDGES\.filter\(e => e\[2\] === "relay" \? !!\(s && s\.forwarded\) : e\[2\] !== "answer" \|\| \(s && !s\.actions\.length && !s\.forwarded\)\);/,
-    'drawn only for an answer-only sortie (F-051 slice 2 added the relay route)',
-  );
+  // Same requirement, read through edgeShown since B-096 moved the route filter there.
+  assert.match(js, /const edges = EDGES\.filter\(e => edgeShown\(s, e\)\);/);
+  const shownAt = js.indexOf('function edgeShown(');
+  const shown = new Function(js.slice(shownAt, js.indexOf('\n}\n', shownAt) + 2) + '\nreturn edgeShown;')() as (
+    s: unknown,
+    e: unknown,
+  ) => boolean;
+  const answer = ['plan', 'debrief', 'answer'];
+  assert.equal(shown({ actions: [] }, answer), true, 'drawn only for an answer-only sortie');
+  assert.equal(shown({ actions: [{ status: 'done' }] }, answer), false, 'not with an action');
+  assert.equal(shown({ actions: [], forwarded: 'Tabgha' }, answer), false, 'not for a forwarded sortie (F-051 relay)');
+  assert.equal(shown({ actions: [], forwarded: 'Tabgha' }, ['detect', 'debrief', 'relay']), true, 'the relay instead');
   assert.doesNotMatch(
     js,
     /function liveEdges\(/,
@@ -882,7 +889,7 @@ test('B-040: an active planning step alone never renders a continuously communic
     'EDGES',
     'nodeEl',
     'passedEdge',
-    `${take('liveEdges')}\n${take('drawEdges')}\nreturn drawEdges;`,
+    `${take('liveEdges')}\n${take('edgeShown')}\n${take('drawEdges')}\nreturn drawEdges;`,
   )(
     document,
     () => true,
