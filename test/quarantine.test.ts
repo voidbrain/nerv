@@ -143,7 +143,7 @@ describe('F-085-T02 sourced project report', () => {
     );
   });
 
-  it('cites the page URL and flags missing licence and instruction-override text', async () => {
+  it('cites the page URL, marks licence not applicable and flags instruction-override text', async () => {
     const url = 'https://example.invalid/project-page';
     const fetched = await fetchIntoQuarantine(url, {
       fetchFn: async () =>
@@ -157,12 +157,14 @@ describe('F-085-T02 sourced project report', () => {
     assert.equal(report.activity.source, url);
     assert.equal(report.licence.source, url);
     assert.equal(report.buildAndTest.source, url);
-    assert.ok(report.visibleRisks.some((r) => r.source === url && /Missing licence/.test(r.summary)));
+    // B-078 (owner review of F-085-T03, 2026-11-18): a web page has no licence file; that is not a risk.
+    assert.ok(!report.visibleRisks.some((r) => /Missing licence/.test(r.summary)));
+    assert.match(report.licence.summary, /^Not applicable to a web page/);
     assert.ok(report.visibleRisks.some((r) => r.source === url && /instruction-override/.test(r.summary)));
   });
 });
 
-test('B-078: a page report names the page, not its scripts, and marks repository fields not applicable', () => {
+it('B-078: a page report names the page, not its scripts, and marks repository fields not applicable', () => {
   const html =
     '<!doctype html><html><head><title>Neutral Fixture Page</title><meta name="description" content="An invented page about tea.">' +
     '<script>(()=>{let i=document.documentElement;window.track=1})()</script><style>body{color:red}</style></head>' +

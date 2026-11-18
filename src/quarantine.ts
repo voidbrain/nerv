@@ -197,8 +197,35 @@ function parsePackageJson(
   return undefined;
 }
 
+/** Markup that is never text: scripts, styles and comments go before tags are stripped (B-078). */
+const withoutCode = (content: string) =>
+  content
+    .replace(/<script\b[\s\S]*?<\/script\s*>/gi, ' ')
+    .replace(/<style\b[\s\S]*?<\/style\s*>/gi, ' ')
+    .replace(/<!--[\s\S]*?-->/g, ' ');
+const decode = (s: string) =>
+  s
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+/** A web page's own name: its title, with its meta description when it has one (B-078). */
+function pageSummary(html: string): string | undefined {
+  const title = decode(/<title\b[^>]*>([\s\S]*?)<\/title\s*>/i.exec(html)?.[1] ?? '');
+  const description = decode(
+    /<meta\b[^>]*name=["']description["'][^>]*content=["']([^"']*)["']/i.exec(html)?.[1] ??
+      /<meta\b[^>]*content=["']([^"']*)["'][^>]*name=["']description["']/i.exec(html)?.[1] ??
+      '',
+  );
+  const summary = [title, description].filter(Boolean).join(' — ');
+  return summary ? summary.slice(0, 200) : undefined;
+}
+
 function extractFirstSummaryLine(content: string): string | undefined {
-  const stripped = content.replace(/<[^>]+>/g, ' ');
+  const stripped = withoutCode(content).replace(/<[^>]+>/g, ' ');
   for (const rawLine of stripped.split(/\r?\n/)) {
     const line = rawLine.replace(/^#+\s*/, '').trim();
     if (line.length > 0) return line.slice(0, 200);
@@ -223,6 +250,12 @@ export function buildProjectReport(fetched: QuarantinedFetchResult): ProjectRepo
   const cargo = findFile(fetched.files, /^cargo\.toml$/i);
   const goMod = findFile(fetched.files, /^go\.mod$/i);
 
+  // B-078: a web page has no licence file, build or commit history; those are not applicable, not missing.
+  const page = fetched.kind === 'page';
+  const notApplicable = (what: string): CitedClaim => ({
+    summary: `Not applicable to a web page (${what})`,
+    source: fetched.target,
+  });
   let whatItIs: CitedClaim;
   const pkgDesc = typeof pkg?.data.description === 'string' ? pkg.data.description.trim() : '';
   const pkgName = typeof pkg?.data.name === 'string' ? pkg.data.name.trim() : '';
@@ -249,14 +282,19 @@ export function buildProjectReport(fetched: QuarantinedFetchResult): ProjectRepo
     };
   } else {
     whatItIs = {
-      summary: extractFirstSummaryLine(fetched.text) ?? 'No summary found in static snapshot',
+      summary:
+        (page ? pageSummary(fetched.text) : undefined) ??
+        extractFirstSummaryLine(fetched.text) ??
+        'No summary found in static snapshot',
       source: fetched.target,
     };
   }
 
-  const activity: CitedClaim = fetched.activity
-    ? { summary: `Latest commit: ${fetched.activity}`, source: 'git log' }
-    : { summary: 'No commit history available in static snapshot', source: fetched.target };
+  const activity: CitedClaim = page
+    ? notApplicable('commit history')
+    : fetched.activity
+      ? { summary: `Latest commit: ${fetched.activity}`, source: 'git log' }
+      : { summary: 'No commit history available in static snapshot', source: fetched.target };
 
   let licence: CitedClaim;
   const pkgLicense = typeof pkg?.data.license === 'string' ? pkg.data.license.trim() : '';
@@ -297,6 +335,10 @@ export function buildProjectReport(fetched: QuarantinedFetchResult): ProjectRepo
     buildAndTest = { summary: 'No build or test configuration found in static snapshot', source: fetched.target };
   }
 
+  if (page) {
+    licence = notApplicable('licence');
+    buildAndTest = notApplicable('build and test');
+  }
   const visibleRisks: CitedClaim[] = [];
   if (licence.summary.startsWith('No licence')) {
     visibleRisks.push({ summary: 'Missing licence increases reuse and compliance risk', source: licence.source });
