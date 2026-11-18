@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-005",
   "id": "F-005-T37",
-  "status": "planned",
+  "status": "closed",
   "title": "Agree the device matrix",
   "goal": "Agree the device matrix",
   "capabilities": [
@@ -26,7 +26,8 @@
     "test/**",
     "docs/**",
     "generated:backlog-views",
-    "contract:service-lifecycle"
+    "contract:service-lifecycle",
+    "docs/acceptance/f005-device-matrix.md"
   ],
   "validation": [
     "Directed regressions or recorded evidence for this slice; final required CI"
@@ -38,11 +39,17 @@
   "effort": {
     "size": "small",
     "estimate": "0.25 h owner",
-    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
-    "reviewed": "2026-11-13",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total. Closed 2026-11-18: the owner answered \"agreed\" to the three-base matrix (NERV-01 Mac, NERV-02 Tabgha Windows, NERV-03 Calvary Debian arm64). No actual: owner decision.",
+    "reviewed": "2026-11-18",
     "baselineDays": 0.25,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "agentHours": 0,
     "ownerKind": "decision"
-  }
+  },
+  "prs": [
+    {
+      "pr": 526,
+      "note": "matrix"
+    }
+  ]
 }
