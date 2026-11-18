@@ -6,8 +6,8 @@
   "goal": "Linux service target acceptance",
   "status": "planned",
   "acceptance": [
-    "Target: the Linux VM nerv-linux (docs/acceptance/linux-vm.md)",
-    "On a Linux VM on the Mac (owner choice 2026-11-13): install/status/start/stop/uninstall and restart catch-up pass; evidence recorded"
+    "Target: Calvary (NERV-03, ClockworkPi DevTerm, Debian 11 arm64, `ssh Calvary`), owner decision 2026-11-18 replacing the Linux VM, which had no outbound internet",
+    "On Calvary: install/status/start/stop/uninstall and restart catch-up pass; evidence recorded"
   ],
   "dependsOn": [
     "F-009-T04"

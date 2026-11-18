@@ -6,7 +6,7 @@
   "goal": "Run the first EVA job on the Linux host",
   "status": "planned",
   "acceptance": [
-    "The agent runs the first EVA job on the Linux host and the result is recorded"
+    "The agent runs the first EVA job on the Linux host (Calvary, NERV-03; owner decision 2026-11-18) and the result is recorded"
   ],
   "dependsOn": [
     "F-049-T10"

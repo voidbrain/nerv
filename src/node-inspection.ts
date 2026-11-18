@@ -112,8 +112,9 @@ export function nodeBelowRequirement(found: string, range = requiredNode()): str
         : undefined;
   return undefined;
 }
-/** Fixed read-only probe. Never read credentials, open SQLite, enroll a base or ask a model. */
-export const NODE_PROBE = String.raw`const os=require('node:os'),fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process');
+/** Fixed read-only probe. Never read credentials, open SQLite, enroll a base or ask a model. Plain `require` names and no
+ * newer syntax, so it also runs on a Node too old for NERV and reports that version (B-083). */
+export const NODE_PROBE = String.raw`const os=require('os'),fs=require('fs'),path=require('path'),cp=require('child_process');
 function version(command){try{const r=cp.spawnSync(command,{shell:true,encoding:'utf8',timeout:3000,maxBuffer:4096,windowsHide:true});const text=(r.stdout||'').trim();return r.status===0&&/^(?:git version )?\d+\.\d+[^\r\n]{0,80}$/.test(text)?text:null;}catch{return null;}}
 let base=null,configured=false;const dir=path.join(os.homedir(),'.nerv');try{const file=path.join(dir,'config.json');configured=fs.existsSync(file);if(fs.statSync(file).size<=65536){const c=JSON.parse(fs.readFileSync(file,'utf8'));if(c.base&&typeof c.base.id==='string')base={id:c.base.id,name:c.base.name};}}catch{}
 process.stdout.write(JSON.stringify({version:1,platform:process.platform,arch:process.arch,node:process.versions.node,hostname:os.hostname(),userId:process.getuid?process.getuid():null,userHome:os.homedir(),git:version('git --version'),npm:version('npm --version'),base,configured,runtime:'not-checked'}));`;
