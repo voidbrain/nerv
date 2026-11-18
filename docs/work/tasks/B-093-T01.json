@@ -4,7 +4,7 @@
   "id": "B-093-T01",
   "title": "The Revoked section keeps its open state across polls",
   "goal": "The Revoked section keeps its open state across polls",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Test committed failing first"
   ],
@@ -32,7 +32,7 @@
     "estimate": "0.5 h",
     "basis": "Estimated 2026-11-18. Not a measurement.",
     "reviewed": "2026-11-18",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.5,
     "actualAgentHours": 0.25,
@@ -41,7 +41,11 @@
   "prs": [
     {
       "pr": 527,
-      "note": "this change"
+      "note": "fix"
+    },
+    {
+      "pr": 530,
+      "note": "closed on the owner live check"
     }
   ]
 }

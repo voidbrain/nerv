@@ -4,7 +4,7 @@
   "id": "B-094-T01",
   "title": "One full stop after a refusal reason",
   "goal": "One full stop after a refusal reason",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Test committed failing first"
   ],
@@ -32,7 +32,7 @@
     "estimate": "0.5 h",
     "basis": "Estimated 2026-11-18. Not a measurement.",
     "reviewed": "2026-11-18",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.5,
     "actualAgentHours": 0.25,
@@ -42,6 +42,10 @@
     {
       "pr": 527,
       "note": "this change"
+    },
+    {
+      "pr": 530,
+      "note": "closed on the live check"
     }
   ]
 }
