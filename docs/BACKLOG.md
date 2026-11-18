@@ -624,10 +624,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-088-t01"></a>B-088-T01 — The rehearsal resolves the candidate reader's packages from the installed checkout | 1 h | 0.75 h so far (stated) | 0.25 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 1 h | 0.75 h | 0.25 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-088-t01"></a>B-088-T01 — The rehearsal resolves the candidate reader's packages from the installed checkout | 1 h | 0.75 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #522](https://github.com/voidbrain/nerv/pull/522) fix |
+| 🟢 Small | **Total** | 1 h | 0.75 h | 0.25 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -636,7 +636,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Test: `test/upgrade-lifecycle.test.ts` "B-088: the candidate reader resolves packages from the installed checkout…" (committed failing first) |
+| PR / evidence | Steps: B-088-T01: [PR #522](https://github.com/voidbrain/nerv/pull/522) fix. Test: `test/upgrade-lifecycle.test.ts` "B-088: the candidate reader resolves packages from the installed checkout…" (committed failing first) |
 | Opened | 2026-11-18 |
 | Verification | Pending: CI, then an update completing on Calvary. |
 | Reviewed | 2026-11-18 |
