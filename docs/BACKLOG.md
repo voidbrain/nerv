@@ -2447,7 +2447,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Test: `test/node-lifecycle-execution.test.ts` "the handler identity of the running process is queried once…" (committed failing first). CI run 44213770369 (windows job failed) |
+| PR / evidence | [PR #508](https://github.com/voidbrain/nerv/pull/508); Test: `test/node-lifecycle-execution.test.ts` "the handler identity of the running process is queried once…" (committed failing first). CI run 44213770369 (windows job failed) |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |
