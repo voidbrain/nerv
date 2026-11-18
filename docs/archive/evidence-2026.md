@@ -80,7 +80,7 @@ Totals against the accepted plan: T07 3.5 days (was 2–3, a material increase t
 
 ## F-005, moved 2026-11-18
 
-Moved verbatim from the active record on 2026-11-18 to keep it within the record budget.
+Moved verbatim from the active record on 2026-11-18 to keep it within the record budget ([PR #532](https://github.com/voidbrain/nerv/pull/532)).
 
 **Initial delivery plan, 2026-11-10:** T06 is not the last F-005 step. Owner requested the full anticipated plan and saved the three remaining work areas. This dated planning snapshot does not advance acceptance; linked task sources own later effort/status revisions. Material expansions or outcome splits require owner agreement before adoption.
 
@@ -116,7 +116,7 @@ Ollama is an example adapter. Different engines and multiple instances/endpoints
 
 ## F-006, moved 2026-11-18
 
-Moved verbatim from the active record on 2026-11-18 to keep it within the record budget.
+Moved verbatim from the active record on 2026-11-18 to keep it within the record budget ([PR #532](https://github.com/voidbrain/nerv/pull/532)).
 
 **T03a–T03c (`F-006-T03`, `F-006-T09`, `F-006-T10`) & T04a (`F-006-T04`) implemented 2026-11-15 ([PR #421](https://github.com/voidbrain/nerv/pull/421)):** Authored `evals/combination-v1.json` (8 cases including 2 holdout across `hidden-acceptance`, `deliberately-flawed-patch`, `false-rejection`, and `shared-blind-spot`), protected grader and combination evidence adapter in `tools/evaluate-model.mjs` (`combinationCorpus`, `stripHiddenAcceptance`, `createProtectedGrader`, `detectGraderTamper`, `validateParticipantConfig`, `validateCombinationSpec`, `configurationIdentity`, `evaluateCombination`, `verifyCombinationEvidence`, `compareCombinationRuns`), promotion authority recheck in `src/pilots.ts` (`verifyPromotionAuthority`), regressions in `test/evaluation-model.test.mjs`, and [Placement campaign plan and budgets](../../decisions/placement-campaign.md) (`F-006-T04`, linked from `F-006-T17` and `F-006-T11`).
 
@@ -165,7 +165,7 @@ Total about 14.5 focused days (no previous per-step estimate; the record said La
 
 ## F-004, moved 2026-11-18
 
-Moved verbatim from the active record on 2026-11-18 to keep it within the record budget.
+Moved verbatim from the active record on 2026-11-18 to keep it within the record budget ([PR #532](https://github.com/voidbrain/nerv/pull/532)).
 
 **Reconcile 2026-11-12 ([PR #304](https://github.com/voidbrain/nerv/pull/304)):** [PR #303](https://github.com/voidbrain/nerv/pull/303) merged into main `5bc2566`; F-004-T05 closed (0.5 h agent, stated, against 3 h baseline). F-004 stays Open: only F-004-T06 (Phone install and push acceptance, 0.5 h agent + 0.5 h owner) remains and requires owner action (🧑).
 
@@ -185,7 +185,7 @@ Moved verbatim from the active record on 2026-11-18 to keep it within the record
 
 ## F-049, moved 2026-11-18
 
-Moved verbatim from the active record on 2026-11-18 to keep it within the record budget.
+Moved verbatim from the active record on 2026-11-18 to keep it within the record budget ([PR #532](https://github.com/voidbrain/nerv/pull/532)).
 
 **From the next action (older part):** F-049-T11 closed 2026-11-15: ([PR #454](https://github.com/voidbrain/nerv/pull/454)) the owner chose `/usr/bin/sandbox-exec` (Seatbelt) for macOS EVA enforcement, as recommended in the [benchmark](../../decisions/eva-macos-enforcement.md), after asking about its deprecation (it is the CLI and profile language Apple deprecated; the kernel sandbox is what macOS, browsers and build tools use). Fails closed when missing; a VM or container stays the fallback. 2026-11-15: F-049-T03 closed with live macOS host measurements in [macOS enforcement benchmark](../../decisions/eva-macos-enforcement.md) (`/usr/bin/sandbox-exec` 19.20 ms avg startup, canonicalized `realpath` fs deny + `(deny network-outbound)` + `ulimit` verified; Docker CLI has no running daemon; `container`/`podman`/`tart`/`limactl`/`colima`/`agentfs` absent), ready for owner choice in F-049-T11. F-049-T02 closed with `EVA_CLASS_SPECS` and `admitEvaJob` in `src/eva-classes.ts`, `eva classes|admit` CLI commands in `src/cli.ts`, and `test/eva-classes.test.ts` verifying EVA-00..03 class data, least-class admission, and fail-closed refusal. F-049-T01 (2026-11-13): [EVA runner contract](../../decisions/eva-runner.md) and [runtime architecture](../../architecture/runtime.md) define the deterministic runner/warden threat model, fixed NERV-grant job admission, least-EVA-class ordering (`eva-03` < `eva-00` < `eva-01` < `eva-02`), per-job host boundaries (mounts, network, credentials, deadlines/cancellation, CPU/memory/output limits), protected grading/promotion separation, ledger/worker recovery uncertainty preservation, and the T05 negative-controlled test gate; no confinement is implemented yet and `eva-03` remains refused. Next: F-049-T11 (owner mechanism choice). Full audit 2026-11-06: the order is EVA-03 first, as the owner chose on 2026-11-05 (the tools process moves into it, so EVA-03 grants can run); the next action said EVA-00. Planned 2026-11-05 (owner). Builds on F-045 pilots and the F-025 stages.
 
@@ -199,7 +199,7 @@ Moved verbatim from the active record on 2026-11-18 to keep it within the record
 
 ## F-062, moved 2026-11-18
 
-Moved verbatim from the active record on 2026-11-18 to keep it within the record budget.
+Moved verbatim from the active record on 2026-11-18 to keep it within the record budget ([PR #532](https://github.com/voidbrain/nerv/pull/532)).
 
 **From the next action (older part):** F-062-T06 implemented 2026-11-14: the nightly encrypted copy also goes over the Kaji line (`POST /kaji/backup`) to each base in `backup.peers`; a receiver stores it only when its `backup.accept` names the sender, never holds the key, and keeps the newest 7 per sender (test/offhost-kaji.test.ts across two linked bases). F-062-T03 closed 2026-11-14 after PR #400 merged (CI 43582256523 green). F-062-T03 implemented 2026-11-14: after each nightly snapshot the service writes an encrypted copy to every folder in `backup.copies` (an external disk), keeping the newest 7. It holds only the backup public key; the private key and its passphrase stay with the owner (`backup keygen`, `backup decrypt`, `backup status`; [backups guide](../../guides/backups.md); `src/offhost.ts`, test/offhost.test.ts). Copies to Tabgha over the Kaji line are split to F-062-T06. F-062-T02 closed 2026-11-14 after PR #395 merged (CI 43574532457 green). F-062-T02 implemented 2026-11-14 (the five ordinary nerv-system-flows cases reran and passed at this source; all seven nerv-system-flows cases reran and passed at this source, stress and browser in F-062-T05): the service takes a nightly verified snapshot (03:30 local, newest 7 kept, `src/snapshots.ts`, test/snapshots.test.ts). F-062-T01 closed 2026-11-13: the owner chose a **nightly** snapshot (SQLite backup API), so up to 24 h of data may be lost; restore target within 1 h; encrypted copies kept on Tabgha over the Kaji line and on an external disk (the location recommended to the owner); the backup key is kept apart from everyday credentials. Continuous replication (Litestream) and hourly snapshots were declined for now. Reconciled2026-11-10: F-005 root/service operations took consistent private snapshots and verified backup integrity. The owner attested an independent encrypted-root backup. Neither establishes the business-data loss/recovery bounds, scheduled off-host retention or general restore drill required here. No acceptance or human cue is cleared. Proposed 2026-11-06 from the reassessment; not accepted scope until the owner sets the bounds. Recommendation: a scheduled snapshot first (simpler, likely enough for personal use); continuous replication such as Litestream only if the agreed loss window is smaller, since it adds storage credentials, monitoring and a dependency, and replication alone copies a damaging deletion. Retention and a tested restore matter more than the tool. Related F-002 (core hardening). P1 because it is data integrity.
 
