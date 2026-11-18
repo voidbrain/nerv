@@ -54,5 +54,11 @@
     "baselineAgentHours": 1,
     "actualAgentHours": 2.5,
     "actualSource": "stated"
-  }
+  },
+  "prs": [
+    {
+      "pr": 525,
+      "note": "evidence"
+    }
+  ]
 }
