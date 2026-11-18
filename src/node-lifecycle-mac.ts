@@ -8,6 +8,9 @@ import {
   readFileSync,
   realpathSync,
   rmSync,
+  symlinkSync,
+  unlinkSync,
+  lstatSync,
 } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { homedir } from 'node:os';
@@ -80,6 +83,13 @@ export function macServiceHost(home: string): ServiceHost {
   requireServiceHome(context.home);
   return macServiceAdapter(context);
 }
+const lstatSafe = (path: string) => {
+  try {
+    return lstatSync(path);
+  } catch {
+    return undefined;
+  }
+};
 export function macServiceAdapter(context: ServiceContext, run: typeof command = command): ServiceHost {
   const gui = 'gui/' + context.uid,
     target = gui + '/io.nerv.agent',
@@ -316,7 +326,8 @@ export function macServiceAdapter(context: ServiceContext, run: typeof command =
       if (!present(root)) mkdirSync(root, { mode: 0o700 });
       safe(root, context.uid, true);
       const tree = join(root, p.digest),
-        archive = tree + '.tar';
+        archive = tree + '.tar',
+        modulesLink = join(tree, 'node_modules');
       mkdirSync(tree, { mode: 0o700 });
       try {
         // The pinned tree is exported, never checked out: the installed checkout and its dependencies stay as they are.
@@ -332,6 +343,11 @@ export function macServiceAdapter(context: ServiceContext, run: typeof command =
           (await run('tar', ['-xf', archive, '-C', tree], undefined, 120000)).status !== 0
         )
           throw Error('The pinned revision could not be exported for rehearsal.');
+        // B-088: the exported tree has no dependencies; its reader imports npm packages (ajv), so it resolves them from
+        // the installed checkout through a link (a junction on Windows). The installed node_modules are never changed.
+        const installedModules = join(context.source, 'node_modules');
+        if (present(installedModules))
+          symlinkSync(installedModules, modulesLink, process.platform === 'win32' ? 'junction' : 'dir');
         let candidateContract: UpgradeContractBounds = UPGRADE_CONTRACT;
         const contractPath = join(tree, CONTRACT_ENTRY);
         if (present(contractPath)) {
@@ -351,6 +367,8 @@ export function macServiceAdapter(context: ServiceContext, run: typeof command =
           candidateContract,
         );
       } finally {
+        // The link goes first, on its own, so removing the tree can never reach the installed dependencies.
+        if (lstatSafe(modulesLink)?.isSymbolicLink()) unlinkSync(modulesLink);
         rmSync(tree, { recursive: true, force: true });
         rmSync(archive, { force: true });
       }
