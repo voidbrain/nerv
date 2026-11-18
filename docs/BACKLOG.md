@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 3 | 5 | 17 | 5 |
+| **This week** | 3 | 5 | 18 | 5 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 42 | 19 |
+| **Open** | 42 | 20 |
 | **Require Human 🧑** | 6 | 3 |
 
 ### Require Human 🧑
@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 72.75 h agent + 11.75 h owner across 144 open steps of 39 features and 19 other records. 41.5 h of actual effort recorded on 92 steps. Generated from the task files.
+**Remaining effort:** 73 h agent + 11.75 h owner across 145 open steps of 39 features and 20 other records. 41.75 h of actual effort recorded on 93 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1987,6 +1987,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-079-T01: [PR #515](https://github.com/voidbrain/nerv/pull/515) fix. Test: `test/gauntlet.test.mjs` B-079 (06e47fc9) |
 | Opened | 2026-11-18 |
 | Verification | Pending: CI and the F-097-T01 run. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="b-089"></a>[🐞 B-089](#top)
+
+**No check catches merge conflict markers in committed files**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-089-T01 — A check fails on committed merge conflict markers (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18: conflict markers reached pushed branches twice in one day while `check:fast` passed: in the F-005 record (PR #520, a patch applied with conflicts) and in `evals/gauntlet/ledger.json` (PRs #522 and #523, a merge whose conflicts a shell loop failed to resolve). Both were found by the agent and fixed by follow-up pushes before merging. |
+| **Reproduce** | Commit a file with `<<<<<<<` / `=======` / `>>>>>>>` lines; `npm run check:fast` passes. |
+| **Check** | Test committed failing first: a tracked file with a conflict block fails `check:conflicts` naming file and line; a lone `=======` line passes; the check runs first in `check:fast` and in CI's `validate` job. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-089-t01"></a>B-089-T01 — A check fails on committed merge conflict markers | 0.5 h | 0.25 h so far (stated) | 0.25 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.5 h | 0.25 h | 0.25 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-089.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/check-conflict-markers.test.mjs` |
+| Opened | 2026-11-18 |
+| Verification | Pending: CI. |
 | Reviewed | 2026-11-18 |
 
 </details>

@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "parent": "B-089",
+  "id": "B-089-T01",
+  "title": "A check fails on committed merge conflict markers",
+  "goal": "Conflict markers never pass the fast checks or CI",
+  "status": "implemented",
+  "acceptance": [
+    "Test committed failing first: a conflict block fails naming file and line; a lone ======= passes",
+    "Runs first in check:fast and in CI validate"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "tools/check-conflict-markers.mjs",
+    "test/check-conflict-markers.test.mjs",
+    "package.json",
+    ".github/workflows/ci.yml",
+    "docs/work/records/B-089.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-18: a small scanner, its wiring and a test. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
+  },
+  "prs": []
+}
