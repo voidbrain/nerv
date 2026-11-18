@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "parent": "F-016",
+  "id": "F-016-T13",
+  "title": "Step 2b — Import a verified snapshot into the read-only standby",
+  "goal": "A standby holds main's state in coordinator-standby.sqlite without touching its own nerv.sqlite",
+  "status": "planned",
+  "acceptance": [
+    "Signature, digest and head checked before any write; import into `coordinator-standby.sqlite` only, `replication_mode = standby`; FTS5 tables rebuilt locally; exact rowids kept (test)"
+  ],
+  "dependsOn": [
+    "F-016-T03"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "test/**",
+    "docs/**",
+    "contract:coordinator-authority",
+    "docs/work/records/F-016.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "regression-design",
+    "distributed-contracts"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h",
+    "basis": "Split from F-016-T03 on 2026-11-18 with the owner's approval. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  }
+}

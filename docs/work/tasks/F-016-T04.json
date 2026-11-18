@@ -17,7 +17,7 @@
     "Incremental log shipping to the standby"
   ],
   "dependsOn": [
-    "F-016-T03"
+    "F-016-T15"
   ],
   "resources": [
     "src/**",
