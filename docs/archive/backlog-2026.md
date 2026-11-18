@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 6 | 9 |
+| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 7 | 15 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
@@ -4998,6 +4998,244 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 | PR / evidence | Test: `test/upgrade-lifecycle.test.ts` "B-088: the candidate reader resolves packages from the installed checkout…" (committed failing first) |
 | Opened | 2026-11-18 |
 | Verification | 2026-11-18: CI green; verified live on Calvary. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### B-077
+
+**Role evaluation runs refuse three repeats, which the approved F-006 campaigns need**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 while checking the owner's F-006 run: `node tools/gauntlet.mjs role-plan --role=both` with `limits-repeat3.json` stops with "Unsupported role limits repeat; only repeat=1 is supported" (`validateRoleBundleConfig` in `tools/evaluate-model.mjs`, added 2026-11-13). The owner approved three runs per case on 2026-11-15 and both campaign plans (F-006-T19, F-006-T20) use `role-run` with `repeat: 3`, so neither campaign can run. |
+| **Reproduce** | `node tools/gauntlet.mjs role-plan --role=both --profile=<gemma4-12b profile> --limits=<limits with "repeat": 3> --machine-profile=<machine> --scenario=node_modules/@voidbrain/gauntlet-protocol/examples/scenarios/moderate-load.json` |
+| **Check** | A committed test fails first: a role bundle with `repeat: 3` plans and runs each case three times against a fake Ollama, with per-repeat results and the budgets counted over all repeats; `repeat: 1` behaves as before. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18. Merged in PR #519 on green CI; the test covers three repeats per case. 2026-11-18: B-077-T01 implemented: `runRoleBundle` runs each selected case `limits.repeat` times and every result carries its `iteration`; the budgets already counted every call. Test: `test/gauntlet.test.mjs` "B-077: a role bundle with repeat 3 runs each case three times…" (committed failing first with "only repeat=1 is supported"); gauntlet tests 23/23. Next: the owner's F-006 Mac page can run once this merges. Opened 2026-11-18 in [PR #513](https://github.com/voidbrain/nerv/pull/513). The owner's F-006 Mac page ([f006-mac-runs.md](../acceptance/f006-mac-runs.md)) waits on it.
+
+**Estimates:** Small, estimated 2026-11-18: 1.5 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/gauntlet.test.mjs` B-077; Dry run 2026-11-18 on main, scratch profile copied from the protocol's `gemma4-12b.json` |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-18: Merged in PR #519 on green CI; the test covers three repeats per case. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### B-078
+
+**Project report on a web page: script text in the summary and repository-only gaps listed as risks**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 in F-085-T03: `nerv quarantine report https://nodejs.org/en/about --kind page` put the page's inline `<script>` text after its title in `whatItIs.summary`, and reported licence, build/test and commit history as missing for a web page, listing "Missing licence increases reuse and compliance risk" under `visibleRisks`. The repository report on the same run was correct. |
+| **Reproduce** | `nerv quarantine report https://nodejs.org/en/about --kind page` |
+| **Check** | A committed test fails first with an invented page fixture holding an inline script: the summary is the title (and description) without script or style text; a `page` report says which fields do not apply instead of listing them as missing, and adds no licence risk. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18. Merged in PR #523 on green CI (CodeQL alerts fixed there); live on nodejs.org/about. 2026-11-18: B-078-T01 implemented: scripts, styles and comments are removed before the summary, a page prefers its title and meta description, and a page report marks licence, build and history "Not applicable to a web page" with no licence risk. Test: `test/quarantine.test.ts` "B-078: a page report names the page…" (committed failing first); the older page test's licence expectation changed with this requirement. Live: nodejs.org/about now reads "Node.js — About Node.js® — Node.js® is a free, open-source, cross-platform JavaScript runtime…". Opened 2026-11-18 from F-085-T03.
+
+**Estimates:** Small, estimated 2026-11-18: 1 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/quarantine.test.ts` B-078; F-085-T03 run 2026-11-18 |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-18: Merged in PR #523 on green CI (CodeQL alerts fixed there); live on nodejs.org/about. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### B-079
+
+**`gauntlet:all` reused system results recorded at another source, and reported them as passed**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 running F-097-T01: `npm run gauntlet:all -- --allow-expensive --execute` ran nothing and reported `passed: true`, reusing the seven `nerv-system-flows` results of 2026-11-14 (browser among them as failed), while `npm run gauntlet:pending` listed all seven as `source-changed`. `all()` in `tools/gauntlet.mjs` built its pending options without the per-case system source key that `pending` uses, so unless `--source-key` was given a source change never made a system case pending. The documented F-097 rerun could not rerun anything. |
+| **Reproduce** | On main before the fix, with the ledger behind the source: `npm run gauntlet:pending` lists the system cases; `npm run gauntlet:all` plans them as reuse. |
+| **Check** | Test committed failing first: with a ledger at a stale source key, `all` plans the seven system cases with reason `source-changed` and reuses none, as `pending` lists them; the existing test that reuses cases at the current source still passes; F-097-T01's real run executes the seven cases. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18. Merged in PR #515 on green CI; the F-097-T01 run executed all seven system cases. 2026-11-18: B-079-T01 implemented: `all()` passes the same per-case `systemSourceKey` default as `pending` (an explicit `--source-key` still wins). Test: `test/gauntlet.test.mjs` "B-079: the root command reruns system cases whose source changed…" (06e47fc9, failing first); `test/gauntlet.test.mjs` 22/22. The F-097-T01 run then executed all seven cases (all passed). Opened 2026-11-18.
+
+**Estimates:** Small, estimated 2026-11-18: 0.75 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/gauntlet.test.mjs` B-079 (06e47fc9) |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-18: Merged in PR #515 on green CI; the F-097-T01 run executed all seven system cases. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### B-083
+
+**Inspecting a target whose Node is older than 14 fails with a generic error**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 on Calvary (Node 12.22.12): `nodes inspect --ssh Calvary` said "Read-only command failed" instead of naming the version as too old. The probe sent to the target's `node` used `require('node:os')`, which Node 12 lacks, so it crashed before reporting. |
+| **Reproduce** | `nerv nodes inspect --ssh <host with Node 12>` |
+| **Check** | Test committed failing first: the probe uses no `node:` require and no `??` or `?.`; on Calvary the inspection reports "Node.js 12.22.12 on the target is below the version NERV requires (>=24.0.0)". |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18. Merged in PR #517 on green CI; live on Calvary (Node 12 reported as too old). 2026-11-18: B-083-T01 implemented and checked live on Calvary: "Node.js 12.22.12 on the target is below the version NERV requires (>=24.0.0) … no installation was requested." Opened 2026-11-18.
+
+**Estimates:** Small, estimated 2026-11-18: 0.5 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/node-inspection.test.ts` "B-083: the read-only probe runs on an old Node…" (committed failing first) |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-18: Merged in PR #517 on green CI; live on Calvary (Node 12 reported as too old). Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### B-084
+
+**Lifecycle inspection on a fresh data home fails with a raw ENOENT**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 on Calvary: after `nerv init`, `nodes lifecycle-inspect --action install` stopped with `ENOENT: no such file or directory, lstat '/home/db/.nerv/base-key'`, and after `nerv base pubkey` with the same for `nerv.sqlite`. `init` creates neither; the F-005-T22 page says to initialize with `nerv setup` or `nerv doctor`. |
+| **Reproduce** | Fresh host: `nerv init --base X --name Y --no-model-setup`, then `nerv nodes lifecycle-inspect --action install --out plan.json`. |
+| **Check** | A committed test fails first: on a data home without `base-key` or `nerv.sqlite`, the inspection names what is missing and how to create it (or `init` creates them), and changes nothing. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18. Merged in PR #523 on green CI. 2026-11-18: B-084-T01 implemented: `requireServiceHome` names each missing file (config.json, token, base-key, base.pub, nerv.sqlite) and the command that creates it (`nerv init`, `nerv base pubkey`, `nerv doctor`), changing nothing. Test: `test/node-lifecycle-execution.test.ts` "B-084: a fresh data home names the files…" (committed failing first). Opened 2026-11-18 from F-005-T22 on Calvary.
+
+**Estimates:** Small, estimated 2026-11-18: 0.75 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/node-lifecycle-execution.test.ts` B-084; F-005-T22 run on Calvary, 2026-11-18 |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-18: Merged in PR #523 on green CI. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### B-089
+
+**No check catches merge conflict markers in committed files**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18: conflict markers reached pushed branches twice in one day while `check:fast` passed: in the F-005 record (PR #520, a patch applied with conflicts) and in `evals/gauntlet/ledger.json` (PRs #522 and #523, a merge whose conflicts a shell loop failed to resolve). Both were found by the agent and fixed by follow-up pushes before merging. |
+| **Reproduce** | Commit a file with `<<<<<<<` / `=======` / `>>>>>>>` lines; `npm run check:fast` passes. |
+| **Check** | Test committed failing first: a tracked file with a conflict block fails `check:conflicts` naming file and line; a lone `=======` line passes; the check runs first in `check:fast` and in CI's `validate` job. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18. Merged in PR #524 on green CI; check:conflicts runs in check:fast and CI. 2026-11-18: B-089-T01 implemented: `tools/check-conflict-markers.mjs` (`npm run check:conflicts`) scans tracked text files for an ordered `<<<<<<<` / `=======` / `>>>>>>>` block. Test: `test/check-conflict-markers.test.mjs` (committed failing first). Opened 2026-11-18.
+
+**Estimates:** Small, estimated 2026-11-18: 0.5 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/check-conflict-markers.test.mjs` |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-18: Merged in PR #524 on green CI; check:conflicts runs in check:fast and CI. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### F-105
+
+**A pull request names itself in a record, or CI fails**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-16: 36 of the 40 PRs merged overnight (#457–#498) named no record, so the ledger fell 40 PRs behind `main`; `work:next` kept offering steps already delivered and 21 duplicate branches were started for closed tasks. The rule exists (name the PR by its number in the records it touches, and push that before the checks finish) but nothing enforces it, so the catch-up reconciliation ([PR #499](https://github.com/voidbrain/nerv/pull/499)) was the only thing keeping the ledger honest. |
+| **Reproduce** | Open a PR that changes `src/` without touching `docs/work/`: every check passes. |
+| **Check** | On a `pull_request` run a NERV-owned check (`tools/check-pr-record.mjs`, run from `ci.yml`; `tools/check-backlog.mjs` is a copied harness file and stays untouched) fails unless the PR's number appears in a record, a task file (`prs`) or the reconciliation log on the branch; a PR that touches no product record names itself in the reconciliation log entry instead; the message says which to edit; a committed test covers both outcomes; proposed to the harness template once it has run here. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18. Merged in PR #511 on green CI; the check has run on every PR since (#512–#525). 2026-11-18: F-105-T01 implemented in [PR #511](https://github.com/voidbrain/nerv/pull/511): `tools/check-pr-record.mjs` (`npm run check:pr-record`) runs in the `validate` job on pull_request and fails unless the PR number appears in a record, a task `prs` entry or the reconciliation log; bot PRs and pushes are skipped; `test/check-pr-record.test.mjs` covers both outcomes. Started 2026-11-16 in another session and finished here. Its tests failed on Windows CI (job 134689577350): reported paths used `\` there; they are now `/` on every platform. Planned 2026-11-16 with the owner, after the 40-PR catch-up of PR #499: F-105-T01 the check and its CI step. Proposed to the harness template once it has run here.
+
+**Estimates:** 1 h agent in one step. Estimated 2026-11-16. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner decision 2026-11-16; [PR #499](https://github.com/voidbrain/nerv/pull/499) the catch-up it prevents; opened in [PR #502](https://github.com/voidbrain/nerv/pull/502) |
+| Opened | 2026-11-16 |
+| Verification | 2026-11-18: Merged in PR #511 on green CI; the check has run on every PR since (#512–#525). Closed 2026-11-18. |
 | Reviewed | 2026-11-18 |
 
 </details>

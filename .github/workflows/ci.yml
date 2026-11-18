@@ -114,6 +114,8 @@ jobs:
       - name: The PR names itself in a record (F-105)
         if: github.event_name == 'pull_request'
         run: npm run check:pr-record
+      - name: No merge conflict markers (B-089)
+        run: npm run check:conflicts
       - run: npm run check:recap
       - run: npm run check:roadmap
       - run: npm run check:conventions
