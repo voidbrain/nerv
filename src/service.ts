@@ -77,15 +77,16 @@ NoNewPrivileges=true
 [Install]
 WantedBy=default.target
 `;
-  if (platform === 'win32')
-    return windowsTaskXml(
-      home,
-      root,
-      process.env.USERDOMAIN && process.env.USERNAME
-        ? `${process.env.USERDOMAIN}\\${process.env.USERNAME}`
-        : (process.env.USERNAME ?? ''),
-    );
+  if (platform === 'win32') return windowsTaskXml(home, root, windowsServiceUser(process.env));
   throw new Error('Services support macOS, Linux and Windows only.');
+}
+/** The account the logon task runs as. A local account is COMPUTERNAME\\user: an SSH session on a workgroup machine reports
+ * USERDOMAIN=WORKGROUP, which names no account, so schtasks refused the task (B-082). A domain account (USERDNSDOMAIN set)
+ * keeps USERDOMAIN\\user. */
+export function windowsServiceUser(env: Record<string, string | undefined>): string {
+  const user = env.USERNAME ?? '';
+  const domain = env.USERDNSDOMAIN ? env.USERDOMAIN : env.COMPUTERNAME;
+  return domain && user ? `${domain}\\${user}` : user;
 }
 /** Windows (F-037): the Task Scheduler name, and the launcher and task files kept in the data home. */
 export const WINDOWS_TASK = 'NERV Agency';
