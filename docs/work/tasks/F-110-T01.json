@@ -4,7 +4,7 @@
   "parent": "F-110",
   "title": "Owner decides which fixed values become settings",
   "goal": "The list of settings and their defaults is chosen",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "The decision is written in docs/decisions/dashboard-settings.md"
   ],
@@ -28,10 +28,10 @@
   "effort": {
     "size": "small",
     "estimate": "0.25 h owner",
-    "basis": "Estimated 2026-11-18. Not a measurement.",
-    "reviewed": "2026-11-18",
+    "basis": "Estimated 2026-11-18. Not a measurement. Owner decision 2026-11-19: every listed value becomes a setting (docs/decisions/dashboard-settings.md).",
+    "reviewed": "2026-11-19",
     "agentHours": 0,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "ownerKind": "decision"
   }
 }
