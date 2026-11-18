@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 69.5 h agent + 10 h owner across 128 open steps of 37 features and 17 other records. 47.75 h of actual effort recorded on 91 steps. Generated from the task files.
+**Remaining effort:** 69.25 h agent + 10 h owner across 127 open steps of 37 features and 17 other records. 47.75 h of actual effort recorded on 91 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2332,6 +2332,52 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-094"></a>[🐞 B-094](#top)
+
+**Remote action wording: a doubled full stop, "queued" for a finished job, "offline" for a revoked base**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-094-T02 — Revoked is not offline; a finished remote action is not queued (Ready).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 in F-005-T27: (1) a refusal read "nothing was sent.." because `remoteOutcomeText` added a full stop after a reason that already ended one; (2) after a worker had run the job ("Calvary ran reminders.add …"), Misato replied that the reminder was "queued" / "in the queue for processing", under-claiming a finished action; (3) for revoked NERV-03 the planner said "No base by that id is online" and Misato called it offline, not revoked. |
+| **Reproduce** | Send a job to a stopped worker and cancel it; send one to a worker; send one to a revoked base. |
+| **Check** | (1) Test committed failing first, one full stop (B-094-T01). (2)–(3) The planner tells a revoked base from an offline one, and the reply after a `kaji.result` grant says the worker ran it (B-094-T02). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-094-t02"></a>B-094-T02 — Revoked is not offline; a finished remote action is not queued | 1 h | 0 h | 1 h | Ready | — |
+| 🟢 Small | **Total** | 1.5 h | 0.25 h (1 of 2 steps recorded) | 1 h | 1 of 2 completed | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="b-094-t01"></a>B-094-T01 — One full stop after a refusal reason | 0.5 h | 0.25 h (stated) | Completed | [PR #527](https://github.com/voidbrain/nerv/pull/527) this change; [PR #530](https://github.com/voidbrain/nerv/pull/530) closed on the live check |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-094.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-094-T01: [PR #527](https://github.com/voidbrain/nerv/pull/527) this change; [PR #530](https://github.com/voidbrain/nerv/pull/530) closed on the live check. Test: `test/remote-outcome-text.test.ts` (committed failing first) |
+| Opened | 2026-11-18 |
+| Verification | Pending: CI. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
 ### <a id="b-095"></a>[🐞 B-095](#top)
 
 **On the map Midori looks like a base: it lost its own blue**
@@ -2365,45 +2411,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Opened in PR #530 |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
-### <a id="b-094"></a>[🐞 B-094](#top)
-
-**Remote action wording: a doubled full stop, "queued" for a finished job, "offline" for a revoked base**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟡 Medium | 1.25 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-094-T01 — One full stop after a refusal reason (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-18 in F-005-T27: (1) a refusal read "nothing was sent.." because `remoteOutcomeText` added a full stop after a reason that already ended one; (2) after a worker had run the job ("Calvary ran reminders.add …"), Misato replied that the reminder was "queued" / "in the queue for processing", under-claiming a finished action; (3) for revoked NERV-03 the planner said "No base by that id is online" and Misato called it offline, not revoked. |
-| **Reproduce** | Send a job to a stopped worker and cancel it; send one to a worker; send one to a revoked base. |
-| **Check** | (1) Test committed failing first, one full stop (B-094-T01). (2)–(3) The planner tells a revoked base from an offline one, and the reply after a `kaji.result` grant says the worker ran it (B-094-T02). |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-094-t01"></a>B-094-T01 — One full stop after a refusal reason | 0.5 h | 0.25 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #527](https://github.com/voidbrain/nerv/pull/527) this change |
-| 🟢 Small | <a id="b-094-t02"></a>B-094-T02 — Revoked is not offline; a finished remote action is not queued | 1 h | 0 h | 1 h | Ready | — |
-| 🟡 Medium | **Total** | 1.5 h | 0.25 h (1 of 2 steps recorded) | 1.25 h | 0 of 2 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-094.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-094-T01: [PR #527](https://github.com/voidbrain/nerv/pull/527) this change. Test: `test/remote-outcome-text.test.ts` (committed failing first) |
-| Opened | 2026-11-18 |
-| Verification | Pending: CI. |
 | Reviewed | 2026-11-18 |
 
 </details>
