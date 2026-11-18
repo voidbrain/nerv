@@ -809,7 +809,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|
 | — | <a id="f-083-t01"></a>F-083-T01 — Saved documents with categories | 1 h | 0.5 h (measured) | Completed | — |
 | — | <a id="f-083-t02"></a>F-083-T02 — Compute from saved values only | 1 h | 0.25 h (stated) | Completed | — |
-| — | <a id="f-083-t03"></a>F-083-T03 — Recipe card | 0.5 h | 0 h | Completed | — |
+| — | <a id="f-083-t03"></a>F-083-T03 — Recipe card | 0.5 h | 0 h | Completed | [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep |
 | — | <a id="f-083-t05"></a>F-083-T05 — Purchases and shelf life | 0.5 h | 0 h | Completed | [PR #481](https://github.com/voidbrain/nerv/pull/481) implementation |
 
 </details>
@@ -821,7 +821,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-083-T05: [PR #481](https://github.com/voidbrain/nerv/pull/481) implementation. [PR #462](https://github.com/voidbrain/nerv/pull/462); [PR #481](https://github.com/voidbrain/nerv/pull/481); [PR #489](https://github.com/voidbrain/nerv/pull/489) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | Steps: F-083-T03: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep · F-083-T05: [PR #481](https://github.com/voidbrain/nerv/pull/481) implementation. [PR #462](https://github.com/voidbrain/nerv/pull/462); [PR #481](https://github.com/voidbrain/nerv/pull/481); [PR #489](https://github.com/voidbrain/nerv/pull/489) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-083-T05 verified: [PR #481](https://github.com/voidbrain/nerv/pull/481) merged on green CI (test/pantry.test.ts). `F-083-T01` verified via `test/documents.test.ts` (`docs.save` approval gate, category listing, verbatim `docs.show`, `docs.edit`, `docs.forget`, append-only history). `F-083-T02` added `computeFromSavedDocument` / `DocumentStore.compute` in `src/documents.ts` and read-only tool `docs.compute` in `src/executors.ts` (cites saved values & arithmetic, asks instead of guessing on missing ratio/setting/unit mismatch); verified with `node --test test/documents.test.ts` and `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
@@ -1618,17 +1618,17 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="b-066-t02"></a>B-066-T02 — Decouple worker-link frame verification from per-frame nervous IPC | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | 🤖 |
-| 🟢 Small | <a id="b-066-t03"></a>B-066-T03 — Find why worker-link tests still lose the connection under load | 1 h | 0 h | 1 h | Ready | 🤖 |
-| 🟡 Medium | **Total** | 1.5 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 1.5 h | 1 of 3 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="b-066-t02"></a>B-066-T02 — Decouple worker-link frame verification from per-frame nervous IPC | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | 🤖 | — |
+| 🟢 Small | <a id="b-066-t03"></a>B-066-T03 — Find why worker-link tests still lose the connection under load | 1 h | 0 h | 1 h | Ready | 🤖 | [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep |
+| 🟡 Medium | **Total** | 1.5 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 1.5 h | 1 of 3 completed | | |
 
 <details><summary>Done steps (1)</summary>
 
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="b-066-t01"></a>B-066-T01 — Choose how worker-link heartbeats decouple from nervous SQLite IPC | — | 0 h | Completed |
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="b-066-t01"></a>B-066-T01 — Choose how worker-link heartbeats decouple from nervous SQLite IPC | — | 0 h | Completed | — |
 
 </details>
 
@@ -1639,7 +1639,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #464](https://github.com/voidbrain/nerv/pull/464) (merged; CI green); [PR #414](https://github.com/voidbrain/nerv/pull/414) (opened record & decision doc); prior context: [PR #411](https://github.com/voidbrain/nerv/pull/411) (B-060-T02), [PR #293](https://github.com/voidbrain/nerv/pull/293) and [PR #361](https://github.com/voidbrain/nerv/pull/361) (B-046). |
+| PR / evidence | Steps: B-066-T03: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep. [PR #464](https://github.com/voidbrain/nerv/pull/464) (merged; CI green); [PR #414](https://github.com/voidbrain/nerv/pull/414) (opened record & decision doc); prior context: [PR #411](https://github.com/voidbrain/nerv/pull/411) (B-060-T02), [PR #293](https://github.com/voidbrain/nerv/pull/293) and [PR #361](https://github.com/voidbrain/nerv/pull/361) (B-046). |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: failing evidence above; B-066-T02 stays implemented until B-066-T03. |
 | Reviewed | 2026-11-18 |
@@ -1899,7 +1899,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="b-069-t02"></a>B-069-T02 — Owner repeats the reproduction and gets exactly one card | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [🧑‍🔧](acceptance/b069-one-card.md) | — |
+| 🟢 Small | <a id="b-069-t02"></a>B-069-T02 — Owner repeats the reproduction and gets exactly one card | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [🧑‍🔧](acceptance/b069-one-card.md) | [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep |
 | 🟢 Small | **Total** | 1 h | 0 h (0 of 2 steps recorded) | 0.25 h owner | 1 of 2 completed | | |
 
 <details><summary>Done steps (1)</summary>
@@ -1917,7 +1917,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-069-T01: [PR #503](https://github.com/voidbrain/nerv/pull/503) implementation. Owner report 2026-11-16; live store evidence 2026-11-16 (11 approvals on one sortie, all `ttl` or `reject`); opened in [PR #500](https://github.com/voidbrain/nerv/pull/500) |
+| PR / evidence | Steps: B-069-T01: [PR #503](https://github.com/voidbrain/nerv/pull/503) implementation · B-069-T02: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep. Owner report 2026-11-16; live store evidence 2026-11-16 (11 approvals on one sortie, all `ttl` or `reject`); opened in [PR #500](https://github.com/voidbrain/nerv/pull/500) |
 | Opened | 2026-11-16 |
 | Verification | 2026-11-18: B-069-T01 verified: [PR #503](https://github.com/voidbrain/nerv/pull/503) merged on green CI. |
 | Reviewed | 2026-11-18 |
@@ -2212,10 +2212,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-074-t01"></a>B-074-T01 — Find why the root-binding CLI child ends without a status on Windows and fix it or its bound | 1 h | 0 h | 1 h | Ready |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-074-t01"></a>B-074-T01 — Find why the root-binding CLI child ends without a status on Windows and fix it or its bound | 1 h | 0 h | 1 h | Ready | [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2224,7 +2224,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Failed: windows job 134648345069 of run 44259214063 (PR #508, first attempt). |
+| PR / evidence | Steps: B-074-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep. Failed: windows job 134648345069 of run 44259214063 (PR #508, first attempt). |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |
@@ -2250,10 +2250,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-075-t01"></a>B-075-T01 — Read the failed Telegram tests on Windows and name the cause | 1 h | 0 h | 1 h | Ready |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-075-t01"></a>B-075-T01 — Read the failed Telegram tests on Windows and name the cause | 1 h | 0 h | 1 h | Ready | [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2262,7 +2262,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Failed: windows job 133087302320 of run 43802969338 (2026-11-16). |
+| PR / evidence | Steps: B-075-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep. Failed: windows job 133087302320 of run 43802969338 (2026-11-16). |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |

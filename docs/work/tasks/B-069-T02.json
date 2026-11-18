@@ -34,5 +34,11 @@
     "ownerHours": 0.25,
     "ownerKind": "procedure",
     "baselineAgentHours": 0
-  }
+  },
+  "prs": [
+    {
+      "pr": 510,
+      "note": "verification sweep"
+    }
+  ]
 }

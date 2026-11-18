@@ -37,5 +37,11 @@
     "agentHours": 1,
     "baselineAgentHours": 1,
     "estimateAgentHours": 1
-  }
+  },
+  "prs": [
+    {
+      "pr": 510,
+      "note": "verification sweep"
+    }
+  ]
 }
