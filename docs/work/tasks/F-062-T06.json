@@ -4,7 +4,7 @@
   "parent": "F-062",
   "title": "Encrypted copies to Tabgha over the Kaji line",
   "goal": "The nightly encrypted copy also reaches Tabgha over the Kaji line, as the owner chose in F-062-T01",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Tabgha keeps the newest encrypted copies it receives over the Kaji line; it cannot decrypt them; a missing or refused transfer is reported, never retried in a loop"
   ],
@@ -38,11 +38,17 @@
     "size": "small",
     "estimate": "1.5 h agent",
     "basis": "Estimated 2026-11-14 when split from F-062-T03: one Kaji message type, a receiver store and a test across both. Not a measurement. Implemented 2026-11-14 in about 1 h (stated).",
-    "reviewed": "2026-11-14",
+    "reviewed": "2026-11-18",
     "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5,
     "actualAgentHours": 1,
     "actualSource": "stated"
-  }
+  },
+  "prs": [
+    {
+      "pr": 401,
+      "note": "implementation"
+    }
+  ]
 }

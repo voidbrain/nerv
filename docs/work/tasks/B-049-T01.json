@@ -4,7 +4,7 @@
   "parent": "B-049",
   "title": "Classify and fix the invented reminder title",
   "goal": "Classify the failure (prompt, plan validation or model choice), fix it with a failing case first, and measure the frozen case in an owner-approved rerun",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A request without a title gets a question in the request's language, never an invented title",
     "A deterministic guard, if chosen, is covered by a failing-first test",
@@ -38,10 +38,16 @@
   "effort": {
     "size": "small",
     "estimate": "1.25 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
-    "reviewed": "2026-11-13",
-    "agentHours": 0.25,
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). No actual: not timed by the session that closed it.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
     "baselineAgentHours": 2,
     "estimateAgentHours": 0.25
-  }
+  },
+  "prs": [
+    {
+      "pr": 367,
+      "note": "implementation"
+    }
+  ]
 }

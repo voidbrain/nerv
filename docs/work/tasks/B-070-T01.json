@@ -12,7 +12,7 @@
   "id": "B-070-T01",
   "title": "SBOM test names the npm it needs",
   "goal": "The dependency SBOM validates whatever the installed tree or Node version",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The cause of the duplicate dependencies entries is named in the record",
     "The test fails with a message naming the npm version and the fix, not a schema error; it passes with npm 11 (CI)"
