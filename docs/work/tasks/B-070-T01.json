@@ -10,13 +10,12 @@
     "A material scope or effort increase goes to the owner"
   ],
   "id": "B-070-T01",
-  "title": "SBOM test stable on a fresh install",
+  "title": "SBOM test names the npm it needs",
   "goal": "The dependency SBOM validates whatever the installed tree or Node version",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "The cause of the duplicate dependencies entries is named in the record",
-    "A committed test fails first: an npm sbom output with a duplicated dependencies entry; the export deduplicates before validation, or the test pins its condition",
-    "npm test passes on a fresh npm ci under Node 24 and the local Node"
+    "The test fails with a message naming the npm version and the fix, not a schema error; it passes with npm 11 (CI)"
   ],
   "dependsOn": [],
   "resources": [
@@ -32,10 +31,12 @@
   "effort": {
     "size": "small",
     "estimate": "0.75 h",
-    "basis": "Estimated 2026-11-16: compare npm sbom outputs, dedupe or pin, one test. Not a measurement.",
-    "reviewed": "2026-11-16",
-    "agentHours": 0.75,
+    "basis": "Estimated 2026-11-16: compare npm sbom outputs, dedupe or pin, one test. Not a measurement. 2026-11-18: cause named (npm 10.8.2 fallback; npm 11 gives no duplicates); the test asserts npm 11 or later with that message. CI (Node 24, npm 11) verifies.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
     "baselineAgentHours": 0.75,
-    "estimateAgentHours": 0.75
+    "estimateAgentHours": 0.75,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
   }
 }

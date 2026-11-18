@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 73.5 h agent + 21.25 h owner across 164 open steps of 43 features and 10 other records. 33 h of actual effort recorded on 75 steps. Generated from the task files.
+**Remaining effort:** 72.75 h agent + 21.5 h owner across 165 open steps of 43 features and 10 other records. 33.5 h of actual effort recorded on 76 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2383,22 +2383,23 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-070-T01 — SBOM test stable on a fresh install (Ready).
+💻 **→** Next: B-070-T01 — SBOM test names the npm it needs (Implemented; verification pending).
 
 | | |
 |---|---|
-| **Issue** | Found 2026-11-16 while verifying B-069: `test/bom.test.ts` ("F-067: npm lock-only dependency SBOM validates…") fails on unmodified `main` in a worktree freshly installed with `npm ci` (Node 26.12, npm 10.8.2): `npm sbom --package-lock-only --sbom-format cyclonedx` returns 13 duplicate `dependencies` entries (e.g. `@inquirer/type@4.2.1` ×10, `ansi-styles@6.2.3` ×3), so the CycloneDX `uniqueItems` validation fails. The same lockfile in a checkout with an older `node_modules` gives no duplicates, and CI (Node 24) passes; removing `node_modules/.package-lock.json` does not change it. Cause unconfirmed: npm's SBOM output may depend on the installed tree or the Node version. |
+| **Issue** | Found 2026-11-16 while verifying B-069: `test/bom.test.ts` ("F-067: npm lock-only dependency SBOM validates…") fails on unmodified `main` in a worktree freshly installed with `npm ci` (Node 26.12, npm 10.8.2): `npm sbom --package-lock-only --sbom-format cyclonedx` returns 13 duplicate `dependencies` entries (e.g. `@inquirer/type@4.2.1` ×10, `ansi-styles@6.2.3` ×3), so the CycloneDX `uniqueItems` validation fails. The same lockfile in a checkout with an older `node_modules` gives no duplicates, and CI (Node 24) passes; removing `node_modules/.package-lock.json` does not change it. Cause unconfirmed: npm's SBOM output may depend on the installed tree or the Node version. **Cause (2026-11-18):** the nvm Node 26.12 install has a broken bundled npm (`npm-cli.js` missing), so `npm` is the old `/usr/local/bin/npm` 10.8.2, which lists packages reached through several paths more than once; the old checkout gives the same 13 duplicates with it, and npm 11 (Node 24.19, as in CI) gives none. |
 | **Reproduce** | `git worktree add ../x origin/main && cd ../x && npm ci && node --test test/bom.test.ts`. |
 | **Check** | The cause is named; either the SBOM export deduplicates `dependencies` before validation (a committed test with a duplicated entry), or the test pins the condition it needs; `npm test` passes on a fresh install under Node 24 and the local Node. |
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-070-t01"></a>B-070-T01 — SBOM test stable on a fresh install | 0.75 h | 0 h | 0.75 h | Ready |
-| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 1 steps recorded) | 0.75 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="b-070-t01"></a>B-070-T01 — SBOM test names the npm it needs | 0.75 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | 🤖 |
+| 🟢 Small | <a id="b-070-t02"></a>B-070-T02 — Owner repairs npm under Node 26.12 (npm 11) | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [B-070-T01](#b-070-t01) | ⏳ 🧑‍🔧 |
+| 🟢 Small | **Total** | 0.75 h | 0.5 h (1 of 2 steps recorded) | 0.25 h owner | 0 of 2 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
