@@ -729,6 +729,68 @@ test('the bases map draws: drawMap runs to the end and draws every base and its 
   assert.equal(calls[ring + 1]!.m, 'stroke', 'this base ring is outline-only');
   assert.ok(Number(calls[ring]!.a[2]) > 11, 'ring is larger than the square');
 });
+test('Midori keeps its blue node and links; only its status dot and label take the status colour (B-095)', async () => {
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
+  const helper = src.slice(src.indexOf('const telegramObserved'), src.indexOf('/* ================= EVA heartbeats'));
+  const draw = (apiState: 'responding' | 'failed') => {
+    const calls: { m: string; a: unknown[]; stroke: string; fill: string }[] = [];
+    const style = { stroke: '', fill: '' };
+    const ctx = new Proxy(
+      {},
+      {
+        get:
+          (_t, k) =>
+          (...a: unknown[]) => {
+            calls.push({ m: String(k), a, stroke: style.stroke, fill: style.fill });
+          },
+        set: (_t, k, v) => {
+          if (k === 'strokeStyle') style.stroke = String(v);
+          if (k === 'fillStyle') style.fill = String(v);
+          return true;
+        },
+      },
+    );
+    const bases = [
+      {
+        baseId: 'nerv-01',
+        status: 'enrolled',
+        online: true,
+        channelFresh: true,
+        channel: { mode: 'local', api: { state: apiState, at: new Date().toISOString() } },
+      },
+    ];
+    const run = new Function(
+      'BASES',
+      'map',
+      'cssVar',
+      'bases',
+      `${helper}\ntelegramBases = bases;\nreturn drawTelegram;`,
+    )([{ id: 'nerv-01', lon: 10, lat: 10 }], { proj: (p: number[]) => p }, (v: string) => v, bases) as (
+      ctx: unknown,
+      now: number,
+      W: number,
+      H: number,
+    ) => void;
+    run(ctx, 0, 236, 100);
+    return calls;
+  };
+  for (const [apiState, token] of [
+    ['responding', '--ok'],
+    ['failed', '--warn'],
+  ] as const) {
+    const calls = draw(apiState);
+    const node = calls.find((c) => c.m === 'stroke' && calls[calls.indexOf(c) - 2]?.a[0] === 200);
+    assert.equal(node?.stroke, '--info', `${apiState}: the Midori node keeps its blue`);
+    const link = calls.find((c) => c.m === 'lineTo');
+    assert.ok(link, 'the dotted link to the base is drawn');
+    assert.equal(calls[calls.indexOf(link!) + 1]!.stroke, '--info', `${apiState}: the dotted link stays blue`);
+    const label = calls.find((c) => c.m === 'fillText' && c.a[0] === 'Midori');
+    assert.equal(label?.fill, token, `${apiState}: the label takes the status colour`);
+    const dot = calls.find((c) => c.m === 'fill' && c.fill === token);
+    assert.ok(dot, `${apiState}: a status dot in ${token} sits by the node`);
+  }
+});
 test('the Sephirot are numbered 1 to 11 with Hebrew and Latin names, the crew top right; the MAGI seats name their role, Casper idle when nothing runs (owner, 2026-11-05)', async () => {
   const { readFileSync } = await import('node:fs');
   const html = readFileSync('web/public/dashboard/index.html', 'utf8');
