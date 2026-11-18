@@ -14,23 +14,22 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 40 | 17 |
-| **Require Human 🧑** | 7 | 3 |
+| **Require Human 🧑** | 6 | 3 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-006](#f-006) | [F-101](#f-101) | [B-057](#b-057) | — |
-| [F-011](#f-011) |  | [B-068](#b-068) |  |
-| [F-004](#f-004) |  | [B-056](#b-056) |  |
-| [F-060](#f-060) |  |  |  |
+| [F-011](#f-011) | [F-101](#f-101) | [B-057](#b-057) | — |
+| [F-004](#f-004) |  | [B-068](#b-068) |  |
+| [F-060](#f-060) |  | [B-056](#b-056) |  |
 | [F-007](#f-007) |  |  |  |
 | [F-100](#f-100) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 70.5 h agent + 11.5 h owner across 131 open steps of 37 features and 17 other records. 47.75 h of actual effort recorded on 94 steps. Generated from the task files.
+**Remaining effort:** 70.5 h agent + 10 h owner across 130 open steps of 37 features and 17 other records. 47.75 h of actual effort recorded on 94 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -129,9 +128,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 3 h agent + 1.5 h owner | — | — | 🤖 | 🧑‍🔧 | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-006-T21 — Owner page for placement P2–P4 on the mini PC and across both bases (Planned).
+💻 **→** Next: F-006-T16 — Record the evidence of F-006-T13 and close it (Planned).
 
 | | |
 |---|---|
@@ -143,16 +142,15 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-006-t13"></a>F-006-T13 — T05b — Three Mac operating-condition runs | — | 0 h | 0 h agent + 1.5 h owner | Planned | [🧑‍🔧](acceptance/f006-mac-runs.md) | — |
+| 🟢 Small | <a id="f-006-t16"></a>F-006-T16 — Record the evidence of F-006-T13 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
 | 🟡 Medium | <a id="f-006-t21"></a>F-006-T21 — Owner page for placement P2–P4 on the mini PC and across both bases | 1.5 h | 0 h | 1.5 h | Planned | 🤖 | — |
 | 🟢 Small | <a id="f-006-t11"></a>F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-006-T21](#f-006-t21) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-006-t14"></a>F-006-T14 — T05c — Mac operating-conditions report | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T16](#f-006-t16) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-006-t15"></a>F-006-T15 — Record the evidence of F-006-T11 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T11](#f-006-t11) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T15](#f-006-t15) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-006-t16"></a>F-006-T16 — Record the evidence of F-006-T13 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T13](#f-006-t13) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-006-t14"></a>F-006-T14 — T05c — Mac operating-conditions report | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T16](#f-006-t16) | ⏳ 🤖 | — |
-| 🟡 Medium | **Total** | 9.25 h (18 of 21 steps) | 5.25 h (10 of 21 steps recorded) | 3 h agent + 1.5 h owner | 14 of 21 completed | | |
+| 🟡 Medium | **Total** | 9.25 h (18 of 21 steps) | 5.25 h (10 of 21 steps recorded) | 3 h | 15 of 21 completed | | |
 
-<details><summary>Done steps (14)</summary>
+<details><summary>Done steps (15)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
@@ -166,6 +164,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-006-t08"></a>F-006-T08 — T02c — Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route | 0.75 h | 0.75 h (stated) | Completed | — |
 | — | <a id="f-006-t09"></a>F-006-T09 — T03b — Evidence adapter binding both configurations, handoffs, budgets and hosts | 0.75 h | 0.75 h (stated) | Completed | — |
 | — | <a id="f-006-t10"></a>F-006-T10 — T03c — Grader tamper protection; stale or mismatched evidence rejected; authority rechecked | 0.75 h | 0.75 h (stated) | Completed | — |
+| — | <a id="f-006-t13"></a>F-006-T13 — T05b — Three Mac operating-condition runs | — | 0 h | Completed | — |
 | — | <a id="f-006-t17"></a>F-006-T17 — Approve the placement campaign plan and budgets | — | 0 h | Completed | — |
 | — | <a id="f-006-t18"></a>F-006-T18 — Approve the Mac operating-conditions plan and budgets | — | 0 h | Completed | — |
 | — | <a id="f-006-t19"></a>F-006-T19 — Revise the placement campaign for 3 runs per case | 0.5 h | 0 h | Completed | [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation |

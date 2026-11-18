@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-006",
   "id": "F-006-T13",
-  "status": "planned",
+  "status": "closed",
   "title": "T05b — Three Mac operating-condition runs",
   "goal": "Three Mac operating-condition runs.",
   "capabilities": [
@@ -38,10 +38,10 @@
   "effort": {
     "size": "small",
     "estimate": "1.5 h owner",
-    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
-    "reviewed": "2026-11-13",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total. Run by the owner 2026-11-18 (about 25 min of runs). No actual: owner time not recorded.",
+    "reviewed": "2026-11-18",
     "baselineDays": 1,
-    "ownerHours": 1.5,
+    "ownerHours": 0,
     "agentHours": 0,
     "ownerKind": "procedure"
   },
