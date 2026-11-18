@@ -140,10 +140,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-077-t01"></a>B-077-T01 — Role bundles run each case the configured number of times | 1.5 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 1.5 h | 0.5 h | 0.25 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-077-t01"></a>B-077-T01 — Role bundles run each case the configured number of times | 1.5 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #519](https://github.com/voidbrain/nerv/pull/519) fix |
+| 🟢 Small | **Total** | 1.5 h | 0.5 h | 0.25 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -152,7 +152,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Test: `test/gauntlet.test.mjs` B-077; Dry run 2026-11-18 on main, scratch profile copied from the protocol's `gemma4-12b.json` |
+| PR / evidence | Steps: B-077-T01: [PR #519](https://github.com/voidbrain/nerv/pull/519) fix. Test: `test/gauntlet.test.mjs` B-077; Dry run 2026-11-18 on main, scratch profile copied from the protocol's `gemma4-12b.json` |
 | Opened | 2026-11-18 |
 | Verification | Pending: CI. |
 | Reviewed | 2026-11-18 |
