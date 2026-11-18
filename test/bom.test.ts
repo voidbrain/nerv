@@ -182,6 +182,16 @@ test('F-067: real CLI emits only JSON, observes local model digests, starts no M
 
 test('F-067: npm lock-only dependency SBOM validates and includes exact direct dependency versions', () => {
   const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+  // B-070: npm 10 lists a package reached through several paths more than once in `dependencies`, which CycloneDX
+  // refuses (uniqueItems); npm 11, the one CI's Node 24 ships, lists each once. Say so instead of a schema error.
+  const npmVersion = spawnSync(npm, ['--version'], {
+    encoding: 'utf8',
+    shell: process.platform === 'win32',
+  }).stdout.trim();
+  assert.ok(
+    Number(npmVersion.split('.')[0]) >= 11,
+    `npm ${npmVersion || '(not found)'} writes duplicate SBOM dependency entries; run the tests with npm 11 or later (CI uses Node 24's npm)`,
+  );
   const result = spawnSync(npm, ['sbom', '--package-lock-only', '--sbom-format', 'cyclonedx'], {
     encoding: 'utf8',
     shell: process.platform === 'win32',

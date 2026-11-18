@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "parent": "B-070",
+  "id": "B-070-T02",
+  "title": "Owner repairs npm under Node 26.12 (npm 11)",
+  "goal": "npm test passes on the Mac with the local Node",
+  "status": "planned",
+  "acceptance": [
+    "npm --version prints 11.x from the Node 26.12 install",
+    "node --test test/bom.test.ts passes on the Mac"
+  ],
+  "dependsOn": [
+    "B-070-T01"
+  ],
+  "resources": [
+    "docs/acceptance/b070-npm-repair.md"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "Owner paste of steps 2 and 3"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "ownerLink": "docs/acceptance/b070-npm-repair.md",
+  "effort": {
+    "size": "small",
+    "estimate": "0 h (+ 0.25 h owner)",
+    "basis": "Estimated 2026-11-18: one copy-paste procedure. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure",
+    "baselineAgentHours": 0
+  }
+}
