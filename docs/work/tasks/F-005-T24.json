@@ -20,6 +20,7 @@
     "Demonstrate selected Windows target lifecycle and reconnect, separating mocked fixtures from actual device evidence"
   ],
   "dependsOn": [
+    "B-080-T01",
     "F-005-T23"
   ],
   "resources": [
