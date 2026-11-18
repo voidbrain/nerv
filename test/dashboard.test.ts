@@ -1331,3 +1331,15 @@ test('B-065: revoked bases are excluded from BASES on the map and listed apart f
   assert.match(revokedHtml, /REVOKED/);
   assert.doesNotMatch(revokedHtml, /Telegram ·/, 'revoked cards omit live channel/heartbeat lines');
 });
+test('the flow header names the sortie by its code only; every EVA cage shows its status on its own line (F-108)', async () => {
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
+  const line = src.split('\n').find((l) => l.includes('getElementById("flow-sub").textContent'))!;
+  const el = { textContent: '' };
+  new Function('document', 's', line)({ getElementById: () => el }, { id: 'S-6E26', title: 'Remind me at 9' });
+  assert.equal(el.textContent, 'S-6E26');
+  const html = readFileSync('web/public/dashboard/index.html', 'utf8');
+  const rule = /\.cage \.ch \{([^}]*)\}/.exec(html)![1]!;
+  assert.match(rule, /flex-direction:\s*column/, 'name and status stack in every cage');
+  assert.doesNotMatch(rule, /flex-wrap:\s*wrap/, 'no width-dependent wrapping');
+});

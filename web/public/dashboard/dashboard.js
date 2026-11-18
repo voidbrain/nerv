@@ -553,7 +553,7 @@ function startReplay(id) {
 function renderFlow() {
   const real = state.sorties.find(x => x.id === state.selected);
   const s = real && state.replay && state.replay.id === real.id && state.replay.k < replayOrder(real).length ? replayFrame(real, state.replay.k) : real;
-  document.getElementById("flow-sub").textContent = s ? s.id + " · " + s.title : "no sortie selected";
+  document.getElementById("flow-sub").textContent = s ? s.id : "no sortie selected";
   document.getElementById("flow-note").textContent = s ? (s.note || s.outcome || "") : "Select a sortie, or launch one.";
   // sephirot nodes
   // Misato's apartment passed means the owner decided: it takes the decision colour, like its lines (owner, 2026-11-05).
