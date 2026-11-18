@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-15T22:52:32.899Z",
+  "reviewed": "2026-11-18T00:18:47.319Z",
   "policy": "7d15ab5f3e1a37d15075876ce3efd53d93600045088f48b41a3ef0dd6ab89e7d",
   "inputs": {
     "AGENTS.md": "2bf68fbeeac1661fa987633e6d6702826ca436c5959f8daa599e08b4228935e5",
@@ -25,21 +25,21 @@
     "docs/backlog/documentation.md": "6328e3eccb3a222af1a9f4682dcef9e763464d0842cf94b28713bbc5f61e04b1",
     "docs/backlog/estimates.md": "251a65fa17a7c5ab79732ad790c4f312baa3251e54f761d0f91a8964cde81574",
     "docs/backlog/evaluations.md": "7540bf69b6b5d40dc09dc9ce82138218525733c5f602945bdaa58d5c3a743f37",
-    "docs/backlog/feature-plans.md": "c59318638d12531e6e2341b9af1dbbace0f6e54405b13b4ec10d3fd525e35ad4",
+    "docs/backlog/feature-plans.md": "f2377140ce4f2f38b449516498dd5ff6ba58ca04287aa92381a1029f7416f85b",
     "docs/backlog/ordering.md": "f36fe3410fe4d838877fe35c61c491608116b0255b864906f91eea23915d81dd",
     "docs/backlog/outcomes.md": "c6f1d8e4ac3afd85e6d90ac7cef8ae39fba765b13c821522fb005edd2b5b88e4",
     "docs/backlog/ownership.md": "d2d39a4e2a56fb7a18c5cce2fe5490282a9c89c947574746bacd71f1040c457f",
     "docs/backlog/records.md": "55ed78706d82419d64d33a82fe55f1179fd65fc35825fd081f3ac2e24079d058",
     "docs/backlog/review.md": "553177fc99074b2bc3ac2c9b430f4d22eaac46247a41b5966b6a97734cfb73df",
-    "docs/backlog/steps.md": "5a0d93b2caed5e8d31089d85fe1efefa90200235696dd3ec6817bf10207f8c99",
+    "docs/backlog/steps.md": "ac81bffab2a3de2b1703f79dca3680407ec64061456a58ad5529787b35f0a57f",
     "tools/task-claims.mjs": "ef755fe7951544e5c05b20de7c64a7b53778b6d039a11a2abeb079e7d42b6fd2",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
-    "tools/work-items.mjs": "e2b205ff58444dc414cf247c66a304b8fe77112d56d018c93ab61ed522eec9fa",
+    "tools/work-items.mjs": "faaa457c6f216ed8499fb90623ecff0af51dcec2291521d916fa7c3112cd52c4",
     "tools/work-usage.mjs": "09569f9b56bd6e403d4c235f980ba5fb03b2aff8fe56a28878cc298fe8a4b2af"
   },
   "measurements": {
-    "samples": 19,
-    "latestAt": "2026-11-12T21:26:32.719Z",
+    "samples": 1,
+    "latestAt": "2026-11-18T00:18:47.225Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -65,25 +65,25 @@
         }
       },
       "reconciliation": {
-        "samples": 19,
+        "samples": 1,
         "durationMs": {
-          "observed": 19,
+          "observed": 1,
           "missing": 0,
-          "median": 240846
+          "median": 155109
         },
         "conflicts": {
-          "observed": 6,
-          "missing": 13,
+          "observed": 1,
+          "missing": 0,
           "median": 0
         },
         "unnecessaryPrompts": {
-          "observed": 2,
-          "missing": 17,
+          "observed": 1,
+          "missing": 0,
           "median": 0
         },
         "repeatedContextLoads": {
-          "observed": 2,
-          "missing": 17,
+          "observed": 1,
+          "missing": 0,
           "median": 1
         }
       }
@@ -149,6 +149,12 @@
       "disposition": "implemented",
       "target": "tools/work-items.mjs",
       "evidence": "Reconciled with project-harness v9.0.0: B-043–B-046, F-083-T03, F-084-T02; zeroed remaining effort on verified F-048-T01–T03"
+    },
+    {
+      "kind": "tool",
+      "disposition": "implemented",
+      "target": "tools/work-items.mjs",
+      "evidence": "B-071: harness 10.0.0 (template B-047, PR #217) reconciled; every open record Next line from tasks; owner pages for F-005-T15, F-007-T05, F-060-T01; check:work fails on an owner-turn step without ownerLink"
     }
   ]
 }

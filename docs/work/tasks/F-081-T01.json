@@ -4,7 +4,7 @@
   "parent": "F-081",
   "title": "Revoke the stale client and run stopped-profile recovery on the service host",
   "goal": "The live service has no unused native client and its recovery path is verified on the host itself",
-  "status": "verified",
+  "status": "closed",
   "acceptance": [
     "The 2026-11-07 client is revoked; the current companion still connects",
     "Stopped-profile rotation on the service host keeps data, changes identity and pin, and the companion recovers by pairing again"

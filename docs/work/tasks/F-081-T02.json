@@ -4,7 +4,7 @@
   "parent": "F-081",
   "title": "Record the evidence of F-081-T01 and close it",
   "goal": "The result of F-081-T01 is recorded in its record with the evidence the owner reported",
-  "status": "verified",
+  "status": "closed",
   "acceptance": [
     "Evidence of F-081-T01 recorded in the record; failures become B- records"
   ],
