@@ -1,5 +1,11 @@
 # Backlog reconciliation log 2026
 
+## 2026-11-18 — main `228ab45`
+
+PRs #525–#528 merged on green CI. Closed F-005-T11, F-005-T27, F-005-T37, F-006-T13, F-085 and F-097. F-027-T02 also waits on F-049-T05. Reconciled in PR #529.
+
+B-092, B-093 and B-094-T01 stay Implemented until their live checks on NERV-01, which runs #527 since 22:11. F-049-T05's escape tests prove the network confinement F-027-T02 needs.
+
 ## 2026-11-18 — main `d8eeba7`
 
 PRs #513–#524 merged on green CI (#513, #514, #520 after reruns). Closed B-077, B-078, B-079, B-083, B-084, B-089, F-105, F-106-T02; B-085, B-088 after review; F-009 and F-005-T26 (Calvary). Reconciled in PR #525.

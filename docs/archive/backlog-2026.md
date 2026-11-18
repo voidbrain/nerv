@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 7 | 15 |
+| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 9 | 15 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
@@ -5239,5 +5239,77 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 | Reviewed | 2026-11-18 |
 
 </details>
+
+---
+
+### F-085
+
+**Check an outside project from a URL or a GitHub repository**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | 🔶 P2 | Closed | 🟣 Very large |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18.
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: "check that project" for a web URL or a GitHub repository. NERV cannot fetch and assess outside content, and anything it reads there is untrusted. |
+| **Reproduce** | Ask Misato to check a public repository URL. |
+| **Check** | NERV fetches the page or clones the repository read-only into a quarantine class (EVA-03, F-049) and marks the content tainted (F-027); it runs none of the project's code by default; the report says what the project is, its activity, licence, how it is built and tested, and visible risks, each with its source; text in the project never changes NERV's instructions (a test plants such text). |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18 in PR #529. All three steps closed; the live `quarantine report` run on a GitHub repository was F-085-T03. 2026-11-18: F-085-T03 closed by the agent: `nerv quarantine report https://github.com/sindresorhus/slugify --kind repo` gave what it is, latest commit, MIT licence, `xo && node --test` and no static risks, each citing package.json, git log or the licence file. `… https://nodejs.org/en/about --kind page` was wrong in two ways, opened as B-078: the summary carries the page's inline script after the title, and repository fields (licence, build, history) are reported missing on a web page, with "Missing licence" listed as a risk. 2026-11-18: F-085-T03 moved from the owner to the agent. Owner decision 2026-11-18: the agent runs this itself (over SSH to nerv-linux or Tabgha, or the CLI on the Mac) and records the commands and output; the owner page stays as the procedure. Opened 2026-11-14 from the [owner jobs case study](../design/owner-jobs-case-study-2026-11-14.md), job 4. Priority P2 set by the owner for all case-study records, to be re-ranked.
+
+**Estimates:** Estimated 2026-11-14: 0src/**,test/**src/**,test/**docs/acceptance/** h agent over 3 steps, at agent speed before any design work. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #490](https://github.com/voidbrain/nerv/pull/490) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](../design/owner-jobs-case-study-2026-11-14.md) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-085-T02 verified: [PR #490](https://github.com/voidbrain/nerv/pull/490) merged on green CI. `F-085-T01` verified via `test/quarantine.test.ts` (read-only shallow clone + page fetch into discarded per-job dir, `tainted: true`, no code executed, planted instruction isolation), `tsc`, `check:conventions`, and `check:fast`. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+---
+
+### F-097
+
+**Rerun the seven NERV system cases at the harness 8.14.1 source**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | 🔶 P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18.
+
+| | |
+|---|---|
+| **Issue** | The harness 8.14.1 reconcile ([PR #404](https://github.com/voidbrain/nerv/pull/404)) changed evaluation-source inputs, so the seven `nerv-system-flows` cases became pending (`source-changed`). Harness 8.15.0 and the Gauntlet 0.9.0 pin keep them pending under this record until the system-only rerun is recorded. The agent's earlier rerun was refused by that session's permission classifier on 2026-11-14. |
+| **Reproduce** | `npm run gauntlet:pending` on the reconcile branch lists policy, ledger, conversation, channels, bases, stress and browser as source-changed. |
+| **Check** | `npm run gauntlet:pending` prints nothing; `evals/gauntlet/ledger.json` records the seven runs at the merged source; `npm run check:evals` passes without this step. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18 in PR #529. Its one step closed: the seven system cases passed at the harness 8.14.1 source. 2026-11-18: F-097-T01 closed by the agent: `npm run build && npm run gauntlet:all -- --allow-expensive --execute` ran the seven `nerv-system-flows` cases (policy, ledger, conversation, channels, bases, stress, browser), all passed at source key `c127a5a7e2b2…` (ledger committed here); `gauntlet:pending` lists no system case. The first attempt ran nothing and reported passed because of B-079, fixed in the same PR. 2026-11-18: F-097-T01 moved from the owner to the agent. Owner decision 2026-11-18: the agent runs this itself (over SSH to nerv-linux or Tabgha, or the CLI on the Mac) and records the commands and output; the owner page stays as the procedure. Copy and paste: `cd <a worktree of this branch or of main after merge> && npm run build && npm run gauntlet:all -- --allow-expensive --execute --out-dir=/private/tmp/nerv-system-8141 && npm run gauntlet:pending`. Expected: the build succeeds, the run reports seven passing system cases, and `gauntlet:pending` prints nothing. Then commit `evals/gauntlet/ledger.json` in a PR naming F-097. No model is called (`modelCallsAuthorized: false`); `stress` is capped at 180 s and the suite at 15 min.
+
+**Estimates:** Small, estimated 2026-11-14: 0.25 h owner (about 15 min of running). Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in [PR #404](https://github.com/voidbrain/nerv/pull/404) |
+| Opened | 2026-11-14 |
+| Verification | Pending. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
 
 ---
