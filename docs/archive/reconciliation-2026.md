@@ -2,7 +2,7 @@
 
 ## 2026-11-18 — main `6c9e27c`
 
-Merged PRs #504–#507, all CI green (#507's windows job passed on rerun: B-073). B-071 verified by #504's CI and closed; F-009-T04 closed; B-073 fixed.
+Merged PRs #504–#507, all CI green (#507's windows job passed on rerun: B-073). B-071 verified by #504's CI and closed; F-009-T04 closed; B-073 fixed (identity query through the adapter runner).
 
 Per-PR mapping: #504: B-071 (closed); #505: B-057 (B-057-T03 closed), B-072 opened; #506: B-070 (B-070-T01); #507: B-072 (B-072-T01), B-073 opened. B-072 and B-073 close once a Windows job passes without reruns. Reconciled in PR #508.
 

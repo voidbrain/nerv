@@ -43,5 +43,6 @@
     "ownerHours": 1.5,
     "agentHours": 0,
     "ownerKind": "procedure"
-  }
+  },
+  "ownerLink": "docs/decisions/mac-operating-conditions.md"
 }

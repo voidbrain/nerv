@@ -4,7 +4,7 @@
   "parent": "F-102",
   "title": "Policy control, scheduled check and notice",
   "goal": "The owner can switch the automatic policy on and off, and a scheduled check announces an update with its apply time",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A `nerv` command and a dashboard switch enable or disable the automatic policy (today it can only be set through POST /api/update/policy)",
     "Scheduler calls the existing evaluation; notice in Telegram and inbox with revision and time",
@@ -33,10 +33,16 @@
   "effort": {
     "size": "small",
     "estimate": "0.75 h agent",
-    "basis": "Estimated 2026-11-14 at agent speed (harness 8.14.3: implementation steps 0.75 h, small fixes 0.5 h). Not a measurement.",
-    "reviewed": "2026-11-14",
-    "agentHours": 0.75,
+    "basis": "Estimated 2026-11-14 at agent speed (harness 8.14.3: implementation steps 0.75 h, small fixes 0.5 h). Not a measurement. No actual: not timed by the session that closed it.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
     "baselineAgentHours": 0.75,
     "estimateAgentHours": 0.75
-  }
+  },
+  "prs": [
+    {
+      "pr": 501,
+      "note": "implementation"
+    }
+  ]
 }

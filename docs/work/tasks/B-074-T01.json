@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "parent": "B-074",
+  "id": "B-074-T01",
+  "title": "Find why the root-binding CLI child ends without a status on Windows and fix it or its bound",
+  "goal": "The root-migration CLI test passes on Windows without reruns",
+  "status": "ready",
+  "acceptance": [
+    "The cause is named in the record",
+    "A committed test fails first if the cause is in code; otherwise the bound comes from measured Windows timings",
+    "The Windows job passes without reruns"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "test/root-migration.test.ts",
+    "src/**",
+    "docs/work/records/B-074.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-18: read the CI log, reproduce under load, fix or bound, one test. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  },
+  "prs": [
+    {
+      "pr": 510,
+      "note": "verification sweep"
+    }
+  ]
+}
