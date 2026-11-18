@@ -1313,6 +1313,12 @@ test('B-065: revoked bases are excluded from BASES on the map and listed apart f
   const html = elements.bases!.innerHTML;
   // Owner 2026-11-18: revoked bases stay in the registry but are folded away in the list.
   assert.match(html, /<details class='revoked-bases'><summary[^>]*>Revoked \(1\)<\/summary>/);
+  // B-093: an opened Revoked section stays open when the list is rebuilt on the next poll.
+  (state as { revokedOpen?: boolean }).revokedOpen = true;
+  api.renderBases();
+  assert.match(elements.bases!.innerHTML, /<details class='revoked-bases' open>/);
+  (state as { revokedOpen?: boolean }).revokedOpen = false;
+  api.renderBases();
   const revokedHeading = html.indexOf('>Revoked (1)<');
   assert.ok(revokedHeading > 0, 'revoked bases render under a separate Revoked section');
   const activeHtml = html.slice(0, revokedHeading);
