@@ -416,7 +416,7 @@ test(
         env.systemctlCalls.some((a) => a.join(' ') === '--user disable --now nerv.service'),
         'the stop disables and stops it',
       );
-      const after = await planService(env.host, 'install');
+      const after = await planService(env.host, 'start');
       assert.deepEqual(after.blockers, [], 'a loaded, disabled, inactive matching unit still reads absent');
     } finally {
       await env.close();

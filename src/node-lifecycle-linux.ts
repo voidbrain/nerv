@@ -122,9 +122,15 @@ export function linuxServiceAdapter(
       let registered: ServiceObservation['registration'] = 'absent';
       let managerPid = 0;
       if (manager) {
-        // B-086: systemd loads a unit as soon as its file exists; it is registered only once enabled.
+        // B-086: systemd loads a unit as soon as its file exists; it is registered once enabled, or while it still
+        // runs after a `disable` without --now (B-086-T02), so a fenced stop can recover it.
         const enabled = /^enabled(-runtime)?$/.test(systemdField(manager.out, 'UnitFileState'));
-        registered = linuxRegistrationMatches(manager.out, context) ? (enabled ? 'owned' : 'absent') : 'foreign';
+        const running = /^(active|activating|reloading)$/.test(systemdField(manager.out, 'ActiveState'));
+        registered = linuxRegistrationMatches(manager.out, context)
+          ? enabled || running
+            ? 'owned'
+            : 'absent'
+          : 'foreign';
         const rawPid = Number(systemdField(manager.out, 'MainPID'));
         managerPid = Number.isSafeInteger(rawPid) && rawPid > 0 ? rawPid : 0;
       }
