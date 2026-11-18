@@ -48,7 +48,7 @@ const TOOLS = {
 };
 const BASES = [
   // Illustrative positions: three bases in the same hills-and-valleys district around Tokyo-3 (Hakone). A real deployment reads lat/lon from each base's enrolment.
-  { id:"tokyo3", name:"TOKYO-3", role:"HQ · coordinator · MAGI · Dogma", lat:35.236, lon:138.985, status:"online", cpu:22, gpu:null, ram:61, rtt:0, models:"S² gemma (Mac)" },
+  { id:"tokyo3", name:"Tokyo-3", role:"HQ · coordinator · MAGI · Dogma", lat:35.236, lon:138.985, status:"online", cpu:22, gpu:null, ram:61, rtt:0, models:"S² gemma (Mac)" },
   { id:"nerv01", name:"NERV-01", role:"branch · S² GPU · EVA cage", lat:35.305, lon:139.215, status:"online", cpu:35, gpu:58, ram:47, rtt:142, models:"S² qwen-coder (GPU)" },
   { id:"nerv02", name:"NERV-02", role:"branch · vault · EVA cage", lat:35.160, lon:139.240, status:"standby", cpu:4, gpu:null, ram:18, rtt:null, models:"—" }
 ];
@@ -902,11 +902,13 @@ function drawMap(now) {
     ctx.globalAlpha = 0.35; ctx.strokeStyle = glow; ctx.lineWidth = 1; map.contours.forEach(c => ctx.stroke(c.p));
     ctx.globalAlpha = 1;
   });
-  // Kaji line: dashed great circles; moving dash when both ends are up
-  LINKS.forEach(([a, b]) => {
+  // Kaji line: dashed great circles. Routes to the main base are green and moving while both ends are up (owner,
+  // 2026-11-18); the heartbeat mesh between peers is a thin, still, neutral dotted line: this base does not observe it.
+  LINKS.forEach(([a, b, kind]) => {
     const A = BASES.find(x => x.id === a), B = BASES.find(x => x.id === b); const up = A.status !== "offline" && B.status !== "offline" && (A.status === "online" || B.status === "online");
-    const pts = map.linkPaths[a + "|" + b];
-    ctx.setLineDash([4, 4]); ctx.lineDashOffset = up ? -(now / 60) % 8 : 0; ctx.strokeStyle = up ? cssVar("--accent") : "#555"; ctx.globalAlpha = up ? 0.85 : 0.4; ctx.lineWidth = 1.1;
+    const pts = map.linkPaths[a + "|" + b]; const mesh = kind === "mesh";
+    if (mesh) { ctx.setLineDash([1.5, 4]); ctx.lineDashOffset = 0; ctx.strokeStyle = cssVar("--muted"); ctx.globalAlpha = up ? 0.45 : 0.2; ctx.lineWidth = 0.8; }
+    else { ctx.setLineDash([4, 4]); ctx.lineDashOffset = up ? -(now / 60) % 8 : 0; ctx.strokeStyle = up ? cssVar("--ok") : "#555"; ctx.globalAlpha = up ? 0.85 : 0.4; ctx.lineWidth = 1.1; }
     ctx.beginPath(); pts.forEach((p, k) => { if (k && Math.abs(p[0] - pts[k - 1][0]) > W / 2) ctx.moveTo(p[0], p[1]); else if (k) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]); }); ctx.stroke();
     ctx.setLineDash([]); ctx.globalAlpha = 1;
   });
@@ -914,6 +916,7 @@ function drawMap(now) {
   state.packets = state.packets.filter(pk => now - pk.t0 < pk.dur + 900);
   state.packets.forEach(pk => {
     const key = LINKS.some(l => l[0] === pk.from && l[1] === pk.to) ? pk.from + "|" + pk.to : pk.to + "|" + pk.from;
+    if (LINKS.some(l => l[2] === "mesh" && (l[0] + "|" + l[1]) === key)) return; // messages travel routes only
     const pts = map.linkPaths[key]; if (!pts) return; const fwd = key.startsWith(pk.from);
     const t = Math.max(0, Math.min(1, (now - pk.t0) / pk.dur)); const idx = Math.round((fwd ? t : 1 - t) * (pts.length - 1)); const [x, y] = pts[idx];
     ctx.fillStyle = pk.kind === "plug" ? cssVar("--accent") : pk.kind === "sync" ? cssVar("--info") : cssVar("--ok"); ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill();
@@ -992,7 +995,8 @@ function telegramApiState(base, now = Date.now()) {
 function drawTelegram(ctx, now, W, H) {
   const routes = telegramRoutes(telegramBases); const x = W - 36, y = H * 0.65;
   const origins = new Set(routes.map(b => b.channel.mode === "via-main" ? b.channel.destination : b.baseId));
-  const color = status => cssVar(status === "responding" ? "--info" : status === "failed" ? "--warn" : "--muted");
+  // Midori in the bases' status colours (owner, 2026-11-18): green while the Bot API responds, as the header's "Midori live".
+  const color = status => cssVar(status === "responding" ? "--ok" : status === "failed" ? "--warn" : "--muted");
   const channelById = id => telegramBases.find(b => b.baseId === id);
   ctx.lineWidth = 1; ctx.globalAlpha = 0.7;
   origins.forEach(id => { const base = BASES.find(b => b.id === String(id).toLowerCase()); if (!base) return;
@@ -1003,7 +1007,7 @@ function drawTelegram(ctx, now, W, H) {
     const pulse = telegramPulses[i]; const t = (now - pulse.t0) / 1500;
     if (t > 1) { telegramPulses.splice(i,1); continue; }
     const base = BASES.find(b => b.id === String(pulse.baseId).toLowerCase()); if (!base || !origins.has(pulse.baseId)) continue;
-    const [bx,by] = map.proj([base.lon,base.lat]); ctx.fillStyle = cssVar("--ok"); ctx.beginPath(); const progress = pulse.direction === "inbound" ? 1-t : t; ctx.arc(bx+(x-bx)*progress,by+(y-by)*progress,3,0,Math.PI*2); ctx.fill();
+    const [bx,by] = map.proj([base.lon,base.lat]); ctx.fillStyle = cssVar("--info"); ctx.beginPath(); const progress = pulse.direction === "inbound" ? 1-t : t; ctx.arc(bx+(x-bx)*progress,by+(y-by)*progress,3,0,Math.PI*2); ctx.fill();
   }
   const states = [...origins].map(id => telegramApiState(channelById(id)));
   const status = states.includes("responding") ? "responding" : states.includes("failed") ? "failed" : "unknown";
